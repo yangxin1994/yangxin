@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+  </head>
+  <body>
+		<p>
+			<%=@user.username%>
+		</p>
+		<br />
+		<p>
+			请点击以下链接激活
+		</p>
+		<p>
+			<a href="<%= @activate_link %>"><%= @activate_link %></a>
+		</p>
+		<p>感谢您使用</p>
+		<br />
+		<p>Oops!Data团队</p>
+  </body>
+</html>

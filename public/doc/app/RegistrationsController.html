@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+<title>class RegistrationsController - Rails Application Documentation</title>
+
+<link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="./js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/darkfish.js"></script>
+
+
+<body id="top" class="class">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="./index.html">Home</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>app/controllers/registrations_controller.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    <nav id="parent-class-section" class="section">
+  <h3 class="section-header">Parent</h3>
+  
+  <p class="link"><a href="ApplicationController.html">ApplicationController</a>
+  
+</nav>
+
+    
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li><a href="#method-i-activate">#activate</a>
+    
+    <li><a href="#method-i-create">#create</a>
+    
+    <li><a href="#method-i-email_illegal">#email_illegal</a>
+    
+    <li><a href="#method-i-index">#index</a>
+    
+    <li><a href="#method-i-input_activate_email">#input_activate_email</a>
+    
+    <li><a href="#method-i-send_activate_email">#send_activate_email</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="./doc/README_FOR_APP.html">README_FOR_APP</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="./Tree.html">Tree</a>
+  
+    <li><a href="./Tree/Serializer.html">Tree::Serializer</a>
+  
+    <li><a href="./ApplicationController.html">ApplicationController</a>
+  
+    <li><a href="./ApplicationHelper.html">ApplicationHelper</a>
+  
+    <li><a href="./BoolInput.html">BoolInput</a>
+  
+    <li><a href="./Cache.html">Cache</a>
+  
+    <li><a href="./Charge.html">Charge</a>
+  
+    <li><a href="./Component.html">Component</a>
+  
+    <li><a href="./Constrain.html">Constrain</a>
+  
+    <li><a href="./Document.html">Document</a>
+  
+    <li><a href="./Encryption.html">Encryption</a>
+  
+    <li><a href="./ErrorEnum.html">ErrorEnum</a>
+  
+    <li><a href="./FileInput.html">FileInput</a>
+  
+    <li><a href="./Filter.html">Filter</a>
+  
+    <li><a href="./Group.html">Group</a>
+  
+    <li><a href="./GroupsController.html">GroupsController</a>
+  
+    <li><a href="./GroupsHelper.html">GroupsHelper</a>
+  
+    <li><a href="./HomeController.html">HomeController</a>
+  
+    <li><a href="./HomeHelper.html">HomeHelper</a>
+  
+    <li><a href="./InputElement.html">InputElement</a>
+  
+    <li><a href="./MyJob.html">MyJob</a>
+  
+    <li><a href="./Node.html">Node</a>
+  
+    <li><a href="./Pagination.html">Pagination</a>
+  
+    <li><a href="./Paragraph.html">Paragraph</a>
+  
+    <li><a href="./Publication.html">Publication</a>
+  
+    <li><a href="./Question.html">Question</a>
+  
+    <li><a href="./RailsEnv.html">RailsEnv</a>
+  
+    <li><a href="./RegistrationsController.html">RegistrationsController</a>
+  
+    <li><a href="./RegistrationsHelper.html">RegistrationsHelper</a>
+  
+    <li><a href="./SessionsController.html">SessionsController</a>
+  
+    <li><a href="./SessionsHelper.html">SessionsHelper</a>
+  
+    <li><a href="./Survey.html">Survey</a>
+  
+    <li><a href="./SurveysController.html">SurveysController</a>
+  
+    <li><a href="./SurveysHelper.html">SurveysHelper</a>
+  
+    <li><a href="./TextInput.html">TextInput</a>
+  
+    <li><a href="./Tool.html">Tool</a>
+  
+    <li><a href="./User.html">User</a>
+  
+    <li><a href="./UserInformation.html">UserInformation</a>
+  
+    <li><a href="./UserMailer.html">UserMailer</a>
+  
+    <li><a href="./UsersController.html">UsersController</a>
+  
+    <li><a href="./UsersHelper.html">UsersHelper</a>
+  
+    <li><a href="./WelcomeController.html">WelcomeController</a>
+  
+    <li><a href="./WelcomeHelper.html">WelcomeHelper</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="class">class RegistrationsController</h1>
+
+  <div id="description" class="description">
+    
+<p>encoding: utf-8</p>
+
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    <!-- Methods -->
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-activate" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">activate</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>method: get description: user click activate link</p>
+          
+
+          
+          <div class="method-source-code" id="activate-source">
+            <pre><span class="ruby-comment"># File app/controllers/registrations_controller.rb, line 106</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">activate</span>
+        <span class="ruby-identifier">activate_info_json</span> = <span class="ruby-constant">Encryption</span>.<span class="ruby-identifier">decrypt_activate_key</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:activate_key</span>])
+        <span class="ruby-ivar">@activate_info</span> = <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">activate_info_json</span>)
+        <span class="ruby-identifier">activate_retval</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">activate</span>(<span class="ruby-ivar">@activate_info</span>)
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">activate_retval</span> <span class="ruby-operator">==</span> <span class="ruby-value">1</span>
+                <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&quot;您已经成功激活，请登录&quot;</span>
+                <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">sessions_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span>
+        <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">activate_retval</span> <span class="ruby-operator">==</span> <span class="ruby-value">-5</span>
+                <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&quot;您的激活链接已经过期，请您重新发送激活邮件进行激活&quot;</span>
+                <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">input_activate_email_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span>
+        <span class="ruby-keyword">else</span>
+                <span class="ruby-identifier">redirect_to</span> <span class="ruby-string">&quot;/500&quot;</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span>                        <span class="ruby-comment"># email account does not exist (link is not generated by our website)</span>
+        <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- activate-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- activate-method -->
+
+    
+      <div id="method-i-create" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">create</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><strong>descryption</strong>: user submit registration form</p>
+
+<p><strong>http</strong> <strong>method</strong>: post</p>
+
+<p><strong>url</strong>: /registrations</p>
+          
+
+          
+          <div class="method-source-code" id="create-source">
+            <pre><span class="ruby-comment"># File app/controllers/registrations_controller.rb, line 18</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>
+        <span class="ruby-comment"># create user model</span>
+        <span class="ruby-identifier">user</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">check_and_create_new</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:user</span>])
+        <span class="ruby-keyword">case</span> <span class="ruby-identifier">user</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">IllegalEmail</span>
+                <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&quot;请输入正确的邮箱地址&quot;</span>
+                <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+                        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">registrations_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">IllegalEmail</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">EmailActivated</span>
+                <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-node">&quot;邮箱#{params[:user][&quot;email&quot;]}已经注册，请直接登录&quot;</span>
+                <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+                        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">sessions_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">EmailActivated</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">EmailNotActivated</span>
+                <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-node">&quot;邮箱#{params[:user][&quot;email&quot;]}已经注册，但未激活，请您首先激活帐号&quot;</span>
+                <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+                        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">sessions_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">EmailNotActivated</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">WrongPasswordConfirmation</span>
+                <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&quot;输入密码不一致&quot;</span>
+                <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+                        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">registrations_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">WrongPasswordConfirmation</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">else</span>
+                <span class="ruby-comment"># create user_information model</span>
+                <span class="ruby-identifier">user_information</span> = <span class="ruby-constant">UserInformation</span>.<span class="ruby-identifier">update</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:user_information</span>])
+                <span class="ruby-comment"># send registration email</span>
+                <span class="ruby-constant">UserMailer</span>.<span class="ruby-identifier">welcome_email</span>(<span class="ruby-identifier">user</span>).<span class="ruby-identifier">deliver</span>
+                <span class="ruby-comment"># succesfully registered</span>
+                <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&quot;注册成功，请到您的邮箱中点击激活链接进行激活&quot;</span>
+                <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+                        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">sessions_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- create-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- create-method -->
+
+    
+      <div id="method-i-email_illegal" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">email_illegal</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>method: get or post description: check whether email is illegal</p>
+          
+
+          
+          <div class="method-source-code" id="email_illegal-source">
+            <pre><span class="ruby-comment"># File app/controllers/registrations_controller.rb, line 62</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">email_illegal</span>
+        <span class="ruby-identifier">email_legal</span> = <span class="ruby-operator">!</span><span class="ruby-constant">Tool</span>.<span class="ruby-identifier">email_illegal?</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:email</span>])
+        <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+                <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span>  { <span class="ruby-identifier">render</span> <span class="ruby-value">:text</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">email_legal</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span>  { <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">email_legal</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+        <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- email_illegal-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- email_illegal-method -->
+
+    
+      <div id="method-i-index" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">index</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>method: get descryption: the page where user inputs the registration form</p>
+          
+
+          
+          <div class="method-source-code" id="index-source">
+            <pre><span class="ruby-comment"># File app/controllers/registrations_controller.rb, line 10</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">index</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- index-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- index-method -->
+
+    
+      <div id="method-i-input_activate_email" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">input_activate_email</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>method: get descryption: show the page where user can input the email for
+activating</p>
+          
+
+          
+          <div class="method-source-code" id="input_activate_email-source">
+            <pre><span class="ruby-comment"># File app/controllers/registrations_controller.rb, line 73</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">input_activate_email</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- input_activate_email-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- input_activate_email-method -->
+
+    
+      <div id="method-i-send_activate_email" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">send_activate_email</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>method: post descryption: user submit “input activate email” form</p>
+          
+
+          
+          <div class="method-source-code" id="send_activate_email-source">
+            <pre><span class="ruby-comment"># File app/controllers/registrations_controller.rb, line 78</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">send_activate_email</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">user_exist?</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:user</span>][<span class="ruby-string">&quot;email&quot;</span>]) <span class="ruby-operator">==</span> <span class="ruby-keyword">false</span>
+                <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&quot;该邮箱未注册，请您注册&quot;</span>
+                <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+                        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">registrations_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">EmailNotExist</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">elsif</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">user_activate?</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:user</span>][<span class="ruby-string">&quot;email&quot;</span>])
+                <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&quot;该帐号已激活，请您登录&quot;</span>
+                <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+                        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">sessions_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">EmailActivated</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">end</span>
+
+        <span class="ruby-identifier">user</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">find_by_email</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:user</span>][<span class="ruby-string">&quot;email&quot;</span>])
+        <span class="ruby-comment"># send activate email</span>
+        <span class="ruby-constant">UserMailer</span>.<span class="ruby-identifier">activate_email</span>(<span class="ruby-identifier">user</span>).<span class="ruby-identifier">deliver</span>
+
+        <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&quot;激活邮件已发送，请到您的邮箱中点击激活链接进行激活&quot;</span>
+        <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+                <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span>  { <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">sessions_path</span> <span class="ruby-keyword">and</span> <span class="ruby-keyword">return</span> }
+                <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span>  { <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span> }
+        <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- send_activate_email-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- send_activate_email-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+

@@ -1,0 +1,41 @@
+= form_tag({:controller => "registrations"}, :method => "post") do
+
+	%p
+		%label *
+		%label 我的邮箱
+		= text_field_tag 'user[email]'
+
+	%p
+		%label *
+		%label 创建密码
+		= password_field_tag 'user[password]'
+
+	%p
+		%label *
+		%label 用户名
+		= text_field_tag 'user[username]'
+
+	%p
+		%label 姓名
+		= text_field_tag 'user_information[realname]'
+
+	%p
+		%label 地址
+		= text_field_tag 'user_information[address]'
+
+	%p
+		%label 邮编
+		= text_field_tag 'user_information[zipcode]'
+
+	%p
+		%label 手机号
+		= text_field_tag 'user_information[telephone]'
+
+	%p
+		%label 性别
+		= text_field_tag 'user_information[gender]'
+
+	%p
+		= submit_tag "开通"
+
+= render :partial => "layouts/navigation"

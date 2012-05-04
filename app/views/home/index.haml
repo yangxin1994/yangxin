@@ -1,0 +1,7 @@
+%p
+	%span 您好！
+	%span= @current_user.username
+%p 这是您的个人主页
+
+%p
+	=link_to "退出登录", logout_path

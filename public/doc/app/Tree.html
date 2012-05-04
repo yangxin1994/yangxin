@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+<title>class Tree - Rails Application Documentation</title>
+
+<link type="text/css" media="screen" href="./rdoc.css" rel="stylesheet">
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script type="text/javascript" charset="utf-8" src="./js/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/navigation.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search_index.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/search.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/searcher.js"></script>
+<script type="text/javascript" charset="utf-8" src="./js/darkfish.js"></script>
+
+
+<body id="top" class="class">
+<nav id="metadata">
+  <nav id="home-section" class="section">
+  <h3 class="section-header">
+    <a href="./index.html">Home</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </h3>
+</nav>
+
+
+  <nav id="search-section" class="section project-section" class="initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <h3 class="section-header">
+      <input type="text" name="search" placeholder="Search" id="search-field"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </h3>
+  </form>
+
+  <ul id="search-results" class="initially-hidden"></ul>
+</nav>
+
+
+  <div id="file-metadata">
+    <nav id="file-list-section" class="section">
+  <h3 class="section-header">Defined In</h3>
+  <ul>
+    <li>app/models/tree.rb
+  </ul>
+</nav>
+
+    
+  </div>
+
+  <div id="class-metadata">
+    
+    <nav id="parent-class-section" class="section">
+  <h3 class="section-header">Parent</h3>
+  
+  <p class="link">Object
+  
+</nav>
+
+    
+    <!-- Method Quickref -->
+<nav id="method-list-section" class="section">
+  <h3 class="section-header">Methods</h3>
+
+  <ul class="link-list">
+    
+    <li><a href="#method-c-new">::new</a>
+    
+    <li><a href="#method-i-add_attr">#add_attr</a>
+    
+    <li><a href="#method-i-add_constrain">#add_constrain</a>
+    
+    <li><a href="#method-i-deserialize">#deserialize</a>
+    
+    <li><a href="#method-i-get_node">#get_node</a>
+    
+    <li><a href="#method-i-insert_exist_child_node">#insert_exist_child_node</a>
+    
+    <li><a href="#method-i-insert_exist_node_after">#insert_exist_node_after</a>
+    
+    <li><a href="#method-i-insert_exist_node_before">#insert_exist_node_before</a>
+    
+    <li><a href="#method-i-insert_new_child_input">#insert_new_child_input</a>
+    
+    <li><a href="#method-i-insert_new_child_internal">#insert_new_child_internal</a>
+    
+    <li><a href="#method-i-insert_new_child_text">#insert_new_child_text</a>
+    
+    <li><a href="#method-i-remove_constrain">#remove_constrain</a>
+    
+    <li><a href="#method-i-remove_node">#remove_node</a>
+    
+    <li><a href="#method-i-set_attr">#set_attr</a>
+    
+  </ul>
+</nav>
+
+  </div>
+
+  <div id="project-metadata">
+    <nav id="fileindex-section" class="section project-section">
+  <h3 class="section-header">Pages</h3>
+
+  <ul>
+  
+    <li class="file"><a href="./doc/README_FOR_APP.html">README_FOR_APP</a>
+  
+  </ul>
+</nav>
+
+    <nav id="classindex-section" class="section project-section">
+  <h3 class="section-header">Class and Module Index</h3>
+
+  <ul class="link-list">
+  
+    <li><a href="./Tree.html">Tree</a>
+  
+    <li><a href="./Tree/Serializer.html">Tree::Serializer</a>
+  
+    <li><a href="./ApplicationController.html">ApplicationController</a>
+  
+    <li><a href="./ApplicationHelper.html">ApplicationHelper</a>
+  
+    <li><a href="./BoolInput.html">BoolInput</a>
+  
+    <li><a href="./Cache.html">Cache</a>
+  
+    <li><a href="./Charge.html">Charge</a>
+  
+    <li><a href="./Component.html">Component</a>
+  
+    <li><a href="./Constrain.html">Constrain</a>
+  
+    <li><a href="./Document.html">Document</a>
+  
+    <li><a href="./Encryption.html">Encryption</a>
+  
+    <li><a href="./ErrorEnum.html">ErrorEnum</a>
+  
+    <li><a href="./FileInput.html">FileInput</a>
+  
+    <li><a href="./Filter.html">Filter</a>
+  
+    <li><a href="./Group.html">Group</a>
+  
+    <li><a href="./GroupsController.html">GroupsController</a>
+  
+    <li><a href="./GroupsHelper.html">GroupsHelper</a>
+  
+    <li><a href="./HomeController.html">HomeController</a>
+  
+    <li><a href="./HomeHelper.html">HomeHelper</a>
+  
+    <li><a href="./InputElement.html">InputElement</a>
+  
+    <li><a href="./MyJob.html">MyJob</a>
+  
+    <li><a href="./Node.html">Node</a>
+  
+    <li><a href="./Pagination.html">Pagination</a>
+  
+    <li><a href="./Paragraph.html">Paragraph</a>
+  
+    <li><a href="./Publication.html">Publication</a>
+  
+    <li><a href="./Question.html">Question</a>
+  
+    <li><a href="./RailsEnv.html">RailsEnv</a>
+  
+    <li><a href="./RegistrationsController.html">RegistrationsController</a>
+  
+    <li><a href="./RegistrationsHelper.html">RegistrationsHelper</a>
+  
+    <li><a href="./SessionsController.html">SessionsController</a>
+  
+    <li><a href="./SessionsHelper.html">SessionsHelper</a>
+  
+    <li><a href="./Survey.html">Survey</a>
+  
+    <li><a href="./SurveysController.html">SurveysController</a>
+  
+    <li><a href="./SurveysHelper.html">SurveysHelper</a>
+  
+    <li><a href="./TextInput.html">TextInput</a>
+  
+    <li><a href="./Tool.html">Tool</a>
+  
+    <li><a href="./User.html">User</a>
+  
+    <li><a href="./UserInformation.html">UserInformation</a>
+  
+    <li><a href="./UserMailer.html">UserMailer</a>
+  
+    <li><a href="./UsersController.html">UsersController</a>
+  
+    <li><a href="./UsersHelper.html">UsersHelper</a>
+  
+    <li><a href="./WelcomeController.html">WelcomeController</a>
+  
+    <li><a href="./WelcomeHelper.html">WelcomeHelper</a>
+  
+  </ul>
+</nav>
+
+  </div>
+</nav>
+
+<div id="documentation">
+  <h1 class="class">class Tree</h1>
+
+  <div id="description" class="description">
+    
+  </div><!-- description -->
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <!-- Attributes -->
+    <section id="attribute-method-details" class="method-section section">
+      <h3 class="section-header">Attributes</h3>
+
+      
+      <div id="attribute-i-constrains" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">constrains</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-edges" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">edges</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-nodes" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">nodes</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-root" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">root</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section><!-- attribute-method-details -->
+    
+
+    <!-- Methods -->
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Class Methods</h3>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(*args)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="Tree.html">Tree</a> instance can be initialized either as an empty
+tree or as a tree with nodes</p>
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File app/models/tree.rb, line 8</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(*<span class="ruby-identifier">args</span>)
+        <span class="ruby-identifier">args_size</span> = <span class="ruby-identifier">args</span>.<span class="ruby-identifier">length</span>
+        <span class="ruby-ivar">@root</span>, <span class="ruby-ivar">@nodes</span>, <span class="ruby-ivar">@edges</span>, <span class="ruby-ivar">@constrains</span> = <span class="ruby-keyword">nil</span>, {}, {}, {}
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">args_size</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>
+                <span class="ruby-comment"># the tree is initialized as an empty tree, do not need to do anything</span>
+        <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">args_size</span> <span class="ruby-operator">==</span> <span class="ruby-value">2</span>
+                <span class="ruby-comment"># the tree is initialized by a node in another tree</span>
+                <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-string">'the first parameter should be a Tree type instance'</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">args</span>[<span class="ruby-value">0</span>].<span class="ruby-identifier">class</span> <span class="ruby-operator">!=</span> <span class="ruby-string">&quot;Tree&quot;</span>
+                <span class="ruby-identifier">tree</span>, <span class="ruby-identifier">node_id</span> = *<span class="ruby-identifier">args</span>
+                <span class="ruby-ivar">@root</span> = <span class="ruby-identifier">tree</span>.<span class="ruby-identifier">nodes</span>[<span class="ruby-identifier">node_id</span>]
+                <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-node">&quot;can not find the node '#{node_id} in the Tree #{tree.to_s}'&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@root</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">nil</span>
+                <span class="ruby-identifier">init_by_node</span>(<span class="ruby-identifier">tree</span>, <span class="ruby-identifier">node_id</span>)
+                <span class="ruby-ivar">@edges</span>[<span class="ruby-identifier">node_id</span>][<span class="ruby-value">:parent</span>] = <span class="ruby-value">-1</span>
+        <span class="ruby-keyword">else</span>
+                <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-string">'the initialize method of Tree accepts no parameter or two parameter'</span>
+        <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- new-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- new-method -->
+
+    
+    </section><!-- public-class-method-details -->
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section section">
+      <h3 class="section-header">Public Instance Methods</h3>
+
+    
+      <div id="method-i-add_attr" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">add_attr</span><span
+            class="method-args">(node_id, attr)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="add_attr-source">
+            <pre><span class="ruby-comment"># File app/models/tree.rb, line 121</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">add_attr</span>(<span class="ruby-identifier">node_id</span>, <span class="ruby-identifier">attr</span>)
+        <span class="ruby-keyword">return</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">NODE_NOT_EXIST</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@nodes</span>[<span class="ruby-identifier">node_id</span>].<span class="ruby-identifier">nil?</span>
+        <span class="ruby-identifier">attr</span>.<span class="ruby-identifier">each_key</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span>
+                <span class="ruby-keyword">return</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">ATTR_NOT_EXIST</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">not</span>(<span class="ruby-constant">Object</span><span class="ruby-operator">::</span><span class="ruby-identifier">const_get</span>(<span class="ruby-ivar">@nodes</span>[<span class="ruby-identifier">node_id</span>][<span class="ruby-value">:node_type</span>]).<span class="ruby-identifier">has_attr?</span>(<span class="ruby-identifier">key</span>))
+        <span class="ruby-keyword">end</span>
+        <span class="ruby-ivar">@nodes</span>[<span class="ruby-identifier">node_id</span>][<span class="ruby-value">:attr</span>] = <span class="ruby-ivar">@nodes</span>[<span class="ruby-identifier">node_id</span>][<span class="ruby-value">:attr</span>].<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">attr</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- add_attr-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- add_attr-method -->
+
+    
+      <div id="method-i-add_constrain" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">add_constrain</span><span
+            class="method-args">(node_id, constrain)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="add_constrain-source">
+            <pre><span class="ruby-comment"># File app/models/tree.rb, line 129</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">add_constrain</span>(<span class="ruby-identifier">node_id</span>, <span class="ruby-identifier">constrain</span>)
+        <span class="ruby-keyword">return</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">NODE_NOT_EXIST</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@nodes</span>[<span class="ruby-identifier">node_id</span>].<span class="ruby-identifier">nil?</span>
+        <span class="ruby-ivar">@constrains</span>[<span class="ruby-identifier">node_id</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">constrain</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- add_constrain-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- add_constrain-method -->
+
+    
+      <div id="method-i-deserialize" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">deserialize</span><span
+            class="method-args">(object)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>DESERIALIZE METHODs ##############</p>
+          
+
+          
+          <div class="method-source-code" id="deserialize-source">
+            <pre><span class="ruby-comment"># File app/models/tree.rb, line 188</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">deserialize</span>(<span class="ruby-identifier">object</span>)
+        <span class="ruby-ivar">@nodes</span> = <span class="ruby-identifier">object</span>[<span class="ruby-value">:nodes</span>]
+        <span class="ruby-ivar">@edges</span> = <span class="ruby-identifier">object</span>[<span class="ruby-value">:edges</span>]
+        <span class="ruby-ivar">@root</span> = <span class="ruby-identifier">object</span>[<span class="ruby-value">:root</span>]
+        <span class="ruby-ivar">@constrains</span> = <span class="ruby-constant">Hash</span>.<span class="ruby-identifier">new</span>
+        <span class="ruby-identifier">object</span>[<span class="ruby-value">:constrains</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">node_id</span>, <span class="ruby-identifier">constrain_array</span><span class="ruby-operator">|</span>
+                <span class="ruby-identifier">constrains</span>[<span class="ruby-identifier">node_id</span>] = <span class="ruby-constant">Array</span>.<span class="ruby-identifier">new</span>
+                <span class="ruby-identifier">constrain_array</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">constrain</span><span class="ruby-operator">|</span>
+                        <span class="ruby-ivar">@constrains</span>[<span class="ruby-identifier">node_id</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">Constrain</span>.<span class="ruby-identifier">deserialize</span>(<span class="ruby-identifier">constrain</span>)
+                <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- deserialize-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- deserialize-method -->
+
+    
+      <div id="method-i-get_node" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">get_node</span><span
+            class="method-args">(node_id)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>READ METHODs ##############</p>
+          
+
+          
+          <div class="method-source-code" id="get_node-source">
+            <pre><span class="ruby-comment"># File app/models/tree.rb, line 99</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">get_node</span>(<span class="ruby-identifier">node_id</span>)
+        <span class="ruby-identifier">node</span> = <span class="ruby-identifier">find_node_by_id</span>(<span class="ruby-identifier">node_id</span>)
+        <span class="ruby-constant">Node</span>.<span class="ruby-identifier">deserialize</span>(<span class="ruby-identifier">node</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- get_node-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- get_node-method -->
+
+    
+      <div id="method-i-insert_exist_child_node" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">insert_exist_child_node</span><span
+            class="method-args">(parent_id, child_index, tree, node_id)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="insert_exist_child_node-source">
+            <pre><span class="ruby-comment"># File app/models/tree.rb, line 139</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">insert_exist_child_node</span>(<span class="ruby-identifier">parent_id</span>, <span class="ruby-identifier">child_index</span>, <span class="ruby-identifier">tree</span>, <span class="ruby-identifier">node_id</span>)
+        <span class="ruby-keyword">return</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">INDEX_OVERFLOW</span> <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span>(<span class="ruby-operator">-</span>(<span class="ruby-ivar">@edges</span>[<span class="ruby-identifier">parent_id</span>][<span class="ruby-value">:children</span>].<span class="ruby-identifier">length</span> <span class="ruby-operator">+</span> <span class="ruby-value">1</span>)<span class="ruby-operator">..</span><span class="ruby-ivar">@edges</span>[<span class="ruby-identifier">parent_id</span>][<span class="ruby-value">:children</span>].<span class="ruby-identifier">length</span>).<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">child_index</span>)
+        <span class="ruby-identifier">old_node_id</span> = <span class="ruby-identifier">node_id</span>
+        <span class="ruby-identifier">node_id</span> = <span class="ruby-constant">SecureRandom</span>.<span class="ruby-identifier">uuid</span>
+        <span class="ruby-ivar">@nodes</span>[<span class="ruby-identifier">node_id</span>] = <span class="ruby-identifier">tree</span>.<span class="ruby-identifier">nodes</span>[<span class="ruby-identifier">old_node_id</span>]
+        <span class="ruby-ivar">@nodes</span>[<span class="ruby-identifier">node_id</span>][<span class="ruby-value">:node_id</span>] = <span class="ruby-identifier">node_id</span>
+        <span class="ruby-ivar">@edges</span>[<span class="ruby-identifier">parent_id</span>][<span class="ruby-value">:children</span>].<span class="ruby-identifier">insert</span>(<span class="ruby-identifier">child_index</span>, <span class="ruby-identifier">node_id</span>)
+        <span class="ruby-ivar">@edges</span>[<span class="ruby-identifier">node_id</span>][<span class="ruby-value">:parent</span>] = <span class="ruby-identifier">parent_id</span>
+        <span class="ruby-ivar">@edges</span>[<span class="ruby-identifier">node_id</span>][<span class="ruby-value">:children</span>] = <span class="ruby-identifier">tree</span>.<span class="ruby-identifier">edges</span>[<span class="ruby-identifier">old_node_id</span>][<span class="ruby-value">:children</span>].<span class="ruby-identifier">clone</span>
+        <span class="ruby-ivar">@constrains</span>[<span class="ruby-identifier">node_id</span>] = <span class="ruby-identifier">tree</span>.<span class="ruby-identifier">constrains</span>[<span class="ruby-identifier">old_node_id</span>].<span class="ruby-identifier">clone</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- insert_exist_child_node-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- insert_exist_child_node-method -->
+
+    
+      <div id="method-i-insert_exist_node_after" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">insert_exist_node_after</span><span
+            class="method-args">(brother_id, tree, node_id)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="insert_exist_node_after-source">
+            <pre><span class="ruby-comment"># File app/models/tree.rb, line 151</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">insert_exist_node_after</span>(<span class="ruby-identifier">brother_id</span>, <span class="ruby-identifier">tree</span>, <span class="ruby-identifier">node_id</span>)
+        <span class="ruby-keyword">return</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">WRONG_POSITION</span> <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">non_root_node?</span>(<span class="ruby-identifier">brother_id</span>)
+        <span class="ruby-identifier">parent_id</span> = <span class="ruby-ivar">@edges</span>[<span class="ruby-identifier">brother_id</span>][<span class="ruby-value">:parent</span>]
+        <span class="ruby-identifier">insert_new_child_node</span>(<span class="ruby-identifier">parent_id</span>, <span class="ruby-ivar">@edges</span>[<span class="ruby-identifier">parent_id</span>][<span class="ruby-value">:children</span>].<span class="ruby-identifier">index</span>(<span class="ruby-identifier">brother_id</span>)<span class="ruby-operator">+</span><span class="ruby-value">1</span>, <span class="ruby-identifier">node_id</span>, <span class="ruby-identifier">tree</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- insert_exist_node_after-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- insert_exist_node_after-method -->
+
+    
+      <div id="method-i-insert_exist_node_before" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">insert_exist_node_before</span><span
+            class="method-args">(brother_id, tree, node_id)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="insert_exist_node_before-source">
+            <pre><span class="ruby-comment"># File app/models/tree.rb, line 157</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">insert_exist_node_before</span>(<span class="ruby-identifier">brother_id</span>, <span class="ruby-identifier">tree</span>, <span class="ruby-identifier">node_id</span>)
+        <span class="ruby-keyword">return</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">WRONG_POSITION</span> <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">non_root_node?</span>(<span class="ruby-identifier">brother_id</span>)
+        <span class="ruby-identifier">parent_id</span> = <span class="ruby-ivar">@edges</span>[<span class="ruby-identifier">brother_id</span>][<span class="ruby-value">:parent</span>]
+        <span class="ruby-identifier">insert_new_child_node</span>(<span class="ruby-identifier">parent_id</span>, <span class="ruby-ivar">@edges</span>[<span class="ruby-identifier">parent_id</span>][<span class="ruby-value">:children</span>].<span class="ruby-identifier">index</span>(<span class="ruby-identifier">brother_id</span>), <span class="ruby-identifier">node_id</span>, <span class="ruby-identifier">tree</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- insert_exist_node_before-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- insert_exist_node_before-method -->
+
+    
+      <div id="method-i-insert_new_child_input" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">insert_new_child_input</span><span
+            class="method-args">(parent_id, child_index, input)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="insert_new_child_input-source">
+            <pre><span class="ruby-comment"># File app/models/tree.rb, line 164</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">insert_new_child_input</span>(<span class="ruby-identifier">parent_id</span>, <span class="ruby-identifier">child_index</span>, <span class="ruby-identifier">input</span>)
+        <span class="ruby-comment"># check the input type</span>
+        <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-string">'the third parameter should be a Input type instance'</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">not</span>(<span class="ruby-identifier">input</span>.<span class="ruby-identifier">kind_of?</span> <span class="ruby-constant">InputElement</span>)
+        <span class="ruby-comment"># insert the input as a node</span>
+        <span class="ruby-identifier">insert_new_child_node</span>(<span class="ruby-identifier">parent_id</span>, <span class="ruby-identifier">child_index</span>, <span class="ruby-identifier">input</span>.<span class="ruby-identifier">class</span>, <span class="ruby-identifier">input</span>.<span class="ruby-identifier">serialize</span>, [])
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- insert_new_child_input-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- insert_new_child_input-method -->
+
+    
+      <div id="method-i-insert_new_child_internal" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">insert_new_child_internal</span><span
+            class="method-args">(parent_id, child_index, node)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="insert_new_child_internal-source">
+            <pre><span class="ruby-comment"># File app/models/tree.rb, line 178</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">insert_new_child_internal</span>(<span class="ruby-identifier">parent_id</span>, <span class="ruby-identifier">child_index</span>, <span class="ruby-identifier">node</span>)
+        <span class="ruby-comment"># check the input type</span>
+        <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-string">'the third parameter should be a Node type instance'</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">not</span>(<span class="ruby-identifier">input</span>.<span class="ruby-identifier">kind_of?</span> <span class="ruby-constant">Node</span>)
+        <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-string">'an input element should be inserted by calling insert_new_child_input'</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">input</span>.<span class="ruby-identifier">kind_of?</span> <span class="ruby-constant">InputElement</span>
+        <span class="ruby-comment"># insert the node as a internal</span>
+        <span class="ruby-identifier">insert_new_child_node</span>(<span class="ruby-identifier">parent_id</span>, <span class="ruby-identifier">child_index</span>, <span class="ruby-identifier">node</span>.<span class="ruby-identifier">class</span>, <span class="ruby-identifier">node</span>.<span class="ruby-identifier">serialize</span>, [])
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- insert_new_child_internal-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- insert_new_child_internal-method -->
+
+    
+      <div id="method-i-insert_new_child_text" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">insert_new_child_text</span><span
+            class="method-args">(parent_id, child_index, text)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="insert_new_child_text-source">
+            <pre><span class="ruby-comment"># File app/models/tree.rb, line 171</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">insert_new_child_text</span>(<span class="ruby-identifier">parent_id</span>, <span class="ruby-identifier">child_index</span>, <span class="ruby-identifier">text</span>)
+        <span class="ruby-comment"># check the text type, must be a String</span>
+        <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-string">'the third parameter should be a Input type instance'</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">not</span>(<span class="ruby-identifier">input</span>.<span class="ruby-identifier">kind_of?</span> <span class="ruby-constant">String</span>)
+        <span class="ruby-comment"># insert the text as a node</span>
+        <span class="ruby-identifier">insert_new_child_node</span>(<span class="ruby-identifier">parent_id</span>, <span class="ruby-identifier">child_index</span>, <span class="ruby-string">&quot;Text&quot;</span>, <span class="ruby-identifier">text</span>, [])
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- insert_new_child_text-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- insert_new_child_text-method -->
+
+    
+      <div id="method-i-remove_constrain" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">remove_constrain</span><span
+            class="method-args">(node_id, constrain_id)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+
+          
+          <div class="method-source-code" id="remove_constrain-source">
+            <pre><span class="ruby-comment"># File app/models/tree.rb, line 134</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">remove_constrain</span>(<span class="ruby-identifier">node_id</span>, <span class="ruby-identifier">constrain_id</span>)
+        <span class="ruby-keyword">return</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">NODE_NOT_EXIST</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@nodes</span>[<span class="ruby-identifier">node_id</span>].<span class="ruby-identifier">nil?</span>
+        <span class="ruby-ivar">@constrains</span>.<span class="ruby-identifier">delete_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">constrain</span><span class="ruby-operator">|</span> <span class="ruby-identifier">constrain</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">constrain_id</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- remove_constrain-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- remove_constrain-method -->
+
+    
+      <div id="method-i-remove_node" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">remove_node</span><span
+            class="method-args">(node_id)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>DELETE METHODs ##############</p>
+          
+
+          
+          <div class="method-source-code" id="remove_node-source">
+            <pre><span class="ruby-comment"># File app/models/tree.rb, line 105</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">remove_node</span>(<span class="ruby-identifier">node_id</span>)
+        <span class="ruby-keyword">return</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">NODE_NOT_EXIST</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@nodes</span>[<span class="ruby-identifier">node_id</span>].<span class="ruby-identifier">nil?</span>
+        <span class="ruby-identifier">parent_id</span> = <span class="ruby-identifier">find_parent_id_by_id</span>(<span class="ruby-identifier">node_id</span>)
+        <span class="ruby-ivar">@nodes</span>[<span class="ruby-identifier">parent_id</span>][<span class="ruby-value">:children</span>].<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">node_id</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">parent_id</span> <span class="ruby-operator">==</span> <span class="ruby-value">-1</span>
+        <span class="ruby-identifier">remove_node_without_parent</span>(<span class="ruby-identifier">node_id</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- remove_node-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- remove_node-method -->
+
+    
+      <div id="method-i-set_attr" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">set_attr</span><span
+            class="method-args">(node_id, attr)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>UPDATE METHODs ##############</p>
+          
+
+          
+          <div class="method-source-code" id="set_attr-source">
+            <pre><span class="ruby-comment"># File app/models/tree.rb, line 113</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">set_attr</span>(<span class="ruby-identifier">node_id</span>, <span class="ruby-identifier">attr</span>)
+        <span class="ruby-keyword">return</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">NODE_NOT_EXIST</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@nodes</span>[<span class="ruby-identifier">node_id</span>].<span class="ruby-identifier">nil?</span>
+        <span class="ruby-identifier">attr</span>.<span class="ruby-identifier">each_key</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span>
+                <span class="ruby-keyword">return</span> <span class="ruby-constant">ErrorEnum</span><span class="ruby-operator">::</span><span class="ruby-constant">ATTR_NOT_EXIST</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">not</span>(<span class="ruby-constant">Object</span><span class="ruby-operator">::</span><span class="ruby-identifier">const_get</span>(<span class="ruby-ivar">@nodes</span>[<span class="ruby-identifier">node_id</span>][<span class="ruby-value">:node_type</span>]).<span class="ruby-identifier">has_attr?</span>(<span class="ruby-identifier">key</span>))
+        <span class="ruby-keyword">end</span>
+        <span class="ruby-ivar">@nodes</span>[<span class="ruby-identifier">node_id</span>][<span class="ruby-value">:attr</span>] = <span class="ruby-identifier">attr</span>.<span class="ruby-identifier">clone</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- set_attr-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- set_attr-method -->
+
+    
+    </section><!-- public-instance-method-details -->
+  
+  </section><!-- 5Buntitled-5D -->
+
+</div><!-- documentation -->
+
+
+<footer id="validator-badges">
+  <p><a href="http://validator.w3.org/check/referer">[Validate]</a>
+  <p>Generated by <a href="https://github.com/rdoc/rdoc">RDoc</a> 3.12.
+  <p>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish Rdoc Generator</a> 3.
+</footer>
+

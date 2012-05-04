@@ -1,0 +1,22 @@
+production:
+  root_url: "166.111.112.18"
+  activate_expiration_time: 86400
+  password_expiration_time: 86400
+  cache_key_prefix: "oopsdata_"
+development:
+  root_url: "localhost:3000"
+  activate_expiration_time: 3600
+  password_expiration_time: 3600
+  cache_key_prefix: "oopsdata_"
+
+survey_default_settings:
+  title: "调查问卷主标题"
+  subtitle: "调查问卷副标题"
+  welcome: "调查问卷欢迎语"
+  closing: "调查问卷结束语"
+  header: "调查问卷页眉"
+  footer: "调查问卷页脚"
+  description: "调查问卷描述"
+
+question_default_settings:
+  content: "题干"

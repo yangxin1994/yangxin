@@ -1,0 +1,11 @@
+= form_tag({:controller => "registrations", :action => "send_activate_email"}, :method => "post") do
+
+
+	%p
+		%label 邮箱
+		= text_field_tag 'user[email]'
+
+	%p
+		= submit_tag "激活"
+
+= render :partial => "layouts/navigation"
