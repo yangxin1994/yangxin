@@ -1,0 +1,67 @@
+= Quill
+
+=== 安装git
+
+  # git
+  sudo apt-get install git-core 
+  # ssh keys
+  # ...
+  
+安装详细: http://help.github.com/linux-set-up-git/
+
+如果你是初次使用此代码，可简单地克隆代码到本地。
+
+  mkdir quill  #创建目录
+  cd quill
+  git clone git@github.com:OopsData/Quill.git ./
+
+=== git管理代码
+
+初始化
+
+  # 进入目录
+  cd quill
+  
+  # 初次建立git管理时，必须的; 以后不必了。
+  # git clone git@... 会自动执行 init 命令, 即可省略 init 操作
+  git init ./ 
+
+获取最新代码
+
+  # checkout master代码分支，可更新至分支的最新版本
+  git checkout master
+  # checkout 结果标识:
+  # M = modified
+  # A = added
+  # D = deleted
+  # R = renamed
+  # C = copied
+  # U = updated but unmerged
+  # checkout 之后，最好继续运行下文代码，详细了解代码情况
+
+  # 查看代码状态. 其会显示你现有的添加项／修改项...
+  git status 
+
+  # 查看代码冲突
+  git diff
+
+  # 解决代码冲突后，最好重新运行命令以检查代码情况。
+
+提交代码
+
+  # 添加所有修改，建议只添加修改的文件，如注释中...
+  git add ./  
+  # git add ./modify_file.rb
+  
+  # 添加提交信息
+  git commit -m "shatle update README.rdoc"
+  
+  # 新建版本 shatle-20120503,版本不能重复
+  git remote add shatle-20120503 git@github.com:OopsData/Quill.git
+  
+  # 提交 新建的版本 到 master 分支上
+  git push -u shatle-20120503 master  
+  # 悄悄地，强制提交 
+  git push -u shatle-20120503 +master  
+
+其它详细命令，可参考 http://blog.longwin.com.tw/2009/05/git-learn-initial-command-2009/
