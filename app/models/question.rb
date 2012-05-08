@@ -17,6 +17,12 @@ class Question
 
 	ATTR_NAME_ARY = %w[content]
 
+	QUESTION_TYPE = %w[ChoiceQuestion MatrixChoiceQuestion BlankQuestion MatrixBlankQuestion ConstSumQuestion SortQuestion RankQuestion Paragraph FileQuestion]
+
+	def self.has_question_type(question_type)
+		return QUESTION_TYPE.include?(question_type)
+	end
+
 	#*description*: find the question instance by its id, return nil if the question does not exist
 	#
 	#*params*:
@@ -37,6 +43,7 @@ class Question
 	#* the question object
 	def serialize(attr_name_ary)
 		question_obj = {}
+		question_obj["question_id"] = self._id.to_s
 		attr_name_ary.each do |attr_name|
 			method_obj = self.method("#{attr_name}".to_sym)
 			question_obj[attr_name] = method_obj.call() 
@@ -53,6 +60,7 @@ class Question
 	#*retval*:
 	def update_question(attr_name_ary, question_obj)
 		attr_name_ary.each do |attr_name|
+			next if attr_name == "question_type"
 			method_obj = self.method("#{attr_name}=".to_sym)
 			method_obj.call(question_obj[attr_name]) 
 		end

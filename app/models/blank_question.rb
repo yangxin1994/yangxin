@@ -12,12 +12,12 @@ require 'securerandom'
 #  "data_type": can be short_text, long_text, pwd, int, float, email, date, phone, address(string)
 # }
 class BlankQuestion < Question
-	field :question_type, :type => String, default: "blank"
+	field :question_type, :type => String, default: "BlankQuestion"
 	field :inputs, :type => Array, default: []
 	field :is_rand, :type => Boolean, default: false
 
-	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type inputs rand]
-	INPUT_ATTR_ARY = %w[input_id label data_type email]
+	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type inputs is_rand]
+	INPUT_ATTR_ARY = %w[input_id label data_type]
 
 	#*description*: serialize the current instance into a question object
 	#
@@ -41,7 +41,7 @@ class BlankQuestion < Question
 		end
 		super(ATTR_NAME_ARY, question_obj)
 		self.inputs.each do |input|
-			input["input_id"] = SecureRandom.uuid if inputs["input_id"].to_s == ""
+			input["input_id"] = SecureRandom.uuid if input["input_id"].to_s == ""
 		end
 		self.save
 	end

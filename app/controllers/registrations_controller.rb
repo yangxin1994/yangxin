@@ -20,6 +20,7 @@ class RegistrationsController < ApplicationController
 	#* user: the user hash, the keys of which include:
 	#  - email
 	#  - password
+	#  - password_confirmation
 	#  - username
 	#* user_information: the user information hash, the keys of which include:
 	#  - email

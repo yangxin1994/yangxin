@@ -21,7 +21,7 @@ require 'securerandom'
 #  "is_exclusive": whether this choice item is exclusive(bool)
 # }
 class MatrixChoiceQuestion < Question
-	field :question_type, :type => String, default: "matrix_choice"
+	field :question_type, :type => String, default: "MatrixChoiceQuestion"
 	field :choices, :type => Array, default: []
 	field :choice_num_per_row, :type => Integer, default: -1
 	field :min_choice, :type => Integer, default: 1
@@ -29,10 +29,11 @@ class MatrixChoiceQuestion < Question
 	field :is_list_style, :type => Boolean, default: true
 	field :is_rand, :type => Boolean, default: false
 	field :row_name, :type => Array, default: []
+	field :row_id, :type => Array, default: []
 	field :is_row_rand, :type => Boolean, default: false
 	field :row_num_per_group, :type => Integer, default: -1
 
-	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type choices choice_num_per_row min_choice max_choice list_style rand row_name row_rand row_num_per_group]
+	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type choices choice_num_per_row min_choice max_choice is_list_style is_rand row_name row_id is_row_rand row_num_per_group]
 	CHOICE_ATTR_ARY = %w[choice_id content has_input is_exclusive]
 
 	#*description*: serialize the current instance into a question object

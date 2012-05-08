@@ -3,11 +3,19 @@ production:
   activate_expiration_time: 86400
   password_expiration_time: 86400
   cache_key_prefix: "oopsdata_"
+  redis_hostname: "orange02"
 development:
   root_url: "localhost:3000"
   activate_expiration_time: 3600
   password_expiration_time: 3600
   cache_key_prefix: "oopsdata_"
+  redis_hostname: "localhost"
+test:
+  root_url: "localhost:3000"
+  activate_expiration_time: 3600
+  password_expiration_time: 3600
+  cache_key_prefix: "oopsdata_"
+  redis_hostname: "localhost"
 
 survey_default_settings:
   title: "调查问卷主标题"

@@ -5,8 +5,8 @@ require 'securerandom'
 #	 "input_id" : id of the input
 #	}
 class FileQuestion < Question
-	field :question_type, :type => String, default: "file"
-	field :input_id, :type => String
+	field :question_type, :type => String, default: "FileQuestion"
+	field :input_id, :type => String, default: -> {SecureRandom.uuid}
 
 	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type input_id]
 
@@ -28,7 +28,7 @@ class FileQuestion < Question
 	#*retval*:
 	def update_question(question_obj)
 		super(ATTR_NAME_ARY, question_obj)
-		self.input_id = SecureRandom.uuid if self.input_id == ""
+		self.input_id = SecureRandom.uuid if self.input_id.to_s == ""
 		self.save
 	end
 

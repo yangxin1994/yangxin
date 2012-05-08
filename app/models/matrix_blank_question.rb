@@ -16,14 +16,15 @@ require 'securerandom'
 #  "data_type": can be short_text, long_text, pwd, int, float, email, date, phone, address(string)
 # }
 class MatrixBlankQuestion < Question
-	field :question_type, :type => String, default: "matrix_blank"
+	field :question_type, :type => String, default: "MatrixBlankQuestion"
 	field :inputs, :type => Array, default: []
 	field :is_rand, :type => Boolean, default: false
 	field :row_name, :type => Array, default: []
+	field :row_id, :type => Array, default: []
 	field :is_row_rand, :type => Boolean, default: false
 	field :row_num_per_group, :type => Integer, default: -1
 
-	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type inputs rand row_name row_rand row_num_per_group]
+	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type inputs is_rand row_name row_id is_row_rand row_num_per_group]
 	INPUT_ATTR_ARY = %w[input_id label data_type email]
 
 	#*description*: serialize the current instance into a question object

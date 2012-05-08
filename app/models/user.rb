@@ -12,7 +12,7 @@ class User
   field :status, :type => Integer, default: 0
   field :last_login_time, :type => Integer
   field :last_login_ip, :type => String
-  field :login_count, :type => Integer
+  field :login_count, :type => Integer, default: 0
   field :created_at, :type => Integer, default: -> { Time.now.to_i }
   field :updated_at, :type => Integer
   field :activate_time, :type => Integer
@@ -79,7 +79,7 @@ class User
 	#* the new user instance: when successfully created
 	def self.check_and_create_new(user)
 		# check whether the email acount is illegal
-		return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal(user["email"])
+		return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal?(user["email"])
 		# check whether this user already exists
 		if user_exist?(user["email"])
 			return ErrorEnum::EMAIL_ACTIVATED if user_activate?(user["email"])
@@ -106,8 +106,9 @@ class User
 		return true  if user_activate?(activate_info["email"])					# already activated
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i		# expired
 		user = User.find_by_email(activate_info["email"])
-		user.update_attributes({"status" => 1, "activate_time" => Time.now.to_})
-		return true
+		user.status = 1
+		user.activate_time = Time.now.to_i
+		return user.save
 	end
 
 	#*description*: user login
@@ -124,17 +125,14 @@ class User
 	#* WRONG_PASSWORD
 	def self.login(email, password, client_ip)
 		return ErrorEnum::EMAIL_NOT_EXIST if !user_exist?(email)			# email account does not exist
-		return ErrorEnum::EMAIL_NOT_ACTIVATED if user_activate?(email)		# not activated
+		return ErrorEnum::EMAIL_NOT_ACTIVATED if !user_activate?(email)		# not activated
 		user = User.find_by_email(email)
-		if user.password != Encryption.encrypt_password(password)
-			return ErrorEnum::WRONG_PASSWORD # wrong password
-		else
-			# record the login information
-			user.update_attributes({"last_login_time" => Time.now.to_i,
-					"last_login_ip" => client_ip,
-					"login_count" => user.login_count + 1})
-			return true
-		end
+		return ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(password)
+		# record the login information
+		user.last_login_time = Time.now.to_i
+		user.last_login_ip = client_ip
+		user.login_count = user.login_count + 1
+		return user.save
 	end
 
 	#*description*: reset password for an user, used when the user forgets its password

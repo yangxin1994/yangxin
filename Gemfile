@@ -14,6 +14,8 @@ gem 'memcache-client'
 gem 'resque'
 gem 'resque-scheduler'
 
+gem 'factory_girl_rails', "~> 3.0"
+
 gem 'haml'
 gem 'haml-rails'
 
@@ -42,4 +44,5 @@ gem 'jquery-rails'
 group :test do
   # Pretty printed test output
   gem 'turn', :require => false
+	gem 'minitest'
 end

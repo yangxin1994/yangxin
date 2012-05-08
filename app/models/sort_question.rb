@@ -14,11 +14,11 @@ require 'securerandom'
 #  "max": maximum number of items needed to be sorted(int)
 # }
 class SortQuestion < Question
-	field :question_type, :type => String, default: "sort"
+	field :question_type, :type => String, default: "SortQuestion"
 	field :items, :type => Array, default: []
 	field :is_rand, :type => Boolean, default: false
 
-	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type items rand]
+	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type items is_rand]
 	ITEM_ATTR_ARY = %w[item_id content has_input min max]
 
 	#*description*: serialize the current instance into a question object

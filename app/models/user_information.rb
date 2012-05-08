@@ -17,30 +17,23 @@ class UserInformation
 
 	key :email
 
-	attr_accessible :email, :realname, :address, :zipcode, :telephone, :gender, :marriage, :education, :birthday, :location, :family_incoming, :personal_incoming, :position, :industry
 
-
-	# check and create
-	def self.check_and_create_new(user_information)
-		return -1 if user_information_exist?(user_information["email"])
-		user_information = UserInformation.new(user_information)
-		user_information.save
-	end
 
 	# check whether user_information for one email exists
 	def self.user_information_exist?(email)
-		User.where(:email => email).length > 0
+		UserInformation.where(:email => email).length > 0
 	end
 
 	# update a user information
 	def self.update(user_information)
 		email = user_information["email"]
 		if user_information_exist?(email)
-			user_information = User.where(:email => email)[0]
-			user_information.update_attributes(user_information)
+			user_information_inst = UserInformation.where(:email => email)[0]
+			puts user_information.inspect
+			user_information_inst.update_attributes(user_information)
 		else
-			user_information = UserInformation.new(user_information)
+			user_information_inst = UserInformation.new(user_information)
 		end
-		user_information.save
+		user_information_inst.save
 	end
 end

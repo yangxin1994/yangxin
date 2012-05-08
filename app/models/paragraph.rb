@@ -2,7 +2,7 @@ require 'error_enum'
 require 'securerandom'
 #Besides the fields that all types questions have, paragraph also have:
 class Paragraph < Question
-	field :question_type, :type => String, default: "paragraph"
+	field :question_type, :type => String, default: "Paragraph"
 
 	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type]
 

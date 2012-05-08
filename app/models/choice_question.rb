@@ -17,7 +17,7 @@ require 'securerandom'
 #  "is_exclusive": whether this choice item is exclusive(bool)
 # }
 class ChoiceQuestion < Question
-	field :question_type, :type => String, default: "choice"
+	field :question_type, :type => String, default: "ChoiceQuestion"
 	field :choices, :type => Array, default: []
 	field :choice_num_per_row, :type => Integer, default: -1
 	field :min_choice, :type => Integer, default: 1
@@ -25,7 +25,7 @@ class ChoiceQuestion < Question
 	field :is_list_style, :type => Boolean, default: true
 	field :is_rand, :type => Boolean, default: false
 
-	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type choices choice_num_per_row min_choice max_choice list_style rand]
+	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type choices choice_num_per_row min_choice max_choice is_list_style is_rand]
 	CHOICE_ATTR_ARY = %w[choice_id content has_input is_exclusive]
 
 	#*description*: serialize the current instance into a question object

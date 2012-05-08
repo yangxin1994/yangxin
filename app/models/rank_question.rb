@@ -16,12 +16,12 @@ require 'securerandom'
 #  "desc_ary": array of string to describe the item(array)
 # }
 class RankQuestion < Question
-	field :question_type, :type => String, default: "rank"
+	field :question_type, :type => String, default: "RankQuestion"
 	field :items, :type => Array, default: []
 	field :is_rand, :type => Boolean, default: false
 
-	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type items rand]
-	ITEM_ATTR_ARY = %w[item_id label icon icon_num has_input has_unkonw desc_ary]
+	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type items is_rand]
+	ITEM_ATTR_ARY = %w[item_id label icon icon_num has_input has_unknow desc_ary]
 
 	#*description*: serialize the current instance into a question object
 	#

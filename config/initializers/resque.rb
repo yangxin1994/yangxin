@@ -2,7 +2,7 @@ require 'rails_env'
 require 'resque_scheduler'
 
 Resque.redis = "#{OOPSDATA[RailsEnv.get_rails_env]["redis_hostname"]}:6379"
-Resque.redis = "localhost:6379"
+#Resque.redis = "localhost:6379"
 Resque.redis.namespace = "resque:OopsData"
 
 # If you want to be able to dynamically change the schedule,

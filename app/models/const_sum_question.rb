@@ -13,12 +13,12 @@ require 'securerandom'
 #  "has_input": whether there is a input text field(bool)
 # }
 class ConstSumQuestion < Question
-	field :question_type, :type => String, default: "const_sum"
+	field :question_type, :type => String, default: "ConstSumQuestion"
 	field :items, :type => Array, default: []
 	field :is_rand, :type => Boolean, default: false
 	field :sum, :type => Integer, default: 100
 
-	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type inputs rand sum]
+	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type items is_rand sum]
 	ITEM_ATTR_ARY = %w[item_id content has_input]
 
 	#*description*: serialize the current instance into a question object
