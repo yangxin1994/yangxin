@@ -17,7 +17,9 @@ class RegistrationsControllerTest < ActionController::TestCase
 		user_hash, user_information = *init_user_and_user_information
 		post :create, :format => :json, :user => user_hash, :user_information => user_information
 		assert_equal true.to_s, @response.body
-		
+	end
+
+	test "should check email" do
 	end
 
 
