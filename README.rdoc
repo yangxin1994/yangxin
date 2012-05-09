@@ -1,5 +1,3 @@
-==== Author: yangzexi@oopsdata.com
-
 = git及github简单使用说明（不断完善中）
 
 == 1. 安装git并且配置ssh key
