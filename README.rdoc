@@ -1,67 +1,50 @@
-= Quill
+Author: yangzexi@oopsdata.com
 
-=== 安装git
+首先确保已经安装git，并且正确配置ssh，请参考http://help.github.com/linux-set-up-git，需要注意的是，我配置ssh时，用rsa keys总是不成功，改用dsa keys才成功完成配置，即我在生成ssh key时，用的是如下语句
+$ ssh-keygen -t dsa -C "your_email@youremail.com"
+而不是如下语句
+$ ssh-keygen -t rsa -C "your_email@youremail.com"
+还请个人使用时依具体情况调整
 
-  # git
-  sudo apt-get install git-core 
-  # ssh keys
-  # ...
-  
-安装详细: http://help.github.com/linux-set-up-git/
 
-如果你是初次使用此代码，可简单地克隆代码到本地。
+如何对一个project创建git repository并且和使用github进行管理？假设project的名字为MyPorject
+1. 在本地创建git repository
+	a.进入到MyProject目录，运行如下命令初始化一个git repository：
+		$ git init ./
+2. 本地git repository的操作
+	a.可以用以下命令查看文件夹下的文件状态
+		$ git status
+		对于刚刚初始化的project，所有的文件都应该是untracked files
+	b.修改或者新建文件后，需要用以下命令将修改过的文件或者是新创建的文件加入到tracked files
+		$ git add /path/to/the/file
+	c.删除文件后，需要用以下命令将删除的文件加入到tracked files
+		$ git rm /path/to/the/file
+	d.可以用以下命令将tracked files的修改更新到本地的git repository中
+		$ git commit -m "comments"
+3. 在github上创建repository：
+	a.以某个organization(例如OopsData)的owner身份用户登录到github，并且转到OopsData页面，创建一个repository，例如名字为TestGitRepo为的repository，该repository的url为 git@github.com:OopsData/TestGitRepo.git
+	b.进入到新创建的repository中，点击admin进入管理该repository的页面，在Teams标签下添加新的team，注意接下来将要在本地操作github上该repository的用户必须被添加到Teams中
+4. 对本地的repository和github上的repository进行同步
+	a.在MyProject目录下可以用如下命令来查看remote repository alias
+		$ git remote
+		在向project添加remote repository之前，用git remote查看应该看不到任何的remote repository alias
+	b.用命令git remote add [alias] [url]，可以添加remote repository alias，例如，下面的命令将github上的TestGitRepo添加成本地的一个名字为origin的alias
+		$ git remote add origin git@github.com:OopsData/TestGitRepo.git
+		添加之后，再用git remote查看就可以看到新添加的origin，并且可以用git remote -v查看可以对各个alias进行的操作
+	c.可以用如下命令将本地的repository同步到github上远端的repository
+		$ git push origin master
+	d.可以用如下命令将github上远端的repository同步到本地
+		$ git pull
 
-  mkdir quill  #创建目录
-  cd quill
-  git clone git@github.com:OopsData/Quill.git ./
+如何将github上已经存在的一个project同步到本地repository并进行开发？仍然以上面创建的MyProject为例
+1. 创建一个本地project目录并进入到目录中
+2. 运行如下命令将远端的git repository同步到本地的一个git repository
+	$ git clone git@github.com:OopsData/TestGitRepo.git ./
+3. 接下来，就可以使用git status，git add，git commit，git pull，git push等命令了
 
-=== git管理代码
 
-初始化
+参考资料：
+http://gitref.org/remotes/
+http://www.vogella.com/articles/Git/article.html
 
-  # 进入目录
-  cd quill
-  
-  # 初次建立git管理时，必须的; 以后不必了。
-  # git clone git@... 会自动执行 init 命令, 即可省略 init 操作
-  git init ./ 
-
-获取最新代码
-
-  # checkout master代码分支，可更新至分支的最新版本
-  git checkout master
-  # checkout 结果标识:
-  # M = modified
-  # A = added
-  # D = deleted
-  # R = renamed
-  # C = copied
-  # U = updated but unmerged
-  # checkout 之后，最好继续运行下文代码，详细了解代码情况
-
-  # 查看代码状态. 其会显示你现有的添加项／修改项...
-  git status 
-
-  # 查看代码冲突
-  git diff
-
-  # 解决代码冲突后，最好重新运行命令以检查代码情况。
-
-提交代码
-
-  # 添加所有修改，建议只添加修改的文件，如注释中...
-  git add ./  
-  # git add ./modify_file.rb
-  
-  # 添加提交信息
-  git commit -m "shatle update README.rdoc"
-  
-  # 新建版本 shatle-20120503,版本不能重复
-  git remote add shatle-20120503 git@github.com:OopsData/Quill.git
-  
-  # 提交 新建的版本 到 master 分支上
-  git push -u shatle-20120503 master  
-  # 悄悄地，强制提交 
-  git push -u shatle-20120503 +master  
-
-其它详细命令，可参考 http://blog.longwin.com.tw/2009/05/git-learn-initial-command-2009/
+Please feel free to contact with me if you have any problem: yangzexi@oopsdata.com
