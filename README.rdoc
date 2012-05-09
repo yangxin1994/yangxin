@@ -1,6 +1,6 @@
 Author: yangzexi@oopsdata.com
 
-首先确保已经安装git，并且正确配置ssh，请参考http://help.github.com/linux-set-up-git，需要注意的是，我配置ssh时，用rsa keys总是不成功，改用dsa keys才成功完成配置，即我在生成ssh key时，用的是如下语句
+首先确保已经安装git，并且正确配置ssh，请参考 http://help.github.com/linux-set-up-git ，需要注意的是，我配置ssh时，用rsa keys总是不成功，改用dsa keys才成功完成配置，即我在生成ssh key时，用的是如下语句
 $ ssh-keygen -t dsa -C "your_email@youremail.com"
 而不是如下语句
 $ ssh-keygen -t rsa -C "your_email@youremail.com"
@@ -9,31 +9,31 @@ $ ssh-keygen -t rsa -C "your_email@youremail.com"
 
 如何对一个project创建git repository并且和使用github进行管理？假设project的名字为MyPorject
 1. 在本地创建git repository
-	a.进入到MyProject目录，运行如下命令初始化一个git repository：
+  1).进入到MyProject目录，运行如下命令初始化一个git repository：
 		$ git init ./
 2. 本地git repository的操作
-	a.可以用以下命令查看文件夹下的文件状态
+	1).可以用以下命令查看文件夹下的文件状态
 		$ git status
 		对于刚刚初始化的project，所有的文件都应该是untracked files
-	b.修改或者新建文件后，需要用以下命令将修改过的文件或者是新创建的文件加入到tracked files
+	2).修改或者新建文件后，需要用以下命令将修改过的文件或者是新创建的文件加入到tracked files
 		$ git add /path/to/the/file
-	c.删除文件后，需要用以下命令将删除的文件加入到tracked files
+	3).删除文件后，需要用以下命令将删除的文件加入到tracked files
 		$ git rm /path/to/the/file
-	d.可以用以下命令将tracked files的修改更新到本地的git repository中
+	4).可以用以下命令将tracked files的修改更新到本地的git repository中
 		$ git commit -m "comments"
 3. 在github上创建repository：
-	a.以某个organization(例如OopsData)的owner身份用户登录到github，并且转到OopsData页面，创建一个repository，例如名字为TestGitRepo为的repository，该repository的url为 git@github.com:OopsData/TestGitRepo.git
-	b.进入到新创建的repository中，点击admin进入管理该repository的页面，在Teams标签下添加新的team，注意接下来将要在本地操作github上该repository的用户必须被添加到Teams中
+	1).以某个organization(例如OopsData)的owner身份用户登录到github，并且转到OopsData页面，创建一个repository，例如名字为TestGitRepo为的repository，该repository的url为 git@github.com:OopsData/TestGitRepo.git
+	2).进入到新创建的repository中，点击admin进入管理该repository的页面，在Teams标签下添加新的team，注意接下来将要在本地操作github上该repository的用户必须被添加到Teams中
 4. 对本地的repository和github上的repository进行同步
-	a.在MyProject目录下可以用如下命令来查看remote repository alias
+	1).在MyProject目录下可以用如下命令来查看remote repository alias
 		$ git remote
 		在向project添加remote repository之前，用git remote查看应该看不到任何的remote repository alias
-	b.用命令git remote add [alias] [url]，可以添加remote repository alias，例如，下面的命令将github上的TestGitRepo添加成本地的一个名字为origin的alias
+	2).用命令git remote add [alias] [url]，可以添加remote repository alias，例如，下面的命令将github上的TestGitRepo添加成本地的一个名字为origin的alias
 		$ git remote add origin git@github.com:OopsData/TestGitRepo.git
 		添加之后，再用git remote查看就可以看到新添加的origin，并且可以用git remote -v查看可以对各个alias进行的操作
-	c.可以用如下命令将本地的repository同步到github上远端的repository
+	3).可以用如下命令将本地的repository同步到github上远端的repository
 		$ git push origin master
-	d.可以用如下命令将github上远端的repository同步到本地
+	4).可以用如下命令将github上远端的repository同步到本地
 		$ git pull
 
 如何将github上已经存在的一个project同步到本地repository并进行开发？仍然以上面创建的MyProject为例
@@ -44,7 +44,9 @@ $ ssh-keygen -t rsa -C "your_email@youremail.com"
 
 
 参考资料：
+
 http://gitref.org/remotes/
+
 http://www.vogella.com/articles/Git/article.html
 
 Please feel free to contact with me if you have any problem: yangzexi@oopsdata.com
