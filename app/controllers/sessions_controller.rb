@@ -90,14 +90,13 @@ class SessionsController < ApplicationController
 	#*url*: /send_password_email
 	#
 	#*params*:
-	#* user: a hash that has following keys
-	#  - email
+	#* email
 	#
 	#*retval*:
 	#* true if successfully send out
 	#* ErrorEnum ::EMAIL_NOT_EXIST
 	def send_password_email
-		if User.user_exist?(params[:user]["email"]) == false
+		if User.user_exist?(params[:email]) == false
 			flash[:notice] = "该邮箱未注册，请您注册"
 			respond_to do |format|
 				format.html { redirect_to registrations_path and return }
@@ -105,7 +104,7 @@ class SessionsController < ApplicationController
 			end
 		end
 
-		user = User.find_by_email(params[:user]["email"])
+		user = User.find_by_email(params[:email])
 		# send password email
 		UserMailer.password_email(user).deliver
 
@@ -129,7 +128,12 @@ class SessionsController < ApplicationController
 	#* redirect to forget_password_url if successfully pass the checking
 	#* redirect to /500 if it is a wrong link
 	def input_new_password
-		password_info_json = Encryption.decrypt_activate_key(params[:password_key])
+		begin
+			password_info_json = Encryption.decrypt_activate_key(params[:password_key])
+		rescue
+			redirect_to "/500" and return
+		end
+		redirect_to "/500" and return if password_info_json.nil?
 		password_info = JSON.parse(password_info_json)
 		if Time.now.to_i - password_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["password_expiration_time"].to_i
 			flash[:notice] = "密码重置链接已经过期，请重新发送重置密码链接"
@@ -152,25 +156,60 @@ class SessionsController < ApplicationController
 	#* user: a hash that has the following keys
 	#  - email
 	#  - password
+	#  - password_confirmation
+	#* password_key
 	#
 	#*retval*:
 	#* true if password is reset
 	#* ErrorEnum::EMAIL_NOT_EXIST
 	def new_password
-		reset_password_retval = User.reset_password(params[:user]["email"], params[:user]["password"])
-		case reset_password_retval
+		begin
+			password_info_json = Encryption.decrypt_activate_key(params[:password_key])
+		rescue
+			respond_to do |format|
+				format.html { redirect_to "/500" and return }		# email account does not exist
+				format.json { render :json => false and return }		# email account does not exist
+			end
+		end
+		if password_info_json.nil?
+			respond_to do |format|
+				format.html { redirect_to "/500" and return }		# email account does not exist
+				format.json { render :json => false and return }		# email account does not exist
+			end
+		end
+		password_info = JSON.parse(password_info_json)
+		if Time.now.to_i - password_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["password_expiration_time"].to_i
+			flash[:notice] = "密码重置链接已经过期，请重新发送重置密码链接"
+			respond_to do |format|
+				format.html { redirect_to forget_password_url and return }		# email account does not exist
+				format.json { render :json => ErrorEnum::RESET_PASSWORD_EXPIRED and return }		# email account does not exist
+			end
+		end
+		if password_info["email"] != params[:user]["email"]
+			respond_to do |format|
+				format.html { redirect_to "/500" and return }		# email account does not exist
+				format.json { render :json => ErrorEnum::EMAIL_NOT_EXIST and return }		# email account does not exist
+			end
+		end
+
+		retval = User.reset_password(params[:user]["email"], params[:user]["password"], params[:user]["password_confirmation"])
+		case retval
 		when ErrorEnum::EMAIL_NOT_EXIST
 			respond_to do |format|
 				format.html { redirect_to "/500" and return }		# email account does not exist
-				format.json { render :json => ErrorEnum::EMAIL_NOT_EXIST }		# email account does not exist
+				format.json { render :json => ErrorEnum::EMAIL_NOT_EXIST and return }		# email account does not exist
+			end
+		when ErrorEnum::WRONG_PASSWORD_CONFIRMATION
+			respond_to do |format|
+				format.html { redirect_to "/500" and return }
+				format.json { render :json => ErrorEnum::WRONG_PASSWORD_CONFIRMATION and return }
 			end
 		else
 			flash[:notice] = "密码已重置"
 			respond_to do |format|
 				format.html { redirect_to sessions_path and return }
-				format.json { render :json => true }
+				format.json { render :json => true and return }
 			end
-			
 		end
 	end
 

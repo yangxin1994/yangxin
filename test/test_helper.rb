@@ -28,4 +28,16 @@ class ActiveSupport::TestCase
 		survey.destroy if survey.class == Survey
 	end
 
+	def init_new_user
+		new_user = FactoryGirl.build(:new_user)
+		new_user.save
+		return new_user
+	end
+
+	def init_activated_user
+		activated_user = FactoryGirl.build(:activated_user)
+		activated_user.save
+		return activated_user
+	end
+
 end

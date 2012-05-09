@@ -118,21 +118,20 @@ class RegistrationsController < ApplicationController
 	#*url*: /send_activate_email
 	#
 	#*params*:
-	#* user: a hash which has the following key
-	#  - email
+	#* email
 	#
 	#*retval*:
 	#* true if the activate email is sent out
 	#* Errorenum ::EMAIL_NOT_EXIST
 	#* Errorenum ::EMAIL_ACTIVATED
 	def send_activate_email
-		if User.user_exist?(params[:user]["email"]) == false
+		if User.user_exist?(params[:email]) == false
 			flash[:notice] = "该邮箱未注册，请您注册"
 			respond_to do |format|
 				format.html	{ redirect_to registrations_path and return }
 				format.json	{ render :json => ErrorEnum::EMAIL_NOT_EXIST and return }
 			end
-		elsif User.user_activate?(params[:user]["email"])
+		elsif User.user_activate?(params[:email])
 			flash[:notice] = "该帐号已激活，请您登录"
 			respond_to do |format|
 				format.html	{ redirect_to sessions_path and return }
@@ -140,7 +139,7 @@ class RegistrationsController < ApplicationController
 			end
 		end
 
-		user = User.find_by_email(params[:user]["email"])
+		user = User.find_by_email(params[:email])
 		# send activate email
 		UserMailer.activate_email(user).deliver
 
@@ -165,13 +164,18 @@ class RegistrationsController < ApplicationController
 	#* redirect to input_activate_email_path if expired
 	#* redirect to /500 if email account does not exist
 	def activate
-		activate_info_json = Encryption.decrypt_activate_key(params[:activate_key])
+		begin
+			activate_info_json = Encryption.decrypt_activate_key(params[:activate_key])
+		rescue
+			redirect_to "/500" and return
+		end
+		redirect_to "/500" and return if activate_info_json.nil?
 		@activate_info = JSON.parse(activate_info_json)
 		activate_retval = User.activate(@activate_info)
 		if activate_retval == true
 			flash[:notice] = "您已经成功激活，请登录"
 			redirect_to sessions_path and return
-		elsif activate_retval == -5
+		elsif activate_retval == ErrorEnum::ACTIVATE_EXPIRED
 			flash[:notice] = "您的激活链接已经过期，请您重新发送激活邮件进行激活"
 			redirect_to input_activate_email_path and return
 		else

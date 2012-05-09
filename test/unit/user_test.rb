@@ -67,16 +67,4 @@ class UserTest < ActiveSupport::TestCase
 		user = User.check_and_create_new(new_user)
 		assert_equal ErrorEnum::WRONG_PASSWORD_CONFIRMATION, user, "fail to correctly check the confirmation of password"
 	end
-
-	def init_new_user
-		new_user = FactoryGirl.build(:new_user)
-		new_user.save
-		return new_user
-	end
-
-	def init_activated_user
-		activated_user = FactoryGirl.build(:activated_user)
-		activated_user.save
-		return activated_user
-	end
 end

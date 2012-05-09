@@ -144,8 +144,10 @@ class User
 	#*retval*:
 	#* true: when successfully login
 	#* EMAIL_NOT_EXIST
-	def self.reset_password(email, new_password)
+	#* WRONG_PASSWORD_CONFIRMATION
+	def self.reset_password(email, new_password, new_password_confirmation)
 		return ErrorEnum::EMAIL_NOT_EXIST if user_exist?(email) == false			# email account does not exist
+		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if new_password != new_password_confirmation
 		user = User.find_by_email(email)
 		user.password = Encryption.encrypt_password(new_password)
 		user.save
