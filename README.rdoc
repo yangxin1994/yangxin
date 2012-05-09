@@ -2,7 +2,7 @@
 
 = git及github简单使用说明（不断完善中）
 
-== 安装git并且配置ssh key
+== 1. 安装git并且配置ssh key
 
 请参考 http://help.github.com/linux-set-up-git 
 
@@ -17,15 +17,15 @@ $ ssh-keygen -t rsa -C "your_email@youremail.com"
 还请个人使用时依具体情况调整
 
 
-== 如何对一个project创建git repository并且和使用github进行管理？
+== 2. 如何对一个project创建git repository并且和使用github进行管理？
 
-=== 在本地创建git repository
+=== (1) 在本地创建git repository
 
 假设项目名称为MyProject，进入到MyProject目录，运行如下命令初始化一个git repository：
 
   $ git init ./
 
-=== 本地git repository的操作
+=== (2) 本地git repository的操作
 
 可以用以下命令查看文件夹下的文件状态
 
@@ -45,13 +45,13 @@ $ ssh-keygen -t rsa -C "your_email@youremail.com"
 
   $ git commit -m "comments"
 
-=== 在github上创建repository：
+=== (3) 在github上创建repository：
 
 以某个organization(例如OopsData)的owner身份用户登录到github，并且转到OopsData页面，创建一个repository，例如名字为TestGitRepo为的repository，该repository的url为 git@github.com:OopsData/TestGitRepo.git
 
 进入到新创建的repository中，点击admin进入管理该repository的页面，在Teams标签下添加新的team，注意接下来将要在本地操作github上该repository的用户必须被添加到Teams中
 
-=== 对本地的repository和github上的repository进行同步
+=== (4) 对本地的repository和github上的repository进行同步
 
 在MyProject目录下可以用如下命令来查看remote repository alias
 
@@ -73,7 +73,7 @@ $ ssh-keygen -t rsa -C "your_email@youremail.com"
 
   $ git pull
 
-== 如何将github上已经存在的一个project同步到本地repository并进行开发？
+== 3. 如何将github上已经存在的一个project同步到本地repository并进行开发？
 
 创建一个本地project目录并进入到目录中
 
