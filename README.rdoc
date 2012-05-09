@@ -6,11 +6,11 @@
 
 需要注意的是，我配置ssh时，用rsa keys总是不成功，改用dsa keys才成功完成配置，即我在生成ssh key时，用的是如下语句
 
-$ ssh-keygen -t dsa -C "your_email@youremail.com"
+  $ ssh-keygen -t dsa -C "your_email@youremail.com"
 
 而不是如下语句
 
-$ ssh-keygen -t rsa -C "your_email@youremail.com"
+  $ ssh-keygen -t rsa -C "your_email@youremail.com"
 
 还请个人使用时依具体情况调整
 
