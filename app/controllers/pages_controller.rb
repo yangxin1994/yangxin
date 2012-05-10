@@ -19,7 +19,7 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def show
-		retval = @current_user.show_page(params[:survey_id], params[:page_index].to_i)
+		retval = @current_user.show_page(params[:survey_id], params[:id].to_i)
 		case retval
 		when ErrorEnum::SURVEY_NOT_EXIST
 			flash[:notice] = "该调查问卷不存在"
@@ -88,7 +88,7 @@ class PagesController < ApplicationController
 
 	#*method*: get
 	#
-	#*url*: /surveys/:survey_id/pages/:page_index/clone
+	#*url*: /surveys/:survey_id/pages/:page_index_1/:page_index_2/clone
 	#
 	#*description*: clone a page, and put the new page after the given page
 	#
@@ -140,7 +140,7 @@ class PagesController < ApplicationController
 	#* page_index_2: index of the page, after which the above page is moved to. Page index starts from 0
 	#
 	#*retval*:
-	#* 1: when page is successfully moved
+	#* true: when page is successfully moved
 	#* ErrorEnum ::OVERFLOW : when the page index is greater than the page number
 	#* ErrorEnum ::NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
@@ -165,7 +165,7 @@ class PagesController < ApplicationController
 		else
 			flash[:notice] = "成功移动页面"
 			respond_to do |format|
-				format.json	{ render :json => retval and return }
+				format.json	{ render :json => true and return }
 			end
 		end
 	end
@@ -186,7 +186,7 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def destroy
-		retval = @current_user.delete_page(params[:survey_id], params[:page_index].to_i)
+		retval = @current_user.delete_page(params[:survey_id], params[:id].to_i)
 		case retval
 		when ErrorEnum::SURVEY_NOT_EXIST
 			flash[:notice] = "该调查问卷不存在"
@@ -206,7 +206,7 @@ class PagesController < ApplicationController
 		else
 			flash[:notice] = "成功删除页面"
 			respond_to do |format|
-				format.json	{ render :json => retval and return }
+				format.json	{ render :json => true and return }
 			end
 		end
 	end
@@ -224,7 +224,7 @@ class PagesController < ApplicationController
 	#* page_index_2: the end id of the pages to be combined. Page index starts from 0
 	#
 	#*retval*:
-	#* 1: when page is successfully destroyed
+	#* true: when pages are successfully combined
 	#* ErrorEnum ::OVERFLOW : when the page index is greater than the page number
 	#* ErrorEnum ::NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
@@ -249,7 +249,7 @@ class PagesController < ApplicationController
 		else
 			flash[:notice] = "成功合并页面"
 			respond_to do |format|
-				format.json	{ render :json => retval and return }
+				format.json	{ render :json => true and return }
 			end
 		end
 	end

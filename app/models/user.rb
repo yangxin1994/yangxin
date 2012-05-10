@@ -535,7 +535,7 @@ class User
 	def delete_page(survey_id, page_index)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
-		return survey.destroy_page(self.email, page_index)
+		return survey.delete_page(self.email, page_index)
 	end
 
 	#*description*: combine pages

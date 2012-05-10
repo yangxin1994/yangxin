@@ -52,6 +52,9 @@ class ActiveSupport::TestCase
 		return oliver
 	end
 
+
+
+
 	def sign_in(email, password)
 		old_controller = @controller
 		@controller = SessionsController.new
@@ -66,4 +69,47 @@ class ActiveSupport::TestCase
 		@controller = old_controller
 	end
 
+	def create_survey(email, password)
+		sign_in(email, password)
+		old_controller = @controller
+		@controller = SurveysController.new
+		get :new, :format => :json
+		survey_obj = JSON.parse(@response.body)
+		post :save_meta_data, :format => :json, :survey => survey_obj
+		@controller = old_controller
+		survey_obj = JSON.parse(@response.body)
+		sign_out
+		return survey_obj["survey_id"]
+	end
+
+	def get_survey_obj(email, password, survey_id)
+		sign_in(email, Encryption.decrypt_password(password))
+		old_controller = @controller
+		@controller = SurveysController.new
+		get :show, :format => :json, :id => survey_id
+		survey_obj = JSON.parse(@response.body)
+		@controller = old_controller
+		sign_out
+		return survey_obj
+	end
+
+	def insert_page(email, password, survey_id, page_index)
+		sign_in(email, Encryption.decrypt_password(password))
+		old_controller = @controller
+		@controller = PagesController.new
+		post :create, :format => :json, :survey_id => survey_id, :page_index => page_index
+		@controller = old_controller
+		sign_out
+	end
+
+	def create_question(email, password, survey_id, page_index, question_id, question_type)
+		sign_in(email, Encryption.decrypt_password(password))
+		old_controller = @controller
+		@controller = QuestionsController.new
+		post :create, :format => :json, :survey_id => survey_id, :page_index => page_index, :question_id => question_id, :question_type => question_type
+		question_obj = JSON.parse(@response.body)
+		@controller = old_controller
+		sign_out
+		return question_obj["question_id"]
+	end
 end

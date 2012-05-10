@@ -29,22 +29,16 @@ OopsData::Application.routes.draw do
 		member do
 			get 'clone'
 		end
-		resources :pages do
-			collection do
-				post 'create_after_question'
-			end
-			member do
-				get 'clone'
-			end
-		end
+		resources :pages
 		resources :questions do 
 			member do
 				get 'clone'
 			end
 		end
 	end
-	match 'surveys/:survey_id/pages/:page_id_1/:page_id_2/move' => 'pages#move'
-	match 'surveys/:survey_id/pages/:page_id_1/:page_id_2/combine' => 'pages#combine'
+	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/move' => 'pages#move'
+	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/combine' => 'pages#combine'
+	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/clone' => 'pages#clone'
 	match 'surveys/:survey_id/questions/:question_id_1/:question_id_2/move' => 'questions#move'
 
   # The priority is based upon order of creation:

@@ -411,7 +411,7 @@ class Survey
 		current_page.each do |question_id|
 			page_object << Question.get_question_object(question_id)
 		end
-		return current_page
+		return page_object
 	end
 
 	#*description*: clone a page
