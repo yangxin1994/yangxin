@@ -33,14 +33,20 @@ class ApplicationController < ActionController::Base
 	#if no user signs in, redirect to root path
 	def require_sign_in
 		if !user_signed_in?
-			redirect_to root_path and return
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+			end
 		end
 	end
 
 	#if user signs in, redirect to home path
 	def require_sign_out
 		if !user_signed_out?
-			redirect_to home_path and return
+			respond_to do |format|
+				format.html { redirect_to home_path and return }
+				format.json	{ render :json => ErrorEnum::REQUIRE_LOGOUT and return }
+			end
 		end
 	end
 

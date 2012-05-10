@@ -40,4 +40,30 @@ class ActiveSupport::TestCase
 		return activated_user
 	end
 
+	def init_jesse
+		jesse = FactoryGirl.build(:jesse)
+		jesse.save
+		return jesse
+	end
+
+	def init_oliver
+		oliver = FactoryGirl.build(:oliver)
+		oliver.save
+		return oliver
+	end
+
+	def sign_in(email, password)
+		old_controller = @controller
+		@controller = SessionsController.new
+		post :create, :format => :json, :user => {"email" => email, "password" => password}
+		@controller = old_controller
+	end
+
+	def sign_out
+		old_controller = @controller
+		@controller = SessionsController.new
+		get :destroy
+		@controller = old_controller
+	end
+
 end

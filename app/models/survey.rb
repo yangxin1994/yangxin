@@ -103,16 +103,18 @@ class Survey
 	#
 	#*retval*:
 	#* the survey object
-	#* ErrorEnum ::NOT_EXIST : if cannot find the survey
+	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	def self.save_meta_data(current_user_email, survey_obj)
+		return ErrorEnum::UNAUTHORIZED if survey_obj["owner_email"]!= current_user_email
 		if survey_obj["survey_id"] == ""
 			# this is a new survey that has not been saved in database
 			survey = Survey.new
+			survey.owner_email = current_user_email
 		else
 			# this is an existing survey
 			survey = Survey.find_by_id(survey_obj["survey_id"])
-			return ErrorEnum::NOT_EXIST if survey == nil
+			return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
 			return ErrorEnum::UNAUTHORIZED if survey.owner_email != current_user_email
 		end
 		META_ATTR_NAME_ARY.each do |attr_name|
@@ -131,7 +133,7 @@ class Survey
 	#*retval*:
 	#* true: if successfully removed
 	#* false
-	#* ErrorEnum ::NOT_EXIST : if cannot find the survey
+	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	def delete(current_user_email)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
@@ -179,13 +181,13 @@ class Survey
 	#
 	#*retval*:
 	#* the survey object: if successfully obtained
-	#* ErrorEnum ::NOT_EXIST : if cannot find the survey
+	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	def self.get_survey_object(current_user_email, survey_id)
 		survey_object = Cache.read(survey_id)
 		if survey_object == nil
 			survey = Survey.find_by_id(survey_id)
-			return ErrorEnum::NOT_EXIST if survey == nil
+			return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
 			survey_object = survey.serialize
 			Cache.write(survey_id, survey_object)
 		end

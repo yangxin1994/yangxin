@@ -10,6 +10,7 @@ OopsData::Application.routes.draw do
 
 	resources :sessions
 	match 'logout' => 'sessions#destroy', :as => :logout
+	match 'login' => 'sessions#create', :as => :login
 	match 'forget_password' => 'sessions#forget_password', :as => :forget_password
 	match 'send_password_email' => 'sessions#send_password_email', :as => :send_password_email, :via => [:post]
 	match 'input_new_password' => 'sessions#input_new_password', :as => :input_new_password

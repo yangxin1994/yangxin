@@ -427,8 +427,7 @@ class SurveyTest < ActiveSupport::TestCase
 
 
 	def init_user_and_survey
-		jesse = FactoryGirl.build(:jesse)
-		jesse.save
+		jesse = init_jesse
 		jesse_s1 = FactoryGirl.build(:jesse_s1)
 		jesse_s1.save
 		return [jesse, jesse_s1]

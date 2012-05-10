@@ -91,7 +91,7 @@ class SurveysController < ApplicationController
 		else
 			flash[:notice] = "调查问卷已成功删除"
 			respond_to do |format|
-				format.json	{ render :json => 1 and return }
+				format.json	{ render :json => true and return }
 			end
 		end
 	end

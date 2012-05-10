@@ -304,7 +304,7 @@ class User
 	#* NOT_EXIST
 	#* UNAUTHORIZED
 	def save_meta_data(survey_object)
-		return Survey.save_meta_data(self.meail, survey_object)
+		return Survey.save_meta_data(self.email, survey_object)
 	end
 	
 	#*description*: delete a survey
@@ -319,7 +319,7 @@ class User
 	#* UNAUTHORIZED
 	def destroy_survey(survey_id)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
 		return survey.delete(self.email)
 	end
 
@@ -335,7 +335,7 @@ class User
 	#* UNAUTHORIZED
 	def clone_survey(survey_id)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
 		return survey.clone(self.email)
 	end
 

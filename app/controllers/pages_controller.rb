@@ -56,7 +56,7 @@ class PagesController < ApplicationController
 	#* page_index: index of this page, after which the new page is created, if set -1, new page is insert at the beginning of the survey. Page index starts from 0
 	#
 	#*retval*:
-	#* an array of Question object: when page is successfully obtained
+	#* true
 	#* ErrorEnum ::OVERFLOW : when the page index is greater than the page number
 	#* ErrorEnum ::NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
