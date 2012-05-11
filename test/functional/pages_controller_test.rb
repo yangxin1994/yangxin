@@ -176,35 +176,27 @@ class PagesControllerTest < ActionController::TestCase
 		survey_id, pages = *create_survey_page_question(jesse.email, jesse.password)
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		get :clone, :format => :json, :survey_id => survey_id, :page_index_1 => 0, :page_index_2 => 10
+		assert_equal ErrorEnum::OVERFLOW.to_s, @response.body
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		get :clone, :format => :json, :survey_id => "wrong survey id", :page_index_1 => 0, :page_index_2 => 3
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		sign_out
+
+		sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
+		get :clone, :format => :json, :survey_id => survey_id, :page_index_1 => 0, :page_index_2 => 3
+		assert_equal ErrorEnum::UNAUTHORIZED.to_s, @response.body
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :clone, :format => :json, :survey_id => survey_id, :page_index_1 => 0, :page_index_2 => 3
 		page_obj = JSON.parse(@response.body)
-		
-		assert_equal true.to_s, @response.body
-		end
+		sign_out
+		survey_obj = get_survey_obj(jesse.email, jesse.password, survey_id)
+		assert_equal survey_obj["pages"][0].length, page_obj.length
+		assert_equal pages.length + 1, survey_obj["pages"].length
+		assert_equal survey_obj["pages"][0].length,survey_obj["pages"][4].length
 	end
-
-
-
-	def create_survey_page_question(email, password)
-		survey_id = create_survey(email, Encryption.decrypt_password(password))
-	
-		insert_page(email, password, survey_id, -1)
-		insert_page(email, password, survey_id, 0)
-		insert_page(email, password, survey_id, 0)
-		insert_page(email, password, survey_id, 0)
-
-		q1 = create_question(email, password, survey_id, 0, -1, "ChoiceQuestion")
-		q2 = create_question(email, password, survey_id, 0, -1, "BlankQuestion")
-		q3 = create_question(email, password, survey_id, 0, -1, "SortQuestion")
-		q4 = create_question(email, password, survey_id, 1, -1, "RankQuestion")
-		q5 = create_question(email, password, survey_id, 2, -1, "MatrixChoiceQuestion")
-		q6 = create_question(email, password, survey_id, 2, -1, "Paragraph")
-		q7 = create_question(email, password, survey_id, 2, -1, "MatrixBlankQuestion")
-		q8 = create_question(email, password, survey_id, 2, -1, "BlankQuestion")
-		q9 = create_question(email, password, survey_id, 3, -1, "ConstSumQuestion")
-		q10 = create_question(email, password, survey_id, 3, -1, "FileQuestion")
-
-		return [survey_id, [[q1, q2, q3], [q4], [q5, q6, q7, q8], [q9, q10]]]
-	end
-
 end

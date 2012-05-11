@@ -100,7 +100,7 @@ class PagesController < ApplicationController
 	#*retval*:
 	#* an array of Question object for the cloned page
 	#* ErrorEnum ::OVERFLOW : when the page index is greater than the page number
-	#* ErrorEnum ::NOT_EXIST : when the survey does not exist
+	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def clone
 		retval = @current_user.clone_page(params[:survey_id], params[:page_index_1].to_i, params[:page_index_2].to_i)

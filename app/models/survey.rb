@@ -286,8 +286,9 @@ class Survey
 			question_index = to_page.index(question_id_2)
 			return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
 		end
-		from_page.delete(question_id_1)
+		question_index_to_be_delete = from_page.index(question_id_1)
 		to_page.insert(question_index+1, question_id_1)
+		from_page.delete_at(question_index_to_be_delete)
 		return self.save
 	end
 

@@ -71,7 +71,7 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def update
-		retval = @current_user.update_question(params[:survey_id], params[:question_id], params[:question])
+		retval = @current_user.update_question(params[:survey_id], params[:id], params[:question])
 		case retval
 		when ErrorEnum::SURVEY_NOT_EXIST
 			flash[:notice] = "调查问卷不存在"
@@ -102,7 +102,7 @@ class QuestionsController < ApplicationController
 	end
 
 
-	#*method*: post
+	#*method*: get
 	#
 	#*url*: /surveys/:survey_id/questions/:question_id_1/:question_id_2/move
 	#
@@ -115,10 +115,9 @@ class QuestionsController < ApplicationController
 	#* question_id_2: id of the question, after which the above question is moved
 	#
 	#*retval*:
-	#* 1: when question is successfully moved
+	#* true: when question is successfully moved
 	#* ErrorEnum ::SURVEY_NOT_EXIST: when the survey does not exist
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
-	#* ErrorEnum ::OVERFLOW: when the page index is greater than the page number
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def move
 		retval = @current_user.move_question(params[:survey_id], params[:question_id_1], params[:page_index].to_i, params[:question_id_2])
@@ -146,7 +145,7 @@ class QuestionsController < ApplicationController
 		else
 			flash[:notice] = "成功更新问题"
 			respond_to do |format|
-				format.json	{ render :json => 1 and return }
+				format.json	{ render :json => true and return }
 			end
 		end
 	end
@@ -161,17 +160,17 @@ class QuestionsController < ApplicationController
 	#*params*:
 	#* survey_id: id of the survey
 	#* question_id_1: id of the question to be moved
-	#* page_index: index of the page, where the question is moved to. Page index starts from 0
-	#* question_id_2: id of the question, after which the above question is moved
+	#* page_index: index of the page, where the question is inserted to. Page index starts from 0
+	#* question_id_2: id of the question, after which the cloned question is inserted
 	#
 	#*retval*:
-	#* : when question is successfully cloned
+	#* the cloned question object: when question is successfully cloned
 	#* ErrorEnum ::SURVEY_NOT_EXIST: when the survey does not exist
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::OVERFLOW: when the page index is greater than the page number
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def clone
-		retval = @current_user.clone_question(params[:survey_id], params[:question_id_1], params[:page_index], params[:question_id_2])
+		retval = @current_user.clone_question(params[:survey_id], params[:question_id_1], params[:page_index].to_i, params[:question_id_2])
 		case retval
 		when ErrorEnum::SURVEY_NOT_EXIST
 			flash[:notice] = "调查问卷不存在"
@@ -194,7 +193,7 @@ class QuestionsController < ApplicationController
 				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
 			end
 		else
-			flash[:notice] = "成功获取问题"
+			flash[:notice] = "成功复制问题"
 			respond_to do |format|
 				format.json	{ render :json => retval and return }
 			end
@@ -253,7 +252,7 @@ class QuestionsController < ApplicationController
 	#* question_id: id of the question to be deleted
 	#
 	#*retval*:
-	#* 1: when question is successfully deleted
+	#* true: when question is successfully deleted
 	#* ErrorEnum ::SURVEY_NOT_EXIST: when the survey does not exist
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
@@ -278,7 +277,7 @@ class QuestionsController < ApplicationController
 		else
 			flash[:notice] = "成功删除问题"
 			respond_to do |format|
-				format.json	{ render :json => 1 and return }
+				format.json	{ render :json => true and return }
 			end
 		end
 	end

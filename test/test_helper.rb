@@ -112,4 +112,37 @@ class ActiveSupport::TestCase
 		sign_out
 		return question_obj["question_id"]
 	end
+
+	def create_survey_page_question(email, password)
+		survey_id = create_survey(email, Encryption.decrypt_password(password))
+	
+		insert_page(email, password, survey_id, -1)
+		insert_page(email, password, survey_id, 0)
+		insert_page(email, password, survey_id, 0)
+		insert_page(email, password, survey_id, 0)
+
+		q1 = create_question(email, password, survey_id, 0, -1, "ChoiceQuestion")
+		q2 = create_question(email, password, survey_id, 0, -1, "BlankQuestion")
+		q3 = create_question(email, password, survey_id, 0, -1, "SortQuestion")
+		q4 = create_question(email, password, survey_id, 1, -1, "RankQuestion")
+		q5 = create_question(email, password, survey_id, 2, -1, "MatrixChoiceQuestion")
+		q6 = create_question(email, password, survey_id, 2, -1, "Paragraph")
+		q7 = create_question(email, password, survey_id, 2, -1, "MatrixBlankQuestion")
+		q8 = create_question(email, password, survey_id, 2, -1, "BlankQuestion")
+		q9 = create_question(email, password, survey_id, 3, -1, "ConstSumQuestion")
+		q10 = create_question(email, password, survey_id, 3, -1, "FileQuestion")
+
+		return [survey_id, [[q1, q2, q3], [q4], [q5, q6, q7, q8], [q9, q10]]]
+	end
+
+	def get_question_obj(email, password, survey_id, question_id)
+		sign_in(email, Encryption.decrypt_password(password))
+		old_controller = @controller
+		@controller = QuestionsController.new
+		get :show, :format => :json, :survey_id => survey_id, :id => question_id
+		question_obj = JSON.parse(@response.body)
+		@controller = old_controller
+		sign_out
+		return question_obj
+	end
 end

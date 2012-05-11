@@ -202,7 +202,7 @@ class SurveyTest < ActiveSupport::TestCase
 
 	end
 
-	test "question move" do
+	test "question movement" do
 		clear(User, Survey, Question)
 
 		jesse, jesse_s1, questions = *init_user_and_survey_and_questions
