@@ -25,7 +25,7 @@ class MatrixBlankQuestion < Question
 	field :row_num_per_group, :type => Integer, default: -1
 
 	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type inputs is_rand row_name row_id is_row_rand row_num_per_group]
-	INPUT_ATTR_ARY = %w[input_id label data_type email]
+	INPUT_ATTR_ARY = %w[input_id label data_type]
 
 	#*description*: serialize the current instance into a question object
 	#

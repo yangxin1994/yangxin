@@ -17,7 +17,7 @@ class Question
 
 	ATTR_NAME_ARY = %w[content]
 
-	QUESTION_TYPE = %w[ChoiceQuestion MatrixChoiceQuestion BlankQuestion MatrixBlankQuestion ConstSumQuestion SortQuestion RankQuestion Paragraph FileQuestion]
+	QUESTION_TYPE = %w[ChoiceQuestion MatrixChoiceQuestion BlankQuestion MatrixBlankQuestion ConstSumQuestion SortQuestion RankQuestion Paragraph FileQuestion TableQuestion]
 
 	def self.has_question_type(question_type)
 		return QUESTION_TYPE.include?(question_type)
