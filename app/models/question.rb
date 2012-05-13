@@ -4,20 +4,24 @@ require 'error_enum'
 #	 "question_id" : id of the question(string),
 #	 "question_type" : type of the question(string),
 #	 "content" : content of the question(string),
+#	 "note" : note of the question(string),
+#	 "is_required" : whether the question is required to be answered(bool),
 #	 other fields are related to question type
 #	}
-#Structure of different type question object can be found at ChoiceQuestion, MatrixChoiceQuestion, BlankQuestion, MatrixBlankQuestion, RankQuestion, SortQuestion, ConstSumQuestion
+#Structure of different type question object can be found at ChoiceQuestion, MatrixChoiceQuestion, TextBlankQuestion, NumberBlankQuestion, EmailBlankQuestion, PhoneBlankQuestion, TimeBlankQuestion, AddressBlankQuestion, BlankQuestion, MatrixBlankQuestion, RankQuestion, SortQuestion, ConstSumQuestion
 class Question
 	include Mongoid::Document
 	field :content, :type => String, default: OOPSDATA["question_default_settings"]["content"]
+	field :note, :type => String, default: OOPSDATA["question_default_settings"]["note"]
+	field :is_required, :type => String, default: true
 
 	before_save :clear_question_object
 	before_update :clear_question_object
 	before_destroy :clear_question_object
 
-	ATTR_NAME_ARY = %w[content]
+	ATTR_NAME_ARY = %w[content note is_required]
 
-	QUESTION_TYPE = %w[ChoiceQuestion MatrixChoiceQuestion BlankQuestion MatrixBlankQuestion ConstSumQuestion SortQuestion RankQuestion Paragraph FileQuestion TableQuestion]
+	QUESTION_TYPE = %w[ChoiceQuestion MatrixChoiceQuestion TextBlankQuestion NumberBlankQuestion EmailBlankQuestion PhoneBlankQuestion TimeBlankQuestion AddressBlankQuestion BlankQuestion MatrixBlankQuestion ConstSumQuestion SortQuestion RankQuestion Paragraph FileQuestion TableQuestion]
 
 	def self.has_question_type(question_type)
 		return QUESTION_TYPE.include?(question_type)

@@ -1,14 +1,22 @@
 require 'error_enum'
 require 'securerandom'
-#Besides the fields that all types questions have, file questions also have:
+#Besides the fields that all types questions have, number blank questions also have:
 # {
-#	 "input_id" : id of the input
+#	 "input_id" : id of the number input
+#	 "precision" : number decimals
+#	 "min_value" : minimal value of the number(Float)
+#	 "max_value" : maximal value of the number(Float)
+#	 "unit" : unit
 #	}
-class FileQuestion < Question
-	field :question_type, :type => String, default: "FileQuestion"
+class NumberBlankQuestion < Question
+	field :question_type, :type => String, default: "NumberBlankQuestion"
 	field :input_id, :type => String, default: -> {SecureRandom.uuid}
+	field :precision, :type => Integer, default: 0
+	field :min_value, :type => Float, default: 0.0
+	field :max_value, :type => Float, default: 10.0
+	field :unit, :type => String, default: "个"
 
-	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type input_id]
+	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type input_id precision min_value max_value unit]
 
 	#*description*: serialize the current instance into a question object
 	#
@@ -42,4 +50,5 @@ class FileQuestion < Question
 		new_inst.input_id = SecureRandom.uuid
 		return new_inst
 	end
+
 end

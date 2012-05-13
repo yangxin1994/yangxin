@@ -28,3 +28,4 @@ survey_default_settings:
 
 question_default_settings:
   content: "题干"
+  note: "说明"

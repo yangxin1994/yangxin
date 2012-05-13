@@ -1,11 +1,11 @@
 require 'error_enum'
 require 'securerandom'
-#Besides the fields that all types questions have, file questions also have:
+#Besides the fields that all types questions have, email blank questions also have:
 # {
-#	 "input_id" : id of the input
+#	 "input_id" : id of the email input
 #	}
-class FileQuestion < Question
-	field :question_type, :type => String, default: "FileQuestion"
+class EmailBlankQuestion < Question
+	field :question_type, :type => String, default: "EmailBlankQuestion"
 	field :input_id, :type => String, default: -> {SecureRandom.uuid}
 
 	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type input_id]
@@ -42,4 +42,5 @@ class FileQuestion < Question
 		new_inst.input_id = SecureRandom.uuid
 		return new_inst
 	end
+
 end
