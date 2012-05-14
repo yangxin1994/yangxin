@@ -384,6 +384,7 @@ class User
 	#* ErrorEnum ::SURVEY_NOT_EXIST
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST
+	#* ErrorEnum ::WRONG_DATA_TYPE
 	def update_question(survey_id, question_id, question_obj)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil

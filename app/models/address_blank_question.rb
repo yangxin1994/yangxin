@@ -4,17 +4,15 @@ require 'securerandom'
 # {
 #	 "input_id" : id of the address input(String)
 #	 "has_postcode" : whether has a postcode input(Boolean)
-#	 "postcode_id" : id of the postcode input(String)
 #	 "format" : format of the input, an integer in the interval of [1, 15]. If converted into a binary number, it has 4 digits, indicating whether this has "province", "city", "county", "detailed address"(Integer)
 #	}
 class AddressBlankQuestion < Question
 	field :question_type, :type => String, default: "AddressBlankQuestion"
 	field :input_id, :type => String, default: -> {SecureRandom.uuid}
 	field :has_postcode, :type => Integer, default: 1
-	field :postcode_id, :type => Integer, default: 10
 	field :format, :type => Boolean, default: 15
 
-	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type input_id has_postcode postcode_id format]
+	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type input_id has_postcode format]
 
 	#*description*: serialize the current instance into a question object
 	#
@@ -46,7 +44,6 @@ class AddressBlankQuestion < Question
 	def clone
 		new_inst = super
 		new_inst.input_id = SecureRandom.uuid
-		new_inst.postcode_id = SecureRandom.uuid
 		return new_inst
 	end
 

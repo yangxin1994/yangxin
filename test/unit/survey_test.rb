@@ -146,19 +146,27 @@ class SurveyTest < ActiveSupport::TestCase
 		assert_equal 2, new_sort_question_obj["items"][0]["max"]
 
 		blank_question_obj = questions[1][0].serialize
-		blank_question_obj["inputs"] << {"label" => "first blank label", "data_type" => "short_text"}
+		blank_question_obj["inputs"] << {"label" => "first blank label", "data_type" => "wrong data type"}
+		retval = jesse_s1.update_question(jesse.email, blank_question_obj["question_id"], blank_question_obj)
+		assert_equal ErrorEnum::WRONG_DATA_TYPE, retval
+		blank_question_obj = questions[1][0].serialize
+		text_input_properties = {"min_length" => 5, "max_length" => 10, "has_multiple_line" => true, "size" => 2, "non_exist_property" => "any value"}
+		blank_question_obj["inputs"] << {"label" => "first blank label", "data_type" => "Text", "properties" => text_input_properties}
 		retval = jesse_s1.update_question(jesse.email, blank_question_obj["question_id"], blank_question_obj)
 		new_blank_question_obj = Question.find_by_id(retval["question_id"]).serialize
 		assert_not_nil new_blank_question_obj["inputs"][0]["input_id"]
 		assert_equal "first blank label", new_blank_question_obj["inputs"][0]["label"]
-		assert_equal "short_text", new_blank_question_obj["inputs"][0]["data_type"]
+		assert_equal "Text", new_blank_question_obj["inputs"][0]["data_type"]
+		assert_equal 5, new_blank_question_obj["inputs"][0]["properties"]["min_length"]
+		assert_equal nil, new_blank_question_obj["inputs"][0]["properties"]["non_exist_property"]
 
 		matrix_blank_question_obj = questions[1][1].serialize
 		matrix_blank_question_obj["row_name"] = %w[row0 row1 row2]
 		matrix_blank_question_obj["row_id"] = ["", "", ""]
 		matrix_blank_question_obj["is_row_rand"] = false
 		matrix_blank_question_obj["row_num_per_group"] = 5
-		matrix_blank_question_obj["inputs"] << {"label" => "first blank label", "data_type" => "long_text"}
+		text_input_properties = {"min_length" => 5, "max_length" => 10, "has_multiple_line" => true, "size" => 2}
+		matrix_blank_question_obj["inputs"] << {"label" => "first blank label", "data_type" => "Text", "properties" => text_input_properties}
 		retval = jesse_s1.update_question(jesse.email, matrix_blank_question_obj["question_id"], matrix_blank_question_obj)
 		new_matrix_blank_question_obj = Question.find_by_id(retval["question_id"]).serialize
 		new_matrix_blank_question_obj["row_name"].each_with_index do |name, index|
@@ -167,7 +175,7 @@ class SurveyTest < ActiveSupport::TestCase
 		end
 		assert_not_nil new_matrix_blank_question_obj["inputs"][0]["input_id"]
 		assert_equal "first blank label", new_matrix_blank_question_obj["inputs"][0]["label"]
-		assert_equal "long_text", new_matrix_blank_question_obj["inputs"][0]["data_type"]
+		assert_equal "Text", new_matrix_blank_question_obj["inputs"][0]["data_type"]
 
 		rank_question_obj = questions[1][2].serialize
 		desc_ary = %w[good normal bad]

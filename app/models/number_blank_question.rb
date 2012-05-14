@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'error_enum'
 require 'securerandom'
 #Besides the fields that all types questions have, number blank questions also have:

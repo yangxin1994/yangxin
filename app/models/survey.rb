@@ -245,11 +245,13 @@ class Survey
 	#* the question object after updated
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST
+	#* ErrorEnum ::WRONG_DATA_TYPE
 	def update_question(current_user_email, question_id, question_obj)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
 		question = Question.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question == nil
-		question.update_question(question_obj)
+		retval = question.update_question(question_obj)
+		return retval if retval != true
 		question.clear_question_object
 		return Question.get_question_object(question._id)
 	end

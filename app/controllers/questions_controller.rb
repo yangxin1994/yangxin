@@ -70,6 +70,7 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST: when the survey does not exist
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
+	#* ErrorEnum ::WRONG_DATA_TYPE: when the data type specified in a blank question is wrong
 	def update
 		retval = @current_user.update_question(params[:survey_id], params[:id], params[:question])
 		case retval

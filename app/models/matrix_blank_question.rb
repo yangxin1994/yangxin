@@ -13,7 +13,37 @@ require 'securerandom'
 # {
 #  "input_id": id of the input(string)
 #  "label": label of the input(string),
-#  "data_type": can be short_text, long_text, pwd, int, float, email, date, phone, address(string)
+#  "data_type": can be Text, Number, Email, Phone, Address, Time
+#  "properties": a hash of properties, for different data type, this input has different properties
+# }
+#The input with Text data type has the following properties
+# {
+#  "min_length"
+#  "max_length"
+#  "has_multiple_line"
+#  "size"
+# }
+#The input with Number data type has the following properties
+# {
+#  "precision"
+#  "min_value"
+#  "max_value"
+#  "unit"
+# }
+#The input with phone data type has the following properties
+# {
+#  "phone_type"
+# }
+#The input with email data type has the following properties
+# {
+# }
+#The input with address data type has the following properties
+# {
+#  "format"
+# }
+#The input with time data type has the following properties
+# {
+#  "format"
 # }
 class MatrixBlankQuestion < Question
 	field :question_type, :type => String, default: "MatrixBlankQuestion"
@@ -25,7 +55,16 @@ class MatrixBlankQuestion < Question
 	field :row_num_per_group, :type => Integer, default: -1
 
 	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type inputs is_rand row_name row_id is_row_rand row_num_per_group]
-	INPUT_ATTR_ARY = %w[input_id label data_type]
+	INPUT_ATTR_ARY = %w[input_id label data_type properties]
+
+	DATA_TYPE_ARY = %w[Text Number Phone Email Address Time]
+
+	TEXT_PROP_ARY = %w[min_length max_length has_multiple_line size]
+	NUMBER_PROP_ARY = %w[precision min_value max_value unit]
+	PHONE_PROP_ARY = %w[phone_type]
+	EMAIL_PROP_ARY = %w[]
+	ADDRESS_PROP_ARY = %w[format]
+	TIME_PROP_ARY = %w[format]
 
 	#*description*: serialize the current instance into a question object
 	#
@@ -46,6 +85,12 @@ class MatrixBlankQuestion < Question
 	def update_question(question_obj)
 		question_obj["inputs"].each do |input_obj|
 			input_obj.delete_if { |k, v| !INPUT_ATTR_ARY.include?(k) }
+			return ErrorEnum::WRONG_DATA_TYPE if !DATA_TYPE_ARY.include?(input_obj["data_type"])
+			if input_obj["properties"].class == Hash
+				input_obj["properties"].delete_if { |k, v| !BlankQuestion.const_get("#{input_obj["data_type"].upcase}_PROP_ARY".to_sym).include?(k) }
+			else
+				input_obj["properties"] == Hash.new
+			end
 		end
 		super(ATTR_NAME_ARY, question_obj)
 		self.inputs.each do |input|

@@ -1,6 +1,6 @@
 require 'error_enum'
 require 'securerandom'
-#Besides the fields that all types questions have, matrix blank questions also have:
+#Besides the fields that all types questions have, table blank questions also have:
 # {
 #	 "inputs" : array of input items(array),
 #	 "is_rand" : whether randomly show blanks(bool),
@@ -11,13 +11,22 @@ require 'securerandom'
 #  "label": label of the input(string),
 #  "data_type": can be short_text, long_text, pwd, int, float, email, date, phone, address(string)
 # }
-class MatrixBlankQuestion < Question
+class TableBlankQuestion < Question
 	field :question_type, :type => String, default: "TableQuestion"
 	field :inputs, :type => Array, default: []
 	field :is_rand, :type => Boolean, default: false
 
 	ATTR_NAME_ARY = Question::ATTR_NAME_ARY + %w[question_type inputs is_rand]
-	INPUT_ATTR_ARY = %w[input_id label data_type]
+	INPUT_ATTR_ARY = %w[input_id label data_type properties]
+
+	DATA_TYPE_ARY = %w[Text Number Phone Email Address Time]
+
+	TEXT_PROP_ARY = %w[min_length max_length has_multiple_line size]
+	NUMBER_PROP_ARY = %w[precision min_value max_value unit]
+	PHONE_PROP_ARY = %w[phone_type]
+	EMAIL_PROP_ARY = %w[]
+	ADDRESS_PROP_ARY = %w[format]
+	TIME_PROP_ARY = %w[format]
 
 	#*description*: serialize the current instance into a question object
 	#
@@ -38,6 +47,12 @@ class MatrixBlankQuestion < Question
 	def update_question(question_obj)
 		question_obj["inputs"].each do |input_obj|
 			input_obj.delete_if { |k, v| !INPUT_ATTR_ARY.include?(k) }
+			return ErrorEnum::WRONG_DATA_TYPE if !DATA_TYPE_ARY.include?(input["data_type"])
+			if input_obj["properties"].class == Hash
+				input_obj["properties"].delete_if { |k, v| BlankQuestion.const_get("#{input_obj["data_type"].upcase}_PROP_ARY".to_sym).include?(k) }
+			else
+				input_obj["properties"] == Hash.new
+			end
 		end
 		super(ATTR_NAME_ARY, question_obj)
 		self.inputs.each do |input|

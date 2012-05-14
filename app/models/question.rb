@@ -50,7 +50,7 @@ class Question
 		question_obj["question_id"] = self._id.to_s
 		attr_name_ary.each do |attr_name|
 			method_obj = self.method("#{attr_name}".to_sym)
-			question_obj[attr_name] = method_obj.call() 
+			question_obj[attr_name] = Marshal.load(Marshal.dump(method_obj.call()))
 		end
 		return question_obj
 	end
@@ -66,7 +66,7 @@ class Question
 		attr_name_ary.each do |attr_name|
 			next if attr_name == "question_type"
 			method_obj = self.method("#{attr_name}=".to_sym)
-			method_obj.call(question_obj[attr_name]) 
+			method_obj.call(Marshal.load(Marshal.dump(question_obj[attr_name]))) 
 		end
 	end
 
@@ -94,5 +94,10 @@ class Question
 	#*params*:
 	def clear_question_object
 		Cache.write(self._id, nil)
+	end
+
+
+	def clone
+		return Marshal.load(Marshal.dump(self))
 	end
 end
