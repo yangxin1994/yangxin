@@ -15,7 +15,7 @@ class SurveysController < ApplicationController
 	#* a Survey object with default meta data and empty survey_id
 	#* ErrorEnum::EMAIL_NOT_EXIST
 	def new
-		retval = Survey.new.set_default_meta_data(@current_user.email).serialize
+		retval = Survey.new.set_default_meta_data(@current_user.email)
 		case retval
 		when ErrorEnum::EMAIL_NOT_EXIST
 			respond_to do |format|

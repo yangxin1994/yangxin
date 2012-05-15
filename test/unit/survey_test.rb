@@ -4,11 +4,10 @@ class SurveyTest < ActiveSupport::TestCase
 	test "survey creation" do
 		clear(User, Survey)
 
-		jesse = FactoryGirl.build(:jesse)
-		retval = Survey.new.set_default_meta_data(jesse.email)
+		retval = Survey.new.set_default_meta_data("wrong email")
 		assert_equal ErrorEnum::EMAIL_NOT_EXIST, retval, "non-exist user creates survey"
 
-		jesse.save
+		jesse = init_jesse
 		retval = Survey.new.set_default_meta_data(jesse.email)
 		assert_not_equal ErrorEnum::EMAIL_NOT_EXIST, retval, "existing user cannot create survey"
 		assert_nil retval._id, "newly created survye should have empty id"
@@ -152,6 +151,8 @@ class SurveyTest < ActiveSupport::TestCase
 		blank_question_obj = questions[1][0].serialize
 		text_input_properties = {"min_length" => 5, "max_length" => 10, "has_multiple_line" => true, "size" => 2, "non_exist_property" => "any value"}
 		blank_question_obj["inputs"] << {"label" => "first blank label", "data_type" => "Text", "properties" => text_input_properties}
+		text_input_properties = {"precision" => 0, "min_value" => 2, "max_value" => 20, "unit" => "time"}
+		blank_question_obj["inputs"] << {"label" => "second blank label", "data_type" => "Number", "properties" => text_input_properties}
 		retval = jesse_s1.update_question(jesse.email, blank_question_obj["question_id"], blank_question_obj)
 		new_blank_question_obj = Question.find_by_id(retval["question_id"]).serialize
 		assert_not_nil new_blank_question_obj["inputs"][0]["input_id"]
@@ -159,6 +160,11 @@ class SurveyTest < ActiveSupport::TestCase
 		assert_equal "Text", new_blank_question_obj["inputs"][0]["data_type"]
 		assert_equal 5, new_blank_question_obj["inputs"][0]["properties"]["min_length"]
 		assert_equal nil, new_blank_question_obj["inputs"][0]["properties"]["non_exist_property"]
+		assert_equal "Number", new_blank_question_obj["inputs"][1]["data_type"]
+		assert_equal 0, new_blank_question_obj["inputs"][1]["properties"]["precision"]
+		assert_equal 2, new_blank_question_obj["inputs"][1]["properties"]["min_value"]
+		assert_equal 20, new_blank_question_obj["inputs"][1]["properties"]["max_value"]
+		assert_equal "time", new_blank_question_obj["inputs"][1]["properties"]["unit"]
 
 		matrix_blank_question_obj = questions[1][1].serialize
 		matrix_blank_question_obj["row_name"] = %w[row0 row1 row2]

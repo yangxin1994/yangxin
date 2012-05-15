@@ -57,7 +57,7 @@ class Survey
 		survey_obj["owner_email"] = self.owner_email
 		survey_obj["survey_id"] = self._id.to_s
 		survey_obj["created_at"] = self.created_at
-		survey_obj["pages"] = self.pages
+		survey_obj["pages"] = Marshal.load(Marshal.dump(self.pages))
 		META_ATTR_NAME_ARY.each do |attr_name|
 			method_obj = self.method("#{attr_name}".to_sym)
 			survey_obj[attr_name] = method_obj.call()
@@ -81,7 +81,7 @@ class Survey
 		end
 		self._id = ""
 		self.owner_email = owner_email
-		return self
+		return self.serialize
 	end
 
 	#*description*: find a survey by its id. return nil if cannot find

@@ -145,4 +145,13 @@ class ActiveSupport::TestCase
 		sign_out
 		return question_obj
 	end
+
+	def generate_group_members
+		members = []
+		("a".."z").to_a.each do |char|
+			members << "#{char}@#{char}.com"
+		end
+		return members
+	end
+
 end
