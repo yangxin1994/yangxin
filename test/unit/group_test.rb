@@ -29,16 +29,13 @@ class GroupTest < ActiveSupport::TestCase
 		updated_group_obj["description"] = "updated group description"
 		updated_group_obj["members"] << "new@member.com"
 		
-		retval = Group.update("wrong email", updated_group_obj)
+		retval = Group.update("wrong email", updated_group_obj["group_id"], updated_group_obj)
 		assert_equal ErrorEnum::UNAUTHORIZED, retval
 	
-		correct_id = updated_group_obj["group_id"]
-		updated_group_obj["group_id"] = "wrong id"
-		retval = Group.update(jesse.email, updated_group_obj)
+		retval = Group.update(jesse.email, "wrong id", updated_group_obj)
 		assert_equal ErrorEnum::GROUP_NOT_EXIST, retval
 	
-		updated_group_obj["group_id"] = correct_id
-		retval = Group.update(jesse.email, updated_group_obj)
+		retval = Group.update(jesse.email, updated_group_obj["group_id"], updated_group_obj)
 		assert_equal "updated group", retval["name"]
 		assert_equal "updated group description", retval["description"]
 		assert_equal "new@member.com", retval["members"][-1]

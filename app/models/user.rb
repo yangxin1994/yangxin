@@ -218,9 +218,9 @@ class User
 	#*params*:
 	#
 	#*retval*:
-	#* an array of groups of this user
+	#* an array of group objects of this user
 	def groups
-		return Group.groups_of(self.email)
+		return Group.get_groups(self.email)
 	end
 
 #--
@@ -234,8 +234,8 @@ class User
 	#* array of members of the new group
 	#
 	#*retval*:
-	#* the group instance: when successfully created
-	#* EXIST
+	#* the group object: when successfully created
+	#* ErrorEnum ::EMAIL_NOT_EXIST
 	def create_group(name, description, members)
 		return Group.check_and_create_new(self.email, name, description, members)
 	end
@@ -243,16 +243,13 @@ class User
 	#*description*: update a group for this user
 	#
 	#*params*:
-	#* name of the new group
-	#* new name of the group
-	#* new description of the new group
-	#* new array of members of the new group
+	#* group object to be updated
 	#
 	#*retval*:
-	#* the group instance: when successfully updated
-	#* NOT_EXIST
-	def update_group(name, new_name, description, members)
-		return Group.update(self.email, name, new_name, description, members)
+	#* the group object: when successfully updated
+	#* ErrorEnum ::GROUP_NOT_EXIST
+	def update_group(group_id, group_obj)
+		return Group.update(self.email, group_id, group_obj)
 	end
 
 	#*description*: delete a group for this user

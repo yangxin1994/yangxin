@@ -10,9 +10,9 @@ class SurveyTest < ActiveSupport::TestCase
 		jesse = init_jesse
 		retval = Survey.new.set_default_meta_data(jesse.email)
 		assert_not_equal ErrorEnum::EMAIL_NOT_EXIST, retval, "existing user cannot create survey"
-		assert_nil retval._id, "newly created survye should have empty id"
+		assert_equal "", retval["survey_id"], "newly created survye should have empty id"
 
-		retval = Survey.save_meta_data(jesse.email, retval.serialize)
+		retval = Survey.save_meta_data(jesse.email, retval)
 		survey = Survey.find_by_id(retval["survey_id"])
 		assert_equal retval["survey_id"], survey._id.to_s, "newly created survye is not correctly saved"
 	end

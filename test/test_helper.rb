@@ -154,4 +154,15 @@ class ActiveSupport::TestCase
 		return members
 	end
 
+	def create_group(email, password, name, description, members)
+		sign_in(email, Encryption.decrypt_password(password))
+		old_controller = @controller
+		@controller = GroupsController.new
+		post :create, :format => :json, :group => {"name" => name, "description" => description, "members" => members}
+		group_obj = JSON.parse(@response.body)
+		@controller = old_controller
+		sign_out
+		return group_obj
+	end
+
 end
