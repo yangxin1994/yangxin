@@ -12,6 +12,11 @@
 
 	%p
 		%label *
+		%label 确认密码
+		= password_field_tag 'user[password_confirmation]'
+
+	%p
+		%label *
 		%label 用户名
 		= text_field_tag 'user[username]'
 

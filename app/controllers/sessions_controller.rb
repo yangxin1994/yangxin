@@ -1,13 +1,22 @@
 # encoding: utf-8
 require 'encryption'
 require 'error_enum'
+require 'tool'
 class SessionsController < ApplicationController
 
-	before_filter :require_sign_out, :except => [:destroy]
+	before_filter :require_sign_out, :except => [:destroy, :sina_connect, :renren_connect]
 
 	# method: get
 	# descryption: the page where user logins
 	def index
+		@renren_app_id = OOPSDATA[RailsEnv.get_rails_env]["renren_app_id"]
+		@renren_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["renren_redirect_uri"]
+		@sina_app_key = OOPSDATA[RailsEnv.get_rails_env]["sina_app_key"]
+		@sina_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["sina_redirect_uri"]
+		@qq_app_id = OOPSDATA[RailsEnv.get_rails_env]["qq_app_id"]
+		@qq_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["qq_redirect_uri"]
+		@google_client_id = OOPSDATA[RailsEnv.get_rails_env]["google_client_id"]
+		@google_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["google_redirect_uri"]
 	end
 
 	#*descryption*: user submits the login form
@@ -213,6 +222,85 @@ class SessionsController < ApplicationController
 		end
 	end
 
+	def renren_connect
+		# 1 obtain the user id
+		access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["renren_api_key"],
+			"client_secret" => OOPSDATA[RailsEnv.get_rails_env]["renren_secret_key"],
+			"redirect_uri" => OOPSDATA[RailsEnv.get_rails_env]["renren_redirect_uri"],
+			"grant_type" => "authorization_code",
+			"code" => params[:code]}
+		retval = Tool.send_post_request("https://graph.renren.com/oauth/token", access_token_params, true)
+		response_data = JSON.parse(retval.body)
+		@user_id = response_data["user"]["id"]
+
+		# 2 check whether this user already exists
+		third_party_user = ThirdPartyUser.find_by_website_and_user_id("renren", @user_id.to_s)
+		if third_party_user == nil
+			# first time to connect ot renren
+			if user_signed_in?
+				# combination
+				
+			else
+				# ask whether already has a oopsdata account
+			end
+		else
+			# not the first time
+			email = third_party_user.email
+			# check whether this user already activates
+			if User.user_activate?(email)
+				# login normally
+			else
+				# activate process
+			end
+		end
+		render :text => @user_id
+	end
+
+	def sina_connect
+		access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["sina_app_key"],
+			"client_secret" => OOPSDATA[RailsEnv.get_rails_env]["sina_app_secret"],
+			"redirect_uri" => OOPSDATA[RailsEnv.get_rails_env]["sina_redirect_uri"],
+			"grant_type" => "authorization_code",
+			"code" => params[:code]}
+		retval = Tool.send_post_request("https://api.weibo.com/oauth2/access_token", access_token_params, true)
+		response_data = JSON.parse(retval.body)
+		@user_id = response_data["uid"]
+
+		render :text => @user_id
+	end
+
+	def qq_connect
+		access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["qq_app_id"],
+			"client_secret" => OOPSDATA[RailsEnv.get_rails_env]["qq_app_key"],
+			"redirect_uri" => OOPSDATA[RailsEnv.get_rails_env]["qq_redirect_uri"],
+			"grant_type" => "authorization_code",
+			"state" => Time.now.to_i,
+			"code" => params[:code]}
+		retval = Tool.send_post_request("https://graph.qq.com/oauth2.0/token", access_token_params, true)
+		@access_token, @expires_in = *(retval.body.split('&').map { |ele| ele.split('=')[1] })
+		retval = Tool.send_get_request("https://graph.qq.com/oauth2.0/me?access_token=#{@access_token}", true)
+		response_data = JSON.parse(retval.body.split(' ')[1])
+		@user_id = response_data["openid"]
+
+		render :text => @user_id
+	end
+
+	def google_connect
+		access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["google_client_id"],
+			"client_secret" => OOPSDATA[RailsEnv.get_rails_env]["google_client_secret"],
+			"redirect_uri" => OOPSDATA[RailsEnv.get_rails_env]["google_redirect_uri"],
+			"grant_type" => "authorization_code",
+			"code" => params[:code]}
+		retval = Tool.send_post_request("https://accounts.google.com/o/oauth2/token", access_token_params, true)
+		response_data = JSON.parse(retval.body)
+		@access_token = response_data["access_token"]
+		retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/userinfo?access_token=#{@access_token}", true)
+		response_data = JSON.parse(retval.body)
+
+		@user_id = response_data["id"]
+		render :text => @user_id
+	end
+
 	private
 
 	# method: in-accessible
@@ -220,8 +308,9 @@ class SessionsController < ApplicationController
 	def set_login_session(email)
 		set_session(:current_user_email, params[:user]["email"]) 
 		auth_key = Encryption.encrypt_auth_key("#{email}&#{Time.now.to_i.to_s}")
-		set_session(:auth_key, auth_key) 
+		set_session(:auth_key, auth_key)
 		User.set_auth_key(email, auth_key)
 	end
+
 	
 end

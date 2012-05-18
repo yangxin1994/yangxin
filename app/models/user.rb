@@ -22,12 +22,11 @@ class User
 # 1 administrator
   field :role, :type => Integer, default: 0
   field :auth_key, :type => String
-	key :email
-
-	attr_accessible :email, :username, :password
 
 	before_save :set_updated_at
 	before_update :set_updated_at
+
+	attr_accessible :email, :username, :password
 
 	private
 	def set_updated_at
@@ -87,7 +86,9 @@ class User
 		end
 		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if user["password"] != user["password_confirmation"]	# wrong password confirmation
 
+#		user_hash = user.merge("password" => Encryption.encrypt_password(user["password"])).delete("password_confirmation")
 		user = User.new(user.merge("password" => Encryption.encrypt_password(user["password"])))
+#		user = User.new(user_hash)
 		user.save
 		return user
 	end
@@ -180,7 +181,8 @@ class User
 	def self.set_auth_key(email, auth_key)
 		user = User.find_by_email(email)
 		user.auth_key = auth_key
-		user.save		
+		user.save
+		return true
 	end
 
 	#*description*: get auth key for one user

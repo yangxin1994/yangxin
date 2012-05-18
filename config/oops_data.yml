@@ -4,18 +4,60 @@ production:
   password_expiration_time: 86400
   cache_key_prefix: "oopsdata_"
   redis_hostname: "orange02"
+  renren_app_id: "194585"
+  renren_api_key: "aa0e45712a7a4960af981ea3f6918b86"
+  renren_secret_key: "b2490c767d264f848a3ef026aadcace0"
+  renren_redirect_uri: "http://quill.oopsdata.com/renren_connect"
+  sina_app_key: "3198161770"
+  sina_app_secret: "2e1b16c7aba8755c22f60ca9f5cda090"
+  sina_redirect_uri: "http://quill.oopsdata.com/sina_connect"
+  qq_app_id: "100271825"
+  qq_app_key: "31d510c1ce2265b8e38d5ab6dbcea119"
+  qq_redirect_uri: "http://quill.oopsdata.com/qq_connect"
+  google_client_id: "739977487035.apps.googleusercontent.com"
+  google_client_secret: "L1TFXRqGFsGkMihTRY1J1bOf"
+  google_redirect_uri: "http://quill.oopsdata.com/google_connect"
 development:
   root_url: "localhost:3000"
   activate_expiration_time: 3600
   password_expiration_time: 3600
   cache_key_prefix: "oopsdata_"
   redis_hostname: "localhost"
+  renren_app_id: "194585"
+  renren_api_key: "aa0e45712a7a4960af981ea3f6918b86"
+  renren_secret_key: "b2490c767d264f848a3ef026aadcace0"
+  renren_redirect_uri: "http://test.oopsdata.com/renren_connect"
+  sina_app_key: "3198161770"
+  sina_app_secret: "2e1b16c7aba8755c22f60ca9f5cda090"
+  sina_redirect_uri: "http://test.oopsdata.com/sina_connect"
+  qq_app_id: "100271825"
+  qq_app_key: "31d510c1ce2265b8e38d5ab6dbcea119"
+  qq_redirect_uri: "http://test.oopsdata.com/qq_connect"
+  google_client_id: "739977487035.apps.googleusercontent.com"
+  google_client_secret: "L1TFXRqGFsGkMihTRY1J1bOf"
+  google_redirect_uri: "http://test.oopsdata.com/google_connect"
 test:
   root_url: "localhost:3000"
   activate_expiration_time: 3600
   password_expiration_time: 3600
   cache_key_prefix: "oopsdata_"
   redis_hostname: "localhost"
+  renren_app_id: "194585"
+  renren_api_key: "aa0e45712a7a4960af981ea3f6918b86"
+  renren_secret_key: "b2490c767d264f848a3ef026aadcace0"
+  renren_redirect_uri: "http://test.oopsdata.com/renren_connect"
+  sina_app_key: "3198161770"
+  sina_app_secret: "2e1b16c7aba8755c22f60ca9f5cda090"
+  sina_redirect_uri: "http://test.oopsdata.com/sina_connect"
+  qq_app_id: "100271825"
+  qq_app_key: "31d510c1ce2265b8e38d5ab6dbcea119"
+  qq_redirect_uri: "http://test.oopsdata.com/qq_connect"
+  google_client_id: "739977487035.apps.googleusercontent.com"
+  google_client_secret: "L1TFXRqGFsGkMihTRY1J1bOf"
+  google_redirect_uri: "http://test.oopsdata.com/google_connect"
+
+
+
 
 survey_default_settings:
   title: "调查问卷主标题"

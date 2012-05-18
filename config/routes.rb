@@ -15,6 +15,10 @@ OopsData::Application.routes.draw do
 	match 'send_password_email' => 'sessions#send_password_email', :as => :send_password_email, :via => [:post]
 	match 'input_new_password' => 'sessions#input_new_password', :as => :input_new_password
 	match 'new_password' => 'sessions#new_password', :as => :new_password, :via => [:post]
+	match 'renren_connect' => 'sessions#renren_connect', :as => :renren_connect
+	match 'sina_connect' => 'sessions#sina_connect', :as => :sina_connect
+	match 'qq_connect' => 'sessions#qq_connect', :as => :qq_connect
+	match 'google_connect' => 'sessions#google_connect', :as => :google_connect
 
 	resources :users
 	match 'update_information' => 'users#update_information', :as => :update_information, :via => [:post]

@@ -6,7 +6,6 @@ class HomeController < ApplicationController
 		if user_signed_out?
 			redirect_to root_path and return
 		end
-
   end
 
 end
