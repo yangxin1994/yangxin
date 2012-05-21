@@ -40,6 +40,9 @@
 		%label 性别
 		= text_field_tag 'user_information[gender]'
 
+	%p{:style => "display:none;"}
+		= text_field_tag 'third_party_info', @third_party_info
+
 	%p
 		= submit_tag "开通"
 

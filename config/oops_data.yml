@@ -17,6 +17,10 @@ production:
   google_client_id: "739977487035.apps.googleusercontent.com"
   google_client_secret: "L1TFXRqGFsGkMihTRY1J1bOf"
   google_redirect_uri: "http://quill.oopsdata.com/google_connect"
+  qihu_app_id: "102205843"
+  qihu_app_key: "ca6d278b690138f21cf31ea6fd3f6e2e"
+  qihu_app_secret: "25e635ca1c06b32ef02f1fbfa996c74d"
+  qihu_redirect_uri: "http://quill.oopsdata.com/qihu_connect"
 development:
   root_url: "localhost:3000"
   activate_expiration_time: 3600
@@ -36,6 +40,10 @@ development:
   google_client_id: "739977487035.apps.googleusercontent.com"
   google_client_secret: "L1TFXRqGFsGkMihTRY1J1bOf"
   google_redirect_uri: "http://test.oopsdata.com/google_connect"
+  qihu_app_id: "102205843"
+  qihu_app_key: "ca6d278b690138f21cf31ea6fd3f6e2e"
+  qihu_app_secret: "25e635ca1c06b32ef02f1fbfa996c74d"
+  qihu_redirect_uri: "http://quill.oopsdata.com/qihu_connect"
 test:
   root_url: "localhost:3000"
   activate_expiration_time: 3600
@@ -55,6 +63,10 @@ test:
   google_client_id: "739977487035.apps.googleusercontent.com"
   google_client_secret: "L1TFXRqGFsGkMihTRY1J1bOf"
   google_redirect_uri: "http://test.oopsdata.com/google_connect"
+  qihu_app_id: "102205843"
+  qihu_app_key: "ca6d278b690138f21cf31ea6fd3f6e2e"
+  qihu_app_secret: "25e635ca1c06b32ef02f1fbfa996c74d"
+  qihu_redirect_uri: "http://quill.oopsdata.com/qihu_connect"
 
 
 

@@ -47,6 +47,7 @@ class RegistrationsController < ApplicationController
 	def create
 		# create user model
 		user = User.check_and_create_new(params[:user])
+		third_party_info = decrypt_third_party_user_id(params[:third_party_info])
 		case user
 		when ErrorEnum::ILLEGAL_EMAIL
 			flash[:notice] = "请输入正确的邮箱地址"
@@ -73,6 +74,7 @@ class RegistrationsController < ApplicationController
 				format.json	{ render :json => ErrorEnum::WRONG_PASSWORD_CONFIRMATION and return }
 			end
 		else # create user_information model
+			User.combine(params[:user]["email"], *third_party_info) if !third_party_info.nil?
 			user_information = UserInformation.update(params[:user_information])
 			# send registration email
 			UserMailer.welcome_email(user).deliver

@@ -4,17 +4,20 @@ require 'error_enum'
 require 'tool'
 class SessionsController < ApplicationController
 
-	before_filter :require_sign_out, :except => [:destroy, :sina_connect, :renren_connect]
+	before_filter :require_sign_out, :except => [:destroy, :sina_connect, :renren_connect, :qq_connect, :google_connect]
 
 	# method: get
 	# descryption: the page where user logins
 	def index
 		@renren_app_id = OOPSDATA[RailsEnv.get_rails_env]["renren_app_id"]
 		@renren_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["renren_redirect_uri"]
+
 		@sina_app_key = OOPSDATA[RailsEnv.get_rails_env]["sina_app_key"]
 		@sina_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["sina_redirect_uri"]
+		
 		@qq_app_id = OOPSDATA[RailsEnv.get_rails_env]["qq_app_id"]
 		@qq_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["qq_redirect_uri"]
+		
 		@google_client_id = OOPSDATA[RailsEnv.get_rails_env]["google_client_id"]
 		@google_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["google_redirect_uri"]
 	end
@@ -37,6 +40,7 @@ class SessionsController < ApplicationController
 	#* WRONG_PASSWORD
 	def create
 		login = User.login(params[:user]["email"], params[:user]["password"], @client_ip)
+		third_party_info = decrypt_third_party_user_id(params[:third_party_info])
 		case login
 		when ErrorEnum::EMAIL_NOT_EXIST
 			flash[:error] = "帐号不存在!"
@@ -57,6 +61,7 @@ class SessionsController < ApplicationController
 				format.json	{ render :json => ErrorEnum::WRONG_PASSWORD and return }
 			end
 		else
+			User.combine(params[:user]["email"], *third_party_info) if !third_party_info.nil?
 			set_login_session(params[:user]["email"])
 			flash[:notice] = "已登录"
 			respond_to do |format|
@@ -222,8 +227,39 @@ class SessionsController < ApplicationController
 		end
 	end
 
+	def third_party_connect(website, user_id, access_token)
+		third_party_user = ThirdPartyUser.find_by_website_and_user_id("renren", @user_id.to_s)
+		if !user_signed_in?
+			if third_party_user.nil?
+				ThirdPartyUser.create(website, user_id, access_token)
+				# ask whether already has a oopsdata account
+				@third_party_info = encrypt_third_party_user_id("renren", @user_id)
+				render :action => "has_oopsdata_account"
+			else
+				third_party_user.update_access_token(access_token)
+				# login process
+				login = User.third_party_login(email, password, @client_ip)
+				case login
+				when ErrorEnum::EMAIL_NOT_ACTIVATED
+					flash[:error] = "您的帐号未激活，请您首先激活帐号"
+					respond_to do |format|
+						format.html	{ redirect_to intput_activate_email_path and return }
+						format.json	{ render :json => ErrorEnum::EMAIL_NOT_ACTIVATED and return }
+					end
+				else
+					set_login_session(params[:user]["email"])
+					flash[:notice] = "已登录"
+					respond_to do |format|
+						format.html	{ redirect_to home_path and return }
+						format.json	{ render :json => true and return }
+					end
+				end
+			end
+		end
+		render :text => @user_id
+	end
+
 	def renren_connect
-		# 1 obtain the user id
 		access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["renren_api_key"],
 			"client_secret" => OOPSDATA[RailsEnv.get_rails_env]["renren_secret_key"],
 			"redirect_uri" => OOPSDATA[RailsEnv.get_rails_env]["renren_redirect_uri"],
@@ -231,29 +267,8 @@ class SessionsController < ApplicationController
 			"code" => params[:code]}
 		retval = Tool.send_post_request("https://graph.renren.com/oauth/token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
-		@user_id = response_data["user"]["id"]
-
-		# 2 check whether this user already exists
-		third_party_user = ThirdPartyUser.find_by_website_and_user_id("renren", @user_id.to_s)
-		if third_party_user == nil
-			# first time to connect ot renren
-			if user_signed_in?
-				# combination
-				
-			else
-				# ask whether already has a oopsdata account
-			end
-		else
-			# not the first time
-			email = third_party_user.email
-			# check whether this user already activates
-			if User.user_activate?(email)
-				# login normally
-			else
-				# activate process
-			end
-		end
-		render :text => @user_id
+		user_id = response_data["user"]["id"]
+		third_party_connect("renren", user_id)
 	end
 
 	def sina_connect
@@ -264,9 +279,8 @@ class SessionsController < ApplicationController
 			"code" => params[:code]}
 		retval = Tool.send_post_request("https://api.weibo.com/oauth2/access_token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
-		@user_id = response_data["uid"]
-
-		render :text => @user_id
+		user_id = response_data["uid"]
+		third_party_connect("renren", user_id)
 	end
 
 	def qq_connect
@@ -280,9 +294,8 @@ class SessionsController < ApplicationController
 		@access_token, @expires_in = *(retval.body.split('&').map { |ele| ele.split('=')[1] })
 		retval = Tool.send_get_request("https://graph.qq.com/oauth2.0/me?access_token=#{@access_token}", true)
 		response_data = JSON.parse(retval.body.split(' ')[1])
-		@user_id = response_data["openid"]
-
-		render :text => @user_id
+		user_id = response_data["openid"]
+		third_party_connect("renren", user_id)
 	end
 
 	def google_connect
@@ -296,9 +309,8 @@ class SessionsController < ApplicationController
 		@access_token = response_data["access_token"]
 		retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/userinfo?access_token=#{@access_token}", true)
 		response_data = JSON.parse(retval.body)
-
-		@user_id = response_data["id"]
-		render :text => @user_id
+		user_id = response_data["id"]
+		third_party_connect("renren", user_id)
 	end
 
 	private
@@ -312,5 +324,17 @@ class SessionsController < ApplicationController
 		User.set_auth_key(email, auth_key)
 	end
 
+	def encrypt_third_party_user_id(website, user_id)
+		return Encryption.encrypt_third_party_user_id({"website" => website, "user_id" => user_id}.to_json)
+	end
+
+	def decrypt_third_party_user_id(string)
+		begin
+			h = JSON.parse(Encryption.decrypt_third_party_user_id(string))
+			return [h["webiste"], h["user_id"]]
+		rescue
+			return nil
+		end
+	end
 	
 end

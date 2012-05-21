@@ -8,6 +8,7 @@ class ThirdPartyUser
   field :website, :type => String
   field :user_id, :type => String
   field :email, :type => String
+  field :access_token, :type => String
 
 
 
@@ -23,6 +24,13 @@ class ThirdPartyUser
 	#* nil: when the third party user does not exist
 	def self.find_by_website_and_user_id(website, user_id)
 		return ThirdPartyUser.where(:website => website, :user_id => user_id)[0]
+	end
+
+	def self.create(website, user_id, access_token, email = nil)
+	end
+	
+	def update_access_token(access_token)
+		self.access_token = access_token
 	end
 	
 end

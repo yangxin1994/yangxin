@@ -112,6 +112,27 @@ class User
 		return user.save
 	end
 
+	#*description*: user login with third party account
+	#
+	#*params*:
+	#* email address of the user
+	#* ip address of the user
+	#
+	#*retval*:
+	#* true: when successfully login
+	#* EMAIL_NOT_EXIST
+	#* EMAIL_NOT_ACTIVATED
+	def self.thrid_party_login(email, client_ip)
+		return ErrorEnum::EMAIL_NOT_EXIST if !user_exist?(email)			# email account does not exist
+		return ErrorEnum::EMAIL_NOT_ACTIVATED if !user_activate?(email)		# not activated
+		user = User.find_by_email(email)
+		# record the login information
+		user.last_login_time = Time.now.to_i
+		user.last_login_ip = client_ip
+		user.login_count = user.login_count + 1
+		return user.save
+	end
+
 	#*description*: user login
 	#
 	#*params*:
@@ -584,4 +605,15 @@ class User
 		Charge.charges_of(self.email)
 	end
 
+#--
+############### operations about third party user #################
+#++
+	def self.combine(email, website, user_id)
+		user = User.find_by_email(email)
+		return ErrorEnum::EMAIL_NOT_EXIST if user.nil?
+		third_party_user = ThirdPartyUser.find_by_website_and_user_id(website, user_id)
+		return ErrorEnum::THIRD_PARTY_USER_NOT_EXIST if third_party_user.nil?
+		third_party_user.email = email
+		return third_party_user.save
+	end
 end
