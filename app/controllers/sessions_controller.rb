@@ -280,7 +280,7 @@ class SessionsController < ApplicationController
 		retval = Tool.send_post_request("https://api.weibo.com/oauth2/access_token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
 		user_id = response_data["uid"]
-		third_party_connect("renren", user_id)
+		third_party_connect("sina", user_id)
 	end
 
 	def qq_connect
@@ -295,7 +295,7 @@ class SessionsController < ApplicationController
 		retval = Tool.send_get_request("https://graph.qq.com/oauth2.0/me?access_token=#{@access_token}", true)
 		response_data = JSON.parse(retval.body.split(' ')[1])
 		user_id = response_data["openid"]
-		third_party_connect("renren", user_id)
+		third_party_connect("qq", user_id)
 	end
 
 	def google_connect
@@ -310,7 +310,7 @@ class SessionsController < ApplicationController
 		retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/userinfo?access_token=#{@access_token}", true)
 		response_data = JSON.parse(retval.body)
 		user_id = response_data["id"]
-		third_party_connect("renren", user_id)
+		third_party_connect("google", user_id)
 	end
 
 	private

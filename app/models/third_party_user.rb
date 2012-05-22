@@ -27,10 +27,13 @@ class ThirdPartyUser
 	end
 
 	def self.create(website, user_id, access_token, email = nil)
+		third_party_user = ThirdPartyUser.new(:website => website, :user_id => user_id, :access_token => access_token, :email => email)
+		third_party_user.save
 	end
 	
 	def update_access_token(access_token)
 		self.access_token = access_token
+		return self.save
 	end
 	
 end
