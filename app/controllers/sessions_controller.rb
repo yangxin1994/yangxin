@@ -20,6 +20,9 @@ class SessionsController < ApplicationController
 		
 		@google_client_id = OOPSDATA[RailsEnv.get_rails_env]["google_client_id"]
 		@google_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["google_redirect_uri"]
+
+        @qihu_client_id = OOPSDATA[RailsEnv.get_rails_env]["qihu_app_key"]
+        @qihu_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["qihu_redirect_uri"]
 	end
 
 	#*kdescryption*: user submits the login form
@@ -228,51 +231,46 @@ class SessionsController < ApplicationController
 	end
 
 	def third_party_connect(website, user_id, access_token)
-		@third_party_user = ThirdPartyUser.find_by_website_and_user_id(website, user_id.to_s)
+		third_party_user = ThirdPartyUser.find_by_website_and_user_id(website, user_id.to_s)
 		
-    # check the TP account from db
-    # if not, create a TP account in company db 
-    # else, update access_token 
-  	if third_party_user.nil?
-		  @third_party_user = ThirdPartyUser.create(website, user_id, access_token)
+        # check the TP account from db
+        # if not, create a TP account in company db 
+        # else, update access_token 
+  	    if third_party_user.nil?
+		    third_party_user = ThirdPartyUser.create(website, user_id, access_token)
 			# ask whether already has a oopsdata account
-			#@third_party_info = encrypt_third_party_user_id(website, user_id)
-			#render :action => "has_oopsdata_account"
 		else
-			@third_party_user.update_access_token(access_token)
-    end
-
-    # now, the third_party_user should be in company's db.
-    # but we should care the former process.
-    if !@third_party_user.nil?
-      # check the third_party_user had bind OD account.
-      if @third_party_user.email.nil? || @third_party_user.email.equal?("") then
-        
-        if user_login? then 
-          #jump to login or register page for OD
-          #it will invoke : User.combine()
-        else 
-          User.combine(session_user.email, @third_party_user.website, @third_party_user.user_id)            
+			third_party_user.update_access_token(access_token)
         end
-      end
-    end
-			# login process
-			#login = User.third_party_login(email, password, @client_ip)
-			#case login
-			#when ErrorEnum::EMAIL_NOT_ACTIVATED
-			#	flash[:error] = "您的帐号未激活，请您首先激活帐号"
-			#	respond_to do |format|
-			#		format.html	{ redirect_to intput_activate_email_path and return }
-			#		format.json	{ render :json => ErrorEnum::EMAIL_NOT_ACTIVATED and return }
-			#	end
-			#else
-			#	set_login_session(params[:user]["email"])
-			#	flash[:notice] = "已登录"
-			#	respond_to do |format|
-			#		format.html	{ redirect_to home_path and return }
-			#		format.json	{ render :json => true and return }
-			#	end
-			#end
+
+        # check the third_party_user had bind OD account.
+        if third_party_user.email.nil? || third_party_user.email.equal?("") then
+        
+           if !user_signed_in? then 
+               @third_party_info = encrypt_third_party_user_id(website, user_id)
+  	           render :action => "login_page2"
+           else 
+               User.combine(@current_user.email, third_party_user.website, third_party_user.user_id)   
+           end
+        end
+       
+		# login process
+		login = User.third_party_login(email, @client_ip) #not need password.
+		case login
+		when ErrorEnum::EMAIL_NOT_ACTIVATED
+			flash[:error] = "您的帐号未激活，请您首先激活帐号"
+			respond_to do |format|
+				format.html	{ redirect_to intput_activate_email_path and return }
+				format.json	{ render :json => ErrorEnum::EMAIL_NOT_ACTIVATED and return }
+			end
+		else
+			set_login_session(params[:user]["email"])
+    		flash[:notice] = "已登录"
+			respond_to do |format|
+				format.html	{ redirect_to home_path and return }
+				format.json	{ render :json => true and return }
+		    end
+		end
 		
 		render :text => @user_id
 	end
@@ -336,7 +334,6 @@ class SessionsController < ApplicationController
 			"client_secret" => OOPSDATA[RailsEnv.get_rails_env]["qihu_app_secret"],
 			"redirect_uri" => OOPSDATA[RailsEnv.get_rails_env]["qihu_redirect_uri"],
 			"grant_type" => "authorization_code",
-      #"scope" => "basic",
 			"code" => params[:code]
       }
 		retval = Tool.send_post_request("https://openapi.360.cn/oauth2/access_token", access_token_params, true)
