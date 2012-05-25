@@ -6,19 +6,27 @@
 =link_to "奇虎360", "https://openapi.360.cn/oauth2/authorize?client_id=#{@qihu_client_id}&response_type=code&redirect_uri=#{@qihu_redirect_uri}&scope=basic&display=default"
 = form_tag({:controller => "sessions"}, :method => "post") do
 
-	%p
-		%label 邮箱
-		= text_field_tag 'user[email]'
+    %p
+        %label 邮箱
+        = text_field_tag 'user[email]'
 
-	%p
-		%label 密码
-		= password_field_tag 'user[password]'
+    %p
+        %label 密码
+        = password_field_tag 'user[password]'
 
-	%p{:style => "display:none;"}
-		= text_field_tag 'third_party_info', @third_party_info
+    %p{:style => "display:none;"}
+        = text_field_tag 'third_party_info', @third_party_info
 
-	%p
-		= submit_tag "登录"
+    %p
+        - if !@third_party_info.nil?
+            %b= @third_party_info.to_s 
+      
+    %p
+        - if !@access_token.nil?
+            %b= @access_token.to_s 
+
+    %p
+        = submit_tag "登录"
 
 
 = render :partial => "layouts/navigation"

@@ -229,50 +229,60 @@ class SessionsController < ApplicationController
 			end
 		end
 	end
-
+    
 	def third_party_connect(website, user_id, access_token)
-		third_party_user = ThirdPartyUser.find_by_website_and_user_id(website, user_id.to_s)
-		
+        third_party_user = ThirdPartyUser.find_by_website_and_user_id(website, user_id.to_s)
+
         # check the TP account from db
         # if not, create a TP account in company db 
         # else, update access_token 
-  	    if third_party_user.nil?
-		    third_party_user = ThirdPartyUser.create(website, user_id, access_token)
-			# ask whether already has a oopsdata account
-		else
-			third_party_user.update_access_token(access_token)
+        if third_party_user.nil?
+            if  ThirdPartyUser.create(website, user_id, access_token) then 
+                third_party_user = ThirdPartyUser.find_by_website_and_user_id(website, user_id.to_s)
+            else 
+                flash[:error] ="数据保存有误！"
+                respond_to do |format|
+                    format.html	{ redirect_to home_path and return }
+                    format.json	{ render :json => true and return }
+                end
+            end 
+        else
+            third_party_user.update_access_token(access_token)
         end
 
         # check the third_party_user had bind OD account.
-        if third_party_user.email.nil? || third_party_user.email.equal?("") then
-        
-           if !user_signed_in? then 
-               @third_party_info = encrypt_third_party_user_id(website, user_id)
-  	           render :action => "login_page2"
-           else 
-               User.combine(@current_user.email, third_party_user.website, third_party_user.user_id)   
-           end
+        if !third_party_user.nil? then
+
+            #if not sign in or no binding, render
+            #else ...
+            if !user_signed_in? || (third_party_user.email.nil? || third_party_user.email.equal?("")) then 
+                @third_party_info = encrypt_third_party_user_id(website, user_id)
+                #
+                render :action => "index", :controller => "sessions"
+            else 
+                User.combine(@current_user.email, third_party_user.website, third_party_user.user_id)   
+                
+                #login process
+                login = User.third_party_login(@current_user.email, @client_ip) #not need password.
+                case login
+                when ErrorEnum::EMAIL_NOT_ACTIVATED
+                    flash[:error] = "您的帐号未激活，请您首先激活帐号"
+                    respond_to do |format|
+                        format.html	{ redirect_to intput_activate_email_path and return }
+                        format.json	{ render :json => ErrorEnum::EMAIL_NOT_ACTIVATED and return }
+                    end
+                else
+                    set_login_session(params[:user]["email"])
+                    flash[:notice] = "已登录"
+                    respond_to do |format|
+                        format.html	{ redirect_to home_path and return }
+                        format.json	{ render :json => true and return }
+                    end
+                end
+            end
         end
-       
-		# login process
-		login = User.third_party_login(email, @client_ip) #not need password.
-		case login
-		when ErrorEnum::EMAIL_NOT_ACTIVATED
-			flash[:error] = "您的帐号未激活，请您首先激活帐号"
-			respond_to do |format|
-				format.html	{ redirect_to intput_activate_email_path and return }
-				format.json	{ render :json => ErrorEnum::EMAIL_NOT_ACTIVATED and return }
-			end
-		else
-			set_login_session(params[:user]["email"])
-    		flash[:notice] = "已登录"
-			respond_to do |format|
-				format.html	{ redirect_to home_path and return }
-				format.json	{ render :json => true and return }
-		    end
-		end
-		
-		render :text => @user_id
+
+		#render :text => @user_id
 	end
 
 	def renren_connect
@@ -284,6 +294,7 @@ class SessionsController < ApplicationController
 		retval = Tool.send_post_request("https://graph.renren.com/oauth/token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
 		user_id = response_data["user"]["id"]
+		@access_token = response_data["access_token"]
 		third_party_connect("renren", user_id, @access_token)
 	end 
 
@@ -296,6 +307,7 @@ class SessionsController < ApplicationController
 		retval = Tool.send_post_request("https://api.weibo.com/oauth2/access_token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
 		user_id = response_data["uid"]
+		@access_token = response_data["access_token"]
 		third_party_connect("sina", user_id, @access_token)
 	end 
 
