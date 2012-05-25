@@ -284,8 +284,8 @@ class SessionsController < ApplicationController
 		retval = Tool.send_post_request("https://graph.renren.com/oauth/token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
 		user_id = response_data["user"]["id"]
-		third_party_connect("renren", user_id)
-	end
+		third_party_connect("renren", user_id, @access_token)
+	end 
 
 	def sina_connect
 		access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["sina_app_key"],
@@ -296,8 +296,8 @@ class SessionsController < ApplicationController
 		retval = Tool.send_post_request("https://api.weibo.com/oauth2/access_token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
 		user_id = response_data["uid"]
-		third_party_connect("sina", user_id)
-	end
+		third_party_connect("sina", user_id, @access_token)
+	end 
 
 	def qq_connect
 		access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["qq_app_id"],
@@ -311,8 +311,8 @@ class SessionsController < ApplicationController
 		retval = Tool.send_get_request("https://graph.qq.com/oauth2.0/me?access_token=#{@access_token}", true)
 		response_data = JSON.parse(retval.body.split(' ')[1])
 		user_id = response_data["openid"]
-		third_party_connect("qq", user_id)
-	end
+		third_party_connect("qq", user_id, @access_token)
+	end 
 
 	def google_connect
 		access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["google_client_id"],
@@ -326,11 +326,11 @@ class SessionsController < ApplicationController
 		retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/userinfo?access_token=#{@access_token}", true)
 		response_data = JSON.parse(retval.body)
 		user_id = response_data["id"]
-		third_party_connect("google", user_id)
+		third_party_connect("google", user_id, @access_token)
 	end
 
-  def qihu_connect
-		access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["qihu_app_key"],
+ def qihu_connect
+	 access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["qihu_app_key"],
 			"client_secret" => OOPSDATA[RailsEnv.get_rails_env]["qihu_app_secret"],
 			"redirect_uri" => OOPSDATA[RailsEnv.get_rails_env]["qihu_redirect_uri"],
 			"grant_type" => "authorization_code",
@@ -342,7 +342,7 @@ class SessionsController < ApplicationController
 		retval = Tool.send_get_request("https://openapi.360.cn/user/me.json?access_token=#{@access_token}", true)
 		response_data = JSON.parse(retval.body)
 		user_id = response_data["id"]
-		third_party_connect("qihu", user_id)
+		third_party_connect("qihu", user_id, @access_token)
   end 
 
 	private
