@@ -1,6 +1,8 @@
 # encoding: utf-8
 require 'error_enum'
 require 'tool'
+require 'encryption'
+
 class RegistrationsController < ApplicationController
 
 	before_filter :require_sign_out, :except => [:email_illegal]
@@ -48,7 +50,7 @@ class RegistrationsController < ApplicationController
 	def create
 		# create user model
 		user = User.check_and_create_new(params[:user])
-		third_party_info = decrypt_third_party_user_id(params[:third_party_info])
+		third_party_info = Encryption.decrypt_third_party_user_id(params[:third_party_info])
 		case user
 		when ErrorEnum::ILLEGAL_EMAIL
 			flash[:notice] = "请输入正确的邮箱地址"

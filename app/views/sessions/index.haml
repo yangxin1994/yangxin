@@ -3,22 +3,30 @@
 =link_to "与新浪微博连接", "https://api.weibo.com/oauth2/authorize?client_id=#{@sina_app_key}&response_type=code&redirect_uri=#{@sina_redirect_uri}&display=page"
 =link_to image_tag("/assets/qq_login_button.png", :border => 0), "https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=#{@qq_app_id}&redirect_uri=#{@qq_redirect_uri}"
 =link_to "用google帐号登录", "https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=#{@google_client_id}&redirect_uri=#{@google_redirect_uri}&scope=https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
-
+=link_to "奇虎360", "https://openapi.360.cn/oauth2/authorize?client_id=#{@qihu_client_id}&response_type=code&redirect_uri=#{@qihu_redirect_uri}&scope=basic&display=default"
 = form_tag({:controller => "sessions"}, :method => "post") do
 
-	%p
-		%label 邮箱
-		= text_field_tag 'user[email]'
+    %p
+        %label 邮箱
+        = text_field_tag 'user[email]'
 
-	%p
-		%label 密码
-		= password_field_tag 'user[password]'
+    %p
+        %label 密码
+        = password_field_tag 'user[password]'
 
-	%p{:style => "display:none;"}
-		= text_field_tag 'third_party_info', @third_party_info
+    %p{:style => "display:none;"}
+        = text_field_tag 'third_party_info', @third_party_info
 
-	%p
-		= submit_tag "登录"
+    %p
+        - if !@third_party_info.nil?
+            %b= @third_party_info.to_s 
+      
+    %p
+        - if !@access_token.nil?
+            %b= @access_token.to_s 
+
+    %p
+        = submit_tag "登录"
 
 
 = render :partial => "layouts/navigation"

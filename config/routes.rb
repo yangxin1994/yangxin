@@ -19,6 +19,7 @@ OopsData::Application.routes.draw do
 	match 'sina_connect' => 'sessions#sina_connect', :as => :sina_connect
 	match 'qq_connect' => 'sessions#qq_connect', :as => :qq_connect
 	match 'google_connect' => 'sessions#google_connect', :as => :google_connect
+    match 'qihu_connect' => 'sessions#qihu_connect', :as => :qihu_connect
 
 	resources :users
 	match 'update_information' => 'users#update_information', :as => :update_information, :via => [:post]
