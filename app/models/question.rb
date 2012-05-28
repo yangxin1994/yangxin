@@ -13,7 +13,7 @@ class Question
 	include Mongoid::Document
 	field :content, :type => String, default: OOPSDATA["question_default_settings"]["content"]
 	field :note, :type => String, default: OOPSDATA["question_default_settings"]["note"]
-	field :is_required, :type => String, default: true
+	field :is_required, :type => Boolean, default: true
 
 	before_save :clear_question_object
 	before_update :clear_question_object

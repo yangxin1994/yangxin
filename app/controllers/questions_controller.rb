@@ -40,6 +40,11 @@ class QuestionsController < ApplicationController
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::OVERFLOW and return }
 			end
+		when ErrorEnum::WRONG_QUESTION_TYPE
+			flash[:notice] = "问题类型错误"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::WRONG_QUESTION_TYPE and return }
+			end
 		when ErrorEnum::UNAUTHORIZED
 			flash[:notice] = "没有权限"
 			respond_to do |format|
@@ -88,6 +93,11 @@ class QuestionsController < ApplicationController
 			flash[:notice] = "页码溢出"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::OVERFLOW and return }
+			end
+		when ErrorEnum::WRONG_DATA_TYPE
+			flash[:notice] = "数据类型错误"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::WRONG_DATA_TYPE and return }
 			end
 		when ErrorEnum::UNAUTHORIZED
 			flash[:notice] = "没有权限"

@@ -37,6 +37,7 @@ class RegistrationsController < ApplicationController
 	#  - personal_incoming
 	#  - position
 	#  - industry
+	#* third_party_info: a key if user registrates with a third party website account
 	#
 	#*retval*:
 	#* true if successfully registrated

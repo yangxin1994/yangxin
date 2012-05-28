@@ -309,7 +309,7 @@ class User
 	#*retval*:
 	#* the array of surveys: when successfully obtained
 	#* NOT_EXIST
-	def surveys
+	def surveys(tags)
 		return Survey.surveys_of(self.email)
 	end
 
@@ -603,6 +603,45 @@ class User
 	#Obtain the charges of this user
 	def charges
 		Charge.charges_of(self.email)
+	end
+
+#--
+############### operations about resource #################
+#++
+	# create a new resource
+	def create_resource(resource)
+		resource = Resource.create(self.email, resource)
+		return resource
+	end
+
+	# get a list of resources
+	def get_resource_object_list(resource_type)
+		resource_list = Resource.get_object_list(self.email, resource_type)
+		return resource_list
+	end
+
+	# get a resource object
+	def get_resource_object(resource_id)
+		resource = Resource.get_object(self.email, resource_id)
+		return resource
+	end
+
+	# destroy a resource
+	def destroy_resource(resource_id)
+		retval = Resource.delete(self.email, resource_id)
+		return retval
+	end
+
+	# clear a resource
+	def clear_resource(resource_id)
+		retval = Resource.clear(self.email, resource_id)
+		return retval
+	end
+
+	# update title of the resource
+	def update_resource_title(resource)
+		retval = Resource.update_title(self.email, resource)
+		return retval
 	end
 
 #--
