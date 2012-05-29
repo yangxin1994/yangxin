@@ -46,6 +46,12 @@ OopsData::Application.routes.draw do
 	match 'surveys/:survey_id/pages/:page_index/questions/:question_id_1/:question_id_2/move' => 'questions#move'
 	match 'surveys/:survey_id/pages/:page_index/questions/:question_id_1/:question_id_2/clone' => 'questions#clone'
 
+	resources :resources do
+		member do
+			get 'clear'
+		end
+	end
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

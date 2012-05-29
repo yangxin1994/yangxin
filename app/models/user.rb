@@ -309,7 +309,7 @@ class User
 	#*retval*:
 	#* the array of surveys: when successfully obtained
 	#* NOT_EXIST
-	def surveys
+	def surveys(tags)
 		return Survey.surveys_of(self.email)
 	end
 
@@ -603,6 +603,50 @@ class User
 	#Obtain the charges of this user
 	def charges
 		Charge.charges_of(self.email)
+	end
+
+#--
+############### operations about resource #################
+#++
+	# create a new resource
+	def create_resource(resource, resource_type, location, title)
+		return Resource.check_and_create_new(self.email, resource_type, location, title)
+	end
+
+	# get a list of resources
+	def get_resource_object_list(resource_type)
+		resource_list = Resource.get_object_list(self.email, resource_type)
+		return resource_list
+	end
+
+	# get a resource object
+	def get_resource_object(resource_id)
+		resource = Resource.get_object(self.email, resource_id)
+		return resource
+	end
+
+	# destroy a resource
+	def destroy_resource(resource_id)
+		resource = Resource.find_by_id(resource_id)
+		return ErrorEnum::RESOURCE_NOT_EXIST if resource.nil?
+		retval = resource.delete(self.email)
+		return retval
+	end
+
+	# clear a resource
+	def clear_resource(resource_id)
+		resource = Resource.find_by_id(resource_id)
+		return ErrorEnum::RESOURCE_NOT_EXIST if resource.nil?
+		retval = resource.clear(self.email)
+		return retval
+	end
+
+	# update title of the resource
+	def update_resource_title(resource)
+		resource = Resource.find_by_id(resource.resource_id)
+		return ErrorEnum::RESOURCE_NOT_EXIST if resource.nil?
+		retval = resource.update_title(self.email, resource.title)
+		return retval
 	end
 
 #--

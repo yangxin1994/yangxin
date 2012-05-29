@@ -72,7 +72,7 @@ class SurveysController < ApplicationController
 	#* survey_id: id of the survey to be deleted
 	#
 	#*retval*:
-	#* 1: when survey is successfully deleted.
+	#* true: when survey is successfully deleted.
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def destroy

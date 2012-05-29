@@ -39,6 +39,7 @@ class RegistrationsController < ApplicationController
 	#  - personal_incoming
 	#  - position
 	#  - industry
+	#* third_party_info: a key if user registrates with a third party website account
 	#
 	#*retval*:
 	#* true if successfully registrated
@@ -49,7 +50,7 @@ class RegistrationsController < ApplicationController
 	def create
 		# create user model
 		user = User.check_and_create_new(params[:user])
-		third_party_info = Encryption.decrypt_third_party_user_id(params[:third_party_info])
+		third_party_info = decrypt_third_party_user_id(params[:third_party_info])
 		case user
 		when ErrorEnum::ILLEGAL_EMAIL
 			flash[:notice] = "请输入正确的邮箱地址"

@@ -25,7 +25,7 @@ class SessionsController < ApplicationController
     @qihu_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["qihu_redirect_uri"]
 	end
 
-	#*kdescryption*: user submits the login form
+	#*descryption*: user submits the login form
 	#
 	#*http* *method*: post
 	#
@@ -143,7 +143,8 @@ class SessionsController < ApplicationController
 	#* password_key
 	#
 	#*retval*:
-	#* redirect to forget_password_url if successfully pass the checking
+	#* show the password input form if successfully pass the checking
+	#* redirect to forget_password_url if expired
 	#* redirect to /500 if it is a wrong link
 	def input_new_password
 		begin
@@ -388,14 +389,4 @@ class SessionsController < ApplicationController
 	def encrypt_third_party_user_id(website, user_id)
 		return Encryption.encrypt_third_party_user_id({"website" => website, "user_id" => user_id}.to_json)
 	end
-
-	def decrypt_third_party_user_id(string)
-		begin
-			h = JSON.parse(Encryption.decrypt_third_party_user_id(string))
-			return [h["webiste"], h["user_id"]]
-		rescue
-			return nil
-		end
-	end 
-	
 end

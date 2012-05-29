@@ -11,7 +11,7 @@ require 'securerandom'
 #  "label": label of the input(string),
 #  "data_type": can be short_text, long_text, pwd, int, float, email, date, phone, address(string)
 # }
-class TableBlankQuestion < Question
+class TableQuestion < Question
 	field :question_type, :type => String, default: "TableQuestion"
 	field :inputs, :type => Array, default: []
 	field :is_rand, :type => Boolean, default: false

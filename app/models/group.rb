@@ -55,7 +55,7 @@ class Group
 	#* ErrorEnum ::GROUP_NOT_EXIST : if cannot find the group
 	def self.check_and_create_new(owner_email, name, description, members)
 		# this owner already has a group with the same name
-		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(owner_email) == nil
+		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(owner_email).nil?
 		group = Group.new(:owner_email => owner_email, :name => name, :description => description, :members =>  members)
 		group.save
 		return group.serialize

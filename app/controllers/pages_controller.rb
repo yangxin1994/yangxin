@@ -58,7 +58,7 @@ class PagesController < ApplicationController
 	#*retval*:
 	#* true
 	#* ErrorEnum ::OVERFLOW : when the page index is greater than the page number
-	#* ErrorEnum ::NOT_EXIST : when the survey does not exist
+	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def create
 		retval = @current_user.create_page(params[:survey_id], params[:page_index].to_i)
@@ -142,7 +142,7 @@ class PagesController < ApplicationController
 	#*retval*:
 	#* true: when page is successfully moved
 	#* ErrorEnum ::OVERFLOW : when the page index is greater than the page number
-	#* ErrorEnum ::NOT_EXIST : when the survey does not exist
+	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def move
 		retval = @current_user.move_page(params[:survey_id], params[:page_index_1].to_i, params[:page_index_2].to_i)
@@ -183,7 +183,7 @@ class PagesController < ApplicationController
 	#*retval*:
 	#* 1: when page is successfully destroyed
 	#* ErrorEnum ::OVERFLOW : when the page index is greater than the page number
-	#* ErrorEnum ::NOT_EXIST : when the survey does not exist
+	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def destroy
 		retval = @current_user.delete_page(params[:survey_id], params[:id].to_i)
@@ -226,7 +226,7 @@ class PagesController < ApplicationController
 	#*retval*:
 	#* true: when pages are successfully combined
 	#* ErrorEnum ::OVERFLOW : when the page index is greater than the page number
-	#* ErrorEnum ::NOT_EXIST : when the survey does not exist
+	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def combine
 		retval = @current_user.combine_pages(params[:survey_id], params[:page_index_1].to_i, params[:page_index_2].to_i)
