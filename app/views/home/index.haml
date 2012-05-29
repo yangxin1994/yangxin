@@ -1,6 +1,8 @@
 %p
   %span 您好！
   %span= @current_user.username
+  %br
+  %span= @current_user.email
 %p 这是您的个人主页
 
 = button_to "第三方信息", :controller => "home", :action => "get_tp_info"

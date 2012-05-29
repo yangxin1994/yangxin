@@ -10,8 +10,7 @@ class ThirdPartyUser
   field :email, :type => String
   field :access_token, :type => String
   field :refresh_token, :type => String
-
-
+  field :scope, :type => String
 
 	public
 	#*description*: find a third party user given a website and an user id
@@ -45,6 +44,11 @@ class ThirdPartyUser
 	
 	def update_refresh_token(refresh_token)
 	  self.refresh_token = refresh_token
+	  return self.save
+	end
+	
+	def update_scope(scope)
+	  self.scope = scope
 	  return self.save
 	end
 	

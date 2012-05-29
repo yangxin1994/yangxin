@@ -20,12 +20,10 @@ class HomeController < ApplicationController
     if !@tp_user then
       flash[:notice] = "你未绑定第三方帐户，未有获取信息的功能！"
     else 
-      #@renren_app_id = OOPSDATA[RailsEnv.get_rails_env]["renren_app_id"]
-		  #@renren_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["renren_redirect_uri"]
 		  
 		  retval = Tool.send_post_request("https://api.renren.com/v2/user?access_token=#{@tp_user.access_token}", true)
   		response_data = JSON.parse(retval.body)  		
-  		@user = response_data[:use]
+  		@user = response_data[:user]
       
     end
     
@@ -42,13 +40,18 @@ class HomeController < ApplicationController
   def get_more_info
     @tp_user = ThirdPartyUser.find_by_email(@current_user.email)
     
-    
     renren =Renren::Base.new(@tp_user.access_token)
-    @info = renren.call_method({:method => "users.getVisitors"})
-  rescue => ex
-    flash[:error] = "error type: #{ex.class}, message: #{ex.message}"
     
-    #reget_access_token
+    #@info = renren.call_method({:method => "share.share", :type => 6, :url => "http://wiki.dev.renren.com/wiki/Share.share", :comment => "好不好 其实我也不知道" })
+    # get error
+    
+    @info = renren.call_method({:method => "status.gets"})
+    #get error
+    
+    #@info = renren.call_method
+  rescue => ex
+    flash[:error] = "error type2: #{ex.class}, message: #{ex.message}"
+    
   ensure
     render :controller => :home, :action => :index
   end

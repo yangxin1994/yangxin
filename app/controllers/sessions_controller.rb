@@ -23,8 +23,8 @@ class SessionsController < ApplicationController
 
     @qihu_client_id = OOPSDATA[RailsEnv.get_rails_env]["qihu_app_key"]
     @qihu_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["qihu_redirect_uri"]
-	end
-
+    
+  end
 	#*descryption*: user submits the login form
 	#
 	#*http* *method*: post
@@ -43,7 +43,7 @@ class SessionsController < ApplicationController
 	#* WRONG_PASSWORD
 	def create
 		login = User.login(params[:user]["email"], params[:user]["password"], @client_ip)
-		third_party_info = decrypt_third_party_user_id(params[:third_party_info])
+		third_party_info = JSON.parse(Encryption.decrypt_third_party_user_id(params[:third_party_info]))
 		case login
 		when ErrorEnum::EMAIL_NOT_EXIST
 			flash[:error] = "帐号不存在!"
@@ -65,9 +65,11 @@ class SessionsController < ApplicationController
 				format.json	{ render :json => ErrorEnum::WRONG_PASSWORD and return }
 			end
 		else
-			User.combine(params[:user]["email"], *third_party_info) if !third_party_info.nil?
+			tp = User.combine(params[:user]["email"], third_party_info["website"], third_party_info["user_id"]) if !third_party_info.nil?
 			set_login_session(params[:user]["email"])
-			flash[:notice] = "已登录"
+			flash[:notice] = "登录成功"
+			flash[:notice] += "，与第三方帐户绑定失败。" if tp==-41
+			flash[:notice] += "，与第三方帐户绑定成功。" if tp!=-41
 			respond_to do |format|
 				format.html	{ redirect_to home_path and return }
 				format.json	{ render :json => true and return }
@@ -232,7 +234,7 @@ class SessionsController < ApplicationController
 		end
 	end
     
-	def third_party_connect(website, user_id, access_token, refresh_token=nil)
+	def third_party_connect(website, user_id, access_token, refresh_token=nil, scope =nil)
     third_party_user = ThirdPartyUser.find_by_website_and_user_id(website, user_id.to_s)
 
     # check the TP account from db
@@ -251,6 +253,7 @@ class SessionsController < ApplicationController
     else
       third_party_user.update_access_token(access_token)
       third_party_user.update_refresh_token(refresh_token) if refresh_token
+      third_party_user.update_scope(scope) if scope
     end
 
     # check the third_party_user had bind OD account.
@@ -265,7 +268,7 @@ class SessionsController < ApplicationController
           user = User.find_by_email(third_party_user.email)        
           User.login(user.email, Encryption.decrypt_password(user.password), @client_ip)
           set_login_session(user.email)
-          
+          flash[:notice] = "登录成功（已绑定）"
           respond_to do |format|
             format.html	{ redirect_to home_path and return }
             format.json	{ render :json => true and return }
@@ -310,10 +313,13 @@ class SessionsController < ApplicationController
 			"code" => params[:code]}
 		retval = Tool.send_post_request("https://graph.renren.com/oauth/token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
+		my_log = Logger.new("log/development.log")
+    my_log.info "response_data: #{response_data}"
 		user_id = response_data["user"]["id"]
 		@access_token = response_data["access_token"]
 		@refresh_token = response_data["refresh_token"]
-		third_party_connect("renren", user_id, @access_token, @refresh_token)
+		@scope = response_data["scope"]
+		third_party_connect("renren", user_id, @access_token, @refresh_token, @scope)
 	end 
 
 	def sina_connect

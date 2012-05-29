@@ -22,7 +22,7 @@ production:
   qihu_app_secret: "25e635ca1c06b32ef02f1fbfa996c74d"
   qihu_redirect_uri: "http://quill.oopsdata.com/qihu_connect"
 development:
-  root_url: "localhost:3000"
+  root_url: "test.oopsdata.com"
   activate_expiration_time: 3600
   password_expiration_time: 3600
   cache_key_prefix: "oopsdata_"
