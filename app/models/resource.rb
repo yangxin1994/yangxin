@@ -19,6 +19,30 @@ class Resource
 		return resource
 	end
 
+	def self.check_and_create_new(owner_email, resource_type, location, title)
+		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(owner_email).nil?
+		return ErrorEnum::WRONG_RESOURCE_TYPE if ![1, 2, 4].include?(resource_type)
+		resource = Resource.new(:owner_email => owner_email, :resource_type => resource_type, :location => location, :title => title)
+		resource.save
+		return resource.serialize
+	end
+
+	def self.get_object_list(current_user_email, resource_type)
+		return ErrorEnum::WRONG_RESOURCE_TYPE if !(1..7).to_a.include?(resource_type)
+		object_list = []
+		Resource.all.each do |resource|
+			object_list << resource.serialize if resource.resource_type & resource_type > 0
+		end
+		return object_list
+	end
+
+	def self.get_object(current_user_email, resource_id)
+		resource = Resource.find_by_id(resource_id)
+		return ErrorEnum::RESOURCE_NOT_EXIST if resource.nil?
+		return ErrorEnum::UNAUTHORIZED if resource.owner_email != current_user_email
+		return resource.serialize
+	end
+
 	def delete(current_user_email)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
 		return self.update_attributes(:status => -1)

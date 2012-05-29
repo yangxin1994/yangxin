@@ -13,10 +13,20 @@ class ResourcesController < ApplicationController
 	#
 	#*retval*:
 	#* the new Resource object
+	#* ErrorEnum::EMAIL_NOT_EXIST
+	#* ErrorEnum::WRONG_RESOURCE_TYPE
 	def create
-		retval = @current_user.create_resource(params[:resource])
-		respond_to do |format|
-			format.json	{ render :json => retval and return }
+		retval = @current_user.create_resource(params[:resource]["resource_type"], params[:resource]["location"], params[:resource]["title"])
+		case retval
+		when ErrorEnum::EMAIL_NOT_EXIST
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::EMAIL_NOT_EXIST and return }
+			end
+		else
+			flash[:notice] = "资源已成功创建"
+			respond_to do |format|
+				format.json	{ render :json => retval and return }
+			end
 		end
 	end
 
@@ -27,11 +37,10 @@ class ResourcesController < ApplicationController
 	#*description*: get a list of resources
 	#
 	#*params*:
-	#* resource_type : can be 0 (images), 1 (videos), or 2 (audios)
+	#* resource_type :  a number in the interval [1, 7]. If converted to a binary number, each digit, from the most significant one, indicates images, videos, and audios.
 	#
 	#*retval*:
-	#* id of the new resource
-	#* ErrorEnum ::WRONG_RESOURCE_TYPE
+	#* the list of objects obtained
 	def index
 		retval = @current_user.get_resource_object_list(params[:resource_type])
 		case retval

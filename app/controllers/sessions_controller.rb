@@ -372,14 +372,4 @@ class SessionsController < ApplicationController
 	def encrypt_third_party_user_id(website, user_id)
 		return Encryption.encrypt_third_party_user_id({"website" => website, "user_id" => user_id}.to_json)
 	end
-
-	def decrypt_third_party_user_id(string)
-		begin
-			h = JSON.parse(Encryption.decrypt_third_party_user_id(string))
-			return [h["webiste"], h["user_id"]]
-		rescue
-			return nil
-		end
-	end 
-	
 end

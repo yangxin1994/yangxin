@@ -609,9 +609,8 @@ class User
 ############### operations about resource #################
 #++
 	# create a new resource
-	def create_resource(resource)
-		resource = Resource.create(self.email, resource)
-		return resource
+	def create_resource(resource, resource_type, location, title)
+		return Resource.check_and_create_new(self.email, resource_type, location, title)
 	end
 
 	# get a list of resources
@@ -628,19 +627,25 @@ class User
 
 	# destroy a resource
 	def destroy_resource(resource_id)
-		retval = Resource.delete(self.email, resource_id)
+		resource = Resource.find_by_id(resource_id)
+		return ErrorEnum::RESOURCE_NOT_EXIST if resource.nil?
+		retval = resource.delete(self.email)
 		return retval
 	end
 
 	# clear a resource
 	def clear_resource(resource_id)
-		retval = Resource.clear(self.email, resource_id)
+		resource = Resource.find_by_id(resource_id)
+		return ErrorEnum::RESOURCE_NOT_EXIST if resource.nil?
+		retval = resource.clear(self.email)
 		return retval
 	end
 
 	# update title of the resource
 	def update_resource_title(resource)
-		retval = Resource.update_title(self.email, resource)
+		resource = Resource.find_by_id(resource.resource_id)
+		return ErrorEnum::RESOURCE_NOT_EXIST if resource.nil?
+		retval = resource.update_title(resource.title, self.email)
 		return retval
 	end
 
