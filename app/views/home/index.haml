@@ -1,7 +1,52 @@
 %p
-	%span 您好！
-	%span= @current_user.username
+  %span 您好！
+  %span= @current_user.username
 %p 这是您的个人主页
 
+= button_to "第三方信息", :controller => "home", :action => "get_tp_info"
+= button_to "更多信息", :controller => "home", :action => "get_more_info"
+
+%hr
+%p= "原token信息"
+#tp_info
+  - if @tp_user
+    %p
+      %label access_token:
+      = @tp_user.access_token
+    %p 
+      %label refresh_token:
+      - if @tp_user.refresh_token
+        = @tp_user.refresh_token
+    %p
+      %label user_id
+      = @tp_user.id
+
+%hr     
+%p= "通过refresh_token 重新获取的token"
 %p
-	=link_to "退出登录", logout_path
+  %label access_token:
+  = @access_token
+%p 
+  %label refresh_token:
+  = @refresh_token
+%p 
+  %label response_data:
+  = @response_data.to_s 
+
+%hr
+  - if @user 
+    %p 
+      %label username:
+      = @user["name"]
+    %p 
+      %label avatar:
+      = @user["avatar"][0]["url"]
+
+    %p
+      = image_tag(@user["avatar"][0]["url"])
+      
+%hr
+  - if @info 
+    %p= @info.to_s
+%p
+  =link_to "退出登录", logout_path

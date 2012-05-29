@@ -21,8 +21,8 @@ class SessionsController < ApplicationController
 		@google_client_id = OOPSDATA[RailsEnv.get_rails_env]["google_client_id"]
 		@google_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["google_redirect_uri"]
 
-        @qihu_client_id = OOPSDATA[RailsEnv.get_rails_env]["qihu_app_key"]
-        @qihu_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["qihu_redirect_uri"]
+    @qihu_client_id = OOPSDATA[RailsEnv.get_rails_env]["qihu_app_key"]
+    @qihu_redirect_uri = OOPSDATA[RailsEnv.get_rails_env]["qihu_redirect_uri"]
 	end
 
 	#*kdescryption*: user submits the login form
@@ -53,8 +53,9 @@ class SessionsController < ApplicationController
 			end
 		when ErrorEnum::EMAIL_NOT_ACTIVATED
 			flash[:error] = "您的帐号未激活，请您首先激活帐号"
+			#set_login_session(params[:user]["email"])
 			respond_to do |format|
-				format.html	{ redirect_to intput_activate_email_path and return }
+				format.html	{ redirect_to input_activate_email_path and return }
 				format.json	{ render :json => ErrorEnum::EMAIL_NOT_ACTIVATED and return }
 			end
 		when ErrorEnum::WRONG_PASSWORD
@@ -230,59 +231,74 @@ class SessionsController < ApplicationController
 		end
 	end
     
-	def third_party_connect(website, user_id, access_token)
+	def third_party_connect(website, user_id, access_token, refresh_token=nil)
+    third_party_user = ThirdPartyUser.find_by_website_and_user_id(website, user_id.to_s)
+
+    # check the TP account from db
+    # if not, create a TP account in company db 
+    # else, update access_token 
+    if third_party_user.nil?
+      if  ThirdPartyUser.create(website, user_id, access_token) then 
         third_party_user = ThirdPartyUser.find_by_website_and_user_id(website, user_id.to_s)
-
-        # check the TP account from db
-        # if not, create a TP account in company db 
-        # else, update access_token 
-        if third_party_user.nil?
-            if  ThirdPartyUser.create(website, user_id, access_token) then 
-                third_party_user = ThirdPartyUser.find_by_website_and_user_id(website, user_id.to_s)
-            else 
-                flash[:error] ="数据保存有误！"
-                respond_to do |format|
-                    format.html	{ redirect_to home_path and return }
-                    format.json	{ render :json => true and return }
-                end
-            end 
-        else
-            third_party_user.update_access_token(access_token)
+      else 
+        flash[:error] ="数据保存有误！"
+        respond_to do |format|
+          format.html	{ redirect_to home_path and return }
+          format.json	{ render :json => true and return }
         end
+      end 
+    else
+      third_party_user.update_access_token(access_token)
+      third_party_user.update_refresh_token(refresh_token) if refresh_token
+    end
 
-        # check the third_party_user had bind OD account.
-        if !third_party_user.nil? then
+    # check the third_party_user had bind OD account.
+    if !third_party_user.nil? then
 
-            #if not sign in or no binding, render
-            #else ...
-            if !user_signed_in? || (third_party_user.email.nil? || third_party_user.email.equal?("")) then 
-                @third_party_info = encrypt_third_party_user_id(website, user_id)
-                #
-                render :action => "index", :controller => "sessions"
-            else 
-                User.combine(@current_user.email, third_party_user.website, third_party_user.user_id)   
-                
-                #login process
-                login = User.third_party_login(@current_user.email, @client_ip) #not need password.
-                case login
-                when ErrorEnum::EMAIL_NOT_ACTIVATED
-                    flash[:error] = "您的帐号未激活，请您首先激活帐号"
-                    respond_to do |format|
-                        format.html	{ redirect_to intput_activate_email_path and return }
-                        format.json	{ render :json => ErrorEnum::EMAIL_NOT_ACTIVATED and return }
-                    end
-                else
-                    set_login_session(params[:user]["email"])
-                    flash[:notice] = "已登录"
-                    respond_to do |format|
-                        format.html	{ redirect_to home_path and return }
-                        format.json	{ render :json => true and return }
-                    end
-                end
-            end
+      #if not sign in or no binding, render
+      #else ...
+      if !user_signed_in? then
+        # if the tp account have binded, redirect_to home_path.
+        if !third_party_user.email.nil? && third_party_user.email != "" then
+          
+          user = User.find_by_email(third_party_user.email)        
+          User.login(user.email, Encryption.decrypt_password(user.password), @client_ip)
+          set_login_session(user.email)
+          
+          respond_to do |format|
+            format.html	{ redirect_to home_path and return }
+            format.json	{ render :json => true and return }
+          end
         end
+      
+        # if not, do ..
+        @third_party_info = encrypt_third_party_user_id(website, user_id)
+        flash[:notice] = "第三方登录成功！请登录OopsData帐户或者注册进行绑定。"
+        render :action => "index", :controller => "sessions"
+      else 
+        User.combine(@current_user.email, third_party_user.website, third_party_user.user_id)   
+        flash[:notice] = "成功将OopsData帐户与第三方帐户绑定。"
+        #login process
+        #login = User.third_party_login(@current_user.email, @client_ip) #not need password.
+        #case login
+        #when ErrorEnum::EMAIL_NOT_ACTIVATED
+        #  flash[:error] = "您的帐号未激活，请您首先激活帐号"
+        #  respond_to do |format|
+        #    format.html	{ redirect_to intput_activate_email_path and return }
+        #    format.json	{ render :json => ErrorEnum::EMAIL_NOT_ACTIVATED and return }
+        #  end
+        #else
+        #  set_login_session(params[:user]["email"])
+        #  flash[:notice] = "已登录"
+          respond_to do |format|
+            format.html	{ redirect_to home_path and return }
+            format.json	{ render :json => true and return }
+          end
+        #end
+      end
+    end
 
-		#render :text => @user_id
+	  #render :text => @user_id
 	end
 
 	def renren_connect
@@ -295,7 +311,8 @@ class SessionsController < ApplicationController
 		response_data = JSON.parse(retval.body)
 		user_id = response_data["user"]["id"]
 		@access_token = response_data["access_token"]
-		third_party_connect("renren", user_id, @access_token)
+		@refresh_token = response_data["refresh_token"]
+		third_party_connect("renren", user_id, @access_token, @refresh_token)
 	end 
 
 	def sina_connect
@@ -362,7 +379,7 @@ class SessionsController < ApplicationController
 	# method: in-accessible
 	# description: help set session for an email account
 	def set_login_session(email)
-		set_session(:current_user_email, params[:user]["email"]) 
+		set_session(:current_user_email, email) 
 		auth_key = Encryption.encrypt_auth_key("#{email}&#{Time.now.to_i.to_s}")
 		set_session(:auth_key, auth_key)
 		User.set_auth_key(email, auth_key)

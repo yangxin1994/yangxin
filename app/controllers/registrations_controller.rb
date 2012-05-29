@@ -129,13 +129,16 @@ class RegistrationsController < ApplicationController
 	#* Errorenum ::EMAIL_NOT_EXIST
 	#* Errorenum ::EMAIL_ACTIVATED
 	def send_activate_email
-		if User.user_exist?(params[:email]) == false
+	
+	  email = params[:user]["email"]
+	  
+		if !User.user_exist?(email)
 			flash[:notice] = "该邮箱未注册，请您注册"
 			respond_to do |format|
 				format.html	{ redirect_to registrations_path and return }
 				format.json	{ render :json => ErrorEnum::EMAIL_NOT_EXIST and return }
 			end
-		elsif User.user_activate?(params[:email])
+		elsif User.user_activate?(email)
 			flash[:notice] = "该帐号已激活，请您登录"
 			respond_to do |format|
 				format.html	{ redirect_to sessions_path and return }
@@ -143,7 +146,7 @@ class RegistrationsController < ApplicationController
 			end
 		end
 
-		user = User.find_by_email(params[:email])
+		user = User.find_by_email(email)
 		# send activate email
 		UserMailer.activate_email(user).deliver
 

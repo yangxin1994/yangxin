@@ -177,6 +177,7 @@ DEPENDENCIES
   memcache-client
   minitest
   mongoid (~> 2.4)
+  multi_json
   passenger
   rails (= 3.1.0)
   resque

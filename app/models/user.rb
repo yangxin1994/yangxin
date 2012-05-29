@@ -122,7 +122,7 @@ class User
 	#* true: when successfully login
 	#* EMAIL_NOT_EXIST
 	#* EMAIL_NOT_ACTIVATED
-	def self.thrid_party_login(email, client_ip)
+	def self.third_party_login(email, client_ip)
 		return ErrorEnum::EMAIL_NOT_EXIST if !user_exist?(email)			# email account does not exist
 		return ErrorEnum::EMAIL_NOT_ACTIVATED if !user_activate?(email)		# not activated
 		user = User.find_by_email(email)

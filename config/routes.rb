@@ -1,6 +1,8 @@
 OopsData::Application.routes.draw do
   get "home/index"
 	match 'home' => 'home#index', :as => :home
+	post "home/get_tp_info"
+	post "home/get_more_info"
 
 	resources :registrations
 	match 'input_activate_email' => 'registrations#input_activate_email', :as => :input_activate_email

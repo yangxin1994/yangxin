@@ -9,6 +9,7 @@ class ThirdPartyUser
   field :user_id, :type => String
   field :email, :type => String
   field :access_token, :type => String
+  field :refresh_token, :type => String
 
 
 
@@ -31,9 +32,20 @@ class ThirdPartyUser
 		third_party_user.save
 	end
 	
+	def self.find_by_email(email)
+	  return ThirdPartyUser.where(:email => email)[0]
+	end
+	
+	#****** instance methods **********
+	
 	def update_access_token(access_token)
 		self.access_token = access_token
 		return self.save
+	end
+	
+	def update_refresh_token(refresh_token)
+	  self.refresh_token = refresh_token
+	  return self.save
 	end
 	
 end
