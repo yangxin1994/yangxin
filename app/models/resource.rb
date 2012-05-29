@@ -13,9 +13,8 @@ class Resource
 	field :created_at, :type => Integer, default: -> {Time.now.to_i}
 	scope :resources_of, lambda { |owner_email| where(:owner_email => owner_email, :status => 0) }
 
-	def self.find_by_id(resource_id, current_user_email)
+	def self.find_by_id(resource_id)
 		resource = Resource.where(:_id => resource_id, :status.gt => -1)[0]
-		return ErrorEnum::UNAUTHORIZED if resource.owner_email != current_user_email
 		return resource
 	end
 
@@ -30,7 +29,7 @@ class Resource
 	def self.get_object_list(current_user_email, resource_type)
 		return ErrorEnum::WRONG_RESOURCE_TYPE if !(1..7).to_a.include?(resource_type)
 		object_list = []
-		Resource.all.each do |resource|
+		Resource.resources_of(current_user_email).each do |resource|
 			object_list << resource.serialize if resource.resource_type & resource_type > 0
 		end
 		return object_list
@@ -53,7 +52,7 @@ class Resource
 		return self.destroy
 	end
 
-	def update_title(title, current_user_email)
+	def update_title(current_user_email, title)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
 		return self.update_attributes(:title => title)
 	end

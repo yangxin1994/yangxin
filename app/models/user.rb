@@ -645,7 +645,7 @@ class User
 	def update_resource_title(resource)
 		resource = Resource.find_by_id(resource.resource_id)
 		return ErrorEnum::RESOURCE_NOT_EXIST if resource.nil?
-		retval = resource.update_title(resource.title, self.email)
+		retval = resource.update_title(self.email, resource.title)
 		return retval
 	end
 
