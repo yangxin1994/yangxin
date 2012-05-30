@@ -38,13 +38,13 @@ class RegistrationsControllerTest < ActionController::TestCase
 		new_user = init_new_user
 		activated_user = init_activated_user
 
-		post :send_activate_email, :format => :json, :email => "non-exist-email@test.com"
+		post :send_activate_email, :format => :json, :user => {"email" => "non-exist-email@test.com"}
 		assert_equal ErrorEnum::EMAIL_NOT_EXIST.to_s, @response.body
 
-		post :send_activate_email, :format => :json, :email => activated_user.email
+		post :send_activate_email, :format => :json, :user => {"email" => activated_user.email}
 		assert_equal ErrorEnum::EMAIL_ACTIVATED.to_s, @response.body
 
-		post :send_activate_email, :format => :json, :email => new_user.email
+		post :send_activate_email, :format => :json, :user => {"email" => new_user.email}
 		assert_equal true.to_s, @response.body
 	end
 
