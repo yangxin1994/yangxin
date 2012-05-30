@@ -43,7 +43,7 @@ class SessionsController < ApplicationController
 	#* WRONG_PASSWORD
 	def create
 		login = User.login(params[:user]["email"], params[:user]["password"], @client_ip)
-		third_party_info = JSON.parse(Encryption.decrypt_third_party_user_id(params[:third_party_info]))
+		third_party_info = decrypt_third_party_user_id(params[:third_party_info])
 		case login
 		when ErrorEnum::EMAIL_NOT_EXIST
 			flash[:error] = "帐号不存在!"
@@ -65,11 +65,11 @@ class SessionsController < ApplicationController
 				format.json	{ render :json => ErrorEnum::WRONG_PASSWORD and return }
 			end
 		else
-			tp = User.combine(params[:user]["email"], third_party_info["website"], third_party_info["user_id"]) if !third_party_info.nil?
+			tp = User.combine(params[:user]["email"], *third_party_info) if !third_party_info.nil?
 			set_login_session(params[:user]["email"])
 			flash[:notice] = "登录成功"
-			flash[:notice] += "，与第三方帐户绑定失败。" if tp==-41
-			flash[:notice] += "，与第三方帐户绑定成功。" if tp!=-41
+			flash[:notice] += "，与第三方帐户绑定失败。" if tp && tp==-41
+			flash[:notice] += "，与第三方帐户绑定成功。" if tp && tp!=-41
 			respond_to do |format|
 				format.html	{ redirect_to home_path and return }
 				format.json	{ render :json => true and return }

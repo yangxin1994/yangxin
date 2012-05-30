@@ -42,10 +42,10 @@ class HomeController < ApplicationController
     
     renren =Renren::Base.new(@tp_user.access_token)
     
-    @info = renren.call_method({:method => "share.share", :type => 6, :url => "http://wiki.dev.renren.com/wiki/Share.share", :comment => "好不好 其实我也不知道" })
+    #@info = renren.call_method({:method => "share.share", :type => 6, :url => "http://wiki.dev.renren.com/wiki/Share.share", :comment => "好不好 其实我也不知道" })
     # get error
     
-    #@info = renren.call_method({:method => "status.gets"})
+    @info = renren.call_method({:method => "friends.get"})
     #get error
     
     #@info = renren.call_method

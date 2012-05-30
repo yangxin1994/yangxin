@@ -63,7 +63,7 @@ class ApplicationController < ActionController::Base
 	def decrypt_third_party_user_id(string)
 		begin
 			h = JSON.parse(Encryption.decrypt_third_party_user_id(string))
-			return [h["webiste"], h["user_id"]]
+			return [h["website"], h["user_id"]]
 		rescue
 			return nil
 		end
