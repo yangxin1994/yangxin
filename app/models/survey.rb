@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'error_enum'
 require 'securerandom'
 #The survey object has the following structure
@@ -34,6 +35,7 @@ class Survey
 	field :tags, :type => Array, default: Array.new
 	scope :surveys_of, lambda { |owner_email| where(:owner_email => owner_email, :status => 0) }
 	scope :all_surveys_of, lambda { |owner_email| where(:owner_email => owner_email) }
+	scope :trash_surveys_of, lambda { |owner_email| where(:owner_email => owner_email, :status => -1) }
 
 	before_save :set_updated_at, :clear_survey_object
 	before_update :set_updated_at, :clear_survey_object
@@ -60,6 +62,7 @@ class Survey
 		survey_obj["survey_id"] = self._id.to_s
 		survey_obj["created_at"] = self.created_at
 		survey_obj["pages"] = Marshal.load(Marshal.dump(self.pages))
+		survey_obj["tags"] = Marshal.load(Marshal.dump(self.tags))
 		META_ATTR_NAME_ARY.each do |attr_name|
 			method_obj = self.method("#{attr_name}".to_sym)
 			survey_obj[attr_name] = method_obj.call()
@@ -150,6 +153,7 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	def delete(current_user_email)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+		self.tags << "已删除"
 		return self.update_attributes(:status => -1)
 	end
 
@@ -166,6 +170,7 @@ class Survey
 	def recover(current_user_email)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
 		return ErrorEnum::SURVEY_NOT_EXIST if self.status != -1
+		self.tags.delete("已删除")
 		return self.update_attributes(:status => 0)
 	end
 
@@ -269,6 +274,7 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	def add_tag(current_user_email, tag)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+		return ErrorEnum::TAG_EXIST if self.tags.include?(tag)
 		self.tags << tag.to_s
 		self.save
 		return Survey.get_survey_object(current_user_email, self._id)
@@ -301,7 +307,12 @@ class Survey
 	#* the survey object: if successfully cleared
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	def self.get_object_list(current_user_email, tags)
-		surveys = Survey.all_surveys_if(current_user_email)
+		if tags.include?("已删除")
+			surveys = Survey.trash_surveys_of(current_user_email)
+			tags.delete("已删除")
+		else
+			surveys = Survey.surveys_of(current_user_email)
+		end
 		list = []
 		surveys.each do |survey|
 			no_tag = false

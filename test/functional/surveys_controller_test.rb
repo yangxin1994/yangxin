@@ -175,8 +175,9 @@ class SurveysControllerTest < ActionController::TestCase
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :clear, :format => :json, :id => survey_id
 		assert_equal true.to_s, @response.body
-#		get :show, :format => :json, :id => survey_id
-#		assert_not_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		get :list, :format => :json, :tags => ["已删除"]
+		survey_obj_list = JSON.parse(@response.body)
+		assert_equal 0, survey_obj_list.length
 		sign_out
 	end
 
