@@ -44,6 +44,34 @@ class SurveyTest < ActiveSupport::TestCase
 		assert_equal -1, jesse_s1.status, "unable to delete a survey"
 	end
 
+	test "survey recover" do
+		clear(User, Survey)
+
+		jesse, jesse_s1 = *init_user_and_survey
+
+		retval = jesse_s1.recover(jesse.email)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST, retval
+
+		jesse_s1.delete(jesse.email)
+		retval = jesse_s1.recover(jesse.email)
+		assert_equal true, retval
+		assert_equal 0, jesse_s1.status
+	end
+
+	test "survey clear" do
+		clear(User, Survey)
+
+		jesse, jesse_s1 = *init_user_and_survey
+
+		retval = jesse_s1.clear(jesse.email)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST, retval
+
+		jesse_s1.delete(jesse.email)
+		retval = jesse_s1.clear(jesse.email)
+		assert_equal true, retval
+		assert_nil Survey.find_by_id_in_trash(jesse_s1._id)
+	end
+
 	test "page creation" do
 		clear(User, Survey, Question)
 		

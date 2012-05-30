@@ -32,9 +32,15 @@ OopsData::Application.routes.draw do
 	resources :surveys do
 		collection do
 			post 'save_meta_data'
+			post 'list'
 		end
 		member do
 			get 'clone'
+			get 'recover'
+			get 'clear'
+			put 'update_tags'
+			put 'add_tag'
+			put 'remove_tag'
 		end
 		resources :pages
 		resources :questions do 

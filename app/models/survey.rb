@@ -31,7 +31,9 @@ class Survey
 	field :status, :type => Integer, default: 0
 	field :pages, :type => Array, default: Array.new
 	field :constrains, :type => Array, default: Array.new
+	field :tags, :type => Array, default: Array.new
 	scope :surveys_of, lambda { |owner_email| where(:owner_email => owner_email, :status => 0) }
+	scope :all_surveys_of, lambda { |owner_email| where(:owner_email => owner_email) }
 
 	before_save :set_updated_at, :clear_survey_object
 	before_update :set_updated_at, :clear_survey_object
@@ -95,6 +97,17 @@ class Survey
 		return Survey.where(:_id => survey_id, :status.gt => -1)[0]
 	end
 
+	#*description*: find a survey by its id in trash. return nil if cannot find
+	#
+	#*params*:
+	#* id of the survey to be found
+	#
+	#*retval*:
+	#* the survey instance found, or nil if cannot find
+	def self.find_by_id_in_trash(survey_id)
+		return Survey.where(:_id => survey_id, :status => -1)[0]
+	end
+
 	#*description*: save meta data for a survey, meta data attributes are defined in META_ATTR_NAME_ARY
 	#
 	#*params*:
@@ -138,6 +151,38 @@ class Survey
 	def delete(current_user_email)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
 		return self.update_attributes(:status => -1)
+	end
+
+	#*description*: recover current survey
+	#
+	#*params*:
+	#* email of the user doing this operation
+	#
+	#*retval*:
+	#* true: if successfully recovered
+	#* false
+	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey in trash
+	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
+	def recover(current_user_email)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+		return ErrorEnum::SURVEY_NOT_EXIST if self.status != -1
+		return self.update_attributes(:status => 0)
+	end
+
+	#*description*: clear current survey
+	#
+	#*params*:
+	#* email of the user doing this operation
+	#
+	#*retval*:
+	#* true: if successfully cleared
+	#* false
+	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey in trash
+	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
+	def clear(current_user_email)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+		return ErrorEnum::SURVEY_NOT_EXIST if self.status != -1
+		return self.destroy
 	end
 
 	#*description*: clone the current survey instance
@@ -193,6 +238,82 @@ class Survey
 		end
 		return ErrorEnum::UNAUTHORIZED if survey_object["owner_email"] != current_user_email
 		return survey_object
+	end
+
+	#*description*: update tags of this survey
+	#
+	#*params*:
+	#* email of the user doing this operation
+	#* tags to be updated
+	#
+	#*retval*:
+	#* the survey object: if successfully cleared
+	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
+	def update_tags(current_user_email, tags)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+		tags.each do |tag|
+			self.tags << tag.to_s
+		end
+		self.save
+		return Survey.get_survey_object(current_user_email, self._id)
+	end
+
+	#*description*: add a tag to the survey
+	#
+	#*params*:
+	#* email of the user doing this operation
+	#* tag to be added
+	#
+	#*retval*:
+	#* the survey object: if successfully cleared
+	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
+	def add_tag(current_user_email, tag)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+		self.tags << tag.to_s
+		self.save
+		return Survey.get_survey_object(current_user_email, self._id)
+	end
+
+	#*description*: remove a tag from the survey
+	#
+	#*params*:
+	#* email of the user doing this operation
+	#* tag to be removed
+	#
+	#*retval*:
+	#* the survey object: if successfully cleared
+	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
+	def remove_tag(current_user_email, tag)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+		return ErrorEnum::TAG_NOT_EXIST if !self.tags.include?(tag)
+		self.tags.delete(tag)
+		self.save
+		return Survey.get_survey_object(current_user_email, self._id)
+	end
+
+	#*description*: obtain a list of Survey objects given a list of tags
+	#
+	#*params*:
+	#* email of the user doing this operation
+	#* tags
+	#
+	#*retval*:
+	#* the survey object: if successfully cleared
+	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
+	def self.get_object_list(current_user_email, tags)
+		surveys = Survey.all_surveys_if(current_user_email)
+		list = []
+		surveys.each do |survey|
+			no_tag = false
+			tags.each do |tag|
+				if !survey.tags.include?(tag)
+					no_tag = true
+					break
+				end
+			end
+			list << Survey.get_survey_object(current_user_email, survey._id) if !no_tag
+		end
+		return list
 	end
 
 	#*description*: clear the cached survey object corresponding to current instance, usually called when the survey is updated, either its meta data, or questions and constrains

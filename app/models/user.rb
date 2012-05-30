@@ -282,7 +282,7 @@ class User
 	#
 	#*retval*:
 	#* true: when successfully deleted
-	#* NOT_EXIST
+	#* SURVEY_NOT_EXIST
 	def destroy_group(name)
 		return Group.delete(self.email, name)
 	end
@@ -294,7 +294,7 @@ class User
 	#
 	#*retval*:
 	#* the group instance: when successfully updated
-	#* NOT_EXIST
+	#* SURVEY_NOT_EXIST
 	def show_group(name)
 		return Group.show(self.email, name)
 	end
@@ -308,7 +308,7 @@ class User
 	#
 	#*retval*:
 	#* the array of surveys: when successfully obtained
-	#* NOT_EXIST
+	#* SURVEY_NOT_EXIST
 	def surveys(tags)
 		return Survey.surveys_of(self.email)
 	end
@@ -321,7 +321,7 @@ class User
 	#*retval*:
 	#* true: when successfully saved
 	#* false: unkown error
-	#* NOT_EXIST
+	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
 	def save_meta_data(survey_object)
 		return Survey.save_meta_data(self.email, survey_object)
@@ -335,12 +335,44 @@ class User
 	#*retval*:
 	#* true: when successfully deleted
 	#* false: unkown error
-	#* NOT_EXIST
+	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
 	def destroy_survey(survey_id)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.delete(self.email)
+	end
+
+	#*description*: recover a survey
+	#
+	#*params*:
+	#* the id of the survey to be recovered
+	#
+	#*retval*:
+	#* true: when successfully recovered
+	#* false: unkown error
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	def recover_survey(survey_id)
+		survey = Survey.find_by_id_in_trash(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return survey.recover(self.email)
+	end
+
+	#*description*: thoroughly destroy a survey
+	#
+	#*params*:
+	#* the id of the survey to be cleared
+	#
+	#*retval*:
+	#* true: when successfully cleared
+	#* false: unkown error
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	def clear_survey(survey_id)
+		survey = Survey.find_by_id_in_trash(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return survey.clear(self.email)
 	end
 
 	#*description*: clone a survey
@@ -351,11 +383,11 @@ class User
 	#*retval*:
 	#* true: when successfully deleted
 	#* false: unkown error
-	#* NOT_EXIST
+	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
 	def clone_survey(survey_id)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.clone(self.email)
 	end
 
@@ -366,10 +398,69 @@ class User
 	#
 	#*retval*:
 	#* the survey object if successfully obtained
-	#* NOT_EXIST
+	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
 	def get_survey_object(survey_id)
 		return Survey.get_survey_object(self.email, survey_id)
+	end
+
+	#*description*: get survey object list given a list of tags
+	#
+	#*params*:
+	#* tags
+	#
+	#*retval*:
+	#* the survey object list
+	def get_survey_object_list(tags)
+		return Survey.get_object_list(self.email, tags)
+	end
+
+	#*description*: update tags of a survey
+	#
+	#*params*:
+	#* the id of the survey object
+	#* the tags to be added
+	#
+	#*retval*:
+	#* the survey object if successfully updating tags
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	def update_survey_tags(survey_id, tags)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return Survey.update_tags(self.email, tags)
+	end
+
+	#*description*: add a tag to a survey
+	#
+	#*params*:
+	#* the id of the survey object
+	#* the tag to be added
+	#
+	#*retval*:
+	#* the survey object if successfully adding tag
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	def add_survey_tag(survey_id, tag)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return Survey.add_tag(self.email, tag)
+	end
+
+	#*description*: remove a tag from a survey
+	#
+	#*params*:
+	#* the id of the survey object
+	#* the tag to be removed
+	#
+	#*retval*:
+	#* the survey object if successfully removing tag
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	def remove_survey_tag(survey_id, tag)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return Survey.remove_tag(self.email, tag)
 	end
 
 	#*description*: createa a new question
@@ -388,7 +479,7 @@ class User
 	#* OVERFLOW
 	def create_question(survey_id, page_index, question_id, question_type)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.create_question(self.email, page_index, question_id, question_type)
 	end
 
@@ -407,7 +498,7 @@ class User
 	#* ErrorEnum ::WRONG_DATA_TYPE
 	def update_question(survey_id, question_id, question_obj)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.update_question(self.email, question_id, question_obj)
 	end
 
@@ -428,7 +519,7 @@ class User
 	#* ErrorEnum ::OVERFLOW
 	def move_question(survey_id, question_id_1, page_index, question_id_2)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.move_question(self.email, question_id_1, page_index, question_id_2)
 	end
 
@@ -448,7 +539,7 @@ class User
 	#* ErrorEnum ::OVERFLOW
 	def clone_question(survey_id, question_id_1, page_index, question_id_2)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.clone_question(self.email, question_id_1, page_index, question_id_2)
 	end
 
@@ -465,7 +556,7 @@ class User
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
 	def get_question_object(survey_id, question_id)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		survey.get_question_object(self.email, question_id)
 	end
 
@@ -483,7 +574,7 @@ class User
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
 	def delete_question(survey_id, question_id)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.delete_question(self.email, question_id)
 	end
 
@@ -501,7 +592,7 @@ class User
 	#* ErrorEnum ::OVERFLOW 
 	def create_page(survey_id, page_index)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.create_page(self.email, page_index)
 	end
 
@@ -518,7 +609,7 @@ class User
 	#* ErrorEnum ::OVERFLOW 
 	def show_page(survey_id, page_index)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.show_page(self.email, page_index)
 	end
 
@@ -537,7 +628,7 @@ class User
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
 	def clone_page(survey_id, page_index_1, page_index_2)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.clone_page(self.email, page_index_1, page_index_2)
 	end
 
@@ -555,7 +646,7 @@ class User
 	#* ErrorEnum ::OVERFLOW
 	def delete_page(survey_id, page_index)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.delete_page(self.email, page_index)
 	end
 
@@ -574,7 +665,7 @@ class User
 	#* ErrorEnum ::OVERFLOW
 	def combine_pages(survey_id, page_index_1, page_index_2)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.combine_pages(self.email, page_index_1, page_index_2)
 	end
 
@@ -593,7 +684,7 @@ class User
 	#* ErrorEnum ::OVERFLOW
 	def move_page(survey_id, page_index_1, page_index_2)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		survey.move_page(self.email, page_index_1, page_index_2)
 	end
 

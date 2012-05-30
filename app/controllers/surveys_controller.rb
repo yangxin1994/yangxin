@@ -98,6 +98,74 @@ class SurveysController < ApplicationController
 
 	#*method*: get
 	#
+	#*url*: /surveys/:survey_id/recover
+	#
+	#*description*: recover a survey from trash
+	#
+	#*params*:
+	#* survey_id: id of the survey to be recovered
+	#
+	#*retval*:
+	#* true: when survey is successfully recovered.
+	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist in the trash
+	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
+	def recover
+		retval = @current_user.recover_survey(params[:id])
+		case retval
+		when ErrorEnum::SURVEY_NOT_EXIST
+			flash[:notice] = "该调查问卷不存在"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		when ErrorEnum::UNAUTHORIZED
+			flash[:notice] = "没有权限"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
+			end
+		else
+			flash[:notice] = "调查问卷已成功恢复"
+			respond_to do |format|
+				format.json	{ render :json => true and return }
+			end
+		end
+	end
+
+	#*method*: get
+	#
+	#*url*: /surveys/:survey_id/clear
+	#
+	#*description*: thoroughly destroy
+	#
+	#*params*:
+	#* survey_id: id of the survey to be cleared
+	#
+	#*retval*:
+	#* true: when survey is successfully cleared.
+	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist in the trash
+	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
+	def clear
+		retval = @current_user.clear_survey(params[:id])
+		case retval
+		when ErrorEnum::SURVEY_NOT_EXIST
+			flash[:notice] = "该调查问卷不存在"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		when ErrorEnum::UNAUTHORIZED
+			flash[:notice] = "没有权限"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
+			end
+		else
+			flash[:notice] = "调查问卷已成功彻底删除"
+			respond_to do |format|
+				format.json	{ render :json => true and return }
+			end
+		end
+	end
+
+	#*method*: get
+	#
 	#*url*: /surveys/:survey_id/clone?title=:title
 	#
 	#*description*: clone a survey
@@ -130,7 +198,6 @@ class SurveysController < ApplicationController
 			end
 		end
 	end
-
 
 	#*method*: get
 	#
@@ -165,4 +232,72 @@ class SurveysController < ApplicationController
 		end
 	end
 
+	#*method*: put
+	#
+	#*url*: /surveys/:survey_id/update_tags
+	#
+	#*description*: update tags of a survey
+	#
+	#*params*:
+	#* survey_id: id of the survey
+	#* tags: array of tags
+	#
+	#*retval*:
+	#* the survey object
+	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
+	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
+	def update_tags
+		retval = @current_user.update_survey_tags(params[:id], params[:tags])
+	end
+
+	#*method*: put
+	#
+	#*url*: /surveys/:survey_id/add_tag
+	#
+	#*description*: add a tag to a survey
+	#
+	#*params*:
+	#* survey_id: id of the survey
+	#* tag: tag to be added
+	#
+	#*retval*:
+	#* the survey object
+	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
+	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
+	def add_tag
+		retval = @current_user.add_survey_tag(params[:id], params[:tag])
+	end
+
+	#*method*: put
+	#
+	#*url*: /surveys/:survey_id/remove_tag
+	#
+	#*description*: remove a tag from a survey
+	#
+	#*params*:
+	#* survey_id: id of the survey
+	#* tags: tag to be removed
+	#
+	#*retval*:
+	#* the survey object
+	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
+	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
+	def remove_tag
+		retval = @current_user.remove_survey_tag(params[:id], params[:tag])
+	end
+
+	#*method*: post
+	#
+	#*url*: /surveys/list
+	#
+	#*description*: obtain a list of survey objects given a list tags
+	#
+	#*params*:
+	#* tags: array of tags
+	#
+	#*retval*:
+	#* a list Survey objects
+	def list
+		retval = @current_user.get_survey_object_list(params[:tags])
+	end
 end
