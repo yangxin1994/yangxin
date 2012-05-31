@@ -428,7 +428,7 @@ class User
 	def update_survey_tags(survey_id, tags)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return Survey.update_tags(self.email, tags)
+		return survey.update_tags(self.email, tags)
 	end
 
 	#*description*: add a tag to a survey
@@ -444,7 +444,7 @@ class User
 	def add_survey_tag(survey_id, tag)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return Survey.add_tag(self.email, tag)
+		return survey.add_tag(self.email, tag)
 	end
 
 	#*description*: remove a tag from a survey
@@ -460,7 +460,7 @@ class User
 	def remove_survey_tag(survey_id, tag)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return Survey.remove_tag(self.email, tag)
+		return survey.remove_tag(self.email, tag)
 	end
 
 	#*description*: createa a new question

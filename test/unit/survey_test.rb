@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'test_helper'
 
 class SurveyTest < ActiveSupport::TestCase
@@ -126,6 +127,43 @@ class SurveyTest < ActiveSupport::TestCase
 		
 		retval = jesse_s1.remove_tag(jesse.email, "tag2")
 		assert_equal [], retval["tags"]
+	end
+
+	test "survey list" do
+		clear(User, Survey)
+
+		jesse, jesse_s1, jesse_s2, jesse_s3 = *init_user_and_surveys
+		retval = jesse_s1.add_tag(jesse.email, "tag1")
+		retval = jesse_s1.add_tag(jesse.email, "tag2")
+		retval = jesse_s1.add_tag(jesse.email, "tag3")
+		retval = jesse_s2.add_tag(jesse.email, "tag1")
+		retval = jesse_s2.add_tag(jesse.email, "tag2")
+		retval = jesse_s3.add_tag(jesse.email, "tag1")
+		
+		retval = Survey.get_object_list("wrong_email@test.com", ["tag1"])
+		assert_equal 0, retval.length
+		
+		retval = Survey.get_object_list(jesse.email, ["tag1"])
+		assert_equal 3, retval.length
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s1._id.to_s)
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s2._id.to_s)
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s3._id.to_s)
+		retval = Survey.get_object_list(jesse.email, ["tag1", "tag2"])
+		assert_equal 2, retval.length
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s1._id.to_s)
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s2._id.to_s)
+		retval = Survey.get_object_list(jesse.email, ["tag1", "tag2", "tag3"])
+		assert_equal 1, retval.length
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s1._id.to_s)
+
+		jesse_s1.delete(jesse.email)
+		retval = Survey.get_object_list(jesse.email, ["tag1"])
+		assert_equal 2, retval.length
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s2._id.to_s)
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s3._id.to_s)
+		retval = Survey.get_object_list(jesse.email, ["tag1", "已删除"])
+		assert_equal 1, retval.length
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s1._id.to_s)
 	end
 
 	test "page creation" do
@@ -543,6 +581,17 @@ class SurveyTest < ActiveSupport::TestCase
 		jesse_s1 = FactoryGirl.build(:jesse_s1)
 		jesse_s1.save
 		return [jesse, jesse_s1]
+	end
+
+	def init_user_and_surveys
+		jesse = init_jesse
+		jesse_s1 = FactoryGirl.build(:jesse_s1)
+		jesse_s2 = FactoryGirl.build(:jesse_s2)
+		jesse_s3 = FactoryGirl.build(:jesse_s3)
+		jesse_s1.save
+		jesse_s2.save
+		jesse_s3.save
+		return [jesse, jesse_s1, jesse_s2, jesse_s3]
 	end
 
 	def init_user_and_survey_and_questions

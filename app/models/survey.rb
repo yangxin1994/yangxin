@@ -63,6 +63,7 @@ class Survey
 		survey_obj["created_at"] = self.created_at
 		survey_obj["pages"] = Marshal.load(Marshal.dump(self.pages))
 		survey_obj["tags"] = Marshal.load(Marshal.dump(self.tags))
+		survey_obj["tags"] << "已删除" if self.status == -1 && !survey_obj["tags"].include?("已删除")
 		META_ATTR_NAME_ARY.each do |attr_name|
 			method_obj = self.method("#{attr_name}".to_sym)
 			survey_obj[attr_name] = method_obj.call()
@@ -98,6 +99,17 @@ class Survey
 	#* the survey instance found, or nil if cannot find
 	def self.find_by_id(survey_id)
 		return Survey.where(:_id => survey_id, :status.gt => -1)[0]
+	end
+
+	#*description*: find a survey by its id, trash included. return nil if cannot find
+	#
+	#*params*:
+	#* id of the survey to be found
+	#
+	#*retval*:
+	#* the survey instance found, or nil if cannot find
+	def self.find_by_id_include_trash(survey_id)
+		return Survey.where(:_id => survey_id)[0]
 	end
 
 	#*description*: find a survey by its id in trash. return nil if cannot find
@@ -153,7 +165,6 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	def delete(current_user_email)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
-		self.tags << "已删除"
 		return self.update_attributes(:status => -1)
 	end
 
@@ -236,7 +247,7 @@ class Survey
 	def self.get_survey_object(current_user_email, survey_id)
 		survey_object = Cache.read(survey_id)
 		if survey_object == nil
-			survey = Survey.find_by_id(survey_id)
+			survey = Survey.find_by_id_include_trash(survey_id)
 			return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
 			survey_object = survey.serialize
 			Cache.write(survey_id, survey_object)
