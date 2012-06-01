@@ -1,6 +1,5 @@
   # -*- coding: utf-8 -*-
 require 'uri'
-require 'multi_json'
 require 'net/http'
 require 'digest'
 

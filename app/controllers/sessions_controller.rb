@@ -330,6 +330,8 @@ class SessionsController < ApplicationController
 			"code" => params[:code]}
 		retval = Tool.send_post_request("https://api.weibo.com/oauth2/access_token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
+		my_log = Logger.new("log/development.log")
+    my_log.info "response_data: #{response_data}"
 		user_id = response_data["uid"]
 		@access_token = response_data["access_token"]
 		third_party_connect("sina", user_id, @access_token)
@@ -346,6 +348,8 @@ class SessionsController < ApplicationController
 		@access_token, @expires_in = *(retval.body.split('&').map { |ele| ele.split('=')[1] })
 		retval = Tool.send_get_request("https://graph.qq.com/oauth2.0/me?access_token=#{@access_token}", true)
 		response_data = JSON.parse(retval.body.split(' ')[1])
+		my_log = Logger.new("log/development.log")
+    my_log.info "response_data: #{response_data}"
 		user_id = response_data["openid"]
 		third_party_connect("qq", user_id, @access_token)
 	end 

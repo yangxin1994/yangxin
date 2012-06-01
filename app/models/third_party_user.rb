@@ -51,5 +51,5 @@ class ThirdPartyUser
 	  self.scope = scope
 	  return self.save
 	end
-	
+		
 end
