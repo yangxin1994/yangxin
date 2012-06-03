@@ -4,6 +4,7 @@ OopsData::Application.routes.draw do
 	post "home/get_tp_info"
 	post "home/get_more_info"
 
+
 	resources :registrations
 	match 'input_activate_email' => 'registrations#input_activate_email', :as => :input_activate_email
 	match 'send_activate_email' => 'registrations#send_activate_email', :as => :send_activate_email, :via => [:post]
@@ -52,7 +53,7 @@ OopsData::Application.routes.draw do
 	match 'surveys/:survey_id/pages/:page_index/questions/:question_id_1/:question_id_2/move' => 'questions#move'
 	match 'surveys/:survey_id/pages/:page_index/questions/:question_id_1/:question_id_2/clone' => 'questions#clone'
 
-	resources :resources do
+	resources :materials do
 		member do
 			get 'clear'
 		end

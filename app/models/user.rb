@@ -254,13 +254,16 @@ class User
 	#*params*:
 	#* name of the new group
 	#* description of the new group
-	#* array of members of the new group
+	#* array of members of the new group; each member has a hash that includes the kes: email, mobile, name, is_exclusive
+	#* array of sub groups id
 	#
 	#*retval*:
 	#* the group object: when successfully created
 	#* ErrorEnum ::EMAIL_NOT_EXIST
-	def create_group(name, description, members)
-		return Group.check_and_create_new(self.email, name, description, members)
+	#* ErrorEnum ::ILLEGAL_EMAIL
+	#* ErrorEnum ::GROUP_NOT_EXIST
+	def create_group(name, description, members, groups)
+		return Group.check_and_create_new(self.email, name, description, members, groups)
 	end
 
 	#*description*: update a group for this user
@@ -272,31 +275,37 @@ class User
 	#* the group object: when successfully updated
 	#* ErrorEnum ::GROUP_NOT_EXIST
 	def update_group(group_id, group_obj)
-		return Group.update(self.email, group_id, group_obj)
+		group = Group.find_by_id(group_id)
+		return ErrorEnum::GROUP_NOT_EXIST if group.nil?
+		return group.update_group(self.email, group_obj)
 	end
 
 	#*description*: delete a group for this user
 	#
 	#*params*:
-	#* name of the group
+	#* id of the group to be deleted
 	#
 	#*retval*:
 	#* true: when successfully deleted
 	#* SURVEY_NOT_EXIST
-	def destroy_group(name)
-		return Group.delete(self.email, name)
+	def destroy_group(group_id)
+		group = Group.find_by_id(group_id)
+		return ErrorEnum::GROUP_NOT_EXIST if group.nil?
+		return group.delete(self.email)
 	end
 
 	#*description*: get a group for this user
 	#
 	#*params*:
-	#* name of the group
+	#* id of the group to be shown
 	#
 	#*retval*:
 	#* the group instance: when successfully updated
 	#* SURVEY_NOT_EXIST
-	def show_group(name)
-		return Group.show(self.email, name)
+	def show_group(group_id)
+		group = Group.find_by_id(group_id)
+		return ErrorEnum::GROUP_NOT_EXIST if group.nil?
+		return group.show(self.email)
 	end
 
 #--
@@ -697,46 +706,46 @@ class User
 	end
 
 #--
-############### operations about resource #################
+############### operations about material #################
 #++
-	# create a new resource
-	def create_resource(resource, resource_type, location, title)
-		return Resource.check_and_create_new(self.email, resource_type, location, title)
+	# create a new material
+	def create_material(material_type, location, title)
+		return Material.check_and_create_new(self.email, material_type, location, title)
 	end
 
-	# get a list of resources
-	def get_resource_object_list(resource_type)
-		resource_list = Resource.get_object_list(self.email, resource_type)
-		return resource_list
+	# get a list of materials
+	def get_material_object_list(material_type)
+		material_list = Material.get_object_list(self.email, material_type)
+		return material_list
 	end
 
-	# get a resource object
-	def get_resource_object(resource_id)
-		resource = Resource.get_object(self.email, resource_id)
-		return resource
+	# get a material object
+	def get_material_object(material_id)
+		material = Material.get_object(self.email, material_id)
+		return material
 	end
 
-	# destroy a resource
-	def destroy_resource(resource_id)
-		resource = Resource.find_by_id(resource_id)
-		return ErrorEnum::RESOURCE_NOT_EXIST if resource.nil?
-		retval = resource.delete(self.email)
+	# destroy a material
+	def destroy_material(material_id)
+		material = Material.find_by_id(material_id)
+		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+		retval = material.delete(self.email)
 		return retval
 	end
 
-	# clear a resource
-	def clear_resource(resource_id)
-		resource = Resource.find_by_id(resource_id)
-		return ErrorEnum::RESOURCE_NOT_EXIST if resource.nil?
-		retval = resource.clear(self.email)
+	# clear a material
+	def clear_material(material_id)
+		material = material.find_by_id(material_id)
+		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+		retval = material.clear(self.email)
 		return retval
 	end
 
-	# update title of the resource
-	def update_resource_title(resource)
-		resource = Resource.find_by_id(resource.resource_id)
-		return ErrorEnum::RESOURCE_NOT_EXIST if resource.nil?
-		retval = resource.update_title(self.email, resource.title)
+	# update title of the material
+	def update_material_title(material_id, material_obj)
+		material = Material.find_by_id(material_id)
+		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+		retval = material.update_title(self.email, material_obj["title"])
 		return retval
 	end
 

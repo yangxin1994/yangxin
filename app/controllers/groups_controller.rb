@@ -42,12 +42,26 @@ class GroupsController < ApplicationController
 	#*params*:
 	#* the group object
 	#* ErrorEnum::EMAIL_NOT_EXIST
+	#* ErrorEnum::ILLEGAL_EMAIL
+	#* ErrorEnum::GROUP_NOT_EXIST
 	def create
-		retval = @current_user.create_group(params[:group]["name"], params[:group]["description"], params[:group]["members"])
+		members = params[:group]["members"].class == Array ? params[:group]["members"] : []
+		sub_groups = params[:group]["sub_groups"].class == Array ? params[:group]["sub_groups"] : []
+		retval = @current_user.create_group(params[:group]["name"], params[:group]["description"], members, sub_groups)
 		case retval
 		when ErrorEnum::EMAIL_NOT_EXIST
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::EMAIL_NOT_EXIST and return }
+			end
+		when ErrorEnum::ILLEGAL_EMAIL
+			flash[:notice] = "非法的邮箱地址"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::ILLEGAL_EMAIL and return }
+			end
+		when ErrorEnum::GROUP_NOT_EXIST
+			flash[:notice] = "样本组不存在"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::GROUP_NOT_EXIST and return }
 			end
 		else
 			flash[:notice] = "样本组已成功创建"
@@ -83,6 +97,16 @@ class GroupsController < ApplicationController
 			flash[:notice] = "没有权限"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
+			end
+		when ErrorEnum::ILLEGAL_EMAIL
+			flash[:notice] = "非法的邮箱地址"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::ILLEGAL_EMAIL and return }
+			end
+		when ErrorEnum::GROUP_NOT_EXIST
+			flash[:notice] = "样本组不存在"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::GROUP_NOT_EXIST and return }
 			end
 		else
 			flash[:notice] = "样本组已成功更新"
