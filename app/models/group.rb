@@ -6,6 +6,7 @@ class Group
 	field :description, :type => String
 	# array of members' emails
 	field :members, :type => Array, default: []
+	field :sub_groups, :type => Array, default: []
 # 0 not destroyed
 # -1 destroyed
 	field :status, :type => Integer, default: 0
@@ -34,10 +35,10 @@ class Group
 	#*retval*:
 	#* the groups object array
 	#* ErrorEnum ::EMAIL_NOT_EXIST
-	def self.get_groups(owner_email)
-		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(owner_email) == nil
+	def self.get_groups(current_user_email)
+		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(current_user_email).nil?
 		groups_obj = []
-		self.groups_of(owner_email).each do |group|
+		self.groups_of(current_user_email).each do |group|
 			groups_obj << group.serialize
 		end
 	end
@@ -53,10 +54,22 @@ class Group
 	#*retval*:
 	#* the group object
 	#* ErrorEnum ::GROUP_NOT_EXIST : if cannot find the group
-	def self.check_and_create_new(owner_email, name, description, members)
+	def self.check_and_create_new(current_user_email, name, description, members, sub_groups)
 		# this owner already has a group with the same name
-		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(owner_email).nil?
-		group = Group.new(:owner_email => owner_email, :name => name, :description => description, :members =>  members)
+		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(current_user_email).nil?
+		group = Group.new(:owner_email => current_user_email, :name => name, :description => description)
+
+		members.each do |member|
+#return ErrorEnum::ILLEGAL_EMAIL Tool.email_illegal?(member["email"])
+			return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal?(member["email"])
+			group.members << {"email" => member["email"], "mobile" => member["mobile"].to_s, "name" => member["name"].to_s, "is_exclusive" => !(member["is_exclusive"].to_s == "false")}
+		end
+
+		sub_groups.each do |sub_group_id|
+			return ErrorEnum::GROUP_NOT_EXIST if Group.find_by_id(sub_group_id).nil?
+			return ErrorEnum::UNAUTHORIZED if Group.find_by_id(sub_group_id).owner_email != current_user_email
+			group.sub_groups << sub_group_id
+		end
 		group.save
 		return group.serialize
 	end
@@ -64,7 +77,6 @@ class Group
 	#*description*: update a group
 	#
 	#*params*:
-	#* email of the user doing this operation
 	#* id of the group to be updated
 	#* the group object to be updated
 	#
@@ -72,47 +84,55 @@ class Group
 	#* the updated group object
 	#* ErrorEnum ::GROUP_NOT_EXIST : if cannot find the group
 	#* ErrorEnum ::UNAUTHORIZED : if cannot find the group
-	def self.update(owner_email, group_id, group_obj)
-		group = find_by_id(group_id)
-		return ErrorEnum::GROUP_NOT_EXIST if group == nil
-		return ErrorEnum::UNAUTHORIZED if owner_email != group["owner_email"]
-		group.update_attributes(:name => group_obj["name"], :description => group_obj["description"], :members => Marshal.load(Marshal.dump(group_obj["members"])))
-		return group.serialize
+	def update_group(current_user_email, group_obj)
+		return ErrorEnum::UNAUTHORIZED if current_user_email != self.owner_email
+		self.name = group_obj["name"]
+		self.description = group_obj["description"]
+		self.members = []
+		group_obj["members"].each do |member|
+			return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal?(member["email"])
+			self.members << {"email" => member["email"], "mobile" => member["mobile"].to_s, "name" => member["name"].to_s, "is_exclusive" => member["is_exclusive"] == false}
+		end
+		self.sub_groups = []
+		group_obj["sub_groups"].each do |sub_group_id|
+			return ErrorEnum::GROUP_NOT_EXIST if Group.find_by_id(sub_group_id).nil?
+			return ErrorEnum::UNAUTHORIZED if Group.find_by_id(sub_group_id).owner_email != current_user_email
+			self.sub_groups << sub_group_id
+		end
+		self.save
+		return self.serialize
 	end
 
 	#*description*: delete a group
 	#
 	#*params*:
 	#* email of the user doing this operation
-	#* id of the group to be deleted
 	#
 	#*retval*:
 	#* true if the group is deleted
-	#* ErrorEnum ::GROUP_NOT_EXIST : if cannot find the group
 	#* ErrorEnum ::UNAUTHORIZED : if cannot find the group
-	def self.delete(owner_email, group_id)
-		group = find_by_id(group_id)
-		return ErrorEnum::GROUP_NOT_EXIST if group == nil
-		return ErrorEnum::UNAUTHORIZED if owner_email != group["owner_email"]
-		group.status = -1
-		return group.save
+	def delete(current_user_email)
+		return ErrorEnum::UNAUTHORIZED if current_user_email != self.owner_email
+		# remove this group from another one if this is a sub-group
+		Group.groups_of(current_user_email).each do |group|
+			group.sub_groups.delete(self._id.to_s)
+			group.save
+		end
+		self.status = -1
+		return self.save
 	end
 
 	#*description*: show a group
 	#
 	#*params*:
 	#* email of the user doing this operation
-	#* id of the group to be shown
 	#
 	#*retval*:
 	#* the group object
-	#* ErrorEnum ::GROUP_NOT_EXIST : if cannot find the group
 	#* ErrorEnum ::UNAUTHORIZED : if cannot find the group
-	def self.show(owner_email, group_id)
-		group = find_by_id(group_id)
-		return ErrorEnum::GROUP_NOT_EXIST if group == nil
-		return ErrorEnum::UNAUTHORIZED if owner_email != group["owner_email"]
-		return group.serialize
+	def show(current_user_email)
+		return ErrorEnum::UNAUTHORIZED if current_user_email != self.owner_email
+		return self.serialize
 	end
 
 	#*description*: serialize current instance into a group object
@@ -128,6 +148,7 @@ class Group
 		group_obj["name"] = self.name
 		group_obj["description"] = self.description
 		group_obj["members"] = Marshal.load(Marshal.dump(self.members))
+		group_obj["sub_groups"] = Marshal.load(Marshal.dump(self.sub_groups))
 		return group_obj
 	end
 end

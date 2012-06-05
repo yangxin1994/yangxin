@@ -1,22 +1,24 @@
 # encoding: utf-8
 require 'error_enum'
-class ResourcesController < ApplicationController
+class MaterialsController < ApplicationController
 	before_filter :require_sign_in
 
+	def show
+	end
 	#*method*: post
 	#
-	#*url*: /resources
+	#*url*: /materials
 	#
-	#*description*: create a new resource
+	#*description*: create a new material
 	#
 	#*params*:
 	#
 	#*retval*:
-	#* the new Resource object
+	#* the new Material object
 	#* ErrorEnum::EMAIL_NOT_EXIST
-	#* ErrorEnum::WRONG_RESOURCE_TYPE
+	#* ErrorEnum::WRONG_MATERIAL_TYPE
 	def create
-		retval = @current_user.create_resource(params[:resource]["resource_type"], params[:resource]["location"], params[:resource]["title"])
+		retval = @current_user.create_material(params[:material]["material_type"].to_i, params[:material]["location"], params[:material]["title"])
 		case retval
 		when ErrorEnum::EMAIL_NOT_EXIST
 			respond_to do |format|
@@ -32,22 +34,22 @@ class ResourcesController < ApplicationController
 
 	#*method*: get
 	#
-	#*url*: /resources
+	#*url*: /materials
 	#
-	#*description*: get a list of resources
+	#*description*: get a list of materials
 	#
 	#*params*:
-	#* resource_type :  a number in the interval [1, 7]. If converted to a binary number, each digit, from the most significant one, indicates images, videos, and audios.
+	#* material_type :  a number in the interval [1, 7]. If converted to a binary number, each digit, from the most significant one, indicates images, videos, and audios.
 	#
 	#*retval*:
 	#* the list of objects obtained
 	def index
-		retval = @current_user.get_resource_object_list(params[:resource_type])
+		retval = @current_user.get_material_object_list(params[:material_type].to_i)
 		case retval
-		when ErrorEnum::WRONG_RESOURCE_TYPE
+		when ErrorEnum::WRONG_MATERIAL_TYPE
 			flash[:notice] = "错误的资源类型"
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_RESOURCE_TYPE and return }
+				format.json	{ render :json => ErrorEnum::WRONG_MATERIAL_TYPE and return }
 			end
 		else
 			flash[:notice] = "成功获取资源列表"
@@ -59,24 +61,24 @@ class ResourcesController < ApplicationController
 
 	#*method*: get
 	#
-	#*url*: /resources/:resource_id
+	#*url*: /materials/:material_id
 	#
-	#*description*: get a resource object
+	#*description*: get a material object
 	#
 	#*params*:
-	#* resource_id : id of the resource to be obtained
+	#* material_id : id of the material to be obtained
 	#
 	#*retval*:
-	#* the Resource object
-	#* ErrorEnum ::RESOURCE_NOT_EXIST 
+	#* the Material object
+	#* ErrorEnum ::MATERIAL_NOT_EXIST 
 	#* ErrorEnum ::UNAUTHORIZED
 	def show
-		retval = @current_user.get_resource_object(params[:resource_id])
+		retval = @current_user.get_material_object(params[:id])
 		case retval
-		when ErrorEnum::RESOURCE_NOT_EXIST
+		when ErrorEnum::MATERIAL_NOT_EXIST
 			flash[:notice] = "该资源不存在"
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::RESOURCE_NOT_EXIST and return }
+				format.json	{ render :json => ErrorEnum::MATERIAL_NOT_EXIST and return }
 			end
 		when ErrorEnum::UNAUTHORIZED
 			flash[:notice] = "没有权限"
@@ -93,24 +95,24 @@ class ResourcesController < ApplicationController
 
 	#*method*: delete
 	#
-	#*url*: /resources/:resource_id
+	#*url*: /materials/:material_id
 	#
-	#*description*: destroy a resource
+	#*description*: destroy a material
 	#
 	#*params*:
-	#* resource_id: id of the resource to be deleted
+	#* material_id: id of the material to be deleted
 	#
 	#*retval*:
-	#* true: when resource is successfully deleted.
-	#* ErrorEnum ::RESOURCE_NOT_EXIST : when the resource does not exist
-	#* ErrorEnum ::UNAUTHORIZED : when the resource does not belong to the current user
+	#* true: when material is successfully deleted.
+	#* ErrorEnum ::MATERIAL_NOT_EXIST : when the material does not exist
+	#* ErrorEnum ::UNAUTHORIZED : when the material does not belong to the current user
 	def destroy
-		retval = @current_user.destroy_resource(params[:id])
+		retval = @current_user.destroy_material(params[:id])
 		case retval
-		when ErrorEnum::RESOURCE_NOT_EXIST
+		when ErrorEnum::MATERIAL_NOT_EXIST
 			flash[:notice] = "该资源不存在"
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::RESOURCE_NOT_EXIST and return }
+				format.json	{ render :json => ErrorEnum::MATERIAL_NOT_EXIST and return }
 			end
 		when ErrorEnum::UNAUTHORIZED
 			flash[:notice] = "没有权限"
@@ -127,24 +129,24 @@ class ResourcesController < ApplicationController
 
 	#*method*: get
 	#
-	#*url*: /resources/:resource_id/clear
+	#*url*: /materials/:material_id/clear
 	#
-	#*description*: thoroughly delete a resource
+	#*description*: thoroughly delete a material
 	#
 	#*params*:
-	#* resource_id: id of the resource to be cleared
+	#* material_id: id of the material to be cleared
 	#
 	#*retval*:
-	#* true: when resource is successfully cleared.
-	#* ErrorEnum ::RESOURCE_NOT_EXIST : when the resource does not exist
-	#* ErrorEnum ::UNAUTHORIZED : when the resource does not belong to the current user
+	#* true: when material is successfully cleared.
+	#* ErrorEnum ::MATERIAL_NOT_EXIST : when the material does not exist
+	#* ErrorEnum ::UNAUTHORIZED : when the material does not belong to the current user
 	def clear
-		retval = @current_user.clear_resource(params[:id])
+		retval = @current_user.clear_material(params[:id])
 		case retval
-		when ErrorEnum::RESOURCE_NOT_EXIST
+		when ErrorEnum::MATERIAL_NOT_EXIST
 			flash[:notice] = "该资源不存在"
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::RESOURCE_NOT_EXIST and return }
+				format.json	{ render :json => ErrorEnum::MATERIAL_NOT_EXIST and return }
 			end
 		when ErrorEnum::UNAUTHORIZED
 			flash[:notice] = "没有权限"
@@ -161,24 +163,24 @@ class ResourcesController < ApplicationController
 
 	#*method*: put
 	#
-	#*url*: /resources/:resource_id
+	#*url*: /materials/:material_id
 	#
-	#*description*: update title of a resource
+	#*description*: update title of a material
 	#
 	#*params*:
-	#* resource: the resource to be updated
+	#* material: the material to be updated
 	#
 	#*retval*:
-	#* the resource object after updated
-	#* ErrorEnum ::RESOURCE_NOT_EXIST : when the resource does not exist
-	#* ErrorEnum ::UNAUTHORIZED : when the resource does not belong to the current user
+	#* the material object after updated
+	#* ErrorEnum ::MATERIAL_NOT_EXIST : when the material does not exist
+	#* ErrorEnum ::UNAUTHORIZED : when the material does not belong to the current user
 	def update
-		retval = @current_user.update_resource_title(params[:resource])
+		retval = @current_user.update_material_title(params[:id], params[:material])
 		case retval
-		when ErrorEnum::RESOURCE_NOT_EXIST
+		when ErrorEnum::MATERIAL_NOT_EXIST
 			flash[:notice] = "该资源不存在"
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::RESOURCE_NOT_EXIST and return }
+				format.json	{ render :json => ErrorEnum::MATERIAL_NOT_EXIST and return }
 			end
 		when ErrorEnum::UNAUTHORIZED
 			flash[:notice] = "没有权限"

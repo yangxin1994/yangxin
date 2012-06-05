@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'test_helper'
 
 class SurveyTest < ActiveSupport::TestCase
@@ -42,6 +43,127 @@ class SurveyTest < ActiveSupport::TestCase
 
 		retval = jesse_s1.delete(jesse.email)
 		assert_equal -1, jesse_s1.status, "unable to delete a survey"
+	end
+
+	test "survey recover" do
+		clear(User, Survey)
+
+		jesse, jesse_s1 = *init_user_and_survey
+
+		retval = jesse_s1.recover(jesse.email)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST, retval
+
+		retval = jesse_s1.clear("wrong_email@test.com")
+		assert_equal ErrorEnum::UNAUTHORIZED, retval
+
+		jesse_s1.delete(jesse.email)
+		retval = jesse_s1.recover(jesse.email)
+		assert_equal true, retval
+		assert_equal 0, jesse_s1.status
+	end
+
+	test "survey clear" do
+		clear(User, Survey)
+
+		jesse, jesse_s1 = *init_user_and_survey
+
+		retval = jesse_s1.clear(jesse.email)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST, retval
+
+		retval = jesse_s1.clear("wrong_email@test.com")
+		assert_equal ErrorEnum::UNAUTHORIZED, retval
+
+		jesse_s1.delete(jesse.email)
+		retval = jesse_s1.clear(jesse.email)
+		assert_equal true, retval
+		assert_nil Survey.find_by_id_in_trash(jesse_s1._id)
+	end
+
+	test "survey tags update" do
+		clear(User, Survey)
+
+		jesse, jesse_s1 = *init_user_and_survey
+
+		retval = jesse_s1.update_tags("wrong_email@test.com", ["tag1", "tag2"])
+		assert_equal ErrorEnum::UNAUTHORIZED, retval
+
+		retval = jesse_s1.update_tags(jesse.email, ["tag1", "tag2"])
+		assert_equal ["tag1", "tag2"], retval["tags"]
+	end
+
+	test "survey tag add" do
+		clear(User, Survey)
+
+		jesse, jesse_s1 = *init_user_and_survey
+
+		retval = jesse_s1.add_tag("wrong_email@test.com", "tag1")
+		assert_equal ErrorEnum::UNAUTHORIZED, retval
+
+		retval = jesse_s1.add_tag(jesse.email, "tag1")
+		assert_equal ["tag1"], retval["tags"]
+		
+		retval = jesse_s1.add_tag(jesse.email, "tag2")
+		assert_equal ["tag1", "tag2"], retval["tags"]
+		
+		retval = jesse_s1.add_tag(jesse.email, "tag2")
+		assert_equal ErrorEnum::TAG_EXIST, retval
+	end
+
+	test "survey tag remove" do
+		clear(User, Survey)
+
+		jesse, jesse_s1 = *init_user_and_survey
+		retval = jesse_s1.add_tag(jesse.email, "tag1")
+		retval = jesse_s1.add_tag(jesse.email, "tag2")
+		
+		retval = jesse_s1.remove_tag("wrong_email@test.com", "tag2")
+		assert_equal ErrorEnum::UNAUTHORIZED, retval
+		
+		retval = jesse_s1.remove_tag(jesse.email, "tag3")
+		assert_equal ErrorEnum::TAG_NOT_EXIST, retval
+		
+		retval = jesse_s1.remove_tag(jesse.email, "tag1")
+		assert_equal ["tag2"], retval["tags"]
+		
+		retval = jesse_s1.remove_tag(jesse.email, "tag2")
+		assert_equal [], retval["tags"]
+	end
+
+	test "survey list" do
+		clear(User, Survey)
+
+		jesse, jesse_s1, jesse_s2, jesse_s3 = *init_user_and_surveys
+		retval = jesse_s1.add_tag(jesse.email, "tag1")
+		retval = jesse_s1.add_tag(jesse.email, "tag2")
+		retval = jesse_s1.add_tag(jesse.email, "tag3")
+		retval = jesse_s2.add_tag(jesse.email, "tag1")
+		retval = jesse_s2.add_tag(jesse.email, "tag2")
+		retval = jesse_s3.add_tag(jesse.email, "tag1")
+		
+		retval = Survey.get_object_list("wrong_email@test.com", ["tag1"])
+		assert_equal 0, retval.length
+		
+		retval = Survey.get_object_list(jesse.email, ["tag1"])
+		assert_equal 3, retval.length
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s1._id.to_s)
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s2._id.to_s)
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s3._id.to_s)
+		retval = Survey.get_object_list(jesse.email, ["tag1", "tag2"])
+		assert_equal 2, retval.length
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s1._id.to_s)
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s2._id.to_s)
+		retval = Survey.get_object_list(jesse.email, ["tag1", "tag2", "tag3"])
+		assert_equal 1, retval.length
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s1._id.to_s)
+
+		jesse_s1.delete(jesse.email)
+		retval = Survey.get_object_list(jesse.email, ["tag1"])
+		assert_equal 2, retval.length
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s2._id.to_s)
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s3._id.to_s)
+		retval = Survey.get_object_list(jesse.email, ["tag1", "已删除"])
+		assert_equal 1, retval.length
+		assert retval.map {|s| s["survey_id"]}.include?(jesse_s1._id.to_s)
 	end
 
 	test "page creation" do
@@ -308,6 +430,20 @@ class SurveyTest < ActiveSupport::TestCase
 	end
 
 	test "page show" do
+		clear(User, Survey, Question)
+
+		jesse, jesse_s1, questions = *init_user_and_survey_and_questions
+
+		retval = jesse_s1.show_page("wrong_email@test.com", 1)
+		assert_equal ErrorEnum::UNAUTHORIZED, retval
+
+		retval = jesse_s1.show_page(jesse.email, 4)
+		assert_equal ErrorEnum::OVERFLOW, retval
+
+		retval = jesse_s1.show_page(jesse.email, 1)
+		assert_equal questions[1][0]._id.to_s, retval[0]["question_id"]
+		assert_equal questions[1][1]._id.to_s, retval[1]["question_id"]
+		assert_equal questions[1][2]._id.to_s, retval[2]["question_id"]
 	end
 
 	test "page clone" do
@@ -445,6 +581,17 @@ class SurveyTest < ActiveSupport::TestCase
 		jesse_s1 = FactoryGirl.build(:jesse_s1)
 		jesse_s1.save
 		return [jesse, jesse_s1]
+	end
+
+	def init_user_and_surveys
+		jesse = init_jesse
+		jesse_s1 = FactoryGirl.build(:jesse_s1)
+		jesse_s2 = FactoryGirl.build(:jesse_s2)
+		jesse_s3 = FactoryGirl.build(:jesse_s3)
+		jesse_s1.save
+		jesse_s2.save
+		jesse_s3.save
+		return [jesse, jesse_s1, jesse_s2, jesse_s3]
 	end
 
 	def init_user_and_survey_and_questions

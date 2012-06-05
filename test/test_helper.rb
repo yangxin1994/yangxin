@@ -149,7 +149,8 @@ class ActiveSupport::TestCase
 	def generate_group_members
 		members = []
 		("a".."z").to_a.each do |char|
-			members << "#{char}@#{char}.com"
+			member = {"email" => "#{char}@#{char}.com", "mobile" => "123456789"}
+			members << member
 		end
 		return members
 	end
@@ -165,4 +166,45 @@ class ActiveSupport::TestCase
 		return group_obj
 	end
 
+	def create_groups(email, password)
+		sign_in(email, Encryption.decrypt_password(password))
+		old_controller = @controller
+		@controller = GroupsController.new
+		post :create, :format => :json, :group => {"name" => "name_1", "description" => "description_1"}
+		group_obj = JSON.parse(@response.body)
+		group_id_1 = group_obj["group_id"]
+		post :create, :format => :json, :group => {"name" => "name_2", "description" => "description_2"}
+		group_obj = JSON.parse(@response.body)
+		group_id_2 = group_obj["group_id"]
+		post :create, :format => :json, :group => {"name" => "name_3", "description" => "description_3"}
+		group_obj = JSON.parse(@response.body)
+		group_id_3 = group_obj["group_id"]
+		post :create, :format => :json, :group => {"name" => "name_4", "description" => "description_4"}
+		group_obj = JSON.parse(@response.body)
+		group_id_4 = group_obj["group_id"]
+		@controller = old_controller
+		sign_out
+		return group_id_1, group_id_2, group_id_3, group_id_4
+	end
+
+	def create_materials(email, password)
+		sign_in(email, Encryption.decrypt_password(password))
+		old_controller = @controller
+		@controller = MaterialsController.new
+		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_1", "title" => "title_1"}
+		material_id_1 = JSON.parse(@response.body)["material_id"]
+		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_2", "title" => "title_2"}
+		material_id_2 = JSON.parse(@response.body)["material_id"]
+		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_3", "title" => "title_3"}
+		material_id_3 = JSON.parse(@response.body)["material_id"]
+		post :create, :format => :json, :material => {"material_type" => 2, "location" => "location_4", "title" => "title_4"}
+		material_id_4 = JSON.parse(@response.body)["material_id"]
+		post :create, :format => :json, :material => {"material_type" => 2, "location" => "location_5", "title" => "title_5"}
+		material_id_5 = JSON.parse(@response.body)["material_id"]
+		post :create, :format => :json, :material => {"material_type" => 4, "location" => "location_6", "title" => "title_6"}
+		material_id_6 = JSON.parse(@response.body)["material_id"]
+		@controller = old_controller
+		sign_out
+		return [material_id_1, material_id_2, material_id_3, material_id_4, material_id_5, material_id_6]
+	end
 end

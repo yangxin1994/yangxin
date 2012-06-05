@@ -254,13 +254,16 @@ class User
 	#*params*:
 	#* name of the new group
 	#* description of the new group
-	#* array of members of the new group
+	#* array of members of the new group; each member has a hash that includes the kes: email, mobile, name, is_exclusive
+	#* array of sub groups id
 	#
 	#*retval*:
 	#* the group object: when successfully created
 	#* ErrorEnum ::EMAIL_NOT_EXIST
-	def create_group(name, description, members)
-		return Group.check_and_create_new(self.email, name, description, members)
+	#* ErrorEnum ::ILLEGAL_EMAIL
+	#* ErrorEnum ::GROUP_NOT_EXIST
+	def create_group(name, description, members, groups)
+		return Group.check_and_create_new(self.email, name, description, members, groups)
 	end
 
 	#*description*: update a group for this user
@@ -272,31 +275,37 @@ class User
 	#* the group object: when successfully updated
 	#* ErrorEnum ::GROUP_NOT_EXIST
 	def update_group(group_id, group_obj)
-		return Group.update(self.email, group_id, group_obj)
+		group = Group.find_by_id(group_id)
+		return ErrorEnum::GROUP_NOT_EXIST if group.nil?
+		return group.update_group(self.email, group_obj)
 	end
 
 	#*description*: delete a group for this user
 	#
 	#*params*:
-	#* name of the group
+	#* id of the group to be deleted
 	#
 	#*retval*:
 	#* true: when successfully deleted
-	#* NOT_EXIST
-	def destroy_group(name)
-		return Group.delete(self.email, name)
+	#* SURVEY_NOT_EXIST
+	def destroy_group(group_id)
+		group = Group.find_by_id(group_id)
+		return ErrorEnum::GROUP_NOT_EXIST if group.nil?
+		return group.delete(self.email)
 	end
 
 	#*description*: get a group for this user
 	#
 	#*params*:
-	#* name of the group
+	#* id of the group to be shown
 	#
 	#*retval*:
 	#* the group instance: when successfully updated
-	#* NOT_EXIST
-	def show_group(name)
-		return Group.show(self.email, name)
+	#* SURVEY_NOT_EXIST
+	def show_group(group_id)
+		group = Group.find_by_id(group_id)
+		return ErrorEnum::GROUP_NOT_EXIST if group.nil?
+		return group.show(self.email)
 	end
 
 #--
@@ -308,7 +317,7 @@ class User
 	#
 	#*retval*:
 	#* the array of surveys: when successfully obtained
-	#* NOT_EXIST
+	#* SURVEY_NOT_EXIST
 	def surveys(tags)
 		return Survey.surveys_of(self.email)
 	end
@@ -321,7 +330,7 @@ class User
 	#*retval*:
 	#* true: when successfully saved
 	#* false: unkown error
-	#* NOT_EXIST
+	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
 	def save_meta_data(survey_object)
 		return Survey.save_meta_data(self.email, survey_object)
@@ -335,12 +344,44 @@ class User
 	#*retval*:
 	#* true: when successfully deleted
 	#* false: unkown error
-	#* NOT_EXIST
+	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
 	def destroy_survey(survey_id)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.delete(self.email)
+	end
+
+	#*description*: recover a survey
+	#
+	#*params*:
+	#* the id of the survey to be recovered
+	#
+	#*retval*:
+	#* true: when successfully recovered
+	#* false: unkown error
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	def recover_survey(survey_id)
+		survey = Survey.find_by_id_in_trash(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return survey.recover(self.email)
+	end
+
+	#*description*: thoroughly destroy a survey
+	#
+	#*params*:
+	#* the id of the survey to be cleared
+	#
+	#*retval*:
+	#* true: when successfully cleared
+	#* false: unkown error
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	def clear_survey(survey_id)
+		survey = Survey.find_by_id_in_trash(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return survey.clear(self.email)
 	end
 
 	#*description*: clone a survey
@@ -351,11 +392,11 @@ class User
 	#*retval*:
 	#* true: when successfully deleted
 	#* false: unkown error
-	#* NOT_EXIST
+	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
 	def clone_survey(survey_id)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.clone(self.email)
 	end
 
@@ -366,10 +407,69 @@ class User
 	#
 	#*retval*:
 	#* the survey object if successfully obtained
-	#* NOT_EXIST
+	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
 	def get_survey_object(survey_id)
 		return Survey.get_survey_object(self.email, survey_id)
+	end
+
+	#*description*: get survey object list given a list of tags
+	#
+	#*params*:
+	#* tags
+	#
+	#*retval*:
+	#* the survey object list
+	def get_survey_object_list(tags)
+		return Survey.get_object_list(self.email, tags)
+	end
+
+	#*description*: update tags of a survey
+	#
+	#*params*:
+	#* the id of the survey object
+	#* the tags to be added
+	#
+	#*retval*:
+	#* the survey object if successfully updating tags
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	def update_survey_tags(survey_id, tags)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return survey.update_tags(self.email, tags)
+	end
+
+	#*description*: add a tag to a survey
+	#
+	#*params*:
+	#* the id of the survey object
+	#* the tag to be added
+	#
+	#*retval*:
+	#* the survey object if successfully adding tag
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	def add_survey_tag(survey_id, tag)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return survey.add_tag(self.email, tag)
+	end
+
+	#*description*: remove a tag from a survey
+	#
+	#*params*:
+	#* the id of the survey object
+	#* the tag to be removed
+	#
+	#*retval*:
+	#* the survey object if successfully removing tag
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	def remove_survey_tag(survey_id, tag)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return survey.remove_tag(self.email, tag)
 	end
 
 	#*description*: createa a new question
@@ -388,7 +488,7 @@ class User
 	#* OVERFLOW
 	def create_question(survey_id, page_index, question_id, question_type)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.create_question(self.email, page_index, question_id, question_type)
 	end
 
@@ -407,7 +507,7 @@ class User
 	#* ErrorEnum ::WRONG_DATA_TYPE
 	def update_question(survey_id, question_id, question_obj)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.update_question(self.email, question_id, question_obj)
 	end
 
@@ -428,7 +528,7 @@ class User
 	#* ErrorEnum ::OVERFLOW
 	def move_question(survey_id, question_id_1, page_index, question_id_2)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.move_question(self.email, question_id_1, page_index, question_id_2)
 	end
 
@@ -448,7 +548,7 @@ class User
 	#* ErrorEnum ::OVERFLOW
 	def clone_question(survey_id, question_id_1, page_index, question_id_2)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.clone_question(self.email, question_id_1, page_index, question_id_2)
 	end
 
@@ -465,7 +565,7 @@ class User
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
 	def get_question_object(survey_id, question_id)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		survey.get_question_object(self.email, question_id)
 	end
 
@@ -483,7 +583,7 @@ class User
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
 	def delete_question(survey_id, question_id)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.delete_question(self.email, question_id)
 	end
 
@@ -501,7 +601,7 @@ class User
 	#* ErrorEnum ::OVERFLOW 
 	def create_page(survey_id, page_index)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.create_page(self.email, page_index)
 	end
 
@@ -518,7 +618,7 @@ class User
 	#* ErrorEnum ::OVERFLOW 
 	def show_page(survey_id, page_index)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.show_page(self.email, page_index)
 	end
 
@@ -537,7 +637,7 @@ class User
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
 	def clone_page(survey_id, page_index_1, page_index_2)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.clone_page(self.email, page_index_1, page_index_2)
 	end
 
@@ -555,7 +655,7 @@ class User
 	#* ErrorEnum ::OVERFLOW
 	def delete_page(survey_id, page_index)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.delete_page(self.email, page_index)
 	end
 
@@ -574,7 +674,7 @@ class User
 	#* ErrorEnum ::OVERFLOW
 	def combine_pages(survey_id, page_index_1, page_index_2)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.combine_pages(self.email, page_index_1, page_index_2)
 	end
 
@@ -593,7 +693,7 @@ class User
 	#* ErrorEnum ::OVERFLOW
 	def move_page(survey_id, page_index_1, page_index_2)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		survey.move_page(self.email, page_index_1, page_index_2)
 	end
 
@@ -606,46 +706,46 @@ class User
 	end
 
 #--
-############### operations about resource #################
+############### operations about material #################
 #++
-	# create a new resource
-	def create_resource(resource, resource_type, location, title)
-		return Resource.check_and_create_new(self.email, resource_type, location, title)
+	# create a new material
+	def create_material(material_type, location, title)
+		return Material.check_and_create_new(self.email, material_type, location, title)
 	end
 
-	# get a list of resources
-	def get_resource_object_list(resource_type)
-		resource_list = Resource.get_object_list(self.email, resource_type)
-		return resource_list
+	# get a list of materials
+	def get_material_object_list(material_type)
+		material_list = Material.get_object_list(self.email, material_type)
+		return material_list
 	end
 
-	# get a resource object
-	def get_resource_object(resource_id)
-		resource = Resource.get_object(self.email, resource_id)
-		return resource
+	# get a material object
+	def get_material_object(material_id)
+		material = Material.get_object(self.email, material_id)
+		return material
 	end
 
-	# destroy a resource
-	def destroy_resource(resource_id)
-		resource = Resource.find_by_id(resource_id)
-		return ErrorEnum::RESOURCE_NOT_EXIST if resource.nil?
-		retval = resource.delete(self.email)
+	# destroy a material
+	def destroy_material(material_id)
+		material = Material.find_by_id(material_id)
+		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+		retval = material.delete(self.email)
 		return retval
 	end
 
-	# clear a resource
-	def clear_resource(resource_id)
-		resource = Resource.find_by_id(resource_id)
-		return ErrorEnum::RESOURCE_NOT_EXIST if resource.nil?
-		retval = resource.clear(self.email)
+	# clear a material
+	def clear_material(material_id)
+		material = material.find_by_id(material_id)
+		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+		retval = material.clear(self.email)
 		return retval
 	end
 
-	# update title of the resource
-	def update_resource_title(resource)
-		resource = Resource.find_by_id(resource.resource_id)
-		return ErrorEnum::RESOURCE_NOT_EXIST if resource.nil?
-		retval = resource.update_title(self.email, resource.title)
+	# update title of the material
+	def update_material_title(material_id, material_obj)
+		material = Material.find_by_id(material_id)
+		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+		retval = material.update_title(self.email, material_obj["title"])
 		return retval
 	end
 
