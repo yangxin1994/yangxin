@@ -5,7 +5,26 @@ class RenrenUser < ThirdPartyUser
   field :sex, :type => String
   field :headurl, :type => String
   
+  #--
+  # ************* instance attribute's methods*****************
+  #++
+  
+  #*attribute*: name
+  def name
+    self.user["name"]
+  end
+  
+  #*attribute*: gender
+  alias gender sex
+  
+  #*attribute*: locale
+  def locale
+    nil
+  end
+  
+  #--
   #***************** class methods *************
+  #++
   
   #*description*: get access_token for other works
   #
@@ -40,23 +59,42 @@ class RenrenUser < ThirdPartyUser
 		user_id = response_data["user"]["id"]
 		access_token = response_data["access_token"]
 		refresh_token = response_data["refresh_token"]
-		
-		# reject the same function field
-		response_data.select!{|k,v| !k.to_s.include?("id") }
-	  
+	  expires_in = response_data["expires_in"]
+	 
 	  #new or update renren_user
 		renren_user = RenrenUser.where(:user_id => user_id)[0]
 		if renren_user.nil? then
-      renren_user = RenrenUser.new(:website => "renren", :user_id => user_id, :access_token => access_token, :refresh_token => refresh_token)
+      renren_user = RenrenUser.new(:website => "renren", :user_id => user_id, :access_token => access_token, 
+      :refresh_token => refresh_token, :expires_in => expires_in)
       renren_user.save
-    else
+    else 
+      #only update access_token, refresh_token, expires_in, remove other info which is un-useful.
+      response_data = {}
+      response_data["access_token"] = access_token 
+      response_data["refresh_token"] = refresh_token
+      response_data["expires_in"] = expires_in
+      
+      # update info 
+      renren_user = ThirdPartyUser.update_by_hash(renren_user, response_data)
+    end
+    
+    if renren_user.sex.nil?
+      # first time get user base information.
+      response_data = renren_user.call_method()[0]
+      
+	    # reject the same function field
+	    response_data.select!{|k,v| !k.to_s.include?("id") }
+      
+      # update info 
       renren_user = ThirdPartyUser.update_by_hash(renren_user, response_data)
     end
     
     return renren_user
   end
   
+  #--
   # ************instance methods**********
+  #++
   
 	#*description*: it can call any methods from third_party's API:
 	#http://wiki.dev.renren.com/wiki/API
@@ -70,8 +108,11 @@ class RenrenUser < ThirdPartyUser
     @params[:v] = '1.0'
     @params[:access_token] = self.access_token
     
+    Logger.new("log/development.log").info("get api url: http://api.renren.com/restserver.do, #{update_params(opts)}")
     ActiveSupport::JSON.decode(Tool.send_post_request('http://api.renren.com/restserver.do', update_params(opts)).body)
   end
+  
+  alias get_user_info  call_method
   
   #*description*: reget access_token from refresh_token for other works
   #
@@ -98,11 +139,7 @@ class RenrenUser < ThirdPartyUser
 	  return response_data
   end  
   
-  #--
-  # ************* instance attribute's methods*****************
-  #++
-  
-  
+
   private
   
   #*description*: the renren params must be diff computed.

@@ -5,7 +5,9 @@ class QqUser < ThirdPartyUser
   field :gender, :type => String
   field :figureurl, :type => String
   
+  #--
   #***************** class methods *************
+  #++
   
   #get access_token for other works
   #
@@ -73,7 +75,9 @@ class QqUser < ThirdPartyUser
     return qq_user
   end
   
-  # ************** instance methods *************
+  #--
+  # ************instance methods**********
+  #++
   
 	#*description*: it can call any methods from third_party's API:
 	#http://wiki.opensns.qq.com/wiki/%E3%80%90QQ%E7%99%BB%E5%BD%95%E3%80%91API%E6%96%87%E6%A1%A3
@@ -87,7 +91,8 @@ class QqUser < ThirdPartyUser
     @params[:oauth_consumer_key] = OOPSDATA[RailsEnv.get_rails_env]["qq_app_id"]
     @params[:openid] = self.user_id
     super(opts)
-    Tool.send_get_request("https://graph.qq.com/user/#{opts[:method]}#{@params_url}", true)
+    retval = Tool.send_get_request("https://graph.qq.com/user/#{opts[:method]}#{@params_url}", true)
+    return JSON.parse(retval.body)
   end
   
 end

@@ -1,4 +1,4 @@
-%a{"href" => "https://graph.renren.com/oauth/authorize?client_id=#{@renren_app_id}&response_type=code&scope=publish_share&redirect_uri=#{@renren_redirect_uri}&display=page"}
+%a{"href" => "https://graph.renren.com/oauth/authorize?client_id=#{@renren_app_id}&response_type=code&scope=read_user_blog,publish_share&redirect_uri=#{@renren_redirect_uri}&display=page"}
 
 =link_to image_tag("/assets/renren_login_button.png", :border => 0), "https://graph.renren.com/oauth/authorize?client_id=#{@renren_app_id}&response_type=code&redirect_uri=#{@renren_redirect_uri}&display=page"
 

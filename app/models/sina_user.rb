@@ -64,7 +64,9 @@ class SinaUser < ThirdPartyUser
     return sina_user
   end
   
+  #--
   # ************instance methods**********
+  #++
   
 	#*description*: it can call any methods from third_party's API:
 	#http://open.weibo.com/wiki/API%E6%96%87%E6%A1%A3_V2
@@ -72,11 +74,16 @@ class SinaUser < ThirdPartyUser
 	#*params*:
 	#
 	#* opts: hash.
-  def call_method(opts = {:method => "statuses/user_timeline"})
+  def call_method(opts = {:method => "users/show"})
     @params={}
     @params[:access_token] = self.access_token
     super(opts)
-    Tool.send_get_request("https://api.weibo.com/2/#{opts[:method]}.json#{@params_url}", true)  
+    retval = Tool.send_get_request("https://api.weibo.com/2/#{opts[:method]}.json#{@params_url}", true)  
+    return JSON.parse(retval.body)
+  end
+  
+  def get_user_info
+    call_method({:method => "users/show", :uid => self.user_id})
   end
   
 end

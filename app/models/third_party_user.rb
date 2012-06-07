@@ -50,7 +50,7 @@ class ThirdPartyUser
 	#* website_user_class
 	#* user id
 	#* access_token
-	#* email
+	#* email=nil
 	#
 	#*retval*:
 	#* the ThirdPartyUser sub class instance: like GoogleUser's instance, SinaUser's instance ...
@@ -64,9 +64,7 @@ class ThirdPartyUser
 	#
 	#*params*:
 	#* website_user_class
-	#* user id
-	#* access_token
-	#* email
+	#* hash
 	#
 	#*retval*:
 	#* the ThirdPartyUser sub class instance: like GoogleUser's instance, SinaUser's instance ...
@@ -82,8 +80,6 @@ class ThirdPartyUser
 	#
 	#*params*:
 	#* website_user_class
-	#* user id
-	#* access_token
 	#* email
 	#
 	#*retval*:

@@ -7,6 +7,19 @@ class GoogleUser < ThirdPartyUser
   field :google_email, :type => String  
   
   #--
+  # ************* instance attribute's methods*****************
+  #++
+  
+  #*attribute*: name
+  # the same getter with db
+  
+  #*attribute*: gender
+  # the same getter with db
+  
+  #*attribute*: locale
+  # the same getter with db 
+  
+  #--
   #***************** class methods *************
   #++
   
@@ -86,6 +99,10 @@ class GoogleUser < ThirdPartyUser
     @params={}
     @params[:access_token] = self.access_token
     super(opts)
-    Tool.send_get_request("https://www.googleapis.com/oauth2/v1/#{opts[:method]}#{@params_url}", true) 
+		Logger.new("log/development.log").info("get api url: https://www.googleapis.com/oauth2/v1/#{opts[:method]}#{@params_url}")
+    retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/#{opts[:method]}#{@params_url}", true) 
+    return JSON.parse(retval.body)
   end
+  
+  
 end
