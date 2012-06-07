@@ -69,6 +69,27 @@ class User
 		return !!(user && user.status == 1)
 	end
 
+	#*description*: check whether an user is adminstrator
+	#
+	#*params*:
+	#
+	#*retval*:
+	#* true or false
+	def is_admin
+		return self.role == 1
+	end
+
+	#*description*: check whether an user is adminstrator
+	#
+	#*params*:
+	#* email of the user
+	#
+	#*retval*:
+	#* true or false
+	def self.is_admin(email)
+		return User.user_exist?(email) && User.find_by_email(email).is_admin
+	end
+
 	#*description*: create a new user
 	#
 	#*params*:
@@ -222,7 +243,6 @@ class User
 		end
 	end
 
-
 #--
 ############### operations about user information #################
 #++
@@ -236,6 +256,9 @@ class User
 		UserInformation.update(profile)
 	end
 
+#--
+############### operations about group #################
+#++
 	#*description*: obtain the groups of this user
 	#
 	#*params*:
@@ -246,9 +269,6 @@ class User
 		return Group.get_groups(self.email)
 	end
 
-#--
-############### operations about group #################
-#++
 	#*description*: create a new group for this user
 	#
 	#*params*:
@@ -410,7 +430,7 @@ class User
 	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
 	def get_survey_object(survey_id)
-		return Survey.get_survey_object(self.email, survey_id)
+		return Survey.get_survey_object(self, survey_id)
 	end
 
 	#*description*: get survey object list given a list of tags
@@ -421,7 +441,7 @@ class User
 	#*retval*:
 	#* the survey object list
 	def get_survey_object_list(tags)
-		return Survey.get_object_list(self.email, tags)
+		return Survey.get_object_list(self, tags)
 	end
 
 	#*description*: update tags of a survey
@@ -437,7 +457,7 @@ class User
 	def update_survey_tags(survey_id, tags)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.update_tags(self.email, tags)
+		return survey.update_tags(self, tags)
 	end
 
 	#*description*: add a tag to a survey
@@ -453,7 +473,7 @@ class User
 	def add_survey_tag(survey_id, tag)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.add_tag(self.email, tag)
+		return survey.add_tag(self, tag)
 	end
 
 	#*description*: remove a tag from a survey
@@ -469,7 +489,86 @@ class User
 	def remove_survey_tag(survey_id, tag)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.remove_tag(self.email, tag)
+		return survey.remove_tag(self, tag)
+	end
+
+	#*description*: submit a survey to administrator for reviewing
+	#
+	#*params*:
+	#* the id of the survey
+	#
+	#*retval*:
+	#* true
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	#* WRONG_PUBLISH_STATUS
+	def submit_survey(survey_id)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return survey.submit(self)
+	end
+
+	#*description*: reject a survey
+	#
+	#*params*:
+	#* the id of the survey
+	#
+	#*retval*:
+	#* true
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	#* WRONG_PUBLISH_STATUS
+	def reject_survey(survey_id)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return survey.reject(self)
+	end
+
+	#*description*: publish a survey
+	#
+	#*params*:
+	#* the id of the survey
+	#
+	#*retval*:
+	#* true
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	#* WRONG_PUBLISH_STATUS
+	def publish_survey(survey_id)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return survey.publish(self)
+	end
+
+	#*description*: close a survey
+	#
+	#*params*:
+	#* the id of the survey
+	#
+	#*retval*:
+	#* true
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	def close_survey(survey_id)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return survey.close(self)
+	end
+
+	#*description*: set the publish status of a survey as revised
+	#
+	#*params*:
+	#* the id of the survey
+	#
+	#*retval*:
+	#* true
+	#* SURVEY_NOT_EXIST
+	#* UNAUTHORIZED
+	#* WRONG_PUBLISH_STATUS
+	def revise_survey(survey_id)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return survey.revise(self)
 	end
 
 	#*description*: createa a new question
@@ -697,6 +796,38 @@ class User
 		survey.move_page(self.email, page_index_1, page_index_2)
 	end
 
+#--
+############### operations about quotas #################
+#++
+	def show_quota(survey_id)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		survey.show_quota(self)
+	end
+
+	def add_quota_rule(survey_id, quota_rule)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		survey.add_quota_rule(self, quota_rule)
+	end
+
+	def update_quota_rule(survey_id, quota_rule_index, quota_rule)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		survey.update_quota_rule(self, quota_rule_index, quota_rule)
+	end
+
+	def delete_quota_rule(survey_id, quota_rule_index)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		survey.delete_quota_rule(self, quota_rule_index)
+	end
+
+	def set_exclusive(survey_id, is_exclusive)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		survey.set_exclusive(self, is_exclusive)
+	end
 #--
 ############### operations about charge #################
 #++

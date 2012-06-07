@@ -83,11 +83,12 @@ class SurveyTest < ActiveSupport::TestCase
 		clear(User, Survey)
 
 		jesse, jesse_s1 = *init_user_and_survey
+		oliver = init_oliver
 
-		retval = jesse_s1.update_tags("wrong_email@test.com", ["tag1", "tag2"])
+		retval = jesse_s1.update_tags(oliver, ["tag1", "tag2"])
 		assert_equal ErrorEnum::UNAUTHORIZED, retval
 
-		retval = jesse_s1.update_tags(jesse.email, ["tag1", "tag2"])
+		retval = jesse_s1.update_tags(jesse, ["tag1", "tag2"])
 		assert_equal ["tag1", "tag2"], retval["tags"]
 	end
 
@@ -95,17 +96,18 @@ class SurveyTest < ActiveSupport::TestCase
 		clear(User, Survey)
 
 		jesse, jesse_s1 = *init_user_and_survey
+		oliver = init_oliver
 
-		retval = jesse_s1.add_tag("wrong_email@test.com", "tag1")
+		retval = jesse_s1.add_tag(oliver, "tag1")
 		assert_equal ErrorEnum::UNAUTHORIZED, retval
 
-		retval = jesse_s1.add_tag(jesse.email, "tag1")
+		retval = jesse_s1.add_tag(jesse, "tag1")
 		assert_equal ["tag1"], retval["tags"]
 		
-		retval = jesse_s1.add_tag(jesse.email, "tag2")
+		retval = jesse_s1.add_tag(jesse, "tag2")
 		assert_equal ["tag1", "tag2"], retval["tags"]
 		
-		retval = jesse_s1.add_tag(jesse.email, "tag2")
+		retval = jesse_s1.add_tag(jesse, "tag2")
 		assert_equal ErrorEnum::TAG_EXIST, retval
 	end
 
@@ -113,19 +115,21 @@ class SurveyTest < ActiveSupport::TestCase
 		clear(User, Survey)
 
 		jesse, jesse_s1 = *init_user_and_survey
-		retval = jesse_s1.add_tag(jesse.email, "tag1")
-		retval = jesse_s1.add_tag(jesse.email, "tag2")
+		oliver = init_oliver
+
+		retval = jesse_s1.add_tag(jesse, "tag1")
+		retval = jesse_s1.add_tag(jesse, "tag2")
 		
-		retval = jesse_s1.remove_tag("wrong_email@test.com", "tag2")
+		retval = jesse_s1.remove_tag(oliver, "tag2")
 		assert_equal ErrorEnum::UNAUTHORIZED, retval
 		
-		retval = jesse_s1.remove_tag(jesse.email, "tag3")
+		retval = jesse_s1.remove_tag(jesse, "tag3")
 		assert_equal ErrorEnum::TAG_NOT_EXIST, retval
 		
-		retval = jesse_s1.remove_tag(jesse.email, "tag1")
+		retval = jesse_s1.remove_tag(jesse, "tag1")
 		assert_equal ["tag2"], retval["tags"]
 		
-		retval = jesse_s1.remove_tag(jesse.email, "tag2")
+		retval = jesse_s1.remove_tag(jesse, "tag2")
 		assert_equal [], retval["tags"]
 	end
 
@@ -133,35 +137,37 @@ class SurveyTest < ActiveSupport::TestCase
 		clear(User, Survey)
 
 		jesse, jesse_s1, jesse_s2, jesse_s3 = *init_user_and_surveys
-		retval = jesse_s1.add_tag(jesse.email, "tag1")
-		retval = jesse_s1.add_tag(jesse.email, "tag2")
-		retval = jesse_s1.add_tag(jesse.email, "tag3")
-		retval = jesse_s2.add_tag(jesse.email, "tag1")
-		retval = jesse_s2.add_tag(jesse.email, "tag2")
-		retval = jesse_s3.add_tag(jesse.email, "tag1")
+		retval = jesse_s1.add_tag(jesse, "tag1")
+		retval = jesse_s1.add_tag(jesse, "tag2")
+		retval = jesse_s1.add_tag(jesse, "tag3")
+		retval = jesse_s2.add_tag(jesse, "tag1")
+		retval = jesse_s2.add_tag(jesse, "tag2")
+		retval = jesse_s3.add_tag(jesse, "tag1")
+
+		oliver = init_oliver
 		
-		retval = Survey.get_object_list("wrong_email@test.com", ["tag1"])
+		retval = Survey.get_object_list(oliver, ["tag1"])
 		assert_equal 0, retval.length
 		
-		retval = Survey.get_object_list(jesse.email, ["tag1"])
+		retval = Survey.get_object_list(jesse, ["tag1"])
 		assert_equal 3, retval.length
 		assert retval.map {|s| s["survey_id"]}.include?(jesse_s1._id.to_s)
 		assert retval.map {|s| s["survey_id"]}.include?(jesse_s2._id.to_s)
 		assert retval.map {|s| s["survey_id"]}.include?(jesse_s3._id.to_s)
-		retval = Survey.get_object_list(jesse.email, ["tag1", "tag2"])
+		retval = Survey.get_object_list(jesse, ["tag1", "tag2"])
 		assert_equal 2, retval.length
 		assert retval.map {|s| s["survey_id"]}.include?(jesse_s1._id.to_s)
 		assert retval.map {|s| s["survey_id"]}.include?(jesse_s2._id.to_s)
-		retval = Survey.get_object_list(jesse.email, ["tag1", "tag2", "tag3"])
+		retval = Survey.get_object_list(jesse, ["tag1", "tag2", "tag3"])
 		assert_equal 1, retval.length
 		assert retval.map {|s| s["survey_id"]}.include?(jesse_s1._id.to_s)
 
 		jesse_s1.delete(jesse.email)
-		retval = Survey.get_object_list(jesse.email, ["tag1"])
+		retval = Survey.get_object_list(jesse, ["tag1"])
 		assert_equal 2, retval.length
 		assert retval.map {|s| s["survey_id"]}.include?(jesse_s2._id.to_s)
 		assert retval.map {|s| s["survey_id"]}.include?(jesse_s3._id.to_s)
-		retval = Survey.get_object_list(jesse.email, ["tag1", "已删除"])
+		retval = Survey.get_object_list(jesse, ["tag1", "已删除"])
 		assert_equal 1, retval.length
 		assert retval.map {|s| s["survey_id"]}.include?(jesse_s1._id.to_s)
 	end

@@ -30,7 +30,11 @@ class Survey
 	field :created_at, :type => Integer, default: -> {Time.now.to_i}
 	field :updated_at, :type => Integer
 	field :status, :type => Integer, default: 0
+	# can be 0 (closed), 1 (under review), 2 (revision), 3 (published)
+	field :publish_status, :type => Integer, default: 0
+	field :reject_message, :type => String, default: ""
 	field :pages, :type => Array, default: Array.new
+	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
 	field :constrains, :type => Array, default: Array.new
 	field :tags, :type => Array, default: Array.new
 	scope :surveys_of, lambda { |owner_email| where(:owner_email => owner_email, :status => 0) }
@@ -41,11 +45,30 @@ class Survey
 	before_update :set_updated_at, :clear_survey_object
 	before_destroy :clear_survey_object
 
+	around_update :around_update_work
+
 	META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
 
 	private
 	def set_updated_at
 		self.updated_at = Time.now.to_i
+	end
+
+	def around_update_work
+		before_publish_status = self.publish_status
+		yield
+
+		if (before_publish_status == 0 || before_publish_status == 2) && self.publish_status == 1
+			# the survey is submitted, and the status changes from closed or revision to under review
+		elsif before_publish_status == 1 && self.publish_status == 3
+			# the survey has passed the check
+		elsif before_publish_status == 1 && self.publish_status == 2
+			# the survey is rejected to be published
+		elsif before_publish_status != 0 && self.publish_status == 0
+			# the survey is closed
+		elsif before_publish_status != 3 && self.publish_status == 2
+			# the survey is set as revised
+		end
 	end
 
 	public
@@ -68,6 +91,7 @@ class Survey
 			method_obj = self.method("#{attr_name}".to_sym)
 			survey_obj[attr_name] = method_obj.call()
 		end
+		survey_obj["quota"] = Marshal.load(Marshal.dump(self.quota))
 		return survey_obj
 	end
 
@@ -244,7 +268,7 @@ class Survey
 	#* the survey object: if successfully obtained
 	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def self.get_survey_object(current_user_email, survey_id)
+	def self.get_survey_object(current_user, survey_id)
 		survey_object = Cache.read(survey_id)
 		if survey_object == nil
 			survey = Survey.find_by_id_include_trash(survey_id)
@@ -252,7 +276,7 @@ class Survey
 			survey_object = survey.serialize
 			Cache.write(survey_id, survey_object)
 		end
-		return ErrorEnum::UNAUTHORIZED if survey_object["owner_email"] != current_user_email
+		return ErrorEnum::UNAUTHORIZED if survey_object["owner_email"] != current_user.email && !current_user.is_admin
 		return survey_object
 	end
 
@@ -265,13 +289,13 @@ class Survey
 	#*retval*:
 	#* the survey object: if successfully cleared
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def update_tags(current_user_email, tags)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def update_tags(current_user, tags)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		tags.each do |tag|
 			self.tags << tag.to_s
 		end
 		self.save
-		return Survey.get_survey_object(current_user_email, self._id)
+		return Survey.get_survey_object(current_user, self._id)
 	end
 
 	#*description*: add a tag to the survey
@@ -283,12 +307,12 @@ class Survey
 	#*retval*:
 	#* the survey object: if successfully cleared
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def add_tag(current_user_email, tag)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def add_tag(current_user, tag)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		return ErrorEnum::TAG_EXIST if self.tags.include?(tag)
 		self.tags << tag.to_s
 		self.save
-		return Survey.get_survey_object(current_user_email, self._id)
+		return Survey.get_survey_object(current_user, self._id)
 	end
 
 	#*description*: remove a tag from the survey
@@ -300,29 +324,108 @@ class Survey
 	#*retval*:
 	#* the survey object: if successfully cleared
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def remove_tag(current_user_email, tag)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def remove_tag(current_user, tag)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		return ErrorEnum::TAG_NOT_EXIST if !self.tags.include?(tag)
 		self.tags.delete(tag)
 		self.save
-		return Survey.get_survey_object(current_user_email, self._id)
+		return Survey.get_survey_object(current_user, self._id)
+	end
+
+	#*description*: submit a survey to the administrator for reviewing
+	#
+	#*params*:
+	#* the user doing this operation
+	#
+	#*retval*:
+	#* true
+	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
+	#* ErrorEnum ::WRONG_PUBLISH_STATUS
+	def submit(current_user)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email && !current_user.is_admin
+		return ErrorEnum::WRONG_PUBLISH_STATUS if ![0, 2].include?(self.publish_status)
+		self.publish_status = 1
+		return self.save
+	end
+
+	#*description*: reject a survey
+	#
+	#*params*:
+	#* the user doing this operation
+	#
+	#*retval*:
+	#* true
+	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
+	#* ErrorEnum ::WRONG_PUBLISH_STATUS
+	def reject(current_user)
+		return ErrorEnum::UNAUTHORIZED if !current_user.is_admin
+		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != 1
+		self.publish_status = 2
+		return self.save
+	end
+
+	#*description*: publish a survey
+	#
+	#*params*:
+	#* the user doing this operation
+	#
+	#*retval*:
+	#* true
+	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
+	#* ErrorEnum ::WRONG_PUBLISH_STATUS
+	def publish(current_user)
+		return ErrorEnum::UNAUTHORIZED if !current_user.is_admin
+		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != 1
+		self.publish_status = 3
+		return self.save
+	end
+
+	#*description*: close a survey
+	#
+	#*params*:
+	#* the user doing this operation
+	#
+	#*retval*:
+	#* true
+	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
+	#* ErrorEnum ::WRONG_PUBLISH_STATUS
+	def close(current_user)
+		return ErrorEnum::UNAUTHORIZED if !current_user.is_admin
+		self.publish_status = 0
+		return self.save
+	end
+
+	#*description*: revise a survey
+	#
+	#*params*:
+	#* the user doing this operation
+	#
+	#*retval*:
+	#* true
+	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
+	#* ErrorEnum ::WRONG_PUBLISH_STATUS
+	def revise(current_user)
+		return ErrorEnum::UNAUTHORIZED if !current_user.is_admin
+		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != 3
+		self.publish_status = 2
+		return self.save
 	end
 
 	#*description*: obtain a list of Survey objects given a list of tags
 	#
 	#*params*:
-	#* email of the user doing this operation
+	#* the user doing this operation
 	#* tags
 	#
 	#*retval*:
 	#* the survey object: if successfully cleared
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def self.get_object_list(current_user_email, tags)
+	def self.get_object_list(current_user, tags)
 		if tags.include?("已删除")
-			surveys = Survey.trash_surveys_of(current_user_email)
+			surveys = Survey.trash_surveys_of(current_user.email)
 			tags.delete("已删除")
 		else
-			surveys = Survey.surveys_of(current_user_email)
+			surveys = Survey.surveys_of(current_user.email)
 		end
 		list = []
 		surveys.each do |survey|
@@ -333,7 +436,7 @@ class Survey
 					break
 				end
 			end
-			list << Survey.get_survey_object(current_user_email, survey._id) if !no_tag
+			list << Survey.get_survey_object(current_user, survey._id) if !no_tag
 		end
 		return list
 	end
@@ -660,4 +763,86 @@ class Survey
 		return self.save
 	end
 
+	def show_quota(current_user)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email && !current_user.is_admin
+		return Marshal.load(Marshal.dump(self.quota))
+	end
+
+	def add_quota_rule(current_user, quota_rule)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email && !current_user.is_admin
+		quota = Quota.new(self.quota)
+		return quota.add_rule(quota_rule, self)
+	end
+
+	def update_quota_rule(current_user, quota_rule_index, quota_rule)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email && !current_user.is_admin
+		quota = Quota.new(self.quota)
+		return quota.update_rule(quota_rule_index, quota_rule, self)
+	end
+
+	def delete_quota_rule(current_user, quota_rule_index)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email && !current_user.is_admin
+		quota = Quota.new(self.quota)
+		return quota.delete_rule(quota_rule_index, self)
+	end
+
+	def set_exclusive(current_user, is_exclusive)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email && !current_user.is_admin
+		quota = Quota.new(self.quota)
+		return quota.set_exclusive(is_exclusive, self)
+	end
+
+	class Quota
+		attr_accessor :rules, :is_exclusive
+		CONDITION_TYPE = (0..4).to_a
+		def initialize(quota)
+			@is_exclusive = !!quota.is_exclusive
+			@rules = Marshal.load(Marshal.dump(quota.rules))
+		end
+
+		def add_rule(rule, survey)
+			return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].class != Interger
+			rule["conditions"].each do |condition|
+				return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include(condition["condition_type"])
+			end
+			@rules << rule
+			survey.quota = self.serialize
+			survey.save
+			return survey.quota
+		end
+
+		def delete_rule(rule_index, survey)
+			return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= rule_index
+			@rules.delete_at(rule_index)
+			survey.quota = self.serialize
+			survey.save
+			return survey.quota
+		end
+
+		def update_rule(rule_index, rule, survey)
+			return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= rule_index
+			return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].class != Interger
+			rule["conditions"].each do |condition|
+				return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include(condition["condition_type"])
+			end
+			@rules[rule_index] = rule
+			survey.quota = self.serialize
+			survey.save
+			return survey.quota
+		end
+
+		def set_exclusive(is_exclusive, survey)
+			@is_exclusive = !!is_exclusive
+			survey.quota = self.serialize
+			survey.save
+			return survey.quota
+		end
+
+		def serialize
+			quota_object = {}
+			quota_object["rules"] = @rules
+			quota_object["is_exclusive"] = @is_exclusive
+			return quota_object
+		end
+	end
 end

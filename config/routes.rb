@@ -42,9 +42,18 @@ OopsData::Application.routes.draw do
 			put 'update_tags'
 			put 'add_tag'
 			put 'remove_tag'
+			get 'submit'
+			get 'reject'
+			get 'publish'
+			get 'close'
+			get 'revise'
 		end
 		resources :pages
-		resources :questions do 
+		resources :questions
+		resources :quotas do
+			collection do
+				post :set_exclusive
+			end
 		end
 	end
 	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/move' => 'pages#move'

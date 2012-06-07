@@ -366,4 +366,158 @@ class SurveysController < ApplicationController
 			format.json	{ render :json => retval and return }
 		end
 	end
+
+	#*method*: get
+	#
+	#*url*: /surveys/:survey_id/submit
+	#
+	#*description*: submit a survey to the administrator for reviewing
+	#
+	#*params*:
+	#* survey_id: id of the suvey submitted
+	#
+	#*retval*:
+	#* true when the survey is successfully submitted
+	#* ErrorEnum::SURVEY_NOT_EXIST
+	#* ErrorEnum::UNAUTHORIZED
+	#* ErrorEnum::WRONG_PUBLISH_STATUS
+	def submit
+		retval = @current_user.submit_survey(params[:id])
+		case retval 
+		when ErrorEnum::SURVEY_NOT_EXIST
+			flash[:notice] = "该调查问卷不存在"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		when ErrorEnum::UNAUTHORIZED
+			flash[:notice] = "没有权限"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
+			end
+		when ErrorEnum::WRONG_PUBLISH_STATUS
+			flash[:notice] = "不能提交问卷"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::WRONG_PUBLISH_STATUS and return }
+			end
+		else
+			flash[:notice] = "已成功提交问卷"
+			respond_to do |format|
+				format.json	{ render :json => true and return }
+			end
+		end
+	end
+
+	#*method*: get
+	#
+	#*url*: /surveys/:survey_id/reject
+	#
+	#*description*: reject a survey to be published
+	#
+	#*params*:
+	#* survey_id: id of the suvey rejected
+	#
+	#*retval*:
+	#* true when the survey is successfully rejected
+	#* ErrorEnum::SURVEY_NOT_EXIST
+	#* ErrorEnum::UNAUTHORIZED
+	#* ErrorEnum::WRONG_PUBLISH_STATUS
+	def reject
+		retval = @current_user.reject_survey(params[:id])
+		case retval 
+		when ErrorEnum::SURVEY_NOT_EXIST
+			flash[:notice] = "该调查问卷不存在"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		when ErrorEnum::UNAUTHORIZED
+			flash[:notice] = "没有权限"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
+			end
+		when ErrorEnum::WRONG_PUBLISH_STATUS
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::WRONG_PUBLISH_STATUS and return }
+			end
+		else
+			flash[:notice] = "已成功拒绝问卷"
+			respond_to do |format|
+				format.json	{ render :json => true and return }
+			end
+		end
+	end
+
+	#*method*: get
+	#
+	#*url*: /surveys/:survey_id/publish
+	#
+	#*description*: publish
+	#
+	#*params*:
+	#* survey_id: id of the suvey published
+	#
+	#*retval*:
+	#* true when the survey is successfully published
+	#* ErrorEnum::SURVEY_NOT_EXIST
+	#* ErrorEnum::UNAUTHORIZED
+	#* ErrorEnum::WRONG_PUBLISH_STATUS
+	def publish
+		retval = @current_user.publish_survey(params[:id])
+		case retval 
+		when ErrorEnum::SURVEY_NOT_EXIST
+			flash[:notice] = "该调查问卷不存在"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		when ErrorEnum::UNAUTHORIZED
+			flash[:notice] = "没有权限"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
+			end
+		when ErrorEnum::WRONG_PUBLISH_STATUS
+			flash[:notice] = "不能提交问卷"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::WRONG_PUBLISH_STATUS and return }
+			end
+		else
+			flash[:notice] = "已成功发布问卷"
+			respond_to do |format|
+				format.json	{ render :json => true and return }
+			end
+		end
+	end
+
+	#*method*: get
+	#
+	#*url*: /surveys/:survey_id/close
+	#
+	#*description*: close a suvey
+	#
+	#*params*:
+	#* survey_id: id of the suvey to be closed
+	#
+	#*retval*:
+	#* true when the survey is successfully closed
+	#* ErrorEnum::SURVEY_NOT_EXIST
+	#* ErrorEnum::UNAUTHORIZED
+	#* ErrorEnum::WRONG_PUBLISH_STATUS
+	def close
+		retval = @current_user.close_survey(params[:id])
+		case retval 
+		when ErrorEnum::SURVEY_NOT_EXIST
+			flash[:notice] = "该调查问卷不存在"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		when ErrorEnum::UNAUTHORIZED
+			flash[:notice] = "没有权限"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
+			end
+		else
+			flash[:notice] = "已成功发布问卷"
+			respond_to do |format|
+				format.json	{ render :json => true and return }
+			end
+		end
+	end
 end
