@@ -8,6 +8,19 @@ class SinaUser < ThirdPartyUser
   field :profile_image_url, :type => String
   
   #--
+  # ************* instance attribute's methods*****************
+  #++
+  
+  #*attribute*: name
+  # the same getter with db
+  
+  #*attribute*: gender
+  # the same getter with db
+  
+  #*attribute*: locale
+  alias locale location
+  
+  #--
   #***************** class methods *************
   #++
   
@@ -61,6 +74,11 @@ class SinaUser < ThirdPartyUser
       sina_user = ThirdPartyUser.update_by_hash(sina_user, response_data)
     end
     
+    if sina_user.gender.nil? then
+      #first time, get user base info 
+      sina_user = sina_user.update_user_info
+    end
+    
     return sina_user
   end
   
@@ -72,18 +90,107 @@ class SinaUser < ThirdPartyUser
 	#http://open.weibo.com/wiki/API%E6%96%87%E6%A1%A3_V2
 	#
 	#*params*:
-	#
 	#* opts: hash.
-  def call_method(opts = {:method => "users/show"})
-    @params={}
-    @params[:access_token] = self.access_token
-    super(opts)
-    retval = Tool.send_get_request("https://api.weibo.com/2/#{opts[:method]}.json#{@params_url}", true)  
+  def call_method(url_method="GET", opts = {:method => "users/show", :uid => self.user_id})
+    
+    if url_method.downcase == "get" then
+      @params={}
+      @params["access_token"] = self.access_token
+      super(opts)
+      retval = Tool.send_get_request("https://api.weibo.com/2/#{opts[:method]}.json#{@params_url}", true) 
+    else
+      opts["access_token"] = self.access_token
+      retval = Tool.send_post_request("https://api.weibo.com/2/#{opts[:method]}.json", opts.select!{|k,v| k.to_s != "method"}, true)
+    end
     return JSON.parse(retval.body)
   end
   
-  def get_user_info
-    call_method({:method => "users/show", :uid => self.user_id})
+  alias get_user_info call_method
+  
+	#*description*: update user base info, it involves get_user_info.
+	#
+	#*params*: none
+	#
+	#*retval*:
+	#* instance: a updated renren user.
+  def update_user_info
+    response_data = get_user_info
+      
+    #select attribute
+    response_data.select!{|k,v| %{name location gender description profile_image_url}.split.include?(k.to_s) }
+    
+    #update
+    return ThirdPartyUser.update_by_hash(self, response_data)
   end
   
+  #*description*: say weibo text
+	#
+	#*params*: 
+	#* status: what is you want to say.
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def say_text(status)
+    retval = call_method("post", {:method => "statuses/update", :status =>text_content})
+    
+    successful?(retval)
+  end
+  
+  #*description*: repost a weibo without message
+	#
+	#*params*: 
+	#* text_id: the weibo's id which is you want to repost.
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def repost_text(text_id)
+    retval = call_method("post", {:method => "statuses/repost", :id => text_id})
+    
+    successful?(retval)
+  end
+
+  #*description*: repost a weibo with message
+	#
+	#*params*: 
+	#* text_id: the weibo's id which is you want to repost.
+	#* status: what is you want to say.
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def repost_text_with_message(text_id, status)
+    retval = call_method("post", {:method => "statuses/repost", :id => text_id, :status => status})
+    
+    successful?(retval)
+  end
+
+  #*description*: follow someone.
+	#
+	#*params*: 
+	#* friend_id: the friend's id.
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def create_friendship(friend_id)
+    retval = call_method("post", {:method => "friendships/create", :id => friend_id})
+    
+    successful?(retval)
+  end
+  
+  #*description*: logout action
+	#
+	#*params*: none
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def logout
+    retval = call_method("get", {:method => "account/end_session"})
+    
+    successful?(retval)
+  end
+
 end

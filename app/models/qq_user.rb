@@ -6,6 +6,23 @@ class QqUser < ThirdPartyUser
   field :figureurl, :type => String
   
   #--
+  # ************* instance attribute's methods*****************
+  #++
+  
+  #*attribute*: name
+  def name
+    @nickname
+  end
+  
+  #*attribute*: gender
+  # the same getter with db
+  
+  #*attribute*: locale
+  def locale
+    nil
+  end
+  
+  #--
   #***************** class methods *************
   #++
   
@@ -52,7 +69,7 @@ class QqUser < ThirdPartyUser
 	  
     #get user_id through access_token
 		retval = Tool.send_get_request("https://graph.qq.com/oauth2.0/me?access_token=#{access_token}", true)
-		Logger.new("log/development.log").info(retval.to_s)
+		Logger.new("log/development.log").info("save_tp_user: "+retval.body.to_s)
 		response_data2 = JSON.parse(retval.body.split(' ')[1])
 		user_id = response_data2["openid"]
 		

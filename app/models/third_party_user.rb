@@ -147,7 +147,7 @@ class ThirdPartyUser
 	  compute_params(opts)
 	end
 	
-	# be involed from call_method method.
+	# be involed from call_method method .
 	#
 	#*params*:
 	#
@@ -175,5 +175,22 @@ class ThirdPartyUser
 	  self.scope = scope
 	  return self.save
 	end
+	
+	private
+	
+  #*description*: judge of a text's action.
+	#
+	#*params*: 
+	#* hash: a hash which some website response.
+	#
+	#*retval*:
+	#* bool: true or false
+  def successful?(hash)
+    if hash.include?("error") then
+      return false
+    else
+      return true
+    end   
+  end
 		
 end

@@ -78,15 +78,9 @@ class RenrenUser < ThirdPartyUser
       renren_user = ThirdPartyUser.update_by_hash(renren_user, response_data)
     end
     
-    if renren_user.sex.nil?
+    if renren_user.gender.nil?
       # first time get user base information.
-      response_data = renren_user.call_method()[0]
-      
-	    # reject the same function field
-	    response_data.select!{|k,v| !k.to_s.include?("id") }
-      
-      # update info 
-      renren_user = ThirdPartyUser.update_by_hash(renren_user, response_data)
+      renren_user = renren_user.update_user_info
     end
     
     return renren_user
@@ -101,6 +95,10 @@ class RenrenUser < ThirdPartyUser
 	#
 	#*params*:
 	#* opts: hash.
+	#
+	#*retval*:
+	#
+	# a hash data
   def call_method(opts = {:method => "users.getInfo"})
     @params = {}
     @params[:call_id] = Time.now.to_i
@@ -112,7 +110,32 @@ class RenrenUser < ThirdPartyUser
     ActiveSupport::JSON.decode(Tool.send_post_request('http://api.renren.com/restserver.do', update_params(opts)).body)
   end
   
-  alias get_user_info  call_method
+	#*description*: get user base info, it involves call_method.
+	#
+	#*params*: none
+	#
+	#*retval*:
+	#
+	# a hash data
+  def get_user_info
+    call_method()[0]
+  end
+  
+	#*description*: get user base info, it involves get_user_info.
+	#
+	#*params*: none
+	#
+	#*retval*:
+	#* instance: a updated renren user.
+  def update_user_info
+    response_data = get_user_info
+      
+    # reject the same function field
+    response_data.select!{|k,v| !k.to_s.include?("id") }
+    
+    # update info 
+    return ThirdPartyUser.update_by_hash(self, response_data)
+  end
   
   #*description*: reget access_token from refresh_token for other works
   #

@@ -39,9 +39,16 @@ class HomeController < ApplicationController
     #
     # renren's privileges is not active, why?
     
-    tp_user = SinaUser.where(:user_id => "1957822497")[0]
+    #tp_user = SinaUser.where(:user_id => "1957822497")[0]
+    #@info = "no info."
+    #@info = tp_user.call_method() if tp_user
+    #@info = tp_user.say_text("第三方登录测试发送微博5。")
+    #@info = tp_user.repost_text("3454675519532348")
+    #@info = tp_user.repost_text_with_message("3454675519532348","with message")
+    
+    tp_user = QqUser.where(:user_id => "2504A9A310DDCC3DD9823B59323D3A47")[0]
     @info = "no info."
-    @info = tp_user.call_method({:method => "users/show", :uid => tp_user.user_id}) if tp_user
+    @info = tp_user.call_method()
     
   rescue => ex 
     flash[:notice] = "error: #{ex.class} => #{ex.message}"
