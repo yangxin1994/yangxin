@@ -71,13 +71,11 @@ class SinaUser < ThirdPartyUser
       sina_user.save
       # this is not update instance, it would lead that other info should be seen in next login.
     else
-      sina_user = ThirdPartyUser.update_by_hash(sina_user, response_data)
+      sina_user.update_by_hash(response_data)
     end
     
-    if sina_user.gender.nil? then
-      #first time, get user base info 
-      sina_user = sina_user.update_user_info
-    end
+    #first time, get user base info 
+    sina_user.update_user_info  if sina_user.gender.nil?
     
     return sina_user
   end
@@ -90,17 +88,20 @@ class SinaUser < ThirdPartyUser
 	#http://open.weibo.com/wiki/API%E6%96%87%E6%A1%A3_V2
 	#
 	#*params*:
+	#* http_method: get or post.
 	#* opts: hash.
-  def call_method(url_method="GET", opts = {:method => "users/show", :uid => self.user_id})
+  def call_method(http_method="GET", opts = {:method => "users/show", :uid => self.user_id})
     
-    if url_method.downcase == "get" then
-      @params={}
-      @params["access_token"] = self.access_token
+    @params={}
+    @params["access_token"] = self.access_token
+    method = opts[:method] || opts["method"]
+    
+    if http_method.downcase == "get" then
       super(opts)
-      retval = Tool.send_get_request("https://api.weibo.com/2/#{opts[:method]}.json#{@params_url}", true) 
+      retval = Tool.send_get_request("https://api.weibo.com/2/#{method}.json#{@params_url}", true) 
     else
-      opts["access_token"] = self.access_token
-      retval = Tool.send_post_request("https://api.weibo.com/2/#{opts[:method]}.json", opts.select!{|k,v| k.to_s != "method"}, true)
+      opts.merge!(@params).select!{|k,v| k.to_s != "method"}
+      retval = Tool.send_post_request("https://api.weibo.com/2/#{method}.json", opts, true)
     end
     return JSON.parse(retval.body)
   end
@@ -114,13 +115,8 @@ class SinaUser < ThirdPartyUser
 	#*retval*:
 	#* instance: a updated renren user.
   def update_user_info
-    response_data = get_user_info
-      
-    #select attribute
-    response_data.select!{|k,v| %{name location gender description profile_image_url}.split.include?(k.to_s) }
-    
-    #update
-    return ThirdPartyUser.update_by_hash(self, response_data)
+    @select_attrs = %{name location gender description profile_image_url}
+    super
   end
   
   #*description*: say weibo text
@@ -132,7 +128,7 @@ class SinaUser < ThirdPartyUser
 	#
 	# say successfully or not.
   def say_text(status)
-    retval = call_method("post", {:method => "statuses/update", :status =>text_content})
+    retval = call_method("post", {:method => "statuses/update", :status =>status})
     
     successful?(retval)
   end
@@ -177,6 +173,20 @@ class SinaUser < ThirdPartyUser
   def create_friendship(friend_id)
     retval = call_method("post", {:method => "friendships/create", :id => friend_id})
     
+    successful?(retval)
+  end
+  
+  #*description*: follow one topic.
+	#
+	#*params*: 
+	#* topic_name: the topic key word.
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def follow_topic(topic_name)
+    retval = call_method("post", {:method => "friendships/create", :trend_name => topic_name})
+
     successful?(retval)
   end
   

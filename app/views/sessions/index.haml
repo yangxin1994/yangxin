@@ -4,7 +4,7 @@
 
 =link_to "与新浪微博连接", "https://api.weibo.com/oauth2/authorize?client_id=#{@sina_app_key}&response_type=code&redirect_uri=#{@sina_redirect_uri}&display=page"
 
-=link_to image_tag("/assets/qq_login_button.png", :border => 0), "https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=#{@qq_app_id}&redirect_uri=#{@qq_redirect_uri}"
+=link_to image_tag("/assets/qq_login_button.png", :border => 0), "https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=#{@qq_app_id}&redirect_uri=#{@qq_redirect_uri}&scope=add_share"
 
 =link_to "用google帐号登录", "https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=#{@google_client_id}&redirect_uri=#{@google_redirect_uri}&scope=https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
 

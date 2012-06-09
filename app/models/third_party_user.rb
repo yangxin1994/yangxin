@@ -138,6 +138,37 @@ class ThirdPartyUser
 	
 	#****** instance methods **********
 	
+	#*description*: update specifi ThirdPartyUser sub class instance 
+	#by hash which has update attributes.
+	#
+	#*params*:
+	#* hash
+	#
+	#*retval*:
+	#* self: like GoogleUser's instance, SinaUser's instance ...
+	def update_by_hash(hash)
+	  attrs = self.attributes
+	  attrs.merge!(hash)
+	  self.class.collection.find_and_modify(:query => {_id: self.id}, :update => attrs, :new => true)
+	  return self
+	end
+	
+	#*description*: update user base info, it involves get_user_info.
+	#
+	#*params*: none
+	#
+	#*retval*:
+	#* instance: a updated tp_user instance
+  def update_user_info
+    response_data = get_user_info
+      
+    #select attribute
+    response_data.select!{|k,v| @select_attrs.split.include?(k.to_s) }
+    
+    #update
+    return self.update_by_hash(response_data)
+  end
+	
 	# it can call any methods from third_party's API. this method should be always overwrite.
 	#
 	#*params*:
@@ -186,10 +217,10 @@ class ThirdPartyUser
 	#*retval*:
 	#* bool: true or false
   def successful?(hash)
-    if hash.include?("error") then
-      return false
-    else
+    if hash.select{|k,v| k.to_s=~/error/}.empty? then
       return true
+    else
+      return false
     end   
   end
 		
