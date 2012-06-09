@@ -90,7 +90,7 @@ class ThirdPartyUser
 	
 	
 	# define token logic. 
-	# it dependence on sub class methods: get_access_token, save_tp_user.
+	# it dependence on sub class methods: get_access_token, save_tp_user, and its method: compute_status.
 	#
 	#*params*:
   #
@@ -126,7 +126,7 @@ class ThirdPartyUser
 	#status have three values(SAVE_FAILED, THIRD_PARTY_USER_NOT_BIND, EMAIL_NOT_ACTIVATED, true).
 	#tp_user do not change.
 	def self.compute_status(tp_user)
-	  Logger.new("log/development.log").info("tp_user: #{tp_user.to_s}")
+	  #Logger.new("log/development.log").info("tp_user: #{tp_user.to_s}")
     return [ErrorEnum::SAVE_FAILED, nil] if tp_user.nil?
     return [ErrorEnum::THIRD_PARTY_USER_NOT_BIND, tp_user] if tp_user.email.nil? || tp_user.email ==""
     user = User.find_by_email(tp_user.email)
@@ -206,8 +206,6 @@ class ThirdPartyUser
 	  self.scope = scope
 	  return self.save
 	end
-	
-	private
 	
   #*description*: judge of a text's action.
 	#

@@ -79,8 +79,11 @@ class GoogleUser < ThirdPartyUser
       google_user = GoogleUser.new(:website => "google", :user_id => user_id, :access_token => access_token)
       google_user.save
     else
-      google_user = ThirdPartyUser.update_by_hash(google_user, response_data)
+      google_user.update_by_hash(response_data)
     end
+    
+    #if no base info, get user base info
+    google_user.update_user_info  if google_user.gender.nil?
     
     return google_user
   end
@@ -94,15 +97,35 @@ class GoogleUser < ThirdPartyUser
 	#*description*: it can call any methods from third_party's API.
 	#
 	#*params*:
+	#* http_method: get or post.
 	#* opts: hash.
-  def call_method(opts = {:method => "userinfo"})
+  def call_method(http_method="get", opts = {:method => "userinfo"})
     @params={}
     @params[:access_token] = self.access_token
-    super(opts)
-		Logger.new("log/development.log").info("get api url: https://www.googleapis.com/oauth2/v1/#{opts[:method]}#{@params_url}")
-    retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/#{opts[:method]}#{@params_url}", true) 
+    method = opts[:method] || opts["method"]
+    
+    if http_method.downcase == "get"  then
+      super(opts)
+		  #Logger.new("log/development.log").info("get api url: https://www.googleapis.com/oauth2/v1/#{opts[:method]}#{@params_url}")
+      retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/#{method}#{@params_url}", true) 
+    else
+      opts.merge!(@params).select!{|k,v| k.to_s != "method"}
+      retval = Tool.send_post_request("https://api.weibo.com/2/#{method}.json", opts, true)
+    end
     return JSON.parse(retval.body)
   end
   
+  alias get_user_info call_method
+  
+	#*description*: update user base info, it involves get_user_info.
+	#
+	#*params*: none
+	#
+	#*retval*:
+	#* instance: a updated google user.
+  def update_user_info
+    @select_attrs = %{name gender locale google_email}
+    super
+  end
   
 end

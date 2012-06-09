@@ -88,7 +88,7 @@ class SinaUser < ThirdPartyUser
 	#http://open.weibo.com/wiki/API%E6%96%87%E6%A1%A3_V2
 	#
 	#*params*:
-	#* http_method: get or post.
+	#* http_method: get(default) or post.
 	#* opts: hash.
   def call_method(http_method="GET", opts = {:method => "users/show", :uid => self.user_id})
     
@@ -113,7 +113,7 @@ class SinaUser < ThirdPartyUser
 	#*params*: none
 	#
 	#*retval*:
-	#* instance: a updated renren user.
+	#* instance: a updated sina user.
   def update_user_info
     @select_attrs = %{name location gender description profile_image_url}
     super

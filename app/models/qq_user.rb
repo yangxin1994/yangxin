@@ -129,7 +129,7 @@ class QqUser < ThirdPartyUser
 	#*params*: none
 	#
 	#*retval*:
-	#* instance: a updated renren user.
+	#* instance: a updated qq user.
   def update_user_info
     @select_attrs = %{nickname gender figureurl}
     super

@@ -94,20 +94,25 @@ class RenrenUser < ThirdPartyUser
 	#http://wiki.dev.renren.com/wiki/API
 	#
 	#*params*:
+	#* http_method: get or post(default).
 	#* opts: hash.
 	#
 	#*retval*:
 	#
 	# a hash data
-  def call_method(opts = {:method => "users.getInfo"})
+  def call_method(http_url="post", opts = {:method => "users.getInfo"})
     @params = {}
     @params[:call_id] = Time.now.to_i
     @params[:format] = 'json'
     @params[:v] = '1.0'
     @params[:access_token] = self.access_token
     
-    Logger.new("log/development.log").info("get api url: http://api.renren.com/restserver.do, #{update_params(opts)}")
-    ActiveSupport::JSON.decode(Tool.send_post_request('http://api.renren.com/restserver.do', update_params(opts)).body)
+    if http_url.downcase == "post" then
+    #Logger.new("log/development.log").info("get api url: http://api.renren.com/restserver.do, #{update_params(opts)}")
+      return ActiveSupport::JSON.decode(Tool.send_post_request('http://api.renren.com/restserver.do', update_params(opts)).body)
+    else
+      nil
+    end
   end
   
 	#*description*: get user base info, it involves call_method.
@@ -121,6 +126,39 @@ class RenrenUser < ThirdPartyUser
     call_method()[0]
   end
   
+  #*description*: add share of a link information.
+  #API: http://wiki.dev.renren.com/wiki/Share.share
+	#
+	#*params*: 
+	#* url: the place which you want to share
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def add_share(url)
+    retval = call_method("post", {:method => "share.share", :type => 6, :url => url}) 
+    
+    successful?(retval)   
+  end
+  
+  #*description*: add share of a link information.
+  #
+  #Note: your like the url page must has "<meta property="xn:app_id" content="your appid" />".
+  #Otherwise, it would be lose.Maybe, you should see 
+  # API: http://wiki.dev.renren.com/wiki/Like.like
+	#
+	#*params*: 
+	#* url: the place which you like
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def add_like(url)
+    retval = call_method("post", {:method => "like.like", :url => url}) 
+    
+    successful?(retval)  
+  end
+  
 	#*description*: get user base info, it involves get_user_info.
 	#
 	#*params*: none
@@ -128,13 +166,8 @@ class RenrenUser < ThirdPartyUser
 	#*retval*:
 	#* instance: a updated renren user.
   def update_user_info
-    response_data = get_user_info
-      
-    # reject the same function field
-    response_data.select!{|k,v| !k.to_s.include?("id") }
-    
-    # update info 
-    return ThirdPartyUser.update_by_hash(self, response_data)
+    @select_attrs = %{name sex headurl}
+    super
   end
   
   #*description*: reget access_token from refresh_token for other works

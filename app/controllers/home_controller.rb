@@ -27,17 +27,16 @@ class HomeController < ApplicationController
   # POST 
   def get_more_info
   
-    #tp_user = GoogleUser.where(:email => "oopsdata@yeah.net")[0]
+    #tp_user = GoogleUser.where(:user_id => "103742878683694305269")[0]
     #@info = "no info."
-    #@info = tp_user.call_method() if tp_user
+    #@info = tp_user.get_user_info
     
-    #tp_user = RenrenUser.where(:user_id => "464063528")[0]
-    #@info = "no info."
-    #@info = tp_user.call_method({:method  => "users.hasAppPermission", :ext_perm => "publish_share"}) if tp_user
-    #@info = tp_user.call_method({:method  => "status.gets"}) if tp_user
+    tp_user = RenrenUser.where(:user_id => "464063528")[0]
+    @info = "no info."
+    #@info = tp_user.call_method("post",{:method  => "users.hasAppPermission", :ext_perm => "publish_share"}) if tp_user
     #@info = tp_user.call_method() if tp_user
-    #
-    # renren's privileges is not active, why?
+    #@info = tp_user.add_share("http://liucm.sinaapp.com")
+    @info = tp_user.add_like("http://liucm.sinaapp.com")
     
     #tp_user = SinaUser.where(:user_id => "1957822497")[0]
     #@info = "no info."
@@ -47,8 +46,8 @@ class HomeController < ApplicationController
     #@info = tp_user.repost_text("3454675519532348")
     #@info = tp_user.repost_text_with_message("3454675519532348","with message")
     
-    tp_user = QqUser.where(:user_id => "2504A9A310DDCC3DD9823B59323D3A47")[0]
-    @info = "no info."
+    #tp_user = QqUser.where(:user_id => "2504A9A310DDCC3DD9823B59323D3A47")[0]
+    #@info = "no info."
     #@info = tp_user.call_method()
     #@info = tp_user.add_share("测试分享功能","http://liucm.sinaapp.com/index.php/archives/5/", "个人博客", "正如标题, 今天是星期六，而我在公司这里。")
     
