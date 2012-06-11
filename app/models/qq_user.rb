@@ -69,6 +69,7 @@ class QqUser < ThirdPartyUser
 		retval = Tool.send_get_request("https://graph.qq.com/oauth2.0/me?access_token=#{access_token}", true)
 		#Logger.new("log/development.log").info("save_tp_user: "+retval.body.to_s)
 		response_data2 = JSON.parse(retval.body.split(' ')[1])
+		
 		user_id = response_data2["openid"]
 		
 		# reject the same function field
@@ -92,6 +93,8 @@ class QqUser < ThirdPartyUser
     qq_user.update_user_info if qq_user.gender.nil?
     
     return qq_user
+  rescue
+    return nil
   end
   
   #--

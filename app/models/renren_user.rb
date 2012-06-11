@@ -82,6 +82,8 @@ class RenrenUser < ThirdPartyUser
     renren_user.update_user_info if renren_user.gender.nil?
     
     return renren_user
+  rescue
+    return nil
   end
   
   #--

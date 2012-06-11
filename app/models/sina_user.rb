@@ -78,6 +78,8 @@ class SinaUser < ThirdPartyUser
     sina_user.update_user_info  if sina_user.gender.nil?
     
     return sina_user
+  rescue
+    return nil
   end
   
   #--

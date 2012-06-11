@@ -61,8 +61,11 @@ class GoogleUser < ThirdPartyUser
     access_token = response_data["access_token"]
   
     #get user_id
-    retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/userinfo?access_token=#{access_token}", true)
+    retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/userinfo?access_token=#{access_token}", true)    
 		response_data2 = JSON.parse(retval.body)
+		
+		return nil if successful?(response_data2)
+		
 		#Logger.new("log/development.log").info("respo2: "+response_data2.to_s)
 		user_id = response_data2["id"]
 		
@@ -86,6 +89,8 @@ class GoogleUser < ThirdPartyUser
     end
     
     return google_user
+  rescue 
+    return nil
   end
   
   #--
