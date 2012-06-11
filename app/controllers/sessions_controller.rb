@@ -293,6 +293,7 @@ class SessionsController < ApplicationController
 	#* status
 	#* tp_user
 	def deal_connect(status, tp_user)
+	  Logger.new("log/development.log").info("status: #{status.to_s}, tp_user: #{tp_user.to_s}")
 	  case status
 	  when ErrorEnum::SAVE_FAILED
 	    flash[:error] ="数据保存有误！"
@@ -310,8 +311,12 @@ class SessionsController < ApplicationController
       end
       
       # if not login, render page
-	    @third_party_info = encrypt_third_party_user_id(tp_user.website, tp_user.user_id)
-	    Logger.new("log/development.log").info("#{tp_user.website}: #{tp_user.user_id}") 
+	    #@third_party_info = 
+	    Logger.new("log/development.log").info("#{tp_user.website}: #{tp_user.user_id}")
+      if tp_user.website == "google" then
+        flash[:google_email] = tp_user.google_email
+      end
+      flash[:third_party_info] = encrypt_third_party_user_id(tp_user.website, tp_user.user_id)
       flash[:notice] = "第三方登录成功！请登录OopsData帐户或者注册进行绑定。"
       render :action => "index", :controller => "sessions"
 	  when ErrorEnum::EMAIL_NOT_ACTIVATED

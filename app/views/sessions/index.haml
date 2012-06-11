@@ -12,7 +12,7 @@
 
   %p
     %label 邮箱
-    = text_field_tag 'user[email]'
+    = text_field_tag 'user[email]', flash[:google_email]
 
   %p
     %label 密码

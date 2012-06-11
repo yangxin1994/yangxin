@@ -78,10 +78,8 @@ class RenrenUser < ThirdPartyUser
       renren_user = ThirdPartyUser.update_by_hash(renren_user, response_data)
     end
     
-    if renren_user.gender.nil?
-      # first time get user base information.
-      renren_user = renren_user.update_user_info
-    end
+    # first time get user base information.
+    renren_user.update_user_info if renren_user.gender.nil?
     
     return renren_user
   end

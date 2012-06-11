@@ -42,7 +42,7 @@ class QqUser < ThirdPartyUser
 			"code" => code}
 		retval = Tool.send_post_request("https://graph.qq.com/oauth2.0/token", access_token_params, true)
 		access_token, expires_in = *(retval.body.split('&').map { |ele| ele.split('=')[1] })
-		Logger.new("log/development.log").info(retval.body.to_s)
+		#Logger.new("log/development.log").info(retval.body.to_s)
 		
 		response_data = {"access_token" => access_token, "expires_in" => expires_in}		
 		return response_data
