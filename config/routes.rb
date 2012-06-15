@@ -46,7 +46,7 @@ OopsData::Application.routes.draw do
 			get 'reject'
 			get 'publish'
 			get 'close'
-			get 'revise'
+			get 'pause'
 		end
 		resources :pages
 		resources :questions

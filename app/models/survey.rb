@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'error_enum'
+require 'publish_status'
 require 'securerandom'
 #The survey object has the following structure
 # {
@@ -30,9 +31,8 @@ class Survey
 	field :created_at, :type => Integer, default: -> {Time.now.to_i}
 	field :updated_at, :type => Integer
 	field :status, :type => Integer, default: 0
-	# can be 0 (closed), 1 (under review), 2 (revision), 3 (published)
+	# can be 0 (closed), 1 (under review), 2 (paused), 3 (published)
 	field :publish_status, :type => Integer, default: 0
-	field :reject_message, :type => String, default: ""
 	field :pages, :type => Array, default: Array.new
 	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
 	field :constrains, :type => Array, default: Array.new
@@ -45,30 +45,11 @@ class Survey
 	before_update :set_updated_at, :clear_survey_object
 	before_destroy :clear_survey_object
 
-	around_update :around_update_work
-
 	META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
 
 	private
 	def set_updated_at
 		self.updated_at = Time.now.to_i
-	end
-
-	def around_update_work
-		before_publish_status = self.publish_status
-		yield
-
-		if (before_publish_status == 0 || before_publish_status == 2) && self.publish_status == 1
-			# the survey is submitted, and the status changes from closed or revision to under review
-		elsif before_publish_status == 1 && self.publish_status == 3
-			# the survey has passed the check
-		elsif before_publish_status == 1 && self.publish_status == 2
-			# the survey is rejected to be published
-		elsif before_publish_status != 0 && self.publish_status == 0
-			# the survey is closed
-		elsif before_publish_status != 3 && self.publish_status == 2
-			# the survey is set as revised
-		end
 	end
 
 	public
@@ -157,17 +138,17 @@ class Survey
 	#* the survey object
 	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def self.save_meta_data(current_user_email, survey_obj)
-		return ErrorEnum::UNAUTHORIZED if survey_obj["owner_email"]!= current_user_email
+	def self.save_meta_data(current_user, survey_obj)
+		return ErrorEnum::UNAUTHORIZED if survey_obj["owner_email"]!= current_user.email
 		if survey_obj["survey_id"] == ""
 			# this is a new survey that has not been saved in database
 			survey = Survey.new
-			survey.owner_email = current_user_email
+			survey.owner_email = current_user.email
 		else
 			# this is an existing survey
 			survey = Survey.find_by_id(survey_obj["survey_id"])
 			return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
-			return ErrorEnum::UNAUTHORIZED if survey.owner_email != current_user_email
+			return ErrorEnum::UNAUTHORIZED if survey.owner_email != current_user.email
 		end
 		META_ATTR_NAME_ARY.each do |attr_name|
 			method_obj = survey.method("#{attr_name}=".to_sym)
@@ -187,8 +168,8 @@ class Survey
 	#* false
 	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def delete(current_user_email)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def delete(current_user)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		return self.update_attributes(:status => -1)
 	end
 
@@ -202,8 +183,8 @@ class Survey
 	#* false
 	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey in trash
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def recover(current_user_email)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def recover(current_user)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		return ErrorEnum::SURVEY_NOT_EXIST if self.status != -1
 		self.tags.delete("已删除")
 		return self.update_attributes(:status => 0)
@@ -219,8 +200,8 @@ class Survey
 	#* false
 	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey in trash
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def clear(current_user_email)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def clear(current_user)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		return ErrorEnum::SURVEY_NOT_EXIST if self.status != -1
 		return self.destroy
 	end
@@ -233,8 +214,8 @@ class Survey
 	#*retval*:
 	#* the new survey instance: if successfully cloned
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def clone(current_user_email)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def clone(current_user)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 
 		# clone the meta data of the survey
 		new_instance = super
@@ -341,11 +322,12 @@ class Survey
 	#* true
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
-	def submit(current_user)
+	def submit(current_user, message)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email && !current_user.is_admin
-		return ErrorEnum::WRONG_PUBLISH_STATUS if ![0, 2].include?(self.publish_status)
-		self.publish_status = 1
-		return self.save
+		return ErrorEnum::WRONG_PUBLISH_STATUS if ![PublishStatus::CLOSED, PublishStatus::PAUSED].include?(self.publish_status)
+		before_publish_status = self.publish_status
+		self.update_attributes(:publish_status => PublishStatus::UNDER_REVIEW)
+		return PublishStatusHistory.create_new(self._id, current_user.email, before_publish_status, PublishStatus::UNDER_REVIEW, message)
 	end
 
 	#*description*: reject a survey
@@ -357,11 +339,12 @@ class Survey
 	#* true
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
-	def reject(current_user)
+	def reject(current_user, message)
 		return ErrorEnum::UNAUTHORIZED if !current_user.is_admin
-		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != 1
-		self.publish_status = 2
-		return self.save
+		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != PublishStatus::UNDER_REVIEW
+		before_publish_status = self.publish_status
+		self.update_attributes(:publish_status => PublishStatus::PAUSED)
+		return PublishStatusHistory.create_new(self._id, current_user.email, before_publish_status, PublishStatus::PAUSED, message)
 	end
 
 	#*description*: publish a survey
@@ -373,11 +356,12 @@ class Survey
 	#* true
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
-	def publish(current_user)
+	def publish(current_user, message)
 		return ErrorEnum::UNAUTHORIZED if !current_user.is_admin
-		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != 1
-		self.publish_status = 3
-		return self.save
+		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != PublishStatus::UNDER_REVIEW
+		before_publish_status = self.publish_status
+		self.update_attributes(:publish_status => PublishStatus::PUBLISHED)
+		return PublishStatusHistory.create_new(self._id, current_user.email, before_publish_status, PublishStatus::PUBLISHED, message)
 	end
 
 	#*description*: close a survey
@@ -389,13 +373,14 @@ class Survey
 	#* true
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
-	def close(current_user)
-		return ErrorEnum::UNAUTHORIZED if !current_user.is_admin
-		self.publish_status = 0
-		return self.save
+	def close(current_user, message)
+		return ErrorEnum::UNAUTHORIZED if !current_user.is_admin && self.owner_email != current_user.email
+		before_publish_status = self.publish_status
+		self.update_attributes(:publish_status => PublishStatus::CLOSED)
+		return PublishStatusHistory.create_new(self._id, current_user.email, before_publish_status, PublishStatus::CLOSED, message)
 	end
 
-	#*description*: revise a survey
+	#*description*: pause a survey
 	#
 	#*params*:
 	#* the user doing this operation
@@ -404,11 +389,12 @@ class Survey
 	#* true
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
-	def revise(current_user)
-		return ErrorEnum::UNAUTHORIZED if !current_user.is_admin
-		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != 3
-		self.publish_status = 2
-		return self.save
+	def pause(current_user, message)
+		return ErrorEnum::UNAUTHORIZED if current_user.email != self.owner_email
+		return ErrorEnum::WRONG_PUBLISH_STATUS if ![PublishStatus::PUBLISHED, PublishStatus::UNDER_REVIEW].include?(self.publish_status)
+		before_publish_status = self.publish_status
+		self.update_attributes(:publish_status => PublishStatus::PAUSED)
+		return PublishStatusHistory.create_new(self._id, current_user.email, before_publish_status, PublishStatus::PAUSED, message)
 	end
 
 	#*description*: obtain a list of Survey objects given a list of tags
@@ -462,8 +448,8 @@ class Survey
 	#* ErrorEnum ::QUESTION_NOT_EXIST
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::OVERFLOW
-	def create_question(current_user_email, page_index, question_id, question_type)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def create_question(current_user, page_index, question_id, question_type)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		current_page = self.pages[page_index]
 		return ErrorEnum::OVERFLOW if current_page == nil
 		if question_id.to_s == "-1"
@@ -492,8 +478,8 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST
 	#* ErrorEnum ::WRONG_DATA_TYPE
-	def update_question(current_user_email, question_id, question_obj)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def update_question(current_user, question_id, question_obj)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		question = Question.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question == nil
 		retval = question.update_question(question_obj)
@@ -516,8 +502,8 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST
 	#* ErrorEnum ::OVERFLOW
-	def move_question(current_user_email, question_id_1, page_index, question_id_2)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def move_question(current_user, question_id_1, page_index, question_id_2)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		from_page = nil
 		self.pages.each do |page|
 			if page.include?(question_id_1)
@@ -553,8 +539,8 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST
 	#* ErrorEnum ::OVERFLOW
-	def clone_question(current_user_email, question_id_1, page_index, question_id_2)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def clone_question(current_user, question_id_1, page_index, question_id_2)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		from_page = nil
 		self.pages.each do |page|
 			if page.include?(question_id_1)
@@ -590,8 +576,8 @@ class Survey
 	#* the question object if successfully obtained
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
-	def get_question_object(current_user_email, question_id)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def get_question_object(current_user, question_id)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		self.pages.each do |page|
 			return Question.get_question_object(question_id) if page.include?(question_id)
 		end
@@ -609,8 +595,8 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
-	def delete_question(current_user_email, question_id)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def delete_question(current_user, question_id)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		self.pages.each do |page|
 			if page.include?(question_id)
 				page.delete(question_id)
@@ -635,8 +621,8 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::OVERFLOW 
-	def create_page(current_user_email, page_index)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def create_page(current_user, page_index)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		return ErrorEnum::OVERFLOW if page_index < -1 or page_index > self.pages.length - 1
 		self.pages.insert(page_index+1, [])
 		return self.save
@@ -652,8 +638,8 @@ class Survey
 	#* the page object if successfully obtained
 	#* ErrorEnum ::UNAUTHORIZED 
 	#* ErrorEnum ::OVERFLOW 
-	def show_page(current_user_email, page_index)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def show_page(current_user, page_index)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		current_page = self.pages[page_index]
 		return ErrorEnum::OVERFLOW if current_page == nil
 		page_object = []
@@ -675,8 +661,8 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED 
 	#* ErrorEnum ::OVERFLOW 
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
-	def clone_page(current_user_email, page_index_1, page_index_2)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def clone_page(current_user, page_index_1, page_index_2)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		current_page = self.pages[page_index_1]
 		return ErrorEnum::OVERFLOW if current_page == nil
 		return ErrorEnum::OVERFLOW if page_index_2 < -1 or page_index_2 > self.pages.length - 1
@@ -706,8 +692,8 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::OVERFLOW
-	def delete_page(current_user_email, page_index)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def delete_page(current_user, page_index)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		current_page = self.pages[page_index]
 		return ErrorEnum::OVERFLOW if current_page == nil
 		current_page.each do |question_id|
@@ -730,8 +716,8 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::OVERFLOW
-	def combine_pages(current_user_email, page_index_1, page_index_2)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def combine_pages(current_user, page_index_1, page_index_2)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		return ErrorEnum::OVERFLOW if page_index_1 < 0 or page_index_1 > self.pages.length - 1
 		return ErrorEnum::OVERFLOW if page_index_2 < 0 or page_index_2 > self.pages.length - 1
 		self.pages[page_index_1+1..page_index_2].each do |page|
@@ -753,8 +739,8 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::OVERFLOW
-	def move_page(current_user_email, page_index_1, page_index_2)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def move_page(current_user, page_index_1, page_index_2)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		current_page = self.pages[page_index_1]
 		return ErrorEnum::OVERFLOW if current_page == nil
 		return ErrorEnum::OVERFLOW if page_index_2 < -1 or page_index_2 > self.pages.length - 1

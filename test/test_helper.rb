@@ -52,6 +52,12 @@ class ActiveSupport::TestCase
 		return oliver
 	end
 
+	def init_lisa
+		lisa = FactoryGirl.build(:lisa)
+		lisa.save
+		return lisa
+	end
+
 
 
 

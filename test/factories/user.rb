@@ -28,4 +28,12 @@ FactoryGirl.define do
 		status 1
 		activate_time Time.now.to_i
 	end
+
+	factory :lisa, class: User do
+		email "lisa@test.com"
+		password Encryption.encrypt_password("123456")
+		username "lisa"
+		status 1
+		activate_time Time.now.to_i
+	end
 end

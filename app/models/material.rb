@@ -18,42 +18,42 @@ class Material
 		return material
 	end
 
-	def self.check_and_create_new(current_user_email, material_type, location, title)
-		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(current_user_email).nil?
+	def self.check_and_create_new(current_user, material_type, location, title)
+		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(current_user.email).nil?
 		return ErrorEnum::WRONG_MATERIAL_TYPE if ![1, 2, 4].include?(material_type)
-		material = Material.new(:owner_email => current_user_email, :material_type => material_type, :location => location, :title => title)
+		material = Material.new(:owner_email => current_user.email, :material_type => material_type, :location => location, :title => title)
 		material.save
 		return material.serialize
 	end
 
-	def self.get_object_list(current_user_email, material_type)
+	def self.get_object_list(current_user, material_type)
 		return ErrorEnum::WRONG_MATERIAL_TYPE if !(1..7).to_a.include?(material_type)
 		object_list = []
-		Material.materials_of(current_user_email).each do |material|
+		Material.materials_of(current_user.email).each do |material|
 			object_list << material.serialize if material.material_type & material_type > 0
 		end
 		return object_list
 	end
 
-	def self.get_object(current_user_email, material_id)
+	def self.get_object(current_user, material_id)
 		material = Material.find_by_id(material_id)
 		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
-		return ErrorEnum::UNAUTHORIZED if material.owner_email != current_user_email
+		return ErrorEnum::UNAUTHORIZED if material.owner_email != current_user.email
 		return material.serialize
 	end
 
-	def delete(current_user_email)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def delete(current_user)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		return self.update_attributes(:status => -1)
 	end
 
-	def clear(current_user_email)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def clear(current_user)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		return self.destroy
 	end
 
-	def update_title(current_user_email, title)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user_email
+	def update_title(current_user, title)
+		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
 		self.update_attributes(:title => title)
 		return self.serialize
 	end
