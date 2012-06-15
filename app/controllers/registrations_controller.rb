@@ -10,6 +10,8 @@ class RegistrationsController < ApplicationController
 	# method: get
 	# descryption: the page where user inputs the registration form
 	def index
+	  flash.keep(:google_email)
+	  flash.keep(:third_party_info)
 	end
 	
 	#*descryption*: user submits registration form
@@ -77,12 +79,30 @@ class RegistrationsController < ApplicationController
 				format.json	{ render :json => ErrorEnum::WRONG_PASSWORD_CONFIRMATION and return }
 			end
 		else # create user_information model
-			User.combine(params[:user]["email"], *third_party_info) if !third_party_info.nil?
-			user_information = UserInformation.update(params[:user_information])
-			# send registration email
-			UserMailer.welcome_email(user).deliver
+      User.combine(params[:user]["email"], *third_party_info) if !third_party_info.nil?
+			user_information = UserInformation.update(params[:user_information]) 
+			
+			#whether or not send email
+			if third_party_info && third_party_info[0]=="google" then
+			  google_user = ThirdPartyUser.find_by_website_and_user_id(*third_party_info)
+			  
+			  if google_user && google_user.google_email && google_user.google_email == params[:user]["email"]
+			    #maybe, his registered email is not the google email, and send registration email.
+			    
+          #change status
+          user.status = 1
+          boo = user.save
+        else
+          UserMailer.welcome_email(user).deliver
+        end
+	    else
+		    # send registration email
+		    UserMailer.welcome_email(user).deliver
+		  end
+			
 			# succesfully registered
-			flash[:notice] = "注册成功，请到您的邮箱中点击激活链接进行激活"
+			flash[:notice] = "注册成功，请到您的邮箱中点击激活链接进行激活" if user.status == 0
+      flash[:notice] = "注册成功，Google邮箱默认已激活" if user.status == 1
 			respond_to do |format|
 				format.html	{ redirect_to sessions_path and return }
 				format.json	{ render :json => true and return }

@@ -50,7 +50,7 @@ class ThirdPartyUser
 	#* website_user_class
 	#* user id
 	#* access_token
-	#* email
+	#* email=nil
 	#
 	#*retval*:
 	#* the ThirdPartyUser sub class instance: like GoogleUser's instance, SinaUser's instance ...
@@ -64,9 +64,7 @@ class ThirdPartyUser
 	#
 	#*params*:
 	#* website_user_class
-	#* user id
-	#* access_token
-	#* email
+	#* hash
 	#
 	#*retval*:
 	#* the ThirdPartyUser sub class instance: like GoogleUser's instance, SinaUser's instance ...
@@ -82,8 +80,6 @@ class ThirdPartyUser
 	#
 	#*params*:
 	#* website_user_class
-	#* user id
-	#* access_token
 	#* email
 	#
 	#*retval*:
@@ -94,7 +90,7 @@ class ThirdPartyUser
 	
 	
 	# define token logic. 
-	# it dependence on sub class methods: get_access_token, save_tp_user.
+	# it dependence on sub class methods: get_access_token, save_tp_user, and its method: compute_status.
 	#
 	#*params*:
   #
@@ -130,7 +126,7 @@ class ThirdPartyUser
 	#status have three values(SAVE_FAILED, THIRD_PARTY_USER_NOT_BIND, EMAIL_NOT_ACTIVATED, true).
 	#tp_user do not change.
 	def self.compute_status(tp_user)
-	  Logger.new("log/development.log").info("tp_user: #{tp_user.to_s}")
+	  #Logger.new("log/development.log").info("tp_user: #{tp_user.to_s}")
     return [ErrorEnum::SAVE_FAILED, nil] if tp_user.nil?
     return [ErrorEnum::THIRD_PARTY_USER_NOT_BIND, tp_user] if tp_user.email.nil? || tp_user.email ==""
     user = User.find_by_email(tp_user.email)
@@ -142,6 +138,37 @@ class ThirdPartyUser
 	
 	#****** instance methods **********
 	
+	#*description*: update specifi ThirdPartyUser sub class instance 
+	#by hash which has update attributes.
+	#
+	#*params*:
+	#* hash
+	#
+	#*retval*:
+	#* self: like GoogleUser's instance, SinaUser's instance ...
+	def update_by_hash(hash)
+	  attrs = self.attributes
+	  attrs.merge!(hash)
+	  self.class.collection.find_and_modify(:query => {_id: self.id}, :update => attrs, :new => true)
+	  return self
+	end
+	
+	#*description*: update user base info, it involves get_user_info.
+	#
+	#*params*: none
+	#
+	#*retval*:
+	#* instance: a updated tp_user instance
+  def update_user_info
+    response_data = get_user_info
+      
+    #select attribute
+    response_data.select!{|k,v| @select_attrs.split.include?(k.to_s) }
+    
+    #update
+    return self.update_by_hash(response_data)
+  end
+	
 	# it can call any methods from third_party's API. this method should be always overwrite.
 	#
 	#*params*:
@@ -151,7 +178,7 @@ class ThirdPartyUser
 	  compute_params(opts)
 	end
 	
-	# be involed from call_method method.
+	# be involed from call_method method .
 	#
 	#*params*:
 	#
@@ -179,5 +206,20 @@ class ThirdPartyUser
 	  self.scope = scope
 	  return self.save
 	end
+	
+  #*description*: judge of a text's action.
+	#
+	#*params*: 
+	#* hash: a hash which some website response.
+	#
+	#*retval*:
+	#* bool: true or false
+  def successful?(hash)
+    if hash.select{|k,v| k.to_s=~/error/}.empty? then
+      return true
+    else
+      return false
+    end   
+  end
 		
 end

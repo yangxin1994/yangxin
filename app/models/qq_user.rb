@@ -5,7 +5,24 @@ class QqUser < ThirdPartyUser
   field :gender, :type => String
   field :figureurl, :type => String
   
+  #--
+  # ************* instance attribute's methods*****************
+  #++
+  
+  #*attribute*: name
+  alias name nickname
+  
+  #*attribute*: gender
+  # the same getter with db
+  
+  #*attribute*: locale
+  def locale
+    nil
+  end
+  
+  #--
   #***************** class methods *************
+  #++
   
   #get access_token for other works
   #
@@ -25,7 +42,7 @@ class QqUser < ThirdPartyUser
 			"code" => code}
 		retval = Tool.send_post_request("https://graph.qq.com/oauth2.0/token", access_token_params, true)
 		access_token, expires_in = *(retval.body.split('&').map { |ele| ele.split('=')[1] })
-		Logger.new("log/development.log").info(retval.body.to_s)
+		#Logger.new("log/development.log").info(retval.body.to_s)
 		
 		response_data = {"access_token" => access_token, "expires_in" => expires_in}		
 		return response_data
@@ -50,8 +67,9 @@ class QqUser < ThirdPartyUser
 	  
     #get user_id through access_token
 		retval = Tool.send_get_request("https://graph.qq.com/oauth2.0/me?access_token=#{access_token}", true)
-		Logger.new("log/development.log").info(retval.to_s)
+		#Logger.new("log/development.log").info("save_tp_user: "+retval.body.to_s)
 		response_data2 = JSON.parse(retval.body.split(' ')[1])
+		
 		user_id = response_data2["openid"]
 		
 		# reject the same function field
@@ -63,17 +81,25 @@ class QqUser < ThirdPartyUser
 		
 		#new or update qq_user
 		qq_user = QqUser.where(:user_id => user_id)[0]
+		#Logger.new("log/development.log").info("tp_user1 : "+qq_user.to_s)
 		if qq_user.nil? then
       qq_user = QqUser.new(:website => "qq", :user_id => user_id, :access_token => access_token)
       qq_user.save
     else
-      qq_user = ThirdPartyUser.update_by_hash(qq_user, response_data)
+      qq_user.update_by_hash(response_data)
     end
     
+    #get base info in first time.
+    qq_user.update_user_info if qq_user.gender.nil?
+    
     return qq_user
+  rescue
+    return nil
   end
   
-  # ************** instance methods *************
+  #--
+  # ************instance methods**********
+  #++
   
 	#*description*: it can call any methods from third_party's API:
 	#http://wiki.opensns.qq.com/wiki/%E3%80%90QQ%E7%99%BB%E5%BD%95%E3%80%91API%E6%96%87%E6%A1%A3
@@ -81,13 +107,62 @@ class QqUser < ThirdPartyUser
 	#*params*:
 	#
 	#*opts: hash.
-  def call_method(opts = {:method => "get_user_info"})
+  def call_method(http_method="get", opts = {:method => "user/get_user_info"})
+  
     @params={}
     @params[:access_token] = self.access_token
     @params[:oauth_consumer_key] = OOPSDATA[RailsEnv.get_rails_env]["qq_app_id"]
     @params[:openid] = self.user_id
-    super(opts)
-    Tool.send_get_request("https://graph.qq.com/user/#{opts[:method]}#{@params_url}", true)
+    method = opts[:method] || opts["method"]
+    
+    if http_method.downcase == "get" then
+      super(opts)
+      retval = Tool.send_get_request("https://graph.qq.com/#{opts[:method]}#{@params_url}", true)
+    else
+      opts.merge!(@params).select!{|k,v| k.to_s != "method"}      
+      retval = Tool.send_post_request("https://graph.qq.com/#{method}", opts, true)
+    end
+    return JSON.parse(retval.body)
+  end
+  
+  alias get_user_info call_method
+  
+	#*description*: update user base info, it involves get_user_info.
+	#
+	#*params*: none
+	#
+	#*retval*:
+	#* instance: a updated qq user.
+  def update_user_info
+    @select_attrs = %{nickname gender figureurl}
+    super
+  end
+  
+  #*description*: add share of a link information.
+  #API: http://wiki.opensns.qq.com/wiki/%E3%80%90QQ%E7%99%BB%E5%BD%95%E3%80%91add_share
+	#
+	#*params*: 
+	#* title: the share info's title
+	#* url: the place which click the info to turn
+	#* comment: what you say with the share. default is nil.
+	#* summary: a short info of the share. default  is nil.
+	#* images: a image's link. default is nil.
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def add_share(title, url, comment=nil, summary=nil, images=nil)
+    opts = {}
+    opts["method"] = "share/add_share"
+    opts["title"] = title
+    opts["url"] = url
+    opts["comment"] = comment if comment
+    opts["summary"] = summary if summary
+    opts["images"] = images if images
+    retval = call_method("post", opts)
+    
+    ##successful?(retval)
+    retval["ret"].to_i == 0 
   end
   
 end

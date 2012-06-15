@@ -8,6 +8,19 @@ class SinaUser < ThirdPartyUser
   field :profile_image_url, :type => String
   
   #--
+  # ************* instance attribute's methods*****************
+  #++
+  
+  #*attribute*: name
+  # the same getter with db
+  
+  #*attribute*: gender
+  # the same getter with db
+  
+  #*attribute*: locale
+  alias locale location
+  
+  #--
   #***************** class methods *************
   #++
   
@@ -58,25 +71,138 @@ class SinaUser < ThirdPartyUser
       sina_user.save
       # this is not update instance, it would lead that other info should be seen in next login.
     else
-      sina_user = ThirdPartyUser.update_by_hash(sina_user, response_data)
+      sina_user.update_by_hash(response_data)
     end
     
+    #first time, get user base info 
+    sina_user.update_user_info  if sina_user.gender.nil?
+    
     return sina_user
+  rescue
+    return nil
   end
   
+  #--
   # ************instance methods**********
+  #++
   
 	#*description*: it can call any methods from third_party's API:
 	#http://open.weibo.com/wiki/API%E6%96%87%E6%A1%A3_V2
 	#
 	#*params*:
-	#
+	#* http_method: get(default) or post.
 	#* opts: hash.
-  def call_method(opts = {:method => "statuses/user_timeline"})
+  def call_method(http_method="GET", opts = {:method => "users/show", :uid => self.user_id})
+    
     @params={}
-    @params[:access_token] = self.access_token
-    super(opts)
-    Tool.send_get_request("https://api.weibo.com/2/#{opts[:method]}.json#{@params_url}", true)  
+    @params["access_token"] = self.access_token
+    method = opts[:method] || opts["method"]
+    
+    if http_method.downcase == "get" then
+      super(opts)
+      retval = Tool.send_get_request("https://api.weibo.com/2/#{method}.json#{@params_url}", true) 
+    else
+      opts.merge!(@params).select!{|k,v| k.to_s != "method"}
+      retval = Tool.send_post_request("https://api.weibo.com/2/#{method}.json", opts, true)
+    end
+    return JSON.parse(retval.body)
   end
   
+  alias get_user_info call_method
+  
+	#*description*: update user base info, it involves get_user_info.
+	#
+	#*params*: none
+	#
+	#*retval*:
+	#* instance: a updated sina user.
+  def update_user_info
+    @select_attrs = %{name location gender description profile_image_url}
+    super
+  end
+  
+  #*description*: say weibo text
+	#
+	#*params*: 
+	#* status: what is you want to say.
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def say_text(status)
+    retval = call_method("post", {:method => "statuses/update", :status =>status})
+    
+    successful?(retval)
+  end
+  
+  #*description*: repost a weibo without message
+	#
+	#*params*: 
+	#* text_id: the weibo's id which is you want to repost.
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def repost_text(text_id)
+    retval = call_method("post", {:method => "statuses/repost", :id => text_id})
+    
+    successful?(retval)
+  end
+
+  #*description*: repost a weibo with message
+	#
+	#*params*: 
+	#* text_id: the weibo's id which is you want to repost.
+	#* status: what is you want to say.
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def repost_text_with_message(text_id, status)
+    retval = call_method("post", {:method => "statuses/repost", :id => text_id, :status => status})
+    
+    successful?(retval)
+  end
+
+  #*description*: follow someone.
+	#
+	#*params*: 
+	#* friend_id: the friend's id.
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def create_friendship(friend_id)
+    retval = call_method("post", {:method => "friendships/create", :id => friend_id})
+    
+    successful?(retval)
+  end
+  
+  #*description*: follow one topic.
+	#
+	#*params*: 
+	#* topic_name: the topic key word.
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def follow_topic(topic_name)
+    retval = call_method("post", {:method => "friendships/create", :trend_name => topic_name})
+
+    successful?(retval)
+  end
+  
+  #*description*: logout action
+	#
+	#*params*: none
+	#
+	#*retval*:
+	#
+	# say successfully or not.
+  def logout
+    retval = call_method("get", {:method => "account/end_session"})
+    
+    successful?(retval)
+  end
+
 end

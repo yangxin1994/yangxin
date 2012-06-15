@@ -7,6 +7,19 @@ class GoogleUser < ThirdPartyUser
   field :google_email, :type => String  
   
   #--
+  # ************* instance attribute's methods*****************
+  #++
+  
+  #*attribute*: name
+  # the same getter with db
+  
+  #*attribute*: gender
+  # the same getter with db
+  
+  #*attribute*: locale
+  # the same getter with db 
+  
+  #--
   #***************** class methods *************
   #++
   
@@ -28,7 +41,7 @@ class GoogleUser < ThirdPartyUser
 			"code" => code}
 		retval = Tool.send_post_request("https://accounts.google.com/o/oauth2/token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
-		Logger.new("log/development.log").info(response_data.to_s)
+		#Logger.new("log/development.log").info("respo1: "+response_data.to_s)
 		#access_token = response_data["access_token"]
 		return response_data
   end
@@ -48,28 +61,36 @@ class GoogleUser < ThirdPartyUser
     access_token = response_data["access_token"]
   
     #get user_id
-    retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/userinfo?access_token=#{access_token}", true)
+    retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/userinfo?access_token=#{access_token}", true)    
 		response_data2 = JSON.parse(retval.body)
+		
+		return nil if successful?(response_data2)
+		
+		#Logger.new("log/development.log").info("respo2: "+response_data2.to_s)
 		user_id = response_data2["id"]
-		response_data["google_email"] = response_data2["email"]
 		
 		# reject the same function field
-		response_data.select!{|k,v| !k.to_s.include?("id") }
+		response_data["google_email"] = response_data2["email"]
 		response_data2.select!{|k,v| !k.to_s.include?("id") && k.to_s !="email" }
 		
 		# merge info
-		response_data.merge!(response_data2)
+		response_data.merge!(response_data2).select!{|k,v| !k.to_s.include?("id") }
 		
 		#new or update google_user
 		google_user = GoogleUser.where(:user_id => user_id)[0]
 		if google_user.nil? then
-      google_user = GoogleUser.new(:website => "google", :user_id => user_id, :access_token => access_token)
+  		response_data.merge!({"website"=>"google", "user_id" => user_id })
+  		
+      google_user = GoogleUser.new(response_data)
       google_user.save
     else
-      google_user = ThirdPartyUser.update_by_hash(google_user, response_data)
+      # it contains access_token ...
+      google_user.update_by_hash(response_data)
     end
     
     return google_user
+  rescue 
+    return nil
   end
   
   #--
@@ -81,11 +102,36 @@ class GoogleUser < ThirdPartyUser
 	#*description*: it can call any methods from third_party's API.
 	#
 	#*params*:
+	#* http_method: get or post.
 	#* opts: hash.
-  def call_method(opts = {:method => "userinfo"})
+  def call_method(http_method="get", opts = {:method => "userinfo"})
     @params={}
     @params[:access_token] = self.access_token
-    super(opts)
-    Tool.send_get_request("https://www.googleapis.com/oauth2/v1/#{opts[:method]}#{@params_url}", true) 
+    method = opts[:method] || opts["method"]
+    
+    if http_method.downcase == "get"  then
+      super(opts)
+		  #Logger.new("log/development.log").info("get api url: https://www.googleapis.com/oauth2/v1/#{opts[:method]}#{@params_url}")
+      retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/#{method}#{@params_url}", true) 
+    else
+      opts.merge!(@params).select!{|k,v| k.to_s != "method"}
+      retval = Tool.send_post_request("https://api.weibo.com/2/#{method}.json", opts, true)
+    end
+    return JSON.parse(retval.body)
   end
+  
+  alias get_user_info call_method
+  
+	#*description*: update user base info, it involves get_user_info.
+	#
+	#*params*: none
+	#
+	#*retval*:
+	#* instance: a updated google user.
+  def update_user_info
+    #Logger.new("log/development.log").info("update_user_info. ")
+    @select_attrs = %{name gender locale google_email}
+    super
+  end
+  
 end

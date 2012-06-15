@@ -22,33 +22,8 @@
     %p
       %label user_id
       = @tp_user.id
-
-%hr     
-%p= "通过refresh_token 重新获取的token"
-%p
-  %label access_token:
-  = @access_token
-%p 
-  %label refresh_token:
-  = @refresh_token
-%p 
-  %label response_data:
-  = @response_data.to_s 
-
-%hr
-  - if @user 
-    %p 
-      %label username:
-      = @user["name"]
-    %p 
-      %label avatar:
-      = @user["avatar"][0]["url"]
-
-    %p
-      = image_tag(@user["avatar"][0]["url"])
       
 %hr
-  - if @info 
-    %p= @info.to_s
+  %p= @info.to_s
 %p
   =link_to "退出登录", logout_path

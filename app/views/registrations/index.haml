@@ -3,7 +3,7 @@
 	%p
 		%label *
 		%label 我的邮箱
-		= text_field_tag 'user[email]'
+		= text_field_tag 'user[email]', flash[:google_email]
 
 	%p
 		%label *
@@ -40,8 +40,8 @@
 		%label 性别
 		= text_field_tag 'user_information[gender]'
 
-	%p{:style => "display:none;"}
-		= text_field_tag 'third_party_info', @third_party_info
+	%p{:display => "style:none"}
+		= text_field_tag 'third_party_info', flash[:third_party_info]
 
 	%p
 		= submit_tag "开通"
