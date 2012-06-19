@@ -30,6 +30,27 @@ class ApplicationController < ActionController::Base
 		!user_signed_in?
 	end
 
+	#judge whether the current user is admin
+	def user_admin?
+		user_signed_in? && @current_user.is_admin
+	end
+
+	
+	def require_admin
+		if !user_signed_in?
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+			end
+		end
+		if !user_admin?
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render :json => ErrorEnum::REQUIRE_ADMIN and return }
+			end
+		end
+	end
+
 	#if no user signs in, redirect to root path
 	def require_sign_in
 		if !user_signed_in?

@@ -89,9 +89,9 @@ class RegistrationsController < ApplicationController
 			  if google_user && google_user.google_email && google_user.google_email == params[:user]["email"]
 			    #maybe, his registered email is not the google email, and send registration email.
 			    
-          #change status
-          user.status = 1
-          boo = user.save
+          #automatically activate this user
+					activate_info = {"email" => params[:user]["email"], "time" => Time.now.to_i}
+					User.activate(activate_info)
         else
           UserMailer.welcome_email(user).deliver
         end

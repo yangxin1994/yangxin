@@ -896,4 +896,41 @@ class User
 		third_party_user.email = email
 		return third_party_user.save
 	end
+
+#--
+############### operations about quality control questions #################
+#++
+	def create_quality_control_question(question_type)
+		return QualityControlQuestion.create_objective_question(self) if question_type == 0
+		return QualityControlQuestion.create_matching_questions(self) if question_type == 1
+		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE
+	end
+
+	def list_quality_control_questions(question_type)
+		return QualityControlQuestion.list_objective_questions(self) if question_type == 0
+		return QualityControlQuestion.list_matching_questions(self) if question_type == 1
+		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE
+	end
+
+	def update_quality_control_question(question_id, question_obj)
+		question = QualityControlQuestion.find_by_id(question_id)
+		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if question.nil?
+		return question.update(question_obj, self)
+
+		return QualityControlQuestion.update_objective_question(question_obj, self) if question_type == 0
+		return QualityControlQuestion.update_matching_questions(question_obj, self) if question_type == 1
+		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE
+	end
+
+	def show_quality_control_question(question_id)
+		question = QualityControlQuestion.find_by_id(question_id)
+		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if question.nil?
+		return question.show(self)
+	end
+
+	def delete_quality_control_question(question_id)
+		question = QualityControlQuestion.find_by_id(question_id)
+		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if question.nil?
+		return question.delete(self)
+	end
 end

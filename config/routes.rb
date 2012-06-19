@@ -68,6 +68,8 @@ OopsData::Application.routes.draw do
 		end
 	end
 
+	resources :quality_control_questions
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
