@@ -14,9 +14,10 @@ require 'error_enum'
 #	}
 class QualityControlQuestion
 	include Mongoid::Document
-	field :_id, :type => String, default: -> {"quality_control_#{SecureRandom.uuid}"}
+
+	field :question_id, :type => String, default: -> { "quality_control_#{SecureRandom.uuid}" }
 	field :content, :type => String, default: OOPSDATA["question_default_settings"]["content"]
-	field :question_type, :type => String, default: ""
+	field :question_type, :type => Integer, default: 0
 	field :creator_email, :type => String, default: ""
 	field :last_mender_email, :type => String, default: ""
 	field :choices, :type => Array, default: []
@@ -24,7 +25,7 @@ class QualityControlQuestion
 	field :is_list_style, :type => Boolean, default: true
 	field :matching_question_id, :type => String, default: ""
 	field :answer_choice_id, :type => String, default: ""
-	scope :objective_questions, lambda { where(:question_type => OBJECITVE_QUESTION) }
+	scope :objective_questions, lambda { where(:question_type => OBJECTIVE_QUESTION) }
 	scope :matching_questions, lambda { where(:question_type => MATCHING_QUESTION) }
 
 	CHOICE_ATTR_ARY = %w[choice_id content]
@@ -36,30 +37,30 @@ class QualityControlQuestion
 	before_update :clear_question_object
 	before_destroy :clear_question_object
 
-	def create_objective_question(creator)
+	def self.create_objective_question(creator)
 		return ErrorEnum::UNAUTHORIZED if !creator.is_admin
 
 		question = QualityControlQuestion.new(:creator_email => creator.email, :question_type => OBJECTIVE_QUESTION)
 		question.save
-		return QualityControlQuestion.get_question_object(question._id)
+		return QualityControlQuestion.get_question_object(question.question_id)
 	end
 
-	def create_matching_questions(creator)
+	def self.create_matching_questions(creator)
 		return ErrorEnum::UNAUTHORIZED if !creator.is_admin
 
 		question_1 = QualityControlQuestion.new(:creator_email => creator.email, :question_type => MATCHING_QUESTION)
 		question_2 = QualityControlQuestion.new(:creator_email => creator.email, :question_type => MATCHING_QUESTION)
 
-		question_1.matching_question_id = question_2._id
-		question_2.matching_question_id = question_1._id
+		question_1.matching_question_id = question_2.question_id
+		question_2.matching_question_id = question_1.question_id
 
 		question_1.save
 		question_2.save
 
-		return [QualityControlQuestion.get_question_object(question_1._id), QualityControlQuestion.get_question_object(question_2._id)]
+		return [QualityControlQuestion.get_question_object(question_1.question_id), QualityControlQuestion.get_question_object(question_2.question_id)]
 	end
 
-	def update(question_obj, last_mender)
+	def update_question(question_obj, last_mender)
 		return ErrorEnum::UNAUTHORIZED if !last_mender.is_admin
 
 		if self.question_type == OBJECTIVE_QUESTION
@@ -70,8 +71,8 @@ class QualityControlQuestion
 	end
 
 	def update_objective_question(question_obj, last_mender)
-		choice_id_ary = question_obj["choices"].map {|ele| choice_id}
-		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_ANSWER !choice_id_ary.include?(question_obj["answer_choice_id"])
+		choice_id_ary = question_obj["choices"].map {|ele| ele["choice_id"]}
+		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_ANSWER if !choice_id_ary.include?(question_obj["answer_choice_id"])
 
 		self.content = question_obj["content"]
 		self.choice_num_per_row = question_obj["choice_num_per_row"]
@@ -90,8 +91,10 @@ class QualityControlQuestion
 		question_ary << QualityControlQuestion.find_by_id(question_obj_ary[1]["question_id"])
 
 		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if question_ary[0].nil? || question_ary[1].nil?
-		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_MATCH if question_ary[0].matching_question_id != question_ary[1]._id
+		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_MATCH if question_ary[0].matching_question_id != question_ary[1].question_id
+		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_ANSWER if question_obj_ary[0]["choices"].length != question_obj_ary[1]["choices"].length
 
+		new_question_obj_ary = []
 		question_ary.each_with_index do |question, index|
 			question.content = question_obj_ary[index]["content"]
 			question.choice_num_per_row = question_obj_ary[index]["choice_num_per_row"]
@@ -100,9 +103,10 @@ class QualityControlQuestion
 			question.choices = Marshal.load(Marshal.dump(question_obj_ary[index]["choices"]))
 			question.last_mender_email = last_mender.email
 			question.save
+			new_question_obj_ary << question.get_question_object
 		end
 		
-		return [question_ary[0].get_question_object, question_ary[1].get_question_object]
+		return new_question_obj_ary
 	end
 
 	def show(operator)
@@ -125,25 +129,25 @@ class QualityControlQuestion
 		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if self.nil?
 		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE if self.question_type != MATCHING_QUESTION
 		question_2_id = self.matching_question_id
-		question_2 = QualityControlQuestion.find_by_id(question_id_2)
+		question_2 = QualityControlQuestion.find_by_id(question_2_id)
 		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if question_2.nil?
 		return [self.get_question_object, question_2.get_question_object]
 	end
 
-	def list_objective_questions(operator)
+	def self.list_objective_questions(operator)
 		return ErrorEnum::UNAUTHORIZED if !operator.is_admin
 
-		objective_questions = QulityControlQuestion.objective_quesitons
+		objective_questions = QualityControlQuestion.objective_questions
 		objective_questions_obj_ary = []
 		objective_questions.each do |q|
 			objective_questions_obj_ary << q.get_question_object
 		end
 	end
 
-	def list_matching_questions(operator)
+	def self.list_matching_questions(operator)
 		return ErrorEnum::UNAUTHORIZED if !operator.is_admin
 
-		matching_questions = QualityControlQuestion.matching_quesitons
+		matching_questions = QualityControlQuestion.matching_questions.to_a
 
 		matching_questions_obj_ary = []
 		while matching_questions.length > 0
@@ -152,7 +156,7 @@ class QualityControlQuestion
 			question_2 = QualityControlQuestion.find_by_id(question_2_id)
 			next if question_2 == nil
 			matching_questions_obj_ary << [question_1.get_question_object, question_2.get_question_object]
-			matching_questions.delete_if {|q| q._id == question_2_id}
+			matching_questions.delete_if {|q| q.question_id == question_2_id}
 		end
 		return matching_questions_obj_ary
 	end
@@ -168,16 +172,16 @@ class QualityControlQuestion
 	end
 
 	def delete_objective_question
-		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE if self.qustion_type != OBJECTIVE_QUESTION
+		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE if self.question_type != OBJECTIVE_QUESTION
 		return self.destroy
 	end
 
 	def delete_matching_questions
 		question_2 = QualityControlQuestion.find_by_id(self.matching_question_id)
-		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE if !self.nil? && self.qustion_type != MATCHING_QUESTION
-		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE if !quesiont_2.nil? && question_2.qustion_type != MATCHING_QUESTION
+		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE if !self.nil? && self.question_type != MATCHING_QUESTION
+		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE if !question_2.nil? && question_2.question_type != MATCHING_QUESTION
 		if !question_2.nil?
-			return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_MATCH if self.matching_question_id != question_2._id
+			return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_MATCH if self.matching_question_id != question_2.question_id
 			self.destroy
 			question_2.destroy
 			return true
@@ -196,7 +200,7 @@ class QualityControlQuestion
 	#*retval*:
 	#* the question instance
 	def self.find_by_id(question_id)
-		return QulityControlQuestion.where(:_id => question_id)[0]
+		return QualityControlQuestion.where(:question_id => question_id)[0]
 	end
 
 	#*description*: serialize the current instance into a question object
@@ -206,14 +210,17 @@ class QualityControlQuestion
 	#
 	#*retval*:
 	#* the question object
-	def serialize(attr_name_ary)
+	def serialize
 		question_obj = {}
-		question_obj["question_id"] = self._id.to_s
+		question_obj["question_id"] = self.question_id.to_s
 		question_obj["content"] = self.content
 		question_obj["choice_num_per_row"] = self.choice_num_per_row
 		question_obj["is_list_style"] = self.is_list_style
-		question_obj["matching_question"] = self.matching_question
+		question_obj["matching_question_id"] = self.matching_question_id
 		question_obj["answer_choice_id"] = self.answer_choice_id
+		question_obj["question_type"] = self.question_type
+		question_obj["creator_email"] = self.creator_email
+		question_obj["last_mender_email"] = self.last_mender_email
 		question_obj["choices"] = Marshal.load(Marshal.dump(self.choices))
 		return question_obj
 	end
@@ -237,11 +244,20 @@ class QualityControlQuestion
 		return question_object
 	end
 
+	def get_question_object
+		question_object = Cache.read(self.question_id)
+		if question_object == nil
+			question_object = self.serialize
+			Cache.write(question_id, question_object)
+		end
+		return question_object
+	end
+
 	#*description*: clear the cached question object corresponding to current instance, usually called when the question is updated, either its meta data, or questions and constrains
 	#
 	#*params*:
 	def clear_question_object
-		Cache.write(self._id, nil)
+		Cache.write(self.question_id, nil)
 	end
 
 end

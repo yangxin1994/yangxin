@@ -797,9 +797,4 @@ class SurveyTest < ActiveSupport::TestCase
 
 		return [jesse, jesse_s1, questions]
 	end
-
-	def set_as_admin(user)
-		user.role = 1
-		user.save
-	end
 end

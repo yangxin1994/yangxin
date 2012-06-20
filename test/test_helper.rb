@@ -58,7 +58,10 @@ class ActiveSupport::TestCase
 		return lisa
 	end
 
-
+	def set_as_admin(user)
+		user.role = 1
+		user.save
+	end
 
 
 	def sign_in(email, password)

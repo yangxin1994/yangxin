@@ -74,7 +74,7 @@ class QualityControlQuestionsController < ApplicationController
 	#*retval*:
 	#* question object: when question is successfully updated
 	def update
-		retval = @current_user.update_quality_control_question(params[:question_id], params[:question_obj])
+		retval = @current_user.update_quality_control_question(params[:id], params[:question_obj])
 		case retval
 		when ErrorEnum::UNAUTHORIZED
 			flash[:notice] = "没有权限"
@@ -116,7 +116,7 @@ class QualityControlQuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def show
-		retval = @current_user.show_quality_control_question(params[:question_type], params[:id])
+		retval = @current_user.show_quality_control_question(params[:id])
 		case retval
 		when ErrorEnum::UNAUTHORIZED
 			flash[:notice] = "没有权限"
@@ -157,7 +157,7 @@ class QualityControlQuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def destroy
-		retval = @current_user.delete_quality_control_question(params[:question_type], params[:id])
+		retval = @current_user.delete_quality_control_question(params[:id])
 		case retval
 		when ErrorEnum::UNAUTHORIZED
 			flash[:notice] = "没有权限"
