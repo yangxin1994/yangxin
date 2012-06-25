@@ -14,10 +14,14 @@ class Question
 	field :content, :type => String, default: OOPSDATA["question_default_settings"]["content"]
 	field :note, :type => String, default: OOPSDATA["question_default_settings"]["note"]
 	field :is_required, :type => Boolean, default: true
+	field :input_prefix, :type => String, default: ""
 
 	before_save :clear_question_object
 	before_update :clear_question_object
 	before_destroy :clear_question_object
+
+	OBJECTIVE = 0
+	MATCHING = 1
 
 	ATTR_NAME_ARY = %w[content note is_required]
 
@@ -36,6 +40,16 @@ class Question
 	#* the question instance
 	def self.find_by_id(question_id)
 		return Question.where(:_id => question_id)[0]
+	end
+
+	#*description*: judge whether this question is a quality control question
+	#
+	#*params*:
+	#
+	#*retval*:
+	#* boolean value
+	def is_quality_control_question
+		return ["objective", "matching"].include?(self.input_prefix)
 	end
 
 	#*description*: serialize the current instance into a question object
@@ -99,5 +113,21 @@ class Question
 
 	def clone
 		return Marshal.load(Marshal.dump(self))
+	end
+
+
+
+	def new_quality_control_question(question_control_type, question_type, creator)
+		return ErrorEnum::UNAUTHORIZED if !creator.is_admin
+		if question_control_type == OBJECTIVE
+			question = Object::const_get(question_type).new(:input_prefix => "objective_")
+			return Question.get_question_object(question._id)
+		elsif question_control_type == MATCHING
+			question_1 = Object::const_get(question_type).new(:input_prefix => "matching_")
+			question_2 = Object::const_get(question_type).new(:input_prefix => "matching_")
+			return [Question.get_question_object(question_1._id), Question.get_question_object(question_1._id)] 
+		else
+			return ErrorEnum::WRONG_QUALITY_CONTROL_TYPE
+		end
 	end
 end

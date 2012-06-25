@@ -54,6 +54,21 @@ class Survey
 
 	public
 
+
+	#*description*: judge whether this survey has a question
+	#
+	#*params*
+	#* id of the question
+	#
+	#*retval*:
+	#* boolean value
+	def has_question(question_id)
+		self.pages.each do |page|
+			return true if page.include?(question_id)
+		end
+		return false
+	end
+
 	#*description*: serialize current instance into a survey object
 	#
 	#*params*
@@ -480,8 +495,11 @@ class Survey
 	#* ErrorEnum ::WRONG_DATA_TYPE
 	def update_question(current_user, question_id, question_obj)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+		return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
 		question = Question.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question == nil
+		# quality control question in a survey cannot be updated
+		return ErrorEnum::UNAUTHORIZED if questiion.is_quality_control_question
 		retval = question.update_question(question_obj)
 		return retval if retval != true
 		question.clear_question_object
@@ -578,10 +596,8 @@ class Survey
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
 	def get_question_object(current_user, question_id)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
-		self.pages.each do |page|
-			return Question.get_question_object(question_id) if page.include?(question_id)
-		end
-		return ErrorEnum::QUESTION_NOT_EXIST 
+		return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
+		return Question.get_question_object(question_id)
 	end
 
 	#*description*: delete a question
@@ -597,17 +613,20 @@ class Survey
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
 	def delete_question(current_user, question_id)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+		find_question = false
 		self.pages.each do |page|
 			if page.include?(question_id)
 				page.delete(question_id)
+				find_question = true
 				break
 			end
 		end
+		return ErrorEnum::QUESTION_NOT_EXIST if !find_question
+		return self.save
 		question = Question.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question == nil
 		question.clear_question_object
 		question.destroy
-		return self.save
 	end
 
 	#*description*: create a page

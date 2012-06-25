@@ -19,17 +19,22 @@ class QualityControlQuestionsController < ApplicationController
 	#* a QualityControlQuestion object: when question is successfully created
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def create
-		retval = @current_user.create_quality_control_question(params[:question_type])
+		retval = @current_user.create_quality_control_question(params[:quality_control_type], params[:question_type])
 		case retval
 		when ErrorEnum::UNAUTHORIZED
 			flash[:notice] = "没有权限"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
 			end
-		when ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE
-			flash[:notice] = "错误的质量控制题类型"
+		when ErrorEnum::WRONG_QUESTION_TYPE
+			flash[:notice] = "错误的题目类型"
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE and return }
+				format.json	{ render :json => ErrorEnum::WRONG_QUESTION_TYPE and return }
+			end
+		when ErrorEnum::WRONG_QUALITY_CONTROL_TYPE
+			flash[:notice] = "错误的质量控制类型"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::WRONG_QUALITY_CONTROL_TYPE and return }
 			end
 		else
 			flash[:notice] = "成功创建新质量控制问题"
@@ -47,10 +52,10 @@ class QualityControlQuestionsController < ApplicationController
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
 			end
-		when ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE
+		when ErrorEnum::WRONG_QUALITY_CONTROL_TYPE
 			flash[:notice] = "错误的质量控制题类型"
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE and return }
+				format.json	{ render :json => ErrorEnum::WRONG_QUALITY_CONTROL_TYPE and return }
 			end
 		else
 			flash[:notice] = "成功创建新质量控制问题"
@@ -81,10 +86,10 @@ class QualityControlQuestionsController < ApplicationController
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
 			end
-		when ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE
+		when ErrorEnum::WRONG_QUALITY_CONTROL_TYPE
 			flash[:notice] = "错误的质量控制题类型"
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE and return }
+				format.json	{ render :json => ErrorEnum::WRONG_QUALITY_CONTROL_TYPE and return }
 			end
 		when ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_ANSWER
 			flash[:notice] = "质量控制题答案格式错误"
@@ -128,10 +133,10 @@ class QualityControlQuestionsController < ApplicationController
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST and return }
 			end
-		when ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE
+		when ErrorEnum::WRONG_QUALITY_CONTROL_TYPE
 			flash[:notice] = "错误的质量控制题类型"
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE and return }
+				format.json	{ render :json => ErrorEnum::WRONG_QUALITY_CONTROL_TYPE and return }
 			end
 		else
 			flash[:notice] = "成功获取质量控制问题"

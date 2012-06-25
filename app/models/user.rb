@@ -901,9 +901,7 @@ class User
 ############### operations about quality control questions #################
 #++
 	def create_quality_control_question(question_type)
-		return QualityControlQuestion.create_objective_question(self) if question_type == QualityControlQuestion::OBJECTIVE_QUESTION
-		return QualityControlQuestion.create_matching_questions(self) if question_type == QualityControlQuestion::MATCHING_QUESTION
-		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE
+		return Question.new_quality_control_question(quality_control_type, question_type, self)
 	end
 
 	def list_quality_control_questions(question_type)
