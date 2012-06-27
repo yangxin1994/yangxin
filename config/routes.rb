@@ -68,7 +68,11 @@ OopsData::Application.routes.draw do
 		end
 	end
 
-	resources :quality_control_questions
+	resources :quality_control_questions do
+		collection do
+			put 'update_quality_control_answer'
+		end
+	end
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

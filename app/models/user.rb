@@ -900,31 +900,33 @@ class User
 #--
 ############### operations about quality control questions #################
 #++
-	def create_quality_control_question(question_type)
-		return Question.new_quality_control_question(quality_control_type, question_type, self)
+	def create_quality_control_question(quality_control_type, question_type, question_number)
+		return Question.new_quality_control_question(quality_control_type, question_type, question_number, self)
 	end
 
-	def list_quality_control_questions(question_type)
-		return QualityControlQuestion.list_objective_questions(self) if question_type == QualityControlQuestion::OBJECTIVE_QUESTION
-		return QualityControlQuestion.list_matching_questions(self) if question_type == QualityControlQuestion::MATCHING_QUESTION
-		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTION_TYPE
+	def update_quality_control_question(question_id, question_object)
+		question = Question.find_by_id(question_id)
+		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
+		return question.update_quality_control_question(question_object, self)
 	end
 
-	def update_quality_control_question(question_id, question_obj)
-		question = QualityControlQuestion.find_by_id(question_id)
-		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if question.nil?
-		return question.update_question(question_obj, self)
+	def update_quality_control_answer(quality_control_type, question_type, question_id_ary, answer_object)
+		QualityControlQuestionAnswer.update(quality_control_type, question_type, question_id_ary, answer_object, self)
+	end
+
+	def list_quality_control_questions(quality_control_type)
+		return Question.list_quality_control_questions(quality_control_type, self)
 	end
 
 	def show_quality_control_question(question_id)
-		question = QualityControlQuestion.find_by_id(question_id)
-		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if question.nil?
-		return question.show(self)
+		question = Question.find_by_id(question_id)
+		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
+		return question.show_quality_control_question(self)
 	end
 
 	def delete_quality_control_question(question_id)
 		question = QualityControlQuestion.find_by_id(question_id)
-		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if question.nil?
-		return question.delete(self)
+		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
+		return question.delete_quality_control_question(self)
 	end
 end
