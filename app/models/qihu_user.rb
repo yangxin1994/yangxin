@@ -24,7 +24,7 @@ class QihuUser < ThirdPartyUser
     else
       hash = {}
       hash[:access_token] = access_token
-      qihu_user = ThirdPartyUser.update_by_hash(qihu_user, hash)
+      qihu_user.update_by_hash(hash)
     end
     
     return [ErrorEnum::SAVE_FAILED, nil] if qihu_user.nil?
