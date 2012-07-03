@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
 	#get the information of the signed user and set @current_user
 	def current_user
 		current_user_id = get_cookie(:current_user_id)
-		@current_user = current_user_id.nil? nil : User.find_by_id(current_user_id)
+		@current_user = current_user_id.nil? ? nil : User.find_by_id(current_user_id)
 	end
 
 	def update_last_visit_time
@@ -90,7 +90,7 @@ class ApplicationController < ActionController::Base
 
 	#get cookie given a key
 	def get_cookie(key)
-		return cookie[key.to_sym]
+		return cookies[key.to_sym]
 	end
 
 	def decrypt_third_party_user_id(string)
