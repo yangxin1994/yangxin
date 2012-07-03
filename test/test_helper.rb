@@ -52,7 +52,16 @@ class ActiveSupport::TestCase
 		return oliver
 	end
 
+	def init_lisa
+		lisa = FactoryGirl.build(:lisa)
+		lisa.save
+		return lisa
+	end
 
+	def set_as_admin(user)
+		user.role = 1
+		user.save
+	end
 
 
 	def sign_in(email, password)

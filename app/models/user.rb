@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'encryption'
 require 'error_enum'
 require 'tool'
@@ -7,8 +8,11 @@ class User
   field :email, :type => String
   field :username, :type => String
   field :password, :type => String
-# 0 registered but not activated
-# 1 registered and activated
+# 0 unregistered
+# 1 registered but not activated
+# 2 registered, activated, but not signed in
+# 3, 4, ... 用户首次登录后，需要填写一些个人信息，状态可以记录用户填写个人信息到了哪一步，以便用户填写过程中关闭浏览器，再次打开后可以继续填写
+# -1 deleted
   field :status, :type => Integer, default: 0
   field :last_login_time, :type => Integer
   field :last_login_ip, :type => String
@@ -22,6 +26,15 @@ class User
 # 1 administrator
   field :role, :type => Integer, default: 0
   field :auth_key, :type => String
+  field :last_visit_time, :type => Integer
+  field :level, :type => Integer, default: 0
+  field :level_expire_time, :type => Integer, default: -1
+
+  field :birthday, :type => Integer, default: -1
+  field :gender, :type => Boolean
+  field :address, :type => String
+  field :postcode, :type => String
+  field :phone, :type => String
 
 	before_save :set_updated_at
 	before_update :set_updated_at
@@ -34,18 +47,64 @@ class User
 	end
 
 	public
-	#*description*: find a user given an email
+	#*description*: Find a user given an email, username and user id. Deleted users are not included.
 	#
 	#*params*:
-	#* email of the user
+	#* email / username / user_id of the user
 	#
 	#*retval*:
 	#* the user instance: when the user exists
 	#* nil: when the user does not exist
-	def self.find_by_email(email)
-		return User.where(:email => email)[0]
+	def self.find_by_email_username(email_username)
+		user = User.where(:email => email_username, :status.gt => -1)[0]
+		user = User.where(:username => email_username, :status.gt => -1)[0] if user.nil?
+		return user
 	end
-	
+
+	def self.find_by_email(email)
+		return User.where(:email => email, :status.gt => -1)[0]
+	end
+
+	def self.find_by_username(username)
+		return User.where(:username => username, :status.gt => -1)[0]
+	end
+
+	def self.find_by_id(user_id)
+		return User.where(:_id => user_id, :status.gt => -1)[0]
+	end
+
+	def update_last_visit_time
+		self.last_visit_time = Time.now.to_i
+		self.save
+	end
+
+	def user_init_basic_info(user_info)
+		if self.fill_up_basic_info(user_info)
+			self.status = self.status + 1
+			return self.save
+		else
+			return false
+		end
+	end
+
+	def fill_up_basic_info(user_info)
+		self.birthday = user_info["birthday"]
+		self.gender = user_info["gender"]
+		self.address = user_info["address"]
+		self.postcode = user_info["postcode"]
+		self.phone = user_info["phone"]
+		return self.save
+	end
+
+	def user_init_attr_survey(answer)
+	end
+
+	def skip_user_init
+		self.status = self.status + 1 if self.status <= 4
+		return self.save
+	end
+
+
 	#*description*: check whether an email has been registered as an user
 	#
 	#*params*:
@@ -53,7 +112,11 @@ class User
 	#
 	#*retval*:
 	#* true or false
-	def self.user_exist?(email)
+	def self.user_exist_by_username?(username)
+		return exists?(conditions: { username: username })
+	end
+
+	def self.user_exist_by_email?(email)
 		return exists?(conditions: { email: email })
 	end
 
@@ -64,9 +127,22 @@ class User
 	#
 	#*retval*:
 	#* true or false
-	def self.user_activate?(email)
+	def self.user_activate_by_email?(email)
 		user = User.find_by_email(email)
 		return !!(user && user.status == 1)
+	end
+
+	def self.user_activate_by_username?(username)
+		user = User.find_by_username(username)
+		return !!(user && user.status == 1)
+	end
+
+	def is_deleted
+		return self.status == -1
+	end
+
+	def is_activated
+		return self.status > 1
 	end
 
 	#*description*: check whether an user is adminstrator
@@ -87,7 +163,7 @@ class User
 	#*retval*:
 	#* true or false
 	def self.is_admin(email)
-		return User.user_exist?(email) && User.find_by_email(email).is_admin
+		return User.user_exist_by_email?(email) && User.find_by_email(email).is_admin
 	end
 
 	#*description*: create a new user
@@ -100,16 +176,10 @@ class User
 	def self.check_and_create_new(user)
 		# check whether the email acount is illegal
 		return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal?(user["email"])
-		# check whether this user already exists
-		if user_exist?(user["email"])
-			return ErrorEnum::EMAIL_ACTIVATED if user_activate?(user["email"])
-			return ErrorEnum::EMAIL_NOT_ACTIVATED if !user_activate?(user["email"])
-		end
-		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if user["password"] != user["password_confirmation"]	# wrong password confirmation
-
-#		user_hash = user.merge("password" => Encryption.encrypt_password(user["password"])).delete("password_confirmation")
+		return ErrorEnum::EMAIL_EXIST if self.user_exist_by_email?(user["email"])
+		return ErrorEnum::USERNAME_EXIST if self.user_exist_by_username?(user["username"])
+		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if user["password"] != user["password_confirmation"]
 		user = User.new(user.merge("password" => Encryption.encrypt_password(user["password"])))
-#		user = User.new(user_hash)
 		user.save
 		return user
 	end
@@ -124,8 +194,9 @@ class User
 	#*retval*:
 	#* true: when successfully activated or already activated
 	def self.activate(activate_info)
-		return ErrorEnum::EMAIL_NOT_EXIST if !user_exist?(activate_info["email"])			# email account does not exist
-		return true  if user_activate?(activate_info["email"])					# already activated
+		user = User.find_by_email(activate_info["email"])
+		return ErrorEnum::EMAIL_NOT_EXIST if user.nil?			# email account does not exist
+		return true  if user.is_activate?
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i		# expired
 		user = User.find_by_email(activate_info["email"])
 		user.status = 1
@@ -144,7 +215,7 @@ class User
 	#* EMAIL_NOT_EXIST
 	#* EMAIL_NOT_ACTIVATED
 	def self.third_party_login(email, client_ip)
-		return ErrorEnum::EMAIL_NOT_EXIST if !user_exist?(email)			# email account does not exist
+		return ErrorEnum::EMAIL_NOT_EXIST if !user_exist_by_email?(email)			# email account does not exist
 		return ErrorEnum::EMAIL_NOT_ACTIVATED if !user_activate?(email)		# not activated
 		user = User.find_by_email(email)
 		# record the login information
@@ -166,10 +237,10 @@ class User
 	#* EMAIL_NOT_EXIST
 	#* EMAIL_NOT_ACTIVATED
 	#* WRONG_PASSWORD
-	def self.login(email, password, client_ip)
-		return ErrorEnum::EMAIL_NOT_EXIST if !user_exist?(email)			# email account does not exist
-		return ErrorEnum::EMAIL_NOT_ACTIVATED if !user_activate?(email)		# not activated
-		user = User.find_by_email(email)
+	def self.login(email_username, password, client_ip)
+		user = User.find_by_email_username(email_username)
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
+		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
 		return ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(password)
 		# record the login information
 		user.last_login_time = Time.now.to_i
@@ -220,11 +291,9 @@ class User
 	#* the auth key to be set
 	#
 	#*retval*:
-	def self.set_auth_key(email, auth_key)
-		user = User.find_by_email(email)
-		user.auth_key = auth_key
-		user.save
-		return true
+	def set_auth_key(user_id, auth_key)
+		self.auth_key = auth_key
+		return self.save
 	end
 
 	#*description*: get auth key for one user
@@ -266,7 +335,7 @@ class User
 	#*retval*:
 	#* an array of group objects of this user
 	def groups
-		return Group.get_groups(self.email)
+		return Group.get_groups(self)
 	end
 
 	#*description*: create a new group for this user
@@ -283,7 +352,7 @@ class User
 	#* ErrorEnum ::ILLEGAL_EMAIL
 	#* ErrorEnum ::GROUP_NOT_EXIST
 	def create_group(name, description, members, groups)
-		return Group.check_and_create_new(self.email, name, description, members, groups)
+		return Group.check_and_create_new(self, name, description, members, groups)
 	end
 
 	#*description*: update a group for this user
@@ -297,7 +366,7 @@ class User
 	def update_group(group_id, group_obj)
 		group = Group.find_by_id(group_id)
 		return ErrorEnum::GROUP_NOT_EXIST if group.nil?
-		return group.update_group(self.email, group_obj)
+		return group.update_group(self, group_obj)
 	end
 
 	#*description*: delete a group for this user
@@ -311,7 +380,7 @@ class User
 	def destroy_group(group_id)
 		group = Group.find_by_id(group_id)
 		return ErrorEnum::GROUP_NOT_EXIST if group.nil?
-		return group.delete(self.email)
+		return group.delete(self)
 	end
 
 	#*description*: get a group for this user
@@ -325,7 +394,7 @@ class User
 	def show_group(group_id)
 		group = Group.find_by_id(group_id)
 		return ErrorEnum::GROUP_NOT_EXIST if group.nil?
-		return group.show(self.email)
+		return group.show(self)
 	end
 
 #--
@@ -353,7 +422,7 @@ class User
 	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
 	def save_meta_data(survey_object)
-		return Survey.save_meta_data(self.email, survey_object)
+		return Survey.save_meta_data(self, survey_object)
 	end
 	
 	#*description*: delete a survey
@@ -369,7 +438,7 @@ class User
 	def destroy_survey(survey_id)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.delete(self.email)
+		return survey.delete(self)
 	end
 
 	#*description*: recover a survey
@@ -385,7 +454,7 @@ class User
 	def recover_survey(survey_id)
 		survey = Survey.find_by_id_in_trash(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.recover(self.email)
+		return survey.recover(self)
 	end
 
 	#*description*: thoroughly destroy a survey
@@ -401,7 +470,7 @@ class User
 	def clear_survey(survey_id)
 		survey = Survey.find_by_id_in_trash(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.clear(self.email)
+		return survey.clear(self)
 	end
 
 	#*description*: clone a survey
@@ -417,7 +486,7 @@ class User
 	def clone_survey(survey_id)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.clone(self.email)
+		return survey.clone(self)
 	end
 
 	#*description*: get a survey object
@@ -496,79 +565,84 @@ class User
 	#
 	#*params*:
 	#* the id of the survey
+	#* the message that the user wants to give the administrator
 	#
 	#*retval*:
 	#* true
 	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
 	#* WRONG_PUBLISH_STATUS
-	def submit_survey(survey_id)
+	def submit_survey(survey_id, message)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.submit(self)
+		return survey.submit(self, message)
 	end
 
 	#*description*: reject a survey
 	#
 	#*params*:
 	#* the id of the survey
+	#* the message that the user wants to give the administrator
 	#
 	#*retval*:
 	#* true
 	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
 	#* WRONG_PUBLISH_STATUS
-	def reject_survey(survey_id)
+	def reject_survey(survey_id, message)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.reject(self)
+		return survey.reject(self, message)
 	end
 
 	#*description*: publish a survey
 	#
 	#*params*:
 	#* the id of the survey
+	#* the message that the user wants to give the administrator
 	#
 	#*retval*:
 	#* true
 	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
 	#* WRONG_PUBLISH_STATUS
-	def publish_survey(survey_id)
+	def publish_survey(survey_id, message)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.publish(self)
+		return survey.publish(self, message)
 	end
 
 	#*description*: close a survey
 	#
 	#*params*:
 	#* the id of the survey
+	#* the message that the user wants to give the administrator
 	#
 	#*retval*:
 	#* true
 	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
-	def close_survey(survey_id)
+	def close_survey(survey_id, message)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.close(self)
+		return survey.close(self, message)
 	end
 
-	#*description*: set the publish status of a survey as revised
+	#*description*: pause a survey
 	#
 	#*params*:
 	#* the id of the survey
+	#* the message that the user wants to give the administrator
 	#
 	#*retval*:
 	#* true
 	#* SURVEY_NOT_EXIST
 	#* UNAUTHORIZED
 	#* WRONG_PUBLISH_STATUS
-	def revise_survey(survey_id)
+	def pause_survey(survey_id, message)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.revise(self)
+		return survey.pause(self, message)
 	end
 
 	#*description*: createa a new question
@@ -588,7 +662,7 @@ class User
 	def create_question(survey_id, page_index, question_id, question_type)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.create_question(self.email, page_index, question_id, question_type)
+		return survey.create_question(self, page_index, question_id, question_type)
 	end
 
 	#*description*: update a question
@@ -607,7 +681,7 @@ class User
 	def update_question(survey_id, question_id, question_obj)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.update_question(self.email, question_id, question_obj)
+		return survey.update_question(self, question_id, question_obj)
 	end
 
 	#*description*: move a question
@@ -628,7 +702,7 @@ class User
 	def move_question(survey_id, question_id_1, page_index, question_id_2)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.move_question(self.email, question_id_1, page_index, question_id_2)
+		return survey.move_question(self, question_id_1, page_index, question_id_2)
 	end
 
 	#*description*: clone a question
@@ -648,7 +722,7 @@ class User
 	def clone_question(survey_id, question_id_1, page_index, question_id_2)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.clone_question(self.email, question_id_1, page_index, question_id_2)
+		return survey.clone_question(self, question_id_1, page_index, question_id_2)
 	end
 
 	#*description*: get a question object
@@ -665,7 +739,7 @@ class User
 	def get_question_object(survey_id, question_id)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		survey.get_question_object(self.email, question_id)
+		survey.get_question_object(self, question_id)
 	end
 
 	#*description*: delete a question
@@ -683,7 +757,7 @@ class User
 	def delete_question(survey_id, question_id)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.delete_question(self.email, question_id)
+		return survey.delete_question(self, question_id)
 	end
 
 	#*description*: create a page
@@ -701,7 +775,7 @@ class User
 	def create_page(survey_id, page_index)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.create_page(self.email, page_index)
+		return survey.create_page(self, page_index)
 	end
 
 	#*description*: show a page
@@ -718,7 +792,7 @@ class User
 	def show_page(survey_id, page_index)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.show_page(self.email, page_index)
+		return survey.show_page(self, page_index)
 	end
 
 	#*description*: clone a page
@@ -737,7 +811,7 @@ class User
 	def clone_page(survey_id, page_index_1, page_index_2)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.clone_page(self.email, page_index_1, page_index_2)
+		return survey.clone_page(self, page_index_1, page_index_2)
 	end
 
 	#*description*: delete a page
@@ -755,7 +829,7 @@ class User
 	def delete_page(survey_id, page_index)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.delete_page(self.email, page_index)
+		return survey.delete_page(self, page_index)
 	end
 
 	#*description*: combine pages
@@ -774,7 +848,7 @@ class User
 	def combine_pages(survey_id, page_index_1, page_index_2)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.combine_pages(self.email, page_index_1, page_index_2)
+		return survey.combine_pages(self, page_index_1, page_index_2)
 	end
 
 	#*description*: move page
@@ -793,7 +867,7 @@ class User
 	def move_page(survey_id, page_index_1, page_index_2)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		survey.move_page(self.email, page_index_1, page_index_2)
+		survey.move_page(self, page_index_1, page_index_2)
 	end
 
 #--
@@ -841,18 +915,18 @@ class User
 #++
 	# create a new material
 	def create_material(material_type, location, title)
-		return Material.check_and_create_new(self.email, material_type, location, title)
+		return Material.check_and_create_new(self, material_type, location, title)
 	end
 
 	# get a list of materials
 	def get_material_object_list(material_type)
-		material_list = Material.get_object_list(self.email, material_type)
+		material_list = Material.get_object_list(self, material_type)
 		return material_list
 	end
 
 	# get a material object
 	def get_material_object(material_id)
-		material = Material.get_object(self.email, material_id)
+		material = Material.get_object(self, material_id)
 		return material
 	end
 
@@ -860,7 +934,7 @@ class User
 	def destroy_material(material_id)
 		material = Material.find_by_id(material_id)
 		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
-		retval = material.delete(self.email)
+		retval = material.delete(self)
 		return retval
 	end
 
@@ -868,7 +942,7 @@ class User
 	def clear_material(material_id)
 		material = material.find_by_id(material_id)
 		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
-		retval = material.clear(self.email)
+		retval = material.clear(self)
 		return retval
 	end
 
@@ -876,7 +950,7 @@ class User
 	def update_material_title(material_id, material_obj)
 		material = Material.find_by_id(material_id)
 		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
-		retval = material.update_title(self.email, material_obj["title"])
+		retval = material.update_title(self, material_obj["title"])
 		return retval
 	end
 
@@ -885,10 +959,42 @@ class User
 #++
 	def self.combine(email, website, user_id)
 		user = User.find_by_email(email)
-		return ErrorEnum::EMAIL_NOT_EXIST if user.nil?
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
 		third_party_user = ThirdPartyUser.find_by_website_and_user_id(website, user_id)
 		return ErrorEnum::THIRD_PARTY_USER_NOT_EXIST if third_party_user.nil?
-		third_party_user.email = email
-		return third_party_user.save
+		return third_party_user.bind(self)
+	end
+
+#--
+############### operations about quality control questions #################
+#++
+	def create_quality_control_question(quality_control_type, question_type, question_number)
+		return Question.new_quality_control_question(quality_control_type, question_type, question_number, self)
+	end
+
+	def update_quality_control_question(question_id, question_object)
+		question = Question.find_by_id(question_id)
+		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
+		return question.update_quality_control_question(question_object, self)
+	end
+
+	def update_quality_control_answer(answer_object)
+		QualityControlQuestionAnswer.update_answers(answer_object, self)
+	end
+
+	def list_quality_control_questions(quality_control_type)
+		return Question.list_quality_control_questions(quality_control_type, self)
+	end
+
+	def show_quality_control_question(question_id)
+		question = Question.find_by_id(question_id)
+		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
+		return question.show_quality_control_question(self)
+	end
+
+	def delete_quality_control_question(question_id)
+		question = QualityControlQuestion.find_by_id(question_id)
+		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
+		return question.delete_quality_control_question(self)
 	end
 end

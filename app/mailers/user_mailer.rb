@@ -31,20 +31,21 @@ class UserMailer < ActionMailer::Base
 					:content_type => "text/html; charset=utf-8")
 	end
 	
-	def publish_email(user, survey)
-		@user = user
-		@survey = survey
-		mail(:to => user.email, 
+	def publish_email(publish_status_history)
+		@survey = Survey.find_by_id(publish_status_history.survey_id)
+		@user = User.find_by_email(@survey.owner_email)
+		@message = publish_status_history.message
+		mail(:to => @user.email, 
 					:subject => "您的点查问卷 #{@survey.title} 已经发布",
 					:content_type => "text/html; charset=utf-8")
 	end
 	
-	def reject_email(user)
-		@user = user
-		@survey = survey
-		mail(:to => user.email, 
+	def reject_email(publish_status_history)
+		@survey = Survey.find_by_id(publish_status_history.survey_id)
+		@user = User.find_by_email(@survey.owner_email)
+		@message = publish_status_history.message
+		mail(:to => @user.email, 
 					:subject => "您的点查问卷 #{@survey.title} 被拒绝发布",
 					:content_type => "text/html; charset=utf-8")
 	end
-	
 end

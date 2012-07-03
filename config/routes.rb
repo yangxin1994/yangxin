@@ -46,7 +46,7 @@ OopsData::Application.routes.draw do
 			get 'reject'
 			get 'publish'
 			get 'close'
-			get 'revise'
+			get 'pause'
 		end
 		resources :pages
 		resources :questions
@@ -65,6 +65,12 @@ OopsData::Application.routes.draw do
 	resources :materials do
 		member do
 			get 'clear'
+		end
+	end
+
+	resources :quality_control_questions do
+		collection do
+			put 'update_quality_control_answer'
 		end
 	end
 

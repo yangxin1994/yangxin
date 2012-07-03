@@ -35,10 +35,10 @@ class Group
 	#*retval*:
 	#* the groups object array
 	#* ErrorEnum ::EMAIL_NOT_EXIST
-	def self.get_groups(current_user_email)
-		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(current_user_email).nil?
+	def self.get_groups(current_user)
+		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(current_user.email).nil?
 		groups_obj = []
-		self.groups_of(current_user_email).each do |group|
+		self.groups_of(current_user.email).each do |group|
 			groups_obj << group.serialize
 		end
 	end
@@ -54,10 +54,10 @@ class Group
 	#*retval*:
 	#* the group object
 	#* ErrorEnum ::GROUP_NOT_EXIST : if cannot find the group
-	def self.check_and_create_new(current_user_email, name, description, members, sub_groups)
+	def self.check_and_create_new(current_user, name, description, members, sub_groups)
 		# this owner already has a group with the same name
-		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(current_user_email).nil?
-		group = Group.new(:owner_email => current_user_email, :name => name, :description => description)
+		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(current_user.email).nil?
+		group = Group.new(:owner_email => current_user.email, :name => name, :description => description)
 
 		members.each do |member|
 #return ErrorEnum::ILLEGAL_EMAIL Tool.email_illegal?(member["email"])
@@ -67,7 +67,7 @@ class Group
 
 		sub_groups.each do |sub_group_id|
 			return ErrorEnum::GROUP_NOT_EXIST if Group.find_by_id(sub_group_id).nil?
-			return ErrorEnum::UNAUTHORIZED if Group.find_by_id(sub_group_id).owner_email != current_user_email
+			return ErrorEnum::UNAUTHORIZED if Group.find_by_id(sub_group_id).owner_email != current_user.email
 			group.sub_groups << sub_group_id
 		end
 		group.save
@@ -84,8 +84,8 @@ class Group
 	#* the updated group object
 	#* ErrorEnum ::GROUP_NOT_EXIST : if cannot find the group
 	#* ErrorEnum ::UNAUTHORIZED : if cannot find the group
-	def update_group(current_user_email, group_obj)
-		return ErrorEnum::UNAUTHORIZED if current_user_email != self.owner_email
+	def update_group(current_user, group_obj)
+		return ErrorEnum::UNAUTHORIZED if current_user.email != self.owner_email
 		self.name = group_obj["name"]
 		self.description = group_obj["description"]
 		self.members = []
@@ -96,7 +96,7 @@ class Group
 		self.sub_groups = []
 		group_obj["sub_groups"].each do |sub_group_id|
 			return ErrorEnum::GROUP_NOT_EXIST if Group.find_by_id(sub_group_id).nil?
-			return ErrorEnum::UNAUTHORIZED if Group.find_by_id(sub_group_id).owner_email != current_user_email
+			return ErrorEnum::UNAUTHORIZED if Group.find_by_id(sub_group_id).owner_email != current_user.email
 			self.sub_groups << sub_group_id
 		end
 		self.save
@@ -111,10 +111,10 @@ class Group
 	#*retval*:
 	#* true if the group is deleted
 	#* ErrorEnum ::UNAUTHORIZED : if cannot find the group
-	def delete(current_user_email)
-		return ErrorEnum::UNAUTHORIZED if current_user_email != self.owner_email
+	def delete(current_user)
+		return ErrorEnum::UNAUTHORIZED if current_user.email != self.owner_email
 		# remove this group from another one if this is a sub-group
-		Group.groups_of(current_user_email).each do |group|
+		Group.groups_of(current_user.email).each do |group|
 			group.sub_groups.delete(self._id.to_s)
 			group.save
 		end
@@ -130,8 +130,8 @@ class Group
 	#*retval*:
 	#* the group object
 	#* ErrorEnum ::UNAUTHORIZED : if cannot find the group
-	def show(current_user_email)
-		return ErrorEnum::UNAUTHORIZED if current_user_email != self.owner_email
+	def show(current_user)
+		return ErrorEnum::UNAUTHORIZED if current_user.email != self.owner_email
 		return self.serialize
 	end
 
