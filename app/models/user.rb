@@ -5,6 +5,7 @@ require 'tool'
 #Corresponding to the User collection in database. Record the user information and activities related to the usage of OopsData system.
 class User
   include Mongoid::Document
+	include Mongoid::Timestamps
   field :email, :type => String
   field :username, :type => String
   field :password, :type => String
@@ -17,8 +18,6 @@ class User
   field :last_login_time, :type => Integer
   field :last_login_ip, :type => String
   field :login_count, :type => Integer, default: 0
-  field :created_at, :type => Integer, default: -> { Time.now.to_i }
-  field :updated_at, :type => Integer
   field :activate_time, :type => Integer
   field :introducer_id, :type => Integer
   field :introducer_to_pay, :type => Float
@@ -36,15 +35,9 @@ class User
   field :postcode, :type => String
   field :phone, :type => String
 
-	before_save :set_updated_at
-	before_update :set_updated_at
+	has_many :groups
 
-	attr_accessible :email, :username, :password
-
-	private
-	def set_updated_at
-		self.updated_at = Time.now.to_i
-	end
+	attr_accessible :email, :username, :password, :registered_at
 
 	public
 	#*description*: Find a user given an email, username and user id. Deleted users are not included.
@@ -78,8 +71,8 @@ class User
 		self.save
 	end
 
-	def user_init_basic_info(user_info)
-		if self.fill_up_basic_info(user_info)
+	def init_basic_info(user_info)
+		if self.update_basic_info(user_info)
 			self.status = self.status + 1
 			return self.save
 		else
@@ -87,7 +80,7 @@ class User
 		end
 	end
 
-	def fill_up_basic_info(user_info)
+	def update_basic_info(user_info)
 		self.birthday = user_info["birthday"]
 		self.gender = user_info["gender"]
 		self.address = user_info["address"]
@@ -96,10 +89,10 @@ class User
 		return self.save
 	end
 
-	def user_init_attr_survey(answer)
+	def init_attr_survey(answer)
 	end
 
-	def skip_user_init
+	def skip_init_step
 		self.status = self.status + 1 if self.status <= 4
 		return self.save
 	end
@@ -155,17 +148,6 @@ class User
 		return self.role == 1
 	end
 
-	#*description*: check whether an user is adminstrator
-	#
-	#*params*:
-	#* email of the user
-	#
-	#*retval*:
-	#* true or false
-	def self.is_admin(email)
-		return User.user_exist_by_email?(email) && User.find_by_email(email).is_admin
-	end
-
 	#*description*: create a new user
 	#
 	#*params*:
@@ -173,14 +155,24 @@ class User
 	#
 	#*retval*:
 	#* the new user instance: when successfully created
-	def self.check_and_create_new(user)
+	def self.create_new_registered_user(user, current_user)
 		# check whether the email acount is illegal
 		return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal?(user["email"])
 		return ErrorEnum::EMAIL_EXIST if self.user_exist_by_email?(user["email"])
 		return ErrorEnum::USERNAME_EXIST if self.user_exist_by_username?(user["username"])
 		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if user["password"] != user["password_confirmation"]
-		user = User.new(user.merge("password" => Encryption.encrypt_password(user["password"])))
-		user.save
+		updated_attr = user.merge("password" => Encryption.encrypt_password(user["password"]), "registered_at" => Time.now.to_i)
+		if !current_user.nil?
+			current_user.attributes = updated_attr
+		else
+			current_user = User.new(updated_attr)
+		end
+		current_user.save
+		return current_user
+	end
+
+	def self.create_new_visitor_user(user)
+		user = User.new
 		return user
 	end
 
@@ -313,93 +305,13 @@ class User
 	end
 
 #--
-############### operations about user information #################
-#++
-	#*description*: update an user's information
-	#
-	#*params*:
-	#* the user information hash
-	#
-	#*retval*:
-	def update_information(profile)
-		UserInformation.update(profile)
-	end
-
-#--
-############### operations about group #################
-#++
-	#*description*: obtain the groups of this user
-	#
-	#*params*:
-	#
-	#*retval*:
-	#* an array of group objects of this user
-	def groups
-		return Group.get_groups(self)
-	end
-
-	#*description*: create a new group for this user
-	#
-	#*params*:
-	#* name of the new group
-	#* description of the new group
-	#* array of members of the new group; each member has a hash that includes the kes: email, mobile, name, is_exclusive
-	#* array of sub groups id
-	#
-	#*retval*:
-	#* the group object: when successfully created
-	#* ErrorEnum ::EMAIL_NOT_EXIST
-	#* ErrorEnum ::ILLEGAL_EMAIL
-	#* ErrorEnum ::GROUP_NOT_EXIST
-	def create_group(name, description, members, groups)
-		return Group.check_and_create_new(self, name, description, members, groups)
-	end
-
-	#*description*: update a group for this user
-	#
-	#*params*:
-	#* group object to be updated
-	#
-	#*retval*:
-	#* the group object: when successfully updated
-	#* ErrorEnum ::GROUP_NOT_EXIST
-	def update_group(group_id, group_obj)
-		group = Group.find_by_id(group_id)
-		return ErrorEnum::GROUP_NOT_EXIST if group.nil?
-		return group.update_group(self, group_obj)
-	end
-
-	#*description*: delete a group for this user
-	#
-	#*params*:
-	#* id of the group to be deleted
-	#
-	#*retval*:
-	#* true: when successfully deleted
-	#* SURVEY_NOT_EXIST
-	def destroy_group(group_id)
-		group = Group.find_by_id(group_id)
-		return ErrorEnum::GROUP_NOT_EXIST if group.nil?
-		return group.delete(self)
-	end
-
-	#*description*: get a group for this user
-	#
-	#*params*:
-	#* id of the group to be shown
-	#
-	#*retval*:
-	#* the group instance: when successfully updated
-	#* SURVEY_NOT_EXIST
-	def show_group(group_id)
-		group = Group.find_by_id(group_id)
-		return ErrorEnum::GROUP_NOT_EXIST if group.nil?
-		return group.show(self)
-	end
-
-#--
 ############### operations about survey #################
 #++
+
+	def tags
+		
+	end
+
 	#*description*: get surveys for this user
 	#
 	#*params*:

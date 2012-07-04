@@ -5,7 +5,7 @@ require 'tool'
 class SessionsController < ApplicationController
 
 	before_filter :require_sign_out, :except => [:destroy, :sina_connect, :renren_connect, :qq_connect, :google_connect]
-	before_filter :require_sign_in, :only => [:destroy, :basic_info]
+	before_filter :require_sign_in, :only => [:destroy, :init_basic_info, :init_user_attr_survey, :skip_init_step, :update_user_info]
 
 	# method: get
 	# descryption: the page where user logins
@@ -81,8 +81,42 @@ class SessionsController < ApplicationController
 		end
 	end
 
-	def basic_info
-		retval = @current_user.user_init_basic_info(params[:user_info)
+	def update_user_info
+		retval = @current_user.update_basic_info(params[:user_info)
+		case retval
+		when true
+			flash[:notice] = "更新个人信息成功"
+			respond_to do |format|
+				format.html	{ redirect_to home_path and return }
+				format.json	{ render :json => true and return }
+			end
+		else
+			respond_to do |format|
+				format.html	{ redirect_to "/500" and return }
+				format.json	{ render :json => "unknown error" and return }
+			end
+		end
+	end
+
+	def init_basic_info
+		retval = @current_user.init_basic_info(params[:user_info)
+		case retval
+		when true
+			flash[:notice] = "更新个人信息成功"
+			respond_to do |format|
+				format.html	{ redirect_to home_path and return }
+				format.json	{ render :json => true and return }
+			end
+		else
+			respond_to do |format|
+				format.html	{ redirect_to "/500" and return }
+				format.json	{ render :json => "unknown error" and return }
+			end
+		end
+	end
+
+	def init_user_attr_survey
+		retval = @current_user.init_attr_survey(params[:answer)
 		case retval
 		when true
 			flash[:notice] = "更新个人信息成功"
@@ -98,25 +132,8 @@ class SessionsController < ApplicationController
 		end
 	end
 
-	def user_attr_survey
-		retval = @current_user.user_init_attr_survey(params[:answer)
-		case retval
-		when true
-			flash[:notice] = "更新个人信息成功"
-			respond_to do |format|
-				format.html	{ redirect_to home_path and return }
-				format.json	{ render :json => true and return }
-			end
-		else
-			respond_to do |format|
-				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => "unknow error" and return }
-			end
-		end
-	end
-
-	def skip_user_init
-		retval = @current_user.skip_user_init
+	def skip_init_step
+		retval = @current_user.skip_init_step
 		case retval
 		when true
 			flash[:notice] = "成功跳到下一步"
@@ -361,7 +378,6 @@ class SessionsController < ApplicationController
 				flash[:notice] = "登录成功"
 				redirect_to home_path and return
 			else
-				flash[:notice] = "unknown error"
 				redirect_to "/500" and return
 			end
 		elsif !tp_user.is_bound && user_signed_in

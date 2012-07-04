@@ -234,41 +234,6 @@ class SurveysController < ApplicationController
 
 	#*method*: put
 	#
-	#*url*: /surveys/:survey_id/update_tags
-	#
-	#*description*: update tags of a survey
-	#
-	#*params*:
-	#* survey_id: id of the survey
-	#* tags: array of tags
-	#
-	#*retval*:
-	#* the survey object
-	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
-	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
-	def update_tags
-		retval = @current_user.update_survey_tags(params[:id], params[:tags])
-		case retval 
-		when ErrorEnum::SURVEY_NOT_EXIST
-			flash[:notice] = "该调查问卷不存在"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "标签已成功更新"
-			respond_to do |format|
-				format.json	{ render :json => retval and return }
-			end
-		end
-	end
-
-	#*method*: put
-	#
 	#*url*: /surveys/:survey_id/add_tag
 	#
 	#*description*: add a tag to a survey
