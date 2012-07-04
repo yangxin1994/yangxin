@@ -29,15 +29,29 @@ class Order
 	embeds_one :realgoods_receive_info, :class_name => "RealgoodsReceiveInfo"
 	embeds_one :virtualgoods_receive_info, :class_name => "VirtualgoodsReceiveInfo"
 	embeds_one :lottery_receive_info, :class_name => "LotteryCodeReceiveInfo"
-	has_one :point_log
-	has_one :present
+
+	has_one :point_log, :class_name => "PointLog"
+
+	belongs_to :present, :class_name => "Present"
 	belongs_to :user, :class_name => "User", :inverse_of => :orders
 	belongs_to :operated_admin, :class_name => "User", :inverse_of => :operate_orders
 	
 
 	# TO DO validation verify
 
+	after_create :decrease_present_and_point
 
+	private
+	
+
+	def decrease_present_and_point
+		return if self.present.blank? && self.user.blank?
+		self.create_point_log(:order_id => self.id,
+													:user_id => self.user.id,
+													:operate_point => self.present.point,
+													:cause => 4)
+		self.present.inc(:quantity, -1)
+	end
 
 
 end

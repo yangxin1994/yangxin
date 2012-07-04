@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'encryption'
 require 'error_enum'
 require 'tool'
@@ -7,8 +8,11 @@ class User
   field :email, :type => String
   field :username, :type => String
   field :password, :type => String
-# 0 registered but not activated
-# 1 registered and activated
+# 0 unregistered
+# 1 registered but not activated
+# 2 registered, activated, but not signed in
+# 3, 4, ... 用户首次登录后，需要填写一些个人信息，状态可以记录用户填写个人信息到了哪一步，以便用户填写过程中关闭浏览器，再次打开后可以继续填写
+# -1 deleted
   field :status, :type => Integer, default: 0
   field :last_login_time, :type => Integer
   field :last_login_ip, :type => String
@@ -22,6 +26,15 @@ class User
 # 1 administrator
   field :role, :type => Integer, default: 0
   field :auth_key, :type => String
+  field :last_visit_time, :type => Integer
+  field :level, :type => Integer, default: 0
+  field :level_expire_time, :type => Integer, default: -1
+
+  field :birthday, :type => Integer, default: -1
+  field :gender, :type => Boolean
+  field :address, :type => String
+  field :postcode, :type => String
+  field :phone, :type => String
 
   #################################
   # QuillMe
@@ -43,18 +56,64 @@ class User
 	end
 
 	public
-	#*description*: find a user given an email
+	#*description*: Find a user given an email, username and user id. Deleted users are not included.
 	#
 	#*params*:
-	#* email of the user
+	#* email / username / user_id of the user
 	#
 	#*retval*:
 	#* the user instance: when the user exists
 	#* nil: when the user does not exist
-	def self.find_by_email(email)
-		return User.where(:email => email)[0]
+	def self.find_by_email_username(email_username)
+		user = User.where(:email => email_username, :status.gt => -1)[0]
+		user = User.where(:username => email_username, :status.gt => -1)[0] if user.nil?
+		return user
 	end
-	
+
+	def self.find_by_email(email)
+		return User.where(:email => email, :status.gt => -1)[0]
+	end
+
+	def self.find_by_username(username)
+		return User.where(:username => username, :status.gt => -1)[0]
+	end
+
+	def self.find_by_id(user_id)
+		return User.where(:_id => user_id, :status.gt => -1)[0]
+	end
+
+	def update_last_visit_time
+		self.last_visit_time = Time.now.to_i
+		self.save
+	end
+
+	def user_init_basic_info(user_info)
+		if self.fill_up_basic_info(user_info)
+			self.status = self.status + 1
+			return self.save
+		else
+			return false
+		end
+	end
+
+	def fill_up_basic_info(user_info)
+		self.birthday = user_info["birthday"]
+		self.gender = user_info["gender"]
+		self.address = user_info["address"]
+		self.postcode = user_info["postcode"]
+		self.phone = user_info["phone"]
+		return self.save
+	end
+
+	def user_init_attr_survey(answer)
+	end
+
+	def skip_user_init
+		self.status = self.status + 1 if self.status <= 4
+		return self.save
+	end
+
+
 	#*description*: check whether an email has been registered as an user
 	#
 	#*params*:
@@ -62,7 +121,11 @@ class User
 	#
 	#*retval*:
 	#* true or false
-	def self.user_exist?(email)
+	def self.user_exist_by_username?(username)
+		return exists?(conditions: { username: username })
+	end
+
+	def self.user_exist_by_email?(email)
 		return exists?(conditions: { email: email })
 	end
 
@@ -73,9 +136,22 @@ class User
 	#
 	#*retval*:
 	#* true or false
-	def self.user_activate?(email)
+	def self.user_activate_by_email?(email)
 		user = User.find_by_email(email)
 		return !!(user && user.status == 1)
+	end
+
+	def self.user_activate_by_username?(username)
+		user = User.find_by_username(username)
+		return !!(user && user.status == 1)
+	end
+
+	def is_deleted
+		return self.status == -1
+	end
+
+	def is_activated
+		return self.status > 1
 	end
 
 	#*description*: check whether an user is adminstrator
@@ -96,7 +172,7 @@ class User
 	#*retval*:
 	#* true or false
 	def self.is_admin(email)
-		return User.user_exist?(email) && User.find_by_email(email).is_admin
+		return User.user_exist_by_email?(email) && User.find_by_email(email).is_admin
 	end
 
 	#*description*: create a new user
@@ -109,16 +185,10 @@ class User
 	def self.check_and_create_new(user)
 		# check whether the email acount is illegal
 		return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal?(user["email"])
-		# check whether this user already exists
-		if user_exist?(user["email"])
-			return ErrorEnum::EMAIL_ACTIVATED if user_activate?(user["email"])
-			return ErrorEnum::EMAIL_NOT_ACTIVATED if !user_activate?(user["email"])
-		end
-		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if user["password"] != user["password_confirmation"]	# wrong password confirmation
-
-#		user_hash = user.merge("password" => Encryption.encrypt_password(user["password"])).delete("password_confirmation")
+		return ErrorEnum::EMAIL_EXIST if self.user_exist_by_email?(user["email"])
+		return ErrorEnum::USERNAME_EXIST if self.user_exist_by_username?(user["username"])
+		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if user["password"] != user["password_confirmation"]
 		user = User.new(user.merge("password" => Encryption.encrypt_password(user["password"])))
-#		user = User.new(user_hash)
 		user.save
 		return user
 	end
@@ -133,8 +203,9 @@ class User
 	#*retval*:
 	#* true: when successfully activated or already activated
 	def self.activate(activate_info)
-		return ErrorEnum::EMAIL_NOT_EXIST if !user_exist?(activate_info["email"])			# email account does not exist
-		return true  if user_activate?(activate_info["email"])					# already activated
+		user = User.find_by_email(activate_info["email"])
+		return ErrorEnum::EMAIL_NOT_EXIST if user.nil?			# email account does not exist
+		return true  if user.is_activate?
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i		# expired
 		user = User.find_by_email(activate_info["email"])
 		user.status = 1
@@ -153,7 +224,7 @@ class User
 	#* EMAIL_NOT_EXIST
 	#* EMAIL_NOT_ACTIVATED
 	def self.third_party_login(email, client_ip)
-		return ErrorEnum::EMAIL_NOT_EXIST if !user_exist?(email)			# email account does not exist
+		return ErrorEnum::EMAIL_NOT_EXIST if !user_exist_by_email?(email)			# email account does not exist
 		return ErrorEnum::EMAIL_NOT_ACTIVATED if !user_activate?(email)		# not activated
 		user = User.find_by_email(email)
 		# record the login information
@@ -175,10 +246,10 @@ class User
 	#* EMAIL_NOT_EXIST
 	#* EMAIL_NOT_ACTIVATED
 	#* WRONG_PASSWORD
-	def self.login(email, password, client_ip)
-		return ErrorEnum::EMAIL_NOT_EXIST if !user_exist?(email)			# email account does not exist
-		return ErrorEnum::EMAIL_NOT_ACTIVATED if !user_activate?(email)		# not activated
-		user = User.find_by_email(email)
+	def self.login(email_username, password, client_ip)
+		user = User.find_by_email_username(email_username)
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
+		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
 		return ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(password)
 		# record the login information
 		user.last_login_time = Time.now.to_i
@@ -229,11 +300,9 @@ class User
 	#* the auth key to be set
 	#
 	#*retval*:
-	def self.set_auth_key(email, auth_key)
-		user = User.find_by_email(email)
-		user.auth_key = auth_key
-		user.save
-		return true
+	def set_auth_key(user_id, auth_key)
+		self.auth_key = auth_key
+		return self.save
 	end
 
 	#*description*: get auth key for one user
@@ -899,11 +968,10 @@ class User
 #++
 	def self.combine(email, website, user_id)
 		user = User.find_by_email(email)
-		return ErrorEnum::EMAIL_NOT_EXIST if user.nil?
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
 		third_party_user = ThirdPartyUser.find_by_website_and_user_id(website, user_id)
 		return ErrorEnum::THIRD_PARTY_USER_NOT_EXIST if third_party_user.nil?
-		third_party_user.email = email
-		return third_party_user.save
+		return third_party_user.bind(self)
 	end
 
 #--
@@ -919,8 +987,8 @@ class User
 		return question.update_quality_control_question(question_object, self)
 	end
 
-	def update_quality_control_answer(quality_control_type, question_type, question_id_ary, answer_object)
-		QualityControlQuestionAnswer.update(quality_control_type, question_type, question_id_ary, answer_object, self)
+	def update_quality_control_answer(answer_object)
+		QualityControlQuestionAnswer.update_answers(answer_object, self)
 	end
 
 	def list_quality_control_questions(quality_control_type)

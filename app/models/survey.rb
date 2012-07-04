@@ -41,6 +41,7 @@ class Survey
 	scope :all_surveys_of, lambda { |owner_email| where(:owner_email => owner_email) }
 	scope :trash_surveys_of, lambda { |owner_email| where(:owner_email => owner_email, :status => -1) }
 
+
 	before_save :set_updated_at, :clear_survey_object
 	before_update :set_updated_at, :clear_survey_object
 	before_destroy :clear_survey_object

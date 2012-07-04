@@ -1,4 +1,3 @@
-
 class RenrenUser < ThirdPartyUser
   
   field :name, :type => String
@@ -41,7 +40,6 @@ class RenrenUser < ThirdPartyUser
 			"code" => code}
 		retval = Tool.send_post_request("https://graph.renren.com/oauth/token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
-		Logger.new("log/development.log").info(response_data.to_s)		
 		return response_data
 	end
 	
@@ -63,7 +61,7 @@ class RenrenUser < ThirdPartyUser
 	 
 	  #new or update renren_user
 		renren_user = RenrenUser.where(:user_id => user_id)[0]
-		if renren_user.nil? then
+		if renren_user.nil?
       renren_user = RenrenUser.new(:website => "renren", :user_id => user_id, :access_token => access_token, 
       :refresh_token => refresh_token, :expires_in => expires_in)
       renren_user.save
@@ -73,17 +71,12 @@ class RenrenUser < ThirdPartyUser
       response_data["access_token"] = access_token 
       response_data["refresh_token"] = refresh_token
       response_data["expires_in"] = expires_in
-      
       # update info 
-      renren_user = ThirdPartyUser.update_by_hash(renren_user, response_data)
+      renren_user.update_by_hash(response_data)
     end
-    
-    # first time get user base information.
-    renren_user.update_user_info if renren_user.gender.nil?
+    renren_user.update_user_info
     
     return renren_user
-  rescue
-    return nil
   end
   
   #--
@@ -131,12 +124,13 @@ class RenrenUser < ThirdPartyUser
 	#
 	#*params*: 
 	#* url: the place which you want to share
+	#* type: the type that you share. 
 	#
 	#*retval*:
 	#
 	# say successfully or not.
-  def add_share(url)
-    retval = call_method("post", {:method => "share.share", :type => 6, :url => url}) 
+  def add_share(url, type=6)
+    retval = call_method("post", {:method => "share.share", :type => type, :url => url}) 
     
     successful?(retval)   
   end

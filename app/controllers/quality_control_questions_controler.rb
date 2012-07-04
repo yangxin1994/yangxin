@@ -139,7 +139,7 @@ class QualityControlQuestionsController < ApplicationController
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::WRONG_QUALITY_CONTROL_TYPE
 	def update_quality_control_answer
-		retval = @current_user.update_quality_control_answer(params[:quality_control_type], params[:question_type], params[:question_id_ary], params[:answer])
+		retval = @current_user.update_quality_control_answer(params[:answer])
 		case retval
 		when ErrorEnum::UNAUTHORIZED
 			flash[:notice] = "没有权限"

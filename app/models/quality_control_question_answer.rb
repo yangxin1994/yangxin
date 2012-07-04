@@ -54,9 +54,10 @@ class QualityControlQuestionAnswer
 		end
 	end
 
-	def self.update(quality_control_type, question_type, question_id_ary, answer_object, operator)
+	def self.update_answers(answer_object, operator)
 		return ErrorEnum::UNAUTHORIZED if !operator.is_admin
 		# construct the hash, from which the question id for each input can be found easily
+		quality_control_type = answer_object[]
 		question_id_for_inputs = {}
 		question_id_ary.each do |question_id|
 			question = Question.find_by_id(question_id)
