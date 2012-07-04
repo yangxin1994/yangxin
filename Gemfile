@@ -10,7 +10,7 @@ gem 'bson_ext'
 gem 'ezcrypto'
 gem 'log4r'
 gem 'memcache-client'
-
+gem 'kaminari' 
 gem 'resque'
 gem 'resque-scheduler'
 

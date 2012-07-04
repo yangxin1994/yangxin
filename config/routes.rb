@@ -74,6 +74,9 @@ OopsData::Application.routes.draw do
 		end
 	end
 
+	# QuillMe
+	resources :presents
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

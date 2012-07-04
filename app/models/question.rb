@@ -17,7 +17,7 @@ class Question
 	field :input_prefix, :type => String, default: ""
 	field :status, :type => Integer, default: 0
 	scope :objective_quality_control_questions, lambda { where(:input_prefix => "objective_", :status => 0) }
-scope :matching_quality_control_questions, lambda { where(:input_prefix => "matching_", :status => 0) }
+	scope :matching_quality_control_questions, lambda { where(:input_prefix => "matching_", :status => 0) }
 
 	before_save :clear_question_object
 	before_update :clear_question_object
@@ -134,7 +134,7 @@ scope :matching_quality_control_questions, lambda { where(:input_prefix => "matc
 			end
 			questions_id_ary = matching_questions_obj.map {|qs_obj| qs_obj["question_id"]}
 			MatchingQuestion.create_matching(questions_id_ary)
-			return matching_questions_obj << QualityControlQuestionAnswer.initialize_answer_object(questions_id_ary, quality_control_type, question_type)]
+			return matching_questions_obj << QualityControlQuestionAnswer.initialize_answer_object(questions_id_ary, quality_control_type, question_type)
 		else
 			return ErrorEnum::WRONG_QUALITY_CONTROL_TYPE
 		end
@@ -149,7 +149,7 @@ scope :matching_quality_control_questions, lambda { where(:input_prefix => "matc
 
 		return retval if retval != true
 		question.clear_question_object
-		return Question.get_question_object(question._id))
+		return Question.get_question_object(question._id)
 	end
 
 	def self.list_quality_control_question(quality_control_type, operator)

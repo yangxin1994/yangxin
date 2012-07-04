@@ -22,6 +22,7 @@ class ApplicationController < ActionController::Base
 
 	#judge whether there is a user signed in currently
 	def user_signed_in?
+		logger.info "#{@current_user}"
 		!!@current_user
 	end
 
