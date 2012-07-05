@@ -50,6 +50,7 @@ class User
 
 	attr_accessible :email, :username, :password
 
+
 	private
 	def set_updated_at
 		self.updated_at = Time.now.to_i
@@ -247,9 +248,10 @@ class User
 	#* EMAIL_NOT_ACTIVATED
 	#* WRONG_PASSWORD
 	def self.login(email_username, password, client_ip)
-		user = User.find_by_email_username(email_username)
+		user = User.find_by_email(email_username)
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
-		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
+		# There is no is_activated
+		#return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
 		return ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(password)
 		# record the login information
 		user.last_login_time = Time.now.to_i

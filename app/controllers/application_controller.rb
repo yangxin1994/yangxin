@@ -86,7 +86,7 @@ class ApplicationController < ActionController::Base
 
 	#set cookie given a pair of key and value
 	def set_cookie(key, value, expire_time = nil)
-		cookie[key.to_sym] = expire_time.nil? value : {:value => value, :expires => expire_time}
+		cookie[key.to_sym] = expire_time.nil ? value : {:value => value, :expires => expire_time}
 	end
 
 	#get cookie given a key

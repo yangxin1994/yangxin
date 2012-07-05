@@ -3,7 +3,7 @@ class PresentsController < ApplicationController
 	def index
 		@presents = Present.page(params[:page].to_i)
 		respond_to do |format|
-			format.json { render json: @presents }
+			format.json { render json: @presents, :only => [:name,:point] }
 		end
 	end
 
