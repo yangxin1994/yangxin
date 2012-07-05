@@ -133,21 +133,7 @@ class SinaUser < ThirdPartyUser
     successful?(retval)
   end
   
-  #*description*: repost a weibo without message
-	#
-	#*params*: 
-	#* text_id: the weibo's id which is you want to repost.
-	#
-	#*retval*:
-	#
-	# say successfully or not.
-  def repost_text(text_id)
-    retval = call_method("post", {:method => "statuses/repost", :id => text_id})
-    
-    successful?(retval)
-  end
-
-  #*description*: repost a weibo with message
+  #*description*: repost a weibo with message or not
 	#
 	#*params*: 
 	#* text_id: the weibo's id which is you want to repost.
@@ -156,8 +142,9 @@ class SinaUser < ThirdPartyUser
 	#*retval*:
 	#
 	# say successfully or not.
-  def repost_text_with_message(text_id, status)
-    retval = call_method("post", {:method => "statuses/repost", :id => text_id, :status => status})
+  def repost_text(text_id, status=nil)
+    retval = call_method("post", {:method => "statuses/repost", :id => text_id}) if status.nil?
+    retval = call_method("post", {:method => "statuses/repost", :id => text_id, :status => status}) if !status.nil?
     
     successful?(retval)
   end
@@ -185,7 +172,7 @@ class SinaUser < ThirdPartyUser
 	#
 	# say successfully or not.
   def follow_topic(topic_name)
-    retval = call_method("post", {:method => "friendships/create", :trend_name => topic_name})
+    retval = call_method("post", {:method => "trends/follow", :trend_name => topic_name})
 
     successful?(retval)
   end

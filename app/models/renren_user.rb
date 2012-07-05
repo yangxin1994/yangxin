@@ -124,12 +124,13 @@ class RenrenUser < ThirdPartyUser
 	#
 	#*params*: 
 	#* url: the place which you want to share
+	#* type: the type that you share. 
 	#
 	#*retval*:
 	#
 	# say successfully or not.
-  def add_share(url)
-    retval = call_method("post", {:method => "share.share", :type => 6, :url => url}) 
+  def add_share(url, type=6)
+    retval = call_method("post", {:method => "share.share", :type => type, :url => url}) 
     
     successful?(retval)   
   end
