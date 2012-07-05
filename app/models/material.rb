@@ -8,54 +8,33 @@ class Material
 	field :material_type, :type => Integer
 	field :location, :type => String
 	field :title, :type => String
-	# 0 for normal, -1 for deleted
-	field :status, :type => Integer ,default: 0
 	field :created_at, :type => Integer, default: -> {Time.now.to_i}
-	scope :materials_of, lambda { |owner_email| where(:owner_email => owner_email, :status => 0) }
+
+	belongs_to :user
 
 	def self.find_by_id(material_id)
-		material = Material.where(:_id => material_id, :status.gt => -1)[0]
+		material = Material.where(:_id => material_id).first
 		return material
 	end
 
-	def self.check_and_create_new(current_user, material_type, location, title)
-		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(current_user.email).nil?
-		return ErrorEnum::WRONG_MATERIAL_TYPE if ![1, 2, 4].include?(material_type)
-		material = Material.new(:owner_email => current_user.email, :material_type => material_type, :location => location, :title => title)
-		material.save
-		return material.serialize
+	def self.check_and_create_new(material)
+		return ErrorEnum::WRONG_MATERIAL_TYPE if ![1, 2, 4].include?(material["material_type"].to_i)
+		material_inst = Material.new(:material_type => material["material_type"].to_i, :location => material["location"], :title => material["title"])
+		material_inst.save
+		return material_inst
 	end
 
-	def self.get_object_list(current_user, material_type)
-		return ErrorEnum::WRONG_MATERIAL_TYPE if !(1..7).to_a.include?(material_type)
-		object_list = []
+	def self.find_by_type(material_type)
+		return [] if !(1..7).to_a.include?(material_type)
+		materials = []
 		Material.materials_of(current_user.email).each do |material|
-			object_list << material.serialize if material.material_type & material_type > 0
+			materials << material if material.material_type & material_type > 0
 		end
-		return object_list
+		return materials
 	end
 
-	def self.get_object(current_user, material_id)
-		material = Material.find_by_id(material_id)
-		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
-		return ErrorEnum::UNAUTHORIZED if material.owner_email != current_user.email
-		return material.serialize
-	end
-
-	def delete(current_user)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
-		return self.update_attributes(:status => -1)
-	end
-
-	def clear(current_user)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
-		return self.destroy
-	end
-
-	def update_title(current_user, title)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
-		self.update_attributes(:title => title)
-		return self.serialize
+	def update_title(title)
+		return self.update_attributes(:title => title)
 	end
 
 	#*description*: serialize current instance into a material object

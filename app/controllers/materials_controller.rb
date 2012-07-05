@@ -3,8 +3,6 @@ require 'error_enum'
 class MaterialsController < ApplicationController
 	before_filter :require_sign_in
 
-	def show
-	end
 	#*method*: post
 	#
 	#*url*: /materials
@@ -18,16 +16,17 @@ class MaterialsController < ApplicationController
 	#* ErrorEnum::EMAIL_NOT_EXIST
 	#* ErrorEnum::WRONG_MATERIAL_TYPE
 	def create
-		retval = @current_user.create_material(params[:material]["material_type"].to_i, params[:material]["location"], params[:material]["title"])
-		case retval
-		when ErrorEnum::EMAIL_NOT_EXIST
+		material = Material.check_and_create_new(params[:material])
+		case material
+		when ErrorEnum::WRONG_MATERIAL_TYPE
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::EMAIL_NOT_EXIST and return }
+				format.json	{ render :json => ErrorEnum::WRONG_MATERIAL_TYPE and return }
 			end
 		else
+			@current_user.materials << meterial
 			flash[:notice] = "资源已成功创建"
 			respond_to do |format|
-				format.json	{ render :json => retval and return }
+				format.json	{ render :json => material.serialize and return }
 			end
 		end
 	end
@@ -44,18 +43,10 @@ class MaterialsController < ApplicationController
 	#*retval*:
 	#* the list of objects obtained
 	def index
-		retval = @current_user.get_material_object_list(params[:material_type].to_i)
-		case retval
-		when ErrorEnum::WRONG_MATERIAL_TYPE
-			flash[:notice] = "错误的资源类型"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_MATERIAL_TYPE and return }
-			end
-		else
-			flash[:notice] = "成功获取资源列表"
-			respond_to do |format|
-				format.json	{ render :json => retval and return }
-			end
+		materials = @current_user.materials.find_by_type(params[:material_type].to_i)
+		flash[:notice] = "成功获取资源列表"
+		respond_to do |format|
+			format.json	{ render :json => materials.serialize and return }
 		end
 	end
 
@@ -73,22 +64,17 @@ class MaterialsController < ApplicationController
 	#* ErrorEnum ::MATERIAL_NOT_EXIST 
 	#* ErrorEnum ::UNAUTHORIZED
 	def show
-		retval = @current_user.get_material_object(params[:id])
-		case retval
-		when ErrorEnum::MATERIAL_NOT_EXIST
+		material = @current_user.materials.find_by_id(params[:id])
+		case material
+		when nil
 			flash[:notice] = "该资源不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::MATERIAL_NOT_EXIST and return }
 			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
 		else
 			flash[:notice] = "成功获取资源"
 			respond_to do |format|
-				format.json	{ render :json => retval and return }
+				format.json	{ render :json => material.serialize and return }
 			end
 		end
 	end
@@ -107,57 +93,10 @@ class MaterialsController < ApplicationController
 	#* ErrorEnum ::MATERIAL_NOT_EXIST : when the material does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the material does not belong to the current user
 	def destroy
-		retval = @current_user.destroy_material(params[:id])
-		case retval
-		when ErrorEnum::MATERIAL_NOT_EXIST
-			flash[:notice] = "该资源不存在"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::MATERIAL_NOT_EXIST and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "资源已成功删除"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
-		end
-	end
-
-	#*method*: get
-	#
-	#*url*: /materials/:material_id/clear
-	#
-	#*description*: thoroughly delete a material
-	#
-	#*params*:
-	#* material_id: id of the material to be cleared
-	#
-	#*retval*:
-	#* true: when material is successfully cleared.
-	#* ErrorEnum ::MATERIAL_NOT_EXIST : when the material does not exist
-	#* ErrorEnum ::UNAUTHORIZED : when the material does not belong to the current user
-	def clear
-		retval = @current_user.clear_material(params[:id])
-		case retval
-		when ErrorEnum::MATERIAL_NOT_EXIST
-			flash[:notice] = "该资源不存在"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::MATERIAL_NOT_EXIST and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "资源已成功清除"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+		@current_user.materials.find_by_id(params[:id]).destroy_all
+		flash[:notice] = "资源已成功删除"
+		respond_to do |format|
+			format.json	{ render :json => true and return }
 		end
 	end
 
@@ -175,22 +114,23 @@ class MaterialsController < ApplicationController
 	#* ErrorEnum ::MATERIAL_NOT_EXIST : when the material does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the material does not belong to the current user
 	def update
-		retval = @current_user.update_material_title(params[:id], params[:material])
-		case retval
-		when ErrorEnum::MATERIAL_NOT_EXIST
+		material = @current_user.materials.find_by_id(params[:id])
+		if material.nil?
 			flash[:notice] = "该资源不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::MATERIAL_NOT_EXIST and return }
 			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
+		end
+		retval = material.update_title(params[:title])
+		case retval
+		when true
 			flash[:notice] = "资源标题已成功更新"
 			respond_to do |format|
-				format.json	{ render :json => retval and return }
+				format.json	{ render :json => material.serialize and return }
+			end
+		else
+			respond_to do |format|
+				format.json	{ render :json => "unknown error" and return }
 			end
 		end
 	end

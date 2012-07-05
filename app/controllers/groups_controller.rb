@@ -14,16 +14,9 @@ class GroupsController < ApplicationController
 	#*params*:
 	#* the group array object
 	def index
-		retval = @current_user.groups
-		case retval
-		when ErrorEnum::EMAIL_NOT_EXIST
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::EMAIL_NOT_EXIST and return }
-			end
-		else
-			respond_to do |format|
-				format.json	{ render :json => retval and return }
-			end
+		groups = @current_user.groups
+		respond_to do |format|
+			format.json	{ render :json => groups.serialize and return }
 		end
 	end
 

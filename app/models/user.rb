@@ -36,6 +36,7 @@ class User
   field :phone, :type => String
 
 	has_many :groups
+	has_many :materials
 
 	attr_accessible :email, :username, :password, :registered_at
 
@@ -820,50 +821,6 @@ class User
 	#Obtain the charges of this user
 	def charges
 		Charge.charges_of(self.email)
-	end
-
-#--
-############### operations about material #################
-#++
-	# create a new material
-	def create_material(material_type, location, title)
-		return Material.check_and_create_new(self, material_type, location, title)
-	end
-
-	# get a list of materials
-	def get_material_object_list(material_type)
-		material_list = Material.get_object_list(self, material_type)
-		return material_list
-	end
-
-	# get a material object
-	def get_material_object(material_id)
-		material = Material.get_object(self, material_id)
-		return material
-	end
-
-	# destroy a material
-	def destroy_material(material_id)
-		material = Material.find_by_id(material_id)
-		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
-		retval = material.delete(self)
-		return retval
-	end
-
-	# clear a material
-	def clear_material(material_id)
-		material = material.find_by_id(material_id)
-		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
-		retval = material.clear(self)
-		return retval
-	end
-
-	# update title of the material
-	def update_material_title(material_id, material_obj)
-		material = Material.find_by_id(material_id)
-		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
-		retval = material.update_title(self, material_obj["title"])
-		return retval
 	end
 
 #--
