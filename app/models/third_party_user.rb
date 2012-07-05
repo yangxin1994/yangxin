@@ -7,7 +7,7 @@ class ThirdPartyUser
   # website can be "renren", "sina", "qq", "google", "qihu"
   field :website, :type => String
   field :user_id, :type => String
-  field :oopsdata_user_id, :type => String, default: nil
+  field :oopsdata_user_id, :type => String
   field :access_token, :type => String
   field :refresh_token, :type => String
   field :scope, :type => String

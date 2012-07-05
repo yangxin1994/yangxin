@@ -36,7 +36,7 @@ class RegistrationsController < ApplicationController
 	#* ErrorEnum ::WRONG_PASSWORD_CONFIRMATION
 	def create
 		# create user model
-		user = User.check_and_create_new(params[:user])
+		user = User.create_new_registered_user(params[:user], @current_user)
 		case user
 		when ErrorEnum::ILLEGAL_EMAIL
 			flash[:notice] = "请输入正确的邮箱地址"

@@ -20,6 +20,7 @@ require 'securerandom'
 #Structure of question object can be found at Question
 class Survey
 	include Mongoid::Document
+	include Mongoid::Timestamps
 	field :owner_email, :type => String
 	field :title, :type => String
 	field :subtitle, :type => String
@@ -28,30 +29,32 @@ class Survey
 	field :header, :type => String
 	field :footer, :type => String
 	field :description, :type => String
-	field :created_at, :type => Integer, default: -> {Time.now.to_i}
-	field :updated_at, :type => Integer
 	field :status, :type => Integer, default: 0
 	# can be 0 (closed), 1 (under review), 2 (paused), 3 (published)
 	field :publish_status, :type => Integer, default: 0
 	field :pages, :type => Array, default: Array.new
 	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
 	field :constrains, :type => Array, default: Array.new
-	field :tags, :type => Array, default: Array.new
+
+	has_and_belongs_to_many :tags do
+		def has_tag?(content)
+			@target.each do |tag|
+				return true if tag.content == content
+			end
+			return false
+		end
+	end
+
 	scope :surveys_of, lambda { |owner_email| where(:owner_email => owner_email, :status => 0) }
 	scope :all_surveys_of, lambda { |owner_email| where(:owner_email => owner_email) }
 	scope :trash_surveys_of, lambda { |owner_email| where(:owner_email => owner_email, :status => -1) }
 
 
-	before_save :set_updated_at, :clear_survey_object
-	before_update :set_updated_at, :clear_survey_object
+	before_save :clear_survey_object
+	before_update :clear_survey_object
 	before_destroy :clear_survey_object
 
 	META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
-
-	private
-	def set_updated_at
-		self.updated_at = Time.now.to_i
-	end
 
 	public
 
@@ -277,24 +280,6 @@ class Survey
 		return survey_object
 	end
 
-	#*description*: update tags of this survey
-	#
-	#*params*:
-	#* email of the user doing this operation
-	#* tags to be updated
-	#
-	#*retval*:
-	#* the survey object: if successfully cleared
-	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def update_tags(current_user, tags)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
-		tags.each do |tag|
-			self.tags << tag.to_s
-		end
-		self.save
-		return Survey.get_survey_object(current_user, self._id)
-	end
-
 	#*description*: add a tag to the survey
 	#
 	#*params*:
@@ -306,9 +291,8 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	def add_tag(current_user, tag)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
-		return ErrorEnum::TAG_EXIST if self.tags.include?(tag)
-		self.tags << tag.to_s
-		self.save
+		return ErrorEnum::TAG_EXIST if self.tags.has_tag?(tag)
+		self.tags << Tag.get_or_create_new(tag)
 		return Survey.get_survey_object(current_user, self._id)
 	end
 
@@ -323,9 +307,9 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	def remove_tag(current_user, tag)
 		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
-		return ErrorEnum::TAG_NOT_EXIST if !self.tags.include?(tag)
-		self.tags.delete(tag)
-		self.save
+		return ErrorEnum::TAG_NOT_EXIST if !self.tags.has_tag?(tag)
+		self.tags.delete(Tag.find_by_content(tag))
+		tag.destroy if tag.surveys.length == 0
 		return Survey.get_survey_object(current_user, self._id)
 	end
 
