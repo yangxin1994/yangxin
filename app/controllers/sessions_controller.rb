@@ -82,7 +82,7 @@ class SessionsController < ApplicationController
 	end
 
 	def basic_info
-		retval = @current_user.user_init_basic_info(params[:user_info)
+		retval = @current_user.user_init_basic_info(params[:user_info])
 		case retval
 		when true
 			flash[:notice] = "更新个人信息成功"
@@ -99,7 +99,7 @@ class SessionsController < ApplicationController
 	end
 
 	def user_attr_survey
-		retval = @current_user.user_init_attr_survey(params[:answer)
+		retval = @current_user.user_init_attr_survey(params[:answer])
 		case retval
 		when true
 			flash[:notice] = "更新个人信息成功"
@@ -364,7 +364,7 @@ class SessionsController < ApplicationController
 				flash[:notice] = "unknown error"
 				redirect_to "/500" and return
 			end
-		elsif !tp_user.is_bound && user_signed_in
+		elsif !tp_user.is_bound && user_signed_in?
 			tp_user.bind(@current_user)
 			flash[:notice] = "绑定成功"
 			redirect_to home_path and return

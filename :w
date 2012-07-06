@@ -42,8 +42,7 @@ class User
 	attr_accessible :email, :username, :password
 
   has_many :public_notice
-  has_many :question_feedback, class_name: "Feedback", inverse_of: :question_user
-  has_many :answer_feedback, class_name: "Feedback", inverse_of: :answer_user
+  has_many :question_f _class_name: "Feedback", inverse_of: 
 
 	private
 	def set_updated_at
