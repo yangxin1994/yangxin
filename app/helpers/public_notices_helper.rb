@@ -1,0 +1,2 @@
+module PublicNoticesHelper
+end

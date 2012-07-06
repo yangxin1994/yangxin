@@ -86,7 +86,7 @@ class ApplicationController < ActionController::Base
 
 	#set cookie given a pair of key and value
 	def set_cookie(key, value, expire_time = nil)
-		cookie[key.to_sym] = expire_time.nil ? value : {:value => value, :expires => expire_time}
+		cookie[key.to_sym] = expire_time.nil? ? value : {:value => value, :expires => expire_time}
 	end
 
 	#get cookie given a key
@@ -109,17 +109,17 @@ class ApplicationController < ActionController::Base
 		user = User.find_by_email_username(email_username)
 		return false if user.nil?
 		if keep_signed_in
-			set_cookie(:current_user_id, user_id, 1.months.to_i) 
+			set_cookie(:current_user_id, user.id, 1.months.to_i) 
 		else
-			set_cookie(:current_user_id, user_id) 
+			set_cookie(:current_user_id, user.id) 
 		end
-		auth_key = Encryption.encrypt_auth_key("#{email}&#{Time.now.to_i.to_s}")
+		auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
 		if keep_signed_in
 			set_cookie(:auth_key, auth_key, keep_signed_in, 1.months.to_i)
 		else
 			set_cookie(:auth_key, auth_key, keep_signed_in)
 		end
-		return user.set_auth_key(user_id, auth_key)
+		return user.set_auth_key(user.id, auth_key)
 	end
 
 	def set_logout_cookie
