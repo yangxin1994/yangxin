@@ -38,9 +38,10 @@ class User
 	has_many :surveys
 	has_many :groups
 	has_many :materials
-  has_many :public_notice
-  has_many :question_feedback, class_name: "Feedback", inverse_of: :question_user
-  has_many :answer_feedback, class_name: "Feedback", inverse_of: :answer_user
+  has_many :public_notices
+  has_many :question_feedbacks, class_name: "Feedback", inverse_of: :question_user
+  has_many :answer_feedbacks, class_name: "Feedback", inverse_of: :answer_user
+  has_many :faqs
 
 	attr_accessible :email, :username, :password, :registered_at
 

@@ -10,6 +10,9 @@ class FaqTest < ActiveSupport::TestCase
 		@@admin_user = User.new(email:"test2@example.com")
 		@@admin_user.role = 1
 		@@admin_user.save
+		@@admin_user3 = User.new(email:"test3@example.com")
+		@@admin_user3.role = 1
+		@@admin_user3.save	
 	end
 	
 	test "99 clear test db data" do 
@@ -28,10 +31,14 @@ class FaqTest < ActiveSupport::TestCase
 		end
 	end
 
-	test "03 a admin user udpate faq from method: update_by_user" do
+	test "03 a admin user update faq from method: update_by_user" do
 		faq = Faq.where(faq_type: "type2").first
+		if @@admin_user3 and faq then
+			assert Faq.update_by_user(faq.id, @@admin_user3, {question: "updated question2"})
+			assert Faq.where(faq_type: "type2").first.user.id.to_s == @@admin_user3.id.to_s
+		end
 		if @@admin_user and faq then
-			Faq.update_by_user(faq.id, @@admin_user, {question: "updated question2"})
+			assert Faq.update_by_user(faq.id, @@admin_user, {question: "updated question2"})
 			assert Faq.where(faq_type: "type2").first.question.to_s == "updated question2"
 		end
 	end
@@ -39,7 +46,7 @@ class FaqTest < ActiveSupport::TestCase
 	test "04 a admin user get faqs with condition from method: condition" do
 		faq = Faq.condition("type", "type2").first
   	assert_equal faq.question, "updated question2"
-    faq = Faq.condition("question", "updated question2").first
+    faq = Faq.condition("question", "update").first
     assert_equal faq.question, "updated question2"
     faq = Faq.condition("answer", "ans").first
     assert_equal faq.question, "updated question2"

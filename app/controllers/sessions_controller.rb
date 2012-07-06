@@ -82,7 +82,7 @@ class SessionsController < ApplicationController
 	end
 
 	def update_user_info
-		retval = @current_user.update_basic_info(params[:user_info)
+		retval = @current_user.update_basic_info(params[:user_info])
 		case retval
 		when true
 			flash[:notice] = "更新个人信息成功"
@@ -99,7 +99,7 @@ class SessionsController < ApplicationController
 	end
 
 	def init_basic_info
-		retval = @current_user.init_basic_info(params[:user_info)
+		retval = @current_user.init_basic_info(params[:user_info])
 		case retval
 		when true
 			flash[:notice] = "更新个人信息成功"
@@ -116,7 +116,7 @@ class SessionsController < ApplicationController
 	end
 
 	def init_user_attr_survey
-		retval = @current_user.init_attr_survey(params[:answer)
+		retval = @current_user.init_attr_survey(params[:answer])
 		case retval
 		when true
 			flash[:notice] = "更新个人信息成功"
