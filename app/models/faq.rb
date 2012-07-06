@@ -5,6 +5,10 @@ class Faq
   field :faq_type, :type => String
   field :question, :type => String
   field :answer, :type => String
+  
+  belongs_to :user
+  
+  attr_accessible :faq_type, :question, :answer
 
   #--
   # instance methods 
@@ -22,7 +26,9 @@ class Faq
   def instance_update_by_user(user, hash)
     return false if !user.is_admin
     hash.select!{|key, vaule| %{faq_type question answer}.split.include?(key.to_s)}
-    return Faq.where(_id: self.id).update(hash)
+    Faq.where(_id: self.id).update(hash)
+    self.user = user 
+    return self.save
   end 
 
   #*description*: destroy faq instance
@@ -34,7 +40,7 @@ class Faq
   # true or false
   def instance_destroy_by_user(user)
     return false if !user.is_admin
-    return Faq.where(_id: self.id).delete
+    return self.destroy
   end 
 
   #--
@@ -52,7 +58,13 @@ class Faq
    	#* true or false
     def create_by_user(user, faq_type, question, answer)
       return false if !user.is_admin
-      return Faq.new(faq_type: faq_type, question: question, answer: answer).save
+      faq = Faq.new(faq_type: faq_type, question: question, answer: answer)
+      faq.user = user
+      if faq.save then
+      	return true
+    	else
+      	return false
+    	end
     end 
 
 	  #*description*: update one Faq instance by user.    
@@ -66,7 +78,8 @@ class Faq
     #true or false
     def update_by_user(faq_id, user, hash)
       faq = Faq.find(faq_id)
-      return faq.instance_update_by_user(user,hash)
+      return faq.instance_update_by_user(user,hash) if faq
+      return false if faq.nil?
     end 
 
     #*description*: destroy faq instance
@@ -77,8 +90,9 @@ class Faq
     #*retval*:
     # true or false
     def destroy_by_user(faq_id, user)
-      faq = Faq.find(faq_id)
-      return faq.instance_destroy_by_user(user)
+      faq = Faq.find(faq_id) 
+      return faq.instance_destroy_by_user(user) if faq 
+      return false if faq.nil?
     end 
 
 	  #*description*: list all faq  

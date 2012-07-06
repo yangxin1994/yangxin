@@ -104,7 +104,7 @@ class Feedback
       	return false if question_user.id.to_s != feedback.question_user.id.to_s
       end
       
-      return Feedback.where(_id: feedback.id).delete
+      return feedback.destroy
   	end
   	
   	#*description*: reply feedback
@@ -134,7 +134,7 @@ class Feedback
       		message_content, 
       		answer_user.id.to_s,
       		1,
-      		feedback.question_user.id.to_s)
+      		[feedback.question_user.id.to_s])
       		
       stat = message.save 
       
