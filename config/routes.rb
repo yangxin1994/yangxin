@@ -1,4 +1,10 @@
 OopsData::Application.routes.draw do
+
+  resources :faqs, :public_notices, :feedbacks
+  match 'faqs/condition/:key/:value' => "faqs#condition"
+  match 'public_notices/condition/:key/:value' => "public_notices#condition"
+  match 'feedbacks/condition/:key/:value' => "feedbacks#condition"
+
   get "home/index"
 	match 'home' => 'home#index', :as => :home
 	post "home/get_tp_info"

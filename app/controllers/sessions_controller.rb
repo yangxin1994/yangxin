@@ -380,7 +380,7 @@ class SessionsController < ApplicationController
 			else
 				redirect_to "/500" and return
 			end
-		elsif !tp_user.is_bound && user_signed_in
+		elsif !tp_user.is_bound && user_signed_in?
 			tp_user.bind(@current_user)
 			flash[:notice] = "绑定成功"
 			redirect_to home_path and return

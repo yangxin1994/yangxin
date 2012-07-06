@@ -3,16 +3,14 @@ class RenrenUser < ThirdPartyUser
   field :name, :type => String
   field :sex, :type => String
   field :headurl, :type => String
+  field :tinyurl, :type => String
   
   #--
   # ************* instance attribute's methods*****************
   #++
   
   #*attribute*: name
-  def name
-    self.user["name"]
-  end
-  
+
   #*attribute*: gender
   alias gender sex
   
@@ -54,6 +52,8 @@ class RenrenUser < ThirdPartyUser
   #* renren_user: new or updated.
 	def self.save_tp_user(response_data)
 	  
+	  Logger.new("log/development.log").info(response_data);
+	  
 		user_id = response_data["user"]["id"]
 		access_token = response_data["access_token"]
 		refresh_token = response_data["refresh_token"]
@@ -74,7 +74,7 @@ class RenrenUser < ThirdPartyUser
       # update info 
       renren_user.update_by_hash(response_data)
     end
-    renren_user.update_user_info
+    renren_user.update_user_info if renren_user.gender.nil?
     
     return renren_user
   end
