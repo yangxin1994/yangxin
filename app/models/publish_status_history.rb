@@ -4,17 +4,18 @@ require 'securerandom'
 
 class PublishStatusHistory
 	include Mongoid::Document
-	# 0 for image, 1 for video, 2 for audio
-	field :survey_id, :type => String
-	field :operator_email, :type => String
+	include Mongoid::Timestamps
+	field :operator_id, :type => String
 	field :before_status, :type => Integer
 	field :after_status, :type => Integer
 	field :message, :type => String
+	
+	belongs_to :survey
 
 	after_save :after_save_work
 
-	def self.create_new(survey_id, operator_email, before_status, after_status, message)
-		publish_status_rec = PublishStatusHistory.new(:survey_id => survey_id.to_s ,:operator_email => operator_email, :before_status => before_status, :after_status => after_status, :message => message)
+	def self.create_new(operator_id, before_status, after_status, message)
+		publish_status_rec = PublishStatusHistory.new(:operator_id => operator_id, :before_status => before_status, :after_status => after_status, :message => message)
 		retval = publish_status_rec.save
 	end
 

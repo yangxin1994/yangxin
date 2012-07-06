@@ -29,8 +29,8 @@ class Survey
 	field :footer, :type => String, default: "调查问卷页脚"
 	field :description, :type => String, default: "调查问卷描述"
 	field :status, :type => Integer, default: 0
-	# can be 0 (closed), 1 (under review), 2 (paused), 3 (published)
-	field :publish_status, :type => Integer, default: 0
+	# can be 1 (closed), 2 (under review), 4 (paused), 8 (published)
+	field :publish_status, :type => Integer, default: 1
 	field :pages, :type => Array, default: Array.new
 	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
 	field :constrains, :type => Array, default: Array.new
@@ -44,6 +44,7 @@ class Survey
 			return false
 		end
 	end
+	has_many :publish_status_historys
 
 	scope :normal, lambda { where(:status.gt => -1) }
 	scope :deleted, lambda { where(:status => -1) }
@@ -101,29 +102,29 @@ class Survey
 	#*retval*:
 	#* the survey instance found, or nil if cannot find
 	def self.find_by_id(survey_id)
-		return Survey.where(:_id => survey_id, :status.gt => -1).first
+		return Survey.where(:_id => survey_id).first
 	end
 
-	#*description*: find a survey by its id, trash included. return nil if cannot find
-	#
-	#*params*:
-	#* id of the survey to be found
-	#
-	#*retval*:
-	#* the survey instance found, or nil if cannot find
-	def self.find_by_id_include_trash(survey_id)
-		return Survey.where(:_id => survey_id)[0]
+
+	def self.list(status, publish_status, tags)
+		survey_list = []
+		case status
+		when "all"
+			surveys = Survey.all
+		when "deleted"
+			surveys = Survey.deleted
+		when "normal"
+			surveys = Survey.normal
+		end
+		surveys.each do |survey|
+			survey_list << survey if survey.publish_status & publish_status && survey.has_one_tag_of(tags)
+		end
+		return survey_list
 	end
 
-	#*description*: find a survey by its id in trash. return nil if cannot find
-	#
-	#*params*:
-	#* id of the survey to be found
-	#
-	#*retval*:
-	#* the survey instance found, or nil if cannot find
-	def self.find_by_id_in_trash(survey_id)
-		return Survey.where(:_id => survey_id, :status => -1)[0]
+	def has_one_tag_of(tags)
+		survey_tags = self.tags.map {|tag_inst| tag_inst.content}
+		return !(survey_tags & tags).empty?
 	end
 
 	#*description*: save meta data for a survey, meta data attributes are defined in META_ATTR_NAME_ARY
@@ -155,9 +156,8 @@ class Survey
 	#* true: if successfully removed
 	#* false
 	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey
-	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def delete(current_user)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def delete
+		### stop publish
 		return self.update_attributes(:status => -1)
 	end
 
@@ -170,11 +170,7 @@ class Survey
 	#* true: if successfully recovered
 	#* false
 	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey in trash
-	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def recover(current_user)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
-		return ErrorEnum::SURVEY_NOT_EXIST if self.status != -1
-		self.tags.delete("已删除")
+	def recover
 		return self.update_attributes(:status => 0)
 	end
 
@@ -188,9 +184,11 @@ class Survey
 	#* false
 	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey in trash
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def clear(current_user)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def clear
 		return ErrorEnum::SURVEY_NOT_EXIST if self.status != -1
+		self.tags.each do |tag|
+			tag.destroy if tag.surveys.length == 1
+		end
 		return self.destroy
 	end
 
@@ -227,28 +225,6 @@ class Survey
 		###################################################
 	end
 		
-	#*description*: get a survey object. Will first try to get it from cache. If failed, will get it from database and write cache
-	#
-	#*params*:
-	#* email of the user doing this operation
-	#* id of the survey required
-	#
-	#*retval*:
-	#* the survey object: if successfully obtained
-	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey
-	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def self.get_survey_object(current_user, survey_id)
-		survey_object = Cache.read(survey_id)
-		if survey_object == nil
-			survey = Survey.find_by_id_include_trash(survey_id)
-			return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
-			survey_object = survey.serialize
-			Cache.write(survey_id, survey_object)
-		end
-		return ErrorEnum::UNAUTHORIZED if survey_object["owner_email"] != current_user.email && !current_user.is_admin
-		return survey_object
-	end
-
 	#*description*: add a tag to the survey
 	#
 	#*params*:
@@ -258,11 +234,10 @@ class Survey
 	#*retval*:
 	#* the survey object: if successfully cleared
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def add_tag(current_user, tag)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def add_tag(tag)
 		return ErrorEnum::TAG_EXIST if self.tags.has_tag?(tag)
 		self.tags << Tag.get_or_create_new(tag)
-		return Survey.get_survey_object(current_user, self._id)
+		return true
 	end
 
 	#*description*: remove a tag from the survey
@@ -274,12 +249,10 @@ class Survey
 	#*retval*:
 	#* the survey object: if successfully cleared
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def remove_tag(current_user, tag)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def remove_tag(tag)
 		return ErrorEnum::TAG_NOT_EXIST if !self.tags.has_tag?(tag)
 		self.tags.delete(Tag.find_by_content(tag))
-		tag.destroy if tag.surveys.length == 0
-		return Survey.get_survey_object(current_user, self._id)
+		return tag.destroy if tag.surveys.length == 0
 	end
 
 	#*description*: submit a survey to the administrator for reviewing
@@ -291,12 +264,14 @@ class Survey
 	#* true
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
-	def submit(current_user, message)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email && !current_user.is_admin
+	def submit(message, operator)
+		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin
 		return ErrorEnum::WRONG_PUBLISH_STATUS if ![PublishStatus::CLOSED, PublishStatus::PAUSED].include?(self.publish_status)
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => PublishStatus::UNDER_REVIEW)
-		return PublishStatusHistory.create_new(self._id, current_user.email, before_publish_status, PublishStatus::UNDER_REVIEW, message)
+		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::UNDER_REVIEW, message)
+		self.publish_status_historys << publish_status_history
+		return true
 	end
 
 	#*description*: reject a survey
@@ -308,12 +283,14 @@ class Survey
 	#* true
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
-	def reject(current_user, message)
-		return ErrorEnum::UNAUTHORIZED if !current_user.is_admin
+	def reject(message, operator)
+		return ErrorEnum::UNAUTHORIZED if !operator.is_admin
 		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != PublishStatus::UNDER_REVIEW
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => PublishStatus::PAUSED)
-		return PublishStatusHistory.create_new(self._id, current_user.email, before_publish_status, PublishStatus::PAUSED, message)
+		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::PAUSED, message)
+		self.publish_status_historys << publish_status_history
+		return true
 	end
 
 	#*description*: publish a survey
@@ -325,12 +302,14 @@ class Survey
 	#* true
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
-	def publish(current_user, message)
-		return ErrorEnum::UNAUTHORIZED if !current_user.is_admin
+	def publish(message, operator)
+		return ErrorEnum::UNAUTHORIZED if !operator.is_admin
 		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != PublishStatus::UNDER_REVIEW
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => PublishStatus::PUBLISHED)
-		return PublishStatusHistory.create_new(self._id, current_user.email, before_publish_status, PublishStatus::PUBLISHED, message)
+		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::PUBLISHED, message)
+		self.publish_status_historys << publish_status_history
+		return true
 	end
 
 	#*description*: close a survey
@@ -342,11 +321,13 @@ class Survey
 	#* true
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
-	def close(current_user, message)
-		return ErrorEnum::UNAUTHORIZED if !current_user.is_admin && self.owner_email != current_user.email
+	def close(message, operator)
+		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => PublishStatus::CLOSED)
-		return PublishStatusHistory.create_new(self._id, current_user.email, before_publish_status, PublishStatus::CLOSED, message)
+		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::CLOSED, message)
+		self.publish_status_historys << publish_status_history
+		return true
 	end
 
 	#*description*: pause a survey
@@ -359,41 +340,13 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
 	def pause(current_user, message)
-		return ErrorEnum::UNAUTHORIZED if current_user.email != self.owner_email
+		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin
 		return ErrorEnum::WRONG_PUBLISH_STATUS if ![PublishStatus::PUBLISHED, PublishStatus::UNDER_REVIEW].include?(self.publish_status)
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => PublishStatus::PAUSED)
-		return PublishStatusHistory.create_new(self._id, current_user.email, before_publish_status, PublishStatus::PAUSED, message)
-	end
-
-	#*description*: obtain a list of Survey objects given a list of tags
-	#
-	#*params*:
-	#* the user doing this operation
-	#* tags
-	#
-	#*retval*:
-	#* the survey object: if successfully cleared
-	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def self.get_object_list(current_user, tags)
-		if tags.include?("已删除")
-			surveys = Survey.trash_surveys_of(current_user.email)
-			tags.delete("已删除")
-		else
-			surveys = Survey.surveys_of(current_user.email)
-		end
-		list = []
-		surveys.each do |survey|
-			no_tag = false
-			tags.each do |tag|
-				if !survey.tags.include?(tag)
-					no_tag = true
-					break
-				end
-			end
-			list << Survey.get_survey_object(current_user, survey._id) if !no_tag
-		end
-		return list
+		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::PAUSED, message)
+		self.publish_status_historys << publish_status_history
+		return true
 	end
 
 	#*description*: clear the cached survey object corresponding to current instance, usually called when the survey is updated, either its meta data, or questions and constrains

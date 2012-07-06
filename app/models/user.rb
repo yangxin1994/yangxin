@@ -426,38 +426,6 @@ class User
 		return survey.update_tags(self, tags)
 	end
 
-	#*description*: add a tag to a survey
-	#
-	#*params*:
-	#* the id of the survey object
-	#* the tag to be added
-	#
-	#*retval*:
-	#* the survey object if successfully adding tag
-	#* SURVEY_NOT_EXIST
-	#* UNAUTHORIZED
-	def add_survey_tag(survey_id, tag)
-		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.add_tag(self, tag)
-	end
-
-	#*description*: remove a tag from a survey
-	#
-	#*params*:
-	#* the id of the survey object
-	#* the tag to be removed
-	#
-	#*retval*:
-	#* the survey object if successfully removing tag
-	#* SURVEY_NOT_EXIST
-	#* UNAUTHORIZED
-	def remove_survey_tag(survey_id, tag)
-		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.remove_tag(self, tag)
-	end
-
 	#*description*: submit a survey to administrator for reviewing
 	#
 	#*params*:
