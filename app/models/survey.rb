@@ -21,14 +21,13 @@ require 'securerandom'
 class Survey
 	include Mongoid::Document
 	include Mongoid::Timestamps
-	field :owner_email, :type => String
-	field :title, :type => String
-	field :subtitle, :type => String
-	field :welcome, :type => String
-	field :closing, :type => String
-	field :header, :type => String
-	field :footer, :type => String
-	field :description, :type => String
+	field :title, :type => String, default: "调查问卷主标题"
+	field :subtitle, :type => String, default: "调查问卷副标题"
+	field :welcome, :type => String, default: "调查问卷欢迎语"
+	field :closing, :type => String, default: "调查问卷结束语"
+	field :header, :type => String, default: "调查问卷页眉"
+	field :footer, :type => String, default: "调查问卷页脚"
+	field :description, :type => String, default: "调查问卷描述"
 	field :status, :type => Integer, default: 0
 	# can be 0 (closed), 1 (under review), 2 (paused), 3 (published)
 	field :publish_status, :type => Integer, default: 0
@@ -36,6 +35,7 @@ class Survey
 	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
 	field :constrains, :type => Array, default: Array.new
 
+	belongs_to :user
 	has_and_belongs_to_many :tags do
 		def has_tag?(content)
 			@target.each do |tag|
@@ -45,9 +45,8 @@ class Survey
 		end
 	end
 
-	scope :surveys_of, lambda { |owner_email| where(:owner_email => owner_email, :status => 0) }
-	scope :all_surveys_of, lambda { |owner_email| where(:owner_email => owner_email) }
-	scope :trash_surveys_of, lambda { |owner_email| where(:owner_email => owner_email, :status => -1) }
+	scope :normal, lambda { where(:status.gt => -1) }
+	scope :deleted, lambda { where(:status => -1) }
 
 	before_save :clear_survey_object
 	before_update :clear_survey_object
@@ -94,25 +93,6 @@ class Survey
 		return survey_obj
 	end
 
-	#*description*: set default meta data, usually used for a newly created survey instance
-	#
-	#*params*
-	#* email address of the owner
-	#
-	#*retval*:
-	#* a survey object
-	#* ErrorEnum ::EMAIL_NOT_EXIST
-	def set_default_meta_data(owner_email)
-		return ErrorEnum::EMAIL_NOT_EXIST if User.find_by_email(owner_email) == nil
-		META_ATTR_NAME_ARY.each do |attr_name|
-			method_obj = self.method("#{attr_name}=".to_sym)
-			method_obj.call(OOPSDATA["survey_default_settings"][attr_name])
-		end
-		self._id = ""
-		self.owner_email = owner_email
-		return self.serialize
-	end
-
 	#*description*: find a survey by its id. return nil if cannot find
 	#
 	#*params*:
@@ -121,7 +101,7 @@ class Survey
 	#*retval*:
 	#* the survey instance found, or nil if cannot find
 	def self.find_by_id(survey_id)
-		return Survey.where(:_id => survey_id, :status.gt => -1)[0]
+		return Survey.where(:_id => survey_id, :status.gt => -1).first
 	end
 
 	#*description*: find a survey by its id, trash included. return nil if cannot find
@@ -156,18 +136,8 @@ class Survey
 	#* the survey object
 	#* ErrorEnum ::SURVEY_NOT_EXIST : if cannot find the survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def self.save_meta_data(current_user, survey_obj)
-		return ErrorEnum::UNAUTHORIZED if survey_obj["owner_email"]!= current_user.email
-		if survey_obj["survey_id"] == ""
-			# this is a new survey that has not been saved in database
-			survey = Survey.new
-			survey.owner_email = current_user.email
-		else
-			# this is an existing survey
-			survey = Survey.find_by_id(survey_obj["survey_id"])
-			return ErrorEnum::SURVEY_NOT_EXIST if survey == nil
-			return ErrorEnum::UNAUTHORIZED if survey.owner_email != current_user.email
-		end
+	def save_meta_data(survey_obj)
+		# this is an existing survey
 		META_ATTR_NAME_ARY.each do |attr_name|
 			method_obj = survey.method("#{attr_name}=".to_sym)
 			method_obj.call(survey_obj[attr_name])

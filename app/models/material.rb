@@ -37,19 +37,4 @@ class Material
 		return self.update_attributes(:title => title)
 	end
 
-	#*description*: serialize current instance into a material object
-	#
-	#*params*
-	#
-	#*retval*:
-	#* a material object
-	def serialize
-		material_obj = Hash.new
-		material_obj["owner_email"] = self.owner_email
-		material_obj["material_id"] = self._id.to_s
-		material_obj["material_type"] = self.material_type
-		material_obj["title"] = self.title
-		material_obj["location"] = self.location
-		return material_obj
-	end
 end

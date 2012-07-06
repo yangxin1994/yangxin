@@ -16,7 +16,7 @@ class GroupsController < ApplicationController
 	def index
 		groups = @current_user.groups
 		respond_to do |format|
-			format.json	{ render :json => groups.serialize and return }
+			format.json	{ render :json => groups and return }
 		end
 	end
 
@@ -49,7 +49,7 @@ class GroupsController < ApplicationController
 			@current_user.groups << group
 			flash[:notice] = "样本组已成功创建"
 			respond_to do |format|
-				format.json	{ render :json => group.serialize and return }
+				format.json	{ render :json => group and return }
 			end
 		end
 	end
@@ -87,7 +87,7 @@ class GroupsController < ApplicationController
 		when true
 			flash[:notice] = "样本组已成功更新"
 			respond_to do |format|
-				format.json	{ render :json => group.serialize and return }
+				format.json	{ render :json => group and return }
 			end
 		else
 			respond_to do |format|
@@ -139,9 +139,8 @@ class GroupsController < ApplicationController
 			end
 		else
 			respond_to do |format|
-				format.json	{ render :json => group.serialize and return }
+				format.json	{ render :json => group and return }
 			end
 		end
 	end
-
 end

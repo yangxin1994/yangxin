@@ -62,20 +62,4 @@ class Group
 		end
 		return self.save
 	end
-
-	#*description*: serialize current instance into a group object
-	#
-	#*params*
-	#
-	#*retval*:
-	#* a group object
-	def serialize
-		group_obj = Hash.new
-		group_obj["group_id"] = self._id.to_s
-		group_obj["owner_email"] = self.owner_email
-		group_obj["name"] = self.name
-		group_obj["description"] = self.description
-		group_obj["members"] = Marshal.load(Marshal.dump(self.members))
-		return group_obj
-	end
 end

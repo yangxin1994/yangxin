@@ -69,17 +69,6 @@ test:
   qihu_redirect_uri: "http://quill.oopsdata.com/qihu_connect"
 
 
-
-
-survey_default_settings:
-  title: "调查问卷主标题"
-  subtitle: "调查问卷副标题"
-  welcome: "调查问卷欢迎语"
-  closing: "调查问卷结束语"
-  header: "调查问卷页眉"
-  footer: "调查问卷页脚"
-  description: "调查问卷描述"
-
 question_default_settings:
   content: "题干"
   note: "说明"

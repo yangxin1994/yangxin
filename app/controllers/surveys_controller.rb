@@ -15,16 +15,10 @@ class SurveysController < ApplicationController
 	#* a Survey object with default meta data and empty survey_id
 	#* ErrorEnum::EMAIL_NOT_EXIST
 	def new
-		retval = Survey.new.set_default_meta_data(@current_user.email)
-		case retval
-		when ErrorEnum::EMAIL_NOT_EXIST
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::EMAIL_NOT_EXIST and return }
-			end
-		else
-			respond_to do |format|
-				format.json	{ render :json => retval and return }
-			end
+		survey = Survey.new
+		survey = @current_user.surveys << survey
+		respond_to do |format|
+			format.json	{ render :json => survey.serialize and return }
 		end
 	end
 
@@ -42,22 +36,24 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def save_meta_data
-		retval = @current_user.save_meta_data(params[:survey])
-		case retval
-		when ErrorEnum::SURVEY_NOT_EXIST
-			flash[:notice] = "该调查问卷不存在"
+		survey = @current_user.surveys.normal.find_by_id(params[:id])
+		if survey.nil?
+			flash[:notice] = "调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
 		else
-			flash[:notice] = "保存成功"
-			respond_to do |format|
-				format.json	{ render :json => retval and return }
+			retval = survey.save_meta_data(params[:survey])
+			case retval
+			when true
+				flash[:notice] = "保存成功"
+				respond_to do |format|
+					format.json	{ render :json => survey.serialize and return }
+				end
+			else
+				respond_to do |format|
+					format.json	{ render :json => "unknown error" and return }
+				end
 			end
 		end
 	end

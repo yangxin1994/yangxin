@@ -35,6 +35,7 @@ class User
   field :postcode, :type => String
   field :phone, :type => String
 
+	has_many :surveys
 	has_many :groups
 	has_many :materials
 
@@ -313,31 +314,6 @@ class User
 		
 	end
 
-	#*description*: get surveys for this user
-	#
-	#*params*:
-	#
-	#*retval*:
-	#* the array of surveys: when successfully obtained
-	#* SURVEY_NOT_EXIST
-	def surveys(tags)
-		return Survey.surveys_of(self.email)
-	end
-
-	#*description*: save meta data for a survey
-	#
-	#*params*:
-	#* the survey object, the meta data of which is to be saved
-	#
-	#*retval*:
-	#* true: when successfully saved
-	#* false: unkown error
-	#* SURVEY_NOT_EXIST
-	#* UNAUTHORIZED
-	def save_meta_data(survey_object)
-		return Survey.save_meta_data(self, survey_object)
-	end
-	
 	#*description*: delete a survey
 	#
 	#*params*:
