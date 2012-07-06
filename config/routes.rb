@@ -75,7 +75,12 @@ OopsData::Application.routes.draw do
 	end
 
 	# QuillMe
-	resources :presents
+	resources :presents do
+		collection do
+			get 'cash'
+			get 'virtual_goods'
+		end
+	end
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

@@ -2,28 +2,24 @@ class Order
 	include Mongoid::Document
 	include Mongoid::Timestamps
 	# can be 0 (Cash), 1 (RealGoods), 2 (VirtualGoods), 3 (Lottery)
-	field :type, :type => Integer
+	field :order_type, :type => Integer
 	# can be 0 (NeedVerify), 1 (Verified), -1 (VerifyFailed), 2 (Delivering), 3 (Delivered), -2 (DeliverFailed)
 	field :status, :type => String
 	# field :status_desc, :type => String
 	field :recipient, :type => String
  	field :phone_number, :type => String
 
-	scope :cash_order, ->{ where( :type => 0)}
-	scope :realgoods_order, ->{ where( :type => 1)}
-	scope :virtualgoods_order, ->{ where( :type => 2)}
-	scope :lottery_order, ->{ where( :type => 3)}
+	scope :cash_order, where( :order_type => 0)
+	scope :realgoods_order, where( :order_type => 1)
+	scope :virtualgoods_order, where( :order_type => 2)
+	scope :lottery_order, where( :order_type => 3)
 
-	scope :need_verify, ->{ where( :status => 0)}
-	scope :verified, ->{ where( :status => 1)}
-	scope :verify_failed, ->{ where( :status => -1)}
-	scope :delivering, ->{ where( :status => 2)}
-	scope :delivered, ->{ where( :status => 3)}
-	scope :deliver_failed, ->{ where( :status => -2)}
-
-
-	scope :can_be_rewarded, ->{ where( :status => 1 ) }
-	scope :expired_present, ->{ where( :status => 0 ) }
+	scope :need_verify, where( :status => 0)
+	scope :verified, where( :status => 1)
+	scope :verify_failed, where( :status => -1)
+	scope :delivering, where( :status => 2)
+	scope :delivered, where( :status => 3)
+	scope :deliver_failed, where( :status => -2)
 
 	embeds_one :cash_receive_info, :class_name => "CashReceiveInfo"
 	embeds_one :realgoods_receive_info, :class_name => "RealgoodsReceiveInfo"
@@ -38,8 +34,14 @@ class Order
 	
 
 	# TO DO validation verify
+	# We must follow the Law of Demeter(summed up as "use only one dot"), and here is the code: 
+	delegate :name, :to => :present, :prefix => true
 
 	after_create :decrease_present_and_point
+
+	def oprate(status)
+		self.status = status
+	end
 
 	private
 	

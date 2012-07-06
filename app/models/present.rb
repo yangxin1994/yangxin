@@ -3,7 +3,7 @@ class Present
 	include Mongoid::Timestamps
 	field :name, :type => String
 	# can be 0 (Cash), 1 (RealGoods), 2 (VirtualGoods), 3 (Lottery), 4 (award)
-	field :type, :type => Integer
+	field :present_type, :type => Integer
 	field :point, :type => Integer
 	field :quantity, :type => Integer
 	field :image_id, :type => String #TO DO Default
@@ -14,21 +14,30 @@ class Present
 	field :status, :type => Integer, :default => 1
 	
 	# TO DO Def Scope
-	scope :cash_present, ->{ where( :type => 0)}
-	scope :realgoods_present, ->{ where( :type => 1)}
-	scope :virtualgoods_present, ->{ where( :type => 2)}
-	scope :lottery_present, ->{ where( :type => 3)}
-	scope :award_present, ->{ where( :type => 4)}
+	scope :cash_present, where( :type => 0)
+	scope :realgoods_present, where( :type => 1)
+	scope :virtualgoods_present, where( :type => 2)
+	scope :lottery_present, where( :type => 3)
+	scope :award_present, where( :type => 4)
 
-	scope :can_be_rewarded, ->{ where( :status => 1 ) }
-	scope :expired_present, ->{ where( :status => 0 ) }
+	scope :can_be_rewarded, where( :status => 1 ) 
+	scope :expired, where( :status => 0 )
 	# TO DO Validation
 	has_many :orders, :class_name => "Order"
-	#validates_presence_of :name, :type, :point, :quantity, :start_time, :end_time
+	
+	validates_presence_of :present_type, :point, :start_time, :end_time
+	validates :name, :presence => true
+									 :length => { :maximum => 140 }
+	validates :present_type, :presence => true
+													 :within => 0..4
+	validates :quantity, :presence => true,
+                       :numericality => { :greater_than_or_equal_to => 0 }
 
 
 	# TO DO Filter
 	
+	# We must follow the Law of Demeter(summed up as "use only one dot"), and here is the code: 
+
 
 	private
 	def auto_expired

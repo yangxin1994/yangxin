@@ -35,7 +35,6 @@ class User
   field :postcode, :type => String
   field :phone, :type => String
 
-<<<<<<< HEAD
   #################################
   # QuillMe
   field :point, :type => Integer

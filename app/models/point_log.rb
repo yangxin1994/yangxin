@@ -12,6 +12,9 @@ class	PointLog
 	belongs_to :user, :class_name => "User", :inverse_of => :point_logs
 	belongs_to :operated_admin, :class_name => "User", :inverse_of => :operate_point_logs
 	belongs_to :order, :class_name => "Order", :inverse_of => :point_logs
+
+	
+	
 	# TO DO validation
 	#validates_presence_of :operate_point, :cause, :operated_admin
 	#	before_save :operate_point
@@ -20,9 +23,6 @@ class	PointLog
 	def self.revoke_operation(log_id,admin_id)
 		p = PointLog.find(log_id)
 		p.user.point -= p.operate_point
-		# debug
-		# p p.operate_point 
-		# p p.user.point
 		p.user.save
 		PointLog.create(:user_id => p.user.id,:operate_point => -p.operate_point,:operated_admin_id => admin_id, :cause => 4)
 	end
