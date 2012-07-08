@@ -26,12 +26,11 @@ class Present
 	has_many :orders, :class_name => "Order"
 	
 	validates_presence_of :present_type, :point, :start_time, :end_time
-	validates :name, :presence => true
+	validates :name, :presence => true,
 									 :length => { :maximum => 140 }
 	validates :present_type, :presence => true
-													 :within => 0..4
 	validates :quantity, :presence => true,
-                       :numericality => { :greater_than_or_equal_to => 0 }
+											 :numericality => { :greater_than_or_equal_to => 0 }
 
 
 	# TO DO Filter

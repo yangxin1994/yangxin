@@ -7,14 +7,6 @@ class PresentsController < ApplicationController
 		end
 	end
 
-	def self.def_each(*method_names, &block)
-		method_names.each do |method_name|
-			define_method method_name do
-				instance_exec method_name, &block
-			end
-		end
-	end
-
 	def_each :virtual_goods, :cash, :real_goods do |method_name|
 		flash[:notice] = "No Goods" unless @presents = Present.send((method_name.to_s + "_present").to_sym).can_be_rewarded.page(params[:page].to_i)
 		respond_to do |format|
@@ -25,12 +17,12 @@ class PresentsController < ApplicationController
 
 	def create		
     respond_to do |format|
-      if @topic.Present.create(params[:present])
-        format.html { redirect_to :action => 'show',:id => @topic.name }
-        #format.json { render json: @topic, status: :created, location: @topic }
+      if @present = Present.create(params[:present])
+        format.html { redirect_to :action => 'show',:id => @present.id }
+        #format.json { render json: @present, status: :created, location: @present }
       else
         format.html { render action: "new" }
-        #format.json { render json: @topic.errors, status: :unprocessable_entity }
+        #format.json { render json: @present.errors, status: :unprocessable_entity }
       end
     end
 	end
@@ -50,6 +42,8 @@ class PresentsController < ApplicationController
 	end
 
   def destroy
+  	#TO DO 
+  	#params[:ids]
     @present = Present.find(params[:id])
     @present.destroy
 

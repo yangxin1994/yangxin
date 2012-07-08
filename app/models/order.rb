@@ -3,11 +3,18 @@ class Order
 	include Mongoid::Timestamps
 	# can be 0 (Cash), 1 (RealGoods), 2 (VirtualGoods), 3 (Lottery)
 	field :order_type, :type => Integer
-	# can be 0 (NeedVerify), 1 (Verified), -1 (VerifyFailed), 2 (Delivering), 3 (Delivered), -2 (DeliverFailed)
+	# can be 0 (NeedVerify), 1 (Verified), -1 (VerifyFailed), 2 (Delivering), 3 (Delivered), -3 (DeliverFailed)
 	field :status, :type => String
 	# field :status_desc, :type => String
 	field :recipient, :type => String
- 	field :phone_number, :type => String
+	field :phone_number, :type => String
+
+	validates :present_type, :presence => true,
+													 :inclusion => { :in => 0..3 },
+													 :numericality => true
+	validates :status, :presence => true,
+													 :inclusion => { :in => -3..3 },
+													 :numericality => true
 
 	scope :cash_order, where( :order_type => 0)
 	scope :realgoods_order, where( :order_type => 1)
@@ -21,6 +28,8 @@ class Order
 	scope :delivered, where( :status => 3)
 	scope :deliver_failed, where( :status => -2)
 
+
+
 	embeds_one :cash_receive_info, :class_name => "CashReceiveInfo"
 	embeds_one :realgoods_receive_info, :class_name => "RealgoodsReceiveInfo"
 	embeds_one :virtualgoods_receive_info, :class_name => "VirtualgoodsReceiveInfo"
@@ -33,26 +42,33 @@ class Order
 	belongs_to :operated_admin, :class_name => "User", :inverse_of => :operate_orders
 	
 
+
 	# TO DO validation verify
 	# We must follow the Law of Demeter(summed up as "use only one dot"), and here is the code: 
 	delegate :name, :to => :present, :prefix => true
+	#delegate :cash_order, :realgoods_order, :to => "self.need_verify", :prefix => true
 
-	after_create :decrease_present_and_point
+	after_create :decrease_point, :decrease_present
 
-	def oprate(status)
+	def operate(status)
 		self.status = status
+	  flash[:notice] = "fails" unless self.save
 	end
 
 	private
 	
 
-	def decrease_present_and_point
+	def decrease_point
 		return if self.present.blank? && self.user.blank?
 		self.create_point_log(:order_id => self.id,
 													:user_id => self.user.id,
 													:operate_point => self.present.point,
 													:cause => 4)
-		self.present.inc(:quantity, -1)
+	end
+
+	def decrease_present
+		return if self.present.blank?
+		self.present.inc(:quantity, -1)	
 	end
 
 
@@ -64,6 +80,7 @@ class CashReceiveInfo
  	field :bank_name, :type => String
  	field :debit_card_number, :type => String
  	field :alipay, :type => String
+
 	embedded_in :order
 end
 
@@ -71,6 +88,7 @@ class RealgoodsReceiveInfo
 	include Mongoid::Document
 	field :address, :type => String
 	field :post_code, :type => String
+
 	embedded_in :order
 end
 

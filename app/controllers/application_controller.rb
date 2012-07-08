@@ -5,6 +5,15 @@ class ApplicationController < ActionController::Base
 
 	helper_method :user_signed_in?, :user_signed_out?
 
+	# QuillMe
+	def self.def_each(*method_names, &block)
+		method_names.each do |method_name|
+			define_method method_name do
+				instance_exec method_name, &block
+			end
+		end
+	end
+
 	#get the information of the signed user and set @current_user
 	def current_user
 		current_user_id = get_cookie(:current_user_id)

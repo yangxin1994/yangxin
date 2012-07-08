@@ -11,10 +11,8 @@ class	PointLog
 	
 	belongs_to :user, :class_name => "User", :inverse_of => :point_logs
 	belongs_to :operated_admin, :class_name => "User", :inverse_of => :operate_point_logs
-	belongs_to :order, :class_name => "Order", :inverse_of => :point_logs
+	belongs_to :order, :class_name => "Order", :inverse_of => :point_log
 
-	
-	
 	# TO DO validation
 	#validates_presence_of :operate_point, :cause, :operated_admin
 	#	before_save :operate_point
@@ -30,5 +28,6 @@ class	PointLog
 	def operate_user_point
 		return if self.user.blank? && self.operate_point.blank?
 		self.user.inc(:point, self.operate_point)
+		self.save
 	end
 end

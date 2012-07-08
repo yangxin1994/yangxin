@@ -26,7 +26,7 @@ class PagesController < ApplicationController
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
-		when ErrorEnum::OVERFLOW
+		when ErrorEnum::OVERFLOW 
 			flash[:notice] = "页码溢出"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::OVERFLOW and return }
