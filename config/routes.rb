@@ -87,6 +87,13 @@ OopsData::Application.routes.draw do
 			get 'virtual_goods'
 		end
 	end
+	resources :orders do
+		collection do
+			get :cash, :realgoods_present, :virtualgoods_present, :lottery_present, :award_present
+			get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
+		end
+	end
+	resources :points, :only => 'index'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

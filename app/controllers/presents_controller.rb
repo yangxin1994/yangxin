@@ -1,4 +1,5 @@
 class PresentsController < ApplicationController
+	#TO DO before_filter
 	# presents.json?page=1
 	def index
 		@presents = Present.page(params[:page].to_i)
