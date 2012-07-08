@@ -26,7 +26,7 @@ class MaterialsController < ApplicationController
 			@current_user.materials << meterial
 			flash[:notice] = "资源已成功创建"
 			respond_to do |format|
-				format.json	{ render :json => material.serialize and return }
+				format.json	{ render :json => material and return }
 			end
 		end
 	end
@@ -46,7 +46,7 @@ class MaterialsController < ApplicationController
 		materials = @current_user.materials.find_by_type(params[:material_type].to_i)
 		flash[:notice] = "成功获取资源列表"
 		respond_to do |format|
-			format.json	{ render :json => materials.serialize and return }
+			format.json	{ render :json => materials and return }
 		end
 	end
 
@@ -74,7 +74,7 @@ class MaterialsController < ApplicationController
 		else
 			flash[:notice] = "成功获取资源"
 			respond_to do |format|
-				format.json	{ render :json => material.serialize and return }
+				format.json	{ render :json => material and return }
 			end
 		end
 	end
@@ -126,7 +126,7 @@ class MaterialsController < ApplicationController
 		when true
 			flash[:notice] = "资源标题已成功更新"
 			respond_to do |format|
-				format.json	{ render :json => material.serialize and return }
+				format.json	{ render :json => material and return }
 			end
 		else
 			respond_to do |format|

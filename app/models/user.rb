@@ -48,11 +48,14 @@ class User
 	before_update :set_updated_at
 
 	attr_accessible :email, :username, :password, :registered_at
+
+	has_many :surveys
 	has_many :groups
 	has_many :materials
-  has_many :public_notice
-  has_many :question_feedback, class_name: "Feedback", inverse_of: :question_user
-  has_many :answer_feedback, class_name: "Feedback", inverse_of: :answer_user
+  has_many :public_notices
+  has_many :question_feedbacks, class_name: "Feedback", inverse_of: :question_user
+  has_many :answer_feedbacks, class_name: "Feedback", inverse_of: :answer_user
+  has_many :faqs
 
 	private
 	def set_updated_at
@@ -339,31 +342,6 @@ class User
 		
 	end
 
-	#*description*: get surveys for this user
-	#
-	#*params*:
-	#
-	#*retval*:
-	#* the array of surveys: when successfully obtained
-	#* SURVEY_NOT_EXIST
-	def surveys(tags)
-		return Survey.surveys_of(self.email)
-	end
-
-	#*description*: save meta data for a survey
-	#
-	#*params*:
-	#* the survey object, the meta data of which is to be saved
-	#
-	#*retval*:
-	#* true: when successfully saved
-	#* false: unkown error
-	#* SURVEY_NOT_EXIST
-	#* UNAUTHORIZED
-	def save_meta_data(survey_object)
-		return Survey.save_meta_data(self, survey_object)
-	end
-	
 	#*description*: delete a survey
 	#
 	#*params*:
@@ -466,38 +444,6 @@ class User
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		return survey.update_tags(self, tags)
-	end
-
-	#*description*: add a tag to a survey
-	#
-	#*params*:
-	#* the id of the survey object
-	#* the tag to be added
-	#
-	#*retval*:
-	#* the survey object if successfully adding tag
-	#* SURVEY_NOT_EXIST
-	#* UNAUTHORIZED
-	def add_survey_tag(survey_id, tag)
-		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.add_tag(self, tag)
-	end
-
-	#*description*: remove a tag from a survey
-	#
-	#*params*:
-	#* the id of the survey object
-	#* the tag to be removed
-	#
-	#*retval*:
-	#* the survey object if successfully removing tag
-	#* SURVEY_NOT_EXIST
-	#* UNAUTHORIZED
-	def remove_survey_tag(survey_id, tag)
-		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.remove_tag(self, tag)
 	end
 
 	#*description*: submit a survey to administrator for reviewing

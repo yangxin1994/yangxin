@@ -45,13 +45,13 @@ class RegistrationsController < ApplicationController
 				format.json	{ render :json => ErrorEnum::ILLEGAL_EMAIL and return }
 			end
 		when ErrorEnum::EMAIL_EXIST
-			flash[:notice] = "邮箱#{params[:user]["email"]}已经存在"
+			flash[:notice] = "邮箱已经存在"
 			respond_to do |format|
 				format.html	{ redirect_to sessions_path and return }
 				format.json	{ render :json => ErrorEnum::EMAIL_EXIST and return }
 			end
 		when ErrorEnum::USERNAME_EXIST
-			flash[:notice] = "邮箱#{params[:user]["username"]}已经存在"
+			flash[:notice] = "用户名已经存在"
 			respond_to do |format|
 				format.html	{ redirect_to sessions_path and return }
 				format.json	{ render :json => ErrorEnum::USERNAME_EXIST and return }

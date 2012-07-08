@@ -8,6 +8,9 @@ class PublicNotice
   field :public_notice_type, :type => String
 
   belongs_to :user
+  
+  attr_accessible :title, :content, :attachment, :public_notice_type
+  
   #--
   # instance methods
   #++u
@@ -33,8 +36,9 @@ class PublicNotice
     def create_by_user(user, public_notice_type, title, content, attachment = nil)
       return false if !user.instance_of?(User)
       return false if !user.is_admin
-      public_notice = PublicNotice.new(user: user, public_notice_type: public_notice_type, 
+      public_notice = PublicNotice.new(public_notice_type: public_notice_type, 
       		title: title, content: content)
+  		public_notice.user = user
       public_notice.attachment = attachment if attachment
       return public_notice.save
     end 
@@ -58,6 +62,7 @@ class PublicNotice
 
       hash.select!{|k,v| %{public_notice_type title content attachment}.split.include?(k.to_s)}
       public_notice.update_attributes(hash)
+      public_notice.user = user
       return public_notice.save 
     end 
 
@@ -73,7 +78,9 @@ class PublicNotice
       return false if !user.instance_of?(User)
       return false if !user.is_admin
 
-      return PublicNotice.where(_id: public_notice_id).delete
+      public_notice = PublicNotice.find(public_notice_id)
+      return public_notice.destroy if public_notice
+      return false
     end
     
     def list_recently

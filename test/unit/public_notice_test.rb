@@ -10,6 +10,9 @@ class PublicNoticeTest < ActiveSupport::TestCase
 		@@admin_user = User.new(email:"test2@example.com")
 		@@admin_user.role = 1
 		@@admin_user.save
+		@@admin_user3 = User.new(email:"test3@example.com")
+		@@admin_user3.role = 1
+		@@admin_user3.save		
 	end
 	
 	test "99 clear test db data" do 
@@ -28,8 +31,12 @@ class PublicNoticeTest < ActiveSupport::TestCase
 		end
 	end
 
-	test "03 a admin user udpate public_notice from method: update_by_user" do
+	test "03 a admin user update public_notice from method: update_by_user" do
 		public_notice = PublicNotice.where(public_notice_type: "type2").first
+		if @@admin_user3 and public_notice then
+			assert PublicNotice.update_by_user(public_notice.id, @@admin_user3, {title: "updated title22"})
+			assert PublicNotice.where(public_notice_type: "type2").first.user.id.to_s == @@admin_user3.id.to_s
+		end 
 		if @@admin_user and public_notice then
 			assert PublicNotice.update_by_user(public_notice.id, @@admin_user, {title: "updated title2"})
 			assert PublicNotice.where(public_notice_type: "type2").first.title.to_s == "updated title2"
