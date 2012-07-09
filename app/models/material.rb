@@ -36,5 +36,4 @@ class Material
 	def update_title(title)
 		return self.update_attributes(:title => title)
 	end
-
 end

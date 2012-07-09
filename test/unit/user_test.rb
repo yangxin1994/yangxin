@@ -43,7 +43,7 @@ class UserTest < ActiveSupport::TestCase
 		assert_equal ErrorEnum::EMAIL_NOT_EXIST, retval, "activate a non-exist user"
 	end
 
-	test "new user creation" do
+	test "new user registration" do
 		clear(User)
 
 		new_user = {"email" => "test@test.com", "password" => "oopsdata", "password_confirmation" => "oopsdata", "username" => "test"}

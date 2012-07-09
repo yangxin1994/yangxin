@@ -9,7 +9,7 @@ FactoryGirl.define do
 		email "activated_user@test.com"
 		password Encryption.encrypt_password("111111")
 		username "activated_user"
-		status 1
+		status 2
 		activate_time Time.now.to_i
 	end
 
@@ -17,7 +17,7 @@ FactoryGirl.define do
 		email "jesse@test.com"
 		password Encryption.encrypt_password("123456")
 		username "jesse"
-		status 1
+		status 2
 		activate_time Time.now.to_i
 	end
 
@@ -25,7 +25,7 @@ FactoryGirl.define do
 		email "oliver@test.com"
 		password Encryption.encrypt_password("123456")
 		username "oliver"
-		status 1
+		status 2
 		activate_time Time.now.to_i
 	end
 
@@ -33,7 +33,7 @@ FactoryGirl.define do
 		email "lisa@test.com"
 		password Encryption.encrypt_password("123456")
 		username "lisa"
-		status 1
+		status 2
 		activate_time Time.now.to_i
 	end
 end

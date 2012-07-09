@@ -198,8 +198,8 @@ class User
 	#* true: when successfully activated or already activated
 	def self.activate(activate_info)
 		user = User.find_by_email(activate_info["email"])
-		return ErrorEnum::EMAIL_NOT_EXIST if user.nil?			# email account does not exist
-		return true  if user.is_activate?
+		return ErrorEnum::USER_NOT_EXIST if user.nil?			# email account does not exist
+		return true  if user.is_activated
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i		# expired
 		user = User.find_by_email(activate_info["email"])
 		user.status = 1
@@ -218,7 +218,7 @@ class User
 	#* EMAIL_NOT_EXIST
 	#* EMAIL_NOT_ACTIVATED
 	def self.third_party_login(email, client_ip)
-		return ErrorEnum::EMAIL_NOT_EXIST if !user_exist_by_email?(email)			# email account does not exist
+		return ErrorEnum::USER_NOT_EXIST if !user_exist_by_email?(email)			# email account does not exist
 		return ErrorEnum::EMAIL_NOT_ACTIVATED if !user_activate?(email)		# not activated
 		user = User.find_by_email(email)
 		# record the login information
@@ -263,7 +263,7 @@ class User
 	#* EMAIL_NOT_EXIST
 	#* WRONG_PASSWORD_CONFIRMATION
 	def self.reset_password(email, new_password, new_password_confirmation)
-		return ErrorEnum::EMAIL_NOT_EXIST if user_exist?(email) == false			# email account does not exist
+		return ErrorEnum::USER_NOT_EXIST if user_exist_by_email?(email) == false			# email account does not exist
 		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if new_password != new_password_confirmation
 		user = User.find_by_email(email)
 		user.password = Encryption.encrypt_password(new_password)

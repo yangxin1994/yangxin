@@ -164,38 +164,6 @@ class ActiveSupport::TestCase
 		return members
 	end
 
-	def create_group(email, password, name, description, members)
-		sign_in(email, Encryption.decrypt_password(password))
-		old_controller = @controller
-		@controller = GroupsController.new
-		post :create, :format => :json, :group => {"name" => name, "description" => description, "members" => members}
-		group_obj = JSON.parse(@response.body)
-		@controller = old_controller
-		sign_out
-		return group_obj
-	end
-
-	def create_groups(email, password)
-		sign_in(email, Encryption.decrypt_password(password))
-		old_controller = @controller
-		@controller = GroupsController.new
-		post :create, :format => :json, :group => {"name" => "name_1", "description" => "description_1"}
-		group_obj = JSON.parse(@response.body)
-		group_id_1 = group_obj["group_id"]
-		post :create, :format => :json, :group => {"name" => "name_2", "description" => "description_2"}
-		group_obj = JSON.parse(@response.body)
-		group_id_2 = group_obj["group_id"]
-		post :create, :format => :json, :group => {"name" => "name_3", "description" => "description_3"}
-		group_obj = JSON.parse(@response.body)
-		group_id_3 = group_obj["group_id"]
-		post :create, :format => :json, :group => {"name" => "name_4", "description" => "description_4"}
-		group_obj = JSON.parse(@response.body)
-		group_id_4 = group_obj["group_id"]
-		@controller = old_controller
-		sign_out
-		return group_id_1, group_id_2, group_id_3, group_id_4
-	end
-
 	def create_materials(email, password)
 		sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller

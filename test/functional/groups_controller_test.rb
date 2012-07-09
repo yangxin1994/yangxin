@@ -7,9 +7,7 @@ class GroupsControllerTest < ActionController::TestCase
 
 		members = generate_group_members
 
-		sub_groups = create_groups(jesse.email, jesse.password)
-
-		post :create, :format => :json, :group => {"name" => "group name", "description" => "group description", "members" => members, "sub_groups" => sub_groups}
+		post :create, :format => :json, :group => {"name" => "group name", "description" => "group description", "members" => members}
 		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, @response.body
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
@@ -53,8 +51,6 @@ class GroupsControllerTest < ActionController::TestCase
 		oliver = init_oliver
 
 		members = generate_group_members
-
-		sub_groups = create_groups(jesse.email, jesse.password)
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :group => {"name" => "group name", "description" => "group description", "members" => members, "sub_groups" => sub_groups}
@@ -100,7 +96,6 @@ class GroupsControllerTest < ActionController::TestCase
 		
 		members = generate_group_members
 
-		sub_groups = create_groups(jesse.email, jesse.password)
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :group => {"name" => "group name", "description" => "group description", "members" => members, "sub_groups" => sub_groups}
@@ -133,7 +128,6 @@ class GroupsControllerTest < ActionController::TestCase
 
 		members = generate_group_members
 
-		sub_groups = create_groups(jesse.email, jesse.password)
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :group => {"name" => "group name", "description" => "group description", "members" => members, "sub_groups" => sub_groups}

@@ -2,21 +2,31 @@ require 'test_helper'
 
 class RegistrationsControllerTest < ActionController::TestCase
 	test "should create user" do
-		clear(User, UserInformation)
+		clear(User)
 
-		user_hash, user_information = *init_user_and_user_information
+		user_hash = init_user
 		user_hash["email"] = "illegal_email"
-		post :create, :format => :json, :user => user_hash, :user_information => user_information
+		post :create, :format => :json, :user => user_hash
 		assert_equal ErrorEnum::ILLEGAL_EMAIL.to_s, @response.body
-		
-		user_hash, user_information = *init_user_and_user_information
+
+		user_hash = init_user
 		user_hash["password_confirmation"] = "wrong_password_confirmation"
-		post :create, :format => :json, :user => user_hash, :user_information => user_information
+		post :create, :format => :json, :user => user_hash
 		assert_equal ErrorEnum::WRONG_PASSWORD_CONFIRMATION.to_s, @response.body
 		
-		user_hash, user_information = *init_user_and_user_information
-		post :create, :format => :json, :user => user_hash, :user_information => user_information
+		user_hash = init_user
+		post :create, :format => :json, :user => user_hash
 		assert_equal true.to_s, @response.body
+
+		user_hash = init_user
+		user_hash["email"] = "another_email@test.com"
+		post :create, :format => :json, :user => user_hash
+		assert_equal ErrorEnum::EMAIL_EXIST.to_s, @response.body
+
+		user_hash = init_user
+		user_hash["username"] = "another_username"
+		post :create, :format => :json, :user => user_hash
+		assert_equal ErrorEnum::USERNAME_EXIST.to_s, @response.body
 	end
 
 	test "should check email" do
@@ -39,10 +49,10 @@ class RegistrationsControllerTest < ActionController::TestCase
 		activated_user = init_activated_user
 
 		post :send_activate_email, :format => :json, :user => {"email" => "non-exist-email@test.com"}
-		assert_equal ErrorEnum::EMAIL_NOT_EXIST.to_s, @response.body
+		assert_equal ErrorEnum::USER_NOT_EXIST.to_s, @response.body
 
 		post :send_activate_email, :format => :json, :user => {"email" => activated_user.email}
-		assert_equal ErrorEnum::EMAIL_ACTIVATED.to_s, @response.body
+		assert_equal ErrorEnum::USER_ACTIVATED.to_s, @response.body
 
 		post :send_activate_email, :format => :json, :user => {"email" => new_user.email}
 		assert_equal true.to_s, @response.body
@@ -66,14 +76,11 @@ class RegistrationsControllerTest < ActionController::TestCase
 		assert_redirected_to sessions_path, "fail to activate an user"
 	end
 
-
-	def init_user_and_user_information
+	def init_user
 		user = {"email" => "jesse@test.com",
 						"password" => "111111",
 						"password_confirmation" => "111111",
 						"username" => "jesse"}
-		user_information = {"email" => "jesse@test.com",
-												"realname" => "Jesse Yang"}
-		return [user, user_information]
+		return user
 	end
 end
