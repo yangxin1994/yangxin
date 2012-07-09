@@ -10,7 +10,7 @@ class Material
 	field :title, :type => String
 	field :created_at, :type => Integer, default: -> {Time.now.to_i}
 
-	mount_uploader :material, MaterialUploader
+#	mount_uploader :material, MaterialUploader
 	belongs_to :mterialable, :polymorphic => true
 	belongs_to :user
 	#validates :imageable, :presence => true

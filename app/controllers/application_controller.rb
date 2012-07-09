@@ -44,7 +44,7 @@ class ApplicationController < ActionController::Base
 	#judge whether there is a user signed in currently
 	def user_signed_in?
 		logger.info "#{@current_user}"
-		!!@current_user && !!@current_user.auth_key == get_cookie(:auth_key)
+		return !!@current_user && @current_user.auth_key == get_cookie(:auth_key)
 	end
 
 	#judge whether there is no user signed in currently
@@ -95,7 +95,7 @@ class ApplicationController < ActionController::Base
 
 	#set cookie given a pair of key and value
 	def set_cookie(key, value, expire_time = nil)
-		cookie[key.to_sym] = expire_time.nil? ? value : {:value => value, :expires => expire_time}
+		cookies[key.to_sym] = expire_time.nil? ? value : {:value => value, :expires => expire_time}
 	end
 
 	#get cookie given a key

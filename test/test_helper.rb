@@ -67,7 +67,7 @@ class ActiveSupport::TestCase
 	def sign_in(email, password)
 		old_controller = @controller
 		@controller = SessionsController.new
-		post :create, :format => :json, :user => {"email" => email, "password" => password}
+		post :create, :format => :json, :user => {"email_username" => email, "password" => password}
 		@controller = old_controller
 	end
 
