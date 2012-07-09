@@ -24,13 +24,15 @@ class Present
 	scope :expired, where( :status => 0 )
 	# TO DO Validation
 	has_many :orders, :class_name => "Order"
-	
-	validates_presence_of :present_type, :point, :start_time, :end_time
-	validates :name, :presence => true,
-									 :length => { :maximum => 140 }
-	validates :present_type, :presence => true
-	validates :quantity, :presence => true,
-											 :numericality => { :greater_than_or_equal_to => 0 }
+	has_many :materials, :as => :materialable
+
+	attr_accessible :materials
+	#validates_presence_of :present_type, :point, :start_time, :end_time
+	#validates :name, :presence => true,
+	#								 :length => { :maximum => 140 }
+	#validates :present_type, :presence => true
+	#validates :quantity, :presence => true,
+	#										 :numericality => { :greater_than_or_equal_to => 0 }
 
 
 	# TO DO Filter

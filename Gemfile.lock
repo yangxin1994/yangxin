@@ -37,6 +37,11 @@ GEM
     bson_ext (1.6.1)
       bson (~> 1.6.1)
     builder (3.0.0)
+    carrierwave (0.5.8)
+      activesupport (~> 3.0)
+    carrierwave-mongoid (0.1.7)
+      carrierwave (~> 0.5.6)
+      mongoid (~> 2.1)
     coffee-rails (3.1.1)
       coffee-script (>= 2.2.0)
       railties (~> 3.1.0)
@@ -136,6 +141,7 @@ GEM
       rufus-scheduler
     rest-client (1.6.7)
       mime-types (>= 1.16)
+    rmagick (2.13.1)
     rufus-scheduler (2.0.16)
       tzinfo (>= 0.3.23)
     sass (3.1.15)
@@ -173,6 +179,7 @@ PLATFORMS
 
 DEPENDENCIES
   bson_ext
+  carrierwave-mongoid
   coffee-rails (~> 3.1.0)
   ezcrypto
   factory_girl_rails (~> 3.0)
@@ -182,6 +189,7 @@ DEPENDENCIES
   kaminari
   log4r
   memcache-client
+  mime-types
   minitest
   mongoid (~> 2.4)
   passenger
@@ -189,6 +197,7 @@ DEPENDENCIES
   resque
   resque-scheduler
   rest-client
+  rmagick
   sass-rails (~> 3.1.0)
   therubyracer
   turn

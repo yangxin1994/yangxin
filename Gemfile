@@ -5,6 +5,7 @@ gem 'rails', '3.1.0'
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 
+
 gem 'mongoid', " ~> 2.4"
 gem 'bson_ext'
 gem 'ezcrypto'
@@ -13,8 +14,6 @@ gem 'memcache-client'
 gem 'kaminari' 
 gem 'resque'
 gem 'resque-scheduler'
-
-gem 'factory_girl_rails', "~> 3.0"
 
 gem 'haml'
 gem 'haml-rails'
@@ -34,6 +33,10 @@ end
 
 gem 'jquery-rails'
 
+# attachment
+gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
+gem 'mime-types'
+gem 'rmagick'
 # Use unicorn as the web server
 # gem 'unicorn'
 
@@ -47,4 +50,5 @@ group :test do
   # Pretty printed test output
   gem 'turn', :require => false
 	gem 'minitest'
+	gem 'factory_girl_rails', "~> 3.0"
 end

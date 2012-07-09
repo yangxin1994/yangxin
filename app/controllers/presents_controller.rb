@@ -15,7 +15,14 @@ class PresentsController < ApplicationController
 			format.json { render json: @presents }
 		end
 	end
+	def new
+    @present = Present.new
 
+    respond_to do |format|
+      format.html # new.html.erb
+      format.json { render json: @present }
+    end		
+	end
 	def create		
     respond_to do |format|
       if @present = Present.create(params[:present])
