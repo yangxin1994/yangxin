@@ -3,19 +3,24 @@ require 'securerandom'
 
 class Material
 	include Mongoid::Document
-	# 0 for image, 1 for video, 2 for audio
+	# 1 for image, 2 for video, 4 for audio
 	field :owner_email, :type => String
 	field :material_type, :type => Integer
 	field :location, :type => String
 	field :title, :type => String
 	field :created_at, :type => Integer, default: -> {Time.now.to_i}
 
+	mount_uploader :material, MaterialUploader
+	belongs_to :mterialable, :polymorphic => true
 	belongs_to :user
+	#validates :imageable, :presence => true
+  #validates :image, :presence => true
 
-	def self.find_by_id(material_id)
-		material = Material.where(:_id => material_id).first
-		return material
-	end
+
+	before_save :set_attachment_attributes
+
+
+
 
 	def self.check_and_create_new(material)
 		return ErrorEnum::WRONG_MATERIAL_TYPE if ![1, 2, 4].include?(material["material_type"].to_i)
@@ -35,5 +40,15 @@ class Material
 
 	def update_title(title)
 		return self.update_attributes(:title => title)
+	end
+
+	protected
+
+	def set_attachment_attributes
+		if attachment.present? && attachment_changed?
+			self.content_type = attachment.file.content_type
+			self.file_size = attachment.file.size
+			self.file_name = attachment.file.original_filename
+		end
 	end
 end

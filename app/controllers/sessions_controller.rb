@@ -44,7 +44,7 @@ class SessionsController < ApplicationController
 	#* EMAIL_NOT_ACTIVATED
 	#* WRONG_PASSWORD
 	def create
-		login = User.login(params[:user]["email_username"], params[:user]["password"], @client_ip)
+		login = User.login(params[:user]["email"], params[:user]["password"], @client_ip)
 		third_party_info = decrypt_third_party_user_id(params[:third_party_info])
 		case login
 		when ErrorEnum::USER_NOT_EXIST

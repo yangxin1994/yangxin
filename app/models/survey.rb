@@ -49,6 +49,7 @@ class Survey
 	scope :normal, lambda { where(:status.gt => -1) }
 	scope :deleted, lambda { where(:status => -1) }
 
+
 	before_save :clear_survey_object
 	before_update :clear_survey_object
 	before_destroy :clear_survey_object

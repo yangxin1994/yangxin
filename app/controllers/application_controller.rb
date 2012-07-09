@@ -5,6 +5,15 @@ class ApplicationController < ActionController::Base
 
 	helper_method :user_signed_in?, :user_signed_out?
 
+	# QuillMe
+	def self.def_each(*method_names, &block)
+		method_names.each do |method_name|
+			define_method method_name do
+				instance_exec method_name, &block
+			end
+		end
+	end
+
 	#get the information of the signed user and set @current_user
 	def current_user
 		current_user_id = get_cookie(:current_user_id)
@@ -34,6 +43,7 @@ class ApplicationController < ActionController::Base
 
 	#judge whether there is a user signed in currently
 	def user_signed_in?
+		logger.info "#{@current_user}"
 		!!@current_user && !!@current_user.auth_key == get_cookie(:auth_key)
 	end
 
@@ -85,7 +95,7 @@ class ApplicationController < ActionController::Base
 
 	#set cookie given a pair of key and value
 	def set_cookie(key, value, expire_time = nil)
-		cookies[key.to_sym] = expire_time.nil? ? value : {:value => value, :expires => expire_time}
+		cookie[key.to_sym] = expire_time.nil? ? value : {:value => value, :expires => expire_time}
 	end
 
 	#get cookie given a key

@@ -35,6 +35,20 @@ class User
   field :postcode, :type => String
   field :phone, :type => String
 
+  #################################
+  # QuillMe
+  field :point, :type => Integer
+  has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
+  has_many :orders, :class_name => "Order", :foreign_key => "user_id"	
+  # QuillAdmin
+  has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
+  has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
+	
+	before_save :set_updated_at
+	before_update :set_updated_at
+
+	attr_accessible :email, :username, :password, :registered_at
+
 	has_many :surveys
 	has_many :groups
 	has_many :materials
@@ -43,7 +57,11 @@ class User
   has_many :answer_feedbacks, class_name: "Feedback", inverse_of: :answer_user
   has_many :faqs
 
-	attr_accessible :email, :username, :password, :registered_at
+	private
+	def set_updated_at
+		self.updated_at = Time.now.to_i
+	end
+
 
 	private
 	def set_updated_at
@@ -241,9 +259,10 @@ class User
 	#* EMAIL_NOT_ACTIVATED
 	#* WRONG_PASSWORD
 	def self.login(email_username, password, client_ip)
-		user = User.find_by_email_username(email_username)
+		user = User.find_by_email(email_username)
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
-		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
+		# There is no is_activated
+		#return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
 		return ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(password)
 		# record the login information
 		user.last_login_time = Time.now.to_i

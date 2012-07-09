@@ -17,7 +17,7 @@ class Question
 	field :input_prefix, :type => String, default: ""
 	field :status, :type => Integer, default: 0
 	scope :objective_quality_control_questions, lambda { where(:input_prefix => "objective_", :status => 0) }
-scope :matching_quality_control_questions, lambda { where(:input_prefix => "matching_", :status => 0) }
+	scope :matching_quality_control_questions, lambda { where(:input_prefix => "matching_", :status => 0) }
 
 	before_save :clear_question_object
 	before_update :clear_question_object
