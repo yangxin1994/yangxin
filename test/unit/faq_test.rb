@@ -2,62 +2,36 @@ require 'test_helper'
 
 class FaqTest < ActiveSupport::TestCase
 
-	test "00 init test db data" do
-		clear(User, Faq)
-		@@normal_user = User.new(email: "test@example.com")
-		@@normal_user.role = 0
-		@@normal_user.save
-		@@admin_user = User.new(email:"test2@example.com")
-		@@admin_user.role = 1
-		@@admin_user.save
-		@@admin_user3 = User.new(email:"test3@example.com")
-		@@admin_user3.role = 1
-		@@admin_user3.save	
-	end
-	
-	test "99 clear test db data" do 
-		clear(User, Faq)
-	end 
-
-	test "01 a normal user create new faq from method: create_by_user" do
-		if @@normal_user then
-			assert !Faq.create_by_user(@@normal_user, "type1", "question1", "answer1")
-		end
-	end
-   
-	test "02 a admin user create new faq from method: create_by_user" do
-		if @@admin_user then
-			assert Faq.create_by_user(@@admin_user, "type2", "question2", "answer2")
-		end
-	end
-
-	test "03 a admin user update faq from method: update_by_user" do
-		faq = Faq.where(faq_type: "type2").first
-		if @@admin_user3 and faq then
-			assert Faq.update_by_user(faq.id, @@admin_user3, {question: "updated question2"})
-			assert Faq.where(faq_type: "type2").first.user.id.to_s == @@admin_user3.id.to_s
-		end
-		if @@admin_user and faq then
-			assert Faq.update_by_user(faq.id, @@admin_user, {question: "updated question2"})
-			assert Faq.where(faq_type: "type2").first.question.to_s == "updated question2"
-		end
-	end
-	
-	test "04 a admin user get faqs with condition from method: condition" do
-		faq = Faq.condition("type", "type2").first
-  	assert_equal faq.question, "updated question2"
-    faq = Faq.condition("question", "update").first
-    assert_equal faq.question, "updated question2"
-    faq = Faq.condition("answer", "ans").first
-    assert_equal faq.question, "updated question2"
-    
-	end
-
-	test "05 a admin user destroy faq from method: destroy_by_user" do
-		faq = Faq.where(faq_type: "type2").first
-		if @@admin_user and faq then
-			assert Faq.destroy_by_user(faq.id, @@admin_user)
-		end
+	test "01 find_by_type" do
+		
+		clear(Faq)
+		
+		assert_raise(TypeError) { 
+			Faq.create(faq_type: "type1", question: "question0", answer: "answer0") 
+		}
+		
+		assert_raise(RangeError) { 
+			Faq.create(faq_type: 0, question: "question0", answer: "answer0") 
+		}
+		
+		assert_raise(RangeError) { 
+			Faq.create(faq_type: 3, question: "question0", answer: "answer0") 
+		}
+		
+		assert_raise(RangeError) { 
+			Faq.create(faq_type: 129, question: "question0", answer: "answer0") 
+		}
+		
+		Faq.create(faq_type: 1, question: "question1", answer: "answer1")
+		Faq.create(faq_type: 2, question: "q2", answer: "answer2")
+		
+		assert_equal Faq.find_by_type(0, "question").count, 1
+		assert_equal Faq.find_by_type(0, "answer").count, 2
+		assert_equal Faq.find_by_type(1, "answer").count, 1
+		assert_equal Faq.find_by_type(3, "answer").count, 2
+		
+		clear(Faq)
+		
 	end
 	
 end
