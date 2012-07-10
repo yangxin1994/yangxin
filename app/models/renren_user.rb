@@ -1,9 +1,8 @@
 class RenrenUser < ThirdPartyUser
   
   field :name, :type => String
-  field :sex, :type => String
+  field :sex, :type => String # male will return: 1
   field :headurl, :type => String
-  field :tinyurl, :type => String
   
   #--
   # ************* instance attribute's methods*****************
@@ -74,7 +73,8 @@ class RenrenUser < ThirdPartyUser
       # update info 
       renren_user.update_by_hash(response_data)
     end
-    renren_user.update_user_info if renren_user.gender.nil?
+    
+    renren_user.update_user_info
     
     return renren_user
   end

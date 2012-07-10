@@ -10,6 +10,7 @@ class ThirdPartyUser
   field :oopsdata_user_id, :type => String
   field :access_token, :type => String
   field :refresh_token, :type => String
+  field :expires_in, :type => String
   field :scope, :type => String
 
   #--
@@ -35,11 +36,11 @@ class ThirdPartyUser
 
 	def is_bound(user = nil)
 		return false if user.nil?
-		return self.oopsdata_user_id == user._id
+		return self.oopsdata_user_id == user.id
 	end
 
 	def bind(user)
-		self.oopsdata_user_id = user._id
+		self.oopsdata_user_id = user.id
 		return self.save
 	end
 	
@@ -118,9 +119,11 @@ class ThirdPartyUser
 	#*retval*:
 	#* bool: true or false
   def successful?(hash)
-    if hash.select{|k,v| k.to_s=~/error/}.empty? then
+    if hash.select{|k,v| k.to_s.include?("error")}.empty? then
+    	Logger.new("log/development.log").info("true: ")
       return true
     else
+    	Logger.new("log/development.log").info("false: ")
       return false
     end   
   end

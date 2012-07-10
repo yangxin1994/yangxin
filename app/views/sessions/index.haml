@@ -18,12 +18,8 @@
     %label 密码
     = password_field_tag 'user[password]'
 
-  %p{:style => "display:none;"}
-    = text_field_tag 'third_party_info', @third_party_info
-
   %p
-    - if !@third_party_info.nil?
-      %b= @third_party_info.to_s 
+    = text_field_tag 'third_party_info', @tp_info
     
   %p
     - if !@access_token.nil?

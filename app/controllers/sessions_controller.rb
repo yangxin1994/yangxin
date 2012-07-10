@@ -69,6 +69,7 @@ class SessionsController < ApplicationController
 			User.combine(params[:user]["email_username"], *third_party_info) if !third_party_info.nil?
 			set_login_cookie(params[:user]["email_username"], params[:keep_signed_in])
 			flash[:notice] = "登录成功"
+			flash[:notice] += ",并成功与第三方帐号绑定。" if third_party_info
 			respond_to do |format|
 				format.html	{ redirect_to home_path and return }
 				format.json	{ render :json => true and return }
@@ -328,7 +329,7 @@ class SessionsController < ApplicationController
 	#*params*:
 	#* code
 	def qq_connect
-		token_data = QqUser.token(params[:code])
+		token_data = QqUser.get_access_token(params[:code])
 		qq_user = QqUser.save_tp_user(token_data)
 		deal_connect(qq_user)
 	end 
@@ -338,7 +339,7 @@ class SessionsController < ApplicationController
 	#*params*:
 	#* code
 	def google_connect
-	  token_data = GoogleUser.token(params[:code])
+	  token_data = GoogleUser.get_access_token(params[:code])
 	  google_user = GoogleUser.save_tp_user(token_data)
 	  deal_connect(google_user)
 	end
@@ -362,10 +363,10 @@ class SessionsController < ApplicationController
 	#* status
 	#* tp_user
 	def deal_connect(tp_user)
-		if tp_user.is_bound && user_signed_in
+		if tp_user.is_bound && user_signed_in?
 			flash[:error] = "不能重复绑定第三方网站"
 			redirect_to home_path and return
-		elsif tp_user.is_bound && !user_signed_in
+		elsif tp_user.is_bound && !user_signed_in?
       retval = User.login(@current_user.email, Encryption.decrypt_password(@current_user.password), @client_ip)
 			case login
 			when ErrorEnum::USER_NOT_ACTIVATED
@@ -383,6 +384,7 @@ class SessionsController < ApplicationController
 			flash[:notice] = "绑定成功"
 			redirect_to home_path and return
 		else # !tp_user.is_bound && !user_signed_in
+			flash[:notice] = "第三方登录成功，请登录OopsData的帐号进行绑定。"
 			@gmail = tp_user.website == "google"? tp_user.google_email : nil
       @tp_info= encrypt_third_party_user_id(tp_user.website, tp_user.user_id)
 			render :action => "index"
