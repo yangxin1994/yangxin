@@ -39,13 +39,13 @@ class SurveysController < ApplicationController
 		survey = @current_user.surveys.normal.find_by_id(params[:id])
 		if survey.nil?
 			survey = Survey.normal.find_by_id(params[:id])
-			if survey.nil?
+			if !survey.nil? && survey.user.nil?
+				survey.user = @current_user
+			else
 				flash[:notice] = "调查问卷不存在"
 				respond_to do |format|
 					format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 				end
-			else
-				survey.user = @current_user
 			end
 		end
 		retval = survey.save_meta_data(params[:survey])
@@ -115,7 +115,7 @@ class SurveysController < ApplicationController
 		end
 
 		survey.recover
-		flash[:notice] = "调查问卷已成功删除"
+		flash[:notice] = "调查问卷已成功恢复"
 		respond_to do |format|
 			format.json	{ render :json => true and return }
 		end
@@ -228,7 +228,7 @@ class SurveysController < ApplicationController
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
-		survey.add_tag(params[:tag])
+		retval = survey.add_tag(params[:tag])
 		case retval
 		when ErrorEnum::TAG_EXIST
 			flash[:notice] = "标签已经存在"
@@ -266,7 +266,7 @@ class SurveysController < ApplicationController
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
-		survey.remove_tag(params[:tag])
+		retval = survey.remove_tag(params[:tag])
 		case retval
 		when ErrorEnum::TAG_NOT_EXIST
 			flash[:notice] = "标签已经存在"
@@ -297,7 +297,7 @@ class SurveysController < ApplicationController
 	def index
 		survey_list = @current_user.surveys.list(params[:status], params[:public_status], params[:tags])
 		respond_to do |format|
-			format.json	{ render :json => survey_list.serialize and return }
+			format.json	{ render :json => survey_list and return }
 		end
 	end
 

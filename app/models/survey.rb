@@ -81,12 +81,9 @@ class Survey
 	#* a survey object
 	def serialize
 		survey_obj = Hash.new
-		survey_obj["owner_email"] = self.owner_email
-		survey_obj["survey_id"] = self._id.to_s
+		survey_obj["_id"] = self._id.to_s
 		survey_obj["created_at"] = self.created_at
 		survey_obj["pages"] = Marshal.load(Marshal.dump(self.pages))
-		survey_obj["tags"] = Marshal.load(Marshal.dump(self.tags))
-		survey_obj["tags"] << "已删除" if self.status == -1 && !survey_obj["tags"].include?("已删除")
 		META_ATTR_NAME_ARY.each do |attr_name|
 			method_obj = self.method("#{attr_name}".to_sym)
 			survey_obj[attr_name] = method_obj.call()
@@ -118,7 +115,11 @@ class Survey
 			surveys = Survey.normal
 		end
 		surveys.each do |survey|
-			survey_list << survey if survey.publish_status & publish_status && survey.has_one_tag_of(tags)
+			if tags.nil? || tags.empty? || survey.has_one_tag_of(tags)
+				if publish_status.nil? || survey.publish_status & publish_status
+					survey_list << survey
+				end
+			end
 		end
 		return survey_list
 	end
@@ -141,11 +142,10 @@ class Survey
 	def save_meta_data(survey_obj)
 		# this is an existing survey
 		META_ATTR_NAME_ARY.each do |attr_name|
-			method_obj = survey.method("#{attr_name}=".to_sym)
+			method_obj = self.method("#{attr_name}=".to_sym)
 			method_obj.call(survey_obj[attr_name])
 		end
-		survey.save
-		return survey.serialize
+		return self.save
 	end
 
 	#*description*: remove current survey
@@ -252,8 +252,10 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	def remove_tag(tag)
 		return ErrorEnum::TAG_NOT_EXIST if !self.tags.has_tag?(tag)
-		self.tags.delete(Tag.find_by_content(tag))
-		return tag.destroy if tag.surveys.length == 0
+		tag_inst = Tag.find_by_content(tag)
+		self.tags.delete(tag_inst)
+		tag_inst.destroy if tag_inst.surveys.length == 0
+		return true
 	end
 
 	#*description*: submit a survey to the administrator for reviewing
