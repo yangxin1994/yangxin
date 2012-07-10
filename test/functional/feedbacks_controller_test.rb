@@ -94,17 +94,17 @@ class FeedbacksControllerTest < ActionController::TestCase
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 0
 		
-		get 'condition', :type => 1, :value => "content1", :format => :json
+		get 'condition', :type => 7, :value => "content1", :format => :json
 		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 1
+		assert_equal retval.count, 3
 
 		get 'condition', :type => 0, :value => "title1", :format => :json
 		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 1
+		assert_equal retval.count, 0
 
 		get 'condition', :type => 0, :value => "content1", :format => :json
 		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 3
+		assert_equal retval.count, 0
 		
 		sign_out
 		clear(User, Feedback)

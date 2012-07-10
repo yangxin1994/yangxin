@@ -54,9 +54,26 @@ class FaqsController < ApplicationController
 				format.json { render json: @faq, status: :created, location: @faq }
 			else
 				format.html { render action: "new" }
-				format.json { render json: @faq.errors, status: :unprocessable_entity }
+				format.json { render :json => {:error => ErrorEnum::SAVE_FAILED} }
 			end
-		end 
+		end
+	rescue => ex 
+		if ex.class == TypeError then
+			respond_to do |format|
+				format.html { render action: "new"}
+				format.json { render :json => {:error => ErrorEnum::TYPE_ERROR}}
+			end
+		elsif ex.class == RangeError then
+			respond_to do |format|
+				format.html { render action: "new" }
+				format.json { render :json => {:error => ErrorEnum::RANGE_ERROR}}
+			end
+		else
+			respond_to do |format|
+				format.html { render action: "new" }
+				format.json { render :json => {:error => ErrorEnum::SAVE_FAILED}}
+			end
+		end
 	end
 
 	# PUT /faqs/1
@@ -76,6 +93,23 @@ class FaqsController < ApplicationController
 				format.json { render json: @faq.errors, status: :unprocessable_entity }
 			end
 		end
+	rescue => ex 
+		if ex.class == TypeError then
+			respond_to do |format|
+				format.html { render action: "edit"}
+				format.json { render :json => {:error => ErrorEnum::TYPE_ERROR}}
+			end
+		elsif ex.class == RangeError then
+			respond_to do |format|
+				format.html { render action: "edit" }
+				format.json { render :json => {:error => ErrorEnum::RANGE_ERROR}}
+			end
+		else
+			respond_to do |format|
+				format.html { render action: "edit" }
+				format.json { render :json => {:error => ErrorEnum::SAVE_FAILED}}
+			end
+		end
 	end
 
 	# DELETE /faqs/1
@@ -90,17 +124,42 @@ class FaqsController < ApplicationController
 		end
 	end
 	
-	# GET /faqs/condition/:type/:value
-	# GET /faqs/condition/:type/:value.json
+	# GET /faqs/condition
+	# GET /faqs/condition.json
 	def condition
-		type = params[:type].to_i
-		value = params[:value]
+		raise TypeError if params[:type] && params[:type].to_i ==0 && params[:type].strip != "0"
+		raise RangeError if params[:type] && (params[:type].to_i < 0 || params[:type].to_i > 2**Faq::MAX_TYPE)		
+		type = params[:type].to_i		
+		value = params[:value] || ""
+		raise ArgumentError if value.strip == ""
 		
 		@faqs = Faq.find_by_type(type, value)
 		
 		respond_to do |format|
-			format.html # index.html.erb
+			format.html
 			format.json { render json: @faqs }
+		end
+	rescue => ex 
+		if ex.class == TypeError then
+			respond_to do |format|
+				format.html
+				format.json { render :json => {:error => ErrorEnum::TYPE_ERROR}}
+			end
+		elsif ex.class == RangeError then
+			respond_to do |format|
+				format.html
+				format.json { render :json => {:error => ErrorEnum::RANGE_ERROR}}
+			end
+		elsif ex.class == ArgumentError then
+			respond_to do |format|
+				format.html
+				format.json { render :json => {:error => ErrorEnum::ARG_ERROR}}
+			end
+		else
+			respond_to do |format|
+				format.html
+				format.json { render :json => {:error => ErrorEnum::UNKNOWN_ERROR}}
+			end
 		end
 	end
 	

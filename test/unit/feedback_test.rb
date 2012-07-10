@@ -25,8 +25,8 @@ class FeedbackTest < ActiveSupport::TestCase
 		Feedback.create(feedback_type: 1, title: "title1", content: "content1")
 		Feedback.create(feedback_type: 2, title: "q2", content: "content2")
 		
-		assert_equal Feedback.find_by_type(0, "title").count, 1
-		assert_equal Feedback.find_by_type(0, "content").count, 2
+		assert_equal Feedback.find_by_type(0, "title").count, 0
+		assert_equal Feedback.find_by_type(0, "content").count, 0
 		assert_equal Feedback.find_by_type(1, "content").count, 1
 		assert_equal Feedback.find_by_type(3, "content").count, 2
 		

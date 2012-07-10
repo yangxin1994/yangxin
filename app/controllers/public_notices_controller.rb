@@ -57,6 +57,23 @@ class PublicNoticesController < ApplicationController
 				format.json { render json: @public_notice.errors, status: :unprocessable_entity }
 			end
 		end
+	rescue => ex 
+		if ex.class == TypeError then
+			respond_to do |format|
+				format.html { render action: "new"}
+				format.json { render :json => {:error => ErrorEnum::TYPE_ERROR}}
+			end
+		elsif ex.class == RangeError then
+			respond_to do |format|
+				format.html { render action: "new" }
+				format.json { render :json => {:error => ErrorEnum::RANGE_ERROR}}
+			end
+		else
+			respond_to do |format|
+				format.html { render action: "new" }
+				format.json { render :json => {:error => ErrorEnum::SAVE_FAILED}}
+			end
+		end
 	end
 
 	# PUT /public_notices/1
@@ -76,6 +93,23 @@ class PublicNoticesController < ApplicationController
 				format.json { render json: @public_notice.errors, status: :unprocessable_entity }
 			end
 		end
+	rescue => ex 
+		if ex.class == TypeError then
+			respond_to do |format|
+				format.html { render action: "edit"}
+				format.json { render :json => {:error => ErrorEnum::TYPE_ERROR}}
+			end
+		elsif ex.class == RangeError then
+			respond_to do |format|
+				format.html { render action: "edit" }
+				format.json { render :json => {:error => ErrorEnum::RANGE_ERROR}}
+			end
+		else
+			respond_to do |format|
+				format.html { render action: "edit" }
+				format.json { render :json => {:error => ErrorEnum::SAVE_FAILED}}
+			end
+		end
 	end
 
 	# DELETE /public_notices/1
@@ -90,17 +124,42 @@ class PublicNoticesController < ApplicationController
 		end
 	end
 	
-	# GET /public_notices/condition/:type/:value
-	# GET /public_notices/condition/:type/:value.json
+	# GET /public_notices/condition
+	# GET /public_notices/condition.json
 	def condition
-		type = params[:type].to_i
-		value = params[:value]
+		raise TypeError if params[:type] && params[:type].to_i ==0 && params[:type].strip != "0"
+		raise RangeError if params[:type] && (params[:type].to_i < 0 || params[:type].to_i > 2**PublicNotice::MAX_TYPE)		
+		type = params[:type].to_i		
+		value = params[:value] || ""
+		raise ArgumentError if value.strip == ""
 		
 		@public_notices = PublicNotice.find_by_type(type, value)
 		
 		respond_to do |format|
-			format.html # index.html.erb
+			format.html
 			format.json { render json: @public_notices }
+		end
+	rescue => ex 
+		if ex.class == TypeError then
+			respond_to do |format|
+				format.html
+				format.json { render :json => {:error => ErrorEnum::TYPE_ERROR}}
+			end
+		elsif ex.class == RangeError then
+			respond_to do |format|
+				format.html
+				format.json { render :json => {:error => ErrorEnum::RANGE_ERROR}}
+			end
+		elsif ex.class == ArgumentError then
+			respond_to do |format|
+				format.html
+				format.json { render :json => {:error => ErrorEnum::ARG_ERROR}}
+			end
+		else
+			respond_to do |format|
+				format.html
+				format.json { render :json => {:error => ErrorEnum::UNKNOWN_ERROR}}
+			end
 		end
 	end
 end

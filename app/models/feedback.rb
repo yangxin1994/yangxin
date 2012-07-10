@@ -38,12 +38,12 @@ class Feedback
 	def feedback_type=(type_number)
 	
 		type_number_class = type_number.class
-	
+		temp = type_number
 		type_number = type_number.to_i
 		
 		# if type_number is string, to_i will return 0.
 		# "0" will raise RangeError, "type1" will raise TypeError
-		raise TypeError if type_number_class != Fixnum && type_number == 0
+		raise TypeError if type_number_class != Fixnum && type_number == 0 && temp.strip !="0"
 		
 		if (type_number % 2 != 0 && type_number !=1) || 
 			type_number <= 0 || type_number > 2**MAX_TYPE
@@ -105,30 +105,22 @@ class Feedback
 		#*retval*:
 		#feedback array 
 		def find_by_type(type_number=0, value)
-			return [] if !type_number.instance_of?(Fixnum)
+			return [] if !type_number.instance_of?(Fixnum) || type_number <= 0
 			feedbacks = []
 			
-			# if type_number = 0
-			if type_number == 0 then
-				feedbacks = Feedback.where(title: /.*#{value}.*/) + Feedback.where(content: /.*#{value}.*/)
-				feedbacks.uniq!{|f| f._id.to_s }
-				feedbacks.sort!{|v1, v2| v2.updated_at <=> v1.updated_at}
-				
-			else
-				# if type_number != 0
-				MAX_TYPE.downto(0).each { |element| 
-					feedbacks_tmp = []
-					if type_number / (2**element) == 1 then
-						feedbacks_tmp = Feedback.where(title: /.*#{value}.*/, feedback_type: 2**element) + Feedback.where(content: /.*#{value}.*/, feedback_type: 2**element)
-						feedbacks_tmp.uniq!{|f| f._id.to_s }
-					end
-					type_number = type_number % 2**element
-					feedbacks = feedbacks + feedbacks_tmp
-				}
-			
-				feedbacks.sort!{|v1, v2| v2.updated_at <=> v1.updated_at} if feedbacks.count > 1
-			end
-			
+			# if type_number != 0
+			MAX_TYPE.downto(0).each { |element| 
+				feedbacks_tmp = []
+				if type_number / (2**element) == 1 then
+					feedbacks_tmp = Feedback.where(title: /.*#{value}.*/, feedback_type: 2**element) + Feedback.where(content: /.*#{value}.*/, feedback_type: 2**element)
+					feedbacks_tmp.uniq!{|f| f._id.to_s }
+				end
+				type_number = type_number % 2**element
+				feedbacks = feedbacks + feedbacks_tmp
+			}
+		
+			feedbacks.sort!{|v1, v2| v2.updated_at <=> v1.updated_at} if feedbacks.count > 1
+		
 			return feedbacks	
 		end
 		

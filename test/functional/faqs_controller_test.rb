@@ -14,7 +14,7 @@ class FaqsControllerTest < ActionController::TestCase
 	
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
 		retval = @response.body.to_i
-		assert_equal retval, -7
+		assert_equal retval, ErrorEnum::REQUIRE_LOGIN
 		
 		clear(User,Faq)
 	end
@@ -29,7 +29,7 @@ class FaqsControllerTest < ActionController::TestCase
 		sign_in(user.email, Encryption.decrypt_password(user.password))
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
 		retval = @response.body.to_i
-		assert_equal retval, -9
+		assert_equal retval, ErrorEnum::REQUIRE_ADMIN
 		sign_out
 		
 		clear(User,Faq)
@@ -43,6 +43,14 @@ class FaqsControllerTest < ActionController::TestCase
 		user.save
 	
 		sign_in(user.email, Encryption.decrypt_password(user.password))
+		post 'create', :faq => {faq_type: "Type1", question: "question1", answer: "answer1"}, :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval["error"], ErrorEnum::TYPE_ERROR
+		
+		post 'create', :faq => {faq_type: 129, question: "question1", answer: "answer1"}, :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval["error"], ErrorEnum::RANGE_ERROR
+		
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
 		retval = JSON.parse(@response.body)
 		assert_equal retval["question"], "question1"
@@ -112,21 +120,29 @@ class FaqsControllerTest < ActionController::TestCase
 		post 'create', :faq => {faq_type: 2, question: "question2", answer: "answer1"}, :format => :json
 		post 'create', :faq => {faq_type: 4, question: "question4", answer: "answer1"}, :format => :json
 		
+		get 'condition', :type => 0, :value => "", :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval["error"], ErrorEnum::ARG_ERROR
+		
+		get 'condition', :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval["error"], ErrorEnum::ARG_ERROR
+		
 		get 'condition', :type => 1, :value => "user", :format => :json
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 0
 		
-		get 'condition', :type => 1, :value => "answer1", :format => :json
+		get 'condition', :type => 7, :value => "answer1", :format => :json
 		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 1
+		assert_equal retval.count, 3
 
 		get 'condition', :type => 0, :value => "question1", :format => :json
 		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 1
+		assert_equal retval.count, 0
 
 		get 'condition', :type => 0, :value => "answer1", :format => :json
 		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 3
+		assert_equal retval.count, 0
 		
 		sign_out
 		clear(User, Faq)
