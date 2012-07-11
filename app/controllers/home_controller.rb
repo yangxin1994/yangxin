@@ -31,20 +31,21 @@ class HomeController < ApplicationController
     #@info = "no info."
     #@info = tp_user.get_user_info
     
-    tp_user = RenrenUser.where(:user_id => "464063528")[0]
-    @info = "no info."
+    #tp_user = RenrenUser.where(oopsdata_user_id: current_user.id.to_s).first
+    #@info = "no info."
     #@info = tp_user.call_method("post",{:method  => "users.hasAppPermission", :ext_perm => "publish_share"}) if tp_user
+    #@info = tp_user.call_method("post",{:method  => "users.hasAppPermission", :ext_perm => "operate_like"}) if tp_user
     #@info = tp_user.call_method() if tp_user
     #@info = tp_user.add_share("http://liucm.sinaapp.com")
-    @info = tp_user.add_like("http://liucm.sinaapp.com")
+    #@info = tp_user.add_like("http://www.baidu.com")
     
     #tp_user = SinaUser.where(:user_id => "1957822497")[0]
     #@info = "no info."
     #@info = tp_user.call_method() if tp_user
     #@info = tp_user.say_text("第三方登录测试发送微博5。")
     #@info = tp_user.say_text("第三方登录测试发送微博。加个链接试试：http://liucm.sinaapp.com")
-    #@info = tp_user.repost_text("3454675519532348")
-    #@info = tp_user.repost_text_with_message("3454675519532348","with message")
+    #@info = tp_user.repost_text("3466228067167425")
+    #@info = tp_user.repost_text("3466228067167425","with message")
     
     #tp_user = QqUser.where(:user_id => "2504A9A310DDCC3DD9823B59323D3A47")[0]
     #@info = "no info."

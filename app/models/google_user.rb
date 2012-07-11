@@ -2,7 +2,7 @@
 class GoogleUser < ThirdPartyUser
   
   field :name, :type => String
-  field :gender, :type => String
+  field :gender, :type => String #male will return: "male"
   field :locale, :type => String
   field :google_email, :type => String  
   
@@ -41,8 +41,6 @@ class GoogleUser < ThirdPartyUser
 			"code" => code}
 		retval = Tool.send_post_request("https://accounts.google.com/o/oauth2/token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
-		#Logger.new("log/development.log").info("respo1: "+response_data.to_s)
-		#access_token = response_data["access_token"]
 		return response_data
   end
   
@@ -62,11 +60,9 @@ class GoogleUser < ThirdPartyUser
   
     #get user_id
     retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/userinfo?access_token=#{access_token}", true)    
-		response_data2 = JSON.parse(retval.body)
+		response_data2 = JSON.parse(retval.body)		
+		return nil if !response_data2.select{|k,v| k.to_s.include?("error")}.empty?
 		
-		return nil if successful?(response_data2)
-		
-		#Logger.new("log/development.log").info("respo2: "+response_data2.to_s)
 		user_id = response_data2["id"]
 		
 		# reject the same function field
@@ -75,6 +71,9 @@ class GoogleUser < ThirdPartyUser
 		
 		# merge info
 		response_data.merge!(response_data2).select!{|k,v| !k.to_s.include?("id") }
+		#select info 
+		attrs = %{access_token refresh_token expires_in name gender locale google_email}
+		response_data.select!{|k,v| attrs.split.include?(k.to_s)}
 		
 		#new or update google_user
 		google_user = GoogleUser.where(:user_id => user_id)[0]
@@ -89,7 +88,7 @@ class GoogleUser < ThirdPartyUser
     end
     
     return google_user
-  rescue 
+  rescue => ex 
     return nil
   end
   

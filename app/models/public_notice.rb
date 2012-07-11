@@ -1,100 +1,78 @@
 class PublicNotice
-  include Mongoid::Document
-  include Mongoid::Timestamps
+	include Mongoid::Document
+	include Mongoid::Timestamps
 
-  field :title, :type => String
-  field :content, :type => String
-  field :attachment, :type => String
-  field :public_notice_type, :type => String
+	field :title, :type => String
+	field :content, :type => String
+	field :attachment, :type => String
+	field :public_notice_type, :type => Integer
 
-  belongs_to :user
-  
-  attr_accessible :title, :content, :attachment, :public_notice_type
-  
-  #--
-  # instance methods
-  #++u
-  #
+	belongs_to :user
+	
+	attr_accessible :title, :content, :attachment, :public_notice_type
+	
+	# the max of multiple type value => 2**7
+	MAX_TYPE = 7
+	
+	#--
+	# instance methods
+	#++u
+	#
+	
+	#*description*: verify the public_notice_type value
+	#
+	#*params*:
+	#* type_number: the number of type: 1, 2, 4, ...
+	#
+	#*retval*:
+	#no return
+	def public_notice_type=(type_number)
+	
+		type_number_class = type_number.class
+		temp = type_number
+		type_number = type_number.to_i
+		
+		# if type_number is string, to_i will return 0.
+		# "0" will raise RangeError, "type1" will raise TypeError
+		raise TypeError if type_number_class != Fixnum && type_number == 0 && temp.strip !="0"
+		
+		if (type_number % 2 != 0 && type_number !=1) || 
+			type_number <= 0 || type_number > 2**MAX_TYPE
+			
+			raise RangeError
+		end
+		super
+	end
 
-  #--
-  # class methods
-  #++
-  
-  class << self
-    
-    #*description*: create public notice 
-    #
-    #*params*:
-    #* user: who create public notice and must be admin 
-    #* public_notice_type: type for public notice
-    #* title: notice 's title
-    #* content: notice 's content
-    #* attachment: notice 's attachment. it is nil in default.
-    #
-    #*retval*:
-    #* false or true
-    def create_by_user(user, public_notice_type, title, content, attachment = nil)
-      return false if !user.instance_of?(User)
-      return false if !user.is_admin
-      public_notice = PublicNotice.new(public_notice_type: public_notice_type, 
-      		title: title, content: content)
-  		public_notice.user = user
-      public_notice.attachment = attachment if attachment
-      return public_notice.save
-    end 
+	#--
+	# class methods
+	#++
+	
+	class << self
 
-    #*description*: update public notice
-    #
-    #*params*:
-    #* user: who update public notice. he does not need to be creator, but must be admin.
-    #* public_notice_id
-    #* hash: public notice attrs. only receive attrs: public_notice_type, title, content, attachment
-    #
-    #*retval*:
-    #* true or false 
-    def update_by_user(public_notice_id, user, hash)
-      
-      return false if !user.instance_of?(User)
-      return false if !user.is_admin
-
-      public_notice = PublicNotice.find(public_notice_id)
-      return false if public_notice.nil?
-
-      hash.select!{|k,v| %{public_notice_type title content attachment}.split.include?(k.to_s)}
-      public_notice.update_attributes(hash)
-      public_notice.user = user
-      return public_notice.save 
-    end 
-
-    #*description*: destroy public notice
-    #
-    #*params*:
-    #* user: who update public notice. he does not need to be creator, but must be admin 
-    #* public_notice_id
-    #
-    #*retval*:
-    #*true or false 
-    def destroy_by_user(public_notice_id, user)
-      return false if !user.instance_of?(User)
-      return false if !user.is_admin
-
-      public_notice = PublicNotice.find(public_notice_id)
-      return public_notice.destroy if public_notice
-      return false
-    end
-    
-    def list_recently
-    	return PublicNotice.all.desc(:updated_at)
-    end
-
-    #*description*: list public_notices with one condition
-  	#
-  	#*retval*:
-    #public_notice array
-    def condition(key, value)
-      return nil if %{type title}.split.delete(key.to_s).nil?
-    	return PublicNotice.where(public_notice_type: value).desc(:updated_at) if key.to_s == "type"
-      return PublicNotice.where(title: /.*#{value}.*/).desc(:updated_at) if key.to_s == "title"
-    end
-  end 
+		#*description*: list public_notice s with condition
+		#
+		#*retval*:
+		#public_notice array 
+		def find_by_type(type_number=0, value)
+			return [] if !type_number.instance_of?(Fixnum) || type_number <= 0
+			public_notices = []
+			
+			# if type_number != 0
+			MAX_TYPE.downto(0).each { |element| 
+				public_notices_tmp = []
+				if type_number / (2**element) == 1 then
+					public_notices_tmp = PublicNotice.where(title: /.*#{value}.*/, public_notice_type: 2**element) + PublicNotice.where(content: /.*#{value}.*/, public_notice_type: 2**element)
+					public_notices_tmp.uniq!{|f| f._id.to_s }
+				end
+				type_number = type_number % 2**element
+				public_notices = public_notices + public_notices_tmp
+			}
+		
+			public_notices.sort!{|v1, v2| v2.updated_at <=> v1.updated_at} if public_notices.count > 1
+			
+			return public_notices	
+		end
+		
+	end 
 end 

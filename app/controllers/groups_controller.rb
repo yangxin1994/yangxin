@@ -110,7 +110,14 @@ class GroupsController < ApplicationController
 	#* ErrorEnum::GROUP_NOT_EXIST
 	#* ErrorEnum::UNAUTHORIZED
 	def destroy
-		@current_user.groups.find_by_id(params[:id]).destroy_all
+		group = @current_user.groups.find_by_id(params[:id])
+		if group.nil?
+			flash[:notice] = "该样本组不存在"
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::GROUP_NOT_EXIST and return }
+			end
+		end
+		group.destroy
 		flash[:notice] = "样本组已成功删除"
 		respond_to do |format|
 			format.json	{ render :json => true and return }

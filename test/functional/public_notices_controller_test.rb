@@ -2,70 +2,134 @@ require 'test_helper'
 
 class PublicNoticesControllerTest < ActionController::TestCase
 
-	test "00 init test db data. Everything action data format be JSON." do
-		clear(User, PublicNotice)
-		@@normal_user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		@@normal_user.status = 2
-		@@normal_user.role = 0
-		@@normal_user.save
-		@@admin_user = User.new(email:"test2@example.com", password: Encryption.encrypt_password("123456"))
-		@@admin_user.status = 2
-		@@admin_user.role = 1
-		@@admin_user.save
-	end
-	
-	test "99 clear test db data" do 
-		clear(User,PublicNotice)
-	end 
-
 	test "01 should get index action and no public_notice record" do
+		clear(PublicNotice)
 		get 'index', :format => :json
 		assert_equal JSON.parse(@response.body), []		
+		clear(PublicNotice)
 	end
-	
-	test "02 should post create action which is without auth" do
-		#sign_in(@@normal_user.email, Encryption.decrypt_password(@@normal_user.password))
-		post 'create', :public_notice => {public_notice_type: "type1", title: "title1", content: "content1"}, :format => :json
-		public_notice = JSON.parse(@response.body)
-		assert_equal public_notice["title"], "title1"
-		assert_equal public_notice["content"], "content1"
-	end
-	
-	test "03 should get index action and has one public_notice record in 02 step" do
-		public_notice = PublicNotice.where(public_notice_type: "type1").first
-		get 'index', :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval[0]["title"], "title1"
-	end
-	
-	test "04 should post update action which is without auth" do 
-		public_notice = PublicNotice.where(public_notice_type: "type1").first
-		if public_notice then
-			assert_equal public_notice.title, "title1"
-			post 'update', :id => public_notice.id.to_s, :public_notice => {title: "updated title1"}, :format => :json
-			public_notice = PublicNotice.where(public_notice_type: "type1").first
-			assert_equal public_notice["title"], "updated title1"
-			assert_equal public_notice["content"], "content1"
-		end
-	end
-	
-	test "05 should get condition action which is without auth" do
-		get 'condition', :key => "type", :value => "type1", :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval[0]["title"], "updated title1"
 
-		get 'condition', :key => "title", :value => "title", :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval[0]["title"], "updated title1"
+	test "02 should post create action which is without login" do
+		clear(User, PublicNotice)
+	
+		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, -7
+		
+		clear(User,PublicNotice)
 	end
 	
-	test "06 should delete destroy action which is without auth" do
-		public_notice = PublicNotice.where(public_notice_type: "type1").first
-		if public_notice then
-			post 'destroy', :id => public_notice.id.to_s, :format => :json
-			public_notice = PublicNotice.where(public_notice_type: "type1").first
-			assert_equal public_notice, nil
-		end
+	test "03 should post create action with login, but not admin user" do
+		clear(User, PublicNotice)
+		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user.status = 2
+		user.role = 0
+		user.save
+	
+		sign_in(user.email, Encryption.decrypt_password(user.password))
+		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, -9
+		sign_out
+		
+		clear(User,PublicNotice)
+	end
+	
+	test "04 should post create action with admin user login" do
+		clear(User, PublicNotice)
+		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user.status = 2
+		user.role = 1
+		user.save
+	
+		sign_in(user.email, Encryption.decrypt_password(user.password))
+		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval["title"], "title1"
+		sign_out
+		
+		clear(User,PublicNotice)
+	end
+
+	test "05 should post update action which is with admin " do
+		clear(User, PublicNotice)
+		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user.status = 2
+		user.role = 1
+		user.save
+		
+		user2 = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
+		user2.status = 2
+		user2.role = 1
+		user2.save
+	
+		sign_in(user.email, Encryption.decrypt_password(user.password))
+		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
+		retval = JSON.parse(@response.body)
+		sign_out
+		
+		sign_in(user2.email, Encryption.decrypt_password(user2.password))
+		post 'update', :id => retval["_id"], :public_notice => {title: "updated title1"}, :format => :json
+		
+		retval = PublicNotice.find(retval["_id"])
+		assert_equal retval["title"], "updated title1"
+		assert_equal retval.user, user2
+		sign_out
+
+		clear(User,PublicNotice)
+	end
+	
+	test "06 should destroy action which is with admin " do
+		clear(User, PublicNotice)
+		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user.status = 2
+		user.role = 1
+		user.save
+	
+		sign_in(user.email, Encryption.decrypt_password(user.password))
+		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
+		retval = JSON.parse(@response.body)
+
+		post 'destroy', :id => retval["_id"], :format => :json
+		
+		retval = PublicNotice.where(_id: retval["_id"]).first
+		assert_equal retval, nil
+		sign_out
+
+		clear(User,PublicNotice)
+	end
+
+	test "07 should get find_by_type action" do
+	
+		clear(User, PublicNotice)
+		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user.status = 2
+		user.role = 1
+		user.save
+	
+		sign_in(user.email, Encryption.decrypt_password(user.password))
+		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
+		post 'create', :public_notice => {public_notice_type: 2, title: "title2", content: "content1"}, :format => :json
+		post 'create', :public_notice => {public_notice_type: 4, title: "title4", content: "content1"}, :format => :json
+		
+		get 'condition', :type => 1, :value => "user", :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 0
+		
+		get 'condition', :type => 7, :value => "content1", :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 3
+
+		get 'condition', :type => 0, :value => "title1", :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 0
+
+		get 'condition', :type => 0, :value => "content1", :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 0
+		
+		sign_out
+		clear(User, PublicNotice)
 	end
 
 end

@@ -2,83 +2,61 @@ require 'test_helper'
 
 class FeedbackTest < ActiveSupport::TestCase
 
-	test "00 init test db data" do
-		clear(User, Feedback)
-		@@normal_user = User.new(email: "test@example.com")
-		@@normal_user.role = 0
-		@@normal_user.save
-		@@admin_user = User.new(email:"test2@example.com")
-		@@admin_user.role = 1
-		@@admin_user.save
-	end
+	test "01 find_by_type" do
 	
-	test "99 clear test db data" do 
-		clear(User, Feedback)
-	end 
+		clear(Feedback)
+		
+		assert_raise(TypeError) { 
+			Feedback.create(feedback_type: "type1", title: "title0", content: "content0") 
+		}
+		
+		assert_raise(RangeError) { 
+			Feedback.create(feedback_type: 0, title: "title0", content: "content0") 
+		}
+		
+		assert_raise(RangeError) { 
+			Feedback.create(feedback_type: 3, title: "title0", content: "content0") 
+		}
+		
+		assert_raise(RangeError) { 
+			Feedback.create(feedback_type: 129, title: "title0", content: "content0") 
+		}
+		
+		Feedback.create(feedback_type: 1, title: "title1", content: "content1")
+		Feedback.create(feedback_type: 2, title: "q2", content: "content2")
+		
+		assert_equal Feedback.find_by_type(0, "title").count, 0
+		assert_equal Feedback.find_by_type(0, "content").count, 0
+		assert_equal Feedback.find_by_type(1, "content").count, 1
+		assert_equal Feedback.find_by_type(3, "content").count, 2
+		
+		clear(Feedback)
+		
+	end
 
-	test "01 a normal user create new feedback from method: create" do
-		if @@normal_user then
-			assert Feedback.create("type1", "title1", "content1", @@normal_user)
-		end
-	end
-   
-	test "02 a admin user create new feedback from method: create" do
-		if @@admin_user then
-			assert Feedback.create("type2", "title2", "content2", @@admin_user)
-		end
-	end
-
-	test "03 a normal user udpate feedback from method: update" do
-		feedback = Feedback.where(feedback_type: "type1").first
-		if @@normal_user and feedback then
-			assert Feedback.update(feedback.id, {title: "updated title1"}, @@normal_user)
-			assert Feedback.where(feedback_type: "type1").first.title.to_s == "updated title1"
-		end
-	end
-	
 =begin
-	test "04 a admin user reply a feedback" do 
-		clear(Message)
+	test "02 reply method" do 
+		clear(User, Feedback, Message)
 		
-		feedback = Feedback.where(feedback_type: "type2").first
-		Feedback(feedback.id, @@admin_user, "test reply")
+		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user.status = 2
+		user.role = 0
+		user.save
 		
-		message = Message.where(sender_id: @@admin_user.id.to_s, content: "test reply").first
-		assert !message.nil?
+		user2 = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
+		user2.status = 2
+		user2.role = 1
+		user2.save
 		
-		if message then
-			feedback.is_answer = true
-			feedback.save
-		end
+		f = Feedback.create(feedback_type: 1, title: "title1", content: "content1")
+		f.question_user = user 
+		f.save
 		
-		clear(Message)
+		assert_equal Feedback.reply(f.id.to_s, user, "illegel user"), false
+		assert_equal Feedback.reply(f.id.to_s, user2, "legel user"), true
+		
+		clear(User, Feedback, Message)
 	end
 =end
-
-	test "05 get feedback with condition from method: condition" do
-		feedback = Feedback.condition("type", "type2").first
-  	assert_equal feedback.title, "title2"
-    feedback = Feedback.condition("title", "title2").first
-    assert_equal feedback.title, "title2"
-    feedback = Feedback.condition("is_answer", false).first
-    assert_equal feedback.title, "updated title1"
-    feedback = Feedback.condition("is_answer", true).first
-    assert_equal feedback, nil
-	end
-	
-	test "06 get feedback from scope " do
-		feedback = Feedback.answered.first
-		assert_equal feedback, nil
-		feedback = Feedback.unanswer.first
-		assert_equal feedback.title, "updated title1"	
-	end 
-
-	test "07 a normal user and a amdin user destroy a feedback from method: destroy" do
-		feedback = Feedback.where(feedback_type: "type1").first
-		if @@admin_user and feedback then
-			assert !Feedback.destroy(feedback.id, @@admin_user)
-			assert Feedback.destroy(feedback.id, @@normal_user)
-		end
-	end
-
 end
+

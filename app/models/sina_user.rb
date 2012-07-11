@@ -4,7 +4,7 @@ class SinaUser < ThirdPartyUser
   field :name, :type => String
   field :location, :type => String
   field :description, :type => String
-  field :gender, :type => String
+  field :gender, :type => String #male will return: "m"
   field :profile_image_url, :type => String
   
   #--
@@ -73,8 +73,7 @@ class SinaUser < ThirdPartyUser
     else
       sina_user.update_by_hash(response_data)
     end
-    
-    #first time, get user base info 
+     
     sina_user.update_user_info
     
     return sina_user
