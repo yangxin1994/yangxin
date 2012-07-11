@@ -1,8 +1,8 @@
-
+# coding: utf-8
 class QqUser < ThirdPartyUser
   
   field :nickname, :type => String
-  field :gender, :type => String
+  field :gender, :type => String # male will return: "男"
   field :figureurl, :type => String
   
   #--
@@ -89,8 +89,7 @@ class QqUser < ThirdPartyUser
       qq_user.update_by_hash(response_data)
     end
     
-    #get base info in first time.
-    qq_user.update_user_info if qq_user.gender.nil?
+    qq_user.update_user_info
     
     return qq_user
   rescue

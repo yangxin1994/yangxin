@@ -803,7 +803,7 @@ class User
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
 		third_party_user = ThirdPartyUser.find_by_website_and_user_id(website, user_id)
 		return ErrorEnum::THIRD_PARTY_USER_NOT_EXIST if third_party_user.nil?
-		return third_party_user.bind(self)
+		return third_party_user.bind(user)
 	end
 
 #--

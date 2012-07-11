@@ -24,12 +24,12 @@ class Faq
 	def faq_type=(type_number)
 	
 		type_number_class = type_number.class
-	
+		temp = type_number
 		type_number = type_number.to_i
 		
 		# if type_number is string, to_i will return 0.
 		# "0" will raise RangeError, "type1" will raise TypeError
-		raise TypeError if type_number_class != Fixnum && type_number == 0
+		raise TypeError if type_number_class != Fixnum && type_number == 0 && temp.strip !="0"
 		
 		if (type_number % 2 != 0 && type_number !=1) || 
 			type_number <= 0 || type_number > 2**MAX_TYPE
@@ -49,16 +49,8 @@ class Faq
 		#*retval*:
 		#faq array 
 		def find_by_type(type_number=0, value)
-			return [] if !type_number.instance_of?(Fixnum)
+			return [] if !type_number.instance_of?(Fixnum) || type_number <= 0
 			faqs = []
-			
-			# if type_number = 0
-			if type_number == 0 then
-				faqs = Faq.where(question: /.*#{value}.*/) + Faq.where(answer: /.*#{value}.*/)
-				faqs.uniq!{|f| f._id.to_s }
-				faqs.sort!{|v1, v2| v2.updated_at <=> v1.updated_at}
-				return faqs
-			end
 			
 			# if type_number != 0
 			MAX_TYPE.downto(0).each { |element| 
