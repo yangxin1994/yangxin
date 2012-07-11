@@ -56,6 +56,7 @@ class User
   has_many :question_feedbacks, class_name: "Feedback", inverse_of: :question_user
   has_many :answer_feedbacks, class_name: "Feedback", inverse_of: :answer_user
   has_many :faqs
+  has_many :advertisements
 
 	private
 	def set_updated_at

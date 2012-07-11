@@ -1,5 +1,7 @@
 OopsData::Application.routes.draw do
 
+  resources :advertisements
+
 	resources :faqs, :public_notices, :feedbacks
 	get 'faqs/condition'
 	get 'public_notices/condition'
