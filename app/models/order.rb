@@ -49,7 +49,7 @@ class Order
 	#delegate :cash_order, :realgoods_order, :to => "self.need_verify", :prefix => true
 
 	after_create :decrease_point, :decrease_present
-
+	# TO DO I18n
 	def operate(status)
 		self.status = status
 	  flash[:notice] = "fails" unless self.save
