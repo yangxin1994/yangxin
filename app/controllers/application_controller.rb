@@ -22,6 +22,15 @@ class ApplicationController < ActionController::Base
     render_optional_error_file(403)
   end
 
+  def render_optional_error_file(status_code)
+    status = status_code.to_s
+    if ["404","403", "422", "500"].include?(status)
+      render :template => "/errors/#{status}", :format => [:html], :handler => [:haml], :status => status, :layout => "application"
+    else
+      render :template => "/errors/unknown", :format => [:html], :handler => [:haml], :status => status, :layout => "application"
+    end
+  end
+
 	#get the information of the signed user and set @current_user
 	def current_user
 		current_user_id = get_cookie(:current_user_id)
