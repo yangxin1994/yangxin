@@ -9,6 +9,10 @@ class PresentTest < ActiveSupport::TestCase
 		assert present.name == "Kindle 4", "has sth wrong"
 	end
 
+	# test "" do
+	# 
+	# end
+
 
 	test "Present models clear" do
 		clear(Present)

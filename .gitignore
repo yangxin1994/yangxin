@@ -7,3 +7,4 @@ public/assets/*
 db/*.lock
 db/journal
 .DS_Store
+public/uploads

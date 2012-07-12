@@ -14,6 +14,14 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
+  def render_404
+    render_optional_error_file(404)
+  end
+
+  def render_403
+    render_optional_error_file(403)
+  end
+
 	#get the information of the signed user and set @current_user
 	def current_user
 		current_user_id = get_cookie(:current_user_id)
@@ -30,7 +38,8 @@ class ApplicationController < ActionController::Base
 		when 3
 			redirect_to fill_basic_info_path and return 
 		when 4
-			redirect_to import_friends_path and return 
+			# Bug?
+			#redirect_to import_friends_path and return 
 		when 5
 			redirect_to first_survey_path and return 
 		end

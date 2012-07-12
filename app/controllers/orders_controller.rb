@@ -20,10 +20,9 @@ class OrdersController < ApplicationController
 	end
 
   def show
-    @order = Order.find(params[:id])
-
-    respond _to do |format|
-      format.html # show.html.erb
+    render_404 unless @order = Order.find(params[:id])
+    respond_to do |format|
+      format.html 
       format.json { render json: @order }
     end
   end
@@ -32,7 +31,7 @@ class OrdersController < ApplicationController
     @order = Order.new
 
     respond_to do |format|
-      format.html # new.html.erb
+      format.html 
       format.json { render json: @order }
     end
   end

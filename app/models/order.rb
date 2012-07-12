@@ -52,7 +52,7 @@ class Order
 	# TO DO I18n
 	def operate(status)
 		self.status = status
-	  flash[:notice] = "fails" unless self.save
+		flash[:notice] = "fails" unless self.save
 	end
 
 	private
@@ -76,10 +76,10 @@ end
 
 class CashReceiveInfo
 	include Mongoid::Document
- 	field :identification_card_number, :type => String
- 	field :bank_name, :type => String
- 	field :debit_card_number, :type => String
- 	field :alipay, :type => String
+	field :identification_card_number, :type => String
+	field :bank_name, :type => String
+	field :debit_card_number, :type => String
+	field :alipay, :type => String
 
 	embedded_in :order
 end
