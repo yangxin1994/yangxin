@@ -4,8 +4,11 @@ OopsData::Application.routes.draw do
 
 	resources :faqs, :public_notices, :feedbacks
 	get 'faqs/condition'
+	get 'faqs/types'
 	get 'public_notices/condition'
+	get 'public_notices/types'
 	get 'feedbacks/condition'
+	get 'feedbacks/types'
 	match 'feedback/:id/reply' => "feedback#reply"
 
 	get "home/index"
