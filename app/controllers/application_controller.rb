@@ -14,6 +14,25 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
+	def render_404
+		render_optional_error_file(404)
+	end
+
+	def render_403
+		render_optional_error_file(403)
+	end
+
+	def render_optional_error_file(status_code)
+		status = status_code.to_s
+		
+		if ["404","403", "422", "500"].include?(status)
+			render :template => "/errors/#{status}", :format => [:html],  :status => status, :layout => "application"
+		else
+			render :template => "/errors/unknown", :format => [:json], :status => status, :layout => "application"
+		end
+
+	end
+
 	#get the information of the signed user and set @current_user
 	def current_user
 		current_user_id = get_cookie(:current_user_id)
@@ -30,7 +49,8 @@ class ApplicationController < ActionController::Base
 		when 3
 			redirect_to fill_basic_info_path and return 
 		when 4
-			redirect_to import_friends_path and return 
+			# Bug?
+			#redirect_to import_friends_path and return 
 		when 5
 			redirect_to first_survey_path and return 
 		end

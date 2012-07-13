@@ -4,22 +4,17 @@ require 'securerandom'
 class Material
 	include Mongoid::Document
 	# 1 for image, 2 for video, 4 for audio
-	field :owner_email, :type => String
+	#field :owner_email, :type => String
 	field :material_type, :type => Integer
-	field :location, :type => String
+	#field :location, :type => String
 	field :title, :type => String
-	field :created_at, :type => Integer, default: -> {Time.now.to_i}
+	#field :created_at, :type => Integer, default: -> {Time.now.to_i}
 
-#	mount_uploader :material, MaterialUploader
-	belongs_to :mterialable, :polymorphic => true
-	belongs_to :user
-	#validates :imageable, :presence => true
-  #validates :image, :presence => true
+	mount_uploader :material, MaterialUploader
+	belongs_to :materials, :polymorphic => true
+	#belongs_to :userma
 
-
-	before_save :set_attachment_attributes
-
-
+	#before_save :set_attachment_attributes
 
 
 	def self.check_and_create_new(material)
@@ -45,10 +40,10 @@ class Material
 	protected
 
 	def set_attachment_attributes
-		if attachment.present? && attachment_changed?
-			self.content_type = attachment.file.content_type
-			self.file_size = attachment.file.size
-			self.file_name = attachment.file.original_filename
+		if material.present? && material_changed?
+			self.content_type = material.file.content_type
+			self.file_size = material.file.size
+			self.file_name = material.file.original_filename
 		end
 	end
 end

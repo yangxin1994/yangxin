@@ -43,7 +43,7 @@ class Feedback
 		
 		# if type_number is string, to_i will return 0.
 		# "0" will raise RangeError, "type1" will raise TypeError
-		raise TypeError if type_number_class != Fixnum && type_number == 0 && temp.strip !="0"
+		raise TypeError if type_number_class != Fixnum && type_number == 0 && temp.to_s.strip !="0"
 		
 		if (type_number % 2 != 0 && type_number !=1) || 
 			type_number <= 0 || type_number > 2**MAX_TYPE
@@ -71,11 +71,11 @@ class Feedback
 		#* false or true
 		def reply(feedback_id, answer_user, message_content)
 
-		# answer_user must be admin
-		return false if answer_user.nil? || ( answer_user && !answer_user.is_admin)
+			# answer_user must be admin
+			return false if answer_user.nil? || ( answer_user && !answer_user.is_admin)
 
-		#find feedback
-		feedback = Feedback.find(feedback_id)
+			#find feedback
+			feedback = Feedback.find(feedback_id)
 			return false if feedback.nil?
 
 			# if feedback 's question_user is nil, do not need reply.
@@ -100,11 +100,17 @@ class Feedback
 		
 		end
 		
-		#*description*: list feedback s with condition
+		#*description*: list feedbacks with condition
 		#
 		#*retval*:
 		#feedback array 
-		def find_by_type(type_number=0, value)
+		def condition(type_number=0, value)
+			#verify params
+			raise TypeError if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
+			raise RangeError if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))		
+			type_number = type_number.to_i
+			raise ArgumentError if value && value.to_s.strip == ""
+
 			return [] if !type_number.instance_of?(Fixnum) || type_number <= 0
 			feedbacks = []
 			
@@ -120,8 +126,34 @@ class Feedback
 			}
 		
 			feedbacks.sort!{|v1, v2| v2.updated_at <=> v1.updated_at} if feedbacks.count > 1
-		
+			
 			return feedbacks	
+		end
+
+		#*description*: list feedbacks with types
+		#
+		#*retval*:
+		#feedback array
+		def find_by_type(type_number=0)
+			#verify params
+			raise TypeError if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
+			raise RangeError if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))
+
+			type_number = type_number.to_i
+			
+			return [] if !type_number.instance_of?(Fixnum) || type_number <= 0
+			feedbacks = []
+
+			MAX_TYPE.downto(0).each { |element| 
+				feedbacks_tmp=[]
+				if type_number / (2**element) == 1 then
+					feedbacks_tmp = Feedback.where(feedback_type: 2**element)
+				end
+				type_number = type_number % 2**element
+				feedbacks = feedbacks + feedbacks_tmp
+			}
+			feedbacks.sort!{|v1, v2| v2.updated_at <=> v1.updated_at} if feedbacks.count > 1
+			return feedbacks
 		end
 		
 	end 

@@ -63,7 +63,7 @@ class FeedbacksController < ApplicationController
 				format.json { render json: @feedback, status: :created, location: @feedback }
 			else
 				format.html { render action: "new" }
-				format.json { render json: @feedback.errors, status: :unprocessable_entity }
+				format.json { render :json => ErrorEnum::SAVE_FAILED}
 			end
 		end
 	rescue => ex 
@@ -93,19 +93,17 @@ class FeedbacksController < ApplicationController
 		require_sign_in if @feedback.question_user
 		
 		if @feedback.question_user && @feedback.question_user != current_user then
-			format.html { render a redirect_to @feedback, notice: "更新失败。" }
-			format.json { render json: @feedback.errors, status: :unprocessable_entity }
+			format.html { render action: "edit"}
+			format.json { render :json => ErrorEnum::SAVE_FAILED}
 		end
 
 		respond_to do |format|
 			if @feedback.update_attributes(params[:feedback])
-				if @feedback.save then
-					format.html { redirect_to @feedback, notice: "更新成功。" }
-					format.json { head :ok }
-				end
+				format.html { redirect_to @feedback, notice: "更新成功。" }
+				format.json { render :json => true }
 			else
 				format.html { render action: "edit" }
-				format.json { render json: @feedback.errors, status: :unprocessable_entity }
+				format.json { render :json => ErrorEnum::SAVE_FAILED }
 			end
 		end
 	rescue => ex 
@@ -135,7 +133,7 @@ class FeedbacksController < ApplicationController
 
 		respond_to do |format|
 			format.html { redirect_to feedbacks_url }
-			format.json { head :ok }
+			format.json { render :json => true }
 		end
 	end
 	
@@ -152,18 +150,18 @@ class FeedbacksController < ApplicationController
 			if stat then
 				respond_to do |format|
 					format.html { redirect_to @feedback, notice: "回复成功。" }
-					format.json { head :ok }
+					format.json { render :json => true}
 				end
 			else
 				respond_to do |format|
 					format.html { redirect_to @feedback, notice: "回复失败。" }
-					format.json { head :status => 404 }
+					format.json { head :json => ErrorEnum::SAVE_FAILED }
 				end
 			end
 		else
 			respond_to do |format|
 				format.html { redirect_to @feedback, notice: "回复失败。" }
-				format.json { head :status => 404 }
+				format.json { head :json => ErrorEnum::SAVE_FAILED }
 			end
 		end
 	end
@@ -171,13 +169,10 @@ class FeedbacksController < ApplicationController
 	# GET /feedbacks/condition
 	# GET /feedbacks/condition.json
 	def condition
-		raise TypeError if params[:type] && params[:type].to_i ==0 && params[:type].strip != "0"
-		raise RangeError if params[:type] && (params[:type].to_i < 0 || params[:type].to_i > 2**Feedback::MAX_TYPE)	
-		type = params[:type].to_i		
+		type = params[:type] || 0
 		value = params[:value] || ""
-		raise ArgumentError if value.strip == ""
 		
-		@feedbacks = Feedback.find_by_type(type, value)
+		@feedbacks = Feedback.condition(type, value)
 		
 		respond_to do |format|
 			format.html
@@ -203,6 +198,41 @@ class FeedbacksController < ApplicationController
 			respond_to do |format|
 				format.html
 				format.json { render :json => {:error => ErrorEnum::UNKNOWN_ERROR}}
+			end
+		end
+	end
+
+	# GET /feedbacks/types
+	# GET /feedbacks/types.json
+	def types
+		type = params[:type] || 0
+
+		@feedbacks = Feedback.find_by_type(type)
+		
+		respond_to do |format|
+			format.html
+			format.json { render json: @feedbacks }
+		end
+	rescue => ex 
+		if ex.class == TypeError then
+			respond_to do |format|
+				format.html
+				format.json { render :json => ErrorEnum::TYPE_ERROR}
+			end
+		elsif ex.class == RangeError then
+			respond_to do |format|
+				format.html
+				format.json { render :json => ErrorEnum::RANGE_ERROR}
+			end
+		elsif ex.class == ArgumentError then
+			respond_to do |format|
+				format.html
+				format.json { render :json => ErrorEnum::ARG_ERROR}
+			end
+		else
+			respond_to do |format|
+				format.html
+				format.json { render :json => ErrorEnum::UNKNOWN_ERROR}
 			end
 		end
 	end

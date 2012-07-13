@@ -44,12 +44,12 @@ class FaqsControllerTest < ActionController::TestCase
 	
 		sign_in(user.email, Encryption.decrypt_password(user.password))
 		post 'create', :faq => {faq_type: "Type1", question: "question1", answer: "answer1"}, :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval["error"], ErrorEnum::TYPE_ERROR
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::TYPE_ERROR
 		
-		post 'create', :faq => {faq_type: 129, question: "question1", answer: "answer1"}, :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval["error"], ErrorEnum::RANGE_ERROR
+		post 'create', :faq => {faq_type: 256, question: "question1", answer: "answer1"}, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::RANGE_ERROR
 		
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
 		retval = JSON.parse(@response.body)
@@ -139,12 +139,12 @@ class FaqsControllerTest < ActionController::TestCase
 		post 'create', :faq => {faq_type: 4, question: "question4", answer: "answer1"}, :format => :json
 		
 		get 'condition', :type => 0, :value => "", :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval["error"], ErrorEnum::ARG_ERROR
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::ARG_ERROR
 		
 		get 'condition', :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval["error"], ErrorEnum::ARG_ERROR
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::ARG_ERROR
 		
 		get 'condition', :type => 1, :value => "user", :format => :json
 		retval = JSON.parse(@response.body)
@@ -163,6 +163,46 @@ class FaqsControllerTest < ActionController::TestCase
 		assert_equal retval.count, 0
 		
 		sign_out
+		clear(User, Faq)
+	end
+
+	test "08 should get types action" do 
+		clear(User, Faq)
+
+		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user.status = 2
+		user.role = 1
+		user.save
+
+		sign_in(user.email, Encryption.decrypt_password(user.password))
+		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
+		post 'create', :faq => {faq_type: 2, question: "question2", answer: "answer1"}, :format => :json
+		post 'create', :faq => {faq_type: 4, question: "question4", answer: "answer1"}, :format => :json
+
+		get 'types', :type => "Type1", :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::TYPE_ERROR
+
+		get 'types', :type => 256, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::RANGE_ERROR
+		
+		get 'types', :type => 1, :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 1
+		
+		get 'types', :type => 7, :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 3
+
+		get 'types', :type => 0, :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 0
+
+		get 'types', :type => 255, :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 3
+
 		clear(User, Faq)
 	end
 	
