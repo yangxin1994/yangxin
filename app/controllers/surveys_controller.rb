@@ -57,7 +57,7 @@ class SurveysController < ApplicationController
 			end
 		else
 			respond_to do |format|
-				format.json	{ render :json => "unknown error" and return }
+				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
 			end
 		end
 	end
@@ -84,11 +84,10 @@ class SurveysController < ApplicationController
 			end
 		end
 
-		survey.delete
+		retval = survey.delete
 		### close the publish of the survey
-		flash[:notice] = "调查问卷已成功删除"
 		respond_to do |format|
-			format.json	{ render :json => true and return }
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -318,23 +317,14 @@ class SurveysController < ApplicationController
 	def submit
 		survey = @current_user.normal.find_by_id(params[:id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
+
 		retval = survey.submit(params[:message])
-		case retval
-		when ErrorEnum::WRONG_PUBLISH_STATUS
-			flash[:notice] = "不能提交问卷"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_PUBLISH_STATUS and return }
-			end
-		when true
-			flash[:notice] = "已成功提交问卷"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -356,23 +346,14 @@ class SurveysController < ApplicationController
 	def reject
 		survey = @current_user.normal.find_by_id(params[:id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
+
 		retval = survey.reject(params[:message])
-		case retval
-		when ErrorEnum::WRONG_PUBLISH_STATUS
-			flash[:notice] = "不能拒绝问卷"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_PUBLISH_STATUS and return }
-			end
-		when true
-			flash[:notice] = "已成功拒绝问卷"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 

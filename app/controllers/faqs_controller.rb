@@ -162,5 +162,4 @@ class FaqsController < ApplicationController
 			end
 		end
 	end
-	
 end

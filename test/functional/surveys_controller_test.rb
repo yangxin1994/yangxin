@@ -202,17 +202,4 @@ class SurveysControllerTest < ActionController::TestCase
 		#########################
 		#########################
 	end
-
-
-
-
-	def create_survey(email, password)
-		sign_in(email, password)
-		get :new, :format => :json
-		survey_obj = JSON.parse(@response.body)
-		post :save_meta_data, :format => :json, :id => survey_obj["_id"], :survey => survey_obj
-		survey_obj = JSON.parse(@response.body)
-		sign_out
-		return survey_obj["_id"]
-	end
 end

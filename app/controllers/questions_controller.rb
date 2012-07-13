@@ -23,38 +23,16 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question, after which the new one is created, does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def create
-		retval = @current_user.create_question(params[:survey_id], params[:page_index].to_i, params[:question_id], params[:question_type])
-		case retval
-		when ErrorEnum::SURVEY_NOT_EXIST
-			flash[:notice] = "该调查问卷不存在"
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
-		when ErrorEnum::QUESTION_NOT_EXIST
-			flash[:notice] = "前一个问题不存在"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::QUESTION_NOT_EXIST and return }
-			end
-		when ErrorEnum::OVERFLOW
-			flash[:notice] = "页码溢出"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::OVERFLOW and return }
-			end
-		when ErrorEnum::WRONG_QUESTION_TYPE
-			flash[:notice] = "问题类型错误"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_QUESTION_TYPE and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "成功创建新问题"
-			respond_to do |format|
-				format.json	{ render :json => retval and return }
-			end
+		end
+
+		question = survey.create_question(params[:page_index].to_i, params[:question_id], params[:question_type].to_i)
+		respond_to do |format|
+			format.json	{ render :json => question and return }
 		end
 	end
 
@@ -77,38 +55,16 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	#* ErrorEnum ::WRONG_DATA_TYPE: when the data type specified in a blank question is wrong
 	def update
-		retval = @current_user.update_question(params[:survey_id], params[:id], params[:question])
-		case retval
-		when ErrorEnum::SURVEY_NOT_EXIST
-			flash[:notice] = "调查问卷不存在"
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
-		when ErrorEnum::QUESTION_NOT_EXIST
-			flash[:notice] = "问题不存在"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::QUESTION_NOT_EXIST and return }
-			end
-		when ErrorEnum::OVERFLOW
-			flash[:notice] = "页码溢出"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::OVERFLOW and return }
-			end
-		when ErrorEnum::WRONG_DATA_TYPE
-			flash[:notice] = "数据类型错误"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_DATA_TYPE and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "成功更新问题"
-			respond_to do |format|
-				format.json	{ render :json => retval and return }
-			end
+		end
+
+		question = survey.update_question(params[:id], params[:question])
+		respond_to do |format|
+			format.json	{ render :json => question and return }
 		end
 	end
 
@@ -131,33 +87,16 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def move
-		retval = @current_user.move_question(params[:survey_id], params[:question_id_1], params[:page_index].to_i, params[:question_id_2])
-		case retval
-		when ErrorEnum::SURVEY_NOT_EXIST
-			flash[:notice] = "调查问卷不存在"
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
-		when ErrorEnum::QUESTION_NOT_EXIST
-			flash[:notice] = "问题不存在"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::QUESTION_NOT_EXIST and return }
-			end
-		when ErrorEnum::OVERFLOW
-			flash[:notice] = "页码溢出"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::OVERFLOW and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "成功更新问题"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+		end
+
+		retval = survey.move_question(params[:question_id_1], params[:page_index].to_i, params[:question_id_2])
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -181,33 +120,16 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::OVERFLOW: when the page index is greater than the page number
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def clone
-		retval = @current_user.clone_question(params[:survey_id], params[:question_id_1], params[:page_index].to_i, params[:question_id_2])
-		case retval
-		when ErrorEnum::SURVEY_NOT_EXIST
-			flash[:notice] = "调查问卷不存在"
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
-		when ErrorEnum::QUESTION_NOT_EXIST
-			flash[:notice] = "问题不存在"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::QUESTION_NOT_EXIST and return }
-			end
-		when ErrorEnum::OVERFLOW
-			flash[:notice] = "页码溢出"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::OVERFLOW and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "成功复制问题"
-			respond_to do |format|
-				format.json	{ render :json => retval and return }
-			end
+		end
+
+		question = survey.clone_question(params[:question_id_1], params[:page_index].to_i, params[:question_id_2])
+		respond_to do |format|
+			format.json	{ render :json => question and return }
 		end
 	end
 
@@ -227,28 +149,16 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def show
-		retval = @current_user.get_question_object(params[:survey_id], params[:id])
-		case retval
-		when ErrorEnum::SURVEY_NOT_EXIST
-			flash[:notice] = "调查问卷不存在"
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
-		when ErrorEnum::QUESTION_NOT_EXIST
-			flash[:notice] = "问题不存在"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::QUESTION_NOT_EXIST and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "成功获取问题"
-			respond_to do |format|
-				format.json	{ render :json => retval and return }
-			end
+		end
+
+		question = survey.get_question_inst(params[:id])
+		respond_to do |format|
+			format.json	{ render :json => question and return }
 		end
 	end
 
@@ -268,28 +178,16 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def destroy
-		retval = @current_user.delete_question(params[:survey_id], params[:id])
-		case retval
-		when ErrorEnum::SURVEY_NOT_EXIST
-			flash[:notice] = "调查问卷不存在"
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
-		when ErrorEnum::QUESTION_NOT_EXIST
-			flash[:notice] = "问题不存在"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::QUESTION_NOT_EXIST and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "成功删除问题"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+		end
+
+		retval = survey.delete_question(params[:id])
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 

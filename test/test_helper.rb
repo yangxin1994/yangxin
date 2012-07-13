@@ -84,11 +84,11 @@ class ActiveSupport::TestCase
 		@controller = SurveysController.new
 		get :new, :format => :json
 		survey_obj = JSON.parse(@response.body)
-		post :save_meta_data, :format => :json, :survey => survey_obj
+		post :save_meta_data, :format => :json, :id => survey_obj["_id"], :survey => survey_obj
 		@controller = old_controller
 		survey_obj = JSON.parse(@response.body)
 		sign_out
-		return survey_obj["survey_id"]
+		return survey_obj["_id"]
 	end
 
 	def get_survey_obj(email, password, survey_id)
@@ -102,11 +102,11 @@ class ActiveSupport::TestCase
 		return survey_obj
 	end
 
-	def insert_page(email, password, survey_id, page_index)
+	def insert_page(email, password, survey_id, page_index, page_name)
 		sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller
 		@controller = PagesController.new
-		post :create, :format => :json, :survey_id => survey_id, :page_index => page_index
+		post :create, :format => :json, :survey_id => survey_id, :page_index => page_index, :page_name => page_name
 		@controller = old_controller
 		sign_out
 	end
@@ -119,27 +119,27 @@ class ActiveSupport::TestCase
 		question_obj = JSON.parse(@response.body)
 		@controller = old_controller
 		sign_out
-		return question_obj["question_id"]
+		return question_obj["_id"]
 	end
 
 	def create_survey_page_question(email, password)
 		survey_id = create_survey(email, Encryption.decrypt_password(password))
 	
-		insert_page(email, password, survey_id, -1)
-		insert_page(email, password, survey_id, 0)
-		insert_page(email, password, survey_id, 0)
-		insert_page(email, password, survey_id, 0)
+		insert_page(email, password, survey_id, -1, "first page")
+		insert_page(email, password, survey_id, 0, "second page")
+		insert_page(email, password, survey_id, 0, "third page")
+		insert_page(email, password, survey_id, 0, "fouth page")
 
-		q1 = create_question(email, password, survey_id, 0, -1, "ChoiceQuestion")
-		q2 = create_question(email, password, survey_id, 0, -1, "BlankQuestion")
-		q3 = create_question(email, password, survey_id, 0, -1, "SortQuestion")
-		q4 = create_question(email, password, survey_id, 1, -1, "RankQuestion")
-		q5 = create_question(email, password, survey_id, 2, -1, "MatrixChoiceQuestion")
-		q6 = create_question(email, password, survey_id, 2, -1, "Paragraph")
-		q7 = create_question(email, password, survey_id, 2, -1, "MatrixBlankQuestion")
-		q8 = create_question(email, password, survey_id, 2, -1, "BlankQuestion")
-		q9 = create_question(email, password, survey_id, 3, -1, "ConstSumQuestion")
-		q10 = create_question(email, password, survey_id, 3, -1, "FileQuestion")
+		q1 = create_question(email, password, survey_id, 0, -1, 0)
+		q2 = create_question(email, password, survey_id, 0, -1, 8)
+		q3 = create_question(email, password, survey_id, 0, -1, 11)
+		q4 = create_question(email, password, survey_id, 1, -1, 12)
+		q5 = create_question(email, password, survey_id, 2, -1, 1)
+		q6 = create_question(email, password, survey_id, 2, -1, 13)
+		q7 = create_question(email, password, survey_id, 2, -1, 9)
+		q8 = create_question(email, password, survey_id, 2, -1, 8)
+		q9 = create_question(email, password, survey_id, 3, -1, 10)
+		q10 = create_question(email, password, survey_id, 3, -1, 14)
 
 		return [survey_id, [[q1, q2, q3], [q4], [q5, q6, q7, q8], [q9, q10]]]
 	end
@@ -169,17 +169,17 @@ class ActiveSupport::TestCase
 		old_controller = @controller
 		@controller = MaterialsController.new
 		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_1", "title" => "title_1"}
-		material_id_1 = JSON.parse(@response.body)["material_id"]
+		material_id_1 = JSON.parse(@response.body)["_id"]
 		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_2", "title" => "title_2"}
-		material_id_2 = JSON.parse(@response.body)["material_id"]
+		material_id_2 = JSON.parse(@response.body)["_id"]
 		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_3", "title" => "title_3"}
-		material_id_3 = JSON.parse(@response.body)["material_id"]
+		material_id_3 = JSON.parse(@response.body)["_id"]
 		post :create, :format => :json, :material => {"material_type" => 2, "location" => "location_4", "title" => "title_4"}
-		material_id_4 = JSON.parse(@response.body)["material_id"]
+		material_id_4 = JSON.parse(@response.body)["_id"]
 		post :create, :format => :json, :material => {"material_type" => 2, "location" => "location_5", "title" => "title_5"}
-		material_id_5 = JSON.parse(@response.body)["material_id"]
+		material_id_5 = JSON.parse(@response.body)["_id"]
 		post :create, :format => :json, :material => {"material_type" => 4, "location" => "location_6", "title" => "title_6"}
-		material_id_6 = JSON.parse(@response.body)["material_id"]
+		material_id_6 = JSON.parse(@response.body)["_id"]
 		@controller = old_controller
 		sign_out
 		return [material_id_1, material_id_2, material_id_3, material_id_4, material_id_5, material_id_6]

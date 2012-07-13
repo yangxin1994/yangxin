@@ -130,7 +130,7 @@ class MaterialsController < ApplicationController
 			end
 		else
 			respond_to do |format|
-				format.json	{ render :json => "unknown error" and return }
+				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
 			end
 		end
 	end

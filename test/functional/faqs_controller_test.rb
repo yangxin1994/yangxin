@@ -106,6 +106,24 @@ class FaqsControllerTest < ActionController::TestCase
 
 		clear(User,Faq)
 	end
+	
+	test "my test" do
+		clear(User, Faq)
+		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user.status = 2
+		user.role = 1
+		user.save
+
+		sign_in(user.email, Encryption.decrypt_password(user.password))
+		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
+		post 'create', :faq => {faq_type: 2, question: "question2", answer: "answer1"}, :format => :json
+		post 'create', :faq => {faq_type: 4, question: "question4", answer: "answer1"}, :format => :json
+		
+		get 'condition', :type => 0, :value => "", :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval["error"], ErrorEnum::ARG_ERROR
+		sign_out
+	end
 
 	test "07 should get find_by_type action" do
 	

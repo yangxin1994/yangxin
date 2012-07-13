@@ -19,28 +19,17 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def show
-		retval = @current_user.show_page(params[:survey_id], params[:id].to_i)
-		case retval
-		when ErrorEnum::SURVEY_NOT_EXIST
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
 			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
-		when ErrorEnum::OVERFLOW 
-			flash[:notice] = "页码溢出"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::OVERFLOW and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "成功获取页面"
-			respond_to do |format|
-				format.json	{ render :json => retval and return }
-			end
+		end
+
+		retval = survey.show_page(params[:id].to_i)
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -61,28 +50,17 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def create
-		retval = @current_user.create_page(params[:survey_id], params[:page_index].to_i)
-		case retval
-		when ErrorEnum::SURVEY_NOT_EXIST
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
 			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
-		when ErrorEnum::OVERFLOW
-			flash[:notice] = "页码溢出"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::OVERFLOW and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "成功创建新页面"
-			respond_to do |format|
-				format.json	{ render :json => retval and return }
-			end
+		end
+
+		retval = survey.create_page(params[:page_index].to_i, params[:page_name])
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -103,28 +81,17 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def clone
-		retval = @current_user.clone_page(params[:survey_id], params[:page_index_1].to_i, params[:page_index_2].to_i)
-		case retval
-		when ErrorEnum::SURVEY_NOT_EXIST
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
 			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
-		when ErrorEnum::OVERFLOW
-			flash[:notice] = "页码溢出"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::OVERFLOW and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "成功复制页面"
-			respond_to do |format|
-				format.json	{ render :json => retval and return }
-			end
+		end
+
+		page = survey.clone_page(params[:page_index_1].to_i, params[:page_index_2].to_i)
+		respond_to do |format|
+			format.json	{ render :json => page and return }
 		end
 	end
 
@@ -145,28 +112,17 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def move
-		retval = @current_user.move_page(params[:survey_id], params[:page_index_1].to_i, params[:page_index_2].to_i)
-		case retval
-		when ErrorEnum::SURVEY_NOT_EXIST
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
 			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
-		when ErrorEnum::OVERFLOW
-			flash[:notice] = "页码溢出"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::OVERFLOW and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "成功移动页面"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+		end
+
+		retval = survey.move_page(params[:page_index_1].to_i, params[:page_index_2].to_i)
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -186,28 +142,17 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def destroy
-		retval = @current_user.delete_page(params[:survey_id], params[:id].to_i)
-		case retval
-		when ErrorEnum::SURVEY_NOT_EXIST
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
 			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
-		when ErrorEnum::OVERFLOW
-			flash[:notice] = "页码溢出"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::OVERFLOW and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "成功删除页面"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+		end
+
+		retval = survey.delete_page(params[:id].to_i)
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -229,28 +174,17 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def combine
-		retval = @current_user.combine_pages(params[:survey_id], params[:page_index_1].to_i, params[:page_index_2].to_i)
-		case retval
-		when ErrorEnum::SURVEY_NOT_EXIST
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
 			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
-		when ErrorEnum::OVERFLOW
-			flash[:notice] = "页码溢出"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::OVERFLOW and return }
-			end
-		when ErrorEnum::UNAUTHORIZED
-			flash[:notice] = "没有权限"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNAUTHORIZED and return }
-			end
-		else
-			flash[:notice] = "成功合并页面"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+		end
+
+		retval = survey.combine_pages(params[:page_index_1].to_i, params[:page_index_2].to_i)
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 
