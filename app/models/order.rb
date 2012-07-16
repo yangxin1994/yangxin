@@ -9,7 +9,7 @@ class Order
 	field :recipient, :type => String
 	field :phone_number, :type => String
 
-	validates :present_type, :presence => true,
+	validates :order_type, :presence => true,
 													 :inclusion => { :in => 0..3 },
 													 :numericality => true
 	validates :status, :presence => true,

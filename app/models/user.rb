@@ -35,6 +35,9 @@ class User
   field :postcode, :type => String
   field :phone, :type => String
 
+  field :message_ids, :type => Array, default:[]
+  has_many :messages
+
   #################################
   # QuillMe
   field :point, :type => Integer
