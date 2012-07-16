@@ -3,6 +3,7 @@ class OrdersController < ApplicationController
 	def index
 		@orders = current_user.orders.page(params[:page].to_i)
 		respond_to do |format|
+      format.html
 			format.json { render json: @orders }
 		end
 	end
@@ -11,10 +12,10 @@ class OrdersController < ApplicationController
     respond_to do |format|
       if @order = Present.create(params[:order])
         format.html { redirect_to :action => 'show',:id => @order.id }
-        #format.json { render json: @order, status: :created, location: @order }
+        format.json { render json: @order, status: :created, location: @order }
       else
         format.html { render action: "new" }
-        #format.json { render json: @order.errors, status: :unprocessable_entity }
+        format.json { render json: @order.errors }
       end
     end
 	end
@@ -38,7 +39,11 @@ class OrdersController < ApplicationController
 
   def edit
     @order = Order.find(params[:id])
+    respond_to do |format|
+      format.html 
+      format.json { render json: @order }
   end
+
   def update
     @order = Faq.find(params[:id])
 
@@ -61,7 +66,7 @@ class OrdersController < ApplicationController
       format.json { head :ok }
     end
   end
-	def_each :cash, :realgoods_present, :virtualgoods_present, :lottery_present, :award_present do |method_name|
+	def_each :for_cash, :for_realgoods, :for_virtualgoods, :for_lottery, :for_award do |method_name|
 		flash[:notice] = "No Order" unless @orders = Order.send(method_name).page(params[:page].to_i)
 		respond_to do |format|
 			format.html 

@@ -2,24 +2,24 @@ class Order
 	include Mongoid::Document
 	include Mongoid::Timestamps
 	# can be 0 (Cash), 1 (RealGoods), 2 (VirtualGoods), 3 (Lottery)
-	field :order_type, :type => Integer
+	field :type, :type => Integer
 	# can be 0 (NeedVerify), 1 (Verified), -1 (VerifyFailed), 2 (Delivering), 3 (Delivered), -3 (DeliverFailed)
 	field :status, :type => String
 	# field :status_desc, :type => String
 	field :recipient, :type => String
 	field :phone_number, :type => String
 
-	validates :order_type, :presence => true,
-													 :inclusion => { :in => 0..3 },
-													 :numericality => true
+	validates :type, :presence => true,
+									:inclusion => { :in => 0..3 },
+									:numericality => true
 	validates :status, :presence => true,
-													 :inclusion => { :in => -3..3 },
-													 :numericality => true
+										:inclusion => { :in => -3..3 },
+										:numericality => true
 
-	scope :cash_order, where( :order_type => 0)
-	scope :realgoods_order, where( :order_type => 1)
-	scope :virtualgoods_order, where( :order_type => 2)
-	scope :lottery_order, where( :order_type => 3)
+	scope :for_cash, where( :type => 0)
+	scope :for_realgoods, where( :type => 1)
+	scope :for_virtualgoods, where( :type => 2)
+	scope :for_lottery, where( :type => 3)
 
 	scope :need_verify, where( :status => 0)
 	scope :verified, where( :status => 1)
@@ -52,7 +52,7 @@ class Order
 	# TO DO I18n
 	def operate(status)
 		self.status = status
-		flash[:notice] = "fails" unless self.save
+		self.save
 	end
 
 	private
@@ -69,6 +69,7 @@ class Order
 	def decrease_present
 		return if self.present.blank?
 		self.present.inc(:quantity, -1)	
+		self.save
 	end
 
 

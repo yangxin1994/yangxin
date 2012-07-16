@@ -23,6 +23,7 @@ class PresentsController < ApplicationController
 			format.json { render json: @presents, :only => [:id, :name, :point, :quantity, :created_at, :status] }
 		end
 	end
+
 	def expired
 		@presents = Present.expired.page(params[:page].to_i)
 		respond_to do |format|
@@ -41,7 +42,7 @@ class PresentsController < ApplicationController
 		@present = Present.new
 
 		respond_to do |format|
-			format.html # new.html.erb
+			format.html 
 			format.json { render json: @present }
 		end		
 	end
@@ -50,10 +51,10 @@ class PresentsController < ApplicationController
 			if @present = Present.create(params[:present])
 				Material.create(:material => params[:material], :materials => @present)
 				format.html { redirect_to :action => 'show',:id => @present.id }
-				#format.json { render json: @present, status: :created, location: @present }
+				format.json { render json: @present, status: :created, location: @present }
 			else
 				format.html { render action: "new" }
-				#format.json { render json: @present.errors, status: :unprocessable_entity }
+				format.json { render json: @present.errors, status: :unprocessable_entity }
 			end
 		end
 	end

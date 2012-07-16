@@ -31,6 +31,18 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def notice_success(msg)
+    flash[:notice] = msg
+  end
+
+  def notice_error(msg)
+    flash[:notice] = msg
+  end
+
+  def notice_warning(msg)
+    flash[:notice] = msg
+  end
+
 	#get the information of the signed user and set @current_user
 	def current_user
 		current_user_id = get_cookie(:current_user_id)
