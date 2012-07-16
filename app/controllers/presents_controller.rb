@@ -32,28 +32,23 @@ class PresentsController < ApplicationController
 		end
 	end
 	def_each :virtual_goods, :cash, :real_goods, :stockout do |method_name|
+		@present = Present.new
 		flash[:notice] = "No Goods" unless @presents = Present.send(method_name).can_be_rewarded.page(params[:page].to_i)
 		respond_to do |format|
 			format.html 
 			format.json { render json: @presents, :only => [:id, :name, :point, :quantity, :created_at, :status]  }
 		end
 	end
-	def new
-		@present = Present.new
 
-		respond_to do |format|
-			format.html 
-			format.json { render json: @present }
-		end		
-	end
 	def create		
 		respond_to do |format|
-			if @present = Present.create(params[:present])
+			@present = Present.create(params[:present])
+			if @present.save
 				Material.create(:material => params[:material], :materials => @present)
 				format.html { redirect_to :action => 'show',:id => @present.id }
 				format.json { render json: @present, status: :created, location: @present }
 			else
-				format.html { render action: "new" }
+				format.html { render action: "cash" }
 				format.json { render json: @present.errors, status: :unprocessable_entity }
 			end
 		end

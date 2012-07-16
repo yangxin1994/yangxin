@@ -91,6 +91,7 @@ OopsData::Application.routes.draw do
 		collection do
 			get 'cash'
 			get 'virtual_goods'
+			get 'edit'
 		end
 	end
 	resources :orders do
