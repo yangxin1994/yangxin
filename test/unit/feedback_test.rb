@@ -22,20 +22,65 @@ class FeedbackTest < ActiveSupport::TestCase
 			Feedback.create(feedback_type: 129, title: "title0", content: "content0") 
 		}
 		
-		Feedback.create(feedback_type: 1, title: "title1", content: "content1")
-		Feedback.create(feedback_type: 2, title: "q2", content: "content2")
-		
-		assert_equal Feedback.find_by_type(0, "title").count, 0
-		assert_equal Feedback.find_by_type(0, "content").count, 0
-		assert_equal Feedback.find_by_type(1, "content").count, 1
-		assert_equal Feedback.find_by_type(3, "content").count, 2
+		assert Feedback.create(feedback_type: 1, title: "title1", content: "content1")
 		
 		clear(Feedback)
 		
 	end
 
+	test "02 condition " do
+		
+		clear(Feedback)
+		
+		assert Feedback.create(feedback_type: 1, title: "title1", content: "content1")
+		assert Feedback.create(feedback_type: 2, title: "q2", content: "content2")
+
+		assert_raise(TypeError){
+			Feedback.condition("type1", "")
+		}
+
+		assert_raise(RangeError){
+			Feedback.condition(-1, "")
+		}
+
+		assert_raise(ArgumentError){
+			Feedback.condition(4, "")
+		}
+		
+		assert_equal Feedback.condition(0, "title").count, 0
+		assert_equal Feedback.condition(0, "content").count, 0
+		assert_equal Feedback.condition(1, "content1").count, 1
+		assert_equal Feedback.condition(3, "content").count, 2
+		
+		clear(Feedback)
+		
+	end
+	
+	test "03 find_by_type" do 
+		clear(Feedback)
+
+		assert Feedback.create(feedback_type: 1, title: "title1", content: "content1")
+		assert Feedback.create(feedback_type: 2, title: "q2", content: "content2")
+
+		assert_raise(TypeError){
+			Feedback.find_by_type("type1")
+		}
+
+		assert_raise(RangeError){
+			Feedback.find_by_type(256)
+		}
+		
+		assert_equal Feedback.find_by_type(0).count, 0
+		assert_equal Feedback.find_by_type(1).count, 1
+		assert_equal Feedback.find_by_type(2).count, 1
+		assert_equal Feedback.find_by_type(3).count, 2
+		assert_equal Feedback.find_by_type(255).count, 2
+
+		clear(Feedback)
+	end
+
 =begin
-	test "02 reply method" do 
+	test "04 reply method" do 
 		clear(User, Feedback, Message)
 		
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))

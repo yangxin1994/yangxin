@@ -77,7 +77,7 @@ class FeedbacksControllerTest < ActionController::TestCase
 		clear(User,Feedback)
 	end
 
-	test "07 should get find_by_type action" do
+	test "07 should get condition action" do
 	
 		clear(User, Feedback)
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
@@ -109,9 +109,49 @@ class FeedbacksControllerTest < ActionController::TestCase
 		sign_out
 		clear(User, Feedback)
 	end
+
+	test "08 should get types action" do 
+		clear(User, Feedback)
+
+		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user.status = 2
+		user.role = 1
+		user.save
+
+		sign_in(user.email, Encryption.decrypt_password(user.password))
+		post 'create', :feedback => {feedback_type: 1, title: "title1", content: "content1"}, :format => :json
+		post 'create', :feedback => {feedback_type: 2, title: "title2", content: "content1"}, :format => :json
+		post 'create', :feedback => {feedback_type: 4, title: "title4", content: "content1"}, :format => :json
+
+		get 'types', :type => "Type1", :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::TYPE_ERROR
+
+		get 'types', :type => 256, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::RANGE_ERROR
+		
+		get 'types', :type => 1, :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 1
+		
+		get 'types', :type => 7, :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 3
+
+		get 'types', :type => 0, :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 0
+
+		get 'types', :type => 255, :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 3
+
+		clear(User, Feedback)
+	end
 	
 =begin
-	test "08 should post reply method" do 
+	test "09 should post reply method" do 
 		clear(User, Feedback, Message)
 		
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))

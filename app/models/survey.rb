@@ -68,7 +68,7 @@ class Survey
 	#* boolean value
 	def has_question(question_id)
 		self.pages.each do |page|
-			return true if page.include?(question_id)
+			return true if page["questions"].include?(question_id)
 		end
 		return false
 	end
@@ -81,12 +81,9 @@ class Survey
 	#* a survey object
 	def serialize
 		survey_obj = Hash.new
-		survey_obj["owner_email"] = self.owner_email
-		survey_obj["survey_id"] = self._id.to_s
+		survey_obj["_id"] = self._id.to_s
 		survey_obj["created_at"] = self.created_at
 		survey_obj["pages"] = Marshal.load(Marshal.dump(self.pages))
-		survey_obj["tags"] = Marshal.load(Marshal.dump(self.tags))
-		survey_obj["tags"] << "已删除" if self.status == -1 && !survey_obj["tags"].include?("已删除")
 		META_ATTR_NAME_ARY.each do |attr_name|
 			method_obj = self.method("#{attr_name}".to_sym)
 			survey_obj[attr_name] = method_obj.call()
@@ -118,7 +115,11 @@ class Survey
 			surveys = Survey.normal
 		end
 		surveys.each do |survey|
-			survey_list << survey if survey.publish_status & publish_status && survey.has_one_tag_of(tags)
+			if tags.nil? || tags.empty? || survey.has_one_tag_of(tags)
+				if publish_status.nil? || survey.publish_status & publish_status
+					survey_list << survey
+				end
+			end
 		end
 		return survey_list
 	end
@@ -141,11 +142,10 @@ class Survey
 	def save_meta_data(survey_obj)
 		# this is an existing survey
 		META_ATTR_NAME_ARY.each do |attr_name|
-			method_obj = survey.method("#{attr_name}=".to_sym)
+			method_obj = self.method("#{attr_name}=".to_sym)
 			method_obj.call(survey_obj[attr_name])
 		end
-		survey.save
-		return survey.serialize
+		return self.save
 	end
 
 	#*description*: remove current survey
@@ -252,8 +252,10 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	def remove_tag(tag)
 		return ErrorEnum::TAG_NOT_EXIST if !self.tags.has_tag?(tag)
-		self.tags.delete(Tag.find_by_content(tag))
-		return tag.destroy if tag.surveys.length == 0
+		tag_inst = Tag.find_by_content(tag)
+		self.tags.delete(tag_inst)
+		tag_inst.destroy if tag_inst.surveys.length == 0
+		return true
 	end
 
 	#*description*: submit a survey to the administrator for reviewing
@@ -371,22 +373,20 @@ class Survey
 	#* ErrorEnum ::QUESTION_NOT_EXIST
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::OVERFLOW
-	def create_question(current_user, page_index, question_id, question_type)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def create_question(page_index, question_id, question_type)
 		current_page = self.pages[page_index]
 		return ErrorEnum::OVERFLOW if current_page == nil
 		if question_id.to_s == "-1"
-			question_index = current_page.length - 1
+			question_index = current_page["questions"].length - 1
 		else
-			question_index = current_page.index(question_id)
+			question_index = current_page["questions"].index(question_id)
 			return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
 		end
-		return ErrorEnum::WRONG_QUESTION_TYPE if !Question.has_question_type(question_type)
-		question = Object::const_get(question_type).new
-		question.save
-		current_page.insert(question_index+1, question._id.to_s)
+		question = Question.create_question(question_type)
+		return ErrorEnum::WRONG_QUESTION_TYPE if question == ErrorEnum::WRONG_QUESTION_TYPE
+		current_page["questions"].insert(question_index+1, question._id.to_s)
 		self.save
-		return Question.get_question_object(question._id.to_s)
+		return question
 	end
 
 	#*description*: update a question
@@ -401,17 +401,14 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST
 	#* ErrorEnum ::WRONG_DATA_TYPE
-	def update_question(current_user, question_id, question_obj)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def update_question(question_id, question_obj)
 		return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
 		question = Question.find_by_id(question_id)
-		return ErrorEnum::QUESTION_NOT_EXIST if question == nil
+		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
 		# quality control question in a survey cannot be updated
-		return ErrorEnum::UNAUTHORIZED if questiion.is_quality_control_question
 		retval = question.update_question(question_obj)
 		return retval if retval != true
-		question.clear_question_object
-		return Question.get_question_object(question._id)
+		return question
 	end
 
 	#*description*: move a question
@@ -428,11 +425,10 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST
 	#* ErrorEnum ::OVERFLOW
-	def move_question(current_user, question_id_1, page_index, question_id_2)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def move_question(question_id_1, page_index, question_id_2)
 		from_page = nil
 		self.pages.each do |page|
-			if page.include?(question_id_1)
+			if page["questions"].include?(question_id_1)
 				from_page = page
 				break
 			end
@@ -443,12 +439,12 @@ class Survey
 		if question_id_2.to_s == "-1"
 			question_index = -1
 		else
-			question_index = to_page.index(question_id_2)
+			question_index = to_page["questions"].index(question_id_2)
 			return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
 		end
-		question_index_to_be_delete = from_page.index(question_id_1)
-		to_page.insert(question_index+1, question_id_1)
-		from_page.delete_at(question_index_to_be_delete)
+		question_index_to_be_delete = from_page["questions"].index(question_id_1)
+		to_page["questions"].insert(question_index+1, question_id_1)
+		from_page["questions"].delete_at(question_index_to_be_delete)
 		return self.save
 	end
 
@@ -465,11 +461,10 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST
 	#* ErrorEnum ::OVERFLOW
-	def clone_question(current_user, question_id_1, page_index, question_id_2)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def clone_question(question_id_1, page_index, question_id_2)
 		from_page = nil
 		self.pages.each do |page|
-			if page.include?(question_id_1)
+			if page["questions"].include?(question_id_1)
 				from_page = page
 				break
 			end
@@ -486,10 +481,9 @@ class Survey
 		orig_question = Question.find_by_id(question_id_1)
 		return ErrorEnum::QUESTION_NOT_EXIST if orig_question == nil
 		new_question = orig_question.clone
-		new_question.save
-		to_page.insert(question_index+1, new_question._id.to_s)
+		to_page["questions"].insert(question_index+1, new_question._id.to_s)
 		self.save
-		return Question.get_question_object(new_question._id)
+		return new_question
 	end
 
 	#*description*: get a question object
@@ -502,10 +496,11 @@ class Survey
 	#* the question object if successfully obtained
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
-	def get_question_object(current_user, question_id)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def get_question_inst(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
-		return Question.get_question_object(question_id)
+		question = Question.find_by_id(question_id)
+		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
+		return question
 	end
 
 	#*description*: delete a question
@@ -519,22 +514,21 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
-	def delete_question(current_user, question_id)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def delete_question(question_id)
 		find_question = false
 		self.pages.each do |page|
-			if page.include?(question_id)
-				page.delete(question_id)
+			if page["questions"].include?(question_id)
+				page["questions"].delete(question_id)
 				find_question = true
 				break
 			end
 		end
 		return ErrorEnum::QUESTION_NOT_EXIST if !find_question
-		return self.save
+		self.save
 		question = Question.find_by_id(question_id)
-		return ErrorEnum::QUESTION_NOT_EXIST if question == nil
+		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
 		question.clear_question_object
-		question.destroy
+		return question.destroy
 	end
 
 	#*description*: create a page
@@ -548,10 +542,10 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::OVERFLOW 
-	def create_page(current_user, page_index)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def create_page(page_index, page_name)
 		return ErrorEnum::OVERFLOW if page_index < -1 or page_index > self.pages.length - 1
-		self.pages.insert(page_index+1, [])
+		new_page = {name: page_name, questions: []}
+		self.pages.insert(page_index+1, new_page)
 		return self.save
 	end
 
@@ -565,13 +559,12 @@ class Survey
 	#* the page object if successfully obtained
 	#* ErrorEnum ::UNAUTHORIZED 
 	#* ErrorEnum ::OVERFLOW 
-	def show_page(current_user, page_index)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def show_page(page_index)
 		current_page = self.pages[page_index]
 		return ErrorEnum::OVERFLOW if current_page == nil
-		page_object = []
-		current_page.each do |question_id|
-			page_object << Question.get_question_object(question_id)
+		page_object = {name: current_page["name"], questions: []}
+		current_page["questions"].each do |question_id|
+			page_object[:questions] << Question.get_question_object(question_id)
 		end
 		return page_object
 	end
@@ -588,24 +581,22 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED 
 	#* ErrorEnum ::OVERFLOW 
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
-	def clone_page(current_user, page_index_1, page_index_2)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def clone_page(page_index_1, page_index_2)
 		current_page = self.pages[page_index_1]
 		return ErrorEnum::OVERFLOW if current_page == nil
 		return ErrorEnum::OVERFLOW if page_index_2 < -1 or page_index_2 > self.pages.length - 1
-		new_page = []
-		new_page_object = []
-		current_page.each do |question_id|
+		new_page = {"name" => current_page["name"], "questions" => []}
+		new_page_obj = {"name" => current_page["name"], "questions" => []}
+		current_page["questions"].each do |question_id|
 			question = Question.find_by_id(question_id)
 			return ErrorEnum::QUESTION_NOT_EXIST if question == nil
 			new_question = question.clone
-			new_question.save
-			new_page << new_question._id.to_s
-			new_page_object << Question.get_question_object(new_question._id)
+			new_page["questions"] << new_question._id.to_s
+			new_page_obj["questions"] << new_question
 		end
 		self.pages.insert(page_index_2+1, new_page)
 		self.save
-		return new_page_object
+		return new_page_obj
 	end
 
 	#*description*: delete a page
@@ -619,13 +610,12 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::OVERFLOW
-	def delete_page(current_user, page_index)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def delete_page(page_index)
 		current_page = self.pages[page_index]
-		return ErrorEnum::OVERFLOW if current_page == nil
-		current_page.each do |question_id|
+		return ErrorEnum::OVERFLOW if current_page.nil?
+		current_page["questions"].each do |question_id|
 			question = Question.find_by_id(question_id)
-			question.destroy if question != nil
+			question.destroy if !question.nil?
 		end
 		self.pages.delete_at(page_index)
 		return self.save
@@ -643,12 +633,11 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::OVERFLOW
-	def combine_pages(current_user, page_index_1, page_index_2)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def combine_pages(page_index_1, page_index_2)
 		return ErrorEnum::OVERFLOW if page_index_1 < 0 or page_index_1 > self.pages.length - 1
 		return ErrorEnum::OVERFLOW if page_index_2 < 0 or page_index_2 > self.pages.length - 1
 		self.pages[page_index_1+1..page_index_2].each do |page|
-			self.pages[page_index_1] = self.pages[page_index_1] + page
+			self.pages[page_index_1]["questions"] = self.pages[page_index_1]["questions"] + page["questions"]
 			self.pages.delete(page)
 		end
 		return self.save
@@ -666,8 +655,7 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::OVERFLOW
-	def move_page(current_user, page_index_1, page_index_2)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
+	def move_page(page_index_1, page_index_2)
 		current_page = self.pages[page_index_1]
 		return ErrorEnum::OVERFLOW if current_page == nil
 		return ErrorEnum::OVERFLOW if page_index_2 < -1 or page_index_2 > self.pages.length - 1
