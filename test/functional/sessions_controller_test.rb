@@ -1,6 +1,7 @@
 require 'test_helper'
 
 class SessionsControllerTest < ActionController::TestCase
+	
 	test "should login" do
 		clear(User)
 		jesse = FactoryGirl.build(:jesse)

@@ -47,8 +47,6 @@ class User
   has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
   has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
 	
-	before_save :set_updated_at
-	before_update :set_updated_at
 
 	attr_accessible :email, :username, :password, :registered_at
 
@@ -60,17 +58,6 @@ class User
   has_many :answer_feedbacks, class_name: "Feedback", inverse_of: :answer_user
   has_many :faqs
   has_many :advertisements
-
-	private
-	def set_updated_at
-		self.updated_at = Time.now.to_i
-	end
-
-
-	private
-	def set_updated_at
-		self.updated_at = Time.now.to_i
-	end
 
 	public
 	#*description*: Find a user given an email, username and user id. Deleted users are not included.

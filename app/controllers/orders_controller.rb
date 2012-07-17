@@ -42,6 +42,7 @@ class OrdersController < ApplicationController
     respond_to do |format|
       format.html 
       format.json { render json: @order }
+    end
   end
 
   def update

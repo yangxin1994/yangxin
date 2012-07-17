@@ -96,11 +96,18 @@ OopsData::Application.routes.draw do
 	end
 	resources :orders do
 		collection do
-			get :cash, :realgoods_present, :virtualgoods_present, :lottery_present, :award_present
+			get :cash, :realgoods, :virtualgoods, :lottery, :award
 			get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
 		end
 	end
 	resources :points, :only => 'index'
+
+	namespace :admin do
+		resources :presents do
+
+		end
+
+	end
 
 	# The priority is based upon order of creation:
 	# first created -> highest priority.

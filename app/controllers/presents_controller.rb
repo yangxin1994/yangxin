@@ -24,64 +24,13 @@ class PresentsController < ApplicationController
 		end
 	end
 
-	def expired
-		@presents = Present.expired.page(params[:page].to_i)
-		respond_to do |format|
-			format.html 
-			format.json { render json: @presents, :only => [:id, :name, :point, :quantity, :created_at, :status] }
-		end
-	end
+
 	def_each :virtual_goods, :cash, :real_goods, :stockout do |method_name|
 		@present = Present.new
 		flash[:notice] = "No Goods" unless @presents = Present.send(method_name).can_be_rewarded.page(params[:page].to_i)
 		respond_to do |format|
 			format.html 
 			format.json { render json: @presents, :only => [:id, :name, :point, :quantity, :created_at, :status]  }
-		end
-	end
-
-	def create		
-		respond_to do |format|
-			@present = Present.create(params[:present])
-			if @present.save
-				Material.create(:material => params[:material], :materials => @present)
-				format.html { redirect_to :action => 'show',:id => @present.id }
-				format.json { render json: @present, status: :created, location: @present }
-			else
-				format.html { render action: "cash" }
-				format.json { render json: @present.errors, status: :unprocessable_entity }
-			end
-		end
-	end
-
-	def update
-		@present = Present.find(params[:id])
-
-		respond_to do |format|
-			if @present.update_attributes(params[:present])
-				format.html { redirect_to @present, notice: 'Present was successfully updated.' }
-				format.json { head :ok }
-			else
-				#format.html { render action: "edit" }
-				format.json { render json: @present.errors, status: :unprocessable_entity }
-			end
-		end
-	end
-
-	def delete_tag
-		#params[:ids]  
-	end
-
-	def destroy
-		#TO DO 
-		#params[:ids]
-
-		@present = Present.find(params[:id])
-		@present.destroy
-
-		respond_to do |format|
-			#format.html { redirect_to presents_url }
-			format.json { head :ok }
 		end
 	end
 
