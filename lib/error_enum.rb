@@ -41,7 +41,13 @@ module ErrorEnum
 	WRONG_QUALITY_CONTROL_TYPE = -83
 	
 	# Orders Error Code 
-	
+	# Presents Error Code
+	PresentNotFound = 21001
+	InvalidPresentId = 21002
+	ErrorCode = {
+		:present_not_found => 21001
+		:invalid_Present_id => 21002
+	}
 
 	TYPE_ERROR = -100001
 	RANGE_ERROR = -100002

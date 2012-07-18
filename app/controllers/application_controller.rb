@@ -4,7 +4,7 @@ class ApplicationController < ActionController::Base
 	before_filter :client_ip, :current_user, :update_last_visit_time, :user_init
 
 	helper_method :user_signed_in?, :user_signed_out?
-
+###################################################
 	# QuillMe
 	def self.def_each(*method_names, &block)
 		method_names.each do |method_name|
@@ -14,35 +14,46 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
-  def render_404
-    render_optional_error_file(404)
-  end
+	begin "kaminari"
+		def page
+			params[:page] || 1
+		end
 
-  def render_403
-    render_optional_error_file(403)
-  end
+		def per_page
+			params[:per_page] || 25
+		end
+	end
 
-  def render_optional_error_file(status_code)
-    status = status_code.to_s
-    if ["404","403", "422", "500"].include?(status)
-      render :template => "/errors/#{status}", :format => [:html], :handler => [:erb], :status => status, :layout => "application"
-    else
-      render :template => "/errors/unknown", :format => [:html], :handler => [:erb], :status => status, :layout => "application"
-    end
-  end
+	def render_404
+		render_optional_error_file(404)
+	end
 
-  def notice_success(msg)
-    flash[:notice] = msg
-  end
+	def render_403
+		render_optional_error_file(403)
+	end
 
-  def notice_error(msg)
-    flash[:notice] = msg
-  end
+	def render_optional_error_file(status_code)
+		status = status_code.to_s
+		if ["404","403", "422", "500"].include?(status)
+			render :template => "/errors/#{status}", :format => [:html], :handler => [:erb], :status => status, :layout => "application"
+		else
+			render :template => "/errors/unknown", :format => [:html], :handler => [:erb], :status => status, :layout => "application"
+		end
+	end
 
-  def notice_warning(msg)
-    flash[:notice] = msg
-  end
+	def notice_success(msg)
+		flash[:notice] = msg
+	end
 
+	def notice_error(msg)
+		flash[:notice] = msg
+	end
+
+	def notice_warning(msg)
+		flash[:notice] = msg
+	end
+	
+################################################
 	#get the information of the signed user and set @current_user
 	def current_user
 		current_user_id = get_cookie(:current_user_id)

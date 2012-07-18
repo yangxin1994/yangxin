@@ -1,6 +1,8 @@
+require 'status'
 class Order
 	include Mongoid::Document
 	include Mongoid::Timestamps
+	include TestMo
 	# can be 0 (Cash), 1 (RealGoods), 2 (VirtualGoods), 3 (Lottery)
 	field :type, :type => Integer
 	# can be 0 (NeedVerify), 1 (Verified), -1 (VerifyFailed), 2 (Delivering), 3 (Delivered), -3 (DeliverFailed)
@@ -29,7 +31,6 @@ class Order
 	scope :deliver_failed, where( :status => -2)
 
 
-
 	embeds_one :cash_receive_info, :class_name => "CashReceiveInfo"
 	embeds_one :realgoods_receive_info, :class_name => "RealgoodsReceiveInfo"
 	embeds_one :virtualgoods_receive_info, :class_name => "VirtualgoodsReceiveInfo"
@@ -42,6 +43,11 @@ class Order
 	belongs_to :operated_admin, :class_name => "User", :inverse_of => :operate_orders
 	
 
+	def dodo
+		event "dasfafas" do
+			false
+		end
+	end
 
 	# TO DO validation verify
 	# We must follow the Law of Demeter(summed up as "use only one dot"), and here is the code: 

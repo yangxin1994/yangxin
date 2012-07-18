@@ -104,7 +104,9 @@ OopsData::Application.routes.draw do
 
 	namespace :admin do
 		resources :presents do
-
+			collection do
+				get 'expired'
+			end
 		end
 
 	end

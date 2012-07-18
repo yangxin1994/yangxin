@@ -16,4 +16,19 @@ class PresentsControllerTest < ActionController::TestCase
   	assert_response :success
   	# get :index, :format => :json
   end
+
+
+end
+class Admin::PresentsControllerTest < ActionController::TestCase
+  setup do
+    clear(User, Present)
+    @present = FactoryGirl.create(:present)
+    @admin_bar = User.first
+    @user_foo = User.last
+  end
+  
+  test "sfdsdfdfdsfsfd" do
+    get :expired, :page => 1, :format => :json
+    assert_response :success
+  end
 end

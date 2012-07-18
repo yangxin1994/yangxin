@@ -4,7 +4,7 @@ class Present
 	field :name, :type => String
 	# can be 0 (Cash), 1 (RealGoods), 2 (VirtualGoods), 3 (Lottery)
 	field :type, :type => Integer
-	field :is_award, :type => Boolean, :default => false
+	#field :is_award, :type => Boolean, :default => false
 	field :point, :type => Integer
 	field :quantity, :type => Integer
 	field :description, :type => String
@@ -14,13 +14,13 @@ class Present
 	field :status, :type => Integer, :default => 1
 	field :is_deleted, :type => Boolean, :default => false
 	
-	default_scope :conditions => {:is_deleted => false, :is_award => false}
+	default_scope where(:is_deleted => false)
 	# TO DO Def Scope
 	scope :cash, where( :type => 0)
 	scope :realgoods, where( :type => 1)
 	scope :virtualgoods, where( :type => 2)
 	scope :lottery, where( :type => 3)
-	scope :award, where( :type => 4)
+	#scope :award, where( :type => 4)
 
 	scope :stockout, where(:quantity.lt => 1)
 	scope :can_be_rewarded, where( :status => 1) 
@@ -37,5 +37,27 @@ class Present
 	validates :quantity, :presence => true,
 											 :numericality => { :greater_than_or_equal_to => 0 }
 
+	def self.find_by_id(id)
+		begin
+			retval = self.find(id)
+		rescue Mongoid::Errors::DocumentNotFound
+			retval = ErrorEnum::PresentNotFound
+		rescue BSON::InvalidObjectId
+			retval = ErrorEnum::InvalidPresentId
+		end
+		retval
+	end
+
+	# def delete
+	# 	begin
+	# 		@present = Present.find(params[:id])
+	# 	rescue Mongoid::Errors::DocumentNotFound
+	# 		format.json { render json: Errors::PresentNotFound } and return
+	# 	rescue BSON::InvalidObjectId
+	# 		format.json { render json: ErrorEnum::InvalidPresentId } and return
+	# 	end
+	# 		@present.is_deleted = true
+	# 		format.json { render json: @present.save }
+	# end
 
 end
