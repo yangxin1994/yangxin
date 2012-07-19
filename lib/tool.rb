@@ -31,4 +31,20 @@ module Tool
 		return response
 	end
 
+	def self.check_ip_mask(ip_address, ip_mask)
+	end
+
+	def self.get_region_by_ip(ip)
+	end
+
+	def self.check_question_answer(answer, standard_answer, fuzzy)
+		standard_answer.each do |standard_choice|
+			return false if !answer.include?(standard_choice)
+		end
+		if fuzzy.to_s == "true"
+			return true
+		else
+			return answer.length == standaard_answer.length
+		end
+	end
 end

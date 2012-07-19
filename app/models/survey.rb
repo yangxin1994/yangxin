@@ -31,9 +31,24 @@ class Survey
 	field :status, :type => Integer, default: 0
 	# can be 1 (closed), 2 (under review), 4 (paused), 8 (published)
 	field :publish_status, :type => Integer, default: 1
-	field :pages, :type => Array, default: Array.new
+	field :pages, :type => Array, default: []
 	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
-	field :constrains, :type => Array, default: Array.new
+	field :logic_control, :type => Array, default: []
+	field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
+		"has_progress_bar" => true,
+		"has_question_number" => true,
+		"is_one_question_per_page" => false,
+		"has_advertisement" => true,
+		"has_oopsdata_link" => true,
+		"redirect_link" => ""}
+	field :quality_control_setting, :type => Hash, default: {"allow_pageup" => false,
+		"times_for_one_computer" => -1,
+		"has_captcha" => false,
+		"password_control" => {"password_type" => -1,
+			"single_password" => "",
+			"password_list" => [],
+			"username_password_list" => []}}
+	field :quota_stats, :type => Hash
 
 	belongs_to :user
 	has_and_belongs_to_many :tags do
@@ -45,6 +60,8 @@ class Survey
 		end
 	end
 	has_many :publish_status_historys
+
+	has_many :answers
 
 	scope :normal, lambda { where(:status.gt => -1) }
 	scope :deleted, lambda { where(:status => -1) }
@@ -79,7 +96,7 @@ class Survey
 	#
 	#*retval*:
 	#* a survey object
-	def serialize
+	def to_json
 		survey_obj = Hash.new
 		survey_obj["_id"] = self._id.to_s
 		survey_obj["created_at"] = self.created_at
@@ -145,7 +162,18 @@ class Survey
 			method_obj = self.method("#{attr_name}=".to_sym)
 			method_obj.call(survey_obj[attr_name])
 		end
-		return self.save
+		self.save
+		return self
+	end
+
+	def update_style_setting(style_setting_obj)
+		self.style_setting = style_setting_obj
+		self.save
+		return true
+	end
+
+	def show_style_setting
+		return self.style_setting
 	end
 
 	#*description*: remove current survey
@@ -389,6 +417,53 @@ class Survey
 		return question
 	end
 
+	def insert_template_question(page_index, question_id, template_question_id)
+		template_question = TemplateQuestion.find_by_id(template_question_id)
+		return ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST if template_question.nil?
+		
+		current_page = self.pages[page_index]
+		return ErrorEnum::OVERFLOW if current_page == nil
+		if question_id.to_s == "-1"
+			question_index = current_page["questions"].length - 1
+		else
+			question_index = current_page["questions"].index(question_id)
+			return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
+		end
+		question = Question.create_template_question(template_question)
+		current_page["questions"].insert(question_index+1, question._id.to_s)
+		self.save
+		return question
+	end
+
+	def convert_template_question_to_normal_question(question_id)
+		return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
+		question = Question.find_by_id(question_id)
+		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
+		# quality control question in a survey cannot be updated
+		question.convert_template_question_to_normal_question
+		return question
+	end
+
+	def insert_quality_control_question(page_index, question_id, quality_control_question_id)
+		quality_control_question = QualityControlQuestion.find_by_id(quality_control_question_id)
+		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if quality_control_question.nil?
+		
+		current_page = self.pages[page_index]
+		return ErrorEnum::OVERFLOW if current_page == nil
+		if question_id.to_s == "-1"
+			question_index = current_page["questions"].length - 1
+		else
+			question_index = current_page["questions"].index(question_id)
+			return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
+		end
+		questions = Question.create_quality_control_question(quality_control_question)
+		questions.each do |question|
+			current_page["questions"].insert(question_index+1, question._id.to_s)
+		end
+		self.save
+		return questions
+	end
+
 	#*description*: update a question
 	#
 	#*params*:
@@ -405,6 +480,7 @@ class Survey
 		return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
 		question = Question.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
+		return ErrorEnum::WRONG_QUESTION_CLASS if question.question_class == "quality_control" || question.question_class == "template"
 		# quality control question in a survey cannot be updated
 		retval = question.update_question(question_obj)
 		return retval if retval != true
@@ -480,6 +556,7 @@ class Survey
 		end
 		orig_question = Question.find_by_id(question_id_1)
 		return ErrorEnum::QUESTION_NOT_EXIST if orig_question == nil
+		return ErrorEnum::WRONG_QUESTION_CLASS if orig_question.question_class == "quality_control" || orig_question.question_class == "template"
 		new_question = orig_question.clone
 		to_page["questions"].insert(question_index+1, new_question._id.to_s)
 		self.save
@@ -561,12 +638,19 @@ class Survey
 	#* ErrorEnum ::OVERFLOW 
 	def show_page(page_index)
 		current_page = self.pages[page_index]
-		return ErrorEnum::OVERFLOW if current_page == nil
+		return ErrorEnum::OVERFLOW if current_page.nil?
 		page_object = {name: current_page["name"], questions: []}
 		current_page["questions"].each do |question_id|
 			page_object[:questions] << Question.get_question_object(question_id)
 		end
 		return page_object
+	end
+
+	def update_page(page_index, page_name)
+		current_page = self.pages[page_index]
+		return ErrorEnum::OVERFLOW if current_page.nil?
+		current_page["name"] = page_name
+		return self.save
 	end
 
 	#*description*: clone a page
@@ -664,41 +748,107 @@ class Survey
 		return self.save
 	end
 
-	def show_quota(current_user)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email && !current_user.is_admin
+	def check_password(username, password, current_user)
+		case self.quality_control_setting["password_control"]["password_type"]
+		when -1
+			return true
+		when 0
+			if self.quality_control_setting["password_control"]["single_password"] == password
+				return true
+			else
+				return ErrorEnum::WRONG_PASSWORD
+			end
+		when 1
+			list = self.quality_control_setting["password_control"]["password_list"]
+			password_element = list.select { |ele| ele["content"] == password }[0]
+		when 2
+			list = self.quality_control_setting["password_control"]["username_password_list"]
+			password_element = list.select { |ele| ele["content"] == [username, password] }[0]
+		end
+		if password_element.nil?
+			return ErrorEnum::WRONG_PASSWORD
+		elsif password_element["used"] = false
+			password_element["used"] = true
+			self.save
+			return true
+		else
+			answer = Answer.find_by_password(username, password)
+			return ErrorEnum::ANSWER_NOT_EXIST if answer.nil?
+			user = answer.user
+			return ErrorEnum::REQUIRE_LOGIN if user.is_registered
+			user.answers.delete(answer)
+			answer.user = current_user
+			return answer
+		end
+	end
+
+	def show_quota
 		return Marshal.load(Marshal.dump(self.quota))
 	end
 
-	def add_quota_rule(current_user, quota_rule)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email && !current_user.is_admin
+	def add_quota_rule(quota_rule)
 		quota = Quota.new(self.quota)
 		return quota.add_rule(quota_rule, self)
 	end
 
-	def update_quota_rule(current_user, quota_rule_index, quota_rule)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email && !current_user.is_admin
+	def update_quota_rule(quota_rule_index, quota_rule)
 		quota = Quota.new(self.quota)
 		return quota.update_rule(quota_rule_index, quota_rule, self)
 	end
 
-	def delete_quota_rule(current_user, quota_rule_index)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email && !current_user.is_admin
+	def delete_quota_rule(quota_rule_index)
 		quota = Quota.new(self.quota)
 		return quota.delete_rule(quota_rule_index, self)
 	end
 
-	def set_exclusive(current_user, is_exclusive)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email && !current_user.is_admin
+	def refresh_quota_stats
+		answers = self.answers
+		quota_stats = {"quota_satisfied" => true, "answer_number" => []}
+		self.quota["rules"].length.times { quota_stats["answer_number"] << 0 }
+		answers.each do |answer|
+			self.quota["rules"].each_with_index do |rule, rule_index|
+				if answer.satisfy_quota_conditions(rule["conditions"])
+					quota_stats["answer_number"][rule_index] = quota_stats["answer_number"][rule_index] + 1
+				end
+			end
+		end
+		quota_stats["answer_number"].each_with_index do |answer_number, index|
+			required_number = self.quota["rules"][index]["amount"]
+			quota_stats["quota_satisfied"] = quota_stats["quota_satisfied"] && answer_number >= required_number
+		end
+		self.quota_stats = quota_stats
+		self.save
+	end
+
+	def set_exclusive(is_exclusive)
 		quota = Quota.new(self.quota)
 		return quota.set_exclusive(is_exclusive, self)
 	end
 
+	def show_logic_control
+		return Marshal.load(Marshal.dump(self.logic_control))
+	end
+
+	def add_logic_control_rule(logic_control_rule)
+		logic_control = LogicControl.new(self.logic_control)
+		return logic_control.add_rule(logic_control_rule, self)
+	end
+
+	def update_logic_control_rule(logic_control_rule_index, logic_control_rule)
+		logic_control = LogicControl.new(self.logic_control)
+		return logic_control.update_rule(logic_control_rule_index, logic_control_rule, self)
+	end
+
+	def delete_logic_control_rule(logic_control_rule_index)
+		logic_control = LogicControl.new(self.logic_control)
+		return logic_control.delete_rule(logic_control_rule_index)
+	end
+
 	class Quota
-		attr_accessor :rules, :is_exclusive
 		CONDITION_TYPE = (0..4).to_a
 		def initialize(quota)
-			@is_exclusive = !!quota.is_exclusive
-			@rules = Marshal.load(Marshal.dump(quota.rules))
+			@is_exclusive = !!quota["is_exclusive"]
+			@rules = Marshal.load(Marshal.dump(quota["rules"]))
 		end
 
 		def add_rule(rule, survey)
@@ -744,6 +894,37 @@ class Survey
 			quota_object["rules"] = @rules
 			quota_object["is_exclusive"] = @is_exclusive
 			return quota_object
+		end
+	end
+
+	class LogicControl
+		RULE_TYPE = (0..6).to_a
+		def initialize(logic_control)
+			@rules = logic_control
+		end
+
+		def add_rule(rule, survey)
+			return ErrorEnum::WRONG_LOGIC_CONTROL_TYPE if !RULE_TYPE.include(rule["rule_type"])
+			@rules << rule
+			survey.logic_control = self.rules
+			survey.save
+			return survey.logic_control
+		end
+
+		def delete_rule(rule_index, survey)
+			return ErrorEnum::LOGIC_CONTROL_RULE_NOT_EXIST if @rules.length <= rule_index
+			@rules.delete_at(rule_index)
+			survey.logic_control = self.rules
+			survey.save
+			return survey.logic_control	
+		end
+
+		def update_rule(rule_index, rule, survey)
+			return ErrorEnum::LOGIC_CONTROL_RULE_NOT_EXIST if @rules.length <= rule_index
+			@rules[rule_index] = rule
+			survey.logic_control = self.rules
+			survey.save
+			return survey.logic_control
 		end
 	end
 end

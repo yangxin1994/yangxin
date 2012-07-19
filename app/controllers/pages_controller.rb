@@ -21,7 +21,6 @@ class PagesController < ApplicationController
 	def show
 		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
@@ -52,13 +51,26 @@ class PagesController < ApplicationController
 	def create
 		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
 
 		retval = survey.create_page(params[:page_index].to_i, params[:page_name])
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
+		end
+	end
+
+	def update
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		end
+
+		retval = survey.update_page(params[:id].to_i, params[:page_name])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -83,7 +95,6 @@ class PagesController < ApplicationController
 	def clone
 		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
@@ -114,7 +125,6 @@ class PagesController < ApplicationController
 	def move
 		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
@@ -144,7 +154,6 @@ class PagesController < ApplicationController
 	def destroy
 		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
@@ -176,7 +185,6 @@ class PagesController < ApplicationController
 	def combine
 		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end

@@ -71,28 +71,14 @@ class GroupsController < ApplicationController
 	def update
 		group = @current_user.groups.find_by_id(params[:id])
 		if group.nil?
-			flash[:notice] = "该样本组不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::GROUP_NOT_EXIST and return }
 			end
 		end
 
-		retval = group.update_group(params[:group])
-		case retval
-		when ErrorEnum::ILLEGAL_EMAIL
-			flash[:notice] = "非法的邮箱地址"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::ILLEGAL_EMAIL and return }
-			end
-		when true
-			flash[:notice] = "样本组已成功更新"
-			respond_to do |format|
-				format.json	{ render :json => group and return }
-			end
-		else
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
-			end
+		group = group.update_group(params[:group])
+		respond_to do |format|
+			format.json	{ render :json => group and return }
 		end
 	end
 
@@ -112,15 +98,15 @@ class GroupsController < ApplicationController
 	def destroy
 		group = @current_user.groups.find_by_id(params[:id])
 		if group.nil?
-			flash[:notice] = "该样本组不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::GROUP_NOT_EXIST and return }
 			end
 		end
-		group.destroy
-		flash[:notice] = "样本组已成功删除"
+
+		@current_user.groups.delete(group)
+		retval = group.destroy
 		respond_to do |format|
-			format.json	{ render :json => true and return }
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -137,17 +123,14 @@ class GroupsController < ApplicationController
 	#* the group object
 	#* ErrorEnum::GROUP_NOT_EXIST
 	def show
-		group = @current_user.groups.where(:_id => params[:id]).first
-		case group
-		when nil
-			flash[:notice] = "该样本组不存在"
+		group = @current_user.groups.find_by_id(params[:id])
+		if group.nil?
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::GROUP_NOT_EXIST and return }
 			end
-		else
-			respond_to do |format|
-				format.json	{ render :json => group and return }
-			end
+		end
+		respond_to do |format|
+			format.json	{ render :json => group and return }
 		end
 	end
 end

@@ -18,7 +18,7 @@ class ConstSumIssue < Issue
 	attr_writer :items, :is_rand, :sum
 
 	ATTR_NAME_ARY = %w[items is_rand sum]
-	ITEM_ATTR_ARY = %w[content has_input]
+	ITEM_ATTR_ARY = %w[input_id content has_input]
 
 	def initialize
 		@items = []

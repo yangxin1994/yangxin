@@ -71,6 +71,37 @@ class PagesControllerTest < ActionController::TestCase
 		sign_out
 	end
 
+	test "should update page" do
+		clear(User, Survey, Question)
+		jesse = init_jesse
+		oliver = init_oliver
+
+		survey_id, pages = *create_survey_page_question(jesse.email, jesse.password)
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		put :update, :format => :json, :survey_id => survey_id, :id => 10, :page_name => "new page name"
+		assert_equal ErrorEnum::OVERFLOW.to_s, @response.body
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		put :update, :format => :json, :survey_id => "wrong survey id", :id => 0, :page_name => "new page name"
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		sign_out
+
+		sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
+		put :update, :format => :json, :survey_id => survey_id, :id => 0, :page_name => "new page name"
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		put :update, :format => :json, :survey_id => survey_id, :id => 0, :page_name => "new page name"
+		assert_equal true.to_s, @response.body
+		get :show, :format => :json, :survey_id => survey_id, :id => 0
+		page_obj = JSON.parse(@response.body)
+		assert_equal "new page name", page_obj["name"]
+		sign_out
+	end
+
 	test "should delete page" do
 		clear(User, Survey, Question)
 		jesse = init_jesse

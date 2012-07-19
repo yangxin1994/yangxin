@@ -47,7 +47,7 @@ class BlankIssue < Issue
 	attr_writer :is_rand, :inputs
 
 	ATTR_NAME_ARY = %w[inputs is_rand]
-	INPUT_ATTR_ARY = %w[label data_type properties]
+	INPUT_ATTR_ARY = %w[input_id content data_type properties]
 
 	DATA_TYPE_ARY = %w[Text Number Phone Email Address Time]
 
