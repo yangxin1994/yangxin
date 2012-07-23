@@ -64,7 +64,7 @@ class RegistrationsController < ApplicationController
 			end
 		else # create user_information model
 			third_party_info = decrypt_third_party_user_id(params[:third_party_info])
-      User.combine(params[:user]["email"], *third_party_info) if !third_party_info.nil?
+      		User.combine(params[:user]["email"], *third_party_info) if !third_party_info.nil?
 			# automatically activate for google user
 			if third_party_info && third_party_info[0]=="google"
 				activate_info = {"email" => params[:user]["email"], "time" => Time.now.to_i}

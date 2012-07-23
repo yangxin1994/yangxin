@@ -2,79 +2,151 @@ require 'test_helper'
 
 class FeedbackTest < ActiveSupport::TestCase
 
-	test "01 find_by_type" do
-	
+	test "01 verify_feedback_type method" do 
 		clear(Feedback)
 		
-		assert_raise(TypeError) { 
-			Feedback.create(feedback_type: "type1", title: "title0", content: "content0") 
-		}
+		assert_equal Feedback.verify_feedback_type("type1"), ErrorEnum::FEEDBACK_TYPE_ERROR
+		assert_equal Feedback.verify_feedback_type(0), ErrorEnum::FEEDBACK_RANGE_ERROR
+		assert_equal Feedback.verify_feedback_type(1), true
+		assert_equal Feedback.verify_feedback_type(129), ErrorEnum::FEEDBACK_RANGE_ERROR
+
+		clear(Feedback)
+	end
+
+	test "02 find_by_id" do 
+	  	clear(Feedback)
+	  	
+		feedback = Feedback.create(feedback_type: 1, title: "title1", content: "content1")
+		assert_equal Feedback.find_by_id("4fff96616c6eea1204022005"), ErrorEnum::FEEDBACK_NOT_EXIST
+		assert_equal Feedback.find_by_id(feedback.id), feedback
+	  	
+	  	clear(Feedback)
+	end
+
+	test "03 create_feedback" do 
+		clear(Feedback, User)
+
+		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user.save
+
+		feedback = Feedback.create_feedback({feedback_type: 1, title: "title1", content: "content1"}, user)
+		assert_equal feedback.question_user, user
+		assert_equal feedback.title, "title1"
+		assert_equal feedback.feedback_type, 1
+
+		assert_equal Feedback.create_feedback({feedback_type: "type1", title: "title1"}, user), ErrorEnum::FEEDBACK_TYPE_ERROR
+		assert_equal Feedback.create_feedback({feedback_type: 0, title: "title1"}, user), ErrorEnum::FEEDBACK_RANGE_ERROR
+		assert_equal Feedback.create_feedback({feedback_type: 1, content: "content1"}, user), ErrorEnum::FEEDBACK_SAVE_FAILED
+		assert_equal Feedback.create_feedback({feedback_type: 129, title: "title1"}, user), ErrorEnum::FEEDBACK_RANGE_ERROR
+
+		clear(Feedback, User)
+	end
+
+	test "04 update_feedback" do
+		clear(User, Feedback)
+  	
+		user = User.create(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user2 = User.create(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
 		
-		assert_raise(RangeError) { 
-			Feedback.create(feedback_type: 0, title: "title0", content: "content0") 
-		}
+		feedback = Feedback.create_feedback({feedback_type: 1, title: "title1", content: "content1"}, user)
+		assert_equal feedback.question_user, user
+		assert_equal feedback.title, "title1"
+		assert_equal feedback.feedback_type, 1
+
+		feedback = Feedback.update_feedback(feedback.id, {feedback_type: 2, title: "updated title1"}, user)		
+		assert_equal feedback.question_user, user
+		assert_equal feedback.title, "updated title1"
+		assert_equal feedback.feedback_type, 2
+
+		feedback.is_answer = true
+		assert_equal feedback.save, true
+
+		assert_equal Feedback.update_feedback(feedback.id,{feedback_type: "type1", title: "title1"}, user), ErrorEnum::FEEDBACK_TYPE_ERROR
+		assert_equal Feedback.update_feedback(feedback.id,{feedback_type: 0, title: "title1"}, user), ErrorEnum::FEEDBACK_RANGE_ERROR
+		assert_equal Feedback.update_feedback(feedback.id,{feedback_type: 129, title: "title1"}, user), ErrorEnum::FEEDBACK_RANGE_ERROR
+		assert_equal Feedback.update_feedback(feedback.id,{feedback_type: 4, title: "title1"}, user2), ErrorEnum::FEEDBACK_NOT_CREATOR
+		assert_equal Feedback.update_feedback(feedback.id,{feedback_type: 4, title: "title1"}, user), ErrorEnum::FEEDBACK_CANNOT_UPDATE
+
+		#create without user
+		feedback = Feedback.create_feedback({feedback_type: 1, title: "title1", content: "content1"})
+		assert_equal feedback.question_user, nil
+		assert_equal feedback.title, "title1"
+		assert_equal feedback.feedback_type, 1
+
+		assert_equal Feedback.update_feedback(feedback.id,{feedback_type: 4, title: "title1"}, user2), ErrorEnum::FEEDBACK_CANNOT_UPDATE
+
+
+		assert_equal Feedback.all.count, 2
+	  	
+	  	clear(User, Feedback)
+	end
+
+	test "05 destroy_by_id " do
 		
-		assert_raise(RangeError) { 
-			Feedback.create(feedback_type: 3, title: "title0", content: "content0") 
-		}
+		clear(Feedback)
 		
-		assert_raise(RangeError) { 
-			Feedback.create(feedback_type: 129, title: "title0", content: "content0") 
-		}
-		
-		assert Feedback.create(feedback_type: 1, title: "title1", content: "content1")
+		user = User.create(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user2 = User.create(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
+
+		feedback = Feedback.create_feedback({feedback_type: 1, title: "title1", content: "content1"}, user)
+		assert_equal feedback.question_user, user
+		assert_equal feedback.title, "title1"
+		assert_equal feedback.feedback_type, 1
+
+		assert_equal Feedback.destroy_by_id("4fff96616c6eea1204022005", user), ErrorEnum::FEEDBACK_NOT_EXIST
+		assert_equal Feedback.destroy_by_id(feedback.id, user2), ErrorEnum::FEEDBACK_NOT_CREATOR
+		assert_equal Feedback.destroy_by_id(feedback.id, user), true
 		
 		clear(Feedback)
 		
 	end
 
-	test "02 condition " do
-		
+	test "06 list_by_type" do 
 		clear(Feedback)
-		
-		assert Feedback.create(feedback_type: 1, title: "title1", content: "content1")
-		assert Feedback.create(feedback_type: 2, title: "q2", content: "content2")
 
-		assert_raise(TypeError){
-			Feedback.condition("type1", "")
-		}
+		user = User.create(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 
-		assert_raise(RangeError){
-			Feedback.condition(-1, "")
-		}
+		Feedback.create_feedback({feedback_type: 1, title: "title1", content: "content1"}, user)
+		Feedback.create_feedback({feedback_type: 2, title: "title1", content: "content1"}, user)
+		Feedback.create_feedback({feedback_type: 4, title: "title1", content: "content1"}, user)
+		Feedback.create_feedback({feedback_type: 8, title: "title1", content: "content1"}, user)
+		Feedback.create_feedback({feedback_type: 16, title: "title1", content: "content1"}, user)
+		Feedback.create_feedback({feedback_type: 32, title: "title1", content: "content1"}, user)
+		Feedback.create_feedback({feedback_type: 64, title: "title1", content: "content1"}, user)
+		Feedback.create_feedback({feedback_type: 128, title: "title1", content: "content1"}, user)
 
-		assert_raise(ArgumentError){
-			Feedback.condition(4, "")
-		}
-		
-		assert_equal Feedback.condition(0, "title").count, 0
-		assert_equal Feedback.condition(0, "content").count, 0
-		assert_equal Feedback.condition(1, "content1").count, 1
-		assert_equal Feedback.condition(3, "content").count, 2
-		
+		assert_equal Feedback.all.count, 8
+		assert_equal Feedback.list_by_type(1).count, 1
+		assert_equal Feedback.list_by_type(4).count, 1
+		assert_equal Feedback.list_by_type(16).count, 1
+		assert_equal Feedback.list_by_type(64).count, 1
+		assert_equal Feedback.list_by_type(7).count, 3
+		assert_equal Feedback.list_by_type(255).count, 8
+
 		clear(Feedback)
-		
 	end
-	
-	test "03 find_by_type" do 
+
+	test "07 list_by_type_and_value" do 
 		clear(Feedback)
 
-		assert Feedback.create(feedback_type: 1, title: "title1", content: "content1")
-		assert Feedback.create(feedback_type: 2, title: "q2", content: "content2")
+		user = User.create(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 
-		assert_raise(TypeError){
-			Feedback.find_by_type("type1")
-		}
+		Feedback.create_feedback({feedback_type: 1, title: "title1", content: "content1"}, user)
+		Feedback.create_feedback({feedback_type: 1, title: "title2", content: "content2"}, user)
+		Feedback.create_feedback({feedback_type: 2, title: "title1", content: "content1"}, user)
+		Feedback.create_feedback({feedback_type: 4, title: "title1", content: "content1"}, user)
+		Feedback.create_feedback({feedback_type: 8, title: "title1", content: "content1"}, user)
+		Feedback.create_feedback({feedback_type: 16, title: "title1", content: "content1"}, user)
+		Feedback.create_feedback({feedback_type: 32, title: "title1", content: "content1"}, user)
+		Feedback.create_feedback({feedback_type: 64, title: "title1", content: "content1"}, user)
+		Feedback.create_feedback({feedback_type: 128, title: "title1", content: "content1"}, user)
 
-		assert_raise(RangeError){
-			Feedback.find_by_type(256)
-		}
-		
-		assert_equal Feedback.find_by_type(0).count, 0
-		assert_equal Feedback.find_by_type(1).count, 1
-		assert_equal Feedback.find_by_type(2).count, 1
-		assert_equal Feedback.find_by_type(3).count, 2
-		assert_equal Feedback.find_by_type(255).count, 2
+		assert_equal Feedback.all.count, 9
+		assert_equal Feedback.list_by_type_and_value(1, nil).count, 2
+		assert_equal Feedback.list_by_type_and_value(1, "content1").count, 1
+		assert_equal Feedback.list_by_type_and_value(1, "title1").count, 1
+		assert_equal Feedback.list_by_type_and_value(255, "title").count, 9
+		assert_equal Feedback.list_by_type_and_value(255, "title1").count, 8
 
 		clear(Feedback)
 	end
@@ -94,10 +166,10 @@ class FeedbackTest < ActiveSupport::TestCase
 		user2.save
 		
 		f = Feedback.create(feedback_type: 1, title: "title1", content: "content1")
-		f.question_user = user 
+		f.title_user = user 
 		f.save
 		
-		assert_equal Feedback.reply(f.id.to_s, user, "illegel user"), false
+		assert_equal Feedback.reply(f.id.to_s, user, "illegel user"), ErrorEnum::REQUIRE_ADMIN
 		assert_equal Feedback.reply(f.id.to_s, user2, "legel user"), true
 		
 		clear(User, Feedback, Message)

@@ -26,7 +26,7 @@ class PublicNoticesControllerTest < ActionController::TestCase
 		user.role = 0
 		user.save
 	
-		sign_in(user.email, Encryption.decrypt_password(user.password))
+		sign_in(user.email, "123456")
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
 		retval = @response.body.to_i
 		assert_equal retval, ErrorEnum::REQUIRE_ADMIN
@@ -37,25 +37,57 @@ class PublicNoticesControllerTest < ActionController::TestCase
 	
 	test "04 should post create action with admin user login" do
 		clear(User, PublicNotice)
+
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.status = 2
 		user.role = 1
 		user.save
-
-		sign_in(user.email, Encryption.decrypt_password(user.password))
+	
+		sign_in(user.email, "123456")
 		post 'create', :public_notice => {public_notice_type: "Type1", title: "title1", content: "content1"}, :format => :json
 		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::TYPE_ERROR
+		assert_equal retval, ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR
 		
-		post 'create', :public_notice => {public_notice_type: 256, title: "title1", content: "content1"}, :format => :json
+		post 'create', :public_notice => {public_notice_type: 129, title: "title1", content: "content1"}, :format => :json
 		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::RANGE_ERROR
-	
+		assert_equal retval, ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR
+		
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
-		Logger.new("log/development.log").info(@response.body)
-		assert_equal PublicNotice.where(public_notice_type: 1).first.title, "title1"
 		retval = JSON.parse(@response.body)
 		assert_equal retval["title"], "title1"
+		public_notice = PublicNotice.all.first
+		assert_equal public_notice.title, "title1"
+
+		#
+		# get index
+		#
+		post 'create', :public_notice => {public_notice_type: 2, title: "title2", content: "content2"}, :format => :json
+		post 'create', :public_notice => {public_notice_type: 64, title: "title3", content: "content3"}, :format => :json
+		post 'create', :public_notice => {public_notice_type: 128, title: "title4", content: "content4"}, :format => :json
+
+		# no type, no value
+		get 'index', :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 4
+
+		# with type, no value
+		get 'index', :format => :json, :public_notice_type => 3
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 2
+
+		get 'index', :format => :json, :public_notice_type => 255
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 4
+
+		#with type and value
+		get 'index', :format => :json, :public_notice_type => 3, :value => "content"
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 2
+
+		get 'index', :format => :json, :public_notice_type => 3, :value => "content1"
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 1		
+
 		sign_out
 		
 		clear(User,PublicNotice)
@@ -63,6 +95,7 @@ class PublicNoticesControllerTest < ActionController::TestCase
 
 	test "05 should post update action which is with admin " do
 		clear(User, PublicNotice)
+
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.status = 2
 		user.role = 1
@@ -73,17 +106,36 @@ class PublicNoticesControllerTest < ActionController::TestCase
 		user2.role = 1
 		user2.save
 	
-		sign_in(user.email, Encryption.decrypt_password(user.password))
+		sign_in(user.email, "123456")
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
 		retval = JSON.parse(@response.body)
 		sign_out
 		
-		sign_in(user2.email, Encryption.decrypt_password(user2.password))
-		post 'update', :id => retval["_id"], :public_notice => {title: "updated title1"}, :format => :json
+		sign_in(user2.email, "123456")
+
+		public_notice = PublicNotice.all.first
+
+		post 'update', :id => "123443454354353", :public_notice => {title: "updated title1"}, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::PUBLIC_NOTICE_NOT_EXIST
+
+		post 'update',:id => public_notice.id.to_s ,  :public_notice => {public_notice_type: "Type1", title: "title1", content: "content1"}, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR
 		
-		retval = PublicNotice.find(retval["_id"])
+		post 'update',:id => public_notice.id.to_s,  :public_notice => {public_notice_type: 129, title: "title1", content: "content1"}, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR
+
+		post 'update', :id => public_notice.id.to_s, :public_notice => {title: "updated title1"}, :format => :json
+		retval = JSON.parse(@response.body)
 		assert_equal retval["title"], "updated title1"
-		assert_equal retval.user, user2
+
+		assert_equal PublicNotice.all.count, 1
+		public_notice = PublicNotice.all.first
+		assert_equal public_notice.title, "updated title1"
+		assert_equal public_notice.user, user2
+
 		sign_out
 
 		clear(User,PublicNotice)
@@ -96,91 +148,18 @@ class PublicNoticesControllerTest < ActionController::TestCase
 		user.role = 1
 		user.save
 	
-		sign_in(user.email, Encryption.decrypt_password(user.password))
+		sign_in(user.email, "123456")
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
 		retval = JSON.parse(@response.body)
 
 		post 'destroy', :id => retval["_id"], :format => :json
+		assert_equal @response.body, "true"
 		
 		retval = PublicNotice.where(_id: retval["_id"]).first
 		assert_equal retval, nil
 		sign_out
 
 		clear(User,PublicNotice)
-	end
-
-	test "07 should get condition action" do
-	
-		clear(User, PublicNotice)
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 2
-		user.role = 1
-		user.save
-	
-		sign_in(user.email, Encryption.decrypt_password(user.password))
-		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
-		post 'create', :public_notice => {public_notice_type: 2, title: "title2", content: "content1"}, :format => :json
-		post 'create', :public_notice => {public_notice_type: 4, title: "title4", content: "content1"}, :format => :json
-		
-		get 'condition', :type => 1, :value => "user", :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 0
-		
-		get 'condition', :type => 7, :value => "content1", :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 3
-
-		get 'condition', :type => 0, :value => "title1", :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 0
-
-		get 'condition', :type => 0, :value => "content1", :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 0
-		
-		sign_out
-		clear(User, PublicNotice)
-	end
-
-	test "08 should get types action" do 
-		clear(User, PublicNotice)
-
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 2
-		user.role = 1
-		user.save
-
-		sign_in(user.email, Encryption.decrypt_password(user.password))
-		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
-		post 'create', :public_notice => {public_notice_type: 2, title: "title2", content: "content1"}, :format => :json
-		post 'create', :public_notice => {public_notice_type: 4, title: "title4", content: "content1"}, :format => :json
-
-		get 'types', :type => "Type1", :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::TYPE_ERROR
-
-		get 'types', :type => 256, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::RANGE_ERROR
-		
-		get 'types', :type => 1, :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 1
-		
-		get 'types', :type => 7, :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 3
-
-		get 'types', :type => 0, :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 0
-
-		get 'types', :type => 255, :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 3
-
-		sign_out
-		clear(User, PublicNotice)
 	end
 
 end
