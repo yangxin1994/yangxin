@@ -18,7 +18,7 @@ class SurveysController < ApplicationController
 		survey = Survey.new
 		survey.save
 		respond_to do |format|
-			format.json	{ render :json => survey.serialize and return }
+			format.json	{ render :json => survey.to_json and return }
 		end
 	end
 
@@ -39,26 +39,71 @@ class SurveysController < ApplicationController
 		survey = @current_user.surveys.normal.find_by_id(params[:id])
 		if survey.nil?
 			survey = Survey.normal.find_by_id(params[:id])
-			if survey.nil?
-				flash[:notice] = "调查问卷不存在"
+			if !survey.nil? && survey.user.nil?
+				survey.user = @current_user
+			else
 				respond_to do |format|
 					format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 				end
-			else
-				survey.user = @current_user
 			end
 		end
-		retval = survey.save_meta_data(params[:survey])
-		case retval
-		when true
-			flash[:notice] = "保存成功"
-			respond_to do |format|
-				format.json	{ render :json => survey.serialize and return }
+		survey = survey.save_meta_data(params[:survey])
+		respond_to do |format|
+			format.json	{ render :json => survey.to_json and return }
+		end
+	end
+
+	def show_style_setting
+		survey = @current_user.surveys.normal.find_by_id(params[:id])
+		if survey.nil?
+			survey = Survey.normal.find_by_id(params[:id])
+			if !survey.nil? && survey.user.nil?
+				survey.user = @current_user
+			else
+				respond_to do |format|
+					format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+				end
 			end
-		else
-			respond_to do |format|
-				format.json	{ render :json => "unknown error" and return }
+		end
+		style_setting = survey.show_style_setting(params[:style_setting])
+		respond_to do |format|
+			format.json	{ render :json => style_setting and return }
+		end
+	end
+
+	def update_style_setting
+		survey = @current_user.surveys.normal.find_by_id(params[:id])
+		if survey.nil?
+			survey = Survey.normal.find_by_id(params[:id])
+			if !survey.nil? && survey.user.nil?
+				survey.user = @current_user
+			else
+				respond_to do |format|
+					format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+				end
 			end
+		end
+		retval = survey.update_style_setting(params[:style_settings])
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
+		end
+	end
+
+	def show_quality_control_setting
+		survey = @current_user.surveys.normal.find_by_id(params[:id])
+		if survey.nil?
+			survey = Survey.normal.find_by_id(params[:id])
+			if !survey.nil? && survey.user.nil?
+				survey.user = @current_user
+			else
+				respond_to do |format|
+					format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+				end
+			end
+		end
+		style_setting = survey.show_style_setting(params[:style_setting])
+		respond_to do |format|
+			format.json	{ render :json => style_setting and return }
 		end
 	end
 
@@ -78,17 +123,15 @@ class SurveysController < ApplicationController
 	def destroy
 		survey = @current_user.surveys.normal.find_by_id(params[:id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
 
-		survey.delete
+		retval = survey.delete
 		### close the publish of the survey
-		flash[:notice] = "调查问卷已成功删除"
 		respond_to do |format|
-			format.json	{ render :json => true and return }
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -108,16 +151,14 @@ class SurveysController < ApplicationController
 	def recover
 		survey = @current_user.surveys.deleted.find_by_id(params[:id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
 
-		survey.recover
-		flash[:notice] = "调查问卷已成功删除"
+		retval = survey.recover
 		respond_to do |format|
-			format.json	{ render :json => true and return }
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -137,16 +178,14 @@ class SurveysController < ApplicationController
 	def clear
 		survey = @current_user.surveys.deleted.find_by_id(params[:id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
 
-		survey.clear
-		flash[:notice] = "调查问卷已成功删除"
+		retval = survey.clear
 		respond_to do |format|
-			format.json	{ render :json => true and return }
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -167,15 +206,14 @@ class SurveysController < ApplicationController
 	def clone
 		survey = @current_user.surveys.normal.find_by_id(params[:id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
+
 		new_survey = survey.clone
-		flash[:notice] = "调查问卷已成功复制"
 		respond_to do |format|
-			format.json	{ render :json => new_survey.serialize and return }
+			format.json	{ render :json => new_survey.to_json and return }
 		end
 	end
 
@@ -195,13 +233,12 @@ class SurveysController < ApplicationController
 	def show
 		survey = @current_user.surveys.find_by_id(params[:id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
 		respond_to do |format|
-			format.json	{ render :json => survey.serialize and return }
+			format.json	{ render :json => survey.to_json and return }
 		end
 	end
 
@@ -223,23 +260,14 @@ class SurveysController < ApplicationController
 	def add_tag
 		survey = @current_user.surveys.find_by_id(params[:id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
-		survey.add_tag(params[:tag])
-		case retval
-		when ErrorEnum::TAG_EXIST
-			flash[:notice] = "标签已经存在"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::TAG_EXIST and return }
-			end
-		when true
-			flash[:notice] = "已成功添加标签"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+
+		retval = survey.add_tag(params[:tag])
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -261,23 +289,14 @@ class SurveysController < ApplicationController
 	def remove_tag
 		survey = @current_user.surveys.find_by_id(params[:id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
-		survey.remove_tag(params[:tag])
-		case retval
-		when ErrorEnum::TAG_NOT_EXIST
-			flash[:notice] = "标签已经存在"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::TAG_NOT_EXIST and return }
-			end
-		when true
-			flash[:notice] = "已成功删除标签"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+
+		retval = survey.remove_tag(params[:tag])
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -297,7 +316,7 @@ class SurveysController < ApplicationController
 	def index
 		survey_list = @current_user.surveys.list(params[:status], params[:public_status], params[:tags])
 		respond_to do |format|
-			format.json	{ render :json => survey_list.serialize and return }
+			format.json	{ render :json => survey_list.to_json and return }
 		end
 	end
 
@@ -318,23 +337,14 @@ class SurveysController < ApplicationController
 	def submit
 		survey = @current_user.normal.find_by_id(params[:id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
+
 		retval = survey.submit(params[:message])
-		case retval
-		when ErrorEnum::WRONG_PUBLISH_STATUS
-			flash[:notice] = "不能提交问卷"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_PUBLISH_STATUS and return }
-			end
-		when true
-			flash[:notice] = "已成功提交问卷"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -356,23 +366,14 @@ class SurveysController < ApplicationController
 	def reject
 		survey = @current_user.normal.find_by_id(params[:id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
+
 		retval = survey.reject(params[:message])
-		case retval
-		when ErrorEnum::WRONG_PUBLISH_STATUS
-			flash[:notice] = "不能拒绝问卷"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_PUBLISH_STATUS and return }
-			end
-		when true
-			flash[:notice] = "已成功拒绝问卷"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -394,23 +395,14 @@ class SurveysController < ApplicationController
 	def publish
 		survey = @current_user.normal.find_by_id(params[:id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
+
 		retval = survey.publish(params[:message])
-		case retval
-		when ErrorEnum::WRONG_PUBLISH_STATUS
-			flash[:notice] = "不能发布问卷"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_PUBLISH_STATUS and return }
-			end
-		when true
-			flash[:notice] = "已成功发布问卷"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -432,18 +424,14 @@ class SurveysController < ApplicationController
 	def close
 		survey = @current_user.normal.find_by_id(params[:id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
+
 		retval = survey.close(params[:message])
-		case retval
-		when true
-			flash[:notice] = "已成功关闭问卷"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -465,23 +453,13 @@ class SurveysController < ApplicationController
 	def pause
 		survey = @current_user.normal.find_by_id(params[:id])
 		if survey.nil?
-			flash[:notice] = "该调查问卷不存在"
 			respond_to do |format|
 				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
 			end
 		end
 		retval = survey.pause(params[:message])
-		case retval
-		when ErrorEnum::WRONG_PUBLISH_STATUS
-			flash[:notice] = "不能暂停问卷"
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_PUBLISH_STATUS and return }
-			end
-		when true
-			flash[:notice] = "已成功暂停问卷"
-			respond_to do |format|
-				format.json	{ render :json => true and return }
-			end
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 end

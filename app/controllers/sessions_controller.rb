@@ -77,7 +77,7 @@ class SessionsController < ApplicationController
 		else
 			respond_to do |format|
 				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => "unknow error" and return }
+				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
 			end
 		end
 	end
@@ -94,7 +94,7 @@ class SessionsController < ApplicationController
 		else
 			respond_to do |format|
 				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => "unknown error" and return }
+				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
 			end
 		end
 	end
@@ -111,7 +111,7 @@ class SessionsController < ApplicationController
 		else
 			respond_to do |format|
 				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => "unknown error" and return }
+				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
 			end
 		end
 	end
@@ -128,7 +128,7 @@ class SessionsController < ApplicationController
 		else
 			respond_to do |format|
 				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => "unknow error" and return }
+				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
 			end
 		end
 	end
@@ -145,7 +145,7 @@ class SessionsController < ApplicationController
 		else 
 			respond_to do |format|
 				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => "unknow error" and return }
+				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
 			end
 		end
 	end

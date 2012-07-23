@@ -1,11 +1,15 @@
 require 'error_enum'
 require 'securerandom'
-#Besides the fields that all types questions have, paragraph also have:
-class Paragraph < Issue
+#Besides the fields that all types questions have, email blank questions also have:
+# {
+#	 "input_id" : id of the email input
+#	}
+class EmailBlankIssue < Issue
 
-	ATTR_NAME_ARY = []
+	ATTR_NAME_ARY = %w[]
 
 	def initialize
+		
 	end
 
 	def update_issue(issue_obj)
