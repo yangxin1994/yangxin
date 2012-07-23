@@ -23,7 +23,7 @@ class User
 	field :introducer_to_pay, :type => Float
 # 0 user
 # 1 administrator
-<<<<<<< HEAD
+
   field :role, :type => Integer, default: 0
   field :auth_key, :type => String
   field :last_visit_time, :type => Integer
@@ -48,17 +48,8 @@ class User
   # QuillAdmin
   has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
   has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
-=======
-	field :role, :type => Integer, default: 0
-	field :auth_key, :type => String
-	field :last_visit_time, :type => Integer
-	field :level, :type => Integer, default: 0
-	field :level_expire_time, :type => Integer, default: -1
-	field :birthday, :type => Integer, default: -1
-	field :gender, :type => Boolean
-	field :address, :type => String
-	field :postcode, :type => String
-	field :phone, :type => String
+
+
 
 	#################################
 	# QuillMe
@@ -67,9 +58,7 @@ class User
 	has_many :orders, :class_name => "Order", :foreign_key => "user_id"	
 	# QuillAdmin
 	has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
-	has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
->>>>>>> 14627a53cf3501e03f0fffcb8ff1cf9282ab2cd2
-	
+	has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"		
 
 	attr_accessible :email, :username, :password, :registered_at
 
