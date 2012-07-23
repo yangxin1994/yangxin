@@ -63,7 +63,15 @@ OopsData::Application.routes.draw do
 			get 'pause'
 		end
 		resources :pages
-		resources :questions
+		resources :questions do
+			collection do
+				post 'insert_template_question'
+			end
+			member do
+				get 'convert_template_question_to_normal_question'
+			end
+		end
+		resources :logic_controls
 		resources :quotas do
 			collection do
 				post :set_exclusive
@@ -83,9 +91,12 @@ OopsData::Application.routes.draw do
 	end
 
 	resources :quality_control_questions do
-		collection do
-			put 'update_quality_control_answer'
+		member do
+			put 'update_answer'
 		end
+	end
+
+	resources :template_questions do
 	end
 
 	# QuillMe

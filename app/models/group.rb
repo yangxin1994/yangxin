@@ -60,6 +60,7 @@ class Group
 			return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal?(member["email"])
 			self.members << {"email" => member["email"], "mobile" => member["mobile"].to_s, "name" => member["name"].to_s, "is_exclusive" => member["is_exclusive"] == false}
 		end
-		return self.save
+		self.save
+		return self
 	end
 end

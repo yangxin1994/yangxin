@@ -50,7 +50,7 @@ class MatrixBlankIssue < Issue
 	attr_writer :is_rand, :inputs, :row_name, :is_row_rand, :row_num_per_group
 
 	ATTR_NAME_ARY = %w[inputs is_rand row_name is_row_rand row_num_per_group]
-	INPUT_ATTR_ARY = %w[input_id label data_type properties]
+	INPUT_ATTR_ARY = %w[input_id content data_type properties]
 
 	DATA_TYPE_ARY = %w[Text Number Phone Email Address Time]
 
@@ -58,7 +58,7 @@ class MatrixBlankIssue < Issue
 	NUMBER_PROP_ARY = %w[precision min_value max_value unit]
 	PHONE_PROP_ARY = %w[phone_type]
 	EMAIL_PROP_ARY = %w[]
-	ADDRESS_PROP_ARY = %w[format]
+	ADDRESS_PROP_ARY = %w[has_postcode format]
 	TIME_PROP_ARY = %w[format]
 
 	def initialize

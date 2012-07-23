@@ -57,7 +57,7 @@ class ApplicationController < ActionController::Base
 	#get the information of the signed user and set @current_user
 	def current_user
 		current_user_id = get_cookie(:current_user_id)
-		@current_user = current_user_id.nil? ? nil : User.find_by_id(current_user_id)
+		@current_user = current_user_id.nil? ? User.create_new_visitor_user : User.find_by_id(current_user_id)
 	end
 
 	def update_last_visit_time
@@ -85,7 +85,7 @@ class ApplicationController < ActionController::Base
 	#judge whether there is a user signed in currently
 	def user_signed_in?
 		logger.info "#{@current_user}"
-		return !!@current_user && @current_user.auth_key == get_cookie(:auth_key)
+		return !!@current_user && get_cookie(:auth_key).to_s != "" && @current_user.auth_key == get_cookie(:auth_key)
 	end
 
 	#judge whether there is no user signed in currently

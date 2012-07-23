@@ -20,7 +20,7 @@ class RankIssue < Issue
 	attr_writer :items, :is_rand
 
 	ATTR_NAME_ARY = %w[items is_rand]
-	ITEM_ATTR_ARY = %w[label icon icon_num has_input has_unknow desc_ary]
+	ITEM_ATTR_ARY = %w[input_id content icon icon_num has_input has_unknow desc_ary]
 
 	def initialize
 		@items = []

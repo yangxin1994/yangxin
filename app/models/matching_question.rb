@@ -3,23 +3,31 @@ require 'error_enum'
 class MatchingQuestion
 	include Mongoid::Document
 	field :question_id, :type => String, default: ""
-	field :matching_question_id, :type => String, default: ""
-	scope :matchings, lambda { |question_id| where(:question_id => question_id) }
+	field :matching_ary, :type => Array, default: []
+
+	def self.find_by_question_id(question_id)
+		matching = MatchingQuestion.where(:question_id => question_id).first
+		return matching
+	end
 
 	def self.create_matching(questions_id_ary)
-		questions_id_ary.each do |id_1|
-			questions_id_ary.each do |id_2|
-				self.new(:question_id => id_1, :matching_question_id => id_2) if id_1 != id_2
-				self.save
-			end
+		questions_id_ary.each do |q_id|
+			self.new(:question_id => q_id, :matching_ary => questions_id_ary)
+			self.save
 		end
 	end
 
 	def self.get_matching_question_ids(question_id)
-		matchings = MatchingQuestion.matchings
-		matching_question_ids = matchings.map {|matching| matching.matching_question_id }
-		matching_question_ids << question_id
-		return matching_question_ids
+		matching = MatchingQuestion.matchings(question_id)
+		return ErrorEnum::MATCING_NOT_EXIST if matching.nil?
+		return matching.matching_ary
+	end
+
+	def self.matching_question_id_groups
+		matching_question_id_groups = []
+		MatchingQuestion.each do |ele|
+			matching_question_id_groups << ele.matching_ary if !matching_question_id_groups.include?(ele.matching_ary)
+		end
 	end
 
 end

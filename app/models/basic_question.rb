@@ -11,7 +11,7 @@ require 'error_enum'
 #Structure of different type question object can be found at ChoiceQuestion, MatrixChoiceQuestion, TextBlankQuestion, NumberBlankQuestion, EmailBlankQuestion, PhoneBlankQuestion, TimeBlankQuestion, AddressBlankQuestion, BlankQuestion, MatrixBlankQuestion, RankQuestion, SortQuestion, ConstSumQuestion
 class BasicQuestion
 	include Mongoid::Document
-	field :content, :type => String, default: OOPSDATA["question_default_settings"]["content"]
+	field :content, :type => Hash, default: {"text" => "", "image" => "", "audio" => "", "video" => ""}
 	field :note, :type => String, default: OOPSDATA["question_default_settings"]["note"]
 	field :issue, :type => Hash
 	field :question_type, :type => Integer
@@ -25,7 +25,7 @@ class BasicQuestion
 	def self.has_question_type(question_type)
 		begin
 			return !Issue::ISSUE_TYPE[question_type].nil?
-		rescue Exception => e
+		rescue
 			return false
 		end
 	end

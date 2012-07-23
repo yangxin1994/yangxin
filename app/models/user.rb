@@ -4,25 +4,26 @@ require 'error_enum'
 require 'tool'
 #Corresponding to the User collection in database. Record the user information and activities related to the usage of OopsData system.
 class User
-  include Mongoid::Document
+	include Mongoid::Document
 	include Mongoid::Timestamps
-  field :email, :type => String
-  field :username, :type => String
-  field :password, :type => String
+	field :email, :type => String
+	field :username, :type => String
+	field :password, :type => String
 # 0 unregistered
 # 1 registered but not activated
 # 2 registered, activated, but not signed in
 # 3, 4, ... 用户首次登录后，需要填写一些个人信息，状态可以记录用户填写个人信息到了哪一步，以便用户填写过程中关闭浏览器，再次打开后可以继续填写
 # -1 deleted
-  field :status, :type => Integer, default: 0
-  field :last_login_time, :type => Integer
-  field :last_login_ip, :type => String
-  field :login_count, :type => Integer, default: 0
-  field :activate_time, :type => Integer
-  field :introducer_id, :type => Integer
-  field :introducer_to_pay, :type => Float
+	field :status, :type => Integer, default: 0
+	field :last_login_time, :type => Integer
+	field :last_login_ip, :type => String
+	field :login_count, :type => Integer, default: 0
+	field :activate_time, :type => Integer
+	field :introducer_id, :type => Integer
+	field :introducer_to_pay, :type => Float
 # 0 user
 # 1 administrator
+<<<<<<< HEAD
   field :role, :type => Integer, default: 0
   field :auth_key, :type => String
   field :last_visit_time, :type => Integer
@@ -47,6 +48,27 @@ class User
   # QuillAdmin
   has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
   has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
+=======
+	field :role, :type => Integer, default: 0
+	field :auth_key, :type => String
+	field :last_visit_time, :type => Integer
+	field :level, :type => Integer, default: 0
+	field :level_expire_time, :type => Integer, default: -1
+	field :birthday, :type => Integer, default: -1
+	field :gender, :type => Boolean
+	field :address, :type => String
+	field :postcode, :type => String
+	field :phone, :type => String
+
+	#################################
+	# QuillMe
+	field :point, :type => Integer
+	has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
+	has_many :orders, :class_name => "Order", :foreign_key => "user_id"	
+	# QuillAdmin
+	has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
+	has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
+>>>>>>> 14627a53cf3501e03f0fffcb8ff1cf9282ab2cd2
 	
 
 	attr_accessible :email, :username, :password, :registered_at
@@ -54,11 +76,15 @@ class User
 	has_many :surveys
 	has_many :groups
 	has_many :materials
-  has_many :public_notices
-  has_many :question_feedbacks, class_name: "Feedback", inverse_of: :question_user
-  has_many :answer_feedbacks, class_name: "Feedback", inverse_of: :answer_user
-  has_many :faqs
-  has_many :advertisements
+	has_many :public_notices
+	has_many :question_feedbacks, class_name: "Feedback", inverse_of: :question_user
+	has_many :answer_feedbacks, class_name: "Feedback", inverse_of: :answer_user
+	has_many :faqs
+	has_many :advertisements
+
+	has_many :answers
+
+
 
 	public
 	#*description*: Find a user given an email, username and user id. Deleted users are not included.
@@ -155,6 +181,10 @@ class User
 		return self.status == -1
 	end
 
+	def is_registered
+		return self.status > 0
+	end
+
 	def is_activated
 		return self.status > 1
 	end
@@ -192,8 +222,9 @@ class User
 		return current_user
 	end
 
-	def self.create_new_visitor_user(user)
+	def self.create_new_visitor_user
 		user = User.new
+		user.save
 		return user
 	end
 
@@ -326,38 +357,6 @@ class User
 		end
 	end
 
-#--
-############### operations about quotas #################
-#++
-	def show_quota(survey_id)
-		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		survey.show_quota(self)
-	end
-
-	def add_quota_rule(survey_id, quota_rule)
-		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		survey.add_quota_rule(self, quota_rule)
-	end
-
-	def update_quota_rule(survey_id, quota_rule_index, quota_rule)
-		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		survey.update_quota_rule(self, quota_rule_index, quota_rule)
-	end
-
-	def delete_quota_rule(survey_id, quota_rule_index)
-		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		survey.delete_quota_rule(self, quota_rule_index)
-	end
-
-	def set_exclusive(survey_id, is_exclusive)
-		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		survey.set_exclusive(self, is_exclusive)
-	end
 #--
 ############### operations about charge #################
 #++

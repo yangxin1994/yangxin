@@ -36,6 +36,47 @@ class QuestionsController < ApplicationController
 		end
 	end
 
+	def insert_template_question
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		end
+
+		question = survey.insert_template_question(params[:page_index].to_i, params[:question_id], params[:template_question_id])
+		respond_to do |format|
+			format.json	{ render :json => question and return }
+		end
+	end
+
+	def convert_template_question_to_normal_question
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		end
+
+		question = survey.convert_template_question_to_normal_question(params[:id])
+		respond_to do |format|
+			format.json	{ render :json => question and return }
+		end
+	end
+
+	def insert_quality_control_question
+		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if survey.nil?
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		end
+
+		questions = survey.insert_quality_control_question(params[:page_index].to_i, params[:question_id], params[:quality_control_question_id])
+		respond_to do |format|
+			format.json	{ render :json => questions and return }
+		end
+	end
 
 	#*method*: put
 	#

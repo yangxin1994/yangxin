@@ -64,17 +64,17 @@ class RegistrationsController < ApplicationController
 			end
 		else # create user_information model
 			third_party_info = decrypt_third_party_user_id(params[:third_party_info])
-      User.combine(params[:user]["email"], *third_party_info) if !third_party_info.nil?
+			User.combine(params[:user]["email"], *third_party_info) if !third_party_info.nil?
 			# automatically activate for google user
 			if third_party_info && third_party_info[0]=="google"
 				activate_info = {"email" => params[:user]["email"], "time" => Time.now.to_i}
 				User.activate(activate_info)
-	    else
-		    UserMailer.welcome_email(user).deliver
-		  end
+			else
+				UserMailer.welcome_email(user).deliver
+			end
 			# succesfully registered
 			flash[:notice] = "注册成功，请到您的邮箱中点击激活链接进行激活" if user.status == 0
-      flash[:notice] = "注册成功，Google邮箱默认已激活" if user.status == 1
+			flash[:notice] = "注册成功，Google邮箱默认已激活" if user.status == 1
 			respond_to do |format|
 				format.html	{ redirect_to sessions_path and return }
 				format.json	{ render :json => true and return }

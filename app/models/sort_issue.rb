@@ -14,11 +14,11 @@ require 'securerandom'
 #  "max": maximum number of items needed to be sorted(int)
 # }
 class SortIssue < Issue
-	attr_reader :items, :is_rand
-	attr_writer :items, :is_rand
+	attr_reader :items, :min, :max, :is_rand
+	attr_writer :items, :min, :max, :is_rand
 
-	ATTR_NAME_ARY = %w[items is_rand]
-	ITEM_ATTR_ARY = %w[item_id content has_input min max]
+	ATTR_NAME_ARY = %w[items is_rand min max]
+	ITEM_ATTR_ARY = %w[input_id content has_input]
 
 	def initialize
 		@items = []

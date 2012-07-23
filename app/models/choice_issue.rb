@@ -22,7 +22,7 @@ class ChoiceIssue < Issue
 	attr_writer :choices, :choice_num_per_row, :min_choice, :max_choice, :is_list_style, :is_rand
 
 	ATTR_NAME_ARY = %w[choices choice_num_per_row min_choice max_choice is_list_style is_rand]
-	CHOICE_ATTR_ARY = %w[content has_input is_exclusive]
+	CHOICE_ATTR_ARY = %w[input_id content has_input is_exclusive]
 
 	def initialize
 		@choice_num_per_row = -1
