@@ -1,5 +1,7 @@
 OopsData::Application.routes.draw do
 
+  resources :lotteries
+
   resources :advertisements
 
 	resources :faqs, :public_notices, :feedbacks
@@ -106,6 +108,12 @@ OopsData::Application.routes.draw do
 		resources :presents do
 			collection do
 				get 'expired'
+				delete 'delete'
+			end
+		end
+		resources :order do
+			collection do
+
 			end
 		end
 

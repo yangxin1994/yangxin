@@ -17,7 +17,8 @@ class PresentsController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def index
-		@presents = Present.can_be_rewarded.page(page) || ErrorEnum::PresentNotFound
+		@presents = Present.can_be_rewarded.page(page)
+		@presents = ErrorEnum::PresentNotFound if @presents.empty? 
 		respond_to do |format|
 			format.html 
 			format.json { render json: @presents }
@@ -34,6 +35,7 @@ class PresentsController < ApplicationController
 	end
 
 	def show
+		# TO DO is owners request?
 		begin
 			retval = Present.find(params[:id])
 		rescue Mongoid::Errors::DocumentNotFound

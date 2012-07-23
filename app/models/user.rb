@@ -42,7 +42,8 @@ class User
   # QuillMe
   field :point, :type => Integer
   has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
-  has_many :orders, :class_name => "Order", :foreign_key => "user_id"	
+  has_many :orders, :class_name => "Order", :foreign_key => "user_id"
+  has_many :lottery_numbers
   # QuillAdmin
   has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
   has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
