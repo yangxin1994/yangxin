@@ -28,10 +28,7 @@ class User
 	field :last_visit_time, :type => Integer
 	field :level, :type => Integer, default: 0
 	field :level_expire_time, :type => Integer, default: -1
-<<<<<<< HEAD
 
-=======
->>>>>>> 14627a53cf3501e03f0fffcb8ff1cf9282ab2cd2
 	field :birthday, :type => Integer, default: -1
 	field :gender, :type => Boolean
 	field :address, :type => String
@@ -41,19 +38,12 @@ class User
 	#################################
 	# QuillMe
 	field :point, :type => Integer
-<<<<<<< HEAD
+
 	has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"  
 	has_many :orders, :class_name => "Order", :foreign_key => "user_id" 
 	# QuillAdmin
 	has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
 	has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"  
-=======
-	has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
-	has_many :orders, :class_name => "Order", :foreign_key => "user_id"	
-	# QuillAdmin
-	has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
-	has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
->>>>>>> 14627a53cf3501e03f0fffcb8ff1cf9282ab2cd2
 	
 	before_save :set_updated_at
 	before_update :set_updated_at
@@ -68,13 +58,6 @@ class User
 	has_many :answer_feedbacks, class_name: "Feedback", inverse_of: :answer_user
 	has_many :faqs
 	has_many :advertisements
-<<<<<<< HEAD
-=======
-
-	has_many :answers
-
-
->>>>>>> 14627a53cf3501e03f0fffcb8ff1cf9282ab2cd2
 
 	private
 	def set_updated_at
