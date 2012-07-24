@@ -49,6 +49,9 @@ module ErrorEnum
 	PresentNotFound = 21001
 	InvalidPresentId = 21002
 
+	# Award Error Code
+	AwardBudgetCounldNotBeBlank = 21511
+
 	TYPE_ERROR = -100001
 	RANGE_ERROR = -100002
 	SAVE_FAILED = -100004
