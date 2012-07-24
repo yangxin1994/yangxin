@@ -2,7 +2,7 @@ class Faq
 	include Mongoid::Document 
 	include Mongoid::Timestamps
 
-	# faq_type divide from 1, 2, 4, 8, ..., default 0 includes all types.
+	# faq_type divide from 1, 2, 4, 8, ...,
 	field :faq_type, :type => Integer
 	field :question, :type => String
 	field :answer, :type => String
@@ -10,76 +10,138 @@ class Faq
 	belongs_to :user
 
 	attr_accessible :faq_type, :question, :answer
+
+	validates_presence_of :faq_type, :question, :answer
 		
 	#faq_type max number
 	MAX_TYPE = 7
-	
-	#*description*: verify the faq_type value
-	#
-	#*params*:
-	#* type_number: the number of type: 1, 2, 4, ...
-	#
-	#*retval*:
-	#no return
-	def faq_type=(type_number)
-	
-		type_number_class = type_number.class
-		temp = type_number
-		type_number = type_number.to_i
-		
-		# if type_number is string, to_i will return 0.
-		# "0" will raise RangeError, "type1" will raise TypeError
-		raise TypeError if type_number_class != Fixnum && type_number == 0 && temp.to_s.strip !="0"
-		
-		if (type_number % 2 != 0 && type_number !=1) || 
-			type_number <= 0 || type_number > 2**MAX_TYPE
-			
-			raise RangeError
-		end
-		super
-	end
-	
-	#*description*: rewrite save method from mongoid
-	#
-	#*params*:
-	#* user: create and update are same user
-	#
-	#*retval*
-	#true or false
-	def save(user=nil)
-		self.user = user if user && user.instance_of?(User)
-		return super()
-	end
-	
-	#*description*: rewrite update_attributes method from mongoid
-	#
-	#*params*:
-	#* params: a hash for update attrs
-	#* user: create and update are same user
-	#
-	#*retval*
-	#true or false
-	def update_attributes(params, user=nil)
-		self.user = user if user && user.instance_of?(User)
-		return super(params)
-	end
 	
 	#--
 	# class methods
 	#++
 	class << self	
+
+		#*description*: verify the faq_type value
+		#
+		#*params*:
+		#* type_number: the number of type: 1, 2, 4, ...
+		#
+		#*retval*:
+		#true or ErrorEnum
+		def verify_faq_type(type_number)
+		
+			type_number_class = type_number.class
+			temp = type_number
+			type_number = type_number.to_i
+			
+			# if type_number is string, to_i will return 0.
+			# "0" will return RangeError, "type1" will return TypeError
+			return ErrorEnum::FAQ_TYPE_ERROR if type_number_class != Fixnum && type_number == 0 && temp.to_s.strip !="0"
+			
+			if (type_number % 2 != 0 && type_number !=1) || 
+				type_number <= 0 || type_number > 2**MAX_TYPE
+				
+				return ErrorEnum::FAQ_RANGE_ERROR
+			end
+			return true
+		end
+
+		# CURD
+
+		#*description*:
+		# different with find method, find_by_id will return ErrorEnum if not found.
+		#
+		#*params*:
+		#* faq_id
+		#
+		#*retval*:
+		#* ErrorEnum or faq instance
+		def find_by_id(faq_id)
+			faq = Faq.where(_id: faq_id.to_s).first
+			return ErrorEnum::FAQ_NOT_EXIST if faq.nil?
+			return faq
+		end
+
+		#*description*:
+		# create faq for different type.
+		#
+		#*params*:
+		#* new_faq: a hash for faq attributes.
+		#* user: who create faq
+		#
+		#*retval*:
+		#* ErrorEnum or faq instance
+		def create_faq(new_faq, user)
+			new_faq[:faq_type] = new_faq[:faq_type] || 1
+			retval = verify_faq_type(new_faq[:faq_type])
+			return retval if retval != true
+
+			faq = Faq.new(new_faq)
+			faq.user = user if user && user.instance_of?(User)
+
+			if faq.save then
+				return faq 
+			else
+				return ErrorEnum::FAQ_SAVE_FAILED
+			end
+		end
+
+		#*description*:
+		# update faq 
+		#
+		#*params*:
+		#* faq_id
+		#* attributes: update attributes
+		#* user: who update faq
+		#
+		#*retval*:
+		#* ErrorEnum or faq instance
+		def update_faq(faq_id, attributes, user)
+			faq = Faq.find_by_id(faq_id)
+			return faq if !faq.instance_of?(Faq)
+
+			if attributes[:faq_type] then
+				retval = verify_faq_type(attributes[:faq_type]) 
+				return retval if retval != true
+			end
+
+			faq.user = user if user && user.instance_of?(User)
+
+			if faq.update_attributes(attributes) then
+				return faq 
+			else
+				return ErrorEnum::FAQ_SAVE_FAILED
+			end
+		end
+
+		#*description*:
+		# destroy faq 
+		#
+		#*params*:
+		#* faq_id
+		#
+		#*retval*:
+		#* ErrorEnum or Boolean
+		def destroy_by_id(faq_id)
+			faq = Faq.find_by_id(faq_id)
+			return faq if !faq.instance_of?(Faq)
+			return faq.destroy
+		end
 		
 		#*description*: list faqs with types and value
 		#
 		#*retval*:
-		#faq array 
-		def condition(type_number=0, value)
-		
+		# faq array 
+		def list_by_type_and_value(type_number=0, value)
+
+			#if value is empty, involve list_by_type
+			list_by_type(type_number) if value.nil? || (value && value.to_s.strip == "")
+
 			#verify params
-			raise TypeError if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
-			raise RangeError if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))		
+			return ErrorEnum::FAQ_TYPE_ERROR if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
+			return ErrorEnum::FAQ_RANGE_ERROR if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))		
+
 			type_number = type_number.to_i
-			raise ArgumentError if value && value.to_s.strip == ""
 			
 			return [] if !type_number.instance_of?(Fixnum) || type_number <= 0
 			faqs = []
@@ -104,10 +166,10 @@ class Faq
 		#
 		#*retval*:
 		#faq array
-		def find_by_type(type_number=0)
+		def list_by_type(type_number=0)
 			#verify params
-			raise TypeError if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
-			raise RangeError if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))
+			return ErrorEnum::FAQ_TYPE_ERROR if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
+			return ErrorEnum::FAQ_RANGE_ERROR if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))
 
 			type_number = type_number.to_i
 			

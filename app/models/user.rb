@@ -44,21 +44,14 @@ class User
   field :point, :type => Integer
   has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
   has_many :orders, :class_name => "Order", :foreign_key => "user_id"
-  has_many :lottery_numbers
+  has_many :lottery_codes
   # QuillAdmin
   has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
   has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
 
+	before_save :set_updated_at
+	before_update :set_updated_at
 
-
-	#################################
-	# QuillMe
-	field :point, :type => Integer
-	has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
-	has_many :orders, :class_name => "Order", :foreign_key => "user_id"	
-	# QuillAdmin
-	has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
-	has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"		
 
 	attr_accessible :email, :username, :password, :registered_at
 
@@ -71,8 +64,15 @@ class User
 	has_many :faqs
 	has_many :advertisements
 
+
 	has_many :answers
 
+
+
+	private
+	def set_updated_at
+		self.updated_at = Time.now.to_i
+	end
 
 
 	public
@@ -228,9 +228,9 @@ class User
 	#* true: when successfully activated or already activated
 	def self.activate(activate_info)
 		user = User.find_by_email(activate_info["email"])
-		return ErrorEnum::USER_NOT_EXIST if user.nil?			# email account does not exist
+		return ErrorEnum::USER_NOT_EXIST if user.nil?     # email account does not exist
 		return true  if user.is_activated
-		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i		# expired
+		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i    # expired
 		user = User.find_by_email(activate_info["email"])
 		user.status = 1
 		user.activate_time = Time.now.to_i
@@ -248,8 +248,8 @@ class User
 	#* EMAIL_NOT_EXIST
 	#* EMAIL_NOT_ACTIVATED
 	def self.third_party_login(email, client_ip)
-		return ErrorEnum::USER_NOT_EXIST if !user_exist_by_email?(email)			# email account does not exist
-		return ErrorEnum::EMAIL_NOT_ACTIVATED if !user_activate?(email)		# not activated
+		return ErrorEnum::USER_NOT_EXIST if !user_exist_by_email?(email)      # email account does not exist
+		return ErrorEnum::EMAIL_NOT_ACTIVATED if !user_activate?(email)   # not activated
 		user = User.find_by_email(email)
 		# record the login information
 		user.last_login_time = Time.now.to_i
@@ -294,7 +294,7 @@ class User
 	#* EMAIL_NOT_EXIST
 	#* WRONG_PASSWORD_CONFIRMATION
 	def self.reset_password(email, new_password, new_password_confirmation)
-		return ErrorEnum::USER_NOT_EXIST if user_exist_by_email?(email) == false			# email account does not exist
+		return ErrorEnum::USER_NOT_EXIST if user_exist_by_email?(email) == false      # email account does not exist
 		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if new_password != new_password_confirmation
 		user = User.find_by_email(email)
 		user.password = Encryption.encrypt_password(new_password)
@@ -312,7 +312,7 @@ class User
 	#* true: when successfully login
 	#* WRONG_PASSWORD
 	def reset_password(old_password, new_password)
-		return ErrorEnum::WRONG_PASSWORD if self.password != Encryption.encrypt_password(old_password)	# wrong password
+		return ErrorEnum::WRONG_PASSWORD if self.password != Encryption.encrypt_password(old_password)  # wrong password
 		self.password = Encryption.encrypt_password(new_password)
 		self.save
 		return true

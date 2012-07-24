@@ -1,0 +1,2 @@
+class SurveyAuditor < SystemUser
+end

@@ -8,6 +8,8 @@
 
 =link_to "奇虎360", "https://openapi.360.cn/oauth2/authorize?client_id=#{@qihu_client_id}&response_type=code&redirect_uri=#{@qihu_redirect_uri}&scope=basic&display=default"
 
+=link_to "tudou", "http://api.tudou.com/auth/request_token.oauth?oauth_consumer_key=fa2c499b3f33370e&oauth_signature_method=RSA-SHA1&oauth_timestamp=2134333&oauth_nonce=345454&oauth_signature=347sskfsdf87sdfsdjfj98uj"
+
 = form_tag({:controller => "sessions"}, :method => "post") do
 
   %p

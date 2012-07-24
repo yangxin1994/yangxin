@@ -10,81 +10,145 @@ class PublicNotice
 	belongs_to :user
 	
 	attr_accessible :title, :content, :attachment, :public_notice_type
+
+	validates_presence_of :title, :content, :public_notice_type
 	
 	# the max of multiple type value => 2**7
 	MAX_TYPE = 7
 	
 	#--
 	# instance methods
-	#++u
+	#++
 	#
 	
-	#*description*: verify the public_notice_type value
-	#
-	#*params*:
-	#* type_number: the number of type: 1, 2, 4, ...
-	#
-	#*retval*:
-	#no return
-	def public_notice_type=(type_number)
 	
-		type_number_class = type_number.class
-		temp = type_number
-		type_number = type_number.to_i
-		
-		# if type_number is string, to_i will return 0.
-		# "0" will raise RangeError, "type1" will raise TypeError
-		raise TypeError if type_number_class != Fixnum && type_number == 0 && temp.to_s.strip !="0"
-		
-		if (type_number % 2 != 0 && type_number !=1) || 
-			type_number <= 0 || type_number > 2**MAX_TYPE
-			
-			raise RangeError
-		end
-		super
-	end
-
-	#*description*: rewrite save method from mongoid
-	#
-	#*params*:
-	#* user: create and update are same user
-	#
-	#*retval*
-	#true or false
-	def save(user=nil)
-		self.user = user if user && user.instance_of?(User)
-		return super()
-	end
-	
-	#*description*: rewrite update_attributes method from mongoid
-	#
-	#*params*:
-	#* params: a hash for update attrs
-	#* user: create and update are same user
-	#
-	#*retval*
-	#true or false
-	def update_attributes(params, user=nil)
-		self.user = user if user && user.instance_of?(User)
-		return super(params)
-	end
-
 	#--
 	# class methods
 	#++
 	
 	class << self
 
+		#*description*: verify the public_notice_type value
+		#
+		#*params*:
+		#* type_number: the number of type: 1, 2, 4, ...
+		#
+		#*retval*:
+		#no return
+		def verify_public_notice_type(type_number)
+		
+			type_number_class = type_number.class
+			temp = type_number
+			type_number = type_number.to_i
+			
+			# if type_number is string, to_i will return 0.
+			# "0" will return RangeError, "type1" will return TypeError
+			return ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR if type_number_class != Fixnum && type_number == 0 && temp.to_s.strip !="0"
+			
+			if (type_number % 2 != 0 && type_number !=1) || 
+				type_number <= 0 || type_number > 2**MAX_TYPE
+				
+				return ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR
+			end
+			return true
+		end
+
+		# CURD
+
+		#*description*:
+		# different with find method, find_by_id will return ErrorEnum if not found.
+		#
+		#*params*:
+		#* public_notice_id
+		#
+		#*retval*:
+		#* ErrorEnum or public_notice instance
+		def find_by_id(public_notice_id)
+			public_notice = PublicNotice.where(_id: public_notice_id.to_s).first
+			return ErrorEnum::PUBLIC_NOTICE_NOT_EXIST if public_notice.nil?
+			return public_notice
+		end
+
+		#*description*:
+		# create public_notice for different type.
+		#
+		#*params*:
+		#* new_public_notice: a hash for public_notice attributes.
+		#* user: who create public_notice
+		#
+		#*retval*:
+		#* ErrorEnum or public_notice instance
+		def create_public_notice(new_public_notice, user)
+			new_public_notice[:public_notice_type] = new_public_notice[:public_notice_type] || 1
+			retval = verify_public_notice_type(new_public_notice[:public_notice_type])
+			return retval if retval != true
+
+			public_notice = PublicNotice.new(new_public_notice)
+			public_notice.user = user if user && user.instance_of?(User)
+
+			if public_notice.save then
+				return public_notice 
+			else
+				return ErrorEnum::PUBLIC_NOTICE_SAVE_FAILED
+			end
+		end
+
+		#*description*:
+		# update public_notice 
+		#
+		#*params*:
+		#* public_notice_id
+		#* attributes: update attributes
+		#* user: who update public_notice
+		#
+		#*retval*:
+		#* ErrorEnum or public_notice instance
+		def update_public_notice(public_notice_id, attributes, user)
+			public_notice = PublicNotice.find_by_id(public_notice_id)
+			return public_notice if !public_notice.instance_of?(PublicNotice)
+
+			if attributes[:public_notice_type] then
+				retval = verify_public_notice_type(attributes[:public_notice_type]) 
+				return retval if retval != true
+			end
+
+			public_notice.user = user if user && user.instance_of?(User)
+
+			if public_notice.update_attributes(attributes) then
+				return public_notice 
+			else
+				return ErrorEnum::PUBLIC_NOTICE_SAVE_FAILED
+			end
+		end
+
+		#*description*:
+		# destroy public_notice 
+		#
+		#*params*:
+		#* public_notice_id
+		#
+		#*retval*:
+		#* ErrorEnum or Boolean
+		def destroy_by_id(public_notice_id)
+			public_notice = PublicNotice.find_by_id(public_notice_id)
+			return public_notice if !public_notice.instance_of?(PublicNotice)
+			return public_notice.destroy
+		end
+
 		#*description*: list public_notice s with condition
 		#
 		#*retval*:
 		#public_notice array 
-		def condition(type_number=0, value)
+		def list_by_type_and_value(type_number=0, value)
+
+			#if value is empty, involve list_by_type
+			list_by_type(type_number) if value.nil? || (value && value.to_s.strip == "")
+
 			#verify params
-			raise TypeError if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
-			raise RangeError if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))		
+			return ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
+			return ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))	
+
 			type_number = type_number.to_i
-			raise ArgumentError if value && value.to_s.strip == ""
 
 			return [] if !type_number.instance_of?(Fixnum) || type_number <= 0
 			public_notices = []
@@ -109,10 +173,10 @@ class PublicNotice
 		#
 		#*retval*:
 		#public_notice array
-		def find_by_type(type_number=0)
+		def list_by_type(type_number=0)
 			#verify params
-			raise TypeError if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
-			raise RangeError if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))
+			return ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
+			return ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))
 
 			type_number = type_number.to_i
 			

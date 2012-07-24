@@ -1,16 +1,22 @@
 OopsData::Application.routes.draw do
 
-  resources :lotteries
+
+  
 
   resources :advertisements
 
-	resources :faqs, :public_notices, :feedbacks
+
 	get 'faqs/condition'
 	get 'faqs/types'
 	get 'public_notices/condition'
 	get 'public_notices/types'
 	get 'feedbacks/condition'
 	get 'feedbacks/types'
+
+	resources :faqs, :public_notices, :feedbacks, :advertisements, :system_users
+	post 'system_users/lock'
+	post 'system_users/unlock'
+
 	match 'feedback/:id/reply' => "feedback#reply"
 
 	get "home/index"
@@ -100,6 +106,7 @@ OopsData::Application.routes.draw do
 	end
 
 	# QuillMe
+	resources :lotteries
 	resources :presents do
 		collection do
 			get 'cash'
