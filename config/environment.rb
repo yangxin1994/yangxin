@@ -6,3 +6,4 @@ OopsData::Application.initialize!
 
 Encoding.default_external = Encoding::UTF_8
 Encoding.default_internal = Encoding::UTF_8
+CAPTCHA_SALT = 'f2413baa93a31bccfe8fdc2d604be0813775f724'
