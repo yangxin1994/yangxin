@@ -1,5 +1,6 @@
 require 'net/http'
 require 'uri'
+
 module Tool
 
 	def self.email_illegal?(email)
@@ -21,20 +22,17 @@ module Tool
 		uri = URI.parse(uri)
 		http = Net::HTTP.new(uri.host, uri.port)
 		http.use_ssl = ssl
-		
 		request = Net::HTTP::Get.new(uri.request_uri)
-		
 		response = http.request(request)
-
-		puts response.body
-
 		return response
 	end
 
+	#
+	# check_ip_mask("218.192.3.42", "218.192.*.*")
 	def self.check_ip_mask(ip_address, ip_mask)
-	end
-
-	def self.get_region_by_ip(ip)
+		return ErrorEnum::IP_FORMAT_ERROR if ip_address.to_s=~/^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/
+		return ErrorEnum::IP_FORMAT_ERROR if !ip_address.to_s.split('.').select{|sec| sec.to_i > 255 || sec.to_i < 0}.empty?
+		return ip_address.match(ip_mask).to_s == ip_address
 	end
 
 	def self.check_question_answer(answer, standard_answer, fuzzy)

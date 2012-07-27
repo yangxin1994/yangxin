@@ -58,12 +58,13 @@ class ApplicationController < ActionController::Base
 
 	#obtain the ip address of the clien, and set it as @remote_ip
 	def client_ip
-		@remote_ip = request.env["HTTP_X_FORWARDED_FOR"]
+		#@remote_ip = request.env["HTTP_X_FORWARDED_FOR"]
+		@remote_ip = request.remote_ip
 	end
 
 	#judge whether there is a user signed in currently
 	def user_signed_in?
-		logger.info "#{@current_user}"
+		#logger.info "#{@current_user}"
 		return !!@current_user && get_cookie(:auth_key).to_s != "" && @current_user.auth_key == get_cookie(:auth_key)
 	end
 
