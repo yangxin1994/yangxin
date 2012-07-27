@@ -5,12 +5,6 @@ GIT
     mini_magick (3.4)
       subexec (~> 0.2.1)
 
-PATH
-  remote: ~/Rrojects/mini_captcha/
-  specs:
-    mini_captcha (1.0.2)
-      mini_magick
-
 GEM
   remote: http://rubygems.org/
   specs:
@@ -203,7 +197,6 @@ DEPENDENCIES
   log4r
   memcache-client
   mime-types
-  mini_captcha!
   mini_magick!
   minitest
   mongoid (~> 2.4)
