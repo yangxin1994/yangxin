@@ -1,5 +1,5 @@
 class Present < BasicPresent
-
+	
 	field :point, :type => Integer
 	# can be -1 (has no), 0 (expired), 1 (can be rewarded)
 	field :status, :type => Integer, :default => 1
@@ -17,16 +17,16 @@ class Present < BasicPresent
 	validates :quantity, :presence => true,
 											 :numericality => { :greater_than_or_equal_to => 0 }
 
-	def self.find_by_id(id)
-		begin
-			retval = self.find(id)
-		rescue Mongoid::Errors::DocumentNotFound
-			retval = ErrorEnum::PresentNotFound
-		rescue BSON::InvalidObjectId
-			retval = ErrorEnum::InvalidPresentId
-		end
-		retval
-	end
+	# def self.find_by_id(id)
+	# 	begin
+	# 		retval = self.find(id)
+	# 	rescue Mongoid::Errors::DocumentNotFound
+	# 		retval = ErrorEnum::PresentNotFound
+	# 	rescue BSON::InvalidObjectId
+	# 		retval = ErrorEnum::InvalidPresentId
+	# 	end
+	# 	retval
+	# end
 
 	# def delete
 	# 	begin

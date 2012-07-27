@@ -109,15 +109,13 @@ OopsData::Application.routes.draw do
 	resources :lotteries
 	resources :presents do
 		collection do
-			get 'cash'
-			get 'virtual_goods'
+			get :index, :virtualgoods, :cash, :realgoods, :stockout
 			get 'edit'
 		end
 	end
 	resources :orders do
 		collection do
-			get :cash, :realgoods, :virtualgoods, :lottery, :award
-			get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
+			get :for_cash, :for_realgoods, :for_virtualgoods, :for_lottery
 		end
 	end
 	resources :points, :only => 'index'
@@ -129,9 +127,9 @@ OopsData::Application.routes.draw do
 				delete 'delete'
 			end
 		end
-		resources :order do
+		resources :orders do
 			collection do
-
+				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
 			end
 		end
 

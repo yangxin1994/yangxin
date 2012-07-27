@@ -9,38 +9,23 @@ class OrdersController < ApplicationController
 		end
 	end
 
-
-
 	def show
 		# TO DO is owners request?
-		begin
-			retval = Order.find(params[:id])
-		rescue Mongoid::Errors::DocumentNotFound
-			retval = ErrorEnum::OrderNotFound
-		rescue BSON::InvalidObjectId
-			retval = ErrorEnum::InvalidOrdertId
-		end
+		retval = Order.find_by_id(params[:id])
 		respond_to do |format|
 			format.json { render json: retval }
 		end
 	end
 
-	def new
-		@order = Order.new
+	def create
 		respond_to do |format|
-			format.html 
-			format.json { render json: @order }
-		end
-	end
-
-	def create		
-		respond_to do |format|
-			if @order = Present.create(params[:order])
-				#format.html { redirect_to :action => 'show',:id => @order.id }
-				format.json { render json: @order, status: :created, location: @order }
+			if @order = Order.create(params[:order])
+				[:cash_receive_info, :realgoods_receive_info, :virtualgoods_receive_info, :lottery_receive_info].each do |e| 
+					@order.send("create_#{e.to_s}",params[:order][e]) if params[:order].include? e
+				end
+				format.json { render json: @order}
 			else
-				format.html { render action: "new" }
-				format.json { render json: @order.errors }
+				format.json { render json: @order.error_codes }
 			end
 		end
 	end

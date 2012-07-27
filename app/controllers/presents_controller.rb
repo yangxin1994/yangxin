@@ -26,23 +26,18 @@ class PresentsController < ApplicationController
 	end
 
 
-	def_each :virtual_goods, :cash, :real_goods, :stockout do |method_name|
-		@presents = Present.send(method_name).can_be_rewarded.page(page) || ErrorEnum::PresentNotFound
+	def_each :virtualgoods, :cash, :realgoods, :stockout do |method_name|
+		@presents = Present.send(method_name).can_be_rewarded.page(page)
+		@presents = ErrorEnum::PresentNotFound if @presents.empty? 
 		respond_to do |format|
-			format.html 
+			#format.html 
 			format.json { render json: @presents}
 		end
 	end
 
 	def show
 		# TO DO is owners request?
-		begin
-			retval = Present.find(params[:id])
-		rescue Mongoid::Errors::DocumentNotFound
-			retval = ErrorEnum::PresentNotFound
-		rescue BSON::InvalidObjectId
-			retval = ErrorEnum::InvalidPresentId
-		end
+			retval = Present.find_by_id(params[:id])
 		respond_to do |format|
 			format.json { render json: retval }
 		end

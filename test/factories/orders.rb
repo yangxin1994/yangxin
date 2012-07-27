@@ -6,7 +6,7 @@ FactoryGirl.define do
 		status 0
 		recipient "Matz"
 		phone_number "00332457"
-		present
+		present factory: :present
 		user factory: :user_bar
 	end
 end

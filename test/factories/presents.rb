@@ -6,6 +6,7 @@ FactoryGirl.define do
 		type 1
 		point 500
 		quantity 20
+		surplus 10
 		description 'amazon Kindle'
 		start_time Time.now
 		end_time Time.now.next_month
