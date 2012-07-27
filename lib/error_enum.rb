@@ -76,15 +76,6 @@ module ErrorEnum
 	SYSTEM_USER_MUST_EMAIL_OR_USERNAME =100046
 	
 
-	# Orders Error Code 
-	OrderNotFound = 21101
-	InvalidOrderId = 21102
 
-	# Presents Error Code
-	PresentNotFound = 21001
-	InvalidPresentId = 21002
-
-	# Award Error Code
-	AwardBudgetCounldNotBeBlank = 21511
 end
 

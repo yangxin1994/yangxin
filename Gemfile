@@ -32,7 +32,7 @@ group :assets do
 end
 
 gem 'jquery-rails'
-gem 'mini_captcha', :path => "~/Rrojects/mini_captcha/"
+#gem 'mini_captcha', :path => "~/Rrojects/mini_captcha/"
 # attachment
 gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
 gem 'mime-types'
