@@ -21,7 +21,7 @@ class SystemUsersController < ApplicationController
 			@system_users = SystemUser.all.desc(:updated_at)
 		end
 
-		@system_users ||= []
+		@system_users = slice((@system_users || []), params[:page], params[:per_page])
 
 		respond_to do |format|
 			format.html # index.html.erb

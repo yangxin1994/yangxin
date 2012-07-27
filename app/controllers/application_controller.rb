@@ -4,13 +4,23 @@ class ApplicationController < ActionController::Base
 	before_filter :client_ip, :current_user, :update_last_visit_time, :user_init
 
 	helper_method :user_signed_in?, :user_signed_out?
-
+###################################################
 	# QuillMe
 	def self.def_each(*method_names, &block)
 		method_names.each do |method_name|
 			define_method method_name do
 				instance_exec method_name, &block
 			end
+		end
+	end
+
+	begin "kaminari"
+		def page
+			params[:page] || 1
+		end
+
+		def per_page
+			params[:per_page] || 25
 		end
 	end
 
@@ -24,15 +34,26 @@ class ApplicationController < ActionController::Base
 
 	def render_optional_error_file(status_code)
 		status = status_code.to_s
-		
 		if ["404","403", "422", "500"].include?(status)
-			render :template => "/errors/#{status}", :format => [:html],  :status => status, :layout => "application"
+			render :template => "/errors/#{status}", :format => [:html], :handler => [:erb], :status => status, :layout => "application"
 		else
-			render :template => "/errors/unknown", :format => [:json], :status => status, :layout => "application"
+			render :template => "/errors/unknown", :format => [:html], :handler => [:erb], :status => status, :layout => "application"
 		end
-
 	end
 
+	def notice_success(msg)
+		flash[:notice] = msg
+	end
+
+	def notice_error(msg)
+		flash[:notice] = msg
+	end
+
+	def notice_warning(msg)
+		flash[:notice] = msg
+	end
+	
+################################################
 	#get the information of the signed user and set @current_user
 	def current_user
 		current_user_id = get_cookie(:current_user_id)
@@ -155,5 +176,20 @@ class ApplicationController < ActionController::Base
 	def set_logout_cookie
 		set_cookie(:current_user_id, nil) 
 		set_cookie(:auth_key, nil) 
+	end
+
+
+	# page operate
+	def slice(arr, page, per_page)
+		return [] if !arr.instance_of?(Array)
+
+		page ||= 1
+		per_page ||= 10
+		page = page.to_i
+		per_page = per_page.to_i
+
+		return [] if page < 1 || per_page < 1
+
+		return arr.slice((page - 1)*per_page - 1, per_page)
 	end
 end

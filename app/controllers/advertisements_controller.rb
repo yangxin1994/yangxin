@@ -18,7 +18,7 @@ class AdvertisementsController < ApplicationController
 			@advertisements = Advertisement.all.desc(:updated_at)
 		end
 
-		@advertisements = @advertisements || []
+		@advertisements =  slice((@advertisements || []), params[:page], params[:per_page])
 
 		respond_to do |format|
 			format.html # index.html.erb

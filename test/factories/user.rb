@@ -1,4 +1,22 @@
 FactoryGirl.define do
+
+	factory :quill_user, class: User do
+		password "123123123"
+		status 2
+		point 1000
+		factory :admin_foo do
+			email "admin_foo@gmail.com"
+			username "foo"
+			role 1
+		end
+		factory :user_bar do
+			email "user_bar@gmail.com"
+			username "user_bar"
+			role 0
+		end
+		
+	end
+
 	factory :new_user, class: User do
 		email "new_user@test.com"
 		password Encryption.encrypt_password("111111")

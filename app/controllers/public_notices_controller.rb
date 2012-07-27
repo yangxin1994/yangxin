@@ -17,7 +17,7 @@ class PublicNoticesController < ApplicationController
 			@public_notices = PublicNotice.all.desc(:updated_at)
 		end
 
-		@public_notices ||= []
+		@public_notices = slice((@public_notices || []), params[:page], params[:per_page])
 
 		respond_to do |format|
 			format.html # index.html.erb

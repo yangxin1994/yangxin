@@ -11,13 +11,13 @@ class FaqsController < ApplicationController
 			if !params[:value].nil? then
 				@faqs = Faq.list_by_type_and_value(params[:faq_type], params[:value])
 			else
-				@faqs = Faq.list_by_type(params[:faq_type]) 
+				@faqs = Faq.list_by_type(params[:faq_type])
 			end
 		else
 			@faqs = Faq.all.desc(:updated_at)
 		end
 
-		@faqs = @faqs || []
+		@faqs = slice((@faqs || []), params[:page], params[:per_page])
 
 		respond_to do |format|
 			format.html # index.html.erb

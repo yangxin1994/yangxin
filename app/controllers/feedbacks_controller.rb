@@ -24,7 +24,7 @@ class FeedbacksController < ApplicationController
 			@feedbacks = Feedback.all.desc(:updated_at)
 		end
 
-		@feedbacks ||= []
+		@feedbacks = slice((@feedbacks || []), params[:page], params[:per_page])
 
 		respond_to do |format|
 			format.html # index.html.erb

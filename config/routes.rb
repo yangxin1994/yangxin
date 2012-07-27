@@ -1,8 +1,22 @@
 OopsData::Application.routes.draw do
 
+
+  
+
+  resources :advertisements
+
+
+	get 'faqs/condition'
+	get 'faqs/types'
+	get 'public_notices/condition'
+	get 'public_notices/types'
+	get 'feedbacks/condition'
+	get 'feedbacks/types'
+
 	resources :faqs, :public_notices, :feedbacks, :advertisements, :system_users
 	post 'system_users/lock'
 	post 'system_users/unlock'
+
 	match 'feedback/:id/reply' => "feedback#reply"
 
 	get "home/index"
@@ -92,19 +106,34 @@ OopsData::Application.routes.draw do
 	end
 
 	# QuillMe
+	resources :lotteries
 	resources :presents do
 		collection do
-			get 'cash'
-			get 'virtual_goods'
+			get :index, :virtualgoods, :cash, :realgoods, :stockout
+			get 'edit'
 		end
 	end
 	resources :orders do
 		collection do
-			get :cash, :realgoods_present, :virtualgoods_present, :lottery_present, :award_present
-			get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
+			get :for_cash, :for_realgoods, :for_virtualgoods, :for_lottery
 		end
 	end
 	resources :points, :only => 'index'
+
+	namespace :admin do
+		resources :presents do
+			collection do
+				get 'expired'
+				delete 'delete'
+			end
+		end
+		resources :orders do
+			collection do
+				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
+			end
+		end
+
+	end
 
 	# The priority is based upon order of creation:
 	# first created -> highest priority.

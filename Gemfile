@@ -32,11 +32,11 @@ group :assets do
 end
 
 gem 'jquery-rails'
-
+#gem 'mini_captcha', :path => "~/Rrojects/mini_captcha/"
 # attachment
 gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
 gem 'mime-types'
-gem 'rmagick'
+gem 'mini_magick', :git => 'https://github.com/karmaQ/mini_magick.git'
 # Use unicorn as the web server
 # gem 'unicorn'
 

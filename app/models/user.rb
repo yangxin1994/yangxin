@@ -23,30 +23,35 @@ class User
 	field :introducer_to_pay, :type => Float
 # 0 user
 # 1 administrator
-	field :role, :type => Integer, default: 0
-	field :auth_key, :type => String
-	field :last_visit_time, :type => Integer
-	field :level, :type => Integer, default: 0
-	field :level_expire_time, :type => Integer, default: -1
 
-	field :birthday, :type => Integer, default: -1
-	field :gender, :type => Boolean
-	field :address, :type => String
-	field :postcode, :type => String
-	field :phone, :type => String
+  field :role, :type => Integer, default: 0
+  field :auth_key, :type => String
+  field :last_visit_time, :type => Integer
+  field :level, :type => Integer, default: 0
+  field :level_expire_time, :type => Integer, default: -1
 
-	#################################
-	# QuillMe
-	field :point, :type => Integer
+  field :birthday, :type => Integer, default: -1
+  field :gender, :type => Boolean
+  field :address, :type => String
+  field :postcode, :type => String
+  field :phone, :type => String
 
-	has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"  
-	has_many :orders, :class_name => "Order", :foreign_key => "user_id" 
-	# QuillAdmin
-	has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
-	has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"  
-	
+  field :message_ids, :type => Array, default:[]
+  has_many :messages
+
+  #################################
+  # QuillMe
+  field :point, :type => Integer
+  has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
+  has_many :orders, :class_name => "Order", :foreign_key => "user_id"
+  has_many :lottery_codes
+  # QuillAdmin
+  has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
+  has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
+
 	before_save :set_updated_at
 	before_update :set_updated_at
+
 
 	attr_accessible :email, :username, :password, :registered_at
 
@@ -59,16 +64,16 @@ class User
 	has_many :faqs
 	has_many :advertisements
 
+
+	has_many :answers
+
+
+
 	private
 	def set_updated_at
 		self.updated_at = Time.now.to_i
 	end
 
-
-	private
-	def set_updated_at
-		self.updated_at = Time.now.to_i
-	end
 
 	public
 	#*description*: Find a user given an email, username and user id. Deleted users are not included.
