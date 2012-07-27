@@ -31,7 +31,7 @@ class OrdersController < ApplicationController
 	end
 
 	def update
-		@order = Faq.find(params[:id])
+		@order = Order.find_by_id(params[:id])
 
 		respond_to do |format|
 			if @order.update_attributes(params[:order])
@@ -54,6 +54,7 @@ class OrdersController < ApplicationController
 	# end
 	def_each :for_cash, :for_realgoods, :for_virtualgoods, :for_lottery, :for_award do |method_name|
 		@orders = Order.send(method_name).page(params[:page].to_i)
+		@orders = ErrorEnum::PresentNotFound if @orders.empty?
 		respond_to do |format|
 			format.html 
 			format.json { render json: @orders }

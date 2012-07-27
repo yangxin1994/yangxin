@@ -54,7 +54,6 @@ class Order
 
 	private
 	
-
 	def decrease_point
 		return if self.present.blank? && self.user.blank?
 		self.create_point_log(:order => self,
