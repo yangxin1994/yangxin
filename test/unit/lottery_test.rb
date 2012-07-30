@@ -36,7 +36,7 @@ class LotteryTest < ActiveSupport::TestCase
   end
 
   test "should draw a lottery" do
-
+    
   end
 
   test "should make a interval" do

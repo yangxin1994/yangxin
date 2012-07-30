@@ -7,5 +7,6 @@ FactoryGirl.define do
   	start_time Time.now
   	end_time Time.now.next_month
   	status 1
+  	
 	end
 end
