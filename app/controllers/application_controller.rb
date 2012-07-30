@@ -4,13 +4,23 @@ class ApplicationController < ActionController::Base
 	before_filter :client_ip, :current_user, :update_last_visit_time, :user_init
 
 	helper_method :user_signed_in?, :user_signed_out?
-
+###################################################
 	# QuillMe
 	def self.def_each(*method_names, &block)
 		method_names.each do |method_name|
 			define_method method_name do
 				instance_exec method_name, &block
 			end
+		end
+	end
+
+	begin "kaminari"
+		def page
+			params[:page] || 1
+		end
+
+		def per_page
+			params[:per_page] || 25
 		end
 	end
 
@@ -24,15 +34,26 @@ class ApplicationController < ActionController::Base
 
 	def render_optional_error_file(status_code)
 		status = status_code.to_s
-		
 		if ["404","403", "422", "500"].include?(status)
-			render :template => "/errors/#{status}", :format => [:html],  :status => status, :layout => "application"
+			render :template => "/errors/#{status}", :format => [:html], :handler => [:erb], :status => status, :layout => "application"
 		else
-			render :template => "/errors/unknown", :format => [:json], :status => status, :layout => "application"
+			render :template => "/errors/unknown", :format => [:html], :handler => [:erb], :status => status, :layout => "application"
 		end
-
 	end
 
+	def notice_success(msg)
+		flash[:notice] = msg
+	end
+
+	def notice_error(msg)
+		flash[:notice] = msg
+	end
+
+	def notice_warning(msg)
+		flash[:notice] = msg
+	end
+	
+################################################
 	#get the information of the signed user and set @current_user
 	def current_user
 		current_user_id = get_cookie(:current_user_id)
@@ -58,12 +79,13 @@ class ApplicationController < ActionController::Base
 
 	#obtain the ip address of the clien, and set it as @remote_ip
 	def client_ip
-		@remote_ip = request.env["HTTP_X_FORWARDED_FOR"]
+		#@remote_ip = request.env["HTTP_X_FORWARDED_FOR"]
+		@remote_ip = request.remote_ip
 	end
 
 	#judge whether there is a user signed in currently
 	def user_signed_in?
-		logger.info "#{@current_user}"
+		#logger.info "#{@current_user}"
 		return !!@current_user && get_cookie(:auth_key).to_s != "" && @current_user.auth_key == get_cookie(:auth_key)
 	end
 
@@ -154,5 +176,20 @@ class ApplicationController < ActionController::Base
 	def set_logout_cookie
 		set_cookie(:current_user_id, nil) 
 		set_cookie(:auth_key, nil) 
+	end
+
+
+	# paging operate
+	def slice(arr, page, per_page)
+		arr = arr.to_a if arr.instance_of?(Mongoid::Criteria)
+		return [] if !arr.instance_of?(Array)
+
+		page = page.nil? ? 1 : page.to_i
+		per_page = per_page.nil? ? 10 : per_page.to_i
+		return [] if page < 1 || per_page < 1 
+
+		# avoid arr = nil
+		arr = arr.slice((page-1)*per_page, per_page) || []
+		return arr
 	end
 end

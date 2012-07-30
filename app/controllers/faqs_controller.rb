@@ -2,27 +2,37 @@
 
 class FaqsController < ApplicationController
 
-	before_filter :require_admin, :except=>[:index, :show, :condition]
+	before_filter :require_admin, :except=>[:index, :show]
  
 	# GET /faqs
 	# GET /faqs.json
 	def index
-		@faqs = Faq.all.desc(:updated_at)
+		if !params[:faq_type].nil? then
+			if !params[:value].nil? then
+				@faqs = Faq.list_by_type_and_value(params[:faq_type], params[:value])
+			else
+				@faqs = Faq.list_by_type(params[:faq_type])
+			end
+		else
+			@faqs = Faq.all.desc(:updated_at)
+		end
+
+		@faqs = slice((@faqs || []), params[:page], params[:per_page])
 
 		respond_to do |format|
 			format.html # index.html.erb
-			format.json { render json: @faqs }
+			format.json { render json: @faqs, :except => [:user_id]}
 		end
 	end
 	
-		# GET /faqs/1 
+	# GET /faqs/1 
 	# GET /faqs/1.json
 	def show
-		@faq = Faq.find(params[:id])
+		@faq = Faq.find_by_id(params[:id])
 
-		respond _to do |format|
+		respond_to do |format|
 			format.html # show.html.erb
-			format.json { render json: @faq }
+			format.json { render json: @faq, :except => [:user_id] }
 		end
 	end
 
@@ -33,159 +43,53 @@ class FaqsController < ApplicationController
 
 		respond_to do |format|
 			format.html # new.html.erb
-			format.json { render json: @faq }
+			format.json { render json: @faq, :except => [:user_id] }
 		end
 	end
 
 	# GET /faqs/1/edit
 	def edit
-		@faq = Faq.find(params[:id])
+		@faq = Faq.find_by_id(params[:id])
+
+		respond _to do |format|
+			format.html # show.html.erb
+			format.json { render json: @system_user, :except => [:user_id] }
+		end
 	end
 	
 	# POST /faqs
 	# POST /faqs.json
 	def create
-		@faq = Faq.new(params[:faq])	
+		@faq = Faq.create_faq(params[:faq], @current_user)	
 			
 		respond_to do |format|
-			if @faq.save(current_user)
-				format.html { redirect_to @faq, notice: "添加成功。" }
-				format.json { render json: @faq, status: :created, location: @faq }
-			else
-				format.html { render action: "new" }
-				format.json { render :json => ErrorEnum::SAVE_FAILED}
-			end
-		end
-	rescue => ex 
-		if ex.class == TypeError then
-			respond_to do |format|
-				format.html { render action: "new"}
-				format.json { render :json => ErrorEnum::TYPE_ERROR}
-			end
-		elsif ex.class == RangeError then
-			respond_to do |format|
-				format.html { render action: "new" }
-				format.json { render :json => ErrorEnum::RANGE_ERROR}
-			end
-		else
-			respond_to do |format|
-				format.html { render action: "new" }
-				format.json { render :json => ErrorEnum::SAVE_FAILED}
-			end
+			format.html  if @faq.instance_of?(Faq)
+			format.html { render action: "new" } if !@faq.instance_of?(Faq)
+			format.json { render :json => @faq, :except => [:user_id]}
 		end
 	end
 
 	# PUT /faqs/1
 	# PUT /faqs/1.json
 	def update
-		@faq = Faq.find(params[:id])
+		@faq = Faq.update_faq(params[:id], params[:faq], @current_user)
 
 		respond_to do |format|
-			if @faq.update_attributes(params[:faq],current_user)
-				format.html { redirect_to @faq, notice: "更新成功。" }
-				format.json { render :json => true }
-			else
-				format.html { render action: "edit" }
-				format.json { render :json => ErrorEnum::SAVE_FAILED }
-			end
-		end
-	rescue => ex 
-		if ex.class == TypeError then
-			respond_to do |format|
-				format.html { render action: "edit"}
-				format.json { render :json => ErrorEnum::TYPE_ERROR}
-			end
-		elsif ex.class == RangeError then
-			respond_to do |format|
-				format.html { render action: "edit" }
-				format.json { render :json => ErrorEnum::RANGE_ERROR}
-			end
-		else
-			respond_to do |format|
-				format.html { render action: "edit" }
-				format.json { render :json => ErrorEnum::SAVE_FAILED}
-			end
+			format.html { redirect_to @faq} if @faq.instance_of?(Faq)
+			format.html { render action: "edit" } if !@faq.instance_of?(Faq)
+			format.json { render :json => @faq,:except => [:user_id] }
 		end
 	end
 
 	# DELETE /faqs/1
 	# DELETE /faqs/1.json
 	def destroy
-		@faq = Faq.find(params[:id])
-		@faq.destroy
+		@faq = Faq.destroy_by_id(params[:id])
 
 		respond_to do |format|
 			format.html { redirect_to faqs_url }
-			format.json { render :json => true }
+			format.json { render :json => @faq,:except => [:user_id] }
 		end
 	end
 	
-	# GET /faqs/condition
-	# GET /faqs/condition.json
-	def condition
-		type = params[:type] || 0
-		value = params[:value] || ""
-		@faqs = Faq.condition(type, value)
-		
-		respond_to do |format|
-			format.html
-			format.json { render json: @faqs }
-		end
-	rescue => ex 
-		if ex.class == TypeError then
-			respond_to do |format|
-				format.html
-				format.json { render :json => ErrorEnum::TYPE_ERROR}
-			end
-		elsif ex.class == RangeError then
-			respond_to do |format|
-				format.html
-				format.json { render :json => ErrorEnum::RANGE_ERROR}
-			end
-		elsif ex.class == ArgumentError then
-			respond_to do |format|
-				format.html
-				format.json { render :json => ErrorEnum::ARG_ERROR}
-			end
-		else
-			respond_to do |format|
-				format.html
-				format.json { render :json => ErrorEnum::UNKNOWN_ERROR}
-			end
-		end
-	end
-	
-	# GET /faqs/types
-	# GET /faqs/types.json
-	def types
-		type = params[:type] || 0
-		@faqs = Faq.find_by_type(type)
-		
-		respond_to do |format|
-			format.html
-			format.json { render json: @faqs }
-		end
-	rescue => ex 
-		if ex.class == TypeError then
-			respond_to do |format|
-				format.html
-				format.json { render :json => ErrorEnum::TYPE_ERROR}
-			end
-		elsif ex.class == RangeError then
-			respond_to do |format|
-				format.html
-				format.json { render :json => ErrorEnum::RANGE_ERROR}
-			end
-		elsif ex.class == ArgumentError then
-			respond_to do |format|
-				format.html
-				format.json { render :json => ErrorEnum::ARG_ERROR}
-			end
-		else
-			respond_to do |format|
-				format.html
-				format.json { render :json => ErrorEnum::UNKNOWN_ERROR}
-			end
-		end
-	end
 end

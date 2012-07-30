@@ -2,127 +2,137 @@ require 'test_helper'
 
 class FaqTest < ActiveSupport::TestCase
 
-	test "01 faq_type= instance method" do 
+	test "01 verify_faq_type method" do 
 		clear(Faq)
 		
-		assert_raise(TypeError) { 
-			Faq.create(faq_type: "type1", question: "question0", answer: "answer0") 
-		}
-		
-		assert_raise(RangeError) { 
-			Faq.create(faq_type: 0, question: "question0", answer: "answer0") 
-		}
-		
-		assert_raise(RangeError) { 
-			Faq.create(faq_type: "0", question: "question0", answer: "answer0") 
-		}
-		
-		assert_raise(RangeError) { 
-			Faq.create(faq_type: 3, question: "question0", answer: "answer0") 
-		}
-		
-		assert_raise(RangeError) { 
-			Faq.create(faq_type: 129, question: "question0", answer: "answer0") 
-		}
-		
-		assert Faq.create(faq_type: 1, question: "question1", answer: "answer1")
+		assert_equal Faq.verify_faq_type("type1"), ErrorEnum::FAQ_TYPE_ERROR
+		assert_equal Faq.verify_faq_type(0), ErrorEnum::FAQ_RANGE_ERROR
+		assert_equal Faq.verify_faq_type(1), true
+		assert_equal Faq.verify_faq_type(129), ErrorEnum::FAQ_RANGE_ERROR
 
 		clear(Faq)
 	end
 
-	test "02 test rewrite instance method: save" do 
-	  	clear(User, Faq)
+	test "02 find_by_id" do 
+	  	clear(Faq)
 	  	
-		# origin save method must be work which is without user 
-		faq = Faq.new(faq_type: 1, question: "question1", answer: "answer1")
-		assert faq.save
-		assert_equal faq.user_id, nil
+		faq = Faq.create(faq_type: 1, question: "question1", answer: "answer1")
+		assert_equal Faq.find_by_id("4fff96616c6eea1204022005"), ErrorEnum::FAQ_NOT_EXIST
+		assert_equal Faq.find_by_id(faq.id), faq
 	  	
-	  	# new save method must be work which is with user
-	  	user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 2
-		user.role = 1
+	  	clear(Faq)
+	end
+
+	test "03 create_faq" do 
+		clear(Faq, User)
+
+		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.save
-		
-		faq = Faq.new(faq_type: 1, question: "question2", answer: "answer2")
-		assert faq.save(user)
+
+		faq = Faq.create_faq({faq_type: 1, question: "question1", answer: "answer1"}, user)
 		assert_equal faq.user, user
-	  	
-	  	clear(User, Faq)
-	  end
-	  
-	  test "03 test rewrite instance method: update_attributes" do
+		assert_equal faq.question, "question1"
+		assert_equal faq.faq_type, 1
+
+		assert_equal Faq.create_faq({faq_type: "type1", question: "question1"}, user), ErrorEnum::FAQ_TYPE_ERROR
+		assert_equal Faq.create_faq({faq_type: 0, question: "question1"}, user), ErrorEnum::FAQ_RANGE_ERROR
+		assert_equal Faq.create_faq({faq_type: 129, question: "question1"}, user), ErrorEnum::FAQ_RANGE_ERROR
+		assert_equal Faq.create_faq({faq_type: 128, question: "question1"}, user), ErrorEnum::FAQ_SAVE_FAILED
+
+		clear(Faq, User)
+	end
+
+	test "04 update_faq" do
 		clear(User, Faq)
   	
-		faq = Faq.new(faq_type: 1, question: "question1", answer: "answer1")
-		assert faq.save
+		user = User.create(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user2 = User.create(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
 		
-		# origin update_attributes method must be work which is without user 
-		assert faq.update_attributes({question: "updated question1"})
-		assert_equal faq.question, "updated question1"
-	  	
-	  	# new update_attributes method must be work which is with user
-	  	user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 2
-		user.role = 1
-		user.save
-		
-		assert faq.update_attributes({question: "updated updated question1"}, user)	
+		faq = Faq.create_faq({faq_type: 1, question: "question1", answer: "answer1"}, user)
 		assert_equal faq.user, user
-		assert_equal faq.question, "updated updated question1"
+		assert_equal faq.question, "question1"
+		assert_equal faq.faq_type, 1
+
+		faq = Faq.update_faq(faq.id, {faq_type: 2, question: "updated question1", answer: "updated answer1"}, user2)		
+		assert_equal faq.user, user2
+		assert_equal faq.question, "updated question1"
+		assert_equal faq.faq_type, 2
+
+		assert_equal Faq.update_faq(faq.id,{faq_type: "type1", question: "question1"}, user), ErrorEnum::FAQ_TYPE_ERROR
+		assert_equal Faq.update_faq(faq.id,{faq_type: 0, question: "question1"}, user), ErrorEnum::FAQ_RANGE_ERROR
+		assert_equal Faq.update_faq(faq.id,{faq_type: 129, question: "question1"}, user), ErrorEnum::FAQ_RANGE_ERROR
+
+		assert_equal Faq.all.count, 1
 	  	
 	  	clear(User, Faq)
-	  end
+	end
 
-	test "04 condition " do
+	test "05 destroy_by_id " do
 		
 		clear(Faq)
 		
-		Faq.create(faq_type: 1, question: "question1", answer: "answer1")
-		Faq.create(faq_type: 2, question: "q2", answer: "answer2")
+		user = User.create(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 
-		assert_raise(TypeError){
-			Faq.condition("type1", "")
-		}
+		faq = Faq.create_faq({faq_type: 1, question: "question1", answer: "answer1"}, user)
+		assert_equal faq.user, user
+		assert_equal faq.question, "question1"
+		assert_equal faq.faq_type, 1
 
-		assert_raise(RangeError){
-			Faq.condition(-1, "")
-		}
-
-		assert_raise(ArgumentError){
-			Faq.condition(4, "")
-		}
-		
-		assert_equal Faq.condition(0, "question").count, 0
-		assert_equal Faq.condition(0, "answer").count, 0
-		assert_equal Faq.condition(1, "answer").count, 1
-		assert_equal Faq.condition(3, "answer").count, 2
+		assert_equal Faq.destroy_by_id("4fff96616c6eea1204022005"), ErrorEnum::FAQ_NOT_EXIST
+		assert_equal Faq.destroy_by_id(faq.id), true
 		
 		clear(Faq)
 		
 	end
-	
 
-	test "05 find_by_type" do 
+	test "06 list_by_type" do 
 		clear(Faq)
 
-		Faq.create(faq_type: 1, question: "question1", answer: "answer1")
-		Faq.create(faq_type: 2, question: "q2", answer: "answer2")
+		user = User.create(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 
-		assert_raise(TypeError){
-			Faq.find_by_type("type1")
-		}
+		Faq.create_faq({faq_type: 1, question: "question1", answer: "answer1"}, user)
+		Faq.create_faq({faq_type: 2, question: "question1", answer: "answer1"}, user)
+		Faq.create_faq({faq_type: 4, question: "question1", answer: "answer1"}, user)
+		Faq.create_faq({faq_type: 8, question: "question1", answer: "answer1"}, user)
+		Faq.create_faq({faq_type: 16, question: "question1", answer: "answer1"}, user)
+		Faq.create_faq({faq_type: 32, question: "question1", answer: "answer1"}, user)
+		Faq.create_faq({faq_type: 64, question: "question1", answer: "answer1"}, user)
+		Faq.create_faq({faq_type: 128, question: "question1", answer: "answer1"}, user)
 
-		assert_raise(RangeError){
-			Faq.find_by_type(256)
-		}
-		
-		assert_equal Faq.find_by_type(0).count, 0
-		assert_equal Faq.find_by_type(1).count, 1
-		assert_equal Faq.find_by_type(2).count, 1
-		assert_equal Faq.find_by_type(3).count, 2
-		assert_equal Faq.find_by_type(255).count, 2
+		assert_equal Faq.all.count, 8
+		assert_equal Faq.list_by_type(1).count, 1
+		assert_equal Faq.list_by_type(4).count, 1
+		assert_equal Faq.list_by_type(16).count, 1
+		assert_equal Faq.list_by_type(64).count, 1
+		assert_equal Faq.list_by_type(7).count, 3
+		assert_equal Faq.list_by_type(255).count, 8
 
 		clear(Faq)
 	end
+
+	test "07 list_by_type_and_value" do 
+		clear(Faq)
+
+		user = User.create(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+
+		Faq.create_faq({faq_type: 1, question: "question1", answer: "answer1"}, user)
+		Faq.create_faq({faq_type: 1, question: "question2", answer: "answer2"}, user)
+		Faq.create_faq({faq_type: 2, question: "question1", answer: "answer1"}, user)
+		Faq.create_faq({faq_type: 4, question: "question1", answer: "answer1"}, user)
+		Faq.create_faq({faq_type: 8, question: "question1", answer: "answer1"}, user)
+		Faq.create_faq({faq_type: 16, question: "question1", answer: "answer1"}, user)
+		Faq.create_faq({faq_type: 32, question: "question1", answer: "answer1"}, user)
+		Faq.create_faq({faq_type: 64, question: "question1", answer: "answer1"}, user)
+		Faq.create_faq({faq_type: 128, question: "question1", answer: "answer1"}, user)
+
+		assert_equal Faq.all.count, 9
+		assert_equal Faq.list_by_type_and_value(1, nil).count, 2
+		assert_equal Faq.list_by_type_and_value(1, "answer1").count, 1
+		assert_equal Faq.list_by_type_and_value(1, "question1").count, 1
+		assert_equal Faq.list_by_type_and_value(255, "question").count, 9
+		assert_equal Faq.list_by_type_and_value(255, "question1").count, 8
+
+		clear(Faq)
+	end
+
 end

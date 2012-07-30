@@ -3,151 +3,217 @@ require 'test_helper'
 class FeedbacksControllerTest < ActionController::TestCase
 
 	test "01 should get index action and no feedback record" do
-		clear(Feedback)
-		get 'index', :format => :json
-		assert_equal JSON.parse(@response.body), []		
-		clear(Feedback)
-	end
+		clear(Feedback, User)
 
-	test "02 should post create action which is without login" do
-		clear(Feedback)
-	
-		post 'create', :feedback => {feedback_type: 1, title: "title1", content: "content1"}, :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval["title"], "title1"
-		
-		clear(Feedback)
-	end
-	
-	test "03 should post create action with login" do
-		clear(User, Feedback)
+		assert_equal User.all.count, 0
+
+		get 'index', :format => :json
+		assert_equal @response.body.to_i, ErrorEnum::REQUIRE_LOGIN
+
+		assert_equal User.all.count, 1
+
+		clear(Feedback, User)
+
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.status = 2
 		user.role = 0
 		user.save
+
+		assert_equal User.all.first, user
+
+		sign_in(user.email, "123456")
+		get 'index', :format => :json
+		assert_equal @response.body.to_i, ErrorEnum::REQUIRE_ADMIN
+		sign_out
+
+		user = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
+		user.status = 2
+		user.role = 1
+		user.save
+
+		sign_in(user.email, "123456")
+		get 'index', :format => :json
+		assert_equal JSON.parse(@response.body), []
+		sign_out
+
+
+		clear(Feedback, User)
+	end
 	
-		sign_in(user.email, Encryption.decrypt_password(user.password))
+	test "02 should post create action" do
+		clear(User, Feedback)
+	
+		post 'create', :feedback => {feedback_type: "Type1", title: "title1", content: "content1"}, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::FEEDBACK_TYPE_ERROR
+		
+		post 'create', :feedback => {feedback_type: 129, title: "title1", content: "content1"}, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::FEEDBACK_RANGE_ERROR
+
+		#create feedback without login
 		post 'create', :feedback => {feedback_type: 1, title: "title1", content: "content1"}, :format => :json
 		retval = JSON.parse(@response.body)
 		assert_equal retval["title"], "title1"
+		feedback = Feedback.all.first
+		assert_equal feedback.title, "title1"
+
+
+		clear(User, Feedback)
+		# create feedback with admin
+		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user.status = 2
+		user.role = 1
+		user.save
+		
+		sign_in(user.email, "123456")
+		post 'create', :feedback => {feedback_type: 1, title: "title1", content: "content1"}, :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval["title"], "title1"
+		feedback = Feedback.all.first
+		assert_equal feedback.title, "title1"
+		assert_equal feedback.question_user, user
+
+		post 'create', :feedback => {content: "content1"}, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::FEEDBACK_SAVE_FAILED
+
+		#
+		# get index
+		#
+		post 'create', :feedback => {feedback_type: 2, title: "title2", content: "content2"}, :format => :json
+		post 'create', :feedback => {feedback_type: 64, title: "title3", content: "content3"}, :format => :json
+		post 'create', :feedback => {feedback_type: 128, title: "title4", content: "content4"}, :format => :json
+
+		# no type, no value
+		get 'index', :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 4
+
+		# with type, no value
+		get 'index', :format => :json, :feedback_type => 3
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 2
+
+		get 'index', :format => :json, :feedback_type => 255
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 4
+
+		#with type and value
+		get 'index', :format => :json, :feedback_type => 3, :value => "content"
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 2
+
+		get 'index', :format => :json, :feedback_type => 3, :value => "content1"
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 1		
+
+		#with type and answer
+		get 'index', :format => :json, :feedback_type => 255, :answer => false
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 4
+
+		fb = Feedback.all.first
+		fb.is_answer = true
+		assert_equal fb.save, true
+		assert_equal Feedback.all.first.is_answer, true
+
+		get 'index', :format => :json, :feedback_type => 255, :answer => true
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 1
+
+		get 'index', :format => :json, :feedback_type => 255, :answer => false
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 3
+
+		#paging
+		get 'index', :format => :json, :per_page => 2, :feedback_type => 255
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 2
+
+		get 'index', :format => :json, :per_page => 3, :page=> 2, :feedback_type => 255
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 1
+
 		sign_out
 		
 		clear(User,Feedback)
 	end
 
-	test "04 should post update action " do
+	test "03 should post update action which is with admin" do
 		clear(User, Feedback)
+
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.status = 2
 		user.role = 1
 		user.save
+		
+		user2 = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
+		user2.status = 2
+		user2.role = 1
+		user2.save
 	
-		sign_in(user.email, Encryption.decrypt_password(user.password))
+		sign_in(user.email, "123456")
 		post 'create', :feedback => {feedback_type: 1, title: "title1", content: "content1"}, :format => :json
 		retval = JSON.parse(@response.body)
 		sign_out
 		
-		sign_in(user.email, Encryption.decrypt_password(user.password))
-		post 'update', :id => retval["_id"], :feedback => {title: "updated title1"}, :format => :json
+		sign_in(user2.email, "123456")
+
+		feedback = Feedback.all.first
+
+		post 'update', :id => "123443454354353", :feedback => {title: "updated title1"}, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::FEEDBACK_NOT_EXIST
+
+		post 'update',:id => feedback.id.to_s ,  :feedback => {feedback_type: "Type1", title: "title1", content: "content1"}, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::FEEDBACK_TYPE_ERROR
 		
-		retval = Feedback.find(retval["_id"])
+		post 'update',:id => feedback.id.to_s,  :feedback => {feedback_type: 129, title: "title1", content: "content1"}, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::FEEDBACK_RANGE_ERROR
+
+		post 'update',:id => feedback.id.to_s,  :feedback => {feedback_type: 4, title: "title1", content: "content1"}, :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::FEEDBACK_NOT_CREATOR
+
+		sign_out
+
+		sign_in(user.email, "123456")
+		post 'update', :id => feedback.id.to_s, :feedback => {title: "updated title1"}, :format => :json
+		retval = JSON.parse(@response.body)
 		assert_equal retval["title"], "updated title1"
+
+		assert_equal Feedback.all.count, 1
+		feedback = Feedback.all.first
+		assert_equal feedback.title, "updated title1"
+		assert_equal feedback.question_user, user
+
 		sign_out
 
 		clear(User,Feedback)
 	end
 	
-	test "05 should destroy action which is with admin " do
+	test "04 should destroy action which is with admin" do
 		clear(User, Feedback)
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.status = 2
 		user.role = 1
 		user.save
 	
-		sign_in(user.email, Encryption.decrypt_password(user.password))
+		sign_in(user.email, "123456")
 		post 'create', :feedback => {feedback_type: 1, title: "title1", content: "content1"}, :format => :json
 		retval = JSON.parse(@response.body)
 
 		post 'destroy', :id => retval["_id"], :format => :json
+		assert_equal @response.body, "true"
 		
 		retval = Feedback.where(_id: retval["_id"]).first
 		assert_equal retval, nil
 		sign_out
 
 		clear(User,Feedback)
-	end
-
-	test "07 should get condition action" do
-	
-		clear(User, Feedback)
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 2
-		user.role = 1
-		user.save
-	
-		sign_in(user.email, Encryption.decrypt_password(user.password))
-		post 'create', :feedback => {feedback_type: 1, title: "title1", content: "content1"}, :format => :json
-		post 'create', :feedback => {feedback_type: 2, title: "title2", content: "content1"}, :format => :json
-		post 'create', :feedback => {feedback_type: 4, title: "title4", content: "content1"}, :format => :json
-		
-		get 'condition', :type => 1, :value => "user", :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 0
-		
-		get 'condition', :type => 7, :value => "content1", :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 3
-
-		get 'condition', :type => 0, :value => "title1", :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 0
-
-		get 'condition', :type => 0, :value => "content1", :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 0
-		
-		sign_out
-		clear(User, Feedback)
-	end
-
-	test "08 should get types action" do 
-		clear(User, Feedback)
-
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 2
-		user.role = 1
-		user.save
-
-		sign_in(user.email, Encryption.decrypt_password(user.password))
-		post 'create', :feedback => {feedback_type: 1, title: "title1", content: "content1"}, :format => :json
-		post 'create', :feedback => {feedback_type: 2, title: "title2", content: "content1"}, :format => :json
-		post 'create', :feedback => {feedback_type: 4, title: "title4", content: "content1"}, :format => :json
-
-		get 'types', :type => "Type1", :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::TYPE_ERROR
-
-		get 'types', :type => 256, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::RANGE_ERROR
-		
-		get 'types', :type => 1, :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 1
-		
-		get 'types', :type => 7, :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 3
-
-		get 'types', :type => 0, :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 0
-
-		get 'types', :type => 255, :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 3
-
-		clear(User, Feedback)
 	end
 	
 =begin
@@ -165,13 +231,13 @@ class FeedbacksControllerTest < ActionController::TestCase
 		user2.save
 		
 		f = Feedback.create(feedback_type: 1, title: "title1", content: "content1")
-		f.question_user = user 
+		f.title_user = user 
 		f.save
 		
 		sign_in(user2.email, Encryption.decrypt_password(user2.password))
 		post "#{f.id.to_s/reply}", :message_content => "reply feedback", :format => :json
 	
-		m = Message.where(question_user: user, answer_user: user2).first
+		m = Message.where(title_user: user, content_user: user2).first
 		assert_equal m.content, "reply feedback"		
 		
 		sign_out

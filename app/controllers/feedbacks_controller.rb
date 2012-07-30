@@ -2,34 +2,42 @@
 
 class FeedbacksController < ApplicationController
 
-	before_filter :require_admin, :only => [:reply]
+	before_filter :require_sign_in, :except => [:new, :create]
+	before_filter :require_admin, :only => [:index, :reply]
 
 	# GET /feedbacks
 	# GET /feedbacks.json
 	def index
-		
-		answer_var = params[:answer]
-	
-		if answer_var && answer_var == "true" then
-			@feedbacks = Feedback.answered
-		elsif answer_var && answer_var == "false" then
-			@feedbacks = Feedback.unanswer
+		if !params[:feedback_type].nil? then
+			if !params[:value].nil? then
+				@feedbacks = Feedback.list_by_type_and_value(params[:feedback_type], params[:value])
+			elsif !params[:answer].nil? then
+				if params[:answer].to_s.strip == "true" then
+					@feedbacks = Feedback.list_by_type_and_answer(params[:feedback_type], true)
+				elsif params[:answer].to_s.strip == "false" then
+					@feedbacks = Feedback.list_by_type_and_answer(params[:feedback_type], false)
+				end
+			else
+				@feedbacks = Feedback.list_by_type(params[:feedback_type])
+			end
 		else
 			@feedbacks = Feedback.all.desc(:updated_at)
 		end
+
+		@feedbacks = slice((@feedbacks || []), params[:page], params[:per_page])
 
 		respond_to do |format|
 			format.html # index.html.erb
 			format.json { render json: @feedbacks }
 		end
 	end
-
-	# GET /feedbacks/1
+	
+	# GET /feedbacks/1 
 	# GET /feedbacks/1.json
 	def show
-		@feedback = Feedback.find(params[:id])
+		@feedback = Feedback.find_by_id(params[:id])
 
-		respond_to do |format|
+		respond _to do |format|
 			format.html # show.html.erb
 			format.json { render json: @feedback }
 		end
@@ -48,192 +56,62 @@ class FeedbacksController < ApplicationController
 
 	# GET /feedbacks/1/edit
 	def edit
-		@feedback = Feedback.find(params[:id])
-	end
+		@feedback = Feedback.find_by_id(params[:id])
 
+		respond _to do |format|
+			format.html # show.html.erb
+			format.json { render json: @system_user }
+		end
+	end
+	
 	# POST /feedbacks
 	# POST /feedbacks.json
 	def create
-		@feedback = Feedback.new(params[:feedback])
-		@feedback.question_user = current_user if current_user
-
+		@feedback = Feedback.create_feedback(params[:feedback], @current_user)	
+			
 		respond_to do |format|
-			if @feedback.save
-				format.html { redirect_to @feedback, notice: "添加成功。" }
-				format.json { render json: @feedback, status: :created, location: @feedback }
-			else
-				format.html { render action: "new" }
-				format.json { render :json => ErrorEnum::SAVE_FAILED}
-			end
-		end
-	rescue => ex 
-		if ex.class == TypeError then
-			respond_to do |format|
-				format.html { render action: "new"}
-				format.json { render :json => {:error => ErrorEnum::TYPE_ERROR}}
-			end
-		elsif ex.class == RangeError then
-			respond_to do |format|
-				format.html { render action: "new" }
-				format.json { render :json => {:error => ErrorEnum::RANGE_ERROR}}
-			end
-		else
-			respond_to do |format|
-				format.html { render action: "new" }
-				format.json { render :json => {:error => ErrorEnum::SAVE_FAILED}}
-			end
+			format.html  if @feedback.instance_of?(Feedback)
+			format.html { render action: "new" } if !@feedback.instance_of?(Feedback)
+			format.json { render :json => @feedback}
 		end
 	end
 
 	# PUT /feedbacks/1
 	# PUT /feedbacks/1.json
 	def update
-		@feedback = Feedback.find(params[:id])
-		
-		require_sign_in if @feedback.question_user
-		
-		if @feedback.question_user && @feedback.question_user != current_user then
-			format.html { render action: "edit"}
-			format.json { render :json => ErrorEnum::SAVE_FAILED}
-		end
+		@feedback = Feedback.update_feedback(params[:id], params[:feedback], @current_user)
 
 		respond_to do |format|
-			if @feedback.update_attributes(params[:feedback])
-				format.html { redirect_to @feedback, notice: "更新成功。" }
-				format.json { render :json => true }
-			else
-				format.html { render action: "edit" }
-				format.json { render :json => ErrorEnum::SAVE_FAILED }
-			end
-		end
-	rescue => ex 
-		if ex.class == TypeError then
-			respond_to do |format|
-				format.html { render action: "edit"}
-				format.json { render :json => {:error => ErrorEnum::TYPE_ERROR}}
-			end
-		elsif ex.class == RangeError then
-			respond_to do |format|
-				format.html { render action: "edit" }
-				format.json { render :json => {:error => ErrorEnum::RANGE_ERROR}}
-			end
-		else
-			respond_to do |format|
-				format.html { render action: "edit" }
-				format.json { render :json => {:error => ErrorEnum::SAVE_FAILED}}
-			end
+			format.html { redirect_to @feedback} if @feedback.instance_of?(Feedback)
+			format.html { render action: "edit" } if !@feedback.instance_of?(Feedback)
+			format.json { render :json => @feedback }
 		end
 	end
 
 	# DELETE /feedbacks/1
 	# DELETE /feedbacks/1.json
 	def destroy
-		@feedback = Feedback.find(params[:id])
-		@feedback.destroy
+		retval = Feedback.destroy_by_id(params[:id], @current_user)
 
 		respond_to do |format|
 			format.html { redirect_to feedbacks_url }
-			format.json { render :json => true }
+			format.json { render :json => retval }
 		end
 	end
 	
-	# POST /feedbacks/1/reply
-	# POST /feedbacks/1/reply.json
+	# POST /feedbacks/reply
+	# POST /feedbacks/reply.json
 	def reply
-		@feedback = Feedback.find(params[:id])
-		message_content = params[:message_content]
-		
-		if @feedback and message_content and message_content !="" then
-		
-			stat = Feedback.reply(params[:id], current_user, message_content)
-			
-			if stat then
-				respond_to do |format|
-					format.html { redirect_to @feedback, notice: "回复成功。" }
-					format.json { render :json => true}
-				end
-			else
-				respond_to do |format|
-					format.html { redirect_to @feedback, notice: "回复失败。" }
-					format.json { head :json => ErrorEnum::SAVE_FAILED }
-				end
-			end
-		else
-			respond_to do |format|
-				format.html { redirect_to @feedback, notice: "回复失败。" }
-				format.json { head :json => ErrorEnum::SAVE_FAILED }
-			end
+		params[:id] = params[:id] || ""
+		params[:message_content] = params[:message_content] || ""
+
+		@feedback = Feedback.where(params[:id]).first
+		retval = Feedback.reply(params[:id], @current_user, params[:message_content])
+
+		respond_to do |format|
+			format.html { redirect_to @feedback} if @feedback
+			format.json { head :json => retval }
 		end
 	end
 	
-	# GET /feedbacks/condition
-	# GET /feedbacks/condition.json
-	def condition
-		type = params[:type] || 0
-		value = params[:value] || ""
-		
-		@feedbacks = Feedback.condition(type, value)
-		
-		respond_to do |format|
-			format.html
-			format.json { render json: @feedbacks }
-		end
-	rescue => ex 
-		if ex.class == TypeError then
-			respond_to do |format|
-				format.html
-				format.json { render :json => {:error => ErrorEnum::TYPE_ERROR}}
-			end
-		elsif ex.class == RangeError then
-			respond_to do |format|
-				format.html
-				format.json { render :json => {:error => ErrorEnum::RANGE_ERROR}}
-			end
-		elsif ex.class == ArgumentError then
-			respond_to do |format|
-				format.html
-				format.json { render :json => {:error => ErrorEnum::ARG_ERROR}}
-			end
-		else
-			respond_to do |format|
-				format.html
-				format.json { render :json => {:error => ErrorEnum::UNKNOWN_ERROR}}
-			end
-		end
-	end
-
-	# GET /feedbacks/types
-	# GET /feedbacks/types.json
-	def types
-		type = params[:type] || 0
-
-		@feedbacks = Feedback.find_by_type(type)
-		
-		respond_to do |format|
-			format.html
-			format.json { render json: @feedbacks }
-		end
-	rescue => ex 
-		if ex.class == TypeError then
-			respond_to do |format|
-				format.html
-				format.json { render :json => ErrorEnum::TYPE_ERROR}
-			end
-		elsif ex.class == RangeError then
-			respond_to do |format|
-				format.html
-				format.json { render :json => ErrorEnum::RANGE_ERROR}
-			end
-		elsif ex.class == ArgumentError then
-			respond_to do |format|
-				format.html
-				format.json { render :json => ErrorEnum::ARG_ERROR}
-			end
-		else
-			respond_to do |format|
-				format.html
-				format.json { render :json => ErrorEnum::UNKNOWN_ERROR}
-			end
-		end
-	end
 end

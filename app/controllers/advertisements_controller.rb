@@ -5,38 +5,35 @@ class AdvertisementsController < ApplicationController
 	# GET /advertisements
 	# GET /advertisements.json
 	def index
-		if params[:activate] && params[:activate] =="true" then
-			@advertisements = Advertisement.activated
-		elsif params[:activate] && params[:activate]=="false" then
-			@advertisements = Advertisement.unactivate
+		if !params[:activate].nil? then
+			if params[:activate].to_s == "true" then
+				@advertisements = Advertisement.activated
+			elsif params[:activate].to_s == "false" then
+				@advertisements = Advertisement.unactivate
+			end
+			@advertisements.desc(:updated_at) if @advertisements && @advertisements.count > 1
+		elsif !params[:title].nil? then
+			@advertisements = Advertisement.list_by_title(params[:title])
 		else
 			@advertisements = Advertisement.all.desc(:updated_at)
 		end
+
+		@advertisements =  slice((@advertisements || []), params[:page], params[:per_page])
 
 		respond_to do |format|
 			format.html # index.html.erb
 			format.json { render json: @advertisements }
 		end
-	rescue 
-		respond_to do |format|
-			format.html
-			format.json { render :json => ErrorEnum::UNKNOWN_ERROR}
-		end
 	end
-
-	# GET /advertisements/1
+	
+	# GET /advertisements/1 
 	# GET /advertisements/1.json
 	def show
-		@advertisement = Advertisement.find(params[:id])
+		@advertisement = Advertisement.find_by_id(params[:id])
 
-		respond_to do |format|
+		respond _to do |format|
 			format.html # show.html.erb
-			format.json { render json: @advertisement }
-		end
-	rescue 
-		respond_to do |format|
-			format.html
-			format.json { render :json => ErrorEnum::UNKNOWN_ERROR}
+			format.json { render json: @advertisement, :except => "user_id" }
 		end
 	end
 
@@ -49,74 +46,51 @@ class AdvertisementsController < ApplicationController
 			format.html # new.html.erb
 			format.json { render json: @advertisement }
 		end
-	rescue 
-		respond_to do |format|
-			format.html
-			format.json { render :json => ErrorEnum::UNKNOWN_ERROR}
-		end
 	end
 
 	# GET /advertisements/1/edit
 	def edit
-		@advertisement = Advertisement.find(params[:id])
-	end
+		@advertisement = Advertisement.find_by_id(params[:id])
 
+		respond _to do |format|
+			format.html # show.html.erb
+			format.json { render json: @system_user }
+		end
+	end
+	
 	# POST /advertisements
 	# POST /advertisements.json
 	def create
-		@advertisement = Advertisement.new(params[:advertisement])
-
+		@advertisement = Advertisement.create_advertisement(params[:advertisement], @current_user)	
+			
 		respond_to do |format|
-			if @advertisement.save(current_user)
-				format.html { redirect_to @advertisement, notice: 'Advertisement was successfully created.' }
-				format.json { render json: @advertisement, status: :created, location: @advertisement }
-			else
-				format.html { render action: "new" }
-				format.json { render json: @advertisement.errors, status: :unprocessable_entity }
-			end
-		end
-	rescue 
-		respond_to do |format|
-			format.html { render action: "new" }
-			format.json { render :json => ErrorEnum::UNKNOWN_ERROR}
+			format.html  if @advertisement.instance_of?(Advertisement)
+			format.html { render action: "new" } if !@advertisement.instance_of?(Advertisement)
+			format.json { render :json => @advertisement}
 		end
 	end
 
 	# PUT /advertisements/1
 	# PUT /advertisements/1.json
 	def update
-		@advertisement = Advertisement.find(params[:id])
+		@advertisement = Advertisement.update_advertisement(params[:id], params[:advertisement], @current_user)
 
 		respond_to do |format|
-			if @advertisement.update_attributes(params[:advertisement], current_user)
-				format.html { redirect_to @advertisement, notice: 'Advertisement was successfully updated.' }
-				format.json { render :json => @advertisement }
-			else
-				format.html { render action: "edit" }
-				format.json { render :json => ErrorEnum::SAVE_FAILED }
-			end
-		end
-	rescue 
-		respond_to do |format|
-			format.html { render action: "edit" }
-			format.json { render :json => ErrorEnum::UNKNOWN_ERROR}
+			format.html { redirect_to @advertisement} if @advertisement.instance_of?(Advertisement)
+			format.html { render action: "edit" } if !@advertisement.instance_of?(Advertisement)
+			format.json { render :json => @advertisement }
 		end
 	end
 
 	# DELETE /advertisements/1
 	# DELETE /advertisements/1.json
 	def destroy
-		@advertisement = Advertisement.find(params[:id])
-		@advertisement.destroy
+		@advertisement = Advertisement.destroy_by_id(params[:id])
 
 		respond_to do |format|
 			format.html { redirect_to advertisements_url }
-			format.json { render :json => true }
-		end
-	rescue 
-		respond_to do |format|
-			format.html
-			format.json { render :json => ErrorEnum::UNKNOWN_ERROR}
+			format.json { render :json => @advertisement }
 		end
 	end
+
 end
