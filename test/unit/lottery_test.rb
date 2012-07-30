@@ -35,6 +35,13 @@ class LotteryTest < ActiveSupport::TestCase
     assert true
   end
 
+  test "should draw a lottery" do
+
+  end
+
+  test "should make a interval" do
+     
+  end
 
 end
 

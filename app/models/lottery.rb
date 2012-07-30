@@ -7,8 +7,7 @@ class Lottery
   field :is_deleted, :type => Boolean, :default => false
   field :point, :type => Integer
   field :weighting, :type => Integer
-  field :award_interval, :type => Array, :default => []
-  field :amazing_time, :type => Array, :default => []
+  #field :award_interval, :type => Array, :default => []
 
   default_scope where(:is_deleted => false)
 
@@ -18,9 +17,10 @@ class Lottery
   scope :finished, where(:status => 3)
   
   #has_many :survey
-  has_many :awards
+  #has_many :awards
   has_many :lottery_codes
-  
+  has_many :lottery_awards, :class_name => 'LotteryAward'
+
   def delete
   	is_deleted = true
   	self.save
@@ -38,12 +38,23 @@ class Lottery
     self.lottery_codes.create(:user => user)
   end
 
-  def make_interval
-    award_interval = []
-    self.awards.can_be_draw.each do |a|
-      award_interval << award_interval[-1] + a.weighting
-    end
-    self.update_attribute(:award_interval, ai)
-  end
+  # def draw
+  #   r = random_weighting
+  #   make_interval.each do |e|   
+  #     r
+  #   end
+  # end
 
+  # def random_weighting
+  #   rand weighting
+  # end
+
+  def make_interval
+    award_interval = [{ :weighting => 0, :award => nil }]
+    self.awards.can_be_draw.each do |a|
+      award_interval << { :weighting => award_interval[-1][:weighting] + a.weighting, :award = a.id }
+    end
+    award_interval
+  end
+  
 end
