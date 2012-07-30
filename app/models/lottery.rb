@@ -38,12 +38,17 @@ class Lottery
     self.lottery_codes.create(:user => user)
   end
 
-  # def draw
-  #   r = random_weighting
-  #   make_interval.each do |e|   
-  #     r
-  #   end
-  # end
+  def draw(lottery_code)
+    r = random_weighting
+    l = LotteryCode.find_by_id(lottery_code)
+    make_interval.each do |e| 
+      if r < e[:weighting]
+        return l unless l.is_a? Award
+        l.award = Award.find_by_id(e[:award])        
+      end
+    end
+    return false
+  end
 
   # def random_weighting
   #   rand weighting
@@ -52,9 +57,10 @@ class Lottery
   def make_interval
     award_interval = [{ :weighting => 0, :award => nil }]
     self.awards.can_be_draw.each do |a|
-      award_interval << { :weighting => award_interval[-1][:weighting] + a.weighting, :award = a.id }
+      award_interval << { :weighting => award_interval[-1][:weighting] + a.weighting, :award => a.id }
     end
     award_interval
   end
   
 end
+

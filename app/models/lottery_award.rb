@@ -2,8 +2,8 @@ class LotteryAward
   include Mongoid::Document
 
   field :weighting, :type => Integer, :default => 0
-  field :start_time, :type => DataTime
-  field :end_time, :type => DataTime
+  field :start_time, :type => DateTime
+  field :end_time, :type => DateTime
   field :surplus, :type => Integer
   field :quantity, :type => Integer
   field :status, :type => Integer, :default => 4
@@ -13,7 +13,7 @@ class LotteryAward
 
   scope :can_be_draw, where => { :status => 0 }
 
-  after_save: make_status
+  after_save :make_status
 
   def make_status
     status = 0

@@ -11,6 +11,7 @@ class LotteryTest < ActiveSupport::TestCase
 	setup do
 		clear(Award, Lottery,LotteryCode,User)
 		@lottery = FactoryGirl.create(:lottery)
+    @lottery_code = FactoryGirl.create(:lottery_code) 
     @user_foo = FactoryGirl.created(:user_foo)
 	end
 

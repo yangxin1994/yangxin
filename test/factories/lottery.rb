@@ -5,5 +5,5 @@ FactoryGirl.define  do
 		point 1000
 		weight 10000
 		
-	end
+		end
 end
