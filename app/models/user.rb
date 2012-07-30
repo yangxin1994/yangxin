@@ -36,17 +36,17 @@ class User
   field :postcode, :type => String
   field :phone, :type => String
 
-  field :message_ids, :type => Array, default:[]
-  has_many :messages
+  #field :message_ids, :type => Array, default:[]
+  #has_many :messages
 
   #################################
   # QuillMe
   field :point, :type => Integer
-  has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
-  has_many :orders, :class_name => "Order", :foreign_key => "user_id"
-  has_many :lottery_codes
+  #has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
+  #has_many :orders, :class_name => "Order", :foreign_key => "user_id"
+  #has_many :lottery_codes
   # QuillAdmin
-  has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
+  #has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
   has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
 
 	before_save :set_updated_at
