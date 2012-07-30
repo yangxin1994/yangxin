@@ -37,14 +37,20 @@ module Tool
 	def self.get_region_by_ip(ip)
 	end
 
-	def self.check_question_answer(answer, standard_answer, fuzzy)
+	def self.check_choice_question_answer(answer, standard_answer, fuzzy)
 		standard_answer.each do |standard_choice|
 			return false if !answer.include?(standard_choice)
 		end
 		if fuzzy.to_s == "true"
 			return true
 		else
-			return answer.length == standaard_answer.length
+			return answer.length == standard_answer.length
 		end
+	end
+
+	def self.check_text_question_answer(answer, standard_answer, fuzzy)
+		return false if !standard_answer.include?(answer)
+		return false if standard_answer != answer && !fuzzy
+		return true
 	end
 end

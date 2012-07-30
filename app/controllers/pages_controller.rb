@@ -2,6 +2,16 @@
 require 'error_enum'
 class PagesController < ApplicationController
 	before_filter :require_sign_in
+	before_filter :check_survey_existence
+
+	def check_survey_existence
+		@survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if @survey.nil?
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		end
+	end
 
 	#*method*: get
 	#
@@ -19,14 +29,7 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def show
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.show_page(params[:id].to_i)
+		retval = @survey.show_page(params[:id].to_i)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -49,28 +52,14 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def create
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.create_page(params[:page_index].to_i, params[:page_name])
+		retval = @survey.create_page(params[:page_index].to_i, params[:page_name])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
 	end
 
 	def update
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.update_page(params[:id].to_i, params[:page_name])
+		retval = @survey.update_page(params[:id].to_i, params[:page_name])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -93,14 +82,7 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def clone
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		page = survey.clone_page(params[:page_index_1].to_i, params[:page_index_2].to_i)
+		page = @survey.clone_page(params[:page_index_1].to_i, params[:page_index_2].to_i)
 		respond_to do |format|
 			format.json	{ render :json => page and return }
 		end
@@ -123,14 +105,7 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def move
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.move_page(params[:page_index_1].to_i, params[:page_index_2].to_i)
+		retval = @survey.move_page(params[:page_index_1].to_i, params[:page_index_2].to_i)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -152,14 +127,7 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def destroy
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.delete_page(params[:id].to_i)
+		retval = @survey.delete_page(params[:id].to_i)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -183,17 +151,9 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def combine
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.combine_pages(params[:page_index_1].to_i, params[:page_index_2].to_i)
+		retval = @survey.combine_pages(params[:page_index_1].to_i, params[:page_index_2].to_i)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
 	end
-
 end

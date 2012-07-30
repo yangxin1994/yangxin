@@ -2,6 +2,36 @@
 require 'error_enum'
 class SurveysController < ApplicationController
 	before_filter :require_sign_in
+	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag]
+	before_filter :check_normal_survey_existence, :except => [:new, :save_meta_data, :index, :recover, :clear, :add_tag, :remove_tag]
+	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
+
+	def check_survey_existence
+		@survey = @current_user.surveys.find_by_id(params[:id])
+		if @survey.nil?
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		end
+	end
+
+	def check_normal_survey_existence
+		@survey = @current_user.surveys.normal.find_by_id(params[:id])
+		if @survey.nil?
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		end
+	end
+
+	def check_deleted_survey_existence
+		@survey = @current_user.surveys.deleted.find_by_id(params[:id])
+		if @survey.nil?
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		end
+	end
 
 	#*method*: get
 	#
@@ -54,56 +84,30 @@ class SurveysController < ApplicationController
 	end
 
 	def show_style_setting
-		survey = @current_user.surveys.normal.find_by_id(params[:id])
-		if survey.nil?
-			survey = Survey.normal.find_by_id(params[:id])
-			if !survey.nil? && survey.user.nil?
-				survey.user = @current_user
-			else
-				respond_to do |format|
-					format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-				end
-			end
-		end
-		style_setting = survey.show_style_setting(params[:style_setting])
+		style_setting = @survey.show_style_setting
 		respond_to do |format|
 			format.json	{ render :json => style_setting and return }
 		end
 	end
 
 	def update_style_setting
-		survey = @current_user.surveys.normal.find_by_id(params[:id])
-		if survey.nil?
-			survey = Survey.normal.find_by_id(params[:id])
-			if !survey.nil? && survey.user.nil?
-				survey.user = @current_user
-			else
-				respond_to do |format|
-					format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-				end
-			end
-		end
-		retval = survey.update_style_setting(params[:style_settings])
+		retval = @survey.update_style_setting(params[:style_setting])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
 	end
 
 	def show_quality_control_setting
-		survey = @current_user.surveys.normal.find_by_id(params[:id])
-		if survey.nil?
-			survey = Survey.normal.find_by_id(params[:id])
-			if !survey.nil? && survey.user.nil?
-				survey.user = @current_user
-			else
-				respond_to do |format|
-					format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-				end
-			end
-		end
-		style_setting = survey.show_style_setting(params[:style_setting])
+		style_setting = @survey.show_quality_control_setting
 		respond_to do |format|
 			format.json	{ render :json => style_setting and return }
+		end
+	end
+
+	def update_quality_control_setting
+		retval = @survey.update_quality_control_setting(params[:quality_control_setting])
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
 		end
 	end
 
@@ -121,14 +125,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def destroy
-		survey = @current_user.surveys.normal.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.delete
+		retval = @survey.delete
 		### close the publish of the survey
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
@@ -149,14 +146,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist in the trash
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def recover
-		survey = @current_user.surveys.deleted.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.recover
+		retval = @survey.recover
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -176,14 +166,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist in the trash
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def clear
-		survey = @current_user.surveys.deleted.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.clear
+		retval = @survey.clear
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -204,14 +187,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def clone
-		survey = @current_user.surveys.normal.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		new_survey = survey.clone
+		new_survey = @survey.clone
 		respond_to do |format|
 			format.json	{ render :json => new_survey.to_json and return }
 		end
@@ -231,14 +207,8 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def show
-		survey = @current_user.surveys.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
 		respond_to do |format|
-			format.json	{ render :json => survey.to_json and return }
+			format.json	{ render :json => @survey.to_json and return }
 		end
 	end
 
@@ -258,14 +228,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	#* ErrorEnum ::TAG_EXIST : when the survey already has the tag
 	def add_tag
-		survey = @current_user.surveys.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.add_tag(params[:tag])
+		retval = @survey.add_tag(params[:tag])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -287,14 +250,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	#* ErrorEnum ::TAG_NOT_EXIST : when the survey does not have the tag
 	def remove_tag
-		survey = @current_user.surveys.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.remove_tag(params[:tag])
+		retval = @survey.remove_tag(params[:tag])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -335,14 +291,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::SURVEY_NOT_EXIST
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def submit
-		survey = @current_user.normal.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.submit(params[:message])
+		retval = @survey.submit(params[:message])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -364,14 +313,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::UNAUTHORIZED
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def reject
-		survey = @current_user.normal.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.reject(params[:message])
+		retval = @survey.reject(params[:message])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -393,14 +335,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::UNAUTHORIZED
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def publish
-		survey = @current_user.normal.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.publish(params[:message])
+		retval = @survey.publish(params[:message])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -422,14 +357,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::UNAUTHORIZED
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def close
-		survey = @current_user.normal.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.close(params[:message])
+		retval = @survey.close(params[:message])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -451,13 +379,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::UNAUTHORIZED
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def pause
-		survey = @current_user.normal.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-		retval = survey.pause(params[:message])
+		retval = @survey.pause(params[:message])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end

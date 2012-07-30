@@ -97,6 +97,15 @@ OopsData::Application.routes.draw do
 	resources :template_questions do
 	end
 
+	resources :answers do
+		collection do
+			post 'load_question'
+			post 'clear'
+			post 'submit_answer'
+			post 'finish'
+		end
+	end
+
 	# QuillMe
 	resources :presents do
 		collection do
