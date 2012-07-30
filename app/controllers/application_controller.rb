@@ -179,17 +179,17 @@ class ApplicationController < ActionController::Base
 	end
 
 
-	# page operate
+	# paging operate
 	def slice(arr, page, per_page)
+		arr = arr.to_a if arr.instance_of?(Mongoid::Criteria)
 		return [] if !arr.instance_of?(Array)
 
-		page ||= 1
-		per_page ||= 10
-		page = page.to_i
-		per_page = per_page.to_i
+		page = page.nil? ? 1 : page.to_i
+		per_page = per_page.nil? ? 10 : per_page.to_i
+		return [] if page < 1 || per_page < 1 
 
-		return [] if page < 1 || per_page < 1
-
-		return arr.slice((page - 1)*per_page - 1, per_page)
+		# avoid arr = nil
+		arr = arr.slice((page-1)*per_page, per_page) || []
+		return arr
 	end
 end

@@ -86,7 +86,17 @@ class PublicNoticesControllerTest < ActionController::TestCase
 
 		get 'index', :format => :json, :public_notice_type => 3, :value => "content1"
 		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 1		
+		assert_equal retval.count, 1
+
+		#paging
+		get 'index', :format => :json, :per_page => 2
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 2
+
+		get 'index', :format => :json, :per_page => 3, :page=> 2
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 1
+
 
 		sign_out
 		

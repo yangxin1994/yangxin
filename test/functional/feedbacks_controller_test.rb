@@ -5,15 +5,21 @@ class FeedbacksControllerTest < ActionController::TestCase
 	test "01 should get index action and no feedback record" do
 		clear(Feedback, User)
 
+		assert_equal User.all.count, 0
+
 		get 'index', :format => :json
 		assert_equal @response.body.to_i, ErrorEnum::REQUIRE_LOGIN
+
+		assert_equal User.all.count, 1
+
+		clear(Feedback, User)
 
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.status = 2
 		user.role = 0
 		user.save
 
-		assert_equal User.all.first, user 
+		assert_equal User.all.first, user
 
 		sign_in(user.email, "123456")
 		get 'index', :format => :json
@@ -119,6 +125,15 @@ class FeedbacksControllerTest < ActionController::TestCase
 		get 'index', :format => :json, :feedback_type => 255, :answer => false
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 3
+
+		#paging
+		get 'index', :format => :json, :per_page => 2, :feedback_type => 255
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 2
+
+		get 'index', :format => :json, :per_page => 3, :page=> 2, :feedback_type => 255
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 1
 
 		sign_out
 		

@@ -109,6 +109,11 @@ class SystemUsersControllerTest < ActionController::TestCase
 		assert_equal retval[0]["true_name"], "lisi"
 		assert_equal retval[1]["true_name"], "zhangsan"
 
+		#paging
+		get 'index', :format => :json, :page => 2, :per_page => 1
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 1
+
 		sign_out
 
 		clear(User)

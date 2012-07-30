@@ -232,7 +232,8 @@ class Feedback
 
 			return feedbacks
 		end
-	
+
+=begin
 		#*description*: reply feedback
 		#
 		#*params*:
@@ -271,7 +272,7 @@ class Feedback
 
 			return stat
 		end
-		
+=end		
 	end 
 	
 end

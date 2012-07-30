@@ -63,6 +63,8 @@ class AdvertisementsControllerTest < ActionController::TestCase
 		post 'create', :advertisement => {title: "title2", linked: "linked1", image_location: "image_location1", activate: true}, :format => :json
 		post 'create', :advertisement => {title: "title3", linked: "linked1", image_location: "image_location1", activate: false}, :format => :json
 
+		assert_equal Advertisement.all.count, 3		
+
 		# without ...
 		get 'index', :format => :json
 		retval = JSON.parse(@response.body)
@@ -84,7 +86,12 @@ class AdvertisementsControllerTest < ActionController::TestCase
 
 		get 'index', :format => :json, :title => "title2"
 		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 1		
+		assert_equal retval.count, 1
+
+		#paging
+		get 'index', :format => :json, :per_page => 2, :page => 2
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 1
 
 		sign_out
 		
