@@ -10,6 +10,7 @@ require "error_enum"
 class Message
 	include Mongoid::Document
 	include Mongoid::Timestamps
+	extend Mongoid::FindHelper 
 	field :title, :type => String
 	field :content, :type => String
 	field :sender_id, :type => String
@@ -19,19 +20,6 @@ class Message
 
 	belongs_to :user
 
-	ATTR_NAME_ARY = %w[title content sender_id type]
-
-	#*description*:find a message by its id.return nil if cannot find
-	#
-	#*params*:
-	#* id of the group to be found
-	#
-	#*retval*:
-	#* the message instance found, or nil if cannot find
-	def self.find_by_id(message_id)	
-		message = Message.where(:_id => message_id)[0]
-		return message
-	end
 	
 	def get_id
     return self._id.to_s

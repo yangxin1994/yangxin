@@ -11,17 +11,31 @@ gem 'bson_ext'
 gem 'ezcrypto'
 gem 'log4r'
 gem 'memcache-client'
-gem 'kaminari' 
+gem 'kaminari'
 gem 'resque'
 gem 'resque-scheduler'
 
 gem 'haml'
 gem 'haml-rails'
 
-gem 'therubyracer'
+
 
 gem 'passenger'
+
 gem 'rest-client'
+if HOST_OS =~ /linux/i
+  gem 'therubyracer', '>= 0.8.2'
+end
+case HOST_OS
+  when /darwin/i
+    gem 'rb-fsevent', :group => :development
+    gem 'growl', :group => :development
+    gem 'guard-pow', :group => :development
+  when /linux/i
+    gem 'libnotify', :group => :development
+    gem 'rb-inotify', :group => :development
+		gem 'therubyracer'
+end
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -51,4 +65,11 @@ group :test do
   gem 'turn', :require => false
 	gem 'minitest'
 	gem 'factory_girl_rails', "~> 3.0"
+  gem 'turn', :require => false
+  gem 'database_cleaner', ">= 0.6.7"
+  gem 'guard-spork'
+  gem 'spork', '~> 0.9.0'
+  gem "guard-rspec"
+  gem 'guard-livereload'
+  gem 'guard-bundler'
 end
