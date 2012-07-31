@@ -30,8 +30,7 @@ class BasicPresent
 	end
 
 	def delete
-  	is_deleted = true
-  	true if self.save		
+  	update_attribute(is_deleted, true)
 	end
 
 end

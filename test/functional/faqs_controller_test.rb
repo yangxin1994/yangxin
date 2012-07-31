@@ -165,8 +165,7 @@ class FaqsControllerTest < ActionController::TestCase
 
 		clear(User,Faq)
 	end
-<<<<<<< HEAD
-=======
+
 	
 	test "my test" do
 		clear(User, Faq)
@@ -266,6 +265,6 @@ class FaqsControllerTest < ActionController::TestCase
 
 		clear(User, Faq)
 	end
->>>>>>> 14627a53cf3501e03f0fffcb8ff1cf9282ab2cd2
+
 	
 end

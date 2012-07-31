@@ -187,3 +187,4 @@ class ActiveSupport::TestCase
 		return [material_id_1, material_id_2, material_id_3, material_id_4, material_id_5, material_id_6]
 	end
 end
+

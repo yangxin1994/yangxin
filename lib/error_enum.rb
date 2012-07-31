@@ -83,7 +83,7 @@ module ErrorEnum
 	# Presents Error Code
 	PresentNotFound = 21001
 	InvalidPresentId = 21002
-
+	UNAUTHROZIED = -1
 	# Award Error Code
 	AwardBudgetCounldNotBeBlank = 21511
 end

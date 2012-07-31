@@ -10,7 +10,8 @@ require "error_enum"
 class Message
 	include Mongoid::Document
 	include Mongoid::Timestamps
-	extend Mongoid::FindHelper 
+	extend Mongoid::FindHelper
+	
 	field :title, :type => String
 	field :content, :type => String
 	field :sender_id, :type => String
