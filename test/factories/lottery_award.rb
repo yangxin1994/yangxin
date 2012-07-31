@@ -1,10 +1,10 @@
 FactoryGirl.define  do
-	factory :lottery_dsxl do
-		weighting 100
-		start_time DataTime.now
-		end_time DataTime.now.next_month
-		point 1000
-		weight 10000
-		
+	factory :lottery_dsxl, class: LotteryAward do
+		weighting 10000
+		start_time DateTime.now
+		end_time DateTime.now.next_month
+		surplus 10
+		quantity 100
+		award factory: :dsxl
 	end
 end

@@ -1,5 +1,5 @@
 FactoryGirl.define do
-	factory :dsxl do
+	factory :dsxl, class: Award do
 		name '3DSXL'
   	type 1
   	quantity 20

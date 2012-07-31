@@ -26,8 +26,8 @@ class Lottery
   	self.save
   end
 
-  def add_an_award(attributes = nil, options = {}, &block)
-  	self.awards.create(attributes, options, &block)
+  def add_an_lottery_award(attributes = nil, options = {}, &block)
+  	self.lottery_awards.create(attributes, options, &block)
   end
 
   def add_a_lottery_code(attributes = nil, options = {}, &block)
@@ -41,23 +41,24 @@ class Lottery
   def draw(lottery_code)
     r = random_weighting
     l = LotteryCode.find_by_id(lottery_code)
-    make_interval.each do |e| 
+    make_interval.each do |e|
       if r < e[:weighting]
-        return l unless l.is_a? Award
-        l.award = Award.find_by_id(e[:award])        
+        return l unless l.is_a? LotteryCode
+        l.award = Award.find_by_id(e[:award])
+        return l if (l.award.is_a?(Award)) && l.save 
       end
     end
     return false
   end
 
-  # def random_weighting
-  #   rand weighting
-  # end
+  def random_weighting
+    rand weighting
+  end
 
   def make_interval
     award_interval = [{ :weighting => 0, :award => nil }]
-    self.awards.can_be_draw.each do |a|
-      award_interval << { :weighting => award_interval[-1][:weighting] + a.weighting, :award => a.id }
+    self.lottery_awards.can_be_draw.each do |a|
+      award_interval << { :weighting => award_interval[-1][:weighting] + a.weighting, :award => a.award.id.to_s }
     end
     award_interval
   end

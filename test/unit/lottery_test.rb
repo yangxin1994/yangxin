@@ -1,29 +1,15 @@
 require 'test_helper'
 
-class UserTest < ActiveSupport::TestCase
-	# setup do
-	# 	clear(User, Lottery)
-	# 	FoctoryGirl.create(:admin_bar)
-	# end
-end
-
 class LotteryTest < ActiveSupport::TestCase
 	setup do
-		clear(Award, Lottery,LotteryCode,User)
+		clear(Award, Lottery, LotteryCode, User, LotteryAward)
 		@lottery = FactoryGirl.create(:lottery)
-    @lottery_code = FactoryGirl.create(:lottery_code) 
-    @user_foo = FactoryGirl.created(:user_foo)
+    @lottery_code = FactoryGirl.create(:lottery_code)
+    #@lottery = @lottery_code.lottery
+    #@lottery_award = FactoryGirl.create(:lottery_dsxl)
+    @award = FactoryGirl.create(:dsxl)
+    # @user_bar = @lottery_code.user
 	end
-
-  test "should add an award" do
-  	assert @lottery.awards.empty?
-  	@lottery.add_an_award(:name => "PSV",
-  											 :type => 1,
-  											 :quantity => 23,
-  											 :description => "sony playstation portable vita"
-  		)
-  	assert_not_nil !@lottery.awards[0].created_at
-  end
 
   test "should add a lottery code" do
   	assert @lottery.lottery_codes.empty?
@@ -37,7 +23,12 @@ class LotteryTest < ActiveSupport::TestCase
   end
 
   test "should draw a lottery" do
-    
+    @lottery_award = FactoryGirl.create(:lottery_dsxl)
+    @lottery.lottery_awards << @lottery_award
+    @lottery.save
+    assert_equal 0, @lottery_award.status
+    d = @lottery.draw(@lottery_code.id)
+    p d
   end
 
   test "should make a interval" do
