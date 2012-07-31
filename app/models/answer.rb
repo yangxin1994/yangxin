@@ -10,6 +10,14 @@ class Answer
 	field :status, :type => Integer, default: 0
 	field :answer_content, :type => Hash
 	field :template_answer_content, :type => Hash
+	# Due to the logic control rules, volunteer's answer will hide/show some questions/choices.
+	# The hide/show of questions can be recorded in the "answer_content" field
+	# => For those questions that are hidden, their answers are set as "{}", and they will not be loaded
+	# The hide/show of choices is recorded in he logic_control_result
+	# => Specifically, logic_control_result is used to record those choices that are hidden.
+	# => logic_control_result is a hash, the key of which is question id, and the value of which has the following strucutre
+	# => => items : array of input ids that are hidden
+	# => => sub_questions : array of row ids that are hidden
 	field :logic_control_result, :type => Hash
 	field :repeat_time, :type => Integer, default: 0
 	# reject_type: 0 for rejected by quota, 1 for rejected by quliaty control, 2 for rejected by screen, 3 for timeout
@@ -67,9 +75,7 @@ class Answer
 		# initialize the answer content
 		answer_content = {}
 		survey.pages.each do |page|
-			page["questions"].each do |q_id|
-				answer_content["q_id"] = nil
-			end
+			answer_content = answer_content.merge(Hash[page["questions"].map { |ele| [ele, nil] }])
 		end
 		logic_control = survey.show_logic_control
 		logic_control.each do |rule|
@@ -80,26 +86,76 @@ class Answer
 			end
 		end
 		answer.answer_content = answer_content
+		# initialize the template answer content
+		answer.template_answer_content = Hash[survey.quota_template_question_page.map { |ele| [ele, nil] }]
+
+		answer.save
+		operator.answers << answer
+		survey.answers << answer
 
 		# initialize the logic control result
 		logic_control_result = {}
 		logic_control.each do |rule|
 			if rule["rule_type"] == 3
-				logic_control_result = logic_control_result.merge(rule["result"])
-			elsif rule["rule_type"] == 5
-				cur_logic_control_rule = {"question_id" => rule["result"]["question_id_2"], "items" => []}
-				rule["result"]["items"].each do |input_ids|
-					cur_logic_control_rule["items"] << input_ids[1]
+				rule["result"].each do |ele|
+					answer.add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
 				end
-				logic_control_result = logic_control_result.merge(cur_logic_control_rule)
+			elsif rule["rule_type"] == 5
+				items_to_be_added = []
+				rule["result"]["items"].each do |input_ids|
+					items_to_be_added << input_ids[1]
+				end
+				answer.add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
 			end
 		end
-		answer.logic_control_result = logic_control_result
-
-		answer.save
-		operator.answers << answer
-		survey.answers << answer
 		return answer
+	end
+
+	#*description*: add a logic control result
+	#
+	#*params*:
+	#* question_id
+	#* items: array of inputs id that are added
+	#* sub_questions: array of rows id that are added
+	#
+	#*retval*:
+	#* true:
+	#* false:
+	def add_logic_control_result(question_id, items, sub_questions)
+		if self.logic_control_result[question_id].nil?
+			self.logic_control_result[question_id] = {"items" => items, "sub_questions" => sub_questions}
+		else
+			self.logic_control_result[question_id["items"]] = 
+				(self.logic_control_result[question_id["items"]].to_a + items.to_a).uniq
+			self.logic_control_result[question_id["sub_questions"]] = 
+				(self.logic_control_result[question_id["sub_questions"]].to_a + items.to_a).uniq
+		end
+		return self.save
+	end
+
+	#*description*: remove a logic control result
+	#
+	#*params*:
+	#* question_id
+	#* items: array of inputs id that are removed
+	#* sub_questions: array of rows id that are removed
+	#
+	#*retval*:
+	#* true:
+	#* false:
+	def remove_logic_control_result(question_id, items, sub_questions)
+		return if self.logic_control_result[question_id].nil?
+		cur_items = self.logic_control_result[question_id]["items"].to_a
+		cur_sub_questions = self.logic_control_result[question_id]["sub_questions"].to_a
+		items.each do |ele|
+			cur_items.delete(ele)
+		end
+		sub_questions.each do |ele|
+			cur_sub_questions.delete(ele)
+		end
+		self.logic_control_result[question_id]["items"] = cur_items
+		self.logic_control_result[question_id]["sub_questions"] = cur_sub_questions
+		return self.save
 	end
 
 	#*description*: check whether the answer satisfies the channel, ip, and address quota, and set the status
@@ -225,11 +281,10 @@ class Answer
 	#* ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP
 	#* ErrorEnum::ANSWER_NOT_COMPLELTE
 	def finish
-		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_redo
+		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_edit
 		return ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP if !self.survey.is_pageup_allowed
-		self.answer_content.each_value do |value|
-			return ErrorEnum::ANSWER_NOT_COMPLETE if value.nil?
-		end
+		return ErrorEnum::ANSWER_NOT_COMPLETE if self.template_answer_content.has_value?(nil)
+		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)
 		self.set_finish
 		return true
 	end
@@ -376,13 +431,13 @@ class Answer
 	#* false
 	def check_screen(answer_content)
 		logic_control = self.survey.show_logic_control
-		question_id_ary = answer_content.values
+		volunteer_answer_question_id_ary = answer_content.keys
 		logic_control.each do |logic_control_rule|
 			# only check the screen logic control rules
 			next if logic_control_rule["rule_type"] != 0
 			screen_condition_question_id_ary = logic_control_rule["conditions"].map {|ele| ele["question_id"]}
 			# check whether, in the answers submitted, there are screen questions for this logic control rule
-			target_question_id_ary = question_id_ary & screen_condition_question_id_ary
+			target_question_id_ary = volunteer_answer_question_id_ary & screen_condition_question_id_ary
 			next if target_question_id_ary.empty?
 
 			# for each condition, check whether it is violated
@@ -448,11 +503,80 @@ class Answer
 	def update_logic_control_result(answer_type, answer_content)
 		# only normal questions are related to logic control
 		return if answer_type == 0
+		# array of ids of the questinos that the volunteer answers this time
+		volunteer_answer_question_id_ary = answer_content.keys
 		logic_control = self.survey.show_logic_control
-		
+		logic_control.each do |logic_control_rule|
+			# array of ids of the quetions that are the conditions of this logic control rule
+			logic_control_rule_question_id_ary = logic_control_rule["conditions"].map {|condition| condition["question_id"]}
+			target_question_id_ary = volunteer_answer_question_id_ary & logic_control_rule_question_id_ary
+			# if the answers submitted have nothing to do with the conditions of this rule, move to the next rule
+			next if target_question_id_ary.empty?
+			# if the conditions of the rule are not satisfied, move to the next rule
+			satisfy_rule = true
+			logic_control_rule["conditions"].each do |condition|
+				# if the volunteer has not answered this question, stop the checking of this rule
+				satisfy_rule = false if answer_content[condition["question_id"]].nil?
+				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]], condition["answer"], condition["fuzzy"])
+				satisfy_rule = false if !pass_condition
+			end
+			next if !satisfy_rule
+			# the conditions of this logic control rule is satisfied
+			case logic_control_rule["rule_type"]
+			when 1
+				# "show question" logic control
+				# if the rule is satisfied, show the question (set the answer of the question as "nil")
+				logic_control_rule["result"].each do |q_id|
+					self.answer_content[q_id] = nil
+				end
+				self.save
+			when 2
+				# "hide question" logic control
+				# if the rule is satisfied, hide the question (set the answer of the question as {})
+				logic_control_rule["result"].each do |q_id|
+					self.answer_content[q_id] = self.answer_content[q_id] || {}
+				end
+				self.save
+			when 3
+				# "show item" logic control
+				# if the rule is satisfied, show the items (remove from the logic_control_result)
+				logic_control_rule["result"].each do |ele|
+					self.remove_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
+				end
+			when 4
+				# "hide item" logic control
+				# if the rule is satisfied, hide the items (add to the logic_control_result)
+				logic_control_rule["result"].each do |ele|
+					self.add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
+				end
+			when 5
+				# "show matching item" logic control
+				# if the rule is satisfied, show the items (remove from the logic_control_result)
+				items_to_be_removed = []
+				log_control_rule["result"]["items"].each do |input_ids|
+					items_to_be_removed << input_ids[1]
+				end
+				self.remove_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_removed, [])
+			when 6
+				# "hide matching item" logic control
+				# if the rule is satisfied, hide the items (add to the logic_control_result)
+				items_to_be_added = []
+				log_control_rule["result"]["items"].each do |input_ids|
+					items_to_be_added << input_ids[1]
+				end
+				self.add_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_added, [])
+			end
+		end
 	end
 
 	def auto_finish
-		
+		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_edit
+		# those surveys that allow pageup cannot be finished automatically
+		return ErrorEnum::SURVEY_ALLOW_PAGEUP if self.survey.is_pageup_allowed
+		# check whether all questions are answered
+		return ErrorEnum::ANSWER_NOT_COMPLETE if self.template_answer_content.has_value?(nil)
+		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)
+		self.set_finish
+		return true
 	end
 end
