@@ -33,6 +33,7 @@ class Survey
 	field :publish_status, :type => Integer, default: 1
 	field :pages, :type => Array, default: []
 	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
+	field :quota_template_question_page, :type => Array, default: []
 	field :logic_control, :type => Array, default: []
 	field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
 		"has_progress_bar" => true,
@@ -177,6 +178,20 @@ class Survey
 
 	def show_style_setting
 		return self.style_setting
+	end
+
+	def update_quality_control_setting(quality_control_setting_obj)
+		self.quality_control_setting = quality_control_setting_obj
+		self.save
+		return true
+	end
+
+	def show_quality_control_setting
+		return self.quality_control_setting
+	end
+
+	def is_pageup_allowed
+		return self.quality_control_setting["allow_pageup"]
 	end
 
 	#*description*: remove current survey
@@ -785,21 +800,52 @@ class Survey
 		end
 	end
 
+	def add_quota_template_question(template_question_id)
+		template_question = TemplateQuestion.find_by_id(template_question_id)
+		return ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST if template_question.nil?
+		return true if self.quota_template_question_page.include?(question._id.to_s)
+		question = Question.create_template_question(template_question)
+		self.quota_template_question_page << question._id.to_s
+		return self.save
+	end
+
+	def remove_quota_template_question(template_question_id)
+		self.quota_template_question_page.each do |q_id|
+			question = Question.find_by_id(q_id)
+			if question.reference_id == template_question_id
+				self.quota_template_question_page.delete(q_id)
+				return self.save
+			end
+		end
+	end
+
 	def show_quota
 		return Marshal.load(Marshal.dump(self.quota))
 	end
 
 	def add_quota_rule(quota_rule)
+		quota_rule["conditions"].each do |condition|
+			self.add_quota_template_question(condition["name"]) if condition["condition_type"] == 0
+		end
 		quota = Quota.new(self.quota)
 		return quota.add_rule(quota_rule, self)
 	end
 
 	def update_quota_rule(quota_rule_index, quota_rule)
+		self.quota[quota_rule_index]["conditions"].each do |condition|
+			self.remove_quota_template_question(condition["name"]) if condition["condition_type"] == 0
+		end
+		quota_rule["conditions"].each do |condition|
+			self.add_quota_template_question(condition["name"]) if condition["condition_type"] == 0
+		end
 		quota = Quota.new(self.quota)
 		return quota.update_rule(quota_rule_index, quota_rule, self)
 	end
 
 	def delete_quota_rule(quota_rule_index)
+		self.quota[quota_rule_index]["conditions"].each do |condition|
+			self.remove_quota_template_question(condition["name"]) if condition["condition_type"] == 0
+		end
 		quota = Quota.new(self.quota)
 		return quota.delete_rule(quota_rule_index, self)
 	end
