@@ -33,7 +33,7 @@ class AdvertisementsController < ApplicationController
 
 		respond _to do |format|
 			format.html # show.html.erb
-			format.json { render json: @advertisement, :except => "user_id" }
+			format.json { render json: @advertisement }
 		end
 	end
 
@@ -54,7 +54,7 @@ class AdvertisementsController < ApplicationController
 
 		respond _to do |format|
 			format.html # show.html.erb
-			format.json { render json: @system_user }
+			format.json { render json: @advertisement }
 		end
 	end
 	

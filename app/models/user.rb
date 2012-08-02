@@ -23,31 +23,33 @@ class User
 	field :introducer_to_pay, :type => Float
 # 0 user
 # 1 administrator
+# 2 belongs to: White List
+# 4 belongs to: Black List
 
-  field :role, :type => Integer, default: 0
-  field :auth_key, :type => String
-  field :last_visit_time, :type => Integer
-  field :level, :type => Integer, default: 0
-  field :level_expire_time, :type => Integer, default: -1
+	field :role, :type => Integer, default: 0
+	field :auth_key, :type => String
+	field :last_visit_time, :type => Integer
+	field :level, :type => Integer, default: 0
+	field :level_expire_time, :type => Integer, default: -1
 
-  field :birthday, :type => Integer, default: -1
-  field :gender, :type => Boolean
-  field :address, :type => String
-  field :postcode, :type => String
-  field :phone, :type => String
+	field :birthday, :type => Integer, default: -1
+	field :gender, :type => Boolean
+	field :address, :type => String
+	field :postcode, :type => String
+	field :phone, :type => String
 
-  #field :message_ids, :type => Array, default:[]
-  #has_many :messages
+	#field :message_ids, :type => Array, default:[]
+	#has_many :messages
 
-  #################################
-  # QuillMe
-  field :point, :type => Integer
-  #has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
-  #has_many :orders, :class_name => "Order", :foreign_key => "user_id"
-  #has_many :lottery_codes
-  # QuillAdmin
-  #has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
-  has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
+	#################################
+	# QuillMe
+	field :point, :type => Integer
+	#has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
+	#has_many :orders, :class_name => "Order", :foreign_key => "user_id"
+	#has_many :lottery_codes
+	# QuillAdmin
+	#has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
+	has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
 
 	before_save :set_updated_at
 	before_update :set_updated_at
@@ -397,4 +399,106 @@ class User
 		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
 		return question.delete_quality_control_question(self)
 	end
+
+
+	#--
+	# **************************************************
+	# Quill AdminController
+	#++
+
+	public
+
+	scope :black_list, where(role: 4)
+	scope :white_list, where(role: 2)
+
+	#--
+	# instance methods
+	#++
+
+	def is_white?
+		return self.role == 2
+	end
+
+	def is_black?
+		return self.role == 4
+	end
+
+	#--
+	# class methods
+	#++
+
+	def self.update_user(user_id, attributes)
+		user = User.find_by_id(user_id)
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
+
+		select_attrs = %w(birthday gender address phone postcode)
+		attributes.select!{|k,v| select_attrs.include?(k.to_s)}
+
+		updated_user = User.collection.find_and_modify(:query => {_id: user.id}, :update => attributes, new: true)
+
+		return User.where(_id: updated_user["_id"]).first
+	end
+
+	def self.change_white_user(user_id)
+		user = User.find_by_id(user_id.to_s.strip)	
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
+
+		if user.role != 2 then
+			user.role = 2 
+		elsif user.role != 0
+			user.role = 0 
+		end
+		if user.save then
+			user[:white] = true if user.role == 2
+			user[:white] = false if user.role == 0
+			return user 
+		else
+			return ErrorEnum::USER_SAVE_FAILED
+		end
+	end
+
+	def self.change_black_user(user_id)
+		user = User.find_by_id(user_id.to_s.strip)	
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
+
+		if user.role != 4 then
+			user.role = 4 
+		elsif user.role != 0
+			user.role = 0 
+		end
+		if user.save then
+			user[:black] = true if user.role == 4
+			user[:black] = false if user.role == 0
+			return user 
+		else
+			return ErrorEnum::USER_SAVE_FAILED
+		end
+	end
+
+	def self.change_to_system_password(user_id)
+		user = User.find_by_id(user_id)
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
+
+		sys_pwd = 1
+		while sys_pwd < 16**7 do
+			sys_pwd = rand(16**8-1)
+		end
+		sys_pwd = sys_pwd.to_s(16)
+
+		user.password = Encryption.encrypt_password(sys_pwd)
+		if !user.save then 
+			return ErrorEnum::USER_SAVE_FAILED
+		end
+
+		user[:tmp_password] = sys_pwd
+
+		#maybe, should be send the pwd to his register email
+		# user.receive_email("You new password is : #{user[:tmp_password]}")
+
+		return user 
+	end
+
+	#--
+	# **************************************************
+	#++
 end

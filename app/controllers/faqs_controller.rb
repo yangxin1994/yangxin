@@ -53,7 +53,7 @@ class FaqsController < ApplicationController
 
 		respond _to do |format|
 			format.html # show.html.erb
-			format.json { render json: @system_user, :except => [:user_id] }
+			format.json { render json: @faq, :except => [:user_id] }
 		end
 	end
 	
