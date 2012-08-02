@@ -1,6 +1,7 @@
 # coding: utf-8
 
 class LotteryController < ApplicationController
+
 	def index
 		@lotteries = Lottery.page(page)
 		@lotteries = ErrorEnum::LotteryNotFound if @lotteries.empty?
@@ -9,6 +10,7 @@ class LotteryController < ApplicationController
 			format.json { render json: @lotteries}ies
 		end
 	end
+
 	def_each :virtualgoods, :cash, :realgoods, :stockout do |method_name|
 		@presents = Present.send(method_name).can_be_rewarded.page(page)
 		@presents = ErrorEnum::PresentNotFound if @presents.empty? 
@@ -17,4 +19,5 @@ class LotteryController < ApplicationController
 			format.json { render json: @presents}
 		end
 	end
+	
 end

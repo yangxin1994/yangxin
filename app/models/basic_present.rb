@@ -8,7 +8,7 @@ class BasicPresent
 	field :surplus, :type => Integer
 	field :quantity, :type => Integer
 	field :description, :type => String
-	field :start_time, :type => Date
+
 	field :end_time, :type => Date
 
 	field :is_deleted, :type => Boolean, :default => false

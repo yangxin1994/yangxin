@@ -1,6 +1,7 @@
 class Lottery
   include Mongoid::Document
   include Mongoid::Timestamps
+
   field :title, :type => String
   field :description, :type => String
   field :status, :type => Integer, :default => 1
@@ -17,9 +18,9 @@ class Lottery
   scope :finished, where(:status => 3)
   
   #has_many :survey
-  #has_many :awards
+  belongs_to :awards
   has_many :lottery_codes
-  has_many :lottery_awards, :class_name => 'LotteryAward'
+  #has_many :lottery_awards, :class_name => 'LotteryAward'
 
   def delete
   	is_deleted = true
@@ -57,8 +58,8 @@ class Lottery
 
   def make_interval
     award_interval = [{ :weighting => 0, :award => nil }]
-    self.lottery_awards.can_be_draw.each do |a|
-      award_interval << { :weighting => award_interval[-1][:weighting] + a.weighting, :award => a.award.id.to_s }
+    self.awards.can_be_draw.each do |a|
+      award_interval << { :weighting => award_interval[-1][:weighting] + a.weighting, :award => a.id.to_s }
     end
     award_interval
   end

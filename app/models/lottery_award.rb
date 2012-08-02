@@ -1,13 +1,6 @@
 class LotteryAward
   include Mongoid::Document
 
-  field :weighting, :type => Integer, :default => 0
-  field :start_time, :type => DateTime
-  field :end_time, :type => DateTime
-  field :surplus, :type => Integer
-  field :quantity, :type => Integer
-  field :status, :type => Integer, :default => 4
-
   belongs_to :award
   belongs_to :lottery
 
