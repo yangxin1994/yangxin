@@ -110,6 +110,11 @@ class Survey
 			survey_obj[attr_name] = method_obj.call()
 		end
 		survey_obj["quota"] = Marshal.load(Marshal.dump(self.quota))
+		survey_obj["quota_stats"] = Marshal.load(Marshal.dump(self.quota_stats))
+		survey_obj["logic_control"] = Marshal.load(Marshal.dump(self.logic_control))
+		survey_obj["quality_control_setting"] = Marshal.load(Marshal.dump(self.quality_control_setting))
+		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
+		survey_obj["publish_status"] = self.publish_status
 		return survey_obj
 	end
 
@@ -388,7 +393,7 @@ class Survey
 	#* true
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
-	def pause(current_user, message)
+	def pause(message, operator)
 		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin
 		return ErrorEnum::WRONG_PUBLISH_STATUS if ![PublishStatus::PUBLISHED, PublishStatus::UNDER_REVIEW].include?(self.publish_status)
 		before_publish_status = self.publish_status
