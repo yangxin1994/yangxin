@@ -73,6 +73,10 @@ class BlankIssue < Issue
 		super(ATTR_NAME_ARY)
 	end
 
+	def remove_hidden_items(items, sub_questions)
+		self.inputs.delete_if { |input| items.include?(input["input_id"]) }
+	end
+
 	#*description*: update the current question instance, including generate id for new inputs
 	#
 	#*params*:

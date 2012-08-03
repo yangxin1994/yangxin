@@ -46,8 +46,8 @@ require 'securerandom'
 # }
 class MatrixBlankIssue < Issue
 
-	attr_reader :is_rand, :inputs, :row_name, :is_row_rand, :row_num_per_group
-	attr_writer :is_rand, :inputs, :row_name, :is_row_rand, :row_num_per_group
+	attr_reader :is_rand, :inputs, :row_id, :row_name, :is_row_rand, :row_num_per_group
+	attr_writer :is_rand, :inputs, :row_id, :row_name, :is_row_rand, :row_num_per_group
 
 	ATTR_NAME_ARY = %w[inputs is_rand row_name is_row_rand row_num_per_group]
 	INPUT_ATTR_ARY = %w[input_id content data_type properties]
@@ -77,6 +77,20 @@ class MatrixBlankIssue < Issue
 	#* the question object
 	def serialize
 		super(ATTR_NAME_ARY)
+	end
+
+	def remove_hidden_items(items, sub_questions)
+		self.inputs.delete_if { |input| items.include?(input["input_id"]) }
+		remaining_row_id = []
+		remaining_row_name = []
+		self.row_id.each_with_index do |r_id, r_index|
+			if !sub_questions.include?(r_id)
+				remaining_row_id << r_id
+				remaining_row_name << row_name[row_index]
+			end
+		end
+		self.row_id = remaining_row_id
+		self.row_name = remaining_row_name
 	end
 
 	#*description*: update the current question instance, including generate id for new inputs

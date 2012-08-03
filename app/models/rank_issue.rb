@@ -35,6 +35,10 @@ class RankIssue < Issue
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 
+	def remove_hidden_items(items, sub_questions)
+		self.items.delete_if { |item| items.include?(item["input_id"]) }
+	end
+
 	#*description*: serialize the current instance into a question object
 	#
 	#*params*:

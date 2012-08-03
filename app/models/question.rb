@@ -85,6 +85,13 @@ class Question < BasicQuestion
 		return cloned_question
 	end
 
+	def remove_hidden_items(items, sub_questions)
+		issue = Issue.create_issue(self.question_type, self.issue)
+		issue.remove_hidden_items(items, sub_questions)
+		self.issue = issue.serialize
+		return self
+	end
+
 	def serialize
 		question_obj = {}
 		question_obj["_id"] = self._id.to_s

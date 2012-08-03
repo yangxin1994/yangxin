@@ -111,6 +111,87 @@ class Answer
 		return answer
 	end
 
+	#*description*: load questions for volunteers
+	#
+	#*params*:
+	#* question_id: the id of the question that indicates the location (only works for the surveys that allow pageup)
+	#* prev_page: whether show the previous page or the next page (only works for the surveys that allow pageup)
+	#
+	#*retval*:
+	#* array of questions objects
+	def load_question(question_id, next_page)
+		loaded_question_ids = []
+		if self.survey.is_pageup_allowed
+			self.survey.pages.each_with_index do |page, page_index|
+				next if !page["questions"].include?(question_id)
+				question_index = page["questions"].index(question_id)
+				if next_page
+					# require next page of questions
+					if question_index + 1 == page["questions"].length
+						return ErrorEnum::PAGE_OVERFLOW if page_index + 1 == self.survey.pages.length
+						return load_question_by_ids(self.survey.pages[page_index + 1]["questions"])
+					else
+						return load_question_by_ids(page["questions"][question_index + 1..-1])
+					end
+				else
+					# require previous page of questions
+					if question_index == 0
+						return ErrorEnum::PAGE_OVERFLOW if page_index == 0
+						return load_question_by_ids(self.survey.pages[page_index - 1]["questions"])
+					else
+						return load_question_by_ids(page["questions"][0..question_index - 1])
+					end
+				end
+			end
+			return ErrorEnum::QUESTION_NOT_EXIST
+		else
+			# first check whether template questions for attributes quotas are loaded
+			template_answer_content_loaded = self.template_answer_content.select { |k,v| v.nil?}
+			template_answer_content_loaded.each do |k,v|
+				loaded_question_ids << k
+			end
+			return load_question_by_ids(loaded_question_ids) if !loaded_question_ids.empty?
+			# then try to load normal questions
+			# summarize the questions that are results of logic control rules
+			logic_control_question_id = []
+			self.survey.logic_control_rule.each do |rule|
+				result_q_ids = rule["result"] if ["1", "2"].include?(rule["type"])
+				result_q_ids = rule["result"].map { |e| e["question_id"] } if ["3", "4"].include?(rule["type"])
+				result_q_ids = rule["result"]["question_id_2"].to_a if ["5", "6"].include?(rule["type"])
+				condition_q_ids = rule["conditions"].map {|condition| condition["question_id"]}
+				logic_control_question_id << { "condition" => condition_question_id_ary, "result" => result_q_ids }
+			end
+			cur_page = false
+			self.survey.pages.each do |page|
+				page["questions"].each do |q_id|
+					next if !self.answer_content[q_id].nil?
+					# find out the first question whose answer is nil
+					cur_page = true
+					# check if this question is the result of some logic control rule
+					logic_control_question_id.each do |ele|
+						if (ele["condition"] & loaded_question_ids).empty? || !ele["result"].include?(q_id)
+							loaded_question_ids << q_id
+						else
+							return load_question_by_ids(loaded_question_ids)
+						end
+					end
+				end
+				return load_question_by_ids(loaded_question_ids) if cur_page
+			end
+			self.auto_finish
+			return true
+		end
+	end
+
+	def load_question_by_ids(question_ids)
+		questions = []
+		question_ids.each do |q_id|
+			question = Question.find_by_id(q_id)
+			questions << question.remove_hidden_items(logic_control_result[q_id]["items"], logic_control_result[q_id]["sub_questions"])
+		end
+		return questions
+	end
+
 	#*description*: add a logic control result
 	#
 	#*params*:
@@ -210,11 +291,11 @@ class Answer
 			when "0"
 				question_id = condition["name"]
 				require_answer = condition["value"]
-				satisfy = Tool.check_choice_question_answer(self.answer_content[question_id], require_answer)
+				satisfy = Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], require_answer)
 			when "1"
 				question_id = condition["name"]
 				require_answer = condition["value"]
-				satisfy = Tool.check_choice_question_answer(self.answer_content[question_id], require_answer)
+				satisfy = Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], require_answer)
 			when "2"
 				satisfy = condition["value"] == answer["region"]
 			when "3"
@@ -241,12 +322,12 @@ class Answer
 			satisfy = false
 			case condition["condition_type"].to_s
 			when "0"
-				volunteer_answer = self.answer_content[condition["name"]]
+				volunteer_answer = self.answer_content[condition["name"]]["selection"]
 				require_answer = condition["value"]
 				# if the volunteer has not answered this question, cannot reject the volunteer
 				satisfy = volunteer_answer.nil? || Tool.check_choice_question_answer(volunteer_answer, require_answer)
 			when "1"
-				volunteer_answer = self.answer_content[condition["name"]]
+				volunteer_answer = self.answer_content[condition["name"]]["selection"]
 				require_answer = condition["value"]
 				# if the volunteer has not answered this question, cannot reject the volunteer
 				satisfy = volunteer_answer.nil? || Tool.check_choice_question_answer(volunteer_answer, require_answer)
@@ -363,18 +444,18 @@ class Answer
 		standard_answer = QualityControlQuestionAnswer.find_by_question_id(quality_control_question_id)
 		if standard_answer.quality_control_type == 0
 			# this is objective quality control question
-			volunteer_answer = self.answer_content[question_id]
+			volunteer_answer = self.answer_content[question_id]["selection"]
 			case standard_answer.question_type
 			when QuestionTypeEnum::CHOICE_QUESTION
-				return Tool.check_choice_question_answer(self.answer_content[question_id], 
+				return Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], 
 					standard_answer.answer_content["items"],
 					standard_answer.answer_content["fuzzy"])
 			when QuestionTypeEnum::TEXT_BLANK_QUESTION
-				return Tool.check_choice_question_answer(self.answer_content[question_id], 
+				return Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], 
 					standard_answer.answer_content["text"],
 					standard_answer.answer_content["fuzzy"])
 			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-				return standard_answer.answer_content["number"] == self.answer_content[question_id]
+				return standard_answer.answer_content["number"] == self.answer_content[question_id]["selection"]
 			else
 				return true
 			end
@@ -386,7 +467,7 @@ class Answer
 			self.answer_content.each do |k,v|
 				question = Question.find_by_id(k)
 				next if !matching_question_id_ary.include?(question.reference_id)
-				v.each do |input_id|
+				v["selection"].each do |input_id|
 					volunteer_answer << [question.reference_id, input_id]
 				end
 			end
@@ -444,7 +525,7 @@ class Answer
 			logic_control_rule["conditions"].each do |condition|
 				# if the volunteer has not answered this question, stop the checking of this rule
 				break if answer_content[condition["question_id"]].nil?
-				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]], condition["answer"], condition["fuzzy"])
+				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]]["selection"], condition["answer"], condition["fuzzy"])
 				return ErrorEnum::VIOLATE_SCREEN if !pass_condition
 			end
 		end
@@ -500,9 +581,7 @@ class Answer
 		return ErrorEnum::VIOLATE_QUOTA
 	end
 
-	def update_logic_control_result(answer_type, answer_content)
-		# only normal questions are related to logic control
-		return if answer_type == 0
+	def update_logic_control_result(answer_content)
 		# array of ids of the questinos that the volunteer answers this time
 		volunteer_answer_question_id_ary = answer_content.keys
 		logic_control = self.survey.show_logic_control
@@ -517,7 +596,7 @@ class Answer
 			logic_control_rule["conditions"].each do |condition|
 				# if the volunteer has not answered this question, stop the checking of this rule
 				satisfy_rule = false if answer_content[condition["question_id"]].nil?
-				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]], condition["answer"], condition["fuzzy"])
+				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]]["selection"], condition["answer"], condition["fuzzy"])
 				satisfy_rule = false if !pass_condition
 			end
 			next if !satisfy_rule

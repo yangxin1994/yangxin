@@ -22,10 +22,10 @@ require 'securerandom'
 # }
 class MatrixChoiceIssue < Issue
 
-	attr_reader :choices, :choice_num_per_row, :min_choice, :max_choice, :is_list_style, :is_rand, :row_name, :is_row_rand, :row_num_per_group
-	attr_writer :choices, :choice_num_per_row, :min_choice, :max_choice, :is_list_style, :is_rand, :row_name, :is_row_rand, :row_num_per_group
+	attr_reader :choices, :choice_num_per_row, :min_choice, :max_choice, :is_list_style, :is_rand, :row_id, :row_name, :is_row_rand, :row_num_per_group
+	attr_writer :choices, :choice_num_per_row, :min_choice, :max_choice, :is_list_style, :is_rand, :row_id, :row_name, :is_row_rand, :row_num_per_group
 
-	ATTR_NAME_ARY = %w[choices choice_num_per_row min_choice max_choice is_list_style is_rand row_name is_row_rand row_num_per_group]
+	ATTR_NAME_ARY = %w[choices choice_num_per_row min_choice max_choice is_list_style is_rand row_id row_name is_row_rand row_num_per_group]
 	CHOICE_ATTR_ARY = %w[input_id content is_exclusive]
 
 	def initialize
@@ -35,6 +35,7 @@ class MatrixChoiceIssue < Issue
 		@is_list_style = true
 		@is_rand = false	
 		@row_name = []	
+		@row_id = []	
 		@is_row_rand = false	
 		@row_num_per_group = -1	
 		@choices = []
@@ -49,6 +50,20 @@ class MatrixChoiceIssue < Issue
 		issue_obj["max_choice"] = issue_obj["max_choice"].to_i
 		issue_obj["row_num_per_group"] = issue_obj["row_num_per_group"].to_i
 		super(ATTR_NAME_ARY, issue_obj)
+	end
+
+	def remove_hidden_items(items, sub_questions)
+		self.choices.delete_if { |choice| items.include?(choice["input_id"]) }
+		remaining_row_id = []
+		remaining_row_name = []
+		self.row_id.each_with_index do |r_id, r_index|
+			if !sub_questions.include?(r_id)
+				remaining_row_id << r_id
+				remaining_row_name << row_name[row_index]
+			end
+		end
+		self.row_id = remaining_row_id
+		self.row_name = remaining_row_name
 	end
 
 	#*description*: serialize the current instance into a question object

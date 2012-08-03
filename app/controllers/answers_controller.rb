@@ -64,7 +64,7 @@ class AnswersController < ApplicationController
 				end
 			elsif retval.class == Answer
 				# move the answer from another visitor user to the current user to let the user continue it
-				answer = retval
+				render :json => [answer.status, answer.reject_type, answer.finish_type] and return
 			else
 				# wrong password or the answer has been deleted
 				render :json => retval and return
@@ -73,8 +73,12 @@ class AnswersController < ApplicationController
 		# 3. now, we have an answer instance
 		answer.update_status
 		if answer.is_edit
-			questions = answer.load_question(params[:question_id], params[:prev_page])
-			render :json => [questions.to_json, answer.repeat_time] and return
+			questions = answer.load_question(params[:question_id], params[:next_page])
+			if answer.is_finish
+				render :json => questions and return
+			else
+				render :json => [questions.to_json, answer.repeat_time] and return
+			end
 		else
 			render :json => [answer.status, answer.reject_type, answer.finish_type] and return
 		end
@@ -111,7 +115,7 @@ class AnswersController < ApplicationController
 		render :json => @answer.violate_quota and return if !retval
 
 		# 5. update the logic control result
-		@answer.update_logic_control_result(params[:answer_type], params[:answer_content])
+		@answer.update_logic_control_result(params[:answer_content])
 
 		# 6. automatically finish the ansewr for those thatdo not allow pageup
 		retval = @answer.auto_finish
