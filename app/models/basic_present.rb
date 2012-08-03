@@ -23,6 +23,9 @@ class BasicPresent
 
 	scope :stockout, where(:surplus.lt => 1)
 
+	defore_create :set_surplus
+
+
 
 	def add_quantity(n)
 		self.update_attribute(:quantity, self.quantity + n)
@@ -33,4 +36,8 @@ class BasicPresent
   	update_attribute(is_deleted, true)
 	end
 
+	private 
+	def set_surplus
+		surplus = quantity
+	end
 end

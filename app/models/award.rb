@@ -1,20 +1,18 @@
 class Award < BasicPresent
 	include Mongoid::Validator
-	field :budget, :type => Integer
+	#field :budget, :type => Integer
   field :weighting, :type => Integer, :default => 0
-  field :surplus, :type => Integer
-  field :quantity, :type => Integer
   field :status, :type => Integer, :default => 1
 
   scope :can_be_draw, where(:status => 0)
 
 	has_one :order
-	has_one :lottery
-	
+	belongs_to :lottery
+	belongs_to :lottery_code
 	after_save :make_status
 
   def make_status
-    return unless self.start_time && self.end_time
+    return unless self.end_time
     status = 0
     status += 1 if Time.now >= end_time
     status += 2 if surplus <= 0
@@ -23,6 +21,6 @@ class Award < BasicPresent
   end
 
 	#validates_presence_of :type
-	validates :budget, :spend => { :size => :big }
+	#validates :budget, :spend => { :size => :big }
 
 end

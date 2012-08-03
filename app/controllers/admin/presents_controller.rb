@@ -15,7 +15,7 @@ class Admin::PresentsController < Admin::ApplicationController
 			end
 		end
 	end
-	
+
 	def expired
 		@presents = Present.expired.page(page)
 		respond_to do |format|

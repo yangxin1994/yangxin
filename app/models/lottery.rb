@@ -4,7 +4,7 @@ class Lottery
 
   field :title, :type => String
   field :description, :type => String
-  field :status, :type => Integer, :default => 1
+  field :status, :type => Integer, :default => 0
   field :is_deleted, :type => Boolean, :default => false
   field :point, :type => Integer
   field :weighting, :type => Integer
@@ -12,14 +12,14 @@ class Lottery
 
   default_scope where(:is_deleted => false)
 
-  scope :unpublished, where(:status => 0)
-  scope :published, where(:status => 1)
-  scope :activity, where(:status => 2)
-  scope :finished, where(:status => 3)
+  scope :published, where(:status => 0)
+  scope :activity, where(:status => 1)
+  scope :finished, where(:status => 2)
   
   #has_many :survey
-  belongs_to :awards
+  has_many :awards
   has_many :lottery_codes
+  belongs_ro :creator, :class_name => 'User'
   #has_many :lottery_awards, :class_name => 'LotteryAward'
 
   def delete
@@ -45,8 +45,9 @@ class Lottery
     make_interval.each do |e|
       if r < e[:weighting]
         return l unless l.is_a? LotteryCode
-        l.award = Award.find_by_id(e[:award])
+        l.award = Award.find_by_id(e[:award_id])
         return l if (l.award.is_a?(Award)) && l.save 
+        p l
       end
     end
     return false
@@ -57,9 +58,9 @@ class Lottery
   end
 
   def make_interval
-    award_interval = [{ :weighting => 0, :award => nil }]
+    award_interval = [{ :weighting => 0, :award_id => nil }]
     self.awards.can_be_draw.each do |a|
-      award_interval << { :weighting => award_interval[-1][:weighting] + a.weighting, :award => a.id.to_s }
+      award_interval << { :weighting => award_interval[-1][:weighting] + a.weighting, :award_id => a.id.to_s }
     end
     award_interval
   end
