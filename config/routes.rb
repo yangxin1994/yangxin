@@ -1,23 +1,24 @@
 OopsData::Application.routes.draw do
 
-
-  
-
-  resources :advertisements
-
-
-	get 'faqs/condition'
-	get 'faqs/types'
-	get 'public_notices/condition'
-	get 'public_notices/types'
-	get 'feedbacks/condition'
-	get 'feedbacks/types'
-
 	resources :faqs, :public_notices, :feedbacks, :advertisements, :system_users
 	post 'system_users/lock'
 	post 'system_users/unlock'
-
 	match 'feedback/:id/reply' => "feedback#reply"
+
+	namespace :admin do
+		resources :users do 
+			collection do 
+				get 'blacks'
+				get 'whites'
+			end
+
+			member do 
+				get 'system_pwd'
+				get 'white'
+				get 'black'
+			end
+		end
+	end
 
 	get "home/index"
 	match 'home' => 'home#index', :as => :home

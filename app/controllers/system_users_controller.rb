@@ -3,6 +3,8 @@
 class SystemUsersController < ApplicationController
 
 	before_filter :require_admin
+
+	@@system_user_attrs_filter = %w(_id system_user_type true_name email username lock created_at updated_at)
  
 	# GET /system_users
 	# GET /system_users.json
@@ -25,7 +27,8 @@ class SystemUsersController < ApplicationController
 
 		respond_to do |format|
 			format.html # index.html.erb
-			format.json { render json: @system_users }
+			format.json { render json: @system_users, 
+				:only => @@system_user_attrs_filter }
 		end
 	end
 	
@@ -36,7 +39,8 @@ class SystemUsersController < ApplicationController
 
 		respond _to do |format|
 			format.html # show.html.erb
-			format.json { render json: @system_user }
+			format.json { render json: @system_user,
+				:only => @@system_user_attrs_filter }
 		end
 	end
 
@@ -47,7 +51,8 @@ class SystemUsersController < ApplicationController
 
 		respond_to do |format|
 			format.html # new.html.erb
-			format.json { render json: @system_user }
+			format.json { render json: @system_user,
+				:only => @@system_user_attrs_filter }
 		end
 	end
 
@@ -57,7 +62,8 @@ class SystemUsersController < ApplicationController
 
 		respond _to do |format|
 			format.html # show.html.erb
-			format.json { render json: @system_user }
+			format.json { render json: @system_user,
+				:only => @@system_user_attrs_filter }
 		end
 	end
 	
@@ -69,7 +75,8 @@ class SystemUsersController < ApplicationController
 		respond_to do |format|
 			format.html  if @system_user.instance_of?(SystemUser)
 			format.html { render action: "new" } if !@system_user.instance_of?(SystemUser)
-			format.json { render :json => @system_user}
+			format.json { render :json => @system_user, 
+				:only => @@system_user_attrs_filter}
 		end
 	end
 
@@ -81,7 +88,8 @@ class SystemUsersController < ApplicationController
 		respond_to do |format|
 			format.html { redirect_to @system_user} if @system_user.instance_of?(SystemUser)
 			format.html { render action: "edit" } if !@system_user.instance_of?(SystemUser)
-			format.json { render :json => @system_user }
+			format.json { render :json => @system_user,
+				:only => @@system_user_attrs_filter }
 		end
 	end
 
@@ -93,7 +101,8 @@ class SystemUsersController < ApplicationController
 		respond_to do |format|
 			format.html { redirect_to @system_user} if @system_user.instance_of?(SystemUser)
 			format.html { render action: "edit" } if !@system_user.instance_of?(SystemUser)
-			format.json { render :json => @system_user }
+			format.json { render :json => @system_user,
+				:only => @@system_user_attrs_filter }
 		end
 	end
 
@@ -105,7 +114,8 @@ class SystemUsersController < ApplicationController
 		respond_to do |format|
 			format.html { redirect_to @system_user } if @system_user.instance_of?(SystemUser)
 			format.html { render action: "edit" } if !@system_user.instance_of?(SystemUser)
-			format.json { render :json => @system_user }
+			format.json { render :json => @system_user, 
+				:only => @@system_user_attrs_filter }
 		end
 	end
 	

@@ -53,7 +53,7 @@ class PublicNoticesController < ApplicationController
 
 		respond _to do |format|
 			format.html # show.html.erb
-			format.json { render json: @system_user }
+			format.json { render json: @public_notice }
 		end
 	end
 	

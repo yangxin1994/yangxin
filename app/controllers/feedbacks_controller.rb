@@ -60,7 +60,7 @@ class FeedbacksController < ApplicationController
 
 		respond _to do |format|
 			format.html # show.html.erb
-			format.json { render json: @system_user }
+			format.json { render json: @feedback }
 		end
 	end
 	

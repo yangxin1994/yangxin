@@ -1,7 +1,7 @@
 #!/bin/bash  
 #
 
-array=(faq public_notice feedback advertisement system_user)
+array=(faq public_notice feedback advertisement system_user ip_info admin/user)
 echo "################ Start Test #############"
 echo " "
 for x in "${array[@]}"; do 
