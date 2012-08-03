@@ -16,7 +16,8 @@ class PublishStatusHistory
 
 	def self.create_new(operator_id, before_status, after_status, message)
 		publish_status_rec = PublishStatusHistory.new(:operator_id => operator_id, :before_status => before_status, :after_status => after_status, :message => message)
-		retval = publish_status_rec.save
+		publish_status_rec.save
+		return publish_status_rec
 	end
 
 	def after_save_work

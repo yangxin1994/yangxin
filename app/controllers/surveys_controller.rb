@@ -125,8 +125,8 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def destroy
-		retval = @survey.delete
 		@survey.close("", @current_user)
+		retval = @survey.delete
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
