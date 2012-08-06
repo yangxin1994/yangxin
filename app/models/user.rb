@@ -408,30 +408,26 @@ class User
 
 	public
 
-	scope :black_list, where(role: 4)
-	scope :white_list, where(role: 2)
+	ROLE_NORMAL = 0
+	ROLE_WHITE = 2
+	ROLE_BLACK = 4
 
 	#--
 	# instance methods
 	#++
 
-	def is_white?
-		return self.role == 2
-	end
-
-	def is_black?
-		return self.role == 4
-	end
-
 	#--
 	# class methods
 	#++
+
+	scope :black_list, where(role: ROLE_BLACK)
+	scope :white_list, where(role: ROLE_WHITE)
 
 	def self.update_user(user_id, attributes)
 		user = User.find_by_id(user_id)
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
 
-		select_attrs = %w(birthday gender address phone postcode)
+		select_attrs = %w(birthday gender address phone postcode status)
 		attributes.select!{|k,v| select_attrs.include?(k.to_s)}
 
 		updated_user = User.collection.find_and_modify(:query => {_id: user.id}, :update => attributes, new: true)
@@ -443,14 +439,19 @@ class User
 		user = User.find_by_id(user_id.to_s.strip)	
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
 
-		if user.role != 2 then
-			user.role = 2 
-		elsif user.role != 0
-			user.role = 0 
+		if user.role != ROLE_WHITE then
+			user.role = ROLE_WHITE
+		elsif user.role != ROLE_NORMAL
+			user.role = ROLE_NORMAL
 		end
+
 		if user.save then
-			user[:white] = true if user.role == 2
-			user[:white] = false if user.role == 0
+			if user.role == ROLE_WHITE then 
+				user[:white] = true 
+			else
+				user[:white] = false 
+			end
+
 			return user 
 		else
 			return ErrorEnum::USER_SAVE_FAILED
@@ -461,14 +462,19 @@ class User
 		user = User.find_by_id(user_id.to_s.strip)	
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
 
-		if user.role != 4 then
-			user.role = 4 
-		elsif user.role != 0
-			user.role = 0 
+		if user.role != ROLE_BLACK then
+			user.role = ROLE_BLACK
+		elsif user.role != ROLE_NORMAL
+			user.role = ROLE_NORMAL
 		end
+
 		if user.save then
-			user[:black] = true if user.role == 4
-			user[:black] = false if user.role == 0
+			if user.role == ROLE_BLACK then 
+				user[:black] = true 
+			else
+				user[:black] = false
+			end
+
 			return user 
 		else
 			return ErrorEnum::USER_SAVE_FAILED
@@ -479,6 +485,7 @@ class User
 		user = User.find_by_id(user_id)
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
 
+		# generate rand number
 		sys_pwd = 1
 		while sys_pwd < 16**7 do
 			sys_pwd = rand(16**8-1)
@@ -490,10 +497,16 @@ class User
 			return ErrorEnum::USER_SAVE_FAILED
 		end
 
-		user[:tmp_password] = sys_pwd
-
-		#maybe, should be send the pwd to his register email
-		# user.receive_email("You new password is : #{user[:tmp_password]}")
+		# maybe, should be send the pwd to his register email
+		#
+		# CODE:
+		#
+		# mail = OopsMail::OMail.new("Change password to new system password.", "Your new password:<b>#{sys_pwd}</b>")
+		# sender = OopsMail::EmailSender.new("customer", "customer@netranking.cn", "netrankingcust")
+		# receiver = OopsMail::EmailReceiver.new(user.username || user.email.split("@")[0], user.email)
+		# email = OopsMail::Email.new(sender, receiver, mail)
+		# OopsMail.send_email(email)
+		#
 
 		return user 
 	end

@@ -103,6 +103,7 @@ class Admin::UsersControllerTest < ActionController::TestCase
 		get 'black', :id => user1.id.to_s, :format => :json
 		retval = JSON.parse(@response.body)
 		assert_equal retval["_id"], user1.id.to_s
+		assert_equal retval["black"], true
 		assert_equal User.where(role: 4).count, 1
 
 		get 'blacks', :format => :json
@@ -113,6 +114,7 @@ class Admin::UsersControllerTest < ActionController::TestCase
 		get 'black', :id => user1.id.to_s, :format => :json
 		retval = JSON.parse(@response.body)
 		assert_equal retval["_id"], user1.id.to_s
+		assert_equal retval["black"], false
 		assert_equal User.where(role: 4).count, 0
 
 		sign_out
@@ -145,6 +147,7 @@ class Admin::UsersControllerTest < ActionController::TestCase
 		get 'white', :id => user2.id.to_s, :format => :json
 		retval = JSON.parse(@response.body)
 		assert_equal retval["_id"], user2.id.to_s
+		assert_equal retval["white"], true
 		assert_equal User.where(role: 2).count, 1
 
 		get 'whites', :format => :json
@@ -155,6 +158,7 @@ class Admin::UsersControllerTest < ActionController::TestCase
 		get 'white', :id => user2.id.to_s, :format => :json
 		retval = JSON.parse(@response.body)
 		assert_equal retval["_id"], user2.id.to_s
+		assert_equal retval["white"], false
 		assert_equal User.where(role: 2).count, 0
 
 		sign_out
@@ -185,7 +189,6 @@ class Admin::UsersControllerTest < ActionController::TestCase
 		retval = JSON.parse(@response.body)
 		assert_equal retval["_id"], user3.id.to_s
 		assert_not_equal retval["password"], Encryption.encrypt_password("123456")
-		assert_equal retval["tmp_password"].length, 8
 		assert_not_equal User.find(user3.id.to_s).password, Encryption.encrypt_password("123456")
 		
 		sign_out
