@@ -54,7 +54,7 @@ class SurveysController < ApplicationController
 
 	#*method*: post
 	#
-	#*url*: /surveys/save_meta_data
+	#*url*: /surveys/:survey_id/save_meta_data
 	#
 	#*description*: save meta data of a survey
 	#
@@ -125,8 +125,8 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def destroy
+		@survey.close("", @current_user)
 		retval = @survey.delete
-		### close the publish of the survey
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -291,7 +291,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::SURVEY_NOT_EXIST
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def submit
-		retval = @survey.submit(params[:message])
+		retval = @survey.submit(params[:message], @current_user)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -313,7 +313,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::UNAUTHORIZED
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def reject
-		retval = @survey.reject(params[:message])
+		retval = @survey.reject(params[:message], @current_user)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -335,7 +335,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::UNAUTHORIZED
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def publish
-		retval = @survey.publish(params[:message])
+		retval = @survey.publish(params[:message], @current_user)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -357,7 +357,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::UNAUTHORIZED
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def close
-		retval = @survey.close(params[:message])
+		retval = @survey.close(params[:message], @current_user)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -379,7 +379,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::UNAUTHORIZED
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def pause
-		retval = @survey.pause(params[:message])
+		retval = @survey.pause(params[:message], @current_user)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end

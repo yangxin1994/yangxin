@@ -78,6 +78,10 @@ OopsData::Application.routes.draw do
 			get 'publish'
 			get 'close'
 			get 'pause'
+			put 'update_style_setting'
+			get 'show_style_setting'
+			put 'update_quality_control_setting'
+			get 'show_quality_control_setting'
 		end
 		resources :pages
 		resources :questions do
