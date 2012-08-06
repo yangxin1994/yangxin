@@ -1,6 +1,6 @@
 module PublishStatus
-	CLOSED = 0
-	UNDER_REVIEW = 1
-	PAUSED = 2
-	PUBLISHED = 3
+	CLOSED = 1
+	UNDER_REVIEW = 2
+	PAUSED = 4
+	PUBLISHED = 8
 end

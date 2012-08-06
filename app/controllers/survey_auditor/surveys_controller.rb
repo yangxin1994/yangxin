@@ -1,6 +1,6 @@
 # encoding: utf-8
 require 'error_enum'
-class SurveyAuditor::SurveysController < ApplicationController
+class SurveyAuditor::SurveysController < SurveyAuditor::ApplicationController
 
 	before_filter :check_normal_survey_existence, :except => [:index]
 	

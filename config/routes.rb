@@ -22,6 +22,12 @@ OopsData::Application.routes.draw do
 
 	namespace :survey_auditor do
 		resources :surveys do
+			member do
+				get 'reject'
+				get 'publish'
+				get 'close'
+				get 'pause'
+			end
 		end
 	end
 
