@@ -1,5 +1,6 @@
 # encoding: utf-8
 class Admin::OrdersController < Admin::ApplicationController
+	
 	def index
 		@orders = current_user.orders.page(page)
 		@orders = ErrorEnum::PresentNotFound if @orders.empty?

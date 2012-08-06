@@ -1,5 +1,6 @@
+require "mongoid/validations/numericality"
 module Mongoid
-	module Validator
+	module ValidationsExt
 		def error_code
 			@error_code ||= []
 			@error_code
@@ -24,10 +25,11 @@ module Mongoid
 		    	#a = attribute.to_s
 		    	#a[0] = a[0].upcase
 		    	a = attribute.to_s.initial_upcase
-		    	record.errors[attribute] << "must not exceed #{spend}"
 		    	record.error_code << ErrorEnum.const_get("#{record._type}#{a}CounldNotBeBlank")
+		    	record.errors[attribute] << "must not exceed #{spend}"
 		    end
 		  end
 		end
+######################
 	end
 end

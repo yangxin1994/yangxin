@@ -1,8 +1,11 @@
+
 class LotteryCode
 	include Mongoid::Document
 	include Mongoid::Timestamps
 	extend Mongoid::FindHelper
+	include Mongoid::ValidationsExt
 
+	field :num, :type => Integer
 	field :code, :type => String
 	field :email, :type => String
 	has_one :award
@@ -10,6 +13,7 @@ class LotteryCode
 	belongs_to :user
 	belongs_to :lottery
 
+	validates :num, :numericality => { :greater_than_or_equal_to => 0 }
 
 	def draw
 		self.lottery.draw(self.id)

@@ -23,7 +23,7 @@ class BasicPresent
 
 	scope :stockout, where(:surplus.lt => 1)
 
-	defore_create :set_surplus
+	before_create :set_surplus
 
 
 
