@@ -42,7 +42,7 @@ class UserMailer < ActionMailer::Base
 	
 	def reject_email(publish_status_history)
 		@survey = Survey.find_by_id(publish_status_history.survey_id)
-		@user = User.find_by_email(@survey.owner_email)
+		@user = @survey.user
 		@message = publish_status_history.message
 		mail(:to => @user.email, 
 					:subject => "您的点查问卷 #{@survey.title} 被拒绝发布",

@@ -30,6 +30,17 @@ OopsData::Application.routes.draw do
 		end
 	end
 
+	namespace :survey_auditor do
+		resources :surveys do
+			member do
+				get 'reject'
+				get 'publish'
+				get 'close'
+				get 'pause'
+			end
+		end
+	end
+
 	get "home/index"
 	match 'home' => 'home#index', :as => :home
 	post "home/get_tp_info"

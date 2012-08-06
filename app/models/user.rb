@@ -190,6 +190,22 @@ class User
 		return self.role == 1
 	end
 
+	def is_survey_auditor
+		return self.class == SurveyAuditor
+	end
+
+	def is_answer_auditor
+		return self.class == AnswerAuditor
+	end
+
+	def is_entry_clerk
+		return self.class == EntryClerk
+	end
+
+	def is_interviewer
+		return self.class == Interviewer
+	end
+
 	#*description*: create a new user
 	#
 	#*params*:

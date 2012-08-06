@@ -279,4 +279,30 @@ class SurveysControllerTest < ActionController::TestCase
 		#########################
 		#########################
 	end
+
+	test "should submit survey" do
+		clear(User, Survey)
+		jesse = init_jesse
+		oliver = init_oliver
+		
+		survey_id = create_survey(jesse.email, Encryption.decrypt_password(jesse.password))
+
+		sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
+		get :submit, :format => :json, :id => survey_id
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		sign_out
+		
+		sign_in(jesse.email, Encryption.decrypt_password(oliver.password))
+		get :submit, :format => :json, :id => survey_id
+		assert_equal true.to_s, @response.body
+		get :show, :format => :json, :id => survey_id
+		survey_obj = JSON.parse(@response.body)
+		assert_equal PublishStatus::UNDER_REVIEW, survey_obj["publish_status"]
+		sign_out
+		
+		sign_in(jesse.email, Encryption.decrypt_password(oliver.password))
+		get :submit, :format => :json, :id => survey_id
+		assert_equal ErrorEnum::WRONG_PUBLISH_STATUS.to_s, @response.body
+		sign_out
+	end
 end
