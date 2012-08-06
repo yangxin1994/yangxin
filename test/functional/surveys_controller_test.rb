@@ -279,4 +279,8 @@ class SurveysControllerTest < ActionController::TestCase
 		#########################
 		#########################
 	end
+
+	test "should change publish status correctly" do
+		
+	end
 end

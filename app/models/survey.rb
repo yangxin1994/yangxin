@@ -115,6 +115,7 @@ class Survey
 		survey_obj["quality_control_setting"] = Marshal.load(Marshal.dump(self.quality_control_setting))
 		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
 		survey_obj["publish_status"] = self.publish_status
+		survey_obj["status"] = self.status
 		return survey_obj
 	end
 
@@ -247,16 +248,15 @@ class Survey
 	#*description*: clone the current survey instance
 	#
 	#*params*:
-	#* email of the user doing this operation
+	#* title of the new survey
 	#
 	#*retval*:
 	#* the new survey instance: if successfully cloned
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def clone(current_user)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
-
+	def clone(title)
 		# clone the meta data of the survey
 		new_instance = super
+		new_instance.title = title || new_instance.title
 
 		# clone all questions
 		new_instance.pages.each do |page|
@@ -268,7 +268,7 @@ class Survey
 			end
 		end
 		
-		# the constrains should also be cloned
+		# the logic control should also be cloned
 		###################################################
 		###################################################
 		###################################################
