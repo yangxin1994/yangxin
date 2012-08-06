@@ -1,13 +1,13 @@
 # coding: utf-8
 
-class SystemUsersController < ApplicationController
+class Admin::SystemUsersController < Admin::ApplicationController
 
 	before_filter :require_admin
 
 	@@system_user_attrs_filter = %w(_id system_user_type true_name email username lock created_at updated_at)
  
-	# GET /system_users
-	# GET /system_users.json
+	# GET /admin/system_users
+	# GET /admin/system_users.json
 	def index
 		if !params[:system_user_type].nil? then
 			if !params[:lock].nil? then
@@ -32,20 +32,20 @@ class SystemUsersController < ApplicationController
 		end
 	end
 	
-	# GET /system_users/1 
-	# GET /system_users/1.json
+	# GET /admin/system_users/1 
+	# GET /admin/system_users/1.json
 	def show
 		@system_user = SystemUser.find_by_id(params[:id])
 
-		respond _to do |format|
+		respond_to do |format|
 			format.html # show.html.erb
 			format.json { render json: @system_user,
 				:only => @@system_user_attrs_filter }
 		end
 	end
 
-	# GET /system_users/new
-	# GET /system_users/new.json
+	# GET /admin/system_users/new
+	# GET /admin/system_users/new.json
 	def new
 		@system_user = SystemUser.new
 
@@ -56,7 +56,7 @@ class SystemUsersController < ApplicationController
 		end
 	end
 
-	# GET /system_users/1/edit
+	# GET /admin/system_users/1/edit
 	def edit
 		@system_user = SystemUser.find_by_id(params[:id])
 
@@ -67,8 +67,8 @@ class SystemUsersController < ApplicationController
 		end
 	end
 	
-	# POST /system_users
-	# POST /system_users.json
+	# POST /admin/system_users
+	# POST /admin/system_users.json
 	def create
 		@system_user = SystemUser.create_system_user(params[:system_user])	
 			
@@ -80,8 +80,8 @@ class SystemUsersController < ApplicationController
 		end
 	end
 
-	# PUT /system_users/1
-	# PUT /system_users/1.json
+	# PUT /admin/system_users/1
+	# PUT /admin/system_users/1.json
 	def update
 		@system_user = SystemUser.update_system_user(params[:id], params[:system_user])
 
@@ -93,8 +93,8 @@ class SystemUsersController < ApplicationController
 		end
 	end
 
-	# POST /system_users/lock
-	# POST /system_users/lock.json
+	# POST /admin/system_users/lock
+	# POST /admin/system_users/lock.json
 	def lock
 		@system_user = SystemUser.update_system_user(params[:id], {"lock" => true})
 
@@ -106,8 +106,8 @@ class SystemUsersController < ApplicationController
 		end
 	end
 
-	# POST /system_users/unlock
-	# POST /system_users/unlock.json
+	# POST /admin/system_users/unlock
+	# POST /admin/system_users/unlock.json
 	def unlock
 		@system_user = SystemUser.update_system_user(params[:id], {"lock" => false})
 

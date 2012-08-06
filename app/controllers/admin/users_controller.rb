@@ -1,5 +1,5 @@
 
-class Admin::UsersController < ApplicationController
+class Admin::UsersController < Admin::ApplicationController
 #--
 # **************Quill Admin Manage User************************************
 #++

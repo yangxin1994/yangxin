@@ -29,7 +29,9 @@ class Admin::UsersControllerTest < ActionController::TestCase
 
 		sign_in(user.email, "123456")
 		get 'index', :format => :json
-		assert_equal JSON.parse(@response.body)[0]["_id"], user.id.to_s
+		retval = JSON.parse(@response.body)
+		assert_equal retval[0]["_id"], user.id.to_s
+		assert_equal retval[0]["password"], nil
 		sign_out
 
 		clear(User)
