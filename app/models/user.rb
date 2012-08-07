@@ -38,8 +38,10 @@ class User
 	field :postcode, :type => String
 	field :phone, :type => String
 
-	#field :message_ids, :type => Array, default:[]
-	#has_many :messages
+	# receiver's messages
+	field :message_ids, :type => Array, default:[]
+	# sender's messages
+	has_many :messages
 
 	#################################
 	# QuillMe
@@ -517,11 +519,13 @@ class User
 		#
 		# CODE:
 		#
-		# mail = OopsMail::OMail.new("Change password to new system password.", "Your new password:<b>#{sys_pwd}</b>")
-		# sender = OopsMail::EmailSender.new("customer", "customer@netranking.cn", "netrankingcust")
-		# receiver = OopsMail::EmailReceiver.new(user.username || user.email.split("@")[0], user.email)
-		# email = OopsMail::Email.new(sender, receiver, mail)
-		# OopsMail.send_email(email)
+		# if user.email.to_s.strip !="" then
+		# 	mail = OopsMail::OMail.new("Change password to new system password.", "Your new password:<b>#{sys_pwd}</b>")
+		# 	sender = OopsMail::EmailSender.new("customer", "customer@netranking.cn", "netrankingcust")
+		# 	receiver = OopsMail::EmailReceiver.new(user.username || user.email.split("@")[0], user.email)
+		# 	email = OopsMail::Email.new(sender, receiver, mail)
+		# 	OopsMail.send_email(email)
+		# end
 		#
 
 		return user 
