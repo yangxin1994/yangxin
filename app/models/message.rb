@@ -17,6 +17,8 @@ class Message
 	# 0 the message is sent to all users
 	# 1 the message is sent to special users
 	field :type, :type => Integer, default: 0
+	# updated_at should be last_login
+	scope :unread, ->(t){where(:updated_at.lt => t)}
 
 	belongs_to :sender, :class_name => "User"
 
