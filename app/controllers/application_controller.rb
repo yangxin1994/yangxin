@@ -262,6 +262,11 @@ class ApplicationController < ActionController::Base
 		per_page = per_page.nil? ? 10 : per_page.to_i
 		return [] if page < 1 || per_page < 1 
 
+		### sort
+		if arr.count > 1 && arr[0].respond_to?(:updated_at) then
+			arr.sort!{|v1, v2| v2.updated_at <=> v1.updated_at}
+		end
+
 		# avoid arr = nil
 		arr = arr.slice((page-1)*per_page, per_page) || []
 		return arr
