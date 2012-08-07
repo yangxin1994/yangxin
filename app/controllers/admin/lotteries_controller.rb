@@ -10,13 +10,6 @@ class Admin::LotteriesController < Admin::ApplicationController
 		end
 	end
 
-	def new
-		@lottery = Lottery.new
-		respond_to do |format|
-			format.html
-		end
-	end
-
 	def create
 		respond_to do |format|
 			@lottery = Present.create(params[:lottery])
@@ -30,4 +23,14 @@ class Admin::LotteriesController < Admin::ApplicationController
 			end
 		end
 	end
+
+	def draw
+		@result = LotteryCode.find_by_id params[:id] do |r|
+				r.draw
+			end
+		respond_to do |format|
+				format.json {render json: @result }
+		end
+	end
+
 end

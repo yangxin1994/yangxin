@@ -17,27 +17,4 @@ class Present < BasicPresent
 	validates :quantity, :presence => true,
 											 :numericality => { :greater_than_or_equal_to => 0 }
 
-	# def self.find_by_id(id)
-	# 	begin
-	# 		retval = self.find(id)
-	# 	rescue Mongoid::Errors::DocumentNotFound
-	# 		retval = ErrorEnum::PresentNotFound
-	# 	rescue BSON::InvalidObjectId
-	# 		retval = ErrorEnum::InvalidPresentId
-	# 	end
-	# 	retval
-	# end
-
-	# def delete
-	# 	begin
-	# 		@present = Present.find(params[:id])
-	# 	rescue Mongoid::Errors::DocumentNotFound
-	# 		format.json { render json: Errors::PresentNotFound } and return
-	# 	rescue BSON::InvalidObjectId
-	# 		format.json { render json: ErrorEnum::InvalidPresentId } and return
-	# 	end
-	# 		@present.is_deleted = true
-	# 		format.json { render json: @present.save }
-	# end
-
 end
