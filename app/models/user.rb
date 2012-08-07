@@ -38,8 +38,9 @@ class User
 	field :postcode, :type => String
 	field :phone, :type => String
 
-	field :message_ids, :type => Array, default:[]
-	has_many :receiver, :class_name => "Message"
+	#field :message_ids, :type => Array, :default => []
+	has_and_belongs_to_many :messages, inverse_of: nil
+	has_many :sended_messages, :class_name => "Message", :inverse_of => :sender
 
 	#################################
 	# QuillMe
@@ -368,31 +369,24 @@ class User
 #++
 	#ctreate
 	def create_message_for_all(title, content)
-		Message.create(:title => title, :content => content)
+		sended_messages.create(:title => title, :content => content, :sender_id => id)
 	end
 
 	def create_message(title, content, receiver = [])
-		m = Message.create(:title => title, :content => content, :type => 1)
+		m = sended_messages.create(:title => title, :content => content, :type => 1)
 		return m unless m.is_a? Message
 		receiver.each do |r|
 			u = User.find_by_id(r)
-			u.message_ids << m.id unless m.created_at.nil?
+			u.messages << m# => unless m.created_at.nil? 
 			u.save
 		end
+		m
 	end
 
-	def messages
+	def show_messages
 		Message.unread(created_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}
 	end
 
-	# def messages(page = 1, per_page = 25)
-	# 	end_page = page * per_page
-	# 	start_page = end_page - per_page
-	# 	message_ids.step(start_page, end_page) do |m|
-	# 		retval = Message.find_by_id m
-	# 	end
-	# 	return retval
-	# end
 
 #--
 ############### operations about charge #################

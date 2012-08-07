@@ -1,3 +1,4 @@
+# encoding: utf-8
 require "error_enum"
 # the message object has the following structure
 # {
@@ -18,9 +19,8 @@ class Message
 	# 1 the message is sent to special users
 	field :type, :type => Integer, default: 0
 	# updated_at should be last_login
-	scope :unread, ->(t){where(:updated_at.lt => t)}
-
-	belongs_to :sender, :class_name => "User"
-
+	scope :unread, ->(t){where(:updated_at.gt => t)}
+	scope :readed, ->(t){where(:updated_at.lt => t)}
+	belongs_to :sender, :class_name => "User", :inverse_of => :sended_messages
 
 end
