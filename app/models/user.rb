@@ -38,8 +38,8 @@ class User
 	field :postcode, :type => String
 	field :phone, :type => String
 
-	#field :message_ids, :type => Array, default:[]
-	#has_many :messages
+	field :message_ids, :type => Array, default:[]
+	has_many :receiver, :class_name => "Message"
 
 	#################################
 	# QuillMe
@@ -346,6 +346,31 @@ class User
 		else
 			return ""
 		end
+	end
+#--
+############### operations about message#################
+#++
+	#ctreate
+	def create_message_for_all(title, content)
+		Message.create(:title => title, :content => content)
+	end
+
+	def create_message(title, content, receiver = [])
+		m = Message.create(:title => title, :content => content, :type => 1)
+		receiver.each do |r|
+			u = User.find_by_id(r)
+			u.message_ids << m.id unless m.created_at.nil?
+			u.save unless u.created_at.nil?
+		end
+	end
+
+	def messages(page = 1, per_page = 25)
+		end_page = page * per_page
+		start_page = end_page - per_page
+		message_ids.step(start_page, end_page) do |m|
+			retval = Message.find_by_id m
+		end
+		return retval
 	end
 
 #--
