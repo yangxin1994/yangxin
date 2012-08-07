@@ -1,12 +1,13 @@
 #!/bin/bash  
 #
 
-array=(faq public_notice feedback advertisement system_user ip_info admin/user)
+array=(faq public_notice feedback advertisement system_user ip_info user)
 echo "################ Start Test #############"
 echo " "
 for x in "${array[@]}"; do 
   ruby -Itest /home/com/Quill/test/unit/"$x"_test.rb
   ruby -Itest /home/com/Quill/test/functional/"$x"s_controller_test.rb 
+  ruby -Itest /home/com/Quill/test/functional/admin/"$x"s_controller_test.rb 
 done
 echo " "
 echo "############### END #########################"

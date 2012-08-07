@@ -60,6 +60,12 @@ class ActiveSupport::TestCase
 		return lisa
 	end
 
+	def init_survey_auditor
+		survey_auditor = FactoryGirl.build(:survey_auditor)
+		survey_auditor.save
+		return survey_auditor
+	end
+
 	def set_as_admin(user)
 		user.role = 1
 		user.save
@@ -78,6 +84,30 @@ class ActiveSupport::TestCase
 		@controller = SessionsController.new
 		get :destroy
 		@controller = old_controller
+	end
+
+	def create_closed_survey
+		closed_survey = FactoryGirl.build(:closed_survey)
+		closed_survey.save
+		return closed_survey._id.to_s
+	end
+
+	def create_under_review_survey
+		under_review_survey = FactoryGirl.build(:under_review_survey)
+		under_review_survey.save
+		return under_review_survey._id.to_s
+	end
+
+	def create_paused_survey
+		paused_survey = FactoryGirl.build(:paused_survey)
+		paused_survey.save
+		return paused_survey._id.to_s
+	end
+
+	def create_published_survey
+		published_survey = FactoryGirl.build(:published_survey)
+		published_survey.save
+		return published_survey._id.to_s
 	end
 
 	def create_survey(email, password)

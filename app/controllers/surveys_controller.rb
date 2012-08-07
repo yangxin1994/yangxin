@@ -2,8 +2,8 @@
 require 'error_enum'
 class SurveysController < ApplicationController
 	before_filter :require_sign_in
-	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag]
-	before_filter :check_normal_survey_existence, :except => [:new, :save_meta_data, :index, :recover, :clear, :add_tag, :remove_tag]
+	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :show]
+	before_filter :check_normal_survey_existence, :except => [:new, :save_meta_data, :index, :recover, :clear, :add_tag, :remove_tag, :show]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
 
 	def check_survey_existence
@@ -54,7 +54,7 @@ class SurveysController < ApplicationController
 
 	#*method*: post
 	#
-	#*url*: /surveys/save_meta_data
+	#*url*: /surveys/:survey_id/save_meta_data
 	#
 	#*description*: save meta data of a survey
 	#
@@ -125,8 +125,8 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def destroy
+		@survey.close("", @current_user)
 		retval = @survey.delete
-		### close the publish of the survey
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -187,7 +187,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def clone
-		new_survey = @survey.clone
+		new_survey = @survey.clone(title)
 		respond_to do |format|
 			format.json	{ render :json => new_survey.to_json and return }
 		end
@@ -225,7 +225,6 @@ class SurveysController < ApplicationController
 	#*retval*:
 	#* the survey object
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
-	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	#* ErrorEnum ::TAG_EXIST : when the survey already has the tag
 	def add_tag
 		retval = @survey.add_tag(params[:tag])
@@ -291,51 +290,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::SURVEY_NOT_EXIST
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def submit
-		retval = @survey.submit(params[:message])
-		respond_to do |format|
-			format.json	{ render :json => retval and return }
-		end
-	end
-
-	#*method*: get
-	#
-	#*url*: /surveys/:survey_id/reject
-	#
-	#*description*: reject a survey to be published
-	#
-	#*params*:
-	#* survey_id: id of the suvey rejected
-	#* message: the message that the user wants to give the administrator
-	#
-	#*retval*:
-	#* true when the survey is successfully rejected
-	#* ErrorEnum::SURVEY_NOT_EXIST
-	#* ErrorEnum::UNAUTHORIZED
-	#* ErrorEnum::WRONG_PUBLISH_STATUS
-	def reject
-		retval = @survey.reject(params[:message])
-		respond_to do |format|
-			format.json	{ render :json => retval and return }
-		end
-	end
-
-	#*method*: get
-	#
-	#*url*: /surveys/:survey_id/publish
-	#
-	#*description*: publish
-	#
-	#*params*:
-	#* survey_id: id of the suvey published
-	#* message: the message that the user wants to give the administrator
-	#
-	#*retval*:
-	#* true when the survey is successfully published
-	#* ErrorEnum::SURVEY_NOT_EXIST
-	#* ErrorEnum::UNAUTHORIZED
-	#* ErrorEnum::WRONG_PUBLISH_STATUS
-	def publish
-		retval = @survey.publish(params[:message])
+		retval = @survey.submit(params[:message], @current_user)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -357,7 +312,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::UNAUTHORIZED
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def close
-		retval = @survey.close(params[:message])
+		retval = @survey.close(params[:message], @current_user)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -379,7 +334,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::UNAUTHORIZED
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def pause
-		retval = @survey.pause(params[:message])
+		retval = @survey.pause(params[:message], @current_user)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end

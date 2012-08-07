@@ -1,8 +1,6 @@
 # coding: utf-8
 
 class PublicNoticesController < ApplicationController
-
-	before_filter :require_admin, :except=>[:index, :show]
  
 	# GET /public_notices
 	# GET /public_notices.json
@@ -30,65 +28,10 @@ class PublicNoticesController < ApplicationController
 	def show
 		@public_notice = PublicNotice.find_by_id(params[:id])
 
-		respond _to do |format|
+		respond_to do |format|
 			format.html # show.html.erb
 			format.json { render json: @public_notice }
 		end
 	end
 
-	# GET /public_notices/new
-	# GET /public_notices/new.json
-	def new
-		@public_notice = PublicNotice.new
-
-		respond_to do |format|
-			format.html # new.html.erb
-			format.json { render json: @public_notice }
-		end
-	end
-
-	# GET /public_notices/1/edit
-	def edit
-		@public_notice = PublicNotice.find_by_id(params[:id])
-
-		respond _to do |format|
-			format.html # show.html.erb
-			format.json { render json: @public_notice }
-		end
-	end
-	
-	# POST /public_notices
-	# POST /public_notices.json
-	def create
-		@public_notice = PublicNotice.create_public_notice(params[:public_notice], @current_user)	
-			
-		respond_to do |format|
-			format.html  if @public_notice.instance_of?(PublicNotice)
-			format.html { render action: "new" } if !@public_notice.instance_of?(PublicNotice)
-			format.json { render :json => @public_notice}
-		end
-	end
-
-	# PUT /public_notices/1
-	# PUT /public_notices/1.json
-	def update
-		@public_notice = PublicNotice.update_public_notice(params[:id], params[:public_notice], @current_user)
-
-		respond_to do |format|
-			format.html { redirect_to @public_notice} if @public_notice.instance_of?(PublicNotice)
-			format.html { render action: "edit" } if !@public_notice.instance_of?(PublicNotice)
-			format.json { render :json => @public_notice }
-		end
-	end
-
-	# DELETE /public_notices/1
-	# DELETE /public_notices/1.json
-	def destroy
-		@public_notice = PublicNotice.destroy_by_id(params[:id])
-
-		respond_to do |format|
-			format.html { redirect_to public_notices_url }
-			format.json { render :json => @public_notice }
-		end
-	end
 end

@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class SystemUsersControllerTest < ActionController::TestCase
+class Admin::SystemUsersControllerTest < ActionController::TestCase
 
 	test "01 get index" do 
 		clear(User)

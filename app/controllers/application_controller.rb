@@ -99,6 +99,20 @@ class ApplicationController < ActionController::Base
 		user_signed_in? && @current_user.is_admin
 	end
 
+	#judge whether the current user is survey auditor
+	def user_survey_auditor?
+		user_signed_in? && @current_user.is_survey_auditor
+	end
+
+	#judge whether the current user is entry clerk
+	def user_entry_clerk?
+		user_signed_in? && @current_user.is_entry_clerk
+	end
+
+	#judge whether the current user is answer auditor
+	def user_interviewer?
+		user_signed_in? && @current_user.is_interviewer
+	end
 	
 	def require_admin
 		if !user_signed_in?
@@ -111,6 +125,66 @@ class ApplicationController < ActionController::Base
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render :json => ErrorEnum::REQUIRE_ADMIN and return }
+			end
+		end
+	end
+	
+	def require_survey_auditor
+		if !user_signed_in?
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+			end
+		end
+		if !user_survey_auditor?
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render :json => ErrorEnum::REQUIRE_SURVEY_AUDITOR and return }
+			end
+		end
+	end
+	
+	def require_answer_auditor
+		if !user_signed_in?
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+			end
+		end
+		if !user_answer_auditor?
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render :json => ErrorEnum::REQUIRE_ANSWER_AUDITOR and return }
+			end
+		end
+	end
+	
+	def require_entry_clerk
+		if !user_signed_in?
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+			end
+		end
+		if !user_entry_clerk?
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render :json => ErrorEnum::REQUIRE_ENTRY_CLERK and return }
+			end
+		end
+	end
+	
+	def require_interviewer
+		if !user_signed_in?
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+			end
+		end
+		if !user_interviewer?
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render :json => ErrorEnum::REQUIRE_INTERVIEWER and return }
 			end
 		end
 	end
@@ -187,6 +261,11 @@ class ApplicationController < ActionController::Base
 		page = page.nil? ? 1 : page.to_i
 		per_page = per_page.nil? ? 10 : per_page.to_i
 		return [] if page < 1 || per_page < 1 
+
+		### sort
+		if arr.count > 1 && arr[0].respond_to?(:updated_at) then
+			arr.sort!{|v1, v2| v2.updated_at <=> v1.updated_at}
+		end
 
 		# avoid arr = nil
 		arr = arr.slice((page-1)*per_page, per_page) || []
