@@ -262,10 +262,9 @@ class Feedback
 
 			title = "反馈意见回复:"+ feedback.title.to_s
 			# 1 in the message type
-			retval = Message.create_new(title,
+			retval = answer_user.create_message(
+				title,
 				message_content,
-				answer_user.id.to_s,
-				1,
 				[feedback.question_user.id.to_s])
 					
 			return retval
