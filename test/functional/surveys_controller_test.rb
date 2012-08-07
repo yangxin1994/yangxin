@@ -72,7 +72,7 @@ class SurveysControllerTest < ActionController::TestCase
 		
 		survey_id = create_survey(jesse.email, Encryption.decrypt_password(jesse.password))
 		
-		sign_in(jesse.email, Encryption.decrypt_password(oliver.password))
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :show_style_setting, :format => :json, :id => survey_id
 		style_setting = JSON.parse(@response.body)
 		assert_equal "", style_setting["style_sheet_name"]
@@ -84,12 +84,12 @@ class SurveysControllerTest < ActionController::TestCase
 		style_setting["has_progress_bar"] = false
 		style_setting["has_question_number"] = false
 		
-		sign_in(jesse.email, Encryption.decrypt_password(oliver.password))
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update_style_setting, :format => :json, :id => survey_id, :style_setting => style_setting
 		assert_equal true.to_s, @response.body
 		sign_out
 
-		sign_in(jesse.email, Encryption.decrypt_password(oliver.password))
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :show_style_setting, :format => :json, :id => survey_id
 		style_setting = JSON.parse(@response.body)
 		assert_equal "style sheet name", style_setting["style_sheet_name"]
@@ -105,7 +105,7 @@ class SurveysControllerTest < ActionController::TestCase
 		
 		survey_id = create_survey(jesse.email, Encryption.decrypt_password(jesse.password))
 		
-		sign_in(jesse.email, Encryption.decrypt_password(oliver.password))
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :show_quality_control_setting, :format => :json, :id => survey_id
 		quality_control_setting = JSON.parse(@response.body)
 		assert !quality_control_setting["allow_pageup"]
@@ -123,12 +123,12 @@ class SurveysControllerTest < ActionController::TestCase
 		username_password_list << {"content" => ["u3", "p3"], "used" => false}
 		quality_control_setting["password_control"]["username_password_list"] = username_password_list
 
-		sign_in(jesse.email, Encryption.decrypt_password(oliver.password))
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update_quality_control_setting, :format => :json, :id => survey_id, :quality_control_setting => quality_control_setting
 		assert_equal true.to_s, @response.body
 		sign_out
 
-		sign_in(jesse.email, Encryption.decrypt_password(oliver.password))
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :show_quality_control_setting, :format => :json, :id => survey_id
 		quality_control_setting = JSON.parse(@response.body)
 		assert quality_control_setting["allow_pageup"]
@@ -292,7 +292,7 @@ class SurveysControllerTest < ActionController::TestCase
 		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
 		sign_out
 		
-		sign_in(jesse.email, Encryption.decrypt_password(oliver.password))
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :submit, :format => :json, :id => survey_id
 		assert_equal true.to_s, @response.body
 		get :show, :format => :json, :id => survey_id
@@ -300,8 +300,60 @@ class SurveysControllerTest < ActionController::TestCase
 		assert_equal PublishStatus::UNDER_REVIEW, survey_obj["publish_status"]
 		sign_out
 		
-		sign_in(jesse.email, Encryption.decrypt_password(oliver.password))
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :submit, :format => :json, :id => survey_id
+		assert_equal ErrorEnum::WRONG_PUBLISH_STATUS.to_s, @response.body
+		sign_out
+	end
+
+	test "should close survey" do
+		clear(User, Survey)
+		jesse = init_jesse
+		oliver = init_oliver
+		
+		published_survey_id = create_published_survey(jesse)
+
+		sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
+		get :close, :format => :json, :id => published_survey_id
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		get :close, :format => :json, :id => published_survey_id
+		assert_equal true.to_s, @response.body
+		get :show, :format => :json, :id => published_survey_id
+		survey_obj = JSON.parse(@response.body)
+		assert_equal PublishStatus::CLOSED, survey_obj["publish_status"]
+		sign_out
+		
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		get :close, :format => :json, :id => published_survey_id
+		assert_equal ErrorEnum::WRONG_PUBLISH_STATUS.to_s, @response.body
+		sign_out
+	end
+
+	test "should pause survey" do
+		clear(User, Survey)
+		jesse = init_jesse
+		oliver = init_oliver
+		
+		published_survey_id = create_published_survey(jesse)
+
+		sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
+		get :pause, :format => :json, :id => published_survey_id
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		sign_out
+		
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		get :pause, :format => :json, :id => published_survey_id
+		assert_equal true.to_s, @response.body
+		get :show, :format => :json, :id => published_survey_id
+		survey_obj = JSON.parse(@response.body)
+		assert_equal PublishStatus::PAUSED, survey_obj["publish_status"]
+		sign_out
+		
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		get :pause, :format => :json, :id => published_survey_id
 		assert_equal ErrorEnum::WRONG_PUBLISH_STATUS.to_s, @response.body
 		sign_out
 	end

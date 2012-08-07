@@ -97,6 +97,7 @@ OopsData::Application.routes.draw do
 		resources :quotas do
 			collection do
 				post :set_exclusive
+				get :get_exclusive
 			end
 		end
 	end

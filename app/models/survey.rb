@@ -377,6 +377,7 @@ class Survey
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
 	def close(message, operator)
 		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_survey_auditor
+		return ErrorEnum::WRONG_PUBLISH_STATUS if ![PublishStatus::PUBLISHED, PublishStatus::UNDER_REVIEW].include?(self.publish_status)
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => PublishStatus::CLOSED)
 		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::CLOSED, message)
@@ -828,29 +829,22 @@ class Survey
 		return Marshal.load(Marshal.dump(self.quota))
 	end
 
+	def show_quota_rule(quota_rule_index)
+		quota = Quota.new(self.quota)
+		return quota.show_rule(quota_rule_index)
+	end
+
 	def add_quota_rule(quota_rule)
-		quota_rule["conditions"].each do |condition|
-			self.add_quota_template_question(condition["name"]) if condition["condition_type"] == 0
-		end
 		quota = Quota.new(self.quota)
 		return quota.add_rule(quota_rule, self)
 	end
 
 	def update_quota_rule(quota_rule_index, quota_rule)
-		self.quota[quota_rule_index]["conditions"].each do |condition|
-			self.remove_quota_template_question(condition["name"]) if condition["condition_type"] == 0
-		end
-		quota_rule["conditions"].each do |condition|
-			self.add_quota_template_question(condition["name"]) if condition["condition_type"] == 0
-		end
 		quota = Quota.new(self.quota)
 		return quota.update_rule(quota_rule_index, quota_rule, self)
 	end
 
 	def delete_quota_rule(quota_rule_index)
-		self.quota[quota_rule_index]["conditions"].each do |condition|
-			self.remove_quota_template_question(condition["name"]) if condition["condition_type"] == 0
-		end
 		quota = Quota.new(self.quota)
 		return quota.delete_rule(quota_rule_index, self)
 	end
@@ -879,6 +873,10 @@ class Survey
 		return quota.set_exclusive(is_exclusive, self)
 	end
 
+	def get_exclusive
+		return self.quota["is_exclusive"]
+	end
+
 	def show_logic_control
 		return Marshal.load(Marshal.dump(self.logic_control))
 	end
@@ -905,42 +903,71 @@ class Survey
 			@rules = Marshal.load(Marshal.dump(quota["rules"]))
 		end
 
+		def show_rule(rule_index)
+			return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= rule_index
+			return Marshal.load(Marshal.dump(@rules[rule_index]))
+		end
+
 		def add_rule(rule, survey)
-			return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].class != Interger
+			# check errors
+			rule["amount"] = rule["amount"].to_i
+			return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
 			rule["conditions"].each do |condition|
-				return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include(condition["condition_type"])
+				condition["condition_type"] = condition["condition_type"].to_i
+				return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
 			end
+			# add the rule
 			@rules << rule
 			survey.quota = self.serialize
 			survey.save
+			# add the template questions corresponding to the new rule
+			survey.quota["rules"][-1]["conditions"].each do |condition|
+				self.add_quota_template_question(condition["name"]) if condition["condition_type"] == 0
+			end
 			return survey.quota
 		end
 
 		def delete_rule(rule_index, survey)
+			# check errors
 			return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= rule_index
+			# remove the template questions corresponding to the old quota rule
+			survey.quota["rules"][rule_index]["conditions"].each do |condition|
+				self.remove_quota_template_question(condition["name"]) if condition["condition_type"] == 0
+			end
+			# delete the rule
 			@rules.delete_at(rule_index)
 			survey.quota = self.serialize
-			survey.save
-			return survey.quota
+			return survey.save
 		end
 
 		def update_rule(rule_index, rule, survey)
+			# check errors
+			rule["amount"] = rule["amount"].to_i
 			return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= rule_index
-			return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].class != Interger
+			return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
 			rule["conditions"].each do |condition|
-				return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include(condition["condition_type"])
+				condition["condition_type"] = condition["condition_type"].to_i
+				return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"].to_i)
 			end
+			# remove the template questions corresponding to the old quota rule
+			survey.quota["rules"][rule_index]["conditions"].each do |condition|
+				self.remove_quota_template_question(condition["name"]) if condition["condition_type"] == 0
+			end
+			# update the rule
 			@rules[rule_index] = rule
 			survey.quota = self.serialize
 			survey.save
+			# add the template questions corresponding to the new quota rule
+			survey.quota["rules"][rule_index]["conditions"].each do |condition|
+				self.add_quota_template_question(condition["name"]) if condition["condition_type"].to_i == 0
+			end
 			return survey.quota
 		end
 
 		def set_exclusive(is_exclusive, survey)
 			@is_exclusive = !!is_exclusive
 			survey.quota = self.serialize
-			survey.save
-			return survey.quota
+			return survey.save
 		end
 
 		def serialize
@@ -958,7 +985,7 @@ class Survey
 		end
 
 		def add_rule(rule, survey)
-			return ErrorEnum::WRONG_LOGIC_CONTROL_TYPE if !RULE_TYPE.include(rule["rule_type"])
+			return ErrorEnum::WRONG_LOGIC_CONTROL_TYPE if !RULE_TYPE.include?(rule["rule_type"])
 			@rules << rule
 			survey.logic_control = self.rules
 			survey.save

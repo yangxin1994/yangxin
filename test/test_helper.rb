@@ -86,27 +86,39 @@ class ActiveSupport::TestCase
 		@controller = old_controller
 	end
 
-	def create_closed_survey
+	def create_closed_survey(user = nil)
 		closed_survey = FactoryGirl.build(:closed_survey)
 		closed_survey.save
+		if !user.nil?
+			user.surveys << closed_survey
+		end
 		return closed_survey._id.to_s
 	end
 
-	def create_under_review_survey
+	def create_under_review_survey(user = nil)
 		under_review_survey = FactoryGirl.build(:under_review_survey)
 		under_review_survey.save
+		if !user.nil?
+			user.surveys << under_review_survey
+		end
 		return under_review_survey._id.to_s
 	end
 
-	def create_paused_survey
+	def create_paused_survey(user = nil)
 		paused_survey = FactoryGirl.build(:paused_survey)
 		paused_survey.save
+		if !user.nil?
+			user.surveys << paused_survey
+		end
 		return paused_survey._id.to_s
 	end
 
-	def create_published_survey
+	def create_published_survey(user = nil)
 		published_survey = FactoryGirl.build(:published_survey)
 		published_survey.save
+		if !user.nil?
+			user.surveys << published_survey
+		end
 		return published_survey._id.to_s
 	end
 
