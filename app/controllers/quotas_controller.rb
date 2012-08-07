@@ -1,7 +1,16 @@
 # encoding: utf-8
 require 'error_enum'
 class QuotasController < ApplicationController
-	before_filter :require_sign_in
+	before_filter :require_sign_in, :check_normal_survey_existence
+
+	def check_normal_survey_existence
+		@survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if @survey.nil?
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		end
+	end
 
 	#*method*: get
 	#
@@ -15,18 +24,30 @@ class QuotasController < ApplicationController
 	#*retval*:
 	#* a hash of attributes that represent quotas
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
-	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def index
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end		
-
-		quota = survey.show_quota
+		quota = @survey.show_quota
 		respond_to do |format|
 			format.json	{ render :json => quota and return }
+		end
+	end
+
+	#*method*: get
+	#
+	#*url*: /surveys/:survey_id/quotas/:quota_rule_index
+	#
+	#*description*: show a quota rule
+	#
+	#*params*:
+	#* survey_id: id of the survey
+	#* quota_rule_index: index of the quota rule
+	#
+	#*retval*:
+	#* a hash of attributes that represent quotas
+	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
+	def show
+		quota_rule = @survey.show_quota_rule(params[:id].to_i)
+		respond_to do |format|
+			format.json	{ render :json => quota_rule and return }
 		end
 	end
 
@@ -43,18 +64,10 @@ class QuotasController < ApplicationController
 	#*retval*:
 	#* the Quota object
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
-	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	#* ErrorEnum ::WRONG_QUOTA_RULE_AMOUNT
 	#* ErrorEnum ::WRONG_QUOTA_RULE_CONDITION_TYPE
 	def create
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end		
-
-		quota = survey.add_quota_rule(params[:quota_rule])
+		quota = @survey.add_quota_rule(params[:quota_rule])
 		respond_to do |format|
 			format.json	{ render :json => quota and return }
 		end
@@ -74,18 +87,11 @@ class QuotasController < ApplicationController
 	#*retval*:
 	#* the Quota object
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
-	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	#* ErrorEnum ::WRONG_QUOTA_RULE_AMOUNT
 	#* ErrorEnum ::WRONG_QUOTA_RULE_CONDITION_TYPE
+	#* ErrorEnum ::QUOTA_RULE_NOT_EXIST
 	def update
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end		
-
-		quota = survey.update_quota_rule(params[:id], params[:quota_rule])
+		quota = @survey.update_quota_rule(params[:id].to_i, params[:quota_rule])
 		respond_to do |format|
 			format.json	{ render :json => quota and return }
 		end
@@ -102,19 +108,11 @@ class QuotasController < ApplicationController
 	#* quota_rule_index: index of the rule to be deleted
 	#
 	#*retval*:
-	#* the Quota object
+	#* true : when successfully removed
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
-	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	#* ErrorEnum ::QUOTA_RULE_NOT_EXIST
 	def destroy
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end		
-
-		retval = survey.delete_quota_rule(params[:id])
+		retval = @survey.delete_quota_rule(params[:id].to_i)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -133,16 +131,27 @@ class QuotasController < ApplicationController
 	#*retval*:
 	#* the Quota object
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
-	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def set_exclusive
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end		
+		retval = @survey.set_exclusive(params[:is_exclusive].to_s == "true")
+		respond_to do |format|
+			format.json	{ render :json => retval and return }
+		end
+	end
 
-		retval = survey.set_exclusive(params[:is_exclusive].to_s == "true")
+	#*method*: get
+	#
+	#*url*: /surveys/:survey_id/quotas/get_exclusive
+	#
+	#*description*: get the "is_exclusive" attribute of the quota
+	#
+	#*params*:
+	#* survey_id: id of the survey
+	#
+	#*retval*:
+	#* the Quota object
+	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
+	def get_exclusive
+		retval = @survey.get_exclusive
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
