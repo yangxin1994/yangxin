@@ -8,4 +8,4 @@ db/*.lock
 db/journal
 .DS_Store
 public/uploads
-app/asets
+app/assets

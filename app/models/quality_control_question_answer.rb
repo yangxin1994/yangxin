@@ -6,15 +6,15 @@ class QualityControlQuestionAnswer
 	field :question_id, :type => Array, default: []
 	field :quality_control_type, :type => Integer, default: 0
 	field :question_type, :type => String, default: ""
-	field :answer, :type => Hash, default: {}
+	field :answer_content, :type => Hash, default: {}
 
 	OBJECTIVE_QUESTION  = 0
 	MATCHING_QUESTION = 1
 
-	ANSWER_STRUCTURE = {"#{OBJECTIVE_QUESTION}_#{QuestionTypeEnum::CHOICE_QUESTION}" => [],
+	ANSWER_STRUCTURE = {"#{OBJECTIVE_QUESTION}_#{QuestionTypeEnum::CHOICE_QUESTION}" => {"fuzzy" => false, "items" => []},
 		"#{OBJECTIVE_QUESTION}_#{QuestionTypeEnum::TEXT_BLANK_QUESTION}" => {"fuzzy" => true, "text" => ""},
 		"#{OBJECTIVE_QUESTION}_#{QuestionTypeEnum::NUMBER_BLANK_QUESTION}" => {"number" => 0},
-		"#{MATCHING_QUESTION}_#{QuestionTypeEnum::CHOICE_QUESTION}" => []
+		"#{MATCHING_QUESTION}_#{QuestionTypeEnum::CHOICE_QUESTION}" => {"matching_items" => []}
 	}
 
 	def self.create_new(question_id, quality_control_type, question_type)
@@ -24,14 +24,13 @@ class QualityControlQuestionAnswer
 		answer.question_type = question_type
 		case "#{quality_control_type}_#{question_type}"
 		when "#{OBJECTIVE_QUESTION}_#{QuestionTypeEnum::CHOICE_QUESTION}"
-			answer.answer = []
+			answer.answer_content = {"fuzzy" => false, "items" => []}
 		when "#{OBJECTIVE_QUESTION}_#{QuestionTypeEnum::TEXT_BLANK_QUESTION}"
-			answer.answer = {"fuzzy" => true, "text" => ""}
+			answer.answer_content = {"fuzzy" => true, "text" => ""}
 		when "#{OBJECTIVE_QUESTION}_#{QuestionTypeEnum::NUMBER_BLANK_QUESTION}"
-			answer.answer = 0
+			answer.answer_content = {"number" => 0}
 		when "#{MATCHING_QUESTION}_#{QuestionTypeEnum::CHOICE_QUESTION}"
-			answer.answer = []
-			question_id.length.downto(1).each {answer.answer << []}
+			answer.answer_content = {"matching_items" => []}
 		end
 		answer.save
 		return answer
@@ -52,13 +51,13 @@ class QualityControlQuestionAnswer
 		if quality_control_type == QualityControlTypeEnum::OBJECTIVE
 			answer = QualityControlQuestionAnswer.find_by_question_id([question_id])
 			return ErrorEnum::QUALITY_CONTROL_QUESTION_ANSWER_NOT_EXIST if answer.nil?
-			answer.answer = answer_object
+			answer.answer_content = answer_object
 			return answer.save
 		elsif quality_control_type == QualityControlTypeEnum::MATCHING
 			question_id_ary = MatchingQuestion.get_matching_question_ids(question_id)
-			answer = QualityControlQuestionAnswer.find_by_question_id([question_id_ary])
+			answer = QualityControlQuestionAnswer.find_by_question_id(question_id_ary)
 			return ErrorEnum::QUALITY_CONTROL_QUESTION_ANSWER_NOT_EXIST if answer.nil?
-			answer.answer = answer_object
+			answer.answer_content = answer_object
 			return answer.save
 		else
 			return ErrorEnum::WRONG_QUALITY_CONTROL_TYPE

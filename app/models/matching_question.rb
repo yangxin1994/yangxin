@@ -18,7 +18,7 @@ class MatchingQuestion
 	end
 
 	def self.get_matching_question_ids(question_id)
-		matching = MatchingQuestion.matchings(question_id)
+		matching = MatchingQuestion.find_by_question_id(question_id)
 		return ErrorEnum::MATCING_NOT_EXIST if matching.nil?
 		return matching.matching_ary
 	end

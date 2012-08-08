@@ -43,6 +43,10 @@ class ChoiceIssue < Issue
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 
+	def remove_hidden_items(items, sub_questions)
+		self.choices.delete_if { |choice| items.include?(choice["input_id"]) }
+	end
+
 	#*description*: serialize the current instance into a question object
 	#
 	#*params*:

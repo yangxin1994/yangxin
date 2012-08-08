@@ -154,7 +154,7 @@ class Feedback
 		#
 		#*retval*:
 		#feedback array 
-		def list_by_type_and_value(type_number=0, value)
+		def list_by_type_and_value(type_number, value, user=nil)
 
 			#if value is empty, involve list_by_type
 			list_by_type(type_number) if value.nil? || (value && value.to_s.strip == "")
@@ -172,7 +172,11 @@ class Feedback
 			MAX_TYPE.downto(0).each { |element| 
 				feedbacks_tmp = []
 				if type_number / (2**element) == 1 then
-					feedbacks_tmp = Feedback.where(title: /.*#{value}.*/, feedback_type: 2**element) + Feedback.where(content: /.*#{value}.*/, feedback_type: 2**element)
+					if user.nil? then					
+						feedbacks_tmp = Feedback.where(title: /.*#{value}.*/, feedback_type: 2**element) + Feedback.where(content: /.*#{value}.*/, feedback_type: 2**element)
+					else
+						feedbacks_tmp = Feedback.where(question_user_id: user.id, title: /.*#{value}.*/, feedback_type: 2**element) + Feedback.where(question_user_id: user.id, content: /.*#{value}.*/, feedback_type: 2**element)
+					end
 					feedbacks_tmp.uniq!{|f| f._id.to_s }
 				end
 				type_number = type_number % 2**element
@@ -191,7 +195,7 @@ class Feedback
 		#
 		#*retval*:
 		#feedback array
-		def list_by_type(type_number=0)
+		def list_by_type(type_number, user=nil)
 			#verify params
 			return ErrorEnum::FEEDBACK_TYPE_ERROR if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
 			return ErrorEnum::FEEDBACK_RANGE_ERROR if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))
@@ -204,7 +208,8 @@ class Feedback
 			MAX_TYPE.downto(0).each { |element| 
 				feedbacks_tmp=[]
 				if type_number / (2**element) == 1 then
-					feedbacks_tmp = Feedback.where(feedback_type: 2**element)
+					feedbacks_tmp = Feedback.where(feedback_type: 2**element) if user.nil?
+					feedbacks_tmp = Feedback.where(question_user_id: user.id,feedback_type: 2**element) if !user.nil?
 				end
 				type_number = type_number % 2**element
 				feedbacks = feedbacks + feedbacks_tmp
@@ -221,7 +226,7 @@ class Feedback
 		#
 		#*retval*:
 		# a feedback array
-		def list_by_type_and_answer(type_number, is_answer)
+		def list_by_type_and_answer(type_number, is_answer, user=nil)
 
 			feedbacks = list_by_type(type_number)
 
@@ -232,7 +237,8 @@ class Feedback
 
 			return feedbacks
 		end
-	
+
+=begin
 		#*description*: reply feedback
 		#
 		#*params*:
@@ -271,7 +277,7 @@ class Feedback
 
 			return stat
 		end
-		
+=end		
 	end 
 	
 end

@@ -23,37 +23,37 @@ class User
 	field :introducer_to_pay, :type => Float
 # 0 user
 # 1 administrator
+# 2 belongs to: White List
+# 4 belongs to: Black List
 
-  field :role, :type => Integer, default: 0
-  field :auth_key, :type => String
-  field :last_visit_time, :type => Integer
-  field :level, :type => Integer, default: 0
-  field :level_expire_time, :type => Integer, default: -1
+	field :role, :type => Integer, default: 0
+	field :auth_key, :type => String
+	field :last_visit_time, :type => Integer
+	field :level, :type => Integer, default: 0
+	field :level_expire_time, :type => Integer, default: -1
 
-  field :birthday, :type => Integer, default: -1
-  field :gender, :type => Boolean
-  field :address, :type => String
-  field :postcode, :type => String
-  field :phone, :type => String
+	field :birthday, :type => Integer, default: -1
+	field :gender, :type => Boolean
+	field :address, :type => String
+	field :postcode, :type => String
+	field :phone, :type => String
 
-  # Message
-  field :message_ids, :type => Array, default:[]
-  has_many :messages
+	#field :message_ids, :type => Array, :default => []
+	has_and_belongs_to_many :messages, inverse_of: nil
+	has_many :sended_messages, :class_name => "Message", :inverse_of => :sender
 
-  # Present && Point
-  field :point, :type => Integer
-  has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
-  has_many :orders, :class_name => "Order", :foreign_key => "user_id"
-  has_many :lottery_codes
-  # Present && Point with Admin
-  has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
-  has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
+	#################################
+	# QuillMe
+	field :point, :type => Integer
+	#has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
+	#has_many :orders, :class_name => "Order", :foreign_key => "user_id"
+	#has_many :lottery_codes
+	# QuillAdmin
+	#has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
+	has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
 
-
-
-	before_save :set_updated_at
-	before_update :set_updated_at
-
+	#before_save :set_updated_at
+	#before_update :set_updated_at
 
 	attr_accessible :email, :username, :password, :registered_at
 
@@ -188,6 +188,22 @@ class User
 	#* true or false
 	def is_admin
 		return self.role == 1
+	end
+
+	def is_survey_auditor
+		return self.class == SurveyAuditor
+	end
+
+	def is_answer_auditor
+		return self.class == AnswerAuditor
+	end
+
+	def is_entry_clerk
+		return self.class == EntryClerk
+	end
+
+	def is_interviewer
+		return self.class == Interviewer
 	end
 
 	#*description*: create a new user
@@ -347,6 +363,29 @@ class User
 			return ""
 		end
 	end
+#--
+############### operations about message#################
+#++
+	#ctreate
+	def create_message_for_all(title, content)
+		sended_messages.create(:title => title, :content => content, :sender_id => id)
+	end
+
+	def create_message(title, content, receiver = [])
+		m = sended_messages.create(:title => title, :content => content, :type => 1)
+		return m unless m.is_a? Message
+		receiver.each do |r|
+			u = User.find_by_id(r)
+			u.messages << m# => unless m.created_at.nil? 
+			u.save
+		end
+		m
+	end
+
+	def show_messages
+		Message.unread(created_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}
+	end
+
 
 #--
 ############### operations about charge #################
@@ -399,4 +438,119 @@ class User
 		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
 		return question.delete_quality_control_question(self)
 	end
+
+
+	#--
+	# **************************************************
+	# Quill AdminController
+	#++
+
+	public
+
+	ROLE_NORMAL = 0
+	ROLE_WHITE = 2
+	ROLE_BLACK = 4
+
+	#--
+	# instance methods
+	#++
+
+	#--
+	# class methods
+	#++
+
+	scope :black_list, where(role: ROLE_BLACK)
+	scope :white_list, where(role: ROLE_WHITE)
+
+	def self.update_user(user_id, attributes)
+		user = User.find_by_id(user_id)
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
+
+		select_attrs = %w(birthday gender address phone postcode status)
+		attributes.select!{|k,v| select_attrs.include?(k.to_s)}
+
+		updated_user = User.collection.find_and_modify(:query => {_id: user.id}, :update => attributes, new: true)
+
+		return User.where(_id: updated_user["_id"]).first
+	end
+
+	def self.change_white_user(user_id)
+		user = User.find_by_id(user_id.to_s.strip)	
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
+
+		if user.role != ROLE_WHITE then
+			user.role = ROLE_WHITE
+		elsif user.role != ROLE_NORMAL
+			user.role = ROLE_NORMAL
+		end
+
+		if user.save then
+			if user.role == ROLE_WHITE then 
+				user[:white] = true 
+			else
+				user[:white] = false 
+			end
+
+			return user 
+		else
+			return ErrorEnum::USER_SAVE_FAILED
+		end
+	end
+
+	def self.change_black_user(user_id)
+		user = User.find_by_id(user_id.to_s.strip)	
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
+
+		if user.role != ROLE_BLACK then
+			user.role = ROLE_BLACK
+		elsif user.role != ROLE_NORMAL
+			user.role = ROLE_NORMAL
+		end
+
+		if user.save then
+			if user.role == ROLE_BLACK then 
+				user[:black] = true 
+			else
+				user[:black] = false
+			end
+
+			return user 
+		else
+			return ErrorEnum::USER_SAVE_FAILED
+		end
+	end
+
+	def self.change_to_system_password(user_id)
+		user = User.find_by_id(user_id)
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
+
+		# generate rand number
+		sys_pwd = 1
+		while sys_pwd < 16**7 do
+			sys_pwd = rand(16**8-1)
+		end
+		sys_pwd = sys_pwd.to_s(16)
+
+		user.password = Encryption.encrypt_password(sys_pwd)
+		if !user.save then 
+			return ErrorEnum::USER_SAVE_FAILED
+		end
+
+		# maybe, should be send the pwd to his register email
+		#
+		# CODE:
+		#
+		# mail = OopsMail::OMail.new("Change password to new system password.", "Your new password:<b>#{sys_pwd}</b>")
+		# sender = OopsMail::EmailSender.new("customer", "customer@netranking.cn", "netrankingcust")
+		# receiver = OopsMail::EmailReceiver.new(user.username || user.email.split("@")[0], user.email)
+		# email = OopsMail::Email.new(sender, receiver, mail)
+		# OopsMail.send_email(email)
+		#
+
+		return user 
+	end
+
+	#--
+	# **************************************************
+	#++
 end

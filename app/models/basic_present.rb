@@ -23,8 +23,8 @@ class BasicPresent
 
 	scope :stockout, where(:surplus.lt => 1)
 
-	before_create :set_surplus
 
+	before_create :set_surplus
 
 
 	def add_quantity(n)
@@ -40,4 +40,5 @@ class BasicPresent
 	def set_surplus
 		surplus = quantity
 	end
+
 end

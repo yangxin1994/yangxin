@@ -2,7 +2,17 @@
 require 'error_enum'
 class QuestionsController < ApplicationController
 	before_filter :require_sign_in
+	before_filter :check_survey_existence
 
+
+	def check_survey_existence
+		@survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if @survey.nil?
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+			end
+		end
+	end
 
 	#*method*: post
 	#
@@ -23,56 +33,28 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question, after which the new one is created, does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def create
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		question = survey.create_question(params[:page_index].to_i, params[:question_id], params[:question_type].to_i)
+		question = @survey.create_question(params[:page_index].to_i, params[:question_id], params[:question_type].to_i)
 		respond_to do |format|
 			format.json	{ render :json => question and return }
 		end
 	end
 
 	def insert_template_question
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		question = survey.insert_template_question(params[:page_index].to_i, params[:question_id], params[:template_question_id])
+		question = @survey.insert_template_question(params[:page_index].to_i, params[:question_id], params[:template_question_id])
 		respond_to do |format|
 			format.json	{ render :json => question and return }
 		end
 	end
 
 	def convert_template_question_to_normal_question
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		question = survey.convert_template_question_to_normal_question(params[:id])
+		question = @survey.convert_template_question_to_normal_question(params[:id])
 		respond_to do |format|
 			format.json	{ render :json => question and return }
 		end
 	end
 
 	def insert_quality_control_question
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		questions = survey.insert_quality_control_question(params[:page_index].to_i, params[:question_id], params[:quality_control_question_id])
+		questions = @survey.insert_quality_control_question(params[:page_index].to_i, params[:question_id], params[:quality_control_question_id])
 		respond_to do |format|
 			format.json	{ render :json => questions and return }
 		end
@@ -96,14 +78,7 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	#* ErrorEnum ::WRONG_DATA_TYPE: when the data type specified in a blank question is wrong
 	def update
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		question = survey.update_question(params[:id], params[:question])
+		question = @survey.update_question(params[:id], params[:question])
 		respond_to do |format|
 			format.json	{ render :json => question and return }
 		end
@@ -128,14 +103,7 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def move
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.move_question(params[:question_id_1], params[:page_index].to_i, params[:question_id_2])
+		retval = @survey.move_question(params[:question_id_1], params[:page_index].to_i, params[:question_id_2])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -161,14 +129,7 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::OVERFLOW: when the page index is greater than the page number
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def clone
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		question = survey.clone_question(params[:question_id_1], params[:page_index].to_i, params[:question_id_2])
+		question = @survey.clone_question(params[:question_id_1], params[:page_index].to_i, params[:question_id_2])
 		respond_to do |format|
 			format.json	{ render :json => question and return }
 		end
@@ -190,14 +151,7 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def show
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		question = survey.get_question_inst(params[:id])
+		question = @survey.get_question_inst(params[:id])
 		respond_to do |format|
 			format.json	{ render :json => question and return }
 		end
@@ -219,14 +173,7 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def destroy
-		survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-
-		retval = survey.delete_question(params[:id])
+		retval = @survey.delete_question(params[:id])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end

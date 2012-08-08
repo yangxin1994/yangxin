@@ -4,7 +4,7 @@ class SystemUser < User
 	field :true_name, :type => String
 	field :lock, :type => Boolean, :default => false	
 
-	attr_accessible :true_name, :password, :system_user_type, :lock
+	attr_accessible :email, :username, :true_name, :password, :system_user_type, :lock
 
 	validates_presence_of :true_name, :password, :system_user_type
 

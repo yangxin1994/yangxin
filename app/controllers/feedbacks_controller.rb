@@ -3,28 +3,27 @@
 class FeedbacksController < ApplicationController
 
 	before_filter :require_sign_in, :except => [:new, :create]
-	before_filter :require_admin, :only => [:index, :reply]
 
 	# GET /feedbacks
 	# GET /feedbacks.json
 	def index
 		if !params[:feedback_type].nil? then
 			if !params[:value].nil? then
-				@feedbacks = Feedback.list_by_type_and_value(params[:feedback_type], params[:value])
+				@feedbacks = Feedback.list_by_type_and_value(params[:feedback_type], params[:value], @current_user)
 			elsif !params[:answer].nil? then
 				if params[:answer].to_s.strip == "true" then
-					@feedbacks = Feedback.list_by_type_and_answer(params[:feedback_type], true)
+					@feedbacks = Feedback.list_by_type_and_answer(params[:feedback_type], true, @current_user)
 				elsif params[:answer].to_s.strip == "false" then
-					@feedbacks = Feedback.list_by_type_and_answer(params[:feedback_type], false)
+					@feedbacks = Feedback.list_by_type_and_answer(params[:feedback_type], false, @current_user)
 				end
 			else
-				@feedbacks = Feedback.list_by_type(params[:feedback_type])
+				@feedbacks = Feedback.list_by_type(params[:feedback_type], @current_user)
 			end
 		else
-			@feedbacks = Feedback.all.desc(:updated_at)
+			@feedbacks = Feedback.where(question_user_id: @current_user.id)
 		end
 
-		@feedbacks ||= []
+		@feedbacks = slice((@feedbacks || []), params[:page], params[:per_page])
 
 		respond_to do |format|
 			format.html # index.html.erb
@@ -37,7 +36,7 @@ class FeedbacksController < ApplicationController
 	def show
 		@feedback = Feedback.find_by_id(params[:id])
 
-		respond _to do |format|
+		respond_to do |format|
 			format.html # show.html.erb
 			format.json { render json: @feedback }
 		end
@@ -60,7 +59,7 @@ class FeedbacksController < ApplicationController
 
 		respond _to do |format|
 			format.html # show.html.erb
-			format.json { render json: @system_user }
+			format.json { render json: @feedback }
 		end
 	end
 	
@@ -97,21 +96,5 @@ class FeedbacksController < ApplicationController
 			format.html { redirect_to feedbacks_url }
 			format.json { render :json => retval }
 		end
-	end
-	
-	# POST /feedbacks/reply
-	# POST /feedbacks/reply.json
-	def reply
-		params[:id] = params[:id] || ""
-		params[:message_content] = params[:message_content] || ""
-
-		@feedback = Feedback.where(params[:id]).first
-		retval = Feedback.reply(params[:id], @current_user, params[:message_content])
-
-		respond_to do |format|
-			format.html { redirect_to @feedback} if @feedback
-			format.json { head :json => retval }
-		end
-	end
-	
+	end	
 end

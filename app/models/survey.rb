@@ -33,6 +33,7 @@ class Survey
 	field :publish_status, :type => Integer, default: 1
 	field :pages, :type => Array, default: []
 	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
+	field :quota_template_question_page, :type => Array, default: []
 	field :logic_control, :type => Array, default: []
 	field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
 		"has_progress_bar" => true,
@@ -109,6 +110,12 @@ class Survey
 			survey_obj[attr_name] = method_obj.call()
 		end
 		survey_obj["quota"] = Marshal.load(Marshal.dump(self.quota))
+		survey_obj["quota_stats"] = Marshal.load(Marshal.dump(self.quota_stats))
+		survey_obj["logic_control"] = Marshal.load(Marshal.dump(self.logic_control))
+		survey_obj["quality_control_setting"] = Marshal.load(Marshal.dump(self.quality_control_setting))
+		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
+		survey_obj["publish_status"] = self.publish_status
+		survey_obj["status"] = self.status
 		return survey_obj
 	end
 
@@ -179,6 +186,20 @@ class Survey
 		return self.style_setting
 	end
 
+	def update_quality_control_setting(quality_control_setting_obj)
+		self.quality_control_setting = quality_control_setting_obj
+		self.save
+		return true
+	end
+
+	def show_quality_control_setting
+		return self.quality_control_setting
+	end
+
+	def is_pageup_allowed
+		return self.quality_control_setting["allow_pageup"]
+	end
+
 	#*description*: remove current survey
 	#
 	#*params*:
@@ -227,16 +248,15 @@ class Survey
 	#*description*: clone the current survey instance
 	#
 	#*params*:
-	#* email of the user doing this operation
+	#* title of the new survey
 	#
 	#*retval*:
 	#* the new survey instance: if successfully cloned
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def clone(current_user)
-		return ErrorEnum::UNAUTHORIZED if self.owner_email != current_user.email
-
+	def clone(title)
 		# clone the meta data of the survey
 		new_instance = super
+		new_instance.title = title || new_instance.title
 
 		# clone all questions
 		new_instance.pages.each do |page|
@@ -248,7 +268,7 @@ class Survey
 			end
 		end
 		
-		# the constrains should also be cloned
+		# the logic control should also be cloned
 		###################################################
 		###################################################
 		###################################################
@@ -318,7 +338,7 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
 	def reject(message, operator)
-		return ErrorEnum::UNAUTHORIZED if !operator.is_admin
+		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_survey_auditor
 		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != PublishStatus::UNDER_REVIEW
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => PublishStatus::PAUSED)
@@ -337,7 +357,7 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
 	def publish(message, operator)
-		return ErrorEnum::UNAUTHORIZED if !operator.is_admin
+		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_survey_auditor
 		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != PublishStatus::UNDER_REVIEW
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => PublishStatus::PUBLISHED)
@@ -356,7 +376,8 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
 	def close(message, operator)
-		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin
+		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_survey_auditor
+		return ErrorEnum::WRONG_PUBLISH_STATUS if ![PublishStatus::PUBLISHED, PublishStatus::UNDER_REVIEW].include?(self.publish_status)
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => PublishStatus::CLOSED)
 		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::CLOSED, message)
@@ -373,8 +394,8 @@ class Survey
 	#* true
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
-	def pause(current_user, message)
-		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin
+	def pause(message, operator)
+		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_survey_auditor
 		return ErrorEnum::WRONG_PUBLISH_STATUS if ![PublishStatus::PUBLISHED, PublishStatus::UNDER_REVIEW].include?(self.publish_status)
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => PublishStatus::PAUSED)
@@ -785,8 +806,32 @@ class Survey
 		end
 	end
 
+	def add_quota_template_question(template_question_id)
+		template_question = TemplateQuestion.find_by_id(template_question_id)
+		return ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST if template_question.nil?
+		return true if self.quota_template_question_page.include?(question._id.to_s)
+		question = Question.create_template_question(template_question)
+		self.quota_template_question_page << question._id.to_s
+		return self.save
+	end
+
+	def remove_quota_template_question(template_question_id)
+		self.quota_template_question_page.each do |q_id|
+			question = Question.find_by_id(q_id)
+			if question.reference_id == template_question_id
+				self.quota_template_question_page.delete(q_id)
+				return self.save
+			end
+		end
+	end
+
 	def show_quota
 		return Marshal.load(Marshal.dump(self.quota))
+	end
+
+	def show_quota_rule(quota_rule_index)
+		quota = Quota.new(self.quota)
+		return quota.show_rule(quota_rule_index)
 	end
 
 	def add_quota_rule(quota_rule)
@@ -828,6 +873,10 @@ class Survey
 		return quota.set_exclusive(is_exclusive, self)
 	end
 
+	def get_exclusive
+		return self.quota["is_exclusive"]
+	end
+
 	def show_logic_control
 		return Marshal.load(Marshal.dump(self.logic_control))
 	end
@@ -854,42 +903,71 @@ class Survey
 			@rules = Marshal.load(Marshal.dump(quota["rules"]))
 		end
 
+		def show_rule(rule_index)
+			return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= rule_index
+			return Marshal.load(Marshal.dump(@rules[rule_index]))
+		end
+
 		def add_rule(rule, survey)
-			return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].class != Interger
+			# check errors
+			rule["amount"] = rule["amount"].to_i
+			return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
 			rule["conditions"].each do |condition|
-				return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include(condition["condition_type"])
+				condition["condition_type"] = condition["condition_type"].to_i
+				return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
 			end
+			# add the rule
 			@rules << rule
 			survey.quota = self.serialize
 			survey.save
+			# add the template questions corresponding to the new rule
+			survey.quota["rules"][-1]["conditions"].each do |condition|
+				self.add_quota_template_question(condition["name"]) if condition["condition_type"] == 0
+			end
 			return survey.quota
 		end
 
 		def delete_rule(rule_index, survey)
+			# check errors
 			return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= rule_index
+			# remove the template questions corresponding to the old quota rule
+			survey.quota["rules"][rule_index]["conditions"].each do |condition|
+				self.remove_quota_template_question(condition["name"]) if condition["condition_type"] == 0
+			end
+			# delete the rule
 			@rules.delete_at(rule_index)
 			survey.quota = self.serialize
-			survey.save
-			return survey.quota
+			return survey.save
 		end
 
 		def update_rule(rule_index, rule, survey)
+			# check errors
+			rule["amount"] = rule["amount"].to_i
 			return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= rule_index
-			return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].class != Interger
+			return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
 			rule["conditions"].each do |condition|
-				return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include(condition["condition_type"])
+				condition["condition_type"] = condition["condition_type"].to_i
+				return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"].to_i)
 			end
+			# remove the template questions corresponding to the old quota rule
+			survey.quota["rules"][rule_index]["conditions"].each do |condition|
+				self.remove_quota_template_question(condition["name"]) if condition["condition_type"] == 0
+			end
+			# update the rule
 			@rules[rule_index] = rule
 			survey.quota = self.serialize
 			survey.save
+			# add the template questions corresponding to the new quota rule
+			survey.quota["rules"][rule_index]["conditions"].each do |condition|
+				self.add_quota_template_question(condition["name"]) if condition["condition_type"].to_i == 0
+			end
 			return survey.quota
 		end
 
 		def set_exclusive(is_exclusive, survey)
 			@is_exclusive = !!is_exclusive
 			survey.quota = self.serialize
-			survey.save
-			return survey.quota
+			return survey.save
 		end
 
 		def serialize
@@ -907,7 +985,7 @@ class Survey
 		end
 
 		def add_rule(rule, survey)
-			return ErrorEnum::WRONG_LOGIC_CONTROL_TYPE if !RULE_TYPE.include(rule["rule_type"])
+			return ErrorEnum::WRONG_LOGIC_CONTROL_TYPE if !RULE_TYPE.include?(rule["rule_type"])
 			@rules << rule
 			survey.logic_control = self.rules
 			survey.save

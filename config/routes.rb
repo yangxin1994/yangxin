@@ -1,23 +1,45 @@
 OopsData::Application.routes.draw do
 
+	resources :faqs, :public_notices, :feedbacks, :advertisements
 
-  
+	namespace :admin do
+		resources :users do 
+			collection do 
+				get 'blacks'
+				get 'whites'
+			end
 
-  resources :advertisements
+			member do 
+				get 'system_pwd'
+				get 'white'
+				get 'black'
+			end
+		end
 
+		resources :faqs, :public_notices, :advertisements
+		resources :system_users do 
+			collection do 
+				post 'lock'
+				post 'unlock'
+			end
+		end
+		resources :feedbacks do 
+			member do 
+				post 'reply'
+			end
+		end
+	end
 
-	get 'faqs/condition'
-	get 'faqs/types'
-	get 'public_notices/condition'
-	get 'public_notices/types'
-	get 'feedbacks/condition'
-	get 'feedbacks/types'
-
-	resources :faqs, :public_notices, :feedbacks, :advertisements, :system_users
-	post 'system_users/lock'
-	post 'system_users/unlock'
-
-	match 'feedback/:id/reply' => "feedback#reply"
+	namespace :survey_auditor do
+		resources :surveys do
+			member do
+				get 'reject'
+				get 'publish'
+				get 'close'
+				get 'pause'
+			end
+		end
+	end
 
 	get "home/index"
 	match 'home' => 'home#index', :as => :home
@@ -67,6 +89,10 @@ OopsData::Application.routes.draw do
 			get 'publish'
 			get 'close'
 			get 'pause'
+			put 'update_style_setting'
+			get 'show_style_setting'
+			put 'update_quality_control_setting'
+			get 'show_quality_control_setting'
 		end
 		resources :pages
 		resources :questions do
@@ -81,6 +107,7 @@ OopsData::Application.routes.draw do
 		resources :quotas do
 			collection do
 				post :set_exclusive
+				get :get_exclusive
 			end
 		end
 	end
@@ -103,6 +130,15 @@ OopsData::Application.routes.draw do
 	end
 
 	resources :template_questions do
+	end
+
+	resources :answers do
+		collection do
+			post 'load_question'
+			post 'clear'
+			post 'submit_answer'
+			post 'finish'
+		end
 	end
 
 	# QuillMe

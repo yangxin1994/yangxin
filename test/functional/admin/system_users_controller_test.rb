@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class SystemUsersControllerTest < ActionController::TestCase
+class Admin::SystemUsersControllerTest < ActionController::TestCase
 
 	test "01 get index" do 
 		clear(User)
@@ -59,13 +59,13 @@ class SystemUsersControllerTest < ActionController::TestCase
 		sign_in(user.email, "123456")		
 		post 'create', :system_user => {username: "zhangsan", password: "123456", true_name:'zhangsan'}, :format => :json
 		retval = JSON.parse(@response.body)
-		assert_equal retval["password"], Encryption.encrypt_password("123456")
+		assert_equal retval["username"], "zhangsan"
 
 		sleep(1)
 
 		post 'create', :system_user => {username: "lisi", password: "123456", system_user_type: 2, true_name:'lisi'}, :format => :json
 		retval = JSON.parse(@response.body)
-		assert_equal retval["password"], Encryption.encrypt_password("123456")
+		assert_equal retval["username"], "lisi"
 
 		post 'create', :system_user => {username: "lisi", password: "123456", system_user_type: 2, true_name:'lisi'}, :format => :json
 		retval = @response.body.to_i
@@ -109,6 +109,11 @@ class SystemUsersControllerTest < ActionController::TestCase
 		assert_equal retval[0]["true_name"], "lisi"
 		assert_equal retval[1]["true_name"], "zhangsan"
 
+		#paging
+		get 'index', :format => :json, :page => 2, :per_page => 1
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 1
+
 		sign_out
 
 		clear(User)
@@ -141,13 +146,12 @@ class SystemUsersControllerTest < ActionController::TestCase
 		#create new system user
 		post 'create', :system_user => {email: "oop@example.com", username: "zhangsan", password: "123456", true_name:'zhangsan'}, :format => :json
 		retval = JSON.parse(@response.body)
-		assert_equal retval["password"], Encryption.encrypt_password("123456")
+		assert_equal retval["username"], "zhangsan"
 
 		post 'update',:id => retval["_id"], :system_user => {username: "zhangsan2", true_name: "test", password: "1234567"}, :format => :json
 		retval = JSON.parse(@response.body)
 		assert_equal retval["username"], "zhangsan" # should do not update username attr.
 		assert_equal retval["true_name"], "test"
-		assert_equal retval["password"], Encryption.encrypt_password("1234567")
 
 		post 'update',:id => retval["_id"], :system_user => {email: "test2@example.com", true_name: "test", password: "1234567"}, :format => :json
 		retval = @response.body.to_i
@@ -156,7 +160,7 @@ class SystemUsersControllerTest < ActionController::TestCase
 		#create new system user
 		post 'create', :system_user => {email: "oop2@example.com", password: "123456", true_name:'zhangsan'}, :format => :json
 		retval = JSON.parse(@response.body)
-		assert_equal retval["password"], Encryption.encrypt_password("123456")
+		assert_equal retval["true_name"], "zhangsan"
 
 		system_user = SystemUser.find(retval["_id"])
 		assert_equal system_user.password, Encryption.encrypt_password("123456")
@@ -196,7 +200,7 @@ class SystemUsersControllerTest < ActionController::TestCase
 		sign_in(user.email, "123456")		
 		post 'create', :system_user => {username: "zhangsan", password: "123456", true_name:'zhangsan'}, :format => :json
 		retval = JSON.parse(@response.body)
-		assert_equal retval["password"], Encryption.encrypt_password("123456")
+		assert_equal retval["username"], "zhangsan"
 
 		post 'lock',:id => retval["_id"], :format => :json
 		retval = JSON.parse(@response.body)
@@ -236,7 +240,7 @@ class SystemUsersControllerTest < ActionController::TestCase
 		sign_in(user.email, "123456")		
 		post 'create', :system_user => {username: "zhangsan", password: "123456", true_name:'zhangsan', lock: true}, :format => :json
 		retval = JSON.parse(@response.body)
-		assert_equal retval["password"], Encryption.encrypt_password("123456")
+		assert_equal retval["username"], "zhangsan"
 		assert_equal retval["lock"], true
 
 		post 'unlock',:id => retval["_id"], :format => :json
