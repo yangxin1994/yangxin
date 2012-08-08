@@ -1,6 +1,6 @@
 module Mongoid
-	module Validations
-		class NumericalityValidator < ActiveModel::EachValidator
+  module Validations
+    class NumericalityValidator < ActiveModel::EachValidator
       CHECKS = { :greater_than => :>, :greater_than_or_equal_to => :>=,
                  :equal_to => :==, :less_than => :<, :less_than_or_equal_to => :<=,
                  :odd => :odd?, :even => :even?, :other_than => :!= }.freeze
@@ -14,7 +14,7 @@ module Mongoid
           raise ArgumentError, ":#{option} must be a number, a symbol or a proc"
         end
       end
-			def validate_each(record, attr_name, value)
+      def validate_each(record, attr_name, value)
         before_type_cast = "#{attr_name}_before_type_cast"
 
         raw_value = record.send(before_type_cast) if record.respond_to?(before_type_cast.to_sym)
@@ -23,14 +23,14 @@ module Mongoid
         return if options[:allow_nil] && raw_value.nil?
 
         unless value = parse_raw_value_as_a_number(raw_value)
-        	record.error_code << ErrorEnum.const_get("#{record.class.name}#{attr_name.to_s.initial_upcase}NotANumber")
+          record.error_code << ErrorEnum.const_get("#{record.class.name}#{attr_name.to_s.initial_upcase}NotANumber")
           record.errors.add(attr_name, :not_a_number, filtered_options(raw_value))
           return
         end
 
         if options[:only_integer]
           unless value = parse_raw_value_as_an_integer(raw_value)
-          	record.error_code << 122#ErrorEnum.const_get("#{record._type}NotAInteger")
+            record.error_code << ErrorEnum.const_get("#{record._type}NotAInteger")
             record.errors.add(attr_name, :not_an_integer, filtered_options(raw_value))
             return
           end
@@ -41,14 +41,14 @@ module Mongoid
           when :odd, :even
             unless value.to_i.send(CHECKS[option])
               record.errors.add(attr_name, option, filtered_options(value))
-              record.error_code << 122#ErrorEnum.const_get("#{record._type}#{attr_name}Not#{option}")
+              record.error_code << ErrorEnum.const_get("#{record._type}#{attr_name}Not#{option}")
             end
           else
             option_value = option_value.call(record) if option_value.is_a?(Proc)
             option_value = record.send(option_value) if option_value.is_a?(Symbol)
 
             unless value.send(CHECKS[option], option_value)
-            	record.error_code << 122#ErrorEnum.const_get("#{record._type}#{attr_name}Not#{option}")
+              record.error_code << ErrorEnum.const_get("#{record._type}#{attr_name}Not#{option}")
               record.errors.add(attr_name, option, filtered_options(value).merge(:count => option_value))
             end
           end
@@ -78,6 +78,6 @@ module Mongoid
         options.except(*RESERVED_OPTIONS).merge!(:value => value)
       end
     
-		end
-	end
+    end
+  end
 end
