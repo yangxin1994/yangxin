@@ -226,6 +226,8 @@ class User
 		else
 			current_user = User.new(updated_attr)
 		end
+		# set the current user's status as registered but not activated
+		current_user.status = 1
 		current_user.save
 		return current_user
 	end
@@ -251,7 +253,7 @@ class User
 		return true  if user.is_activated
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i    # expired
 		user = User.find_by_email(activate_info["email"])
-		user.status = 1
+		user.status = 2
 		user.activate_time = Time.now.to_i
 		return user.save
 	end

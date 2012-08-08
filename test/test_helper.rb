@@ -1,6 +1,7 @@
 ENV["RAILS_ENV"] = "test"
 require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
+require 'securerandom'
 
 class ActiveSupport::TestCase
   # Add more helper methods to be used by all tests here...
@@ -165,6 +166,35 @@ class ActiveSupport::TestCase
 		sign_out
 		return question_obj["_id"]
 	end
+
+	def create_choice_question_with_choices(email, password, survey_id, page_index, question_id, question_type)
+		sign_in(email, Encryption.decrypt_password(password))
+		old_controller = @controller
+		@controller = QuestionsController.new
+		post :create, :format => :json, :survey_id => survey_id, :page_index => page_index, :question_id => question_id, :question_type => question_type
+		question_obj = JSON.parse(@response.body)
+		question_obj["issue"]["min_choice"] = 2
+		question_obj["issue"]["max_choice"] = 4
+		question_obj["issue"]["choices"] << {"input_id" => SecureRandom.uuid, "content" => "first choice content", "has_input" => false, "is_exclusive" => false}
+		question_obj["issue"]["choices"] << {"input_id" => SecureRandom.uuid, "content" => "second choice content", "has_input" => false, "is_exclusive" => false}
+		question_obj["issue"]["choices"] << {"input_id" => SecureRandom.uuid, "content" => "third choice content", "has_input" => false, "is_exclusive" => false}
+		put :update, :format => :json, :survey_id => survey_id, :id => question_obj["_id"], :question => question_obj
+		@controller = old_controller
+		sign_out
+		return question_obj["_id"]
+	end
+
+	def show_question(email, password, survey_id, question_id)
+		sign_in(email, Encryption.decrypt_password(password))
+		old_controller = @controller
+		@controller = QuestionsController.new
+		get :show, :format => :json, :survey_id => survey_id, :id => question_id
+		question_obj = JSON.parse(@response.body)
+		@controller = old_controller
+		sign_out
+		return question_obj
+	end
+
 
 	def create_survey_page_question(email, password)
 		survey_id = create_survey(email, Encryption.decrypt_password(password))
