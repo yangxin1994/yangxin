@@ -12,8 +12,8 @@ class MatchingQuestion
 
 	def self.create_matching(questions_id_ary)
 		questions_id_ary.each do |q_id|
-			self.new(:question_id => q_id, :matching_ary => questions_id_ary)
-			self.save
+			matching = MatchingQuestion.new(:question_id => q_id, :matching_ary => questions_id_ary)
+			matching.save
 		end
 	end
 

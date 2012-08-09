@@ -14,22 +14,25 @@ require 'securerandom'
 # }
 class ConstSumIssue < Issue
 
-	attr_reader :items, :is_rand, :sum
-	attr_writer :items, :is_rand, :sum
+	attr_reader :items, :other_item, :is_rand, :sum
+	attr_writer :items, :other_item, :is_rand, :sum
 
-	ATTR_NAME_ARY = %w[items is_rand sum]
-	ITEM_ATTR_ARY = %w[input_id content has_input]
+	ATTR_NAME_ARY = %w[items other_item is_rand sum]
+	ITEM_ATTR_ARY = %w[input_id content]
+	OTHER_ITEM_ATTR_ARY = %w[has_other_item input_id content]
 
 	def initialize
 		@items = []
 		@is_rand = false
 		@sum = 100
+		@other_item = {"has_other_item" => false}
 	end
 
 	def update_issue
 		issue_obj["items"].each do |item_obj|
 			item_obj.delete_if { |k, v| !ITEM_ATTR_ARY.include?(k) }
 		end
+		issue_obj["other_item"].delete_if { |k, v|  !OTHER_ITEM_ATTR_ARY.include?(k)}
 		issue_obj["sum"] = issue_obj["sum"].to_i
 		super(ATTR_NAME_ARY, issue_obj)
 	end

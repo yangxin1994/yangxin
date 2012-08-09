@@ -14,19 +14,18 @@ class QualityControlQuestion < BasicQuestion
 	include Mongoid::Document
 	field :quality_control_type, :type => Integer
 
-	def self.create_quality_control_question(quality_control_type, question_type, question_number, creator)
-		return ErrorEnum::UNAUTHORIZED if !creator.is_admin
+	def self.create_quality_control_question(quality_control_type, question_type, question_number)
 		return ErrorEnum::WRONG_QUESTION_TYPE if !self.has_question_type(question_type)
 		if quality_control_type == QualityControlTypeEnum::OBJECTIVE
 			# create a objective quality control question
-			question = Question.new(quality_control_type: QualityControlTypeEnum::OBJECTIVE, question_type: question_type, issue: Issue.create_issue(question_type).serialize)
+			question = QualityControlQuestion.new(quality_control_type: QualityControlTypeEnum::OBJECTIVE, question_type: question_type, issue: Issue.create_issue(question_type).serialize)
 			question.save
 			return [question, QualityControlQuestionAnswer.create_new([question._id], quality_control_type, question_type)]
-		elsif quality_control_type == QualityControlTypeEnum::OBJECTIVE
+		elsif quality_control_type == QualityControlTypeEnum::MATCHING
 			# create a matching quality control question
 			matching_questions = []
-			1.upto(question_number.to_).each do
-				question = Question.new(quality_control_type: QualityControlTypeEnum::MATCHING, question_type: question_type, issue: Issue.create_issue(question_type).serialize)
+			1.upto(question_number.to_i).each do
+				question = QualityControlQuestion.new(quality_control_type: QualityControlTypeEnum::MATCHING, question_type: question_type, issue: Issue.create_issue(question_type).serialize)
 				question.save
 				matching_questions << question
 			end

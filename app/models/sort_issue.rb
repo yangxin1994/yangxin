@@ -14,23 +14,26 @@ require 'securerandom'
 #  "max": maximum number of items needed to be sorted(int)
 # }
 class SortIssue < Issue
-	attr_reader :items, :min, :max, :is_rand
-	attr_writer :items, :min, :max, :is_rand
+	attr_reader :items, :other_item, :min, :max, :is_rand
+	attr_writer :items, :other_item, :min, :max, :is_rand
 
-	ATTR_NAME_ARY = %w[items is_rand min max]
-	ITEM_ATTR_ARY = %w[input_id content has_input]
+	ATTR_NAME_ARY = %w[items other_item is_rand min max]
+	ITEM_ATTR_ARY = %w[input_id content]
+	OTHER_ITEM_ATTR_ARY = %w[has_other_item input_id content]
 
 	def initialize
 		@items = []
 		@is_rand = false
+		@other_item = {"has_other_item" => false}
 	end
 
 	def update_issue(issue_obj)
 		issue_obj["items"].each do |item_obj|
 			item_obj.delete_if { |k, v| !ITEM_ATTR_ARY.include?(k) }
-			item_obj["min"] = item_obj["min"].to_i if !item_obj["min"].nil?
-			item_obj["max"] = item_obj["max"].to_i if !item_obj["max"].nil?
 		end
+		issue_obj["other_item"].delete_if { |k, v|  !OTHER_ITEM_ATTR_ARY.include?(k)}
+		issue_obj["min"] = issue_obj["min"].to_i if !issue_obj["min"].nil?
+		issue_obj["max"] = issue_obj["max"].to_i if !issue_obj["max"].nil?
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 

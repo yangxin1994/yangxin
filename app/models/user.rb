@@ -409,40 +409,6 @@ class User
 		return third_party_user.bind(user)
 	end
 
-#--
-############### operations about quality control questions #################
-#++
-	def create_quality_control_question(quality_control_type, question_type, question_number)
-		return Question.new_quality_control_question(quality_control_type, question_type, question_number, self)
-	end
-
-	def update_quality_control_question(question_id, question_object)
-		question = Question.find_by_id(question_id)
-		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
-		return question.update_quality_control_question(question_object, self)
-	end
-
-	def update_quality_control_answer(answer_object)
-		QualityControlQuestionAnswer.update_answers(answer_object, self)
-	end
-
-	def list_quality_control_questions(quality_control_type)
-		return Question.list_quality_control_questions(quality_control_type, self)
-	end
-
-	def show_quality_control_question(question_id)
-		question = Question.find_by_id(question_id)
-		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
-		return question.show_quality_control_question(self)
-	end
-
-	def delete_quality_control_question(question_id)
-		question = QualityControlQuestion.find_by_id(question_id)
-		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
-		return question.delete_quality_control_question(self)
-	end
-
-
 	#--
 	# **************************************************
 	# Quill AdminController

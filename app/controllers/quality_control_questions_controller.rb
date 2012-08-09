@@ -2,27 +2,34 @@
 require 'error_enum'
 class QualityControlQuestionsController < ApplicationController
 	before_filter :require_admin
+	before_filter :check_quality_question_existence, :only => [:update, :show, :destroy, :update_answer]
+
+	def check_quality_question_existence
+		@question = QualityControlQuestion.find_by_id(params[:id])
+		if @question.nil?
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST and return }
+			end
+		end
+	end
 
 	#*method*: post
 	#
-	#*url*: /surveys/:survey_id/questions
+	#*url*: /quality_control_questions
 	#
-	#*description*: create a new question in the given page after the given question with given question type
+	#*description*: create a new quality control question
 	#
 	#*params*:
-	#* survey_id: id of the survey, in url
-	#* page_index: index of the page, in which the new question is created. Page index starts from 0
-	#* question_id: id of the question, after which the new question is created. if is set as -1, the new question will be created at the last of the page
-	#* question_type: type of the question
+	#* quality_control_type: type of the quality control question, 1 for objective questions, 2 for matching questions
+	#* question_type: type of the question, please check lib/question_type_enum.rb
+	#* question_number: number of questions, only for matching question
 	#
 	#*retval*:
-	#* a Question object: when question is successfully created
-	#* ErrorEnum ::OVERFLOW: when the page index is greater than the page number
-	#* ErrorEnum ::SURVEY_NOT_EXIST: when the survey does not exist
-	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question, after which the new one is created, does not exist
-	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
+	#* an array, the formal elements of which are questions created, and the last element is the quality control answer object: when successfully created
+	#* ErrorEnum::WRONG_QUALITY_CONTROL_TYPE
+	#* ErrorEnum::WRONG_QUESTION_TYPE
 	def create
-		quality_control_question = QualityControlQuestion.create_quality_control_question(params[:quality_control_type].to_i, params[:question_type].to_i, params[:question_number].to_i, @current_user)
+		quality_control_question = QualityControlQuestion.create_quality_control_question(params[:quality_control_type].to_i, params[:question_type].to_i, params[:question_number].to_i)
 		respond_to do |format|
 			format.json	{ render :json => quality_control_question and return }
 		end
@@ -30,37 +37,28 @@ class QualityControlQuestionsController < ApplicationController
 
 	#*method*: put
 	#
-	#*url*: /surveys/:survey_id/questions/:question_id
+	#*url*: /quality_control_questions/:quality_control_question_id
 	#
-	#*description*: update a specific question
+	#*description*: update a quality control question
 	#
 	#*params*:
-	#* survey_id: id of the survey
-	#* question_id: id of the question to be updated
+	#* quality_control_question_id: id of the question to be updated
 	#* question: the question object to be updated
 	#
 	#*retval*:
 	#* question object: when question is successfully updated
-	#* ErrorEnum ::SURVEY_NOT_EXIST: when the survey does not exist
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
-	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
+	#* ErrorEnum ::UNAUTHORIZED: when the operator is not admin
 	#* ErrorEnum ::WRONG_DATA_TYPE: when the data type specified in a blank question is wrong
 	def update
-		question = QualityControlQuestion.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST and return }
-			end
-		end
-
-		question = question.update_question(params[:question], @current_user)
+		question = @question.update_question(params[:question], @current_user)
 		respond_to do |format|
 			format.json	{ render :json => question and return }
 		end
 	end
 
 	def update_answer
-		retval = QualityControlQuestionAnswer.update_answers(params[:id], params[:quality_control_type], params[:answer], @current_user)
+		retval = QualityControlQuestionAnswer.update_answers(params[:id], params[:quality_control_type], params[:answer])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -82,14 +80,7 @@ class QualityControlQuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def show
-		question = QualityControlQuestion.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST and return }
-			end
-		end
-
-		question = question.show_quality_control_question(@current_user)
+		question = @question.show_quality_control_question(@current_user)
 		respond_to do |format|
 			format.json	{ render :json => question and return }
 		end
@@ -118,14 +109,7 @@ class QualityControlQuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def destroy
-		question = QualityControlQuestion.find_by_id(params[:id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST and return }
-			end
-		end
-
-		retval = question.destroy_quality_control_question(@current_user)
+		retval = @question.destroy_quality_control_question(@current_user)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end

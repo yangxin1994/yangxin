@@ -5,10 +5,13 @@ require 'securerandom'
 #	 "input_id" : id of the input
 #	}
 class FileIssue < Issue
+	attr_reader :max_number
+	attr_writer :max_number
 
-	ATTR_NAME_ARY = []
+	ATTR_NAME_ARY = %w[max_number]
 
 	def initialize
+		@max_number = 1
 	end
 
 	def update_issue(issue_obj)
