@@ -28,12 +28,13 @@ class ConstSumIssue < Issue
 		@other_item = {"has_other_item" => false}
 	end
 
-	def update_issue
+	def update_issue(issue_obj)
 		issue_obj["items"].each do |item_obj|
 			item_obj.delete_if { |k, v| !ITEM_ATTR_ARY.include?(k) }
 		end
 		issue_obj["other_item"].delete_if { |k, v|  !OTHER_ITEM_ATTR_ARY.include?(k)}
 		issue_obj["sum"] = issue_obj["sum"].to_i
+		issue_obj["other_item"]["has_other_item"] = issue_obj["other_item"]["has_other_item"].to_s == "true"
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 

@@ -7,17 +7,21 @@ require 'securerandom'
 #	}
 class TimeBlankIssue < Issue
 
-	attr_reader :format
-	attr_writer :format
+	attr_reader :format, :min_time, :max_time
+	attr_writer :format, :min_time, :max_time
 
-	ATTR_NAME_ARY = %w[format]
+	ATTR_NAME_ARY = %w[format min_time max_time]
 
 	def initialize
 		@format = 127
+		@min_time = Array.new(7) { |i| -1 }
+		@max_time = Array.new(7) { |i| -1 }
 	end
 
 	def update_issue(issue_obj)
 		issue_obj["format"] = issue_obj["format"].to_i
+		issue_obj["min_time"].map! { |e| e.to_i }
+		issue_obj["max_time"].map! { |e| e.to_i }
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 

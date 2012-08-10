@@ -16,16 +16,17 @@ require 'securerandom'
 #  "desc_ary": array of string to describe the item(array)
 # }
 class RankIssue < Issue
-	attr_reader :items, :other_item, :is_rand
-	attr_writer :items, :other_item, :is_rand
+	attr_reader :items, :other_item, :is_rand, :show_style
+	attr_writer :items, :other_item, :is_rand, :show_style
 
 	ATTR_NAME_ARY = %w[items other_item is_rand]
-	ITEM_ATTR_ARY = %w[input_id content icon icon_num has_unknow desc_ary]
+	ITEM_ATTR_ARY = %w[input_id content icon icon_num has_unknow desc_ary show_style]
 	OTHER_ITEM_ATTR_ARY = %w[has_other_item input_id content icon icon_num desc_ary]
 
 	def initialize
 		@items = []
 		@is_rand = false
+		@show_style = 0
 		@other_item = {"has_other_item" => false}
 	end
 
@@ -35,6 +36,8 @@ class RankIssue < Issue
 			item_obj["icon_num"] = item_obj["icon_num"].to_i if !item_obj["icon_num"].nil?
 		end
 		issue_obj["other_item"].delete_if { |k, v|  !OTHER_ITEM_ATTR_ARY.include?(k)}
+		issue_obj["other_item"]["has_other_item"] = issue_obj["other_item"]["has_other_item"].to_s == "true"
+		issue_obj["show_style"] = issue_obj["show_style"].to_i
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 

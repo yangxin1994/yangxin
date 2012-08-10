@@ -43,24 +43,26 @@ require 'securerandom'
 # }
 class BlankIssue < Issue
 
-	attr_reader :is_rand, :inputs
-	attr_writer :is_rand, :inputs
+	attr_reader :is_rand, :inputs, :show_style
+	attr_writer :is_rand, :inputs, :show_style
 
-	ATTR_NAME_ARY = %w[inputs is_rand]
+	ATTR_NAME_ARY = %w[inputs is_rand show_style]
 	INPUT_ATTR_ARY = %w[input_id content data_type properties]
 
-	DATA_TYPE_ARY = %w[Text Number Phone Email Address Time]
+	DATA_TYPE_ARY = %w[Text Number Phone Email Url Address Time]
 
 	TEXT_PROP_ARY = %w[min_length max_length has_multiple_line size]
-	NUMBER_PROP_ARY = %w[precision min_value max_value unit]
+	NUMBER_PROP_ARY = %w[precision min_value max_value unit unit_location]
 	PHONE_PROP_ARY = %w[phone_type]
 	EMAIL_PROP_ARY = %w[]
+	URL_PROP_ARY = %w[]
 	ADDRESS_PROP_ARY = %w[has_postcode format]
-	TIME_PROP_ARY = %w[format]
+	TIME_PROP_ARY = %w[format min_time max_time]
 
 	def initialize
 		@inputs = []
 		@is_rand = false
+		@show_style = 0
 	end
 
 	#*description*: serialize the current instance into a question object
@@ -97,18 +99,25 @@ class BlankIssue < Issue
 				input_obj["properties"]["min_length"] = input_obj["properties"]["min_length"].to_i if !input_obj["properties"]["min_length"].nil?
 				input_obj["properties"]["max_length"] = input_obj["properties"]["max_length"].to_i if !input_obj["properties"]["max_length"].nil?
 				input_obj["properties"]["size"] = input_obj["properties"]["size"].to_i if !input_obj["properties"]["size"].nil?
+				input_obj["properties"]["has_multiple_line"] = input_obj["properties"]["has_multiple_line"].to_s == "true" if !input_obj["properties"]["has_multiple_line"].nil?
 			when Number
 				input_obj["properties"]["min_value"] = input_obj["properties"]["min_value"].to_i if !input_obj["properties"]["min_value"].nil?
 				input_obj["properties"]["max_value"] = input_obj["properties"]["max_value"].to_i if !input_obj["properties"]["max_value"].nil?
 				input_obj["properties"]["precision"] = input_obj["properties"]["precision"].to_i if !input_obj["properties"]["precision"].nil?
+				input_obj["properties"]["unit_location"] = input_obj["properties"]["unit_location"].to_i if !input_obj["properties"]["unit_location"].nil?
 			when Phone
 				input_obj["properties"]["phone_type"] = input_obj["properties"]["phone_type"].to_i if !input_obj["properties"]["phone_type"].nil?
 			when Address
 				input_obj["properties"]["format"] = input_obj["properties"]["format"].to_i if !input_obj["properties"]["format"].nil?
+				input_obj["properties"]["has_postcode"] = input_obj["properties"]["has_postcode"].to_s == "true" if !input_obj["properties"]["has_postcode"].nil?
 			when Time
 				input_obj["properties"]["format"] = input_obj["properties"]["format"].to_i if !input_obj["properties"]["format"].nil?
+				input_obj["properties"]["min_time"].map! { |e| e.to_i } if !input_obj["properties"]["min_time"].nil?
+				input_obj["properties"]["max_time"].map! { |e| e.to_i } if !input_obj["properties"]["max_time"].nil?
 			end
 		end
+		issue_obj["show_style"] = issue_obj["show_style"].to_i
+		issue_obj["is_rand"] = issue_obj["is_rand"].to_s == "true"
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 end

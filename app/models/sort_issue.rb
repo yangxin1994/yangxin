@@ -25,6 +25,8 @@ class SortIssue < Issue
 		@items = []
 		@is_rand = false
 		@other_item = {"has_other_item" => false}
+		@min = -1
+		@min = -1
 	end
 
 	def update_issue(issue_obj)
@@ -34,6 +36,7 @@ class SortIssue < Issue
 		issue_obj["other_item"].delete_if { |k, v|  !OTHER_ITEM_ATTR_ARY.include?(k)}
 		issue_obj["min"] = issue_obj["min"].to_i if !issue_obj["min"].nil?
 		issue_obj["max"] = issue_obj["max"].to_i if !issue_obj["max"].nil?
+		issue_obj["other_item"]["has_other_item"] = issue_obj["other_item"]["has_other_item"].to_s == "true"
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 

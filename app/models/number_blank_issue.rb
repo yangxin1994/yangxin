@@ -11,16 +11,17 @@ require 'securerandom'
 #	}
 class NumberBlankIssue < Issue
 
-	attr_reader :precision, :min_value, :max_value, :unit
-	attr_writer :precision, :min_value, :max_value, :unit
+	attr_reader :precision, :min_value, :max_value, :unit, :unit_location
+	attr_writer :precision, :min_value, :max_value, :unit, :unit_location
 
-	ATTR_NAME_ARY = %w[precision min_value max_value unit]
+	ATTR_NAME_ARY = %w[precision min_value max_value unit unit_location]
 
 	def initialize
 		@precision = 0
 		@min_value = 0
 		@max_value = 100
 		@unit = ""
+		@unit_location = 0
 	end
 
 
@@ -28,6 +29,7 @@ class NumberBlankIssue < Issue
 		issue_obj["precision"] = issue_obj["precision"].to_i
 		issue_obj["min_value"] = issue_obj["min_value"].to_i
 		issue_obj["max_value"] = issue_obj["max_value"].to_i
+		issue_obj["unit_location"] = issue_obj["unit_location"].to_i
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 
