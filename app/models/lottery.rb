@@ -19,7 +19,7 @@ class Lottery
   #has_many :survey
   has_many :awards
   has_many :lottery_codes
-  belongs_ro :creator, :class_name => 'User'
+  belongs_to :creator, :class_name => 'User'
   #has_many :lottery_awards, :class_name => 'LotteryAward'
 
   def delete

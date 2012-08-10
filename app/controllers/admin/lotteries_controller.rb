@@ -12,7 +12,7 @@ class Admin::LotteriesController < Admin::ApplicationController
 
 	def create
 		respond_to do |format|
-			@lottery = Present.create(params[:lottery])
+			@lottery = Lottery.create(params[:lottery])
 			# TO DO add admin_id
 			if @lottery.save
 				Material.create(:material => params[:material], :materials => @lottery)

@@ -3,7 +3,7 @@
 class LotteryController < ApplicationController
 
 	def index
-		@lotteries = Lottery.page(page)
+		@lotteries = Lottery.activity.page(page)
 		@lotteries = ErrorEnum::LotteryNotFound if @lotteries.empty?
 		respond_to do |format|
 			format.html

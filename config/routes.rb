@@ -168,7 +168,12 @@ OopsData::Application.routes.draw do
 				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
 			end
 		end
+		resources :lotteries do
 
+		end
+		resources :lottery_codes do
+			
+		end
 	end
 
 	# The priority is based upon order of creation:

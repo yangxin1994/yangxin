@@ -38,18 +38,18 @@ class User
 	field :postcode, :type => String
 	field :phone, :type => String
 
-	#field :message_ids, :type => Array, :default => []
+
 	has_and_belongs_to_many :messages, inverse_of: nil
 	has_many :sended_messages, :class_name => "Message", :inverse_of => :sender
 
 	#################################
 	# QuillMe
 	field :point, :type => Integer
-	#has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
-	#has_many :orders, :class_name => "Order", :foreign_key => "user_id"
-	#has_many :lottery_codes
+	has_many :point_logs, :class_name => "PointLog", :foreign_key => "user_id"	
+	has_many :orders, :class_name => "Order", :foreign_key => "user_id"
+	has_many :lottery_codes
 	# QuillAdmin
-	#has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
+	has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
 	has_many :operate_point_logs, :class_name => "PointLog", :foreign_key => "operated_admin_id"	
 
 	#before_save :set_updated_at
@@ -386,7 +386,13 @@ class User
 		Message.unread(created_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}
 	end
 
-
+#--
+############### operations about point #################
+#++
+	def operate_point(operated_point)
+		operate_point_logs.create(:operated_point => operated_point,
+															:cause => 0)
+	end
 #--
 ############### operations about charge #################
 #++

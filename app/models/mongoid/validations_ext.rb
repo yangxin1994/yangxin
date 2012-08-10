@@ -12,6 +12,10 @@ module Mongoid
 		def error_code=(e=[])
 			@error_code = e
 		end
+		def as_retval
+			 return error_code if invalid?
+			 self
+		end
 		class ::String
 			def initial_upcase
 				self[0] = self[0].upcase

@@ -1,30 +1,13 @@
 # encoding: utf-8
-require "error_enum"
-# the message object has the following structure
-# {
-#    message_id:   id of the message  
-#    title:        title of the message
-#    content:      content of the message
-#    sender_id:    id of the sender
-#    type:         whether the message is sent to all users 
-#  } 
-class Message
-  include Mongoid::Document
-  include Mongoid::Timestamps
-  extend Mongoid::FindHelper
-
-  field :title, :type => String
-  field :content, :type => String
-  # 0 the message is sent to all users
-  # 1 the message is sent to special users
-  field :type, :type => Integer, default: 0
-
-  belongs_to :sender, :class_name => "User", :inverse_of => :sended_messages
-  
-  validates :title, :presence => true
-  validates :content, :presence => true
-
-  scope :unread, ->(t){where(:updated_at.gt => t)}
-  scope :readed, ->(t){where(:updated_at.lt => t)}
-  
+require 'error_enum'
+class MessagesController < ApplicationController
+ 
+  def index
+    @messages = current_user.show_messages
+    @messages = ErrorEnum::MessgaeNotFound if @messages.empty? 
+    respond_to do |format|
+      format.json { render json: @messages }
+    end
+  end
+ 
 end
