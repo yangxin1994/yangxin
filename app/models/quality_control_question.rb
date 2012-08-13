@@ -13,6 +13,8 @@ require 'quality_control_type_enum'
 class QualityControlQuestion < BasicQuestion
 	include Mongoid::Document
 	field :quality_control_type, :type => Integer
+	scope :objective_questions, lambda { where(:quality_control_type => 1) }
+	scope :matching_questions, lambda { where(:quality_control_type => 2) }
 
 	def self.create_quality_control_question(quality_control_type, question_type, question_number)
 		return ErrorEnum::WRONG_QUESTION_TYPE if !self.has_question_type(question_type)
@@ -20,7 +22,7 @@ class QualityControlQuestion < BasicQuestion
 			# create a objective quality control question
 			question = QualityControlQuestion.new(quality_control_type: QualityControlTypeEnum::OBJECTIVE, question_type: question_type, issue: Issue.create_issue(question_type).serialize)
 			question.save
-			return [question, QualityControlQuestionAnswer.create_new([question._id], quality_control_type, question_type)]
+			return [question, QualityControlQuestionAnswer.create_new([question._id.to_s], quality_control_type, question_type)]
 		elsif quality_control_type == QualityControlTypeEnum::MATCHING
 			# create a matching quality control question
 			matching_questions = []
@@ -60,11 +62,11 @@ class QualityControlQuestion < BasicQuestion
 			matching_question_id_groups.each do |group|
 				questions_group = []
 				group.each do |q_id|
-					questions_group << QualityControlQuestion.find_by_question_id(q_id)
+					questions_group << QualityControlQuestion.find_by_id(q_id)
 				end
-				questions_group << QualityControlQuestionAnswer.find_by_question_id(group)
+				#questions_group << QualityControlQuestionAnswer.find_by_question_id(group)
+				matching_questions << questions_group
 			end
-			matching_questions << questions_group
 		end
 		return {"objective_questions" => objective_questions, "matching_questions" => matching_questions}
 	end
@@ -72,16 +74,17 @@ class QualityControlQuestion < BasicQuestion
 	def show_quality_control_question(operator)
 		return ErrorEnum::UNAUTHORIZED if !operator.is_admin
 		if self.quality_control_type == QualityControlTypeEnum::OBJECTIVE
-			quality_ccontrol_answer = QualityControlQuestionAnswer.find_by_question_id([self._id])
+			quality_control_answer = QualityControlQuestionAnswer.find_by_question_id(self._id.to_s)
 			return [self, quality_control_answer]
 		else
+			quality_control_answer = QualityControlQuestionAnswer.find_by_question_id(self._id.to_s)
 			matching_question_ids = MatchingQuestion.get_matching_question_ids(self._id)
-			quality_control_answer = QualityControlQuestionAnswer.find_by_question_id(matching_question_ids)
 			questions = []
 			matching_question_ids.each do |q_id|
 				questions << QualityControlQuestion.find_by_id(q_id)
 			end
-			return [question_obj, quality_control_answer]
+			questions << quality_control_answer
+			return questions
 		end
 	end
 
@@ -96,6 +99,8 @@ class QualityControlQuestion < BasicQuestion
 			matching_question_ids.each do |q_id|
 				question = QualityControlQuestion.find_by_id(q_id)
 				question.destroy
+				matching_question = MatchingQuestion.find_by_question_id(q_id)
+				matching_question.destroy
 			end
 			return true
 		end

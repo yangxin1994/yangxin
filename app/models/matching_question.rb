@@ -25,9 +25,10 @@ class MatchingQuestion
 
 	def self.matching_question_id_groups
 		matching_question_id_groups = []
-		MatchingQuestion.each do |ele|
+		MatchingQuestion.all.each do |ele|
 			matching_question_id_groups << ele.matching_ary if !matching_question_id_groups.include?(ele.matching_ary)
 		end
+		return matching_question_id_groups
 	end
 
 end
