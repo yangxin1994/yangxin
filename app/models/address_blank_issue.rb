@@ -20,6 +20,7 @@ class AddressBlankIssue < Issue
 
 	def update_issue(issue_obj)
 		issue_obj["format"] = issue_obj["format"].to_i
+		issue_obj["has_postcode"] = issue_obj["has_postcode"].to_s == "true"
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 

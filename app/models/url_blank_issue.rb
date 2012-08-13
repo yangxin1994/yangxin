@@ -1,17 +1,15 @@
 require 'error_enum'
 require 'securerandom'
-#Besides the fields that all types questions have, file questions also have:
+#Besides the fields that all types questions have, email blank questions also have:
 # {
-#	 "input_id" : id of the input
+#	 "input_id" : id of the email input
 #	}
-class FileIssue < Issue
-	attr_reader :max_number
-	attr_writer :max_number
+class UrlBlankIssue < Issue
 
-	ATTR_NAME_ARY = %w[max_number]
+	ATTR_NAME_ARY = %w[]
 
 	def initialize
-		@max_number = 1
+		
 	end
 
 	def update_issue(issue_obj)

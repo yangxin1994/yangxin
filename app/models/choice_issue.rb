@@ -13,16 +13,16 @@ require 'securerandom'
 # {
 #  "choice_id": the id of this choice input
 #  "content": the content of the choice(string),
-#  "has_input": whether there is a input field(bool),
 #  "is_exclusive": whether this choice item is exclusive(bool)
 # }
 class ChoiceIssue < Issue
 
-	attr_reader :choices, :choice_num_per_row, :min_choice, :max_choice, :is_list_style, :is_rand
-	attr_writer :choices, :choice_num_per_row, :min_choice, :max_choice, :is_list_style, :is_rand
+	attr_reader :choices, :other_item, :choice_num_per_row, :min_choice, :max_choice, :is_list_style, :is_rand
+	attr_writer :choices, :other_item, :choice_num_per_row, :min_choice, :max_choice, :is_list_style, :is_rand
 
-	ATTR_NAME_ARY = %w[choices choice_num_per_row min_choice max_choice is_list_style is_rand]
-	CHOICE_ATTR_ARY = %w[input_id content has_input is_exclusive]
+	ATTR_NAME_ARY = %w[choices other_item choice_num_per_row min_choice max_choice is_list_style is_rand]
+	CHOICE_ATTR_ARY = %w[input_id content is_exclusive]
+	OTHER_ITEM_ATTR_ARY = %w[has_other_item input_id content is_exclusive]
 
 	def initialize
 		@choice_num_per_row = -1
@@ -31,15 +31,21 @@ class ChoiceIssue < Issue
 		@is_list_style = true
 		@is_rand = false	
 		@choices = []
+		@other_item = {"has_other_item" => false}
 	end
 
 	def update_issue(issue_obj)
 		issue_obj["choices"].each do |choice_obj|
 			choice_obj.delete_if { |k, v| !CHOICE_ATTR_ARY.include?(k) }
+			choice_obj["is_exclusive"] = choice_obj["is_exclusive"].to_s == "true"
 		end
+		issue_obj["other_item"].delete_if { |k, v|  !OTHER_ITEM_ATTR_ARY.include?(k)}
 		issue_obj["choice_num_per_row"] = issue_obj["choice_num_per_row"].to_i
 		issue_obj["min_choice"] = issue_obj["min_choice"].to_i
 		issue_obj["max_choice"] = issue_obj["max_choice"].to_i
+		issue_obj["is_list_style"] = issue_obj["is_list_style"].to_s == "true"
+		issue_obj["is_rand"] = issue_obj["is_rand"].to_s == "true"
+		issue_obj["other_item"]["has_other_item"] = issue_obj["other_item"]["has_other_item"].to_s == "true"
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 

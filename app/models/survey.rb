@@ -881,6 +881,11 @@ class Survey
 		return Marshal.load(Marshal.dump(self.logic_control))
 	end
 
+	def show_logic_control_rule(logic_control_rule_index)
+		logic_control = LogicControl.new(self.logic_control)
+		return logic_control.show_rule(logic_control_rule_index)
+	end
+
 	def add_logic_control_rule(logic_control_rule)
 		logic_control = LogicControl.new(self.logic_control)
 		return logic_control.add_rule(logic_control_rule, self)
@@ -893,7 +898,7 @@ class Survey
 
 	def delete_logic_control_rule(logic_control_rule_index)
 		logic_control = LogicControl.new(self.logic_control)
-		return logic_control.delete_rule(logic_control_rule_index)
+		return logic_control.delete_rule(logic_control_rule_index, self)
 	end
 
 	class Quota
@@ -984,10 +989,16 @@ class Survey
 			@rules = logic_control
 		end
 
+		def show_rule(rule_index)
+			return ErrorEnum::LOGIC_RULE_NOT_EXIST if @rules.length <= rule_index
+			return Marshal.load(Marshal.dump(@rules[rule_index]))
+		end
+
 		def add_rule(rule, survey)
+			rule["rule_type"] = rule["rule_type"].to_i
 			return ErrorEnum::WRONG_LOGIC_CONTROL_TYPE if !RULE_TYPE.include?(rule["rule_type"])
 			@rules << rule
-			survey.logic_control = self.rules
+			survey.logic_control = @rules
 			survey.save
 			return survey.logic_control
 		end
@@ -995,15 +1006,16 @@ class Survey
 		def delete_rule(rule_index, survey)
 			return ErrorEnum::LOGIC_CONTROL_RULE_NOT_EXIST if @rules.length <= rule_index
 			@rules.delete_at(rule_index)
-			survey.logic_control = self.rules
-			survey.save
-			return survey.logic_control	
+			survey.logic_control = @rules
+			return survey.save
 		end
 
 		def update_rule(rule_index, rule, survey)
 			return ErrorEnum::LOGIC_CONTROL_RULE_NOT_EXIST if @rules.length <= rule_index
+			rule["rule_type"] = rule["rule_type"].to_i
+			return ErrorEnum::WRONG_LOGIC_CONTROL_TYPE if !RULE_TYPE.include?(rule["rule_type"])
 			@rules[rule_index] = rule
-			survey.logic_control = self.rules
+			survey.logic_control = @rules
 			survey.save
 			return survey.logic_control
 		end

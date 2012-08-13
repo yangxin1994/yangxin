@@ -151,8 +151,7 @@ class FeedbackTest < ActiveSupport::TestCase
 		clear(Feedback)
 	end
 
-=begin
-	test "04 reply method" do 
+	test "08 reply method" do 
 		clear(User, Feedback, Message)
 		
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
@@ -165,15 +164,20 @@ class FeedbackTest < ActiveSupport::TestCase
 		user2.role = 1
 		user2.save
 		
-		f = Feedback.create(feedback_type: 1, title: "title1", content: "content1")
-		f.title_user = user 
-		f.save
+		assert_equal Feedback.all.count, 0
+		f = Feedback.create_feedback({feedback_type: 1, title: "title1", content: "content1"}, user)
+		assert_equal f.class, Feedback
+		assert_equal Feedback.all.count, 1
 		
+		assert_equal Message.all.count, 0
 		assert_equal Feedback.reply(f.id.to_s, user, "illegel user"), ErrorEnum::REQUIRE_ADMIN
-		assert_equal Feedback.reply(f.id.to_s, user2, "legel user"), true
+		message = Feedback.reply(f.id.to_s, user2, "legel user")
+		assert_equal message.class, Message
+
+		assert_equal Message.all.count, 1
 		
 		clear(User, Feedback, Message)
 	end
-=end
+
 end
 
