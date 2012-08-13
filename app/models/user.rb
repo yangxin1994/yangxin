@@ -226,6 +226,8 @@ class User
 		else
 			current_user = User.new(updated_attr)
 		end
+		# set the current user's status as registered but not activated
+		current_user.status = 1
 		current_user.save
 		return current_user
 	end
@@ -251,7 +253,7 @@ class User
 		return true  if user.is_activated
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i    # expired
 		user = User.find_by_email(activate_info["email"])
-		user.status = 1
+		user.status = 2
 		user.activate_time = Time.now.to_i
 		return user.save
 	end
@@ -407,40 +409,6 @@ class User
 		return third_party_user.bind(user)
 	end
 
-#--
-############### operations about quality control questions #################
-#++
-	def create_quality_control_question(quality_control_type, question_type, question_number)
-		return Question.new_quality_control_question(quality_control_type, question_type, question_number, self)
-	end
-
-	def update_quality_control_question(question_id, question_object)
-		question = Question.find_by_id(question_id)
-		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
-		return question.update_quality_control_question(question_object, self)
-	end
-
-	def update_quality_control_answer(answer_object)
-		QualityControlQuestionAnswer.update_answers(answer_object, self)
-	end
-
-	def list_quality_control_questions(quality_control_type)
-		return Question.list_quality_control_questions(quality_control_type, self)
-	end
-
-	def show_quality_control_question(question_id)
-		question = Question.find_by_id(question_id)
-		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
-		return question.show_quality_control_question(self)
-	end
-
-	def delete_quality_control_question(question_id)
-		question = QualityControlQuestion.find_by_id(question_id)
-		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
-		return question.delete_quality_control_question(self)
-	end
-
-
 	#--
 	# **************************************************
 	# Quill AdminController
@@ -541,11 +509,13 @@ class User
 		#
 		# CODE:
 		#
-		# mail = OopsMail::OMail.new("Change password to new system password.", "Your new password:<b>#{sys_pwd}</b>")
-		# sender = OopsMail::EmailSender.new("customer", "customer@netranking.cn", "netrankingcust")
-		# receiver = OopsMail::EmailReceiver.new(user.username || user.email.split("@")[0], user.email)
-		# email = OopsMail::Email.new(sender, receiver, mail)
-		# OopsMail.send_email(email)
+		# if user.email.to_s.strip !="" then
+		# 	mail = OopsMail::OMail.new("Change password to new system password.", "Your new password:<b>#{sys_pwd}</b>")
+		# 	sender = OopsMail::EmailSender.new("customer", "customer@netranking.cn", "netrankingcust")
+		# 	receiver = OopsMail::EmailReceiver.new(user.username || user.email.split("@")[0], user.email)
+		# 	email = OopsMail::Email.new(sender, receiver, mail)
+		# 	OopsMail.send_email(email)
+		# end
 		#
 
 		return user 

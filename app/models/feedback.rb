@@ -238,7 +238,7 @@ class Feedback
 			return feedbacks
 		end
 
-=begin
+
 		#*description*: reply feedback
 		#
 		#*params*:
@@ -247,7 +247,7 @@ class Feedback
 		#* message_content: message content
 		#
 		#*retval*:
-		#* false or true
+		# it will return Message.create_new 's Return value;
 		def reply(feedback_id, answer_user, message_content)
 
 			# answer_user must be admin
@@ -262,22 +262,31 @@ class Feedback
 
 			title = "反馈意见回复:"+ feedback.title.to_s
 			# 1 in the message type
-			message = Message.create_new(title,
+			retval = answer_user.create_message(
+				title,
 				message_content,
-				answer_user.id.to_s,
-				1,
 				[feedback.question_user.id.to_s])
+					
+			return retval
 
-			stat = message.save
-
-			if stat then
-				feedback.is_answer = true
-				feedback.save
-			end
-
-			return stat
-		end
-=end		
+			# __return retval__ same as follows:
+			#
+			#case retval
+			# when ErrorEnum::UNAUTHROZIED
+			# 	return ErrorEnum::UNAUTHROZIED
+			# when ErrorEnum::RECEIVER_CAN_NOT_BLANK
+			# 	return ErrorEnum::RECEIVER_CAN_NOT_BLANK
+			# when ErrorEnum::TITLE_CAN_NOT_BLANK
+			# 	return ErrorEnum::TITLE_CAN_NOT_BLANK
+			# when ErrorEnum::CONTENT_CAN_NOT_BLANK
+			# 	return ErrorEnum::CONTENT_CAN_NOT_BLANK
+			# when Message then
+			# 	return retval
+			# end
+			# 
+			# But, anymore. The Error which is from Message.create_new() should be no return.
+			# Because, the params had been verified.
+		end		
 	end 
 	
 end

@@ -103,13 +103,12 @@ class Admin::FeedbacksController < Admin::ApplicationController
 	def reply
 		params[:id] = params[:id] || ""
 		params[:message_content] = params[:message_content] || ""
-
-		@feedback = Feedback.where(params[:id]).first
+		@feedback = Feedback.where(_id: params[:id]).first
 		retval = Feedback.reply(params[:id], @current_user, params[:message_content])
 
 		respond_to do |format|
 			format.html { redirect_to @feedback} if @feedback
-			format.json { head :json => retval }
+			format.json { render :json => retval }
 		end
 	end
 	

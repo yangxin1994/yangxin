@@ -473,10 +473,7 @@ class Answer
 			end
 			standard_matching_items = standard_answer.answer_content["matching_items"]
 			standard_matching_items.each do |standard_matching_item|
-				volunteer_answer.each do |one_input_answer|
-					next if !standard_matching_item.include?(one_input_answer)
-				end
-				return true
+				return true if (volunteer_answer - standard_matching_item).empty?
 			end
 			return false
 		end
