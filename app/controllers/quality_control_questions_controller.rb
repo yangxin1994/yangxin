@@ -58,7 +58,7 @@ class QualityControlQuestionsController < ApplicationController
 	end
 
 	def update_answer
-		retval = QualityControlQuestionAnswer.update_answers(params[:id], params[:quality_control_type], params[:answer])
+		retval = QualityControlQuestionAnswer.update_answer(params[:id], params[:quality_control_type].to_i, params[:answer])
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
@@ -87,7 +87,7 @@ class QualityControlQuestionsController < ApplicationController
 	end
 
 	def index
-		questions = QualityControlQuestion.list_quality_control_question(params[:quality_control_type], @current_user)
+		questions = QualityControlQuestion.list_quality_control_question(params[:quality_control_type].to_i, @current_user)
 		respond_to do |format|
 			format.json	{ render :json => questions and return }
 		end
@@ -109,7 +109,7 @@ class QualityControlQuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def destroy
-		retval = @question.destroy_quality_control_question(@current_user)
+		retval = @question.delete_quality_control_question(@current_user)
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end

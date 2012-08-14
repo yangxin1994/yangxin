@@ -38,8 +38,10 @@ class QualityControlQuestionAnswer
 	end
 
 	def self.find_by_question_id(question_id)
-		answer = QualityControlQuestionAnswer.where(:question_id => question_id).first
-		return answer
+		QualityControlQuestionAnswer.all.each do |answer|
+			return answer if answer.question_id.include?(question_id)
+		end
+		return nil
 	end
 
 	def self.destroy_by_question_id(question_id)
@@ -49,13 +51,12 @@ class QualityControlQuestionAnswer
 
 	def self.update_answer(question_id, quality_control_type, answer_object)
 		if quality_control_type == QualityControlTypeEnum::OBJECTIVE
-			answer = QualityControlQuestionAnswer.find_by_question_id([question_id])
+			answer = QualityControlQuestionAnswer.find_by_question_id(question_id)
 			return ErrorEnum::QUALITY_CONTROL_QUESTION_ANSWER_NOT_EXIST if answer.nil?
 			answer.answer_content = answer_object
 			return answer.save
 		elsif quality_control_type == QualityControlTypeEnum::MATCHING
-			question_id_ary = MatchingQuestion.get_matching_question_ids(question_id)
-			answer = QualityControlQuestionAnswer.find_by_question_id(question_id_ary)
+			answer = QualityControlQuestionAnswer.find_by_question_id(question_id)
 			return ErrorEnum::QUALITY_CONTROL_QUESTION_ANSWER_NOT_EXIST if answer.nil?
 			answer.answer_content = answer_object
 			return answer.save
