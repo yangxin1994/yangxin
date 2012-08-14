@@ -157,6 +157,11 @@ OopsData::Application.routes.draw do
 	resources :points, :only => 'index'
 
 	namespace :admin do
+		resources :points do
+			new do
+				post :operate
+			end
+		end
 		resources :presents do
 			collection do
 				get 'expired'
@@ -168,7 +173,12 @@ OopsData::Application.routes.draw do
 				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
 			end
 		end
+		resources :lotteries do
 
+		end
+		resources :lottery_codes do
+			
+		end
 	end
 
 	# The priority is based upon order of creation:

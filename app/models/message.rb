@@ -9,6 +9,7 @@ require "error_enum"
 #    type:         whether the message is sent to all users 
 #  } 
 class Message
+
   include Mongoid::Document
   include Mongoid::Timestamps
   extend Mongoid::FindHelper
@@ -26,5 +27,5 @@ class Message
 
   scope :unread, ->(t){where(:updated_at.gt => t)}
   scope :readed, ->(t){where(:updated_at.lt => t)}
-  
+
 end

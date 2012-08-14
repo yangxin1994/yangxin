@@ -19,8 +19,6 @@ class ActiveSupport::TestCase
 		user.destroy if user.class == User
 	end
 
-
-
 	def activate_user(email)
 		activate_info = {"email" => email, "time" => Time.now.to_i}
 		User.activate(activate_info)
@@ -259,3 +257,4 @@ class ActiveSupport::TestCase
 		return [material_id_1, material_id_2, material_id_3, material_id_4, material_id_5, material_id_6]
 	end
 end
+

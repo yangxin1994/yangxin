@@ -6,7 +6,7 @@ FactoryGirl.define do
 		point 1000
 		factory :admin_foo do
 			email "admin_foo@gmail.com"
-			username "foo"
+			username "admin_foo"
 			role 1
 		end
 		factory :user_bar do

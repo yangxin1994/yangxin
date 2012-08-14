@@ -43,6 +43,61 @@ class FaqsControllerTest < ActionController::TestCase
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 1
 
+		post 'destroy', :id => retval["_id"], :format => :json
+		assert_equal @response.body, "true"
+		
+		retval = Faq.where(_id: retval["_id"]).first
+		assert_equal retval, nil
+		sign_out
+
+		clear(User,Faq)
+	end
+
+	
+	test "my test" do
+		clear(User, Faq)
+		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user.status = 2
+		user.role = 1
+		user.save
+
+		sign_in(user.email, Encryption.decrypt_password(user.password))
+		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
+		post 'create', :faq => {faq_type: 2, question: "question2", answer: "answer1"}, :format => :json
+		post 'create', :faq => {faq_type: 4, question: "question4", answer: "answer1"}, :format => :json
+		
+		get 'condition', :type => 0, :value => "", :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval["error"], ErrorEnum::ARG_ERROR
+		sign_out
+	end
+
+	test "07 should get find_by_type action" do
+	
+		clear(User, Faq)
+		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
+		user.status = 2
+		user.role = 1
+		user.save
+	
+		sign_in(user.email, Encryption.decrypt_password(user.password))
+		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
+		post 'create', :faq => {faq_type: 2, question: "question2", answer: "answer1"}, :format => :json
+		post 'create', :faq => {faq_type: 4, question: "question4", answer: "answer1"}, :format => :json
+		
+		get 'condition', :type => 0, :value => "", :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::ARG_ERROR
+		
+		get 'condition', :format => :json
+		retval = @response.body.to_i
+		assert_equal retval, ErrorEnum::ARG_ERROR
+		
+		get 'condition', :type => 1, :value => "user", :format => :json
+		retval = JSON.parse(@response.body)
+		assert_equal retval.count, 0
+		
+		get 'condition', :type => 7, :value => "answer1", :format => :json
 		#paging
 		get 'index', :format => :json, :per_page => 2
 		retval = JSON.parse(@response.body)
