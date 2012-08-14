@@ -3,10 +3,10 @@ module ActiveModel
   # == Active Model Length Validator
   module Validations
     class LengthValidator < EachValidator #:nodoc:
-      MESSAGES  = { :is => :wrong_length, :minimum => :too_short, :maximum => :too_long }.freeze
-      CHECKS    = { :is => :==, :minimum => :>=, :maximum => :<= }.freeze
+      #MESSAGES  = { :is => :wrong_length, :minimum => :too_short, :maximum => :too_long }.freeze
+      #CHECKS    = { :is => :==, :minimum => :>=, :maximum => :<= }.freeze
 
-      RESERVED_OPTIONS  = [:minimum, :maximum, :within, :is, :tokenizer, :too_short, :too_long]
+      #RESERVED_OPTIONS  = [:minimum, :maximum, :within, :is, :tokenizer, :too_short, :too_long]
 
       def initialize(options)
         if range = (options.delete(:in) || options.delete(:within))

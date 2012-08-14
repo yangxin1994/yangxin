@@ -157,6 +157,11 @@ OopsData::Application.routes.draw do
 	resources :points, :only => 'index'
 
 	namespace :admin do
+		resources :points do
+			new do
+				post :operate
+			end
+		end
 		resources :presents do
 			collection do
 				get 'expired'
