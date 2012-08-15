@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'error_enum'
+require 'quality_control_type_enum'
 require 'publish_status'
 require 'securerandom'
 #The survey object has the following structure
@@ -430,6 +431,8 @@ class Survey
 		return ErrorEnum::OVERFLOW if current_page == nil
 		if question_id.to_s == "-1"
 			question_index = current_page["questions"].length - 1
+		elsif question_id.to_s == "0"
+			question_index = -1
 		else
 			question_index = current_page["questions"].index(question_id)
 			return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
@@ -449,6 +452,8 @@ class Survey
 		return ErrorEnum::OVERFLOW if current_page == nil
 		if question_id.to_s == "-1"
 			question_index = current_page["questions"].length - 1
+		elsif question_id.to_s == "0"
+			question_index = -1
 		else
 			question_index = current_page["questions"].index(question_id)
 			return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
@@ -476,6 +481,8 @@ class Survey
 		return ErrorEnum::OVERFLOW if current_page == nil
 		if question_id.to_s == "-1"
 			question_index = current_page["questions"].length - 1
+		elsif question_id.to_s == "0"
+			question_index = -1
 		else
 			question_index = current_page["questions"].index(question_id)
 			return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
@@ -616,6 +623,27 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
 	def delete_question(question_id)
+		question = Question.find_by_id(question_id)
+		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
+		# find out other matching questions if the question to be deleted is a matching question
+		if question.question_class == 2
+			quality_control_question = QualityControlQuestion.find_by_id(question.reference_id)
+			if quality_control_question.quality_control_type == QualityControlTypeEnum::MATCHING
+				matching_question_ids = MatchingQuestion.get_matching_question_ids(quality_control_question._id)
+				self.pages.each do |page|
+					page["questions"].each do |q_id|
+						q = Question.find_by_id(q_id)
+						if q.nil? || matching_question_ids.include?(q.reference_id)
+							page["questions"].delete(q_id)
+							q.destroy
+							q.clear_question_object
+						end
+					end
+				end
+				self.save
+			end
+		end
+		# not a matching quality control question
 		find_question = false
 		self.pages.each do |page|
 			if page["questions"].include?(question_id)
@@ -626,8 +654,6 @@ class Survey
 		end
 		return ErrorEnum::QUESTION_NOT_EXIST if !find_question
 		self.save
-		question = Question.find_by_id(question_id)
-		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
 		question.clear_question_object
 		return question.destroy
 	end

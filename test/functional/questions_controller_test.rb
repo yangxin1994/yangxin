@@ -12,17 +12,17 @@ class QuestionsControllerTest < ActionController::TestCase
 		insert_page(jesse.email, jesse.password, survey_id, -1, "first page")
 		insert_page(jesse.email, jesse.password, survey_id, 0, "second page")
 
-		sign_in(jesse.email, Encryption.decrypt_password(oliver.password))
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :survey_id => "wrong survey id", :page_index => 0, :question_id => -1, :question_type => 0
 		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
 		sign_out
 
-		sign_in(jesse.email, Encryption.decrypt_password(oliver.password))
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id => -1, :question_type => 0
 		assert_equal ErrorEnum::OVERFLOW.to_s, @response.body
 		sign_out
 
-		sign_in(jesse.email, Encryption.decrypt_password(oliver.password))
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => "wrong question id", :question_type => 0
 		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
 		sign_out
@@ -37,7 +37,7 @@ class QuestionsControllerTest < ActionController::TestCase
 		assert_equal ErrorEnum::WRONG_QUESTION_TYPE.to_s, @response.body
 		sign_out
 
-		sign_in(jesse.email, Encryption.decrypt_password(oliver.password))
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :question_type => 0
 		question_obj_1 = JSON.parse(@response.body)
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :question_type => 10
@@ -219,5 +219,155 @@ class QuestionsControllerTest < ActionController::TestCase
 		assert_equal question_obj["issue"]["max_choice"], cloned_question_obj["issue"]["max_choice"]
 		assert_equal question_obj["issue"]["is_rand"], cloned_question_obj["issue"]["is_rand"]
 		assert_equal question_obj["issue"]["choices"][0]["content"], cloned_question_obj["issue"]["choices"][0]["content"]
+	end
+
+	test "should insert template question" do
+		clear(User, Survey, Question, TemplateQuestion)
+		jesse = init_jesse
+		oliver = init_oliver
+		lisa = init_lisa
+
+		set_as_admin(lisa)
+
+		survey_id = create_survey(jesse.email, Encryption.decrypt_password(jesse.password))
+
+		insert_page(jesse.email, jesse.password, survey_id, -1, "first page")
+		insert_page(jesse.email, jesse.password, survey_id, 0, "second page")
+
+		template_question_id = create_template_question(lisa.email, lisa.password, QuestionTypeEnum::CHOICE_QUESTION)
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :insert_template_question, :format => :json, :survey_id => "wrong survey id", :page_index => 0, :question_id => -1, :template_question_id => template_question_id
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id => -1, :template_question_id => template_question_id
+		assert_equal ErrorEnum::OVERFLOW.to_s, @response.body
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => "wrong question id", :template_question_id => template_question_id
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
+		sign_out
+
+		sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
+		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :template_question_id => template_question_id
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :template_question_id => "wron template question id"
+		assert_equal ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST.to_s, @response.body
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => 0, :template_question_id => template_question_id
+		question_obj = JSON.parse(@response.body)
+		assert_equal template_question_id, question_obj["reference_id"]
+		sign_out
+	end
+
+	test "should convert template question to normal question" do
+		clear(User, Survey, Question, TemplateQuestion)
+		jesse = init_jesse
+		oliver = init_oliver
+		lisa = init_lisa
+
+		set_as_admin(lisa)
+
+		survey_id = create_survey(jesse.email, Encryption.decrypt_password(jesse.password))
+
+		insert_page(jesse.email, jesse.password, survey_id, -1, "first page")
+		insert_page(jesse.email, jesse.password, survey_id, 0, "second page")
+
+		template_question_id = create_template_question(lisa.email, lisa.password, QuestionTypeEnum::CHOICE_QUESTION)
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => 0, :template_question_id => template_question_id
+		question_obj = JSON.parse(@response.body)
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		get :convert_template_question_to_normal_question, :format => :json, :survey_id => survey_id, :id => "wrong question id"
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		get :convert_template_question_to_normal_question, :format => :json, :survey_id => survey_id, :id => question_obj["_id"]
+		updated_question_obj = JSON.parse(@response.body)
+		assert_equal 0, updated_question_obj["question_class"]
+		assert_equal "", updated_question_obj["reference_id"]
+		get :show, :format => :json, :survey_id => survey_id, :id => question_obj["_id"]
+		normal_question = JSON.parse(@response.body)
+		assert_equal 0, normal_question["question_class"]
+		assert_equal "", normal_question["reference_id"]
+		sign_out
+	end
+
+	test "should insert quality control question" do
+		clear(User, Survey, Question, QualityControlQuestion, MatchingQuestion, QualityControlQuestionAnswer)
+		jesse = init_jesse
+		oliver = init_oliver
+		lisa = init_lisa
+
+		set_as_admin(lisa)
+
+		survey_id = create_survey(jesse.email, Encryption.decrypt_password(jesse.password))
+
+		insert_page(jesse.email, jesse.password, survey_id, -1, "first page")
+		insert_page(jesse.email, jesse.password, survey_id, 0, "second page")
+
+		objective_question_id = create_quality_control_question(lisa.email, lisa.password, QualityControlTypeEnum::OBJECTIVE, QuestionTypeEnum::CHOICE_QUESTION, -1)
+		matching_question_id = create_quality_control_question(lisa.email, lisa.password, QualityControlTypeEnum::MATCHING, QuestionTypeEnum::CHOICE_QUESTION, 2)
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :insert_quality_control_question, :format => :json, :survey_id => "wrong survey id", :page_index => 0, :question_id => -1, :quality_control_question_id => objective_question_id
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id => -1, :quality_control_question_id => objective_question_id
+		assert_equal ErrorEnum::OVERFLOW.to_s, @response.body
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => "wrong question id", :quality_control_question_id => objective_question_id
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
+		sign_out
+
+		sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
+		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :quality_control_question_id => objective_question_id
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :quality_control_question_id => "wron quality control question id"
+		assert_equal ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST.to_s, @response.body
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => 0, :quality_control_question_id => objective_question_id
+		inserted_objective_question_ary = JSON.parse(@response.body)
+		assert_equal objective_question_id, inserted_objective_question_ary[0]["reference_id"]
+		sign_out
+
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => 0, :quality_control_question_id => matching_question_id
+		inserted_matching_question_ary = JSON.parse(@response.body)
+		assert_equal 2, inserted_matching_question_ary.length
+		sign_out
+
+		survey_obj = show_survey(jesse.email, jesse.password, survey_id)
+
+		# delelete quality control question
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		delete :destroy, :format => :json, :survey_id => survey_id, :id => inserted_objective_question_ary[0]["_id"]
+		assert_equal true.to_s, @response.body
+		delete :destroy, :format => :json, :survey_id => survey_id, :id => inserted_matching_question_ary[0]["_id"]
+		assert_equal true.to_s, @response.body
+		delete :destroy, :format => :json, :survey_id => survey_id, :id => inserted_matching_question_ary[1]["_id"]
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
+		sign_out
 	end
 end

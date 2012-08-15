@@ -1,10 +1,9 @@
 # encoding: utf-8
 require 'error_enum'
-class QualityControlQuestionsController < ApplicationController
-	before_filter :require_admin
-	before_filter :check_quality_question_existence, :only => [:update, :show, :destroy, :update_answer]
+class Admin::QualityControlQuestionsController < Admin::ApplicationController
+	before_filter :check_quality_control_question_existence, :only => [:update, :show, :destroy, :update_answer]
 
-	def check_quality_question_existence
+	def check_quality_control_question_existence
 		@question = QualityControlQuestion.find_by_id(params[:id])
 		if @question.nil?
 			respond_to do |format|

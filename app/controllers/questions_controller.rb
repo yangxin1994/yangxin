@@ -178,5 +178,4 @@ class QuestionsController < ApplicationController
 			format.json	{ render :json => retval and return }
 		end
 	end
-
 end

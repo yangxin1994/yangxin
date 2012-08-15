@@ -1,4 +1,5 @@
 require 'error_enum'
+require 'quality_control_type_enum'
 #The question object has the following structure
 # {
 #	 "question_id" : id of the question(string),
@@ -47,16 +48,26 @@ class Question < BasicQuestion
 
 	def self.create_quality_control_question(quality_control_question)
 		questions = []
-		quality_control_question_ids = MatchingQuestion.get_matching_question_ids(quality_control_question._id)
-		quality_control_question_ids.each do |quality_control_question_id|
-			quality_control_question = QualityControlQustion.find_by_id(quality_control_question_id)
-			question = Question.new(:question_class => 2, :reference_id => quality_control_question_id)
+		if quality_control_question.quality_control_type == QualityControlTypeEnum::OBJECTIVE
+			question = Question.new(:question_class => 2, :reference_id => quality_control_question._id.to_s)
 			question.content = quality_control_question.content
 			question.note = quality_control_question.note
 			question.question_type = quality_control_question.question_type
 			question.issue = Marshal.load(Marshal.dump(quality_control_question.issue))
 			question.save
 			questions << question
+		else
+			quality_control_question_ids = MatchingQuestion.get_matching_question_ids(quality_control_question._id.to_s)
+			quality_control_question_ids.each do |quality_control_question_id|
+				quality_control_question = QualityControlQuestion.find_by_id(quality_control_question_id)
+				question = Question.new(:question_class => 2, :reference_id => quality_control_question_id)
+				question.content = quality_control_question.content
+				question.note = quality_control_question.note
+				question.question_type = quality_control_question.question_type
+				question.issue = Marshal.load(Marshal.dump(quality_control_question.issue))
+				question.save
+				questions << question
+			end
 		end
 		return questions
 	end

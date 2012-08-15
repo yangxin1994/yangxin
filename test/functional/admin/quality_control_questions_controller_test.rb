@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class QualityControlQuestionsControllerTest < ActionController::TestCase
+class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 
 	test "should create quality control question" do
 		clear(User, Survey, QualityControlQuestion, QualityControlQuestionAnswer, MatchingQuestion)

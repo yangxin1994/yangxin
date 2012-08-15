@@ -28,6 +28,62 @@ OopsData::Application.routes.draw do
 				post 'reply'
 			end
 		end
+
+		resources :quality_control_questions do
+			member do
+				put 'update_answer'
+			end
+		end
+
+	resources :template_questions do
+	end
+
+	resources :answers do
+		collection do
+			post 'load_question'
+			post 'clear'
+			post 'submit_answer'
+			post 'finish'
+		end
+	end
+
+	# QuillMe
+	resources :lotteries
+	resources :presents do
+		collection do
+			get :index, :virtualgoods, :cash, :realgoods, :stockout
+			get 'edit'
+		end
+	end
+	resources :orders do
+		collection do
+			get :for_cash, :for_realgoods, :for_virtualgoods, :for_lottery
+		end
+	end
+	resources :points, :only => 'index'
+
+	namespace :admin do
+		resources :presents do
+			collection do
+				get 'expired'
+				delete 'delete'
+			end
+		end
+		resources :orders do
+			collection do
+				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
+			end
+		end
+
+	end
+
+	# The priority is based upon order of creation:
+	# first created -> highest priority.
+
+	# Sample of regular route:
+	#	 match 'products/:id' => 'catalog#view'
+	# Keep in mind you can assign values other than :controller and :action
+
 	end
 
 	namespace :survey_auditor do
@@ -98,6 +154,7 @@ OopsData::Application.routes.draw do
 		resources :questions do
 			collection do
 				post 'insert_template_question'
+				post 'insert_quality_control_question'
 			end
 			member do
 				get 'convert_template_question_to_normal_question'
@@ -122,61 +179,6 @@ OopsData::Application.routes.draw do
 			get 'clear'
 		end
 	end
-
-	resources :quality_control_questions do
-		member do
-			put 'update_answer'
-		end
-	end
-
-	resources :template_questions do
-	end
-
-	resources :answers do
-		collection do
-			post 'load_question'
-			post 'clear'
-			post 'submit_answer'
-			post 'finish'
-		end
-	end
-
-	# QuillMe
-	resources :lotteries
-	resources :presents do
-		collection do
-			get :index, :virtualgoods, :cash, :realgoods, :stockout
-			get 'edit'
-		end
-	end
-	resources :orders do
-		collection do
-			get :for_cash, :for_realgoods, :for_virtualgoods, :for_lottery
-		end
-	end
-	resources :points, :only => 'index'
-
-	namespace :admin do
-		resources :presents do
-			collection do
-				get 'expired'
-				delete 'delete'
-			end
-		end
-		resources :orders do
-			collection do
-				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
-			end
-		end
-
-	end
-
-	# The priority is based upon order of creation:
-	# first created -> highest priority.
-
-	# Sample of regular route:
-	#	 match 'products/:id' => 'catalog#view'
-	# Keep in mind you can assign values other than :controller and :action
 
 	# Sample of named route:
 	#	 match 'products/:id/purchase' => 'catalog#purchase', :as => :purchase

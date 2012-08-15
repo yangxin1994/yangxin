@@ -195,6 +195,16 @@ class ActiveSupport::TestCase
 		return question_obj
 	end
 
+	def show_survey(email, password, survey_id)
+		sign_in(email, Encryption.decrypt_password(password))
+		old_controller = @controller
+		@controller = SurveysController.new
+		get :show, :format => :json, :id => survey_id
+		survey_obj = JSON.parse(@response.body)
+		@controller = old_controller
+		sign_out
+		return survey_obj
+	end
 
 	def create_survey_page_question(email, password)
 		survey_id = create_survey(email, Encryption.decrypt_password(password))
@@ -257,5 +267,27 @@ class ActiveSupport::TestCase
 		@controller = old_controller
 		sign_out
 		return [material_id_1, material_id_2, material_id_3, material_id_4, material_id_5, material_id_6]
+	end
+
+	def create_template_question(email, password, question_type)
+		sign_in(email, Encryption.decrypt_password(password))
+		old_controller = @controller
+		@controller = Admin::TemplateQuestionsController.new
+		post :create, :format => :json, :question_type => question_type
+		question_obj = JSON.parse(@response.body)
+		@controller = old_controller
+		sign_out
+		return question_obj["_id"]
+	end
+
+	def create_quality_control_question(email, password, quality_control_type, question_type, question_number)
+		sign_in(email, Encryption.decrypt_password(password))
+		old_controller = @controller
+		@controller = Admin::QualityControlQuestionsController.new
+		post :create, :format => :json, :quality_control_type => quality_control_type, :question_type => question_type, :question_number => question_number
+		retval = JSON.parse(@response.body)
+		@controller = old_controller
+		sign_out
+		return retval[0]["_id"]
 	end
 end

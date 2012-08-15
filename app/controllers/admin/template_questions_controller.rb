@@ -1,8 +1,16 @@
 # encoding: utf-8
 require 'error_enum'
-class TemplateQuestionsController < ApplicationController
-	before_filter :require_admin
+class Admin::TemplateQuestionsController < Admin::ApplicationController
+	before_filter :check_template_question_existence, :only => [:update, :show, :destroy]
 
+	def check_template_question_existence
+		@template_question = TemplateQuestion.find_by_id(params[:id])
+		if @template_question.nil?
+			respond_to do |format|
+				format.json	{ render :json => ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST and return }
+			end
+		end
+	end
 
 	#*method*: post
 	#
@@ -48,19 +56,18 @@ class TemplateQuestionsController < ApplicationController
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	#* ErrorEnum ::WRONG_DATA_TYPE: when the data type specified in a blank question is wrong
 	def update
-		template_question = TemplateQuestion.find_by_id(params[:id])
-		if template_question.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST and return }
-			end
-		end
-
-		template_question = template_question.update_question(params[:question], @current_user)
+		template_question = @template_question.update_question(params[:question], @current_user)
 		respond_to do |format|
 			format.json	{ render :json => template_question and return }
 		end
 	end
 
+	def index
+		questions = TemplateQuestion.list_template_question
+		respond_to do |format|
+			format.json	{ render :json => questions and return }
+		end
+	end
 
 	#*method*: get
 	#
@@ -78,15 +85,8 @@ class TemplateQuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def show
-		template_question = TemplateQuestion.find_by_id(params[:id])
-		if template_question.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST and return }
-			end
-		else
-			respond_to do |format|
-				format.json	{ render :json => template_question and return }
-			end
+		respond_to do |format|
+			format.json	{ render :json => @template_question and return }
 		end
 	end
 
@@ -106,14 +106,7 @@ class TemplateQuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def destroy
-		template_question = TemplateQuestion.find_by_id(params[:id])
-		if template_question.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST and return }
-			end
-		end
-
-		retval = template_question.destroy
+		retval = @template_question.destroy
 		respond_to do |format|
 			format.json	{ render :json => retval and return }
 		end
