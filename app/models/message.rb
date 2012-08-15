@@ -9,18 +9,23 @@ require "error_enum"
 #    type:         whether the message is sent to all users 
 #  } 
 class Message
-	include Mongoid::Document
-	include Mongoid::Timestamps
-	extend Mongoid::FindHelper
 
-	field :title, :type => String
-	field :content, :type => String
-	# 0 the message is sent to all users
-	# 1 the message is sent to special users
-	field :type, :type => Integer, default: 0
-	# updated_at should be last_login
-	scope :unread, ->(t){where(:updated_at.gt => t)}
-	scope :readed, ->(t){where(:updated_at.lt => t)}
-	belongs_to :sender, :class_name => "User", :inverse_of => :sended_messages
+  include Mongoid::Document
+  include Mongoid::Timestamps
+  extend Mongoid::FindHelper
+
+  field :title, :type => String
+  field :content, :type => String
+  # 0 the message is sent to all users
+  # 1 the message is sent to special users
+  field :type, :type => Integer, default: 0
+
+  belongs_to :sender, :class_name => "User", :inverse_of => :sended_messages
+  
+  validates :title, :presence => true
+  validates :content, :presence => true
+
+  scope :unread, ->(t){where(:updated_at.gt => t)}
+  scope :readed, ->(t){where(:updated_at.lt => t)}
 
 end

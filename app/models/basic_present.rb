@@ -8,7 +8,7 @@ class BasicPresent
 	field :surplus, :type => Integer
 	field :quantity, :type => Integer
 	field :description, :type => String
-	field :start_time, :type => Date
+
 	field :end_time, :type => Date
 
 	field :is_deleted, :type => Boolean, :default => false
@@ -24,14 +24,21 @@ class BasicPresent
 	scope :stockout, where(:surplus.lt => 1)
 
 
+	before_create :set_surplus
+
+
 	def add_quantity(n)
 		self.update_attribute(:quantity, self.quantity + n)
 		self.update_attribute(:surplus, self.surplus + n)
 	end
 
 	def delete
-  	is_deleted = true
-  	true if self.save		
+  	update_attribute(is_deleted, true)
+	end
+
+	private 
+	def set_surplus
+		surplus = quantity
 	end
 
 end

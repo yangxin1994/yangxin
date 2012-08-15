@@ -1,0 +1,53 @@
+%div
+	#main-content
+		.clear
+		.content-box
+			.content-box-header
+				%h3 实物礼品
+				%ul.content-box-tabs
+					%li
+						%a.default-tab{ :href => "#tab1" } 礼品列表
+					%li
+						%a{ :href => "#tab2"} 新增礼品
+				.clear
+			.content-box-content
+				.tab-content.default-tab#tab1
+					.notification.attention.png_bg
+						%a.close{ :href => '#'}
+							=image_tag 'icons/cross_grey_small.png'
+						%div 这里是提示信息
+					%table
+						%thead
+							%tr
+								%th
+									%input.check-all{:type => 'checkbox'}
+								%th 礼品名称
+								%th 数量
+								%th 所需积分
+								%th 发布日期
+								%th 礼品状态
+								%th 管理操作
+						%tfoot
+							%tr
+								%td{:colspan => "6"}
+									.bulk-actions.align-left
+										%select{:name => "dropdown" }
+											%option{ :value => 'option1' } 批量删除
+											%option{ :value => 'option2' } 批量上架
+											%option{ :value => 'option3' } 批量下架
+										%a.button{ :href => "#" } 确定
+									.pagination
+										%a{ :href => '#', :title => "首页"}
+				.tab-content#tab2
+					= form_for @present, :url => presents_path, :validate => true do |f|
+						%fieldset
+							%p
+								=f.label :name
+								=f.text_field :name,:class => 'text-input small-input', :id => 'small-input', :name => 'small-input'
+								%span.input-notification.error.png_bg 请填写礼品名称
+							%p
+								=f.label :description
+								=f.text_field :description,:class => 'text-input', :id => 'textarea', :name => 'textfield', :rows => '2', :cols => '2'						
+								=#f.label :description
+								=#f.text_field :description,:id => 'small-input', :name => 'small-input'	
+							= f.submit 'submit'

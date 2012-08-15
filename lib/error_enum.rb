@@ -85,6 +85,12 @@ module ErrorEnum
 	IP_REQUEST_SINA_ERROR = 100102
 	POSTCODE_REQUEST_BAIDU_ERROR =100103
 
+	# Presents Error Code
+	PresentNotFound = 21001
+	InvalidPresentId = 21002
+	UNAUTHROZIED = -1
+	# Award Error Code
+	AwardBudgetCounldNotBeBlank = 21511
 	USER_SAVE_FAILED = 110000
 
 end
