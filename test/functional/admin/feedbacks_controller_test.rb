@@ -1,5 +1,3 @@
-# coding: utf-8
-
 require 'test_helper'
 
 class Admin::FeedbacksControllerTest < ActionController::TestCase
@@ -28,75 +26,16 @@ class Admin::FeedbacksControllerTest < ActionController::TestCase
 		assert_equal @response.body.to_i, ErrorEnum::REQUIRE_ADMIN
 		sign_out
 
-		user1 = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
-		user1.status = 2
-		user1.role = 1
-		user1.save
+		user = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
+		user.status = 2
+		user.role = 1
+		user.save
 
-		sign_in(user1.email, "123456")
-
+		sign_in(user.email, "123456")
 		get 'index', :format => :json
 		assert_equal JSON.parse(@response.body), []
-
-		assert_equal Feedback.all.count, 0
-		Feedback.create_feedback({feedback_type: 1, title: "title1", content: "content1"}, user)
-		Feedback.create_feedback({feedback_type: 1, title: "title2", content: "content2"}, user)
-		Feedback.create_feedback({feedback_type: 2, title: "title3", content: "content3"}, user)
-		Feedback.create_feedback({feedback_type: 8, title: "title4", content: "content4"}, user)
-
-		assert_equal Feedback.all.count, 4
-
-		# no type, no value
-		get 'index', :format => :json
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 4
-
-		# with type, no value
-		get 'index', :format => :json, :feedback_type => 3
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 3
-
-		get 'index', :format => :json, :feedback_type => 255
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 4
-
-		#with type and value
-		get 'index', :format => :json, :feedback_type => 3, :value => "content"
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 3
-
-		get 'index', :format => :json, :feedback_type => 3, :value => "content1"
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 1		
-
-		#with type and answer
-		get 'index', :format => :json, :feedback_type => 255, :answer => false
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 4
-
-		fb = Feedback.all.first
-		fb.is_answer = true
-		assert_equal fb.save, true
-		assert_equal Feedback.all.first.is_answer, true
-
-		get 'index', :format => :json, :feedback_type => 255, :answer => true
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 1
-
-		get 'index', :format => :json, :feedback_type => 255, :answer => false
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 3
-
-		#paging
-		get 'index', :format => :json, :per_page => 2, :feedback_type => 255
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 2
-
-		get 'index', :format => :json, :per_page => 3, :page=> 2, :feedback_type => 255
-		retval = JSON.parse(@response.body)
-		assert_equal retval.count, 1
-
 		sign_out
+
 
 		clear(Feedback, User)
 	end
@@ -127,6 +66,7 @@ class Admin::FeedbacksControllerTest < ActionController::TestCase
 		clear(User,Feedback)
 	end
 	
+=begin
 	test "03 should post reply method" do 
 		clear(User, Feedback, Message)
 		
@@ -140,23 +80,19 @@ class Admin::FeedbacksControllerTest < ActionController::TestCase
 		user2.role = 1
 		user2.save
 		
-		assert_equal Feedback.all.count, 0
-		f = Feedback.create_feedback({feedback_type: 1, title: "title1", content: "content1"}, user)
-		assert_equal f.class, Feedback
-		assert_equal Feedback.all.count, 1
+		f = Feedback.create(feedback_type: 1, title: "title1", content: "content1")
+		f.title_user = user 
+		f.save
 		
-		assert_equal Message.all.count, 0
 		sign_in(user2.email, Encryption.decrypt_password(user2.password))
-		post "reply",:id => f.id.to_s, :message_content => "reply feedback", :format => :json
-		assert_equal Message.all.count, 1 #reply successfully.
-
-		retval = JSON.parse(@response.body)
-		assert_equal retval["content"], "reply feedback"
-		assert_equal retval["title"], "反馈意见回复:"+ f.title.to_s
-
+		post "#{f.id.to_s/reply}", :message_content => "reply feedback", :format => :json
+	
+		m = Message.where(title_user: user, content_user: user2).first
+		assert_equal m.content, "reply feedback"		
+		
 		sign_out
-
 		clear(User, Feedback, Message)
 	end
+=end
 
 end
