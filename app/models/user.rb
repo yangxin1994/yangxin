@@ -34,7 +34,7 @@ class User
 
 	field :birthday, :type => Integer, default: -1
 	field :gender, :type => Boolean
-	field :address, :type => String
+	field :address, :type => Array
 	field :postcode, :type => String
 	field :phone, :type => String
 
@@ -119,15 +119,17 @@ class User
 	end
 
 	def update_basic_info(user_info)
-		self.birthday = user_info["birthday"]
-		self.gender = user_info["gender"]
+		self.birthday = user_info["birthday"].to_i
+		self.gender = user_info["gender"].to_s == "true"
 		self.address = user_info["address"]
 		self.postcode = user_info["postcode"]
 		self.phone = user_info["phone"]
 		return self.save
 	end
 
-	def init_attr_survey(answer)
+	def init_attr_survey(survey_id, answer_content)
+		retval Answer.create_user_attr_survey_answer(self, survey_id, answer_content)
+		return retval
 	end
 
 	def skip_init_step
@@ -331,7 +333,8 @@ class User
 	#*retval*:
 	#* true: when successfully login
 	#* WRONG_PASSWORD
-	def reset_password(old_password, new_password)
+	def reset_password(old_password, new_password, new_password_confirmation)
+		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if new_password != new_password_confirmation
 		return ErrorEnum::WRONG_PASSWORD if self.password != Encryption.encrypt_password(old_password)  # wrong password
 		self.password = Encryption.encrypt_password(new_password)
 		self.save

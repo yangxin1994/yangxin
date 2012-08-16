@@ -47,7 +47,7 @@ class SessionsControllerTest < ActionController::TestCase
 		assert_redirected_to "/500"
 
 		get :input_new_password, :password_key => password_key_1
-		assert_redirected_to forget_password_url, "activate an user with expired activate key"
+		assert_redirected_to :action => "forget_password"
 
 		get :input_new_password, :password_key => password_key_2
 		assert_response :success

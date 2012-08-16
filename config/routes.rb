@@ -109,13 +109,16 @@ OopsData::Application.routes.draw do
 	match 'activate' => 'registrations#activate', :as => :activate
 	match 'check_email' => 'registrations#email_illegal', :as => :check_email, :via => [:get, :post]
 
-	resources :sessions
+	resources :sessions do
+		collection do
+			post :update_user_info, :init_basic_info, :init_user_attr_survey, :send_password_email
+			get :obtain_user_attr_survey, :skip_init_step
+			post :new_password, :reset_password
+			get :forget_password, :input_new_password
+		end
+	end
 	match 'logout' => 'sessions#destroy', :as => :logout
 	match 'login' => 'sessions#create', :as => :login
-	match 'forget_password' => 'sessions#forget_password', :as => :forget_password
-	match 'send_password_email' => 'sessions#send_password_email', :as => :send_password_email, :via => [:post]
-	match 'input_new_password' => 'sessions#input_new_password', :as => :input_new_password
-	match 'new_password' => 'sessions#new_password', :as => :new_password, :via => [:post]
 	match 'renren_connect' => 'sessions#renren_connect', :as => :renren_connect
 	match 'sina_connect' => 'sessions#sina_connect', :as => :sina_connect
 	match 'qq_connect' => 'sessions#qq_connect', :as => :qq_connect

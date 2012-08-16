@@ -32,6 +32,7 @@ class Survey
 	field :status, :type => Integer, default: 0
 	# can be 1 (closed), 2 (under review), 4 (paused), 8 (published)
 	field :publish_status, :type => Integer, default: 1
+	field :user_attr_survey, :type => Boolean, default: false
 	field :pages, :type => Array, default: []
 	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
 	field :quota_template_question_page, :type => Array, default: []
@@ -796,6 +797,32 @@ class Survey
 		self.pages.insert(page_index_2+1, current_page)
 		self.pages.delete_at(page_index_1)
 		return self.save
+	end
+
+	def set_user_attr_survey(user_attr_survey)
+		self.user_attr_survey = user_attr_survey.to_s == "true"
+		self.save
+		return true
+	end
+
+	def self.get_user_attr_survey
+		survey = Survey.where(:user_attr_survey => true)[0]
+		return [] if survey.nil?
+		questions = []
+		survey.pages.each do |page|
+			page["questions"].each do |q_id|
+				q = Question.find_by_id(q_id)
+				next if q.nil? || q.question_class != 1
+				questions << q
+			end
+		end
+		return questions
+	end
+
+	# return all the surveys that are published and are active
+	# it is needed to send emails and invite volunteers for these surveys
+	def self.get_published_active_surveys
+		
 	end
 
 	def check_password(username, password, current_user)

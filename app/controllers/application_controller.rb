@@ -233,14 +233,14 @@ class ApplicationController < ActionController::Base
 	def set_login_cookie(email_username, keep_signed_in)
 		user = User.find_by_email_username(email_username)
 		return false if user.nil?
-		if keep_signed_in
-			set_cookie(:current_user_id, user.id, 1.months.to_i) 
+		if keep_signed_in.to_s == "true"
+			set_cookie(:current_user_id, user.id, 1.months.from_now) 
 		else
 			set_cookie(:current_user_id, user.id) 
 		end
 		auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
-		if keep_signed_in
-			set_cookie(:auth_key, auth_key, keep_signed_in, 1.months.to_i)
+		if keep_signed_in.to_s == "true"
+			set_cookie(:auth_key, auth_key, keep_signed_in, 1.months.from_now)
 		else
 			set_cookie(:auth_key, auth_key, keep_signed_in)
 		end

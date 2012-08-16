@@ -4,38 +4,6 @@ class UsersController < ApplicationController
 
 	before_filter :require_sign_in
 
-	#*descryption*: update profile of a signed in user
-	#
-	#*http* *method*: post
-	#
-	#*url*: /update_information
-	#
-	#*params*:
-	#* user_information: a hash that has the following keys
-	#  - email
-	#  - realname
-	#  - address
-	#  - zipcode
-	#  - telephone
-	#  - gender
-	#  - marriage
-	#  - education
-	#  - birthday
-	#  - location
-	#  - family_incoming
-	#  - personal_incoming
-	#  - position
-	#  - industry
-	#
-	#*retval*:
-	#* true if succeed
-	def update_information
-		@current_user.update_information(params[:user_information])
-		respond_to do |format|
-			format.json	{ render :json => true and return }
-		end
-	end
-
 	#*descryption*: user resets the new password
 	#
 	#*http* *method*: post

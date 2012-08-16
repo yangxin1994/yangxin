@@ -67,6 +67,18 @@ class Answer
 		return answer
 	end
 
+	def self.create_user_attr_survey_answer(operator, survey_id, answer_content)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		
+		answer = Answer.new
+		answer.template_answer_content = answer_content
+		answer.save
+		operator.answers << answer
+		survey.answers << answer
+		return true
+	end
+
 	def self.create_answer(operator, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
