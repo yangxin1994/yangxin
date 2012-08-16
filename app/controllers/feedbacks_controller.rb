@@ -20,7 +20,7 @@ class FeedbacksController < ApplicationController
 				@feedbacks = Feedback.list_by_type(params[:feedback_type], @current_user)
 			end
 		else
-			@feedbacks = Feedback.where(question_user_id: @current_user.id.to_s)
+			@feedbacks = Feedback.where(question_user_id: @current_user.id)
 		end
 
 		@feedbacks = slice((@feedbacks || []), params[:page], params[:per_page])

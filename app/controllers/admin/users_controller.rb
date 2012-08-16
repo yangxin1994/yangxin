@@ -4,9 +4,7 @@ class Admin::UsersController < Admin::ApplicationController
 # **************Quill Admin Manage User************************************
 #++
 	
-	@@user_attrs_filter = %w(_id email username true_name birthday gender address phone postcode black white tmp_password)
-
-	before_filter :require_admin
+	@@user_attrs_filter = %w(_id email status username true_name birthday gender address phone postcode black white)
 
 	# GET /admin/users
 	# GET /admin/users.json
@@ -14,15 +12,14 @@ class Admin::UsersController < Admin::ApplicationController
 		
 		if !params[:email].nil? then
 			@users = User.where(email: params[:email]).to_a
-		elsif !params[:username].nil? then
-			@users = User.where(username: params[:username]).to_a
-		elsif !params[:true_name].nil? then
+		elsif !params[:true_name].nil? then	
 			@users = User.where(true_name: params[:true_name]).to_a
+		elsif !params[:username].nil? then
+			@users = User.where(username: /.*#{params[:username]}.*/).to_a
 		else
 			@users = User.all.to_a
 		end			
 		
-		@users.sort!{|v1, v2| v2.updated_at <=> v1.updated_at} if @users.count > 1
 		@users =  slice((@users || []), params[:page], params[:per_page])
 
 		respond_to do |format|
@@ -58,7 +55,14 @@ class Admin::UsersController < Admin::ApplicationController
 	# PUT /admin/users/1
 	# PUT /admin/users/1.json
 	def update
-		@user = User.update_user(params[:id], params[:user])
+
+		if !params[:recovery].nil? && %w(true false).include?(params[:recovery].to_s) then
+			@user = User.update_user(params[:id], {"status" => 0}) if params[:recovery] == "true"
+			@user = User.update_user(params[:id], {"status" => -1}) if params[:recovery] == "false"
+		else
+			params[:user].select!{|k,v| %w(birthday gender address phone postcode).include?(k.to_s)}
+			@user = User.update_user(params[:id], params[:user])
+		end
 
 		respond_to do |format|
 			format.html { redirect_to @user} if @user.instance_of?(User)
@@ -68,16 +72,26 @@ class Admin::UsersController < Admin::ApplicationController
 		end
 	end
 
+	# DELETE /admin/users/1
+	# DELETE /admin/users/1.json
+	def destroy
+		@user = User.update_user(params[:id], {"status" => -1})
+
+		respond_to do |format|
+			format.html { redirect_to users_url }
+			format.json { render :json => @user }
+		end
+	end
+
 	#--
 	# **************************************
 	# Black List Operate 
 	# **************************************
 	#++
 
-	# GET /admin/users/blacks
+	# GET /admin/users/blacks(.json)
 	def blacks
 		@users = User.black_list.to_a
-		@users.sort!{|v1, v2| v2.updated_at <=> v1.updated_at} if @users.count > 1
 
 		@users =  slice((@users || []), params[:page], params[:per_page])
 
@@ -88,10 +102,9 @@ class Admin::UsersController < Admin::ApplicationController
 		end
 	end
 
-	# GET /admin/users/whites
+	# GET /admin/users/whites(.json)
 	def whites
 		@users = User.white_list.to_a
-		@users.sort!{|v1, v2| v2.updated_at <=> v1.updated_at} if @users.count > 1
 
 		@users =  slice((@users || []), params[:page], params[:per_page])
 
@@ -102,7 +115,7 @@ class Admin::UsersController < Admin::ApplicationController
 		end
 	end
 
-	# GET /admin/users/1/black
+	# GET /admin/users/1/black(.json)
 	def black
 		@user = User.change_black_user(params[:id])
 
@@ -113,7 +126,7 @@ class Admin::UsersController < Admin::ApplicationController
 		end
 	end
 
-	# GET /admin/users/1/white
+	# GET /admin/users/1/white(.json)
 	def white
 		@user = User.change_white_user(params[:id])
 
@@ -130,7 +143,7 @@ class Admin::UsersController < Admin::ApplicationController
 	# ************************************
 	#++
 
-	# GET /admin/users/1/system_pwd
+	# GET /admin/users/1/system_pwd(.json)
 	def system_pwd
 		@user = User.change_to_system_password(params[:id])
 
