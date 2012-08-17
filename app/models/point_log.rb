@@ -2,7 +2,7 @@ class PointLog
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt
-  field :operated_point, :type => Integer
+  field :operated_point, :type => Integer, :default => 0
   # can be 0 (AdminOperate), 1 (InviteUser), 2 (FilledSurvey), 3 (ExtendSurvey), 4 (ExchangePresent), 5 (revoke)
   field :cause, :type => Integer
 

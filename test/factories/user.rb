@@ -1,7 +1,7 @@
 FactoryGirl.define do
 
 	factory :quill_user, class: User do
-		password "123123123"
+		password Encryption.encrypt_password("123123123")
 		status 2
 		point 1000
 		factory :admin_foo do

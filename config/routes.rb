@@ -47,36 +47,6 @@ OopsData::Application.routes.draw do
 		end
 	end
 
-	# QuillMe
-	resources :lotteries
-	resources :presents do
-		collection do
-			get :index, :virtualgoods, :cash, :realgoods, :stockout
-			get 'edit'
-		end
-	end
-	resources :orders do
-		collection do
-			get :for_cash, :for_realgoods, :for_virtualgoods, :for_lottery
-		end
-	end
-	resources :points, :only => 'index'
-
-	namespace :admin do
-		resources :presents do
-			collection do
-				get 'expired'
-				delete 'delete'
-			end
-		end
-		resources :orders do
-			collection do
-				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
-			end
-		end
-
-	end
-
 	# The priority is based upon order of creation:
 	# first created -> highest priority.
 
@@ -201,8 +171,13 @@ OopsData::Application.routes.draw do
 		end
 	end
 
-	# QuillMe
-	resources :lotteries
+
+
+	resources :lotteries do
+		member do
+			get :draw
+		end
+	end
 	resources :presents do
 		collection do
 			get :index, :virtualgoods, :cash, :realgoods, :stockout
