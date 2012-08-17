@@ -5,7 +5,7 @@ class LotteryCode
 	extend Mongoid::FindHelper
 	include Mongoid::ValidationsExt
 
-	field :num, :type => Integer
+	field :num, :type => Integer, default: 0
 	field :code, :type => String
 	field :email, :type => String
 	has_one :award

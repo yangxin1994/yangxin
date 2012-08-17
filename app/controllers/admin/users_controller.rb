@@ -154,16 +154,4 @@ class Admin::UsersController < Admin::ApplicationController
 		end
 	end
 
-	def set_user_attr_survey
-		survey = Survey.find_by_id(params[:survey_id])
-		if survey.nil?
-			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
-			end
-		end
-		retval = survey.set_user_attr_survey(params[:user_attr_survey])
-		respond_to do |format|
-			format.json	{ render :json => retval and return }
-		end
-	end
 end
