@@ -16,7 +16,7 @@ gem 'memcache-client'
 gem 'kaminari'
 gem 'resque'
 gem 'resque-scheduler'
-
+gem 'oops-mail', '0.0.2', :path => "vendor/gems/oops-mail-0.0.2"
 
 gem 'haml'
 gem 'haml-rails'

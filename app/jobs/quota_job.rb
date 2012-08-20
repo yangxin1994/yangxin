@@ -7,6 +7,7 @@ module Jobs
 		@@last_interval_time = nil
 		@queue = :quota_job_queue
 
+		# resque auto involve method
 		def self.perform(*args)
 			puts "Quota Job perform Test: #{Time.now}"
 
@@ -36,47 +37,61 @@ module Jobs
 			puts "End Quota Job perform Test. The interval_time is #{interval_time}"
 		end
 
-		private 
-		# 
+		# check quota info for each survey,
+		# it will return a array for Jobs::Rule object.
 		def self.check_quota
 			rule_arr = []
 
 			#find all surveys which are published
-			published_surveies = Survey.where(status: 8).collect
+			published_surveies = Survey.where(status: 8).to_a
 
 			published_surveies.each do |survey|
 				quota = survey.quota
-
 				tmp_rule_arr = []
+
 				#get the conditions of type==0 to tmp_rule_arr
 				quota["rules"].each_index do |rule_index|
 					rule = quota["rules"][rule_index]
-
-					# already answer count:
-					answer_number = survey.answer_number[rule_index].to_i
-
-					# compute the rest count
-					rest_number = rule["amount"].to_i - answer_number
-					rest_number = rest_number > 0 ? rest_number : 0
+					rule_amount = rule["amount"].to_i
 
 					conditions = []
 					rule["conditions"].each do |condition|
 						if condition["condition_type"] == 0 then
-							conditions << Condititon.new(condition["name"], condition["value"])
+							conditions << Condition.new(condition["name"], condition["value"])
 						end
 					end
 
-					tmp_rule_arr << Rule.new(survey.id.to_s, 	0, conditions, rest_number, condition["fuzzy"]) if conditions.size > 0
+					#compute rest number
+					quota_stats = survey.quota_stats
+					answer_number = quota_stats["answer_number"][rule_index].to_i
+					rest_number = rule_amount - answer_number
+
+					# change to 0 if tmp_rule_arr element 's amount < 0.
+					# because a rule(Rule object) would has two or more rule(survey.quota.rule )
+					rest_number = 0 if rest_number < 0
+
+					is_same_rule = false
+					tmp_rule_arr.each_index do |diff_index|
+
+						# if a rule which is in tmp_rule_arr has the same conditions,
+						# add the amount in tmp_rule_arr element
+						# and donot push the rule to tmp_rule_arr.
+						if conditions.to_json == tmp_rule_arr[diff_index].conditions.to_json then
+							tmp_rule_arr[diff_index].amount += rest_number
+							is_same_rule = true 
+							break
+						else
+							is_same_rule = false
+						end
+					end
+
+					# if not the rule 's conditions be not contains from tmp_rule_arr,
+					# push it .
+					if !is_same_rule and conditions.size > 0 and rest_number > 0 then
+						tmp_rule_arr << Rule.new(survey.id.to_s, 	0, conditions, rest_number) 
+					end
 				end
 
-				# combine the rules if their have same condition.
-				#
-				
-
-				# select diff conditions, reject others.
-				tmp_rule_arr = tmp_rule_arr.values_at(*diff_rule_indexs) if diff_rule_indexs.size > 0
-
-				# add tmp_rule_arr to rule_arr which is to be return.
 				rule_arr += tmp_rule_arr
 			end
 
