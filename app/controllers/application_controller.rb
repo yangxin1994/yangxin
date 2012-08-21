@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
 	protect_from_forgery
 
-	before_filter :client_ip, :current_user, :update_last_visit_time, :user_init
+	before_filter :client_ip, :current_user, :update_last_visit_info, :user_init
 
 	helper_method :user_signed_in?, :user_signed_out?
 ###################################################
@@ -56,12 +56,17 @@ class ApplicationController < ActionController::Base
 ################################################
 	#get the information of the signed user and set @current_user
 	def current_user
-		current_user_id = get_cookie(:current_user_id)
-		@current_user = current_user_id.nil? ? User.create_new_visitor_user : User.find_by_id(current_user_id)
+		if params[:client_type] == "web" || params[:client_type].to_s == ""
+			current_user_id = get_cookie(:current_user_id)
+			@current_user = current_user_id.nil? ? User.create_new_visitor_user : User.find_by_id(current_user_id)
+		else
+			current_user_id = params[:current_user_id]
+			@current_user = current_user_id == "" ? nil : User.find_by_id(current_user_id)
+		end
 	end
 
-	def update_last_visit_time
-		@current_user.update_last_visit_time if !@current_user.nil?
+	def update_last_visit_info
+		@current_user.update_last_visit_info(params[:client_type]) if !@current_user.nil?
 	end
 
 	def user_init
@@ -86,7 +91,11 @@ class ApplicationController < ActionController::Base
 	#judge whether there is a user signed in currently
 	def user_signed_in?
 		#logger.info "#{@current_user}"
-		return !!@current_user && get_cookie(:auth_key).to_s != "" && @current_user.auth_key == get_cookie(:auth_key)
+		if params[:client_type] == "web" || params[:client_type].to_s == ""
+			return !!@current_user && get_cookie(:auth_key).to_s != "" && @current_user.auth_key == get_cookie(:auth_key)
+		else
+			return !!@current_user && params(:auth_key).to_s != "" && @current_user.auth_key == params(:auth_key)
+		end
 	end
 
 	#judge whether there is no user signed in currently
@@ -230,7 +239,7 @@ class ApplicationController < ActionController::Base
 
 	# method: in-accessible
 	# description: help set session for an account
-	def set_login_cookie(email_username, keep_signed_in)
+	def set_login_cookie(email_username, keep_signed_in, auth_key)
 		user = User.find_by_email_username(email_username)
 		return false if user.nil?
 		if keep_signed_in.to_s == "true"
@@ -238,13 +247,11 @@ class ApplicationController < ActionController::Base
 		else
 			set_cookie(:current_user_id, user.id) 
 		end
-		auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
 		if keep_signed_in.to_s == "true"
 			set_cookie(:auth_key, auth_key, keep_signed_in, 1.months.from_now)
 		else
 			set_cookie(:auth_key, auth_key, keep_signed_in)
 		end
-		return user.set_auth_key(user.id, auth_key)
 	end
 
 	def set_logout_cookie

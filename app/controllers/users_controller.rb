@@ -35,4 +35,10 @@ class UsersController < ApplicationController
 		end
 	end
 
+	def get_level_information
+		retval = @current_user.get_level_information
+		respond_to do |format|
+			format.json { render :json => retval and return }
+		end
+	end
 end

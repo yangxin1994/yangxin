@@ -816,7 +816,7 @@ class Survey
 				questions << q
 			end
 		end
-		return questions
+		return {survey._id.to_s => questions}
 	end
 
 	# return all the surveys that are published and are active

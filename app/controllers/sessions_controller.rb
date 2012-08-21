@@ -4,8 +4,8 @@ require 'error_enum'
 require 'tool'
 class SessionsController < ApplicationController
 
-	before_filter :require_sign_out, :except => [:destroy, :sina_connect, :renren_connect, :qq_connect, :google_connect]
-	before_filter :require_sign_in, :only => [:destroy, :init_basic_info, :obtain_user_attr_survey, :init_user_attr_survey, :skip_init_step, :update_user_info, :reset_password]
+	before_filter :require_sign_out, :only => [:create]
+	before_filter :require_sign_in, :only => [:destroy, :init_basic_info, :obtain_user_attr_survey, :init_user_attr_survey, :skip_init_step, :update_user_info, :reset_password, :get_level_information]
 
 	# method: get
 	# descryption: the page where user logins
@@ -65,19 +65,21 @@ class SessionsController < ApplicationController
 				format.html	{ redirect_to sessions_path and return }
 				format.json	{ render :json => ErrorEnum::WRONG_PASSWORD and return }
 			end
-		when true
+		when false
+			respond_to do |format|
+				format.html	{ redirect_to "/500" and return }
+				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
+			end
+		else
 			User.combine(params[:user]["email_username"], *third_party_info) if !third_party_info.nil?
-			set_login_cookie(params[:user]["email_username"], params[:keep_signed_in])
+			######## this should be moved to the web client side #########
+			set_login_cookie(params[:user]["email_username"], params[:keep_signed_in], login["auth_key"])
+			##############################################################
 			flash[:notice] = "登录成功"
 			flash[:notice] += ",并成功与第三方帐号绑定。" if third_party_info
 			respond_to do |format|
 				format.html	{ redirect_to home_path and return }
-				format.json	{ render :json => true and return }
-			end
-		else
-			respond_to do |format|
-				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
+				format.json	{ render :json => login and return }
 			end
 		end
 	end
@@ -133,20 +135,21 @@ class SessionsController < ApplicationController
 	def skip_init_step
 		retval = @current_user.skip_init_step
 		case retval
-		when true
-			flash[:notice] = "成功跳到下一步"
-			respond_to do |format|
-				format.html	{ redirect_to home_path and return }
-				format.json	{ render :json => true and return }
-			end
-		else 
+		when false 
 			respond_to do |format|
 				format.html	{ redirect_to "/500" and return }
 				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
 			end
+		else
+			flash[:notice] = "成功跳到下一步"
+			respond_to do |format|
+				format.html	{ redirect_to home_path and return }
+				format.json	{ render :json => {"status" => retval} and return }
+			end
 		end
 	end
 
+	################# this should moved to the web client side ###############
 	#*descryption*: sign out
 	#
 	#*http* *method*: delete
@@ -171,6 +174,7 @@ class SessionsController < ApplicationController
 	# descryption: the page where user inputs the email to reset password
 	def forget_password
 	end
+	#############################################################################
 
 	#*descryption*: send email to reset password
 	#
@@ -372,7 +376,36 @@ class SessionsController < ApplicationController
 		raise "Do not have :code params." if params[:code].nil?
 		status, qihu_user = QihuUser.token(params[:code])
 		deal_connect(status, qihu_user)
-	 end 
+	end 
+
+	def third_party_authorized
+		# try to find the third party user in the database, if not, create a new one
+		tp_user = ThirdPartyUser.find_by_website_and_user_id(params[:third_party_website], params[:third_party_user_id])
+		tp_user = ThirdPartyUser.create_third_party_user(params) if tp_user.nil?
+
+		if tp_user.is_bound && user_signed_in?
+			# bound and signed in
+			respond_to do |format|
+				format.json { render :json => {"binding" => tp_user.is_bound(@current_user)} and return }
+			end
+		elsif tp_user.is_bound && !user_signed_in?
+			retval = User.login(@current_user.email, Encryption.decrypt_password(@current_user.password), @client_ip)
+			respond_to do |format|
+				format.json { render :json => retval and return }
+			end
+		elsif !tp_user.is_bound && user_signed_in
+			respond_to do |format|
+				format.json { render :json => {"binding" => tp_user.bind(@current_user)} and return }
+			end
+		else
+			google_user = tp_user.website == "google"? tp_user.google_email : nil
+			third_party_info = encrypt_third_party_user_id(tp_user.website, tp_user.user_id)
+			respond_to do |format|
+				format.json { render :json => {"third_party_info" => third_party_info, "google_user" => google_user} and return }
+			end
+		end
+
+	end
 	
 	#*descryption*: deal with the third party user login logic
 	#
