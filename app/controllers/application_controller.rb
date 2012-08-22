@@ -238,21 +238,6 @@ class ApplicationController < ActionController::Base
 	end 
 
 	# method: in-accessible
-	# description: help set session for an account
-	def set_login_cookie(email_username, keep_signed_in, auth_key)
-		user = User.find_by_email_username(email_username)
-		return false if user.nil?
-		if keep_signed_in.to_s == "true"
-			set_cookie(:current_user_id, user.id, 1.months.from_now) 
-		else
-			set_cookie(:current_user_id, user.id) 
-		end
-		if keep_signed_in.to_s == "true"
-			set_cookie(:auth_key, auth_key, keep_signed_in, 1.months.from_now)
-		else
-			set_cookie(:auth_key, auth_key, keep_signed_in)
-		end
-	end
 
 	def set_logout_cookie
 		set_cookie(:current_user_id, nil) 
