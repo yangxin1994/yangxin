@@ -281,15 +281,19 @@ class ApplicationController < ActionController::Base
 	
 	# return error
 	def return_json(is_success, value)
-    render :json => {
-      :success => is_success,
-      :value => value
-    }
-  end
+		render :json => {
+			:success => is_success,
+			:value => value
+		}
+	end
 	def render_json_e(error_code)
-	  return_json(false, error_code)
-  end
-  def render_json_s(value = true)
-	  return_json(true, value)
-  end
+		return_json(false, error_code)
+	end
+	def render_json_s(value = true)
+		return_json(true, value)
+	end
+	def render_json_auto(value = true)
+		is_success = !(value.class == String && value.start_with?('error'))
+		render_json(is_success, value)
+	end
 end
