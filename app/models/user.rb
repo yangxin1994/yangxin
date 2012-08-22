@@ -223,6 +223,7 @@ class User
 	#*retval*:
 	#* the new user instance: when successfully created
 	def self.create_new_registered_user(user, current_user)
+    logger.debug user.inspect
 		# check whether the email acount is illegal
 		return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal?(user["email"])
 		return ErrorEnum::EMAIL_EXIST if self.user_exist_by_email?(user["email"])

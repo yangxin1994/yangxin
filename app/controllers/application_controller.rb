@@ -278,4 +278,18 @@ class ApplicationController < ActionController::Base
 		arr = arr.slice((page-1)*per_page, per_page) || []
 		return arr
 	end
+	
+	# return error
+	def return_json(is_success, value)
+    render :json => {
+      :success => is_success,
+      :value => value
+    }
+  end
+	def render_json_e(error_code)
+	  return_json(false, error_code)
+  end
+  def render_json_s(value = true)
+	  return_json(true, value)
+  end
 end
