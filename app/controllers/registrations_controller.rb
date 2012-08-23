@@ -42,25 +42,25 @@ class RegistrationsController < ApplicationController
 			flash[:notice] = "请输入正确的邮箱地址"
 			respond_to do |format|
 				format.html	{ redirect_to registrations_path and return }
-				format.json	{ render :json => ErrorEnum::ILLEGAL_EMAIL and return }
+				format.json { render :json => ErrorEnum::ILLEGAL_EMAIL and return }
 			end
 		when ErrorEnum::EMAIL_EXIST
 			flash[:notice] = "邮箱已经存在"
 			respond_to do |format|
 				format.html	{ redirect_to sessions_path and return }
-				format.json	{ render :json => ErrorEnum::EMAIL_EXIST and return }
+				format.json { render :json => ErrorEnum::EMAIL_EXIST and return }
 			end
 		when ErrorEnum::USERNAME_EXIST
 			flash[:notice] = "用户名已经存在"
 			respond_to do |format|
 				format.html	{ redirect_to sessions_path and return }
-				format.json	{ render :json => ErrorEnum::USERNAME_EXIST and return }
+				format.json { render :json => ErrorEnum::USERNAME_EXIST and return }
 			end
 		when ErrorEnum::WRONG_PASSWORD_CONFIRMATION
 			flash[:notice] = "输入密码不一致"
 			respond_to do |format|
 				format.html	{ redirect_to registrations_path and return }
-				format.json	{ render :json => ErrorEnum::WRONG_PASSWORD_CONFIRMATION and return }
+				format.json { render :json => ErrorEnum::WRONG_PASSWORD_CONFIRMATION and return }
 			end
 		else # create user_information model
 			third_party_info = decrypt_third_party_user_id(params[:third_party_info])

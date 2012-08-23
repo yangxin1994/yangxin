@@ -29,6 +29,7 @@ class User
 	field :role, :type => Integer, default: 0
 	field :auth_key, :type => String
 	field :last_visit_time, :type => Integer
+	field :last_visit_client, :type => String
 	field :level, :type => Integer, default: 0
 	field :level_expire_time, :type => Integer, default: -1
 
@@ -104,8 +105,13 @@ class User
 		return User.where(:_id => user_id, :status.gt => -1)[0]
 	end
 
-	def update_last_visit_time
+	def get_level_information
+		return {"level" => self.level, "level_expire_time" => self.level_expire_time}
+	end
+
+	def update_last_visit_info(client)
 		self.last_visit_time = Time.now.to_i
+		self.last_visit_client = client
 		self.save
 	end
 
@@ -133,8 +139,9 @@ class User
 	end
 
 	def skip_init_step
-		self.status = self.status + 1 if self.status <= 4
-		return self.save
+		self.status = self.status + 1 if self.status < 4
+		return false if !self.save
+		return self.status
 	end
 
 
@@ -216,6 +223,7 @@ class User
 	#*retval*:
 	#* the new user instance: when successfully created
 	def self.create_new_registered_user(user, current_user)
+    logger.debug user.inspect
 		# check whether the email acount is illegal
 		return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal?(user["email"])
 		return ErrorEnum::EMAIL_EXIST if self.user_exist_by_email?(user["email"])
@@ -302,7 +310,9 @@ class User
 		user.last_login_time = Time.now.to_i
 		user.last_login_ip = client_ip
 		user.login_count = user.login_count + 1
-		return user.save
+		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
+		return false if !user.save
+		return {"status" => user.status, "auth_key" => user.auth_key, "user_id" => user._id.to_s}
 	end
 
 	#*description*: reset password for an user, used when the user forgets its password

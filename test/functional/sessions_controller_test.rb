@@ -19,7 +19,8 @@ class SessionsControllerTest < ActionController::TestCase
 		assert_equal ErrorEnum::WRONG_PASSWORD.to_s, @response.body
 
 		post :create, :format => :json, :user => {"email_username" => jesse.email, "password" => Encryption.decrypt_password(jesse.password)}
-		assert_equal true.to_s, @response.body
+		retval = JSON.parse(@response.body)
+		assert_equal 2, retval["status"]
 	end
 
 	test "should send password email" do
