@@ -23,6 +23,7 @@ module Mongoid
         return if options[:allow_nil] && raw_value.nil?
 
         unless value = parse_raw_value_as_a_number(raw_value)
+          #record.error_code << ErrorEnum.const_get("#{record.class.name}#{attr_name.to_s.initial_upcase}NotANumber")
           record.error_code << ErrorEnum.const_get("#{record.class.name}#{attr_name.to_s.initial_upcase}NotANumber")
           record.errors.add(attr_name, :not_a_number, filtered_options(raw_value))
           return

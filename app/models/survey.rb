@@ -81,6 +81,16 @@ class Survey
 
 	public
 
+	def all_questions(attributes = [])
+		q = []
+		quota_template_question_page.each do |page|
+			q << page[:questions]
+		end
+		pages.each do |page|
+			q << page[:questions]
+		end
+		q.collect { |i| Question.find(i) }[0]
+	end
 
 	#*description*: judge whether this survey has a question
 	#

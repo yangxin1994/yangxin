@@ -387,8 +387,13 @@ class User
 		m
 	end
 
+	def unread_messages_count
+		Message.unread(created_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}.count
+	end
+
 	def show_messages
-		Message.unread(created_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}
+		Message.all.select{ |m| (message_ids.include? m.id) or (m.type == 0)}
+		#Message.unread(created_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}
 	end
 
 #--

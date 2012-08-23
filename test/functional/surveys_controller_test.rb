@@ -161,6 +161,7 @@ class SurveysControllerTest < ActionController::TestCase
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :show, :format => :json, :id => survey_id
 		survey_obj = JSON.parse(@response.body)
+		pp survey_obj
 		assert_equal survey_id, survey_obj["_id"]
 		sign_out
 	end

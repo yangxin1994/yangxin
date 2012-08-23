@@ -20,8 +20,9 @@ class Message
   # 1 the message is sent to special users
   field :type, :type => Integer, default: 0
 
-  belongs_to :sender, :class_name => "User", :inverse_of => :sended_messages
-  
+  belongs_to :sender, :class_name => "User",
+                      :inverse_of => :sended_messages
+
   validates :title, :presence => true
   validates :content, :presence => true
 

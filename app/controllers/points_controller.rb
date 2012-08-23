@@ -1,7 +1,7 @@
 class PointsController < ApplicationController
 	#TODO before_filter
 	def index
-		@point_logs = current_user.point_logs.page(params[:page].to_i)
+		@point_logs = current_user.point_logs.page(page)
 		respond_to do |format|
 			format.json { render json: @point_logs }
 		end

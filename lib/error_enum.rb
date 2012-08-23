@@ -85,12 +85,25 @@ module ErrorEnum
 	IP_REQUEST_SINA_ERROR = 100102
 	POSTCODE_REQUEST_BAIDU_ERROR =100103
 
-	# Presents Error Code
-	PresentNotFound = 21001
-	InvalidPresentId = 21002
-	UNAUTHROZIED = -1
-	# Award Error Code
-	AwardBudgetCounldNotBeBlank = 21511
+###
+# 	syetem error 1
+# 	error 2
+# 	not_found 01
+# 	invalid_id 02
+# 	
+###
+
+	# Presents Error Code (10)
+	PRESENT_NOT_FOUND= 21001
+	INVALID_PRESENT_ID = 21002
+	# Messages Error Code (11)
+	MESSAGE_NOT_FOUND = 21101
+	INVALID_MESSAGE_ID = 21102
+	MESSAGE_TITLE_COULD_NOT_BE_BLANK = 21110
+	MESSAGE_CONTENT_COULD_NOT_BE_BLANK = 21120
+	# Award Error Code (12)
+	AwardBudgetCounldNotBeBlank = 21211
+
 	USER_SAVE_FAILED = 110000
 
 end

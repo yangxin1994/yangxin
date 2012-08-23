@@ -22,6 +22,23 @@ class BasicQuestion
 
 	ATTR_NAME_ARY = %w[content note]
 
+	def header(qindex)
+		retval = []
+		header_prefix = "q#{qindex}"
+		input = "-input"
+		case question_type
+		when QuestionTypeEnum::CHOICE_QUESTION
+			if issue[:min_choice] >= 1
+				issue[:min_choice].each do |i|
+					retval << header_prefix + "c_#{i}"
+				end				
+			end
+			if issue[:other_item][:has_other_item]
+				retval << header_prefix + input
+			end
+		end
+	end
+
 	def self.has_question_type(question_type)
 		begin
 			return !Issue::ISSUE_TYPE[question_type].nil?

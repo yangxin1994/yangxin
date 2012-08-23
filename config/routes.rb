@@ -171,6 +171,11 @@ OopsData::Application.routes.draw do
 		end
 	end
 
+	resources :messages do
+		collection do 
+			get :unread_count
+		end
+	end
 
 
 	resources :lotteries do

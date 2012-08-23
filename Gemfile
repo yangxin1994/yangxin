@@ -43,7 +43,6 @@ gem 'mime-types'
 gem 'mini_magick', :git => 'https://github.com/karmaQ/mini_magick.git'
 # Use unicorn as the web server
 # gem 'unicorn'
-
 # Deploy with Capistrano
 # gem 'capistrano'
 

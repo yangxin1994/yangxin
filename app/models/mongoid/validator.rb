@@ -25,7 +25,7 @@ module Mongoid
 		    	#a[0] = a[0].upcase
 		    	a = attribute.to_s.initial_upcase
 		    	record.errors[attribute] << "must not exceed #{spend}"
-		    	record.error_code << ErrorEnum.const_get("#{record._type}#{a}CounldNotBeBlank")
+		    	record.error_code << ErrorEnum.const_get("#{record._type.upcase}_#{a.upcase}COULD_NOT_BE_BLANK")
 		    end
 		  end
 		end
