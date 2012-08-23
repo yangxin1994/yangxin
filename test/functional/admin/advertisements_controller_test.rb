@@ -6,8 +6,7 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 		clear(Advertisement, User)
 
 		get 'index', :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_LOGIN
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, @response.body
 
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.status = 2
@@ -16,8 +15,7 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 
 		sign_in(user.email, "123456")
 		get 'index', :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_ADMIN
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, @response.body
 		sign_out
 
 		user = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
@@ -51,11 +49,11 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 
 		# unique
 		post 'create', :advertisement => {title: "title1", linked: "linked1"}, :format => :json
-		assert_equal @response.body.to_i, ErrorEnum::ADVERTISEMENT_SAVE_FAILED
+		assert_equal ErrorEnum::ADVERTISEMENT_SAVE_FAILED.to_s, @response.body
 
 		# lack of image_location attr
 		post 'create', :advertisement => {title: "title2", linked: "linked1"}, :format => :json
-		assert_equal @response.body.to_i, ErrorEnum::ADVERTISEMENT_SAVE_FAILED
+		assert_equal ErrorEnum::ADVERTISEMENT_SAVE_FAILED.to_s, @response.body
 
 		#
 		# get index
@@ -126,7 +124,7 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 
 		post 'update', :id => "123443454354353", :advertisement => {linked: "updated linked1"}, :format => :json
 		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::ADVERTISEMENT_NOT_EXIST
+		assert_equal ErrorEnum::ADVERTISEMENT_NOT_EXIST.to_s, @response.body
 
 		post 'update', :id => advertisement.id.to_s, :advertisement => {linked: "updated linked1"}, :format => :json
 		retval = JSON.parse(@response.body)
@@ -154,7 +152,7 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 
 		post 'update', :id => "123443454354353", :format => :json
 		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::ADVERTISEMENT_NOT_EXIST
+		assert_equal ErrorEnum::ADVERTISEMENT_NOT_EXIST.to_s, @response.body
 
 		post 'create', :advertisement => {title: "title1", linked: "linked1", image_location: "image_location1"}, :format => :json
 		retval = JSON.parse(@response.body)

@@ -272,13 +272,17 @@ class ApplicationController < ActionController::Base
 		}
 	end
 	def render_json_e(error_code)
-		return_json(false, error_code)
+		error_code_obj = {
+			:error_code => error_code,
+			:error_message => ""
+		}
+		return_json(false, error_code_obj)
 	end
 	def render_json_s(value = true)
 		return_json(true, value)
 	end
 	def render_json_auto(value = true)
-		is_success = !(value.class == String && value.start_with?('error'))
+		is_success = !(value.class == String && value.start_with?('error_'))
 		render_json(is_success, value)
 	end
 end

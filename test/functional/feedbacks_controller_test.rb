@@ -8,7 +8,7 @@ class FeedbacksControllerTest < ActionController::TestCase
 		assert_equal User.all.count, 0
 
 		get 'index', :format => :json
-		assert_equal @response.body.to_i, ErrorEnum::REQUIRE_LOGIN
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, @response.body
 
 		assert_equal User.all.count, 1
 
@@ -41,12 +41,10 @@ class FeedbacksControllerTest < ActionController::TestCase
 		sign_in(user.email, "123456")
 
 		post 'create', :feedback => {feedback_type: "Type1", title: "title1", content: "content1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::FEEDBACK_TYPE_ERROR
+		assert_equal ErrorEnum::FEEDBACK_TYPE_ERROR.to_s, @response.body
 		
 		post 'create', :feedback => {feedback_type: 129, title: "title1", content: "content1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::FEEDBACK_RANGE_ERROR
+		assert_equal ErrorEnum::FEEDBACK_RANGE_ERROR.to_s, @response.body
 
 		post 'create', :feedback => {feedback_type: 1, title: "title1", content: "content1"}, :format => :json
 		retval = JSON.parse(@response.body)
@@ -56,8 +54,7 @@ class FeedbacksControllerTest < ActionController::TestCase
 		assert_equal feedback.question_user, user
 
 		post 'create', :feedback => {content: "content1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::FEEDBACK_SAVE_FAILED
+		assert_equal ErrorEnum::FEEDBACK_SAVE_FAILED.to_s, @response.body
 
 		#
 		# get index
@@ -144,20 +141,16 @@ class FeedbacksControllerTest < ActionController::TestCase
 		feedback = Feedback.all.first
 
 		post 'update', :id => "123443454354353", :feedback => {title: "updated title1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::FEEDBACK_NOT_EXIST
+		assert_equal ErrorEnum::FEEDBACK_NOT_EXIST.to_s, @response.body
 
 		post 'update',:id => feedback.id.to_s ,  :feedback => {feedback_type: "Type1", title: "title1", content: "content1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::FEEDBACK_TYPE_ERROR
+		assert_equal ErrorEnum::FEEDBACK_TYPE_ERROR.to_s, @response.body
 		
 		post 'update',:id => feedback.id.to_s,  :feedback => {feedback_type: 129, title: "title1", content: "content1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::FEEDBACK_RANGE_ERROR
+		assert_equal ErrorEnum::FEEDBACK_RANGE_ERROR.to_s, @response.body
 
 		post 'update',:id => feedback.id.to_s,  :feedback => {feedback_type: 4, title: "title1", content: "content1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::FEEDBACK_NOT_CREATOR
+		assert_equal ErrorEnum::FEEDBACK_NOT_CREATOR.to_s, @response.body
 
 		sign_out
 

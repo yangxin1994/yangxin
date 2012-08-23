@@ -51,24 +51,24 @@ class SessionsController < ApplicationController
 			flash[:error] = "帐号不存在!"
 			respond_to do |format|
 				format.html	{ redirect_to sessions_path and return }
-				format.json	{ render :json => ErrorEnum::USER_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::USER_NOT_EXIST) and return }
 			end
 		when ErrorEnum::USER_NOT_ACTIVATED
 			flash[:error] = "您的帐号未激活，请您首先激活帐号"
 			respond_to do |format|
 				format.html	{ redirect_to input_activate_email_path and return }
-				format.json	{ render :json => ErrorEnum::USER_NOT_ACTIVATED and return }
+				format.json	{ render_json_e(ErrorEnum::USER_NOT_ACTIVATED) and return }
 			end
 		when ErrorEnum::WRONG_PASSWORD
 			flash[:error] = "密码错误"
 			respond_to do |format|
 				format.html	{ redirect_to sessions_path and return }
-				format.json	{ render :json => ErrorEnum::WRONG_PASSWORD and return }
+				format.json	{ render_json_e(ErrorEnum::WRONG_PASSWORD) and return }
 			end
 		when false
 			respond_to do |format|
 				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
+				format.json	{ render_json_e(ErrorEnum::UNKNOWN_ERROR) and return }
 			end
 		else
 			User.combine(params[:user]["email_username"], *third_party_info) if !third_party_info.nil?
@@ -79,7 +79,7 @@ class SessionsController < ApplicationController
 			flash[:notice] += ",并成功与第三方帐号绑定。" if third_party_info
 			respond_to do |format|
 				format.html	{ redirect_to home_path and return }
-				format.json	{ render :json => login and return }
+				format.json	{ render_json_s(login) and return }
 			end
 		end
 	end
@@ -107,12 +107,12 @@ class SessionsController < ApplicationController
 			flash[:notice] = "更新个人信息成功"
 			respond_to do |format|
 				format.html	{ redirect_to home_path and return }
-				format.json	{ render :json => true and return }
+				format.json	{ render_json_s and return }
 			end
 		else
 			respond_to do |format|
 				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
+				format.json	{ render_json_e(ErrorEnum::UNKNOWN_ERROR) and return }
 			end
 		end
 	end
@@ -124,12 +124,12 @@ class SessionsController < ApplicationController
 			flash[:notice] = "更新个人信息成功"
 			respond_to do |format|
 				format.html	{ redirect_to home_path and return }
-				format.json	{ render :json => true and return }
+				format.json	{ render_json_s and return }
 			end
 		else
 			respond_to do |format|
 				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
+				format.json	{ render_json_e(ErrorEnum::UNKNOWN_ERROR) and return }
 			end
 		end
 	end
@@ -137,14 +137,14 @@ class SessionsController < ApplicationController
 	def init_user_attr_survey
 		retval = @current_user.init_attr_survey(params[:survey_id], params[:answer])
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_s(retval) and return }
 		end
 	end
 
 	def obtain_user_attr_survey
 		questions = Survey.get_user_attr_survey
 		respond_to do |format|
-			format.json { render :json => questions and return }
+			format.json { render_json_s(questions) and return }
 		end
 	end
 
@@ -154,13 +154,13 @@ class SessionsController < ApplicationController
 		when false 
 			respond_to do |format|
 				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
+				format.json	{ render_json_e(ErrorEnum::UNKNOWN_ERROR) and return }
 			end
 		else
 			flash[:notice] = "成功跳到下一步"
 			respond_to do |format|
 				format.html	{ redirect_to home_path and return }
-				format.json	{ render :json => {"status" => retval} and return }
+				format.json	{ render_json_s({"status" => retval}) and return }
 			end
 		end
 	end
@@ -182,7 +182,7 @@ class SessionsController < ApplicationController
 		# redirect to the welcome page
 		respond_to do |format|
 			format.html	{ redirect_to root_path and return }
-			format.json	{ render :json => true and return }
+			format.json	{ render_json_s and return }
 		end
 	end
 
@@ -210,7 +210,7 @@ class SessionsController < ApplicationController
 			flash[:notice] = "该邮箱未注册，请您注册"
 			respond_to do |format|
 				format.html { redirect_to registrations_path and return }
-				format.json { render :json => ErrorEnum::USER_NOT_EXIST and return }
+				format.json { render_json_e(ErrorEnum::USER_NOT_EXIST) and return }
 			end
 		end
 
@@ -220,7 +220,7 @@ class SessionsController < ApplicationController
 		flash[:notice] = "重置密码邮件已发送，请到您的邮箱中点击链接进行密码重置"
 		respond_to do |format|
 			format.html { redirect_to sessions_path and return }
-			format.json { render :json => true and return }
+			format.json { render_json_s and return }
 		end
 	end
 
@@ -276,13 +276,13 @@ class SessionsController < ApplicationController
 		rescue
 			respond_to do |format|
 				format.html { redirect_to "/500" and return }		# email account does not exist
-				format.json { render :json => false and return }		# email account does not exist
+				format.json { render_json_e(ErrorEnum::USER_NOT_EXIST) and return }		# email account does not exist
 			end
 		end
 		if password_info_json.nil?
 			respond_to do |format|
 				format.html { redirect_to "/500" and return }		# email account does not exist
-				format.json { render :json => false and return }		# email account does not exist
+				format.json { render_json_e(ErrorEnum::USER_NOT_EXIST) and return }		# email account does not exist
 			end
 		end
 		password_info = JSON.parse(password_info_json)
@@ -290,13 +290,13 @@ class SessionsController < ApplicationController
 			flash[:notice] = "密码重置链接已经过期，请重新发送重置密码链接"
 			respond_to do |format|
 				format.html { redirect_to :action => "forget_password" and return }		# email account does not exist
-				format.json { render :json => ErrorEnum::RESET_PASSWORD_EXPIRED and return }		# email account does not exist
+				format.json { render_json_e(ErrorEnum::RESET_PASSWORD_EXPIRED) and return }		# email account does not exist
 			end
 		end
 		if password_info["email"] != params[:user]["email"]
 			respond_to do |format|
 				format.html { redirect_to "/500" and return }		# email account does not exist
-				format.json { render :json => ErrorEnum::USER_NOT_EXIST and return }		# email account does not exist
+				format.json { render_json_e(ErrorEnum::USER_NOT_EXIST) and return }		# email account does not exist
 			end
 		end
 
@@ -305,18 +305,18 @@ class SessionsController < ApplicationController
 		when ErrorEnum::USER_NOT_EXIST
 			respond_to do |format|
 				format.html { redirect_to "/500" and return }		# email account does not exist
-				format.json { render :json => ErrorEnum::USER_NOT_EXIST and return }		# email account does not exist
+				format.json { render_json_e(ErrorEnum::USER_NOT_EXIST) and return }		# email account does not exist
 			end
 		when ErrorEnum::WRONG_PASSWORD_CONFIRMATION
 			respond_to do |format|
 				format.html { redirect_to "/500" and return }
-				format.json { render :json => ErrorEnum::WRONG_PASSWORD_CONFIRMATION and return }
+				format.json { render_json_e(ErrorEnum::WRONG_PASSWORD_CONFIRMATION) and return }		# email account does not exist
 			end
 		else
 			flash[:notice] = "密码已重置"
 			respond_to do |format|
 				format.html { redirect_to sessions_path and return }
-				format.json { render :json => true and return }
+				format.json { render_json_s and return }
 			end
 		end
 	end
@@ -337,7 +337,7 @@ class SessionsController < ApplicationController
 	def reset_password
 		reset_password_retval = @current_user.reset_password(params["old_password"], params["new_password"], params["new_password_confirmation"])
 		respond_to do |format|
-			format.json { render :json => reset_password_retval and return }
+			format.json { render_json_s(reset_password_retval) and return }
 		end
 	end
 
@@ -402,22 +402,22 @@ class SessionsController < ApplicationController
 		if tp_user.is_bound && user_signed_in?
 			# bound and signed in
 			respond_to do |format|
-				format.json { render :json => {"binding" => tp_user.is_bound(@current_user)} and return }
+				format.json { render_json_s({"binding" => tp_user.is_bound(@current_user)}) and return }
 			end
 		elsif tp_user.is_bound && !user_signed_in?
 			retval = User.login(@current_user.email, Encryption.decrypt_password(@current_user.password), @client_ip)
 			respond_to do |format|
-				format.json { render :json => retval and return }
+				format.json { render_json_s(retval) and return }
 			end
 		elsif !tp_user.is_bound && user_signed_in
 			respond_to do |format|
-				format.json { render :json => {"binding" => tp_user.bind(@current_user)} and return }
+				format.json { render_json_s({"binding" => tp_user.bind(@current_user)}) and return }
 			end
 		else
 			google_user = tp_user.website == "google"? tp_user.google_email : nil
 			third_party_info = encrypt_third_party_user_id(tp_user.website, tp_user.user_id)
 			respond_to do |format|
-				format.json { render :json => {"third_party_info" => third_party_info, "google_user" => google_user} and return }
+				format.json { render_json_s({"third_party_info" => third_party_info, "google_user" => google_user}) and return }
 			end
 		end
 

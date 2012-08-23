@@ -21,12 +21,12 @@ class RegistrationsControllerTest < ActionController::TestCase
 		user_hash = init_user
 		user_hash["email"] = "another_email@test.com"
 		post :create, :format => :json, :user => user_hash
-		assert_equal ErrorEnum::EMAIL_EXIST.to_s, @response.body
+		assert_equal ErrorEnum::USERNAME_EXIST.to_s, @response.body
 
 		user_hash = init_user
 		user_hash["username"] = "another_username"
 		post :create, :format => :json, :user => user_hash
-		assert_equal ErrorEnum::USERNAME_EXIST.to_s, @response.body
+		assert_equal ErrorEnum::EMAIL_EXIST.to_s, @response.body
 	end
 
 	test "should check email" do
