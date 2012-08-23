@@ -16,6 +16,7 @@ class PointLog
 
   # TO DO validation
   #validates_presence_of :operated_point, :cause, :operated_admin
+  validates :operated_point, :numericality => true
   # before_save :operated_point
   after_create :operate_user_point
 

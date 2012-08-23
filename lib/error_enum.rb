@@ -90,7 +90,8 @@ module ErrorEnum
 # 	error 2
 # 	not_found 01
 # 	invalid_id 02
-# 	
+# 	blank x0
+#   not a number x1
 ###
 
 	# Presents Error Code (10)
@@ -103,6 +104,8 @@ module ErrorEnum
 	MESSAGE_CONTENT_COULD_NOT_BE_BLANK = 21120
 	# Award Error Code (12)
 	AwardBudgetCounldNotBeBlank = 21211
+	# PointLog Error Code (13)
+	POINTLOG_OPERATED_POINT_NOT_A_NUNBER = 21311
 
 	USER_SAVE_FAILED = 110000
 

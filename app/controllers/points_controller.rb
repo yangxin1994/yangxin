@@ -1,9 +1,6 @@
 class PointsController < ApplicationController
-	#TODO before_filter
+	before_filter :require_sign_in
 	def index
-		@point_logs = current_user.point_logs.page(page)
-		respond_to do |format|
-			format.json { render json: @point_logs }
-		end
+		respond_and_render_json {current_user.point_logs.page(page)}
 	end
 end

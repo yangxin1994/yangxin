@@ -8,9 +8,9 @@ class PointsControllerTest < ActionController::TestCase
   end
 
 
-  test "should show a point log list " do
+  test "should show a point log list" do
     get :index, :page => 1, :format => :json
+    pp response.body
     assert_response :success
-
    end
 end

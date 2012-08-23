@@ -30,8 +30,8 @@ module ActiveModel
       end
 
       def record_error(record, attribute, name, value)
-        #record.error_code << ErrorEnum.const_get("#{record.type}#{attr_name}IsInvalid")
-        record.error_code << ErrorEnum.const_get("#{record._type.upcase}_#{attr_name.upcase}_IS_INVALID")
+        #record.add_error_code ErrorEnum.const_get("#{record.type}#{attr_name}IsInvalid")
+        record.add_error_code ErrorEnum.const_get("#{record._type.upcase}_#{attr_name.upcase}_IS_INVALID")
         record.errors.add(attribute, :invalid, options.except(name).merge!(:value => value))
       end
 

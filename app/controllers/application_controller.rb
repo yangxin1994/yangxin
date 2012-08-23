@@ -24,33 +24,14 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
-	def render_404
-		render_optional_error_file(404)
-	end
-
-	def render_403
-		render_optional_error_file(403)
-	end
-
-	def render_optional_error_file(status_code)
-		status = status_code.to_s
-		if ["404","403", "422", "500"].include?(status)
-			render :template => "/errors/#{status}", :format => [:html], :handler => [:erb], :status => status, :layout => "application"
-		else
-			render :template => "/errors/unknown", :format => [:html], :handler => [:erb], :status => status, :layout => "application"
-		end
-	end
-
-	def notice_success(msg)
-		flash[:notice] = msg
-	end
-
-	def notice_error(msg)
-		flash[:notice] = msg
-	end
-
-	def notice_warning(msg)
-		flash[:notice] = msg
+	def respond_and_render_json(is_success = true, &block)
+		respond_to do |format|
+			format.json do 
+				render :json => {
+				:success => is_success,
+				:value => yield }
+			end
+		end		
 	end
 	
 ################################################
@@ -270,5 +251,22 @@ class ApplicationController < ActionController::Base
 		# avoid arr = nil
 		arr = arr.slice((page-1)*per_page, per_page) || []
 		return arr
+	end
+	# return error
+	def return_json(is_success, value)
+		render :json => {
+			:success => is_success,
+			:value => value
+		}
+	end
+	def render_json_e(error_code)
+		return_json(false, error_code)
+	end
+	def render_json_s(value = true)
+		return_json(true, value)
+	end
+	def render_json_auto(value = true)
+		is_success = !(value.class == String && value.start_with?('error'))
+		render_json(is_success, value)
 	end
 end
