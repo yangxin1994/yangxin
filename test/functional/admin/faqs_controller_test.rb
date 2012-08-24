@@ -24,7 +24,8 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 		clear(User, Faq)
 	
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
-		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 		
 		clear(User,Faq)
 	end
@@ -38,7 +39,8 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 	
 		sign_in(user.email, "123456")
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
-		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out
 		
 		clear(User,Faq)

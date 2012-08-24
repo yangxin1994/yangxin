@@ -21,7 +21,8 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 		clear(User, PublicNotice)
 	
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
-		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 		
 		clear(User,PublicNotice)
 	end
@@ -35,7 +36,8 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 	
 		sign_in(user.email, "123456")
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
-		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out
 		
 		clear(User,PublicNotice)

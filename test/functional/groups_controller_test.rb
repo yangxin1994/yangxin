@@ -8,7 +8,8 @@ class GroupsControllerTest < ActionController::TestCase
 		members = generate_group_members
 
 		post :create, :format => :json, :group => {"name" => "group name", "description" => "group description", "members" => members}
-		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :group => {"name" => "group name", "description" => "group description", "members" => Marshal.load(Marshal.dump(members)) << {}}

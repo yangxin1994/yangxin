@@ -94,7 +94,7 @@ class ApplicationController < ActionController::Base
 		if params[:client_type] == "web" || params[:client_type].to_s == ""
 			return !!@current_user && get_cookie(:auth_key).to_s != "" && @current_user.auth_key == get_cookie(:auth_key)
 		else
-			return !!@current_user && params(:auth_key).to_s != "" && @current_user.auth_key == params(:auth_key)
+			return !!@current_user && params[:auth_key].to_s != "" && @current_user.auth_key == params[:auth_key]
 		end
 	end
 
@@ -127,13 +127,13 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_admin?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_ADMIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_ADMIN) and return }
 			end
 		end
 	end
@@ -142,7 +142,7 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_survey_auditor?
@@ -203,7 +203,7 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 	end
@@ -283,6 +283,6 @@ class ApplicationController < ActionController::Base
 	end
 	def render_json_auto(value = true)
 		is_success = !(value.class == String && value.start_with?('error_'))
-		render_json(is_success, value)
+		is_success ? render_json_s(value) : render_json_e(value)
 	end
 end

@@ -102,7 +102,7 @@ class Survey
 	#
 	#*retval*:
 	#* a survey object
-	def to_json
+	def serialize
 		survey_obj = Hash.new
 		survey_obj["_id"] = self._id.to_s
 		survey_obj["created_at"] = self.created_at

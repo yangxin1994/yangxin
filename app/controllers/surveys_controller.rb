@@ -1,4 +1,5 @@
 # encoding: utf-8
+require 'array'
 require 'error_enum'
 class SurveysController < ApplicationController
 	before_filter :require_sign_in
@@ -10,7 +11,7 @@ class SurveysController < ApplicationController
 		@survey = @current_user.surveys.find_by_id(params[:id])
 		if @survey.nil?
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
 			end
 		end
 	end
@@ -19,7 +20,7 @@ class SurveysController < ApplicationController
 		@survey = @current_user.surveys.normal.find_by_id(params[:id])
 		if @survey.nil?
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
 			end
 		end
 	end
@@ -28,7 +29,7 @@ class SurveysController < ApplicationController
 		@survey = @current_user.surveys.deleted.find_by_id(params[:id])
 		if @survey.nil?
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
 			end
 		end
 	end
@@ -48,7 +49,7 @@ class SurveysController < ApplicationController
 		survey = Survey.new
 		survey.save
 		respond_to do |format|
-			format.json	{ render :json => survey.to_json and return }
+			format.json	{ render_json_s(survey.serialize) and return }
 		end
 	end
 
@@ -73,41 +74,41 @@ class SurveysController < ApplicationController
 				survey.user = @current_user
 			else
 				respond_to do |format|
-					format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+					format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
 				end
 			end
 		end
 		survey = survey.save_meta_data(params[:survey])
 		respond_to do |format|
-			format.json	{ render :json => survey.to_json and return }
+			format.json	{ render_json_s(survey.serialize) and return }
 		end
 	end
 
 	def show_style_setting
 		style_setting = @survey.show_style_setting
 		respond_to do |format|
-			format.json	{ render :json => style_setting and return }
+			format.json	{ render_json_auto(style_setting) and return }
 		end
 	end
 
 	def update_style_setting
 		retval = @survey.update_style_setting(params[:style_setting])
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
 	def show_quality_control_setting
-		style_setting = @survey.show_quality_control_setting
+		quality_control_setting = @survey.show_quality_control_setting
 		respond_to do |format|
-			format.json	{ render :json => style_setting and return }
+			format.json	{ render_json_auto(quality_control_setting) and return }
 		end
 	end
 
 	def update_quality_control_setting
 		retval = @survey.update_quality_control_setting(params[:quality_control_setting])
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -128,7 +129,7 @@ class SurveysController < ApplicationController
 		@survey.close("", @current_user)
 		retval = @survey.delete
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -148,7 +149,7 @@ class SurveysController < ApplicationController
 	def recover
 		retval = @survey.recover
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -168,7 +169,7 @@ class SurveysController < ApplicationController
 	def clear
 		retval = @survey.clear
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -189,7 +190,7 @@ class SurveysController < ApplicationController
 	def clone
 		new_survey = @survey.clone(title)
 		respond_to do |format|
-			format.json	{ render :json => new_survey.to_json and return }
+			format.json	{ render_json_auto(new_survey.serialize) and return }
 		end
 	end
 
@@ -208,7 +209,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def show
 		respond_to do |format|
-			format.json	{ render :json => @survey.to_json and return }
+			format.json	{ render_json_auto(@survey.serialize) and return }
 		end
 	end
 
@@ -229,7 +230,7 @@ class SurveysController < ApplicationController
 	def add_tag
 		retval = @survey.add_tag(params[:tag])
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -251,7 +252,7 @@ class SurveysController < ApplicationController
 	def remove_tag
 		retval = @survey.remove_tag(params[:tag])
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -271,7 +272,7 @@ class SurveysController < ApplicationController
 	def index
 		survey_list = @current_user.surveys.list(params[:status], params[:public_status], params[:tags])
 		respond_to do |format|
-			format.json	{ render :json => survey_list.to_json and return }
+			format.json	{ render_json_auto(survey_list.serialize) and return }
 		end
 	end
 
@@ -292,7 +293,7 @@ class SurveysController < ApplicationController
 	def submit
 		retval = @survey.submit(params[:message], @current_user)
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -314,7 +315,7 @@ class SurveysController < ApplicationController
 	def close
 		retval = @survey.close(params[:message], @current_user)
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -336,7 +337,7 @@ class SurveysController < ApplicationController
 	def pause
 		retval = @survey.pause(params[:message], @current_user)
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 end

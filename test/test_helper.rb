@@ -126,10 +126,12 @@ class ActiveSupport::TestCase
 		old_controller = @controller
 		@controller = SurveysController.new
 		get :new, :format => :json
-		survey_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		survey_obj = result["value"]
 		post :save_meta_data, :format => :json, :id => survey_obj["_id"], :survey => survey_obj
 		@controller = old_controller
-		survey_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		survey_obj = result["value"]
 		sign_out
 		return survey_obj["_id"]
 	end
@@ -139,7 +141,8 @@ class ActiveSupport::TestCase
 		old_controller = @controller
 		@controller = SurveysController.new
 		get :show, :format => :json, :id => survey_id
-		survey_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		survey_obj = result["value"]
 		@controller = old_controller
 		sign_out
 		return survey_obj

@@ -10,7 +10,8 @@ class Admin::FeedbacksControllerTest < ActionController::TestCase
 		assert_equal User.all.count, 0
 
 		get 'index', :format => :json
-		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 
 		assert_equal User.all.count, 1
 
@@ -25,7 +26,8 @@ class Admin::FeedbacksControllerTest < ActionController::TestCase
 
 		sign_in(user.email, "123456")
 		get 'index', :format => :json
-		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out
 
 		user1 = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))

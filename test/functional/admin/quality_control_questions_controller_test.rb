@@ -10,7 +10,8 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 
 		sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
 		post :create, :format => :json, :quality_control_type => 1, :question_type => 0, :question_number => -1
-		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))

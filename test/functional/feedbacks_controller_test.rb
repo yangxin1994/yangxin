@@ -8,7 +8,8 @@ class FeedbacksControllerTest < ActionController::TestCase
 		assert_equal User.all.count, 0
 
 		get 'index', :format => :json
-		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 
 		assert_equal User.all.count, 1
 

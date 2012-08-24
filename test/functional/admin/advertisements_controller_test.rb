@@ -6,7 +6,8 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 		clear(Advertisement, User)
 
 		get 'index', :format => :json
-		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.status = 2
@@ -15,7 +16,8 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 
 		sign_in(user.email, "123456")
 		get 'index', :format => :json
-		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out
 
 		user = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
