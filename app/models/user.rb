@@ -17,6 +17,7 @@ class User
 	field :status, :type => Integer, default: 0
 	field :last_login_time, :type => Integer
 	field :last_login_ip, :type => String
+	field :last_login_client_type, :type => String
 	field :login_count, :type => Integer, default: 0
 	field :activate_time, :type => Integer
 	field :introducer_id, :type => Integer
@@ -28,8 +29,6 @@ class User
 
 	field :role, :type => Integer, default: 0
 	field :auth_key, :type => String
-	field :last_visit_time, :type => Integer
-	field :last_visit_client, :type => String
 	field :level, :type => Integer, default: 0
 	field :level_expire_time, :type => Integer, default: -1
 
@@ -107,12 +106,6 @@ class User
 
 	def get_level_information
 		return {"level" => self.level, "level_expire_time" => self.level_expire_time}
-	end
-
-	def update_last_visit_info(client)
-		self.last_visit_time = Time.now.to_i
-		self.last_visit_client = client
-		self.save
 	end
 
 	def init_basic_info(user_info)
@@ -267,27 +260,6 @@ class User
 		return user.save
 	end
 
-	#*description*: user login with third party account
-	#
-	#*params*:
-	#* email address of the user
-	#* ip address of the user
-	#
-	#*retval*:
-	#* true: when successfully login
-	#* EMAIL_NOT_EXIST
-	#* EMAIL_NOT_ACTIVATED
-	def self.third_party_login(email, client_ip)
-		return ErrorEnum::USER_NOT_EXIST if !user_exist_by_email?(email)      # email account does not exist
-		return ErrorEnum::EMAIL_NOT_ACTIVATED if !user_activate?(email)   # not activated
-		user = User.find_by_email(email)
-		# record the login information
-		user.last_login_time = Time.now.to_i
-		user.last_login_ip = client_ip
-		user.login_count = user.login_count + 1
-		return user.save
-	end
-
 	#*description*: user login
 	#
 	#*params*:
@@ -300,8 +272,8 @@ class User
 	#* EMAIL_NOT_EXIST
 	#* EMAIL_NOT_ACTIVATED
 	#* WRONG_PASSWORD
-	def self.login(email_username, password, client_ip)
-		user = User.find_by_email(email_username)
+	def self.login(email_username, password, client_ip, client_type)
+		user = User.find_by_email_username(email_username)
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
 		# There is no is_activated
 		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
@@ -309,6 +281,7 @@ class User
 		# record the login information
 		user.last_login_time = Time.now.to_i
 		user.last_login_ip = client_ip
+		user.last_login_client_type = client_type
 		user.login_count = user.login_count + 1
 		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
 		return false if !user.save

@@ -47,7 +47,7 @@ class AnswersController < ApplicationController
 		if answer.nil?
 			# if this is the first time that the volonteer opens this survey
 			# 1. check the captcha
-			render :json => ErrorEnum::WRONG_CAPTCHA and return if @survey.quality_control_setting["has_captcha"] && !Tool.check_captcha
+			render :json => ErrorEnum::WRONG_CAPTCHA and return if @survey.access_control_setting["has_captcha"] && !Tool.check_captcha
 			# 2. check the password
 			retval = @survey.check_password
 			if retval == true

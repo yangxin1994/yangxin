@@ -98,15 +98,29 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	def show_quality_control_setting
-		quality_control_setting = @survey.show_quality_control_setting
+	def show_access_control_setting
+		access_control_setting = @survey.show_access_control_setting
 		respond_to do |format|
-			format.json	{ render_json_auto(quality_control_setting) and return }
+			format.json	{ render_json_auto(access_control_setting) and return }
 		end
 	end
 
-	def update_quality_control_setting
-		retval = @survey.update_quality_control_setting(params[:quality_control_setting])
+	def update_access_control_setting
+		retval = @survey.update_access_control_setting(params[:access_control_setting])
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
+
+	def set_random_quality_control_questions
+		retval = @survey.set_random_quality_control_questions(params[:random_quality_control_questions])
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
+
+	def get_random_quality_control_questions
+		retval = @survey.get_random_quality_control_questions
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
@@ -188,7 +202,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def clone
-		new_survey = @survey.clone(title)
+		new_survey = @survey.clone_survey(params[:title])
 		respond_to do |format|
 			format.json	{ render_json_auto(new_survey.serialize) and return }
 		end

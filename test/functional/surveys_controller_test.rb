@@ -88,11 +88,13 @@ class SurveysControllerTest < ActionController::TestCase
 		assert_equal "", style_setting["style_sheet_name"]
 		assert style_setting["has_progress_bar"]
 		assert style_setting["has_question_number"]
+		assert !style_setting["allow_pageup"]
 		sign_out
 
 		style_setting["style_sheet_name"] = "style sheet name"
 		style_setting["has_progress_bar"] = false
 		style_setting["has_question_number"] = false
+		style_setting["allow_pageup"] = true
 		
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update_style_setting, :format => :json, :id => survey_id, :style_setting => style_setting
@@ -107,10 +109,11 @@ class SurveysControllerTest < ActionController::TestCase
 		assert_equal "style sheet name", style_setting["style_sheet_name"]
 		assert !style_setting["has_progress_bar"]
 		assert !style_setting["has_question_number"]
+		assert style_setting["allow_pageup"]
 		sign_out
 	end
 
-	test "should update and show quality control setting" do
+	test "should update and show access control setting" do
 		clear(User, Survey)
 		jesse = init_jesse
 		oliver = init_oliver
@@ -118,41 +121,38 @@ class SurveysControllerTest < ActionController::TestCase
 		survey_id = create_survey(jesse.email, Encryption.decrypt_password(jesse.password))
 		
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :show_quality_control_setting, :format => :json, :id => survey_id
+		get :show_access_control_setting, :format => :json, :id => survey_id
 		result = JSON.parse(@response.body)
-		quality_control_setting = result["value"]
-		assert !quality_control_setting["allow_pageup"]
-		assert_equal -1, quality_control_setting["times_for_one_computer"]
-		assert !quality_control_setting["has_captcha"]
+		access_control_setting = result["value"]
+		assert_equal -1, access_control_setting["times_for_one_computer"]
+		assert !access_control_setting["has_captcha"]
 		sign_out
 
-		quality_control_setting["allow_pageup"] = true
-		quality_control_setting["times_for_one_computer"] = 2
-		quality_control_setting["has_captcha"] = true
-		quality_control_setting["password_control"]["password_type"] = 2
+		access_control_setting["times_for_one_computer"] = 2
+		access_control_setting["has_captcha"] = true
+		access_control_setting["password_control"]["password_type"] = 2
 		username_password_list = []
 		username_password_list << {"content" => ["u1", "p1"], "used" => false}
 		username_password_list << {"content" => ["u2", "p2"], "used" => false}
 		username_password_list << {"content" => ["u3", "p3"], "used" => false}
-		quality_control_setting["password_control"]["username_password_list"] = username_password_list
+		access_control_setting["password_control"]["username_password_list"] = username_password_list
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		put :update_quality_control_setting, :format => :json, :id => survey_id, :quality_control_setting => quality_control_setting
+		put :update_access_control_setting, :format => :json, :id => survey_id, :access_control_setting => access_control_setting
 		result = JSON.parse(@response.body)
 		assert_equal true, result["value"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :show_quality_control_setting, :format => :json, :id => survey_id
+		get :show_access_control_setting, :format => :json, :id => survey_id
 		result = JSON.parse(@response.body)
-		quality_control_setting = result["value"]
-		assert quality_control_setting["allow_pageup"]
-		assert_equal "2", quality_control_setting["times_for_one_computer"]
-		assert quality_control_setting["has_captcha"]
-		assert_equal "2", quality_control_setting["password_control"]["password_type"]
-		assert_equal 3, quality_control_setting["password_control"]["username_password_list"].length
-		assert_equal "u2", quality_control_setting["password_control"]["username_password_list"][1]["content"][0]
-		assert !quality_control_setting["password_control"]["username_password_list"][1]["used"]
+		access_control_setting = result["value"]
+		assert_equal "2", access_control_setting["times_for_one_computer"]
+		assert access_control_setting["has_captcha"]
+		assert_equal "2", access_control_setting["password_control"]["password_type"]
+		assert_equal 3, access_control_setting["password_control"]["username_password_list"].length
+		assert_equal "u2", access_control_setting["password_control"]["username_password_list"][1]["content"][0]
+		assert !access_control_setting["password_control"]["username_password_list"][1]["used"]
 		sign_out
 	end
 
@@ -310,14 +310,23 @@ class SurveysControllerTest < ActionController::TestCase
 	end
 
 	test "should clone survey" do
-		#########################
-		#########################
-		#########################
-		#########################
-		#########################
-		#########################
-		#########################
-		#########################
+		clear(User, Survey)
+		jesse = init_jesse
+		oliver = init_oliver
+		
+		survey_id = create_survey(jesse.email, Encryption.decrypt_password(jesse.password))
+
+		sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
+		get :clone, :format => :json, :id => survey_id
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
+		sign_out
+		
+		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		get :clone, :format => :json, :id => survey_id, :title => "new_title"
+		result = JSON.parse(@response.body)
+		assert_equal "new_title", result["value"]["title"]
+		sign_out
 	end
 
 	test "should submit survey" do

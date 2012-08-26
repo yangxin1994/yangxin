@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
 	protect_from_forgery
 
-	before_filter :client_ip, :current_user, :update_last_visit_info, :user_init
+	before_filter :client_ip, :current_user, :user_init
 
 	helper_method :user_signed_in?, :user_signed_out?
 ###################################################
@@ -63,10 +63,6 @@ class ApplicationController < ActionController::Base
 			current_user_id = params[:current_user_id]
 			@current_user = current_user_id == "" ? nil : User.find_by_id(current_user_id)
 		end
-	end
-
-	def update_last_visit_info
-		@current_user.update_last_visit_info(params[:client_type]) if !@current_user.nil?
 	end
 
 	def user_init
