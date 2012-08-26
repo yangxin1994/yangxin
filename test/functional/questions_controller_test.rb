@@ -14,38 +14,47 @@ class QuestionsControllerTest < ActionController::TestCase
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :survey_id => "wrong survey id", :page_index => 0, :question_id => -1, :question_type => 0
-		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id => -1, :question_type => 0
-		assert_equal ErrorEnum::OVERFLOW.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => "wrong question id", :question_type => 0
-		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :question_type => 0
-		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :question_type => 200
-		assert_equal ErrorEnum::WRONG_QUESTION_TYPE.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::WRONG_QUESTION_TYPE.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :question_type => 0
-		question_obj_1 = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		question_obj_1 = result["value"]
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :question_type => 10
-		question_obj_3 = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		question_obj_3 = result["value"]
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => question_obj_1["_id"], :question_type => 12
-		question_obj_2 = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		question_obj_2 = result["value"]
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 1, :question_id => -1, :question_type => 15
-		question_obj_4 = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		question_obj_4 = result["value"]
 		survey_obj = get_survey_obj(jesse.email, jesse.password, survey_id)
 		assert_equal 3, survey_obj["pages"][0]["questions"].length
 		assert_equal 1, survey_obj["pages"][1]["questions"].length
@@ -71,17 +80,20 @@ class QuestionsControllerTest < ActionController::TestCase
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update, :format => :json, :survey_id => "wrong survey id", :id => pages[0][0], :question => question_obj
-		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update, :format => :json, :survey_id => survey_id, :id => "wrong question id", :question => question_obj
-		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update, :format => :json, :survey_id => survey_id, :id => pages[0][0], :question => question_obj
-		updated_question_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		updated_question_obj = result["value"]
 		sign_out
 		assert_equal question_obj["issue"]["min_choice"], updated_question_obj["issue"]["min_choice"]
 		assert_equal question_obj["issue"]["max_choice"], updated_question_obj["issue"]["max_choice"]
@@ -99,17 +111,20 @@ class QuestionsControllerTest < ActionController::TestCase
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :show, :format => :json, :survey_id => "wrong survey id", :id => pages[0][1]
-		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :show, :format => :json, :survey_id => survey_id, :id => "wrong question id"
-		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :show, :format => :json, :survey_id => survey_id, :id => pages[0][1]
-		question_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		question_obj = result["value"]
 		assert_equal pages[0][1], question_obj["_id"]
 		sign_out
 	end
@@ -123,17 +138,20 @@ class QuestionsControllerTest < ActionController::TestCase
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		delete :destroy, :format => :json, :survey_id => "wrong survey id", :id => pages[0][1]
-		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		delete :destroy, :format => :json, :survey_id => survey_id, :id => "wrong question id"
-		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		delete :destroy, :format => :json, :survey_id => survey_id, :id => pages[0][1]
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
 		sign_out
 		survey_obj = get_survey_obj(jesse.email, jesse.password, survey_id)
 		assert_equal pages.length, survey_obj["pages"].length
@@ -151,22 +169,26 @@ class QuestionsControllerTest < ActionController::TestCase
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :move, :format => :json, :survey_id => "wrong survey id", :page_index => 2, :question_id_1 => pages[2][1], :question_id_2 => pages[2][3]
-		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :move, :format => :json, :survey_id => survey_id, :page_index => 10, :question_id_1 => pages[2][1], :question_id_2 => pages[2][3]
-		assert_equal ErrorEnum::OVERFLOW.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :move, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => "wrong question id", :question_id_2 => pages[2][3]
-		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :move, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => pages[2][1], :question_id_2 => pages[2][3]
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
 		sign_out
 		survey_obj = get_survey_obj(jesse.email, jesse.password, survey_id)
 		assert_equal pages[2][0], survey_obj["pages"][2]["questions"][0]
@@ -192,22 +214,26 @@ class QuestionsControllerTest < ActionController::TestCase
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :clone, :format => :json, :survey_id => "wrong survey id", :page_index => 2, :question_id_1 => pages[0][0], :question_id_2 => -1
-		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :clone, :format => :json, :survey_id => survey_id, :page_index => 10, :question_id_1 => pages[0][0], :question_id_2 => -1
-		assert_equal ErrorEnum::OVERFLOW.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :clone, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => "wrong question id", :question_id_2 => -1
-		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :clone, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => pages[0][0], :question_id_2 => -1
-		cloned_question_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		cloned_question_obj = result["value"]
 		sign_out
 		assert_equal question_obj["issue"]["min_choice"], cloned_question_obj["issue"]["min_choice"]
 		assert_equal question_obj["issue"]["max_choice"], cloned_question_obj["issue"]["max_choice"]
@@ -238,32 +264,38 @@ class QuestionsControllerTest < ActionController::TestCase
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :insert_template_question, :format => :json, :survey_id => "wrong survey id", :page_index => 0, :question_id => -1, :template_question_id => template_question_id
-		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id => -1, :template_question_id => template_question_id
-		assert_equal ErrorEnum::OVERFLOW.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => "wrong question id", :template_question_id => template_question_id
-		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
 		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :template_question_id => template_question_id
-		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :template_question_id => "wron template question id"
-		assert_equal ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => 0, :template_question_id => template_question_id
-		question_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		question_obj = result["value"]
 		assert_equal template_question_id, question_obj["reference_id"]
 		sign_out
 	end
@@ -285,21 +317,25 @@ class QuestionsControllerTest < ActionController::TestCase
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => 0, :template_question_id => template_question_id
-		question_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		question_obj = result["value"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :convert_template_question_to_normal_question, :format => :json, :survey_id => survey_id, :id => "wrong question id"
-		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :convert_template_question_to_normal_question, :format => :json, :survey_id => survey_id, :id => question_obj["_id"]
-		updated_question_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		updated_question_obj = result["value"]
 		assert_equal 0, updated_question_obj["question_class"]
 		assert_equal "", updated_question_obj["reference_id"]
 		get :show, :format => :json, :survey_id => survey_id, :id => question_obj["_id"]
-		normal_question = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		normal_question = result["value"]
 		assert_equal 0, normal_question["question_class"]
 		assert_equal "", normal_question["reference_id"]
 		sign_out
@@ -323,38 +359,45 @@ class QuestionsControllerTest < ActionController::TestCase
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :insert_quality_control_question, :format => :json, :survey_id => "wrong survey id", :page_index => 0, :question_id => -1, :quality_control_question_id => objective_question_id
-		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id => -1, :quality_control_question_id => objective_question_id
-		assert_equal ErrorEnum::OVERFLOW.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => "wrong question id", :quality_control_question_id => objective_question_id
-		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
 		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :quality_control_question_id => objective_question_id
-		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :quality_control_question_id => "wron quality control question id"
-		assert_equal ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => 0, :quality_control_question_id => objective_question_id
-		inserted_objective_question_ary = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		inserted_objective_question_ary = result["value"]
 		assert_equal objective_question_id, inserted_objective_question_ary[0]["reference_id"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => 0, :quality_control_question_id => matching_question_id
-		inserted_matching_question_ary = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		inserted_matching_question_ary = result["value"]
 		assert_equal 2, inserted_matching_question_ary.length
 		sign_out
 
@@ -363,11 +406,14 @@ class QuestionsControllerTest < ActionController::TestCase
 		# delelete quality control question
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		delete :destroy, :format => :json, :survey_id => survey_id, :id => inserted_objective_question_ary[0]["_id"]
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
 		delete :destroy, :format => :json, :survey_id => survey_id, :id => inserted_matching_question_ary[0]["_id"]
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
 		delete :destroy, :format => :json, :survey_id => survey_id, :id => inserted_matching_question_ary[1]["_id"]
-		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 	end
 end

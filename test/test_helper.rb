@@ -162,7 +162,8 @@ class ActiveSupport::TestCase
 		old_controller = @controller
 		@controller = QuestionsController.new
 		post :create, :format => :json, :survey_id => survey_id, :page_index => page_index, :question_id => question_id, :question_type => question_type
-		question_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		question_obj = result["value"]
 		@controller = old_controller
 		sign_out
 		return question_obj["_id"]
@@ -173,7 +174,8 @@ class ActiveSupport::TestCase
 		old_controller = @controller
 		@controller = QuestionsController.new
 		post :create, :format => :json, :survey_id => survey_id, :page_index => page_index, :question_id => question_id, :question_type => question_type
-		question_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		question_obj = result["value"]
 		question_obj["issue"]["min_choice"] = 2
 		question_obj["issue"]["max_choice"] = 4
 		question_obj["issue"]["choices"] << {"input_id" => SecureRandom.uuid, "content" => "first choice content", "has_input" => false, "is_exclusive" => false}
@@ -190,7 +192,8 @@ class ActiveSupport::TestCase
 		old_controller = @controller
 		@controller = QuestionsController.new
 		get :show, :format => :json, :survey_id => survey_id, :id => question_id
-		question_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		question_obj = result["value"]
 		@controller = old_controller
 		sign_out
 		return question_obj
@@ -234,7 +237,8 @@ class ActiveSupport::TestCase
 		old_controller = @controller
 		@controller = QuestionsController.new
 		get :show, :format => :json, :survey_id => survey_id, :id => question_id
-		question_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		question_obj = result["value"]
 		@controller = old_controller
 		sign_out
 		return question_obj
