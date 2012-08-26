@@ -81,7 +81,8 @@ class ApplicationController < ActionController::Base
 	#obtain the ip address of the clien, and set it as @remote_ip
 	def client_ip
 		#@remote_ip = request.env["HTTP_X_FORWARDED_FOR"]
-		@remote_ip = request.remote_ip
+		@remote_ip = params[:_remote_ip]
+		@remote_ip = request.remote_ip if @remote_ip.blank?
 	end
 
 	#judge whether there is a user signed in currently

@@ -44,30 +44,30 @@ class SessionsController < ApplicationController
 	#* EMAIL_NOT_ACTIVATED
 	#* WRONG_PASSWORD
 	def create
-		login = User.login(params[:user]["email_username"], params[:user]["password"], @remote_ip, params[:client_type])
+		login = User.login(params[:user]["email_username"], params[:user]["password"], @remote_ip, params[:_client_type])
 		third_party_info = decrypt_third_party_user_id(params[:third_party_info])
 		case login
 		when ErrorEnum::USER_NOT_EXIST
-			flash[:error] = "帐号不存在!"
+      # flash[:error] = "帐号不存在!"
 			respond_to do |format|
-				format.html	{ redirect_to sessions_path and return }
+        # format.html { redirect_to sessions_path and return }
 				format.json	{ render_json_e(ErrorEnum::USER_NOT_EXIST) and return }
 			end
 		when ErrorEnum::USER_NOT_ACTIVATED
-			flash[:error] = "您的帐号未激活，请您首先激活帐号"
+      # flash[:error] = "您的帐号未激活，请您首先激活帐号"
 			respond_to do |format|
-				format.html	{ redirect_to input_activate_email_path and return }
+        # format.html { redirect_to input_activate_email_path and return }
 				format.json	{ render_json_e(ErrorEnum::USER_NOT_ACTIVATED) and return }
 			end
 		when ErrorEnum::WRONG_PASSWORD
-			flash[:error] = "密码错误"
+      # flash[:error] = "密码错误"
 			respond_to do |format|
-				format.html	{ redirect_to sessions_path and return }
+        # format.html { redirect_to sessions_path and return }
 				format.json	{ render_json_e(ErrorEnum::WRONG_PASSWORD) and return }
 			end
 		when false
 			respond_to do |format|
-				format.html	{ redirect_to "/500" and return }
+        # format.html { redirect_to "/500" and return }
 				format.json	{ render_json_e(ErrorEnum::UNKNOWN_ERROR) and return }
 			end
 		else
@@ -75,10 +75,10 @@ class SessionsController < ApplicationController
 			######## this should be moved to the web client side #########
 			set_login_cookie(params[:user]["email_username"], params[:keep_signed_in], login["auth_key"])
 			##############################################################
-			flash[:notice] = "登录成功"
-			flash[:notice] += ",并成功与第三方帐号绑定。" if third_party_info
+      # flash[:notice] = "登录成功"
+      # flash[:notice] += ",并成功与第三方帐号绑定。" if third_party_info
 			respond_to do |format|
-				format.html	{ redirect_to home_path and return }
+        # format.html { redirect_to home_path and return }
 				format.json	{ render_json_s(login) and return }
 			end
 		end
