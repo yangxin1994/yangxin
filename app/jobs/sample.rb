@@ -2,21 +2,62 @@
 module Jobs
 	class Sample
 
-		attr_accessor :name, :gender, :age, :email
+		attr_accessor :user_id, :conditions, :email, :last_email_time
 
-		def initialize(name, gender, age, email)
-			@name = name
-			@gender = gender
-			@age = gender
+		def initialize(user_id, email, conditions, last_email_time=nil)
+			if !conditions.instance_of?(Array) || (conditions.size > 0 && !conditions[0].instance_of?(Condition)) then
+				raise ArgumentError, "You should set a Array of Condition instances." 
+			end
+			@user_id = user_id
 			@email = email
+			@conditions = conditions
+			if last_email_time.nil? && last_email_time.is_a?(Time) then
+				@last_email_time = last_email_time
+			else
+				@last_email_time = Time.new(2012,01,01)
+			end
+		end
+
+		def to_s
+			{user_id: @user_id, conditions: JSON.parse(@conditions.to_json), 
+					email: @email, last_email_time: @last_email_time, 
+					meet_surveys: @meet_surveys}
 		end
 
 		class << self 
 
 			def all
 				arr = []
-				arr << Sample.new("zhangsan", "male", 23, "oopsdata@126.com")
-				arr << Sample.new("lisi", "female", 22, "oopsdata@163.com")
+				conditions = []
+				conditions << Condition.new("tp_q_1", "female")
+				conditions << Condition.new("tp_q_2", "23")
+				arr << Sample.new("1", "oopsdata@126.com",conditions)
+
+				conditions = []
+				conditions << Condition.new("tp_q_1", "male")
+				conditions << Condition.new("tp_q_2", "24")
+				arr << Sample.new("2", "oopsdata@163.com", conditions)
+
+				conditions = []
+				conditions << Condition.new("tp_q_1", "male")
+				conditions << Condition.new("tp_q_3", "apple")
+				arr << Sample.new("3", "oopsdata@qq.com", conditions)
+
+				conditions = []
+				conditions << Condition.new("tp_q_3", "apple")
+				arr << Sample.new("4", "oopsdata@gmail.com", conditions)
+
+				conditions = []
+				conditions << Condition.new("tp_q_1", "male")
+				conditions << Condition.new("tp_q_2", "23")
+				arr << Sample.new("5", "oopsdata@yahoo.com", conditions)
+
+				conditions = []
+				conditions << Condition.new("tp_q_1", "male")
+				conditions << Condition.new("tp_q_2", "23")
+				conditions << Condition.new("tp_q_3", "pear")
+				arr << Sample.new("6", "oopsdata@sogou.com", conditions)
+
 				return arr
 			end
 

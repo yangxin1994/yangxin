@@ -1,3 +1,4 @@
+# coding: utf-8
 
 module Jobs
 
@@ -6,6 +7,9 @@ module Jobs
 		# store last time interval_time that use to remove_delayed job
 		@@last_interval_time = nil
 		@queue = :quota_job_queue
+
+		MaxCountOfReceivingSurveies = 2
+		MaxCountOfDescingConditionForWhile = 1
 
 		# resque auto involve method
 		def self.perform(*args)
@@ -77,7 +81,7 @@ module Jobs
 						# add the amount in tmp_rule_arr element
 						# and donot push the rule to tmp_rule_arr.
 						if conditions.to_json == tmp_rule_arr[diff_index].conditions.to_json then
-							tmp_rule_arr[diff_index].amount += rest_number
+							tmp_rule_arr[diff_index].amount_increase(rest_number)
 							is_same_rule = true 
 							break
 						else
@@ -99,49 +103,208 @@ module Jobs
 		end
 
 
-		def self.get_select_sample_array(rule_arr)
-			# 
-			select_sample_array = []
-			rule_arr.each do |rule|
-				rule_amount = 0
-				if rule.condition_type == 0 then
-					Sample.all.each do |sample|
-						sample.to_json.each do |key, value|
-							if key.to_s == rule.condition_name then
-								if !rule.fuzzy && 
-								value.to_s == rule.condition_value then
-									select_sample_array << [rule.survey_id, sample]
-									rule_amount += 1 
-								elsif value.to_s.include?(rule.condition_value) then
-									select_sample_array << [rule.survey_id, sample]
-									rule_amount += 1
-								end
-
-								break
-							end
-						end
-
-						break if rule_amount >= rule.amount
-					end
-				end
-			end
-
-			return select_sample_array
+		class Jobs::Sample
+			attr_accessor :meet_surveys
+		end
+		class TemplateQuestionAnswer
+			attr_accessor :meet_surveys
 		end
 
-		def self.send_email(select_sample_array)
-			select_sample_array.each do |work|
-				Resque.enqueue_at_with_queue(1, Time.now, OopsMailJob,{
-					:mailler => "netranking",
-					:account_name => account[:netranking]["account_name"],
-					:account_secret => account[:netranking]["account_secret"],
-					:mail_list => ([] << work[1].email),
-					:subject => "Happy to invite you to answer survey.",
-					:content => ("Hello, this is a new survey. <br/>"+ 
-							"if work it for a less time, you are gone to get a reward.<br/>"+
-							"click it to <a href=\"http://www.oopsdata.com\">Survey</a>")
-				})
+		# Find some templates who do not send email recently.
+		def self.templates_before_filter(templates)
+			# templates.sort!{|v1,v2| v1.last_email_time <=> v2.last_email_time} if templates.count > 1
+			templates
+		end
+
+		# it must return false or true
+		def self.compare_template_rule(template, rule)
+			return JSON.parse(template.conditions.to_json) & 
+					JSON.parse(rule.conditions.to_json) == 
+					JSON.parse(rule.conditions.to_json) && rule.email_number > 0 
+		end
+
+		# this method start of answer_templates.each
+		#
+		def self.get_select_answer_templates(rule_arr)
+
+			#
+			# First, we should compare tempates with rule_arr
+			#
+
+			#
+			# 1: Find some templates who do not send email recently.
+			# Method: templates_before_filter
+			#
+
+			# answer_templates = templates_filter(TemplateQuestionAnswer.all.to_a)
+			answer_templates = templates_before_filter(Sample.all) # for test
+			return [] if answer_templates.count == 0
+
+			select_answer_templates = []
+			select_block(answer_templates, select_answer_templates, rule_arr)
+
+			# Other work.
+			# if it is end of all templates, but rule_arr.count > 0 .
+			# That is, rule arr not satisfied with all templates.
+			# So, we should bring down conditions of rule_arr.each_rule.
+			while_count = 0
+			while while_count < MaxCountOfDescingConditionForWhile && rule_arr.count > 0 do
+				# bring down conditions
+				puts "**********bring down conditions  rules**********"
+				rule_arr.each do |rule|
+					rule.conditions.pop if rule.conditions.count > 0
+					puts "bring down:rule:: #{rule.to_s}"
+				end
+
+				# sort answer_templates again
+				# and consider of select_answer_templates.
+				#
+				# The select_answer_templates should be top.
+				# Next,
+				# other answer_templates should be order with last_email_time.
+				# What's more, 
+				# templates which have sent in this time should not be in it.
+				answer_templates.select!{|template| !select_answer_templates.include?(template)}
+				templates_before_filter(select_answer_templates)
+				answer_templates = select_answer_templates + answer_templates
+
+				puts "**********combine's answer_templates**********"
+				answer_templates.each do |element|
+					puts "combine template::: #{element.to_s}"
+				end
+
+				select_answer_templates = []
+				select_block(answer_templates, select_answer_templates, rule_arr)
+
+				while_count += 1
 			end
+
+			# # End,
+			# # although some rules not be satisfied, but template is over.
+			# # Then, we send email for select_answer_templates 
+			# # which 's survey_ids < MaxCountOfReceivingSurveies
+			# select_answer_templates.each do |template|
+			# 	send_emails(template)
+			# end
+
+			return select_answer_templates
+		end
+
+		def self.select_block(templates, select_templates, rules)
+			templates.each do |template|
+				puts ">>>>>>>>>>>template.user_id::#{template.user_id}"
+
+				break if rules.count == 0
+
+				# sort desc of email_number
+				rules.sort!{|v1, v2| v2.email_number <=> v1.email_number} if rules.count > 1
+				puts "sort >>>>>>>>>>"
+
+				#
+				# 2: Find some rules who fit with this template.
+				rules.each do |rule|
+
+					template.meet_surveys ||= []
+
+					#
+					# 2.1: compare conditions
+					#
+
+					# binding.pry
+
+					if compare_template_rule(template, rule) then
+
+						# puts ">>>>>>>>>"
+
+						# next if rule.sample_ids.include?(template.user_id)
+						rule.sample_ids << template.user_id
+
+						# add tmp field: meet_surveys in template_question_answer object 
+						# that store survey ids
+						template.meet_surveys ||= []
+						if !template.meet_surveys.include?(rule.survey_id) then
+							template.meet_surveys << rule.survey_id
+						end
+
+						# a template_question_answer object which include one rule 
+						# should be in select_answer_templates 
+						if !select_templates.include?(template) then
+							select_templates << template
+						end
+						rules.reject!{|a| a == rule}  if rule.email_number_decrease <= 0
+
+						# find other rules with same of the current rule 's survey_id/
+						# because this can use this template max-ily when
+						#
+						# if template.meet_surveys.size >= MaxCountOfReceivingSurveies then 
+						# 	# send email ??? 
+						# 	send_email(template)
+						# 	break  
+						# end
+						#
+						# this code send email.
+						same_survey_rules = rules.select{|element| element != rule && element.survey_id == rule.survey_id}
+						same_survey_rules.each do |rule2|
+							if compare_template_rule(template, rule2) then
+								rules.reject!{|a| a == rule2}  if rule2.email_number_decrease <= 0
+								rule2.sample_ids << template.user_id
+							end
+						end
+					end
+
+					if template.meet_surveys.size >= MaxCountOfReceivingSurveies then
+						# send email ???
+						send_email(template)
+						# remove tempate which sends email from select_answer_tmplates
+						select_templates.reject!{|element| element == template}
+						# because this template has sent email, and it should be removed from templates
+						# which assures that not send email in secondly.
+						templates.reject!{|element| element == template}
+						break 
+					end
+				end
+
+				rules.each {|rule| puts "after rule ::: #{rule.to_s}"}
+
+				# puts "answer_templates::::#{template.to_json}"
+			end
+
+			return select_templates
+		end
+
+		def self.send_emails(select_sample_array)
+			select_sample_array.each do |work|
+				send_email(work)
+			end
+		end
+
+		def self.send_email(sample)
+			list_surveys_str = ""
+			sample.meet_surveys.each do |survey_id|
+				list_surveys_str += "<a href=\"http://www.oopsdata.com/surveys/#{survey_id}\">#{survey_id}</a>\n"
+			end
+
+			content = "Hi! #{sample.user_id}. OopsData is very happy to invite you to answer survey.
+If work it for a less time, you are gone to get a reward probablely.
+Now, we choose some for you which fit you.
+
+#{list_surveys_str}
+More, click <a href=\"http://www.oopsdata.com\">OopsData</a>"
+
+			# binding.pry
+			
+			# Resque.enqueue_at_with_queue(1, Time.now, OopsMailJob,{
+			# 	:mailler => "netranking",
+			# 	:account_name => account[:netranking]["account_name"],
+			# 	:account_secret => account[:netranking]["account_secret"],
+			# 	:mail_list => ([] << sample.email),
+			# 	:subject => "Happy to invite you to answer survey.",
+			# 	:content => content
+			# })
+
+			puts "send_email content::: #{content}"
+
+			sample.last_email_time = Time.now
 		end
 
 	end
