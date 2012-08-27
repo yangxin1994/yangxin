@@ -16,7 +16,7 @@ class GroupsController < ApplicationController
 	def index
 		groups = @current_user.groups
 		respond_to do |format|
-			format.json	{ render :json => groups and return }
+			format.json	{ render_json_auto(groups) and return }
 		end
 	end
 
@@ -43,13 +43,13 @@ class GroupsController < ApplicationController
 		when ErrorEnum::ILLEGAL_EMAIL
 			flash[:notice] = "非法的邮箱地址"
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::ILLEGAL_EMAIL and return }
+				format.json	{ render_json_e(ErrorEnum::ILLEGAL_EMAIL) and return }
 			end
 		else
 			@current_user.groups << group
 			flash[:notice] = "样本组已成功创建"
 			respond_to do |format|
-				format.json	{ render :json => group and return }
+				format.json	{ render_json_auto(group) and return }
 			end
 		end
 	end
@@ -72,13 +72,13 @@ class GroupsController < ApplicationController
 		group = @current_user.groups.find_by_id(params[:id])
 		if group.nil?
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::GROUP_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::GROUP_NOT_EXIST) and return }
 			end
 		end
 
 		group = group.update_group(params[:group])
 		respond_to do |format|
-			format.json	{ render :json => group and return }
+			format.json	{ render_json_auto(group) and return }
 		end
 	end
 
@@ -99,14 +99,14 @@ class GroupsController < ApplicationController
 		group = @current_user.groups.find_by_id(params[:id])
 		if group.nil?
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::GROUP_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::GROUP_NOT_EXIST) and return }
 			end
 		end
 
 		@current_user.groups.delete(group)
 		retval = group.destroy
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -126,11 +126,11 @@ class GroupsController < ApplicationController
 		group = @current_user.groups.find_by_id(params[:id])
 		if group.nil?
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::GROUP_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::GROUP_NOT_EXIST) and return }
 			end
 		end
 		respond_to do |format|
-			format.json	{ render :json => group and return }
+			format.json	{ render_json_auto(group) and return }
 		end
 	end
 end

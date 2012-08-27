@@ -145,7 +145,7 @@ class ApplicationController < ActionController::Base
 		if !user_survey_auditor?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_SURVEY_AUDITOR and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_SURVEY_AUDITOR) and return }
 			end
 		end
 	end
@@ -154,13 +154,13 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_answer_auditor?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_ANSWER_AUDITOR and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_ANSWER_AUDITOR) and return }
 			end
 		end
 	end
@@ -169,13 +169,13 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_entry_clerk?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_ENTRY_CLERK and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_ENTRY_CLERK) and return }
 			end
 		end
 	end
@@ -184,13 +184,13 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_interviewer?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_INTERVIEWER and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_INTERVIEWER) and return }
 			end
 		end
 	end
@@ -210,7 +210,7 @@ class ApplicationController < ActionController::Base
 		if !user_signed_out?
 			respond_to do |format|
 				format.html { redirect_to home_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGOUT and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGOUT) and return }
 			end
 		end
 	end

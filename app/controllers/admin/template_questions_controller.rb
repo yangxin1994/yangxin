@@ -7,7 +7,7 @@ class Admin::TemplateQuestionsController < Admin::ApplicationController
 		@template_question = TemplateQuestion.find_by_id(params[:id])
 		if @template_question.nil?
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST) and return }
 			end
 		end
 	end
@@ -33,7 +33,7 @@ class Admin::TemplateQuestionsController < Admin::ApplicationController
 	def create
 		template_question = TemplateQuestion.create_question(params[:question_type].to_i, @current_user)
 		respond_to do |format|
-			format.json	{ render :json => template_question and return }
+			format.json	{ render_json_auto(template_question) and return }
 		end
 	end
 
@@ -58,14 +58,14 @@ class Admin::TemplateQuestionsController < Admin::ApplicationController
 	def update
 		template_question = @template_question.update_question(params[:question], @current_user)
 		respond_to do |format|
-			format.json	{ render :json => template_question and return }
+			format.json	{ render_json_auto(template_question) and return }
 		end
 	end
 
 	def index
 		questions = TemplateQuestion.list_template_question
 		respond_to do |format|
-			format.json	{ render :json => questions and return }
+			format.json	{ render_json_auto(questions) and return }
 		end
 	end
 
@@ -86,7 +86,7 @@ class Admin::TemplateQuestionsController < Admin::ApplicationController
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def show
 		respond_to do |format|
-			format.json	{ render :json => @template_question and return }
+			format.json	{ render_json_auto(@template_questions) and return }
 		end
 	end
 
@@ -108,7 +108,7 @@ class Admin::TemplateQuestionsController < Admin::ApplicationController
 	def destroy
 		retval = @template_question.destroy
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 

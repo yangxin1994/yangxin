@@ -258,17 +258,23 @@ class ActiveSupport::TestCase
 		old_controller = @controller
 		@controller = MaterialsController.new
 		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_1", "title" => "title_1"}
-		material_id_1 = JSON.parse(@response.body)["_id"]
+		result = JSON.parse(@response.body)
+		material_id_1 = result["value"]["_id"]
 		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_2", "title" => "title_2"}
-		material_id_2 = JSON.parse(@response.body)["_id"]
+		result = JSON.parse(@response.body)
+		material_id_2 = result["value"]["_id"]
 		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_3", "title" => "title_3"}
-		material_id_3 = JSON.parse(@response.body)["_id"]
+		result = JSON.parse(@response.body)
+		material_id_3 = result["value"]["_id"]
 		post :create, :format => :json, :material => {"material_type" => 2, "location" => "location_4", "title" => "title_4"}
-		material_id_4 = JSON.parse(@response.body)["_id"]
+		result = JSON.parse(@response.body)
+		material_id_4 = result["value"]["_id"]
 		post :create, :format => :json, :material => {"material_type" => 2, "location" => "location_5", "title" => "title_5"}
-		material_id_5 = JSON.parse(@response.body)["_id"]
+		result = JSON.parse(@response.body)
+		material_id_5 = result["value"]["_id"]
 		post :create, :format => :json, :material => {"material_type" => 4, "location" => "location_6", "title" => "title_6"}
-		material_id_6 = JSON.parse(@response.body)["_id"]
+		result = JSON.parse(@response.body)
+		material_id_6 = result["value"]["_id"]
 		@controller = old_controller
 		sign_out
 		return [material_id_1, material_id_2, material_id_3, material_id_4, material_id_5, material_id_6]
@@ -279,7 +285,8 @@ class ActiveSupport::TestCase
 		old_controller = @controller
 		@controller = Admin::TemplateQuestionsController.new
 		post :create, :format => :json, :question_type => question_type
-		question_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		question_obj = result["value"]
 		@controller = old_controller
 		sign_out
 		return question_obj["_id"]
@@ -290,7 +297,8 @@ class ActiveSupport::TestCase
 		old_controller = @controller
 		@controller = Admin::QualityControlQuestionsController.new
 		post :create, :format => :json, :quality_control_type => quality_control_type, :question_type => question_type, :question_number => question_number
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		@controller = old_controller
 		sign_out
 		return retval[0]["_id"]

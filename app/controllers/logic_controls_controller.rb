@@ -7,7 +7,7 @@ class LogicControlsController < ApplicationController
 		@survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
 		if @survey.nil?
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
 			end
 		end
 	end
@@ -27,7 +27,7 @@ class LogicControlsController < ApplicationController
 	def index
 		logic_control = @survey.show_logic_control
 		respond_to do |format|
-			format.json	{ render :json => logic_control and return }
+			format.json	{ render_json_auto(logic_control) and return }
 		end
 	end
 
@@ -48,7 +48,7 @@ class LogicControlsController < ApplicationController
 	def show
 		logic_control_rule = @survey.show_logic_control_rule(params[:id].to_i)
 		respond_to do |format|
-			format.json	{ render :json => logic_control_rule and return }
+			format.json	{ render_json_auto(logic_control_rule) and return }
 		end
 	end
 
@@ -68,7 +68,7 @@ class LogicControlsController < ApplicationController
 	def create
 		logic_control = @survey.add_logic_control_rule(params[:logic_control_rule])
 		respond_to do |format|
-			format.json	{ render :json => logic_control and return }
+			format.json	{ render_json_auto(logic_control) and return }
 		end
 	end
 
@@ -89,7 +89,7 @@ class LogicControlsController < ApplicationController
 	def update
 		logic_control = @survey.update_logic_control_rule(params[:id].to_i, params[:logic_control_rule])
 		respond_to do |format|
-			format.json	{ render :json => logic_control and return }
+			format.json	{ render_json_auto(logic_control) and return }
 		end
 	end
 
@@ -109,7 +109,7 @@ class LogicControlsController < ApplicationController
 	def destroy
 		retval = @survey.delete_logic_control_rule(params[:id].to_i)
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 end
