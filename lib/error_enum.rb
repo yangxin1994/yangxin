@@ -90,6 +90,7 @@ module ErrorEnum
 # 	error 2
 # 	not_found 01
 # 	invalid_id 02
+#
 # 	blank x0
 #   not a number x1
 ###

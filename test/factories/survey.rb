@@ -4,16 +4,16 @@ FactoryGirl.define do
   factory :survey_with_issue, class: Survey do
     title "我是用来做导出的"
     subtitle "伤不起的问卷啊"
-    welcome "每次看到这句欢迎都感觉很悲催"
+    welcome "欢迎词"
     closing "终于结束了么"
     header "我是页眉"
-    footer "页脚desu"
+    footer "页脚"
     description "描述哦"
-    pages [{name: "页码君吃饭去了",
+    pages [{name: "仅有的一页",
             questions: [FactoryGirl.create(:single_choice_question).id,
                         FactoryGirl.create(:single_choice_question).id,
                         FactoryGirl.create(:single_choice_question).id
-              ]},
+              ]}
     ]
     status 8
   end

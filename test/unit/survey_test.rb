@@ -8,10 +8,12 @@ class SurveyTest < ActiveSupport::TestCase
 	#FactoryGirl.create(:single_choice_question)
 	end
 
-	test "01 should get rule arr from check_quota" do
+	test "should show a header of csv" do
 		#pp @survey_with_issue
 		#pp Question.first
 		@survey_with_issue.all_questions.each { |i| p i.attributes['_id'] }
+		pp Question.issue
+		#pp Question.first.header 1
 		assert true
 	end
 end

@@ -6,6 +6,7 @@ require 'tool'
 class User
 	include Mongoid::Document
 	include Mongoid::Timestamps
+  include Mongoid::ValidationsExt	
 	field :email, :type => String
 	field :username, :type => String
 	field :password, :type => String
@@ -402,7 +403,6 @@ class User
 # admin inc
 	def operate_point(operated_point, user_id)
 		u = User.find_by_id(user_id)
-		return ErrorEnum::USER_NOT_EXIST unless u.is_a? User
 		operate_point_logs.create(:operated_point => operated_point,
 															:user => u,
 															:cause => 0)

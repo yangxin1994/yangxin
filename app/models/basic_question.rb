@@ -8,7 +8,20 @@ require 'error_enum'
 #	 "is_required" : whether the question is required to be answered(bool),
 #	 other fields are related to question type
 #	}
-#Structure of different type question object can be found at ChoiceQuestion, MatrixChoiceQuestion, TextBlankQuestion, NumberBlankQuestion, EmailBlankQuestion, PhoneBlankQuestion, TimeBlankQuestion, AddressBlankQuestion, BlankQuestion, MatrixBlankQuestion, RankQuestion, SortQuestion, ConstSumQuestion
+#Structure of different type question object can be found at 
+# ChoiceQuestion, 
+# MatrixChoiceQuestion, 
+# TextBlankQuestion, 
+# NumberBlankQuestion, 
+# EmailBlankQuestion, 
+# PhoneBlankQuestion, 
+# TimeBlankQuestion, 
+# AddressBlankQuestion, 
+# BlankQuestion, 
+# MatrixBlankQuestion, 
+# RankQuestion, 
+# SortQuestion, 
+# ConstSumQuestion
 class BasicQuestion
 	include Mongoid::Document
 	field :content, :type => Hash, default: {"text" => "", "image" => "", "audio" => "", "video" => ""}
@@ -27,16 +40,43 @@ class BasicQuestion
 		header_prefix = "q#{qindex}"
 		input = "-input"
 		case question_type
+		##### CHOICE_QUESTION #####
 		when QuestionTypeEnum::CHOICE_QUESTION
 			if issue[:min_choice] >= 1
 				issue[:min_choice].each do |i|
 					retval << header_prefix + "c_#{i}"
-				end				
+				end
 			end
 			if issue[:other_item][:has_other_item]
 				retval << header_prefix + input
 			end
 		end
+		##### MATRIX_CHOICE_QUESTION #####
+		# when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
+		# 	if issue[:min_choice] >= 1
+		# 		issue[:min_choice].each do |i|
+		# 			retval << header_prefix + "c_#{i}"
+		# 		end
+		# 	end
+		# end
+		# ##### TEXT_BLANK_QUESTION #####
+		# when QuestionTypeEnum::TEXT_BLANK_QUESTION
+		# 	if issue[:other_item][:has_other_item]
+		# 		retval << header_prefix + input
+		# 	end
+		# end
+		# ##### NUMBER_BLANK_QUESTION #####
+		# when QuestionTypeEnum::NUMBER_BLANK_QUESTION
+		# 	#TO-DO
+		# end
+		# ##### NUMBER_BLANK_QUESTION #####
+		# when QuestionTypeEnum::NUMBER_BLANK_QUESTION
+		# 	if issue[:min_choice] >= 1
+		# 		issue[:min_choice].each do |i|
+		# 			retval << header_prefix + "c_#{i}"
+		# 		end
+		# 	end
+		# end
 	end
 
 	def self.has_question_type(question_type)
@@ -50,6 +90,7 @@ class BasicQuestion
 	#*description*: find the question instance by its id, return nil if the question does not exist
 	#
 	#*params*:
+
 	#* id of the question required
 	#
 	#*retval*:
