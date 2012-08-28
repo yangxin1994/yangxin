@@ -10,18 +10,21 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 
 		sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
 		post :create, :format => :json, :quality_control_type => 1, :question_type => 0, :question_number => -1
-		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :quality_control_type => 3, :question_type => 0, :question_number => -1
-		assert_equal ErrorEnum::WRONG_QUALITY_CONTROL_TYPE.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::WRONG_QUALITY_CONTROL_TYPE.to_s, result["value"]["error_code"]
 		sign_out
 
 		# create an objective quality control question
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :quality_control_type => 1, :question_type => 0, :question_number => -1
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		assert_equal 2, retval.length
 		assert_equal 1, retval[1]["question_id"].length
 		assert_equal retval[0]["_id"], retval[1]["question_id"][0]
@@ -32,7 +35,8 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 		# create matching quality control questions
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :quality_control_type => 2, :question_type => 0, :question_number => 3
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		assert_equal 4, retval.length
 		assert_equal retval[0]["_id"], retval[3]["question_id"][0]
 		assert_equal retval[1]["_id"], retval[3]["question_id"][1]
@@ -50,7 +54,8 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 		# create an objective quality control question
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :quality_control_type => 1, :question_type => 0, :question_number => -1
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		objective_question_obj = retval[0]
 		sign_out
 
@@ -62,12 +67,14 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update, :format => :json, :id => "wrong quality control question id", :question => objective_question_obj
-		assert_equal ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update, :format => :json, :id => objective_question_obj["_id"], :question => objective_question_obj
-		updated_question_obj = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		updated_question_obj = result["value"]
 		sign_out
 		assert_equal objective_question_obj["issue"]["min_choice"], updated_question_obj["issue"]["min_choice"]
 		assert_equal objective_question_obj["issue"]["max_choice"], updated_question_obj["issue"]["max_choice"]
@@ -85,25 +92,29 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 		# create an objective quality control question
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :quality_control_type => 1, :question_type => 0, :question_number => -1
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		objective_question_obj = retval[0]
 		sign_out
 
 		# create matching quality control questions
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :quality_control_type => 2, :question_type => 0, :question_number => 3
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		matching_question_obj = retval[0]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :show, :format => :json, :id => "wrong quality control question id"
-		assert_equal ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :show, :format => :json, :id => objective_question_obj["_id"]
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		assert_equal 2, retval.length
 		assert_equal 1, retval[1]["question_id"].length
 		assert_equal objective_question_obj["_id"], retval[1]["question_id"][0]
@@ -114,7 +125,8 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :show, :format => :json, :id => matching_question_obj["_id"]
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		assert_equal 4, retval.length
 		assert_equal retval[0]["_id"], retval[3]["question_id"][0]
 		assert_equal retval[1]["_id"], retval[3]["question_id"][1]
@@ -132,20 +144,23 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 		# create an objective quality control question
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :quality_control_type => 1, :question_type => 0, :question_number => -1
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		objective_question_obj = retval[0]
 		sign_out
 
 		# create matching quality control questions
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :quality_control_type => 2, :question_type => 0, :question_number => 3
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		matching_question_obj = retval[0]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :index, :format => :json, :quality_control_type => 1
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		assert_equal Array, retval["objective_questions"].class
 		assert_equal 1, retval["objective_questions"].length
 		assert_equal objective_question_obj["_id"], retval["objective_questions"][0]["_id"]
@@ -155,7 +170,8 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :index, :format => :json, :quality_control_type => 2
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		assert_equal Array, retval["objective_questions"].class
 		assert_equal 0, retval["objective_questions"].length
 		assert_equal Array, retval["matching_questions"].class
@@ -165,7 +181,8 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :index, :format => :json, :quality_control_type => 3
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		assert_equal Array, retval["objective_questions"].class
 		assert_equal 1, retval["objective_questions"].length
 		assert_equal objective_question_obj["_id"], retval["objective_questions"][0]["_id"]
@@ -184,7 +201,8 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 		# create an objective quality control question
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :quality_control_type => 1, :question_type => 0, :question_number => -1
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		objective_question_answer = retval[1]
 		objective_question_obj = retval[0]
 		sign_out
@@ -192,31 +210,36 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 		# create matching quality control questions
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :quality_control_type => 2, :question_type => 0, :question_number => 3
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		matching_question_answer = retval[-1]
 		matching_question_obj_1 = retval[0]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update_answer, :format => :json, :id => "wrong quality control question id", :quality_control_type => 1, :answer => objective_question_answer 
-		assert_equal ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update_answer, :format => :json, :id => objective_question_obj["_id"], :quality_control_type => 4, :answer => objective_question_answer 
-		assert_equal ErrorEnum::WRONG_QUALITY_CONTROL_TYPE.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::WRONG_QUALITY_CONTROL_TYPE.to_s, result["value"]["error_code"]
 		sign_out
 
 		# update objective question answer
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update_answer, :format => :json, :id => objective_question_obj["_id"], :quality_control_type => 1, :answer => objective_question_answer 
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
 		sign_out
 
 		# update matching question answer
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update_answer, :format => :json, :id => matching_question_obj_1["_id"], :quality_control_type => 2, :answer => matching_question_answer 
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
 		sign_out
 	end
 
@@ -229,27 +252,32 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 		# create an objective quality control question
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :quality_control_type => 1, :question_type => 0, :question_number => -1
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		objective_question_obj = retval[0]
 		sign_out
 
 		# create matching quality control questions
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :quality_control_type => 2, :question_type => 0, :question_number => 3
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		matching_question_obj_1 = retval[0]
 		sign_out
 			
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		delete :destroy, :format => :json, :id => "wrong quality control question id"
-		assert_equal ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		delete :destroy, :format => :json, :id => objective_question_obj["_id"]
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
 		get :index, :format => :json, :quality_control_type => 3
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		assert_equal Array, retval["objective_questions"].class
 		assert_equal 0, retval["objective_questions"].length
 		assert_equal 1, retval["matching_questions"].length
@@ -257,9 +285,11 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 
 		sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		delete :destroy, :format => :json, :id => matching_question_obj_1["_id"]
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
 		get :index, :format => :json, :quality_control_type => 3
-		retval = JSON.parse(@response.body)
+		result = JSON.parse(@response.body)
+		retval = result["value"]
 		assert_equal Array, retval["objective_questions"].class
 		assert_equal 0, retval["objective_questions"].length
 		assert_equal 0, retval["matching_questions"].length

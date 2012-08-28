@@ -6,8 +6,8 @@ class Admin::UsersControllerTest < ActionController::TestCase
 		clear(User)
 
 		get 'index', :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_LOGIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.status = 2
@@ -16,8 +16,8 @@ class Admin::UsersControllerTest < ActionController::TestCase
 	
 		sign_in(user.email, "123456")
 		get 'index', :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_ADMIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out
 
 		clear(User)

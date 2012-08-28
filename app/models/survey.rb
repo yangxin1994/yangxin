@@ -43,14 +43,16 @@ class Survey
 		"is_one_question_per_page" => false,
 		"has_advertisement" => true,
 		"has_oopsdata_link" => true,
-		"redirect_link" => ""}
-	field :quality_control_setting, :type => Hash, default: {"allow_pageup" => false,
-		"times_for_one_computer" => -1,
+		"redirect_link" => "",
+		"allow_pageup" => false}
+	field :access_control_setting, :type => Hash, default: {"times_for_one_computer" => -1,
 		"has_captcha" => false,
+		"ip_restrictions" => [],
 		"password_control" => {"password_type" => -1,
 			"single_password" => "",
 			"password_list" => [],
 			"username_password_list" => []}}
+	field :random_quality_control_questions, :type => Boolean, default: false
 	field :quota_stats, :type => Hash
 
 	belongs_to :user
@@ -102,7 +104,7 @@ class Survey
 	#
 	#*retval*:
 	#* a survey object
-	def to_json
+	def serialize
 		survey_obj = Hash.new
 		survey_obj["_id"] = self._id.to_s
 		survey_obj["created_at"] = self.created_at
@@ -114,7 +116,7 @@ class Survey
 		survey_obj["quota"] = Marshal.load(Marshal.dump(self.quota))
 		survey_obj["quota_stats"] = Marshal.load(Marshal.dump(self.quota_stats))
 		survey_obj["logic_control"] = Marshal.load(Marshal.dump(self.logic_control))
-		survey_obj["quality_control_setting"] = Marshal.load(Marshal.dump(self.quality_control_setting))
+		survey_obj["access_control_setting"] = Marshal.load(Marshal.dump(self.access_control_setting))
 		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
 		survey_obj["publish_status"] = self.publish_status
 		survey_obj["status"] = self.status
@@ -188,18 +190,27 @@ class Survey
 		return self.style_setting
 	end
 
-	def update_quality_control_setting(quality_control_setting_obj)
-		self.quality_control_setting = quality_control_setting_obj
+	def update_access_control_setting(access_control_setting_obj)
+		self.access_control_setting = access_control_setting_obj
 		self.save
 		return true
 	end
 
-	def show_quality_control_setting
-		return self.quality_control_setting
+	def show_access_control_setting
+		return self.access_control_setting
 	end
 
 	def is_pageup_allowed
-		return self.quality_control_setting["allow_pageup"]
+		return self.style_setting["allow_pageup"]
+	end
+
+	def set_random_quality_control_questions(random_quality_control_questions)
+		self.random_quality_control_questions = random_quality_control_questions
+		return self.save
+	end
+
+	def get_random_quality_control_questions
+		return self.random_quality_control_questions
 	end
 
 	#*description*: remove current survey
@@ -255,10 +266,18 @@ class Survey
 	#*retval*:
 	#* the new survey instance: if successfully cloned
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def clone(title)
+	def clone_survey(title = nil)
 		# clone the meta data of the survey
-		new_instance = super
+		new_instance = self.clone
 		new_instance.title = title || new_instance.title
+
+		new_instance.status = 0
+		new_instance.publish_status = 1
+		new_instance.user_attr_survey = false
+		new_instance.quota_stats = {}
+
+		# the mapping of question ids
+		question_id_mapping = {}
 
 		# clone all questions
 		new_instance.pages.each do |page|
@@ -267,16 +286,51 @@ class Survey
 				return ErrorEnum::QUESTION_NOT_EXIST if question == nil
 				cloned_question = question.clone
 				page[question_index] = cloned_question._id.to_s
+				question_id_mapping[question_id] = cloned_question._id
 			end
 		end
+
+		# clone template questions
+		new_instance.quota_template_question_page.each do |question_id, question_index|
+			question = Question.find_by_id(question_id)
+			return ErrorEnum::QUESTION_NOT_EXIST if question == nil
+			cloned_question = question.clone
+			new_instance.quota_template_question_page[question_index] = cloned_question._id.to_s
+			question_id_mapping[question_id] = cloned_question._id
+		end
+
+		# clone quota rules
+		new_instance.quota["rules"].each do |quota_rule|
+			quota_rule["conditions"].each do |condition|
+				if condition["condition_type"] == 1
+					condition["name"] = question_id_mapping[condition["name"]]
+				end
+			end
+		end
+
+		# clone logic control rules
+		new_instance.logic_control.each do |logic_control_rule|
+			logic_control_rule["conditions"].each do |condition|
+				condition["question_id"] = question_id_mapping[condition["question_id"]]
+			end
+			if [1, 2].include?(logic_control_rule["rule_type"])
+				logic_control_rule["result"].each do |question_id, index|
+					logic_control_rule["result"][index] = question_id_mapping[question_id]
+				end
+			elsif [3, 4].include?(logic_control_rule["rule_type"])
+				logic_control_rule["result"].each do |result_ele|
+					result_ele["question_id"] = question_id_mapping[result_ele["question_id"]]
+				end
+			elsif [5, 6].include?(logic_control_rule["rule_type"])
+				logic_control_rule["result"]["question_id_1"] = question_id_mapping[logic_control_rule["result"]["question_id_1"]]
+				logic_control_rule["result"]["question_id_2"] = question_id_mapping[logic_control_rule["result"]["question_id_2"]]
+			end
+		end
+
+		new_instance.save
+
+		return new_instance
 		
-		# the logic control should also be cloned
-		###################################################
-		###################################################
-		###################################################
-		###################################################
-		###################################################
-		###################################################
 	end
 		
 	#*description*: add a tag to the survey
@@ -826,20 +880,20 @@ class Survey
 	end
 
 	def check_password(username, password, current_user)
-		case self.quality_control_setting["password_control"]["password_type"]
+		case self.access_control_setting["password_control"]["password_type"]
 		when -1
 			return true
 		when 0
-			if self.quality_control_setting["password_control"]["single_password"] == password
+			if self.access_control_setting["password_control"]["single_password"] == password
 				return true
 			else
 				return ErrorEnum::WRONG_PASSWORD
 			end
 		when 1
-			list = self.quality_control_setting["password_control"]["password_list"]
+			list = self.access_control_setting["password_control"]["password_list"]
 			password_element = list.select { |ele| ele["content"] == password }[0]
 		when 2
-			list = self.quality_control_setting["password_control"]["username_password_list"]
+			list = self.access_control_setting["password_control"]["username_password_list"]
 			password_element = list.select { |ele| ele["content"] == [username, password] }[0]
 		end
 		if password_element.nil?

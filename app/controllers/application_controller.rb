@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
 	protect_from_forgery
 
-	before_filter :client_ip, :current_user, :update_last_visit_info, :user_init
+	before_filter :client_ip, :current_user, :user_init
 
 	helper_method :user_signed_in?, :user_signed_out?
 ###################################################
@@ -65,10 +65,6 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
-	def update_last_visit_info
-		@current_user.update_last_visit_info(params[:client_type]) if !@current_user.nil?
-	end
-
 	def user_init
 		return if !user_signed_in?
 		case @current_user.status
@@ -85,7 +81,8 @@ class ApplicationController < ActionController::Base
 	#obtain the ip address of the clien, and set it as @remote_ip
 	def client_ip
 		#@remote_ip = request.env["HTTP_X_FORWARDED_FOR"]
-		@remote_ip = request.remote_ip
+		@remote_ip = params[:_remote_ip]
+		@remote_ip = request.remote_ip if @remote_ip.blank?
 	end
 
 	#judge whether there is a user signed in currently
@@ -94,7 +91,7 @@ class ApplicationController < ActionController::Base
 		if params[:client_type] == "web" || params[:client_type].to_s == ""
 			return !!@current_user && get_cookie(:auth_key).to_s != "" && @current_user.auth_key == get_cookie(:auth_key)
 		else
-			return !!@current_user && params(:auth_key).to_s != "" && @current_user.auth_key == params(:auth_key)
+			return !!@current_user && params[:auth_key].to_s != "" && @current_user.auth_key == params[:auth_key]
 		end
 	end
 
@@ -127,13 +124,13 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_admin?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_ADMIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_ADMIN) and return }
 			end
 		end
 	end
@@ -142,13 +139,13 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_survey_auditor?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_SURVEY_AUDITOR and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_SURVEY_AUDITOR) and return }
 			end
 		end
 	end
@@ -157,13 +154,13 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_answer_auditor?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_ANSWER_AUDITOR and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_ANSWER_AUDITOR) and return }
 			end
 		end
 	end
@@ -172,13 +169,13 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_entry_clerk?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_ENTRY_CLERK and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_ENTRY_CLERK) and return }
 			end
 		end
 	end
@@ -187,13 +184,13 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_interviewer?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_INTERVIEWER and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_INTERVIEWER) and return }
 			end
 		end
 	end
@@ -203,7 +200,7 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 	end
@@ -213,7 +210,7 @@ class ApplicationController < ActionController::Base
 		if !user_signed_out?
 			respond_to do |format|
 				format.html { redirect_to home_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGOUT and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGOUT) and return }
 			end
 		end
 	end
@@ -272,13 +269,17 @@ class ApplicationController < ActionController::Base
 		}
 	end
 	def render_json_e(error_code)
-		return_json(false, error_code)
+		error_code_obj = {
+			:error_code => error_code,
+			:error_message => ""
+		}
+		return_json(false, error_code_obj)
 	end
 	def render_json_s(value = true)
 		return_json(true, value)
 	end
 	def render_json_auto(value = true)
-		is_success = !(value.class == String && value.start_with?('error'))
-		render_json(is_success, value)
+		is_success = !(value.class == String && value.start_with?('error_'))
+		is_success ? render_json_s(value) : render_json_e(value)
 	end
 end

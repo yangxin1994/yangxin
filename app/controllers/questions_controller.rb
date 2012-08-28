@@ -9,7 +9,7 @@ class QuestionsController < ApplicationController
 		@survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
 		if @survey.nil?
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
 			end
 		end
 	end
@@ -35,28 +35,28 @@ class QuestionsController < ApplicationController
 	def create
 		question = @survey.create_question(params[:page_index].to_i, params[:question_id], params[:question_type].to_i)
 		respond_to do |format|
-			format.json	{ render :json => question and return }
+			format.json	{ render_json_auto(question) and return }
 		end
 	end
 
 	def insert_template_question
 		question = @survey.insert_template_question(params[:page_index].to_i, params[:question_id], params[:template_question_id])
 		respond_to do |format|
-			format.json	{ render :json => question and return }
+			format.json	{ render_json_auto(question) and return }
 		end
 	end
 
 	def convert_template_question_to_normal_question
 		question = @survey.convert_template_question_to_normal_question(params[:id])
 		respond_to do |format|
-			format.json	{ render :json => question and return }
+			format.json	{ render_json_auto(question) and return }
 		end
 	end
 
 	def insert_quality_control_question
 		questions = @survey.insert_quality_control_question(params[:page_index].to_i, params[:question_id], params[:quality_control_question_id])
 		respond_to do |format|
-			format.json	{ render :json => questions and return }
+			format.json	{ render_json_auto(questions) and return }
 		end
 	end
 
@@ -80,7 +80,7 @@ class QuestionsController < ApplicationController
 	def update
 		question = @survey.update_question(params[:id], params[:question])
 		respond_to do |format|
-			format.json	{ render :json => question and return }
+			format.json	{ render_json_auto(question) and return }
 		end
 	end
 
@@ -105,7 +105,7 @@ class QuestionsController < ApplicationController
 	def move
 		retval = @survey.move_question(params[:question_id_1], params[:page_index].to_i, params[:question_id_2])
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -131,7 +131,7 @@ class QuestionsController < ApplicationController
 	def clone
 		question = @survey.clone_question(params[:question_id_1], params[:page_index].to_i, params[:question_id_2])
 		respond_to do |format|
-			format.json	{ render :json => question and return }
+			format.json	{ render_json_auto(question) and return }
 		end
 	end
 
@@ -153,7 +153,7 @@ class QuestionsController < ApplicationController
 	def show
 		question = @survey.get_question_inst(params[:id])
 		respond_to do |format|
-			format.json	{ render :json => question and return }
+			format.json	{ render_json_auto(question) and return }
 		end
 	end
 
@@ -175,7 +175,7 @@ class QuestionsController < ApplicationController
 	def destroy
 		retval = @survey.delete_question(params[:id])
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 end

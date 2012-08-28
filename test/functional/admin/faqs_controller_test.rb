@@ -24,8 +24,8 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 		clear(User, Faq)
 	
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_LOGIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 		
 		clear(User,Faq)
 	end
@@ -39,8 +39,8 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 	
 		sign_in(user.email, "123456")
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_ADMIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out
 		
 		clear(User,Faq)
@@ -56,16 +56,13 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 	
 		sign_in(user.email, "123456")
 		post 'create', :faq => {faq_type: "Type1", question: "question1", answer: "answer1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::FAQ_TYPE_ERROR
+		assert_equal ErrorEnum::FAQ_TYPE_ERROR.to_s, @response.body
 		
 		post 'create', :faq => {faq_type: 129, question: "question1", answer: "answer1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::FAQ_RANGE_ERROR
+		assert_equal ErrorEnum::FAQ_RANGE_ERROR.to_s, @response.body
 
 		post 'create', :faq => {faq_type: 128, answer: "answer1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::FAQ_SAVE_FAILED
+		assert_equal ErrorEnum::FAQ_SAVE_FAILED.to_s, @response.body
 		
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
 		retval = JSON.parse(@response.body)
@@ -140,16 +137,13 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 		faq = Faq.all.first
 
 		post 'update', :id => "123443454354353", :faq => {question: "updated question1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::FAQ_NOT_EXIST
+		assert_equal ErrorEnum::FAQ_NOT_EXIST.to_s, @response.body
 
 		post 'update',:id => faq.id.to_s ,  :faq => {faq_type: "Type1", question: "question1", answer: "answer1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::FAQ_TYPE_ERROR
+		assert_equal ErrorEnum::FAQ_TYPE_ERROR.to_s, @response.body
 		
 		post 'update',:id => faq.id.to_s,  :faq => {faq_type: 129, question: "question1", answer: "answer1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::FAQ_RANGE_ERROR
+		assert_equal ErrorEnum::FAQ_RANGE_ERROR.to_s, @response.body
 
 		post 'update', :id => faq.id.to_s, :faq => {question: "updated question1"}, :format => :json
 		retval = JSON.parse(@response.body)

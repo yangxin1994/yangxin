@@ -21,8 +21,8 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 		clear(User, PublicNotice)
 	
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_LOGIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 		
 		clear(User,PublicNotice)
 	end
@@ -36,8 +36,8 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 	
 		sign_in(user.email, "123456")
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_ADMIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out
 		
 		clear(User,PublicNotice)
@@ -53,12 +53,10 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 	
 		sign_in(user.email, "123456")
 		post 'create', :public_notice => {public_notice_type: "Type1", title: "title1", content: "content1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR
+		assert_equal ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR.to_s, @response.body
 		
 		post 'create', :public_notice => {public_notice_type: 129, title: "title1", content: "content1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR
+		assert_equal ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR.to_s, @response.body
 		
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json
 		retval = JSON.parse(@response.body)
@@ -134,16 +132,13 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 		public_notice = PublicNotice.all.first
 
 		post 'update', :id => "123443454354353", :public_notice => {title: "updated title1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::PUBLIC_NOTICE_NOT_EXIST
+		assert_equal ErrorEnum::PUBLIC_NOTICE_NOT_EXIST.to_s, @response.body
 
 		post 'update',:id => public_notice.id.to_s ,  :public_notice => {public_notice_type: "Type1", title: "title1", content: "content1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR
+		assert_equal ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR.to_s, @response.body
 		
 		post 'update',:id => public_notice.id.to_s,  :public_notice => {public_notice_type: 129, title: "title1", content: "content1"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR
+		assert_equal ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR.to_s, @response.body
 
 		post 'update', :id => public_notice.id.to_s, :public_notice => {title: "updated title1"}, :format => :json
 		retval = JSON.parse(@response.body)
@@ -179,5 +174,4 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 
 		clear(User,PublicNotice)
 	end
-
 end

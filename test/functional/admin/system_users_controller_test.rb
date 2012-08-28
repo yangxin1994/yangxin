@@ -6,8 +6,8 @@ class Admin::SystemUsersControllerTest < ActionController::TestCase
 		clear(User)
 
 		get 'index', :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_LOGIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.status = 2
@@ -16,8 +16,8 @@ class Admin::SystemUsersControllerTest < ActionController::TestCase
 	
 		sign_in(user.email, "123456")
 		get 'index', :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_ADMIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out
 
 		user = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
@@ -37,8 +37,8 @@ class Admin::SystemUsersControllerTest < ActionController::TestCase
 		clear(User)
 
 		post 'create', :system_user => {username: "zhangsan", password: "123456", true_name:'zhangsan'}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_LOGIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.status = 2
@@ -47,8 +47,8 @@ class Admin::SystemUsersControllerTest < ActionController::TestCase
 	
 		sign_in(user.email, "123456")
 		post 'create', :system_user => {username: "zhangsan", password: "123456", true_name: 'zhangsan'}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_ADMIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out
 
 		user = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
@@ -68,20 +68,16 @@ class Admin::SystemUsersControllerTest < ActionController::TestCase
 		assert_equal retval["username"], "lisi"
 
 		post 'create', :system_user => {username: "lisi", password: "123456", system_user_type: 2, true_name:'lisi'}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::USERNAME_EXIST
+		assert_equal ErrorEnum::USERNAME_EXIST.to_s, @response.body
 
 		post 'create', :system_user => {email: "test@example.com", password: "123456", system_user_type: 2, true_name:'lisi'}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::EMAIL_EXIST
+		assert_equal ErrorEnum::EMAIL_EXIST.to_s, @response.body
 
 		post 'create', :system_user => {password: "123456", system_user_type: 2, true_name:'lisi'}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::SYSTEM_USER_MUST_EMAIL_OR_USERNAME
+		assert_equal ErrorEnum::SYSTEM_USER_MUST_EMAIL_OR_USERNAME.to_s, @response.body
 
 		post 'create', :system_user => {email: "test4@example.com", system_user_type: 2, true_name:'lisi'}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::SYSTEM_USER_SAVE_FAILED
+		assert_equal ErrorEnum::SYSTEM_USER_SAVE_FAILED.to_s, @response.body
 
 		assert_equal SystemUser.all.count, 2
 		# get index
@@ -123,8 +119,8 @@ class Admin::SystemUsersControllerTest < ActionController::TestCase
 		clear(User)
 
 		post 'update',:id => "5004bffb6c6eea1204000009",  :system_user => {username: "zhangsan", password: "123456", true_name:'zhangsan'}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_LOGIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.status = 2
@@ -133,8 +129,8 @@ class Admin::SystemUsersControllerTest < ActionController::TestCase
 	
 		sign_in(user.email, "123456")
 		post 'update',:id => "5004bffb6c6eea1204000009",  :system_user => {username: "zhangsan", password: "123456"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_ADMIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out
 
 		user = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
@@ -154,8 +150,7 @@ class Admin::SystemUsersControllerTest < ActionController::TestCase
 		assert_equal retval["true_name"], "test"
 
 		post 'update',:id => retval["_id"], :system_user => {email: "test2@example.com", true_name: "test", password: "1234567"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::EMAIL_EXIST
+		assert_equal ErrorEnum::EMAIL_EXIST.to_s, @response.body
 
 		#create new system user
 		post 'create', :system_user => {email: "oop2@example.com", password: "123456", true_name:'zhangsan'}, :format => :json
@@ -166,8 +161,7 @@ class Admin::SystemUsersControllerTest < ActionController::TestCase
 		assert_equal system_user.password, Encryption.encrypt_password("123456")
 
 		post 'update',:id => retval["_id"], :system_user => {email: "", true_name: "test", password: "1234567"}, :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::SYSTEM_USER_MUST_EMAIL_OR_USERNAME
+		assert_equal ErrorEnum::SYSTEM_USER_MUST_EMAIL_OR_USERNAME.to_s, @response.body
 
 		sign_out
 
@@ -178,8 +172,8 @@ class Admin::SystemUsersControllerTest < ActionController::TestCase
 		clear(User)
 
 		post 'lock', :id => "5004bffb6c6eea1204000009", :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_LOGIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.status = 2
@@ -188,8 +182,8 @@ class Admin::SystemUsersControllerTest < ActionController::TestCase
 	
 		sign_in(user.email, "123456")
 		post 'lock', :id => "5004bffb6c6eea1204000009", :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_ADMIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out
 
 		user = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
@@ -218,8 +212,8 @@ class Admin::SystemUsersControllerTest < ActionController::TestCase
 		clear(User)
 
 		post 'unlock', :id => "5004bffb6c6eea1204000009", :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_LOGIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
 		user.status = 2
@@ -228,8 +222,8 @@ class Admin::SystemUsersControllerTest < ActionController::TestCase
 	
 		sign_in(user.email, "123456")
 		post 'unlock', :id => "5004bffb6c6eea1204000009", :format => :json
-		retval = @response.body.to_i
-		assert_equal retval, ErrorEnum::REQUIRE_ADMIN
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out
 
 		user = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
