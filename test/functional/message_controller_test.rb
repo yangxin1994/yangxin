@@ -4,7 +4,7 @@ class MessagesControllerTest < ActionController::TestCase
 	setup do
 		clear(Message, User)
 		@user_bar = FactoryGirl.create(:user_bar)
-		@user_bar.update_attribute(:created_at, Time.now - 1.day)
+		@user_bar.update_attribute(:last_read_messeges_time, Time.now - 1.day)
 		sign_in('user_bar@gmail.com', '123123123')
 		3.times{ FactoryGirl.create(:message) }
 

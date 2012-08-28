@@ -22,6 +22,7 @@ class User
 	field :activate_time, :type => Integer
 	field :introducer_id, :type => Integer
 	field :introducer_to_pay, :type => Float
+	field :last_read_messeges_time, :type => Time, :default => Time.now
 # 0 user
 # 1 administrator
 # 2 belongs to: White List
@@ -371,10 +372,11 @@ class User
 	end
 
 	def unread_messages_count
-		Message.unread(created_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}.count
+		Message.unread(last_read_messeges_time).select{ |m| (message_ids.include? m.id) or (m.type == 0)}.count
 	end
 
 	def show_messages
+		self.update_attribute(:last_read_messeges_time, Time.now)
 		Message.all.select{ |m| (message_ids.include? m.id) or (m.type == 0)}
 		#Message.unread(created_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}
 	end
