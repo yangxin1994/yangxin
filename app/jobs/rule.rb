@@ -13,7 +13,9 @@ module Jobs
 	end
 
 	class Rule
-		attr_accessor :survey_id, :condition_type, :conditions, :amount, :time_left, :email_number, :fuzzy, :sample_ids
+		attr_accessor :survey_id, :condition_type, :conditions, 
+					:amount, :time_left, :email_number, :fuzzy, :sample_ids, 
+					:pop_conditions_names
 
 		MaxNumber = 3
 
@@ -30,16 +32,25 @@ module Jobs
 			@fuzzy = fuzzy
 
 			@sample_ids = []
+			@pop_conditions_names = []
 		end
 
 		def conditions
 			@conditions || []
 		end
 
+		def conditions_names
+			names = []
+			@conditions.each do |condition|
+				names << condition.name
+			end
+			return names
+		end
+
 		def to_s
 			{survey_id: @survey_id, conditions: JSON.parse(@conditions.to_json), 
 					amount: @amount, email_number: @email_number, 
-					sample_ids: sample_ids}
+					sample_ids: @sample_ids, pop_conditions_names: @pop_conditions_names}
 		end
 
 		def email_number_decrease

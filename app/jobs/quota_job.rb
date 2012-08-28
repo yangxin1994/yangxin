@@ -102,10 +102,6 @@ module Jobs
 			return rule_arr
 		end
 
-
-		class Jobs::Sample
-			attr_accessor :meet_surveys
-		end
 		class TemplateQuestionAnswer
 			attr_accessor :meet_surveys
 		end
@@ -118,9 +114,13 @@ module Jobs
 
 		# it must return false or true
 		def self.compare_template_rule(template, rule)
-			return JSON.parse(template.conditions.to_json) & 
+			return 	rule.email_number > 0 &&
+					!rule.sample_ids.include?(template.user_id) &&
+					JSON.parse(template.conditions.to_json) & 
 					JSON.parse(rule.conditions.to_json) == 
-					JSON.parse(rule.conditions.to_json) && rule.email_number > 0 
+					JSON.parse(rule.conditions.to_json) &&
+					rule.pop_conditions_names &
+					template.conditions_names == []
 		end
 
 		# this method start of answer_templates.each
@@ -152,7 +152,8 @@ module Jobs
 				# bring down conditions
 				puts "**********bring down conditions  rules**********"
 				rule_arr.each do |rule|
-					rule.conditions.pop if rule.conditions.count > 0
+					pop_condition = rule.conditions.pop if rule.conditions.count > 0
+					rule.pop_conditions_names << pop_condition.name if pop_condition
 					puts "bring down:rule:: #{rule.to_s}"
 				end
 
@@ -183,28 +184,35 @@ module Jobs
 			# # although some rules not be satisfied, but template is over.
 			# # Then, we send email for select_answer_templates 
 			# # which 's survey_ids < MaxCountOfReceivingSurveies
-			# select_answer_templates.each do |template|
-			# 	send_emails(template)
-			# end
+			# send_emails(select_answer_templates)
 
 			return select_answer_templates
 		end
 
 		def self.select_block(templates, select_templates, rules)
-			templates.each do |template|
-				puts ">>>>>>>>>>>template.user_id::#{template.user_id}"
+			templates.each_index do |index|
+
+				# template[index] maybe a nil due to templates which will be changed
+				break if templates[index].nil?
+				puts "%%%%%%%%%%%%%%%%%template::#{templates[index].to_s}"
 
 				break if rules.count == 0
 
 				# sort desc of email_number
 				rules.sort!{|v1, v2| v2.email_number <=> v1.email_number} if rules.count > 1
-				puts "sort >>>>>>>>>>"
+				puts "sort &&&&&&&&&&&&&&&&&&&&&&&&&&&&"
+				rules.each {|rule| puts "after rule ::: #{rule.to_s}"}	
+
+				# init template_send_email variable
+				# if current template sends email at follows step,
+				# it should be true.
+				template_send_email = false
 
 				#
 				# 2: Find some rules who fit with this template.
 				rules.each do |rule|
 
-					template.meet_surveys ||= []
+					templates[index].meet_surveys ||= []
 
 					#
 					# 2.1: compare conditions
@@ -212,61 +220,72 @@ module Jobs
 
 					# binding.pry
 
-					if compare_template_rule(template, rule) then
+					if compare_template_rule(templates[index], rule) then
 
 						# puts ">>>>>>>>>"
 
-						# next if rule.sample_ids.include?(template.user_id)
-						rule.sample_ids << template.user_id
+						# next if rule.sample_ids.include?(templates[index].user_id)
+						rule.sample_ids << templates[index].user_id
 
 						# add tmp field: meet_surveys in template_question_answer object 
 						# that store survey ids
-						template.meet_surveys ||= []
-						if !template.meet_surveys.include?(rule.survey_id) then
-							template.meet_surveys << rule.survey_id
+						templates[index].meet_surveys ||= []
+						if !templates[index].meet_surveys.include?(rule.survey_id) then
+							templates[index].meet_surveys << rule.survey_id
 						end
 
 						# a template_question_answer object which include one rule 
 						# should be in select_answer_templates 
-						if !select_templates.include?(template) then
-							select_templates << template
+						if !select_templates.include?(templates[index]) then
+							select_templates << templates[index]
 						end
 						rules.reject!{|a| a == rule}  if rule.email_number_decrease <= 0
 
 						# find other rules with same of the current rule 's survey_id/
-						# because this can use this template max-ily when
+						# because this can use this templates[index] max-ily when
 						#
-						# if template.meet_surveys.size >= MaxCountOfReceivingSurveies then 
+						# if templates[index].meet_surveys.size >= MaxCountOfReceivingSurveies then 
 						# 	# send email ??? 
-						# 	send_email(template)
+						# 	send_email(templates[index])
 						# 	break  
 						# end
 						#
 						# this code send email.
 						same_survey_rules = rules.select{|element| element != rule && element.survey_id == rule.survey_id}
 						same_survey_rules.each do |rule2|
-							if compare_template_rule(template, rule2) then
+							if compare_template_rule(templates[index], rule2) then
 								rules.reject!{|a| a == rule2}  if rule2.email_number_decrease <= 0
-								rule2.sample_ids << template.user_id
+								rule2.sample_ids << templates[index].user_id
 							end
 						end
 					end
 
-					if template.meet_surveys.size >= MaxCountOfReceivingSurveies then
+					if templates[index].meet_surveys.size >= MaxCountOfReceivingSurveies then
 						# send email ???
-						send_email(template)
+						send_email(templates[index])
 						# remove tempate which sends email from select_answer_tmplates
-						select_templates.reject!{|element| element == template}
+						select_templates.reject!{|element| element == templates[index]}
 						# because this template has sent email, and it should be removed from templates
 						# which assures that not send email in secondly.
-						templates.reject!{|element| element == template}
+						templates.reject!{|element| element == templates[index]}
+						#change template_send_email
+						template_send_email = true
 						break 
 					end
 				end
 
+				puts "deal rules $$$$$$$$$$$$$$$$$$"
 				rules.each {|rule| puts "after rule ::: #{rule.to_s}"}
 
-				# puts "answer_templates::::#{template.to_json}"
+				# if template_send_email is true, the templates' count would be changed.
+				# so, we should redo more one time.
+				# Example:
+				# arr = [1,2,3]
+				# arr.each{|e| puts e.to_s; arr.reject!{|el| el==2 && e==2}}
+				# it will output: 1 2, arr = [1,3]. but not print 3.
+				# However, now we need to remove 2(arr=[1,3]) and output 1 2 3. So, we can:
+				# arr.each_index{|index| puts arr[index].to_s; if arr[index]==2 then arr.reject!{|el| el==2}; redo; end;}
+				redo if template_send_email
 			end
 
 			return select_templates

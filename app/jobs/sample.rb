@@ -2,7 +2,7 @@
 module Jobs
 	class Sample
 
-		attr_accessor :user_id, :conditions, :email, :last_email_time
+		attr_accessor :user_id, :conditions, :email, :last_email_time, :meet_surveys
 
 		def initialize(user_id, email, conditions, last_email_time=nil)
 			if !conditions.instance_of?(Array) || (conditions.size > 0 && !conditions[0].instance_of?(Condition)) then
@@ -16,12 +16,25 @@ module Jobs
 			else
 				@last_email_time = Time.new(2012,01,01)
 			end
+			@meet_surveys = []
 		end
 
 		def to_s
 			{user_id: @user_id, conditions: JSON.parse(@conditions.to_json), 
 					email: @email, last_email_time: @last_email_time, 
 					meet_surveys: @meet_surveys}
+		end
+
+		def conditions
+			@conditions || []
+		end	
+
+		def conditions_names
+			names = []
+			@conditions.each do |condition|
+				names << condition.name
+			end
+			return names
 		end
 
 		class << self 
