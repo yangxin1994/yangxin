@@ -7,7 +7,7 @@ class MessagesController < ApplicationController
     @messages = ErrorEnum::MESSAGE_NOT_FOUND if @messages.empty? 
     #todo 更新 last_read_time
     respond_to do |format|
-      format.json { render :json => @messages , :include => 3 }
+      format.json { render :json => @messages }
     end
   end
   def unread_count
