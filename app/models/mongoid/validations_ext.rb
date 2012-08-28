@@ -16,8 +16,11 @@ module Mongoid
 			@error_codes
 		end
 		def as_retval
-			 return error_codes if invalid?
-			 self
+			if invalid?
+				retval = {:error_code => self.error_codes,
+									:error_message => self.errors.messages}
+			end
+			self
 		end
 		class ::String
 			def initial_upcase
