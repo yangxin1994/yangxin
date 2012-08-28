@@ -21,6 +21,6 @@ class MessagesControllerTest < ActionController::TestCase
 		get :unread_count, :format => :json
 		#pp @user_bar.unread_messages_count
 		#pp response.body
-		assert_equal "3", response.body
+		assert_equal "{\"success\":true,\"value\":3}", response.body
 	end 	
 end

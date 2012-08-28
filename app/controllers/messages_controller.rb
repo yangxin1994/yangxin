@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'error_enum'
 class MessagesController < ApplicationController
-  before_filter :require_login
+  before_filter :require_sign_in
   def index
     @messages = current_user.show_messages
     #@messages = ErrorEnum::MESSAGE_NOT_FOUND if @messages.empty? 
