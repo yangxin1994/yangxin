@@ -72,3 +72,7 @@ test:
 question_default_settings:
   content: "题干"
   note: "说明"
+
+login_keep_time:
+  kept: 2592000 # 1.months.to_i
+  unkept: 86400 # 1.days.to_i

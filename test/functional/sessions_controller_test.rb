@@ -23,7 +23,7 @@ class SessionsControllerTest < ActionController::TestCase
 
 		post :create, :format => :json, :user => {"email_username" => jesse.email, "password" => Encryption.decrypt_password(jesse.password)}
 		result = JSON.parse(@response.body)
-		assert_equal 2, result["value"]["status"]
+		assert_equal 4, result["value"]["status"]
 	end
 
 	test "should send password email" do

@@ -195,7 +195,6 @@ class RegistrationsController < ApplicationController
 				format.json	{ render_json_e(ErrorEnum::USER_NOT_EXIST) and return }
 			end
 		else
-			set_logout_cookie
 			respond_to do |format|
 				flash[:notice] = "已经成功注销帐号"
 				format.html	{ redirect_to root_path and return }

@@ -6,16 +6,16 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 		clear(User,Faq)
 
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 2
+		user.status = 4
 		user.role = 1
 		user.save
 	
-		sign_in(user.email, "123456")
+		auth_key = sign_in(user.email, "123456")
 
-		get 'index', :format => :json
+		get 'index', :format => :json, :auth_key => auth_key
 		assert_equal JSON.parse(@response.body), []
 
-		sign_out
+		sign_out(auth_key)
 
 		clear(User,Faq)
 	end
@@ -33,15 +33,15 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 	test "03 should post create action with login, but not admin user" do
 		clear(User, Faq)
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 2
+		user.status = 4
 		user.role = 0
 		user.save
 	
-		sign_in(user.email, "123456")
-		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
+		auth_key = sign_in(user.email, "123456")
+		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
-		sign_out
+		sign_out(auth_key)
 		
 		clear(User,Faq)
 	end
@@ -50,21 +50,21 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 		clear(User, Faq)
 
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 2
+		user.status = 4
 		user.role = 1
 		user.save
 	
-		sign_in(user.email, "123456")
-		post 'create', :faq => {faq_type: "Type1", question: "question1", answer: "answer1"}, :format => :json
+		auth_key = sign_in(user.email, "123456")
+		post 'create', :faq => {faq_type: "Type1", question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
 		assert_equal ErrorEnum::FAQ_TYPE_ERROR.to_s, @response.body
 		
-		post 'create', :faq => {faq_type: 129, question: "question1", answer: "answer1"}, :format => :json
+		post 'create', :faq => {faq_type: 129, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
 		assert_equal ErrorEnum::FAQ_RANGE_ERROR.to_s, @response.body
 
-		post 'create', :faq => {faq_type: 128, answer: "answer1"}, :format => :json
+		post 'create', :faq => {faq_type: 128, answer: "answer1"}, :format => :json, :auth_key => auth_key
 		assert_equal ErrorEnum::FAQ_SAVE_FAILED.to_s, @response.body
 		
-		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
+		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval["question"], "question1"
 		faq = Faq.all.first
@@ -73,43 +73,43 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 		#
 		# get index
 		#
-		post 'create', :faq => {faq_type: 2, question: "question2", answer: "answer2"}, :format => :json
-		post 'create', :faq => {faq_type: 64, question: "question3", answer: "answer3"}, :format => :json
-		post 'create', :faq => {faq_type: 128, question: "question4", answer: "answer4"}, :format => :json
+		post 'create', :faq => {faq_type: 2, question: "question2", answer: "answer2"}, :format => :json, :auth_key => auth_key
+		post 'create', :faq => {faq_type: 64, question: "question3", answer: "answer3"}, :format => :json, :auth_key => auth_key
+		post 'create', :faq => {faq_type: 128, question: "question4", answer: "answer4"}, :format => :json, :auth_key => auth_key
 
 		# no type, no value
-		get 'index', :format => :json
+		get 'index', :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 4
 
 		# with type, no value
-		get 'index', :format => :json, :faq_type => 3
+		get 'index', :format => :json, :faq_type => 3, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 2
 
-		get 'index', :format => :json, :faq_type => 255
+		get 'index', :format => :json, :faq_type => 255, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 4
 
 		#with type and value
-		get 'index', :format => :json, :faq_type => 3, :value => "answer"
+		get 'index', :format => :json, :faq_type => 3, :value => "answer", :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 2
 
-		get 'index', :format => :json, :faq_type => 3, :value => "answer1"
+		get 'index', :format => :json, :faq_type => 3, :value => "answer1", :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 1
 
 		#paging
-		get 'index', :format => :json, :per_page => 2
+		get 'index', :format => :json, :per_page => 2, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 2
 
-		get 'index', :format => :json, :per_page => 3, :page=> 2
+		get 'index', :format => :json, :per_page => 3, :page=> 2, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 1
 
-		sign_out
+		sign_out(auth_key)
 		
 		clear(User,Faq)
 	end
@@ -118,34 +118,34 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 		clear(User, Faq)
 
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 2
+		user.status = 4
 		user.role = 1
 		user.save
 		
 		user2 = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
-		user2.status = 2
+		user2.status = 4
 		user2.role = 1
 		user2.save
 	
-		sign_in(user.email, "123456")
-		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
+		auth_key = sign_in(user.email, "123456")
+		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
-		sign_out
+		sign_out(auth_key)
 		
-		sign_in(user2.email, "123456")
+		auth_key = sign_in(user2.email, "123456")
 
 		faq = Faq.all.first
 
-		post 'update', :id => "123443454354353", :faq => {question: "updated question1"}, :format => :json
+		post 'update', :id => "123443454354353", :faq => {question: "updated question1"}, :format => :json, :auth_key => auth_key
 		assert_equal ErrorEnum::FAQ_NOT_EXIST.to_s, @response.body
 
-		post 'update',:id => faq.id.to_s ,  :faq => {faq_type: "Type1", question: "question1", answer: "answer1"}, :format => :json
+		post 'update',:id => faq.id.to_s ,  :faq => {faq_type: "Type1", question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
 		assert_equal ErrorEnum::FAQ_TYPE_ERROR.to_s, @response.body
 		
-		post 'update',:id => faq.id.to_s,  :faq => {faq_type: 129, question: "question1", answer: "answer1"}, :format => :json
+		post 'update',:id => faq.id.to_s,  :faq => {faq_type: 129, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
 		assert_equal ErrorEnum::FAQ_RANGE_ERROR.to_s, @response.body
 
-		post 'update', :id => faq.id.to_s, :faq => {question: "updated question1"}, :format => :json
+		post 'update', :id => faq.id.to_s, :faq => {question: "updated question1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval["question"], "updated question1"
 
@@ -154,7 +154,7 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 		assert_equal faq.question, "updated question1"
 		assert_equal faq.user, user2
 
-		sign_out
+		sign_out(auth_key)
 
 		clear(User,Faq)
 	end
@@ -162,20 +162,20 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 	test "06 should destroy action which is with admin " do
 		clear(User, Faq)
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 2
+		user.status = 4
 		user.role = 1
 		user.save
 	
-		sign_in(user.email, "123456")
-		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
+		auth_key = sign_in(user.email, "123456")
+		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 
-		post 'destroy', :id => retval["_id"], :format => :json
+		post 'destroy', :id => retval["_id"], :format => :json, :auth_key => auth_key
 		assert_equal @response.body, "true"
 		
 		retval = Faq.where(_id: retval["_id"]).first
 		assert_equal retval, nil
-		sign_out
+		sign_out(auth_key)
 
 		clear(User,Faq)
 	end

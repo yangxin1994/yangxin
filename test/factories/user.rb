@@ -2,7 +2,7 @@ FactoryGirl.define do
 
 	factory :quill_user, class: User do
 		password Encryption.encrypt_password("123123123")
-		status 2
+		status 4
 		point 1000
 		factory :admin_foo do
 			email "admin_foo@gmail.com"
@@ -35,7 +35,7 @@ FactoryGirl.define do
 		email "jesse@test.com"
 		password Encryption.encrypt_password("123456")
 		username "jesse"
-		status 2
+		status 4
 		activate_time Time.now.to_i
 	end
 
@@ -43,7 +43,7 @@ FactoryGirl.define do
 		email "oliver@test.com"
 		password Encryption.encrypt_password("123456")
 		username "oliver"
-		status 2
+		status 4
 		activate_time Time.now.to_i
 	end
 
@@ -51,7 +51,7 @@ FactoryGirl.define do
 		email "lisa@test.com"
 		password Encryption.encrypt_password("123456")
 		username "lisa"
-		status 2
+		status 4
 		activate_time Time.now.to_i
 	end
 end
