@@ -11,9 +11,15 @@ class SurveyTest < ActiveSupport::TestCase
 	test "should show a header of csv" do
 		#pp @survey_with_issue
 		#pp Question.first
-		@survey_with_issue.all_questions.each { |i| p i.attributes['_id'] }
-		pp Question.issue
-		#pp Question.first.header 1
+		#@survey_with_issue.all_questions.each { |i| p i.attributes['_id'] }
+		#pp Question.first.issue
+		# pp Question.first.issue["max_choice"]
+		# pp Surver.first.header 1
+		# pp Question.first.header 2
+		# @survey_with_issue.all_questions.each do |q|
+		# 	pp q.header 1
+		# end
+		p @survey_with_issue.headers
 		assert true
 	end
 end

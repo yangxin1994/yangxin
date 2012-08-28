@@ -11,8 +11,18 @@ FactoryGirl.define do
     description "描述哦"
     pages [{name: "仅有的一页",
             questions: [FactoryGirl.create(:single_choice_question).id,
-                        FactoryGirl.create(:single_choice_question).id,
-                        FactoryGirl.create(:single_choice_question).id
+                        FactoryGirl.create(:multi_choice_question).id,
+                        FactoryGirl.create(:matrix_singel_choice_question).id,
+                        FactoryGirl.create(:matrix_mutil_choice_question).id,
+                        FactoryGirl.create(:text_blank_choice_question).id,
+                        FactoryGirl.create(:number_blank_choice_question).id,
+                        FactoryGirl.create(:email_blank_choice_question).id,
+                        #FactoryGirl.create(:url_blank_choice_question).id,
+                        FactoryGirl.create(:phone_blank_choice_question).id,
+                        FactoryGirl.create(:time_blank_choice_question).id,
+                        FactoryGirl.create(:address_blank_choice_question).id,
+                        FactoryGirl.create(:blank_choice_question).id,
+                        FactoryGirl.create(:matrix_blank_choice_question).id
               ]}
     ]
     status 8

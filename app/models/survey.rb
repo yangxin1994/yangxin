@@ -81,7 +81,7 @@ class Survey
 
 	public
 
-	def all_questions(attributes = [])
+	def all_questions
 		q = []
 		quota_template_question_page.each do |page|
 			q << page[:questions]
@@ -92,6 +92,14 @@ class Survey
 		q.collect { |i| Question.find(i) }[0]
 	end
 
+	def headers
+		headers, index =[], 0
+		all_questions.each do |e|
+			index += 1
+			headers += e.header(index)
+		end
+		headers
+	end
 	#*description*: judge whether this survey has a question
 	#
 	#*params*

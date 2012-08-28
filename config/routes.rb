@@ -23,7 +23,7 @@ OopsData::Application.routes.draw do
 				post 'unlock'
 			end
 		end
-		resources :feedbacks do 
+		resources :feedbacks do
 			member do 
 				post 'reply'
 			end
