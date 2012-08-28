@@ -37,25 +37,21 @@ class ApplicationController < ActionController::Base
 ################################################
 	#get the information of the signed user and set @current_user
 	def current_user
-		if params[:client_type] == "web" || params[:client_type].to_s == ""
-			current_user_id = get_cookie(:current_user_id)
-			@current_user = current_user_id.nil? ? User.create_new_visitor_user : User.find_by_id(current_user_id)
+		if params[:auth_key] == nil
+			@current_user = nil
 		else
-			current_user_id = params[:current_user_id]
-			@current_user = current_user_id == "" ? nil : User.find_by_id(current_user_id)
+			@current_user = User.find_by_auth_key(params[:auth_key])
 		end
+		return @current_user
 	end
 
 	def user_init
 		return if !user_signed_in?
 		case @current_user.status
+		when 2
+			render_json_e(ErrorEnum::REQUIRE_INIT_STEP_1) and return 
 		when 3
-			redirect_to fill_basic_info_path and return 
-		when 4
-			# Bug?
-			#redirect_to import_friends_path and return 
-		when 5
-			redirect_to first_survey_path and return 
+			render_json_e(ErrorEnum::REQUIRE_INIT_STEP_2) and return 
 		end
 	end
 
@@ -68,12 +64,7 @@ class ApplicationController < ActionController::Base
 
 	#judge whether there is a user signed in currently
 	def user_signed_in?
-		#logger.info "#{@current_user}"
-		if params[:client_type] == "web" || params[:client_type].to_s == ""
-			return !!@current_user && get_cookie(:auth_key).to_s != "" && @current_user.auth_key == get_cookie(:auth_key)
-		else
-			return !!@current_user && params[:auth_key].to_s != "" && @current_user.auth_key == params[:auth_key]
-		end
+		return @current_user && @current_user.status >= 2
 	end
 
 	#judge whether there is no user signed in currently
@@ -176,6 +167,15 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
+	def require_user_exist
+		if !@current_user
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render_json_e(ErrorEnum::USER_NOT_EXIST) and return }
+			end
+		end
+	end
+
 	#if no user signs in, redirect to root path
 	def require_sign_in
 		if !user_signed_in?
@@ -196,16 +196,6 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
-	#set cookie given a pair of key and value
-	def set_cookie(key, value, expire_time = nil)
-		cookies[key.to_sym] = expire_time.nil? ? value : {:value => value, :expires => expire_time}
-	end
-
-	#get cookie given a key
-	def get_cookie(key)
-		return cookies[key.to_sym]
-	end
-
 	def decrypt_third_party_user_id(string)
 		begin
 			h = JSON.parse(Encryption.decrypt_third_party_user_id(string))
@@ -216,12 +206,6 @@ class ApplicationController < ActionController::Base
 	end 
 
 	# method: in-accessible
-
-	def set_logout_cookie
-		set_cookie(:current_user_id, nil) 
-		set_cookie(:auth_key, nil) 
-	end
-
 
 	# paging operate
 	def slice(arr, page, per_page)
