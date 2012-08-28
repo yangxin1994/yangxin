@@ -5,16 +5,22 @@ require "mongoid/validations/presence"
 require "mongoid/validations/with"
 module Mongoid
 	module ValidationsExt
-		def error_code
-			@error_code ||= []
-			@error_code
+		def error_codes
+			@error_codes ||= []
+			@error_codes
 		end
-		def error_code=(e=[])
-			@error_code = e
+		def add_error_code(e)
+			error_codes << e unless error_codes.include?(e)
+		end
+		def error_codes=(e=[])
+			@error_codes
 		end
 		def as_retval
-			 return error_code if invalid?
-			 self
+			if invalid?
+				retval = {:error_code => self.error_codes,
+									:error_message => self.errors.messages}
+			end
+			self
 		end
 		class ::String
 			def initial_upcase
