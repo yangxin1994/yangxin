@@ -25,6 +25,11 @@ module Jobs
 			# #send_email
 			# send_email(select_sample_array)
 
+			rule_arr = check_quota
+
+			get_select_answer_templates(rule_arr)
+
+
 			# next 
 			arg = {}
 			arg = args[0] if args[0].class == Hash
@@ -50,12 +55,9 @@ module Jobs
 			published_surveies = Survey.where(status: 8).to_a
 
 			published_surveies.each do |survey|
-				quota = survey.quota
 				tmp_rule_arr = []
-
 				#get the conditions of type==0 to tmp_rule_arr
-				quota["rules"].each_index do |rule_index|
-					rule = quota["rules"][rule_index]
+				survey.quota["rules"].each_with_index do |rule, rule_index|
 					rule_amount = rule["amount"].to_i
 
 					conditions = []
@@ -66,39 +68,24 @@ module Jobs
 					end
 
 					#compute rest number
-					quota_stats = survey.quota_stats
-					answer_number = quota_stats["answer_number"][rule_index].to_i
-					rest_number = rule_amount - answer_number
+					answer_number = survey.quota_stats["answer_number"][rule_index].to_i
+					rest_number = rule_amount < answer_number ? 0 : rule_amount - answer_number
 
-					# change to 0 if tmp_rule_arr element 's amount < 0.
-					# because a rule(Rule object) would has two or more rule(survey.quota.rule )
-					rest_number = 0 if rest_number < 0
-
-					is_same_rule = false
-					tmp_rule_arr.each_index do |diff_index|
-
+					tmp_rule_arr.each_with_index do |rule, diff_index|
 						# if a rule which is in tmp_rule_arr has the same conditions,
 						# add the amount in tmp_rule_arr element
 						# and donot push the rule to tmp_rule_arr.
-						if conditions.to_json == tmp_rule_arr[diff_index].conditions.to_json then
-							tmp_rule_arr[diff_index].amount_increase(rest_number)
-							is_same_rule = true 
+						if conditions - rule.conditions == [] && rule.conditions - conditions == []
+							rule.amount_increase(rest_number)
 							break
 						else
-							is_same_rule = false
+							tmp_rule_arr << Rule.new(survey.id.to_s, 0, conditions, rest_number) if conditions.size > 0 && rest_number > 0
 						end
-					end
-
-					# if not the rule 's conditions be not contains from tmp_rule_arr,
-					# push it .
-					if !is_same_rule and conditions.size > 0 and rest_number > 0 then
-						tmp_rule_arr << Rule.new(survey.id.to_s, 	0, conditions, rest_number) 
 					end
 				end
 
 				rule_arr += tmp_rule_arr
 			end
-
 			return rule_arr
 		end
 
@@ -140,22 +127,32 @@ module Jobs
 			answer_templates = templates_before_filter(Sample.all) # for test
 			return [] if answer_templates.count == 0
 
-			select_answer_templates = []
-			select_block(answer_templates, select_answer_templates, rule_arr)
+			select_answer_templates = select_block(answer_templates, rule_arr)
 
 			# Other work.
 			# if it is end of all templates, but rule_arr.count > 0 .
 			# That is, rule arr not satisfied with all templates.
 			# So, we should bring down conditions of rule_arr.each_rule.
-			while_count = 0
-			while while_count < MaxCountOfDescingConditionForWhile && rule_arr.count > 0 do
+			#while_count = 0
+			#while while_count < MaxCountOfDescingConditionForWhile && rule_arr.count > 0 do
+			while true
 				# bring down conditions
 				puts "**********bring down conditions  rules**********"
+				all_nil = true
 				rule_arr.each do |rule|
-					pop_condition = rule.conditions.pop if rule.conditions.count > 0
-					rule.pop_conditions_names << pop_condition.name if pop_condition
+					rule.conditions.each do |condition|
+						if !condition.value.nil?
+							condition.value = nil
+							all_nil = false
+							break
+						end
+					end
+					# pop_condition = rule.conditions.pop if rule.conditions.count > 0
+					# rule.pop_conditions_names << pop_condition.name if pop_condition
 					puts "bring down:rule:: #{rule.to_s}"
 				end
+				# if all the conditions are nil, it means that we can not satisfy the "amount"
+				break if all_nil
 
 				# sort answer_templates again
 				# and consider of select_answer_templates.
@@ -175,9 +172,7 @@ module Jobs
 				end
 
 				select_answer_templates = []
-				select_block(answer_templates, select_answer_templates, rule_arr)
-
-				while_count += 1
+				select_answer_templates = select_block(answer_templates, rule_arr)
 			end
 
 			# # End,
@@ -185,11 +180,10 @@ module Jobs
 			# # Then, we send email for select_answer_templates 
 			# # which 's survey_ids < MaxCountOfReceivingSurveies
 			# send_emails(select_answer_templates)
-
-			return select_answer_templates
 		end
 
-		def self.select_block(templates, select_templates, rules)
+		def self.select_block(templates, rules)
+			select_templates = []
 			templates.each_index do |index|
 
 				# template[index] maybe a nil due to templates which will be changed
