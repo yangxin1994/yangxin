@@ -20,13 +20,13 @@ class MaterialsController < ApplicationController
 		case material
 		when ErrorEnum::WRONG_MATERIAL_TYPE
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::WRONG_MATERIAL_TYPE and return }
+				format.json	{ render_json_e(ErrorEnum::WRONG_MATERIAL_TYPE) and return }
 			end
 		else
 			@current_user.materials << meterial
 			flash[:notice] = "资源已成功创建"
 			respond_to do |format|
-				format.json	{ render :json => material and return }
+				format.json	{ render_json_auto(material) and return }
 			end
 		end
 	end
@@ -46,7 +46,7 @@ class MaterialsController < ApplicationController
 		materials = @current_user.materials.find_by_type(params[:material_type].to_i)
 		flash[:notice] = "成功获取资源列表"
 		respond_to do |format|
-			format.json	{ render :json => materials and return }
+			format.json	{ render_json_auto(material) and return }
 		end
 	end
 
@@ -69,12 +69,12 @@ class MaterialsController < ApplicationController
 		when nil
 			flash[:notice] = "该资源不存在"
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::MATERIAL_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::MATERIAL_NOT_EXIST) and return }
 			end
 		else
 			flash[:notice] = "成功获取资源"
 			respond_to do |format|
-				format.json	{ render :json => material and return }
+				format.json	{ render_json_auto(material) and return }
 			end
 		end
 	end
@@ -96,7 +96,7 @@ class MaterialsController < ApplicationController
 		@current_user.materials.find_by_id(params[:id]).destroy_all
 		flash[:notice] = "资源已成功删除"
 		respond_to do |format|
-			format.json	{ render :json => true and return }
+			format.json	{ render_json_s and return }
 		end
 	end
 
@@ -118,7 +118,7 @@ class MaterialsController < ApplicationController
 		if material.nil?
 			flash[:notice] = "该资源不存在"
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::MATERIAL_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::MATERIAL_NOT_EXIST) and return }
 			end
 		end
 		retval = material.update_title(params[:title])
@@ -126,11 +126,11 @@ class MaterialsController < ApplicationController
 		when true
 			flash[:notice] = "资源标题已成功更新"
 			respond_to do |format|
-				format.json	{ render :json => material and return }
+				format.json	{ render_json_auto(material) and return }
 			end
 		else
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
+				format.json	{ render_json_e(ErrorEnum::UNKNOWN_ERROR) and return }
 			end
 		end
 	end

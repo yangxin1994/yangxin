@@ -7,7 +7,7 @@ class Admin::QualityControlQuestionsController < Admin::ApplicationController
 		@question = QualityControlQuestion.find_by_id(params[:id])
 		if @question.nil?
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST) and return }
 			end
 		end
 	end
@@ -30,7 +30,7 @@ class Admin::QualityControlQuestionsController < Admin::ApplicationController
 	def create
 		quality_control_question = QualityControlQuestion.create_quality_control_question(params[:quality_control_type].to_i, params[:question_type].to_i, params[:question_number].to_i)
 		respond_to do |format|
-			format.json	{ render :json => quality_control_question and return }
+			format.json	{ render_json_auto(quality_control_question) and return }
 		end
 	end
 
@@ -52,14 +52,14 @@ class Admin::QualityControlQuestionsController < Admin::ApplicationController
 	def update
 		question = @question.update_question(params[:question], @current_user)
 		respond_to do |format|
-			format.json	{ render :json => question and return }
+			format.json	{ render_json_auto(question) and return }
 		end
 	end
 
 	def update_answer
 		retval = QualityControlQuestionAnswer.update_answer(params[:id], params[:quality_control_type].to_i, params[:answer])
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -81,14 +81,14 @@ class Admin::QualityControlQuestionsController < Admin::ApplicationController
 	def show
 		question = @question.show_quality_control_question(@current_user)
 		respond_to do |format|
-			format.json	{ render :json => question and return }
+			format.json	{ render_json_auto(question) and return }
 		end
 	end
 
 	def index
 		questions = QualityControlQuestion.list_quality_control_question(params[:quality_control_type].to_i, @current_user)
 		respond_to do |format|
-			format.json	{ render :json => questions and return }
+			format.json	{ render_json_auto(questions) and return }
 		end
 	end
 
@@ -110,7 +110,7 @@ class Admin::QualityControlQuestionsController < Admin::ApplicationController
 	def destroy
 		retval = @question.delete_quality_control_question(@current_user)
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 

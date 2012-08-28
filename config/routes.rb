@@ -120,8 +120,10 @@ OopsData::Application.routes.draw do
 			get 'pause'
 			put 'update_style_setting'
 			get 'show_style_setting'
-			put 'update_quality_control_setting'
-			get 'show_quality_control_setting'
+			put 'update_access_control_setting'
+			get 'show_access_control_setting'
+			get 'set_random_quality_control_questions'
+			get 'get_random_quality_control_questions'
 		end
 		resources :pages
 		resources :questions do
@@ -176,7 +178,6 @@ OopsData::Application.routes.draw do
 			get :unread_count
 		end
 	end
-
 
 	resources :lotteries do
 		member do

@@ -10,32 +10,32 @@ class Admin::FeedbacksControllerTest < ActionController::TestCase
 		assert_equal User.all.count, 0
 
 		get 'index', :format => :json
-		assert_equal @response.body.to_i, ErrorEnum::REQUIRE_LOGIN
-
-		assert_equal User.all.count, 1
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 
 		clear(Feedback, User)
 
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 2
+		user.status = 4
 		user.role = 0
 		user.save
 
 		assert_equal User.all.first, user
 
-		sign_in(user.email, "123456")
-		get 'index', :format => :json
-		assert_equal @response.body.to_i, ErrorEnum::REQUIRE_ADMIN
-		sign_out
+		auth_key = sign_in(user.email, "123456")
+		get 'index', :format => :json, :auth_key => auth_key
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
+		sign_out(auth_key)
 
 		user1 = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
-		user1.status = 2
+		user1.status = 4
 		user1.role = 1
 		user1.save
 
-		sign_in(user1.email, "123456")
+		auth_key = sign_in(user1.email, "123456")
 
-		get 'index', :format => :json
+		get 'index', :format => :json, :auth_key => auth_key
 		assert_equal JSON.parse(@response.body), []
 
 		assert_equal Feedback.all.count, 0
@@ -47,30 +47,30 @@ class Admin::FeedbacksControllerTest < ActionController::TestCase
 		assert_equal Feedback.all.count, 4
 
 		# no type, no value
-		get 'index', :format => :json
+		get 'index', :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 4
 
 		# with type, no value
-		get 'index', :format => :json, :feedback_type => 3
+		get 'index', :format => :json, :feedback_type => 3, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 3
 
-		get 'index', :format => :json, :feedback_type => 255
+		get 'index', :format => :json, :feedback_type => 255, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 4
 
 		#with type and value
-		get 'index', :format => :json, :feedback_type => 3, :value => "content"
+		get 'index', :format => :json, :feedback_type => 3, :value => "content", :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 3
 
-		get 'index', :format => :json, :feedback_type => 3, :value => "content1"
+		get 'index', :format => :json, :feedback_type => 3, :value => "content1", :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 1		
 
 		#with type and answer
-		get 'index', :format => :json, :feedback_type => 255, :answer => false
+		get 'index', :format => :json, :feedback_type => 255, :answer => false, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 4
 
@@ -79,24 +79,24 @@ class Admin::FeedbacksControllerTest < ActionController::TestCase
 		assert_equal fb.save, true
 		assert_equal Feedback.all.first.is_answer, true
 
-		get 'index', :format => :json, :feedback_type => 255, :answer => true
+		get 'index', :format => :json, :feedback_type => 255, :answer => true, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 1
 
-		get 'index', :format => :json, :feedback_type => 255, :answer => false
+		get 'index', :format => :json, :feedback_type => 255, :answer => false, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 3
 
 		#paging
-		get 'index', :format => :json, :per_page => 2, :feedback_type => 255
+		get 'index', :format => :json, :per_page => 2, :feedback_type => 255, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 2
 
-		get 'index', :format => :json, :per_page => 3, :page=> 2, :feedback_type => 255
+		get 'index', :format => :json, :per_page => 3, :page=> 2, :feedback_type => 255, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		assert_equal retval.count, 1
 
-		sign_out
+		sign_out(auth_key)
 
 		clear(Feedback, User)
 	end
@@ -111,18 +111,18 @@ class Admin::FeedbacksControllerTest < ActionController::TestCase
 		assert_equal Feedback.all.count, 1
 
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 2
+		user.status = 4
 		user.role = 1
 		user.save
 	
-		sign_in(user.email, "123456")
+		auth_key = sign_in(user.email, "123456")
 
-		post 'destroy', :id => f.id.to_s , :format => :json
+		post 'destroy', :id => f.id.to_s , :format => :json, :auth_key => auth_key
 		assert_equal @response.body, "true"
 		
 		retval = Feedback.where(_id: f.id).first
 		assert_equal retval, nil
-		sign_out
+		sign_out(auth_key)
 
 		clear(User,Feedback)
 	end
@@ -131,12 +131,12 @@ class Admin::FeedbacksControllerTest < ActionController::TestCase
 		clear(User, Feedback, Message)
 		
 		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 2
+		user.status = 4
 		user.role = 0
 		user.save
 		
 		user2 = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
-		user2.status = 2
+		user2.status = 4
 		user2.role = 1
 		user2.save
 		
@@ -146,15 +146,15 @@ class Admin::FeedbacksControllerTest < ActionController::TestCase
 		assert_equal Feedback.all.count, 1
 		
 		assert_equal Message.all.count, 0
-		sign_in(user2.email, Encryption.decrypt_password(user2.password))
-		post "reply",:id => f.id.to_s, :message_content => "reply feedback", :format => :json
+		auth_key = sign_in(user2.email, Encryption.decrypt_password(user2.password))
+		post "reply",:id => f.id.to_s, :message_content => "reply feedback", :format => :json, :auth_key => auth_key
 		assert_equal Message.all.count, 1 #reply successfully.
 
 		retval = JSON.parse(@response.body)
 		assert_equal retval["content"], "reply feedback"
 		assert_equal retval["title"], "反馈意见回复:"+ f.title.to_s
 
-		sign_out
+		sign_out(auth_key)
 
 		clear(User, Feedback, Message)
 	end

@@ -10,16 +10,20 @@ class SessionsControllerTest < ActionController::TestCase
 		new_user.save
 
 		post :create, :format => :json, :user => {"email_username" => "wrong_email@test.com", "password" => Encryption.decrypt_password(jesse.password)}
-		assert_equal ErrorEnum::USER_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::USER_NOT_EXIST.to_s, result["value"]["error_code"]
 
 		post :create, :format => :json, :user => {"email_username" => new_user.email, "password" => Encryption.decrypt_password(new_user.password)}
-		assert_equal ErrorEnum::USER_NOT_ACTIVATED.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::USER_NOT_ACTIVATED.to_s, result["value"]["error_code"]
 
 		post :create, :format => :json, :user => {"email_username" => jesse.email, "password" => "wrong password"}
-		assert_equal ErrorEnum::WRONG_PASSWORD.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::WRONG_PASSWORD.to_s, result["value"]["error_code"]
 
 		post :create, :format => :json, :user => {"email_username" => jesse.email, "password" => Encryption.decrypt_password(jesse.password)}
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal 4, result["value"]["status"]
 	end
 
 	test "should send password email" do
@@ -28,10 +32,12 @@ class SessionsControllerTest < ActionController::TestCase
 		jesse.save
 		
 		post :send_password_email, :format => :json, :email => "wrong_email@test.com"
-		assert_equal ErrorEnum::USER_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::USER_NOT_EXIST.to_s, result["value"]["error_code"]
 
 		post :send_password_email, :format => :json, :email => jesse.email
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
 	end
 
 	test "should input new password" do
@@ -63,18 +69,23 @@ class SessionsControllerTest < ActionController::TestCase
 		password_key_2 = Encryption.encrypt_activate_key(password_info_2.to_json)
 
 		get :new_password, :format => :json, :user => {"email" => jesse.email, "password" => "new_password", "password_confirmation" => "new_password"}, :password_key => "wrong password key"
-		assert_equal false.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal false, result["success"]
 
 		get :new_password, :format => :json, :user => {"email" => jesse.email, "password" => "new_password", "password_confirmation" => "new_password"}, :password_key => password_key_1
-		assert_equal ErrorEnum::RESET_PASSWORD_EXPIRED.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::RESET_PASSWORD_EXPIRED.to_s, result["value"]["error_code"]
 
 		get :new_password, :format => :json, :user => {"email" => "wrong_email@test.com", "password" => "new_password", "password_confirmation" => "new_password"}, :password_key => password_key_2
-		assert_equal ErrorEnum::USER_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::USER_NOT_EXIST.to_s, result["value"]["error_code"]
 
 		get :new_password, :format => :json, :user => {"email" => jesse.email, "password" => "new_password", "password_confirmation" => "wrong_confirmation"}, :password_key => password_key_2
-		assert_equal ErrorEnum::WRONG_PASSWORD_CONFIRMATION.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::WRONG_PASSWORD_CONFIRMATION.to_s, result["value"]["error_code"]
 		
 		get :new_password, :format => :json, :user => {"email" => jesse.email, "password" => "new_password", "password_confirmation" => "new_password"}, :password_key => password_key_2
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
 	end
 end

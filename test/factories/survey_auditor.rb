@@ -3,7 +3,7 @@ FactoryGirl.define do
 		email "survey_auditor@test.com"
 		password Encryption.encrypt_password("123456")
 		username "survey_auditor"
-		status 2
+		status 4
 		activate_time Time.now.to_i
 		true_name "survey auditor"
 		lock "survey auditor"

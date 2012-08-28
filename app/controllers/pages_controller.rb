@@ -8,7 +8,7 @@ class PagesController < ApplicationController
 		@survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
 		if @survey.nil?
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
 			end
 		end
 	end
@@ -31,7 +31,7 @@ class PagesController < ApplicationController
 	def show
 		retval = @survey.show_page(params[:id].to_i)
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -54,14 +54,14 @@ class PagesController < ApplicationController
 	def create
 		retval = @survey.create_page(params[:page_index].to_i, params[:page_name])
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
 	def update
 		retval = @survey.update_page(params[:id].to_i, params[:page_name])
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -84,7 +84,7 @@ class PagesController < ApplicationController
 	def clone
 		page = @survey.clone_page(params[:page_index_1].to_i, params[:page_index_2].to_i)
 		respond_to do |format|
-			format.json	{ render :json => page and return }
+			format.json	{ render_json_auto(page) and return }
 		end
 	end
 
@@ -107,7 +107,7 @@ class PagesController < ApplicationController
 	def move
 		retval = @survey.move_page(params[:page_index_1].to_i, params[:page_index_2].to_i)
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -129,7 +129,7 @@ class PagesController < ApplicationController
 	def destroy
 		retval = @survey.delete_page(params[:id].to_i)
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -153,7 +153,7 @@ class PagesController < ApplicationController
 	def combine
 		retval = @survey.combine_pages(params[:page_index_1].to_i, params[:page_index_2].to_i)
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 end

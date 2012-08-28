@@ -7,40 +7,49 @@ class RegistrationsControllerTest < ActionController::TestCase
 		user_hash = init_user
 		user_hash["email"] = "illegal_email"
 		post :create, :format => :json, :user => user_hash
-		assert_equal ErrorEnum::ILLEGAL_EMAIL.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::ILLEGAL_EMAIL.to_s, result["value"]["error_code"]
 
 		user_hash = init_user
 		user_hash["password_confirmation"] = "wrong_password_confirmation"
 		post :create, :format => :json, :user => user_hash
-		assert_equal ErrorEnum::WRONG_PASSWORD_CONFIRMATION.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::WRONG_PASSWORD_CONFIRMATION.to_s, result["value"]["error_code"]
 		
 		user_hash = init_user
 		post :create, :format => :json, :user => user_hash
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
 
 		user_hash = init_user
 		user_hash["email"] = "another_email@test.com"
 		post :create, :format => :json, :user => user_hash
-		assert_equal ErrorEnum::EMAIL_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::USERNAME_EXIST.to_s, result["value"]["error_code"]
 
 		user_hash = init_user
 		user_hash["username"] = "another_username"
 		post :create, :format => :json, :user => user_hash
-		assert_equal ErrorEnum::USERNAME_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::EMAIL_EXIST.to_s, result["value"]["error_code"]
 	end
 
 	test "should check email" do
 		post :email_illegal, :format => :json, :email => "correct_email@test.com"
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
 
 		get :email_illegal, :format => :json, :email => "correct_email@test.com"
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
 
 		post :email_illegal, :format => :json, :email => "wrong_email"
-		assert_equal false.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal false, result["value"]
 
 		get :email_illegal, :format => :json, :email => "wrong_email"
-		assert_equal false.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal false, result["value"]
 	end
 
 	test "should send activate email" do
@@ -49,13 +58,16 @@ class RegistrationsControllerTest < ActionController::TestCase
 		activated_user = init_activated_user
 
 		post :send_activate_email, :format => :json, :user => {"email" => "non-exist-email@test.com"}
-		assert_equal ErrorEnum::USER_NOT_EXIST.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::USER_NOT_EXIST.to_s, result["value"]["error_code"]
 
 		post :send_activate_email, :format => :json, :user => {"email" => activated_user.email}
-		assert_equal ErrorEnum::USER_ACTIVATED.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal ErrorEnum::USER_ACTIVATED.to_s, result["value"]["error_code"]
 
 		post :send_activate_email, :format => :json, :user => {"email" => new_user.email}
-		assert_equal true.to_s, @response.body
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
 	end
 
 	test "should activate" do

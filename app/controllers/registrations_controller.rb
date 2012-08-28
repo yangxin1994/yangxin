@@ -42,25 +42,25 @@ class RegistrationsController < ApplicationController
 			flash[:notice] = "请输入正确的邮箱地址"
 			respond_to do |format|
 				format.html	{ redirect_to registrations_path and return }
-				format.json	{ render :json => ErrorEnum::ILLEGAL_EMAIL and return }
+				format.json { render_json_e(ErrorEnum::ILLEGAL_EMAIL) and return }
 			end
 		when ErrorEnum::EMAIL_EXIST
 			flash[:notice] = "邮箱已经存在"
 			respond_to do |format|
 				format.html	{ redirect_to sessions_path and return }
-				format.json	{ render :json => ErrorEnum::EMAIL_EXIST and return }
+				format.json { render_json_e(ErrorEnum::EMAIL_EXIST) and return }
 			end
 		when ErrorEnum::USERNAME_EXIST
 			flash[:notice] = "用户名已经存在"
 			respond_to do |format|
 				format.html	{ redirect_to sessions_path and return }
-				format.json	{ render :json => ErrorEnum::USERNAME_EXIST and return }
+				format.json { render_json_e(ErrorEnum::USERNAME_EXIST) and return }
 			end
 		when ErrorEnum::WRONG_PASSWORD_CONFIRMATION
 			flash[:notice] = "输入密码不一致"
 			respond_to do |format|
 				format.html	{ redirect_to registrations_path and return }
-				format.json	{ render :json => ErrorEnum::WRONG_PASSWORD_CONFIRMATION and return }
+				format.json { render_json_e(ErrorEnum::WRONG_PASSWORD_CONFIRMATION) and return }
 			end
 		else # create user_information model
 			third_party_info = decrypt_third_party_user_id(params[:third_party_info])
@@ -77,7 +77,7 @@ class RegistrationsController < ApplicationController
 			flash[:notice] = "注册成功，Google邮箱默认已激活" if user.status == 1
 			respond_to do |format|
 				format.html	{ redirect_to sessions_path and return }
-				format.json	{ render :json => true and return }
+				format.json	{ render_json_s and return }
 			end
 		end
 	end
@@ -98,7 +98,7 @@ class RegistrationsController < ApplicationController
 		email_legal = !Tool.email_illegal?(params[:email])
 		respond_to do |format|
 			format.html	{ render :text => email_legal and return }
-			format.json	{ render :json => email_legal and return }
+			format.json	{ render_json_s(email_legal) and return }
 		end
 	end
 
@@ -129,13 +129,13 @@ class RegistrationsController < ApplicationController
 			flash[:notice] = "该邮箱未注册，请您注册"
 			respond_to do |format|
 				format.html	{ redirect_to registrations_path and return }
-				format.json	{ render :json => ErrorEnum::USER_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::USER_NOT_EXIST) and return }
 			end
 		elsif user.is_activated
 			flash[:notice] = "该帐号已激活，请您登录"
 			respond_to do |format|
 				format.html	{ redirect_to sessions_path and return }
-				format.json	{ render :json => ErrorEnum::USER_ACTIVATED and return }
+				format.json	{ render_json_e(ErrorEnum::USER_ACTIVATED) and return }
 			end
 		end
 		
@@ -145,7 +145,7 @@ class RegistrationsController < ApplicationController
 		flash[:notice] = "激活邮件已发送，请到您的邮箱中点击激活链接进行激活"
 		respond_to do |format|
 			format.html	{ redirect_to sessions_path and return }
-			format.json	{ render :json => true }
+			format.json	{ render_json_s }
 		end
 	end
 
@@ -192,14 +192,13 @@ class RegistrationsController < ApplicationController
 			flash[:error] = "帐号不存在!"
 			respond_to do |format|
 				format.html	{ redirect_to home_path and return }
-				format.json	{ render :json => ErrorEnum::USER_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::USER_NOT_EXIST) and return }
 			end
 		else
-			set_logout_cookie
 			respond_to do |format|
 				flash[:notice] = "已经成功注销帐号"
 				format.html	{ redirect_to root_path and return }
-				format.json	{ render :json => true and return }
+				format.json	{ render_json_s and return }
 			end
 		end
 		
