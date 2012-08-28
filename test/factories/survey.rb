@@ -17,12 +17,13 @@ FactoryGirl.define do
                         FactoryGirl.create(:text_blank_choice_question).id,
                         FactoryGirl.create(:number_blank_choice_question).id,
                         FactoryGirl.create(:email_blank_choice_question).id,
-                        #FactoryGirl.create(:url_blank_choice_question).id,
                         FactoryGirl.create(:phone_blank_choice_question).id,
                         FactoryGirl.create(:time_blank_choice_question).id,
                         FactoryGirl.create(:address_blank_choice_question).id,
-                        FactoryGirl.create(:blank_choice_question).id,
-                        FactoryGirl.create(:matrix_blank_choice_question).id
+                        FactoryGirl.create(:blank_question).id,
+                        FactoryGirl.create(:const_sum_question).id,
+                        FactoryGirl.create(:sort_question).id,
+                        FactoryGirl.create(:rank_question).id
               ]}
     ]
     status 8

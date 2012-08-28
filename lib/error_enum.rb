@@ -107,7 +107,10 @@ module ErrorEnum
 	AwardBudgetCounldNotBeBlank = 21211
 	# PointLog Error Code (13)
 	POINTLOG_OPERATED_POINT_NOT_A_NUNBER = 21311
-
+	# Order Error Code (14)
+	ORDER_TYPE_NOT_A_NUNBER = 21411
+	ORDER_STATUS_NOT_A_NUNBER = 21412
+	
 	USER_SAVE_FAILED = 110000
 
 end

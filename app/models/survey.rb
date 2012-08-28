@@ -3,6 +3,7 @@ require 'error_enum'
 require 'quality_control_type_enum'
 require 'publish_status'
 require 'securerandom'
+require 'csv'
 #The survey object has the following structure
 # {
 #	 "owner_meail" : email of the owner user(string),
@@ -100,6 +101,9 @@ class Survey
 		end
 		headers
 	end
+	def csv_header
+    headers.to_csv
+  end
 	#*description*: judge whether this survey has a question
 	#
 	#*params*

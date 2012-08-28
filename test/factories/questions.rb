@@ -1,4 +1,5 @@
 # encoding: utf-8
+include QuestionTypeEnum
 FactoryGirl.define do
   factory :single_choice_question, class: Question do
     content({:text => "这是一个单选题",
@@ -35,7 +36,7 @@ FactoryGirl.define do
            :is_list_style => false,
            :is_rand => false
     })
-    question_type 0
+    question_type CHOICE_QUESTION
   end
   factory :multi_choice_question, class: Question do
     content({:text => "这是一个多选题",
@@ -72,7 +73,7 @@ FactoryGirl.define do
            :is_list_style => false,
            :is_rand => false
     })
-    question_type 0
+    question_type CHOICE_QUESTION
   end
 
   factory :matrix_singel_choice_question, class: Question do
@@ -115,7 +116,7 @@ FactoryGirl.define do
            :is_list_style => false,
            :is_rand => false  
     })
-    question_type 1
+    question_type MATRIX_CHOICE_QUESTION
   end
   factory :matrix_mutil_choice_question, class: Question do
     content({:text => "这是一个矩阵多项选择题",
@@ -157,7 +158,7 @@ FactoryGirl.define do
            :is_list_style => false,
            :is_rand => false  
     })
-    question_type 1
+    question_type MATRIX_CHOICE_QUESTION
   end
   factory :text_blank_choice_question, class: Question do
     content({:text => "这是一个文本填充题",
@@ -168,7 +169,7 @@ FactoryGirl.define do
            :max_length => 140,
            :has_multiple_line => true,
            :size => 1})
-    question_type 2
+    question_type TEXT_BLANK_QUESTION
   end
   factory :number_blank_choice_question, class: Question do
     content({:text => "这是一个数值填充题",
@@ -180,7 +181,7 @@ FactoryGirl.define do
            :max_value => 80000,
            :unit => "$",
            :unit_location => 1})
-    question_type 3
+    question_type NUMBER_BLANK_QUESTION
   end
   factory :email_blank_choice_question, class: Question do
     content({:text => "这是一个邮箱填充题",
@@ -188,7 +189,7 @@ FactoryGirl.define do
              :audio => "",
              :video => ""})
     issue({})
-    question_type 4
+    question_type EMAIL_BLANK_QUESTION
   end
   factory :phone_blank_choice_question, class: Question do
     content({:text => "这是一个电话填充题",
@@ -196,7 +197,7 @@ FactoryGirl.define do
              :audio => "",
              :video => ""})
     issue({:phone_type => 1})
-    question_type 5
+    question_type PHONE_BLANK_QUESTION
   end
   factory :time_blank_choice_question, class: Question do
     content({:text => "这是一个时间填充题",
@@ -206,30 +207,103 @@ FactoryGirl.define do
     issue({:format => 127,
            :min_time => -1,
            :max_time => -1})
-    question_type 6
+    question_type TIME_BLANK_QUESTION
   end
   factory :address_blank_choice_question, class: Question do
-    content({:text => "这是一个电话填充题",
+    content({:text => "这是一个地址填充题",
              :image => "",
              :audio => "",
              :video => ""})
-    issue({:phone_type => 1})
-    question_type 7
+    issue({:has_postcode => true,
+           :format => 15})
+    question_type ADDRESS_BLANK_QUESTION
   end
-  factory :blank_choice_question, class: Question do
-    content({:text => "这是一个电话填充题",
+  factory :blank_question, class: Question do
+    content({:text => "这是一个组合填充题",
              :image => "",
              :audio => "",
              :video => ""})
-    issue({:phone_type => 1})
-    question_type 8
+    issue({:is_rand => false,
+      #TODO 
+           :inputs => [{:input_id => "1"},
+                       {:input_id => "2"},
+                       {:input_id => "3"}],
+           :show_style => 0})
+    question_type BLANK_QUESTION
   end
-  factory :matrix_blank_choice_question, class: Question do
-    content({:text => "这是一个电话填充题",
+  factory :matrix_blank_question, class: Question do
+    content({:text => "这是一个矩阵填充题",
              :image => "",
              :audio => "",
              :video => ""})
-    issue({:phone_type => 1})
-    question_type 9
+    issue({:is_rand => false,
+           :inputs => [{:input_id => "1"},
+                       {:input_id => "2"},
+                       {:input_id => "3"}],
+           :show_style => 1,
+           :row_name => ["一", "二", "三"],
+           :row_id => ["1", "2", "3"],
+           :is_row_rand => false,
+           :row_number_per_group => -1})
+    question_type MATRIX_BLANK_QUESTION
+  end
+  factory :const_sum_question, class: Question do
+    content({:text => "这是一个比重题",
+             :image => "",
+             :audio => "",
+             :video => ""})
+    issue({:is_rand => false,
+           :items => [{:input_id => "1"},
+                      {:input_id => "2"},
+                      {:input_id => "3"}],
+           :other_item => {:has_other_item => true,
+                           :input_id => "4",
+                           :content => {:text => "四号其它项",
+                                        :image => "",
+                                        :audio => "",
+                                        :video => ""}},
+           :sum => 100})
+    question_type CONST_SUM_QUESTION
+  end
+  factory :sort_question, class: Question do
+    content({:text => "这是一个排序题",
+             :image => "",
+             :audio => "",
+             :video => ""})
+    issue({:is_rand => false,
+           :items => [{:input_id => "1"},
+                      {:input_id => "2"},
+                      {:input_id => "3"}],
+           :other_item => {:has_other_item => true,
+                           :input_id => "4",
+                           :content => {:text => "四号其它项",
+                                        :image => "",
+                                        :audio => "",
+                                        :video => ""}},
+           :min => 1,
+           :max => 4})
+    question_type SORT_QUESTION
+  end
+  factory :rank_question, class: Question do
+    content({:text => "这是一个评分题",
+             :image => "",
+             :audio => "",
+             :video => ""})
+    issue({:is_rand => false,
+           :items => [{:input_id => "1",
+                      :has_unknow => true},
+                      {:input_id => "2",
+                      :has_unknow => true},
+                      {:input_id => "3",
+                      :has_unknow => false}],
+           :other_item => {:has_other_item => true,
+                           :input_id => "4",
+                           :content => {:text => "四号其它项",
+                                        :image => "",
+                                        :audio => "",
+                                        :video => ""}},
+           :min => 1,
+           :max => 4})
+    question_type RANK_QUESTION
   end
 end

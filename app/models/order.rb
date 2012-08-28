@@ -1,7 +1,7 @@
 class Order
 	include Mongoid::Document
 	include Mongoid::Timestamps
-
+	include Mongoid::ValidationsExt
 	# can be 0 (Cash), 1 (RealGoods), 2 (VirtualGoods), 3 (Lottery)
 	field :type, :type => Integer
 	# can be 0 (NeedVerify), 1 (Verified), -1 (VerifyFailed), 2 (Delivering), 3 (Delivered), -3 (DeliverFailed)

@@ -1,8 +1,8 @@
-require "mongoid/validations/numericality"
-require "mongoid/validations/format"
-require "mongoid/validations/length"
-require "mongoid/validations/presence"
-require "mongoid/validations/with"
+p require "mongoid/validations/numericality"
+p require "mongoid/validations/format"
+p require "mongoid/validations/length"
+p require "mongoid/validations/presence"
+p require "mongoid/validations/with"
 module Mongoid
 	module ValidationsExt
 		def error_codes
@@ -17,8 +17,8 @@ module Mongoid
 		end
 		def as_retval
 			if invalid?
-				retval = {:error_code => self.error_codes,
-									:error_message => self.errors.messages}
+				return retval = {:error_code => self.error_codes,
+										 		 :error_message => self.errors.messages}
 			end
 			self
 		end

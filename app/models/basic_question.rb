@@ -66,21 +66,52 @@ class BasicQuestion
           retval << header_prefix  + "-r#{r}"
         end
       end
-      retval
    ##### QuestionTypeEnum::TEXT_BLANK_QUESTION..QuestionTypeEnum::ADDRESS_BLANK_QUESTION #####
     when QuestionTypeEnum::TEXT_BLANK_QUESTION..QuestionTypeEnum::ADDRESS_BLANK_QUESTION
       retval << header_prefix
     ##### BLANK_QUESTION #####
-    # when QuestionTypeEnum::BLANK_QUESTION
-
+    when QuestionTypeEnum::BLANK_QUESTION
+      issue["inputs"].each do |i|
+        retval << header_prefix  + "-c#{i["input_id"]}"
+      end
     # ##### MATRIX_BLANK_QUESTION #####
-    # when QuestionTypeEnum::MATRIX_BLANK_QUESTION
+    when QuestionTypeEnum::MATRIX_BLANK_QUESTION
+      issue["row_id"].each do |r|
+        issue["inputs"].each do |i|
+          retval << header_prefix  + "-r#{r}" + "-c#{i["input_id"]}"
+        end
+      end
     # ##### CONST_SUM_QUESTION #####
-    # when QuestionTypeEnum::CONST_SUM_QUESTION
+    when QuestionTypeEnum::CONST_SUM_QUESTION
+      issue["items"].each do |i|
+        retval << header_prefix + "-c#{i["input_id"]}"
+      end
+      if issue["other_item"]["has_other_item"]
+        retval << header_prefix + input
+        retval << header_prefix + input + "-value"
+      end
     # ##### SORT_QUESTION #####
-    # when QuestionTypeEnum::SORT_QUESTION
+    when QuestionTypeEnum::SORT_QUESTION
+      issue["items"].each do |i|
+        retval << header_prefix + "-c#{i["input_id"]}"
+      end
+      if issue["other_item"]["has_other_item"]
+        retval << header_prefix + input
+        retval << header_prefix + input + "-value"
+      end
     # ##### RANK_QUESTION #####
-    # when QuestionTypeEnum::RANK_QUESTION 
+    when QuestionTypeEnum::RANK_QUESTION
+      issue["items"].each do |i|
+        retval << header_prefix + "-c#{i["input_id"]}"
+        if i["has_unknow"]
+          retval << header_prefix + "-c#{i["input_id"]}" + "-unknow"
+        end
+      end
+      if issue["other_item"]["has_other_item"]
+        retval << header_prefix + input
+        retval << header_prefix + input + "-value"
+      end
+
     # ##### PARAGRAPH #####
     # when QuestionTypeEnum::PARAGRAPH
     # ##### PARAGRAPH #####
@@ -88,6 +119,7 @@ class BasicQuestion
     # ##### TABLE_QUESTION #####
     # when QuestionTypeEnum::TABLE_QUESTION
     end
+    retval
   end
 
   def self.has_question_type(question_type)
