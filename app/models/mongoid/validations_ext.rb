@@ -19,11 +19,13 @@ module Mongoid
 		def error_codes=(e=[])
 			@error_codes
 		end
-
+		def error_message
+			self.errors.first[0].to_s + " " + self.errors.first[1]
+		end
 		def as_retval
 			if invalid?
-				return retval = {:error_code => self.error_codes,
-										 		 :error_message => self.errors.messages}
+				return retval = {:error_code => self.error_code,
+										 		 :error_message => self.error_message}
 			end
 			self
 		end

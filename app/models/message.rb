@@ -12,6 +12,7 @@ class Message
 
   include Mongoid::Document
   include Mongoid::Timestamps
+  include Mongoid::ValidationsExt
   extend Mongoid::FindHelper
 
   field :title, :type => String
