@@ -28,12 +28,24 @@ class ApplicationController < ActionController::Base
 		respond_to do |format|
 			format.json do 
 				render :json => {
-				:success => is_success,
-				:value => yield }
+					:value => yield,
+					:success => is_success
+				 }
 			end
 		end		
 	end
-	
+
+	def respond_and_render_instance(instance, only = [], except = [])
+		retval = instance.as_retval
+		respond_to do |format|
+			format.json do 
+				render :json => {
+					:value => retval,
+					:success => retval
+				 }, :only => only, :except => except
+			end
+		end		
+	end
 ################################################
 	#get the information of the signed user and set @current_user
 	def current_user

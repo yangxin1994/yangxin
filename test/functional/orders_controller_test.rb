@@ -33,5 +33,6 @@ class OrdersControllerTest < ActionController::TestCase
     #p @response.body
     assert_not_nil @response.body
   end
+
 end
 
