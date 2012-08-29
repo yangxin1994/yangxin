@@ -36,8 +36,8 @@ class ApplicationController < ActionController::Base
 							:except => options[:except], 
 							:only => options[:only]
 			end
-			format.text do
-				unless options[:format].nil?
+			unless options[:format].nil?
+				format.send(options[:format]) do
 				 	render options[:format], :except => options[:except],
 				 													 :only => options[:only]
 				end
