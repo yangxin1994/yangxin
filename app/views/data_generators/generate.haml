@@ -1,0 +1,12 @@
+%div
+	%p 用户列表
+	%table 
+		%tr
+			%th 邮箱
+			%th 密码
+			%th 状态
+		- @users.each do |u|
+			%tr
+				%td= u["email"]
+				%td= u["password"]
+				%td= u["status_shown"]
