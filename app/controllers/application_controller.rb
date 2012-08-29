@@ -34,10 +34,11 @@ class ApplicationController < ActionController::Base
 				end
 				render :html
 				render :json => {
-					:value => yield,
-					:success => is_success
-				 }, :except => options[:except], 
-						:only => options[:only]
+								:value => yield,
+								:success => is_success
+							 },
+							:except => options[:except], 
+							:only => options[:only]
 			end
 		end		
 	end
