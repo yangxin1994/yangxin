@@ -17,6 +17,7 @@ gem 'kaminari'
 gem 'resque'
 gem 'resque-scheduler'
 
+gem 'faker'
 
 gem 'haml'
 gem 'haml-rails'

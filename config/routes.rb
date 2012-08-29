@@ -1,6 +1,11 @@
 OopsData::Application.routes.draw do
 
 	resources :faqs, :public_notices, :feedbacks, :advertisements
+	resources :data_generators do
+		collection do
+			get 'generate'
+		end
+	end
 
 	namespace :admin do
 		resources :users do 
