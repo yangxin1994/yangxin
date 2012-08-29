@@ -19,9 +19,9 @@ module Mongoid
 		def error_codes=(e=[])
 			@error_codes
 		end
+
 		def as_retval
 			if invalid?
-				retval.is_valid = false
 				return retval = {:error_code => self.error_codes,
 										 		 :error_message => self.errors.messages}
 			end

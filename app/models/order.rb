@@ -22,11 +22,11 @@ class Order
 	belongs_to :operated_admin, :class_name => "User", :inverse_of => :operate_orders
 	
 	validates :type, :presence_ext => true,
-									:inclusion => { :in => 0..3 },
-									:numericality => true
+									 :inclusion => { :in => 0..3 },
+									 :numericality => true
 	validates :status, :presence => true,
-										:inclusion => { :in => -3..3 },
-										:numericality => true
+									   :inclusion => { :in => -3..3 },
+										 :numericality => true
 
 	scope :for_cash, where( :type => 0)
 	scope :for_realgoods, where( :type => 1)

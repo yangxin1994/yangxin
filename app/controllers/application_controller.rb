@@ -24,25 +24,41 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
-	def respond_and_render_json(is_success = true, options = {}, &block)
+	def respond_and_render(is_success = true, options = {}, &block)
+		options[:only]+= [:value, :success] unless options[:only].nil?
 		respond_to do |format|
-			format.json do 
+			format.json do
+				unless options[:format].nil?
+				 	render options[:format], :except => options[:except],
+				 													 :only => options[:only]
+				end
+				render :html
 				render :json => {
 					:value => yield,
 					:success => is_success
-				 }
+				 }, :except => options[:except], 
+						:only => options[:only]
 			end
 		end		
 	end
-
-	def respond_and_render_instance(instance, only = [], except = [])
+	def respond_and_render_json(is_success = true, options = {}, &block)
+		options[:only]+= [:value, :success] unless options[:only].nil?
+		respond_to do |format|
+			format.json do
+				render :json => {:value => yield,
+												 :success => is_success
+				 }, :except => options[:except], :only => options[:only]
+			end
+		end		
+	end
+	def respond_and_render_instance(instance)
 		retval = instance.as_retval
 		respond_to do |format|
-			format.json do 
+			format.json do
 				render :json => {
 					:value => retval,
 					:success => retval
-				 }, :only => only, :except => except
+				 }
 			end
 		end		
 	end
