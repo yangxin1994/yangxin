@@ -27,18 +27,20 @@ class ApplicationController < ActionController::Base
 	def respond_and_render(is_success = true, options = {}, &block)
 		options[:only]+= [:value, :success] unless options[:only].nil?
 		respond_to do |format|
+			format.html
 			format.json do
-				unless options[:format].nil?
-				 	render options[:format], :except => options[:except],
-				 													 :only => options[:only]
-				end
-				render :html
 				render :json => {
 								:value => yield,
 								:success => is_success
 							 },
 							:except => options[:except], 
 							:only => options[:only]
+			end
+			format.text do
+				unless options[:format].nil?
+				 	render options[:format], :except => options[:except],
+				 													 :only => options[:only]
+				end
 			end
 		end		
 	end
