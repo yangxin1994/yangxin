@@ -21,7 +21,7 @@ class Order
 	belongs_to :user, :class_name => "User", :inverse_of => :orders
 	belongs_to :operated_admin, :class_name => "User", :inverse_of => :operate_orders
 	
-	validates :type, :presence => true,
+	validates :type, :presence_ext => true,
 									:inclusion => { :in => 0..3 },
 									:numericality => true
 	validates :status, :presence => true,

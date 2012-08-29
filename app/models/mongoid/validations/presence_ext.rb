@@ -2,7 +2,7 @@ module ActiveModel
 
   # == Active Model Presence Validator
   module Validations
-    class PresenceValidator < EachValidator #:nodoc:
+    class PresenceExtValidator < EachValidator #:nodoc:
       def validate(record)
         p "#{record.class.name} presence"
         record.add_error_code ErrorEnum.const_get("#{record.class.name.upcase}_COULN_NOT_BE_BLANK")
