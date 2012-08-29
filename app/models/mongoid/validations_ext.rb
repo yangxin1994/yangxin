@@ -1,5 +1,5 @@
 p require "mongoid/validations/numericality"
-p require "mongoid/validations/format" #
+p require "mongoid/validations/format_ext" #
 p require "mongoid/validations/length"
 p require "mongoid/validations/presence_ext" #
 p require "mongoid/validations/with"
