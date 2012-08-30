@@ -1,12 +1,32 @@
-%div
-	%p 用户列表
+= stylesheet_link_tag "data_generators"
+
+.table_box
+	%p.title 用户列表
 	%table 
 		%tr
 			%th 邮箱
 			%th 密码
 			%th 状态
-		- @users.each do |u|
+		- @users.each do |users|
+			- users.each do |u|
+				%tr
+					%td= u["email"]
+					%td= u["password"]
+					%td= u["status_shown"]
+
+.table_box
+	%p.title 调查问卷列表
+	%table
+		%tr
+			%th 用户邮箱
+			%th	标题 
+			%th	标签 
+			%th 问卷状态
+			%th 发布状态
+		- @surveys.each do |s|
 			%tr
-				%td= u["email"]
-				%td= u["password"]
-				%td= u["status_shown"]
+				%td= s.user.email
+				%td= s.title
+				%td= (s.tags.map {|t| t.content}).join(', ')
+				%td= @survey_status_shown[s.status]
+				%td= @survey_publish_status_shown[s.publish_status]
