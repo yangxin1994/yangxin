@@ -23,7 +23,7 @@ module Mongoid
 			self.errors.first[0].to_s + " " + self.errors.first[1]
 		end
 		def as_retval
-			if invalid?
+			unless is_valid?
 				return retval = {:error_code => self.error_code,
 										 		 :error_message => self.error_message}
 			end
@@ -35,6 +35,9 @@ module Mongoid
 		class ::Hash
 			def is_valid?
 				false
+			end
+			def as_retval
+				self				
 			end
 		end
 		class ::String
