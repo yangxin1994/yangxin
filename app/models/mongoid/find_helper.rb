@@ -4,10 +4,10 @@ module Mongoid
       begin
         retval = self.find(id)
       rescue Mongoid::Errors::DocumentNotFound
-        retval = {:error_code => ErrorEnum.const_get("#{name.upcase}_NOT_FOUND",
+        retval = {:error_code => ErrorEnum.const_get("#{name.upcase}_NOT_FOUND"),
                   :error_message => "#{name} not found!"}
       rescue BSON::InvalidObjectId
-        retval = {:error_code => ErrorEnum.const_get("INVALID_#{name.upcase}_ID",
+        retval = {:error_code => ErrorEnum.const_get("INVALID_#{name.upcase}_ID"),
                   :error_message => "invalid #{name} id"}
       else
         retval = yield(retval) if block_given?
