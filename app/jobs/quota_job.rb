@@ -10,6 +10,8 @@ module Jobs
 
 		MaxCountOfReceivingSurveies = 2
 		MaxCountOfDescingConditionForWhile = 1
+		
+		
 
 		# resque auto involve method
 		def self.perform(*args)
