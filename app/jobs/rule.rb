@@ -7,6 +7,11 @@ module Jobs
 			@value = value
 		end
 
+		def ==(object_2)
+			return true if self.name == object_2.name && self.value == object_2.value
+			return false
+		end
+
 		def to_s
 			{name: "#{@name}", value: "#{@value}"}
 		end
