@@ -3,6 +3,7 @@ require 'error_enum'
 require 'quality_control_type_enum'
 require 'publish_status'
 require 'securerandom'
+require 'csv'
 #The survey object has the following structure
 # {
 #	 "owner_meail" : email of the owner user(string),
@@ -83,7 +84,28 @@ class Survey
 
 	public
 
+	def all_questions
+		q = []
+		quota_template_question_page.each do |page|
+			q << page[:questions]
+		end
+		pages.each do |page|
+			q << page[:questions]
+		end
+		q.collect { |i| Question.find(i) }[0]
+	end
 
+	def headers
+		headers, index =[], 0
+		all_questions.each do |e|
+			index += 1
+			headers += e.header(index)
+		end
+		headers
+	end
+	def csv_header
+    headers.to_csv
+  end
 	#*description*: judge whether this survey has a question
 	#
 	#*params*

@@ -1,5 +1,5 @@
 class Award < BasicPresent
-	include Mongoid::Validator
+	include Mongoid::ValidationsExt
 	#field :budget, :type => Integer
   field :weighting, :type => Integer, :default => 0
   field :status, :type => Integer, :default => 1

@@ -175,6 +175,7 @@ class SurveysControllerTest < ActionController::TestCase
 		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 		
+
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :show, :format => :json, :id => survey_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)

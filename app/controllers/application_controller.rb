@@ -24,16 +24,47 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
-	def respond_and_render_json(is_success = true, &block)
+	def respond_and_render(is_success = true, options = {}, &block)
+		options[:only]+= [:value, :success] unless options[:only].nil?
 		respond_to do |format|
-			format.json do 
+			format.html
+			format.json do
 				render :json => {
-				:success => is_success,
-				:value => yield }
+								:value => yield,
+								:success => is_success
+							 },
+							:except => options[:except], 
+							:only => options[:only]
+			end
+			unless options[:format].nil?
+				format.send(options[:format]) do
+				 	render options[:format], :except => options[:except],
+				 													 :only => options[:only]
+				end
 			end
 		end		
 	end
-	
+	def respond_and_render_json(is_success = true, options = {}, &block)
+		options[:only]+= [:value, :success] unless options[:only].nil?
+		respond_to do |format|
+			format.json do
+				render :json => {:value => yield,
+												 :success => is_success
+				 }, :except => options[:except], :only => options[:only]
+			end
+		end		
+	end
+	def respond_and_render_instance(instance)
+		retval = instance.as_retval
+		respond_to do |format|
+			format.json do
+				render :json => {
+					:value => retval,
+					:success => retval
+				 }
+			end
+		end		
+	end
 ################################################
 	#get the information of the signed user and set @current_user
 	def current_user
@@ -225,7 +256,7 @@ class ApplicationController < ActionController::Base
 		arr = arr.slice((page-1)*per_page, per_page) || []
 		return arr
 	end
-	
+
 	# return error
 	def return_json(is_success, value)
 		render :json => {

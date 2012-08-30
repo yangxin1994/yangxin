@@ -46,7 +46,7 @@ module ActiveModel
 
           default_message = options[MESSAGES[key]]
           errors_options[:message] ||= default_message if default_message
-
+          #record.add_error_code ErrorEnum.const_get("")
           record.errors.add(attribute, MESSAGES[key], errors_options)
         end
       end
