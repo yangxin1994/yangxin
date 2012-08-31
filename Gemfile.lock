@@ -215,6 +215,7 @@ DEPENDENCIES
   resque
   resque-scheduler
   rest-client
-  sass-rails (~> 3.1.0)
+  sass-rails (~> 3.1.4)
+  therubyracer (>= 0.8.2)
   turn
   uglifier
