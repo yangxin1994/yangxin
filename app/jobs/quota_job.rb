@@ -5,8 +5,36 @@ module Jobs
 	class QuotaJob
 
 		# store last time interval_time that use to remove_delayed job
-		@@last_interval_time = nil
 		@queue = :quota_job_queue
+
+		def self.start(interval_time)
+      stop
+     
+     	if interval_time.to_i > 10 then
+				#save to redis
+				Resque.redis.set "quota_last_interval_time", interval_time.to_i
+		    
+		    Resque.enqueue_at(Time.now, 
+					QuotaJob, 
+					{"interval_time"=> interval_time.to_i})
+			else
+				false
+			end
+    end
+    
+    def self.stop
+    	#remove relative data from redis
+    	Resque.redis.srem("queues", QuotaJob.instance_variable_get(:@queue)) if QuotaJob.instance_variable_defined?(:@queue)
+    
+    	# remove delayed job from scheduler method
+    	# because remove_delayed method need params, 
+    	# so it set a quota_last_interval_time variable to redis 
+    	# then get it in here.
+    	interval_time = Resque.redis.get "quota_last_interval_time"
+    	retval = Resque.remove_delayed(QuotaJob, "interval_time" => interval_time.to_i) if interval_time
+    	
+    	retval = retval.nil? || retval == 1 ? true : false
+    end
 
 		# resque auto involve method
 		def self.perform(*args)
@@ -28,16 +56,12 @@ module Jobs
 			arg = {}
 			arg = args[0] if args[0].class == Hash
 			# unit is second
-			interval_time =  arg["interval_time"] || 60
-			@@last_interval_time = interval_time
-			#save to redis
-			Resque.redis.set "quota_last_interval_time", @@last_interval_time if @@last_interval_time
-
-			Resque.enqueue_at(Time.now + interval_time.to_i, 
-				QuotaJob, 
-				{"interval_time"=> interval_time.to_i})
+			interval_time = arg["interval_time"]
 
 			puts "End Quota Job perform Test. The interval_time is #{interval_time}"
+			Resque.enqueue_at(Time.now + interval_time.to_i, 
+				QuotaJob, 
+				{"interval_time"=> interval_time.to_i}) 		
 		end
 
 		def send_emails
