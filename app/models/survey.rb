@@ -822,7 +822,7 @@ class Survey
 	# return all the surveys that are published and are active
 	# it is needed to send emails and invite volunteers for these surveys
 	def self.get_published_active_surveys
-		
+		return self.list("normal", PublishStatus::PUBLISHED, [])
 	end
 
 	def check_password(username, password, current_user)
