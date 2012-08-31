@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'error_enum'
 #The question object has the following structure
 # {
@@ -35,7 +36,7 @@ class BasicQuestion
 
   ATTR_NAME_ARY = %w[content note]
 
-  def header(qindex)
+  def csv_header(qindex)
     retval = []
     header_prefix = "q#{qindex}"
     input = "-input"
@@ -52,7 +53,6 @@ class BasicQuestion
       if issue["other_item"]["has_other_item"]
         retval << header_prefix + input
       end
-    #end
     ##### MATRIX_CHOICE_QUESTION #####
     when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
       if issue["max_choice"].to_i > 1
@@ -110,6 +110,157 @@ class BasicQuestion
       if issue["other_item"]["has_other_item"]
         retval << header_prefix + input
         retval << header_prefix + input + "-value"
+      end
+
+    # ##### PARAGRAPH #####
+    # when QuestionTypeEnum::PARAGRAPH
+    # ##### PARAGRAPH #####
+    # when QuestionTypeEnum::FILE_QUESTION
+    # ##### TABLE_QUESTION #####
+    # when QuestionTypeEnum::TABLE_QUESTION
+    end
+    retval
+  end
+
+  ##### spss #####
+  
+  SPSS_NUMERIC = "Numeric"
+  SPSS_STRING = "String"
+  SPSS_OPTED = "选中"
+  SPSS_NOT_OPTED = "未选中"
+  SPSS_ETC = "其它"
+  SPSS_UNKOWN = "不清楚"
+  def spss_header(qindex)
+    retval = []
+    header_prefix = "q#{qindex}"
+    input = "-input"
+    case question_type
+    ##### CHOICE_QUESTION #####
+    when QuestionTypeEnum::CHOICE_QUESTION
+      if issue["max_choice"].to_i > 1
+        issue["choices"].each_index do |i|
+          retval << {"spss_name" => header_prefix + "-c#{i + 1}",
+                     "spss_type" => SPSS_NUMERIC,
+                     "spss_label" => issue["choices"][i]["content"]["text"],
+                     "spss_value_label" => {:c1 => SPSS_OPTED,
+                                            :c2 => SPSS_NOT_OPTED}}
+        end
+      else
+        choices = {}
+        issue["choices"].each_index do |i|
+          choices["c#{i+1}"] = issue["choices"][i]
+        end
+        retval << {"spss_name" => header_prefix,
+                   "spss_type" => SPSS_NUMERIC,
+                   "spss_label" => content["text"],
+                   "spss_value_label" => choices }
+      end
+      if issue["other_item"]["has_other_item"]
+        retval << {"spss_name" => header_prefix + input,
+                   "spss_type" => SPSS_STRING,
+                   "spss_label" => SPSS_ETC}
+      end
+    ##### MATRIX_CHOICE_QUESTION #####
+    when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
+      if issue["max_choice"].to_i > 1
+        issue["row_id"].each_index do |r|
+          issue["choices"].each_index do |i|
+            retval << {"spss_name" => header_prefix  + "-r#{r + 1}" + "-c#{i + 1}",
+                       "spss_type" => SPSS_NUMERIC,
+                       "spss_label" => issue["choices"][i]["content"]["text"],
+                       "spss_value_label" => {:c1 => SPSS_OPTED,
+                                              :c2 => SPSS_NOT_OPTED}}
+          end
+        end
+      else
+        choices = {}
+        issue["choices"].each_index do |i|
+          choices["c#{i+1}"] = issue["choices"][i]
+        end
+        issue["row_id"].each_index do |r|
+          retval << {"spss_name" => header_prefix + "-r#{r + 1}",
+                     "spss_type" => SPSS_NUMERIC,
+                     "spss_label" => content["text"],
+                     "spss_value_label" => choices }
+        end
+      end
+   ##### QuestionTypeEnum::TEXT_BLANK_QUESTION..QuestionTypeEnum::ADDRESS_BLANK_QUESTION #####
+    when QuestionTypeEnum::TEXT_BLANK_QUESTION..QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+      retval << {"spss_name" => header_prefix,
+                 "spss_type" => SPSS_STRING,
+                 "spss_label" => content["text"]}
+    ##### BLANK_QUESTION #####
+    when QuestionTypeEnum::BLANK_QUESTION
+      issue["inputs"].each_index do |i|
+        retval << {"spss_name" => header_prefix + "-c#{i + 1}",
+                   "spss_type" => SPSS_STRING,
+                   "spss_label" => issue["inputs"][i]["content"]["text"]}
+      end
+    # # ##### MATRIX_BLANK_QUESTION #####
+    when QuestionTypeEnum::MATRIX_BLANK_QUESTION
+      issue["row_id"].each_index do |r|
+        issue["inputs"].each_index do |i|
+          retval << {"spss_name" => header_prefix  + "-r#{r + 1}" + "-c#{i + 1}",
+                     "spss_type" => SPSS_STRING,
+                     "spss_label" => issue["inputs"][i]["content"]["text"]}
+        end
+      end
+    # ##### CONST_SUM_QUESTION #####
+    when QuestionTypeEnum::CONST_SUM_QUESTION
+      issue["items"].each_index do |i|
+        retval << {"spss_name" => header_prefix + "-c#{i + 1}",
+                   "spss_type" => SPSS_STRING,
+                   "spss_label" => issue["items"][i]["content"]["text"]}
+      end
+      if issue["other_item"]["has_other_item"]
+        retval << {"spss_name" => header_prefix + input,
+                   "spss_type" => SPSS_STRING,
+                   "spss_label" => SPSS_ETC}
+        retval << {"spss_name" => header_prefix + input+ "-value",
+                   "spss_type" => SPSS_STRING,
+                   "spss_label" => issue["other_item"]["content"]["text"]}                   
+      end
+    # ##### SORT_QUESTION #####
+    when QuestionTypeEnum::SORT_QUESTION
+      issue["items"].each_index do |i|
+        #spss_name << header_prefix + "-c#{i + 1}"
+        retval << {"spss_name" => header_prefix + "-c#{i + 1}",
+                   "spss_type" => SPSS_STRING,
+                   "spss_label" => issue["items"][i]["content"]["text"]}        
+      end
+      if issue["other_item"]["has_other_item"]
+        #spss_name << header_prefix + input
+        #spss_name << header_prefix + input + "-value"
+        retval << {"spss_name" => header_prefix + input,
+                   "spss_type" => SPSS_STRING,
+                   "spss_label" => SPSS_ETC}
+        retval << {"spss_name" => header_prefix + input+ "-value",
+                   "spss_type" => SPSS_STRING,
+                   "spss_label" => issue["other_item"]["content"]["text"]}   
+      end
+    # ##### RANK_QUESTION #####
+    when QuestionTypeEnum::RANK_QUESTION
+      issue["items"].each_index do |i|
+        retval << {"spss_name" => header_prefix + "-c#{i + 1}",
+                   "spss_type" => SPSS_STRING,
+                   "spss_label" => issue["items"][i]["content"]["text"]}          
+        if issue["items"][i]["has_unknow"]
+          retval << {"spss_name" => header_prefix + "-c#{i + 1}" + "-unknow",
+                     "spss_type" => SPSS_STRING,
+                     "spss_label" => SPSS_UNKOWN,
+                     "spss_value_label" => {:c1 => SPSS_OPTED,
+                                            :c2 => SPSS_NOT_OPTED}}  
+        end
+      end
+      if issue["other_item"]["has_other_item"]
+        #spss_name << header_prefix + input
+        #spss_name << header_prefix + input + "-value"
+        retval << {"spss_name" => header_prefix + input,
+                   "spss_type" => SPSS_STRING,
+                   "spss_label" => SPSS_ETC}
+        retval << {"spss_name" => header_prefix + input+ "-value",
+                   "spss_type" => SPSS_STRING,
+                   "spss_label" => issue["other_item"]["content"]["text"]}  
       end
 
     # ##### PARAGRAPH #####

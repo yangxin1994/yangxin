@@ -19,7 +19,8 @@ class SurveyTest < ActiveSupport::TestCase
 		# @survey_with_issue.all_questions.each do |q|
 		# 	pp q.header 1
 		# end
-		p @survey_with_issue.csv_header
+		pp @survey_with_issue.csv_headers
+		pp @survey_with_issue.spss_headers
 		assert true
 	end
 end

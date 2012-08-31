@@ -40,11 +40,5 @@ module Mongoid
         self
       end
     end
-    class ::String
-      def initial_upcase
-        self[0] = self[0].upcase
-        self
-      end
-    end
   end
 end

@@ -95,16 +95,21 @@ class Survey
 		q.collect { |i| Question.find(i) }[0]
 	end
 
-	def headers
+	def csv_headers
 		headers, index =[], 0
 		all_questions.each do |e|
 			index += 1
-			headers += e.header(index)
+			headers += e.csv_header(index)
 		end
 		headers
 	end
-	def csv_header
-    headers.to_csv
+	def spss_headers
+		headers, index =[], 0
+		all_questions.each do |e|
+			index += 1
+			headers += e.spss_header(index)
+		end
+		headers
   end
 	#*description*: judge whether this survey has a question
 	#
