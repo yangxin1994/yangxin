@@ -30,6 +30,8 @@ class Answer
 	field :channel, :type => Integer
 	field :ip_address, :type => String, default: ""
 
+	field :is_scanned, :type => Boolean, :default => false
+
 	belongs_to :user
 	belongs_to :survey
 
