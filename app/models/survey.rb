@@ -748,7 +748,7 @@ class Survey
 	#* ErrorEnum ::OVERFLOW 
 	def create_page(page_index, page_name)
 		return ErrorEnum::OVERFLOW if page_index < -1 or page_index > self.pages.length - 1
-		new_page = {name: page_name, questions: []}
+		new_page = {"name" => page_name, "questions" => []}
 		self.pages.insert(page_index+1, new_page)
 		return self.save
 	end
