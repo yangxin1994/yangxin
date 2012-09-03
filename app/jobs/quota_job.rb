@@ -120,24 +120,12 @@ module Jobs
 			rule_arr = []
 			#find all surveys which are published
 			published_survey = Survey.get_published_active_surveys
-<<<<<<< HEAD
-
 			# puts "published_survey count:: #{published_survey}"
-
-=======
->>>>>>> 00dafc9e16bab1f0294c7f43c2461640673630d1
 			published_survey.each do |survey|
 				cur_survey_rule_arr = []
 				survey.quota["rules"].each_with_index do |rule, rule_index|
 					rule_amount = rule["amount"].to_i
-<<<<<<< HEAD
 
-					# puts "----------------------------------"
-					# puts "rule::#{rule}"
-					# puts "rule_amount::#{rule_amount}"
-
-=======
->>>>>>> 00dafc9e16bab1f0294c7f43c2461640673630d1
 					# 1. get the conditions
 					conditions = []
 					rule["conditions"].each do |condition|
@@ -145,21 +133,11 @@ module Jobs
 							conditions << Condition.new(condition["name"], condition["value"])
 						end
 					end
-<<<<<<< HEAD
-
-					# puts "conditions:::#{JSON.parse(conditions.to_json)}"
 
 					# 2. get the remainning number
 					answer_number = survey.quota_stats["answer_number"][rule_index].to_i
 					rest_number = rule_amount < answer_number ? 0 : rule_amount - answer_number
 
-					# puts "rest_number::#{rest_number}"
-
-=======
-					# 2. get the remainning number
-					answer_number = survey.quota_stats["answer_number"][rule_index].to_i
-					rest_number = rule_amount < answer_number ? 0 : rule_amount - answer_number
->>>>>>> 00dafc9e16bab1f0294c7f43c2461640673630d1
 					# 3. combine the rule
 					has_same = false
 					cur_survey_rule_arr.each do |rule|
