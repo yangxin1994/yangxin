@@ -17,6 +17,7 @@ gem 'kaminari'
 gem 'resque'
 gem 'resque-scheduler'
 gem 'oops-mail', '0.0.2', :path => "vendor/gems/oops-mail-0.0.2"
+gem 'faker'
 
 gem 'haml'
 gem 'haml-rails'
@@ -30,7 +31,7 @@ if HOST_OS =~ /linux/i
   gem 'therubyracer', '>= 0.8.2'
 end
 group :assets do
-  gem 'sass-rails', "  ~> 3.1.0"
+  gem 'sass-rails', "  ~> 3.1.4"
   gem 'coffee-rails', "~> 3.1.0"
   gem 'uglifier'
 end
@@ -43,7 +44,6 @@ gem 'mime-types'
 gem 'mini_magick', :git => 'https://github.com/karmaQ/mini_magick.git'
 # Use unicorn as the web server
 # gem 'unicorn'
-
 # Deploy with Capistrano
 # gem 'capistrano'
 

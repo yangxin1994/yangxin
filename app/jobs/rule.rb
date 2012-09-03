@@ -13,6 +13,9 @@ module Jobs
 	end
 
 	class Rule
+
+		MAX_NUMBER = 3
+
 		attr_accessor :survey_id, :conditions, 
 					:amount, :time_left, :email_number
 					:pop_conditions_names
@@ -22,7 +25,7 @@ module Jobs
 			@conditions = conditions || []
 			@amount = amount.to_i
 			survey = Survey.find_by_id(@survey_id)
-			@time_left = survey.deadline.to_i - Time.now.to_i
+			@time_left = survey.deadline.to_i - Time.now.to_i if survey
 			compute_email_number
 		end
 
@@ -55,7 +58,7 @@ module Jobs
 
 				#but email_number should has max number, we do not like send 1000000
 				# now, set max is 1000
-				@email_number = @email_number > MaxNumber ? MaxNumber : @email_number
+				@email_number = @email_number > MAX_NUMBER ? MAX_NUMBER : @email_number
 			end
 		end
 	end

@@ -1,0 +1,62 @@
+.table_box
+	%p.title 用户列表
+	%table 
+		%tr
+			%th 邮箱
+			%th 密码
+			%th 状态
+		- @users.each do |users|
+			- users.each do |u|
+				%tr
+					%td= u["email"]
+					%td= u["password"]
+					%td= u["status_shown"]
+
+.table_box
+	%p.title 调查问卷列表
+	%table
+		%tr
+			%th 用户邮箱
+			%th	标题 
+			%th	标签 
+			%th 问卷状态
+			%th 发布状态
+			%th 
+		- @surveys.each do |s|
+			%tr
+				%td= s.user.email
+				%td= s.title
+				%td= (s.tags.map {|t| t.content}).join(', ')
+				%td= @survey_status_shown[s.status]
+				%td= @survey_publish_status_shown[s.publish_status]
+				%td
+					=link_to "详细", "#survey_#{s._id.to_s}"
+
+- @surveys.each do |survey|
+	.table_box{:id => "survey_#{survey._id.to_s}"}
+		=link_to "top", "#top"
+		%p.title= "调查问卷详细信息：#{survey.title}"
+		%p.sub_title 问题列表
+		%table
+			%tr
+				%th 页码
+				%th 页名
+				%th	问题类型 
+				%th	问题种类 
+				%th	题干 
+				%th 题目说明
+				%th 是否必答
+				%th 具体结构
+			- survey.pages.each_with_index do |page, page_index|
+				- page_name = page["page_name"]
+				- page["questions"].each do |question_id|
+					-question = Question.find_by_id(question_id)
+					%tr
+						%td= page_index
+						%td= page_name
+						%td= @question_type_shown[question.question_type]
+						%td= @question_class_shown[question.question_class]
+						%td= question.content.inspect
+						%td= question.note
+						%td= question.is_required
+						%td= question.issue.inspect

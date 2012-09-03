@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
 	protect_from_forgery
 
-	before_filter :client_ip, :current_user, :update_last_visit_time, :user_init
+	before_filter :client_ip, :current_user, :user_init
 
 	helper_method :user_signed_in?, :user_signed_out?
 ###################################################
@@ -24,69 +24,78 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
-	def render_404
-		render_optional_error_file(404)
+	def respond_and_render(is_success = true, options = {}, &block)
+		options[:only]+= [:value, :success] unless options[:only].nil?
+		respond_to do |format|
+			format.html
+			format.json do
+				render :json => {
+								:value => yield,
+								:success => is_success
+							 },
+							:except => options[:except], 
+							:only => options[:only]
+			end
+			unless options[:format].nil?
+				format.send(options[:format]) do
+				 	render options[:format], :except => options[:except],
+				 													 :only => options[:only]
+				end
+			end
+		end		
 	end
-
-	def render_403
-		render_optional_error_file(403)
+	def respond_and_render_json(is_success = true, options = {}, &block)
+		options[:only]+= [:value, :success] unless options[:only].nil?
+		respond_to do |format|
+			format.json do
+				render :json => {:value => yield,
+												 :success => is_success
+				 }, :except => options[:except], :only => options[:only]
+			end
+		end		
 	end
-
-	def render_optional_error_file(status_code)
-		status = status_code.to_s
-		if ["404","403", "422", "500"].include?(status)
-			render :template => "/errors/#{status}", :format => [:html], :handler => [:erb], :status => status, :layout => "application"
-		else
-			render :template => "/errors/unknown", :format => [:html], :handler => [:erb], :status => status, :layout => "application"
-		end
+	def respond_and_render_instance(instance)
+		retval = instance.as_retval
+		respond_to do |format|
+			format.json do
+				render :json => {
+					:value => retval,
+					:success => retval
+				 }
+			end
+		end		
 	end
-
-	def notice_success(msg)
-		flash[:notice] = msg
-	end
-
-	def notice_error(msg)
-		flash[:notice] = msg
-	end
-
-	def notice_warning(msg)
-		flash[:notice] = msg
-	end
-	
 ################################################
 	#get the information of the signed user and set @current_user
 	def current_user
-		current_user_id = get_cookie(:current_user_id)
-		@current_user = current_user_id.nil? ? User.create_new_visitor_user : User.find_by_id(current_user_id)
-	end
-
-	def update_last_visit_time
-		@current_user.update_last_visit_time if !@current_user.nil?
+		if params[:auth_key] == nil
+			@current_user = nil
+		else
+			@current_user = User.find_by_auth_key(params[:auth_key])
+		end
+		return @current_user
 	end
 
 	def user_init
 		return if !user_signed_in?
 		case @current_user.status
+		when 2
+			render_json_e(ErrorEnum::REQUIRE_INIT_STEP_1) and return 
 		when 3
-			redirect_to fill_basic_info_path and return 
-		when 4
-			# Bug?
-			#redirect_to import_friends_path and return 
-		when 5
-			redirect_to first_survey_path and return 
+			render_json_e(ErrorEnum::REQUIRE_INIT_STEP_2) and return 
 		end
 	end
 
 	#obtain the ip address of the clien, and set it as @remote_ip
 	def client_ip
 		#@remote_ip = request.env["HTTP_X_FORWARDED_FOR"]
-		@remote_ip = request.remote_ip
+		@remote_ip = params[:_remote_ip]
+		@remote_ip = request.remote_ip if @remote_ip.blank?
 	end
 
 	#judge whether there is a user signed in currently
 	def user_signed_in?
-		#logger.info "#{@current_user}"
-		return !!@current_user && get_cookie(:auth_key).to_s != "" && @current_user.auth_key == get_cookie(:auth_key)
+		return @current_user && @current_user.status >= 2
 	end
 
 	#judge whether there is no user signed in currently
@@ -118,13 +127,13 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_admin?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_ADMIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_ADMIN) and return }
 			end
 		end
 	end
@@ -133,13 +142,13 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_survey_auditor?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_SURVEY_AUDITOR and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_SURVEY_AUDITOR) and return }
 			end
 		end
 	end
@@ -148,13 +157,13 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_answer_auditor?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_ANSWER_AUDITOR and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_ANSWER_AUDITOR) and return }
 			end
 		end
 	end
@@ -163,13 +172,13 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_entry_clerk?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_ENTRY_CLERK and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_ENTRY_CLERK) and return }
 			end
 		end
 	end
@@ -178,13 +187,22 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_interviewer?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_INTERVIEWER and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_INTERVIEWER) and return }
+			end
+		end
+	end
+
+	def require_user_exist
+		if !@current_user
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render_json_e(ErrorEnum::USER_NOT_EXIST) and return }
 			end
 		end
 	end
@@ -194,7 +212,7 @@ class ApplicationController < ActionController::Base
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGIN and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 	end
@@ -204,19 +222,9 @@ class ApplicationController < ActionController::Base
 		if !user_signed_out?
 			respond_to do |format|
 				format.html { redirect_to home_path and return }
-				format.json	{ render :json => ErrorEnum::REQUIRE_LOGOUT and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGOUT) and return }
 			end
 		end
-	end
-
-	#set cookie given a pair of key and value
-	def set_cookie(key, value, expire_time = nil)
-		cookies[key.to_sym] = expire_time.nil? ? value : {:value => value, :expires => expire_time}
-	end
-
-	#get cookie given a key
-	def get_cookie(key)
-		return cookies[key.to_sym]
 	end
 
 	def decrypt_third_party_user_id(string)
@@ -229,29 +237,6 @@ class ApplicationController < ActionController::Base
 	end 
 
 	# method: in-accessible
-	# description: help set session for an account
-	def set_login_cookie(email_username, keep_signed_in)
-		user = User.find_by_email_username(email_username)
-		return false if user.nil?
-		if keep_signed_in.to_s == "true"
-			set_cookie(:current_user_id, user.id, 1.months.from_now) 
-		else
-			set_cookie(:current_user_id, user.id) 
-		end
-		auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
-		if keep_signed_in.to_s == "true"
-			set_cookie(:auth_key, auth_key, keep_signed_in, 1.months.from_now)
-		else
-			set_cookie(:auth_key, auth_key, keep_signed_in)
-		end
-		return user.set_auth_key(user.id, auth_key)
-	end
-
-	def set_logout_cookie
-		set_cookie(:current_user_id, nil) 
-		set_cookie(:auth_key, nil) 
-	end
-
 
 	# paging operate
 	def slice(arr, page, per_page)
@@ -270,5 +255,27 @@ class ApplicationController < ActionController::Base
 		# avoid arr = nil
 		arr = arr.slice((page-1)*per_page, per_page) || []
 		return arr
+	end
+
+	# return error
+	def return_json(is_success, value)
+		render :json => {
+			:success => is_success,
+			:value => value
+		}
+	end
+	def render_json_e(error_code)
+		error_code_obj = {
+			:error_code => error_code,
+			:error_message => ""
+		}
+		return_json(false, error_code_obj)
+	end
+	def render_json_s(value = true)
+		return_json(true, value)
+	end
+	def render_json_auto(value = true)
+		is_success = !(value.class == String && value.start_with?('error_'))
+		is_success ? render_json_s(value) : render_json_e(value)
 	end
 end

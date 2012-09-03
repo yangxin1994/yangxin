@@ -18,7 +18,6 @@ class PresentsController < ApplicationController
   #* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
   def index
     @presents = Present.can_be_rewarded.page(page)
-    @presents = ErrorEnum::PresentNotFound if @presents.empty? 
     respond_to do |format|
       format.html 
       format.json { render json: @presents }
@@ -28,7 +27,6 @@ class PresentsController < ApplicationController
 
   def_each :virtualgoods, :cash, :realgoods, :stockout do |method_name|
     @presents = Present.send(method_name).can_be_rewarded.page(page)
-    @presents = ErrorEnum::PresentNotFound if @presents.empty? 
     respond_to do |format|
       #format.html 
       format.json { render json: @presents}

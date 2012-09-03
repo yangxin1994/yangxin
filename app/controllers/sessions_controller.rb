@@ -4,8 +4,8 @@ require 'error_enum'
 require 'tool'
 class SessionsController < ApplicationController
 
-	before_filter :require_sign_out, :except => [:destroy, :sina_connect, :renren_connect, :qq_connect, :google_connect]
-	before_filter :require_sign_in, :only => [:destroy, :init_basic_info, :obtain_user_attr_survey, :init_user_attr_survey, :skip_init_step, :update_user_info, :reset_password]
+	before_filter :require_sign_out, :only => [:create]
+	before_filter :require_sign_in, :only => [:destroy, :init_basic_info, :obtain_user_attr_survey, :init_user_attr_survey, :skip_init_step, :update_user_info, :reset_password, :get_level_information]
 
 	# method: get
 	# descryption: the page where user logins
@@ -44,44 +44,50 @@ class SessionsController < ApplicationController
 	#* EMAIL_NOT_ACTIVATED
 	#* WRONG_PASSWORD
 	def create
-		login = User.login(params[:user]["email_username"], params[:user]["password"], @remote_ip)
+		login = User.login(params[:user]["email_username"], params[:user]["password"], @remote_ip, params[:_client_type], params[:keep_signed_in])
 		third_party_info = decrypt_third_party_user_id(params[:third_party_info])
 		case login
 		when ErrorEnum::USER_NOT_EXIST
-			flash[:error] = "帐号不存在!"
+      # flash[:error] = "帐号不存在!"
 			respond_to do |format|
-				format.html	{ redirect_to sessions_path and return }
-				format.json	{ render :json => ErrorEnum::USER_NOT_EXIST and return }
+        # format.html { redirect_to sessions_path and return }
+				format.json	{ render_json_e(ErrorEnum::USER_NOT_EXIST) and return }
 			end
 		when ErrorEnum::USER_NOT_ACTIVATED
-			flash[:error] = "您的帐号未激活，请您首先激活帐号"
+      # flash[:error] = "您的帐号未激活，请您首先激活帐号"
 			respond_to do |format|
-				format.html	{ redirect_to input_activate_email_path and return }
-				format.json	{ render :json => ErrorEnum::USER_NOT_ACTIVATED and return }
+        # format.html { redirect_to input_activate_email_path and return }
+				format.json	{ render_json_e(ErrorEnum::USER_NOT_ACTIVATED) and return }
 			end
 		when ErrorEnum::WRONG_PASSWORD
-			flash[:error] = "密码错误"
+      # flash[:error] = "密码错误"
 			respond_to do |format|
-				format.html	{ redirect_to sessions_path and return }
-				format.json	{ render :json => ErrorEnum::WRONG_PASSWORD and return }
+        # format.html { redirect_to sessions_path and return }
+				format.json	{ render_json_e(ErrorEnum::WRONG_PASSWORD) and return }
 			end
-		when true
-			User.combine(params[:user]["email_username"], *third_party_info) if !third_party_info.nil?
-			set_login_cookie(params[:user]["email_username"], params[:keep_signed_in])
-			flash[:notice] = "登录成功"
-			flash[:notice] += ",并成功与第三方帐号绑定。" if third_party_info
+		when false
 			respond_to do |format|
-				format.html	{ redirect_to home_path and return }
-				format.json	{ render :json => true and return }
+        # format.html { redirect_to "/500" and return }
+				format.json	{ render_json_e(ErrorEnum::UNKNOWN_ERROR) and return }
 			end
 		else
+			User.combine(params[:user]["email_username"], *third_party_info) if !third_party_info.nil?
+			######## this should be moved to the web client side #########
+			##############################################################
+      # flash[:notice] = "登录成功"
+      # flash[:notice] += ",并成功与第三方帐号绑定。" if third_party_info
 			respond_to do |format|
-				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
+        # format.html { redirect_to home_path and return }
+				format.json	{ render_json_s(login) and return }
 			end
 		end
 	end
 
+	def show
+		user = user.find_by_auth_key(params[:id])
+		render_json_auto(user.nil?) and return
+	end
+	
 	def update_user_info
 		retval = @current_user.update_basic_info(params[:user_info])
 		case retval
@@ -89,12 +95,12 @@ class SessionsController < ApplicationController
 			flash[:notice] = "更新个人信息成功"
 			respond_to do |format|
 				format.html	{ redirect_to home_path and return }
-				format.json	{ render :json => true and return }
+				format.json	{ render_json_s and return }
 			end
 		else
 			respond_to do |format|
 				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
+				format.json	{ render_json_e(ErrorEnum::UNKNOWN_ERROR) and return }
 			end
 		end
 	end
@@ -106,12 +112,12 @@ class SessionsController < ApplicationController
 			flash[:notice] = "更新个人信息成功"
 			respond_to do |format|
 				format.html	{ redirect_to home_path and return }
-				format.json	{ render :json => true and return }
+				format.json	{ render_json_s and return }
 			end
 		else
 			respond_to do |format|
 				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
+				format.json	{ render_json_e(ErrorEnum::UNKNOWN_ERROR) and return }
 			end
 		end
 	end
@@ -119,34 +125,35 @@ class SessionsController < ApplicationController
 	def init_user_attr_survey
 		retval = @current_user.init_attr_survey(params[:survey_id], params[:answer])
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_s(retval) and return }
 		end
 	end
 
 	def obtain_user_attr_survey
 		questions = Survey.get_user_attr_survey
 		respond_to do |format|
-			format.json { render :json => questions and return }
+			format.json { render_json_s(questions) and return }
 		end
 	end
 
 	def skip_init_step
 		retval = @current_user.skip_init_step
 		case retval
-		when true
+		when false 
+			respond_to do |format|
+				format.html	{ redirect_to "/500" and return }
+				format.json	{ render_json_e(ErrorEnum::UNKNOWN_ERROR) and return }
+			end
+		else
 			flash[:notice] = "成功跳到下一步"
 			respond_to do |format|
 				format.html	{ redirect_to home_path and return }
-				format.json	{ render :json => true and return }
-			end
-		else 
-			respond_to do |format|
-				format.html	{ redirect_to "/500" and return }
-				format.json	{ render :json => ErrorEnum::UNKNOWN_ERROR and return }
+				format.json	{ render_json_s({"status" => retval}) and return }
 			end
 		end
 	end
 
+	################# this should moved to the web client side ###############
 	#*descryption*: sign out
 	#
 	#*http* *method*: delete
@@ -158,12 +165,11 @@ class SessionsController < ApplicationController
 	#*retval*:
 	#* true if successfully logout
 	def destroy
-		# clear cookie
-		set_logout_cookie
+		User.logout(params[:auth_key])
 		# redirect to the welcome page
 		respond_to do |format|
 			format.html	{ redirect_to root_path and return }
-			format.json	{ render :json => true and return }
+			format.json	{ render_json_s and return }
 		end
 	end
 
@@ -171,6 +177,7 @@ class SessionsController < ApplicationController
 	# descryption: the page where user inputs the email to reset password
 	def forget_password
 	end
+	#############################################################################
 
 	#*descryption*: send email to reset password
 	#
@@ -190,7 +197,7 @@ class SessionsController < ApplicationController
 			flash[:notice] = "该邮箱未注册，请您注册"
 			respond_to do |format|
 				format.html { redirect_to registrations_path and return }
-				format.json { render :json => ErrorEnum::USER_NOT_EXIST and return }
+				format.json { render_json_e(ErrorEnum::USER_NOT_EXIST) and return }
 			end
 		end
 
@@ -200,7 +207,7 @@ class SessionsController < ApplicationController
 		flash[:notice] = "重置密码邮件已发送，请到您的邮箱中点击链接进行密码重置"
 		respond_to do |format|
 			format.html { redirect_to sessions_path and return }
-			format.json { render :json => true and return }
+			format.json { render_json_s and return }
 		end
 	end
 
@@ -256,13 +263,13 @@ class SessionsController < ApplicationController
 		rescue
 			respond_to do |format|
 				format.html { redirect_to "/500" and return }		# email account does not exist
-				format.json { render :json => false and return }		# email account does not exist
+				format.json { render_json_e(ErrorEnum::USER_NOT_EXIST) and return }		# email account does not exist
 			end
 		end
 		if password_info_json.nil?
 			respond_to do |format|
 				format.html { redirect_to "/500" and return }		# email account does not exist
-				format.json { render :json => false and return }		# email account does not exist
+				format.json { render_json_e(ErrorEnum::USER_NOT_EXIST) and return }		# email account does not exist
 			end
 		end
 		password_info = JSON.parse(password_info_json)
@@ -270,13 +277,13 @@ class SessionsController < ApplicationController
 			flash[:notice] = "密码重置链接已经过期，请重新发送重置密码链接"
 			respond_to do |format|
 				format.html { redirect_to :action => "forget_password" and return }		# email account does not exist
-				format.json { render :json => ErrorEnum::RESET_PASSWORD_EXPIRED and return }		# email account does not exist
+				format.json { render_json_e(ErrorEnum::RESET_PASSWORD_EXPIRED) and return }		# email account does not exist
 			end
 		end
 		if password_info["email"] != params[:user]["email"]
 			respond_to do |format|
 				format.html { redirect_to "/500" and return }		# email account does not exist
-				format.json { render :json => ErrorEnum::USER_NOT_EXIST and return }		# email account does not exist
+				format.json { render_json_e(ErrorEnum::USER_NOT_EXIST) and return }		# email account does not exist
 			end
 		end
 
@@ -285,18 +292,18 @@ class SessionsController < ApplicationController
 		when ErrorEnum::USER_NOT_EXIST
 			respond_to do |format|
 				format.html { redirect_to "/500" and return }		# email account does not exist
-				format.json { render :json => ErrorEnum::USER_NOT_EXIST and return }		# email account does not exist
+				format.json { render_json_e(ErrorEnum::USER_NOT_EXIST) and return }		# email account does not exist
 			end
 		when ErrorEnum::WRONG_PASSWORD_CONFIRMATION
 			respond_to do |format|
 				format.html { redirect_to "/500" and return }
-				format.json { render :json => ErrorEnum::WRONG_PASSWORD_CONFIRMATION and return }
+				format.json { render_json_e(ErrorEnum::WRONG_PASSWORD_CONFIRMATION) and return }		# email account does not exist
 			end
 		else
 			flash[:notice] = "密码已重置"
 			respond_to do |format|
 				format.html { redirect_to sessions_path and return }
-				format.json { render :json => true and return }
+				format.json { render_json_s and return }
 			end
 		end
 	end
@@ -317,7 +324,7 @@ class SessionsController < ApplicationController
 	def reset_password
 		reset_password_retval = @current_user.reset_password(params["old_password"], params["new_password"], params["new_password_confirmation"])
 		respond_to do |format|
-			format.json { render :json => reset_password_retval and return }
+			format.json { render_json_s(reset_password_retval) and return }
 		end
 	end
 
@@ -372,7 +379,36 @@ class SessionsController < ApplicationController
 		raise "Do not have :code params." if params[:code].nil?
 		status, qihu_user = QihuUser.token(params[:code])
 		deal_connect(status, qihu_user)
-	 end 
+	end 
+
+	def third_party_authorized
+		# try to find the third party user in the database, if not, create a new one
+		tp_user = ThirdPartyUser.find_by_website_and_user_id(params[:third_party_website], params[:third_party_user_id])
+		tp_user = ThirdPartyUser.create_third_party_user(params) if tp_user.nil?
+
+		if tp_user.is_bound && user_signed_in?
+			# bound and signed in
+			respond_to do |format|
+				format.json { render_json_s({"binding" => tp_user.is_bound(@current_user)}) and return }
+			end
+		elsif tp_user.is_bound && !user_signed_in?
+			retval = User.login(@current_user.email, Encryption.decrypt_password(@current_user.password), @client_ip)
+			respond_to do |format|
+				format.json { render_json_s(retval) and return }
+			end
+		elsif !tp_user.is_bound && user_signed_in
+			respond_to do |format|
+				format.json { render_json_s({"binding" => tp_user.bind(@current_user)}) and return }
+			end
+		else
+			google_user = tp_user.website == "google"? tp_user.google_email : nil
+			third_party_info = encrypt_third_party_user_id(tp_user.website, tp_user.user_id)
+			respond_to do |format|
+				format.json { render_json_s({"third_party_info" => third_party_info, "google_user" => google_user}) and return }
+			end
+		end
+
+	end
 	
 	#*descryption*: deal with the third party user login logic
 	#
@@ -390,7 +426,6 @@ class SessionsController < ApplicationController
 				flash[:error] = "您的帐号未激活，请您首先激活帐号"
 				redirect_to input_activate_email_path and return
 			when true
-				set_login_cookie(@current_user._id)
 				flash[:notice] = "登录成功"
 				redirect_to home_path and return
 			else

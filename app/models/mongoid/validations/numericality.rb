@@ -19,18 +19,20 @@ module Mongoid
 
         raw_value = record.send(before_type_cast) if record.respond_to?(before_type_cast.to_sym)
         raw_value ||= value
-
         return if options[:allow_nil] && raw_value.nil?
 
         unless value = parse_raw_value_as_a_number(raw_value)
-          record.error_code << ErrorEnum.const_get("#{record.class.name}#{attr_name.to_s.initial_upcase}NotANumber")
+          #record.add_error_code ErrorEnum.const_get("#{record.class.name}#{attr_name.to_s.initial_upcase}NotANumber")
+          p "#{record.class.name} #{attr_name.to_s} must a number"
+          record.add_error_code ErrorEnum.const_get("#{record.class.name.upcase}_#{attr_name.to_s.upcase}_NOT_A_NUNBER")
           record.errors.add(attr_name, :not_a_number, filtered_options(raw_value))
           return
         end
 
         if options[:only_integer]
           unless value = parse_raw_value_as_an_integer(raw_value)
-            record.error_code << ErrorEnum.const_get("#{record._type}NotAInteger")
+            # record.add_error_code ErrorEnum.const_get("#{record.class.name.upcase}NotAInteger")
+            record.add_error_code ErrorEnum.const_get("#{record.class.name.upcase}_NOT_A_INTEGER")
             record.errors.add(attr_name, :not_an_integer, filtered_options(raw_value))
             return
           end
@@ -41,14 +43,15 @@ module Mongoid
           when :odd, :even
             unless value.to_i.send(CHECKS[option])
               record.errors.add(attr_name, option, filtered_options(value))
-              record.error_code << ErrorEnum.const_get("#{record._type}#{attr_name}Not#{option}")
+              #record.add_error_code ErrorEnum.const_get("#{record.class.name.upcase}#{attr_name}Not#{option}")
+              record.add_error_code ErrorEnum.const_get("#{record.class.name.upcase}_#{attr_name.upcase}_NOT_#{option}")
             end
           else
             option_value = option_value.call(record) if option_value.is_a?(Proc)
             option_value = record.send(option_value) if option_value.is_a?(Symbol)
 
             unless value.send(CHECKS[option], option_value)
-              record.error_code << ErrorEnum.const_get("#{record._type}#{attr_name}Not#{option}")
+              record.add_error_code ErrorEnum.const_get("#{record._type}#{attr_name}Not#{option}")
               record.errors.add(attr_name, option, filtered_options(value).merge(:count => option_value))
             end
           end

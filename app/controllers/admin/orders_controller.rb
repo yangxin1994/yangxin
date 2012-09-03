@@ -2,11 +2,8 @@
 class Admin::OrdersController < Admin::ApplicationController
 	
 	def index
-		@orders = current_user.orders.page(page)
-		@orders = ErrorEnum::PresentNotFound if @orders.empty?
-		respond_to do |format|
-			format.html
-			format.json { render json: @orders }
+		respond_and_render_json true do
+			current_user.orders.page(page)
 		end
 	end
 	
@@ -17,9 +14,7 @@ class Admin::OrdersController < Admin::ApplicationController
 				r.delete
 			end)
 		end
-		respond_to do |format|
-			format.json { render json: @orders }
-		end
+		respond_and_render_json{ @orders }
 	end
 
 	def operate
@@ -29,17 +24,12 @@ class Admin::OrdersController < Admin::ApplicationController
 				r.operate 1
 			end)
 		end
-		respond_to do |format|
-			format.json { render json: @orders }
-		end
+		respond_and_render_json{@orders }
 	end
 
 	def_each :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed do |method_name|
-		@orders = Order.send(method_name).page(page)
-		@orders = ErrorEnum::PresentNotFound if @orders.empty?
-		respond_to do |format|
-			format.html 
-			format.json { render json: @orders }
+		respond_and_render_json true, :only => [:type] do
+			Order.send(method_name).page(page)
 		end
 	end
 	

@@ -1,8 +1,8 @@
 class OrdersController < ApplicationController
 #TO DO before_filter
+	before_filter :require_user_exist
 	def index
-		@orders = current_user.orders.page(page)
-		@orders = ErrorEnum::PresentNotFound if @orders.empty?
+		@orders = @current_user.orders.page(page)
 		respond_to do |format|
 			format.html
 			format.json { render json: @orders }
@@ -54,7 +54,6 @@ class OrdersController < ApplicationController
 	# end
 	def_each :for_cash, :for_realgoods, :for_virtualgoods, :for_lottery, :for_award do |method_name|
 		@orders = Order.send(method_name).page(params[:page].to_i)
-		@orders = ErrorEnum::PresentNotFound if @orders.empty?
 		respond_to do |format|
 			format.html 
 			format.json { render json: @orders }

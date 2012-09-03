@@ -1,7 +1,8 @@
 class Order
 	include Mongoid::Document
 	include Mongoid::Timestamps
-
+	include Mongoid::ValidationsExt
+	extend Mongoid::FindHelper
 	# can be 0 (Cash), 1 (RealGoods), 2 (VirtualGoods), 3 (Lottery)
 	field :type, :type => Integer
 	# can be 0 (NeedVerify), 1 (Verified), -1 (VerifyFailed), 2 (Delivering), 3 (Delivered), -3 (DeliverFailed)
@@ -21,12 +22,12 @@ class Order
 	belongs_to :user, :class_name => "User", :inverse_of => :orders
 	belongs_to :operated_admin, :class_name => "User", :inverse_of => :operate_orders
 	
-	validates :type, :presence => true,
-									:inclusion => { :in => 0..3 },
-									:numericality => true
+	validates :type, :presence_ext => true,
+									 :inclusion => { :in => 0..3 },
+									 :numericality => true
 	validates :status, :presence => true,
-										:inclusion => { :in => -3..3 },
-										:numericality => true
+									   :inclusion => { :in => -3..3 },
+										 :numericality => true
 
 	scope :for_cash, where( :type => 0)
 	scope :for_realgoods, where( :type => 1)

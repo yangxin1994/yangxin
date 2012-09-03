@@ -1,4 +1,3 @@
-
 class SinaUser < ThirdPartyUser
 	
 	field :name, :type => String
@@ -87,15 +86,15 @@ class SinaUser < ThirdPartyUser
 	#*params*:
 	#* http_method: get(default) or post.
 	#* opts: hash.
-	def call_method(http_method="GET", opts = {:method => "users/show", :uid => self.user_id})
+	def call_method(http_method="get", opts = {:method => "users/show", :uid => self.user_id})
 		
 		@params={}
 		@params["access_token"] = self.access_token
 		method = opts[:method] || opts["method"]
 		
 		if http_method.downcase == "get" then
-			super(opts)
-			retval = Tool.send_get_request("https://api.weibo.com/2/#{method}.json#{@params_url}", true) 
+			params_string = generate_params_string(opts)
+			retval = Tool.send_get_request("https://api.weibo.com/2/#{method}.json#{params_string}", true) 
 		else
 			opts.merge!(@params).select!{|k,v| k.to_s != "method"}
 			retval = Tool.send_post_request("https://api.weibo.com/2/#{method}.json", opts, true)

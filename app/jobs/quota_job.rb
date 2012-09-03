@@ -59,12 +59,12 @@ module Jobs
 			interval_time = arg["interval_time"]
 
 			puts "End Quota Job perform Test. The interval_time is #{interval_time}"
-			Resque.enqueue_at(Time.now + interval_time.to_i, 
-				QuotaJob, 
-				{"interval_time"=> interval_time.to_i}) 		
+			# Resque.enqueue_at(Time.now + interval_time.to_i, 
+			# 	QuotaJob, 
+			# 	{"interval_time"=> interval_time.to_i}) 		
 		end
 
-		def send_emails
+		def self.send_emails
 			# 1. calculate the survey invitations for each sample
 			ready_to_send = {}
 			@samples_found.each_with_index do |samples_found_for_one_survey, index|
@@ -89,7 +89,7 @@ module Jobs
 			end
 		end
 
-		def find_samples
+		def self.find_samples
 			samples_found = []
 			user_ids_answered = {}
 			user_ids_sent = {}
@@ -133,10 +133,16 @@ module Jobs
 			#find all surveys which are published
 			published_survey = Survey.get_published_active_surveys
 
+			# puts "published_survey count:: #{published_survey}"
+
 			published_survey.each do |survey|
 				cur_survey_rule_arr = []
 				survey.quota["rules"].each_with_index do |rule, rule_index|
 					rule_amount = rule["amount"].to_i
+
+					# puts "----------------------------------"
+					# puts "rule::#{rule}"
+					# puts "rule_amount::#{rule_amount}"
 
 					# 1. get the conditions
 					conditions = []
@@ -146,23 +152,36 @@ module Jobs
 						end
 					end
 
+					# puts "conditions:::#{JSON.parse(conditions.to_json)}"
+
 					# 2. get the remainning number
 					answer_number = survey.quota_stats["answer_number"][rule_index].to_i
 					rest_number = rule_amount < answer_number ? 0 : rule_amount - answer_number
 
+					# puts "rest_number::#{rest_number}"
+
 					# 3. combine the rule
+					has_same = false
 					cur_survey_rule_arr.each do |rule|
-						if conditions - rule.conditions == [] && rule.conditions - conditions == []
+						if compare_conditions(conditions, rule.conditions)
 							rule.amount_increase(rest_number)
+							has_same = true
 							break
-						else
-							cur_survey_rule_arr << Rule.new(survey._id.to_s, conditions, rest_number) if rest_number > 0
-						end
+						end 
+					end
+
+					if has_same == false && rest_number > 0 then
+						cur_survey_rule_arr << 	Rule.new(survey._id.to_s, conditions, rest_number) 
 					end
 				end
 				rule_arr += cur_survey_rule_arr
 			end
 			return rule_arr
+		end
+
+		def self.compare_conditions(c1, c2)
+			return JSON.parse(c1.to_json) - JSON.parse(c2.to_json) == [] && 
+			JSON.parse(c2.to_json) - JSON.parse(c1.to_json) == []
 		end
 
 		def self.send_email(sample)

@@ -5,7 +5,7 @@ class SurveyAuditor::ApplicationController < ApplicationController
 		@survey = Survey.normal.find_by_id(params[:id])
 		if @survey.nil?
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
 			end
 		end
 	end

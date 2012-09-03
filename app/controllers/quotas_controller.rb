@@ -7,7 +7,7 @@ class QuotasController < ApplicationController
 		@survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
 		if @survey.nil?
 			respond_to do |format|
-				format.json	{ render :json => ErrorEnum::SURVEY_NOT_EXIST and return }
+				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
 			end
 		end
 	end
@@ -27,7 +27,7 @@ class QuotasController < ApplicationController
 	def index
 		quota = @survey.show_quota
 		respond_to do |format|
-			format.json	{ render :json => quota and return }
+			format.json	{ render_json_auto(quota) and return }
 		end
 	end
 
@@ -47,7 +47,7 @@ class QuotasController < ApplicationController
 	def show
 		quota_rule = @survey.show_quota_rule(params[:id].to_i)
 		respond_to do |format|
-			format.json	{ render :json => quota_rule and return }
+			format.json	{ render_json_auto(quota_rule) and return }
 		end
 	end
 
@@ -69,7 +69,7 @@ class QuotasController < ApplicationController
 	def create
 		quota = @survey.add_quota_rule(params[:quota_rule])
 		respond_to do |format|
-			format.json	{ render :json => quota and return }
+			format.json	{ render_json_auto(quota) and return }
 		end
 	end
 
@@ -93,7 +93,7 @@ class QuotasController < ApplicationController
 	def update
 		quota = @survey.update_quota_rule(params[:id].to_i, params[:quota_rule])
 		respond_to do |format|
-			format.json	{ render :json => quota and return }
+			format.json	{ render_json_auto(quota) and return }
 		end
 	end
 
@@ -114,7 +114,7 @@ class QuotasController < ApplicationController
 	def destroy
 		retval = @survey.delete_quota_rule(params[:id].to_i)
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -134,7 +134,7 @@ class QuotasController < ApplicationController
 	def set_exclusive
 		retval = @survey.set_exclusive(params[:is_exclusive].to_s == "true")
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -153,7 +153,7 @@ class QuotasController < ApplicationController
 	def get_exclusive
 		retval = @survey.get_exclusive
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 end

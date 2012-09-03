@@ -19,7 +19,7 @@ class SurveyAuditor::SurveysController < SurveyAuditor::ApplicationController
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def show
 		respond_to do |format|
-			format.json	{ render :json => @survey.to_json and return }
+			format.json	{ render_json_auto(@survey.serialize) and return }
 		end
 	end
 
@@ -39,7 +39,7 @@ class SurveyAuditor::SurveysController < SurveyAuditor::ApplicationController
 		# third parameter are tags
 		survey_list = Survey.normal.list("normal", 2, nil)
 		respond_to do |format|
-			format.json	{ render :json => survey_list.to_json and return }
+			format.json	{ render_json_auto(survey_list.serialize) and return }
 		end
 	end
 
@@ -61,7 +61,7 @@ class SurveyAuditor::SurveysController < SurveyAuditor::ApplicationController
 	def reject
 		retval = @survey.reject(params[:message], @current_user)
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -83,7 +83,7 @@ class SurveyAuditor::SurveysController < SurveyAuditor::ApplicationController
 	def publish
 		retval = @survey.publish(params[:message], @current_user)
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -105,7 +105,7 @@ class SurveyAuditor::SurveysController < SurveyAuditor::ApplicationController
 	def close
 		retval = @survey.close(params[:message], @current_user)
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
@@ -127,7 +127,7 @@ class SurveyAuditor::SurveysController < SurveyAuditor::ApplicationController
 	def pause
 		retval = @survey.pause(params[:message], @current_user)
 		respond_to do |format|
-			format.json	{ render :json => retval and return }
+			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 end
