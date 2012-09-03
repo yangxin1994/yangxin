@@ -101,7 +101,7 @@ class RenrenUser < ThirdPartyUser
 		@params[:access_token] = self.access_token
 		
 		if http_method.downcase == "post" then
-			return ActiveSupport::JSON.decode(Tool.send_post_request('http://api.renren.com/restserver.do', update_params(opts)).body)
+			retval = JSON.parse(Tool.send_post_request('http://api.renren.com/restserver.do', update_params(opts)).body)
 		else
 			return {}
 		end
@@ -115,6 +115,7 @@ class RenrenUser < ThirdPartyUser
 	#
 	# a hash data
 	def get_user_info
+		# if not a array, it should be error for user login.
 		call_method()[0]
 	end
 

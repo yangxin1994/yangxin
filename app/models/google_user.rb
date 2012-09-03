@@ -112,7 +112,7 @@ class GoogleUser < ThirdPartyUser
 			retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/#{method}#{params_string}", true) 
 		else
 			opts.merge!(@params).select!{|k,v| k.to_s != "method"}
-			retval = Tool.send_post_request("https://api.weibo.com/2/#{method}.json", opts, true)
+			retval = Tool.send_post_request("https://www.googleapis.com/oauth2/v1/#{method}", opts, true)
 		end
 		return JSON.parse(retval.body)
 	end
