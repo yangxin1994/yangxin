@@ -219,7 +219,7 @@ class DataGeneratorsController < ApplicationController
 			user["status_shown"] = @user_status_shown[status]
 			user.merge("password" => Encryption.encrypt_password(user["password"]))
 			user_inst = User.new(user.merge("password" => Encryption.encrypt_password(user["password"])))
-			user.status = status
+			user_inst.status = status
 			user_inst.save
 			users << user
 		end
