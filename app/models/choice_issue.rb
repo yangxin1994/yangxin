@@ -17,10 +17,10 @@ require 'securerandom'
 # }
 class ChoiceIssue < Issue
 
-	attr_reader :choices, :other_item, :choice_num_per_row, :min_choice, :max_choice, :is_list_style, :is_rand
-	attr_writer :choices, :other_item, :choice_num_per_row, :min_choice, :max_choice, :is_list_style, :is_rand
+	attr_reader :choices, :other_item, :choice_num_per_row, :min_choice, :max_choice, :option_type, :is_list_style, :is_rand
+	attr_writer :choices, :other_item, :choice_num_per_row, :min_choice, :max_choice, :option_type, :is_list_style, :is_rand
 
-	ATTR_NAME_ARY = %w[choices other_item choice_num_per_row min_choice max_choice is_list_style is_rand]
+	ATTR_NAME_ARY = %w[choices other_item choice_num_per_row min_choice max_choice option_type is_list_style is_rand]
 	CHOICE_ATTR_ARY = %w[input_id content is_exclusive]
 	OTHER_ITEM_ATTR_ARY = %w[has_other_item input_id content is_exclusive]
 
@@ -28,6 +28,7 @@ class ChoiceIssue < Issue
 		@choice_num_per_row = -1
 		@min_choice = 1
 		@max_choice = 1
+		@option_type = 1
 		@is_list_style = true
 		@is_rand = false	
 		@choices = []
@@ -43,6 +44,7 @@ class ChoiceIssue < Issue
 		issue_obj["choice_num_per_row"] = issue_obj["choice_num_per_row"].to_i
 		issue_obj["min_choice"] = issue_obj["min_choice"].to_i
 		issue_obj["max_choice"] = issue_obj["max_choice"].to_i
+		issue_obj["option_type"] = issue_obj["option_type"].to_i
 		issue_obj["is_list_style"] = issue_obj["is_list_style"].to_s == "true"
 		issue_obj["is_rand"] = issue_obj["is_rand"].to_s == "true"
 		issue_obj["other_item"]["has_other_item"] = issue_obj["other_item"]["has_other_item"].to_s == "true"
