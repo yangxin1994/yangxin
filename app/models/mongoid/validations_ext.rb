@@ -29,11 +29,13 @@ module Mongoid
 			end
 			self
 		end
-		def is_valid
+		def is_valid?
 			valid?
 		end
 		class ::Hash
-			is_valid = false
+			def is_valid?
+				false
+			end
 		end
 		class ::String
 			def initial_upcase
