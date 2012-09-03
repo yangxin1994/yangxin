@@ -20,7 +20,7 @@ class SurveyTest < ActiveSupport::TestCase
 		# 	pp q.header 1
 		# end
 		pp @survey_with_issue.csv_headers
-		pp @survey_with_issue.spss_headers
+		pp @survey_with_issue.spss_headers.to_xml
 		assert true
 	end
 end
