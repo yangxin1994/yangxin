@@ -16,15 +16,21 @@ class PointLog
 
   # TO DO validation
   #validates_presence_of :operated_point, :cause, :operated_admin
+  validates :operated_point, :numericality => true
+  #validates :invited_user_id, :presence => true
+  #validates :user_id, :presence => true
+
   # before_save :operated_point
   after_create :operate_user_point
-
+  # before_create :fsasfsd
+  # def fsasfsd
+  # end  
   def self.revoke_operation(log_id,admin_id)
     p = PointLog.find(log_id)
     PointLog.create(:user_id => p.user.id,
-                :operated_point => -p.operated_point,
-                :operated_admin_id => admin_id, 
-                :cause => 4)
+                    :operated_point => -p.operated_point,
+                    :operated_admin_id => admin_id, 
+                    :cause => 4)
   end
   private
   def operate_user_point

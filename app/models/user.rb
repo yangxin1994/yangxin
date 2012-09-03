@@ -6,6 +6,7 @@ require 'tool'
 class User
 	include Mongoid::Document
 	include Mongoid::Timestamps
+  include Mongoid::ValidationsExt	
 	field :email, :type => String
 	field :username, :type => String
 	field :password, :type => String
@@ -22,6 +23,7 @@ class User
 	field :activate_time, :type => Integer
 	field :introducer_id, :type => Integer
 	field :introducer_to_pay, :type => Float
+	field :last_read_messeges_time, :type => Time, :default => Time.now
 # 0 user
 # 1 administrator
 # 2 belongs to: White List
@@ -29,6 +31,7 @@ class User
 
 	field :role, :type => Integer, default: 0
 	field :auth_key, :type => String
+	field :auth_key_expire_time, :type => Integer, default: 0
 	field :level, :type => Integer, default: 0
 	field :level_expire_time, :type => Integer, default: -1
 
@@ -102,6 +105,26 @@ class User
 
 	def self.find_by_id(user_id)
 		return User.where(:_id => user_id, :status.gt => -1)[0]
+	end
+
+	def self.find_by_auth_key(auth_key)
+		user = User.where(:auth_key => auth_key, :status.gt => -1)[0]
+		return nil if user.nil?
+		if user.auth_key_expire_time > Time.now.to_i
+			return user
+		else
+			user.auth_key = nil
+			user.save
+			return nil
+		end
+	end
+
+	def self.logout(auth_key)
+		user = User.find_by_auth_key(auth_key)
+		if !user.nil?
+			user.auth_key = nil
+			user.save
+		end
 	end
 
 	def get_level_information
@@ -272,7 +295,7 @@ class User
 	#* EMAIL_NOT_EXIST
 	#* EMAIL_NOT_ACTIVATED
 	#* WRONG_PASSWORD
-	def self.login(email_username, password, client_ip, client_type)
+	def self.login(email_username, password, client_ip, client_type, keep_signed_in)
 		user = User.find_by_email_username(email_username)
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
 		# There is no is_activated
@@ -284,6 +307,7 @@ class User
 		user.last_login_client_type = client_type
 		user.login_count = user.login_count + 1
 		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
+		user.auth_key_expire_time = Time.now.to_i + (keep_signed_in.to_s == "true" ? OOPSDATA["login_keep_time"]["kept"].to_i : OOPSDATA["login_keep_time"]["unkept"].to_i)
 		return false if !user.save
 		return {"status" => user.status, "auth_key" => user.auth_key, "user_id" => user._id.to_s}
 	end
@@ -370,8 +394,14 @@ class User
 		m
 	end
 
+	def unread_messages_count
+		Message.unread(last_read_messeges_time).select{ |m| (message_ids.include? m.id) or (m.type == 0)}.count
+	end
+
 	def show_messages
-		Message.unread(created_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}
+		self.update_attribute(:last_read_messeges_time, Time.now)
+		Message.all.select{ |m| (message_ids.include? m.id) or (m.type == 0)}
+		#Message.unread(created_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}
 	end
 
 #--
@@ -379,8 +409,7 @@ class User
 #++
 # admin inc
 	def operate_point(operated_point, user_id)
-		u = User.find(user_id)
-		return false unless u.is_a? User
+		u = User.find_by_id(user_id)
 		operate_point_logs.create(:operated_point => operated_point,
 															:user => u,
 															:cause => 0)

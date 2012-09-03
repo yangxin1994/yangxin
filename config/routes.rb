@@ -1,6 +1,11 @@
 OopsData::Application.routes.draw do
 
 	resources :faqs, :public_notices, :feedbacks, :advertisements
+	resources :data_generators do
+		collection do
+			get 'generate'
+		end
+	end
 
 	namespace :admin do
 		resources :users do 
@@ -23,7 +28,7 @@ OopsData::Application.routes.draw do
 				post 'unlock'
 			end
 		end
-		resources :feedbacks do 
+		resources :feedbacks do
 			member do 
 				post 'reply'
 			end
@@ -173,7 +178,11 @@ OopsData::Application.routes.draw do
 		end
 	end
 
-
+	resources :messages do
+		collection do 
+			get :unread_count
+		end
+	end
 
 	resources :lotteries do
 		member do

@@ -75,13 +75,15 @@ class ActiveSupport::TestCase
 		old_controller = @controller
 		@controller = SessionsController.new
 		post :create, :format => :json, :user => {"email_username" => email, "password" => password}
+		result = JSON.parse(@response.body)
 		@controller = old_controller
+		return result["value"]["auth_key"]
 	end
 
-	def sign_out
+	def sign_out(auth_key)
 		old_controller = @controller
 		@controller = SessionsController.new
-		get :destroy
+		get :destroy, :auth_key => auth_key
 		@controller = old_controller
 	end
 
@@ -122,58 +124,58 @@ class ActiveSupport::TestCase
 	end
 
 	def create_survey(email, password)
-		sign_in(email, password)
+		auth_key = sign_in(email, password)
 		old_controller = @controller
 		@controller = SurveysController.new
-		get :new, :format => :json
+		get :new, :format => :json, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		survey_obj = result["value"]
-		post :save_meta_data, :format => :json, :id => survey_obj["_id"], :survey => survey_obj
+		post :save_meta_data, :format => :json, :id => survey_obj["_id"], :survey => survey_obj, :auth_key => auth_key
 		@controller = old_controller
 		result = JSON.parse(@response.body)
 		survey_obj = result["value"]
-		sign_out
+		sign_out(auth_key)
 		return survey_obj["_id"]
 	end
 
 	def get_survey_obj(email, password, survey_id)
-		sign_in(email, Encryption.decrypt_password(password))
+		auth_key = sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller
 		@controller = SurveysController.new
-		get :show, :format => :json, :id => survey_id
+		get :show, :format => :json, :id => survey_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		survey_obj = result["value"]
 		@controller = old_controller
-		sign_out
+		sign_out(auth_key)
 		return survey_obj
 	end
 
 	def insert_page(email, password, survey_id, page_index, page_name)
-		sign_in(email, Encryption.decrypt_password(password))
+		auth_key = sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller
 		@controller = PagesController.new
-		post :create, :format => :json, :survey_id => survey_id, :page_index => page_index, :page_name => page_name
+		post :create, :format => :json, :survey_id => survey_id, :page_index => page_index, :page_name => page_name, :auth_key => auth_key
 		@controller = old_controller
-		sign_out
+		sign_out(auth_key)
 	end
 
 	def create_question(email, password, survey_id, page_index, question_id, question_type)
-		sign_in(email, Encryption.decrypt_password(password))
+		auth_key = sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller
 		@controller = QuestionsController.new
-		post :create, :format => :json, :survey_id => survey_id, :page_index => page_index, :question_id => question_id, :question_type => question_type
+		post :create, :format => :json, :survey_id => survey_id, :page_index => page_index, :question_id => question_id, :question_type => question_type, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		question_obj = result["value"]
 		@controller = old_controller
-		sign_out
+		sign_out(auth_key)
 		return question_obj["_id"]
 	end
 
 	def create_choice_question_with_choices(email, password, survey_id, page_index, question_id, question_type)
-		sign_in(email, Encryption.decrypt_password(password))
+		auth_key = sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller
 		@controller = QuestionsController.new
-		post :create, :format => :json, :survey_id => survey_id, :page_index => page_index, :question_id => question_id, :question_type => question_type
+		post :create, :format => :json, :survey_id => survey_id, :page_index => page_index, :question_id => question_id, :question_type => question_type, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		question_obj = result["value"]
 		question_obj["issue"]["min_choice"] = 2
@@ -181,32 +183,32 @@ class ActiveSupport::TestCase
 		question_obj["issue"]["choices"] << {"input_id" => SecureRandom.uuid, "content" => "first choice content", "has_input" => false, "is_exclusive" => false}
 		question_obj["issue"]["choices"] << {"input_id" => SecureRandom.uuid, "content" => "second choice content", "has_input" => false, "is_exclusive" => false}
 		question_obj["issue"]["choices"] << {"input_id" => SecureRandom.uuid, "content" => "third choice content", "has_input" => false, "is_exclusive" => false}
-		put :update, :format => :json, :survey_id => survey_id, :id => question_obj["_id"], :question => question_obj
+		put :update, :format => :json, :survey_id => survey_id, :id => question_obj["_id"], :question => question_obj, :auth_key => auth_key
 		@controller = old_controller
-		sign_out
+		sign_out(auth_key)
 		return question_obj["_id"]
 	end
 
 	def show_question(email, password, survey_id, question_id)
-		sign_in(email, Encryption.decrypt_password(password))
+		auth_key = sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller
 		@controller = QuestionsController.new
-		get :show, :format => :json, :survey_id => survey_id, :id => question_id
+		get :show, :format => :json, :survey_id => survey_id, :id => question_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		question_obj = result["value"]
 		@controller = old_controller
-		sign_out
+		sign_out(auth_key)
 		return question_obj
 	end
 
 	def show_survey(email, password, survey_id)
-		sign_in(email, Encryption.decrypt_password(password))
+		auth_key = sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller
 		@controller = SurveysController.new
-		get :show, :format => :json, :id => survey_id
+		get :show, :format => :json, :id => survey_id, :auth_key => auth_key
 		survey_obj = JSON.parse(@response.body)
 		@controller = old_controller
-		sign_out
+		sign_out(auth_key)
 		return survey_obj
 	end
 
@@ -233,14 +235,14 @@ class ActiveSupport::TestCase
 	end
 
 	def get_question_obj(email, password, survey_id, question_id)
-		sign_in(email, Encryption.decrypt_password(password))
+		auth_key = sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller
 		@controller = QuestionsController.new
-		get :show, :format => :json, :survey_id => survey_id, :id => question_id
+		get :show, :format => :json, :survey_id => survey_id, :id => question_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		question_obj = result["value"]
 		@controller = old_controller
-		sign_out
+		sign_out(auth_key)
 		return question_obj
 	end
 
@@ -254,53 +256,53 @@ class ActiveSupport::TestCase
 	end
 
 	def create_materials(email, password)
-		sign_in(email, Encryption.decrypt_password(password))
+		auth_key = sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller
 		@controller = MaterialsController.new
-		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_1", "title" => "title_1"}
+		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_1", "title" => "title_1"}, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		material_id_1 = result["value"]["_id"]
-		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_2", "title" => "title_2"}
+		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_2", "title" => "title_2"}, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		material_id_2 = result["value"]["_id"]
-		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_3", "title" => "title_3"}
+		post :create, :format => :json, :material => {"material_type" => 1, "location" => "location_3", "title" => "title_3"}, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		material_id_3 = result["value"]["_id"]
-		post :create, :format => :json, :material => {"material_type" => 2, "location" => "location_4", "title" => "title_4"}
+		post :create, :format => :json, :material => {"material_type" => 2, "location" => "location_4", "title" => "title_4"}, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		material_id_4 = result["value"]["_id"]
-		post :create, :format => :json, :material => {"material_type" => 2, "location" => "location_5", "title" => "title_5"}
+		post :create, :format => :json, :material => {"material_type" => 2, "location" => "location_5", "title" => "title_5"}, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		material_id_5 = result["value"]["_id"]
-		post :create, :format => :json, :material => {"material_type" => 4, "location" => "location_6", "title" => "title_6"}
+		post :create, :format => :json, :material => {"material_type" => 4, "location" => "location_6", "title" => "title_6"}, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		material_id_6 = result["value"]["_id"]
 		@controller = old_controller
-		sign_out
+		sign_out(auth_key)
 		return [material_id_1, material_id_2, material_id_3, material_id_4, material_id_5, material_id_6]
 	end
 
 	def create_template_question(email, password, question_type)
-		sign_in(email, Encryption.decrypt_password(password))
+		auth_key = sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller
 		@controller = Admin::TemplateQuestionsController.new
-		post :create, :format => :json, :question_type => question_type
+		post :create, :format => :json, :question_type => question_type, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		question_obj = result["value"]
 		@controller = old_controller
-		sign_out
+		sign_out(auth_key)
 		return question_obj["_id"]
 	end
 
 	def create_quality_control_question(email, password, quality_control_type, question_type, question_number)
-		sign_in(email, Encryption.decrypt_password(password))
+		auth_key = sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller
 		@controller = Admin::QualityControlQuestionsController.new
-		post :create, :format => :json, :quality_control_type => quality_control_type, :question_type => question_type, :question_number => question_number
+		post :create, :format => :json, :quality_control_type => quality_control_type, :question_type => question_type, :question_number => question_number, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		retval = result["value"]
 		@controller = old_controller
-		sign_out
+		sign_out(auth_key)
 		return retval[0]["_id"]
 	end
 end

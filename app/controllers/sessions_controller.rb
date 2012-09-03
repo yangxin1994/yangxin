@@ -44,7 +44,7 @@ class SessionsController < ApplicationController
 	#* EMAIL_NOT_ACTIVATED
 	#* WRONG_PASSWORD
 	def create
-		login = User.login(params[:user]["email_username"], params[:user]["password"], @remote_ip, params[:_client_type])
+		login = User.login(params[:user]["email_username"], params[:user]["password"], @remote_ip, params[:_client_type], params[:keep_signed_in])
 		third_party_info = decrypt_third_party_user_id(params[:third_party_info])
 		case login
 		when ErrorEnum::USER_NOT_EXIST
@@ -73,7 +73,6 @@ class SessionsController < ApplicationController
 		else
 			User.combine(params[:user]["email_username"], *third_party_info) if !third_party_info.nil?
 			######## this should be moved to the web client side #########
-			set_login_cookie(params[:user]["email_username"], params[:keep_signed_in], login["auth_key"])
 			##############################################################
       # flash[:notice] = "登录成功"
       # flash[:notice] += ",并成功与第三方帐号绑定。" if third_party_info
@@ -83,23 +82,12 @@ class SessionsController < ApplicationController
 			end
 		end
 	end
-	
-	# description: help set session for an account
-	def set_login_cookie(email_username, keep_signed_in, auth_key)
-		user = User.find_by_email_username(email_username)
-		return false if user.nil?
-		if keep_signed_in.to_s == "true"
-			set_cookie(:current_user_id, user.id, 1.months.from_now) 
-		else
-			set_cookie(:current_user_id, user.id) 
-		end
-		if keep_signed_in.to_s == "true"
-			set_cookie(:auth_key, auth_key, keep_signed_in, 1.months.from_now)
-		else
-			set_cookie(:auth_key, auth_key, keep_signed_in)
-		end
-	end
 
+	def show
+		user = user.find_by_auth_key(params[:id])
+		render_json_auto(user.nil?) and return
+	end
+	
 	def update_user_info
 		retval = @current_user.update_basic_info(params[:user_info])
 		case retval
@@ -177,8 +165,7 @@ class SessionsController < ApplicationController
 	#*retval*:
 	#* true if successfully logout
 	def destroy
-		# clear cookie
-		set_logout_cookie
+		User.logout(params[:auth_key])
 		# redirect to the welcome page
 		respond_to do |format|
 			format.html	{ redirect_to root_path and return }
@@ -439,7 +426,6 @@ class SessionsController < ApplicationController
 				flash[:error] = "您的帐号未激活，请您首先激活帐号"
 				redirect_to input_activate_email_path and return
 			when true
-				set_login_cookie(@current_user._id)
 				flash[:notice] = "登录成功"
 				redirect_to home_path and return
 			else

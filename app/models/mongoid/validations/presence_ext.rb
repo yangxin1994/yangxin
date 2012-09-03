@@ -1,11 +1,11 @@
-
 module ActiveModel
 
   # == Active Model Presence Validator
   module Validations
-    class PresenceValidator < EachValidator #:nodoc:
+    class PresenceExtValidator < EachValidator #:nodoc:
       def validate(record)
-        record.error_code << ErrorEnum.const_get("#{record._type}CannotBeBlank")
+        record.add_error_code ErrorEnum.const_get("#{record.class.name.upcase}_#{attributes[0].upcase}_COULN_NOT_BE_BLANK")
+        #record.add_error_code ErrorEnum.const_get("#{record._type}CouldNotBeBlank")
         record.errors.add_on_blank(attributes, options)
       end
     end
