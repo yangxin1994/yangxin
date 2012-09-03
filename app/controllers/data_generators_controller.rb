@@ -216,10 +216,10 @@ class DataGeneratorsController < ApplicationController
 			user["email"] = Faker::Internet.email
 			user["username"] = user["email"]
 			user["password"] = (0...6).map{ ('a'..'z').to_a[rand(26)] }.join
-			user["status"] = status
 			user["status_shown"] = @user_status_shown[status]
 			user.merge("password" => Encryption.encrypt_password(user["password"]))
 			user_inst = User.new(user.merge("password" => Encryption.encrypt_password(user["password"])))
+			user.status = status
 			user_inst.save
 			users << user
 		end
