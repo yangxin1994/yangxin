@@ -72,6 +72,7 @@ class SurveysController < ApplicationController
 			survey = Survey.normal.find_by_id(params[:id])
 			if !survey.nil? && survey.user.nil?
 				survey.user = @current_user
+				survey.save
 			else
 				respond_to do |format|
 					format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
