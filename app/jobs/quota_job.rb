@@ -8,56 +8,50 @@ module Jobs
 		@queue = :quota_job_queue
 
 		def self.start(interval_time)
-      stop
-     
-     	if interval_time.to_i > 10 then
+			stop
+		
+			if interval_time.to_i > 10 then
 				#save to redis
 				Resque.redis.set "quota_last_interval_time", interval_time.to_i
-		    
-		    Resque.enqueue_at(Time.now, 
+					
+				Resque.enqueue_at(Time.now, 
 					QuotaJob, 
 					{"interval_time"=> interval_time.to_i})
 			else
 				false
 			end
-    end
-    
-    def self.stop
-    	#remove relative data from redis
-    	Resque.redis.srem("queues", QuotaJob.instance_variable_get(:@queue)) if QuotaJob.instance_variable_defined?(:@queue)
-    
-    	# remove delayed job from scheduler method
-    	# because remove_delayed method need params, 
-    	# so it set a quota_last_interval_time variable to redis 
-    	# then get it in here.
-    	interval_time = Resque.redis.get "quota_last_interval_time"
-    	retval = Resque.remove_delayed(QuotaJob, "interval_time" => interval_time.to_i) if interval_time
-    	
-    	retval = retval.nil? || retval == 1 ? true : false
-    end
+		end
+
+		def self.stop
+			#remove relative data from redis
+			Resque.redis.srem("queues", QuotaJob.instance_variable_get(:@queue)) if QuotaJob.instance_variable_defined?(:@queue)
+		
+			# remove delayed job from scheduler method
+			# because remove_delayed method need params, 
+			# so it set a quota_last_interval_time variable to redis 
+			# then get it in here.
+			interval_time = Resque.redis.get "quota_last_interval_time"
+			retval = Resque.remove_delayed(QuotaJob, "interval_time" => interval_time.to_i) if interval_time
+			
+			retval = retval.nil? || retval == 1 ? true : false
+		end
 
 		# resque auto involve method
 		def self.perform(*args)
 			puts "Quota Job perform Test: #{Time.now}"
-
 			# 1. get all samples, excluding those are in the blacklist
 			@user_ids = User.ids_not_in_blacklist
-
 			# 2. summarize the quota rules of the surveys
 			@rule_arr = check_quota
-
 			# 3. find out samples for surveys
 			@samples_found = find_samples
-
 			# 4. send emails to the samples found
 			send_emails
-
 			# 5. prepare for the next execuation
 			arg = {}
 			arg = args[0] if args[0].class == Hash
 			# unit is second
 			interval_time = arg["interval_time"]
-
 			puts "End Quota Job perform Test. The interval_time is #{interval_time}"
 			Resque.enqueue_at(Time.now + interval_time.to_i, 
 				QuotaJob, 
@@ -98,7 +92,6 @@ module Jobs
 				user_ids_answered[s_id] ||= Answer.get_user_ids_answered(s_id)
 				user_ids_sent[s_id] ||= EmailHistory.get_user_ids_sent(s_id)
 				users_id = @users_id - user_ids_answered[s_id] - user_ids_sent[s_id]
-
 				user_ids_satisfied = nil
 				rule["conditions"].each do |c|
 					if user_ids_satisfied.nil?
@@ -107,12 +100,10 @@ module Jobs
 						user_ids_satisfied &= TemplateQuestionAnswer.user_ids_satisfied(users_id, c)
 					end
 				end
-
 				if user_ids_satisfied.length >= rule.email_number
 					samples_found << user_ids_satisfied.shuffle[0..rule.email_number-1]
 					next
 				end
-
 				user_ids_unsatisfied = []
 				rule["conditions"].each do |c|
 					user_ids_unsatisfied |= TemplateQuestionAnswer.user_ids_unsatisfied(users_id, c)
@@ -129,15 +120,12 @@ module Jobs
 		# it will return a array for Jobs::Rule object.
 		def self.check_quota
 			rule_arr = []
-
 			#find all surveys which are published
 			published_survey = Survey.get_published_active_surveys
-
 			published_survey.each do |survey|
 				cur_survey_rule_arr = []
 				survey.quota["rules"].each_with_index do |rule, rule_index|
 					rule_amount = rule["amount"].to_i
-
 					# 1. get the conditions
 					conditions = []
 					rule["conditions"].each do |condition|
@@ -145,11 +133,9 @@ module Jobs
 							conditions << Condition.new(condition["name"], condition["value"])
 						end
 					end
-
 					# 2. get the remainning number
 					answer_number = survey.quota_stats["answer_number"][rule_index].to_i
 					rest_number = rule_amount < answer_number ? 0 : rule_amount - answer_number
-
 					# 3. combine the rule
 					cur_survey_rule_arr.each do |rule|
 						if conditions - rule.conditions == [] && rule.conditions - conditions == []
@@ -172,14 +158,14 @@ module Jobs
 			end
 
 			content = "Hi! #{sample.user_id}. OopsData is very happy to invite you to answer survey.
-If work it for a less time, you are gone to get a reward probablely.
-Now, we choose some for you which fit you.
+	If work it for a less time, you are gone to get a reward probablely.
+	Now, we choose some for you which fit you.
 
-#{list_surveys_str}
-More, click <a href=\"http://www.oopsdata.com\">OopsData</a>"
+	#{list_surveys_str}
+	More, click <a href=\"http://www.oopsdata.com\">OopsData</a>"
 
 			# binding.pry
-			
+				
 			# Resque.enqueue_at_with_queue(1, Time.now, OopsMailJob,{
 			# 	:mailler => "netranking",
 			# 	:account_name => account[:netranking]["account_name"],
@@ -189,9 +175,9 @@ More, click <a href=\"http://www.oopsdata.com\">OopsData</a>"
 			# 	:content => content
 			# })
 
-			puts "send_email content::: #{content}"
+				puts "send_email content::: #{content}"
 
-			sample.last_email_time = Time.now
+				sample.last_email_time = Time.now
+			end
 		end
-	end
 end
