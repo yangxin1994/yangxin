@@ -22,7 +22,7 @@ module Jobs
 		def self.handle_answers
 			@answers.each do |answer|
 				next if answer.user.nil?
-				use_id = answer.user._id.to_s
+				user_id = answer.user._id.to_s
 
 				template_answer_content = answer.template_answer_content
 
