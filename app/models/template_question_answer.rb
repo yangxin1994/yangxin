@@ -16,11 +16,14 @@ class TemplateQuestionAnswer
 	# Class methods
 	#++
 
-	def self.update_or_create(template_question_id, user_id, value)
-		result = self.where(template_question_id: template_question_id, 
-									user_id: user_id).to_a
-		tqa = result[0] if result.count > 0
+	def self.find_by_template_question_id_and_user_id(template_question_id, user_id)
+		record = self.where(template_question_id: template_question_id, 
+								user_id: user_id)[0]
+		return record
+	end
 
+	def self.update_or_create(template_question_id, user_id, value)
+		tqa = self.find_by_template_question_id_and_user_id(template_question_id, user_id)
 		if tqa then
 			tqa.update_content(value)
 		else
