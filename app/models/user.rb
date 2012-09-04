@@ -31,7 +31,7 @@ class User
 
 	field :role, :type => Integer, default: 0
 	field :auth_key, :type => String
-	field :auth_key_expire_time, :type => Integer, default: 0
+	field :auth_key_expire_time, :type => Integer
 	field :level, :type => Integer, default: 0
 	field :level_expire_time, :type => Integer, default: -1
 
@@ -110,7 +110,8 @@ class User
 	def self.find_by_auth_key(auth_key)
 		user = User.where(:auth_key => auth_key, :status.gt => -1)[0]
 		return nil if user.nil?
-		if user.auth_key_expire_time > Time.now.to_i
+		# for visitor users, auth_key_expire_time is set as -1
+		if user.auth_key_expire_time > Time.now.to_i || user.auth_key_expire_time == -1
 			return user
 		else
 			user.auth_key = nil
@@ -259,8 +260,10 @@ class User
 
 	def self.create_new_visitor_user
 		user = User.new
+		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
+		user.auth_key_expire_time = -1
 		user.save
-		return user
+		return user.auth_key
 	end
 
 	#*description*: activate a user

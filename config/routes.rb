@@ -78,7 +78,11 @@ OopsData::Application.routes.draw do
 	post "home/get_more_info"
 
 
-	resources :registrations
+	resources :registrations do
+		collection do
+			post :create_new_visitor_user
+		end
+	end
 	match 'input_activate_email' => 'registrations#input_activate_email', :as => :input_activate_email
 	match 'send_activate_email' => 'registrations#send_activate_email', :as => :send_activate_email, :via => [:post]
 	match 'activate' => 'registrations#activate', :as => :activate

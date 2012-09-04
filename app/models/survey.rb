@@ -346,6 +346,8 @@ class Survey
 			elsif [5, 6].include?(logic_control_rule["rule_type"])
 				logic_control_rule["result"]["question_id_1"] = question_id_mapping[logic_control_rule["result"]["question_id_1"]]
 				logic_control_rule["result"]["question_id_2"] = question_id_mapping[logic_control_rule["result"]["question_id_2"]]
+			elsif [7, 8].include?(logic_control_rule["rule_type"])
+				# for logic control that show/hide pages, it is not needed to replace with new question ids
 			end
 		end
 
@@ -1113,7 +1115,7 @@ class Survey
 	end
 
 	class LogicControl
-		RULE_TYPE = (0..6).to_a
+		RULE_TYPE = (0..8).to_a
 		def initialize(logic_control)
 			@rules = logic_control
 		end
