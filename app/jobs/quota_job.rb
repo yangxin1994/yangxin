@@ -118,6 +118,7 @@ module Jobs
 							rule.amount_increase(rest_number)
 							has_same = true
 							break
+						end
 					end
 
 					if has_same == false && rest_number > 0 then
