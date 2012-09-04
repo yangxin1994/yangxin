@@ -94,6 +94,7 @@ OopsData::Application.routes.draw do
 			get :obtain_user_attr_survey, :skip_init_step
 			post :new_password, :reset_password
 			get :forget_password, :input_new_password
+			post :login_with_auth_key
 		end
 	end
 	match 'logout' => 'sessions#destroy', :as => :logout

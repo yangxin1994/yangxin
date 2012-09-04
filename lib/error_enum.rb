@@ -18,6 +18,7 @@ module ErrorEnum
 	THERE_ARE_SOME_RECEIVERS_NOT_EXIST = "error_16"
 	EMAIL_EXIST = "error_17"
 	USERNAME_EXIST = "error_18"
+	AUTH_KEY_EXIST = "error_19"
 	GROUP_EXIST = "error_20"
 	GROUP_NOT_EXIST = "error_21"
 	UNAUTHORIZED = "error_22"

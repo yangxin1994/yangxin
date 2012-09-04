@@ -108,6 +108,7 @@ class User
 	end
 
 	def self.find_by_auth_key(auth_key)
+		return nil if auth_key.blank?
 		user = User.where(:auth_key => auth_key, :status.gt => -1)[0]
 		return nil if user.nil?
 		# for visitor users, auth_key_expire_time is set as -1
@@ -313,6 +314,12 @@ class User
 		user.auth_key_expire_time = Time.now.to_i + (keep_signed_in.to_s == "true" ? OOPSDATA["login_keep_time"]["kept"].to_i : OOPSDATA["login_keep_time"]["unkept"].to_i)
 		return false if !user.save
 		return {"status" => user.status, "auth_key" => user.auth_key, "user_id" => user._id.to_s}
+	end
+
+	def self.login_with_auth_key(auth_key)
+		user = User.find_by_auth_key(auth_key)
+		return ErrorEnum::AUTH_KEY_NOT_EXIST if user.nil?
+		return {"status" => user.status, "auth_key" => user.auth_key}
 	end
 
 	#*description*: reset password for an user, used when the user forgets its password
