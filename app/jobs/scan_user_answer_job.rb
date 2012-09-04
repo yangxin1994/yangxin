@@ -22,7 +22,7 @@ module Jobs
 		def self.handle_answers
 			@answers.each do |answer|
 				next if answer.user.nil?
-				use_id = answer.user._id.to_s
+				user_id = answer.user._id.to_s
 
 				template_answer_content = answer.template_answer_content
 
@@ -30,8 +30,10 @@ module Jobs
 					question = Question.find(key.to_s)
 					template_question_id = question.reference_id if question
 
-					if template_question_id && user_id && !value.blank? then
-						TemplateQuestionAnswer.update_or_create(template_question_id, 
+					if !template_question_id.blank? && 
+								user_id && !value.blank? then
+						TemplateQuestionAnswer.update_or_create(
+							template_question_id, 
 							user_id, value)	
 					end
 				end
