@@ -71,7 +71,7 @@ class AnswersController < ApplicationController
 			end
 		end
 		# 3. now, we have an answer instance
-		answer.update_status
+		answer.update_status	# check whether it is time out
 		if answer.is_edit
 			questions = answer.load_question(params[:question_id], params[:next_page])
 			if answer.is_finish
