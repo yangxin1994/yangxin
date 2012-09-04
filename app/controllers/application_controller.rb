@@ -85,7 +85,7 @@ class ApplicationController < ActionController::Base
 				render_json_e(ErrorEnum::REQUIRE_INIT_STEP_1) and return 
 			end
 		when 3
-			if params[controller] != "sessions" || 
+			if params[:controller] != "sessions" || 
 					!["init_user_attr_survey", "obtain_user_attr_survey", "skip_init_step"].include?(params[:action])
 				render_json_e(ErrorEnum::REQUIRE_INIT_STEP_2) and return 
 			end
