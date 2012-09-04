@@ -45,7 +45,7 @@ class AnswersController < ApplicationController
 		answer = Answer.find_by_survey_id_and_user(params[:survey_id], @current_user)
 		# 2. if cannot find the answer, create new answer and check region, channel and ip quota
 		if answer.nil?
-			# if this is the first time that the volonteer opens this survey
+			# this is the first time that the volonteer opens this survey
 			# 1. check the captcha
 			render_json_e(ErrorEnum::WRONG_CAPTCHA) and return if @survey.access_control_setting["has_captcha"] && !Tool.check_captcha
 			# 2. check the password
