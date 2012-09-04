@@ -71,7 +71,7 @@ class User
 
 
 	has_many :answers
-
+	has_many :template_question_answers
 
 
 	private
