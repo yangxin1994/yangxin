@@ -1,5 +1,6 @@
 module ErrorEnum
 
+	LOGIN_TOO_FREQUENT = "error_0"
 	ILLEGAL_EMAIL = "error_1"
 	USER_ACTIVATED = "error_2"
 	USER_NOT_ACTIVATED = "error_3"

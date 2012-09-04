@@ -75,6 +75,10 @@ class SessionsController < ApplicationController
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::WRONG_PASSWORD) and return }
 			end
+		when ErrorEnum::LOGIN_TOO_FREQUENT
+			respond_to do |format|
+				format.json	{ render_json_e(ErrorEnum::LOGIN_TOO_FREQUENT) and return }
+			end
 		when false
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::UNKNOWN_ERROR) and return }

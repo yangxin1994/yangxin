@@ -306,10 +306,12 @@ class User
 		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
 		return ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(password)
 		# record the login information
-		user.last_login_time = Time.now.to_i
 		user.last_login_ip = client_ip
 		user.last_login_client_type = client_type
+		user.login_count = 0 if user.last_login_time.blank? || Time.at(user.last_login_time).day != Time.now.day
+		return ErrorEnum::LOGIN_TOO_FREQUENT if user.login_count > OOPSDATA[RailsEnv.get_rails_env]["login_count_threshold"]
 		user.login_count = user.login_count + 1
+		user.last_login_time = Time.now.to_i
 		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
 		user.auth_key_expire_time = Time.now.to_i + (keep_signed_in.to_s == "true" ? OOPSDATA["login_keep_time"]["kept"].to_i : OOPSDATA["login_keep_time"]["unkept"].to_i)
 		return false if !user.save
