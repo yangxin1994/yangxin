@@ -6,7 +6,6 @@ class AnswersController < ApplicationController
 
 	before_filter :check_survey_existence
 	before_filter :check_answer_existence, :except => [:load_question]
-	before_filter :check_answer_status, :except => [:load_question]
 
 	def check_answer_existence
 		@answer = Answer.find_by_survey_id_and_user(params[:survey_id], @current_user)
@@ -32,9 +31,9 @@ class AnswersController < ApplicationController
 	end
 
 	def check_answer_status
-		answer.update_status
-		if answer.is_finish || answer.is_reject
-			render_json_s([answer.status, answer.reject_type, answer.finish_type]) and return
+		@answer.update_status
+		if @answer.is_finish || @answer.is_reject
+			render_json_s([@answer.status, @answer.reject_type, @answer.finish_type]) and return
 		end
 	end
 
@@ -47,9 +46,9 @@ class AnswersController < ApplicationController
 		if answer.nil?
 			# this is the first time that the volonteer opens this survey
 			# 1. check the captcha
-			render_json_e(ErrorEnum::WRONG_CAPTCHA) and return if @survey.access_control_setting["has_captcha"] && !Tool.check_captcha
+#			render_json_e(ErrorEnum::WRONG_CAPTCHA) and return if @survey.access_control_setting["has_captcha"] && !Tool.check_captcha
 			# 2. check the password
-			retval = @survey.check_password
+			retval = @survey.check_password(params[:username], params[:password], @current_user)
 			if retval == true
 				# pass the checking, create a new answer and check the region, channel, and ip quotas
 				answer = Answer.create_answer(@current_user, params[:survey_id], params[:channel], params[:ip], params[:usrename], params[:password])
@@ -64,7 +63,8 @@ class AnswersController < ApplicationController
 				end
 			elsif retval.class == Answer
 				# move the answer from another visitor user to the current user to let the user continue it
-				render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return
+				# render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return
+				answer = retval
 			else
 				# wrong password or the answer has been deleted
 				render_json_auto(retval) and return
@@ -75,7 +75,7 @@ class AnswersController < ApplicationController
 		if answer.is_edit
 			questions = answer.load_question(params[:question_id], params[:next_page])
 			if answer.is_finish
-				render_json_auto(questions) and return
+				render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return
 			else
 				render_json_auto([questions.to_json, answer.repeat_time]) and return
 			end
@@ -92,23 +92,19 @@ class AnswersController < ApplicationController
 	end
 
 	def submit_answer
+		# 0. check the answer's status
+		render_json_e(ErrorEnum::WRONG_ANSWER_STATUS) and return if !@answer.is_edit
+
 		# 1. update the answer content
 		retval = @answer.update_answer(params[:answer_type], params[:answer_content])
-		render_json_auto(retval) and return if !retval
 
 		# 2. check quality control
-		if params[:answer_type] == 1
-			# all quality control questions are normal questions
-			retval = @answer.check_quality_control(params[:answer_content])
-			render_json_auto(@answer.violate_quality_control) and return if !retval
-		end
+		retval = @answer.check_quality_control(params[:answer_content])
+		render_json_auto(@answer.violate_quality_control) and return if !retval
 
 		# 3. check screen questions
-		if params[:answer_type] == 1
-			# all screen questions are normal questions
-			retval = @answer.check_screen(params[:answer_content])
-			render_json_auto(@answer.violate_screen) and return if !retval
-		end
+		retval = @answer.check_screen(params[:answer_content])
+		render_json_auto(@answer.violate_screen) and return if !retval
 
 		# 4. check quota questions
 		retval = @answer.check_quota_questions
@@ -118,8 +114,9 @@ class AnswersController < ApplicationController
 		@answer.update_logic_control_result(params[:answer_content])
 
 		# 6. automatically finish the ansewr for those thatdo not allow pageup
-		retval = @answer.auto_finish
-		render_json_auto(retval) and return
+		@answer.auto_finish
+
+		render_json_s and return
 	end
 
 	def finish
