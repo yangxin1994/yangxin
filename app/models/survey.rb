@@ -86,13 +86,21 @@ class Survey
 
 	def all_questions
 		q = []
-		quota_template_question_page.each do |page|
-			q << page[:questions]
-		end
+		# quota_template_question_page.each do |page|
+		# 	q << page[:questions]
+		# end
 		pages.each do |page|
-			q << page[:questions]
+			q += page[:questions]
 		end
-		q.collect { |i| Question.find(i) }[0]
+		q.collect { |i| Question.find(i) }
+	end
+
+	def all_questions_id
+		q = []
+		pages.each do |page|
+			q += page[:questions]
+		end
+		return q
 	end
 
 	def csv_headers

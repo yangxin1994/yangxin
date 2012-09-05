@@ -1,0 +1,3 @@
+class ChoiceQustion < Question
+	
+end

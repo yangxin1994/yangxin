@@ -70,7 +70,7 @@ class BasicQuestion
     when QuestionTypeEnum::TEXT_BLANK_QUESTION..QuestionTypeEnum::ADDRESS_BLANK_QUESTION
       retval << header_prefix
     ##### BLANK_QUESTION #####
-    when QuestionTypeEnum::BLANK_QUESTION
+    when QuestionTypeEnum::BLANK_QUESTION, QuestionTypeEnum::TABLE_QUESTION
       issue["inputs"].each_index do |i|
         retval << header_prefix  + "-c#{i + 1}"
       end
@@ -190,7 +190,7 @@ class BasicQuestion
                  "spss_type" => SPSS_STRING,
                  "spss_label" => content["text"]}
     ##### BLANK_QUESTION #####
-    when QuestionTypeEnum::BLANK_QUESTION
+    when QuestionTypeEnum::BLANK_QUESTION, QuestionTypeEnum::TABLE_QUESTION
       issue["inputs"].each_index do |i|
         retval << {"spss_name" => header_prefix + "-c#{i + 1}",
                    "spss_type" => SPSS_STRING,

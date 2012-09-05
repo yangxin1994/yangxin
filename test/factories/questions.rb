@@ -160,7 +160,7 @@ FactoryGirl.define do
     })
     question_type MATRIX_CHOICE_QUESTION
   end
-  factory :text_blank_choice_question, class: Question do
+  factory :text_blank_question, class: Question do
     content({:text => "这是一个文本填充题",
              :image => [],
              :audio => [],
@@ -171,7 +171,7 @@ FactoryGirl.define do
            :size => 1})
     question_type TEXT_BLANK_QUESTION
   end
-  factory :number_blank_choice_question, class: Question do
+  factory :number_blank_question, class: Question do
     content({:text => "这是一个数值填充题",
              :image => [],
              :audio => [],
@@ -183,7 +183,7 @@ FactoryGirl.define do
            :unit_location => 1})
     question_type NUMBER_BLANK_QUESTION
   end
-  factory :email_blank_choice_question, class: Question do
+  factory :email_blank_question, class: Question do
     content({:text => "这是一个邮箱填充题",
              :image => [],
              :audio => [],
@@ -191,7 +191,15 @@ FactoryGirl.define do
     issue({})
     question_type EMAIL_BLANK_QUESTION
   end
-  factory :phone_blank_choice_question, class: Question do
+  # factory :url_blank_question, class: Question do
+  #   content({:text => "这是一个链接填充题",
+  #            :image => [],
+  #            :audio => [],
+  #            :video => []})
+  #   issue({})
+  #   question_type URL_BLANK_QUESTION
+  # end
+  factory :phone_blank_question, class: Question do
     content({:text => "这是一个电话填充题",
              :image => [],
              :audio => [],
@@ -199,7 +207,7 @@ FactoryGirl.define do
     issue({:phone_type => 1})
     question_type PHONE_BLANK_QUESTION
   end
-  factory :time_blank_choice_question, class: Question do
+  factory :time_blank_question, class: Question do
     content({:text => "这是一个时间填充题",
              :image => [],
              :audio => [],
@@ -209,7 +217,7 @@ FactoryGirl.define do
            :max_time => -1})
     question_type TIME_BLANK_QUESTION
   end
-  factory :address_blank_choice_question, class: Question do
+  factory :address_blank_question, class: Question do
     content({:text => "这是一个地址填充题",
              :image => [],
              :audio => [],
@@ -220,6 +228,36 @@ FactoryGirl.define do
   end
   factory :blank_question, class: Question do
     content({:text => "这是一个组合填充题",
+             :image => [],
+             :audio => [],
+             :video => []})
+    issue({:is_rand => false,
+           :inputs => [{:input_id => "1",
+                        :content => {:text => "这是一个文本填充题",
+                                     :image => [],
+                                     :audio => [],
+                                     :video => []},
+                        :data_type => "text",
+                        :properties => {:min_length => 1,
+                                        :max_length => 20,
+                                        :has_multiple_line => false,
+                                        :size => 1}},
+                       {:input_id => "2",
+                        :content => {:text => "这是一个数字填充题",
+                                     :image => [],
+                                     :audio => [],
+                                     :video => []},
+                        :data_type => "Number"},
+                       {:input_id => "3",
+                         :content => {:text => "这是一个电话填充题",
+                                      :image => [],
+                                      :audio => [],
+                                      :video => []}}],
+           :show_style => 0})
+    question_type BLANK_QUESTION
+  end
+  factory :table_question, class: Question do
+    content({:text => "这是一个循环填充题",
              :image => [],
              :audio => [],
              :video => []})
@@ -240,7 +278,7 @@ FactoryGirl.define do
                                       :audio => [],
                                       :video => []}}],
            :show_style => 0})
-    question_type BLANK_QUESTION
+    question_type TABLE_QUESTION
   end
   factory :matrix_blank_question, class: Question do
     content({:text => "这是一个矩阵填充题",
@@ -277,17 +315,17 @@ FactoryGirl.define do
              :video => []})
     issue({:is_rand => false,
            :items => [{:input_id => "1",
-                        :content => {:text => "这是一个文本填充题",
+                        :content => {:text => "选项1",
                                      :image => [],
                                      :audio => [],
                                      :video => []}},
                       {:input_id => "2",
-                        :content => {:text => "这是一个数字填充题",
+                        :content => {:text => "选项2",
                                      :image => [],
                                      :audio => [],
                                      :video => []}},
                       {:input_id => "3",
-                        :content => {:text => "这是一个电话填充题",
+                        :content => {:text => "选项3",
                                      :image => [],
                                      :audio => [],
                                      :video => []}}],
