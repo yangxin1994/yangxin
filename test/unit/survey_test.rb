@@ -22,8 +22,8 @@ class SurveyTest < ActiveSupport::TestCase
 		# end
 		p @survey_with_issue.csv_headers.to_csv
 		#pp @survey_with_issue.spss_headers
-		pp @survey_with_issue_and_answer.csv_content.to_csv
-		@survey_with_issue_and_answer.load_csv
+		#pp @survey_with_issue_and_answer.csv_content.to_csv
+		#@survey_with_issue_and_answer.load_csv
 		assert true
 	end
 end

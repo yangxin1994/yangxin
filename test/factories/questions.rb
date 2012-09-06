@@ -191,14 +191,14 @@ FactoryGirl.define do
     issue({})
     question_type EMAIL_BLANK_QUESTION
   end
-  # factory :url_blank_question, class: Question do
-  #   content({:text => "这是一个链接填充题",
-  #            :image => [],
-  #            :audio => [],
-  #            :video => []})
-  #   issue({})
-  #   question_type URL_BLANK_QUESTION
-  # end
+  factory :url_blank_question, class: Question do
+    content({:text => "这是一个链接填充题",
+             :image => [],
+             :audio => [],
+             :video => []})
+    issue({})
+    question_type URL_BLANK_QUESTION
+  end
   factory :phone_blank_question, class: Question do
     content({:text => "这是一个电话填充题",
              :image => [],

@@ -107,7 +107,7 @@ class Survey
 		headers, index =[], 0
 		all_questions.each do |e|
 			index += 1
-			headers += e.csv_header(index)
+			headers += e.csv_header("q#{index}")
 		end
 		headers
 	end

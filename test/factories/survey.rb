@@ -8,8 +8,8 @@ FactoryGirl.define do
                   FactoryGirl.create(:matrix_mutil_choice_question).id,
                   FactoryGirl.create(:text_blank_question).id,
                   FactoryGirl.create(:number_blank_question).id,
-                  FactoryGirl.create(:email_blank_question).id#,
-                  #FactoryGirl.create(:url_blank_question)
+                  FactoryGirl.create(:email_blank_question).id,
+                  FactoryGirl.create(:url_blank_question).id
               ]
     @questions2 = [FactoryGirl.create(:phone_blank_question).id,
                   FactoryGirl.create(:time_blank_question).id,
