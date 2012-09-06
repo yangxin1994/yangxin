@@ -80,9 +80,15 @@ class ApplicationController < ActionController::Base
 		return if !user_signed_in?
 		case @current_user.status
 		when 2
-			render_json_e(ErrorEnum::REQUIRE_INIT_STEP_1) and return 
+			if params[:controller] != "sessions" ||
+					!["init_basic_info", "skip_init_step"].include?(params[:action])
+				render_json_e(ErrorEnum::REQUIRE_INIT_STEP_1) and return 
+			end
 		when 3
-			render_json_e(ErrorEnum::REQUIRE_INIT_STEP_2) and return 
+			if params[:controller] != "sessions" || 
+					!["init_user_attr_survey", "obtain_user_attr_survey", "skip_init_step"].include?(params[:action])
+				render_json_e(ErrorEnum::REQUIRE_INIT_STEP_2) and return 
+			end
 		end
 	end
 
