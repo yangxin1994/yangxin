@@ -166,7 +166,7 @@ class Survey
 	end
 
 	def self.find_new_by_user(user)
-		return user.surveys.where(:new_survey => true)
+		return user.surveys.where(:new_survey => true)[0]
 	end
 
 	def self.list(status, publish_status, tags)
@@ -317,7 +317,7 @@ class Survey
 
 		# clone all questions
 		new_instance.pages.each do |page|
-			page.each_with_index do |question_id, question_index|
+			page["questions"].each_with_index do |question_id, question_index|
 				question = Question.find_by_id(question_id)
 				return ErrorEnum::QUESTION_NOT_EXIST if question == nil
 				cloned_question = question.clone
@@ -513,9 +513,6 @@ class Survey
 
 
 	def update_new
-		logger.info "AAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-		logger.info self.alt_new_survey
-		logger.info "AAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 		if self.alt_new_survey
 			self.new_survey = false
 		else

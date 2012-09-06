@@ -34,7 +34,7 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	#*method*: post
+	#*method*: get
 	#
 	#*url*: /surveys
 	#
@@ -45,7 +45,7 @@ class SurveysController < ApplicationController
 	#*retval*:
 	#* a Survey object with default meta data and empty survey_id
 	#* ErrorEnum::EMAIL_NOT_EXIST
-	def create
+	def new
 		survey = Survey.find_new_by_user(@current_user)
 		if survey.nil?
 			survey = Survey.create
