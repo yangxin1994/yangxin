@@ -56,6 +56,7 @@ class MatrixChoiceIssue < Issue
 	end
 
 	def update_issue(issue_obj)
+		issue_obj["choices"] ||= []
 		issue_obj["choices"].each do |choice_obj|
 			choice_obj.delete_if { |k, v| !CHOICE_ATTR_ARY.include?(k) }
 			choice_obj["is_exclusive"] = choice_obj["is_exclusive"].to_s == "true"

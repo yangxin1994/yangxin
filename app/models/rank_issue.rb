@@ -45,13 +45,15 @@ class RankIssue < Issue
 	end
 
 	def update_issue
+		issue_obj ||= []
 		issue_obj["items"].each do |item_obj|
 			item_obj.delete_if { |k, v| !ITEM_ATTR_ARY.include?(k) }
 			item_obj["icon_num"] = item_obj["icon_num"].to_i if !item_obj["icon_num"].nil?
 		end
+		issue_obj["show_style"] = issue_obj["show_style"].to_i
+		issue_obj["other_item"] ||= {}
 		issue_obj["other_item"].delete_if { |k, v|  !OTHER_ITEM_ATTR_ARY.include?(k)}
 		issue_obj["other_item"]["has_other_item"] = issue_obj["other_item"]["has_other_item"].to_s == "true"
-		issue_obj["show_style"] = issue_obj["show_style"].to_i
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 

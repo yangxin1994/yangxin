@@ -40,12 +40,14 @@ class SortIssue < Issue
 	end
 
 	def update_issue(issue_obj)
+		issue_obj ||= []
 		issue_obj["items"].each do |item_obj|
 			item_obj.delete_if { |k, v| !ITEM_ATTR_ARY.include?(k) }
 		end
-		issue_obj["other_item"].delete_if { |k, v|  !OTHER_ITEM_ATTR_ARY.include?(k)}
 		issue_obj["min"] = issue_obj["min"].to_i if !issue_obj["min"].nil?
 		issue_obj["max"] = issue_obj["max"].to_i if !issue_obj["max"].nil?
+		issue_obj["other_item"] ||= {}
+		issue_obj["other_item"].delete_if { |k, v|  !OTHER_ITEM_ATTR_ARY.include?(k)}
 		issue_obj["other_item"]["has_other_item"] = issue_obj["other_item"]["has_other_item"].to_s == "true"
 		super(ATTR_NAME_ARY, issue_obj)
 	end
