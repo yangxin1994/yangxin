@@ -36,9 +36,11 @@ class ChoiceIssue < Issue
 	end
 
 	def update_issue(issue_obj)
-		issue_obj["choices"].each do |choice_obj|
-			choice_obj.delete_if { |k, v| !CHOICE_ATTR_ARY.include?(k) }
-			choice_obj["is_exclusive"] = choice_obj["is_exclusive"].to_s == "true"
+		if issue_obj["choices"]
+			issue_obj["choices"].each do |choice_obj|
+				choice_obj.delete_if { |k, v| !CHOICE_ATTR_ARY.include?(k) }
+				choice_obj["is_exclusive"] = choice_obj["is_exclusive"].to_s == "true"
+			end
 		end
 		issue_obj["other_item"].delete_if { |k, v|  !OTHER_ITEM_ATTR_ARY.include?(k)}
 		issue_obj["choice_num_per_row"] = issue_obj["choice_num_per_row"].to_i
