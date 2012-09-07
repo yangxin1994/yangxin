@@ -74,7 +74,7 @@ test:
 
 question_default_settings:
   content: "请在此输入问题标题"
-  note: "请在此输入问题说明"
+  note: ""
 
 login_keep_time:
   kept: 2592000 # 1.months.to_i
