@@ -1,5 +1,5 @@
+	desc "create indexes with parameters, which is dependent on mongoid.
 
-desc "create indexes with parameters, which is dependent on mongoid.
 Params:
 
 MODEL || M: model name. Actually, model class name.
@@ -10,14 +10,19 @@ more info about OPTIONS in http://www.mongodb.org/display/DOCS/Indexes#Indexes-C
 
 Example: 
 
-> rake build_index MODEL=User, FIELDS={name: 1}
-it will create index which increase with name for user collection. 
+> rake index:build MODEL=Faq FIELDS={faq_type:1}
+it will create index which increase with faq_type for Faq collection. 
 1 means increase, -1 means decrease.
 
-> rake build_index MODEL=User, FIELDS=\\{name: 1, age: -1\\}, O=\\{unique: true, background: true\\}
+> rake index:build MODEL=Faq FIELDS=\\{faq_type:1,answer:-1\\} O=\\{unique:true,background:true\\}
 because of console command, multi-fields index should add \'\\', so is OPTIONS.
 
-"
+> rake index:build MODEL=Faq FIELDS={faq_type:1} O={name:\\'type_1\\'}
+this will assgin \'type_1\' to index name.
+if do not, it should create name: \'faq_type_1\' auto. 
+Formula: \'field1_value1_field2_value2\'.
+
+	"
 task :build_index => :environment do
 	model 	= ENV["MODEL"] 	|| ENV["M"]
 	fields 	= ENV["FIELDS"] 	|| ENV["F"]
@@ -51,6 +56,7 @@ task :build_index => :environment do
 	end
 	# verify _options
 	_options[:background] = true unless _options[:background]
+	_options[:unique] = false unless _options[:unique]
 
 	puts "_spec: #{_spec}, _options: #{_options}"	
 
@@ -58,4 +64,3 @@ task :build_index => :environment do
 	_model.create_indexes
 	
 end
-
