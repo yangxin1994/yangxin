@@ -1,4 +1,6 @@
+# encoding: utf-8
 require 'error_enum'
+require 'tool'
 require 'securerandom'
 #Besides the fields that all types questions have, choice questions also have:
 # {
@@ -32,6 +34,14 @@ class ChoiceIssue < Issue
 		@is_list_style = true
 		@is_rand = false	
 		@choices = []
+		1.upto(4) do |input_index|
+			choice = {}
+			choice["input_id"] = input_index
+			choice["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
+														"image" => [], "audio" => [], "video" => []}
+			choice["is_exclusive"] = true
+			@choices << choice
+		end
 		@other_item = {"has_other_item" => false}
 	end
 

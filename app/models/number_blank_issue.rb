@@ -20,7 +20,7 @@ class NumberBlankIssue < Issue
 		@precision = 0
 		@min_value = 0
 		@max_value = 100
-		@unit = ""
+		@unit = "个"
 		@unit_location = 0
 	end
 

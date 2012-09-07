@@ -1,4 +1,6 @@
+# encoding: utf-8
 require 'error_enum'
+require 'tool'
 require 'securerandom'
 #Besides the fields that all types questions have, sort questions also have:
 # {
@@ -25,8 +27,16 @@ class SortIssue < Issue
 		@items = []
 		@is_rand = false
 		@other_item = {"has_other_item" => false}
-		@min = -1
-		@min = -1
+		@min = 2
+		@max = 4 
+
+		1.upto(4) do |item_index|
+			item = {}
+			item["input_id"] = item_index
+			item["content"] = {"text" => "选项#{Tool.convert_digit(item_index)}",
+														"image" => [], "audio" => [], "video" => []}
+			@items << item
+		end
 	end
 
 	def update_issue(issue_obj)

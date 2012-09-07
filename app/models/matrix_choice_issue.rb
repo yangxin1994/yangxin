@@ -1,4 +1,6 @@
+# encoding: utf-8
 require 'error_enum'
+require 'tool'
 require 'securerandom'
 #Besides the fields that all types questions have, matrix choice questions also have:
 # {
@@ -39,6 +41,18 @@ class MatrixChoiceIssue < Issue
 		@is_row_rand = false	
 		@row_num_per_group = -1	
 		@choices = []
+		1.upto(4) do |row_id|
+			@row_id << row_id
+			@row_name << "子题目#{Tool.convert_digit(row_id)}"
+		end
+		1.upto(4) do |input_index|
+			choice = {}
+			choice["input_id"] = input_index
+			choice["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
+														"image" => [], "audio" => [], "video" => []}
+			choice["is_exclusive"] = true
+			@choices << choice
+		end
 	end
 
 	def update_issue(issue_obj)

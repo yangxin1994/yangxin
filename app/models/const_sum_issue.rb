@@ -1,4 +1,6 @@
+# encoding: utf-8
 require 'error_enum'
+require 'tool'
 require 'securerandom'
 #Besides the fields that all types questions have, const sum questions also have:
 # {
@@ -26,6 +28,14 @@ class ConstSumIssue < Issue
 		@is_rand = false
 		@sum = 100
 		@other_item = {"has_other_item" => false}
+
+		1.upto(4) do |item_index|
+			item = {}
+			item["input_id"] = item_index
+			item["content"] = {"text" => "选项#{Tool.convert_digit(item_index)}",
+														"image" => [], "audio" => [], "video" => []}
+			@items << item
+		end
 	end
 
 	def update_issue(issue_obj)

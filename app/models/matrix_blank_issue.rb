@@ -1,4 +1,6 @@
+# encoding: utf-8
 require 'error_enum'
+require 'tool'
 require 'securerandom'
 #Besides the fields that all types questions have, matrix blank questions also have:
 # {
@@ -49,7 +51,7 @@ class MatrixBlankIssue < Issue
 	attr_reader :is_rand, :inputs, :row_id, :row_name, :is_row_rand, :row_num_per_group, :show_style
 	attr_writer :is_rand, :inputs, :row_id, :row_name, :is_row_rand, :row_num_per_group, :show_style
 
-	ATTR_NAME_ARY = %w[inputs is_rand row_name is_row_rand row_num_per_group show_style]
+	ATTR_NAME_ARY = %w[inputs is_rand row_id row_name is_row_rand row_num_per_group show_style]
 	INPUT_ATTR_ARY = %w[input_id content data_type properties]
 
 	DATA_TYPE_ARY = %w[Text Number Phone Email Url Address Time]
@@ -65,9 +67,45 @@ class MatrixBlankIssue < Issue
 		@inputs = []
 		@is_rand = false
 		@row_name = []
+		@row_id = []
 		@is_row_rand = false
 		@row_num_per_group = -1
 		@show_style
+
+		1.upto(4) do |row_id|
+			@row_id << row_id
+			@row_name << "子题目#{Tool.convert_digit(row_id)}"
+		end
+		
+		1.upto(4) do |input_index|
+			input = {}
+			input["input_id"] = input_index
+			input["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
+														"image" => [], "audio" => [], "video" => []}
+			@inputs << input
+		end
+		# the first input's content
+		@inputs[0]["data_type"] = "Text"
+		@inputs[0]["properties"] = {}
+		@inputs[0]["properties"]["min_length"] = 1
+		@inputs[0]["properties"]["max_length"] = 10
+		@inputs[0]["properties"]["has_multiple_line"] = false
+		@inputs[0]["properties"]["size"] = 0
+		# the second input's content
+		@inputs[1]["data_type"] = "Number"
+		@inputs[1]["properties"] = {}
+		@inputs[1]["properties"]["precision"] = 0
+		@inputs[1]["properties"]["min_value"] = 0
+		@inputs[1]["properties"]["max_value"] = 100
+		@inputs[1]["properties"]["unit"] = "个"
+		@inputs[1]["properties"]["unit_location"] = 0
+		# the third input's content
+		@inputs[2]["data_type"] = "Phone"
+		@inputs[2]["properties"] = {}
+		@inputs[2]["properties"]["phone_type"] = 1
+		# the fouth input's content
+		@inputs[3]["data_type"] = "Email"
+		@inputs[3]["properties"] = {}
 	end
 
 	#*description*: serialize the current instance into a question object
