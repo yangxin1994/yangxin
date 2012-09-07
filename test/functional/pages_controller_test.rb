@@ -16,7 +16,7 @@ class PagesControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 		
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :create, :format => :json, :survey_id => survey_id, :page_index => 0, :page_name => "new page name", :auth_key => auth_key
+		post :create, :format => :json, :survey_id => survey_id, :page_index => 1, :page_name => "new page name", :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
@@ -30,13 +30,14 @@ class PagesControllerTest < ActionController::TestCase
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :survey_id => survey_id, :page_index => -1, :page_name => "new page name", :auth_key => auth_key
 		result = JSON.parse(@response.body)
-		assert_equal true, result["value"]
+		assert_equal "new page name", result["value"]["name"]
+		assert_equal [], result["value"]["questions"]
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 0, :page_name => "new page name", :auth_key => auth_key
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 0, :page_name => "new page name", :auth_key => auth_key
 		sign_out(auth_key)
 
 		survey_obj = get_survey_obj(jesse.email, jesse.password, survey_id)
-		assert_equal 3, survey_obj["pages"].length
+		assert_equal 4, survey_obj["pages"].length
 	end
 
 	test "should show page" do
@@ -213,6 +214,8 @@ class PagesControllerTest < ActionController::TestCase
 		oliver = init_oliver
 
 		survey_id, pages = *create_survey_page_question(jesse.email, jesse.password)
+
+		survey = Survey.find_by_id(survey_id)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :clone, :format => :json, :survey_id => survey_id, :page_index_1 => 0, :page_index_2 => 10, :auth_key => auth_key

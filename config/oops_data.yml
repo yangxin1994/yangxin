@@ -1,5 +1,6 @@
 production:
   root_url: "166.111.112.18"
+  login_count_threshold: 1000
   activate_expiration_time: 86400
   password_expiration_time: 86400
   cache_key_prefix: "oopsdata_"
@@ -23,6 +24,7 @@ production:
   qihu_redirect_uri: "http://quill.oopsdata.com/qihu_connect"
 development:
   root_url: "test.oopsdata.com"
+  login_count_threshold: 100
   activate_expiration_time: 3600
   password_expiration_time: 3600
   cache_key_prefix: "oopsdata_"
@@ -46,6 +48,7 @@ development:
   qihu_redirect_uri: "http://test.oopsdata.com/qihu_connect"
 test:
   root_url: "localhost:3000"
+  login_count_threshold: 100
   activate_expiration_time: 3600
   password_expiration_time: 3600
   cache_key_prefix: "oopsdata_"
@@ -70,8 +73,8 @@ test:
 
 
 question_default_settings:
-  content: "题干"
-  note: "说明"
+  content: "请在此输入问题标题"
+  note: ""
 
 login_keep_time:
   kept: 2592000 # 1.months.to_i
