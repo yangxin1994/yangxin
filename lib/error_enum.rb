@@ -86,6 +86,8 @@ module ErrorEnum
 	IP_REQUEST_SINA_ERROR = 100102
 	POSTCODE_REQUEST_BAIDU_ERROR =100103
 
+	SURVEY_DEADLINE_ERROR = -110001
+
 ###
 # 	syetem error 1
 # 	error 2

@@ -9,6 +9,17 @@ module Jobs
 
 		# resque auto involve method
 		def self.perform(*args)
+			arg = {}
+			arg = args[0] if args[0].class == Hash
+			# unit is second
+			interval_time = arg["interval_time"]
+
+			unless interval_time
+				puts "Must provide interval_time"
+				return
+			end
+			puts "End Quota Job perform Test. The interval_time is #{interval_time}"
+
 			puts "Quota Job perform Test: #{Time.now}"
 			# 1. get all samples, excluding those are in the blacklist
 			@user_ids = User.ids_not_in_blacklist
@@ -19,11 +30,6 @@ module Jobs
 			# 4. send emails to the samples found
 			send_emails
 			# 5. prepare for the next execuation
-			arg = {}
-			arg = args[0] if args[0].class == Hash
-			# unit is second
-			interval_time = arg["interval_time"]
-			puts "End Quota Job perform Test. The interval_time is #{interval_time}"
 			Resque.enqueue_at(Time.now + interval_time.to_i, 
 				QuotaJob, 
 				{"interval_time"=> interval_time.to_i}) 		

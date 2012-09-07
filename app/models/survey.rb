@@ -55,7 +55,7 @@ class Survey
 			"username_password_list" => []}}
 	field :random_quality_control_questions, :type => Boolean, default: false
 	field :quota_stats, :type => Hash
-	field :deadline, :type => Time
+	field :deadline, :type => Integer
 
 	belongs_to :user
 	has_and_belongs_to_many :tags do
@@ -84,6 +84,23 @@ class Survey
 	META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
 
 	public
+
+	#--
+	# update deadline and create a survey_deadline_job
+	#++
+
+	# Example:
+	#
+	# instance.update_deadline(Time.now+3.days)
+	def update_deadline(time)
+		time = time.to_i if time.is_a?(Time)
+		return ErrorEnum::SURVEY_DEADLINE_ERROR if time <= Time.now.to_i
+		self.deadline = time
+		return ErrorEnum::UNKNOWN_ERROR unless self.save
+
+		#create or update job
+		Jobs::SurveyDeadlineJob.update(self.id, time)
+	end
 
 	def all_questions
 		q = []

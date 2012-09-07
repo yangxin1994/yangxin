@@ -5,18 +5,33 @@ module Jobs
 		@queue = :sua_job_queue
 
 		def self.perform(*args)
+			arg = {}
+			arg = args[0] if args[0].class == Hash
+			# unit is second
+			interval_time = arg["interval_time"]
+
+			unless interval_time
+				puts "Must provide interval_time"
+				return
+			end
 
 			# 1. find answers which are satisfied that ...
 			@answers = find_answers.to_a
 
 			# 2. handle answers
 			handle_answers
+
+			# 3. next 
+			Resque.enqueue_at(Time.now + interval_time.to_i, 
+				ScanUserAnswerJob, 
+				{"interval_time"=> interval_time.to_i}) 	
 		end
 
 		def self.find_answers
-			Answer.or({is_scanned: false, status: 2}, 
-				{is_scanned: false, status: 1, reject_type: 0}, 
-				{is_scanned: false, status: 1, reject_type: 2})
+			Answer.where(is_scanned: false).or(
+				{status: 2}, 
+				{status: 1, reject_type: 0}, 
+				{status: 1, reject_type: 2})
 		end
 
 		def self.handle_answers

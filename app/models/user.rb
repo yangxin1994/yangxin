@@ -73,6 +73,7 @@ class User
 	has_many :answers
 	has_many :template_question_answers
 
+	scope :unregistered, where(status: 0)
 
 	private
 	def set_updated_at
