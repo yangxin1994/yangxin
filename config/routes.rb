@@ -129,6 +129,7 @@ OopsData::Application.routes.draw do
 			get 'show_access_control_setting'
 			get 'set_random_quality_control_questions'
 			get 'get_random_quality_control_questions'
+			get 'spss_header'
 		end
 		resources :pages
 		resources :questions do

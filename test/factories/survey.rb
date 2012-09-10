@@ -16,6 +16,7 @@ FactoryGirl.define do
                   FactoryGirl.create(:address_blank_question).id,
                   FactoryGirl.create(:blank_question).id,
                   FactoryGirl.create(:table_question).id,
+                  FactoryGirl.create(:matrix_blank_question).id,
                   FactoryGirl.create(:const_sum_question).id,
                   FactoryGirl.create(:sort_question).id,
                   FactoryGirl.create(:rank_question).id
@@ -40,19 +41,20 @@ FactoryGirl.define do
     @answer_content = {}
     @all_questions_id = @survey.all_questions_id
 
-    @answers = [{"text_input" => "我选择了其它项", "selection" => ""},
+    @answers = [{"text_input" => "我选择了其它项", "selection" => []},
                 {"text_input" => "我选择了其它项", "selections" => ["1", "3"]},
                 ["1", "2"],
                 [["1", "2"], ["2"]],
                 "我是文本填充题的答案",
                 123.456,
                 "lalala@cc.com",
-                # "http://twitter.com",
+                "http://twitter.com",
                 "010 1231212",
                 [1012, 9, 3, 2, 4, 2, 60],
                 ["北京市", "北京市", "朝阳区", "大屯东路金泉家园", "000000"],
-                ["组合文本填充题的答案", 123, "dssds"],
-                ["组合文本填充题的答案", 123, "dssds"],
+                ["组合文本填充题的答案", 123.123, "0312 4566456"],
+                ["foobar@gmail.com", "www.google.com", ["北京市", "北京市", "朝阳区", "大屯东路金泉家园", "000000"]],
+                ["foobar@gmail.com", "www.google.com", "www.baidu.com", ["北京市", "北京市", "朝阳区", "大屯东路金泉家园", "000000"]],
                 {"text_input" => "其他项",
                  "1" => 20,
                  "2" => 30,

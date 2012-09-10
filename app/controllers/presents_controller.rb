@@ -17,20 +17,13 @@ class PresentsController < ApplicationController
   #* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
   #* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
   def index
-    @presents = Present.can_be_rewarded.page(page)
-    respond_to do |format|
-      format.html 
-      format.json { render json: @presents }
-    end
+    respond_and_render_json { Present.can_be_rewarded.page(page) }
   end
 
 
   def_each :virtualgoods, :cash, :realgoods, :stockout do |method_name|
     @presents = Present.send(method_name).can_be_rewarded.page(page)
-    respond_to do |format|
-      #format.html 
-      format.json { render json: @presents}
-    end
+    respond_and_render_json { @presents}
   end
 
   def show

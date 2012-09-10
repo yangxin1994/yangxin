@@ -17,11 +17,7 @@ class Admin::AwardsController < Admin::ApplicationController
 	end
 	
 	def stockout
-		@awards = Award.stockout.page(page)
-		respond_to do |format|
-			format.html 
-			format.json { render json: @awards, :only => [:id, :name, :point, :quantity, :created_at, :status] }
-		end
+		respond_and_render_json {@awards }
 	end
 
 	def update
@@ -39,15 +35,23 @@ class Admin::AwardsController < Admin::ApplicationController
 	end
 
 	def delete
-		@awards = []
-		params[:ids].to_a.each do |id|
-			@awards << (Award.find_by_id id do |r|
-				r.delete
-			end)
+		params[:ids] ||= []
+		respond_and_render_json do
+			params[:ids].to_a.each do |id|
+				Award.find_by_id id do |r|
+					r.delete
+				end
+			end
 		end
-		respond_to do |format|
-			format.json { render json: @awards }
-		end
+		# @awards = []
+		# params[:ids].to_a.each do |id|
+		# 	@awards << (Award.find_by_id id do |r|
+		# 		r.delete
+		# 	end)
+		# end
+		# respond_to do |format|
+		# 	format.json { render json: @awards }
+		# end
 	end
 
 

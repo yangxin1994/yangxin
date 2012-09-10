@@ -7,6 +7,14 @@ class SurveysController < ApplicationController
 	before_filter :check_normal_survey_existence, :except => [:new, :save_meta_data, :index, :recover, :clear, :add_tag, :remove_tag, :show]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
 
+
+	def spss_header
+		@survey = Survey.find_by_id(params[:id])
+		respond_and_render_json do
+			@surveyspss_header
+		end
+	end
+	
 	def check_survey_existence
 		@survey = @current_user.surveys.find_by_id(params[:id])
 		if @survey.nil?

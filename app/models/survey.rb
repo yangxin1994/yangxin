@@ -115,7 +115,7 @@ class Survey
 		headers, index =[], 0
 		all_questions.each do |e|
 			index += 1
-			headers += e.spss_header(index)
+			headers += e.spss_header("q#{index}")
 		end
 		headers
   end

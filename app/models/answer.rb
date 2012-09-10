@@ -36,7 +36,17 @@ class Answer
   STATUS_NAME_ARY = ["edit", "reject", "finish", "redo"]
 
   ##### answer import #####
+  def csv_content
+    cc = []
+    answer_content.each do |k,v|
+      question = Question.find_by_id(k)
+      q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question.question_type}"] + "Io").new(question)
+      cc += q.csv_content(v)
+    end
+    cc
+  end
 
+=begin
   def csv_content
     retval = []
     #header_prefix = "q#{qindex}"
@@ -113,7 +123,7 @@ class Answer
     end # each block
     retval
   end
-
+=end
   def load_csv(survey=1)
     CSV.foreach("public/import/test.csv", :headers => true) do |row|
       p row.to_hash

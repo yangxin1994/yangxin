@@ -36,4 +36,16 @@ module QuestionTypeEnum
 		"15" => "FileQuestion",
 		"16" => "TableQuestion"
 	}
+
+	BLANK_QUESTION_TYPE = {
+		"Text" => TEXT_BLANK_QUESTION,
+		"Number" => NUMBER_BLANK_QUESTION,
+		"Phone" => PHONE_BLANK_QUESTION,
+		"Email" => EMAIL_BLANK_QUESTION,
+		"Url" => URL_BLANK_QUESTION,
+		"Address" => ADDRESS_BLANK_QUESTION,
+		"Time" => TIME_BLANK_QUESTION
+
+	}
+
 end

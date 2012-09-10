@@ -42,7 +42,12 @@ class BasicQuestion
     q.csv_header(header_prefix)
   end
 
+  def spss_header(header_prefix)
+    q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question_type}"] + "Io").new(self)
+    q.spss_header(header_prefix)
+  end
 
+=begin
   # def csv_header(qindex)
   #   retval = []
   #   header_prefix = "q#{qindex}"
@@ -279,7 +284,7 @@ class BasicQuestion
     end
     retval
   end
-
+=end
   def self.has_question_type(question_type)
     begin
       return !Issue::ISSUE_TYPE[question_type].nil?
