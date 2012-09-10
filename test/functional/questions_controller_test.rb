@@ -19,7 +19,7 @@ class QuestionsControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :create, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id => -1, :question_type => 0, :auth_key => auth_key
+		post :create, :format => :json, :survey_id => survey_id, :page_index => 3, :question_id => -1, :question_type => 0, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
@@ -269,7 +269,7 @@ class QuestionsControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id => -1, :template_question_id => template_question_id, :auth_key => auth_key
+		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 3, :question_id => -1, :template_question_id => template_question_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
@@ -364,7 +364,7 @@ class QuestionsControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id => -1, :quality_control_question_id => objective_question_id, :auth_key => auth_key
+		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 3, :question_id => -1, :quality_control_question_id => objective_question_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
 		sign_out(auth_key)

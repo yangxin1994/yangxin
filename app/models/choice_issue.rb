@@ -1,4 +1,6 @@
+# encoding: utf-8
 require 'error_enum'
+require 'tool'
 require 'securerandom'
 #Besides the fields that all types questions have, choice questions also have:
 # {
@@ -32,21 +34,31 @@ class ChoiceIssue < Issue
 		@is_list_style = true
 		@is_rand = false	
 		@choices = []
+		1.upto(4) do |input_index|
+			choice = {}
+			choice["input_id"] = input_index
+			choice["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
+														"image" => [], "audio" => [], "video" => []}
+			choice["is_exclusive"] = true
+			@choices << choice
+		end
 		@other_item = {"has_other_item" => false}
 	end
 
 	def update_issue(issue_obj)
+		issue_obj["choices"] ||= []
 		issue_obj["choices"].each do |choice_obj|
 			choice_obj.delete_if { |k, v| !CHOICE_ATTR_ARY.include?(k) }
 			choice_obj["is_exclusive"] = choice_obj["is_exclusive"].to_s == "true"
 		end
-		issue_obj["other_item"].delete_if { |k, v|  !OTHER_ITEM_ATTR_ARY.include?(k)}
 		issue_obj["choice_num_per_row"] = issue_obj["choice_num_per_row"].to_i
 		issue_obj["min_choice"] = issue_obj["min_choice"].to_i
 		issue_obj["max_choice"] = issue_obj["max_choice"].to_i
 		issue_obj["option_type"] = issue_obj["option_type"].to_i
 		issue_obj["is_list_style"] = issue_obj["is_list_style"].to_s == "true"
 		issue_obj["is_rand"] = issue_obj["is_rand"].to_s == "true"
+		issue_obj["other_item"] ||= {}
+		issue_obj["other_item"].delete_if { |k, v|  !OTHER_ITEM_ATTR_ARY.include?(k)}
 		issue_obj["other_item"]["has_other_item"] = issue_obj["other_item"]["has_other_item"].to_s == "true"
 		super(ATTR_NAME_ARY, issue_obj)
 	end

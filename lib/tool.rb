@@ -1,5 +1,6 @@
-	require 'net/http'
-	require 'uri'
+# encoding: utf-8
+require 'net/http'
+require 'uri'
 
 module Tool
 
@@ -50,5 +51,10 @@ module Tool
 		return false if !standard_answer.include?(answer)
 		return false if standard_answer != answer && !fuzzy
 		return true
+	end
+
+	def self.convert_digit(number)
+		numbers = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"]
+		return numbers[number.to_i%10]
 	end
 end

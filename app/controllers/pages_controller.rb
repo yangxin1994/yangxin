@@ -58,6 +58,13 @@ class PagesController < ApplicationController
 		end
 	end
 
+	def split
+		retval = @survey.split_page(params[:page_index].to_i, params[:question_id], params[:page_name_1], params[:page_name_2])
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
+
 	def update
 		retval = @survey.update_page(params[:id].to_i, params[:page_name])
 		respond_to do |format|

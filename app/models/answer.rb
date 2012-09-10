@@ -84,7 +84,7 @@ class Answer
 	def self.create_answer(operator, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		answer = Answer.new(channel: channel, ip: ip, region: Tool.get_region_by_ip(ip), username: username, password: password)
+		answer = Answer.new(channel: channel, ip: ip, region: IpInfo.find_by_id(ip).postcode, username: username, password: password)
 
 		# initialize the answer content
 		answer_content = {}
@@ -276,9 +276,9 @@ class Answer
 			next if quota_stats["answer_number"][index] >= rule["amount"]
 			rule["conditions"].each do |condition|
 				# if the answer's ip, channel, or region violates one condition of the rule, move to the next rule
-				next if condition["condition_type"] == 2 && region != condition["value"]
-				next if condition["condition_type"] == 3 && channel != condition["value"]
-				next if condition["condition_type"] == 4 && Tool.check_ip_mask(ip, condition["value"])
+				next if condition["condition_type"] == 2 && self.region != condition["value"]
+				next if condition["condition_type"] == 3 && self.channel != condition["value"]
+				next if condition["condition_type"] == 4 && Tool.check_ip_mask(self.ip, condition["value"])
 			end
 			# find out one rule. the quota for this rule has not been satisfied, and the answer does not violate conditions of the rule
 			return true
@@ -411,12 +411,12 @@ class Answer
 	#*retval*:
 	#* true: when the answers are successfully updated
 	def update_answer(answer_type, answer_content)
-		answer_to_be_updated = answer_type == 0? self.template_answer_content : self.answer_content
 		answer_content.each do |k, v|
-			return ErrorEnum::QUESTION_NOT_EXIST if !answer_to_be_updated.has_key?(k)
-			answer_to_be_updated[k] = v
+			self.answer_content[k] = v if self.answer_content.has_key?(k)
+			self.template_answer_content[k] = v if self.template_answer_content.has_key?(k)
 		end
-		return self.save
+		self.save
+		return true
 	end
 
 	#*description*: check whether the answer content violates the quality control rules
@@ -655,19 +655,30 @@ class Answer
 					items_to_be_added << input_ids[1]
 				end
 				self.add_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_added, [])
+			when 7
+				# "show page" logic control
+				# if the rule is satisfied, show the pages (set the answer of the questions in the pages as "nil")
+				logic_control_rule["result"].each do |page_index|
+					self.survey.pages[page_index]["questions"].each do |q_id|
+						self.answer_content[q_id] = nil
+					end
+				end
+				self.save
+			when 8
+				# "hide page" logic control
+				# if the rule is satisfied, hide the pages (set the answer of the question in the pages as {})
+				logic_control_rule["result"].each do |page_index|
+					self.survey.pages[page_index]["questions"].each do |q_id|
+						self.answer_content[q_id] = self.answer_content[q_id] || {}
+					end
+				end
+				self.save
 			end
 		end
 	end
 
 	def auto_finish
-		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_edit
-		# those surveys that allow pageup cannot be finished automatically
-		return ErrorEnum::SURVEY_ALLOW_PAGEUP if self.survey.is_pageup_allowed
-		# check whether all questions are answered
-		return ErrorEnum::ANSWER_NOT_COMPLETE if self.template_answer_content.has_value?(nil)
-		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)
-		self.set_finish
-		return true
+		self.set_finish if self.is_edit && !self.suvey.is_pageup_allowed && !self.template_answer_content.has_value?(nil) && !self.answer_content.has_value?(nil)
 	end
 
 	def get_user_ids_answered(survey_id)

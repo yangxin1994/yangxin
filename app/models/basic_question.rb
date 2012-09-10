@@ -24,7 +24,7 @@ require 'error_enum'
 # ConstSumQuestion
 class BasicQuestion
   include Mongoid::Document
-  field :content, :type => Hash, default: {"text" => "", "image" => "", "audio" => "", "video" => ""}
+  field :content, :type => Hash, default: {"text" => OOPSDATA["question_default_settings"]["content"], "image" => "", "audio" => "", "video" => ""}
   field :note, :type => String, default: OOPSDATA["question_default_settings"]["note"]
   field :issue, :type => Hash
   field :question_type, :type => Integer

@@ -30,11 +30,15 @@ class Survey
 	field :header, :type => String, default: "调查问卷页眉"
 	field :footer, :type => String, default: "调查问卷页脚"
 	field :description, :type => String, default: "调查问卷描述"
-	field :status, :type => Integer, default: 0
+	# indicates whether this is a new survey that has not been edited
+	field :new_survey, :type => Boolean, default: true
+	field :alt_new_survey, :type => Boolean, default: false
+	# can be 0 (normal), or -1 (deleted)
+	field :status, :type => Integer, default: 0 
 	# can be 1 (closed), 2 (under review), 4 (paused), 8 (published)
 	field :publish_status, :type => Integer, default: 1
 	field :user_attr_survey, :type => Boolean, default: false
-	field :pages, :type => Array, default: []
+	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
 	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
 	field :quota_template_question_page, :type => Array, default: []
 	field :logic_control, :type => Array, default: []
@@ -75,11 +79,16 @@ class Survey
 	has_many :email_histories
 
 
+	scope :all_but_new, lambda { where(:new_survey => false) }
 	scope :normal, lambda { where(:status.gt => -1) }
+	scope :normal_but_new, lambda { where(:status.gt => -1, :new_survey => false) }
 	scope :deleted, lambda { where(:status => -1) }
+	scope :deleted_but_new, lambda { where(:status => -1, :new_survey => false) }
 
+	before_create :set_new
 
 	before_save :clear_survey_object
+	before_save :update_new
 	before_update :clear_survey_object
 	before_destroy :clear_survey_object
 
@@ -179,16 +188,22 @@ class Survey
 	def self.find_by_ids(survey_id_list)
 		return Survey.all.in(_id: survey_id_list)
 	end
+	
+	def self.find_new_by_user(user)
+		return user.surveys.where(:new_survey => true)[0]
+	end
 
 	def self.list(status, publish_status, tags)
 		survey_list = []
 		case status
 		when "all"
-			surveys = Survey.all
+			surveys = Survey.all_but_new
 		when "deleted"
-			surveys = Survey.deleted
+			surveys = Survey.deleted_but_new
 		when "normal"
-			surveys = Survey.normal
+			surveys = Survey.normal_but_new
+		else
+			surveys = []
 		end
 		surveys.each do |survey|
 			if tags.nil? || tags.empty? || survey.has_one_tag_of(tags)
@@ -326,7 +341,7 @@ class Survey
 
 		# clone all questions
 		new_instance.pages.each do |page|
-			page.each_with_index do |question_id, question_index|
+			page["questions"].each_with_index do |question_id, question_index|
 				question = Question.find_by_id(question_id)
 				return ErrorEnum::QUESTION_NOT_EXIST if question == nil
 				cloned_question = question.clone
@@ -369,6 +384,8 @@ class Survey
 			elsif [5, 6].include?(logic_control_rule["rule_type"])
 				logic_control_rule["result"]["question_id_1"] = question_id_mapping[logic_control_rule["result"]["question_id_1"]]
 				logic_control_rule["result"]["question_id_2"] = question_id_mapping[logic_control_rule["result"]["question_id_2"]]
+			elsif [7, 8].include?(logic_control_rule["rule_type"])
+				# for logic control that show/hide pages, it is not needed to replace with new question ids
 			end
 		end
 
@@ -510,6 +527,22 @@ class Survey
 	#*params*:
 	def clear_survey_object
 		Cache.write(self._id, nil)
+		return true
+	end
+
+	def set_new
+		# self.new_survey = true
+		return true
+	end
+
+
+	def update_new
+		if self.alt_new_survey
+			self.new_survey = false
+		else
+			self.alt_new_survey = true
+		end
+		return true
 	end
 
 
@@ -773,7 +806,38 @@ class Survey
 		return ErrorEnum::OVERFLOW if page_index < -1 or page_index > self.pages.length - 1
 		new_page = {"name" => page_name, "questions" => []}
 		self.pages.insert(page_index+1, new_page)
-		return self.save
+		self.save
+		return new_page
+	end
+
+	def split_page(page_index, question_id, page_name_1, page_name_2)
+		current_page = self.pages[page_index]
+		return ErrorEnum::OVERFLOW if current_page.nil?
+		if question_id.to_s == "-1"
+			question_index = 0
+		else
+			question_index = -1
+			current_page["questions"].each_with_index do |q_id, q_index|
+				if q_id == question_id
+					question_index = q_index + 1
+					break
+				end
+			end
+			return ErrorEnum::QUESTION_NOT_EXIST if question_index == -1
+		end
+		if question_index == 0
+			new_page_1 = {"name" => page_name_1, "questions" => []}
+		else
+			new_page_1 = {"name" => page_name_1,
+						"questions" => current_page["questions"][0..question_index-1]}
+		end
+		new_page_2 = {"name" => page_name_2,
+						"questions" => current_page["questions"][question_index..current_page["questions"].length-1]}
+		self.pages.delete_at(page_index)
+		self.pages.insert(page_index, new_page_2)
+		self.pages.insert(page_index, new_page_1)
+		self.save
+		return [new_page_1, new_page_2]
 	end
 
 	#*description*: show a page
@@ -1136,7 +1200,7 @@ class Survey
 	end
 
 	class LogicControl
-		RULE_TYPE = (0..6).to_a
+		RULE_TYPE = (0..8).to_a
 		def initialize(logic_control)
 			@rules = logic_control
 		end
