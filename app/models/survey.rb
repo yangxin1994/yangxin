@@ -72,6 +72,8 @@ class Survey
 	has_and_belongs_to_many :interviewers, class_name: "Interviewer", inverse_of: :managable_survey
 
 	has_many :answers
+	has_many :email_histories
+
 
 	scope :normal, lambda { where(:status.gt => -1) }
 	scope :deleted, lambda { where(:status => -1) }
@@ -174,6 +176,9 @@ class Survey
 		return Survey.where(:_id => survey_id).first
 	end
 
+	def self.find_by_ids(survey_id_list)
+		return Survey.all.in(_id: survey_id_list)
+	end
 
 	def self.list(status, publish_status, tags)
 		survey_list = []

@@ -70,6 +70,7 @@ class User
 	has_many :advertisements
 
 
+	has_many :email_histories
 	has_many :answers
 	has_many :template_question_answers
 
@@ -457,7 +458,7 @@ class User
 	scope :white_list, where(role: ROLE_WHITE)
 
 	def self.ids_not_in_blacklist
-		[]
+		return User.any_of({role: 0}, {role: 1})
 	end
 
 	def self.update_user(user_id, attributes)

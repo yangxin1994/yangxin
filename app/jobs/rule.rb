@@ -1,13 +1,14 @@
 module Jobs
 
 	class Condition
-		attr_accessor :name, :value 
-		def initialize(name, value)
+		attr_accessor :name, :value, :fuzzy
+		def initialize(name, value, fuzzy)
 			@name = name
 			@value = value
+			@fuzzy = fuzzy
 		end
 		def ==(object_2)
-			return true if self.name == object_2.name && self.value == object_2.value
+			return true if self.name == object_2.name && self.value == object_2.value && self.fuzzy == object_2.fuzzy
 			return false
 		end
 	end
@@ -18,7 +19,6 @@ module Jobs
 
 		attr_accessor :survey_id, :conditions, 
 					:amount, :time_left, :email_number
-					:pop_conditions_names
 
 		def initialize(survey_id, conditions, amount)
 			@survey_id = survey_id.to_s

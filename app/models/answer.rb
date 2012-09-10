@@ -669,4 +669,9 @@ class Answer
 		self.set_finish
 		return true
 	end
+
+	def get_user_ids_answered(survey_id)
+		survey = Survey.find_by_id(survey_id)
+		return survey.answers.map {|a| a.user_id.to_s}
+	end
 end

@@ -22,24 +22,24 @@ module Jobs
 
 			puts "Quota Job perform Test: #{Time.now}"
 			# 1. get all samples, excluding those are in the blacklist
-			@user_ids = User.ids_not_in_blacklist
+			user_ids = User.ids_not_in_blacklist
 			# 2. summarize the quota rules of the surveys
-			@rule_arr = check_quota
+			rule_arr = check_quota
 			# 3. find out samples for surveys
-			@samples_found = find_samples
+			samples_found = find_samples(user_ids, rule_arr)
 			# 4. send emails to the samples found
-			send_emails
+			send_emails(rule_arr, samples_found)
 			# 5. prepare for the next execuation
 			Resque.enqueue_at(Time.now + interval_time.to_i, 
 				QuotaJob, 
 				{"interval_time"=> interval_time.to_i}) 		
 		end
 
-		def self.send_emails
+		def self.send_emails(rule_arr, samples_found)
 			# 1. calculate the survey invitations for each sample
 			ready_to_send = {}
-			@samples_found.each_with_index do |samples_found_for_one_survey, index|
-				survey_id = @rule_arr[index].survey_id
+			samples_found.each_with_index do |samples_found_for_one_survey, index|
+				survey_id = rule_arr[index].survey_id
 				samples_found_for_one_survey.each do |sample|
 					ready_to_send[sample] ||= []
 					ready_to_send[sample] << survey_id if !ready_to_send[sample].include?(survey_id)
@@ -47,11 +47,13 @@ module Jobs
 			end
 			# 2. send out emails and save results
 			surveys = {}
-			@rule_arr.each do |rule|
+			rule_arr.each do |rule|
 				surveys[rule.survey_id] = Survey.find_by_id(rule.survey_id)
 			end
 			ready_to_send.each do |user_id, survey_id_list|
 				user = User.find_by_id(user_id)
+				surveys = Survey.find_by_ids(survey_id_list)
+				send_email(user, surveys)
 				survey_id_list.each do |survey_id|
 					email_history = EmailHistory.create
 					email_history.user = user
@@ -60,21 +62,21 @@ module Jobs
 			end
 		end
 
-		def self.find_samples
+		def self.find_samples(user_ids, rule_arr)
 			samples_found = []
 			user_ids_answered = {}
 			user_ids_sent = {}
-			@rule_arr.each do |rule|
-				s_id = rule["survey_id"]
+			rule_arr.each do |rule|
+				s_id = rule.survey_id
 				user_ids_answered[s_id] ||= Answer.get_user_ids_answered(s_id)
 				user_ids_sent[s_id] ||= EmailHistory.get_user_ids_sent(s_id)
-				users_id = @users_id - user_ids_answered[s_id] - user_ids_sent[s_id]
+				user_ids = user_ids - user_ids_answered[s_id] - user_ids_sent[s_id]
 				user_ids_satisfied = nil
-				rule["conditions"].each do |c|
+				rule.conditions.each do |c|
 					if user_ids_satisfied.nil?
-						user_ids_satisfied = TemplateQuestionAnswer.user_ids_satisfied(users_id, c)
+						user_ids_satisfied = TemplateQuestionAnswer.user_ids_satisfied(user_ids, c)
 					else
-						user_ids_satisfied &= TemplateQuestionAnswer.user_ids_satisfied(users_id, c)
+						user_ids_satisfied &= TemplateQuestionAnswer.user_ids_satisfied(user_ids, c)
 					end
 				end
 				if user_ids_satisfied.length >= rule.email_number
@@ -82,10 +84,10 @@ module Jobs
 					next
 				end
 				user_ids_unsatisfied = []
-				rule["conditions"].each do |c|
-					user_ids_unsatisfied |= TemplateQuestionAnswer.user_ids_unsatisfied(users_id, c)
+				rule.conditions.each do |c|
+					user_ids_unsatisfied |= TemplateQuestionAnswer.user_ids_unsatisfied(user_ids, c)
 				end
-				user_ids_unknow = users_id - user_ids_satisfied - user_ids_unsatisfied
+				user_ids_unknow = user_ids - user_ids_satisfied - user_ids_unsatisfied
 				user_ids_selected = user_ids_satisfied 
 							+ user_ids_unknow.shuffle[0..rule.email_number-user_ids_satisfied.length-1]
 				samples_found << user_ids_selected
@@ -99,7 +101,6 @@ module Jobs
 			rule_arr = []
 			#find all surveys which are published
 			published_survey = Survey.get_published_active_surveys
-			# puts "published_survey count:: #{published_survey}"
 			published_survey.each do |survey|
 				cur_survey_rule_arr = []
 				survey.quota["rules"].each_with_index do |rule, rule_index|
@@ -109,7 +110,7 @@ module Jobs
 					conditions = []
 					rule["conditions"].each do |condition|
 						if condition["condition_type"] == 0 then
-							conditions << Condition.new(condition["name"], condition["value"])
+							conditions << Condition.new(condition["name"], condition["value"], condition["fuzzy"])
 						end
 					end
 
@@ -118,17 +119,16 @@ module Jobs
 					rest_number = rule_amount < answer_number ? 0 : rule_amount - answer_number
 
 					# 3. combine the rule
-					has_same = false
-					cur_survey_rule_arr.each do |rule|
-						if compare_conditions(conditions, rule.conditions)
-							rule.amount_increase(rest_number)
-							has_same = true
-							break
+					if rest_number > 0
+						has_same = false
+						cur_survey_rule_arr.each do |rule|
+							if conditions - rule.conditions == [] && rule.conditions - conditions == []
+								rule.amount_increase(rest_number)
+								has_same = true
+								break
+							end
 						end
-					end
-
-					if has_same == false && rest_number > 0 then
-						cur_survey_rule_arr << 	Rule.new(survey._id.to_s, conditions, rest_number) 
+						cur_survey_rule_arr << 	Rule.new(survey._id.to_s, conditions, rest_number) if !has_same
 					end
 				end
 				rule_arr += cur_survey_rule_arr
@@ -136,12 +136,7 @@ module Jobs
 			return rule_arr
 		end
 
-		def self.compare_conditions(c1, c2)
-			return JSON.parse(c1.to_json) - JSON.parse(c2.to_json) == [] && 
-			JSON.parse(c2.to_json) - JSON.parse(c1.to_json) == []
-		end
-
-		def self.send_email(sample)
+		def self.send_email(user, surveys)
 			list_surveys_str = ""
 			sample.meet_surveys.each do |survey_id|
 				list_surveys_str += "<a href=\"http://www.oopsdata.com/surveys/#{survey_id}\">#{survey_id}</a>\n"
