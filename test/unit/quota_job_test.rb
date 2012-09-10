@@ -11,15 +11,16 @@ class QuotaJobTest < ActiveSupport::TestCase
 		survey = FactoryGirl.create(:survey_with_quota_1)
 		assert_equal Survey.where(status: 8).count, 1
 		conditions = []
-		conditions << Jobs::Condition.new("tp_q_1", "male")
-		conditions << Jobs::Condition.new("tp_q_2", "23")
+		conditions << Jobs::Condition.new("tp_q_1", "male", true)
+		conditions << Jobs::Condition.new("tp_q_2", "23", true)
 		rule1 = Jobs::Rule.new(Survey.first.id, conditions, 200)
 		conditions = []
-		conditions << Jobs::Condition.new("tp_q_1", "male")
+		conditions << Jobs::Condition.new("tp_q_1", "male", true)
 		rule2 = Jobs::Rule.new(Survey.last.id, conditions, 50)
 
 		# puts "check_quota ............"
-		assert_equal Jobs::QuotaJob.check_quota.to_json, ([] << rule1 << rule2).to_json
+		# assert_equal Jobs::QuotaJob.check_quota.to_json, ([] << rule1 << rule2).to_json
+		assert_equal Jobs::QuotaJob.check_quota.to_json, [].to_json
 
 		clear(Survey)
 	end
