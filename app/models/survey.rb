@@ -1066,7 +1066,8 @@ class Survey
 	end
 
 	def refresh_quota_stats
-		answers = self.answers
+		# only make statisics from the answers that are not preview answers
+		answers = self.answers.not_preview
 		quota_stats = {"quota_satisfied" => true, "answer_number" => []}
 		self.quota["rules"].length.times { quota_stats["answer_number"] << 0 }
 		answers.each do |answer|
