@@ -17,7 +17,7 @@ module Jobs
 			puts "do survey job in #{Time.now}"
 
 			#do
-			# action(survey_id)
+      action(survey_id)
 		end
 
 		def self.action(survey_id)
