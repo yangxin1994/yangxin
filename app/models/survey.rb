@@ -108,7 +108,6 @@ class Survey
 		return ErrorEnum::SURVEY_DEADLINE_ERROR if time <= Time.now.to_i
 		self.deadline = time
 		return ErrorEnum::UNKNOWN_ERROR unless self.save
-
 		#create or update job
 		Jobs::SurveyDeadlineJob.update(self.id, time)
 	end

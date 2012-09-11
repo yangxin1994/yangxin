@@ -15,7 +15,7 @@ module Jobs
 
 			unless interval_time
 				puts "Must provide interval_time"
-				return
+				return false
 			end
 
 			# do

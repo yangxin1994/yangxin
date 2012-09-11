@@ -12,7 +12,7 @@ module Jobs
 
 			unless interval_time
 				puts "Must provide interval_time"
-				return
+				return false
 			end
 
 			# 1. find answers which are satisfied that ...
