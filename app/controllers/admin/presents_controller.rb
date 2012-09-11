@@ -1,54 +1,33 @@
 # encoding: utf-8
 class Admin::PresentsController < Admin::ApplicationController
 
-	def create		
-		respond_to do |format|
-			@present = Present.create(params[:present])
-			# TO DO add admin_id
-			if @present.save
-				Material.create(:material => params[:material], :materials => @present)
-				format.html { redirect_to :action => 'show',:id => @present.id }
-				format.json { render json: @present, status: :created, location: @present }
-			else
-				#format.html { render action: "cash" }
-				format.json { render json: false }
-			end
-		end
-	end
+  def create
+    @present = Present.create(params[:present])
+    # TODO add admin_id
+    respond_and_render_json @present.save do
+      Material.create(:material => params[:material], :materials => @present)
+      @present.as_retval
+    end
+  end
 
-	def expired
-		@presents = Present.expired.page(page)
-		respond_to do |format|
-			format.html 
-			format.json { render json: @presents, :only => [:id, :name, :point, :quantity, :created_at, :status] }
-		end
-	end
+  def expired
+    respond_and_render_json { Present.expired.page(page)}
+  end
 
-	def update
-		@present = Present.find(params[:id])
+  def update
+    @present = Present.find(params[:id])
+    respond_and_render_json @present.update_attributes(params[:present]) do
+      @present.as_retval
+    end
+  end
 
-		respond_to do |format|
-			if @present.update_attributes(params[:present])
-				format.html { redirect_to @present, notice: 'Present was successfully updated.' }
-				format.json { head :ok }
-			else
-				#format.html { render action: "edit" }
-				format.json { render json: @present.errors, status: :unprocessable_entity }
-			end
-		end
-	end
-
-	def delete
-		@presents = []
-		params[:ids].to_a.each do |id|
-			@presents << (Present.find_by_id id do |r|
-				r.delete
-			end)
-		end
-		respond_to do |format|
-			format.json { render json: @presents }
-		end
-	end
-
-
+  def delete
+    respond_and_render_json do
+      params[:ids].to_a.each do |id|
+        Present.find_by_id id do |r|
+          r.delete
+        end
+      end
+    end
+  end
 end
