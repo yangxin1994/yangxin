@@ -40,6 +40,9 @@ class Survey
 	field :user_attr_survey, :type => Boolean, default: false
 	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
 	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
+	field :quota_stats, :type => Hash
+	field :filters, :type => Array, default: []
+	field :filters_stats, :type => Array, default: []
 	field :quota_template_question_page, :type => Array, default: []
 	field :logic_control, :type => Array, default: []
 	field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
@@ -58,7 +61,6 @@ class Survey
 			"password_list" => [],
 			"username_password_list" => []}}
 	field :random_quality_control_questions, :type => Boolean, default: false
-	field :quota_stats, :type => Hash
 	field :deadline, :type => Integer
 
 	belongs_to :user
@@ -166,6 +168,8 @@ class Survey
 		end
 		survey_obj["quota"] = Marshal.load(Marshal.dump(self.quota))
 		survey_obj["quota_stats"] = Marshal.load(Marshal.dump(self.quota_stats))
+		survey_obj["filters"] = Marshal.load(Marshal.dump(self.filters))
+		survey_obj["filters_stats"] = Marshal.load(Marshal.dump(self.filters_stats))
 		survey_obj["logic_control"] = Marshal.load(Marshal.dump(self.logic_control))
 		survey_obj["access_control_setting"] = Marshal.load(Marshal.dump(self.access_control_setting))
 		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
@@ -1116,6 +1120,84 @@ class Survey
 	def delete_logic_control_rule(logic_control_rule_index)
 		logic_control = LogicControl.new(self.logic_control)
 		return logic_control.delete_rule(logic_control_rule_index, self)
+	end
+
+	def list_filters
+		return Marshal.load(Marshal.dump(self.filters))
+	end
+
+	def show_filter(filter_index)
+		filters = Filters.new(self.filters)
+		return filters.show_filter(filter_index)
+	end
+
+	def add_filter(filter)
+		filters = Filters.new(self.filters)
+		return filters.add_filter(filter, self)
+	end
+
+	def update_filter(filter_index, filter)
+		filters = Filters.new(self.filters)
+		return filters.update_filter(filter_index, filter, self)
+	end
+
+	def delete_filter(filter_index)
+		filters = Filters.new(self.filters)
+		return filters.delete_filter(filter_index, self)
+	end
+
+	class Filters
+		CONDITION_TYPE = (0..4).to_a
+		def initialize(filters)
+			@filters = Marshal.load(Marshal.dump(filters))
+		end
+
+		def show_filter(filter_index)
+			return ErrorEnum::FILTER_NOT_EXIST if @filters.length <= filter_index
+			return @filters[filter_index]
+		end
+
+		def add_filter(filter, survey)
+			# check errors
+			filter["conditions"].each do |condition|
+				condition["condition_type"] = condition["condition_type"].to_i
+				return ErrorEnum::WRONG_FILTER_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
+			end
+			# add the rule
+			@filters << filter
+			survey.filters = self.serialize
+			survey.save
+			return survey.filters
+		end
+
+		def delete_filter(filter_index, survey)
+			# check errors
+			return ErrorEnum::FILTER_NOT_EXIST if @filters.length <= rule_index
+			# delete the rule
+			@filters.delete_at(filter_index)
+			survey.filters = self.serialize
+			survey.save
+			return survey.filters
+		end
+
+		def update_filter(filter_index, filter, survey)
+			# check errors
+			return ErrorEnum::FILTER_NOT_EXIST if @filters.length <= filter_index
+			filter["conditions"].each do |condition|
+				condition["condition_type"] = condition["condition_type"].to_i
+				return ErrorEnum::WRONG_FILTER_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"].to_i)
+			end
+			# update the rule
+			@filters[filter_index] = filter
+			survey.filters = self.serialize
+			survey.save
+			return survey.filters
+		end
+
+		def serialize
+			filters_object = @filters
+			return filters_object
+		end
 	end
 
 	class Quota

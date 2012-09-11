@@ -153,6 +153,12 @@ OopsData::Application.routes.draw do
 				get :get_exclusive
 			end
 		end
+
+		resources :filters do
+		end
+
+		resources :results do
+		end
 	end
 	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/move' => 'pages#move'
 	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/combine' => 'pages#combine'
