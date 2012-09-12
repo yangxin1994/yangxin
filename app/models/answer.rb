@@ -347,7 +347,7 @@ class Answer
 	#*retval*:
 	#* true: when the conditions can be satisfied
 	#* false: otherwise
-	def satisfy_quota_conditions(conditions)
+	def satisfy_conditions(conditions)
 		# only answers that are finished contribute to quotas
 		return false if !self.is_finish
 		# check the conditions one by one
@@ -749,7 +749,7 @@ class Answer
 		quota_stats = self.survey.quota_stats
 		quota_rules = self.survey.quota["rules"]
 		quota_rules.each_with_index do |rule, index|
-			if self.satisfy_quota_conditions(rule["conditions"])
+			if self.satisfy_conditions(rule["conditions"])
 				quota_stats["answer_number"][rule_index] = quota_stats["answer_number"][rule_index] + 1
 			end
 		end

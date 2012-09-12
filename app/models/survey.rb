@@ -1069,6 +1069,22 @@ class Survey
 		return quota.delete_rule(quota_rule_index, self)
 	end
 
+	def refresh_filters_stats
+		# only make statisics from the answers that are not preview answers
+		answers = self.answers.not_preview
+		filters_stats = []
+		self.filters.length.times { filters_stats << 0 }
+		answers.each do |answer|
+			self.filters.each_with_index do |filter, filter_index|
+				if answer.satisfy_conditions(rule["conditions"])
+					filters_stats[filter_index] = filters_stats[filter_index] + 1
+				end
+			end
+		end
+		self.filters_stats = filters_stats
+		self.save
+	end
+
 	def refresh_quota_stats
 		# only make statisics from the answers that are not preview answers
 		answers = self.answers.not_preview
@@ -1076,7 +1092,7 @@ class Survey
 		self.quota["rules"].length.times { quota_stats["answer_number"] << 0 }
 		answers.each do |answer|
 			self.quota["rules"].each_with_index do |rule, rule_index|
-				if answer.satisfy_quota_conditions(rule["conditions"])
+				if answer.satisfy_conditions(rule["conditions"])
 					quota_stats["answer_number"][rule_index] = quota_stats["answer_number"][rule_index] + 1
 				end
 			end
