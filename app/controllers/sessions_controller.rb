@@ -4,7 +4,6 @@ require 'error_enum'
 require 'tool'
 class SessionsController < ApplicationController
 
-	before_filter :require_sign_out, :only => [:create]
 	before_filter :require_sign_in, :only => [:destroy, :init_basic_info, :obtain_user_attr_survey, :init_user_attr_survey, :skip_init_step, :update_user_info, :reset_password, :get_level_information]
 
 	# method: get
