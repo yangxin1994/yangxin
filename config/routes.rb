@@ -134,6 +134,7 @@ OopsData::Application.routes.draw do
 			get 'show_access_control_setting'
 			get 'set_random_quality_control_questions'
 			get 'get_random_quality_control_questions'
+			get 'update_deadline'
 		end
 		resources :pages
 		resources :questions do
@@ -151,6 +152,15 @@ OopsData::Application.routes.draw do
 				post :set_exclusive
 				get :get_exclusive
 			end
+		end
+
+		resources :filters do
+			member do
+				put :update_filter_name
+			end
+		end
+
+		resources :results do
 		end
 	end
 	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/move' => 'pages#move'

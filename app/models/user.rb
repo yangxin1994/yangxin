@@ -70,9 +70,11 @@ class User
 	has_many :advertisements
 
 
+	has_many :email_histories
 	has_many :answers
+	has_many :template_question_answers
 
-
+	scope :unregistered, where(status: 0)
 
 	private
 	def set_updated_at
@@ -466,6 +468,10 @@ class User
 
 	scope :black_list, where(role: ROLE_BLACK)
 	scope :white_list, where(role: ROLE_WHITE)
+
+	def self.ids_not_in_blacklist
+		return User.any_of({role: 0}, {role: 1})
+	end
 
 	def self.update_user(user_id, attributes)
 		user = User.find_by_id(user_id)

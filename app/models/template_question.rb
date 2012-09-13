@@ -13,6 +13,8 @@ class TemplateQuestion < BasicQuestion
 	include Mongoid::Document
 	field :attribute_name, :type => String, default: ""
 
+	has_many :template_question_answers
+
 	before_save :clear_question_object
 	before_update :clear_question_object
 	before_destroy :clear_question_object

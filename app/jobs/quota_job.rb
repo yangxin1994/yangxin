@@ -1,133 +1,168 @@
+# coding: utf-8
 
 module Jobs
 
 	class QuotaJob
 
 		# store last time interval_time that use to remove_delayed job
-		@@last_interval_time = nil
 		@queue = :quota_job_queue
 
+		# resque auto involve method
 		def self.perform(*args)
-			puts "Quota Job perform Test: #{Time.now}"
-
-			# # check_quota
-			# # return Quota Array
-			# rule_arr = check_quota
-
-			# # sample not reject selected
-			# select_sample_array = get_select_sample_array(rule_arr)
-
-			# #send_email
-			# send_email(select_sample_array)
-
-			# next 
 			arg = {}
 			arg = args[0] if args[0].class == Hash
 			# unit is second
-			interval_time =  arg["interval_time"] || 60
-			@@last_interval_time = interval_time
-			#save to redis
-			Resque.redis.set "quota_last_interval_time", @@last_interval_time if @@last_interval_time
+			interval_time = arg["interval_time"]
 
+			unless interval_time
+				puts "Must provide interval_time"
+				return
+			end
+			puts "End Quota Job perform Test. The interval_time is #{interval_time}"
+
+			puts "Quota Job perform Test: #{Time.now}"
+			# 1. get all samples, excluding those are in the blacklist
+			user_ids = User.ids_not_in_blacklist
+			# 2. summarize the quota rules of the surveys
+			rule_arr = check_quota
+			# 3. find out samples for surveys
+			samples_found = find_samples(user_ids, rule_arr)
+			# 4. send emails to the samples found
+			send_emails(rule_arr, samples_found)
+			# 5. prepare for the next execuation
 			Resque.enqueue_at(Time.now + interval_time.to_i, 
 				QuotaJob, 
-				{"interval_time"=> interval_time.to_i})
-
-			puts "End Quota Job perform Test. The interval_time is #{interval_time}"
+				{"interval_time"=> interval_time.to_i}) 		
 		end
 
-		private 
-		# 
+		def self.send_emails(rule_arr, samples_found)
+			# 1. calculate the survey invitations for each sample
+			ready_to_send = {}
+			samples_found.each_with_index do |samples_found_for_one_survey, index|
+				survey_id = rule_arr[index].survey_id
+				samples_found_for_one_survey.each do |sample|
+					ready_to_send[sample] ||= []
+					ready_to_send[sample] << survey_id if !ready_to_send[sample].include?(survey_id)
+				end
+			end
+			# 2. send out emails and save results
+			surveys = {}
+			rule_arr.each do |rule|
+				surveys[rule.survey_id] = Survey.find_by_id(rule.survey_id)
+			end
+			ready_to_send.each do |user_id, survey_id_list|
+				user = User.find_by_id(user_id)
+				surveys = Survey.find_by_ids(survey_id_list)
+				send_email(user, surveys)
+				survey_id_list.each do |survey_id|
+					email_history = EmailHistory.create
+					email_history.user = user
+					email_history.survey = surveys[survey_id]
+				end
+			end
+		end
+
+		def self.find_samples(user_ids, rule_arr)
+			samples_found = []
+			user_ids_answered = {}
+			user_ids_sent = {}
+			rule_arr.each do |rule|
+				s_id = rule.survey_id
+				user_ids_answered[s_id] ||= Answer.get_user_ids_answered(s_id)
+				user_ids_sent[s_id] ||= EmailHistory.get_user_ids_sent(s_id)
+				user_ids = user_ids - user_ids_answered[s_id] - user_ids_sent[s_id]
+				user_ids_satisfied = nil
+				rule.conditions.each do |c|
+					if user_ids_satisfied.nil?
+						user_ids_satisfied = TemplateQuestionAnswer.user_ids_satisfied(user_ids, c)
+					else
+						user_ids_satisfied &= TemplateQuestionAnswer.user_ids_satisfied(user_ids, c)
+					end
+				end
+				if user_ids_satisfied.length >= rule.email_number
+					samples_found << user_ids_satisfied.shuffle[0..rule.email_number-1]
+					next
+				end
+				user_ids_unsatisfied = []
+				rule.conditions.each do |c|
+					user_ids_unsatisfied |= TemplateQuestionAnswer.user_ids_unsatisfied(user_ids, c)
+				end
+				user_ids_unknow = user_ids - user_ids_satisfied - user_ids_unsatisfied
+				user_ids_selected = user_ids_satisfied 
+							+ user_ids_unknow.shuffle[0..rule.email_number-user_ids_satisfied.length-1]
+				samples_found << user_ids_selected
+			end
+			return samples_found
+		end
+
+		# check quota info for each survey,
+		# it will return a array for Jobs::Rule object.
 		def self.check_quota
 			rule_arr = []
-
 			#find all surveys which are published
-			published_surveies = Survey.where(status: 8).collect
+			published_survey = Survey.get_published_active_surveys
+			published_survey.each do |survey|
+				cur_survey_rule_arr = []
+				survey.quota["rules"].each_with_index do |rule, rule_index|
+					rule_amount = rule["amount"].to_i
 
-			published_surveies.each do |survey|
-				quota = survey.quota
-
-				tmp_rule_arr = []
-				#get the conditions of type==0 to tmp_rule_arr
-				quota["rules"].each_index do |rule_index|
-					rule = quota["rules"][rule_index]
-
-					# already answer count:
-					answer_number = survey.answer_number[rule_index].to_i
-
-					# compute the rest count
-					rest_number = rule["amount"].to_i - answer_number
-					rest_number = rest_number > 0 ? rest_number : 0
-
+					# 1. get the conditions
 					conditions = []
 					rule["conditions"].each do |condition|
 						if condition["condition_type"] == 0 then
-							conditions << Condititon.new(condition["name"], condition["value"])
+							conditions << Condition.new(condition["name"], condition["value"], condition["fuzzy"])
 						end
 					end
 
-					tmp_rule_arr << Rule.new(survey.id.to_s, 	0, conditions, rest_number, condition["fuzzy"]) if conditions.size > 0
-				end
+					# 2. get the remainning number
+					answer_number = survey.quota_stats["answer_number"][rule_index].to_i
+					rest_number = rule_amount < answer_number ? 0 : rule_amount - answer_number
 
-				# combine the rules if their have same condition.
-				#
-				
-
-				# select diff conditions, reject others.
-				tmp_rule_arr = tmp_rule_arr.values_at(*diff_rule_indexs) if diff_rule_indexs.size > 0
-
-				# add tmp_rule_arr to rule_arr which is to be return.
-				rule_arr += tmp_rule_arr
-			end
-
-			return rule_arr
-		end
-
-
-		def self.get_select_sample_array(rule_arr)
-			# 
-			select_sample_array = []
-			rule_arr.each do |rule|
-				rule_amount = 0
-				if rule.condition_type == 0 then
-					Sample.all.each do |sample|
-						sample.to_json.each do |key, value|
-							if key.to_s == rule.condition_name then
-								if !rule.fuzzy && 
-								value.to_s == rule.condition_value then
-									select_sample_array << [rule.survey_id, sample]
-									rule_amount += 1 
-								elsif value.to_s.include?(rule.condition_value) then
-									select_sample_array << [rule.survey_id, sample]
-									rule_amount += 1
-								end
-
+					# 3. combine the rule
+					if rest_number > 0
+						has_same = false
+						cur_survey_rule_arr.each do |rule|
+							if conditions - rule.conditions == [] && rule.conditions - conditions == []
+								rule.amount_increase(rest_number)
+								has_same = true
 								break
 							end
 						end
-
-						break if rule_amount >= rule.amount
+						cur_survey_rule_arr << 	Rule.new(survey._id.to_s, conditions, rest_number) if !has_same
 					end
 				end
+				rule_arr += cur_survey_rule_arr
 			end
-
-			return select_sample_array
+			return rule_arr
 		end
 
-		def self.send_email(select_sample_array)
-			select_sample_array.each do |work|
-				Resque.enqueue_at_with_queue(1, Time.now, OopsMailJob,{
-					:mailler => "netranking",
-					:account_name => account[:netranking]["account_name"],
-					:account_secret => account[:netranking]["account_secret"],
-					:mail_list => ([] << work[1].email),
-					:subject => "Happy to invite you to answer survey.",
-					:content => ("Hello, this is a new survey. <br/>"+ 
-							"if work it for a less time, you are gone to get a reward.<br/>"+
-							"click it to <a href=\"http://www.oopsdata.com\">Survey</a>")
-				})
+		def self.send_email(user, surveys)
+			list_surveys_str = ""
+			sample.meet_surveys.each do |survey_id|
+				list_surveys_str += "<a href=\"http://www.oopsdata.com/surveys/#{survey_id}\">#{survey_id}</a>\n"
+			end
+
+			content = "Hi! #{sample.user_id}. OopsData is very happy to invite you to answer survey.
+	If work it for a less time, you are gone to get a reward probablely.
+	Now, we choose some for you which fit you.
+
+	#{list_surveys_str}
+	More, click <a href=\"http://www.oopsdata.com\">OopsData</a>"
+
+			# binding.pry
+				
+			# Resque.enqueue_at_with_queue(1, Time.now, OopsMailJob,{
+			# 	:mailler => "netranking",
+			# 	:account_name => account[:netranking]["account_name"],
+			# 	:account_secret => account[:netranking]["account_secret"],
+			# 	:mail_list => ([] << sample.email),
+			# 	:subject => "Happy to invite you to answer survey.",
+			# 	:content => content
+			# })
+
+				puts "send_email content::: #{content}"
+
+				sample.last_email_time = Time.now
 			end
 		end
-
-	end
 end

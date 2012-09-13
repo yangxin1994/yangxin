@@ -1,4 +1,115 @@
 # encoding: utf-8
+
+FactoryGirl.define do 
+	factory :survey_with_quota, class: Survey do 
+		status 8
+
+		factory :survey_with_quota_1 do
+			quota 	({	"rules" => 	[
+						{   "conditions" => [
+								{"condition_type" => 0, 
+								"name" => "tp_q_1", 
+								"value" => "male"
+								},
+								{"condition_type" => 0, 
+								"name" => "tp_q_2", 
+								"value" => "23"
+								},
+								{"condition_type" => 1,
+								"name" => "tp_q_3", 
+								"value" => "apple"
+								}
+											],
+							"amount" => 100
+						},
+						{   "conditions" => [
+								{"condition_type" => 0, 
+								"name" => "tp_q_1", 
+								"value" => "male"
+								},
+								{"condition_type" => 0, 
+								"name" => "tp_q_2", 
+								"value" => "23"
+								},
+								{"condition_type" => 1,
+								"name" => "tp_q_3", 
+								"value" => "pear"
+								}
+											],
+							"amount" => 200
+						},
+						{   "conditions" => [
+								{"condition_type" => 0, 
+								"name" => "tp_q_1", 
+								"value" => "male"
+								},
+								{"condition_type" => 1,
+								"name" => "tp_q_3", 
+								"value" => "pear"
+								}
+											],
+							"amount" => 100
+						}
+								]
+					})
+
+			quota_stats ({"answer_number" => [50, 50, 50]})
+		end
+
+		factory :survey_with_quota_2 do
+			quota 	({	"rules" => 	[
+						{   "conditions" => [
+								{"condition_type" => 0, 
+								"name" => "tp_q_1", 
+								"value" => "female"
+								},
+								{"condition_type" => 0, 
+								"name" => "tp_q_2", 
+								"value" => "24"
+								},
+								{"condition_type" => 1,
+								"name" => "tp_q_3", 
+								"value" => "apple"
+								}
+											],
+							"amount" => 100
+						},
+						{   "conditions" => [
+								{"condition_type" => 0, 
+								"name" => "tp_q_1", 
+								"value" => "male"
+								},
+								{"condition_type" => 0, 
+								"name" => "tp_q_2", 
+								"value" => "23"
+								},
+								{"condition_type" => 1,
+								"name" => "tp_q_3", 
+								"value" => "pear"
+								}
+											],
+							"amount" => 200
+						},
+						{   "conditions" => [
+								{"condition_type" => 0, 
+								"name" => "tp_q_1", 
+								"value" => "female"
+								},
+								{"condition_type" => 1,
+								"name" => "tp_q_3", 
+								"value" => "pear"
+								}
+											],
+							"amount" => 100
+						}
+								]
+					})
+
+			quota_stats ({"answer_number" => [50, 100, 50]})
+		end
+	end
+end
+
 FactoryGirl.define do
 
   factory :survey_with_issue, class: Survey do

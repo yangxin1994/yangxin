@@ -3,7 +3,7 @@ require 'array'
 require 'error_enum'
 class SurveysController < ApplicationController
 	before_filter :require_sign_in
-	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :show]
+	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :show, :update_deadline]
 	before_filter :check_normal_survey_existence, :except => [:new, :index, :recover, :clear, :add_tag, :remove_tag, :show]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
 
@@ -343,6 +343,21 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def pause
 		retval = @survey.pause(params[:message], @current_user)
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
+
+	#*method*: get
+	#
+	#*url*: /surveys/:survey_id/update_deadline
+	#
+	#*description*: the owner of the survey pause the survey
+	#
+	#*params*:
+	#* survey_id: id of the suvey to be set
+	def update_deadline
+		retval = @survey.update_deadline(params[:deadline])
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end

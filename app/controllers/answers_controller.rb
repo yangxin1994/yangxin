@@ -2,13 +2,15 @@
 require 'error_enum'
 class AnswersController < ApplicationController
 
-	## before filters ##
-
 	before_filter :check_survey_existence
-	before_filter :check_answer_existence, :except => [:load_question]
+	before_filter :check_answer_existence, :except => [:load_question, :preview_load_question, :index]
 
 	def check_answer_existence
-		@answer = Answer.find_by_survey_id_and_user(params[:survey_id], @current_user)
+		if !params[:preview_id].blank?
+			@answer = Answer.find_by_survey_id_and_preview_id(params[:survey_id], params[:preview_id])
+		else
+			@answer = Answer.find_by_survey_id_and_user(params[:survey_id], @current_user)
+		end
 		if @answer.nil?
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
@@ -30,14 +32,33 @@ class AnswersController < ApplicationController
 		end
 	end
 
-	def check_answer_status
-		@answer.update_status
-		if @answer.is_finish || @answer.is_reject
-			render_json_s([@answer.status, @answer.reject_type, @answer.finish_type]) and return
+	######################
+
+	def preview_load_question
+		# 1. try to find the answer
+		answer = Answer.find_by_survey_id_and_preview_id(params[:survey_id], params[:preview_id])
+		# 2. if cannot find the answer, create new answer and check region, channel and ip quota
+		if answer.nil?
+			# this is the first time that the volonteer opens this survey
+			# for previewing, it is not needed to check captcha, password, channel, ip, or address
+			# pass the checking, create a new answer and check the region, channel, and ip quotas
+			answer = Answer.create_preview_answer(params[:survey_id], params[:preview_id])
+			render_json_auto(answer) and return if answer.class != Answer
+			answer.set_edit
+		end
+		# 3. now, we have an answer instance
+		answer.update_status	# check whether it is time out
+		if answer.is_edit
+			questions = answer.load_question(params[:question_id], params[:next_page])
+			if answer.is_finish
+				render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return
+			else
+				render_json_auto([questions.to_json, answer.repeat_time]) and return
+			end
+		else
+			render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return
 		end
 	end
-
-	######################
 
 	def load_question
 		# 1. try to find the answer
@@ -106,9 +127,11 @@ class AnswersController < ApplicationController
 		retval = @answer.check_screen(params[:answer_content])
 		render_json_auto(@answer.violate_screen) and return if !retval
 
-		# 4. check quota questions
-		retval = @answer.check_quota_questions
-		render_json_auto(@answer.violate_quota) and return if !retval
+		# 4. check quota questions (skip for previewing)
+		if !@answer.is_preview?
+			retval = @answer.check_quota_questions
+			render_json_auto(@answer.violate_quota) and return if !retval
+		end
 
 		# 5. update the logic control result
 		@answer.update_logic_control_result(params[:answer_content])
@@ -121,6 +144,26 @@ class AnswersController < ApplicationController
 
 	def finish
 		retval = @answer.finish
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
+
+	def index
+		answers = @survey.answers
+		respond_to do |format|
+			format.json	{ render_json_auto(answers) and return }
+		end
+	end
+
+	def show
+		respond_to do |format|
+			format.json	{ render_json_auto(@answer) and return }
+		end
+	end
+
+	def destroy
+		retval = @answer.delete
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
