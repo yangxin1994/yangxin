@@ -26,7 +26,10 @@ module Jobs
 				puts "survey can not find by id: #{survey_id}"
 				return false
 			end
+			# the publish status of the survey is set as closed
 			survey.publish_status = 1
+			# the result of the survey should be analyzed
+			survey.refresh_results
 			survey.save
 		end
 

@@ -41,8 +41,8 @@ class Survey
 	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
 	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
 	field :quota_stats, :type => Hash
-	field :filters, :type => Array, default: []
-	field :filters_stats, :type => Array, default: []
+	field :filters, :type => Hash, default: {}
+	field :filters_stats, :type => Hash, default: {}
 	field :quota_template_question_page, :type => Array, default: []
 	field :logic_control, :type => Array, default: []
 	field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
@@ -80,6 +80,7 @@ class Survey
 	has_many :answers
 	has_many :email_histories
 
+	has_one :result
 
 	scope :all_but_new, lambda { where(:new_survey => false) }
 	scope :normal, lambda { where(:status.gt => -1) }
@@ -1076,7 +1077,7 @@ class Survey
 		self.filters.length.times { filters_stats << 0 }
 		answers.each do |answer|
 			self.filters.each_with_index do |filter, filter_index|
-				if answer.satisfy_conditions(rule["conditions"])
+				if answer.satisfy_conditions(filter["conditions"])
 					filters_stats[filter_index] = filters_stats[filter_index] + 1
 				end
 			end
@@ -1142,24 +1143,51 @@ class Survey
 		return Marshal.load(Marshal.dump(self.filters))
 	end
 
-	def show_filter(filter_index)
+	def show_filter(filter_name)
 		filters = Filters.new(self.filters)
-		return filters.show_filter(filter_index)
+		return filters.show_filter(filter_name)
 	end
 
-	def add_filter(filter)
+	def add_filter(filter_name, filter_conditions)
 		filters = Filters.new(self.filters)
-		return filters.add_filter(filter, self)
+		return filters.add_filter(filter_name, filter_conditions, self)
 	end
 
-	def update_filter(filter_index, filter)
+	def update_filter(filter_name, filter_conditions)
 		filters = Filters.new(self.filters)
-		return filters.update_filter(filter_index, filter, self)
+		return filters.update_filter(filter_name, filter_conditions, self)
 	end
 
-	def delete_filter(filter_index)
+	def update_filter_name(filter_name, new_filter_name)
 		filters = Filters.new(self.filters)
-		return filters.delete_filter(filter_index, self)
+		return filter.update_filter_name(filter_name, new_filter_name, self)
+	end
+
+	def delete_filter(filter_name)
+		filters = Filters.new(self.filters)
+		return filters.delete_filter(filter_name, self)
+	end
+
+	def show_result(filter_name)
+		return ErrorEnum::FILTER_NOT_EXIST if !filter_name.blank? && !self.filters.has_key?(filter_name)
+		filter_name = "default" if filter_name.blank?
+		result = self.results.find_or_create_by_filter_name(filter_name)
+		return result
+	end
+
+	def refresh_result(filter_name)
+		return ErrorEnum::FILTER_NOT_EXIST if !filter_name.blank? && !self.filters.has_key?(filter_name)
+		filter_name = "default" if filter_name.blank?
+		result = self.results.refresh_or_create_by_filter_name(filter_name)
+		return result
+	end
+
+	def refresh_results
+		self.filters.each_key do |filter_name|
+			self.results.refresh_or_create_by_filter_name(filter_name)
+		end
+		self.results.refresh_or_create_by_filter_name("default")
+		return true
 	end
 
 	class Filters
@@ -1168,43 +1196,55 @@ class Survey
 			@filters = Marshal.load(Marshal.dump(filters))
 		end
 
-		def show_filter(filter_index)
-			return ErrorEnum::FILTER_NOT_EXIST if @filters.length <= filter_index
-			return @filters[filter_index]
+		def show_filter(filter_name)
+			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
+			return @filters[filter_name]
 		end
 
-		def add_filter(filter, survey)
+		def add_filter(filter_name, filter_conditions, survey)
 			# check errors
-			filter["conditions"].each do |condition|
+			return ErrorEnum::FILTER_EXIST if survey.filters.has_key?(filter_name)
+			return ErrorEnum::FILTER_NAME_BLANK if filter_name.blank?
+			filter_conditions.each do |condition|
 				condition["condition_type"] = condition["condition_type"].to_i
 				return ErrorEnum::WRONG_FILTER_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
 			end
 			# add the rule
-			@filters << filter
+			@filters[filter_name] = filter_conditions
 			survey.filters = self.serialize
 			survey.save
 			return survey.filters
 		end
 
-		def delete_filter(filter_index, survey)
+		def delete_filter(filter_name, survey)
 			# check errors
-			return ErrorEnum::FILTER_NOT_EXIST if @filters.length <= rule_index
+			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
 			# delete the rule
-			@filters.delete_at(filter_index)
+			@filters.delete(filter_name)
 			survey.filters = self.serialize
 			survey.save
 			return survey.filters
 		end
 
-		def update_filter(filter_index, filter, survey)
+		def update_filter_name(filter_name, new_filter_name, survey)
 			# check errors
-			return ErrorEnum::FILTER_NOT_EXIST if @filters.length <= filter_index
-			filter["conditions"].each do |condition|
+			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
+			@filters[new_filter_name] = @filters[filter_name]
+			@filters.delete(filter_name)
+			survey.filters = self.serialize
+			survey.save
+			return survey.filters
+		end
+
+		def update_filter(filter_name, filter_conditions, survey)
+			# check errors
+			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
+			filter_conditions.each do |condition|
 				condition["condition_type"] = condition["condition_type"].to_i
 				return ErrorEnum::WRONG_FILTER_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"].to_i)
 			end
 			# update the rule
-			@filters[filter_index] = filter
+			@filters[filter_name] = filter_conditions
 			survey.filters = self.serialize
 			survey.save
 			return survey.filters

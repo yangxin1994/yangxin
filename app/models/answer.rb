@@ -34,7 +34,10 @@ class Answer
 
 	field :preview_id, :type => String, :default => ""
 
+	field :finished_at, :type => Integer
+
 	scope :not_preview, lambda { where(:preview_id => "") }
+	scope :finished, lambda { where(:status => 2) }
 
 	belongs_to :user
 	belongs_to :survey
@@ -722,6 +725,8 @@ class Answer
 	def auto_finish
 		if self.is_edit && !self.suvey.is_pageup_allowed && !self.template_answer_content.has_value?(nil) && !self.answer_content.has_value?(nil)
 			self.set_finish
+			self.finished_at = Time.now.to_i
+			self.save
 			self.update_quota
 		end
 	end
@@ -741,6 +746,8 @@ class Answer
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.template_answer_content.has_value?(nil)
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)
 		self.set_finish
+		self.finished_at = Time.now.to_i
+		self.save
 		self.update_quota
 		return true
 	end
