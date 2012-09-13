@@ -786,16 +786,17 @@ class Survey
 		return new_page
 	end
 
+	# split page before question_id
 	def split_page(page_index, question_id, page_name_1, page_name_2)
 		current_page = self.pages[page_index]
 		return ErrorEnum::OVERFLOW if current_page.nil?
 		if question_id.to_s == "-1"
-			question_index = 0
+			question_index = current_page["questions"].length
 		else
 			question_index = -1
 			current_page["questions"].each_with_index do |q_id, q_index|
 				if q_id == question_id
-					question_index = q_index + 1
+					question_index = q_index
 					break
 				end
 			end
