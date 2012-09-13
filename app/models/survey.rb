@@ -1073,15 +1073,16 @@ class Survey
 	def refresh_filters_stats
 		# only make statisics from the answers that are not preview answers
 		answers = self.answers.not_preview
-		filters_stats = []
-		self.filters.length.times { filters_stats << 0 }
+		filters_stats = {}
 		answers.each do |answer|
-			self.filters.each_with_index do |filter, filter_index|
-				if answer.satisfy_conditions(filter["conditions"])
-					filters_stats[filter_index] = filters_stats[filter_index] + 1
+			self.filters.each do |filter_name, filter_conditions|
+				filter_stats[filter_name] = 0 if filter_stats[filter_name].nil?
+				if answer.satisfy_conditions(filter_conditions)
+					filters_stats[filter_name] = filters_stats[filter_name] + 1
 				end
 			end
 		end
+		filters_stats["_default"] = answers.length
 		self.filters_stats = filters_stats
 		self.save
 	end
@@ -1170,14 +1171,14 @@ class Survey
 
 	def show_result(filter_name)
 		return ErrorEnum::FILTER_NOT_EXIST if !filter_name.blank? && !self.filters.has_key?(filter_name)
-		filter_name = "default" if filter_name.blank?
+		filter_name = "_default" if filter_name.blank?
 		result = self.results.find_or_create_by_filter_name(filter_name)
 		return result
 	end
 
 	def refresh_result(filter_name)
 		return ErrorEnum::FILTER_NOT_EXIST if !filter_name.blank? && !self.filters.has_key?(filter_name)
-		filter_name = "default" if filter_name.blank?
+		filter_name = "_default" if filter_name.blank?
 		result = self.results.refresh_or_create_by_filter_name(filter_name)
 		return result
 	end
@@ -1186,7 +1187,7 @@ class Survey
 		self.filters.each_key do |filter_name|
 			self.results.refresh_or_create_by_filter_name(filter_name)
 		end
-		self.results.refresh_or_create_by_filter_name("default")
+		self.results.refresh_or_create_by_filter_name("_default")
 		return true
 	end
 

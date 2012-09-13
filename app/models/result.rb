@@ -21,7 +21,7 @@ class Result
 
 	def answers
 		answers = self.survey.answers.not_preview.finished
-		return answers if self.filter_name == "default"
+		return answers if self.filter_name == "_default"
 		filter_conditions = self.survey.filters[self.filter_name]
 		filtered_answers = []
 		answers.each do |a|
@@ -49,7 +49,9 @@ class Result
 	def refresh
 		answers = self.answers
 		self.analyze_time(answers)
+		self.analyze_region(answers)
 		self.analyze_channel(answers)
+		self.analyze_answers(answers)
 		self.save
 	end
 
@@ -104,20 +106,52 @@ class Result
 	end
 
 
-	def self.sample_attr_analysis(question, answers, analysis_params)
-		# 1. the total answer number and the number of answers that answers this question
+	def analyze_answers(answers)
+		self.answer_result["total_answer_number"] = answers.length
 
+		answers_transform = {}
+		survey.pages.each do |page|
+			page["questions"].each do |q_id|
+				answers_transform[q_id] = []
+			end
+		end
+		survey.quota_template_question_page.each do |q_id|
+			answers_transform[q_id] = []
+		end
+
+		answers.each do |answer|
+			all_answer_content = answer.answer_content.mrege(answer.template_answer_content)
+			all_answer_content.each do |q_id, question_answer|
+				answers_transform[q_id] << question_answer if question_answer != {}
+			end
+		end
+
+		answers_transform.each do |q_id, question_answer_ary|
+			self.answer_result[q_id] = [question_answer_ary.length, analyze_answers(q_id, question_answer_ary)]
+		end
 	end
 
-	def self.analysis_choice
+	def analyze_answers(q_id, answer_ary)
+		question = Question.find_by_id(q_id)
+		case question.question_type
+		when QuestionTypeEnum::CHOICE_QUESTION
+			return analyze_choice(answer_ary)
+		when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
+			return analyze_choice(answer_ary)
+		when QuestionTypeEnum::NUMBER_BLANK_QUESTION
+			return analyze_choice(answer_ary)
+		end
+	end
+
+	def analyze_choice(answer_ary)
 		
 	end
 
-	def self.analysis_matrix_choice
+	def analyze_matrix_choice(answer_ary)
 		
 	end
 
-	def self.analysis_number
+	def analyze_number_blank(answer_ary)
 		
 	end
 end
