@@ -144,6 +144,7 @@ OopsData::Application.routes.draw do
 			end
 			member do
 				get 'convert_template_question_to_normal_question'
+				put 'move'
 			end
 		end
 		resources :logic_controls
@@ -167,7 +168,6 @@ OopsData::Application.routes.draw do
 	match 'surveys/:survey_id/pages/:page_index/split' => 'pages#split', :via => :put
 	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/combine' => 'pages#combine', :via => :put
 	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/clone' => 'pages#clone'
-	match 'surveys/:survey_id/pages/:page_index/questions/:question_id_1/:question_id_2/move' => 'questions#move'
 	match 'surveys/:survey_id/pages/:page_index/questions/:question_id_1/:question_id_2/clone' => 'questions#clone'
 
 	resources :materials do

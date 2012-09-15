@@ -85,17 +85,18 @@ class QuestionsController < ApplicationController
 	end
 
 
-	#*method*: get
+	#*method*: put
 	#
-	#*url*: /surveys/:survey_id/questions/:question_id_1/:question_id_2/move
+	#*url*: /surveys/:survey_id/questions/:id
 	#
-	#*description*: move a question after another give question
+	#*description*: move a question after another give question, 
+	#if after_question_id is -1, move question_id to the begining of page_index
 	#
 	#*params*:
 	#* survey_id: id of the survey
-	#* question_id_1: id of the question to be moved
+	#* id: id of the question to be moved
 	#* page_index: index of the page, where the question is moved to. Page index starts from 0
-	#* question_id_2: id of the question, after which the above question is moved
+	#* after_question_id: id of the question, after which the above question is moved
 	#
 	#*retval*:
 	#* true: when question is successfully moved
@@ -103,7 +104,7 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def move
-		retval = @survey.move_question(params[:question_id_1], params[:page_index].to_i, params[:question_id_2])
+		retval = @survey.move_question(params[:id], params[:page_index].to_i, params[:after_question_id])
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
