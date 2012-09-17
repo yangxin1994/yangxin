@@ -10,4 +10,8 @@ class Array
 			end
 		end
 	end
+
+	def mean
+		return self.sum / self.length
+	end
 end

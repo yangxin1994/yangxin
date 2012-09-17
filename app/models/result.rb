@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'error_enum'
+require 'array'
 require 'tool'
 class Result
 	include Mongoid::Document
@@ -10,7 +11,6 @@ class Result
 	field :time_result, :type => Hash
 	field :region_result, :type => Hash
 	field :channel_result, :type => Hash
-	field :source_result, :type => Hash
 	field :answers_result, :type => Hash
 
 	belongs_to :survey
@@ -70,37 +70,18 @@ class Result
 		# get data
 		time_ary = answers.map { |a| a.finished_at - a.created_at.to_i }
 		time_ary.sort!
-		# get segment parameters
+		# get segment parameters, 5 segments by default
 		segments = self.time_params["segments"]
-		if segments.nil?
-			segment_num = 5
-			min_time = time_ary[0]
-			max_time = time_ary[-1]
-			interval = (max_time - min_time) - segment_num
-			segments = []
-			1.upto(segment_num - 1) do |i|
-				segments << min_time + i * interval
-			end
-		end
+		segments = segmentation(5, time_ary[0], time_ary[-1]) if segments.blank?
 
 		# make stats of segment results
-		segments << time_ary[-1]
-		segments_result = Array(segments.length, 0)
-		segment_index = 0
-		time_ary.each do |time|
-			if time > segments[segment_index]
-				segment_index = segment_index + 1
-				redo
-			end
-			segments_result[segment_index] = segments_result[segment_index] + 1
-		end
-		self.time_result["segments_result"] = segments_result
+		self.time_result["histogram"] = get_histogram(time_ary, segments)
 
 		# make other stats
 		self.time_params["stats"].each do |stat|
 			case stat
 			when "mean"
-				self.time_result["mean"] = time_ary.sum / time_ary.length
+				self.time_result["mean"] = time_ary.mean
 			end
 		end
 	end
@@ -122,36 +103,167 @@ class Result
 		answers.each do |answer|
 			all_answer_content = answer.answer_content.mrege(answer.template_answer_content)
 			all_answer_content.each do |q_id, question_answer|
-				answers_transform[q_id] << question_answer if question_answer != {}
+				answers_transform[q_id] << question_answer if !question_answer.blank?
 			end
 		end
 
 		answers_transform.each do |q_id, question_answer_ary|
-			self.answer_result[q_id] = [question_answer_ary.length, analyze_answers(q_id, question_answer_ary)]
+			self.answer_result[q_id] = [question_answer_ary.length, analyze_one_question_answers(q_id, question_answer_ary)]
 		end
 	end
 
-	def analyze_answers(q_id, answer_ary)
+	def analyze_one_question_answers(q_id, answer_ary)
 		question = Question.find_by_id(q_id)
 		case question.question_type
 		when QuestionTypeEnum::CHOICE_QUESTION
-			return analyze_choice(answer_ary)
+			return analyze_choice(question.issue, answer_ary)
 		when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
-			return analyze_choice(answer_ary)
+			return analyze_matrix_choice(question.issue, answer_ary)
 		when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-			return analyze_choice(answer_ary)
+			return analyze_number_blank(question.issue, answer_ary)
+		when QuestionTypeEnum::TIME_BLANK_QUESTION
+			return analyze_time_blank(question.issue, answer_ary)
+		when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+			return analyze_address_blank(question.issue, answer_ary)
+		when QuestionTypeEnum::BLANK_QUESTION
+			return analyze_blank(question.issue, answer_ary)
+		when QuestionTypeEnum::MATRIX_BLANK_QUESTION
+			return analyze_matrix_blank(question.issue, answer_ary)
+		when QuestionTypeEnum::TABLE_QUESTION
+			return analyze_table(question.issue, answer_ary)
+		when QuestionTypeEnum::CONST_SUM_QUESTION
+			return analyze_const_sum(question.issue, answer_ary)
+		when QuestionTypeEnum::SORT_QUESTION
+			return analyze_sort(question.issue, answer_ary)
+		when QuestionTypeEnum::RANK_QUESTION
+			return analyze_rank(question.issue, answer_ary)
 		end
 	end
 
-	def analyze_choice(answer_ary)
+	def analyze_choice(issue, answer_ary)
+		input_ids = issue["choices"].map { |e| e["input_id"] }
+		input_ids << issue["other_item"]["input_id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		result = {}
+		input_ids.each { |input_id| result[input_id] = 0 }
+		answer_ary.each do |answer|
+			answer["selection"].each do |input_id|
+				result[input_id] = result[input_id] + 1 if !result[input_id].nil?
+			end
+		end
+		return result
+	end
+
+	def analyze_matrix_choice(issue, answer_ary)
+		input_ids = issue["choices"].map { |e| e["input_id"] }
+		result = {}
+		issue["row_id"].each do |row_id|
+			input_ids.each do |input_id|
+				result["#{row_id}-#{input_id}"] = 0
+			end
+		end
+
+		answer_ary.each do |answer|
+			answer.each_with_index do |row_answer, row_index|
+				row_id = issue["row_id"][row_index]
+				row_answer.each do |input_id|
+					result["#{row_id}-#{input_id}"] = result["#{row_id}-#{input_id}"] + 1 if !result["#{row_id}-#{input_id}"].nil?
+				end
+			end
+		end
+		return result
+	end
+
+	def analyze_number_blank(issue, answer_ary)
+		result = {}		
+		answer_ary.map! { |answer| answer.to_f }
+		answer_ary.sort!
+		result["mean"] = answer_ary.mean
+
+		# segmentation, 5 segments by default
+		segments = segmentation(5, answer_ary[0], answer_ary[-1])
+
+		# make stats of segment results
+		result["histogram"] = get_histogram(answer_ary, segments)
+
+		return result
+	end
+
+	def analyze_time_blank(issue, answer_ary)
+		result = {}
+		if issue["format"].to_i & 64
+			# this is a date question
+			answer_ary = answer_ary.map! do |answer|
+				Time.mktime(answer[0], answer[1], answer[2], answer[4], answer[5], answer[6], answer[7]).to_i
+			end
+		else
+			# this is a time question
+			answer_ary = answer_ary.map! do |answer|
+				Tool.convert_to_int(answer)
+			end
+		end
+		answer_ary.sort!
+		result["mean"] = answer_ary.mean
+
+		# segmentation, 5 segments by default
+		segments = segmentation(5, answer_ary[0], answer_ary[-1])
+
+		# make stats of segment results
+		result["histogram"] = get_histogram(answer_ary, segments)
+
+		return result
+	end
+
+	def analyze_address_blank(issue, answer_ary)
 		
 	end
 
-	def analyze_matrix_choice(answer_ary)
+	def analyze_blank(issue, answer_ary)
 		
 	end
 
-	def analyze_number_blank(answer_ary)
+	def analyze_matrix_blank(issue, answer_ary)
 		
+	end
+
+	def analyze_table(issue, answer_ary)
+		
+	end
+
+	def analyze_const_sum(issue, answer_ary)
+		
+	end
+
+	def analyze_sort(issue, answer_ary)
+		
+	end
+
+	def analyze_rank(issue, answer_ary)
+		
+	end
+
+
+
+
+	def segmentation(segment_number, min_value, max_value)
+		interval = (max_value - min_value) * 1.0 / segment_num
+		segments = []
+		1.upto(segment_num - 1) do |i|
+			segments << min_value + i * interval
+		end
+		segments << max_value
+		return segments
+	end
+
+	def get_histogram(data, segments)
+		histogram = Array(segments.length, 0)
+		segment_index = 0
+		data.each do |value|
+			if value > segments[segment_index]
+				segment_index = segment_index + 1
+				redo
+			end
+			segments_result[segment_index] = segments_result[segment_index] + 1
+		end
+		return histogram
 	end
 end

@@ -57,4 +57,19 @@ module Tool
 		numbers = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"]
 		return numbers[number.to_i%10]
 	end
+
+	def convert_to_int(time_ary)
+		seconds = []
+		seconds[6] = 1					# second
+		seconds[5] = seconds[6] * 60	# minute
+		seconds[4] = seconds[5] * 60	# hour
+		seconds[3] = seconds[4] * 24	# day
+		seconds[2] = seconds[3] * 7		# week
+		seconds[1] = seconds[3] * 30	# month
+		result = 0
+		1.upto(6) do |index|
+			result = result + seconds[index] * time_ary[index]
+		end
+		return result
+	end
 end

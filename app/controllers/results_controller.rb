@@ -39,7 +39,4 @@ class ResultsController < ApplicationController
 			format.json	{ render_json_auto(result) and return }
 		end
 	end
-
-
-
 end
