@@ -39,6 +39,12 @@ class IpInfo
 		#*retval*:
 		# json data of one ip info , or ErrorEnum::IP_REQUEST_SINA_ERROR
 		def get_ip_info_from_sina_api(ip_address)
+			# China Mainland: 218.192.3.45
+			# API return: var remote_ip_info = {"ret":1,"start":"218.192.0.0","end":"218.192.7.255","country":"\u4e2d\u56fd","province":"\u5e7f\u4e1c","city":"\u5e7f\u5dde","district":"","isp":"\u6559\u80b2\u7f51","type":"\u5b66\u6821","desc":"\u5e7f\u5dde\u5927\u5b66\u7eba\u7ec7\u670d\u88c5\u5b66\u9662"};
+			# HK ip: 59.188.1.101
+			# API return: var remote_ip_info = {"ret":1,"start":"59.188.0.0","end":"59.188.102.255","country":"\u4e2d\u56fd","province":"\u9999\u6e2f","city":"","district":"","isp":"","type":"","desc":"Central District"};
+			# America IP: 048.000.000.034
+			# API return: -2
 			retval = Tool.send_get_request("http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=js&ip="+ip_address.to_s)
 
 			retval = retval.body.to_s.match(/{.*}/).to_s
@@ -49,6 +55,8 @@ class IpInfo
 				return json_data if json_data["ret"].to_i == 1
 			end
 
+			return ErrorEnum::IP_REQUEST_SINA_ERROR
+		rescue	
 			return ErrorEnum::IP_REQUEST_SINA_ERROR
 		end
 
@@ -113,10 +121,6 @@ class IpInfo
 			ip = IpInfo.new(:ip => ip_address.strip)
 
 			postcode = get_postcode(information)
-			return postcode if postcode.to_i <= 0
-
-			# now, 
-			# the postcode record must be existed.
 			ip.postcode = postcode
 
 			return ip.postcode if ip.save
@@ -130,6 +134,16 @@ class IpInfo
 		#*retval*:
 		# Postcode object, or ErrorEnum
 		def get_postcode(information)
+			# add some no postcode region
+			if information["province"] == "香港" then
+				pc = Postcode.where(province: "香港").first
+				unless pc
+					information.select!{|k,v| %w(province city postcode).include?(k.to_s)}
+					pc = Postcode.create(information)
+				end
+				pc
+			end
+
 			if information["city"] then
 				#find in Postcode by city
 				pc = Postcode.where(city: information["city"]).first
@@ -140,9 +154,12 @@ class IpInfo
 				# if can not find record in Postcode,
 				# create one 
 				p_code = get_postcode_from_baidu(information["city"].to_s) 
-				return p_code if p_code.to_i <= 0
 
-				information["postcode"] = p_code
+				# if it can find postcode from baidu, store postcode.
+				if p_code.to_i > 0 then
+					information["postcode"] = p_code
+				end
+
 				information.select!{|k,v| %w(province city postcode).include?(k.to_s)}
 
 				# create a postcode record

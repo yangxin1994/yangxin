@@ -43,6 +43,15 @@ class IpInfoTest < ActiveSupport::TestCase
 		assert_equal retval, Postcode.first
 		assert_equal retval["city"], "广州"
 
+		# add
+		retval = IpInfo.find_by_ip("59.188.1.101")
+		assert_equal IpInfo.all.count, 3
+		assert_equal Postcode.all.count, 2
+
+		assert_equal retval, Postcode.last
+		assert_equal retval["city"], ""
+		assert_equal retval["province"], "香港"
+
 		clear(IpInfo, Postcode)
 	end
 
