@@ -83,6 +83,8 @@ class IpInfo
 
 			retval = retval=="" ? ErrorEnum::POSTCODE_REQUEST_BAIDU_ERROR : retval
 			return retval
+		rescue
+			return ErrorEnum::POSTCODE_REQUEST_BAIDU_ERROR
 		end
 
 		#*description*: find ip info from ip_address
