@@ -105,7 +105,11 @@ OopsData::Application.routes.draw do
 	match 'google_connect' => 'sessions#google_connect', :as => :google_connect
 	match 'qihu_connect' => 'sessions#qihu_connect', :as => :qihu_connect
 
-	resources :users
+	resources :users do 
+		collection do 
+			get :get_basic_info
+		end
+	end
 	match 'update_information' => 'users#update_information', :as => :update_information, :via => [:post]
 	match 'reset_password' => 'users#reset_password', :as => :reset_password, :via => [:post]
 
