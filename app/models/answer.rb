@@ -26,7 +26,7 @@ class Answer
 	field :username, :type => String, default: ""
 	field :password, :type => String, default: ""
 
-	field :region, :type => String, default: ""
+	field :region, :type => Integer, default: -1
 	field :channel, :type => Integer
 	field :ip_address, :type => String, default: ""
 
@@ -139,7 +139,7 @@ class Answer
 	def self.create_answer(operator, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		answer = Answer.new(channel: channel, ip: ip, region: IpInfo.find_by_id(ip).postcode, username: username, password: password)
+		answer = Answer.new(channel: channel, ip: ip, region: Address.find_address_code_by_ip(ip).postcode, username: username, password: password)
 
 		# initialize the answer content
 		answer_content = {}
@@ -331,7 +331,7 @@ class Answer
 			next if quota_stats["answer_number"][index] >= rule["amount"]
 			rule["conditions"].each do |condition|
 				# if the answer's ip, channel, or region violates one condition of the rule, move to the next rule
-				next if condition["condition_type"] == 2 && self.region != condition["value"]
+				next if condition["condition_type"] == 2 && !Address.satisfy_region_code?(self.region, condition["value"])
 				next if condition["condition_type"] == 3 && self.channel != condition["value"]
 				next if condition["condition_type"] == 4 && Tool.check_ip_mask(self.ip, condition["value"])
 			end
@@ -366,7 +366,7 @@ class Answer
 				require_answer = condition["value"]
 				satisfy = Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], require_answer)
 			when "2"
-				satisfy = condition["value"] == answer["region"]
+				satisfy = Address.satisfy_region_code?(self.region, condition["value"])
 			when "3"
 				satisfy = condition["value"] == answer["channel"].to_s
 			when "4"
