@@ -13,6 +13,11 @@ class IpInfo
 	# instance methods
 	#++
 
+	def to_s
+		return self.postcode.to_s if self.postcode
+		return ip
+	end
+
 	#--
 	# class methods
 	#++
@@ -32,6 +37,15 @@ class IpInfo
 			return true
 		end
 
+		# format ip string, it should verify_ip before if using.
+		# Example: 
+		# IpInfo.format_ip("023.000.004.100") == "23.0.4.100"
+		def format_ip(ip_address)
+			r = ""
+			ip_address.to_s.split('.').each{|v| r+=v.gsub(/^(0){2,}/, '0')+'.'}
+			return r[0, r.size - 1]
+		end
+
 		#*description*: get ip info from sina api by ip address
 		#*params*:
 		#* ip_address
@@ -39,12 +53,15 @@ class IpInfo
 		#*retval*:
 		# json data of one ip info , or ErrorEnum::IP_REQUEST_SINA_ERROR
 		def get_ip_info_from_sina_api(ip_address)
+			puts "get_ip_info_from_sina_api ip_address: #{ip_address}"
 			# China Mainland: 218.192.3.45
 			# API return: var remote_ip_info = {"ret":1,"start":"218.192.0.0","end":"218.192.7.255","country":"\u4e2d\u56fd","province":"\u5e7f\u4e1c","city":"\u5e7f\u5dde","district":"","isp":"\u6559\u80b2\u7f51","type":"\u5b66\u6821","desc":"\u5e7f\u5dde\u5927\u5b66\u7eba\u7ec7\u670d\u88c5\u5b66\u9662"};
 			# HK ip: 59.188.1.101
 			# API return: var remote_ip_info = {"ret":1,"start":"59.188.0.0","end":"59.188.102.255","country":"\u4e2d\u56fd","province":"\u9999\u6e2f","city":"","district":"","isp":"","type":"","desc":"Central District"};
-			# America IP: 048.000.000.034
-			# API return: -2
+			# America IP: 48.0.0.34
+			# API return: var remote_ip_info = {"ret":1,"start":"48.0.0.0","end":"48.255.255.255","country":"\u7f8e\u56fd","province":"","city":"","district":"","isp":"","type":"","desc":""};
+			# England IP: 83.170.113.182
+			# API return: var remote_ip_info = {"ret":1,"start":"83.170.64.0","end":"83.170.127.255","country":"\u82f1\u56fd","province":"\u4f26\u6566","city":"","district":"","isp":"","type":"","desc":"\u4f26\u6566"};
 			retval = Tool.send_get_request("http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=js&ip="+ip_address.to_s)
 
 			retval = retval.body.to_s.match(/{.*}/).to_s
@@ -107,6 +124,11 @@ class IpInfo
 			retval = verify_ip(ip_address)
 			return retval if retval != true
 
+			# format ip
+			ip_address = format_ip(ip_address)
+
+			puts "format_ip: #{ip_address}"
+
 			#check that db contains this ip or not.
 			retval = IpInfo.where(ip: ip_address.strip).first
 
@@ -116,6 +138,8 @@ class IpInfo
 			# get ip info from sina api
 			information = get_ip_info_from_sina_api(ip_address)
 			return information if !information.instance_of?(Hash)
+
+			# if it exists information of city, new IpInfo.
 
 			#new ip record
 			ip = IpInfo.new(:ip => ip_address.strip)
@@ -134,16 +158,43 @@ class IpInfo
 		#*retval*:
 		# Postcode object, or ErrorEnum
 		def get_postcode(information)
-			# add some no postcode region
+			information.select!{|k,v| %w(country province city postcode).include?(k.to_s)}
+
+			# if it not China Mainland and records country only.
+			if information["country"] != "中国" then
+				pc = Postcode.where(country: information["country"]).first
+				unless pc
+					pc = Postcode.create(country: information["country"])
+				end
+				return pc
+			end
+
+			# add some no postcode region in China
 			if information["province"] == "香港" then
 				pc = Postcode.where(province: "香港").first
 				unless pc
-					information.select!{|k,v| %w(province city postcode).include?(k.to_s)}
-					pc = Postcode.create(information)
+					pc = Postcode.create(country: "中国", province: "香港")
 				end
-				pc
+				return pc
 			end
 
+			if information["province"] == "澳门" then
+				pc = Postcode.where(province: "澳门").first
+				unless pc
+					pc = Postcode.create(country: "中国", province: "澳门")
+				end
+				return pc
+			end
+
+			if information["province"] == "台湾" then
+				pc = Postcode.where(province: "台湾").first
+				unless pc
+					pc = Postcode.create(country: "中国", province: "台湾")
+				end
+				return pc
+			end
+
+			# if it from China Mainland
 			if information["city"] then
 				#find in Postcode by city
 				pc = Postcode.where(city: information["city"]).first
@@ -160,15 +211,13 @@ class IpInfo
 					information["postcode"] = p_code
 				end
 
-				information.select!{|k,v| %w(province city postcode).include?(k.to_s)}
-
 				# create a postcode record
 				postcode = Postcode.new(information)
 				return ErrorEnum::UNKNOWN_ERROR if !postcode.save
 				return postcode
-			else
-				return ErrorEnum::UNKNOWN_ERROR
-			end		
+			end
+
+			return ErrorEnum::UNKNOWN_ERROR	
 		end
 
 	end
