@@ -164,7 +164,7 @@ OopsData::Application.routes.draw do
 			end
 		end
 
-		resources :results do
+		resources :analyze_results do
 		end
 	end
 	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/move' => 'pages#move'
