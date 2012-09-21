@@ -17,7 +17,7 @@ module Jobs
 			puts "do survey job in #{Time.now}"
 
 			#do
-			action(survey_id)
+      action(survey_id)
 		end
 
 		def self.action(survey_id)
@@ -26,7 +26,10 @@ module Jobs
 				Rails.logger.error "SurveyDeadlineJbo: Survey can not find by id: #{survey_id}"
 				return false
 			end
+			# the publish status of the survey is set as closed
 			survey.publish_status = 1
+			# the result of the survey should be analyzed
+			survey.refresh_results
 			survey.save
 		end
 

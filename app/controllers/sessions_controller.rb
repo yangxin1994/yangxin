@@ -4,7 +4,6 @@ require 'error_enum'
 require 'tool'
 class SessionsController < ApplicationController
 
-	before_filter :require_sign_out, :only => [:create]
 	before_filter :require_sign_in, :only => [:destroy, :init_basic_info, :obtain_user_attr_survey, :init_user_attr_survey, :skip_init_step, :update_user_info, :reset_password, :get_level_information]
 
 	# method: get
@@ -92,7 +91,7 @@ class SessionsController < ApplicationController
 	end
 
 	def show
-		user = user.find_by_auth_key(params[:id])
+		user = User.find_by_auth_key(params[:id])
 		render_json_auto(user.nil?) and return
 	end
 	
@@ -330,9 +329,9 @@ class SessionsController < ApplicationController
 	#* true if succeed
 	#* ErrorEnum ::WRONG_PASSWORD 
 	def reset_password
-		reset_password_retval = @current_user.reset_password(params["old_password"], params["new_password"], params["new_password_confirmation"])
+		reset_password_retval = @current_user.reset_password(params[:old_password], params[:new_password], params[:new_password_confirmation])
 		respond_to do |format|
-			format.json { render_json_s(reset_password_retval) and return }
+			format.json { render_json_auto(reset_password_retval) and return }
 		end
 	end
 

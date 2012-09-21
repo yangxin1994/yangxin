@@ -1,0 +1,28 @@
+# encoding: utf-8
+require 'error_enum'
+require 'array'
+require 'tool'
+class Result
+	include Mongoid::Document
+	include Mongoid::Timestamps
+
+	field :result_key, :type => String
+	field :finished, :type => Boolean, default: false
+
+	belongs_to :survey
+
+	def self.find_by_result_key(result_key)
+		return Result.where(:result_key => result_key).first
+	end
+
+	def self.answers(filter_name)
+		answers = self.survey.answers.not_preview.finished
+		return answers if filter_name == "_default"
+		filter_conditions = self.survey.filters[filter_name]
+		filtered_answers = []
+		answers.each do |a|
+			filtered_answers << a if a.satisfy_conditions(filter_conditions)
+		end
+		return filtered_answers
+	end
+end

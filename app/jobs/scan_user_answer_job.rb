@@ -28,7 +28,7 @@ module Jobs
 		end
 
 		def self.find_answers
-			Answer.where(is_scanned: false).or(
+			Answer.where(is_scanned: false).not_preview.or(
 				{status: 2}, 
 				{status: 1, reject_type: 0}, 
 				{status: 1, reject_type: 2})
