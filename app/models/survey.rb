@@ -80,7 +80,7 @@ class Survey
 	has_many :answers
 	has_many :email_histories
 
-	has_one :result
+	has_many :analyze_results
 
 	scope :all_but_new, lambda { where(:new_survey => false) }
 	scope :normal, lambda { where(:status.gt => -1) }
@@ -1171,26 +1171,11 @@ class Survey
 		return filters.delete_filter(filter_name, self)
 	end
 
-	def show_result(filter_name)
+	def show_analyze_result(filter_name)
 		return ErrorEnum::FILTER_NOT_EXIST if !filter_name.blank? && !self.filters.has_key?(filter_name)
 		filter_name = "_default" if filter_name.blank?
-		result = self.results.find_or_create_by_filter_name(filter_name)
+		result = self.analyze_results.find_or_create_by_filter_name(filter_name)
 		return result
-	end
-
-	def refresh_result(filter_name)
-		return ErrorEnum::FILTER_NOT_EXIST if !filter_name.blank? && !self.filters.has_key?(filter_name)
-		filter_name = "_default" if filter_name.blank?
-		result = self.results.refresh_or_create_by_filter_name(filter_name)
-		return result
-	end
-
-	def refresh_results
-		self.filters.each_key do |filter_name|
-			self.results.refresh_or_create_by_filter_name(filter_name)
-		end
-		self.results.refresh_or_create_by_filter_name("_default")
-		return true
 	end
 
 	class Filters
