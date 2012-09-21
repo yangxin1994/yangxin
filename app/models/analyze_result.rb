@@ -13,7 +13,7 @@ class AnalyzeResult < Result
 	field :answers_result, :type => Hash
 
 	def self.generate_result_key(answers)
-		answer_ids = super
+		answer_ids = answers.map { |e| e._id.to_s }
 		result_key = Digest::MD5.hexdigest("analyze_result-#{answer_ids.to_s}")
 		return result_key
 	end
@@ -28,6 +28,7 @@ class AnalyzeResult < Result
 			self.analyze_region(answers)
 			self.analyze_channel(answers)
 			self.analyze_answers(answers)
+			answers_result.finished = true
 			analyze_result.save
 		end
 		return analyze_result

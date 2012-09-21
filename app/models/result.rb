@@ -7,6 +7,7 @@ class Result
 	include Mongoid::Timestamps
 
 	field :result_key, :type => String
+	field :finished, :type => Boolean, default: false
 
 	belongs_to :survey
 
