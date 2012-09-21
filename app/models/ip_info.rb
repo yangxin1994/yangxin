@@ -53,7 +53,6 @@ class IpInfo
 		#*retval*:
 		# json data of one ip info , or ErrorEnum::IP_REQUEST_SINA_ERROR
 		def get_ip_info_from_sina_api(ip_address)
-			puts "get_ip_info_from_sina_api ip_address: #{ip_address}"
 			# China Mainland: 218.192.3.45
 			# API return: var remote_ip_info = {"ret":1,"start":"218.192.0.0","end":"218.192.7.255","country":"\u4e2d\u56fd","province":"\u5e7f\u4e1c","city":"\u5e7f\u5dde","district":"","isp":"\u6559\u80b2\u7f51","type":"\u5b66\u6821","desc":"\u5e7f\u5dde\u5927\u5b66\u7eba\u7ec7\u670d\u88c5\u5b66\u9662"};
 			# HK ip: 59.188.1.101
@@ -126,8 +125,6 @@ class IpInfo
 
 			# format ip
 			ip_address = format_ip(ip_address)
-
-			puts "format_ip: #{ip_address}"
 
 			#check that db contains this ip or not.
 			retval = IpInfo.where(ip: ip_address.strip).first
