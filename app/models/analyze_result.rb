@@ -25,9 +25,9 @@ class AnalyzeResult < Result
 		if analyze_result.nil?
 			analyze_result = AnalyzeResult.new(:result_key => result_key)
 			analyze_result.analyze_time(answers)
-			self.analyze_region(answers)
-			self.analyze_channel(answers)
-			self.analyze_answers(answers)
+			analyze_result.analyze_region(answers)
+			analyze_result.analyze_channel(answers)
+			analyze_result.analyze_answers(answers)
 			answers_result.finished = true
 			analyze_result.save
 		end
