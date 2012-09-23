@@ -112,7 +112,7 @@ class Survey
 		self.deadline = time
 		return ErrorEnum::UNKNOWN_ERROR unless self.save
 		#create or update job
-		Jobs::SurveyDeadlineJob.update(self.id, time)
+		Jobs.start(:SurveyDeadlineJob, time, survey_id: self.id)
 	end
 
 	def all_questions
