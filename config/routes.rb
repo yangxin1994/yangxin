@@ -114,6 +114,7 @@ OopsData::Application.routes.draw do
 			post 'save_meta_data'
 			get 'clone'
 			get 'recover'
+			get 'export_csv'
 			get 'clear'
 			put 'update_tags'
 			put 'add_tag'

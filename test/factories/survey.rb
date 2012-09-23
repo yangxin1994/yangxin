@@ -1,4 +1,4 @@
-# encoding: utf-8
+# coding: utf-8
 FactoryGirl.define do
 
   factory :survey_with_issue, class: Survey do
@@ -36,11 +36,11 @@ FactoryGirl.define do
 
     status 8
   end
-  factory :survey_with_issue_and_answer, class: Answer do
+  factory :answer_with_issue, class: Answer do
     @survey = FactoryGirl.create(:survey_with_issue)
     @answer_content = {}
     @all_questions_id = @survey.all_questions_id
-
+    # 所有的其他项必须是最后一个,这是答案分析的结构决定的
     @answers = [{"text_input" => "我选择了其它项", "selection" => []},
                 {"text_input" => "我选择了其它项", "selections" => ["1", "3"]},
                 ["1", "2"],
@@ -54,18 +54,21 @@ FactoryGirl.define do
                 ["北京市", "北京市", "朝阳区", "大屯东路金泉家园", "000000"],
                 ["组合文本填充题的答案", 123.123, "0312 4566456"],
                 ["foobar@gmail.com", "www.google.com", ["北京市", "北京市", "朝阳区", "大屯东路金泉家园", "000000"]],
-                ["foobar@gmail.com", "www.google.com", "www.baidu.com", ["北京市", "北京市", "朝阳区", "大屯东路金泉家园", "000000"]],
+                [["foobar@gmail.com", "www.google.com", "www.baidu.com", ["北京市", "北京市", "朝阳区", "大屯东路金泉家园", "000000"]],
+                ["foobar@qq.com", "www.bing.com", "www.yahoo.com", ["北京市", "北京市", "Laaa", "大屯东路金泉家园", "000000"]],
+                ["foobar@qq.com", "www.bing.com", "www.yahoo.com", ["北京市", "北京市", "Laaa", "大屯东路金泉家园", "000000"]]],
                 {"text_input" => "其他项",
                  "1" => 20,
                  "2" => 30,
                  "3" => 20,
                  "4" => 30},
                 {"text_input" => "其他项",
-                 "sort_result" => ["3", "2", "1"]},
+                 "sort_result" => ["3", "2", "1", "4"]},
                 {"text_input" => "其他项",
                  "1" => 80,
-                 "2" => 70,
-                 "3" => 50}
+                 "2" => -1,
+                 "3" => 30,
+                 "4" => 60}
                ]
     @answers.each_index do |i|
       @answer_content[@all_questions_id[i].to_s] = @answers[i]

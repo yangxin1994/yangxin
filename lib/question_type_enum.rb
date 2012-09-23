@@ -45,7 +45,6 @@ module QuestionTypeEnum
 		"Url" => URL_BLANK_QUESTION,
 		"Address" => ADDRESS_BLANK_QUESTION,
 		"Time" => TIME_BLANK_QUESTION
-
 	}
 
 end

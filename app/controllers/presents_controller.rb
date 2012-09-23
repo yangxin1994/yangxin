@@ -1,4 +1,4 @@
-# encoding: utf-8
+# coding: utf-8
 class PresentsController < ApplicationController
   #TO DO before_filter
   # presents.json?page=1

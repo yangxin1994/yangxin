@@ -1,4 +1,4 @@
-# encoding: utf-8
+# coding: utf-8
 include QuestionTypeEnum
 FactoryGirl.define do
   factory :single_choice_question, class: Question do
@@ -376,20 +376,20 @@ FactoryGirl.define do
              :video => []})
     issue({:is_rand => false,
            :items => [{:input_id => "1",
-                        :content => {:text => "这是一个文本填充题",
-                                     :image => [],
-                                     :audio => [],
-                                     :video => []}},
+                      :content => {:text => "这是一个文本填充题",
+                                   :image => [],
+                                   :audio => [],
+                                   :video => []}},
                       {:input_id => "2",
-                        :content => {:text => "这是一个数字填充题",
-                                     :image => [],
-                                     :audio => [],
-                                     :video => []}},
+                       :content => {:text => "这是一个数字填充题",
+                                    :image => [],
+                                    :audio => [],
+                                    :video => []}},
                       {:input_id => "3",
-                        :content => {:text => "这是一个电话填充题",
-                                     :image => [],
-                                     :audio => [],
-                                     :video => []}}],
+                       :content => {:text => "这是一个电话填充题",
+                                    :image => [],
+                                    :audio => [],
+                                    :video => []}}],
            :other_item => {:has_other_item => true,
                            :input_id => "4",
                            :content => {:text => "四号其它项",

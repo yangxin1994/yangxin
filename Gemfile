@@ -36,6 +36,8 @@ group :assets do
   gem 'uglifier'
 end
 
+gem 'savon'
+
 gem 'jquery-rails'
 #gem 'mini_captcha', :path => "~/Rrojects/mini_captcha/"
 # attachment

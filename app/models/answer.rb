@@ -36,98 +36,17 @@ class Answer
   STATUS_NAME_ARY = ["edit", "reject", "finish", "redo"]
 
   ##### answer import #####
-  def csv_content
-    cc = []
-    answer_content.each do |k,v|
-      question = Question.find_by_id(k)
-      q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question.question_type}"] + "Io").new(question)
-      cc += q.csv_content(v)
-    end
-    cc
-  end
 
-=begin
-  def csv_content
-    retval = []
-    #header_prefix = "q#{qindex}"
-    input = "-input"
-    i = 0
-    answer_content.each do |k,v|
-      question = Question.find_by_id(k)
-      #answer_case = []
-      case question.question_type
-      ##### CHOICE_QUESTION #####
-      when QuestionTypeEnum::CHOICE_QUESTION
-        if question.issue["max_choice"].to_i > 1
-          question.issue["choices"].each_index do |i|
-            if v["selections"].include?( (i + 1).to_s)
-              retval << "1"
-            else
-              retval << "0"
-            end
-          end
-        else
-          retval << v["selection"]
-        end
-        if question.issue["other_item"]["has_other_item"]
-          retval << v["text_input"]
-        end
-      ##### MATRIX_CHOICE_QUESTION #####
-      when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
-        if question.issue["max_choice"].to_i > 1
-          question.issue["row_id"].each_index do |r|
-            question.issue["choices"].each_index do |i|
-              if v[r].include?( (i + 1).to_s)
-                retval << "1"
-              else
-                retval << "0"
-              end
-            end
-          end
-        else
-          question.issue["row_id"].each_index do |r|
-            retval << v[r]
-          end
-        end
-      ##### TEXT_BLANK_QUESTION..PHONE_BLANK_QUESTION #####
-      when QuestionTypeEnum::TEXT_BLANK_QUESTION..QuestionTypeEnum::PHONE_BLANK_QUESTION
-        retval << v
-      ##### TIME_BLANK_QUESTION #####
-      when QuestionTypeEnum::TIME_BLANK_QUESTION
-        retval << "#{v[0]}年#{v[1]}月#{v[2]}周#{v[3]}天#{v[4]}时#{v[5]}分#{v[6]}秒"
-      ##### ADDRESS_BLANK_QUESTION #####
-      when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
-        retval << v.join(';')
-      ##### BLANK_QUESTION,TABLE_QUESTION #####
-      when QuestionTypeEnum::BLANK_QUESTION, QuestionTypeEnum::TABLE_QUESTION
-        question.issue["inputs"].each_index do |i|
-          retval << v[i]
-        end
-      ##### MATRIX_BLANK_QUESTION #####
-      when QuestionTypeEnum::MATRIX_BLANK_QUESTION
-        question.issue["row_id"].each_index do |r|
-          question.issue["inputs"].each_index do |i|
-            retval << v[i]
-          end
-        end
-      ##### CONST_SUM_QUESTION #####
-      when QuestionTypeEnum::CONST_SUM_QUESTION
 
-      ##### SORT_QUESTION #####
-      when QuestionTypeEnum::SORT_QUESTION
-
-      ##### RANK_QUESTION #####
-      when QuestionTypeEnum::RANK_QUESTION
-
-      end # case
-    end # each block
-    retval
-  end
-=end
   def load_csv(survey=1)
-    CSV.foreach("public/import/test.csv", :headers => true) do |row|
+    filename = "public/import/test.csv"
+    CSV.foreach(filename, :headers => true) do |row|
       p row.to_hash
     end
+  end
+
+  def export_csv
+    
   end
 
   def self.def_status_attr
