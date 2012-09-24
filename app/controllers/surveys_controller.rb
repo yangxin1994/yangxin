@@ -119,6 +119,13 @@ class SurveysController < ApplicationController
 		end
 	end
 
+	def show_quality_control
+		retval = @survey.show_quality_control
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
+
 	#*method*: delete
 	#
 	#*url*: /surveys/:survey_id
@@ -358,6 +365,13 @@ class SurveysController < ApplicationController
 	#* survey_id: id of the suvey to be set
 	def update_deadline
 		retval = @survey.update_deadline(params[:deadline])
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
+
+	def check_progress
+		retval = @survey.check_progress(params[:deadline])
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end

@@ -38,6 +38,7 @@ class Answer
 
 	scope :not_preview, lambda { where(:preview_id => "") }
 	scope :finished, lambda { where(:status => 2) }
+	scope :screened, lambda { where(:status => 1, :reject_type => 2) }
 
 	belongs_to :user
 	belongs_to :survey

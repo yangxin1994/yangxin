@@ -41,7 +41,6 @@ class AnswersController < ApplicationController
 		if answer.nil?
 			# this is the first time that the volonteer opens this survey
 			# for previewing, it is not needed to check captcha, password, channel, ip, or address
-			# pass the checking, create a new answer and check the region, channel, and ip quotas
 			answer = Answer.create_preview_answer(params[:survey_id], params[:preview_id])
 			render_json_auto(answer) and return if answer.class != Answer
 			answer.set_edit

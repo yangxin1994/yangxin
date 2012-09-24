@@ -142,6 +142,8 @@ OopsData::Application.routes.draw do
 			get 'set_random_quality_control_questions'
 			get 'get_random_quality_control_questions'
 			get 'update_deadline'
+			get 'show_quality_control'
+			get 'check_progress'
 		end
 		resources :pages
 		resources :questions do

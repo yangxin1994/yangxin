@@ -277,6 +277,21 @@ class Survey
 		return self.random_quality_control_questions
 	end
 
+	def show_quality_control
+		quality_control = {"is_random_quality_control_questions" => self.random_quality_control_questions}
+		return quality_control if self.random_quality_control_questions
+
+		quality_control_questions = []
+		self.pages.each do |page|
+			page["questions"].each do |q|
+				quality_control_questions << q if q.question_class == 2
+			end
+		end
+		quality_control["quality_control_questions"] = quality_control_questions
+		return quality_control
+		
+	end
+
 	#*description*: remove current survey
 	#
 	#*params*:
@@ -1026,6 +1041,27 @@ class Survey
 			answer.user = current_user
 			return answer
 		end
+	end
+
+	def check_progress
+		progress = {}
+
+		start_publish_time_ary = self.publish_status_historys.start_publish_time
+		end_publish_time_ary = self.publish_status_historys.end_publish_time
+
+		if start_publish_time_ary.blank?
+			progress["duration"] = 0
+		elsif end_publish_time_ary.blank?
+			progress["duration"] = Time.now.to_i - start_publish_time_ary[0]
+		else
+			progress["duration"] = end_publish_time_ary[0] - start_publish_time_ary[0]
+		end
+
+		progress["answer_number"] = self.answers.not_preview.finished.length
+		progress["screen_answer_number"] = self.answers.not_preview.screened
+		progress["quota"] = self.quota
+		progress["quota_stats"] = self.quota_stats
+		return progress
 	end
 
 	def add_quota_template_question(template_question_id)
