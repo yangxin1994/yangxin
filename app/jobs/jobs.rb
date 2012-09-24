@@ -22,7 +22,6 @@ module Jobs
 		Resque.enqueue_at(time, 
 			Jobs.const_get(job_name), 
 			opt)
-			# {"interval_time"=> interval_time.to_i})
 	end
 
 	def self.stop(job_name)

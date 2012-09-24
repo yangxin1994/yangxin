@@ -70,7 +70,7 @@ class RegistrationsController < ApplicationController
 				activate_info = {"email" => params[:user]["email"], "time" => Time.now.to_i}
 				User.activate(activate_info)
 			else
-				Jobs.start(:EmailSendingJob, Time.now.to_i, email_type: "welcome", user: user)
+				Jobs.start(:EmailSendingJob, Time.now.to_i, email_type: "welcome", user_email: user.email)
 				# UserMailer.welcome_email(user).deliver
 			end
 			# succesfully registered
@@ -151,7 +151,7 @@ class RegistrationsController < ApplicationController
 		end
 		
 		# send activate email
-		Jobs.start(:EmailSendingJob, Time.now.to_i, email_type: "activate", user: user)
+		Jobs.start(:EmailSendingJob, Time.now.to_i, email_type: "activate", user_email: user.email)
 		# UserMailer.activate_email(user).deliver
 
 		flash[:notice] = "激活邮件已发送，请到您的邮箱中点击激活链接进行激活"

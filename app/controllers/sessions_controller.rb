@@ -209,7 +209,7 @@ class SessionsController < ApplicationController
 		end
 
 		# send password email
-		Jobs.start(:EmailSendingJob, Time.now.to_i, email_type: "password", user: user)
+		Jobs.start(:EmailSendingJob, Time.now.to_i, email_type: "password", user_email: user.email)
 		# UserMailer.password_email(user).deliver
 
 		flash[:notice] = "重置密码邮件已发送，请到您的邮箱中点击链接进行密码重置"
