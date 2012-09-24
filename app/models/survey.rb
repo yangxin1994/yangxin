@@ -1236,6 +1236,9 @@ class Survey
 	field :user_attr_survey, :type => Boolean, default: false
 	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
 	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
+	field :quota_stats, :type => Hash
+	field :filters, :type => Hash, default: {}
+	field :filters_stats, :type => Hash, default: {}
 	field :quota_template_question_page, :type => Array, default: []
 	field :logic_control, :type => Array, default: []
 	field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
@@ -1254,7 +1257,6 @@ class Survey
 			"password_list" => [],
 			"username_password_list" => []}}
 	field :random_quality_control_questions, :type => Boolean, default: false
-	field :quota_stats, :type => Hash
 	field :deadline, :type => Integer
 
 	belongs_to :user
@@ -1274,6 +1276,7 @@ class Survey
 	has_many :answers
 	has_many :email_histories
 
+	has_many :analyze_results
 
 	scope :all_but_new, lambda { where(:new_survey => false) }
 	scope :normal, lambda { where(:status.gt => -1) }
@@ -1304,9 +1307,8 @@ class Survey
 		return ErrorEnum::SURVEY_DEADLINE_ERROR if time <= Time.now.to_i
 		self.deadline = time
 		return ErrorEnum::UNKNOWN_ERROR unless self.save
-
 		#create or update job
-		Jobs::SurveyDeadlineJob.update(self.id, time)
+		Jobs.start(:SurveyDeadlineJob, time, survey_id: self.id)
 	end
 
 	def all_questions
@@ -1362,6 +1364,8 @@ class Survey
 		end
 		survey_obj["quota"] = Marshal.load(Marshal.dump(self.quota))
 		survey_obj["quota_stats"] = Marshal.load(Marshal.dump(self.quota_stats))
+		survey_obj["filters"] = Marshal.load(Marshal.dump(self.filters))
+		survey_obj["filters_stats"] = Marshal.load(Marshal.dump(self.filters_stats))
 		survey_obj["logic_control"] = Marshal.load(Marshal.dump(self.logic_control))
 		survey_obj["access_control_setting"] = Marshal.load(Marshal.dump(self.access_control_setting))
 		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
@@ -1879,8 +1883,9 @@ class Survey
 			return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
 		end
 		question_index_to_be_delete = from_page["questions"].index(question_id_1)
+		from_page["questions"][question_index_to_be_delete] = ""
 		to_page["questions"].insert(question_index+1, question_id_1)
-		from_page["questions"].delete_at(question_index_to_be_delete)
+		from_page["questions"].delete("")
 		return self.save
 	end
 
@@ -2006,16 +2011,17 @@ class Survey
 		return new_page
 	end
 
+	# split page before question_id
 	def split_page(page_index, question_id, page_name_1, page_name_2)
 		current_page = self.pages[page_index]
 		return ErrorEnum::OVERFLOW if current_page.nil?
 		if question_id.to_s == "-1"
-			question_index = 0
+			question_index = current_page["questions"].length
 		else
 			question_index = -1
 			current_page["questions"].each_with_index do |q_id, q_index|
 				if q_id == question_id
-					question_index = q_index + 1
+					question_index = q_index
 					break
 				end
 			end
@@ -2261,13 +2267,31 @@ class Survey
 		return quota.delete_rule(quota_rule_index, self)
 	end
 
+	def refresh_filters_stats
+		# only make statisics from the answers that are not preview answers
+		answers = self.answers.not_preview
+		filters_stats = {}
+		answers.each do |answer|
+			self.filters.each do |filter_name, filter_conditions|
+				filter_stats[filter_name] = 0 if filter_stats[filter_name].nil?
+				if answer.satisfy_conditions(filter_conditions)
+					filters_stats[filter_name] = filters_stats[filter_name] + 1
+				end
+			end
+		end
+		filters_stats["_default"] = answers.length
+		self.filters_stats = filters_stats
+		self.save
+	end
+
 	def refresh_quota_stats
-		answers = self.answers
+		# only make statisics from the answers that are not preview answers
+		answers = self.answers.not_preview
 		quota_stats = {"quota_satisfied" => true, "answer_number" => []}
 		self.quota["rules"].length.times { quota_stats["answer_number"] << 0 }
 		answers.each do |answer|
 			self.quota["rules"].each_with_index do |rule, rule_index|
-				if answer.satisfy_quota_conditions(rule["conditions"])
+				if answer.satisfy_conditions(rule["conditions"])
 					quota_stats["answer_number"][rule_index] = quota_stats["answer_number"][rule_index] + 1
 				end
 			end
@@ -2311,6 +2335,108 @@ class Survey
 	def delete_logic_control_rule(logic_control_rule_index)
 		logic_control = LogicControl.new(self.logic_control)
 		return logic_control.delete_rule(logic_control_rule_index, self)
+	end
+
+	def list_filters
+		return Marshal.load(Marshal.dump(self.filters))
+	end
+
+	def show_filter(filter_name)
+		filters = Filters.new(self.filters)
+		return filters.show_filter(filter_name)
+	end
+
+	def add_filter(filter_name, filter_conditions)
+		filters = Filters.new(self.filters)
+		return filters.add_filter(filter_name, filter_conditions, self)
+	end
+
+	def update_filter(filter_name, filter_conditions)
+		filters = Filters.new(self.filters)
+		return filters.update_filter(filter_name, filter_conditions, self)
+	end
+
+	def update_filter_name(filter_name, new_filter_name)
+		filters = Filters.new(self.filters)
+		return filter.update_filter_name(filter_name, new_filter_name, self)
+	end
+
+	def delete_filter(filter_name)
+		filters = Filters.new(self.filters)
+		return filters.delete_filter(filter_name, self)
+	end
+
+	def show_analyze_result(filter_name)
+		return ErrorEnum::FILTER_NOT_EXIST if !filter_name.blank? && !self.filters.has_key?(filter_name)
+		filter_name = "_default" if filter_name.blank?
+		result = self.analyze_results.find_or_create_by_filter_name(filter_name)
+		return result
+	end
+
+	class Filters
+		CONDITION_TYPE = (0..4).to_a
+		def initialize(filters)
+			@filters = Marshal.load(Marshal.dump(filters))
+		end
+
+		def show_filter(filter_name)
+			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
+			return @filters[filter_name]
+		end
+
+		def add_filter(filter_name, filter_conditions, survey)
+			# check errors
+			return ErrorEnum::FILTER_EXIST if survey.filters.has_key?(filter_name)
+			return ErrorEnum::FILTER_NAME_BLANK if filter_name.blank?
+			filter_conditions.each do |condition|
+				condition["condition_type"] = condition["condition_type"].to_i
+				return ErrorEnum::WRONG_FILTER_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
+			end
+			# add the rule
+			@filters[filter_name] = filter_conditions
+			survey.filters = self.serialize
+			survey.save
+			return survey.filters
+		end
+
+		def delete_filter(filter_name, survey)
+			# check errors
+			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
+			# delete the rule
+			@filters.delete(filter_name)
+			survey.filters = self.serialize
+			survey.save
+			return survey.filters
+		end
+
+		def update_filter_name(filter_name, new_filter_name, survey)
+			# check errors
+			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
+			@filters[new_filter_name] = @filters[filter_name]
+			@filters.delete(filter_name)
+			survey.filters = self.serialize
+			survey.save
+			return survey.filters
+		end
+
+		def update_filter(filter_name, filter_conditions, survey)
+			# check errors
+			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
+			filter_conditions.each do |condition|
+				condition["condition_type"] = condition["condition_type"].to_i
+				return ErrorEnum::WRONG_FILTER_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"].to_i)
+			end
+			# update the rule
+			@filters[filter_name] = filter_conditions
+			survey.filters = self.serialize
+			survey.save
+			return survey.filters
+		end
+
+		def serialize
+			filters_object = @filters
+			return filters_object
+		end
 	end
 
 	class Quota

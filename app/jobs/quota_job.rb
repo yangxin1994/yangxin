@@ -4,7 +4,7 @@ module Jobs
 
 	class QuotaJob
 
-		# store last time interval_time that use to remove_delayed job
+		@recurring = true
 		@queue = :quota_job_queue
 
 		# resque auto involve method
@@ -32,7 +32,7 @@ module Jobs
 			# 5. prepare for the next execuation
 			Resque.enqueue_at(Time.now + interval_time.to_i, 
 				QuotaJob, 
-				{"interval_time"=> interval_time.to_i}) 		
+				{interval_time: interval_time.to_i}) 		
 		end
 
 		def self.send_emails(rule_arr, samples_found)

@@ -195,6 +195,17 @@ class QuestionsControllerTest < ActionController::TestCase
 		assert_equal pages[2][2], survey_obj["pages"][2]["questions"][1]
 		assert_equal pages[2][3], survey_obj["pages"][2]["questions"][2]
 		assert_equal pages[2][1], survey_obj["pages"][2]["questions"][3]
+
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		get :move, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => pages[2][1], :question_id_2 => -1, :auth_key => auth_key
+		result = JSON.parse(@response.body)
+		assert_equal true, result["value"]
+		sign_out(auth_key)
+		survey_obj = get_survey_obj(jesse.email, jesse.password, survey_id)
+		assert_equal pages[2][1], survey_obj["pages"][2]["questions"][0]
+		assert_equal pages[2][0], survey_obj["pages"][2]["questions"][1]
+		assert_equal pages[2][2], survey_obj["pages"][2]["questions"][2]
+		assert_equal pages[2][3], survey_obj["pages"][2]["questions"][3]
 	end
 
 	test "should clone question" do

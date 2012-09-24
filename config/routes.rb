@@ -105,7 +105,11 @@ OopsData::Application.routes.draw do
 	match 'google_connect' => 'sessions#google_connect', :as => :google_connect
 	match 'qihu_connect' => 'sessions#qihu_connect', :as => :qihu_connect
 
-	resources :users
+	resources :users do 
+		collection do 
+			get :get_basic_info
+		end
+	end
 	match 'update_information' => 'users#update_information', :as => :update_information, :via => [:post]
 	match 'reset_password' => 'users#reset_password', :as => :reset_password, :via => [:post]
 
@@ -155,9 +159,19 @@ OopsData::Application.routes.draw do
 				get :get_exclusive
 			end
 		end
+
+		resources :filters do
+			member do
+				put :update_filter_name
+			end
+		end
+
+		resources :analyze_results do
+		end
 	end
 	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/move' => 'pages#move'
-	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/combine' => 'pages#combine'
+	match 'surveys/:survey_id/pages/:page_index/split' => 'pages#split', :via => :put
+	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/combine' => 'pages#combine', :via => :put
 	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/clone' => 'pages#clone'
 	match 'surveys/:survey_id/pages/:page_index/questions/:question_id_1/:question_id_2/move' => 'questions#move'
 	match 'surveys/:survey_id/pages/:page_index/questions/:question_id_1/:question_id_2/clone' => 'questions#clone'

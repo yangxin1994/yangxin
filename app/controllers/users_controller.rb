@@ -10,4 +10,12 @@ class UsersController < ApplicationController
 			format.json { render_json_auto(retval) and return }
 		end
 	end
+
+	def get_basic_info
+		user = User.find_by_id(params[:id]) if params[:id]
+		user = @current_user if user.nil?
+		respond_to do |format|
+			format.json { render_json_auto(user) and return }
+		end
+	end
 end

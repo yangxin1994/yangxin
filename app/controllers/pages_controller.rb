@@ -141,7 +141,7 @@ class PagesController < ApplicationController
 	end
 
 
-	#*method*: get
+	#*method*: put
 	#
 	#*url*: /surveys/:survey_id/pages/:page_index_1/:page_index_2/combine
 	#

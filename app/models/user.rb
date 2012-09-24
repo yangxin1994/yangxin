@@ -37,9 +37,12 @@ class User
 
 	field :birthday, :type => Integer, default: -1
 	field :gender, :type => Boolean
-	field :address, :type => Array
+	field :address, :type => String
 	field :postcode, :type => String
 	field :phone, :type => String
+	field :full_name, :type => String
+	field :identity_card, :type => String
+	field :company, :type => String
 
 
 	has_and_belongs_to_many :messages, inverse_of: nil
@@ -150,6 +153,9 @@ class User
 		self.address = user_info["address"]
 		self.postcode = user_info["postcode"]
 		self.phone = user_info["phone"]
+		self.full_name = user_info["full_name"]
+		self.identity_card = user_info["identity_card"]
+		self.company = user_info["company"]
 		return self.save
 	end
 
@@ -359,7 +365,6 @@ class User
 		return ErrorEnum::WRONG_PASSWORD if self.password != Encryption.encrypt_password(old_password)  # wrong password
 		self.password = Encryption.encrypt_password(new_password)
 		self.save
-		return true
 	end
 
 	#*description*: set auth key for one user

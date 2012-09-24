@@ -705,11 +705,18 @@ class Answer
 	field :username, :type => String, default: ""
 	field :password, :type => String, default: ""
 
-	field :region, :type => String, default: ""
+	field :region, :type => Integer, default: -1
 	field :channel, :type => Integer
 	field :ip_address, :type => String, default: ""
 
 	field :is_scanned, :type => Boolean, :default => false
+
+	field :preview_id, :type => String, :default => ""
+
+	field :finished_at, :type => Integer
+
+	scope :not_preview, lambda { where(:preview_id => "") }
+	scope :finished, lambda { where(:status => 2) }
 
 	belongs_to :user
 	belongs_to :survey
@@ -743,21 +750,25 @@ class Answer
 		return answer
 	end
 
+	def self.find_by_survey_id_and_preview_id(survey_id, preview_id)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return survey.answers.where(preview_id: preview_id)[0]
+	end
+
 	def self.find_by_survey_id_and_user(survey_id, user)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		answers = survey.answers
-		answers.each do |answer|
-			if answer.user == user
-				return answer
-			end
-		end
-		return nil
+		return survey.answers.where(user_id: user._id)[0]
 	end
 
 	def self.find_by_password(username, password)
 		answer = Answer.where(username: username, password: password)
 		return answer
+	end
+
+	def is_preview
+		return !self.preview_id.blank?
 	end
 
 	def self.create_user_attr_survey_answer(operator, survey_id, answer_content)
@@ -772,10 +783,54 @@ class Answer
 		return true
 	end
 
+	def self.create_preview_answer(survey_id, preview_id)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		answer = Answer.new(preview_id: preview_id)
+		
+		# initialize the answer content
+		answer_content = {}
+		survey.pages.each do |page|
+			answer_content = answer_content.merge(Hash[page["questions"].map { |ele| [ele, nil] }])
+		end
+		logic_control = survey.show_logic_control
+		logic_control.each do |rule|
+			if rule["rule_type"] == 1
+				rule["result"].each do |q_id|
+					answer_content[q_id] = {}
+				end
+			end
+		end
+		answer.answer_content = answer_content
+		# initialize the template answer content
+		answer.template_answer_content = Hash[survey.quota_template_question_page.map { |ele| [ele, nil] }]
+
+		answer.save
+		operator.answers << answer
+		survey.answers << answer
+
+		# initialize the logic control result
+		logic_control_result = {}
+		logic_control.each do |rule|
+			if rule["rule_type"] == 3
+				rule["result"].each do |ele|
+					answer.add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
+				end
+			elsif rule["rule_type"] == 5
+				items_to_be_added = []
+				rule["result"]["items"].each do |input_ids|
+					items_to_be_added << input_ids[1]
+				end
+				answer.add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
+			end
+		end
+		return answer
+	end
+
 	def self.create_answer(operator, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		answer = Answer.new(channel: channel, ip: ip, region: IpInfo.find_by_id(ip).postcode, username: username, password: password)
+		answer = Answer.new(channel: channel, ip: ip, region: Address.find_address_code_by_ip(ip).postcode, username: username, password: password)
 
 		# initialize the answer content
 		answer_content = {}
@@ -967,7 +1022,7 @@ class Answer
 			next if quota_stats["answer_number"][index] >= rule["amount"]
 			rule["conditions"].each do |condition|
 				# if the answer's ip, channel, or region violates one condition of the rule, move to the next rule
-				next if condition["condition_type"] == 2 && self.region != condition["value"]
+				next if condition["condition_type"] == 2 && !Address.satisfy_region_code?(self.region, condition["value"])
 				next if condition["condition_type"] == 3 && self.channel != condition["value"]
 				next if condition["condition_type"] == 4 && Tool.check_ip_mask(self.ip, condition["value"])
 			end
@@ -986,7 +1041,7 @@ class Answer
 	#*retval*:
 	#* true: when the conditions can be satisfied
 	#* false: otherwise
-	def satisfy_quota_conditions(conditions)
+	def satisfy_conditions(conditions)
 		# only answers that are finished contribute to quotas
 		return false if !self.is_finish
 		# check the conditions one by one
@@ -1002,7 +1057,7 @@ class Answer
 				require_answer = condition["value"]
 				satisfy = Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], require_answer)
 			when "2"
-				satisfy = condition["value"] == answer["region"]
+				satisfy = Address.satisfy_region_code?(self.region, condition["value"])
 			when "3"
 				satisfy = condition["value"] == answer["channel"].to_s
 			when "4"
@@ -1057,24 +1112,6 @@ class Answer
 		return true
 	end
 
-	#*description*: finish an answer, only work for answers that allow pageup (those that do not allow pageup finish automatically)
-	#
-	#*params*:
-	#
-	#*retval*:
-	#* true: when the answer is set as finished
-	#* ErrorEnum::WRONG_ANSWER_STATUS
-	#* ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP
-	#* ErrorEnum::ANSWER_NOT_COMPLELTE
-	def finish
-		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_edit
-		return ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP if !self.survey.is_pageup_allowed
-		return ErrorEnum::ANSWER_NOT_COMPLETE if self.template_answer_content.has_value?(nil)
-		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)
-		self.set_finish
-		return true
-	end
-
 	#*description*: check whether the answer expires and update the answer's status
 	#
 	#*params*:
@@ -1091,6 +1128,9 @@ class Answer
 
 	def delete
 		# only answers that are finished can be deleted
+		return ErrorEnum::WRONG_ANSWER_STATUS if self.is_redo || self.is_edit
+		self.destroy
+		return true
 	end
 
 	#*description*: update the answer content
@@ -1368,12 +1408,49 @@ class Answer
 		end
 	end
 
-	def auto_finish
-		self.set_finish if self.is_edit && !self.suvey.is_pageup_allowed && !self.template_answer_content.has_value?(nil) && !self.answer_content.has_value?(nil)
-	end
-
 	def get_user_ids_answered(survey_id)
 		survey = Survey.find_by_id(survey_id)
 		return survey.answers.map {|a| a.user_id.to_s}
+	end
+
+	def auto_finish
+		if self.is_edit && !self.suvey.is_pageup_allowed && !self.template_answer_content.has_value?(nil) && !self.answer_content.has_value?(nil)
+			self.set_finish
+			self.finished_at = Time.now.to_i
+			self.save
+			self.update_quota
+		end
+	end
+
+	#*description*: finish an answer, only work for answers that allow pageup (those that do not allow pageup finish automatically)
+	#
+	#*params*:
+	#
+	#*retval*:
+	#* true: when the answer is set as finished
+	#* ErrorEnum::WRONG_ANSWER_STATUS
+	#* ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP
+	#* ErrorEnum::ANSWER_NOT_COMPLELTE
+	def finish
+		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_edit
+		return ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP if !self.survey.is_pageup_allowed
+		return ErrorEnum::ANSWER_NOT_COMPLETE if self.template_answer_content.has_value?(nil)
+		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)
+		self.set_finish
+		self.finished_at = Time.now.to_i
+		self.save
+		self.update_quota
+		return true
+	end
+
+	def update_quota
+		quota_stats = self.survey.quota_stats
+		quota_rules = self.survey.quota["rules"]
+		quota_rules.each_with_index do |rule, index|
+			if self.satisfy_conditions(rule["conditions"])
+				quota_stats["answer_number"][rule_index] = quota_stats["answer_number"][rule_index] + 1
+			end
+		end
+		self.survey.save
 	end
 end

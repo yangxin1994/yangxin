@@ -5,17 +5,24 @@ module Jobs
 	# Jobs.start(:QuotaJob, 2.hours)
 	# , or 
 	# Jobs.start(:QuotaJob, 7200)
-	def self.start(job_name, interval_time)
+	def self.start(job_name, time, opt={})
+		# check existance of this job
 		return false if !Jobs.const_defined?(job_name)
-		return false if interval_time.to_i <= 10
+		# return false if interval_time.to_i <= 10
 
-		stop(job_name)
+		job_class = Jobs.const_get(job_name)
+		recurring = job_class.class_variable_get(:@@recurring)
+
+		# stop the current schedule of the job if it is a recurring job
+		stop(job_name) if recurring
 		
-		#save to redis
-		Resque.redis.set "#{job_name}_last_interval_time", interval_time.to_i
-		Resque.enqueue_at(Time.now, 
+		# set the new interval time if this is a recurring job
+		Resque.redis.set "#{job_name}_last_interval_time", interval_time.to_i if recurring
+		# push the job to the job queue
+		Resque.enqueue_at(time, 
 			Jobs.const_get(job_name), 
-			{"interval_time"=> interval_time.to_i})
+			opt)
+			# {"interval_time"=> interval_time.to_i})
 	end
 
 	def self.stop(job_name)
