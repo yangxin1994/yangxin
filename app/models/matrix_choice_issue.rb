@@ -50,7 +50,7 @@ class MatrixChoiceIssue < Issue
 			choice["input_id"] = input_index
 			choice["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
-			choice["is_exclusive"] = true
+			choice["is_exclusive"] = false
 			@choices << choice
 		end
 	end

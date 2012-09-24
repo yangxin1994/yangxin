@@ -34,15 +34,16 @@ class ChoiceIssue < Issue
 		@is_list_style = true
 		@is_rand = false	
 		@choices = []
-		1.upto(4) do |input_index|
+		input_number = 4
+		1.upto(input_number) do |input_index|
 			choice = {}
 			choice["input_id"] = input_index
 			choice["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
-			choice["is_exclusive"] = true
+			choice["is_exclusive"] = false
 			@choices << choice
 		end
-		@other_item = {"has_other_item" => false}
+		@other_item = {"has_other_item" => true, "input_id" => input_number + 1, "content" => "其他（请填写）：", "is_exclusive" => false}
 	end
 
 	def update_issue(issue_obj)

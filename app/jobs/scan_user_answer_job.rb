@@ -2,6 +2,7 @@ module Jobs
 
 	class ScanUserAnswerJob
 
+		@@recurring = true
 		@queue = :sua_job_queue
 
 		def self.perform(*args)
@@ -24,7 +25,7 @@ module Jobs
 			# 3. next 
 			Resque.enqueue_at(Time.now + interval_time.to_i, 
 				ScanUserAnswerJob, 
-				{"interval_time"=> interval_time.to_i}) 	
+				{interval_time: interval_time.to_i}) 	
 		end
 
 		def self.find_answers

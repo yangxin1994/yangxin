@@ -1,4 +1,7 @@
+require 'resque/server'
 OopsData::Application.routes.draw do
+
+	mount Resque::Server.new, :at => "/resque"
 
 	resources :faqs, :public_notices, :feedbacks, :advertisements
 	resources :data_generators do

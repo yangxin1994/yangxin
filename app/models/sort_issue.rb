@@ -26,17 +26,18 @@ class SortIssue < Issue
 	def initialize
 		@items = []
 		@is_rand = false
-		@other_item = {"has_other_item" => false}
 		@min = 2
 		@max = 4 
 
-		1.upto(4) do |item_index|
+		input_number = 4
+		1.upto(input_number) do |item_index|
 			item = {}
 			item["input_id"] = item_index
 			item["content"] = {"text" => "选项#{Tool.convert_digit(item_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			@items << item
 		end
+		@other_item = {"has_other_item" => true, "input_id" => input_number + 1, "content" => "其他（请填写）："}
 	end
 
 	def update_issue(issue_obj)
