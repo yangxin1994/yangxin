@@ -231,7 +231,7 @@ class ActiveSupport::TestCase
 		q9 = create_question(email, password, survey_id, 3, -1, 10)
 		q10 = create_question(email, password, survey_id, 3, -1, 14)
 
-		return [survey_id, [[q1, q2, q3], [q4], [q5, q6, q7, q8], [q9, q10]]]
+		return [survey_id, [[q1, q2, q3], [q4], [q5, q6, q7, q8], [q9, q10], []]]
 	end
 
 	def get_question_obj(email, password, survey_id, question_id)

@@ -1,5 +1,6 @@
 module ErrorEnum
 
+	LOGIN_TOO_FREQUENT = "error_0"
 	ILLEGAL_EMAIL = "error_1"
 	USER_ACTIVATED = "error_2"
 	USER_NOT_ACTIVATED = "error_3"
@@ -18,6 +19,7 @@ module ErrorEnum
 	THERE_ARE_SOME_RECEIVERS_NOT_EXIST = "error_16"
 	EMAIL_EXIST = "error_17"
 	USERNAME_EXIST = "error_18"
+	AUTH_KEY_EXIST = "error_19"
 	GROUP_EXIST = "error_20"
 	GROUP_NOT_EXIST = "error_21"
 	UNAUTHORIZED = "error_22"
@@ -85,6 +87,8 @@ module ErrorEnum
 	IP_FORMAT_ERROR = 100101
 	IP_REQUEST_SINA_ERROR = 100102
 	POSTCODE_REQUEST_BAIDU_ERROR =100103
+
+	SURVEY_DEADLINE_ERROR = -110001
 
 ###
 # 	syetem error 1

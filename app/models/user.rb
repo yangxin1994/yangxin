@@ -31,7 +31,7 @@ class User
 
 	field :role, :type => Integer, default: 0
 	field :auth_key, :type => String
-	field :auth_key_expire_time, :type => Integer, default: 0
+	field :auth_key_expire_time, :type => Integer
 	field :level, :type => Integer, default: 0
 	field :level_expire_time, :type => Integer, default: -1
 
@@ -70,9 +70,11 @@ class User
 	has_many :advertisements
 
 
+	has_many :email_histories
 	has_many :answers
+	has_many :template_question_answers
 
-
+	scope :unregistered, where(status: 0)
 
 	private
 	def set_updated_at
@@ -108,9 +110,11 @@ class User
 	end
 
 	def self.find_by_auth_key(auth_key)
+		return nil if auth_key.blank?
 		user = User.where(:auth_key => auth_key, :status.gt => -1)[0]
 		return nil if user.nil?
-		if user.auth_key_expire_time > Time.now.to_i
+		# for visitor users, auth_key_expire_time is set as -1
+		if user.auth_key_expire_time > Time.now.to_i || user.auth_key_expire_time == -1
 			return user
 		else
 			user.auth_key = nil
@@ -259,8 +263,10 @@ class User
 
 	def self.create_new_visitor_user
 		user = User.new
+		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
+		user.auth_key_expire_time = -1
 		user.save
-		return user
+		return user.auth_key
 	end
 
 	#*description*: activate a user
@@ -302,14 +308,22 @@ class User
 		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
 		return ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(password)
 		# record the login information
-		user.last_login_time = Time.now.to_i
 		user.last_login_ip = client_ip
 		user.last_login_client_type = client_type
+		user.login_count = 0 if user.last_login_time.blank? || Time.at(user.last_login_time).day != Time.now.day
+		return ErrorEnum::LOGIN_TOO_FREQUENT if user.login_count > OOPSDATA[RailsEnv.get_rails_env]["login_count_threshold"]
 		user.login_count = user.login_count + 1
+		user.last_login_time = Time.now.to_i
 		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
 		user.auth_key_expire_time = Time.now.to_i + (keep_signed_in.to_s == "true" ? OOPSDATA["login_keep_time"]["kept"].to_i : OOPSDATA["login_keep_time"]["unkept"].to_i)
 		return false if !user.save
 		return {"status" => user.status, "auth_key" => user.auth_key, "user_id" => user._id.to_s}
+	end
+
+	def self.login_with_auth_key(auth_key)
+		user = User.find_by_auth_key(auth_key)
+		return ErrorEnum::AUTH_KEY_NOT_EXIST if user.nil?
+		return {"status" => user.status, "auth_key" => user.auth_key}
 	end
 
 	#*description*: reset password for an user, used when the user forgets its password
@@ -454,6 +468,10 @@ class User
 
 	scope :black_list, where(role: ROLE_BLACK)
 	scope :white_list, where(role: ROLE_WHITE)
+
+	def self.ids_not_in_blacklist
+		return User.any_of({role: 0}, {role: 1})
+	end
 
 	def self.update_user(user_id, attributes)
 		user = User.find_by_id(user_id)

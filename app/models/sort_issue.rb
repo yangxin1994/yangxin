@@ -1,4 +1,6 @@
+# encoding: utf-8
 require 'error_enum'
+require 'tool'
 require 'securerandom'
 #Besides the fields that all types questions have, sort questions also have:
 # {
@@ -25,17 +27,27 @@ class SortIssue < Issue
 		@items = []
 		@is_rand = false
 		@other_item = {"has_other_item" => false}
-		@min = -1
-		@min = -1
+		@min = 2
+		@max = 4 
+
+		1.upto(4) do |item_index|
+			item = {}
+			item["input_id"] = item_index
+			item["content"] = {"text" => "选项#{Tool.convert_digit(item_index)}",
+														"image" => [], "audio" => [], "video" => []}
+			@items << item
+		end
 	end
 
 	def update_issue(issue_obj)
+		issue_obj ||= []
 		issue_obj["items"].each do |item_obj|
 			item_obj.delete_if { |k, v| !ITEM_ATTR_ARY.include?(k) }
 		end
-		issue_obj["other_item"].delete_if { |k, v|  !OTHER_ITEM_ATTR_ARY.include?(k)}
 		issue_obj["min"] = issue_obj["min"].to_i if !issue_obj["min"].nil?
 		issue_obj["max"] = issue_obj["max"].to_i if !issue_obj["max"].nil?
+		issue_obj["other_item"] ||= {}
+		issue_obj["other_item"].delete_if { |k, v|  !OTHER_ITEM_ATTR_ARY.include?(k)}
 		issue_obj["other_item"]["has_other_item"] = issue_obj["other_item"]["has_other_item"].to_s == "true"
 		super(ATTR_NAME_ARY, issue_obj)
 	end

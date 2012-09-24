@@ -78,7 +78,11 @@ OopsData::Application.routes.draw do
 	post "home/get_more_info"
 
 
-	resources :registrations
+	resources :registrations do
+		collection do
+			post :create_new_visitor_user
+		end
+	end
 	match 'input_activate_email' => 'registrations#input_activate_email', :as => :input_activate_email
 	match 'send_activate_email' => 'registrations#send_activate_email', :as => :send_activate_email, :via => [:post]
 	match 'activate' => 'registrations#activate', :as => :activate
@@ -90,6 +94,7 @@ OopsData::Application.routes.draw do
 			get :obtain_user_attr_survey, :skip_init_step
 			post :new_password, :reset_password
 			get :forget_password, :input_new_password
+			post :login_with_auth_key
 		end
 	end
 	match 'logout' => 'sessions#destroy', :as => :logout
@@ -131,6 +136,7 @@ OopsData::Application.routes.draw do
 			get 'set_random_quality_control_questions'
 			get 'get_random_quality_control_questions'
 			get 'spss_header'
+			get 'update_deadline'
 		end
 		resources :pages
 		resources :questions do

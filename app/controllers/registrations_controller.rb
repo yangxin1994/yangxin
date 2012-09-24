@@ -82,6 +82,22 @@ class RegistrationsController < ApplicationController
 		end
 	end
 
+	#*descryption*: create a visitor user
+	#
+	#*http* *method*: post
+	#
+	#*url*: /registrations/create_visitor
+	#
+	#*params*:
+	#
+	#*retval*:
+	#* auth_key
+	def create_new_visitor_user
+		# create user model
+		auth_key = User.create_new_visitor_user
+		format.json	{ render_json_s(auth_key) and return }
+	end
+
 	#*description*: check whether email is illegal
 	#
 	#*http* *method*: get or post
@@ -100,12 +116,6 @@ class RegistrationsController < ApplicationController
 			format.html	{ render :text => email_legal and return }
 			format.json	{ render_json_s(email_legal) and return }
 		end
-	end
-
-
-	# method: get
-	# descryption: show the page where user can input the email for activating
-	def input_activate_email
 	end
 
 	#*description*: submit email address to send activate email

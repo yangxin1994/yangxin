@@ -3,8 +3,8 @@ require 'array'
 require 'error_enum'
 class SurveysController < ApplicationController
 	before_filter :require_sign_in
-	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :show]
-	before_filter :check_normal_survey_existence, :except => [:new, :save_meta_data, :index, :recover, :clear, :add_tag, :remove_tag, :show]
+	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :show, :update_deadline]
+	before_filter :check_normal_survey_existence, :except => [:new, :index, :recover, :clear, :add_tag, :remove_tag, :show]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
 	#TODO 无法测试
 	def export_spss
@@ -58,8 +58,12 @@ class SurveysController < ApplicationController
 	#* a Survey object with default meta data and empty survey_id
 	#* ErrorEnum::EMAIL_NOT_EXIST
 	def new
-		survey = Survey.new
-		survey.save
+		survey = Survey.find_new_by_user(@current_user)
+		if survey.nil?
+			survey = Survey.create
+			survey.alt_new_survey = false
+			@current_user.surveys << survey
+		end
 		respond_to do |format|
 			format.json	{ render_json_s(survey.serialize) and return }
 		end
@@ -79,18 +83,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def save_meta_data
-		survey = @current_user.surveys.normal.find_by_id(params[:id])
-		if survey.nil?
-			survey = Survey.normal.find_by_id(params[:id])
-			if !survey.nil? && survey.user.nil?
-				survey.user = @current_user
-			else
-				respond_to do |format|
-					format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
-				end
-			end
-		end
-		survey = survey.save_meta_data(params[:survey])
+		survey = @survey.save_meta_data(params[:survey])
 		respond_to do |format|
 			format.json	{ render_json_s(survey.serialize) and return }
 		end
@@ -362,6 +355,21 @@ class SurveysController < ApplicationController
 	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def pause
 		retval = @survey.pause(params[:message], @current_user)
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
+
+	#*method*: get
+	#
+	#*url*: /surveys/:survey_id/update_deadline
+	#
+	#*description*: the owner of the survey pause the survey
+	#
+	#*params*:
+	#* survey_id: id of the suvey to be set
+	def update_deadline
+		retval = @survey.update_deadline(params[:deadline])
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
