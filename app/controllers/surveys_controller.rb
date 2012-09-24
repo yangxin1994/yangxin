@@ -284,9 +284,22 @@ class SurveysController < ApplicationController
 	#*retval*:
 	#* a list Survey objects
 	def index
-		survey_list = @current_user.surveys.list(params[:status], params[:public_status], params[:tags])
-		respond_to do |format|
-			format.json	{ render_json_auto(survey_list.serialize) and return }
+
+		if params[:stars].nil? then
+			survey_list = @current_user.surveys.list(params[:status], params[:publish_status], params[:tags])
+
+			survey_list = slice((survey_list || []), params[:page], params[:per_page])
+
+			respond_to do |format|
+				format.json	{ render_json_auto(survey_list.serialize) and return }
+			end
+		else
+			params[:page] ||= 1
+			params[:per_page] ||= 10
+			survey_list = @current_user.surveys.stars.page(params[:page]).per(params[:per_page])
+			respond_to do |format|
+				format.json	{ render_json_auto(survey_list) and return }
+			end
 		end
 	end
 
@@ -355,7 +368,7 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	#*method*: get
+	#*method*: POST
 	#
 	#*url*: /surveys/:survey_id/update_deadline
 	#
@@ -372,6 +385,24 @@ class SurveysController < ApplicationController
 
 	def check_progress
 		retval = @survey.check_progress(params[:deadline])
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
+	
+	#*method*: POST
+	#
+	#*url*: /surveys/:survey_id/update_star
+	#
+	#*description*: set or remove one survey to a star
+	#
+	#*params*:
+	#* survey_id: id of the suvey to be set
+	#
+	#*retval*:
+	# true or false
+	def update_star
+		retval = @survey.update_star
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
