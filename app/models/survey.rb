@@ -62,6 +62,7 @@ class Survey
 			"username_password_list" => []}}
 	field :random_quality_control_questions, :type => Boolean, default: false
 	field :deadline, :type => Integer
+	field :is_star, :type => Boolean, :default => false
 
 	belongs_to :user
 	has_and_belongs_to_many :tags do
@@ -87,6 +88,8 @@ class Survey
 	scope :normal_but_new, lambda { where(:status.gt => -1, :new_survey => false) }
 	scope :deleted, lambda { where(:status => -1) }
 	scope :deleted_but_new, lambda { where(:status => -1, :new_survey => false) }
+	# scope for star
+	scope :stars, where(:status.gt => -1, :is_star => true)
 
 	before_create :set_new
 
@@ -113,6 +116,12 @@ class Survey
 		return ErrorEnum::UNKNOWN_ERROR unless self.save
 		#create or update job
 		Jobs::SurveyDeadlineJob.update(self.id, time)
+	end
+
+	def update_star
+		self.is_star = !self.is_star
+		return ErrorEnum::UNKNOWN_ERROR unless self.save
+		self.is_star
 	end
 
 	def all_questions
@@ -198,6 +207,8 @@ class Survey
 	end
 
 	def self.list(status, publish_status, tags)
+		puts "status:: #{status}"
+		puts "publish_status:: #{publish_status}, type: #{publish_status.class}"
 		survey_list = []
 		case status
 		when "all"
@@ -209,9 +220,10 @@ class Survey
 		else
 			surveys = []
 		end
+
 		surveys.each do |survey|
-			if tags.nil? || tags.empty? || survey.has_one_tag_of(tags)
-				if publish_status.nil? || survey.publish_status & publish_status
+			if tags.nil? ||  tags.empty? || survey.has_one_tag_of(tags)
+				if publish_status.nil? ||publish_status == '' || survey.publish_status == publish_status.to_i
 					survey_list << survey
 				end
 			end
