@@ -1,4 +1,7 @@
+require 'resque/server'
 OopsData::Application.routes.draw do
+
+	mount Resque::Server.new, :at => "/resque"
 
 	resources :faqs, :public_notices, :feedbacks, :advertisements
 	resources :data_generators do
@@ -120,7 +123,7 @@ OopsData::Application.routes.draw do
 			post 'list'
 		end
 		member do
-			post 'save_meta_data'
+			put 'save_meta_data'
 			get 'clone'
 			get 'recover'
 			get 'export_csv'
@@ -139,17 +142,33 @@ OopsData::Application.routes.draw do
 			get 'show_access_control_setting'
 			get 'set_random_quality_control_questions'
 			get 'get_random_quality_control_questions'
+<<<<<<< HEAD
 			get 'spss_header'
 			get 'update_deadline'
+=======
+			get 'show_quality_control'
+			get 'check_progress'
+			post 'update_deadline'
+			post 'update_star'
 		end
-		resources :pages
+		resources :pages do
+			member do
+				put 'move'
+				put 'clone'
+				put 'split'
+				put 'combine'
+			end
+>>>>>>> master
+		end
 		resources :questions do
 			collection do
 				post 'insert_template_question'
 				post 'insert_quality_control_question'
 			end
 			member do
-				get 'convert_template_question_to_normal_question'
+				put 'convert_template_question_to_normal_question'
+				put 'move'
+				put 'clone'
 			end
 		end
 		resources :logic_controls
@@ -169,12 +188,6 @@ OopsData::Application.routes.draw do
 		resources :analyze_results do
 		end
 	end
-	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/move' => 'pages#move'
-	match 'surveys/:survey_id/pages/:page_index/split' => 'pages#split', :via => :put
-	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/combine' => 'pages#combine', :via => :put
-	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/clone' => 'pages#clone'
-	match 'surveys/:survey_id/pages/:page_index/questions/:question_id_1/:question_id_2/move' => 'questions#move'
-	match 'surveys/:survey_id/pages/:page_index/questions/:question_id_1/:question_id_2/clone' => 'questions#clone'
 
 	resources :materials do
 		member do
@@ -193,6 +206,7 @@ OopsData::Application.routes.draw do
 
 	resources :answers do
 		collection do
+			post 'preview_load_question'
 			post 'load_question'
 			post 'clear'
 			post 'submit_answer'

@@ -24,10 +24,10 @@ require 'securerandom'
 # }
 class MatrixChoiceIssue < Issue
 
-	attr_reader :choices, :choice_num_per_row, :min_choice, :max_choice, :show_style, :is_rand, :row_id, :row_name, :is_row_rand, :row_num_per_group
-	attr_writer :choices, :choice_num_per_row, :min_choice, :max_choice, :show_style, :is_rand, :row_id, :row_name, :is_row_rand, :row_num_per_group
+	attr_reader :items, :choice_num_per_row, :min_choice, :max_choice, :show_style, :is_rand, :row_id, :row_name, :is_row_rand, :row_num_per_group
+	attr_writer :items, :choice_num_per_row, :min_choice, :max_choice, :show_style, :is_rand, :row_id, :row_name, :is_row_rand, :row_num_per_group
 
-	ATTR_NAME_ARY = %w[choices choice_num_per_row min_choice max_choice show_style is_rand row_id row_name is_row_rand row_num_per_group]
+	ATTR_NAME_ARY = %w[items choice_num_per_row min_choice max_choice show_style is_rand row_id row_name is_row_rand row_num_per_group]
 	CHOICE_ATTR_ARY = %w[input_id content is_exclusive]
 
 	def initialize
@@ -50,14 +50,14 @@ class MatrixChoiceIssue < Issue
 			choice["input_id"] = input_index
 			choice["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
-			choice["is_exclusive"] = true
+			choice["is_exclusive"] = false
 			@choices << choice
 		end
 	end
 
 	def update_issue(issue_obj)
-		issue_obj["choices"] ||= []
-		issue_obj["choices"].each do |choice_obj|
+		issue_obj["items"] ||= []
+		issue_obj["items"].each do |choice_obj|
 			choice_obj.delete_if { |k, v| !CHOICE_ATTR_ARY.include?(k) }
 			choice_obj["is_exclusive"] = choice_obj["is_exclusive"].to_s == "true"
 		end
@@ -72,7 +72,7 @@ class MatrixChoiceIssue < Issue
 	end
 
 	def remove_hidden_items(items, sub_questions)
-		self.choices.delete_if { |choice| items.include?(choice["input_id"]) }
+		self.items.delete_if { |choice| items.include?(choice["input_id"]) }
 		remaining_row_id = []
 		remaining_row_name = []
 		self.row_id.each_with_index do |r_id, r_index|

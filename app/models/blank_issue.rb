@@ -4,7 +4,7 @@ require 'tool'
 require 'securerandom'
 #Besides the fields that all types questions have, blank questions also have:
 # {
-#	 "inputs" : array of input items(array),
+#	 "items" : array of input items(array),
 #	 "is_rand" : whether randomly show blanks(bool)
 #	}
 #The element in the "inputs" array has the following structure
@@ -45,10 +45,10 @@ require 'securerandom'
 # }
 class BlankIssue < Issue
 
-	attr_reader :is_rand, :inputs, :show_style
-	attr_writer :is_rand, :inputs, :show_style
+	attr_reader :is_rand, :items, :show_style
+	attr_writer :is_rand, :items, :show_style
 
-	ATTR_NAME_ARY = %w[inputs is_rand show_style]
+	ATTR_NAME_ARY = %w[items is_rand show_style]
 	INPUT_ATTR_ARY = %w[input_id content data_type properties]
 
 	DATA_TYPE_ARY = %w[Text Number Phone Email Url Address Time]
@@ -62,7 +62,7 @@ class BlankIssue < Issue
 	TIME_PROP_ARY = %w[format min_time max_time]
 
 	def initialize
-		@inputs = []
+		@items = []
 		@is_rand = false
 		@show_style = 0
 		1.upto(4) do |input_index|
@@ -70,30 +70,30 @@ class BlankIssue < Issue
 			input["input_id"] = input_index
 			input["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
-			@inputs << input
+			@items << input
 		end
 		# the first input's content
-		@inputs[0]["data_type"] = "Text"
-		@inputs[0]["properties"] = {}
-		@inputs[0]["properties"]["min_length"] = 1
-		@inputs[0]["properties"]["max_length"] = 10
-		@inputs[0]["properties"]["has_multiple_line"] = false
-		@inputs[0]["properties"]["size"] = 0
+		@items[0]["data_type"] = "Text"
+		@items[0]["properties"] = {}
+		@items[0]["properties"]["min_length"] = 1
+		@items[0]["properties"]["max_length"] = 10
+		@items[0]["properties"]["has_multiple_line"] = false
+		@items[0]["properties"]["size"] = 0
 		# the second input's content
-		@inputs[1]["data_type"] = "Number"
-		@inputs[1]["properties"] = {}
-		@inputs[1]["properties"]["precision"] = 0
-		@inputs[1]["properties"]["min_value"] = 0
-		@inputs[1]["properties"]["max_value"] = 100
-		@inputs[1]["properties"]["unit"] = "个"
-		@inputs[1]["properties"]["unit_location"] = 0
+		@items[1]["data_type"] = "Number"
+		@items[1]["properties"] = {}
+		@items[1]["properties"]["precision"] = 0
+		@items[1]["properties"]["min_value"] = 0
+		@items[1]["properties"]["max_value"] = 100
+		@items[1]["properties"]["unit"] = "个"
+		@items[1]["properties"]["unit_location"] = 0
 		# the third input's content
-		@inputs[2]["data_type"] = "Phone"
-		@inputs[2]["properties"] = {}
-		@inputs[2]["properties"]["phone_type"] = 1
+		@items[2]["data_type"] = "Phone"
+		@items[2]["properties"] = {}
+		@items[2]["properties"]["phone_type"] = 1
 		# the fouth input's content
-		@inputs[3]["data_type"] = "Email"
-		@inputs[3]["properties"] = {}
+		@items[3]["data_type"] = "Email"
+		@items[3]["properties"] = {}
 	end
 
 	#*description*: serialize the current instance into a question object
@@ -107,7 +107,7 @@ class BlankIssue < Issue
 	end
 
 	def remove_hidden_items(items, sub_questions)
-		self.inputs.delete_if { |input| items.include?(input["input_id"]) }
+		self.items.delete_if { |input| items.include?(input["input_id"]) }
 	end
 
 	#*description*: update the current question instance, including generate id for new inputs
@@ -117,8 +117,8 @@ class BlankIssue < Issue
 	#
 	#*retval*:
 	def update_issue(issue_obj)
-		issue_obj["inputs"] ||= []
-		issue_obj["inputs"].each do |input_obj|
+		issue_obj["items"] ||= []
+		issue_obj["items"].each do |input_obj|
 			input_obj.delete_if { |k, v| !INPUT_ATTR_ARY.include?(k) }
 			return ErrorEnum::WRONG_DATA_TYPE if !DATA_TYPE_ARY.include?(input_obj["data_type"])
 			if input_obj["properties"].class == Hash

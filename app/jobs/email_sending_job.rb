@@ -11,19 +11,22 @@ module Jobs
 			arg = args[0] if args[0].class == Hash
 			# unit is second
 			email_type = arg["email_type"]
+			user_email = arg["user_email"]
 
 			if email_type.blank?
 				Rails.logger.error "SurveyDeadlineJob: Must provide email_type"
 				return false
 			end
 
+			user = User.find_by_email(user_email)
+
 			case email_type
 			when "welcome"
-				UserMailer.welcome_email(args["user"]).deliver
+				UserMailer.welcome_email(user).deliver
 			when "activate"
-				UserMailer.activate_email(args["user"]).deliver
+				UserMailer.activate_email(user).deliver
 			when "password"
-				UserMailer.password_email(args["user"]).deliver
+				UserMailer.password_email(user).deliver
 			end
 		end
 	end

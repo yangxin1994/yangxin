@@ -76,7 +76,7 @@ class QuestionsControllerTest < ActionController::TestCase
 		question_obj["issue"]["max_choice"] = 4
 		question_obj["issue"]["is_rand"] = true
 		question_obj["issue"]["non_exist_attr"] = 1
-		question_obj["issue"]["choices"] << {"content" => "first choice content", "has_input" => false, "is_exclusive" => false, "non_exist_attr" => 1}
+		question_obj["issue"]["items"] << {"content" => "first choice content", "has_input" => false, "is_exclusive" => false, "non_exist_attr" => 1}
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update, :format => :json, :survey_id => "wrong survey id", :id => pages[0][0], :question => question_obj, :auth_key => auth_key
@@ -98,7 +98,7 @@ class QuestionsControllerTest < ActionController::TestCase
 		assert_equal question_obj["issue"]["min_choice"], updated_question_obj["issue"]["min_choice"]
 		assert_equal question_obj["issue"]["max_choice"], updated_question_obj["issue"]["max_choice"]
 		assert_equal question_obj["issue"]["is_rand"], updated_question_obj["issue"]["is_rand"]
-		assert_equal question_obj["issue"]["choices"][0]["content"], updated_question_obj["issue"]["choices"][0]["content"]
+		assert_equal question_obj["issue"]["items"][0]["content"], updated_question_obj["issue"]["items"][0]["content"]
 		assert_equal nil, updated_question_obj["issue"]["non_exist_attr"]
 	end
 
@@ -168,25 +168,25 @@ class QuestionsControllerTest < ActionController::TestCase
 		survey_id, pages = *create_survey_page_question(jesse.email, jesse.password)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :move, :format => :json, :survey_id => "wrong survey id", :page_index => 2, :question_id_1 => pages[2][1], :question_id_2 => pages[2][3], :auth_key => auth_key
+		put :move, :format => :json, :survey_id => "wrong survey id", :page_index => 2, :id => pages[2][1], :after_question_id => pages[2][3], :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :move, :format => :json, :survey_id => survey_id, :page_index => 10, :question_id_1 => pages[2][1], :question_id_2 => pages[2][3], :auth_key => auth_key
+		put :move, :format => :json, :survey_id => survey_id, :page_index => 10, :id => pages[2][1], :after_question_id => pages[2][3], :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :move, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => "wrong question id", :question_id_2 => pages[2][3], :auth_key => auth_key
+		put :move, :format => :json, :survey_id => survey_id, :page_index => 2, :id => "wrong question id", :after_question_id => pages[2][3], :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :move, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => pages[2][1], :question_id_2 => pages[2][3], :auth_key => auth_key
+		put :move, :format => :json, :survey_id => survey_id, :page_index => 2, :id => pages[2][1], :after_question_id => pages[2][3], :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal true, result["value"]
 		sign_out(auth_key)
@@ -197,7 +197,7 @@ class QuestionsControllerTest < ActionController::TestCase
 		assert_equal pages[2][1], survey_obj["pages"][2]["questions"][3]
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :move, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => pages[2][1], :question_id_2 => -1, :auth_key => auth_key
+		put :move, :format => :json, :survey_id => survey_id, :page_index => 2, :id => pages[2][1], :after_question_id => -1, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal true, result["value"]
 		sign_out(auth_key)
@@ -218,44 +218,44 @@ class QuestionsControllerTest < ActionController::TestCase
 		question_obj["issue"]["min_choice"] = 2
 		question_obj["issue"]["max_choice"] = 4
 		question_obj["issue"]["is_rand"] = true
-		question_obj["issue"]["choices"] << {"content" => "first choice content", "has_input" => false, "is_exclusive" => false, "non_exist_attr" => 1}
+		question_obj["issue"]["items"] << {"content" => "first choice content", "has_input" => false, "is_exclusive" => false, "non_exist_attr" => 1}
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update, :format => :json, :survey_id => survey_id, :id => pages[0][0], :question => question_obj, :auth_key => auth_key
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :clone, :format => :json, :survey_id => "wrong survey id", :page_index => 2, :question_id_1 => pages[0][0], :question_id_2 => -1, :auth_key => auth_key
+		put :clone, :format => :json, :survey_id => "wrong survey id", :page_index => 2, :id => pages[0][0], :after_question_id => -1, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :clone, :format => :json, :survey_id => survey_id, :page_index => 10, :question_id_1 => pages[0][0], :question_id_2 => -1, :auth_key => auth_key
+		put :clone, :format => :json, :survey_id => survey_id, :page_index => 10, :id => pages[0][0], :after_question_id => -1, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :clone, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => "wrong question id", :question_id_2 => -1, :auth_key => auth_key
+		put :clone, :format => :json, :survey_id => survey_id, :page_index => 2, :id => "wrong question id", :after_question_id => -1, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :clone, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => pages[0][0], :question_id_2 => -1, :auth_key => auth_key
+		put :clone, :format => :json, :survey_id => survey_id, :page_index => 2, :id => pages[0][0], :after_question_id => -1, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		cloned_question_obj = result["value"]
 		sign_out(auth_key)
 		assert_equal question_obj["issue"]["min_choice"], cloned_question_obj["issue"]["min_choice"]
 		assert_equal question_obj["issue"]["max_choice"], cloned_question_obj["issue"]["max_choice"]
 		assert_equal question_obj["issue"]["is_rand"], cloned_question_obj["issue"]["is_rand"]
-		assert_equal question_obj["issue"]["choices"][0]["content"], cloned_question_obj["issue"]["choices"][0]["content"]
+		assert_equal question_obj["issue"]["items"][0]["content"], cloned_question_obj["issue"]["items"][0]["content"]
 		survey_obj = get_survey_obj(jesse.email, jesse.password, survey_id)
 		cloned_question_obj = get_question_obj(jesse.email, jesse.password, survey_id, survey_obj["pages"][2]["questions"][0])
 		assert_equal question_obj["issue"]["min_choice"], cloned_question_obj["issue"]["min_choice"]
 		assert_equal question_obj["issue"]["max_choice"], cloned_question_obj["issue"]["max_choice"]
 		assert_equal question_obj["issue"]["is_rand"], cloned_question_obj["issue"]["is_rand"]
-		assert_equal question_obj["issue"]["choices"][0]["content"], cloned_question_obj["issue"]["choices"][0]["content"]
+		assert_equal question_obj["issue"]["items"][0]["content"], cloned_question_obj["issue"]["items"][0]["content"]
 	end
 
 	test "should insert template question" do

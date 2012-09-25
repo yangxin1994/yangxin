@@ -15,8 +15,8 @@ class Result
 		return Result.where(:result_key => result_key).first
 	end
 
-	def self.answers(filter_name)
-		answers = self.survey.answers.not_preview.finished
+	def self.answers(filter_name, include_screened_answer)
+		answers = include_screened_answer.to_s == "true" ? self.survey.answers.not_preview.finished_and_screened : self.survey.answers.not_preview.finished
 		return answers if filter_name == "_default"
 		filter_conditions = self.survey.filters[filter_name]
 		filtered_answers = []

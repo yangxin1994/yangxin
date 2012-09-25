@@ -7,6 +7,7 @@ class AnalyzeResult < Result
 	include Mongoid::Document
 	include Mongoid::Timestamps
 
+	field :duration_result, :type => Hash
 	field :time_result, :type => Hash
 	field :region_result, :type => Hash
 	field :channel_result, :type => Hash
@@ -18,12 +19,13 @@ class AnalyzeResult < Result
 		return result_key
 	end
 
-	def self.find_or_create_by_filter_name(filter_name)
-		answers = self.answers(filter_name)
+	def self.find_or_create_by_filter_name(filter_name, include_screened_answer)
+		answers = self.answers(filter_name, include_screened_answer)
 		result_key = self.generate_result_key(answers)
 		analyze_result = self.find_by_result_key(result_key)
 		if analyze_result.nil?
 			analyze_result = AnalyzeResult.new(:result_key => result_key)
+			analyze_result.analyze_duration(answers)
 			analyze_result.analyze_time(answers)
 			analyze_result.analyze_region(answers)
 			analyze_result.analyze_channel(answers)
@@ -57,16 +59,27 @@ class AnalyzeResult < Result
 
 	def analyze_time(answers)
 		# get data
-		time_ary = answers.map { |a| a.finished_at - a.created_at.to_i }
+		time_ary = answers.map { |a| a.is_finish ? a.finished_at : a.rejected_at }
 		time_ary.sort!
 		# get segment parameters, 5 segments by default
 		segments = segmentation(5, time_ary[0], time_ary[-1])
 
 		# make stats of segment results
 		self.time_result["histogram"] = get_continuous_histogram(time_ary, segments)
+	end
+
+	def analyze_duration(answers)
+		# get data
+		duration_ary = answers.map { |a| a.finished_at - a.created_at.to_i }
+		duration_ary.sort!
+		# get segment parameters, 5 segments by default
+		segments = segmentation(5, duration_ary[0], duration_ary[-1])
+
+		# make stats of segment results
+		self.duration_result["histogram"] = get_continuous_histogram(duration_ary, segments)
 
 		# make other stats
-		self.time_result["mean"] = time_ary.mean
+		self.duration_result["mean"] = duration_ary.mean
 	end
 
 

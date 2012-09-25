@@ -25,42 +25,41 @@ class AnswersController < ApplicationController
 				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
 			end
 		end
-		if survey.publish_status != 8
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_PUBLISHED) and return }
-			end
-		end
 	end
 
 	######################
 
 	def preview_load_question
-		# 1. try to find the answer
-		answer = Answer.find_by_survey_id_and_preview_id(params[:survey_id], params[:preview_id])
-		# 2. if cannot find the answer, create new answer and check region, channel and ip quota
-		if answer.nil?
-			# this is the first time that the volonteer opens this survey
-			# for previewing, it is not needed to check captcha, password, channel, ip, or address
-			# pass the checking, create a new answer and check the region, channel, and ip quotas
-			answer = Answer.create_preview_answer(params[:survey_id], params[:preview_id])
+		if params[:preview_id].blank?
+			# the first time to load questions, create the preview answer
+			answer = Answer.create_preview_answer(params[:survey_id])
 			render_json_auto(answer) and return if answer.class != Answer
 			answer.set_edit
+		else
+			# find the answer based on the survey_id and preview_id
+			answer = Answer.find_by_survey_id_and_preview_id(params[:survey_id], params[:preview_id])
+			render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
 		end
-		# 3. now, we have an answer instance
+		# now, we have an answer instance
 		answer.update_status	# check whether it is time out
 		if answer.is_edit
 			questions = answer.load_question(params[:question_id], params[:next_page])
 			if answer.is_finish
-				render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return
+				render_json_auto([answer.preview_id, answer.status, answer.reject_type, answer.finish_type]) and return
 			else
-				render_json_auto([questions.to_json, answer.repeat_time]) and return
+				render_json_auto([answer.preview_id, questions.to_json, answer.repeat_time]) and return
 			end
 		else
-			render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return
+			render_json_auto([answer.preview_id, answer.status, answer.reject_type, answer.finish_type]) and return
 		end
 	end
 
 	def load_question
+		if @survey.publish_status != 8
+			respond_to do |format|
+				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_PUBLISHED) and return }
+			end
+		end
 		# 1. try to find the answer
 		answer = Answer.find_by_survey_id_and_user(params[:survey_id], @current_user)
 		# 2. if cannot find the answer, create new answer and check region, channel and ip quota
