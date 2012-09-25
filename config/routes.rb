@@ -116,7 +116,7 @@ OopsData::Application.routes.draw do
 			post 'list'
 		end
 		member do
-			post 'save_meta_data'
+			put 'save_meta_data'
 			get 'clone'
 			get 'recover'
 			get 'clear'

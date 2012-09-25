@@ -57,7 +57,7 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	#*method*: post
+	#*method*: put
 	#
 	#*url*: /surveys/:survey_id/save_meta_data
 	#
