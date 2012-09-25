@@ -81,6 +81,7 @@ class Survey
   has_many :email_histories
 
   has_many :analyze_results
+  has_many :export_results
 
   scope :all_but_new, lambda { where(:new_survey => false) }
   scope :normal, lambda { where(:status.gt => -1) }
@@ -132,6 +133,7 @@ class Survey
     end
     headers
   end
+
   def answer_content(ac = self.answers)
     @retval = []
     ac.each do |answer|
@@ -150,6 +152,7 @@ class Survey
     data = {"spss_header" => spss_header,
             "answer_contents" => answer_content}
   end
+
   def export_csv(path = "public/import/test.csv")
     c = CSV.open(path, "w") do |csv|
       csv << csv_header
@@ -170,12 +173,6 @@ class Survey
       end
       return line_answer
     end
-  end
-
-  def connect_dotnet
-
-    client = Savon::Client.new('http://192.168.1.129/DataImport.asmx?wsdl')
-    p client
   end
 
   def connect_sinatra
