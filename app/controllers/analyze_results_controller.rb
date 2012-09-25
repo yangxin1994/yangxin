@@ -11,7 +11,7 @@ class AnalyzeResultsController < ApplicationController
 	end
 
 	def show
-		result = @survey.show_analyze_result(params[:filter_name])
+		result = @survey.show_analyze_result(params[:filter_name], params[:include_screened_answer])
 		respond_to do |format|
 			format.json	{ render_json_auto(result) and return }
 		end

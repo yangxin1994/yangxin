@@ -19,10 +19,10 @@ require 'securerandom'
 # }
 class ChoiceIssue < Issue
 
-	attr_reader :choices, :other_item, :choice_num_per_row, :min_choice, :max_choice, :option_type, :is_list_style, :is_rand
-	attr_writer :choices, :other_item, :choice_num_per_row, :min_choice, :max_choice, :option_type, :is_list_style, :is_rand
+	attr_reader :items, :other_item, :choice_num_per_row, :min_choice, :max_choice, :option_type, :is_list_style, :is_rand
+	attr_writer :items, :other_item, :choice_num_per_row, :min_choice, :max_choice, :option_type, :is_list_style, :is_rand
 
-	ATTR_NAME_ARY = %w[choices other_item choice_num_per_row min_choice max_choice option_type is_list_style is_rand]
+	ATTR_NAME_ARY = %w[items other_item choice_num_per_row min_choice max_choice option_type is_list_style is_rand]
 	CHOICE_ATTR_ARY = %w[input_id content is_exclusive]
 	OTHER_ITEM_ATTR_ARY = %w[has_other_item input_id content is_exclusive]
 
@@ -33,7 +33,7 @@ class ChoiceIssue < Issue
 		@option_type = 1
 		@is_list_style = true
 		@is_rand = false	
-		@choices = []
+		@items = []
 		input_number = 4
 		1.upto(input_number) do |input_index|
 			choice = {}
@@ -41,14 +41,14 @@ class ChoiceIssue < Issue
 			choice["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			choice["is_exclusive"] = false
-			@choices << choice
+			@items << choice
 		end
 		@other_item = {"has_other_item" => true, "input_id" => input_number + 1, "content" => "其他（请填写）：", "is_exclusive" => false}
 	end
 
 	def update_issue(issue_obj)
-		issue_obj["choices"] ||= []
-		issue_obj["choices"].each do |choice_obj|
+		issue_obj["items"] ||= []
+		issue_obj["items"].each do |choice_obj|
 			choice_obj.delete_if { |k, v| !CHOICE_ATTR_ARY.include?(k) }
 			choice_obj["is_exclusive"] = choice_obj["is_exclusive"].to_s == "true"
 		end
@@ -65,7 +65,7 @@ class ChoiceIssue < Issue
 	end
 
 	def remove_hidden_items(items, sub_questions)
-		self.choices.delete_if { |choice| items.include?(choice["input_id"]) }
+		self.items.delete_if { |choice| items.include?(choice["input_id"]) }
 	end
 
 	#*description*: serialize the current instance into a question object

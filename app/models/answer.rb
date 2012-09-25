@@ -35,10 +35,12 @@ class Answer
 	field :preview_id, :type => String, :default => ""
 
 	field :finished_at, :type => Integer
+	field :rejected_at, :type => Integer
 
 	scope :not_preview, lambda { where(:preview_id => "") }
 	scope :finished, lambda { where(:status => 2) }
 	scope :screened, lambda { where(:status => 1, :reject_type => 2) }
+	scope :finished_and_screened, lambda { any_of({:status => 2}, {:status => 1, :reject_type => 2}) }
 
 	belongs_to :user
 	belongs_to :survey
@@ -432,7 +434,7 @@ class Answer
 	def update_status
 		if Time.now.to_i - self.created_at.to_i > EXPIRATION_TIME
 			self.set_reject
-			self.update_attributes(reject_type: 3)
+			self.update_attributes(reject_type: 3, rejected_at: Time.now.to_i)
 		end
 		return self.status
 	end
@@ -550,7 +552,7 @@ class Answer
 			return ErrorEnum::VIOLATE_QUALITY_CONTROL_ONCE
 		else
 			self.set_reject
-			self.update_attributes(reject_type: 1)
+			self.update_attributes(reject_type: 1, rejected_at: Time.now.to_i)
 			return ErrorEnum::VIOLATE_QUALITY_CONTROL_TWICE
 		end
 	end
@@ -593,7 +595,7 @@ class Answer
 	#* ErrorEnum::VIOLATE_SCREEN
 	def violate_screen
 		self.set_reject
-		self.update_attributes(reject_type: 2)
+		self.update_attributes(reject_type: 2, rejected_at: Time.now.to_i)
 		return ErrorEnum::VIOLATE_SCREEN
 	end
 
@@ -630,7 +632,7 @@ class Answer
 	#* ErrorEnum::VIOLATE_QUOTA
 	def violate_quota
 		self.set_reject
-		self.update_attributes(reject_type: 0)
+		self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
 		return ErrorEnum::VIOLATE_QUOTA
 	end
 

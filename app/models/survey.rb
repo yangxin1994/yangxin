@@ -1219,10 +1219,10 @@ class Survey
 		return filters.delete_filter(filter_name, self)
 	end
 
-	def show_analyze_result(filter_name)
+	def show_analyze_result(filter_name, include_screened_answer)
 		return ErrorEnum::FILTER_NOT_EXIST if !filter_name.blank? && !self.filters.has_key?(filter_name)
 		filter_name = "_default" if filter_name.blank?
-		result = self.analyze_results.find_or_create_by_filter_name(filter_name)
+		result = self.analyze_results.find_or_create_by_filter_name(filter_name, include_screened_answer)
 		return result
 	end
 
