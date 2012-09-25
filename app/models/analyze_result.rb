@@ -65,7 +65,7 @@ class AnalyzeResult < Result
 		segments = segmentation(5, time_ary[0], time_ary[-1])
 
 		# make stats of segment results
-		self.time_result["histogram"] = get_continuous_histogram(time_ary, segments)
+		self.time_result["histogram"] = [segments, get_continuous_histogram(time_ary, segments)]
 	end
 
 	def analyze_duration(answers)
@@ -76,7 +76,7 @@ class AnalyzeResult < Result
 		segments = segmentation(5, duration_ary[0], duration_ary[-1])
 
 		# make stats of segment results
-		self.duration_result["histogram"] = get_continuous_histogram(duration_ary, segments)
+		self.duration_result["histogram"] = [segments, get_continuous_histogram(duration_ary, segments)]
 
 		# make other stats
 		self.duration_result["mean"] = duration_ary.mean
@@ -179,7 +179,7 @@ class AnalyzeResult < Result
 		segments = segmentation(5, answer_ary[0], answer_ary[-1])
 
 		# make stats of segment results
-		result["histogram"] = get_continuous_histogram(answer_ary, segments)
+		result["histogram"] = [segments, get_continuous_histogram(answer_ary, segments)]
 
 		return result
 	end
