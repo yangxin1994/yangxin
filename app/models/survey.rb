@@ -63,6 +63,8 @@ class Survey
   field :random_quality_control_questions, :type => Boolean, default: false
   field :deadline, :type => Integer
 
+  attr_accessor :filter_name
+
   belongs_to :user
   has_and_belongs_to_many :tags do
     def has_tag?(content)
@@ -135,10 +137,19 @@ class Survey
   end
 
   def answer_content(ac = self.answers)
+    ac = []
     @retval = []
+    if filter_name == "_default"
+      ac = answers.not_preview.finished
+    else
+      filter_conditions = filters[filter_name]
+      answers.each do |a|
+        ac << a if a.satisfy_conditions(filter_conditions)
+      end
+    end
     ac.each do |answer|
       line_answer = []
-      answer.answer_content.each do |k,v|
+      answer.answer_content.each do |k, v|
         question = Question.find_by_id(k)
         q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question.question_type}"] + "Io").new(question)
         line_answer += q.answer_content(v)
@@ -150,7 +161,25 @@ class Survey
 
   def spss_data
     data = {"spss_header" => spss_header,
-            "answer_contents" => answer_content}
+            "answer_contents" => answer_content()}
+  end
+
+  def send_spss_data
+    url = URI.parse('http://192.168.1.129:9292')
+    begin
+      Net::HTTP.start(url.host,url.port) do |http| 
+        r = Net::HTTP::Post.new('/to_spss')
+        # p spss_data
+        http.read_timeout = 3
+        r.set_form_data('spss_data'=> Marshal.dump(spss_data))
+        http.request(r)
+      end
+    rescue Errno::ECONNREFUSED
+      p "连接失败"
+    rescue Timeout::Error
+      p "超时"
+    ensure
+    end
   end
 
   def export_csv(path = "public/import/test.csv")
@@ -160,9 +189,12 @@ class Survey
         csv << a
       end
     end
-    p c
   end
-
+  def export_csv_header(path = "public/import/test.csv")
+    c = CSV.open(path, "w") do |csv|
+      csv << csv_header
+    end
+  end
   def answer_import(csv_path)
     line_answer = {}
     CSV.foreach("public/import/test.csv", :headers => true) do |row|
@@ -175,24 +207,11 @@ class Survey
     end
   end
 
-  def connect_sinatra
-    url = URI.parse('http://192.168.1.129:9292')
-    begin
-      Net::HTTP.start(url.host,url.port) do |http| 
-        r = Net::HTTP::Post.new('/to_spss')
-        # p spss_data
-        http.read_timeout = 3
-        r.set_form_data('spss_data'=> Marshal.dump(spss_data))
-        http.request(r)
-      end
-    rescue Errno::ECONNREFUSED
-      p "链接失败"
-    rescue Timeout::Error
-      p "超时"
-    ensure
+  def to_spss(filter_name)
+    er = ExportResult.new(filter_name, self)
 
-    end
   end
+
  
   public
 
