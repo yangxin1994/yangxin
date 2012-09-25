@@ -55,9 +55,12 @@ class QuestionsControllerTest < ActionController::TestCase
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 1, :question_id => -1, :question_type => 15, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		question_obj_4 = result["value"]
+		post :create, :format => :json, :survey_id => survey_id, :page_index => 1, :question_id => -1, :question_type => 13, :auth_key => auth_key
+		result = JSON.parse(@response.body)
+		question_obj_5 = result["value"]
 		survey_obj = get_survey_obj(jesse.email, jesse.password, survey_id)
 		assert_equal 3, survey_obj["pages"][0]["questions"].length
-		assert_equal 1, survey_obj["pages"][1]["questions"].length
+		assert_equal 2, survey_obj["pages"][1]["questions"].length
 		assert_equal question_obj_1["_id"], survey_obj["pages"][0]["questions"][0]
 		assert_equal question_obj_2["_id"], survey_obj["pages"][0]["questions"][1]
 		assert_equal question_obj_3["_id"], survey_obj["pages"][0]["questions"][2]
