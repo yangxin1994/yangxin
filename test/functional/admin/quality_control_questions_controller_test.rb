@@ -63,7 +63,7 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 		objective_question_obj["issue"]["max_choice"] = 4
 		objective_question_obj["issue"]["is_rand"] = true
 		objective_question_obj["issue"]["non_exist_attr"] = 1
-		objective_question_obj["issue"]["choices"] << {"content" => "first choice content", "has_input" => false, "is_exclusive" => false, "non_exist_attr" => 1}
+		objective_question_obj["issue"]["items"] << {"content" => "first choice content", "has_input" => false, "is_exclusive" => false, "non_exist_attr" => 1}
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update, :format => :json, :id => "wrong quality control question id", :question => objective_question_obj, :auth_key => auth_key
@@ -79,7 +79,7 @@ class Admin::QualityControlQuestionsControllerTest < ActionController::TestCase
 		assert_equal objective_question_obj["issue"]["min_choice"], updated_question_obj["issue"]["min_choice"]
 		assert_equal objective_question_obj["issue"]["max_choice"], updated_question_obj["issue"]["max_choice"]
 		assert_equal objective_question_obj["issue"]["is_rand"], updated_question_obj["issue"]["is_rand"]
-		assert_equal objective_question_obj["issue"]["choices"][0]["content"], updated_question_obj["issue"]["choices"][0]["content"]
+		assert_equal objective_question_obj["issue"]["items"][0]["content"], updated_question_obj["issue"]["items"][0]["content"]
 		assert_equal nil, updated_question_obj["issue"]["non_exist_attr"]
 	end
 
