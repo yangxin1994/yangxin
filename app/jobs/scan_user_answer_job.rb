@@ -2,6 +2,7 @@ module Jobs
 
 	class ScanUserAnswerJob
 
+		@@recurring = true
 		@queue = :sua_job_queue
 
 		def self.perform(*args)
@@ -12,7 +13,7 @@ module Jobs
 
 			unless interval_time
 				puts "Must provide interval_time"
-				return
+				return false
 			end
 
 			# 1. find answers which are satisfied that ...
@@ -24,7 +25,7 @@ module Jobs
 			# 3. next 
 			Resque.enqueue_at(Time.now + interval_time.to_i, 
 				ScanUserAnswerJob, 
-				{"interval_time"=> interval_time.to_i}) 	
+				{interval_time: interval_time.to_i}) 	
 		end
 
 		def self.find_answers

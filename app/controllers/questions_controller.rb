@@ -1,12 +1,11 @@
 # encoding: utf-8
 require 'error_enum'
 class QuestionsController < ApplicationController
-	before_filter :require_sign_in
-	before_filter :check_survey_existence
+	before_filter :require_sign_in, :check_normal_survey_existence
 
 
-	def check_survey_existence
-		@survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+	def check_normal_survey_existence
+		@survey = @current_user.is_admin ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
 		if @survey.nil?
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }

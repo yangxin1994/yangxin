@@ -62,6 +62,7 @@ class Survey
 			"username_password_list" => []}}
 	field :random_quality_control_questions, :type => Boolean, default: false
 	field :deadline, :type => Integer
+	field :is_star, :type => Boolean, :default => false
 
 	belongs_to :user
 	has_and_belongs_to_many :tags do
@@ -80,13 +81,15 @@ class Survey
 	has_many :answers
 	has_many :email_histories
 
-	has_one :result
+	has_many :analyze_results
 
 	scope :all_but_new, lambda { where(:new_survey => false) }
 	scope :normal, lambda { where(:status.gt => -1) }
 	scope :normal_but_new, lambda { where(:status.gt => -1, :new_survey => false) }
 	scope :deleted, lambda { where(:status => -1) }
 	scope :deleted_but_new, lambda { where(:status => -1, :new_survey => false) }
+	# scope for star
+	scope :stars, where(:status.gt => -1, :is_star => true)
 
 	before_create :set_new
 
@@ -107,13 +110,19 @@ class Survey
 	#
 	# instance.update_deadline(Time.now+3.days)
 	def update_deadline(time)
-		time = time.to_i if time.is_a?(Time)
+		time = time.to_i
 		return ErrorEnum::SURVEY_DEADLINE_ERROR if time <= Time.now.to_i
 		self.deadline = time
 		return ErrorEnum::UNKNOWN_ERROR unless self.save
-
 		#create or update job
-		Jobs::SurveyDeadlineJob.update(self.id, time)
+		Jobs.start(:SurveyDeadlineJob, time, survey_id: self.id)
+		return true
+	end
+
+	def update_star
+		self.is_star = !self.is_star
+		return ErrorEnum::UNKNOWN_ERROR unless self.save
+		return self.is_star
 	end
 
 	def all_questions
@@ -199,6 +208,8 @@ class Survey
 	end
 
 	def self.list(status, publish_status, tags)
+		puts "status:: #{status}"
+		puts "publish_status:: #{publish_status}, type: #{publish_status.class}"
 		survey_list = []
 		case status
 		when "all"
@@ -210,9 +221,10 @@ class Survey
 		else
 			surveys = []
 		end
+
 		surveys.each do |survey|
-			if tags.nil? || tags.empty? || survey.has_one_tag_of(tags)
-				if publish_status.nil? || survey.publish_status & publish_status
+			if tags.nil? ||  tags.empty? || survey.has_one_tag_of(tags)
+				if publish_status.nil? ||publish_status == '' || survey.publish_status == publish_status.to_i
 					survey_list << survey
 				end
 			end
@@ -276,6 +288,21 @@ class Survey
 
 	def get_random_quality_control_questions
 		return self.random_quality_control_questions
+	end
+
+	def show_quality_control
+		quality_control = {"is_random_quality_control_questions" => self.random_quality_control_questions}
+		return quality_control if self.random_quality_control_questions
+
+		quality_control_questions = []
+		self.pages.each do |page|
+			page["questions"].each do |q|
+				quality_control_questions << q if q.question_class == 2
+			end
+		end
+		quality_control["quality_control_questions"] = quality_control_questions
+		return quality_control
+		
 	end
 
 	#*description*: remove current survey
@@ -1029,6 +1056,27 @@ class Survey
 		end
 	end
 
+	def check_progress
+		progress = {}
+
+		start_publish_time_ary = self.publish_status_historys.start_publish_time
+		end_publish_time_ary = self.publish_status_historys.end_publish_time
+
+		if start_publish_time_ary.blank?
+			progress["duration"] = 0
+		elsif end_publish_time_ary.blank?
+			progress["duration"] = Time.now.to_i - start_publish_time_ary[0]
+		else
+			progress["duration"] = end_publish_time_ary[0] - start_publish_time_ary[0]
+		end
+
+		progress["answer_number"] = self.answers.not_preview.finished.length
+		progress["screen_answer_number"] = self.answers.not_preview.screened
+		progress["quota"] = self.quota
+		progress["quota_stats"] = self.quota_stats
+		return progress
+	end
+
 	def add_quota_template_question(template_question_id)
 		template_question = TemplateQuestion.find_by_id(template_question_id)
 		return ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST if template_question.nil?
@@ -1171,26 +1219,11 @@ class Survey
 		return filters.delete_filter(filter_name, self)
 	end
 
-	def show_result(filter_name)
+	def show_analyze_result(filter_name, include_screened_answer)
 		return ErrorEnum::FILTER_NOT_EXIST if !filter_name.blank? && !self.filters.has_key?(filter_name)
 		filter_name = "_default" if filter_name.blank?
-		result = self.results.find_or_create_by_filter_name(filter_name)
+		result = self.analyze_results.find_or_create_by_filter_name(filter_name, include_screened_answer)
 		return result
-	end
-
-	def refresh_result(filter_name)
-		return ErrorEnum::FILTER_NOT_EXIST if !filter_name.blank? && !self.filters.has_key?(filter_name)
-		filter_name = "_default" if filter_name.blank?
-		result = self.results.refresh_or_create_by_filter_name(filter_name)
-		return result
-	end
-
-	def refresh_results
-		self.filters.each_key do |filter_name|
-			self.results.refresh_or_create_by_filter_name(filter_name)
-		end
-		self.results.refresh_or_create_by_filter_name("_default")
-		return true
 	end
 
 	class Filters

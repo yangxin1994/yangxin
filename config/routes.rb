@@ -1,4 +1,7 @@
+require 'resque/server'
 OopsData::Application.routes.draw do
+
+	mount Resque::Server.new, :at => "/resque"
 
 	resources :faqs, :public_notices, :feedbacks, :advertisements
 	resources :data_generators do
@@ -105,7 +108,11 @@ OopsData::Application.routes.draw do
 	match 'google_connect' => 'sessions#google_connect', :as => :google_connect
 	match 'qihu_connect' => 'sessions#qihu_connect', :as => :qihu_connect
 
-	resources :users
+	resources :users do 
+		collection do 
+			get :get_basic_info
+		end
+	end
 	match 'update_information' => 'users#update_information', :as => :update_information, :via => [:post]
 	match 'reset_password' => 'users#reset_password', :as => :reset_password, :via => [:post]
 
@@ -134,7 +141,10 @@ OopsData::Application.routes.draw do
 			get 'show_access_control_setting'
 			get 'set_random_quality_control_questions'
 			get 'get_random_quality_control_questions'
-			get 'update_deadline'
+			get 'show_quality_control'
+			get 'check_progress'
+			post 'update_deadline'
+			post 'update_star'
 		end
 		resources :pages
 		resources :questions do
@@ -161,7 +171,7 @@ OopsData::Application.routes.draw do
 			end
 		end
 
-		resources :results do
+		resources :analyze_results do
 		end
 	end
 	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/move' => 'pages#move'
@@ -187,6 +197,7 @@ OopsData::Application.routes.draw do
 
 	resources :answers do
 		collection do
+			post 'preview_load_question'
 			post 'load_question'
 			post 'clear'
 			post 'submit_answer'

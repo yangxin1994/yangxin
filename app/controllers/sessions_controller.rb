@@ -91,7 +91,7 @@ class SessionsController < ApplicationController
 	end
 
 	def show
-		user = user.find_by_auth_key(params[:id])
+		user = User.find_by_auth_key(params[:id])
 		render_json_auto(user.nil?) and return
 	end
 	
@@ -209,7 +209,8 @@ class SessionsController < ApplicationController
 		end
 
 		# send password email
-		UserMailer.password_email(user).deliver
+		Jobs.start(:EmailSendingJob, Time.now.to_i, email_type: "password", user_email: user.email)
+		# UserMailer.password_email(user).deliver
 
 		flash[:notice] = "重置密码邮件已发送，请到您的邮箱中点击链接进行密码重置"
 		respond_to do |format|
@@ -329,9 +330,9 @@ class SessionsController < ApplicationController
 	#* true if succeed
 	#* ErrorEnum ::WRONG_PASSWORD 
 	def reset_password
-		reset_password_retval = @current_user.reset_password(params["old_password"], params["new_password"], params["new_password_confirmation"])
+		reset_password_retval = @current_user.reset_password(params[:old_password], params[:new_password], params[:new_password_confirmation])
 		respond_to do |format|
-			format.json { render_json_s(reset_password_retval) and return }
+			format.json { render_json_auto(reset_password_retval) and return }
 		end
 	end
 

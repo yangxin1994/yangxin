@@ -19,6 +19,7 @@ class IpInfoTest < ActiveSupport::TestCase
 		# find and create
 		#
 		retval = IpInfo.find_by_ip("218.192.3.42")
+		# puts "retval test: #{retval.to_s}"
 		assert_equal IpInfo.all.count, 1
 		assert_equal Postcode.all.count, 1
 
@@ -27,21 +28,54 @@ class IpInfoTest < ActiveSupport::TestCase
 
 		# diff ip.
 		retval = IpInfo.find_by_ip("218.192.3.45")
+		# puts "retval test: #{retval.to_s}"
 		assert_equal IpInfo.all.count, 2
 		assert_equal Postcode.all.count, 1
 
-		assert_equal retval, Postcode.first
+		assert_equal retval, Postcode.last
 		assert_equal retval["city"], "广州"
 
 		#
 		# just find
 		#
 		retval = IpInfo.find_by_ip("218.192.3.45")
+		# puts "retval test: #{retval.to_s}"
 		assert_equal IpInfo.all.count, 2
 		assert_equal Postcode.all.count, 1
 
-		assert_equal retval, Postcode.first
+		assert_equal retval, Postcode.last
 		assert_equal retval["city"], "广州"
+
+		# add
+		retval = IpInfo.find_by_ip("59.188.1.101")
+		assert_equal IpInfo.all.count, 3
+		assert_equal Postcode.all.count, 2
+
+		assert_equal retval, Postcode.last
+		assert_equal retval["city"], ""
+		assert_equal retval["province"], "香港"
+		# puts "retval test: #{retval.to_s}"
+
+		# add
+		retval = IpInfo.find_by_ip("48.0.0.34")
+		# puts "retval test: #{retval.to_s}"
+		assert_equal IpInfo.all.count, 4
+		assert_equal Postcode.all.count, 3
+
+		assert_equal retval, Postcode.last
+		assert_equal retval["city"], ""
+		assert_equal retval["country"], "美国"
+		
+
+		# add
+		retval = IpInfo.find_by_ip("83.170.113.182")
+		# puts "retval test: #{retval.to_s}"
+		assert_equal IpInfo.all.count, 5
+		assert_equal Postcode.all.count, 4
+
+		assert_equal retval, Postcode.last
+		assert_equal retval["city"], ""
+		assert_equal retval["country"], "英国"
 
 		clear(IpInfo, Postcode)
 	end

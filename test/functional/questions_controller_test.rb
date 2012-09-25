@@ -76,7 +76,7 @@ class QuestionsControllerTest < ActionController::TestCase
 		question_obj["issue"]["max_choice"] = 4
 		question_obj["issue"]["is_rand"] = true
 		question_obj["issue"]["non_exist_attr"] = 1
-		question_obj["issue"]["choices"] << {"content" => "first choice content", "has_input" => false, "is_exclusive" => false, "non_exist_attr" => 1}
+		question_obj["issue"]["items"] << {"content" => "first choice content", "has_input" => false, "is_exclusive" => false, "non_exist_attr" => 1}
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update, :format => :json, :survey_id => "wrong survey id", :id => pages[0][0], :question => question_obj, :auth_key => auth_key
@@ -98,7 +98,7 @@ class QuestionsControllerTest < ActionController::TestCase
 		assert_equal question_obj["issue"]["min_choice"], updated_question_obj["issue"]["min_choice"]
 		assert_equal question_obj["issue"]["max_choice"], updated_question_obj["issue"]["max_choice"]
 		assert_equal question_obj["issue"]["is_rand"], updated_question_obj["issue"]["is_rand"]
-		assert_equal question_obj["issue"]["choices"][0]["content"], updated_question_obj["issue"]["choices"][0]["content"]
+		assert_equal question_obj["issue"]["items"][0]["content"], updated_question_obj["issue"]["items"][0]["content"]
 		assert_equal nil, updated_question_obj["issue"]["non_exist_attr"]
 	end
 
@@ -218,7 +218,7 @@ class QuestionsControllerTest < ActionController::TestCase
 		question_obj["issue"]["min_choice"] = 2
 		question_obj["issue"]["max_choice"] = 4
 		question_obj["issue"]["is_rand"] = true
-		question_obj["issue"]["choices"] << {"content" => "first choice content", "has_input" => false, "is_exclusive" => false, "non_exist_attr" => 1}
+		question_obj["issue"]["items"] << {"content" => "first choice content", "has_input" => false, "is_exclusive" => false, "non_exist_attr" => 1}
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		put :update, :format => :json, :survey_id => survey_id, :id => pages[0][0], :question => question_obj, :auth_key => auth_key
 		sign_out(auth_key)
@@ -249,13 +249,13 @@ class QuestionsControllerTest < ActionController::TestCase
 		assert_equal question_obj["issue"]["min_choice"], cloned_question_obj["issue"]["min_choice"]
 		assert_equal question_obj["issue"]["max_choice"], cloned_question_obj["issue"]["max_choice"]
 		assert_equal question_obj["issue"]["is_rand"], cloned_question_obj["issue"]["is_rand"]
-		assert_equal question_obj["issue"]["choices"][0]["content"], cloned_question_obj["issue"]["choices"][0]["content"]
+		assert_equal question_obj["issue"]["items"][0]["content"], cloned_question_obj["issue"]["items"][0]["content"]
 		survey_obj = get_survey_obj(jesse.email, jesse.password, survey_id)
 		cloned_question_obj = get_question_obj(jesse.email, jesse.password, survey_id, survey_obj["pages"][2]["questions"][0])
 		assert_equal question_obj["issue"]["min_choice"], cloned_question_obj["issue"]["min_choice"]
 		assert_equal question_obj["issue"]["max_choice"], cloned_question_obj["issue"]["max_choice"]
 		assert_equal question_obj["issue"]["is_rand"], cloned_question_obj["issue"]["is_rand"]
-		assert_equal question_obj["issue"]["choices"][0]["content"], cloned_question_obj["issue"]["choices"][0]["content"]
+		assert_equal question_obj["issue"]["items"][0]["content"], cloned_question_obj["issue"]["items"][0]["content"]
 	end
 
 	test "should insert template question" do

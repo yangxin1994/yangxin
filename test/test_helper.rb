@@ -180,9 +180,9 @@ class ActiveSupport::TestCase
 		question_obj = result["value"]
 		question_obj["issue"]["min_choice"] = 2
 		question_obj["issue"]["max_choice"] = 4
-		question_obj["issue"]["choices"] << {"input_id" => SecureRandom.uuid, "content" => "first choice content", "has_input" => false, "is_exclusive" => false}
-		question_obj["issue"]["choices"] << {"input_id" => SecureRandom.uuid, "content" => "second choice content", "has_input" => false, "is_exclusive" => false}
-		question_obj["issue"]["choices"] << {"input_id" => SecureRandom.uuid, "content" => "third choice content", "has_input" => false, "is_exclusive" => false}
+		question_obj["issue"]["items"] << {"input_id" => SecureRandom.uuid, "content" => "first choice content", "has_input" => false, "is_exclusive" => false}
+		question_obj["issue"]["items"] << {"input_id" => SecureRandom.uuid, "content" => "second choice content", "has_input" => false, "is_exclusive" => false}
+		question_obj["issue"]["items"] << {"input_id" => SecureRandom.uuid, "content" => "third choice content", "has_input" => false, "is_exclusive" => false}
 		put :update, :format => :json, :survey_id => survey_id, :id => question_obj["_id"], :question => question_obj, :auth_key => auth_key
 		@controller = old_controller
 		sign_out(auth_key)

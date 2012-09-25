@@ -3,6 +3,7 @@
 class Postcode
 	include Mongoid::Document
 
+	field :country, :type => String, :default => ""
 	field :province, :type => String, :default =>""
 	field :city, :type => String, :default => ""
 	field :postcode, :type => String, :default => ""
@@ -17,5 +18,9 @@ class Postcode
 		return postcode.to_i
 	rescue
 		return ErrorEnum::UNKNOWN_ERROR
+	end
+
+	def to_s
+		JSON.parse(self.to_json)
 	end
 end
