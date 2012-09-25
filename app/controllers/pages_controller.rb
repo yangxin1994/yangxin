@@ -58,7 +58,7 @@ class PagesController < ApplicationController
 	end
 
 	def split
-		retval = @survey.split_page(params[:page_index].to_i, params[:question_id], params[:page_name_1], params[:page_name_2])
+		retval = @survey.split_page(params[:id].to_i, params[:question_id], params[:page_name_1], params[:page_name_2])
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
@@ -73,14 +73,14 @@ class PagesController < ApplicationController
 
 	#*method*: get
 	#
-	#*url*: /surveys/:survey_id/pages/:page_index_1/:page_index_2/clone
+	#*url*: /surveys/:survey_id/pages/:page_index_1/clone
 	#
 	#*description*: clone a page, and put the new page after the given page
 	#
 	#*params*:
 	#* survey_id: id of the survey
 	#* page_index_1: index of the page to be cloned. Page index starts from 0
-	#* page_index_2: index of the page, after which the new page is inserted. Page index starts from 0
+	#* after_page_index: index of the page, after which the new page is inserted. Page index starts from 0
 	#
 	#*retval*:
 	#* an array of Question object for the cloned page
@@ -88,7 +88,7 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def clone
-		page = @survey.clone_page(params[:page_index_1].to_i, params[:page_index_2].to_i)
+		page = @survey.clone_page(params[:id].to_i, params[:after_page_index].to_i)
 		respond_to do |format|
 			format.json	{ render_json_auto(page) and return }
 		end
@@ -96,14 +96,14 @@ class PagesController < ApplicationController
 
 	#*method*: get
 	#
-	#*url*: /surveys/:survey_id/pages/:page_index_1/:page_index_2/move
+	#*url*: /surveys/:survey_id/pages/:page_index_1/move
 	#
 	#*description*: clone a page, and put the new page after the given page
 	#
 	#*params*:
 	#* survey_id: id of the survey
 	#* page_index_1: index of the page to be moved. Page index starts from 0
-	#* page_index_2: index of the page, after which the above page is moved to. Page index starts from 0
+	#* after_page_index: index of the page, after which the above page is moved to. Page index starts from 0
 	#
 	#*retval*:
 	#* true: when page is successfully moved
@@ -111,7 +111,7 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def move
-		retval = @survey.move_page(params[:page_index_1].to_i, params[:page_index_2].to_i)
+		retval = @survey.move_page(params[:id].to_i, params[:after_page_index].to_i)
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
@@ -142,14 +142,14 @@ class PagesController < ApplicationController
 
 	#*method*: put
 	#
-	#*url*: /surveys/:survey_id/pages/:page_index_1/:page_index_2/combine
+	#*url*: /surveys/:survey_id/pages/:page_index_1/combine
 	#
 	#*description*: combine continuous pages into one page
 	#
 	#*params*:
 	#* survey_id: id of the survey
 	#* page_index_1: the start id of the pages to be combined. Page index starts from 0
-	#* page_index_2: the end id of the pages to be combined. Page index starts from 0
+	#* after_page_index: the end id of the pages to be combined. Page index starts from 0
 	#
 	#*retval*:
 	#* true: when pages are successfully combined
@@ -157,7 +157,7 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def combine
-		retval = @survey.combine_pages(params[:page_index_1].to_i, params[:page_index_2].to_i)
+		retval = @survey.combine_pages(params[:id].to_i, params[:after_page_index].to_i)
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end

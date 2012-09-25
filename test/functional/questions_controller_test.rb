@@ -168,25 +168,25 @@ class QuestionsControllerTest < ActionController::TestCase
 		survey_id, pages = *create_survey_page_question(jesse.email, jesse.password)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :move, :format => :json, :survey_id => "wrong survey id", :page_index => 2, :question_id_1 => pages[2][1], :question_id_2 => pages[2][3], :auth_key => auth_key
+		put :move, :format => :json, :survey_id => "wrong survey id", :page_index => 2, :id => pages[2][1], :after_question_id => pages[2][3], :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :move, :format => :json, :survey_id => survey_id, :page_index => 10, :question_id_1 => pages[2][1], :question_id_2 => pages[2][3], :auth_key => auth_key
+		put :move, :format => :json, :survey_id => survey_id, :page_index => 10, :id => pages[2][1], :after_question_id => pages[2][3], :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :move, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => "wrong question id", :question_id_2 => pages[2][3], :auth_key => auth_key
+		put :move, :format => :json, :survey_id => survey_id, :page_index => 2, :id => "wrong question id", :after_question_id => pages[2][3], :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :move, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => pages[2][1], :question_id_2 => pages[2][3], :auth_key => auth_key
+		put :move, :format => :json, :survey_id => survey_id, :page_index => 2, :id => pages[2][1], :after_question_id => pages[2][3], :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal true, result["value"]
 		sign_out(auth_key)
@@ -197,7 +197,7 @@ class QuestionsControllerTest < ActionController::TestCase
 		assert_equal pages[2][1], survey_obj["pages"][2]["questions"][3]
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :move, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => pages[2][1], :question_id_2 => -1, :auth_key => auth_key
+		put :move, :format => :json, :survey_id => survey_id, :page_index => 2, :id => pages[2][1], :after_question_id => -1, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal true, result["value"]
 		sign_out(auth_key)
@@ -224,25 +224,25 @@ class QuestionsControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :clone, :format => :json, :survey_id => "wrong survey id", :page_index => 2, :question_id_1 => pages[0][0], :question_id_2 => -1, :auth_key => auth_key
+		put :clone, :format => :json, :survey_id => "wrong survey id", :page_index => 2, :id => pages[0][0], :after_question_id => -1, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :clone, :format => :json, :survey_id => survey_id, :page_index => 10, :question_id_1 => pages[0][0], :question_id_2 => -1, :auth_key => auth_key
+		put :clone, :format => :json, :survey_id => survey_id, :page_index => 10, :id => pages[0][0], :after_question_id => -1, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :clone, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => "wrong question id", :question_id_2 => -1, :auth_key => auth_key
+		put :clone, :format => :json, :survey_id => survey_id, :page_index => 2, :id => "wrong question id", :after_question_id => -1, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :clone, :format => :json, :survey_id => survey_id, :page_index => 2, :question_id_1 => pages[0][0], :question_id_2 => -1, :auth_key => auth_key
+		put :clone, :format => :json, :survey_id => survey_id, :page_index => 2, :id => pages[0][0], :after_question_id => -1, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		cloned_question_obj = result["value"]
 		sign_out(auth_key)
