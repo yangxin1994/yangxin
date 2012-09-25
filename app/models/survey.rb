@@ -30,12 +30,19 @@ class Survey
   field :header, :type => String, default: "调查问卷页眉"
   field :footer, :type => String, default: "调查问卷页脚"
   field :description, :type => String, default: "调查问卷描述"
-  field :status, :type => Integer, default: 0
+  # indicates whether this is a new survey that has not been edited
+  field :new_survey, :type => Boolean, default: true
+  field :alt_new_survey, :type => Boolean, default: false
+  # can be 0 (normal), or -1 (deleted)
+  field :status, :type => Integer, default: 0 
   # can be 1 (closed), 2 (under review), 4 (paused), 8 (published)
   field :publish_status, :type => Integer, default: 1
   field :user_attr_survey, :type => Boolean, default: false
-  field :pages, :type => Array, default: []
+  field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
   field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
+  field :quota_stats, :type => Hash
+  field :filters, :type => Hash, default: {}
+  field :filters_stats, :type => Hash, default: {}
   field :quota_template_question_page, :type => Array, default: []
   field :logic_control, :type => Array, default: []
   field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
@@ -54,7 +61,7 @@ class Survey
       "password_list" => [],
       "username_password_list" => []}}
   field :random_quality_control_questions, :type => Boolean, default: false
-  field :quota_stats, :type => Hash
+  field :deadline, :type => Integer
 
   belongs_to :user
   has_and_belongs_to_many :tags do
@@ -71,12 +78,20 @@ class Survey
   has_and_belongs_to_many :interviewers, class_name: "Interviewer", inverse_of: :managable_survey
 
   has_many :answers
+  has_many :email_histories
 
+  has_many :analyze_results
+
+  scope :all_but_new, lambda { where(:new_survey => false) }
   scope :normal, lambda { where(:status.gt => -1) }
+  scope :normal_but_new, lambda { where(:status.gt => -1, :new_survey => false) }
   scope :deleted, lambda { where(:status => -1) }
+  scope :deleted_but_new, lambda { where(:status => -1, :new_survey => false) }
 
+  before_create :set_new
 
   before_save :clear_survey_object
+  before_save :update_new
   before_update :clear_survey_object
   before_destroy :clear_survey_object
 
@@ -118,37 +133,45 @@ class Survey
     headers
   end
   def answer_content(ac = self.answers)
-    cc = []
+    @retval = []
     ac.each do |answer|
-
+      line_answer = []
       answer.answer_content.each do |k,v|
         question = Question.find_by_id(k)
         q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question.question_type}"] + "Io").new(question)
-        cc += q.answer_content(v)
-      end      
+        line_answer += q.answer_content(v)
+      end
+      @retval << line_answer
     end
-    cc
+    @retval
   end
+
   def spss_data
     data = {"spss_header" => spss_header,
-            "answer_contents" => []}
+            "answer_contents" => answer_content}
   end
-  def export_csv
-    (csv_header + answer_content).to_csv
+  def export_csv(path = "public/import/test.csv")
+    c = CSV.open(path, "w") do |csv|
+      csv << csv_header
+      answer_content.each do |a|
+        csv << a
+      end
+    end
+    p c
   end
+
   def answer_import(csv_path)
     line_answer = {}
     CSV.foreach("public/import/test.csv", :headers => true) do |row|
       row = row.to_hash
-      p row
-      all_questions.each_with_index do |e,i|
+      all_questions.each_with_index do |e, i|
         q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
         line_answer.merge! q.answer_import(row,"q#{i+1}")
       end
-      pp line_answer
       return line_answer
     end
   end
+
   def connect_dotnet
 
     client = Savon::Client.new('http://192.168.1.129/DataImport.asmx?wsdl')
@@ -173,6 +196,25 @@ class Survey
 
     end
   end
+ 
+  public
+
+  #--
+  # update deadline and create a survey_deadline_job
+  #++
+
+  # Example:
+  #
+  # instance.update_deadline(Time.now+3.days)
+  def update_deadline(time)
+    time = time.to_i if time.is_a?(Time)
+    return ErrorEnum::SURVEY_DEADLINE_ERROR if time <= Time.now.to_i
+    self.deadline = time
+    return ErrorEnum::UNKNOWN_ERROR unless self.save
+    #create or update job
+    Jobs.start(:SurveyDeadlineJob, time, survey_id: self.id)
+  end
+
   #*description*: judge whether this survey has a question
   #
   #*params*
@@ -204,6 +246,8 @@ class Survey
     end
     survey_obj["quota"] = Marshal.load(Marshal.dump(self.quota))
     survey_obj["quota_stats"] = Marshal.load(Marshal.dump(self.quota_stats))
+    survey_obj["filters"] = Marshal.load(Marshal.dump(self.filters))
+    survey_obj["filters_stats"] = Marshal.load(Marshal.dump(self.filters_stats))
     survey_obj["logic_control"] = Marshal.load(Marshal.dump(self.logic_control))
     survey_obj["access_control_setting"] = Marshal.load(Marshal.dump(self.access_control_setting))
     survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
@@ -223,16 +267,25 @@ class Survey
     return Survey.where(:_id => survey_id).first
   end
 
+  def self.find_by_ids(survey_id_list)
+    return Survey.all.in(_id: survey_id_list)
+  end
+  
+  def self.find_new_by_user(user)
+    return user.surveys.where(:new_survey => true)[0]
+  end
 
   def self.list(status, publish_status, tags)
     survey_list = []
     case status
     when "all"
-      surveys = Survey.all
+      surveys = Survey.all_but_new
     when "deleted"
-      surveys = Survey.deleted
+      surveys = Survey.deleted_but_new
     when "normal"
-      surveys = Survey.normal
+      surveys = Survey.normal_but_new
+    else
+      surveys = []
     end
     surveys.each do |survey|
       if tags.nil? || tags.empty? || survey.has_one_tag_of(tags)
@@ -370,7 +423,7 @@ class Survey
 
     # clone all questions
     new_instance.pages.each do |page|
-      page.each_with_index do |question_id, question_index|
+      page["questions"].each_with_index do |question_id, question_index|
         question = Question.find_by_id(question_id)
         return ErrorEnum::QUESTION_NOT_EXIST if question == nil
         cloned_question = question.clone
@@ -413,6 +466,8 @@ class Survey
       elsif [5, 6].include?(logic_control_rule["rule_type"])
         logic_control_rule["result"]["question_id_1"] = question_id_mapping[logic_control_rule["result"]["question_id_1"]]
         logic_control_rule["result"]["question_id_2"] = question_id_mapping[logic_control_rule["result"]["question_id_2"]]
+      elsif [7, 8].include?(logic_control_rule["rule_type"])
+        # for logic control that show/hide pages, it is not needed to replace with new question ids
       end
     end
 
@@ -554,6 +609,22 @@ class Survey
   #*params*:
   def clear_survey_object
     Cache.write(self._id, nil)
+    return true
+  end
+
+  def set_new
+    # self.new_survey = true
+    return true
+  end
+
+
+  def update_new
+    if self.alt_new_survey
+      self.new_survey = false
+    else
+      self.alt_new_survey = true
+    end
+    return true
   end
 
 
@@ -694,8 +765,9 @@ class Survey
       return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
     end
     question_index_to_be_delete = from_page["questions"].index(question_id_1)
+    from_page["questions"][question_index_to_be_delete] = ""
     to_page["questions"].insert(question_index+1, question_id_1)
-    from_page["questions"].delete_at(question_index_to_be_delete)
+    from_page["questions"].delete("")
     return self.save
   end
 
@@ -815,9 +887,41 @@ class Survey
   #* ErrorEnum ::OVERFLOW 
   def create_page(page_index, page_name)
     return ErrorEnum::OVERFLOW if page_index < -1 or page_index > self.pages.length - 1
-    new_page = {name: page_name, questions: []}
+    new_page = {"name" => page_name, "questions" => []}
     self.pages.insert(page_index+1, new_page)
-    return self.save
+    self.save
+    return new_page
+  end
+
+  # split page before question_id
+  def split_page(page_index, question_id, page_name_1, page_name_2)
+    current_page = self.pages[page_index]
+    return ErrorEnum::OVERFLOW if current_page.nil?
+    if question_id.to_s == "-1"
+      question_index = current_page["questions"].length
+    else
+      question_index = -1
+      current_page["questions"].each_with_index do |q_id, q_index|
+        if q_id == question_id
+          question_index = q_index
+          break
+        end
+      end
+      return ErrorEnum::QUESTION_NOT_EXIST if question_index == -1
+    end
+    if question_index == 0
+      new_page_1 = {"name" => page_name_1, "questions" => []}
+    else
+      new_page_1 = {"name" => page_name_1,
+            "questions" => current_page["questions"][0..question_index-1]}
+    end
+    new_page_2 = {"name" => page_name_2,
+            "questions" => current_page["questions"][question_index..current_page["questions"].length-1]}
+    self.pages.delete_at(page_index)
+    self.pages.insert(page_index, new_page_2)
+    self.pages.insert(page_index, new_page_1)
+    self.save
+    return [new_page_1, new_page_2]
   end
 
   #*description*: show a page
@@ -965,7 +1069,7 @@ class Survey
   # return all the surveys that are published and are active
   # it is needed to send emails and invite volunteers for these surveys
   def self.get_published_active_surveys
-    
+    return self.list("normal", PublishStatus::PUBLISHED, [])
   end
 
   def check_password(username, password, current_user)
@@ -1045,13 +1149,31 @@ class Survey
     return quota.delete_rule(quota_rule_index, self)
   end
 
+  def refresh_filters_stats
+    # only make statisics from the answers that are not preview answers
+    answers = self.answers.not_preview
+    filters_stats = {}
+    answers.each do |answer|
+      self.filters.each do |filter_name, filter_conditions|
+        filter_stats[filter_name] = 0 if filter_stats[filter_name].nil?
+        if answer.satisfy_conditions(filter_conditions)
+          filters_stats[filter_name] = filters_stats[filter_name] + 1
+        end
+      end
+    end
+    filters_stats["_default"] = answers.length
+    self.filters_stats = filters_stats
+    self.save
+  end
+
   def refresh_quota_stats
-    answers = self.answers
+    # only make statisics from the answers that are not preview answers
+    answers = self.answers.not_preview
     quota_stats = {"quota_satisfied" => true, "answer_number" => []}
     self.quota["rules"].length.times { quota_stats["answer_number"] << 0 }
     answers.each do |answer|
       self.quota["rules"].each_with_index do |rule, rule_index|
-        if answer.satisfy_quota_conditions(rule["conditions"])
+        if answer.satisfy_conditions(rule["conditions"])
           quota_stats["answer_number"][rule_index] = quota_stats["answer_number"][rule_index] + 1
         end
       end
@@ -1095,6 +1217,108 @@ class Survey
   def delete_logic_control_rule(logic_control_rule_index)
     logic_control = LogicControl.new(self.logic_control)
     return logic_control.delete_rule(logic_control_rule_index, self)
+  end
+
+  def list_filters
+    return Marshal.load(Marshal.dump(self.filters))
+  end
+
+  def show_filter(filter_name)
+    filters = Filters.new(self.filters)
+    return filters.show_filter(filter_name)
+  end
+
+  def add_filter(filter_name, filter_conditions)
+    filters = Filters.new(self.filters)
+    return filters.add_filter(filter_name, filter_conditions, self)
+  end
+
+  def update_filter(filter_name, filter_conditions)
+    filters = Filters.new(self.filters)
+    return filters.update_filter(filter_name, filter_conditions, self)
+  end
+
+  def update_filter_name(filter_name, new_filter_name)
+    filters = Filters.new(self.filters)
+    return filter.update_filter_name(filter_name, new_filter_name, self)
+  end
+
+  def delete_filter(filter_name)
+    filters = Filters.new(self.filters)
+    return filters.delete_filter(filter_name, self)
+  end
+
+  def show_analyze_result(filter_name)
+    return ErrorEnum::FILTER_NOT_EXIST if !filter_name.blank? && !self.filters.has_key?(filter_name)
+    filter_name = "_default" if filter_name.blank?
+    result = self.analyze_results.find_or_create_by_filter_name(filter_name)
+    return result
+  end
+
+  class Filters
+    CONDITION_TYPE = (0..4).to_a
+    def initialize(filters)
+      @filters = Marshal.load(Marshal.dump(filters))
+    end
+
+    def show_filter(filter_name)
+      return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
+      return @filters[filter_name]
+    end
+
+    def add_filter(filter_name, filter_conditions, survey)
+      # check errors
+      return ErrorEnum::FILTER_EXIST if survey.filters.has_key?(filter_name)
+      return ErrorEnum::FILTER_NAME_BLANK if filter_name.blank?
+      filter_conditions.each do |condition|
+        condition["condition_type"] = condition["condition_type"].to_i
+        return ErrorEnum::WRONG_FILTER_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
+      end
+      # add the rule
+      @filters[filter_name] = filter_conditions
+      survey.filters = self.serialize
+      survey.save
+      return survey.filters
+    end
+
+    def delete_filter(filter_name, survey)
+      # check errors
+      return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
+      # delete the rule
+      @filters.delete(filter_name)
+      survey.filters = self.serialize
+      survey.save
+      return survey.filters
+    end
+
+    def update_filter_name(filter_name, new_filter_name, survey)
+      # check errors
+      return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
+      @filters[new_filter_name] = @filters[filter_name]
+      @filters.delete(filter_name)
+      survey.filters = self.serialize
+      survey.save
+      return survey.filters
+    end
+
+    def update_filter(filter_name, filter_conditions, survey)
+      # check errors
+      return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
+      filter_conditions.each do |condition|
+        condition["condition_type"] = condition["condition_type"].to_i
+        return ErrorEnum::WRONG_FILTER_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"].to_i)
+      end
+      # update the rule
+      @filters[filter_name] = filter_conditions
+      survey.filters = self.serialize
+      survey.save
+      return survey.filters
+    end
+
+    def serialize
+      filters_object = @filters
+      return filters_object
+    end
   end
 
   class Quota
@@ -1180,7 +1404,7 @@ class Survey
   end
 
   class LogicControl
-    RULE_TYPE = (0..6).to_a
+    RULE_TYPE = (0..8).to_a
     def initialize(logic_control)
       @rules = logic_control
     end

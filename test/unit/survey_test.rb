@@ -6,6 +6,8 @@ class SurveyTest < ActiveSupport::TestCase
     clear(Survey)
     @survey_with_issue = FactoryGirl.create(:survey_with_issue)
     @answer_with_issue = FactoryGirl.create(:answer_with_issue)
+    @survey_with_issue.answers << @answer_with_issue
+
   #FactoryGirl.create(:single_choice_question)
   end
 
@@ -17,17 +19,15 @@ class SurveyTest < ActiveSupport::TestCase
     # pp Question.first.issue["max_choice"]
     # pp Surver.first.header 1
     # pp Question.first.header 2
-    # @survey_with_issue.all_questions.each do |q|
-    #   pp q.header 1
-    # end
-    #p @survey_with_issue.csv_header.to_csv
+    # p @survey_with_issue.csv_header.to_csv
     # pp @survey_with_issue.spss_header
     
     # p Encoding.default_external
     # p Encoding.default_internal
-    #@answer_with_issue.csv_content
+    # p @survey_with_issue.answer_content.to_csv
     #@answer_with_issue.load_csv
-    @survey_with_issue.answer_import("")
+    @survey_with_issue.export_csv
+    pp @survey_with_issue.answer_import("")
     #@survey_with_issue.connect_sinatra
     assert true
   end

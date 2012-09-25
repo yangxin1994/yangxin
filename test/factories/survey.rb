@@ -108,9 +108,7 @@ FactoryGirl.define do
 			quota_stats ({"answer_number" => [50, 100, 50]})
 		end
 	end
-end
-
-FactoryGirl.define do
+  
 
   factory :survey_with_issue, class: Survey do
     @questions1 = [FactoryGirl.create(:single_choice_question).id,
@@ -174,10 +172,10 @@ FactoryGirl.define do
                  "3" => 20,
                  "4" => 30},
                 {"text_input" => "其他项",
-                 "sort_result" => ["3", "2", "1", "4"]},
+                 "sort_result" => ["8", "2", "1", "4"]},
                 {"text_input" => "其他项",
-                 "1" => 80,
-                 "2" => -1,
+                 "7" => 80,
+                 "9" => -1,
                  "3" => 30,
                  "4" => 60}
                ]

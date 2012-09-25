@@ -147,7 +147,7 @@ class MatrixChoiceQuestionIo < QuestionIo
         issue["choices"].each_index do |c|
           @retval << {"spss_name" => header_prefix  + "_r#{r + 1}" + "_c#{c + 1}",
                       "spss_type" => SPSS_NUMERIC,
-                      "spss_label" => issue["choices"][i]["content"]["text"],
+                      "spss_label" => issue["choices"][c]["content"]["text"],
                       "spss_value_labels" => {"1" => SPSS_OPTED,
                                               "0" => SPSS_NOT_OPTED}}
         end
@@ -242,8 +242,9 @@ class TimeBlankQuestionIo < QuestionIo
     #   @retval << "#{t}#{e}"
     # end
      
-    p=/[^\u0030-\u0040]/
-    @retval = row["#{header_prefix}"].gsub(p, ',').split(",").collect{|s| s.to_i}
+    pa=/[^\u0030-\u0040]/
+    p row
+    @retval = row["#{header_prefix}"].gsub(pa, ',').split(",").collect{|s| s.to_i}
     return { "#{origin_id}" => @retval}
   end
 end
@@ -437,22 +438,29 @@ class SortQuestionIo < QuestionIo
       if issue["other_item"]["has_other_item"]
         break if i == v["sort_result"].size - 1
       end
-      @retval[issue["items"][i]["input_id"].to_i - 1] = e
+      @retval[i] = e
     end
 
     if issue["other_item"]["has_other_item"]
+
       @retval << v["text_input"]
       @retval << v["sort_result"][-1] #这句就是个陷阱!!!
     end
     return @retval
   end
   def answer_import(row, header_prefix)
-    @retval = {}
-    (1..issue["items"].size).each do |i|
-      @retval = 
+    @retval = {"sort_result" => []}
+    issue["items"].each_index do |i|
+      @retval["sort_result"] << row["#{header_prefix}_c#{i + 1}"]
     end
+    if issue["other_item"]["has_other_item"]
+      @retval["text_input"] = row["#{header_prefix}#{INPUT}"]
+      @retval["sort_result"] << row["#{header_prefix}#{INPUT+VALUE}"]
+    end
+    return { "#{origin_id}" => @retval} 
   end
 end
+
 class RankQuestionIo < QuestionIo
   def csv_header(header_prefix)
     issue["items"].each_index do |i|
@@ -481,8 +489,6 @@ class RankQuestionIo < QuestionIo
       end
     end
     if issue["other_item"]["has_other_item"]
-      #spss_name << header_prefix + input
-      #spss_name << header_prefix + input + VALUE
       @retval << {"spss_name" => header_prefix + INPUT,
                   "spss_type" => SPSS_STRING,
                   "spss_label" => SPSS_ETC}
@@ -493,22 +499,26 @@ class RankQuestionIo < QuestionIo
     return @retval
   end
   def answer_content(v)
-    v.each do |k, c|
-      unless k == "text_input" || k == issue["other_item"]["input_id"]
-        @retval << c 
-        issue["items"].each do |e|
-          if e["input_id"] == k
-            @retval << (c == -1 ? 1 : 0 ) if e["has_unknow"]
-          end
-        end
-      end
+    issue["items"].each do |e|
+      @retval << v[e["input_id"]]
+      @retval << (v[e["input_id"]] == -1 ? 1 : 0 ) if e["has_unknow"]
     end
-
     if issue["other_item"]["has_other_item"]
       @retval << v["text_input"]
       @retval << v[issue["other_item"]["input_id"]]
     end
     return @retval
+  end
+  def answer_import(row, header_prefix)
+    @retval = {}
+    issue["items"].each_with_index do |e, i|
+      @retval["#{e["input_id"]}"] = row["#{header_prefix}_c#{i + 1}"]
+    end
+    if issue["other_item"]["has_other_item"]
+      @retval["text_input"] = row["#{header_prefix + INPUT}"]
+      @retval["#{issue["other_item"]["input_id"]}"] = row["#{header_prefix + INPUT + VALUE}"]
+    end
+    return { "#{origin_id}" => @retval} 
   end
 end
 
