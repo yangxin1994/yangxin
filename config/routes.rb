@@ -197,6 +197,7 @@ OopsData::Application.routes.draw do
 
 	resources :answers do
 		collection do
+			post 'preview_load_question'
 			post 'load_question'
 			post 'clear'
 			post 'submit_answer'

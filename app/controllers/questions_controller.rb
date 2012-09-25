@@ -5,7 +5,7 @@ class QuestionsController < ApplicationController
 
 
 	def check_normal_survey_existence
-		@survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		@survey = @current_user.is_admin ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
 		if @survey.nil?
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }

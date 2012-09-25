@@ -93,9 +93,10 @@ class Answer
 		return true
 	end
 
-	def self.create_preview_answer(survey_id, preview_id)
+	def self.create_preview_answer(survey_id)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		preview_id = SecureRandom.uuid
 		answer = Answer.new(preview_id: preview_id)
 		
 		# initialize the answer content
