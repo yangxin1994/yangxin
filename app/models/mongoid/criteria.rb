@@ -1,4 +1,4 @@
-module Mongoid
-	module Criteria
-	end
-end
+# module Mongoid
+# 	module Criteria
+# 	end
+# end
