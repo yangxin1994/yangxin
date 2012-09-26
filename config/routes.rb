@@ -142,10 +142,10 @@ OopsData::Application.routes.draw do
 			get 'show_access_control_setting'
 			get 'set_random_quality_control_questions'
 			get 'get_random_quality_control_questions'
-<<<<<<< HEAD
+
 			get 'spss_header'
 			get 'update_deadline'
-=======
+
 			get 'show_quality_control'
 			get 'check_progress'
 			post 'update_deadline'
@@ -158,7 +158,7 @@ OopsData::Application.routes.draw do
 				put 'split'
 				put 'combine'
 			end
->>>>>>> master
+
 		end
 		resources :questions do
 			collection do

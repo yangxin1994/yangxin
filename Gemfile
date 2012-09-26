@@ -7,7 +7,7 @@ gem 'rails', '3.1.0'
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 
-
+gem 'rack-protection'
 gem 'mongoid', " ~> 2.4"
 gem 'bson_ext'
 gem 'ezcrypto'
