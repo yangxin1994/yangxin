@@ -10,6 +10,9 @@ class Answer
 	field :status, :type => Integer, default: 0
 	field :answer_content, :type => Hash
 	field :template_answer_content, :type => Hash
+	field :random_quality_control_answer_content, :type => Hash
+	field :random_quality_control_locations, :type => Hash
+
 	# Due to the logic control rules, volunteer's answer will hide/show some questions/choices.
 	# The hide/show of questions can be recorded in the "answer_content" field
 	# => For those questions that are hidden, their answers are set as "{}", and they will not be loaded
@@ -181,6 +184,34 @@ class Answer
 				answer.add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
 			end
 		end
+
+		# randomly generate quality control questions
+		if survey.random_quality_control_questions
+			# 1. determine the number of random quality control questions
+			question_number = answer.answer_content.length
+			qc_question_number = [[question_number / 10, 1].max, 4].min
+			objective_question_number = (qc_question_number / 2.0).ceil
+			matching_question_number = qc_question_number - objective_question_number
+			# 2. randomly choose questions and generate locations of questions
+			objective_questions_ids = QualityControlQuestion.objective_questions.random(objective_question_number).map { |e| e._id.to_s }
+			temp_matching_questions_ids = QualityControlQuestion.matching_questions.random(objective_question_number).map { |e| e._id.to_s }
+			matching_questions_uniq_ids = []
+			temp_matching_questions_ids.each do |m_q_id|
+				matching_questions_uniq_ids += MatchingQuestion.get_matching_question_ids(m_q_id)
+			end
+			matching_questions_ids = matching_questions_uniq_ids.uniq
+			quality_control_questions_ids = [objective_questions_ids + matching_questions_ids]
+
+			# 3. random generate locations for the quality control questions
+			quality_control_questions_ids.each do |qc_id|
+				answer.random_quality_control_locations[survey.pages.shuffle[0]["questions"].shuffle[0]] =
+					qc_id
+			end
+
+			# 4. initialize the random quality control questions answers
+			answer.random_quality_control_answer_content = Hash[quality_control_questions_ids.map { |ele| [ele, nil] }]
+		end
+
 		return answer
 	end
 
@@ -237,20 +268,25 @@ class Answer
 			cur_page = false
 			self.survey.pages.each do |page|
 				page["questions"].each do |q_id|
-					next if !self.answer_content[q_id].nil?
+					qc_id = self.random_quality_control_locations[q_id]
+					if !self.answer_content[q_id].nil?
+						loaded_question_ids << qc_id if !qc_id.blank? && self.random_quality_control_answer_content[qc_id].nil?
+						next
+					end
 					# find out the first question whose answer is nil
 					cur_page = true
 					# check if this question is the result of some logic control rule
 					logic_control_question_id.each do |ele|
-						if (ele["condition"] & loaded_question_ids).empty? || !ele["result"].include?(q_id)
-							loaded_question_ids << q_id
-						else
+						if !(ele["condition"] & loaded_question_ids).empty? && ele["result"].include?(q_id)
 							return load_question_by_ids(loaded_question_ids)
 						end
 					end
+					loaded_question_ids << q_id
+					loaded_question_ids << qc_id if !qc_id.blank? && self.random_quality_control_answer_content[qc_id].nil?
 				end
 				return load_question_by_ids(loaded_question_ids) if cur_page
 			end
+			return load_question_by_ids(loaded_question_ids) if loaded_question_ids.length > 0
 			self.auto_finish
 			return true
 		end
@@ -259,8 +295,13 @@ class Answer
 	def load_question_by_ids(question_ids)
 		questions = []
 		question_ids.each do |q_id|
-			question = Question.find_by_id(q_id)
+			question = BasicQuestion.find_by_id(q_id)
 			questions << question.remove_hidden_items(logic_control_result[q_id]["items"], logic_control_result[q_id]["sub_questions"])
+			# load random quality control quesitons for surveys that allow page up (no logic control)
+			random_qc_id = self.random_quality_control_locations[q_id]
+			if !random_qc_id.blank? && !question_ids.include?(random_qc_id)
+				questions << BasicQuestion.find_by_id(random_qc_id)
+			end
 		end
 		return questions
 	end
@@ -419,7 +460,15 @@ class Answer
 	#* ErrorEnum::WRONG_ANSWER_STATUS
 	def clear
 		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_redo
-		self.answer_content = {}
+		self.template_answer_content.each do |k, v|
+			v = nil
+		end
+		self.answer_content.each do |k, v|
+			v = nil
+		end
+		self.random_quality_control_answer_content.each do |k, v|
+			v = nil
+		end
 		self.save
 		self.set_edit
 		return true
@@ -458,6 +507,7 @@ class Answer
 		answer_content.each do |k, v|
 			self.answer_content[k] = v if self.answer_content.has_key?(k)
 			self.template_answer_content[k] = v if self.template_answer_content.has_key?(k)
+			self.random_quality_control_answer_content[k] = v if self.random_quality_control_answer_content.has_key?(k)
 		end
 		self.save
 		return true
@@ -473,17 +523,28 @@ class Answer
 	#* false: when the quality control rules are violated
 	def check_quality_control(answer_content)
 		# find out quality control questions
-		quality_control_question_ary = []
+		inserted_quality_control_question_ary = []
+		random_quality_control_question_id_ary = []
 		answer_content.each do |k, v|
-			question = Question.find_by_id(k)
-			quality_control_question_ary << question if !question.nil? && question.question_class == 2
+			question = BasicQuestion.find_by_id(k)
+			inserted_quality_control_question_ary << question if !question.nil? && question.class == Question && question.question_class == 2
+			random_quality_control_question_id_ary << k if !question.nil? && question.class == QualityControlQuestion
 		end
 		# if there is no quality control questions, return
-		return true if quality_control_question_ary.empty?
+		return true if inserted_quality_control_question_ary.blank? && random_quality_control_question_id_ary.blank?
+		########## check quality control quesoitns that are added manually ##########
 		# if there are quality control questions, check whether passing the quality control
-		quality_control_question_ary.each do |q|
+		inserted_quality_control_question_ary.each do |q|
 			quality_control_question_id = q.reference_id
-			retval = self.check_quality_control_answer(q._id, quality_control_question_id)
+			return false if self.answer_content[q._id].nil?
+			retval = self.check_quality_control_answer(self.answer_content[q._id], quality_control_question_id)
+			return false if !retval
+		end
+
+		########## check quality control quesoitns that are randomly inserted ##########
+		random_quality_control_question_id_ary do |qc_id|
+			return false if self.random_quality_control_answer_content[qc_id].nil?
+			retval = self.check_quality_control_answer(self.random_quality_control_answer_content[qc_id], qc_id ,true)
 			return false if !retval
 		end
 		return true
@@ -498,37 +559,48 @@ class Answer
 	#*retval*:
 	#* true: when the quality control rules are not violated
 	#* false: when the quality control rules are violated
-	def check_quality_control_answer(question_id, quality_control_question_id)
+	def check_quality_control_answer(question_answer, quality_control_question_id, randomly_inserted = false)
 		standard_answer = QualityControlQuestionAnswer.find_by_question_id(quality_control_question_id)
 		if standard_answer.quality_control_type == 0
 			# this is objective quality control question
-			volunteer_answer = self.answer_content[question_id]["selection"]
+			volunteer_answer = question_answer["selection"]
 			case standard_answer.question_type
 			when QuestionTypeEnum::CHOICE_QUESTION
-				return Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], 
+				return Tool.check_choice_question_answer(question_answer["selection"], 
 					standard_answer.answer_content["items"],
 					standard_answer.answer_content["fuzzy"])
 			when QuestionTypeEnum::TEXT_BLANK_QUESTION
-				return Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], 
+				return Tool.check_choice_question_answer(question_answer["selection"], 
 					standard_answer.answer_content["text"],
 					standard_answer.answer_content["fuzzy"])
 			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-				return standard_answer.answer_content["number"] == self.answer_content[question_id]["selection"]
+				return standard_answer.answer_content["number"] == question_answer["selection"]
 			else
 				return true
 			end
 		else
 			# this is matching quality control question
 			# find all the volunteer answers of this group of quality control questions
-			matching_question_id_ary = MatchingQuestion.get_matching_question_ids(question_id)
+			matching_question_id_ary = MatchingQuestion.get_matching_question_ids(quality_control_question_id)
 			volunteer_answer = []
-			self.answer_content.each do |k,v|
-				question = Question.find_by_id(k)
-				next if !matching_question_id_ary.include?(question.reference_id)
-				v["selection"].each do |input_id|
-					volunteer_answer << [question.reference_id, input_id]
+
+			if randomly_inserted
+				self.random_quality_control_answer_content do |k, v|
+					next if !matching_question_id_ary.include?(k)
+					v["selection"].each do |input_id|
+						volunteer_answer << [k, input_id]
+					end
+				end
+			else
+				self.answer_content.each do |k,v|
+					question = Question.find_by_id(k)
+					next if !matching_question_id_ary.include?(question.reference_id)
+					v["selection"].each do |input_id|
+						volunteer_answer << [question.reference_id, input_id]
+					end
 				end
 			end
+
 			standard_matching_items = standard_answer.answer_content["matching_items"]
 			standard_matching_items.each do |standard_matching_item|
 				return true if (volunteer_answer - standard_matching_item).empty?
@@ -727,7 +799,7 @@ class Answer
 	end
 
 	def auto_finish
-		if self.is_edit && !self.suvey.is_pageup_allowed && !self.template_answer_content.has_value?(nil) && !self.answer_content.has_value?(nil)
+		if self.is_edit && !self.suvey.is_pageup_allowed && !self.template_answer_content.has_value?(nil) && !self.answer_content.has_value?(nil) && !self.random_quality_control_answer_content.has_value?(nil)
 			self.set_finish
 			self.finished_at = Time.now.to_i
 			self.save
@@ -749,6 +821,7 @@ class Answer
 		return ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP if !self.survey.is_pageup_allowed
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.template_answer_content.has_value?(nil)
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)
+		return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
 		self.set_finish
 		self.finished_at = Time.now.to_i
 		self.save
