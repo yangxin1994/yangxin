@@ -16,10 +16,10 @@ require 'securerandom'
 # }
 class ConstSumIssue < Issue
 
-	attr_reader :items, :other_item, :is_rand, :sum
-	attr_writer :items, :other_item, :is_rand, :sum
+	attr_reader :items, :other_item, :is_rand, :sum, :show_style
+	attr_writer :items, :other_item, :is_rand, :sum, :show_style
 
-	ATTR_NAME_ARY = %w[items other_item is_rand sum]
+	ATTR_NAME_ARY = %w[items other_item is_rand sum show_style]
 	ITEM_ATTR_ARY = %w[input_id content]
 	OTHER_ITEM_ATTR_ARY = %w[has_other_item input_id content]
 
@@ -27,6 +27,7 @@ class ConstSumIssue < Issue
 		@items = []
 		@is_rand = false
 		@sum = 100
+		@show_style = 0
 
 		input_number = 4
 		1.upto(input_number) do |item_index|

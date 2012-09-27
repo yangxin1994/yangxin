@@ -105,15 +105,15 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	def set_random_quality_control_questions
-		retval = @survey.set_random_quality_control_questions(params[:random_quality_control_questions])
+	def set_quality_control_questions_type
+		retval = @survey.set_quality_control_questions_type(params[:quality_control_questions_type].to_i)
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
-	def get_random_quality_control_questions
-		retval = @survey.get_random_quality_control_questions
+	def get_quality_control_questions_type
+		retval = @survey.quality_control_questions_type
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
@@ -384,7 +384,7 @@ class SurveysController < ApplicationController
 	end
 
 	def check_progress
-		retval = @survey.check_progress(params[:deadline])
+		retval = @survey.check_progress(params[:detail])
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end

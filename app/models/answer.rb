@@ -126,7 +126,7 @@ class Answer
 		survey.answers << answer
 
 		# initialize the logic control result
-		logic_control_result = {}
+		answer.logic_control_result = {}
 		logic_control.each do |rule|
 			if rule["rule_type"] == 3
 				rule["result"].each do |ele|
@@ -140,6 +140,10 @@ class Answer
 				answer.add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
 			end
 		end
+
+		# randomly generate quality control questions
+		answer = answer.genereate_random_quality_control_questions if survey.is_random_quality_control_questions
+
 		return answer
 	end
 
@@ -170,7 +174,7 @@ class Answer
 		survey.answers << answer
 
 		# initialize the logic control result
-		logic_control_result = {}
+		answer.logic_control_result = {}
 		logic_control.each do |rule|
 			if rule["rule_type"] == 3
 				rule["result"].each do |ele|
@@ -186,33 +190,36 @@ class Answer
 		end
 
 		# randomly generate quality control questions
-		if survey.random_quality_control_questions
-			# 1. determine the number of random quality control questions
-			question_number = answer.answer_content.length
-			qc_question_number = [[question_number / 10, 1].max, 4].min
-			objective_question_number = (qc_question_number / 2.0).ceil
-			matching_question_number = qc_question_number - objective_question_number
-			# 2. randomly choose questions and generate locations of questions
-			objective_questions_ids = QualityControlQuestion.objective_questions.random(objective_question_number).map { |e| e._id.to_s }
-			temp_matching_questions_ids = QualityControlQuestion.matching_questions.random(objective_question_number).map { |e| e._id.to_s }
-			matching_questions_uniq_ids = []
-			temp_matching_questions_ids.each do |m_q_id|
-				matching_questions_uniq_ids += MatchingQuestion.get_matching_question_ids(m_q_id)
-			end
-			matching_questions_ids = matching_questions_uniq_ids.uniq
-			quality_control_questions_ids = [objective_questions_ids + matching_questions_ids]
-
-			# 3. random generate locations for the quality control questions
-			quality_control_questions_ids.each do |qc_id|
-				answer.random_quality_control_locations[survey.pages.shuffle[0]["questions"].shuffle[0]] =
-					qc_id
-			end
-
-			# 4. initialize the random quality control questions answers
-			answer.random_quality_control_answer_content = Hash[quality_control_questions_ids.map { |ele| [ele, nil] }]
-		end
-
+		answer = answer.genereate_random_quality_control_questions if survey.is_random_quality_control_questions
+		
 		return answer
+	end
+
+	def genereate_random_quality_control_questions
+		# 1. determine the number of random quality control questions
+		question_number = self.answer_content.length
+		qc_question_number = [[question_number / 10, 1].max, 4].min
+		objective_question_number = (qc_question_number / 2.0).ceil
+		matching_question_number = qc_question_number - objective_question_number
+		# 2. randomly choose questions and generate locations of questions
+		objective_questions_ids = QualityControlQuestion.objective_questions.random(objective_question_number).map { |e| e._id.to_s }
+		temp_matching_questions_ids = QualityControlQuestion.matching_questions.random(objective_question_number).map { |e| e._id.to_s }
+		matching_questions_uniq_ids = []
+		temp_matching_questions_ids.each do |m_q_id|
+			matching_questions_uniq_ids += MatchingQuestion.get_matching_question_ids(m_q_id)
+		end
+		matching_questions_ids = matching_questions_uniq_ids.uniq
+		quality_control_questions_ids = [objective_questions_ids + matching_questions_ids]
+		# 3. random generate locations for the quality control questions
+		quality_control_questions_ids.each do |qc_id|
+			self.random_quality_control_locations[survey.pages.shuffle[0]["questions"].shuffle[0]] =
+				qc_id
+		end
+		# 4. initialize the random quality control questions answers
+		self.random_quality_control_answer_content = Hash[quality_control_questions_ids.map { |ele| [ele, nil] }]
+		self.save
+		return self
+		
 	end
 
 	#*description*: load questions for volunteers
@@ -460,14 +467,32 @@ class Answer
 	#* ErrorEnum::WRONG_ANSWER_STATUS
 	def clear
 		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_redo
+		# clear the template answer content
 		self.template_answer_content.each do |k, v|
 			v = nil
 		end
+		# clear the answer content
 		self.answer_content.each do |k, v|
 			v = nil
 		end
+		# clear the random quality control questoins answer content
 		self.random_quality_control_answer_content.each do |k, v|
 			v = nil
+		end
+		# initialize the logic control result
+		self.logic_control_result = {}
+		logic_control.each do |rule|
+			if rule["rule_type"] == 3
+				rule["result"].each do |ele|
+					self.add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
+				end
+			elsif rule["rule_type"] == 5
+				items_to_be_added = []
+				rule["result"]["items"].each do |input_ids|
+					items_to_be_added << input_ids[1]
+				end
+				self.add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
+			end
 		end
 		self.save
 		self.set_edit

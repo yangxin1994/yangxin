@@ -18,10 +18,10 @@ require 'securerandom'
 #  "desc_ary": array of string to describe the item(array)
 # }
 class RankIssue < Issue
-	attr_reader :items, :other_item, :is_rand, :show_style, :icon, :icon_num, :desc_ary
-	attr_writer :items, :other_item, :is_rand, :show_style, :icon, :icon_num, :desc_ary
+	attr_reader :items, :other_item, :is_rand, :show_style, :icon, :icon_num, :bar, :desc_ary
+	attr_writer :items, :other_item, :is_rand, :show_style, :icon, :icon_num, :bar, :desc_ary
 
-	ATTR_NAME_ARY = %w[items other_item is_rand show_style icon icon_num desc_ary]
+	ATTR_NAME_ARY = %w[items other_item is_rand show_style icon icon_num bar desc_ary]
 	ITEM_ATTR_ARY = %w[input_id content]
 	OTHER_ITEM_ATTR_ARY = %w[has_other_item input_id content]
 
@@ -29,9 +29,10 @@ class RankIssue < Issue
 		@items = []
 		@is_rand = false
 		@show_style = 0
-		@icon = 'star'
+		@icon = 0
 		@icon_num = 7
 		@desc_ary = ["不满意", "基本满意", "很满意"]
+		@bar = 0
 
 		input_number = 4
 		1.upto(input_number) do |item_index|

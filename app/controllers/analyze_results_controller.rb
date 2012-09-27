@@ -16,4 +16,11 @@ class AnalyzeResultsController < ApplicationController
 			format.json	{ render_json_auto(result) and return }
 		end
 	end
+
+	def check_progress
+		retval = @survey.check_progress(params[:detail])
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
 end
