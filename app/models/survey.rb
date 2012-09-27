@@ -21,7 +21,7 @@ require 'csv'
 # }
 #Structure of question object can be found at Question
 class Survey
-<<<<<<< HEAD
+
   include Mongoid::Document
   include Mongoid::Timestamps
   field :title, :type => String, default: "调查问卷主标题"
