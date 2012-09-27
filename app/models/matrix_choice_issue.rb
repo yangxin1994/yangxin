@@ -27,7 +27,7 @@ class MatrixChoiceIssue < Issue
 	attr_reader :items, :choice_num_per_row, :min_choice, :max_choice, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
 	attr_writer :items, :choice_num_per_row, :min_choice, :max_choice, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
 
-	ATTR_NAME_ARY = %w[items choice_num_per_row min_choice max_choice show_style is_rand row_id row_name is_row_rand row_num_per_group]
+	ATTR_NAME_ARY = %w[items choice_num_per_row min_choice max_choice show_style is_rand rows is_row_rand row_num_per_group]
 	CHOICE_ATTR_ARY = %w[input_id content is_exclusive]
 	ROW_ATTR_ARY = %w[row_id content]
 
@@ -37,8 +37,6 @@ class MatrixChoiceIssue < Issue
 		@max_choice = 1
 		@show_style = 0
 		@is_rand = false	
-		@row_name = []	
-		@row_id = []	
 		@is_row_rand = false	
 		@row_num_per_group = -1	
 		@items = []
@@ -46,7 +44,7 @@ class MatrixChoiceIssue < Issue
 		1.upto(4) do |row_id|
 			row = {}
 			row["row_id"] = row_id
-			row["content"] = {"text" => "子题目#{Tool.convert_digit(input_index)}",
+			row["content"] = {"text" => "子题目#{Tool.convert_digit(row_id)}",
 														"image" => [], "audio" => [], "video" => []}
 			@rows << row
 		end
