@@ -7,7 +7,10 @@ class SurveyTest < ActiveSupport::TestCase
     @survey_with_issue = FactoryGirl.create(:survey_with_issue)
     @answer_with_issue = FactoryGirl.create(:answer_with_issue)
     @survey_with_issue.answers << @answer_with_issue
-
+    # 3000.times do
+    #     @survey_with_issue.answers << FactoryGirl.create(:answer_with_issue)
+    # end
+    p "###### Ready !!! ######"
   #FactoryGirl.create(:single_choice_question)
   end
 
@@ -26,9 +29,9 @@ class SurveyTest < ActiveSupport::TestCase
     # p Encoding.default_internal
     # p @survey_with_issue.answer_content.to_csv
     #@answer_with_issue.load_csv
-    @survey_with_issue.export_csv
-    pp @survey_with_issue.answer_import("")
-    #@survey_with_issue.connect_sinatra
+    #@survey_with_issue.export_csv
+    #pp @survey_with_issue.answer_import("")
+    @survey_with_issue.send_spss_data
     assert true
   end
 end

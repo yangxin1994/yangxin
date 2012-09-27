@@ -137,23 +137,46 @@ class Survey
   end
 
   def answer_content(ac = self.answers)
-    ac = []
+    # ac = []
     @retval = []
-    if filter_name == "_default"
-      ac = answers.not_preview.finished
-    else
-      filter_conditions = filters[filter_name]
-      answers.each do |a|
-        ac << a if a.satisfy_conditions(filter_conditions)
-      end
+    # if filter_name == "_default"
+    #   ac = answers.not_preview.finished
+    # else
+    #   filter_conditions = filters[filter_name]
+    #   answers.each do |a|
+    #     ac << a if a.satisfy_conditions(filter_conditions)
+    #   end
+    # end
+
+    # i = 0
+    # ac.each do |answer|
+    #   line_answer = []
+    #   answer.answer_content.each do |k, v|
+    #     question = Question.find_by_id(k)
+    #     q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question.question_type}"] + "Io").new(question)
+    #     line_answer += q.answer_content(v)
+    #   end
+    #   i += 1
+    #   p "========= 转出 #{i} 条 =========" if i%10 == 0
+    #   @retval << line_answer
+    # end
+    # @retval
+
+    q = []
+    ac[0].answer_content.each do |k, v|
+      question = Question.find_by_id(k)
+      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question.question_type}"] + "Io").new(question)
     end
+    p "========= 准备完毕 ========="
+    n = 0
     ac.each do |answer|
       line_answer = []
+      i = -1
       answer.answer_content.each do |k, v|
-        question = Question.find_by_id(k)
-        q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question.question_type}"] + "Io").new(question)
-        line_answer += q.answer_content(v)
+        line_answer += q[i += 1].answer_content(v)
       end
+      n += 1
+      p "========= 转出 #{n} 条 =========" if n%10 == 0
       @retval << line_answer
     end
     @retval
@@ -161,16 +184,24 @@ class Survey
 
   def spss_data
     data = {"spss_header" => spss_header,
-            "answer_contents" => answer_content()}
+            "answer_contents" => answer_content(),
+            "header_name" => csv_header}
   end
 
   def send_spss_data
     url = URI.parse('http://192.168.1.129:9292')
+    p "===== 开始转换 ====="
+    p a = Time.now
+    pp spss_data
+    {'spss_data'=> Marshal.dump(spss_data) }
+    p Time.now - a 
     begin
       Net::HTTP.start(url.host,url.port) do |http| 
+        
         r = Net::HTTP::Post.new('/to_spss')
         # p spss_data
-        http.read_timeout = 3
+        http.read_timeout = 50
+        p "===== 开始序列化 ====="
         r.set_form_data('spss_data'=> Marshal.dump(spss_data))
         http.request(r)
       end
