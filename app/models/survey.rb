@@ -60,7 +60,11 @@ class Survey
 			"single_password" => "",
 			"password_list" => [],
 			"username_password_list" => []}}
-	field :random_quality_control_questions, :type => Boolean, default: false
+	# the type of inserting quality control question
+	#  0 for not inserting
+	#  1 for inserting manually
+	#  2 for inserting randomly
+	field :quality_control_questions_type, :type => Integer, default: 0
 	field :deadline, :type => Integer
 	field :is_star, :type => Boolean, :default => false
 
@@ -281,18 +285,19 @@ class Survey
 		return self.style_setting["allow_pageup"]
 	end
 
-	def set_random_quality_control_questions(random_quality_control_questions)
-		self.random_quality_control_questions = random_quality_control_questions
+	def set_quality_control_questions_type(quality_control_questions_type)
+		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTIONS_TYPE if [0, 1, 2].include?(quality_control_questions_type)
+		self.quality_control_questions_type = quality_control_questions_type
 		return self.save
 	end
 
-	def get_random_quality_control_questions
-		return self.random_quality_control_questions
+	def is_random_quality_control_questions
+		return self.quality_control_questions_type == 2
 	end
 
 	def show_quality_control
-		quality_control = {"is_random_quality_control_questions" => self.random_quality_control_questions}
-		return quality_control if self.random_quality_control_questions
+		quality_control = {"quality_control_questions_type" => self.quality_control_questions_type}
+		return quality_control if self.is_random_quality_control_questions
 
 		quality_control_questions = []
 		self.pages.each do |page|
@@ -302,7 +307,6 @@ class Survey
 		end
 		quality_control["quality_control_questions"] = quality_control_questions
 		return quality_control
-		
 	end
 
 	#*description*: remove current survey
@@ -1056,8 +1060,14 @@ class Survey
 		end
 	end
 
-	def check_progress
+	def check_progress(detail)
 		progress = {}
+
+		progress["screened_answer_number"] = self.answers.not_preview.screened.length
+		progress["finished_answer_number"] = self.answers.not_preview.finished.length
+		progress["answer_number"] = progress["screened_answer_number"] + progress["finished_answer_number"]
+
+		return progress if detail.to_s == "true"
 
 		start_publish_time_ary = self.publish_status_historys.start_publish_time
 		end_publish_time_ary = self.publish_status_historys.end_publish_time
@@ -1070,10 +1080,12 @@ class Survey
 			progress["duration"] = end_publish_time_ary[0] - start_publish_time_ary[0]
 		end
 
-		progress["answer_number"] = self.answers.not_preview.finished.length
-		progress["screen_answer_number"] = self.answers.not_preview.screened
+		self.refresh_quota_stats
 		progress["quota"] = self.quota
 		progress["quota_stats"] = self.quota_stats
+		self.refresh_filters_stats
+		progress["filters"] = self.filters
+		progress["filters_stats"] = self.filters_stats
 		return progress
 	end
 

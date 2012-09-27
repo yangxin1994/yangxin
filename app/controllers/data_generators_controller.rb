@@ -74,7 +74,7 @@ class DataGeneratorsController < ApplicationController
 
 				question = Question.create_question(question_type)
 				question_id = question._id
-				survey.pages[page_index]["questions"].insert(0, question_id)
+				survey.pages[page_index]["questions"].insert(0, question_id.to_s)
 				survey.save
 				question.content = {}
 				question.content["text"] = Faker::Lorem.paragraph

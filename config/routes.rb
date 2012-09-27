@@ -180,6 +180,9 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :analyze_results do
+			collection do
+				get :check_progress
+			end
 		end
 	end
 
