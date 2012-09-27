@@ -13,14 +13,16 @@ class AnalyzeResult < Result
 	field :channel_result, :type => Hash
 	field :answers_result, :type => Hash
 
+	belongs_to :survey
+
 	def self.generate_result_key(answers)
 		answer_ids = answers.map { |e| e._id.to_s }
 		result_key = Digest::MD5.hexdigest("analyze_result-#{answer_ids.to_s}")
 		return result_key
 	end
 
-	def self.find_or_create_by_filter_name(filter_name, include_screened_answer)
-		answers = self.answers(filter_name, include_screened_answer)
+	def self.find_or_create_by_filter_name(survey, filter_name, include_screened_answer)
+		answers = self.answers(survey, filter_name, include_screened_answer)
 		result_key = self.generate_result_key(answers)
 		analyze_result = self.find_by_result_key(result_key)
 		if analyze_result.nil?
@@ -65,7 +67,7 @@ class AnalyzeResult < Result
 		segments = segmentation(5, time_ary[0], time_ary[-1])
 
 		# make stats of segment results
-		self.time_result["histogram"] = get_continuous_histogram(time_ary, segments)
+		self.time_result["histogram"] = [segments, get_continuous_histogram(time_ary, segments)]
 	end
 
 	def analyze_duration(answers)
@@ -76,7 +78,7 @@ class AnalyzeResult < Result
 		segments = segmentation(5, duration_ary[0], duration_ary[-1])
 
 		# make stats of segment results
-		self.duration_result["histogram"] = get_continuous_histogram(duration_ary, segments)
+		self.duration_result["histogram"] = [segments, get_continuous_histogram(duration_ary, segments)]
 
 		# make other stats
 		self.duration_result["mean"] = duration_ary.mean
@@ -179,7 +181,7 @@ class AnalyzeResult < Result
 		segments = segmentation(5, answer_ary[0], answer_ary[-1])
 
 		# make stats of segment results
-		result["histogram"] = get_continuous_histogram(answer_ary, segments)
+		result["histogram"] = [segments, get_continuous_histogram(answer_ary, segments)]
 
 		return result
 	end

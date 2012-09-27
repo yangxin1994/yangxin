@@ -18,17 +18,20 @@ require 'securerandom'
 #  "desc_ary": array of string to describe the item(array)
 # }
 class RankIssue < Issue
-	attr_reader :items, :other_item, :is_rand, :show_style
-	attr_writer :items, :other_item, :is_rand, :show_style
+	attr_reader :items, :other_item, :is_rand, :show_style, :icon, :icon_num, :desc_ary
+	attr_writer :items, :other_item, :is_rand, :show_style, :icon, :icon_num, :desc_ary
 
-	ATTR_NAME_ARY = %w[items other_item is_rand show_style]
-	ITEM_ATTR_ARY = %w[input_id content icon icon_num has_unknow desc_ary]
-	OTHER_ITEM_ATTR_ARY = %w[has_other_item input_id content icon icon_num desc_ary]
+	ATTR_NAME_ARY = %w[items other_item is_rand show_style icon icon_num desc_ary]
+	ITEM_ATTR_ARY = %w[input_id content]
+	OTHER_ITEM_ATTR_ARY = %w[has_other_item input_id content]
 
 	def initialize
 		@items = []
 		@is_rand = false
 		@show_style = 0
+		@icon = 'star'
+		@icon_num = 7
+		@desc_ary = ["不满意", "基本满意", "很满意"]
 
 		input_number = 4
 		1.upto(input_number) do |item_index|
@@ -36,17 +39,13 @@ class RankIssue < Issue
 			item["input_id"] = item_index
 			item["content"] = {"text" => "选项#{Tool.convert_digit(item_index)}",
 														"image" => [], "audio" => [], "video" => []}
-			item["icon"] = ""
-			item["icon_num"] = 3
-			item["has_unknow"] = false
-			item["desc_ary"] = ["不满意", "基本满意", "很满意"]
 			@items << item
 		end
-		@other_item = {"has_other_item" => true, "input_id" => input_number + 1, "content" => "其他（请填写）：", "icon" => "", "icon_num" => 3, "desc_ary" => ["不满意", "基本满意", "很满意"]}
+		@other_item = {"has_other_item" => false, "input_id" => input_number + 1, "content" => {"text" => "其他（请填写）：", "image" => [], "video" => [], "audio" => []}}
 	end
 
-	def update_issue
-		issue_obj ||= []
+	def update_issue(issue_obj)
+		issue_obj["items"] ||= []
 		issue_obj["items"].each do |item_obj|
 			item_obj.delete_if { |k, v| !ITEM_ATTR_ARY.include?(k) }
 			item_obj["icon_num"] = item_obj["icon_num"].to_i if !item_obj["icon_num"].nil?
