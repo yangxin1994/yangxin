@@ -255,6 +255,8 @@ OopsData::Application.routes.draw do
 		resources :lottery_codes do
 			
 		end
+
+		resources :messages
 	end
 
 	# The priority is based upon order of creation:
