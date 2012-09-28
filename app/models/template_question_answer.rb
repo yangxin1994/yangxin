@@ -35,7 +35,6 @@ class TemplateQuestionAnswer
 	end
 
 	def self.user_ids_satisfied(user_ids, c)
-		q_id = c.name
 		input_ids = c.value.sort!
 		fuzzy = c.fuzzy
 		
@@ -71,7 +70,6 @@ class TemplateQuestionAnswer
 	end
 
 	def self.user_ids_unsatisfied(user_ids, c)
-		q_id = c.name
 		input_ids = c.value.sort!
 		fuzzy = c.fuzzy
 		

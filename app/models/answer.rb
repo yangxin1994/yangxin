@@ -496,7 +496,7 @@ class Answer
 		end
 
 		# initialize the random quality control questions
-		self =self.genereate_random_quality_control_questions if self.survey.is_random_quality_control_questions
+		self.genereate_random_quality_control_questions if self.survey.is_random_quality_control_questions
 
 		self.save
 		self.set_edit
