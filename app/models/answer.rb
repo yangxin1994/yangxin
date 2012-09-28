@@ -78,7 +78,7 @@ class Answer
 	end
 
 	def self.find_by_password(username, password)
-		answer = Answer.where(username: username, password: password)
+		answer = Answer.where(username: username, password: password)[0]
 		return answer
 	end
 

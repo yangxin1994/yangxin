@@ -272,6 +272,9 @@ class Survey
 	end
 
 	def update_access_control_setting(access_control_setting_obj)
+		access_control_setting_obj["times_for_one_computer"] = access_control_setting_obj["times_for_one_computer"].to_i
+		access_control_setting_obj["password_control"]["password_type"] = 
+			access_control_setting_obj["password_control"]["password_type"].to_i
 		self.access_control_setting = access_control_setting_obj
 		self.save
 		return true
@@ -1066,7 +1069,7 @@ class Survey
 		end
 		if password_element.nil?
 			return ErrorEnum::WRONG_SURVEY_PASSWORD
-		elsif password_element["used"] = false
+		elsif password_element["used"] == false
 			password_element["used"] = true
 			self.save
 			return true

@@ -71,7 +71,7 @@ class AnswersController < ApplicationController
 			retval = @survey.check_password(params[:username], params[:password], @current_user)
 			if retval == true
 				# pass the checking, create a new answer and check the region, channel, and ip quotas
-				answer = Answer.create_answer(@current_user, params[:survey_id], params[:channel], params[:ip], params[:usrename], params[:password])
+				answer = Answer.create_answer(@current_user, params[:survey_id], params[:channel], params[:ip], params[:username], params[:password])
 				render_json_auto(answer) and return if answer.class != Answer
 				retval = answer.check_channel_ip_address_quota
 				if retval
