@@ -738,9 +738,6 @@ class Answer
     end
   end
 
-  def export_csv
-    
-  end
 	def self.def_status_attr
 		STATUS_NAME_ARY.each_with_index do |status_name, index|
 			define_method("is_#{status_name}".to_sym) { return index == self.status }

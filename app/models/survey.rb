@@ -163,10 +163,14 @@ class Survey
     # end
     # @retval
 
+    # q = []
+    # ac[0].answer_content.each do |k, v|
+    #   question = Question.find_by_id(k)
+    #   q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question.question_type}"] + "Io").new(question)
+    # end
     q = []
-    ac[0].answer_content.each do |k, v|
-      question = Question.find_by_id(k)
-      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question.question_type}"] + "Io").new(question)
+    all_questions.each do |a|
+      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
     end
     p "========= 准备完毕 ========="
     n = 0
@@ -191,26 +195,31 @@ class Survey
 
   def send_spss_data
     url = URI.parse('http://192.168.1.129:9292')
-    p "===== 开始转换 ====="
-    p a = Time.now
-    pp spss_data
-    {'spss_data'=> Marshal.dump(spss_data) }
-    p Time.now - a 
+    
+    # p a = Time.now
+    # pp spss_data
+    # {'spss_data'=> Marshal.dump(spss_data) }
+    # p Time.now - a 
+    # return
     begin
       Net::HTTP.start(url.host,url.port) do |http| 
         
         r = Net::HTTP::Post.new('/to_spss')
-        # p spss_data
-        http.read_timeout = 50
-        p "===== 开始序列化 ====="
+        p "===== 开始转换 ====="
+        a = Time.now
         r.set_form_data('spss_data'=> Marshal.dump(spss_data))
+        p Time.now - a
+        http.read_timeout = 3
         http.request(r)
       end
     rescue Errno::ECONNREFUSED
       p "连接失败"
     rescue Timeout::Error
       p "超时"
+    else
+      p "其他错误"
     ensure
+      p "连接结束"
     end
   end
 
@@ -229,11 +238,15 @@ class Survey
   end
   def answer_import(csv_path)
     line_answer = {}
+    q = []
+    all_questions.each do |a|
+      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+    end 
     CSV.foreach("public/import/test.csv", :headers => true) do |row|
       row = row.to_hash
       all_questions.each_with_index do |e, i|
-        q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
-        line_answer.merge! q.answer_import(row,"q#{i+1}")
+        #q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
+        line_answer.merge! q[i].answer_import(row,"q#{i+1}")
       end
       return line_answer
     end

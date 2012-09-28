@@ -54,7 +54,7 @@ class ChoiceQuestionIo < QuestionIo
 
   def csv_header(header_prefix)
     if issue["max_choice"].to_i > 1
-      issue["choices"].each_index do |i|
+      issue["items"].each_index do |i|
         @retval << header_prefix + "_c#{i + 1}"
       end
     else
@@ -68,17 +68,17 @@ class ChoiceQuestionIo < QuestionIo
 
   def spss_header(header_prefix)
    if issue["max_choice"].to_i > 1
-      issue["choices"].each_index do |i|
+      issue["items"].each_index do |i|
         @retval << {"spss_name" => header_prefix + "_c#{i + 1}",
                     "spss_type" => SPSS_STRING,
-                    "spss_label" => issue["choices"][i]["content"]["text"],
+                    "spss_label" => issue["items"][i]["content"]["text"],
                     "spss_value_labels" => {"1" => SPSS_OPTED,
                                             "0" => SPSS_NOT_OPTED}}
       end
     else
       choices = {}
-      issue["choices"].each_index do |i|
-        choices["#{i+1}"] = issue["choices"][i]["content"]["text"]
+      issue["items"].each_index do |i|
+        choices["#{i+1}"] = issue["items"][i]["content"]["text"]
       end
       @retval << {"spss_name" => header_prefix,
                   "spss_type" => SPSS_STRING,
@@ -96,7 +96,7 @@ class ChoiceQuestionIo < QuestionIo
   def answer_content(v)
     clear_retval
     if issue["max_choice"].to_i > 1
-      issue["choices"].each_index do |i|
+      issue["items"].each_index do |i|
         if v["selections"].include?( (i + 1).to_s)
           @retval << "1"
         else
@@ -116,7 +116,7 @@ class ChoiceQuestionIo < QuestionIo
     @retval = {"text_input" => "",
                "selection" => []}
     if issue["max_choice"].to_i > 1
-      issue["choices"].each_index do |i|
+      issue["items"].each_index do |i|
         @retval["selection"] << (i + 1).to_s if row["#{header_prefix}_c#{i+1}"] == "1"
       end
     else
@@ -134,13 +134,13 @@ class MatrixChoiceQuestionIo < QuestionIo
   #TODO 矩阵选择题好多悲剧!!! 看清了 答案的格式是二维数组
   def csv_header(header_prefix)
     if issue["max_choice"].to_i > 1
-      issue["row_id"].each_index do |r|
-        issue["choices"].each_index do |c|
+      issue["rows"].each_index do |r|
+        issue["items"].each_index do |c|
           @retval << header_prefix  + "_r#{r + 1}" + "_c#{c + 1}"
         end
       end
     else
-      issue["row_id"].each_index do |r|
+      issue["rows"].each_index do |r|
         @retval << header_prefix  + "_r#{r + 1}"
       end
     end
@@ -149,24 +149,24 @@ class MatrixChoiceQuestionIo < QuestionIo
 
   def spss_header(header_prefix)
     if issue["max_choice"].to_i > 1
-      issue["row_id"].each_index do |r|
-        issue["choices"].each_index do |c|
+      issue["rows"].each_index do |r|
+        issue["items"].each_index do |c|
           @retval << {"spss_name" => header_prefix  + "_r#{r + 1}" + "_c#{c + 1}",
                       "spss_type" => SPSS_STRING,
-                      "spss_label" => issue["choices"][c]["content"]["text"],
+                      "spss_label" => issue["items"][c]["content"]["text"],
                       "spss_value_labels" => {"1" => SPSS_OPTED,
                                               "0" => SPSS_NOT_OPTED}}
         end
       end
     else
       choices = {}
-      issue["choices"].each_index do |i|
-        choices["#{i+1}"] = issue["choices"][i]["content"]["text"]
+      issue["items"].each_index do |i|
+        choices["#{i+1}"] = issue["items"][i]["content"]["text"]
       end
-      issue["row_id"].each_index do |r|
-        @retval << {"spss_name" => header_prefix + "_r#{r + 1}",
+      issue["rows"].each_with_index do |r, i|
+        @retval << {"spss_name" => header_prefix + "_r#{i + 1}",
                     "spss_type" => SPSS_STRING,
-                    "spss_label" => content["text"],
+                    "spss_label" => r["content"]["text"],
                     "spss_value_labels" => choices }
       end
     end
@@ -177,8 +177,8 @@ class MatrixChoiceQuestionIo < QuestionIo
     clear_retval
     clear_retval
     if issue["max_choice"].to_i > 1
-      issue["row_id"].each_index do |r|
-        issue["choices"].each_index do |c|
+      issue["rows"].each_index do |r|
+        issue["items"].each_index do |c|
           if v[r].include?( (c + 1).to_s)
             @retval << "1"
           else
@@ -187,7 +187,7 @@ class MatrixChoiceQuestionIo < QuestionIo
         end
       end
     else
-      issue["row_id"].each_index do |r|
+      issue["rows"].each_index do |r|
         @retval << v[r]
       end
     end
@@ -197,19 +197,19 @@ class MatrixChoiceQuestionIo < QuestionIo
   def answer_import(row, header_prefix)
     @retval = []
     if issue["max_choice"].to_i > 1
-      issue["row_id"].each_index do |r|
+      issue["rows"].each_index do |r|
         row_choices = []
-        issue["choices"].each_index do |c|
+        issue["items"].each_index do |c|
           row_choices << (c + 1).to_s if row["#{header_prefix}_r#{r + 1}_c#{c + 1}"] == "1"
         end
         @retval << row_choices
       end
     else
-      issue["row_id"].each_index do |r|
+      issue["rows"].each_index do |r|
         @retval << row["#{header_prefix}_r#{r + 1}"]
       end
     end
-    return { "#{origin_id}" => @retval}  
+    return { "#{origin_id}" => @retval }  
   end
 
 end
@@ -277,27 +277,27 @@ end
 
 class BlankQuestionIo < QuestionIo
   def csv_header(header_prefix)
-    issue["inputs"].each_index do |c|
+    issue["items"].each_index do |c|
       @retval << header_prefix  + "_c#{c + 1}"
     end
     return @retval
   end
 
   def spss_header(header_prefix)
-    issue["inputs"].each_index do |i|
+    issue["items"].each_index do |i|
       @retval << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_STRING,
-                  "spss_label" => issue["inputs"][i]["content"]["text"]}
+                  "spss_label" => issue["items"][i]["content"]["text"]}
     end
     return @retval   
   end
 
   def answer_content(v)
     clear_retval
-    issue["inputs"].each_index do |i|
-      q = Question.new(:content => issue["inputs"][i]["content"],
-                       :issue => issue["inputs"][i]["properties"],
-                       :question_type => QuestionTypeEnum::BLANK_QUESTION_TYPE["#{issue["inputs"][i]["data_type"]}"])
+    issue["items"].each_index do |i|
+      q = Question.new(:content => issue["items"][i]["content"],
+                       :issue => issue["items"][i]["properties"],
+                       :question_type => QuestionTypeEnum::BLANK_QUESTION_TYPE["#{issue["items"][i]["data_type"]}"])
       qi = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{q.question_type}"] + "Io").new(q)
       @retval += qi.answer_content(v[i])
     end
@@ -305,10 +305,10 @@ class BlankQuestionIo < QuestionIo
   end
 
   def answer_import(row, header_prefix)
-     issue["inputs"].each_index do |i|
-      q = Question.new(:content => issue["inputs"][i]["content"],
-                       :issue => issue["inputs"][i]["properties"],
-                       :question_type => QuestionTypeEnum::BLANK_QUESTION_TYPE["#{issue["inputs"][i]["data_type"]}"])
+     issue["items"].each_index do |i|
+      q = Question.new(:content => issue["items"][i]["content"],
+                       :issue => issue["items"][i]["properties"],
+                       :question_type => QuestionTypeEnum::BLANK_QUESTION_TYPE["#{issue["items"][i]["data_type"]}"])
       qi = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{q.question_type}"] + "Io").new(q)
       @retval << qi.answer_import(row, "#{header_prefix}_c#{i + 1 }").values[0]
     end
@@ -319,7 +319,7 @@ end
 class MatrixBlankQuestionIo < QuestionIo
   def csv_header(header_prefix)
     issue["row_id"].each_index do |r|
-      issue["inputs"].each_index do |c|
+      issue["items"].each_index do |c|
         @retval << header_prefix  + "_r#{r + 1}" + "_c#{c + 1}"
       end
     end
@@ -328,10 +328,10 @@ class MatrixBlankQuestionIo < QuestionIo
 
   def spss_header(header_prefix)
     issue["row_id"].each_index do |r|
-      issue["inputs"].each_index do |i|
+      issue["items"].each_index do |i|
         @retval << {"spss_name" => header_prefix  + "_r#{r + 1}" + "_c#{i + 1}",
                     "spss_type" => SPSS_STRING,
-                    "spss_label" => issue["inputs"][i]["content"]["text"]}
+                    "spss_label" => issue["items"][i]["content"]["text"]}
       end
     end
     return @retval 
@@ -340,10 +340,10 @@ class MatrixBlankQuestionIo < QuestionIo
   def answer_content(v)
     clear_retval
     issue["row_id"].each_index do |r|
-      issue["inputs"].each_index do |i|
-        q = Question.new(:content => issue["inputs"][i]["content"],
-                         :issue => issue["inputs"][i]["properties"],
-                         :question_type => QuestionTypeEnum::BLANK_QUESTION_TYPE["#{issue["inputs"][i]["data_type"]}"])
+      issue["items"].each_index do |i|
+        q = Question.new(:content => issue["items"][i]["content"],
+                         :issue => issue["items"][i]["properties"],
+                         :question_type => QuestionTypeEnum::BLANK_QUESTION_TYPE["#{issue["items"][i]["data_type"]}"])
         qi = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{q.question_type}"] + "Io").new(q)
         # p "#{r}*#{i}= #{qi}"
         @retval += qi.answer_content(v[r][i])
@@ -354,10 +354,10 @@ class MatrixBlankQuestionIo < QuestionIo
   def answer_import(row, header_prefix)
     issue["row_id"].each_index do |r|
       row_content = []
-      issue["inputs"].each_index do |i|
-        q = Question.new(:content => issue["inputs"][i]["content"],
-                         :issue => issue["inputs"][i]["properties"],
-                         :question_type => QuestionTypeEnum::BLANK_QUESTION_TYPE["#{issue["inputs"][i]["data_type"]}"])
+      issue["items"].each_index do |i|
+        q = Question.new(:content => issue["items"][i]["content"],
+                         :issue => issue["items"][i]["properties"],
+                         :question_type => QuestionTypeEnum::BLANK_QUESTION_TYPE["#{issue["items"][i]["data_type"]}"])
         qi = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{q.question_type}"] + "Io").new(q)
         row_content << qi.answer_import(row, "#{header_prefix}_r#{r + 1}_c#{i + 1 }").values[0]
       end
@@ -553,35 +553,35 @@ end
 
 class TableQuestionIo < QuestionIo
   def csv_header(header_prefix)
-    issue["inputs"].each_index do |i|
+    issue["items"].each_index do |i|
       @retval << header_prefix  + "_c#{i + 1}"
     end
     return @retval
   end
   def spss_header(header_prefix)
-    issue["inputs"].each_index do |i|
+    issue["items"].each_index do |i|
       @retval << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_STRING,
-                  "spss_label" => issue["inputs"][i]["content"]["text"]}
+                  "spss_label" => issue["items"][i]["content"]["text"]}
     end
     return @retval   
   end
   def answer_content(v)
     clear_retval
-    issue["inputs"].each_index do |i|
-      q = Question.new(:content => issue["inputs"][i]["content"],
-                       :issue => issue["inputs"][i]["properties"],
-                       :question_type => QuestionTypeEnum::BLANK_QUESTION_TYPE["#{issue["inputs"][i]["data_type"]}"])
+    issue["items"].each_index do |i|
+      q = Question.new(:content => issue["items"][i]["content"],
+                       :issue => issue["items"][i]["properties"],
+                       :question_type => QuestionTypeEnum::BLANK_QUESTION_TYPE["#{issue["items"][i]["data_type"]}"])
       qi = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{q.question_type}"] + "Io").new(q)
       @retval += qi.answer_content(v[i])
     end
     return @retval  
   end
   def answer_import(row, header_prefix)
-     issue["inputs"].each_index do |i|
-      q = Question.new(:content => issue["inputs"][i]["content"],
-                       :issue => issue["inputs"][i]["properties"],
-                       :question_type => QuestionTypeEnum::BLANK_QUESTION_TYPE["#{issue["inputs"][i]["data_type"]}"])
+     issue["items"].each_index do |i|
+      q = Question.new(:content => issue["items"][i]["content"],
+                       :issue => issue["items"][i]["properties"],
+                       :question_type => QuestionTypeEnum::BLANK_QUESTION_TYPE["#{issue["items"][i]["data_type"]}"])
       qi = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{q.question_type}"] + "Io").new(q)
       @retval << qi.answer_import(row, "#{header_prefix}_c#{i + 1 }").values[0]
     end

@@ -22,7 +22,11 @@ module Mongoid
     def error_message
       self.errors.first[0].to_s + " " + self.errors.first[1]
     end
-    def as_retval
+    def as_retval(options = {})
+      options.each do |k, v|
+        # TODO New Selector
+          self[k] = eval v
+      end
       unless is_valid?
         return retval = {:error_code => self.error_code,
                          :error_message => self.error_message}

@@ -406,7 +406,8 @@ class User
 		m = sended_messages.create(:title => title, :content => content, :type => 1)
 		return m unless m.is_a? Message
 		receiver.each do |r|
-			u = User.find_by_id(r)
+			u = User.find_by_email(r)
+			# TODO 异常处理
 			u.messages << m# => unless m.created_at.nil? 
 			u.save
 		end
