@@ -494,6 +494,10 @@ class Answer
 				self.add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
 			end
 		end
+
+		# initialize the random quality control questions
+		self =self.genereate_random_quality_control_questions if self.survey.is_random_quality_control_questions
+
 		self.save
 		self.set_edit
 		return true
