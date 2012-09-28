@@ -5,10 +5,8 @@ require 'securerandom'
 #Besides the fields that all types questions have, matrix choice questions also have:
 # {
 #	 "choices" : array of choice items(array),
-#	 "choice_num_per_row" : number of choices items in one row(integer),
 #	 "min_choice" : number of choices that user at least selects(integer),
 #	 "max_choice" : number of choices that user at most selects(integer),
-#	 "is_list_style" : whether show choices in list style(bool),
 #	 "is_rand" : whether randomly show choices(bool),
 #	 "row_name" : array of row names(array),
 #	 "" : array of row id(array),
@@ -24,15 +22,14 @@ require 'securerandom'
 # }
 class MatrixChoiceIssue < Issue
 
-	attr_reader :items, :choice_num_per_row, :min_choice, :max_choice, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
-	attr_writer :items, :choice_num_per_row, :min_choice, :max_choice, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
+	attr_reader :items, :min_choice, :max_choice, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
+	attr_writer :items, :min_choice, :max_choice, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
 
-	ATTR_NAME_ARY = %w[items choice_num_per_row min_choice max_choice show_style is_rand rows is_row_rand row_num_per_group]
+	ATTR_NAME_ARY = %w[items min_choice max_choice show_style is_rand rows is_row_rand row_num_per_group]
 	CHOICE_ATTR_ARY = %w[input_id content is_exclusive]
 	ROW_ATTR_ARY = %w[row_id content]
 
 	def initialize
-		@choice_num_per_row = -1
 		@min_choice = 1
 		@max_choice = 1
 		@show_style = 0
@@ -67,7 +64,6 @@ class MatrixChoiceIssue < Issue
 		issue_obj["rows"].each do |row_obj|
 			row_obj.delete_if { |k, v| !ROW_ATTR_ARY.include?(k) }
 		end
-		issue_obj["choice_num_per_row"] = issue_obj["choice_num_per_row"].to_i
 		issue_obj["min_choice"] = issue_obj["min_choice"].to_i
 		issue_obj["max_choice"] = issue_obj["max_choice"].to_i
 		issue_obj["row_num_per_group"] = issue_obj["row_num_per_group"].to_i
