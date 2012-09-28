@@ -27,7 +27,7 @@ class TextBlankIssue < Issue
 		issue_obj["min_length"] = issue_obj["min_length"].to_i
 		issue_obj["max_length"] = issue_obj["max_length"].to_i
 		issue_obj["size"] = issue_obj["size"].to_i
-		issue_obj["has_multiple_line"] = issue_obj["has_multiple_line"].to_s = "true"
+		issue_obj["has_multiple_line"] = (issue_obj["has_multiple_line"].to_s == "true")
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 
