@@ -1140,23 +1140,23 @@ class Survey
 
 	def add_quota_rule(quota_rule)
 		quota = Quota.new(self.quota)
-		quota.add_rule(quota_rule, self)
-		self.refresh_quota_stats
-		return true
+		retval = quota.add_rule(quota_rule, self)
+		self.refresh_quota_stats if retval
+		return retval
 	end
 
 	def update_quota_rule(quota_rule_index, quota_rule)
 		quota = Quota.new(self.quota)
-		quota.update_rule(quota_rule_index, quota_rule, self)
-		self.refresh_quota_stats
-		return true
+		retval = quota.update_rule(quota_rule_index, quota_rule, self)
+		self.refresh_quota_stats if retval
+		return retval
 	end
 
 	def delete_quota_rule(quota_rule_index)
 		quota = Quota.new(self.quota)
-		quota.delete_rule(quota_rule_index, self)
-		self.refresh_quota_stats
-		return true
+		retval = quota.delete_rule(quota_rule_index, self)
+		self.refresh_quota_stats if retval
+		return retval
 	end
 
 	def refresh_filters_stats
