@@ -18,7 +18,7 @@ class Address
 		cities_addresses = self.cities.each do |city|
 			target_cities << city if (city.code >> 12) == (province_code >> 12) && province_code == (province_code >> 12 << 12)
 		end
-		return target_cities.map { |city_address| [city_address.code, city_address.name] }
+		return target_cities
 	end
 
 	def self.find_counties_by_city(city_code)
@@ -35,8 +35,10 @@ class Address
 		return -1 if ip_info.nil? || ip_info.province.blank?
 		target_province = nil
 		self.provinces.each do |province|
-			target_province = province if province.name.gsub(/\s+/, "").include?(ip_info.province.gsub(/\s+/, ""))
-			break
+			if province.name.gsub(/\s+/, "").include?(ip_info.province.gsub(/\s+/, ""))
+				target_province = province
+				break
+			end
 		end
 		# the province cannot be found
 		return -1 if target_province.nil?

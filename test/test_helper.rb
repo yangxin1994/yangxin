@@ -138,6 +138,22 @@ class ActiveSupport::TestCase
 		return survey_obj["_id"]
 	end
 
+	def set_survey_published(survey_id, operator, survey_auditor)
+		survey = Survey.find_by_id(survey_id)
+		survey.submit("", operator)
+		survey.publish("", survey_auditor)
+	end
+
+	def update_survey_access_control_setting(email, password, survey_id, access_control_setting)
+		auth_key = sign_in(email, password)
+		old_controller = @controller
+		@controller = SurveysController.new
+		put :update_access_control_setting, :format => :json, :id => survey_id, :access_control_setting => access_control_setting, :auth_key => auth_key
+		result = JSON.parse(@response.body)
+		@controller = old_controller
+		sign_out(auth_key)
+	end
+
 	def get_survey_obj(email, password, survey_id)
 		auth_key = sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller

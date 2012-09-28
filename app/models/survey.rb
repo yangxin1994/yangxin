@@ -39,8 +39,8 @@ class Survey
 	field :publish_status, :type => Integer, default: 1
 	field :user_attr_survey, :type => Boolean, default: false
 	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
-	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
-	field :quota_stats, :type => Hash
+	field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100], "is_exclusive" => true}
+	field :quota_stats, :type => Hash, default: {"quota_satisfied" => false, "answer_number" => [0]}
 	field :filters, :type => Hash, default: {}
 	field :filters_stats, :type => Hash, default: {}
 	field :quota_template_question_page, :type => Array, default: []
@@ -1055,7 +1055,7 @@ class Survey
 			if self.access_control_setting["password_control"]["single_password"] == password
 				return true
 			else
-				return ErrorEnum::WRONG_PASSWORD
+				return ErrorEnum::WRONG_SURVEY_PASSWORD
 			end
 		when 1
 			list = self.access_control_setting["password_control"]["password_list"]
@@ -1065,7 +1065,7 @@ class Survey
 			password_element = list.select { |ele| ele["content"] == [username, password] }[0]
 		end
 		if password_element.nil?
-			return ErrorEnum::WRONG_PASSWORD
+			return ErrorEnum::WRONG_SURVEY_PASSWORD
 		elsif password_element["used"] = false
 			password_element["used"] = true
 			self.save
@@ -1140,17 +1140,23 @@ class Survey
 
 	def add_quota_rule(quota_rule)
 		quota = Quota.new(self.quota)
-		return quota.add_rule(quota_rule, self)
+		quota.add_rule(quota_rule, self)
+		self.refresh_quota_stats
+		return true
 	end
 
 	def update_quota_rule(quota_rule_index, quota_rule)
 		quota = Quota.new(self.quota)
-		return quota.update_rule(quota_rule_index, quota_rule, self)
+		quota.update_rule(quota_rule_index, quota_rule, self)
+		self.refresh_quota_stats
+		return true
 	end
 
 	def delete_quota_rule(quota_rule_index)
 		quota = Quota.new(self.quota)
-		return quota.delete_rule(quota_rule_index, self)
+		quota.delete_rule(quota_rule_index, self)
+		self.refresh_quota_stats
+		return true
 	end
 
 	def refresh_filters_stats
