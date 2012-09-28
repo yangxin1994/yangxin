@@ -133,7 +133,11 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def destroy
-		retval = @survey.delete_page(params[:id].to_i)
+		if params[:enforce].to_s == "true"
+			retval = @survey.delete_page!(params[:id].to_i)
+		else
+			retval = @survey.delete_page(params[:id].to_i)
+		end
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end

@@ -664,6 +664,13 @@ class Survey
 		return questions
 	end
 
+	def update_question(question_id, question_obj)
+		if LogicControl.new(self.logic_control).detect_conflict_question_update(question_id)
+			return ErrorEnum::LOGIC_CONTROL_CONFLICT_DETECTED
+		end
+		return update_question!(question_id, question_obj)
+	end
+
 	#*description*: update a question
 	#
 	#*params*:
@@ -676,7 +683,7 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST
 	#* ErrorEnum ::WRONG_DATA_TYPE
-	def update_question(question_id, question_obj)
+	def update_question!(question_id, question_obj)
 		return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
 		question = Question.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
@@ -781,6 +788,13 @@ class Survey
 		return question
 	end
 
+	def delete_question(question_id)
+		if LogicControl.new(self.logic_control).detect_conflict_question_update(question_id)
+			return ErrorEnum::LOGIC_CONTROL_CONFLICT_DETECTED
+		end
+		return delete_question!(question_id)
+	end
+
 	#*description*: delete a question
 	#
 	#*params*:
@@ -792,7 +806,7 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
-	def delete_question(question_id)
+	def delete_question!(question_id)
 		question = Question.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
 		# find out other matching questions if the question to be deleted is a matching question
@@ -935,6 +949,13 @@ class Survey
 		return new_page_obj
 	end
 
+	def delete_page(page_index)
+		current_page = self.pages[page_index]
+		return ErrorEnum::OVERFLOW if current_page.nil?
+		return ErrorEnum::LOGIC_CONTROL_CONFLICT_DETECTED if LogicControl.new(self.logic_control).detect_conflict_questions_update(current_page["questions"])
+		return delete_page!(page_index)
+	end
+
 	#*description*: delete a page
 	#
 	#*params*:
@@ -946,7 +967,7 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::OVERFLOW
-	def delete_page(page_index)
+	def delete_page!(page_index)
 		current_page = self.pages[page_index]
 		return ErrorEnum::OVERFLOW if current_page.nil?
 		current_page["questions"].each do |question_id|
@@ -1390,6 +1411,22 @@ class Survey
 		RULE_TYPE = (0..8).to_a
 		def initialize(logic_control)
 			@rules = logic_control
+		end
+
+		# check whether the updated question is a condition for some logic control rule
+		def detect_conflict_question_update(question_id)
+			@rules.each do |rule|
+				return true if (rule["conditions"].map { |e| e["question_id"] }).include?(question_id)
+			end
+			return false
+		end
+
+		# check whether the updated question is a condition for some logic control rule
+		def detect_conflict_questions_update(question_id_ary)
+			@rules.each do |rule|
+				return true if !((rule["conditions"].map { |e| e["question_id"] }) & question_id_ary).blank?
+			end
+			return false
 		end
 
 		def show_rule(rule_index)
