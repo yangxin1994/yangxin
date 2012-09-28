@@ -45,7 +45,7 @@ class User
 	field :company, :type => String
 
 
-	has_and_belongs_to_many :messages, inverse_of: nil
+	has_and_belongs_to_many :messages, class_name: "Message", inverse_of: :receiver
 	has_many :sended_messages, :class_name => "Message", :inverse_of => :sender
 
 	#################################
@@ -78,6 +78,7 @@ class User
 	has_many :template_question_answers
 
 	scope :unregistered, where(status: 0)
+	scope :receive_email_user
 
 	private
 	def set_updated_at
@@ -398,19 +399,30 @@ class User
 ############### operations about message#################
 #++
 	#ctreate
-	def create_message_for_all(title, content)
-		sended_messages.create(:title => title, :content => content, :sender_id => id)
-	end
-
 	def create_message(title, content, receiver = [])
-		m = sended_messages.create(:title => title, :content => content, :type => 1)
+		m = sended_messages.create(:title => title, :content => content, :type => 0) if receiver.size == 0
+		m = sended_messages.create(:title => title, :content => content, :type => 1) if receiver.size >= 1
 		return m unless m.is_a? Message
 		receiver.each do |r|
-			u = User.find_by_id(r)
+			u = User.find_by_email(r)
+			next unless u
 			u.messages << m# => unless m.created_at.nil? 
 			u.save
 		end
 		m
+	end
+
+	def update_message(message_id, update_attrs)
+		m = Message.where(_id: message_id)[0]
+		return ErrorEnum::MESSAGE_NOT_FOUND unless m
+		m.update_attributes(update_attrs)
+		m.save
+	end
+
+	def destroy_message(message_id)
+		m = Message.where(_id: message_id)[0]
+		return ErrorEnum::MESSAGE_NOT_FOUND unless m
+		m.destroy
 	end
 
 	def unread_messages_count
