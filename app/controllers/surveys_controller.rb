@@ -287,20 +287,23 @@ class SurveysController < ApplicationController
 
 		if params[:stars].nil? then
 			survey_list = @current_user.surveys.list(params[:status], params[:publish_status], params[:tags])
-
 			survey_list = slice((survey_list || []), params[:page], params[:per_page])
-
-			respond_to do |format|
-				format.json	{ render_json_auto(survey_list.serialize) and return }
-			end
 		else
 			params[:page] ||= 1
 			params[:per_page] ||= 10
 			survey_list = @current_user.surveys.stars.page(params[:page]).per(params[:per_page])
-			respond_to do |format|
-				format.json	{ render_json_auto(survey_list) and return }
-			end
+		end	
+
+		# add answer_number
+		survey_list.map do |e| 
+			e['screened_answer_number']=e.answers.not_preview.screened.length
+			e['finished_answer_number']=e.answers.not_preview.finished.length
 		end
+
+		respond_to do |format|
+			format.json	{ render_json_auto(survey_list) and return }
+		end
+		
 	end
 
 	#*method*: get
