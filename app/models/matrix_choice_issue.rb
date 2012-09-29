@@ -73,9 +73,10 @@ class MatrixChoiceIssue < Issue
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 
-	def remove_hidden_items(items, sub_questions)
-		self.items.delete_if { |choice| items.include?(choice["input_id"]) }
-		self.rows.delete_if { |row| sub_questions.include?(row["row_id"]) }
+	def remove_hidden_items(items)
+		return if items.blank?
+		self.items.delete_if { |choice| items["items"].include?(choice["input_id"]) } if !items["items"].blank?
+		self.rows.delete_if { |row| items["sub_questions"].include?(row["row_id"]) } if !items["sub_questions"].blank?
 	end
 
 	#*description*: serialize the current instance into a question object

@@ -162,25 +162,30 @@ class AnswersControllerTest < ActionController::TestCase
 		polly = init_polly
 		survey_auditor = init_survey_auditor
 
+		# create survey and set the status of the survey as published
 		survey_id = create_survey(jesse.email, Encryption.decrypt_password(jesse.password))
 		set_survey_published(survey_id, jesse, survey_auditor)
 
-		# set quota for the survey
+		# remove the default quota rule for the survey
 		delete_quota_rule(jesse.email, jesse.password, survey_id, 0)
 
+		# verify that there is no quota rules
 		survey = Survey.find_by_id(survey_id)
 		assert_equal 0, survey.quota_stats["answer_number"].length
 
+		# insert a new quota rule to the survey
 		quota_rule = {}
 		quota_rule["amount"] = 2
 		quota_rule["conditions"] = []
 		quota_rule["conditions"] << {"condition_type" => 3, "name" => "channel", "value" => "1"}
 		add_quota_rule(jesse.email, jesse.password, survey_id, quota_rule)
 
+		# check the stats for the quota rule
 		survey = Survey.find_by_id(survey_id)
 		assert_equal 1, survey.quota_stats["answer_number"].length
 		assert_equal 0, survey.quota_stats["answer_number"][0]
 
+		# first answer
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
@@ -188,10 +193,12 @@ class AnswersControllerTest < ActionController::TestCase
 		assert_equal true, result["success"]
 		assert_equal 2, result["value"][0]
 
+		# check the stats for the quota rule after the first answer
 		survey = Survey.find_by_id(survey_id)
 		assert_equal 1, survey.quota_stats["answer_number"].length
 		assert_equal 1, survey.quota_stats["answer_number"][0]
 
+		# second answer
 		auth_key = sign_in(lisa.email, Encryption.decrypt_password(lisa.password))
 		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
@@ -199,34 +206,38 @@ class AnswersControllerTest < ActionController::TestCase
 		assert_equal true, result["success"]
 		assert_equal 2, result["value"][0]
 
+		# check the stats for the quota rule after the second answer
 		survey = Survey.find_by_id(survey_id)
 		assert_equal 1, survey.quota_stats["answer_number"].length
 		assert_equal 2, survey.quota_stats["answer_number"][0]
 
-		survey = Survey.find_by_id(survey_id)
-
+		# third answer, violate the quotas, should be rejected
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
 		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::VIOLATE_QUOTA, result["value"]["error_code"]
 
+		# refreshe and check the stats for the quota rule
 		survey = Survey.find_by_id(survey_id)
 		assert_equal false, survey.quota_stats["quota_satisfied"]
 		survey.refresh_quota_stats
 		assert_equal true, survey.quota_stats["quota_satisfied"]
 
+		# insert a new quota rule
 		quota_rule = {}
 		quota_rule["amount"] = 3
 		quota_rule["conditions"] = []
 		quota_rule["conditions"] << {"condition_type" => 4, "name" => "ip", "value" => "166.111.*.*"}
 		add_quota_rule(jesse.email, jesse.password, survey_id, quota_rule)
 
+		# check the stats for the quota rule after the new quota rule is inserted
 		survey = Survey.find_by_id(survey_id)
 		assert_equal false, survey.quota_stats["quota_satisfied"]
 		assert_equal 2, survey.quota_stats["answer_number"][0]
 		assert_equal 2, survey.quota_stats["answer_number"][1]
 
+		# oliver's answering should be rejected since it violated quotas, though it should pass the quota now
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
 		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
@@ -240,6 +251,7 @@ class AnswersControllerTest < ActionController::TestCase
 		assert_equal 2, survey.quota_stats["answer_number"][0]
 		assert_equal 2, survey.quota_stats["answer_number"][1]
 
+		# third answer
 		auth_key = sign_in(polly.email, Encryption.decrypt_password(polly.password))
 		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 2,
 				:ip => "166.111.135.92"
@@ -247,12 +259,36 @@ class AnswersControllerTest < ActionController::TestCase
 		assert_equal true, result["success"]
 		assert_equal 2, result["value"][0]
 
+		# check the quota stats
 		survey = Survey.find_by_id(survey_id)
 		assert_equal false, survey.quota_stats["quota_satisfied"]
 		assert_equal 2, survey.quota_stats["answer_number"][0]
 		assert_equal 3, survey.quota_stats["answer_number"][1]
 		survey.refresh_quota_stats
 		assert_equal true, survey.quota_stats["quota_satisfied"]
+	end
+
+	test "should initialize answer correctly" do
+		clear(User, Survey, Answer)
+		jesse = init_jesse
+		oliver = init_oliver
+		lisa = init_lisa
+		polly = init_polly
+		survey_auditor = init_survey_auditor
+
+		survey_id, pages = *create_survey_page_question(jesse.email, jesse.password)
+
+		question_ids = pages.flatten
+
+		set_survey_published(survey_id, jesse, survey_auditor)
+
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91"
+		result = JSON.parse(@response.body)
+		assert_equal 3, result["value"][0].length
+		a = Answer.first
+		assert_equal 10, a.answer_content.length
 	end
 
 	def add_quota_rule(email, password, survey_id, quota_rule)

@@ -74,18 +74,9 @@ class TableIssue < Issue
 		super(ATTR_NAME_ARY)
 	end
 
-	def remove_hidden_items(items, sub_questions)
-		self.items.delete_if { |input| items.include?(input["input_id"]) }
-		remaining_row_id = []
-		remaining_row_name = []
-		self.row_id.each_with_index do |r_id, r_index|
-			if !sub_questions.include?(r_id)
-				remaining_row_id << r_id
-				remaining_row_name << row_name[row_index]
-			end
-		end
-		self.row_id = remaining_row_id
-		self.row_name = remaining_row_name
+	def remove_hidden_items(items)
+		return if items.blank?
+		self.items.delete_if { |input| items["items"].include?(input["input_id"]) } if !items["items"].blank?
 	end
 
 	#*description*: update the current question instance, including generate id for new inputs

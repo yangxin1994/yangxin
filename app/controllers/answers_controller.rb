@@ -47,7 +47,7 @@ class AnswersController < ApplicationController
 			if answer.is_finish
 				render_json_auto([answer.preview_id, answer.status, answer.reject_type, answer.finish_type]) and return
 			else
-				render_json_auto([answer.preview_id, questions.to_json, answer.repeat_time]) and return
+				render_json_auto([answer.preview_id, questions, answer.repeat_time]) and return
 			end
 		else
 			render_json_auto([answer.preview_id, answer.status, answer.reject_type, answer.finish_type]) and return
@@ -97,7 +97,7 @@ class AnswersController < ApplicationController
 			if answer.is_finish
 				render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return
 			else
-				render_json_auto([questions.to_json, answer.repeat_time]) and return
+				render_json_auto([questions, answer.repeat_time]) and return
 			end
 		else
 			render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return

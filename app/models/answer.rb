@@ -307,7 +307,7 @@ class Answer
 		questions = []
 		question_ids.each do |q_id|
 			question = BasicQuestion.find_by_id(q_id)
-			questions << question.remove_hidden_items(logic_control_result[q_id]["items"], logic_control_result[q_id]["sub_questions"])
+			questions << question.remove_hidden_items(logic_control_result[q_id])
 			# load random quality control quesitons for surveys that allow page up (no logic control)
 			random_qc_id = self.random_quality_control_locations[q_id]
 			if !random_qc_id.blank? && !question_ids.include?(random_qc_id)

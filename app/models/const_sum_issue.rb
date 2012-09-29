@@ -52,8 +52,9 @@ class ConstSumIssue < Issue
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 
-	def remove_hidden_items(items, sub_questions)
-		self.items.delete_if { |item| items.include?(item["input_id"]) }
+	def remove_hidden_items(items)
+		return if items.blank?
+		self.items.delete_if { |item| items["items"].include?(item["input_id"]) } if !items["items"].blank?
 	end
 
 	#*description*: serialize the current instance into a question object
