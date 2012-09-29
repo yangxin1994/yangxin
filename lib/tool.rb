@@ -34,7 +34,12 @@ module Tool
 	def self.check_ip_mask(ip_address, ip_mask)
 		return ErrorEnum::IP_FORMAT_ERROR if ip_address.to_s=~/^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/
 		return ErrorEnum::IP_FORMAT_ERROR if !ip_address.to_s.split('.').select{|sec| sec.to_i > 255 || sec.to_i < 0}.empty?
-		return ip_address.match(ip_mask).to_s == ip_address
+		ip_address_ary = ip_address.split('.')
+		ip_mask_ary = ip_address.split('.')
+		ip_address_ary.each_with_index do |seg, index|
+			return false if ip_mask_ary[index] != "*" && ip_mask_ary[index] != ip_address_ary[index]
+		end
+		return true
 	end
 
 	def self.check_choice_question_answer(answer, standard_answer, fuzzy)

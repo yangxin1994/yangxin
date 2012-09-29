@@ -59,6 +59,12 @@ class ActiveSupport::TestCase
 		return lisa
 	end
 
+	def init_polly
+		polly = FactoryGirl.build(:polly)
+		polly.save
+		return polly
+	end
+
 	def init_survey_auditor
 		survey_auditor = FactoryGirl.build(:survey_auditor)
 		survey_auditor.save

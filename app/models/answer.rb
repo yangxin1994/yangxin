@@ -150,7 +150,7 @@ class Answer
 	def self.create_answer(operator, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		answer = Answer.new(channel: channel, ip: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
+		answer = Answer.new(channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
 
 		# initialize the answer content
 		answer_content = {}
@@ -389,7 +389,7 @@ class Answer
 				# if the answer's ip, channel, or region violates one condition of the rule, move to the next rule
 				next if condition["condition_type"] == 2 && !Address.satisfy_region_code?(self.region, condition["value"])
 				next if condition["condition_type"] == 3 && self.channel != condition["value"]
-				next if condition["condition_type"] == 4 && Tool.check_ip_mask(self.ip, condition["value"])
+				next if condition["condition_type"] == 4 && Tool.check_ip_mask(self.ip_address, condition["value"])
 			end
 			# find out one rule. the quota for this rule has not been satisfied, and the answer does not violate conditions of the rule
 			return true
@@ -424,9 +424,9 @@ class Answer
 			when "2"
 				satisfy = Address.satisfy_region_code?(self.region, condition["value"])
 			when "3"
-				satisfy = condition["value"] == answer["channel"].to_s
+				satisfy = condition["value"] == self.channel.to_s
 			when "4"
-				satisfy = Tool.check_ip_mask(condition["value"], answer["ip_address"])
+				satisfy = Tool.check_ip_mask(condition["value"], self.ip_address)
 			end
 			return satisfy if !satisfy
 		end
