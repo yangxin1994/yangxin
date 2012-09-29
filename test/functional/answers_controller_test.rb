@@ -45,10 +45,6 @@ class AnswersControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 
 		# update access control setting to set a password list
-		access_control_setting = {}
-		access_control_setting["times_for_one_computer"] = 2
-		access_control_setting["has_captcha"] = true
-		access_control_setting["password_control"] = {}
 		access_control_setting["password_control"]["password_type"] = 1
 		password_list = []
 		password_list << {"content" => "p1", "used" => false}
@@ -79,10 +75,6 @@ class AnswersControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 
 		# update access control setting to set a username password list
-		access_control_setting = {}
-		access_control_setting["times_for_one_computer"] = 2
-		access_control_setting["has_captcha"] = true
-		access_control_setting["password_control"] = {}
 		access_control_setting["password_control"]["password_type"] = 2
 		username_password_list = []
 		username_password_list << {"content" => ["u1", "p1"], "used" => false}
@@ -111,5 +103,11 @@ class AnswersControllerTest < ActionController::TestCase
 		assert_equal false, result["success"]
 		assert_equal ErrorEnum::REQUIRE_LOGIN, result["value"]["error_code"]
 		sign_out(auth_key)
+	end
+
+	def test_unregistered_users
+		clear(User, Survey, Answer)
+
+		
 	end
 end

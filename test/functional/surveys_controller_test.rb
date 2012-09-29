@@ -147,9 +147,9 @@ class SurveysControllerTest < ActionController::TestCase
 		get :show_access_control_setting, :format => :json, :id => survey_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		access_control_setting = result["value"]
-		assert_equal "2", access_control_setting["times_for_one_computer"]
+		assert_equal 2, access_control_setting["times_for_one_computer"]
 		assert access_control_setting["has_captcha"]
-		assert_equal "2", access_control_setting["password_control"]["password_type"]
+		assert_equal 2, access_control_setting["password_control"]["password_type"]
 		assert_equal 3, access_control_setting["password_control"]["username_password_list"].length
 		assert_equal "u2", access_control_setting["password_control"]["username_password_list"][1]["content"][0]
 		assert !access_control_setting["password_control"]["username_password_list"][1]["used"]

@@ -34,6 +34,14 @@ class RegistrationsControllerTest < ActionController::TestCase
 		assert_equal ErrorEnum::EMAIL_EXIST.to_s, result["value"]["error_code"]
 	end
 
+	test "should create visitor user" do
+		clear(User)
+
+		post :create_new_visitor_user
+		result = JSON.parse(@response.body)
+		assert_equal true, result["success"]
+	end
+
 	test "should check email" do
 		post :email_illegal, :format => :json, :email => "correct_email@test.com"
 		result = JSON.parse(@response.body)
