@@ -70,6 +70,14 @@ class ActiveSupport::TestCase
 		user.save
 	end
 
+	def create_new_visitor_user
+		old_controller = @controller
+		@controller = RegistrationsController.new
+		post :create_new_visitor_user, :format => :json
+		result = JSON.parse(@response.body)
+		@controller = old_controller
+		return result["value"]
+	end
 
 	def sign_in(email, password)
 		old_controller = @controller

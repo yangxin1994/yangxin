@@ -1080,6 +1080,7 @@ class Survey
 			return ErrorEnum::REQUIRE_LOGIN if user.is_registered
 			user.answers.delete(answer)
 			answer.user = current_user
+			answer.save
 			return answer
 		end
 	end

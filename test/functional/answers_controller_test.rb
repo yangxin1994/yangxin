@@ -105,9 +105,54 @@ class AnswersControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 	end
 
-	def test_unregistered_users
+	test "visitor user" do
 		clear(User, Survey, Answer)
+		jesse = init_jesse
 
-		
+		visitor_user_auth_key = create_new_visitor_user
+
+		survey_auditor = init_survey_auditor
+		survey_id = create_survey(jesse.email, Encryption.decrypt_password(jesse.password))
+		set_survey_published(survey_id, jesse, survey_auditor)
+
+		# update access control setting to require a single password
+		access_control_setting = {}
+		access_control_setting["times_for_one_computer"] = 2
+		access_control_setting["has_captcha"] = true
+		access_control_setting["password_control"] = {}
+		access_control_setting["password_control"]["password_type"] = 1
+		password_list = []
+		password_list << {"content" => "p1", "used" => false}
+		password_list << {"content" => "p2", "used" => false}
+		password_list << {"content" => "p3", "used" => false}
+		access_control_setting["password_control"]["password_list"] = password_list
+		update_survey_access_control_setting(jesse.email, Encryption.decrypt_password(jesse.password), survey_id, access_control_setting)
+
+		post :load_question, :format => :json, :auth_key => visitor_user_auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91", :password => "p1"
+		result = JSON.parse(@response.body)
+		assert_equal true, result["success"]
+		assert_equal 2, result["value"][0]
+
+		a = Answer.first
+		assert_equal visitor_user_auth_key, User.find_by_id(a.user_id).auth_key
+
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91", :password => "p1"
+		result = JSON.parse(@response.body)
+		assert_equal true, result["success"]
+		assert_equal 2, result["value"][0]
+		sign_out(auth_key)
+
+		assert_equal 1, Answer.all.length
+		a = Answer.first
+		assert_equal jesse._id.to_s, a.user._id.to_s
+
+		post :load_question, :format => :json, :auth_key => visitor_user_auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91", :password => "p1"
+		result = JSON.parse(@response.body)
+		assert_equal false, result["success"]
+		assert_equal ErrorEnum::REQUIRE_LOGIN, result["value"]["error_code"]
 	end
 end

@@ -37,7 +37,7 @@ class RegistrationsControllerTest < ActionController::TestCase
 	test "should create visitor user" do
 		clear(User)
 
-		post :create_new_visitor_user
+		post :create_new_visitor_user, :format => :json
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
 	end
