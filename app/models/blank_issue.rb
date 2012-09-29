@@ -9,7 +9,7 @@ require 'securerandom'
 #	}
 #The element in the "inputs" array has the following structure
 # {
-#  "input_id": id of the input(string)
+#  "id": id of the input(string)
 #  "label": label of the input(string),
 #  "data_type": can be Text, Number, Email, Phone, Address, Time
 #  "properties": a hash of properties, for different data type, this input has different properties
@@ -49,7 +49,7 @@ class BlankIssue < Issue
 	attr_writer :is_rand, :items, :show_style
 
 	ATTR_NAME_ARY = %w[items is_rand show_style]
-	INPUT_ATTR_ARY = %w[input_id content data_type properties]
+	INPUT_ATTR_ARY = %w[id content data_type properties]
 
 	DATA_TYPE_ARY = %w[Text Number Phone Email Url Address Time]
 
@@ -67,7 +67,7 @@ class BlankIssue < Issue
 		@show_style = 0
 		1.upto(4) do |input_index|
 			input = {}
-			input["input_id"] = input_index
+			input["id"] = input_index
 			input["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			@items << input
@@ -108,7 +108,7 @@ class BlankIssue < Issue
 
 	def remove_hidden_items(items)
 		return if items.blank?
-		self.items.delete_if { |input| items["items"].include?(input["input_id"]) } if !items["items"].blank?
+		self.items.delete_if { |input| items["items"].include?(input["id"]) } if !items["items"].blank?
 	end
 
 	#*description*: update the current question instance, including generate id for new inputs

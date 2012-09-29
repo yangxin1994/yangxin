@@ -139,8 +139,8 @@ class AnalyzeResult < Result
 	end
 
 	def analyze_choice(issue, answer_ary)
-		input_ids = issue["choices"].map { |e| e["input_id"] }
-		input_ids << issue["other_item"]["input_id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		input_ids = issue["items"].map { |e| e["id"] }
+		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		result = {}
 		input_ids.each { |input_id| result[input_id] = 0 }
 		answer_ary.each do |answer|
@@ -152,17 +152,17 @@ class AnalyzeResult < Result
 	end
 
 	def analyze_matrix_choice(issue, answer_ary)
-		input_ids = issue["choices"].map { |e| e["input_id"] }
+		input_ids = issue["choices"].map { |e| e["id"] }
 		result = {}
-		issue["row_id"].each do |row_id|
+		issue["rows"].each do |row|
 			input_ids.each do |input_id|
-				result["#{row_id}-#{input_id}"] = 0
+				result["#{row["id"]}-#{input_id}"] = 0
 			end
 		end
 
 		answer_ary.each do |answer|
 			answer.each_with_index do |row_answer, row_index|
-				row_id = issue["row_id"][row_index]
+				row_id = issue["rows"][row_index]["id"]
 				row_answer.each do |input_id|
 					result["#{row_id}-#{input_id}"] = result["#{row_id}-#{input_id}"] + 1 if !result["#{row_id}-#{input_id}"].nil?
 				end
@@ -233,14 +233,14 @@ class AnalyzeResult < Result
 
 	def analyze_blank(issue, answer_ary)
 		result = {}
-		issue["inputs"].each_with_index do |input, input_index|
+		issue["items"].each_with_index do |input, input_index|
 			case input["data_type"]
 			when "Number"
-				result[input["input_id"]] = analyze_number_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				result[input["id"]] = analyze_number_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			when "Address"
-				result[input["input_id"]] = analyze_address_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				result[input["id"]] = analyze_address_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			when "Time"
-				result[input["input_id"]] = analyze_time_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				result[input["id"]] = analyze_time_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			end
 		end
 		return result
@@ -249,9 +249,10 @@ class AnalyzeResult < Result
 	def analyze_matrix_blank(issue, answer_ary)
 		result = {}
 
-		issue["row_id"].each_with_index do |row_id, row_index|
-			issue["inputs"].each_with_index do |input, input_index|
-				input_id = input["input_id"]
+		issue["rows"].each_with_index do |row, row_index|
+			row_id = row["id"]
+			issue["items"].each_with_index do |input, input_index|
+				input_id = input["id"]
 				case input["data_type"]
 				when "Number"
 					result["#{row_id}-#{input_id}"] = analyze_number_blank(input["properties"], answer_ary.map { |e| e[row_index][input_index] })
@@ -268,22 +269,22 @@ class AnalyzeResult < Result
 	def analyze_table(issue, answer_ary)
 		result = {}
 		flatten_answer_ary = answer_ary.flatten(1)
-		issue["inputs"].each_with_index do |input, input_index|
+		issue["items"].each_with_index do |input, input_index|
 			case input["data_type"]
 			when "Number"
-				result[input["input_id"]] = analyze_number_blank(input["properties"], flatten_answer_ary.map { |e| e[input_index] })
+				result[input["id"]] = analyze_number_blank(input["properties"], flatten_answer_ary.map { |e| e[input_index] })
 			when "Address"
-				result[input["input_id"]] = analyze_address_blank(input["properties"], flatten_answer_ary.map { |e| e[input_index] })
+				result[input["id"]] = analyze_address_blank(input["properties"], flatten_answer_ary.map { |e| e[input_index] })
 			when "Time"
-				result[input["input_id"]] = analyze_time_blank(input["properties"], flatten_answer_ary.map { |e| e[input_index] })
+				result[input["id"]] = analyze_time_blank(input["properties"], flatten_answer_ary.map { |e| e[input_index] })
 			end
 		end
 		return result
 	end
 
 	def analyze_const_sum(issue, answer_ary)
-		input_ids = issue["items"].map { |e| e["input_id"] }
-		input_ids << issue["other_item"]["input_id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		input_ids = issue["items"].map { |e| e["id"] }
+		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		weights = {}
 		input_ids.each { |input_id| weights[input_id] = [] }
 
@@ -302,8 +303,8 @@ class AnalyzeResult < Result
 	end
 
 	def analyze_sort(issue, answer_ary)
-		input_ids = issue["items"].map { |e| e["input_id"] }
-		input_ids << issue["other_item"]["input_id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		input_ids = issue["items"].map { |e| e["id"] }
+		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		
 		input_number = input_ids.length
 		result = {}
@@ -321,8 +322,8 @@ class AnalyzeResult < Result
 	end
 
 	def analyze_rank(issue, answer_ary)
-		input_ids = issue["items"].map { |e| e["input_id"] }
-		input_ids << issue["other_item"]["input_id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		input_ids = issue["items"].map { |e| e["id"] }
+		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		scores = {}
 		input_ids.each { |input_id| scores[input_id] = [] }
 		

@@ -12,7 +12,7 @@ require 'securerandom'
 #	}
 #The element in the "inputs" array has the following structure
 # {
-#  "input_id": id of the input(string)
+#  "id": id of the input(string)
 #  "label": label of the input(string),
 #  "data_type": can be Text, Number, Email, Phone, Address, Time
 #  "properties": a hash of properties, for different data type, this input has different properties
@@ -52,8 +52,8 @@ class MatrixBlankIssue < Issue
 	attr_writer :is_rand, :items, :rows, :is_row_rand, :row_num_per_group, :show_style
 
 	ATTR_NAME_ARY = %w[items is_rand rows is_row_rand row_num_per_group show_style]
-	INPUT_ATTR_ARY = %w[input_id content data_type properties]
-	ROW_ATTR_ARY = %w[row_id content]
+	INPUT_ATTR_ARY = %w[id content data_type properties]
+	ROW_ATTR_ARY = %w[id content]
 
 	DATA_TYPE_ARY = %w[Text Number Phone Email Url Address Time]
 
@@ -72,17 +72,17 @@ class MatrixBlankIssue < Issue
 		@row_num_per_group = -1
 		@show_style
 
-		1.upto(4) do |row_id|
+		1.upto(4) do |id|
 			row = {}
-			row["row_id"] = row_id
-			row["content"] = {"text" => "子题目#{Tool.convert_digit(row_id)}",
+			row["id"] = id
+			row["content"] = {"text" => "子题目#{Tool.convert_digit(id)}",
 														"image" => [], "audio" => [], "video" => []}
 			@rows << row
 		end
 		
 		1.upto(4) do |input_index|
 			input = {}
-			input["input_id"] = input_index
+			input["id"] = input_index
 			input["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			@items << input
@@ -123,8 +123,8 @@ class MatrixBlankIssue < Issue
 
 	def remove_hidden_items(items)
 		return if items.blank?
-		self.items.delete_if { |input| items["items"].include?(input["input_id"]) } if !items["items"].blank?
-		self.rows.delete_if { |row| items["sub_questions"].include?(row["row_id"]) } if !items["sub_questions"].blank?
+		self.items.delete_if { |input| items["items"].include?(input["id"]) } if !items["items"].blank?
+		self.rows.delete_if { |row| items["sub_questions"].include?(row["id"]) } if !items["sub_questions"].blank?
 	end
 
 	#*description*: update the current question instance, including generate id for new inputs

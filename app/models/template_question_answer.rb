@@ -47,7 +47,7 @@ class TemplateQuestionAnswer
 				t_question.template_question_answers.where(content: {"template_question_answer_content" => input_ids.sort}).map { |e| e.user_id.to_s }
 		else
 			# template questions cannot have other item
-			all_input_ids = t_question.issue["choices"].map { |e| e["input_id"] }
+			all_input_ids = t_question.issue["choices"].map { |e| e["id"] }
 			other_input_ids = all_input_ids - input_ids
 			possible_input_ids = []
 			possible_number = 2 ^ other_input_ids.length
@@ -82,7 +82,7 @@ class TemplateQuestionAnswer
 				t_question.template_question_answers.where(content: {"template_question_answer_content" => input_ids.sort}).map { |e| e.user_id.to_s }
 		else
 			# template questions cannot have other item
-			all_input_ids = t_question.issue["choices"].map { |e| e["input_id"] }
+			all_input_ids = t_question.issue["choices"].map { |e| e["id"] }
 			other_input_ids = all_input_ids - input_ids
 			possible_input_ids = []
 			possible_number = 2 ^ other_input_ids.length

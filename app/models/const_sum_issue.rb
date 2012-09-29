@@ -20,8 +20,8 @@ class ConstSumIssue < Issue
 	attr_writer :items, :other_item, :is_rand, :sum, :show_style
 
 	ATTR_NAME_ARY = %w[items other_item is_rand sum show_style]
-	ITEM_ATTR_ARY = %w[input_id content]
-	OTHER_ITEM_ATTR_ARY = %w[has_other_item input_id content]
+	ITEM_ATTR_ARY = %w[id content]
+	OTHER_ITEM_ATTR_ARY = %w[has_other_item id content]
 
 	def initialize
 		@items = []
@@ -32,12 +32,12 @@ class ConstSumIssue < Issue
 		input_number = 4
 		1.upto(input_number) do |item_index|
 			item = {}
-			item["input_id"] = item_index
+			item["id"] = item_index
 			item["content"] = {"text" => "选项#{Tool.convert_digit(item_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			@items << item
 		end
-		@other_item = {"has_other_item" => false, "input_id" => input_number + 1, "content" => {"text" => "其他（请填写）：", "image" => [], "video" => [], "audio" => []}}
+		@other_item = {"has_other_item" => false, "id" => input_number + 1, "content" => {"text" => "其他（请填写）：", "image" => [], "video" => [], "audio" => []}}
 	end
 
 	def update_issue(issue_obj)
@@ -54,7 +54,7 @@ class ConstSumIssue < Issue
 
 	def remove_hidden_items(items)
 		return if items.blank?
-		self.items.delete_if { |item| items["items"].include?(item["input_id"]) } if !items["items"].blank?
+		self.items.delete_if { |item| items["items"].include?(item["id"]) } if !items["items"].blank?
 	end
 
 	#*description*: serialize the current instance into a question object

@@ -26,8 +26,8 @@ class MatrixChoiceIssue < Issue
 	attr_writer :items, :min_choice, :max_choice, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
 
 	ATTR_NAME_ARY = %w[items min_choice max_choice show_style is_rand rows is_row_rand row_num_per_group]
-	CHOICE_ATTR_ARY = %w[input_id content is_exclusive]
-	ROW_ATTR_ARY = %w[row_id content]
+	CHOICE_ATTR_ARY = %w[id content is_exclusive]
+	ROW_ATTR_ARY = %w[id content]
 
 	def initialize
 		@min_choice = 1
@@ -38,16 +38,16 @@ class MatrixChoiceIssue < Issue
 		@row_num_per_group = -1	
 		@items = []
 		@rows = []
-		1.upto(4) do |row_id|
+		1.upto(4) do |id|
 			row = {}
-			row["row_id"] = row_id
-			row["content"] = {"text" => "子题目#{Tool.convert_digit(row_id)}",
+			row["id"] = id
+			row["content"] = {"text" => "子题目#{Tool.convert_digit(id)}",
 														"image" => [], "audio" => [], "video" => []}
 			@rows << row
 		end
 		1.upto(4) do |input_index|
 			choice = {}
-			choice["input_id"] = input_index
+			choice["id"] = input_index
 			choice["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			choice["is_exclusive"] = false
@@ -75,8 +75,8 @@ class MatrixChoiceIssue < Issue
 
 	def remove_hidden_items(items)
 		return if items.blank?
-		self.items.delete_if { |choice| items["items"].include?(choice["input_id"]) } if !items["items"].blank?
-		self.rows.delete_if { |row| items["sub_questions"].include?(row["row_id"]) } if !items["sub_questions"].blank?
+		self.items.delete_if { |choice| items["items"].include?(choice["id"]) } if !items["items"].blank?
+		self.rows.delete_if { |row| items["sub_questions"].include?(row["id"]) } if !items["sub_questions"].blank?
 	end
 
 	#*description*: serialize the current instance into a question object

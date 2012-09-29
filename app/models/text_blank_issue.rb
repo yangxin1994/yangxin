@@ -2,7 +2,6 @@ require 'error_enum'
 require 'securerandom'
 #Besides the fields that all types questions have, text blank questions also have:
 # {
-#	 "input_id" : id of the text input
 #	 "min_length" : minimal length of the input text(Integer)
 #	 "max_length" : maximal length of the input text(Integer)
 #	 "has_multiple_line" : whether has multiple lines to input(Boolean)
