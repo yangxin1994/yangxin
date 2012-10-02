@@ -108,4 +108,8 @@ module Tool
 			Address.create(:code => (province_code << 12) + (city_code << 6) + (county_code), :name => row[3].strip, :address_type => 2)
 		end
 	end
+
+	def self.rand_id
+		return (rand * 10**16).floor
+	end
 end

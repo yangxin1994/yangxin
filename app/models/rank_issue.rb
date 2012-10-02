@@ -37,7 +37,7 @@ class RankIssue < Issue
 		input_number = 4
 		1.upto(input_number) do |item_index|
 			item = {}
-			item["id"] = item_index
+			item["id"] = Tool.rand_id
 			item["content"] = {"text" => "选项#{Tool.convert_digit(item_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			@items << item

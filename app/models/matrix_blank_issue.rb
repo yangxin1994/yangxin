@@ -74,7 +74,7 @@ class MatrixBlankIssue < Issue
 
 		1.upto(4) do |id|
 			row = {}
-			row["id"] = id
+			row["id"] = Tool.rand_id
 			row["content"] = {"text" => "子题目#{Tool.convert_digit(id)}",
 														"image" => [], "audio" => [], "video" => []}
 			@rows << row
@@ -82,7 +82,7 @@ class MatrixBlankIssue < Issue
 		
 		1.upto(4) do |input_index|
 			input = {}
-			input["id"] = input_index
+		input["id"] = Tool.rand_id
 			input["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			@items << input

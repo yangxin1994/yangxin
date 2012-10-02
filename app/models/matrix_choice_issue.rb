@@ -40,14 +40,14 @@ class MatrixChoiceIssue < Issue
 		@rows = []
 		1.upto(4) do |id|
 			row = {}
-			row["id"] = id
+			row["id"] = Tool.rand_id
 			row["content"] = {"text" => "子题目#{Tool.convert_digit(id)}",
 														"image" => [], "audio" => [], "video" => []}
 			@rows << row
 		end
 		1.upto(4) do |input_index|
 			choice = {}
-			choice["id"] = input_index
+			choice["id"] = Tool.rand_id
 			choice["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			choice["is_exclusive"] = false

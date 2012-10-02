@@ -35,7 +35,7 @@ class TableIssue < Issue
 		@is_rand = false
 		1.upto(4) do |input_index|
 			input = {}
-			input["id"] = input_index
+			input["id"] = Tool.rand_id
 			input["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			@items << input

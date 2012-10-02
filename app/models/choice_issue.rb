@@ -37,7 +37,7 @@ class ChoiceIssue < Issue
 		input_number = 4
 		1.upto(input_number) do |input_index|
 			choice = {}
-			choice["id"] = input_index
+			choice["id"] = Tool.rand_id
 			choice["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			choice["is_exclusive"] = false
