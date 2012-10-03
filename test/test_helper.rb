@@ -168,6 +168,27 @@ class ActiveSupport::TestCase
 		sign_out(auth_key)
 	end
 
+	def get_survey_style_setting(email, password, survey_id)
+		auth_key = sign_in(email, password)
+		old_controller = @controller
+		@controller = SurveysController.new
+		get :show_style_setting, :format => :json, :id => survey_id, :auth_key => auth_key
+		result = JSON.parse(@response.body)
+		@controller = old_controller
+		sign_out(auth_key)
+		return result
+	end
+
+	def update_survey_style_setting(email, password, survey_id, style_setting)
+		auth_key = sign_in(email, password)
+		old_controller = @controller
+		@controller = SurveysController.new
+		put :update_style_setting, :format => :json, :id => survey_id, :style_setting => style_setting, :auth_key => auth_key
+		result = JSON.parse(@response.body)
+		@controller = old_controller
+		sign_out(auth_key)
+	end
+
 	def get_survey_obj(email, password, survey_id)
 		auth_key = sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller
@@ -185,6 +206,16 @@ class ActiveSupport::TestCase
 		old_controller = @controller
 		@controller = PagesController.new
 		post :create, :format => :json, :survey_id => survey_id, :page_index => page_index, :page_name => page_name, :auth_key => auth_key
+		@controller = old_controller
+		sign_out(auth_key)
+	end
+
+	def remove_page(email, password, survey_id, page_index)
+		auth_key = sign_in(email, Encryption.decrypt_password(password))
+		old_controller = @controller
+		@controller = PagesController.new
+		delete :destroy, :format => :json, :survey_id => survey_id, :id => page_index, :auth_key => auth_key
+		result = JSON.parse(@response.body)
 		@controller = old_controller
 		sign_out(auth_key)
 	end
@@ -245,6 +276,7 @@ class ActiveSupport::TestCase
 	def create_survey_page_question(email, password)
 		survey_id = create_survey(email, Encryption.decrypt_password(password))
 	
+		remove_page(email, password, survey_id, 0)
 		insert_page(email, password, survey_id, -1, "first page")
 		insert_page(email, password, survey_id, 0, "second page")
 		insert_page(email, password, survey_id, 0, "third page")
@@ -261,7 +293,7 @@ class ActiveSupport::TestCase
 		q9 = create_question(email, password, survey_id, 3, -1, 10)
 		q10 = create_question(email, password, survey_id, 3, -1, 14)
 
-		return [survey_id, [[q1, q2, q3], [q4], [q5, q6, q7, q8], [q9, q10], []]]
+		return [survey_id, [[q1, q2, q3], [q4], [q5, q6, q7, q8], [q9, q10]]]
 	end
 
 	def get_question_obj(email, password, survey_id, question_id)

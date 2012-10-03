@@ -42,7 +42,7 @@ class RankIssue < Issue
 														"image" => [], "audio" => [], "video" => []}
 			@items << item
 		end
-		@other_item = {"has_other_item" => false, "id" => input_number + 1, "content" => {"text" => "其他（请填写）：", "image" => [], "video" => [], "audio" => []}}
+		@other_item = {"has_other_item" => false, "id" => Tool.rand_id, "content" => {"text" => "其他（请填写）：", "image" => [], "video" => [], "audio" => []}}
 	end
 
 	def update_issue(issue_obj)

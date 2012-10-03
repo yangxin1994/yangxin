@@ -95,7 +95,10 @@ class AnswersController < ApplicationController
 		if answer.is_edit
 			questions = answer.load_question(params[:question_id], params[:next_page])
 			if answer.is_finish
+				# the survey does not allow page up, and there are no more questions to be loaded
 				render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return
+			elsif questions.class == String && questions.start_with?("error")
+				render_json_e(questions) and return
 			else
 				render_json_auto([questions, answer.repeat_time]) and return
 			end
