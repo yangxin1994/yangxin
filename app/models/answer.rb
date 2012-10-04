@@ -197,6 +197,8 @@ class Answer
 
 	def genereate_random_quality_control_questions
 		if self.survey.is_random_quality_control_questions
+			self.random_quality_control_answer_content = {}
+			self.random_quality_control_locations = {}
 			# 1. determine the number of random quality control questions
 			question_number = self.answer_content.length
 			qc_question_number = [[question_number / 10, 1].max, 4].min
@@ -210,7 +212,7 @@ class Answer
 				matching_questions_uniq_ids += MatchingQuestion.get_matching_question_ids(m_q_id)
 			end
 			matching_questions_ids = matching_questions_uniq_ids.uniq
-			quality_control_questions_ids = [objective_questions_ids + matching_questions_ids]
+			quality_control_questions_ids = objective_questions_ids + matching_questions_ids
 			# 3. random generate locations for the quality control questions
 			quality_control_questions_ids.each do |qc_id|
 				self.random_quality_control_locations[survey.pages.shuffle[0]["questions"].shuffle[0]] =

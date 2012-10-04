@@ -43,7 +43,7 @@ class ChoiceIssue < Issue
 			choice["is_exclusive"] = false
 			@items << choice
 		end
-		@other_item = {"has_other_item" => false, "id" => Tool.rand_id, "content" => {"text" => "其他（请填写）：", "image" => [], "video" => [], "audio" => []}, "is_exclusive" => false}
+		@other_item = {"has_other_item" => false, "id" => nil, "content" => {"text" => "其他（请填写）：", "image" => [], "video" => [], "audio" => []}, "is_exclusive" => false}
 	end
 
 	def update_issue(issue_obj)
