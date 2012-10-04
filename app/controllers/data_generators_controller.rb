@@ -64,7 +64,7 @@ class DataGeneratorsController < ApplicationController
 		page_number = (3 + 2 * rand).round
 		0.upto(page_number-1).each do |page_index|
 			page_name = Faker::Lorem.words[0]
-			survey.pages << {"page_name" => page_name, "questions" => []}
+			survey.pages << {"name" => page_name, "questions" => []}
 			survey.save
 
 			question_number = (3 + 2 * rand).round

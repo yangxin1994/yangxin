@@ -238,20 +238,20 @@ class Answer
 		loaded_question_ids = []
 		if self.survey.is_pageup_allowed
 			self.survey.pages.each_with_index do |page, page_index|
-				next if !page["questions"].include?(question_id)
-				question_index = page["questions"].index(question_id)
+				next if question_id.to_s != "-1" && !page["questions"].include?(question_id)
+				question_index = question_id.to_s == "-1" ? -1 : page["questions"].index(question_id)
 				if next_page
 					# require next page of questions
 					if question_index + 1 == page["questions"].length
-						return ErrorEnum::PAGE_OVERFLOW if page_index + 1 == self.survey.pages.length
+						return ErrorEnum::OVERFLOW if page_index + 1 == self.survey.pages.length
 						return load_question_by_ids(self.survey.pages[page_index + 1]["questions"])
 					else
 						return load_question_by_ids(page["questions"][question_index + 1..-1])
 					end
 				else
 					# require previous page of questions
-					if question_index == 0
-						return ErrorEnum::PAGE_OVERFLOW if page_index == 0
+					if question_index <= 0
+						return ErrorEnum::OVERFLOW if page_index == 0
 						return load_question_by_ids(self.survey.pages[page_index - 1]["questions"])
 					else
 						return load_question_by_ids(page["questions"][0..question_index - 1])

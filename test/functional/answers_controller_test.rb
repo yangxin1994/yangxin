@@ -291,7 +291,88 @@ class AnswersControllerTest < ActionController::TestCase
 		a = Answer.first
 		assert_equal 10, a.answer_content.length
 
+		# update the style setting to make the survey allow page up
+		style_setting = get_survey_style_setting(jesse.email, Encryption.decrypt_password(jesse.password), survey_id)
+		style_setting["allow_pageup"] = true
+		update_survey_style_setting(jesse.email, Encryption.decrypt_password(jesse.password), survey_id, style_setting)
+
 		# questions loading for surveys that allow page up
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91"
+		result = JSON.parse(@response.body)
+		# must provide question id when the survey allows page up
+		assert_equal false, result["success"]
+		assert_equal ErrorEnum::QUESTION_NOT_EXIST, result["value"]["error_code"]
+
+		# load the three questions in the first page
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91", :question_id => -1, :next_page => true
+		result = JSON.parse(@response.body)
+		assert_equal true, result["success"]
+		assert_equal 3, result["value"][0].length
+		assert_equal pages[0][0], result["value"][0][0]["_id"]
+		assert_equal pages[0][1], result["value"][0][1]["_id"]
+		assert_equal pages[0][2], result["value"][0][2]["_id"]
+
+		# load the latter two questions in the first page
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91", :question_id => pages[0][0], :next_page => true
+		result = JSON.parse(@response.body)
+		assert_equal true, result["success"]
+		assert_equal 2, result["value"][0].length
+		assert_equal pages[0][1], result["value"][0][0]["_id"]
+		assert_equal pages[0][2], result["value"][0][1]["_id"]
+
+		# load the questions in the third page
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91", :question_id => pages[1][-1], :next_page => true
+		result = JSON.parse(@response.body)
+		assert_equal true, result["success"]
+		assert_equal 4, result["value"][0].length
+		assert_equal pages[2][0], result["value"][0][0]["_id"]
+		assert_equal pages[2][1], result["value"][0][1]["_id"]
+		assert_equal pages[2][2], result["value"][0][2]["_id"]
+		assert_equal pages[2][3], result["value"][0][3]["_id"]
+		
+		# want to load the page after the last page, should return page overflow
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91", :question_id => pages[-1][-1], :next_page => true
+		result = JSON.parse(@response.body)
+		assert_equal false, result["success"]
+		assert_equal ErrorEnum::OVERFLOW, result["value"]["error_code"]
+
+		# want to load the page before the first page, should return page overflow
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91", :question_id => pages[0][0], :next_page => false
+		result = JSON.parse(@response.body)
+		assert_equal false, result["success"]
+		assert_equal ErrorEnum::OVERFLOW, result["value"]["error_code"]
+
+		# load the first page questions
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91", :question_id => pages[1][0], :next_page => false
+		result = JSON.parse(@response.body)
+		assert_equal true, result["success"]
+		assert_equal pages[0].length, result["value"][0].length
+		assert_equal pages[0][0], result["value"][0][0]["_id"]
+		assert_equal pages[0][1], result["value"][0][1]["_id"]
+
+		# load the first two questions of the third page
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91", :question_id => pages[2][2], :next_page => false
+		result = JSON.parse(@response.body)
+		assert_equal true, result["success"]
+		assert_equal 2, result["value"][0].length
+		assert_equal pages[2][0], result["value"][0][0]["_id"]
+		assert_equal pages[2][1], result["value"][0][1]["_id"]
 	end
 
 	def add_quota_rule(email, password, survey_id, quota_rule)
