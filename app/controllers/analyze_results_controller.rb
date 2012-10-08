@@ -11,10 +11,16 @@ class AnalyzeResultsController < ApplicationController
 	end
 
 	def show
-		result = @survey.show_analyze_result(params[:filter_name], params[:include_screened_answer])
+		result = @survey.show_analyze_result(params[:id], params[:include_screened_answer])
 		respond_to do |format|
 			format.json	{ render_json_auto(result) and return }
 		end
+	end
 
+	def check_progress
+		retval = @survey.check_progress(params[:detail])
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
 	end
 end

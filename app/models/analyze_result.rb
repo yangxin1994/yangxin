@@ -13,14 +13,16 @@ class AnalyzeResult < Result
 	field :channel_result, :type => Hash
 	field :answers_result, :type => Hash
 
+	belongs_to :survey
+
 	def self.generate_result_key(answers)
 		answer_ids = answers.map { |e| e._id.to_s }
 		result_key = Digest::MD5.hexdigest("analyze_result-#{answer_ids.to_s}")
 		return result_key
 	end
 
-	def self.find_or_create_by_filter_name(filter_name, include_screened_answer)
-		answers = self.answers(filter_name, include_screened_answer)
+	def self.find_or_create_by_filter_name(survey, filter_name, include_screened_answer)
+		answers = self.answers(survey, filter_name, include_screened_answer)
 		result_key = self.generate_result_key(answers)
 		analyze_result = self.find_by_result_key(result_key)
 		if analyze_result.nil?
@@ -65,7 +67,7 @@ class AnalyzeResult < Result
 		segments = segmentation(5, time_ary[0], time_ary[-1])
 
 		# make stats of segment results
-		self.time_result["histogram"] = get_continuous_histogram(time_ary, segments)
+		self.time_result["histogram"] = [segments, get_continuous_histogram(time_ary, segments)]
 	end
 
 	def analyze_duration(answers)
@@ -76,7 +78,7 @@ class AnalyzeResult < Result
 		segments = segmentation(5, duration_ary[0], duration_ary[-1])
 
 		# make stats of segment results
-		self.duration_result["histogram"] = get_continuous_histogram(duration_ary, segments)
+		self.duration_result["histogram"] = [segments, get_continuous_histogram(duration_ary, segments)]
 
 		# make other stats
 		self.duration_result["mean"] = duration_ary.mean
@@ -137,8 +139,8 @@ class AnalyzeResult < Result
 	end
 
 	def analyze_choice(issue, answer_ary)
-		input_ids = issue["choices"].map { |e| e["input_id"] }
-		input_ids << issue["other_item"]["input_id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		input_ids = issue["items"].map { |e| e["id"] }
+		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		result = {}
 		input_ids.each { |input_id| result[input_id] = 0 }
 		answer_ary.each do |answer|
@@ -150,17 +152,17 @@ class AnalyzeResult < Result
 	end
 
 	def analyze_matrix_choice(issue, answer_ary)
-		input_ids = issue["choices"].map { |e| e["input_id"] }
+		input_ids = issue["choices"].map { |e| e["id"] }
 		result = {}
-		issue["row_id"].each do |row_id|
+		issue["rows"].each do |row|
 			input_ids.each do |input_id|
-				result["#{row_id}-#{input_id}"] = 0
+				result["#{row["id"]}-#{input_id}"] = 0
 			end
 		end
 
 		answer_ary.each do |answer|
 			answer.each_with_index do |row_answer, row_index|
-				row_id = issue["row_id"][row_index]
+				row_id = issue["rows"][row_index]["id"]
 				row_answer.each do |input_id|
 					result["#{row_id}-#{input_id}"] = result["#{row_id}-#{input_id}"] + 1 if !result["#{row_id}-#{input_id}"].nil?
 				end
@@ -179,23 +181,15 @@ class AnalyzeResult < Result
 		segments = segmentation(5, answer_ary[0], answer_ary[-1])
 
 		# make stats of segment results
-		result["histogram"] = get_continuous_histogram(answer_ary, segments)
+		result["histogram"] = [segments, get_continuous_histogram(answer_ary, segments)]
 
 		return result
 	end
 
 	def analyze_time_blank(issue, answer_ary)
 		result = {}
-		if issue["format"].to_i & 64
-			# this is a date question
-			answer_ary = answer_ary.map! do |answer|
-				Time.mktime(answer[0], answer[1], answer[2], answer[4], answer[5], answer[6], answer[7]).to_i
-			end
-		else
-			# this is a time question
-			answer_ary = answer_ary.map! do |answer|
-				Tool.convert_to_int(answer)
-			end
+		answer_ary = answer_ary.map! do |answer|
+			Time.mktime(answer[0], answer[1], answer[2], answer[3], answer[4], answer[5]).to_i
 		end
 		answer_ary.sort!
 		result["mean"] = answer_ary.mean
@@ -231,14 +225,14 @@ class AnalyzeResult < Result
 
 	def analyze_blank(issue, answer_ary)
 		result = {}
-		issue["inputs"].each_with_index do |input, input_index|
+		issue["items"].each_with_index do |input, input_index|
 			case input["data_type"]
 			when "Number"
-				result[input["input_id"]] = analyze_number_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				result[input["id"]] = analyze_number_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			when "Address"
-				result[input["input_id"]] = analyze_address_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				result[input["id"]] = analyze_address_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			when "Time"
-				result[input["input_id"]] = analyze_time_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				result[input["id"]] = analyze_time_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			end
 		end
 		return result
@@ -247,9 +241,10 @@ class AnalyzeResult < Result
 	def analyze_matrix_blank(issue, answer_ary)
 		result = {}
 
-		issue["row_id"].each_with_index do |row_id, row_index|
-			issue["inputs"].each_with_index do |input, input_index|
-				input_id = input["input_id"]
+		issue["rows"].each_with_index do |row, row_index|
+			row_id = row["id"]
+			issue["items"].each_with_index do |input, input_index|
+				input_id = input["id"]
 				case input["data_type"]
 				when "Number"
 					result["#{row_id}-#{input_id}"] = analyze_number_blank(input["properties"], answer_ary.map { |e| e[row_index][input_index] })
@@ -266,22 +261,22 @@ class AnalyzeResult < Result
 	def analyze_table(issue, answer_ary)
 		result = {}
 		flatten_answer_ary = answer_ary.flatten(1)
-		issue["inputs"].each_with_index do |input, input_index|
+		issue["items"].each_with_index do |input, input_index|
 			case input["data_type"]
 			when "Number"
-				result[input["input_id"]] = analyze_number_blank(input["properties"], flatten_answer_ary.map { |e| e[input_index] })
+				result[input["id"]] = analyze_number_blank(input["properties"], flatten_answer_ary.map { |e| e[input_index] })
 			when "Address"
-				result[input["input_id"]] = analyze_address_blank(input["properties"], flatten_answer_ary.map { |e| e[input_index] })
+				result[input["id"]] = analyze_address_blank(input["properties"], flatten_answer_ary.map { |e| e[input_index] })
 			when "Time"
-				result[input["input_id"]] = analyze_time_blank(input["properties"], flatten_answer_ary.map { |e| e[input_index] })
+				result[input["id"]] = analyze_time_blank(input["properties"], flatten_answer_ary.map { |e| e[input_index] })
 			end
 		end
 		return result
 	end
 
 	def analyze_const_sum(issue, answer_ary)
-		input_ids = issue["items"].map { |e| e["input_id"] }
-		input_ids << issue["other_item"]["input_id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		input_ids = issue["items"].map { |e| e["id"] }
+		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		weights = {}
 		input_ids.each { |input_id| weights[input_id] = [] }
 
@@ -300,8 +295,8 @@ class AnalyzeResult < Result
 	end
 
 	def analyze_sort(issue, answer_ary)
-		input_ids = issue["items"].map { |e| e["input_id"] }
-		input_ids << issue["other_item"]["input_id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		input_ids = issue["items"].map { |e| e["id"] }
+		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		
 		input_number = input_ids.length
 		result = {}
@@ -319,8 +314,8 @@ class AnalyzeResult < Result
 	end
 
 	def analyze_rank(issue, answer_ary)
-		input_ids = issue["items"].map { |e| e["input_id"] }
-		input_ids << issue["other_item"]["input_id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		input_ids = issue["items"].map { |e| e["id"] }
+		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		scores = {}
 		input_ids.each { |input_id| scores[input_id] = [] }
 		

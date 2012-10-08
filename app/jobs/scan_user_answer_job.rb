@@ -40,10 +40,8 @@ module Jobs
 				next if answer.user.nil?
 				user_id = answer.user._id.to_s
 
-				template_answer_content = answer.template_answer_content
-
-				template_answer_content.each do |key, value|
-					question = Question.find(key.to_s)
+				answer.template_answer_content.merge(answer.answer_content).each do |key, value|
+					question = Question.find_by_id(key.to_s)
 					template_question_id = question.reference_id if question
 
 					if !template_question_id.blank? && 

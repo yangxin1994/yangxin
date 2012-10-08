@@ -2,7 +2,6 @@ require 'error_enum'
 require 'securerandom'
 #Besides the fields that all types questions have, phone blank questions also have:
 # {
-#	 "input_id" : id of the phone input
 #	 "phone_type" : 1 for fixed phone number, 2 for mobile number, 3 for both fixed phone number and mobile number
 #	}
 class PhoneBlankIssue < Issue

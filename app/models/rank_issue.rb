@@ -18,35 +18,35 @@ require 'securerandom'
 #  "desc_ary": array of string to describe the item(array)
 # }
 class RankIssue < Issue
-	attr_reader :items, :other_item, :is_rand, :show_style
-	attr_writer :items, :other_item, :is_rand, :show_style
+	attr_reader :items, :other_item, :is_rand, :show_style, :icon, :icon_num, :bar, :desc_ary
+	attr_writer :items, :other_item, :is_rand, :show_style, :icon, :icon_num, :bar, :desc_ary
 
-	ATTR_NAME_ARY = %w[items other_item is_rand show_style]
-	ITEM_ATTR_ARY = %w[input_id content icon icon_num has_unknow desc_ary]
-	OTHER_ITEM_ATTR_ARY = %w[has_other_item input_id content icon icon_num desc_ary]
+	ATTR_NAME_ARY = %w[items other_item is_rand show_style icon icon_num bar desc_ary]
+	ITEM_ATTR_ARY = %w[id content]
+	OTHER_ITEM_ATTR_ARY = %w[has_other_item id content]
 
 	def initialize
 		@items = []
 		@is_rand = false
 		@show_style = 0
+		@icon = 0
+		@icon_num = 7
+		@desc_ary = ["不满意", "基本满意", "很满意"]
+		@bar = 0
 
 		input_number = 4
 		1.upto(input_number) do |item_index|
 			item = {}
-			item["input_id"] = item_index
+			item["id"] = Tool.rand_id
 			item["content"] = {"text" => "选项#{Tool.convert_digit(item_index)}",
 														"image" => [], "audio" => [], "video" => []}
-			item["icon"] = ""
-			item["icon_num"] = 3
-			item["has_unknow"] = false
-			item["desc_ary"] = ["不满意", "基本满意", "很满意"]
 			@items << item
 		end
-		@other_item = {"has_other_item" => true, "input_id" => input_number + 1, "content" => "其他（请填写）：", "icon" => "", "icon_num" => 3, "desc_ary" => ["不满意", "基本满意", "很满意"]}
+		@other_item = {"has_other_item" => false, "id" => nil, "content" => {"text" => "其他（请填写）：", "image" => [], "video" => [], "audio" => []}}
 	end
 
-	def update_issue
-		issue_obj ||= []
+	def update_issue(issue_obj)
+		issue_obj["items"] ||= []
 		issue_obj["items"].each do |item_obj|
 			item_obj.delete_if { |k, v| !ITEM_ATTR_ARY.include?(k) }
 			item_obj["icon_num"] = item_obj["icon_num"].to_i if !item_obj["icon_num"].nil?
@@ -58,8 +58,9 @@ class RankIssue < Issue
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 
-	def remove_hidden_items(items, sub_questions)
-		self.items.delete_if { |item| items.include?(item["input_id"]) }
+	def remove_hidden_items(items)
+		return if items.blank?
+		self.items.delete_if { |item| items["items"].include?(item["id"]) } if !items["items"].blank?
 	end
 
 	#*description*: serialize the current instance into a question object

@@ -96,7 +96,7 @@ class RegistrationsController < ApplicationController
 	def create_new_visitor_user
 		# create user model
 		auth_key = User.create_new_visitor_user
-		format.json	{ render_json_s(auth_key) and return }
+		render_json_s(auth_key) and return
 	end
 
 	#*description*: check whether email is illegal

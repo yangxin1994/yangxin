@@ -23,7 +23,7 @@ class ChoiceIssue < Issue
 	attr_writer :items, :other_item, :choice_num_per_row, :min_choice, :max_choice, :option_type, :is_list_style, :is_rand
 
 	ATTR_NAME_ARY = %w[items other_item choice_num_per_row min_choice max_choice option_type is_list_style is_rand]
-	CHOICE_ATTR_ARY = %w[input_id content is_exclusive]
+	CHOICE_ATTR_ARY = %w[id content is_exclusive]
 	OTHER_ITEM_ATTR_ARY = %w[has_other_item input_id content is_exclusive]
 
 	def initialize
@@ -37,13 +37,13 @@ class ChoiceIssue < Issue
 		input_number = 4
 		1.upto(input_number) do |input_index|
 			choice = {}
-			choice["input_id"] = input_index
+			choice["id"] = Tool.rand_id
 			choice["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			choice["is_exclusive"] = false
 			@items << choice
 		end
-		@other_item = {"has_other_item" => true, "input_id" => input_number + 1, "content" => "其他（请填写）：", "is_exclusive" => false}
+		@other_item = {"has_other_item" => false, "id" => nil, "content" => {"text" => "其他（请填写）：", "image" => [], "video" => [], "audio" => []}, "is_exclusive" => false}
 	end
 
 	def update_issue(issue_obj)
@@ -64,8 +64,9 @@ class ChoiceIssue < Issue
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 
-	def remove_hidden_items(items, sub_questions)
-		self.items.delete_if { |choice| items.include?(choice["input_id"]) }
+	def remove_hidden_items(items)
+		return if items.blank?
+		self.items.delete_if { |choice| items["items"].include?(choice["id"]) } if !items["items"].blank?
 	end
 
 	#*description*: serialize the current instance into a question object

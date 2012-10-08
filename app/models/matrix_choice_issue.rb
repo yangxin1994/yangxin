@@ -5,10 +5,8 @@ require 'securerandom'
 #Besides the fields that all types questions have, matrix choice questions also have:
 # {
 #	 "choices" : array of choice items(array),
-#	 "choice_num_per_row" : number of choices items in one row(integer),
 #	 "min_choice" : number of choices that user at least selects(integer),
 #	 "max_choice" : number of choices that user at most selects(integer),
-#	 "is_list_style" : whether show choices in list style(bool),
 #	 "is_rand" : whether randomly show choices(bool),
 #	 "row_name" : array of row names(array),
 #	 "" : array of row id(array),
@@ -24,46 +22,52 @@ require 'securerandom'
 # }
 class MatrixChoiceIssue < Issue
 
-	attr_reader :choices, :choice_num_per_row, :min_choice, :max_choice, :show_style, :is_rand, :row_id, :row_name, :is_row_rand, :row_num_per_group
-	attr_writer :choices, :choice_num_per_row, :min_choice, :max_choice, :show_style, :is_rand, :row_id, :row_name, :is_row_rand, :row_num_per_group
+	attr_reader :items, :min_choice, :max_choice, :option_type, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
+	attr_writer :items, :min_choice, :max_choice, :option_type, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
 
-	ATTR_NAME_ARY = %w[choices choice_num_per_row min_choice max_choice show_style is_rand row_id row_name is_row_rand row_num_per_group]
-	CHOICE_ATTR_ARY = %w[input_id content is_exclusive]
+	ATTR_NAME_ARY = %w[items min_choice max_choice option_type show_style is_rand rows is_row_rand row_num_per_group]
+	CHOICE_ATTR_ARY = %w[id content is_exclusive]
+	ROW_ATTR_ARY = %w[id content]
 
 	def initialize
-		@choice_num_per_row = -1
 		@min_choice = 1
 		@max_choice = 1
+		@option_type = 1
 		@show_style = 0
 		@is_rand = false	
-		@row_name = []	
-		@row_id = []	
 		@is_row_rand = false	
 		@row_num_per_group = -1	
-		@choices = []
-		1.upto(4) do |row_id|
-			@row_id << row_id
-			@row_name << "子题目#{Tool.convert_digit(row_id)}"
+		@items = []
+		@rows = []
+		1.upto(4) do |id|
+			row = {}
+			row["id"] = Tool.rand_id
+			row["content"] = {"text" => "子题目#{Tool.convert_digit(id)}",
+														"image" => [], "audio" => [], "video" => []}
+			@rows << row
 		end
 		1.upto(4) do |input_index|
 			choice = {}
-			choice["input_id"] = input_index
+			choice["id"] = Tool.rand_id
 			choice["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			choice["is_exclusive"] = false
-			@choices << choice
+			@items << choice
 		end
 	end
 
 	def update_issue(issue_obj)
-		issue_obj["choices"] ||= []
-		issue_obj["choices"].each do |choice_obj|
+		issue_obj["items"] ||= []
+		issue_obj["items"].each do |choice_obj|
 			choice_obj.delete_if { |k, v| !CHOICE_ATTR_ARY.include?(k) }
 			choice_obj["is_exclusive"] = choice_obj["is_exclusive"].to_s == "true"
 		end
-		issue_obj["choice_num_per_row"] = issue_obj["choice_num_per_row"].to_i
+		issue_obj["rows"].each do |row_obj|
+			row_obj.delete_if { |k, v| !ROW_ATTR_ARY.include?(k) }
+		end
 		issue_obj["min_choice"] = issue_obj["min_choice"].to_i
 		issue_obj["max_choice"] = issue_obj["max_choice"].to_i
+		issue_obj["option_type"] = issue_obj["option_type"].to_i
 		issue_obj["row_num_per_group"] = issue_obj["row_num_per_group"].to_i
 		issue_obj["show_style"] = issue_obj["show_style"].to_i
 		issue_obj["is_rand"] = issue_obj["is_rand"].to_s == "true"
@@ -71,18 +75,10 @@ class MatrixChoiceIssue < Issue
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 
-	def remove_hidden_items(items, sub_questions)
-		self.choices.delete_if { |choice| items.include?(choice["input_id"]) }
-		remaining_row_id = []
-		remaining_row_name = []
-		self.row_id.each_with_index do |r_id, r_index|
-			if !sub_questions.include?(r_id)
-				remaining_row_id << r_id
-				remaining_row_name << row_name[row_index]
-			end
-		end
-		self.row_id = remaining_row_id
-		self.row_name = remaining_row_name
+	def remove_hidden_items(items)
+		return if items.blank?
+		self.items.delete_if { |choice| items["items"].include?(choice["id"]) } if !items["items"].blank?
+		self.rows.delete_if { |row| items["sub_questions"].include?(row["id"]) } if !items["sub_questions"].blank?
 	end
 
 	#*description*: serialize the current instance into a question object

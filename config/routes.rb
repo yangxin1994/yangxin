@@ -146,15 +146,23 @@ OopsData::Application.routes.draw do
 			post 'update_deadline'
 			post 'update_star'
 		end
-		resources :pages
+		resources :pages do
+			member do
+				put 'move'
+				put 'clone'
+				put 'split'
+				put 'combine'
+			end
+		end
 		resources :questions do
 			collection do
 				post 'insert_template_question'
 				post 'insert_quality_control_question'
 			end
 			member do
-				get 'convert_template_question_to_normal_question'
+				put 'convert_template_question_to_normal_question'
 				put 'move'
+				put 'clone'
 			end
 		end
 		resources :logic_controls
@@ -172,13 +180,11 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :analyze_results do
+			collection do
+				get :check_progress
+			end
 		end
 	end
-	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/move' => 'pages#move'
-	match 'surveys/:survey_id/pages/:page_index/split' => 'pages#split', :via => :put
-	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/combine' => 'pages#combine', :via => :put
-	match 'surveys/:survey_id/pages/:page_index_1/:page_index_2/clone' => 'pages#clone'
-	match 'surveys/:survey_id/pages/:page_index/questions/:question_id_1/:question_id_2/clone' => 'questions#clone'
 
 	resources :materials do
 		member do
@@ -252,6 +258,8 @@ OopsData::Application.routes.draw do
 		resources :lottery_codes do
 			
 		end
+
+		resources :messages
 	end
 
 	# The priority is based upon order of creation:

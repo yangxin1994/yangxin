@@ -96,9 +96,9 @@ class Question < BasicQuestion
 		return cloned_question
 	end
 
-	def remove_hidden_items(items, sub_questions)
+	def remove_hidden_items(items)
 		issue = Issue.create_issue(self.question_type, self.issue)
-		issue.remove_hidden_items(items, sub_questions)
+		issue.remove_hidden_items(items)
 		self.issue = issue.serialize
 		return self
 	end

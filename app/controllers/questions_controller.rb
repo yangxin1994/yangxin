@@ -77,7 +77,11 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	#* ErrorEnum ::WRONG_DATA_TYPE: when the data type specified in a blank question is wrong
 	def update
-		question = @survey.update_question(params[:id], params[:question])
+		if params[:enforce].to_s == "true"
+			question = @survey.update_question!(params[:id], params[:question])
+		else
+			question = @survey.update_question(params[:id], params[:question])
+		end
 		respond_to do |format|
 			format.json	{ render_json_auto(question) and return }
 		end
@@ -86,7 +90,7 @@ class QuestionsController < ApplicationController
 
 	#*method*: put
 	#
-	#*url*: /surveys/:survey_id/questions/:id
+	#*url*: /surveys/:survey_id/questions/:id/move
 	#
 	#*description*: move a question after another give question, 
 	#if after_question_id is -1, move question_id to the begining of page_index
@@ -118,9 +122,9 @@ class QuestionsController < ApplicationController
 	#
 	#*params*:
 	#* survey_id: id of the survey
-	#* question_id_1: id of the question to be moved
+	#* question_id: id of the question to be moved
 	#* page_index: index of the page, where the question is inserted to. Page index starts from 0
-	#* question_id_2: id of the question, after which the cloned question is inserted
+	#* after_question_id: id of the question, after which the cloned question is inserted
 	#
 	#*retval*:
 	#* the cloned question object: when question is successfully cloned
@@ -129,7 +133,7 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::OVERFLOW: when the page index is greater than the page number
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def clone
-		question = @survey.clone_question(params[:question_id_1], params[:page_index].to_i, params[:question_id_2])
+		question = @survey.clone_question(params[:id], params[:page_index].to_i, params[:after_question_id])
 		respond_to do |format|
 			format.json	{ render_json_auto(question) and return }
 		end
@@ -173,7 +177,11 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def destroy
-		retval = @survey.delete_question(params[:id])
+		if params[:enforce].to_s == "true"
+			retval = @survey.delete_question!(params[:id])
+		else
+			retval = @survey.delete_question(params[:id])
+		end
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
