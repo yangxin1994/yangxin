@@ -22,16 +22,17 @@ require 'securerandom'
 # }
 class MatrixChoiceIssue < Issue
 
-	attr_reader :items, :min_choice, :max_choice, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
-	attr_writer :items, :min_choice, :max_choice, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
+	attr_reader :items, :min_choice, :max_choice, :option_type, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
+	attr_writer :items, :min_choice, :max_choice, :option_type, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
 
-	ATTR_NAME_ARY = %w[items min_choice max_choice show_style is_rand rows is_row_rand row_num_per_group]
+	ATTR_NAME_ARY = %w[items min_choice max_choice option_type show_style is_rand rows is_row_rand row_num_per_group]
 	CHOICE_ATTR_ARY = %w[id content is_exclusive]
 	ROW_ATTR_ARY = %w[id content]
 
 	def initialize
 		@min_choice = 1
 		@max_choice = 1
+		@option_type = 1
 		@show_style = 0
 		@is_rand = false	
 		@is_row_rand = false	
@@ -66,6 +67,7 @@ class MatrixChoiceIssue < Issue
 		end
 		issue_obj["min_choice"] = issue_obj["min_choice"].to_i
 		issue_obj["max_choice"] = issue_obj["max_choice"].to_i
+		issue_obj["option_type"] = issue_obj["option_type"].to_i
 		issue_obj["row_num_per_group"] = issue_obj["row_num_per_group"].to_i
 		issue_obj["show_style"] = issue_obj["show_style"].to_i
 		issue_obj["is_rand"] = issue_obj["is_rand"].to_s == "true"
