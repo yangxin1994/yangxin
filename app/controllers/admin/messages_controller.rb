@@ -2,23 +2,12 @@ class Admin::MessagesController < Admin::ApplicationController
 
 	before_filter :require_sign_in
 
-	def page
-		params[:page].to_i == 0 ? 1 : params[:page].to_i
-	rescue
-		1
-	end
-
-	def per_page
-		params[:per_page].to_i == 0 ? 10 : params[:per_page].to_i
-	rescue
-		10
-	end
-
 	def maping(message)
 		message['receiver_emails'] = []
 		message['receiver_ids'].each do |rec_id|
 			message['receiver_emails'] << User.find(rec_id).email
 		end
+		message['sender_email'] = User.find(message['sender_id'].to_s).email
 		message
 	end
 
@@ -26,6 +15,11 @@ class Admin::MessagesController < Admin::ApplicationController
 		@messages = (Message.all.page(page).per(per_page) || []).map{ |e| maping(e) }
 		#@messages = ErrorEnum::MessgaeNotFound if @messages.empty?
 		render_json_auto @messages
+	end
+
+	def count
+		count = Message.count
+		render_json_auto count
 	end
 
 	def show

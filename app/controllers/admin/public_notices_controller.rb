@@ -1,7 +1,7 @@
 # coding: utf-8
 
 class Admin::PublicNoticesController < Admin::ApplicationController	
- 
+
 	# GET /admin/public_notices
 	# GET /admin/public_notices.json
 	def index
@@ -11,16 +11,28 @@ class Admin::PublicNoticesController < Admin::ApplicationController
 			else
 				@public_notices = PublicNotice.list_by_type(params[:public_notice_type]) 
 			end
+
+			@public_notices = slice((@public_notices || []), page, per_page)
 		else
-			@public_notices = PublicNotice.all.desc(:updated_at)
+			@public_notices = PublicNotice.all.desc(:updated_at).page(page).per(per_page)
 		end
 
-		@public_notices = slice((@public_notices || []), params[:page], params[:per_page])
+		# if not show content
+		if params[:show_content]=="false" then
+			@public_notices.map do |e|
+				e.content = nil
+			end
+		end
 
 		respond_to do |format|
 			format.html # index.html.erb
 			format.json { render json: @public_notices }
 		end
+	end
+
+	def count
+		count = PublicNotice.count
+		render_json_auto count
 	end
 	
 	# GET /admin/public_notices/1 

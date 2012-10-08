@@ -16,11 +16,15 @@ class ApplicationController < ActionController::Base
 
 	begin "kaminari"
 		def page
-			params[:page] || 1
+			params[:page].to_i == 0 ? 1 : params[:page].to_i
+		rescue
+			1
 		end
 
 		def per_page
-			params[:per_page] || 25
+			params[:per_page].to_i == 0 ? 10 : params[:per_page].to_i
+		rescue
+			10
 		end
 	end
 
