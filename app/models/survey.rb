@@ -4,6 +4,7 @@ require 'quality_control_type_enum'
 require 'publish_status'
 require 'securerandom'
 require 'csv'
+require 'resque/tasks'
 #The survey object has the following structure
 # {
 #  "owner_meail" : email of the owner user(string),
@@ -193,6 +194,7 @@ class Survey
             "header_name" => csv_header}
   end
 
+
   def send_spss_data
     url = URI.parse('http://192.168.1.129:9292')
     
@@ -231,11 +233,13 @@ class Survey
       end
     end
   end
+
   def export_csv_header(path = "public/import/test.csv")
     c = CSV.open(path, "w") do |csv|
       csv << csv_header
     end
   end
+
   def answer_import(csv_path)
     line_answer = {}
     q = []
@@ -257,7 +261,12 @@ class Survey
 
   end
 
- 
+  def self.send_spss_data(survey)
+    Resque.enqueue(Jobs::AnswerAnalyzeJob, survey)
+  end
+  def send_spss_data_r
+    Resque.enqueue(Jobs::AnswerAnalyzeJob, self)
+  end
   public
 
   #--

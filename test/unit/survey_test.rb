@@ -30,7 +30,8 @@ class SurveyTest < ActiveSupport::TestCase
     # p @survey_with_issue.answer_content.to_csv
     #@survey_with_issue.export_csv
     #pp @survey_with_issue.answer_import("")
-    @survey_with_issue.send_spss_data
+    # @survey_with_issue.send_spss_data
+    @survey_with_issue.send_spss_data_r
     assert true
   end
 end
