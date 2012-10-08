@@ -64,7 +64,7 @@ class DataGeneratorsController < ApplicationController
 		page_number = (3 + 2 * rand).round
 		0.upto(page_number-1).each do |page_index|
 			page_name = Faker::Lorem.words[0]
-			survey.pages << {"page_name" => page_name, "questions" => []}
+			survey.pages << {"name" => page_name, "questions" => []}
 			survey.save
 
 			question_number = (3 + 2 * rand).round
@@ -74,7 +74,7 @@ class DataGeneratorsController < ApplicationController
 
 				question = Question.create_question(question_type)
 				question_id = question._id
-				survey.pages[page_index]["questions"].insert(0, question_id)
+				survey.pages[page_index]["questions"].insert(0, question_id.to_s)
 				survey.save
 				question.content = {}
 				question.content["text"] = Faker::Lorem.paragraph
@@ -119,7 +119,7 @@ class DataGeneratorsController < ApplicationController
 		issue["items"] = []
 		(3 + 2 * rand).round.times do |input_index|
 			item = {}
-			item["input_id"] = input_index
+			item["id"] = input_index
 			item["content"] = {}
 			item["content"]["text"] = Faker::Lorem.paragraph
 			issue["items"] << item
@@ -127,7 +127,7 @@ class DataGeneratorsController < ApplicationController
 		issue["other_item"] = {}
 		issue["other_item"]["has_other_item"] = rand > 0.5
 		if issue["other_item"]["has_other_item"]
-			issue["other_item"]["input_id"] = issue["items"].length + 1
+			issue["other_item"]["id"] = issue["items"].length + 1
 			issue["other_item"]["content"] = {}
 			issue["other_item"]["content"]["text"] = Faker::Lorem.paragraph
 		end
@@ -168,7 +168,7 @@ class DataGeneratorsController < ApplicationController
 		issue["choices"] = []
 		(3 + 2 * rand).round.times do |input_index|
 			choice = {}
-			choice["input_id"] = input_index
+			choice["id"] = input_index
 			choice["content"] = {}
 			choice["content"]["text"] = Faker::Lorem.paragraph
 			choice["is_exclusive"] = rand > 0.5
@@ -177,7 +177,7 @@ class DataGeneratorsController < ApplicationController
 		issue["other_item"] = {}
 		issue["other_item"]["has_other_item"] = rand > 0.5
 		if issue["other_item"]["has_other_item"]
-			issue["other_item"]["input_id"] = issue["choices"].length + 1
+			issue["other_item"]["id"] = issue["choices"].length + 1
 			issue["other_item"]["content"] = {}
 			issue["other_item"]["content"]["text"] = Faker::Lorem.paragraph
 			issue["other_item"]["is_exclusive"] = rand > 0.5

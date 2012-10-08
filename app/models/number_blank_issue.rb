@@ -3,7 +3,6 @@ require 'error_enum'
 require 'securerandom'
 #Besides the fields that all types questions have, number blank questions also have:
 # {
-#	 "input_id" : id of the number input
 #	 "precision" : number decimals
 #	 "min_value" : minimal value of the number(Float)
 #	 "max_value" : maximal value of the number(Float)

@@ -2,7 +2,6 @@ require 'error_enum'
 require 'securerandom'
 #Besides the fields that all types questions have, text blank questions also have:
 # {
-#	 "input_id" : id of the text input
 #	 "min_length" : minimal length of the input text(Integer)
 #	 "max_length" : maximal length of the input text(Integer)
 #	 "has_multiple_line" : whether has multiple lines to input(Boolean)
@@ -27,7 +26,7 @@ class TextBlankIssue < Issue
 		issue_obj["min_length"] = issue_obj["min_length"].to_i
 		issue_obj["max_length"] = issue_obj["max_length"].to_i
 		issue_obj["size"] = issue_obj["size"].to_i
-		issue_obj["has_multiple_line"] = issue_obj["has_multiple_line"].to_s = "true"
+		issue_obj["has_multiple_line"] = (issue_obj["has_multiple_line"].to_s == "true")
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 

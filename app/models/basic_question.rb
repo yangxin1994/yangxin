@@ -367,6 +367,10 @@ class BasicQuestion
     return question_object
   end
 
+  def remove_hidden_items(items)
+    return self
+  end
+
   #*description*: clear the cached question object corresponding to current instance, usually called when the question is updated, either its meta data, or questions and constrains
   #
   #*params*:

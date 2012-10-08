@@ -186,6 +186,9 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :analyze_results do
+			collection do
+				get :check_progress
+			end
 		end
 	end
 
@@ -261,6 +264,8 @@ OopsData::Application.routes.draw do
 		resources :lottery_codes do
 			
 		end
+
+		resources :messages
 	end
 
 	# The priority is based upon order of creation:

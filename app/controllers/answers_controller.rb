@@ -47,7 +47,7 @@ class AnswersController < ApplicationController
 			if answer.is_finish
 				render_json_auto([answer.preview_id, answer.status, answer.reject_type, answer.finish_type]) and return
 			else
-				render_json_auto([answer.preview_id, questions.to_json, answer.repeat_time]) and return
+				render_json_auto([answer.preview_id, questions, answer.repeat_time]) and return
 			end
 		else
 			render_json_auto([answer.preview_id, answer.status, answer.reject_type, answer.finish_type]) and return
@@ -71,7 +71,7 @@ class AnswersController < ApplicationController
 			retval = @survey.check_password(params[:username], params[:password], @current_user)
 			if retval == true
 				# pass the checking, create a new answer and check the region, channel, and ip quotas
-				answer = Answer.create_answer(@current_user, params[:survey_id], params[:channel], params[:ip], params[:usrename], params[:password])
+				answer = Answer.create_answer(@current_user, params[:survey_id], params[:channel], params[:ip], params[:username], params[:password])
 				render_json_auto(answer) and return if answer.class != Answer
 				retval = answer.check_channel_ip_address_quota
 				if retval
@@ -95,9 +95,12 @@ class AnswersController < ApplicationController
 		if answer.is_edit
 			questions = answer.load_question(params[:question_id], params[:next_page])
 			if answer.is_finish
+				# the survey does not allow page up, and there are no more questions to be loaded
 				render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return
+			elsif questions.class == String && questions.start_with?("error")
+				render_json_e(questions) and return
 			else
-				render_json_auto([questions.to_json, answer.repeat_time]) and return
+				render_json_auto([questions, answer.repeat_time]) and return
 			end
 		else
 			render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return

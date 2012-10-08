@@ -18,7 +18,7 @@ class LogicControlsControllerTest < ActionController::TestCase
 		logic_control_rule = {}
 		logic_control_rule["rule_type"] = 0
 		logic_control_rule["conditions"] = []
-		logic_control_rule["conditions"] << {"question_id" => q1_id, "result" => [question_1["issue"]["items"][0]["input_id"]], "fuzzy" => true}
+		logic_control_rule["conditions"] << {"question_id" => q1_id, "result" => [question_1["issue"]["items"][0]["id"]], "fuzzy" => true}
 		logic_control_rule["result"] = nil
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
@@ -70,7 +70,7 @@ class LogicControlsControllerTest < ActionController::TestCase
 		logic_control_rule = {}
 		logic_control_rule["rule_type"] = 0
 		logic_control_rule["conditions"] = []
-		logic_control_rule["conditions"] << {"question_id" => q1_id, "result" => [question_1["issue"]["items"][0]["input_id"]], "fuzzy" => true}
+		logic_control_rule["conditions"] << {"question_id" => q1_id, "result" => [question_1["issue"]["items"][0]["id"]], "fuzzy" => true}
 		logic_control_rule["result"] = nil
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
@@ -123,7 +123,7 @@ class LogicControlsControllerTest < ActionController::TestCase
 		logic_control_rule = {}
 		logic_control_rule["rule_type"] = 0
 		logic_control_rule["conditions"] = []
-		logic_control_rule["conditions"] << {"question_id" => q1_id, "result" => [question_1["issue"]["items"][0]["input_id"]], "fuzzy" => true}
+		logic_control_rule["conditions"] << {"question_id" => q1_id, "result" => [question_1["issue"]["items"][0]["id"]], "fuzzy" => true}
 		logic_control_rule["result"] = nil
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))

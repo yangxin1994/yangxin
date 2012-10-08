@@ -111,6 +111,9 @@ module Jobs
 					rule["conditions"].each do |condition|
 						if condition["condition_type"] == 0 then
 							conditions << Condition.new(condition["name"], condition["value"], condition["fuzzy"])
+						elsif condition["condition_type"] == 1 then
+							question = Question.find_by_id(condition["name"])
+							conditions << Condition.new(question.reference_id, condition["value"], condition["fuzzy"]) if !question.reference_id.blank?
 						end
 					end
 

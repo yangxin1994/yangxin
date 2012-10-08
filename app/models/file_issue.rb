@@ -2,7 +2,6 @@ require 'error_enum'
 require 'securerandom'
 #Besides the fields that all types questions have, file questions also have:
 # {
-#	 "input_id" : id of the input
 #	}
 class FileIssue < Issue
 	attr_reader :max_number

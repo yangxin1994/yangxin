@@ -9,7 +9,7 @@ require 'securerandom'
 #	}
 #The element in the "inputs" array has the following structure
 # {
-#  "input_id": id of the input(string)
+#  "id": id of the input(string)
 #  "label": label of the input(string),
 #  "data_type": can be short_text, long_text, pwd, int, float, email, date, phone, address(string)
 # }
@@ -18,7 +18,7 @@ class TableIssue < Issue
 	attr_writer :items, :is_rand, :min_line_num, :max_line_num
 
 	ATTR_NAME_ARY = %w[items is_rand min_line_num max_line_num]
-	INPUT_ATTR_ARY = %w[input_id content data_type properties]
+	INPUT_ATTR_ARY = %w[id content data_type properties]
 
 	DATA_TYPE_ARY = %w[Text Number Phone Email Url Address Time]
 
@@ -35,7 +35,7 @@ class TableIssue < Issue
 		@is_rand = false
 		1.upto(4) do |input_index|
 			input = {}
-			input["input_id"] = input_index
+			input["id"] = Tool.rand_id
 			input["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			@items << input
@@ -74,18 +74,9 @@ class TableIssue < Issue
 		super(ATTR_NAME_ARY)
 	end
 
-	def remove_hidden_items(items, sub_questions)
-		self.items.delete_if { |input| items.include?(input["input_id"]) }
-		remaining_row_id = []
-		remaining_row_name = []
-		self.row_id.each_with_index do |r_id, r_index|
-			if !sub_questions.include?(r_id)
-				remaining_row_id << r_id
-				remaining_row_name << row_name[row_index]
-			end
-		end
-		self.row_id = remaining_row_id
-		self.row_name = remaining_row_name
+	def remove_hidden_items(items)
+		return if items.blank?
+		self.items.delete_if { |input| items["items"].include?(input["id"]) } if !items["items"].blank?
 	end
 
 	#*description*: update the current question instance, including generate id for new inputs
