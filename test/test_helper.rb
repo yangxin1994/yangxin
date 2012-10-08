@@ -158,6 +158,12 @@ class ActiveSupport::TestCase
 		survey.publish("", survey_auditor)
 	end
 
+	def set_survey_random_quality_control_questions(survey_id)
+		survey = Survey.find_by_id(survey_id)
+		survey.quality_control_questions_type = 2
+		survey.save
+	end
+
 	def update_survey_access_control_setting(email, password, survey_id, access_control_setting)
 		auth_key = sign_in(email, password)
 		old_controller = @controller

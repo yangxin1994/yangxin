@@ -188,16 +188,8 @@ class AnalyzeResult < Result
 
 	def analyze_time_blank(issue, answer_ary)
 		result = {}
-		if issue["format"].to_i & 64
-			# this is a date question
-			answer_ary = answer_ary.map! do |answer|
-				Time.mktime(answer[0], answer[1], answer[2], answer[4], answer[5], answer[6], answer[7]).to_i
-			end
-		else
-			# this is a time question
-			answer_ary = answer_ary.map! do |answer|
-				Tool.convert_to_int(answer)
-			end
+		answer_ary = answer_ary.map! do |answer|
+			Time.mktime(answer[0], answer[1], answer[2], answer[3], answer[4], answer[5]).to_i
 		end
 		answer_ary.sort!
 		result["mean"] = answer_ary.mean
