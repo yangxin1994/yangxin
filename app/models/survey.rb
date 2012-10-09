@@ -39,8 +39,8 @@ class Survey
 	field :publish_status, :type => Integer, default: 1
 	field :user_attr_survey, :type => Boolean, default: false
 	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
-	field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
-	field :quota_stats, :type => Hash
+	field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100], "is_exclusive" => true}
+	field :quota_stats, :type => Hash, default: {"quota_satisfied" => false, "answer_number" => [0]}
 	field :filters, :type => Hash, default: {}
 	field :filters_stats, :type => Hash, default: {}
 	field :quota_template_question_page, :type => Array, default: []
@@ -272,6 +272,9 @@ class Survey
 	end
 
 	def update_access_control_setting(access_control_setting_obj)
+		access_control_setting_obj["times_for_one_computer"] = access_control_setting_obj["times_for_one_computer"].to_i
+		access_control_setting_obj["password_control"]["password_type"] = 
+			access_control_setting_obj["password_control"]["password_type"].to_i
 		self.access_control_setting = access_control_setting_obj
 		self.save
 		return true
@@ -664,6 +667,13 @@ class Survey
 		return questions
 	end
 
+	def update_question(question_id, question_obj)
+		if LogicControl.new(self.logic_control).detect_conflict_question_update(question_id)
+			return ErrorEnum::LOGIC_CONTROL_CONFLICT_DETECTED
+		end
+		return update_question!(question_id, question_obj)
+	end
+
 	#*description*: update a question
 	#
 	#*params*:
@@ -676,7 +686,7 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST
 	#* ErrorEnum ::WRONG_DATA_TYPE
-	def update_question(question_id, question_obj)
+	def update_question!(question_id, question_obj)
 		return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
 		question = Question.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
@@ -781,6 +791,13 @@ class Survey
 		return question
 	end
 
+	def delete_question(question_id)
+		if LogicControl.new(self.logic_control).detect_conflict_question_update(question_id)
+			return ErrorEnum::LOGIC_CONTROL_CONFLICT_DETECTED
+		end
+		return delete_question!(question_id)
+	end
+
 	#*description*: delete a question
 	#
 	#*params*:
@@ -792,7 +809,7 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
-	def delete_question(question_id)
+	def delete_question!(question_id)
 		question = Question.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
 		# find out other matching questions if the question to be deleted is a matching question
@@ -935,6 +952,13 @@ class Survey
 		return new_page_obj
 	end
 
+	def delete_page(page_index)
+		current_page = self.pages[page_index]
+		return ErrorEnum::OVERFLOW if current_page.nil?
+		return ErrorEnum::LOGIC_CONTROL_CONFLICT_DETECTED if LogicControl.new(self.logic_control).detect_conflict_questions_update(current_page["questions"])
+		return delete_page!(page_index)
+	end
+
 	#*description*: delete a page
 	#
 	#*params*:
@@ -946,7 +970,7 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::OVERFLOW
-	def delete_page(page_index)
+	def delete_page!(page_index)
 		current_page = self.pages[page_index]
 		return ErrorEnum::OVERFLOW if current_page.nil?
 		current_page["questions"].each do |question_id|
@@ -1034,7 +1058,7 @@ class Survey
 			if self.access_control_setting["password_control"]["single_password"] == password
 				return true
 			else
-				return ErrorEnum::WRONG_PASSWORD
+				return ErrorEnum::WRONG_SURVEY_PASSWORD
 			end
 		when 1
 			list = self.access_control_setting["password_control"]["password_list"]
@@ -1044,8 +1068,8 @@ class Survey
 			password_element = list.select { |ele| ele["content"] == [username, password] }[0]
 		end
 		if password_element.nil?
-			return ErrorEnum::WRONG_PASSWORD
-		elsif password_element["used"] = false
+			return ErrorEnum::WRONG_SURVEY_PASSWORD
+		elsif password_element["used"] == false
 			password_element["used"] = true
 			self.save
 			return true
@@ -1056,6 +1080,7 @@ class Survey
 			return ErrorEnum::REQUIRE_LOGIN if user.is_registered
 			user.answers.delete(answer)
 			answer.user = current_user
+			answer.save
 			return answer
 		end
 	end
@@ -1119,17 +1144,23 @@ class Survey
 
 	def add_quota_rule(quota_rule)
 		quota = Quota.new(self.quota)
-		return quota.add_rule(quota_rule, self)
+		retval = quota.add_rule(quota_rule, self)
+		self.refresh_quota_stats if retval
+		return retval
 	end
 
 	def update_quota_rule(quota_rule_index, quota_rule)
 		quota = Quota.new(self.quota)
-		return quota.update_rule(quota_rule_index, quota_rule, self)
+		retval = quota.update_rule(quota_rule_index, quota_rule, self)
+		self.refresh_quota_stats if retval
+		return retval
 	end
 
 	def delete_quota_rule(quota_rule_index)
 		quota = Quota.new(self.quota)
-		return quota.delete_rule(quota_rule_index, self)
+		retval = quota.delete_rule(quota_rule_index, self)
+		self.refresh_quota_stats if retval
+		return retval
 	end
 
 	def refresh_filters_stats
@@ -1390,6 +1421,22 @@ class Survey
 		RULE_TYPE = (0..8).to_a
 		def initialize(logic_control)
 			@rules = logic_control
+		end
+
+		# check whether the updated question is a condition for some logic control rule
+		def detect_conflict_question_update(question_id)
+			@rules.each do |rule|
+				return true if (rule["conditions"].map { |e| e["question_id"] }).include?(question_id)
+			end
+			return false
+		end
+
+		# check whether the updated question is a condition for some logic control rule
+		def detect_conflict_questions_update(question_id_ary)
+			@rules.each do |rule|
+				return true if !((rule["conditions"].map { |e| e["question_id"] }) & question_id_ary).blank?
+			end
+			return false
 		end
 
 		def show_rule(rule_index)

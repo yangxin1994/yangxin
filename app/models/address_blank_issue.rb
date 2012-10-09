@@ -2,7 +2,6 @@ require 'error_enum'
 require 'securerandom'
 #Besides the fields that all types questions have, address blank questions also have:
 # {
-#	 "input_id" : id of the address input(String)
 #	 "has_postcode" : whether has a postcode input(Boolean)
 #	 "format" : format of the input, an integer in the interval of [1, 15]. If converted into a binary number, it has 4 digits, indicating whether this has "province", "city", "county", "detailed address"(Integer)
 #	}

@@ -12,7 +12,7 @@ require 'securerandom'
 #	}
 #The element in the "inputs" array has the following structure
 # {
-#  "input_id": id of the input(string)
+#  "id": id of the input(string)
 #  "label": label of the input(string),
 #  "data_type": can be Text, Number, Email, Phone, Address, Time
 #  "properties": a hash of properties, for different data type, this input has different properties
@@ -48,11 +48,12 @@ require 'securerandom'
 # }
 class MatrixBlankIssue < Issue
 
-	attr_reader :is_rand, :items, :row_id, :row_name, :is_row_rand, :row_num_per_group, :show_style
-	attr_writer :is_rand, :items, :row_id, :row_name, :is_row_rand, :row_num_per_group, :show_style
+	attr_reader :is_rand, :items, :rows, :is_row_rand, :row_num_per_group, :show_style
+	attr_writer :is_rand, :items, :rows, :is_row_rand, :row_num_per_group, :show_style
 
-	ATTR_NAME_ARY = %w[items is_rand row_id row_name is_row_rand row_num_per_group show_style]
-	INPUT_ATTR_ARY = %w[input_id content data_type properties]
+	ATTR_NAME_ARY = %w[items is_rand rows is_row_rand row_num_per_group show_style]
+	INPUT_ATTR_ARY = %w[id content data_type properties]
+	ROW_ATTR_ARY = %w[id content]
 
 	DATA_TYPE_ARY = %w[Text Number Phone Email Url Address Time]
 
@@ -66,20 +67,22 @@ class MatrixBlankIssue < Issue
 	def initialize
 		@items = []
 		@is_rand = false
-		@row_name = []
-		@row_id = []
+		@rows = []
 		@is_row_rand = false
 		@row_num_per_group = -1
 		@show_style
 
-		1.upto(4) do |row_id|
-			@row_id << row_id
-			@row_name << "子题目#{Tool.convert_digit(row_id)}"
+		1.upto(4) do |id|
+			row = {}
+			row["id"] = Tool.rand_id
+			row["content"] = {"text" => "子题目#{Tool.convert_digit(id)}",
+														"image" => [], "audio" => [], "video" => []}
+			@rows << row
 		end
 		
 		1.upto(4) do |input_index|
 			input = {}
-			input["input_id"] = input_index
+		input["id"] = Tool.rand_id
 			input["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			@items << input
@@ -118,18 +121,10 @@ class MatrixBlankIssue < Issue
 		super(ATTR_NAME_ARY)
 	end
 
-	def remove_hidden_items(items, sub_questions)
-		self.items.delete_if { |input| items.include?(input["input_id"]) }
-		remaining_row_id = []
-		remaining_row_name = []
-		self.row_id.each_with_index do |r_id, r_index|
-			if !sub_questions.include?(r_id)
-				remaining_row_id << r_id
-				remaining_row_name << row_name[row_index]
-			end
-		end
-		self.row_id = remaining_row_id
-		self.row_name = remaining_row_name
+	def remove_hidden_items(items)
+		return if items.blank?
+		self.items.delete_if { |input| items["items"].include?(input["id"]) } if !items["items"].blank?
+		self.rows.delete_if { |row| items["sub_questions"].include?(row["id"]) } if !items["sub_questions"].blank?
 	end
 
 	#*description*: update the current question instance, including generate id for new inputs
@@ -169,6 +164,9 @@ class MatrixBlankIssue < Issue
 				input_obj["properties"]["min_time"].map! { |e| e.to_i } if !input_obj["properties"]["min_time"].nil?
 				input_obj["properties"]["max_time"].map! { |e| e.to_i } if !input_obj["properties"]["max_time"].nil?
 			end
+		end
+		issue_obj["rows"].each do |row_obj|
+			row_obj.delete_if { |k, v| !ROW_ATTR_ARY.include?(k) }
 		end
 		issue_obj["row_num_per_group"] = issue_obj["row_num_per_group"].to_i
 		issue_obj["show_style"] = issue_obj["show_style"].to_i

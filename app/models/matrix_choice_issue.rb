@@ -22,32 +22,33 @@ require 'securerandom'
 # }
 class MatrixChoiceIssue < Issue
 
-	attr_reader :items, :min_choice, :max_choice, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
-	attr_writer :items, :min_choice, :max_choice, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
+	attr_reader :items, :min_choice, :max_choice, :option_type, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
+	attr_writer :items, :min_choice, :max_choice, :option_type, :show_style, :is_rand, :rows, :is_row_rand, :row_num_per_group
 
-	ATTR_NAME_ARY = %w[items min_choice max_choice show_style is_rand rows is_row_rand row_num_per_group]
-	CHOICE_ATTR_ARY = %w[input_id content is_exclusive]
-	ROW_ATTR_ARY = %w[row_id content]
+	ATTR_NAME_ARY = %w[items min_choice max_choice option_type show_style is_rand rows is_row_rand row_num_per_group]
+	CHOICE_ATTR_ARY = %w[id content is_exclusive]
+	ROW_ATTR_ARY = %w[id content]
 
 	def initialize
 		@min_choice = 1
 		@max_choice = 1
+		@option_type = 1
 		@show_style = 0
 		@is_rand = false	
 		@is_row_rand = false	
 		@row_num_per_group = -1	
 		@items = []
 		@rows = []
-		1.upto(4) do |row_id|
+		1.upto(4) do |id|
 			row = {}
-			row["row_id"] = row_id
-			row["content"] = {"text" => "子题目#{Tool.convert_digit(row_id)}",
+			row["id"] = Tool.rand_id
+			row["content"] = {"text" => "子题目#{Tool.convert_digit(id)}",
 														"image" => [], "audio" => [], "video" => []}
 			@rows << row
 		end
 		1.upto(4) do |input_index|
 			choice = {}
-			choice["input_id"] = input_index
+			choice["id"] = Tool.rand_id
 			choice["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
 														"image" => [], "audio" => [], "video" => []}
 			choice["is_exclusive"] = false
@@ -66,6 +67,7 @@ class MatrixChoiceIssue < Issue
 		end
 		issue_obj["min_choice"] = issue_obj["min_choice"].to_i
 		issue_obj["max_choice"] = issue_obj["max_choice"].to_i
+		issue_obj["option_type"] = issue_obj["option_type"].to_i
 		issue_obj["row_num_per_group"] = issue_obj["row_num_per_group"].to_i
 		issue_obj["show_style"] = issue_obj["show_style"].to_i
 		issue_obj["is_rand"] = issue_obj["is_rand"].to_s == "true"
@@ -73,9 +75,10 @@ class MatrixChoiceIssue < Issue
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 
-	def remove_hidden_items(items, sub_questions)
-		self.items.delete_if { |choice| items.include?(choice["input_id"]) }
-		self.rows.delete_if { |row| sub_questions.include?(row["row_id"]) }
+	def remove_hidden_items(items)
+		return if items.blank?
+		self.items.delete_if { |choice| items["items"].include?(choice["id"]) } if !items["items"].blank?
+		self.rows.delete_if { |row| items["sub_questions"].include?(row["id"]) } if !items["sub_questions"].blank?
 	end
 
 	#*description*: serialize the current instance into a question object

@@ -41,12 +41,12 @@ class QuotasControllerTest < ActionController::TestCase
 		post :create, :format => :json, :survey_id => survey_id, :quota_rule => quota_rule, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		quota = result["value"]
-		assert_equal 1, quota["rules"].length
-		assert_equal 100, quota["rules"][0]["amount"]
-		assert_equal 2, quota["rules"][0]["conditions"].length
-		assert_equal 3, quota["rules"][0]["conditions"][0]["condition_type"]
-		assert_equal "166.111.*.*", quota["rules"][0]["conditions"][1]["value"]
-		get :show, :format => :json, :survey_id => survey_id, :id => 0, :auth_key => auth_key
+		assert_equal 2, quota["rules"].length
+		assert_equal 100, quota["rules"][1]["amount"]
+		assert_equal 2, quota["rules"][1]["conditions"].length
+		assert_equal 3, quota["rules"][1]["conditions"][0]["condition_type"]
+		assert_equal "166.111.*.*", quota["rules"][1]["conditions"][1]["value"]
+		get :show, :format => :json, :survey_id => survey_id, :id => 1, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		quota_rule = result["value"]
 		assert_equal 100, quota_rule["amount"]
@@ -80,14 +80,14 @@ class QuotasControllerTest < ActionController::TestCase
 
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		put :update, :format => :json, :survey_id => survey_id, :id => 1, :quota_rule => quota_rule, :auth_key => auth_key
+		put :update, :format => :json, :survey_id => survey_id, :id => 2, :quota_rule => quota_rule, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::QUOTA_RULE_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		quota_rule["amount"] = 0
-		put :update, :format => :json, :survey_id => survey_id, :id => 0, :quota_rule => quota_rule, :auth_key => auth_key
+		put :update, :format => :json, :survey_id => survey_id, :id => 1, :quota_rule => quota_rule, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::WRONG_QUOTA_RULE_AMOUNT.to_s, result["value"]["error_code"]
 		quota_rule["amount"] = 1000
@@ -95,7 +95,7 @@ class QuotasControllerTest < ActionController::TestCase
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		quota_rule["conditions"][0]["condition_type"] = -1
-		put :update, :format => :json, :survey_id => survey_id, :id => 0, :quota_rule => quota_rule, :auth_key => auth_key
+		put :update, :format => :json, :survey_id => survey_id, :id => 1, :quota_rule => quota_rule, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE.to_s, result["value"]["error_code"]
 		quota_rule["conditions"][0]["condition_type"] = 3
@@ -103,14 +103,14 @@ class QuotasControllerTest < ActionController::TestCase
 
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		put :update, :format => :json, :survey_id => survey_id, :id => 0, :quota_rule => quota_rule, :auth_key => auth_key
+		put :update, :format => :json, :survey_id => survey_id, :id => 1, :quota_rule => quota_rule, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		quota = result["value"]
-		assert_equal 1, quota["rules"].length
-		assert_equal 1000, quota["rules"][0]["amount"]
-		assert_equal 1, quota["rules"][0]["conditions"].length
-		assert_equal 3, quota["rules"][0]["conditions"][0]["condition_type"]
-		get :show, :format => :json, :survey_id => survey_id, :id => 0, :auth_key => auth_key
+		assert_equal 2, quota["rules"].length
+		assert_equal 1000, quota["rules"][1]["amount"]
+		assert_equal 1, quota["rules"][1]["conditions"].length
+		assert_equal 3, quota["rules"][1]["conditions"][0]["condition_type"]
+		get :show, :format => :json, :survey_id => survey_id, :id => 1, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		quota_rule = result["value"]
 		assert_equal 1000, quota_rule["amount"]
@@ -137,19 +137,19 @@ class QuotasControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		delete :destroy, :format => :json, :survey_id => survey_id, :id => 1, :auth_key => auth_key
+		delete :destroy, :format => :json, :survey_id => survey_id, :id => 2, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::QUOTA_RULE_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		delete :destroy, :format => :json, :survey_id => survey_id, :id => 0, :auth_key => auth_key
+		delete :destroy, :format => :json, :survey_id => survey_id, :id => 1, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal true, result["value"]
 		get :index, :format => :json, :survey_id => survey_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		quota = result["value"]
-		assert_equal 0, quota["rules"].length
+		assert_equal 1, quota["rules"].length
 		sign_out(auth_key)
 	end
 

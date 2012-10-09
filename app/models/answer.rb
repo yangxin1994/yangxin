@@ -78,7 +78,7 @@ class Answer
 	end
 
 	def self.find_by_password(username, password)
-		answer = Answer.where(username: username, password: password)
+		answer = Answer.where(username: username, password: password)[0]
 		return answer
 	end
 
@@ -142,7 +142,7 @@ class Answer
 		end
 
 		# randomly generate quality control questions
-		answer = answer.genereate_random_quality_control_questions if survey.is_random_quality_control_questions
+		answer = answer.genereate_random_quality_control_questions
 
 		return answer
 	end
@@ -150,7 +150,7 @@ class Answer
 	def self.create_answer(operator, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		answer = Answer.new(channel: channel, ip: ip, region: Address.find_address_code_by_ip(ip).postcode, username: username, password: password)
+		answer = Answer.new(channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
 
 		# initialize the answer content
 		answer_content = {}
@@ -190,36 +190,42 @@ class Answer
 		end
 
 		# randomly generate quality control questions
-		answer = answer.genereate_random_quality_control_questions if survey.is_random_quality_control_questions
+		answer = answer.genereate_random_quality_control_questions
 		
 		return answer
 	end
 
 	def genereate_random_quality_control_questions
-		# 1. determine the number of random quality control questions
-		question_number = self.answer_content.length
-		qc_question_number = [[question_number / 10, 1].max, 4].min
-		objective_question_number = (qc_question_number / 2.0).ceil
-		matching_question_number = qc_question_number - objective_question_number
-		# 2. randomly choose questions and generate locations of questions
-		objective_questions_ids = QualityControlQuestion.objective_questions.random(objective_question_number).map { |e| e._id.to_s }
-		temp_matching_questions_ids = QualityControlQuestion.matching_questions.random(objective_question_number).map { |e| e._id.to_s }
-		matching_questions_uniq_ids = []
-		temp_matching_questions_ids.each do |m_q_id|
-			matching_questions_uniq_ids += MatchingQuestion.get_matching_question_ids(m_q_id)
+		if self.survey.is_random_quality_control_questions
+			self.random_quality_control_answer_content = {}
+			self.random_quality_control_locations = {}
+			# 1. determine the number of random quality control questions
+			question_number = self.answer_content.length
+			qc_question_number = [[question_number / 10, 1].max, 4].min
+			objective_question_number = (qc_question_number / 2.0).ceil
+			matching_question_number = qc_question_number - objective_question_number
+			# 2. randomly choose questions and generate locations of questions
+			objective_questions_ids = QualityControlQuestion.objective_questions.random(objective_question_number).map { |e| e._id.to_s }
+			temp_matching_questions_ids = QualityControlQuestion.matching_questions.random(objective_question_number).map { |e| e._id.to_s }
+			matching_questions_uniq_ids = []
+			temp_matching_questions_ids.each do |m_q_id|
+				matching_questions_uniq_ids += MatchingQuestion.get_matching_question_ids(m_q_id)
+			end
+			matching_questions_ids = matching_questions_uniq_ids.uniq
+			quality_control_questions_ids = objective_questions_ids + matching_questions_ids
+			# 3. random generate locations for the quality control questions
+			quality_control_questions_ids.each do |qc_id|
+				self.random_quality_control_locations[survey.pages.shuffle[0]["questions"].shuffle[0]] =
+					qc_id
+			end
+			# 4. initialize the random quality control questions answers
+			self.random_quality_control_answer_content = Hash[quality_control_questions_ids.map { |ele| [ele, nil] }]
+		else
+			self.random_quality_control_answer_content = {}
+			self.random_quality_control_locations = {}
 		end
-		matching_questions_ids = matching_questions_uniq_ids.uniq
-		quality_control_questions_ids = [objective_questions_ids + matching_questions_ids]
-		# 3. random generate locations for the quality control questions
-		quality_control_questions_ids.each do |qc_id|
-			self.random_quality_control_locations[survey.pages.shuffle[0]["questions"].shuffle[0]] =
-				qc_id
-		end
-		# 4. initialize the random quality control questions answers
-		self.random_quality_control_answer_content = Hash[quality_control_questions_ids.map { |ele| [ele, nil] }]
 		self.save
 		return self
-		
 	end
 
 	#*description*: load questions for volunteers
@@ -234,20 +240,20 @@ class Answer
 		loaded_question_ids = []
 		if self.survey.is_pageup_allowed
 			self.survey.pages.each_with_index do |page, page_index|
-				next if !page["questions"].include?(question_id)
-				question_index = page["questions"].index(question_id)
+				next if question_id.to_s != "-1" && !page["questions"].include?(question_id)
+				question_index = question_id.to_s == "-1" ? -1 : page["questions"].index(question_id)
 				if next_page
 					# require next page of questions
 					if question_index + 1 == page["questions"].length
-						return ErrorEnum::PAGE_OVERFLOW if page_index + 1 == self.survey.pages.length
+						return ErrorEnum::OVERFLOW if page_index + 1 == self.survey.pages.length
 						return load_question_by_ids(self.survey.pages[page_index + 1]["questions"])
 					else
 						return load_question_by_ids(page["questions"][question_index + 1..-1])
 					end
 				else
 					# require previous page of questions
-					if question_index == 0
-						return ErrorEnum::PAGE_OVERFLOW if page_index == 0
+					if question_index <= 0
+						return ErrorEnum::OVERFLOW if page_index == 0
 						return load_question_by_ids(self.survey.pages[page_index - 1]["questions"])
 					else
 						return load_question_by_ids(page["questions"][0..question_index - 1])
@@ -265,7 +271,7 @@ class Answer
 			# then try to load normal questions
 			# summarize the questions that are results of logic control rules
 			logic_control_question_id = []
-			self.survey.logic_control_rule.each do |rule|
+			self.survey.logic_control.each do |rule|
 				result_q_ids = rule["result"] if ["1", "2"].include?(rule["type"])
 				result_q_ids = rule["result"].map { |e| e["question_id"] } if ["3", "4"].include?(rule["type"])
 				result_q_ids = rule["result"]["question_id_2"].to_a if ["5", "6"].include?(rule["type"])
@@ -303,7 +309,7 @@ class Answer
 		questions = []
 		question_ids.each do |q_id|
 			question = BasicQuestion.find_by_id(q_id)
-			questions << question.remove_hidden_items(logic_control_result[q_id]["items"], logic_control_result[q_id]["sub_questions"])
+			questions << question.remove_hidden_items(logic_control_result[q_id])
 			# load random quality control quesitons for surveys that allow page up (no logic control)
 			random_qc_id = self.random_quality_control_locations[q_id]
 			if !random_qc_id.blank? && !question_ids.include?(random_qc_id)
@@ -372,7 +378,7 @@ class Answer
 		quota = self.survey.quota
 		quota_stats = self.survey.quota_stats
 		# 2. if all quota rules are satisfied, the new answer should be rejected
-		return false if quota_stats["quota_satisfied"]
+		return false if quota_stats && quota_stats["quota_satisfied"]
 		# 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
 		return true if !quota["is_exclusive"]
 		# 4 the rules should be checked one by one to see whether this answer can be satisfied
@@ -385,7 +391,7 @@ class Answer
 				# if the answer's ip, channel, or region violates one condition of the rule, move to the next rule
 				next if condition["condition_type"] == 2 && !Address.satisfy_region_code?(self.region, condition["value"])
 				next if condition["condition_type"] == 3 && self.channel != condition["value"]
-				next if condition["condition_type"] == 4 && Tool.check_ip_mask(self.ip, condition["value"])
+				next if condition["condition_type"] == 4 && Tool.check_ip_mask(self.ip_address, condition["value"])
 			end
 			# find out one rule. the quota for this rule has not been satisfied, and the answer does not violate conditions of the rule
 			return true
@@ -420,9 +426,9 @@ class Answer
 			when "2"
 				satisfy = Address.satisfy_region_code?(self.region, condition["value"])
 			when "3"
-				satisfy = condition["value"] == answer["channel"].to_s
+				satisfy = condition["value"] == self.channel.to_s
 			when "4"
-				satisfy = Tool.check_ip_mask(condition["value"], answer["ip_address"])
+				satisfy = Tool.check_ip_mask(condition["value"], self.ip_address)
 			end
 			return satisfy if !satisfy
 		end
@@ -494,6 +500,10 @@ class Answer
 				self.add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
 			end
 		end
+
+		# initialize the random quality control questions
+		self.genereate_random_quality_control_questions if self.survey.is_random_quality_control_questions
+
 		self.save
 		self.set_edit
 		return true
@@ -506,7 +516,7 @@ class Answer
 	#*retval*:
 	#* the status of the answer after updating
 	def update_status
-		if Time.now.to_i - self.created_at.to_i > EXPIRATION_TIME
+		if Time.now.to_i - self.created_at.to_i > 10.days.to_i
 			self.set_reject
 			self.update_attributes(reject_type: 3, rejected_at: Time.now.to_i)
 		end
@@ -824,7 +834,7 @@ class Answer
 	end
 
 	def auto_finish
-		if self.is_edit && !self.suvey.is_pageup_allowed && !self.template_answer_content.has_value?(nil) && !self.answer_content.has_value?(nil) && !self.random_quality_control_answer_content.has_value?(nil)
+		if self.is_edit && !self.survey.is_pageup_allowed && !self.template_answer_content.has_value?(nil) && !self.answer_content.has_value?(nil) && !self.random_quality_control_answer_content.has_value?(nil)
 			self.set_finish
 			self.finished_at = Time.now.to_i
 			self.save
@@ -857,7 +867,7 @@ class Answer
 	def update_quota
 		quota_stats = self.survey.quota_stats
 		quota_rules = self.survey.quota["rules"]
-		quota_rules.each_with_index do |rule, index|
+		quota_rules.each_with_index do |rule, rule_index|
 			if self.satisfy_conditions(rule["conditions"])
 				quota_stats["answer_number"][rule_index] = quota_stats["answer_number"][rule_index] + 1
 			end

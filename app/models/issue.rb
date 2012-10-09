@@ -21,4 +21,7 @@ class Issue
 			self.send("#{attr_name}=".to_sym, Marshal.load(Marshal.dump(issue_obj[attr_name])))
 		end	
 	end
+
+	def remove_hidden_items(items)
+	end
 end

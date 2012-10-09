@@ -2,7 +2,6 @@ require 'error_enum'
 require 'securerandom'
 #Besides the fields that all types questions have, email blank questions also have:
 # {
-#	 "input_id" : id of the email input
 #	}
 class UrlBlankIssue < Issue
 
