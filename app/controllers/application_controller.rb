@@ -253,8 +253,8 @@ class ApplicationController < ActionController::Base
 		arr = arr.to_a if arr.instance_of?(Mongoid::Criteria)
 		return [] if !arr.instance_of?(Array)
 
-		page = page.nil? || page.empty? ? 1 : page.to_i
-		per_page = per_page.nil? || per_page.empty? ? 10 : per_page.to_i
+		page = page.nil? || page.to_s.empty? ? 1 : page.to_i
+		per_page = per_page.nil? || per_page.to_s.empty? ? 10 : per_page.to_i
 		return [] if page < 1 || per_page < 1 
 
 		### sort

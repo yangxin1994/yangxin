@@ -12,7 +12,7 @@ class Admin::MessagesController < Admin::ApplicationController
 	end
 
 	def index
-		@messages = (Message.all.page(page).per(per_page) || []).map{ |e| maping(e) }
+		@messages = (Message.all.desc(:created_at).page(page).per(per_page) || []).map{ |e| maping(e) }
 		#@messages = ErrorEnum::MessgaeNotFound if @messages.empty?
 		render_json_auto @messages
 	end

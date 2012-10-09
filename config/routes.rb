@@ -32,11 +32,14 @@ OopsData::Application.routes.draw do
 		resources :public_notices do 
 			collection do 
 				get 'count'
+				get 'list_by_type_count'
+				get 'list_by_type_and_value_count'
 			end
 		end
 		resources :advertisements do 
 			collection do 
 				get 'count'
+				get 'list_by_title_count'
 				get 'activated_count'
 				get 'unactivate_count'
 			end
@@ -50,6 +53,9 @@ OopsData::Application.routes.draw do
 		resources :feedbacks do
 			collection do 
 				get 'count'
+				get 'list_by_type_and_value_count'
+				get 'list_by_type_and_answer_count'
+				get 'list_by_type_count'
 			end
 			member do 
 				post 'reply'

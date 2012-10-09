@@ -24,15 +24,22 @@ class Admin::PublicNoticesController < Admin::ApplicationController
 			end
 		end
 
-		respond_to do |format|
-			format.html # index.html.erb
-			format.json { render json: @public_notices }
-		end
+		render_json_auto @public_notices
 	end
 
 	def count
 		count = PublicNotice.count
 		render_json_auto count
+	end
+
+	def list_by_type_count
+		@public_notices = PublicNotice.list_by_type(params[:public_notice_type]) 
+		render_json_auto @public_notices.count
+	end
+
+	def list_by_type_and_value_count
+		@public_notices = PublicNotice.list_by_type_and_value(params[:public_notice_type], params[:value])
+		render_json_auto @public_notices.count
 	end
 	
 	# GET /admin/public_notices/1 
@@ -42,7 +49,7 @@ class Admin::PublicNoticesController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html # show.html.erb
-			format.json { render json: @public_notice }
+			format.json { render_json_auto @public_notice }
 		end
 	end
 
@@ -53,7 +60,7 @@ class Admin::PublicNoticesController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html # new.html.erb
-			format.json { render json: @public_notice }
+			format.json { render_json_auto @public_notice }
 		end
 	end
 
@@ -63,7 +70,7 @@ class Admin::PublicNoticesController < Admin::ApplicationController
 
 		respond _to do |format|
 			format.html # show.html.erb
-			format.json { render json: @public_notice }
+			format.json { render_json_auto @public_notice }
 		end
 	end
 	
@@ -75,7 +82,7 @@ class Admin::PublicNoticesController < Admin::ApplicationController
 		respond_to do |format|
 			format.html  if @public_notice.instance_of?(PublicNotice)
 			format.html { render action: "new" } if !@public_notice.instance_of?(PublicNotice)
-			format.json { render :json => @public_notice}
+			format.json { render_json_auto @public_notice}
 		end
 	end
 
@@ -87,7 +94,7 @@ class Admin::PublicNoticesController < Admin::ApplicationController
 		respond_to do |format|
 			format.html { redirect_to @public_notice} if @public_notice.instance_of?(PublicNotice)
 			format.html { render action: "edit" } if !@public_notice.instance_of?(PublicNotice)
-			format.json { render :json => @public_notice }
+			format.json { render_json_auto @public_notice }
 		end
 	end
 
@@ -98,7 +105,7 @@ class Admin::PublicNoticesController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html { redirect_to public_notices_url }
-			format.json { render :json => @public_notice }
+			format.json { render_json_auto @public_notice }
 		end
 	end
 end
