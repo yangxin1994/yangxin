@@ -103,6 +103,11 @@ class Question < BasicQuestion
 		return self
 	end
 
+	def estimate_answer_time
+		text.length = self.content["text"].length + self.note.length
+		return (text.length / 5).ceil + Issue.create_issue(self.question_type, self.issue).estimate_answer_time
+	end
+
 	def serialize
 		question_obj = {}
 		question_obj["_id"] = self._id.to_s

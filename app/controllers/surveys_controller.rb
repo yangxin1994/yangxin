@@ -408,4 +408,8 @@ class SurveysController < ApplicationController
 			format.json	{ render_json_auto(retval) and return }
 		end
 	end
+
+	def estimate_answer_time
+		
+	end
 end

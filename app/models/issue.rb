@@ -24,4 +24,7 @@ class Issue
 
 	def remove_hidden_items(items)
 	end
+
+	def estimate_answer_time
+	end
 end

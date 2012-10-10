@@ -69,6 +69,12 @@ class ChoiceIssue < Issue
 		self.items.delete_if { |choice| items["items"].include?(choice["id"]) } if !items["items"].blank?
 	end
 
+	def estimate_answer_time
+		text_length = 0
+		self.items.each do |item|
+		end
+	end
+
 	#*description*: serialize the current instance into a question object
 	#
 	#*params*:
