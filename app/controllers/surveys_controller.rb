@@ -410,6 +410,9 @@ class SurveysController < ApplicationController
 	end
 
 	def estimate_answer_time
-		
+		retval = @survey.estimate_answer_time
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
 	end
 end

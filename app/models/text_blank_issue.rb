@@ -14,6 +14,8 @@ class TextBlankIssue < Issue
 
 	ATTR_NAME_ARY = %w[min_length max_length has_multiple_line size]
 
+	CHAR_PER_SECOND = 5
+
 	def initialize
 		@min_length = 1
 		@max_length = 10
@@ -28,6 +30,11 @@ class TextBlankIssue < Issue
 		issue_obj["size"] = issue_obj["size"].to_i
 		issue_obj["has_multiple_line"] = (issue_obj["has_multiple_line"].to_s == "true")
 		super(ATTR_NAME_ARY, issue_obj)
+	end
+
+	def estimate_answer_time
+		answer_length = self.min_length.blank? ? 1 : self.min_length
+		return (min_length / CHAR_PER_SECOND).ceil
 	end
 
 	#*description*: serialize the current instance into a question object

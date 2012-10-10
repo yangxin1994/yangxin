@@ -1137,6 +1137,16 @@ class Survey
 		return Marshal.load(Marshal.dump(self.quota))
 	end
 
+	def estimate_answer_time
+		answer_time = 0
+		self.pages.each do |page|
+			page["questions"].each do |q_id|
+				q = Question.find_by_id(q_id)
+				answer_time = answer_time + q.estimate_answer_time if !q.nil?
+			end
+		end
+	end
+
 	def show_quota_rule(quota_rule_index)
 		quota = Quota.new(self.quota)
 		return quota.show_rule(quota_rule_index)

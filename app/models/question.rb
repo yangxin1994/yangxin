@@ -104,8 +104,9 @@ class Question < BasicQuestion
 	end
 
 	def estimate_answer_time
-		text.length = self.content["text"].length + self.note.length
-		return (text.length / 5).ceil + Issue.create_issue(self.question_type, self.issue).estimate_answer_time
+		text_length = self.content["text"].length + self.note.length
+		return (text_length / OOPSDATA[RailsEnv.get_rails_env]["words_per_second"].to_i).ceil + 
+			Issue.create_issue(self.question_type, self.issue).estimate_answer_time
 	end
 
 	def serialize

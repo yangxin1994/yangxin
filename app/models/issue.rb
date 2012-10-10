@@ -26,5 +26,6 @@ class Issue
 	end
 
 	def estimate_answer_time
+		return 1
 	end
 end

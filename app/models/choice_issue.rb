@@ -26,6 +26,8 @@ class ChoiceIssue < Issue
 	CHOICE_ATTR_ARY = %w[id content is_exclusive]
 	OTHER_ITEM_ATTR_ARY = %w[has_other_item id content is_exclusive]
 
+	ANSWER_TIME = 2
+
 	def initialize
 		@choice_num_per_row = -1
 		@min_choice = 1
@@ -72,7 +74,10 @@ class ChoiceIssue < Issue
 	def estimate_answer_time
 		text_length = 0
 		self.items.each do |item|
+			text_length = text_length + item["content"]["text"].length
 		end
+		text_length = text_length + self.other_item["content"]["text"] if !self.other_item.nil? && self.other_item["has_other_item"] == true
+		return text_length / OOPSDATA[RailsEnv.get_rails_env]["words_per_second"].to_i + ANSWER_TIME
 	end
 
 	#*description*: serialize the current instance into a question object
