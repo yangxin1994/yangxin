@@ -113,25 +113,25 @@ class BlankIssue < Issue
 
 	def estimate_answer_time
 		answer_time = 0
-		issue_obj["items"] ||= []
 		self.items.each do |item|
 			case item["data_type"]
 			when "Text"
-				Issue.create_issue("TextBlankIssue", item["properties"]).estimate_answer_time
+				Issue.create_issue(2, item["properties"]).estimate_answer_time
 			when "Number"
-				Issue.create_issue("NumberBlankIssue", item["properties"]).estimate_answer_time
-			when "Phone"
-				Issue.create_issue("PhoneBlankIssue", item["properties"]).estimate_answer_time
-			when "Address"
-				Issue.create_issue("AddressBlankIssue", item["properties"]).estimate_answer_time
-			when "Time"
-				Issue.create_issue("TimeBlankIssue", item["properties"]).estimate_answer_time
-			when "Url"
-				Issue.create_issue("UrlBlankIssue", item["properties"]).estimate_answer_time
+				Issue.create_issue(3, item["properties"]).estimate_answer_time
 			when "Email"
-				Issue.create_issue("EmailBlankIssue", item["properties"]).estimate_answer_time
+				Issue.create_issue(4, item["properties"]).estimate_answer_time
+			when "Url"
+				Issue.create_issue(5, item["properties"]).estimate_answer_time
+			when "Phone"
+				Issue.create_issue(6, item["properties"]).estimate_answer_time
+			when "Time"
+				Issue.create_issue(7, item["properties"]).estimate_answer_time
+			when "Address"
+				Issue.create_issue(8, item["properties"]).estimate_answer_time
 			end
 		end
+		return answer_time
 	end
 
 	#*description*: update the current question instance, including generate id for new inputs
