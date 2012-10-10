@@ -4,7 +4,7 @@ require 'quality_control_type_enum'
 require 'publish_status'
 require 'securerandom'
 require 'csv'
-require 'resque/tasks'
+#require 'resque/tasks'
 #The survey object has the following structure
 # {
 #  "owner_meail" : email of the owner user(string),
@@ -65,7 +65,7 @@ class Survey
   field :random_quality_control_questions, :type => Boolean, default: false
   field :deadline, :type => Integer
 
-  attr_accessor :filter_name
+  attr_accessor :filter_name, :filtered_answers
 
   belongs_to :user
   has_and_belongs_to_many :tags do
@@ -123,6 +123,14 @@ class Survey
     return q
   end
 
+  def all_questions_type
+    q = []
+    all_questions.each do |a|
+      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+    end
+    q
+  end
+
   def csv_header
     headers = []
     all_questions.each_with_index do |e,i|
@@ -130,6 +138,7 @@ class Survey
     end
     headers
   end
+
   def spss_header
     headers =[]
     all_questions.each_with_index do |e,i|
@@ -138,47 +147,24 @@ class Survey
     headers
   end
 
-  def answer_content(ac = self.answers)
-    # ac = []
-    @retval = []
-    # if filter_name == "_default"
-    #   ac = answers.not_preview.finished
-    # else
-    #   filter_conditions = filters[filter_name]
-    #   answers.each do |a|
-    #     ac << a if a.satisfy_conditions(filter_conditions)
-    #   end
-    # end
-
-    # i = 0
-    # ac.each do |answer|
-    #   line_answer = []
-    #   answer.answer_content.each do |k, v|
-    #     question = Question.find_by_id(k)
-    #     q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question.question_type}"] + "Io").new(question)
-    #     line_answer += q.answer_content(v)
-    #   end
-    #   i += 1
-    #   p "========= 转出 #{i} 条 =========" if i%10 == 0
-    #   @retval << line_answer
-    # end
-    # @retval
-
-    # q = []
-    # ac[0].answer_content.each do |k, v|
-    #   question = Question.find_by_id(k)
-    #   q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question.question_type}"] + "Io").new(question)
-    # end
-    q = []
-    all_questions.each do |a|
-      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+  def excel_header
+    headers =[]
+    all_questions.each_with_index do |e,i|
+      headers += e.excel_header("q#{i+1}")
     end
+    headers
+  end
+
+  def answer_content
+    filtered_answers ||= answers
+    @retval = []
+    q = all_questions_type
     p "========= 准备完毕 ========="
     n = 0
-    ac.each do |answer|
+    filtered_answers.each do |a|
       line_answer = []
       i = -1
-      answer.answer_content.each do |k, v|
+      a.answer_content.each do |k, v|
         line_answer += q[i += 1].answer_content(v)
       end
       n += 1
@@ -190,26 +176,34 @@ class Survey
 
   def spss_data
     data = {"spss_header" => spss_header,
-            "answer_contents" => answer_content(),
+            "answer_contents" => answer_content,
             "header_name" => csv_header}
   end
 
+  def excel_data
+    data = {"excel_header" => excel_header,
+            "answer_contents" => answer_content,
+            "header_name" => csv_header}
+  end
 
-  def send_spss_data
+  def get_export_result(filter_name, include_screened_answer)
+    filtered_answers = Result.answers(self, filter_name, include_screened_answer)
+    answer_ids = filtered_answers.collect { |a| a.id.to_s}.join
+    p "===== 获取 Key 成功 ====="
+    result_key = Digest::MD5.hexdigest("export_result-#{answer_ids}")
+    result = ExportResult.where(:result_key => result_key).first
+    result ||= ExportResult.create(:result_key => result_key)
+  end
+
+  def send_data(post_to)
     url = URI.parse('http://192.168.1.129:9292')
-    
-    # p a = Time.now
-    # pp spss_data
-    # {'spss_data'=> Marshal.dump(spss_data) }
-    # p Time.now - a 
-    # return
     begin
       Net::HTTP.start(url.host,url.port) do |http| 
         
-        r = Net::HTTP::Post.new('/to_spss')
+        r = Net::HTTP::Post.new(post_to)
         p "===== 开始转换 ====="
         a = Time.now
-        r.set_form_data('spss_data'=> Marshal.dump(spss_data))
+        r.set_form_data(yield)
         p Time.now - a
         http.read_timeout = 3
         http.request(r)
@@ -225,7 +219,13 @@ class Survey
     end
   end
 
-  def export_csv(path = "public/import/test.csv")
+  #----------------------------------------------
+  #  
+  #     file export interface
+  #
+  #++++++++++++++++++++++++++++++++++++++++++++++
+
+  def to_csv(path = "public/import/test.csv")
     c = CSV.open(path, "w") do |csv|
       csv << csv_header
       answer_content.each do |a|
@@ -234,39 +234,69 @@ class Survey
     end
   end
 
-  def export_csv_header(path = "public/import/test.csv")
+  def get_csv_header(path = "public/import/test.csv")
     c = CSV.open(path, "w") do |csv|
       csv << csv_header
     end
   end
 
-  def answer_import(csv_path)
-    line_answer = {}
+  def answer_import(path = "public/import/test.csv")
     q = []
+    batch = []
     all_questions.each do |a|
       q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
     end 
-    CSV.foreach("public/import/test.csv", :headers => true) do |row|
+    CSV.foreach(path, :headers => true) do |row|
       row = row.to_hash
-      all_questions.each_with_index do |e, i|
+      line_answer = {}
+      q.each_with_index do |e, i|
         #q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
-        line_answer.merge! q[i].answer_import(row,"q#{i+1}")
+        line_answer.merge! e.answer_import(row,"q#{i+1}")
       end
-      return line_answer
+      batch << {:answer_content => line_answer, :survey => self._id}
+    end
+    Survey.collection.insert(batch)
+    return self.save
+  end
+
+  def to_spss(filter_name = "_default", include_screened_answer = true)
+    result = get_export_result(filter_name, include_screened_answer)
+    if result.finished
+      return "Spss文件的路径:类似于 localhost/result_key.sav"
+    else
+      Resque.enqueue(Jobs::ToSpssJob, self.id)
     end
   end
 
-  def to_spss(filter_name)
-    er = ExportResult.new(filter_name, self)
-
+  def to_spss_r
+    result = get_export_result(filter_name, include_screened_answer)
+    send_data '/to_spss' do
+      {'spss_data' => Marshal.dump({"spss_header" => spss_header,
+                                    "answer_contents" => answer_content,
+                                    "header_name" => csv_header,
+                                    "result_key" => result.result_key})}
+    end
   end
 
-  def self.send_spss_data(survey)
-    Resque.enqueue(Jobs::AnswerAnalyzeJob, survey)
+  def to_excel(filter_name = "_default", include_screened_answer = true)
+    result = get_export_result(filter_name, include_screened_answer)
+    if result.finished
+      return "Excel文件的路径:类似于 localhost/result_key.xsl"
+    else
+      Resque.enqueue(Jobs::ToSpssJob, self.id)
+    end
   end
-  def send_spss_data_r
-    Resque.enqueue(Jobs::AnswerAnalyzeJob, self)
+
+  def to_excel_r
+    result = get_export_result(filter_name, include_screened_answer)
+    send_data '/to_spss' do
+      {'spss_data' => Marshal.dump({"excel_header" => excel_header,
+                                    "answer_contents" => answer_content,
+                                    "header_name" => csv_header,
+                                    "result_key" => result.result_key})}
+    end
   end
+
   public
 
   #--

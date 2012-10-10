@@ -1,4 +1,4 @@
-# coding: utf-8
+ # coding: utf-8
 require 'test_helper'
 
 class SurveyTest < ActiveSupport::TestCase
@@ -7,7 +7,7 @@ class SurveyTest < ActiveSupport::TestCase
     @survey_with_issue = FactoryGirl.create(:survey_with_issue)
     @answer_with_issue = FactoryGirl.create(:answer_with_issue)
     @survey_with_issue.answers << @answer_with_issue
-    3000.times do
+    30.times do
         @survey_with_issue.answers << FactoryGirl.create(:answer_with_issue)
     end
     p "###### Ready !!! ######"
@@ -29,9 +29,10 @@ class SurveyTest < ActiveSupport::TestCase
     # p Encoding.default_internal
     # p @survey_with_issue.answer_content.to_csv
     #@survey_with_issue.export_csv
-    #pp @survey_with_issue.answer_import("")
-    # @survey_with_issue.send_spss_data
-    @survey_with_issue.send_spss_data_r
+    #@survey_with_issue.answer_import("")
+    p @survey_with_issue.to_spss
+    #@survey_with_issue.send_spss_data
+    #@survey_with_issue.send_spss_data_r
     assert true
   end
 end

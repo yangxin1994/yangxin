@@ -734,7 +734,7 @@ class Answer
   def load_csv(survey=1)
     filename = "public/import/test.csv"
     CSV.foreach(filename, :headers => true) do |row|
-      p row.to_hash
+      row.to_hash
     end
   end
 

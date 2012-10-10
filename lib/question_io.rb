@@ -35,6 +35,11 @@ class QuestionIo
                 "spss_label" => content["text"]}    
   end
 
+  def excel_header(header_prefix)
+    # TODO "重写以提高效率"
+    @retval << spss_header(header_prefix)["spss_label"]
+  end
+
   def answer_content(v)
     clear_retval
     @retval << v
@@ -47,6 +52,9 @@ class QuestionIo
 
   def clear_retval
     @retval = []
+  end
+  def ret
+    @retval
   end
 end
 
@@ -175,7 +183,6 @@ class MatrixChoiceQuestionIo < QuestionIo
 
   def answer_content(v)
     clear_retval
-    clear_retval
     if issue["max_choice"].to_i > 1
       issue["rows"].each_index do |r|
         issue["items"].each_index do |c|
@@ -243,7 +250,6 @@ class TimeBlankQuestionIo < QuestionIo
   # @time_unit = ["Y", "M", "W", "D", "H", "M", "S"]
   def answer_content(v)
     clear_retval
-    clear_retval
     # @time_unit.each_with_index do |e, i|
     #   @retval << "#{v[i]}#{e}" if v[i] != 0
     # end
@@ -256,9 +262,8 @@ class TimeBlankQuestionIo < QuestionIo
     #   t = row["#{header_prefix}"][2 * i + 1] == e ? row["#{header_prefix}"][2 * i] : 0
     #   @retval << "#{t}#{e}"
     # end
-     
+    clear_retval
     pa=/[^\u0030-\u0040]/
-    p row
     @retval = row["#{header_prefix}"].gsub(pa, ',').split(",").collect{|s| s.to_i}
     return { "#{origin_id}" => @retval}
   end
@@ -270,7 +275,7 @@ class AddressBlankQuestionIo < QuestionIo
     @retval << v.join(';')
   end
   def answer_import(row, header_prefix)
-     @retval = row["#{header_prefix}"].split(";")
+    @retval = row["#{header_prefix}"].split(";")
     return { "#{origin_id}" => @retval}
   end
 end
@@ -305,6 +310,7 @@ class BlankQuestionIo < QuestionIo
   end
 
   def answer_import(row, header_prefix)
+    clear_retval
      issue["items"].each_index do |i|
       q = Question.new(:content => issue["items"][i]["content"],
                        :issue => issue["items"][i]["properties"],
@@ -352,6 +358,7 @@ class MatrixBlankQuestionIo < QuestionIo
     return @retval  
   end
   def answer_import(row, header_prefix)
+    clear_retval
     issue["row_id"].each_index do |r|
       row_content = []
       issue["items"].each_index do |i|
@@ -578,7 +585,8 @@ class TableQuestionIo < QuestionIo
     return @retval  
   end
   def answer_import(row, header_prefix)
-     issue["items"].each_index do |i|
+    clear_retval
+    issue["items"].each_index do |i|
       q = Question.new(:content => issue["items"][i]["content"],
                        :issue => issue["items"][i]["properties"],
                        :question_type => QuestionTypeEnum::BLANK_QUESTION_TYPE["#{issue["items"][i]["data_type"]}"])
