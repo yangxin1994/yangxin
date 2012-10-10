@@ -71,15 +71,6 @@ OopsData::Application.routes.draw do
 		resources :template_questions do
 		end
 
-		resources :answers do
-			collection do
-				post 'load_question'
-				post 'clear'
-				post 'submit_answer'
-				post 'finish'
-			end
-		end
-
 	# The priority is based upon order of creation:
 	# first created -> highest priority.
 
@@ -200,9 +191,6 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :filters do
-			member do
-				put :update_filter_name
-			end
 		end
 
 		resources :analyze_results do
@@ -229,8 +217,8 @@ OopsData::Application.routes.draw do
 
 	resources :answers do
 		collection do
-			post 'preview_load_question'
-			post 'load_question'
+			get 'preview_load_question'
+			get 'load_question'
 			post 'clear'
 			post 'submit_answer'
 			post 'finish'
