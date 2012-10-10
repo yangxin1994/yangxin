@@ -5,23 +5,38 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 	def index
 		if !params[:activate].nil? then
 			if params[:activate].to_s == "true" then
-				@advertisements = Advertisement.activated
+				@advertisements = Advertisement.activated.desc(:updated_at).page(page).per(per_page)
 			elsif params[:activate].to_s == "false" then
-				@advertisements = Advertisement.unactivate
+				@advertisements = Advertisement.unactivate.desc(:updated_at).page(page).per(per_page)
 			end
-			@advertisements.desc(:updated_at) if @advertisements && @advertisements.count > 1
 		elsif !params[:title].nil? then
-			@advertisements = Advertisement.list_by_title(params[:title])
+			@advertisements = Advertisement.list_by_title(params[:title]).desc(:updated_at).page(page).per(per_page)
 		else
-			@advertisements = Advertisement.all.desc(:updated_at)
-		end
+			@advertisements = Advertisement.all.desc(:updated_at).page(page).per(per_page)
+		end		
 
-		@advertisements =  slice((@advertisements || []), params[:page], params[:per_page])
+		render_json_auto @advertisements
+	end
 
-		respond_to do |format|
-			format.html # index.html.erb
-			format.json { render json: @advertisements }
-		end
+	# GET
+	def count
+		render_json_auto Advertisement.count
+	end
+
+	#GET
+	def list_by_title_count
+		@advertisements = Advertisement.list_by_title(params[:title])
+		render_json_auto @advertisements.count
+	end
+
+	#GET
+	def activated_count
+		render_json_auto Advertisement.activated.count
+	end
+
+	#GET
+	def unactivate_acount
+		render_json_auto Advertisement.unactivate.count
 	end
 	
 	# GET /admin/advertisements/1 
@@ -31,7 +46,7 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html # show.html.erb
-			format.json { render json: @advertisement }
+			format.json { render_json_auto @advertisement }
 		end
 	end
 
@@ -42,7 +57,7 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html # new.html.erb
-			format.json { render json: @advertisement }
+			format.json { render_json_auto @advertisement }
 		end
 	end
 
@@ -52,7 +67,7 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 
 		respond _to do |format|
 			format.html # show.html.erb
-			format.json { render json: @advertisement }
+			format.json { render_json_auto @advertisement }
 		end
 	end
 	
@@ -64,7 +79,7 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 		respond_to do |format|
 			format.html  if @advertisement.instance_of?(Advertisement)
 			format.html { render action: "new" } if !@advertisement.instance_of?(Advertisement)
-			format.json { render :json => @advertisement}
+			format.json { render_json_auto @advertisement}
 		end
 	end
 
@@ -76,7 +91,7 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 		respond_to do |format|
 			format.html { redirect_to @advertisement} if @advertisement.instance_of?(Advertisement)
 			format.html { render action: "edit" } if !@advertisement.instance_of?(Advertisement)
-			format.json { render :json => @advertisement }
+			format.json { render_json_auto @advertisement }
 		end
 	end
 
@@ -87,7 +102,7 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html { redirect_to advertisements_url }
-			format.json { render :json => @advertisement }
+			format.json { render_json_auto @advertisement }
 		end
 	end
 

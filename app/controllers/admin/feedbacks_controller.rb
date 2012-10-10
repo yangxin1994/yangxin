@@ -9,24 +9,41 @@ class Admin::FeedbacksController < Admin::ApplicationController
 			if !params[:value].nil? then
 				@feedbacks = Feedback.list_by_type_and_value(params[:feedback_type], params[:value])
 			elsif !params[:answer].nil? then
-				if params[:answer].to_s.strip == "true" then
-					@feedbacks = Feedback.list_by_type_and_answer(params[:feedback_type], true)
-				elsif params[:answer].to_s.strip == "false" then
-					@feedbacks = Feedback.list_by_type_and_answer(params[:feedback_type], false)
-				end
+				@feedbacks = Feedback.list_by_type_and_answer(params[:feedback_type], params[:answer].to_s.strip == "true")
 			else
 				@feedbacks = Feedback.list_by_type(params[:feedback_type])
 			end
 		else
-			@feedbacks = Feedback.all.desc(:updated_at)
+			@feedbacks = Feedback.all.desc(:updated_at).page(page).per(per_page)
 		end
 
-		@feedbacks = slice((@feedbacks || []), params[:page], params[:per_page])
+		@feedbacks = slice((@feedbacks || []), page, per_page)
 
-		respond_to do |format|
-			format.html # index.html.erb
-			format.json { render json: @feedbacks }
+		render_json_auto @feedbacks
+	end
+
+	def count
+		render_json_auto Feedback.count
+	end
+
+	def list_by_type_and_value_count
+		render_json_auto Feedback.list_by_type_and_value(params[:feedback_type], params[:value]).count
+	end
+
+	def list_by_type_and_answer_count
+		if params[:feedback_type].to_i >=255 then
+			if params[:answer].to_s.strip == "true" then
+				render_json_auto Feedback.answered.count
+			else
+				render_json_auto Feedback.unanswer.count
+			end
+		else
+			render_json_auto Feedback.list_by_type_and_answer(params[:feedback_type], params[:answer].to_s.strip == "true").count
 		end
+	end
+
+	def list_by_type_count
+		render_json_auto Feedback.list_by_type(params[:feedback_type]).count
 	end
 	
 	# GET /admin/feedbacks/1 
@@ -36,7 +53,7 @@ class Admin::FeedbacksController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html # show.html.erb
-			format.json { render json: @feedback }
+			format.json { render_json_auto @feedback }
 		end
 	end
 	
@@ -94,12 +111,12 @@ class Admin::FeedbacksController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html { redirect_to feedbacks_url }
-			format.json { render :json => retval }
+			format.json { render_json_auto retval }
 		end
 	end
 	
-	# POST /admin/feedbacks/reply
-	# POST /admin/feedbacks/reply.json
+	# POST /admin/feedbacks/:id/reply
+	# POST /admin/feedbacks/:id/reply.json
 	def reply
 		params[:id] = params[:id] || ""
 		params[:message_content] = params[:message_content] || ""
@@ -108,7 +125,7 @@ class Admin::FeedbacksController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html { redirect_to @feedback} if @feedback
-			format.json { render :json => retval }
+			format.json { render_json_auto retval }
 		end
 	end
 	

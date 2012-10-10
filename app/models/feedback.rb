@@ -15,6 +15,9 @@ class Feedback
 	
 	belongs_to :question_user, class_name: "User", inverse_of: :question_feedback
 	belongs_to :answer_user, class_name: "User", inverse_of: :answer_feedback
+
+	scope :answered, where(is_answer: true)
+	scope :unanswer, where(is_answer: false)
 	
 	# the max of multiple type value => 2**7
 	MAX_TYPE = 7

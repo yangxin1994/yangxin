@@ -464,7 +464,7 @@ class Answer
 		return true
 	end
 
-	#*description*: clear the answer contents, only work for answers with "redo" status
+	#*description*: clear the answer contents, only work for answers with "redo" status, or preview answers, or answers whose survey allows pageup
 	#
 	#*params*:
 	#
@@ -472,7 +472,9 @@ class Answer
 	#* true: when the answer content is cleared
 	#* ErrorEnum::WRONG_ANSWER_STATUS
 	def clear
-		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_redo
+		if !self.is_redo && !self.is_preview && !self.survey.is_pageup_allowed
+			return ErrorEnum::WRONG_ANSWER_STATUS
+		end
 		# clear the template answer content
 		self.template_answer_content.each do |k, v|
 			v = nil

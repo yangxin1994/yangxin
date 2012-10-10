@@ -24,7 +24,26 @@ OopsData::Application.routes.draw do
 			end
 		end
 
-		resources :faqs, :public_notices, :advertisements
+		resources :faqs do 
+			collection do 
+				get 'count'
+			end
+		end
+		resources :public_notices do 
+			collection do 
+				get 'count'
+				get 'list_by_type_count'
+				get 'list_by_type_and_value_count'
+			end
+		end
+		resources :advertisements do 
+			collection do 
+				get 'count'
+				get 'list_by_title_count'
+				get 'activated_count'
+				get 'unactivate_count'
+			end
+		end
 		resources :system_users do 
 			collection do 
 				post 'lock'
@@ -32,6 +51,12 @@ OopsData::Application.routes.draw do
 			end
 		end
 		resources :feedbacks do
+			collection do 
+				get 'count'
+				get 'list_by_type_and_value_count'
+				get 'list_by_type_and_answer_count'
+				get 'list_by_type_count'
+			end
 			member do 
 				post 'reply'
 			end
@@ -43,8 +68,8 @@ OopsData::Application.routes.draw do
 			end
 		end
 
-	resources :template_questions do
-	end
+		resources :template_questions do
+		end
 
 	# The priority is based upon order of creation:
 	# first created -> highest priority.
@@ -250,6 +275,7 @@ OopsData::Application.routes.draw do
 			
 		end
 
+		match 'messages/count' => 'messages#count'
 		resources :messages
 	end
 

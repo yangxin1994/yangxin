@@ -287,11 +287,9 @@ class SurveysController < ApplicationController
 
 		if params[:stars].nil? then
 			survey_list = @current_user.surveys.list(params[:status], params[:publish_status], params[:tags])
-			survey_list = slice((survey_list || []), params[:page], params[:per_page])
+			survey_list = slice((survey_list || []), page, per_page)
 		else
-			params[:page] ||= 1
-			params[:per_page] ||= 10
-			survey_list = @current_user.surveys.stars.page(params[:page]).per(params[:per_page])
+			survey_list = @current_user.surveys.stars.page(page).per(per_page)
 		end	
 
 		# add answer_number
