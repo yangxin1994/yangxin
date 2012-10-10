@@ -199,9 +199,6 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :filters do
-			member do
-				put :update_filter_name
-			end
 		end
 
 		resources :analyze_results do

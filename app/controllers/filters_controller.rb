@@ -59,17 +59,16 @@ class FiltersController < ApplicationController
 	#
 	#*params*:
 	#* survey_id: id of the survey
-	#* filter_name: name of the filter to be created
-	#* filter_conditions: conditions of the filter to be created
+	#* filter: filter to be added
 	#
 	#*retval*:
 	#* the filter object
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::WRONG_FILTER_CONDITION_TYPE
 	def create
-		filters = @survey.add_filter(params[:filter_name], params[:filter_conditions])
+		filters = @survey.add_filter(params[:filter])
 		respond_to do |format|
-			format.json	{ render_json_auto(filter) and return }
+			format.json	{ render_json_auto(filters) and return }
 		end
 	end
 
@@ -92,14 +91,7 @@ class FiltersController < ApplicationController
 	def update
 		filters = @survey.update_filter(params[:id].to_i, params[:filter])
 		respond_to do |format|
-			format.json	{ render_json_auto(filter) and return }
-		end
-	end
-
-	def update_filter_name
-		filters = @survey.update_filter_name(params[:id].to_i, params[:new_filter_name])
-		respond_to do |format|
-			format.json	{ render_json_auto(filter) and return }
+			format.json	{ render_json_auto(filters) and return }
 		end
 	end
 
