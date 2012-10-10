@@ -159,6 +159,7 @@ OopsData::Application.routes.draw do
 			get 'get_random_quality_control_questions'
 			get 'show_quality_control'
 			get 'check_progress'
+			get 'estimate_answer_time'
 			post 'update_deadline'
 			post 'update_star'
 		end
@@ -190,9 +191,6 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :filters do
-			member do
-				put :update_filter_name
-			end
 		end
 
 		resources :analyze_results do

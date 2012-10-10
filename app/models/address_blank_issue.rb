@@ -23,6 +23,16 @@ class AddressBlankIssue < Issue
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 
+	def estimate_answer_time
+		answer_time = 0
+		answer_time = answer_time + 1 if (format & 8) != 0
+		answer_time = answer_time + 1 if (format & 4) != 0
+		answer_time = answer_time + 1 if (format & 2) != 0
+		answer_time = answer_time + 1 if (format & 1) != 0
+		answer_time = answer_time + 1 if has_postcode
+		return answer_time
+	end
+
 	#*description*: serialize the current instance into a question object
 	#
 	#*params*:

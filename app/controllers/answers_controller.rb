@@ -47,7 +47,7 @@ class AnswersController < ApplicationController
 			if answer.is_finish
 				render_json_auto([answer.preview_id, answer.status, answer.reject_type, answer.finish_type]) and return
 			else
-				render_json_auto([answer.preview_id, questions, answer.repeat_time]) and return
+				render_json_auto([answer.preview_id, questions, questions.estimate_answer_time, answer.repeat_time]) and return
 			end
 		else
 			render_json_auto([answer.preview_id, answer.status, answer.reject_type, answer.finish_type]) and return
@@ -100,7 +100,7 @@ class AnswersController < ApplicationController
 			elsif questions.class == String && questions.start_with?("error")
 				render_json_e(questions) and return
 			else
-				render_json_auto([questions, answer.repeat_time]) and return
+				render_json_auto([questions, questions.estimate_answer_time, answer.repeat_time]) and return
 			end
 		else
 			render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return

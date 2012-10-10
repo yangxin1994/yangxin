@@ -111,6 +111,29 @@ class BlankIssue < Issue
 		self.items.delete_if { |input| items["items"].include?(input["id"]) } if !items["items"].blank?
 	end
 
+	def estimate_answer_time
+		answer_time = 0
+		self.items.each do |item|
+			case item["data_type"]
+			when "Text"
+				Issue.create_issue(2, item["properties"]).estimate_answer_time
+			when "Number"
+				Issue.create_issue(3, item["properties"]).estimate_answer_time
+			when "Email"
+				Issue.create_issue(4, item["properties"]).estimate_answer_time
+			when "Url"
+				Issue.create_issue(5, item["properties"]).estimate_answer_time
+			when "Phone"
+				Issue.create_issue(6, item["properties"]).estimate_answer_time
+			when "Time"
+				Issue.create_issue(7, item["properties"]).estimate_answer_time
+			when "Address"
+				Issue.create_issue(8, item["properties"]).estimate_answer_time
+			end
+		end
+		return answer_time
+	end
+
 	#*description*: update the current question instance, including generate id for new inputs
 	#
 	#*params*:

@@ -29,6 +29,8 @@ class MatrixChoiceIssue < Issue
 	CHOICE_ATTR_ARY = %w[id content is_exclusive]
 	ROW_ATTR_ARY = %w[id content]
 
+	ANSWER_TIME = 2
+
 	def initialize
 		@min_choice = 1
 		@max_choice = 1
@@ -79,6 +81,17 @@ class MatrixChoiceIssue < Issue
 		return if items.blank?
 		self.items.delete_if { |choice| items["items"].include?(choice["id"]) } if !items["items"].blank?
 		self.rows.delete_if { |row| items["sub_questions"].include?(row["id"]) } if !items["sub_questions"].blank?
+	end
+
+	def estimate_answer_time
+		text_length = 0
+		self.items.each do |item|
+			text_length = text_length + item["content"]["text"].length
+		end
+		self.rows.each do |row|
+			text_length = text_length + row["content"]["text"].length
+		end
+		return text_length / OOPSDATA[RailsEnv.get_rails_env]["words_per_second"].to_i + ANSWER_TIME * self.rows.length
 	end
 
 	#*description*: serialize the current instance into a question object
