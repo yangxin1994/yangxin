@@ -2,6 +2,18 @@
 
 class Admin::FeedbacksController < Admin::ApplicationController
 
+	def maping_question_user(feedback)
+		feedback["question_user_email"] = User.find(feedback["question_user_id"].to_s).email
+		feedback
+	end
+
+	def maping_answer_user(feedback)
+		unless feedback["answer_user_id"].to_s.empty?
+			feedback["answer_user_email"] = User.find(feedback["answer_user_id"].to_s).email
+		end
+		feedback
+	end
+
 	# GET /admin/feedbacks
 	# GET /admin/feedbacks.json
 	def index
@@ -18,6 +30,7 @@ class Admin::FeedbacksController < Admin::ApplicationController
 		end
 
 		@feedbacks = slice((@feedbacks || []), page, per_page)
+		@feedbacks = @feedbacks.map{|e| maping_question_user(e)}
 
 		render_json_auto @feedbacks
 	end
@@ -50,6 +63,7 @@ class Admin::FeedbacksController < Admin::ApplicationController
 	# GET /admin/feedbacks/1.json
 	def show
 		@feedback = Feedback.find_by_id(params[:id])
+		@feedback = maping_question_user(maping_answer_user(@feedback)) if @feedback.is_a? Feedback
 
 		respond_to do |format|
 			format.html # show.html.erb

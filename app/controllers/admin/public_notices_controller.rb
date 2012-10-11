@@ -2,6 +2,11 @@
 
 class Admin::PublicNoticesController < Admin::ApplicationController	
 
+	def maping(public_notice)
+		public_notice['user_email'] = User.find(public_notice['user_id'].to_s).email
+		public_notice
+	end
+
 	# GET /admin/public_notices
 	# GET /admin/public_notices.json
 	def index
@@ -18,10 +23,10 @@ class Admin::PublicNoticesController < Admin::ApplicationController
 		end
 
 		# if not show content
-		if params[:show_content]=="false" then
-			@public_notices.map do |e|
-				e.content = nil
-			end
+		tmp = params[:show_content].to_s=="false" ? true : false
+		@public_notices = @public_notices.map do |e|
+			e.content = nil if tmp
+			maping(e)
 		end
 
 		render_json_auto @public_notices
@@ -46,6 +51,7 @@ class Admin::PublicNoticesController < Admin::ApplicationController
 	# GET /admin/public_notices/1.json
 	def show
 		@public_notice = PublicNotice.find_by_id(params[:id])
+		@public_notice = maping(@public_notice) if @public_notice.is_a? PublicNotice
 
 		respond_to do |format|
 			format.html # show.html.erb

@@ -1,5 +1,10 @@
 class Admin::AdvertisementsController < Admin::ApplicationController
 
+	def maping(advertisement)
+		advertisement['user_email'] = User.find(advertisement['user_id'].to_s).email
+		advertisement
+	end
+
 	# GET /admin/advertisements
 	# GET /admin/advertisements.json
 	def index
@@ -43,6 +48,7 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 	# GET /admin/advertisements/1.json
 	def show
 		@advertisement = Advertisement.find_by_id(params[:id])
+		@advertisement = maping(@advertisement) if @advertisement.is_a? Advertisement
 
 		respond_to do |format|
 			format.html # show.html.erb
