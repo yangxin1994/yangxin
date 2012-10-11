@@ -15,10 +15,10 @@ class Result
 		return Result.where(:result_key => result_key).first
 	end
 
-	def self.answers(survey, filter_name, include_screened_answer)
+	def self.answers(survey, filter_index, include_screened_answer)
 		answers = include_screened_answer.to_s == "true" ? survey.answers.not_preview.finished_and_screened : survey.answers.not_preview.finished
-		return answers if filter_name == "_default"
-		filter_conditions = self.survey.filters[filter_name]
+		return answers if filter_index == -1
+		filter_conditions = self.survey.filters[filter_index]["conditions"]
 		filtered_answers = []
 		answers.each do |a|
 			filtered_answers << a if a.satisfy_conditions(filter_conditions)

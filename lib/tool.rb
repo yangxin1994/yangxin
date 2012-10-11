@@ -79,36 +79,6 @@ module Tool
 		return result
 	end
 
-	def self.import_address
-		Address.all.each do |e|
-			e.destroy
-		end
-		csv_text = File.read('list.csv')
-		csv = CSV.parse(csv_text, :headers => false)
-		province_code = 0
-		city_code = 0
-		county_code = 0
-		csv.each do |row|
-			return if row[3].nil?
-			if !row[0].nil?
-				# save province
-				province_code = province_code + 1
-				city_code = 0
-				county_code = 0
-				Address.create(:code => province_code << 12, :name => row[0].strip, :address_type => 0)
-			end
-			if !row[2].nil?
-				# save city
-				city_code = city_code + 1
-				county_code = 0
-				Address.create(:code => (province_code << 12) + (city_code << 6), :name => row[2].strip, :address_type => 1)
-			end
-			# save county
-			county_code = county_code + 1
-			Address.create(:code => (province_code << 12) + (city_code << 6) + (county_code), :name => row[3].strip, :address_type => 2)
-		end
-	end
-
 	def self.rand_id
 		return (rand * 10**16).floor
 	end
