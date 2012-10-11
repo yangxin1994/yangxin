@@ -27,6 +27,8 @@ OopsData::Application.routes.draw do
 		resources :faqs do 
 			collection do 
 				get 'count'
+				get 'list_by_type_count'
+				get 'list_by_type_and_value_count'
 			end
 		end
 		resources :public_notices do 
