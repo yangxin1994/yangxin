@@ -170,6 +170,8 @@ class Feedback
 
 			return [] if !type_number.instance_of?(Fixnum) || type_number <= 0
 			feedbacks = []
+
+			value = value.gsub(/[*]/, ' ')
 			
 			# if type_number != 0
 			MAX_TYPE.downto(0).each { |element| 

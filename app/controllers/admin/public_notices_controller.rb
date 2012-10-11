@@ -33,8 +33,7 @@ class Admin::PublicNoticesController < Admin::ApplicationController
 	end
 
 	def count
-		count = PublicNotice.count
-		render_json_auto count
+		render_json_auto PublicNotice.count
 	end
 
 	def list_by_type_count
