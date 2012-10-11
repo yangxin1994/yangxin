@@ -285,7 +285,7 @@ class ApplicationController < ActionController::Base
 		return_json(true, value)
 	end
 	def render_json_auto(value = true)
-		is_success = !(value.class == String && value.start_with?('error_'))
+		is_success = !((value.class == String && value.start_with?('error_')) || value.to_s.to_i < 0)
 		is_success ? render_json_s(value) : render_json_e(value)
 	end
 end
