@@ -55,7 +55,7 @@ class SortIssue < Issue
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 
-	def remove_hidden_items(items, sub_questions)
+	def remove_hidden_items(items)
 		return if items.blank?
 		self.items.delete_if { |item| items["items"].include?(item["id"]) } if !items["items"].blank?
 	end

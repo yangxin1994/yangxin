@@ -8,7 +8,6 @@ class FiltersControllerTest < ActionController::TestCase
 
 		survey_id = create_closed_survey(jesse)
 
-
 		filter = {}
 		filter["name"] = "filter1"
 		filter["conditions"] = []
