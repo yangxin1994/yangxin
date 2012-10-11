@@ -400,6 +400,33 @@ class AnswersControllerTest < ActionController::TestCase
 		end
 	end
 
+	test "should submit answer correctly" do
+		clear(User, Survey, Answer)
+		jesse = init_jesse
+		oliver = init_oliver
+		lisa = init_lisa
+		polly = init_polly
+		survey_auditor = init_survey_auditor
+
+		survey_id, pages = *create_survey_page_question(jesse.email, jesse.password)
+		question_ids = pages.flatten
+		set_survey_published(survey_id, jesse, survey_auditor)
+
+		# quetions loadding for surveys that do not allow page up
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91"
+		result = JSON.parse(@response.body)
+		# the first has three quesitons
+		assert_equal 3, result["value"][0].length
+
+		puts "AAAAAAAAAAAAAAAAAAAAA"
+		puts result["value"][0].length
+		puts "AAAAAAAAAAAAAAAAAAAAA"
+		puts result["value"][1].length
+		puts "AAAAAAAAAAAAAAAAAAAAA"
+	end
+
 	def add_quota_rule(email, password, survey_id, quota_rule)
 		auth_key = sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller
