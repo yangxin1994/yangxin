@@ -1,53 +1,100 @@
 # encoding: utf-8
+require 'csv'
 class Address
-	include Mongoid::Document
-	field :code, :type => Integer
-	field :name, :type => String
-	field :address_type, :type => Integer
-
-	scope :provinces, lambda { where(:address_type => 0) }
-	scope :cities, lambda { where(:address_type => 1) }
-	scope :counties, lambda { where(:address_type => 2) }
+	def self.generate_address_file
+		csv_text = File.read('lib/list.csv')
+		csv = CSV.parse(csv_text, :headers => false)
+		province_code = 0
+		city_code = 0
+		county_code = 0
+		CSV.open('lib/address_info.csv', 'wb') do |csv_export|
+			csv.each do |row|
+				return if row[3].nil?
+				if !row[0].nil?
+					# save province
+					province_code = province_code + 1
+					city_code = 0
+					county_code = 0
+					csv_export << [province_code << 12, row[0].strip, 0]
+					#Address.create(:code => province_code << 12, :name => row[0].strip, :address_type => 0)
+				end
+				if !row[2].nil?
+					# save city
+					city_code = city_code + 1
+					county_code = 0
+					csv_export << [(province_code << 12) + (city_code << 6), row[2].strip, 1]
+					#Address.create(:code => (province_code << 12) + (city_code << 6), :name => row[2].strip, :address_type => 1)
+				end
+				# save county
+				county_code = county_code + 1
+				csv_export << [(province_code << 12) + (city_code << 6) + (county_code), row[3].strip, 2]
+				#Address.create(:code => (province_code << 12) + (city_code << 6) + (county_code), :name => row[3].strip, :address_type => 2)
+			end
+		end
+	end
 
 	def self.find_provinces
-		return self.provinces.map { |province_address| [province_address.code, province_address.name] }
+		csv_text = File.read('lib/address_info.csv')
+		csv = CSV.parse(csv_text, :headers => false)
+		provinces = []
+		csv.each do |row|
+			provinces << row[0..1] if row[2].to_s == "0"
+		end
+		return provinces
+	end
+
+	def self.find_cities
+		csv_text = File.read('lib/address_info.csv')
+		csv = CSV.parse(csv_text, :headers => false)
+		cities = []
+		csv.each do |row|
+			cities << row[0..1] if row[2].to_s == "1"
+		end
+		return cities
 	end
 
 	def self.find_cities_by_province(province_code)
+		csv_text = File.read('lib/address_info.csv')
+		csv = CSV.parse(csv_text, :headers => false)
 		target_cities = []
-		cities_addresses = self.cities.each do |city|
-			target_cities << city if (city.code >> 12) == (province_code >> 12) && province_code == (province_code >> 12 << 12)
+		province_code = province_code.to_i
+		csv.each do |row|
+			target_cities << row[0..1] if (row[2].to_s == "1") && (row[0].to_i >> 12) == (province_code >> 12) && province_code == (province_code >> 12 << 12)
 		end
 		return target_cities
 	end
 
 	def self.find_counties_by_city(city_code)
+		csv_text = File.read('lib/address_info.csv')
+		csv = CSV.parse(csv_text, :headers => false)
 		target_counties = []
-		counties_addresses = self.counties.each do |county|
-			target_counties << county if (county.code >> 6) == (city_code >> 6) && city_code == (city_code >> 6 << 6)
+		city_code = city_code.to_i
+		csv.each do |row|
+			target_counties << row[0..1] if (row[2].to_s == "2") && (row[0].to_i >> 6) == (city_code >> 6) && city_code == (city_code >> 6 << 6)
 		end
-		return target_counties.map { |county_address| [county_address.code, county_address.name] }
+		return target_counties
 	end
 
 	def self.find_address_code_by_ip(ip_address)
 		ip_info = IpInfo.find_by_ip(ip_address)
-		# the province cannot be found
+		# no province information in the ip info
 		return -1 if ip_info.nil? || ip_info.province.blank?
+		csv_text = File.read('lib/address_info.csv')
+		csv = CSV.parse(csv_text, :headers => false)
 		target_province = nil
-		self.provinces.each do |province|
-			if province.name.gsub(/\s+/, "").include?(ip_info.province.gsub(/\s+/, ""))
-				target_province = province
-				break
+		csv.each do |row|
+			if row[2].to_s == "0" && row[1].gsub(/\s+/, "").include?(ip_info.province.gsub(/\s+/, ""))
+				target_province = row[0]
 			end
 		end
 		# the province cannot be found
 		return -1 if target_province.nil?
 		target_city = nil
-		self.find_cities_by_province(target_province.code).each do |city|
-			target_city = city if city.name.gsub(/\s+/, "").include?(ip_info.city.gsub(/\s+/, ""))
+		self.find_cities_by_province(target_province).each do |city|
+			target_city = city[0] if city[1].gsub(/\s+/, "").include?(ip_info.city.gsub(/\s+/, ""))
 		end
 		# if city can be found, return city code, otherwise, return province code
-		return (target_city.nil? ? target_province.code : target_city.code)
+		return (target_city.nil? ? target_province : target_city)
 	end
 
 	def self.satisfy_region_code?(candidate_code, condition_code)
@@ -72,16 +119,16 @@ class Address
 
 	def self.province_hash
 		province_hash = {}
-		Address.provinces.each do |province|
-			province_hash[province.code] = 0
+		Address.find_provinces.each do |province|
+			province_hash[province[0]] = 0
 		end
 		return province_hash
 	end
 
 	def self.city_hash
 		city_hash = {}
-		Address.cities.each do |city|
-			city_hash[city.code] = 0
+		Address.find_cities.each do |city|
+			city_hash[city[0]] = 0
 		end
 		return city_hash
 	end
