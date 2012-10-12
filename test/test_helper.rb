@@ -284,9 +284,6 @@ class ActiveSupport::TestCase
 	
 		remove_page(email, password, survey_id, 0)
 		insert_page(email, password, survey_id, -1, "first page")
-		insert_page(email, password, survey_id, 0, "second page")
-		insert_page(email, password, survey_id, 0, "third page")
-		insert_page(email, password, survey_id, 0, "fouth page")
 
 		q1 = create_question(email, password, survey_id, 0, -1, 0)
 		q2 = create_question(email, password, survey_id, 0, -1, 8)
