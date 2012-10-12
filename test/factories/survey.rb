@@ -111,6 +111,7 @@ FactoryGirl.define do
   
 
   factory :survey_with_issue, class: Survey do
+    @quota_questions = [FactoryGirl.create(:text_blank_question).id]
     @questions1 = [FactoryGirl.create(:single_choice_question).id,
                   FactoryGirl.create(:multi_choice_question).id,
                   FactoryGirl.create(:matrix_singel_choice_question).id,
@@ -142,15 +143,17 @@ FactoryGirl.define do
            {name: "别挣扎了...我是第二页",
             questions: @questions2 }
     ]
-
+    quota_template_question_page @quota_questions
     status 8
   end
   factory :answer_with_issue, class: Answer do
     @survey = FactoryGirl.create(:survey_with_issue)
     @answer_content = {}
-    @all_questions_id = @survey.all_questions_id
+    @all_questions_with_quota_id = @survey.all_quota_questions_id + @survey.all_questions_id
     # 所有的其他项必须是最后一个,这是答案分析的结构决定的
-    @answers = [{"text_input" => "我选择了其它项", "selection" => []},
+    #@quota_answers = ["我是一个质控题"]
+    @answers = ["我是一个质控题",
+                {"text_input" => "我选择了其它项", "selection" => []},
                 {"text_input" => "我选择了其它项", "selections" => ["1", "3","6","10"]},
                 ["1", "2", "6"],
                 [["1", "2"], ["2", "7"]],
@@ -217,8 +220,9 @@ FactoryGirl.define do
                  "3" => 30,
                  "4" => 60}
                ]
+
     @answers.each_index do |i|
-      @answer_content[@all_questions_id[i].to_s] = @answers[i]
+      @answer_content[@all_questions_with_quota_id[i].to_s] = @answers[i]
     end
     status 2
     finish_type 1

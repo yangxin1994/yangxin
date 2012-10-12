@@ -27,10 +27,11 @@ class SurveyTest < ActiveSupport::TestCase
     
     # p Encoding.default_external
     # p Encoding.default_internal
-    # p @survey_with_issue.answer_content.to_csv
-    #@survey_with_issue.export_csv
+    #@survey_with_issue.to_csv
+    #@survey_with_issue.get_csv_header
+    #@survey_with_issue.answer_content
     #@survey_with_issue.answer_import("")
-    p @survey_with_issue.to_spss
+    @survey_with_issue.to_spss
     #@survey_with_issue.send_spss_data
     #@survey_with_issue.send_spss_data_r
     assert true

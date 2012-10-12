@@ -43,7 +43,7 @@ class Survey
   field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
   field :quota, :type => Hash, default: {"rules" => [], "is_exclusive" => true}
   field :quota_stats, :type => Hash
-  field :filters, :type => Hash, default: {}
+  field :filters, :type => Array, default: []
   field :filters_stats, :type => Hash, default: {}
   field :quota_template_question_page, :type => Array, default: []
   field :logic_control, :type => Array, default: []
@@ -65,7 +65,7 @@ class Survey
   field :random_quality_control_questions, :type => Boolean, default: false
   field :deadline, :type => Integer
 
-  attr_accessor :filter_name, :filtered_answers
+  attr_accessor :filter_index, :filtered_answers
 
   belongs_to :user
   has_and_belongs_to_many :tags do
@@ -131,8 +131,27 @@ class Survey
     q
   end
 
+  def all_quota_quetions
+    quota_template_question_page.collect { |i| Question.find(i) }
+  end
+
+  def all_quota_questions_id
+    quota_template_question_page
+  end
+
+  def all_quota_questions_type
+    q = []
+    all_quota_quetions.each do |a|
+      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+    end
+    q
+  end
+
   def csv_header
     headers = []
+    all_quota_quetions.each_with_index do |e,i|
+      headers += e.csv_header("t#{i+1}")
+    end
     all_questions.each_with_index do |e,i|
       headers += e.csv_header("q#{i+1}")
     end
@@ -141,6 +160,9 @@ class Survey
 
   def spss_header
     headers =[]
+    all_quota_quetions.each_with_index do |e,i|
+      headers += e.spss_header("t#{i+1}")
+    end
     all_questions.each_with_index do |e,i|
       headers += e.spss_header("q#{i+1}")
     end
@@ -149,6 +171,9 @@ class Survey
 
   def excel_header
     headers =[]
+    all_quota_quetions.each_with_index do |e,i|
+      headers += e.excel_header("t#{i+1}")
+    end
     all_questions.each_with_index do |e,i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -158,7 +183,7 @@ class Survey
   def answer_content
     filtered_answers ||= answers
     @retval = []
-    q = all_questions_type
+    q = all_quota_questions_type + all_questions_type 
     p "========= 准备完毕 ========="
     n = 0
     filtered_answers.each do |a|
@@ -174,15 +199,15 @@ class Survey
     @retval
   end
 
-  def get_export_result(filter_name, include_screened_answer)
-    filtered_answers = Result.answers(self, filter_name, include_screened_answer)
+  def get_export_result(filter_index, include_screened_answer)
+    filtered_answers = Result.answers(self, filter_index, include_screened_answer)
     answer_ids = filtered_answers.collect { |a| a.id.to_s}.join
     p "===== 获取 Key 成功 ====="
     result_key = Digest::MD5.hexdigest("export_result-#{answer_ids}")
     result = ExportResult.where(:result_key => result_key).first
     result ||= ExportResult.create(:result_key => result_key,
                                    :survey => self,
-                                   :filter_name => filter_name,
+                                   :filter_index => filter_index,
                                    :include_screened_answer => include_screened_answer)
   end
 
@@ -240,9 +265,15 @@ class Survey
     CSV.foreach(path, :headers => true) do |row|
       row = row.to_hash
       line_answer = {}
+      quota_qustions_count = quota_qustions.size
       q.each_with_index do |e, i|
         #q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
-        line_answer.merge! e.answer_import(row,"q#{i+1}")
+        if i < quota_qustions_count
+          header_prefix = "t#{i + 1}"
+        else
+          header_prefix = "q#{i - quota_qustions_count + 1}"
+        end
+        line_answer.merge! e.answer_import(row, header_prefix)
       end
       batch << {:answer_content => line_answer, :survey => self._id}
     end
@@ -250,8 +281,8 @@ class Survey
     return self.save
   end
 
-  def to_spss(filter_name = "_default", include_screened_answer = true)
-    result = get_export_result(filter_name, include_screened_answer)
+  def to_spss(filter_index = 0, include_screened_answer = true)
+    result = get_export_result(filter_index, include_screened_answer)
     if result.finished
       return "Spss文件的路径:类似于 localhost/result_key.sav"
     else
@@ -270,8 +301,8 @@ class Survey
     end
   end
 
-  def to_excel(filter_name = "_default", include_screened_answer = true)
-    result = get_export_result(filter_name, include_screened_answer)
+  def to_excel(filter_index = 0, include_screened_answer = true)
+    result = get_export_result(filter_index, include_screened_answer)
     if result.finished
       return "Excel文件的路径:类似于 localhost/result_key.xsl"
     else
