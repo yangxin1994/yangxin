@@ -1554,8 +1554,8 @@ class Survey
 	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
 	field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100], "is_exclusive" => true}
 	field :quota_stats, :type => Hash, default: {"quota_satisfied" => false, "answer_number" => [0]}
-	field :filters, :type => Hash, default: {}
-	field :filters_stats, :type => Hash, default: {}
+	field :filters, :type => Array, default: []
+	field :filters_stats, :type => Array, default: []
 	field :quota_template_question_page, :type => Array, default: []
 	field :logic_control, :type => Array, default: []
 	field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
@@ -2650,6 +2650,16 @@ class Survey
 		return Marshal.load(Marshal.dump(self.quota))
 	end
 
+	def estimate_answer_time
+		answer_time = 0
+		self.pages.each do |page|
+			page["questions"].each do |q_id|
+				q = Question.find_by_id(q_id)
+				answer_time = answer_time + q.estimate_answer_time if !q.nil?
+			end
+		end
+	end
+
 	def show_quota_rule(quota_rule_index)
 		quota = Quota.new(self.quota)
 		return quota.show_rule(quota_rule_index)
@@ -2679,16 +2689,13 @@ class Survey
 	def refresh_filters_stats
 		# only make statisics from the answers that are not preview answers
 		answers = self.answers.not_preview
-		filters_stats = {}
+		filters_stats = Array.new(self.filters.length, 0)
 		answers.each do |answer|
-			self.filters.each do |filter_name, filter_conditions|
-				filter_stats[filter_name] = 0 if filter_stats[filter_name].nil?
-				if answer.satisfy_conditions(filter_conditions)
-					filters_stats[filter_name] = filters_stats[filter_name] + 1
-				end
+			self.filters.each_with_index do |filter, filter_index|
+				conditions = filter["conditions"]
+				filters_stats[filter_index] = filters_stats[filter_index] + 1 if answer.satisfy_conditions(conditions)
 			end
 		end
-		filters_stats["_default"] = answers.length
 		self.filters_stats = filters_stats
 		self.save
 	end
@@ -2750,35 +2757,29 @@ class Survey
 		return Marshal.load(Marshal.dump(self.filters))
 	end
 
-	def show_filter(filter_name)
+	def show_filter(filter_index)
 		filters = Filters.new(self.filters)
-		return filters.show_filter(filter_name)
+		return filters.show_filter(filter_index)
 	end
 
-	def add_filter(filter_name, filter_conditions)
+	def add_filter(filter)
 		filters = Filters.new(self.filters)
-		return filters.add_filter(filter_name, filter_conditions, self)
+		return filters.add_filter(filter, self)
 	end
 
-	def update_filter(filter_name, filter_conditions)
+	def update_filter(filter_index, filter)
 		filters = Filters.new(self.filters)
-		return filters.update_filter(filter_name, filter_conditions, self)
+		return filters.update_filter(filter_index, filter, self)
 	end
 
-	def update_filter_name(filter_name, new_filter_name)
+	def delete_filter(filter_index)
 		filters = Filters.new(self.filters)
-		return filter.update_filter_name(filter_name, new_filter_name, self)
+		return filters.delete_filter(filter_index, self)
 	end
 
-	def delete_filter(filter_name)
-		filters = Filters.new(self.filters)
-		return filters.delete_filter(filter_name, self)
-	end
-
-	def show_analyze_result(filter_name, include_screened_answer)
-		return ErrorEnum::FILTER_NOT_EXIST if !filter_name.blank? && !self.filters.has_key?(filter_name)
-		filter_name = "_default" if filter_name.blank?
-		result = self.analyze_results.find_or_create_by_filter_name(self, filter_name, include_screened_answer)
+	def show_analyze_result(filter_index, include_screened_answer)
+		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
+		result = self.analyze_results.find_or_create_by_filter_index(self, filter_index, include_screened_answer)
 		return result
 	end
 
@@ -2788,55 +2789,42 @@ class Survey
 			@filters = Marshal.load(Marshal.dump(filters))
 		end
 
-		def show_filter(filter_name)
-			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
-			return @filters[filter_name]
+		def show_filter(filter_index)
+			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_index].nil?
+			return @filters[filter_index]
 		end
 
-		def add_filter(filter_name, filter_conditions, survey)
+		def add_filter(filter, survey)
 			# check errors
-			return ErrorEnum::FILTER_EXIST if survey.filters.has_key?(filter_name)
-			return ErrorEnum::FILTER_NAME_BLANK if filter_name.blank?
-			filter_conditions.each do |condition|
+			filter["conditions"].each do |condition|
 				condition["condition_type"] = condition["condition_type"].to_i
 				return ErrorEnum::WRONG_FILTER_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
 			end
 			# add the rule
-			@filters[filter_name] = filter_conditions
+			@filters << filter
 			survey.filters = self.serialize
 			survey.save
 			return survey.filters
 		end
 
-		def delete_filter(filter_name, survey)
+		def delete_filter(filter_index, survey)
 			# check errors
-			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
+			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_index].nil?
 			# delete the rule
-			@filters.delete(filter_name)
+			@filters.delete_at(filter_index)
 			survey.filters = self.serialize
-			survey.save
-			return survey.filters
+			return survey.save
 		end
 
-		def update_filter_name(filter_name, new_filter_name, survey)
+		def update_filter(filter_index, filter, survey)
 			# check errors
-			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
-			@filters[new_filter_name] = @filters[filter_name]
-			@filters.delete(filter_name)
-			survey.filters = self.serialize
-			survey.save
-			return survey.filters
-		end
-
-		def update_filter(filter_name, filter_conditions, survey)
-			# check errors
-			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_name].nil?
-			filter_conditions.each do |condition|
+			return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_index].nil?
+			filter["conditions"].each do |condition|
 				condition["condition_type"] = condition["condition_type"].to_i
 				return ErrorEnum::WRONG_FILTER_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"].to_i)
 			end
 			# update the rule
-			@filters[filter_name] = filter_conditions
+			@filters[filter_index] = filter
 			survey.filters = self.serialize
 			survey.save
 			return survey.filters

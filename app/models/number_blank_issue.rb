@@ -32,6 +32,10 @@ class NumberBlankIssue < Issue
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 
+	def estimate_answer_time
+		return 1
+	end
+
 	#*description*: serialize the current instance into a question object
 	#
 	#*params*:

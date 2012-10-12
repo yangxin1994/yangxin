@@ -19,9 +19,13 @@ class TimeBlankIssue < Issue
 
 	def update_issue(issue_obj)
 		issue_obj["format"] = issue_obj["format"].to_i
-		issue_obj["min"].map! { |e| e.to_i }
-		issue_obj["max"].map! { |e| e.to_i }
+		issue_obj["min"] = issue_obj["min"].to_i
+		issue_obj["max"] = issue_obj["max"].to_i
 		super(ATTR_NAME_ARY, issue_obj)
+	end
+
+	def estimate_answer_time
+		return 2
 	end
 
 	#*description*: serialize the current instance into a question object

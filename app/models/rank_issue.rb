@@ -25,6 +25,8 @@ class RankIssue < Issue
 	ITEM_ATTR_ARY = %w[id content]
 	OTHER_ITEM_ATTR_ARY = %w[has_other_item id content]
 
+	ANSWER_TIME = 4
+
 	def initialize
 		@items = []
 		@is_rand = false
@@ -42,7 +44,7 @@ class RankIssue < Issue
 														"image" => [], "audio" => [], "video" => []}
 			@items << item
 		end
-		@other_item = {"has_other_item" => false, "id" => nil, "content" => {"text" => "其他（请填写）：", "image" => [], "video" => [], "audio" => []}}
+		@other_item = {"has_other_item" => false, "id" => Tool.rand_id, "content" => {"text" => "其他（请填写）：", "image" => [], "video" => [], "audio" => []}}
 	end
 
 	def update_issue(issue_obj)
@@ -61,6 +63,15 @@ class RankIssue < Issue
 	def remove_hidden_items(items)
 		return if items.blank?
 		self.items.delete_if { |item| items["items"].include?(item["id"]) } if !items["items"].blank?
+	end
+
+	def estimate_answer_time
+		text_length = 0
+		self.items.each do |item|
+			text_length = text_length + item["content"]["text"].length
+		end
+		text_length = text_length + self.other_item["content"]["text"] if !self.other_item.nil? && self.other_item["has_other_item"] == true
+		return text_length / OOPSDATA[RailsEnv.get_rails_env]["words_per_second"].to_i + ANSWER_TIME
 	end
 
 	#*description*: serialize the current instance into a question object

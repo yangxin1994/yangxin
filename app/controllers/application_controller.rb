@@ -16,11 +16,15 @@ class ApplicationController < ActionController::Base
 
 	begin "kaminari"
 		def page
-			params[:page] || 1
+			params[:page].to_i == 0 ? 1 : params[:page].to_i
+		rescue
+			1
 		end
 
 		def per_page
-			params[:per_page] || 25
+			params[:per_page].to_i == 0 ? 10 : params[:per_page].to_i
+		rescue
+			10
 		end
 	end
 
@@ -249,8 +253,8 @@ class ApplicationController < ActionController::Base
 		arr = arr.to_a if arr.instance_of?(Mongoid::Criteria)
 		return [] if !arr.instance_of?(Array)
 
-		page = page.nil? || page.empty? ? 1 : page.to_i
-		per_page = per_page.nil? || per_page.empty? ? 10 : per_page.to_i
+		page = page.nil? || page.to_s.empty? ? 1 : page.to_i
+		per_page = per_page.nil? || per_page.to_s.empty? ? 10 : per_page.to_i
 		return [] if page < 1 || per_page < 1 
 
 		### sort
@@ -281,7 +285,7 @@ class ApplicationController < ActionController::Base
 		return_json(true, value)
 	end
 	def render_json_auto(value = true)
-		is_success = !(value.class == String && value.start_with?('error_'))
+		is_success = !((value.class == String && value.start_with?('error_')) || value.to_s.to_i < 0)
 		is_success ? render_json_s(value) : render_json_e(value)
 	end
 end

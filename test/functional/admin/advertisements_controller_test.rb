@@ -27,7 +27,7 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 
 		auth_key = sign_in(user.email, "123456")
 		get 'index', :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 0
 		sign_out(auth_key)
 
@@ -44,18 +44,18 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 		
 		auth_key = sign_in(user.email, "123456")
 		post 'create', :advertisement => {title: "title1", linked: "linked1", image_location: "image_location1"}, :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval["linked"], "linked1"
 		advertisement = Advertisement.all.first
 		assert_equal advertisement.linked, "linked1"
 
 		# unique
 		post 'create', :advertisement => {title: "title1", linked: "linked1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::ADVERTISEMENT_SAVE_FAILED.to_s, @response.body
+		assert_equal ErrorEnum::ADVERTISEMENT_SAVE_FAILED, JSON.parse(@response.body)["value"]
 
 		# lack of image_location attr
 		post 'create', :advertisement => {title: "title2", linked: "linked1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::ADVERTISEMENT_SAVE_FAILED.to_s, @response.body
+		assert_equal ErrorEnum::ADVERTISEMENT_SAVE_FAILED, JSON.parse(@response.body)["value"]
 
 		#
 		# get index
@@ -67,30 +67,30 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 
 		# without ...
 		get 'index', :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 3
 
 		# with activate
 		get 'index', :format => :json, :activate => true, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, Advertisement.activated.count
 
 		get 'index', :format => :json, :activate => false, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, Advertisement.unactivate.count
 
 		#with title
 		get 'index', :format => :json, :title => "title1", :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 1
 
 		get 'index', :format => :json, :title => "title2", :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 1
 
 		#paging
 		get 'index', :format => :json, :per_page => 2, :page => 2, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 1
 
 		sign_out(auth_key)
@@ -113,7 +113,7 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 	
 		auth_key = sign_in(user.email, "123456")
 		post 'create', :advertisement => {title: "title1", linked: "linked1", image_location: "image_location1"}, :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval["linked"], "linked1"
 		advertisement = Advertisement.all.first
 		assert_equal advertisement.linked, "linked1"
@@ -126,10 +126,10 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 
 		post 'update', :id => "123443454354353", :advertisement => {linked: "updated linked1"}, :format => :json, :auth_key => auth_key
 		retval = @response.body.to_i
-		assert_equal ErrorEnum::ADVERTISEMENT_NOT_EXIST.to_s, @response.body
+		assert_equal ErrorEnum::ADVERTISEMENT_NOT_EXIST, JSON.parse(@response.body)["value"]
 
 		post 'update', :id => advertisement.id.to_s, :advertisement => {linked: "updated linked1"}, :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval["linked"], "updated linked1"
 
 		assert_equal Advertisement.all.count, 1
@@ -154,13 +154,13 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 
 		post 'update', :id => "123443454354353", :format => :json, :auth_key => auth_key
 		retval = @response.body.to_i
-		assert_equal ErrorEnum::ADVERTISEMENT_NOT_EXIST.to_s, @response.body
+		assert_equal ErrorEnum::ADVERTISEMENT_NOT_EXIST, JSON.parse(@response.body)["value"]
 
 		post 'create', :advertisement => {title: "title1", linked: "linked1", image_location: "image_location1"}, :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 
 		post 'destroy', :id => retval["_id"], :format => :json, :auth_key => auth_key
-		assert_equal @response.body, "true"
+		assert_equal JSON.parse(@response.body)["value"], true
 		
 		retval = Advertisement.where(_id: retval["_id"]).first
 		assert_equal retval, nil

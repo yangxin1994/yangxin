@@ -400,6 +400,207 @@ class AnswersControllerTest < ActionController::TestCase
 		end
 	end
 
+	test "should submit answer correctly" do
+		clear(User, Survey, Answer)
+		jesse = init_jesse
+		oliver = init_oliver
+		lisa = init_lisa
+		polly = init_polly
+		survey_auditor = init_survey_auditor
+
+		survey_id, pages = *create_survey_page_question(jesse.email, jesse.password)
+		question_ids = pages.flatten
+		set_survey_published(survey_id, jesse, survey_auditor)
+
+		# quetions loadding for surveys that do not allow page up
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91"
+		result = JSON.parse(@response.body)
+		questions = result["value"][0]
+		# answer the questions in the first page
+		answer_content = {}
+		answer_content[questions[0]["_id"]] = "answer for the first question"
+		answer_content[questions[1]["_id"]] = "answer for the second question"
+		answer_content[questions[2]["_id"]] = "answer for the third question"
+		post :submit_answer, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :answer_content => answer_content
+		result = JSON.parse(@response.body)
+		assert result["success"]
+		answer = Answer.first
+		assert_equal "answer for the first question", answer.answer_content[questions[0]["_id"]]
+		assert_equal "answer for the second question", answer.answer_content[questions[1]["_id"]]
+		assert_equal "answer for the third question", answer.answer_content[questions[2]["_id"]]
+		# load questions after answering the first three questions
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91"
+		result = JSON.parse(@response.body)
+		questions = result["value"][0]
+		assert_equal pages[1].length, questions.length
+		assert_equal pages[1][0], questions[0]["_id"]
+		# answer the questions in the second page
+		answer_content = {}
+		answer_content[questions[0]["_id"]] = "answer for the first question in the second page"
+		post :submit_answer, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :answer_content => answer_content
+		result = JSON.parse(@response.body)
+		assert result["success"]
+		answer = Answer.first
+		assert_equal "answer for the first question in the second page", answer.answer_content[questions[0]["_id"]]
+		# load questions in the third page
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91"
+		result = JSON.parse(@response.body)
+		questions = result["value"][0]
+		assert_equal pages[2].length, questions.length
+		assert_equal pages[2][0], questions[0]["_id"]
+		assert_equal pages[2][1], questions[1]["_id"]
+		assert_equal pages[2][2], questions[2]["_id"]
+		assert_equal pages[2][3], questions[3]["_id"]
+		# answer the first three questions in the third page
+		answer_content = {}
+		answer_content[questions[0]["_id"]] = "answer for the first question in the third page"
+		answer_content[questions[1]["_id"]] = "answer for the second question in the third page"
+		answer_content[questions[2]["_id"]] = "answer for the third question in the third page"
+		post :submit_answer, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :answer_content => answer_content
+		result = JSON.parse(@response.body)
+		assert result["success"]
+		answer = Answer.first
+		assert_equal "answer for the first question in the third page", answer.answer_content[questions[0]["_id"]]
+		assert_equal "answer for the second question in the third page", answer.answer_content[questions[1]["_id"]]
+		assert_equal "answer for the third question in the third page", answer.answer_content[questions[2]["_id"]]
+		assert_equal nil, answer.answer_content[questions[3]["_id"]]
+		# load questions again, the last question in the third page should be loaded
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91"
+		result = JSON.parse(@response.body)
+		questions = result["value"][0]
+		assert_equal 1, questions.length
+		assert_equal pages[2][3], questions[0]["_id"]
+		# answer the last question in the third page
+		answer_content = {}
+		answer_content[questions[0]["_id"]] = "answer for the fourth question in the third page"
+		post :submit_answer, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :answer_content => answer_content
+		result = JSON.parse(@response.body)
+		assert result["success"]
+		answer = Answer.first
+		assert_equal "answer for the fourth question in the third page", answer.answer_content[questions[0]["_id"]]
+		assert !answer.is_finish
+		assert answer.is_edit
+		# load questions in the last page
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91"
+		result = JSON.parse(@response.body)
+		questions = result["value"][0]
+		assert_equal pages[3].length, questions.length
+		assert_equal pages[3][0], questions[0]["_id"]
+		assert_equal pages[3][1], questions[1]["_id"]
+		# answer the questions in the last page
+		answer_content = {}
+		answer_content[questions[0]["_id"]] = "answer for the first question in the last page"
+		answer_content[questions[1]["_id"]] = "answer for the second question in the last page"
+		post :submit_answer, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :answer_content => answer_content
+		result = JSON.parse(@response.body)
+		assert result["success"]
+		answer = Answer.first
+		assert_equal "answer for the first question in the last page", answer.answer_content[questions[0]["_id"]]
+		assert_equal "answer for the second question in the last page", answer.answer_content[questions[1]["_id"]]
+		# all the questions are answered, for the surveys that do not allow pageup, the answer process automatically finishes
+		assert answer.is_finish
+	end
+
+
+	test "should check quota when submitting answers" do
+		clear(User, Survey, Answer)
+		jesse = init_jesse
+		oliver = init_oliver
+		lisa = init_lisa
+		polly = init_polly
+		survey_auditor = init_survey_auditor
+
+		survey_id, pages = *create_short_survey_page_question(jesse.email, jesse.password)
+		question_ids = pages.flatten
+		first_question = Question.find_by_id(question_ids[0])
+
+		# remove the default quota rule for the survey
+		delete_quota_rule(jesse.email, jesse.password, survey_id, 0)
+
+		# add a question quota rule
+		quota_rule = {}
+		quota_rule["amount"] = 2
+		quota_rule["conditions"] = []
+		quota_rule["conditions"] << {"condition_type" => 1, "name" => question_ids[0], "value" => [first_question.issue["items"][0]["id"]], "fuzzy" => false}
+		add_quota_rule(jesse.email, jesse.password, survey_id, quota_rule)
+		set_survey_published(survey_id, jesse, survey_auditor)
+
+		# first user answers the survey
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91"
+		result = JSON.parse(@response.body)
+		questions = result["value"][0]
+		# answer the questions in the first page
+		answer_content = {}
+		answer_content[questions[0]["_id"]] = {"selection" => [first_question.issue["items"][0]["id"]]}
+		answer_content[questions[1]["_id"]] = "answer for the second question"
+		answer_content[questions[2]["_id"]] = "answer for the third question"
+		post :submit_answer, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :answer_content => answer_content
+		result = JSON.parse(@response.body)
+		assert result["success"]
+		survey = Survey.find_by_id(survey_id)
+		assert_equal 1, survey.quota_stats["answer_number"][0]
+		assert jesse.answers.first.is_finish
+		sign_out(auth_key)
+
+		# second user answers the survey
+		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91"
+		result = JSON.parse(@response.body)
+		questions = result["value"][0]
+		# answer the questions in the first page
+		answer_content = {}
+		answer_content[questions[0]["_id"]] = {"selection" => [first_question.issue["items"][1]["id"]]}
+		answer_content[questions[1]["_id"]] = "answer for the second question"
+		answer_content[questions[2]["_id"]] = "answer for the third question"
+		post :submit_answer, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :answer_content => answer_content
+		result = JSON.parse(@response.body)
+		assert !result["success"]
+		assert_equal ErrorEnum::VIOLATE_QUOTA, result["value"]["error_code"]
+		survey = Survey.find_by_id(survey_id)
+		assert_equal 1, survey.quota_stats["answer_number"][0]
+		assert oliver.answers.first.is_reject
+		sign_out(auth_key)
+
+		# third user answers the survey
+		auth_key = sign_in(lisa.email, Encryption.decrypt_password(lisa.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91"
+		result = JSON.parse(@response.body)
+		questions = result["value"][0]
+		# answer the questions in the first page
+		answer_content = {}
+		answer_content[questions[0]["_id"]] = {"selection" => [first_question.issue["items"][0]["id"]]}
+		answer_content[questions[1]["_id"]] = "answer for the second question"
+		answer_content[questions[2]["_id"]] = "answer for the third question"
+		post :submit_answer, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :answer_content => answer_content
+		result = JSON.parse(@response.body)
+		assert result["success"]
+		survey = Survey.find_by_id(survey_id)
+		assert_equal 2, survey.quota_stats["answer_number"][0]
+		assert lisa.answers.first.is_finish
+		sign_out(auth_key)
+
+		# fourth user answers the survey
+		auth_key = sign_in(polly.email, Encryption.decrypt_password(polly.password))
+		post :load_question, :format => :json, :auth_key => auth_key, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91"
+		result = JSON.parse(@response.body)
+		assert !result["success"]
+		assert_equal ErrorEnum::VIOLATE_QUOTA, result["value"]["error_code"]
+		survey = Survey.find_by_id(survey_id)
+		assert polly.answers.first.is_reject
+		sign_out(auth_key)
+	end
+
 	def add_quota_rule(email, password, survey_id, quota_rule)
 		auth_key = sign_in(email, Encryption.decrypt_password(password))
 		old_controller = @controller

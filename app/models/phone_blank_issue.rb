@@ -20,6 +20,12 @@ class PhoneBlankIssue < Issue
 		super(ATTR_NAME_ARY, issue_obj)
 	end
 
+	def estimate_answer_time
+		answer_time = 0
+		answer_time = answer_time + 1 if (phone_type & 2) != 0
+		answer_time = answer_time + 1 if (phone_type & 1) != 0
+	end
+
 	#*description*: serialize the current instance into a question object
 	#
 	#*params*:

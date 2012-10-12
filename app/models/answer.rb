@@ -1106,11 +1106,11 @@ class Answer
 			when "0"
 				question_id = condition["name"]
 				require_answer = condition["value"]
-				satisfy = Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], require_answer)
+				satisfy = Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], require_answer, condition["fuzzy"])
 			when "1"
 				question_id = condition["name"]
 				require_answer = condition["value"]
-				satisfy = Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], require_answer)
+				satisfy = Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], require_answer, condition["fuzzy"])
 			when "2"
 				satisfy = Address.satisfy_region_code?(self.region, condition["value"])
 			when "3"
@@ -1140,19 +1140,19 @@ class Answer
 				volunteer_answer = self.answer_content[condition["name"]]["selection"]
 				require_answer = condition["value"]
 				# if the volunteer has not answered this question, cannot reject the volunteer
-				satisfy = volunteer_answer.nil? || Tool.check_choice_question_answer(volunteer_answer, require_answer)
+				satisfy = volunteer_answer.nil? || Tool.check_choice_question_answer(volunteer_answer, require_answer, condition["fuzzy"])
 			when "1"
 				volunteer_answer = self.answer_content[condition["name"]]["selection"]
 				require_answer = condition["value"]
 				# if the volunteer has not answered this question, cannot reject the volunteer
-				satisfy = volunteer_answer.nil? || Tool.check_choice_question_answer(volunteer_answer, require_answer)
+				satisfy = volunteer_answer.nil? || Tool.check_choice_question_answer(volunteer_answer, require_answer, condition["fuzzy"])
 			end
 			return satisfy if !satisfy
 		end
 		return true
 	end
 
-	#*description*: clear the answer contents, only work for answers with "redo" status
+	#*description*: clear the answer contents, only work for answers with "redo" status, or preview answers, or answers whose survey allows pageup
 	#
 	#*params*:
 	#
@@ -1160,7 +1160,12 @@ class Answer
 	#* true: when the answer content is cleared
 	#* ErrorEnum::WRONG_ANSWER_STATUS
 	def clear
-		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_redo
+		if self.is_finish || self.is_reject
+			return ErrorEnum::WRONG_ANSWER_STATUS
+		end
+		if !self.is_redo && !self.is_preview && !self.survey.is_pageup_allowed
+			return ErrorEnum::WRONG_ANSWER_STATUS
+		end
 		# clear the template answer content
 		self.template_answer_content.each do |k, v|
 			v = nil
@@ -1226,7 +1231,7 @@ class Answer
 	#
 	#*retval*:
 	#* true: when the answers are successfully updated
-	def update_answer(answer_type, answer_content)
+	def update_answer(answer_content)
 		answer_content.each do |k, v|
 			self.answer_content[k] = v if self.answer_content.has_key?(k)
 			self.template_answer_content[k] = v if self.template_answer_content.has_key?(k)

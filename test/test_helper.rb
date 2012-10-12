@@ -279,6 +279,22 @@ class ActiveSupport::TestCase
 		return survey_obj
 	end
 
+	def create_short_survey_page_question(email, password)
+		survey_id = create_survey(email, Encryption.decrypt_password(password))
+	
+		remove_page(email, password, survey_id, 0)
+		insert_page(email, password, survey_id, -1, "first page")
+		insert_page(email, password, survey_id, 0, "second page")
+		insert_page(email, password, survey_id, 0, "third page")
+		insert_page(email, password, survey_id, 0, "fouth page")
+
+		q1 = create_question(email, password, survey_id, 0, -1, 0)
+		q2 = create_question(email, password, survey_id, 0, -1, 8)
+		q3 = create_question(email, password, survey_id, 0, -1, 11)
+
+		return [survey_id, [[q1, q2, q3]]]
+	end
+
 	def create_survey_page_question(email, password)
 		survey_id = create_survey(email, Encryption.decrypt_password(password))
 	

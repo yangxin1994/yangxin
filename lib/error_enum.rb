@@ -20,9 +20,10 @@ module ErrorEnum
 	EMAIL_EXIST = "error_17"
 	USERNAME_EXIST = "error_18"
 	AUTH_KEY_EXIST = "error_19"
-	GROUP_EXIST = "error_20"
-	GROUP_NOT_EXIST = "error_21"
-	UNAUTHORIZED = "error_22"
+	AUTH_KEY_NOT_EXIST = "error_20"
+	GROUP_EXIST = "error_21"
+	GROUP_NOT_EXIST = "error_22"
+	UNAUTHORIZED = "error_23"
 	SURVEY_NOT_EXIST = "error_30"
 	QUESTION_NOT_EXIST = "error_31"
 	WRONG_QUESTION_TYPE = "error_32"
@@ -61,6 +62,9 @@ module ErrorEnum
 
 	WRONG_SURVEY_PASSWORD = "error_140"
 	ANSWER_NOT_EXIST = "error_141"
+
+	WRONG_FILTER_CONDITION_TYPE = "error_150"
+	FILTER_NOT_EXIST = "error_151"
 
 	UNKNOWN_ERROR = -100000
 	FAQ_TYPE_ERROR = -100001

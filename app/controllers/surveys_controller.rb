@@ -3,7 +3,7 @@ require 'array'
 require 'error_enum'
 class SurveysController < ApplicationController
 	before_filter :require_sign_in
-	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :show, :update_deadline]
+	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :update_deadline]
 	before_filter :check_normal_survey_existence, :except => [:new, :index, :recover, :clear, :add_tag, :remove_tag, :show]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
 	#TODO 无法测试
@@ -234,6 +234,12 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def show
+		@survey = Survey.find_by_id(params[:id])
+		if @survey.nil?
+			respond_to do |format|
+				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
+			end
+		end
 		respond_to do |format|
 			format.json	{ render_json_auto(@survey.serialize) and return }
 		end
@@ -299,11 +305,9 @@ class SurveysController < ApplicationController
 
 		if params[:stars].nil? then
 			survey_list = @current_user.surveys.list(params[:status], params[:publish_status], params[:tags])
-			survey_list = slice((survey_list || []), params[:page], params[:per_page])
+			survey_list = slice((survey_list || []), page, per_page)
 		else
-			params[:page] ||= 1
-			params[:per_page] ||= 10
-			survey_list = @current_user.surveys.stars.page(params[:page]).per(params[:per_page])
+			survey_list = @current_user.surveys.stars.page(page).per(per_page)
 		end	
 
 		# add answer_number
@@ -418,6 +422,13 @@ class SurveysController < ApplicationController
 	# true or false
 	def update_star
 		retval = @survey.update_star
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
+
+	def estimate_answer_time
+		retval = @survey.estimate_answer_time
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end

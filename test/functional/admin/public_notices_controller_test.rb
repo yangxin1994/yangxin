@@ -11,7 +11,7 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 	
 		auth_key = sign_in(user.email, "123456")
 		get 'index', :format => :json, :auth_key => auth_key
-		assert_equal JSON.parse(@response.body), []		
+		assert_equal JSON.parse(@response.body)['value'], []		
 		sign_out(auth_key)
 		
 		clear(User,PublicNotice)
@@ -53,14 +53,14 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 	
 		auth_key = sign_in(user.email, "123456")
 		post 'create', :public_notice => {public_notice_type: "Type1", title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR.to_s, @response.body
+		assert_equal ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR, JSON.parse(@response.body)["value"]
 		
 		post 'create', :public_notice => {public_notice_type: 129, title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR.to_s, @response.body
+		assert_equal ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR, JSON.parse(@response.body)["value"]
 		
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
-		assert_equal retval["title"], "title1"
+		assert_equal retval["value"]["title"], "title1"
 		public_notice = PublicNotice.all.first
 		assert_equal public_notice.title, "title1"
 
@@ -73,34 +73,34 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 
 		# no type, no value
 		get 'index', :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 4
 
 		# with type, no value
 		get 'index', :format => :json, :public_notice_type => 3, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 2
 
 		get 'index', :format => :json, :public_notice_type => 255, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 4
 
 		#with type and value
 		get 'index', :format => :json, :public_notice_type => 3, :value => "content", :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 2
 
 		get 'index', :format => :json, :public_notice_type => 3, :value => "content1", :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 1
 
 		#paging
 		get 'index', :format => :json, :per_page => 2, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 2
 
 		get 'index', :format => :json, :per_page => 3, :page=> 2, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 1
 
 
@@ -132,16 +132,16 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 		public_notice = PublicNotice.all.first
 
 		post 'update', :id => "123443454354353", :public_notice => {title: "updated title1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::PUBLIC_NOTICE_NOT_EXIST.to_s, @response.body
+		assert_equal ErrorEnum::PUBLIC_NOTICE_NOT_EXIST, JSON.parse(@response.body)["value"]
 
 		post 'update',:id => public_notice.id.to_s ,  :public_notice => {public_notice_type: "Type1", title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR.to_s, @response.body
+		assert_equal ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR, JSON.parse(@response.body)["value"]
 		
 		post 'update',:id => public_notice.id.to_s,  :public_notice => {public_notice_type: 129, title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR.to_s, @response.body
+		assert_equal ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR, JSON.parse(@response.body)["value"]
 
 		post 'update', :id => public_notice.id.to_s, :public_notice => {title: "updated title1"}, :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval["title"], "updated title1"
 
 		assert_equal PublicNotice.all.count, 1
@@ -163,10 +163,10 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 	
 		auth_key = sign_in(user.email, "123456")
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 
 		post 'destroy', :id => retval["_id"], :format => :json, :auth_key => auth_key
-		assert_equal @response.body, "true"
+		assert_equal JSON.parse(@response.body)["value"], true
 		
 		retval = PublicNotice.where(_id: retval["_id"]).first
 		assert_equal retval, nil
