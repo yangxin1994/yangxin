@@ -146,6 +146,8 @@ class Faq
 			return [] if !type_number.instance_of?(Fixnum) || type_number <= 0
 			faqs = []
 			
+			value = value.gsub(/[*]/, ' ')
+
 			# if type_number legal
 			MAX_TYPE.downto(0).each { |element| 
 				faqs_tmp = []

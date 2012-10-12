@@ -1,6 +1,11 @@
 # coding: utf-8
 
 class Admin::FaqsController < Admin::ApplicationController
+
+	def maping(faq)
+		faq['user_email'] = User.find(faq['user_id'].to_s).email
+		faq
+	end
  
 	# GET /admin/faqs
 	# GET /admin/faqs.json
@@ -11,26 +16,41 @@ class Admin::FaqsController < Admin::ApplicationController
 			else
 				@faqs = Faq.list_by_type(params[:faq_type])
 			end
-		else
-			@faqs = Faq.all.desc(:updated_at)
-		end
 
-		@faqs = slice((@faqs || []), params[:page], params[:per_page])
+			@faqs = slice((@faqs || []), page, per_page)
+		else
+			@faqs = Faq.all.desc(:updated_at).page(page).per(per_page)
+		end		
 
 		respond_to do |format|
 			format.html # index.html.erb
-			format.json { render json: @faqs, :except => [:user_id]}
+			format.json { render_json_auto @faqs}
 		end
+	end
+
+	def count
+		render_json_auto Faq.count
+	end
+
+	def list_by_type_count
+		@public_notices = PublicNotice.list_by_type(params[:public_notice_type]) 
+		render_json_auto @public_notices.count
+	end
+
+	def list_by_type_and_value_count
+		@public_notices = PublicNotice.list_by_type_and_value(params[:public_notice_type], params[:value])
+		render_json_auto @public_notices.count
 	end
 	
 	# GET /admin/faqs/1 
 	# GET /admin/faqs/1.json
 	def show
 		@faq = Faq.find_by_id(params[:id])
+		@faq = maping(@faq) if @faq.is_a? Faq
 
 		respond_to do |format|
 			format.html # show.html.erb
-			format.json { render json: @faq, :except => [:user_id] }
+			format.json { render_json_auto @faq }
 		end
 	end
 
@@ -41,7 +61,7 @@ class Admin::FaqsController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html # new.html.erb
-			format.json { render json: @faq, :except => [:user_id] }
+			format.json { render_json_auto @faq }
 		end
 	end
 
@@ -51,7 +71,7 @@ class Admin::FaqsController < Admin::ApplicationController
 
 		respond _to do |format|
 			format.html # show.html.erb
-			format.json { render json: @faq, :except => [:user_id] }
+			format.json { render_json_auto @faq }
 		end
 	end
 	
@@ -63,7 +83,7 @@ class Admin::FaqsController < Admin::ApplicationController
 		respond_to do |format|
 			format.html  if @faq.instance_of?(Faq)
 			format.html { render action: "new" } if !@faq.instance_of?(Faq)
-			format.json { render :json => @faq, :except => [:user_id]}
+			format.json { render_json_auto @faq}
 		end
 	end
 
@@ -75,7 +95,7 @@ class Admin::FaqsController < Admin::ApplicationController
 		respond_to do |format|
 			format.html { redirect_to @faq} if @faq.instance_of?(Faq)
 			format.html { render action: "edit" } if !@faq.instance_of?(Faq)
-			format.json { render :json => @faq,:except => [:user_id] }
+			format.json { render_json_auto @faq}
 		end
 	end
 
@@ -86,7 +106,7 @@ class Admin::FaqsController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html { redirect_to faqs_url }
-			format.json { render :json => @faq,:except => [:user_id] }
+			format.json { render_json_auto @faq}
 		end
 	end
 	

@@ -2,7 +2,7 @@
 
 class Admin::SystemUsersController < Admin::ApplicationController
 
-	before_filter :require_admin
+	# before_filter :require_admin
 
 	@@system_user_attrs_filter = %w(_id system_user_type true_name email username lock created_at updated_at)
  

@@ -15,7 +15,8 @@ class Admin::UsersController < Admin::ApplicationController
 		elsif !params[:true_name].nil? then	
 			@users = User.where(true_name: params[:true_name]).to_a
 		elsif !params[:username].nil? then
-			@users = User.where(username: /.*#{params[:username]}.*/).to_a
+			filter = params[:username].to_s.gsub(/[*]/, ' ')
+			@users = User.where(username: /.*#{filter}.*/).to_a
 		else
 			@users = User.all.to_a
 		end			
