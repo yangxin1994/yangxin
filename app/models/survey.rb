@@ -174,25 +174,16 @@ class Survey
     @retval
   end
 
-  def spss_data
-    data = {"spss_header" => spss_header,
-            "answer_contents" => answer_content,
-            "header_name" => csv_header}
-  end
-
-  def excel_data
-    data = {"excel_header" => excel_header,
-            "answer_contents" => answer_content,
-            "header_name" => csv_header}
-  end
-
   def get_export_result(filter_name, include_screened_answer)
     filtered_answers = Result.answers(self, filter_name, include_screened_answer)
     answer_ids = filtered_answers.collect { |a| a.id.to_s}.join
     p "===== 获取 Key 成功 ====="
     result_key = Digest::MD5.hexdigest("export_result-#{answer_ids}")
     result = ExportResult.where(:result_key => result_key).first
-    result ||= ExportResult.create(:result_key => result_key)
+    result ||= ExportResult.create(:result_key => result_key,
+                                   :survey => self,
+                                   :filter_name => filter_name,
+                                   :include_screened_answer => include_screened_answer)
   end
 
   def send_data(post_to)
@@ -205,7 +196,7 @@ class Survey
         a = Time.now
         r.set_form_data(yield)
         p Time.now - a
-        http.read_timeout = 3
+        http.read_timeout = 20
         http.request(r)
       end
     rescue Errno::ECONNREFUSED
@@ -264,17 +255,18 @@ class Survey
     if result.finished
       return "Spss文件的路径:类似于 localhost/result_key.sav"
     else
-      Resque.enqueue(Jobs::ToSpssJob, self.id)
+      #Resque.enqueue(Jobs::ToSpssJob, self.id, result.result_key)
+      to_spss_r(result.result_key)
     end
   end
 
-  def to_spss_r
-    result = get_export_result(filter_name, include_screened_answer)
+  def to_spss_r(result_key)
+    filtered_answers = Result.where(:result_key => result_key).first.filtered_answers
     send_data '/to_spss' do
-      {'spss_data' => Marshal.dump({"spss_header" => spss_header,
-                                    "answer_contents" => answer_content,
-                                    "header_name" => csv_header,
-                                    "result_key" => result.result_key})}
+      {'spss_data' => {"spss_header" => spss_header,
+                       "answer_contents" => answer_content,
+                       "header_name" => csv_header,
+                       "result_key" => result_key}.to_yaml}
     end
   end
 
@@ -283,17 +275,18 @@ class Survey
     if result.finished
       return "Excel文件的路径:类似于 localhost/result_key.xsl"
     else
-      Resque.enqueue(Jobs::ToSpssJob, self.id)
+      # Resque.enqueue(Jobs::ToSpssJob, self.id)
+      to_excel_r(result.result_key)
     end
   end
 
-  def to_excel_r
-    result = get_export_result(filter_name, include_screened_answer)
-    send_data '/to_spss' do
-      {'spss_data' => Marshal.dump({"excel_header" => excel_header,
-                                    "answer_contents" => answer_content,
-                                    "header_name" => csv_header,
-                                    "result_key" => result.result_key})}
+  def to_excel_r(result_key)
+    filtered_answers = Result.where(:result_key => result_key).first.filtered_answers
+    send_data '/to_excel' do
+      {'excel_data' => ({"excel_header" => excel_header,
+                         "answer_contents" => answer_content,
+                         "header_name" => csv_header,
+                         "result_key" => result_key}).to_yaml}
     end
   end
 

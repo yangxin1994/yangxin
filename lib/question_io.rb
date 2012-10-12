@@ -37,7 +37,7 @@ class QuestionIo
 
   def excel_header(header_prefix)
     # TODO "重写以提高效率"
-    @retval << spss_header(header_prefix)["spss_label"]
+    spss_header(header_prefix).map{|s| s['spss_label']}
   end
 
   def answer_content(v)
