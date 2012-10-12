@@ -91,7 +91,7 @@ class Answer
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		
 		answer = Answer.new
-		answer.template_answer_content = answer_content
+		answer.answer_content = answer_content
 		answer.save
 		operator.answers << answer
 		survey.answers << answer
@@ -319,7 +319,7 @@ class Answer
 		return questions
 	end
 
-	#*description*: add a logic control result
+	#*description*: add a logic control result, used for show/hide items logic control rules
 	#
 	#*params*:
 	#* question_id
@@ -479,16 +479,24 @@ class Answer
 			return ErrorEnum::WRONG_ANSWER_STATUS
 		end
 		# clear the template answer content
-		self.template_answer_content.each do |k, v|
-			v = nil
+		self.template_answer_content.each_key do |k|
+			self.template_answer_content[k] = nil
 		end
 		# clear the answer content
-		self.answer_content.each do |k, v|
-			v = nil
+		self.answer_content.each_key do |k|
+			self.answer_content[k] = nil
 		end
 		# clear the random quality control questoins answer content
-		self.random_quality_control_answer_content.each do |k, v|
-			v = nil
+		self.random_quality_control_answer_content.each_key do |k|
+			self.random_quality_control_answer_content[k] = nil
+		end
+		logic_control = self.survey.show_logic_control
+		logic_control.each do |rule|
+			if rule["rule_type"] == 1
+				rule["result"].each do |q_id|
+					answer_content[q_id] = {}
+				end
+			end
 		end
 		# initialize the logic control result
 		self.logic_control_result = {}
@@ -576,13 +584,13 @@ class Answer
 		# if there are quality control questions, check whether passing the quality control
 		inserted_quality_control_question_ary.each do |q|
 			quality_control_question_id = q.reference_id
-			return false if self.answer_content[q._id].nil?
-			retval = self.check_quality_control_answer(self.answer_content[q._id], quality_control_question_id)
+			return false if self.answer_content[q._id.to_s].nil?
+			retval = self.check_quality_control_answer(self.answer_content[q._id.to_s], quality_control_question_id)
 			return false if !retval
 		end
 
 		########## check quality control quesoitns that are randomly inserted ##########
-		random_quality_control_question_id_ary do |qc_id|
+		random_quality_control_question_id_ary.each do |qc_id|
 			return false if self.random_quality_control_answer_content[qc_id].nil?
 			retval = self.check_quality_control_answer(self.random_quality_control_answer_content[qc_id], qc_id ,true)
 			return false if !retval
@@ -601,7 +609,7 @@ class Answer
 	#* false: when the quality control rules are violated
 	def check_quality_control_answer(question_answer, quality_control_question_id, randomly_inserted = false)
 		standard_answer = QualityControlQuestionAnswer.find_by_question_id(quality_control_question_id)
-		if standard_answer.quality_control_type == 0
+		if standard_answer.quality_control_type == 1
 			# this is objective quality control question
 			volunteer_answer = question_answer["selection"]
 			case standard_answer.question_type
