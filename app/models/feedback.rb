@@ -271,6 +271,8 @@ class Feedback
 				title,
 				message_content,
 				[feedback.question_user.id.to_s])
+
+			feedback.is_answer = true and feedback.save if retval.is_a? Message
 					
 			return retval
 
