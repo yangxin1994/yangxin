@@ -25,11 +25,12 @@ class Admin::FeedbacksController < Admin::ApplicationController
 			else
 				@feedbacks = Feedback.list_by_type(params[:feedback_type])
 			end
+
+			@feedbacks = slice((@feedbacks || []), page, per_page)
 		else
-			@feedbacks = Feedback.all.desc(:updated_at).page(page).per(per_page)
+			@feedbacks = Feedback.all.asc(:is_answer).desc(:created_at).page(page).per(per_page) 
 		end
 
-		@feedbacks = slice((@feedbacks || []), page, per_page)
 		@feedbacks = @feedbacks.map{|e| maping_question_user(e)}
 
 		render_json_auto @feedbacks
