@@ -174,6 +174,7 @@ class Survey
 	def serialize
 		survey_obj = Hash.new
 		survey_obj["_id"] = self._id.to_s
+		survey_obj["user_id"] = self.user_id.to_s
 		survey_obj["created_at"] = self.created_at
 		survey_obj["pages"] = Marshal.load(Marshal.dump(self.pages))
 		META_ATTR_NAME_ARY.each do |attr_name|
@@ -189,6 +190,9 @@ class Survey
 		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
 		survey_obj["publish_status"] = self.publish_status
 		survey_obj["status"] = self.status
+		survey_obj["quality_control_questions_type"] = self.quality_control_questions_type
+		survey_obj["deadline"] = self.deadline
+		survey_obj["is_star"] = self.is_star
 		return survey_obj
 	end
 
