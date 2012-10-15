@@ -53,10 +53,10 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 	
 		auth_key = sign_in(user.email, "123456")
 		post 'create', :public_notice => {public_notice_type: "Type1", title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR, JSON.parse(@response.body)["value"]["error_code"]
 		
 		post 'create', :public_notice => {public_notice_type: 129, title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR, JSON.parse(@response.body)["value"]["error_code"]
 		
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
@@ -132,13 +132,13 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 		public_notice = PublicNotice.all.first
 
 		post 'update', :id => "123443454354353", :public_notice => {title: "updated title1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::PUBLIC_NOTICE_NOT_EXIST, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::PUBLIC_NOTICE_NOT_EXIST, JSON.parse(@response.body)["value"]["error_code"]
 
 		post 'update',:id => public_notice.id.to_s ,  :public_notice => {public_notice_type: "Type1", title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR, JSON.parse(@response.body)["value"]["error_code"]
 		
 		post 'update',:id => public_notice.id.to_s,  :public_notice => {public_notice_type: 129, title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::PUBLIC_NOTICE_RANGE_ERROR, JSON.parse(@response.body)["value"]["error_code"]
 
 		post 'update', :id => public_notice.id.to_s, :public_notice => {title: "updated title1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)["value"]

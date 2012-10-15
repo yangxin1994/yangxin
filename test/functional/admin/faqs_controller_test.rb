@@ -56,13 +56,13 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 	
 		auth_key = sign_in(user.email, "123456")
 		post 'create', :faq => {faq_type: "Type1", question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::FAQ_TYPE_ERROR, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::FAQ_TYPE_ERROR, JSON.parse(@response.body)["value"]["error_code"]
 		
 		post 'create', :faq => {faq_type: 129, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::FAQ_RANGE_ERROR, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::FAQ_RANGE_ERROR, JSON.parse(@response.body)["value"]["error_code"]
 
 		post 'create', :faq => {faq_type: 128, answer: "answer1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::FAQ_SAVE_FAILED, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::FAQ_SAVE_FAILED, JSON.parse(@response.body)["value"]["error_code"]
 		
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)["value"]
@@ -137,13 +137,13 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 		faq = Faq.all.first
 
 		post 'update', :id => "123443454354353", :faq => {question: "updated question1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::FAQ_NOT_EXIST, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::FAQ_NOT_EXIST, JSON.parse(@response.body)["value"]["error_code"]
 
 		post 'update',:id => faq.id.to_s ,  :faq => {faq_type: "Type1", question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::FAQ_TYPE_ERROR, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::FAQ_TYPE_ERROR, JSON.parse(@response.body)["value"]["error_code"]
 		
 		post 'update',:id => faq.id.to_s,  :faq => {faq_type: 129, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::FAQ_RANGE_ERROR, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::FAQ_RANGE_ERROR, JSON.parse(@response.body)["value"]["error_code"]
 
 		post 'update', :id => faq.id.to_s, :faq => {question: "updated question1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)["value"]
