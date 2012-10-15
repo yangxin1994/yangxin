@@ -1209,6 +1209,7 @@ class Survey
 		end
 		self.quota_stats = quota_stats
 		self.save
+		return quota_stats
 	end
 
 	def set_exclusive(is_exclusive)

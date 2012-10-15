@@ -164,6 +164,7 @@ OopsData::Application.routes.draw do
 			get 'estimate_answer_time'
 			post 'update_deadline'
 			post 'update_star'
+			post 'refresh_quota_stats'
 		end
 		resources :pages do
 			member do
