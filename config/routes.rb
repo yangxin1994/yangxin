@@ -162,7 +162,7 @@ OopsData::Application.routes.draw do
 			get 'show_quality_control'
 			get 'check_progress'
 			get 'estimate_answer_time'
-			post 'update_deadline'
+			put 'update_deadline'
 			post 'update_star'
 			post 'refresh_quota_stats'
 		end
