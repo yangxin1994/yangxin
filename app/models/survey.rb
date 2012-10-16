@@ -523,6 +523,8 @@ class Survey
 		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != PublishStatus::UNDER_REVIEW
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => PublishStatus::PUBLISHED)
+		self.deadline = Time.now.to_i + 30.days.to_i if self.deadline.blank?
+		self.save
 		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::PUBLISHED, message)
 		self.publish_status_historys << publish_status_history
 		return true
