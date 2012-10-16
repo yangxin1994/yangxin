@@ -375,7 +375,7 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	#*method*: POST
+	#*method*: put
 	#
 	#*url*: /surveys/:survey_id/update_deadline
 	#
