@@ -1,5 +1,10 @@
 class Admin::AdvertisementsController < Admin::ApplicationController
 
+	def maping(advertisement)
+		advertisement['user_email'] = User.find(advertisement['user_id'].to_s).email
+		advertisement
+	end
+
 	# GET /admin/advertisements
 	# GET /admin/advertisements.json
 	def index
@@ -12,7 +17,7 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 		elsif !params[:title].nil? then
 			@advertisements = Advertisement.list_by_title(params[:title]).desc(:updated_at).page(page).per(per_page)
 		else
-			@advertisements = Advertisement.all.desc(:updated_at).page(page).per(per_page)
+			@advertisements = Advertisement.all.desc(:activate, :created_at).page(page).per(per_page)
 		end		
 
 		render_json_auto @advertisements
@@ -43,6 +48,7 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 	# GET /admin/advertisements/1.json
 	def show
 		@advertisement = Advertisement.find_by_id(params[:id])
+		@advertisement = maping(@advertisement) if @advertisement.is_a? Advertisement
 
 		respond_to do |format|
 			format.html # show.html.erb

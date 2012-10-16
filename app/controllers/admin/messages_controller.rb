@@ -24,7 +24,7 @@ class Admin::MessagesController < Admin::ApplicationController
 
 	def show
 		@message = Message.find_by_id(params[:id])
-		@message = maping(@message) if @message
+		@message = maping(@message) if @message.is_a? Message
 		render_json_auto @message
 	end
 

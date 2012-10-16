@@ -119,7 +119,7 @@ class AnswersController < ApplicationController
 		render_json_e(ErrorEnum::WRONG_ANSWER_STATUS) and return if !@answer.is_edit
 
 		# 1. update the answer content
-		retval = @answer.update_answer(params[:answer_type], params[:answer_content])
+		retval = @answer.update_answer(params[:answer_content])
 
 		# 2. check quality control
 		retval = @answer.check_quality_control(params[:answer_content])
@@ -130,7 +130,7 @@ class AnswersController < ApplicationController
 		render_json_auto(@answer.violate_screen) and return if !retval
 
 		# 4. check quota questions (skip for previewing)
-		if !@answer.is_preview?
+		if !@answer.is_preview
 			retval = @answer.check_quota_questions
 			render_json_auto(@answer.violate_quota) and return if !retval
 		end

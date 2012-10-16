@@ -20,5 +20,6 @@ class Array
 		self.each do |ele|
 			answer_time = answer_time + ele.estimate_answer_time if ele.class == Question
 		end
+		return answer_time
 	end
 end

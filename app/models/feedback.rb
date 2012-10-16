@@ -170,6 +170,8 @@ class Feedback
 
 			return [] if !type_number.instance_of?(Fixnum) || type_number <= 0
 			feedbacks = []
+
+			value = value.to_s.gsub(/[*]/, ' ')
 			
 			# if type_number != 0
 			MAX_TYPE.downto(0).each { |element| 
@@ -269,6 +271,8 @@ class Feedback
 				title,
 				message_content,
 				[feedback.question_user.id.to_s])
+
+			feedback.is_answer = true and feedback.save if retval.is_a? Message
 					
 			return retval
 

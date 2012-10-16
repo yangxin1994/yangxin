@@ -13,7 +13,7 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 		auth_key = sign_in(user.email, "123456")
 
 		get 'index', :format => :json, :auth_key => auth_key
-		assert_equal JSON.parse(@response.body), []
+		assert_equal JSON.parse(@response.body)["value"], []
 
 		sign_out(auth_key)
 
@@ -25,7 +25,7 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 	
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json
 		result = JSON.parse(@response.body)
-		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
+		assert_equal ErrorEnum::REQUIRE_LOGIN, result["value"]["error_code"]
 		
 		clear(User,Faq)
 	end
@@ -40,7 +40,7 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 		auth_key = sign_in(user.email, "123456")
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
 		result = JSON.parse(@response.body)
-		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
+		assert_equal ErrorEnum::REQUIRE_ADMIN, result["value"]["error_code"]
 		sign_out(auth_key)
 		
 		clear(User,Faq)
@@ -56,16 +56,16 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 	
 		auth_key = sign_in(user.email, "123456")
 		post 'create', :faq => {faq_type: "Type1", question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::FAQ_TYPE_ERROR.to_s, @response.body
+		assert_equal ErrorEnum::FAQ_TYPE_ERROR, JSON.parse(@response.body)["value"]["error_code"]
 		
 		post 'create', :faq => {faq_type: 129, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::FAQ_RANGE_ERROR.to_s, @response.body
+		assert_equal ErrorEnum::FAQ_RANGE_ERROR, JSON.parse(@response.body)["value"]["error_code"]
 
 		post 'create', :faq => {faq_type: 128, answer: "answer1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::FAQ_SAVE_FAILED.to_s, @response.body
+		assert_equal ErrorEnum::FAQ_SAVE_FAILED, JSON.parse(@response.body)["value"]["error_code"]
 		
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval["question"], "question1"
 		faq = Faq.all.first
 		assert_equal faq.question, "question1"
@@ -79,34 +79,34 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 
 		# no type, no value
 		get 'index', :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 4
 
 		# with type, no value
 		get 'index', :format => :json, :faq_type => 3, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 2
 
 		get 'index', :format => :json, :faq_type => 255, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 4
 
 		#with type and value
 		get 'index', :format => :json, :faq_type => 3, :value => "answer", :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 2
 
 		get 'index', :format => :json, :faq_type => 3, :value => "answer1", :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 1
 
 		#paging
 		get 'index', :format => :json, :per_page => 2, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 2
 
 		get 'index', :format => :json, :per_page => 3, :page=> 2, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 1
 
 		sign_out(auth_key)
@@ -137,16 +137,16 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 		faq = Faq.all.first
 
 		post 'update', :id => "123443454354353", :faq => {question: "updated question1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::FAQ_NOT_EXIST.to_s, @response.body
+		assert_equal ErrorEnum::FAQ_NOT_EXIST, JSON.parse(@response.body)["value"]["error_code"]
 
 		post 'update',:id => faq.id.to_s ,  :faq => {faq_type: "Type1", question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::FAQ_TYPE_ERROR.to_s, @response.body
+		assert_equal ErrorEnum::FAQ_TYPE_ERROR, JSON.parse(@response.body)["value"]["error_code"]
 		
 		post 'update',:id => faq.id.to_s,  :faq => {faq_type: 129, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::FAQ_RANGE_ERROR.to_s, @response.body
+		assert_equal ErrorEnum::FAQ_RANGE_ERROR, JSON.parse(@response.body)["value"]["error_code"]
 
 		post 'update', :id => faq.id.to_s, :faq => {question: "updated question1"}, :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval["question"], "updated question1"
 
 		assert_equal Faq.all.count, 1
@@ -168,10 +168,10 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 	
 		auth_key = sign_in(user.email, "123456")
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 
 		post 'destroy', :id => retval["_id"], :format => :json, :auth_key => auth_key
-		assert_equal @response.body, "true"
+		assert_equal JSON.parse(@response.body)["value"], true
 		
 		retval = Faq.where(_id: retval["_id"]).first
 		assert_equal retval, nil
