@@ -86,6 +86,7 @@ class Survey
 	has_many :email_histories
 
 	has_many :analyze_results
+	has_many :report_mockups
 
 	scope :all_but_new, lambda { where(:new_survey => false) }
 	scope :normal, lambda { where(:status.gt => -1) }
@@ -1273,6 +1274,37 @@ class Survey
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
 		result = self.analyze_results.find_or_create_by_filter_index(self, filter_index, include_screened_answer)
 		return result
+	end
+
+	def create_report_mockup(report_mockup)
+		result = ReportMockup.check_and_create_new(self, report_mockup)
+		return result
+	end
+
+	def show_report_mockup(report_mockup_id)
+		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
+		return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
+		return report_mockup
+	end
+
+	def list_report_mockups
+		return self.report_mockups
+	end
+
+	def delete_report_mockup(report_mockup_id)
+		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
+		if !report_mockup.nil?
+			report_mockup.destroy
+			return true
+		else
+			return ErrorEnum::REPORT_MOCKUP_NOT_EXIST
+		end
+	end
+
+	def update_report_mockup(report_mockup_id, report_mockup_obj)
+		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
+		return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
+		return report_mockup.update_report_mockup(report_mockup_obj)
 	end
 
 	class Filters

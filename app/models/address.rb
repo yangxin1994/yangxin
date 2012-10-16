@@ -97,6 +97,7 @@ class Address
 	end
 
 	def self.find_address_code_by_ip(ip_address)
+		self.ensure_cache
 		ip_info = IpInfo.find_by_ip(ip_address)
 		# no province information in the ip info
 		return -1 if ip_info.nil? || ip_info.province.blank?

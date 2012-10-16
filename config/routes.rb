@@ -201,6 +201,9 @@ OopsData::Application.routes.draw do
 				get :check_progress
 			end
 		end
+
+		resources :report_mockups do
+		end
 	end
 
 	resources :materials do
