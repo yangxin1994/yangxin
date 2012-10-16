@@ -17,7 +17,7 @@ OopsData::Application.routes.draw do
 				get 'whites'
 			end
 
-			member do 
+			member do
 				get 'system_pwd'
 				get 'white'
 				get 'black'
@@ -247,7 +247,7 @@ OopsData::Application.routes.draw do
 	resources :presents do
 		collection do
 			get :index, :virtualgoods, :cash, :realgoods, :stockout
-			get 'edit'
+			get :edit
 		end
 	end
 	resources :orders do

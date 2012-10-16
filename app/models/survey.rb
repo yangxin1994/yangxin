@@ -159,25 +159,6 @@ class Survey
     headers
   end
 
-  def answer_content
-    filtered_answers ||= answers
-    @retval = []
-    q = all_questions_type
-    p "========= 准备完毕 ========="
-    n = 0
-    filtered_answers.each do |a|
-      line_answer = []
-      i = -1
-      a.answer_content.each do |k, v|
-        line_answer += q[i += 1].answer_content(v)
-      end
-      n += 1
-      p "========= 转出 #{n} 条 =========" if n%10 == 0
-      @retval << line_answer
-    end
-    @retval
-  end
-
   def get_export_result(filter_index, include_screened_answer)
     filtered_answers = Result.answers(self, filter_index, include_screened_answer)
     answer_ids = filtered_answers.collect { |a| a.id.to_s}.join
@@ -189,29 +170,6 @@ class Survey
                                    :survey => self,
                                    :filter_index => filter_index,
                                    :include_screened_answer => include_screened_answer)
-  end
-
-  def send_data(post_to)
-    url = URI.parse('http://192.168.1.129:9292')
-    begin
-      Net::HTTP.start(url.host, url.port) do |http| 
-        r = Net::HTTP::Post.new(post_to)
-        p "===== 开始转换 ====="
-        a = Time.now
-        r.set_form_data(yield)
-        p Time.now - a
-        http.read_timeout = 2
-        http.request(r)
-      end
-    rescue Errno::ECONNREFUSED
-      p "连接失败"
-    rescue Timeout::Error
-      p "超时"
-    else
-      p "其他错误"
-    ensure
-      p "连接结束"
-    end
   end
 
   #----------------------------------------------
@@ -262,26 +220,21 @@ class Survey
       return "Spss文件的路径:类似于 localhost/result_key.sav"
     else
       #Resque.enqueue(Jobs::ToSpssJob, self.id, result.result_key)
-      to_spss_r(result.result_key)
+      #to_spss_r(result)
+      result.to_spss
     end
   end
 
-  def to_spss_r(result_key)
-    filtered_answers = Result.where(:result_key => result_key).first.filtered_answers
-    send_data '/to_spss'
-      {'spss_data' => {"spss_header" => spss_header,
-                       "answer_contents" => answer_content,
-                       "header_name" => csv_header,
-                       "result_key" => result_key}.to_yaml}
-  end
   # def to_spss_r(result_key)
-  #   filtered_answers = Result.where(:result_key => result_key).first.filtered_answers
-  #   data = {'spss_data' => {"spss_header" => spss_header,
-  #                      "answer_contents" => answer_content,
-  #                      "header_name" => csv_header,
-  #                      "result_key" => result_key}.to_yaml}
-  #   send_data '/to_spss', data
-  # end
+  def to_spss_r(result)
+    filtered_answers = Result.where(:result_key => result.result_key).first.filtered_answers
+    result.send_data '/to_spss' do
+      {'spss_data' => {"spss_header" => spss_header,
+                       "answer_contents" => result.answer_content,
+                       "header_name" => csv_header,
+                       "result_key" => result.result_key}.to_yaml}
+    end
+  end
   def to_excel(filter_index = -1, include_screened_answer = true)
     result = get_export_result(filter_index, include_screened_answer)
     if result.finished

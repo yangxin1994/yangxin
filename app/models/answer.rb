@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'error_enum'
 require 'publish_status'
 require 'securerandom'

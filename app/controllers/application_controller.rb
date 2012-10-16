@@ -52,7 +52,7 @@ class ApplicationController < ActionController::Base
 		options[:only]+= [:value, :success] unless options[:only].nil?
 		respond_to do |format|
 			format.json do
-				render :json => {:value => yield,
+				render :json => {:value => yield(is_success),
 												 :success => is_success
 				 }, :except => options[:except], :only => options[:only]
 			end

@@ -1,3 +1,5 @@
+#encoding: utf-8
+
 # coding: utf-8
 class QuestionIo
   attr_accessor :content, :issue, :question_type, :origin_id
@@ -255,6 +257,11 @@ class TimeBlankQuestionIo < QuestionIo
     # end
     # return @retval
     @retval << "#{v[0]}年#{v[1]}月#{v[2]}周#{v[3]}天#{v[4]}时#{v[5]}分#{v[6]}秒"
+  end
+
+  def new_answer_content
+    clear_retval
+    
   end
 
   def answer_import(row, header_prefix)

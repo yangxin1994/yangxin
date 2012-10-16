@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'error_enum'
 class SurveyAuditor::AnswersController < SurveyAuditor::ApplicationController
 	
@@ -22,7 +21,6 @@ class SurveyAuditor::AnswersController < SurveyAuditor::ApplicationController
 				survey.as_retval
 			end
 		end
-
 	end
 
 end
