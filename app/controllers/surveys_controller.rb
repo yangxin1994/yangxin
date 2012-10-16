@@ -3,7 +3,7 @@ require 'array'
 require 'error_enum'
 class SurveysController < ApplicationController
 	before_filter :require_sign_in
-	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :show, :update_deadline]
+	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :update_deadline]
 	before_filter :check_normal_survey_existence, :except => [:new, :index, :recover, :clear, :add_tag, :remove_tag, :show]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
 
@@ -222,6 +222,12 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def show
+		@survey = Survey.find_by_id(params[:id])
+		if @survey.nil?
+			respond_to do |format|
+				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
+			end
+		end
 		respond_to do |format|
 			format.json	{ render_json_auto(@survey.serialize) and return }
 		end
@@ -411,6 +417,13 @@ class SurveysController < ApplicationController
 
 	def estimate_answer_time
 		retval = @survey.estimate_answer_time
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
+
+	def refresh_quota_stats
+		retval = @survey.refresh_quota_stats
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end

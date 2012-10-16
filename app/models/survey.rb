@@ -86,6 +86,7 @@ class Survey
 	has_many :email_histories
 
 	has_many :analyze_results
+	has_many :report_mockups
 
 	scope :all_but_new, lambda { where(:new_survey => false) }
 	scope :normal, lambda { where(:status.gt => -1) }
@@ -174,6 +175,7 @@ class Survey
 	def serialize
 		survey_obj = Hash.new
 		survey_obj["_id"] = self._id.to_s
+		survey_obj["user_id"] = self.user_id.to_s
 		survey_obj["created_at"] = self.created_at
 		survey_obj["pages"] = Marshal.load(Marshal.dump(self.pages))
 		META_ATTR_NAME_ARY.each do |attr_name|
@@ -189,6 +191,9 @@ class Survey
 		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
 		survey_obj["publish_status"] = self.publish_status
 		survey_obj["status"] = self.status
+		survey_obj["quality_control_questions_type"] = self.quality_control_questions_type
+		survey_obj["deadline"] = self.deadline
+		survey_obj["is_star"] = self.is_star
 		return survey_obj
 	end
 
@@ -518,6 +523,8 @@ class Survey
 		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != PublishStatus::UNDER_REVIEW
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => PublishStatus::PUBLISHED)
+		self.deadline = Time.now.to_i + 30.days.to_i if self.deadline.blank?
+		self.save
 		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::PUBLISHED, message)
 		self.publish_status_historys << publish_status_history
 		return true
@@ -1205,6 +1212,7 @@ class Survey
 		end
 		self.quota_stats = quota_stats
 		self.save
+		return quota_stats
 	end
 
 	def set_exclusive(is_exclusive)
@@ -1268,6 +1276,37 @@ class Survey
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
 		result = self.analyze_results.find_or_create_by_filter_index(self, filter_index, include_screened_answer)
 		return result
+	end
+
+	def create_report_mockup(report_mockup)
+		result = ReportMockup.check_and_create_new(self, report_mockup)
+		return result
+	end
+
+	def show_report_mockup(report_mockup_id)
+		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
+		return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
+		return report_mockup
+	end
+
+	def list_report_mockups
+		return self.report_mockups
+	end
+
+	def delete_report_mockup(report_mockup_id)
+		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
+		if !report_mockup.nil?
+			report_mockup.destroy
+			return true
+		else
+			return ErrorEnum::REPORT_MOCKUP_NOT_EXIST
+		end
+	end
+
+	def update_report_mockup(report_mockup_id, report_mockup_obj)
+		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
+		return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
+		return report_mockup.update_report_mockup(report_mockup_obj)
 	end
 
 	class Filters

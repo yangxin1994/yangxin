@@ -51,11 +51,11 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 
 		# unique
 		post 'create', :advertisement => {title: "title1", linked: "linked1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::ADVERTISEMENT_SAVE_FAILED, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::ADVERTISEMENT_SAVE_FAILED, JSON.parse(@response.body)["value"]["error_code"]
 
 		# lack of image_location attr
 		post 'create', :advertisement => {title: "title2", linked: "linked1"}, :format => :json, :auth_key => auth_key
-		assert_equal ErrorEnum::ADVERTISEMENT_SAVE_FAILED, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::ADVERTISEMENT_SAVE_FAILED, JSON.parse(@response.body)["value"]["error_code"]
 
 		#
 		# get index
@@ -126,7 +126,7 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 
 		post 'update', :id => "123443454354353", :advertisement => {linked: "updated linked1"}, :format => :json, :auth_key => auth_key
 		retval = @response.body.to_i
-		assert_equal ErrorEnum::ADVERTISEMENT_NOT_EXIST, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::ADVERTISEMENT_NOT_EXIST, JSON.parse(@response.body)["value"]["error_code"]
 
 		post 'update', :id => advertisement.id.to_s, :advertisement => {linked: "updated linked1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)["value"]
@@ -154,7 +154,7 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 
 		post 'update', :id => "123443454354353", :format => :json, :auth_key => auth_key
 		retval = @response.body.to_i
-		assert_equal ErrorEnum::ADVERTISEMENT_NOT_EXIST, JSON.parse(@response.body)["value"]
+		assert_equal ErrorEnum::ADVERTISEMENT_NOT_EXIST, JSON.parse(@response.body)["value"]["error_code"]
 
 		post 'create', :advertisement => {title: "title1", linked: "linked1", image_location: "image_location1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)["value"]

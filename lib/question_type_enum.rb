@@ -16,4 +16,5 @@ module QuestionTypeEnum
 	PARAGRAPH = 14
 	FILE_QUESTION = 15
 	TABLE_QUESTION = 16
+	SCALE_QUESTION = 17
 end

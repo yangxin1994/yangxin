@@ -17,7 +17,7 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 		elsif !params[:title].nil? then
 			@advertisements = Advertisement.list_by_title(params[:title]).desc(:updated_at).page(page).per(per_page)
 		else
-			@advertisements = Advertisement.all.desc(:updated_at).page(page).per(per_page)
+			@advertisements = Advertisement.all.desc(:activate, :created_at).page(page).per(per_page)
 		end		
 
 		render_json_auto @advertisements

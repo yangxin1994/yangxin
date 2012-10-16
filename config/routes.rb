@@ -164,6 +164,7 @@ OopsData::Application.routes.draw do
 			get 'estimate_answer_time'
 			post 'update_deadline'
 			post 'update_star'
+			post 'refresh_quota_stats'
 		end
 		resources :pages do
 			member do
@@ -199,6 +200,9 @@ OopsData::Application.routes.draw do
 			collection do
 				get :check_progress
 			end
+		end
+
+		resources :report_mockups do
 		end
 	end
 
@@ -250,6 +254,15 @@ OopsData::Application.routes.draw do
 		end
 	end
 	resources :points, :only => 'index'
+
+	resources :tools do
+		collection do
+			get :find_provinces
+			get :find_cities_by_province
+			get :find_towns_by_city
+			post :send_email
+		end
+	end
 
 	namespace :admin do
 		resources :points do
