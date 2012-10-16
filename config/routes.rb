@@ -255,6 +255,15 @@ OopsData::Application.routes.draw do
 	end
 	resources :points, :only => 'index'
 
+	resources :tools do
+		collection do
+			get :find_provinces
+			get :find_cities_by_province
+			get :find_towns_by_city
+			post :send_email
+		end
+	end
+
 	namespace :admin do
 		resources :points do
 			new do
