@@ -23,6 +23,8 @@ require 'csv'
 class Survey
   include Mongoid::Document
   include Mongoid::Timestamps
+  extend Mongoid::FindHelper
+  include Mongoid::ValidationsExt
   field :title, :type => String, default: "调查问卷主标题"
   field :subtitle, :type => String, default: "调查问卷副标题"
   field :welcome, :type => String, default: "调查问卷欢迎语"
@@ -133,27 +135,8 @@ class Survey
     q
   end
 
-  def all_quota_quetions
-    quota_template_question_page.collect { |i| Question.find(i) }
-  end
-
-  def all_quota_questions_id
-    quota_template_question_page
-  end
-
-  def all_quota_questions_type
-    q = []
-    all_quota_quetions.each do |a|
-      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
-    end
-    q
-  end
-
   def csv_header
     headers = []
-    all_quota_quetions.each_with_index do |e,i|
-      headers += e.csv_header("t#{i+1}")
-    end
     all_questions.each_with_index do |e,i|
       headers += e.csv_header("q#{i+1}")
     end
@@ -162,9 +145,6 @@ class Survey
 
   def spss_header
     headers =[]
-    all_quota_quetions.each_with_index do |e,i|
-      headers += e.spss_header("t#{i+1}")
-    end
     all_questions.each_with_index do |e,i|
       headers += e.spss_header("q#{i+1}")
     end
@@ -173,9 +153,6 @@ class Survey
 
   def excel_header
     headers =[]
-    all_quota_quetions.each_with_index do |e,i|
-      headers += e.excel_header("t#{i+1}")
-    end
     all_questions.each_with_index do |e,i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -185,7 +162,7 @@ class Survey
   def answer_content
     filtered_answers ||= answers
     @retval = []
-    q = all_quota_questions_type + all_questions_type 
+    q = all_questions_type
     p "========= 准备完毕 ========="
     n = 0
     filtered_answers.each do |a|
@@ -206,6 +183,7 @@ class Survey
     answer_ids = filtered_answers.collect { |a| a.id.to_s}.join
     p "===== 获取 Key 成功 ====="
     result_key = Digest::MD5.hexdigest("export_result-#{answer_ids}")
+    p "===== 生成 Key 成功 ====="
     result = ExportResult.where(:result_key => result_key).first
     result ||= ExportResult.create(:result_key => result_key,
                                    :survey => self,
@@ -216,14 +194,13 @@ class Survey
   def send_data(post_to)
     url = URI.parse('http://192.168.1.129:9292')
     begin
-      Net::HTTP.start(url.host,url.port) do |http| 
-        
+      Net::HTTP.start(url.host, url.port) do |http| 
         r = Net::HTTP::Post.new(post_to)
         p "===== 开始转换 ====="
         a = Time.now
         r.set_form_data(yield)
         p Time.now - a
-        http.read_timeout = 20
+        http.read_timeout = 2
         http.request(r)
       end
     rescue Errno::ECONNREFUSED
@@ -270,11 +247,7 @@ class Survey
       quota_qustions_count = quota_qustions.size
       q.each_with_index do |e, i|
         #q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
-        if i < quota_qustions_count
-          header_prefix = "t#{i + 1}"
-        else
-          header_prefix = "q#{i - quota_qustions_count + 1}"
-        end
+        header_prefix = "q#{i + 1}"
         line_answer.merge! e.answer_import(row, header_prefix)
       end
       batch << {:answer_content => line_answer, :survey => self._id}
@@ -283,7 +256,7 @@ class Survey
     return self.save
   end
 
-  def to_spss(filter_index = 0, include_screened_answer = true)
+  def to_spss(filter_index = -1, include_screened_answer = true)
     result = get_export_result(filter_index, include_screened_answer)
     if result.finished
       return "Spss文件的路径:类似于 localhost/result_key.sav"
@@ -295,15 +268,21 @@ class Survey
 
   def to_spss_r(result_key)
     filtered_answers = Result.where(:result_key => result_key).first.filtered_answers
-    send_data '/to_spss' do
+    send_data '/to_spss'
       {'spss_data' => {"spss_header" => spss_header,
                        "answer_contents" => answer_content,
                        "header_name" => csv_header,
                        "result_key" => result_key}.to_yaml}
-    end
   end
-
-  def to_excel(filter_index = 0, include_screened_answer = true)
+  # def to_spss_r(result_key)
+  #   filtered_answers = Result.where(:result_key => result_key).first.filtered_answers
+  #   data = {'spss_data' => {"spss_header" => spss_header,
+  #                      "answer_contents" => answer_content,
+  #                      "header_name" => csv_header,
+  #                      "result_key" => result_key}.to_yaml}
+  #   send_data '/to_spss', data
+  # end
+  def to_excel(filter_index = -1, include_screened_answer = true)
     result = get_export_result(filter_index, include_screened_answer)
     if result.finished
       return "Excel文件的路径:类似于 localhost/result_key.xsl"
@@ -322,7 +301,14 @@ class Survey
                          "result_key" => result_key}).to_yaml}
     end
   end
-
+  # def to_excel_r(result_key)
+  #   filtered_answers = Result.where(:result_key => result_key).first.filtered_answers
+  #   data = {'excel_data' => ({"excel_header" => excel_header,
+  #                             "answer_contents" => answer_content,
+  #                             "header_name" => csv_header,
+  #                             "result_key" => result_key}).to_yaml}
+  #   send_data '/to_excel', data
+  # end
   #--
   # update deadline and create a survey_deadline_job
   #++
@@ -346,28 +332,6 @@ class Survey
     return self.is_star
   end
 
-  def all_questions
-    q = []
-    quota_template_question_page.each do |page|
-      q << page[:questions]
-    end
-    pages.each do |page|
-      q << page[:questions]
-    end
-    q.collect { |i| Question.find(i) }[0]
-  end
-
-  def headers
-    headers, index =[], 0
-    all_questions.each do |e|
-      index += 1
-      headers += e.header(index)
-    end
-    headers
-  end
-  def csv_header
-    headers.to_csv
-  end
   #*description*: judge whether this survey has a question
   #
   #*params*
@@ -416,9 +380,9 @@ class Survey
   #
   #*retval*:
   #* the survey instance found, or nil if cannot find
-  def self.find_by_id(survey_id)
-    return Survey.where(:_id => survey_id).first
-  end
+  # def self.find_by_id(survey_id)
+  #   return Survey.where(:_id => survey_id).first
+  # end
 
   def self.find_by_ids(survey_id_list)
     return Survey.all.in(_id: survey_id_list)

@@ -7,16 +7,26 @@ class SurveysController < ApplicationController
 	before_filter :check_normal_survey_existence, :except => [:new, :index, :recover, :clear, :add_tag, :remove_tag, :show]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
 	#TODO 无法测试
-	def export_spss
+	def to_spss
 		@survey = Survey.find_by_id(params[:id])
+		respond_and_render_json @survey.is_valid? do
+			@survey.to_spss(params[:filter_index], params[:include_screened_answer])		
+		end
+	end
 
+	def to_excel
+		@survey = Survey.find_by_id(params[:id])
+		respond_and_render_json @survey.is_valid? do
+			@survey.to_excel(params[:filter_index], params[:include_screened_answer])		
+		end
+	end
+
+	def export_process
+		
 	end
 	
-	def export_csv
-		@survey = Survey.find_by_id(params[:id])
-		unless @survey.nil?
-			send_data @survey.export_csv, :file_name => "#{@survey.title}.csv"
-		end
+	def finish_export
+		
 	end
 
 	def check_survey_existence

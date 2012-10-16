@@ -18,7 +18,6 @@ class Result
 	def self.answers(survey, filter_index, include_screened_answer)
 		answers = include_screened_answer.to_s == "true" ? survey.answers.not_preview.finished_and_screened : survey.answers.not_preview.finished
 		return answers if filter_index == -1
-		p survey.filters
 		filter_conditions = survey.filters[filter_index]["conditions"]
 		filtered_answers = []
 		answers.each do |a|

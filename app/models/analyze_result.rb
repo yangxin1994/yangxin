@@ -84,7 +84,6 @@ class AnalyzeResult < Result
 		self.duration_result["mean"] = duration_ary.mean
 	end
 
-
 	def analyze_answers(answers)
 		self.answer_result["total_answer_number"] = answers.length
 

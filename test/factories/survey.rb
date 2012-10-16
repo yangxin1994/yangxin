@@ -149,11 +149,10 @@ FactoryGirl.define do
   factory :answer_with_issue, class: Answer do
     @survey = FactoryGirl.create(:survey_with_issue)
     @answer_content = {}
-    @all_questions_with_quota_id = @survey.all_quota_questions_id + @survey.all_questions_id
+    @all_questions_id = @survey.all_questions_id
     # 所有的其他项必须是最后一个,这是答案分析的结构决定的
     #@quota_answers = ["我是一个质控题"]
-    @answers = ["我是一个质控题",
-                {"text_input" => "我选择了其它项", "selection" => []},
+    @answers = [{"text_input" => "我选择了其它项", "selection" => []},
                 {"text_input" => "我选择了其它项", "selections" => ["1", "3","6","10"]},
                 ["1", "2", "6"],
                 [["1", "2"], ["2", "7"]],
@@ -222,7 +221,7 @@ FactoryGirl.define do
                ]
 
     @answers.each_index do |i|
-      @answer_content[@all_questions_with_quota_id[i].to_s] = @answers[i]
+      @answer_content[@all_questions_id[i].to_s] = @answers[i]
     end
     status 2
     finish_type 1
