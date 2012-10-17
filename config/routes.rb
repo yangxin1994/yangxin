@@ -148,10 +148,10 @@ OopsData::Application.routes.draw do
 			put 'update_tags'
 			put 'add_tag'
 			put 'remove_tag'
-			get 'submit'
+			put 'submit'
+			put 'close'
 			get 'reject'
 			get 'publish'
-			get 'close'
 			get 'pause'
 			put 'update_style_setting'
 			get 'show_style_setting'
@@ -162,7 +162,7 @@ OopsData::Application.routes.draw do
 			get 'show_quality_control'
 			get 'check_progress'
 			get 'estimate_answer_time'
-			post 'update_deadline'
+			put 'update_deadline'
 			post 'update_star'
 		end
 		resources :pages do

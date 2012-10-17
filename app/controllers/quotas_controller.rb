@@ -157,6 +157,18 @@ class QuotasController < ApplicationController
 		end
 	end
 
+	#*method*: post
+	#
+	#*url*: /surveys/:survey_id/quotas/refresh
+	#
+	#*description*: refresh quotas stat
+	#
+	#*params*:
+	#* survey_id: id of the survey
+	#
+	#*retval*:
+	#* the Quota stat object
+	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	def refresh
 		retval = @survey.refresh_quota_stats
 		respond_to do |format|
