@@ -148,10 +148,10 @@ OopsData::Application.routes.draw do
 			put 'update_tags'
 			put 'add_tag'
 			put 'remove_tag'
-			get 'submit'
+			put 'submit'
+			put 'close'
 			get 'reject'
 			get 'publish'
-			get 'close'
 			get 'pause'
 			put 'update_style_setting'
 			get 'show_style_setting'
@@ -162,7 +162,7 @@ OopsData::Application.routes.draw do
 			get 'show_quality_control'
 			get 'check_progress'
 			get 'estimate_answer_time'
-			post 'update_deadline'
+			put 'update_deadline'
 			post 'update_star'
 		end
 		resources :pages do
@@ -189,6 +189,7 @@ OopsData::Application.routes.draw do
 			collection do
 				post :set_exclusive
 				get :get_exclusive
+				post :refresh
 			end
 		end
 
@@ -199,6 +200,9 @@ OopsData::Application.routes.draw do
 			collection do
 				get :check_progress
 			end
+		end
+
+		resources :report_mockups do
 		end
 	end
 
@@ -250,6 +254,15 @@ OopsData::Application.routes.draw do
 		end
 	end
 	resources :points, :only => 'index'
+
+	resources :tools do
+		collection do
+			get :find_provinces
+			get :find_cities_by_province
+			get :find_towns_by_city
+			post :send_email
+		end
+	end
 
 	namespace :admin do
 		resources :points do

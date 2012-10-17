@@ -404,7 +404,7 @@ class User
 		m = sended_messages.create(:title => title, :content => content, :type => 1) if receiver.size >= 1
 		return m unless m.is_a? Message
 		receiver.each do |r|
-			u = User.find_by_email(r)
+			u = User.find_by_email(r) || User.find_by_id(r)
 			next unless u
 			u.messages << m# => unless m.created_at.nil? 
 			u.save

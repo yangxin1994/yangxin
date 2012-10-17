@@ -86,6 +86,7 @@ class Survey
 	has_many :email_histories
 
 	has_many :analyze_results
+	has_many :report_mockups
 
 	scope :all_but_new, lambda { where(:new_survey => false) }
 	scope :normal, lambda { where(:status.gt => -1) }
@@ -391,6 +392,7 @@ class Survey
 	def serialize
 		survey_obj = Hash.new
 		survey_obj["_id"] = self._id.to_s
+		survey_obj["user_id"] = self.user_id.to_s
 		survey_obj["created_at"] = self.created_at
 		survey_obj["pages"] = Marshal.load(Marshal.dump(self.pages))
 		META_ATTR_NAME_ARY.each do |attr_name|
@@ -406,6 +408,9 @@ class Survey
 		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
 		survey_obj["publish_status"] = self.publish_status
 		survey_obj["status"] = self.status
+		survey_obj["quality_control_questions_type"] = self.quality_control_questions_type
+		survey_obj["deadline"] = self.deadline
+		survey_obj["is_star"] = self.is_star
 		return survey_obj
 	end
 
@@ -640,8 +645,6 @@ class Survey
 			elsif [5, 6].include?(logic_control_rule["rule_type"])
 				logic_control_rule["result"]["question_id_1"] = question_id_mapping[logic_control_rule["result"]["question_id_1"]]
 				logic_control_rule["result"]["question_id_2"] = question_id_mapping[logic_control_rule["result"]["question_id_2"]]
-			elsif [7, 8].include?(logic_control_rule["rule_type"])
-				# for logic control that show/hide pages, it is not needed to replace with new question ids
 			end
 		end
 
@@ -735,6 +738,8 @@ class Survey
 		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != PublishStatus::UNDER_REVIEW
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => PublishStatus::PUBLISHED)
+		self.deadline = Time.now.to_i + 30.days.to_i if self.deadline.blank?
+		self.save
 		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::PUBLISHED, message)
 		self.publish_status_historys << publish_status_history
 		return true
@@ -884,13 +889,6 @@ class Survey
 		return questions
 	end
 
-	def update_question(question_id, question_obj)
-		if LogicControl.new(self.logic_control).detect_conflict_question_update(question_id)
-			return ErrorEnum::LOGIC_CONTROL_CONFLICT_DETECTED
-		end
-		return update_question!(question_id, question_obj)
-	end
-
 	#*description*: update a question
 	#
 	#*params*:
@@ -903,13 +901,16 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST
 	#* ErrorEnum ::WRONG_DATA_TYPE
-	def update_question!(question_id, question_obj)
+	def update_question(question_id, question_obj)
 		return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
 		question = Question.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
 		return ErrorEnum::WRONG_QUESTION_CLASS if question.question_class == "quality_control" || question.question_class == "template"
 		# quality control question in a survey cannot be updated
+		question_inst = question.clone
 		retval = question.update_question(question_obj)
+		# the logic control rules need to be adjusted
+		adjust_logic_control_quota_filter('question_update', question_id)
 		return retval if retval != true
 		return question
 	end
@@ -949,6 +950,8 @@ class Survey
 		from_page["questions"][question_index_to_be_delete] = ""
 		to_page["questions"].insert(question_index+1, question_id_1)
 		from_page["questions"].delete("")
+		# the logic control rules need to be adjusted
+		adjust_logic_control_quota_filter('question_move', question_id_1)
 		return self.save
 	end
 
@@ -1008,13 +1011,6 @@ class Survey
 		return question
 	end
 
-	def delete_question(question_id)
-		if LogicControl.new(self.logic_control).detect_conflict_question_update(question_id)
-			return ErrorEnum::LOGIC_CONTROL_CONFLICT_DETECTED
-		end
-		return delete_question!(question_id)
-	end
-
 	#*description*: delete a question
 	#
 	#*params*:
@@ -1026,7 +1022,7 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
-	def delete_question!(question_id)
+	def delete_question(question_id)
 		question = Question.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
 		# find out other matching questions if the question to be deleted is a matching question
@@ -1045,6 +1041,9 @@ class Survey
 					end
 				end
 				self.save
+				# logic control rules need to be adjusted
+				adjust_logic_control_quota_filter('question_delete', question_id)
+				return true
 			end
 		end
 		# not a matching quality control question
@@ -1058,6 +1057,8 @@ class Survey
 		end
 		return ErrorEnum::QUESTION_NOT_EXIST if !find_question
 		self.save
+		# logic control rules need to be adjusted
+		adjust_logic_control_quota_filter('question_delete', question_id)
 		question.clear_question_object
 		return question.destroy
 	end
@@ -1172,7 +1173,6 @@ class Survey
 	def delete_page(page_index)
 		current_page = self.pages[page_index]
 		return ErrorEnum::OVERFLOW if current_page.nil?
-		return ErrorEnum::LOGIC_CONTROL_CONFLICT_DETECTED if LogicControl.new(self.logic_control).detect_conflict_questions_update(current_page["questions"])
 		return delete_page!(page_index)
 	end
 
@@ -1422,6 +1422,7 @@ class Survey
 		end
 		self.quota_stats = quota_stats
 		self.save
+		return quota_stats
 	end
 
 	def set_exclusive(is_exclusive)
@@ -1485,6 +1486,37 @@ class Survey
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
 		result = self.analyze_results.find_or_create_by_filter_index(self, filter_index, include_screened_answer)
 		return result
+	end
+
+	def create_report_mockup(report_mockup)
+		result = ReportMockup.check_and_create_new(self, report_mockup)
+		return result
+	end
+
+	def show_report_mockup(report_mockup_id)
+		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
+		return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
+		return report_mockup
+	end
+
+	def list_report_mockups
+		return self.report_mockups
+	end
+
+	def delete_report_mockup(report_mockup_id)
+		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
+		if !report_mockup.nil?
+			report_mockup.destroy
+			return true
+		else
+			return ErrorEnum::REPORT_MOCKUP_NOT_EXIST
+		end
+	end
+
+	def update_report_mockup(report_mockup_id, report_mockup_obj)
+		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
+		return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
+		return report_mockup.update_report_mockup(report_mockup_obj)
 	end
 
 	class Filters
@@ -1622,26 +1654,181 @@ class Survey
 		end
 	end
 
+	def adjust_logic_control_quota_filter(type, question_id)
+		# first adjust the logic control
+		rules = self.logic_control
+		rules.each_with_index do |rule, rule_index|
+			case type
+			when 'question_update'
+				question = Question.find_by_id(question_id)
+				item_ids = question.issue["items"].map { |i| i["id"] }
+				row_ids = question.issue["items"].map { |i| i["id"] }
+				# first handle conditions
+				if (0..4).to_a.include?(rule["rule_type"])
+					rule["conditions"].each do |c|
+						next if c["question_id"] != question_id
+						# the condition is about the question updated
+						# remove the items that do not exist
+						c["answer"].delete_if { |item_id| !item_ids.include?(item_id) }
+					end
+					# if all the items for a condition is removed, remove this condition
+					rule["conditions"].delete_if { |c| c["answer"].blank? }
+					# if all the conditions for a rule is removed, remove this rule
+					if rule["conditions"].blank?
+						rules.delete_at(rule_index)
+						next
+					end
+				end
+				# then handle result
+				if [3,4].to_a.include?(rule["rule_type"])
+					rule["result"].each do |r|
+						next if r["question_id"] != question_id
+						# the result is about the question updated
+						# remove the items that do not exist
+						r["items"].delete_if { |item_id| !item_ids.include?(item_id) }
+						# remove the rows that do not exist
+						r["sub_questions"].delete_if { |row_id| !row_ids.include?(row_id) }
+					end
+					# if all the items for a result is removed, remove this result
+					rule["result"].delete_if { |r| r["items"].blank? && r["sub_questions"].blank? }
+					# if all the results for a rule is removed, remove this rule
+					rules.delete_at(rule_index) if rule["result"].blank?
+				elsif [5,6].to_a.include?(rule["rule_type"])
+					if rule["result"]["question_id_1"] == question_id
+						rule["result"]["items"].delete_if { |i| !item_ids.include?(i[0]) }
+					elsif rule["result"]["question_id_2"] == question_id
+						rule["result"]["items"].delete_if { |i| !item_ids.include?(i[1]) }
+					end
+					# if all the results for a rule is removed, remove this rule
+					rules.delete_at(rule_index) if rule["result"]["items"].blank?
+				end
+			when 'question_move'
+				question_ids = (self.pages.map { |p| p["questions"] }).flatten
+				if [1,2].to_a.include?(rule["rule_type"])
+					# a show/hide questions rule
+					conditions_question_ids = rule["conditions"].map { |c| c["question_id"] }
+					result_question_ids = rule["result"]
+					if conditions_question_ids.include?(question_id)
+						# the conditions include the question to be moved
+						result_question_ids.each do |result_question_id|
+							if !question_ids.before(question_id, result_question_id)
+								rule["conditions"].delete_if { |c| c["question_id"] == question_id }
+							end
+						end
+					end
+					if result_question_ids.include?(question_id)
+						# the results include the question to be moved
+						conditions_question_ids.each do |condition_question_id|
+							if !question_ids.before(condition_question_id, question_id)
+								rule["result"].delete(question_id)
+							end
+						end
+					end
+					rules.delete_at(rule_index) if rule["conditions"].blank? || rule["results"].blank?
+				elsif [3,4].to_a.include?(rule["rule_type"])
+					# a show/hide items rule
+					conditions_question_ids = rule["conditions"].map { |c| c["question_id"] }
+					result_question_ids = rule["result"].map { |r| r["question_id"] }
+					if conditions_question_ids.include?(question_id)
+						# the conditions include the question to be moved
+						result_question_ids.each do |result_question_id|
+							if !question_ids.before(question_id, result_question_id)
+								rule["conditions"].delete_if { |c| c["question_id"] == question_id }
+							end
+						end
+					end
+					if result_question_ids.include?(question_id)
+						# the results include the question to be moved
+						conditions_question_ids.each do |condition_question_id|
+							if !question_ids.before(condition_question_id, question_id)
+								rule["result"].delete_if { |r| r["question_id"] == question_id }
+							end
+						end
+					end
+					rules.delete_at(rule_index) if rule["conditions"].blank? || rule["results"].blank?
+				elsif [5,6].to_a.include?(rule["rule_type"])
+					rules.delete_at(rule_index) if question_ids.before(rule["result"]["question_id_1"], rule["result"]["question_id_2"])
+				end
+			when 'question_delete'
+				if ![5,6].include?(rule["rule_type"])
+					# not a corresponding items rule
+					# adjust the conditions part
+					rule["conditions"].delete_if { |c| c["question_id"] == question_id }
+					# adjust the result part
+					if [1, 2].include?(rule["rule_type"])
+						rule["result"].delete(question_id)
+					elsif [3, 4].include?(rule["rule_type"])
+						rule["result"].delete_if { |r| r["question_id"] == question_id }
+					end
+					# check whether this logic control rule can be removed
+					if rule["conditions"].blank?
+						# no conditions, can be removed
+						rules.delete_at(rule_index)
+					elsif (1..4).to_a.include?(rule["rule_type"]) && rule["result"].blank?
+						# no results for the show/hide questions/items, can be removed
+						rules.delete_at(rule_index)
+					end
+				else
+					# a corresponding items rule
+					if rule["result"]["question_id_1"] == question_id || rule["result"]["question_id_2"] == question_id
+						rules.delete_at(rule_index)
+					end
+				end
+			end
+		end
+		self.save
+		# then adjust the quota
+		rules = self.quota["rules"]
+		rules.each_with_index do |rule, rule_index|
+			case type
+			when 'question_update'
+				question = Question.find_by_id(question_id)
+				item_ids = question.issue["items"].map { |i| i["id"] }
+				row_ids = question.issue["items"].map { |i| i["id"] }
+				rule["conditions"].each do |c|
+					next if c["condition_type"] != 1 || c["name"] != question_id
+					# this condition is about the updated question
+					c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
+				end
+				rule["conditions"].delete_if { |c| c["value"].blank? }
+				rules.delete_at(rule_index) if rule["conditions"].blank?
+				self.refresh_quota_stats
+			when 'question_delete'
+				rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
+				rules.delete_at(rule_index) if rule["conditions"].blank?
+				self.refresh_quota_stats
+			end
+		end 
+		self.save
+		# then adjust the filters
+		rules = self.filters
+		rules.each_with_index do |rule, rule_index|
+			case type
+			when 'question_update'
+				question = Question.find_by_id(question_id)
+				item_ids = question.issue["items"].map { |i| i["id"] }
+				row_ids = question.issue["items"].map { |i| i["id"] }
+				rule["conditions"].each do |c|
+					next if c["condition_type"] != 1 || c["name"] != question_id
+					# this condition is about the updated question
+					c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
+				end
+				rule["conditions"].delete_if { |c| c["value"].blank? }
+				rules.delete_at(rule_index) if rule["conditions"].blank?
+				self.refresh_filters_stats
+			when 'question_delete'
+				rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
+				rules.delete_at(rule_index) if rule["conditions"].blank?
+				self.refresh_filters_stats
+			end
+		end 
+		self.save
+	end
+
 	class LogicControl
-		RULE_TYPE = (0..8).to_a
+		RULE_TYPE = (0..6).to_a
 		def initialize(logic_control)
 			@rules = logic_control
-		end
-
-		# check whether the updated question is a condition for some logic control rule
-		def detect_conflict_question_update(question_id)
-			@rules.each do |rule|
-				return true if (rule["conditions"].map { |e| e["question_id"] }).include?(question_id)
-			end
-			return false
-		end
-
-		# check whether the updated question is a condition for some logic control rule
-		def detect_conflict_questions_update(question_id_ary)
-			@rules.each do |rule|
-				return true if !((rule["conditions"].map { |e| e["question_id"] }) & question_id_ary).blank?
-			end
-			return false
 		end
 
 		def show_rule(rule_index)

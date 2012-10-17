@@ -16,14 +16,13 @@ class MaterialsController < ApplicationController
 	#* ErrorEnum::EMAIL_NOT_EXIST
 	#* ErrorEnum::WRONG_MATERIAL_TYPE
 	def create
-		material = Material.check_and_create_new(params[:material])
+		material = Material.check_and_create_new(@current_user, params[:material])
 		case material
 		when ErrorEnum::WRONG_MATERIAL_TYPE
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::WRONG_MATERIAL_TYPE) and return }
 			end
 		else
-			@current_user.materials << meterial
 			flash[:notice] = "资源已成功创建"
 			respond_to do |format|
 				format.json	{ render_json_auto(material) and return }
@@ -46,7 +45,7 @@ class MaterialsController < ApplicationController
 		materials = @current_user.materials.find_by_type(params[:material_type].to_i)
 		flash[:notice] = "成功获取资源列表"
 		respond_to do |format|
-			format.json	{ render_json_auto(material) and return }
+			format.json	{ render_json_auto(materials) and return }
 		end
 	end
 
@@ -93,7 +92,8 @@ class MaterialsController < ApplicationController
 	#* ErrorEnum ::MATERIAL_NOT_EXIST : when the material does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the material does not belong to the current user
 	def destroy
-		@current_user.materials.find_by_id(params[:id]).destroy_all
+		material = @current_user.materials.find_by_id(params[:id])
+		material.destroy if !material.nil?
 		flash[:notice] = "资源已成功删除"
 		respond_to do |format|
 			format.json	{ render_json_s and return }
@@ -121,7 +121,7 @@ class MaterialsController < ApplicationController
 				format.json	{ render_json_e(ErrorEnum::MATERIAL_NOT_EXIST) and return }
 			end
 		end
-		retval = material.update_title(params[:title])
+		retval = material.update_material(params[:material])
 		case retval
 		when true
 			flash[:notice] = "资源标题已成功更新"

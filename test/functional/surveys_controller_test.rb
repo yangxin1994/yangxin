@@ -15,7 +15,6 @@ class SurveysControllerTest < ActionController::TestCase
 		result = JSON.parse(@response.body)
 		survey_obj = result["value"]
 		assert_not_equal "", survey_obj["_id"]
-		assert_nil survey_obj["user_id"]
 		assert_not_equal "", survey_obj["title"]
 
 		sign_out(auth_key)
