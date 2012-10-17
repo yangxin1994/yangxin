@@ -164,7 +164,6 @@ OopsData::Application.routes.draw do
 			get 'estimate_answer_time'
 			post 'update_deadline'
 			post 'update_star'
-			post 'refresh_quota_stats'
 		end
 		resources :pages do
 			member do
@@ -190,6 +189,7 @@ OopsData::Application.routes.draw do
 			collection do
 				post :set_exclusive
 				get :get_exclusive
+				post :refresh
 			end
 		end
 

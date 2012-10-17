@@ -22,4 +22,9 @@ class Array
 		end
 		return answer_time
 	end
+
+	def before(e1, e2)
+		return false if !self.include?(e1) || !self.include?(e2)
+		return self.find_index(e1) < self.find_index(e2)
+	end
 end

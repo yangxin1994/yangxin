@@ -156,4 +156,11 @@ class QuotasController < ApplicationController
 			format.json	{ render_json_auto(retval) and return }
 		end
 	end
+
+	def refresh
+		retval = @survey.refresh_quota_stats
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
 end
