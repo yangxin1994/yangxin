@@ -491,65 +491,89 @@ class User
 	end
 
 	def self.update_user(user_id, attributes)
-		user = User.find_by_id(user_id)
+		user = User.where(_id: user_id).first
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
 
-		select_attrs = %w(birthday gender address phone postcode status)
+		select_attrs = %w(status birthday gender address phone postcode company identity_card username true_name)
 		attributes.select!{|k,v| select_attrs.include?(k.to_s)}
+		retval = User.where(_id: user.id.to_s).update(attributes)
 
-		updated_user = User.collection.find_and_modify(:query => {_id: user.id}, :update => attributes, new: true)
-
-		return User.where(_id: updated_user["_id"]).first
+		return true if retval > 0
+		return false
 	end
 
-	def self.change_white_user(user_id)
-		user = User.find_by_id(user_id.to_s.strip)	
-		return ErrorEnum::USER_NOT_EXIST if user.nil?
-
-		if user.role != ROLE_WHITE then
+	def self.change_user_role_status(user_id, role_status="NORMAL")
+		user = User.where(_id: user_id).first	
+		return ErrorEnum::USER_NOT_EXIST unless user
+		role_status_arr = %w(NORMAL WHITE BLACK DELETE)
+		return ErrorEnum::UNKNOWN_ERROR unless role_status_arr.include?(role_status)
+		case role_status
+		when "NORMAL"
+			user.status = 0 if user.is_deleted
+			user.role = ROLE_NORMAL
+			return user.save 
+		when "WHITE"
 			user.role = ROLE_WHITE
-		elsif user.role != ROLE_NORMAL
-			user.role = ROLE_NORMAL
-		end
-
-		if user.save then
-			if user.role == ROLE_WHITE then 
-				user[:white] = true 
-			else
-				user[:white] = false 
-			end
-
-			return user 
-		else
-			return ErrorEnum::USER_SAVE_FAILED
-		end
-	end
-
-	def self.change_black_user(user_id)
-		user = User.find_by_id(user_id.to_s.strip)	
-		return ErrorEnum::USER_NOT_EXIST if user.nil?
-
-		if user.role != ROLE_BLACK then
+			user.status = 0 if user.is_deleted
+			return user.save 
+		when "BLACK" 
 			user.role = ROLE_BLACK
-		elsif user.role != ROLE_NORMAL
-			user.role = ROLE_NORMAL
-		end
-
-		if user.save then
-			if user.role == ROLE_BLACK then 
-				user[:black] = true 
-			else
-				user[:black] = false
-			end
-
-			return user 
-		else
-			return ErrorEnum::USER_SAVE_FAILED
+			user.status = 0 if user.is_deleted
+			return user.save
+		when "DELETE"				
+			user.status = -1
+			return user.save
 		end
 	end
+
+	# def self.change_white_user(user_id)
+	# 	user = User.where(_id: user_id).first	
+	# 	return ErrorEnum::USER_NOT_EXIST if user.nil?
+
+	# 	if user.role != ROLE_WHITE then
+	# 		user.role = ROLE_WHITE
+	# 	elsif user.role != ROLE_NORMAL
+	# 		user.role = ROLE_NORMAL
+	# 	end
+
+	# 	if user.save then
+	# 		if user.role == ROLE_WHITE then 
+	# 			user[:white] = true 
+	# 		else
+	# 			user[:white] = false 
+	# 		end
+
+	# 		return user 
+	# 	else
+	# 		return ErrorEnum::USER_SAVE_FAILED
+	# 	end
+	# end
+
+	# def self.change_black_user(user_id)
+	# 	user = User.where(_id: user_id).first	
+	# 	return ErrorEnum::USER_NOT_EXIST if user.nil?
+
+	# 	if user.role != ROLE_BLACK then
+	# 		user.role = ROLE_BLACK
+	# 	elsif user.role != ROLE_NORMAL
+	# 		user.role = ROLE_NORMAL
+	# 	end
+
+	# 	if user.save then
+	# 		if user.role == ROLE_BLACK then 
+	# 			user[:black] = true 
+	# 		else
+	# 			user[:black] = false
+	# 		end
+
+	# 		return user 
+	# 	else
+	# 		return ErrorEnum::USER_SAVE_FAILED
+	# 	end
+	# end
 
 	def self.change_to_system_password(user_id)
-		user = User.find_by_id(user_id)
+		user = User.where(_id: user_id).first
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
 
 		# generate rand number

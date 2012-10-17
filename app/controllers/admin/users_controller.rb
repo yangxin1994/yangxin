@@ -4,52 +4,65 @@ class Admin::UsersController < Admin::ApplicationController
 # **************Quill Admin Manage User************************************
 #++
 	
-	@@user_attrs_filter = %w(_id email status username true_name birthday gender address phone postcode black white)
+	@@user_attrs_filter = %w(_id email role status username true_name identity_card company birthday gender address phone postcode black white)
 
 	# GET /admin/users
 	# GET /admin/users.json
 	def index
 		
 		if !params[:email].nil? then
-			@users = User.where(email: params[:email]).to_a
+			@users = User.where(email: params[:email]).desc(:status, :created_at).page(page).per(per_page)
 		elsif !params[:true_name].nil? then	
-			@users = User.where(true_name: params[:true_name]).to_a
+			@users = User.where(true_name: params[:true_name]).desc(:status, :created_at).page(page).per(per_page)
 		elsif !params[:username].nil? then
 			filter = params[:username].to_s.gsub(/[*]/, ' ')
-			@users = User.where(username: /.*#{filter}.*/).to_a
+			@users = User.where(username: /.*#{filter}.*/).desc(:status, :created_at).page(page).per(per_page)
 		else
-			@users = User.all.to_a
+			@users = User.all.desc(:status, :created_at).page(page).per(per_page)
 		end			
-		
-		@users =  slice((@users || []), params[:page], params[:per_page])
 
 		respond_to do |format|
 			format.html # index.html.erb
-			format.json { render json: @users,
-				:only => @@user_attrs_filter }
+			format.json { render_json_auto @users, :only => @@user_attrs_filter }
 		end
 	end
+
+	def count
+		render_json_auto User.count
+	end
+
+	def email_count
+		render_json_auto User.where(email: params[:email]).count
+	end
+
+	def true_name_count
+		render_json_auto User.where(true_name: params[:true_name]).count
+	end
 	
+	def username_count
+		filter = params[:username].to_s.gsub(/[*]/, ' ')
+		render_json_auto User.where(username: /.*#{filter}.*/).count
+	end
 	# GET /admin/users/1 
 	# GET /admin/users/1.json
 	def show
-		@user = User.find_by_id(params[:id])
+		@user = User.where(_id: params[:id]).first
+		@user = ErrorEnum::USER_NOT_EXIST unless @user
 
 		respond_to do |format|
 			format.html # show.html.erb
-			format.json { render json: @user, 
-				:only => @@user_attrs_filter}
+			format.json { render_json_auto @user, :only => @@user_attrs_filter}
 		end
 	end
 
 	# GET /admin/users/1/edit
 	def edit
-		@user = User.find_by_id(params[:id])
+		@user = User.where(_id: params[:id]).first
+		@user = ErrorEnum::USER_NOT_EXIST unless @user
 
 		respond_to do |format|
 			format.html # show.html.erb
-			format.json { render json: @user, 
-				:only => @@user_attrs_filter }
+			format.json { render_json_auto @user, :only => @@user_attrs_filter }
 		end
 	end
 
@@ -61,15 +74,13 @@ class Admin::UsersController < Admin::ApplicationController
 			@user = User.update_user(params[:id], {"status" => 0}) if params[:recovery] == "true"
 			@user = User.update_user(params[:id], {"status" => -1}) if params[:recovery] == "false"
 		else
-			params[:user].select!{|k,v| %w(birthday gender address phone postcode).include?(k.to_s)}
 			@user = User.update_user(params[:id], params[:user])
 		end
 
 		respond_to do |format|
 			format.html { redirect_to @user} if @user.instance_of?(User)
 			format.html { render action: "edit" } if !@user.instance_of?(User)
-			format.json { render :json => @user, 
-				:only => @@user_attrs_filter }
+			format.json { render_json_auto @user, :only => @@user_attrs_filter }
 		end
 	end
 
@@ -80,7 +91,7 @@ class Admin::UsersController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html { redirect_to users_url }
-			format.json { render :json => @user }
+			format.json { render_json_auto @user }
 		end
 	end
 
@@ -92,49 +103,59 @@ class Admin::UsersController < Admin::ApplicationController
 
 	# GET /admin/users/blacks(.json)
 	def blacks
-		@users = User.black_list.to_a
-
-		@users =  slice((@users || []), params[:page], params[:per_page])
+		@users = User.black_list.desc(:created_at).page(page).per(per_page)
 
 		respond_to do |format|
 			format.html # index.html.erb
-			format.json { render json: @users, 
-				:only => @@user_attrs_filter }
+			format.json { render_json_auto @users, :only => @@user_attrs_filter }
 		end
+	end
+
+	def blacks_count
+		render_json_auto User.black_list.count
 	end
 
 	# GET /admin/users/whites(.json)
 	def whites
-		@users = User.white_list.to_a
-
-		@users =  slice((@users || []), params[:page], params[:per_page])
+		@users = User.white_list.desc(:created_at).page(page).per(per_page)
 
 		respond_to do |format|
 			format.html # index.html.erb
-			format.json { render json: @users, 
-				:only => @@user_attrs_filter }
+			format.json { render_json_auto @users, :only => @@user_attrs_filter }
 		end
 	end
 
-	# GET /admin/users/1/black(.json)
-	def black
-		@user = User.change_black_user(params[:id])
-
-		respond_to do |format|
-			format.html {render action => 'show', :id => @user.id.to_s }
-			format.json { render json: @user, 
-				:only => @@user_attrs_filter }
-		end
+	def whites_count
+		render_json_auto User.white_list.count
 	end
 
-	# GET /admin/users/1/white(.json)
-	def white
-		@user = User.change_white_user(params[:id])
+	# # GET /admin/users/1/black(.json)
+	# def black
+	# 	@user = User.change_black_user(params[:id])
+
+	# 	respond_to do |format|
+	# 		format.html {render action => 'show', :id => @user.id.to_s }
+	# 		format.json { render_json_auto @user, :only => @@user_attrs_filter }
+	# 	end
+	# end
+
+	# # GET /admin/users/1/white(.json)
+	# def white
+	# 	@user = User.change_white_user(params[:id])
+
+	# 	respond_to do |format|
+	# 		format.html {render action => 'show', :id => @user.id.to_s }
+	# 		format.json { render_json_auto @user, :only => @@user_attrs_filter }
+	# 	end
+	# end
+
+	#POST
+	def change_role_status
+		retval = User.change_user_role_status(params[:id], params[:role_status])
 
 		respond_to do |format|
-			format.html {render action => 'show', :id => @user.id.to_s }
-			format.json { render json: @user, 
-				:only => @@user_attrs_filter }
+			format.html {render action => 'show', :id => params[:id] }
+			format.json { render_json_auto retval }
 		end
 	end
 
@@ -150,8 +171,7 @@ class Admin::UsersController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html {render action => 'show', :id => @user.id.to_s }
-			format.json { render json: @user, 
-				:only => @@user_attrs_filter }
+			format.json { render_json_auto @user, :only => @@user_attrs_filter }
 		end
 	end
 
