@@ -257,6 +257,11 @@ OopsData::Application.routes.draw do
 	end
 	resources :points, :only => 'index'
 
+	resources :export_results do
+		post :set_spss_export_process
+		post :set_excel_export_process
+	end
+
 	namespace :admin do
 		resources :points do
 			new do

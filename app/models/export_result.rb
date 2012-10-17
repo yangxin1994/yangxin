@@ -10,9 +10,11 @@ class ExportResult < Result
   field :filter_index, :type => Integer
   field :include_screened_answer, :type => Boolean
   field :last_updated_time, :type => Hash
+  field :answers_count, :type => Integer
   field :export_process, :type => Hash, :default => { :answers => 0,
                                                       :post => 0,
-                                                      :convert => 0}
+                                                      :excel_convert => 0,
+                                                      :spss_convert => 0}
                                                       
   def filtered_answers
   	Result.answers(self.survey, filter_index, include_screened_answer)
@@ -24,7 +26,8 @@ class ExportResult < Result
     q = survey.all_questions_type
     p "========= 准备完毕 ========="
     n = 0
-    answers_count = answers.size
+    self.answers_count = answers.size
+    self.save
     answers.each do |a|
       line_answer = []
       i = -1
@@ -34,10 +37,10 @@ class ExportResult < Result
           line_answer += q[i += 1].answer_content(v)
         end
       #end
-      n += 1
-      export_process[:answers] += GRANULARITY if (n % (answers_count / 100 * GRANULARITY) == 0 )
+      #n += 1
+      export_process[:answers] += GRANULARITY if ((n += 1) % (answers_count / 100 * GRANULARITY) == 0 )
       
-      p "========= 转出 #{n} 条 进度 #{get_export_process} =========" if n%GRANULARITY == 0
+      p "========= 转出 #{n} 条 进度 #{excel_export_process} =========" if n%GRANULARITY == 0
       @retval << line_answer
     end
     answer_content = @retval
@@ -97,19 +100,43 @@ class ExportResult < Result
       {'spss_data' => {"spss_header" => survey.spss_header,
                        "answer_contents" => answer_content,
                        "header_name" => survey.csv_header,
-                       "result_key" => result_key}.to_yaml}
+                       "result_key" => result_key,
+                       "answers_count" => answers_count,
+                       "granularity" =>GRANULARITY}.to_yaml}
     end
   end
 
-  def get_export_process
+  def excel_export_process
     ep = export_process[:answers] * 0.5 +
          export_process[:post] * 0.1 +
-         export_process[:convert] * 0.4 
+         export_process[:excel_convert] * 0.4 
     if ep >= 100
       return "某链接"
     else
       return ep
     end
   end
-   
+
+  def to_excel
+    send_data '/to_excel' do
+      {'excel_data' => {"excel_header" => excel_header,
+                        "answer_contents" => answer_content,
+                        "header_name" => csv_header,
+                        "result_key" => result_key,
+                        "answers_count" => answers_count,
+                        "granularity" =>GRANULARITY}.to_yaml}
+    end
+  end
+
+  def spss_export_process
+    ep = export_process[:answers] * 0.5 +
+         export_process[:post] * 0.1 +
+         export_process[:spss_convert] * 0.4 
+    if ep >= 100
+      return "某链接"
+    else
+      return ep
+    end
+  end
+
 end
