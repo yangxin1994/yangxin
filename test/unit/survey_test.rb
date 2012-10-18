@@ -3,7 +3,7 @@ require 'test_helper'
 
 class SurveyTest < ActiveSupport::TestCase
   setup do
-    clear(Survey)
+    #clear(Survey)
     @survey_with_issue = FactoryGirl.create(:survey_with_issue)
     @answer_with_issue = FactoryGirl.create(:answer_with_issue)
     @survey_with_issue.answers << @answer_with_issue
@@ -31,8 +31,8 @@ class SurveyTest < ActiveSupport::TestCase
     #@survey_with_issue.get_csv_header
     #@survey_with_issue.answer_content
     #@survey_with_issue.answer_import("")
-    #@survey_with_issue.to_spss
-    @survey_with_issue.to_excel
+    @survey_with_issue.to_spss
+    #@survey_with_issue.to_excel
     #@survey_with_issue.send_spss_data
     #@survey_with_issue.send_spss_data_r
     assert true

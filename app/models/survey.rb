@@ -219,9 +219,9 @@ class Survey
     if result.finished
       return "Spss文件的路径:类似于 localhost/result_key.sav"
     else
-      #Resque.enqueue(Jobs::ToSpssJob, self.id, result.result_key)
+      Resque.enqueue(Jobs::ToSpssJob, result.result_key)
       #to_spss_r(result)
-      result.to_spss
+      #result.to_spss
     end
   end
 

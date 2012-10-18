@@ -6,7 +6,7 @@ class ExportResult < Result
 
   GRANULARITY = 5
 
-  field :answer_content, :type => Hash, :default => []
+  #field :answer_contents, :type => Array, :default => []
   field :filter_index, :type => Integer
   field :include_screened_answer, :type => Boolean
   field :last_updated_time, :type => Hash
@@ -20,7 +20,7 @@ class ExportResult < Result
   	Result.answers(self.survey, filter_index, include_screened_answer)
   end
 
-  def answer_content
+  def answer_contents
     answers = filtered_answers
     @retval = []
     q = survey.all_questions_type
@@ -43,8 +43,8 @@ class ExportResult < Result
       p "========= 转出 #{n} 条 进度 #{excel_export_process} =========" if n%GRANULARITY == 0
       @retval << line_answer
     end
-    answer_content = @retval
-    self.save
+    #answer_contents = @retval
+    #self.save
     @retval
   end
 
@@ -73,15 +73,17 @@ class ExportResult < Result
   end
 
   def send_data(post_to)
+    
     url = URI.parse('http://192.168.1.129:9292')
+    p url
     begin
       Net::HTTP.start(url.host, url.port) do |http| 
         r = Net::HTTP::Post.new(post_to)
-        p "===== 开始转换 ====="
         a = Time.now
         r.set_form_data(yield)
         p Time.now - a
         http.read_timeout = 120
+        p "===== 准备连接 ====="
         http.request(r)
       end
     rescue Errno::ECONNREFUSED
@@ -97,8 +99,9 @@ class ExportResult < Result
 
   def to_spss
     send_data '/to_spss' do
+      p "===== 准备转换 ====="
       {'spss_data' => {"spss_header" => survey.spss_header,
-                       "answer_contents" => answer_content,
+                       "answer_contents" => self.answer_contents,
                        "header_name" => survey.csv_header,
                        "result_key" => result_key,
                        "answers_count" => answers_count,
@@ -120,7 +123,7 @@ class ExportResult < Result
   def to_excel
     send_data '/to_excel' do
       {'excel_data' => {"excel_header" => excel_header,
-                        "answer_contents" => answer_content,
+                        "answer_contents" => answer_contents,
                         "header_name" => csv_header,
                         "result_key" => result_key,
                         "answers_count" => answers_count,

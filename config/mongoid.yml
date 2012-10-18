@@ -1,6 +1,6 @@
 development:
   host: localhost
-  database: oops_data_development
+  database: oops_data_test
 
 test:
   host: localhost
