@@ -309,8 +309,8 @@ class Survey
     if result.finished
       return "Excel文件的路径:类似于 localhost/result_key.xsl"
     else
-      # Resque.enqueue(Jobs::ToSpssJob, self.id)
-      to_excel_r(result.result_key)
+      Resque.enqueue(Jobs::ToSpssJob, self.id)
+      # to_excel_r(result.result_key)
     end
   end
 
