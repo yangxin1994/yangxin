@@ -142,25 +142,25 @@ class Admin::UsersController < Admin::ApplicationController
 		render_json_auto User.deleted_users.count
 	end
 
-	# # GET /admin/users/1/black(.json)
-	# def black
-	# 	@user = User.change_black_user(params[:id])
+	# GET /admin/users/1/black(.json)
+	def black
+		@user = User.change_black_user(params[:id])
 
-	# 	respond_to do |format|
-	# 		format.html {render action => 'show', :id => @user.id.to_s }
-	# 		format.json { render_json_auto @user, :only => @@user_attrs_filter }
-	# 	end
-	# end
+		respond_to do |format|
+			format.html {render action => 'show', :id => @user.id.to_s }
+			format.json { render_json_auto @user, :only => @@user_attrs_filter }
+		end
+	end
 
-	# # GET /admin/users/1/white(.json)
-	# def white
-	# 	@user = User.change_white_user(params[:id])
+	# GET /admin/users/1/white(.json)
+	def white
+		@user = User.change_white_user(params[:id])
 
-	# 	respond_to do |format|
-	# 		format.html {render action => 'show', :id => @user.id.to_s }
-	# 		format.json { render_json_auto @user, :only => @@user_attrs_filter }
-	# 	end
-	# end
+		respond_to do |format|
+			format.html {render action => 'show', :id => @user.id.to_s }
+			format.json { render_json_auto @user, :only => @@user_attrs_filter }
+		end
+	end
 
 	#POST
 	def change_role_status

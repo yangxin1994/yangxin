@@ -529,51 +529,53 @@ class User
 		end
 	end
 
-	# def self.change_white_user(user_id)
-	# 	user = User.where(_id: user_id).first	
-	# 	return ErrorEnum::USER_NOT_EXIST if user.nil?
+	# as self.change_user_role_status(user_id, "WHITE")
+	def self.change_white_user(user_id)
+		user = User.where(_id: user_id).first	
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
 
-	# 	if user.role != ROLE_WHITE then
-	# 		user.role = ROLE_WHITE
-	# 	elsif user.role != ROLE_NORMAL
-	# 		user.role = ROLE_NORMAL
-	# 	end
+		if user.role != ROLE_WHITE then
+			user.role = ROLE_WHITE
+		elsif user.role != ROLE_NORMAL
+			user.role = ROLE_NORMAL
+		end
 
-	# 	if user.save then
-	# 		if user.role == ROLE_WHITE then 
-	# 			user[:white] = true 
-	# 		else
-	# 			user[:white] = false 
-	# 		end
+		if user.save then
+			if user.role == ROLE_WHITE then 
+				user[:white] = true 
+			else
+				user[:white] = false 
+			end
 
-	# 		return user 
-	# 	else
-	# 		return ErrorEnum::USER_SAVE_FAILED
-	# 	end
-	# end
+			return user 
+		else
+			return ErrorEnum::USER_SAVE_FAILED
+		end
+	end
 
-	# def self.change_black_user(user_id)
-	# 	user = User.where(_id: user_id).first	
-	# 	return ErrorEnum::USER_NOT_EXIST if user.nil?
+	# as self.change_user_role_status(user_id, "WHITE")
+	def self.change_black_user(user_id)
+		user = User.where(_id: user_id).first	
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
 
-	# 	if user.role != ROLE_BLACK then
-	# 		user.role = ROLE_BLACK
-	# 	elsif user.role != ROLE_NORMAL
-	# 		user.role = ROLE_NORMAL
-	# 	end
+		if user.role != ROLE_BLACK then
+			user.role = ROLE_BLACK
+		elsif user.role != ROLE_NORMAL
+			user.role = ROLE_NORMAL
+		end
 
-	# 	if user.save then
-	# 		if user.role == ROLE_BLACK then 
-	# 			user[:black] = true 
-	# 		else
-	# 			user[:black] = false
-	# 		end
+		if user.save then
+			if user.role == ROLE_BLACK then 
+				user[:black] = true 
+			else
+				user[:black] = false
+			end
 
-	# 		return user 
-	# 	else
-	# 		return ErrorEnum::USER_SAVE_FAILED
-	# 	end
-	# end
+			return user 
+		else
+			return ErrorEnum::USER_SAVE_FAILED
+		end
+	end
 
 	def self.change_to_system_password(user_id)
 		user = User.where(_id: user_id).first

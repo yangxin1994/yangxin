@@ -19,7 +19,7 @@ OopsData::Application.routes.draw do
 			end
 
 			member do 
-				get 'system_pwd'
+				get 'system_pwd', 'black', 'white'
 				post 'change_role_status'
 			end
 		end
