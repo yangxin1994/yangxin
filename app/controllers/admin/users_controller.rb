@@ -18,7 +18,7 @@ class Admin::UsersController < Admin::ApplicationController
 			filter = params[:username].to_s.gsub(/[*]/, ' ')
 			@users = User.where(username: /.*#{filter}.*/).desc(:status, :created_at).page(page).per(per_page)
 		else
-			@users = User.all.desc(:status, :created_at).page(page).per(per_page)
+			@users = User.normal_list.desc(:status, :created_at).page(page).per(per_page)
 		end			
 
 		respond_to do |format|
@@ -28,7 +28,7 @@ class Admin::UsersController < Admin::ApplicationController
 	end
 
 	def count
-		render_json_auto User.count
+		render_json_auto User.normal_list.count
 	end
 
 	def email_count
@@ -127,6 +127,19 @@ class Admin::UsersController < Admin::ApplicationController
 
 	def whites_count
 		render_json_auto User.white_list.count
+	end
+
+	def deleteds
+		@users = User.deleted_users.desc(:created_at).page(page).per(per_page)
+
+		respond_to do |format|
+			format.html # index.html.erb
+			format.json { render_json_auto @users, :only => @@user_attrs_filter }
+		end
+	end
+
+	def deleteds_count
+		render_json_auto User.deleted_users.count
 	end
 
 	# # GET /admin/users/1/black(.json)

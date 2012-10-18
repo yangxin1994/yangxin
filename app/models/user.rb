@@ -472,6 +472,7 @@ class User
 	public
 
 	ROLE_NORMAL = 0
+	ROLE_ADMIN = 1
 	ROLE_WHITE = 2
 	ROLE_BLACK = 4
 
@@ -483,8 +484,10 @@ class User
 	# class methods
 	#++
 
-	scope :black_list, where(role: ROLE_BLACK)
-	scope :white_list, where(role: ROLE_WHITE)
+	scope :normal_list, where(:role.in => [ROLE_NORMAL, ROLE_ADMIN], :status.gt => -1)
+	scope :black_list, where(role: ROLE_BLACK, :status.gt => -1)
+	scope :white_list, where(role: ROLE_WHITE, :status.gt => -1)
+	scope :deleted_users, where(status: -1)
 
 	def self.ids_not_in_blacklist
 		return User.any_of({role: 0}, {role: 1})
