@@ -819,24 +819,6 @@ class Answer
 					items_to_be_added << input_ids[1]
 				end
 				self.add_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_added, [])
-			when 7
-				# "show page" logic control
-				# if the rule is satisfied, show the pages (set the answer of the questions in the pages as "nil")
-				logic_control_rule["result"].each do |page_index|
-					self.survey.pages[page_index]["questions"].each do |q_id|
-						self.answer_content[q_id] = nil
-					end
-				end
-				self.save
-			when 8
-				# "hide page" logic control
-				# if the rule is satisfied, hide the pages (set the answer of the question in the pages as {})
-				logic_control_rule["result"].each do |page_index|
-					self.survey.pages[page_index]["questions"].each do |q_id|
-						self.answer_content[q_id] = self.answer_content[q_id] || {}
-					end
-				end
-				self.save
 			end
 		end
 	end
