@@ -86,6 +86,7 @@ class Survey
 	has_many :email_histories
 
 	has_many :analyze_results
+	has_many :data_list_results
 	has_many :report_mockups
 
 	scope :all_but_new, lambda { where(:new_survey => false) }
@@ -1263,6 +1264,12 @@ class Survey
 	def delete_filter(filter_index)
 		filters = Filters.new(self.filters)
 		return filters.delete_filter(filter_index, self)
+	end
+
+	def list_answers_info(filter_index, include_screened_answer)
+		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
+		job_id = Jobs::DataListJob.create(:survey_id => self._id, :filter_index => filter_index, :include_screened_answer => include_screened_answer)
+		return job_id
 	end
 
 	def show_analyze_result(filter_index, include_screened_answer)
