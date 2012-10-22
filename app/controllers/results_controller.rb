@@ -11,9 +11,19 @@ class ResultsController < ApplicationController
 		end
 	end
 
-	def list_answers_info
-		job_id = @survey.list_answers_info(params[:id], params[:include_screened_answer])
+	def data_list
+		job_id = @survey.data_list(params[:id], params[:include_screened_answer])
+		respond_to do |format|
+			format.json	{ render_json_auto(job_id) and return }
+		end
 	end
+
+  def analysis
+		job_id = @survey.analysis(params[:id], params[:include_screened_answer])
+		respond_to do |format|
+			format.json	{ render_json_auto(job_id) and return }
+		end
+  end
 
 	def job_progress
 		progress = Result.job_progress(params[:job_id])
@@ -25,15 +35,6 @@ class ResultsController < ApplicationController
 			end
 		end
 		
-	end
-
-
-
-	def show
-		result = @survey.show_analyze_result(params[:id], params[:include_screened_answer])
-		respond_to do |format|
-			format.json	{ render_json_auto(result) and return }
-		end
 	end
 
 	def check_progress

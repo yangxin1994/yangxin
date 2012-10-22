@@ -3,7 +3,7 @@ require 'error_enum'
 require 'array'
 require 'tool'
 require 'digest/md5'
-class AnalyzeResult < Result
+class AnalysisResult < Result
 	include Mongoid::Document
 	include Mongoid::Timestamps
 
@@ -14,12 +14,6 @@ class AnalyzeResult < Result
 	field :answers_result, :type => Hash
 
 	belongs_to :survey
-
-	def self.generate_result_key(answers)
-		answer_ids = answers.map { |e| e._id.to_s }
-		result_key = Digest::MD5.hexdigest("analyze_result-#{answer_ids.to_s}")
-		return result_key
-	end
 
 	def self.find_or_create_by_filter_index(survey, filter_index, include_screened_answer)
 		answers = self.answers(survey, filter_index, include_screened_answer)

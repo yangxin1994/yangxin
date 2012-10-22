@@ -2759,17 +2759,17 @@ class Survey
 		return filters.delete_filter(filter_index, self)
 	end
 
-	def list_answers_info(filter_index, include_screened_answer)
+	def data_list(filter_index, include_screened_answer)
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
 		job_id = Jobs::DataListJob.create(:survey_id => self._id, :filter_index => filter_index, :include_screened_answer => include_screened_answer)
 		return job_id
 	end
 
-	def show_analyze_result(filter_index, include_screened_answer)
+  def analysis(filter_index, include_screend_answer)
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
-		result = self.analyze_results.find_or_create_by_filter_index(self, filter_index, include_screened_answer)
-		return result
-	end
+		job_id = Jobs::AnalysisJob.create(:survey_id => self._id, :filter_index => filter_index, :include_screened_answer => include_screened_answer)
+		return job_id
+  end
 
 	def create_report_mockup(report_mockup)
 		result = ReportMockup.check_and_create_new(self, report_mockup)
