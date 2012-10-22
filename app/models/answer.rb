@@ -778,6 +778,11 @@ class Answer
 		end
 	end
 
+	def answers_of(questions)
+		question_ids = questions.map { |q| q._id }
+		return self.answer_content.select { |q_id, a| question_ids.include?(q_id) }
+	end
+
 	#*description*: finish an answer, only work for answers that allow pageup (those that do not allow pageup finish automatically)
 	#
 	#*params*:
