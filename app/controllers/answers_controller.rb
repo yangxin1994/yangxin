@@ -142,6 +142,13 @@ class AnswersController < ApplicationController
 		end
 	end
 
+	def get_my_answer
+		answer = @current_user.nil? ? nil : Answer.find_by_survey_id_and_user(params[:survey_id], @current_user)
+		respond_to do |format|
+			format.json	{ render_json_auto(answer) and return }
+		end
+	end
+
 	def destroy
 		retval = @answer.delete
 		respond_to do |format|

@@ -225,6 +225,7 @@ OopsData::Application.routes.draw do
 			post 'clear'
 			post 'submit_answer'
 			post 'finish'
+			get 'get_my_answer'
 		end
 	end
 
