@@ -47,7 +47,7 @@ module ActiveModel
         elsif option && option.is_a?(Regexp) &&
               regexp_using_multiline_anchors?(option) && options[:multiline] != true
           raise ArgumentError, "The provided regular expression is using multiline anchors (^ or $), " \
-          "which may present a security risk. Did you mean to use \\A and \\z, or forgot to add the " \
+          "which may gift a security risk. Did you mean to use \\A and \\z, or forgot to add the " \
           ":multiline => true option?"
         end
       end

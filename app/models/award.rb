@@ -1,4 +1,4 @@
-class Award < BasicPresent
+class Award < BasicGift
 	include Mongoid::ValidationsExt
 	#field :budget, :type => Integer
   field :weighting, :type => Integer, :default => 0

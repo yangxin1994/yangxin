@@ -39,7 +39,7 @@
 									.pagination
 										%a{ :href => '#', :title => "首页"}
 				.tab-content#tab2
-					= form_for @present, :url => presents_path, :validate => true do |f|
+					= form_for @gift, :url => gifts_path, :validate => true do |f|
 						%fieldset
 							%p
 								=f.label :name
