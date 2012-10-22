@@ -2,7 +2,7 @@
   mongoid:
     models:
       order: '订单'
-      present: '礼品'
+      gift: '礼品'
       point_log: '积分操作'
     attributes:
       order:
