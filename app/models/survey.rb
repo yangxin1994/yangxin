@@ -86,6 +86,7 @@ class Survey
 	has_many :email_histories
 
 	has_many :analyze_results
+	has_many :data_list_results
 	has_many :report_mockups
 
 	scope :all_but_new, lambda { where(:new_survey => false) }
@@ -104,8 +105,225 @@ class Survey
 	before_destroy :clear_survey_object
 
 	META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
+  
+  public
+  
+  def all_questions
+    q = []
+    # quota_template_question_page.each do |page|
+    #   q << page[:questions]
+    # end
+    pages.each do |page|
+      q += page[:questions]
+    end
+    q.collect { |i| Question.find(i) }
+  end
 
-	public
+  def all_questions_id
+    q = []
+    pages.each do |page|
+      q += page[:questions]
+    end
+    return q
+  end
+
+  def all_questions_type
+    q = []
+    all_questions.each do |a|
+      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+    end
+    q
+  end
+
+  def all_quota_quetions
+    quota_template_question_page.collect { |i| Question.find(i) }
+  end
+
+  def all_quota_questions_id
+    quota_template_question_page
+  end
+
+  def all_quota_questions_type
+    q = []
+    all_quota_quetions.each do |a|
+      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+    end
+    q
+  end
+
+  def csv_header
+    headers = []
+    all_quota_quetions.each_with_index do |e,i|
+      headers += e.csv_header("t#{i+1}")
+    end
+    all_questions.each_with_index do |e,i|
+      headers += e.csv_header("q#{i+1}")
+    end
+    headers
+  end
+
+  def spss_header
+    headers =[]
+    all_quota_quetions.each_with_index do |e,i|
+      headers += e.spss_header("t#{i+1}")
+    end
+    all_questions.each_with_index do |e,i|
+      headers += e.spss_header("q#{i+1}")
+    end
+    headers
+  end
+
+  def excel_header
+    headers =[]
+    all_quota_quetions.each_with_index do |e,i|
+      headers += e.excel_header("t#{i+1}")
+    end
+    all_questions.each_with_index do |e,i|
+      headers += e.excel_header("q#{i+1}")
+    end
+    headers
+  end
+
+  def answer_content
+    filtered_answers ||= answers
+    @retval = []
+    q = all_quota_questions_type + all_questions_type 
+    p "========= 准备完毕 ========="
+    n = 0
+    filtered_answers.each do |a|
+      line_answer = []
+      i = -1
+      a.answer_content.each do |k, v|
+        line_answer += q[i += 1].answer_content(v)
+      end
+      n += 1
+      p "========= 转出 #{n} 条 =========" if n%10 == 0
+      @retval << line_answer
+    end
+    @retval
+  end
+
+  def get_export_result(filter_index, include_screened_answer)
+    filtered_answers = Result.answers(self, filter_index, include_screened_answer)
+    answer_ids = filtered_answers.collect { |a| a.id.to_s}.join
+    p "===== 获取 Key 成功 ====="
+    result_key = Digest::MD5.hexdigest("export_result-#{answer_ids}")
+    result = ExportResult.where(:result_key => result_key).first
+    result ||= ExportResult.create(:result_key => result_key,
+                                   :survey => self,
+                                   :filter_index => filter_index,
+                                   :include_screened_answer => include_screened_answer)
+  end
+
+  def send_data(post_to)
+    url = URI.parse('http://192.168.1.129:9292')
+    begin
+      Net::HTTP.start(url.host,url.port) do |http| 
+        
+        r = Net::HTTP::Post.new(post_to)
+        p "===== 开始转换 ====="
+        a = Time.now
+        r.set_form_data(yield)
+        p Time.now - a
+        http.read_timeout = 20
+        http.request(r)
+      end
+    rescue Errno::ECONNREFUSED
+      p "连接失败"
+    rescue Timeout::Error
+      p "超时"
+    else
+      p "其他错误"
+    ensure
+      p "连接结束"
+    end
+  end
+
+  #----------------------------------------------
+  #  
+  #     file export interface
+  #
+  #++++++++++++++++++++++++++++++++++++++++++++++
+
+  def to_csv(path = "public/import/test.csv")
+    c = CSV.open(path, "w") do |csv|
+      csv << csv_header
+      answer_content.each do |a|
+        csv << a
+      end
+    end
+  end
+
+  def get_csv_header(path = "public/import/test.csv")
+    c = CSV.open(path, "w") do |csv|
+      csv << csv_header
+    end
+  end
+
+  def answer_import(path = "public/import/test.csv")
+    q = []
+    batch = []
+    all_questions.each do |a|
+      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+    end 
+    CSV.foreach(path, :headers => true) do |row|
+      row = row.to_hash
+      line_answer = {}
+      quota_qustions_count = quota_qustions.size
+      q.each_with_index do |e, i|
+        #q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
+        if i < quota_qustions_count
+          header_prefix = "t#{i + 1}"
+        else
+          header_prefix = "q#{i - quota_qustions_count + 1}"
+        end
+        line_answer.merge! e.answer_import(row, header_prefix)
+      end
+      batch << {:answer_content => line_answer, :survey => self._id}
+    end
+    Survey.collection.insert(batch)
+    return self.save
+  end
+
+  def to_spss(filter_index = 0, include_screened_answer = true)
+    result = get_export_result(filter_index, include_screened_answer)
+    if result.finished
+      return "Spss文件的路径:类似于 localhost/result_key.sav"
+    else
+      #Resque.enqueue(Jobs::ToSpssJob, self.id, result.result_key)
+      to_spss_r(result.result_key)
+    end
+  end
+
+  def to_spss_r(result_key)
+    filtered_answers = Result.where(:result_key => result_key).first.filtered_answers
+    send_data '/to_spss' do
+      {'spss_data' => {"spss_header" => spss_header,
+                       "answer_contents" => answer_content,
+                       "header_name" => csv_header,
+                       "result_key" => result_key}.to_yaml}
+    end
+  end
+
+  def to_excel(filter_index = 0, include_screened_answer = true)
+    result = get_export_result(filter_index, include_screened_answer)
+    if result.finished
+      return "Excel文件的路径:类似于 localhost/result_key.xsl"
+    else
+      Resque.enqueue(Jobs::ToSpssJob, self.id)
+      # to_excel_r(result.result_key)
+    end
+  end
+
+  def to_excel_r(result_key)
+    filtered_answers = Result.where(:result_key => result_key).first.filtered_answers
+    send_data '/to_excel' do
+      {'excel_data' => ({"excel_header" => excel_header,
+                         "answer_contents" => answer_content,
+                         "header_name" => csv_header,
+                         "result_key" => result_key}).to_yaml}
+    end
+  end
 
 	#--
 	# update deadline and create a survey_deadline_job
@@ -1265,11 +1483,17 @@ class Survey
 		return filters.delete_filter(filter_index, self)
 	end
 
-	def show_analyze_result(filter_index, include_screened_answer)
+	def data_list(filter_index, include_screened_answer)
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
-		result = self.analyze_results.find_or_create_by_filter_index(self, filter_index, include_screened_answer)
-		return result
+		job_id = Jobs::DataListJob.create(:survey_id => self._id, :filter_index => filter_index, :include_screened_answer => include_screened_answer)
+		return job_id
 	end
+
+  def analysis(filter_index, include_screend_answer)
+		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
+		job_id = Jobs::AnalysisJob.create(:survey_id => self._id, :filter_index => filter_index, :include_screened_answer => include_screened_answer)
+		return job_id
+  end
 
 	def create_report_mockup(report_mockup)
 		result = ReportMockup.check_and_create_new(self, report_mockup)

@@ -192,9 +192,12 @@ OopsData::Application.routes.draw do
 		resources :filters do
 		end
 
-		resources :analyze_results do
+		resources :results do
 			collection do
 				get :check_progress
+				get :job_progress
+        get :data_list
+        get :analysis
 			end
 		end
 
@@ -224,6 +227,7 @@ OopsData::Application.routes.draw do
 			post 'clear'
 			post 'submit_answer'
 			post 'finish'
+			get 'get_my_answer'
 		end
 	end
 
@@ -238,7 +242,7 @@ OopsData::Application.routes.draw do
 			get :draw
 		end
 	end
-	resources :presents do
+	resources :gifts do
 		collection do
 			get :index, :virtualgoods, :cash, :realgoods, :stockout
 			get 'edit'
@@ -266,7 +270,7 @@ OopsData::Application.routes.draw do
 				post :operate
 			end
 		end
-		resources :presents do
+		resources :gifts do
 			collection do
 				get 'expired'
 				delete 'delete'

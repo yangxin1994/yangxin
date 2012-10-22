@@ -1,4 +1,4 @@
-class Present < BasicPresent
+class Gift < BasicGift
 	
 	field :point, :type => Integer
 	# can be -1 (has no), 0 (expired), 1 (can be rewarded)

@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'error_enum'
 class FiltersController < ApplicationController
 	before_filter :require_sign_in, :check_normal_survey_existence
@@ -42,7 +41,7 @@ class FiltersController < ApplicationController
 	#* filter_index: index of the filter
 	#
 	#*retval*:
-	#* a hash of attributes that represent the filter
+	#* a hash of attributes that regift the filter
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	def show
 		filter = @survey.show_filter(params[:id].to_i)

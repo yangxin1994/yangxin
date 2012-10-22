@@ -35,12 +35,14 @@ class Answer
 
 	field :is_scanned, :type => Boolean, :default => false
 
-	field :preview_id, :type => String, :default => ""
+	field :is_preview, :type => Boolean, :default => false
 
 	field :finished_at, :type => Integer
 	field :rejected_at, :type => Integer
 
-	scope :not_preview, lambda { where(:preview_id => "") }
+	scope :not_preview, lambda { where(:is_preview => false) }
+	scope :preview, lambda { where(:is_preview => true) }
+
 	scope :finished, lambda { where(:status => 2) }
 	scope :screened, lambda { where(:status => 1, :reject_type => 2) }
 	scope :finished_and_screened, lambda { any_of({:status => 2}, {:status => 1, :reject_type => 2}) }
@@ -65,25 +67,15 @@ class Answer
 		return answer
 	end
 
-	def self.find_by_survey_id_and_preview_id(survey_id, preview_id)
+	def self.find_by_survey_id_user_is_preview(survey_id, user, is_preview)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.answers.where(preview_id: preview_id)[0]
-	end
-
-	def self.find_by_survey_id_and_user(survey_id, user)
-		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		return survey.answers.where(user_id: user._id)[0]
-	end
+		return survey.answers.where(user_id: user._id, :is_preview => is_preview)[0]
+	end	
 
 	def self.find_by_password(username, password)
 		answer = Answer.where(username: username, password: password)[0]
 		return answer
-	end
-
-	def is_preview
-		return !self.preview_id.blank?
 	end
 
 	def self.create_user_attr_survey_answer(operator, survey_id, answer_content)
@@ -98,11 +90,10 @@ class Answer
 		return true
 	end
 
-	def self.create_preview_answer(survey_id)
+	def self.create_answer(is_preview, operator, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		preview_id = SecureRandom.uuid
-		answer = Answer.new(preview_id: preview_id)
+		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
 		
 		# initialize the answer content
 		answer_content = {}
@@ -144,54 +135,6 @@ class Answer
 		# randomly generate quality control questions
 		answer = answer.genereate_random_quality_control_questions
 
-		return answer
-	end
-
-	def self.create_answer(operator, survey_id, channel, ip, username, password)
-		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		answer = Answer.new(channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
-
-		# initialize the answer content
-		answer_content = {}
-		survey.pages.each do |page|
-			answer_content = answer_content.merge(Hash[page["questions"].map { |ele| [ele, nil] }])
-		end
-		logic_control = survey.show_logic_control
-		logic_control.each do |rule|
-			if rule["rule_type"] == 1
-				rule["result"].each do |q_id|
-					answer_content[q_id] = {}
-				end
-			end
-		end
-		answer.answer_content = answer_content
-		# initialize the template answer content
-		answer.template_answer_content = Hash[survey.quota_template_question_page.map { |ele| [ele, nil] }]
-
-		answer.save
-		operator.answers << answer
-		survey.answers << answer
-
-		# initialize the logic control result
-		answer.logic_control_result = {}
-		logic_control.each do |rule|
-			if rule["rule_type"] == 3
-				rule["result"].each do |ele|
-					answer.add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
-				end
-			elsif rule["rule_type"] == 5
-				items_to_be_added = []
-				rule["result"]["items"].each do |input_ids|
-					items_to_be_added << input_ids[1]
-				end
-				answer.add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
-			end
-		end
-
-		# randomly generate quality control questions
-		answer = answer.genereate_random_quality_control_questions
-		
 		return answer
 	end
 
@@ -472,11 +415,9 @@ class Answer
 	#* true: when the answer content is cleared
 	#* ErrorEnum::WRONG_ANSWER_STATUS
 	def clear
-		if self.is_finish || self.is_reject
-			return ErrorEnum::WRONG_ANSWER_STATUS
-		end
-		if !self.is_redo && !self.is_preview && !self.survey.is_pageup_allowed
-			return ErrorEnum::WRONG_ANSWER_STATUS
+		if !self.is_preview
+			return ErrorEnum::WRONG_ANSWER_STATUS if self.is_finish || self.is_reject
+			return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_redo && !self.survey.is_pageup_allowed
 		end
 		# clear the template answer content
 		self.template_answer_content.each_key do |k|
@@ -835,6 +776,11 @@ class Answer
 			self.save
 			self.update_quota
 		end
+	end
+
+	def answers_of(questions)
+		question_ids = questions.map { |q| q._id }
+		return self.answer_content.select { |q_id, a| question_ids.include?(q_id) }
 	end
 
 	#*description*: finish an answer, only work for answers that allow pageup (those that do not allow pageup finish automatically)
