@@ -19,7 +19,6 @@ class Result
 		return Result.where(:result_key => result_key, :ref_result_id => nil).first
 	end
 
-
 	def self.find_result_by_job_id(job_id)
 		result = Result.where(:jog_id => job_id)[0]
 		return ErrorEnum::RESULT_NOT_EXIST if result.nil?
@@ -47,7 +46,6 @@ class Result
 			# calculate the total progress
 			s = s1 * 0.5 + s2 * 0.5
 		when "result_analyze"
-
 		end
 		# the job has not been finished, the progress cannot be greater than 0.99
 		return [s, 0.99].max
