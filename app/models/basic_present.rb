@@ -1,4 +1,4 @@
-class BasicPresent
+class BasicGift
 	include Mongoid::Document
 	include Mongoid::Timestamps
 	extend Mongoid::FindHelper

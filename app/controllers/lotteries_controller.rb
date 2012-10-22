@@ -14,11 +14,11 @@ class LotteriesController < ApplicationController
 		end
 	end
 	# def_each :virtualgoods, :cash, :realgoods, :stockout do |method_name|
-	# 	@presents = Present.send(method_name).can_be_rewarded.page(page)
-	# 	@presents = ErrorEnum::PresentNotFound if @presents.empty? 
+	# 	@gifts = Gift.send(method_name).can_be_rewarded.page(page)
+	# 	@gifts = ErrorEnum::GiftNotFound if @gifts.empty? 
 	# 	respond_to do |format|
 	# 		#format.html 
-	# 		format.json { render json: @presents}
+	# 		format.json { render json: @gifts}
 	# 	end
 	# end
 	

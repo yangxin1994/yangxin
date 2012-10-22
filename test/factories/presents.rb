@@ -1,7 +1,7 @@
 # Read about factories at https://github.com/thoughtbot/factory_girl
 
 FactoryGirl.define do
-	factory :present do
+	factory :gift do
 		name 'Kindle 4'
 		type 1
 		point 500

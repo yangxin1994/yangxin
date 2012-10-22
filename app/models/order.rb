@@ -18,7 +18,7 @@ class Order
 
 	has_one :point_log, :class_name => "PointLog"
 
-	belongs_to :present, :class_name => "BasicPresent"
+	belongs_to :gift, :class_name => "BasicGift"
 	belongs_to :user, :class_name => "User", :inverse_of => :orders
 	belongs_to :operated_admin, :class_name => "User", :inverse_of => :operate_orders
 	
@@ -43,9 +43,9 @@ class Order
 
 	# TO DO validation verify
 	# We must follow the Law of Demeter(summed up as "use only one dot"), and here is the code: 
-	delegate :name, :to => :present, :prefix => true
+	delegate :name, :to => :gift, :prefix => true
 	#delegate :cash_order, :realgoods_order, :to => "self.need_verify", :prefix => true
-	#after_create :decrease_point, :decrease_present
+	#after_create :decrease_point, :decrease_gift
 
 	# TO DO I18n
 	def operate(status)
@@ -56,16 +56,16 @@ class Order
 	private
 	
 	def decrease_point
-		return if self.present.blank? && self.user.blank?
+		return if self.gift.blank? && self.user.blank?
 		self.create_point_log(:order => self,
 													:user => self.user,
-													:operated_point => self.present.point,
+													:operated_point => self.gift.point,
 													:cause => 4)
 	end
 
-	def decrease_present
-		return if self.present.blank?
-		self.present.inc(:surplus, -1)	
+	def decrease_gift
+		return if self.gift.blank?
+		self.gift.inc(:surplus, -1)	
 		self.save
 	end
 
