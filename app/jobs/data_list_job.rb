@@ -1,3 +1,4 @@
+require 'result_job'
 module Jobs
 
 	class DataListJob < ResultJob

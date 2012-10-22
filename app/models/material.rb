@@ -22,7 +22,8 @@ class Material
 		return ErrorEnum::WRONG_MATERIAL_TYPE unless [1, 2, 4].include?(material["material_type"].to_i)
 		material_inst = Material.new(:material_type => material["material_type"].to_i, 
 			:value => material["value"], 
-			:title => material["title"])
+			:title => material["title"],
+			:picture_url => material["picture_url"])
 		material_inst.save
 		current_user.materials << material_inst
 		current_user.save
