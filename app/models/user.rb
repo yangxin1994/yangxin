@@ -404,7 +404,7 @@ class User
 		m = sended_messages.create(:title => title, :content => content, :type => 1) if receiver.size >= 1
 		return m unless m.is_a? Message
 		receiver.each do |r|
-			u = User.find_by_email(r)
+			u = User.find_by_email(r) || User.find_by_id(r)
 			next unless u
 			u.messages << m# => unless m.created_at.nil? 
 			u.save
@@ -472,6 +472,7 @@ class User
 	public
 
 	ROLE_NORMAL = 0
+	ROLE_ADMIN = 1
 	ROLE_WHITE = 2
 	ROLE_BLACK = 4
 
@@ -483,27 +484,54 @@ class User
 	# class methods
 	#++
 
-	scope :black_list, where(role: ROLE_BLACK)
-	scope :white_list, where(role: ROLE_WHITE)
+	scope :normal_list, where(:role.in => [ROLE_NORMAL, ROLE_ADMIN], :status.gt => -1)
+	scope :black_list, where(role: ROLE_BLACK, :status.gt => -1)
+	scope :white_list, where(role: ROLE_WHITE, :status.gt => -1)
+	scope :deleted_users, where(status: -1)
 
 	def self.ids_not_in_blacklist
 		return User.any_of({role: 0}, {role: 1})
 	end
 
 	def self.update_user(user_id, attributes)
-		user = User.find_by_id(user_id)
+		user = User.where(_id: user_id).first
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
 
-		select_attrs = %w(birthday gender address phone postcode status)
+		select_attrs = %w(status birthday gender address phone postcode company identity_card username true_name)
 		attributes.select!{|k,v| select_attrs.include?(k.to_s)}
+		retval = User.where(_id: user.id.to_s).update(attributes)
 
-		updated_user = User.collection.find_and_modify(:query => {_id: user.id}, :update => attributes, new: true)
-
-		return User.where(_id: updated_user["_id"]).first
+		return true if retval > 0
+		return false
 	end
 
+	def self.change_user_role_status(user_id, role_status="NORMAL")
+		user = User.where(_id: user_id).first	
+		return ErrorEnum::USER_NOT_EXIST unless user
+		role_status_arr = %w(NORMAL WHITE BLACK DELETE)
+		return ErrorEnum::UNKNOWN_ERROR unless role_status_arr.include?(role_status)
+		case role_status
+		when "NORMAL"
+			user.status = 0 if user.is_deleted
+			user.role = ROLE_NORMAL
+			return user.save 
+		when "WHITE"
+			user.role = ROLE_WHITE
+			user.status = 0 if user.is_deleted
+			return user.save 
+		when "BLACK" 
+			user.role = ROLE_BLACK
+			user.status = 0 if user.is_deleted
+			return user.save
+		when "DELETE"				
+			user.status = -1
+			return user.save
+		end
+	end
+
+	# as self.change_user_role_status(user_id, "WHITE")
 	def self.change_white_user(user_id)
-		user = User.find_by_id(user_id.to_s.strip)	
+		user = User.where(_id: user_id).first	
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
 
 		if user.role != ROLE_WHITE then
@@ -525,8 +553,9 @@ class User
 		end
 	end
 
+	# as self.change_user_role_status(user_id, "WHITE")
 	def self.change_black_user(user_id)
-		user = User.find_by_id(user_id.to_s.strip)	
+		user = User.where(_id: user_id).first	
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
 
 		if user.role != ROLE_BLACK then
@@ -549,7 +578,7 @@ class User
 	end
 
 	def self.change_to_system_password(user_id)
-		user = User.find_by_id(user_id)
+		user = User.where(_id: user_id).first
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
 
 		# generate rand number

@@ -13,51 +13,41 @@ OopsData::Application.routes.draw do
 	namespace :admin do
 		resources :users do 
 			collection do 
-				get 'blacks'
-				get 'whites'
+				get 'blacks', 'blacks_count', 'whites', 'whites_count', 'count', 
+					'deleteds', 'deleteds_count', 
+					'email_count', 'true_name_count', 'username_count'
 			end
 
 			member do
-				get 'system_pwd'
-				get 'white'
-				get 'black'
+				get 'system_pwd', 'black', 'white'
+				post 'change_role_status'
 			end
 		end
 
 		resources :faqs do 
 			collection do 
-				get 'count'
-				get 'list_by_type_count'
-				get 'list_by_type_and_value_count'
+				get 'count', 'list_by_type_count', 'list_by_type_and_value_count'
 			end
 		end
 		resources :public_notices do 
 			collection do 
-				get 'count'
-				get 'list_by_type_count'
-				get 'list_by_type_and_value_count'
+				get 'count', 'list_by_type_count', 'list_by_type_and_value_count'
 			end
 		end
 		resources :advertisements do 
 			collection do 
-				get 'count'
-				get 'list_by_title_count'
-				get 'activated_count'
-				get 'unactivate_count'
+				get 'count', 'list_by_title_count', 'activated_count', 'unactivate_count'
 			end
 		end
 		resources :system_users do 
 			collection do 
-				post 'lock'
-				post 'unlock'
+				post 'lock', 'unlock'
 			end
 		end
 		resources :feedbacks do
 			collection do 
-				get 'count'
-				get 'list_by_type_and_value_count'
-				get 'list_by_type_and_answer_count'
-				get 'list_by_type_count'
+				get 'count', 'list_by_type_count', 'list_by_type_and_value_count', 
+					'list_by_type_and_answer_count'
 			end
 			member do 
 				post 'reply'
@@ -149,10 +139,10 @@ OopsData::Application.routes.draw do
 			put 'update_tags'
 			put 'add_tag'
 			put 'remove_tag'
-			get 'submit'
+			put 'submit'
+			put 'close'
 			get 'reject'
 			get 'publish'
-			get 'close'
 			get 'pause'
 			put 'update_style_setting'
 			get 'show_style_setting'
@@ -167,7 +157,7 @@ OopsData::Application.routes.draw do
 			get 'show_quality_control'
 			get 'check_progress'
 			get 'estimate_answer_time'
-			post 'update_deadline'
+			put 'update_deadline'
 			post 'update_star'
 		end
 		resources :pages do
@@ -195,16 +185,21 @@ OopsData::Application.routes.draw do
 			collection do
 				post :set_exclusive
 				get :get_exclusive
+				post :refresh
 			end
 		end
 
 		resources :filters do
 		end
 
-		resources :analyze_results do
+		resources :results do
 			collection do
 				get :check_progress
+				get :job_progress
 			end
+		end
+
+		resources :report_mockups do
 		end
 	end
 
@@ -257,9 +252,19 @@ OopsData::Application.routes.draw do
 	end
 	resources :points, :only => 'index'
 
+<<<<<<< HEAD
 	resources :export_results do
 		post :set_spss_export_process
 		post :set_excel_export_process
+=======
+	resources :tools do
+		collection do
+			get :find_provinces
+			get :find_cities_by_province
+			get :find_towns_by_city
+			post :send_email
+		end
+>>>>>>> master
 	end
 
 	namespace :admin do

@@ -17,7 +17,7 @@ class Admin::UsersControllerTest < ActionController::TestCase
 		auth_key = sign_in(user.email, "123456")
 		get 'index', :format => :json, :auth_key => auth_key
 		result = JSON.parse(@response.body)
-		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
+		assert_equal ErrorEnum::REQUIRE_ADMIN, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		clear(User)
@@ -29,7 +29,7 @@ class Admin::UsersControllerTest < ActionController::TestCase
 
 		auth_key = sign_in(user.email, "123456")
 		get 'index', :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval[0]["_id"], user.id.to_s
 		assert_equal retval[0]["password"], nil
 		sign_out(auth_key)
@@ -48,7 +48,7 @@ class Admin::UsersControllerTest < ActionController::TestCase
 		auth_key = sign_in(user.email, "123456")
 
 		get 'show', :format => :json, :id => user.id.to_s, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval["_id"], user.id.to_s
 
 		sign_out(auth_key)
@@ -69,11 +69,8 @@ class Admin::UsersControllerTest < ActionController::TestCase
 		auth_key = sign_in(user.email, "123456")
 		
 		put 'update', :format => :json, :id => user.id.to_s, :user => {phone: "12345678900"}, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
-		assert_equal retval["_id"], user.id.to_s
-		assert_equal retval["phone"], "12345678900"
-		#assert_equal User.all.count, 1
-		assert_equal User.all.first.phone, "12345678900"
+		retval = JSON.parse(@response.body)["value"]
+		assert_equal retval, true
 
 		sign_out(auth_key)
 
@@ -101,18 +98,18 @@ class Admin::UsersControllerTest < ActionController::TestCase
 		# ***************
 		# change user1 to black 
 		get 'black', :id => user1.id.to_s, :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval["_id"], user1.id.to_s
 		assert_equal retval["black"], true
 		assert_equal User.where(role: 4).count, 1
 
 		get 'blacks', :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 1
 
 		# change user1 to normal
 		get 'black', :id => user1.id.to_s, :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval["_id"], user1.id.to_s
 		assert_equal retval["black"], false
 		assert_equal User.where(role: 4).count, 0
@@ -145,18 +142,18 @@ class Admin::UsersControllerTest < ActionController::TestCase
 		# *****************************
 		# change user2 to white
 		get 'white', :id => user2.id.to_s, :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval["_id"], user2.id.to_s
 		assert_equal retval["white"], true
 		assert_equal User.where(role: 2).count, 1
 
 		get 'whites', :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 1
 
 		# change user2 to normal
 		get 'white', :id => user2.id.to_s, :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval["_id"], user2.id.to_s
 		assert_equal retval["white"], false
 		assert_equal User.where(role: 2).count, 0
@@ -186,7 +183,7 @@ class Admin::UsersControllerTest < ActionController::TestCase
 		# change user3 password to system
 		assert_equal user3.password, Encryption.encrypt_password("123456")
 		get 'system_pwd', :id => user3.id.to_s, :format => :json, :auth_key => auth_key
-		retval = JSON.parse(@response.body)
+		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval["_id"], user3.id.to_s
 		assert_not_equal retval["password"], Encryption.encrypt_password("123456")
 		assert_not_equal User.find(user3.id.to_s).password, Encryption.encrypt_password("123456")

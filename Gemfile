@@ -15,6 +15,7 @@ gem 'log4r'
 gem 'memcache-client'
 gem 'kaminari'
 gem 'resque'
+gem 'resque-status'
 gem 'resque-scheduler'
 gem 'oops-mail', '0.0.2', :path => "vendor/gems/oops-mail-0.0.2"
 gem 'faker'

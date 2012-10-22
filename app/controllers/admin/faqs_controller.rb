@@ -20,7 +20,9 @@ class Admin::FaqsController < Admin::ApplicationController
 			@faqs = slice((@faqs || []), page, per_page)
 		else
 			@faqs = Faq.all.desc(:updated_at).page(page).per(per_page)
-		end		
+		end
+
+		@faqs = @faqs.map{|e| maping(e)}
 
 		respond_to do |format|
 			format.html # index.html.erb

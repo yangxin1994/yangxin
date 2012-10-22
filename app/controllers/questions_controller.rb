@@ -77,11 +77,7 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	#* ErrorEnum ::WRONG_DATA_TYPE: when the data type specified in a blank question is wrong
 	def update
-		if params[:enforce].to_s == "true"
-			question = @survey.update_question!(params[:id], params[:question])
-		else
-			question = @survey.update_question(params[:id], params[:question])
-		end
+		question = @survey.update_question(params[:id], params[:question])
 		respond_to do |format|
 			format.json	{ render_json_auto(question) and return }
 		end
@@ -177,11 +173,7 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def destroy
-		if params[:enforce].to_s == "true"
-			retval = @survey.delete_question!(params[:id])
-		else
-			retval = @survey.delete_question(params[:id])
-		end
+		retval = @survey.delete_question(params[:id])
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end

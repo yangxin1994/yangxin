@@ -332,7 +332,7 @@ class SurveysController < ApplicationController
 		
 	end
 
-	#*method*: get
+	#*method*: put
 	#
 	#*url*: /surveys/:survey_id/submit
 	#
@@ -353,7 +353,7 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	#*method*: get
+	#*method*: put
 	#
 	#*url*: /surveys/:survey_id/close
 	#
@@ -397,7 +397,7 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	#*method*: POST
+	#*method*: put
 	#
 	#*url*: /surveys/:survey_id/update_deadline
 	#

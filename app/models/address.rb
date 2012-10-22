@@ -1,6 +1,11 @@
 # encoding: utf-8
 require 'csv'
 class Address
+
+	@@provinces = nil
+	@@province_cities = nil
+	@@city_towns = nil
+
 	def self.generate_address_file
 		csv_text = File.read('lib/list.csv')
 		csv = CSV.parse(csv_text, :headers => false)
@@ -33,58 +38,73 @@ class Address
 		end
 	end
 
-	def self.find_provinces
-		csv_text = File.read('lib/address_info.csv')
-		csv = CSV.parse(csv_text, :headers => false)
-		provinces = []
-		csv.each do |row|
-			provinces << row[0..1] if row[2].to_s == "0"
+
+	def self.ensure_cache
+		if !@@provinces
+
+			# import data from csv file
+			csv = CSV.parse(File.read("lib/address_info.csv"), 
+				:headers => false)
+
+			# init caches
+			@@provinces = []
+			@@province_cities = {}
+			@@city_towns = {}
+
+			@@all_cities = []
+
+			# parse csv data
+			csv.each do |row|
+				# convert int values
+				row[0] = row[0].to_i
+				row[2] = row[2].to_i
+				# setup cache
+				case row[2]
+				when 0
+					@@provinces << row[0..1]
+				when 1
+					province_id = (row[0] >> 12 << 12)
+					@@province_cities[province_id] = [] if !@@province_cities[province_id]
+					@@province_cities[province_id] << row[0..1]
+					@@all_cities << row[0..1]
+				when 2
+					city_id = (row[0] >> 6 << 6)
+					@@city_towns[city_id] = [] if !@@city_towns[city_id]
+					@@city_towns[city_id] << row[0..1]
+				end
+			end
 		end
-		return provinces
+	end
+
+	def self.find_provinces
+		self.ensure_cache
+		return @@provinces
 	end
 
 	def self.find_cities
-		csv_text = File.read('lib/address_info.csv')
-		csv = CSV.parse(csv_text, :headers => false)
-		cities = []
-		csv.each do |row|
-			cities << row[0..1] if row[2].to_s == "1"
-		end
-		return cities
+		self.ensure_cache
+		return @@all_cities
 	end
 
-	def self.find_cities_by_province(province_code)
-		csv_text = File.read('lib/address_info.csv')
-		csv = CSV.parse(csv_text, :headers => false)
-		target_cities = []
-		province_code = province_code.to_i
-		csv.each do |row|
-			target_cities << row[0..1] if (row[2].to_s == "1") && (row[0].to_i >> 12) == (province_code >> 12) && province_code == (province_code >> 12 << 12)
-		end
-		return target_cities
+	def self.find_cities_by_province(province_id)
+		self.ensure_cache
+		return @@province_cities[province_id]
 	end
 
-	def self.find_counties_by_city(city_code)
-		csv_text = File.read('lib/address_info.csv')
-		csv = CSV.parse(csv_text, :headers => false)
-		target_counties = []
-		city_code = city_code.to_i
-		csv.each do |row|
-			target_counties << row[0..1] if (row[2].to_s == "2") && (row[0].to_i >> 6) == (city_code >> 6) && city_code == (city_code >> 6 << 6)
-		end
-		return target_counties
+	def self.find_towns_by_city(city_id)
+		self.ensure_cache
+		return @@city_towns[city_id]
 	end
 
 	def self.find_address_code_by_ip(ip_address)
+		self.ensure_cache
 		ip_info = IpInfo.find_by_ip(ip_address)
 		# no province information in the ip info
 		return -1 if ip_info.nil? || ip_info.province.blank?
-		csv_text = File.read('lib/address_info.csv')
-		csv = CSV.parse(csv_text, :headers => false)
 		target_province = nil
-		csv.each do |row|
-			if row[2].to_s == "0" && row[1].gsub(/\s+/, "").include?(ip_info.province.gsub(/\s+/, ""))
-				target_province = row[0]
+		@@provinces.each do |province|
+			if province[1].gsub(/\s+/, "").include?(ip_info.province.gsub(/\s+/, ""))
+				target_province = province[0]
 			end
 		end
 		# the province cannot be found
