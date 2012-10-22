@@ -252,11 +252,10 @@ OopsData::Application.routes.draw do
 	end
 	resources :points, :only => 'index'
 
-<<<<<<< HEAD
+
 	resources :export_results do
 		post :set_spss_export_process
 		post :set_excel_export_process
-=======
 	resources :tools do
 		collection do
 			get :find_provinces
@@ -264,7 +263,7 @@ OopsData::Application.routes.draw do
 			get :find_towns_by_city
 			post :send_email
 		end
->>>>>>> master
+
 	end
 
 	namespace :admin do
