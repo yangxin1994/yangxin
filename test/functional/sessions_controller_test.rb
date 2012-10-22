@@ -24,7 +24,20 @@ class SessionsControllerTest < ActionController::TestCase
 		post :create, :format => :json, :user => {"email_username" => jesse.email, "password" => Encryption.decrypt_password(jesse.password)}
 		result = JSON.parse(@response.body)
 		assert_equal 4, result["value"]["status"]
+
 	end
+
+  test "should login with auth key" do
+    clear(User)
+    jesse = init_jesse
+		post :create, :format => :json, :user => {"email_username" => jesse.email, "password" => Encryption.decrypt_password(jesse.password)}
+		result = JSON.parse(@response.body)
+    auth_key = result["value"]["auth_key"]
+
+    post :login_with_auth_key, :format => :json, :auth_key => auth_key
+    result = JSON.parse(@response.body)
+    assert_equal 4, result["value"]["status"]
+  end
 
 	test "should send password email" do
 		clear(User)
