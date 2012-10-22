@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'error_enum'
 class LogicControlsController < ApplicationController
 	before_filter :require_sign_in, :check_normal_survey_existence
@@ -42,7 +41,7 @@ class LogicControlsController < ApplicationController
 	#* logic_control_rule_index: index of the logic control rule
 	#
 	#*retval*:
-	#* a hash of attributes that represent the logic control rule
+	#* a hash of attributes that regift the logic control rule
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::LOGIC_CONTROL_RULE_NOT_EXIST : when the survey does not exist
 	def show
