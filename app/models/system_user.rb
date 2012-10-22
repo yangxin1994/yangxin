@@ -181,63 +181,63 @@ class SystemUser < User
 			return system_user.save
 		end
 
-		# #*description*:
-		# #
-		# # types		:AnswerAuditor, SurveyAuditor, EntryClerk, Interviewer.
-		# #
-		# # type number: 	 1           2               4  	        8
-		# #
-		# #*params*
-		# #* type_number: the search types number which is be 1, 2, 3, 7. 3=1+2; 7=1+2+4.
-		# #
-		# #*retval*:
-		# # a system_user array
-		# def list_by_type(type_number=0)
+		#*description*:
+		#
+		# types		:AnswerAuditor, SurveyAuditor, EntryClerk, Interviewer.
+		#
+		# type number: 	 1           2               4  	        8
+		#
+		#*params*
+		#* type_number: the search types number which is be 1, 2, 3, 7. 3=1+2; 7=1+2+4.
+		#
+		#*retval*:
+		# a system_user array
+		def list_by_type(type_number=0)
 
-		# 	#verify params
-		# 	return ErrorEnum::SYSTEM_USER_TYPE_ERROR if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
-		# 	return ErrorEnum::SYSTEM_USER_RANGE_ERROR if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))
-		# 	type_number = type_number.to_i
+			#verify params
+			return ErrorEnum::SYSTEM_USER_TYPE_ERROR if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
+			return ErrorEnum::SYSTEM_USER_RANGE_ERROR if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))
+			type_number = type_number.to_i
 			
-		# 	return [] if !type_number.instance_of?(Fixnum) || type_number <= 0
-		# 	system_users = []
-		# 	MAX_TYPE.downto(0).each { |element| 
-		# 		system_users_tmp=[]
-		# 		if type_number / (2**element) == 1 then
-		# 			system_users_tmp = SystemUser.where(system_user_type: 2**element)
-		# 		end
-		# 		type_number = type_number % 2**element
-		# 		system_users = system_users + system_users_tmp
-		# 	}
-		# 	system_users.sort!{|v1, v2| v2.updated_at <=> v1.updated_at} if system_users.count > 1
+			return [] if !type_number.instance_of?(Fixnum) || type_number <= 0
+			system_users = []
+			MAX_TYPE.downto(0).each { |element| 
+				system_users_tmp=[]
+				if type_number / (2**element) == 1 then
+					system_users_tmp = SystemUser.where(system_user_type: 2**element)
+				end
+				type_number = type_number % 2**element
+				system_users = system_users + system_users_tmp
+			}
+			system_users.sort!{|v1, v2| v2.updated_at <=> v1.updated_at} if system_users.count > 1
 
-		# 	return system_users
-		# end
+			return system_users
+		end
 
-		# #*description*:
-		# #
-		# # types		:AnswerAuditor, SurveyAuditor, EntryClerk, Interviewer.
-		# #
-		# # type number: 	 1           2               4  	        8
-		# #
-		# #*params*
-		# #* type_number: the search types number which is be 1, 2, 3, 7. 3=1+2; 7=1+2+4.
-		# #* is_lock: true or false
-		# #
-		# #*retval*:
-		# # a system_user array
-		# def list_by_type_and_lock(type_number, is_lock)
+		#*description*:
+		#
+		# types		:AnswerAuditor, SurveyAuditor, EntryClerk, Interviewer.
+		#
+		# type number: 	 1           2               4  	        8
+		#
+		#*params*
+		#* type_number: the search types number which is be 1, 2, 3, 7. 3=1+2; 7=1+2+4.
+		#* is_lock: true or false
+		#
+		#*retval*:
+		# a system_user array
+		def list_by_type_and_lock(type_number, is_lock)
 
-		# 	system_users = list_by_type(type_number)
+			system_users = list_by_type(type_number)
 
-		# 	return system_users if !system_users.instance_of?(Array)
+			return system_users if !system_users.instance_of?(Array)
 
-		# 	if system_users.count > 0 then
-		# 		system_users.select!{|o| o.lock == is_lock}
-		# 	end
+			if system_users.count > 0 then
+				system_users.select!{|o| o.lock == is_lock}
+			end
 
-		# 	return system_users
-		# end
+			return system_users
+		end
 
 	end
 
