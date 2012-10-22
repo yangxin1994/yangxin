@@ -1,4 +1,0 @@
-#<User:0x007feb6b275fc0>
-#<Material:0x007feb6b3cda58>
-#<Material:0x007feb6b3cd198>
-#<Material:0x007feb6b3cc7c0>
