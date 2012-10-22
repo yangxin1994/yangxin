@@ -43,6 +43,11 @@ class MaterialsController < ApplicationController
 	#* the list of objects obtained
 	def index
 		materials = @current_user.materials.find_by_type(params[:material_type].to_i)
+		File.open("public/a.txt", "w+") do |f|
+			f.puts @current_user
+			f.puts materials
+			#f.puts params[:material_type].to_i
+		end
 		flash[:notice] = "成功获取资源列表"
 		respond_to do |format|
 			format.json	{ render_json_auto(materials) and return }

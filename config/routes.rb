@@ -186,9 +186,10 @@ OopsData::Application.routes.draw do
 		resources :filters do
 		end
 
-		resources :analyze_results do
+		resources :results do
 			collection do
 				get :check_progress
+				get :job_progress
 			end
 		end
 
