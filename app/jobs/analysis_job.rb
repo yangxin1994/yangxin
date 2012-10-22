@@ -1,13 +1,13 @@
 require 'result_job'
 module Jobs
 
-	class DataListJob < ResultJob
+	class AnalysisResult < ResultJob
 
 		@queue = :result_job
 
 		def perform
 			# set the type of the job
-			set_status({"result_type" => "data_list"})
+			set_status({"result_type" => "analysis_result"})
 
 			# get parameters
 			filter_index = options["filter_index"].to_i
@@ -21,30 +21,52 @@ module Jobs
 			result_key = sef.generate_result_key(answers)
 
 			# judge whether the result_key already exists
-			result = DataListResult.find_by_result_key(result_key)
+			result = AnalysisResult.find_by_result_key(result_key)
 			#create new result record
 			if !result.nil?
-				data_list_result = DataListResult.create(:result_key => result_key, :job_id => status["uuid"], :ref_result_id => result._id)
+				analysis_result = AnalysisResult.create(:result_key => result_key, :job_id => status["uuid"], :ref_result_id => result._id)
 				set_status({"ref_job_id" => result.job_id})
 				return
 			else
-				data_list_result = DataListResult.create(:result_key => result_key, :job_id => status["uuid"])
+				analysis_result = AnalysisResult.create(:result_key => result_key, :job_id => status["uuid"])
 			end
 
 			# analy answers info
 			answer_info = self.analyze_answer_info(answers)
 
 			# update answer info and set the job finished
-			data_list_result.answer_info = answer_info
-			data_list_result.save
+			analysis_result.answer_info = answer_info
+			analysis_result.save
 			set_status({"is_finished" => true})
 		end
 
 		def generate_result_key(answers)
 			answer_ids = answers.map { |e| e._id.to_s }
-			result_key = Digest::MD5.hexdigest("data_list-#{answer_ids.to_s}")
+			result_key = Digest::MD5.hexdigest("analyze_result-#{answer_ids.to_s}")
 			return result_key
 		end
+
+    def analysis(answers)
+      address_result = Address.province_hash.merge(Address.city_hash)
+      channel_result = {}
+      duration_mean = []
+      
+      answers.each do |answer|
+        # analyze region
+        region = answer.region
+        address_result[region] = address_result[region] + 1 if !address_result[region].nil?
+
+        # analyze channel
+        channel = answer.channel
+        channel_result[channel] = 0 if channel_result[channel].nil?
+        channel_result[channel] = channel_result[channel] + 1
+
+        # analyze duration
+        duration_mean << answer.finished_at - answer.created_at.to_i
+      end
+
+      duration_mean = duration_mean.mean
+    end
 
 		def analyze_answer_info(answers)
 			answer_info = []
