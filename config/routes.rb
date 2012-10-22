@@ -257,6 +257,7 @@ OopsData::Application.routes.draw do
 	resources :export_results do
 		post :set_spss_export_process
 		post :set_excel_export_process
+	end
 	resources :tools do
 		collection do
 			get :find_provinces
