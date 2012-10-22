@@ -13,51 +13,41 @@ OopsData::Application.routes.draw do
 	namespace :admin do
 		resources :users do 
 			collection do 
-				get 'blacks'
-				get 'whites'
+				get 'blacks', 'blacks_count', 'whites', 'whites_count', 'count', 
+					'deleteds', 'deleteds_count', 
+					'email_count', 'true_name_count', 'username_count'
 			end
 
 			member do 
-				get 'system_pwd'
-				get 'white'
-				get 'black'
+				get 'system_pwd', 'black', 'white'
+				post 'change_role_status'
 			end
 		end
 
 		resources :faqs do 
 			collection do 
-				get 'count'
-				get 'list_by_type_count'
-				get 'list_by_type_and_value_count'
+				get 'count', 'list_by_type_count', 'list_by_type_and_value_count'
 			end
 		end
 		resources :public_notices do 
 			collection do 
-				get 'count'
-				get 'list_by_type_count'
-				get 'list_by_type_and_value_count'
+				get 'count', 'list_by_type_count', 'list_by_type_and_value_count'
 			end
 		end
 		resources :advertisements do 
 			collection do 
-				get 'count'
-				get 'list_by_title_count'
-				get 'activated_count'
-				get 'unactivate_count'
+				get 'count', 'list_by_title_count', 'activated_count', 'unactivate_count'
 			end
 		end
 		resources :system_users do 
 			collection do 
-				post 'lock'
-				post 'unlock'
+				post 'lock', 'unlock'
 			end
 		end
 		resources :feedbacks do
 			collection do 
-				get 'count'
-				get 'list_by_type_and_value_count'
-				get 'list_by_type_and_answer_count'
-				get 'list_by_type_count'
+				get 'count', 'list_by_type_count', 'list_by_type_and_value_count', 
+					'list_by_type_and_answer_count'
 			end
 			member do 
 				post 'reply'
@@ -196,9 +186,10 @@ OopsData::Application.routes.draw do
 		resources :filters do
 		end
 
-		resources :analyze_results do
+		resources :results do
 			collection do
 				get :check_progress
+				get :job_progress
 			end
 		end
 
