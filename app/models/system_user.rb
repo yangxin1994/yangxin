@@ -6,7 +6,7 @@ class SystemUser < User
 
 	attr_accessible :email, :username, :true_name, :password, :system_user_type, :lock
 
-	validates_presence_of :true_name, :password, :system_user_type
+	validates_presence_of :email, :true_name, :password, :system_user_type
 
 	MAX_TYPE = 3
 	SUBCLASS = { 0 => "AnswerAuditor", 1 => "SurveyAuditor", 2=> "EntryClerk", 3=> "Interviewer" }
@@ -91,7 +91,7 @@ class SystemUser < User
 		#*retval*:
 		#* ErrorEnum or system_user instance
 		def find_by_id(system_user_id)
-			user = SystemUser.where(_id: system_user_id.to_s).first
+			user = User.where(_id: system_user_id).in(system_user_type: [1,2,4,8]).first
 			return ErrorEnum::SYSTEM_USER_NOT_EXIST if user.nil?
 			return user  
 		end
@@ -124,11 +124,13 @@ class SystemUser < User
 			if new_system_user[:password] || new_system_user["password"] then
 				new_system_user[:password] = new_system_user[:password] || new_system_user["password"]
 				new_system_user[:password] = Encryption.encrypt_password(new_system_user[:password]) 
+			else
+				new_system_user[:password] = Encryption.encrypt_password("oopsdata")
 			end
 			system_user = Kernel.const_get(SUBCLASS[Math.log2(new_system_user[:system_user_type].to_i).to_i]).new(new_system_user)
 
 			# init user other attrs, disable default
-			system_user.status = 2 #it is activated
+			system_user.status = 4 #it is activated
 			if !system_user.save then
 				return ErrorEnum::SYSTEM_USER_SAVE_FAILED
 			end	
@@ -172,63 +174,70 @@ class SystemUser < User
 			end
 		end
 
-		#*description*:
-		#
-		# types		:AnswerAuditor, SurveyAuditor, EntryClerk, Interviewer.
-		#
-		# type number: 	 1           2               4  	        8
-		#
-		#*params*
-		#* type_number: the search types number which is be 1, 2, 3, 7. 3=1+2; 7=1+2+4.
-		#
-		#*retval*:
-		# a system_user array
-		def list_by_type(type_number=0)
+		def update_lock(system_user_id, is_lock)
+			system_user = SystemUser.find_by_id(system_user_id)
+			return system_user if !system_user.is_a?(SystemUser)
+			system_user.lock = is_lock
+			return system_user.save
+		end
 
-			#verify params
-			return ErrorEnum::SYSTEM_USER_TYPE_ERROR if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
-			return ErrorEnum::SYSTEM_USER_RANGE_ERROR if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))
-			type_number = type_number.to_i
+		# #*description*:
+		# #
+		# # types		:AnswerAuditor, SurveyAuditor, EntryClerk, Interviewer.
+		# #
+		# # type number: 	 1           2               4  	        8
+		# #
+		# #*params*
+		# #* type_number: the search types number which is be 1, 2, 3, 7. 3=1+2; 7=1+2+4.
+		# #
+		# #*retval*:
+		# # a system_user array
+		# def list_by_type(type_number=0)
+
+		# 	#verify params
+		# 	return ErrorEnum::SYSTEM_USER_TYPE_ERROR if type_number && type_number.to_i ==0 && type_number.to_s.strip != "0"
+		# 	return ErrorEnum::SYSTEM_USER_RANGE_ERROR if type_number && (type_number.to_i < 0 || type_number.to_i >= 2**(MAX_TYPE+1))
+		# 	type_number = type_number.to_i
 			
-			return [] if !type_number.instance_of?(Fixnum) || type_number <= 0
-			system_users = []
-			MAX_TYPE.downto(0).each { |element| 
-				system_users_tmp=[]
-				if type_number / (2**element) == 1 then
-					system_users_tmp = SystemUser.where(system_user_type: 2**element)
-				end
-				type_number = type_number % 2**element
-				system_users = system_users + system_users_tmp
-			}
-			system_users.sort!{|v1, v2| v2.updated_at <=> v1.updated_at} if system_users.count > 1
+		# 	return [] if !type_number.instance_of?(Fixnum) || type_number <= 0
+		# 	system_users = []
+		# 	MAX_TYPE.downto(0).each { |element| 
+		# 		system_users_tmp=[]
+		# 		if type_number / (2**element) == 1 then
+		# 			system_users_tmp = SystemUser.where(system_user_type: 2**element)
+		# 		end
+		# 		type_number = type_number % 2**element
+		# 		system_users = system_users + system_users_tmp
+		# 	}
+		# 	system_users.sort!{|v1, v2| v2.updated_at <=> v1.updated_at} if system_users.count > 1
 
-			return system_users
-		end
+		# 	return system_users
+		# end
 
-		#*description*:
-		#
-		# types		:AnswerAuditor, SurveyAuditor, EntryClerk, Interviewer.
-		#
-		# type number: 	 1           2               4  	        8
-		#
-		#*params*
-		#* type_number: the search types number which is be 1, 2, 3, 7. 3=1+2; 7=1+2+4.
-		#* is_lock: true or false
-		#
-		#*retval*:
-		# a system_user array
-		def list_by_type_and_lock(type_number, is_lock)
+		# #*description*:
+		# #
+		# # types		:AnswerAuditor, SurveyAuditor, EntryClerk, Interviewer.
+		# #
+		# # type number: 	 1           2               4  	        8
+		# #
+		# #*params*
+		# #* type_number: the search types number which is be 1, 2, 3, 7. 3=1+2; 7=1+2+4.
+		# #* is_lock: true or false
+		# #
+		# #*retval*:
+		# # a system_user array
+		# def list_by_type_and_lock(type_number, is_lock)
 
-			system_users = list_by_type(type_number)
+		# 	system_users = list_by_type(type_number)
 
-			return system_users if !system_users.instance_of?(Array)
+		# 	return system_users if !system_users.instance_of?(Array)
 
-			if system_users.count > 0 then
-				system_users.select!{|o| o.lock == is_lock}
-			end
+		# 	if system_users.count > 0 then
+		# 		system_users.select!{|o| o.lock == is_lock}
+		# 	end
 
-			return system_users
-		end
+		# 	return system_users
+		# end
 
 	end
 

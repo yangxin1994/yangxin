@@ -40,8 +40,14 @@ OopsData::Application.routes.draw do
 			end
 		end
 		resources :system_users do 
-			collection do 
+			member do 
 				post 'lock', 'unlock'
+			end
+			collection do 
+				get 'count', 'answer_anuditors', 'answer_anuditors_count',
+				'survey_auditors', 'survey_auditors_count',
+				'entry_clerks', 'entry_clerks_count',
+				'interviewers', 'interviewers_count'
 			end
 		end
 		resources :feedbacks do

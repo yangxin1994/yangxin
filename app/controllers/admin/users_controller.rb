@@ -1,24 +1,24 @@
 
 class Admin::UsersController < Admin::ApplicationController
 #--
-# **************Quill Admin Manage User************************************
+# ************** Quill Admin Manage User ************************************
 #++
 	
-	@@user_attrs_filter = %w(_id email role status username true_name identity_card company birthday gender address phone postcode black white)
+	@@user_attrs_filter = %w(_id email role status username true_name identity_card company birthday gender address phone postcode black white new_password lock)
 
 	# GET /admin/users
 	# GET /admin/users.json
 	def index
 		
 		if !params[:email].nil? then
-			@users = User.where(email: params[:email]).desc(:status, :created_at).page(page).per(per_page)
+			@users = User.where(email: params[:email]).desc(:status, :created_at).page(page).per(per_page) || []
 		elsif !params[:true_name].nil? then	
-			@users = User.where(true_name: params[:true_name]).desc(:status, :created_at).page(page).per(per_page)
+			@users = User.where(true_name: params[:true_name]).desc(:status, :created_at).page(page).per(per_page) || []
 		elsif !params[:username].nil? then
 			filter = params[:username].to_s.gsub(/[*]/, ' ')
-			@users = User.where(username: /.*#{filter}.*/).desc(:status, :created_at).page(page).per(per_page)
+			@users = User.where(username: /.*#{filter}.*/).desc(:status, :created_at).page(page).per(per_page) || []
 		else
-			@users = User.normal_list.desc(:status, :created_at).page(page).per(per_page)
+			@users = User.normal_list.desc(:status, :created_at).page(page).per(per_page) || []
 		end			
 
 		respond_to do |format|
