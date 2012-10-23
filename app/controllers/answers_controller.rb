@@ -148,7 +148,7 @@ class AnswersController < ApplicationController
 	end
 
 	def get_my_answer
-		@answer = @current_user.nil? ? nil : Answer.find_by_survey_id_and_user(params[:survey_id], @current_user)
+		@answer = @current_user.nil? ? nil : Answer.find_by_survey_id_user_is_preview(params[:survey_id], @current_user, params[:is_preview])
 		if @answer.nil?
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }

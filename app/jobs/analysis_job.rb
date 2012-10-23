@@ -1,7 +1,7 @@
 require 'result_job'
 module Jobs
 
-	class AnalysisResult < ResultJob
+	class AnalysisJob < ResultJob
 
 		@queue = :result_job
 
@@ -32,10 +32,12 @@ module Jobs
 			end
 
 			# analy answers info
-			answer_info = self.analyze_answer_info(answers)
+			[region_result, channel_result, duration_mean] = self.analysis(answers)
 
-			# update answer info and set the job finished
-			analysis_result.answer_info = answer_info
+			# update analysis result
+			analysis_result.region_result = region_result
+			analysis_result.channel_result = channel_result
+			analysis_result.duration_mean = duration_mean
 			analysis_result.save
 			set_status({"is_finished" => true})
 		end
@@ -46,41 +48,42 @@ module Jobs
 			return result_key
 		end
 
-    def analysis(answers)
-      address_result = Address.province_hash.merge(Address.city_hash)
-      channel_result = {}
-      duration_mean = []
-      
-      answers.each do |answer|
-        # analyze region
-        region = answer.region
-        address_result[region] = address_result[region] + 1 if !address_result[region].nil?
+		def analysis(answers)
+			region_result = Address.province_hash.merge(Address.city_hash)
+			channel_result = {}
+			duration_mean = []
+			finish_time = []
+			
+			answers.each do |answer|
+				# analyze region
+				region = answer.region
+				region_result[region] = region_result[region] + 1 if !region_result[region].nil?
+				
+				# analyze channel
+				channel = answer.channel
+				channel_result[channel] = 0 if channel_result[channel].nil?
+				channel_result[channel] = channel_result[channel] + 1
+				
+				# analyze duration
+				duration_mean << answer.finished_at - answer.created_at.to_i
 
-        # analyze channel
-        channel = answer.channel
-        channel_result[channel] = 0 if channel_result[channel].nil?
-        channel_result[channel] = channel_result[channel] + 1
+				# analyze time
+				finish_time << answer.finished_at
 
-        # analyze duration
-        duration_mean << answer.finished_at - answer.created_at.to_i
-      end
-
-      duration_mean = duration_mean.mean
-    end
-
-		def analyze_answer_info(answers)
-			answer_info = []
-			answers_length = answers.length
-			answers.each_with_index do |a, index|
-				info = {}
-				info["email"] = a.user.email
-				info["answer_time"] = a.created_at.to_i
-				info["duration"] = a.finished_at - a.created_at.to_i
-				info["region"] = a.region
-				answer_info << info
-				set_status({"answer_info_progress" => (index + 1) * 1.0 / answers_length })
+				# re-organize answers
+				all_answer_content = answer.answer_content.mrege(answer.template_answer_content)
+				all_answer_content.each do |q_id, question_answer|
+					answers_transform[q_id] << question_answer if !question_answer.blank?
+				end
 			end
-			return answer_info
+			
+			# calculate the mean of duration
+			duration_mean = duration_mean.mean
+
+			# make stats of the finish time
+
+			return [region_result, channel_result, duration_mean]
 		end
+
 	end
 end
