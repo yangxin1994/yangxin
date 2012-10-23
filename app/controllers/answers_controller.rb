@@ -2,8 +2,8 @@
 require 'error_enum'
 class AnswersController < ApplicationController
 
-	before_filter :check_survey_existence
-	before_filter :check_answer_existence, :except => [:load_question, :preview_load_question, :index]
+	before_filter :check_survey_existence, :except => [:show, :get_my_answer, :destroy]
+	before_filter :check_answer_existence, :except => [:show, :get_my_answer, :destroy, :load_question]
 
 	def check_answer_existence
 		@answer = Answer.find_by_survey_id_user_is_preview(params[:survey_id], @current_user, params[:is_preview])
@@ -129,27 +129,49 @@ class AnswersController < ApplicationController
 		end
 	end
 
-	def index
-		answers = @survey.answers
-		respond_to do |format|
-			format.json	{ render_json_auto(answers) and return }
-		end
-	end
-
 	def show
+		@survey = @current_user.is_admin ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if @survey.nil?
+			respond_to do |format|
+				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
+			end
+		end
+		@answer = @survey.answers.find_by_id(params[:id])
+		if @survey.nil?
+			respond_to do |format|
+				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
+			end
+		end
 		respond_to do |format|
 			format.json	{ render_json_auto(@answer) and return }
 		end
 	end
 
 	def get_my_answer
-		answer = @current_user.nil? ? nil : Answer.find_by_survey_id_and_user(params[:survey_id], @current_user)
+		@answer = @current_user.nil? ? nil : Answer.find_by_survey_id_and_user(params[:survey_id], @current_user)
+		if @answer.nil?
+			respond_to do |format|
+				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
+			end
+		end
 		respond_to do |format|
 			format.json	{ render_json_auto(answer) and return }
 		end
 	end
 
 	def destroy
+		@survey = @current_user.is_admin ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
+		if @survey.nil?
+			respond_to do |format|
+				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
+			end
+		end
+		@answer = @survey.answers.find_by_id(params[:id])
+		if @answer.nil?
+			respond_to do |format|
+				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
+			end
+		end
 		retval = @answer.delete
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
