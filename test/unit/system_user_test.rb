@@ -12,7 +12,7 @@ class SystemUserTest < ActiveSupport::TestCase
 		assert_equal SystemUser.all.count, 0
 		assert_equal system_user, false
 
-		system_user = SystemUser.create(system_user_type: 1, password: Encryption.encrypt_password("123456"), true_name: "lisi")
+		system_user = SystemUser.create(email: "1@example.com",system_user_type: 1, password: Encryption.encrypt_password("123456"), true_name: "lisi")
 		assert_equal SystemUser.all.count, 1
 		assert_equal system_user, SystemUser.all.first
 
@@ -46,7 +46,7 @@ class SystemUserTest < ActiveSupport::TestCase
 		new_system_user = {email: "test@example.com", username:"test", password: "123456", true_name: "lisi"}
 		system_user = SystemUser.create_system_user(new_system_user)
 		assert system_user.instance_of?(AnswerAuditor)
-		assert_equal system_user.status, 2
+		assert_equal system_user.status, 4
 		assert_equal system_user.password, Encryption.encrypt_password("123456")
 
 		new_system_user = {email: "test2@example.com", password: "123456", true_name: "lisi", system_user_type: 2}
@@ -90,14 +90,14 @@ class SystemUserTest < ActiveSupport::TestCase
 		new_system_user = {email: "test@example.com", password: "123456", true_name: "lisi"}
 		system_user = SystemUser.create_system_user(new_system_user)
 		assert system_user.instance_of?(AnswerAuditor)
-		assert_equal system_user.status, 2
+		assert_equal system_user.status, 4
 		assert_equal system_user.password, Encryption.encrypt_password("123456")
 		system_user = SystemUser.update_system_user(system_user.id.to_s, 
 			{:email => "test2@example.com",:true_name => "test", :lock => true })
 		assert_equal system_user.email, "test2@example.com"
 		assert_equal system_user.lock, true
 		assert_equal system_user.true_name, "test"
-		assert_equal system_user.status, 2
+		assert_equal system_user.status, 4
 
 		clear(User)
 	end

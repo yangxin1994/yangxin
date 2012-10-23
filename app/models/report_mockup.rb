@@ -7,7 +7,7 @@ class ReportMockup
 	include Mongoid::Document
 	include Mongoid::Timestamps
 
-	field :title, :type => String
+	field :title, :type => String, default: "未命名"
 	field :subtitle, :type => String
 	field :header, :type => String
 	field :footer, :type => String

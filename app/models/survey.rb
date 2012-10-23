@@ -87,9 +87,10 @@ class Survey
   has_many :answers
   has_many :email_histories
 
-  has_many :analyze_results
-  has_many :data_list_results
-  has_many :report_mockups
+	has_many :analysis_results
+	has_many :data_list_results
+	has_many :report_mockups
+
 
   scope :all_but_new, lambda { where(:new_survey => false) }
   scope :normal, lambda { where(:status.gt => -1) }

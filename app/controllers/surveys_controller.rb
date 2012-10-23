@@ -313,11 +313,11 @@ class SurveysController < ApplicationController
 	#* a list Survey objects
 	def index
 
-		if params[:stars].nil? then
+		if params[:stars] then
+			survey_list = @current_user.surveys.stars.page(page).per(per_page)
+		else
 			survey_list = @current_user.surveys.list(params[:status], params[:publish_status], params[:tags])
 			survey_list = slice((survey_list || []), page, per_page)
-		else
-			survey_list = @current_user.surveys.stars.page(page).per(per_page)
 		end	
 
 		# add answer_number
