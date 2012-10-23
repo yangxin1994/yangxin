@@ -78,7 +78,7 @@ class AnswersController < ApplicationController
 			elsif questions.class == String && questions.start_with?("error")
 				render_json_e(questions) and return
 			else
-				render_json_auto([questions, answer.answers_of(questions), answer.load_progress_of(questions), questions.estimate_answer_time, answer.repeat_time]) and return
+				render_json_auto([questions, answer.answers_of(questions), answer.question_number, answer.index_of(questions), questions.estimate_answer_time, answer.repeat_time]) and return
 			end
 		else
 			render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return

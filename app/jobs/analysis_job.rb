@@ -7,7 +7,7 @@ module Jobs
 
 		def perform
 			# set the type of the job
-			set_status({"result_type" => "analysis_result"})
+			set_status({"result_type" => "analysis"})
 
 			# get parameters
 			filter_index = options["filter_index"].to_i
@@ -31,13 +31,15 @@ module Jobs
 				analysis_result = AnalysisResult.create(:result_key => result_key, :job_id => status["uuid"])
 			end
 
-			# analy answers info
-			[region_result, channel_result, duration_mean] = self.analysis(answers)
+			# analyze result
+			region_result, channel_result, duration_mean, time_result, answer_result = *self.analysis(answers)
 
 			# update analysis result
 			analysis_result.region_result = region_result
 			analysis_result.channel_result = channel_result
 			analysis_result.duration_mean = duration_mean
+			analysis_result.time_result = time_result
+			analysis_result.answer_result = answer_result
 			analysis_result.save
 			set_status({"is_finished" => true})
 		end
@@ -53,8 +55,9 @@ module Jobs
 			channel_result = {}
 			duration_mean = []
 			finish_time = []
+			answers_transform = {}
 			
-			answers.each do |answer|
+			answers.each_with_index do |answer, index|
 				# analyze region
 				region = answer.region
 				region_result[region] = region_result[region] + 1 if !region_result[region].nil?
@@ -71,19 +74,230 @@ module Jobs
 				finish_time << answer.finished_at
 
 				# re-organize answers
-				all_answer_content = answer.answer_content.mrege(answer.template_answer_content)
-				all_answer_content.each do |q_id, question_answer|
+				answer.answer_content.each do |q_id, question_answer|
 					answers_transform[q_id] << question_answer if !question_answer.blank?
 				end
+
+				set_status({"analysis_answer_progress" => 0.5 * (index + 1) * 1.0 / answers.length })
 			end
 			
 			# calculate the mean of duration
 			duration_mean = duration_mean.mean
 
 			# make stats of the finish time
+			min_finish_time = finish_time.min
+			min_finish_date = Time.at(min_finish_time).to_date
+			start_day = [min_finish_date.year, min_finish_date.month, min_finish_date.day]
+			day_number = (finish_time.max / 86400 - min_finish_time / 86400) + 1
+			time_histogram = Array.new(day_number, 0)
+			finish_time.each do |t|
+				time_histogram[t / 86400 - min_finish_time / 86400] = time_histogram[t / 86400 - min_finish_time / 86400] + 1
+			end
+			time_result = {"start_day" => start_day, "time_histogram" => time_histogram}
+			set_status({"analysis_answer_progress" => 0.6 })
 
-			return [region_result, channel_result, duration_mean]
+			# make stats for the answers
+			answer_result = {}
+			answers_transform.each do |q_id, question_answer_ary|
+				question = Question.find_by_id(q_id)
+				answer_result[q_id] = [question, question_answer_ary.length, analyze_one_question_answers(question, question_answer_ary)]
+				set_status({"analysis_answer_progress" => 0.6 + 0.4 * aindex / answers_transform.length })
+			end
+
+			return [region_result, channel_result, duration_mean, time_result, answer_result]
 		end
 
+		def analyze_one_question_answers(question, answer_ary)
+			case question.question_type
+			when QuestionTypeEnum::CHOICE_QUESTION
+				return analyze_choice(question.issue, answer_ary)
+			when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
+				return analyze_matrix_choice(question.issue, answer_ary)
+			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
+				return analyze_number_blank(question.issue, answer_ary)
+			when QuestionTypeEnum::TIME_BLANK_QUESTION
+				return analyze_time_blank(question.issue, answer_ary)
+			when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+				return analyze_address_blank(question.issue, answer_ary)
+			when QuestionTypeEnum::BLANK_QUESTION
+				return analyze_blank(question.issue, answer_ary)
+			when QuestionTypeEnum::MATRIX_BLANK_QUESTION
+				return analyze_matrix_blank(question.issue, answer_ary)
+			when QuestionTypeEnum::TABLE_QUESTION
+				return analyze_table(question.issue, answer_ary)
+			when QuestionTypeEnum::CONST_SUM_QUESTION
+				return analyze_const_sum(question.issue, answer_ary)
+			when QuestionTypeEnum::SORT_QUESTION
+				return analyze_sort(question.issue, answer_ary)
+			when QuestionTypeEnum::RANK_QUESTION
+				return analyze_rank(question.issue, answer_ary)
+			end
+		end
+
+		def analyze_choice(issue, answer_ary)
+			input_ids = issue["items"].map { |e| e["id"] }
+			input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+			result = {}
+			input_ids.each { |input_id| result[input_id] = 0 }
+			answer_ary.each do |answer|
+				answer["selection"].each do |input_id|
+					result[input_id] = result[input_id] + 1 if !result[input_id].nil?
+				end
+			end
+			return result
+		end
+
+		def analyze_matrix_choice(issue, answer_ary)
+			input_ids = issue["choices"].map { |e| e["id"] }
+			result = {}
+			issue["rows"].each do |row|
+				input_ids.each do |input_id|
+					result["#{row["id"]}-#{input_id}"] = 0
+				end
+			end
+	
+			answer_ary.each do |answer|
+				answer.each_with_index do |row_answer, row_index|
+					row_id = issue["rows"][row_index]["id"]
+					row_answer.each do |input_id|
+						result["#{row_id}-#{input_id}"] = result["#{row_id}-#{input_id}"] + 1 if !result["#{row_id}-#{input_id}"].nil?
+					end
+				end
+			end
+			return result
+		end
+
+		def analyze_number_blank(issue, answer_ary)
+			result = {}		
+			answer_ary.map! { |answer| answer.to_f }
+			answer_ary.sort!
+			result["mean"] = answer_ary.mean
+			return result
+		end
+
+		def analyze_time_blank(issue, answer_ary)
+			result = {}
+			if (0..3).to_a.include?(issue["format"])
+				# year-based
+				target_array = answer_ary.map! { |a| a[0] }
+				(target_array.min..target_array.max).to_a do |year|
+					result[year] = 0
+				end
+
+			elsif issue["format"] == 4
+				# month-based
+				target_array = answer_ary.map! { |a| a[1] }
+				(1..12).to_a.each do |month|
+					result[month] = 0
+				end
+			else
+				# hour-based
+				target_array = answer_ary.map! { |a| a[3] }
+				(0..23).to_a.each do |hour|
+					result[hour] = 0
+				end
+			end
+			target_array do |ele|
+				result[ele] = result[ele] + 1
+			end
+			return result
+		end
+
+		def analyze_address_blank(issue, answer_ary)
+			result = {}
+			if issue["format"].to_i & 4
+				# city is required
+				result = Address.province_hash
+				answer_ary = answer_ary.map! do |answer|
+					answer[1].to_i
+				end
+			else
+				# only province is required
+				result = Address.city_hash
+				answer_ary = answer_ary.map! do |answer|
+					answer[0].to_i
+				end
+			end
+			answer_ary.each do |value|
+				result[value] = result[value] + 1 if !result[value].nil?
+			end
+			return result
+		end
+
+		def analyze_blank(issue, answer_ary)
+			result = {}
+			issue["items"].each_with_index do |input, input_index|
+				case input["data_type"]
+				when "Number"
+					result[input["id"]] = analyze_number_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				when "Address"
+					result[input["id"]] = analyze_address_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				when "Time"
+					result[input["id"]] = analyze_time_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				end
+			end
+			return result
+		end
+
+		def analyze_const_sum(issue, answer_ary)
+			input_ids = issue["items"].map { |e| e["id"] }
+			input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+			weights = {}
+			input_ids.each { |input_id| weights[input_id] = [] }
+
+			answer_ary.each do |answer|
+				answer.each do |input_id, value|
+					weights[input_id] << value.to_f if !weights[input_id].nil?
+				end
+			end
+
+			result = {}
+			weights.each do |key, weight_ary|
+				result[key] = weight_ary.mean
+			end
+
+			return result
+		end
+
+		def analyze_sort(issue, answer_ary)
+			input_ids = issue["items"].map { |e| e["id"] }
+			input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+			
+			input_number = input_ids.length
+			result = {}
+			input_ids.each do |input_id|
+				result[input_id] = Array(input_number, 0)
+			end
+	
+			answer_ary.each do |answer|
+				answer["sort_result"].each_with_index do |input_id, sort_index|
+					result[input_id][sort_index] = result[input_id][sort_index] + 1 if sort_index < input_number
+				end
+			end
+	
+			return result
+		end
+
+		def analyze_rank(issue, answer_ary)
+			input_ids = issue["items"].map { |e| e["id"] }
+			input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+			scores = {}
+			input_ids.each { |input_id| scores[input_id] = [] }
+			
+			answer_ary.each do |answer|
+				answer.each do |input_id, value|
+					scores[input_id] << value if !scores[input_id].nil? && value.to_i != -1
+				end
+			end
+	
+			result = {}
+			scores.each do |key, score_ary|
+				result[key] = []
+				result[key] << score_ary.length
+				result[key] << (score_ary.blank? ? -1 : score_ary.mean)
+			end
+	
+			return result
+		end
 	end
 end
