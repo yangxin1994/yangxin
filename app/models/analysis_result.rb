@@ -18,18 +18,18 @@ class AnalysisResult < Result
 	def self.find_or_create_by_filter_index(survey, filter_index, include_screened_answer)
 		answers = self.answers(survey, filter_index, include_screened_answer)
 		result_key = self.generate_result_key(answers)
-		analyze_result = self.find_by_result_key(result_key)
+		analysis_result = self.find_by_result_key(result_key)
 		if analyze_result.nil?
-			analyze_result = AnalyzeResult.new(:result_key => result_key)
-			analyze_result.analyze_duration(answers)
-			analyze_result.analyze_time(answers)
-			analyze_result.analyze_region(answers)
-			analyze_result.analyze_channel(answers)
-			analyze_result.analyze_answers(answers)
-			answers_result.finished = true
-			analyze_result.save
+			analysis_result = AnalysisResult.new(:result_key => result_key)
+			analysis_result.analyze_duration(answers)
+			analysis_result.analyze_time(answers)
+			analysis_result.analyze_region(answers)
+			analysis_result.analyze_channel(answers)
+			analysis_result.analyze_answers(answers)
+			analysis_result.finished = true
+			analysis_result.save
 		end
-		return analyze_result
+		return analysis_result
 	end
 
 	def analyze_region(answers)

@@ -85,7 +85,7 @@ class Survey
 	has_many :answers
 	has_many :email_histories
 
-	has_many :analyze_results
+	has_many :analysis_results
 	has_many :data_list_results
 	has_many :report_mockups
 

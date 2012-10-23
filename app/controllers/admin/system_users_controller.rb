@@ -19,17 +19,21 @@ class Admin::SystemUsersController < Admin::ApplicationController
 			else
 				@system_users = SystemUser.list_by_type(params[:system_user_type])	
 			end
-		else
-			@system_users = SystemUser.all.desc(:updated_at)
-		end
 
-		@system_users = slice((@system_users || []), params[:page], params[:per_page])
+			@system_users = slice((@system_users || []), page, per_page)
+		else
+			@system_users = SystemUser.all.desc(:created_at).page(page).per(per_page)
+		end
 
 		respond_to do |format|
 			format.html # index.html.erb
-			format.json { render json: @system_users, 
+			format.json { render_json_auto @system_users, 
 				:only => @@system_user_attrs_filter }
 		end
+	end
+
+	def count
+		render_json_auto SystemUser.count
 	end
 	
 	# GET /admin/system_users/1 
@@ -39,7 +43,7 @@ class Admin::SystemUsersController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html # show.html.erb
-			format.json { render json: @system_user,
+			format.json { render_json_auto @system_user,
 				:only => @@system_user_attrs_filter }
 		end
 	end
@@ -51,7 +55,7 @@ class Admin::SystemUsersController < Admin::ApplicationController
 
 		respond_to do |format|
 			format.html # new.html.erb
-			format.json { render json: @system_user,
+			format.json { render_json_auto @system_user,
 				:only => @@system_user_attrs_filter }
 		end
 	end
@@ -62,7 +66,7 @@ class Admin::SystemUsersController < Admin::ApplicationController
 
 		respond _to do |format|
 			format.html # show.html.erb
-			format.json { render json: @system_user,
+			format.json { render_json_auto @system_user,
 				:only => @@system_user_attrs_filter }
 		end
 	end
@@ -75,7 +79,7 @@ class Admin::SystemUsersController < Admin::ApplicationController
 		respond_to do |format|
 			format.html  if @system_user.instance_of?(SystemUser)
 			format.html { render action: "new" } if !@system_user.instance_of?(SystemUser)
-			format.json { render :json => @system_user, 
+			format.json { render_json_auto @system_user, 
 				:only => @@system_user_attrs_filter}
 		end
 	end
@@ -88,35 +92,67 @@ class Admin::SystemUsersController < Admin::ApplicationController
 		respond_to do |format|
 			format.html { redirect_to @system_user} if @system_user.instance_of?(SystemUser)
 			format.html { render action: "edit" } if !@system_user.instance_of?(SystemUser)
-			format.json { render :json => @system_user,
+			format.json { render_json_auto @system_user,
 				:only => @@system_user_attrs_filter }
 		end
 	end
 
-	# POST /admin/system_users/lock
-	# POST /admin/system_users/lock.json
+	# POST /admin/system_users/:id/lock
+	# POST /admin/system_users/:id/lock.json
 	def lock
-		@system_user = SystemUser.update_system_user(params[:id], {"lock" => true})
+		@system_user = SystemUser.update_lock(params[:id], true)
 
 		respond_to do |format|
 			format.html { redirect_to @system_user} if @system_user.instance_of?(SystemUser)
 			format.html { render action: "edit" } if !@system_user.instance_of?(SystemUser)
-			format.json { render :json => @system_user,
+			format.json { render_json_auto @system_user,
 				:only => @@system_user_attrs_filter }
 		end
 	end
 
-	# POST /admin/system_users/unlock
-	# POST /admin/system_users/unlock.json
+	# POST /admin/system_users/:id/unlock
+	# POST /admin/system_users/:id/unlock.json
 	def unlock
-		@system_user = SystemUser.update_system_user(params[:id], {"lock" => false})
+		@system_user = SystemUser.update_lock(params[:id], false)
 
 		respond_to do |format|
 			format.html { redirect_to @system_user } if @system_user.instance_of?(SystemUser)
 			format.html { render action: "edit" } if !@system_user.instance_of?(SystemUser)
-			format.json { render :json => @system_user, 
+			format.json { render_json_auto @system_user, 
 				:only => @@system_user_attrs_filter }
 		end
 	end
+
+	# add diff class systemuser interface
+	def answer_anuditors
+		render_json_auto AnswerAuditor.all.desc(:lock, :created_at).page(page).per(per_page)
+	end
+
+	def answer_anuditors_count
+		render_json_auto AnswerAuditor.count
+	end
+
+	def survey_auditors
+		render_json_auto SurveyAuditor.all.desc(:created_at) .page(page).per(per_page)
+	end
+
+	def survey_auditors_count
+		render_json_auto SurveyAuditor.count
+	end 
 	
+	def entry_clerks
+		render_json_auto EntryClerk.all.desc(:created_at) .page(page).per(per_page)
+	end
+
+	def entry_clerks_count
+		render_json_auto EntryClerk.count
+	end 
+
+	def interviewers
+		render_json_auto Interviewer.all.desc(:created_at) .page(page).per(per_page)
+	end
+
+	def interviewers_count
+		render_json_auto Interviewer.count
+	end 
 end

@@ -593,6 +593,8 @@ class User
 			return ErrorEnum::USER_SAVE_FAILED
 		end
 
+		user[:new_password] = sys_pwd
+
 		# maybe, should be send the pwd to his register email
 		#
 		# CODE:
