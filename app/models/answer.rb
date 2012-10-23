@@ -783,6 +783,12 @@ class Answer
 		return self.answer_content.select { |q_id, a| question_ids.include?(q_id) }
 	end
 
+	def load_progress_of(questions)
+		question_id = questions[0]._id.to_s
+		question_ids = (self.survey.pages.map { |p| p["questions"] }).flatten
+		return question_ids.index(question_id) * 1.0 / question_ids.length
+	end
+
 	#*description*: finish an answer, only work for answers that allow pageup (those that do not allow pageup finish automatically)
 	#
 	#*params*:
