@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'error_enum'
 require 'array'
 require 'tool'
@@ -20,7 +19,7 @@ class AnalysisResult < Result
 		result_key = self.generate_result_key(answers)
 		analyze_result = self.find_by_result_key(result_key)
 		if analyze_result.nil?
-			analyze_result = AnalyzeResult.new(:result_key => result_key)
+			analyze_result = AnalysisResult.new(:result_key => result_key)
 			analyze_result.analyze_duration(answers)
 			analyze_result.analyze_time(answers)
 			analyze_result.analyze_region(answers)

@@ -6,7 +6,7 @@ class ExportResult < Result
 
   GRANULARITY = 5
 
-  #field :answer_contents, :type => Array, :default => []
+  field :answer_contents, :type => Array, :default => []
   field :filter_index, :type => Integer
   field :include_screened_answer, :type => Boolean
   field :last_updated_time, :type => Hash
@@ -20,33 +20,33 @@ class ExportResult < Result
   	Result.answers(self.survey, filter_index, include_screened_answer)
   end
 
-  def answer_contents
-    answers = filtered_answers
-    @retval = []
-    q = survey.all_questions_type
-    p "========= 准备完毕 ========="
-    n = 0
-    self.answers_count = answers.size
-    self.save
-    answers.each do |a|
-      line_answer = []
-      i = -1
-      #begin
-        #TODO 异常处理
-        a.answer_content.each do |k, v|
-          line_answer += q[i += 1].answer_content(v)
-        end
-      #end
-      #n += 1
-      export_process[:answers] += GRANULARITY if ((n += 1) % (answers_count / 100 * GRANULARITY) == 0 )
+  # def answer_contents
+  #   answers = filtered_answers
+  #   @retval = []
+  #   q = survey.all_questions_type
+  #   p "========= 准备完毕 ========="
+  #   n = 0
+  #   self.answers_count = answers.size
+  #   self.save
+  #   answers.each do |a|
+  #     line_answer = []
+  #     i = -1
+  #     #begin
+  #       #TODO 异常处理
+  #       a.answer_content.each do |k, v|
+  #         line_answer += q[i += 1].answer_content(v)
+  #       end
+  #     #end
+  #     #n += 1
+  #     export_process[:answers] += GRANULARITY if ((n += 1) % (answers_count / 100 * GRANULARITY) == 0 )
       
-      p "========= 转出 #{n} 条 进度 #{excel_export_process} =========" if n%GRANULARITY == 0
-      @retval << line_answer
-    end
-    #answer_contents = @retval
-    #self.save
-    @retval
-  end
+  #     p "========= 转出 #{n} 条 进度 #{excel_export_process} =========" if n%GRANULARITY == 0
+  #     @retval << line_answer
+  #   end
+  #   #answer_contents = @retval
+  #   #self.save
+  #   @retval
+  # end
 
   def csv_header
     headers = []
