@@ -78,7 +78,7 @@ class AnswersController < ApplicationController
 			elsif questions.class == String && questions.start_with?("error")
 				render_json_e(questions) and return
 			else
-				render_json_auto([questions, answer.answers_of(questions), answer.load_progress_of(questions), questions.estimate_answer_time, answer.repeat_time]) and return
+				render_json_auto([questions, answer.answers_of(questions), answer.question_number, answer.index_of(questions), questions.estimate_answer_time, answer.repeat_time]) and return
 			end
 		else
 			render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return
@@ -148,7 +148,7 @@ class AnswersController < ApplicationController
 	end
 
 	def get_my_answer
-		@answer = @current_user.nil? ? nil : Answer.find_by_survey_id_and_user(params[:survey_id], @current_user)
+		@answer = @current_user.nil? ? nil : Answer.find_by_survey_id_user_is_preview(params[:survey_id], @current_user, params[:is_preview])
 		if @answer.nil?
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }

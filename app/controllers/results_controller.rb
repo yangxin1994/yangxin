@@ -29,12 +29,14 @@ class ResultsController < ApplicationController
 		progress = Result.job_progress(params[:job_id])
 		if progress == 1
 			result = Result.find_result_by_job_id(params[:job_id])
+			respond_to do |format|
+				format.json	{ render_json_auto(result) and return }
+			end
 		else
 			respond_to do |format|
 				format.json	{ render_json_s(progress) and return }
 			end
 		end
-		
 	end
 
 	def check_progress
