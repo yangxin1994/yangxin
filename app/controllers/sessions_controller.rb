@@ -160,6 +160,11 @@ class SessionsController < ApplicationController
 		end
 	end
 
+	def destroy
+		User.logout(params[:auth_key])
+		render_json_s and return
+	end
+
 	#*descryption*: send email to reset password
 	#
 	#*http* *method*: post

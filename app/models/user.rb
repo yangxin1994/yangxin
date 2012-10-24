@@ -468,7 +468,8 @@ class User
 
 	public
 
-	ROLE_NORMAL = 1
+	ROLE_NORMAL = 0
+	ROLE_ADMIN = 1
 	ROLE_WHITE = 2
 	ROLE_BLACK = 4
 
