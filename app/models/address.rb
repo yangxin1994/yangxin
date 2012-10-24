@@ -100,7 +100,7 @@ class Address
 		self.ensure_cache
 		ip_info = IpInfo.find_by_ip(ip_address)
 		# no province information in the ip info
-		return -1 if ip_info.nil? || ip_info.province.blank?
+		return -1 if ip_info.class != Postcode || ip_info.province.blank?
 		target_province = nil
 		@@provinces.each do |province|
 			if province[1].gsub(/\s+/, "").include?(ip_info.province.gsub(/\s+/, ""))

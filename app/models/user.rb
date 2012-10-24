@@ -319,7 +319,7 @@ class User
 		user.login_count = user.login_count + 1
 		user.last_login_time = Time.now.to_i
 		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
-		user.auth_key_expire_time =  keep_signed_in ? -1 : Time.now.to_i + OOPSDATA["login_keep_time"]['unkept'].to_i
+		user.auth_key_expire_time =  keep_signed_in ? -1 : Time.now.to_i + OOPSDATA["login_keep_time"].to_i
 		return false if !user.save
 		return {"status" => user.status, "auth_key" => user.auth_key, "user_id" => user._id.to_s}
 	end
