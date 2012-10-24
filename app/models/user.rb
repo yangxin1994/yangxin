@@ -26,8 +26,11 @@ class User
 	field :last_read_messeges_time, :type => Time, :default => Time.now
 # 0 user
 # 1 administrator
-# 2 belongs to: White List
-# 4 belongs to: Black List
+
+# 0 no color
+# 1 in the black list
+# 1 in the white list
+	field :color, :type => Integer, default: 1
 
 	field :role, :type => Integer, default: 0
 	field :auth_key, :type => String
@@ -273,7 +276,7 @@ class User
 		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
 		user.auth_key_expire_time = -1
 		user.save
-		return user.auth_key
+		return {"status" => user.status, "auth_key" => user.auth_key, "expire_at" => user.auth_key_expire_time, "role" => user.role}
 	end
 
 	#*description*: activate a user
@@ -324,13 +327,13 @@ class User
 		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
 		user.auth_key_expire_time = Time.now.to_i + (keep_signed_in.to_s == "true" ? OOPSDATA["login_keep_time"]["kept"].to_i : OOPSDATA["login_keep_time"]["unkept"].to_i)
 		return false if !user.save
-		return {"status" => user.status, "auth_key" => user.auth_key, "user_id" => user._id.to_s}
+		return {"status" => user.status, "auth_key" => user.auth_key, "user_id" => user._id.to_s, "expire_at" => user.auth_key_expire_time,"role" => user.role}
 	end
 
 	def self.login_with_auth_key(auth_key)
 		user = User.find_by_auth_key(auth_key)
 		return ErrorEnum::AUTH_KEY_NOT_EXIST if user.nil?
-		return {"status" => user.status, "auth_key" => user.auth_key}
+		return {"status" => user.status, "auth_key" => user.auth_key, "expire_at" => user.auth_key_expire_time, "role" => user.role}
 	end
 
 	#*description*: reset password for an user, used when the user forgets its password
@@ -471,8 +474,7 @@ class User
 
 	public
 
-	ROLE_NORMAL = 0
-	ROLE_ADMIN = 1
+	ROLE_NORMAL = 1
 	ROLE_WHITE = 2
 	ROLE_BLACK = 4
 

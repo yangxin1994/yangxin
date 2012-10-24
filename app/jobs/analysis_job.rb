@@ -78,7 +78,7 @@ module Jobs
 					answers_transform[q_id] << question_answer if !question_answer.blank?
 				end
 
-				set_status({"analysis_answer_progress" => 0.5 * (index + 1) * 1.0 / answers.length })
+				set_status({"analyze_answer_progress" => 0.5 * (index + 1) * 1.0 / answers.length })
 			end
 			
 			# calculate the mean of duration
@@ -94,14 +94,14 @@ module Jobs
 				time_histogram[t / 86400 - min_finish_time / 86400] = time_histogram[t / 86400 - min_finish_time / 86400] + 1
 			end
 			time_result = {"start_day" => start_day, "time_histogram" => time_histogram}
-			set_status({"analysis_answer_progress" => 0.6 })
+			set_status({"analyze_answer_progress" => 0.6 })
 
 			# make stats for the answers
 			answer_result = {}
 			answers_transform.each do |q_id, question_answer_ary|
 				question = Question.find_by_id(q_id)
 				answer_result[q_id] = [question, question_answer_ary.length, analyze_one_question_answers(question, question_answer_ary)]
-				set_status({"analysis_answer_progress" => 0.6 + 0.4 * aindex / answers_transform.length })
+				set_status({"analyze_answer_progress" => 0.6 + 0.4 * aindex / answers_transform.length })
 			end
 
 			return [region_result, channel_result, duration_mean, time_result, answer_result]

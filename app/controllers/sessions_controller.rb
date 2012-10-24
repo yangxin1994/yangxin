@@ -160,32 +160,6 @@ class SessionsController < ApplicationController
 		end
 	end
 
-	################# this should moved to the web client side ###############
-	#*descryption*: sign out
-	#
-	#*http* *method*: delete
-	#
-	#*url*: /sessions
-	#
-	#*params*:
-	#
-	#*retval*:
-	#* true if successfully logout
-	def destroy
-		User.logout(params[:auth_key])
-		# redirect to the welcome page
-		respond_to do |format|
-			format.html	{ redirect_to root_path and return }
-			format.json	{ render_json_s and return }
-		end
-	end
-
-	# method: get
-	# descryption: the page where user inputs the email to reset password
-	def forget_password
-	end
-	#############################################################################
-
 	#*descryption*: send email to reset password
 	#
 	#*http* *method*: post
