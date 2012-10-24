@@ -26,6 +26,16 @@ class Result
 		return ErrorEnum::RESULT_NOT_EXIST if result.nil?
 
 		# based on the result type, return results
+		case result._type
+		when "DataListResult"
+			return result.answer_info
+		when "AnalysisResult"
+			return {"region_result" => result.region_result,
+					"time_result" => result.time_result,
+					"duration_result" => result.duration_result,
+					"channel_result" => result.channel_result,
+					"answers_result" => result.answers_result}
+		end
 	end
 
 	def self.job_progress(job_id)
@@ -45,7 +55,7 @@ class Result
 			s2 = status["answer_info_progress"].to_f
 			# calculate the total progress
 			s = s1 * 0.5 + s2 * 0.5
-		when "result_analyze"
+		when "analysis"
 		end
 		# the job has not been finished, the progress cannot be greater than 0.99
 		return [s, 0.99].max
