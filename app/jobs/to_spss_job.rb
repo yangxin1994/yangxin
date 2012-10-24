@@ -3,23 +3,20 @@
 # coding: utf-8
 module Jobs
 
-  class ToSpssJob
+  class ToSpssJob < ResultJob
     @queue = :to_spss_queue
 
-    def perform(result_key)
-      #survey = Survey.find survey_id
-      #survey.to_spss_r(result_key)
-      #result = Result.find_by_result_key result_key
-      #result.to_spss
-      #set the type of the job
-      set_status({"result_type" => "to_spss"})
+    def perform(export_result_id)
+      p "dsafasdfasdfadsfasfsdafdsafdsafsdafsadfsdfasds"
+      # #set the type of the job
+      # set_status({"result_type" => "to_spss"})
 
-      # get parameters
-      @result = ExportResult.find_by_result_key(result_key)
-      return if !@result
-      @survey = @result.survey
-      to_spss
-      #survey.to_excel_r
+      # # get parameters
+      # @result = ExportResult.find_by_result_id(export_result_id)
+      # return if !@result
+      # @survey = @result.survey
+      # # ===================== #
+      # to_spss
     end
 
     def filtered_answers
@@ -27,13 +24,13 @@ module Jobs
     end
 
     def answer_contents
-      answers = filtered_answers
+      a = filtered_answers
       @retval = []
       q = @survey.all_questions_type
       p "========= 准备完毕 ========="
       n = 0
       @result.answers_count = answers.size
-      answers.each do |a|
+      a.each do |a|
         line_answer = []
         i = -1
         #begin
@@ -60,7 +57,7 @@ module Jobs
                          "header_name" => @survey.csv_header,
                          "result_key" => @result.result_key,
                          "answers_count" => @result.answers_count,
-                         "granularity" =>GRANULARITY}.to_yaml}
+                         "granularity" =>5}.to_yaml}
       end
     end
 

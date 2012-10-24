@@ -50,4 +50,11 @@ class Result
 		# the job has not been finished, the progress cannot be greater than 0.99
 		return [s, 0.99].max
 	end
+
+	def self.generate_result_key(answers)
+		answer_ids = answers.map { |e| e._id.to_s }
+		result_key = Digest::MD5.hexdigest("analyze_result-#{answer_ids.to_s}")
+		return result_key
+	end
+
 end

@@ -31,7 +31,12 @@ class SurveyTest < ActiveSupport::TestCase
     #@survey_with_issue.get_csv_header
     #@survey_with_issue.answer_content
     #@survey_with_issue.answer_import("")
-    @survey_with_issue.to_spss
+    #@survey_with_issue.to_spss
+    answers = @survey_with_issue.answers
+    result_key = Result.generate_result_key(answers)
+		data_list_result = DataListResult.create(:result_key => result_key) #Result.find_result_by_job_id(job_id)
+		export_result = ExportResult.find_or_create_by_result_key(data_list_result.result_key, @survey_with_issue)
+    Jobs::ToSpssJob.create(:export_result_id => export_result.id)
     #@survey_with_issue.to_excel
     #@survey_with_issue.send_spss_data
     #@survey_with_issue.send_spss_data_r

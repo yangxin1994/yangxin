@@ -87,6 +87,7 @@ class Survey
   has_many :answers
   has_many :email_histories
 
+  has_many :export_results
 	has_many :analysis_results
 	has_many :data_list_results
 	has_many :report_mockups
@@ -138,43 +139,6 @@ class Survey
     q
   end
 
-  def csv_header
-    headers = []
-    all_questions.each_with_index do |e,i|
-      headers += e.csv_header("q#{i+1}")
-    end
-    headers
-  end
-
-  def spss_header
-    headers =[]
-    all_questions.each_with_index do |e,i|
-      headers += e.spss_header("q#{i+1}")
-    end
-    headers
-  end
-
-  def excel_header
-    headers =[]
-    all_questions.each_with_index do |e,i|
-      headers += e.excel_header("q#{i+1}")
-    end
-    headers
-  end
-
-  def get_export_result(filter_index, include_screened_answer)
-    filtered_answers = Result.answers(self, filter_index, include_screened_answer)
-    answer_ids = filtered_answers.collect { |a| a.id.to_s}.join
-    p "===== 获取 Key 成功 ====="
-    result_key = Digest::MD5.hexdigest("export_result-#{answer_ids}")
-    p "===== 生成 Key 成功 ====="
-    result = ExportResult.where(:result_key => result_key).first
-    result ||= ExportResult.create(:result_key => result_key,
-                                   :survey => self,
-                                   :filter_index => filter_index,
-                                   :include_screened_answer => include_screened_answer)
-  end
-
   #----------------------------------------------
   #  
   #     file export interface
@@ -216,55 +180,6 @@ class Survey
     Survey.collection.insert(batch)
     return self.save
   end
-
-  def to_spss(filter_index = -1, include_screened_answer = true)
-    result = get_export_result(filter_index, include_screened_answer)
-    if result.finished
-      return "Spss文件的路径:类似于 localhost/result_key.sav"
-    else
-      Resque.enqueue(Jobs::ToSpssJob, result.result_key)
-      #to_spss_r(result)
-      #result.to_spss
-    end
-  end
-
-  # def to_spss_r(result_key)
-  def to_spss_r(result)
-    filtered_answers = Result.where(:result_key => result.result_key).first.filtered_answers
-    result.send_data '/to_spss' do
-      {'spss_data' => {"spss_header" => spss_header,
-                       "answer_contents" => result.answer_content,
-                       "header_name" => csv_header,
-                       "result_key" => result.result_key}.to_yaml}
-    end
-  end
-  def to_excel(filter_index = -1, include_screened_answer = true)
-    result = get_export_result(filter_index, include_screened_answer)
-    if result.finished
-      return "Excel文件的路径:类似于 localhost/result_key.xsl"
-    else
-      # Resque.enqueue(Jobs::ToSpssJob, self.id)
-      result.to_excel
-    end
-  end
-
-  def to_excel_r(result_key)
-    filtered_answers = Result.where(:result_key => result_key).first.filtered_answers
-    send_data '/to_excel' do
-      {'excel_data' => ({"excel_header" => excel_header,
-                         "answer_contents" => answer_content,
-                         "header_name" => csv_header,
-                         "result_key" => result_key}).to_yaml}
-    end
-  end
-  # def to_excel_r(result_key)
-  #   filtered_answers = Result.where(:result_key => result_key).first.filtered_answers
-  #   data = {'excel_data' => ({"excel_header" => excel_header,
-  #                             "answer_contents" => answer_content,
-  #                             "header_name" => csv_header,
-  #                             "result_key" => result_key}).to_yaml}
-  #   send_data '/to_excel', data
-  # end
 
 	#--
 	# update deadline and create a survey_deadline_job
