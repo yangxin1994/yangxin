@@ -26,12 +26,6 @@ class User
 	field :last_read_messeges_time, :type => Time, :default => Time.now
 # 0 user
 # 1 administrator
-
-# 0 no color
-# 1 in the black list
-# 1 in the white list
-	field :color, :type => Integer, default: 1
-
 	field :role, :type => Integer, default: 0
 	field :auth_key, :type => String
 	field :auth_key_expire_time, :type => Integer
@@ -276,7 +270,7 @@ class User
 		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
 		user.auth_key_expire_time = -1
 		user.save
-		return {"status" => user.status, "auth_key" => user.auth_key, "expire_at" => user.auth_key_expire_time, "role" => user.role}
+		return user.auth_key
 	end
 
 	#*description*: activate a user
@@ -325,9 +319,9 @@ class User
 		user.login_count = user.login_count + 1
 		user.last_login_time = Time.now.to_i
 		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
-		user.auth_key_expire_time = Time.now.to_i + (keep_signed_in.to_s == "true" ? OOPSDATA["login_keep_time"]["kept"].to_i : OOPSDATA["login_keep_time"]["unkept"].to_i)
+		user.auth_key_expire_time =  keep_signed_in ? -1 : Time.now.to_i + OOPSDATA["login_keep_time"].to_i
 		return false if !user.save
-		return {"status" => user.status, "auth_key" => user.auth_key, "user_id" => user._id.to_s, "expire_at" => user.auth_key_expire_time,"role" => user.role}
+		return {"status" => user.status, "auth_key" => user.auth_key, "user_id" => user._id.to_s}
 	end
 
 	def self.login_with_auth_key(auth_key)
