@@ -479,7 +479,7 @@ class Answer
 
 	def delete
 		# only answers that are finished can be deleted
-		return ErrorEnum::WRONG_ANSWER_STATUS if self.is_redo || self.is_edit
+		# return ErrorEnum::WRONG_ANSWER_STATUS if self.is_redo || self.is_edit
 		self.destroy
 		return true
 	end

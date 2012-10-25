@@ -38,7 +38,7 @@ class AnswersController < ApplicationController
 		if answer.nil?
 			if params[:is_preview]
 				retval = @survey.check_password_for_preview(params[:username], params[:password], @current_user)
-				if retval == false
+				if retval == true
 					# the first time to load questions, create the preview answer
 					answer = Answer.create_answer(params[:is_preview], @current_user, params[:survey_id], params[:channel], params[:ip], params[:username], params[:password])
 					render_json_auto(answer) and return if answer.class != Answer
