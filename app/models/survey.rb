@@ -1356,13 +1356,14 @@ class Survey
 	end
 
 	def estimate_answer_time
-		answer_time = 0
+		answer_time = 0.0
 		self.pages.each do |page|
 			page["questions"].each do |q_id|
 				q = Question.find_by_id(q_id)
 				answer_time = answer_time + q.estimate_answer_time if !q.nil?
 			end
 		end
+		return answer_time
 	end
 
 	def show_quota_rule(quota_rule_index)

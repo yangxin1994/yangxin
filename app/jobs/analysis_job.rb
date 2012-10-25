@@ -137,11 +137,11 @@ module Jobs
 		def analyze_choice(issue, answer_ary)
 			input_ids = issue["items"].map { |e| e["id"] }
 			input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
-			result = {}
-			input_ids.each { |input_id| result[input_id] = 0 }
+			result = Array.new(input_ids.length, 0)
 			answer_ary.each do |answer|
 				answer["selection"].each do |input_id|
-					result[input_id] = result[input_id] + 1 if !result[input_id].nil?
+					selection_index = input_ids.index(input_id)
+					result[selection_index] = result[selection_index] + 1 if !selection_index.nil?
 				end
 			end
 			return result
@@ -149,18 +149,16 @@ module Jobs
 
 		def analyze_matrix_choice(issue, answer_ary)
 			input_ids = issue["choices"].map { |e| e["id"] }
-			result = {}
+			result = []
 			issue["rows"].each do |row|
-				input_ids.each do |input_id|
-					result["#{row["id"]}-#{input_id}"] = 0
-				end
+				result << Array.new(input_ids.length, 0)
 			end
 	
 			answer_ary.each do |answer|
 				answer.each_with_index do |row_answer, row_index|
-					row_id = issue["rows"][row_index]["id"]
 					row_answer.each do |input_id|
-						result["#{row_id}-#{input_id}"] = result["#{row_id}-#{input_id}"] + 1 if !result["#{row_id}-#{input_id}"].nil?
+						selection_index = input_ids.index(input_id)
+						result[row_index][selection_index] = result[row_index][selection_index] + 1 if !selection_index.nil?
 					end
 				end
 			end

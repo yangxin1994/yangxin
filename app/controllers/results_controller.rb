@@ -18,12 +18,12 @@ class ResultsController < ApplicationController
 		end
 	end
 
-  def analysis
+	def analysis
 		job_id = @survey.analysis(params[:id], params[:include_screened_answer])
 		respond_to do |format|
 			format.json	{ render_json_auto(job_id) and return }
 		end
-  end
+	end
 
 	def job_progress
 		progress = Result.job_progress(params[:job_id])

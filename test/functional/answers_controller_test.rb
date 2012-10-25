@@ -637,6 +637,41 @@ class AnswersControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 	end
 
+	test "should check remain answer time" do
+		clear(User, Survey, Question, Answer)
+		jesse = init_jesse
+		oliver = init_oliver
+		lisa = init_lisa
+		polly = init_polly
+		survey_auditor = init_survey_auditor
+
+		survey_id, pages = *create_short_survey_page_question(jesse.email, jesse.password)
+		question_ids = pages.flatten
+		first_question = Question.find_by_id(question_ids[0])
+
+		set_survey_published(survey_id, jesse, survey_auditor)
+
+		# first user answers the survey
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		get :estimate_remain_answer_time, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
+		result = JSON.parse(@response.body)
+		time_1 = result["value"]
+		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91"
+		result = JSON.parse(@response.body)
+		questions = result["value"][0]
+		# answer the questions in the first page
+		answer_content = {}
+		answer_content[questions[0]["_id"]] = {"selection" => [first_question.issue["items"][0]["id"]]}
+		answer_content[questions[1]["_id"]] = "answer for the second question"
+		post :submit_answer, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :answer_content => answer_content
+		get :estimate_remain_answer_time, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
+		result = JSON.parse(@response.body)
+		time_2 = result["value"]
+		assert time_1 > time_2
+		sign_out(auth_key)
+	end
+
 	test "should check quota when submitting answers" do
 		clear(User, Survey, Question, Answer)
 		jesse = init_jesse
