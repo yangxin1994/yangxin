@@ -61,6 +61,10 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :quality_control_questions do
+			collection do 
+				get 'objective_questions', 'objective_questions_count', 
+					'matching_questions', 'matching_questions_count'
+			end
 			member do
 				put 'update_answer'
 			end
