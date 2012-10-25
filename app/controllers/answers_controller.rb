@@ -37,10 +37,16 @@ class AnswersController < ApplicationController
 		# 2. if cannot find the answer, create new answer and check region, channel and ip quota
 		if answer.nil?
 			if params[:is_preview]
-				# the first time to load questions, create the preview answer
-				answer = Answer.create_answer(params[:is_preview], @current_user, params[:survey_id], params[:channel], params[:ip], params[:username], params[:password])
-				render_json_auto(answer) and return if answer.class != Answer
-				answer.set_edit
+				retval = @survey.check_password_for_preview(params[:username], params[:password], @current_user)
+				if retval == false
+					# the first time to load questions, create the preview answer
+					answer = Answer.create_answer(params[:is_preview], @current_user, params[:survey_id], params[:channel], params[:ip], params[:username], params[:password])
+					render_json_auto(answer) and return if answer.class != Answer
+					answer.set_edit
+				else
+					# wrong password
+					render_json_auto(retval) and return
+				end
 			else
 				# this is the first time that the volonteer opens this survey
 				# 1. check the captcha
@@ -59,12 +65,8 @@ class AnswersController < ApplicationController
 						# fail to pass the check of channel, ip, and address quota, return
 						render_json_auto(answer.violate_quota) and return if !retval
 					end
-				elsif retval.class == Answer
-					# move the answer from another visitor user to the current user to let the user continue it
-					# render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return
-					answer = retval
 				else
-					# wrong password or the answer has been deleted
+					# wrong password
 					render_json_auto(retval) and return
 				end
 			end
@@ -160,21 +162,34 @@ class AnswersController < ApplicationController
 	end
 
 	def destroy
-		@survey = @current_user.is_admin ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if @survey.nil?
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
+		if params[:is_preview]
+			@answer = Answer.find_by_survey_id_user_is_preview(params[:survey_id], @current_user, params[:is_preview])
+			if @answer.nil?
+				respond_to do |format|
+					format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
+				end
 			end
-		end
-		@answer = @survey.answers.find_by_id(params[:id])
-		if @answer.nil?
+			retval = @answer.delete
 			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
+				format.json	{ render_json_auto(retval) and return }
 			end
-		end
-		retval = @answer.delete
-		respond_to do |format|
-			format.json	{ render_json_auto(retval) and return }
+		else
+			@survey = @current_user.is_admin ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
+			if @survey.nil?
+				respond_to do |format|
+					format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
+				end
+			end
+			@answer = @survey.answers.find_by_id(params[:id])
+			if @answer.nil?
+				respond_to do |format|
+					format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
+				end
+			end
+			retval = @answer.delete
+			respond_to do |format|
+				format.json	{ render_json_auto(retval) and return }
+			end
 		end
 	end
 

@@ -71,7 +71,7 @@ class AnswersControllerTest < ActionController::TestCase
 				:ip => "166.111.135.91", :password => "p1"
 		result = JSON.parse(@response.body)
 		assert_equal false, result["success"]
-		assert_equal ErrorEnum::REQUIRE_LOGIN, result["value"]["error_code"]
+		assert_equal ErrorEnum::SURVEY_PASSWORD_USED, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		# update access control setting to set a username password list
@@ -101,7 +101,7 @@ class AnswersControllerTest < ActionController::TestCase
 				:ip => "166.111.135.91", :username => "u1", :password => "p1"
 		result = JSON.parse(@response.body)
 		assert_equal false, result["success"]
-		assert_equal ErrorEnum::REQUIRE_LOGIN, result["value"]["error_code"]
+		assert_equal ErrorEnum::SURVEY_PASSWORD_USED, result["value"]["error_code"]
 		sign_out(auth_key)
 	end
 
@@ -139,19 +139,13 @@ class AnswersControllerTest < ActionController::TestCase
 		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91", :password => "p1"
 		result = JSON.parse(@response.body)
-		assert_equal true, result["success"]
-		assert_equal 2, result["value"][0]
+		assert_equal false, result["success"]
 		sign_out(auth_key)
-
-		assert_equal 1, Answer.all.length
-		a = Answer.first
-		assert_equal jesse._id.to_s, a.user._id.to_s
 
 		post :load_question, :format => :json, :auth_key => visitor_user_auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91", :password => "p1"
 		result = JSON.parse(@response.body)
-		assert_equal false, result["success"]
-		assert_equal ErrorEnum::REQUIRE_LOGIN, result["value"]["error_code"]
+		assert_equal true, result["success"]
 	end
 
 	test "should check channel quota" do

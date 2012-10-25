@@ -819,7 +819,7 @@ class Answer
 		remain_answer_time = 0.0
 		self.answer_content.each do |q_id, a|
 			q = Question.find_by_id(q_id)
-			remain_answer_time = remain_answer_time + q.estimate_answer_time if a.nil?
+			remain_answer_time = remain_answer_time + q.estimate_answer_time if a.nil? && !q.nil?
 		end
 		return remain_answer_time
 	end
