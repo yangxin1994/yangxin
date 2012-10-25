@@ -228,6 +228,7 @@ OopsData::Application.routes.draw do
 			post 'submit_answer'
 			post 'finish'
 			get 'get_my_answer'
+			get 'estimate_remain_answer_time'
 		end
 	end
 

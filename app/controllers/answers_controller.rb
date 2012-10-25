@@ -3,7 +3,7 @@ require 'error_enum'
 class AnswersController < ApplicationController
 
 	before_filter :check_survey_existence, :except => [:show, :get_my_answer, :destroy]
-	before_filter :check_answer_existence, :except => [:show, :get_my_answer, :destroy, :load_question]
+	before_filter :check_answer_existence, :except => [:show, :get_my_answer, :destroy, :load_question, :estimate_remain_answer_time]
 
 	def check_answer_existence
 		@answer = Answer.find_by_survey_id_user_is_preview(params[:survey_id], @current_user, params[:is_preview])
@@ -148,7 +148,7 @@ class AnswersController < ApplicationController
 	end
 
 	def get_my_answer
-		@answer = @current_user.nil? ? nil : Answer.find_by_survey_id_user_is_preview(params[:survey_id], @current_user, params[:is_preview])
+		@answer = Answer.find_by_survey_id_user_is_preview(params[:survey_id], @current_user, params[:is_preview])
 		if @answer.nil?
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
@@ -176,5 +176,11 @@ class AnswersController < ApplicationController
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
+	end
+
+	def estimate_remain_answer_time
+		answer = Answer.find_by_survey_id_user_is_preview(params[:survey_id], @current_user, params[:is_preview])
+		render_json_auto(@survey.estimate_answer_time) and return if answer.nil?
+		render_json_auto(answer.estimate_remain_answer_time) and return
 	end
 end

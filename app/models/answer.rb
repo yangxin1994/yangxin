@@ -815,6 +815,18 @@ class Answer
 		return true
 	end
 
+	def estimate_remain_answer_time
+		remain_answer_time = 0.0
+		puts "%%%%%%%%%%%%%%%%%%"
+		puts self.answer_content.inspect
+		puts "%%%%%%%%%%%%%%%%%%"
+		self.answer_content.each do |q_id, a|
+			q = Question.find_by_id(q_id)
+			remain_answer_time = remain_answer_time + q.estimate_answer_time if a.nil?
+		end
+		return remain_answer_time
+	end
+
 	def update_quota
 		quota_stats = self.survey.quota_stats
 		quota_rules = self.survey.quota["rules"]

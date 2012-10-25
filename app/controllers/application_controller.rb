@@ -72,11 +72,7 @@ class ApplicationController < ActionController::Base
 ################################################
 	#get the information of the signed user and set @current_user
 	def current_user
-		if params[:auth_key] == nil
-			@current_user = nil
-		else
-			@current_user = User.find_by_auth_key(params[:auth_key])
-		end
+		@current_user = params[:auth_key].nil? ? nil : User.find_by_auth_key(params[:auth_key])
 		return @current_user
 	end
 
@@ -225,6 +221,10 @@ class ApplicationController < ActionController::Base
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
+	end
+
+	def require_current_user
+		render_json_e(ErrorEnum::USER_NOT_EXIST) and return if !@current_user.nil?
 	end
 
 	#if user signs in, redirect to home path
