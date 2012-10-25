@@ -155,7 +155,7 @@ class AnswersController < ApplicationController
 			end
 		end
 		respond_to do |format|
-			format.json	{ render_json_auto(answer) and return }
+			format.json	{ render_json_auto(@answer) and return }
 		end
 	end
 
