@@ -64,6 +64,6 @@ class Result
 			s = s1 * 0.5 + s2 * 0.5
 		end
 		# the job has not been finished, the progress cannot be greater than 0.99
-		return [s, 0.99].max
+		return [s, 0.99].min
 	end
 end
