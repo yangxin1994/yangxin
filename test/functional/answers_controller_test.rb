@@ -301,8 +301,8 @@ class AnswersControllerTest < ActionController::TestCase
 		get :load_question, :format => :json, :id => answer_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		# must provide question id when the survey allows page up
-		assert_equal false, result["success"]
-		assert_equal ErrorEnum::QUESTION_NOT_EXIST, result["value"]["error_code"]
+		assert_equal true, result["success"]
+		assert_equal question_ids[0], result["value"][0][0]["_id"]
 
 		# load the three questions in the first page
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
@@ -334,19 +334,19 @@ class AnswersControllerTest < ActionController::TestCase
 		assert_equal pages[2][2], result["value"][0][2]["_id"]
 		assert_equal pages[2][3], result["value"][0][3]["_id"]
 		
-		# want to load the page after the last page, should return page overflow
+		# want to load the page after the last page, should return blank array
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :load_question, :format => :json, :id => answer_id, :auth_key => auth_key, :question_id => pages[-1][-1], :next_page => true
 		result = JSON.parse(@response.body)
-		assert_equal false, result["success"]
-		assert_equal ErrorEnum::OVERFLOW, result["value"]["error_code"]
+		assert_equal true, result["success"]
+		assert_equal [], result["value"][0]
 
-		# want to load the page before the first page, should return page overflow
+		# want to load the page before the first page, should return blank array
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get :load_question, :format => :json, :id => answer_id, :auth_key => auth_key, :question_id => pages[0][0], :next_page => false
 		result = JSON.parse(@response.body)
-		assert_equal false, result["success"]
-		assert_equal ErrorEnum::OVERFLOW, result["value"]["error_code"]
+		assert_equal true, result["success"]
+		assert_equal [], result["value"][0]
 
 		# load the first page questions
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))

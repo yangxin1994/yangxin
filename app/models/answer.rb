@@ -188,7 +188,7 @@ class Answer
 				if next_page
 					# require next page of questions
 					if question_index + 1 == page["questions"].length
-						return ErrorEnum::OVERFLOW if page_index + 1 == self.survey.pages.length
+						return [] if page_index + 1 == self.survey.pages.length
 						return load_question_by_ids(self.survey.pages[page_index + 1]["questions"])
 					else
 						return load_question_by_ids(page["questions"][question_index + 1..-1])
@@ -196,22 +196,28 @@ class Answer
 				else
 					# require previous page of questions
 					if question_index <= 0
-						return ErrorEnum::OVERFLOW if page_index == 0
+						return [] if page_index == 0
 						return load_question_by_ids(self.survey.pages[page_index - 1]["questions"])
 					else
 						return load_question_by_ids(page["questions"][0..question_index - 1])
 					end
 				end
 			end
-			return ErrorEnum::QUESTION_NOT_EXIST
-		else
-			# first check whether template questions for attributes quotas are loaded
-			template_answer_content_loaded = self.template_answer_content.select { |k,v| v.nil?}
-			template_answer_content_loaded.each do |k,v|
-				loaded_question_ids << k
+			# the question cannot be found, load questions from the one will nil answer
+			cur_page = false
+			self.survey.pages.each do |page|
+				page["questions"].each do |q_id|
+					next if !self.answer_content[q_id].nil? && !cur_page
+					cur_page = true
+					loaded_question_ids << q_id
+					qc_id = self.random_quality_control_locations[q_id]
+					loaded_question_ids << qc_id if !qc_id.blank? && self.random_quality_control_answer_content[qc_id].nil?
+				end
+				return load_question_by_ids(loaded_question_ids) if cur_page
 			end
-			return load_question_by_ids(loaded_question_ids) if !loaded_question_ids.empty?
-			# then try to load normal questions
+			return []
+		else
+			# try to load normal questions
 			# summarize the questions that are results of logic control rules
 			logic_control_question_id = []
 			self.survey.logic_control.each do |rule|
@@ -225,7 +231,8 @@ class Answer
 			self.survey.pages.each do |page|
 				page["questions"].each do |q_id|
 					qc_id = self.random_quality_control_locations[q_id]
-					if !self.answer_content[q_id].nil?
+					if !self.answer_content[q_id].nil? && !cur_page
+						# the question q_id might be removed by logic control rules, and the random quality control question after it is not answered
 						loaded_question_ids << qc_id if !qc_id.blank? && self.random_quality_control_answer_content[qc_id].nil?
 						next
 					end
@@ -242,6 +249,7 @@ class Answer
 				end
 				return load_question_by_ids(loaded_question_ids) if cur_page
 			end
+			# it is possible that only several random quality control questions are loaded
 			return load_question_by_ids(loaded_question_ids) if loaded_question_ids.length > 0
 			self.auto_finish
 			return true
@@ -770,7 +778,7 @@ class Answer
 	end
 
 	def auto_finish
-		if self.is_edit && !self.survey.is_pageup_allowed && !self.template_answer_content.has_value?(nil) && !self.answer_content.has_value?(nil) && !self.random_quality_control_answer_content.has_value?(nil)
+		if self.is_edit && !self.survey.is_pageup_allowed && !self.answer_content.has_value?(nil) && !self.random_quality_control_answer_content.has_value?(nil)
 			self.set_finish
 			self.finished_at = Time.now.to_i
 			self.save
@@ -784,6 +792,7 @@ class Answer
 	end
 
 	def index_of(questions)
+		return nil if questions.blank?
 		question_id = questions[0]._id.to_s
 		question_ids = (self.survey.pages.map { |p| p["questions"] }).flatten
 		return question_ids.index(question_id)
