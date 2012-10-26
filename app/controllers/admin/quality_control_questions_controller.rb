@@ -92,6 +92,28 @@ class Admin::QualityControlQuestionsController < Admin::ApplicationController
 		end
 	end
 
+	def objective_questions
+		questions = QualityControlQuestion.objective_questions.desc(:created_at).page(page).per(per_page)
+		respond_to do |format|
+			format.json	{ render_json_auto(questions) and return }
+		end
+	end
+
+	def objective_questions_count
+		render_json_auto QualityControlQuestion.objective_questions.count
+	end
+
+	def matching_questions
+		questions = QualityControlQuestion.matching_questions.desc(:created_at).page(page).per(per_page)
+		respond_to do |format|
+			format.json	{ render_json_auto(questions) and return }
+		end
+	end
+
+	def matching_questions_count
+		render_json_auto QualityControlQuestion.matching_questions.count
+	end
+
 	#*method*: delete
 	#
 	#*url*: /surveys/:survey_id/questions/:question_id

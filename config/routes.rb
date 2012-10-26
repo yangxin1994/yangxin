@@ -61,6 +61,10 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :quality_control_questions do
+			collection do 
+				get 'objective_questions', 'objective_questions_count', 
+					'matching_questions', 'matching_questions_count'
+			end
 			member do
 				put 'update_answer'
 			end
@@ -222,12 +226,13 @@ OopsData::Application.routes.draw do
 
 	resources :answers do
 		collection do
-			get 'preview_load_question'
+			get 'get_my_answer'
+		end
+		member do
 			get 'load_question'
 			post 'clear'
 			post 'submit_answer'
 			post 'finish'
-			get 'get_my_answer'
 			get 'estimate_remain_answer_time'
 		end
 	end
