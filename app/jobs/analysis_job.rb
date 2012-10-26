@@ -40,8 +40,8 @@ module Jobs
 			analysis_result.duration_mean = duration_mean
 			analysis_result.time_result = time_result
 			analysis_result.answer_result = answer_result
+			analysis_result.status = 1
 			analysis_result.save
-			set_status({"is_finished" => true})
 		end
 
 		def generate_result_key(answers)
