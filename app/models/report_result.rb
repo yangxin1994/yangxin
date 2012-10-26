@@ -7,7 +7,7 @@ class ReportResult < Result
 	include Mongoid::Document
 	include Mongoid::Timestamps
 
-	field :file_location, :type => String
+	field :file_uri, :type => String
 
 	belongs_to :survey
 

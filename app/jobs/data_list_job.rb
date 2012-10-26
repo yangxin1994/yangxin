@@ -36,8 +36,8 @@ module Jobs
 
 			# update answer info and set the job finished
 			data_list_result.answer_info = answer_info
+			data_list_result.status = 1
 			data_list_result.save
-			set_status({"is_finished" => true})
 		end
 
 		def generate_result_key(answers)
