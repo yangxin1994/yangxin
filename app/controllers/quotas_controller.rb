@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'error_enum'
 class QuotasController < ApplicationController
 	before_filter :require_sign_in, :check_normal_survey_existence
@@ -22,7 +21,7 @@ class QuotasController < ApplicationController
 	#* survey_id: id of the survey
 	#
 	#*retval*:
-	#* a hash of attributes that represent quotas
+	#* a hash of attributes that regift quotas
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	def index
 		quota = @survey.show_quota
@@ -42,7 +41,7 @@ class QuotasController < ApplicationController
 	#* quota_rule_index: index of the quota rule
 	#
 	#*retval*:
-	#* a hash of attributes that represent quotas
+	#* a hash of attributes that regift quotas
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	def show
 		quota_rule = @survey.show_quota_rule(params[:id].to_i)
@@ -175,5 +174,4 @@ class QuotasController < ApplicationController
 			format.json	{ render_json_auto(retval) and return }
 		end
 	end
-
 end

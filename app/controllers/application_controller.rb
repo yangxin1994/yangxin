@@ -72,11 +72,7 @@ class ApplicationController < ActionController::Base
 ################################################
 	#get the information of the signed user and set @current_user
 	def current_user
-		if params[:auth_key] == nil
-			@current_user = nil
-		else
-			@current_user = User.find_by_auth_key(params[:auth_key])
-		end
+		@current_user = params[:auth_key].nil? ? nil : User.find_by_auth_key(params[:auth_key])
 		return @current_user
 	end
 
@@ -227,6 +223,10 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
+	def require_current_user
+		render_json_e(ErrorEnum::USER_NOT_EXIST) and return if !@current_user.nil?
+	end
+
 	#if user signs in, redirect to home path
 	def require_sign_out
 		if !user_signed_out?
@@ -268,11 +268,14 @@ class ApplicationController < ActionController::Base
 	end
 
 	# return error
-	def return_json(is_success, value)
+	def return_json(is_success, value, options = {})
+		options[:only] = options[:only].to_a + [:success, :value] if options[:only]
 		render :json => {
-			:success => is_success,
-			:value => value
-		}
+				:success => is_success,
+				:value => value
+			},
+			:except => options[:except], 
+			:only => options[:only]
 	end
 	def render_json_e(error_code)
 		error_code_obj = {
@@ -281,11 +284,11 @@ class ApplicationController < ActionController::Base
 		}
 		return_json(false, error_code_obj)
 	end
-	def render_json_s(value = true)
-		return_json(true, value)
+	def render_json_s(value = true, options={})
+		return_json(true, value, options)
 	end
-	def render_json_auto(value = true)
+	def render_json_auto(value = true, options={})
 		is_success = !((value.class == String && value.start_with?('error_')) || value.to_s.to_i < 0)
-		is_success ? render_json_s(value) : render_json_e(value)
+		is_success ? render_json_s(value, options) : render_json_e(value)
 	end
 end

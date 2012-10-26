@@ -85,7 +85,9 @@ class Survey
 	has_many :answers
 	has_many :email_histories
 
-	has_many :analyze_results
+	has_many :analysis_results
+	has_many :data_list_results
+	has_many :report_results
 	has_many :report_mockups
 
 	scope :all_but_new, lambda { where(:new_survey => false) }
@@ -104,8 +106,225 @@ class Survey
 	before_destroy :clear_survey_object
 
 	META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
+  
+  public
+  
+  def all_questions
+    q = []
+    # quota_template_question_page.each do |page|
+    #   q << page[:questions]
+    # end
+    pages.each do |page|
+      q += page[:questions]
+    end
+    q.collect { |i| Question.find(i) }
+  end
 
-	public
+  def all_questions_id
+    q = []
+    pages.each do |page|
+      q += page[:questions]
+    end
+    return q
+  end
+
+  def all_questions_type
+    q = []
+    all_questions.each do |a|
+      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+    end
+    q
+  end
+
+  def all_quota_quetions
+    quota_template_question_page.collect { |i| Question.find(i) }
+  end
+
+  def all_quota_questions_id
+    quota_template_question_page
+  end
+
+  def all_quota_questions_type
+    q = []
+    all_quota_quetions.each do |a|
+      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+    end
+    q
+  end
+
+  def csv_header
+    headers = []
+    all_quota_quetions.each_with_index do |e,i|
+      headers += e.csv_header("t#{i+1}")
+    end
+    all_questions.each_with_index do |e,i|
+      headers += e.csv_header("q#{i+1}")
+    end
+    headers
+  end
+
+  def spss_header
+    headers =[]
+    all_quota_quetions.each_with_index do |e,i|
+      headers += e.spss_header("t#{i+1}")
+    end
+    all_questions.each_with_index do |e,i|
+      headers += e.spss_header("q#{i+1}")
+    end
+    headers
+  end
+
+  def excel_header
+    headers =[]
+    all_quota_quetions.each_with_index do |e,i|
+      headers += e.excel_header("t#{i+1}")
+    end
+    all_questions.each_with_index do |e,i|
+      headers += e.excel_header("q#{i+1}")
+    end
+    headers
+  end
+
+  def answer_content
+    filtered_answers ||= answers
+    @retval = []
+    q = all_quota_questions_type + all_questions_type 
+    p "========= 准备完毕 ========="
+    n = 0
+    filtered_answers.each do |a|
+      line_answer = []
+      i = -1
+      a.answer_content.each do |k, v|
+        line_answer += q[i += 1].answer_content(v)
+      end
+      n += 1
+      p "========= 转出 #{n} 条 =========" if n%10 == 0
+      @retval << line_answer
+    end
+    @retval
+  end
+
+  def get_export_result(filter_index, include_screened_answer)
+    filtered_answers = Result.answers(self, filter_index, include_screened_answer)
+    answer_ids = filtered_answers.collect { |a| a.id.to_s}.join
+    p "===== 获取 Key 成功 ====="
+    result_key = Digest::MD5.hexdigest("export_result-#{answer_ids}")
+    result = ExportResult.where(:result_key => result_key).first
+    result ||= ExportResult.create(:result_key => result_key,
+                                   :survey => self,
+                                   :filter_index => filter_index,
+                                   :include_screened_answer => include_screened_answer)
+  end
+
+  def send_data(post_to)
+    url = URI.parse('http://192.168.1.129:9292')
+    begin
+      Net::HTTP.start(url.host,url.port) do |http| 
+        
+        r = Net::HTTP::Post.new(post_to)
+        p "===== 开始转换 ====="
+        a = Time.now
+        r.set_form_data(yield)
+        p Time.now - a
+        http.read_timeout = 20
+        http.request(r)
+      end
+    rescue Errno::ECONNREFUSED
+      p "连接失败"
+    rescue Timeout::Error
+      p "超时"
+    else
+      p "其他错误"
+    ensure
+      p "连接结束"
+    end
+  end
+
+  #----------------------------------------------
+  #  
+  #     file export interface
+  #
+  #++++++++++++++++++++++++++++++++++++++++++++++
+
+  def to_csv(path = "public/import/test.csv")
+    c = CSV.open(path, "w") do |csv|
+      csv << csv_header
+      answer_content.each do |a|
+        csv << a
+      end
+    end
+  end
+
+  def get_csv_header(path = "public/import/test.csv")
+    c = CSV.open(path, "w") do |csv|
+      csv << csv_header
+    end
+  end
+
+  def answer_import(path = "public/import/test.csv")
+    q = []
+    batch = []
+    all_questions.each do |a|
+      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+    end 
+    CSV.foreach(path, :headers => true) do |row|
+      row = row.to_hash
+      line_answer = {}
+      quota_qustions_count = quota_qustions.size
+      q.each_with_index do |e, i|
+        #q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
+        if i < quota_qustions_count
+          header_prefix = "t#{i + 1}"
+        else
+          header_prefix = "q#{i - quota_qustions_count + 1}"
+        end
+        line_answer.merge! e.answer_import(row, header_prefix)
+      end
+      batch << {:answer_content => line_answer, :survey => self._id}
+    end
+    Survey.collection.insert(batch)
+    return self.save
+  end
+
+  def to_spss(filter_index = 0, include_screened_answer = true)
+    result = get_export_result(filter_index, include_screened_answer)
+    if result.finished
+      return "Spss文件的路径:类似于 localhost/result_key.sav"
+    else
+      #Resque.enqueue(Jobs::ToSpssJob, self.id, result.result_key)
+      to_spss_r(result.result_key)
+    end
+  end
+
+  def to_spss_r(result_key)
+    filtered_answers = Result.where(:result_key => result_key).first.filtered_answers
+    send_data '/to_spss' do
+      {'spss_data' => {"spss_header" => spss_header,
+                       "answer_contents" => answer_content,
+                       "header_name" => csv_header,
+                       "result_key" => result_key}.to_yaml}
+    end
+  end
+
+  def to_excel(filter_index = 0, include_screened_answer = true)
+    result = get_export_result(filter_index, include_screened_answer)
+    if result.finished
+      return "Excel文件的路径:类似于 localhost/result_key.xsl"
+    else
+      Resque.enqueue(Jobs::ToSpssJob, self.id)
+      # to_excel_r(result.result_key)
+    end
+  end
+
+  def to_excel_r(result_key)
+    filtered_answers = Result.where(:result_key => result_key).first.filtered_answers
+    send_data '/to_excel' do
+      {'excel_data' => ({"excel_header" => excel_header,
+                         "answer_contents" => answer_content,
+                         "header_name" => csv_header,
+                         "result_key" => result_key}).to_yaml}
+    end
+  end
 
 	#--
 	# update deadline and create a survey_deadline_job
@@ -428,8 +647,6 @@ class Survey
 			elsif [5, 6].include?(logic_control_rule["rule_type"])
 				logic_control_rule["result"]["question_id_1"] = question_id_mapping[logic_control_rule["result"]["question_id_1"]]
 				logic_control_rule["result"]["question_id_2"] = question_id_mapping[logic_control_rule["result"]["question_id_2"]]
-			elsif [7, 8].include?(logic_control_rule["rule_type"])
-				# for logic control that show/hide pages, it is not needed to replace with new question ids
 			end
 		end
 
@@ -674,13 +891,6 @@ class Survey
 		return questions
 	end
 
-	def update_question(question_id, question_obj)
-		if LogicControl.new(self.logic_control).detect_conflict_question_update(question_id)
-			return ErrorEnum::LOGIC_CONTROL_CONFLICT_DETECTED
-		end
-		return update_question!(question_id, question_obj)
-	end
-
 	#*description*: update a question
 	#
 	#*params*:
@@ -693,13 +903,16 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST
 	#* ErrorEnum ::WRONG_DATA_TYPE
-	def update_question!(question_id, question_obj)
+	def update_question(question_id, question_obj)
 		return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
 		question = Question.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
 		return ErrorEnum::WRONG_QUESTION_CLASS if question.question_class == "quality_control" || question.question_class == "template"
 		# quality control question in a survey cannot be updated
+		question_inst = question.clone
 		retval = question.update_question(question_obj)
+		# the logic control rules need to be adjusted
+		adjust_logic_control_quota_filter('question_update', question_id)
 		return retval if retval != true
 		return question
 	end
@@ -739,6 +952,8 @@ class Survey
 		from_page["questions"][question_index_to_be_delete] = ""
 		to_page["questions"].insert(question_index+1, question_id_1)
 		from_page["questions"].delete("")
+		# the logic control rules need to be adjusted
+		adjust_logic_control_quota_filter('question_move', question_id_1)
 		return self.save
 	end
 
@@ -798,13 +1013,6 @@ class Survey
 		return question
 	end
 
-	def delete_question(question_id)
-		if LogicControl.new(self.logic_control).detect_conflict_question_update(question_id)
-			return ErrorEnum::LOGIC_CONTROL_CONFLICT_DETECTED
-		end
-		return delete_question!(question_id)
-	end
-
 	#*description*: delete a question
 	#
 	#*params*:
@@ -816,7 +1024,7 @@ class Survey
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
-	def delete_question!(question_id)
+	def delete_question(question_id)
 		question = Question.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
 		# find out other matching questions if the question to be deleted is a matching question
@@ -835,6 +1043,9 @@ class Survey
 					end
 				end
 				self.save
+				# logic control rules need to be adjusted
+				adjust_logic_control_quota_filter('question_delete', question_id)
+				return true
 			end
 		end
 		# not a matching quality control question
@@ -848,6 +1059,8 @@ class Survey
 		end
 		return ErrorEnum::QUESTION_NOT_EXIST if !find_question
 		self.save
+		# logic control rules need to be adjusted
+		adjust_logic_control_quota_filter('question_delete', question_id)
 		question.clear_question_object
 		return question.destroy
 	end
@@ -962,7 +1175,6 @@ class Survey
 	def delete_page(page_index)
 		current_page = self.pages[page_index]
 		return ErrorEnum::OVERFLOW if current_page.nil?
-		return ErrorEnum::LOGIC_CONTROL_CONFLICT_DETECTED if LogicControl.new(self.logic_control).detect_conflict_questions_update(current_page["questions"])
 		return delete_page!(page_index)
 	end
 
@@ -1057,6 +1269,30 @@ class Survey
 		return self.list("normal", PublishStatus::PUBLISHED, [])
 	end
 
+	def check_password_for_preview(username, password, current_user)
+		case self.access_control_setting["password_control"]["password_type"]
+		when -1
+			return true
+		when 0
+			if self.access_control_setting["password_control"]["single_password"] == password
+				return true
+			else
+				return ErrorEnum::WRONG_SURVEY_PASSWORD
+			end
+		when 1
+			list = self.access_control_setting["password_control"]["password_list"]
+			password_element = list.select { |ele| ele["content"] == password }[0]
+		when 2
+			list = self.access_control_setting["password_control"]["username_password_list"]
+			password_element = list.select { |ele| ele["content"] == [username, password] }[0]
+		end
+		if password_element.nil?
+			return ErrorEnum::WRONG_SURVEY_PASSWORD
+		else
+			return true
+		end
+	end
+
 	def check_password(username, password, current_user)
 		case self.access_control_setting["password_control"]["password_type"]
 		when -1
@@ -1081,14 +1317,7 @@ class Survey
 			self.save
 			return true
 		else
-			answer = Answer.find_by_password(username, password)
-			return ErrorEnum::ANSWER_NOT_EXIST if answer.nil?
-			user = answer.user
-			return ErrorEnum::REQUIRE_LOGIN if user.is_registered
-			user.answers.delete(answer)
-			answer.user = current_user
-			answer.save
-			return answer
+			return ErrorEnum::SURVEY_PASSWORD_USED
 		end
 	end
 
@@ -1145,13 +1374,14 @@ class Survey
 	end
 
 	def estimate_answer_time
-		answer_time = 0
+		answer_time = 0.0
 		self.pages.each do |page|
 			page["questions"].each do |q_id|
 				q = Question.find_by_id(q_id)
 				answer_time = answer_time + q.estimate_answer_time if !q.nil?
 			end
 		end
+		return answer_time
 	end
 
 	def show_quota_rule(quota_rule_index)
@@ -1272,10 +1502,25 @@ class Survey
 		return filters.delete_filter(filter_index, self)
 	end
 
-	def show_analyze_result(filter_index, include_screened_answer)
+	def data_list(filter_index, include_screened_answer)
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
-		result = self.analyze_results.find_or_create_by_filter_index(self, filter_index, include_screened_answer)
-		return result
+		job_id = Jobs::DataListJob.create(:survey_id => self._id, :filter_index => filter_index, :include_screened_answer => include_screened_answer)
+		return job_id
+	end
+
+	def analysis(filter_index, include_screened_answer)
+		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
+		job_id = Jobs::AnalysisJob.create(:survey_id => self._id, :filter_index => filter_index, :include_screened_answer => include_screened_answer)
+		return job_id
+	end
+
+	def report(filter_index, include_screened_answer, report_mockup_id, report_style, report_type)
+		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
+		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
+		return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
+		return ErrorEnum::WRONG_REPORT_TYPE if %w[word ppt pdf].include?(report_type)
+		job_id = Jobs::ReportJob.create(:filter_index => filter_index, :include_screened_answer => include_screened_answer, :report_mockup_id => report_mockup_id, :report_style => report_style, :report_type => report_type)
+		return job_id
 	end
 
 	def create_report_mockup(report_mockup)
@@ -1444,26 +1689,181 @@ class Survey
 		end
 	end
 
+	def adjust_logic_control_quota_filter(type, question_id)
+		# first adjust the logic control
+		rules = self.logic_control
+		rules.each_with_index do |rule, rule_index|
+			case type
+			when 'question_update'
+				question = Question.find_by_id(question_id)
+				item_ids = question.issue["items"].map { |i| i["id"] }
+				row_ids = question.issue["items"].map { |i| i["id"] }
+				# first handle conditions
+				if (0..4).to_a.include?(rule["rule_type"])
+					rule["conditions"].each do |c|
+						next if c["question_id"] != question_id
+						# the condition is about the question updated
+						# remove the items that do not exist
+						c["answer"].delete_if { |item_id| !item_ids.include?(item_id) }
+					end
+					# if all the items for a condition is removed, remove this condition
+					rule["conditions"].delete_if { |c| c["answer"].blank? }
+					# if all the conditions for a rule is removed, remove this rule
+					if rule["conditions"].blank?
+						rules.delete_at(rule_index)
+						next
+					end
+				end
+				# then handle result
+				if [3,4].to_a.include?(rule["rule_type"])
+					rule["result"].each do |r|
+						next if r["question_id"] != question_id
+						# the result is about the question updated
+						# remove the items that do not exist
+						r["items"].delete_if { |item_id| !item_ids.include?(item_id) }
+						# remove the rows that do not exist
+						r["sub_questions"].delete_if { |row_id| !row_ids.include?(row_id) }
+					end
+					# if all the items for a result is removed, remove this result
+					rule["result"].delete_if { |r| r["items"].blank? && r["sub_questions"].blank? }
+					# if all the results for a rule is removed, remove this rule
+					rules.delete_at(rule_index) if rule["result"].blank?
+				elsif [5,6].to_a.include?(rule["rule_type"])
+					if rule["result"]["question_id_1"] == question_id
+						rule["result"]["items"].delete_if { |i| !item_ids.include?(i[0]) }
+					elsif rule["result"]["question_id_2"] == question_id
+						rule["result"]["items"].delete_if { |i| !item_ids.include?(i[1]) }
+					end
+					# if all the results for a rule is removed, remove this rule
+					rules.delete_at(rule_index) if rule["result"]["items"].blank?
+				end
+			when 'question_move'
+				question_ids = (self.pages.map { |p| p["questions"] }).flatten
+				if [1,2].to_a.include?(rule["rule_type"])
+					# a show/hide questions rule
+					conditions_question_ids = rule["conditions"].map { |c| c["question_id"] }
+					result_question_ids = rule["result"]
+					if conditions_question_ids.include?(question_id)
+						# the conditions include the question to be moved
+						result_question_ids.each do |result_question_id|
+							if !question_ids.before(question_id, result_question_id)
+								rule["conditions"].delete_if { |c| c["question_id"] == question_id }
+							end
+						end
+					end
+					if result_question_ids.include?(question_id)
+						# the results include the question to be moved
+						conditions_question_ids.each do |condition_question_id|
+							if !question_ids.before(condition_question_id, question_id)
+								rule["result"].delete(question_id)
+							end
+						end
+					end
+					rules.delete_at(rule_index) if rule["conditions"].blank? || rule["results"].blank?
+				elsif [3,4].to_a.include?(rule["rule_type"])
+					# a show/hide items rule
+					conditions_question_ids = rule["conditions"].map { |c| c["question_id"] }
+					result_question_ids = rule["result"].map { |r| r["question_id"] }
+					if conditions_question_ids.include?(question_id)
+						# the conditions include the question to be moved
+						result_question_ids.each do |result_question_id|
+							if !question_ids.before(question_id, result_question_id)
+								rule["conditions"].delete_if { |c| c["question_id"] == question_id }
+							end
+						end
+					end
+					if result_question_ids.include?(question_id)
+						# the results include the question to be moved
+						conditions_question_ids.each do |condition_question_id|
+							if !question_ids.before(condition_question_id, question_id)
+								rule["result"].delete_if { |r| r["question_id"] == question_id }
+							end
+						end
+					end
+					rules.delete_at(rule_index) if rule["conditions"].blank? || rule["results"].blank?
+				elsif [5,6].to_a.include?(rule["rule_type"])
+					rules.delete_at(rule_index) if question_ids.before(rule["result"]["question_id_1"], rule["result"]["question_id_2"])
+				end
+			when 'question_delete'
+				if ![5,6].include?(rule["rule_type"])
+					# not a corresponding items rule
+					# adjust the conditions part
+					rule["conditions"].delete_if { |c| c["question_id"] == question_id }
+					# adjust the result part
+					if [1, 2].include?(rule["rule_type"])
+						rule["result"].delete(question_id)
+					elsif [3, 4].include?(rule["rule_type"])
+						rule["result"].delete_if { |r| r["question_id"] == question_id }
+					end
+					# check whether this logic control rule can be removed
+					if rule["conditions"].blank?
+						# no conditions, can be removed
+						rules.delete_at(rule_index)
+					elsif (1..4).to_a.include?(rule["rule_type"]) && rule["result"].blank?
+						# no results for the show/hide questions/items, can be removed
+						rules.delete_at(rule_index)
+					end
+				else
+					# a corresponding items rule
+					if rule["result"]["question_id_1"] == question_id || rule["result"]["question_id_2"] == question_id
+						rules.delete_at(rule_index)
+					end
+				end
+			end
+		end
+		self.save
+		# then adjust the quota
+		rules = self.quota["rules"]
+		rules.each_with_index do |rule, rule_index|
+			case type
+			when 'question_update'
+				question = Question.find_by_id(question_id)
+				item_ids = question.issue["items"].map { |i| i["id"] }
+				row_ids = question.issue["items"].map { |i| i["id"] }
+				rule["conditions"].each do |c|
+					next if c["condition_type"] != 1 || c["name"] != question_id
+					# this condition is about the updated question
+					c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
+				end
+				rule["conditions"].delete_if { |c| c["value"].blank? }
+				rules.delete_at(rule_index) if rule["conditions"].blank?
+				self.refresh_quota_stats
+			when 'question_delete'
+				rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
+				rules.delete_at(rule_index) if rule["conditions"].blank?
+				self.refresh_quota_stats
+			end
+		end 
+		self.save
+		# then adjust the filters
+		rules = self.filters
+		rules.each_with_index do |rule, rule_index|
+			case type
+			when 'question_update'
+				question = Question.find_by_id(question_id)
+				item_ids = question.issue["items"].map { |i| i["id"] }
+				row_ids = question.issue["items"].map { |i| i["id"] }
+				rule["conditions"].each do |c|
+					next if c["condition_type"] != 1 || c["name"] != question_id
+					# this condition is about the updated question
+					c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
+				end
+				rule["conditions"].delete_if { |c| c["value"].blank? }
+				rules.delete_at(rule_index) if rule["conditions"].blank?
+				self.refresh_filters_stats
+			when 'question_delete'
+				rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
+				rules.delete_at(rule_index) if rule["conditions"].blank?
+				self.refresh_filters_stats
+			end
+		end 
+		self.save
+	end
+
 	class LogicControl
-		RULE_TYPE = (0..8).to_a
+		RULE_TYPE = (0..6).to_a
 		def initialize(logic_control)
 			@rules = logic_control
-		end
-
-		# check whether the updated question is a condition for some logic control rule
-		def detect_conflict_question_update(question_id)
-			@rules.each do |rule|
-				return true if (rule["conditions"].map { |e| e["question_id"] }).include?(question_id)
-			end
-			return false
-		end
-
-		# check whether the updated question is a condition for some logic control rule
-		def detect_conflict_questions_update(question_id_ary)
-			@rules.each do |rule|
-				return true if !((rule["conditions"].map { |e| e["question_id"] }) & question_id_ary).blank?
-			end
-			return false
 		end
 
 		def show_rule(rule_index)

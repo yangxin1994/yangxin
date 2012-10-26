@@ -79,7 +79,4 @@ question_default_settings:
   content: "请在此输入问题标题"
   note: ""
 
-login_keep_time:
-  kept: 2592000 # 1.months.to_i
-  unkept: 86400 # 1.days.to_i
-
+login_keep_time: 86400 # 1.days.to_i

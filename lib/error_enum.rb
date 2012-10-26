@@ -29,7 +29,6 @@ module ErrorEnum
 	WRONG_QUESTION_TYPE = "error_32"
 	WRONG_QUESTION_CLASS = "error_33"
 	OVERFLOW = "error_34"
-	LOGIC_CONTROL_CONFLICT_DETECTED = "error_35"
 	WRONG_DATA_TYPE = "error_40"
 	THIRD_PARTY_USER_NOT_EXIST = "error_41"
 	THIRD_PARTY_USER_NOT_BIND = "error_42"
@@ -64,6 +63,9 @@ module ErrorEnum
 	ANSWER_NOT_EXIST = "error_141"
 	VIOLATE_QUALITY_CONTROL_ONCE = "error_142"
 	VIOLATE_QUALITY_CONTROL_TWICE = "error_143"
+	SURVEY_NOT_PUBLISHED = "error_144"
+	SURVEY_PASSWORD_USED = "error_145"
+	WRONG_ANSWER_STATUS="error_146"
 
 	WRONG_FILTER_CONDITION_TYPE = "error_150"
 	FILTER_NOT_EXIST = "error_151"
@@ -117,7 +119,7 @@ module ErrorEnum
 #   not a number x1
 ###
 
-	# Presents Error Code (10)
+	# Gifts Error Code (10)
 	PRESENT_NOT_FOUND= 21001
 	INVALID_PRESENT_ID = 21002
 	# Messages Error Code (11)

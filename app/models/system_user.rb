@@ -6,7 +6,7 @@ class SystemUser < User
 
 	attr_accessible :email, :username, :true_name, :password, :system_user_type, :lock
 
-	validates_presence_of :true_name, :password, :system_user_type
+	validates_presence_of :email, :true_name, :password, :system_user_type
 
 	MAX_TYPE = 3
 	SUBCLASS = { 0 => "AnswerAuditor", 1 => "SurveyAuditor", 2=> "EntryClerk", 3=> "Interviewer" }
@@ -91,7 +91,7 @@ class SystemUser < User
 		#*retval*:
 		#* ErrorEnum or system_user instance
 		def find_by_id(system_user_id)
-			user = SystemUser.where(_id: system_user_id.to_s).first
+			user = User.where(_id: system_user_id).in(system_user_type: [1,2,4,8]).first
 			return ErrorEnum::SYSTEM_USER_NOT_EXIST if user.nil?
 			return user  
 		end
@@ -124,11 +124,13 @@ class SystemUser < User
 			if new_system_user[:password] || new_system_user["password"] then
 				new_system_user[:password] = new_system_user[:password] || new_system_user["password"]
 				new_system_user[:password] = Encryption.encrypt_password(new_system_user[:password]) 
+			else
+				new_system_user[:password] = Encryption.encrypt_password("oopsdata")
 			end
 			system_user = Kernel.const_get(SUBCLASS[Math.log2(new_system_user[:system_user_type].to_i).to_i]).new(new_system_user)
 
 			# init user other attrs, disable default
-			system_user.status = 2 #it is activated
+			system_user.status = 4 #it is activated
 			if !system_user.save then
 				return ErrorEnum::SYSTEM_USER_SAVE_FAILED
 			end	
@@ -170,6 +172,13 @@ class SystemUser < User
 			else
 				return system_user
 			end
+		end
+
+		def update_lock(system_user_id, is_lock)
+			system_user = SystemUser.find_by_id(system_user_id)
+			return system_user if !system_user.is_a?(SystemUser)
+			system_user.lock = is_lock
+			return system_user.save
 		end
 
 		#*description*:

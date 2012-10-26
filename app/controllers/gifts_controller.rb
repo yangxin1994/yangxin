@@ -1,13 +1,13 @@
-# encoding: utf-8
-class PresentsController < ApplicationController
+# coding: utf-8
+class GiftsController < ApplicationController
   #TO DO before_filter
-  # presents.json?page=1
+  # gifts.json?page=1
 
   #*method*: get
   #
-  #*url*: /presents
+  #*url*: /gifts
   #
-  #*description*: list all presents can be rewarded
+  #*description*: list all gifts can be rewarded
   #
   #*params*:
   #* page: page number
@@ -17,25 +17,18 @@ class PresentsController < ApplicationController
   #* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
   #* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
   def index
-    @presents = Present.can_be_rewarded.page(page)
-    respond_to do |format|
-      format.html 
-      format.json { render json: @presents }
-    end
+    respond_and_render_json { Gift.can_be_rewarded.page(page) }
   end
 
 
   def_each :virtualgoods, :cash, :realgoods, :stockout do |method_name|
-    @presents = Present.send(method_name).can_be_rewarded.page(page)
-    respond_to do |format|
-      #format.html 
-      format.json { render json: @presents}
-    end
+    @gifts = Gift.send(method_name).can_be_rewarded.page(page)
+    respond_and_render_json { @gifts}
   end
 
   def show
     # TO DO is owners request?
-      retval = Present.find_by_id(params[:id])
+      retval = Gift.find_by_id(params[:id])
     respond_to do |format|
       format.json { render json: retval }
     end
