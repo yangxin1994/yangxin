@@ -69,7 +69,7 @@ class Answer
 
 	def self.find_by_survey_id_user_is_preview(survey_id, user, is_preview)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return nil if survey.nil?
 		return survey.answers.where(user_id: user._id, :is_preview => is_preview)[0]
 	end	
 
@@ -479,7 +479,7 @@ class Answer
 
 	def delete
 		# only answers that are finished can be deleted
-		# return ErrorEnum::WRONG_ANSWER_STATUS if self.is_redo || self.is_edit
+		return ErrorEnum::WRONG_ANSWER_STATUS if self.is_redo || self.is_edit
 		self.destroy
 		return true
 	end

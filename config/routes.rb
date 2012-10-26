@@ -222,6 +222,7 @@ OopsData::Application.routes.draw do
 
 	resources :answers do
 		collection do
+			post 'start'
 			get 'preview_load_question'
 			get 'load_question'
 			post 'clear'
