@@ -15,11 +15,11 @@ class AnswersControllerTest < ActionController::TestCase
 		set_survey_published(survey_id, jesse, survey_auditor)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
-		assert_equal 2, result["value"][0]
+		assert_equal Answer.first._id.to_s, result["value"]
 		sign_out(auth_key)
 
 		# update access control setting to require a single password
@@ -32,16 +32,16 @@ class AnswersControllerTest < ActionController::TestCase
 		update_survey_access_control_setting(jesse.email, Encryption.decrypt_password(jesse.password), survey_id, access_control_setting)
 
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
 		result = JSON.parse(@response.body)
 		assert_equal false, result["success"]
 		assert_equal ErrorEnum::WRONG_SURVEY_PASSWORD, result["value"]["error_code"]
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91", :password => "abcd"
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
-		assert_equal 2, result["value"][0]
+		assert_equal Answer.all[1]._id.to_s, result["value"]
 		sign_out(auth_key)
 
 		# update access control setting to set a password list
@@ -55,23 +55,23 @@ class AnswersControllerTest < ActionController::TestCase
 
 		clear(Answer)
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91", :password => "abcd"
 		result = JSON.parse(@response.body)
 		assert_equal false, result["success"]
 		assert_equal ErrorEnum::WRONG_SURVEY_PASSWORD, result["value"]["error_code"]
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91", :password => "p1"
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
-		assert_equal 2, result["value"][0]
+		assert_equal Answer.first._id.to_s, result["value"]
 		sign_out(auth_key)
 		auth_key = sign_in(lisa.email, Encryption.decrypt_password(lisa.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91", :password => "p1"
 		result = JSON.parse(@response.body)
 		assert_equal false, result["success"]
-		assert_equal ErrorEnum::REQUIRE_LOGIN, result["value"]["error_code"]
+		assert_equal ErrorEnum::SURVEY_PASSWORD_USED, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		# update access control setting to set a username password list
@@ -85,23 +85,23 @@ class AnswersControllerTest < ActionController::TestCase
 
 		clear(Answer)
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91", :password => "p1"
 		result = JSON.parse(@response.body)
 		assert_equal false, result["success"]
 		assert_equal ErrorEnum::WRONG_SURVEY_PASSWORD, result["value"]["error_code"]
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91", :username => "u1", :password => "p1"
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
-		assert_equal 2, result["value"][0]
+		assert_equal Answer.first._id.to_s, result["value"]
 		sign_out(auth_key)
 		auth_key = sign_in(lisa.email, Encryption.decrypt_password(lisa.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91", :username => "u1", :password => "p1"
 		result = JSON.parse(@response.body)
 		assert_equal false, result["success"]
-		assert_equal ErrorEnum::REQUIRE_LOGIN, result["value"]["error_code"]
+		assert_equal ErrorEnum::SURVEY_PASSWORD_USED, result["value"]["error_code"]
 		sign_out(auth_key)
 	end
 
@@ -126,32 +126,26 @@ class AnswersControllerTest < ActionController::TestCase
 		access_control_setting["password_control"]["password_list"] = password_list
 		update_survey_access_control_setting(jesse.email, Encryption.decrypt_password(jesse.password), survey_id, access_control_setting)
 
-		post :load_question, :format => :json, :auth_key => visitor_user_auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => visitor_user_auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91", :password => "p1"
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
-		assert_equal 2, result["value"][0]
+		assert_equal Answer.first._id.to_s, result["value"]
 
 		a = Answer.first
 		assert_equal visitor_user_auth_key, User.find_by_id(a.user_id).auth_key
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:ip => "166.111.135.91", :password => "p1"
-		result = JSON.parse(@response.body)
-		assert_equal true, result["success"]
-		assert_equal 2, result["value"][0]
-		sign_out(auth_key)
-
-		assert_equal 1, Answer.all.length
-		a = Answer.first
-		assert_equal jesse._id.to_s, a.user._id.to_s
-
-		post :load_question, :format => :json, :auth_key => visitor_user_auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91", :password => "p1"
 		result = JSON.parse(@response.body)
 		assert_equal false, result["success"]
-		assert_equal ErrorEnum::REQUIRE_LOGIN, result["value"]["error_code"]
+		sign_out(auth_key)
+
+		post :start, :format => :json, :auth_key => visitor_user_auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91", :password => "p1"
+		result = JSON.parse(@response.body)
+		assert_equal true, result["success"]
 	end
 
 	test "should check channel quota" do
@@ -187,11 +181,13 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# first answer
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
-		assert_equal 2, result["value"][0]
+		assert_equal jesse.answers.first._id.to_s, result["value"]
+		# finish the first answer
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 
 		# check the stats for the quota rule after the first answer
 		survey = Survey.find_by_id(survey_id)
@@ -200,11 +196,12 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# second answer
 		auth_key = sign_in(lisa.email, Encryption.decrypt_password(lisa.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
-		assert_equal 2, result["value"][0]
+		assert_equal lisa.answers.first._id.to_s, result["value"]
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 
 		# check the stats for the quota rule after the second answer
 		survey = Survey.find_by_id(survey_id)
@@ -213,7 +210,7 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# third answer, violate the quotas, should be rejected
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::VIOLATE_QUOTA, result["value"]["error_code"]
@@ -239,8 +236,7 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# oliver's answering should be rejected since it violated quotas, though it should pass the quota now
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:ip => "166.111.135.91"
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
 		assert_equal 1, result["value"][0]
@@ -251,13 +247,14 @@ class AnswersControllerTest < ActionController::TestCase
 		assert_equal 2, survey.quota_stats["answer_number"][0]
 		assert_equal 2, survey.quota_stats["answer_number"][1]
 
-		# third answer
+		# fourth answer
 		auth_key = sign_in(polly.email, Encryption.decrypt_password(polly.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 2,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 2,
 				:ip => "166.111.135.92"
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
-		assert_equal 2, result["value"][0]
+		assert_equal polly.answers.first._id.to_s, result["value"]
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 
 		# check the quota stats
 		survey = Survey.find_by_id(survey_id)
@@ -282,13 +279,14 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# quetions loadding for surveys that do not allow page up
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 		result = JSON.parse(@response.body)
 		# the first has three questions
 		assert_equal 3, result["value"][0].length
 		# there are 10 questions totally
-		a = Answer.first
+		a = jesse.answers.first
 		assert_equal 10, a.answer_content.length
 
 		# update the style setting to make the survey allow page up
@@ -390,7 +388,7 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# quetions loadding for surveys that do not allow page up
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
 		result = JSON.parse(@response.body)
 		a = Answer.first
@@ -414,8 +412,9 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# quetions loadding for surveys that do not allow page up
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 		result = JSON.parse(@response.body)
 		questions = result["value"][0]
 		# answer the questions in the first page
@@ -531,8 +530,9 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# oliver answers the survey
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 		result = JSON.parse(@response.body)
 		questions = result["value"][0]
 		# answer the questions in the first page
@@ -550,8 +550,9 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# lisa answers the survey
 		auth_key = sign_in(lisa.email, Encryption.decrypt_password(lisa.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 		result = JSON.parse(@response.body)
 		questions = result["value"][0]
 		# answer the questions in the first page
@@ -570,8 +571,7 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# lisa answers the survey the second time
 		auth_key = sign_in(lisa.email, Encryption.decrypt_password(lisa.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:ip => "166.111.135.91"
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 		result = JSON.parse(@response.body)
 		# the answer is in the status of redo
 		assert_equal 3, result["value"][0]
@@ -581,8 +581,7 @@ class AnswersControllerTest < ActionController::TestCase
 		assert result["value"]
 		assert lisa.answers.first.is_edit
 		# load questions again
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:ip => "166.111.135.91"
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 		result = JSON.parse(@response.body)
 		questions = result["value"][0]
 		# answer the questions in the first page
@@ -600,8 +599,9 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# polly answers the survey
 		auth_key = sign_in(polly.email, Encryption.decrypt_password(polly.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 		result = JSON.parse(@response.body)
 		questions = result["value"][0]
 		# answer the questions in the first page
@@ -618,8 +618,7 @@ class AnswersControllerTest < ActionController::TestCase
 		post :clear, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 		result = JSON.parse(@response.body)
 		# load questions again
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:ip => "166.111.135.91"
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 		result = JSON.parse(@response.body)
 		questions = result["value"][0]
 		# answer the questions in the first page
@@ -634,6 +633,42 @@ class AnswersControllerTest < ActionController::TestCase
 		assert_equal ErrorEnum::VIOLATE_QUALITY_CONTROL_TWICE, result["value"]["error_code"]
 		assert polly.answers.first.is_reject
 		assert_equal 2, Survey.find_by_id(survey_id).quota_stats["answer_number"][0]
+		sign_out(auth_key)
+	end
+
+	test "should check remain answer time" do
+		clear(User, Survey, Question, Answer)
+		jesse = init_jesse
+		oliver = init_oliver
+		lisa = init_lisa
+		polly = init_polly
+		survey_auditor = init_survey_auditor
+
+		survey_id, pages = *create_short_survey_page_question(jesse.email, jesse.password)
+		question_ids = pages.flatten
+		first_question = Question.find_by_id(question_ids[0])
+
+		set_survey_published(survey_id, jesse, survey_auditor)
+
+		# first user answers the survey
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
+		get :estimate_remain_answer_time, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
+		result = JSON.parse(@response.body)
+		time_1 = result["value"]
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+				:ip => "166.111.135.91"
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
+		result = JSON.parse(@response.body)
+		questions = result["value"][0]
+		# answer the questions in the first page
+		answer_content = {}
+		answer_content[questions[0]["_id"]] = {"selection" => [first_question.issue["items"][0]["id"]]}
+		answer_content[questions[1]["_id"]] = "answer for the second question"
+		post :submit_answer, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :answer_content => answer_content
+		get :estimate_remain_answer_time, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
+		result = JSON.parse(@response.body)
+		time_2 = result["value"]
+		assert time_1 > time_2
 		sign_out(auth_key)
 	end
 
@@ -663,8 +698,9 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# first user answers the survey
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 		result = JSON.parse(@response.body)
 		questions = result["value"][0]
 		# answer the questions in the first page
@@ -682,8 +718,9 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# second user answers the survey
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 		result = JSON.parse(@response.body)
 		questions = result["value"][0]
 		# answer the questions in the first page
@@ -702,8 +739,9 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# third user answers the survey
 		auth_key = sign_in(lisa.email, Encryption.decrypt_password(lisa.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
+		get :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id
 		result = JSON.parse(@response.body)
 		questions = result["value"][0]
 		# answer the questions in the first page
@@ -721,7 +759,7 @@ class AnswersControllerTest < ActionController::TestCase
 
 		# fourth user answers the survey
 		auth_key = sign_in(polly.email, Encryption.decrypt_password(polly.password))
-		post :load_question, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		post :start, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:ip => "166.111.135.91"
 		result = JSON.parse(@response.body)
 		assert !result["success"]

@@ -59,7 +59,12 @@ class Result
 			# calculate the total progress
 			s = s1 * 0.5 + s2 * 0.5
 		when "analysis"
-
+			# the analysis job consists of three parts
+			# the first part is to find the answers by the filter
+			s1 = status["find_answers_progress"].to_f
+			# the third part is to analyze data
+			s2 = status["analyze_answer_progress"].to_f
+			s = s1 * 0.5 + s2 * 0.5
 		when "to_spss"
 			
 		when "to_excel"
