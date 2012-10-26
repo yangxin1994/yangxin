@@ -63,7 +63,7 @@ class Answer
 	public
 
 	def self.find_by_id(answer_id)
-		answer = Answer.where(:id => answer_id).first
+		answer = Answer.where(:_id => answer_id).first
 		return answer
 	end
 
