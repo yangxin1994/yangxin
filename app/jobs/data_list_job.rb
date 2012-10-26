@@ -2,9 +2,7 @@ require 'result_job'
 module Jobs
 
 	class DataListJob < ResultJob
-
-		@queue = :result_job
-
+		
 		def perform
 			# set the type of the job
 			set_status({"result_type" => "data_list"})

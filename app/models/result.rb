@@ -35,6 +35,9 @@ class Result
 					"duration_result" => result.duration_result,
 					"channel_result" => result.channel_result,
 					"answers_result" => result.answers_result}
+		when "ExportResult"
+			# TODO 返回结果
+			return result
 		end
 	end
 
@@ -56,6 +59,11 @@ class Result
 			# calculate the total progress
 			s = s1 * 0.5 + s2 * 0.5
 		when "analysis"
+
+		when "to_spss"
+			
+		when "to_excel"
+			
 		end
 		# the job has not been finished, the progress cannot be greater than 0.99
 		return [s, 0.99].max

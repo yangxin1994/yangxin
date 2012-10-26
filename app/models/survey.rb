@@ -118,7 +118,7 @@ class Survey
     #   q << page[:questions]
     # end
     pages.each do |page|
-      q += page[:questions]
+      q += page["questions"]
     end
     q.collect { |i| Question.find(i) }
   end

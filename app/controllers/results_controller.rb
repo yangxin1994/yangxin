@@ -1,5 +1,3 @@
-#encoding: utf-8
-
 class ResultsController < ApplicationController
 	before_filter :require_sign_in
 	before_filter :check_normal_survey_existence, :except => [:job_progress]
@@ -49,16 +47,13 @@ class ResultsController < ApplicationController
 	end
 
 	def to_spss
-		data_list_result = Result.find_result_by_job_id(params[:job_id])
-
-		export_result = ExportResult.find_or_create_by_result_key(data_list_result.result_key, @survey)
-		if export_result.is_export_spss_finished
-      "Spss文件的路径:类似于 localhost/result_key.sav"
-    else
-    	job_id = Jobs::ToSpssJob.create(:export_result_id => export_result.id)
-    end
-
+		data_list_result = Result.find_by_result_key(params[:result_key])
+		respond_and_render_json do 
+			if data_list_result.nil?
+				# return ERROR
+			else
+				Jobs::ToSpssJob.create(:data_list_result_id => data_list_result.id, :survey_id => @survey.id)
+			end
+		end
 	end
-
-
 end

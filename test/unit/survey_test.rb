@@ -3,7 +3,7 @@ require 'test_helper'
 
 class SurveyTest < ActiveSupport::TestCase
   setup do
-    #clear(Survey)
+    #clear(Survey, Result, ExportResult)
     @survey_with_issue = FactoryGirl.create(:survey_with_issue)
     @answer_with_issue = FactoryGirl.create(:answer_with_issue)
     @survey_with_issue.answers << @answer_with_issue
@@ -32,11 +32,11 @@ class SurveyTest < ActiveSupport::TestCase
     #@survey_with_issue.answer_content
     #@survey_with_issue.answer_import("")
     #@survey_with_issue.to_spss
-    answers = @survey_with_issue.answers
-    result_key = Result.generate_result_key(answers)
-  data_list_result = DataListResult.create(:result_key => result_key) #Result.find_result_by_job_id(job_id)
-  export_result = ExportResult.find_or_create_by_result_key(data_list_result.result_key, @survey_with_issue)
-    p Jobs::ToSpssJob.create(:export_result_id => export_result.id)
+    #job_id = @survey_with_issue.data_list(-1, false)
+    #sleep 10 # until Result.job_progress(job_id) >= 1
+    #data_list_result = Result.find_result_by_job_id job_id
+    Jobs::ToSpssJob.create(:data_list_result_id => data_list_result.id, :survey_id => @survey_with_issue.id)
+    #Jobs::DataListJob.create
     #@survey_with_issue.to_excel
     #@survey_with_issue.send_spss_data
     #@survey_with_issue.send_spss_data_r

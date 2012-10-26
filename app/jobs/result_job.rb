@@ -4,7 +4,7 @@ module Jobs
 
 	class ResultJob
 		include Resque::Plugins::Status
-
+		include ConnectDotNet
 		@queue = :result_job
 
 		def self.answers(survey_id, filter_index, include_screened_answer)
@@ -24,28 +24,35 @@ module Jobs
 			return filtered_answers	
 		end
 
-		def send_data(post_to)
-      url = URI.parse('http://192.168.1.129:9292')
-      begin
-        Net::HTTP.start(url.host, url.port) do |http| 
-          r = Net::HTTP::Post.new(post_to)
-          a = Time.now
-          r.set_form_data(yield)
-          p Time.now - a
-          http.read_timeout = 120
-          p "===== 准备连接 ====="
-          http.request(r)
-        end
-      rescue Errno::ECONNREFUSED
-        p "连接失败"
-      rescue Timeout::Error
-        p "超时"
-      ensure
-        export_process[:post] = 100
-        self.save
-        p "连接结束"
-      end
+    def filtered_answers
+      @survey.answers.not_preview.finished_and_screened
+      # DataListResult.find_by_result_key(@data_list_result.result_key).answer_info
     end
 
+    def answer_contents
+      a = filtered_answers
+      @retval = []
+      q = @survey.all_questions_type
+      p "========= 准备完毕 ========="
+      n = 0
+      @result.answers_count = a.size
+      a.each do |a|
+        line_answer = []
+        i = -1
+        #begin
+          #TODO 异常处理
+          a.answer_content.each do |k, v|
+            line_answer += q[i += 1].answer_content(v)
+          end
+        #end
+        set_status({"export_answers_progress" => n * 1.0 / @result.answers_count })
+        
+        p "========= 转出 #{n} 条 进度 #{set_status["export_answers_progress"]} =========" if n%10 == 0
+        @retval << line_answer
+      end
+      @result.answer_contents = @retval
+      @result.save
+      @retval
+    end
 	end
 end
