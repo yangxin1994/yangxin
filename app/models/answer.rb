@@ -69,7 +69,7 @@ class Answer
 
 	def self.find_by_survey_id_user_is_preview(survey_id, user, is_preview)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return nil if survey.nil?
 		return survey.answers.where(user_id: user._id, :is_preview => is_preview)[0]
 	end	
 
@@ -813,6 +813,15 @@ class Answer
 		self.save
 		self.update_quota
 		return true
+	end
+
+	def estimate_remain_answer_time
+		remain_answer_time = 0.0
+		self.answer_content.each do |q_id, a|
+			q = Question.find_by_id(q_id)
+			remain_answer_time = remain_answer_time + q.estimate_answer_time if a.nil? && !q.nil?
+		end
+		return remain_answer_time
 	end
 
 	def update_quota

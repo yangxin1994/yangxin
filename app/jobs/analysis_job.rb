@@ -78,7 +78,7 @@ module Jobs
 					answers_transform[q_id] << question_answer if !question_answer.blank?
 				end
 
-				set_status({"analysis_answer_progress" => 0.5 * (index + 1) * 1.0 / answers.length })
+				set_status({"analyze_answer_progress" => 0.5 * (index + 1) * 1.0 / answers.length })
 			end
 			
 			# calculate the mean of duration
@@ -94,14 +94,14 @@ module Jobs
 				time_histogram[t / 86400 - min_finish_time / 86400] = time_histogram[t / 86400 - min_finish_time / 86400] + 1
 			end
 			time_result = {"start_day" => start_day, "time_histogram" => time_histogram}
-			set_status({"analysis_answer_progress" => 0.6 })
+			set_status({"analyze_answer_progress" => 0.6 })
 
 			# make stats for the answers
 			answer_result = {}
 			answers_transform.each do |q_id, question_answer_ary|
 				question = Question.find_by_id(q_id)
 				answer_result[q_id] = [question, question_answer_ary.length, analyze_one_question_answers(question, question_answer_ary)]
-				set_status({"analysis_answer_progress" => 0.6 + 0.4 * aindex / answers_transform.length })
+				set_status({"analyze_answer_progress" => 0.6 + 0.4 * aindex / answers_transform.length })
 			end
 
 			return [region_result, channel_result, duration_mean, time_result, answer_result]
@@ -117,6 +117,8 @@ module Jobs
 				return analyze_number_blank(question.issue, answer_ary)
 			when QuestionTypeEnum::TIME_BLANK_QUESTION
 				return analyze_time_blank(question.issue, answer_ary)
+			when QuestionTypeEnum::EMAIL_BLANK_QUESTION
+				return analyze_email_blank(question.issue, answer_ary)
 			when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 				return analyze_address_blank(question.issue, answer_ary)
 			when QuestionTypeEnum::BLANK_QUESTION
@@ -149,7 +151,7 @@ module Jobs
 
 		def analyze_matrix_choice(issue, answer_ary)
 			input_ids = issue["choices"].map { |e| e["id"] }
-			result = {}
+			result = []
 			issue["rows"].each do |row|
 				input_ids.each do |input_id|
 					result["#{row["id"]}-#{input_id}"] = 0
@@ -167,45 +169,68 @@ module Jobs
 			return result
 		end
 
-		def analyze_number_blank(issue, answer_ary)
+		def analyze_number_blank(issue, answer_ary, segment=[])
 			result = {}		
 			answer_ary.map! { |answer| answer.to_f }
 			answer_ary.sort!
 			result["mean"] = answer_ary.mean
+			if !segment.blank?
+				histogram = Array(segment.length + 1, 0)
+				segment_index = 0
+				answer_ary.each do |a|
+					while a > segment[segment_index]
+						segment_index = segment_index + 1
+						break if segment_index >= segment.length
+					end
+					histogram = histogram + 1
+				end
+				result["histogram"] = histogram
+			end
 			return result
 		end
 
-		def analyze_time_blank(issue, answer_ary)
+		def analyze_time_blank(issue, answer_ary, segment=[])
 			result = {}
-			if (0..3).to_a.include?(issue["format"])
-				# year-based
-				target_array = answer_ary.map! { |a| a[0] }
-				(target_array.min..target_array.max).to_a do |year|
-					result[year] = 0
-				end
-
-			elsif issue["format"] == 4
-				# month-based
-				target_array = answer_ary.map! { |a| a[1] }
-				(1..12).to_a.each do |month|
-					result[month] = 0
-				end
-			else
-				# hour-based
-				target_array = answer_ary.map! { |a| a[3] }
-				(0..23).to_a.each do |hour|
-					result[hour] = 0
-				end
+			# convert the time format from array to integer
+			answer_ary = answer_ary.map! do |answer|
+				Time.mktime(*(answer.map {|e| e.to_i })).to_i
 			end
-			target_array do |ele|
-				result[ele] = result[ele] + 1
+			answer_ary.sort!
+			result["mean"] = answer_ary.mean
+			if !segment.blank?
+				histogram = Array(segment.length + 1, 0)
+				segment_index = 0
+				answer_ary.each do |a|
+					while a > segment[segment_index]
+						segment_index = segment_index + 1
+						break if segment_index >= segment.length
+					end
+					histogram = histogram + 1
+				end
+				result["histogram"] = histogram
+			end
+			return result
+		end
+
+		def analyze_email_blank(issue, answer_ary)
+			result = {}
+			answer_ary.each do |email_address|
+				domain_name = (email_address.split('@'))[-1]
+				result[domain_name] = 0 if result[domain_name].nil?
+				result[domain_name] = result[domain_name] + 1
 			end
 			return result
 		end
 
 		def analyze_address_blank(issue, answer_ary)
 			result = {}
-			if issue["format"].to_i & 4
+			if issue["format"].to_i & 2
+				# county is required
+				result = Address.county_hash
+				answer_ary = answer_ary.map! do |answer|
+					answer[2].to_i
+				end
+			elsif issue["format"].to_i & 4
 				# city is required
 				result = Address.province_hash
 				answer_ary = answer_ary.map! do |answer|
@@ -232,6 +257,8 @@ module Jobs
 					result[input["id"]] = analyze_number_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 				when "Address"
 					result[input["id"]] = analyze_address_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				when "Email"
+					result[input["id"]] = analyze_email_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 				when "Time"
 					result[input["id"]] = analyze_time_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 				end

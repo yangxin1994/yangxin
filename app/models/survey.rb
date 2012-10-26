@@ -87,6 +87,7 @@ class Survey
 
 	has_many :analysis_results
 	has_many :data_list_results
+	has_many :report_results
 	has_many :report_mockups
 
 	scope :all_but_new, lambda { where(:new_survey => false) }
@@ -1268,6 +1269,30 @@ class Survey
 		return self.list("normal", PublishStatus::PUBLISHED, [])
 	end
 
+	def check_password_for_preview(username, password, current_user)
+		case self.access_control_setting["password_control"]["password_type"]
+		when -1
+			return true
+		when 0
+			if self.access_control_setting["password_control"]["single_password"] == password
+				return true
+			else
+				return ErrorEnum::WRONG_SURVEY_PASSWORD
+			end
+		when 1
+			list = self.access_control_setting["password_control"]["password_list"]
+			password_element = list.select { |ele| ele["content"] == password }[0]
+		when 2
+			list = self.access_control_setting["password_control"]["username_password_list"]
+			password_element = list.select { |ele| ele["content"] == [username, password] }[0]
+		end
+		if password_element.nil?
+			return ErrorEnum::WRONG_SURVEY_PASSWORD
+		else
+			return true
+		end
+	end
+
 	def check_password(username, password, current_user)
 		case self.access_control_setting["password_control"]["password_type"]
 		when -1
@@ -1292,14 +1317,7 @@ class Survey
 			self.save
 			return true
 		else
-			answer = Answer.find_by_password(username, password)
-			return ErrorEnum::ANSWER_NOT_EXIST if answer.nil?
-			user = answer.user
-			return ErrorEnum::REQUIRE_LOGIN if user.is_registered
-			user.answers.delete(answer)
-			answer.user = current_user
-			answer.save
-			return answer
+			return ErrorEnum::SURVEY_PASSWORD_USED
 		end
 	end
 
@@ -1356,13 +1374,14 @@ class Survey
 	end
 
 	def estimate_answer_time
-		answer_time = 0
+		answer_time = 0.0
 		self.pages.each do |page|
 			page["questions"].each do |q_id|
 				q = Question.find_by_id(q_id)
 				answer_time = answer_time + q.estimate_answer_time if !q.nil?
 			end
 		end
+		return answer_time
 	end
 
 	def show_quota_rule(quota_rule_index)
@@ -1489,11 +1508,20 @@ class Survey
 		return job_id
 	end
 
-  def analysis(filter_index, include_screend_answer)
+	def analysis(filter_index, include_screened_answer)
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
 		job_id = Jobs::AnalysisJob.create(:survey_id => self._id, :filter_index => filter_index, :include_screened_answer => include_screened_answer)
 		return job_id
-  end
+	end
+
+	def report(filter_index, include_screened_answer, report_mockup_id, report_style, report_type)
+		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
+		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
+		return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
+		return ErrorEnum::WRONG_REPORT_TYPE if %w[word ppt pdf].include?(report_type)
+		job_id = Jobs::ReportJob.create(:filter_index => filter_index, :include_screened_answer => include_screened_answer, :report_mockup_id => report_mockup_id, :report_style => report_style, :report_type => report_type)
+		return job_id
+	end
 
 	def create_report_mockup(report_mockup)
 		result = ReportMockup.check_and_create_new(self, report_mockup)

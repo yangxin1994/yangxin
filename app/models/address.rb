@@ -52,6 +52,7 @@ class Address
 			@@city_towns = {}
 
 			@@all_cities = []
+			@@all_counties = []
 
 			# parse csv data
 			csv.each do |row|
@@ -71,6 +72,7 @@ class Address
 					city_id = (row[0] >> 6 << 6)
 					@@city_towns[city_id] = [] if !@@city_towns[city_id]
 					@@city_towns[city_id] << row[0..1]
+					@@all_counties << row[0..1]
 				end
 			end
 		end
@@ -84,6 +86,11 @@ class Address
 	def self.find_cities
 		self.ensure_cache
 		return @@all_cities
+	end
+
+	def self.find_counties
+		self.ensure_cache
+		return @@all_counties
 	end
 
 	def self.find_cities_by_province(province_id)
@@ -100,7 +107,7 @@ class Address
 		self.ensure_cache
 		ip_info = IpInfo.find_by_ip(ip_address)
 		# no province information in the ip info
-		return -1 if ip_info.nil? || ip_info.province.blank?
+		return -1 if ip_info.class != Postcode || ip_info.province.blank?
 		target_province = nil
 		@@provinces.each do |province|
 			if province[1].gsub(/\s+/, "").include?(ip_info.province.gsub(/\s+/, ""))
@@ -151,5 +158,13 @@ class Address
 			city_hash[city[0]] = 0
 		end
 		return city_hash
+	end
+
+	def self.county_hash
+		county_hash = {}
+		Address.find_counties.each do |county|
+			county_hash[county[0]] = 0
+		end
+		return county_hash
 	end
 end
