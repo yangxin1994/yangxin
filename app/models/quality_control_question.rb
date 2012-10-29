@@ -13,8 +13,12 @@ require 'quality_control_type_enum'
 class QualityControlQuestion < BasicQuestion
 	include Mongoid::Document
 	field :quality_control_type, :type => Integer
+
+	#set matching_quality_control_question which is in list page
+	field :is_first, :type => Boolean, :default => false
+
 	scope :objective_questions, lambda { where(:quality_control_type => 1) }
-	scope :matching_questions, lambda { where(:quality_control_type => 2) }
+	scope :matching_questions, lambda { where(:quality_control_type => 2, :is_first=> true) }
 
 	def self.create_quality_control_question(quality_control_type, question_type, question_number)
 		return ErrorEnum::WRONG_QUESTION_TYPE if !self.has_question_type(question_type)
@@ -26,8 +30,14 @@ class QualityControlQuestion < BasicQuestion
 		elsif quality_control_type == QualityControlTypeEnum::MATCHING
 			# create a matching quality control question
 			matching_questions = []
+			is_first = true
 			1.upto(question_number.to_i).each do
-				question = QualityControlQuestion.new(quality_control_type: QualityControlTypeEnum::MATCHING, question_type: question_type, issue: Issue.create_issue(question_type).serialize)
+				if is_first
+					question = QualityControlQuestion.new(is_first:true, quality_control_type: QualityControlTypeEnum::MATCHING, question_type: question_type, issue: Issue.create_issue(question_type).serialize)
+					is_first=false
+				else
+					question = QualityControlQuestion.new(quality_control_type: QualityControlTypeEnum::MATCHING, question_type: question_type, issue: Issue.create_issue(question_type).serialize)
+				end
 				question.save
 				matching_questions << question
 			end
