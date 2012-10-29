@@ -109,6 +109,11 @@ class ApplicationController < ActionController::Base
 		!user_signed_in?
 	end
 
+	#judge whether the current user is a super admin
+	def user_super_admin?
+		user_signed_in? && @current_user.is_super_admin
+	end
+
 	#judge whether the current user is admin
 	def user_admin?
 		user_signed_in? && @current_user.is_admin
@@ -129,6 +134,21 @@ class ApplicationController < ActionController::Base
 		user_signed_in? && @current_user.is_interviewer
 	end
 	
+	def require_super_admin
+		if !user_signed_in?
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
+			end
+		end
+		if !user_super_admin?
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_SUPER_ADMIN) and return }
+			end
+		end
+	end
+
 	def require_admin
 		if !user_signed_in?
 			respond_to do |format|

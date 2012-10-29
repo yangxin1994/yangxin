@@ -1,7 +1,7 @@
 require 'test_helper'
 
 class Admin::SystemUsersControllerTest < ActionController::TestCase
-
+=begin
 	test "01 get index" do 
 		clear(User)
 
@@ -241,5 +241,5 @@ class Admin::SystemUsersControllerTest < ActionController::TestCase
 
 		clear(User)
 	end
-
+=end
 end

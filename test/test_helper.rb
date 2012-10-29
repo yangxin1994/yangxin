@@ -65,6 +65,12 @@ class ActiveSupport::TestCase
 		return polly
 	end
 
+	def init_admin
+		admin = FactoryGirl.build(:admin)
+		admin.save
+		return admin
+	end
+
 	def init_survey_auditor
 		survey_auditor = FactoryGirl.build(:survey_auditor)
 		survey_auditor.save
@@ -72,7 +78,7 @@ class ActiveSupport::TestCase
 	end
 
 	def set_as_admin(user)
-		user.role = 1
+		user.role = user.role | 16
 		user.save
 	end
 

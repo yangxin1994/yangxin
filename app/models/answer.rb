@@ -478,7 +478,7 @@ class Answer
 	#*retval*:
 	#* the status of the answer after updating
 	def update_status
-		if Time.now.to_i - self.created_at.to_i > 10.days.to_i
+		if Time.now.to_i - self.created_at.to_i > 2.days.to_i
 			self.set_reject
 			self.update_attributes(reject_type: 3, rejected_at: Time.now.to_i)
 		end
