@@ -44,7 +44,7 @@ class Result
 					"answers_result" => result.answers_result}
 		when "ExportResult"
 			# TODO 返回结果
-			return result
+			return result.file_uri
 		end
 	end
 
@@ -78,7 +78,7 @@ class Result
 			if s1 < 1
 				s = s1 * 0.6
 			else
-			# TODO 
+			# TODO send request for s2
 				s2 = 1 
 				s = s1 * 0.6 + s2 * 0.4
 			end

@@ -9,10 +9,6 @@ class Admin::GiftsController < Admin::ApplicationController
     end
   end
 
-  def expired
-    respond_and_render_json { Gift.expired.page(page)}
-  end
-
   def update
     @gift = Gift.find(params[:id])
     respond_and_render_json @gift.update_attributes(params[:gift]) do
@@ -20,7 +16,7 @@ class Admin::GiftsController < Admin::ApplicationController
     end
   end
 
-  def delete
+  def destroy
     respond_and_render_json do
       params[:ids].to_a.each do |id|
         Gift.find_by_id id do |r|
