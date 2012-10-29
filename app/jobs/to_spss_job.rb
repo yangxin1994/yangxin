@@ -14,10 +14,19 @@ module Jobs
       @survey = Survey.find_by_id(options["survey_id"])
       #pp @survey
       @data_list_result = DataListResult.find(options["data_list_result_id"])
-      @result = ExportResult.find_by_data_list_result(generate_result_key, @survey)
-      # ===================== #
+      @result = ExportResult.find_by_result_key(generate_result_key)
+      if @result.nil?
+        @result = ExportResult.create(:result_key => generate_result_key,
+                                      :job_id => status["uuid"])
+      else
+        ExportResult.create(:result_key => generate_result_key,
+                            :job_id => status["uuid"],
+                            :ref_job_id => @result.job_id)
+        set_status(["ref_job_id"] => @result.job_id)
+        return
+      end
       p "===== 调用 to_spss ====="
-      to_spss
+      p to_spss
     end
 
     def spss_header
@@ -27,6 +36,7 @@ module Jobs
       end
       headers
     end
+
     def csv_header
       headers = []
       @survey.all_questions.each_with_index do |e, i|
@@ -40,9 +50,7 @@ module Jobs
         {'spss_data' => {"spss_header" => spss_header,
                          "answer_contents" => answer_contents,
                          "header_name" => csv_header,
-                         "result_key" => @result.result_key,
-                         "answers_count" => @result.answers_count,
-                         "granularity" => 5}.to_yaml}
+                         "result_key" => @result.result_key}.to_yaml}
       end
     end
 

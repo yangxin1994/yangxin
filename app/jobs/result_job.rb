@@ -25,8 +25,8 @@ module Jobs
 		end
 
     def filtered_answers
-      @survey.answers.not_preview.finished_and_screened
-      # DataListResult.find_by_result_key(@data_list_result.result_key).answer_info
+      #@survey.answers.not_preview.finished_and_screened
+      DataListResult.find_by_result_key(@data_list_result.result_key).answer_info
     end
 
     def answer_contents
@@ -34,20 +34,19 @@ module Jobs
       @retval = []
       q = @survey.all_questions_type
       p "========= 准备完毕 ========="
-      n = 0
       @result.answers_count = a.size
-      a.each do |a|
+      a.each_with_index do |answer, index|
         line_answer = []
         i = -1
         #begin
           #TODO 异常处理
-          a.answer_content.each do |k, v|
+          answer.answer_content.each do |k, v|
             line_answer += q[i += 1].answer_content(v)
           end
         #end
-        set_status({"export_answers_progress" => n * 1.0 / @result.answers_count })
+        set_status({"export_answers_progress" => (index + 1) * 1.0 / @result.answers_count })
         
-        p "========= 转出 #{n} 条 进度 #{set_status["export_answers_progress"]} =========" if n%10 == 0
+        p "========= 转出 #{index} 条 进度 #{set_status["export_answers_progress"]} =========" if index%10 == 0
         @retval << line_answer
       end
       @result.answer_contents = @retval

@@ -6,7 +6,7 @@ class Result
 	include Mongoid::Timestamps
 
 	field :result_key, :type => String
-	field :finished, :type => Boolean, default: false
+	field :status, :type => Integer, default: 0
 	field :ref_result_id, :type => String
 
 	belongs_to :survey
@@ -66,7 +66,14 @@ class Result
 			s2 = status["analyze_answer_progress"].to_f
 			s = s1 * 0.5 + s2 * 0.5
 		when "to_spss"
-			
+			s1 = status["export_answers_progress"]
+			if s1 < 1
+				s = s1 * 0.6
+			else
+			# TODO 
+				s2 = 1 
+				s = s1 * 0.6 + s2 * 0.4
+			end
 		when "to_excel"
 			
 		end

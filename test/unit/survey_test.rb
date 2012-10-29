@@ -32,9 +32,13 @@ class SurveyTest < ActiveSupport::TestCase
     #@survey_with_issue.answer_content
     #@survey_with_issue.answer_import("")
     #@survey_with_issue.to_spss
-    #job_id = @survey_with_issue.data_list(-1, false)
+    clear(Result)
+    job_id = @survey_with_issue.data_list(-1, false)
+    sleep 3
+    p job_id.inspect
+    p Result.all.to_a.inspect
     #sleep 10 # until Result.job_progress(job_id) >= 1
-    #data_list_result = Result.find_result_by_job_id job_id
+    data_list_result = Result.find_result_by_job_id job_id
     Jobs::ToSpssJob.create(:data_list_result_id => data_list_result.id, :survey_id => @survey_with_issue.id)
     #Jobs::DataListJob.create
     #@survey_with_issue.to_excel

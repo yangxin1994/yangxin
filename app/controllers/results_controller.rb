@@ -53,6 +53,10 @@ class ResultsController < ApplicationController
 		end
 	end
 
+	def finish
+		
+	end
+	
 	def to_spss
 		data_list_result = Result.find_by_result_key(params[:result_key])
 		respond_and_render_json do 
@@ -63,4 +67,5 @@ class ResultsController < ApplicationController
 			end
 		end
 	end
+	
 end
