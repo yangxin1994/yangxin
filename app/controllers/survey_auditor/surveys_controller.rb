@@ -37,7 +37,7 @@ class SurveyAuditor::SurveysController < SurveyAuditor::ApplicationController
 		# first parameter is survey status (0 for normal surveys)
 		# second parameter is survey publish status (2 for under review surveys)
 		# third parameter are tags
-		survey_list = Survey.normal.list("normal", 2, nil)
+		survey_list = Survey.normal.list("normal", publishStatus::UNDER_REVIEW, nil)
 		respond_to do |format|
 			format.json	{ render_json_auto(survey_list.serialize) and return }
 		end

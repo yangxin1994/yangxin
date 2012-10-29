@@ -232,13 +232,13 @@ OopsData::Application.routes.draw do
 
 	resources :answers do
 		collection do
-			post 'start'
-			get 'preview_load_question'
+			get 'get_my_answer'
+		end
+		member do
 			get 'load_question'
 			post 'clear'
 			post 'submit_answer'
 			post 'finish'
-			get 'get_my_answer'
 			get 'estimate_remain_answer_time'
 		end
 	end

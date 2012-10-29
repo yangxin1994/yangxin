@@ -53,14 +53,12 @@ class QualityControlQuestionAnswer
 		if quality_control_type == QualityControlTypeEnum::OBJECTIVE
 			answer = QualityControlQuestionAnswer.find_by_question_id(question_id)
 			return ErrorEnum::QUALITY_CONTROL_QUESTION_ANSWER_NOT_EXIST if answer.nil?
-			# answer.answer_content = answer_object
-			answer.answer_content = JSON.parse(answer_object.gsub('=>',':'))
+			answer.answer_content = answer_object
 			return answer.save
 		elsif quality_control_type == QualityControlTypeEnum::MATCHING
 			answer = QualityControlQuestionAnswer.find_by_question_id(question_id)
 			return ErrorEnum::QUALITY_CONTROL_QUESTION_ANSWER_NOT_EXIST if answer.nil?
-			# answer.answer_content = answer_object
-			answer.answer_content = JSON.parse(answer_object.gsub('=>',':'))
+			answer.answer_content = answer_object
 			return answer.save
 		else
 			return ErrorEnum::WRONG_QUALITY_CONTROL_TYPE

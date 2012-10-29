@@ -2,11 +2,22 @@
 require 'error_enum'
 class AnswersController < ApplicationController
 
-	before_filter :check_survey_existence, :except => [:show, :get_my_answer, :destroy]
-	before_filter :check_answer_existence, :except => [:show, :get_my_answer, :destroy, :start, :estimate_remain_answer_time]
+	before_filter :require_user_exist
+	before_filter :check_survey_existence, :only => [:create]
+	before_filter :check_my_answer_existence, :except => [:show, :get_my_answer, :destroy, :create]
+	before_filter :check_answer_existence, :only => [:show, :destroy]
 
 	def check_answer_existence
-		@answer = Answer.find_by_survey_id_user_is_preview(params[:survey_id], @current_user, params[:is_preview])
+		@answer = Answer.find_by_id(params[:id])
+		if @answer.nil?
+			respond_to do |format|
+				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
+			end
+		end
+	end
+
+	def check_my_answer_existence
+		@answer = @current_user.answers.find_by_id(params[:id])
 		if @answer.nil?
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
@@ -25,7 +36,7 @@ class AnswersController < ApplicationController
 
 	######################
 
-	def start
+	def create
 		if !params[:is_preview] && @survey.publish_status != 8
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_PUBLISHED) and return }
@@ -41,7 +52,7 @@ class AnswersController < ApplicationController
 			retval = @survey.check_password_for_preview(params[:username], params[:password], @current_user)
 			if retval == true
 				# the first time to load questions, create the preview answer
-				answer = Answer.create_answer(params[:is_preview], @current_user, params[:survey_id], params[:channel], params[:ip], params[:username], params[:password])
+				answer = Answer.create_answer(params[:is_preview], @current_user, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
 				render_json_auto(answer) and return if answer.class != Answer
 				answer.set_edit
 				render_json_auto(answer._id) and return
@@ -57,7 +68,7 @@ class AnswersController < ApplicationController
 			retval = @survey.check_password(params[:username], params[:password], @current_user)
 			if retval == true
 				# pass the checking, create a new answer and check the region, channel, and ip quotas
-				answer = Answer.create_answer(params[:is_preview], @current_user, params[:survey_id], params[:channel], params[:ip], params[:username], params[:password])
+				answer = Answer.create_answer(params[:is_preview], @current_user, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
 				render_json_auto(answer) and return if answer.class != Answer
 				retval = answer.check_channel_ip_address_quota
 				if retval
@@ -76,28 +87,23 @@ class AnswersController < ApplicationController
 	end
 
 	def load_question
-		if !params[:is_preview] && @survey.publish_status != 8
+		if !@answer.is_preview && @answer.survey.publish_status != 8
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_PUBLISHED) and return }
 			end
 		end
-		# 1. try to find the answer
-		answer = Answer.find_by_survey_id_user_is_preview(params[:survey_id], @current_user, params[:is_preview])
-		# 2. if cannot find the answer, return error code
-		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
-		# now, we have an answer instance
-		answer.update_status	# check whether it is time out
-		if answer.is_edit
-			questions = answer.load_question(params[:question_id], params[:next_page])
-			if answer.is_finish
-				render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return
+		@answer.update_status	# check whether it is time out
+		if @answer.is_edit
+			questions = @answer.load_question(params[:question_id], params[:next_page])
+			if @answer.is_finish
+				render_json_auto([@answer.status, @answer.reject_type, @answer.finish_type]) and return
 			elsif questions.class == String && questions.start_with?("error")
 				render_json_e(questions) and return
 			else
-				render_json_auto([questions, answer.answers_of(questions), answer.question_number, answer.index_of(questions), questions.estimate_answer_time, answer.repeat_time]) and return
+				render_json_auto([questions, @answer.answers_of(questions), @answer.question_number, @answer.index_of(questions), questions.estimate_answer_time, @answer.repeat_time]) and return
 			end
 		else
-			render_json_auto([answer.status, answer.reject_type, answer.finish_type]) and return
+			render_json_auto([@answer.status, @answer.reject_type, @answer.finish_type]) and return
 		end
 	end
 
@@ -146,18 +152,7 @@ class AnswersController < ApplicationController
 	end
 
 	def show
-		@survey = @current_user.is_admin ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if @survey.nil?
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
-			end
-		end
-		@answer = @survey.answers.find_by_id(params[:id])
-		if @survey.nil?
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
-			end
-		end
+		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if !@current_user.is_admin  && @answer.survey.user_id != @current_user._id
 		respond_to do |format|
 			format.json	{ render_json_auto(@answer) and return }
 		end
@@ -176,40 +171,24 @@ class AnswersController < ApplicationController
 	end
 
 	def destroy
-		if params[:is_preview]
-			@answer = Answer.find_by_survey_id_user_is_preview(params[:survey_id], @current_user, params[:is_preview])
-			if @answer.nil?
-				respond_to do |format|
-					format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
-				end
-			end
-			retval = @answer.destroy
-			respond_to do |format|
-				format.json	{ render_json_auto(retval) and return }
+		if @answer.is_preview
+			# this is a preview answer, and the owner of the answer wants to clear the answer
+			if @answer.user_id == @current_user._id
+				retval = @answer.destroy
+				render_json_auto(retval) and return 
+			else
+				render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return
 			end
 		else
-			@survey = @current_user.is_admin ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
-			if @survey.nil?
-				respond_to do |format|
-					format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
-				end
-			end
-			@answer = @survey.answers.find_by_id(params[:id])
-			if @answer.nil?
-				respond_to do |format|
-					format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
-				end
-			end
-			retval = @answer.delete
-			respond_to do |format|
-				format.json	{ render_json_auto(retval) and return }
-			end
+			# this is a normal answer, and the owner of the survey wants to clear the answer
+			render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if !@current_user.is_admin && @answer.survey.user_id != @current_user._id
+			retval = @answer.delete if @answer.survey_id == @survey._id
+			render_json_auto(retval) and return 
 		end
 	end
 
 	def estimate_remain_answer_time
-		answer = Answer.find_by_survey_id_user_is_preview(params[:survey_id], @current_user, params[:is_preview])
-		render_json_auto(@survey.estimate_answer_time) and return if answer.nil?
-		render_json_auto(answer.estimate_remain_answer_time) and return
+		render_json_auto(@survey.estimate_answer_time) and return if @answer.nil?
+		render_json_auto(@answer.estimate_remain_answer_time) and return
 	end
 end

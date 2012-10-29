@@ -223,10 +223,6 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
-	def require_current_user
-		render_json_e(ErrorEnum::USER_NOT_EXIST) and return if !@current_user.nil?
-	end
-
 	#if user signs in, redirect to home path
 	def require_sign_out
 		if !user_signed_out?

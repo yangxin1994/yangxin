@@ -13,6 +13,7 @@ module Jobs
 			filter_index = options["filter_index"].to_i
 			include_screened_answer = options["include_screened_answer"].to_s == "true"
 			report_mockup_id = options["report_mockup_id"].to_s
+			report_mockup = ReportMockup.find_by_id(report_mockup_id)
 			report_style = options["report_style"].to_i
 			report_type = options["report_type"].to_s
 
@@ -33,13 +34,16 @@ module Jobs
 				report_result = DataListResult.create(:result_key => result_key, :job_id => status["uuid"])
 			end
 
-			# analyze the result
+			analysis_results = []
+			# analyze the result based on the report mockup
+			report_mockup.components.each do |component|
+				if component["component_type"] == 0
+					# this is a single question analysis
+				else
+					# this is a cross questions analysis
+				end
+			end
 
-
-			# update file location
-			report_result.answer_info = file_location
-			report_result.save
-			set_status({"is_finished" => true})
 		end
 
 		def generate_result_key(answers, report_mockup, report_style, report_type)
