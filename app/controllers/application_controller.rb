@@ -116,22 +116,27 @@ class ApplicationController < ActionController::Base
 
 	#judge whether the current user is admin
 	def user_admin?
-		user_signed_in? && @current_user.is_admin
+		user_signed_in? && (@current_user.is_admin || @current_user.is_super_admin)
 	end
 
 	#judge whether the current user is survey auditor
 	def user_survey_auditor?
-		user_signed_in? && @current_user.is_survey_auditor
+		user_signed_in? && (@current_user.is_survey_auditor || @current_user.is_admin || @current_user.is_super_admin)
 	end
 
 	#judge whether the current user is entry clerk
 	def user_entry_clerk?
-		user_signed_in? && @current_user.is_entry_clerk
+		user_signed_in? && (@current_user.is_entry_clerk || @current_user.is_admin || @current_user.is_super_admin)
+	end
+
+	#judge whether the current user is interviewer
+	def user_interviewer?
+		user_signed_in? && (@current_user.is_interviewer || @current_user.is_admin || @current_user.is_super_admin)
 	end
 
 	#judge whether the current user is answer auditor
 	def user_interviewer?
-		user_signed_in? && @current_user.is_interviewer
+		user_signed_in? && (@current_user.is_answer_auditor || @current_user.is_admin || @current_user.is_super_admin)
 	end
 	
 	def require_super_admin
