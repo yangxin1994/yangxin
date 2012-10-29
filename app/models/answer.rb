@@ -67,6 +67,14 @@ class Answer
 		return answer
 	end
 
+	def self.find_by_survey_id_email_is_preview(survey_id, email, is_preview)
+		survey = Survey.find_by_id(survey_id)
+		owner = User.find_by_email(email)
+		return nil if survey.nil?
+		return nil if owner.nil?
+		return survey.answers.where(user_id: owner._id.to_s, :is_preview => is_preview)[0]
+	end	
+
 	def self.find_by_survey_id_user_is_preview(survey_id, user, is_preview)
 		survey = Survey.find_by_id(survey_id)
 		return nil if survey.nil?
@@ -90,7 +98,7 @@ class Answer
 		return true
 	end
 
-	def self.create_answer(is_preview, operator, survey_id, channel, ip, username, password)
+	def self.create_answer(is_preview, email, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
@@ -113,7 +121,8 @@ class Answer
 		answer.template_answer_content = Hash[survey.quota_template_question_page.map { |ele| [ele, nil] }]
 
 		answer.save
-		operator.answers << answer
+		owner = User.find_by_email(email)
+		owner.answers << answer if !owner.nil?
 		survey.answers << answer
 
 		# initialize the logic control result

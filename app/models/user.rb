@@ -286,6 +286,14 @@ class User
 		return user.auth_key
 	end
 
+	def self.find_or_create_new_visitor_by_email(email)
+		user = User.find_by_email(email)
+		return user if !user.nil?
+		user = User.new(:email => email)
+		user.save
+		return user
+	end
+
 	#*description*: activate a user
 	#
 	#*params*:

@@ -1293,6 +1293,11 @@ class Survey
 		end
 	end
 
+	def has_award
+		# need to fill this method
+		return false
+	end
+
 	def check_password(username, password, current_user)
 		case self.access_control_setting["password_control"]["password_type"]
 		when -1
