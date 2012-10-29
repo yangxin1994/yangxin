@@ -10,6 +10,14 @@ OopsData::Application.routes.draw do
 		end
 	end
 
+	namespace :super_admin do
+		resources :users do
+			member do
+				put 'set_admin'
+			end
+		end
+	end
+
 	namespace :admin do
 		resources :users do 
 			collection do 
@@ -20,7 +28,7 @@ OopsData::Application.routes.draw do
 
 			member do 
 				get 'system_pwd', 'black', 'white'
-				post 'change_role_status'
+				post 'set_color', 'set_role', 'set_lock'
 			end
 		end
 

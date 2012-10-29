@@ -1,15 +1,20 @@
 
 class Admin::UsersController < Admin::ApplicationController
+	before_filter :check_user_existence, :only => [:show, :edit, :set_color, :set_role, :set_lock, :destroy, :update, :system_pwd]
 #--
 # ************** Quill Admin Manage User ************************************
 #++
 	
-	@@user_attrs_filter = %w(_id email role status username true_name identity_card company birthday gender address phone postcode black white new_password lock)
+	@@user_attrs_filter = %w(_id email color role status username true_name identity_card company birthday gender address phone postcode black white new_password lock color)
+
+	def check_user_existence
+		@user = User.find_by_id_including_deleted(params[:id])
+		render_json_auto(ErrorEnum::USER_NOT_EXIST) and return if @user.nil?
+	end
 
 	# GET /admin/users
 	# GET /admin/users.json
 	def index
-		
 		if !params[:email].nil? then
 			@users = User.where(email: params[:email]).desc(:status, :created_at).page(page).per(per_page) || []
 		elsif !params[:true_name].nil? then	
@@ -46,22 +51,14 @@ class Admin::UsersController < Admin::ApplicationController
 	# GET /admin/users/1 
 	# GET /admin/users/1.json
 	def show
-		@user = User.where(_id: params[:id]).first
-		@user = ErrorEnum::USER_NOT_EXIST unless @user
-
 		respond_to do |format|
-			format.html # show.html.erb
 			format.json { render_json_auto @user, :only => @@user_attrs_filter}
 		end
 	end
 
 	# GET /admin/users/1/edit
 	def edit
-		@user = User.where(_id: params[:id]).first
-		@user = ErrorEnum::USER_NOT_EXIST unless @user
-
 		respond_to do |format|
-			format.html # show.html.erb
 			format.json { render_json_auto @user, :only => @@user_attrs_filter }
 		end
 	end
@@ -69,28 +66,17 @@ class Admin::UsersController < Admin::ApplicationController
 	# PUT /admin/users/1
 	# PUT /admin/users/1.json
 	def update
-
-		if !params[:recovery].nil? && %w(true false).include?(params[:recovery].to_s) then
-			@user = User.update_user(params[:id], {"status" => 0}) if params[:recovery] == "true"
-			@user = User.update_user(params[:id], {"status" => -1}) if params[:recovery] == "false"
-		else
-			@user = User.update_user(params[:id], params[:user])
-		end
-
+		retval = @user.update_user(params[:user])
 		respond_to do |format|
-			format.html { redirect_to @user} if @user.instance_of?(User)
-			format.html { render action: "edit" } if !@user.instance_of?(User)
-			format.json { render_json_auto @user, :only => @@user_attrs_filter }
+			format.json { render_json_auto retval }
 		end
 	end
 
 	# DELETE /admin/users/1
 	# DELETE /admin/users/1.json
 	def destroy
-		@user = User.update_user(params[:id], {"status" => -1})
-
+		@user.update_attributes({"status" => -1})
 		respond_to do |format|
-			format.html { redirect_to users_url }
 			format.json { render_json_auto @user }
 		end
 	end
@@ -142,50 +128,33 @@ class Admin::UsersController < Admin::ApplicationController
 		render_json_auto User.deleted_users.count
 	end
 
-	# GET /admin/users/1/black(.json)
-	def black
-		@user = User.change_black_user(params[:id])
-
+	def set_role
+		# admin can only set the latter 4 digits of the role field
+		@user.set_role({"role" => params[:role].to_i & 15})
 		respond_to do |format|
-			format.html {render action => 'show', :id => @user.id.to_s }
 			format.json { render_json_auto @user, :only => @@user_attrs_filter }
 		end
 	end
 
-	# GET /admin/users/1/white(.json)
-	def white
-		@user = User.change_white_user(params[:id])
-
+	def set_color
+		@user.set_color(params[:color].to_i)
 		respond_to do |format|
-			format.html {render action => 'show', :id => @user.id.to_s }
 			format.json { render_json_auto @user, :only => @@user_attrs_filter }
 		end
 	end
 
-	#POST
-	def change_role_status
-		retval = User.change_user_role_status(params[:id], params[:role_status])
-
+	def set_lock
+		@user.set_lock(params[:lock])
 		respond_to do |format|
-			format.html {render action => 'show', :id => params[:id] }
-			format.json { render_json_auto retval }
+			format.json { render_json_auto @user, :only => @@user_attrs_filter }
 		end
 	end
 
-	#--
-	# ***********************************
-	#  Change password to system
-	# ************************************
-	#++
-
-	# GET /admin/users/1/system_pwd(.json)
 	def system_pwd
-		@user = User.change_to_system_password(params[:id])
+		@user.change_to_system_password
 
 		respond_to do |format|
-			format.html {render action => 'show', :id => @user.id.to_s }
 			format.json { render_json_auto @user, :only => @@user_attrs_filter }
 		end
 	end
-
 end

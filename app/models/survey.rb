@@ -78,9 +78,9 @@ class Survey
 		end
 	end
 	has_many :publish_status_historys
-	has_and_belongs_to_many :answer_auditors, class_name: "AnswerAuditor", inverse_of: :managable_survey
-	has_and_belongs_to_many :entry_clerks, class_name: "EntryClerk", inverse_of: :managable_survey
-	has_and_belongs_to_many :interviewers, class_name: "Interviewer", inverse_of: :managable_survey
+# has_and_belongs_to_many :answer_auditors, class_name: "AnswerAuditor", inverse_of: :managable_survey
+#	has_and_belongs_to_many :entry_clerks, class_name: "EntryClerk", inverse_of: :managable_survey
+#	has_and_belongs_to_many :interviewers, class_name: "Interviewer", inverse_of: :managable_survey
 
 	has_many :answers
 	has_many :email_histories

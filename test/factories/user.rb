@@ -7,7 +7,7 @@ FactoryGirl.define do
 		factory :admin_foo do
 			email "admin_foo@gmail.com"
 			username "admin_foo"
-			role 1
+			role 16
 		end
 		factory :user_bar do
 			email "user_bar@gmail.com"
@@ -60,6 +60,24 @@ FactoryGirl.define do
 		password Encryption.encrypt_password("111111")
 		username "polly"
 		status 4
+		activate_time Time.now.to_i
+	end
+
+	factory :admin, class: User do
+		email "admin@test.com"
+		password Encryption.encrypt_password("111811")
+		username "admin"
+		status 4
+		role 16
+		activate_time Time.now.to_i
+	end
+
+	factory :survey_auditor, class: User do
+		email "survey_auditor@test.com"
+		password Encryption.encrypt_password("123456")
+		username "survey_auditor"
+		status 4
+		role 8
 		activate_time Time.now.to_i
 	end
 end

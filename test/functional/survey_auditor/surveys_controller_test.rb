@@ -2,6 +2,7 @@
 require 'test_helper'
 
 class SurveyAuditor::SurveysControllerTest < ActionController::TestCase
+=begin
 	test "should reject survey" do
 		clear(User, Survey)
 		jesse = init_jesse
@@ -127,4 +128,5 @@ class SurveyAuditor::SurveysControllerTest < ActionController::TestCase
 		assert_equal ErrorEnum::WRONG_PUBLISH_STATUS.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 	end
+=end
 end
