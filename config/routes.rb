@@ -18,6 +18,9 @@ OopsData::Application.routes.draw do
 		end
 	end
 
+	resources :quality_control_questions do
+	end
+
 	namespace :admin do
 		resources :users do 
 			collection do 

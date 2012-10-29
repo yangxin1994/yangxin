@@ -79,14 +79,14 @@ class Admin::QualityControlQuestionsController < Admin::ApplicationController
 	#* ErrorEnum ::QUESTION_NOT_EXIST: when the question does not exist
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def show
-		question = @question.show_quality_control_question(@current_user)
+		question = @question.show_quality_control_question
 		respond_to do |format|
 			format.json	{ render_json_auto(question) and return }
 		end
 	end
 
 	def index
-		questions = QualityControlQuestion.list_quality_control_question(params[:quality_control_type].to_i, @current_user)
+		questions = QualityControlQuestion.list_quality_control_question(params[:quality_control_type].to_i)
 		respond_to do |format|
 			format.json	{ render_json_auto(questions) and return }
 		end
