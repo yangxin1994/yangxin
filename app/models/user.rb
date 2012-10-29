@@ -229,27 +229,27 @@ class User
 	end
 
 	def is_super_admin
-		return self.role & 32 > 0
+		return (self.role.to_i & 32) > 0
 	end
 
 	def is_admin
-		return self.role & 16 > 0
+		return (self.role.to_i & 16) > 0
 	end
 
 	def is_survey_auditor
-		return self.role & 8 > 0
+		return (self.role.to_i & 8) > 0
 	end
 
 	def is_answer_auditor
-		return self.role & 4 > 0
+		return (self.role.to_i & 4) > 0
 	end
 
 	def is_interviewer
-		return self.role & 2 > 0
+		return (self.role.to_i & 2) > 0
 	end
 
 	def is_entry_clerk
-		return self.role & 1 > 0
+		return (self.role.to_i & 1) > 0
 	end
 
 	#*description*: create a new user
