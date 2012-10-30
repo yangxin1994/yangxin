@@ -4,20 +4,10 @@ class AnswersController < ApplicationController
 
 	# before_filter :require_user_exist
 	before_filter :check_survey_existence, :only => [:create]
-	before_filter :check_my_answer_existence, :except => [:show, :get_my_answer, :destroy, :create]
-	before_filter :check_answer_existence, :only => [:show, :destroy]
+	before_filter :check_answer_existence, :except => [:get_my_answer, :create]
 
 	def check_answer_existence
 		@answer = Answer.find_by_id(params[:id])
-		if @answer.nil?
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
-			end
-		end
-	end
-
-	def check_my_answer_existence
-		@answer = @current_user.answers.find_by_id(params[:id])
 		if @answer.nil?
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
@@ -51,7 +41,7 @@ class AnswersController < ApplicationController
 			# obtain an user instance given the email
 			user = User.find_or_create_new_visitor_by_email(params[:email])
 			# return error if another registered user's email is provided
-			render_json_e(ErrorEnum::WRONG_USER_EMAIL) and return if user.is_registered && user.email != @current_user.email
+			render_json_e(ErrorEnum::WRONG_USER_EMAIL) and return if !@current_user.nil? && @current_user.email != user.email
 			# try to get the answer the current user answers
 			answer = Answer.find_by_survey_id_email_is_preview(params[:survey_id], params[:email], params[:is_preview])
 			render_json_s(answer._id) and return if !answer.nil?
@@ -164,14 +154,15 @@ class AnswersController < ApplicationController
 	end
 
 	def show
-		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if !@current_user.is_admin  && @answer.survey.user_id != @current_user._id
+		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if !(@current_user.is_admin || @current_user.is_super_admin) && @answer.survey.user_id != @current_user._id
 		respond_to do |format|
 			format.json	{ render_json_auto(@answer) and return }
 		end
 	end
 
 	def get_my_answer
-		@answer = Answer.find_by_survey_id_email_is_preview(params[:survey_id], params[:email], params[:is_preview])
+		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) if @current_user.nil?
+		@answer = Answer.find_by_survey_id_email_is_preview(params[:survey_id], @current_user.email, params[:is_preview])
 		if @answer.nil?
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
@@ -193,7 +184,7 @@ class AnswersController < ApplicationController
 			end
 		else
 			# this is a normal answer, and the owner of the survey wants to clear the answer
-			render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if !@current_user.is_admin && @answer.survey.user_id != @current_user._id
+			render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if !(@current_user.is_admin || @current_user.is_super_admin) && @answer.survey.user_id != @current_user._id
 			retval = @answer.delete if @answer.survey_id == @survey._id
 			render_json_auto(retval) and return 
 		end

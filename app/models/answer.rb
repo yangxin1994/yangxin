@@ -156,9 +156,11 @@ class Answer
 	end
 
 	def genereate_random_quality_control_questions
+		quality_control_questions_ids = []
+		self.random_quality_control_answer_content = {}
+		self.random_quality_control_locations = {}
 		if self.survey.is_random_quality_control_questions
-			self.random_quality_control_answer_content = {}
-			self.random_quality_control_locations = {}
+			# need to select random questions
 			# 1. determine the number of random quality control questions
 			question_number = self.answer_content.length
 			qc_question_number = [[question_number / 10, 1].max, 4].min
@@ -173,17 +175,18 @@ class Answer
 			end
 			matching_questions_ids = matching_questions_uniq_ids.uniq
 			quality_control_questions_ids = objective_questions_ids + matching_questions_ids
-			# 3. random generate locations for the quality control questions
-			quality_control_questions_ids.each do |qc_id|
-				self.random_quality_control_locations[survey.pages.shuffle[0]["questions"].shuffle[0]] =
-					qc_id
-			end
-			# 4. initialize the random quality control questions answers
-			self.random_quality_control_answer_content = Hash[quality_control_questions_ids.map { |ele| [ele, nil] }]
 		else
-			self.random_quality_control_answer_content = {}
-			self.random_quality_control_locations = {}
+			quality_control_questions_ids = self.survey.quality_control_questions_ids
 		end
+
+		# 3. random generate locations for the quality control questions
+		quality_control_questions_ids.each do |qc_id|
+			self.random_quality_control_locations[survey.pages.shuffle[0]["questions"].shuffle[0]] =
+				qc_id
+		end
+		# 4. initialize the random quality control questions answers
+		self.random_quality_control_answer_content = Hash[quality_control_questions_ids.map { |ele| [ele, nil] }]
+
 		self.save
 		return self
 	end
@@ -537,25 +540,14 @@ class Answer
 	#* false: when the quality control rules are violated
 	def check_quality_control(answer_content)
 		# find out quality control questions
-		inserted_quality_control_question_ary = []
 		random_quality_control_question_id_ary = []
 		answer_content.each do |k, v|
 			question = BasicQuestion.find_by_id(k)
-			inserted_quality_control_question_ary << question if !question.nil? && question.class == Question && question.question_class == 2
 			random_quality_control_question_id_ary << k if !question.nil? && question.class == QualityControlQuestion
 		end
 		# if there is no quality control questions, return
-		return true if inserted_quality_control_question_ary.blank? && random_quality_control_question_id_ary.blank?
-		########## check quality control quesoitns that are added manually ##########
-		# if there are quality control questions, check whether passing the quality control
-		inserted_quality_control_question_ary.each do |q|
-			quality_control_question_id = q.reference_id
-			return false if self.answer_content[q._id.to_s].nil?
-			retval = self.check_quality_control_answer(self.answer_content[q._id.to_s], quality_control_question_id)
-			return false if !retval
-		end
-
-		########## check quality control quesoitns that are randomly inserted ##########
+		return true if random_quality_control_question_id_ary.blank?
+		########## all quality control quesoitns are randomly inserted ##########
 		random_quality_control_question_id_ary.each do |qc_id|
 			return false if self.random_quality_control_answer_content[qc_id].nil?
 			retval = self.check_quality_control_answer(self.random_quality_control_answer_content[qc_id], qc_id ,true)

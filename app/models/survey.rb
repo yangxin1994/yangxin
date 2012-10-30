@@ -65,6 +65,7 @@ class Survey
 	#  1 for inserting manually
 	#  2 for inserting randomly
 	field :quality_control_questions_type, :type => Integer, default: 0
+	field :quality_control_questions_ids, :type => Array, default: []
 	field :deadline, :type => Integer
 	field :is_star, :type => Boolean, :default => false
 
@@ -229,6 +230,7 @@ class Survey
 		survey_obj["publish_status"] = self.publish_status
 		survey_obj["status"] = self.status
 		survey_obj["quality_control_questions_type"] = self.quality_control_questions_type
+		survey_obj["quality_control_questions_ids"] = self.quality_control_questions_ids
 		survey_obj["deadline"] = self.deadline
 		survey_obj["is_star"] = self.is_star
 		return survey_obj
@@ -333,6 +335,9 @@ class Survey
 	def set_quality_control_questions_type(quality_control_questions_type)
 		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTIONS_TYPE if [0, 1, 2].include?(quality_control_questions_type)
 		self.quality_control_questions_type = quality_control_questions_type
+		# the random quality control questions should be generated when answering
+		# thus, no matter how the user sets, the quality control questions should always be blank array
+		self.quality_control_questions = []
 		return self.save
 	end
 
@@ -341,17 +346,8 @@ class Survey
 	end
 
 	def show_quality_control
-		quality_control = {"quality_control_questions_type" => self.quality_control_questions_type}
-		return quality_control if self.is_random_quality_control_questions
-
-		quality_control_questions = []
-		self.pages.each do |page|
-			page["questions"].each do |q|
-				quality_control_questions << q if q.question_class == 2
-			end
-		end
-		quality_control["quality_control_questions"] = quality_control_questions
-		return quality_control
+		return {"quality_control_questions_type" => self.quality_control_questions_type,
+				"quality_control_questions" => self.quality_control_questions}
 	end
 
 	#*description*: remove current survey
@@ -672,25 +668,38 @@ class Survey
 			question_index = current_page["questions"].index(question_id)
 			return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
 		end
-		question = Question.create_template_question(template_question)
-		current_page["questions"].insert(question_index+1, question._id.to_s)
+		# do not create new question, just insert the template question id into the pages
+		# question = Question.create_template_question(template_question)
+		current_page["questions"].insert(question_index+1, template_question_id)
 		self.save
-		return question
+		return true
 	end
 
 	def convert_template_question_to_normal_question(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
-		question = Question.find_by_id(question_id)
+		question = TemplateQuestion.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
 		# quality control question in a survey cannot be updated
-		question.convert_template_question_to_normal_question
-		return question
+		normal_question = question.convert_template_question_to_normal_question
+		# replace the template question with the normal question
+		self.pages.each do |page|
+			page["questions"].each_with_index do |q_id, index|
+				if q_id == question_id
+					page["questions"][index] = normal_question._id.to_s
+				end
+			end
+		end
+		self.save
+		return normal_question
 	end
 
-	def insert_quality_control_question(page_index, question_id, quality_control_question_id)
+	def insert_quality_control_question(quality_control_question_id)
+		return ErrorEnum::RANDOM_QUALITY_CONTROL if self.quality_control_questions_type == 2
+		return ErrorEnum::NO_QUALITY_CONTROL if self.quality_control_questions_type == 0
 		quality_control_question = QualityControlQuestion.find_by_id(quality_control_question_id)
 		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if quality_control_question.nil?
-		
+		self.quality_control_questions_ids << quality_control_question._id
+=begin
 		current_page = self.pages[page_index]
 		return ErrorEnum::OVERFLOW if current_page == nil
 		if question_id.to_s == "-1"
@@ -705,8 +714,9 @@ class Survey
 		questions.each do |question|
 			current_page["questions"].insert(question_index+1, question._id.to_s)
 		end
+=end
 		self.save
-		return questions
+		return true
 	end
 
 	#*description*: update a question
@@ -722,10 +732,8 @@ class Survey
 	#* ErrorEnum ::QUESTION_NOT_EXIST
 	#* ErrorEnum ::WRONG_DATA_TYPE
 	def update_question(question_id, question_obj)
-		return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
 		question = Question.find_by_id(question_id)
-		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
-		return ErrorEnum::WRONG_QUESTION_CLASS if question.question_class == "quality_control" || question.question_class == "template"
+		return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id) || question.nil?
 		# quality control question in a survey cannot be updated
 		question_inst = question.clone
 		retval = question.update_question(question_obj)
@@ -807,7 +815,6 @@ class Survey
 		end
 		orig_question = Question.find_by_id(question_id_1)
 		return ErrorEnum::QUESTION_NOT_EXIST if orig_question == nil
-		return ErrorEnum::WRONG_QUESTION_CLASS if orig_question.question_class == "quality_control" || orig_question.question_class == "template"
 		new_question = orig_question.clone
 		to_page["questions"].insert(question_index+1, new_question._id.to_s)
 		self.save
@@ -843,30 +850,8 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED
 	#* ErrorEnum ::QUESTION_NOT_EXIST 
 	def delete_question(question_id)
-		question = Question.find_by_id(question_id)
+		question = BasicQuestion.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
-		# find out other matching questions if the question to be deleted is a matching question
-		if question.question_class == 2
-			quality_control_question = QualityControlQuestion.find_by_id(question.reference_id)
-			if quality_control_question.quality_control_type == QualityControlTypeEnum::MATCHING
-				matching_question_ids = MatchingQuestion.get_matching_question_ids(quality_control_question._id)
-				self.pages.each do |page|
-					page["questions"].each do |q_id|
-						q = Question.find_by_id(q_id)
-						if q.nil? || matching_question_ids.include?(q.reference_id)
-							page["questions"].delete(q_id)
-							q.destroy
-							q.clear_question_object
-						end
-					end
-				end
-				self.save
-				# logic control rules need to be adjusted
-				adjust_logic_control_quota_filter('question_delete', question_id)
-				return true
-			end
-		end
-		# not a matching quality control question
 		find_question = false
 		self.pages.each do |page|
 			if page["questions"].include?(question_id)
@@ -880,7 +865,14 @@ class Survey
 		# logic control rules need to be adjusted
 		adjust_logic_control_quota_filter('question_delete', question_id)
 		question.clear_question_object
-		return question.destroy
+		question.destroy if question.type_of(Question)
+		return true
+	end
+
+	def delete_quality_control_question(question_id)
+		return ErrorEnum::RANDOM_QUALITY_CONTROL if self.is_random_quality_control_questions
+		self.quality_control_questions_ids.delete(question_id)
+		return self.save
 	end
 
 	#*description*: create a page
@@ -1073,8 +1065,8 @@ class Survey
 		questions = []
 		survey.pages.each do |page|
 			page["questions"].each do |q_id|
-				q = Question.find_by_id(q_id)
-				next if q.nil? || q.question_class != 1
+				q = TemplateQuestion.find_by_id(q_id)
+				next if q.nil?
 				questions << q
 			end
 		end
@@ -1181,7 +1173,7 @@ class Survey
 		self.quota_template_question_page << question._id.to_s
 		return self.save
 	end
-
+=begin
 	def remove_quota_template_question(template_question_id)
 		self.quota_template_question_page.each do |q_id|
 			question = Question.find_by_id(q_id)
@@ -1191,6 +1183,7 @@ class Survey
 			end
 		end
 	end
+=end
 
 	def show_quota
 		return Marshal.load(Marshal.dump(self.quota))

@@ -309,8 +309,7 @@ class QuestionsControllerTest < ActionController::TestCase
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :insert_template_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => 0, :template_question_id => template_question_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
-		question_obj = result["value"]
-		assert_equal template_question_id, question_obj["reference_id"]
+		assert result["value"]
 		sign_out(auth_key)
 	end
 
@@ -341,17 +340,18 @@ class QuestionsControllerTest < ActionController::TestCase
 		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
+		survey = Survey.find_by_id(survey_id)
+
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		get :convert_template_question_to_normal_question, :format => :json, :survey_id => survey_id, :id => question_obj["_id"], :auth_key => auth_key
+		get :convert_template_question_to_normal_question, :format => :json, :survey_id => survey_id, :id => template_question_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		updated_question_obj = result["value"]
-		assert_equal 0, updated_question_obj["question_class"]
-		assert_equal "", updated_question_obj["reference_id"]
-		get :show, :format => :json, :survey_id => survey_id, :id => question_obj["_id"], :auth_key => auth_key
+		survey = Survey.find_by_id(survey_id)
+
+		get :show, :format => :json, :survey_id => survey_id, :id => updated_question_obj["_id"], :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		normal_question = result["value"]
-		assert_equal 0, normal_question["question_class"]
-		assert_equal "", normal_question["reference_id"]
+		assert_equal "Question", normal_question["type"]
 		sign_out(auth_key)
 	end
 
@@ -372,62 +372,49 @@ class QuestionsControllerTest < ActionController::TestCase
 		matching_question_id = create_quality_control_question(lisa.email, lisa.password, QualityControlTypeEnum::MATCHING, QuestionTypeEnum::CHOICE_QUESTION, 2)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :insert_quality_control_question, :format => :json, :survey_id => "wrong survey id", :page_index => 0, :question_id => -1, :quality_control_question_id => objective_question_id, :auth_key => auth_key
+		post :insert_quality_control_question, :format => :json, :survey_id => "wrong survey id", :quality_control_question_id => objective_question_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
-		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 3, :question_id => -1, :quality_control_question_id => objective_question_id, :auth_key => auth_key
-		result = JSON.parse(@response.body)
-		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
-		sign_out(auth_key)
-
-		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => "wrong question id", :quality_control_question_id => objective_question_id, :auth_key => auth_key
-		result = JSON.parse(@response.body)
-		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
-		sign_out(auth_key)
+		# manually insert quality control questions
+		survey = Survey.find_by_id(survey_id)
+		survey.quality_control_questions_type = 1
+		survey.save
 
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
-		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :quality_control_question_id => objective_question_id, :auth_key => auth_key
+		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :quality_control_question_id => objective_question_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::SURVEY_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => -1, :quality_control_question_id => "wron quality control question id", :auth_key => auth_key
+		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :quality_control_question_id => "wron quality control question id", :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => 0, :quality_control_question_id => objective_question_id, :auth_key => auth_key
+		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :quality_control_question_id => objective_question_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
-		inserted_objective_question_ary = result["value"]
-		assert_equal objective_question_id, inserted_objective_question_ary[0]["reference_id"]
+		assert result["value"]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => 0, :quality_control_question_id => matching_question_id, :auth_key => auth_key
+		post :insert_quality_control_question, :format => :json, :survey_id => survey_id, :quality_control_question_id => matching_question_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
-		inserted_matching_question_ary = result["value"]
-		assert_equal 2, inserted_matching_question_ary.length
+		assert result["value"]
 		sign_out(auth_key)
 
 		survey_obj = show_survey(jesse.email, jesse.password, survey_id)
 
 		# delelete quality control question
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		delete :destroy, :format => :json, :survey_id => survey_id, :id => inserted_objective_question_ary[0]["_id"], :auth_key => auth_key
+		delete :delete_quality_control_question, :format => :json, :survey_id => survey_id, :id => objective_question_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal true, result["value"]
-		delete :destroy, :format => :json, :survey_id => survey_id, :id => inserted_matching_question_ary[0]["_id"], :auth_key => auth_key
+		delete :delete_quality_control_question, :format => :json, :survey_id => survey_id, :id => matching_question_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal true, result["value"]
-		delete :destroy, :format => :json, :survey_id => survey_id, :id => inserted_matching_question_ary[1]["_id"], :auth_key => auth_key
-		result = JSON.parse(@response.body)
-		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
-		sign_out(auth_key)
 	end
 end

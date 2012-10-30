@@ -18,8 +18,8 @@ class ReportMockupsControllerTest < ActionController::TestCase
 		report_mockup["author"] = "author of the report"
 		report_mockup["chart_style"] = {"single_style" => 0, "cross_style" => -1}
 		report_mockup["components"] = []
-		report_mockup["components"] << {"component_type" => 0, "value" => questions[0]}
-		report_mockup["components"] << {"component_type" => 1, "value" => [questions[0], questions[1]]}
+		report_mockup["components"] << {"component_type" => 0, "value" => {"id" => questions[0], "format" => []}}
+		report_mockup["components"] << {"component_type" => 1, "value" => {"id" => questions[0], "target" => {"id" => questions[1], "format" => []} } }
 
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
 		post :create, :format => :json, :survey_id => survey_id, :report_mockup => report_mockup, :auth_key => auth_key
@@ -44,11 +44,11 @@ class ReportMockupsControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		report_mockup["components"][0]["value"] = "wrong question id"
+		report_mockup["components"][0]["value"]["id"] = "wrong question id"
 		post :create, :format => :json, :survey_id => survey_id, :report_mockup => report_mockup, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
-		report_mockup["components"][0]["value"] = questions[0]
+		report_mockup["components"][0]["value"]["id"] = questions[0]
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
@@ -65,10 +65,10 @@ class ReportMockupsControllerTest < ActionController::TestCase
 		assert_equal -1, report_mockup["chart_style"]["cross_style"]
 		assert_equal 2, report_mockup["components"].length
 		assert_equal 0, report_mockup["components"][0]["component_type"]
-		assert_equal questions[0], report_mockup["components"][0]["value"]
+		assert_equal questions[0], report_mockup["components"][0]["value"]["id"]
 		assert_equal 1, report_mockup["components"][1]["component_type"]
-		assert_equal questions[0], report_mockup["components"][1]["value"][0]
-		assert_equal questions[1], report_mockup["components"][1]["value"][1]
+		assert_equal questions[0], report_mockup["components"][1]["value"]["id"]
+		assert_equal questions[1], report_mockup["components"][1]["value"]["target"]["id"]
 		get :show, :format => :json, :survey_id => survey_id, :id => report_mockup["_id"], :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		report_mockup = result["value"]
@@ -82,10 +82,10 @@ class ReportMockupsControllerTest < ActionController::TestCase
 		assert_equal -1, report_mockup["chart_style"]["cross_style"]
 		assert_equal 2, report_mockup["components"].length
 		assert_equal 0, report_mockup["components"][0]["component_type"]
-		assert_equal questions[0], report_mockup["components"][0]["value"]
+		assert_equal questions[0], report_mockup["components"][0]["value"]["id"]
 		assert_equal 1, report_mockup["components"][1]["component_type"]
-		assert_equal questions[0], report_mockup["components"][1]["value"][0]
-		assert_equal questions[1], report_mockup["components"][1]["value"][1]
+		assert_equal questions[0], report_mockup["components"][1]["value"]["id"]
+		assert_equal questions[1], report_mockup["components"][1]["value"]["target"]["id"]
 		sign_out(auth_key)
 	end
 
@@ -106,8 +106,8 @@ class ReportMockupsControllerTest < ActionController::TestCase
 		report_mockup["author"] = "author of the report"
 		report_mockup["chart_style"] = {"single_style" => 0, "cross_style" => -1}
 		report_mockup["components"] = []
-		report_mockup["components"] << {"component_type" => 0, "value" => questions[0]}
-		report_mockup["components"] << {"component_type" => 1, "value" => [questions[0], questions[1]]}
+		report_mockup["components"] << {"component_type" => 0, "value" => {"id" => questions[0], "format" => []}}
+		report_mockup["components"] << {"component_type" => 1, "value" => {"id" => questions[0], "target" => {"id" => questions[1], "format" => []} } }
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :survey_id => survey_id, :report_mockup => report_mockup, :auth_key => auth_key
@@ -132,21 +132,21 @@ class ReportMockupsControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		report_mockup["components"] << {"component_type" => 1, "value" => [questions[3], questions[1]]}
+		report_mockup["components"] << {"component_type" => 1, "value" => {"id" => questions[3], "target" => {"id" => questions[1]} }}
 		put :update, :format => :json, :survey_id => survey_id, :id => report_mockup["_id"], :report_mockup => report_mockup, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		report_mockup = result["value"]
 		assert_equal 3, report_mockup["components"].length
 		assert_equal 1, report_mockup["components"][2]["component_type"]
-		assert_equal questions[3], report_mockup["components"][2]["value"][0]
-		assert_equal questions[1], report_mockup["components"][2]["value"][1]
+		assert_equal questions[3], report_mockup["components"][2]["value"]["id"]
+		assert_equal questions[1], report_mockup["components"][2]["value"]["target"]["id"]
 		get :show, :format => :json, :survey_id => survey_id, :id => report_mockup["_id"], :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		report_mockup = result["value"]
 		assert_equal 3, report_mockup["components"].length
 		assert_equal 1, report_mockup["components"][2]["component_type"]
-		assert_equal questions[3], report_mockup["components"][2]["value"][0]
-		assert_equal questions[1], report_mockup["components"][2]["value"][1]
+		assert_equal questions[3], report_mockup["components"][2]["value"]["id"]
+		assert_equal questions[1], report_mockup["components"][2]["value"]["target"]["id"]
 		sign_out(auth_key)
 	end
 
@@ -167,8 +167,8 @@ class ReportMockupsControllerTest < ActionController::TestCase
 		report_mockup["author"] = "author of the report"
 		report_mockup["chart_style"] = {"single_style" => 0, "cross_style" => -1}
 		report_mockup["components"] = []
-		report_mockup["components"] << {"component_type" => 0, "value" => questions[0]}
-		report_mockup["components"] << {"component_type" => 1, "value" => [questions[0], questions[1]]}
+		report_mockup["components"] << {"component_type" => 0, "value" => {"id" => questions[0], "format" => []}}
+		report_mockup["components"] << {"component_type" => 1, "value" => {"id" => questions[0], "target" => {"id" => questions[1], "format" => []} } }
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :survey_id => survey_id, :report_mockup => report_mockup, :auth_key => auth_key
@@ -217,8 +217,8 @@ class ReportMockupsControllerTest < ActionController::TestCase
 		report_mockup["author"] = "author of the report"
 		report_mockup["chart_style"] = {"single_style" => 0, "cross_style" => -1}
 		report_mockup["components"] = []
-		report_mockup["components"] << {"component_type" => 0, "value" => questions[0]}
-		report_mockup["components"] << {"component_type" => 1, "value" => [questions[0], questions[1]]}
+		report_mockup["components"] << {"component_type" => 0, "value" => {"id" => questions[0], "format" => []}}
+		report_mockup["components"] << {"component_type" => 1, "value" => {"id" => questions[0], "target" => {"id" => questions[1], "format" => []} } }
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :survey_id => survey_id, :report_mockup => report_mockup, :auth_key => auth_key

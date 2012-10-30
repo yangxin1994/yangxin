@@ -139,6 +139,10 @@ class BasicQuestion
     return self
   end
 
+  def type_of(class_name)
+    return self.class == class_name
+  end
+
   #*description*: clear the cached question object corresponding to current instance, usually called when the question is updated, either its meta data, or questions and constrains
   #
   #*params*:
