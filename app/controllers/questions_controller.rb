@@ -5,7 +5,7 @@ class QuestionsController < ApplicationController
 
 
 	def check_normal_survey_existence
-		@survey = @current_user.is_admin ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
+		@survey = (@current_user.is_admin || @current_user.is_super_admin) ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
 		if @survey.nil?
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
@@ -53,7 +53,7 @@ class QuestionsController < ApplicationController
 	end
 
 	def insert_quality_control_question
-		questions = @survey.insert_quality_control_question(params[:page_index].to_i, params[:question_id], params[:quality_control_question_id])
+		questions = @survey.insert_quality_control_question(params[:quality_control_question_id])
 		respond_to do |format|
 			format.json	{ render_json_auto(questions) and return }
 		end
@@ -152,6 +152,7 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def show
 		question = @survey.get_question_inst(params[:id])
+		question = question.serialize if question.class == Question
 		respond_to do |format|
 			format.json	{ render_json_auto(question) and return }
 		end
@@ -174,6 +175,13 @@ class QuestionsController < ApplicationController
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def destroy
 		retval = @survey.delete_question(params[:id])
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
+
+	def delete_quality_control_question
+		retval = @survey.delete_quality_control_question(params[:id])
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end

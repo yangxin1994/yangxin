@@ -109,26 +109,51 @@ class ApplicationController < ActionController::Base
 		!user_signed_in?
 	end
 
+	#judge whether the current user is a super admin
+	def user_super_admin?
+		user_signed_in? && @current_user.is_super_admin
+	end
+
 	#judge whether the current user is admin
 	def user_admin?
-		user_signed_in? && @current_user.is_admin
+		user_signed_in? && (@current_user.is_admin || @current_user.is_super_admin)
 	end
 
 	#judge whether the current user is survey auditor
 	def user_survey_auditor?
-		user_signed_in? && @current_user.is_survey_auditor
+		user_signed_in? && (@current_user.is_survey_auditor || @current_user.is_admin || @current_user.is_super_admin)
 	end
 
 	#judge whether the current user is entry clerk
 	def user_entry_clerk?
-		user_signed_in? && @current_user.is_entry_clerk
+		user_signed_in? && (@current_user.is_entry_clerk || @current_user.is_admin || @current_user.is_super_admin)
+	end
+
+	#judge whether the current user is interviewer
+	def user_interviewer?
+		user_signed_in? && (@current_user.is_interviewer || @current_user.is_admin || @current_user.is_super_admin)
 	end
 
 	#judge whether the current user is answer auditor
 	def user_interviewer?
-		user_signed_in? && @current_user.is_interviewer
+		user_signed_in? && (@current_user.is_answer_auditor || @current_user.is_admin || @current_user.is_super_admin)
 	end
 	
+	def require_super_admin
+		if !user_signed_in?
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
+			end
+		end
+		if !user_super_admin?
+			respond_to do |format|
+				format.html { redirect_to root_path and return }
+				format.json	{ render_json_e(ErrorEnum::REQUIRE_SUPER_ADMIN) and return }
+			end
+		end
+	end
+
 	def require_admin
 		if !user_signed_in?
 			respond_to do |format|
@@ -221,10 +246,6 @@ class ApplicationController < ActionController::Base
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
-	end
-
-	def require_current_user
-		render_json_e(ErrorEnum::USER_NOT_EXIST) and return if !@current_user.nil?
 	end
 
 	#if user signs in, redirect to home path

@@ -5,6 +5,7 @@ class Result
 	include Mongoid::Document
 	include Mongoid::Timestamps
 
+	field :job_id, :type => String
 	field :result_key, :type => String
 	field :finished, :type => Boolean, default: false
 	field :ref_result_id, :type => String
@@ -13,6 +14,12 @@ class Result
 
 	def self.find_by_result_id(result_id)
 		return Result.where(:_id => result_id)[0]
+	end
+
+	def self.find_by_job_id(job_id)
+		result = Result.where(:job_id => job_id).first
+		return nil if result.nil?
+		return Result.where(:result_key => result.result_key, :ref_result_id => nil).first
 	end
 
 	def self.find_by_result_key(result_key)
@@ -44,7 +51,8 @@ class Result
 
 		return ErrorEnum::JOB_NOT_EXIST if status.nil?
 
-		return 1 if status["is_finished"]
+		result = Result.find_by_job_id(job_id)
+		return 1 if result.status == 1
 		# calculate the status
 		case status["result_type"]
 		when "data_list"
@@ -64,6 +72,6 @@ class Result
 			s = s1 * 0.5 + s2 * 0.5
 		end
 		# the job has not been finished, the progress cannot be greater than 0.99
-		return [s, 0.99].max
+		return [s, 0.99].min
 	end
 end

@@ -10,6 +10,17 @@ OopsData::Application.routes.draw do
 		end
 	end
 
+	namespace :super_admin do
+		resources :users do
+			member do
+				put 'set_admin'
+			end
+		end
+	end
+
+	resources :quality_control_questions do
+	end
+
 	namespace :admin do
 		resources :users do 
 			collection do 
@@ -20,7 +31,7 @@ OopsData::Application.routes.draw do
 
 			member do 
 				get 'system_pwd', 'black', 'white'
-				post 'change_role_status'
+				post 'set_color', 'set_role', 'set_lock'
 			end
 		end
 
@@ -61,6 +72,10 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :quality_control_questions do
+			collection do 
+				get 'objective_questions', 'objective_questions_count', 
+					'matching_questions', 'matching_questions_count'
+			end
 			member do
 				put 'update_answer'
 			end
@@ -178,6 +193,7 @@ OopsData::Application.routes.draw do
 				put 'convert_template_question_to_normal_question'
 				put 'move'
 				put 'clone'
+				delete 'delete_quality_control_question'
 			end
 		end
 		resources :logic_controls
@@ -222,12 +238,13 @@ OopsData::Application.routes.draw do
 
 	resources :answers do
 		collection do
-			get 'preview_load_question'
+			get 'get_my_answer'
+		end
+		member do
 			get 'load_question'
 			post 'clear'
 			post 'submit_answer'
 			post 'finish'
-			get 'get_my_answer'
 			get 'estimate_remain_answer_time'
 		end
 	end

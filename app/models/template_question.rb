@@ -57,6 +57,16 @@ class TemplateQuestion < BasicQuestion
 		return self
 	end
 
+
+	def convert_template_question_to_normal_question
+		question = Question.new(:content => self.content,
+								:note => self.note,
+								:question_type => self.question_type,
+								:issue => Marshal.load(Marshal.dump(self.issue)))
+		question.save
+		return question
+	end
+
 	def serialize
 		question_obj = {}
 		question_obj["_id"] = self._id.to_s

@@ -63,13 +63,21 @@ class Answer
 	public
 
 	def self.find_by_id(answer_id)
-		answer = Answer.where(:id => answer_id).first
+		answer = Answer.where(:_id => answer_id).first
 		return answer
 	end
 
+	def self.find_by_survey_id_email_is_preview(survey_id, email, is_preview)
+		survey = Survey.find_by_id(survey_id)
+		owner = User.find_by_email(email)
+		return nil if survey.nil?
+		return nil if owner.nil?
+		return survey.answers.where(user_id: owner._id.to_s, :is_preview => is_preview)[0]
+	end	
+
 	def self.find_by_survey_id_user_is_preview(survey_id, user, is_preview)
 		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		return nil if survey.nil?
 		return survey.answers.where(user_id: user._id, :is_preview => is_preview)[0]
 	end	
 
@@ -90,7 +98,7 @@ class Answer
 		return true
 	end
 
-	def self.create_answer(is_preview, operator, survey_id, channel, ip, username, password)
+	def self.create_answer(is_preview, email, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
@@ -113,7 +121,8 @@ class Answer
 		answer.template_answer_content = Hash[survey.quota_template_question_page.map { |ele| [ele, nil] }]
 
 		answer.save
-		operator.answers << answer
+		owner = User.find_by_email(email)
+		owner.answers << answer if !owner.nil?
 		survey.answers << answer
 
 		# initialize the logic control result
@@ -139,9 +148,11 @@ class Answer
 	end
 
 	def genereate_random_quality_control_questions
+		quality_control_questions_ids = []
+		self.random_quality_control_answer_content = {}
+		self.random_quality_control_locations = {}
 		if self.survey.is_random_quality_control_questions
-			self.random_quality_control_answer_content = {}
-			self.random_quality_control_locations = {}
+			# need to select random questions
 			# 1. determine the number of random quality control questions
 			question_number = self.answer_content.length
 			qc_question_number = [[question_number / 10, 1].max, 4].min
@@ -156,17 +167,18 @@ class Answer
 			end
 			matching_questions_ids = matching_questions_uniq_ids.uniq
 			quality_control_questions_ids = objective_questions_ids + matching_questions_ids
-			# 3. random generate locations for the quality control questions
-			quality_control_questions_ids.each do |qc_id|
-				self.random_quality_control_locations[survey.pages.shuffle[0]["questions"].shuffle[0]] =
-					qc_id
-			end
-			# 4. initialize the random quality control questions answers
-			self.random_quality_control_answer_content = Hash[quality_control_questions_ids.map { |ele| [ele, nil] }]
 		else
-			self.random_quality_control_answer_content = {}
-			self.random_quality_control_locations = {}
+			quality_control_questions_ids = self.survey.quality_control_questions_ids
 		end
+
+		# 3. random generate locations for the quality control questions
+		quality_control_questions_ids.each do |qc_id|
+			self.random_quality_control_locations[survey.pages.shuffle[0]["questions"].shuffle[0]] =
+				qc_id
+		end
+		# 4. initialize the random quality control questions answers
+		self.random_quality_control_answer_content = Hash[quality_control_questions_ids.map { |ele| [ele, nil] }]
+
 		self.save
 		return self
 	end
@@ -188,7 +200,7 @@ class Answer
 				if next_page
 					# require next page of questions
 					if question_index + 1 == page["questions"].length
-						return ErrorEnum::OVERFLOW if page_index + 1 == self.survey.pages.length
+						return [] if page_index + 1 == self.survey.pages.length
 						return load_question_by_ids(self.survey.pages[page_index + 1]["questions"])
 					else
 						return load_question_by_ids(page["questions"][question_index + 1..-1])
@@ -196,22 +208,28 @@ class Answer
 				else
 					# require previous page of questions
 					if question_index <= 0
-						return ErrorEnum::OVERFLOW if page_index == 0
+						return [] if page_index == 0
 						return load_question_by_ids(self.survey.pages[page_index - 1]["questions"])
 					else
 						return load_question_by_ids(page["questions"][0..question_index - 1])
 					end
 				end
 			end
-			return ErrorEnum::QUESTION_NOT_EXIST
-		else
-			# first check whether template questions for attributes quotas are loaded
-			template_answer_content_loaded = self.template_answer_content.select { |k,v| v.nil?}
-			template_answer_content_loaded.each do |k,v|
-				loaded_question_ids << k
+			# the question cannot be found, load questions from the one will nil answer
+			cur_page = false
+			self.survey.pages.each do |page|
+				page["questions"].each do |q_id|
+					next if !self.answer_content[q_id].nil? && !cur_page
+					cur_page = true
+					loaded_question_ids << q_id
+					qc_id = self.random_quality_control_locations[q_id]
+					loaded_question_ids << qc_id if !qc_id.blank? && self.random_quality_control_answer_content[qc_id].nil?
+				end
+				return load_question_by_ids(loaded_question_ids) if cur_page
 			end
-			return load_question_by_ids(loaded_question_ids) if !loaded_question_ids.empty?
-			# then try to load normal questions
+			return []
+		else
+			# try to load normal questions
 			# summarize the questions that are results of logic control rules
 			logic_control_question_id = []
 			self.survey.logic_control.each do |rule|
@@ -225,7 +243,8 @@ class Answer
 			self.survey.pages.each do |page|
 				page["questions"].each do |q_id|
 					qc_id = self.random_quality_control_locations[q_id]
-					if !self.answer_content[q_id].nil?
+					if !self.answer_content[q_id].nil? && !cur_page
+						# the question q_id might be removed by logic control rules, and the random quality control question after it is not answered
 						loaded_question_ids << qc_id if !qc_id.blank? && self.random_quality_control_answer_content[qc_id].nil?
 						next
 					end
@@ -242,6 +261,7 @@ class Answer
 				end
 				return load_question_by_ids(loaded_question_ids) if cur_page
 			end
+			# it is possible that only several random quality control questions are loaded
 			return load_question_by_ids(loaded_question_ids) if loaded_question_ids.length > 0
 			self.auto_finish
 			return true
@@ -470,7 +490,7 @@ class Answer
 	#*retval*:
 	#* the status of the answer after updating
 	def update_status
-		if Time.now.to_i - self.created_at.to_i > 10.days.to_i
+		if Time.now.to_i - self.created_at.to_i > 2.days.to_i
 			self.set_reject
 			self.update_attributes(reject_type: 3, rejected_at: Time.now.to_i)
 		end
@@ -479,7 +499,7 @@ class Answer
 
 	def delete
 		# only answers that are finished can be deleted
-		# return ErrorEnum::WRONG_ANSWER_STATUS if self.is_redo || self.is_edit
+		return ErrorEnum::WRONG_ANSWER_STATUS if self.is_redo || self.is_edit
 		self.destroy
 		return true
 	end
@@ -512,25 +532,14 @@ class Answer
 	#* false: when the quality control rules are violated
 	def check_quality_control(answer_content)
 		# find out quality control questions
-		inserted_quality_control_question_ary = []
 		random_quality_control_question_id_ary = []
 		answer_content.each do |k, v|
 			question = BasicQuestion.find_by_id(k)
-			inserted_quality_control_question_ary << question if !question.nil? && question.class == Question && question.question_class == 2
 			random_quality_control_question_id_ary << k if !question.nil? && question.class == QualityControlQuestion
 		end
 		# if there is no quality control questions, return
-		return true if inserted_quality_control_question_ary.blank? && random_quality_control_question_id_ary.blank?
-		########## check quality control quesoitns that are added manually ##########
-		# if there are quality control questions, check whether passing the quality control
-		inserted_quality_control_question_ary.each do |q|
-			quality_control_question_id = q.reference_id
-			return false if self.answer_content[q._id.to_s].nil?
-			retval = self.check_quality_control_answer(self.answer_content[q._id.to_s], quality_control_question_id)
-			return false if !retval
-		end
-
-		########## check quality control quesoitns that are randomly inserted ##########
+		return true if random_quality_control_question_id_ary.blank?
+		########## all quality control quesoitns are randomly inserted ##########
 		random_quality_control_question_id_ary.each do |qc_id|
 			return false if self.random_quality_control_answer_content[qc_id].nil?
 			retval = self.check_quality_control_answer(self.random_quality_control_answer_content[qc_id], qc_id ,true)
@@ -770,7 +779,7 @@ class Answer
 	end
 
 	def auto_finish
-		if self.is_edit && !self.survey.is_pageup_allowed && !self.template_answer_content.has_value?(nil) && !self.answer_content.has_value?(nil) && !self.random_quality_control_answer_content.has_value?(nil)
+		if self.is_edit && !self.survey.is_pageup_allowed && !self.answer_content.has_value?(nil) && !self.random_quality_control_answer_content.has_value?(nil)
 			self.set_finish
 			self.finished_at = Time.now.to_i
 			self.save
@@ -779,11 +788,12 @@ class Answer
 	end
 
 	def answers_of(questions)
-		question_ids = questions.map { |q| q._id }
+		question_ids = questions.map { |q| q._id.to_s }
 		return self.answer_content.select { |q_id, a| question_ids.include?(q_id) }
 	end
 
 	def index_of(questions)
+		return nil if questions.blank?
 		question_id = questions[0]._id.to_s
 		question_ids = (self.survey.pages.map { |p| p["questions"] }).flatten
 		return question_ids.index(question_id)
