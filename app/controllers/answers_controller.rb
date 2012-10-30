@@ -106,7 +106,7 @@ class AnswersController < ApplicationController
 		end
 		@answer.update_status	# check whether it is time out
 		if @answer.is_edit
-			questions = @answer.load_question(params[:question_id], params[:next_page])
+			questions = @answer.load_question(params[:question_id], params[:next_page].to_s == "true")
 			if @answer.is_finish
 				render_json_auto([@answer.status, @answer.reject_type, @answer.finish_type]) and return
 			elsif questions.class == String && questions.start_with?("error")
