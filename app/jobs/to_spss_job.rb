@@ -1,4 +1,5 @@
 #encoding: utf-8
+require 'result_job'
 module Jobs
   
   class ToSpssJob < ResultJob

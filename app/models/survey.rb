@@ -204,6 +204,20 @@ class Survey
 		return self.is_star
 	end
 
+	#*description*: judge whether this survey has a question
+	#
+	#*params*
+	#* id of the question
+	#
+	#*retval*:
+	#* boolean value
+	def has_question(question_id)
+		self.pages.each do |page|
+			return true if page["questions"].include?(question_id)
+		end
+		return false
+	end
+
 	#*description*: serialize current instance into a survey object
 	#
 	#*params*
