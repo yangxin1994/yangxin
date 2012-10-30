@@ -78,7 +78,8 @@ class Result
 			if s1 < 1
 				s = s1 * 0.6
 			else
-				s2 = ConnectDotNet::send_data("/get_progress") { result.result_key }
+				r = ConnectDotNet::get_data("/get_progress") { result.result_key }
+				s2 = r["status"]
 				s = s1 * 0.6 + s2 * 0.4
 			end
 		when "to_excel"
@@ -86,7 +87,8 @@ class Result
 			if s1 < 1
 				s = s1 * 0.6
 			else
-				s2 = ConnectDotNet::send_data("/get_progress") { result.result_key }
+				r = ConnectDotNet::get_data("/get_progress") { result.result_key }
+				s2 = r["status"]
 				s = s1 * 0.6 + s2 * 0.4
 			end
 		end
