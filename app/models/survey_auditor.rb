@@ -1,2 +1,0 @@
-class SurveyAuditor < SystemUser
-end

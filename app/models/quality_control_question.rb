@@ -60,8 +60,7 @@ class QualityControlQuestion < BasicQuestion
 		return self
 	end
 
-	def self.list_quality_control_question(quality_control_type, operator)
-		return ErrorEnum::UNAUTHORIZED if !operator.is_admin
+	def self.list_quality_control_question(quality_control_type)
 		objective_questions = []
 		matching_questions = []
 		if quality_control_type & QualityControlTypeEnum::OBJECTIVE > 0
@@ -81,8 +80,7 @@ class QualityControlQuestion < BasicQuestion
 		return {"objective_questions" => objective_questions, "matching_questions" => matching_questions}
 	end
 
-	def show_quality_control_question(operator)
-		return ErrorEnum::UNAUTHORIZED if !operator.is_admin
+	def show_quality_control_question
 		if self.quality_control_type == QualityControlTypeEnum::OBJECTIVE
 			quality_control_answer = QualityControlQuestionAnswer.find_by_question_id(self._id.to_s)
 			return [self, quality_control_answer]

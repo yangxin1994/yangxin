@@ -4,12 +4,9 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 
 	test "01 should get index action and no public_notice record" do
 		clear(User, PublicNotice)
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 1
-		user.save
+		admin = init_admin
 	
-		auth_key = sign_in(user.email, "123456")
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 		get 'index', :format => :json, :auth_key => auth_key
 		assert_equal JSON.parse(@response.body)['value'], []		
 		sign_out(auth_key)
@@ -29,12 +26,9 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 	
 	test "03 should post create action with login, but not admin user" do
 		clear(User, PublicNotice)
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 0
-		user.save
+		jesse = init_jesse
 	
-		auth_key = sign_in(user.email, "123456")
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
@@ -46,12 +40,9 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 	test "04 should post create action with admin user login" do
 		clear(User, PublicNotice)
 
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 1
-		user.save
+		admin = init_admin
 	
-		auth_key = sign_in(user.email, "123456")
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 		post 'create', :public_notice => {public_notice_type: "Type1", title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
 		assert_equal ErrorEnum::PUBLIC_NOTICE_TYPE_ERROR, JSON.parse(@response.body)["value"]["error_code"]
 		
@@ -112,22 +103,14 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 	test "05 should post update action which is with admin " do
 		clear(User, PublicNotice)
 
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 1
-		user.save
-		
-		user2 = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
-		user2.status = 4
-		user2.role = 1
-		user2.save
+		admin = init_admin
 	
-		auth_key = sign_in(user.email, "123456")
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		sign_out(auth_key)
 		
-		auth_key = sign_in(user2.email, "123456")
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 
 		public_notice = PublicNotice.all.first
 
@@ -147,7 +130,7 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 		assert_equal PublicNotice.all.count, 1
 		public_notice = PublicNotice.all.first
 		assert_equal public_notice.title, "updated title1"
-		assert_equal public_notice.user, user2
+		assert_equal public_notice.user, admin
 
 		sign_out(auth_key)
 
@@ -156,12 +139,9 @@ class Admin::PublicNoticesControllerTest < ActionController::TestCase
 	
 	test "06 should destroy action which is with admin " do
 		clear(User, PublicNotice)
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 1
-		user.save
+		admin = init_admin
 	
-		auth_key = sign_in(user.email, "123456")
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 		post 'create', :public_notice => {public_notice_type: 1, title: "title1", content: "content1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)["value"]
 

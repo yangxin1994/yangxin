@@ -21,68 +21,66 @@ require 'csv'
 # }
 #Structure of question object can be found at Question
 class Survey
-  include Mongoid::Document
-  include Mongoid::Timestamps
-  extend Mongoid::FindHelper
-  include Mongoid::ValidationsExt
-  field :title, :type => String, default: "调查问卷主标题"
-  field :subtitle, :type => String, default: "调查问卷副标题"
-  field :welcome, :type => String, default: "调查问卷欢迎语"
-  field :closing, :type => String, default: "调查问卷结束语"
-  field :header, :type => String, default: "调查问卷页眉"
-  field :footer, :type => String, default: "调查问卷页脚"
-  field :description, :type => String, default: "调查问卷描述"
-  # indicates whether this is a new survey that has not been edited
-  field :new_survey, :type => Boolean, default: true
-  field :alt_new_survey, :type => Boolean, default: false
-  # can be 0 (normal), or -1 (deleted)
-  field :status, :type => Integer, default: 0 
-  # can be 1 (closed), 2 (under review), 4 (paused), 8 (published)
-  field :publish_status, :type => Integer, default: 1
-  field :user_attr_survey, :type => Boolean, default: false
-  field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
-  field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100], "is_exclusive" => true}
-  field :quota_stats, :type => Hash, default: {"quota_satisfied" => false, "answer_number" => [0]}
-  field :filters, :type => Array, default: []
-  field :filters_stats, :type => Array, default: []
-  field :quota_template_question_page, :type => Array, default: []
-  field :logic_control, :type => Array, default: []
-  field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
-    "has_progress_bar" => true,
-    "has_question_number" => true,
-    "is_one_question_per_page" => false,
-    "has_advertisement" => true,
-    "has_oopsdata_link" => true,
-    "redirect_link" => "",
-    "allow_pageup" => false}
-  field :access_control_setting, :type => Hash, default: {"times_for_one_computer" => -1,
-    "has_captcha" => false,
-    "ip_restrictions" => [],
-    "password_control" => {"password_type" => -1,
-      "single_password" => "",
-      "password_list" => [],
-      "username_password_list" => []}}
-  # the type of inserting quality control question
-  #  0 for not inserting
-  #  1 for inserting manually
-  #  2 for inserting randomly
-  field :quality_control_questions_type, :type => Integer, default: 0
-  field :deadline, :type => Integer
-  field :is_star, :type => Boolean, :default => false
+	include Mongoid::Document
+	include Mongoid::Timestamps
+	field :title, :type => String, default: "调查问卷主标题"
+	field :subtitle, :type => String, default: "调查问卷副标题"
+	field :welcome, :type => String, default: "调查问卷欢迎语"
+	field :closing, :type => String, default: "调查问卷结束语"
+	field :header, :type => String, default: "调查问卷页眉"
+	field :footer, :type => String, default: "调查问卷页脚"
+	field :description, :type => String, default: "调查问卷描述"
+	# indicates whether this is a new survey that has not been edited
+	field :new_survey, :type => Boolean, default: true
+	field :alt_new_survey, :type => Boolean, default: false
+	# can be 0 (normal), or -1 (deleted)
+	field :status, :type => Integer, default: 0 
+	# can be 1 (closed), 2 (under review), 4 (paused), 8 (published)
+	field :publish_status, :type => Integer, default: 1
+	field :user_attr_survey, :type => Boolean, default: false
+	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
+	field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100], "is_exclusive" => true}
+	field :quota_stats, :type => Hash, default: {"quota_satisfied" => false, "answer_number" => [0]}
+	field :filters, :type => Array, default: []
+	field :filters_stats, :type => Array, default: []
+	field :quota_template_question_page, :type => Array, default: []
+	field :logic_control, :type => Array, default: []
+	field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
+		"has_progress_bar" => true,
+		"has_question_number" => true,
+		"is_one_question_per_page" => false,
+		"has_advertisement" => true,
+		"has_oopsdata_link" => true,
+		"redirect_link" => "",
+		"allow_pageup" => false}
+	field :access_control_setting, :type => Hash, default: {"times_for_one_computer" => -1,
+		"has_captcha" => false,
+		"ip_restrictions" => [],
+		"password_control" => {"password_type" => -1,
+			"single_password" => "",
+			"password_list" => [],
+			"username_password_list" => []}}
+	# the type of inserting quality control question
+	#  0 for not inserting
+	#  1 for inserting manually
+	#  2 for inserting randomly
+	field :quality_control_questions_type, :type => Integer, default: 0
+	field :deadline, :type => Integer
+	field :is_star, :type => Boolean, :default => false
 
-  belongs_to :user
-  has_and_belongs_to_many :tags do
-    def has_tag?(content)
-      @target.each do |tag|
-        return true if tag.content == content
-      end
-      return false
-    end
-  end
-  has_many :publish_status_historys
-  has_and_belongs_to_many :answer_auditors, class_name: "AnswerAuditor", inverse_of: :managable_survey
-  has_and_belongs_to_many :entry_clerks, class_name: "EntryClerk", inverse_of: :managable_survey
-  has_and_belongs_to_many :interviewers, class_name: "Interviewer", inverse_of: :managable_survey
+	belongs_to :user
+	has_and_belongs_to_many :tags do
+		def has_tag?(content)
+			@target.each do |tag|
+				return true if tag.content == content
+			end
+			return false
+		end
+	end
+	has_many :publish_status_historys
+# has_and_belongs_to_many :answer_auditors, class_name: "AnswerAuditor", inverse_of: :managable_survey
+#	has_and_belongs_to_many :entry_clerks, class_name: "EntryClerk", inverse_of: :managable_survey
+#	has_and_belongs_to_many :interviewers, class_name: "Interviewer", inverse_of: :managable_survey
 
   has_many :answers
   has_many :email_histories
@@ -1111,6 +1109,11 @@ class Survey
 		else
 			return true
 		end
+	end
+
+	def has_award
+		# need to fill this method
+		return false
 	end
 
 	def check_password(username, password, current_user)

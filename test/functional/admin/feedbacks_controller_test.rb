@@ -15,34 +15,28 @@ class Admin::FeedbacksControllerTest < ActionController::TestCase
 
 		clear(Feedback, User)
 
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 0
-		user.save
+		jesse = init_jesse
 
-		assert_equal User.all.first, user
+		assert_equal User.all.first, jesse
 
-		auth_key = sign_in(user.email, "123456")
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get 'index', :format => :json, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
-		user1 = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
-		user1.status = 4
-		user1.role = 1
-		user1.save
+		admin = init_admin
 
-		auth_key = sign_in(user1.email, "123456")
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 
 		get 'index', :format => :json, :auth_key => auth_key
 		assert_equal JSON.parse(@response.body)["value"], []
 
 		assert_equal Feedback.all.count, 0
-		Feedback.create_feedback({feedback_type: 1, title: "title1", content: "content1"}, user)
-		Feedback.create_feedback({feedback_type: 1, title: "title2", content: "content2"}, user)
-		Feedback.create_feedback({feedback_type: 2, title: "title3", content: "content3"}, user)
-		Feedback.create_feedback({feedback_type: 8, title: "title4", content: "content4"}, user)
+		Feedback.create_feedback({feedback_type: 1, title: "title1", content: "content1"}, jesse)
+		Feedback.create_feedback({feedback_type: 1, title: "title2", content: "content2"}, jesse)
+		Feedback.create_feedback({feedback_type: 2, title: "title3", content: "content3"}, jesse)
+		Feedback.create_feedback({feedback_type: 8, title: "title4", content: "content4"}, jesse)
 
 		assert_equal Feedback.all.count, 4
 
@@ -110,12 +104,9 @@ class Admin::FeedbacksControllerTest < ActionController::TestCase
 		assert_equal f.save, true
 		assert_equal Feedback.all.count, 1
 
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 1
-		user.save
+		admin = init_admin
 	
-		auth_key = sign_in(user.email, "123456")
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 
 		post 'destroy', :id => f.id.to_s , :format => :json, :auth_key => auth_key
 		assert_equal JSON.parse(@response.body)["value"], true
@@ -130,23 +121,17 @@ class Admin::FeedbacksControllerTest < ActionController::TestCase
 	test "03 should post reply method" do 
 		clear(User, Feedback, Message)
 		
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 0
-		user.save
+		jesse = init_jesse
 		
-		user2 = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
-		user2.status = 4
-		user2.role = 1
-		user2.save
+		admin = init_admin
 		
 		assert_equal Feedback.all.count, 0
-		f = Feedback.create_feedback({feedback_type: 1, title: "title1", content: "content1"}, user)
+		f = Feedback.create_feedback({feedback_type: 1, title: "title1", content: "content1"}, jesse)
 		assert_equal f.class, Feedback
 		assert_equal Feedback.all.count, 1
 		
 		assert_equal Message.all.count, 0
-		auth_key = sign_in(user2.email, Encryption.decrypt_password(user2.password))
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 		post "reply",:id => f.id.to_s, :message_content => "reply feedback", :format => :json, :auth_key => auth_key
 		assert_equal Message.all.count, 1 #reply successfully.
 

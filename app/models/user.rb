@@ -16,6 +16,8 @@ class User
 # 3, 4, ... 用户首次登录后，需要填写一些个人信息，状态可以记录用户填写个人信息到了哪一步，以便用户填写过程中关闭浏览器，再次打开后可以继续填写
 # -1 deleted
 	field :status, :type => Integer, default: 0
+# true: the user is locked and cannot login
+	field :lock, :type => Boolean, default: false
 	field :last_login_time, :type => Integer
 	field :last_login_ip, :type => String
 	field :last_login_client_type, :type => String
@@ -24,9 +26,18 @@ class User
 	field :introducer_id, :type => Integer
 	field :introducer_to_pay, :type => Float
 	field :last_read_messeges_time, :type => Time, :default => Time.now
-# 0 user
-# 1 administrator
+# an integer in the range of [0, 63]. If converted into a binary, each digit from the most significant one indicates:
+# super admin
+# admin
+# survey auditor
+# answer auditor
+# interviewer
+# entry clerk
 	field :role, :type => Integer, default: 0
+# 0 normal users
+# 1 in the white list
+# 2 in the black list
+	field :color, :type => Integer, default: 0
 	field :auth_key, :type => String
 	field :auth_key_expire_time, :type => Integer
 	field :level, :type => Integer, default: 0
@@ -99,15 +110,19 @@ class User
 	end
 
 	def self.find_by_email(email)
-		return User.where(:email => email, :status.gt => -1)[0]
+		return User.where(:email => email, :status.gt => -1).first
 	end
 
 	def self.find_by_username(username)
-		return User.where(:username => username, :status.gt => -1)[0]
+		return User.where(:username => username, :status.gt => -1).first
 	end
 
 	def self.find_by_id(user_id)
-		return User.where(:_id => user_id, :status.gt => -1)[0]
+		return User.where(:_id => user_id, :status.gt => -1).first
+	end
+
+	def self.find_by_id_including_deleted(user_id)
+		return User.where(:_id => user_id).first
 	end
 
 	def self.find_by_auth_key(auth_key)
@@ -213,30 +228,28 @@ class User
 		return self.status > 1
 	end
 
-	#*description*: check whether an user is adminstrator
-	#
-	#*params*:
-	#
-	#*retval*:
-	#* true or false
+	def is_super_admin
+		return (self.role.to_i & 32) > 0
+	end
+
 	def is_admin
-		return self.role == 1
+		return (self.role.to_i & 16) > 0
 	end
 
 	def is_survey_auditor
-		return self.class == SurveyAuditor
+		return (self.role.to_i & 8) > 0
 	end
 
 	def is_answer_auditor
-		return self.class == AnswerAuditor
-	end
-
-	def is_entry_clerk
-		return self.class == EntryClerk
+		return (self.role.to_i & 4) > 0
 	end
 
 	def is_interviewer
-		return self.class == Interviewer
+		return (self.role.to_i & 2) > 0
+	end
+
+	def is_entry_clerk
+		return (self.role.to_i & 1) > 0
 	end
 
 	#*description*: create a new user
@@ -271,6 +284,14 @@ class User
 		user.auth_key_expire_time = -1
 		user.save
 		return user.auth_key
+	end
+
+	def self.find_or_create_new_visitor_by_email(email)
+		user = User.find_by_email(email)
+		return user if !user.nil?
+		user = User.new(:email => email)
+		user.save
+		return user
 	end
 
 	#*description*: activate a user
@@ -468,10 +489,9 @@ class User
 
 	public
 
-	ROLE_NORMAL = 0
-	ROLE_ADMIN = 1
-	ROLE_WHITE = 2
-	ROLE_BLACK = 4
+	COLOR_NORMAL = 0
+	COLOR_WHITE = 1
+	COLOR_BLACK = -1
 
 	#--
 	# instance methods
@@ -481,134 +501,74 @@ class User
 	# class methods
 	#++
 
-	scope :normal_list, where(:role.in => [ROLE_NORMAL, ROLE_ADMIN], :status.gt => -1)
-	scope :black_list, where(role: ROLE_BLACK, :status.gt => -1)
-	scope :white_list, where(role: ROLE_WHITE, :status.gt => -1)
+	scope :normal_list, where(:color => COLOR_NORMAL, :status.gt => 0)
+	scope :black_list, where(:color => COLOR_BLACK, :status.gt => -1)
+	scope :white_list, where(:color => COLOR_WHITE, :status.gt => 1)
 	scope :deleted_users, where(status: -1)
 
 	def self.ids_not_in_blacklist
-		return User.any_of({role: 0}, {role: 1})
+		return User.any_of({color: 0}, {color: 1})
 	end
 
-	def self.update_user(user_id, attributes)
-		user = User.where(_id: user_id).first
-		return ErrorEnum::USER_NOT_EXIST if user.nil?
-
+	def update_user(attributes)
 		select_attrs = %w(status birthday gender address phone postcode company identity_card username true_name)
 		attributes.select!{|k,v| select_attrs.include?(k.to_s)}
-		retval = User.where(_id: user.id.to_s).update(attributes)
-
-		return true if retval > 0
-		return false
+		retval = self.update_attributes(attributes)
+		return retval
 	end
 
-	def self.change_user_role_status(user_id, role_status="NORMAL")
-		user = User.where(_id: user_id).first	
-		return ErrorEnum::USER_NOT_EXIST unless user
-		role_status_arr = %w(NORMAL WHITE BLACK DELETE)
-		return ErrorEnum::UNKNOWN_ERROR unless role_status_arr.include?(role_status)
-		case role_status
-		when "NORMAL"
-			user.status = 0 if user.is_deleted
-			user.role = ROLE_NORMAL
-			return user.save 
-		when "WHITE"
-			user.role = ROLE_WHITE
-			user.status = 0 if user.is_deleted
-			return user.save 
-		when "BLACK" 
-			user.role = ROLE_BLACK
-			user.status = 0 if user.is_deleted
-			return user.save
-		when "DELETE"				
-			user.status = -1
-			return user.save
-		end
-	end
-
-	# as self.change_user_role_status(user_id, "WHITE")
-	def self.change_white_user(user_id)
-		user = User.where(_id: user_id).first	
-		return ErrorEnum::USER_NOT_EXIST if user.nil?
-
-		if user.role != ROLE_WHITE then
-			user.role = ROLE_WHITE
-		elsif user.role != ROLE_NORMAL
-			user.role = ROLE_NORMAL
-		end
-
-		if user.save then
-			if user.role == ROLE_WHITE then 
-				user[:white] = true 
-			else
-				user[:white] = false 
-			end
-
-			return user 
+	def set_admin(admin)
+		if admin == true
+			self.role = self.role | 16
 		else
-			return ErrorEnum::USER_SAVE_FAILED
+			self.role = self.role & 47
 		end
+		return self.save
 	end
 
-	# as self.change_user_role_status(user_id, "WHITE")
-	def self.change_black_user(user_id)
-		user = User.where(_id: user_id).first	
-		return ErrorEnum::USER_NOT_EXIST if user.nil?
-
-		if user.role != ROLE_BLACK then
-			user.role = ROLE_BLACK
-		elsif user.role != ROLE_NORMAL
-			user.role = ROLE_NORMAL
-		end
-
-		if user.save then
-			if user.role == ROLE_BLACK then 
-				user[:black] = true 
-			else
-				user[:black] = false
-			end
-
-			return user 
-		else
-			return ErrorEnum::USER_SAVE_FAILED
-		end
+	def set_role(role)
+		return ErrorEnum::WRONG_USER_ROLE if !(0..63).to_a.include?(role)
+		self.role = role
+		return self.save
 	end
 
-	def self.change_to_system_password(user_id)
-		user = User.where(_id: user_id).first
-		return ErrorEnum::USER_NOT_EXIST if user.nil?
+	def set_color(color)
+		return ErrorEnum::WRONG_USER_COLOR if ![-1, 0, 1].include?(role)
+		self.color = color
+		return self.save
+	end
 
+	def set_lock(lock)
+		self.lock = lock == true
+		return self.save
+	end
+
+	def change_to_system_password
 		# generate rand number
 		sys_pwd = 1
 		while sys_pwd < 16**7 do
 			sys_pwd = rand(16**8-1)
 		end
 		sys_pwd = sys_pwd.to_s(16)
-
-		user.password = Encryption.encrypt_password(sys_pwd)
-		if !user.save then 
+		self.password = Encryption.encrypt_password(sys_pwd)
+		if !self.save then 
 			return ErrorEnum::USER_SAVE_FAILED
 		end
-
-		user[:new_password] = sys_pwd
-
-		# maybe, should be send the pwd to his register email
-		#
-		# CODE:
-		#
-		# if user.email.to_s.strip !="" then
-		# 	mail = OopsMail::OMail.new("Change password to new system password.", "Your new password:<b>#{sys_pwd}</b>")
-		# 	sender = OopsMail::EmailSender.new("customer", "customer@netranking.cn", "netrankingcust")
-		# 	receiver = OopsMail::EmailReceiver.new(user.username || user.email.split("@")[0], user.email)
-		# 	email = OopsMail::Email.new(sender, receiver, mail)
-		# 	OopsMail.send_email(email)
-		# end
-		#
-
-		return user 
+		self[:new_password] = sys_pwd
+		return self 
 	end
 
-	#--
-	# **************************************************
-	#++
+	def self.list_system_user(role, lock)
+		role = role.to_i & 15
+		selected_users = []
+		users = User.where(:role.gt => 0)
+		users.each do |u|
+			next if u.role & role == 0
+			if !lock.nil?
+				next if u.lock != lock
+			end
+			selected_users << u
+		end
+		return selected_users
+	end
 end

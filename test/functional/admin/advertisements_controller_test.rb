@@ -9,23 +9,17 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::REQUIRE_LOGIN.to_s, result["value"]["error_code"]
 
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 0
-		user.save
+		jesse = init_jesse
 
-		auth_key = sign_in(user.email, "123456")
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		get 'index', :format => :json, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::REQUIRE_ADMIN.to_s, result["value"]["error_code"]
 		sign_out(auth_key)
 
-		user = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 1
-		user.save
+		admin = init_admin
 
-		auth_key = sign_in(user.email, "123456")
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 		get 'index', :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval.count, 0
@@ -37,12 +31,9 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 	test "02 should post create action with admin user login" do
 		clear(User, Advertisement)
 
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 1
-		user.save
+		admin = init_admin
 		
-		auth_key = sign_in(user.email, "123456")
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 		post 'create', :advertisement => {title: "title1", linked: "linked1", image_location: "image_location1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval["linked"], "linked1"
@@ -101,17 +92,9 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 	test "03 should post update action which is with admin " do
 		clear(User, Advertisement)
 
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 1
-		user.save
-		
-		user2 = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
-		user2.status = 4
-		user2.role = 1
-		user2.save
-	
-		auth_key = sign_in(user.email, "123456")
+		admin = init_admin
+
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 		post 'create', :advertisement => {title: "title1", linked: "linked1", image_location: "image_location1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)["value"]
 		assert_equal retval["linked"], "linked1"
@@ -120,7 +103,7 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 		
 		# update with other user
-		auth_key = sign_in(user2.email, "123456")
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 
 		advertisement = Advertisement.all.first
 
@@ -135,7 +118,7 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 		assert_equal Advertisement.all.count, 1
 		advertisement = Advertisement.all.first
 		assert_equal advertisement.linked, "updated linked1"
-		assert_equal advertisement.user, user2
+		assert_equal advertisement.user, admin
 
 		sign_out(auth_key)
 
@@ -145,12 +128,9 @@ class Admin::AdvertisementsControllerTest < ActionController::TestCase
 	test "04 should destroy action which is with admin " do
 		clear(User, Advertisement)
 
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 1
-		user.save
-	
-		auth_key = sign_in(user.email, "123456")
+		admin = init_admin
+
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 
 		post 'update', :id => "123443454354353", :format => :json, :auth_key => auth_key
 		retval = @response.body.to_i

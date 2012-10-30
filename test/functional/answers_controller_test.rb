@@ -16,7 +16,7 @@ class AnswersControllerTest < ActionController::TestCase
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => jesse.email
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
 		assert_equal Answer.first._id.to_s, result["value"]
@@ -33,12 +33,12 @@ class AnswersControllerTest < ActionController::TestCase
 
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => oliver.email
 		result = JSON.parse(@response.body)
 		assert_equal false, result["success"]
 		assert_equal ErrorEnum::WRONG_SURVEY_PASSWORD, result["value"]["error_code"]
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91", :password => "abcd"
+				:_remote_ip => "166.111.135.91", :password => "abcd", :email => oliver.email
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
 		assert_equal Answer.all[1]._id.to_s, result["value"]
@@ -56,19 +56,19 @@ class AnswersControllerTest < ActionController::TestCase
 		clear(Answer)
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91", :password => "abcd"
+				:_remote_ip => "166.111.135.91", :password => "abcd", :email => oliver.email
 		result = JSON.parse(@response.body)
 		assert_equal false, result["success"]
 		assert_equal ErrorEnum::WRONG_SURVEY_PASSWORD, result["value"]["error_code"]
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91", :password => "p1"
+				:_remote_ip => "166.111.135.91", :password => "p1", :email => oliver.email
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
 		assert_equal Answer.first._id.to_s, result["value"]
 		sign_out(auth_key)
 		auth_key = sign_in(lisa.email, Encryption.decrypt_password(lisa.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91", :password => "p1"
+				:_remote_ip => "166.111.135.91", :password => "p1", :email => lisa.email
 		result = JSON.parse(@response.body)
 		assert_equal false, result["success"]
 		assert_equal ErrorEnum::SURVEY_PASSWORD_USED, result["value"]["error_code"]
@@ -86,19 +86,19 @@ class AnswersControllerTest < ActionController::TestCase
 		clear(Answer)
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91", :password => "p1"
+				:_remote_ip => "166.111.135.91", :password => "p1", :email => oliver.email
 		result = JSON.parse(@response.body)
 		assert_equal false, result["success"]
 		assert_equal ErrorEnum::WRONG_SURVEY_PASSWORD, result["value"]["error_code"]
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91", :username => "u1", :password => "p1"
+				:_remote_ip => "166.111.135.91", :username => "u1", :password => "p1", :email => oliver.email
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
 		assert_equal Answer.first._id.to_s, result["value"]
 		sign_out(auth_key)
 		auth_key = sign_in(lisa.email, Encryption.decrypt_password(lisa.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91", :username => "u1", :password => "p1"
+				:_remote_ip => "166.111.135.91", :username => "u1", :password => "p1", :email => lisa.email
 		result = JSON.parse(@response.body)
 		assert_equal false, result["success"]
 		assert_equal ErrorEnum::SURVEY_PASSWORD_USED, result["value"]["error_code"]
@@ -108,7 +108,7 @@ class AnswersControllerTest < ActionController::TestCase
 	test "visitor user" do
 		clear(User, Survey, Answer)
 		jesse = init_jesse
-		visitor_user_auth_key = create_new_visitor_user
+		# visitor_user_auth_key = create_new_visitor_user
 		survey_auditor = init_survey_auditor
 		survey_id = create_survey(jesse.email, Encryption.decrypt_password(jesse.password))
 		set_survey_published(survey_id, jesse, survey_auditor)
@@ -126,24 +126,33 @@ class AnswersControllerTest < ActionController::TestCase
 		access_control_setting["password_control"]["password_list"] = password_list
 		update_survey_access_control_setting(jesse.email, Encryption.decrypt_password(jesse.password), survey_id, access_control_setting)
 
-		post :create, :format => :json, :auth_key => visitor_user_auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
+		# to run this piece of test code, the survey must be set as "has award"
+=begin
+		post :create, :format => :json, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:_remote_ip => "166.111.135.91", :password => "p1"
+		result = JSON.parse(@response.body)
+		assert_equal false, result["success"]
+		assert_equal ErrorEnum::REQUIRE_EMAIL_ADDRESS, result["value"]
+=end
+
+		post :create, :format => :json, :is_preview => false, :survey_id => survey_id, :channel => 1,
+				:_remote_ip => "166.111.135.91", :password => "p1", :email => "visitor@test.com"
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
 		assert_equal Answer.first._id.to_s, result["value"]
 
 		a = Answer.first
-		assert_equal visitor_user_auth_key, User.find_by_id(a.user_id).auth_key
+		assert_equal 'visitor@test.com', User.find_by_id(a.user_id).email
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91", :password => "p1"
+				:_remote_ip => "166.111.135.91", :password => "p1", :email => jesse.email
 		result = JSON.parse(@response.body)
 		assert_equal false, result["success"]
 		sign_out(auth_key)
 
-		post :create, :format => :json, :auth_key => visitor_user_auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91", :password => "p1"
+		post :create, :format => :json, :is_preview => false, :survey_id => survey_id, :channel => 1,
+				:_remote_ip => "166.111.135.91", :password => "p1", :email => 'visitor@test.com'
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
 	end
@@ -182,7 +191,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# first answer
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => jesse.email
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
 		assert_equal jesse.answers.first._id.to_s, result["value"]
@@ -197,7 +206,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# second answer
 		auth_key = sign_in(lisa.email, Encryption.decrypt_password(lisa.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => lisa.email
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
 		assert_equal lisa.answers.first._id.to_s, result["value"]
@@ -211,7 +220,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# third answer, violate the quotas, should be rejected
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => oliver.email
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::VIOLATE_QUOTA, result["value"]["error_code"]
 
@@ -250,7 +259,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# fourth answer
 		auth_key = sign_in(polly.email, Encryption.decrypt_password(polly.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 2,
-				:_remote_ip => "166.111.135.92"
+				:_remote_ip => "166.111.135.92", :email => polly.email
 		result = JSON.parse(@response.body)
 		assert_equal true, result["success"]
 		assert_equal polly.answers.first._id.to_s, result["value"]
@@ -280,7 +289,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# quetions loadding for surveys that do not allow page up
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => jesse.email
 		result = JSON.parse(@response.body)
 		answer_id = result["value"]
 		get :load_question, :format => :json, :id => answer_id, :auth_key => auth_key
@@ -383,7 +392,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# quetions loadding for surveys that do not allow page up
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => jesse.email
 		result = JSON.parse(@response.body)
 		a = Answer.first
 		a.random_quality_control_locations.each do |key, value|
@@ -407,7 +416,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# quetions loadding for surveys that do not allow page up
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => jesse.email
 		result = JSON.parse(@response.body)
 		answer_id = result["value"]
 		get :load_question, :format => :json, :id => answer_id, :auth_key => auth_key
@@ -524,7 +533,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# oliver answers the survey
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => oliver.email
 		result = JSON.parse(@response.body)
 		answer_id = result["value"]
 		get :load_question, :format => :json, :id => answer_id, :auth_key => auth_key
@@ -546,7 +555,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# lisa answers the survey
 		auth_key = sign_in(lisa.email, Encryption.decrypt_password(lisa.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => lisa.email
 		result = JSON.parse(@response.body)
 		answer_id = result["value"]
 		get :load_question, :format => :json, :id => answer_id, :auth_key => auth_key
@@ -597,7 +606,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# polly answers the survey
 		auth_key = sign_in(polly.email, Encryption.decrypt_password(polly.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => polly.email
 		result = JSON.parse(@response.body)
 		answer_id = result["value"]
 		get :load_question, :format => :json, :auth_key => auth_key, :id => answer_id
@@ -652,7 +661,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# first user answers the survey
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => jesse.email
 		result = JSON.parse(@response.body)
 		answer_id = result["value"]
 		get :estimate_remain_answer_time, :format => :json, :id => answer_id, :auth_key => auth_key
@@ -700,7 +709,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# first user answers the survey
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => jesse.email
 		result = JSON.parse(@response.body)
 		answer_id = result["value"]
 		get :load_question, :format => :json, :id => answer_id, :auth_key => auth_key
@@ -722,7 +731,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# second user answers the survey
 		auth_key = sign_in(oliver.email, Encryption.decrypt_password(oliver.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => oliver.email
 		result = JSON.parse(@response.body)
 		answer_id = result["value"]
 		get :load_question, :format => :json, :id => answer_id, :auth_key => auth_key
@@ -745,7 +754,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# third user answers the survey
 		auth_key = sign_in(lisa.email, Encryption.decrypt_password(lisa.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => lisa.email
 		result = JSON.parse(@response.body)
 		answer_id = result["value"]
 		get :load_question, :format => :json, :id => answer_id, :auth_key => auth_key
@@ -767,7 +776,7 @@ class AnswersControllerTest < ActionController::TestCase
 		# fourth user answers the survey
 		auth_key = sign_in(polly.email, Encryption.decrypt_password(polly.password))
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
-				:_remote_ip => "166.111.135.91"
+				:_remote_ip => "166.111.135.91", :email => polly.email
 		result = JSON.parse(@response.body)
 		assert !result["success"]
 		assert_equal ErrorEnum::VIOLATE_QUOTA, result["value"]["error_code"]
