@@ -78,12 +78,17 @@ class Result
 			if s1 < 1
 				s = s1 * 0.6
 			else
-			# TODO send request for s2
-				s2 = 1 
+				s2 = ConnectDotNet::send_data("/get_progress") { result.result_key }
 				s = s1 * 0.6 + s2 * 0.4
 			end
 		when "to_excel"
-			
+			s1 = status["export_answers_progress"]
+			if s1 < 1
+				s = s1 * 0.6
+			else
+				s2 = ConnectDotNet::send_data("/get_progress") { result.result_key }
+				s = s1 * 0.6 + s2 * 0.4
+			end
 		end
 		# the job has not been finished, the progress cannot be greater than 0.99
 		return [s, 0.99].min

@@ -54,7 +54,9 @@ class ResultsController < ApplicationController
 	end
 
 	def finish
-		
+		result = Result.find_by_result_key params[:result_key]
+		result.status = params[:status]
+		respond_and_render_json { result.save }
 	end
 	
 	def to_spss
@@ -67,5 +69,14 @@ class ResultsController < ApplicationController
 			end
 		end
 	end
-	
+	def to_excel
+		data_list_result = Result.find_by_result_key(params[:result_key])
+		respond_and_render_json do 
+			if data_list_result.nil?
+				# return ERROR
+			else
+				Jobs::ToExcelJob.create(:data_list_result_id => data_list_result.id, :survey_id => @survey.id)
+			end
+		end
+	end
 end
