@@ -82,6 +82,9 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :template_questions do
+			collection	 do 
+				get 'count', 'list_by_type', 'list_by_type_count'
+			end
 		end
 
 	# The priority is based upon order of creation:
