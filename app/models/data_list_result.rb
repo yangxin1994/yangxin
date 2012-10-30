@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'error_enum'
 require 'array'
 require 'tool'
@@ -10,5 +9,9 @@ class DataListResult < Result
 	field :answer_info, :type => Array
 
 	belongs_to :survey
+
+	def get_answer_info
+		ref_result_id.nil? ? answer_info : Result.find_by_result_id(result.ref_result_id).answer_info
+	end
 
 end

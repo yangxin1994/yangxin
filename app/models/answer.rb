@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'error_enum'
 require 'publish_status'
 require 'securerandom'
@@ -51,6 +50,15 @@ class Answer
 	belongs_to :survey
 
 	STATUS_NAME_ARY = ["edit", "reject", "finish", "redo"]
+  ##### answer import #####
+
+
+  def load_csv(survey=1)
+    filename = "public/import/test.csv"
+    CSV.foreach(filename, :headers => true) do |row|
+      row.to_hash
+    end
+  end
 
 	def self.def_status_attr
 		STATUS_NAME_ARY.each_with_index do |status_name, index|

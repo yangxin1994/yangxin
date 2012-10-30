@@ -21,7 +21,7 @@ class GiftsController < ApplicationController
   end
 
 
-  def_each :virtualgoods, :cash, :realgoods, :stockout do |method_name|
+  def_each :virtualgoods, :cash, :realgoods, :stockout, :expired do |method_name|
     @gifts = Gift.send(method_name).can_be_rewarded.page(page)
     respond_and_render_json { @gifts}
   end

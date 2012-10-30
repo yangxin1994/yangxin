@@ -40,5 +40,5 @@ class Admin::MessagesController < Admin::ApplicationController
 		@message = current_user.destroy_message(params[:id])
 		render_json_auto @message
 	end
-							 
+
 end

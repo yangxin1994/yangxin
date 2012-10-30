@@ -1,4 +1,4 @@
-# encoding: utf-8
+# coding: utf-8
 require 'error_enum'
 class AnswersController < ApplicationController
 
@@ -33,20 +33,28 @@ class AnswersController < ApplicationController
 			end
 		end
 
-		if params[:email].blank?
-			# the survey has award, but no email is provided
-			render_json_e(ErrorEnum::REQUIRE_EMAIL_ADDRESS) and return if @survey.has_award
-			# need to create new answer
+		if @current_user
+			# user already signs in
+			answer = Answer.find_by_survey_id_email_is_preview(params[:survey_id], @current_user.email, params[:is_preview])
+			render_json_auto(answer._id) and return if !answer.nil?
+			# need to create answer
 		else
-			# obtain an user instance given the email
-			user = User.find_or_create_new_visitor_by_email(params[:email])
-			# return error if another registered user's email is provided
-			render_json_e(ErrorEnum::WRONG_USER_EMAIL) and return if !@current_user.nil? && @current_user.email != user.email
-			# try to get the answer the current user answers
-			answer = Answer.find_by_survey_id_email_is_preview(params[:survey_id], params[:email], params[:is_preview])
-			render_json_s(answer._id) and return if !answer.nil?
-			# need to create new answer
+			if params[:email].blank?
+				# the survey has award, but no email is provided
+				render_json_e(ErrorEnum::REQUIRE_EMAIL_ADDRESS) and return if @survey.has_award
+				# need to create new answer
+			else
+				# obtain an user instance given the email
+				user = User.find_or_create_new_visitor_by_email(params[:email])
+				# return error if another registered user's email is provided
+				render_json_e(ErrorEnum::WRONG_USER_EMAIL) and return if user.is_registered
+				# try to get the answer the current user answers
+				answer = Answer.find_by_survey_id_email_is_preview(params[:survey_id], params[:email], params[:is_preview])
+				render_json_s(answer._id) and return if !answer.nil?
+				# need to create new answer
+			end
 		end
+
 
 		# need to create the answer
 		if params[:is_preview]

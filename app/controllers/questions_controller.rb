@@ -1,4 +1,4 @@
-# encoding: utf-8
+# coding: utf-8
 require 'error_enum'
 class QuestionsController < ApplicationController
 	before_filter :require_sign_in, :check_normal_survey_existence

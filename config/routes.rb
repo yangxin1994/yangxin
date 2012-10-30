@@ -29,7 +29,7 @@ OopsData::Application.routes.draw do
 					'email_count', 'true_name_count', 'username_count'
 			end
 
-			member do 
+			member do
 				get 'system_pwd', 'black', 'white'
 				post 'set_color', 'set_role', 'set_lock'
 			end
@@ -155,6 +155,7 @@ OopsData::Application.routes.draw do
 			put 'save_meta_data'
 			get 'clone'
 			get 'recover'
+			get 'export_csv'
 			get 'clear'
 			put 'update_tags'
 			put 'add_tag'
@@ -170,6 +171,10 @@ OopsData::Application.routes.draw do
 			get 'show_access_control_setting'
 			get 'set_random_quality_control_questions'
 			get 'get_random_quality_control_questions'
+
+			get 'spss_header'
+			get 'update_deadline'
+
 			get 'show_quality_control'
 			get 'check_progress'
 			get 'estimate_answer_time'
@@ -183,6 +188,7 @@ OopsData::Application.routes.draw do
 				put 'split'
 				put 'combine'
 			end
+
 		end
 		resources :questions do
 			collection do
@@ -214,6 +220,9 @@ OopsData::Application.routes.draw do
 				get :job_progress
         get :data_list
         get :analysis
+        get :to_spss
+        get :to_excel
+        put :finish
 			end
 		end
 
@@ -263,7 +272,7 @@ OopsData::Application.routes.draw do
 	resources :gifts do
 		collection do
 			get :index, :virtualgoods, :cash, :realgoods, :stockout
-			get 'edit'
+			get :edit
 		end
 	end
 	resources :orders do
@@ -273,6 +282,11 @@ OopsData::Application.routes.draw do
 	end
 	resources :points, :only => 'index'
 
+
+	resources :export_results do
+		post :set_spss_export_process
+		post :set_excel_export_process
+	end
 	resources :tools do
 		collection do
 			get :find_provinces
@@ -280,6 +294,7 @@ OopsData::Application.routes.draw do
 			get :find_towns_by_city
 			post :send_email
 		end
+
 	end
 
 	namespace :admin do

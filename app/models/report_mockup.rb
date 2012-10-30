@@ -35,9 +35,9 @@ class ReportMockup
 		report_mockup["components"].each do |c|
 			c["component_type"] = c["component_type"].to_i
 			if c["component_type"] == 0
-				return ErrorEnum::QUESTION_NOT_EXIST if !questions.include?(c["value"])
+				return ErrorEnum::QUESTION_NOT_EXIST if !questions.include?(c["value"]["id"])
 			elsif c["component_type"] == 1
-				return ErrorEnum::QUESTION_NOT_EXIST if !questions.include?(c["value"][0]) || !questions.include?(c["value"][1])
+				return ErrorEnum::QUESTION_NOT_EXIST if !questions.include?(c["value"]["id"]) || !questions.include?(c["value"]["target"]["id"])
 			else
 				return ErrorEnum::WRONG_REPORT_MOCKUP_COMPONENT_TYPE
 			end
@@ -68,9 +68,9 @@ class ReportMockup
 		report_mockup["components"].each do |c|
 			c["component_type"] = c["component_type"].to_i
 			if c["component_type"] == 0
-				return ErrorEnum::QUESTION_NOT_EXIST if !questions.include?(c["value"])
+				return ErrorEnum::QUESTION_NOT_EXIST if !questions.include?(c["value"]["id"])
 			elsif c["component_type"] == 1
-				return ErrorEnum::QUESTION_NOT_EXIST if !questions.include?(c["value"][0]) || !questions.include?(c["value"][1])
+				return ErrorEnum::QUESTION_NOT_EXIST if !questions.include?(c["value"]["id"]) || !questions.include?(c["value"]["target"]["id"])
 			else
 				return ErrorEnum::WRONG_REPORT_MOCKUP_COMPONENT_TYPE
 			end
