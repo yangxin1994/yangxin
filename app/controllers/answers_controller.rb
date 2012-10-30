@@ -86,11 +86,11 @@ class AnswersController < ApplicationController
 				if retval
 					# pass the check of channel, ip, and address quota, set the answer status as "edit"
 					answer.set_edit
-					render_json_auto(answer._id) and return
 				else
 					# fail to pass the check of channel, ip, and address quota, return
-					render_json_auto(answer.violate_quota) and return if !retval
+					answer.violate_quota
 				end
+				render_json_auto(answer._id) and return
 			else
 				# wrong password
 				render_json_auto(retval) and return
@@ -99,18 +99,11 @@ class AnswersController < ApplicationController
 	end
 
 	def load_question
-		if !@answer.is_preview && @answer.survey.publish_status != 8
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_PUBLISHED) and return }
-			end
-		end
 		@answer.update_status	# check whether it is time out
 		if @answer.is_edit
 			questions = @answer.load_question(params[:question_id], params[:next_page].to_s == "true")
 			if @answer.is_finish
 				render_json_auto([@answer.status, @answer.reject_type, @answer.finish_type]) and return
-			elsif questions.class == String && questions.start_with?("error")
-				render_json_e(questions) and return
 			else
 				render_json_auto([questions, @answer.answers_of(questions), @answer.question_number, @answer.index_of(questions), questions.estimate_answer_time, @answer.repeat_time]) and return
 			end
@@ -164,7 +157,6 @@ class AnswersController < ApplicationController
 	end
 
 	def show
-		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if !(@current_user.is_admin || @current_user.is_super_admin) && @answer.survey.user_id != @current_user._id
 		respond_to do |format|
 			format.json	{ render_json_auto(@answer) and return }
 		end

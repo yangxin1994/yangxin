@@ -222,7 +222,11 @@ class AnswersControllerTest < ActionController::TestCase
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:_remote_ip => "166.111.135.91", :email => oliver.email
 		result = JSON.parse(@response.body)
-		assert_equal ErrorEnum::VIOLATE_QUOTA, result["value"]["error_code"]
+		# the answer should be in the status of rejected by quota
+		answer_id = result["value"]
+		answer = Answer.find_by_id(answer_id)
+		assert answer.is_reject
+		assert_equal 0, answer.reject_type
 
 		# refreshe and check the stats for the quota rule
 		survey = Survey.find_by_id(survey_id)
@@ -746,11 +750,11 @@ class AnswersControllerTest < ActionController::TestCase
 		answer_content[questions[2]["_id"]] = "answer for the third question"
 		post :submit_answer, :format => :json, :id => answer_id, :auth_key => auth_key, :answer_content => answer_content
 		result = JSON.parse(@response.body)
-		assert !result["success"]
-		assert_equal ErrorEnum::VIOLATE_QUOTA, result["value"]["error_code"]
-		survey = Survey.find_by_id(survey_id)
-		assert_equal 1, survey.quota_stats["answer_number"][0]
-		assert oliver.answers.first.is_reject
+		assert result["success"]
+		assert result["value"]
+		answer = Answer.find_by_id(answer_id)
+		assert answer.is_reject
+		assert_equal 0, answer.reject_type
 		sign_out(auth_key)
 
 		# third user answers the survey
@@ -780,10 +784,12 @@ class AnswersControllerTest < ActionController::TestCase
 		post :create, :format => :json, :auth_key => auth_key, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:_remote_ip => "166.111.135.91", :email => polly.email
 		result = JSON.parse(@response.body)
-		assert !result["success"]
-		assert_equal ErrorEnum::VIOLATE_QUOTA, result["value"]["error_code"]
-		survey = Survey.find_by_id(survey_id)
-		assert polly.answers.first.is_reject
+		assert result["success"]
+		answer_id = result["value"]
+		answer = Answer.find_by_id(answer_id)
+		puts "aaaa"
+		puts answer.inspect
+		puts "aaaa"
 		sign_out(auth_key)
 	end
 

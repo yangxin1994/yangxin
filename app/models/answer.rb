@@ -710,8 +710,7 @@ class Answer
 	#* ErrorEnum::VIOLATE_QUOTA
 	def violate_quota
 		self.set_reject
-		self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
-		return ErrorEnum::VIOLATE_QUOTA
+		return self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
 	end
 
 	def update_logic_control_result(answer_content)
