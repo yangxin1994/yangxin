@@ -63,10 +63,25 @@ class Admin::TemplateQuestionsController < Admin::ApplicationController
 	end
 
 	def index
-		questions = TemplateQuestion.list_template_question
+		questions = TemplateQuestion.all.page(page).per(per_page)
 		respond_to do |format|
 			format.json	{ render_json_auto(questions) and return }
 		end
+	end
+
+	def count
+		render_json_auto TemplateQuestion.count
+	end
+
+	def list_by_type
+		questions = TemplateQuestion.where(question_type: params[:question_type].to_i).page(page).per(per_page)
+		respond_to do |format|
+			format.json	{ render_json_auto(questions) and return }
+		end
+	end
+
+	def list_by_type_count
+		render_json_auto TemplateQuestion.where(question_type: params[:question_type].to_i).count
 	end
 
 	#*method*: get
@@ -86,7 +101,7 @@ class Admin::TemplateQuestionsController < Admin::ApplicationController
 	#* ErrorEnum ::UNAUTHORIZED: when the survey does not belong to the current user
 	def show
 		respond_to do |format|
-			format.json	{ render_json_auto(@template_questions) and return }
+			format.json	{ render_json_auto(@template_question) and return }
 		end
 	end
 
