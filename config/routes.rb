@@ -193,6 +193,7 @@ OopsData::Application.routes.draw do
 				put 'convert_template_question_to_normal_question'
 				put 'move'
 				put 'clone'
+				delete 'delete_quality_control_question'
 			end
 		end
 		resources :logic_controls
