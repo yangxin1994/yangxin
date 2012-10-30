@@ -2,6 +2,7 @@ require 'test_helper'
 
 class SystemUserTest < ActiveSupport::TestCase
 	
+=begin
 	test "01 find_by_id method" do 
 		clear(User)
 
@@ -159,5 +160,5 @@ class SystemUserTest < ActiveSupport::TestCase
 
 		clear(User)
 	end
-
+=end
 end

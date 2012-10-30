@@ -5,13 +5,9 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 	test "01 should get index action " do
 		clear(User,Faq)
 
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 1
-		user.save
-	
-		auth_key = sign_in(user.email, "123456")
+		admin = init_admin
 
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 		get 'index', :format => :json, :auth_key => auth_key
 		assert_equal JSON.parse(@response.body)["value"], []
 
@@ -32,12 +28,9 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 	
 	test "03 should post create action with login, but not admin user" do
 		clear(User, Faq)
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 0
-		user.save
-	
-		auth_key = sign_in(user.email, "123456")
+		jesse = init_jesse
+
+		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::REQUIRE_ADMIN, result["value"]["error_code"]
@@ -49,12 +42,9 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 	test "04 should post create action with admin user login" do
 		clear(User, Faq)
 
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 1
-		user.save
-	
-		auth_key = sign_in(user.email, "123456")
+		admin = init_admin
+
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 		post 'create', :faq => {faq_type: "Type1", question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
 		assert_equal ErrorEnum::FAQ_TYPE_ERROR, JSON.parse(@response.body)["value"]["error_code"]
 		
@@ -117,22 +107,14 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 	test "05 should post update action which is with admin " do
 		clear(User, Faq)
 
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 1
-		user.save
-		
-		user2 = User.new(email: "test2@example.com", password: Encryption.encrypt_password("123456"))
-		user2.status = 4
-		user2.role = 1
-		user2.save
-	
-		auth_key = sign_in(user.email, "123456")
+		admin = init_admin
+
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)
 		sign_out(auth_key)
 		
-		auth_key = sign_in(user2.email, "123456")
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 
 		faq = Faq.all.first
 
@@ -152,7 +134,7 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 		assert_equal Faq.all.count, 1
 		faq = Faq.all.first
 		assert_equal faq.question, "updated question1"
-		assert_equal faq.user, user2
+		assert_equal faq.user, admin
 
 		sign_out(auth_key)
 
@@ -161,12 +143,9 @@ class Admin::FaqsControllerTest < ActionController::TestCase
 	
 	test "06 should destroy action which is with admin " do
 		clear(User, Faq)
-		user = User.new(email: "test@example.com", password: Encryption.encrypt_password("123456"))
-		user.status = 4
-		user.role = 1
-		user.save
-	
-		auth_key = sign_in(user.email, "123456")
+		admin = init_admin
+
+		auth_key = sign_in(admin.email, Encryption.decrypt_password(admin.password))
 		post 'create', :faq => {faq_type: 1, question: "question1", answer: "answer1"}, :format => :json, :auth_key => auth_key
 		retval = JSON.parse(@response.body)["value"]
 

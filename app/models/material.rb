@@ -42,6 +42,7 @@ class Material
 	def update_material(material)
 		return self.update_attributes(:material_type => material["material_type"], 
 			:value => material["value"],
-			:title => material["title"])
+			:title => material["title"],
+			:picture_url => material["picture_url"])
 	end
 end

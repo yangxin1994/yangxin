@@ -13,8 +13,8 @@ require 'quality_control_type_enum'
 class Question < BasicQuestion
 	include Mongoid::Document
 	field :is_required, :type => Boolean, default: true
-	field :question_class, :type => Integer, default: 0
-	field :reference_id, :type => String, default: ""
+	#field :question_class, :type => Integer, default: 0
+	#field :reference_id, :type => String, default: ""
 
 	before_save :clear_question_object
 	before_update :clear_question_object
@@ -30,6 +30,7 @@ class Question < BasicQuestion
 		return question
 	end
 
+=begin
 	def self.create_template_question(template_question)
 		question = Question.new(:question_class => 1, :reference_id => template_question._id)
 		question.content = template_question.content
@@ -39,13 +40,9 @@ class Question < BasicQuestion
 		question.save
 		return question
 	end
+=end
 
-	def convert_template_question_to_normal_question
-		self.question_class = 0
-		self.reference_id = ""
-		return self.save
-	end
-
+=begin
 	def self.create_quality_control_question(quality_control_question)
 		questions = []
 		if quality_control_question.quality_control_type == QualityControlTypeEnum::OBJECTIVE
@@ -71,6 +68,7 @@ class Question < BasicQuestion
 		end
 		return questions
 	end
+=end
 
 	#*description*: update the current question instance without generating id for inputs, and without saving (such stuff should be done by methods in subclasses)
 	#
@@ -117,6 +115,7 @@ class Question < BasicQuestion
 		question_obj["question_type"] = self.question_type
 		question_obj["is_required"] = self.is_required
 		question_obj["issue"] = Marshal.load(Marshal.dump(self.issue))
+		question_obj["type"] = self._type
 		return question_obj
 	end
 end

@@ -2,9 +2,7 @@ require 'result_job'
 module Jobs
 
 	class DataListJob < ResultJob
-
-		@queue = :result_job
-
+		
 		def perform
 			# set the type of the job
 			set_status({"result_type" => "data_list"})
@@ -22,6 +20,7 @@ module Jobs
 
 			# judge whether the result_key already exists
 			result = DataListResult.find_by_result_key(result_key)
+
 			#create new result record
 			if !result.nil?
 				data_list_result = DataListResult.create(:result_key => result_key, :job_id => status["uuid"], :ref_result_id => result._id)

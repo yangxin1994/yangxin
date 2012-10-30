@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'error_enum'
 require 'publish_status'
 require 'securerandom'
@@ -51,6 +50,15 @@ class Answer
 	belongs_to :survey
 
 	STATUS_NAME_ARY = ["edit", "reject", "finish", "redo"]
+  ##### answer import #####
+
+
+  def load_csv(survey=1)
+    filename = "public/import/test.csv"
+    CSV.foreach(filename, :headers => true) do |row|
+      row.to_hash
+    end
+  end
 
 	def self.def_status_attr
 		STATUS_NAME_ARY.each_with_index do |status_name, index|
@@ -66,6 +74,14 @@ class Answer
 		answer = Answer.where(:_id => answer_id).first
 		return answer
 	end
+
+	def self.find_by_survey_id_email_is_preview(survey_id, email, is_preview)
+		survey = Survey.find_by_id(survey_id)
+		owner = User.find_by_email(email)
+		return nil if survey.nil?
+		return nil if owner.nil?
+		return survey.answers.where(user_id: owner._id.to_s, :is_preview => is_preview)[0]
+	end	
 
 	def self.find_by_survey_id_user_is_preview(survey_id, user, is_preview)
 		survey = Survey.find_by_id(survey_id)
@@ -90,7 +106,7 @@ class Answer
 		return true
 	end
 
-	def self.create_answer(is_preview, operator, survey_id, channel, ip, username, password)
+	def self.create_answer(is_preview, email, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
@@ -113,7 +129,8 @@ class Answer
 		answer.template_answer_content = Hash[survey.quota_template_question_page.map { |ele| [ele, nil] }]
 
 		answer.save
-		operator.answers << answer
+		owner = User.find_by_email(email)
+		owner.answers << answer if !owner.nil?
 		survey.answers << answer
 
 		# initialize the logic control result
@@ -139,9 +156,11 @@ class Answer
 	end
 
 	def genereate_random_quality_control_questions
+		quality_control_questions_ids = []
+		self.random_quality_control_answer_content = {}
+		self.random_quality_control_locations = {}
 		if self.survey.is_random_quality_control_questions
-			self.random_quality_control_answer_content = {}
-			self.random_quality_control_locations = {}
+			# need to select random questions
 			# 1. determine the number of random quality control questions
 			question_number = self.answer_content.length
 			qc_question_number = [[question_number / 10, 1].max, 4].min
@@ -156,17 +175,18 @@ class Answer
 			end
 			matching_questions_ids = matching_questions_uniq_ids.uniq
 			quality_control_questions_ids = objective_questions_ids + matching_questions_ids
-			# 3. random generate locations for the quality control questions
-			quality_control_questions_ids.each do |qc_id|
-				self.random_quality_control_locations[survey.pages.shuffle[0]["questions"].shuffle[0]] =
-					qc_id
-			end
-			# 4. initialize the random quality control questions answers
-			self.random_quality_control_answer_content = Hash[quality_control_questions_ids.map { |ele| [ele, nil] }]
 		else
-			self.random_quality_control_answer_content = {}
-			self.random_quality_control_locations = {}
+			quality_control_questions_ids = self.survey.quality_control_questions_ids
 		end
+
+		# 3. random generate locations for the quality control questions
+		quality_control_questions_ids.each do |qc_id|
+			self.random_quality_control_locations[survey.pages.shuffle[0]["questions"].shuffle[0]] =
+				qc_id
+		end
+		# 4. initialize the random quality control questions answers
+		self.random_quality_control_answer_content = Hash[quality_control_questions_ids.map { |ele| [ele, nil] }]
+
 		self.save
 		return self
 	end
@@ -478,7 +498,7 @@ class Answer
 	#*retval*:
 	#* the status of the answer after updating
 	def update_status
-		if Time.now.to_i - self.created_at.to_i > 10.days.to_i
+		if Time.now.to_i - self.created_at.to_i > 2.days.to_i
 			self.set_reject
 			self.update_attributes(reject_type: 3, rejected_at: Time.now.to_i)
 		end
@@ -520,25 +540,14 @@ class Answer
 	#* false: when the quality control rules are violated
 	def check_quality_control(answer_content)
 		# find out quality control questions
-		inserted_quality_control_question_ary = []
 		random_quality_control_question_id_ary = []
 		answer_content.each do |k, v|
 			question = BasicQuestion.find_by_id(k)
-			inserted_quality_control_question_ary << question if !question.nil? && question.class == Question && question.question_class == 2
 			random_quality_control_question_id_ary << k if !question.nil? && question.class == QualityControlQuestion
 		end
 		# if there is no quality control questions, return
-		return true if inserted_quality_control_question_ary.blank? && random_quality_control_question_id_ary.blank?
-		########## check quality control quesoitns that are added manually ##########
-		# if there are quality control questions, check whether passing the quality control
-		inserted_quality_control_question_ary.each do |q|
-			quality_control_question_id = q.reference_id
-			return false if self.answer_content[q._id.to_s].nil?
-			retval = self.check_quality_control_answer(self.answer_content[q._id.to_s], quality_control_question_id)
-			return false if !retval
-		end
-
-		########## check quality control quesoitns that are randomly inserted ##########
+		return true if random_quality_control_question_id_ary.blank?
+		########## all quality control quesoitns are randomly inserted ##########
 		random_quality_control_question_id_ary.each do |qc_id|
 			return false if self.random_quality_control_answer_content[qc_id].nil?
 			retval = self.check_quality_control_answer(self.random_quality_control_answer_content[qc_id], qc_id ,true)
@@ -701,8 +710,7 @@ class Answer
 	#* ErrorEnum::VIOLATE_QUOTA
 	def violate_quota
 		self.set_reject
-		self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
-		return ErrorEnum::VIOLATE_QUOTA
+		return self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
 	end
 
 	def update_logic_control_result(answer_content)

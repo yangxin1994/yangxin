@@ -2,19 +2,12 @@ class OrdersController < ApplicationController
 #TO DO before_filter
 	before_filter :require_user_exist
 	def index
-		@orders = @current_user.orders.page(page)
-		respond_to do |format|
-			format.html
-			format.json { render json: @orders }
-		end
+		respond_and_render_json { @current_user.orders.page(page) }
 	end
 
 	def show
-		# TO DO is owners request?
-		retval = Order.find_by_id(params[:id])
-		respond_to do |format|
-			format.json { render json: retval }
-		end
+		# TODO is owners request?
+		respond_and_render_json { Order.find_by_id(params[:id])}
 	end
 
 	def create

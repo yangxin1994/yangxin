@@ -1,7 +1,5 @@
 class Admin::MessagesController < Admin::ApplicationController
 
-	before_filter :require_sign_in
-
 	def maping(message)
 		message['receiver_emails'] = []
 		message['receiver_ids'].each do |rec_id|
@@ -42,5 +40,5 @@ class Admin::MessagesController < Admin::ApplicationController
 		@message = current_user.destroy_message(params[:id])
 		render_json_auto @message
 	end
-							 
+
 end
