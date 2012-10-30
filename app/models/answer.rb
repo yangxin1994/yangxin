@@ -223,7 +223,7 @@ class Answer
 					end
 				end
 			end
-			# the question cannot be found, load questions from the one will nil answer
+			# the question cannot be found, load questions from the one with nil answer
 			cur_page = false
 			self.survey.pages.each do |page|
 				page["questions"].each do |q_id|
@@ -271,6 +271,14 @@ class Answer
 			end
 			# it is possible that only several random quality control questions are loaded
 			return load_question_by_ids(loaded_question_ids) if loaded_question_ids.length > 0
+			# synchronize the questions in the survey and the qeustions in the answer content
+			survey_question_ids = self.survey.pages.map { |page| page["questions"] }
+			survey_question_ids = survey_question_ids.flatten
+			self.answer_content.delete_if { |q_id, a| !survey_question_ids.include?(q_id) }
+			survey_question_ids.each do |q_id|
+				self.answer_content[q_id] ||= nil
+			end
+			self.save
 			self.auto_finish
 			return true
 		end
@@ -520,10 +528,12 @@ class Answer
 	#
 	#*retval*:
 	#* true: when the answers are successfully updated
-	def update_answer(answer_content)
-		answer_content.each do |k, v|
-			self.answer_content[k] = v if self.answer_content.has_key?(k)
-			self.template_answer_content[k] = v if self.template_answer_content.has_key?(k)
+	def update_answer(updated_answer_content)
+		# it might happen that:
+		# survey has a new question, but the answer content does not has the question id as a key
+		# thus when updating the answer content, the key should not be checked
+		updated_answer_content.each do |k, v|
+			self.answer_content[k] = v
 			self.random_quality_control_answer_content[k] = v if self.random_quality_control_answer_content.has_key?(k)
 		end
 		self.save
@@ -590,20 +600,10 @@ class Answer
 			matching_question_id_ary = MatchingQuestion.get_matching_question_ids(quality_control_question_id)
 			volunteer_answer = []
 
-			if randomly_inserted
-				self.random_quality_control_answer_content do |k, v|
-					next if !matching_question_id_ary.include?(k)
-					v["selection"].each do |input_id|
-						volunteer_answer << [k, input_id]
-					end
-				end
-			else
-				self.answer_content.each do |k,v|
-					question = Question.find_by_id(k)
-					next if !matching_question_id_ary.include?(question.reference_id)
-					v["selection"].each do |input_id|
-						volunteer_answer << [question.reference_id, input_id]
-					end
+			self.random_quality_control_answer_content do |k, v|
+				next if !matching_question_id_ary.include?(k)
+				v["selection"].each do |input_id|
+					volunteer_answer << [k, input_id]
 				end
 			end
 
@@ -820,9 +820,16 @@ class Answer
 	#* ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP
 	#* ErrorEnum::ANSWER_NOT_COMPLELTE
 	def finish
+		# synchronize the questions in the survey and the qeustions in the answer content
+		survey_question_ids = self.survey.pages.map { |page| page["questions"] }
+		survey_question_ids = survey_question_ids.flatten
+		self.answer_content.delete_if { |q_id, a| !survey_question_ids.include?(q_id) }
+		survey_question_ids.each do |q_id|
+			self.answer_content[q_id] ||= nil
+		end
+		self.save
 		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_edit
 		return ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP if !self.survey.is_pageup_allowed
-		return ErrorEnum::ANSWER_NOT_COMPLETE if self.template_answer_content.has_value?(nil)
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
 		self.set_finish
@@ -834,9 +841,11 @@ class Answer
 
 	def estimate_remain_answer_time
 		remain_answer_time = 0.0
-		self.answer_content.each do |q_id, a|
-			q = Question.find_by_id(q_id)
-			remain_answer_time = remain_answer_time + q.estimate_answer_time if a.nil? && !q.nil?
+		self.survey.pages.each do |page|
+			page["questions"].each do |q_id|
+				q = BasicQuestion.find_by_id(q_id)
+				remain_answer_time = remain_answer_time + q.estimate_answer_time if self.answer_content[q_id].nil? && !q.nil?
+			end
 		end
 		return remain_answer_time
 	end
