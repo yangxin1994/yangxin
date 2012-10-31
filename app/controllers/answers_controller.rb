@@ -6,9 +6,33 @@ class AnswersController < ApplicationController
 	before_filter :check_survey_existence, :only => [:create]
 	before_filter :check_answer_existence, :except => [:get_my_answer, :create]
 
+	before_filter :check_my_answer_existence, :only => [:load_question, :submit_answer, :clear, :finish, :destroy_preview]
+
+	before_filter :check_ownerness_of_survey, :only => [:destroy, :show]
+
+	def check_ownerness_of_survey
+		owner = @answer.survey.user
+		if @current_user.nil? || (!@current_user.is_admin && !@current_user.is_super_admin && owner != @current_user)
+			respond_to do |format|
+				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
+			end
+		end
+	end
+
 	def check_answer_existence
 		@answer = Answer.find_by_id(params[:id])
 		if @answer.nil?
+			respond_to do |format|
+				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
+			end
+		end
+	end
+
+	def check_my_answer_existence
+		@answer = Answer.find_by_id(params[:id])
+		owner = @answer.user
+		# if the owner of the answer is a registered user, and the current user is not the owner, return ANSWER_NOT_EXIST
+		if @answer.nil? || ( !owner.nil? && owner.is_registered && owner != @current_user )
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
 			end
@@ -44,6 +68,7 @@ class AnswersController < ApplicationController
 				# the survey has award, but no email is provided
 				render_json_e(ErrorEnum::REQUIRE_EMAIL_ADDRESS) and return if @survey.has_award
 				# need to create new answer
+				email = nil
 			else
 				# obtain an user instance given the email
 				user = User.find_or_create_new_visitor_by_email(params[:email])
@@ -171,25 +196,23 @@ class AnswersController < ApplicationController
 			end
 		end
 		respond_to do |format|
-			format.json	{ render_json_auto(@answer) and return }
+			format.json	{ render_json_auto(@answer._id.to_s) and return }
+		end
+	end
+
+	def destroy_preview
+		if @answer.is_preview
+			# this is a preview answer, and the owner of the answer wants to clear the answer
+			retval = @answer.destroy
+			render_json_auto(retval) and return 
+		else
+			render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return
 		end
 	end
 
 	def destroy
-		if @answer.is_preview
-			# this is a preview answer, and the owner of the answer wants to clear the answer
-			if @answer.user_id == @current_user._id
-				retval = @answer.destroy
-				render_json_auto(retval) and return 
-			else
-				render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return
-			end
-		else
-			# this is a normal answer, and the owner of the survey wants to clear the answer
-			render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if !(@current_user.is_admin || @current_user.is_super_admin) && @answer.survey.user_id != @current_user._id
-			retval = @answer.delete if @answer.survey_id == @survey._id
-			render_json_auto(retval) and return 
-		end
+		retval = @answer.delete
+		render_json_auto(retval) and return 
 	end
 
 	def estimate_remain_answer_time

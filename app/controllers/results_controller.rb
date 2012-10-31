@@ -48,7 +48,7 @@ class ResultsController < ApplicationController
 	end
 
 	def report
-		job_id = @survey.analysis(params[:id], params[:include_screened_answer], params[:report_mockup_id], params[:report_style], params[:report_type])
+		job_id = @survey.report(params[:id], params[:include_screened_answer], params[:report_mockup_id], params[:report_style], params[:report_type])
 		respond_to do |format|
 			format.json	{ render_json_auto(job_id) and return }
 		end

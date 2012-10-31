@@ -37,21 +37,18 @@ module Jobs
 
 		def self.handle_answers
 			@answers.each do |answer|
-				next if answer.user.nil?
+				if answer.user.nil?
+					answer.is_scanned = true
+					next
+				end
 				user_id = answer.user._id.to_s
 
-				answer.template_answer_content.merge(answer.answer_content).each do |key, value|
-					question = Question.find_by_id(key.to_s)
-					template_question_id = question.reference_id if question
-
-					if !template_question_id.blank? && 
-								user_id && !value.blank? then
-						TemplateQuestionAnswer.update_or_create(
-							template_question_id, 
-							user_id, value)	
+				answer.answer_content.each do |key, value|
+					question = BasicQuestion.find_by_id(key)
+					if !question.nil? && question.class == TemplateQuestion && !value.blank?
+						TemplateQuestionAnswer.update_or_create(key, user_id, value)	
 					end
 				end
-
 				answer.is_scanned = true
 				answer.save
 			end

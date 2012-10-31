@@ -255,6 +255,7 @@ OopsData::Application.routes.draw do
 			post 'submit_answer'
 			post 'finish'
 			get 'estimate_remain_answer_time'
+			delete 'destroy_preview'
 		end
 	end
 
