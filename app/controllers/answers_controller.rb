@@ -6,9 +6,22 @@ class AnswersController < ApplicationController
 	before_filter :check_survey_existence, :only => [:create]
 	before_filter :check_answer_existence, :except => [:get_my_answer, :create]
 
+	before_filter :check_my_answer_existence, :only => [:load_question, :submit_answer, :clear, :finish]
+
 	def check_answer_existence
 		@answer = Answer.find_by_id(params[:id])
 		if @answer.nil?
+			respond_to do |format|
+				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
+			end
+		end
+	end
+
+	def check_my_answer_existence
+		@answer = Answer.find_by_id(params[:id])
+		owner = @answer.user
+		# if the owner of the answer is a registered user, and the current user is not the owner, return ANSWER_NOT_EXIST
+		if @answer.nil? || ( !owner.nil? && owner.is_registered && owner != @current_user )
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
 			end
@@ -158,6 +171,11 @@ class AnswersController < ApplicationController
 	end
 
 	def show
+		survey = @answer.survey
+		# to check the answer, the user must be an admin or the owner of the survey
+		if !@current_user || ( !@current_user.is_admin && !@current_user.is_super_admin && survey.user != @current_user )
+			render_json_auto(ErrorEnum::ANSWER_NOT_EXIST) and return
+		end
 		respond_to do |format|
 			format.json	{ render_json_auto(@answer) and return }
 		end
@@ -172,7 +190,7 @@ class AnswersController < ApplicationController
 			end
 		end
 		respond_to do |format|
-			format.json	{ render_json_auto(@answer) and return }
+			format.json	{ render_json_auto(@answer._id.to_s) and return }
 		end
 	end
 
