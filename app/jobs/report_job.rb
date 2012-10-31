@@ -43,37 +43,43 @@ module Jobs
 					question = Question.find_by_id(question_id)
 					case question.question_type
 					when QuestionTypeEnum::CHOICE_QUESTION
-						analyze_result = analyze_choice(question.issue, answer_ary)
+						analysis_result = analyze_choice(question.issue, answer_ary)
 						# judge whether this is a single choice or multiple choice
 						if question.issue["max_choice"] == 1
-							# this is a single choice question
-							# 1. generate the text for this question
-							text_description(analyze_result, question)
+							text = single_choice_description(analysis_result, question)
+							analysis_results << {"question_type" => "single_choice",
+												"result" => analysis_result,
+												"text" => text}
 						else
-							# this is a multiple choice question
+							pie_text = multiple_choice_description(analysis_result, question, 'pie')
+							bar_text = multiple_choice_description(analysis_result, question, 'bar')
+							analysis_results << {"question_type" => "single_choice",
+												"result" => analysis_result,
+												"pie_text" => pie_text,
+												"bar_text" => bar_text}
 						end
 					when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
-						analyze_result = analyze_matrix_choice(question.issue, answer_ary)
+						analysis_result = analyze_matrix_choice(question.issue, answer_ary)
 					when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-						analyze_result = analyze_number_blank(question.issue, answer_ary)
+						analysis_result = analyze_number_blank(question.issue, answer_ary)
 					when QuestionTypeEnum::TIME_BLANK_QUESTION
-						analyze_result = analyze_time_blank(question.issue, answer_ary)
+						analysis_result = analyze_time_blank(question.issue, answer_ary)
 					when QuestionTypeEnum::EMAIL_BLANK_QUESTION
-						analyze_result = analyze_email_blank(question.issue, answer_ary)
+						analysis_result = analyze_email_blank(question.issue, answer_ary)
 					when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
-						analyze_result = analyze_address_blank(question.issue, answer_ary)
+						analysis_result = analyze_address_blank(question.issue, answer_ary)
 					when QuestionTypeEnum::BLANK_QUESTION
-						analyze_result = analyze_blank(question.issue, answer_ary)
+						analysis_result = analyze_blank(question.issue, answer_ary)
 					when QuestionTypeEnum::MATRIX_BLANK_QUESTION
-						analyze_result = analyze_matrix_blank(question.issue, answer_ary)
+						analysis_result = analyze_matrix_blank(question.issue, answer_ary)
 					when QuestionTypeEnum::TABLE_QUESTION
-						analyze_result = analyze_table(question.issue, answer_ary)
+						analysis_result = analyze_table(question.issue, answer_ary)
 					when QuestionTypeEnum::CONST_SUM_QUESTION
-						analyze_result = analyze_const_sum(question.issue, answer_ary)
+						analysis_result = analyze_const_sum(question.issue, answer_ary)
 					when QuestionTypeEnum::SORT_QUESTION
-						analyze_result = analyze_sort(question.issue, answer_ary)
+						analysis_result = analyze_sort(question.issue, answer_ary)
 					when QuestionTypeEnum::RANK_QUESTION
-						analyze_result = analyze_rank(question.issue, answer_ary)
+						analysis_result = analyze_rank(question.issue, answer_ary)
 					end
 				else
 					# this is a cross questions analysis
@@ -88,11 +94,28 @@ module Jobs
 			return result_key
 		end
 
-		def generate_text_description(analyze_result, description_type)
-			case description_type
-			when "single_choice"
-
-			end
+		def get_item_text_by_id(items, id)
+			item = issue.items.select { |e| e["id"] == input_id }
+			return "" if item.nil
+			item_text = item[0]["content"]["text"]
 		end
+
+		def single_choice_description(analysis_result, question)
+			issue = question.issue
+			total_number = 0
+			results = []
+			analysis_result.each do |input_id, select_number|
+				item_text = get_item_text_by_id(input_id)
+				total_number = total_number + select_number
+				results << { "text" => item_text, "number" => select_number.to_i }
+			end
+			temp_results = results.clone
+			temp_results.sort_by! { |e| -e["select_number"] }
+			text = "调查显示，#{temp_results[0]["select_number"] * 1.0 / total_number}%的人选择了#{temp_results[0]["text"]}"
+		end
+
+		def multiple_choice_description(analysis_result, question, chart_type)
+		end
+
 	end
 end
