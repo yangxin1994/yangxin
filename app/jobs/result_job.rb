@@ -100,7 +100,7 @@ module Jobs
 						segment_index = segment_index + 1
 						break if segment_index >= segment.length
 					end
-					histogram = histogram + 1
+					histogram[segment_index] = histogram[segment_index] + 1
 				end
 				result["histogram"] = histogram
 			end
