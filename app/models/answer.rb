@@ -829,7 +829,8 @@ class Answer
 		end
 		self.save
 		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_edit
-		return ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP if !self.survey.is_pageup_allowed
+		# surveys that do not allow page up can also be finished manually
+		# return ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP if !self.survey.is_pageup_allowed
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
 		self.set_finish
