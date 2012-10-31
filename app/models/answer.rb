@@ -126,8 +126,10 @@ class Answer
 		answer.answer_content = answer_content
 
 		answer.save
-		owner = User.find_by_email(email)
-		owner.answers << answer if !owner.nil?
+		if !email.nil?
+			owner = User.find_by_email(email)
+			owner.answers << answer if !owner.nil?
+		end
 		survey.answers << answer
 
 		# initialize the logic control result

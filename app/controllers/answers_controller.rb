@@ -44,6 +44,7 @@ class AnswersController < ApplicationController
 				# the survey has award, but no email is provided
 				render_json_e(ErrorEnum::REQUIRE_EMAIL_ADDRESS) and return if @survey.has_award
 				# need to create new answer
+				email = nil
 			else
 				# obtain an user instance given the email
 				user = User.find_or_create_new_visitor_by_email(params[:email])
