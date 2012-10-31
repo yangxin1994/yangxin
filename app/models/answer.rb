@@ -8,7 +8,6 @@ class Answer
 	# status: 0 for editting, 1 for reject, 2 for finish, 3 for redo
 	field :status, :type => Integer, default: 0
 	field :answer_content, :type => Hash
-	field :template_answer_content, :type => Hash
 	field :random_quality_control_answer_content, :type => Hash
 	field :random_quality_control_locations, :type => Hash
 
@@ -125,8 +124,6 @@ class Answer
 			end
 		end
 		answer.answer_content = answer_content
-		# initialize the template answer content
-		answer.template_answer_content = Hash[survey.quota_template_question_page.map { |ele| [ele, nil] }]
 
 		answer.save
 		owner = User.find_by_email(email)
@@ -454,10 +451,6 @@ class Answer
 		if !self.is_preview
 			return ErrorEnum::WRONG_ANSWER_STATUS if self.is_finish || self.is_reject
 			return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_redo && !self.survey.is_pageup_allowed
-		end
-		# clear the template answer content
-		self.template_answer_content.each_key do |k|
-			self.template_answer_content[k] = nil
 		end
 		# clear the answer content
 		self.answer_content.each_key do |k|
