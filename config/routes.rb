@@ -26,7 +26,8 @@ OopsData::Application.routes.draw do
 			collection do 
 				get 'blacks', 'blacks_count', 'whites', 'whites_count', 'count', 
 					'deleteds', 'deleteds_count', 
-					'email_count', 'true_name_count', 'username_count'
+					'email_count', 'true_name_count', 'username_count',
+					'list_by_role', 'list_by_role_count'
 			end
 
 			member do
@@ -50,17 +51,7 @@ OopsData::Application.routes.draw do
 				get 'count', 'list_by_title_count', 'activated_count', 'unactivate_count'
 			end
 		end
-		resources :system_users do 
-			member do 
-				post 'lock', 'unlock'
-			end
-			collection do 
-				get 'count', 'answer_anuditors', 'answer_anuditors_count',
-				'survey_auditors', 'survey_auditors_count',
-				'entry_clerks', 'entry_clerks_count',
-				'interviewers', 'interviewers_count'
-			end
-		end
+		resources :system_users
 		resources :feedbacks do
 			collection do 
 				get 'count', 'list_by_type_count', 'list_by_type_and_value_count', 
