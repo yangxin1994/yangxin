@@ -36,6 +36,12 @@ OopsData::Application.routes.draw do
 			end
 		end
 
+		resources :surveys do 
+			collection do 
+				get 'count', 'list_by_status', 'list_by_status_count'
+			end
+		end
+
 		resources :faqs do 
 			collection do 
 				get 'count', 'list_by_type_count', 'list_by_type_and_value_count'
@@ -51,7 +57,7 @@ OopsData::Application.routes.draw do
 				get 'count', 'list_by_title_count', 'activated_count', 'unactivate_count'
 			end
 		end
-		resources :system_users
+
 		resources :feedbacks do
 			collection do 
 				get 'count', 'list_by_type_count', 'list_by_type_and_value_count', 
