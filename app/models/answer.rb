@@ -450,10 +450,7 @@ class Answer
 	#* true: when the answer content is cleared
 	#* ErrorEnum::WRONG_ANSWER_STATUS
 	def clear
-		if !self.is_preview
-			return ErrorEnum::WRONG_ANSWER_STATUS if self.is_finish || self.is_reject
-			return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_redo && !self.survey.is_pageup_allowed
-		end
+		return ErrorEnum::WRONG_ANSWER_STATUS if self.is_finish || self.is_reject
 		# clear the answer content
 		self.answer_content.each_key do |k|
 			self.answer_content[k] = nil
