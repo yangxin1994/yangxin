@@ -6,7 +6,18 @@ class AnswersController < ApplicationController
 	before_filter :check_survey_existence, :only => [:create]
 	before_filter :check_answer_existence, :except => [:get_my_answer, :create]
 
-	before_filter :check_my_answer_existence, :only => [:load_question, :submit_answer, :clear, :finish]
+	before_filter :check_my_answer_existence, :only => [:load_question, :submit_answer, :clear, :finish, :destroy_preview]
+
+	before_filter :check_ownerness_of_survey, :only => [:destroy, :show]
+
+	def check_ownerness_of_survey
+		owner = @answer.survey.user
+		if @current_user.nil? || (!@current_user.is_admin && !@current_user.is_super_admin && owner != @current_user)
+			respond_to do |format|
+				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
+			end
+		end
+	end
 
 	def check_answer_existence
 		@answer = Answer.find_by_id(params[:id])
@@ -171,11 +182,6 @@ class AnswersController < ApplicationController
 	end
 
 	def show
-		survey = @answer.survey
-		# to check the answer, the user must be an admin or the owner of the survey
-		if !@current_user || ( !@current_user.is_admin && !@current_user.is_super_admin && survey.user != @current_user )
-			render_json_auto(ErrorEnum::ANSWER_NOT_EXIST) and return
-		end
 		respond_to do |format|
 			format.json	{ render_json_auto(@answer) and return }
 		end
@@ -194,21 +200,19 @@ class AnswersController < ApplicationController
 		end
 	end
 
-	def destroy
+	def destroy_preview
 		if @answer.is_preview
 			# this is a preview answer, and the owner of the answer wants to clear the answer
-			if @answer.user_id == @current_user._id
-				retval = @answer.destroy
-				render_json_auto(retval) and return 
-			else
-				render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return
-			end
-		else
-			# this is a normal answer, and the owner of the survey wants to clear the answer
-			render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if !(@current_user.is_admin || @current_user.is_super_admin) && @answer.survey.user_id != @current_user._id
-			retval = @answer.delete if @answer.survey_id == @survey._id
+			retval = @answer.destroy
 			render_json_auto(retval) and return 
+		else
+			render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return
 		end
+	end
+
+	def destroy
+		retval = @answer.delete
+		render_json_auto(retval) and return 
 	end
 
 	def estimate_remain_answer_time

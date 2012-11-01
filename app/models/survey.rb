@@ -1041,7 +1041,9 @@ class Survey
 		return ErrorEnum::OVERFLOW if page_index_2 < 0 or page_index_2 > self.pages.length - 1
 		self.pages[page_index_1+1..page_index_2].each do |page|
 			self.pages[page_index_1]["questions"] = self.pages[page_index_1]["questions"] + page["questions"]
-			self.pages.delete(page)
+		end
+		(page_index_2 - page_index_1).times do
+			self.pages.delete_at(page_index_1+1)
 		end
 		return self.save
 	end

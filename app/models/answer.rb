@@ -450,10 +450,7 @@ class Answer
 	#* true: when the answer content is cleared
 	#* ErrorEnum::WRONG_ANSWER_STATUS
 	def clear
-		if !self.is_preview
-			return ErrorEnum::WRONG_ANSWER_STATUS if self.is_finish || self.is_reject
-			return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_redo && !self.survey.is_pageup_allowed
-		end
+		return ErrorEnum::WRONG_ANSWER_STATUS if self.is_finish || self.is_reject
 		# clear the answer content
 		self.answer_content.each_key do |k|
 			self.answer_content[k] = nil
@@ -501,7 +498,8 @@ class Answer
 	#*retval*:
 	#* the status of the answer after updating
 	def update_status
-		if Time.now.to_i - self.created_at.to_i > 2.days.to_i
+		# an answer expires only when the survey is not published
+		if Time.now.to_i - self.created_at.to_i > 2.days.to_i && self.survey.publish_status != 8
 			self.set_reject
 			self.update_attributes(reject_type: 3, rejected_at: Time.now.to_i)
 		end
