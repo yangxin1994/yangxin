@@ -133,6 +133,8 @@ module Jobs
 				return analyze_sort(question.issue, answer_ary)
 			when QuestionTypeEnum::RANK_QUESTION
 				return analyze_rank(question.issue, answer_ary)
+			when QuestionTypeEnum::SCALE_QUESTION
+				return analyze_scale(question.issue, answer_ary)
 			end
 		end
 	end

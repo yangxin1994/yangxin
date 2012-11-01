@@ -100,7 +100,7 @@ module Jobs
 						segment_index = segment_index + 1
 						break if segment_index >= segment.length
 					end
-					histogram = histogram + 1
+					histogram[segment_index] = histogram[segment_index] + 1
 				end
 				result["histogram"] = histogram
 			end
@@ -218,6 +218,28 @@ module Jobs
 				answer["sort_result"].each_with_index do |input_id, sort_index|
 					result[input_id][sort_index] = result[input_id][sort_index] + 1 if sort_index < input_number
 				end
+			end
+	
+			return result
+		end
+
+		def analyze_scale(issue, answer_ary)
+			input_ids = issue["items"].map { |e| e["id"] }
+			scores = {}
+			input_ids.each { |input_id| scores[input_id] = [] }
+			
+			answer_ary.each do |answer|
+				answer.each do |input_id, value|
+					# value is 0-based, should be converted to score-based
+					scores[input_id] << value + 1 if !scores[input_id].nil? && value.to_i != -1
+				end
+			end
+	
+			result = {}
+			scores.each do |key, score_ary|
+				result[key] = []
+				result[key] << score_ary.length
+				result[key] << (score_ary.blank? ? -1 : score_ary.mean)
 			end
 	
 			return result

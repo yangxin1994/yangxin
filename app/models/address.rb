@@ -2,6 +2,7 @@
 require 'csv'
 class Address
 
+	@@all_address = nil
 	@@provinces = nil
 	@@province_cities = nil
 	@@city_towns = nil
@@ -47,6 +48,7 @@ class Address
 				:headers => false)
 
 			# init caches
+			@@all_address = []
 			@@provinces = []
 			@@province_cities = {}
 			@@city_towns = {}
@@ -60,6 +62,7 @@ class Address
 				row[0] = row[0].to_i
 				row[2] = row[2].to_i
 				# setup cache
+				@@all_address << row[0..1]
 				case row[2]
 				when 0
 					@@provinces << row[0..1]
@@ -76,6 +79,12 @@ class Address
 				end
 			end
 		end
+	end
+
+	def self.find_text_by_code(code)
+		self.ensure_cache
+		find_address = @@all_address.select { |e| e[0].to_i == code.to_i }
+		return find_address.blank? ? nil : find_address[0][1]
 	end
 
 	def self.find_provinces
