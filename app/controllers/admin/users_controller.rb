@@ -157,4 +157,20 @@ class Admin::UsersController < Admin::ApplicationController
 			format.json { render_json_auto @user, :only => @@user_attrs_filter }
 		end
 	end
+
+	# add diff class system_user interface
+	def create
+		retval = @current_user.create_user(params[:user])
+		respond_to do |format|
+			format.json { render_json_auto retval }
+		end
+	end
+
+	def list_by_role
+		render_json_auto User.where(role: params[:role].to_i).desc(:lock, :created_at).page(page).per(per_page)
+	end
+
+	def list_by_role_count
+		render_json_auto User.where(role: params[:role].to_i).count
+	end
 end
