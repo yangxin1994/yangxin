@@ -1068,6 +1068,12 @@ class Survey
 	end
 
 	def set_user_attr_survey(user_attr_survey)
+		if user_attr_survey.to_s == "true"
+			Survey.where(:user_attr_survey => true).each do |s|
+				s.user_attr_survey = false
+				s.save
+			end
+		end
 		self.user_attr_survey = user_attr_survey.to_s == "true"
 		self.save
 		return true

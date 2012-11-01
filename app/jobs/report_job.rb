@@ -69,17 +69,18 @@ module Jobs
 						end
 					when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
 						analysis_result = analyze_matrix_choice(question.issue, answers_transform[question_id])
-						text = matrix_choice_description(analysis_result, question)
+						text = matrix_choice_description(analysis_result, question.issue)
 					when QuestionTypeEnum::NUMBER_BLANK_QUESTION
 						analysis_result = analyze_number_blank(question.issue, answers_transform[question_id], component["value"]["format"] || [])
-						text = number_blank_description(analysis_result, question, component["value"]["format"] || [])
+						text = number_blank_description(analysis_result, question.issue, component["value"]["format"] || [])
 					when QuestionTypeEnum::TIME_BLANK_QUESTION
 						analysis_result = analyze_time_blank(question.issue, answers_transform[question_id])
-						text = time_blank_description(analysis_result, question, component["value"]["format"] || [])
+						text = time_blank_description(analysis_result, question.issue, component["value"]["format"] || [])
 					when QuestionTypeEnum::EMAIL_BLANK_QUESTION
 						analysis_result = analyze_email_blank(question.issue, answers_transform[question_id])
 					when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 						analysis_result = analyze_address_blank(question.issue, answers_transform[question_id])
+						text = address_blank_description(analysis_result, question.issue)
 					when QuestionTypeEnum::BLANK_QUESTION
 						analysis_result = analyze_blank(question.issue, answers_transform[question_id])
 					when QuestionTypeEnum::MATRIX_BLANK_QUESTION
@@ -88,8 +89,10 @@ module Jobs
 						analysis_result = analyze_table(question.issue, answers_transform[question_id])
 					when QuestionTypeEnum::CONST_SUM_QUESTION
 						analysis_result = analyze_const_sum(question.issue, answers_transform[question_id])
+						text = const_sum_description(analysis_result, question.issue)
 					when QuestionTypeEnum::SORT_QUESTION
 						analysis_result = analyze_sort(question.issue, answers_transform[question_id])
+						text = sort_description(analysis_result, question.issue)
 					when QuestionTypeEnum::RANK_QUESTION
 						analysis_result = analyze_rank(question.issue, answers_transform[question_id])
 					end
@@ -110,6 +113,72 @@ module Jobs
 			item = items.select { |e| e["id"] == input_id }
 			return nil if item.nil?
 			item_text = item[0]["content"]["text"]
+		end
+
+		def sort_description(analysis_result, issue)
+			return "" if analysis_result.blank?
+			first_index_dist = {}
+			second_index_dist = {}
+			analysis_result.each do |input_id, sort_number_ary|
+				first_index_dist[input_id] = sort_number_ary[0]
+				second_index_dist[input_id] = sort_number_ary[1]
+			end
+		end
+
+		def const_sum_description(analysis_result, issue)
+			return "" if analysis_result.blank?
+			analysis_result.each do |input_id, mean_weight|
+				results << { "text" => get_item_text_by_id(issue["items"], input_id), "mean_weight" => mean_weight.to_f }
+			end
+			results.sort_by! { |e| -e["mean_weight"] }
+			item_text_ary = results.map { |e| e["text"] }
+			mean_weight_ary = results.map { |e| e["mean_weight"] }
+			
+			text = "调查显示，被访者为#{item_text_ary[0]}分配的比重最高，平均为#{mean_weight_ary[0]}"
+			# one item
+			return text + "。" if results.length == 1
+			text = text + "，其次是#{item_text_ary[1]}，所占比重为#{mean_weight_ary[1]}"
+			# two items
+			return text + "。" if results.length == 2
+			# three items
+			return text + "，#{item_text_ary[2]}所占比重为#{mean_weight_ary[2]}。" if results.length == 3
+			# at least four items
+			item_text_string = item_text_ary[2..-1].join('、')
+			mean_weight_string = mean_weight_ary[2..-1].join('、')
+			return text + "，#{item_text_string}所占比重分别为#{mean_weight_string}。"
+		end
+
+		def address_blank_description(analysis_result, issue)
+			total_number = 0
+			return "" if analysis_result.blank?
+			analysis_result.each do |region_code, number|
+				address_text = Address.find_text_by_code(region_code)
+				next if address_text.nil?
+				total_number = total_number + number
+				results << { "text" => address_text, "number" => number.to_f }
+			end
+			results.sort_by! { |e| -e["number"] }
+			address_text_ary = results.map { |e| e["text"] }
+			ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
+
+			text = "调查显示，被访者中，#{ratio_ary[0]}%的人填写#{address_text_ary[0]}，所占比例最高"
+			# only one address
+			return text + "。" if results.length == 1
+			text = text + "，其次是%#{address_text_ary[1]}，填写比例是#{ratio_ary[1]}"
+			# two addresses
+			return text + "。" if results.length == 2
+			# three addresses
+			return text + "，填写#{address_text_ary[2]}的比例为#{ratio_ary[2]}%。" if results.length == 3
+			# four addresses
+			return text + "，填写#{address_text_ary[2]}、#{address_text_ary[3]}的比例分别为#{ratio_ary[2]}%、#{ratio_ary[3]}%。" if results.length == 4
+			# at least five addresses
+			text = text + "，填写#{address_text_ary[2]}、#{address_text_ary[3]}、#{address_text_ary[4]}的比例分别为#{ratio_ary[2]}%、#{ratio_ary[3]}%、#{ratio_ary[4]}%"
+			return text + "。" if results.length == 5
+			# six addresses
+			return text + "，另有#{ratio_ary[5]}%的人填写了#{address_text_ary[5]}。" if results.length == 6
+			# more than six addresses
+			other_ratio = 100 - ratio_array[1..4].sum
+			return text + "，另有#{other_ratio}%的人填写了其他。"
 		end
 
 		def convert_time_interval_to_text(format, v1, v2)
@@ -279,8 +348,7 @@ module Jobs
 			end
 		end
 
-		def time_blank_description(analysis_result, question, segments)
-			issue = question.issue
+		def time_blank_description(analysis_result, issue, segments)
 			histogram = analysis_result["histogram"]
 			mean = convert_time_mean_to_text(issue.format, analysis_result["mean"])
 			text = "调查显示"
@@ -300,7 +368,7 @@ module Jobs
 			end
 			results.sort_by! { |e| -e["number"] }
 			interval_text_ary = results.map { |e| e["text"] }
-			ratio_ary = results.map { |e| e["number"] / total_number }
+			ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
 			text = text + "，填写#{interval_text_ary[0]}的被访者比例最高，为#{ratio_ary[0]}%"
 			# one interval
 			return text + "；被访者填写的平均值为#{mean}。" if results.length == 1
@@ -321,7 +389,7 @@ module Jobs
 			return text
 		end
 
-		def number_blank_description(analysis_result, question, segments)
+		def number_blank_description(analysis_result, issue, segments)
 			histogram = analysis_result["histogram"]
 			mean = analysis_result["mean"]
 			text = "调查显示"
@@ -341,7 +409,7 @@ module Jobs
 			end
 			results.sort_by! { |e| -e["number"] }
 			interval_text_ary = results.map { |e| e["text"] }
-			ratio_ary = results.map { |e| e["number"] / total_number }
+			ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
 			text = text + "，填写#{interval_text_ary[0]}的被访者比例最高，为#{ratio_ary[0]}%"
 			# one interval
 			return text + "；被访者填写的平均值为#{mean}。" if results.length == 1
@@ -362,8 +430,7 @@ module Jobs
 			return text
 		end
 
-		def matrix_choice_description(analysis_result, question)
-			issue = question.issue
+		def matrix_choice_description(analysis_result, issue)
 			item_number = issue.items.length
 			text = "调查显示，"
 			# get description for each row respectively
@@ -384,7 +451,7 @@ module Jobs
 				end
 				cur_row_results.sort_by! { |e| -e["select_number"] }
 				item_text_ary = cur_row_results.map { |e| e["text"] }
-				ratio_ary = cur_row_results.map { |e| e["select_number"] / cur_row_total_number }
+				ratio_ary = cur_row_results.map { |e| (e["select_number"] * 100 / cur_row_total_number).round }
 				# generate text for this row
 				cur_row_text_ary
 				item_text_ary.each_with_index do |item_text, index|
@@ -395,8 +462,7 @@ module Jobs
 			return text
 		end
 
-		def single_choice_description(analysis_result, question)
-			issue = question.issue
+		def single_choice_description(analysis_result, issue)
 			total_number = 0
 			results = []
 			analysis_result.each do |input_id, select_number|
@@ -408,7 +474,7 @@ module Jobs
 			temp_results = results.clone
 			temp_results.sort_by! { |e| -e["select_number"] }
 			item_text_ary = temp_results.map { |e| e["text"] }
-			ratio_ary = temp_results.map { |e| e["select_number"] / total_number }
+			ratio_ary = temp_results.map { |e| (e["select_number"] * 100 / total_number).round }
 			text = "调查显示，#{ratio_ary[0]}%的人选择了#{item_text_ary[0]}"
 			# only one item
 			return text + "。" if temp_results.length == 1
@@ -430,11 +496,10 @@ module Jobs
 			return text
 		end
 
-		def multiple_choice_description(analysis_result, question, answer_number, chart_type)
+		def multiple_choice_description(analysis_result, issue, answer_number, chart_type)
 			# the description for multiple choice question with pie chart is exactly the same as the single choice questoin
-			return single_choice_description(analysis_result, question) if chart_type == "pie"
+			return single_choice_description(analysis_result, issue) if chart_type == "pie"
 
-			issue = question.issue
 			results = []
 			analysis_result.each do |input_id, select_number|
 				item_text = get_item_text_by_id(input_id)
@@ -444,7 +509,7 @@ module Jobs
 			temp_results = results.clone
 			temp_results.sort_by! { |e| -e["select_number"] }
 			item_text_ary = temp_results.map { |e| e["text"] }
-			ratio_ary = temp_results.map { |e| e["select_number"] / answer_number }
+			ratio_ary = temp_results.map { |e| (e["select_number"] * 100 / answer_number).round }
 
 			text = "调查显示，#{ratio_ary[0]}%的人选择了#{item_text_ary[0]}，所占比例最高"
 			# only one item
