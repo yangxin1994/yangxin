@@ -254,7 +254,6 @@ OopsData::Application.routes.draw do
 		end
 		member do
 			get 'load_question'
-			delete 'destroy_preview'
 			post 'clear'
 			post 'submit_answer'
 			post 'finish'
