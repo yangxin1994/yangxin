@@ -109,10 +109,8 @@ module Jobs
 
 		def analyze_time_blank(issue, answer_ary, segment=[])
 			result = {}
-			# convert the time format from array to integer
-			answer_ary = answer_ary.map! do |answer|
-				Time.mktime(*(answer.map {|e| e.to_i })).to_i
-			end
+			# the raw answers are in the unit of milliseconds
+			answer_ary.map! { |e| (e / 1000).round }
 			answer_ary.sort!
 			result["mean"] = answer_ary.mean
 			if !segment.blank?
@@ -142,27 +140,10 @@ module Jobs
 
 		def analyze_address_blank(issue, answer_ary)
 			result = {}
-			if issue["format"].to_i & 2
-				# county is required
-				result = Address.county_hash
-				answer_ary = answer_ary.map! do |answer|
-					answer[2].to_i
-				end
-			elsif issue["format"].to_i & 4
-				# city is required
-				result = Address.province_hash
-				answer_ary = answer_ary.map! do |answer|
-					answer[1].to_i
-				end
-			else
-				# only province is required
-				result = Address.city_hash
-				answer_ary = answer_ary.map! do |answer|
-					answer[0].to_i
-				end
-			end
 			answer_ary.each do |value|
-				result[value] = result[value] + 1 if !result[value].nil?
+				region_code = value["address"]
+				result[region_code] = 0 if result[region_code].nil?
+				result[region_code] = result[region_code] + 1
 			end
 			return result
 		end
