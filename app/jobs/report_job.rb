@@ -123,7 +123,8 @@ module Jobs
 			analysis_result.each do |input_id, ele|
 				if ele[1] != -1
 					item_text = get_item_text_by_id(input_id)
-					results << { "text" => , "score" => ele[1] } 
+					next if item_text.nil?
+					results << { "text" => item_text, "score" => ele[1] } 
 				end
 			end
 			return "" if results.blank?

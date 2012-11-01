@@ -2,6 +2,7 @@
 require 'csv'
 class Address
 
+	@@all_address = nil
 	@@provinces = nil
 	@@province_cities = nil
 	@@city_towns = nil
@@ -47,7 +48,7 @@ class Address
 				:headers => false)
 
 			# init caches
-			@all_address
+			@@all_address = []
 			@@provinces = []
 			@@province_cities = {}
 			@@city_towns = {}
