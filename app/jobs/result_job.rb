@@ -223,6 +223,28 @@ module Jobs
 			return result
 		end
 
+		def analyze_scale(issue, answer_ary)
+			input_ids = issue["items"].map { |e| e["id"] }
+			scores = {}
+			input_ids.each { |input_id| scores[input_id] = [] }
+			
+			answer_ary.each do |answer|
+				answer.each do |input_id, value|
+					# value is 0-based, should be converted to score-based
+					scores[input_id] << value + 1 if !scores[input_id].nil? && value.to_i != -1
+				end
+			end
+	
+			result = {}
+			scores.each do |key, score_ary|
+				result[key] = []
+				result[key] << score_ary.length
+				result[key] << (score_ary.blank? ? -1 : score_ary.mean)
+			end
+	
+			return result
+		end
+
 		def analyze_rank(issue, answer_ary)
 			input_ids = issue["items"].map { |e| e["id"] }
 			input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]

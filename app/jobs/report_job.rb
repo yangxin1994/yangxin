@@ -55,13 +55,13 @@ module Jobs
 						analysis_result = analyze_choice(question.issue, answers_transform[question_id])
 						# judge whether this is a single choice or multiple choice
 						if question.issue["max_choice"] == 1
-							text = single_choice_description(analysis_result, question)
+							text = single_choice_description(analysis_result, question.issue)
 							analysis_results << {"question_type" => "single_choice",
 												"result" => analysis_result,
 												"text" => text}
 						else
-							pie_text = multiple_choice_description(analysis_result, question, answers.length, 'pie')
-							bar_text = multiple_choice_description(analysis_result, question, answers.length, 'bar')
+							pie_text = multiple_choice_description(analysis_result, question.issue, answers.length, 'pie')
+							bar_text = multiple_choice_description(analysis_result, question.issue, answers.length, 'bar')
 							analysis_results << {"question_type" => "single_choice",
 												"result" => analysis_result,
 												"pie_text" => pie_text,
@@ -92,9 +92,12 @@ module Jobs
 						text = const_sum_description(analysis_result, question.issue)
 					when QuestionTypeEnum::SORT_QUESTION
 						analysis_result = analyze_sort(question.issue, answers_transform[question_id])
-						text = sort_description(analysis_result, question.issue)
+						text = sort_description(analysis_result, question.issue, answers.length)
 					when QuestionTypeEnum::RANK_QUESTION
 						analysis_result = analyze_rank(question.issue, answers_transform[question_id])
+					when QuestionTypeEnum::SCALE_QUESTION
+						analysis_result = analyze_scale(question.issue, answers_transform[question_id])
+						text = scale_description(analysis_result, question.issue, answers.length)
 					end
 				else
 					# this is a cross questions analysis
@@ -115,20 +118,83 @@ module Jobs
 			item_text = item[0]["content"]["text"]
 		end
 
-		def sort_description(analysis_result, issue)
+		def scale_description(analysis_result, issue)
+			results = []
+			analysis_result.each do |input_id, ele|
+				if ele[1] != -1
+					item_text = get_item_text_by_id(input_id)
+					results << { "text" => , "score" => ele[1] } 
+				end
+			end
+			return "" if results.blank?
+			results.sort_by! { |e| -e["ratio"] }
+			item_text_ary = results.map { |e| e["text"] }
+			score_ary = results.map { |e| e["score"] }
+
+			text = "调查显示，#{item_text_ary[0]}的平均得分最高，为#{score_ary[0]}"
+			# one item
+			return text + "。" if item_text_ary.length == 1
+			text = text + "，其次是#{item_text_ary[1]}，平均得分是#{score_ary[1]}"
+			# two items
+			return text + "。" if item_text_ary.length == 2
+			# three items
+			return text + "，#{item_text_ary[2]}的平均得分为#{score_ary[2]}。"
+			# more than three items
+			item_text_string = item_text_ary[2..-1].join('、')
+			score_string = score_ary[2..-1].join('、')
+			return text + "，#{item_text_string}的平均得分分别为#{score_string}。"
+		end
+
+		def sort_description(analysis_result, issue, answer_number)
 			return "" if analysis_result.blank?
 			first_index_dist = {}
 			second_index_dist = {}
 			analysis_result.each do |input_id, sort_number_ary|
-				first_index_dist[input_id] = sort_number_ary[0]
-				second_index_dist[input_id] = sort_number_ary[1]
+				first_index_dist[input_id] = (sort_number_ary[0] * 100.0 / answer_number).round
+				second_index_dist[input_id] = (sort_number_ary[1] * 100.0 / answer_number).round if sort_number_ary.length > 1
+			end
+			# handle the result for the first index
+			first_index_results = []
+			first_index_dist.each do |input_id, ratio|
+				item_text = get_item_text_by_id(issue["items"], input_id)
+				next if item_text.nil?
+				first_index_results << { "text" => item_text, "ratio" => ratio }
+			end
+			first_index_results.sort_by! { |e| -e["ratio"] }
+			first_index_item_text_ary = results.map { |e| e["text"] }
+			first_index_ratio_ary = results.map { |e| e["ratio"] }
+			text = "调查显示，将#{first_index_results_text_ary[0]}排在第一位的被访者所占比例最高，为#{first_index_ratio_ary[0]}%"
+			if first_index_results_text_ary.length == 1
+			elsif first_index_results_text_ary.lenght == 2
+				text = text + "，其次是#{first_index_results_text_ary[1]}，所占比例为#{first_index_ratio_ary[1]}%"
+			else
+				text = text + "，其次是#{first_index_results_text_ary[1]}和#{first_index_results_text_ary[2]}，所占比例为#{first_index_ratio_ary[1]}%和#{first_index_ratio_ary[2]}%"
+			end
+			# handle the result for the second index
+			second_index_results = []
+			second_index_dist.each do |input_id, ratio|
+				item_text = get_item_text_by_id(issue["items"], input_id)
+				next if item_text.nil?
+				second_index_results << { "text" => item_text, "ratio" => ratio }
+			end
+			second_index_results.sort_by! { |e| -e["ratio"] }
+			second_index_item_text_ary = results.map { |e| e["text"] }
+			second_index_ratio_ary = results.map { |e| e["ratio"] }
+			return text + "。" if second_index_results_text_ary.length == 1
+			text = text + "；在第二位的排序中，#{second_index_results_text_ary[0]}所占比例最高，为#{second_index_ratio_ary[0]}%"
+			if second_index_results_text_ary.length == 2
+				return text + "，其次是#{second_index_results_text_ary[1]}，所占比例为#{second_index_ratio_ary[1]}%。"
+			else
+				return text + "，其次是#{second_index_results_text_ary[1]}和#{second_index_results_text_ary[2]}，所占比例为#{second_index_ratio_ary[1]}%和#{second_index_ratio_ary[2]}%。"
 			end
 		end
 
 		def const_sum_description(analysis_result, issue)
 			return "" if analysis_result.blank?
 			analysis_result.each do |input_id, mean_weight|
-				results << { "text" => get_item_text_by_id(issue["items"], input_id), "mean_weight" => mean_weight.to_f }
+				item_text = get_item_text_by_id(issue["items"], input_id)
+				next if item_text.nil?
+				results << { "text" => item_text, "mean_weight" => mean_weight.to_f }
 			end
 			results.sort_by! { |e| -e["mean_weight"] }
 			item_text_ary = results.map { |e| e["text"] }
