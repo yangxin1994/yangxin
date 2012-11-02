@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Admin::LotteriesController < Admin::ApplicationController
 	
 	def index

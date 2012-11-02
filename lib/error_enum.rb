@@ -131,7 +131,7 @@ module ErrorEnum
 ###
 
 	# Gifts Error Code (10)
-	PRESENT_NOT_FOUND= 21001
+	GIFT_NOT_FOUND= 21001
 	INVALID_PRESENT_ID = 21002
 	# Messages Error Code (11)
 	MESSAGE_NOT_FOUND = 21101

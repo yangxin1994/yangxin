@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'test_helper'
 
 class OrdersControllerTest < ActionController::TestCase
@@ -11,7 +10,7 @@ class OrdersControllerTest < ActionController::TestCase
   end
 
   test "should show a order list" do
-    list = [:index, :for_cash, :for_realgoods, :for_virtualgoods, :for_lottery]
+    list = [:index, :for_cash, :for_entity, :for_virtual, :for_lottery]
     list.each do |e|
       get e, :page => 1, :format => :json, :auth_key => @auth_key
     pp @response.body
@@ -27,7 +26,7 @@ class OrdersControllerTest < ActionController::TestCase
                     :status => 0,
                     :recipient => "Mazt",
                     :phone_number => "321464534",
-                    :realgoods_receive_info =>{:address => "Matzs address",
+                    :entity_receive_info =>{:address => "Matzs address",
                                                :post_code => "10000"
                     },
                     :user => @user_bar
