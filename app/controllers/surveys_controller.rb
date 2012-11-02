@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'array'
 require 'error_enum'
 class SurveysController < ApplicationController
@@ -6,7 +5,7 @@ class SurveysController < ApplicationController
 	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :update_deadline]
 	before_filter :check_normal_survey_existence, :except => [:new, :index, :recover, :clear, :add_tag, :remove_tag, :show, :estimate_answer_time]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
-
+	
 	def check_survey_existence
 		@survey = (@current_user.is_admin || @current_user.is_super_admin) ? Survey.find_by_id(params[:id]) : @current_user.surveys.find_by_id(params[:id])
 		if @survey.nil?

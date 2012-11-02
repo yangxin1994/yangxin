@@ -28,7 +28,7 @@ class Admin::OrdersController < Admin::ApplicationController
 	end
 
 	def_each :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed do |method_name|
-		respond_and_render_json true, :only => [:type] do
+		respond_and_render_json true do
 			Order.send(method_name).page(page)
 		end
 	end

@@ -1,4 +1,6 @@
+# coding: utf-8
 require 'error_enum'
+require 'question_io'
 #The question object has the following structure
 # {
 #  "question_id" : id of the question(string),
@@ -38,91 +40,18 @@ class BasicQuestion
 
   ATTR_NAME_ARY = %w[content note]
 
-  def header(qindex)
-    retval = []
-    header_prefix = "q#{qindex}"
-    input = "-input"
-    case question_type
-    ##### CHOICE_QUESTION #####
-    when QuestionTypeEnum::CHOICE_QUESTION
-      if issue["max_choice"].to_i > 1
-        issue["choices"].each_index do |i|
-          retval << header_prefix + "-c#{i + 1}"
-        end
-      else
-        retval << header_prefix
-      end
-      if issue["other_item"]["has_other_item"]
-        retval << header_prefix + input
-      end
-    #end
-    ##### MATRIX_CHOICE_QUESTION #####
-    when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
-      if issue["max_choice"].to_i > 1
-        issue["row_id"].each_index do |r|
-          issue["choices"].each_index do |i|
-            retval << header_prefix  + "-r#{r + 1}" + "-c#{i + 1}"
-          end
-        end
-      else
-        issue["row_id"].each_index do |r|
-          retval << header_prefix  + "-r#{r + 1}"
-        end
-      end
-   ##### QuestionTypeEnum::TEXT_BLANK_QUESTION..QuestionTypeEnum::ADDRESS_BLANK_QUESTION #####
-    when QuestionTypeEnum::TEXT_BLANK_QUESTION..QuestionTypeEnum::ADDRESS_BLANK_QUESTION
-      retval << header_prefix
-    ##### BLANK_QUESTION #####
-    when QuestionTypeEnum::BLANK_QUESTION
-      issue["inputs"].each_index do |i|
-        retval << header_prefix  + "-c#{i + 1}"
-      end
-    # ##### MATRIX_BLANK_QUESTION #####
-    when QuestionTypeEnum::MATRIX_BLANK_QUESTION
-      issue["row_id"].each_index do |r|
-        issue["inputs"].each_index do |i|
-          retval << header_prefix  + "-r#{r + 1}" + "-c#{i + 1}"
-        end
-      end
-    # ##### CONST_SUM_QUESTION #####
-    when QuestionTypeEnum::CONST_SUM_QUESTION
-      issue["items"].each_index do |i|
-        retval << header_prefix + "-c#{i + 1}"
-      end
-      if issue["other_item"]["has_other_item"]
-        retval << header_prefix + input
-        retval << header_prefix + input + "-value"
-      end
-    # ##### SORT_QUESTION #####
-    when QuestionTypeEnum::SORT_QUESTION
-      issue["items"].each_index do |i|
-        retval << header_prefix + "-c#{i + 1}"
-      end
-      if issue["other_item"]["has_other_item"]
-        retval << header_prefix + input
-        retval << header_prefix + input + "-value"
-      end
-    # ##### RANK_QUESTION #####
-    when QuestionTypeEnum::RANK_QUESTION
-      issue["items"].each_index do |i|
-        retval << header_prefix + "-c#{i + 1}"
-        if issue["items"][i]["has_unknow"]
-          retval << header_prefix + "-c#{i + 1}" + "-unknow"
-        end
-      end
-      if issue["other_item"]["has_other_item"]
-        retval << header_prefix + input
-        retval << header_prefix + input + "-value"
-      end
+  def csv_header(header_prefix)
+    q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question_type}"] + "Io").new(self)
+    q.csv_header(header_prefix)
+  end
 
-    # ##### PARAGRAPH #####
-    # when QuestionTypeEnum::PARAGRAPH
-    # ##### PARAGRAPH #####
-    # when QuestionTypeEnum::FILE_QUESTION
-    # ##### TABLE_QUESTION #####
-    # when QuestionTypeEnum::TABLE_QUESTION
-    end
-    retval
+  def spss_header(header_prefix)
+    q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question_type}"] + "Io").new(self)
+    q.spss_header(header_prefix)
+  end
+
+  def excel_header(header_prefix)
+    spss_header(header_prefix).map{|s| s['spss_label']}
   end
 
   def self.has_question_type(question_type)

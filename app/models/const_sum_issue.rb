@@ -64,7 +64,7 @@ class ConstSumIssue < Issue
 		self.items.each do |item|
 			text_length = text_length + item["content"]["text"].length
 		end
-		text_length = text_length + self.other_item["content"]["text"] if !self.other_item.nil? && self.other_item["has_other_item"] == true
+		text_length = text_length + self.other_item["content"]["text"].length if !self.other_item.nil? && self.other_item["has_other_item"] == true
 		return text_length / OOPSDATA[RailsEnv.get_rails_env]["words_per_second"].to_i + ANSWER_TIME
 	end
 

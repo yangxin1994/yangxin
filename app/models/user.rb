@@ -10,6 +10,7 @@ class User
 	field :email, :type => String
 	field :username, :type => String
 	field :password, :type => String
+	field :true_name, :type => String
 # 0 unregistered
 # 1 registered but not activated
 # 2 registered, activated, but not signed in
@@ -69,7 +70,8 @@ class User
 	#before_save :set_updated_at
 	#before_update :set_updated_at
 
-	attr_accessible :email, :username, :password, :registered_at
+	# add role, true_name to create system_user
+	attr_accessible :email, :username, :password, :registered_at, :role, :true_name
 
 	has_many :surveys
 	has_many :groups
@@ -274,6 +276,8 @@ class User
 		end
 		# set the current user's status as registered but not activated
 		current_user.status = 1
+		# attr_accessible :role
+		current_user.role = 0
 		current_user.save
 		return current_user
 	end
@@ -348,7 +352,7 @@ class User
 	def self.login_with_auth_key(auth_key)
 		user = User.find_by_auth_key(auth_key)
 		return ErrorEnum::AUTH_KEY_NOT_EXIST if user.nil?
-		return {"status" => user.status, "auth_key" => user.auth_key, "expire_at" => user.auth_key_expire_time, "role" => user.role}
+		return {"email" => user.email, "status" => user.status, "auth_key" => user.auth_key, "expire_at" => user.auth_key_expire_time, "role" => user.role}
 	end
 
 	#*description*: reset password for an user, used when the user forgets its password
@@ -508,6 +512,19 @@ class User
 
 	def self.ids_not_in_blacklist
 		return User.any_of({color: 0}, {color: 1})
+	end
+
+	def create_user(new_user)
+		return ErrorEnum::REQUIRE_ADMIN unless self.is_admin
+		return ErrorEnum::REQUIRE_SUPER_ADMIN if new_user["role"].to_s.to_i > 16 and !self.is_super_admin
+		return ErrorEnum::EMAIL_EXIST if User.where(email: new_user["email"].to_s.strip).count >0
+		return ErrorEnum::USERNAME_EXIST if User.where(username: new_user["username"].to_s.strip).count >0
+		new_user["password"] = "oopsdata" unless new_user["password"]
+		new_user["password"] = Encryption.encrypt_password(new_user["password"])
+		one_user = User.new(new_user)
+		one_user.status =4 # do not need activate
+		return ErrorEnum:SAVE_ERROR unless one_user.save
+		return true
 	end
 
 	def update_user(attributes)

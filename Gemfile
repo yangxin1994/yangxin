@@ -7,7 +7,7 @@ gem 'rails', '3.1.0'
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 
-
+gem 'rack-protection'
 gem 'mongoid', " ~> 2.4"
 gem 'bson_ext'
 gem 'ezcrypto'
@@ -22,6 +22,7 @@ gem 'faker'
 
 gem 'haml'
 gem 'haml-rails'
+gem 'sass'
 
 gem 'pry-rails'
 
@@ -36,6 +37,7 @@ group :assets do
   gem 'coffee-rails', "~> 3.1.0"
   gem 'uglifier'
 end
+
 
 gem 'jquery-rails'
 #gem 'mini_captcha', :path => "~/Rrojects/mini_captcha/"

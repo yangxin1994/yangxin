@@ -25,7 +25,7 @@ class Order
 	validates :type, :presence_ext => true,
 									 :inclusion => { :in => 0..3 },
 									 :numericality => true
-	validates :status, :presence => true,
+	validates :status, :presence_ext => true,
 									   :inclusion => { :in => -3..3 },
 										 :numericality => true
 

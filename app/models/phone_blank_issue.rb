@@ -24,6 +24,7 @@ class PhoneBlankIssue < Issue
 		answer_time = 0
 		answer_time = answer_time + 1 if (phone_type & 2) != 0
 		answer_time = answer_time + 1 if (phone_type & 1) != 0
+		return answer_time
 	end
 
 	#*description*: serialize the current instance into a question object

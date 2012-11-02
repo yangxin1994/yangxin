@@ -26,12 +26,19 @@ OopsData::Application.routes.draw do
 			collection do 
 				get 'blacks', 'blacks_count', 'whites', 'whites_count', 'count', 
 					'deleteds', 'deleteds_count', 
-					'email_count', 'true_name_count', 'username_count'
+					'email_count', 'true_name_count', 'username_count',
+					'list_by_role', 'list_by_role_count'
 			end
 
-			member do 
+			member do
 				get 'system_pwd', 'black', 'white'
 				post 'set_color', 'set_role', 'set_lock'
+			end
+		end
+
+		resources :surveys do 
+			collection do 
+				get 'count', 'list_by_status', 'list_by_status_count'
 			end
 		end
 
@@ -50,17 +57,7 @@ OopsData::Application.routes.draw do
 				get 'count', 'list_by_title_count', 'activated_count', 'unactivate_count'
 			end
 		end
-		resources :system_users do 
-			member do 
-				post 'lock', 'unlock'
-			end
-			collection do 
-				get 'count', 'answer_anuditors', 'answer_anuditors_count',
-				'survey_auditors', 'survey_auditors_count',
-				'entry_clerks', 'entry_clerks_count',
-				'interviewers', 'interviewers_count'
-			end
-		end
+
 		resources :feedbacks do
 			collection do 
 				get 'count', 'list_by_type_count', 'list_by_type_and_value_count', 
@@ -82,6 +79,9 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :template_questions do
+			collection	 do 
+				get 'count', 'list_by_type', 'list_by_type_count'
+			end
 		end
 
 	# The priority is based upon order of creation:
@@ -155,6 +155,7 @@ OopsData::Application.routes.draw do
 			put 'save_meta_data'
 			get 'clone'
 			get 'recover'
+			get 'export_csv'
 			get 'clear'
 			put 'update_tags'
 			put 'add_tag'
@@ -170,6 +171,10 @@ OopsData::Application.routes.draw do
 			get 'show_access_control_setting'
 			get 'set_random_quality_control_questions'
 			get 'get_random_quality_control_questions'
+
+			get 'spss_header'
+			get 'update_deadline'
+
 			get 'show_quality_control'
 			get 'check_progress'
 			get 'estimate_answer_time'
@@ -183,6 +188,7 @@ OopsData::Application.routes.draw do
 				put 'split'
 				put 'combine'
 			end
+
 		end
 		resources :questions do
 			collection do
@@ -214,6 +220,9 @@ OopsData::Application.routes.draw do
 				get :job_progress
         get :data_list
         get :analysis
+        get :to_spss
+        get :to_excel
+        put :finish
 			end
 		end
 
@@ -246,6 +255,7 @@ OopsData::Application.routes.draw do
 			post 'submit_answer'
 			post 'finish'
 			get 'estimate_remain_answer_time'
+			delete 'destroy_preview'
 		end
 	end
 
@@ -263,7 +273,7 @@ OopsData::Application.routes.draw do
 	resources :gifts do
 		collection do
 			get :index, :virtualgoods, :cash, :realgoods, :stockout
-			get 'edit'
+			get :edit
 		end
 	end
 	resources :orders do
@@ -273,6 +283,11 @@ OopsData::Application.routes.draw do
 	end
 	resources :points, :only => 'index'
 
+
+	resources :export_results do
+		post :set_spss_export_process
+		post :set_excel_export_process
+	end
 	resources :tools do
 		collection do
 			get :find_provinces
@@ -280,6 +295,7 @@ OopsData::Application.routes.draw do
 			get :find_towns_by_city
 			post :send_email
 		end
+
 	end
 
 	namespace :admin do

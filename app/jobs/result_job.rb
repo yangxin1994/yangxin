@@ -1,8 +1,10 @@
+#encoding: utf-8
+
 module Jobs
 
 	class ResultJob
 		include Resque::Plugins::Status
-
+		include ConnectDotNet
 		@queue = :result_job
 
 		def self.answers(survey_id, filter_index, include_screened_answer)
@@ -21,6 +23,36 @@ module Jobs
 			end
 			return filtered_answers	
 		end
+
+    def filtered_answers
+      #@survey.answers.not_preview.finished_and_screened
+      DataListResult.find_by_result_key(@data_list_result.result_key).answer_info
+    end
+
+    def answer_contents
+      a = filtered_answers
+      @retval = []
+      q = @survey.all_questions_type
+      p "========= 准备完毕 ========="
+      @result.answers_count = a.size
+      a.each_with_index do |answer, index|
+        line_answer = []
+        i = -1
+        #begin
+          #TODO 异常处理
+          answer.answer_content.each do |k, v|
+            line_answer += q[i += 1].answer_content(v)
+          end
+        #end
+        set_status({"export_answers_progress" => (index + 1) * 1.0 / @result.answers_count })
+        
+        p "========= 转出 #{index} 条 进度 #{set_status["export_answers_progress"]} =========" if index%10 == 0
+        @retval << line_answer
+      end
+      @result.answer_contents = @retval
+      @result.save
+      @retval
+    end
 
 		def analyze_choice(issue, answer_ary)
 			input_ids = issue["items"].map { |e| e["id"] }
@@ -68,7 +100,7 @@ module Jobs
 						segment_index = segment_index + 1
 						break if segment_index >= segment.length
 					end
-					histogram = histogram + 1
+					histogram[segment_index] = histogram[segment_index] + 1
 				end
 				result["histogram"] = histogram
 			end
@@ -77,10 +109,8 @@ module Jobs
 
 		def analyze_time_blank(issue, answer_ary, segment=[])
 			result = {}
-			# convert the time format from array to integer
-			answer_ary = answer_ary.map! do |answer|
-				Time.mktime(*(answer.map {|e| e.to_i })).to_i
-			end
+			# the raw answers are in the unit of milliseconds
+			answer_ary.map! { |e| (e / 1000).round }
 			answer_ary.sort!
 			result["mean"] = answer_ary.mean
 			if !segment.blank?
@@ -110,27 +140,10 @@ module Jobs
 
 		def analyze_address_blank(issue, answer_ary)
 			result = {}
-			if issue["format"].to_i & 2
-				# county is required
-				result = Address.county_hash
-				answer_ary = answer_ary.map! do |answer|
-					answer[2].to_i
-				end
-			elsif issue["format"].to_i & 4
-				# city is required
-				result = Address.province_hash
-				answer_ary = answer_ary.map! do |answer|
-					answer[1].to_i
-				end
-			else
-				# only province is required
-				result = Address.city_hash
-				answer_ary = answer_ary.map! do |answer|
-					answer[0].to_i
-				end
-			end
 			answer_ary.each do |value|
-				result[value] = result[value] + 1 if !result[value].nil?
+				region_code = value["address"]
+				result[region_code] = 0 if result[region_code].nil?
+				result[region_code] = result[region_code] + 1
 			end
 			return result
 		end
@@ -186,6 +199,28 @@ module Jobs
 				answer["sort_result"].each_with_index do |input_id, sort_index|
 					result[input_id][sort_index] = result[input_id][sort_index] + 1 if sort_index < input_number
 				end
+			end
+	
+			return result
+		end
+
+		def analyze_scale(issue, answer_ary)
+			input_ids = issue["items"].map { |e| e["id"] }
+			scores = {}
+			input_ids.each { |input_id| scores[input_id] = [] }
+			
+			answer_ary.each do |answer|
+				answer.each do |input_id, value|
+					# value is 0-based, should be converted to score-based
+					scores[input_id] << value + 1 if !scores[input_id].nil? && value.to_i != -1
+				end
+			end
+	
+			result = {}
+			scores.each do |key, score_ary|
+				result[key] = []
+				result[key] << score_ary.length
+				result[key] << (score_ary.blank? ? -1 : score_ary.mean)
 			end
 	
 			return result

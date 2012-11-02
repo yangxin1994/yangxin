@@ -7,7 +7,7 @@ class Result
 
 	field :job_id, :type => String
 	field :result_key, :type => String
-	field :finished, :type => Boolean, default: false
+	field :status, :type => Integer, default: 0
 	field :ref_result_id, :type => String
 
 	belongs_to :survey
@@ -42,6 +42,9 @@ class Result
 					"duration_result" => result.duration_result,
 					"channel_result" => result.channel_result,
 					"answers_result" => result.answers_result}
+		when "ExportResult"
+			# TODO 返回结果
+			return result.file_uri
 		end
 	end
 
@@ -70,8 +73,33 @@ class Result
 			# the third part is to analyze data
 			s2 = status["analyze_answer_progress"].to_f
 			s = s1 * 0.5 + s2 * 0.5
+		when "to_spss"
+			s1 = status["export_answers_progress"]
+			if s1 < 1
+				s = s1 * 0.6
+			else
+				r = ConnectDotNet::get_data("/get_progress") { result.result_key }
+				s2 = r["status"]
+				s = s1 * 0.6 + s2 * 0.4
+			end
+		when "to_excel"
+			s1 = status["export_answers_progress"]
+			if s1 < 1
+				s = s1 * 0.6
+			else
+				r = ConnectDotNet::get_data("/get_progress") { result.result_key }
+				s2 = r["status"]
+				s = s1 * 0.6 + s2 * 0.4
+			end
 		end
 		# the job has not been finished, the progress cannot be greater than 0.99
 		return [s, 0.99].min
 	end
+
+	def self.generate_result_key(answers)
+		answer_ids = answers.map { |e| e._id.to_s }
+		result_key = Digest::MD5.hexdigest("analyze_result-#{answer_ids.to_s}")
+		return result_key
+	end
+
 end
