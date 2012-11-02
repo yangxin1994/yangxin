@@ -22,6 +22,7 @@ gem 'faker'
 
 gem 'haml'
 gem 'haml-rails'
+gem 'sass'
 
 gem 'pry-rails'
 

@@ -1046,7 +1046,9 @@ class Survey
 		return ErrorEnum::OVERFLOW if page_index_2 < 0 or page_index_2 > self.pages.length - 1
 		self.pages[page_index_1+1..page_index_2].each do |page|
 			self.pages[page_index_1]["questions"] = self.pages[page_index_1]["questions"] + page["questions"]
-			self.pages.delete(page)
+		end
+		(page_index_2 - page_index_1).times do
+			self.pages.delete_at(page_index_1+1)
 		end
 		return self.save
 	end
@@ -1073,6 +1075,12 @@ class Survey
 	end
 
 	def set_user_attr_survey(user_attr_survey)
+		if user_attr_survey.to_s == "true"
+			Survey.where(:user_attr_survey => true).each do |s|
+				s.user_attr_survey = false
+				s.save
+			end
+		end
 		self.user_attr_survey = user_attr_survey.to_s == "true"
 		self.save
 		return true
@@ -1526,27 +1534,30 @@ class Survey
 
 	def adjust_logic_control_quota_filter(type, question_id)
 		# first adjust the logic control
+		question = Question.find_by_id(question_id)
 		rules = self.logic_control
 		rules.each_with_index do |rule, rule_index|
 			case type
 			when 'question_update'
-				question = Question.find_by_id(question_id)
 				item_ids = question.issue["items"].map { |i| i["id"] }
 				row_ids = question.issue["items"].map { |i| i["id"] }
 				# first handle conditions
-				if (0..4).to_a.include?(rule["rule_type"])
-					rule["conditions"].each do |c|
-						next if c["question_id"] != question_id
-						# the condition is about the question updated
-						# remove the items that do not exist
-						c["answer"].delete_if { |item_id| !item_ids.include?(item_id) }
-					end
-					# if all the items for a condition is removed, remove this condition
-					rule["conditions"].delete_if { |c| c["answer"].blank? }
-					# if all the conditions for a rule is removed, remove this rule
-					if rule["conditions"].blank?
-						rules.delete_at(rule_index)
-						next
+				if question.question_type == 0
+					# only choice questions can be conditions for logic control
+					if (0..4).to_a.include?(rule["rule_type"])
+						rule["conditions"].each do |c|
+							next if c["question_id"] != question_id
+							# the condition is about the question updated
+							# remove the items that do not exist
+							c["answer"].delete_if { |item_id| !item_ids.include?(item_id) }
+						end
+						# if all the items for a condition is removed, remove this condition
+						rule["conditions"].delete_if { |c| c["answer"].blank? }
+						# if all the conditions for a rule is removed, remove this rule
+						if rule["conditions"].blank?
+							rules.delete_at(rule_index)
+							next
+						end
 					end
 				end
 				# then handle result
@@ -1648,51 +1659,56 @@ class Survey
 		end
 		self.save
 		# then adjust the quota
-		rules = self.quota["rules"]
-		rules.each_with_index do |rule, rule_index|
-			case type
-			when 'question_update'
-				question = Question.find_by_id(question_id)
-				item_ids = question.issue["items"].map { |i| i["id"] }
-				row_ids = question.issue["items"].map { |i| i["id"] }
-				rule["conditions"].each do |c|
-					next if c["condition_type"] != 1 || c["name"] != question_id
-					# this condition is about the updated question
-					c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
+		if question.question_type == 0
+			# only choice questions can be conditions of quotas
+			rules = self.quota["rules"]
+			rules.each_with_index do |rule, rule_index|
+				case type
+				when 'question_update'
+					item_ids = question.issue["items"].map { |i| i["id"] }
+					row_ids = question.issue["items"].map { |i| i["id"] }
+					rule["conditions"].each do |c|
+						next if c["condition_type"] != 1 || c["name"] != question_id
+						# this condition is about the updated question
+						c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
+					end
+					rule["conditions"].delete_if { |c| c["value"].blank? }
+					rules.delete_at(rule_index) if rule["conditions"].blank?
+					self.refresh_quota_stats
+				when 'question_delete'
+					rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
+					rules.delete_at(rule_index) if rule["conditions"].blank?
+					self.refresh_quota_stats
 				end
-				rule["conditions"].delete_if { |c| c["value"].blank? }
-				rules.delete_at(rule_index) if rule["conditions"].blank?
-				self.refresh_quota_stats
-			when 'question_delete'
-				rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
-				rules.delete_at(rule_index) if rule["conditions"].blank?
-				self.refresh_quota_stats
-			end
-		end 
-		self.save
+			end 
+			self.save
+		end
 		# then adjust the filters
-		rules = self.filters
-		rules.each_with_index do |rule, rule_index|
-			case type
-			when 'question_update'
-				question = Question.find_by_id(question_id)
-				item_ids = question.issue["items"].map { |i| i["id"] }
-				row_ids = question.issue["items"].map { |i| i["id"] }
-				rule["conditions"].each do |c|
-					next if c["condition_type"] != 1 || c["name"] != question_id
-					# this condition is about the updated question
-					c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
+		if question.question_type == 0
+			# only choice questions can be conditions of filters
+			rules = self.filters
+			rules.each_with_index do |rule, rule_index|
+				case type
+				when 'question_update'
+					question = Question.find_by_id(question_id)
+					item_ids = question.issue["items"].map { |i| i["id"] }
+					row_ids = question.issue["items"].map { |i| i["id"] }
+					rule["conditions"].each do |c|
+						next if c["condition_type"] != 1 || c["name"] != question_id
+						# this condition is about the updated question
+						c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
+					end
+					rule["conditions"].delete_if { |c| c["value"].blank? }
+					rules.delete_at(rule_index) if rule["conditions"].blank?
+					self.refresh_filters_stats
+				when 'question_delete'
+					rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
+					rules.delete_at(rule_index) if rule["conditions"].blank?
+					self.refresh_filters_stats
 				end
-				rule["conditions"].delete_if { |c| c["value"].blank? }
-				rules.delete_at(rule_index) if rule["conditions"].blank?
-				self.refresh_filters_stats
-			when 'question_delete'
-				rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
-				rules.delete_at(rule_index) if rule["conditions"].blank?
-				self.refresh_filters_stats
-			end
-		end 
-		self.save
+			end 
+			self.save
+		end
 	end
 
 	class LogicControl

@@ -36,7 +36,8 @@ module QuestionTypeEnum
 		"13" => "RankQuestion",
 		"14" => "Paragraph",
 		"15" => "FileQuestion",
-		"16" => "TableQuestion"
+		"16" => "TableQuestion",
+		"16" => "ScaleQuestion"
 	}
 
 	BLANK_QUESTION_TYPE = {

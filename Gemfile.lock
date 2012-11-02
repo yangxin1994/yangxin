@@ -226,6 +226,7 @@ DEPENDENCIES
   resque-scheduler
   resque-status
   rest-client
+  sass
   sass-rails (~> 3.1.4)
   turn
   uglifier
