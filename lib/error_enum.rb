@@ -10,7 +10,6 @@ module ErrorEnum
 	REQUIRE_LOGIN = "error_7"
 	REQUIRE_LOGOUT = "error_8"
 	REQUIRE_ADMIN = "error_9"
-	REQUIRE_SUPER_ADMIN = "error_10000"
 	WRONG_PASSWORD_CONFIRMATION = "error_10"
 	WRONG_PASSWORD = "error_11"
 	RECEIVER_CAN_NOT_BLANK = "error_12"

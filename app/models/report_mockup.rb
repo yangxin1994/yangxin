@@ -1,7 +1,6 @@
 # encoding: utf-8
 require 'error_enum'
 require 'array'
-require 'tool'
 require 'digest/md5'
 class ReportMockup
 	include Mongoid::Document
@@ -12,7 +11,6 @@ class ReportMockup
 	field :header, :type => String
 	field :footer, :type => String
 	field :author, :type => String
-	field :chart_style, :type => Hash, default: {"single_style" => 0, "cross_style" => 2}
 	field :components, :type => Array, default: []
 
 	belongs_to :survey
@@ -23,13 +21,6 @@ class ReportMockup
 	end
 
 	def self.check_and_create_new(survey, report_mockup)
-		return ErrorEnum::WRONG_REPORT_MOCKUP_CHART_STYLE if report_mockup["chart_style"].nil?
-		report_mockup["chart_style"]["single_style"] = report_mockup["chart_style"]["single_style"].to_i
-		report_mockup["chart_style"]["cross_style"] = report_mockup["chart_style"]["cross_style"].to_i
-		if !(-1..4).to_a.include?(report_mockup["chart_style"]["single_style"]) || ![-1, 2, 3, 4].to_a.include?(report_mockup["chart_style"]["cross_style"])
-			return ErrorEnum::WRONG_REPORT_MOCKUP_CHART_STYLE
-		end
-
 		questions = (survey.pages.map { |p| p["questions"] }).flatten
 		report_mockup["components"] ||= []
 		report_mockup["components"].each do |c|
@@ -41,13 +32,14 @@ class ReportMockup
 			else
 				return ErrorEnum::WRONG_REPORT_MOCKUP_COMPONENT_TYPE
 			end
+			c["chart_style"] = c["chart_style"].to_i
+			return ErrorEnum::WRONG_REPORT_MOCKUP_CHART_STYLE if !(-1..4).to_a.include?(c["chart_style"])
 		end
 		report_mockup = ReportMockup.new(:title => report_mockup["title"],
 			:subtitle => report_mockup["subtitle"],
 			:header => report_mockup["header"],
 			:footer => report_mockup["footer"],
 			:author => report_mockup["author"],
-			:chart_style => report_mockup["chart_style"],
 			:components => report_mockup["components"])
 		report_mockup.save
 		survey.report_mockups << report_mockup
@@ -56,13 +48,6 @@ class ReportMockup
 	end
 
 	def update_report_mockup(report_mockup)
-		return ErrorEnum::WRONG_REPORT_MOCKUP_CHART_STYLE if report_mockup["chart_style"].nil?
-		report_mockup["chart_style"]["single_style"] = report_mockup["chart_style"]["single_style"].to_i
-		report_mockup["chart_style"]["cross_style"] = report_mockup["chart_style"]["cross_style"].to_i
-		if !(-1..4).to_a.include?(report_mockup["chart_style"]["single_style"]) || ![-1, 2, 3, 4].to_a.include?(report_mockup["chart_style"]["cross_style"])
-			return ErrorEnum::WRONG_REPORT_MOCKUP_CHART_STYLE
-		end
-
 		questions = (self.survey.pages.map { |p| p["questions"] }).flatten
 		report_mockup["components"] ||= []
 		report_mockup["components"].each do |c|
@@ -74,13 +59,14 @@ class ReportMockup
 			else
 				return ErrorEnum::WRONG_REPORT_MOCKUP_COMPONENT_TYPE
 			end
+			c["chart_style"] = c["chart_style"].to_i
+			return ErrorEnum::WRONG_REPORT_MOCKUP_CHART_STYLE if !(-1..4).to_a.include?(c["chart_style"])
 		end
 		self.update_attributes(:title => report_mockup["title"],
 			:subtitle => report_mockup["subtitle"],
 			:header => report_mockup["header"],
 			:footer => report_mockup["footer"],
 			:author => report_mockup["author"],
-			:chart_style => report_mockup["chart_style"],
 			:components => report_mockup["components"])
 		return self
 	end
