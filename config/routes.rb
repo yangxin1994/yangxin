@@ -21,6 +21,10 @@ OopsData::Application.routes.draw do
 	resources :quality_control_questions do
 	end
 
+
+	# alias interface
+	match '/admin/surveys/new' => 'surveys#new'
+	# 
 	namespace :admin do
 		resources :users do 
 			collection do 
@@ -38,7 +42,8 @@ OopsData::Application.routes.draw do
 
 		resources :surveys do 
 			collection do 
-				get 'count', 'list_by_status', 'list_by_status_count'
+				get 'list_by_status', 'list_by_status_count', 'show_user_attr_survey'
+				post 'add_questions'
 			end
 		end
 
