@@ -16,21 +16,23 @@ class Admin::SurveysController < Admin::ApplicationController
 	end
 
 	def add_questions
-		@survey = Survey.find_by_id(params[:id]) if params[:id]
-		unless @survey
-			@survey = Survey.create
-			@survey.set_user_attr_survey(true)
-		end
 		if params[:question_ids]
+			@survey = Survey.find_by_id(params[:id]) if params[:id]
+			unless @survey
+				@survey = Survey.create
+				@survey.alt_new_survey = false
+				@current_user.surveys << @survey
+				@survey.set_user_attr_survey(true)
+			end
 			params[:question_ids].each do |id|
 				@survey.insert_template_question( params[:page_index].to_s.to_i, 
 					"-1", id)	
 			end
+
 			render_json_auto true
 		else
 			render_json_auto false
 		end
-		
 	end
 
 end

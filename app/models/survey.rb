@@ -86,12 +86,12 @@ class Survey
 #	has_and_belongs_to_many :entry_clerks, class_name: "EntryClerk", inverse_of: :managable_survey
 #	has_and_belongs_to_many :interviewers, class_name: "Interviewer", inverse_of: :managable_survey
 
-  has_many :answers
-  has_many :email_histories
+	has_many :answers
+	has_many :email_histories
 
-  belongs_to :loterry
+	belongs_to :loterry
 
-  has_many :export_results
+	has_many :export_results
 	has_many :analysis_results
 	has_many :data_list_results
 	has_many :report_results

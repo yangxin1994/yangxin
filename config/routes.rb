@@ -42,8 +42,11 @@ OopsData::Application.routes.draw do
 
 		resources :surveys do 
 			collection do 
-				get 'list_by_status', 'list_by_status_count', 'show_user_attr_survey'
+				get 'list_by_status', 'list_by_status_count', 'show_user_attr_survey', 'count'
 				post 'add_questions'
+			end
+			member do 
+				put 'publish'
 			end
 		end
 
@@ -100,11 +103,22 @@ OopsData::Application.routes.draw do
 
 	namespace :survey_auditor do
 		resources :surveys do
+			collection do 
+				get 'count'
+			end
 			member do
 				get 'reject'
 				get 'publish'
 				get 'close'
 				get 'pause'
+			end
+		end
+	end
+
+	namespace :answer_auditor do 
+		resources :answers do 
+			collection do 
+				get 'count'
 			end
 		end
 	end

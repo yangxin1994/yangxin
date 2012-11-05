@@ -124,6 +124,10 @@ class ApplicationController < ActionController::Base
 		user_signed_in? && (@current_user.is_survey_auditor || @current_user.is_admin || @current_user.is_super_admin)
 	end
 
+	def user_answer_auditor?
+		user_signed_in? && (@current_user.is_answer_auditor || @current_user.is_admin || @current_user.is_super_admin)
+	end
+
 	#judge whether the current user is entry clerk
 	def user_entry_clerk?
 		user_signed_in? && (@current_user.is_entry_clerk || @current_user.is_admin || @current_user.is_super_admin)
