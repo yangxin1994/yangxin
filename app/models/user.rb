@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'encryption'
 require 'error_enum'
 require 'tool'

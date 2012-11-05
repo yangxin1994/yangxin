@@ -10,8 +10,10 @@ class MessagesControllerTest < ActionController::TestCase
 	end
 
 	test "should show a messages list" do
-		get :index, :format => :json, :auth_key => @auth_key
+		get :index, :format => :json, page: 0, per_page: 2, :auth_key => @auth_key
 		pp @user_bar.unread_messages_count
+		pp response.body
+		get :index, :format => :json, :auth_key => @auth_key
 		pp response.body
 		assert response.body
 	end

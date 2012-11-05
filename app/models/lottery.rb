@@ -16,7 +16,7 @@ class Lottery
   scope :activity, where(:status => 1)
   scope :finished, where(:status => 2)
   
-  #has_many :survey
+  has_many :survey
   has_many :awards
   has_many :lottery_codes
   belongs_to :creator, :class_name => 'User'

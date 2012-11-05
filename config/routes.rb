@@ -283,7 +283,7 @@ OopsData::Application.routes.draw do
 	end
 	resources :orders do
 		collection do
-			get :for_cash, :for_realgoods, :for_virtualgoods, :for_lottery
+			get :for_cash, :for_entity, :for_virtual, :for_lottery
 		end
 	end
 	resources :points, :only => 'index'

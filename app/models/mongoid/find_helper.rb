@@ -15,7 +15,9 @@ module Mongoid
 				retval = {:error_code => ErrorEnum.const_get("INVALID_#{name.upcase}_ID"),
 									:error_message => "invalid #{name} id"}
 			else
-				retval = yield(retval) if block_given?
+				if block_given?
+					retval = yield(retval)
+				end
 			end
 			retval
 		end
