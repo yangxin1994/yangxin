@@ -4,7 +4,7 @@ class Admin::GiftsController < Admin::ApplicationController
     @gift = Gift.create(params[:gift])
     # TODO add admin_id
     respond_and_render_json @gift.save do
-      Material.create(:material => params[:material], :materials => @gift)
+      #Material.create(:material => params[:material], :materials => @gift)
       @gift.as_retval
     end
   end
