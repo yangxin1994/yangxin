@@ -10,7 +10,6 @@ module ErrorEnum
 	REQUIRE_LOGIN = "error_7"
 	REQUIRE_LOGOUT = "error_8"
 	REQUIRE_ADMIN = "error_9"
-	REQUIRE_SUPER_ADMIN = "error_10000"
 	WRONG_PASSWORD_CONFIRMATION = "error_10"
 	WRONG_PASSWORD = "error_11"
 	RECEIVER_CAN_NOT_BLANK = "error_12"
@@ -126,6 +125,7 @@ module ErrorEnum
 ###
 # 	syetem error 1
 # 	error 2
+#
 # 	not_found 01
 # 	invalid_id 02
 #
@@ -134,8 +134,12 @@ module ErrorEnum
 ###
 
 	# Gifts Error Code (10)
-	PRESENT_NOT_FOUND= 21001
-	INVALID_PRESENT_ID = 21002
+	GIFT_NOT_FOUND = 21001
+	INVALID_GIFT_ID = 21002
+	
+	GIFT_QUANTITY_NOT_A_NUNBER = 21031
+
+	GIFT_POINT_COULD_NOT_BE_BLANK = 21020
 	# Messages Error Code (11)
 	MESSAGE_NOT_FOUND = 21101
 	INVALID_MESSAGE_ID = 21102

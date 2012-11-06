@@ -16,11 +16,11 @@ class Lottery
   scope :activity, where(:status => 1)
   scope :finished, where(:status => 2)
   
-  #has_many :survey
+  has_many :survey
   has_many :awards
   has_many :lottery_codes
   belongs_to :creator, :class_name => 'User'
-  #has_many :lottery_awards, :class_name => 'LotteryAward'
+  #has_many :lottery_awards, :class_nam => 'LotteryAward'
 
   def delete
   	is_deleted = true

@@ -1,7 +1,7 @@
 class Award < BasicGift
-	include Mongoid::ValidationsExt
+	
 	#field :budget, :type => Integer
-  field :weighting, :type => Integer, :default => 0
+  field :weighting, :type => Integer, :default => 10
   field :status, :type => Integer, :default => 1
 
   scope :can_be_draw, where(:status => 0)

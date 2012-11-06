@@ -3,7 +3,7 @@ class Order
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
 	extend Mongoid::FindHelper
-	# can be 0 (Cash), 1 (RealGoods), 2 (VirtualGoods), 3 (Lottery)
+	# can be 0 (Cash), 1 (Entity), 2 (VirtualGoods), 3 (Lottery)
 	field :type, :type => Integer
 	# can be 0 (NeedVerify), 1 (Verified), -1 (VerifyFailed), 2 (Delivering), 3 (Delivered), -3 (DeliverFailed)
 	field :status, :type => Integer
@@ -12,9 +12,9 @@ class Order
 	field :phone_number, :type => String
 
 	embeds_one :cash_receive_info, :class_name => "CashReceiveInfo"
-	embeds_one :realgoods_receive_info, :class_name => "RealgoodsReceiveInfo"
-	embeds_one :virtualgoods_receive_info, :class_name => "VirtualgoodsReceiveInfo"
-	embeds_one :lottery_receive_info, :class_name => "LotteryCodeReceiveInfo"
+	embeds_one :entity_receive_info, :class_name => "EntityReceiveInfo"
+	embeds_one :virtual_receive_info, :class_name => "VirtualReceiveInfo"
+	embeds_one :lottery_receive_info, :class_name => "LotteryReceiveInfo"
 
 	has_one :point_log, :class_name => "PointLog"
 
@@ -30,8 +30,8 @@ class Order
 										 :numericality => true
 
 	scope :for_cash, where( :type => 0)
-	scope :for_realgoods, where( :type => 1)
-	scope :for_virtualgoods, where( :type => 2)
+	scope :for_entity, where( :type => 1)
+	scope :for_virtual, where( :type => 2)
 	scope :for_lottery, where( :type => 3)
 
 	scope :need_verify, where( :status => 0)
@@ -48,10 +48,6 @@ class Order
 	#after_create :decrease_point, :decrease_gift
 
 	# TO DO I18n
-	def operate(status)
-		self.status = status
-		self.save
-	end
 
 	private
 	
@@ -81,19 +77,19 @@ class CashReceiveInfo
 	embedded_in :order
 end
 
-class RealgoodsReceiveInfo
+class EntityReceiveInfo
 	include Mongoid::Document
 	field :address, :type => String
 	field :post_code, :type => String
 	embedded_in :order
 end
 
-class VirtualgoodsReceiveInfo
+class VirtualReceiveInfo
 	include Mongoid::Document
 	embedded_in :order
 end
 
-class LotteryCodeReceiveInfo
+class LotteryReceiveInfo
 	include Mongoid::Document
 	embedded_in :order
 end
