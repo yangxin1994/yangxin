@@ -19,4 +19,10 @@ class Admin::SurveysController < Admin::ApplicationController
 		render_json_auto(@surveys)
 	end
 
+	def add_reward
+		@survey = Survey.find_by_id(params[:id])
+		s = params[:survey].select{:reward || :point || :lottery_id}
+		respond_and_render_json @survey.update_attributes(s)
+	end	
+
 end
