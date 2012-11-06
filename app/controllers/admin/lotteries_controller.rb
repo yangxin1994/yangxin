@@ -13,4 +13,16 @@ class Admin::LotteriesController < Admin::ApplicationController
 			# TODO add admin_id
 	end
 
+  def update
+    @lottery = Lottery.find_by_id params[:id]
+    respond_and_render_json @lottery.update_attributes(params[:lottery]) do
+      @lottery.as_retval
+    end
+  end
+  
+  def_each :for_publish, :activity, :finished do |method_name|
+    @lottery = Lottery.send(method_name).page(page).per(per_page)
+    respond_and_render_json { @lottery }
+  end
+
 end

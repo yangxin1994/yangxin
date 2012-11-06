@@ -1,7 +1,8 @@
 class Lottery
   include Mongoid::Document
   include Mongoid::Timestamps
-
+  extend Mongoid::FindHelper
+  include Mongoid::ValidationsExt
   field :title, :type => String
   field :description, :type => String
   field :status, :type => Integer, :default => 0
@@ -12,7 +13,7 @@ class Lottery
 
   default_scope where(:is_deleted => false)
 
-  scope :published, where(:status => 0)
+  scope :for_publish, where(:status => 0)
   scope :activity, where(:status => 1)
   scope :finished, where(:status => 2)
   

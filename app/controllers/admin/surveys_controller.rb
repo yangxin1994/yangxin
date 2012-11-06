@@ -21,7 +21,8 @@ class Admin::SurveysController < Admin::ApplicationController
 
 	def add_reward
 		@survey = Survey.find_by_id(params[:id])
-		s = params[:survey].select{:reward || :point || :lottery_id}
+		params[:lottery] = lottery.find_by_id(params[:lottery_id])
+		s = params[:survey].select{:reward || :point || :lottery}
 		respond_and_render_json @survey.update_attributes(s)
 	end	
 

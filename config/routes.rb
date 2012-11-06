@@ -314,9 +314,13 @@ OopsData::Application.routes.draw do
 				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
 			end
 		end
+		
 		resources :lotteries do
-
+			collection do
+				get :for_publish, :activity, :finished
+			end
 		end
+
 		resources :lottery_codes do
 			
 		end
