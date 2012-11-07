@@ -86,6 +86,12 @@ class User
 	has_many :answers
 	has_many :template_question_answers
 
+	has_and_belongs_to_many :answer_auditor_allocated_surveys, class_name: "Survey", inverse_of: :answer_auditors
+	has_and_belongs_to_many :entry_clerk_allocated_surveys, class_name: "Survey", inverse_of: :entry_clerks
+	has_and_belongs_to_many :interviewer_allocated_surveys, class_name: "Survey", inverse_of: :interviewers
+
+	has_many :reviewed_answers, class_name: "Answer", inverse_of: :auditor
+
 	scope :unregistered, where(status: 0)
 	scope :receive_email_user
 

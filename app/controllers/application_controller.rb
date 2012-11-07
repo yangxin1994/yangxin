@@ -135,7 +135,7 @@ class ApplicationController < ActionController::Base
 	end
 
 	#judge whether the current user is answer auditor
-	def user_interviewer?
+	def user_answer_auditor?
 		user_signed_in? && (@current_user.is_answer_auditor || @current_user.is_admin || @current_user.is_super_admin)
 	end
 	

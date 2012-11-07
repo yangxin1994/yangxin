@@ -77,6 +77,24 @@ class ActiveSupport::TestCase
 		return survey_auditor
 	end
 
+	def init_answer_auditor
+		answer_auditor = FactoryGirl.build(:answer_auditor)
+		answer_auditor.save
+		return answer_auditor
+	end
+
+	def init_entry_clerk
+		entry_clerk = FactoryGirl.build(:entry_clerk)
+		entry_clerk.save
+		return entry_clerk
+	end
+
+	def init_interviewer
+		interviewer = FactoryGirl.build(:interviewer)
+		interviewer.save
+		return interviewer
+	end
+
 	def set_as_admin(user)
 		user.role = user.role | 16
 		user.save
