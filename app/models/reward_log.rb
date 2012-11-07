@@ -37,7 +37,7 @@ class RewardLog
   private
   def operate_user_point
     return false if user.blank? && operated_point.blank?
-    return true if type != 2 || point = 0
+    return true if type != 2 || point == 0
     user.inc(:point, self.point)
   end
 end

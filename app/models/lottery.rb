@@ -9,7 +9,7 @@ class Lottery
   field :status, :type => Integer, :default => 0
   field :is_deleted, :type => Boolean, :default => false
   #field :point, :type => Integer
-  field :weighting, :type => Integer :default => 10000
+  field :weighting, :type => Integer, :default => 10000
   #field :prize_interval, :type => Array, :default => []
 
   default_scope where(:is_deleted => false)

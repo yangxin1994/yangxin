@@ -14,6 +14,19 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
+	def auto_paginate(value)
+	  retval = {}
+	  retval["current_page"] = page
+	  retval["per_page"] = per_page
+	  if block_given?
+	    retval["data"] = yield(value)
+	  else
+	    retval["data"] = value.per(retval["current_page"]).per_page(retval["per_page"]) 
+	  end
+	  retval["total_page"] = ( value.count / per_page.to_f ).ceil
+	  retval
+	end
+
 	begin "kaminari"
 		def page
 			params[:page].to_i == 0 ? 1 : params[:page].to_i
