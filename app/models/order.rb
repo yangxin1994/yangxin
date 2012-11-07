@@ -16,7 +16,7 @@ class Order
 	embeds_one :virtual_receive_info, :class_name => "VirtualReceiveInfo"
 	embeds_one :lottery_receive_info, :class_name => "LotteryReceiveInfo"
 
-	has_one :point_log, :class_name => "PointLog"
+	has_one :reward_log, :class_name => "RewardLog"
 
 	belongs_to :gift, :class_name => "BasicGift"
 	belongs_to :user, :class_name => "User", :inverse_of => :orders
@@ -53,7 +53,7 @@ class Order
 	
 	def decrease_point
 		return if self.gift.blank? && self.user.blank?
-		self.create_point_log(:order => self,
+		self.create_reward_log(:order => self,
 													:user => self.user,
 													:operated_point => self.gift.point,
 													:cause => 4)

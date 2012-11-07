@@ -150,7 +150,7 @@ module ErrorEnum
 	MESSAGE_CONTENT_COULD_NOT_BE_BLANK = 21120
 	# Prize Error Code (12)
 	PrizeBudgetCounldNotBeBlank = 21211
-	# PointLog Error Code (13)
+	# RewardLog Error Code (13)
 	POINTLOG_OPERATED_POINT_NOT_A_NUNBER = 21311
 	# Order Error Code (14)
 	ORDER_NOT_FOUND = 21401

@@ -1,7 +1,7 @@
 require 'test_helper'
 class Admin::PointsControllerTest < ActionController::TestCase
   setup do
-    clear(User, PointLog)
+    clear(User, RewardLog)
     @admin_foo = FactoryGirl.create(:admin_foo)
     @user_bar = FactoryGirl.create(:user_bar)
     @auth_key = sign_in('admin_foo@gmail.com', '123123123')
@@ -15,10 +15,10 @@ class Admin::PointsControllerTest < ActionController::TestCase
          :user_id => @user_bar.id,
          :auth_key => @auth_key
     #pp re
-    # pp PointLog.count
+    # pp RewardLog.count
     # pp response.body
     @user_bar = User.find(@user_bar.id)
-    assert_equal 100, PointLog.first.operated_point
+    assert_equal 100, RewardLog.first.operated_point
     assert_equal 1100, @user_bar.point
   # operate point false with point type error
     post :operate, :format => :json,

@@ -867,6 +867,13 @@ class Answer
 		self.auditor = user
 		self.save
 		# assign this user points, or a loterry code
+		# usage post_reward_to(user, :type => 2, :point => 100)
+		# 1 for lottery & 2 for point
+		lc = survey.reward == 1 ? nil : survey.lottery.give_lottery_code_to(user)
+		return ErrorEnum::REWARD_ERROR unless survey.post_reward_to(user, 
+																								  :type => survey.reward, 
+																								  :point => survey.point,
+																								  :lottery_code => lc)
 		return true
 	end
 end

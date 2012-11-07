@@ -89,7 +89,7 @@ class Survey
 	has_many :answers
 	has_many :email_histories
 
-	belongs_to :loterry
+	belongs_to :lottery
 
 	has_many :export_results
 	has_many :analysis_results
@@ -1769,6 +1769,11 @@ class Survey
 			survey.logic_control = @rules
 			survey.save
 			return survey.logic_control
+		end
+
+		def post_reward_to(user, options = {})
+			options[:user] = user
+			RewardLog.create(reward).created_at ? true : false
 		end
 	end
 end

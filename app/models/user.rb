@@ -59,12 +59,12 @@ class User
 	#################################
 	# QuillMe
 	field :point, :type => Integer
-	has_many :point_logs, :class_name => "PointLog", :inverse_of => :user
+	has_many :reward_logs, :class_name => "RewardLog", :inverse_of => :user
 	has_many :orders, :class_name => "Order"
 	has_many :lottery_codes
 	# QuillAdmin
 	has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
-	has_many :operate_point_logs, :class_name => "PointLog", :inverse_of => :operated_admin,:foreign_key => "operated_admin_id"	
+	has_many :operate_reward_logs, :class_name => "RewardLog", :inverse_of => :operated_admin,:foreign_key => "operated_admin_id"	
 
 	#before_save :set_updated_at
 	#before_update :set_updated_at
@@ -468,7 +468,7 @@ class User
 # admin inc
 	def operate_point(operated_point, user_id)
 		u = User.find_by_id(user_id)
-		operate_point_logs.create(:operated_point => operated_point,
+		operate_reward_logs.create(:operated_point => operated_point,
 															:user => u,
 															:cause => 0)
 	end
