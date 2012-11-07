@@ -102,6 +102,8 @@ OopsData::Application.routes.draw do
 		resources :answers do
 			member do
 				post 'review'
+				get 'csv_header'
+				post 'import_answer'
 			end
 		end
 	end
@@ -168,7 +170,6 @@ OopsData::Application.routes.draw do
 			put 'save_meta_data'
 			get 'clone'
 			get 'recover'
-			get 'export_csv'
 			get 'clear'
 			put 'update_tags'
 			put 'add_tag'
@@ -185,7 +186,6 @@ OopsData::Application.routes.draw do
 			get 'set_random_quality_control_questions'
 			get 'get_random_quality_control_questions'
 
-			get 'spss_header'
 			get 'update_deadline'
 
 			get 'show_quality_control'
