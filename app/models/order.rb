@@ -3,7 +3,7 @@ class Order
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
 	extend Mongoid::FindHelper
-	# can be 0 (Cash), 1 (Entity), 2 (VirtualGoods), 3 (Lottery)
+	# can be 0 (Cash), 1 (Entity), 2 (Virtual), 3 (Lottery)
 	field :type, :type => Integer
 	# can be 0 (NeedVerify), 1 (Verified), -1 (VerifyFailed), 2 (Delivering), 3 (Delivered), -3 (DeliverFailed)
 	field :status, :type => Integer

@@ -6,7 +6,7 @@ class Admin::GiftsController < Admin::ApplicationController
   end
 
 
-  def_each :virtualgoods, :cash, :realgoods, :stockout, :expired do |method_name|
+  def_each :virtual, :cash, :entity, :stockout, :expired do |method_name|
     @gifts = Gift.send(method_name).page(page).per(per_page)
     respond_and_render_json { @gifts}
   end

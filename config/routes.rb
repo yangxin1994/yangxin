@@ -285,7 +285,7 @@ OopsData::Application.routes.draw do
 	end
 	resources :gifts do
 		collection do
-			get :virtualgoods, :cash, :realgoods, :stockout
+			get :virtual, :cash, :entity, :stockout
 			get :edit
 		end
 	end
@@ -319,7 +319,7 @@ OopsData::Application.routes.draw do
 		end
 		resources :gifts do
 			collection do
-				get :expired, :index, :virtualgoods, :cash, :realgoods, :stockout
+				get :expired, :index, :virtual, :cash, :entity, :stockout
 			end
 		end
 		resources :orders do

@@ -5,10 +5,11 @@ class Lottery
   include Mongoid::ValidationsExt
   field :title, :type => String
   field :description, :type => String
+  # 0 (for_publish) 1 (activity) 2 (finished)
   field :status, :type => Integer, :default => 0
   field :is_deleted, :type => Boolean, :default => false
-  field :point, :type => Integer
-  field :weighting, :type => Integer
+  #field :point, :type => Integer
+  field :weighting, :type => Integer :default => 10000
   #field :prize_interval, :type => Array, :default => []
 
   default_scope where(:is_deleted => false)
@@ -21,7 +22,6 @@ class Lottery
   has_many :prizes
   has_many :lottery_codes
   belongs_to :creator, :class_name => 'User'
-  #has_many :lottery_prizes, :class_nam => 'LotteryPrize'
 
   def delete
   	is_deleted = true
@@ -48,7 +48,6 @@ class Lottery
         return l unless l.is_a? LotteryCode
         l.prize = Prezi.find_by_id(e[:prize_id])
         return l if (l.prize.is_a?(Prize)) && l.save 
-        p l
       end
     end
     return false
