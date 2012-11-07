@@ -40,6 +40,9 @@ OopsData::Application.routes.draw do
 			collection do 
 				get 'count', 'list_by_status', 'list_by_status_count'
 			end
+			member do
+				post 'allocate'
+			end
 		end
 
 		resources :faqs do 
@@ -91,6 +94,16 @@ OopsData::Application.routes.draw do
 	#	 match 'products/:id' => 'catalog#view'
 	# Keep in mind you can assign values other than :controller and :action
 
+	end
+
+	namespace :answer_auditor do
+		resources :surveys do
+		end
+		resources :answers do
+			member do
+				post 'review'
+			end
+		end
 	end
 
 	namespace :survey_auditor do
