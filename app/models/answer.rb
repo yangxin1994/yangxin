@@ -32,12 +32,15 @@ class Answer
 	field :channel, :type => Integer
 	field :ip_address, :type => String, default: ""
 
-	field :is_scanned, :type => Boolean, :default => false
+	field :is_scanned, :type => Boolean, default: false
 
-	field :is_preview, :type => Boolean, :default => false
+	field :is_preview, :type => Boolean, default: false
 
 	field :finished_at, :type => Integer
 	field :rejected_at, :type => Integer
+
+	field :introducer_id, :type => String
+	field :introducer_to_pay, :type => Integer, default: 5
 
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
@@ -110,10 +113,11 @@ class Answer
 		return true
 	end
 
-	def self.create_answer(is_preview, email, survey_id, channel, ip, username, password)
+	def self.create_answer(is_preview, introducer_id, email, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
+		answer.introducer_id = introducer_id if !is_preview
 		
 		# initialize the answer content
 		answer_content = {}
@@ -869,11 +873,15 @@ class Answer
 		# assign this user points, or a loterry code
 		# usage post_reward_to(user, :type => 2, :point => 100)
 		# 1 for lottery & 2 for point
-		lc = survey.reward == 1 ? nil : survey.lottery.give_lottery_code_to(user)
-		return ErrorEnum::REWARD_ERROR unless survey.post_reward_to(user, 
-																								  :type => survey.reward, 
-																								  :point => survey.point,
+		lc = self.survey.reward == 1 ? nil : self.survey.lottery.give_lottery_code_to(user)
+		return ErrorEnum::REWARD_ERROR unless self.survey.post_reward_to(user, 
+																								  :type => self.survey.reward, 
+																								  :point => self.survey.point,
 																								  :lottery_code => lc)
+		# give the introducer points
+		introducer = User.find_by_id(self.introducer_id)
+		introducer.give_points(self.introducer_to_pay, 3, :extended_survey_id => self.survey._id)
+		# send the introducer a message about the rewarded points
 		return true
 	end
 end

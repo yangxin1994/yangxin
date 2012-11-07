@@ -42,6 +42,7 @@ OopsData::Application.routes.draw do
 			end
 			member do
 				post 'allocate'
+				post 'set_community'
 			end
 		end
 
@@ -154,7 +155,8 @@ OopsData::Application.routes.draw do
 
 	resources :users do 
 		collection do 
-			get :get_basic_info
+			get :get_level_information
+			get :get_invited_user_ids
 		end
 	end
 	match 'update_information' => 'users#update_information', :as => :update_information, :via => [:post]
