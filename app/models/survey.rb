@@ -1773,7 +1773,7 @@ class Survey
 
 		def post_reward_to(user, options = {})
 			options[:user] = user
-			RewardLog.create(reward).created_at ? true : false
+			RewardLog.create(options).created_at ? true : false
 		end
 	end
 end
