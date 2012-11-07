@@ -39,7 +39,7 @@ class Order
 	scope :verify_failed, where( :status => -1)
 	scope :delivering, where( :status => 2)
 	scope :delivered, where( :status => 3)
-	scope :deliver_failed, where( :status => -2)
+	scope :deliver_failed, where( :status => -3)
 
 	# TO DO validation verify
 	# We must follow the Law of Demeter(summed up as "use only one dot"), and here is the code: 

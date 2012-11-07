@@ -25,4 +25,11 @@ class Admin::SurveysController < Admin::ApplicationController
 		retval = @survey.allocate(params[:system_user_type], params[:user_id], params[:allocate].to_s == "true")
 		render_json_auto(retval) and return
 	end
+
+	def add_reward
+		@survey = Survey.find_by_id(params[:id])
+		params[:lottery] = lottery.find_by_id(params[:lottery_id])
+		s = params[:survey].select{:reward || :point || :lottery}
+		respond_and_render_json @survey.update_attributes(s)
+	end	
 end

@@ -70,7 +70,7 @@ class Survey
 	field :is_star, :type => Boolean, :default => false
 	field :point, :type => Integer, :default => 0
 	# reward: -1: nothing, 1: award, 2: point 
-	field :reward, :type => Integer
+	field :reward, :type => Integer, :default => 1
 
 	belongs_to :user
 	has_and_belongs_to_many :tags do
@@ -1155,7 +1155,7 @@ class Survey
 
 	def has_award
 		# need to fill this method
-		reward == 1 ? true : false
+		reward > 0 ? true : false
 	end
 
 	def check_password(username, password, current_user)
