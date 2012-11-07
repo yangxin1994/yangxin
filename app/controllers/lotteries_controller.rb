@@ -3,7 +3,7 @@
 class LotteriesController < ApplicationController
 
 	def index
-		respond_and_render_json { Lottery.activity.page(page) }
+		respond_and_render_json { auto_paginate(Lottery.activity) }
 	end
 	
 	def draw

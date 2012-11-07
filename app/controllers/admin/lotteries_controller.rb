@@ -1,7 +1,7 @@
 class Admin::LotteriesController < Admin::ApplicationController
 	
 	def index
-		respond_and_render_json Lottery.page(page)
+		respond_and_render_json auto_paginate(Lottery.all)
 	end
 
 	def create
@@ -21,7 +21,7 @@ class Admin::LotteriesController < Admin::ApplicationController
   end
   
   def_each :for_publish, :activity, :finished do |method_name|
-    @lottery = Lottery.send(method_name).page(page).per(per_page)
+    @lottery = auto_paginate(Lottery.send(method_name))
     respond_and_render_json { @lottery }
   end
 

@@ -2,13 +2,13 @@ class Admin::GiftsController < Admin::ApplicationController
 
 
   def index
-    respond_and_render_json { Gift.page(page).per(per_page) }
+    respond_and_render_json { auto_paginate(Gift) }
   end
 
 
   def_each :virtual, :cash, :entity, :stockout, :expired do |method_name|
-    @gifts = Gift.send(method_name).page(page).per(per_page)
-    respond_and_render_json { @gifts}
+    @gifts = auto_paginate(Gift.send(method_name))
+    respond_and_render_json { @gifts }
   end
 
   def create

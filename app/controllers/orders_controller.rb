@@ -2,7 +2,7 @@ class OrdersController < ApplicationController
 #TO DO before_filter
   before_filter :require_user_exist
   def index
-    respond_and_render_json { @current_user.orders.page(page).per(per_page) }
+    respond_and_render_json { auto_paginate(@current_user.orders) }
   end
 
   def show
@@ -52,7 +52,7 @@ class OrdersController < ApplicationController
   #   end
   # end
   def_each :for_cash, :for_entity, :for_virtual, :for_lottery, :for_prize do |method_name|
-    @orders = @current_user.orders.send(method_name).page(params[:page].to_i)
+    @orders = auto_paginate(@current_user.orders.send(method_name))
     respond_to do |format|
       format.html 
       format.json { render json: @orders }
