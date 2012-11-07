@@ -40,7 +40,7 @@ class OrdersController < ApplicationController
   #     format.json { head :ok }
   #   end
   # end
-  def_each :for_cash, :for_entity, :for_virtual, :for_lottery, :for_award do |method_name|
+  def_each :for_cash, :for_entity, :for_virtual, :for_lottery, :for_prize do |method_name|
     @orders = Order.send(method_name).page(params[:page].to_i)
     respond_to do |format|
       format.html 

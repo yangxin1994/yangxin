@@ -69,7 +69,7 @@ class Survey
 	field :deadline, :type => Integer
 	field :is_star, :type => Boolean, :default => false
 	field :point, :type => Integer, :default => 0
-	# reward: -1: nothing, 1: award, 2: point 
+	# reward: -1: nothing, 1: prize, 2: point 
 	field :reward, :type => Integer, :default => 1
 
 	belongs_to :user
@@ -1130,7 +1130,7 @@ class Survey
 		end
 	end
 
-	def has_award
+	def has_prize
 		# need to fill this method
 		reward > 0 ? true : false
 	end

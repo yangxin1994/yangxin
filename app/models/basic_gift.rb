@@ -20,7 +20,7 @@ class BasicGift
 	scope :realgoods, where( :type => 1)
 	scope :virtualgoods, where( :type => 2)
 	scope :lottery, where( :type => 3)
-	#scope :award, where( :type => 4)
+	#scope :prize, where( :type => 4)
 
 	scope :stockout, where(:surplus.lt => 1)
 

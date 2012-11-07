@@ -145,8 +145,8 @@ module ErrorEnum
 	INVALID_MESSAGE_ID = 21102
 	MESSAGE_TITLE_COULD_NOT_BE_BLANK = 21110
 	MESSAGE_CONTENT_COULD_NOT_BE_BLANK = 21120
-	# Award Error Code (12)
-	AwardBudgetCounldNotBeBlank = 21211
+	# Prize Error Code (12)
+	PrizeBudgetCounldNotBeBlank = 21211
 	# PointLog Error Code (13)
 	POINTLOG_OPERATED_POINT_NOT_A_NUNBER = 21311
 	# Order Error Code (14)

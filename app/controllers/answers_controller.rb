@@ -65,8 +65,8 @@ class AnswersController < ApplicationController
 			email = @current_user.email
 		else
 			if params[:email].blank?
-				# the survey has award, but no email is provided
-				render_json_e(ErrorEnum::REQUIRE_EMAIL_ADDRESS) and return if @survey.has_award
+				# the survey has prize, but no email is provided
+				render_json_e(ErrorEnum::REQUIRE_EMAIL_ADDRESS) and return if @survey.has_prize
 				# need to create new answer
 				email = nil
 			else
