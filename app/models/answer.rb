@@ -23,7 +23,8 @@ class Answer
 	field :repeat_time, :type => Integer, default: 0
 	# reject_type: 0 for rejected by quota, 1 for rejected by quliaty control, 2 for rejected by screen, 3 for timeout
 	field :reject_type, :type => Integer
-	field :finish_type, :type => Integer
+	# finish_type: 0 for not reviewed, 1 for passing reviewed, 2 for rejected
+	field :finish_type, :type => Integer, default: 0
 	field :username, :type => String, default: ""
 	field :password, :type => String, default: ""
 
@@ -45,19 +46,23 @@ class Answer
 	scope :screened, lambda { where(:status => 1, :reject_type => 2) }
 	scope :finished_and_screened, lambda { any_of({:status => 2}, {:status => 1, :reject_type => 2}) }
 
+	scope :unreviewed, lambda { where(:status => 2, :finish_type => 0) }
+
 	belongs_to :user
 	belongs_to :survey
 
+	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
+
 	STATUS_NAME_ARY = ["edit", "reject", "finish", "redo"]
-  ##### answer import #####
+	##### answer import #####
 
 
-  def load_csv(survey=1)
-    filename = "public/import/test.csv"
-    CSV.foreach(filename, :headers => true) do |row|
-      row.to_hash
-    end
-  end
+	def load_csv(survey=1)
+		filename = "public/import/test.csv"
+		CSV.foreach(filename, :headers => true) do |row|
+			row.to_hash
+		end
+	end
 
 	def self.def_status_attr
 		STATUS_NAME_ARY.each_with_index do |status_name, index|
@@ -811,7 +816,7 @@ class Answer
 	#* true: when the answer is set as finished
 	#* ErrorEnum::WRONG_ANSWER_STATUS
 	#* ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP
-	#* ErrorEnum::ANSWER_NOT_COMPLELTE
+	#* ErrorEnum::ANSWER_NOT_COMPLETE
 	def finish
 		# synchronize the questions in the survey and the qeustions in the answer content
 		survey_question_ids = self.survey.pages.map { |page| page["questions"] }
@@ -853,5 +858,15 @@ class Answer
 			end
 		end
 		self.survey.save
+	end
+
+	def review(review_result, user)
+		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 2
+		return ErrorEnum::ANSWER_REVIEWED if self.finish_type > 0
+		self.finish_type = review_result.to_i == 1 ? 1 : 2
+		self.auditor = user
+		self.save
+		# assign this user points, or a loterry code
+		return true
 	end
 end

@@ -80,4 +80,31 @@ FactoryGirl.define do
 		role 8
 		activate_time Time.now.to_i
 	end
+
+	factory :answer_auditor, class: User do
+		email "answer_auditor@test.com"
+		password Encryption.encrypt_password("123456")
+		username "answer_auditor"
+		status 4
+		role 4
+		activate_time Time.now.to_i
+	end
+
+	factory :interviewer, class: User do
+		email "interviewer@test.com"
+		password Encryption.encrypt_password("123456")
+		username "interviewer"
+		status 4
+		role 2
+		activate_time Time.now.to_i
+	end
+
+	factory :entry_clerk, class: User do
+		email "entry_clerk@test.com"
+		password Encryption.encrypt_password("123456")
+		username "entry_clerk"
+		status 4
+		role 1
+		activate_time Time.now.to_i
+	end
 end

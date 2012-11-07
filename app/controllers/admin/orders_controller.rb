@@ -2,7 +2,7 @@ class Admin::OrdersController < Admin::ApplicationController
 	
 	def index
 		respond_and_render_json true do
-			current_user.orders.page(page).per(per_page).map do |o|
+			Order.page(page).per(per_page).map do |o|
 				o["gift_name"] = o.gift.name
 				logger.info o
 				o
@@ -30,6 +30,14 @@ class Admin::OrdersController < Admin::ApplicationController
 		respond_and_render_json{@orders }
 	end
 
+	def update
+		@order = Order.find_by_id(params[:id])
+		params[:order][:operated_admin] = current_user
+    respond_and_render_json @order.update_attributes(params[:order]) do
+      @order.as_retval
+    end
+	end
+	
 	def status
 		Order.find_by_id params[:id] do |o|
 			o.status = params[:status] || o.status

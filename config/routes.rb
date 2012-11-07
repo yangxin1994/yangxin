@@ -40,6 +40,9 @@ OopsData::Application.routes.draw do
 			collection do 
 				get 'count', 'list_by_status', 'list_by_status_count'
 			end
+			member do
+				post 'allocate'
+			end
 		end
 
 		resources :faqs do 
@@ -91,6 +94,16 @@ OopsData::Application.routes.draw do
 	#	 match 'products/:id' => 'catalog#view'
 	# Keep in mind you can assign values other than :controller and :action
 
+	end
+
+	namespace :answer_auditor do
+		resources :surveys do
+		end
+		resources :answers do
+			member do
+				post 'review'
+			end
+		end
 	end
 
 	namespace :survey_auditor do
@@ -272,7 +285,7 @@ OopsData::Application.routes.draw do
 	end
 	resources :gifts do
 		collection do
-			get :index, :virtualgoods, :cash, :realgoods, :stockout
+			get :virtualgoods, :cash, :realgoods, :stockout
 			get :edit
 		end
 	end
@@ -306,8 +319,7 @@ OopsData::Application.routes.draw do
 		end
 		resources :gifts do
 			collection do
-				get 'expired'
-				delete 'delete'
+				get :expired, :index, :virtualgoods, :cash, :realgoods, :stockout
 			end
 		end
 		resources :orders do
@@ -315,9 +327,13 @@ OopsData::Application.routes.draw do
 				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
 			end
 		end
+		
 		resources :lotteries do
-
+			collection do
+				get :for_publish, :activity, :finished
+			end
 		end
+
 		resources :lottery_codes do
 			
 		end

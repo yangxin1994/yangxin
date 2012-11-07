@@ -52,7 +52,7 @@ class ApplicationController < ActionController::Base
 		options[:only]+= [:value, :success] unless options[:only].nil?
 		respond_to do |format|
 			format.json do
-				render :json => {:value => yield(is_success),
+				render :json => {:value => block_given? ? yield(is_success) : is_success ,
 												 :success => is_success
 				 }, :except => options[:except], :only => options[:only]
 			end
@@ -135,7 +135,7 @@ class ApplicationController < ActionController::Base
 	end
 
 	#judge whether the current user is answer auditor
-	def user_interviewer?
+	def user_answer_auditor?
 		user_signed_in? && (@current_user.is_answer_auditor || @current_user.is_admin || @current_user.is_super_admin)
 	end
 	
