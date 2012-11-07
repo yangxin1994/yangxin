@@ -103,8 +103,6 @@ OopsData::Application.routes.draw do
 		resources :answers do
 			member do
 				post 'review'
-				get 'csv_header'
-				post 'import_answer'
 			end
 		end
 	end
@@ -116,6 +114,15 @@ OopsData::Application.routes.draw do
 				get 'publish'
 				get 'close'
 				get 'pause'
+			end
+		end
+	end
+
+	namespace 'entry_clerk' do
+		resources :answers do
+			member do
+				get 'csv_header'
+				post 'import_answer'
 			end
 		end
 	end
