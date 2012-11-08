@@ -1762,19 +1762,19 @@ class Survey
 		return self.save
 	end
 
-	def self.list_surveys_in_community(published, reward, only_spreadable)
+	def self.list_surveys_in_community(reward, only_spreadable, user)
 		surveys = Survey.in_community
-		surveys = published ? surveys.where(:publish_status => PublishStatus::PUBLISHED) : surveys.not_in(:publish_status => PublishStatus::PUBLISHED)
 		surveys = surveys.where(:spreadable => true) if only_spreadable
-		surveys = surveys.where(:reward => reward) if reward != -1
-		return surveys.map { |s| s.serialize }
+		surveys = surveys.where(:reward => reward)
+		surveys = surveys.order_by(:publish_status, :desc)
+		return surveys.map { |s| {"survey" => s.serialize_in_short, "answer_status" => s.answer_status(user)} }
 	end
 
 	def self.list_answered_surveys(user)
 		answers = user.answers
 		surveys_with_answer_status = []
 		answers.each do |a|
-			surveys_with_answer_status << {"survey" => a.survey.serialize, "answer_status" => a.status}
+			surveys_with_answer_status << {"survey" => a.survey.serialize_in_short, "answer_status" => a.status}
 		end
 		return surveys_with_answer_status
 	end
@@ -1790,8 +1790,25 @@ class Survey
 		end
 		surveys_with_spread_number_hash.each do |survey_id, spread_number|
 			survey = Survey.find_by_id(survey_id)
-			surveys_with_spread_number << {"survey" => survey.searlize, "spread_number" => spread_number}
+			surveys_with_spread_number << {"survey" => survey.serialize_in_short, "answer_status" => s.answer_status(user), "spread_number" => spread_number}
 		end
 		return surveys_with_spread_number
+	end
+
+	def serialize_in_short
+		survey_obj = Hash.new
+		survey_obj["_id"] = self._id.to_s
+		survey_obj["title"] = self.title.to_s
+		survey_obj["subtitle"] = self.subtitle.to_s
+		survey_obj["created_at"] = self.created_at.to_i
+		survey_obj["reward"] = self.reward
+		return survey_obj
+	end
+
+	def answer_status(user)
+		return nil if user.nil?
+		answer = Answer.where(:survey_id => self._id.to_s, :user_id => user._id.to_s, :is_preview => false)[0]
+		return nil if answer.nil?
+		return answer.status
 	end
 end
