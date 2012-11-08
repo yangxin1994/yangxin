@@ -52,13 +52,6 @@ class QuestionsController < ApplicationController
 		end
 	end
 
-	def insert_quality_control_question
-		questions = @survey.insert_quality_control_question(params[:quality_control_question_id])
-		respond_to do |format|
-			format.json	{ render_json_auto(questions) and return }
-		end
-	end
-
 	#*method*: put
 	#
 	#*url*: /surveys/:survey_id/questions/:question_id
@@ -180,10 +173,4 @@ class QuestionsController < ApplicationController
 		end
 	end
 
-	def delete_quality_control_question
-		retval = @survey.delete_quality_control_question(params[:id])
-		respond_to do |format|
-			format.json	{ render_json_auto(retval) and return }
-		end
-	end
 end

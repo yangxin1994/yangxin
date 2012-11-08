@@ -5,11 +5,12 @@ class Lottery
   include Mongoid::ValidationsExt
   field :title, :type => String
   field :description, :type => String
+  # 0 (for_publish) 1 (activity) 2 (finished)
   field :status, :type => Integer, :default => 0
   field :is_deleted, :type => Boolean, :default => false
-  field :point, :type => Integer
-  field :weighting, :type => Integer
-  #field :award_interval, :type => Array, :default => []
+  #field :point, :type => Integer
+  field :weighting, :type => Integer, :default => 10000
+  #field :prize_interval, :type => Array, :default => []
 
   default_scope where(:is_deleted => false)
 
@@ -18,25 +19,24 @@ class Lottery
   scope :finished, where(:status => 2)
   
   has_many :survey
-  has_many :awards
+  has_many :prizes
   has_many :lottery_codes
   belongs_to :creator, :class_name => 'User'
-  #has_many :lottery_awards, :class_nam => 'LotteryAward'
 
   def delete
   	is_deleted = true
   	self.save
   end
 
-  def add_an_lottery_award(attributes = nil, options = {}, &block)
-  	self.lottery_awards.create(attributes, options, &block)
+  def add_prezi(attributes = nil, options = {}, &block)
+  	self.lottery_prizes.create(attributes, options, &block)
   end
 
-  def add_a_lottery_code(attributes = nil, options = {}, &block)
+  def add_lottery_code(attributes = nil, options = {}, &block)
     self.lottery_codes.create(attributes, options, &block)
   end
 
-  def give_a_lottery_code_to(user)
+  def give_lottery_code_to(user)
     self.lottery_codes.create(:user => user)
   end
 
@@ -46,9 +46,8 @@ class Lottery
     make_interval.each do |e|
       if r < e[:weighting]
         return l unless l.is_a? LotteryCode
-        l.award = Award.find_by_id(e[:award_id])
-        return l if (l.award.is_a?(Award)) && l.save 
-        p l
+        l.prize = Prezi.find_by_id(e[:prize_id])
+        return l if (l.prize.is_a?(Prize)) && l.save 
       end
     end
     return false
@@ -59,11 +58,11 @@ class Lottery
   end
 
   def make_interval
-    award_interval = [{ :weighting => 0, :award_id => nil }]
-    self.awards.can_be_draw.each do |a|
-      award_interval << { :weighting => award_interval[-1][:weighting] + a.weighting, :award_id => a.id.to_s }
+    prize_interval = [{ :weighting => 0, :prize_id => nil }]
+    self.prizes.can_be_draw.each do |a|
+      prize_interval << { :weighting => prize_interval[-1][:weighting] + a.weighting, :prize_id => a.id.to_s }
     end
-    award_interval
+    prize_interval
   end
   
 end

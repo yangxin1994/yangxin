@@ -17,10 +17,9 @@ class BasicGift
 	default_scope where(:is_deleted => false)
 	# TO DO Def Scope
 	scope :cash, where( :type => 0)
-	scope :realgoods, where( :type => 1)
-	scope :virtualgoods, where( :type => 2)
+	scope :entity, where( :type => 1)
+	scope :virtual, where( :type => 2)
 	scope :lottery, where( :type => 3)
-	#scope :award, where( :type => 4)
 
 	scope :stockout, where(:surplus.lt => 1)
 

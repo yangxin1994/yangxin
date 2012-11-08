@@ -5,7 +5,7 @@ class Gift < BasicGift
 	field :status, :type => Integer, :default => 1
 	field :start_time, :type => Date
 	has_many :orders, :class_name => "Order"
-	has_many :materials, :as => :materials
+	#has_many :materials, :as => :materials
 	
 	scope :can_be_rewarded, where( :status => 1) 	
 	scope :expired, where( :status => 0)

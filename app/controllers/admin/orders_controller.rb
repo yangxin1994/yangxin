@@ -2,10 +2,11 @@ class Admin::OrdersController < Admin::ApplicationController
 	
 	def index
 		respond_and_render_json true do
-			Order.page(page).per(per_page).map do |o|
-				o["gift_name"] = o.gift.name
-				logger.info o
-				o
+			auto_paginate(Order.all) do |orders|
+				orders.page(page).per(per_page).map do |o|
+					o["gift_name"] = o.gift.name
+					o
+				end
 			end
 		end
 	end
@@ -48,10 +49,11 @@ class Admin::OrdersController < Admin::ApplicationController
 	def_each :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed do |method_name|
 		respond_and_render_json true do
 			#Order.send(method_name).page(page)
-			current_user.orders.send(method_name).page(page).per(per_page).map do |o|
-				o["gift_name"] = o.gift.name
-				logger.info o
-				o
+			auto_paginate(current_user.orders.send(method_name)) do |orders|
+				orders.page(page).per(per_page).map do |o|
+					o["gift_name"] = o.gift.name
+					o
+				end
 			end
 		end
 	end

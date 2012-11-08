@@ -65,8 +65,8 @@ class AnswersController < ApplicationController
 			email = @current_user.email
 		else
 			if params[:email].blank?
-				# the survey has award, but no email is provided
-				render_json_e(ErrorEnum::REQUIRE_EMAIL_ADDRESS) and return if @survey.has_award
+				# the survey has prize, but no email is provided
+				render_json_e(ErrorEnum::REQUIRE_EMAIL_ADDRESS) and return if @survey.has_prize
 				# need to create new answer
 				email = nil
 			else
@@ -89,7 +89,7 @@ class AnswersController < ApplicationController
 			if retval == true
 				# the first time to load questions, create the preview answer
 				# answer = Answer.create_answer(params[:is_preview], @current_user, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
-				answer = Answer.create_answer(params[:is_preview], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
+				answer = Answer.create_answer(params[:is_preview], params[:introducer_id], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
 				render_json_auto(answer) and return if answer.class != Answer
 				answer.set_edit
 				render_json_auto(answer._id) and return
@@ -105,7 +105,7 @@ class AnswersController < ApplicationController
 			retval = @survey.check_password(params[:username], params[:password], @current_user)
 			if retval == true
 				# pass the checking, create a new answer and check the region, channel, and ip quotas
-				answer = Answer.create_answer(params[:is_preview], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
+				answer = Answer.create_answer(params[:is_preview], params[:introducer_id], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
 				render_json_auto(answer) and return if answer.class != Answer
 				retval = answer.check_channel_ip_address_quota
 				if retval

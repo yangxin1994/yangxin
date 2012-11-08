@@ -1,22 +1,21 @@
-# encoding: utf-8
-class Admin::AwardsController < Admin::ApplicationController
+class Admin::PrizesController < Admin::ApplicationController
 
 	def create
-		@award = Award.create(params[:award])
-		Material.create(:material => params[:material], :materials => @award)
-		respond_and_render_json @award.save do
-			@award.as_retval
+		@prize = Prize.create(params[:prize])
+		Material.create(:material => params[:material], :materials => @prize)
+		respond_and_render_json @prize.save do
+			@prize.as_retval
 		end
 	end
 	
 	def stockout
-		respond_and_render_json { @awards }
+		respond_and_render_json { @prizes }
 	end
 
 	def update
-		@award = Award.find(params[:id])
-		respond_and_render_json @award.update_attributes(params[:award]) do
-			@award.as_retval
+		@prize = Prize.find(params[:id])
+		respond_and_render_json @prize.update_attributes(params[:prize]) do
+			@prize.as_retval
 		end
 	end
 
@@ -24,19 +23,19 @@ class Admin::AwardsController < Admin::ApplicationController
 		params[:ids] ||= []
 		respond_and_render_json do
 			params[:ids].to_a.each do |id|
-				Award.find_by_id id do |r|
+				Prize.find_by_id id do |r|
 					r.delete
 				end
 			end
 		end
-		# @awards = []
+		# @prizes = []
 		# params[:ids].to_a.each do |id|
-		# 	@awards << (Award.find_by_id id do |r|
+		# 	@prizes << (Prize.find_by_id id do |r|
 		# 		r.delete
 		# 	end)
 		# end
 		# respond_to do |format|
-		# 	format.json { render json: @awards }
+		# 	format.json { render json: @prizes }
 		# end
 	end
 

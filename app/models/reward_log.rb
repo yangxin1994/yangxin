@@ -1,18 +1,22 @@
-class PointLog
+class RewardLog
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt
-  field :operated_point, :type => Integer, :default => 0
+  # can be 1 (LotteryCode) 2 (Point)
+  field :type, :type => Integer
+  field :point, :type => Integer, :default => 0
+
   # can be 0 (AdminOperate), 1 (InviteUser), 2 (FilledSurvey), 3 (ExtendSurvey), 4 (ExchangeGift), 5 (revoke)
   field :cause, :type => Integer
 
   field :invited_user_id, :type => String
-  field :filled_survey_id, :type => String
   field :extended_survey_id, :type => String
-  
-  belongs_to :user, :class_name => "User", :inverse_of => :point_logs
-  belongs_to :operated_admin, :class_name => "User", :inverse_of => :operate_point_logs
-  belongs_to :order, :class_name => "Order", :inverse_of => :point_log
+
+  has_one :lottery_code
+  belongs_to :filled_survey, :class_name => "Survey", :inverse_of => :reward_logs
+  belongs_to :user, :class_name => "User", :inverse_of => :reward_logs
+  belongs_to :operated_admin, :class_name => "User", :inverse_of => :operate_reward_logs
+  belongs_to :order, :class_name => "Order", :inverse_of => :reward_log
 
   # TO DO validation
   #validates_presence_of :operated_point, :cause, :operated_admin
@@ -22,19 +26,18 @@ class PointLog
 
   # before_save :operated_point
   after_create :operate_user_point
-  # before_create :fsasfsd
-  # def fsasfsd
-  # end  
+ 
   def self.revoke_operation(log_id,admin_id)
-    p = PointLog.find(log_id)
-    PointLog.create(:user_id => p.user.id,
-                    :operated_point => -p.operated_point,
+    p = RewardLog.find(log_id)
+    RewardLog.create(:user_id => p.user.id,
+                    :point => -p.operated_point,
                     :operated_admin_id => admin_id, 
                     :cause => 4)
   end
   private
   def operate_user_point
     return false if user.blank? && operated_point.blank?
-    user.inc(:point, self.operated_point)
+    return true if type != 2 || point == 0
+    user.inc(:point, self.point)
   end
 end

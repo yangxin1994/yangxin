@@ -32,4 +32,18 @@ class Admin::SurveysController < Admin::ApplicationController
 		s = params[:survey].select{:reward || :point || :lottery}
 		respond_and_render_json @survey.update_attributes(s)
 	end	
+
+	def set_community
+		@survey = Survey.normal.find_by_id(params[:id])
+		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
+		retval = @survey.set_community(params[:show_in_community].to_s == "true")
+		render_json_auto(retval) and return
+	end
+
+	def set_spread
+		@survey = Survey.normal.find_by_id(params[:id])
+		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
+		retval = @survey.set_spread(params[:spread_point].to_i, params[:spreadable].to_s == "true")
+		render_json_auto(retval) and return
+	end
 end

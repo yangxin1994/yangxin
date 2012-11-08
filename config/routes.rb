@@ -42,6 +42,8 @@ OopsData::Application.routes.draw do
 			end
 			member do
 				post 'allocate'
+				post 'set_community'
+				post 'set_spread'
 			end
 		end
 
@@ -117,6 +119,15 @@ OopsData::Application.routes.draw do
 		end
 	end
 
+	namespace 'entry_clerk' do
+		resources :answers do
+			member do
+				get 'csv_header'
+				post 'import_answer'
+			end
+		end
+	end
+
 	get "home/index"
 	match 'home' => 'home#index', :as => :home
 	post "home/get_tp_info"
@@ -152,7 +163,8 @@ OopsData::Application.routes.draw do
 
 	resources :users do 
 		collection do 
-			get :get_basic_info
+			get :get_level_information
+			get :get_invited_user_ids
 		end
 	end
 	match 'update_information' => 'users#update_information', :as => :update_information, :via => [:post]
@@ -162,13 +174,14 @@ OopsData::Application.routes.draw do
 
 	resources :surveys do
 		collection do
-			post 'list'
+			get 'list_surveys_in_community'
+			get 'list_answered_surveys'
+			get 'list_spreaded_surveys'
 		end
 		member do
 			put 'save_meta_data'
 			get 'clone'
 			get 'recover'
-			get 'export_csv'
 			get 'clear'
 			put 'update_tags'
 			put 'add_tag'
@@ -182,10 +195,9 @@ OopsData::Application.routes.draw do
 			get 'show_style_setting'
 			put 'update_access_control_setting'
 			get 'show_access_control_setting'
-			get 'set_random_quality_control_questions'
-			get 'get_random_quality_control_questions'
+			put 'update_quality_control'
+			get 'show_quality_control'
 
-			get 'spss_header'
 			get 'update_deadline'
 
 			get 'show_quality_control'
@@ -285,7 +297,7 @@ OopsData::Application.routes.draw do
 	end
 	resources :gifts do
 		collection do
-			get :virtualgoods, :cash, :realgoods, :stockout
+			get :virtual, :cash, :entity, :stockout
 			get :edit
 		end
 	end
@@ -319,7 +331,7 @@ OopsData::Application.routes.draw do
 		end
 		resources :gifts do
 			collection do
-				get :expired, :index, :virtualgoods, :cash, :realgoods, :stockout
+				get :expired, :index, :virtual, :cash, :entity, :stockout
 			end
 		end
 		resources :orders do

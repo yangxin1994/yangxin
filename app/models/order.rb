@@ -3,7 +3,7 @@ class Order
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
 	extend Mongoid::FindHelper
-	# can be 0 (Cash), 1 (Entity), 2 (VirtualGoods), 3 (Lottery)
+	# can be 0 (Cash), 1 (Entity), 2 (Virtual), 3 (Lottery)
 	field :type, :type => Integer
 	# can be 0 (NeedVerify), 1 (Verified), -1 (VerifyFailed), 2 (Delivering), 3 (Delivered), -3 (DeliverFailed)
 	field :status, :type => Integer
@@ -16,7 +16,7 @@ class Order
 	embeds_one :virtual_receive_info, :class_name => "VirtualReceiveInfo"
 	embeds_one :lottery_receive_info, :class_name => "LotteryReceiveInfo"
 
-	has_one :point_log, :class_name => "PointLog"
+	has_one :reward_log, :class_name => "RewardLog"
 
 	belongs_to :gift, :class_name => "BasicGift"
 	belongs_to :user, :class_name => "User", :inverse_of => :orders
@@ -53,7 +53,7 @@ class Order
 	
 	def decrease_point
 		return if self.gift.blank? && self.user.blank?
-		self.create_point_log(:order => self,
+		self.create_reward_log(:order => self,
 													:user => self.user,
 													:operated_point => self.gift.point,
 													:cause => 4)

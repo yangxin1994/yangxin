@@ -1,4 +1,4 @@
-class Award < BasicGift
+class Prize < BasicGift
 	
 	#field :budget, :type => Integer
   field :weighting, :type => Integer, :default => 10

@@ -2,14 +2,14 @@ require 'test_helper'
 
 class PointTest < ActiveSupport::TestCase
 	setup do
-		clear(User, PointLog)
+		clear(User, RewardLog)
 		@ponit_log = FactoryGirl.create(:increase_point) 
 		@admin_foo = User.first
 		@user_bar = User.last
 	end
 
 	test "increase point" do
-		p = PointLog.create(:operated_point => -200,
+		p = RewardLog.create(:operated_point => -200,
 											:cause => 0,
 											:operated_admin => @admin_foo,
 											:user => @user_bar )
@@ -17,7 +17,7 @@ class PointTest < ActiveSupport::TestCase
 	end
 
 	test "revoke a operation" do
-		PointLog.revoke_operation(@ponit_log.id, @admin_foo.id)
+		RewardLog.revoke_operation(@ponit_log.id, @admin_foo.id)
 		@user_bar.reload
 		assert @user_bar.point == 1000
 	end

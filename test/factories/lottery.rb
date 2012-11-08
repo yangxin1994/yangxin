@@ -6,6 +6,6 @@ FactoryGirl.define  do
 		weighting 10000
 		
 		#lottery_codes factory: :lottery_code
-		#lottery_awards factory: :lottery_dsxl
+		#lottery_prizes factory: :lottery_dsxl
 		end
 end
