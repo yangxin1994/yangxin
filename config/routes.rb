@@ -42,6 +42,7 @@ OopsData::Application.routes.draw do
 			end
 			member do
 				post 'allocate'
+				post 'set_community'
 			end
 		end
 
@@ -102,8 +103,6 @@ OopsData::Application.routes.draw do
 		resources :answers do
 			member do
 				post 'review'
-				get 'csv_header'
-				post 'import_answer'
 			end
 		end
 	end
@@ -115,6 +114,15 @@ OopsData::Application.routes.draw do
 				get 'publish'
 				get 'close'
 				get 'pause'
+			end
+		end
+	end
+
+	namespace 'entry_clerk' do
+		resources :answers do
+			member do
+				get 'csv_header'
+				post 'import_answer'
 			end
 		end
 	end
@@ -154,7 +162,8 @@ OopsData::Application.routes.draw do
 
 	resources :users do 
 		collection do 
-			get :get_basic_info
+			get :get_level_information
+			get :get_invited_user_ids
 		end
 	end
 	match 'update_information' => 'users#update_information', :as => :update_information, :via => [:post]

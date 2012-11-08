@@ -71,6 +71,7 @@ class Survey
 	field :point, :type => Integer, :default => 0
 	# reward: 0: nothing, 1: prize, 2: point 
 	field :reward, :type => Integer, :default => 0
+	field :show_in_community, :type => Boolean, default: false
 
 	belongs_to :user
 	has_and_belongs_to_many :tags do
@@ -207,6 +208,11 @@ class Survey
 		self.is_star = !self.is_star
 		return ErrorEnum::UNKNOWN_ERROR unless self.save
 		return self.is_star
+	end
+
+	def set_community(show_in_community)
+		self.show_in_community = show_in_community
+		return self.save
 	end
 
 	#*description*: judge whether this survey has a question
@@ -1770,10 +1776,10 @@ class Survey
 			survey.save
 			return survey.logic_control
 		end
+	end
 
-		def post_reward_to(user, options = {})
-			options[:user] = user
-			RewardLog.create(options).created_at ? true : false
-		end
+	def post_reward_to(user, options = {})
+		options[:user] = user
+		RewardLog.create(options).created_at ? true : false
 	end
 end
