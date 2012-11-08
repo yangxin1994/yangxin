@@ -53,6 +53,9 @@ class User
 	field :identity_card, :type => String
 	field :company, :type => String
 
+	field :bankcard_number, :type => String
+	field :bank, :type => String
+	field :alipay_account, :type => String
 
 	has_and_belongs_to_many :messages, class_name: "Message", inverse_of: :receiver
 	has_many :sended_messages, :class_name => "Message", :inverse_of => :sender
