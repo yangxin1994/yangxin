@@ -323,12 +323,8 @@ class User
 		user.save
 		# pay introducer points
 		inviter = User.find_by_id(user.introducer_id)
-		inviter.give_points(user.introducer_to_pay, 1, :invited_user_id => user._id) if !inviter.nil?
+		RewardLog.create(:user => introducer, :type => 2, :point => self.introducer_to_pay, :invited_user_id => user._id, :cause => 1) if !inviter.nil?
 		return true
-	end
-
-	def give_points(point, cause, opt={})
-		# assign the user point for inviting the invited_user_id
 	end
 
 	#*description*: user login

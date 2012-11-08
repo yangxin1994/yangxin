@@ -1776,10 +1776,10 @@ class Survey
 			survey.save
 			return survey.logic_control
 		end
+	end
 
-		def post_reward_to(user, options = {})
-			options[:user] = user
-			RewardLog.create(options).created_at ? true : false
-		end
+	def post_reward_to(user, options = {})
+		options[:user] = user
+		RewardLog.create(options).created_at ? true : false
 	end
 end
