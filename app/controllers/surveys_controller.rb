@@ -1,7 +1,7 @@
 require 'array'
 require 'error_enum'
 class SurveysController < ApplicationController
-	before_filter :require_sign_in, :except => [:show, :estimate_answer_time]
+	before_filter :require_sign_in, :except => [:show, :estimate_answer_time, :list_surveys_in_community]
 	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :update_deadline]
 	before_filter :check_normal_survey_existence, :except => [:new, :index, :recover, :clear, :add_tag, :remove_tag, :show, :estimate_answer_time]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
@@ -307,6 +307,10 @@ class SurveysController < ApplicationController
 			format.json	{ render_json_auto(survey_list) and return }
 		end
 		
+	end
+
+	def list_surveys_in_community
+		#Survey.list_surveys_in_community(params[:], params[:reward], params[:spreadable])
 	end
 
 	#*method*: put

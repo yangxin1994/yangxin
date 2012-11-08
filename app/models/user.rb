@@ -323,7 +323,11 @@ class User
 		user.save
 		# pay introducer points
 		inviter = User.find_by_id(user.introducer_id)
-		RewardLog.create(:user => introducer, :type => 2, :point => self.introducer_to_pay, :invited_user_id => user._id, :cause => 1) if !inviter.nil?
+		if !inviter.nil?
+			RewardLog.create(:user => introducer, :type => 2, :point => user.introducer_to_pay, :invited_user_id => user._id, :cause => 1)
+			# send a message to the introducer
+			inviter.create_message("邀请好友注册积分奖励", "您邀请的用户#{user.email}注册激活成功，您获得了#{user.introducer_to_pay}个积分奖励。", [inviter._id])
+		end
 		return true
 	end
 

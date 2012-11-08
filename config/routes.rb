@@ -43,6 +43,7 @@ OopsData::Application.routes.draw do
 			member do
 				post 'allocate'
 				post 'set_community'
+				post 'set_spread'
 			end
 		end
 

@@ -69,6 +69,8 @@ class Survey
 	field :deadline, :type => Integer
 	field :is_star, :type => Boolean, :default => false
 	field :point, :type => Integer, :default => 0
+	field :spread_point, :type => Integer, :default => 0
+	field :spreadable, :type => Boolean, :default => false
 	# reward: -1: nothing, 1: prize, 2: point 
 	field :reward, :type => Integer, :default => 1
 	field :show_in_community, :type => Boolean, default: false
@@ -1781,5 +1783,11 @@ class Survey
 	def post_reward_to(user, options = {})
 		options[:user] = user
 		RewardLog.create(options).created_at ? true : false
+	end
+
+	def set_spread(spread_point, spreadable)
+		self.spread_point = spread_point
+		self.spreadable = spreadable
+		return self.save
 	end
 end
