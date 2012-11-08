@@ -69,8 +69,8 @@ class Survey
 	field :deadline, :type => Integer
 	field :is_star, :type => Boolean, :default => false
 	field :point, :type => Integer, :default => 0
-	# reward: -1: nothing, 1: prize, 2: point 
-	field :reward, :type => Integer, :default => 1
+	# reward: 0: nothing, 1: prize, 2: point 
+	field :reward, :type => Integer, :default => 0
 
 	belongs_to :user
 	has_and_belongs_to_many :tags do
