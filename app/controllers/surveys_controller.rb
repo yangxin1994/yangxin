@@ -3,7 +3,7 @@ require 'error_enum'
 class SurveysController < ApplicationController
 	before_filter :require_sign_in, :except => [:show, :estimate_answer_time, :list_surveys_in_community]
 	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :update_deadline]
-	before_filter :check_normal_survey_existence, :except => [:new, :index, :recover, :clear, :add_tag, :remove_tag, :show, :estimate_answer_time]
+	before_filter :check_normal_survey_existence, :except => [:new, :index, :list_surveys_in_community, :list_answered_surveys, :list_spreaded_surveys, :recover, :clear, :add_tag, :remove_tag, :show, :estimate_answer_time]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
 	
 	def check_survey_existence
@@ -104,22 +104,15 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	def set_quality_control_questions_type
-		retval = @survey.set_quality_control_questions_type(params[:quality_control_questions_type].to_i)
-		respond_to do |format|
-			format.json	{ render_json_auto(retval) and return }
-		end
-	end
-
-	def get_quality_control_questions_type
-		retval = @survey.quality_control_questions_type
-		respond_to do |format|
-			format.json	{ render_json_auto(retval) and return }
-		end
-	end
-
 	def show_quality_control
 		retval = @survey.show_quality_control
+		respond_to do |format|
+			format.json	{ render_json_auto(retval) and return }
+		end
+	end
+
+	def update_quality_control
+		retval = @survey.update_quality_control(params[:quality_control_questions_type], params[:quality_control_questions_ids])
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
@@ -310,7 +303,29 @@ class SurveysController < ApplicationController
 	end
 
 	def list_surveys_in_community
-		#Survey.list_surveys_in_community(params[:], params[:reward], params[:spreadable])
+		surveys = Survey.list_surveys_in_community(params[:published].to_s == "true",
+										params[:reward].to_i,
+										params[:only_spreadable].to_s == "true")
+		paginated_surveys = auto_paginate surveys do |s|
+			s.slice((page - 1) * per_page, per_page)
+		end
+		respond_and_render_json { paginated_surveys }
+	end
+
+	def list_answered_surveys
+		surveys_with_answer_status = Survey.list_answered_surveys(@current_user)
+		paginated_surveys = auto_paginate surveys_with_answer_status do |s|
+			s.slice((page - 1) * per_page, per_page)
+		end
+		respond_and_render_json { paginated_surveys }
+	end
+
+	def list_spreaded_surveys
+		surveys_with_spreaded_number = Survey.list_spreaded_surveys(@current_user)
+		paginated_surveys = auto_paginate surveys_with_spreaded_number do |s|
+			s.slice((page - 1) * per_page, per_page)
+		end
+		respond_and_render_json { paginated_surveys }
 	end
 
 	#*method*: put

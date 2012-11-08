@@ -109,6 +109,8 @@ class Survey
 	# scope for star
 	scope :stars, where(:status.gt => -1, :is_star => true)
 
+	scope :in_community, lambda { where(:show_in_community => true) }
+
 	before_create :set_new
 
 	before_save :clear_survey_object
@@ -382,22 +384,23 @@ class Survey
 		return self.style_setting["allow_pageup"]
 	end
 
-	def set_quality_control_questions_type(quality_control_questions_type)
-		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTIONS_TYPE if [0, 1, 2].include?(quality_control_questions_type)
-		self.quality_control_questions_type = quality_control_questions_type
-		# the random quality control questions should be generated when answering
-		# thus, no matter how the user sets, the quality control questions should always be blank array
-		self.quality_control_questions = []
-		return self.save
-	end
-
 	def is_random_quality_control_questions
 		return self.quality_control_questions_type == 2
 	end
 
 	def show_quality_control
 		return {"quality_control_questions_type" => self.quality_control_questions_type,
-				"quality_control_questions" => self.quality_control_questions}
+				"quality_control_questions_ids" => self.quality_control_questions_ids}
+	end
+
+	def update_quality_control(quality_control_questions_type, quality_control_questions_ids)
+		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTIONS_TYPE if [0, 1, 2].include?(quality_control_questions_type)
+		quality_control_questions_ids.each do |qc_id|
+			return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if QualityControlQuestion.find_by_id(qc_id).nil?
+		end
+		self.quality_control_questions_type = quality_control_questions_type
+		self.quality_control_questions_ids = quality_control_questions_ids
+		return self.save
 	end
 
 	#*description*: remove current survey
@@ -743,32 +746,6 @@ class Survey
 		return normal_question
 	end
 
-	def insert_quality_control_question(quality_control_question_id)
-		return ErrorEnum::RANDOM_QUALITY_CONTROL if self.quality_control_questions_type == 2
-		return ErrorEnum::NO_QUALITY_CONTROL if self.quality_control_questions_type == 0
-		quality_control_question = QualityControlQuestion.find_by_id(quality_control_question_id)
-		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if quality_control_question.nil?
-		self.quality_control_questions_ids << quality_control_question._id
-=begin
-		current_page = self.pages[page_index]
-		return ErrorEnum::OVERFLOW if current_page == nil
-		if question_id.to_s == "-1"
-			question_index = current_page["questions"].length - 1
-		elsif question_id.to_s == "0"
-			question_index = -1
-		else
-			question_index = current_page["questions"].index(question_id)
-			return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
-		end
-		questions = Question.create_quality_control_question(quality_control_question)
-		questions.each do |question|
-			current_page["questions"].insert(question_index+1, question._id.to_s)
-		end
-=end
-		self.save
-		return true
-	end
-
 	#*description*: update a question
 	#
 	#*params*:
@@ -917,12 +894,6 @@ class Survey
 		question.clear_question_object
 		question.destroy if question.type_of(Question)
 		return true
-	end
-
-	def delete_quality_control_question(question_id)
-		return ErrorEnum::RANDOM_QUALITY_CONTROL if self.is_random_quality_control_questions
-		self.quality_control_questions_ids.delete(question_id)
-		return self.save
 	end
 
 	#*description*: create a page
@@ -1789,5 +1760,38 @@ class Survey
 		self.spread_point = spread_point
 		self.spreadable = spreadable
 		return self.save
+	end
+
+	def self.list_surveys_in_community(published, reward, only_spreadable)
+		surveys = Survey.in_community
+		surveys = published ? surveys.where(:publish_status => PublishStatus::PUBLISHED) : surveys.not_in(:publish_status => PublishStatus::PUBLISHED)
+		surveys = surveys.where(:spreadable => true) if only_spreadable
+		surveys = surveys.where(:reward => reward) if reward != -1
+		return surveys.map { |s| s.serialize }
+	end
+
+	def self.list_answered_surveys(user)
+		answers = user.answers
+		surveys_with_answer_status = []
+		answers.each do |a|
+			surveys_with_answer_status << {"survey" => a.survey.serialize, "answer_status" => a.status}
+		end
+		return surveys_with_answer_status
+	end
+
+	def self.list_spreaded_surveys(user)
+		answers = Answer.where(:introducer_id => user._id, :status => 2, :finish_type => 1)
+		surveys_with_spread_number_hash = {}
+		surveys_with_spread_number = []
+		answers.each do |a|
+			survey_id = a.survey_id.to_s
+			surveys_with_spread_number_hash[survey_id] ||= 0
+			surveys_with_spread_number_hash[survey_id] = surveys_with_spread_number_hash[survey_id] + 1
+		end
+		surveys_with_spread_number_hash.each do |survey_id, spread_number|
+			survey = Survey.find_by_id(survey_id)
+			surveys_with_spread_number << {"survey" => survey.searlize, "spread_number" => spread_number}
+		end
+		return surveys_with_spread_number
 	end
 end
