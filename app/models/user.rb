@@ -23,8 +23,8 @@ class User
 	field :last_login_client_type, :type => String
 	field :login_count, :type => Integer, default: 0
 	field :activate_time, :type => Integer
-	field :introducer_id, :type => Integer
-	field :introducer_to_pay, :type => Float
+	field :introducer_id, :type => String
+	field :introducer_to_pay, :type => Integer, default: 10
 	field :last_read_messeges_time, :type => Time, :default => Time.now
 # an integer in the range of [0, 63]. If converted into a binary, each digit from the most significant one indicates:
 # super admin
@@ -59,12 +59,12 @@ class User
 	#################################
 	# QuillMe
 	field :point, :type => Integer
-	has_many :point_logs, :class_name => "PointLog", :inverse_of => :user
+	has_many :reward_logs, :class_name => "RewardLog", :inverse_of => :user
 	has_many :orders, :class_name => "Order"
 	has_many :lottery_codes
 	# QuillAdmin
 	has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
-	has_many :operate_point_logs, :class_name => "PointLog", :inverse_of => :operated_admin,:foreign_key => "operated_admin_id"	
+	has_many :operate_reward_logs, :class_name => "RewardLog", :inverse_of => :operated_admin,:foreign_key => "operated_admin_id"	
 
 	#before_save :set_updated_at
 	#before_update :set_updated_at
@@ -85,6 +85,12 @@ class User
 	has_many :email_histories
 	has_many :answers
 	has_many :template_question_answers
+
+	has_and_belongs_to_many :answer_auditor_allocated_surveys, class_name: "Survey", inverse_of: :answer_auditors
+	has_and_belongs_to_many :entry_clerk_allocated_surveys, class_name: "Survey", inverse_of: :entry_clerks
+	has_and_belongs_to_many :interviewer_allocated_surveys, class_name: "Survey", inverse_of: :interviewers
+
+	has_many :reviewed_answers, class_name: "Answer", inverse_of: :auditor
 
 	scope :unregistered, where(status: 0)
 	scope :receive_email_user
@@ -261,7 +267,7 @@ class User
 	#*retval*:
 	#* the new user instance: when successfully created
 	def self.create_new_registered_user(user, current_user)
-    logger.debug user.inspect
+    	logger.debug user.inspect
 		# check whether the email acount is illegal
 		return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal?(user["email"])
 		return ErrorEnum::EMAIL_EXIST if self.user_exist_by_email?(user["email"])
@@ -314,7 +320,15 @@ class User
 		user = User.find_by_email(activate_info["email"])
 		user.status = 2
 		user.activate_time = Time.now.to_i
-		return user.save
+		user.save
+		# pay introducer points
+		inviter = User.find_by_id(user.introducer_id)
+		inviter.give_points(user.introducer_to_pay, 1, :invited_user_id => user._id) if !inviter.nil?
+		return true
+	end
+
+	def give_points(point, cause, opt={})
+		# assign the user point for inviting the invited_user_id
 	end
 
 	#*description*: user login
@@ -462,7 +476,7 @@ class User
 # admin inc
 	def operate_point(operated_point, user_id)
 		u = User.find_by_id(user_id)
-		operate_point_logs.create(:operated_point => operated_point,
+		operate_reward_logs.create(:operated_point => operated_point,
 															:user => u,
 															:cause => 0)
 	end
@@ -586,5 +600,10 @@ class User
 			selected_users << u
 		end
 		return selected_users
+	end
+
+	def get_invited_user_ids
+		invited_users = User.where(:introducer_id => self._id.to_s)
+		return invited_users.map { |u| u._id.to_s }
 	end
 end

@@ -48,6 +48,10 @@ OopsData::Application.routes.draw do
 			member do 
 				put 'publish'
 			end
+			member do
+				post 'allocate'
+				post 'set_community'
+			end
 		end
 
 		resources :faqs do 
@@ -101,6 +105,16 @@ OopsData::Application.routes.draw do
 
 	end
 
+	namespace :answer_auditor do
+		resources :surveys do
+		end
+		resources :answers do
+			member do
+				post 'review'
+			end
+		end
+	end
+
 	namespace :survey_auditor do
 		resources :surveys do
 			collection do 
@@ -119,6 +133,15 @@ OopsData::Application.routes.draw do
 		resources :answers do 
 			collection do 
 				get 'count'
+			end
+		end
+	end
+
+	namespace 'entry_clerk' do
+		resources :answers do
+			member do
+				get 'csv_header'
+				post 'import_answer'
 			end
 		end
 	end
@@ -158,7 +181,8 @@ OopsData::Application.routes.draw do
 
 	resources :users do 
 		collection do 
-			get :get_basic_info
+			get :get_level_information
+			get :get_invited_user_ids
 		end
 	end
 	match 'update_information' => 'users#update_information', :as => :update_information, :via => [:post]
@@ -174,7 +198,6 @@ OopsData::Application.routes.draw do
 			put 'save_meta_data'
 			get 'clone'
 			get 'recover'
-			get 'export_csv'
 			get 'clear'
 			put 'update_tags'
 			put 'add_tag'
@@ -191,7 +214,6 @@ OopsData::Application.routes.draw do
 			get 'set_random_quality_control_questions'
 			get 'get_random_quality_control_questions'
 
-			get 'spss_header'
 			get 'update_deadline'
 
 			get 'show_quality_control'
@@ -291,7 +313,7 @@ OopsData::Application.routes.draw do
 	end
 	resources :gifts do
 		collection do
-			get :index, :virtualgoods, :cash, :realgoods, :stockout
+			get :virtual, :cash, :entity, :stockout
 			get :edit
 		end
 	end
@@ -325,8 +347,7 @@ OopsData::Application.routes.draw do
 		end
 		resources :gifts do
 			collection do
-				get 'expired'
-				delete 'delete'
+				get :expired, :index, :virtual, :cash, :entity, :stockout
 			end
 		end
 		resources :orders do
@@ -334,9 +355,13 @@ OopsData::Application.routes.draw do
 				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
 			end
 		end
+		
 		resources :lotteries do
-
+			collection do
+				get :for_publish, :activity, :finished
+			end
 		end
+
 		resources :lottery_codes do
 			
 		end

@@ -14,6 +14,27 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
+	def auto_paginate(value)
+	  retval = {}
+	  logger.info Gift.page(page).per(10)
+	  retval["current_page"] = page
+	  retval["per_page"] = per_page
+	  retval["previous_page"] = page - 1
+	  # retval["previous_page"] = [page - 1, 1].max
+
+	  #v = eval(value)
+	  if block_given?
+	    retval["data"] = yield(value)
+	  else
+	  	#retval["data"] = eval(value + '.page(retval["current_page"]).per(retval["per_page"])' )
+	  	retval["data"] = value.page(retval["current_page"]).per(retval["per_page"])
+	  end
+	  retval["total_page"] = ( value.count / per_page.to_f ).ceil
+	  retval["next_page"] = page + 1
+	  # retval["next_page"] = [page + 1, retval["total_page"]].min
+	  retval
+	end
+
 	begin "kaminari"
 		def page
 			params[:page].to_i == 0 ? 1 : params[:page].to_i
@@ -52,7 +73,7 @@ class ApplicationController < ActionController::Base
 		options[:only]+= [:value, :success] unless options[:only].nil?
 		respond_to do |format|
 			format.json do
-				render :json => {:value => yield(is_success),
+				render :json => {:value => block_given? ? yield(is_success) : is_success ,
 												 :success => is_success
 				 }, :except => options[:except], :only => options[:only]
 			end
@@ -139,7 +160,7 @@ class ApplicationController < ActionController::Base
 	end
 
 	#judge whether the current user is answer auditor
-	def user_interviewer?
+	def user_answer_auditor?
 		user_signed_in? && (@current_user.is_answer_auditor || @current_user.is_admin || @current_user.is_super_admin)
 	end
 	

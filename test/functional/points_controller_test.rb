@@ -1,7 +1,7 @@
 require 'test_helper'
 class PointsControllerTest < ActionController::TestCase		
   setup do
-    clear(User, PointLog)
+    clear(User, RewardLog)
     @admin_foo = FactoryGirl.create(:admin_foo)
     @user_bar = FactoryGirl.create(:user_bar)
     @auth_key = sign_in('admin_foo@gmail.com', '123123123')

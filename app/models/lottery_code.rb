@@ -8,7 +8,7 @@ class LotteryCode
 	field :num, :type => Integer, default: 0
 	field :code, :type => String
 	field :email, :type => String
-	has_one :award
+	has_one :prize
 	belongs_to :order
 	belongs_to :user
 	belongs_to :lottery

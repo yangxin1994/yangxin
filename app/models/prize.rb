@@ -1,5 +1,5 @@
-class Award < BasicGift
-	include Mongoid::ValidationsExt
+class Prize < BasicGift
+	
 	#field :budget, :type => Integer
   field :weighting, :type => Integer, :default => 10
   field :status, :type => Integer, :default => 1

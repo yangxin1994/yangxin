@@ -23,7 +23,8 @@ class Answer
 	field :repeat_time, :type => Integer, default: 0
 	# reject_type: 0 for rejected by quota, 1 for rejected by quliaty control, 2 for rejected by screen, 3 for timeout
 	field :reject_type, :type => Integer
-	field :finish_type, :type => Integer
+	# finish_type: 0 for not reviewed, 1 for passing reviewed, 2 for rejected
+	field :finish_type, :type => Integer, default: 0
 	field :username, :type => String, default: ""
 	field :password, :type => String, default: ""
 
@@ -31,12 +32,15 @@ class Answer
 	field :channel, :type => Integer
 	field :ip_address, :type => String, default: ""
 
-	field :is_scanned, :type => Boolean, :default => false
+	field :is_scanned, :type => Boolean, default: false
 
-	field :is_preview, :type => Boolean, :default => false
+	field :is_preview, :type => Boolean, default: false
 
 	field :finished_at, :type => Integer
 	field :rejected_at, :type => Integer
+
+	field :introducer_id, :type => String
+	field :introducer_to_pay, :type => Integer, default: 5
 
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
@@ -45,19 +49,23 @@ class Answer
 	scope :screened, lambda { where(:status => 1, :reject_type => 2) }
 	scope :finished_and_screened, lambda { any_of({:status => 2}, {:status => 1, :reject_type => 2}) }
 
+	scope :unreviewed, lambda { where(:status => 2, :finish_type => 0) }
+
 	belongs_to :user
 	belongs_to :survey
 
+	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
+
 	STATUS_NAME_ARY = ["edit", "reject", "finish", "redo"]
-  ##### answer import #####
+	##### answer import #####
 
 
-  def load_csv(survey=1)
-    filename = "public/import/test.csv"
-    CSV.foreach(filename, :headers => true) do |row|
-      row.to_hash
-    end
-  end
+	def load_csv(survey=1)
+		filename = "public/import/test.csv"
+		CSV.foreach(filename, :headers => true) do |row|
+			row.to_hash
+		end
+	end
 
 	def self.def_status_attr
 		STATUS_NAME_ARY.each_with_index do |status_name, index|
@@ -105,10 +113,11 @@ class Answer
 		return true
 	end
 
-	def self.create_answer(is_preview, email, survey_id, channel, ip, username, password)
+	def self.create_answer(is_preview, introducer_id, email, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
+		answer.introducer_id = introducer_id if !is_preview
 		
 		# initialize the answer content
 		answer_content = {}
@@ -811,7 +820,7 @@ class Answer
 	#* true: when the answer is set as finished
 	#* ErrorEnum::WRONG_ANSWER_STATUS
 	#* ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP
-	#* ErrorEnum::ANSWER_NOT_COMPLELTE
+	#* ErrorEnum::ANSWER_NOT_COMPLETE
 	def finish
 		# synchronize the questions in the survey and the qeustions in the answer content
 		survey_question_ids = self.survey.pages.map { |page| page["questions"] }
@@ -853,5 +862,26 @@ class Answer
 			end
 		end
 		self.survey.save
+	end
+
+	def review(review_result, user)
+		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 2
+		return ErrorEnum::ANSWER_REVIEWED if self.finish_type > 0
+		self.finish_type = review_result.to_i == 1 ? 1 : 2
+		self.auditor = user
+		self.save
+		# assign this user points, or a loterry code
+		# usage post_reward_to(user, :type => 2, :point => 100)
+		# 1 for lottery & 2 for point
+		lc = self.survey.reward == 1 ? nil : self.survey.lottery.give_lottery_code_to(user)
+		return ErrorEnum::REWARD_ERROR unless self.survey.post_reward_to(user, 
+																								  :type => self.survey.reward, 
+																								  :point => self.survey.point,
+																								  :lottery_code => lc)
+		# give the introducer points
+		introducer = User.find_by_id(self.introducer_id)
+		introducer.give_points(self.introducer_to_pay, 3, :extended_survey_id => self.survey._id)
+		# send the introducer a message about the rewarded points
+		return true
 	end
 end

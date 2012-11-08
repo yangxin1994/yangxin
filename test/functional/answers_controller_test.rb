@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'test_helper'
 
 class AnswersControllerTest < ActionController::TestCase
@@ -126,7 +125,7 @@ class AnswersControllerTest < ActionController::TestCase
 		access_control_setting["password_control"]["password_list"] = password_list
 		update_survey_access_control_setting(jesse.email, Encryption.decrypt_password(jesse.password), survey_id, access_control_setting)
 
-		# to run this piece of test code, the survey must be set as "has award"
+		# to run this piece of test code, the survey must be set as "has prize"
 =begin
 		post :create, :format => :json, :is_preview => false, :survey_id => survey_id, :channel => 1,
 				:_remote_ip => "166.111.135.91", :password => "p1"

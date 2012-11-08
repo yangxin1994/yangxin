@@ -1,5 +1,5 @@
 FactoryGirl.define do
-	factory :dsxl, class: Award do
+	factory :dsxl, class: Prize do
 		name '3DSXL'
   	type 1
   	description 'Nintendo Portable Game Suit'

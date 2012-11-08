@@ -43,7 +43,7 @@ module Jobs
 				end
 			end
 
-			analysis_results = []
+			report_components = []
 			# analyze the result based on the report mockup
 			report_mockup.components.each do |component|
 				if component["component_type"] == 0
@@ -83,27 +83,25 @@ module Jobs
 						text = address_blank_description(analysis_result, question.issue)
 					when QuestionTypeEnum::BLANK_QUESTION
 						analysis_result = analyze_blank(question.issue, answers_transform[question_id])
-					when QuestionTypeEnum::MATRIX_BLANK_QUESTION
-						analysis_result = analyze_matrix_blank(question.issue, answers_transform[question_id])
-					when QuestionTypeEnum::TABLE_QUESTION
-						analysis_result = analyze_table(question.issue, answers_transform[question_id])
 					when QuestionTypeEnum::CONST_SUM_QUESTION
 						analysis_result = analyze_const_sum(question.issue, answers_transform[question_id])
 						text = const_sum_description(analysis_result, question.issue)
 					when QuestionTypeEnum::SORT_QUESTION
 						analysis_result = analyze_sort(question.issue, answers_transform[question_id])
 						text = sort_description(analysis_result, question.issue, answers.length)
-					when QuestionTypeEnum::RANK_QUESTION
-						analysis_result = analyze_rank(question.issue, answers_transform[question_id])
 					when QuestionTypeEnum::SCALE_QUESTION
 						analysis_result = analyze_scale(question.issue, answers_transform[question_id])
 						text = scale_description(analysis_result, question.issue, answers.length)
+						report_components << text
+						# possible charts for scale questions: pie, doughnut, line, bar1, bar2
+						# report_components <<
+					else
+						# other types of questions are removed
 					end
-				else
-					# this is a cross questions analysis
 				end
 			end
 
+			# call the webservice to generate the report
 		end
 
 		def generate_result_key(answers, report_mockup, report_style, report_type)

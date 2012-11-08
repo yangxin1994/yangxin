@@ -69,8 +69,9 @@ class Survey
 	field :deadline, :type => Integer
 	field :is_star, :type => Boolean, :default => false
 	field :point, :type => Integer, :default => 0
-	# reward: -1: nothing, 1: award, 2: point 
-	field :reward, :type => Integer
+	# reward: -1: nothing, 1: prize, 2: point 
+	field :reward, :type => Integer, :default => 1
+	field :show_in_community, :type => Boolean, default: false
 
 	belongs_to :user
 	has_and_belongs_to_many :tags do
@@ -82,9 +83,9 @@ class Survey
 		end
 	end
 	has_many :publish_status_historys
-# has_and_belongs_to_many :answer_auditors, class_name: "AnswerAuditor", inverse_of: :managable_survey
-#	has_and_belongs_to_many :entry_clerks, class_name: "EntryClerk", inverse_of: :managable_survey
-#	has_and_belongs_to_many :interviewers, class_name: "Interviewer", inverse_of: :managable_survey
+	has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
+	has_and_belongs_to_many :entry_clerks, class_name: "User", inverse_of: :entry_clerk_allocated_surveys
+	has_and_belongs_to_many :interviewers, class_name: "User", inverse_of: :interviewer_allocated_surveys
 
 	has_many :answers
 	has_many :email_histories
@@ -98,93 +99,93 @@ class Survey
 	has_many :report_mockups
 
 
-  scope :all_but_new, lambda { where(:new_survey => false) }
-  scope :normal, lambda { where(:status.gt => -1) }
-  scope :normal_but_new, lambda { where(:status.gt => -1, :new_survey => false) }
-  scope :deleted, lambda { where(:status => -1) }
-  scope :deleted_but_new, lambda { where(:status => -1, :new_survey => false) }
-  # scope for star
-  scope :stars, where(:status.gt => -1, :is_star => true)
+	scope :all_but_new, lambda { where(:new_survey => false) }
+	scope :normal, lambda { where(:status.gt => -1) }
+	scope :normal_but_new, lambda { where(:status.gt => -1, :new_survey => false) }
+	scope :deleted, lambda { where(:status => -1) }
+	scope :deleted_but_new, lambda { where(:status => -1, :new_survey => false) }
+	# scope for star
+	scope :stars, where(:status.gt => -1, :is_star => true)
 
-  before_create :set_new
+	before_create :set_new
 
-  before_save :clear_survey_object
-  before_save :update_new
-  before_update :clear_survey_object
-  before_destroy :clear_survey_object
+	before_save :clear_survey_object
+	before_save :update_new
+	before_update :clear_survey_object
+	before_destroy :clear_survey_object
 
-  META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
+	META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
 
-  public
-  
-  def all_questions
-    q = []
-    # quota_template_question_page.each do |page|
-    #   q << page[:questions]
-    # end
-    pages.each do |page|
-      q += page["questions"]
-    end
-    q.collect { |i| Question.find(i) }
-  end
+	public
+	
+	def all_questions
+		q = []
+		# quota_template_question_page.each do |page|
+		#   q << page[:questions]
+		# end
+		pages.each do |page|
+			q += page["questions"]
+		end
+		q.collect { |i| Question.find(i) }
+	end
 
-  def all_questions_id
-    q = []
-    pages.each do |page|
-      q += page[:questions]
-    end
-    return q
-  end
+	def all_questions_id
+		q = []
+		pages.each do |page|
+			q += page[:questions]
+		end
+		return q
+	end
 
-  def all_questions_type
-    q = []
-    all_questions.each do |a|
-      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
-    end
-    q
-  end
+	def all_questions_type
+		q = []
+		all_questions.each do |a|
+			q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+		end
+		q
+	end
 
-  #----------------------------------------------
-  #  
-  #     file export interface
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
+	#----------------------------------------------
+	#  
+	#     file export interface
+	#
+	#++++++++++++++++++++++++++++++++++++++++++++++
 
-  def to_csv(path = "public/import/test.csv")
-    c = CSV.open(path, "w") do |csv|
-      csv << csv_header
-      answer_content.each do |a|
-        csv << a
-      end
-    end
-  end
+	def to_csv(path = "public/import/test.csv")
+		c = CSV.open(path, "w") do |csv|
+			csv << csv_header
+			answer_content.each do |a|
+			csv << a
+			end
+		end
+	end
 
-  def get_csv_header(path = "public/import/test.csv")
-    c = CSV.open(path, "w") do |csv|
-      csv << csv_header
-    end
-  end
+	def get_csv_header(path = "public/import/test.csv")
+		c = CSV.open(path, "w") do |csv|
+			csv << csv_header
+		end
+	end
 
-  def answer_import(path = "public/import/test.csv")
-    q = []
-    batch = []
-    all_questions.each do |a|
-      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
-    end 
-    CSV.foreach(path, :headers => true) do |row|
-      row = row.to_hash
-      line_answer = {}
-      quota_qustions_count = quota_qustions.size
-      q.each_with_index do |e, i|
-        #q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
-        header_prefix = "q#{i + 1}"
-        line_answer.merge! e.answer_import(row, header_prefix)
-      end
-      batch << {:answer_content => line_answer, :survey => self._id}
-    end
-    Survey.collection.insert(batch)
-    return self.save
-  end
+	def answer_import(path = "public/import/test.csv")
+		q = []
+		batch = []
+		all_questions.each do |a|
+			q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+		end 
+		CSV.foreach(path, :headers => true) do |row|
+			row = row.to_hash
+			line_answer = {}
+			quota_qustions_count = quota_qustions.size
+			q.each_with_index do |e, i|
+				#q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
+				header_prefix = "q#{i + 1}"
+				line_answer.merge! e.answer_import(row, header_prefix)
+			end
+			batch << {:answer_content => line_answer, :survey => self._id}
+		end
+		Survey.collection.insert(batch)
+		return self.save
+	end
 
 	#--
 	# update deadline and create a survey_deadline_job
@@ -207,6 +208,11 @@ class Survey
 		self.is_star = !self.is_star
 		return ErrorEnum::UNKNOWN_ERROR unless self.save
 		return self.is_star
+	end
+
+	def set_community(show_in_community)
+		self.show_in_community = show_in_community
+		return self.save
 	end
 
 	#*description*: judge whether this survey has a question
@@ -253,6 +259,29 @@ class Survey
 		survey_obj["deadline"] = self.deadline
 		survey_obj["is_star"] = self.is_star
 		return survey_obj
+	end
+
+
+	def allocate(system_user_type, user_id, allocate)
+		user = User.find_by_id(user_id)
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
+		case system_user_type
+		when "answer_auditor"
+			return ErrorEnum::USER_NOT_EXIST if !(user.is_answer_auditor || user.is_admin)
+			self.answer_auditors << user if allocate
+			self.answer_auditors.delete(user) if !allocate
+		when "entry_clerk"
+			return ErrorEnum::USER_NOT_EXIST if !(user.is_entry_clerk || user.is_admin)
+			self.entry_clerks << user if allocate
+			self.entry_clerks.delete(user) if !allocate
+		when "interviewer"
+			return ErrorEnum::USER_NOT_EXIST if !(user.is_interview || user.is_admin)
+			self.interviewers << user if allocate
+			self.interviewers.delete(user) if !allocate
+		else
+			return ErrorEnum::SYSTEM_USER_TYPE_ERROR
+		end
+		return self.save
 	end
 
 	#*description*: find a survey by its id. return nil if cannot find
@@ -1130,9 +1159,9 @@ class Survey
 		end
 	end
 
-	def has_award
+	def has_prize
 		# need to fill this method
-		reward == 1 ? true : false
+		reward > 0 ? true : false
 	end
 
 	def check_password(username, password, current_user)
@@ -1746,6 +1775,11 @@ class Survey
 			survey.logic_control = @rules
 			survey.save
 			return survey.logic_control
+		end
+
+		def post_reward_to(user, options = {})
+			options[:user] = user
+			RewardLog.create(options).created_at ? true : false
 		end
 	end
 end

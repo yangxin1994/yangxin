@@ -2,6 +2,7 @@ class BasicGift
 	include Mongoid::Document
 	include Mongoid::Timestamps
 	extend Mongoid::FindHelper
+	include Mongoid::ValidationsExt
 	field :name, :type => String
 	# can be 0 (Cash), 1 (RealGoods), 2 (VirtualGoods), 3 (Lottery)
 	field :type, :type => Integer
@@ -16,10 +17,9 @@ class BasicGift
 	default_scope where(:is_deleted => false)
 	# TO DO Def Scope
 	scope :cash, where( :type => 0)
-	scope :realgoods, where( :type => 1)
-	scope :virtualgoods, where( :type => 2)
+	scope :entity, where( :type => 1)
+	scope :virtual, where( :type => 2)
 	scope :lottery, where( :type => 3)
-	#scope :award, where( :type => 4)
 
 	scope :stockout, where(:surplus.lt => 1)
 

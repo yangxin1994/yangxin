@@ -10,7 +10,6 @@ module ErrorEnum
 	REQUIRE_LOGIN = "error_7"
 	REQUIRE_LOGOUT = "error_8"
 	REQUIRE_ADMIN = "error_9"
-	REQUIRE_SUPER_ADMIN = "error_10000"
 	WRONG_PASSWORD_CONFIRMATION = "error_10"
 	WRONG_PASSWORD = "error_11"
 	RECEIVER_CAN_NOT_BLANK = "error_12"
@@ -87,6 +86,9 @@ module ErrorEnum
 	RESULT_NOT_EXIST = 'error_170'
 	DATA_LIST_NOT_EXIST = 'error_171'
 
+	ANSWER_NOT_FINISHED = 'error_180'
+	ANSWER_REVIEWED = 'error_181'
+
 	UNKNOWN_ERROR = -100000
 	SAVE_ERROR = -200000
 	FAQ_TYPE_ERROR = -100001
@@ -126,6 +128,7 @@ module ErrorEnum
 ###
 # 	syetem error 1
 # 	error 2
+#
 # 	not_found 01
 # 	invalid_id 02
 #
@@ -134,16 +137,20 @@ module ErrorEnum
 ###
 
 	# Gifts Error Code (10)
-	GIFT_NOT_FOUND= 21001
-	INVALID_PRESENT_ID = 21002
+	GIFT_NOT_FOUND = 21001
+	INVALID_GIFT_ID = 21002
+	
+	GIFT_QUANTITY_NOT_A_NUNBER = 21031
+
+	GIFT_POINT_COULD_NOT_BE_BLANK = 21020
 	# Messages Error Code (11)
 	MESSAGE_NOT_FOUND = 21101
 	INVALID_MESSAGE_ID = 21102
 	MESSAGE_TITLE_COULD_NOT_BE_BLANK = 21110
 	MESSAGE_CONTENT_COULD_NOT_BE_BLANK = 21120
-	# Award Error Code (12)
-	AwardBudgetCounldNotBeBlank = 21211
-	# PointLog Error Code (13)
+	# Prize Error Code (12)
+	PrizeBudgetCounldNotBeBlank = 21211
+	# RewardLog Error Code (13)
 	POINTLOG_OPERATED_POINT_NOT_A_NUNBER = 21311
 	# Order Error Code (14)
 	ORDER_NOT_FOUND = 21401
