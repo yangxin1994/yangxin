@@ -1,12 +1,12 @@
 class Admin::SurveysController < Admin::ApplicationController
 
-	def list_by_status
-		@surveys = Survey.where(status: params[:status].to_i).page(page).per(per_page)
+	def list_by_publish_status
+		@surveys = Survey.where(publish_status: params[:publish_status].to_i).page(page).per(per_page)
 		render_json_auto(@surveys)
 	end
 
-	def list_by_status_count
-		@surveys = Survey.where(status: params[:status].to_i).page(page).per(per_page)
+	def list_by_publish_status_count
+		@surveys = Survey.where(publish_status: params[:publish_status].to_i).count
 		render_json_auto(@surveys)
 	end
 
