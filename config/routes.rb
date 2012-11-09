@@ -297,8 +297,7 @@ OopsData::Application.routes.draw do
 	end
 	resources :gifts do
 		collection do
-			get :virtual, :cash, :entity, :stockout
-			get :edit
+			get :virtual, :cash, :entity
 		end
 	end
 	resources :orders do

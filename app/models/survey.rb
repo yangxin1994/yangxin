@@ -71,8 +71,9 @@ class Survey
 	field :point, :type => Integer, :default => 0
 	field :spread_point, :type => Integer, :default => 0
 	field :spreadable, :type => Boolean, :default => false
-	# reward: -1: nothing, 1: prize, 2: point 
-	field :reward, :type => Integer, :default => 1
+	# reward: 0: nothing, 1: prize, 2: point 
+	field :reward, :type => Integer, :default => 0
+
 	field :show_in_community, :type => Boolean, default: false
 
 	belongs_to :user

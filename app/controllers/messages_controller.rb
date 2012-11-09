@@ -14,11 +14,11 @@ class MessagesController < ApplicationController
     @messages = auto_paginate current_user.show_messages do |m|
       m.slice((page - 1) * per_page, per_page)
     end
-    respond_and_render_json { @messages }
+    render_json { @messages }
   end
   
   def unread_count
-    respond_and_render_json { current_user.unread_messages_count }
+    render_json { current_user.unread_messages_count }
   end 
 
 end

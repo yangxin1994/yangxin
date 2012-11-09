@@ -3,11 +3,11 @@
 class LotteriesController < ApplicationController
 
 	def index
-		respond_and_render_json { auto_paginate(Lottery.activity) }
+		render_json { auto_paginate(Lottery.activity) }
 	end
 	
 	def draw
-		respond_and_render_json do
+		render_json do
 			LotteryCode.find_by_id params[:id] do |r|
 				r.draw
 			end
