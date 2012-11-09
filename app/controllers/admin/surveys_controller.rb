@@ -30,7 +30,7 @@ class Admin::SurveysController < Admin::ApplicationController
 		@survey = Survey.find_by_id(params[:id])
 		params[:lottery] = lottery.find_by_id(params[:lottery_id])
 		s = params[:survey].select{:reward || :point || :lottery}
-		respond_and_render_json @survey.update_attributes(s)
+		render_json @survey.update_attributes(s)
 	end	
 
 	def set_community

@@ -28,12 +28,12 @@ class Admin::MessagesController < Admin::ApplicationController
 
 	def create
 		@message = current_user.create_message(params[:message][:title],params[:message][:content],params[:message][:receiver])
-		respond_and_render_json @message.save do @message.as_retval end
+		render_json @message.save do @message.as_retval end
 	end
 
 	def update
 		@message = current_user.update_message(params[:id], params[:message])
-		respond_and_render_json @message.save do @message.as_retval end
+		render_json @message.save do @message.as_retval end
 	end
 
 	def destroy
