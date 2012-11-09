@@ -42,7 +42,7 @@ OopsData::Application.routes.draw do
 
 		resources :surveys do 
 			collection do 
-				get 'list_by_status', 'list_by_status_count', 'show_user_attr_survey', 'count'
+				get 'list_by_publish_status', 'list_by_publish_status_count', 'show_user_attr_survey', 'count'
 				post 'add_questions'
 			end
 			member do 
