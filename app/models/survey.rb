@@ -209,8 +209,8 @@ class Survey
 		return true
 	end
 
-	def update_star
-		self.is_star = !self.is_star
+	def update_star(is_star)
+		self.is_star = is_star
 		return ErrorEnum::UNKNOWN_ERROR unless self.save
 		return self.is_star
 	end
