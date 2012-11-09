@@ -78,6 +78,7 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
+	
 	#obtain the ip address of the clien, and set it as @remote_ip
 	def client_ip
 		#@remote_ip = request.env["HTTP_X_FORWARDED_FOR"]
