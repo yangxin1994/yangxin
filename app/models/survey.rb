@@ -476,18 +476,9 @@ class Survey
 				question = Question.find_by_id(question_id)
 				return ErrorEnum::QUESTION_NOT_EXIST if question == nil
 				cloned_question = question.clone
-				page[question_index] = cloned_question._id.to_s
-				question_id_mapping[question_id] = cloned_question._id
+				page["questions"][question_index] = cloned_question._id.to_s
+				question_id_mapping[question_id] = cloned_question._id.to_s
 			end
-		end
-
-		# clone template questions
-		new_instance.quota_template_question_page.each do |question_id, question_index|
-			question = Question.find_by_id(question_id)
-			return ErrorEnum::QUESTION_NOT_EXIST if question == nil
-			cloned_question = question.clone
-			new_instance.quota_template_question_page[question_index] = cloned_question._id.to_s
-			question_id_mapping[question_id] = cloned_question._id
 		end
 
 		# clone quota rules
@@ -521,7 +512,6 @@ class Survey
 		new_instance.save
 
 		return new_instance
-		
 	end
 		
 	#*description*: add a tag to the survey
@@ -692,7 +682,13 @@ class Survey
 	#* ErrorEnum ::OVERFLOW
 	def create_question(page_index, question_id, question_type)
 		current_page = self.pages[page_index]
-		return ErrorEnum::OVERFLOW if current_page == nil
+		if current_page == nil
+			# if the page cannot be found, append a new page in the last and insert the question into that page
+			self.pages << {"name" => "", "questions" => []}
+			page_index = self.pages.length - 1
+			question_id = "-1"
+			current_page = self.pages[page_index]
+		end
 		if question_id.to_s == "-1"
 			question_index = current_page["questions"].length - 1
 		elsif question_id.to_s == "0"
@@ -1803,6 +1799,7 @@ class Survey
 		survey_obj["subtitle"] = self.subtitle.to_s
 		survey_obj["created_at"] = self.created_at.to_i
 		survey_obj["reward"] = self.reward
+		survey_obj["status"] = self.status
 		return survey_obj
 	end
 
