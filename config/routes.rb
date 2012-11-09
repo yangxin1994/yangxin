@@ -43,6 +43,7 @@ OopsData::Application.routes.draw do
 			member do
 				post 'allocate'
 				post 'set_community'
+				post 'set_spread'
 			end
 		end
 
@@ -173,7 +174,9 @@ OopsData::Application.routes.draw do
 
 	resources :surveys do
 		collection do
-			post 'list'
+			get 'list_surveys_in_community'
+			get 'list_answered_surveys'
+			get 'list_spreaded_surveys'
 		end
 		member do
 			put 'save_meta_data'
@@ -192,8 +195,8 @@ OopsData::Application.routes.draw do
 			get 'show_style_setting'
 			put 'update_access_control_setting'
 			get 'show_access_control_setting'
-			get 'set_random_quality_control_questions'
-			get 'get_random_quality_control_questions'
+			put 'update_quality_control'
+			get 'show_quality_control'
 
 			get 'update_deadline'
 

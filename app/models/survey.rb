@@ -69,8 +69,11 @@ class Survey
 	field :deadline, :type => Integer
 	field :is_star, :type => Boolean, :default => false
 	field :point, :type => Integer, :default => 0
+	field :spread_point, :type => Integer, :default => 0
+	field :spreadable, :type => Boolean, :default => false
 	# reward: 0: nothing, 1: prize, 2: point 
 	field :reward, :type => Integer, :default => 0
+
 	field :show_in_community, :type => Boolean, default: false
 
 	belongs_to :user
@@ -106,6 +109,8 @@ class Survey
 	scope :deleted_but_new, lambda { where(:status => -1, :new_survey => false) }
 	# scope for star
 	scope :stars, where(:status.gt => -1, :is_star => true)
+
+	scope :in_community, lambda { where(:show_in_community => true) }
 
 	before_create :set_new
 
@@ -380,22 +385,23 @@ class Survey
 		return self.style_setting["allow_pageup"]
 	end
 
-	def set_quality_control_questions_type(quality_control_questions_type)
-		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTIONS_TYPE if [0, 1, 2].include?(quality_control_questions_type)
-		self.quality_control_questions_type = quality_control_questions_type
-		# the random quality control questions should be generated when answering
-		# thus, no matter how the user sets, the quality control questions should always be blank array
-		self.quality_control_questions = []
-		return self.save
-	end
-
 	def is_random_quality_control_questions
 		return self.quality_control_questions_type == 2
 	end
 
 	def show_quality_control
 		return {"quality_control_questions_type" => self.quality_control_questions_type,
-				"quality_control_questions" => self.quality_control_questions}
+				"quality_control_questions_ids" => self.quality_control_questions_ids}
+	end
+
+	def update_quality_control(quality_control_questions_type, quality_control_questions_ids)
+		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTIONS_TYPE if [0, 1, 2].include?(quality_control_questions_type)
+		quality_control_questions_ids.each do |qc_id|
+			return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if QualityControlQuestion.find_by_id(qc_id).nil?
+		end
+		self.quality_control_questions_type = quality_control_questions_type
+		self.quality_control_questions_ids = quality_control_questions_ids
+		return self.save
 	end
 
 	#*description*: remove current survey
@@ -741,32 +747,6 @@ class Survey
 		return normal_question
 	end
 
-	def insert_quality_control_question(quality_control_question_id)
-		return ErrorEnum::RANDOM_QUALITY_CONTROL if self.quality_control_questions_type == 2
-		return ErrorEnum::NO_QUALITY_CONTROL if self.quality_control_questions_type == 0
-		quality_control_question = QualityControlQuestion.find_by_id(quality_control_question_id)
-		return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if quality_control_question.nil?
-		self.quality_control_questions_ids << quality_control_question._id
-=begin
-		current_page = self.pages[page_index]
-		return ErrorEnum::OVERFLOW if current_page == nil
-		if question_id.to_s == "-1"
-			question_index = current_page["questions"].length - 1
-		elsif question_id.to_s == "0"
-			question_index = -1
-		else
-			question_index = current_page["questions"].index(question_id)
-			return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
-		end
-		questions = Question.create_quality_control_question(quality_control_question)
-		questions.each do |question|
-			current_page["questions"].insert(question_index+1, question._id.to_s)
-		end
-=end
-		self.save
-		return true
-	end
-
 	#*description*: update a question
 	#
 	#*params*:
@@ -915,12 +895,6 @@ class Survey
 		question.clear_question_object
 		question.destroy if question.type_of(Question)
 		return true
-	end
-
-	def delete_quality_control_question(question_id)
-		return ErrorEnum::RANDOM_QUALITY_CONTROL if self.is_random_quality_control_questions
-		self.quality_control_questions_ids.delete(question_id)
-		return self.save
 	end
 
 	#*description*: create a page
@@ -1781,5 +1755,61 @@ class Survey
 	def post_reward_to(user, options = {})
 		options[:user] = user
 		RewardLog.create(options).created_at ? true : false
+	end
+
+	def set_spread(spread_point, spreadable)
+		self.spread_point = spread_point
+		self.spreadable = spreadable
+		return self.save
+	end
+
+	def self.list_surveys_in_community(reward, only_spreadable, user)
+		surveys = Survey.in_community
+		surveys = surveys.where(:spreadable => true) if only_spreadable
+		surveys = surveys.where(:reward => reward)
+		surveys = surveys.order_by(:publish_status, :desc)
+		return surveys.map { |s| {"survey" => s.serialize_in_short, "answer_status" => s.answer_status(user)} }
+	end
+
+	def self.list_answered_surveys(user)
+		answers = user.answers
+		surveys_with_answer_status = []
+		answers.each do |a|
+			surveys_with_answer_status << {"survey" => a.survey.serialize_in_short, "answer_status" => a.status}
+		end
+		return surveys_with_answer_status
+	end
+
+	def self.list_spreaded_surveys(user)
+		answers = Answer.where(:introducer_id => user._id, :status => 2, :finish_type => 1)
+		surveys_with_spread_number_hash = {}
+		surveys_with_spread_number = []
+		answers.each do |a|
+			survey_id = a.survey_id.to_s
+			surveys_with_spread_number_hash[survey_id] ||= 0
+			surveys_with_spread_number_hash[survey_id] = surveys_with_spread_number_hash[survey_id] + 1
+		end
+		surveys_with_spread_number_hash.each do |survey_id, spread_number|
+			survey = Survey.find_by_id(survey_id)
+			surveys_with_spread_number << {"survey" => survey.serialize_in_short, "answer_status" => s.answer_status(user), "spread_number" => spread_number}
+		end
+		return surveys_with_spread_number
+	end
+
+	def serialize_in_short
+		survey_obj = Hash.new
+		survey_obj["_id"] = self._id.to_s
+		survey_obj["title"] = self.title.to_s
+		survey_obj["subtitle"] = self.subtitle.to_s
+		survey_obj["created_at"] = self.created_at.to_i
+		survey_obj["reward"] = self.reward
+		return survey_obj
+	end
+
+	def answer_status(user)
+		return nil if user.nil?
+		answer = Answer.where(:survey_id => self._id.to_s, :user_id => user._id.to_s, :is_preview => false)[0]
+		return nil if answer.nil?
+		return answer.status
 	end
 end
