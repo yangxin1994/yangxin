@@ -355,6 +355,7 @@ class QuestionsControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 	end
 
+=begin
 	test "should insert quality control question" do
 		clear(User, Survey, Question, QualityControlQuestion, MatchingQuestion, QualityControlQuestionAnswer)
 		jesse = init_jesse
@@ -417,4 +418,5 @@ class QuestionsControllerTest < ActionController::TestCase
 		result = JSON.parse(@response.body)
 		assert_equal true, result["value"]
 	end
+=end
 end

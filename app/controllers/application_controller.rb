@@ -15,24 +15,24 @@ class ApplicationController < ActionController::Base
 	end
 
 	def auto_paginate(value)
-	  retval = {}
-	  logger.info Gift.page(page).per(10)
-	  retval["current_page"] = page
-	  retval["per_page"] = per_page
-	  retval["previous_page"] = page - 1
-	  # retval["previous_page"] = [page - 1, 1].max
+		retval = {}
+		logger.info Gift.page(page).per(10)
+		retval["current_page"] = page
+		retval["per_page"] = per_page
+		retval["previous_page"] = page - 1
+		# retval["previous_page"] = [page - 1, 1].max
 
-	  #v = eval(value)
-	  if block_given?
-	    retval["data"] = yield(value)
-	  else
-	  	#retval["data"] = eval(value + '.page(retval["current_page"]).per(retval["per_page"])' )
-	  	retval["data"] = value.page(retval["current_page"]).per(retval["per_page"])
-	  end
-	  retval["total_page"] = ( value.count / per_page.to_f ).ceil
-	  retval["next_page"] = page + 1
-	  # retval["next_page"] = [page + 1, retval["total_page"]].min
-	  retval
+		#v = eval(value)
+		if block_given?
+			retval["data"] = yield(value)
+		else
+			#retval["data"] = eval(value + '.page(retval["current_page"]).per(retval["per_page"])' )
+			retval["data"] = value.page(retval["current_page"]).per(retval["per_page"])
+		end
+		retval["total_page"] = ( value.count / per_page.to_f ).ceil
+		retval["next_page"] = page + 1
+		# retval["next_page"] = [page + 1, retval["total_page"]].min
+		retval
 	end
 
 	begin "kaminari"
@@ -63,8 +63,8 @@ class ApplicationController < ActionController::Base
 			end
 			unless options[:format].nil?
 				format.send(options[:format]) do
-				 	render options[:format], :except => options[:except],
-				 													 :only => options[:only]
+					render options[:format], :except => options[:except],
+																	 :only => options[:only]
 				end
 			end
 		end		

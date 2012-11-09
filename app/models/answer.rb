@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'error_enum'
 require 'publish_status'
 require 'securerandom'
@@ -40,7 +41,7 @@ class Answer
 	field :rejected_at, :type => Integer
 
 	field :introducer_id, :type => String
-	field :introducer_to_pay, :type => Integer, default: 5
+	field :introducer_to_pay, :type => Integer
 
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
@@ -117,7 +118,10 @@ class Answer
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
-		answer.introducer_id = introducer_id if !is_preview
+		if !is_preview
+			answer.introducer_id = introducer_id
+			answer.introducer_to_pay = survey.spread_point
+		end
 		
 		# initialize the answer content
 		answer_content = {}
@@ -877,11 +881,15 @@ class Answer
 		return ErrorEnum::REWARD_ERROR unless self.survey.post_reward_to(user, 
 																								  :type => self.survey.reward, 
 																								  :point => self.survey.point,
-																								  :lottery_code => lc)
+																								  :lottery_code => lc,
+																								  :cause => 2)
 		# give the introducer points
 		introducer = User.find_by_id(self.introducer_id)
-		introducer.give_points(self.introducer_to_pay, 3, :extended_survey_id => self.survey._id)
-		# send the introducer a message about the rewarded points
+		if !introducer.nil? && introducer_to_pay > 0
+			RewardLog.create(:user => introducer, :type => 2, :point => self.introducer_to_pay, :extended_survey_id => self.survey_id, :cause => 3)
+			# send the introducer a message about the rewarded points
+			user.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.introducer_to_pay}个积分奖励。", [introducer._id])
+		end
 		return true
 	end
 end

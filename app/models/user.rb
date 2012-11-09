@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'encryption'
 require 'error_enum'
 require 'tool'
@@ -52,6 +53,9 @@ class User
 	field :identity_card, :type => String
 	field :company, :type => String
 
+	field :bankcard_number, :type => String
+	field :bank, :type => String
+	field :alipay_account, :type => String
 
 	has_and_belongs_to_many :messages, class_name: "Message", inverse_of: :receiver
 	has_many :sended_messages, :class_name => "Message", :inverse_of => :sender
@@ -323,12 +327,12 @@ class User
 		user.save
 		# pay introducer points
 		inviter = User.find_by_id(user.introducer_id)
-		inviter.give_points(user.introducer_to_pay, 1, :invited_user_id => user._id) if !inviter.nil?
+		if !inviter.nil?
+			RewardLog.create(:user => introducer, :type => 2, :point => user.introducer_to_pay, :invited_user_id => user._id, :cause => 1)
+			# send a message to the introducer
+			inviter.create_message("邀请好友注册积分奖励", "您邀请的用户#{user.email}注册激活成功，您获得了#{user.introducer_to_pay}个积分奖励。", [inviter._id])
+		end
 		return true
-	end
-
-	def give_points(point, cause, opt={})
-		# assign the user point for inviting the invited_user_id
 	end
 
 	#*description*: user login
