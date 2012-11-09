@@ -687,6 +687,7 @@ class Survey
 			self.pages << {"name" => "", "questions" => []}
 			page_index = self.pages.length - 1
 			question_id = "-1"
+			current_page = self.pages[page_index]
 		end
 		if question_id.to_s == "-1"
 			question_index = current_page["questions"].length - 1
