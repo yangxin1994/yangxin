@@ -423,11 +423,12 @@ class SurveysController < ApplicationController
 	#
 	#*params*:
 	#* survey_id: id of the suvey to be set
+	#* is_star: bool. is star or not
 	#
 	#*retval*:
 	# true or false
 	def update_star
-		retval = @survey.update_star
+		retval = @survey.update_star(params[:is_star])
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end

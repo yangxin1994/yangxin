@@ -10,9 +10,10 @@ class Material
 	field :value, :type => String
 	field :picture_url, :type => String
 
+	belongs_to :gift, :inverse_of => 'photo'
 	belongs_to :user
 
-	default_scope ->(o = 'ASC'){ order_by("created_at", o) }
+	default_scope ->(o = 'ASC'){order_by("created_at", o) }
 
 	def self.find_by_id(material_id)
 		return Material.where(:_id => material_id).first

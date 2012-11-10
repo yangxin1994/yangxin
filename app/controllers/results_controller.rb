@@ -20,7 +20,7 @@ class ResultsController < ApplicationController
 
 	def to_spss
 		data_list_result = Result.find_by_result_key(params[:result_key])
-		respond_and_render_json !data_list_result.nil? do 
+		render_json !data_list_result.nil? do 
 			if data_list_result.nil?
 				ErrorEnum::DATA_LIST_NOT_EXIST
 			else
@@ -31,7 +31,7 @@ class ResultsController < ApplicationController
 
 	def to_excel
 		data_list_result = Result.find_by_result_key(params[:result_key])
-		respond_and_render_json !data_list_result.nil? do |e|
+		render_json !data_list_result.nil? do |e|
 			if !e
 				ErrorEnum::DATA_LIST_NOT_EXIST
 			else
@@ -78,7 +78,7 @@ class ResultsController < ApplicationController
 	def finish
 		result = Result.find_by_result_key params[:result_key]
 		result.status = params[:status]
-		respond_and_render_json { result.save }
+		render_json { result.save }
 	end
 	
 end
