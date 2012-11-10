@@ -18,7 +18,7 @@ class ApplicationController < ActionController::Base
 	  retval = {}
 	  retval["current_page"] = page
 	  retval["per_page"] = per_page
-	  retval["previous_page"] = page - 1
+	  retval["previous_page"] = (page - 1 > 0 ? page-1 : 1)
 	  # retval["previous_page"] = [page - 1, 1].max
 
 	  #v = eval(value)
@@ -29,7 +29,7 @@ class ApplicationController < ActionController::Base
 	  	retval["data"] = value.page(retval["current_page"]).per(retval["per_page"])
 	  end
 	  retval["total_page"] = ( (count || value.count )/ per_page.to_f ).ceil
-	  retval["next_page"] = page + 1
+	  retval["next_page"] = (page+1 <= retval["total_page"] ? page+1: retval["total_page"])
 	  # retval["next_page"] = [page + 1, retval["total_page"]].min
 	  retval
 	end

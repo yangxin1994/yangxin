@@ -35,23 +35,18 @@ OopsData::Application.routes.draw do
 			end
 
 			member do
-				get 'system_pwd', 'black', 'white'
+				get 'system_pwd', 'black', 'white', 'get_email'
 				post 'set_color', 'set_role', 'set_lock'
 			end
 		end
 
 		resources :surveys do 
 			collection do 
-				get 'list_by_publish_status', 'list_by_publish_status_count', 'show_user_attr_survey', 'count'
-				post 'add_questions'
-			end
-			member do 
-				put 'publish'
+				get 'wait_to_community' , 'show_user_attr_survey'
+				put 'add_questions'
 			end
 			member do
-				post 'allocate'
-				post 'set_community'
-				post 'set_spread'
+				put 'allocate', 'add_reward', 'set_community', 'set_spread'
 			end
 		end
 

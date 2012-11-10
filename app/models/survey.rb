@@ -280,7 +280,7 @@ class Survey
 			self.entry_clerks << user if allocate
 			self.entry_clerks.delete(user) if !allocate
 		when "interviewer"
-			return ErrorEnum::USER_NOT_EXIST if !(user.is_interview || user.is_admin)
+			return ErrorEnum::USER_NOT_EXIST if !(user.is_interviewer || user.is_admin)
 			self.interviewers << user if allocate
 			self.interviewers.delete(user) if !allocate
 		else
