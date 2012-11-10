@@ -151,7 +151,7 @@ module ErrorEnum
 	# Prize Error Code (12)
 	PrizeBudgetCounldNotBeBlank = 21211
 	# RewardLog Error Code (13)
-	POINTLOG_OPERATED_POINT_NOT_A_NUNBER = 21311
+	REWARDLOG_OPERATED_POINT_NOT_A_NUNBER = 21311
 	# Order Error Code (14)
 	ORDER_NOT_FOUND = 21401
 	INVALID_ORDER_ID = 21402

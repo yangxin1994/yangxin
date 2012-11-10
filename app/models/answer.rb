@@ -221,7 +221,14 @@ class Answer
 					# require next page of questions
 					if question_index + 1 == page["questions"].length
 						return [] if page_index + 1 == self.survey.pages.length
-						return load_question_by_ids(self.survey.pages[page_index + 1]["questions"])
+						questions = load_question_by_ids(self.survey.pages[page_index + 1]["questions"])
+						while questions.blank?
+							# if the next page has no questions, try to load questions in the page after the next
+							page_index = page_index + 1
+							return [] if page_index + 1 == self.survey.pages.length
+							questions = load_question_by_ids(self.survey.pages[page_index + 1]["questions"])
+						end
+						return questions
 					else
 						return load_question_by_ids(page["questions"][question_index + 1..-1])
 					end
@@ -229,7 +236,14 @@ class Answer
 					# require previous page of questions
 					if question_index <= 0
 						return [] if page_index == 0
-						return load_question_by_ids(self.survey.pages[page_index - 1]["questions"])
+						questions = load_question_by_ids(self.survey.pages[page_index - 1]["questions"])
+						while questions.blank?
+							# if the previous page has no questions, try to laod questions in the page before the previous
+							page_index = page_index - 1
+							return [] if page_index == 0
+							questions = load_question_by_ids(self.survey.pages[page_index - 1]["questions"])
+						end
+						return questions
 					else
 						return load_question_by_ids(page["questions"][0..question_index - 1])
 					end
@@ -468,7 +482,7 @@ class Answer
 		self.answer_content.each_key do |k|
 			self.answer_content[k] = nil
 		end
-		# clear the random quality control questoins answer content
+		# clear the random quality control questions answer content
 		self.random_quality_control_answer_content.each_key do |k|
 			self.random_quality_control_answer_content[k] = nil
 		end
@@ -874,15 +888,17 @@ class Answer
 		self.finish_type = review_result.to_i == 1 ? 1 : 2
 		self.auditor = user
 		self.save
-		# assign this user points, or a loterry code
-		# usage post_reward_to(user, :type => 2, :point => 100)
-		# 1 for lottery & 2 for point
-		lc = self.survey.reward == 1 ? nil : self.survey.lottery.give_lottery_code_to(user)
-		return ErrorEnum::REWARD_ERROR unless self.survey.post_reward_to(user, 
-																								  :type => self.survey.reward, 
-																								  :point => self.survey.point,
-																								  :lottery_code => lc,
-																								  :cause => 2)
+		if [1,2].include?(self.survey.reward)
+			# assign this user points, or a loterry code
+			# usage post_reward_to(user, :type => 2, :point => 100)
+			# 1 for lottery & 2 for point
+			lc = self.survey.reward == 1 ? nil : self.survey.lottery.give_lottery_code_to(user)
+			return ErrorEnum::REWARD_ERROR unless self.survey.post_reward_to(user, 
+																									  :type => self.survey.reward, 
+																									  :point => self.survey.point,
+																									  :lottery_code => lc,
+																									  :cause => 2)
+		end
 		# give the introducer points
 		introducer = User.find_by_id(self.introducer_id)
 		if !introducer.nil? && introducer_to_pay > 0

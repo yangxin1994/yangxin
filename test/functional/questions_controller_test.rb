@@ -19,12 +19,6 @@ class QuestionsControllerTest < ActionController::TestCase
 		sign_out(auth_key)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
-		post :create, :format => :json, :survey_id => survey_id, :page_index => 3, :question_id => -1, :question_type => 0, :auth_key => auth_key
-		result = JSON.parse(@response.body)
-		assert_equal ErrorEnum::OVERFLOW.to_s, result["value"]["error_code"]
-		sign_out(auth_key)
-
-		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
 		post :create, :format => :json, :survey_id => survey_id, :page_index => 0, :question_id => "wrong question id", :question_type => 0, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::QUESTION_NOT_EXIST.to_s, result["value"]["error_code"]
