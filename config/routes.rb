@@ -90,6 +90,9 @@ OopsData::Application.routes.draw do
 			collection	 do 
 				get 'count', 'list_by_type', 'list_by_type_count'
 			end
+			member do 
+				get 'get_text'
+			end
 		end
 
 	# The priority is based upon order of creation:
@@ -106,7 +109,7 @@ OopsData::Application.routes.draw do
 		end
 		resources :answers do
 			member do
-				post 'review'
+				put 'review'
 			end
 		end
 	end
@@ -179,6 +182,9 @@ OopsData::Application.routes.draw do
 		collection do 
 			get :get_level_information
 			get :get_invited_user_ids
+		end
+		member do 
+			get 'get_email'
 		end
 	end
 	match 'update_information' => 'users#update_information', :as => :update_information, :via => [:post]

@@ -884,28 +884,32 @@ class Answer
 
 	def review(review_result, user)
 		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 2
-		return ErrorEnum::ANSWER_REVIEWED if self.finish_type > 0
+		# The finish_type not need to check. --by lcm
+		# return ErrorEnum::ANSWER_REVIEWED if self.finish_type > 0
 		self.finish_type = review_result.to_i == 1 ? 1 : 2
 		self.auditor = user
 		self.save
-		if [1,2].include?(self.survey.reward)
-			# assign this user points, or a loterry code
-			# usage post_reward_to(user, :type => 2, :point => 100)
-			# 1 for lottery & 2 for point
-			lc = self.survey.reward == 1 ? nil : self.survey.lottery.give_lottery_code_to(user)
-			return ErrorEnum::REWARD_ERROR unless self.survey.post_reward_to(user, 
-																									  :type => self.survey.reward, 
-																									  :point => self.survey.point,
-																									  :lottery_code => lc,
-																									  :cause => 2)
-		end
-		# give the introducer points
-		introducer = User.find_by_id(self.introducer_id)
-		if !introducer.nil? && introducer_to_pay > 0
-			RewardLog.create(:user => introducer, :type => 2, :point => self.introducer_to_pay, :extended_survey_id => self.survey_id, :cause => 3)
-			# send the introducer a message about the rewarded points
-			user.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.introducer_to_pay}个积分奖励。", [introducer._id])
-		end
+		puts ">>>>>>>>>>#{self.survey.reward}"
+		# if [1,2].include?(self.survey.reward)
+		# 	# assign this user points, or a loterry code
+		# 	# usage post_reward_to(user, :type => 2, :point => 100)
+		# 	# 1 for lottery & 2 for point
+		# 	lc = self.survey.reward == 1 ? nil : self.survey.lottery.give_lottery_code_to(user)
+		# 	return ErrorEnum::REWARD_ERROR unless self.survey.post_reward_to(user, 
+		# 													  :type => self.survey.reward, 
+		# 													  :point => self.survey.point,
+		# 													  :lottery_code => lc,
+		# 													  :cause => 2)
+		# end
+		# # give the introducer points
+		# introducer = User.find_by_id(self.introducer_id)
+		# if !introducer.nil? && introducer_to_pay > 0
+		# 	RewardLog.create(:user => introducer, :type => 2, :point => self.introducer_to_pay, :extended_survey_id => self.survey_id, :cause => 3)
+		# 	# send the introducer a message about the rewarded points
+		# 	user.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.introducer_to_pay}个积分奖励。", [introducer._id])
+		# end
+
+		# top has error , survey no method lottery  --by lcm
 		return true
 	end
 

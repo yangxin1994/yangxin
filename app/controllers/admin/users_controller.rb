@@ -1,6 +1,6 @@
 
 class Admin::UsersController < Admin::ApplicationController
-	before_filter :check_user_existence, :only => [:get_email, :show, :edit, :set_color, :set_role, :set_lock, :destroy, :update, :system_pwd]
+	before_filter :check_user_existence, :only => [:show, :edit, :set_color, :set_role, :set_lock, :destroy, :update, :system_pwd]
 #--
 # ************** Quill Admin Manage User ************************************
 #++
@@ -10,10 +10,6 @@ class Admin::UsersController < Admin::ApplicationController
 	def check_user_existence
 		@user = User.find_by_id_including_deleted(params[:id])
 		render_json_auto(ErrorEnum::USER_NOT_EXIST) and return if @user.nil?
-	end
-
-	def get_email
-		render_json_auto @user.email
 	end
 
 	# GET /admin/users

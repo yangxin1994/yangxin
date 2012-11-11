@@ -17,7 +17,7 @@ class Admin::SurveysController < Admin::ApplicationController
 	end
 
 	def add_questions
-		if params[:question_ids]
+		# if params[:question_ids]
 			@survey = Survey.find_by_id(params[:id]) if params[:id]
 			unless @survey
 				@survey = Survey.create
@@ -25,15 +25,18 @@ class Admin::SurveysController < Admin::ApplicationController
 				@current_user.surveys << @survey
 				@survey.set_user_attr_survey(true)
 			end
-			params[:question_ids].each do |id|
+			if params[:question_id]
+				# insert
 				@survey.insert_template_question( params[:page_index].to_s.to_i, 
-					"-1", id)	
+						"-1", params[:question_id])
+				# convert
+				@survey.convert_template_question_to_normal_question(params[:question_id])
 			end
 
 			render_json_auto true
-		else
-			render_json_auto false
-		end
+		# else
+		# 	render_json_auto false
+		# end
 	end
 
 	def allocate
