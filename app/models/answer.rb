@@ -754,7 +754,6 @@ class Answer
 	# the answer auditor reviews this answer, the review result can be 1 (pass review) or 2 (not pass)
 	def review(review_result, answer_auditor)
 		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 2
-		return ErrorEnum::ANSWER_REVIEWED if self.finish_type > 0
 		self.finish_type = review_result.to_i == 1 ? 1 : 2
 		self.auditor = answer_auditor
 		self.save

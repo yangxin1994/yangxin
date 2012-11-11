@@ -18,7 +18,7 @@ class ApplicationController < ActionController::Base
 	  retval = {}
 	  retval["current_page"] = page
 	  retval["per_page"] = per_page
-	  retval["previous_page"] = page - 1
+	  retval["previous_page"] = (page - 1 > 0 ? page-1 : 1)
 	  # retval["previous_page"] = [page - 1, 1].max
 
 	  #v = eval(value)
@@ -29,7 +29,7 @@ class ApplicationController < ActionController::Base
 	  	retval["data"] = value.page(retval["current_page"]).per(retval["per_page"])
 	  end
 	  retval["total_page"] = ( (count || value.count )/ per_page.to_f ).ceil
-	  retval["next_page"] = page + 1
+	  retval["next_page"] = (page+1 <= retval["total_page"] ? page+1: retval["total_page"])
 	  # retval["next_page"] = [page + 1, retval["total_page"]].min
 	  retval
 	end
@@ -109,6 +109,10 @@ class ApplicationController < ActionController::Base
 	#judge whether the current user is survey auditor
 	def user_survey_auditor?
 		user_signed_in? && (@current_user.is_survey_auditor || @current_user.is_admin || @current_user.is_super_admin)
+	end
+
+	def user_answer_auditor?
+		user_signed_in? && (@current_user.is_answer_auditor || @current_user.is_admin || @current_user.is_super_admin)
 	end
 
 	#judge whether the current user is entry clerk

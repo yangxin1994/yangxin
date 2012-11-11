@@ -2,7 +2,7 @@
 require 'error_enum'
 class SurveyAuditor::SurveysController < SurveyAuditor::ApplicationController
 
-	before_filter :check_normal_survey_existence, :except => [:index]
+	before_filter :check_normal_survey_existence, :except => [:index, :count]
 	
 	#*method*: get
 	#
@@ -37,10 +37,15 @@ class SurveyAuditor::SurveysController < SurveyAuditor::ApplicationController
 		# first parameter is survey status (0 for normal surveys)
 		# second parameter is survey publish status (2 for under review surveys)
 		# third parameter are tags
-		survey_list = Survey.normal.list("normal", publishStatus::UNDER_REVIEW, nil)
+		survey_list = Survey.normal.list("normal", PublishStatus::UNDER_REVIEW, nil)
+		survey_list = slice((survey_list || []), page, per_page)
 		respond_to do |format|
-			format.json	{ render_json_auto(survey_list.serialize) and return }
+			format.json	{ render_json_auto(survey_list) and return }
 		end
+	end
+
+	def count
+		render_json_auto @current_user.surveys.list(params[:status], params[:publish_status], params[:tags]).count
 	end
 
 	#*method*: get

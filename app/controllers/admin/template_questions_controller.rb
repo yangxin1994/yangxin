@@ -12,6 +12,12 @@ class Admin::TemplateQuestionsController < Admin::ApplicationController
 		end
 	end
 
+	def get_text
+		@question = BasicQuestion.find_by_id(params[:id])
+		render_json_auto(ErrorEnum::QUESTION_NOT_EXIST) and return unless @question
+		render_json_auto @question.content["text"]
+	end
+
 	#*method*: post
 	#
 	#*url*: /surveys/:survey_id/questions
@@ -74,14 +80,8 @@ class Admin::TemplateQuestionsController < Admin::ApplicationController
 	end
 
 	def list_by_type
-		questions = TemplateQuestion.where(question_type: params[:question_type].to_i).page(page).per(per_page)
-		respond_to do |format|
-			format.json	{ render_json_auto(questions) and return }
-		end
-	end
-
-	def list_by_type_count
-		render_json_auto TemplateQuestion.where(question_type: params[:question_type].to_i).count
+		questions = TemplateQuestion.where(question_type: params[:question_type].to_i)
+		render_json_auto auto_paginate(questions)
 	end
 
 	#*method*: get
