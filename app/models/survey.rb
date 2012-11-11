@@ -793,7 +793,7 @@ class Survey
 		to_page = self.pages[page_index]
 		# if the to_page does not exist, create a new page at the end of the survey
 		if to_page == nil
-			self.pages << {"name" => "", questions => []}
+			self.pages << {"name" => "", "questions" => []}
 			to_page = self.pages[-1]
 			question_id = "-1"
 		end
