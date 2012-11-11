@@ -135,11 +135,7 @@ class Survey
 	end
 
 	def all_questions_id
-		q = []
-		pages.each do |page|
-			q += page[:questions]
-		end
-		return q
+		return (pages.map {|p| p["questions"]}).flatten
 	end
 
 	def all_questions_type
@@ -793,9 +789,9 @@ class Survey
 		to_page = self.pages[page_index]
 		# if the to_page does not exist, create a new page at the end of the survey
 		if to_page == nil
-			self.pages << {"name" => "", questions => []}
+			self.pages << {"name" => "", "questions" => []}
 			to_page = self.pages[-1]
-			question_id = "-1"
+			question_id_2 = "-1"
 		end
 		if question_id_2.to_s == "-1"
 			question_index = -1
@@ -1218,6 +1214,11 @@ class Survey
 
 	def show_quota
 		return Marshal.load(Marshal.dump(self.quota))
+	end
+
+	def self.get_user_ids_answered(survey_id)
+		survey = Survey.find_by_id(survey_id)
+		return survey.answers.map {|a| a.user_id.to_s}	
 	end
 
 	def estimate_answer_time
