@@ -3,7 +3,7 @@ class Gift < BasicGift
 	field :point, :type => Integer
 	# can be -1 (has no), 0 (expired), 1 (can be rewarded)
 	field :status, :type => Integer, :default => 0
-	field :start_time, :type => Date
+	#field :start_time, :type => Date
 	has_many :orders, :class_name => "Order"
 	has_one :photo, :class_name => "Material", :inverse_of => 'gift'
 	

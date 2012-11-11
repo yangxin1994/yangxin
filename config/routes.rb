@@ -323,6 +323,7 @@ OopsData::Application.routes.draw do
 	resources :orders do
 		collection do
 			get :for_cash, :for_entity, :for_virtual, :for_lottery
+			get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
 		end
 	end
 	resources :points, :only => 'index'

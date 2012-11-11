@@ -395,7 +395,7 @@ class Survey
 	end
 
 	def update_quality_control(quality_control_questions_type, quality_control_questions_ids)
-		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTIONS_TYPE if [0, 1, 2].include?(quality_control_questions_type)
+		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTIONS_TYPE if ![0, 1, 2].include?(quality_control_questions_type)
 		quality_control_questions_ids.each do |qc_id|
 			return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if QualityControlQuestion.find_by_id(qc_id).nil?
 		end
@@ -791,7 +791,12 @@ class Survey
 		end
 		return ErrorEnum::QUESTION_NOT_EXIST if from_page == nil
 		to_page = self.pages[page_index]
-		return ErrorEnum::OVERFLOW if to_page == nil
+		# if the to_page does not exist, create a new page at the end of the survey
+		if to_page == nil
+			self.pages << {"name" => "", "questions" => []}
+			to_page = self.pages[-1]
+			question_id = "-1"
+		end
 		if question_id_2.to_s == "-1"
 			question_index = -1
 		else
