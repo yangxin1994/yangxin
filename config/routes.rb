@@ -228,6 +228,7 @@ OopsData::Application.routes.draw do
 	resources :users do 
 		collection do 
 			get :get_level_information
+			get :get_basic_info
 			get :get_invited_user_ids
 			get :point
 			get :lottery_codes
