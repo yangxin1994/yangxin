@@ -28,7 +28,7 @@ class AnswerAuditor::SurveysControllerTest < ActionController::TestCase
 		auth_key = sign_in(answer_auditor.email, Encryption.decrypt_password(answer_auditor.password))
 		get :index, :format => :json, :auth_key => auth_key
 		result = JSON.parse(@response.body)
-		assert_equal 0, result["value"].length
+		assert_equal 0, result["value"]["data"].length
 		sign_out(auth_key)
 
 		survey.answer_auditors << answer_auditor
@@ -36,7 +36,7 @@ class AnswerAuditor::SurveysControllerTest < ActionController::TestCase
 		auth_key = sign_in(answer_auditor.email, Encryption.decrypt_password(answer_auditor.password))
 		get :index, :format => :json, :auth_key => auth_key
 		result = JSON.parse(@response.body)
-		assert_equal 1, result["value"].length
+		assert_equal 1, result["value"]["data"].length
 		sign_out(auth_key)
 	end
 end
