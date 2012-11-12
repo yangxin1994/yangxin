@@ -13,6 +13,7 @@ require 'quality_control_type_enum'
 class QualityControlQuestion < BasicQuestion
 	include Mongoid::Document
 	field :quality_control_type, :type => Integer
+	field :is_required, :type => Boolean, default: true
 
 	#set matching_quality_control_question which is in list page
 	field :is_first, :type => Boolean, :default => false
