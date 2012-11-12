@@ -334,7 +334,11 @@ class Answer
 		end
 		# consider the scenario that "one question per page"
 		if self.survey.style_setting["is_one_question_per_page"]
-			return [questions[0]]
+			if questions.blank?
+				return []
+			else
+				return [questions[0]]
+			end
 		else
 			return questions
 		end

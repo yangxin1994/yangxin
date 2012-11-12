@@ -1777,6 +1777,7 @@ class Survey
 		answers = user.answers
 		surveys_with_answer_status = []
 		answers.each do |a|
+			next if a.survey.nil?
 			surveys_with_answer_status << {"survey" => a.survey.serialize_in_short, "answer_status" => a.status}
 		end
 		return surveys_with_answer_status

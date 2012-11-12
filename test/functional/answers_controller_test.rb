@@ -400,7 +400,9 @@ class AnswersControllerTest < ActionController::TestCase
 		a = Answer.first
 		a.random_quality_control_locations.each do |key, value|
 			assert question_ids.include?(key)
-			assert a.random_quality_control_answer_content.has_key?(value)
+			value.each do |qc_id|
+				assert a.random_quality_control_answer_content.has_key?(qc_id)
+			end
 		end
 	end
 
