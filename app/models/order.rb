@@ -30,7 +30,7 @@ class Order
 
   belongs_to :gift, :class_name => "BasicGift"
   belongs_to :user, :class_name => "User", :inverse_of => :orders
-  belongs_to :operated_admin, :class_name => "User", :inverse_of => :operate_orders
+  belongs_to :operator, :class_name => "User", :inverse_of => :operate_orders
   
   validates :type, :presence_ext => true,
                    :inclusion => { :in => 0..3 },

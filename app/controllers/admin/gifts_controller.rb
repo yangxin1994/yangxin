@@ -6,7 +6,7 @@ class Admin::GiftsController < Admin::ApplicationController
   end
 
 
-  def_each :virtual, :cash, :entity, :stockout, :expired do |method_name|
+  def_each :virtual, :cash, :entity, :lottery, :stockout, :expired do |method_name|
     @gifts = auto_paginate(Gift.send(method_name))
     render_json { @gifts }
   end

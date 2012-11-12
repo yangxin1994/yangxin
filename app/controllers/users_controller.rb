@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'error_enum'
 class UsersController < ApplicationController
 
@@ -21,4 +20,9 @@ class UsersController < ApplicationController
 		render_json_auto(ErrorEnum::USER_NOT_EXIST) and return if @user.nil?
 		render_json_auto @user.email
 	end
+
+	def point
+		render_json @current_user.point
+	end
+	
 end

@@ -6,9 +6,9 @@ class RewardLog
   # can be 1 (LotteryCode) 2 (Point)
   field :type, :type => Integer
   field :point, :type => Integer, :default => 0
-
   # can be 0 (AdminOperate), 1 (InviteUser), 2 (FilledSurvey), 3 (ExtendSurvey), 4 (ExchangeGift), 5 (revoke)
   field :cause, :type => Integer
+  field :value, :type => Hash
 
   field :invited_user_id, :type => String
   field :extended_survey_id, :type => String
@@ -18,12 +18,13 @@ class RewardLog
 
   has_one :lottery_code
   belongs_to :filled_survey, :class_name => "Survey", :inverse_of => :reward_logs
+  
   belongs_to :user, :class_name => "User", :inverse_of => :reward_logs
-  belongs_to :operated_admin, :class_name => "User", :inverse_of => :operate_reward_logs
+  belongs_to :operator, :class_name => "User", :inverse_of => :operate_reward_logs
   belongs_to :order, :class_name => "Order", :inverse_of => :reward_log
 
   # TO DO validation
-  #validates_presence_of :point, :cause, :operated_admin
+  #validates_presence_of :point, :cause, :operator
   validates :point, :numericality => true
   #validates :invited_user_id, :presence => true
   #validates :user_id, :presence => true
@@ -35,7 +36,7 @@ class RewardLog
     p = RewardLog.find(log_id)
     RewardLog.create(:user_id => p.user.id,
                      :point => -p.point,
-                     :operated_admin_id => admin_id, 
+                     :operator_id => admin_id, 
                      :cause => 4)
   end
 

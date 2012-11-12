@@ -102,6 +102,7 @@ OopsData::Application.routes.draw do
 		end
 		resources :gifts do
 			collection do
+				get :virtual, :cash, :entity, :lottery
 				get :expired, :index, :virtual, :cash, :entity, :stockout
 			end
 		end
@@ -222,6 +223,7 @@ OopsData::Application.routes.draw do
 		collection do 
 			get :get_level_information
 			get :get_invited_user_ids
+			get :point
 		end
 		member do 
 			get 'get_email'
@@ -357,7 +359,7 @@ OopsData::Application.routes.draw do
 	end
 	resources :gifts do
 		collection do
-			get :virtual, :cash, :entity
+			get :virtual, :cash, :entity, :lottery
 		end
 	end
 	resources :orders do

@@ -69,8 +69,8 @@ class User
 	has_many :orders, :class_name => "Order"
 	has_many :lottery_codes
 	# QuillAdmin
-	has_many :operate_orders, :class_name => "Order", :foreign_key => "operated_admin_id"
-	has_many :operate_reward_logs, :class_name => "RewardLog", :inverse_of => :operated_admin,:foreign_key => "operated_admin_id"	
+	has_many :operate_orders, :class_name => "Order", :foreign_key => "operator_id"
+	has_many :operate_reward_logs, :class_name => "RewardLog", :inverse_of => :operator,:foreign_key => "operator_id"	
 
 	#before_save :set_updated_at
 	#before_update :set_updated_at
