@@ -22,7 +22,7 @@ class UsersController < ApplicationController
 	end
 
 	def point
-		render_json {@current_user.point}
+		render_json { @current_user.point ? @current_user.point : 0 }
 	end
 	
 	def lottery_codes
