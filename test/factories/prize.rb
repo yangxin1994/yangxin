@@ -5,7 +5,7 @@ FactoryGirl.define do
   	description 'Nintendo Portable Game Suit'
     weighting 10000
   	#start_time Time.now
-  	end_time Time.now.next_month
+  	# end_time Time.now.next_month
   	status 1
     surplus 10
     quantity 100 	

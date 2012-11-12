@@ -31,6 +31,29 @@ class Admin::OrdersController < Admin::ApplicationController
     render_json{@orders }
   end
 
+  def verify
+    params[:order][:status] = 1
+    update
+  end
+  
+  def false_verify
+    params[:order][:status] = -1
+    # params[:order][:status_desc] 
+    update
+  end
+
+  def false_verify
+    params[:order][:status] = -1
+    # params[:order][:status_desc] 
+    update
+  end
+  
+  def false_verify
+    params[:order][:status] = -1
+    # params[:order][:status_desc] 
+    update
+  end  
+
   def update
     @order = @current_user.orders.find_by_id(params[:id])
     render_json @order.update_attributes(params[:order]) do

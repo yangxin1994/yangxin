@@ -43,15 +43,15 @@ class OrdersController < ApplicationController
     end
   end
 
-  def verify
-    params[:order][:status] = 1
-    update
-  end
-  
-  def false_verify
-    params[:order][:status] = -1
-    # params[:order][:status_desc] 
-    update
+  def destroy
+    @order = @current_user.orders.find_by_id(params[:id])
+    render_json @order.status == 1 do |s|
+      if s
+        @order.update_attribute("is_deleted", true)
+      else
+        ErrorEnum::ORDER_CAN_NOT_BE_CANCELED
+      end
+    end
   end
 
   def_each :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed do |method_name|
@@ -67,10 +67,14 @@ class OrdersController < ApplicationController
   end
 
   def_each :for_cash, :for_entity, :for_virtual, :for_lottery, :for_prize do |method_name|
-    @orders = auto_paginate(@current_user.orders.send(method_name))
-    respond_to do |format|
-      format.html 
-      format.json { render json: @orders }
+    render_json true do
+      #Order.send(method_name).page(page)
+      auto_paginate(current_user.orders.send(method_name)) do |orders|
+        orders.page(page).per(per_page).map do |o|
+          o["gift_name"] = o.gift.name
+          o
+        end
+      end
     end
   end
 

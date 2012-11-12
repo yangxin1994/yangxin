@@ -15,17 +15,14 @@ class BasicGift
 	field :is_deleted, :type => Boolean, :default => false
 	
 	default_scope where(:is_deleted => false ).order_by("created_at","desc")
-	# TO DO Def Scope
+
 	scope :cash, where( :type => 0)
 	scope :entity, where( :type => 1)
 	scope :virtual, where( :type => 2)
 	scope :lottery, where( :type => 3)
-
 	scope :stockout, where(:surplus.lt => 1)
 
-
 	before_create :set_surplus
-
 
 	def add_quantity(n)
 		self.update_attribute(:quantity, self.quantity + n)

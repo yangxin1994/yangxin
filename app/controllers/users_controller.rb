@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'error_enum'
 class UsersController < ApplicationController
 
@@ -28,4 +27,12 @@ class UsersController < ApplicationController
 		render_json_auto(ErrorEnum::USER_NOT_EXIST) and return if @user.nil?
 		render_json_auto @user.email
 	end
+
+	def point
+		render_json { @current_user.point ? @current_user.point : 0 }
+	end
+	
+	def lottery_codes
+		render_json {auto_paginate(@current_user.lottery_codes)}
+	end	
 end

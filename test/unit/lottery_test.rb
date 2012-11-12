@@ -27,8 +27,8 @@ class LotteryTest < ActiveSupport::TestCase
     @lottery.prizes << @prize
     @lottery.save
     @prize.save
-    assert_equal 0, @prize.status
     d = @lottery_code.draw
+    assert_equal 1, @prize.status
   end
 
   test "should make a interval" do

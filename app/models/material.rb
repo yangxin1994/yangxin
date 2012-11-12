@@ -11,6 +11,7 @@ class Material
 	field :picture_url, :type => String
 
 	belongs_to :gift, :inverse_of => 'photo'
+	belongs_to :prize, :inverse_of => 'photo'
 	belongs_to :user
 
 	default_scope ->(o = 'ASC'){order_by("created_at", o) }

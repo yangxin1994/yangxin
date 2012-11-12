@@ -1,5 +1,5 @@
 require 'test_helper'
-class Admin::PointsControllerTest < ActionController::TestCase
+class Admin::RewardsControllerTest < ActionController::TestCase
   setup do
     clear(User, RewardLog)
     @admin_foo = FactoryGirl.create(:admin_foo)
@@ -10,24 +10,24 @@ class Admin::PointsControllerTest < ActionController::TestCase
   test "should add 100 point for user_bar" do
 
   # operate point success
-    post :operate, :format => :json,
-         :operate_point => 100,
+    post :operate_point, :format => :json,
+         :point => 100,
          :user_id => @user_bar.id,
          :auth_key => @auth_key
     #pp re
     # pp RewardLog.count
     # pp response.body
     @user_bar = User.find(@user_bar.id)
-    assert_equal 100, RewardLog.first.operated_point
+    assert_equal 100, RewardLog.first.point
     assert_equal 1100, @user_bar.point
   # operate point false with point type error
-    post :operate, :format => :json,
-         :operate_point => "f",
+    post :operate_point, :format => :json,
+         :point => "f",
          :user_id => @user_bar.id,
          :auth_key => @auth_key
     #pp response.body
     assert true
-    #assert_equal "{\"success\":false,\"value\":{\"error_code\":[21311],\"error_message\":{\"operated_point\":[\"is not a number\"]}}}", response.body
+    #assert_equal "{\"success\":false,\"value\":{\"error_code\":[21311],\"error_message\":{\"point\":[\"is not a number\"]}}}", response.body
   # TODO operate point false without a user
     # post :operate, :format => :json,
     #      :operate_point => 100,
