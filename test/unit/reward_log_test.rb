@@ -12,7 +12,7 @@ class RewardLogTest < ActiveSupport::TestCase
 		p = RewardLog.create(:point => -200,
 											:type => 2,
 											:cause => 0,
-											:operated_admin => @admin_foo,
+											:operator => @admin_foo,
 											:user => @user_bar )
 		assert @user_bar.point == 800
 	end
