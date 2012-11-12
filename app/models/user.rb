@@ -64,7 +64,7 @@ class User
 
 	#################################
 	# QuillMe
-	field :point, :type => Integer
+	field :point, :type => Integer, :default => 0
 	has_many :reward_logs, :class_name => "RewardLog", :inverse_of => :user
 	has_many :orders, :class_name => "Order"
 	has_many :lottery_codes

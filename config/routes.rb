@@ -224,6 +224,7 @@ OopsData::Application.routes.draw do
 			get :get_level_information
 			get :get_invited_user_ids
 			get :point
+			get :lottery_codes
 		end
 		member do 
 			get 'get_email'
