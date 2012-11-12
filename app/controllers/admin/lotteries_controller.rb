@@ -6,6 +6,7 @@ class Admin::LotteriesController < Admin::ApplicationController
 
 	def create
 			@lottery = Lottery.create(params[:lottery])
+      
 			render_json @lottery.save do
 				#Material.create(:material => params[:material], :materials => @lottery)
 				@lottery.as_retval
@@ -24,6 +25,7 @@ class Admin::LotteriesController < Admin::ApplicationController
     @lottery = auto_paginate(Lottery.send(method_name))
     render_json { @lottery }
   end
+
   def show
     # TODO is owners request?
     render_json { Lottery.find_by_id(params[:id])}

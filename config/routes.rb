@@ -106,6 +106,12 @@ OopsData::Application.routes.draw do
 				get :expired, :index, :virtual, :cash, :entity, :stockout
 			end
 		end
+		resources :prizes do
+			collection do
+				get :virtual, :cash, :entity, :lottery
+				get :expired, :index, :virtual, :cash, :entity, :stockout
+			end
+		end
 		resources :orders do
 			collection do
 				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
@@ -361,6 +367,10 @@ OopsData::Application.routes.draw do
 	resources :gifts do
 		collection do
 			get :virtual, :cash, :entity, :lottery
+
+		end
+		member do
+			put :exchange
 		end
 	end
 	resources :orders do
