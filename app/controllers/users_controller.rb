@@ -22,7 +22,10 @@ class UsersController < ApplicationController
 	end
 
 	def point
-		render_json @current_user.point
+		render_json {@current_user.point}
 	end
 	
+	def lottery_codes
+		render_json {auto_paginate(@current_user.lottery_codes)}
+	end	
 end
