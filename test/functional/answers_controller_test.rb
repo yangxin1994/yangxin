@@ -444,6 +444,7 @@ class AnswersControllerTest < ActionController::TestCase
 				:_remote_ip => "166.111.135.91"
 		result = JSON.parse(@response.body)
 		questions = result["value"][0]
+		answer = Answer.find_by_id(answer_id)
 		assert_equal pages[1].length, questions.length
 		assert_equal pages[1][0], questions[0]["_id"]
 		# answer the questions in the second page
@@ -788,9 +789,6 @@ class AnswersControllerTest < ActionController::TestCase
 		assert result["success"]
 		answer_id = result["value"]
 		answer = Answer.find_by_id(answer_id)
-		puts "aaaa"
-		puts answer.inspect
-		puts "aaaa"
 		sign_out(auth_key)
 	end
 

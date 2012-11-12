@@ -39,8 +39,9 @@ class AnswerAuditor::AnswersControllerTest < ActionController::TestCase
 		result = JSON.parse(@response.body)
 		answer_list = result["value"]["data"]
 		assert_equal 2, answer_list.length
-		assert_equal answer_1._id.to_s, answer_list[0]["_id"]
-		assert_equal answer_2._id.to_s, answer_list[1]["_id"]
+		answer_id_list = answer_list.map { |e| e["_id"] }
+		assert answer_id_list.include?(answer_1._id.to_s)
+		assert answer_id_list.include?(answer_2._id.to_s)
 		sign_out(auth_key)
 	end
 
