@@ -93,7 +93,7 @@ class Survey
 	has_many :answers
 	has_many :email_histories
 
-	belongs_to :lottery
+	belongs_to :loterry
 
 	has_many :export_results
 	has_many :analysis_results
@@ -135,11 +135,7 @@ class Survey
 	end
 
 	def all_questions_id
-		q = []
-		pages.each do |page|
-			q += page[:questions]
-		end
-		return q
+		return (pages.map {|p| p["questions"]}).flatten
 	end
 
 	def all_questions_type
@@ -280,7 +276,7 @@ class Survey
 			self.entry_clerks << user if allocate
 			self.entry_clerks.delete(user) if !allocate
 		when "interviewer"
-			return ErrorEnum::USER_NOT_EXIST if !(user.is_interview || user.is_admin)
+			return ErrorEnum::USER_NOT_EXIST if !(user.is_interviewer || user.is_admin)
 			self.interviewers << user if allocate
 			self.interviewers.delete(user) if !allocate
 		else
@@ -395,7 +391,7 @@ class Survey
 	end
 
 	def update_quality_control(quality_control_questions_type, quality_control_questions_ids)
-		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTIONS_TYPE if [0, 1, 2].include?(quality_control_questions_type)
+		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTIONS_TYPE if ![0, 1, 2].include?(quality_control_questions_type)
 		quality_control_questions_ids.each do |qc_id|
 			return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if QualityControlQuestion.find_by_id(qc_id).nil?
 		end
@@ -791,7 +787,12 @@ class Survey
 		end
 		return ErrorEnum::QUESTION_NOT_EXIST if from_page == nil
 		to_page = self.pages[page_index]
-		return ErrorEnum::OVERFLOW if to_page == nil
+		# if the to_page does not exist, create a new page at the end of the survey
+		if to_page == nil
+			self.pages << {"name" => "", "questions" => []}
+			to_page = self.pages[-1]
+			question_id_2 = "-1"
+		end
 		if question_id_2.to_s == "-1"
 			question_index = -1
 		else
@@ -1213,6 +1214,11 @@ class Survey
 
 	def show_quota
 		return Marshal.load(Marshal.dump(self.quota))
+	end
+
+	def self.get_user_ids_answered(survey_id)
+		survey = Survey.find_by_id(survey_id)
+		return survey.answers.map {|a| a.user_id.to_s}	
 	end
 
 	def estimate_answer_time

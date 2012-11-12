@@ -68,7 +68,7 @@ module Jobs
 			user_ids_sent = {}
 			rule_arr.each do |rule|
 				s_id = rule.survey_id
-				user_ids_answered[s_id] ||= Answer.get_user_ids_answered(s_id)
+				user_ids_answered[s_id] ||= Survey.get_user_ids_answered(s_id)
 				user_ids_sent[s_id] ||= EmailHistory.get_user_ids_sent(s_id)
 				user_ids = user_ids - user_ids_answered[s_id] - user_ids_sent[s_id]
 				user_ids_satisfied = nil

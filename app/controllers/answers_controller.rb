@@ -82,44 +82,24 @@ class AnswersController < ApplicationController
 			end
 		end
 
-
 		# need to create the answer
 		if params[:is_preview]
 			retval = @survey.check_password_for_preview(params[:username], params[:password], @current_user)
-			if retval == true
-				# the first time to load questions, create the preview answer
-				# answer = Answer.create_answer(params[:is_preview], @current_user, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
-				answer = Answer.create_answer(params[:is_preview], params[:introducer_id], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
-				render_json_auto(answer) and return if answer.class != Answer
-				answer.set_edit
-				render_json_auto(answer._id) and return
-			else
-				# wrong password
-				render_json_auto(retval) and return
-			end
+			render_json_auto(retval) and return if retval != true
+			# the first time to load questions, create the preview answer
+			# answer = Answer.create_answer(params[:is_preview], @current_user, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
+			answer = Answer.create_answer(params[:is_preview], params[:introducer_id], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
+			render_json_auto(answer) and return if answer.class != Answer
+			render_json_auto(answer._id) and return
 		else
 			# this is the first time that the volonteer opens this survey
-			# 1. check the captcha
-			#	render_json_e(ErrorEnum::WRONG_CAPTCHA) and return if @survey.access_control_setting["has_captcha"] && !Tool.check_captcha
-			# 2. check the password
+			# check the password
 			retval = @survey.check_password(params[:username], params[:password], @current_user)
-			if retval == true
-				# pass the checking, create a new answer and check the region, channel, and ip quotas
-				answer = Answer.create_answer(params[:is_preview], params[:introducer_id], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
-				render_json_auto(answer) and return if answer.class != Answer
-				retval = answer.check_channel_ip_address_quota
-				if retval
-					# pass the check of channel, ip, and address quota, set the answer status as "edit"
-					answer.set_edit
-				else
-					# fail to pass the check of channel, ip, and address quota, return
-					answer.violate_quota
-				end
-				render_json_auto(answer._id) and return
-			else
-				# wrong password
-				render_json_auto(retval) and return
-			end
+			render_json_auto(retval) and return if retval != true
+			answer = Answer.create_answer(params[:is_preview], params[:introducer_id], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
+			render_json_auto(answer) and return if answer.class != Answer
+			answer.check_channel_ip_address_quota
+			render_json_auto(answer._id) and return
 		end
 	end
 
@@ -130,7 +110,12 @@ class AnswersController < ApplicationController
 			if @answer.is_finish
 				render_json_auto([@answer.status, @answer.reject_type, @answer.finish_type]) and return
 			else
-				render_json_auto([questions, @answer.answers_of(questions), @answer.question_number, @answer.index_of(questions), questions.estimate_answer_time, @answer.repeat_time]) and return
+				render_json_auto([questions,
+								@answer.answer_content,
+								@answer.survey.all_questions_id.length,
+								@answer.index_of(questions),
+								questions.estimate_answer_time,
+								@answer.repeat_time]) and return
 			end
 		else
 			render_json_auto([@answer.status, @answer.reject_type, @answer.finish_type]) and return
@@ -152,24 +137,19 @@ class AnswersController < ApplicationController
 		retval = @answer.update_answer(params[:answer_content])
 
 		# 2. check quality control
-		retval = @answer.check_quality_control(params[:answer_content])
-		render_json_auto(@answer.violate_quality_control) and return if !retval
+		passed = @answer.check_quality_control(params[:answer_content])
 
 		# 3. check screen questions
-		retval = @answer.check_screen(params[:answer_content])
-		render_json_auto(@answer.violate_screen) and return if !retval
+		passed &&= @answer.check_screen(params[:answer_content]) if passed
 
 		# 4. check quota questions (skip for previewing)
-		if !@answer.is_preview
-			retval = @answer.check_quota_questions
-			render_json_auto(@answer.violate_quota) and return if !retval
-		end
+		passed &&= @answer.check_question_quota if !@answer.is_preview && passed
 
 		# 5. update the logic control result
-		@answer.update_logic_control_result(params[:answer_content])
+		@answer.update_logic_control_result(params[:answer_content]) if passed
 
-		# 6. automatically finish the ansewr for those thatdo not allow pageup
-		@answer.auto_finish
+		# 6. automatically finish the answers that do not allow pageup
+		@answer.finish(true) if passed
 
 		render_json_s and return
 	end
@@ -203,6 +183,7 @@ class AnswersController < ApplicationController
 	def destroy_preview
 		if @answer.is_preview
 			# this is a preview answer, and the owner of the answer wants to clear the answer
+			@answer.survey.answers.delete(@answer)
 			retval = @answer.destroy
 			render_json_auto(retval) and return 
 		else

@@ -21,6 +21,10 @@ OopsData::Application.routes.draw do
 	resources :quality_control_questions do
 	end
 
+
+	# alias interface
+	match '/admin/surveys/new' => 'surveys#new'
+	# 
 	namespace :admin do
 		resources :users do 
 			collection do 
@@ -31,19 +35,18 @@ OopsData::Application.routes.draw do
 			end
 
 			member do
-				get 'system_pwd', 'black', 'white'
+				get 'system_pwd', 'black', 'white', 'get_email'
 				post 'set_color', 'set_role', 'set_lock'
 			end
 		end
 
 		resources :surveys do 
 			collection do 
-				get 'count', 'list_by_status', 'list_by_status_count'
+				get 'wait_to_community' , 'show_user_attr_survey'
+				put 'add_questions'
 			end
 			member do
-				post 'allocate'
-				post 'set_community'
-				post 'set_spread'
+				put 'allocate', 'add_reward', 'set_community', 'set_spread'
 			end
 		end
 
@@ -86,6 +89,9 @@ OopsData::Application.routes.draw do
 		resources :template_questions do
 			collection	 do 
 				get 'count', 'list_by_type', 'list_by_type_count'
+			end
+			member do 
+				get 'get_text'
 			end
 		end
 
@@ -143,18 +149,29 @@ OopsData::Application.routes.draw do
 		end
 		resources :answers do
 			member do
-				post 'review'
+				put 'review'
 			end
 		end
 	end
 
 	namespace :survey_auditor do
 		resources :surveys do
+			collection do 
+				get 'count'
+			end
 			member do
 				get 'reject'
 				get 'publish'
 				get 'close'
 				get 'pause'
+			end
+		end
+	end
+
+	namespace :answer_auditor do 
+		resources :answers do 
+			collection do 
+				get 'count'
 			end
 		end
 	end
@@ -205,6 +222,9 @@ OopsData::Application.routes.draw do
 		collection do 
 			get :get_level_information
 			get :get_invited_user_ids
+		end
+		member do 
+			get 'get_email'
 		end
 	end
 	match 'update_information' => 'users#update_information', :as => :update_information, :via => [:post]

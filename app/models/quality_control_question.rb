@@ -113,4 +113,46 @@ class QualityControlQuestion < BasicQuestion
 			return true
 		end
 	end
+
+	def self.check_quality_control_answer(quality_control_question_id, answer)
+		standard_answer = QualityControlQuestionAnswer.find_by_question_id(quality_control_question_id)
+		if standard_answer.quality_control_type == 1
+			# this is objective quality control question
+			question_answer = answer.answer_content[quality_control_question_id]
+			return false if question_answer.nil?
+			volunteer_answer = question_answer["selection"]
+			case standard_answer.question_type
+			when QuestionTypeEnum::CHOICE_QUESTION
+				return Tool.check_choice_question_answer(question_answer["selection"], 
+					standard_answer.answer_content["items"],
+					standard_answer.answer_content["fuzzy"])
+			else
+				return true
+			end
+		else
+			# this is matching quality control question
+			# find all the volunteer answers of this group of quality control questions
+			matching_question_id_ary = MatchingQuestion.get_matching_question_ids(quality_control_question_id)
+			volunteer_answer = []
+
+			# get the selection of the user
+			answer.random_quality_control_answer_content.each do |k, v|
+				next if !matching_question_id_ary.include?(k)
+				next if v.nil?
+				# return false if v.nil?
+				volunteer_answer = volunteer_answer + v["selection"]
+			end
+
+
+			standard_matching_items = standard_answer.answer_content["matching_items"]
+			logger.info "BBBBBBBBBBBBBBBBBBBBB"
+			logger.info standard_matching_items.inspect
+			logger.info "BBBBBBBBBBBBBBBBBBBBB"
+			standard_matching_items.each do |standard_matching_item|
+				return true if (volunteer_answer - standard_matching_item).empty?
+			end
+			return false
+		end
+	end
+
 end

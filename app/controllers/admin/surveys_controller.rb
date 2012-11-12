@@ -1,22 +1,42 @@
 class Admin::SurveysController < Admin::ApplicationController
 
-	def index
-		@surveys = Survey.all.page(page).per(per_page)
-		render_json_auto(@surveys)
+	def wait_to_community
+		@surveys = Survey.normal.where(publish_status: 8).asc(:show_in_community)
+		render_json_auto auto_paginate(@surveys)
 	end
 
-	def count
-		render_json_auto Survey.count
+	def show
+		@survey = Survey.normal.find_by_id(params[:id])
+		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return unless @survey
+		render_json_auto @survey
 	end
 
-	def list_by_status
-		@surveys = Survey.all.page(page).per(per_page)
-		render_json_auto(@surveys)
+	def show_user_attr_survey
+		@survey = Survey.get_user_attr_survey
+		render_json_auto @survey
 	end
 
-	def list_by_status_count
-		@surveys = Survey.all.page(page).per(per_page)
-		render_json_auto(@surveys)
+	def add_questions
+		# if params[:question_ids]
+			@survey = Survey.find_by_id(params[:id]) if params[:id]
+			unless @survey
+				@survey = Survey.create
+				@survey.alt_new_survey = false
+				@current_user.surveys << @survey
+				@survey.set_user_attr_survey(true)
+			end
+			if params[:question_id]
+				# insert
+				@survey.insert_template_question( params[:page_index].to_s.to_i, 
+						"-1", params[:question_id])
+				# convert
+				@survey.convert_template_question_to_normal_question(params[:question_id])
+			end
+
+			render_json_auto true
+		# else
+		# 	render_json_auto false
+		# end
 	end
 
 	def allocate
@@ -27,10 +47,11 @@ class Admin::SurveysController < Admin::ApplicationController
 	end
 
 	def add_reward
-		@survey = Survey.find_by_id(params[:id])
-		params[:lottery] = lottery.find_by_id(params[:lottery_id])
-		s = params[:survey].select{:reward || :point || :lottery}
-		render_json @survey.update_attributes(s)
+		@survey = Survey.normal.find_by_id(params[:id])
+		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return unless @survey
+		params[:lottery] = Lottery.find_by_id(params[:lottery_id]) if params[:reward].to_i==1
+		s = params[:survey].select{|k,v| %w(reward point lottery).include?(k.to_s)}
+		render_json_auto @survey.update_attributes(s) and return
 	end	
 
 	def set_community
@@ -46,4 +67,5 @@ class Admin::SurveysController < Admin::ApplicationController
 		retval = @survey.set_spread(params[:spread_point].to_i, params[:spreadable].to_s == "true")
 		render_json_auto(retval) and return
 	end
+
 end
