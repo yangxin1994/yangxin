@@ -1,3 +1,5 @@
+#encoding: utf-8
+
 # encoding: utf-8
 require 'encryption'
 require 'error_enum'
@@ -478,11 +480,11 @@ class User
 ############### operations about point #################
 #++
 # admin inc
-	def operate_point(operated_point, user_id)
+	def operate_point(point, user_id)
 		u = User.find_by_id(user_id)
-		operate_reward_logs.create(:operated_point => operated_point,
-															:user => u,
-															:cause => 0)
+		operate_reward_logs.create(:point => point,
+															 :user => u,
+															 :cause => 0)
 	end
 #--
 ############### operations about charge #################

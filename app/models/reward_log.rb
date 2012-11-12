@@ -1,6 +1,7 @@
 class RewardLog
   include Mongoid::Document
   include Mongoid::Timestamps
+  extend Mongoid::FindHelper
   include Mongoid::ValidationsExt
   # can be 1 (LotteryCode) 2 (Point)
   field :type, :type => Integer
@@ -13,6 +14,7 @@ class RewardLog
   field :extended_survey_id, :type => String
 
   scope :point_logs, where( :type => 2)
+  scope :lottery_logs, where( :type => 1)
 
   has_one :lottery_code
   belongs_to :filled_survey, :class_name => "Survey", :inverse_of => :reward_logs
@@ -21,8 +23,8 @@ class RewardLog
   belongs_to :order, :class_name => "Order", :inverse_of => :reward_log
 
   # TO DO validation
-  #validates_presence_of :operated_point, :cause, :operated_admin
-  validates :operated_point, :numericality => true
+  #validates_presence_of :point, :cause, :operated_admin
+  validates :point, :numericality => true
   #validates :invited_user_id, :presence => true
   #validates :user_id, :presence => true
 
@@ -32,14 +34,14 @@ class RewardLog
   def self.revoke_operation(log_id,admin_id)
     p = RewardLog.find(log_id)
     RewardLog.create(:user_id => p.user.id,
-                    :point => -p.operated_point,
-                    :operated_admin_id => admin_id, 
-                    :cause => 4)
+                     :point => -p.point,
+                     :operated_admin_id => admin_id, 
+                     :cause => 4)
   end
-  private
+
   def operate_user_point
-    return false if user.blank? && operated_point.blank?
-    return true if type != 2 || point == 0
+    return false if user.blank? && point.blank?
+    return true if point == 0
     user.inc(:point, self.point)
   end
 end

@@ -21,6 +21,7 @@ class Lottery
   has_many :survey
   has_many :prizes
   has_many :lottery_codes
+  has_many :gifts
   belongs_to :creator, :class_name => 'User'
 
   def delete

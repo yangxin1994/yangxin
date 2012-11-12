@@ -89,6 +89,46 @@ OopsData::Application.routes.draw do
 			end
 		end
 
+		resources :points do
+			new do
+				post :operate
+			end
+		end
+		resources :gifts do
+			collection do
+				get :expired, :index, :virtual, :cash, :entity, :stockout
+			end
+		end
+		resources :orders do
+			collection do
+				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
+			end
+		end
+		
+		resources :lotteries do
+			collection do
+				get :for_publish, :activity, :finished
+			end
+		end
+
+		resources :reward_logs do
+			collection do
+				get :for_points, :for_lotteries
+			end
+		end
+
+		resources :lottery_codes do
+			
+		end
+
+		match 'messages/count' => 'messages#count'
+		resources :messages
+
+		resources :rewards do
+			collection do
+				put :operate_point, :revoke_operation
+			end
+		end
 	# The priority is based upon order of creation:
 	# first created -> highest priority.
 
@@ -306,13 +346,14 @@ OopsData::Application.routes.draw do
 			get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
 		end
 	end
-	resources :points, :only => 'index'
 
+	resources :reward_logs do
+		collection do
+			get :for_points, :for_lotteries
 
-	resources :export_results do
-		post :set_spss_export_process
-		post :set_excel_export_process
+		end
 	end
+
 	resources :tools do
 		collection do
 			get :find_provinces
@@ -321,37 +362,6 @@ OopsData::Application.routes.draw do
 			post :send_email
 		end
 
-	end
-
-	namespace :admin do
-		resources :points do
-			new do
-				post :operate
-			end
-		end
-		resources :gifts do
-			collection do
-				get :expired, :index, :virtual, :cash, :entity, :stockout
-			end
-		end
-		resources :orders do
-			collection do
-				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
-			end
-		end
-		
-		resources :lotteries do
-			collection do
-				get :for_publish, :activity, :finished
-			end
-		end
-
-		resources :lottery_codes do
-			
-		end
-
-		match 'messages/count' => 'messages#count'
-		resources :messages
 	end
 
 	# The priority is based upon order of creation:
