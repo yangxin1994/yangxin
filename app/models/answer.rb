@@ -174,20 +174,32 @@ class Answer
 			matching_question_number = qc_question_number - objective_question_number
 			# 2. randomly choose questions and generate locations of questions
 			objective_questions_ids = QualityControlQuestion.objective_questions.random(objective_question_number).map { |e| e._id.to_s }
-			temp_matching_questions_ids = QualityControlQuestion.matching_questions.random(objective_question_number).map { |e| e._id.to_s }
-			matching_questions_uniq_ids = []
+			temp_matching_questions_ids = QualityControlQuestion.matching_questions.random(matching_question_number).map { |e| e._id.to_s }
+			matching_questions_ids = []
 			temp_matching_questions_ids.each do |m_q_id|
-				matching_questions_uniq_ids += MatchingQuestion.get_matching_question_ids(m_q_id)
+				matching_questions_ids += MatchingQuestion.get_matching_question_ids(m_q_id)
 			end
-			matching_questions_ids = matching_questions_uniq_ids.uniq
 			quality_control_questions_ids = objective_questions_ids + matching_questions_ids
 		else
-			quality_control_questions_ids = self.survey.quality_control_questions_ids
+			self.survey.quality_control_questions_ids.each do |qc_id|
+				quality_control_question = QualityControlQuestion.find_by_id(qc_id)
+				next if quality_control_question.nil?
+				if quality_control_question.quality_control_type == 1
+					# objective quality control question
+					quality_control_questions_ids << qc_id
+				else
+					# matching quality control question
+					quality_control_questions_ids += MatchingQuestion.get_matching_question_ids(qc_id)
+				end
+			end
 		end
+		quality_control_questions_ids.uniq!
 
 		# 3. random generate locations for the quality control questions
 		quality_control_questions_ids.each do |qc_id|
-			self.random_quality_control_locations[self.survey.all_questions_id.shuffle[0]] = qc_id
+			normal_question_id = self.survey.all_questions_id.shuffle[0]
+			self.random_quality_control_locations[normal_question_id] ||= []
+			self.random_quality_control_locations[normal_question_id] << qc_id
 		end
 		# 4. initialize the random quality control questions answers
 		self.random_quality_control_answer_content = Hash[quality_control_questions_ids.map { |ele| [ele, nil] }]
@@ -249,8 +261,10 @@ class Answer
 					next if !self.answer_content[q_id].nil? && !cur_page
 					cur_page = true
 					loaded_question_ids << q_id
-					qc_id = self.random_quality_control_locations[q_id]
-					loaded_question_ids << qc_id if !qc_id.blank? && self.random_quality_control_answer_content[qc_id].nil?
+					qc_ids = self.random_quality_control_locations[q_id] || []
+					qc_ids.each do |qc_id|
+						loaded_question_ids << qc_id if self.random_quality_control_answer_content[qc_id].nil?
+					end
 				end
 				return load_question_by_ids(loaded_question_ids) if cur_page
 			end
@@ -269,10 +283,12 @@ class Answer
 			cur_page = false
 			self.survey.pages.each do |page|
 				page["questions"].each do |q_id|
-					qc_id = self.random_quality_control_locations[q_id]
+					qc_ids = self.random_quality_control_locations[q_id] || []
 					if !self.answer_content[q_id].nil? && !cur_page
 						# the question q_id might be removed by logic control rules, and the random quality control question after it is not answered
-						loaded_question_ids << qc_id if !qc_id.blank? && self.random_quality_control_answer_content[qc_id].nil?
+						qc_ids.each do |qc_id|
+							loaded_question_ids << qc_id if self.random_quality_control_answer_content[qc_id].nil?
+						end
 						next
 					end
 					# find out the first question whose answer is nil
@@ -284,7 +300,9 @@ class Answer
 						end
 					end
 					loaded_question_ids << q_id
-					loaded_question_ids << qc_id if !qc_id.blank? && self.random_quality_control_answer_content[qc_id].nil?
+					qc_ids.each do |qc_id|
+						loaded_question_ids << qc_id if self.random_quality_control_answer_content[qc_id].nil?
+					end
 				end
 				return load_question_by_ids(loaded_question_ids) if cur_page
 			end
@@ -308,15 +326,15 @@ class Answer
 		question_ids.each do |q_id|
 			question = BasicQuestion.find_by_id(q_id)
 			questions << question.remove_hidden_items(logic_control_result[q_id])
-			# load random quality control quesitons for surveys that allow page up (no logic control)
-			random_qc_id = self.random_quality_control_locations[q_id]
-			if !random_qc_id.blank? && !question_ids.include?(random_qc_id)
-				questions << BasicQuestion.find_by_id(random_qc_id)
+			# load quality control questions
+			random_qc_ids = self.random_quality_control_locations[q_id] || []
+			random_qc_ids.each do |random_qc_id|
+				questions << BasicQuestion.find_by_id(random_qc_id) if !question_ids.include?(random_qc_id)
 			end
 		end
 		# consider the scenario that "one question per page"
 		if self.survey.style_setting["is_one_question_per_page"]
-			return questions[0]
+			return [questions[0]]
 		else
 			return questions
 		end
@@ -446,7 +464,7 @@ class Answer
 		end
 
 		# initialize the random quality control questions
-		self.genereate_random_quality_control_questions if self.survey.is_random_quality_control_questions
+		self.genereate_random_quality_control_questions
 
 		self.save
 		self.set_edit
@@ -500,7 +518,7 @@ class Answer
 		return true if random_quality_control_question_id_ary.blank?
 		########## all quality control quesoitns are randomly inserted ##########
 		random_quality_control_question_id_ary.each do |qc_id|
-			retval = QualityControlQuestion.check_quality_control_answer(qc_id, self.random_quality_control_answer_content[qc_id])
+			retval = QualityControlQuestion.check_quality_control_answer(qc_id, self)
 			if !retval
 				# the quality control is violated
 				self.repeat_time = self.repeat_time + 1 if self.repeat_time < 2

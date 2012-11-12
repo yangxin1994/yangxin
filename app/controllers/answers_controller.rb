@@ -82,7 +82,6 @@ class AnswersController < ApplicationController
 			end
 		end
 
-
 		# need to create the answer
 		if params[:is_preview]
 			retval = @survey.check_password_for_preview(params[:username], params[:password], @current_user)
@@ -184,6 +183,7 @@ class AnswersController < ApplicationController
 	def destroy_preview
 		if @answer.is_preview
 			# this is a preview answer, and the owner of the answer wants to clear the answer
+			@answer.survey.answers.delete(@answer)
 			retval = @answer.destroy
 			render_json_auto(retval) and return 
 		else
