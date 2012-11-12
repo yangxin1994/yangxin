@@ -372,9 +372,9 @@ class Answer
 	#*retval*:
 	#* true: when the conditions can be satisfied
 	#* false: otherwise
-	def satisfy_conditions(conditions)
+	def satisfy_conditions(conditions, refresh_quota = true)
 		# only answers that are finished contribute to quotas
-		return false if !self.is_finish
+		return false if !self.is_finish && refresh_quota
 		# check the conditions one by one
 		conditions.each do |condition|
 			satisfy = false
@@ -393,35 +393,6 @@ class Answer
 				satisfy = condition["value"] == self.channel.to_s
 			when "4"
 				satisfy = Tool.check_ip_mask(condition["value"], self.ip_address)
-			end
-			return satisfy if !satisfy
-		end
-		return true
-	end
-
-	#*description*: called by "check_quota_questions", check whether the answer satisfies question quota conditions in the given conditions
-	#
-	#*params*:
-	#* conditions: array, the conditions to be checked
-	#
-	#*retval*:
-	#* true: when the conditions can be satisfied
-	#* false: otherwise
-	def satisfy_question_quota_conditions(conditions)
-		# check the conditions one by one
-		conditions.each do |condition|
-			satisfy = false
-			case condition["condition_type"].to_s
-			when "0"
-				volunteer_answer = self.answer_content[condition["name"]]["selection"]
-				require_answer = condition["value"]
-				# if the volunteer has not answered this question, cannot reject the volunteer
-				satisfy = volunteer_answer.nil? || Tool.check_choice_question_answer(volunteer_answer, require_answer, condition["fuzzy"])
-			when "1"
-				volunteer_answer = self.answer_content[condition["name"]]["selection"]
-				require_answer = condition["value"]
-				# if the volunteer has not answered this question, cannot reject the volunteer
-				satisfy = volunteer_answer.nil? || Tool.check_choice_question_answer(volunteer_answer, require_answer, condition["fuzzy"])
 			end
 			return satisfy if !satisfy
 		end
@@ -524,7 +495,7 @@ class Answer
 		return true if random_quality_control_question_id_ary.blank?
 		########## all quality control quesoitns are randomly inserted ##########
 		random_quality_control_question_id_ary.each do |qc_id|
-			retval = QualityControlQuestion.check_quality_control_answer(self.random_quality_control_answer_content[qc_id], qc_id ,true)
+			retval = QualityControlQuestion.check_quality_control_answer(self.random_quality_control_answer_content[qc_id], qc_id)
 			if !retval
 				# the quality control is violated
 				self.repeat_time = self.repeat_time + 1 if self.repeat_time < 2
@@ -567,7 +538,7 @@ class Answer
 		return true
 	end
 
-	def check_quota_questions
+	def check_question_quota
 		# 1. get the corresponding survey, quota, and quota stats
 		quota = self.survey.show_quota
 		quota_stats = self.survey.quota_stats
@@ -584,7 +555,7 @@ class Answer
 			# find out a rule that:
 			# a. the quota of the rule has not been satisfied
 			# b. this answer satisfies the rule
-			return true if quota_stats["answer_number"][rule_index] < rule["amount"] && self.satisfy_question_quota_conditions(rule["conditions"])
+			return true if quota_stats["answer_number"][rule_index] < rule["amount"] && self.satisfy_conditions(rule["conditions"], false)
 		end
 		self.set_reject
 		self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)

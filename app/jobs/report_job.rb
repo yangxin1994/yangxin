@@ -18,8 +18,21 @@ module Jobs
 			report_style = options["report_style"].to_i
 			report_type = options["report_type"].to_s
 
+			# initialize a report data
+			report_data = ReportData.new(report_type,
+										report_mockup.title,
+										report_mockup.subtitle,
+										report_mockup.header,
+										report_mockup.footer,
+										report_mockup.author_chn,
+										report_mockup.author_eng,
+										report_style)
+
 			# get answers set by filter
 			answers = ResultJob.answers(survey_id, filter_index, include_screened_answer)
+
+			# get the survey
+			survey = Survey.find_by_id(survey_id)
 
 			# generate result key
 			result_key = sef.generate_result_key(answers, report_mockup, report_style, report_type)
@@ -43,12 +56,14 @@ module Jobs
 				end
 			end
 
-			report_components = []
 			# analyze the result based on the report mockup
 			report_mockup.components.each do |component|
 				if component["component_type"] == 0
 					# this is a single question analysis
 					question_id = component["value"]["id"]
+					question_index = survey.all_questions_id.index(qustion_id)
+					next if question_index.nil?
+					report_data.push_compoent(1, "text" => "第#{question_index}题分析")
 					question = BasicQuestion.find_by_id(question_id)
 					case question.question_type
 					when QuestionTypeEnum::CHOICE_QUESTION
@@ -70,6 +85,7 @@ module Jobs
 					when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
 						analysis_result = analyze_matrix_choice(question.issue, answers_transform[question_id])
 						text = matrix_choice_description(analysis_result, question.issue)
+						report_components << {"component_type" => 2, }
 					when QuestionTypeEnum::NUMBER_BLANK_QUESTION
 						analysis_result = analyze_number_blank(question.issue, answers_transform[question_id], component["value"]["format"] || [])
 						text = number_blank_description(analysis_result, question.issue, component["value"]["format"] || [])
@@ -92,12 +108,26 @@ module Jobs
 					when QuestionTypeEnum::SCALE_QUESTION
 						analysis_result = analyze_scale(question.issue, answers_transform[question_id])
 						text = scale_description(analysis_result, question.issue, answers.length)
-						report_components << text
+						# push the text description component
+						report_data.push_compoent(2, "text" => text)
 						# possible charts for scale questions: pie, doughnut, line, bar1, bar2
-						# report_components <<
+						case component["chart_style"]
+						when ChartStyleEnum::LINE
+						when ChartStyleEnum::BAR
+						when ChartStyleEnum::STACK
+						when ChartStyleEnum::ALL
+						end
 					else
 						# other types of questions are removed
+						report_data.pop_component
 					end
+				else
+					question_id = component["value"]["id"]
+					target_question_id = component["value"]["target"]["id"]
+					question_index = survey.all_questions_id.index(qustion_id)
+					target_question_index = survey.all_questions_id.index(qustion_id)
+					next if question_index.nil? || target_question_index.nil?
+					report_data.push_compoent(1, "text" => "第#{question_index}题，第#{target_question_index}题交叉分析")
 				end
 			end
 
