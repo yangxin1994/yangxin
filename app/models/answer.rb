@@ -314,7 +314,12 @@ class Answer
 				questions << BasicQuestion.find_by_id(random_qc_id)
 			end
 		end
-		return questions
+		# consider the scenario that "one question per page"
+		if self.survey.style_setting["is_one_question_per_page"]
+			return questions[0]
+		else
+			return questions
+		end
 	end
 
 	#*description*: add a logic control result, used for show/hide items logic control rules
@@ -495,7 +500,7 @@ class Answer
 		return true if random_quality_control_question_id_ary.blank?
 		########## all quality control quesoitns are randomly inserted ##########
 		random_quality_control_question_id_ary.each do |qc_id|
-			retval = QualityControlQuestion.check_quality_control_answer(self.random_quality_control_answer_content[qc_id], qc_id)
+			retval = QualityControlQuestion.check_quality_control_answer(qc_id, self.random_quality_control_answer_content[qc_id])
 			if !retval
 				# the quality control is violated
 				self.repeat_time = self.repeat_time + 1 if self.repeat_time < 2
