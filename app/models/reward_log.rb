@@ -12,6 +12,8 @@ class RewardLog
   field :invited_user_id, :type => String
   field :extended_survey_id, :type => String
 
+  scope :point_logs, where( :type => 2)
+
   has_one :lottery_code
   belongs_to :filled_survey, :class_name => "Survey", :inverse_of => :reward_logs
   belongs_to :user, :class_name => "User", :inverse_of => :reward_logs

@@ -2,24 +2,24 @@ class OrdersController < ApplicationController
 #TO DO before_filter
   before_filter :require_user_exist
   def index
-    respond_and_render_json { auto_paginate(@current_user.orders) }
+    render_json { auto_paginate(@current_user.orders) }
   end
 
   def show
     # TODO is owners request?
-    respond_and_render_json { @current_user.orders.find_by_id(params[:id])}
+    render_json { @current_user.orders.find_by_id(params[:id])}
   end
 
   def create
     @order = @current_user.orders.create(params[:order])
-    respond_and_render_json !@order.created_at.nil? do |s|
+    render_json !@order.created_at.nil? do |s|
       @order.as_retval
     end
   end
 
   # def create
   #   @order = @current_user.orders.create(params[:order])
-  #   respond_and_render_json @order.save do |s|
+  #   render_json @order.save do |s|
   #     if s
   #       [:cash_receive_info, :entity_receive_info, :virtual_receive_info, :lottery_receive_info].each do |e| 
   #         @order.send("create_#{e.to_s}",params[:order][e]) if params[:order].include? e
@@ -33,7 +33,7 @@ class OrdersController < ApplicationController
 
   def update
     @order = @current_user.orders.find_by_id(params[:id])
-    respond_and_render_json @order.status == 1 do |s|
+    render_json @order.status == 1 do |s|
       if s
         @order.update_attributes(params[:order])
         @order.as_retval
@@ -42,15 +42,30 @@ class OrdersController < ApplicationController
       end
     end
   end
-  # def destroy
-  #   @order = Order.find(params[:id])
-  #   @order.destroy
 
-  #   respond_to do |format|
-  #     format.html { redirect_to orders_url }
-  #     format.json { head :ok }
-  #   end
-  # end
+  def verify
+    params[:order][:status] = 1
+    update
+  end
+  
+  def false_verify
+    params[:order][:status] = -1
+    # params[:order][:status_desc] 
+    update
+  end
+
+  def_each :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed do |method_name|
+    render_json true do
+      #Order.send(method_name).page(page)
+      auto_paginate(current_user.orders.send(method_name)) do |orders|
+        orders.page(page).per(per_page).map do |o|
+          o["gift_name"] = o.gift.name
+          o
+        end
+      end
+    end
+  end
+
   def_each :for_cash, :for_entity, :for_virtual, :for_lottery, :for_prize do |method_name|
     @orders = auto_paginate(@current_user.orders.send(method_name))
     respond_to do |format|

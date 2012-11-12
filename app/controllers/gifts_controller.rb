@@ -4,17 +4,18 @@ class GiftsController < ApplicationController
   # gifts.json?page=1
 
   def index
-    respond_and_render_json { Gift.can_be_rewarded.page(page).per(per_page) }
+    render_json { auto_paginate(Gift) }
   end
 
-  def_each :virtual, :cash, :entity, :stockout, :expired do |method_name|
-    @gifts = Gift.send(method_name).can_be_rewarded.page(page).per(per_page)
-    respond_and_render_json { @gifts}
+  def_each :virtual, :cash, :entity do |method_name|
+    @gifts = auto_paginate(Gift.send(method_name))
+    render_json { @gifts }
   end
 
   def show
-    # TO DO is owners request?
-    respond_and_render_json { Gift.find_by_id(params[:id]) }
+    @gift = Gift.find_by_id(params[:id])
+    @gift[:photo_src] = @gift.photo.picture_url
+    render_json { @gift }
   end
   
 end

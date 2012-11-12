@@ -91,12 +91,6 @@ class Answer
 		return survey.answers.where(user_id: owner._id.to_s, :is_preview => is_preview)[0]
 	end	
 
-	def self.find_by_survey_id_user_is_preview(survey_id, user, is_preview)
-		survey = Survey.find_by_id(survey_id)
-		return nil if survey.nil?
-		return survey.answers.where(user_id: user._id, :is_preview => is_preview)[0]
-	end	
-
 	def self.find_by_password(username, password)
 		answer = Answer.where(username: username, password: password)[0]
 		return answer
@@ -193,8 +187,7 @@ class Answer
 
 		# 3. random generate locations for the quality control questions
 		quality_control_questions_ids.each do |qc_id|
-			self.random_quality_control_locations[survey.pages.shuffle[0]["questions"].shuffle[0]] =
-				qc_id
+			self.random_quality_control_locations[self.survey.all_questions_id.shuffle[0]] = qc_id
 		end
 		# 4. initialize the random quality control questions answers
 		self.random_quality_control_answer_content = Hash[quality_control_questions_ids.map { |ele| [ele, nil] }]
@@ -221,7 +214,14 @@ class Answer
 					# require next page of questions
 					if question_index + 1 == page["questions"].length
 						return [] if page_index + 1 == self.survey.pages.length
-						return load_question_by_ids(self.survey.pages[page_index + 1]["questions"])
+						questions = load_question_by_ids(self.survey.pages[page_index + 1]["questions"])
+						while questions.blank?
+							# if the next page has no questions, try to load questions in the page after the next
+							page_index = page_index + 1
+							return [] if page_index + 1 == self.survey.pages.length
+							questions = load_question_by_ids(self.survey.pages[page_index + 1]["questions"])
+						end
+						return questions
 					else
 						return load_question_by_ids(page["questions"][question_index + 1..-1])
 					end
@@ -229,7 +229,14 @@ class Answer
 					# require previous page of questions
 					if question_index <= 0
 						return [] if page_index == 0
-						return load_question_by_ids(self.survey.pages[page_index - 1]["questions"])
+						questions = load_question_by_ids(self.survey.pages[page_index - 1]["questions"])
+						while questions.blank?
+							# if the previous page has no questions, try to laod questions in the page before the previous
+							page_index = page_index - 1
+							return [] if page_index == 0
+							questions = load_question_by_ids(self.survey.pages[page_index - 1]["questions"])
+						end
+						return questions
 					else
 						return load_question_by_ids(page["questions"][0..question_index - 1])
 					end
@@ -291,7 +298,7 @@ class Answer
 				self.answer_content[q_id] ||= nil
 			end
 			self.save
-			self.auto_finish
+			self.finish(true)
 			return true
 		end
 	end
@@ -355,40 +362,6 @@ class Answer
 		self.logic_control_result[question_id]["items"] = cur_items
 		self.logic_control_result[question_id]["sub_questions"] = cur_sub_questions
 		return self.save
-	end
-
-	#*description*: check whether the answer satisfies the channel, ip, and address quota, and set the status
-	#
-	#*params*:
-	#
-	#*retval*:
-	#* true: when the quotas can be satisfied
-	#* false: otherwise
-	def check_channel_ip_address_quota
-		# 1. get the corresponding survey, quota, and quota stats
-		quota = self.survey.quota
-		quota_stats = self.survey.quota_stats
-		# 2. if all quota rules are satisfied, the new answer should be rejected
-		return false if quota_stats && quota_stats["quota_satisfied"]
-		# 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
-		return true if !quota["is_exclusive"]
-		# 4 the rules should be checked one by one to see whether this answer can be satisfied
-		quota = self.survey.quota
-		quota_stats = self.survey.quota_stats
-		quota["rules"].each_with_index do |rule, index|
-			# move to next rule if the quota of this rule is already satisfied
-			next if quota_stats["answer_number"][index] >= rule["amount"]
-			rule["conditions"].each do |condition|
-				# if the answer's ip, channel, or region violates one condition of the rule, move to the next rule
-				next if condition["condition_type"] == 2 && !Address.satisfy_region_code?(self.region, condition["value"])
-				next if condition["condition_type"] == 3 && self.channel != condition["value"]
-				next if condition["condition_type"] == 4 && Tool.check_ip_mask(self.ip_address, condition["value"])
-			end
-			# find out one rule. the quota for this rule has not been satisfied, and the answer does not violate conditions of the rule
-			return true
-		end
-		# 5 cannot find a quota rule to accept this new answer
-		return false
 	end
 
 	#*description*: called by "refresh_quota_stats" in survey.rb, check whether the answer satisfies the given conditions
@@ -468,7 +441,7 @@ class Answer
 		self.answer_content.each_key do |k|
 			self.answer_content[k] = nil
 		end
-		# clear the random quality control questoins answer content
+		# clear the random quality control questions answer content
 		self.random_quality_control_answer_content.each_key do |k|
 			self.random_quality_control_answer_content[k] = nil
 		end
@@ -527,13 +500,6 @@ class Answer
 	end
 
 	#*description*: update the answer content
-	#
-	#*params*:
-	#* the type of the answer content, can be 0 (quota template questions' answers) or 1 (normal questions' answers)
-	#* the answer to be checked
-	#
-	#*retval*:
-	#* true: when the answers are successfully updated
 	def update_answer(updated_answer_content)
 		# it might happen that:
 		# survey has a new question, but the answer content does not has the question id as a key
@@ -546,14 +512,7 @@ class Answer
 		return true
 	end
 
-	#*description*: check whether the answer content violates the quality control rules
-	#
-	#*params*:
-	#* the answer content to be checked
-	#
-	#*retval*:
-	#* true: when the quality control rules are not violated
-	#* false: when the quality control rules are violated
+	# the following three methods check the quality control, screen, and quota questions, respectively
 	def check_quality_control(answer_content)
 		# find out quality control questions
 		random_quality_control_question_id_ary = []
@@ -565,90 +524,23 @@ class Answer
 		return true if random_quality_control_question_id_ary.blank?
 		########## all quality control quesoitns are randomly inserted ##########
 		random_quality_control_question_id_ary.each do |qc_id|
-			return false if self.random_quality_control_answer_content[qc_id].nil?
-			retval = self.check_quality_control_answer(self.random_quality_control_answer_content[qc_id], qc_id ,true)
-			return false if !retval
+			retval = QualityControlQuestion.check_quality_control_answer(self.random_quality_control_answer_content[qc_id], qc_id ,true)
+			if !retval
+				# the quality control is violated
+				self.repeat_time = self.repeat_time + 1 if self.repeat_time < 2
+				self.save
+				if self.repeat_time == 1
+					self.set_redo
+				else
+					self.set_reject
+					self.update_attributes(reject_type: 1, rejected_at: Time.now.to_i)
+				end
+				return false
+			end
 		end
 		return true
 	end
 
-	#*description*: for a specific question answer, check whether the answer violates the quality control rules
-	#
-	#*params*:
-	#* the id of the question the volunteer answers
-	#* the id of the quality control question
-	#
-	#*retval*:
-	#* true: when the quality control rules are not violated
-	#* false: when the quality control rules are violated
-	def check_quality_control_answer(question_answer, quality_control_question_id, randomly_inserted = false)
-		standard_answer = QualityControlQuestionAnswer.find_by_question_id(quality_control_question_id)
-		if standard_answer.quality_control_type == 1
-			# this is objective quality control question
-			volunteer_answer = question_answer["selection"]
-			case standard_answer.question_type
-			when QuestionTypeEnum::CHOICE_QUESTION
-				return Tool.check_choice_question_answer(question_answer["selection"], 
-					standard_answer.answer_content["items"],
-					standard_answer.answer_content["fuzzy"])
-			when QuestionTypeEnum::TEXT_BLANK_QUESTION
-				return Tool.check_choice_question_answer(question_answer["selection"], 
-					standard_answer.answer_content["text"],
-					standard_answer.answer_content["fuzzy"])
-			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-				return standard_answer.answer_content["number"] == question_answer["selection"]
-			else
-				return true
-			end
-		else
-			# this is matching quality control question
-			# find all the volunteer answers of this group of quality control questions
-			matching_question_id_ary = MatchingQuestion.get_matching_question_ids(quality_control_question_id)
-			volunteer_answer = []
-
-			self.random_quality_control_answer_content do |k, v|
-				next if !matching_question_id_ary.include?(k)
-				v["selection"].each do |input_id|
-					volunteer_answer << [k, input_id]
-				end
-			end
-
-			standard_matching_items = standard_answer.answer_content["matching_items"]
-			standard_matching_items.each do |standard_matching_item|
-				return true if (volunteer_answer - standard_matching_item).empty?
-			end
-			return false
-		end
-	end
-
-	#*description*: called when the answer violates the quality control rules
-	#
-	#*params*:
-	#
-	#*retval*:
-	#* ErrorEnum::VIOLATE_QUALITY_CONTROL_ONCE: when this is the first time
-	#* ErrorEnum::VIOLATE_QUALITY_CONTROL_TWICE: when this is the second time
-	def violate_quality_control
-		self.repeat_time = self.repeat_time + 1 if self.repeat_time < 2
-		self.save
-		if self.repeat_time == 1
-			self.set_redo
-			return ErrorEnum::VIOLATE_QUALITY_CONTROL_ONCE
-		else
-			self.set_reject
-			self.update_attributes(reject_type: 1, rejected_at: Time.now.to_i)
-			return ErrorEnum::VIOLATE_QUALITY_CONTROL_TWICE
-		end
-	end
-
-	#*description*: check whether the volunteer passes the screen questions
-	#
-	#*params*:
-	#* the answer content to be checked
-	#
-	#*retval*:
-	#* true
-	#* false
 	def check_screen(answer_content)
 		logic_control = self.survey.show_logic_control
 		volunteer_answer_question_id_ary = answer_content.keys
@@ -665,37 +557,26 @@ class Answer
 				# if the volunteer has not answered this question, stop the checking of this rule
 				break if answer_content[condition["question_id"]].nil?
 				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]]["selection"], condition["answer"], condition["fuzzy"])
-				return ErrorEnum::VIOLATE_SCREEN if !pass_condition
+				if !pass_condition
+					self.set_reject
+					self.update_attributes(reject_type: 2, rejected_at: Time.now.to_i)
+					return false
+				end
 			end
 		end
 		return true
 	end
 
-	#*description*: called when the answer violates the screen rules
-	#
-	#*params*:
-	#
-	#*retval*:
-	#* ErrorEnum::VIOLATE_SCREEN
-	def violate_screen
-		self.set_reject
-		self.update_attributes(reject_type: 2, rejected_at: Time.now.to_i)
-		return ErrorEnum::VIOLATE_SCREEN
-	end
-
-	#*description*: check whether the volunteer passes the quotas of questions
-	#
-	#*params*:
-	#
-	#*retval*:
-	#* true
-	#* false
 	def check_quota_questions
 		# 1. get the corresponding survey, quota, and quota stats
 		quota = self.survey.show_quota
 		quota_stats = self.survey.quota_stats
 		# 2. if all quota rules are satisfied, the new answer should be rejected
-		return false if quota_stats["quota_satisfied"]
+		if quota_stats["quota_satisfied"]
+			self.set_reject
+			self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
+			return false
+		end
 		# 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
 		return true if !quota["is_exclusive"]
 		# 4. check the rules one by one
@@ -705,18 +586,42 @@ class Answer
 			# b. this answer satisfies the rule
 			return true if quota_stats["answer_number"][rule_index] < rule["amount"] && self.satisfy_question_quota_conditions(rule["conditions"])
 		end
+		self.set_reject
+		self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
 		return false
 	end
 
-	#*description*: called when the answer violates the screen rules
-	#
-	#*params*:
-	#
-	#*retval*:
-	#* ErrorEnum::VIOLATE_QUOTA
-	def violate_quota
+	def check_channel_ip_address_quota
+		# 1. get the corresponding survey, quota, and quota stats
+		quota = self.survey.quota
+		quota_stats = self.survey.quota_stats
+		# 2. if all quota rules are satisfied, the new answer should be rejected
+		if quota_stats && quota_stats["quota_satisfied"]
+			self.set_reject
+			self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
+			return false
+		end
+		# 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
+		return true if !quota["is_exclusive"]
+		# 4 the rules should be checked one by one to see whether this answer can be satisfied
+		quota = self.survey.quota
+		quota_stats = self.survey.quota_stats
+		quota["rules"].each_with_index do |rule, index|
+			# move to next rule if the quota of this rule is already satisfied
+			next if quota_stats["answer_number"][index] >= rule["amount"]
+			rule["conditions"].each do |condition|
+				# if the answer's ip, channel, or region violates one condition of the rule, move to the next rule
+				next if condition["condition_type"] == 2 && !Address.satisfy_region_code?(self.region, condition["value"])
+				next if condition["condition_type"] == 3 && self.channel != condition["value"]
+				next if condition["condition_type"] == 4 && Tool.check_ip_mask(self.ip_address, condition["value"])
+			end
+			# find out one rule. the quota for this rule has not been satisfied, and the answer does not violate conditions of the rule
+			return true
+		end
+		# 5 cannot find a quota rule to accept this new answer
 		self.set_reject
-		return self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
+		self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
+		return false
 	end
 
 	def update_logic_control_result(answer_content)
@@ -786,37 +691,15 @@ class Answer
 		end
 	end
 
-	def get_user_ids_answered(survey_id)
-		survey = Survey.find_by_id(survey_id)
-		return survey.answers.map {|a| a.user_id.to_s}
-	end
-
-	def auto_finish
-		if self.is_edit && !self.survey.is_pageup_allowed && !self.answer_content.has_value?(nil) && !self.random_quality_control_answer_content.has_value?(nil)
-			self.set_finish
-			self.finished_at = Time.now.to_i
-			self.save
-			self.update_quota
-		end
-	end
-
-	def answers_of(questions)
-		question_ids = questions.map { |q| q._id.to_s }
-		return self.answer_content.select { |q_id, a| question_ids.include?(q_id) }
-	end
-
+	# return the index of the first given question in all the survey questions
 	def index_of(questions)
 		return nil if questions.blank?
 		question_id = questions[0]._id.to_s
-		question_ids = (self.survey.pages.map { |p| p["questions"] }).flatten
+		question_ids = self.survey.all_questions_id
 		return question_ids.index(question_id)
 	end
 
-	def question_number
-		return (self.survey.pages.map { |p| p["questions"] }).flatten.length
-	end
-
-	#*description*: finish an answer, only work for answers that allow pageup (those that do not allow pageup finish automatically)
+	#*description*: finish an answer
 	#
 	#*params*:
 	#
@@ -825,18 +708,18 @@ class Answer
 	#* ErrorEnum::WRONG_ANSWER_STATUS
 	#* ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP
 	#* ErrorEnum::ANSWER_NOT_COMPLETE
-	def finish
+	def finish(auto = false)
+		# surveys that allow page up cannot be finished automatically
+		return false if self.survey.is_pageup_allowed && auto
 		# synchronize the questions in the survey and the qeustions in the answer content
-		survey_question_ids = self.survey.pages.map { |page| page["questions"] }
-		survey_question_ids = survey_question_ids.flatten
+		survey_question_ids = self.survey.all_questions_id
 		self.answer_content.delete_if { |q_id, a| !survey_question_ids.include?(q_id) }
 		survey_question_ids.each do |q_id|
 			self.answer_content[q_id] ||= nil
 		end
 		self.save
+		# check whether can finish this answer
 		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_edit
-		# surveys that do not allow page up can also be finished manually
-		# return ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP if !self.survey.is_pageup_allowed
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
 		self.set_finish
@@ -868,21 +751,25 @@ class Answer
 		self.survey.save
 	end
 
-	def review(review_result, user)
+	# the answer auditor reviews this answer, the review result can be 1 (pass review) or 2 (not pass)
+	def review(review_result, answer_auditor)
 		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 2
-		return ErrorEnum::ANSWER_REVIEWED if self.finish_type > 0
 		self.finish_type = review_result.to_i == 1 ? 1 : 2
-		self.auditor = user
+		self.auditor = answer_auditor
 		self.save
-		# assign this user points, or a loterry code
-		# usage post_reward_to(user, :type => 2, :point => 100)
-		# 1 for lottery & 2 for point
-		lc = self.survey.reward == 1 ? nil : self.survey.lottery.give_lottery_code_to(user)
-		return ErrorEnum::REWARD_ERROR unless self.survey.post_reward_to(user, 
-																								  :type => self.survey.reward, 
-																								  :point => self.survey.point,
-																								  :lottery_code => lc,
-																								  :cause => 2)
+		# no need to give points if the answer does not pass the review
+		return if self.finish_type == 2
+		if [1,2].include?(self.survey.reward)
+			# assign this user points, or a loterry code
+			# usage post_reward_to(user, :type => 2, :point => 100)
+			# 1 for lottery & 2 for point
+			lc = self.survey.reward == 1 ? nil : self.survey.lottery.give_lottery_code_to(user)
+			return ErrorEnum::REWARD_ERROR unless self.survey.post_reward_to(user, 
+																			:type => self.survey.reward, 
+																			:point => self.survey.point,
+																			:lottery_code => lc,
+																			:cause => 2)
+		end
 		# give the introducer points
 		introducer = User.find_by_id(self.introducer_id)
 		if !introducer.nil? && introducer_to_pay > 0
@@ -892,4 +779,5 @@ class Answer
 		end
 		return true
 	end
+
 end

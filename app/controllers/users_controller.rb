@@ -15,4 +15,10 @@ class UsersController < ApplicationController
 		invited_user_ids = @current_user.get_invited_user_ids
 		render_json_auto(invited_user_ids) and return
 	end
+
+	def get_email
+		@user = User.find_by_id_including_deleted(params[:id])
+		render_json_auto(ErrorEnum::USER_NOT_EXIST) and return if @user.nil?
+		render_json_auto @user.email
+	end
 end

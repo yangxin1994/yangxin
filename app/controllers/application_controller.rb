@@ -14,12 +14,11 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
-	def auto_paginate(value)
+	def auto_paginate(value, count = nil)
 	  retval = {}
-	  logger.info Gift.page(page).per(10)
 	  retval["current_page"] = page
 	  retval["per_page"] = per_page
-	  retval["previous_page"] = page - 1
+	  retval["previous_page"] = (page - 1 > 0 ? page-1 : 1)
 	  # retval["previous_page"] = [page - 1, 1].max
 
 	  #v = eval(value)
@@ -29,8 +28,8 @@ class ApplicationController < ActionController::Base
 	  	#retval["data"] = eval(value + '.page(retval["current_page"]).per(retval["per_page"])' )
 	  	retval["data"] = value.page(retval["current_page"]).per(retval["per_page"])
 	  end
-	  retval["total_page"] = ( value.count / per_page.to_f ).ceil
-	  retval["next_page"] = page + 1
+	  retval["total_page"] = ( (count || value.count )/ per_page.to_f ).ceil
+	  retval["next_page"] = (page+1 <= retval["total_page"] ? page+1: retval["total_page"])
 	  # retval["next_page"] = [page + 1, retval["total_page"]].min
 	  retval
 	end
@@ -49,47 +48,13 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
-	def respond_and_render(is_success = true, options = {}, &block)
+	def render_json(is_success = true, options = {}, &block)
 		options[:only]+= [:value, :success] unless options[:only].nil?
-		respond_to do |format|
-			format.html
-			format.json do
-				render :json => {
-								:value => yield,
-								:success => is_success
-							 },
-							:except => options[:except], 
-							:only => options[:only]
-			end
-			unless options[:format].nil?
-				format.send(options[:format]) do
-				 	render options[:format], :except => options[:except],
-				 													 :only => options[:only]
-				end
-			end
-		end		
+		render :json => {:value => block_given? ? yield(is_success) : is_success ,
+										 :success => is_success
+		}, :except => options[:except], :only => options[:only]		
 	end
-	def respond_and_render_json(is_success = true, options = {}, &block)
-		options[:only]+= [:value, :success] unless options[:only].nil?
-		respond_to do |format|
-			format.json do
-				render :json => {:value => block_given? ? yield(is_success) : is_success ,
-												 :success => is_success
-				 }, :except => options[:except], :only => options[:only]
-			end
-		end		
-	end
-	def respond_and_render_instance(instance)
-		retval = instance.as_retval
-		respond_to do |format|
-			format.json do
-				render :json => {
-					:value => retval,
-					:success => retval
-				 }
-			end
-		end		
-	end
+	
 ################################################
 	#get the information of the signed user and set @current_user
 	def current_user
@@ -113,6 +78,7 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
+	
 	#obtain the ip address of the clien, and set it as @remote_ip
 	def client_ip
 		#@remote_ip = request.env["HTTP_X_FORWARDED_FOR"]
@@ -143,6 +109,10 @@ class ApplicationController < ActionController::Base
 	#judge whether the current user is survey auditor
 	def user_survey_auditor?
 		user_signed_in? && (@current_user.is_survey_auditor || @current_user.is_admin || @current_user.is_super_admin)
+	end
+
+	def user_answer_auditor?
+		user_signed_in? && (@current_user.is_answer_auditor || @current_user.is_admin || @current_user.is_super_admin)
 	end
 
 	#judge whether the current user is entry clerk

@@ -71,8 +71,9 @@ class Survey
 	field :point, :type => Integer, :default => 0
 	field :spread_point, :type => Integer, :default => 0
 	field :spreadable, :type => Boolean, :default => false
-	# reward: -1: nothing, 1: prize, 2: point 
-	field :reward, :type => Integer, :default => 1
+	# reward: 0: nothing, 1: prize, 2: point 
+	field :reward, :type => Integer, :default => 0
+
 	field :show_in_community, :type => Boolean, default: false
 
 	belongs_to :user
@@ -92,7 +93,7 @@ class Survey
 	has_many :answers
 	has_many :email_histories
 
-	belongs_to :lottery
+	belongs_to :loterry
 
 	has_many :export_results
 	has_many :analysis_results
@@ -134,11 +135,7 @@ class Survey
 	end
 
 	def all_questions_id
-		q = []
-		pages.each do |page|
-			q += page[:questions]
-		end
-		return q
+		return (pages.map {|p| p["questions"]}).flatten
 	end
 
 	def all_questions_type
@@ -208,8 +205,8 @@ class Survey
 		return true
 	end
 
-	def update_star
-		self.is_star = !self.is_star
+	def update_star(is_star)
+		self.is_star = is_star
 		return ErrorEnum::UNKNOWN_ERROR unless self.save
 		return self.is_star
 	end
@@ -279,7 +276,7 @@ class Survey
 			self.entry_clerks << user if allocate
 			self.entry_clerks.delete(user) if !allocate
 		when "interviewer"
-			return ErrorEnum::USER_NOT_EXIST if !(user.is_interview || user.is_admin)
+			return ErrorEnum::USER_NOT_EXIST if !(user.is_interviewer || user.is_admin)
 			self.interviewers << user if allocate
 			self.interviewers.delete(user) if !allocate
 		else
@@ -394,7 +391,7 @@ class Survey
 	end
 
 	def update_quality_control(quality_control_questions_type, quality_control_questions_ids)
-		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTIONS_TYPE if [0, 1, 2].include?(quality_control_questions_type)
+		return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTIONS_TYPE if ![0, 1, 2].include?(quality_control_questions_type)
 		quality_control_questions_ids.each do |qc_id|
 			return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if QualityControlQuestion.find_by_id(qc_id).nil?
 		end
@@ -475,18 +472,9 @@ class Survey
 				question = Question.find_by_id(question_id)
 				return ErrorEnum::QUESTION_NOT_EXIST if question == nil
 				cloned_question = question.clone
-				page[question_index] = cloned_question._id.to_s
-				question_id_mapping[question_id] = cloned_question._id
+				page["questions"][question_index] = cloned_question._id.to_s
+				question_id_mapping[question_id] = cloned_question._id.to_s
 			end
-		end
-
-		# clone template questions
-		new_instance.quota_template_question_page.each do |question_id, question_index|
-			question = Question.find_by_id(question_id)
-			return ErrorEnum::QUESTION_NOT_EXIST if question == nil
-			cloned_question = question.clone
-			new_instance.quota_template_question_page[question_index] = cloned_question._id.to_s
-			question_id_mapping[question_id] = cloned_question._id
 		end
 
 		# clone quota rules
@@ -520,7 +508,6 @@ class Survey
 		new_instance.save
 
 		return new_instance
-		
 	end
 		
 	#*description*: add a tag to the survey
@@ -691,7 +678,13 @@ class Survey
 	#* ErrorEnum ::OVERFLOW
 	def create_question(page_index, question_id, question_type)
 		current_page = self.pages[page_index]
-		return ErrorEnum::OVERFLOW if current_page == nil
+		if current_page == nil
+			# if the page cannot be found, append a new page in the last and insert the question into that page
+			self.pages << {"name" => "", "questions" => []}
+			page_index = self.pages.length - 1
+			question_id = "-1"
+			current_page = self.pages[page_index]
+		end
 		if question_id.to_s == "-1"
 			question_index = current_page["questions"].length - 1
 		elsif question_id.to_s == "0"
@@ -794,7 +787,12 @@ class Survey
 		end
 		return ErrorEnum::QUESTION_NOT_EXIST if from_page == nil
 		to_page = self.pages[page_index]
-		return ErrorEnum::OVERFLOW if to_page == nil
+		# if the to_page does not exist, create a new page at the end of the survey
+		if to_page == nil
+			self.pages << {"name" => "", "questions" => []}
+			to_page = self.pages[-1]
+			question_id_2 = "-1"
+		end
 		if question_id_2.to_s == "-1"
 			question_index = -1
 		else
@@ -1216,6 +1214,11 @@ class Survey
 
 	def show_quota
 		return Marshal.load(Marshal.dump(self.quota))
+	end
+
+	def self.get_user_ids_answered(survey_id)
+		survey = Survey.find_by_id(survey_id)
+		return survey.answers.map {|a| a.user_id.to_s}	
 	end
 
 	def estimate_answer_time
@@ -1762,19 +1765,19 @@ class Survey
 		return self.save
 	end
 
-	def self.list_surveys_in_community(published, reward, only_spreadable)
+	def self.list_surveys_in_community(reward, only_spreadable, user)
 		surveys = Survey.in_community
-		surveys = published ? surveys.where(:publish_status => PublishStatus::PUBLISHED) : surveys.not_in(:publish_status => PublishStatus::PUBLISHED)
 		surveys = surveys.where(:spreadable => true) if only_spreadable
-		surveys = surveys.where(:reward => reward) if reward != -1
-		return surveys.map { |s| s.serialize }
+		surveys = surveys.where(:reward => reward)
+		surveys = surveys.order_by(:publish_status, :desc)
+		return surveys.map { |s| {"survey" => s.serialize_in_short, "answer_status" => s.answer_status(user)} }
 	end
 
 	def self.list_answered_surveys(user)
 		answers = user.answers
 		surveys_with_answer_status = []
 		answers.each do |a|
-			surveys_with_answer_status << {"survey" => a.survey.serialize, "answer_status" => a.status}
+			surveys_with_answer_status << {"survey" => a.survey.serialize_in_short, "answer_status" => a.status}
 		end
 		return surveys_with_answer_status
 	end
@@ -1790,8 +1793,26 @@ class Survey
 		end
 		surveys_with_spread_number_hash.each do |survey_id, spread_number|
 			survey = Survey.find_by_id(survey_id)
-			surveys_with_spread_number << {"survey" => survey.searlize, "spread_number" => spread_number}
+			surveys_with_spread_number << {"survey" => survey.serialize_in_short, "answer_status" => s.answer_status(user), "spread_number" => spread_number}
 		end
 		return surveys_with_spread_number
+	end
+
+	def serialize_in_short
+		survey_obj = Hash.new
+		survey_obj["_id"] = self._id.to_s
+		survey_obj["title"] = self.title.to_s
+		survey_obj["subtitle"] = self.subtitle.to_s
+		survey_obj["created_at"] = self.created_at.to_i
+		survey_obj["reward"] = self.reward
+		survey_obj["status"] = self.status
+		return survey_obj
+	end
+
+	def answer_status(user)
+		return nil if user.nil?
+		answer = Answer.where(:survey_id => self._id.to_s, :user_id => user._id.to_s, :is_preview => false)[0]
+		return nil if answer.nil?
+		return answer.status
 	end
 end

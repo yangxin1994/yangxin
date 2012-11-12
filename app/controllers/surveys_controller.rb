@@ -303,9 +303,9 @@ class SurveysController < ApplicationController
 	end
 
 	def list_surveys_in_community
-		surveys = Survey.list_surveys_in_community(params[:published].to_s == "true",
-										params[:reward].to_i,
-										params[:only_spreadable].to_s == "true")
+		surveys = Survey.list_surveys_in_community(params[:reward].to_i,
+										params[:only_spreadable].to_s == "true",
+										@current_user)
 		paginated_surveys = auto_paginate surveys do |s|
 			s.slice((page - 1) * per_page, per_page)
 		end
@@ -423,11 +423,12 @@ class SurveysController < ApplicationController
 	#
 	#*params*:
 	#* survey_id: id of the suvey to be set
+	#* is_star: bool. is star or not
 	#
 	#*retval*:
 	# true or false
 	def update_star
-		retval = @survey.update_star
+		retval = @survey.update_star(params[:is_star])
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
