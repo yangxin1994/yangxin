@@ -24,5 +24,8 @@ class Admin::LotteriesController < Admin::ApplicationController
     @lottery = auto_paginate(Lottery.send(method_name))
     render_json { @lottery }
   end
-
+  def show
+    # TODO is owners request?
+    render_json { Lottery.find_by_id(params[:id])}
+  end
 end

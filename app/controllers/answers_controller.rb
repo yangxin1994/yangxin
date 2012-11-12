@@ -82,7 +82,6 @@ class AnswersController < ApplicationController
 			end
 		end
 
-
 		# need to create the answer
 		if params[:is_preview]
 			retval = @survey.check_password_for_preview(params[:username], params[:password], @current_user)
@@ -144,7 +143,7 @@ class AnswersController < ApplicationController
 		passed &&= @answer.check_screen(params[:answer_content]) if passed
 
 		# 4. check quota questions (skip for previewing)
-		passed &&= @answer.check_quota_questions if !@answer.is_preview && passed
+		passed &&= @answer.check_question_quota if !@answer.is_preview && passed
 
 		# 5. update the logic control result
 		@answer.update_logic_control_result(params[:answer_content]) if passed
@@ -184,6 +183,7 @@ class AnswersController < ApplicationController
 	def destroy_preview
 		if @answer.is_preview
 			# this is a preview answer, and the owner of the answer wants to clear the answer
+			@answer.survey.answers.delete(@answer)
 			retval = @answer.destroy
 			render_json_auto(retval) and return 
 		else

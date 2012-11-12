@@ -10,7 +10,8 @@ class ReportMockup
 	field :subtitle, :type => String
 	field :header, :type => String
 	field :footer, :type => String
-	field :author, :type => String
+	field :author_eng, :type => String
+	field :author_chn, :type => String
 	field :components, :type => Array, default: []
 
 	belongs_to :survey

@@ -136,13 +136,18 @@ class QualityControlQuestion < BasicQuestion
 			volunteer_answer = []
 
 			# get the selection of the user
-			answer.random_quality_control_answer_content do |k, v|
+			answer.random_quality_control_answer_content.each do |k, v|
 				next if !matching_question_id_ary.include?(k)
-				return false if v.nil?
+				next if v.nil?
+				# return false if v.nil?
 				volunteer_answer = volunteer_answer + v["selection"]
 			end
 
+
 			standard_matching_items = standard_answer.answer_content["matching_items"]
+			logger.info "BBBBBBBBBBBBBBBBBBBBB"
+			logger.info standard_matching_items.inspect
+			logger.info "BBBBBBBBBBBBBBBBBBBBB"
 			standard_matching_items.each do |standard_matching_item|
 				return true if (volunteer_answer - standard_matching_item).empty?
 			end

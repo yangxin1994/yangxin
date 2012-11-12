@@ -7,7 +7,7 @@ class GiftsController < ApplicationController
     render_json { auto_paginate(Gift) }
   end
 
-  def_each :virtual, :cash, :entity do |method_name|
+  def_each :virtual, :cash, :entity, :lottery do |method_name|
     @gifts = auto_paginate(Gift.send(method_name))
     render_json { @gifts }
   end

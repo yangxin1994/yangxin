@@ -6,9 +6,10 @@ class Gift < BasicGift
 	#field :start_time, :type => Date
 	has_many :orders, :class_name => "Order"
 	has_one :photo, :class_name => "Material", :inverse_of => 'gift'
-	
+	belongs_to :lottery
 	scope :can_be_rewarded, where( :status => 1) 	
 	scope :expired, where( :status => 0)
+
 	# TO DO Validation
 	validates_presence_of :point
 	validates :name, :presence => true,
