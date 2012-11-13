@@ -43,6 +43,10 @@ class RewardLog
   def operate_user_point
     return false if user.blank? && point.blank?
     return true if point == 0
-    user.inc(:point, self.point)
+    if self.point + point >= 0
+      user.inc(:point, self.point)
+    else
+      false
+    end
   end
 end

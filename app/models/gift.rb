@@ -17,5 +17,10 @@ class Gift < BasicGift
 	validates :type, :presence => true
 	validates :quantity, :presence => true,
 											 :numericality => { :greater_than_or_equal_to => 0 }
+	before_save :make_status
 
+  def make_status
+    status = -1 if surplus <= 0
+  end
+  
 end

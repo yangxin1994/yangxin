@@ -18,4 +18,24 @@ class GiftsController < ApplicationController
     render_json { @gift }
   end
   
+  def exchange
+    @gift = Gift.find_by_id(params[:id])
+    render_json @gift.is_valid? &&
+                @gift.point > user.point &&
+                @gift.surplus >= 0 do |s|
+      if s
+        if @gift.point > user.point 
+          user.orders.create(:gift => @gift,
+                             :type => @gift.type) 
+        elsif @gift.surplus <= 0
+          return ErrorEnum::GIFT_NOT_ENOUGH
+        else
+          return ErrorEnum::POINT_NOT_ENOUGH
+        end
+      else
+        return ErrorEnum::GIFT_NOT_FOUND
+      end
+    end
+  end
+
 end

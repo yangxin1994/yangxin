@@ -309,7 +309,7 @@ class SurveysController < ApplicationController
 		paginated_surveys = auto_paginate surveys do |s|
 			s.slice((page - 1) * per_page, per_page)
 		end
-		respond_and_render_json { paginated_surveys }
+		render_json_auto(paginated_surveys)
 	end
 
 	def list_answered_surveys
@@ -317,7 +317,7 @@ class SurveysController < ApplicationController
 		paginated_surveys = auto_paginate surveys_with_answer_status do |s|
 			s.slice((page - 1) * per_page, per_page)
 		end
-		respond_and_render_json { paginated_surveys }
+		render_json_auto(paginated_surveys)
 	end
 
 	def list_spreaded_surveys
@@ -325,7 +325,7 @@ class SurveysController < ApplicationController
 		paginated_surveys = auto_paginate surveys_with_spreaded_number do |s|
 			s.slice((page - 1) * per_page, per_page)
 		end
-		respond_and_render_json { paginated_surveys }
+		render_json_auto(paginated_surveys)
 	end
 
 	#*method*: put

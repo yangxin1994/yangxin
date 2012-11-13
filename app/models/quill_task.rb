@@ -1,57 +1,13 @@
 #encoding: utf-8
-require 'encryption'
 require 'error_enum'
-require 'tool'
 #Corresponding to the User collection in database. Record the user information and activities related to the usage of OopsData system.
-class User
+class QuillTask
 	include Mongoid::Document
 	include Mongoid::Timestamps
-  include Mongoid::ValidationsExt	
-	field :email, :type => String
-	field :username, :type => String
-	field :password, :type => String
-	field :true_name, :type => String
-# 0 unregistered
-# 1 registered but not activated
-# 2 registered, activated, but not signed in
-# 3, 4, ... 用户首次登录后，需要填写一些个人信息，状态可以记录用户填写个人信息到了哪一步，以便用户填写过程中关闭浏览器，再次打开后可以继续填写
-# -1 deleted
-	field :status, :type => Integer, default: 0
-# true: the user is locked and cannot login
-	field :lock, :type => Boolean, default: false
-	field :last_login_time, :type => Integer
-	field :last_login_ip, :type => String
-	field :last_login_client_type, :type => String
-	field :login_count, :type => Integer, default: 0
-	field :activate_time, :type => Integer
-	field :introducer_id, :type => String
-	field :introducer_to_pay, :type => Integer, default: 10
-	field :last_read_messeges_time, :type => Time, :default => Time.now
-# an integer in the range of [0, 63]. If converted into a binary, each digit from the most significant one indicates:
-# super admin
-# admin
-# survey auditor
-# answer auditor
-# interviewer
-# entry clerk
-	field :role, :type => Integer, default: 0
-# 0 normal users
-# 1 in the white list
-# 2 in the black list
-	field :color, :type => Integer, default: 0
-	field :auth_key, :type => String
-	field :auth_key_expire_time, :type => Integer
-	field :level, :type => Integer, default: 0
-	field :level_expire_time, :type => Integer, default: -1
-
-	field :birthday, :type => Integer, default: -1
-	field :gender, :type => Boolean
-	field :address, :type => String
-	field :postcode, :type => String
-	field :phone, :type => String
-	field :full_name, :type => String
-	field :identity_card, :type => String
-	field :company, :type => String
+	field :task_type, :type => Integer
+	field :priority, :type => Integer
+	field :executed_at, :type => Integer
+	field :period, :type => Integer
 
 	field :bankcard_number, :type => String
 	field :bank, :type => String

@@ -15,7 +15,7 @@ module Jobs
 			survey_id = options["survey_id"]
 
 			# get answers set by filter
-			answers = ResultJob.answers(survey_id, filter_index, include_screened_answer)
+			answers = get_answers(survey_id, filter_index, include_screened_answer)
 
 			# generate result key
 			result_key = sef.generate_result_key(answers)

@@ -37,10 +37,11 @@ class AnswerAuditor::AnswersControllerTest < ActionController::TestCase
 		auth_key = sign_in(answer_auditor.email, Encryption.decrypt_password(answer_auditor.password))
 		get :index, :format => :json, :auth_key => auth_key, :survey_id => survey_id
 		result = JSON.parse(@response.body)
-		answer_list = result["value"]
+		answer_list = result["value"]["data"]
 		assert_equal 2, answer_list.length
-		assert_equal answer_1._id.to_s, answer_list[0]["_id"]
-		assert_equal answer_2._id.to_s, answer_list[1]["_id"]
+		answer_id_list = answer_list.map { |e| e["_id"] }
+		assert answer_id_list.include?(answer_1._id.to_s)
+		assert answer_id_list.include?(answer_2._id.to_s)
 		sign_out(auth_key)
 	end
 
@@ -112,13 +113,6 @@ class AnswerAuditor::AnswersControllerTest < ActionController::TestCase
 		answer_2 = Answer.find_by_id(answer_2._id.to_s)
 		assert_equal 1, answer_2.finish_type
 		assert_equal answer_auditor._id.to_s, answer_2.auditor._id.to_s
-		sign_out(auth_key)
-
-		auth_key = sign_in(answer_auditor.email, Encryption.decrypt_password(answer_auditor.password))
-		post :review, :format => :json, :auth_key => auth_key, :id => answer_2._id.to_s, :review_result => 1
-		result = JSON.parse(@response.body)
-		assert !result["success"]
-		assert_equal ErrorEnum::ANSWER_REVIEWED, result["value"]["error_code"]
 		sign_out(auth_key)
 	end
 end

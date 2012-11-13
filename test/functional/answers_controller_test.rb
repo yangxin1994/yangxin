@@ -400,7 +400,9 @@ class AnswersControllerTest < ActionController::TestCase
 		a = Answer.first
 		a.random_quality_control_locations.each do |key, value|
 			assert question_ids.include?(key)
-			assert a.random_quality_control_answer_content.has_key?(value)
+			value.each do |qc_id|
+				assert a.random_quality_control_answer_content.has_key?(qc_id)
+			end
 		end
 	end
 
@@ -442,6 +444,7 @@ class AnswersControllerTest < ActionController::TestCase
 				:_remote_ip => "166.111.135.91"
 		result = JSON.parse(@response.body)
 		questions = result["value"][0]
+		answer = Answer.find_by_id(answer_id)
 		assert_equal pages[1].length, questions.length
 		assert_equal pages[1][0], questions[0]["_id"]
 		# answer the questions in the second page
@@ -786,9 +789,6 @@ class AnswersControllerTest < ActionController::TestCase
 		assert result["success"]
 		answer_id = result["value"]
 		answer = Answer.find_by_id(answer_id)
-		puts "aaaa"
-		puts answer.inspect
-		puts "aaaa"
 		sign_out(auth_key)
 	end
 

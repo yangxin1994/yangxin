@@ -10,6 +10,12 @@ class UsersController < ApplicationController
 		end
 	end
 
+	def get_basic_info
+		user = User.find_by_id(params[:id]) if params[:id]
+		user = @current_user if user.nil?
+		render_json_auto(user) and return
+	end
+
 	def get_invited_user_ids
 		invited_user_ids = @current_user.get_invited_user_ids
 		render_json_auto(invited_user_ids) and return
