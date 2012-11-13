@@ -12,7 +12,7 @@ class ResultsController < ApplicationController
 	end
 
 	def data_list
-		job_id = @survey.data_list(params[:id], params[:include_screened_answer])
+		job_id = @survey.data_list(params[:filter_index].to_i, params[:include_screened_answer])
 		respond_to do |format|
 			format.json	{ render_json_auto(job_id) and return }
 		end
@@ -41,14 +41,14 @@ class ResultsController < ApplicationController
 	end
 
 	def analysis
-		job_id = @survey.analysis(params[:id], params[:include_screened_answer])
+		job_id = @survey.analysis(params[:filter_index].to_i, params[:include_screened_answer])
 		respond_to do |format|
 			format.json	{ render_json_auto(job_id) and return }
 		end
 	end
 
 	def report
-		job_id = @survey.report(params[:id], params[:include_screened_answer], params[:report_mockup_id], params[:report_style], params[:report_type])
+		job_id = @survey.report(params[:filter_index].to_i, params[:include_screened_answer], params[:report_mockup_id], params[:report_style], params[:report_type])
 		respond_to do |format|
 			format.json	{ render_json_auto(job_id) and return }
 		end
