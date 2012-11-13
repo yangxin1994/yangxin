@@ -29,7 +29,7 @@ module Jobs
 										report_style)
 
 			# get answers set by filter
-			answers = ResultJob.answers(survey_id, filter_index, include_screened_answer)
+			answers = get_answers(survey_id, filter_index, include_screened_answer)
 
 			# get the survey
 			survey = Survey.find_by_id(survey_id)
