@@ -165,6 +165,11 @@ class Answer
 		quality_control_questions_ids = []
 		self.random_quality_control_answer_content = {}
 		self.random_quality_control_locations = {}
+		if self.answer_content.blank?
+			# when there are no normal questions, it is not needed to generate random quality control questions
+			self.save
+			return self
+		end
 		if self.survey.is_random_quality_control_questions
 			# need to select random questions
 			# 1. determine the number of random quality control questions
@@ -508,7 +513,7 @@ class Answer
 		# survey has a new question, but the answer content does not has the question id as a key
 		# thus when updating the answer content, the key should not be checked
 		updated_answer_content.each do |k, v|
-			self.answer_content[k] = v
+			self.answer_content[k] = v if self.answer_content.has_key?(k)
 			self.random_quality_control_answer_content[k] = v if self.random_quality_control_answer_content.has_key?(k)
 		end
 		self.save
@@ -712,8 +717,6 @@ class Answer
 	#* ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP
 	#* ErrorEnum::ANSWER_NOT_COMPLETE
 	def finish(auto = false)
-		# surveys that allow page up cannot be finished automatically
-		return false if self.survey.is_pageup_allowed && auto
 		# synchronize the questions in the survey and the qeustions in the answer content
 		survey_question_ids = self.survey.all_questions_id
 		self.answer_content.delete_if { |q_id, a| !survey_question_ids.include?(q_id) }
@@ -721,6 +724,8 @@ class Answer
 			self.answer_content[q_id] ||= nil
 		end
 		self.save
+		# surveys that allow page up cannot be finished automatically
+		return false if self.survey.is_pageup_allowed && auto
 		# check whether can finish this answer
 		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_edit
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)
