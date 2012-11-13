@@ -13,7 +13,7 @@ module Jobs
 			survey_id = options["survey_id"]
 
 			# get answers set by filter
-			answers = ResultJob.answers(survey_id, filter_index, include_screened_answer)
+			answers = get_answers(survey_id, filter_index, include_screened_answer)
 
 			# generate result key
 			result_key = DataListJob.generate_result_key(answers)
@@ -29,7 +29,6 @@ module Jobs
 			else
 				data_list_result = DataListResult.create(:result_key => result_key, :job_id => status["uuid"])
 			end
-
 			# analy answers info
 			answer_info = self.analyze_answer_info(answers)
 

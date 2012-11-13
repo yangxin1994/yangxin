@@ -35,7 +35,8 @@ class Result
 		# based on the result type, return results
 		case result._type
 		when "DataListResult"
-			return result.answer_info
+			return {"answer_info" => result.answer_info,
+					"result_key" => result.result_key}
 		when "AnalysisResult"
 			return {"region_result" => result.region_result,
 					"time_result" => result.time_result,
