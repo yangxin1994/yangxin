@@ -16,7 +16,7 @@ module Jobs
 			answers = ResultJob.answers(survey_id, filter_index, include_screened_answer)
 
 			# generate result key
-			result_key = sef.generate_result_key(answers)
+			result_key = DataListJob.generate_result_key(answers)
 
 			# judge whether the result_key already exists
 			result = DataListResult.find_by_result_key(result_key)
@@ -39,7 +39,7 @@ module Jobs
 			data_list_result.save
 		end
 
-		def generate_result_key(answers)
+		def self.generate_result_key(answers)
 			answer_ids = answers.map { |e| e._id.to_s }
 			result_key = Digest::MD5.hexdigest("data_list-#{answer_ids.to_s}")
 			return result_key

@@ -27,7 +27,7 @@ class Result
 	end
 
 	def self.find_result_by_job_id(job_id)
-		result = Result.where(:jog_id => job_id)[0]
+		result = Result.where(:job_id => job_id)[0]
 		return ErrorEnum::RESULT_NOT_EXIST if result.nil?
 		result = result.ref_result_id.nil? ? result : Result.find_by_result_id(result.ref_result_id)
 		return ErrorEnum::RESULT_NOT_EXIST if result.nil?

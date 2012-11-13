@@ -313,11 +313,11 @@ OopsData::Application.routes.draw do
 			collection do
 				get :check_progress
 				get :job_progress
-        get :data_list
-        get :analysis
-        get :to_spss
-        get :to_excel
-        put :finish
+				get :data_list
+				get :analysis
+				get :to_spss
+				get :to_excel
+				put :finish
 			end
 		end
 
