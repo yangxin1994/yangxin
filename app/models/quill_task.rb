@@ -1,9 +1,7 @@
 #encoding: utf-8
-require 'encryption'
 require 'error_enum'
-require 'tool'
 #Corresponding to the User collection in database. Record the user information and activities related to the usage of OopsData system.
-class OopsTask
+class QuillTask
 	include Mongoid::Document
 	include Mongoid::Timestamps
 	field :task_type, :type => Integer

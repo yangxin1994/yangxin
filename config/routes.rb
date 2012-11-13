@@ -317,6 +317,7 @@ OopsData::Application.routes.draw do
 				get :analysis
 				get :to_spss
 				get :to_excel
+				get :report
 				put :finish
 			end
 		end
