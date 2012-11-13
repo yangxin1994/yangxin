@@ -59,6 +59,12 @@ class ResultsController < ApplicationController
 		if progress == 1
 			result = Result.find_result_by_job_id(params[:job_id])
 			respond_to do |format|
+				# make pagination for data list
+				if !result["answer_info"].blank?
+					result["answer_info"] = auto_paginate result["answer_info"] do |a|
+						a.slice((page - 1) * per_page, per_page)
+					end
+				end
 				format.json	{ render_json_auto({ "progress" => 1, "result" => result}) and return }
 			end
 		else
