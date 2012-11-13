@@ -59,11 +59,11 @@ class ResultsController < ApplicationController
 		if progress == 1
 			result = Result.find_result_by_job_id(params[:job_id])
 			respond_to do |format|
-				format.json	{ render_json_auto(result) and return }
+				format.json	{ render_json_auto({ "progress" => 1, "result" => result}) and return }
 			end
 		else
 			respond_to do |format|
-				format.json	{ render_json_s(progress) and return }
+				format.json	{ render_json_s({ "progress" => progress }) and return }
 			end
 		end
 	end
