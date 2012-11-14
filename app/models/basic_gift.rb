@@ -35,7 +35,7 @@ class BasicGift
 
 	private 
 	def set_surplus
-		surplus = quantity
+		self.quantity = self.surplus
 	end
 
 end
