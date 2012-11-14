@@ -7,9 +7,10 @@ module Jobs
 		include ConnectDotNet
 		@queue = :result_job
 
-		def self.answers(survey_id, filter_index, include_screened_answer)
+		def get_answers(survey_id, filter_index, include_screened_answer)
 			survey = Survey.find_by_id(survey_id)
-			answers = include_screened_answer ? survey.answers.not_preview.finished_and_screened : survey.answers.not_preview.finished
+			# answers = include_screened_answer ? survey.answers.not_preview.finished_and_screened : survey.answers.not_preview.finished
+			answers = include_screened_answer ? survey.answers.finished_and_screened : survey.answers.finished
 			if filter_index == -1
 				set_status({"find_answers_progress" => 1})
 				return answers

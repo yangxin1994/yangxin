@@ -143,7 +143,7 @@ FactoryGirl.define do
            {name: "别挣扎了...我是第二页",
             questions: @questions2 }
     ]
-    quota_template_question_page @quota_questions
+    #quota_template_question_page @quota_questions
     status 8
   end
   factory :answer_with_issue, class: Answer do

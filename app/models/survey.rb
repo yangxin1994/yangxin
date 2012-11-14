@@ -43,7 +43,6 @@ class Survey
 	field :quota_stats, :type => Hash, default: {"quota_satisfied" => false, "answer_number" => [0]}
 	field :filters, :type => Array, default: []
 	field :filters_stats, :type => Array, default: []
-	field :quota_template_question_page, :type => Array, default: []
 	field :logic_control, :type => Array, default: []
 	field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
 		"has_progress_bar" => true,
@@ -461,7 +460,6 @@ class Survey
 		new_instance.status = 0
 		new_instance.publish_status = 1
 		new_instance.user_attr_survey = false
-		new_instance.quota_stats = {}
 
 		# the mapping of question ids
 		question_id_mapping = {}
@@ -485,6 +483,17 @@ class Survey
 				end
 			end
 		end
+		new_instance.refresh_quota_stats
+
+		# clone quota rules
+		new_instance.filters.each do |filter|
+			filter["conditions"].each do |condition|
+				if condition["condition_type"] == 1
+					condition["name"] = question_id_mapping[condition["name"]]
+				end
+			end
+		end
+		new_instance.refresh_filters_stats
 
 		# clone logic control rules
 		new_instance.logic_control.each do |logic_control_rule|
@@ -1192,26 +1201,6 @@ class Survey
 		return progress
 	end
 
-	def add_quota_template_question(template_question_id)
-		template_question = TemplateQuestion.find_by_id(template_question_id)
-		return ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST if template_question.nil?
-		return true if self.quota_template_question_page.include?(question._id.to_s)
-		question = Question.create_template_question(template_question)
-		self.quota_template_question_page << question._id.to_s
-		return self.save
-	end
-=begin
-	def remove_quota_template_question(template_question_id)
-		self.quota_template_question_page.each do |q_id|
-			question = Question.find_by_id(q_id)
-			if question.reference_id == template_question_id
-				self.quota_template_question_page.delete(q_id)
-				return self.save
-			end
-		end
-	end
-=end
-
 	def show_quota
 		return Marshal.load(Marshal.dump(self.quota))
 	end
@@ -1479,10 +1468,6 @@ class Survey
 			@rules << rule
 			survey.quota = self.serialize
 			survey.save
-			# add the template questions corresponding to the new rule
-			survey.quota["rules"][-1]["conditions"].each do |condition|
-				self.add_quota_template_question(condition["name"]) if condition["condition_type"] == 0
-			end
 			return survey.quota
 		end
 
@@ -1516,10 +1501,6 @@ class Survey
 			@rules[rule_index] = rule
 			survey.quota = self.serialize
 			survey.save
-			# add the template questions corresponding to the new quota rule
-			survey.quota["rules"][rule_index]["conditions"].each do |condition|
-				self.add_quota_template_question(condition["name"]) if condition["condition_type"].to_i == 0
-			end
 			return survey.quota
 		end
 
@@ -1777,6 +1758,7 @@ class Survey
 		answers = user.answers
 		surveys_with_answer_status = []
 		answers.each do |a|
+			next if a.survey.nil?
 			surveys_with_answer_status << {"survey" => a.survey.serialize_in_short, "answer_status" => a.status}
 		end
 		return surveys_with_answer_status

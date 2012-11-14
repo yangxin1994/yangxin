@@ -13,6 +13,7 @@ require 'quality_control_type_enum'
 class QualityControlQuestion < BasicQuestion
 	include Mongoid::Document
 	field :quality_control_type, :type => Integer
+	field :is_required, :type => Boolean, default: true
 
 	#set matching_quality_control_question which is in list page
 	field :is_first, :type => Boolean, :default => false
@@ -20,7 +21,8 @@ class QualityControlQuestion < BasicQuestion
 	scope :objective_questions, lambda { where(:quality_control_type => 1) }
 	scope :matching_questions, lambda { where(:quality_control_type => 2, :is_first=> true) }
 
-	def self.create_quality_control_question(quality_control_type, question_type, question_number)
+	def self.create_quality_control_question(quality_control_type, question_type, question_number, operator)
+		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_super_admin
 		return ErrorEnum::WRONG_QUESTION_TYPE if !self.has_question_type(question_type)
 		if quality_control_type == QualityControlTypeEnum::OBJECTIVE
 			# create a objective quality control question
@@ -50,7 +52,7 @@ class QualityControlQuestion < BasicQuestion
 	end
 
 	def update_question(question_obj, operator)
-		return ErrorEnum::UNAUTHORIZED if !operator.is_admin
+		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_super_admin
 		self.content = question_obj["content"]
 		self.note = question_obj["note"]
 		issue = Issue.create_issue(self.question_type, question_obj["issue"])
@@ -97,7 +99,7 @@ class QualityControlQuestion < BasicQuestion
 	end
 
 	def delete_quality_control_question(operator)
-		return ErrorEnum::UNAUTHORIZED if !operator.is_admin
+		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_super_admin
 		if self.quality_control_type == QualityControlTypeEnum::OBJECTIVE
 			QualityControlQuestionAnswer.destroy_by_question_id([self._id])
 			return self.destroy
@@ -118,7 +120,7 @@ class QualityControlQuestion < BasicQuestion
 		standard_answer = QualityControlQuestionAnswer.find_by_question_id(quality_control_question_id)
 		if standard_answer.quality_control_type == 1
 			# this is objective quality control question
-			question_answer = answer.answer_content[quality_control_question_id]
+			question_answer = answer.random_quality_control_answer_content[quality_control_question_id]
 			return false if question_answer.nil?
 			volunteer_answer = question_answer["selection"]
 			case standard_answer.question_type
@@ -145,9 +147,6 @@ class QualityControlQuestion < BasicQuestion
 
 
 			standard_matching_items = standard_answer.answer_content["matching_items"]
-			logger.info "BBBBBBBBBBBBBBBBBBBBB"
-			logger.info standard_matching_items.inspect
-			logger.info "BBBBBBBBBBBBBBBBBBBBB"
 			standard_matching_items.each do |standard_matching_item|
 				return true if (volunteer_answer - standard_matching_item).empty?
 			end

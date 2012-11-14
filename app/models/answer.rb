@@ -165,6 +165,11 @@ class Answer
 		quality_control_questions_ids = []
 		self.random_quality_control_answer_content = {}
 		self.random_quality_control_locations = {}
+		if self.answer_content.blank?
+			# when there are no normal questions, it is not needed to generate random quality control questions
+			self.save
+			return self
+		end
 		if self.survey.is_random_quality_control_questions
 			# need to select random questions
 			# 1. determine the number of random quality control questions
@@ -217,59 +222,81 @@ class Answer
 	#*retval*:
 	#* array of questions objects
 	def load_question(question_id, next_page)
-		loaded_question_ids = []
+		pages = self.survey.pages.map { |p| p["questions"] }
+		pages_with_qc_questions = []
+		pages.each do |page_question_ids|
+			cur_page_questions = []
+			page_question_ids.each do |q_id|
+				cur_page_questions << q_id
+				qc_ids = self.random_quality_control_locations[q_id] || []
+				cur_page_questions += qc_ids
+			end
+			pages_with_qc_questions << cur_page_questions
+		end
+		# consider the following scenario:
+		# a normal question is removed, there are quality control questions after this normal question
+		# such quality control questions are added to the last page
+		current_all_questions = pages_with_qc_questions.flatten
+		remain_qc_ids = []
+		self.random_quality_control_answer_content.each do |k, v|
+			remain_qc_ids << k if !current_all_questions.include?(k)
+		end
+		pages_with_qc_questions << remain_qc_ids if !remain_qc_ids.blank?
+
 		if self.survey.is_pageup_allowed
-			self.survey.pages.each_with_index do |page, page_index|
-				next if question_id.to_s != "-1" && !page["questions"].include?(question_id)
-				question_index = question_id.to_s == "-1" ? -1 : page["questions"].index(question_id)
+			# begin to find the question given
+			pages_with_qc_questions.each_with_index do |page_questions, page_index|
+				next if question_id.to_s != "-1" && !page_questions.include?(question_id)
+				question_index = question_id.to_s == "-1" ? -1 : page_questions.index(question_id)
 				if next_page
-					# require next page of questions
-					if question_index + 1 == page["questions"].length
-						return [] if page_index + 1 == self.survey.pages.length
-						questions = load_question_by_ids(self.survey.pages[page_index + 1]["questions"])
-						while questions.blank?
+					if question_index + 1 == page_questions.length
+						# should load next page questions
+						return load_question_by_ids([]) if page_index + 1 == pages_with_qc_questions.length
+						questions_ids = pages_with_qc_questions[page_index + 1]
+						while questions_ids.blank?
 							# if the next page has no questions, try to load questions in the page after the next
 							page_index = page_index + 1
-							return [] if page_index + 1 == self.survey.pages.length
-							questions = load_question_by_ids(self.survey.pages[page_index + 1]["questions"])
+							return load_question_by_ids([]) if page_index + 1 == pages_with_qc_questions.length
+							questions_ids = pages_with_qc_questions[page_index + 1]
 						end
-						return questions
+						return load_question_by_ids(questions_ids, next_page)
 					else
-						return load_question_by_ids(page["questions"][question_index + 1..-1])
+						# should load remaining questions in the current page
+						return load_question_by_ids(page_questions[question_index + 1..-1], next_page)
 					end
 				else
-					# require previous page of questions
 					if question_index <= 0
-						return [] if page_index == 0
-						questions = load_question_by_ids(self.survey.pages[page_index - 1]["questions"])
-						while questions.blank?
+						# should load previous page questions
+						return load_question_by_ids([]) if page_index == 0
+						questions_ids = pages_with_qc_questions[page_index - 1]
+						while questions_ids.blank?
 							# if the previous page has no questions, try to laod questions in the page before the previous
 							page_index = page_index - 1
-							return [] if page_index == 0
-							questions = load_question_by_ids(self.survey.pages[page_index - 1]["questions"])
+							return load_question_by_ids([]) if page_index == 0
+							questions_ids = pages_with_qc_questions[page_index - 1]
 						end
-						return questions
+						return load_question_by_ids(questions_ids, next_page)
 					else
-						return load_question_by_ids(page["questions"][0..question_index - 1])
+						# should load remaining questions in the current page
+						return load_question_by_ids(page_questions[0..question_index - 1], next_page)
 					end
 				end
 			end
 			# the question cannot be found, load questions from the one with nil answer
+			loaded_question_ids = []
 			cur_page = false
-			self.survey.pages.each do |page|
-				page["questions"].each do |q_id|
-					next if !self.answer_content[q_id].nil? && !cur_page
+			pages_with_qc_questions.each_with_index do |page_questions, page_index|
+				page_questions.each do |q_id|
+					# go to the next one if this questions has been answered
+					next if ( !self.answer_content[q_id].nil? || !self.random_quality_control_answer_content[q_id].nil? ) && !cur_page
 					cur_page = true
 					loaded_question_ids << q_id
-					qc_ids = self.random_quality_control_locations[q_id] || []
-					qc_ids.each do |qc_id|
-						loaded_question_ids << qc_id if self.random_quality_control_answer_content[qc_id].nil?
-					end
 				end
-				return load_question_by_ids(loaded_question_ids) if cur_page
+				return load_question_by_ids(loaded_question_ids, next_page) if cur_page
 			end
-			return []
+			return load_question_by_ids([])
 		else
+			loaded_question_ids = []
 			# try to load normal questions
 			# summarize the questions that are results of logic control rules
 			logic_control_question_id = []
@@ -281,17 +308,9 @@ class Answer
 				logic_control_question_id << { "condition" => condition_question_id_ary, "result" => result_q_ids }
 			end
 			cur_page = false
-			self.survey.pages.each do |page|
-				page["questions"].each do |q_id|
-					qc_ids = self.random_quality_control_locations[q_id] || []
-					if !self.answer_content[q_id].nil? && !cur_page
-						# the question q_id might be removed by logic control rules, and the random quality control question after it is not answered
-						qc_ids.each do |qc_id|
-							loaded_question_ids << qc_id if self.random_quality_control_answer_content[qc_id].nil?
-						end
-						next
-					end
-					# find out the first question whose answer is nil
+			pages_with_qc_questions.each do |page_questions|
+				page_questions.each do |q_id|
+					next if ( !self.answer_content[q_id].nil? || !self.random_quality_control_answer_content[q_id].nil? ) && !cur_page
 					cur_page = true
 					# check if this question is the result of some logic control rule
 					logic_control_question_id.each do |ele|
@@ -300,41 +319,36 @@ class Answer
 						end
 					end
 					loaded_question_ids << q_id
-					qc_ids.each do |qc_id|
-						loaded_question_ids << qc_id if self.random_quality_control_answer_content[qc_id].nil?
-					end
 				end
 				return load_question_by_ids(loaded_question_ids) if cur_page
 			end
-			# it is possible that only several random quality control questions are loaded
-			return load_question_by_ids(loaded_question_ids) if loaded_question_ids.length > 0
-			# synchronize the questions in the survey and the qeustions in the answer content
-			survey_question_ids = self.survey.pages.map { |page| page["questions"] }
-			survey_question_ids = survey_question_ids.flatten
-			self.answer_content.delete_if { |q_id, a| !survey_question_ids.include?(q_id) }
-			survey_question_ids.each do |q_id|
-				self.answer_content[q_id] ||= nil
-			end
-			self.save
-			self.finish(true)
-			return true
+			return load_question_by_ids([])
 		end
 	end
 
-	def load_question_by_ids(question_ids)
+	def load_question_by_ids(question_ids, next_page = true)
+		if question_ids.blank? && !self.survey.is_pageup_allowed
+			# try to automatically finish the survey if:
+			# 1. no questions to load
+			# 2. page up is now allowed
+			finish(true)
+		end
 		questions = []
 		question_ids.each do |q_id|
 			question = BasicQuestion.find_by_id(q_id)
-			questions << question.remove_hidden_items(logic_control_result[q_id])
-			# load quality control questions
-			random_qc_ids = self.random_quality_control_locations[q_id] || []
-			random_qc_ids.each do |random_qc_id|
-				questions << BasicQuestion.find_by_id(random_qc_id) if !question_ids.include?(random_qc_id)
-			end
+			questions << question if !question.nil?
 		end
 		# consider the scenario that "one question per page"
 		if self.survey.style_setting["is_one_question_per_page"]
-			return [questions[0]]
+			if questions.blank?
+				return []
+			elsif next_page
+				# should return the first question
+				return [questions[0]]
+			else
+				# should return the last question
+				return [questions[-1]]
+			end
 		else
 			return questions
 		end
@@ -499,7 +513,7 @@ class Answer
 		# survey has a new question, but the answer content does not has the question id as a key
 		# thus when updating the answer content, the key should not be checked
 		updated_answer_content.each do |k, v|
-			self.answer_content[k] = v
+			self.answer_content[k] = v if self.answer_content.has_key?(k)
 			self.random_quality_control_answer_content[k] = v if self.random_quality_control_answer_content.has_key?(k)
 		end
 		self.save
@@ -703,8 +717,6 @@ class Answer
 	#* ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP
 	#* ErrorEnum::ANSWER_NOT_COMPLETE
 	def finish(auto = false)
-		# surveys that allow page up cannot be finished automatically
-		return false if self.survey.is_pageup_allowed && auto
 		# synchronize the questions in the survey and the qeustions in the answer content
 		survey_question_ids = self.survey.all_questions_id
 		self.answer_content.delete_if { |q_id, a| !survey_question_ids.include?(q_id) }
@@ -712,6 +724,8 @@ class Answer
 			self.answer_content[q_id] ||= nil
 		end
 		self.save
+		# surveys that allow page up cannot be finished automatically
+		return false if self.survey.is_pageup_allowed && auto
 		# check whether can finish this answer
 		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_edit
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)

@@ -111,7 +111,7 @@ class AnswersController < ApplicationController
 				render_json_auto([@answer.status, @answer.reject_type, @answer.finish_type]) and return
 			else
 				render_json_auto([questions,
-								@answer.answer_content,
+								@answer.answer_content.merge(@answer.random_quality_control_answer_content),
 								@answer.survey.all_questions_id.length,
 								@answer.index_of(questions),
 								questions.estimate_answer_time,

@@ -28,7 +28,7 @@ class Admin::QualityControlQuestionsController < Admin::ApplicationController
 	#* ErrorEnum::WRONG_QUALITY_CONTROL_TYPE
 	#* ErrorEnum::WRONG_QUESTION_TYPE
 	def create
-		quality_control_question = QualityControlQuestion.create_quality_control_question(params[:quality_control_type].to_i, params[:question_type].to_i, params[:question_number].to_i)
+		quality_control_question = QualityControlQuestion.create_quality_control_question(params[:quality_control_type].to_i, params[:question_type].to_i, params[:question_number].to_i, @current_user)
 		respond_to do |format|
 			format.json	{ render_json_auto(quality_control_question) and return }
 		end
