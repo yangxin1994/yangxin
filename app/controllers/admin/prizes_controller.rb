@@ -11,12 +11,16 @@ class Admin::PrizesController < Admin::ApplicationController
     render_json { @prizes }
   end
 
+  def for_lottery
+    render_json { Prize.for_lottery }
+  end
+
   def create
-    material = Material.create(:material_type => 1, 
-                               :title => params[:prize][:name],
-                               :value => params[:prize][:photo],
-                               :picture_url => params[:prize][:photo])
-    params[:prize][:photo] = material
+    # material = Material.create(:material_type => 1, 
+    #                            :title => params[:prize][:name],
+    #                            :value => params[:prize][:photo],
+    #                            :picture_url => params[:prize][:photo])
+    # params[:prize][:photo] = material
     @prize = Prize.create(params[:prize])
     # TODO add admin_id
     render_json @prize.save do

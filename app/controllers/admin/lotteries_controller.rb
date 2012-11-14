@@ -1,16 +1,22 @@
 class Admin::LotteriesController < Admin::ApplicationController
 	
 	def index
-		render_json auto_paginate(Lottery.all)
+		render_json { auto_paginate(Lottery.all)}
 	end
 
 	def create
-			@lottery = Lottery.create(params[:lottery])
-      
-			render_json @lottery.save do
+    lp_ids = params[:lottery][:prize_ids]
+    params[:lottery][:prize_ids] = nil
+		@lottery = Lottery.new(params[:lottery])
+    lp_ids.each do |i|
+      lp = Prize.where("_id"=> i).first
+      @lottery.prizes << lp #unless lp.nil?
+      lp.save
+    end #unless lp_ids.nil?
+    render_json @lottery.save do
 				#Material.create(:material => params[:material], :materials => @lottery)
-				@lottery.as_retval
-			end
+	    @lottery.as_retval
+		end
 			# TODO add admin_id
 	end
 

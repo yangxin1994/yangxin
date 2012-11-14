@@ -4,7 +4,7 @@ class Admin::OrdersController < Admin::ApplicationController
     render_json true do
       auto_paginate(Order.all) do |orders|
         orders.page(page).per(per_page).map do |o|
-          o["gift_name"] = o.gift.name
+          o["gift_name"] = o.gift.name unless o.gift.nil?
           o
         end
       end
