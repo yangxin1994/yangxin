@@ -4,17 +4,23 @@ class GiftsController < ApplicationController
   # gifts.json?page=1
 
   def index
-    render_json { auto_paginate(Gift) }
+    render_json do 
+      auto_paginate(Gift.can_be_rewarded) do |g|
+        g.page(page).per(per_page).map { |e| logger.info "=====  =====";e[:photo_src] = e.photo.nil? ? nil : e.photo.picture_url; e  }
+      end
+    end
   end
 
   def_each :virtual, :cash, :entity, :lottery do |method_name|
-    @gifts = auto_paginate(Gift.send(method_name))
+    @gifts = auto_paginate(Gift.can_be_rewarded.send(method_name)) do |g|
+      g.page(page).per(per_page).map { |e| logger.info "=====  =====";e[:photo_src] = e.photo.nil? ? nil : e.photo.picture_url; e  }
+    end
     render_json { @gifts }
   end
 
   def show
     @gift = Gift.find_by_id(params[:id])
-    @gift[:photo_src] = @gift.photo.picture_url
+    @gift[:photo_src] = @gift.photo.nil? ? nil : @gift.photo.picture_url 
     render_json { @gift }
   end
   
