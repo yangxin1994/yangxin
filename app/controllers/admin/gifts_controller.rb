@@ -18,6 +18,19 @@ class Admin::GiftsController < Admin::ApplicationController
                                :picture_url => params[:gift][:photo])
     params[:gift][:photo] = material
     @gift = Gift.create(params[:gift])
+    if params[:gift][:type] == 3
+      l = Lottery.where(:_id => params[:gift][:lottery]).first
+      if !l.nil?
+        params[:gift][:lottery] = l
+        @gift.lottery = l
+        @gift.lottery.save
+      else
+        render_json(false){ErrorEnum::LOTTERY_NOT_FOUND}
+      end
+    end
+    
+    @gift.photo = material
+    material.save
     # TODO add admin_id
     render_json @gift.save do
       #Material.create(:material => params[:material], :materials => @gift)
@@ -28,9 +41,27 @@ class Admin::GiftsController < Admin::ApplicationController
   def update
     @gift = Gift.find_by_id params[:id]
     unless params[:gift][:photo].nil?
+      if @gift.photo.nil?
+        material = Material.create(:material_type => 1, 
+                                   :title => params[:gift][:name],
+                                   :value => params[:gift][:photo],
+                                   :picture_url => params[:gift][:photo])
+        params[:gift][:photo] = material
+        @gift.photo = material
+      end
       @gift.photo.value = params[:gift][:photo]
       @gift.photo.picture_url = params[:gift][:photo]
       @gift.photo.save
+    end
+    if params[:gift][:type] == 3
+      l = Lottery.where(:_id => params[:gift][:lottery]).first
+      if !l.nil?
+        params[:gift][:lottery] = l
+        @gift.lottery = l
+        @gift.lottery.save
+      else
+        render_json(false){ErrorEnum::LOTTERY_NOT_FOUND}
+      end
     end
     render_json @gift.update_attributes(params[:gift]) do
       @gift.as_retval
@@ -39,7 +70,8 @@ class Admin::GiftsController < Admin::ApplicationController
   
   def show
     @gift = Gift.find_by_id(params[:id])
-    @gift[:photo_src] = @gift.photo.picture_url
+    @gift[:photo_src] = @gift.photo.picture_url unless @gift.photo.nil?
+    @gift[:lottery_id] = @gift.lottery._id unless @gift.lottery.nil?
     render_json { @gift }
   end
 

@@ -108,7 +108,7 @@ OopsData::Application.routes.draw do
 		end
 		resources :prizes do
 			collection do
-				get :virtual, :cash, :entity, :lottery
+				get :virtual, :cash, :entity, :lottery, :for_lottery
 				get :expired, :index, :virtual, :cash, :entity, :stockout
 			end
 		end

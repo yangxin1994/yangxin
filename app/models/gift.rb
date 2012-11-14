@@ -15,12 +15,16 @@ class Gift < BasicGift
 	validates :name, :presence => true,
 						:length => { :maximum => 140 }
 	validates :type, :presence => true
-	validates :quantity, :presence => true,
+	validates :surplus, :presence => true,
 											 :numericality => { :greater_than_or_equal_to => 0 }
 	before_save :make_status
 
   def make_status
-    status = -1 if surplus <= 0
+    self.status = -1 if self.surplus <= 0
   end
-  
+  def to_builder
+    person = Jbuilder.new
+    person.(self, :name, :point)
+    person
+  end 
 end

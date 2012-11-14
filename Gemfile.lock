@@ -45,6 +45,7 @@ GEM
     ansi (1.4.3)
     arel (2.2.3)
     bcrypt-ruby (3.0.1)
+    blankslate (2.1.2.4)
     bson (1.7.0)
     bson_ext (1.7.0)
       bson (~> 1.7.0)
@@ -82,6 +83,9 @@ GEM
       railties (~> 3.0)
     hike (1.2.1)
     i18n (0.6.0)
+    jbuilder (0.4.0)
+      activesupport (>= 3.0.0)
+      blankslate (>= 2.1.2.4)
     jquery-rails (1.0.19)
       railties (~> 3.0)
     json (1.7.5)
@@ -209,6 +213,7 @@ DEPENDENCIES
   faker
   haml
   haml-rails
+  jbuilder
   jquery-rails
   kaminari
   log4r
