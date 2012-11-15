@@ -1755,7 +1755,7 @@ class Survey
 	end
 
 	def self.list_answered_surveys(user)
-		answers = user.answers
+		answers = user.answers.not_preview
 		surveys_with_answer_status = []
 		answers.each do |a|
 			next if a.survey.nil?
@@ -1765,7 +1765,7 @@ class Survey
 	end
 
 	def self.list_spreaded_surveys(user)
-		answers = Answer.where(:introducer_id => user._id, :status => 2, :finish_type => 1)
+		answers = Answer.where(:is_preview => false, :introducer_id => user._id, :status => 2, :finish_type => 1)
 		surveys_with_spread_number_hash = {}
 		surveys_with_spread_number = []
 		answers.each do |a|
@@ -1787,7 +1787,7 @@ class Survey
 		survey_obj["subtitle"] = self.subtitle.to_s
 		survey_obj["created_at"] = self.created_at.to_i
 		survey_obj["reward"] = self.reward
-		survey_obj["status"] = self.status
+		survey_obj["publish_status"] = self.publish_status
 		return survey_obj
 	end
 

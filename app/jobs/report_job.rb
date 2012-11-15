@@ -71,54 +71,119 @@ module Jobs
 						# judge whether this is a single choice or multiple choice
 						if question.issue["max_choice"] == 1
 							text = single_choice_description(analysis_result, question.issue)
-							analysis_results << {"question_type" => "single_choice",
-												"result" => analysis_result,
-												"text" => text}
+							report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
+							chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+																				analysis_result,
+																				question.issue,
+																				component["chart_style"])
+							report_data.push_chart_compoents(chart_components)
 						else
 							pie_text = multiple_choice_description(analysis_result, question.issue, answers.length, 'pie')
 							bar_text = multiple_choice_description(analysis_result, question.issue, answers.length, 'bar')
-							analysis_results << {"question_type" => "single_choice",
-												"result" => analysis_result,
-												"pie_text" => pie_text,
-												"bar_text" => bar_text}
+							chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+																				analysis_result,
+																				question.issue,
+																				component["chart_style"])
+							if [ChartStyleEnum::ALL, ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::STACK].include?(component["chart_style"])
+								report_data.push_compoent(ReportData::DESCRIPTION, "text" => pie_text)
+							end
+							if [ChartStyleEnum::ALL, ChartStyleEnum::LINE, ChartStyleEnum::BAR].include?(component["chart_style"])
+								report_data.push_compoent(ReportData::DESCRIPTION, "text" => bar_text)
+							end
+							report_data.push_chart_compoents(chart_components)
 						end
 					when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
 						analysis_result = analyze_matrix_choice(question.issue, answers_transform[question_id])
 						text = matrix_choice_description(analysis_result, question.issue)
-						report_components << {"component_type" => 2, }
+						report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+																			analysis_result,
+																			question.issue,
+																			component["chart_style"])
+						report_data.push_chart_compoents(chart_components)
 					when QuestionTypeEnum::NUMBER_BLANK_QUESTION
 						analysis_result = analyze_number_blank(question.issue, answers_transform[question_id], component["value"]["format"] || [])
 						text = number_blank_description(analysis_result, question.issue, component["value"]["format"] || [])
+						report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+																			analysis_result,
+																			question.issue,
+																			component["chart_style"],
+																			"format" => component["value"]["format"] || [])
+						report_data.push_chart_compoents(chart_components)
 					when QuestionTypeEnum::TIME_BLANK_QUESTION
 						analysis_result = analyze_time_blank(question.issue, answers_transform[question_id])
 						text = time_blank_description(analysis_result, question.issue, component["value"]["format"] || [])
-					when QuestionTypeEnum::EMAIL_BLANK_QUESTION
-						analysis_result = analyze_email_blank(question.issue, answers_transform[question_id])
+						report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+																			analysis_result,
+																			question.issue,
+																			component["chart_style"],
+																			"format" => component["value"]["format"] || [])
+						report_data.push_chart_compoents(chart_components)
 					when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 						analysis_result = analyze_address_blank(question.issue, answers_transform[question_id])
 						text = address_blank_description(analysis_result, question.issue)
+						report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+																			analysis_result,
+																			question.issue,
+																			component["chart_style"])
+						report_data.push_chart_compoents(chart_components)
 					when QuestionTypeEnum::BLANK_QUESTION
 						analysis_result = analyze_blank(question.issue, answers_transform[question_id])
+						analysis_result.each do |id, sub_analysis_result|
+							sub_question_item = (question.issue["items"].select { |e| e["id"] == id })[0]
+							next if sub_question_issue.nil?
+							sub_question_type = sub_question_item["data_type"]
+							sub_question_issue = sub_question_item["properties"]
+							case sub_question_type
+							when "Number"
+								text = address_number_blank_description(sub_analysis_result, sub_question_issue)
+								sub_question_type = QuestionTypeEnum::NUMBER_BLANK_QUESTION
+							when "Address"
+								text = address_address_blank_description(sub_analysis_result, sub_question_issue)
+								sub_question_type = QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+							when "Time"
+								text = address_time_blank_description(sub_analysis_result, sub_question_issue)
+								sub_question_type = QuestionTypeEnum::TIME_BLANK_QUESTION
+							end
+							report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
+							chart_components = ReportDataAdaptor.convert_single_data(sub_question_type,
+																				sub_analysis_result,
+																				sub_question_issue,
+																				component["chart_style"])
+							report_data.push_chart_compoents(chart_components)
+						end
 					when QuestionTypeEnum::CONST_SUM_QUESTION
 						analysis_result = analyze_const_sum(question.issue, answers_transform[question_id])
 						text = const_sum_description(analysis_result, question.issue)
+						report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+																			analysis_result,
+																			question.issue,
+																			component["chart_style"])
+						report_data.push_chart_compoents(chart_components)
 					when QuestionTypeEnum::SORT_QUESTION
 						analysis_result = analyze_sort(question.issue, answers_transform[question_id])
 						text = sort_description(analysis_result, question.issue, answers.length)
+						report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+																			analysis_result,
+																			question.issue,
+																			component["chart_style"])
+						report_data.push_chart_compoents(chart_components)
 					when QuestionTypeEnum::SCALE_QUESTION
 						analysis_result = analyze_scale(question.issue, answers_transform[question_id])
 						text = scale_description(analysis_result, question.issue, answers.length)
-						# push the text description component
-						report_data.push_compoent(2, "text" => text)
-						# possible charts for scale questions: pie, doughnut, line, bar1, bar2
-						case component["chart_style"]
-						when ChartStyleEnum::LINE
-						when ChartStyleEnum::BAR
-						when ChartStyleEnum::STACK
-						when ChartStyleEnum::ALL
-						end
+						report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+																			analysis_result,
+																			question.issue,
+																			component["chart_style"])
+						report_data.push_chart_compoents(chart_components)
 					else
-						# other types of questions are removed
+						# other types of questions are removed, the heading in the component should be removed
 						report_data.pop_component
 					end
 				else
@@ -127,11 +192,15 @@ module Jobs
 					question_index = survey.all_questions_id.index(qustion_id)
 					target_question_index = survey.all_questions_id.index(qustion_id)
 					next if question_index.nil? || target_question_index.nil?
-					report_data.push_compoent(1, "text" => "第#{question_index}题，第#{target_question_index}题交叉分析")
+					report_data.push_compoent(ReportData::HEADING_2, "text" => "第#{question_index}题，第#{target_question_index}题交叉分析")
 				end
 			end
 
 			# call the webservice to generate the report
+			send_data "" do
+				{'report_data' => {"report_data" => report_data,
+													"result_key" => result_key}.to_yaml}
+			end
 		end
 
 		def generate_result_key(answers, report_mockup, report_style, report_type)
@@ -248,7 +317,7 @@ module Jobs
 			return "" if analysis_result.blank?
 			analysis_result.each do |region_code, number|
 				address_text = Address.find_text_by_code(region_code)
-				next if address_text.nil?
+				next if address_text.blank?
 				total_number = total_number + number
 				results << { "text" => address_text, "number" => number.to_f }
 			end
@@ -276,7 +345,7 @@ module Jobs
 			return text + "，另有#{other_ratio}%的人填写了其他。"
 		end
 
-		def convert_time_interval_to_text(format, v1, v2)
+		def self.convert_time_interval_to_text(format, v1, v2)
 			case format.to_i
 			when 0
 				# year
@@ -449,11 +518,11 @@ module Jobs
 			text = "调查显示"
 			return text + "，被访者填写的平均值为#{mean}。" if segments.blank?
 			interval_text_ary = []
-			interval_text_ary << convert_time_interval_to_text(issue.format, nil, segments[0])
+			interval_text_ary << ReportJob.convert_time_interval_to_text(issue.format, nil, segments[0])
 			segments[0..-2].each_with_index do |e, index|
-				interval_text_ary << convert_time_interval_to_text(issue.format, e, segments[index+1])
+				interval_text_ary << ReportJob.convert_time_interval_to_text(issue.format, e, segments[index+1])
 			end
-			interval_text_ary << convert_time_interval_to_text(issue.format, segments[-1], nil)
+			interval_text_ary << ReportJob.convert_time_interval_to_text(issue.format, segments[-1], nil)
 			
 			results = []
 			total_number = 0
@@ -592,7 +661,7 @@ module Jobs
 		end
 
 		def multiple_choice_description(analysis_result, issue, answer_number, chart_type)
-			# the description for multiple choice question with pie chart is exactly the same as the single choice questoin
+			# the description for multiple choice question with pie chart is exactly the same as the single choice question
 			return single_choice_description(analysis_result, issue) if chart_type == "pie"
 
 			results = []
