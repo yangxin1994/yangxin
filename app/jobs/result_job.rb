@@ -55,9 +55,10 @@ module Jobs
       @retval
     end
 
-		def analyze_choice(issue, answer_ary)
+		def self.analyze_choice(issue, answer_ary)
 			input_ids = issue["items"].map { |e| e["id"] }
 			input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+			input_ids.map! { |e| e.to_s }
 			result = {}
 			input_ids.each { |input_id| result[input_id] = 0 }
 			answer_ary.each do |answer|
@@ -68,8 +69,9 @@ module Jobs
 			return result
 		end
 
-		def analyze_matrix_choice(issue, answer_ary)
+		def self.analyze_matrix_choice(issue, answer_ary)
 			input_ids = issue["choices"].map { |e| e["id"] }
+			input_ids.map! { |e| e.to_s }
 			result = []
 			issue["rows"].each do |row|
 				input_ids.each do |input_id|
@@ -88,7 +90,7 @@ module Jobs
 			return result
 		end
 
-		def analyze_number_blank(issue, answer_ary, segment=[])
+		def self.analyze_number_blank(issue, answer_ary, segment=[])
 			result = {}		
 			answer_ary.map! { |answer| answer.to_f }
 			answer_ary.sort!
@@ -108,7 +110,7 @@ module Jobs
 			return result
 		end
 
-		def analyze_time_blank(issue, answer_ary, segment=[])
+		def self.analyze_time_blank(issue, answer_ary, segment=[])
 			result = {}
 			# the raw answers are in the unit of milliseconds
 			answer_ary.map! { |e| (e / 1000).round }
@@ -129,7 +131,7 @@ module Jobs
 			return result
 		end
 
-		def analyze_email_blank(issue, answer_ary)
+		def self.analyze_email_blank(issue, answer_ary)
 			result = {}
 			answer_ary.each do |email_address|
 				domain_name = (email_address.split('@'))[-1]
@@ -139,7 +141,7 @@ module Jobs
 			return result
 		end
 
-		def analyze_address_blank(issue, answer_ary)
+		def self.analyze_address_blank(issue, answer_ary)
 			result = {}
 			answer_ary.each do |value|
 				region_code = value["address"]
@@ -149,7 +151,7 @@ module Jobs
 			return result
 		end
 
-		def analyze_blank(issue, answer_ary)
+		def self.analyze_blank(issue, answer_ary)
 			result = {}
 			issue["items"].each_with_index do |input, input_index|
 				case input["data_type"]
@@ -166,9 +168,10 @@ module Jobs
 			return result
 		end
 
-		def analyze_const_sum(issue, answer_ary)
+		def self.analyze_const_sum(issue, answer_ary)
 			input_ids = issue["items"].map { |e| e["id"] }
 			input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+			input_ids.map! { |e| e.to_s }
 			weights = {}
 			input_ids.each { |input_id| weights[input_id] = [] }
 
@@ -186,9 +189,10 @@ module Jobs
 			return result
 		end
 
-		def analyze_sort(issue, answer_ary)
+		def self.analyze_sort(issue, answer_ary)
 			input_ids = issue["items"].map { |e| e["id"] }
 			input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+			input_ids.map! { |e| e.to_s }
 			
 			input_number = input_ids.length
 			result = {}
@@ -205,8 +209,10 @@ module Jobs
 			return result
 		end
 
-		def analyze_scale(issue, answer_ary)
+		def self.analyze_scale(issue, answer_ary)
 			input_ids = issue["items"].map { |e| e["id"] }
+			input_ids.map! { |e| e.to_s }
+
 			scores = {}
 			input_ids.each { |input_id| scores[input_id] = [] }
 			
@@ -227,9 +233,11 @@ module Jobs
 			return result
 		end
 
-		def analyze_rank(issue, answer_ary)
+		def self.analyze_rank(issue, answer_ary)
 			input_ids = issue["items"].map { |e| e["id"] }
 			input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+			input_ids.map! { |e| e.to_s }
+
 			scores = {}
 			input_ids.each { |input_id| scores[input_id] = [] }
 			

@@ -1,4 +1,5 @@
 require 'result_job'
+require 'array'
 module Jobs
 
 	class AnalysisJob < ResultJob
@@ -18,7 +19,7 @@ module Jobs
 			answers = get_answers(survey_id, filter_index, include_screened_answer)
 
 			# generate result key
-			result_key = sef.generate_result_key(answers)
+			result_key = AnalysisJob.generate_result_key(answers)
 
 			# judge whether the result_key already exists
 			result = AnalysisResult.find_by_result_key(result_key)
@@ -32,19 +33,19 @@ module Jobs
 			end
 
 			# analyze result
-			region_result, channel_result, duration_mean, time_result, answer_result = *self.analysis(answers)
+			region_result, channel_result, duration_mean, time_result, answers_result = *analysis(answers)
 
 			# update analysis result
 			analysis_result.region_result = region_result
 			analysis_result.channel_result = channel_result
 			analysis_result.duration_mean = duration_mean
 			analysis_result.time_result = time_result
-			analysis_result.answer_result = answer_result
+			analysis_result.answers_result = answers_result
 			analysis_result.status = 1
 			analysis_result.save
 		end
 
-		def generate_result_key(answers)
+		def self.generate_result_key(answers)
 			answer_ids = answers.map { |e| e._id.to_s }
 			result_key = Digest::MD5.hexdigest("analyze_result-#{answer_ids.to_s}")
 			return result_key
@@ -59,12 +60,12 @@ module Jobs
 			
 			answers.each_with_index do |answer, index|
 				# analyze region
-				region = answer.region
+				region = answer.region.to_s
 				region_result[region] = region_result[region] + 1 if !region_result[region].nil?
 				
 				# analyze channel
-				channel = answer.channel
-				channel_result[channel] = 0 if channel_result[channel].nil?
+				channel = answer.channel.to_s
+				channel_result[channel] ||= 0
 				channel_result[channel] = channel_result[channel] + 1
 				
 				# analyze duration
@@ -75,6 +76,7 @@ module Jobs
 
 				# re-organize answers
 				answer.answer_content.each do |q_id, question_answer|
+					answers_transform[q_id] ||= []
 					answers_transform[q_id] << question_answer if !question_answer.blank?
 				end
 
@@ -97,17 +99,19 @@ module Jobs
 			set_status({"analyze_answer_progress" => 0.6 })
 
 			# make stats for the answers
-			answer_result = {}
+			answers_result = {}
+			i = 0
 			answers_transform.each do |q_id, question_answer_ary|
+				i = i + 1
 				question = Question.find_by_id(q_id)
-				answer_result[q_id] = [question, question_answer_ary.length, analyze_one_question_answers(question, question_answer_ary)]
-				set_status({"analyze_answer_progress" => 0.6 + 0.4 * aindex / answers_transform.length })
+				answers_result[q_id] = [question_answer_ary.length, AnalysisJob.analyze_one_question_answers(question, question_answer_ary)]
+				set_status({"analyze_answer_progress" => 0.6 + 0.4 * i / answers_transform.length })
 			end
 
-			return [region_result, channel_result, duration_mean, time_result, answer_result]
+			return [region_result, channel_result, duration_mean, time_result, answers_result]
 		end
 
-		def analyze_one_question_answers(question, answer_ary)
+		def self.analyze_one_question_answers(question, answer_ary)
 			case question.question_type
 			when QuestionTypeEnum::CHOICE_QUESTION
 				return analyze_choice(question.issue, answer_ary)
