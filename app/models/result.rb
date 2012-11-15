@@ -51,12 +51,29 @@ class Result
 
 	def self.job_progress(job_id)
 		status = Resque::Plugins::Status::Hash.get(job_id)
-		status = Resque::Plugins::Status::Hash.get(status["ref_job_id"]) if !status["ref_job_id"].blank?
+		if status.nil?
+			# the status of the job does not exist, try to find the corresponding result
+			result = Result.find_by_job_id(job_id)
+			# the result cannot be found
+			return ErrorEnum::JOB_NOT_EXIST if result.nil?
+			# the found job is finished, return 1
+			return 1 if result.status == 1
+			# the found job is not finished, try to get its status
+			status = Resque::Plugins::Status::Hash.get(result["job_id"])
+		else
+			# the status if found
+			ref_job_id = status["ref_job_id"]
+			if !ref_job_id.blank?
+				# try to find the real result/job that did the work
+				result = Result.find_by_job_id(ref_job_id)
+				return ErrorEnum::JOB_NOT_EXIST if result.nil?
+				return 1 if result.status == 1
+				# the found job is not finished, try to get its status
+				status = Resque::Plugins::Status::Hash.get(result["job_id"])
+			end
+		end
+		return -1 if status.nil?
 
-		return ErrorEnum::JOB_NOT_EXIST if status.nil?
-
-		result = Result.find_by_job_id(job_id)
-		return 1 if result.status == 1
 		# calculate the status
 		case status["result_type"]
 		when "data_list"
