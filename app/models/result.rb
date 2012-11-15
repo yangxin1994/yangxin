@@ -40,7 +40,7 @@ class Result
 		when "AnalysisResult"
 			return {"region_result" => result.region_result,
 					"time_result" => result.time_result,
-					"duration_result" => result.duration_result,
+					"duration_mean" => result.duration_mean,
 					"channel_result" => result.channel_result,
 					"answers_result" => result.answers_result}
 		when "ExportResult"
