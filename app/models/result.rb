@@ -74,6 +74,9 @@ class Result
 		end
 		return -1 if status.nil?
 
+		# the job has not set the status
+		return 0 if status["result_type"].nil?
+
 		# calculate the status
 		case status["result_type"]
 		when "data_list"
