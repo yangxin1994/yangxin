@@ -36,6 +36,7 @@ class ApplicationController < ActionController::Base
 
 	begin "kaminari"
 		def page
+			#params[:page].to_i == 0 ? 1 : params[:page].to_i - 1
 			params[:page].to_i == 0 ? 1 : params[:page].to_i
 		rescue
 			1

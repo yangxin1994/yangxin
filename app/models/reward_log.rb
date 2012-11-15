@@ -10,9 +10,6 @@ class RewardLog
   field :cause, :type => Integer
   field :value, :type => Hash
 
-  field :invited_user_id, :type => String
-  field :extended_survey_id, :type => String
-
   scope :point_logs, where( :type => 2)
   scope :lottery_logs, where( :type => 1)
 
@@ -33,19 +30,20 @@ class RewardLog
   after_create :operate_user_point
  
   def self.revoke_operation(log_id,admin_id)
-    p = RewardLog.find(log_id)
-    RewardLog.create(:user_id => p.user.id,
-                     :point => -p.point,
+    r = RewardLog.find(log_id)
+    RewardLog.create(:user_id => r.user.id,
+                     :point => -r.point,
                      :operator_id => admin_id, 
                      :cause => 4)
   end
 
   def operate_user_point
-    return false if user.blank? && point.blank?
+    return false if user.blank?
     return true if point == 0
-    if self.point + point >= 0
+    if((self.point + user.point) >= 0)
       user.inc(:point, self.point)
     else
+      self.delete
       false
     end
   end

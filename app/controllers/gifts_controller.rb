@@ -6,14 +6,14 @@ class GiftsController < ApplicationController
   def index
     render_json do 
       auto_paginate(Gift.can_be_rewarded) do |g|
-        g.page(page).per(per_page).map { |e| logger.info "=====  =====";e[:photo_src] = e.photo.nil? ? nil : e.photo.picture_url; e  }
+        g.page(page).per(per_page).map { |e| e[:photo_src] = e.photo.nil? ? nil : e.photo.picture_url; e  }
       end
     end
   end
 
   def_each :virtual, :cash, :entity, :lottery do |method_name|
     @gifts = auto_paginate(Gift.can_be_rewarded.send(method_name)) do |g|
-      g.page(page).per(per_page).map { |e| logger.info "=====  =====";e[:photo_src] = e.photo.nil? ? nil : e.photo.picture_url; e  }
+      g.page(page).per(per_page).map { |e| e[:photo_src] = e.photo.nil? ? nil : e.photo.picture_url; e  }
     end
     render_json { @gifts }
   end

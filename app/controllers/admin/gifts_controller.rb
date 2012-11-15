@@ -33,7 +33,6 @@ class Admin::GiftsController < Admin::ApplicationController
     material.save
     # TODO add admin_id
     render_json @gift.save do
-      #Material.create(:material => params[:material], :materials => @gift)
       @gift.as_retval
     end
   end
