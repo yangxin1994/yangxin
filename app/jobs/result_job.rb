@@ -15,7 +15,7 @@ module Jobs
 				set_status({"find_answers_progress" => 1})
 				return answers
 			end
-			filter_conditions = self.survey.filters[filter_index]["conditions"]
+			filter_conditions = survey.filters[filter_index]["conditions"]
 			filtered_answers = []
 			answers_length = answers.length
 			answers.each_with_index do |a, index|

@@ -61,7 +61,9 @@ class Result
 			# the found job is not finished, try to get its status
 			status = Resque::Plugins::Status::Hash.get(result["job_id"])
 		else
-			# the status if found
+			# the status is found
+			result = Result.find_by_job_id(job_id)
+			return 1 if result && result.status == 1
 			ref_job_id = status["ref_job_id"]
 			if !ref_job_id.blank?
 				# try to find the real result/job that did the work
