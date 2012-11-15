@@ -63,7 +63,7 @@ module Jobs
 			input_ids.each { |input_id| result[input_id] = 0 }
 			answer_ary.each do |answer|
 				answer["selection"].each do |input_id|
-					result[input_id] = result[input_id] + 1 if !result[input_id].nil?
+					result[input_id.to_s] = result[input_id.to_s] + 1 if !result[input_id.to_s].nil?
 				end
 			end
 			return result

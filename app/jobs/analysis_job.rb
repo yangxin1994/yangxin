@@ -82,6 +82,9 @@ module Jobs
 
 				set_status({"analyze_answer_progress" => 0.5 * (index + 1) * 1.0 / answers.length })
 			end
+
+			region_result.select! { |k,v| v != 0 }
+			channel_result.select! { |k,v| v != 0 }
 			
 			# calculate the mean of duration
 			duration_mean = duration_mean.mean
