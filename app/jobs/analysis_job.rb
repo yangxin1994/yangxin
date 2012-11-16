@@ -93,7 +93,7 @@ module Jobs
 			# min_finish_time = finish_time.min
 			# min_finish_date = Time.at(min_finish_time).to_date
 			# start_day = [min_finish_date.year, min_finish_date.month, min_finish_date.day]
-			start_day = min_finish_time
+			start_day = finish_time.min
 			day_number = (finish_time.max / 86400 - min_finish_time / 86400) + 1
 			time_histogram = Array.new(day_number, 0)
 			finish_time.each do |t|

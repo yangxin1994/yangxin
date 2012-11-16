@@ -10,6 +10,8 @@ module Jobs
 			# set the type of the job
 			set_status({"result_type" => "report"})
 
+			puts "1111111111111111111"
+
 			# get parameters
 			filter_index = options["filter_index"].to_i
 			include_screened_answer = options["include_screened_answer"].to_s == "true"
@@ -60,6 +62,7 @@ module Jobs
 					answers_transform[q_id] << question_answer if !question_answer.blank?
 				end
 			end
+			puts "222222222222222222222222"
 
 			# analyze the result based on the report mockup
 			component_length = report_mockup.components.length
@@ -83,6 +86,7 @@ module Jobs
 																				question.issue,
 																				component["chart_style"])
 							report_data.push_chart_components(chart_components)
+							puts "3333333333333333333333333"
 						else
 							pie_text = multiple_choice_description(analysis_result, question.issue, answers.length, 'pie')
 							bar_text = multiple_choice_description(analysis_result, question.issue, answers.length, 'bar')
