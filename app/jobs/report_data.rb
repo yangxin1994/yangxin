@@ -34,13 +34,18 @@ module Jobs
 			when HEADING_1
 				component.merge!("text" => opt["text"])
 			when HEADING_2
+				puts "bbbbb"
 				component.merge!("text" => opt["text"])
+				puts "ccccc"
+				puts component.inspect
 			when DESCRIPTION
 				component.merge!("text" => opt["text"])
 			when CHART_DATA
 				component.merge!("chart_data" => opt["chart_data"])
 			end
+			puts "ddddd"
 			@component_list << component
+			puts "eeeee"
 		end
 
 		def pop_component

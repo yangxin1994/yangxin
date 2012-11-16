@@ -80,6 +80,7 @@ module Jobs
 			chart_data = []
 			items_id = issue["items"].map { |e| e["id"] }
 			items_text = issue["items"].map { |e| e["content"]["text"] }
+			items_id.map! { |e| e.to_s }
 			if issue["other_item"] && issue["other_item"]["has_other_item"]
 				items_id << issue["other_item"]["id"]
 				items_text << issue["other_item"]["content"]["text"]
@@ -197,6 +198,7 @@ module Jobs
 				items_id << issue["other_item"]["id"]
 				items_text << issue["other_item"]["content"]["text"]
 			end
+			items_id.map! { |e| e.to_s }
 			chart_styles.each do |chart_style|
 				data = []
 				if [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
@@ -224,6 +226,7 @@ module Jobs
 				items_id << issue["other_item"]["id"]
 				items_text << issue["other_item"]["content"]["text"]
 			end
+			items_id.map! { |e| e.to_s }
 			order_number = (analysis_result.map { |e| e.length }).max
 			order_text = []
 			1.upto(order_number) do |e|
@@ -266,6 +269,7 @@ module Jobs
 			chart_data = []
 			items_id = issue["items"].map { |e| e["id"] }
 			items_text = issue["items"].map { |e| e["content"]["text"] }
+			items_id.map! { |e| e.to_s }
 			chart_styles.each do |chart_style|
 				data = []
 				if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
