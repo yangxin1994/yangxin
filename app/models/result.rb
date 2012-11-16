@@ -120,12 +120,12 @@ class Result
 				s = s1 * 0.3
 			else
 				s2 = status["data_conversion_progress"].to_f
-				if s2 < 2
+#				if s2 < 2
 					s = s1 * 0.3 + s2 * 0.2
-				else
-					s3 = ConnectDotNet::get_data("/get_progress") { job_id }
-					s = s1 * 0.3 + s2 * 0.2 + s3 * 0.5
-				end
+#				else
+#					s3 = ConnectDotNet::get_data("/get_progress") { job_id }
+#					s = s1 * 0.3 + s2 * 0.2 + s3 * 0.5
+#				end
 			end
 		end
 		# the job has not been finished, the progress cannot be greater than 0.99

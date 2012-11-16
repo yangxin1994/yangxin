@@ -209,13 +209,12 @@ module Jobs
 
 			# call the webservice to generate the report
 			puts "kkkkkkkkkkk"
-			data = {'report_data' => {"report_data" => report_data.serialize,
+			data = {'report_data' => {"report_data" => report_data.serialize.to_json,
                                                   "job_id" => status["uuid"]}.to_yaml}
 			puts report_data.serialize.inspect
 			puts "kkkkkkkkkkk"
 			send_data "/report_export" do
-				{'report_data' => {"report_data" => report_data.serialize,
-									"job_id" => status["uuid"]}.to_yaml}
+				{"report_data" => report_data.serialize, "job_id" => status["uuid"]}
 			end
 			puts "2222222222222222"
 			report_result.status = 1
