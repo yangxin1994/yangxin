@@ -204,10 +204,19 @@ module Jobs
 			end
 
 			# call the webservice to generate the report
-			result = send_data "report_export" do
-				{'report_data' => {"report_data" => report_data,
+			puts "kkkkkkkkkkk"
+			data = {'report_data' => {"report_data" => report_data.serialize,
+                                                  "job_id" => status["uuid"]}.to_yaml}
+			puts report_data.serialize.inspect
+			puts "kkkkkkkkkkk"
+			send_data "/report_export" do
+				{'report_data' => {"report_data" => report_data.serialize,
 									"job_id" => status["uuid"]}.to_yaml}
 			end
+			puts "2222222222222222"
+			report_result.status = 1
+			report_result.save
+			puts "3333333333333333"
 		end
 
 		def self.generate_result_key(answers, report_mockup, report_style, report_type)

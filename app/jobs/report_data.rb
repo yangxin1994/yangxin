@@ -22,6 +22,19 @@ module Jobs
 			@component_list = []
 		end
 
+		def serialize
+			obj = {}
+			obj["report_type"] = self.report_type
+			obj["title"] = self.title
+			obj["header"] = self.header
+			obj["footer"] = self.footer
+			obj["author_chn"] = self.author_chn
+			obj["author_eng"] = self.author_eng
+			obj["style"] = self.style
+			obj["component_list"] = self.component_list
+			return obj
+		end
+
 		def push_chart_components(component_ary)
 			component_ary.each do |c|
 				@component_list << {"component_type" => CHART_DATA, "chart_data" => c}
@@ -34,18 +47,13 @@ module Jobs
 			when HEADING_1
 				component.merge!("text" => opt["text"])
 			when HEADING_2
-				puts "bbbbb"
 				component.merge!("text" => opt["text"])
-				puts "ccccc"
-				puts component.inspect
 			when DESCRIPTION
 				component.merge!("text" => opt["text"])
 			when CHART_DATA
 				component.merge!("chart_data" => opt["chart_data"])
 			end
-			puts "ddddd"
 			@component_list << component
-			puts "eeeee"
 		end
 
 		def pop_component
