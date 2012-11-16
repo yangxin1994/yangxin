@@ -1,9 +1,9 @@
 require 'array'
 require 'error_enum'
 class SurveysController < ApplicationController
-	before_filter :require_sign_in, :except => [:show, :estimate_answer_time, :list_surveys_in_community]
+	before_filter :require_sign_in, :except => [:show, :estimate_answer_time, :list_surveys_in_community, :reward_info]
 	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :update_deadline]
-	before_filter :check_normal_survey_existence, :except => [:new, :index, :list_surveys_in_community, :list_answered_surveys, :list_spreaded_surveys, :recover, :clear, :add_tag, :remove_tag, :show, :estimate_answer_time]
+	before_filter :check_normal_survey_existence, :except => [:new, :index, :list_surveys_in_community, :list_answered_surveys, :list_spreaded_surveys, :recover, :clear, :add_tag, :remove_tag, :show, :estimate_answer_time, :reward_info]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
 	
 	def check_survey_existence
@@ -438,6 +438,13 @@ class SurveysController < ApplicationController
 		survey = Survey.normal.find_by_id(params[:id])
 		respond_to do |format|
 			format.json	{ render_json_auto(survey.nil? ? ErrorEnum::SURVEY_NOT_EXIST : survey.estimate_answer_time) and return }
+		end
+	end
+
+	def reward_info
+		survey = Survey.normal.find_by_id(params[:id])
+		respond_to do |format|
+			format.json	{ render_json_auto(survey.nil? ? ErrorEnum::SURVEY_NOT_EXIST : survey.reward_info) and return }
 		end
 	end
 end

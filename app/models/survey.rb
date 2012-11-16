@@ -1797,4 +1797,12 @@ class Survey
 		return nil if answer.nil?
 		return answer.status
 	end
+
+	def reward_info
+		return {"reward_type" => self.reward,
+				"point" => self.point,
+				"loterry_id" => self.loterry_id,
+				"spreadable" => self.spreadable,
+				"spread_point" => self.spread_point}
+	end
 end
