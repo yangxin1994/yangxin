@@ -1,7 +1,7 @@
 #encoding: utf-8
 module ConnectDotNet
     def send_data(post_to)
-      url = URI.parse('http://192.168.1.105:9292')
+      url = URI.parse('http://192.168.1.103:9292')
       begin
         Net::HTTP.start(url.host, url.port) do |http| 
           r = Net::HTTP::Post.new(post_to)

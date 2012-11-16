@@ -9,7 +9,7 @@ class RewardLogTest < ActiveSupport::TestCase
 	end
 
 	test "increase point" do
-		p = RewardLog.create(:point => -200,
+		r = RewardLog.create(:point => -200,
 											:type => 2,
 											:cause => 0,
 											:operator => @admin_foo,

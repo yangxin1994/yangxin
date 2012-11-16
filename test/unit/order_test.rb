@@ -26,6 +26,7 @@ class OrderTest < ActiveSupport::TestCase
     g.update
     assert @jesse.full_name == "CASH"
     assert g.surplus == 9
+    p @jesse.point
     assert @jesse.point == 500
   end
 

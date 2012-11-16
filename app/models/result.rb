@@ -40,7 +40,7 @@ class Result
 		when "AnalysisResult"
 			return {"region_result" => result.region_result,
 					"time_result" => result.time_result,
-					"duration_result" => result.duration_result,
+					"duration_mean" => result.duration_mean,
 					"channel_result" => result.channel_result,
 					"answers_result" => result.answers_result}
 		when "ExportResult"
@@ -61,7 +61,9 @@ class Result
 			# the found job is not finished, try to get its status
 			status = Resque::Plugins::Status::Hash.get(result["job_id"])
 		else
-			# the status if found
+			# the status is found
+			result = Result.find_by_job_id(job_id)
+			return 1 if result && result.status == 1
 			ref_job_id = status["ref_job_id"]
 			if !ref_job_id.blank?
 				# try to find the real result/job that did the work
@@ -73,6 +75,9 @@ class Result
 			end
 		end
 		return -1 if status.nil?
+
+		# the job has not set the status
+		return 0 if status["result_type"].nil?
 
 		# calculate the status
 		case status["result_type"]

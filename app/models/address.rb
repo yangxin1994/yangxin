@@ -84,7 +84,7 @@ class Address
 	def self.find_text_by_code(code)
 		self.ensure_cache
 		find_address = @@all_address.select { |e| e[0].to_i == code.to_i }
-		return find_address.blank? ? nil : find_address[0][1]
+		return find_address.blank? ? "" : find_address[0][1]
 	end
 
 	def self.find_provinces
@@ -156,7 +156,7 @@ class Address
 	def self.province_hash
 		province_hash = {}
 		Address.find_provinces.each do |province|
-			province_hash[province[0]] = 0
+			province_hash[province[0].to_s] = 0
 		end
 		return province_hash
 	end
@@ -164,7 +164,7 @@ class Address
 	def self.city_hash
 		city_hash = {}
 		Address.find_cities.each do |city|
-			city_hash[city[0]] = 0
+			city_hash[city[0].to_s] = 0
 		end
 		return city_hash
 	end
@@ -172,7 +172,7 @@ class Address
 	def self.county_hash
 		county_hash = {}
 		Address.find_counties.each do |county|
-			county_hash[county[0]] = 0
+			county_hash[county[0].to_s] = 0
 		end
 		return county_hash
 	end

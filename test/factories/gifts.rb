@@ -14,7 +14,6 @@ FactoryGirl.define do
 		name '100 yuan'
 		type 0
 		point 500
-		quantity 20
 		surplus 10
 		description '100 yuan'
 		status 1
