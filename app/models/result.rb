@@ -45,7 +45,7 @@ class Result
 					"answers_result" => result.answers_result}
 		when "ExportResult"
 			# TODO 返回结果
-			return result.file_uri
+			return {"file_name" => "FinalReport#{result.job_id}.docx"}
 		end
 	end
 
