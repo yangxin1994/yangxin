@@ -56,11 +56,14 @@ class ResultsController < ApplicationController
 
 	def job_progress
 		progress = Result.job_progress(params[:job_id])
+		logger.info "AAAAAAAAAAAAAAAAA"
+		logger.info params[:job_id]
 		if progress == 1
 			result = Result.find_result_by_job_id(params[:job_id])
+			logger.info result.inspect
 			respond_to do |format|
 				# make pagination for data list
-				if !result["answer_info"].blank?
+				if result["answer_info"] && !result["answer_info"].blank?
 					result["answer_info"] = auto_paginate result["answer_info"] do |a|
 						a.slice((page - 1) * per_page, per_page)
 					end

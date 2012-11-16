@@ -213,7 +213,7 @@ module Jobs
                                                   "job_id" => status["uuid"]}.to_yaml}
 			puts report_data.serialize.inspect
 			puts "kkkkkkkkkkk"
-			send_data "/report_export" do
+			send_data "/ExportReport.aspx" do
 				{"report_data" => report_data.serialize, "job_id" => status["uuid"]}
 			end
 			puts "2222222222222222"

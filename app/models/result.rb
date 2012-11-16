@@ -43,7 +43,7 @@ class Result
 					"duration_mean" => result.duration_mean,
 					"channel_result" => result.channel_result,
 					"answers_result" => result.answers_result}
-		when "ExportResult"
+		when "ReportResult"
 			# TODO 返回结果
 			return {"file_name" => "FinalReport#{result.job_id}.docx"}
 		end
