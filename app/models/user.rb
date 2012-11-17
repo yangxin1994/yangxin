@@ -6,7 +6,7 @@ require 'tool'
 class User
 	include Mongoid::Document
 	include Mongoid::Timestamps
-  include Mongoid::ValidationsExt	
+  	include Mongoid::ValidationsExt	
 	field :email, :type => String
 	field :username, :type => String
 	field :password, :type => String

@@ -34,19 +34,20 @@ class SurveyAuditor::SurveysController < SurveyAuditor::ApplicationController
 	#*retval*:
 	#* a list Survey objects
 	def index
-		# first parameter is survey status (0 for normal surveys)
-		# second parameter is survey publish status (2 for under review surveys)
-		# third parameter are tags
-		survey_list = Survey.normal.list("normal", PublishStatus::UNDER_REVIEW, nil)
-		survey_list = slice((survey_list || []), page, per_page)
-		respond_to do |format|
-			format.json	{ render_json_auto(survey_list) and return }
-		end
+		# # first parameter is survey status (0 for normal surveys)
+		# # second parameter is survey publish status (2 for under review surveys)
+		# # third parameter are tags
+		# survey_list = Survey.normal.list("normal", PublishStatus::UNDER_REVIEW, nil)
+		# survey_list = slice((survey_list || []), page, per_page)
+		# respond_to do |format|
+		# 	format.json	{ render_json_auto(survey_list) and return }
+		# end
+		render_json_auto auto_paginate(Survey.normal.where(publish_status: PublishStatus::UNDER_REVIEW))
 	end
 
-	def count
-		render_json_auto @current_user.surveys.list(params[:status], params[:publish_status], params[:tags]).count
-	end
+	# def count
+	# 	render_json_auto @current_user.surveys.list(params[:status], params[:publish_status], params[:tags]).count
+	# end
 
 	#*method*: get
 	#
