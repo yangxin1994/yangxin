@@ -15,8 +15,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 			# key is question id
 			# val is like of { "selection" : [ NumberLong("1351400998231222"), NumberLong("3055564856809646") ], "text_input" : "" }
 			question = Question.find_by_id(key)
-			return ErrorEnum::QUESTION_NOT_EXIST unless question
-			puts "???#{JSON.parse(question.to_json)}"
+			next unless question
 			show_answer = {}
 			show_answer.merge!({"title" => question.content["text"]})
 			if question.issue["items"] 

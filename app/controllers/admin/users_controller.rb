@@ -16,38 +16,19 @@ class Admin::UsersController < Admin::ApplicationController
 	# GET /admin/users.json
 	def index
 		if !params[:email].nil? then
-			@users = User.where(email: params[:email]).desc(:status, :created_at).page(page).per(per_page) || []
+			@users = User.where(email: params[:email]).desc(:status, :created_at)
 		elsif !params[:true_name].nil? then	
-			@users = User.where(true_name: params[:true_name]).desc(:status, :created_at).page(page).per(per_page) || []
+			@users = User.where(true_name: params[:true_name]).desc(:status, :created_at)
 		elsif !params[:username].nil? then
 			filter = params[:username].to_s.gsub(/[*]/, ' ')
-			@users = User.where(username: /.*#{filter}.*/).desc(:status, :created_at).page(page).per(per_page) || []
+			@users = User.where(username: /.*#{filter}.*/).desc(:status, :created_at)
 		else
-			@users = User.normal_list.desc(:status, :created_at).page(page).per(per_page) || []
+			@users = User.normal_list.desc(:status, :created_at)
 		end			
 
-		respond_to do |format|
-			format.html # index.html.erb
-			format.json { render_json_auto @users, :only => @@user_attrs_filter }
-		end
+		render_json_auto(auto_paginate(@users)) and return
 	end
 
-	def count
-		render_json_auto User.normal_list.count
-	end
-
-	def email_count
-		render_json_auto User.where(email: params[:email]).count
-	end
-
-	def true_name_count
-		render_json_auto User.where(true_name: params[:true_name]).count
-	end
-	
-	def username_count
-		filter = params[:username].to_s.gsub(/[*]/, ' ')
-		render_json_auto User.where(username: /.*#{filter}.*/).count
-	end
 	# GET /admin/users/1 
 	# GET /admin/users/1.json
 	def show
@@ -89,43 +70,31 @@ class Admin::UsersController < Admin::ApplicationController
 
 	# GET /admin/users/blacks(.json)
 	def blacks
-		@users = User.black_list.desc(:created_at).page(page).per(per_page)
+		@users = User.black_list.desc(:created_at)
 
 		respond_to do |format|
 			format.html # index.html.erb
-			format.json { render_json_auto @users, :only => @@user_attrs_filter }
+			format.json { render_json_auto auto_paginate(@users)}
 		end
-	end
-
-	def blacks_count
-		render_json_auto User.black_list.count
 	end
 
 	# GET /admin/users/whites(.json)
 	def whites
-		@users = User.white_list.desc(:created_at).page(page).per(per_page)
+		@users = User.white_list.desc(:created_at)
 
 		respond_to do |format|
 			format.html # index.html.erb
-			format.json { render_json_auto @users, :only => @@user_attrs_filter }
+			format.json { render_json_auto auto_paginate(@users)}
 		end
-	end
-
-	def whites_count
-		render_json_auto User.white_list.count
 	end
 
 	def deleteds
-		@users = User.deleted_users.desc(:created_at).page(page).per(per_page)
+		@users = User.deleted_users.desc(:created_at)
 
 		respond_to do |format|
 			format.html # index.html.erb
-			format.json { render_json_auto @users, :only => @@user_attrs_filter }
+			format.json { render_json_auto auto_paginate(@users)}
 		end
-	end
-
-	def deleteds_count
-		render_json_auto User.deleted_users.count
 	end
 
 	def set_role
@@ -167,10 +136,7 @@ class Admin::UsersController < Admin::ApplicationController
 	end
 
 	def list_by_role
-		render_json_auto User.where(role: params[:role].to_i).desc(:lock, :created_at).page(page).per(per_page)
-	end
-
-	def list_by_role_count
-		render_json_auto User.where(role: params[:role].to_i).count
+		users = User.where(role: params[:role].to_i).desc(:lock, :created_at)
+		render_json_auto auto_paginate(users)
 	end
 end
