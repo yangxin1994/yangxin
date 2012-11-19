@@ -57,6 +57,11 @@ module Jobs
 			duration_mean = []
 			finish_time = []
 			answers_transform = {}
+
+			if answers.length == 0
+				set_status({"analyze_answer_progress" => 1 })
+				return [{}, {}, 0, {}, {}]
+			end
 			
 			answers.each_with_index do |answer, index|
 				# analyze region
