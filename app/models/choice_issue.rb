@@ -33,7 +33,7 @@ class ChoiceIssue < Issue
 		@min_choice = 1
 		@max_choice = 1
 		@option_type = 1
-		@is_list_style = true
+		@is_list_style = false
 		@is_rand = false	
 		@items = []
 		input_number = 4
