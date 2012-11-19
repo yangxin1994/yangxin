@@ -2,6 +2,10 @@ development:
   host: localhost
   database: oops_data_development
 
+oops_task_development:
+  host: localhost
+  database: oops_task_development
+
 test:
   host: localhost
   database: oops_data_test
