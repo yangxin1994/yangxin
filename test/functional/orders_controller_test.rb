@@ -13,8 +13,9 @@ class OrdersControllerTest < ActionController::TestCase
     list = [:index, :for_cash, :for_entity, :for_virtual, :for_lottery]
     list.each do |e|
       get e, :page => 1, :format => :json, :auth_key => @auth_key
-    pp @response.body
+      h = JSON.parse(@response.body)
       assert_response :success
+      assert h["success"] == true
     end
   end
 
@@ -32,8 +33,28 @@ class OrdersControllerTest < ActionController::TestCase
                     :user => @user_bar
          },
          :auth_key => @auth_key
-    pp @response.body
-    assert_not_nil @response.body
+    h = JSON.parse(@response.body)
+    assert h["success"] == true
+    assert !h["value"]["created_at"].nil?
+  end
+
+  test "should show a order" do
+
+    get :show, :id => '123132', :auth_key => @auth_key
+    h = JSON.parse(@response.body)
+
+    assert h["success"] == false
+    assert h["value"]["error_code"] == 21402
+    #assert @response.body[]
+    @user_bar.orders << @order
+    @user_bar.save
+    @order.save
+    get :show, :id => @order.id, :auth_key => @auth_key
+    h = JSON.parse(@response.body)
+
+    assert h["success"] == true
+    assert h["value"]["_id"] == "#{@order._id}"
+    # assert_response :success
   end
 
 end
