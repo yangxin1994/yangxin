@@ -7,7 +7,10 @@ class OrdersController < ApplicationController
 
   def show
     # TODO is owners request?
-    render_json { @current_user.orders.find_by_id(params[:id])}
+    order =  @current_user.orders.find_by_id(params[:id])
+    render_json order.is_a?(Order) do
+      order
+    end 
   end
 
   def create

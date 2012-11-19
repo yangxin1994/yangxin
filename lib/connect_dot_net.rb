@@ -44,8 +44,6 @@ module ConnectDotNet
       rescue Timeout::Error
         p "超时"
       ensure
-        # export_process[:post] = 100
-        # self.save
         p "连接结束"
       end
     end
