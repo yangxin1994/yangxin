@@ -2,8 +2,8 @@ require 'array'
 require 'error_enum'
 class SurveysController < ApplicationController
 	before_filter :require_sign_in, :except => [:show, :estimate_answer_time, :list_surveys_in_community, :reward_info]
-	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :update_deadline]
-	before_filter :check_normal_survey_existence, :except => [:new, :index, :list_surveys_in_community, :list_answered_surveys, :list_spreaded_surveys, :recover, :clear, :add_tag, :remove_tag, :show, :estimate_answer_time, :reward_info]
+	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :update_deadline, :update_star]
+	before_filter :check_normal_survey_existence, :except => [:new, :index, :list_surveys_in_community, :list_answered_surveys, :list_spreaded_surveys, :recover, :clear, :add_tag, :remove_tag, :show, :estimate_answer_time, :reward_info, :update_star]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
 	
 	def check_survey_existence
