@@ -1356,7 +1356,7 @@ class Survey
 		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
 		return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
 		return ErrorEnum::WRONG_REPORT_TYPE if %w[word ppt pdf].include?(report_type)
-		job_id = Jobs::ReportJob.create(:filter_index => filter_index, :include_screened_answer => include_screened_answer, :report_mockup_id => report_mockup_id, :report_style => report_style, :report_type => report_type)
+		job_id = Jobs::ReportJob.create(:survey_id => self._id, :filter_index => filter_index, :include_screened_answer => include_screened_answer, :report_mockup_id => report_mockup_id, :report_style => report_style, :report_type => report_type)
 		return job_id
 	end
 
@@ -1796,5 +1796,13 @@ class Survey
 		answer = Answer.where(:survey_id => self._id.to_s, :user_id => user._id.to_s, :is_preview => false)[0]
 		return nil if answer.nil?
 		return answer.status
+	end
+
+	def reward_info
+		return {"reward_type" => self.reward,
+				"point" => self.point,
+				"loterry_id" => self.loterry_id,
+				"spreadable" => self.spreadable,
+				"spread_point" => self.spread_point}
 	end
 end

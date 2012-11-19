@@ -33,31 +33,18 @@ class Admin::FeedbacksController < Admin::ApplicationController
 
 		@feedbacks = @feedbacks.map{|e| maping_question_user(e)}
 
-		render_json_auto @feedbacks
-	end
-
-	def count
-		render_json_auto Feedback.count
-	end
-
-	def list_by_type_and_value_count
-		render_json_auto Feedback.list_by_type_and_value(params[:feedback_type], params[:value]).count
-	end
-
-	def list_by_type_and_answer_count
-		if params[:feedback_type].to_i >=255 then
-			if params[:answer].to_s.strip == "true" then
-				render_json_auto Feedback.answered.count
+		if !params[:feedback_type].nil? then
+			if !params[:value].nil? then
+				render_json_auto (auto_paginate(@feedbacks, Feedback.list_by_type_and_value(params[:feedback_type], params[:value]).count){@feedbacks}) and return 
+			elsif !params[:answer].nil? then
+				render_json_auto (auto_paginate(@feedbacks, Feedback.list_by_type_and_answer(params[:feedback_type], params[:answer].to_s.strip == "true").count){@feedbacks}) and return 
 			else
-				render_json_auto Feedback.unanswer.count
+				render_json_auto (auto_paginate(@feedbacks, Feedback.list_by_type(params[:feedback_type]).count){@feedbacks}) and return 
 			end
 		else
-			render_json_auto Feedback.list_by_type_and_answer(params[:feedback_type], params[:answer].to_s.strip == "true").count
+			render_json_auto (auto_paginate(@feedbacks, Feedback.count){@feedbacks}) and return 
 		end
-	end
 
-	def list_by_type_count
-		render_json_auto Feedback.list_by_type(params[:feedback_type]).count
 	end
 	
 	# GET /admin/feedbacks/1 

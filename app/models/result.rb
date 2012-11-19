@@ -40,12 +40,12 @@ class Result
 		when "AnalysisResult"
 			return {"region_result" => result.region_result,
 					"time_result" => result.time_result,
-					"duration_result" => result.duration_result,
+					"duration_mean" => result.duration_mean,
 					"channel_result" => result.channel_result,
 					"answers_result" => result.answers_result}
-		when "ExportResult"
+		when "ReportResult"
 			# TODO 返回结果
-			return result.file_uri
+			return {"file_name" => "FinalReport#{result.job_id}.docx"}
 		end
 	end
 
@@ -61,7 +61,9 @@ class Result
 			# the found job is not finished, try to get its status
 			status = Resque::Plugins::Status::Hash.get(result["job_id"])
 		else
-			# the status if found
+			# the status is found
+			result = Result.find_by_job_id(job_id)
+			return 1 if result && result.status == 1
 			ref_job_id = status["ref_job_id"]
 			if !ref_job_id.blank?
 				# try to find the real result/job that did the work
@@ -99,7 +101,7 @@ class Result
 			if s1 < 1
 				s = s1 * 0.6
 			else
-				r = ConnectDotNet::get_data("/get_progress") { result.result_key }
+				r = ConnectDotNet::get_data("/get_progress") { job_id }
 				s2 = r["status"]
 				s = s1 * 0.6 + s2 * 0.4
 			end
@@ -108,9 +110,22 @@ class Result
 			if s1 < 1
 				s = s1 * 0.6
 			else
-				r = ConnectDotNet::get_data("/get_progress") { result.result_key }
+				r = ConnectDotNet::get_data("/get_progress") { job_id }
 				s2 = r["status"]
 				s = s1 * 0.6 + s2 * 0.4
+			end
+		when "report"
+			s1 = status["find_answers_progress"].to_f
+			if s1 < 1
+				s = s1 * 0.3
+			else
+				s2 = status["data_conversion_progress"].to_f
+#				if s2 < 2
+					s = s1 * 0.3 + s2 * 0.2
+#				else
+#					s3 = ConnectDotNet::get_data("/get_progress") { job_id }
+#					s = s1 * 0.3 + s2 * 0.2 + s3 * 0.5
+#				end
 			end
 		end
 		# the job has not been finished, the progress cannot be greater than 0.99

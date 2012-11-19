@@ -10,6 +10,8 @@ module Jobs
 			# set the type of the job
 			set_status({"result_type" => "report"})
 
+			puts "1111111111111111111"
+
 			# get parameters
 			filter_index = options["filter_index"].to_i
 			include_screened_answer = options["include_screened_answer"].to_s == "true"
@@ -18,14 +20,16 @@ module Jobs
 			report_style = options["report_style"].to_i
 			report_type = options["report_type"].to_s
 
+			survey_id = options["survey_id"]
+
 			# initialize a report data
 			report_data = ReportData.new(report_type,
 										report_mockup.title,
 										report_mockup.subtitle,
 										report_mockup.header,
 										report_mockup.footer,
-										report_mockup.author_chn,
-										report_mockup.author_eng,
+										report_mockup.author,
+										report_mockup.author,
 										report_style)
 
 			# get answers set by filter
@@ -35,103 +39,109 @@ module Jobs
 			survey = Survey.find_by_id(survey_id)
 
 			# generate result key
-			result_key = sef.generate_result_key(answers, report_mockup, report_style, report_type)
+			result_key = ReportJob.generate_result_key(answers, report_mockup, report_style, report_type)
 
 			# judge whether the result_key already exists
-			result = DataListResult.find_by_result_key(result_key)
+			result = ReportResult.find_by_result_key(result_key)
 			#create new result record
 			if !result.nil?
-				report_result = DataListResult.create(:result_key => result_key, :job_id => status["uuid"], :ref_result_id => result._id)
+				report_result = ReportResult.create(:result_key => result_key, :job_id => status["uuid"], :ref_result_id => result._id)
 				set_status({"ref_job_id" => result.job_id})
 				return
 			else
-				report_result = DataListResult.create(:result_key => result_key, :job_id => status["uuid"])
+				report_result = ReportResult.create(:result_key => result_key, :job_id => status["uuid"])
 			end
+
+			answers_transform = {}
 
 			# transform the answers
 			answers.each_with_index do |answer, index|
 				# re-organize answers
 				answer.answer_content.each do |q_id, question_answer|
+					answers_transform[q_id] ||= []
 					answers_transform[q_id] << question_answer if !question_answer.blank?
 				end
 			end
+			puts "222222222222222222222222"
 
 			# analyze the result based on the report mockup
-			report_mockup.components.each do |component|
+			component_length = report_mockup.components.length
+			report_mockup.components.each_with_index do |component, i|
 				if component["component_type"] == 0
 					# this is a single question analysis
 					question_id = component["value"]["id"]
-					question_index = survey.all_questions_id.index(qustion_id)
+					question_index = survey.all_questions_id.index(question_id)
 					next if question_index.nil?
-					report_data.push_compoent(1, "text" => "第#{question_index}题分析")
+					report_data.push_component(1, "text" => "第#{question_index+1}题分析")
 					question = BasicQuestion.find_by_id(question_id)
 					case question.question_type
 					when QuestionTypeEnum::CHOICE_QUESTION
-						analysis_result = analyze_choice(question.issue, answers_transform[question_id])
+						analysis_result = ResultJob.analyze_choice(question.issue, answers_transform[question_id])
 						# judge whether this is a single choice or multiple choice
 						if question.issue["max_choice"] == 1
 							text = single_choice_description(analysis_result, question.issue)
-							report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
-							chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+							report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+							chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																				analysis_result,
 																				question.issue,
 																				component["chart_style"])
-							report_data.push_chart_compoents(chart_components)
+							report_data.push_chart_components(chart_components)
+							puts "3333333333333333333333333"
 						else
 							pie_text = multiple_choice_description(analysis_result, question.issue, answers.length, 'pie')
 							bar_text = multiple_choice_description(analysis_result, question.issue, answers.length, 'bar')
-							chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+							chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																				analysis_result,
 																				question.issue,
 																				component["chart_style"])
 							if [ChartStyleEnum::ALL, ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::STACK].include?(component["chart_style"])
-								report_data.push_compoent(ReportData::DESCRIPTION, "text" => pie_text)
+								report_data.push_component(ReportData::DESCRIPTION, "text" => pie_text)
 							end
 							if [ChartStyleEnum::ALL, ChartStyleEnum::LINE, ChartStyleEnum::BAR].include?(component["chart_style"])
-								report_data.push_compoent(ReportData::DESCRIPTION, "text" => bar_text)
+								report_data.push_component(ReportData::DESCRIPTION, "text" => bar_text)
 							end
-							report_data.push_chart_compoents(chart_components)
+							report_data.push_chart_components(chart_components)
 						end
 					when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
-						analysis_result = analyze_matrix_choice(question.issue, answers_transform[question_id])
+						analysis_result = ResultJob.analyze_matrix_choice(question.issue, answers_transform[question_id])
 						text = matrix_choice_description(analysis_result, question.issue)
-						report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
-						chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+						report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																			analysis_result,
 																			question.issue,
 																			component["chart_style"])
-						report_data.push_chart_compoents(chart_components)
+						report_data.push_chart_components(chart_components)
 					when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-						analysis_result = analyze_number_blank(question.issue, answers_transform[question_id], component["value"]["format"] || [])
+						analysis_result = ResultJob.analyze_number_blank(question.issue, answers_transform[question_id], component["value"]["format"] || [])
 						text = number_blank_description(analysis_result, question.issue, component["value"]["format"] || [])
-						report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
-						chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+						report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																			analysis_result,
 																			question.issue,
 																			component["chart_style"],
 																			"format" => component["value"]["format"] || [])
-						report_data.push_chart_compoents(chart_components)
+						report_data.push_chart_components(chart_components)
 					when QuestionTypeEnum::TIME_BLANK_QUESTION
-						analysis_result = analyze_time_blank(question.issue, answers_transform[question_id])
+						analysis_result = ResultJob.analyze_time_blank(question.issue, answers_transform[question_id])
 						text = time_blank_description(analysis_result, question.issue, component["value"]["format"] || [])
-						report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
-						chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+						report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																			analysis_result,
 																			question.issue,
 																			component["chart_style"],
 																			"format" => component["value"]["format"] || [])
-						report_data.push_chart_compoents(chart_components)
+						report_data.push_chart_components(chart_components)
 					when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
-						analysis_result = analyze_address_blank(question.issue, answers_transform[question_id])
+						analysis_result = ResultJob.analyze_address_blank(question.issue, answers_transform[question_id])
 						text = address_blank_description(analysis_result, question.issue)
-						report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
-						chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+						report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																			analysis_result,
 																			question.issue,
 																			component["chart_style"])
-						report_data.push_chart_compoents(chart_components)
+						report_data.push_chart_components(chart_components)
 					when QuestionTypeEnum::BLANK_QUESTION
-						analysis_result = analyze_blank(question.issue, answers_transform[question_id])
+						analysis_result = ResultJob.analyze_blank(question.issue, answers_transform[question_id])
 						analysis_result.each do |id, sub_analysis_result|
 							sub_question_item = (question.issue["items"].select { |e| e["id"] == id })[0]
 							next if sub_question_issue.nil?
@@ -148,40 +158,40 @@ module Jobs
 								text = address_time_blank_description(sub_analysis_result, sub_question_issue)
 								sub_question_type = QuestionTypeEnum::TIME_BLANK_QUESTION
 							end
-							report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
-							chart_components = ReportDataAdaptor.convert_single_data(sub_question_type,
+							report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+							chart_components = ReportDataAdapter.convert_single_data(sub_question_type,
 																				sub_analysis_result,
 																				sub_question_issue,
 																				component["chart_style"])
-							report_data.push_chart_compoents(chart_components)
+							report_data.push_chart_components(chart_components)
 						end
 					when QuestionTypeEnum::CONST_SUM_QUESTION
-						analysis_result = analyze_const_sum(question.issue, answers_transform[question_id])
+						analysis_result = ResultJob.analyze_const_sum(question.issue, answers_transform[question_id])
 						text = const_sum_description(analysis_result, question.issue)
-						report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
-						chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+						report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																			analysis_result,
 																			question.issue,
 																			component["chart_style"])
-						report_data.push_chart_compoents(chart_components)
+						report_data.push_chart_components(chart_components)
 					when QuestionTypeEnum::SORT_QUESTION
-						analysis_result = analyze_sort(question.issue, answers_transform[question_id])
+						analysis_result = ResultJob.analyze_sort(question.issue, answers_transform[question_id])
 						text = sort_description(analysis_result, question.issue, answers.length)
-						report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
-						chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+						report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																			analysis_result,
 																			question.issue,
 																			component["chart_style"])
-						report_data.push_chart_compoents(chart_components)
+						report_data.push_chart_components(chart_components)
 					when QuestionTypeEnum::SCALE_QUESTION
-						analysis_result = analyze_scale(question.issue, answers_transform[question_id])
+						analysis_result = ResultJob.analyze_scale(question.issue, answers_transform[question_id])
 						text = scale_description(analysis_result, question.issue, answers.length)
-						report_data.push_compoent(ReportData::DESCRIPTION, "text" => text)
-						chart_components = ReportDataAdaptor.convert_single_data(question.question_type,
+						report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																			analysis_result,
 																			question.issue,
 																			component["chart_style"])
-						report_data.push_chart_compoents(chart_components)
+						report_data.push_chart_components(chart_components)
 					else
 						# other types of questions are removed, the heading in the component should be removed
 						report_data.pop_component
@@ -192,25 +202,34 @@ module Jobs
 					question_index = survey.all_questions_id.index(qustion_id)
 					target_question_index = survey.all_questions_id.index(qustion_id)
 					next if question_index.nil? || target_question_index.nil?
-					report_data.push_compoent(ReportData::HEADING_2, "text" => "第#{question_index}题，第#{target_question_index}题交叉分析")
+					report_data.push_component(ReportData::HEADING_2, "text" => "第#{question_index}题，第#{target_question_index}题交叉分析")
 				end
+				set_status({"data_conversion_progress" => (i+1).to_f / component_length})
 			end
 
 			# call the webservice to generate the report
-			send_data "" do
-				{'report_data' => {"report_data" => report_data,
-													"result_key" => result_key}.to_yaml}
+			puts "kkkkkkkkkkk"
+			data = {'report_data' => {"report_data" => report_data.serialize.to_json,
+                                                  "job_id" => status["uuid"]}.to_yaml}
+			puts report_data.serialize.inspect
+			puts "kkkkkkkkkkk"
+			send_data "/ExportReport.aspx" do
+				{"report_data" => report_data.serialize, "job_id" => status["uuid"]}
 			end
+			puts "2222222222222222"
+			report_result.status = 1
+			report_result.save
+			puts "3333333333333333"
 		end
 
-		def generate_result_key(answers, report_mockup, report_style, report_type)
+		def self.generate_result_key(answers, report_mockup, report_style, report_type)
 			answer_ids = answers.map { |e| e._id.to_s }
 			result_key = Digest::MD5.hexdigest("report-#{report_mockup.to_json}-#{report_style}-#{report_type}-#{answer_ids.to_s}")
 			return result_key
 		end
 
 		def get_item_text_by_id(items, id)
-			item = items.select { |e| e["id"] == input_id }
+			item = items.select { |e| e["id"].to_s == id.to_s }
 			return nil if item.nil?
 			item_text = item[0]["content"]["text"]
 		end
@@ -630,7 +649,7 @@ module Jobs
 			total_number = 0
 			results = []
 			analysis_result.each do |input_id, select_number|
-				item_text = get_item_text_by_id(issue.items, input_id)
+				item_text = get_item_text_by_id(issue["items"], input_id)
 				next if item_text.nil?
 				total_number = total_number + select_number
 				results << { "text" => item_text, "select_number" => select_number.to_f }

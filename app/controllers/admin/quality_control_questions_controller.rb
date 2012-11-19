@@ -93,25 +93,13 @@ class Admin::QualityControlQuestionsController < Admin::ApplicationController
 	end
 
 	def objective_questions
-		questions = QualityControlQuestion.objective_questions.desc(:created_at).page(page).per(per_page)
-		respond_to do |format|
-			format.json	{ render_json_auto(questions) and return }
-		end
-	end
-
-	def objective_questions_count
-		render_json_auto QualityControlQuestion.objective_questions.count
+		questions = QualityControlQuestion.objective_questions.desc(:created_at)
+		render_json_auto auto_paginate(questions)
 	end
 
 	def matching_questions
-		questions = QualityControlQuestion.matching_questions.desc(:created_at).page(page).per(per_page)
-		respond_to do |format|
-			format.json	{ render_json_auto(questions) and return }
-		end
-	end
-
-	def matching_questions_count
-		render_json_auto QualityControlQuestion.matching_questions.count
+		questions = QualityControlQuestion.matching_questions.desc(:created_at)
+		render_json_auto auto_paginate(questions)
 	end
 
 	#*method*: delete

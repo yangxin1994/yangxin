@@ -6,7 +6,7 @@ class AnalysisResult < Result
 	include Mongoid::Document
 	include Mongoid::Timestamps
 
-	field :duration_result, :type => Float
+	field :duration_mean, :type => Float
 	field :time_result, :type => Hash
 	field :region_result, :type => Hash
 	field :channel_result, :type => Hash

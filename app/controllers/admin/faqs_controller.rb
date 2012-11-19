@@ -24,24 +24,15 @@ class Admin::FaqsController < Admin::ApplicationController
 
 		@faqs = @faqs.map{|e| maping(e)}
 
-		respond_to do |format|
-			format.html # index.html.erb
-			format.json { render_json_auto @faqs}
-		end
-	end
-
-	def count
-		render_json_auto Faq.count
-	end
-
-	def list_by_type_count
-		@public_notices = PublicNotice.list_by_type(params[:public_notice_type]) 
-		render_json_auto @public_notices.count
-	end
-
-	def list_by_type_and_value_count
-		@public_notices = PublicNotice.list_by_type_and_value(params[:public_notice_type], params[:value])
-		render_json_auto @public_notices.count
+		if !params[:faq_type].nil? then
+			if !params[:value].nil? then
+				render_json_auto (auto_paginate(@faqs, Faq.list_by_type_and_value(params[:faq_type], params[:value]).count){@faqs}) and return
+			else
+				render_json_auto (auto_paginate(@faqs, Faq.list_by_type(params[:faq_type]).count){@faqs}) and return
+			end
+		else
+			render_json_auto (auto_paginate(@faqs, Faq.count){@faqs}) and return
+		end 		
 	end
 	
 	# GET /admin/faqs/1 

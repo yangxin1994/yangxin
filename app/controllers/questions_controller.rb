@@ -5,7 +5,16 @@ class QuestionsController < ApplicationController
 
 
 	def check_normal_survey_existence
-		@survey = (@current_user.is_admin || @current_user.is_super_admin) ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
+		# @survey = (@current_user.is_admin || @current_user.is_super_admin) ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
+		# change for answer_auditor
+
+		if @current_user.is_admin || @current_user.is_super_admin 
+			@survey = Survey.normal.find_by_id(params[:survey_id])
+		elsif @current_user.is_answer_auditor
+			@survey = @current_user.answer_auditor_allocated_surveys.find_by_id(params[:survey_id])
+		else
+			@survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
+		end
 		if @survey.nil?
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }

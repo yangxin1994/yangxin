@@ -31,7 +31,7 @@ OopsData::Application.routes.draw do
 				get 'blacks', 'blacks_count', 'whites', 'whites_count', 'count', 
 					'deleteds', 'deleteds_count', 
 					'email_count', 'true_name_count', 'username_count',
-					'list_by_role', 'list_by_role_count'
+					'list_by_role'
 			end
 
 			member do
@@ -275,6 +275,7 @@ OopsData::Application.routes.draw do
 			get 'estimate_answer_time'
 			put 'update_deadline'
 			post 'update_star'
+			get 'reward_info'
 		end
 		resources :pages do
 			member do

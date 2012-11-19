@@ -10,6 +10,29 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 	def show
 		answer = Answer.find_by_id(params[:id])
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
+		answer["question_content"] = []
+		answer.answer_content.each do |key, val|
+			# key is question id
+			# val is like of { "selection" : [ NumberLong("1351400998231222"), NumberLong("3055564856809646") ], "text_input" : "" }
+			question = Question.find_by_id(key)
+			next unless question
+			show_answer = {}
+			show_answer.merge!({"title" => question.content["text"]})
+			if question.issue["items"] 
+				choices = []
+				selected_choices = []
+				question.issue["items"].each do |item|
+					choices << item["content"]["text"]
+					val["selection"].each do |selection_id|
+						selected_choices << item["content"]["text"] if selection_id.to_s == item["id"].to_s
+					end
+				end
+				show_answer.merge!({"choices"=>choices})
+				show_answer.merge!({"selected_choices"=> selected_choices})
+			end
+			# {question_content: [{title: "", choices: [], selected_choices: []}]}
+			answer["question_content"] << show_answer if show_answer.count > 0
+		end
 		render_json_auto(answer)
 	end
 

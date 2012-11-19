@@ -49,7 +49,8 @@ module Jobs
 			answers_length = answers.length
 			answers.each_with_index do |a, index|
 				info = {}
-				info["email"] = a.user.email
+				info["email"] = a.user.nil? ? "" : a.user.email.to_s
+				info["true_name"] = a.user.nil? ? "" : a.user.true_email.to_s
 				info["answer_time"] = a.created_at.to_i
 				info["duration"] = a.finished_at - a.created_at.to_i
 				info["region"] = a.region
