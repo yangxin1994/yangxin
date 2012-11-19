@@ -12,6 +12,7 @@ class Array
 	end
 
 	def mean
+		return 0 if self.length == 0
 		return self.sum / self.length
 	end
 

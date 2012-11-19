@@ -10,7 +10,6 @@ class User
 	field :email, :type => String
 	field :username, :type => String
 	field :password, :type => String
-	field :true_name, :type => String
 # 0 unregistered
 # 1 registered but not activated
 # 2 registered, activated, but not signed in
@@ -73,8 +72,8 @@ class User
 	#before_save :set_updated_at
 	#before_update :set_updated_at
 
-	# add role, true_name to create system_user
-	attr_accessible :email, :username, :password, :registered_at, :role, :true_name
+	# add role, full_name to create system_user
+	attr_accessible :email, :username, :password, :registered_at, :role, :full_name
 
 	has_many :surveys
 	has_many :groups
@@ -545,7 +544,7 @@ class User
 	end
 
 	def update_user(attributes)
-		select_attrs = %w(status birthday gender address phone postcode company identity_card username true_name)
+		select_attrs = %w(status birthday gender address phone postcode company identity_card username full_name)
 		attributes.select!{|k,v| select_attrs.include?(k.to_s)}
 		retval = self.update_attributes(attributes)
 		return retval

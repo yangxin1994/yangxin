@@ -1780,6 +1780,11 @@ class Survey
 		return surveys_with_spread_number
 	end
 
+	def self.search_title(query)
+		surveys = Survey.where(title: Regexp.new(query.to_s))
+		return surveys.map { |s| s.serialize_in_short }
+	end
+
 	def serialize_in_short
 		survey_obj = Hash.new
 		survey_obj["_id"] = self._id.to_s
