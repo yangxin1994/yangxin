@@ -29,17 +29,23 @@ class GiftsController < ApplicationController
     render_json @gift.is_valid? &&
                 @gift.point > current_user.point &&
                 @gift.surplus >= 0 do |s|
+      order = params[:order].merge({:gift => @gift, :type => @gift.type})
       if s
-        if @gift.point > user.point 
-          current_user.orders.create(:gift => @gift,
-                                     :type => @gift.type) 
+        if @gift.point > current_user.point 
+          current_user.orders.create(order) 
         elsif @gift.surplus <= 0
           return ErrorEnum::GIFT_NOT_ENOUGH
         else
           return ErrorEnum::POINT_NOT_ENOUGH
         end
       else
-        return ErrorEnum::GIFT_NOT_FOUND
+        if @gift.surplus <= 0
+          return ErrorEnum::GIFT_NOT_ENOUGH
+        elsif
+          return ErrorEnum::POINT_NOT_ENOUGH
+        else
+          return ErrorEnum::GIFT_NOT_FOUND
+        end
       end
     end
   end
