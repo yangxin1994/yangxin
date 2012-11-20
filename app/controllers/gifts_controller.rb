@@ -2,7 +2,7 @@
 class GiftsController < ApplicationController
   #TO DO before_filter
   # gifts.json?page=1
-
+  before_filter :require_sign_in, :only => :exchange
   def index
     render_json do 
       auto_paginate(Gift.can_be_rewarded) do |g|
@@ -27,12 +27,12 @@ class GiftsController < ApplicationController
   def exchange
     @gift = Gift.find_by_id(params[:id])
     render_json @gift.is_valid? &&
-                @gift.point > user.point &&
+                @gift.point > current_user.point &&
                 @gift.surplus >= 0 do |s|
       if s
         if @gift.point > user.point 
-          user.orders.create(:gift => @gift,
-                             :type => @gift.type) 
+          current_user.orders.create(:gift => @gift,
+                                     :type => @gift.type) 
         elsif @gift.surplus <= 0
           return ErrorEnum::GIFT_NOT_ENOUGH
         else
