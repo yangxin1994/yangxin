@@ -8,9 +8,9 @@ class Answer
 	include Mongoid::Timestamps
 	# status: 0 for editting, 1 for reject, 2 for finish, 3 for redo
 	field :status, :type => Integer, default: 0
-	field :answer_content, :type => Hash
-	field :random_quality_control_answer_content, :type => Hash
-	field :random_quality_control_locations, :type => Hash
+	field :answer_content, :type => Hash, default: {}
+	field :random_quality_control_answer_content, :type => Hash, default: {}
+	field :random_quality_control_locations, :type => Hash, default: {}
 
 	# Due to the logic control rules, volunteer's answer will hide/show some questions/choices.
 	# The hide/show of questions can be recorded in the "answer_content" field
@@ -20,7 +20,7 @@ class Answer
 	# => logic_control_result is a hash, the key of which is question id, and the value of which has the following strucutre
 	# => => items : array of input ids that are hidden
 	# => => sub_questions : array of row ids that are hidden
-	field :logic_control_result, :type => Hash
+	field :logic_control_result, :type => Hash, default: {}
 	field :repeat_time, :type => Integer, default: 0
 	# reject_type: 0 for rejected by quota, 1 for rejected by quliaty control, 2 for rejected by screen, 3 for timeout
 	field :reject_type, :type => Integer
@@ -732,6 +732,7 @@ class Answer
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
 		self.set_finish
 		self.finished_at = Time.now.to_i
+		self.finish_type = 1 if !self.survey.has_prize
 		self.save
 		self.update_quota
 		return true
