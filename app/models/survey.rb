@@ -1792,8 +1792,24 @@ class Survey
 	end
 
 	def self.search_title(query)
-		surveys = Survey.where(title: Regexp.new(query.to_s))
-		return surveys.map { |s| s.serialize_in_short }
+		surveys = Survey.where(title: Regexp.new(query.to_s)).desc(:updated_at)
+		return surveys.map { |s| s.serialize_in_list_page }
+	end
+
+	def serialize_in_list_page
+		survey_obj = Hash.new
+		survey_obj["_id"] = self._id.to_s
+		survey_obj["title"] = self.title.to_s
+		survey_obj["subtitle"] = self.subtitle.to_s
+		survey_obj["created_at"] = self.created_at
+		survey_obj["updated_at"] = self.updated_at
+		survey_obj["reward"] = self.reward
+		survey_obj["publish_status"] = self.publish_status
+		survey_obj["status"] = self.status
+		survey_obj["is_star"] = self.is_star
+		survey_obj['screened_answer_number']=self.answers.not_preview.screened.length
+		survey_obj['finished_answer_number']=self.answers.not_preview.finished.length
+		return survey_obj
 	end
 
 	def serialize_in_short
