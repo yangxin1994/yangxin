@@ -92,6 +92,8 @@ class Survey
 	has_many :answers
 	has_many :email_histories
 
+	has_many :survey_spreads
+
 	belongs_to :loterry
 
 	has_many :export_results
@@ -1766,16 +1768,10 @@ class Survey
 
 	def self.list_spreaded_surveys(user)
 		answers = Answer.where(:is_preview => false, :introducer_id => user._id, :status => 2, :finish_type => 1)
-		surveys_with_spread_number_hash = {}
 		surveys_with_spread_number = []
-		answers.each do |a|
-			survey_id = a.survey_id.to_s
-			surveys_with_spread_number_hash[survey_id] ||= 0
-			surveys_with_spread_number_hash[survey_id] = surveys_with_spread_number_hash[survey_id] + 1
-		end
-		surveys_with_spread_number_hash.each do |survey_id, spread_number|
-			survey = Survey.find_by_id(survey_id)
-			surveys_with_spread_number << {"survey" => survey.serialize_in_short, "answer_status" => s.answer_status(user), "spread_number" => spread_number}
+		user.survey_spreads.each do |ss|
+			survey = ss.survey
+			surveys_with_spread_number << {"survey" => survey.serialize_in_short, "answer_status" => survey.answer_status(user), "spread_number" => ss.times}
 		end
 		return surveys_with_spread_number
 	end

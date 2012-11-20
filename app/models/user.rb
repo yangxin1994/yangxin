@@ -88,6 +88,7 @@ class User
 	has_many :email_histories
 	has_many :answers
 	has_many :template_question_answers
+	has_many :survey_spreads
 
 	has_and_belongs_to_many :answer_auditor_allocated_surveys, class_name: "Survey", inverse_of: :answer_auditors
 	has_and_belongs_to_many :entry_clerk_allocated_surveys, class_name: "Survey", inverse_of: :entry_clerks
