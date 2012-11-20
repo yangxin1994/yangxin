@@ -768,7 +768,7 @@ class Answer
 		# no need to give points if the answer does not pass the review
 		return if self.finish_type == 2
 		if [1,2].include?(self.survey.reward)
-			# assign this user points, or a loterry code
+			# assign this user points, or a lottery code
 			# usage post_reward_to(user, :type => 2, :point => 100)
 			# 1 for lottery & 2 for point
 			lc = self.survey.reward == 1 ? nil : self.survey.lottery.give_lottery_code_to(user)

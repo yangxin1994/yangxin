@@ -18,7 +18,7 @@ class Lottery
   scope :activity, where(:status => 1)
   scope :finished, where(:status => 2)
   
-  has_many :survey
+  has_many :surveys
   has_many :prizes
   has_many :lottery_codes
   has_many :gifts

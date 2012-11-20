@@ -94,7 +94,7 @@ class Survey
 
 	has_many :survey_spreads
 
-	belongs_to :loterry
+	belongs_to :lottery
 
 	has_many :export_results
 	has_many :analysis_results
@@ -459,9 +459,24 @@ class Survey
 		new_instance = self.clone
 		new_instance.title = title || new_instance.title
 
+		# some information that cannot be cloned
 		new_instance.status = 0
 		new_instance.publish_status = 1
 		new_instance.user_attr_survey = false
+		new_instance.is_star = false
+		new_instance.point = 0
+		new_instance.spread_point = 0
+		new_instance.spreadable = false
+		new_instance.reward = 0
+		new_instance.show_in_community = false
+		lottery = new_instance.lottery
+		lottery.surveys.delete(new_instance) if !lottery.nil?
+		interviewers = new_instance.interviewers
+		interviewers.each do |interviewer| interviewer.delete(new_instance) end
+		entry_clerks = new_instance.entry_clerks
+		entry_clerks.each do |entry_clerk| entry_clerk.delete(new_instance) end
+		answer_auditors = new_instance.answer_auditors
+		answer_auditors.each do |answer_auditor| answer_auditor.delete(new_instance) end
 
 		# the mapping of question ids
 		question_id_mapping = {}
@@ -1802,7 +1817,7 @@ class Survey
 	def reward_info
 		return {"reward_type" => self.reward,
 				"point" => self.point,
-				"loterry_id" => self.loterry_id,
+				"lottery_id" => self.lottery_id,
 				"spreadable" => self.spreadable,
 				"spread_point" => self.spread_point}
 	end
