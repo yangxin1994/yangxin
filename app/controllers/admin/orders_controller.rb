@@ -11,12 +11,9 @@ class Admin::OrdersController < Admin::ApplicationController
     end
   end
   
-  def delete
-    @orders = []
-    params[:ids].to_a.each do |id|
-      @orders << (Order.find_by_id id do |r|
-        r.delete
-      end)
+  def destroy
+    Order.find_by_id(params[:id]) do |r|
+      r.delete
     end
     render_json{ @orders }
   end
@@ -42,20 +39,20 @@ class Admin::OrdersController < Admin::ApplicationController
     update
   end
 
-  def false_verify
-    params[:order][:status] = -1
-    # params[:order][:status_desc] 
-    update
-  end
+  # def false_verify
+  #   params[:order][:status] = -1
+  #   # params[:order][:status_desc] 
+  #   update
+  # end
   
-  def false_verify
-    params[:order][:status] = -1
-    # params[:order][:status_desc] 
-    update
-  end  
+  # def false_verify
+  #   params[:order][:status] = -1
+  #   # params[:order][:status_desc] 
+  #   update
+  # end  
 
   def update
-    @order = @current_user.orders.find_by_id(params[:id])
+    @order = Order.find_by_id(params[:id])
     render_json @order.update_attributes(params[:order]) do
       @order.as_retval
     end
@@ -73,7 +70,7 @@ class Admin::OrdersController < Admin::ApplicationController
       #Order.send(method_name).page(page)
       auto_paginate(Order.send(method_name)) do |orders|
         orders.page(page).per(per_page).map do |o|
-          o["gift_name"] = o.gift.name
+          o["gift_name"] = o.gift.name unless o.gift.nil?
           o
         end
       end
