@@ -10,7 +10,6 @@ class User
 	field :email, :type => String
 	field :username, :type => String
 	field :password, :type => String
-	field :true_name, :type => String
 # 0 unregistered
 # 1 registered but not activated
 # 2 registered, activated, but not signed in
@@ -73,8 +72,8 @@ class User
 	#before_save :set_updated_at
 	#before_update :set_updated_at
 
-	# add role, true_name to create system_user
-	attr_accessible :email, :username, :password, :registered_at, :role, :true_name
+	# add role, full_name to create system_user
+	attr_accessible :email, :username, :password, :registered_at, :role, :full_name
 
 	has_many :surveys
 	has_many :groups
@@ -89,6 +88,7 @@ class User
 	has_many :email_histories
 	has_many :answers
 	has_many :template_question_answers
+	has_many :survey_spreads
 
 	has_and_belongs_to_many :answer_auditor_allocated_surveys, class_name: "Survey", inverse_of: :answer_auditors
 	has_and_belongs_to_many :entry_clerk_allocated_surveys, class_name: "Survey", inverse_of: :entry_clerks
@@ -535,7 +535,7 @@ class User
 		return ErrorEnum::REQUIRE_ADMIN unless self.is_admin
 		return ErrorEnum::REQUIRE_SUPER_ADMIN if new_user["role"].to_s.to_i > 16 and !self.is_super_admin
 		return ErrorEnum::EMAIL_EXIST if User.where(email: new_user["email"].to_s.strip).count >0
-		return ErrorEnum::USERNAME_EXIST if User.where(username: new_user["username"].to_s.strip).count >0
+		return ErrorEnum::USERNAME_EXIST if new_user["username"].to_s.strip!="" && User.where(username: new_user["username"].to_s.strip).count >0
 		new_user["password"] = "oopsdata" unless new_user["password"]
 		new_user["password"] = Encryption.encrypt_password(new_user["password"])
 		one_user = User.new(new_user)
@@ -545,7 +545,7 @@ class User
 	end
 
 	def update_user(attributes)
-		select_attrs = %w(status birthday gender address phone postcode company identity_card username true_name)
+		select_attrs = %w(status birthday gender address phone postcode company identity_card username full_name)
 		attributes.select!{|k,v| select_attrs.include?(k.to_s)}
 		retval = self.update_attributes(attributes)
 		return retval

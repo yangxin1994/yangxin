@@ -4,7 +4,7 @@ class Admin::SystemUsersController < Admin::ApplicationController
 
 	# before_filter :require_admin
 
-	@@system_user_attrs_filter = %w(_id system_user_type true_name email username lock created_at updated_at)
+	@@system_user_attrs_filter = %w(_id system_user_type full_name email username lock created_at updated_at)
  
 	# all the interfaces should be able to realized by the interfaces in the admin::users_controller
 =begin

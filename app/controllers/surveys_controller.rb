@@ -1,9 +1,9 @@
 require 'array'
 require 'error_enum'
 class SurveysController < ApplicationController
-	before_filter :require_sign_in, :except => [:show, :estimate_answer_time, :list_surveys_in_community, :reward_info]
-	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :update_deadline]
-	before_filter :check_normal_survey_existence, :except => [:new, :index, :list_surveys_in_community, :list_answered_surveys, :list_spreaded_surveys, :recover, :clear, :add_tag, :remove_tag, :show, :estimate_answer_time, :reward_info]
+	before_filter :require_sign_in, :except => [:show, :estimate_answer_time, :list_surveys_in_community, :reward_info, :search_title]
+	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :update_deadline, :update_star]
+	before_filter :check_normal_survey_existence, :except => [:new, :index, :list_surveys_in_community, :list_answered_surveys, :list_spreaded_surveys, :recover, :clear, :add_tag, :remove_tag, :show, :estimate_answer_time, :reward_info, :update_star]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
 	
 	def check_survey_existence
@@ -446,5 +446,13 @@ class SurveysController < ApplicationController
 		respond_to do |format|
 			format.json	{ render_json_auto(survey.nil? ? ErrorEnum::SURVEY_NOT_EXIST : survey.reward_info) and return }
 		end
+	end
+
+	def search_title
+		surveys = Survey.search_title(params[:query])
+		paginated_surveys = auto_paginate surveys_with_spreaded_number do |s|
+			s.slice((page - 1) * per_page, per_page)
+		end
+		render_json_auto(paginated_surveys)
 	end
 end
