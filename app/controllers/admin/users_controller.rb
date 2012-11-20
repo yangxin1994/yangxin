@@ -5,7 +5,7 @@ class Admin::UsersController < Admin::ApplicationController
 # ************** Quill Admin Manage User ************************************
 #++
 	
-	@@user_attrs_filter = %w(_id email color role status username true_name identity_card company birthday gender address phone postcode black white new_password lock color)
+	@@user_attrs_filter = %w(_id email color role status username full_name identity_card company birthday gender address phone postcode black white new_password lock color)
 
 	def check_user_existence
 		@user = User.find_by_id_including_deleted(params[:id])
@@ -17,8 +17,8 @@ class Admin::UsersController < Admin::ApplicationController
 	def index
 		if !params[:email].nil? then
 			@users = User.where(email: params[:email]).desc(:status, :created_at)
-		elsif !params[:true_name].nil? then	
-			@users = User.where(true_name: params[:true_name]).desc(:status, :created_at)
+		elsif !params[:full_name].nil? then	
+			@users = User.where(full_name: params[:full_name]).desc(:status, :created_at)
 		elsif !params[:username].nil? then
 			filter = params[:username].to_s.gsub(/[*]/, ' ')
 			@users = User.where(username: /.*#{filter}.*/).desc(:status, :created_at)

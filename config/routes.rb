@@ -247,6 +247,7 @@ OopsData::Application.routes.draw do
 			get 'list_surveys_in_community'
 			get 'list_answered_surveys'
 			get 'list_spreaded_surveys'
+			get 'search_title'
 		end
 		member do
 			put 'save_meta_data'
