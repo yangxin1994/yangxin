@@ -32,6 +32,9 @@ class PublishStatusHistory
 		if (self.before_status == PublishStatus::CLOSED || self.before_status == PublishStatus::PAUSED) && self.after_status == PublishStatus::UNDER_REVIEW
 			# the survey is submitted, and the status changes from closed or paused to under review
 			# 1. need to send administrator email?
+		elsif (self.before_status == PublishStatus::CLOSED || self.before_status == PublishStatus::PAUSED) && self.after_status == PublishStatus::PUBLISHED
+			# the survey is submitted by an administrator, and the status changes from closed or paused to under review
+			# 1. need to send administrator email?
 		elsif self.before_status == PublishStatus::UNDER_REVIEW && self.after_status == PublishStatus::PUBLISHED
 			# the survey has passed the check
 			# 1. should send user email
