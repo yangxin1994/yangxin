@@ -13,4 +13,23 @@ class JobsController < ApplicationController
 		render_json_s(true)
 	end
 
+	def result_job
+		case params[:result_type]
+		when "data_list"
+			survey = Survey.find_by_id(params[:survey_id])
+			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
+			answers = survey.get_answers
+			
+		when "analysis"
+			
+		when "report"
+			
+		when "to_spss"
+			
+		when "to_excel"
+			
+		end
+		
+	end
+
 end
