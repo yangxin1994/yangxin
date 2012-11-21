@@ -146,7 +146,7 @@ OopsData::Application.routes.draw do
 
 		resources :rewards do
 			collection do
-				put :operate_point, :revoke_operation
+				post :operate_point, :revoke_operation
 			end
 		end
 	# The priority is based upon order of creation:

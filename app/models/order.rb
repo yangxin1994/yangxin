@@ -39,6 +39,8 @@ class Order
                      :inclusion => { :in => -3..3 },
                      :numericality => true
 
+  default_scope where(:is_deleted => false)
+  
   scope :for_cash, where( :type => 0)
   scope :for_entity, where( :type => 1)
   scope :for_virtual, where( :type => 2)

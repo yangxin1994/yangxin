@@ -48,7 +48,7 @@ class OrdersController < ApplicationController
 
   def destroy
     @order = @current_user.orders.find_by_id(params[:id])
-    render_json @order.status == 1 do |s|
+    render_json @order.status == 0 do |s|
       if s
         @order.update_attribute("is_deleted", true)
       else
