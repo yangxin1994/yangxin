@@ -136,7 +136,22 @@ class Admin::UsersController < Admin::ApplicationController
 	end
 
 	def list_by_role
-		users = User.where(role: params[:role].to_i).desc(:lock, :created_at)
-		render_json_auto auto_paginate(users)
+		role = params[:role].to_i
+		if role > 0
+			users = User.where(:role.gt => 0).desc(:lock, :created_at).to_a
+			logger.debug '+++++++++++'
+			logger.debug users.length
+			users.select! do |u|
+				u.role.to_i & role > 0
+			end
+			logger.debug users.to_a.length
+		else
+			users = User.where(role: role).desc(:lock, :created_at).to_a
+		end
+		# users = User.where(role: params[:role].to_i).desc(:lock, :created_at)
+		paginated_users = auto_paginate(users) do |u|
+			u.slice((page - 1) * per_page, per_page)
+    end
+    render_json_auto paginated_users
 	end
 end
