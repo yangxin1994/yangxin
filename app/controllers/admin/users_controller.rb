@@ -15,7 +15,17 @@ class Admin::UsersController < Admin::ApplicationController
 	# GET /admin/users
 	# GET /admin/users.json
 	def index
-		if !params[:email].nil? then
+		if !params[:role].nil? then
+			role_params=params[:role].to_i
+			roles = []
+			5.downto(0).each do |i|
+				if role_params / 2**i == 1 
+					roles << 2**i
+					role_params %= 2**i
+				end
+			end
+			@users = User.list_by_roles(roles)
+		elsif !params[:email].nil? then
 			@users = User.where(email: params[:email]).desc(:status, :created_at)
 		elsif !params[:full_name].nil? then	
 			@users = User.where(full_name: params[:full_name]).desc(:status, :created_at)
@@ -26,7 +36,11 @@ class Admin::UsersController < Admin::ApplicationController
 			@users = User.normal_list.desc(:status, :created_at)
 		end			
 
-		render_json_auto(auto_paginate(@users)) and return
+		if !params[:role].nil? then
+			render_json_auto(auto_paginate(@users){@users.slice((page-1)*per_page, per_page)}) and return
+		else
+			render_json_auto (auto_paginate(@users)) and return
+		end
 	end
 
 	# GET /admin/users/1 
@@ -56,9 +70,9 @@ class Admin::UsersController < Admin::ApplicationController
 	# DELETE /admin/users/1
 	# DELETE /admin/users/1.json
 	def destroy
-		@user.update_attributes({"status" => -1})
+		retval = @user.update_attributes({"status" => -1})
 		respond_to do |format|
-			format.json { render_json_auto @user }
+			format.json { render_json_auto retval }
 		end
 	end
 

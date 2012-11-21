@@ -327,7 +327,8 @@ class Survey
 				end
 			end
 		end
-		return survey_list
+		# sort by created_at
+		return survey_list.sort{|v1,v2| v2.created_at <=> v1.created_at}
 	end
 
 	def has_one_tag_of(tags)
@@ -1792,7 +1793,7 @@ class Survey
 	end
 
 	def self.search_title(query)
-		surveys = Survey.where(title: Regexp.new(query.to_s)).desc(:updated_at)
+		surveys = Survey.where(title: Regexp.new(query.to_s)).desc(:created_at)
 		return surveys.map { |s| s.serialize_in_list_page }
 	end
 

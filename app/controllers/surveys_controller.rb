@@ -284,7 +284,7 @@ class SurveysController < ApplicationController
 	def index
 
 		if params[:stars] then
-			survey_list = @current_user.surveys.stars
+			survey_list = @current_user.surveys.stars.desc(:created_at)
 		else
 			survey_list = @current_user.surveys.list(params[:status], params[:publish_status], params[:tags])
 		end	
@@ -449,7 +449,7 @@ class SurveysController < ApplicationController
 	end
 
 	def search_title
-		surveys = Survey.search_title(params[:query])
+		surveys = @current_user.surveys.search_title(params[:query])
 		paginated_surveys = auto_paginate surveys do |s|
 			s.slice((page - 1) * per_page, per_page)
 		end
