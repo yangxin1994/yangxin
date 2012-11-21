@@ -41,7 +41,7 @@ class Answer
 	field :rejected_at, :type => Integer
 
 	field :introducer_id, :type => String
-	field :introducer_to_pay, :type => Integer
+	field :point_to_introducer, :type => Integer
 
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
@@ -112,9 +112,12 @@ class Answer
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
-		if !is_preview
-			answer.introducer_id = introducer_id
-			answer.introducer_to_pay = survey.spread_point
+		if !is_preview && !introducer_id
+			introducer = User.find_by_id(introducer_id)
+			if !introducer.nil? && introducer.email != email
+				answer.introducer_id = introducer_id
+				answer.point_to_introducer = survey.spread_point
+			end
 		end
 		
 		# initialize the answer content
@@ -784,10 +787,10 @@ class Answer
 		if !introducer.nil?
 			# update the survey spread
 			SurveySpread.inc(introducer, self.survey)
-			if introducer_to_pay > 0
-				RewardLog.create(:user => introducer, :type => 2, :point => self.introducer_to_pay, :extended_survey_id => self.survey_id, :cause => 3)
+			if point_to_introducer > 0
+				RewardLog.create(:user => introducer, :type => 2, :point => self.point_to_introducer, :extended_survey_id => self.survey_id, :cause => 3)
 				# send the introducer a message about the rewarded points
-				user.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.introducer_to_pay}个积分奖励。", [introducer._id])
+				user.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.point_to_introducer}个积分奖励。", [introducer._id])
 			end
 		end
 		return true

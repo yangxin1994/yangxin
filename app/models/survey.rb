@@ -578,11 +578,16 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
 	def submit(message, operator)
-		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin
+		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_super_admin
 		return ErrorEnum::WRONG_PUBLISH_STATUS if ![PublishStatus::CLOSED, PublishStatus::PAUSED].include?(self.publish_status)
 		before_publish_status = self.publish_status
-		self.update_attributes(:publish_status => PublishStatus::UNDER_REVIEW)
-		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::UNDER_REVIEW, message)
+		if operator.is_admin || operator.is_super_admin
+			self.update_attributes(:publish_status => PublishStatus::PUBLISHED)
+			publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::PUBLISHED, message)
+		else
+			self.update_attributes(:publish_status => PublishStatus::UNDER_REVIEW)
+			publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::UNDER_REVIEW, message)
+		end
 		self.publish_status_historys << publish_status_history
 		return true
 	end
