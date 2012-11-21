@@ -21,13 +21,7 @@ gem 'resque-scheduler'
 gem 'oops-mail', '0.0.2', :path => "vendor/gems/oops-mail-0.0.2"
 gem 'faker'
 
-gem 'haml'
-gem 'haml-rails'
-gem 'sass'
-
 gem 'pry-rails'
-
-gem 'passenger'
 
 gem 'rest-client'
 if HOST_OS =~ /linux/i
@@ -37,15 +31,19 @@ group :assets do
   gem 'sass-rails', "  ~> 3.1.4"
   gem 'coffee-rails', "~> 3.1.0"
   gem 'uglifier'
+	gem 'haml'
+	gem 'haml-rails'
+	gem 'sass'
+	gem 'jquery-rails'
+	#gem 'mini_captcha', :path => "~/Rrojects/mini_captcha/"
+	# attachment
+	gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
 end
 
 
-gem 'jquery-rails'
-#gem 'mini_captcha', :path => "~/Rrojects/mini_captcha/"
-# attachment
-gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
+
 gem 'mime-types'
-gem 'mini_magick', :git => 'https://github.com/karmaQ/mini_magick.git'
+# gem 'mini_magick', :git => 'https://github.com/karmaQ/mini_magick.git'
 # Use unicorn as the web server
 # gem 'unicorn'
 # Deploy with Capistrano
@@ -58,4 +56,8 @@ group :test do
   gem 'turn', :require => false
 	gem 'minitest'
 	gem 'factory_girl_rails', "~> 3.0"
+end
+
+group :production do
+  gem 'passenger'
 end
