@@ -24,7 +24,6 @@ class User
 	field :login_count, :type => Integer, default: 0
 	field :activate_time, :type => Integer
 	field :introducer_id, :type => String
-	field :introducer_to_pay, :type => Integer, default: 10
 	field :last_read_messeges_time, :type => Time, :default => Time.now
 # an integer in the range of [0, 63]. If converted into a binary, each digit from the most significant one indicates:
 # super admin
@@ -98,6 +97,8 @@ class User
 
 	scope :unregistered, where(status: 0)
 	scope :receive_email_user
+
+	POINT_TO_INTRODUCER = 10
 
 	private
 	def set_updated_at
@@ -328,9 +329,9 @@ class User
 		# pay introducer points
 		inviter = User.find_by_id(user.introducer_id)
 		if !inviter.nil?
-			RewardLog.create(:user => introducer, :type => 2, :point => user.introducer_to_pay, :invited_user_id => user._id, :cause => 1)
+			RewardLog.create(:user => introducer, :type => 2, :point => POINT_TO_INTRODUCER, :invited_user_id => user._id, :cause => 1)
 			# send a message to the introducer
-			inviter.create_message("邀请好友注册积分奖励", "您邀请的用户#{user.email}注册激活成功，您获得了#{user.introducer_to_pay}个积分奖励。", [inviter._id])
+			inviter.create_message("邀请好友注册积分奖励", "您邀请的用户#{user.email}注册激活成功，您获得了#{POINT_TO_INTRODUCER}个积分奖励。", [inviter._id])
 		end
 		return true
 	end
