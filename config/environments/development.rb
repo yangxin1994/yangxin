@@ -32,15 +32,14 @@ OopsData::Application.configure do
 
 	config.action_mailer.perform_deliveries = true
 	config.action_mailer.delivery_method = :smtp
-	config.action_mailer.smtp_settings = {
-		:address				=> "smtp.gmail.com",
-		:port						=> 587,
-		:domain					=> "gmail.com",
-#		:user_name			=> "no-reply@oopsdata.com",
-#		:password				=> "o2ps@llysc.data",
-		:user_name			=> "oopsdata2012@gmail.com",
-		:password				=> "jesseyang1985",
-		:authentication => "plain",
-		:enable_starttls_auto => true }
-	
+  config.action_mailer.smtp_settings = {
+    :authentication => :plain,
+    :address => "smtp.mailgun.org",
+    :port => 25,
+    :domain => "oopsdata.net",
+    :user_name => "postmaster@oopsdata.net",
+    :password => "0nlnhy08vbk1"
+  }
+
+  config.task_web_service_uri = 'localhost:5000'
 end

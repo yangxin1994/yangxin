@@ -1,8 +1,7 @@
 # encoding: utf-8
 require 'encryption'
 class UserMailer < ActionMailer::Base
-#  default from: "no-reply@oopsdata.com"
-  default from: "oopsdata2012@gmail.com"
+  default from: "postmaster@oopsdata.net"
 
 	def welcome_email(user)
 		@user = user
