@@ -41,8 +41,6 @@ class GiftsController < ApplicationController
       else
         if @gift.surplus <= 0
           return ErrorEnum::GIFT_NOT_ENOUGH
-        elsif
-          return ErrorEnum::POINT_NOT_ENOUGH
         else
           return ErrorEnum::GIFT_NOT_FOUND
         end
