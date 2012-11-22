@@ -35,10 +35,7 @@ OopsData::Application.routes.draw do
 	namespace :admin do
 		resources :users do 
 			collection do 
-				get 'blacks', 'blacks_count', 'whites', 'whites_count', 'count', 
-					'deleteds', 'deleteds_count', 
-					'email_count', 'true_name_count', 'username_count',
-					'list_by_role'
+				get 'blacks', 'whites', 'deleteds','list_by_role'
 			end
 
 			member do

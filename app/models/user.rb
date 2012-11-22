@@ -621,23 +621,4 @@ class User
 		invited_users = User.where(:introducer_id => self._id.to_s)
 		return invited_users.map { |u| u._id.to_s }
 	end
-
-	def roles
-		roleses=[0]
-		role_params = self.role
-		5.downto(0).each do |i|
-			if role_params / 2**i == 1 
-				roleses << 2**i
-				role_params %= 2**i
-			end
-		end
-		return roleses
-	end
-
-	def self.list_by_roles(roleses)
-		# roleses is a Array
-		roleses ||= []
-		users = User.all.desc(:created_at).to_a.select{|user| (user.roles & roleses).count > 0 }
-		return users
-	end
 end
