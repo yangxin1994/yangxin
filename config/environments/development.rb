@@ -41,5 +41,5 @@ OopsData::Application.configure do
     :password => "0nlnhy08vbk1"
   }
 
-  config.task_web_service_uri = 'localhost:5000'
+  config.task_web_service_uri = 'localhost:9000'
 end

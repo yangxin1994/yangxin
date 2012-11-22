@@ -70,7 +70,7 @@ class RegistrationsController < ApplicationController
 				activate_info = {"email" => params[:user]["email"], "time" => Time.now.to_i}
 				User.activate(activate_info)
 			else
-				TaskClient.create_task({ task_type: :EmailJob, params: { email_type: "welcome", email: user.email } })
+				TaskClient.create_task({ task_type: "email", params: { email_type: "welcome", email: user.email } })
 			end
 			# succesfully registered
 			flash[:notice] = "注册成功，请到您的邮箱中点击激活链接进行激活" if user.status == 0
@@ -150,7 +150,7 @@ class RegistrationsController < ApplicationController
 		end
 		
 		# send activate email
-		TaskClient.create_task({ task_type: :EmailJob, params: { email_type: "activate", email: user.email } })
+		TaskClient.create_task({ task_type: "email", params: { email_type: "activate", email: user.email } })
 
 		flash[:notice] = "激活邮件已发送，请到您的邮箱中点击激活链接进行激活"
 		respond_to do |format|
