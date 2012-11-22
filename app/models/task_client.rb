@@ -27,6 +27,16 @@ class TaskClient
 	end
 
 	def self.set_progress(task_id, progress_item, progress_value)
-		# put to tasks
+		self.put("/tasks/#{task_id}", {:body => {:progress_item => progress_item, :progress_value => progress_value}})
+	end
+
+	def self.get_task(task_id)
+		response = self.get("/tasks/#{task_id}", {:body => {}})
+		result = response.parsed_response
+		if result && result["success"]
+			return result["value"]
+		else
+			return ErrorEnum::PROGRESS_NOT_FOUND
+		end
 	end
 end

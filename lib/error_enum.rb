@@ -3,6 +3,7 @@ module ErrorEnum
 	LOGIN_TOO_FREQUENT = "error_0"
 	ILLEGAL_EMAIL = "error_1"
 	USER_ACTIVATED = "error_2"
+	ILLEGAL_ACTIVATE_KEY = "error_02"
 	USER_NOT_ACTIVATED = "error_3"
 	USER_NOT_EXIST = "error_4"
 	ACTIVATE_EXPIRED = "error_5"
@@ -92,6 +93,7 @@ module ErrorEnum
 	JOB_NOT_EXIST = 'error_190'
 
 	TASK_CREATION_FAILED = 'error_200'
+	TASK_NOT_FOUND = 'error_201'
 
 	UNKNOWN_ERROR = -100000
 	SAVE_ERROR = -200000

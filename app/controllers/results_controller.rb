@@ -56,10 +56,8 @@ class ResultsController < ApplicationController
 
 	def job_progress
 		progress = Result.job_progress(params[:job_id])
-		logger.info "AAAAAAAAAAAAAAAAA"
-		logger.info params[:job_id]
 		if progress == 1
-			result = Result.find_result_by_job_id(params[:job_id])
+			result = Result.find_result_by_task_id(params[:job_id])
 			logger.info result.inspect
 			respond_to do |format|
 				# make pagination for data list

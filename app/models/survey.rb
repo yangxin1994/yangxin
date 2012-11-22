@@ -1363,18 +1363,22 @@ class Survey
 
 	def data_list(filter_index, include_screened_answer)
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
-		task_id = TaskClient.create_task({ task_type: :ResutJob,
+		task_id = TaskClient.create_task({ task_type: "result",
 											params: { result_type: "data_list",
-														:survey_id => self._id,
-														:filter_index => filter_index,
-														:include_screened_answer => include_screened_answer} })
+														survey_id: self._id,
+														filter_index: filter_index,
+														include_screened_answer: include_screened_answer} })
 		return task_id
 	end
 
 	def analysis(filter_index, include_screened_answer)
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
-		job_id = Jobs::AnalysisJob.create(:survey_id => self._id, :filter_index => filter_index, :include_screened_answer => include_screened_answer)
-		return job_id
+		task_id = TaskClient.create_task({ task_type: "result",
+											params: { result_type: "analysis",
+														survey_id: self._id,
+														filter_index: filter_index,
+														include_screened_answer: include_screened_answer} })
+		return task_id
 	end
 
 	def report(filter_index, include_screened_answer, report_mockup_id, report_style, report_type)
@@ -1382,13 +1386,21 @@ class Survey
 		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
 		return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
 		return ErrorEnum::WRONG_REPORT_TYPE if %w[word ppt pdf].include?(report_type)
-		job_id = Jobs::ReportJob.create(:survey_id => self._id, :filter_index => filter_index, :include_screened_answer => include_screened_answer, :report_mockup_id => report_mockup_id, :report_style => report_style, :report_type => report_type)
-		return job_id
+		task_id = TaskClient.create_task({ task_type: "result",
+											params: { result_type: "report",
+														survey_id: self._id,
+														filter_index: filter_index,
+														include_screened_answer: include_screened_answer,
+														report_mockup_id: report_mockup_id,
+														report_style: report_style,
+														report_type: report_type } })
+		return task_id
 	end
 
-	def get_answers
+	def get_answers(filter_index, include_screened_answer, task_id = nil)
 		answers = include_screened_answer ? self.answers.not_preview.finished_and_screened : self.answers.not_preview.finished
 		if filter_index == -1
+			TaskClient.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
 			#set_status({"find_answers_progress" => 1})
 			return answers
 		end
@@ -1398,6 +1410,7 @@ class Survey
 		answers.each_with_index do |a, index|
 			filtered_answers << a if a.satisfy_conditions(filter_conditions)
 			#set_status({"find_answers_progress" => (index + 1) * 1.0 / answers_length})
+			TaskClient.set_progress(task_id, "find_answers_progress", (index + 1).to_f / answers_length) if !task_id.nil?
 		end
 		return filtered_answers
 	end

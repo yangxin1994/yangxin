@@ -6,7 +6,7 @@ OopsData::Application.routes.draw do
 	resources :jobs do
 		collection do
 			post :email_job
-			get :email_job
+			post :result_job
 		end
 	end
 
