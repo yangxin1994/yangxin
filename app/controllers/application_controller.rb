@@ -51,8 +51,9 @@ class ApplicationController < ActionController::Base
 
 	def render_json(is_success = true, options = {}, &block)
 		options[:only]+= [:value, :success] unless options[:only].nil?
-		render :json => {:value => block_given? ? yield(is_success) : is_success ,
-										 :success => is_success
+		@is_success = is_success
+		render :json => {:value => block_given? ? yield(@is_success) : @is_success ,
+										 :success => @is_success
 		}, :except => options[:except], :only => options[:only]		
 	end
 	

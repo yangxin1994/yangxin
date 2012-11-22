@@ -3,6 +3,13 @@ OopsData::Application.routes.draw do
 
 	mount Resque::Server.new, :at => "/resque"
 
+	resources :jobs do
+		collection do
+			post :email_job
+			post :result_job
+		end
+	end
+
 	resources :faqs, :public_notices, :feedbacks, :advertisements
 	resources :data_generators do
 		collection do
@@ -139,7 +146,7 @@ OopsData::Application.routes.draw do
 
 		resources :rewards do
 			collection do
-				put :operate_point, :revoke_operation
+				post :operate_point, :revoke_operation
 			end
 		end
 	# The priority is based upon order of creation:

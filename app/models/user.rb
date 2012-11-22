@@ -24,7 +24,6 @@ class User
 	field :login_count, :type => Integer, default: 0
 	field :activate_time, :type => Integer
 	field :introducer_id, :type => String
-	field :introducer_to_pay, :type => Integer, default: 10
 	field :last_read_messeges_time, :type => Time, :default => Time.now
 # an integer in the range of [0, 63]. If converted into a binary, each digit from the most significant one indicates:
 # super admin
@@ -98,6 +97,8 @@ class User
 
 	scope :unregistered, where(status: 0)
 	scope :receive_email_user
+
+	POINT_TO_INTRODUCER = 10
 
 	private
 	def set_updated_at
@@ -316,7 +317,7 @@ class User
 	#
 	#*retval*:
 	#* true: when successfully activated or already activated
-	def self.activate(activate_info)
+	def self.activate(activate_info, client_ip, client_type)
 		user = User.find_by_email(activate_info["email"])
 		return ErrorEnum::USER_NOT_EXIST if user.nil?     # email account does not exist
 		return true  if user.is_activated
@@ -328,11 +329,21 @@ class User
 		# pay introducer points
 		inviter = User.find_by_id(user.introducer_id)
 		if !inviter.nil?
-			RewardLog.create(:user => introducer, :type => 2, :point => user.introducer_to_pay, :invited_user_id => user._id, :cause => 1)
+			RewardLog.create(:user => introducer, :type => 2, :point => POINT_TO_INTRODUCER, :invited_user_id => user._id, :cause => 1)
 			# send a message to the introducer
-			inviter.create_message("邀请好友注册积分奖励", "您邀请的用户#{user.email}注册激活成功，您获得了#{user.introducer_to_pay}个积分奖励。", [inviter._id])
+			inviter.create_message("邀请好友注册积分奖励", "您邀请的用户#{user.email}注册激活成功，您获得了#{POINT_TO_INTRODUCER}个积分奖励。", [inviter._id])
 		end
-		return true
+		# activate succeed, login automatically
+		# record the login information
+		user.last_login_ip = client_ip
+		user.last_login_client_type = client_type
+		user.login_count = 0 if user.last_login_time.blank? || Time.at(user.last_login_time).day != Time.now.day
+		return ErrorEnum::LOGIN_TOO_FREQUENT if user.login_count > OOPSDATA[RailsEnv.get_rails_env]["login_count_threshold"]
+		user.login_count = user.login_count + 1
+		user.last_login_time = Time.now.to_i
+		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
+		user.auth_key_expire_time =  Time.now.to_i + OOPSDATA["login_keep_time"].to_i
+		return {"status" => user.status, "auth_key" => user.auth_key, "user_id" => user._id.to_s}
 	end
 
 	#*description*: user login

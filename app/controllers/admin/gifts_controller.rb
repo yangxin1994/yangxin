@@ -45,23 +45,26 @@ class Admin::GiftsController < Admin::ApplicationController
                                    :title => params[:gift][:name],
                                    :value => params[:gift][:photo],
                                    :picture_url => params[:gift][:photo])
-        params[:gift][:photo] = material
         @gift.photo = material
       end
       @gift.photo.value = params[:gift][:photo]
       @gift.photo.picture_url = params[:gift][:photo]
+      params[:prize][:photo] = material
       @gift.photo.save
     end
+
+    
     if params[:gift][:type] == 3
       l = Lottery.where(:_id => params[:gift][:lottery]).first
-      if !l.nil?
-        params[:gift][:lottery] = l
+      if !l.nil? 
+        params[:gift].delete(:lottery)
         @gift.lottery = l
         @gift.lottery.save
       else
         render_json(false){ErrorEnum::LOTTERY_NOT_FOUND}
       end
     end
+    params[:gift].select!{ |k, v| !v.nil?}
     render_json @gift.update_attributes(params[:gift]) do
       @gift.as_retval
     end

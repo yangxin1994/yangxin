@@ -62,8 +62,6 @@ module Jobs
 					answers_transform[q_id] << question_answer if !question_answer.blank?
 				end
 			end
-			puts "222222222222222222222222"
-
 			# analyze the result based on the report mockup
 			component_length = report_mockup.components.length
 			report_mockup.components.each_with_index do |component, i|
@@ -208,11 +206,8 @@ module Jobs
 			end
 
 			# call the webservice to generate the report
-			puts "kkkkkkkkkkk"
 			data = {'report_data' => {"report_data" => report_data.serialize.to_json,
                                                   "job_id" => status["uuid"]}.to_yaml}
-			puts report_data.serialize.inspect
-			puts "kkkkkkkkkkk"
 			send_data "/ExportReport.aspx" do
 				{"report_data" => report_data.serialize, "job_id" => status["uuid"]}
 			end

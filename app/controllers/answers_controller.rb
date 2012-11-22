@@ -168,7 +168,7 @@ class AnswersController < ApplicationController
 	end
 
 	def get_my_answer
-		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) if @current_user.nil?
+		render_json_e(ErrorEnum::REQUIRE_LOGIN) and return if @current_user.nil?
 		@answer = Answer.find_by_survey_id_email_is_preview(params[:survey_id], @current_user.email, params[:is_preview])
 		if @answer.nil?
 			respond_to do |format|

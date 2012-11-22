@@ -31,20 +31,16 @@ class GiftsController < ApplicationController
                 @gift.surplus >= 0 do |s|
       order = params[:order].merge({:gift => @gift, :type => @gift.type})
       if s
-        if @gift.point > current_user.point 
-          current_user.orders.create(order) 
-        elsif @gift.surplus <= 0
-          return ErrorEnum::GIFT_NOT_ENOUGH
-        else
-          return ErrorEnum::POINT_NOT_ENOUGH
-        end
+        order = current_user.orders.create(order)
+        @is_success = false  if order.created_at.nil?
+        order.as_retval
       else
         if @gift.surplus <= 0
-          return ErrorEnum::GIFT_NOT_ENOUGH
-        elsif
-          return ErrorEnum::POINT_NOT_ENOUGH
+          ErrorEnum::GIFT_NOT_ENOUGH
+        elsif @gift.point > current_user.point 
+          ErrorEnum::POINT_NOT_ENOUGH
         else
-          return ErrorEnum::GIFT_NOT_FOUND
+          ErrorEnum::GIFT_NOT_FOUND
         end
       end
     end

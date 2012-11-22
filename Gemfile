@@ -4,6 +4,8 @@ source 'http://rubygems.org'
 
 gem 'rails', '3.1.0'
 
+gem 'httparty'
+
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 
@@ -43,7 +45,7 @@ end
 
 
 gem 'mime-types'
-# gem 'mini_magick', :git => 'https://github.com/karmaQ/mini_magick.git'
+gem 'mini_magick', :git => 'https://github.com/karmaQ/mini_magick.git'
 # Use unicorn as the web server
 # gem 'unicorn'
 # Deploy with Capistrano
