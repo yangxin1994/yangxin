@@ -188,7 +188,7 @@ class SessionsController < ApplicationController
 		end
 
 		# send password email
-		TaskClient.create_task({ task_type: :EmailJob, params: { email_type: "password", email: user.email } })
+		TaskClient.create_task({ task_type: "email", params: { email_type: "password", email: user.email } })
 
 		flash[:notice] = "重置密码邮件已发送，请到您的邮箱中点击链接进行密码重置"
 		respond_to do |format|
