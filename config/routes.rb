@@ -364,6 +364,9 @@ OopsData::Application.routes.draw do
 	end
 
 	resources :lotteries do
+		collection do
+			get :own
+		end
 		member do
 			get :draw
 		end

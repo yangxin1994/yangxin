@@ -1,5 +1,3 @@
-require 'test_helper'
-
 class OrdersControllerTest < ActionController::TestCase
   setup do
     clear(User, Order)

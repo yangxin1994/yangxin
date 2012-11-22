@@ -51,10 +51,13 @@ gem 'mini_magick', :git => 'https://github.com/karmaQ/mini_magick.git'
 
 # To use debugger
 # gem 'ruby-debug19', :require => 'ruby-debug'
-group :test do
-  # Pretty printed test output
+group :test, :development do
+  gem 'guard-spork'
+  gem "spork-minitest"
+  gem "guard-minitest", :git => 'https://github.com/karmaQ/guard-minitest.git'
+  gem 'minitest-rails'
+  gem 'rb-fsevent', '~> 0.9.1'
   gem 'turn', :require => false
-	gem 'minitest'
 	gem 'factory_girl_rails', "~> 3.0"
 end
 
