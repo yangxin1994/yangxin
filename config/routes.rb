@@ -35,15 +35,12 @@ OopsData::Application.routes.draw do
 	namespace :admin do
 		resources :users do 
 			collection do 
-				get 'blacks', 'blacks_count', 'whites', 'whites_count', 'count', 
-					'deleteds', 'deleteds_count', 
-					'email_count', 'true_name_count', 'username_count',
-					'list_by_role'
+				get 'blacks', 'whites', 'deleteds','list_by_role'
 			end
 
 			member do
-				get 'system_pwd', 'black', 'white', 'get_email'
-				post 'set_color', 'set_role', 'set_lock'
+				get 'get_email'
+				put 'set_color', 'set_role', 'set_lock', 'system_pwd', 'recover','add_point'
 			end
 		end
 

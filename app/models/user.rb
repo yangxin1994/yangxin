@@ -72,7 +72,7 @@ class User
 	#before_update :set_updated_at
 
 	# add role, full_name to create system_user
-	attr_accessible :email, :username, :password, :registered_at, :role, :full_name
+	attr_accessible :email, :username, :password, :registered_at, :role, :full_name, :status
 
 	has_many :third_party_users
 	has_many :surveys
@@ -510,8 +510,8 @@ class User
 	#++
 
 	scope :normal_list, where(:color => COLOR_NORMAL, :status.gt => 0)
-	scope :black_list, where(:color => COLOR_BLACK, :status.gt => -1)
-	scope :white_list, where(:color => COLOR_WHITE, :status.gt => 1)
+	scope :black_list, where(:color => COLOR_BLACK)
+	scope :white_list, where(:color => COLOR_WHITE)
 	scope :deleted_users, where(status: -1)
 
 	def self.ids_not_in_blacklist
@@ -554,7 +554,7 @@ class User
 	end
 
 	def set_color(color)
-		return ErrorEnum::WRONG_USER_COLOR if ![-1, 0, 1].include?(role)
+		return ErrorEnum::WRONG_USER_COLOR if ![-1, 0, 1].include?(color)
 		self.color = color
 		return self.save
 	end
@@ -562,6 +562,21 @@ class User
 	def set_lock(lock)
 		self.lock = lock == true
 		return self.save
+	end
+
+	def remove
+		self.status = -1
+		self.save
+	end
+
+	def recover
+		self.status = 4
+		self.save
+	end
+
+	def add_point(point_int)
+		self.point += point_int
+		self.save
 	end
 
 	def change_to_system_password

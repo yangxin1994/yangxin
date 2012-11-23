@@ -275,8 +275,8 @@ class ApplicationController < ActionController::Base
 		return [] if page < 1 || per_page < 1 
 
 		### sort
-		if arr.count > 1 && arr[0].respond_to?(:updated_at) then
-			arr.sort!{|v1, v2| v2.updated_at <=> v1.updated_at}
+		if arr.count > 1 && arr[0].respond_to?(:created_at) then
+			arr.sort!{|v1, v2| v2.created_at <=> v1.created_at}
 		end
 
 		# avoid arr = nil
