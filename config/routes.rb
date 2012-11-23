@@ -207,30 +207,22 @@ OopsData::Application.routes.draw do
 
 	resources :registrations do
 		collection do
-			post :create_new_visitor_user
+			post :send_activate_email
+			post :activate
 		end
 	end
-	match 'input_activate_email' => 'registrations#input_activate_email', :as => :input_activate_email
-	match 'send_activate_email' => 'registrations#send_activate_email', :as => :send_activate_email, :via => [:post]
-	match 'activate' => 'registrations#activate', :as => :activate
-	match 'check_email' => 'registrations#email_illegal', :as => :check_email, :via => [:get, :post]
 
 	resources :sessions do
 		collection do
 			post :update_user_info, :init_basic_info, :init_user_attr_survey, :send_password_email
 			get :obtain_user_attr_survey, :skip_init_step
 			post :new_password, :reset_password
-			get :forget_password, :input_new_password
 			post :login_with_auth_key
+			post :login_with_code
 		end
 	end
 	match 'logout' => 'sessions#destroy', :as => :logout
 	match 'login' => 'sessions#create', :as => :login
-	match 'renren_connect' => 'sessions#renren_connect', :as => :renren_connect
-	match 'sina_connect' => 'sessions#sina_connect', :as => :sina_connect
-	match 'qq_connect' => 'sessions#qq_connect', :as => :qq_connect
-	match 'google_connect' => 'sessions#google_connect', :as => :google_connect
-	match 'qihu_connect' => 'sessions#qihu_connect', :as => :qihu_connect
 
 	resources :users do 
 		collection do 

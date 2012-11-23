@@ -13,7 +13,14 @@ class ThirdPartyUser
 	field :expires_in, :type => String
 	field :scope, :type => String
 
+	belongs_to :user
+
 	public
+
+	def self.find_by_id(third_party_user_id)
+		third_party_user = ThirdPartyUser.where(third_party_user_id: third_party_user_id)[0]
+		return third_party_user
+	end
 	
 	#*description*: find a third party user from a website and an user id, 
 	#
@@ -28,14 +35,41 @@ class ThirdPartyUser
 	  return self.where(:website => website, :user_id => user_id)[0]
 	end
 
+	def self.get_access_token(website, code)
+		case website
+		when "sina"
+			response_data = SinaUser.get_access_token(code)
+		when "renren"
+			response_data = RenrenUser.get_access_token(code)
+		when "qq"
+			response_data = QqUser.get_access_token(code)
+		when "google"
+			response_data = GoogleUser.get_access_token(code)
+		end
+		return response_data
+	end
+
+	def self.find_or_create_user(website, response_data)
+		case website
+		when "sina"
+			tp_user = SinaUser.save_tp_user(response_data)
+		when "renren"
+			tp_user = RenrenUser.save_tp_user(response_data)
+		when "qq"
+			tp_user = QqUser.save_tp_user(response_data)
+		when "google"
+			tp_user = GoogleUser.save_tp_user(response_data)
+		end
+		return tp_user
+	end
+
 	def is_bound(user = nil)
 		return false if user.nil?
 		return self.oopsdata_user_id == user.id
 	end
 
 	def bind(user)
-		self.oopsdata_user_id = user.id
-		return self.save
+		user.third_party_users << self
 	end
 	
 	#*description*: update specifi ThirdPartyUser sub class instance 

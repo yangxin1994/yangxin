@@ -6,22 +6,8 @@ class SinaUser < ThirdPartyUser
 	field :gender, :type => String #male will return: "m"
 	field :profile_image_url, :type => String
 	
-	#--
-	# ************* instance attribute's methods*****************
-	#++
-	
-	#*attribute*: name
-	# the same getter with db
-	
-	#*attribute*: gender
-	# the same getter with db
-	
 	#*attribute*: locale
 	alias locale location
-	
-	#--
-	#***************** class methods *************
-	#++
 	
 	#*description*: get access_token for other works
 	#
@@ -76,10 +62,6 @@ class SinaUser < ThirdPartyUser
 		return sina_user
 	end
 	
-	#--
-	# ************instance methods**********
-	#++
-	
 	#*description*: it can call any methods from third_party's API:
 	#http://open.weibo.com/wiki/API%E6%96%87%E6%A1%A3_V2
 	#
@@ -87,11 +69,9 @@ class SinaUser < ThirdPartyUser
 	#* http_method: get(default) or post.
 	#* opts: hash.
 	def call_method(http_method="get", opts = {:method => "users/show", :uid => self.user_id})
-		
 		@params={}
 		@params["access_token"] = self.access_token
 		method = opts[:method] || opts["method"]
-		
 		if http_method.downcase == "get" then
 			params_string = generate_params_string(opts)
 			retval = Tool.send_get_request("https://api.weibo.com/2/#{method}.json#{params_string}", true) 

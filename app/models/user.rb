@@ -74,6 +74,7 @@ class User
 	# add role, full_name to create system_user
 	attr_accessible :email, :username, :password, :registered_at, :role, :full_name
 
+	has_many :third_party_users
 	has_many :surveys
 	has_many :groups
 	has_many :materials
@@ -122,7 +123,7 @@ class User
 	end
 
 	def self.find_by_email(email)
-		return User.where(:email => email, :status.gt => -1).first
+		return User.where(:email => email.downcase, :status.gt => -1).first
 	end
 
 	def self.find_by_username(username)
@@ -192,7 +193,7 @@ class User
 	def skip_init_step
 		self.status = self.status + 1 if self.status < 4
 		return false if !self.save
-		return self.status
+		return {status: self.status}
 	end
 
 
@@ -271,40 +272,30 @@ class User
 	#
 	#*retval*:
 	#* the new user instance: when successfully created
-	def self.create_new_registered_user(user, current_user)
-    	logger.debug user.inspect
-		# check whether the email acount is illegal
+	def self.create_new_registered_user(user, current_user, third_party_user_id)
 		return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal?(user["email"])
-		return ErrorEnum::EMAIL_EXIST if self.user_exist_by_email?(user["email"])
-		return ErrorEnum::USERNAME_EXIST if self.user_exist_by_username?(user["username"])
+		existing_user = self.find_by_email(user["email"])
+		return ErrorEnum::EMAIL_EXIST if existing_user && existing_user.is_registered
 		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if user["password"] != user["password_confirmation"]
-		updated_attr = user.merge("password" => Encryption.encrypt_password(user["password"]), "registered_at" => Time.now.to_i)
-		if !current_user.nil?
-			current_user.attributes = updated_attr
-		else
-			current_user = User.new(updated_attr)
+		updated_attr = user.merge(email: user["email"].downcase,
+								password: Encryption.encrypt_password(user["password"]),
+								registered_at: Time.now.to_i,
+								status: 1)
+		current_user = User.create if current_user.nil?
+		current_user.update_attributes(updated_attr)
+		# send welcome email
+		TaskClient.create_task({ task_type: "email", params: { email_type: "welcome", email: current_user.email } })
+		if !third_party_user_id.nil?
+			# bind the third party user if the id is provided
+			third_party_user = ThirdPartyUser.find_by_id(third_party_user_id)
+			third_party_user.bind(current_user) if !third_party_user.nil?
 		end
-		# set the current user's status as registered but not activated
-		current_user.status = 1
-		# attr_accessible :role
-		current_user.role = 0
-		current_user.save
-		return current_user
-	end
-
-	def self.create_new_visitor_user
-		user = User.new
-		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
-		user.auth_key_expire_time = -1
-		user.save
-		return user.auth_key
+		return true
 	end
 
 	def self.find_or_create_new_visitor_by_email(email)
 		user = User.find_by_email(email)
-		return user if !user.nil?
-		user = User.new(:email => email)
-		user.save
+		user = User.create(email: email) if user.nil?
 		return user
 	end
 
@@ -320,8 +311,8 @@ class User
 	def self.activate(activate_info, client_ip, client_type)
 		user = User.find_by_email(activate_info["email"])
 		return ErrorEnum::USER_NOT_EXIST if user.nil?     # email account does not exist
-		return true  if user.is_activated
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i    # expired
+		return user.login(client_ip, client_type, false)  if user.is_activated
 		user = User.find_by_email(activate_info["email"])
 		user.status = 2
 		user.activate_time = Time.now.to_i
@@ -333,17 +324,7 @@ class User
 			# send a message to the introducer
 			inviter.create_message("邀请好友注册积分奖励", "您邀请的用户#{user.email}注册激活成功，您获得了#{POINT_TO_INTRODUCER}个积分奖励。", [inviter._id])
 		end
-		# activate succeed, login automatically
-		# record the login information
-		user.last_login_ip = client_ip
-		user.last_login_client_type = client_type
-		user.login_count = 0 if user.last_login_time.blank? || Time.at(user.last_login_time).day != Time.now.day
-		return ErrorEnum::LOGIN_TOO_FREQUENT if user.login_count > OOPSDATA[RailsEnv.get_rails_env]["login_count_threshold"]
-		user.login_count = user.login_count + 1
-		user.last_login_time = Time.now.to_i
-		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
-		user.auth_key_expire_time =  Time.now.to_i + OOPSDATA["login_keep_time"].to_i
-		return {"status" => user.status, "auth_key" => user.auth_key, "user_id" => user._id.to_s}
+		return user.login(client_ip, client_type, false)
 	end
 
 	#*description*: user login
@@ -358,23 +339,30 @@ class User
 	#* EMAIL_NOT_EXIST
 	#* EMAIL_NOT_ACTIVATED
 	#* WRONG_PASSWORD
-	def self.login(email_username, password, client_ip, client_type, keep_signed_in)
-		user = User.find_by_email_username(email_username)
+	def self.login_with_email(email_username, password, client_ip, client_type, keep_signed_in, third_party_user_id)
+		user = User.find_by_email(email_username)
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
-		# There is no is_activated
 		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
 		return ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(password)
-		# record the login information
-		user.last_login_ip = client_ip
-		user.last_login_client_type = client_type
-		user.login_count = 0 if user.last_login_time.blank? || Time.at(user.last_login_time).day != Time.now.day
-		return ErrorEnum::LOGIN_TOO_FREQUENT if user.login_count > OOPSDATA[RailsEnv.get_rails_env]["login_count_threshold"]
-		user.login_count = user.login_count + 1
-		user.last_login_time = Time.now.to_i
-		user.auth_key = Encryption.encrypt_auth_key("#{user.id}&#{Time.now.to_i.to_s}")
-		user.auth_key_expire_time =  keep_signed_in ? -1 : Time.now.to_i + OOPSDATA["login_keep_time"].to_i
-		return false if !user.save
-		return {"status" => user.status, "auth_key" => user.auth_key, "user_id" => user._id.to_s}
+		if !third_party_user_id.nil?
+			# bind the third party user if the id is provided
+			third_party_user = ThirdPartyUser.find_by_id(third_party_user_id)
+			third_party_user.bind(user) if !third_party_user.nil?
+		end
+		return user.login(client_ip, client_type, keep_signed_in)
+	end
+
+	def login(client_ip, client_type, keep_signed_in=false)
+		self.last_login_ip = client_ip
+		self.last_login_client_type = client_type
+		self.login_count = 0 if self.last_login_time.blank? || Time.at(self.last_login_time).day != Time.now.day
+		return ErrorEnum::LOGIN_TOO_FREQUENT if self.login_count > OOPSDATA[RailsEnv.get_rails_env]["login_count_threshold"]
+		self.login_count = self.login_count + 1
+		self.last_login_time = Time.now.to_i
+		self.auth_key = Encryption.encrypt_auth_key("#{self._id}&#{Time.now.to_i.to_s}")
+		self.auth_key_expire_time =  keep_signed_in ? -1 : Time.now.to_i + OOPSDATA["login_keep_time"].to_i
+		return false if !self.save
+		return {"auth_key" => self.auth_key}
 	end
 
 	def self.login_with_auth_key(auth_key)
@@ -394,12 +382,11 @@ class User
 	#* EMAIL_NOT_EXIST
 	#* WRONG_PASSWORD_CONFIRMATION
 	def self.reset_password(email, new_password, new_password_confirmation)
-		return ErrorEnum::USER_NOT_EXIST if user_exist_by_email?(email) == false      # email account does not exist
-		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if new_password != new_password_confirmation
 		user = User.find_by_email(email)
+		return ErrorEnum::USER_NOT_EXIST if user.nil?      # email account does not exist
+		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if new_password != new_password_confirmation
 		user.password = Encryption.encrypt_password(new_password)
-		user.save
-		return true
+		return user.save
 	end
 
 	#*description*: reset password for an user, used when the user resets its password
@@ -415,7 +402,7 @@ class User
 		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if new_password != new_password_confirmation
 		return ErrorEnum::WRONG_PASSWORD if self.password != Encryption.encrypt_password(old_password)  # wrong password
 		self.password = Encryption.encrypt_password(new_password)
-		self.save
+		return self.save
 	end
 
 	#*description*: set auth key for one user
@@ -501,17 +488,6 @@ class User
 	#Obtain the charges of this user
 	def charges
 		Charge.charges_of(self.email)
-	end
-
-#--
-############### operations about third party user #################
-#++
-	def self.combine(email, website, user_id)
-		user = User.find_by_email(email)
-		return ErrorEnum::USER_NOT_EXIST if user.nil?
-		third_party_user = ThirdPartyUser.find_by_website_and_user_id(website, user_id)
-		return ErrorEnum::THIRD_PARTY_USER_NOT_EXIST if third_party_user.nil?
-		return third_party_user.bind(user)
 	end
 
 	#--

@@ -4,23 +4,11 @@ class RenrenUser < ThirdPartyUser
 	field :sex, :type => String # male will return: 1
 	field :headurl, :type => String
 
-	#--
-	# ************* instance attribute's methods*****************
-	#++
-
-	#*attribute*: name
-
-	#*attribute*: gender
 	alias gender sex
 
-	#*attribute*: locale
 	def locale
 		nil
 	end
-
-	#--
-	#***************** class methods *************
-	#++
 
 	#*description*: get access_token for other works
 	#
@@ -78,10 +66,6 @@ class RenrenUser < ThirdPartyUser
 		
 		return renren_user
 	end
-
-	#--
-	# ************instance methods**********
-	#++
 
 	#*description*: it can call any methods from third_party's API:
 	#http://wiki.dev.renren.com/wiki/API

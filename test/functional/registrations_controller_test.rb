@@ -8,6 +8,8 @@ class RegistrationsControllerTest < ActionController::TestCase
 		user_hash["email"] = "illegal_email"
 		post :create, :format => :json, :user => user_hash
 		result = JSON.parse(@response.body)
+		puts "aaaa"
+		puts result.inspect
 		assert_equal ErrorEnum::ILLEGAL_EMAIL.to_s, result["value"]["error_code"]
 
 		user_hash = init_user
@@ -19,45 +21,13 @@ class RegistrationsControllerTest < ActionController::TestCase
 		user_hash = init_user
 		post :create, :format => :json, :user => user_hash
 		result = JSON.parse(@response.body)
-		assert_equal true, result["value"]
-
-		user_hash = init_user
-		user_hash["email"] = "another_email@test.com"
-		post :create, :format => :json, :user => user_hash
-		result = JSON.parse(@response.body)
-		assert_equal ErrorEnum::USERNAME_EXIST.to_s, result["value"]["error_code"]
+		assert result["value"]
 
 		user_hash = init_user
 		user_hash["username"] = "another_username"
 		post :create, :format => :json, :user => user_hash
 		result = JSON.parse(@response.body)
 		assert_equal ErrorEnum::EMAIL_EXIST.to_s, result["value"]["error_code"]
-	end
-
-	test "should create visitor user" do
-		clear(User)
-
-		post :create_new_visitor_user, :format => :json
-		result = JSON.parse(@response.body)
-		assert_equal true, result["success"]
-	end
-
-	test "should check email" do
-		post :email_illegal, :format => :json, :email => "correct_email@test.com"
-		result = JSON.parse(@response.body)
-		assert_equal true, result["value"]
-
-		get :email_illegal, :format => :json, :email => "correct_email@test.com"
-		result = JSON.parse(@response.body)
-		assert_equal true, result["value"]
-
-		post :email_illegal, :format => :json, :email => "wrong_email"
-		result = JSON.parse(@response.body)
-		assert_equal false, result["value"]
-
-		get :email_illegal, :format => :json, :email => "wrong_email"
-		result = JSON.parse(@response.body)
-		assert_equal false, result["value"]
 	end
 
 	test "should send activate email" do
@@ -80,20 +50,26 @@ class RegistrationsControllerTest < ActionController::TestCase
 
 	test "should activate" do
 		clear(User)
-		new_user = init_new_user
-		activate_info_1 = {"email" => new_user.email, "time" => Time.now.to_i - 1.months.to_i}
+		jesse = init_jesse
+		activate_info_1 = {"email" => jesse.email, "time" => Time.now.to_i - 1.months.to_i}
 		activate_key_1 = Encryption.encrypt_activate_key(activate_info_1.to_json)
-		activate_info_2 = {"email" => new_user.email, "time" => Time.now.to_i}
+		activate_info_2 = {"email" => jesse.email, "time" => Time.now.to_i}
 		activate_key_2 = Encryption.encrypt_activate_key(activate_info_2.to_json)
 
-		get :activate, :activate_key => "wrong activate key"
-		assert_redirected_to "/500"
+		post :activate, :format => :json, :activate_key => "wrong activate key"
+		result = JSON.parse(@response.body)
+		assert !result["success"]
+		assert_equal ErrorEnum::ILLEGAL_ACTIVATE_KEY, result["value"]["error_code"]
 
-		get :activate, :activate_key => activate_key_1
-		assert_redirected_to input_activate_email_path, "activate an user with expired activate key"
+		post :activate, :format => :json, :activate_key => activate_key_1
+		result = JSON.parse(@response.body)
+		assert !result["success"]
+		assert_equal ErrorEnum::ACTIVATE_EXPIRED, result["value"]["error_code"]
 
-		get :activate, :activate_key => activate_key_2
-		assert_redirected_to sessions_path, "fail to activate an user"
+		post :activate, :format => :json, :activate_key => activate_key_2
+		result = JSON.parse(@response.body)
+		assert result["success"]
+		assert_equal User.find_by_email(jesse.email).auth_key, result["value"]["auth_key"]
 	end
 
 	def init_user

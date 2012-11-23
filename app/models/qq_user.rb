@@ -20,10 +20,6 @@ class QqUser < ThirdPartyUser
 		nil
 	end
 
-	#--
-	#***************** class methods *************
-	#++
-
 	#get access_token for other works
 	#
 	#*params*:
@@ -95,10 +91,6 @@ class QqUser < ThirdPartyUser
 		return nil
 	end
  
-	#--
-	# ************instance methods**********
-	#++
-
 	#*description*: it can call any methods from third_party's API:
 	#http://wiki.opensns.qq.com/wiki/%E3%80%90QQ%E7%99%BB%E5%BD%95%E3%80%91API%E6%96%87%E6%A1%A3
 	#
