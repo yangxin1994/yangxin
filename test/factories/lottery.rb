@@ -2,7 +2,7 @@ FactoryGirl.define  do
 	factory :lottery do
 		title 'New Lottery'
 		description 'New Lottery'
-		weighting 10000
+		weight 100000
 		
 		#lottery_codes factory: :lottery_code
 		#lottery_prizes factory: :lottery_dsxl

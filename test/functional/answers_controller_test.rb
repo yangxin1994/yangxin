@@ -10,7 +10,7 @@ class AnswersControllerTest < ActionController::TestCase
 		survey_auditor = init_survey_auditor
 
 		survey_id = create_survey(jesse.email, Encryption.decrypt_password(jesse.password))
-
+		
 		set_survey_published(survey_id, jesse, survey_auditor)
 
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))

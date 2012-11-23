@@ -69,8 +69,8 @@ class Admin::PrizesController < Admin::ApplicationController
         render_json(false){ErrorEnum::LOTTERY_NOT_FOUND}
       end
     end
-    render_json @gift.update_attributes(params[:gift]) do
-      @gift.as_retval
+    render_json @prize.update_attributes(params[:prize]) do
+      @prize.as_retval
     end
   end
   
