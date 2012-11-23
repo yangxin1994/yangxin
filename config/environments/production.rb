@@ -65,8 +65,10 @@ OopsData::Application.configure do
 		:address				=> "smtp.mailgun.com",
 		:port						=> 25,
 		:domain					=> "oopsdata.net",
-		:user_name			=> "postmaster@oopsdata.com",
+		:user_name			=> "postmaster@oopsdata.net",
 		:password				=> "0nlnhy08vbk1",
+		:enable_starttls_auto => true,
+		:openssl_verify_mode  => 'none'
 }
 
   config.task_web_service_uri = 'localhost:9000'
