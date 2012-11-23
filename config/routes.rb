@@ -40,7 +40,7 @@ OopsData::Application.routes.draw do
 
 			member do
 				get 'get_email'
-				put 'set_color', 'set_role', 'set_lock', 'system_pwd'
+				put 'set_color', 'set_role', 'set_lock', 'system_pwd', 'recover','add_point'
 			end
 		end
 
