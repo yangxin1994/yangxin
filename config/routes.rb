@@ -20,6 +20,8 @@ OopsData::Application.routes.draw do
 
 	resources :quality_control_questions do
 	end
+	
+	resources :lottery_codes 
 
 
 	# alias interface
@@ -130,9 +132,7 @@ OopsData::Application.routes.draw do
 			end
 		end
 
-		resources :lottery_codes do
-			
-		end
+		resources :lottery_codes 
 
 		match 'messages/count' => 'messages#count'
 		resources :messages

@@ -18,8 +18,9 @@ class LotteryCode
 	scope :for_draw, where(:status => 0)
 	scope :drawed, where(:status.gt => 0)
 	scope :drawed_f, where(:status => 1)
-	scope :drawed_w, where(:status => 2)
-	scope :drawed_W_o, where(:status => 4)
+	scope :drawed_w, where(:status.gt => 1)
+	scope :drawed_w_n, where(:status => 2)
+	scope :drawed_w_o, where(:status => 4)
 
 	validates :num, :numericality => { :greater_than_or_equal_to => 0 }
 
