@@ -37,7 +37,7 @@ OopsData::Application.configure do
   # config.logger = SyslogLogger.new
 
   # Use a different cache store in production
-  config.cache_store = :mem_cache_store, 'orange02:11211'
+  # config.cache_store = :mem_cache_store, 'orange02:11211'
 
   # Enable serving of images, stylesheets, and JavaScripts from an asset server
   # config.action_controller.asset_host = "http://assets.example.com"
@@ -61,12 +61,13 @@ OopsData::Application.configure do
 	config.action_mailer.perform_deliveries = true
 	config.action_mailer.delivery_method = :smtp
 	config.action_mailer.smtp_settings = {
-		:address				=> "smtp.gmail.com",
-		:port						=> 587,
-		:domain					=> "gmail.com",
-		:user_name			=> "oopsdata2012@gmail.com",
-		:password				=> "jesseyang1985",
 		:authentication => "plain",
-		:enable_starttls_auto => true }
+		:address				=> "smtp.mailgun.com",
+		:port						=> 25,
+		:domain					=> "oopsdata.net",
+		:user_name			=> "postmaster@oopsdata.com",
+		:password				=> "0nlnhy08vbk1",
+}
 
+  config.task_web_service_uri = 'localhost:9000'
 end
