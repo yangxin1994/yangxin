@@ -1,5 +1,3 @@
-require 'test_helper'
-
 class OrderTest < ActiveSupport::TestCase
   setup do
     clear(User, RewardLog, Order)

@@ -9,7 +9,7 @@ class Lottery
   field :status, :type => Integer, :default => 0
   field :is_deleted, :type => Boolean, :default => false
   #field :point, :type => Integer
-  field :weighting, :type => Integer, :default => 10000
+  field :weight, :type => Integer, :default => 100000
   #field :prize_interval, :type => Array, :default => []
 
   default_scope where(:is_deleted => false)
@@ -22,6 +22,7 @@ class Lottery
   has_many :prizes
   has_many :lottery_codes
   has_many :gifts
+  has_one :photo, :class_name => "Material", :inverse_of => 'lottery'
   belongs_to :creator, :class_name => 'User'
 
   def delete
@@ -42,26 +43,48 @@ class Lottery
   end
 
   def draw(lottery_code)
-    r = random_weighting
-    l = LotteryCode.find_by_id(lottery_code)
-    make_interval.each do |e|
-      if r < e[:weighting]
-        return l unless l.is_a? LotteryCode
-        l.prize = Prezi.find_by_id(e[:prize_id])
-        return l if (l.prize.is_a?(Prize)) && l.save 
+    base_num = 0
+    r = random_weight
+    interval = self.prizes.can_be_draw.map do |e|
+      base_num += e.weight 
+      {
+        :weight => base_num,
+        :prize => e
+      }
+    end
+    interval.each do |i|
+      if r <= i[:weight]
+        i[:prize].surplus -= 1
+        i[:prize].save
+        lottery_code.update_attributes(
+          :status => 2,
+          :prize => i[:prize]
+          )
+        return lottery_code
       end
     end
-    return false
+    lottery_code.update_attribute(:status, 1)
+    lottery_code
+    # r = random_weight
+    # l = LotteryCode.find_by_id(lottery_code)
+    # make_interval.each do |e|
+    #   if r < e[:weight]
+    #     return l unless l.is_a? LotteryCode
+    #     l.prize = Prezi.find_by_id(e[:prize_id])
+    #     return l if (l.prize.is_a?(Prize)) && l.save 
+    #   end
+    # end
+    # return false
   end
 
-  def random_weighting
-    rand weighting
+  def random_weight
+    rand weight
   end
 
   def make_interval
-    prize_interval = [{ :weighting => 0, :prize_id => nil }]
+    prize_interval = [{ :weight => 0, :prize_id => nil }]
     self.prizes.can_be_draw.each do |a|
-      prize_interval << { :weighting => prize_interval[-1][:weighting] + a.weighting, :prize_id => a.id.to_s }
+      prize_interval << { :weight => prize_interval[-1][:weight] + a.weight, :prize_id => a.id.to_s }
     end
     prize_interval
   end

@@ -9,7 +9,10 @@ class LotteryTest < ActiveSupport::TestCase
     #@lottery = @lottery_code.lottery
     #@lottery_prize = FactoryGirl.create(:lottery_dsxl)
     @prize = FactoryGirl.create(:dsxl)
-    # @user_bar = @lottery_code.user
+    @prize1 = FactoryGirl.create(:dsxl_d)
+    @prize1.weight = 100000
+    @prize2 = FactoryGirl.create(:dsxl)
+    @user_bar = @lottery_code.user
 	end
 
   test "should add a lottery code" do
@@ -25,14 +28,20 @@ class LotteryTest < ActiveSupport::TestCase
 
   test "should draw a lottery" do
     @lottery.prizes << @prize
+    @lottery.prizes << @prize2
     @lottery.save
     @prize.save
+    # p @prize1.surplus
     d = @lottery_code.draw
     assert_equal 1, @prize.status
   end
 
-  test "should make a interval" do
-     
+  test "should draw a lottery and win" do
+    @lottery.prizes << @prize1
+    @lottery.save
+    @prize1.save
+    d = @lottery_code.draw
+    assert_equal -1, @lottery_code.prize.status
   end
 
 end
