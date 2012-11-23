@@ -123,6 +123,7 @@ class User
 	end
 
 	def self.find_by_email(email)
+		return nil if email.blank?
 		return User.where(:email => email.downcase, :status.gt => -1).first
 	end
 

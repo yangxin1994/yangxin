@@ -48,8 +48,8 @@ class RegistrationsController < ApplicationController
 	#* Errorenum ::USER_ACTIVATED
 	def send_activate_email
 		user = User.find_by_email(params[:email])
-		render_json_e(ErrorEnum::USER_NOT_EXIST) if user.nil?
-		render_json_e(ErrorEnum::USER_ACTIVATED) if user.is_activated?
+		render_json_e(ErrorEnum::USER_NOT_EXIST) and return if user.nil?
+		render_json_e(ErrorEnum::USER_ACTIVATED) and return if user.is_activated
 		# send activate email
 		TaskClient.create_task({ task_type: "email", params: { email_type: "activate", email: user.email } })
 		render_json_s and return
