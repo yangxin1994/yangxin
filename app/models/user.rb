@@ -273,7 +273,7 @@ class User
 	#
 	#*retval*:
 	#* the new user instance: when successfully created
-	def self.create_new_registered_user(user, current_user, third_party_user_id)
+	def self.create_new_registered_user(user, current_user, third_party_user_id, callback)
 		return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal?(user["email"])
 		existing_user = self.find_by_email(user["email"])
 		return ErrorEnum::EMAIL_EXIST if existing_user && existing_user.is_registered
@@ -285,7 +285,7 @@ class User
 		current_user = User.create if current_user.nil?
 		current_user.update_attributes(updated_attr)
 		# send welcome email
-		TaskClient.create_task({ task_type: "email", params: { email_type: "welcome", email: current_user.email } })
+		TaskClient.create_task({ task_type: "email", params: { email_type: "welcome", email: current_user.email, callback: callback } })
 		if !third_party_user_id.nil?
 			# bind the third party user if the id is provided
 			third_party_user = ThirdPartyUser.find_by_id(third_party_user_id)

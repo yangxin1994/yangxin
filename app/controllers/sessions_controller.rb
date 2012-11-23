@@ -73,7 +73,10 @@ class SessionsController < ApplicationController
 	def send_password_email
 		user = User.find_by_email(params[:email])
 		render_json_e(ErrorEnum::USER_NOT_EXIST) and return if user.nil?
-		TaskClient.create_task({ task_type: "email", params: { email_type: "password", email: user.email } })
+		TaskClient.create_task({ task_type: "email",
+								params: { email_type: "password",
+										email: user.email,
+										callback: params[:callback] } })
 		render_json_s and return
 	end
 

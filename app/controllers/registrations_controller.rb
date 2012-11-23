@@ -29,7 +29,10 @@ class RegistrationsController < ApplicationController
 	#* ErrorEnum ::WRONG_PASSWORD_CONFIRMATION
 	def create
 		# create user model
-		retval = User.create_new_registered_user(params[:user], @current_user, params[:third_party_user_id])
+		retval = User.create_new_registered_user(params[:user],
+												@current_user,
+												params[:third_party_user_id],
+												params[:callback])
 		render_json_auto(retval) and return
 	end
 
@@ -51,7 +54,10 @@ class RegistrationsController < ApplicationController
 		render_json_e(ErrorEnum::USER_NOT_EXIST) and return if user.nil?
 		render_json_e(ErrorEnum::USER_ACTIVATED) and return if user.is_activated
 		# send activate email
-		TaskClient.create_task({ task_type: "email", params: { email_type: "activate", email: user.email } })
+		TaskClient.create_task({ task_type: "email",
+								params: { email_type: "activate",
+										email: user.email,
+										callback: params[:callback] } })
 		render_json_s and return
 	end
 

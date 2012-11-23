@@ -735,7 +735,8 @@ class Answer
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
 		self.set_finish
 		self.finished_at = Time.now.to_i
-		self.finish_type = 1 if !self.survey.has_prize
+		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as passing review
+		self.finish_type = 1 if !self.survey.has_prize && (!self.survey.spreadable || self.survey.spread_point == 0)
 		self.save
 		self.update_quota
 		return true

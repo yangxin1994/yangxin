@@ -17,7 +17,11 @@ class TaskClient
 		task_obj.merge!({priority: priority})
 		
 		# send request to the oops-task server
-		response = self.post('/tasks.json', {:body => {:task => task_obj}})
+		begin
+			response = self.post('/tasks.json', {:body => {:task => task_obj}})
+		rescue
+			return ErrorEnum::TASK_CREATION_FAILED
+		end
 		result = response.parsed_response
 		if result && result["success"]
 			return result["value"]
