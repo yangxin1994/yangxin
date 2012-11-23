@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'error_enum'
 class MaterialsController < ApplicationController
-	before_filter :require_sign_in, :except => [:show, :index]
+	before_filter :require_sign_in, :except => [:show]
 
 	#*method*: post
 	#
@@ -42,12 +42,7 @@ class MaterialsController < ApplicationController
 	#*retval*:
 	#* the list of objects obtained
 	def index
-		materials = Material.find_by_type(params[:material_type].to_i)
-		# File.open("public/a.txt", "w+") do |f|
-		# 	f.puts @current_user
-		# 	f.puts materials
-		# 	#f.puts params[:material_type].to_i
-		# end
+		materials = @current_user.materials.find_by_type(params[:material_type].to_i)
 		flash[:notice] = "成功获取资源列表"
 		respond_to do |format|
 			format.json	{ render_json_auto(materials) and return }
