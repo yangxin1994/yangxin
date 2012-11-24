@@ -296,7 +296,11 @@ OopsData::Application.routes.draw do
 				delete 'delete_quality_control_question'
 			end
 		end
-		resources :logic_controls
+		resources :logic_controls do
+			collection do
+				get :list_with_question_objects
+			end
+		end
 		resources :quotas do
 			collection do
 				post :set_exclusive
