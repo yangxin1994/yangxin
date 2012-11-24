@@ -478,10 +478,10 @@ class User
 #++
 # admin inc
 	def operate_point(point, user_id)
-		u = User.find_by_id(user_id)
+		u = User.find_by_id_including_deleted(user_id)
 		operate_reward_logs.create(:point => point,
-															 :user => u,
-															 :cause => 0)
+				 :user => u,
+				 :cause => 0)
 	end
 #--
 ############### operations about charge #################
@@ -575,10 +575,10 @@ class User
 		self.save
 	end
 
-	def add_point(point_int)
-		self.point += point_int
-		self.save
-	end
+	# def add_point(point_int)
+	# 	self.point += point_int
+	# 	self.save
+	# end
 
 	def change_to_system_password
 		# generate rand number

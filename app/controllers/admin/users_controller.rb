@@ -121,9 +121,9 @@ class Admin::UsersController < Admin::ApplicationController
 		end
 	end
 
-	def add_point
-		render_json_auto @user.add_point(params[:point].to_i)
-	end
+	# def add_point
+	# 	render_json_auto @user.add_point(params[:point].to_i)
+	# end
 
 	def system_pwd
 		@user.change_to_system_password
@@ -165,6 +165,9 @@ class Admin::UsersController < Admin::ApplicationController
 			users = User.all.desc(:lock, :created_at).to_a
 			users.select!{|u| u.role.to_i < 15} if !@current_user.is_super_admin
 		end
+
+		# display delete users if params[:deleted]
+		users.select!{|u| u.status >= 0} if params[:deleted] && params[:deleted].to_s == 'false'
 
 		paginated_users = auto_paginate(users) do |u|
 			u.slice((page - 1) * per_page, per_page)
