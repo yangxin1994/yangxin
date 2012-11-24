@@ -1318,6 +1318,32 @@ class Survey
 		return Marshal.load(Marshal.dump(self.logic_control))
 	end
 
+	def show_logic_control_with_question_objects
+		logic_control = Marshal.load(Marshal.dump(self.logic_control))
+		logic_control.each do |rule|
+			conditions = rule["conditions"]
+			conditions.each do |c|
+				c["question"] = BasicQuestion.find_by_id(c["question_id"])
+			end
+			result = rule["result"]
+			if [1,2].include?(rule["rule_type"])
+				result.each_with_index do |q_id, index|
+					result[index] = BasicQuestion.find_by_id(q_id)
+				end
+			elsif [3,4].include?(rule["rule_type"])
+				result.each do |r|
+					r["question"] = BasicQuestion.find_by_id(r["question_id"])
+				end
+			elsif [5,6].include?(rule["rule_type"])
+				result.each do |r|
+					r["question_1"] = BasicQuestion.find_by_id(r["question_id_1"])
+					r["question_2"] = BasicQuestion.find_by_id(r["question_id_2"])
+				end
+			end
+		end
+		return logic_control
+	end
+
 	def show_logic_control_rule(logic_control_rule_index)
 		logic_control = LogicControl.new(self.logic_control)
 		return logic_control.show_rule(logic_control_rule_index)

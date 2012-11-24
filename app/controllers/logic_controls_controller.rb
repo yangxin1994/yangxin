@@ -30,6 +30,13 @@ class LogicControlsController < ApplicationController
 		end
 	end
 
+	def list_with_question_objects
+		logic_control = @survey.show_logic_control_with_question_objects
+		respond_to do |format|
+			format.json	{ render_json_auto(logic_control) and return }
+		end
+	end
+
 	#*method*: get
 	#
 	#*url*: /surveys/:survey_id/logic_controls/:logic_control_rule_index
