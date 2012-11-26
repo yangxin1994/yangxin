@@ -45,6 +45,8 @@ class ThirdPartyUser
 			response_data = QqUser.get_access_token(code)
 		when "google"
 			response_data = GoogleUser.get_access_token(code)
+		else
+			response_data = {}
 		end
 		return response_data
 	end
@@ -59,6 +61,8 @@ class ThirdPartyUser
 			tp_user = QqUser.save_tp_user(response_data)
 		when "google"
 			tp_user = GoogleUser.save_tp_user(response_data)
+		else
+			return ErrorEnum::WRONG_THIRD_PARTY_WEBSITE
 		end
 		return tp_user
 	end

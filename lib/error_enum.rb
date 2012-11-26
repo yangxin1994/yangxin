@@ -33,6 +33,7 @@ module ErrorEnum
 	WRONG_DATA_TYPE = "error_40"
 	THIRD_PARTY_USER_NOT_EXIST = "error_41"
 	THIRD_PARTY_USER_NOT_BIND = "error_42"
+	WRONG_THIRD_PARTY_WEBSITE = "error_43"
 	MATERIAL_NOT_EXIST = "error_50"
 	WRONG_MATERIAL_TYPE = "error_51"
 	TAG_EXIST = "error_60"

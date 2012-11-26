@@ -155,7 +155,8 @@ class SessionsController < ApplicationController
 		# => for google, qq, another request is needed to get the user id
 		response_data = ThirdPartyUser.get_access_token(params[:website], params[:code])
 		# with the response data, find the third party user in database, or create one
-		tp_user = ThridPartyUser.find_or_create_user(website, response_data)
+		tp_user = ThridPartyUser.find_or_create_user(params[:website], response_data)
+		render_json_e(tp_user) and return if tp_user.class != ThirdPartyUser
 		# check whether this user has been bound to one quill account
 		user = tp_user.user
 		if user.nil?
@@ -167,5 +168,4 @@ class SessionsController < ApplicationController
 			render_json_auto(retval) and return
 		end
 	end
-
 end

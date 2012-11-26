@@ -314,7 +314,7 @@ class Answer
 				result_q_ids = rule["result"].map { |e| e["question_id"] } if ["3", "4"].include?(rule["type"])
 				result_q_ids = rule["result"]["question_id_2"].to_a if ["5", "6"].include?(rule["type"])
 				condition_q_ids = rule["conditions"].map {|condition| condition["question_id"]}
-				logic_control_question_id << { "condition" => condition_question_id_ary, "result" => result_q_ids }
+				logic_control_question_id << { "condition" => condition_q_ids, "result" => result_q_ids || [] }
 			end
 			cur_page = false
 			pages_with_qc_questions.each do |page_questions|
@@ -323,6 +323,9 @@ class Answer
 					cur_page = true
 					# check if this question is the result of some logic control rule
 					logic_control_question_id.each do |ele|
+						logger.info "AAAAAAAAAAAAAA"
+						logger.info ele.inspect
+						logger.info "AAAAAAAAAAAAAA"
 						if !(ele["condition"] & loaded_question_ids).empty? && ele["result"].include?(q_id)
 							return load_question_by_ids(loaded_question_ids)
 						end
