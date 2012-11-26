@@ -156,7 +156,7 @@ class SessionsController < ApplicationController
 		response_data = ThirdPartyUser.get_access_token(params[:website], params[:code])
 		# with the response data, find the third party user in database, or create one
 		tp_user = ThirdPartyUser.find_or_create_user(params[:website], response_data)
-		render_json_e(tp_user) and return if tp_user.class != ThirdPartyUser
+		render_json_e(tp_user) and return if tp_user == ErrorEnum::WRONG_THIRD_PARTY_WEBSITE
 		# check whether this user has been bound to one quill account
 		user = tp_user.user
 		if user.nil?
