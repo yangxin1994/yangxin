@@ -56,7 +56,7 @@ class Admin::UsersController < Admin::ApplicationController
 	# DELETE /admin/users/1
 	# DELETE /admin/users/1.json
 	def destroy
-		render_json_auto @user.remove
+		render_json_auto @user.remove_user
 	end
 
 	# PUT
