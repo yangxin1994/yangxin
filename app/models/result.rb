@@ -129,9 +129,9 @@ class Result
 	end
 
 	def analyze_matrix_choice(issue, answer_ary)
-		input_ids = issue["choices"].map { |e| e["id"] }
+		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids.map! { |e| e.to_s }
-		result = []
+		result = {}
 		issue["rows"].each do |row|
 			input_ids.each do |input_id|
 				result["#{row["id"]}-#{input_id}"] = 0
@@ -153,8 +153,11 @@ class Result
 		answer_ary.map! { |answer| answer.to_f }
 		answer_ary.sort!
 		result["mean"] = answer_ary.mean
+		if segment.blank?
+			segment = [answer_ary[0], (answer_ary[0].to_f + answer_ary[-1].to_f) / 2, answer_ary[-1]]
+		end
 		if !segment.blank?
-			histogram = Array(segment.length + 1, 0)
+			histogram = Array.new(segment.length + 1, 0)
 			segment_index = 0
 			answer_ary.each do |a|
 				while a > segment[segment_index]
@@ -165,6 +168,7 @@ class Result
 			end
 			result["histogram"] = histogram
 		end
+		result["segment"] = segment
 		return result
 	end
 
@@ -174,18 +178,22 @@ class Result
 		answer_ary.map! { |e| (e / 1000).round }
 		answer_ary.sort!
 		result["mean"] = answer_ary.mean
+		if segment.blank?
+			segment = [answer_ary[0], (answer_ary[0].to_f + answer_ary[-1].to_f) / 2, answer_ary[-1]]
+		end
 		if !segment.blank?
-			histogram = Array(segment.length + 1, 0)
+			histogram = Array.new(segment.length + 1, 0)
 			segment_index = 0
 			answer_ary.each do |a|
 				while a > segment[segment_index]
 					segment_index = segment_index + 1
 					break if segment_index >= segment.length
 				end
-				histogram = histogram + 1
+				histogram[segment_index] = histogram[segment_index] + 1
 			end
 			result["histogram"] = histogram
 		end
+		result["segment"] = segment
 		return result
 	end
 
@@ -214,13 +222,13 @@ class Result
 		issue["items"].each_with_index do |input, input_index|
 			case input["data_type"]
 			when "Number"
-				result[input["id"]] = analyze_number_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				result[input["id"].to_s] = analyze_number_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			when "Address"
-				result[input["id"]] = analyze_address_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				result[input["id"].to_s] = analyze_address_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			when "Email"
-				result[input["id"]] = analyze_email_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				result[input["id"].to_s] = analyze_email_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			when "Time"
-				result[input["id"]] = analyze_time_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				result[input["id"].to_s] = analyze_time_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			end
 		end
 		return result
@@ -255,7 +263,7 @@ class Result
 		input_number = input_ids.length
 		result = {}
 		input_ids.each do |input_id|
-			result[input_id] = Array(input_number, 0)
+			result[input_id] = Array.new(input_number, 0)
 		end
 	
 		answer_ary.each do |answer|
