@@ -50,7 +50,7 @@ class SinaUser < ThirdPartyUser
 		#new or update sina_user
 		sina_user = SinaUser.where(:website_id => website_id)[0]
 		if sina_user.nil? then
-			sina_user = SinaUser.new(:website => "sina", :website_id => user_id, :access_token => access_token)
+			sina_user = SinaUser.new(:website => "sina", :website_id => website_id, :access_token => access_token)
 			sina_user.save
 			# this is not update instance, it would lead that other info should be seen in next login.
 		else

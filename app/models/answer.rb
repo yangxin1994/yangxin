@@ -316,6 +316,9 @@ class Answer
 				condition_q_ids = rule["conditions"].map {|condition| condition["question_id"]}
 				logic_control_question_id << { "condition" => condition_q_ids, "result" => result_q_ids || [] }
 			end
+			logger.info "AAAAAAAAAAAAAAAAAAAAAA"
+			logger.info logic_control_question_id.inspect
+			logger.info "AAAAAAAAAAAAAAAAAAAAAA"
 			cur_page = false
 			pages_with_qc_questions.each do |page_questions|
 				page_questions.each do |q_id|
