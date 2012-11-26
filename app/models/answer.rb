@@ -323,9 +323,6 @@ class Answer
 					cur_page = true
 					# check if this question is the result of some logic control rule
 					logic_control_question_id.each do |ele|
-						logger.info "AAAAAAAAAAAAAA"
-						logger.info ele.inspect
-						logger.info "AAAAAAAAAAAAAA"
 						if !(ele["condition"] & loaded_question_ids).empty? && ele["result"].include?(q_id)
 							return load_question_by_ids(loaded_question_ids)
 						end
@@ -577,7 +574,7 @@ class Answer
 				# if the volunteer has not answered this question, stop the checking of this rule
 				break if answer_content[condition["question_id"]].nil?
 				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]]["selection"], condition["answer"], condition["fuzzy"])
-				if !pass_condition
+				if pass_condition
 					self.set_reject
 					self.update_attributes(reject_type: 2, rejected_at: Time.now.to_i)
 					return false
