@@ -65,7 +65,7 @@ class QqUser < ThirdPartyUser
 		#Logger.new("log/development.log").info("save_tp_user: "+retval.body.to_s)
 		response_data2 = JSON.parse(retval.body.split(' ')[1])
 		
-		user_id = response_data2["openid"]
+		website_id = response_data2["openid"]
 		
 		# reject the same function field
 		response_data.select!{|k,v| !k.to_s.include?("id") }
@@ -75,10 +75,10 @@ class QqUser < ThirdPartyUser
 		response_data.merge!(response_data2)
 		
 		#new or update qq_user
-		qq_user = QqUser.where(:user_id => user_id)[0]
+		qq_user = QqUser.where(:website_id => website_id)[0]
 		#Logger.new("log/development.log").info("tp_user1 : "+qq_user.to_s)
 		if qq_user.nil? then
-			qq_user = QqUser.new(:website => "qq", :user_id => user_id, :access_token => access_token)
+			qq_user = QqUser.new(:website => "qq", :website_id => website_id, :access_token => access_token)
 			qq_user.save
 		else
 			qq_user.update_by_hash(response_data)

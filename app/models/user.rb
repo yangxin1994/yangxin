@@ -565,7 +565,7 @@ class User
 		return self.save
 	end
 
-	def remove
+	def remove_user
 		self.status = -1
 		self.save
 	end
