@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
 	protect_from_forgery
 
-	before_filter :client_ip, :current_user, :user_init
+	before_filter :client_ip, :current_user#, :user_init
 
 	helper_method :user_signed_in?, :user_signed_out?
 ###################################################
