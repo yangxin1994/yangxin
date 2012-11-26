@@ -89,6 +89,9 @@ class AnalysisResult < Result
 		self.time_result = time_result
 		self.answers_result = answers_result
 		self.status = 1
+		logger.info "AAAAAAAAAAAAAA"
+		logger.info self.answers_result["50b2d496455e01174a000036"].inspect
+		logger.info "AAAAAAAAAAAAAA"
 		return self.save
 	end
 
