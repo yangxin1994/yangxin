@@ -609,6 +609,13 @@ class Survey
 		self.update_attributes(:publish_status => PublishStatus::PAUSED)
 		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::PAUSED, message)
 		self.publish_status_historys << publish_status_history
+		# message
+		message ||={}
+		operator.create_message(
+			message[:title] || '管理人员-拒绝问卷审核', 
+			message[:content] || '问卷有问题噢！', 
+			[] << self.user.id.to_s)
+
 		return true
 	end
 
@@ -630,6 +637,12 @@ class Survey
 		self.save
 		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::PUBLISHED, message)
 		self.publish_status_historys << publish_status_history
+		# message
+		message ||={}
+		operator.create_message(
+			message[:title] || '管理人员-通过问卷审核', 
+			message[:content] || '问卷通过审核，己发布!', 
+			[] << self.user.id.to_s)
 		return true
 	end
 

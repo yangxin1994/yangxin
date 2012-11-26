@@ -141,9 +141,10 @@ OopsData::Application.routes.draw do
 		match 'messages/count' => 'messages#count'
 		resources :messages
 
-		resources :rewards do
+		resources :rewards, :only => [:index] do
 			collection do
 				post :operate_point, :revoke_operation
+				get :for_points, :for_lotteries
 			end
 		end
 	# The priority is based upon order of creation:

@@ -38,6 +38,12 @@ class Answer
 	field :is_preview, :type => Boolean, default: false
 
 	field :finished_at, :type => Integer
+
+	# audit time
+	field :audit_at, :type => Integer
+	# audit message content
+	field :audit_message, :type => String
+
 	field :rejected_at, :type => Integer
 
 	field :introducer_id, :type => String
@@ -765,33 +771,56 @@ class Answer
 	end
 
 	# the answer auditor reviews this answer, the review result can be 1 (pass review) or 2 (not pass)
-	def review(review_result, answer_auditor)
+	def review(review_result, answer_auditor, message_content)
+
 		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 2
 		self.finish_type = review_result.to_i == 1 ? 1 : 2
 		self.auditor = answer_auditor
+		self.audit_at = Time.now.to_i
+
+		# message
+		message_content ||= "你的此问卷[#{self.survey.title}]的答案通过审核." if review_result.to_i ==1
+		message_content ||= "你的此问卷[#{self.survey.title}]的答案未通过审核." if review_result.to_i ==2
+
+		answer_auditor.create_message(
+				"审核问卷答案消息",
+				message_content,
+				[] << self.user._id.to_s
+			)
+
+		self.audit_message = message_content
 		self.save
+
 		# no need to give points if the answer does not pass the review
 		return if self.finish_type == 2
+
 		if [1,2].include?(self.survey.reward)
 			# assign this user points, or a lottery code
 			# usage post_reward_to(user, :type => 2, :point => 100)
 			# 1 for lottery & 2 for point
-			lc = self.survey.reward == 1 ? nil : self.survey.lottery.give_lottery_code_to(user)
-			return ErrorEnum::REWARD_ERROR unless self.survey.post_reward_to(user, 
-																			:type => self.survey.reward, 
-																			:point => self.survey.point,
-																			:lottery_code => lc,
-																			:cause => 2)
+
+			# maybe lottery is nil
+			if self.survey.lottery
+				lc = self.survey.reward == 1 ? nil : self.survey.lottery.give_lottery_code_to(user)
+				if lc
+					return ErrorEnum::REWARD_ERROR unless self.survey.post_reward_to(user, 
+						:type => self.survey.reward, 
+						:point => self.survey.point,
+						:lottery_code => lc,
+						:cause => 2) 
+				end
+			end
 		end
 		# give the introducer points
 		introducer = User.find_by_id(self.introducer_id)
+
 		if !introducer.nil?
 			# update the survey spread
 			SurveySpread.inc(introducer, self.survey)
 			if point_to_introducer > 0
 				RewardLog.create(:user => introducer, :type => 2, :point => self.point_to_introducer, :extended_survey_id => self.survey_id, :cause => 3)
 				# send the introducer a message about the rewarded points
-				user.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.point_to_introducer}个积分奖励。", [introducer._id])
+				user.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.point_to_introducer}个积分奖励。", [introducer._id.to_s])
 			end
 		end
 		return true

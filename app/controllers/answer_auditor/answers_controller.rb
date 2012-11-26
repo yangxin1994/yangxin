@@ -2,9 +2,23 @@ require 'error_enum'
 class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 	
 	def index
-		survey = @current_user.answer_auditor_allocated_surveys.find_by_id(params[:survey_id])
+		if @current_user.is_admin
+			survey = Survey.find_by_id(params[:survey_id])
+		else
+			survey = @current_user.answer_auditor_allocated_surveys.find_by_id(params[:survey_id])
+		end
 		render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
-		render_json_auto auto_paginate(survey.answers)
+
+		render_json_auto auto_paginate(survey.answers.where(
+			status: params[:status].to_i, 
+			finish_type: params[:finish_type].to_i
+		)) and return if params[:status] && params[:finish_type]
+
+		render_json_auto auto_paginate(survey.answers.where(
+			status: params[:status].to_i
+		)) and return if params[:status]
+
+		render_json_auto auto_paginate(survey.answers) and return
 	end
 
 	def show
@@ -46,7 +60,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 	def review
 		answer = Answer.find_by_id(params[:id])
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
-		retval = answer.review(params[:review_result], @current_user)
+		retval = answer.review(params[:review_result], @current_user, params[:message_content])
 		render_json_auto(retval)
 	end
 end

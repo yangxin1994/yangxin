@@ -95,6 +95,9 @@ module ErrorEnum
 	TASK_CREATION_FAILED = 'error_200'
 	TASK_NOT_FOUND = 'error_201'
 
+	# lcm add for answer review
+	REWARD_ERROR = 'error_300'
+
 	UNKNOWN_ERROR = -100000
 	SAVE_ERROR = -200000
 	FAQ_TYPE_ERROR = -100001
