@@ -54,10 +54,10 @@ class SinaUser < ThirdPartyUser
 			sina_user.save
 			# this is not update instance, it would lead that other info should be seen in next login.
 		else
-			sina_user.update_by_hash(response_data)
+			#sina_user.update_by_hash(response_data)
 		end
 		 
-		sina_user.update_user_info
+		#sina_user.update_user_info
 		
 		return sina_user
 	end

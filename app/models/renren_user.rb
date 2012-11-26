@@ -59,10 +59,10 @@ class RenrenUser < ThirdPartyUser
 			response_data["refresh_token"] = refresh_token
 			response_data["expires_in"] = expires_in
 			# update info 
-			renren_user.update_by_hash(response_data)
+			#renren_user.update_by_hash(response_data)
 		end
 		
-		renren_user.update_user_info
+		#renren_user.update_user_info
 		
 		return renren_user
 	end

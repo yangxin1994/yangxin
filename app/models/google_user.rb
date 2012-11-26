@@ -60,7 +60,7 @@ class GoogleUser < ThirdPartyUser
 		#get user_id
 		retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/userinfo?access_token=#{access_token}", true)    
 		response_data2 = JSON.parse(retval.body)		
-		return nil if !response_data2.select{|k,v| k.to_s.include?("error")}.empty?
+		return false if !response_data2.select{|k,v| k.to_s.include?("error")}.empty?
 		
 		user_id = response_data2["id"]
 		
