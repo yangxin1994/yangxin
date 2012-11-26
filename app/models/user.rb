@@ -72,7 +72,7 @@ class User
 	#before_update :set_updated_at
 
 	# add role, full_name to create system_user
-	attr_accessible :email, :username, :password, :registered_at, :role, :full_name, :status
+	attr_accessible :email, :username, :password, :registered_at, :introducer_id, :role, :full_name, :status
 
 	has_many :third_party_users
 	has_many :surveys
