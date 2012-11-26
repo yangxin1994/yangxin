@@ -6,6 +6,7 @@ class Order
   # can be 0 (Cash), 1 (Entity), 2 (Virtual), 3 (Lottery)
   field :type, :type => Integer
   # can be 0 (NeedVerify), 1 (Verified), -1 (VerifyFailed), 2 (Delivering), 3 (Delivered), -3 (DeliverFailed)
+  field :is_prize, :type => Boolean, :default => false
   field :status, :type => Integer, :default => 0
   field :status_desc, :type => String
   field :is_deleted, :type => Boolean, :default => false 
@@ -58,25 +59,107 @@ class Order
   delegate :name, :to => :gift, :prefix => true
   #delegate :cash_order, :realgoods_order, :to => "self.need_verify", :prefix => true
   #after_create :decrease_point, :decrease_gift
-
+  def as_retval
+    return @ret_error if @ret_error
+    super
+  end
   # TO DO I18n
-  after_create :decrease_gift, :update_user_info
-
+  #after_create :decrease_gift, :update_user_info
+  after_create :exchange
   private
-  
-  def decrease_gift
-    return false if self.gift.blank? || self.user.blank?
-    if self.gift.type == 3
-      self.gift.lottery.give_lottery_code_to(self.user) 
+  def exchange
+    is_prize ? ex_prize : ex_gift
+  end
+
+  def ex_gift
+    if decrease_point && decrease_gift && update_user_info
+      true
+    else
+      self.is_deleted = true
+      self.delete
+      false
+    end 
+  end
+
+  def ex_prize
+    if ck_lottery_code && decrease_prize && update_user_info
+      self.is_deleted = true
+      self.delete
+      false
+    end 
+  end
+
+  def decrease_point
+    # p self
+    if self.gift.blank? || self.user.blank? || self.gift.point > self.user.point
+      @ret_error= {
+        :error_code => ErrorEnum::POINT_NOT_ENOUGH,
+        :error_message => "point not enough"
+      }
+    return false 
     end
     self.create_reward_log(:order => self,
                            :type => 1,
                            :user => self.user,
                            :point => -self.gift.point,
                            :cause => 4)
+    self.save
+  end
+
+  def decrease_gift
+    if self.gift.blank? || self.gift.surplus <= 0
+      @ret_error= {
+        :error_code => ErrorEnum::GIFT_NOT_ENOUGH,
+        :error_message => "gift not enough"
+      }
+      return false
+    end
+    if self.gift.type == 3
+      self.gift.lottery.give_lottery_code_to(self.user) 
+    end
     self.gift.inc(:surplus, -1) 
     self.save
   end
+
+  def ck_lottery_code
+    if self.lottery_code.blank? || self.lottery_code.satus != 2
+      @ret_error= {
+        :error_code => ErrorEnum::INVALID_LOTTERYCODE_ID,
+        :error_message => "Invalid lottery code"
+      }
+      return false
+    end
+    self.lottery_code.satus = 4
+    self.lottery_code.save
+  end
+
+  def decrease_prize
+    if self.prize.blank? || self.prize.surplus <= 0
+      @ret_error= {
+        :error_code => ErrorEnum::PRIZE_NOT_ENOUGH,
+        :error_message => "prize not enough"
+      }
+      return false
+    end
+    if self.prize.type == 3
+      self.prize.lottery.give_lottery_code_to(self.user) 
+    end
+    self.prize.inc(:surplus, -1) 
+    self.save
+  end
+  # def decrease_gift
+  #   return false if self.gift.blank? || self.user.blank? || self.gift.point > self.user.point
+  #   self.create_reward_log(:order => self,
+  #                          :type => 1,
+  #                          :user => self.user,
+  #                          :point => -self.gift.point,
+  #                          :cause => 4)
+  #   if self.gift.type == 3
+  #     self.gift.lottery.give_lottery_code_to(self.user) 
+  #   end
+  #   self.gift.inc(:surplus, -1) 
+  #   self.save
+  # end
 
   def update_user_info
     return false if self.user.blank?
@@ -110,44 +193,4 @@ class Order
 
 end
 
-class CashReceiveInfo
-  include Mongoid::Document
-  field :need_update, :type => Boolean
-  field :full_name, :type => String
-  field :identity_card, :type => String
-  field :bank, :type => String
-  field :bankcard_number, :type => String
-  field :alipay_account, :type => String
-  field :phone, :type => String
-  embedded_in :order
-  after_create :update_user_info
-  def update_user_info
-    return true unless self.need_update
-    p self.attributes
-    #self.user.update_attributes(self.attributes, :without_protection => true)
-  end
-
-end
-
-class EntityReceiveInfo
-  include Mongoid::Document
-  field :phone, :type => String
-  field :full_name, :type => String
-  field :address, :type => String
-  field :postcode, :type => String
-  embedded_in :order
-end
-
-class VirtualReceiveInfo
-  include Mongoid::Document
-  field :full_name, :type => String
-  field :phone, :type => String
-  embedded_in :order
-end
-
-class LotteryReceiveInfo
-  include Mongoid::Document
-  field :email, :type => String
-  embedded_in :order
-end
 

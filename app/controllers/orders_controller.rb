@@ -9,30 +9,36 @@ class OrdersController < ApplicationController
     # TODO is owners request?
     order =  @current_user.orders.find_by_id(params[:id])
     render_json order.is_a?(Order) do
-      order
+      order.as_retval
     end 
   end
 
   def create
+    # @gift = Gift.find_by_id(params[:id])
+    # render_json @gift.is_valid? &&
+    #             @gift.point > current_user.point &&
+    #             @gift.surplus >= 0 do |s|
+    #   order = params[:order].merge({:gift => @gift, :type => @gift.type})
+    #   if s
+    #     order = current_user.orders.create(order)
+    #     @is_success = false  if order.created_at.nil?
+    #     order.as_retval
+    #   else
+    #     if @gift.surplus <= 0
+    #       ErrorEnum::GIFT_NOT_ENOUGH
+    #     elsif @gift.point > current_user.point 
+    #       ErrorEnum::POINT_NOT_ENOUGH
+    #     else
+    #       ErrorEnum::GIFT_NOT_FOUND
+    #     end
+    #   end
+    # end
+    p @current_user
     @order = @current_user.orders.create(params[:order])
-    render_json !@order.created_at.nil? do |s|
+    render_json !@order.deleted? && @order.is_valid? do
       @order.as_retval
     end
   end
-
-  # def create
-  #   @order = @current_user.orders.create(params[:order])
-  #   render_json @order.save do |s|
-  #     if s
-  #       [:cash_receive_info, :entity_receive_info, :virtual_receive_info, :lottery_receive_info].each do |e| 
-  #         @order.send("create_#{e.to_s}",params[:order][e]) if params[:order].include? e
-  #       end
-  #       @order
-  #     else
-  #       @order.error_codes
-  #     end
-  #   end
-  # end
 
   def update
     @order = @current_user.orders.find_by_id(params[:id])
