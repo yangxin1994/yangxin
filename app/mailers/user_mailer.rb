@@ -29,6 +29,19 @@ class UserMailer < ActionMailer::Base
 					:subject => "重置Oops!Data密码",
 					:content_type => "text/html; charset=utf-8")
 	end
+
+	def survey_email(user_id, survey_id_ary)
+		@user = User.find_by_id(user_id)
+		@surveys = survey_id_ary.map { |e| Survey.find_by_id(e) }
+		@surveys.each do |s|
+			email_history = EmailHistory.create
+			email_history.user = @user
+			email_history.survey = s
+		end
+		mail(:to => user.email, 
+					:subject => "invitation to take part in our surveys",
+					:content_type => "text/html; charset=utf-8")
+	end
 	
 	def publish_email(publish_status_history)
 		@survey = Survey.find_by_id(publish_status_history.survey_id)
