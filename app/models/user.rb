@@ -612,7 +612,7 @@ class User
 
 	def get_introduced_users
 		introduced_users = User.where(:introducer_id => self._id.to_s)
-		summary_info = introduced_users.map { |u| [u._id.to_s, u.email, u.registered_at] }
+		summary_info = introduced_users.map { |u| { _id: u._id.to_s, email: u.email, registered_at: u.registered_at } }
 		return summary_info
 	end
 end
