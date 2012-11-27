@@ -18,6 +18,9 @@ class JobsController < ApplicationController
 	def quota_job
 		# 1. get all samples, excluding those are in the blacklist
 		user_ids = User.ids_not_in_blacklist
+
+		published_survey = Survey.get_published_active_surveys
+
 		# 2. summarize the quota rules of the surveys
 		rule_arr = check_quota
 		# 3. find out samples for surveys
