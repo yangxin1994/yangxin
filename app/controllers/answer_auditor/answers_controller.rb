@@ -31,7 +31,9 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 			# val is like of { "selection" : [ NumberLong("1351400998231222"), NumberLong("3055564856809646") ], "text_input" : "" }
 			question = Question.find_by_id(key)
 			next unless question
-			show_answer = {'question_type' => question.question_type}
+			show_answer = {'question_type' => question.question_type, 
+					"title" => question.content["text"]}
+
 			logger.debug ">>>>>>>>>#{question.question_type}"
 			case question.question_type
 			when QuestionTypeEnum::CHOICE_QUESTION
@@ -43,7 +45,6 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 		'selected_choices' => ['aaa', 'bbb']
 				# 	}
 
-				show_answer.merge!({"title" => question.content["text"]})
 				if question.issue["items"] 
 					choices = []
 					selected_choices = []
@@ -56,48 +57,115 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 					show_answer.merge!({"choices"=>choices})
 					show_answer.merge!({"selected_choices"=> selected_choices})
 				end
-				# {question_content: [{title: "", choices: [], selected_choices: []}]}
 				answer["question_content"] << show_answer
+
 			when QuestionTypeEnum::MATRIX_CHOICE_QUESTION	
 				# 矩阵选择题
 				# Example:
 				# show_answer = {'question_type' => 1 ,
 				# 		'title'=>'XXXXXXXXXXX',
+				# 		'choices' => ['aaa', 'bbb', 'ccc'],
+				# 		'rows' => ['a1', 'a2'],
+				# 		'rows_selected_choices' => [["aaa",'bbb'], ['aaa']]
+				# }
+
+				choices = []
+				rows = []
+				rows_selected_choices = []
+
+				question.issue["items"].each do |item|
+					choices << item["content"]["text"]
+				end
+				show_answer.merge!({"choices"=>choices})
+			
+				question.issue['rows'].each_with_index do |item, index|
+					rows << item['content']['text']
+					row_selected_choices = []
+					val[index].each do |choice_id|
+						question.issue["items"].each do |e|
+							row_selected_choices << e["content"]["text"] if choice_id.to_s == e['id'].to_s
+						end
+					end
+					rows_selected_choices << row_selected_choices
+				end
+				show_answer.merge!({"rows"=>rows, "rows_selected_choices"=>rows_selected_choices})
+				answer["question_content"] << show_answer
+
 			when QuestionTypeEnum::TEXT_BLANK_QUESTION
 				# 文本填充题
 				# Example:
 				# show_answer = {'question_type' => 2 ,
 				# 		'title'=>'XXXXXXXXXXX',
+				#		'content' => 'XXXXXXXXXXX'
+				# }
+				show_answer.merge!({"content"=> val.to_s})
+				answer["question_content"] << show_answer
+
 			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
 				# 数值填充题
 				# Example:
 				# show_answer = {'question_type' => 3 ,
-				# 		'title'=>'XXXXXXXXXXX',	
+				# 		'title'=>'XXXXXXXXXXX',
+				#		'content' => '23.5'
+				# }	
+
+				show_answer.merge!({"content"=> val.to_s})
+				answer["question_content"] << show_answer
+
 			when QuestionTypeEnum::EMAIL_BLANK_QUESTION
 				# 邮箱题
 				# Example:
 				# show_answer = {'question_type' => 4 ,
-				# 		'title'=>'XXXXXXXXXXX',	
+				# 		'title'=>'XXXXXXXXXXX',
+				#		'content' => '23.5'
+				# }	
+
+				show_answer.merge!({"content"=> val.to_s})
+				answer["question_content"] << show_answer
+
 			when QuestionTypeEnum::URL_BLANK_QUESTION
 				# 网址链接题
 				# Example:
 				# show_answer = {'question_type' => 5 ,
 				# 		'title'=>'XXXXXXXXXXX',
+				#		'content' => 'www.baidu.com'
+				# }	
+				show_answer.merge!({"content"=> val.to_s})
+				answer["question_content"] << show_answer
+
 			when QuestionTypeEnum::PHONE_BLANK_QUESTION
 				# 电话题
 				# Example:
 				# show_answer = {'question_type' => 6 ,
 				# 		'title'=>'XXXXXXXXXXX',
+				#		'content' => '010-8888-8888'
+				# }	
+				show_answer.merge!({"content"=> val.to_s})
+				answer["question_content"] << show_answer
 			when QuestionTypeEnum::TIME_BLANK_QUESTION
 				# 时间题
 				# Example:
 				# show_answer = {'question_type' => 7 ,
 				# 		'title'=>'XXXXXXXXXXX',
+				#		'content' => '2012-01-01'
+				# }	
+
+				show_answer.merge!({"content"=> Time.at(val.to_s[0,10].to_i).strftime("%F")})
+				answer["question_content"] << show_answer
+
 			when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 				# 地址题
 				# Example:
 				# show_answer = {'question_type' => 8 ,
 				# 		'title'=>'XXXXXXXXXXX',	
+				#		'address' => 'city-code',
+				#		'detail' => 'XXXXXXXXXXXX',
+				#		'postcode' => '100083',
+				# }	
+				show_answer.merge!({"address"=> val["address"], 
+					"detail" => val["detail"],
+					"postcode" => val["postcode"]})
+				answer["question_content"] << show_answer
 			when QuestionTypeEnum::BLANK_QUESTION
 				# 组合填充题
 				# Example:
@@ -131,9 +199,9 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 		'content' => 'XXXXXXXXXXX'
 				# 	}
 
-				show_answer.merge!({"title" => question.content["text"]})
 				show_answer.merge!({"content" => val.to_s})
 				answer["question_content"] << show_answer
+
 			when QuestionTypeEnum::FILE_QUESTION	
 				# 
 				# Example:
@@ -153,7 +221,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 		'choices' => ['aaa', 'bbb', 'ccc']
 				# 		'selected_labels' => ["很不满意", "不满意", "满意"]
 				# 	}
-				show_answer.merge!({"title" => question.content["text"]})
+
 				show_answer.merge!({"labels" => question.issue["labels"]})
 				if question.issue["items"] 
 					choices = []
@@ -170,6 +238,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 					show_answer.merge!({"choices"=>choices})
 					show_answer.merge!({"selected_labels"=> selected_labels})
 				end
+
 				answer["question_content"] << show_answer
 			end	
 			
