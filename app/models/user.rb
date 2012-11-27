@@ -16,6 +16,7 @@ class User
 # 3, 4, ... 用户首次登录后，需要填写一些个人信息，状态可以记录用户填写个人信息到了哪一步，以便用户填写过程中关闭浏览器，再次打开后可以继续填写
 # -1 deleted
 	field :status, :type => Integer, default: 0
+	field :registered_at, :type => Integer, default: 0
 # true: the user is locked and cannot login
 	field :lock, :type => Boolean, default: false
 	field :last_login_time, :type => Integer
@@ -609,8 +610,9 @@ class User
 		return selected_users
 	end
 
-	def get_invited_user_ids
-		invited_users = User.where(:introducer_id => self._id.to_s)
-		return invited_users.map { |u| u._id.to_s }
+	def get_introduced_users
+		introduced_users = User.where(:introducer_id => self._id.to_s)
+		summary_info = introduced_users.map { |u| [u._id.to_s, u.email, u.registered_at] }
+		return summary_info
 	end
 end
