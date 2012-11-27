@@ -109,11 +109,10 @@ module Jobs
 					# 1. get the conditions
 					conditions = []
 					rule["conditions"].each do |condition|
-						if condition["condition_type"] == 0 then
-							conditions << Condition.new(condition["name"], condition["value"], condition["fuzzy"])
-						elsif condition["condition_type"] == 1 then
-							question = Question.find_by_id(condition["name"])
-							conditions << Condition.new(question.reference_id, condition["value"], condition["fuzzy"]) if !question.reference_id.blank?
+						if condition["condition_type"] == 1 then
+							# only find template questions
+							question = TemplateQuestion.find_by_id(condition["name"])
+							conditions << Condition.new(question._id, condition["value"], condition["fuzzy"]) if !question.nil?
 						end
 					end
 

@@ -411,7 +411,7 @@ class ActiveSupport::TestCase
 		return retval[0]["_id"]
 	end
 end
-
+=begin
 require 'rubygems'
 require 'spork'
 
@@ -444,3 +444,4 @@ Spork.each_run do
   # This code will be run each time you run your specs.
 
 end
+=end
