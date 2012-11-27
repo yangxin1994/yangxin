@@ -10,8 +10,8 @@ class RewardLog
   field :cause, :type => Integer
   field :value, :type => Hash
 
-  scope :point_logs, where( :type => 2)
-  scope :lottery_logs, where( :type => 1)
+  scope :point_logs, where( :type => 2).order_by("created_at","desc")
+  scope :lottery_logs, where( :type => 1).order_by("created_at","desc")
 
   has_one :lottery_code
   belongs_to :filled_survey, :class_name => "Survey", :inverse_of => :reward_logs
