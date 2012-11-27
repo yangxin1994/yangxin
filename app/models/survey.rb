@@ -1241,9 +1241,8 @@ class Survey
 		return Marshal.load(Marshal.dump(self.quota))
 	end
 
-	def self.get_user_ids_answered(survey_id)
-		survey = Survey.find_by_id(survey_id)
-		return survey.answers.map {|a| a.user_id.to_s}	
+	def get_user_ids_answered
+		return self.answers.map {|a| a.user_id.to_s}	
 	end
 
 	def estimate_answer_time
@@ -1914,5 +1913,13 @@ class Survey
 				"lottery_id" => self.lottery_id,
 				"spreadable" => self.spreadable,
 				"spread_point" => self.spread_point}
+	end
+
+	def remaining_quota_amount
+		number = 0
+		self.quota["rules"].each_with_index do |rule, rule_index|
+			number += [rule["amount"] - quota_stats["answer_number"][rule_index], 0].max
+		end
+		return number
 	end
 end

@@ -83,12 +83,10 @@ class GoogleUser < ThirdPartyUser
 			google_user.save
 		else
 			# it contains access_token ...
-			google_user.update_by_hash(response_data)
+			# google_user.update_by_hash(response_data)
 		end
 		
 		return google_user
-	rescue => ex 
-		return nil
 	end
 
 	#--
