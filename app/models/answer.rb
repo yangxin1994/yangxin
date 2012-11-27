@@ -345,7 +345,7 @@ class Answer
 		questions = []
 		question_ids.each do |q_id|
 			question = BasicQuestion.find_by_id(q_id)
-			questions << question if !question.nil?
+			questions << question.remove_hidden_items(logic_control_result[q_id]) if !question.nil?
 		end
 		# consider the scenario that "one question per page"
 		if self.survey.style_setting["is_one_question_per_page"]
@@ -661,34 +661,34 @@ class Answer
 			end
 			next if !satisfy_rule
 			# the conditions of this logic control rule is satisfied
-			case logic_control_rule["rule_type"]
-			when 1
+			case logic_control_rule["rule_type"].to_s
+			when "1"
 				# "show question" logic control
 				# if the rule is satisfied, show the question (set the answer of the question as "nil")
 				logic_control_rule["result"].each do |q_id|
 					self.answer_content[q_id] = nil
 				end
 				self.save
-			when 2
+			when "2"
 				# "hide question" logic control
 				# if the rule is satisfied, hide the question (set the answer of the question as {})
 				logic_control_rule["result"].each do |q_id|
 					self.answer_content[q_id] = self.answer_content[q_id] || {}
 				end
 				self.save
-			when 3
+			when "3"
 				# "show item" logic control
 				# if the rule is satisfied, show the items (remove from the logic_control_result)
 				logic_control_rule["result"].each do |ele|
 					self.remove_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
 				end
-			when 4
+			when "4"
 				# "hide item" logic control
 				# if the rule is satisfied, hide the items (add to the logic_control_result)
 				logic_control_rule["result"].each do |ele|
 					self.add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
 				end
-			when 5
+			when "5"
 				# "show matching item" logic control
 				# if the rule is satisfied, show the items (remove from the logic_control_result)
 				items_to_be_removed = []
@@ -696,7 +696,7 @@ class Answer
 					items_to_be_removed << input_ids[1]
 				end
 				self.remove_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_removed, [])
-			when 6
+			when "6"
 				# "hide matching item" logic control
 				# if the rule is satisfied, hide the items (add to the logic_control_result)
 				items_to_be_added = []
