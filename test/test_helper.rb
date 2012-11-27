@@ -424,39 +424,16 @@ Spork.prefork do
 
 	require "minitest/autorun"
 	require "minitest/rails"
-	MiniTest::Rails.override_testunit!
+	# MiniTest::Rails.override_testunit!
 	# Uncomment if you want Capybara in accceptance/integration tests
 	# require "minitest/rails/capybara"
 
 	# Uncomment if you want awesome colorful output
-	# require "minitest/pride"
+	require "minitest/pride"
 
 	class MiniTest::Rails::ActiveSupport::TestCase
 	  # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in alphabetical order.
 	  # fixtures :all
-	  def clear(*models)
-			models.each do |model|
-				model.all.each do |instance|
-					instance.destroy
-				end
-			end
-		end
-		def sign_in(email, password)
-			old_controller = @controller
-			@controller = SessionsController.new
-			post :create, :format => :json, :user => {"email_username" => email, "password" => password}
-			result = JSON.parse(@response.body)
-			@controller = old_controller
-			return result["value"]["auth_key"]
-		end
-
-		def sign_out(auth_key)
-			old_controller = @controller
-			@controller = SessionsController.new
-			get :destroy, :auth_key => auth_key
-			@controller = old_controller
-		end
-	  # Add more helper methods to be used by all tests here...
 	end
   
 end

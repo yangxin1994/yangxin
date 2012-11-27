@@ -1,3 +1,5 @@
+#encoding: utf-8
+
 class Order
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -28,7 +30,7 @@ class Order
   # embeds_one :lottery_receive_info, :class_name => "LotteryReceiveInfo"
 
   has_one :reward_log, :class_name => "RewardLog"
-
+  belongs_to :lottery_code, :class_name => "LotteryCode"
   belongs_to :gift, :class_name => "BasicGift"
   belongs_to :user, :class_name => "User", :inverse_of => :orders
   belongs_to :operator, :class_name => "User", :inverse_of => :operate_orders
@@ -63,30 +65,26 @@ class Order
     return @ret_error if @ret_error
     super
   end
+  def prize
+    self.gift
+  end
   # TO DO I18n
   #after_create :decrease_gift, :update_user_info
   after_create :exchange
   private
   def exchange
-    is_prize ? ex_prize : ex_gift
+    if !(is_prize ? ex_prize : ex_gift)
+      self.is_deleted = true
+      self.delete
+    end
   end
 
   def ex_gift
-    if decrease_point && decrease_gift && update_user_info
-      true
-    else
-      self.is_deleted = true
-      self.delete
-      false
-    end 
+    decrease_point && decrease_gift && update_user_info
   end
 
   def ex_prize
-    if ck_lottery_code && decrease_prize && update_user_info
-      self.is_deleted = true
-      self.delete
-      false
-    end 
+    ck_lottery_code && decrease_prize && update_user_info
   end
 
   def decrease_point
@@ -127,6 +125,7 @@ class Order
         :error_code => ErrorEnum::INVALID_LOTTERYCODE_ID,
         :error_message => "Invalid lottery code"
       }
+      logger.info "=======抽奖号验证失败======="
       return false
     end
     self.lottery_code.satus = 4
@@ -134,17 +133,17 @@ class Order
   end
 
   def decrease_prize
-    if self.prize.blank? || self.prize.surplus <= 0
+    if self.gift.blank? || self.gift.surplus <= 0
       @ret_error= {
         :error_code => ErrorEnum::PRIZE_NOT_ENOUGH,
         :error_message => "prize not enough"
       }
       return false
     end
-    if self.prize.type == 3
-      self.prize.lottery.give_lottery_code_to(self.user) 
+    if self.gift.type == 3
+      self.gift.lottery.give_lottery_code_to(self.user) 
     end
-    self.prize.inc(:surplus, -1) 
+    self.gift.inc(:surplus, -1) 
     self.save
   end
   # def decrease_gift

@@ -17,23 +17,22 @@ class OrdersControllerTest < ActionController::TestCase
   end
 
   test "should create a new order" do
-    # g = FactoryGirl.create(:kindle)
-    # post :create,
-    #      :format => :json,
-    #      :order => {:type => 1,
-    #                 :status => 0,
-    #                 :is_update_user => true,
-    #                 :full_name => "CASH",
-    #                 :address => "123123",
-    #                 :postcode => "000000",
-    #                 :phone => "123",
-    #                 :gift => g,
-    #      },
-    #      :auth_key => @auth_key
-    # h = JSON.parse(@response.body)
-    # p h
-    # assert h["success"] == true
-    # assert !h["value"]["created_at"].nil?
+    g = FactoryGirl.create(:kindle)
+    post :create,
+         :format => :json,
+         :order => {:type => 1,
+                    :status => 0,
+                    :is_update_user => true,
+                    :full_name => "CASH",
+                    :address => "123123",
+                    :postcode => "000000",
+                    :phone => "123",
+                    :gift => g,
+         },
+         :auth_key => @auth_key
+    h = JSON.parse(@response.body)
+    assert h["success"] == true
+    assert !h["value"]["created_at"].nil?
   end
 
   test "should show a order" do
@@ -47,9 +46,8 @@ class OrdersControllerTest < ActionController::TestCase
     # @user_bar.orders << @order
     # @user_bar.save
     # @order.save
-    # get :show, :id => @user_bar.orders[0]._id, :auth_key => @auth_key
+    # get :show, :id => @order._id, :auth_key => @auth_key
     # h = JSON.parse(response.body)
-    # p h
     # assert h["success"] == true
     # assert h["value"]["_id"] == "#{@order._id}"
     # assert_response :success
