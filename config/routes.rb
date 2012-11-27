@@ -122,6 +122,9 @@ OopsData::Application.routes.draw do
 			collection do
 				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
 			end
+			member do
+				put :verify, :verify_as_failed, :deliver, :deliver_success, :deliver_as_failed
+			end
 		end
 		
 		resources :lotteries do

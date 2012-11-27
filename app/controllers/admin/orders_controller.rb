@@ -29,27 +29,50 @@ class Admin::OrdersController < Admin::ApplicationController
   end
 
   def verify
-    params[:order][:status] = 1
-    update
+    render_json do
+      @success = Order.find_by_id params[:id] do |o|
+        o.update_attribute(:status, 1)
+      end
+    end
   end
   
-  def false_verify
-    params[:order][:status] = -1
-    # params[:order][:status_desc] 
-    update
+  def verify_as_failed
+    render_json do
+      @success = Order.find_by_id params[:id] do |o|
+        o.update_attribute(:status, -1)
+        o.gift.inc(:surplus, 1)
+        o.update_attribute(:status_desc, params[:status_desc])
+        o.reward_log.revoke_operation(current_user, params[:status_desc])
+      end
+    end
   end
 
-  # def false_verify
-  #   params[:order][:status] = -1
-  #   # params[:order][:status_desc] 
-  #   update
-  # end
-  
-  # def false_verify
-  #   params[:order][:status] = -1
-  #   # params[:order][:status_desc] 
-  #   update
-  # end  
+  def deliver
+    render_json do
+      @success = Order.find_by_id params[:id] do |o|
+        o.update_attribute(:status, 2)
+      end
+    end
+  end
+
+  def deliver_success
+    render_json do
+      @success = Order.find_by_id params[:id] do |o|
+        o.update_attribute(:status, 3)
+      end
+    end
+  end
+
+  def deliver_as_failed
+    render_json do
+      @success = Order.find_by_id params[:id] do |o|
+        o.update_attribute(:status, -3)
+        o.gift.inc(:surplus, 1)
+        o.update_attribute(:status_desc, params[:status_desc])
+        o.reward_log.revoke_operation(current_user, params[:status_desc])
+      end
+    end
+  end
 
   def update
     @order = Order.find_by_id(params[:id])

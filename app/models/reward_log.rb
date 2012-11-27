@@ -8,6 +8,7 @@ class RewardLog
   field :point, :type => Integer, :default => 0
   # can be 0 (AdminOperate), 1 (InviteUser), 2 (FilledSurvey), 3 (ExtendSurvey), 4 (ExchangeGift), 5 (revoke)
   field :cause, :type => Integer
+  field :cause_desc, :type => String
   field :value, :type => Hash
 
   scope :point_logs, where( :type => 2).order_by("created_at","desc")
@@ -28,12 +29,13 @@ class RewardLog
 
   # before_save :operated_point
   after_create :operate_user_point
- 
-  def self.revoke_operation(log_id,admin_id)
-    r = RewardLog.find(log_id)
-    RewardLog.create(:user_id => r.user.id,
-                     :point => -r.point,
-                     :operator_id => admin_id, 
+
+  def revoke_operation(admin, cause_desc)
+    RewardLog.create(:user_id => self.user.id,
+                     :point => -self.point,
+                     :operator => admin,
+                     :type => 2,
+                     :cause_desc => cause_desc,
                      :cause => 4)
   end
 

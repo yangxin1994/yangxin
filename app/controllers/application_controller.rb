@@ -148,16 +148,16 @@ class ApplicationController < ActionController::Base
 	end
 
 	def require_admin
-		logger.info "AAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+		#logger.info "AAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 		if !user_signed_in?
-			logger.info "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+			#logger.info "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_admin?
-			logger.info "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+			#logger.info "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_ADMIN) and return }
