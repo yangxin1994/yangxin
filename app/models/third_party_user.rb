@@ -6,8 +6,7 @@ class ThirdPartyUser
 	include Mongoid::Document
 	# website can be "renren", "sina", "qq", "google", "qihu"
 	field :website, :type => String
-	field :user_id, :type => String
-	field :oopsdata_user_id, :type => String
+	field :website_id, :type => String
 	field :access_token, :type => String
 	field :refresh_token, :type => String
 	field :expires_in, :type => String
@@ -18,23 +17,10 @@ class ThirdPartyUser
 	public
 
 	def self.find_by_id(third_party_user_id)
-		third_party_user = ThirdPartyUser.where(third_party_user_id: third_party_user_id)[0]
+		third_party_user = ThirdPartyUser.where(_id: third_party_user_id)[0]
 		return third_party_user
 	end
 	
-	#*description*: find a third party user from a website and an user id, 
-	#
-	#*params*:
-	#* website
-	#* user id
-	#
-	#*retval*:
-	#* the third party user instance: when the user exists, it's only ThirdPartyUser instance.
-	#* nil: when the third party user does not exist	
-	def self.find_by_website_and_user_id(website, user_id)
-	  return self.where(:website => website, :user_id => user_id)[0]
-	end
-
 	def self.get_access_token(website, code)
 		case website
 		when "sina"
@@ -45,6 +31,8 @@ class ThirdPartyUser
 			response_data = QqUser.get_access_token(code)
 		when "google"
 			response_data = GoogleUser.get_access_token(code)
+		else
+			response_data = {}
 		end
 		return response_data
 	end
@@ -59,6 +47,8 @@ class ThirdPartyUser
 			tp_user = QqUser.save_tp_user(response_data)
 		when "google"
 			tp_user = GoogleUser.save_tp_user(response_data)
+		else
+			return ErrorEnum::WRONG_THIRD_PARTY_WEBSITE
 		end
 		return tp_user
 	end

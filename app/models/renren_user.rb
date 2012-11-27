@@ -41,15 +41,15 @@ class RenrenUser < ThirdPartyUser
 		
 		Logger.new("log/development.log").info(response_data);
 		
-		user_id = response_data["user"]["id"]
+		website_id = response_data["user"]["id"]
 		access_token = response_data["access_token"]
 		refresh_token = response_data["refresh_token"]
 		expires_in = response_data["expires_in"]
 	 
 		#new or update renren_user
-		renren_user = RenrenUser.where(:user_id => user_id)[0]
+		renren_user = RenrenUser.where(:website_id => website_id)[0]
 		if renren_user.nil?
-			renren_user = RenrenUser.new(:website => "renren", :user_id => user_id, :access_token => access_token, 
+			renren_user = RenrenUser.new(:website => "renren", :website_id => website_id, :access_token => access_token, 
 			:refresh_token => refresh_token, :expires_in => expires_in)
 			renren_user.save
 		else 
@@ -59,10 +59,10 @@ class RenrenUser < ThirdPartyUser
 			response_data["refresh_token"] = refresh_token
 			response_data["expires_in"] = expires_in
 			# update info 
-			renren_user.update_by_hash(response_data)
+			#renren_user.update_by_hash(response_data)
 		end
 		
-		renren_user.update_user_info
+		#renren_user.update_user_info
 		
 		return renren_user
 	end

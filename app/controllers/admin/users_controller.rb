@@ -56,7 +56,7 @@ class Admin::UsersController < Admin::ApplicationController
 	# DELETE /admin/users/1
 	# DELETE /admin/users/1.json
 	def destroy
-		render_json_auto @user.remove
+		render_json_auto @user.remove_user
 	end
 
 	# PUT
@@ -147,12 +147,12 @@ class Admin::UsersController < Admin::ApplicationController
 			# not include role =0 
 
 			users = User.where(:role.gt => 0).desc(:lock, :created_at).to_a
-			logger.debug '+++++++++++'
-			logger.debug users.length
+			# logger.debug '+++++++++++'
+			# logger.debug users.length
 			users.select! do |u|
 				u.role.to_i & role > 0
 			end
-			logger.debug users.to_a.length
+			# logger.debug users.to_a.length
 
 			# super_admin can search all with role in fix.
 			# admin all, but super_admin and admin.

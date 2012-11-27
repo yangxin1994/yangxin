@@ -42,22 +42,22 @@ class SinaUser < ThirdPartyUser
 	#* sina_user: new or updated.
 	def self.save_tp_user(response_data)
 		access_token = response_data["access_token"]
-		user_id = response_data["uid"]
+		website_id = response_data["uid"]
 		
 		# reject the same function field
 		response_data.select!{|k,v| !k.to_s.include?("id") }
 	
 		#new or update sina_user
-		sina_user = SinaUser.where(:user_id => user_id)[0]
+		sina_user = SinaUser.where(:website_id => website_id)[0]
 		if sina_user.nil? then
-			sina_user = SinaUser.new(:website => "sina", :user_id => user_id, :access_token => access_token)
+			sina_user = SinaUser.new(:website => "sina", :website_id => website_id, :access_token => access_token)
 			sina_user.save
 			# this is not update instance, it would lead that other info should be seen in next login.
 		else
-			sina_user.update_by_hash(response_data)
+			#sina_user.update_by_hash(response_data)
 		end
 		 
-		sina_user.update_user_info
+		#sina_user.update_user_info
 		
 		return sina_user
 	end

@@ -10,17 +10,17 @@ class Admin::RewardsController < Admin::ApplicationController
 
 	# ******************************
 
-	def for_points
-		render_json { auto_paginate(@user.reward_logs.point_logs)}
-	end
+	# def for_points
+	# 	render_json { auto_paginate(@user.reward_logs.point_logs)}
+	# end
 
-	def for_lotteries
-		render_json { auto_paginate(@user.reward_logs.lottery_logs)}
-	end
+	# def for_lotteries
+	# 	render_json { auto_paginate(@user.reward_logs.lottery_logs)}
+	# end
 
-	def index
-		render_json { auto_paginate(@user.reward_logs)}
-	end
+	# def index
+	# 	render_json { auto_paginate(@user.reward_logs)}
+	# end
 
 	def operate_point
 		@reward_log = @current_user.operate_point(params[:point], params[:uid] || params[:user_id])

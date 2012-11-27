@@ -60,9 +60,9 @@ class GoogleUser < ThirdPartyUser
 		#get user_id
 		retval = Tool.send_get_request("https://www.googleapis.com/oauth2/v1/userinfo?access_token=#{access_token}", true)    
 		response_data2 = JSON.parse(retval.body)		
-		return nil if !response_data2.select{|k,v| k.to_s.include?("error")}.empty?
+		return false if !response_data2.select{|k,v| k.to_s.include?("error")}.empty?
 		
-		user_id = response_data2["id"]
+		website_id = response_data2["id"]
 		
 		# reject the same function field
 		response_data["google_email"] = response_data2["email"]
@@ -75,9 +75,9 @@ class GoogleUser < ThirdPartyUser
 		response_data.select!{|k,v| attrs.split.include?(k.to_s)}
 		
 		#new or update google_user
-		google_user = GoogleUser.where(:user_id => user_id)[0]
+		google_user = GoogleUser.where(:website_id => website_id)[0]
 		if google_user.nil? then
-			response_data.merge!({"website"=>"google", "user_id" => user_id })
+			response_data.merge!({"website"=>"google", "website_id" => website_id })
 			
 			google_user = GoogleUser.new(response_data)
 			google_user.save
