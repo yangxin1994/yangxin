@@ -20,8 +20,8 @@ class OrderTest < ActiveSupport::TestCase
                  :bankcard_number => "alipay_account",
                  :phone => "123")
 
-    @user_bar.update
-    g.update
+    @user_bar.reload
+    g.reload
     assert @user_bar.full_name == "CASH"
     assert g.surplus == 9
     #p @user_bar.point
@@ -39,8 +39,8 @@ class OrderTest < ActiveSupport::TestCase
                  :postcode => "000000",
                  :phone => "123")
 
-    @user_bar.update
-    g.update
+    @user_bar.reload
+    g.reload
     assert @user_bar.postcode == "000000"
   end
 
@@ -53,9 +53,30 @@ class OrderTest < ActiveSupport::TestCase
                  :full_name => "CASH",
                  :phone => "1234")
 
-    @user_bar.update
-    g.update
+    @user_bar.reload
+    g.reload
     assert @user_bar.phone == "1234"
+  end
+
+  test "should create a order for virtual prize" do
+    g = FactoryGirl.create(:mobile100)
+    lc =  FactoryGirl.create(:lottery_code)
+    lc.status = 2
+    lc.save
+    o = Order.create(:type => 2,
+                 :gift => g,
+                 :user => @user_bar,
+                 :is_update_user => true,
+                 :lottery_code_id => lc._id,
+                 :is_prize => true,
+                 :full_name => "CASH",
+                 :phone => "1234")
+
+    @user_bar.reload
+    g.reload
+    lc.reload
+    assert @user_bar.phone == "1234"
+    assert o.lottery_code.status == 4
   end
 
   test "should create a order for lottery" do
@@ -65,8 +86,8 @@ class OrderTest < ActiveSupport::TestCase
                  :gift => g,
                  :user => @user_bar)
 
-    @user_bar.update
-    g.update
+    @user_bar.reload
+    g.reload
     assert @user_bar.lottery_codes.count == lc + 1
   end
 

@@ -1,5 +1,3 @@
-#encoding: utf-8
-
 class Order
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -120,15 +118,14 @@ class Order
   end
 
   def ck_lottery_code
-    if self.lottery_code.blank? || self.lottery_code.satus != 2
+    if self.lottery_code.blank? || self.lottery_code.status != 2
       @ret_error= {
         :error_code => ErrorEnum::INVALID_LOTTERYCODE_ID,
         :error_message => "Invalid lottery code"
       }
-      logger.info "=======抽奖号验证失败======="
       return false
     end
-    self.lottery_code.satus = 4
+    self.lottery_code.status = 4
     self.lottery_code.save
   end
 
