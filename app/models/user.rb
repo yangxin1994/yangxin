@@ -319,11 +319,11 @@ class User
 		user.activate_time = Time.now.to_i
 		user.save
 		# pay introducer points
-		inviter = User.find_by_id(user.introducer_id)
-		if !inviter.nil?
+		introducer = User.find_by_id(user.introducer_id)
+		if !introducer.nil?
 			RewardLog.create(:user => introducer, :type => 2, :point => POINT_TO_INTRODUCER, :invited_user_id => user._id, :cause => 1)
 			# send a message to the introducer
-			inviter.create_message("邀请好友注册积分奖励", "您邀请的用户#{user.email}注册激活成功，您获得了#{POINT_TO_INTRODUCER}个积分奖励。", [inviter._id])
+			introducer.create_message("邀请好友注册积分奖励", "您邀请的用户#{user.email}注册激活成功，您获得了#{POINT_TO_INTRODUCER}个积分奖励。", [introducer._id])
 		end
 		return user.login(client_ip, client_type, false)
 	end
