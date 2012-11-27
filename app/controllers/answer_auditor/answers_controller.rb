@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'error_enum'
 class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 	
@@ -31,8 +32,10 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 			question = Question.find_by_id(key)
 			next unless question
 			show_answer = {'question_type' => question.question_type}
+			logger.debug ">>>>>>>>>#{question.question_type}"
 			case question.question_type
-			when QuillCommon::QuestionTypeEnum::CHOICE_QUESTION
+			when QuestionTypeEnum::CHOICE_QUESTION
+				# 选择题
 				# Example:
 				# show_answer = {'question_type'=> 0,
 				# 		'title' => 'XXXXXXXXXXX',
@@ -55,20 +58,73 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				end
 				# {question_content: [{title: "", choices: [], selected_choices: []}]}
 				answer["question_content"] << show_answer
-			when QuillCommon::QuestionTypeEnum::MATRIX_CHOICE_QUESTION	
-			when QuillCommon::QuestionTypeEnum::TEXT_BLANK_QUESTION	
-			when QuillCommon::QuestionTypeEnum::NUMBER_BLANK_QUESTION	
-			when QuillCommon::QuestionTypeEnum::EMAIL_BLANK_QUESTION	
-			when QuillCommon::QuestionTypeEnum::URL_BLANK_QUESTION	
-			when QuillCommon::QuestionTypeEnum::PHONE_BLANK_QUESTION	
-			when QuillCommon::QuestionTypeEnum::TIME_BLANK_QUESTION	
-			when QuillCommon::QuestionTypeEnum::ADDRESS_BLANK_QUESTION	
-			when QuillCommon::QuestionTypeEnum::BLANK_QUESTION	
-			when QuillCommon::QuestionTypeEnum::MATRIX_BLANK_QUESTION	
-			when QuillCommon::QuestionTypeEnum::CONST_SUM_QUESTION	
-			when QuillCommon::QuestionTypeEnum::SORT_QUESTION
-			when QuillCommon::QuestionTypeEnum::RANK_QUESTION
-			when QuillCommon::QuestionTypeEnum::PARAGRAPH
+			when QuestionTypeEnum::MATRIX_CHOICE_QUESTION	
+				# 矩阵选择题
+				# Example:
+				# show_answer = {'question_type' => 1 ,
+				# 		'title'=>'XXXXXXXXXXX',
+			when QuestionTypeEnum::TEXT_BLANK_QUESTION
+				# 文本填充题
+				# Example:
+				# show_answer = {'question_type' => 2 ,
+				# 		'title'=>'XXXXXXXXXXX',
+			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
+				# 数值填充题
+				# Example:
+				# show_answer = {'question_type' => 3 ,
+				# 		'title'=>'XXXXXXXXXXX',	
+			when QuestionTypeEnum::EMAIL_BLANK_QUESTION
+				# 邮箱题
+				# Example:
+				# show_answer = {'question_type' => 4 ,
+				# 		'title'=>'XXXXXXXXXXX',	
+			when QuestionTypeEnum::URL_BLANK_QUESTION
+				# 网址链接题
+				# Example:
+				# show_answer = {'question_type' => 5 ,
+				# 		'title'=>'XXXXXXXXXXX',
+			when QuestionTypeEnum::PHONE_BLANK_QUESTION
+				# 电话题
+				# Example:
+				# show_answer = {'question_type' => 6 ,
+				# 		'title'=>'XXXXXXXXXXX',
+			when QuestionTypeEnum::TIME_BLANK_QUESTION
+				# 时间题
+				# Example:
+				# show_answer = {'question_type' => 7 ,
+				# 		'title'=>'XXXXXXXXXXX',
+			when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+				# 地址题
+				# Example:
+				# show_answer = {'question_type' => 8 ,
+				# 		'title'=>'XXXXXXXXXXX',	
+			when QuestionTypeEnum::BLANK_QUESTION
+				# 组合填充题
+				# Example:
+				# show_answer = {'question_type' => 9 ,
+				# 		'title'=>'XXXXXXXXXXX',
+			when QuestionTypeEnum::MATRIX_BLANK_QUESTION
+				# 
+				# Example:
+				# show_answer = {'question_type' => 10 ,
+				# 		'title'=>'XXXXXXXXXXX',	
+			when QuestionTypeEnum::CONST_SUM_QUESTION
+				# 比重题
+				# Example:
+				# show_answer = {'question_type' => 11 ,
+				# 		'title'=>'XXXXXXXXXXX',	
+			when QuestionTypeEnum::SORT_QUESTION
+				# 排序题
+				# Example:
+				# show_answer = {'question_type' => 12 ,
+				# 		'title'=>'XXXXXXXXXXX',
+			when QuestionTypeEnum::RANK_QUESTION
+				# 
+				# Example:
+				# show_answer = {'question_type' => 13 ,
+				# 		'title'=>'XXXXXXXXXXX',
+			when QuestionTypeEnum::PARAGRAPH
+				# 文本段
 				# Example:
 				# show_answer = {'question_type' => 14 ,
 				# 		'title'=>'XXXXXXXXXXX',
@@ -78,9 +134,18 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				show_answer.merge!({"title" => question.content["text"]})
 				show_answer.merge!({"content" => val.to_s})
 				answer["question_content"] << show_answer
-			when QuillCommon::QuestionTypeEnum::FILE_QUESTION	
-			when QuillCommon::QuestionTypeEnum::TABLE_QUESTION
-			when QuillCommon::QuestionTypeEnum::SCALE_QUESTION
+			when QuestionTypeEnum::FILE_QUESTION	
+				# 
+				# Example:
+				# show_answer = {'question_type' => 15 ,
+				# 		'title'=>'XXXXXXXXXXX',
+			when QuestionTypeEnum::TABLE_QUESTION
+				# 
+				# Example:
+				# show_answer = {'question_type' => 16 ,
+				# 		'title'=>'XXXXXXXXXXX',
+			when QuestionTypeEnum::SCALE_QUESTION
+				# 量表题
 				# Example:
 				# show_answer = {'question_type' =>17 ,
 				# 		'title'=>'XXXXXXXXXXX',
@@ -95,18 +160,21 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 					selected_labels = []
 					question.issue["items"].each do |item|
 						choices << item["content"]["text"]
+						val.each do |v_index, v_val|
+							if v_index.to_s == item['id'].to_s
+								selected_labels << question.issue["labels"][v_val.to_i] if v_val.to_i >=0
+								selected_labels << "不清楚" if v_val.to_i == -1
+							end
+						end
 					end
 					show_answer.merge!({"choices"=>choices})
-
-					val.each do |v_index, v_val|
-						selected_labels << question.issue["labels"][v_val.to_i]
-					end
 					show_answer.merge!({"selected_labels"=> selected_labels})
 				end
+				answer["question_content"] << show_answer
 			end	
 			
 		end
-		render_json_auto(answer)
+		render_json_auto(answer, :only => [:question_content])
 	end
 
 	# def update
