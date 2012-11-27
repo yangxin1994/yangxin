@@ -71,6 +71,7 @@ class Admin::LotteriesController < Admin::ApplicationController
     @lottery[:photo_src] = @lottery.photo.picture_url unless @lottery.photo.nil?
     render_json { @lottery}
   end
+  
   def destroy
     render_json do
       Lottery.find_by_id(params[:id]) do |e|

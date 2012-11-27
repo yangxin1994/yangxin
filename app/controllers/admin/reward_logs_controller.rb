@@ -1,8 +1,8 @@
 class Admin::RewardLogsController < ApplicationController
 	before_filter :require_sign_in
 	def for_points
-		if params[:uid]
-			@user = User.find_by_id(params[:uid])
+		if params[:user_id]
+			@user = User.find_by_id(params[:user_id])
 			render_json @user.valid? do |s|
 				if s
 					auto_paginate(@user.reward_logs.point_logs)
@@ -18,8 +18,8 @@ class Admin::RewardLogsController < ApplicationController
 	end
 
 	def for_lotteries
-		if params[:uid]
-			@user = User.find_by_id(params[:uid])
+		if params[:user_id]
+			@user = User.find_by_id(params[:user_id])
 			render_json @user.is_valid? do |s|
 				if s
 					auto_paginate(@user.reward_logs.lottery_logs)
