@@ -481,6 +481,7 @@ class User
 		u = User.find_by_id_including_deleted(user_id)
 		operate_reward_logs.create(:point => point,
 				 :user => u,
+				 :type => 2,
 				 :cause => 0)
 	end
 #--

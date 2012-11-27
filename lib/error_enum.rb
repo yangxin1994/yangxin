@@ -183,5 +183,7 @@ module ErrorEnum
 	USER_SAVE_FAILED = 110000
 	# Point Error (18)
 	POINT_NOT_ENOUGH = 21833
+	# User Error (20)
+	USER_NOT_FOUND = 22001
 end
 

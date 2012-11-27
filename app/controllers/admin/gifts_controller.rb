@@ -2,7 +2,17 @@ class Admin::GiftsController < Admin::ApplicationController
 
 
   def index
-    render_json { auto_paginate(Gift) }
+    @gifts = params[:user_id] ? Gift.where(:_id => params[:user_id]) : Gift.all
+    render_json @gifts.is_a? Array do |s|
+      if s
+        auto_paginate(Gift) 
+      else
+        {
+          error_code: ErrorEnum::USER_NOT_FOUND,
+          error_message: "User not found"
+        }
+      end
+    end
   end
 
 
