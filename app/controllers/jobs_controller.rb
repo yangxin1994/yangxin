@@ -15,6 +15,18 @@ class JobsController < ApplicationController
 		render_json_s(true) and return
 	end
 
+	def quota_job
+		# 1. get all samples, excluding those are in the blacklist
+		user_ids = User.ids_not_in_blacklist
+		# 2. summarize the quota rules of the surveys
+		rule_arr = check_quota
+		# 3. find out samples for surveys
+		samples_found = find_samples(user_ids, rule_arr)
+		# 4. send emails to the samples found
+		send_emails(rule_arr, samples_found)	
+		render_json_s(true) and return
+	end
+
 	def result_job
 		case params[:result_type]
 		when "data_list"
