@@ -1,7 +1,7 @@
 # coding: utf-8
 
 class LotteriesController < ApplicationController
-
+	before_filter :require_sign_in, :only => [:own, :draw]
 	def index
 		render_json do
 			auto_paginate Lottery.activity do 
@@ -14,6 +14,7 @@ class LotteriesController < ApplicationController
 	end
 	
 	def own
+		logger.info "==== #{current_user}======="
 		render_json do
 			[:for_draw, :drawed_w].map do |s|
 				pl = params["#{s.to_s}_p".to_sym].to_i || 1
@@ -34,11 +35,18 @@ class LotteriesController < ApplicationController
 	end
 
 	def draw
-		render_json do
+		@lottery_code = current_user.lottery_codes.for_draw.find_by_id params[:id]
+		render_json @lottery_code.is_valid? do |s|
 			# 直接找不到抽奖号比较好? 或者提示抽过奖了 ?
-			current_user.lottery_codes.for_draw.find_by_id params[:id] do |r|
-				r.draw
-			end
+			if !s
+				@lottery_code.as_retval
+			elsif @lottery_code.lottery.status != 1
+				@success = false
+				{:error_code => ErrorEnum::INVALID_LOTTERYCODE_ID,
+	       :error_message => "Lottery not activity"}
+			else
+				@lottery_code.draw
+			end				
 		end
 	end
 	# def_each :virtualgoods, :cash, :realgoods, :stockout do |method_name|

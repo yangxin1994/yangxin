@@ -424,18 +424,16 @@ Spork.prefork do
 
 	require "minitest/autorun"
 	require "minitest/rails"
-	MiniTest::Rails.override_testunit!
+	# MiniTest::Rails.override_testunit!
 	# Uncomment if you want Capybara in accceptance/integration tests
 	# require "minitest/rails/capybara"
 
 	# Uncomment if you want awesome colorful output
-	# require "minitest/pride"
+	require "minitest/pride"
 
 	class MiniTest::Rails::ActiveSupport::TestCase
 	  # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in alphabetical order.
 	  # fixtures :all
-
-	  # Add more helper methods to be used by all tests here...
 	end
   
 end

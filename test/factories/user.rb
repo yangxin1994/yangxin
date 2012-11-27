@@ -3,7 +3,7 @@ FactoryGirl.define do
 	factory :quill_user, class: User do
 		password Encryption.encrypt_password("123123123")
 		status 4
-		point 1000
+		point 10000
 		factory :admin_foo do
 			email "admin_foo@gmail.com"
 			username "admin_foo"
