@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+  </head>
+  <body>
+		<p>
+			<%=@user.username%>
+		</p>
+		<br />
+		<p>
+			邀请填写以下问卷
+		</p>
+		<p>
+			<%- @surveys.each do |s| %>
+				<a href="<%= "http://quill.oopsdata.com/surveys/#{s._id.to_s}" %>"><%= s.title %></a>
+				<br />
+			<%- end %>
+		</p>
+		<p>感谢您注册</p>
+		<br />
+		<p>Oops!Data团队</p>
+  </body>
+</html>

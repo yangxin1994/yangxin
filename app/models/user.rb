@@ -16,6 +16,7 @@ class User
 # 3, 4, ... 用户首次登录后，需要填写一些个人信息，状态可以记录用户填写个人信息到了哪一步，以便用户填写过程中关闭浏览器，再次打开后可以继续填写
 # -1 deleted
 	field :status, :type => Integer, default: 0
+	field :registered_at, :type => Integer, default: 0
 # true: the user is locked and cannot login
 	field :lock, :type => Boolean, default: false
 	field :last_login_time, :type => Integer
@@ -319,11 +320,11 @@ class User
 		user.activate_time = Time.now.to_i
 		user.save
 		# pay introducer points
-		inviter = User.find_by_id(user.introducer_id)
-		if !inviter.nil?
+		introducer = User.find_by_id(user.introducer_id)
+		if !introducer.nil?
 			RewardLog.create(:user => introducer, :type => 2, :point => POINT_TO_INTRODUCER, :invited_user_id => user._id, :cause => 1)
 			# send a message to the introducer
-			inviter.create_message("邀请好友注册积分奖励", "您邀请的用户#{user.email}注册激活成功，您获得了#{POINT_TO_INTRODUCER}个积分奖励。", [inviter._id])
+			introducer.create_message("邀请好友注册积分奖励", "您邀请的用户#{user.email}注册激活成功，您获得了#{POINT_TO_INTRODUCER}个积分奖励。", [introducer._id])
 		end
 		return user.login(client_ip, client_type, false)
 	end
@@ -442,7 +443,7 @@ class User
 		m = sended_messages.create(:title => title, :content => content, :type => 1) if receiver.size >= 1
 		return m unless m.is_a? Message
 		receiver.each do |r|
-			u = User.find_by_email(r) || User.find_by_id(r)
+			u = User.find_by_email(r.to_s) || User.find_by_id(r)
 			next unless u
 			u.messages << m# => unless m.created_at.nil? 
 			u.save
@@ -481,6 +482,7 @@ class User
 		u = User.find_by_id_including_deleted(user_id)
 		operate_reward_logs.create(:point => point,
 				 :user => u,
+				 :type => 2,
 				 :cause => 0)
 	end
 #--
@@ -609,8 +611,9 @@ class User
 		return selected_users
 	end
 
-	def get_invited_user_ids
-		invited_users = User.where(:introducer_id => self._id.to_s)
-		return invited_users.map { |u| u._id.to_s }
+	def get_introduced_users
+		introduced_users = User.where(:introducer_id => self._id.to_s)
+		summary_info = introduced_users.map { |u| { _id: u._id.to_s, email: u.email, registered_at: u.registered_at } }
+		return summary_info
 	end
 end

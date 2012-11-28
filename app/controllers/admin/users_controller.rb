@@ -64,6 +64,34 @@ class Admin::UsersController < Admin::ApplicationController
 		render_json_auto @user.recover
 	end
 
+
+	def lottery_codes
+		@user = User.find_by_id params[:id]
+		render_json(@user.is_a? User) do |s|
+			if s
+				auto_paginate @user.lottery_codes
+			else
+				{
+					:error_code => ErrorEnum::USER_NOT_EXIST,
+					:error_message => "User not exist"
+				}
+			end
+		end
+	end
+
+	def orders
+		@user = User.find_by_id params[:id]
+		render_json(@user.is_a? User) do |s|
+			if s
+				auto_paginate @user.orders
+			else
+				{
+					:error_code => ErrorEnum::USER_NOT_EXIST,
+					:error_message => "User not exist"
+				}
+			end
+		end
+	end
 	#--
 	# **************************************
 	# Black List Operate 
@@ -174,5 +202,14 @@ class Admin::UsersController < Admin::ApplicationController
 	    end
 
 	    render_json_auto paginated_users
+	end
+
+	def get_introduced_users
+		user = User.find_by_id_including_deleted(params[:id])
+		render_json_e(ErrorEnum::USER_NOT_EXIST) if user.nil?
+		introduced_user = user.get_introduced_users do |u|
+			u.slice((page - 1) * per_page, per_page)
+		end
+		render_json_auto(introduced_user) and return
 	end
 end

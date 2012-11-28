@@ -31,11 +31,11 @@ class GoogleUser < ThirdPartyUser
 	#
 	#*retval*:
 	#* response_data: it includes access_token, expires_in and other
-	def self.get_access_token(code)
+	def self.get_access_token(code, redirect_uri)
 		#get access_token
 		access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["google_client_id"],
 			"client_secret" => OOPSDATA[RailsEnv.get_rails_env]["google_client_secret"],
-			"redirect_uri" => OOPSDATA[RailsEnv.get_rails_env]["google_redirect_uri"],
+			"redirect_uri" => redirect_uri || OOPSDATA[RailsEnv.get_rails_env]["google_redirect_uri"],
 			"grant_type" => "authorization_code",
 			"code" => code}
 		retval = Tool.send_post_request("https://accounts.google.com/o/oauth2/token", access_token_params, true)
@@ -83,12 +83,10 @@ class GoogleUser < ThirdPartyUser
 			google_user.save
 		else
 			# it contains access_token ...
-			google_user.update_by_hash(response_data)
+			# google_user.update_by_hash(response_data)
 		end
 		
 		return google_user
-	rescue => ex 
-		return nil
 	end
 
 	#--

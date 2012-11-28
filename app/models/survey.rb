@@ -98,7 +98,6 @@ class Survey
 
 	has_many :export_results
 	has_many :analysis_results
-	has_many :data_list_results
 	has_many :report_results
 	has_many :report_mockups
 
@@ -1241,9 +1240,8 @@ class Survey
 		return Marshal.load(Marshal.dump(self.quota))
 	end
 
-	def self.get_user_ids_answered(survey_id)
-		survey = Survey.find_by_id(survey_id)
-		return survey.answers.map {|a| a.user_id.to_s}	
+	def get_user_ids_answered
+		return self.answers.map {|a| a.user_id.to_s}	
 	end
 
 	def estimate_answer_time
@@ -1399,16 +1397,6 @@ class Survey
 	def delete_filter(filter_index)
 		filters = Filters.new(self.filters)
 		return filters.delete_filter(filter_index, self)
-	end
-
-	def data_list(filter_index, include_screened_answer)
-		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
-		task_id = TaskClient.create_task({ task_type: "result",
-											params: { result_type: "data_list",
-														survey_id: self._id,
-														filter_index: filter_index,
-														include_screened_answer: include_screened_answer} })
-		return task_id
 	end
 
 	def analysis(filter_index, include_screened_answer)
@@ -1615,13 +1603,13 @@ class Survey
 
 	def adjust_logic_control_quota_filter(type, question_id)
 		# first adjust the logic control
-		question = Question.find_by_id(question_id)
+		question = BasicQuestion.find_by_id(question_id)
 		rules = self.logic_control
 		rules.each_with_index do |rule, rule_index|
 			case type
 			when 'question_update'
 				item_ids = question.issue["items"].map { |i| i["id"] }
-				row_ids = question.issue["items"].map { |i| i["id"] }
+				row_ids = question.issue["rows"].map { |i| i["id"] } if !question.issue["rows"].nil?
 				# first handle conditions
 				if question.question_type == 0
 					# only choice questions can be conditions for logic control
@@ -1665,7 +1653,7 @@ class Survey
 					rules.delete_at(rule_index) if rule["result"]["items"].blank?
 				end
 			when 'question_move'
-				question_ids = (self.pages.map { |p| p["questions"] }).flatten
+				question_ids = self.all_questions_id
 				if [1,2].to_a.include?(rule["rule_type"])
 					# a show/hide questions rule
 					conditions_question_ids = rule["conditions"].map { |c| c["question_id"] }
@@ -1686,7 +1674,7 @@ class Survey
 							end
 						end
 					end
-					rules.delete_at(rule_index) if rule["conditions"].blank? || rule["results"].blank?
+					rules.delete_at(rule_index) if rule["conditions"].blank? || rule["result"].blank?
 				elsif [3,4].to_a.include?(rule["rule_type"])
 					# a show/hide items rule
 					conditions_question_ids = rule["conditions"].map { |c| c["question_id"] }
@@ -1707,7 +1695,7 @@ class Survey
 							end
 						end
 					end
-					rules.delete_at(rule_index) if rule["conditions"].blank? || rule["results"].blank?
+					rules.delete_at(rule_index) if rule["conditions"].blank? || rule["result"].blank?
 				elsif [5,6].to_a.include?(rule["rule_type"])
 					rules.delete_at(rule_index) if question_ids.before(rule["result"]["question_id_1"], rule["result"]["question_id_2"])
 				end
@@ -1744,6 +1732,7 @@ class Survey
 			# only choice questions can be conditions of quotas
 			rules = self.quota["rules"]
 			rules.each_with_index do |rule, rule_index|
+				next if rule["conditions"].blank?
 				case type
 				when 'question_update'
 					item_ids = question.issue["items"].map { |i| i["id"] }
@@ -1914,5 +1903,13 @@ class Survey
 				"lottery_id" => self.lottery_id,
 				"spreadable" => self.spreadable,
 				"spread_point" => self.spread_point}
+	end
+
+	def remaining_quota_amount
+		number = 0
+		self.quota["rules"].each_with_index do |rule, rule_index|
+			number += [rule["amount"] - quota_stats["answer_number"][rule_index], 0].max
+		end
+		return number
 	end
 end

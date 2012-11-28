@@ -23,7 +23,7 @@ class Admin::RewardsController < Admin::ApplicationController
 	# end
 
 	def operate_point
-		@reward_log = @current_user.operate_point(params[:point], params[:uid] || params[:user_id])
+		@reward_log = @current_user.operate_point(params[:point], params[:user_id])
 		render_json(@reward_log.valid?) do
 			@reward_log.as_retval
 		end

@@ -45,6 +45,14 @@ class Admin::LotteriesController < Admin::ApplicationController
       params[:lottery][:photo] = material
       @lottery.photo.save
     end
+    lp_ids = params[:lottery][:prize_ids]
+    params[:lottery][:prize_ids] = nil
+    @lottery = Lottery.new(params[:lottery])
+    lp_ids.each do |i|
+      lp = Prize.where("_id"=> i).first
+      @lottery.prizes << lp #unless lp.nil?
+      lp.save
+    end unless lp_ids.nil?
     # @lottery = Lottery.find_by_id params[:id]
     render_json @lottery.update_attributes(params[:lottery]) do
       @lottery.as_retval
@@ -59,9 +67,11 @@ class Admin::LotteriesController < Admin::ApplicationController
   def show
     # TODO is owners request?
     @lottery = Lottery.find_by_id(params[:id])
+    @lottery[:prizes] = @lottery.prizes
     @lottery[:photo_src] = @lottery.photo.picture_url unless @lottery.photo.nil?
     render_json { @lottery}
   end
+  
   def destroy
     render_json do
       Lottery.find_by_id(params[:id]) do |e|

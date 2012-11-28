@@ -1,3 +1,5 @@
+#encoding: utf-8
+
 require 'test_helper'
 class Admin::OrdersControllerTest < ActionController::TestCase
   setup do
@@ -14,11 +16,21 @@ class Admin::OrdersControllerTest < ActionController::TestCase
     list = [:index, :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed]
     list.each do |e|
       get e, :page => 1, :format => :json, :auth_key => @auth_key
-      pp response.body
+
       # get e, :page => 1, :format => :xml, :auth_key => @auth_key
       # pp response.body
       assert_response :success
     end
+  end
+
+  test "should verify a order into failed" do
+    put :verify_as_failed,
+        :id => @order.id,
+        :cause_desc => "出错",
+        :format => :json, 
+        :auth_key => @auth_key
+    o = JSON.parse response.body
+    assert o["value"]["point"] == 500
   end
   
   # test "should delete some orders" do

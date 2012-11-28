@@ -12,7 +12,7 @@ class Lottery
   field :weight, :type => Integer, :default => 100000
   #field :prize_interval, :type => Array, :default => []
 
-  default_scope where(:is_deleted => false)
+  default_scope where(:is_deleted => false).order_by(:created_at, :desc)
 
   scope :for_publish, where(:status => 0)
   scope :activity, where(:status => 1)
@@ -46,12 +46,13 @@ class Lottery
     base_num = 0
     r = random_weight
     interval = self.prizes.can_be_draw.map do |e|
-      base_num += e.weight 
+      base_num += e.weight
       {
         :weight => base_num,
         :prize => e
       }
     end
+    #logger.info "======#{interval}======="
     interval.each do |i|
       if r <= i[:weight]
         i[:prize].surplus -= 1
@@ -60,21 +61,12 @@ class Lottery
           :status => 2,
           :prize => i[:prize]
           )
+        lottery_code[:prize] = i[:prize]
         return lottery_code
       end
     end
     lottery_code.update_attribute(:status, 1)
     lottery_code
-    # r = random_weight
-    # l = LotteryCode.find_by_id(lottery_code)
-    # make_interval.each do |e|
-    #   if r < e[:weight]
-    #     return l unless l.is_a? LotteryCode
-    #     l.prize = Prezi.find_by_id(e[:prize_id])
-    #     return l if (l.prize.is_a?(Prize)) && l.save 
-    #   end
-    # end
-    # return false
   end
 
   def random_weight

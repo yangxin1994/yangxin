@@ -21,16 +21,16 @@ class ThirdPartyUser
 		return third_party_user
 	end
 	
-	def self.get_access_token(website, code)
+	def self.get_access_token(website, code, redirect_uri)
 		case website
 		when "sina"
-			response_data = SinaUser.get_access_token(code)
+			response_data = SinaUser.get_access_token(code, redirect_uri)
 		when "renren"
-			response_data = RenrenUser.get_access_token(code)
+			response_data = RenrenUser.get_access_token(code, redirect_uri)
 		when "qq"
-			response_data = QqUser.get_access_token(code)
+			response_data = QqUser.get_access_token(code, redirect_uri)
 		when "google"
-			response_data = GoogleUser.get_access_token(code)
+			response_data = GoogleUser.get_access_token(code, redirect_uri)
 		else
 			response_data = {}
 		end

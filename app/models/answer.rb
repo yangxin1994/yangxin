@@ -310,6 +310,15 @@ class Answer
 			# summarize the questions that are results of logic control rules
 			logic_control_question_id = []
 			self.survey.logic_control.each do |rule|
+				if rule["rule_type"] == 0
+					all_questions_id = self.survey.all_questions_id
+					max_condition_index = -1
+					rule["conditions"].each do |c|
+						cur_index = all_questions_id.index(c["question_id"])
+						max_condition_index = cur_index if !cur_index.nil? && cur_index > max_condition_index
+					end
+					result_q_ids = all_questions_id[max_condition_index+1..-1] if max_condition_index != -1
+				end
 				result_q_ids = rule["result"] if ["1", "2"].include?(rule["rule_type"].to_s)
 				result_q_ids = rule["result"].map { |e| e["question_id"] } if ["3", "4"].include?(rule["rule_type"].to_s)
 				result_q_ids = rule["result"]["question_id_2"].to_a if ["5", "6"].include?(rule["rule_type"].to_s)
@@ -345,7 +354,7 @@ class Answer
 		questions = []
 		question_ids.each do |q_id|
 			question = BasicQuestion.find_by_id(q_id)
-			questions << question if !question.nil?
+			questions << question.remove_hidden_items(logic_control_result[q_id]) if !question.nil?
 		end
 		# consider the scenario that "one question per page"
 		if self.survey.style_setting["is_one_question_per_page"]
@@ -428,11 +437,19 @@ class Answer
 			when "0"
 				question_id = condition["name"]
 				require_answer = condition["value"]
-				satisfy = Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], require_answer, condition["fuzzy"])
+				if answer_content[question_id].nil?
+					satisfy = false
+				else
+					satisfy = Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], require_answer, condition["fuzzy"])
+				end
 			when "1"
 				question_id = condition["name"]
 				require_answer = condition["value"]
-				satisfy = Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], require_answer, condition["fuzzy"])
+				if answer_content[question_id].nil?
+					satisfy = false
+				else
+					satisfy = Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], require_answer, condition["fuzzy"])
+				end
 			when "2"
 				satisfy = Address.satisfy_region_code?(self.region, condition["value"])
 			when "3"
@@ -661,34 +678,34 @@ class Answer
 			end
 			next if !satisfy_rule
 			# the conditions of this logic control rule is satisfied
-			case logic_control_rule["rule_type"]
-			when 1
+			case logic_control_rule["rule_type"].to_s
+			when "1"
 				# "show question" logic control
 				# if the rule is satisfied, show the question (set the answer of the question as "nil")
 				logic_control_rule["result"].each do |q_id|
 					self.answer_content[q_id] = nil
 				end
 				self.save
-			when 2
+			when "2"
 				# "hide question" logic control
 				# if the rule is satisfied, hide the question (set the answer of the question as {})
 				logic_control_rule["result"].each do |q_id|
 					self.answer_content[q_id] = self.answer_content[q_id] || {}
 				end
 				self.save
-			when 3
+			when "3"
 				# "show item" logic control
 				# if the rule is satisfied, show the items (remove from the logic_control_result)
 				logic_control_rule["result"].each do |ele|
 					self.remove_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
 				end
-			when 4
+			when "4"
 				# "hide item" logic control
 				# if the rule is satisfied, hide the items (add to the logic_control_result)
 				logic_control_rule["result"].each do |ele|
 					self.add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
 				end
-			when 5
+			when "5"
 				# "show matching item" logic control
 				# if the rule is satisfied, show the items (remove from the logic_control_result)
 				items_to_be_removed = []
@@ -696,7 +713,7 @@ class Answer
 					items_to_be_removed << input_ids[1]
 				end
 				self.remove_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_removed, [])
-			when 6
+			when "6"
 				# "hide matching item" logic control
 				# if the rule is satisfied, hide the items (add to the logic_control_result)
 				items_to_be_added = []

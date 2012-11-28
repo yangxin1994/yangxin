@@ -29,10 +29,10 @@ class QqUser < ThirdPartyUser
 	#*retval*:
 	#
 	#* response_data: it includes access_token, expires_in
-	def self.get_access_token(code)
+	def self.get_access_token(code, redirect_uri)
 		access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["qq_app_id"],
 			"client_secret" => OOPSDATA[RailsEnv.get_rails_env]["qq_app_key"],
-			"redirect_uri" => OOPSDATA[RailsEnv.get_rails_env]["qq_redirect_uri"],
+			"redirect_uri" => redirect_uri || OOPSDATA[RailsEnv.get_rails_env]["qq_redirect_uri"],
 			"grant_type" => "authorization_code",
 			"state" => Time.now.to_i,
 			"code" => code}
@@ -66,7 +66,7 @@ class QqUser < ThirdPartyUser
 		response_data2 = JSON.parse(retval.body.split(' ')[1])
 		
 		website_id = response_data2["openid"]
-		
+
 		# reject the same function field
 		response_data.select!{|k,v| !k.to_s.include?("id") }
 		response_data2.select!{|k,v| !k.to_s.include?("id") }
@@ -81,14 +81,12 @@ class QqUser < ThirdPartyUser
 			qq_user = QqUser.new(:website => "qq", :website_id => website_id, :access_token => access_token)
 			qq_user.save
 		else
-			qq_user.update_by_hash(response_data)
+			#qq_user.update_by_hash(response_data)
 		end
 
-		qq_user.update_user_info
+		# qq_user.update_user_info
 
 		return qq_user
-		rescue
-		return nil
 	end
  
 	#*description*: it can call any methods from third_party's API:

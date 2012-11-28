@@ -15,23 +15,38 @@ class JobsController < ApplicationController
 		render_json_s(true) and return
 	end
 
+	def quota_job
+		# 1. get all samples, excluding those are in the blacklist
+		user_ids = User.ids_not_in_blacklist
+		# 2. get the remaining number for each survey
+		published_survey = Survey.get_published_active_surveys
+		email_number_ary = published_survey.map do |e|
+			amount = e.remaining_quota_amount
+			email_number = amount * 3
+		end
+		# 3. find out samples for surveys
+		surveys_for_user = {}
+		published_survey.each do |survey|
+			amount = e.remaining_quota_amount
+			email_number = amount * 3
+			user_ids_answered = survey.get_user_ids_answered
+			user_ids_sent = EmailHistory.get_user_ids_sent(s_id)
+			user_ids = user_ids - user_ids_answered[s_id] - user_ids_sent[s_id]
+			samples_found = user_ids.length > email_number ? user_ids.shuffle[0..rule.email_number-1] : user_ids
+			samples_found.each do |u_id|
+				surveys_for_user[u_id] ||= []
+				surveys_for_user[u_id] << survey._id
+			end
+		end
+		# 4. send emails to the samples found
+		surveys_for_user.each do |u_id, s_id_ary|
+			UserMailer.survey_email(u_id, s_id_ary).deliver	
+		end
+		render_json_s(true) and return
+	end
+
 	def result_job
 		case params[:result_type]
-		when "data_list"
-			# get the survey instance
-			survey = Survey.find_by_id(params[:survey_id])
-			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
-			# find answers set
-			answers = survey.get_answers(params[:filter_index].to_i,
-										params[:include_screened_answer].to_s == "true",
-										params[:task_id])
-			# generate the result_key
-			result_key = DataListResult.generate_result_key(answers)
-			# create data list result
-			data_list_result = DataListResult.create(:result_key => result_key, :task_id => params[:task_id])
-			# analyze and save the answer info
-			retval = data_list_result.analyze_answer_info(answers, params[:task_id])
-			render_json_auto(retval) and return
 		when "analysis"
 			# get the survey instance
 			survey = Survey.find_by_id(params[:survey_id])

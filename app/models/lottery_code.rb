@@ -11,9 +11,11 @@ class LotteryCode
 	field :status, :type => Integer, default: 0
 
 	has_one :prize
-	belongs_to :order
+	has_one :order
 	belongs_to :user
 	belongs_to :lottery
+
+  default_scope order_by(:created_at, :desc)
 
 	scope :for_draw, where(:status => 0)
 	scope :drawed, where(:status.gt => 0)
@@ -27,5 +29,7 @@ class LotteryCode
 	def draw
 		self.lottery.draw(self)
 	end
+
+	
 
 end

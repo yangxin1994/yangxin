@@ -6,6 +6,7 @@ class AnalysisResult < Result
 	include Mongoid::Document
 	include Mongoid::Timestamps
 
+	field :answer_info, :type => Array
 	field :duration_mean, :type => Float
 	field :time_result, :type => Hash
 	field :region_result, :type => Hash
@@ -28,10 +29,29 @@ class AnalysisResult < Result
 		finish_time = []
 		answers_transform = {}
 		if answers.length == 0
-			TaskClient.set_progress(task_id, "analyze_answer_progress", 1.0) if !task_id.nil?
-			return [{}, {}, 0, {}, {}]
+			if !task_id.nil?
+				TaskClient.set_progress(task_id, "analyze_answer_progress", 1.0)
+				TaskClient.set_progress(task_id, "answer_info_progress", 1.0)
+			end
+			return true
 		end
+
+		# get the answer info
+		answer_info = []
+		answers_length = answers.length
+		answers.each_with_index do |a, index|
+			info = {}
+			info["email"] = a.user.nil? ? "" : a.user.email.to_s
+			info["full_name"] = a.user.nil? ? "" : a.user.full_name.to_s
+			info["answer_time"] = a.created_at.to_i
+			info["duration"] = a.finished_at - a.created_at.to_i
+			info["region"] = a.region
+			answer_info << info
+			TaskClient.set_progress(task_id, "answer_info_progress", (index + 1).to_f / answers_length) if !task_id.nil?
+		end
+		self.answer_info = answer_info
 		
+		# get the analysis result
 		answers.each_with_index do |answer, index|
 			# analyze region
 			region = answer.region.to_s
