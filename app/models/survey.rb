@@ -1614,13 +1614,13 @@ class Survey
 
 	def adjust_logic_control_quota_filter(type, question_id)
 		# first adjust the logic control
-		question = Question.find_by_id(question_id)
+		question = BasicQuestion.find_by_id(question_id)
 		rules = self.logic_control
 		rules.each_with_index do |rule, rule_index|
 			case type
 			when 'question_update'
 				item_ids = question.issue["items"].map { |i| i["id"] }
-				row_ids = question.issue["items"].map { |i| i["id"] }
+				row_ids = question.issue["rows"].map { |i| i["id"] } if !question.issue["rows"].nil?
 				# first handle conditions
 				if question.question_type == 0
 					# only choice questions can be conditions for logic control
@@ -1664,7 +1664,7 @@ class Survey
 					rules.delete_at(rule_index) if rule["result"]["items"].blank?
 				end
 			when 'question_move'
-				question_ids = (self.pages.map { |p| p["questions"] }).flatten
+				question_ids = self.all_questions_id
 				if [1,2].to_a.include?(rule["rule_type"])
 					# a show/hide questions rule
 					conditions_question_ids = rule["conditions"].map { |c| c["question_id"] }
@@ -1685,7 +1685,7 @@ class Survey
 							end
 						end
 					end
-					rules.delete_at(rule_index) if rule["conditions"].blank? || rule["results"].blank?
+					rules.delete_at(rule_index) if rule["conditions"].blank? || rule["result"].blank?
 				elsif [3,4].to_a.include?(rule["rule_type"])
 					# a show/hide items rule
 					conditions_question_ids = rule["conditions"].map { |c| c["question_id"] }
@@ -1706,7 +1706,7 @@ class Survey
 							end
 						end
 					end
-					rules.delete_at(rule_index) if rule["conditions"].blank? || rule["results"].blank?
+					rules.delete_at(rule_index) if rule["conditions"].blank? || rule["result"].blank?
 				elsif [5,6].to_a.include?(rule["rule_type"])
 					rules.delete_at(rule_index) if question_ids.before(rule["result"]["question_id_1"], rule["result"]["question_id_2"])
 				end
