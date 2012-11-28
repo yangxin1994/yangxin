@@ -50,6 +50,7 @@ class Order
   scope :need_verify, where( :status => 0)
   scope :verified, where( :status => 1)
   scope :verify_failed, where( :status => -1)
+  scope :canceled, where( :status => -2)
   scope :delivering, where( :status => 2)
   scope :delivered, where( :status => 3)
   scope :deliver_failed, where( :status => -3)

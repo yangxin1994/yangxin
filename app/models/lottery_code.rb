@@ -28,4 +28,6 @@ class LotteryCode
 		self.lottery.draw(self)
 	end
 
+	
+
 end

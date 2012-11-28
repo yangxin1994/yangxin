@@ -39,5 +39,10 @@ class Admin::PrizesController < Admin::ApplicationController
 		# end
 	end
 
+	def for_lottery
+		render_json do
+			Prize.for_lottery
+		end
+	end
 
 end
