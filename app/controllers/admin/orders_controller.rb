@@ -88,7 +88,7 @@ class Admin::OrdersController < Admin::ApplicationController
     end
   end
 
-  def_each :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed do |method_name|
+  def_each :need_verify, :verified, :canceled, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed do |method_name|
     render_json true do
       #Order.send(method_name).page(page)
       auto_paginate(Order.send(method_name)) do |orders|

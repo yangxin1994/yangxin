@@ -14,7 +14,7 @@ class BasicGift
 
 	field :is_deleted, :type => Boolean, :default => false
 	
-	default_scope where(:is_deleted => false ).order_by("created_at","desc")
+	default_scope where(:is_deleted => false ).order_by(:created_at, :desc)
 
 	scope :cash, where( :type => 0)
 	scope :entity, where( :type => 1)

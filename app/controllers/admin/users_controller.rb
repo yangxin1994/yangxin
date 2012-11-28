@@ -64,6 +64,34 @@ class Admin::UsersController < Admin::ApplicationController
 		render_json_auto @user.recover
 	end
 
+
+	def lottery_codes
+		@user = User.find_by_id params[:id]
+		render_json(@user.is_a? User) do |s|
+			if s
+				auto_paginate @user.lottery_codes
+			else
+				{
+					:error_code => ErrorEnum::USER_NOT_EXIST,
+					:error_message => "User not exist"
+				}
+			end
+		end
+	end
+
+	def orders
+		@user = User.find_by_id params[:id]
+		render_json(@user.is_a? User) do |s|
+			if s
+				auto_paginate @user.orders
+			else
+				{
+					:error_code => ErrorEnum::USER_NOT_EXIST,
+					:error_message => "User not exist"
+				}
+			end
+		end
+	end
 	#--
 	# **************************************
 	# Black List Operate 

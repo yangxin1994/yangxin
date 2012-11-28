@@ -41,7 +41,7 @@ OopsData::Application.routes.draw do
 			end
 
 			member do
-				get 'get_email', 'get_introduced_users'
+				get 'get_email', 'get_introduced_users', 'lottery_codes', 'orders'
 				put 'set_color', 'set_role', 'set_lock', 'system_pwd', 'recover','add_point'
 			end
 		end
@@ -388,6 +388,9 @@ OopsData::Application.routes.draw do
 		collection do
 			get :for_cash, :for_entity, :for_virtual, :for_lottery
 			get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
+		end
+		member do
+			put :cancel
 		end
 	end
 

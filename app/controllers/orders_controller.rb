@@ -52,6 +52,16 @@ class OrdersController < ApplicationController
     end
   end
 
+  def cancel
+    render_json do
+      @success = Order.find_by_id params[:id] do |o|
+        o.update_attribute(:status, -2)
+        o.gift.inc(:surplus, 1)
+        o.update_attribute(:status_desc, params[:status_desc])
+        o.reward_log.revoke_operation(current_user, params[:status_desc])
+      end
+    end
+  end
   def destroy
     @order = @current_user.orders.find_by_id(params[:id])
     render_json @order.status == 0 do |s|
@@ -75,7 +85,7 @@ class OrdersController < ApplicationController
     end
   end
 
-  def_each :for_cash, :for_entity, :for_virtual, :for_lottery, :for_prize do |method_name|
+  def_each :for_cash, :for_entity, :canceled, :for_virtual, :for_lottery, :for_prize do |method_name|
     render_json true do
       #Order.send(method_name).page(page)
       auto_paginate(current_user.orders.send(method_name)) do |orders|

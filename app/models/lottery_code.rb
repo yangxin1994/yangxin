@@ -15,6 +15,8 @@ class LotteryCode
 	belongs_to :user
 	belongs_to :lottery
 
+  default_scope order_by(:created_at, :desc)
+
 	scope :for_draw, where(:status => 0)
 	scope :drawed, where(:status.gt => 0)
 	scope :drawed_f, where(:status => 1)
@@ -27,5 +29,7 @@ class LotteryCode
 	def draw
 		self.lottery.draw(self)
 	end
+
+	
 
 end
