@@ -12,7 +12,7 @@ class Lottery
   field :weight, :type => Integer, :default => 100000
   #field :prize_interval, :type => Array, :default => []
 
-  default_scope where(:is_deleted => false)
+  default_scope where(:is_deleted => false).order_by(:created_at, :desc)
 
   scope :for_publish, where(:status => 0)
   scope :activity, where(:status => 1)
