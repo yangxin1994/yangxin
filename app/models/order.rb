@@ -42,18 +42,18 @@ class Order
 
   default_scope where(:is_deleted => false)
   
-  scope :for_cash, where( :type => 0)
-  scope :for_entity, where( :type => 1)
-  scope :for_virtual, where( :type => 2)
-  scope :for_lottery, where( :type => 3)
+  scope :for_cash, where( :type => 0).order_by(:created_at, :desc)
+  scope :for_entity, where( :type => 1).order_by(:created_at, :desc)
+  scope :for_virtual, where( :type => 2).order_by(:created_at, :desc)
+  scope :for_lottery, where( :type => 3).order_by(:created_at, :desc)
 
-  scope :need_verify, where( :status => 0)
-  scope :verified, where( :status => 1)
-  scope :verify_failed, where( :status => -1)
-  scope :canceled, where( :status => -2)
-  scope :delivering, where( :status => 2)
-  scope :delivered, where( :status => 3)
-  scope :deliver_failed, where( :status => -3)
+  scope :need_verify, where( :status => 0).order_by(:created_at, :asc)
+  scope :verified, where( :status => 1).order_by(:created_at, :desc)
+  scope :verify_failed, where( :status => -1).order_by(:created_at, :desc)
+  scope :canceled, where( :status => -2).order_by(:created_at, :desc)
+  scope :delivering, where( :status => 2).order_by(:created_at, :desc)
+  scope :delivered, where( :status => 3).order_by(:created_at, :desc)
+  scope :deliver_failed, where( :status => -3).order_by(:created_at, :desc)
 
   # TO DO validation verify
   # We must follow the Law of Demeter(summed up as "use only one dot"), and here is the code: 
