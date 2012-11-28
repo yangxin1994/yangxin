@@ -98,7 +98,6 @@ class Survey
 
 	has_many :export_results
 	has_many :analysis_results
-	has_many :data_list_results
 	has_many :report_results
 	has_many :report_mockups
 
@@ -1398,16 +1397,6 @@ class Survey
 	def delete_filter(filter_index)
 		filters = Filters.new(self.filters)
 		return filters.delete_filter(filter_index, self)
-	end
-
-	def data_list(filter_index, include_screened_answer)
-		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
-		task_id = TaskClient.create_task({ task_type: "result",
-											params: { result_type: "data_list",
-														survey_id: self._id,
-														filter_index: filter_index,
-														include_screened_answer: include_screened_answer} })
-		return task_id
 	end
 
 	def analysis(filter_index, include_screened_answer)

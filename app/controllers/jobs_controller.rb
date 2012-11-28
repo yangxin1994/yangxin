@@ -47,21 +47,6 @@ class JobsController < ApplicationController
 
 	def result_job
 		case params[:result_type]
-		when "data_list"
-			# get the survey instance
-			survey = Survey.find_by_id(params[:survey_id])
-			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
-			# find answers set
-			answers = survey.get_answers(params[:filter_index].to_i,
-										params[:include_screened_answer].to_s == "true",
-										params[:task_id])
-			# generate the result_key
-			result_key = DataListResult.generate_result_key(answers)
-			# create data list result
-			data_list_result = DataListResult.create(:result_key => result_key, :task_id => params[:task_id])
-			# analyze and save the answer info
-			retval = data_list_result.analyze_answer_info(answers, params[:task_id])
-			render_json_auto(retval) and return
 		when "analysis"
 			# get the survey instance
 			survey = Survey.find_by_id(params[:survey_id])

@@ -34,11 +34,10 @@ class Result
 
 		# based on the result type, return results
 		case result._type
-		when "DataListResult"
-			return {"answer_info" => result.answer_info,
-					"result_key" => result.result_key}
 		when "AnalysisResult"
-			return {"region_result" => result.region_result,
+			return {"result_key" => result.result_key,
+					"answer_info" => result.answer_info,
+					"region_result" => result.region_result,
 					"time_result" => result.time_result,
 					"duration_mean" => result.duration_mean,
 					"channel_result" => result.channel_result,
@@ -62,21 +61,15 @@ class Result
 
 		# calculate the status
 		case task["params"]["result_type"]
-		when "data_list"
-			# the data list job consists of two parts
-			# the first part is to find the answers by the filter
-			s1 = progress["find_answers_progress"].to_f
-			# the second part is to get the info of the answers
-			s2 = progress["answer_info_progress"].to_f
-			# calculate the total progress
-			s = s1 * 0.5 + s2 * 0.5
 		when "analysis"
 			# the analysis job consists of three parts
 			# the first part is to find the answers by the filter
 			s1 = progress["find_answers_progress"].to_f
+			# the second part is to get the info of the answers
+			s2 = progress["answer_info_progress"].to_f
 			# the third part is to analyze data
-			s2 = progress["analyze_answer_progress"].to_f
-			s = s1 * 0.5 + s2 * 0.5
+			s3 = progress["analyze_answer_progress"].to_f
+			s = s1 * 0.3 + s2 * 0.3 + s3 * 0.4
 		when "to_spss"
 			s1 = status["export_answers_progress"]
 			if s1 < 1

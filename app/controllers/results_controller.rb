@@ -11,39 +11,32 @@ class ResultsController < ApplicationController
 		end
 	end
 
-	def data_list
-		job_id = @survey.data_list(params[:filter_index].to_i, params[:include_screened_answer])
+	def analysis
+		job_id = @survey.analysis(params[:filter_index].to_i, params[:include_screened_answer])
 		respond_to do |format|
 			format.json	{ render_json_auto(job_id) and return }
 		end
 	end
 
 	def to_spss
-		data_list_result = Result.find_by_result_key(params[:result_key])
-		render_json !data_list_result.nil? do 
-			if data_list_result.nil?
+		analysis_result = Result.find_by_result_key(params[:result_key])
+		render_json !analysis_result.nil? do 
+			if analysis_result.nil?
 				ErrorEnum::DATA_LIST_NOT_EXIST
 			else
-				Jobs::ToSpssJob.create(:data_list_result_id => data_list_result.id, :survey_id => @survey.id)
+				Jobs::ToSpssJob.create(:data_list_result_id => analysis_result.id, :survey_id => @survey.id)
 			end
 		end
 	end
 
 	def to_excel
-		data_list_result = Result.find_by_result_key(params[:result_key])
-		render_json !data_list_result.nil? do |e|
+		analysis_result = Result.find_by_result_key(params[:result_key])
+		render_json !analysis_result.nil? do |e|
 			if !e
 				ErrorEnum::DATA_LIST_NOT_EXIST
 			else
 				Jobs::ToExcelJob.create(:data_list_result_id => data_list_result.id, :survey_id => @survey.id)
 			end
-		end
-	end
-
-	def analysis
-		job_id = @survey.analysis(params[:filter_index].to_i, params[:include_screened_answer])
-		respond_to do |format|
-			format.json	{ render_json_auto(job_id) and return }
 		end
 	end
 
