@@ -12,6 +12,10 @@
 			邀请填写以下问卷
 		</p>
 		<p>
+			<%- @surveys.each do |s| %>
+				<a href="<%= "http://quill.oopsdata.com/surveys/#{s._id.to_s}" %>"><%= s.title %></a>
+				<br />
+			<%- end %>
 		</p>
 		<p>感谢您注册</p>
 		<br />
