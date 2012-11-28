@@ -1743,6 +1743,7 @@ class Survey
 			# only choice questions can be conditions of quotas
 			rules = self.quota["rules"]
 			rules.each_with_index do |rule, rule_index|
+				next if rule["conditions"].blank?
 				case type
 				when 'question_update'
 					item_ids = question.issue["items"].map { |i| i["id"] }
