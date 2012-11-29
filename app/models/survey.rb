@@ -454,14 +454,14 @@ class Survey
 	#*retval*:
 	#* the new survey instance: if successfully cloned
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def clone_survey(title = nil)
+	def clone_survey(operator, title = nil)
 		# clone the meta data of the survey
 		new_instance = self.clone
 		new_instance.title = title || new_instance.title
 
 		# some information that cannot be cloned
 		new_instance.status = 0
-		new_instance.publish_status = 1
+		new_instance.publish_status = (operator,is_admin || operator.is_super_admin) ? PublishStatus::PUBLISHED : PublishStatus::CLOSED
 		new_instance.user_attr_survey = false
 		new_instance.is_star = false
 		new_instance.point = 0

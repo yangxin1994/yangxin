@@ -195,7 +195,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def clone
-		new_survey = @survey.clone_survey(params[:title])
+		new_survey = @survey.clone_survey(@current_user, params[:title])
 		respond_to do |format|
 			format.json	{ render_json_auto(new_survey.serialize) and return }
 		end
