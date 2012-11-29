@@ -6,6 +6,8 @@ class AnalysisResult < Result
 	include Mongoid::Document
 	include Mongoid::Timestamps
 
+	field :tot_answer_number, :type => Integer, default: 0
+	field :screened_answer_number, :type => Integer, default: 0
 	field :answer_info, :type => Array, default: []
 	field :duration_mean, :type => Float, default: 0
 	field :time_result, :type => Hash, default: {}
