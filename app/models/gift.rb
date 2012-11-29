@@ -16,7 +16,9 @@ class Gift < BasicGift
 						:length => { :maximum => 140 }
 	validates :type, :presence => true
 	validates :surplus, :presence => true,
-											 :numericality => { :greater_than_or_equal_to => 0 }
+											:numericality => { :greater_than_or_equal_to => 0 }
+	validates :point, :presence => true,
+										:numericality => { :greater_than_or_equal_to => 0 }
 	before_save :make_status
 
   def make_status

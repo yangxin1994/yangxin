@@ -30,47 +30,57 @@ class Admin::OrdersController < Admin::ApplicationController
 
   def verify
     render_json do
-      @success = Order.find_by_id params[:id] do |o|
+      result = Order.find_by_id params[:id] do |o|
         o.update_attribute(:status, 1)
       end
+      @is_success = !(result.is_a? Hash)
+      result
     end
   end
   
   def verify_as_failed
     render_json do
-      @success = Order.find_by_id params[:id] do |o|
+      result = Order.find_by_id params[:id] do |o|
         o.update_attribute(:status, -1)
         o.gift.inc(:surplus, 1)
         o.update_attribute(:status_desc, params[:status_desc])
         o.reward_log.revoke_operation(current_user, params[:status_desc])
       end
+      @is_success = !(result.is_a? Hash)
+      result
     end
   end
 
   def deliver
     render_json do
-      @success = Order.find_by_id params[:id] do |o|
+      result = Order.find_by_id params[:id] do |o|
         o.update_attribute(:status, 2)
       end
+      @is_success = !(result.is_a? Hash)
+      result
     end
   end
 
   def deliver_success
     render_json do
-      @success = Order.find_by_id params[:id] do |o|
+      result = Order.find_by_id params[:id] do |o|
         o.update_attribute(:status, 3)
       end
+      @is_success = !(result.is_a? Hash)
+      result
     end
   end
 
   def deliver_as_failed
     render_json do
-      @success = Order.find_by_id params[:id] do |o|
+      result = Order.find_by_id params[:id] do |o|
         o.update_attribute(:status, -3)
         o.gift.inc(:surplus, 1)
         o.update_attribute(:status_desc, params[:status_desc])
         o.reward_log.revoke_operation(current_user, params[:status_desc])
       end
+      @is_success = !(result.is_a? Hash)
+      result
     end
   end
 

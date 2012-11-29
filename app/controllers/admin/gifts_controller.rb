@@ -58,7 +58,7 @@ class Admin::GiftsController < Admin::ApplicationController
       end
       @gift.photo.value = params[:gift][:photo]
       @gift.photo.picture_url = params[:gift][:photo]
-      params[:prize][:photo] = material
+      params[:gift][:photo] = material
       @gift.photo.save
     end
 

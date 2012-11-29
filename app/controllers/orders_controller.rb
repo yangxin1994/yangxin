@@ -33,7 +33,7 @@ class OrdersController < ApplicationController
     #     end
     #   end
     # end
-    p @current_user
+    # p @current_user
     @order = @current_user.orders.create(params[:order])
     render_json !@order.deleted? && @order.is_valid? do
       @order.as_retval
@@ -54,14 +54,23 @@ class OrdersController < ApplicationController
 
   def cancel
     render_json do
-      @success = Order.find_by_id params[:id] do |o|
+      result = current_user.orders.find_by_id params[:id] do |o|
+        if o.status != 0 
+          break {
+            :error_code => ErrorEnum::ORDER_CAN_NOT_BE_UPDATED,
+            :error_message =>  "Order can not be updated"
+          }
+        end
         o.update_attribute(:status, -2)
         o.gift.inc(:surplus, 1)
         o.update_attribute(:status_desc, params[:status_desc])
         o.reward_log.revoke_operation(current_user, params[:status_desc])
       end
+      @is_success = !(result.is_a? Hash)
+      result
     end
   end
+
   def destroy
     @order = @current_user.orders.find_by_id(params[:id])
     render_json @order.status == 0 do |s|
