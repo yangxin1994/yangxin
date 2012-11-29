@@ -116,9 +116,13 @@ class Answer
 
 	def self.create_answer(is_preview, introducer_id, email, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
+		logger.info "111111111111111111111111111"
+		logger.info introducer_id
+		logger.info "111111111111111111111111111"
+		logger.info survey.spread_point
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
-		if !is_preview && !introducer_id
+		if !is_preview && introducer_id
 			introducer = User.find_by_id(introducer_id)
 			if !introducer.nil? && introducer.email != email
 				answer.introducer_id = introducer_id
@@ -817,15 +821,13 @@ class Answer
 			# 1 for lottery & 2 for point
 
 			# maybe lottery is nil
-			if self.survey.lottery
-				lc = self.survey.reward == 1 ? nil : self.survey.lottery.give_lottery_code_to(user)
-				if lc
-					return ErrorEnum::REWARD_ERROR unless self.survey.post_reward_to(user, 
-						:type => self.survey.reward, 
-						:point => self.survey.point,
-						:lottery_code => lc,
-						:cause => 2) 
+			if self.survey.reward == 1
+				if self.survey.lottery
+					lc = self.survey.lottery.give_lottery_code_to(user)
+					self.survey.post_reward_to(user, :type => self.survey.reward, :lottery_code => lc, :cause => 2)
 				end
+			elsif self.survey.reward == 2
+				self.survey.post_reward_to(user, :type => self.survey.reward, :point => self.survey.point, :cause => 2)
 			end
 		end
 		# give the introducer points
