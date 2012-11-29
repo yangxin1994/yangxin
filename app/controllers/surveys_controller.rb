@@ -50,6 +50,7 @@ class SurveysController < ApplicationController
 			survey = Survey.create
 			survey.alt_new_survey = false
 			@current_user.surveys << survey
+			survey.update_attributes(:publish_status => PublishStatus::PUBLISHED) if @current_user.is_admin || @current_user.is_super_admin
 		end
 		respond_to do |format|
 			format.json	{ render_json_s(survey.serialize) and return }

@@ -193,7 +193,7 @@ class ReportResult < Result
 													answers_transform[target_question_id])
 				when QuestionTypeEnum::NUMBER_BLANK_QUESTION
 					analysis_result = analyze_cross(target_question.question_type,
-													question.issue
+													question.issue,
 													target_question.issue,
 													answers_transform[question_id],
 													answers_transform[target_question_id],
