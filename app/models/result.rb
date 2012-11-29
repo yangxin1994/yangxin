@@ -18,8 +18,8 @@ class Result
 
 	def self.find_by_task_id(task_id)
 		result = Result.where(:task_id => task_id).first
-		return nil if result.nil?
-		return Result.where(:result_key => result.result_key, :ref_result_id => nil).first
+		#return nil if result.nil?
+		#return Result.where(:result_key => result.result_key, :ref_result_id => nil).first
 	end
 
 	def self.find_by_result_key(result_key)
@@ -56,7 +56,7 @@ class Result
 		# the task has not been finished, chech the progress
 		task = TaskClient.get_task(task_id)
 
-		return task if task == ErrorEnum::TASK_NOT_FOUND
+		return task if task == ErrorEnum::TASK_NOT_EXIST
 		progress = task["progress"]
 
 		# calculate the status
@@ -143,6 +143,7 @@ class Result
 
 #	def analyze_number_blank(issue, answer_ary, segment=[])
 	def analyze_number_blank(issue, answer_ary, opt={})
+		segment = opt[:segment]
 		result = {}		
 		answer_ary.map! { |answer| answer.to_f }
 		answer_ary.sort!
@@ -169,6 +170,7 @@ class Result
 
 #	def analyze_time_blank(issue, answer_ary, segment=[])
 	def analyze_time_blank(issue, answer_ary, opt={})
+		segment = opt[:segment]
 		result = {}
 		# the raw answers are in the unit of milliseconds
 		answer_ary.map! { |e| (e / 1000).round }
@@ -216,15 +218,16 @@ class Result
 	def analyze_blank(issue, answer_ary, opt={})
 		result = {}
 		issue["items"].each_with_index do |input, input_index|
+			segment = opt[:segment].nil? ? nil : opt[:segment][input["id"]]
 			case input["data_type"]
 			when "Number"
 				result[input["id"].to_s] = analyze_number_blank(input["properties"],
 																answer_ary.map { |e| e[input_index] },
-																opt[:segment][input["id"]])
+																:segment => segment)
 			when "Time"
 				result[input["id"].to_s] = analyze_time_blank(input["properties"],
 															answer_ary.map { |e| e[input_index] },
-															opt[:segment][input["id"]])
+															:segment => segment)
 			when "Address"
 				result[input["id"].to_s] = analyze_address_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			when "Email"

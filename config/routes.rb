@@ -324,6 +324,9 @@ OopsData::Application.routes.draw do
 				get :to_excel
 				get :report
 				put :finish
+				get :get_data_list
+				get :get_stats
+				get :get_analysis_result
 			end
 		end
 

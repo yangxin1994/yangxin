@@ -118,7 +118,7 @@ class Answer
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
-		if !is_preview && !introducer_id
+		if !is_preview && introducer_id
 			introducer = User.find_by_id(introducer_id)
 			if !introducer.nil? && introducer.email != email
 				answer.introducer_id = introducer_id
@@ -168,6 +168,10 @@ class Answer
 		answer = answer.genereate_random_quality_control_questions
 
 		return answer
+	end
+
+	def is_screened
+		return status == 1 && reject_type == 2
 	end
 
 	def genereate_random_quality_control_questions
@@ -803,7 +807,7 @@ class Answer
 				"审核问卷答案消息",
 				message_content,
 				[] << self.user._id.to_s
-			)
+			) if !self.user.nil?
 
 		self.audit_message = message_content
 		self.save
@@ -817,15 +821,13 @@ class Answer
 			# 1 for lottery & 2 for point
 
 			# maybe lottery is nil
-			if self.survey.lottery
-				lc = self.survey.reward == 1 ? nil : self.survey.lottery.give_lottery_code_to(user)
-				if lc
-					return ErrorEnum::REWARD_ERROR unless self.survey.post_reward_to(user, 
-						:type => self.survey.reward, 
-						:point => self.survey.point,
-						:lottery_code => lc,
-						:cause => 2) 
+			if self.survey.reward == 1
+				if self.survey.lottery
+					lc = self.survey.lottery.give_lottery_code_to(user)
+					self.survey.post_reward_to(user, :type => self.survey.reward, :lottery_code => lc, :cause => 2)
 				end
+			elsif self.survey.reward == 2
+				self.survey.post_reward_to(user, :type => self.survey.reward, :point => self.survey.point, :cause => 2)
 			end
 		end
 		# give the introducer points
