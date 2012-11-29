@@ -29,6 +29,7 @@ class ApplicationController < ActionController::Base
 	  	retval["data"] = value.page(retval["current_page"]).per(retval["per_page"])
 	  end
 	  retval["total_page"] = ( (count || value.count )/ per_page.to_f ).ceil
+	  retval["total_page"] = retval["total_page"] == 0 ? 1 : retval["total_page"]
 	  retval["next_page"] = (page+1 <= retval["total_page"] ? page+1: retval["total_page"])
 	  # retval["next_page"] = [page + 1, retval["total_page"]].min
 	  retval
