@@ -116,10 +116,6 @@ class Answer
 
 	def self.create_answer(is_preview, introducer_id, email, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
-		logger.info "111111111111111111111111111"
-		logger.info introducer_id
-		logger.info "111111111111111111111111111"
-		logger.info survey.spread_point
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
 		if !is_preview && introducer_id
