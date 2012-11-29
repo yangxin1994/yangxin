@@ -6,12 +6,12 @@ class AnalysisResult < Result
 	include Mongoid::Document
 	include Mongoid::Timestamps
 
-	field :answer_info, :type => Array
-	field :duration_mean, :type => Float
-	field :time_result, :type => Hash
-	field :region_result, :type => Hash
-	field :channel_result, :type => Hash
-	field :answers_result, :type => Hash
+	field :answer_info, :type => Array, default: []
+	field :duration_mean, :type => Float, default: 0
+	field :time_result, :type => Hash, default: {}
+	field :region_result, :type => Hash, default: {}
+	field :channel_result, :type => Hash, default: {}
+	field :answers_result, :type => Hash, default: {}
 
 	belongs_to :survey
 
@@ -33,7 +33,8 @@ class AnalysisResult < Result
 				TaskClient.set_progress(task_id, "analyze_answer_progress", 1.0)
 				TaskClient.set_progress(task_id, "answer_info_progress", 1.0)
 			end
-			return true
+			self.status = 1
+			return self.save
 		end
 
 		# get the answer info

@@ -803,7 +803,7 @@ class Answer
 				"审核问卷答案消息",
 				message_content,
 				[] << self.user._id.to_s
-			)
+			) if !self.user.nil?
 
 		self.audit_message = message_content
 		self.save
