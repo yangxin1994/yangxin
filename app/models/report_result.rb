@@ -37,9 +37,10 @@ class ReportResult < Result
 				next if question_index.nil?
 				report_data.push_component(1, "text" => "第#{question_index+1}题分析")
 				question = BasicQuestion.find_by_id(question_id)
+				cur_question_answer = answers_transform[question_id].delete_if { |e| e.blank? }
 				case question.question_type
 				when QuestionTypeEnum::CHOICE_QUESTION
-					analysis_result = ResultJob.analyze_choice(question.issue, answers_transform[question_id])
+					analysis_result = analyze_choice(question.issue, cur_question_answer)
 					# judge whether this is a single choice or multiple choice
 					if question.issue["max_choice"] == 1
 						text = single_choice_description(analysis_result, question.issue)
@@ -50,8 +51,8 @@ class ReportResult < Result
 																			component["chart_style"])
 						report_data.push_chart_components(chart_components)
 					else
-						pie_text = multiple_choice_description(analysis_result, question.issue, answers.length, 'pie')
-						bar_text = multiple_choice_description(analysis_result, question.issue, answers.length, 'bar')
+						pie_text = multiple_choice_description(analysis_result, question.issue, :answer_number => answers.length, :chart_type => 'pie')
+						bar_text = multiple_choice_description(analysis_result, question.issue, :answer_number => answers.length, :chart_type => 'bar')
 						chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																			analysis_result,
 																			question.issue,
@@ -65,7 +66,7 @@ class ReportResult < Result
 						report_data.push_chart_components(chart_components)
 					end
 				when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
-					analysis_result = ResultJob.analyze_matrix_choice(question.issue, answers_transform[question_id])
+					analysis_result = analyze_matrix_choice(question.issue, cur_question_answer)
 					text = matrix_choice_description(analysis_result, question.issue)
 					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
 					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
@@ -74,27 +75,31 @@ class ReportResult < Result
 																		component["chart_style"])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-					analysis_result = ResultJob.analyze_number_blank(question.issue, answers_transform[question_id], component["value"]["format"] || [])
-					text = number_blank_description(analysis_result, question.issue, component["value"]["format"] || [])
+					analysis_result = analyze_number_blank(question.issue, cur_question_answer, :segment => component["value"]["format"][-1])
+					text = number_blank_description(analysis_result,
+													question.issue,
+													:segment => component["value"]["format"][-1])
 					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
 					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
 																		question.issue,
 																		component["chart_style"],
-																		"format" => component["value"]["format"] || [])
+																		:segment => component["value"]["format"][-1])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::TIME_BLANK_QUESTION
-					analysis_result = ResultJob.analyze_time_blank(question.issue, answers_transform[question_id])
-					text = time_blank_description(analysis_result, question.issue, component["value"]["format"] || [])
+					analysis_result = analyze_time_blank(question.issue, cur_question_answer, :segment => component["value"]["format"][-1])
+					text = time_blank_description(analysis_result,
+												question.issue,
+												:segment => component["value"]["format"][-1])
 					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
 					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
 																		question.issue,
 																		component["chart_style"],
-																		"format" => component["value"]["format"] || [])
+																		:segment => component["value"]["format"][-1])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
-					analysis_result = ResultJob.analyze_address_blank(question.issue, answers_transform[question_id])
+					analysis_result = analyze_address_blank(question.issue, cur_question_answer)
 					text = address_blank_description(analysis_result, question.issue)
 					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
 					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
@@ -103,7 +108,7 @@ class ReportResult < Result
 																		component["chart_style"])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::BLANK_QUESTION
-					analysis_result = ResultJob.analyze_blank(question.issue, answers_transform[question_id])
+					analysis_result = analyze_blank(question.issue, cur_question_answer, :segment => component["value"]["format"])
 					analysis_result.each do |id, sub_analysis_result|
 						sub_question_item = (question.issue["items"].select { |e| e["id"] == id })[0]
 						next if sub_question_issue.nil?
@@ -111,24 +116,29 @@ class ReportResult < Result
 						sub_question_issue = sub_question_item["properties"]
 						case sub_question_type
 						when "Number"
-							text = address_number_blank_description(sub_analysis_result, sub_question_issue)
+							text = address_number_blank_description(sub_analysis_result,
+																	sub_question_issue,
+																	:segment => component["value"]["format"][id])
 							sub_question_type = QuestionTypeEnum::NUMBER_BLANK_QUESTION
+						when "Time"
+							text = address_time_blank_description(sub_analysis_result,
+																sub_question_issue,
+																:segment => component["value"]["format"][id])
+							sub_question_type = QuestionTypeEnum::TIME_BLANK_QUESTION
 						when "Address"
 							text = address_address_blank_description(sub_analysis_result, sub_question_issue)
 							sub_question_type = QuestionTypeEnum::ADDRESS_BLANK_QUESTION
-						when "Time"
-							text = address_time_blank_description(sub_analysis_result, sub_question_issue)
-							sub_question_type = QuestionTypeEnum::TIME_BLANK_QUESTION
 						end
 						report_data.push_component(ReportData::DESCRIPTION, "text" => text)
 						chart_components = ReportDataAdapter.convert_single_data(sub_question_type,
 																			sub_analysis_result,
 																			sub_question_issue,
-																			component["chart_style"])
+																			component["chart_style"],
+																			:segment => component["value"]["format"][id])
 						report_data.push_chart_components(chart_components)
 					end
 				when QuestionTypeEnum::CONST_SUM_QUESTION
-					analysis_result = ResultJob.analyze_const_sum(question.issue, answers_transform[question_id])
+					analysis_result = analyze_const_sum(question.issue, cur_question_answer)
 					text = const_sum_description(analysis_result, question.issue)
 					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
 					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
@@ -137,8 +147,8 @@ class ReportResult < Result
 																		component["chart_style"])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::SORT_QUESTION
-					analysis_result = ResultJob.analyze_sort(question.issue, answers_transform[question_id])
-					text = sort_description(analysis_result, question.issue, answers.length)
+					analysis_result = analyze_sort(question.issue, cur_question_answer)
+					text = sort_description(analysis_result, question.issue, :answer_number => answers.length)
 					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
 					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
@@ -146,7 +156,7 @@ class ReportResult < Result
 																		component["chart_style"])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::SCALE_QUESTION
-					analysis_result = ResultJob.analyze_scale(question.issue, answers_transform[question_id])
+					analysis_result = analyze_scale(question.issue, cur_question_answer)
 					text = scale_description(analysis_result, question.issue, answers.length)
 					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
 					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
@@ -165,8 +175,81 @@ class ReportResult < Result
 				target_question_index = survey.all_questions_id.index(qustion_id)
 				next if question_index.nil? || target_question_index.nil?
 				report_data.push_component(ReportData::HEADING_2, "text" => "第#{question_index}题，第#{target_question_index}题交叉分析")
+
+				question = BasicQuestion.find_by_id(question_id)
+				target_question = BasicQuestion.find_by_id(target_question_id)
+				case target_question.question_type
+				when QuestionTypeEnum::CHOICE_QUESTION
+					analysis_result = analyze_cross(target_question.question_type,
+													question.issue,
+													target_question.issue,
+													answers_transform[question_id],
+													answers_transform[target_question_id])
+				when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
+					analysis_result = analyze_cross(target_question.question_type,
+													question.issue,
+													target_question.issue,
+													answers_transform[question_id],
+													answers_transform[target_question_id])
+				when QuestionTypeEnum::NUMBER_BLANK_QUESTION
+					analysis_result = analyze_cross(target_question.question_type,
+													question.issue
+													target_question.issue,
+													answers_transform[question_id],
+													answers_transform[target_question_id],
+													:segment => component["value"]["format"])
+					text = cross_number_blank_description(analysis_result, question.issue, component["value"]["format"][-1])
+					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+					chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+																		analysis_result,
+																		question.issue,
+																		target_question.issue,
+																		component["chart_style"],
+																		:segment => component["value"]["format"][-1])
+					report_data.push_chart_components(chart_components)
+				when QuestionTypeEnum::TIME_BLANK_QUESTION
+					analysis_result = analyze_cross(target_question.question_type,
+													question.issue,
+													target_question.issue,
+													answers_transform[question_id],
+													answers_transform[target_question_id],
+													:segment => component["value"]["format"])
+				when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+					analysis_result = analyze_cross(target_question.question_type,
+													question.issue,
+													target_question.issue,
+													answers_transform[question_id],
+													answers_transform[target_question_id])
+				when QuestionTypeEnum::BLANK_QUESTION
+					analysis_result = analyze_cross(target_question.question_type,
+													question.issue,
+													target_question.issue,
+													answers_transform[question_id],
+													answers_transform[target_question_id])
+				when QuestionTypeEnum::CONST_SUM_QUESTION
+					analysis_result = analyze_cross(target_question.question_type,
+													question.issue,
+													target_question.issue,
+													answers_transform[question_id],
+													answers_transform[target_question_id])
+				when QuestionTypeEnum::SORT_QUESTION
+					analysis_result = analyze_cross(target_question.question_type,
+													question.issue,
+													target_question.issue,
+													answers_transform[question_id],
+													answers_transform[target_question_id])
+				when QuestionTypeEnum::SCALE_QUESTION
+					analysis_result = analyze_cross(target_question.question_type,
+													question.issue,
+													target_question.issue,
+													answers_transform[question_id],
+													answers_transform[target_question_id])
+				else
+					# other types of questions are removed, the heading in the component should be removed
+					report_data.pop_component
+				end
 			end
-			set_status({"data_conversion_progress" => (i+1).to_f / component_length})
+			TaskClient.set_progress(task_id, "data_conversion_progress", (i+1).to_f / component_length)
 		end
 
 		# call the webservice to generate the report
@@ -177,15 +260,74 @@ class ReportResult < Result
 		report_result.save
 	end
 
-
-
-	def get_item_text_by_id(items, id)
-		item = items.select { |e| e["id"].to_s == id.to_s }
-		return nil if item.nil?
-		item_text = item[0]["content"]["text"]
+	# cross analysis and description generation
+	def analyze_cross(question_type, question_issue, target_question_issue, question_answer_ary, target_question_answer_ary, opt)
+		target_question_sub_answer_ary = {}
+		target_question_answer_ary.each_with_index do |target_question_answer, index|
+			question_answer = question_answer_ary[index]
+			question_answer["selection"].each do |item_id|
+				target_question_sub_answer_ary[item_id] ||= []
+				target_question_sub_answer_ary[item_id] << target_question_answer
+			end
+		end
+		result = {}
+		question_issue["items"].each do |item|
+			case question_type
+			when QuestionTypeEnum::CHOICE_QUESTION
+				result[item["id"]] = analyze_choice(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+			when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
+				result[item["id"]] = analyze_matrix_choice(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
+				result[item["id"]] = analyze_number_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+			when QuestionTypeEnum::TIME_BLANK_QUESTION
+				result[item["id"]] = analyze_time_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+			when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+				result[item["id"]] = analyze_address_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+			when QuestionTypeEnum::BLANK_QUESTION
+				result[item["id"]] = analyze_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+			when QuestionTypeEnum::CONST_SUM_QUESTION
+				result[item["id"]] = analyze_const_sum(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+			when QuestionTypeEnum::SORT_QUESTION
+				result[item["id"]] = analyze_sort(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+			when QuestionTypeEnum::SCALE_QUESTION
+				result[item["id"]] = analyze_scale(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+			end
+		end
+		return result
 	end
 
-	def scale_description(analysis_result, issue)
+	def cross_description(question_type, analysis_result, issue, target_issue, opt)
+		text = "调查显示：" if opt[:cross] != true
+		analysis_result.each do |item_id, result|
+			item = (issue["items"].select { |e| e["id"] == item_id })[0]
+			next if item.nil? || result.blank?
+			text = "选择#{item["content"]["text"]}的被访者中，"
+			case question_type
+			when "single_choice"
+				text += single_choice_description(result, target_issue, opt.merge({:cross => true}))
+			when "multiple_choice"
+				text += multiple_choice_description(result, target_issue, opt.merge({:cross => true}))
+			when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
+				text += matrix_choice_description(result, target_issue, opt.merge({:cross => true}))
+			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
+				text += number_blank_description(result, target_issue, opt.merge({:cross => true}))
+			when QuestionTypeEnum::TIME_BLANK_QUESTION
+				text += time_blank_description(result, target_issue, opt.merge({:cross => true}))
+			when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+				text += address_blank_description(result, target_issue, opt.merge({:cross => true}))
+			when QuestionTypeEnum::CONST_SUM_QUESTION
+				text += const_sum_description(result, target_issue, opt.merge({:cross => true}))
+			when QuestionTypeEnum::SORT_QUESTION
+				text += sort_description(result, target_issue, opt.merge({:cross => true}))
+			when QuestionTypeEnum::SCALE_QUESTION
+				text += scale_description(result, target_issue, opt.merge({:cross => true}))
+			end
+		end
+		return text
+	end
+
+	# description generation
+	def scale_description(analysis_result, issue, opt)
 		results = []
 		analysis_result.each do |input_id, ele|
 			if ele[1] != -1
@@ -198,7 +340,8 @@ class ReportResult < Result
 		results.sort_by! { |e| -e["ratio"] }
 		item_text_ary = results.map { |e| e["text"] }
 		score_ary = results.map { |e| e["score"] }
-		text = "调查显示，#{item_text_ary[0]}的平均得分最高，为#{score_ary[0]}"
+		text = "调查显示，" if opt[:cross] != true
+		text = "#{item_text_ary[0]}的平均得分最高，为#{score_ary[0]}"
 		# one item
 		return text + "。" if item_text_ary.length == 1
 		text = text + "，其次是#{item_text_ary[1]}，平均得分是#{score_ary[1]}"
@@ -212,7 +355,8 @@ class ReportResult < Result
 		return text + "，#{item_text_string}的平均得分分别为#{score_string}。"
 	end
 
-	def sort_description(analysis_result, issue, answer_number)
+	def sort_description(analysis_result, issue, opt)
+		answer_number = opt[:answer_number]
 		return "" if analysis_result.blank?
 		first_index_dist = {}
 		second_index_dist = {}
@@ -230,7 +374,8 @@ class ReportResult < Result
 		first_index_results.sort_by! { |e| -e["ratio"] }
 		first_index_item_text_ary = results.map { |e| e["text"] }
 		first_index_ratio_ary = results.map { |e| e["ratio"] }
-		text = "调查显示，将#{first_index_results_text_ary[0]}排在第一位的被访者所占比例最高，为#{first_index_ratio_ary[0]}%"
+		text = "调查显示，" if opt[:cross] != true
+		text = "将#{first_index_results_text_ary[0]}排在第一位的被访者所占比例最高，为#{first_index_ratio_ary[0]}%"
 		if first_index_results_text_ary.length == 1
 		elsif first_index_results_text_ary.lenght == 2
 			text = text + "，其次是#{first_index_results_text_ary[1]}，所占比例为#{first_index_ratio_ary[1]}%"
@@ -256,7 +401,7 @@ class ReportResult < Result
 		end
 	end
 
-	def const_sum_description(analysis_result, issue)
+	def const_sum_description(analysis_result, issue, opt)
 		return "" if analysis_result.blank?
 		analysis_result.each do |input_id, mean_weight|
 			item_text = get_item_text_by_id(issue["items"], input_id)
@@ -267,7 +412,8 @@ class ReportResult < Result
 		item_text_ary = results.map { |e| e["text"] }
 		mean_weight_ary = results.map { |e| e["mean_weight"] }
 			
-		text = "调查显示，被访者为#{item_text_ary[0]}分配的比重最高，平均为#{mean_weight_ary[0]}"
+		text = "调查显示，" if opt[:cross] != true
+		text = "被访者为#{item_text_ary[0]}分配的比重最高，平均为#{mean_weight_ary[0]}"
 		# one item
 		return text + "。" if results.length == 1
 		text = text + "，其次是#{item_text_ary[1]}，所占比重为#{mean_weight_ary[1]}"
@@ -281,7 +427,7 @@ class ReportResult < Result
 		return text + "，#{item_text_string}所占比重分别为#{mean_weight_string}。"
 	end
 
-	def address_blank_description(analysis_result, issue)
+	def address_blank_description(analysis_result, issue, opt)
 		total_number = 0
 		return "" if analysis_result.blank?
 		analysis_result.each do |region_code, number|
@@ -294,7 +440,8 @@ class ReportResult < Result
 		address_text_ary = results.map { |e| e["text"] }
 		ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
 
-		text = "调查显示，被访者中，#{ratio_ary[0]}%的人填写#{address_text_ary[0]}，所占比例最高"
+		text = "调查显示，" if opt[:cross] != true
+		text = "被访者中，#{ratio_ary[0]}%的人填写#{address_text_ary[0]}，所占比例最高"
 		# only one address
 		return text + "。" if results.length == 1
 		text = text + "，其次是%#{address_text_ary[1]}，填写比例是#{ratio_ary[1]}"
@@ -314,7 +461,199 @@ class ReportResult < Result
 		return text + "，另有#{other_ratio}%的人填写了其他。"
 	end
 
-	def self.convert_time_interval_to_text(format, v1, v2)
+	def time_blank_description(analysis_result, issue, opt)
+		segment = opt[:segment]
+		histogram = analysis_result["histogram"]
+		mean = convert_time_mean_to_text(issue.format, analysis_result["mean"])
+		text = "调查显示，" if opt[:cross] != true
+		return text + "被访者填写的平均值为#{mean}。" if segment.blank?
+		interval_text_ary = []
+		interval_text_ary << convert_time_interval_to_text(issue.format, nil, segment[0])
+		segment[0..-2].each_with_index do |e, index|
+			interval_text_ary << convert_time_interval_to_text(issue.format, e, segment[index+1])
+		end
+		interval_text_ary << convert_time_interval_to_text(issue.format, segment[-1], nil)
+			
+		results = []
+		total_number = 0
+		histogram.each_with_index do |number, index|
+			total_number = total_number + number
+			results << { "text" => interval_text_ary[index], "number" => number.to_f }
+		end
+		results.sort_by! { |e| -e["number"] }
+		interval_text_ary = results.map { |e| e["text"] }
+		ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
+		text = text + "，填写#{interval_text_ary[0]}的被访者比例最高，为#{ratio_ary[0]}%"
+		# one interval
+		return text + "；被访者填写的平均值为#{mean}。" if results.length == 1
+		text = text + "，其次是填写#{interval_text_ary[1]}的被访者，所占比例为#{ratio_ary[1]}%"
+		# two intervals
+		return text + "；被访者填写的平均值为#{mean}。" if results.length == 2
+		if results.length == 3
+			# three intervals
+			text = text + "，填写#{interval_text_ary[2]}的比例为#{ratio_ary[2]}%"
+		else
+			# at least four items
+			interval_text_string = interval_text_ary[2..-1].join('、')
+			ratio_string = (ratio_ary[2..-1].map { |e| "#{e}%" }).join('、')
+			text = text + "，填写#{interval_text_string}的比例分别为#{ratio_string}"
+		end
+
+		text = text + "；被访者填写的平均值为#{mean}。"
+		return text
+	end
+
+	def number_blank_description(analysis_result, issue, opt)
+		segment = opt[:segment]
+		histogram = analysis_result["histogram"]
+		mean = analysis_result["mean"]
+		text = "调查显示，" if opt[:cross] != true
+		return text + "被访者填写的平均值为#{mean}。" if segment.blank?
+		interval_text_ary = []
+		interval_text_ary << "#{segment[0]}以下"
+		segment[0..-2].each_with_index do |e, index|
+			interval_text_ary << "#{e}到#{segment[index+1]}"
+		end
+		interval_text_ary << "#{segment[-1]}以上"
+			
+		results = []
+		total_number = 0
+		histogram.each_with_index do |number, index|
+			total_number = total_number + number
+			results << { "text" => interval_text_ary[index], "number" => number.to_f }
+		end
+		results.sort_by! { |e| -e["number"] }
+		interval_text_ary = results.map { |e| e["text"] }
+		ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
+		text = text + "，填写#{interval_text_ary[0]}的被访者比例最高，为#{ratio_ary[0]}%"
+		# one interval
+		return text + "；被访者填写的平均值为#{mean}。" if results.length == 1
+		text = text + "，其次是填写#{interval_text_ary[1]}的被访者，所占比例为#{ratio_ary[1]}%"
+		# two intervals
+		return text + "；被访者填写的平均值为#{mean}。" if results.length == 2
+		if results.length == 3
+			# three intervals
+			text = text + "，填写#{interval_text_ary[2]}的比例为#{ratio_ary[2]}%"
+		else
+			# at least four items
+			interval_text_string = interval_text_ary[2..-1].join('、')
+			ratio_string = (ratio_ary[2..-1].map { |e| "#{e}%" }).join('、')
+			text = text + "，填写#{interval_text_string}的比例分别为#{ratio_string}"
+		end
+
+		text = text + "；被访者填写的平均值为#{mean}。"
+		return text
+	end
+
+	def matrix_choice_description(analysis_result, issue, opt)
+		item_number = issue.items.length
+		text = "调查显示，" if opt[:cross] != true
+		# get description for each row respectively
+		issue.rows.each do |row|
+			row_id = row["id"]
+			row_text = get_item_text_by_id(row_id)
+			# obtain all the results about this row
+			cur_row_analysis_result = analysis_result.select { |k, v| k.start_with?(row_id) }
+			next if cur_row_analysis_result.blank?
+			cur_row_results = []
+			cur_row_total_number = 0
+			cur_row_analysis_result.each do |k, select_number|
+				item_id = k.split('-')[1]
+				item_text = get_item_text_by_id(issue.items, input_id)
+				next if item_text.nil?
+				cur_row_total_number = cur_row_total_number + select_number.to_f
+				cur_row_results << { "text" => item_text, "select_number" => select_number.to_f}
+			end
+			cur_row_results.sort_by! { |e| -e["select_number"] }
+			item_text_ary = cur_row_results.map { |e| e["text"] }
+			ratio_ary = cur_row_results.map { |e| (e["select_number"] * 100 / cur_row_total_number).round }
+			# generate text for this row
+			cur_row_text_ary
+			item_text_ary.each_with_index do |item_text, index|
+				cur_row_text_ary << "#{ratio_ary[index]}%的人对#{row_text}的选择为#{item_text}"
+			end
+			text = text + cur_row_text_ary.join('，') + "。"
+		end
+		return text
+	end
+
+	def single_choice_description(analysis_result, issue, opt)
+		total_number = 0
+		results = []
+		analysis_result.each do |input_id, select_number|
+			item_text = get_item_text_by_id(issue["items"], input_id)
+			next if item_text.nil?
+			total_number = total_number + select_number
+			results << { "text" => item_text, "select_number" => select_number.to_f }
+		end
+		temp_results = results.clone
+		temp_results.sort_by! { |e| -e["select_number"] }
+		item_text_ary = temp_results.map { |e| e["text"] }
+		ratio_ary = temp_results.map { |e| (e["select_number"] * 100 / total_number).round }
+		text = "调查显示，" if opt[:cross] != true
+		text = "#{ratio_ary[0]}%的人选择了#{item_text_ary[0]}"
+		# only one item
+		return text + "。" if temp_results.length == 1
+		# two items
+		return text + "，选择#{item_text_ary[1]}的比例为#{ratio_ary[1]}%。" if temp_results.length == 2
+		# at least three items
+		text = text + "，其次是#{item_text_ary[1]}，选择比例为#{ratio_ary[1]}%"
+		if temp_results.length == 4
+			# four items
+			text = text + "，选择#{item_text_ary[2]}的比例为#{ratio_ary[2]}%"
+		elsif temp_results.length > 4
+			# at least five items
+			item_text_string = item_text_ary[2..-2].join('、')
+			ratio_string = (ratio_ary[2..-2].map { |e| "#{e}%" }).join('、')
+			text = text + "，选择#{item_text_string}的比例分别为#{ratio_string}"
+		end
+		# the last item
+		text = text + "。另外有#{ratio_ary[-1]}%的人选择#{item_text_ary[-1]}"
+		return text
+	end
+
+	def multiple_choice_description(analysis_result, issue, opt)
+		answer_number = opt[:answer_number]
+		chart_type = opt[:chart_type]
+		# the description for multiple choice question with pie chart is exactly the same as the single choice question
+		return single_choice_description(analysis_result, issue, opt) if chart_type == "pie"
+		results = []
+		analysis_result.each do |input_id, select_number|
+			item_text = get_item_text_by_id(input_id)
+			next if item_text.nil?
+			results << { "text" => item_text, "select_number" => select_number.to_f }
+		end
+		temp_results = results.clone
+		temp_results.sort_by! { |e| -e["select_number"] }
+		item_text_ary = temp_results.map { |e| e["text"] }
+		ratio_ary = temp_results.map { |e| (e["select_number"] * 100 / answer_number).round }
+		text = "调查显示，" if opt[:cross] != true
+		text = "#{ratio_ary[0]}%的人选择了#{item_text_ary[0]}，所占比例最高"
+		# only one item
+		return text + "。" if temp_results.length == 1
+		text + "，#{item_text_ary[1]}位列第二位，选择比例为#{ratio_ary[1]}%"
+		# two items
+		return text + "。" if temp_results.length == 2
+		# three items
+		return text + "，其他是#{item_text_ary[2]}（#{ratio_ary[2]}%）。" if temp_results.length == 3
+		item_ratio_ary = []
+		item_text_ary.each_with_index do |item_text, index|
+			item_ratio_ary << "#{item_text}（#{ratio_ary[index]}%）"
+		end
+		item_ratio_string = item_ratio_ary.join('、')
+		return text + "，其他依次是#{item_ratio_string}。"
+	end
+
+
+	# tools
+	def get_item_text_by_id(items, id)
+		item = items.select { |e| e["id"].to_s == id.to_s }
+		return nil if item.nil?
+		item_text = item[0]["content"]["text"]
+		return item_text
+	end
+
+	def convert_time_interval_to_text(format, v1, v2)
 		case format.to_i
 		when 0
 			# year
@@ -479,183 +818,6 @@ class ReportResult < Result
 			# hour minute second
 			return "#{time.hour}时#{time.minute}分#{year.second}秒"
 		end
-	end
-
-	def time_blank_description(analysis_result, issue, segments)
-		histogram = analysis_result["histogram"]
-		mean = convert_time_mean_to_text(issue.format, analysis_result["mean"])
-		text = "调查显示"
-		return text + "，被访者填写的平均值为#{mean}。" if segments.blank?
-		interval_text_ary = []
-		interval_text_ary << ReportJob.convert_time_interval_to_text(issue.format, nil, segments[0])
-		segments[0..-2].each_with_index do |e, index|
-			interval_text_ary << ReportJob.convert_time_interval_to_text(issue.format, e, segments[index+1])
-		end
-		interval_text_ary << ReportJob.convert_time_interval_to_text(issue.format, segments[-1], nil)
-			
-		results = []
-		total_number = 0
-		histogram.each_with_index do |number, index|
-			total_number = total_number + number
-			results << { "text" => interval_text_ary[index], "number" => number.to_f }
-		end
-		results.sort_by! { |e| -e["number"] }
-		interval_text_ary = results.map { |e| e["text"] }
-		ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
-		text = text + "，填写#{interval_text_ary[0]}的被访者比例最高，为#{ratio_ary[0]}%"
-		# one interval
-		return text + "；被访者填写的平均值为#{mean}。" if results.length == 1
-		text = text + "，其次是填写#{interval_text_ary[1]}的被访者，所占比例为#{ratio_ary[1]}%"
-		# two intervals
-		return text + "；被访者填写的平均值为#{mean}。" if results.length == 2
-		if results.length == 3
-			# three intervals
-			text = text + "，填写#{interval_text_ary[2]}的比例为#{ratio_ary[2]}%"
-		else
-			# at least four items
-			interval_text_string = interval_text_ary[2..-1].join('、')
-			ratio_string = (ratio_ary[2..-1].map { |e| "#{e}%" }).join('、')
-			text = text + "，填写#{interval_text_string}的比例分别为#{ratio_string}"
-		end
-
-		text = text + "；被访者填写的平均值为#{mean}。"
-		return text
-	end
-
-	def number_blank_description(analysis_result, issue, segments)
-		histogram = analysis_result["histogram"]
-		mean = analysis_result["mean"]
-		text = "调查显示"
-		return text + "，被访者填写的平均值为#{mean}。" if segments.blank?
-		interval_text_ary = []
-		interval_text_ary << "#{segments[0]}以下"
-		segments[0..-2].each_with_index do |e, index|
-			interval_text_ary << "#{e}到#{segments[index+1]}"
-		end
-		interval_text_ary << "#{segments[-1]}以上"
-			
-		results = []
-		total_number = 0
-		histogram.each_with_index do |number, index|
-			total_number = total_number + number
-			results << { "text" => interval_text_ary[index], "number" => number.to_f }
-		end
-		results.sort_by! { |e| -e["number"] }
-		interval_text_ary = results.map { |e| e["text"] }
-		ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
-		text = text + "，填写#{interval_text_ary[0]}的被访者比例最高，为#{ratio_ary[0]}%"
-		# one interval
-		return text + "；被访者填写的平均值为#{mean}。" if results.length == 1
-		text = text + "，其次是填写#{interval_text_ary[1]}的被访者，所占比例为#{ratio_ary[1]}%"
-		# two intervals
-		return text + "；被访者填写的平均值为#{mean}。" if results.length == 2
-		if results.length == 3
-			# three intervals
-			text = text + "，填写#{interval_text_ary[2]}的比例为#{ratio_ary[2]}%"
-		else
-			# at least four items
-			interval_text_string = interval_text_ary[2..-1].join('、')
-			ratio_string = (ratio_ary[2..-1].map { |e| "#{e}%" }).join('、')
-			text = text + "，填写#{interval_text_string}的比例分别为#{ratio_string}"
-		end
-
-		text = text + "；被访者填写的平均值为#{mean}。"
-		return text
-	end
-
-	def matrix_choice_description(analysis_result, issue)
-		item_number = issue.items.length
-		text = "调查显示，"
-		# get description for each row respectively
-		issue.rows.each do |row|
-			row_id = row["id"]
-			row_text = get_item_text_by_id(row_id)
-			# obtain all the results about this row
-			cur_row_analysis_result = analysis_result.select { |k, v| k.start_with?(row_id) }
-			next if cur_row_analysis_result.blank?
-			cur_row_results = []
-			cur_row_total_number = 0
-			cur_row_analysis_result.each do |k, select_number|
-				item_id = k.split('-')[1]
-				item_text = get_item_text_by_id(issue.items, input_id)
-				next if item_text.nil?
-				cur_row_total_number = cur_row_total_number + select_number.to_f
-				cur_row_results << { "text" => item_text, "select_number" => select_number.to_f}
-			end
-			cur_row_results.sort_by! { |e| -e["select_number"] }
-			item_text_ary = cur_row_results.map { |e| e["text"] }
-			ratio_ary = cur_row_results.map { |e| (e["select_number"] * 100 / cur_row_total_number).round }
-			# generate text for this row
-			cur_row_text_ary
-			item_text_ary.each_with_index do |item_text, index|
-				cur_row_text_ary << "#{ratio_ary[index]}%的人对#{row_text}的选择为#{item_text}"
-			end
-			text = text + cur_row_text_ary.join('，') + "。"
-		end
-		return text
-	end
-
-	def single_choice_description(analysis_result, issue)
-		total_number = 0
-		results = []
-		analysis_result.each do |input_id, select_number|
-			item_text = get_item_text_by_id(issue["items"], input_id)
-			next if item_text.nil?
-			total_number = total_number + select_number
-			results << { "text" => item_text, "select_number" => select_number.to_f }
-		end
-		temp_results = results.clone
-		temp_results.sort_by! { |e| -e["select_number"] }
-		item_text_ary = temp_results.map { |e| e["text"] }
-		ratio_ary = temp_results.map { |e| (e["select_number"] * 100 / total_number).round }
-		text = "调查显示，#{ratio_ary[0]}%的人选择了#{item_text_ary[0]}"
-		# only one item
-		return text + "。" if temp_results.length == 1
-		# two items
-		return text + "，选择#{item_text_ary[1]}的比例为#{ratio_ary[1]}%。" if temp_results.length == 2
-		# at least three items
-		text = text + "，其次是#{item_text_ary[1]}，选择比例为#{ratio_ary[1]}%"
-		if temp_results.length == 4
-			# four items
-			text = text + "，选择#{item_text_ary[2]}的比例为#{ratio_ary[2]}%"
-		elsif temp_results.length > 4
-			# at least five items
-			item_text_string = item_text_ary[2..-2].join('、')
-			ratio_string = (ratio_ary[2..-2].map { |e| "#{e}%" }).join('、')
-			text = text + "，选择#{item_text_string}的比例分别为#{ratio_string}"
-		end
-		# the last item
-		text = text + "。另外有#{ratio_ary[-1]}%的人选择#{item_text_ary[-1]}"
-		return text
-	end
-
-	def multiple_choice_description(analysis_result, issue, answer_number, chart_type)
-		# the description for multiple choice question with pie chart is exactly the same as the single choice question
-		return single_choice_description(analysis_result, issue) if chart_type == "pie"
-		results = []
-		analysis_result.each do |input_id, select_number|
-			item_text = get_item_text_by_id(input_id)
-			next if item_text.nil?
-			results << { "text" => item_text, "select_number" => select_number.to_f }
-		end
-		temp_results = results.clone
-		temp_results.sort_by! { |e| -e["select_number"] }
-		item_text_ary = temp_results.map { |e| e["text"] }
-		ratio_ary = temp_results.map { |e| (e["select_number"] * 100 / answer_number).round }
-		text = "调查显示，#{ratio_ary[0]}%的人选择了#{item_text_ary[0]}，所占比例最高"
-		# only one item
-		return text + "。" if temp_results.length == 1
-		text + "，#{item_text_ary[1]}位列第二位，选择比例为#{ratio_ary[1]}%"
-		# two items
-		return text + "。" if temp_results.length == 2
-		# three items
-		return text + "，其他是#{item_text_ary[2]}（#{ratio_ary[2]}%）。" if temp_results.length == 3
-		item_ratio_ary = []
-		item_text_ary.each_with_index do |item_text, index|
-			item_ratio_ary << "#{item_text}（#{ratio_ary[index]}%）"
-		end
-		item_ratio_string = item_ratio_ary.join('、')
-		return text + "，其他依次是#{item_ratio_string}。"
 	end
 
 end

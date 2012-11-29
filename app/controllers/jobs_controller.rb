@@ -80,7 +80,7 @@ class JobsController < ApplicationController
 				# re-organize answers
 				answer.answer_content.each do |q_id, question_answer|
 					answers_transform[q_id] ||= []
-					answers_transform[q_id] << question_answer if !question_answer.blank?
+					answers_transform[q_id] << question_answer
 				end
 			end
 			# generate the report

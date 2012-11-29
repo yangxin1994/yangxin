@@ -107,7 +107,7 @@ class Result
 	end
 
 
-	def analyze_choice(issue, answer_ary)
+	def analyze_choice(issue, answer_ary, opt={})
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		input_ids.map! { |e| e.to_s }
@@ -121,7 +121,7 @@ class Result
 		return result
 	end
 
-	def analyze_matrix_choice(issue, answer_ary)
+	def analyze_matrix_choice(issue, answer_ary, opt={})
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids.map! { |e| e.to_s }
 		result = {}
@@ -141,11 +141,13 @@ class Result
 		return result
 	end
 
-	def analyze_number_blank(issue, answer_ary, segment=[])
+#	def analyze_number_blank(issue, answer_ary, segment=[])
+	def analyze_number_blank(issue, answer_ary, opt={})
 		result = {}		
 		answer_ary.map! { |answer| answer.to_f }
 		answer_ary.sort!
 		result["mean"] = answer_ary.mean
+		setment = opt[:segment] || []
 		if segment.blank?
 			segment = [answer_ary[0], (answer_ary[0].to_f + answer_ary[-1].to_f) / 2, answer_ary[-1]]
 		end
@@ -165,7 +167,8 @@ class Result
 		return result
 	end
 
-	def analyze_time_blank(issue, answer_ary, segment=[])
+#	def analyze_time_blank(issue, answer_ary, segment=[])
+	def analyze_time_blank(issue, answer_ary, opt={})
 		result = {}
 		# the raw answers are in the unit of milliseconds
 		answer_ary.map! { |e| (e / 1000).round }
@@ -190,7 +193,7 @@ class Result
 		return result
 	end
 
-	def analyze_email_blank(issue, answer_ary)
+	def analyze_email_blank(issue, answer_ary, opt={})
 		result = {}
 		answer_ary.each do |email_address|
 			domain_name = (email_address.split('@'))[-1]
@@ -200,7 +203,7 @@ class Result
 		return result
 	end
 
-	def analyze_address_blank(issue, answer_ary)
+	def analyze_address_blank(issue, answer_ary, opt={})
 		result = {}
 		answer_ary.each do |value|
 			region_code = value["address"]
@@ -210,24 +213,28 @@ class Result
 		return result
 	end
 
-	def analyze_blank(issue, answer_ary)
+	def analyze_blank(issue, answer_ary, opt={})
 		result = {}
 		issue["items"].each_with_index do |input, input_index|
 			case input["data_type"]
 			when "Number"
-				result[input["id"].to_s] = analyze_number_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				result[input["id"].to_s] = analyze_number_blank(input["properties"],
+																answer_ary.map { |e| e[input_index] },
+																opt[:segment][input["id"]])
+			when "Time"
+				result[input["id"].to_s] = analyze_time_blank(input["properties"],
+															answer_ary.map { |e| e[input_index] },
+															opt[:segment][input["id"]])
 			when "Address"
 				result[input["id"].to_s] = analyze_address_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			when "Email"
 				result[input["id"].to_s] = analyze_email_blank(input["properties"], answer_ary.map { |e| e[input_index] })
-			when "Time"
-				result[input["id"].to_s] = analyze_time_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			end
 		end
 		return result
 	end
 
-	def analyze_const_sum(issue, answer_ary)
+	def analyze_const_sum(issue, answer_ary, opt={})
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		input_ids.map! { |e| e.to_s }
@@ -248,7 +255,7 @@ class Result
 		return result
 	end
 
-	def analyze_sort(issue, answer_ary)
+	def analyze_sort(issue, answer_ary, opt={})
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		input_ids.map! { |e| e.to_s }
@@ -268,7 +275,7 @@ class Result
 		return result
 	end
 
-	def analyze_scale(issue, answer_ary)
+	def analyze_scale(issue, answer_ary, opt={})
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids.map! { |e| e.to_s }
 
