@@ -25,6 +25,14 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 	def show
 		answer = Answer.find_by_id(params[:id])
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
+		# passing if not.
+		if answer.finish_type == 1
+			answer["is_pass"] = true 
+			answer['auditor_email'] = answer.auditor.email
+		else
+			answer["is_pass"] = false
+		end
+
 		answer["question_content"] = []
 		answer.answer_content.each do |key, val|
 			# key is question id
@@ -359,7 +367,8 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 			end	
 			
 		end
-		render_json_auto(answer, :only => [:question_content])
+
+		render_json_auto(answer, :only => [:question_content, :is_pass, :auditor_email, :audit_at, :audit_message])
 	end
 
 	# def update
