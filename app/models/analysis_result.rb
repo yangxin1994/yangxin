@@ -145,4 +145,30 @@ class AnalysisResult < Result
 			return analyze_scale(question.issue, answer_ary)
 		end
 	end
+
+	def self.get_data_list(task_id)
+		analysis_result = self.where(:task_id => task_id)[0]
+		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
+		return {:result_key => analysis_result.result_key,
+				:answer_info => analysis_result.answer_info}
+	end
+
+	def self.get_stats(task_id)
+		analysis_result = self.where(:task_id => task_id)[0]
+		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
+		return {:tot_answer_number => analysis_result.tot_answer_number,
+				:screened_answer_number => analysis_result.screened_answer_number,
+				:duration_mean => analysis_result.duration_mean,
+				:time_result => analysis_result.time_result,
+				:region_result => analysis_result.region_result,
+				:channel_result => analysis_result.channel_result}
+	end
+
+	def self.get_analysis_result(task_id, page_index)
+		analysis_result = self.where(:task_id => task_id)[0]
+		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
+		page = analysis_result.survey.pages[page_index]
+		return ErrorEnum::OVERFLOW if page.nil?
+		return answers_result.select { |e, v| page["questions"].include?(e) }
+	end
 end

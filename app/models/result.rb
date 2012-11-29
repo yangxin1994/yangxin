@@ -51,17 +51,12 @@ class Result
 	def self.job_progress(task_id)
 		result = Result.find_by_task_id(task_id)
 		# the task is finished, return
-		if result
-			logger.info "AAAAAAAAAAAAAA"
-			logger.info result._id
-			logger.info result.status
-		end
 		return 1 if result && result.status == 1
 
 		# the task has not been finished, chech the progress
 		task = TaskClient.get_task(task_id)
 
-		return task if task == ErrorEnum::TASK_NOT_FOUND
+		return task if task == ErrorEnum::TASK_NOT_EXIST
 		progress = task["progress"]
 
 		# calculate the status
