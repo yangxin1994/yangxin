@@ -461,7 +461,7 @@ class Survey
 
 		# some information that cannot be cloned
 		new_instance.status = 0
-		new_instance.publish_status = (operator,is_admin || operator.is_super_admin) ? PublishStatus::PUBLISHED : PublishStatus::CLOSED
+		new_instance.publish_status = (operator.is_admin || operator.is_super_admin) ? PublishStatus::PUBLISHED : PublishStatus::CLOSED
 		new_instance.user_attr_survey = false
 		new_instance.is_star = false
 		new_instance.point = 0
