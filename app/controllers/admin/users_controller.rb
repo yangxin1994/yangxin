@@ -211,12 +211,9 @@ class Admin::UsersController < Admin::ApplicationController
 		user = User.find_by_id_including_deleted(params[:id])
 		render_json_e(ErrorEnum::USER_NOT_EXIST) if user.nil?
 
-		introduced_users = User.where(:introducer_id => user.id.to_s).desc(:created_at)
-		show_users = introduced_users.page(page).per(per_page)
-		# this is not map for all users, the max is per_page's number.
-		show_users = show_users.to_a.map do |u|
-			{_id: u._id.to_s, email: u.email, created_at: u.created_at}
+		introduced_users = auto_paginate user.get_introduced_users do |u|
+			u.slice((page - 1) * per_page, per_page)
 		end
-		render_json_auto (auto_paginate(show_users, introduced_users.count){show_users}) and return
+		render_json_auto(introduced_users) and return
 	end
 end
