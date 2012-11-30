@@ -155,9 +155,11 @@ class Result
 			histogram = Array.new(segment.length + 1, 0)
 			segment_index = 0
 			answer_ary.each do |a|
-				while a > segment[segment_index]
-					segment_index = segment_index + 1
-					break if segment_index >= segment.length
+				if segment_index < segment.length
+					while a > segment[segment_index].to_f
+						segment_index = segment_index + 1
+						break if segment_index >= segment.length
+					end
 				end
 				histogram[segment_index] = histogram[segment_index] + 1
 			end
@@ -169,9 +171,6 @@ class Result
 
 	def analyze_time_blank(issue, answer_ary, opt={})
 		segment = opt[:segment]
-		logger.info "222222222222222"
-		logger.info segment.inspect
-		logger.info "222222222222222"
 		result = {}
 		# the raw answers are in the unit of milliseconds
 		answer_ary.map! { |e| (e / 1000).round }
@@ -184,9 +183,11 @@ class Result
 			histogram = Array.new(segment.length + 1, 0)
 			segment_index = 0
 			answer_ary.each do |a|
-				while a > segment[segment_index]
-					segment_index = segment_index + 1
-					break if segment_index >= segment.length
+				if segment_index < segment.length
+					while a > segment[segment_index]
+						segment_index = segment_index + 1
+						break if segment_index >= segment.length
+					end
 				end
 				histogram[segment_index] = histogram[segment_index] + 1
 			end

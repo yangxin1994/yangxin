@@ -61,9 +61,9 @@ class Report::DataAdapter
 		when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
 			return self.convert_single_matrix_choice_data(analysis_result, issue, chart_styles)
 		when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-			return self.convert_single_number_blank_data(analysis_result, issue, chart_styles, opt[:format] || [])
+			return self.convert_single_number_blank_data(analysis_result, issue, chart_styles, opt[:segment] || [])
 		when QuestionTypeEnum::TIME_BLANK_QUESTION
-			return self.convert_single_time_blank_data(analysis_result, issue, chart_styles, opt[:format] || [])
+			return self.convert_single_time_blank_data(analysis_result, issue, chart_styles, opt[:segment] || [])
 		when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 			return self.convert_single_address_blank_data(analysis_result, issue, chart_styles)
 		when QuestionTypeEnum::CONST_SUM_QUESTION
@@ -124,7 +124,7 @@ class Report::DataAdapter
 				data << ["数量"] + histogram
 			elsif chart_style == ChartStyleEnum::STACK
 				# one category, multiple series
-				data << ["Categories"] + "数量"
+				data << ["Categories", "数量"]
 				interval_text_ary.each_with_index do |text, index|
 					data << [text, histogram[index]]
 				end
@@ -137,11 +137,11 @@ class Report::DataAdapter
 	def self.convert_single_time_blank_data(analysis_result, issue, chart_styles, segments)
 		chart_data = []
 		interval_text_ary = []
-		interval_text_ary << ReportJob.convert_time_interval_to_text(issue.format, nil, segments[0])
+		interval_text_ary << ReportResult.convert_time_interval_to_text(issue["format"], nil, segments[0])
 		segments[0..-2].each_with_index do |e, index|
-			interval_text_ary << ReportJob.convert_time_interval_to_text(issue.format, e, segments[index+1])
+			interval_text_ary << ReportResult.convert_time_interval_to_text(issue["format"], e, segments[index+1])
 		end
-		interval_text_ary << ReportJob.convert_time_interval_to_text(issue.format, segments[-1], nil)
+		interval_text_ary << ReportResult.convert_time_interval_to_text(issue["format"], segments[-1], nil)
 		histogram = histogram = analysis_result["histogram"]
 		chart_styles.each do |chart_style|
 			data = []
@@ -151,7 +151,7 @@ class Report::DataAdapter
 				data << ["数量"] + histogram
 			elsif chart_style == ChartStyleEnum::STACK
 				# one category, multiple series
-				data << ["Categories"] + "数量"
+				data << ["Categories", "数量"]
 				interval_text_ary.each_with_index do |text, index|
 					data << [text, histogram[index]]
 				end
