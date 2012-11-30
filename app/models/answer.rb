@@ -170,6 +170,10 @@ class Answer
 		return answer
 	end
 
+	def is_screened
+		return status == 1 && reject_type == 2
+	end
+
 	def genereate_random_quality_control_questions
 		quality_control_questions_ids = []
 		self.random_quality_control_answer_content = {}

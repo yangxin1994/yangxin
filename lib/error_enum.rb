@@ -91,10 +91,8 @@ module ErrorEnum
 	ANSWER_NOT_FINISHED = 'error_180'
 	ANSWER_REVIEWED = 'error_181'
 
-	JOB_NOT_EXIST = 'error_190'
-
+	TASK_NOT_EXIST = 'error_190'
 	TASK_CREATION_FAILED = 'error_200'
-	TASK_NOT_FOUND = 'error_201'
 
 	# lcm add for answer review
 	REWARD_ERROR = 'error_300'

@@ -1426,21 +1426,28 @@ class Survey
 	end
 
 	def get_answers(filter_index, include_screened_answer, task_id = nil)
-		answers = include_screened_answer ? self.answers.not_preview.finished_and_screened : self.answers.not_preview.finished
+		# answers = include_screened_answer ? self.answers.not_preview.finished_and_screened : self.answers.not_preview.finished
+		answers = self.answers.not_preview.finished_and_screened
 		if filter_index == -1
 			TaskClient.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
 			#set_status({"find_answers_progress" => 1})
-			return answers
+			return [answers, answers.length, self.answers.not_preview.screened.length]
 		end
 		filter_conditions = self.filters[filter_index]["conditions"]
 		filtered_answers = []
+		tot_answer_number = 0
+		not_screened_answer_number = 0
 		answers_length = answers.length
 		answers.each_with_index do |a, index|
-			filtered_answers << a if a.satisfy_conditions(filter_conditions)
+			next if !a.satisfy_conditions(filter_conditions)
+			tot_answer_number += 1
+			next if include_screened_answer && a.is_screened
+			not_screened_answer_number += 1
+			filtered_answers << a
 			#set_status({"find_answers_progress" => (index + 1) * 1.0 / answers_length})
 			TaskClient.set_progress(task_id, "find_answers_progress", (index + 1).to_f / answers_length) if !task_id.nil?
 		end
-		return filtered_answers
+		return [filtered_answers, tot_answer_number, tot_answer_number - not_screened_answer_number]
 	end
 
 	def create_report_mockup(report_mockup)

@@ -48,24 +48,26 @@ class ResultsController < ApplicationController
 	end
 
 	def job_progress
-		progress = Result.job_progress(params[:job_id])
-		if progress == 1
-			result = Result.find_result_by_task_id(params[:job_id])
-			logger.info result.inspect
-			respond_to do |format|
-				# make pagination for data list
-				if result["answer_info"] && !result["answer_info"].blank?
-					result["answer_info"] = auto_paginate result["answer_info"] do |a|
-						a.slice((page - 1) * per_page, per_page)
-					end
-				end
-				format.json	{ render_json_auto({ "progress" => 1, "result" => result}) and return }
-			end
-		else
-			respond_to do |format|
-				format.json	{ render_json_s({ "progress" => progress }) and return }
-			end
+		progress = Result.job_progress(params[:task_id])
+		render_json_auto(progress) and return
+	end
+
+	def get_data_list
+		result = AnalysisResult.get_data_list(params[:task_id])
+		result[:answer_info] = auto_paginate(result[:answer_info]) do |a|
+			a.slice((page - 1) * per_page, per_page)
 		end
+		render_json_auto(result) and return
+	end
+
+	def get_stats
+		stats = AnalysisResult.get_stats(params[:task_id])
+		render_json_auto(stats) and return
+	end
+
+	def get_analysis_result
+		analysis_result = AnalysisResult.get_analysis_result(params[:task_id], params[:page_index])
+		render_json_auto(analysis_result) and return
 	end
 
 	def check_progress

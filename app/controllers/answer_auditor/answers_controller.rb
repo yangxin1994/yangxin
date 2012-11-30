@@ -25,6 +25,14 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 	def show
 		answer = Answer.find_by_id(params[:id])
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
+		# passing if not.
+		if answer.finish_type == 1
+			answer["is_pass"] = true 
+			answer['auditor_email'] = answer.auditor.email
+		else
+			answer["is_pass"] = false
+		end
+
 		answer["question_content"] = []
 		answer.answer_content.each do |key, val|
 			# key is question id
@@ -39,6 +47,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 选择题
 				# Example:
 				# show_answer = {'question_type'=> 0,
+				# 		'question_type_label'=> '选择题',
 				# 		'title' => 'XXXXXXXXXXX',
 				# 		'choices' => ['aaa', 'bbb', 'ccc'],
 				# 		'selected_choices' => ['aaa', 'bbb']
@@ -63,6 +72,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 矩阵选择题
 				# Example:
 				# show_answer = {'question_type' => 1 ,
+				# 		'question_type_label'=> '矩阵选择题',
 				# 		'title'=>'XXXXXXXXXXX',
 				# 		'choices' => ['aaa', 'bbb', 'ccc'],
 				# 		'rows' => ['a1', 'a2'],
@@ -96,6 +106,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 文本填充题
 				# Example:
 				# show_answer = {'question_type' => 2 ,
+				# 		'question_type_label'=> '文本填充题',
 				# 		'title'=>'XXXXXXXXXXX',
 				#		'content' => 'XXXXXXXXXXX'
 				# }
@@ -108,6 +119,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 数值填充题
 				# Example:
 				# show_answer = {'question_type' => 3 ,
+				# 		'question_type_label'=> '数值填充题',
 				# 		'title'=>'XXXXXXXXXXX',
 				#		'content' => '23.5'
 				# }	
@@ -120,6 +132,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 邮箱题
 				# Example:
 				# show_answer = {'question_type' => 4 ,
+				# 		'question_type_label'=> '邮箱题',
 				# 		'title'=>'XXXXXXXXXXX',
 				#		'content' => '23.5'
 				# }	
@@ -132,6 +145,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 网址链接题
 				# Example:
 				# show_answer = {'question_type' => 5 ,
+				# 		'question_type_label'=> '网址链接题',
 				# 		'title'=>'XXXXXXXXXXX',
 				#		'content' => 'www.baidu.com'
 				# }	
@@ -145,6 +159,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 电话题
 				# Example:
 				# show_answer = {'question_type' => 6 ,
+				# 		'question_type_label'=> '电话题',
 				# 		'title'=>'XXXXXXXXXXX',
 				#		'content' => '010-8888-8888'
 				# }	
@@ -156,6 +171,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 时间题
 				# Example:
 				# show_answer = {'question_type' => 7 ,
+				# 		'question_type_label'=> '时间题',
 				# 		'title'=>'XXXXXXXXXXX',
 				#		'content' => '2012-01-01'
 				# }	
@@ -168,6 +184,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 地址题
 				# Example:
 				# show_answer = {'question_type' => 8 ,
+				# 		'question_type_label'=> '地址题',
 				# 		'title'=>'XXXXXXXXXXX',	
 				#		'address' => 'city-code',
 				#		'detail' => 'XXXXXXXXXXXX',
@@ -183,6 +200,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 组合填充题
 				# Example:
 				# show_answer = {'question_type' => 9 ,
+				# 		'question_type_label'=> '组合填充题',
 				# 		'title'=>'XXXXXXXXXXX',
 				# 		'items' => [
 				# 			{
@@ -217,12 +235,14 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 
 				# Example:
 				# show_answer = {'question_type' => 10 ,
+				# 		'question_type_label'=> '',
 				# 		'title'=>'XXXXXXXXXXX',	
 				show_answer.merge!({'question_type_label'=> ''})
 			when QuestionTypeEnum::CONST_SUM_QUESTION
 				# 比重题
 				# Example:
 				# show_answer = {'question_type' => 11 ,
+				# 		'question_type_label'=> '比重题',
 				# 		'title'=>'XXXXXXXXXXX',
 				# 		'items' => [
 				# 			{
@@ -254,6 +274,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 排序题
 				# Example:
 				# show_answer = {'question_type' => 12 ,
+				# 		'question_type_label'=> '排序题',
 				# 		'title'=>'XXXXXXXXXXX',
 				# 		'items' => [
 				# 			{
@@ -283,12 +304,14 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 
 				# Example:
 				# show_answer = {'question_type' => 13 ,
+				# 		'question_type_label'=> '',
 				# 		'title'=>'XXXXXXXXXXX',
 				show_answer.merge!({'question_type_label'=> ''})
 			when QuestionTypeEnum::PARAGRAPH
 				# 文本段
 				# Example:
 				# show_answer = {'question_type' => 14 ,
+				# 		'question_type_label'=> '文本段',
 				# 		'title'=>'XXXXXXXXXXX',
 				# 		'content' => 'XXXXXXXXXXX'
 				# 	}
@@ -300,12 +323,14 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 
 				# Example:
 				# show_answer = {'question_type' => 15 ,
+				# 		'question_type_label'=> '',
 				# 		'title'=>'XXXXXXXXXXX',
 				show_answer.merge!({'question_type_label'=> ''})
 			when QuestionTypeEnum::TABLE_QUESTION
 				# 
 				# Example:
 				# show_answer = {'question_type' => 16 ,
+				# 		'question_type_label'=> '',
 				# 		'title'=>'XXXXXXXXXXX',
 
 				show_answer.merge!({'question_type_label'=> ''})
@@ -313,6 +338,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 量表题
 				# Example:
 				# show_answer = {'question_type' =>17 ,
+				# 		'question_type_label'=> '量表题',
 				# 		'title'=>'XXXXXXXXXXX',
 				# 		'labels' => ["很不满意", "不满意", "满意", "很满意"]
 				# 		'choices' => ['aaa', 'bbb', 'ccc']
@@ -341,7 +367,8 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 			end	
 			
 		end
-		render_json_auto(answer, :only => [:question_content])
+
+		render_json_auto(answer, :only => [:question_content, :is_pass, :auditor_email, :audit_at, :audit_message])
 	end
 
 	# def update
