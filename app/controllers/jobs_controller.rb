@@ -62,6 +62,7 @@ class JobsController < ApplicationController
 													:task_id => params[:task_id],
 													:tot_answer_number => tot_answer_number,
 													:screened_answer_number => screened_answer_number)
+			survey.analysis_results << analysis_result
 			# analyze and save the analysis result
 			retval = analysis_result.analysis(answers, params[:task_id])
 			render_json_auto(retval) and return
@@ -74,9 +75,14 @@ class JobsController < ApplicationController
 																					params[:task_id])
 			report_mockup = ReportMockup.find_by_id(params[:report_mockup_id])
 			# generate result key
-			result_key = ReportResult.generate_result_key(answers, report_mockup, report_style, report_type)
+			result_key = ReportResult.generate_result_key(answers,
+														report_mockup,
+														params[:report_type],
+														params[:report_style])
 			# create new result record
-			report_result = ReportResult.create(:result_key => result_key, :task_id => params["task_id"])
+			report_result = ReportResult.create(:result_key => result_key,
+												:task_id => params["task_id"])
+			survey.report_results << report_result
 			# transform the answers
 			answers_transform = {}
 			answers.each_with_index do |answer, index|
@@ -87,7 +93,10 @@ class JobsController < ApplicationController
 				end
 			end
 			# generate the report
-			retval = report_result.generate_report(report_mockup, report_type, report_style, answers_transform)
+			retval = report_result.generate_report(report_mockup,
+												params[:report_type],
+												params[:report_style],
+												answers_transform)
 			render_json_auto(retval) and return
 		when "to_spss"
 			

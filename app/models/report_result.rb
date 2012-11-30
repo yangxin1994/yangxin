@@ -11,7 +11,7 @@ class ReportResult < Result
 
 	belongs_to :survey
 
-	def self.generate_result_key(answers, report_mockup, report_style, report_type)
+	def self.generate_result_key(answers, report_mockup, report_type, report_style)
 		answer_ids = answers.map { |e| e._id.to_s }
 		result_key = Digest::MD5.hexdigest(("report-#{report_mockup.to_json}-#{report_style}-#{report_type}-#{answer_ids.to_s}"))
 		return result_key
@@ -19,7 +19,7 @@ class ReportResult < Result
 
 	def generate_report(report_mockup, report_type, report_style, answers_transform)
 		# initialize a report data instance
-		report_data = ReportData.new(report_type,
+		report_data = Report::Data.new(report_type,
 									report_mockup.title,
 									report_mockup.subtitle,
 									report_mockup.header,
@@ -44,8 +44,8 @@ class ReportResult < Result
 					# judge whether this is a single choice or multiple choice
 					if question.issue["max_choice"] == 1
 						text = single_choice_description(analysis_result, question.issue)
-						report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-						chart_components = ReportDataAdapter.convert_single_data(question.question_type,
+						report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+						chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																			analysis_result,
 																			question.issue,
 																			component["chart_style"])
@@ -59,23 +59,23 @@ class ReportResult < Result
 																question.issue,
 																:answer_number => cur_question_answer.length,
 																:chart_type => 'bar')
-						chart_components = ReportDataAdapter.convert_single_data(question.question_type,
+						chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																			analysis_result,
 																			question.issue,
 																			component["chart_style"])
 						if [ChartStyleEnum::ALL, ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::STACK].include?(component["chart_style"])
-							report_data.push_component(ReportData::DESCRIPTION, "text" => pie_text)
+							report_data.push_component(Report::Data::DESCRIPTION, "text" => pie_text)
 						end
 						if [ChartStyleEnum::ALL, ChartStyleEnum::LINE, ChartStyleEnum::BAR].include?(component["chart_style"])
-							report_data.push_component(ReportData::DESCRIPTION, "text" => bar_text)
+							report_data.push_component(Report::Data::DESCRIPTION, "text" => bar_text)
 						end
 						report_data.push_chart_components(chart_components)
 					end
 				when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
 					analysis_result = analyze_matrix_choice(question.issue, cur_question_answer)
 					text = matrix_choice_description(analysis_result, question.issue)
-					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
+					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
 																		question.issue,
 																		component["chart_style"])
@@ -87,8 +87,8 @@ class ReportResult < Result
 					text = number_blank_description(analysis_result,
 													question.issue,
 													:segment => component["value"]["format"][-1])
-					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
+					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
 																		question.issue,
 																		component["chart_style"],
@@ -101,8 +101,8 @@ class ReportResult < Result
 					text = time_blank_description(analysis_result,
 												question.issue,
 												:segment => component["value"]["format"][-1])
-					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
+					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
 																		question.issue,
 																		component["chart_style"],
@@ -112,8 +112,8 @@ class ReportResult < Result
 					analysis_result = analyze_address_blank(question.issue,
 															cur_question_answer)
 					text = address_blank_description(analysis_result, question.issue)
-					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
+					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
 																		question.issue,
 																		component["chart_style"])
@@ -142,8 +142,8 @@ class ReportResult < Result
 							text = address_address_blank_description(sub_analysis_result, sub_question_issue)
 							sub_question_type = QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 						end
-						report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-						chart_components = ReportDataAdapter.convert_single_data(sub_question_type,
+						report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+						chart_components = Report::DataAdapter.convert_single_data(sub_question_type,
 																			sub_analysis_result,
 																			sub_question_issue,
 																			component["chart_style"],
@@ -153,8 +153,8 @@ class ReportResult < Result
 				when QuestionTypeEnum::CONST_SUM_QUESTION
 					analysis_result = analyze_const_sum(question.issue, cur_question_answer)
 					text = const_sum_description(analysis_result, question.issue)
-					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
+					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
 																		question.issue,
 																		component["chart_style"])
@@ -164,17 +164,17 @@ class ReportResult < Result
 					text = sort_description(analysis_result,
 											question.issue,
 											:answer_number => cur_question_answer.length)
-					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
+					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
 																		question.issue,
 																		component["chart_style"])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::SCALE_QUESTION
 					analysis_result = analyze_scale(question.issue, cur_question_answer)
-					text = scale_description(analysis_result, question.issue, answers.length)
-					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
+					text = scale_description(analysis_result, question.issue)
+					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
 																		question.issue,
 																		component["chart_style"])
@@ -189,7 +189,7 @@ class ReportResult < Result
 				question_index = survey.all_questions_id.index(qustion_id)
 				target_question_index = survey.all_questions_id.index(qustion_id)
 				next if question_index.nil? || target_question_index.nil?
-				report_data.push_component(ReportData::HEADING_2, "text" => "第#{question_index}题，第#{target_question_index}题交叉分析")
+				report_data.push_component(Report::Data::HEADING_2, "text" => "第#{question_index}题，第#{target_question_index}题交叉分析")
 
 				question = BasicQuestion.find_by_id(question_id)
 				target_question = BasicQuestion.find_by_id(target_question_id)
@@ -205,8 +205,8 @@ class ReportResult < Result
 												analysis_result,
 												question.issue,
 												target_question.issue)
-						report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-						chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+						report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+						chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																			analysis_result,
 																			question.issue,
 																			target_question.issue,
@@ -223,16 +223,16 @@ class ReportResult < Result
 												question.issue,
 												target_question.issue,
 												:chart_type => 'bar')
-						chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+						chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																			analysis_result,
 																			question.issue,
 																			target_question.issue,
 																			component["chart_style"])
 						if [ChartStyleEnum::ALL, ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::STACK].include?(component["chart_style"])
-							report_data.push_component(ReportData::DESCRIPTION, "text" => pie_text)
+							report_data.push_component(Report::Data::DESCRIPTION, "text" => pie_text)
 						end
 						if [ChartStyleEnum::ALL, ChartStyleEnum::LINE, ChartStyleEnum::BAR].include?(component["chart_style"])
-							report_data.push_component(ReportData::DESCRIPTION, "text" => bar_text)
+							report_data.push_component(Report::Data::DESCRIPTION, "text" => bar_text)
 						end
 						report_data.push_chart_components(chart_components)
 					end
@@ -254,8 +254,8 @@ class ReportResult < Result
 											question.issue,
 											target_question.issue,
 											:segment => component["value"]["format"][-1])
-					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-					chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																		analysis_result,
 																		question.issue,
 																		target_question.issue,
@@ -274,8 +274,8 @@ class ReportResult < Result
 											question.issue,
 											target_question.issue,
 											:segment => component["value"]["format"][-1])
-					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-					chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																		analysis_result,
 																		question.issue,
 																		target_question.issue,
@@ -292,8 +292,8 @@ class ReportResult < Result
 											analysis_result,
 											question.issue,
 											target_question.issue)
-					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-					chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																		analysis_result,
 																		question.issue,
 																		target_question.issue,
@@ -328,8 +328,8 @@ class ReportResult < Result
 							text = address_address_blank_description(sub_analysis_result, sub_question_issue)
 							sub_question_type = QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 						end
-						report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-						chart_components = ReportDataAdapter.convert_single_data(sub_question_type,
+						report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+						chart_components = Report::DataAdapter.convert_single_data(sub_question_type,
 																			sub_analysis_result,
 																			sub_question_issue,
 																			component["chart_style"],
@@ -346,8 +346,8 @@ class ReportResult < Result
 											analysis_result,
 											question.issue,
 											target_question.issue)
-					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-					chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																		analysis_result,
 																		question.issue,
 																		target_question.issue,
@@ -363,8 +363,8 @@ class ReportResult < Result
 											analysis_result,
 											question.issue,
 											target_question.issue)
-					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-					chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																		analysis_result,
 																		question.issue,
 																		target_question.issue,
@@ -380,8 +380,8 @@ class ReportResult < Result
 											analysis_result,
 											question.issue,
 											target_question.issue)
-					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
-					chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																		analysis_result,
 																		question.issue,
 																		target_question.issue,
@@ -404,7 +404,7 @@ class ReportResult < Result
 	end
 
 	# cross analysis and description generation
-	def analyze_cross(question_type, question_issue, target_question_issue, question_answer_ary, target_question_answer_ary, opt)
+	def analyze_cross(question_type, question_issue, target_question_issue, question_answer_ary, target_question_answer_ary, opt={})
 		target_question_sub_answer_ary = {}
 		target_question_answer_ary.each_with_index do |target_question_answer, index|
 			next if target_question_answer.blank?
@@ -441,7 +441,7 @@ class ReportResult < Result
 		return result
 	end
 
-	def cross_description(question_type, analysis_result, issue, target_issue, opt)
+	def cross_description(question_type, analysis_result, issue, target_issue, opt={})
 		text = "调查显示：" if opt[:cross] != true
 		analysis_result[:result].each do |item_id, result|
 			item = (issue["items"].select { |e| e["id"] == item_id })[0]
@@ -473,17 +473,17 @@ class ReportResult < Result
 	end
 
 	# description generation
-	def scale_description(analysis_result, issue, opt)
+	def scale_description(analysis_result, issue, opt={})
 		results = []
 		analysis_result.each do |input_id, ele|
 			if ele[1] != -1
-				item_text = get_item_text_by_id(input_id)
+				item_text = get_item_text_by_id(issue["items"], input_id)
 				next if item_text.nil?
 				results << { "text" => item_text, "score" => ele[1] } 
 			end
 		end
 		return "" if results.blank?
-		results.sort_by! { |e| -e["ratio"] }
+		results.sort_by! { |e| -e["score"] }
 		item_text_ary = results.map { |e| e["text"] }
 		score_ary = results.map { |e| e["score"] }
 		text = "调查显示，" if opt[:cross] != true
@@ -501,7 +501,7 @@ class ReportResult < Result
 		return text + "，#{item_text_string}的平均得分分别为#{score_string}。"
 	end
 
-	def sort_description(analysis_result, issue, opt)
+	def sort_description(analysis_result, issue, opt={})
 		answer_number = opt[:answer_number]
 		return "" if analysis_result.blank?
 		first_index_dist = {}
@@ -547,7 +547,7 @@ class ReportResult < Result
 		end
 	end
 
-	def const_sum_description(analysis_result, issue, opt)
+	def const_sum_description(analysis_result, issue, opt={})
 		return "" if analysis_result.blank?
 		analysis_result.each do |input_id, mean_weight|
 			item_text = get_item_text_by_id(issue["items"], input_id)
@@ -573,7 +573,7 @@ class ReportResult < Result
 		return text + "，#{item_text_string}所占比重分别为#{mean_weight_string}。"
 	end
 
-	def address_blank_description(analysis_result, issue, opt)
+	def address_blank_description(analysis_result, issue, opt={})
 		total_number = 0
 		return "" if analysis_result.blank?
 		analysis_result.each do |region_code, number|
@@ -607,7 +607,7 @@ class ReportResult < Result
 		return text + "，另有#{other_ratio}%的人填写了其他。"
 	end
 
-	def time_blank_description(analysis_result, issue, opt)
+	def time_blank_description(analysis_result, issue, opt={})
 		segment = opt[:segment]
 		histogram = analysis_result["histogram"]
 		mean = convert_time_mean_to_text(issue.format, analysis_result["mean"])
@@ -649,7 +649,7 @@ class ReportResult < Result
 		return text
 	end
 
-	def number_blank_description(analysis_result, issue, opt)
+	def number_blank_description(analysis_result, issue, opt={})
 		segment = opt[:segment]
 		histogram = analysis_result["histogram"]
 		mean = analysis_result["mean"]
@@ -691,13 +691,13 @@ class ReportResult < Result
 		return text
 	end
 
-	def matrix_choice_description(analysis_result, issue, opt)
+	def matrix_choice_description(analysis_result, issue, opt={})
 		item_number = issue.items.length
 		text = "调查显示，" if opt[:cross] != true
 		# get description for each row respectively
 		issue.rows.each do |row|
 			row_id = row["id"]
-			row_text = get_item_text_by_id(row_id)
+			row_text = get_item_text_by_id(issue["rows"], row_id)
 			# obtain all the results about this row
 			cur_row_analysis_result = analysis_result.select { |k, v| k.start_with?(row_id) }
 			next if cur_row_analysis_result.blank?
@@ -705,7 +705,7 @@ class ReportResult < Result
 			cur_row_total_number = 0
 			cur_row_analysis_result.each do |k, select_number|
 				item_id = k.split('-')[1]
-				item_text = get_item_text_by_id(issue.items, input_id)
+				item_text = get_item_text_by_id(issue["items"], input_id)
 				next if item_text.nil?
 				cur_row_total_number = cur_row_total_number + select_number.to_f
 				cur_row_results << { "text" => item_text, "select_number" => select_number.to_f}
@@ -723,7 +723,7 @@ class ReportResult < Result
 		return text
 	end
 
-	def single_choice_description(analysis_result, issue, opt)
+	def single_choice_description(analysis_result, issue, opt={})
 		total_number = 0
 		results = []
 		analysis_result.each do |input_id, select_number|
@@ -758,14 +758,14 @@ class ReportResult < Result
 		return text
 	end
 
-	def multiple_choice_description(analysis_result, issue, opt)
+	def multiple_choice_description(analysis_result, issue, opt={})
 		answer_number = opt[:answer_number]
 		chart_type = opt[:chart_type]
 		# the description for multiple choice question with pie chart is exactly the same as the single choice question
 		return single_choice_description(analysis_result, issue, opt) if chart_type == "pie"
 		results = []
 		analysis_result.each do |input_id, select_number|
-			item_text = get_item_text_by_id(input_id)
+			item_text = get_item_text_by_id(issue["items"], input_id)
 			next if item_text.nil?
 			results << { "text" => item_text, "select_number" => select_number.to_f }
 		end
