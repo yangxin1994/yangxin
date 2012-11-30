@@ -51,8 +51,14 @@ class ReportResult < Result
 																			component["chart_style"])
 						report_data.push_chart_components(chart_components)
 					else
-						pie_text = multiple_choice_description(analysis_result, question.issue, :answer_number => answers.length, :chart_type => 'pie')
-						bar_text = multiple_choice_description(analysis_result, question.issue, :answer_number => answers.length, :chart_type => 'bar')
+						pie_text = multiple_choice_description(analysis_result,
+																question.issue,
+																:answer_number => cur_question_answer.length,
+																:chart_type => 'pie')
+						bar_text = multiple_choice_description(analysis_result,
+																question.issue,
+																:answer_number => cur_question_answer.length,
+																:chart_type => 'bar')
 						chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																			analysis_result,
 																			question.issue,
@@ -75,7 +81,9 @@ class ReportResult < Result
 																		component["chart_style"])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-					analysis_result = analyze_number_blank(question.issue, cur_question_answer, :segment => component["value"]["format"][-1])
+					analysis_result = analyze_number_blank(question.issue,
+														cur_question_answer,
+														:segment => component["value"]["format"][-1])
 					text = number_blank_description(analysis_result,
 													question.issue,
 													:segment => component["value"]["format"][-1])
@@ -87,7 +95,9 @@ class ReportResult < Result
 																		:segment => component["value"]["format"][-1])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::TIME_BLANK_QUESTION
-					analysis_result = analyze_time_blank(question.issue, cur_question_answer, :segment => component["value"]["format"][-1])
+					analysis_result = analyze_time_blank(question.issue,
+														cur_question_answer,
+														:segment => component["value"]["format"][-1])
 					text = time_blank_description(analysis_result,
 												question.issue,
 												:segment => component["value"]["format"][-1])
@@ -99,7 +109,8 @@ class ReportResult < Result
 																		:segment => component["value"]["format"][-1])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
-					analysis_result = analyze_address_blank(question.issue, cur_question_answer)
+					analysis_result = analyze_address_blank(question.issue,
+															cur_question_answer)
 					text = address_blank_description(analysis_result, question.issue)
 					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
 					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
@@ -108,7 +119,9 @@ class ReportResult < Result
 																		component["chart_style"])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::BLANK_QUESTION
-					analysis_result = analyze_blank(question.issue, cur_question_answer, :segment => component["value"]["format"])
+					analysis_result = analyze_blank(question.issue,
+													cur_question_answer,
+													:segment => component["value"]["format"])
 					analysis_result.each do |id, sub_analysis_result|
 						sub_question_item = (question.issue["items"].select { |e| e["id"] == id })[0]
 						next if sub_question_issue.nil?
@@ -148,7 +161,9 @@ class ReportResult < Result
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::SORT_QUESTION
 					analysis_result = analyze_sort(question.issue, cur_question_answer)
-					text = sort_description(analysis_result, question.issue, :answer_number => answers.length)
+					text = sort_description(analysis_result,
+											question.issue,
+											:answer_number => cur_question_answer.length)
 					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
 					chart_components = ReportDataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
@@ -185,6 +200,42 @@ class ReportResult < Result
 													target_question.issue,
 													answers_transform[question_id],
 													answers_transform[target_question_id])
+					if question.issue["max_choice"] == 1
+						text = cross_description("single_choice",
+												analysis_result,
+												question.issue,
+												target_question.issue)
+						report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+																			analysis_result,
+																			question.issue,
+																			target_question.issue,
+																			component["chart_style"])
+						report_data.push_chart_components(chart_components)
+					else
+						pie_text = cross_description("multiple_choice",
+												analysis_result,
+												question.issue,
+												target_question.issue,
+												:chart_type => 'pie')
+						bar_text = cross_description("multiple_choice",
+												analysis_result,
+												question.issue,
+												target_question.issue,
+												:chart_type => 'bar')
+						chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+																			analysis_result,
+																			question.issue,
+																			target_question.issue,
+																			component["chart_style"])
+						if [ChartStyleEnum::ALL, ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::STACK].include?(component["chart_style"])
+							report_data.push_component(ReportData::DESCRIPTION, "text" => pie_text)
+						end
+						if [ChartStyleEnum::ALL, ChartStyleEnum::LINE, ChartStyleEnum::BAR].include?(component["chart_style"])
+							report_data.push_component(ReportData::DESCRIPTION, "text" => bar_text)
+						end
+						report_data.push_chart_components(chart_components)
+					end
 				when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
 					analysis_result = analyze_cross(target_question.question_type,
 													question.issue,
@@ -198,7 +249,11 @@ class ReportResult < Result
 													answers_transform[question_id],
 													answers_transform[target_question_id],
 													:segment => component["value"]["format"])
-					text = cross_number_blank_description(analysis_result, question.issue, component["value"]["format"][-1])
+					text = cross_description(target_question.question_type,
+											analysis_result,
+											question.issue,
+											target_question.issue,
+											:segment => component["value"]["format"][-1])
 					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
 					chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
 																		analysis_result,
@@ -213,37 +268,125 @@ class ReportResult < Result
 													target_question.issue,
 													answers_transform[question_id],
 													answers_transform[target_question_id],
-													:segment => component["value"]["format"])
+													:segment => component["value"]["format"][-1])
+					text = cross_description(target_question.question_type,
+											analysis_result,
+											question.issue,
+											target_question.issue,
+											:segment => component["value"]["format"][-1])
+					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+					chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+																		analysis_result,
+																		question.issue,
+																		target_question.issue,
+																		component["chart_style"],
+																		:segment => component["value"]["format"][-1])
+					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 					analysis_result = analyze_cross(target_question.question_type,
 													question.issue,
 													target_question.issue,
 													answers_transform[question_id],
 													answers_transform[target_question_id])
+					text = cross_description(target_question.question_type,
+											analysis_result,
+											question.issue,
+											target_question.issue)
+					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+					chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+																		analysis_result,
+																		question.issue,
+																		target_question.issue,
+																		component["chart_style"])
+					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::BLANK_QUESTION
 					analysis_result = analyze_cross(target_question.question_type,
 													question.issue,
 													target_question.issue,
 													answers_transform[question_id],
-													answers_transform[target_question_id])
+													answers_transform[target_question_id],
+													:segment => component["value"]["format"])
+					target_question.issue.items.each do |item|
+						id = item["id"]
+						sub_question_type = item["data_type"]
+						sub_question_issue = item["properties"]
+						sub_analysis_result = analysis_result[:result].merge(analysis_result[:result]) do |k,v|
+							v = {id => v[id]}
+						end
+						case sub_question_type
+						when "Number"
+							text = address_number_blank_description(sub_analysis_result,
+																	sub_question_issue,
+																	:segment => component["value"]["format"][id])
+							sub_question_type = QuestionTypeEnum::NUMBER_BLANK_QUESTION
+						when "Time"
+							text = address_time_blank_description(sub_analysis_result,
+																sub_question_issue,
+																:segment => component["value"]["format"][id])
+							sub_question_type = QuestionTypeEnum::TIME_BLANK_QUESTION
+						when "Address"
+							text = address_address_blank_description(sub_analysis_result, sub_question_issue)
+							sub_question_type = QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+						end
+						report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+						chart_components = ReportDataAdapter.convert_single_data(sub_question_type,
+																			sub_analysis_result,
+																			sub_question_issue,
+																			component["chart_style"],
+																			:segment => component["value"]["format"][id])
+						report_data.push_chart_components(chart_components)
+					end
 				when QuestionTypeEnum::CONST_SUM_QUESTION
 					analysis_result = analyze_cross(target_question.question_type,
 													question.issue,
 													target_question.issue,
 													answers_transform[question_id],
 													answers_transform[target_question_id])
+					text = cross_description(target_question.question_type,
+											analysis_result,
+											question.issue,
+											target_question.issue)
+					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+					chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+																		analysis_result,
+																		question.issue,
+																		target_question.issue,
+																		component["chart_style"])
+					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::SORT_QUESTION
 					analysis_result = analyze_cross(target_question.question_type,
 													question.issue,
 													target_question.issue,
 													answers_transform[question_id],
 													answers_transform[target_question_id])
+					text = cross_description(target_question.question_type,
+											analysis_result,
+											question.issue,
+											target_question.issue)
+					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+					chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+																		analysis_result,
+																		question.issue,
+																		target_question.issue,
+																		component["chart_style"])
+					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::SCALE_QUESTION
 					analysis_result = analyze_cross(target_question.question_type,
 													question.issue,
 													target_question.issue,
 													answers_transform[question_id],
 													answers_transform[target_question_id])
+					text = cross_description(target_question.question_type,
+											analysis_result,
+											question.issue,
+											target_question.issue)
+					report_data.push_component(ReportData::DESCRIPTION, "text" => text)
+					chart_components = ReportDataAdapter.convert_cross_data(target_question.question_type,
+																		analysis_result,
+																		question.issue,
+																		target_question.issue,
+																		component["chart_style"])
+					report_data.push_chart_components(chart_components)
 				else
 					# other types of questions are removed, the heading in the component should be removed
 					report_data.pop_component
@@ -264,49 +407,52 @@ class ReportResult < Result
 	def analyze_cross(question_type, question_issue, target_question_issue, question_answer_ary, target_question_answer_ary, opt)
 		target_question_sub_answer_ary = {}
 		target_question_answer_ary.each_with_index do |target_question_answer, index|
+			next if target_question_answer.blank?
 			question_answer = question_answer_ary[index]
 			question_answer["selection"].each do |item_id|
 				target_question_sub_answer_ary[item_id] ||= []
 				target_question_sub_answer_ary[item_id] << target_question_answer
 			end
 		end
-		result = {}
+		result = {:answer_number => {}}
 		question_issue["items"].each do |item|
 			case question_type
 			when QuestionTypeEnum::CHOICE_QUESTION
-				result[item["id"]] = analyze_choice(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"]] = analyze_choice(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
-				result[item["id"]] = analyze_matrix_choice(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"]] = analyze_matrix_choice(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-				result[item["id"]] = analyze_number_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"]] = analyze_number_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::TIME_BLANK_QUESTION
-				result[item["id"]] = analyze_time_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"]] = analyze_time_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
-				result[item["id"]] = analyze_address_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"]] = analyze_address_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::BLANK_QUESTION
-				result[item["id"]] = analyze_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"]] = analyze_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::CONST_SUM_QUESTION
-				result[item["id"]] = analyze_const_sum(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"]] = analyze_const_sum(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::SORT_QUESTION
-				result[item["id"]] = analyze_sort(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"]] = analyze_sort(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::SCALE_QUESTION
-				result[item["id"]] = analyze_scale(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"]] = analyze_scale(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			end
+			result[:answer_number][item["id"]] = target_question_sub_answer_ary[item["id"]].length
 		end
 		return result
 	end
 
 	def cross_description(question_type, analysis_result, issue, target_issue, opt)
 		text = "调查显示：" if opt[:cross] != true
-		analysis_result.each do |item_id, result|
+		analysis_result[:result].each do |item_id, result|
 			item = (issue["items"].select { |e| e["id"] == item_id })[0]
 			next if item.nil? || result.blank?
-			text = "选择#{item["content"]["text"]}的被访者中，"
+			answer_number = analysis_result[:answer_number][item_id]
+			text = "选择#{item["content"]["text"]}的#{answer_number}名被访者中，"
 			case question_type
 			when "single_choice"
 				text += single_choice_description(result, target_issue, opt.merge({:cross => true}))
 			when "multiple_choice"
-				text += multiple_choice_description(result, target_issue, opt.merge({:cross => true}))
+				text += multiple_choice_description(result, target_issue, opt.merge({:cross => true, :answer_number => answer_number}))
 			when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
 				text += matrix_choice_description(result, target_issue, opt.merge({:cross => true}))
 			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
@@ -318,7 +464,7 @@ class ReportResult < Result
 			when QuestionTypeEnum::CONST_SUM_QUESTION
 				text += const_sum_description(result, target_issue, opt.merge({:cross => true}))
 			when QuestionTypeEnum::SORT_QUESTION
-				text += sort_description(result, target_issue, opt.merge({:cross => true}))
+				text += sort_description(result, target_issue, opt.merge({:cross => true, :answer_number => answer_number}))
 			when QuestionTypeEnum::SCALE_QUESTION
 				text += scale_description(result, target_issue, opt.merge({:cross => true}))
 			end

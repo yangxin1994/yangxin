@@ -285,7 +285,6 @@ OopsData::Application.routes.draw do
 				put 'split'
 				put 'combine'
 			end
-
 		end
 		resources :questions do
 			collection do
@@ -311,26 +310,23 @@ OopsData::Application.routes.draw do
 				post :refresh
 			end
 		end
-
 		resources :filters do
 		end
-
-		resources :results do
-			collection do
-				get :check_progress
-				get :job_progress
-				get :analysis
-				get :to_spss
-				get :to_excel
-				get :report
-				put :finish
-				get :get_data_list
-				get :get_stats
-				get :get_analysis_result
-			end
-		end
-
 		resources :report_mockups do
+		end
+	end
+	resources :results do
+		collection do
+			get :check_progress
+			get :job_progress
+			get :analysis
+			get :to_spss
+			get :to_excel
+			get :report
+			put :finish
+			get :get_data_list
+			get :get_stats
+			get :get_analysis_result
 		end
 	end
 

@@ -141,7 +141,6 @@ class Result
 		return result
 	end
 
-#	def analyze_number_blank(issue, answer_ary, segment=[])
 	def analyze_number_blank(issue, answer_ary, opt={})
 		segment = opt[:segment]
 		result = {}		
@@ -168,7 +167,6 @@ class Result
 		return result
 	end
 
-#	def analyze_time_blank(issue, answer_ary, segment=[])
 	def analyze_time_blank(issue, answer_ary, opt={})
 		segment = opt[:segment]
 		result = {}

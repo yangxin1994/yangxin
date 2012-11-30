@@ -1,6 +1,6 @@
 class ResultsController < ApplicationController
 	before_filter :require_sign_in
-	before_filter :check_normal_survey_existence, :except => [:job_progress]
+	before_filter :check_normal_survey_existence, :only => [:analysis, :to_spss, :to_excel, :report]
 
 	def check_normal_survey_existence
 		@survey = (@current_user.is_admin || @current_user.is_super_admin) ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
