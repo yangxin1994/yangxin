@@ -57,11 +57,14 @@ class Lottery
       if r <= i[:weight]
         i[:prize].surplus -= 1
         i[:prize].save
-        lottery_code.update_attributes(
-          :status => 2,
-          :prize => i[:prize]
-          )
-        lottery_code[:prize] = i[:prize]
+        # lottery_code.update_attributes(
+        #   :status => 2,
+        #   :prize => i[:prize]
+        #   )
+        lottery_code.status = 2
+        lottery_code.prize = i[:prize]
+        lottery_code.prize.save
+        lottery_code.save
         return lottery_code
       end
     end
@@ -71,6 +74,12 @@ class Lottery
 
   def random_weight
     rand weight
+  end
+
+  def auto_draw
+    self.lottery_codes.for_draw.each do |lc|
+      self.draw lc
+    end
   end
 
   def make_interval

@@ -9,7 +9,9 @@ class BasicGift
 	field :surplus, :type => Integer
 	field :quantity, :type => Integer
 	field :description, :type => String
-
+	# can be -1 (has no), 0 (expired), 1 (can be rewarded)
+  # can be -1 (has no), 0 (expired), 1 (can be draw) 
+	field :status, :type => Integer, :default => 0
 	field :end_time, :type => Date
 
 	field :is_deleted, :type => Boolean, :default => false
@@ -23,6 +25,20 @@ class BasicGift
 	scope :stockout, where(:surplus.lt => 1)
 
 	before_create :set_surplus
+	before_save :make_status , :set_quantity
+
+  def make_status
+    self.status = 1 if self.surplus > 0 && self.status == -1 
+    self.status = -1 if self.surplus <= 0
+  end
+
+  def set_quantity
+  	p "aa"
+  	if changed_attributes["surplus"]
+  		p "========"
+  		self.quantity += (changed_attributes["surplus"]- self.surplus)
+  	end
+  end
 
 	def add_quantity(n)
 		self.update_attribute(:quantity, self.quantity + n)

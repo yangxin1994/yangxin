@@ -80,16 +80,25 @@ class Admin::GiftsController < Admin::ApplicationController
   end
   
   def show
-    @gift = Gift.find_by_id(params[:id])
-    @gift[:photo_src] = @gift.photo.picture_url unless @gift.photo.nil?
-    @gift[:lottery_id] = @gift.lottery._id unless @gift.lottery.nil?
-    render_json { @gift }
+    # @gift = Gift.find_by_id(params[:id])
+    # @gift[:photo_src] = @gift.photo.picture_url unless @gift.photo.nil?
+    # @gift[:lottery_id] = @gift.lottery._id unless @gift.lottery.nil?
+    # render_json { @gift }
+    render_json false do
+      result = Gift.find_by_id(params[:id]) do |gift|
+        gift[:photo_src] = gift.photo.picture_url unless gift.photo.nil?
+        gift[:lottery_id] = gift.lottery._id unless gift.lottery.nil?
+        @is_success = true
+        gift
+      end
+    end
   end
 
   def destroy
-    @gift = Gift.find_by_id(params[:id])
-    render_json @gift.is_valid? do |g|
-      @gift.update_attribute('is_deleted', true) if g
+    render_json false do |g|
+      Gift.find_by_id(params[:id]) do |gift|
+        @is_success = true if gift.update_attribute('is_deleted', true)
+      end
     end
   end
 end

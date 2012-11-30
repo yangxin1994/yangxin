@@ -1,8 +1,6 @@
 class Gift < BasicGift
 	
 	field :point, :type => Integer
-	# can be -1 (has no), 0 (expired), 1 (can be rewarded)
-	field :status, :type => Integer, :default => 0
 	#field :start_time, :type => Date
 	has_many :orders, :class_name => "Order"
 	has_one :photo, :class_name => "Material", :inverse_of => 'gift'
@@ -19,11 +17,7 @@ class Gift < BasicGift
 											:numericality => { :greater_than_or_equal_to => 0 }
 	validates :point, :presence => true,
 										:numericality => { :greater_than_or_equal_to => 0 }
-	before_save :make_status
 
-  def make_status
-    self.status = -1 if self.surplus <= 0
-  end
   def to_builder
     person = Jbuilder.new
     person.(self, :name, :point)

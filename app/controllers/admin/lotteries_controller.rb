@@ -45,13 +45,19 @@ class Admin::LotteriesController < Admin::ApplicationController
       params[:lottery][:photo] = material
       @lottery.photo.save
     end
+    # 增加奖品
     lp_ids = params[:lottery][:prize_ids]
+    @lottery.prizes if lp_ids
     params[:lottery][:prize_ids] = nil
-    @lottery = Lottery.new(params[:lottery])
+    #@lottery = Lottery.new(params[:lottery])
     lp_ids.each do |i|
-      lp = Prize.where("_id"=> i).first
-      @lottery.prizes << lp #unless lp.nil?
-      lp.save
+      Prize.find_by_id(i) do |prize|
+        @lottery.prizes << prize 
+      end
+
+      # lp = Prize.where("_id"=> i).first
+      # @lottery.prizes << lp #unless lp.nil?
+      # lp.save
     end unless lp_ids.nil?
     # @lottery = Lottery.find_by_id params[:id]
     render_json @lottery.update_attributes(params[:lottery]) do
@@ -65,11 +71,26 @@ class Admin::LotteriesController < Admin::ApplicationController
   end
 
   def show
-    # TODO is owners request?
-    @lottery = Lottery.find_by_id(params[:id])
-    @lottery[:prizes] = @lottery.prizes
-    @lottery[:photo_src] = @lottery.photo.picture_url unless @lottery.photo.nil?
-    render_json { @lottery}
+    render_json false do
+      Lottery.find_by_id(params[:id]) do |l|
+        l[:prizes] = l.prizes
+        l[:prize_ids] = l.prizes.map(&:_id)
+        l[:photo_src] = l.photo.picture_url unless l.photo.nil?
+        @is_success = true
+        #binding.pry
+        l
+      end
+    end
+  end
+
+  def auto_draw
+    render_json false do
+      Lottery.find_by_id(params[:id]) do |l|
+        l.auto_draw
+        # binding.pry
+        @is_success = true
+      end
+    end
   end
   
   def destroy

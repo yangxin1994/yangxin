@@ -10,7 +10,7 @@ class RewardLog
   field :cause, :type => Integer
   field :cause_desc, :type => String
   field :value, :type => Hash
-
+  field :ref, :type => String
   scope :point_logs, where( :type => 2).order_by("created_at","desc")
   scope :lottery_logs, where( :type => 1).order_by("created_at","desc")
 
@@ -35,8 +35,9 @@ class RewardLog
                      :point => -self.point,
                      :operator => admin,
                      :type => 2,
+                     :ref => self._id,
                      :cause_desc => cause_desc,
-                     :cause => 4)
+                     :cause => 5)
   end
 
   def operate_user_point

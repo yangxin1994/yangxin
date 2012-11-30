@@ -131,6 +131,9 @@ OopsData::Application.routes.draw do
 			collection do
 				get :for_publish, :activity, :finished
 			end
+			member do
+				get :auto_draw
+			end
 		end
 
 		resources :reward_logs do

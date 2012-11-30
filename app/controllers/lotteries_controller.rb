@@ -40,13 +40,15 @@ class LotteriesController < ApplicationController
 			# 直接找不到抽奖号比较好? 或者提示抽过奖了 ?
 			if !s
 				@lottery_code.as_retval
+	       # binding.pry
 			elsif @lottery_code.lottery.status != 1
-				@success = false
+				@is_success = false
 				{:error_code => ErrorEnum::INVALID_LOTTERYCODE_ID,
 	       :error_message => "Lottery not activity"}
+	       # binding.pry
 			else
 				@lottery_code.draw
-			end				
+			end
 		end
 	end
 	# def_each :virtualgoods, :cash, :realgoods, :stockout do |method_name|

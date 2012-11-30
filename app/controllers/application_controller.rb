@@ -23,6 +23,7 @@ class ApplicationController < ActionController::Base
 
 	  #v = eval(value)
 	  if block_given?
+	  	value = value.page(retval["current_page"]).per(retval["per_page"]) if count == nil
 	    retval["data"] = yield(value)
 	  else
 	  	#retval["data"] = eval(value + '.page(retval["current_page"]).per(retval["per_page"])' )

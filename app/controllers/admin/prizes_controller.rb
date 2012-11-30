@@ -46,10 +46,10 @@ class Admin::PrizesController < Admin::ApplicationController
         material = Material.create(:material_type => 1, 
                                    :title => params[:prize][:name],
                                    :value => params[:prize][:photo],
-                                   :picture_url => params[:prize][:photo])
-        
+                                   :picture_url => params[:prize][:photo])  
         @prize.photo = material
       end
+      logger.info "=====#{material}====="
       @prize.photo.value = params[:prize][:photo]
       @prize.photo.picture_url = params[:prize][:photo]
       params[:prize][:photo] = material
@@ -67,16 +67,26 @@ class Admin::PrizesController < Admin::ApplicationController
         render_json(false){ErrorEnum::LOTTERY_NOT_FOUND}
       end
     end
+
     render_json @prize.update_attributes(params[:prize]) do
       @prize.as_retval
     end
   end
   
   def show
-    @prize = Prize.find_by_id(params[:id])
-    @prize[:photo_src] = @prize.photo.picture_url unless @prize.photo.nil?
-    @prize[:lottery_id] = @prize.lottery._id unless @prize.lottery.nil?
-    render_json { @prize }
+    # @prize = Prize.find_by_id(params[:id])
+    # @prize[:photo_src] = @prize.photo.picture_url unless @prize.photo.nil?
+    # @prize[:lottery_id] = @prize.lottery._id unless @prize.lottery.nil?
+    # render_json { @prize }
+    render_json false do
+      result = Prize.find_by_id(params[:id]) do |prize|
+        prize[:photo_src] = prize.photo.picture_url unless prize.photo.nil?
+        prize[:lottery_id] = prize.lottery._id unless prize.lottery.nil?
+        @is_success = true
+        prize
+      end
+    end
+
   end
 
   def destroy
