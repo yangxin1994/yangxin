@@ -207,7 +207,7 @@ class Report::DataAdapter
 				data << ["平均比重"] + score
 			elsif chart_style == ChartStyleEnum::STACK
 				# one category, multiple series
-				data << ["Categories"] + "平均比重"
+				data << ["Categories", "平均比重"]
 				items_id.each_with_index do |id, index|
 					data << [items_text[index], analysis_result[id]]
 				end
@@ -229,7 +229,7 @@ class Report::DataAdapter
 		order_number = (analysis_result.map { |e| e.length }).max
 		order_text = []
 		1.upto(order_number) do |e|
-			order_text << "第{e}位"
+			order_text << "第#{e}位"
 		end
 		chart_styles.each do |chart_style|
 			data = []
@@ -241,7 +241,7 @@ class Report::DataAdapter
 					analysis_result[items_id[e-1]].each_with_index do |e, index|
 						number[index] = e
 					end
-					data << items_text[e-1] + number
+					data << [items_text[e-1]] + number
 				end
 			elsif chart_style == ChartStyleEnum::STACK
 				# one category, multiple series

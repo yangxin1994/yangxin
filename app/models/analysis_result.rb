@@ -101,6 +101,7 @@ class AnalysisResult < Result
 		answers_transform.each do |q_id, question_answer_ary|
 			i = i + 1
 			question = Question.find_by_id(q_id)
+			next if question.nil?
 			answers_result[q_id] = [question_answer_ary.length, analyze_one_question_answers(question, question_answer_ary)]
 			TaskClient.set_progress(task_id, "analyze_answer_progress", 0.6 + 0.4 * i / answers_transform.length ) if !task_id.nil?
 		end

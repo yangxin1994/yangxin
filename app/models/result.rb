@@ -169,6 +169,9 @@ class Result
 
 	def analyze_time_blank(issue, answer_ary, opt={})
 		segment = opt[:segment]
+		logger.info "222222222222222"
+		logger.info segment.inspect
+		logger.info "222222222222222"
 		result = {}
 		# the raw answers are in the unit of milliseconds
 		answer_ary.map! { |e| (e / 1000).round }
