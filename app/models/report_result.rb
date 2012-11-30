@@ -130,17 +130,17 @@ class ReportResult < Result
 						sub_question_issue = sub_question_item["properties"]
 						case sub_question_type
 						when "Number"
-							text = address_number_blank_description(sub_analysis_result,
+							text = number_blank_description(sub_analysis_result,
 																	sub_question_issue,
 																	:segment => component["value"]["format"][id.to_s])
 							sub_question_type = QuestionTypeEnum::NUMBER_BLANK_QUESTION
 						when "Time"
-							text = address_time_blank_description(sub_analysis_result,
+							text = time_blank_description(sub_analysis_result,
 																sub_question_issue,
 																:segment => component["value"]["format"][id.to_s])
 							sub_question_type = QuestionTypeEnum::TIME_BLANK_QUESTION
 						when "Address"
-							text = address_address_blank_description(sub_analysis_result, sub_question_issue)
+							text = address_blank_description(sub_analysis_result, sub_question_issue)
 							sub_question_type = QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 						end
 						report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
@@ -316,17 +316,17 @@ class ReportResult < Result
 						end
 						case sub_question_type
 						when "Number"
-							text = address_number_blank_description(sub_analysis_result,
+							text = number_blank_description(sub_analysis_result,
 																	sub_question_issue,
 																	:segment => component["value"]["format"][id.to_s])
 							sub_question_type = QuestionTypeEnum::NUMBER_BLANK_QUESTION
 						when "Time"
-							text = address_time_blank_description(sub_analysis_result,
+							text = time_blank_description(sub_analysis_result,
 																sub_question_issue,
 																:segment => component["value"]["format"][id.to_s])
 							sub_question_type = QuestionTypeEnum::TIME_BLANK_QUESTION
 						when "Address"
-							text = address_address_blank_description(sub_analysis_result, sub_question_issue)
+							text = address_blank_description(sub_analysis_result, sub_question_issue)
 							sub_question_type = QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 						end
 						report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
@@ -615,15 +615,15 @@ class ReportResult < Result
 	def time_blank_description(analysis_result, issue, opt={})
 		segment = opt[:segment]
 		histogram = analysis_result["histogram"]
-		mean = convert_time_mean_to_text(issue.format, analysis_result["mean"])
+		mean = convert_time_mean_to_text(issue["format"], analysis_result["mean"])
 		text = opt[:cross] ? "" : "调查显示，"
 		return text + "被访者填写的平均值为#{mean.round(1)}。" if segment.blank?
 		interval_text_ary = []
-		interval_text_ary << convert_time_interval_to_text(issue.format, nil, segment[0])
+		interval_text_ary << ReportResult.convert_time_interval_to_text(issue["format"], nil, segment[0])
 		segment[0..-2].each_with_index do |e, index|
-			interval_text_ary << convert_time_interval_to_text(issue.format, e, segment[index+1])
+			interval_text_ary << ReportResult.convert_time_interval_to_text(issue["format"], e, segment[index+1])
 		end
-		interval_text_ary << convert_time_interval_to_text(issue.format, segment[-1], nil)
+		interval_text_ary << ReportResult.convert_time_interval_to_text(issue["format"], segment[-1], nil)
 			
 		results = []
 		total_number = 0
@@ -634,7 +634,7 @@ class ReportResult < Result
 		results.sort_by! { |e| -e["number"] }
 		interval_text_ary = results.map { |e| e["text"] }
 		ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
-		text = text + "，填写#{interval_text_ary[0]}的被访者比例最高，为#{ratio_ary[0].round(1)}%"
+		text = text + "填写#{interval_text_ary[0]}的被访者比例最高，为#{ratio_ary[0].round(1)}%"
 		# one interval
 		return text + "；被访者填写的平均值为#{mean}。" if results.length == 1
 		text = text + "，其次是填写#{interval_text_ary[1]}的被访者，所占比例为#{ratio_ary[1].round(1)}%"
@@ -650,7 +650,7 @@ class ReportResult < Result
 			text = text + "，填写#{interval_text_string}的比例分别为#{ratio_string}"
 		end
 
-		text = text + "；被访者填写的平均值为#{mean.round(1)}。"
+		text = text + "；被访者填写的平均值为#{mean}。"
 		return text
 	end
 
@@ -676,7 +676,7 @@ class ReportResult < Result
 		results.sort_by! { |e| -e["number"] }
 		interval_text_ary = results.map { |e| e["text"] }
 		ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
-		text = text + "，填写#{interval_text_ary[0]}的被访者比例最高，为#{ratio_ary[0].round(1)}%"
+		text = text + "填写#{interval_text_ary[0]}的被访者比例最高，为#{ratio_ary[0].round(1)}%"
 		# one interval
 		return text + "；被访者填写的平均值为#{mean.round(1)}。" if results.length == 1
 		text = text + "，其次是填写#{interval_text_ary[1]}的被访者，所占比例为#{ratio_ary[1].round(1)}%"
@@ -804,7 +804,7 @@ class ReportResult < Result
 		return item_text
 	end
 
-	def convert_time_interval_to_text(format, v1, v2)
+	def self.convert_time_interval_to_text(format, v1, v2)
 		case format.to_i
 		when 0
 			# year
@@ -864,26 +864,26 @@ class ReportResult < Result
 				m = Time.at(v2).month
 				d = Time.at(v2).day
 				h = Time.at(v2).hour
-				min = Time.at(v2).minute
+				min = Time.at(v2).min
 				return "#{y}年#{m}月#{d}日#{h}时#{min}分以前"
 			elsif v2.nil?
 				y = Time.at(v1).year
 				m = Time.at(v1).month
 				d = Time.at(v1).day
 				h = Time.at(v1).hour
-				min = Time.at(v1).minute + 1
+				min = Time.at(v1).min + 1
 				return "#{y}年#{m}月#{d}日#{h}时#{min}分以后"
 			else
 				y1 = Time.at(v1).year
 				m1 = Time.at(v1).month
 				d1 = Time.at(v1).day
 				h1 = Time.at(v1).hour
-				min1 = Time.at(v1).minute + 1
+				min1 = Time.at(v1).min + 1
 				y2 = Time.at(v2).year
 				m2 = Time.at(v2).month
 				d2 = Time.at(v2).day
 				h2 = Time.at(v2).hour
-				min2 = Time.at(v2).minute
+				min2 = Time.at(v2).min
 				return y1 == y2 && m1 == m2 && d1 == d2 ? "#{y1}年#{m1}月#{d1}日#{h1}时#{min1}分" : "#{y1}年#{m1}月#{d1}日#{h1}时#{min1}分到#{y2}年#{m2}月#{d2}日#{h2}时#{min2}分"
 			end
 		when 4
@@ -907,37 +907,37 @@ class ReportResult < Result
 			# hour, minute
 			if v1.nil?
 				h = Time.at(v2).hour
-				min = Time.at(v2).minute
+				min = Time.at(v2).min
 				return "#{h}时#{m}分以前"
 			elsif v2.nil?
 				h = Time.at(v1).hour
-				min = Time.at(v1).minute + 1
+				min = Time.at(v1).min + 1
 				return "#{h}时#{m}分以后"
 			else
 				h1 = Time.at(v1).hour
-				min1 = Time.at(v1).minute + 1
+				min1 = Time.at(v1).min + 1
 				h2 = Time.at(v2).hour
-				min2 = Time.at(v2).minute
+				min2 = Time.at(v2).min
 				return h1 == h2 && min1 == min2 ? "#{h1}时#{min1}分" : "#{h1}时#{min1}分到#{h2}时#{min2}分"
 			end
 		when 6
 			# hour, minute, second
 			if v1.nil?
 				h = Time.at(v2).hour
-				min = Time.at(v2).minute
+				min = Time.at(v2).min
 				sec = Time.at(v2).second
 				return "#{h}时#{m}分#{sec}秒以前"
 			elsif v2.nil?
 				h = Time.at(v1).hour
-				min = Time.at(v1).minute
+				min = Time.at(v1).min
 				sec = Time.at(v1).second + 1
 				return "#{h}时#{m}分#{sec}秒以后"
 			else
 				h1 = Time.at(v1).hour
-				min1 = Time.at(v1).minute
+				min1 = Time.at(v1).min
 				sec1 = Time.at(v1).second + 1
 				h2 = Time.at(v2).hour
-				min2 = Time.at(v2).minute
+				min2 = Time.at(v2).min
 				sec2 = Time.at(v2).second
 				return h1 == h2 && min1 == min2 && sec1 == sec2 ? "#{h1}时#{min1}分#{sec1}秒" : "#{h1}时#{min1}分#{sec1}秒到#{h2}时#{min2}分#{sec2}秒"
 			end
@@ -958,16 +958,16 @@ class ReportResult < Result
 			return "#{time.year}年#{time.month}月#{time.day}日"
 		when 3
 			# year month day hour minute
-			return "#{time.year}年#{time.month}月#{time.day}日#{time.hour}时#{time.minute}分"
+			return "#{time.year}年#{time.month}月#{time.day}日#{time.hour}时#{time.min}分"
 		when 4
 			# month day
 			return "#{time.month}月#{time.day}日"
 		when 5
 			# hour minute
-			return "#{time.hour}时#{time.minute}分"
+			return "#{time.hour}时#{time.min}分"
 		when 6
 			# hour minute second
-			return "#{time.hour}时#{time.minute}分#{year.second}秒"
+			return "#{time.hour}时#{time.min}分#{year.second}秒"
 		end
 	end
 
