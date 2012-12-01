@@ -1410,10 +1410,15 @@ class Survey
 	end
 
 	def report(filter_index, include_screened_answer, report_mockup_id, report_style, report_type)
+		logger.info "AAAAAAAAAAAAAAAAAAAAAA"
+		logger.info report_mockup_id.inspect
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
-		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
-		return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
-		return ErrorEnum::WRONG_REPORT_TYPE if %w[word ppt pdf].include?(report_type)
+		# if report_mockup_id is nil, export all single questions analysis with default charts
+		if !report_mockup_id.blank?
+			report_mockup = self.report_mockups.find_by_id(report_mockup_id)
+			return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
+		end
+		return ErrorEnum::WRONG_REPORT_TYPE if !%w[word ppt pdf].include?(report_type)
 		task_id = TaskClient.create_task({ task_type: "result",
 											params: { result_type: "report",
 														survey_id: self._id,

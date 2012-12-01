@@ -253,7 +253,7 @@ class Report::DataAdapter
 					end
 					data << ["第#{e}位", order_result]
 				end
-			elsif [ChartStyleEnum::BAR, ChartStyleEnum::DOUGHNUT].include?(chart_style)
+			elsif [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT].include?(chart_style)
 				# the propotion for the first order
 				data << ["Categories"] + items_text
 				times = items_id.map { |id| analysis_result[id][0] }

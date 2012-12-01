@@ -73,7 +73,11 @@ class JobsController < ApplicationController
 			answers, tot_answer_number, screened_answer_number = *survey.get_answers(params[:filter_index].to_i,
 																					params[:include_screened_answer].to_s == "true",
 																					params[:task_id])
-			report_mockup = ReportMockup.find_by_id(params[:report_mockup_id])
+			if report_mockup_id.nil?
+				report_mockup = ReportMockup.default_report_mockup(survey)
+			else
+				report_mockup = ReportMockup.find_by_id(params[:report_mockup_id])
+			end
 			# generate result key
 			result_key = ReportResult.generate_result_key(answers,
 														report_mockup,
