@@ -66,7 +66,7 @@ class ResultsController < ApplicationController
 	end
 
 	def get_analysis_result
-		analysis_result = AnalysisResult.get_analysis_result(params[:task_id], params[:page_index])
+		analysis_result = AnalysisResult.get_analysis_result(params[:task_id], params[:page_index].to_i)
 		render_json_auto(analysis_result) and return
 	end
 

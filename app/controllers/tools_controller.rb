@@ -15,7 +15,7 @@ class ToolsController < ApplicationController
 	end
 
 	def find_towns_by_city
-		counties = Address.find_counties_by_city(params[:city_code].to_i)
+		counties = Address.find_towns_by_city(params[:city_code].to_i)
 		respond_to do |format|
 			format.json	{ render_json_s(counties) and return }
 		end
