@@ -21,6 +21,24 @@ class ReportMockup
 		return ReportMockup.where(:_id => report_mockup_id).first
 	end
 
+	def self.default_report_mockup(survey)
+		components = []
+		survey.all_question_ids.each do |q_id|
+			components << {"component_type" => 0,
+							"value" => {"id" => q_id,
+										"format" => []},
+							"chart_style" => -1}
+		end
+		report_mockup = ReportMockup.new(:title => survey.title,
+										:subtitle => survey.subtitle,
+										:header => "OopsData",
+										:footer => "OopsData",
+										:author_chn => "OopsData",
+										:author_eng => "OopsData",
+										:components => components)
+		
+	end
+
 	def self.check_and_create_new(survey, report_mockup)
 		questions = (survey.pages.map { |p| p["questions"] }).flatten
 		report_mockup["components"] ||= []

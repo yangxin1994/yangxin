@@ -89,11 +89,11 @@ class Result
 				s = s1 * 0.6 + s2 * 0.4
 			end
 		when "report"
-			s1 = status["find_answers_progress"].to_f
+			s1 = progress["find_answers_progress"].to_f
 			if s1 < 1
 				s = s1 * 0.3
 			else
-				s2 = status["data_conversion_progress"].to_f
+				s2 = progress["data_conversion_progress"].to_f
 #				if s2 < 2
 					s = s1 * 0.3 + s2 * 0.2
 #				else
