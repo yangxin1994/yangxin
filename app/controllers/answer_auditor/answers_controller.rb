@@ -28,7 +28,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 		# passing if not.
 		if answer.finish_type == 1
 			answer["is_pass"] = true 
-			answer['auditor_email'] = answer.auditor.email
+			answer['auditor_email'] = answer.auditor.email if answer.auditor
 		else
 			answer["is_pass"] = false
 		end
@@ -192,9 +192,11 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# }	
 				show_answer.merge!({'question_type_label'=> '地址题'})
 
-				show_answer.merge!({"address"=> val["address"], 
+				town =  Address.find_text_by_code(val["address"].to_i)
+
+				show_answer.merge!({"address"=> town, 
 					"detail" => val["detail"],
-					"postcode" => val["postcode"]})
+					"postcode" => val["postcode"].to_i})
 				answer["question_content"] << show_answer
 			when QuestionTypeEnum::BLANK_QUESTION
 				# 组合填充题
@@ -216,18 +218,21 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				questions = []
 				show_answer['items'] = []
 				question.issue['items'].each_with_index do |item, index|
-					# case item['data_type'].to_s
-					# when 'Text'
-					# when 'Number'
-					# when 'Phone'
-					# when 'Email'
-					# when 'Url'
-					# when 'Address'						
-					# when 'Time'
-					# end
 					sub_question = {'data_type' => item['data_type'].to_s, 
-						'title' => item['content']['text'], 
-						'content'=> val[index]}
+						'title' => item['content']['text']}
+					case item['data_type'].to_s
+					when 'Text','Time','Number','Phone','Email','Url'
+						sub_question.merge!({	'content'=> val[index]})
+					when 'Address'
+						town =  Address.find_text_by_code(val[index]["address"].to_i)
+						sub_question.merge!({	'content'=> 
+							{
+								"address"=> town, 
+								"detail" => val[index]["detail"],
+								"postcode" => val[index]["postcode"].to_i
+							}})					
+					end
+					
 					show_answer['items'] << sub_question
 				end
 				answer["question_content"] << show_answer

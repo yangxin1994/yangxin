@@ -513,7 +513,7 @@ class User
 	# class methods
 	#++
 
-	scope :normal_list, where(:color => COLOR_NORMAL, :status.gt => 0)
+	scope :normal_list, where(:color => COLOR_NORMAL, :status.gt => -1)
 	scope :black_list, where(:color => COLOR_BLACK)
 	scope :white_list, where(:color => COLOR_WHITE)
 	scope :deleted_users, where(status: -1)
@@ -523,13 +523,14 @@ class User
 	end
 
 	def create_user(new_user)
-		return ErrorEnum::REQUIRE_ADMIN unless self.is_admin
+		return ErrorEnum::REQUIRE_ADMIN unless self.is_admin || self.is_super_admin
 		return ErrorEnum::REQUIRE_SUPER_ADMIN if new_user["role"].to_s.to_i > 16 and !self.is_super_admin
 		return ErrorEnum::EMAIL_EXIST if User.where(email: new_user["email"].to_s.strip).count >0
 		return ErrorEnum::USERNAME_EXIST if new_user["username"].to_s.strip!="" && User.where(username: new_user["username"].to_s.strip).count >0
 		new_user["password"] = "oopsdata" unless new_user["password"]
 		new_user["password"] = Encryption.encrypt_password(new_user["password"])
 		one_user = User.new(new_user)
+		one_user.role = new_user['role'].to_i # against a case of attr restrained
 		one_user.status =4 # do not need activate
 		return ErrorEnum:SAVE_ERROR unless one_user.save
 		return true
