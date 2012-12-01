@@ -170,6 +170,6 @@ class AnalysisResult < Result
 		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
 		page = analysis_result.survey.pages[page_index]
 		return ErrorEnum::OVERFLOW if page.nil?
-		return answers_result.select { |e, v| page["questions"].include?(e) }
+		return answers_result.answers_result.select { |e, v| page["questions"].include?(e) }
 	end
 end

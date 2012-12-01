@@ -96,18 +96,26 @@ class ReportResult < Result
 																		:segment => component["value"]["format"]["-1"])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::TIME_BLANK_QUESTION
+					segment = component["value"]["format"]["-1"]
+					logger.info "11111"
+					logger.info Time.at(segment[0])
+					logger.info Time.at(segment[1])
+					segment.map! { |v| v = v / 1000 } if !segment.blank?
+					logger.info "22222"
+					logger.info Time.at(segment[0])
+					logger.info Time.at(segment[1])
 					analysis_result = analyze_time_blank(question.issue,
 														cur_question_answer,
-														:segment => component["value"]["format"]["-1"])
+														:segment => segment)
 					text = time_blank_description(analysis_result,
 												question.issue,
-												:segment => component["value"]["format"]["-1"])
+												:segment => segment)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
 																		question.issue,
 																		component["chart_style"],
-																		:segment => component["value"]["format"]["-1"])
+																		:segment => segment)
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 					analysis_result = analyze_address_blank(question.issue,
@@ -396,13 +404,13 @@ class ReportResult < Result
 			TaskClient.set_progress(task_id, "data_conversion_progress", (i+1).to_f / component_length)
 		end
 
+		logger.info "AAAAAAAAAAAAAAAAAA"
+		logger.info report_data.serialize
+		logger.info "AAAAAAAAAAAAAAAAAA"
 		# call the webservice to generate the report
 		send_data "/ExportReport.aspx" do
 			{"report_data" => report_data.serialize, "task_id" => task_id}
 		end
-		logger.info "AAAAAAAAAAAAAAAAAA"
-		logger.info report_data.inspect
-		logger.info "AAAAAAAAAAAAAAAAAA"
 		self.status = 1
 		self.save
 	end
@@ -908,11 +916,11 @@ class ReportResult < Result
 			if v1.nil?
 				h = Time.at(v2).hour
 				min = Time.at(v2).min
-				return "#{h}时#{m}分以前"
+				return "#{h}时#{min}分以前"
 			elsif v2.nil?
 				h = Time.at(v1).hour
 				min = Time.at(v1).min + 1
-				return "#{h}时#{m}分以后"
+				return "#{h}时#{min}分以后"
 			else
 				h1 = Time.at(v1).hour
 				min1 = Time.at(v1).min + 1
@@ -926,12 +934,12 @@ class ReportResult < Result
 				h = Time.at(v2).hour
 				min = Time.at(v2).min
 				sec = Time.at(v2).second
-				return "#{h}时#{m}分#{sec}秒以前"
+				return "#{h}时#{min}分#{sec}秒以前"
 			elsif v2.nil?
 				h = Time.at(v1).hour
 				min = Time.at(v1).min
 				sec = Time.at(v1).second + 1
-				return "#{h}时#{m}分#{sec}秒以后"
+				return "#{h}时#{min}分#{sec}秒以后"
 			else
 				h1 = Time.at(v1).hour
 				min1 = Time.at(v1).min
