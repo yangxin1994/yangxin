@@ -47,7 +47,11 @@ class AnalysisResult < Result
 			info["email"] = a.user.nil? ? "" : a.user.email.to_s
 			info["full_name"] = a.user.nil? ? "" : a.user.full_name.to_s
 			info["answer_time"] = a.created_at.to_i
-			info["duration"] = a.finished_at - a.created_at.to_i
+			if !a.finished_at.nil?
+				info["duration"] = a.finished_at - a.created_at.to_i
+			else
+				info["duration"] = a.rejected_at - a.created_at.to_i
+			end
 			info["region"] = a.region
 			answer_info << info
 			TaskClient.set_progress(task_id, "answer_info_progress", (index + 1).to_f / answers_length) if !task_id.nil?
@@ -66,9 +70,17 @@ class AnalysisResult < Result
 			channel_result[channel] = channel_result[channel] + 1
 			
 			# analyze duration
-			duration_mean << answer.finished_at - answer.created_at.to_i
+			if !answer.finished_at.nil?
+				duration_mean << answer.finished_at - answer.created_at.to_i
+			else
+				duration_mean << answer.rejected_at - answer.created_at.to_i
+			end
 			# analyze time
-			finish_time << answer.finished_at
+			if !answer.finished_at.nil?
+				finish_time << answer.finished_at
+			else
+				finish_time << answer.rejected_at
+			end
 			# re-organize answers
 			answer.answer_content.each do |q_id, question_answer|
 				answers_transform[q_id] ||= []
