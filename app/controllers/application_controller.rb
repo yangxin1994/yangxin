@@ -22,13 +22,22 @@ class ApplicationController < ActionController::Base
 	  # retval["previous_page"] = [page - 1, 1].max
 
 	  #v = eval(value)
-	  if block_given?
-	  	value = value.page(retval["current_page"]).per(retval["per_page"]) if count == nil
+	  if block_given? 
+	  	if value.methods.include? :page
+	  		value = value.page(retval["current_page"]).per(retval["per_page"])
+	  	end
 	    retval["data"] = yield(value)
 	  else
 	  	#retval["data"] = eval(value + '.page(retval["current_page"]).per(retval["per_page"])' )
 	  	retval["data"] = value.page(retval["current_page"]).per(retval["per_page"])
 	  end
+
+	  # if !block_given? || value.methods.include?(:page)
+	  # 	retval["data"] = value.page(retval["current_page"]).per(retval["per_page"])
+	  # else
+	  # 	retval["data"] = yield(value)
+	  # end
+
 	  retval["total_page"] = ( (count || value.count )/ per_page.to_f ).ceil
 	  retval["total_page"] = retval["total_page"] == 0 ? 1 : retval["total_page"]
 	  retval["next_page"] = (page+1 <= retval["total_page"] ? page+1: retval["total_page"])
