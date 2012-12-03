@@ -8,7 +8,7 @@ class Prize < BasicGift
   
 	has_one :order
 	belongs_to :lottery
-	has_many :lottery_code
+	has_many :lottery_codes
   has_one :photo, :class_name => "Material", :inverse_of => 'prize'
 
 	#validates_presence_of :type

@@ -63,8 +63,10 @@ class Lottery
         #   )
         lottery_code.status = 2
         lottery_code.prize = i[:prize]
+        # binding.pry
         lottery_code.prize.save
         lottery_code.save
+        lottery_code[:prize] = i[:prize]
         return lottery_code
       end
     end
@@ -80,6 +82,13 @@ class Lottery
     self.lottery_codes.for_draw.each do |lc|
       self.draw lc
     end
+  end
+
+  def assign_prize(user, prize)
+    lottery_code = give_lottery_code_to(user)
+    lottery_code.prize = prize
+    lottery_code.status = 2
+    lottery_code.save
   end
 
   def make_interval

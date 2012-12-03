@@ -86,13 +86,26 @@ class Admin::LotteriesController < Admin::ApplicationController
   def auto_draw
     render_json false do
       Lottery.find_by_id(params[:id]) do |l|
-        l.auto_draw
         # binding.pry
         @is_success = true
+        l.auto_draw
       end
     end
   end
   
+  def assign_prize
+    render_json false do
+      Lottery.find_by_id(params[:id]) do |lottery|
+        lottery.prizes.find_by_id(params[:prize_id]) do |prize|
+          unless user = User.find_by_id(params[:user_id]).nil?
+            @is_success = true
+            lottery.assign_prize(user, prize)
+          end
+        end
+      end
+    end
+  end
+
   def destroy
     render_json do
       Lottery.find_by_id(params[:id]) do |e|

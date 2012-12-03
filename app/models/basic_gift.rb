@@ -33,9 +33,7 @@ class BasicGift
   end
 
   def set_quantity
-  	p "aa"
   	if changed_attributes["surplus"]
-  		p "========"
   		self.quantity += (changed_attributes["surplus"]- self.surplus)
   	end
   end

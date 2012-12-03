@@ -133,6 +133,7 @@ OopsData::Application.routes.draw do
 			end
 			member do
 				get :auto_draw
+				put :assign_prize
 			end
 		end
 
