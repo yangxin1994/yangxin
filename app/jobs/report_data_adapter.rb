@@ -62,9 +62,9 @@ module Jobs
 			when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
 				return self.convert_single_matrix_choice_data(analysis_result, issue, chart_styles)
 			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-				return self.convert_single_number_blank_data(analysis_result, issue, chart_styles, opt["format"] || [])
+				return self.convert_single_number_blank_data(analysis_result, issue, chart_styles, opt[:format] || [])
 			when QuestionTypeEnum::TIME_BLANK_QUESTION
-				return self.convert_single_time_blank_data(analysis_result, issue, chart_styles, opt["format"] || [])
+				return self.convert_single_time_blank_data(analysis_result, issue, chart_styles, opt[:format] || [])
 			when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 				return self.convert_single_address_blank_data(analysis_result, issue, chart_styles)
 			when QuestionTypeEnum::CONST_SUM_QUESTION

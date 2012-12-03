@@ -6,11 +6,14 @@ class AnalysisResult < Result
 	include Mongoid::Document
 	include Mongoid::Timestamps
 
-	field :duration_mean, :type => Float
-	field :time_result, :type => Hash
-	field :region_result, :type => Hash
-	field :channel_result, :type => Hash
-	field :answers_result, :type => Hash
+	field :tot_answer_number, :type => Integer, default: 0
+	field :screened_answer_number, :type => Integer, default: 0
+	field :answer_info, :type => Array, default: []
+	field :duration_mean, :type => Float, default: 0
+	field :time_result, :type => Hash, default: {}
+	field :region_result, :type => Hash, default: {}
+	field :channel_result, :type => Hash, default: {}
+	field :answers_result, :type => Hash, default: {}
 
 	belongs_to :survey
 
@@ -28,10 +31,30 @@ class AnalysisResult < Result
 		finish_time = []
 		answers_transform = {}
 		if answers.length == 0
-			TaskClient.set_progress(task_id, "analyze_answer_progress", 1.0) if !task_id.nil?
-			return [{}, {}, 0, {}, {}]
+			if !task_id.nil?
+				TaskClient.set_progress(task_id, "analyze_answer_progress", 1.0)
+				TaskClient.set_progress(task_id, "answer_info_progress", 1.0)
+			end
+			self.status = 1
+			return self.save
 		end
+
+		# get the answer info
+		answer_info = []
+		answers_length = answers.length
+		answers.each_with_index do |a, index|
+			info = {}
+			info["email"] = a.user.nil? ? "" : a.user.email.to_s
+			info["full_name"] = a.user.nil? ? "" : a.user.full_name.to_s
+			info["answer_time"] = a.created_at.to_i
+			info["duration"] = a.finished_at - a.created_at.to_i
+			info["region"] = a.region
+			answer_info << info
+			TaskClient.set_progress(task_id, "answer_info_progress", (index + 1).to_f / answers_length) if !task_id.nil?
+		end
+		self.answer_info = answer_info
 		
+		# get the analysis result
 		answers.each_with_index do |answer, index|
 			# analyze region
 			region = answer.region.to_s
@@ -78,6 +101,7 @@ class AnalysisResult < Result
 		answers_transform.each do |q_id, question_answer_ary|
 			i = i + 1
 			question = Question.find_by_id(q_id)
+			next if question.nil?
 			answers_result[q_id] = [question_answer_ary.length, analyze_one_question_answers(question, question_answer_ary)]
 			TaskClient.set_progress(task_id, "analyze_answer_progress", 0.6 + 0.4 * i / answers_transform.length ) if !task_id.nil?
 		end
@@ -121,5 +145,31 @@ class AnalysisResult < Result
 		when QuestionTypeEnum::SCALE_QUESTION
 			return analyze_scale(question.issue, answer_ary)
 		end
+	end
+
+	def self.get_data_list(task_id)
+		analysis_result = self.where(:task_id => task_id)[0]
+		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
+		return {:result_key => analysis_result.result_key,
+				:answer_info => analysis_result.answer_info}
+	end
+
+	def self.get_stats(task_id)
+		analysis_result = self.where(:task_id => task_id)[0]
+		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
+		return {:tot_answer_number => analysis_result.tot_answer_number,
+				:screened_answer_number => analysis_result.screened_answer_number,
+				:duration_mean => analysis_result.duration_mean,
+				:time_result => analysis_result.time_result,
+				:region_result => analysis_result.region_result,
+				:channel_result => analysis_result.channel_result}
+	end
+
+	def self.get_analysis_result(task_id, page_index)
+		analysis_result = self.where(:task_id => task_id)[0]
+		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
+		page = analysis_result.survey.pages[page_index]
+		return ErrorEnum::OVERFLOW if page.nil?
+		return analysis_result.answers_result.select { |e, v| page["questions"].include?(e) }
 	end
 end

@@ -49,7 +49,7 @@ class BlankIssue < Issue
 	attr_writer :is_rand, :items, :show_style
 
 	ATTR_NAME_ARY = %w[items is_rand show_style]
-	INPUT_ATTR_ARY = %w[id content data_type properties]
+	ITEM_ATTR_ARY = %w[id content data_type properties]
 
 	DATA_TYPE_ARY = %w[Text Number Phone Email Url Address Time]
 
@@ -143,7 +143,7 @@ class BlankIssue < Issue
 	def update_issue(issue_obj)
 		issue_obj["items"] ||= []
 		issue_obj["items"].each do |input_obj|
-			input_obj.delete_if { |k, v| !INPUT_ATTR_ARY.include?(k) }
+			input_obj.delete_if { |k, v| !ITEM_ATTR_ARY.include?(k) }
 			return ErrorEnum::WRONG_DATA_TYPE if !DATA_TYPE_ARY.include?(input_obj["data_type"])
 			if input_obj["properties"].class == Hash
 				input_obj["properties"].delete_if { |k, v| !BlankIssue.const_get("#{input_obj["data_type"].upcase}_PROP_ARY".to_sym).include?(k) }

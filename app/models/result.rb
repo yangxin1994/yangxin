@@ -18,8 +18,8 @@ class Result
 
 	def self.find_by_task_id(task_id)
 		result = Result.where(:task_id => task_id).first
-		return nil if result.nil?
-		return Result.where(:result_key => result.result_key, :ref_result_id => nil).first
+		#return nil if result.nil?
+		#return Result.where(:result_key => result.result_key, :ref_result_id => nil).first
 	end
 
 	def self.find_by_result_key(result_key)
@@ -34,11 +34,10 @@ class Result
 
 		# based on the result type, return results
 		case result._type
-		when "DataListResult"
-			return {"answer_info" => result.answer_info,
-					"result_key" => result.result_key}
 		when "AnalysisResult"
-			return {"region_result" => result.region_result,
+			return {"result_key" => result.result_key,
+					"answer_info" => result.answer_info,
+					"region_result" => result.region_result,
 					"time_result" => result.time_result,
 					"duration_mean" => result.duration_mean,
 					"channel_result" => result.channel_result,
@@ -57,26 +56,20 @@ class Result
 		# the task has not been finished, chech the progress
 		task = TaskClient.get_task(task_id)
 
-		return task if task == ErrorEnum::TASK_NOT_FOUND
+		return task if task == ErrorEnum::TASK_NOT_EXIST
 		progress = task["progress"]
 
 		# calculate the status
 		case task["params"]["result_type"]
-		when "data_list"
-			# the data list job consists of two parts
-			# the first part is to find the answers by the filter
-			s1 = progress["find_answers_progress"].to_f
-			# the second part is to get the info of the answers
-			s2 = progress["answer_info_progress"].to_f
-			# calculate the total progress
-			s = s1 * 0.5 + s2 * 0.5
 		when "analysis"
 			# the analysis job consists of three parts
 			# the first part is to find the answers by the filter
 			s1 = progress["find_answers_progress"].to_f
+			# the second part is to get the info of the answers
+			s2 = progress["answer_info_progress"].to_f
 			# the third part is to analyze data
-			s2 = progress["analyze_answer_progress"].to_f
-			s = s1 * 0.5 + s2 * 0.5
+			s3 = progress["analyze_answer_progress"].to_f
+			s = s1 * 0.3 + s2 * 0.3 + s3 * 0.4
 		when "to_spss"
 			s1 = status["export_answers_progress"]
 			if s1 < 1
@@ -96,11 +89,11 @@ class Result
 				s = s1 * 0.6 + s2 * 0.4
 			end
 		when "report"
-			s1 = status["find_answers_progress"].to_f
+			s1 = progress["find_answers_progress"].to_f
 			if s1 < 1
 				s = s1 * 0.3
 			else
-				s2 = status["data_conversion_progress"].to_f
+				s2 = progress["data_conversion_progress"].to_f
 #				if s2 < 2
 					s = s1 * 0.3 + s2 * 0.2
 #				else
@@ -114,7 +107,7 @@ class Result
 	end
 
 
-	def analyze_choice(issue, answer_ary)
+	def analyze_choice(issue, answer_ary, opt={})
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		input_ids.map! { |e| e.to_s }
@@ -128,7 +121,7 @@ class Result
 		return result
 	end
 
-	def analyze_matrix_choice(issue, answer_ary)
+	def analyze_matrix_choice(issue, answer_ary, opt={})
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids.map! { |e| e.to_s }
 		result = {}
@@ -148,11 +141,13 @@ class Result
 		return result
 	end
 
-	def analyze_number_blank(issue, answer_ary, segment=[])
+	def analyze_number_blank(issue, answer_ary, opt={})
+		segment = opt[:segment]
 		result = {}		
 		answer_ary.map! { |answer| answer.to_f }
 		answer_ary.sort!
 		result["mean"] = answer_ary.mean
+		setment = opt[:segment] || []
 		if segment.blank?
 			segment = [answer_ary[0], (answer_ary[0].to_f + answer_ary[-1].to_f) / 2, answer_ary[-1]]
 		end
@@ -160,9 +155,11 @@ class Result
 			histogram = Array.new(segment.length + 1, 0)
 			segment_index = 0
 			answer_ary.each do |a|
-				while a > segment[segment_index]
-					segment_index = segment_index + 1
-					break if segment_index >= segment.length
+				if segment_index < segment.length
+					while a > segment[segment_index].to_f
+						segment_index = segment_index + 1
+						break if segment_index >= segment.length
+					end
 				end
 				histogram[segment_index] = histogram[segment_index] + 1
 			end
@@ -172,7 +169,8 @@ class Result
 		return result
 	end
 
-	def analyze_time_blank(issue, answer_ary, segment=[])
+	def analyze_time_blank(issue, answer_ary, opt={})
+		segment = opt[:segment]
 		result = {}
 		# the raw answers are in the unit of milliseconds
 		answer_ary.map! { |e| (e / 1000).round }
@@ -185,9 +183,11 @@ class Result
 			histogram = Array.new(segment.length + 1, 0)
 			segment_index = 0
 			answer_ary.each do |a|
-				while a > segment[segment_index]
-					segment_index = segment_index + 1
-					break if segment_index >= segment.length
+				if segment_index < segment.length
+					while a > segment[segment_index]
+						segment_index = segment_index + 1
+						break if segment_index >= segment.length
+					end
 				end
 				histogram[segment_index] = histogram[segment_index] + 1
 			end
@@ -197,7 +197,7 @@ class Result
 		return result
 	end
 
-	def analyze_email_blank(issue, answer_ary)
+	def analyze_email_blank(issue, answer_ary, opt={})
 		result = {}
 		answer_ary.each do |email_address|
 			domain_name = (email_address.split('@'))[-1]
@@ -207,7 +207,7 @@ class Result
 		return result
 	end
 
-	def analyze_address_blank(issue, answer_ary)
+	def analyze_address_blank(issue, answer_ary, opt={})
 		result = {}
 		answer_ary.each do |value|
 			region_code = value["address"]
@@ -217,24 +217,29 @@ class Result
 		return result
 	end
 
-	def analyze_blank(issue, answer_ary)
+	def analyze_blank(issue, answer_ary, opt={})
 		result = {}
 		issue["items"].each_with_index do |input, input_index|
+			segment = opt[:segment].nil? ? nil : opt[:segment][input["id"]]
 			case input["data_type"]
 			when "Number"
-				result[input["id"].to_s] = analyze_number_blank(input["properties"], answer_ary.map { |e| e[input_index] })
+				result[input["id"].to_s] = analyze_number_blank(input["properties"],
+																answer_ary.map { |e| e[input_index] },
+																:segment => segment)
+			when "Time"
+				result[input["id"].to_s] = analyze_time_blank(input["properties"],
+															answer_ary.map { |e| e[input_index] },
+															:segment => segment)
 			when "Address"
 				result[input["id"].to_s] = analyze_address_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			when "Email"
 				result[input["id"].to_s] = analyze_email_blank(input["properties"], answer_ary.map { |e| e[input_index] })
-			when "Time"
-				result[input["id"].to_s] = analyze_time_blank(input["properties"], answer_ary.map { |e| e[input_index] })
 			end
 		end
 		return result
 	end
 
-	def analyze_const_sum(issue, answer_ary)
+	def analyze_const_sum(issue, answer_ary, opt={})
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		input_ids.map! { |e| e.to_s }
@@ -255,7 +260,7 @@ class Result
 		return result
 	end
 
-	def analyze_sort(issue, answer_ary)
+	def analyze_sort(issue, answer_ary, opt={})
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		input_ids.map! { |e| e.to_s }
@@ -275,7 +280,7 @@ class Result
 		return result
 	end
 
-	def analyze_scale(issue, answer_ary)
+	def analyze_scale(issue, answer_ary, opt={})
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids.map! { |e| e.to_s }
 

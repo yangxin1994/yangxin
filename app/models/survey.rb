@@ -98,7 +98,6 @@ class Survey
 
 	has_many :export_results
 	has_many :analysis_results
-	has_many :data_list_results
 	has_many :report_results
 	has_many :report_mockups
 
@@ -455,14 +454,14 @@ class Survey
 	#*retval*:
 	#* the new survey instance: if successfully cloned
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	def clone_survey(title = nil)
+	def clone_survey(operator, title = nil)
 		# clone the meta data of the survey
 		new_instance = self.clone
 		new_instance.title = title || new_instance.title
 
 		# some information that cannot be cloned
 		new_instance.status = 0
-		new_instance.publish_status = 1
+		new_instance.publish_status = (operator.is_admin || operator.is_super_admin) ? PublishStatus::PUBLISHED : PublishStatus::CLOSED
 		new_instance.user_attr_survey = false
 		new_instance.is_star = false
 		new_instance.point = 0
@@ -1148,7 +1147,7 @@ class Survey
 	# return all the surveys that are published and are active
 	# it is needed to send emails and invite volunteers for these surveys
 	def self.get_published_active_surveys
-		return self.list("normal", PublishStatus::PUBLISHED, [])
+		return surveys = Survey.normal.in_community.where(:publish_status => PublishStatus::PUBLISHED)
 	end
 
 	def check_password_for_preview(username, password, current_user)
@@ -1400,16 +1399,6 @@ class Survey
 		return filters.delete_filter(filter_index, self)
 	end
 
-	def data_list(filter_index, include_screened_answer)
-		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
-		task_id = TaskClient.create_task({ task_type: "result",
-											params: { result_type: "data_list",
-														survey_id: self._id,
-														filter_index: filter_index,
-														include_screened_answer: include_screened_answer} })
-		return task_id
-	end
-
 	def analysis(filter_index, include_screened_answer)
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
 		task_id = TaskClient.create_task({ task_type: "result",
@@ -1422,9 +1411,12 @@ class Survey
 
 	def report(filter_index, include_screened_answer, report_mockup_id, report_style, report_type)
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
-		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
-		return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
-		return ErrorEnum::WRONG_REPORT_TYPE if %w[word ppt pdf].include?(report_type)
+		# if report_mockup_id is nil, export all single questions analysis with default charts
+		if !report_mockup_id.blank?
+			report_mockup = self.report_mockups.find_by_id(report_mockup_id)
+			return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
+		end
+		return ErrorEnum::WRONG_REPORT_TYPE if !%w[word ppt pdf].include?(report_type)
 		task_id = TaskClient.create_task({ task_type: "result",
 											params: { result_type: "report",
 														survey_id: self._id,
@@ -1437,21 +1429,30 @@ class Survey
 	end
 
 	def get_answers(filter_index, include_screened_answer, task_id = nil)
-		answers = include_screened_answer ? self.answers.not_preview.finished_and_screened : self.answers.not_preview.finished
+		# answers = include_screened_answer ? self.answers.not_preview.finished_and_screened : self.answers.not_preview.finished
+		answers = self.answers.not_preview.finished_and_screened
 		if filter_index == -1
 			TaskClient.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
 			#set_status({"find_answers_progress" => 1})
-			return answers
+			tot_answer_number = answers.length
+			answers = include_screened_answer ? answers : answers.finished
+			return [answers, tot_answer_number, self.answers.not_preview.screened.length]
 		end
 		filter_conditions = self.filters[filter_index]["conditions"]
 		filtered_answers = []
+		tot_answer_number = 0
+		not_screened_answer_number = 0
 		answers_length = answers.length
 		answers.each_with_index do |a, index|
-			filtered_answers << a if a.satisfy_conditions(filter_conditions)
+			next if !a.satisfy_conditions(filter_conditions)
+			tot_answer_number += 1
+			next if !include_screened_answer && a.is_screened
+			not_screened_answer_number += 1
+			filtered_answers << a
 			#set_status({"find_answers_progress" => (index + 1) * 1.0 / answers_length})
 			TaskClient.set_progress(task_id, "find_answers_progress", (index + 1).to_f / answers_length) if !task_id.nil?
 		end
-		return filtered_answers
+		return [filtered_answers, tot_answer_number, tot_answer_number - not_screened_answer_number]
 	end
 
 	def create_report_mockup(report_mockup)
@@ -1743,6 +1744,7 @@ class Survey
 			# only choice questions can be conditions of quotas
 			rules = self.quota["rules"]
 			rules.each_with_index do |rule, rule_index|
+				next if rule["conditions"].blank?
 				case type
 				when 'question_update'
 					item_ids = question.issue["items"].map { |i| i["id"] }
@@ -1844,7 +1846,7 @@ class Survey
 		surveys = Survey.in_community
 		surveys = surveys.where(:spreadable => true) if only_spreadable
 		surveys = surveys.where(:reward => reward)
-		surveys = surveys.order_by(:publish_status, :desc)
+		surveys = surveys.order_by(:publish_status, :desc).order_by(:created_at, :desc)
 		return surveys.map { |s| {"survey" => s.serialize_in_short, "answer_status" => s.answer_status(user)} }
 	end
 

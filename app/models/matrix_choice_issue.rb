@@ -34,7 +34,7 @@ class MatrixChoiceIssue < Issue
 	def initialize
 		@min_choice = 1
 		@max_choice = 1
-		@option_type = 1
+		@option_type = 0
 		@show_style = 0
 		@is_rand = false	
 		@is_row_rand = false	

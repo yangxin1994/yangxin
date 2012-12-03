@@ -16,7 +16,7 @@ class Admin::SurveysController < Admin::ApplicationController
 		render_json_auto @survey
 	end
 
-	def add_questions
+	def add_template_question
 		# if params[:question_ids]
 			@survey = Survey.find_by_id(params[:id]) if params[:id]
 			unless @survey

@@ -73,7 +73,8 @@ class User
 	#before_update :set_updated_at
 
 	# add role, full_name to create system_user
-	attr_accessible :email, :username, :password, :registered_at, :introducer_id, :role, :full_name, :status
+	# attr_accessible :email, :username, :password, :registered_at, :introducer_id, :role, :full_name, :status
+	attr_protected :role, :status, :level
 
 	has_many :third_party_users
 	has_many :surveys
@@ -512,7 +513,7 @@ class User
 	# class methods
 	#++
 
-	scope :normal_list, where(:color => COLOR_NORMAL, :status.gt => 0)
+	scope :normal_list, where(:color => COLOR_NORMAL, :status.gt => -1)
 	scope :black_list, where(:color => COLOR_BLACK)
 	scope :white_list, where(:color => COLOR_WHITE)
 	scope :deleted_users, where(status: -1)
@@ -522,13 +523,14 @@ class User
 	end
 
 	def create_user(new_user)
-		return ErrorEnum::REQUIRE_ADMIN unless self.is_admin
+		return ErrorEnum::REQUIRE_ADMIN unless self.is_admin || self.is_super_admin
 		return ErrorEnum::REQUIRE_SUPER_ADMIN if new_user["role"].to_s.to_i > 16 and !self.is_super_admin
 		return ErrorEnum::EMAIL_EXIST if User.where(email: new_user["email"].to_s.strip).count >0
 		return ErrorEnum::USERNAME_EXIST if new_user["username"].to_s.strip!="" && User.where(username: new_user["username"].to_s.strip).count >0
 		new_user["password"] = "oopsdata" unless new_user["password"]
 		new_user["password"] = Encryption.encrypt_password(new_user["password"])
 		one_user = User.new(new_user)
+		one_user.role = new_user['role'].to_i # against a case of attr restrained
 		one_user.status =4 # do not need activate
 		return ErrorEnum:SAVE_ERROR unless one_user.save
 		return true
@@ -612,7 +614,7 @@ class User
 	end
 
 	def get_introduced_users
-		introduced_users = User.where(:introducer_id => self._id.to_s)
+		introduced_users = User.where(:introducer_id => self._id.to_s, :status.gt => 1).desc(:created_at)
 		summary_info = introduced_users.map { |u| { _id: u._id.to_s, email: u.email, registered_at: u.registered_at } }
 		return summary_info
 	end

@@ -50,6 +50,7 @@ class SurveysController < ApplicationController
 			survey = Survey.create
 			survey.alt_new_survey = false
 			@current_user.surveys << survey
+			survey.update_attributes(:publish_status => PublishStatus::PUBLISHED) if @current_user.is_admin || @current_user.is_super_admin
 		end
 		respond_to do |format|
 			format.json	{ render_json_s(survey.serialize) and return }
@@ -194,7 +195,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def clone
-		new_survey = @survey.clone_survey(params[:title])
+		new_survey = @survey.clone_survey(@current_user, params[:title])
 		respond_to do |format|
 			format.json	{ render_json_auto(new_survey.serialize) and return }
 		end

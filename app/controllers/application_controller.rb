@@ -30,6 +30,7 @@ class ApplicationController < ActionController::Base
 	  	retval["data"] = value.page(retval["current_page"]).per(retval["per_page"])
 	  end
 	  retval["total_page"] = ( (count || value.count )/ per_page.to_f ).ceil
+	  retval["total_page"] = retval["total_page"] == 0 ? 1 : retval["total_page"]
 	  retval["next_page"] = (page+1 <= retval["total_page"] ? page+1: retval["total_page"])
 	  # retval["next_page"] = [page + 1, retval["total_page"]].min
 	  retval
@@ -172,7 +173,7 @@ class ApplicationController < ActionController::Base
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
-		if !user_survey_auditor?
+		if !user_survey_auditor? || !user_admin?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_SURVEY_AUDITOR) and return }
@@ -187,7 +188,7 @@ class ApplicationController < ActionController::Base
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
-		if !user_answer_auditor?
+		if !user_answer_auditor? || !user_admin?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_ANSWER_AUDITOR) and return }
@@ -202,7 +203,7 @@ class ApplicationController < ActionController::Base
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
-		if !user_entry_clerk?
+		if !user_entry_clerk? || !user_admin?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_ENTRY_CLERK) and return }
@@ -217,7 +218,7 @@ class ApplicationController < ActionController::Base
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
-		if !user_interviewer?
+		if !user_interviewer? || !user_admin?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_INTERVIEWER) and return }

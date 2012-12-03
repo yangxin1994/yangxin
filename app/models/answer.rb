@@ -44,8 +44,6 @@ class Answer
 	# audit message content
 	field :audit_message, :type => String
 
-	field :rejected_at, :type => Integer
-
 	field :introducer_id, :type => String
 	field :point_to_introducer, :type => Integer
 
@@ -118,7 +116,7 @@ class Answer
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
-		if !is_preview && !introducer_id
+		if !is_preview && introducer_id
 			introducer = User.find_by_id(introducer_id)
 			if !introducer.nil? && introducer.email != email
 				answer.introducer_id = introducer_id
@@ -168,6 +166,10 @@ class Answer
 		answer = answer.genereate_random_quality_control_questions
 
 		return answer
+	end
+
+	def is_screened
+		return status == 1 && reject_type == 2
 	end
 
 	def genereate_random_quality_control_questions
@@ -521,7 +523,7 @@ class Answer
 		# an answer expires only when the survey is not published
 		if Time.now.to_i - self.created_at.to_i > 2.days.to_i && self.survey.publish_status != 8
 			self.set_reject
-			self.update_attributes(reject_type: 3, rejected_at: Time.now.to_i)
+			self.update_attributes(reject_type: 3, finished_at: Time.now.to_i)
 		end
 		return self.status
 	end
@@ -567,7 +569,7 @@ class Answer
 					self.set_redo
 				else
 					self.set_reject
-					self.update_attributes(reject_type: 1, rejected_at: Time.now.to_i)
+					self.update_attributes(reject_type: 1, finished_at: Time.now.to_i)
 				end
 				return false
 			end
@@ -593,7 +595,7 @@ class Answer
 				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]]["selection"], condition["answer"], condition["fuzzy"])
 				if pass_condition
 					self.set_reject
-					self.update_attributes(reject_type: 2, rejected_at: Time.now.to_i)
+					self.update_attributes(reject_type: 2, finished_at: Time.now.to_i)
 					return false
 				end
 			end
@@ -608,7 +610,7 @@ class Answer
 		# 2. if all quota rules are satisfied, the new answer should be rejected
 		if quota_stats["quota_satisfied"]
 			self.set_reject
-			self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
+			self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
 			return false
 		end
 		# 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
@@ -621,7 +623,7 @@ class Answer
 			return true if quota_stats["answer_number"][rule_index] < rule["amount"] && self.satisfy_conditions(rule["conditions"], false)
 		end
 		self.set_reject
-		self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
+		self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
 		return false
 	end
 
@@ -632,7 +634,7 @@ class Answer
 		# 2. if all quota rules are satisfied, the new answer should be rejected
 		if quota_stats && quota_stats["quota_satisfied"]
 			self.set_reject
-			self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
+			self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
 			return false
 		end
 		# 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
@@ -654,7 +656,7 @@ class Answer
 		end
 		# 5 cannot find a quota rule to accept this new answer
 		self.set_reject
-		self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
+		self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
 		return false
 	end
 
@@ -803,7 +805,7 @@ class Answer
 				"审核问卷答案消息",
 				message_content,
 				[] << self.user._id.to_s
-			)
+			) if !self.user.nil?
 
 		self.audit_message = message_content
 		self.save
@@ -817,15 +819,13 @@ class Answer
 			# 1 for lottery & 2 for point
 
 			# maybe lottery is nil
-			if self.survey.lottery
-				lc = self.survey.reward == 1 ? nil : self.survey.lottery.give_lottery_code_to(user)
-				if lc
-					return ErrorEnum::REWARD_ERROR unless self.survey.post_reward_to(user, 
-						:type => self.survey.reward, 
-						:point => self.survey.point,
-						:lottery_code => lc,
-						:cause => 2) 
+			if self.survey.reward == 1
+				if self.survey.lottery
+					lc = self.survey.lottery.give_lottery_code_to(user)
+					self.survey.post_reward_to(user, :type => self.survey.reward, :lottery_code => lc, :cause => 2)
 				end
+			elsif self.survey.reward == 2
+				self.survey.post_reward_to(user, :type => self.survey.reward, :point => self.survey.point, :cause => 2)
 			end
 		end
 		# give the introducer points
@@ -837,7 +837,7 @@ class Answer
 			if point_to_introducer > 0
 				RewardLog.create(:user => introducer, :type => 2, :point => self.point_to_introducer, :extended_survey_id => self.survey_id, :cause => 3)
 				# send the introducer a message about the rewarded points
-				user.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.point_to_introducer}个积分奖励。", [introducer._id.to_s])
+				introducer.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.point_to_introducer}个积分奖励。", [introducer._id.to_s])
 			end
 		end
 		return true

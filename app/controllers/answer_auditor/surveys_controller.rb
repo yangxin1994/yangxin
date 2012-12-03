@@ -7,7 +7,7 @@ class AnswerAuditor::SurveysController < AnswerAuditor::ApplicationController
 			@surveys = Survey.where(
 					user_attr_survey: false, 
 					:new_survey => false, 
-					:publish_status.gt => 2
+					:publish_status => 8
 				)
 		else
 			@surveys = @current_user.answer_auditor_allocated_surveys

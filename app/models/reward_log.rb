@@ -41,9 +41,15 @@ class RewardLog
   end
 
   def operate_user_point
+    logger.info "AAAAAAAAAAAAA"
+    logger.info user.inspect
     return false if user.blank?
+    logger.info "BBBBBBBBBBBBB"
+    logger.info point
     return true if point == 0
     if((self.point + user.point) >= 0)
+      logger.info "CCCCCCCCCCCC"
+      logger.info self.point + user.point
       user.inc(:point, self.point)
     else
       self.delete

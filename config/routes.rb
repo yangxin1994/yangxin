@@ -49,7 +49,7 @@ OopsData::Application.routes.draw do
 		resources :surveys do 
 			collection do 
 				get 'wait_to_community' , 'show_user_attr_survey'
-				put 'add_questions'
+				put 'add_template_question'
 			end
 			member do
 				put 'allocate', 'add_reward', 'set_community', 'set_spread'
@@ -289,7 +289,6 @@ OopsData::Application.routes.draw do
 				put 'split'
 				put 'combine'
 			end
-
 		end
 		resources :questions do
 			collection do
@@ -315,24 +314,23 @@ OopsData::Application.routes.draw do
 				post :refresh
 			end
 		end
-
 		resources :filters do
 		end
-
-		resources :results do
-			collection do
-				get :check_progress
-				get :job_progress
-				get :data_list
-				get :analysis
-				get :to_spss
-				get :to_excel
-				get :report
-				put :finish
-			end
-		end
-
 		resources :report_mockups do
+		end
+	end
+	resources :results do
+		collection do
+			get :check_progress
+			get :job_progress
+			get :analysis
+			get :to_spss
+			get :to_excel
+			get :report
+			put :finish
+			get :get_data_list
+			get :get_stats
+			get :get_analysis_result
 		end
 	end
 

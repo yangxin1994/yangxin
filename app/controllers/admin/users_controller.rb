@@ -69,7 +69,7 @@ class Admin::UsersController < Admin::ApplicationController
 		@user = User.find_by_id params[:id]
 		render_json(@user.is_a? User) do |s|
 			if s
-				auto_paginate @user.lottery_codes
+				auto_paginate @user.lottery_codes.desc(:created_at)
 			else
 				{
 					:error_code => ErrorEnum::USER_NOT_EXIST,
@@ -83,7 +83,7 @@ class Admin::UsersController < Admin::ApplicationController
 		@user = User.find_by_id params[:id]
 		render_json(@user.is_a? User) do |s|
 			if s
-				auto_paginate @user.orders
+				auto_paginate @user.orders.desc(:created_at)
 			else
 				{
 					:error_code => ErrorEnum::USER_NOT_EXIST,
@@ -149,9 +149,12 @@ class Admin::UsersController < Admin::ApplicationController
 		end
 	end
 
-	# def add_point
-	# 	render_json_auto @user.add_point(params[:point].to_i)
-	# end
+	def add_point
+		@reward_log = @current_user.operate_point(params[:point], params[:id])
+		render_json(@reward_log.valid?) do
+			@reward_log.as_retval
+		end
+	end
 
 	def system_pwd
 		@user.change_to_system_password
@@ -207,9 +210,10 @@ class Admin::UsersController < Admin::ApplicationController
 	def get_introduced_users
 		user = User.find_by_id_including_deleted(params[:id])
 		render_json_e(ErrorEnum::USER_NOT_EXIST) if user.nil?
-		introduced_user = user.get_introduced_users do |u|
+
+		introduced_users = auto_paginate user.get_introduced_users do |u|
 			u.slice((page - 1) * per_page, per_page)
 		end
-		render_json_auto(introduced_user) and return
+		render_json_auto(introduced_users) and return
 	end
 end
