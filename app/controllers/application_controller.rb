@@ -21,7 +21,8 @@ class ApplicationController < ActionController::Base
 		retval["previous_page"] = (page - 1 > 0 ? page-1 : 1)
 		# retval["previous_page"] = [page - 1, 1].max
 
-		#v = eval(value)
+		# 当没有block或者传入的是一个mongoid集合对象时就自动分页
+		# TODO : 更优的判断是否mongoid对象?
 		if block_given? 
 			if value.methods.include? :page
 				value = value.page(retval["current_page"]).per(retval["per_page"])
@@ -31,16 +32,8 @@ class ApplicationController < ActionController::Base
 			#retval["data"] = eval(value + '.page(retval["current_page"]).per(retval["per_page"])' )
 			retval["data"] = value.page(retval["current_page"]).per(retval["per_page"])
 		end
-		# 当没有block或者传入的是一个mongoid集合对象时就自动分页
-		# TODO : 更优的判断是否mongoid对象?
-		# if value.methods.include?(:page)
-		# 	value = value.page(retval["current_page"]).per(retval["per_page"])
-		# end
-		# if !block_given?
-		# 	retval["data"] = value
-		# else
-		# 	retval["data"] = yield(value)
-		# end
+
+
 
 		retval["total_page"] = ( (count || value.count )/ per_page.to_f ).ceil
 		retval["total_page"] = retval["total_page"] == 0 ? 1 : retval["total_page"]
