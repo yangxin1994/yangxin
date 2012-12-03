@@ -1410,8 +1410,6 @@ class Survey
 	end
 
 	def report(filter_index, include_screened_answer, report_mockup_id, report_style, report_type)
-		logger.info "AAAAAAAAAAAAAAAAAAAAAA"
-		logger.info report_mockup_id.inspect
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
 		# if report_mockup_id is nil, export all single questions analysis with default charts
 		if !report_mockup_id.blank?
@@ -1436,7 +1434,9 @@ class Survey
 		if filter_index == -1
 			TaskClient.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
 			#set_status({"find_answers_progress" => 1})
-			return [answers, answers.length, self.answers.not_preview.screened.length]
+			tot_answer_number = answers.length
+			answers = include_screened_answer ? answers : answers.finished
+			return [answers, tot_answer_number, self.answers.not_preview.screened.length]
 		end
 		filter_conditions = self.filters[filter_index]["conditions"]
 		filtered_answers = []
@@ -1446,7 +1446,7 @@ class Survey
 		answers.each_with_index do |a, index|
 			next if !a.satisfy_conditions(filter_conditions)
 			tot_answer_number += 1
-			next if include_screened_answer && a.is_screened
+			next if !include_screened_answer && a.is_screened
 			not_screened_answer_number += 1
 			filtered_answers << a
 			#set_status({"find_answers_progress" => (index + 1) * 1.0 / answers_length})

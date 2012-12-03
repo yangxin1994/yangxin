@@ -44,8 +44,6 @@ class Answer
 	# audit message content
 	field :audit_message, :type => String
 
-	field :rejected_at, :type => Integer
-
 	field :introducer_id, :type => String
 	field :point_to_introducer, :type => Integer
 
@@ -525,7 +523,7 @@ class Answer
 		# an answer expires only when the survey is not published
 		if Time.now.to_i - self.created_at.to_i > 2.days.to_i && self.survey.publish_status != 8
 			self.set_reject
-			self.update_attributes(reject_type: 3, rejected_at: Time.now.to_i)
+			self.update_attributes(reject_type: 3, finished_at: Time.now.to_i)
 		end
 		return self.status
 	end
@@ -571,7 +569,7 @@ class Answer
 					self.set_redo
 				else
 					self.set_reject
-					self.update_attributes(reject_type: 1, rejected_at: Time.now.to_i)
+					self.update_attributes(reject_type: 1, finished_at: Time.now.to_i)
 				end
 				return false
 			end
@@ -597,7 +595,7 @@ class Answer
 				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]]["selection"], condition["answer"], condition["fuzzy"])
 				if pass_condition
 					self.set_reject
-					self.update_attributes(reject_type: 2, rejected_at: Time.now.to_i)
+					self.update_attributes(reject_type: 2, finished_at: Time.now.to_i)
 					return false
 				end
 			end
@@ -612,7 +610,7 @@ class Answer
 		# 2. if all quota rules are satisfied, the new answer should be rejected
 		if quota_stats["quota_satisfied"]
 			self.set_reject
-			self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
+			self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
 			return false
 		end
 		# 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
@@ -625,7 +623,7 @@ class Answer
 			return true if quota_stats["answer_number"][rule_index] < rule["amount"] && self.satisfy_conditions(rule["conditions"], false)
 		end
 		self.set_reject
-		self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
+		self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
 		return false
 	end
 
@@ -636,7 +634,7 @@ class Answer
 		# 2. if all quota rules are satisfied, the new answer should be rejected
 		if quota_stats && quota_stats["quota_satisfied"]
 			self.set_reject
-			self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
+			self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
 			return false
 		end
 		# 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
@@ -658,7 +656,7 @@ class Answer
 		end
 		# 5 cannot find a quota rule to accept this new answer
 		self.set_reject
-		self.update_attributes(reject_type: 0, rejected_at: Time.now.to_i)
+		self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
 		return false
 	end
 
