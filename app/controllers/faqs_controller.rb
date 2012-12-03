@@ -15,12 +15,9 @@ class FaqsController < ApplicationController
 			@faqs = Faq.all.desc(:updated_at)
 		end
 
-		@faqs = slice((@faqs || []), params[:page], params[:per_page])
+		@show_faqs = slice((@faqs || []), params[:page], params[:per_page])
 
-		respond_to do |format|
-			format.html # index.html.erb
-			format.json { render json: @faqs, :except => [:user_id]}
-		end
+		render_json_auto (auto_paginate(@show_faqs, @faqs.count){@show_faqs}) and return
 	end
 	
 	# GET /faqs/1 
