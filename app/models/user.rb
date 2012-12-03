@@ -471,7 +471,7 @@ class User
 
 	def show_messages
 		self.update_attribute(:last_read_messeges_time, Time.now)
-		Message.all.select{ |m| (message_ids.include? m.id) or (m.type == 0)}
+		Message.all.desc(:updated_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}
 		#Message.unread(created_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}
 	end
 
