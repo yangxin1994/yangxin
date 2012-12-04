@@ -5,6 +5,7 @@ class Prize < BasicGift
 
   scope :can_be_draw, where(:status => 1)
   scope :for_lottery, where(:lottery_id => nil)
+  scope :wined, where(:status => 2)
   
 	has_one :order
 	belongs_to :lottery

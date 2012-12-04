@@ -132,7 +132,7 @@ OopsData::Application.routes.draw do
 				get :for_publish, :activity, :finished
 			end
 			member do
-				get :auto_draw
+				get :auto_draw, :prize_records
 				put :assign_prize
 			end
 		end

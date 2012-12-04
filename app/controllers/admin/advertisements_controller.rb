@@ -10,17 +10,21 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 	def index
 		if !params[:activate].nil? then
 			if params[:activate].to_s == "true" then
-				@advertisements = Advertisement.activated.desc(:updated_at).page(page).per(per_page)
+				@advertisements = Advertisement.activated.desc(:updated_at)
 			elsif params[:activate].to_s == "false" then
-				@advertisements = Advertisement.unactivate.desc(:updated_at).page(page).per(per_page)
+				@advertisements = Advertisement.unactivate.desc(:updated_at)
 			end
 		elsif !params[:title].nil? then
-			@advertisements = Advertisement.list_by_title(params[:title]).desc(:updated_at).page(page).per(per_page)
+			@advertisements = Advertisement.list_by_title(params[:title]).desc(:updated_at)
 		else
-			@advertisements = Advertisement.all.desc(:activate, :created_at).page(page).per(per_page)
-		end		
+			@advertisements = Advertisement.all.desc(:activate, :created_at)
+		end
+		render_json true do
+			auto_paginate @advertisements do |ad|
+				ad
+			end
+		end
 
-		render_json_auto @advertisements
 	end
 
 	# GET

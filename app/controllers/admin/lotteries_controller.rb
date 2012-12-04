@@ -96,13 +96,20 @@ class Admin::LotteriesController < Admin::ApplicationController
   def assign_prize
     render_json false do
       Lottery.find_by_id(params[:id]) do |lottery|
-          binding.pry
         lottery.prizes.find_by_id(params[:prize_id]) do |prize|
           unless user = User.find_by_id(params[:user_id]).nil?
             @is_success = true
             lottery.assign_prize(user, prize)
           end
         end
+      end
+    end
+  end
+
+  def prize_records
+    render_json false do
+      Lottery.find_by_id(params[:id]) do |lottery|
+        auto_paginate lottery.prizes.wined
       end
     end
   end
