@@ -385,13 +385,14 @@ class Answer
 	#* true:
 	#* false:
 	def add_logic_control_result(question_id, items, sub_questions)
+		return if self.survey.is_pageup_allowed
 		if self.logic_control_result[question_id].nil?
 			self.logic_control_result[question_id] = {"items" => items, "sub_questions" => sub_questions}
 		else
-			self.logic_control_result[question_id["items"]] = 
-				(self.logic_control_result[question_id["items"]].to_a + items.to_a).uniq
-			self.logic_control_result[question_id["sub_questions"]] = 
-				(self.logic_control_result[question_id["sub_questions"]].to_a + items.to_a).uniq
+			self.logic_control_result[question_id]["items"] = 
+				(self.logic_control_result[question_id]["items"].to_a + items.to_a).uniq
+			self.logic_control_result[question_id]["sub_questions"] = 
+				(self.logic_control_result[question_id]["sub_questions"].to_a + sub_questions.to_a).uniq
 		end
 		return self.save
 	end
@@ -407,6 +408,7 @@ class Answer
 	#* true:
 	#* false:
 	def remove_logic_control_result(question_id, items, sub_questions)
+		return if self.survey.is_pageup_allowed
 		return if self.logic_control_result[question_id].nil?
 		cur_items = self.logic_control_result[question_id]["items"].to_a
 		cur_sub_questions = self.logic_control_result[question_id]["sub_questions"].to_a
@@ -661,6 +663,7 @@ class Answer
 	end
 
 	def update_logic_control_result(answer_content)
+		return if self.survey.is_pageup_allowed
 		# array of ids of the questinos that the volunteer answers this time
 		volunteer_answer_question_id_ary = answer_content.keys
 		logic_control = self.survey.show_logic_control
