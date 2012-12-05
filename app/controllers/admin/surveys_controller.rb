@@ -1,7 +1,7 @@
 class Admin::SurveysController < Admin::ApplicationController
 
 	def wait_to_community
-		@surveys = Survey.normal.where(:publish_status.gt => 2).asc(:show_in_community)
+		@surveys = Survey.normal.where(:publish_status.gt => 2).asc(:show_in_community).desc(:created_at)
 		render_json_auto auto_paginate(@surveys)
 	end
 
