@@ -330,7 +330,7 @@ class Answer
 			cur_page = false
 			pages_with_qc_questions.each do |page_questions|
 				page_questions.each do |q_id|
-					next if ( !self.answer_content[q_id].nil? || !self.random_quality_control_answer_content[q_id].nil? ) && !cur_page
+					next if ( !self.answer_content[q_id].nil? || !self.random_quality_control_answer_content[q_id].nil? )
 					cur_page = true
 					# check if this question is the result of some logic control rule
 					logic_control_question_id.each do |ele|

@@ -1895,7 +1895,7 @@ class Survey
 		survey_obj["title"] = self.title.to_s
 		survey_obj["subtitle"] = self.subtitle.to_s
 		survey_obj["created_at"] = self.created_at.to_i
-		survey_obj["reward"] = self.reward
+		survey_obj["reward_info"] = self.reward_info
 		survey_obj["publish_status"] = self.publish_status
 		return survey_obj
 	end
