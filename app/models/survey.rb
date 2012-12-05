@@ -463,6 +463,7 @@ class Survey
 		new_instance.status = 0
 		new_instance.publish_status = (operator.is_admin || operator.is_super_admin) ? PublishStatus::PUBLISHED : PublishStatus::CLOSED
 		new_instance.user_attr_survey = false
+
 		new_instance.is_star = false
 		new_instance.point = 0
 		new_instance.spread_point = 0
@@ -471,12 +472,9 @@ class Survey
 		new_instance.show_in_community = false
 		lottery = new_instance.lottery
 		lottery.surveys.delete(new_instance) if !lottery.nil?
-		interviewers = new_instance.interviewers
-		interviewers.each do |interviewer| interviewer.delete(new_instance) end
-		entry_clerks = new_instance.entry_clerks
-		entry_clerks.each do |entry_clerk| entry_clerk.delete(new_instance) end
-		answer_auditors = new_instance.answer_auditors
-		answer_auditors.each do |answer_auditor| answer_auditor.delete(new_instance) end
+		new_instance.interviewers.each do |i| new_instance.interviewers.delete(i) end
+		new_instance.entry_clerks.each do |e| new_instance.entry_clerks.delete(e) end
+		new_instance.answer_auditors.each do |a| new_instance.answer_auditors.delete(a) end
 
 		# the mapping of question ids
 		question_id_mapping = {}
@@ -518,7 +516,7 @@ class Survey
 				condition["question_id"] = question_id_mapping[condition["question_id"]]
 			end
 			if [1, 2].include?(logic_control_rule["rule_type"])
-				logic_control_rule["result"].each do |question_id, index|
+				logic_control_rule["result"].each_with_index do |question_id, index|
 					logic_control_rule["result"][index] = question_id_mapping[question_id]
 				end
 			elsif [3, 4].include?(logic_control_rule["rule_type"])
