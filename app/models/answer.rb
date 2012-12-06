@@ -41,7 +41,7 @@ class Answer
 	# audit time
 	field :audit_at, :type => Integer
 	# audit message content
-	field :audit_message, :type => String
+	field :audit_message, :type => String, default: ""
 
 	field :introducer_id, :type => String
 	field :point_to_introducer, :type => Integer
