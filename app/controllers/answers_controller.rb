@@ -108,7 +108,7 @@ class AnswersController < ApplicationController
 		if @answer.is_edit
 			questions = @answer.load_question(params[:question_id], params[:next_page].to_s == "true")
 			if @answer.is_finish
-				render_json_auto([@answer.status, @answer.reject_type) and return
+				render_json_auto([@answer.status, @answer.reject_type]) and return
 			else
 				render_json_auto([questions,
 								@answer.answer_content.merge(@answer.random_quality_control_answer_content),
