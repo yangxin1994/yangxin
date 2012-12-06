@@ -46,7 +46,7 @@ class Lottery
     base_num = 0
     r = random_weight
     interval = self.prizes.can_be_draw.map do |e|
-      base_num += e.weight
+      base_num += self.weight / e.weight
       {
         :weight => base_num,
         :prize => e
@@ -56,6 +56,7 @@ class Lottery
     interval.each do |i|
       if r <= i[:weight]
         i[:prize].surplus -= 1
+        i[:prize].update_ctrl_surplus
         i[:prize].save
         # lottery_code.update_attributes(
         #   :status => 2,
@@ -79,6 +80,9 @@ class Lottery
   end
 
   def auto_draw
+    self.prizes.can_be_draw.map do |prize|
+      prize.update_attribute :ctrl_type, -1
+    end
     self.lottery_codes.for_draw.each do |lc|
       self.draw lc
     end

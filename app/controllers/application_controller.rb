@@ -61,6 +61,10 @@ class ApplicationController < ActionController::Base
 										 :success => @is_success
 		}, :except => options[:except], :only => options[:only]		
 	end
+
+	def success_true
+		@is_success = true
+	end
 	
 ################################################
 	#get the information of the signed user and set @current_user

@@ -23,12 +23,9 @@ class FeedbacksController < ApplicationController
 			@feedbacks = Feedback.where(question_user_id: @current_user.id)
 		end
 
-		@feedbacks = slice((@feedbacks || []), params[:page], params[:per_page])
+		@show_feedbacks = slice((@feedbacks || []), params[:page], params[:per_page])
 
-		respond_to do |format|
-			format.html # index.html.erb
-			format.json { render json: @feedbacks }
-		end
+		render_json_auto (auto_paginate(@show_feedbacks, @feedbacks.count){@show_feedbacks}) and return
 	end
 	
 	# GET /feedbacks/1 

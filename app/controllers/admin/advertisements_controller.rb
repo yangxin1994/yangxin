@@ -17,35 +17,42 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 		elsif !params[:title].nil? then
 			@advertisements = Advertisement.list_by_title(params[:title]).desc(:updated_at)
 		else
-			@advertisements = Advertisement.all.desc(:activate, :created_at)
-		end
-		render_json true do
-			auto_paginate @advertisements do |ad|
-				ad
-			end
-		end
+# <<<<<<< HEAD
+# 			@advertisements = Advertisement.all.desc(:activate, :created_at)
+# 		end
+# 		render_json true do
+# 			auto_paginate @advertisements do |ad|
+# 				ad
+# 			end
+# 		end
 
-	end
+# 	end
 
-	# GET
-	def count
-		render_json_auto Advertisement.count
-	end
+# 	# GET
+# 	def count
+# 		render_json_auto Advertisement.count
+# 	end
 
-	#GET
-	def list_by_title_count
-		@advertisements = Advertisement.list_by_title(params[:title])
-		render_json_auto @advertisements.count
-	end
+# 	#GET
+# 	def list_by_title_count
+# 		@advertisements = Advertisement.list_by_title(params[:title])
+# 		render_json_auto @advertisements.count
+# 	end
 
-	#GET
-	def activated_count
-		render_json_auto Advertisement.activated.count
-	end
+# 	#GET
+# 	def activated_count
+# 		render_json_auto Advertisement.activated.count
+# 	end
 
-	#GET
-	def unactivate_acount
-		render_json_auto Advertisement.unactivate.count
+# 	#GET
+# 	def unactivate_acount
+# 		render_json_auto Advertisement.unactivate.count
+# =======
+			@advertisements = Advertisement.all.desc(:activate, :updated_at).page(page).per(per_page)
+		end		
+
+		render_json_auto auto_paginate(@advertisements) and return
+
 	end
 	
 	# GET /admin/advertisements/1 

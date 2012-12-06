@@ -109,7 +109,23 @@ class Admin::LotteriesController < Admin::ApplicationController
   def prize_records
     render_json false do
       Lottery.find_by_id(params[:id]) do |lottery|
-        auto_paginate lottery.prizes.wined
+        success_true
+        auto_paginate lottery.lottery_codes.drawed_w_n do |lottery_codes|
+          lottery_codes.map do |lottery_code|
+            lottery_code[:prize] = lottery_code.prize
+            lottery_code[:user] = lottery_code.user
+            lottery_code
+          end
+        end
+      end
+    end
+  end
+
+  def lottery_codes
+    render_json false do
+      Lottery.find_by_id(params[:id]) do |lottery|
+        success_true
+        auto_paginate lottery.lottery_codes
       end
     end
   end

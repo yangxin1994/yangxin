@@ -103,8 +103,22 @@ class Report::DataAdapter
 		return chart_data
 	end
 
-	def self.convert_single_matrix_choice_data(analysis_result, issue, chart_styles, segments)
-
+	def self.convert_single_matrix_choice_data(analysis_result, issue, chart_styles)
+		chart_data = []
+		issue["rows"].each do |row|
+			row_id = row["id"]
+			# obtain all the results about this row
+			cur_row_analysis_result = analysis_result.select do |k, v|
+				k.start_with?(row_id.to_s)
+			end
+			next if cur_row_analysis_result.blank?
+			cur_result_without_row_id = {}
+			cur_row_analysis_result.each do |k,v|
+				cur_result_without_row_id[k.split('-')[1]] = v
+			end
+			chart_data = chart_data + convert_single_choice_data(cur_result_without_row_id, issue, chart_styles)
+		end
+		return chart_data
 	end
 
 	def self.convert_single_number_blank_data(analysis_result, issue, chart_styles, segments)

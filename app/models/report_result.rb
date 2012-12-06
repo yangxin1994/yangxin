@@ -74,7 +74,13 @@ class ReportResult < Result
 					end
 				when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
 					analysis_result = analyze_matrix_choice(question.issue, cur_question_answer)
+					logger.info "2222222222222222222"
+					logger.info analysis_result.inspect
+					logger.info question.issue.inspect
 					text = matrix_choice_description(analysis_result, question.issue)
+					logger.info "3333333333333333333"
+					logger.info text.inspect
+					logger.info "4444444444444444444"
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
@@ -97,13 +103,7 @@ class ReportResult < Result
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::TIME_BLANK_QUESTION
 					segment = component["value"]["format"]["-1"]
-					logger.info "11111"
-					logger.info Time.at(segment[0])
-					logger.info Time.at(segment[1])
 					segment.map! { |v| v = v / 1000 } if !segment.blank?
-					logger.info "22222"
-					logger.info Time.at(segment[0])
-					logger.info Time.at(segment[1])
 					analysis_result = analyze_time_blank(question.issue,
 														cur_question_answer,
 														:segment => segment)
@@ -705,20 +705,22 @@ class ReportResult < Result
 	end
 
 	def matrix_choice_description(analysis_result, issue, opt={})
-		item_number = issue.items.length
+		item_number = issue["items"].length
 		text = opt[:cross] ? "" : "调查显示，"
 		# get description for each row respectively
-		issue.rows.each do |row|
+		issue["rows"].each do |row|
 			row_id = row["id"]
 			row_text = get_item_text_by_id(issue["rows"], row_id)
 			# obtain all the results about this row
-			cur_row_analysis_result = analysis_result.select { |k, v| k.start_with?(row_id) }
+			cur_row_analysis_result = analysis_result.select do |k, v|
+				k.start_with?(row_id.to_s)
+			end
 			next if cur_row_analysis_result.blank?
 			cur_row_results = []
 			cur_row_total_number = 0
 			cur_row_analysis_result.each do |k, select_number|
 				item_id = k.split('-')[1]
-				item_text = get_item_text_by_id(issue["items"], input_id)
+				item_text = get_item_text_by_id(issue["items"], item_id)
 				next if item_text.nil?
 				cur_row_total_number = cur_row_total_number + select_number.to_f
 				cur_row_results << { "text" => item_text, "select_number" => select_number.to_f}
@@ -727,7 +729,7 @@ class ReportResult < Result
 			item_text_ary = cur_row_results.map { |e| e["text"] }
 			ratio_ary = cur_row_results.map { |e| (e["select_number"] * 100 / cur_row_total_number).round }
 			# generate text for this row
-			cur_row_text_ary
+			cur_row_text_ary = []
 			item_text_ary.each_with_index do |item_text, index|
 				cur_row_text_ary << "#{ratio_ary[index].round(1)}%的人对#{row_text}的选择为#{item_text}"
 			end

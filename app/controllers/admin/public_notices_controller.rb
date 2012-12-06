@@ -16,34 +16,20 @@ class Admin::PublicNoticesController < Admin::ApplicationController
 			else
 				@public_notices = PublicNotice.list_by_type(params[:public_notice_type]) 
 			end
-
-			@public_notices = slice((@public_notices || []), page, per_page)
 		else
-			@public_notices = PublicNotice.all.desc(:updated_at).page(page).per(per_page)
+			@public_notices = PublicNotice.all.desc(:updated_at)
 		end
+
+		@show_public_notices = slice((@public_notices || []), page, per_page)
 
 		# if not show content
 		tmp = params[:show_content].to_s=="false" ? true : false
-		@public_notices = @public_notices.map do |e|
+		@show_public_notices = @show_public_notices.map do |e|
 			e.content = nil if tmp
 			maping(e)
 		end
 
-		render_json_auto @public_notices
-	end
-
-	def count
-		render_json_auto PublicNotice.count
-	end
-
-	def list_by_type_count
-		@public_notices = PublicNotice.list_by_type(params[:public_notice_type]) 
-		render_json_auto @public_notices.count
-	end
-
-	def list_by_type_and_value_count
-		@public_notices = PublicNotice.list_by_type_and_value(params[:public_notice_type], params[:value])
-		render_json_auto @public_notices.count
+		render_json_auto(auto_paginate(@show_public_notices, @public_notices.count){@show_public_notices}) and return
 	end
 	
 	# GET /admin/public_notices/1 

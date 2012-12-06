@@ -15,12 +15,14 @@ class PublicNoticesController < ApplicationController
 			@public_notices = PublicNotice.all.desc(:updated_at)
 		end
 
-		@public_notices = slice((@public_notices || []), params[:page], params[:per_page])
+		@show_public_notices = slice((@public_notices || []), params[:page], params[:per_page])
 
-		respond_to do |format|
-			format.html # index.html.erb
-			format.json { render json: @public_notices }
-		end
+		# respond_to do |format|
+		# 	format.html # index.html.erb
+		# 	format.json { render json: @public_notices }
+		# end
+
+		render_json_auto(auto_paginate(@show_public_notices, @public_notices.count){@show_public_notices}) and return
 	end
 	
 	# GET /public_notices/1 

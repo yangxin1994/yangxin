@@ -10,13 +10,21 @@ class Admin::MessagesController < Admin::ApplicationController
 	end
 
 	def index
-		# (Message.all.desc(:created_at).page(page).per(per_page) || []).map{ |e| maping(e) }
+# <<<<<<< HEAD
+# 		# (Message.all.desc(:created_at).page(page).per(per_page) || []).map{ |e| maping(e) }
+# 		#@messages = ErrorEnum::MessgaeNotFound if @messages.empty?
+# 		render_json true do
+# 			auto_paginate Message.all.desc(:created_at) do |messages|
+# 				(messages || []).map{ |e| maping(e) }
+# 			end
+# 		end
+# =======
+		@messages = Message.all.desc(:created_at)
+		@show_messages = auto_paginate(@messages)
+		@show_messages['data'] = @show_messages['data'].map{ |e| maping(e) }
 		#@messages = ErrorEnum::MessgaeNotFound if @messages.empty?
-		render_json true do
-			auto_paginate Message.all.desc(:created_at) do |messages|
-				(messages || []).map{ |e| maping(e) }
-			end
-		end
+		render_json_auto @show_messages
+
 	end
 
 	def count
