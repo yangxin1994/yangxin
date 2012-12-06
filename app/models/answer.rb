@@ -6,7 +6,7 @@ require 'tool'
 class Answer
 	include Mongoid::Document
 	include Mongoid::Timestamps
-	# status: 0 for editting, 1 for reject, 2 for finish, 3 for redo
+	# status: 0 for editting, 1 for reject, 2 for under review, 3 for finish, 4 for redo
 	field :status, :type => Integer, default: 0
 	field :answer_content, :type => Hash, default: {}
 	field :random_quality_control_answer_content, :type => Hash, default: {}
@@ -20,12 +20,11 @@ class Answer
 	# => logic_control_result is a hash, the key of which is question id, and the value of which has the following strucutre
 	# => => items : array of input ids that are hidden
 	# => => sub_questions : array of row ids that are hidden
+	field :finish_type, :type => Integer, default: 0
 	field :logic_control_result, :type => Hash, default: {}
 	field :repeat_time, :type => Integer, default: 0
-	# reject_type: 0 for rejected by quota, 1 for rejected by quliaty control, 2 for rejected by screen, 3 for timeout
+	# reject_type: 0 for rejected by quota, 1 for rejected by quliaty control (auto quality control), 2 for rejected by manual quality control, 3 for rejected by screen, 4 for timeout
 	field :reject_type, :type => Integer
-	# finish_type: 0 for not reviewed, 1 for passing reviewed, 2 for rejected
-	field :finish_type, :type => Integer, default: 0
 	field :username, :type => String, default: ""
 	field :password, :type => String, default: ""
 
@@ -50,18 +49,18 @@ class Answer
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
 
-	scope :finished, lambda { where(:status => 2) }
-	scope :screened, lambda { where(:status => 1, :reject_type => 2) }
-	scope :finished_and_screened, lambda { any_of({:status => 2}, {:status => 1, :reject_type => 2}) }
+	scope :finished, lambda { where(:status => 3) }
+	scope :screened, lambda { where(:status => 1, :reject_type => 3) }
+	scope :finished_and_screened, lambda { any_of({:status => 3}, {:status => 1, :reject_type => 3}) }
 
-	scope :unreviewed, lambda { where(:status => 2, :finish_type => 0) }
+	scope :unreviewed, lambda { where(:status => 2) }
 
 	belongs_to :user
 	belongs_to :survey
 
 	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
 
-	STATUS_NAME_ARY = ["edit", "reject", "finish", "redo"]
+	STATUS_NAME_ARY = ["edit", "reject", "under_review", "finish", "redo"]
 	##### answer import #####
 
 
@@ -763,12 +762,11 @@ class Answer
 		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_edit
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
-		self.set_finish
+		self.set_under_review
 		self.finished_at = Time.now.to_i
-		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as passing review
-		self.finish_type = 1 if !self.survey.has_prize && (!self.survey.spreadable || self.survey.spread_point == 0)
+		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
+		self.set_finish if !self.survey.has_prize && (!self.survey.spreadable || self.survey.spread_point == 0)
 		self.save
-		self.update_quota
 		return true
 	end
 
@@ -798,13 +796,22 @@ class Answer
 	def review(review_result, answer_auditor, message_content)
 
 		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 2
-		self.finish_type = review_result.to_i == 1 ? 1 : 2
+		if review_result
+			self.update_quota
+			self.set_finish
+		else
+			self.set_reject
+			self.reject_type = 2
+		end
 		self.auditor = answer_auditor
 		self.audit_at = Time.now.to_i
 
 		# message
-		message_content ||= "你的此问卷[#{self.survey.title}]的答案通过审核." if review_result.to_i ==1
-		message_content ||= "你的此问卷[#{self.survey.title}]的答案未通过审核." if review_result.to_i ==2
+		if review_result
+			message_content ||= "你的此问卷[#{self.survey.title}]的答案通过审核."
+		else
+			message_content ||= "你的此问卷[#{self.survey.title}]的答案未通过审核."
+		end
 
 		answer_auditor.create_message(
 				"审核问卷答案消息",
@@ -816,7 +823,7 @@ class Answer
 		self.save
 
 		# no need to give points if the answer does not pass the review
-		return if self.finish_type == 2
+		return if self.is_reject
 
 		if [1,2].include?(self.survey.reward)
 			# assign this user points, or a lottery code
