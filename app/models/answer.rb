@@ -330,14 +330,16 @@ class Answer
 			cur_page = false
 			pages_with_qc_questions.each do |page_questions|
 				page_questions.each do |q_id|
-					next if ( !self.answer_content[q_id].nil? || !self.random_quality_control_answer_content[q_id].nil? )
-					cur_page = true
 					# check if this question is the result of some logic control rule
-					logic_control_question_id.each do |ele|
-						if !(ele["condition"] & loaded_question_ids).empty? && ele["result"].include?(q_id)
-							return load_question_by_ids(loaded_question_ids)
+					if cur_page
+						logic_control_question_id.each do |ele|
+							if !(ele["condition"] & loaded_question_ids).empty? && ele["result"].include?(q_id)
+								return load_question_by_ids(loaded_question_ids)
+							end
 						end
 					end
+					next if ( !self.answer_content[q_id].nil? || !self.random_quality_control_answer_content[q_id].nil? )
+					cur_page = true
 					loaded_question_ids << q_id
 				end
 				return load_question_by_ids(loaded_question_ids) if cur_page
