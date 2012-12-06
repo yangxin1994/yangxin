@@ -526,7 +526,7 @@ class Answer
 		# an answer expires only when the survey is not published
 		if Time.now.to_i - self.created_at.to_i > 2.days.to_i && self.survey.publish_status != 8
 			self.set_reject
-			self.update_attributes(reject_type: 3, finished_at: Time.now.to_i)
+			self.update_attributes(reject_type: 4, finished_at: Time.now.to_i)
 		end
 		return self.status
 	end
@@ -598,7 +598,7 @@ class Answer
 				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]]["selection"], condition["answer"], condition["fuzzy"])
 				if pass_condition
 					self.set_reject
-					self.update_attributes(reject_type: 2, finished_at: Time.now.to_i)
+					self.update_attributes(reject_type: 3, finished_at: Time.now.to_i)
 					return false
 				end
 			end
