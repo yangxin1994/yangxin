@@ -118,7 +118,7 @@ class AnswersController < ApplicationController
 								@answer.repeat_time]) and return
 			end
 		else
-			render_json_auto([@answer.status, @answer.reject_type) and return
+			render_json_auto([@answer.status, @answer.reject_type]) and return
 		end
 	end
 
