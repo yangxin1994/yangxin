@@ -1281,7 +1281,7 @@ class Survey
 
 	def refresh_filters_stats
 		# only make statisics from the answers that are not preview answers
-		answers = self.answers.not_preview
+		answers = self.answers.not_preview.finished
 		filters_stats = Array.new(self.filters.length, 0)
 		answers.each do |answer|
 			self.filters.each_with_index do |filter, filter_index|
@@ -1295,7 +1295,7 @@ class Survey
 
 	def refresh_quota_stats
 		# only make statisics from the answers that are not preview answers
-		answers = self.answers.not_preview
+		answers = self.answers.not_preview.finished
 		quota_stats = {"quota_satisfied" => true, "answer_number" => []}
 		self.quota["rules"].length.times { quota_stats["answer_number"] << 0 }
 		answers.each do |answer|
@@ -1859,7 +1859,7 @@ class Survey
 	end
 
 	def self.list_spreaded_surveys(user)
-		answers = Answer.where(:is_preview => false, :introducer_id => user._id, :status => 2, :finish_type => 1)
+		answers = Answer.finished.where(:is_preview => false, :introducer_id => user._id)
 		surveys_with_spread_number = []
 		user.survey_spreads.each do |ss|
 			survey = ss.survey

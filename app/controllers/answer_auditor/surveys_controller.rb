@@ -15,7 +15,7 @@ class AnswerAuditor::SurveysController < AnswerAuditor::ApplicationController
 
 		@show_surveys = @surveys.page(page).per(per_page)
 		@show_surveys = @show_surveys.to_a.map{|elem| 
-			elem['not_review_answer_num']= elem.answers.where(status: 2, finish_type: 0).count
+			elem['not_review_answer_num']= elem.answers.unreviewed.count
 			elem
 		}
 
