@@ -298,7 +298,7 @@ class Result
 		scores.each do |key, score_ary|
 			result[key] = []
 			result[key] << score_ary.length
-			result[key] << (score_ary.blank? ? -1 : score_ary.mean)
+			result[key] << (score_ary.blank? ? 0 : score_ary.mean)
 		end
 	
 		return result

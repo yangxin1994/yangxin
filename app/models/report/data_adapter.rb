@@ -86,6 +86,20 @@ class Report::DataAdapter
 		case target_question_type
 		when QuestionTypeEnum::CHOICE_QUESTION
 			return self.convert_cross_choice_data(analysis_result, question_issue, target_question_issue, chart_styles)
+		when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
+			return self.convert_cross_matrix_choice_data(analysis_result, question_issue, target_question_issue, chart_styles)
+		when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+			return self.convert_cross_address_blank_data(analysis_result, question_issue, target_question_issue, chart_styles)
+		when QuestionTypeEnum::NUMBER_BLANK_QUESTION
+			return self.convert_cross_number_blank_data(analysis_result, question_issue, target_question_issue, chart_styles, opt[:segment] || [])
+		when QuestionTypeEnum::TIME_BLANK_QUESTION
+			return self.convert_cross_time_blank_data(analysis_result, question_issue, target_question_issue, chart_styles, opt[:segment] || [])
+		when QuestionTypeEnum::CONST_SUM_QUESTION
+			return self.convert_cross_const_sum_data(analysis_result, question_issue, target_question_issue, chart_styles)
+		when QuestionTypeEnum::SORT_QUESTION
+			return self.convert_cross_sort_data(analysis_result, question_issue, target_question_issue, chart_styles)
+		when QuestionTypeEnum::SCALE_QUESTION
+			return self.convert_cross_scale_data(analysis_result, question_issue, target_question_issue, chart_styles)
 		end
 	end
 
@@ -170,6 +184,30 @@ class Report::DataAdapter
 		return chart_data
 	end
 
+	def self.convert_cross_matrix_choice_data(analysis_result, question_issue, target_question_issue, chart_styles)
+		chart_data = []
+		target_question_issue["rows"].each do |row|
+			row_id = row["id"]
+			cur_result_without_row_id = {}
+			cur_result_without_row_id[:answer_number] = analysis_result[:answer_number]
+			cur_result = {}
+			analysis_result[:result].each do |id, cur_analysis_result|
+				cur_result[id] = {}
+				cur_row_analysis_result = cur_analysis_result.select do |k, v|
+					k.start_with?(row_id.to_s)
+				end
+				cur_row_analysis_result.each do |k,v|
+					cur_result[id][k.split('-')[1]] = v
+				end
+			end
+			cur_result_without_row_id[:result] = cur_result
+			Rails.logger.info "1111111111111111111111111111"
+			Rails.logger.info cur_result_without_row_id[:result].inspect
+			chart_data = chart_data + convert_cross_choice_data(cur_result_without_row_id, question_issue, target_question_issue, chart_styles)
+		end
+		return chart_data
+	end
+
 	def self.convert_single_number_blank_data(analysis_result, issue, chart_styles, segments)
 		chart_data = []
 		histogram = analysis_result["histogram"]
@@ -190,6 +228,41 @@ class Report::DataAdapter
 				data << ["Categories", "数量"]
 				interval_text_ary.each_with_index do |text, index|
 					data << [text, histogram[index]]
+				end
+			end
+			chart_data << [chart_style, data] if !data.blank?
+		end
+		return chart_data
+	end
+
+	def self.convert_cross_number_blank_data(analysis_result, question_issue, target_question_issue, chart_styles, segments)
+		chart_data = []
+		items_id, items_text = *self.get_item_id_and_text_array(question_issue)
+		interval_text_ary = []
+		interval_text_ary << "#{segments[0]}以下"
+		segments[0..-2].each_with_index do |e, index|
+			interval_text_ary << "#{e}到#{segments[index+1]}"
+		end
+		interval_text_ary << "#{segments[-1]}以上"
+		chart_styles.each do |chart_style|
+			data = []
+			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+				# categories correspond to target items, series correspond to items
+				data << ["Categories"] + interval_text_ary
+				items_id.each_with_index do |item_id, index|
+					number = analysis_result[:result][item_id]["histogram"]
+					next if number.blank?
+					data << [items_text[index]] + number
+				end
+			elsif chart_style == ChartStyleEnum::STACK
+				# categories correspond to items, series correspond to target items
+				data << ["Categories"] + items_text
+				interval_text_ary.each_with_index do |interval_text, index|
+					number = []
+					analysis_result[:result].each do |item_id, target_result|
+						number << target_result["histogram"][index]
+					end
+					data << [interval_text] + number
 				end
 			end
 			chart_data << [chart_style, data] if !data.blank?
@@ -224,12 +297,47 @@ class Report::DataAdapter
 		return chart_data
 	end
 
+	def self.convert_cross_time_blank_data(analysis_result, question_issue, target_question_issue, chart_styles, segments)
+		chart_data = []
+		items_id, items_text = *self.get_item_id_and_text_array(question_issue)
+		interval_text_ary = []
+		interval_text_ary << ReportResult.convert_time_interval_to_text(target_question_issue["format"], nil, segments[0])
+		segments[0..-2].each_with_index do |e, index|
+			interval_text_ary << ReportResult.convert_time_interval_to_text(target_question_issue["format"], e, segments[index+1])
+		end
+		interval_text_ary << ReportResult.convert_time_interval_to_text(target_question_issue["format"], segments[-1], nil)
+		chart_styles.each do |chart_style|
+			data = []
+			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+				# categories correspond to target items, series correspond to items
+				data << ["Categories"] + interval_text_ary
+				items_id.each_with_index do |item_id, index|
+					number = analysis_result[:result][item_id]["histogram"]
+					next if number.blank?
+					data << [items_text[index]] + number
+				end
+			elsif chart_style == ChartStyleEnum::STACK
+				# categories correspond to items, series correspond to target items
+				data << ["Categories"] + items_text
+				interval_text_ary.each_with_index do |interval_text, index|
+					number = []
+					analysis_result[:result].each do |item_id, target_result|
+						number << target_result["histogram"][index]
+					end
+					data << [interval_text] + number
+				end
+			end
+			chart_data << [chart_style, data] if !data.blank?
+		end
+		return chart_data
+	end
+
 	def self.convert_single_address_blank_data(analysis_result, issue, chart_styles)
 		address_text = []
 		answer_number = []
 		analysis_result.each do |region_code, number|
 			text = Address.find_text_by_code(region_code)
-			next if _text.blank?
+			next if text.blank?
 			address_text << text
 			answer_number << number
 		end
@@ -242,7 +350,7 @@ class Report::DataAdapter
 				data << ["数量"] + answer_number
 			elsif chart_style == ChartStyleEnum::STACK
 				# one category, multiple series
-				data << ["Categories"] + "数量"
+				data << ["Categories", "数量"]
 				address_text.each_with_index do |text, index|
 					data << [text, answer_number[index]]
 				end
@@ -252,20 +360,60 @@ class Report::DataAdapter
 		return chart_data
 	end
 
-	def self.convert_single_const_sum_data(analysis_result, issue, chart_styles)
-		Rails.
+	def self.convert_cross_address_blank_data(analysis_result, question_issue, target_question_issue, chart_styles)
 		chart_data = []
 		items_id, items_text = *self.get_item_id_and_text_array(question_issue)
-		target_items_id, target_items_text = *self.get_item_id_and_text_array(target_question_issue)
+		address_text = []
+		region_code = []
+		analysis_result[:result].each do |id, cur_result|
+			cur_result.each do |code, number|
+				next if region_code.include?(code)
+				text = Address.find_text_by_code(code)
+				next if text.blank?
+				region_code << code
+				address_text << text
+			end
+		end
 		chart_styles.each do |chart_style|
 			data = []
 			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
 				# categories correspond to target items, series correspond to items
+				data << ["Categories"] + address_text
+				items_id.each_with_index do |item_id, index|
+					number = []
+					region_code.each do |code|
+						number << analysis_result[:result][item_id][code].to_i
+					end
+					data << [items_text[index]] + number
+				end
+			elsif chart_style == ChartStyleEnum::STACK
+				# categories correspond to items, series correspond to target items
+				data << ["Categories"] + items_text
+				region_code.each_with_index do |code, index|
+					number = []
+					analysis_result[:result].each do |item_id, target_result|
+						number << target_result[code].to_i
+					end
+					data << [address_text[index]] + number
+				end
+			end
+			chart_data << [chart_style, data] if !data.blank?
+		end
+		return chart_data
+	end
+
+	def self.convert_single_const_sum_data(analysis_result, issue, chart_styles)
+		chart_data = []
+		items_id, items_text = *self.get_item_id_and_text_array(issue)
+		chart_styles.each do |chart_style|
+			data = []
+			if [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+				# multipe categories, one series
 				data << ["Categories"] + items_text
 				score = items_id.map { |id| analysis_result[id] }
 				data << ["平均比重"] + score
 			elsif chart_style == ChartStyleEnum::STACK
-				# categories correspond to items, series correspond to target items
+				# one category, multiple series
 				data << ["Categories", "平均比重"]
 				items_id.each_with_index do |id, index|
 					data << [items_text[index], analysis_result[id]]
@@ -277,18 +425,38 @@ class Report::DataAdapter
 	end
 
 	def self.convert_cross_const_sum_data(analysis_result, question_issue, target_question_issue, chart_styles)
-		
+		chart_data = []
+		items_id, items_text = *self.get_item_id_and_text_array(question_issue)
+		target_items_id, target_items_text = *self.get_item_id_and_text_array(target_question_issue)
+		chart_styles.each do |chart_style|
+			data = []
+			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+				# categories correspond to target items, series correspond to items
+				data << ["Categories"] + target_items_text
+				items_id.each_with_index do |item_id, index|
+					number = analysis_result[:result][item_id].values
+					next if number.blank?
+					data << [items_text[index]] + number
+				end
+			elsif chart_style == ChartStyleEnum::STACK
+				# categories correspond to items, series correspond to target items
+				data << ["Categories"] + items_text
+				target_items_id.each_with_index do |id, index|
+					number = []
+					analysis_result[:result].each do |item_id, target_result|
+						number << target_result[id.to_s]
+					end
+					data << [target_items_text[index]] + number
+				end
+			end
+			chart_data << [chart_style, data] if !data.blank?
+		end
+		return chart_data
 	end
 
 	def self.convert_single_sort_data(analysis_result, issue, chart_styles)
 		chart_data = []
-		items_id = issue["items"].map { |e| e["id"] }
-		items_text = issue["items"].map { |e| e["content"]["text"] }
-		if issue["other_item"] && issue["other_item"]["has_other_item"]
-			items_id << issue["other_item"]["id"]
-			items_text << issue["other_item"]["content"]["text"]
-		end
-		items_id.map! { |e| e.to_s }
+		items_id, items_text = *self.get_item_id_and_text_array(issue)
 		order_number = (analysis_result.map { |e| e.length }).max
 		order_text = []
 		1.upto(order_number) do |e|
@@ -327,11 +495,39 @@ class Report::DataAdapter
 		return chart_data
 	end
 
+	def self.convert_cross_sort_data(analysis_result, question_issue, target_question_issue, chart_styles)
+		chart_data = []
+		items_id, items_text = *self.get_item_id_and_text_array(question_issue)
+		target_items_id, target_items_text = *self.get_item_id_and_text_array(target_question_issue)
+		chart_styles.each do |chart_style|
+			data = []
+			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+				# categories correspond to target items, series correspond to items
+				data << ["Categories"] + target_items_text
+				items_id.each_with_index do |item_id, index|
+					number = analysis_result[:result][item_id].values.map { |e| e[0]}
+					next if number.blank?
+					data << [items_text[index]] + number
+				end
+			elsif chart_style == ChartStyleEnum::STACK
+				# categories correspond to items, series correspond to target items
+				data << ["Categories"] + items_text
+				target_items_id.each_with_index do |id, index|
+					number = []
+					analysis_result[:result].each do |item_id, target_result|
+						number << target_result[id.to_s][0]
+					end
+					data << [target_items_text[index]] + number
+				end
+			end
+			chart_data << [chart_style, data] if !data.blank?
+		end
+		return chart_data
+	end
+
 	def self.convert_single_scale_data(analysis_result, issue, chart_styles)
 		chart_data = []
-		items_id = issue["items"].map { |e| e["id"] }
-		items_text = issue["items"].map { |e| e["content"]["text"] }
-		items_id.map! { |e| e.to_s }
+		items_id, items_text = *self.get_item_id_and_text_array(issue)
 		chart_styles.each do |chart_style|
 			data = []
 			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
@@ -344,6 +540,36 @@ class Report::DataAdapter
 				data << ["Categories", "分数"]
 				items_id.each_with_index do |id, index|
 					data << [items_text[index], analysis_result[id][1]]
+				end
+			end
+			chart_data << [chart_style, data] if !data.blank?
+		end
+		return chart_data
+	end
+
+	def self.convert_cross_scale_data(analysis_result, question_issue, target_question_issue, chart_styles)
+		chart_data = []
+		items_id, items_text = *self.get_item_id_and_text_array(question_issue)
+		target_items_id, target_items_text = *self.get_item_id_and_text_array(target_question_issue)
+		chart_styles.each do |chart_style|
+			data = []
+			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+				# categories correspond to target items, series correspond to items
+				data << ["Categories"] + target_items_text
+				items_id.each_with_index do |item_id, index|
+					number = analysis_result[:result][item_id].values.map { |e| e[1]}
+					next if number.blank?
+					data << [items_text[index]] + number
+				end
+			elsif chart_style == ChartStyleEnum::STACK
+				# categories correspond to items, series correspond to target items
+				data << ["Categories"] + items_text
+				target_items_id.each_with_index do |id, index|
+					number = []
+					analysis_result[:result].each do |item_id, target_result|
+						number << target_result[id.to_s][1]
+					end
+					data << [target_items_text[index]] + number
 				end
 			end
 			chart_data << [chart_style, data] if !data.blank?
