@@ -74,13 +74,7 @@ class ReportResult < Result
 					end
 				when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
 					analysis_result = analyze_matrix_choice(question.issue, cur_question_answer)
-					logger.info "2222222222222222222"
-					logger.info analysis_result.inspect
-					logger.info question.issue.inspect
 					text = matrix_choice_description(analysis_result, question.issue)
-					logger.info "3333333333333333333"
-					logger.info text.inspect
-					logger.info "4444444444444444444"
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
@@ -195,10 +189,10 @@ class ReportResult < Result
 			else
 				question_id = component["value"]["id"]
 				target_question_id = component["value"]["target"]["id"]
-				question_index = survey.all_questions_id.index(qustion_id)
-				target_question_index = survey.all_questions_id.index(qustion_id)
+				question_index = survey.all_questions_id.index(question_id)
+				target_question_index = survey.all_questions_id.index(target_question_id)
 				next if question_index.nil? || target_question_index.nil?
-				report_data.push_component(Report::Data::HEADING_2, "text" => "第#{question_index}题，第#{target_question_index}题交叉分析")
+				report_data.push_component(Report::Data::HEADING_2, "text" => "第#{question_index+1}题，第#{target_question_index+1}题交叉分析")
 
 				question = BasicQuestion.find_by_id(question_id)
 				target_question = BasicQuestion.find_by_id(target_question_id)
@@ -426,29 +420,29 @@ class ReportResult < Result
 				target_question_sub_answer_ary[item_id] << target_question_answer
 			end
 		end
-		result = {:answer_number => {}}
+		result = {:answer_number => {}, :result => {}}
 		question_issue["items"].each do |item|
 			case question_type
 			when QuestionTypeEnum::CHOICE_QUESTION
-				result[:result][item["id"]] = analyze_choice(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"].to_s] = analyze_choice(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
 			when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
-				result[:result][item["id"]] = analyze_matrix_choice(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"].to_s] = analyze_matrix_choice(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-				result[:result][item["id"]] = analyze_number_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"].to_s] = analyze_number_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::TIME_BLANK_QUESTION
-				result[:result][item["id"]] = analyze_time_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"].to_s] = analyze_time_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
-				result[:result][item["id"]] = analyze_address_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"].to_s] = analyze_address_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::BLANK_QUESTION
-				result[:result][item["id"]] = analyze_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"].to_s] = analyze_blank(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::CONST_SUM_QUESTION
-				result[:result][item["id"]] = analyze_const_sum(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"].to_s] = analyze_const_sum(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::SORT_QUESTION
-				result[:result][item["id"]] = analyze_sort(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"].to_s] = analyze_sort(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			when QuestionTypeEnum::SCALE_QUESTION
-				result[:result][item["id"]] = analyze_scale(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
+				result[:result][item["id"].to_s] = analyze_scale(target_question_issue, target_question_sub_answer_ary[item["id"]], opt)
 			end
-			result[:answer_number][item["id"]] = target_question_sub_answer_ary[item["id"]].length
+			result[:answer_number][item["id"].to_s] = (target_question_sub_answer_ary[item["id"].to_s] || []).length
 		end
 		return result
 	end
@@ -515,6 +509,7 @@ class ReportResult < Result
 
 	def sort_description(analysis_result, issue, opt={})
 		answer_number = opt[:answer_number]
+		return "" if answer_number == 0
 		return "" if analysis_result.blank?
 		first_index_dist = {}
 		second_index_dist = {}
@@ -595,6 +590,7 @@ class ReportResult < Result
 			total_number = total_number + number
 			results << { "text" => address_text, "number" => number.to_f }
 		end
+		return "" if total_number == 0
 		results.sort_by! { |e| -e["number"] }
 		address_text_ary = results.map { |e| e["text"] }
 		ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
@@ -639,6 +635,7 @@ class ReportResult < Result
 			total_number = total_number + number
 			results << { "text" => interval_text_ary[index], "number" => number.to_f }
 		end
+		return text if total_number == 0
 		results.sort_by! { |e| -e["number"] }
 		interval_text_ary = results.map { |e| e["text"] }
 		ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
@@ -681,6 +678,7 @@ class ReportResult < Result
 			total_number = total_number + number
 			results << { "text" => interval_text_ary[index], "number" => number.to_f }
 		end
+		return text if total_number == 0
 		results.sort_by! { |e| -e["number"] }
 		interval_text_ary = results.map { |e| e["text"] }
 		ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
@@ -725,6 +723,7 @@ class ReportResult < Result
 				cur_row_total_number = cur_row_total_number + select_number.to_f
 				cur_row_results << { "text" => item_text, "select_number" => select_number.to_f}
 			end
+			next if cur_row_total_number == 0
 			cur_row_results.sort_by! { |e| -e["select_number"] }
 			item_text_ary = cur_row_results.map { |e| e["text"] }
 			ratio_ary = cur_row_results.map { |e| (e["select_number"] * 100 / cur_row_total_number).round }
@@ -747,6 +746,7 @@ class ReportResult < Result
 			total_number = total_number + select_number
 			results << { "text" => item_text, "select_number" => select_number.to_f }
 		end
+		return "" if total_number == 0
 		temp_results = results.clone
 		temp_results.sort_by! { |e| -e["select_number"] }
 		item_text_ary = temp_results.map { |e| e["text"] }
@@ -775,6 +775,7 @@ class ReportResult < Result
 
 	def multiple_choice_description(analysis_result, issue, opt={})
 		answer_number = opt[:answer_number]
+		return "" if answer_number == 0
 		chart_type = opt[:chart_type]
 		# the description for multiple choice question with pie chart is exactly the same as the single choice question
 		return single_choice_description(analysis_result, issue, opt) if chart_type == "pie"
