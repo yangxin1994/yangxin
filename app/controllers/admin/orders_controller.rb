@@ -3,7 +3,6 @@ class Admin::OrdersController < Admin::ApplicationController
   def index
     render_json true do
       auto_paginate(Order.all) do |orders|
-        binding.pry
         orders.map do |o|
           o["gift_name"] = o.gift.name unless o.gift.nil?
           o

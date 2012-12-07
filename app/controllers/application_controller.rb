@@ -32,9 +32,6 @@ class ApplicationController < ActionController::Base
 			#retval["data"] = eval(value + '.page(retval["current_page"]).per(retval["per_page"])' )
 			retval["data"] = value.page(retval["current_page"]).per(retval["per_page"])
 		end
-
-
-
 		retval["total_page"] = ( (count || value.count )/ per_page.to_f ).ceil
 		retval["total_page"] = retval["total_page"] == 0 ? 1 : retval["total_page"]
 		retval["next_page"] = (page+1 <= retval["total_page"] ? page+1: retval["total_page"])
@@ -63,6 +60,10 @@ class ApplicationController < ActionController::Base
 		render :json => {:value => block_given? ? yield(@is_success) : @is_success ,
 										 :success => @is_success
 		}, :except => options[:except], :only => options[:only]		
+	end
+
+	def success_true
+		@is_success = true
 	end
 	
 ################################################
