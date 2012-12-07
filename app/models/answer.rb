@@ -6,7 +6,7 @@ require 'tool'
 class Answer
 	include Mongoid::Document
 	include Mongoid::Timestamps
-	# status: 0 for editting, 1 for reject, 2 for finish, 3 for redo
+	# status: 0 for editting, 1 for reject, 2 for under review, 3 for finish, 4 for redo
 	field :status, :type => Integer, default: 0
 	field :answer_content, :type => Hash, default: {}
 	field :random_quality_control_answer_content, :type => Hash, default: {}
@@ -20,12 +20,11 @@ class Answer
 	# => logic_control_result is a hash, the key of which is question id, and the value of which has the following strucutre
 	# => => items : array of input ids that are hidden
 	# => => sub_questions : array of row ids that are hidden
+	field :finish_type, :type => Integer, default: 0
 	field :logic_control_result, :type => Hash, default: {}
 	field :repeat_time, :type => Integer, default: 0
-	# reject_type: 0 for rejected by quota, 1 for rejected by quliaty control, 2 for rejected by screen, 3 for timeout
+	# reject_type: 0 for rejected by quota, 1 for rejected by quliaty control (auto quality control), 2 for rejected by manual quality control, 3 for rejected by screen, 4 for timeout
 	field :reject_type, :type => Integer
-	# finish_type: 0 for not reviewed, 1 for passing reviewed, 2 for rejected
-	field :finish_type, :type => Integer, default: 0
 	field :username, :type => String, default: ""
 	field :password, :type => String, default: ""
 
@@ -42,7 +41,7 @@ class Answer
 	# audit time
 	field :audit_at, :type => Integer
 	# audit message content
-	field :audit_message, :type => String
+	field :audit_message, :type => String, default: ""
 
 	field :introducer_id, :type => String
 	field :point_to_introducer, :type => Integer
@@ -50,18 +49,18 @@ class Answer
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
 
-	scope :finished, lambda { where(:status => 2) }
-	scope :screened, lambda { where(:status => 1, :reject_type => 2) }
-	scope :finished_and_screened, lambda { any_of({:status => 2}, {:status => 1, :reject_type => 2}) }
+	scope :finished, lambda { where(:status => 3) }
+	scope :screened, lambda { where(:status => 1, :reject_type => 3) }
+	scope :finished_and_screened, lambda { any_of({:status => 3}, {:status => 1, :reject_type => 3}) }
 
-	scope :unreviewed, lambda { where(:status => 2, :finish_type => 0) }
+	scope :unreviewed, lambda { where(:status => 2) }
 
 	belongs_to :user
 	belongs_to :survey
 
 	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
 
-	STATUS_NAME_ARY = ["edit", "reject", "finish", "redo"]
+	STATUS_NAME_ARY = ["edit", "reject", "under_review", "finish", "redo"]
 	##### answer import #####
 
 
@@ -330,14 +329,16 @@ class Answer
 			cur_page = false
 			pages_with_qc_questions.each do |page_questions|
 				page_questions.each do |q_id|
-					next if ( !self.answer_content[q_id].nil? || !self.random_quality_control_answer_content[q_id].nil? ) && !cur_page
-					cur_page = true
 					# check if this question is the result of some logic control rule
-					logic_control_question_id.each do |ele|
-						if !(ele["condition"] & loaded_question_ids).empty? && ele["result"].include?(q_id)
-							return load_question_by_ids(loaded_question_ids)
+					if cur_page
+						logic_control_question_id.each do |ele|
+							if !(ele["condition"] & loaded_question_ids).empty? && ele["result"].include?(q_id)
+								return load_question_by_ids(loaded_question_ids)
+							end
 						end
 					end
+					next if ( !self.answer_content[q_id].nil? || !self.random_quality_control_answer_content[q_id].nil? )
+					cur_page = true
 					loaded_question_ids << q_id
 				end
 				return load_question_by_ids(loaded_question_ids) if cur_page
@@ -385,13 +386,14 @@ class Answer
 	#* true:
 	#* false:
 	def add_logic_control_result(question_id, items, sub_questions)
+		return if self.survey.is_pageup_allowed
 		if self.logic_control_result[question_id].nil?
 			self.logic_control_result[question_id] = {"items" => items, "sub_questions" => sub_questions}
 		else
-			self.logic_control_result[question_id["items"]] = 
-				(self.logic_control_result[question_id["items"]].to_a + items.to_a).uniq
-			self.logic_control_result[question_id["sub_questions"]] = 
-				(self.logic_control_result[question_id["sub_questions"]].to_a + items.to_a).uniq
+			self.logic_control_result[question_id]["items"] = 
+				(self.logic_control_result[question_id]["items"].to_a + items.to_a).uniq
+			self.logic_control_result[question_id]["sub_questions"] = 
+				(self.logic_control_result[question_id]["sub_questions"].to_a + sub_questions.to_a).uniq
 		end
 		return self.save
 	end
@@ -407,6 +409,7 @@ class Answer
 	#* true:
 	#* false:
 	def remove_logic_control_result(question_id, items, sub_questions)
+		return if self.survey.is_pageup_allowed
 		return if self.logic_control_result[question_id].nil?
 		cur_items = self.logic_control_result[question_id]["items"].to_a
 		cur_sub_questions = self.logic_control_result[question_id]["sub_questions"].to_a
@@ -523,7 +526,7 @@ class Answer
 		# an answer expires only when the survey is not published
 		if Time.now.to_i - self.created_at.to_i > 2.days.to_i && self.survey.publish_status != 8
 			self.set_reject
-			self.update_attributes(reject_type: 3, finished_at: Time.now.to_i)
+			self.update_attributes(reject_type: 4, finished_at: Time.now.to_i)
 		end
 		return self.status
 	end
@@ -595,7 +598,7 @@ class Answer
 				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]]["selection"], condition["answer"], condition["fuzzy"])
 				if pass_condition
 					self.set_reject
-					self.update_attributes(reject_type: 2, finished_at: Time.now.to_i)
+					self.update_attributes(reject_type: 3, finished_at: Time.now.to_i)
 					return false
 				end
 			end
@@ -661,6 +664,7 @@ class Answer
 	end
 
 	def update_logic_control_result(answer_content)
+		return if self.survey.is_pageup_allowed
 		# array of ids of the questinos that the volunteer answers this time
 		volunteer_answer_question_id_ary = answer_content.keys
 		logic_control = self.survey.show_logic_control
@@ -758,12 +762,11 @@ class Answer
 		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_edit
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
-		self.set_finish
+		self.set_under_review
 		self.finished_at = Time.now.to_i
-		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as passing review
-		self.finish_type = 1 if !self.survey.has_prize && (!self.survey.spreadable || self.survey.spread_point == 0)
+		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
+		self.set_finish if !self.survey.has_prize && (!self.survey.spreadable || self.survey.spread_point == 0)
 		self.save
-		self.update_quota
 		return true
 	end
 
@@ -793,13 +796,22 @@ class Answer
 	def review(review_result, answer_auditor, message_content)
 
 		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 2
-		self.finish_type = review_result.to_i == 1 ? 1 : 2
+		if review_result
+			self.update_quota
+			self.set_finish
+		else
+			self.set_reject
+			self.reject_type = 2
+		end
 		self.auditor = answer_auditor
 		self.audit_at = Time.now.to_i
 
 		# message
-		message_content ||= "你的此问卷[#{self.survey.title}]的答案通过审核." if review_result.to_i ==1
-		message_content ||= "你的此问卷[#{self.survey.title}]的答案未通过审核." if review_result.to_i ==2
+		if review_result
+			message_content ||= "你的此问卷[#{self.survey.title}]的答案通过审核."
+		else
+			message_content ||= "你的此问卷[#{self.survey.title}]的答案未通过审核."
+		end
 
 		answer_auditor.create_message(
 				"审核问卷答案消息",
@@ -811,7 +823,7 @@ class Answer
 		self.save
 
 		# no need to give points if the answer does not pass the review
-		return if self.finish_type == 2
+		return if self.is_reject
 
 		if [1,2].include?(self.survey.reward)
 			# assign this user points, or a lottery code

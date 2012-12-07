@@ -108,7 +108,7 @@ class AnswersController < ApplicationController
 		if @answer.is_edit
 			questions = @answer.load_question(params[:question_id], params[:next_page].to_s == "true")
 			if @answer.is_finish
-				render_json_auto([@answer.status, @answer.reject_type, @answer.finish_type]) and return
+				render_json_auto([@answer.status, @answer.reject_type, @answer.audit_message]) and return
 			else
 				render_json_auto([questions,
 								@answer.answer_content.merge(@answer.random_quality_control_answer_content),
@@ -118,7 +118,7 @@ class AnswersController < ApplicationController
 								@answer.repeat_time]) and return
 			end
 		else
-			render_json_auto([@answer.status, @answer.reject_type, @answer.finish_type]) and return
+			render_json_auto([@answer.status, @answer.reject_type, @answer.audit_message]) and return
 		end
 	end
 
@@ -176,7 +176,7 @@ class AnswersController < ApplicationController
 			end
 		end
 		respond_to do |format|
-			format.json	{ render_json_auto(@answer._id.to_s) and return }
+			format.json	{ render_json_auto(@answer) and return }
 		end
 	end
 

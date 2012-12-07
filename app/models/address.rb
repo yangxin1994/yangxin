@@ -7,6 +7,9 @@ class Address
 	@@province_cities = nil
 	@@city_towns = nil
 
+	@@all_cities = nil
+	@@all_counties = nil
+
 	def self.generate_address_file
 		csv_text = File.read('lib/list.csv')
 		csv = CSV.parse(csv_text, :headers => false)

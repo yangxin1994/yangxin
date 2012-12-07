@@ -12,8 +12,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 
 		render_json_auto auto_paginate(survey.answers.where(
 			status: params[:status].to_i, 
-			finish_type: params[:finish_type].to_i
-		)) and return if params[:status] && params[:finish_type]
+		)) and return if params[:status]
 
 		render_json_auto auto_paginate(survey.answers.where(
 			status: params[:status].to_i
@@ -26,7 +25,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 		answer = Answer.find_by_id(params[:id])
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
 		# passing if not.
-		if answer.finish_type == 1
+		if answer.is_finish
 			answer["is_pass"] = true 
 			answer['auditor_email'] = answer.auditor.email if answer.auditor
 		else
@@ -376,17 +375,10 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 		render_json_auto(answer, :only => [:question_content, :is_pass, :auditor_email, :audit_at, :audit_message])
 	end
 
-	# def update
-	# 	answer = Answer.find_by_id(params[:id])
-	# 	render_json_auto Error::ANSWER_NOT_EXIST and return unless answer 
-	# 	answer.update_attributes({finish_type: params[:finish_type].to_i})
-	# 	render_json_auto answer.save
-	# end
-
 	def review
 		answer = Answer.find_by_id(params[:id])
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
-		retval = answer.review(params[:review_result], @current_user, params[:message_content])
+		retval = answer.review(params[:review_result].to_s == "true", @current_user, params[:message_content])
 		render_json_auto(retval)
 	end
 end
