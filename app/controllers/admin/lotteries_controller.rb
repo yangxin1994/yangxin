@@ -97,7 +97,8 @@ class Admin::LotteriesController < Admin::ApplicationController
     render_json false do
       Lottery.find_by_id(params[:id]) do |lottery|
         lottery.prizes.find_by_id(params[:prize_id]) do |prize|
-          unless user = User.find_by_id(params[:user_id]).nil?
+          user = User.find_by_id(params[:user_id])
+          unless user.nil?
             @is_success = true
             lottery.assign_prize(user, prize)
           end
@@ -125,7 +126,12 @@ class Admin::LotteriesController < Admin::ApplicationController
     render_json false do
       Lottery.find_by_id(params[:id]) do |lottery|
         success_true
-        auto_paginate lottery.lottery_codes
+        auto_paginate lottery.lottery_codes.all do |lottery_codes|
+          lottery_codes.map do |lottery_code|
+            lottery_code[:user] = lottery_code.user
+            lottery_code            
+          end
+        end
       end
     end
   end

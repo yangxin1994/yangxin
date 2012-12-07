@@ -92,6 +92,8 @@ class Lottery
     lottery_code = give_lottery_code_to(user)
     lottery_code.prize = prize
     lottery_code.status = 2
+    lottery_code.prize.surplus -= 1
+    lottery_code.prize.save
     lottery_code.save
   end
 
