@@ -5,6 +5,7 @@ class Admin::OrdersController < Admin::ApplicationController
       auto_paginate(Order.all) do |orders|
         orders.map do |o|
           o["gift_name"] = o.gift.name unless o.gift.nil?
+          o["gift_name"] = o.prize.name if o.is_prize && !o.prize.nil?
           o
         end
       end
