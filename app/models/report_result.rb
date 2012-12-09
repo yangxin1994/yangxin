@@ -320,31 +320,42 @@ class ReportResult < Result
 													answers_transform[question_id],
 													answers_transform[target_question_id],
 													:segment => component["value"]["target"]["format"])
-					target_question.issue.items.each do |item|
+					target_question.issue["items"].each do |item|
 						id = item["id"]
 						sub_question_type = item["data_type"]
 						sub_question_issue = item["properties"]
-						sub_analysis_result = analysis_result[:result].merge(analysis_result[:result]) do |k,v|
-							v = {id => v[id]}
+						sub_analysis_result = {}
+						sub_analysis_result[:answer_number] = analysis_result[:answer_number]
+						sub_analysis_result[:result] = {}
+						analysis_result[:result].each do |item_id, sub_question_result|
+							sub_analysis_result[:result][item_id] = sub_question_result[id.to_s]
 						end
 						case sub_question_type
 						when "Number"
-							text = number_blank_description(sub_analysis_result,
-																	sub_question_issue,
-																	:segment => component["value"]["target"]["format"][id.to_s])
 							sub_question_type = QuestionTypeEnum::NUMBER_BLANK_QUESTION
+							text = cross_description(sub_question_type,
+													sub_analysis_result,
+													question.issue,
+													sub_question_issue,
+													:segment => component["value"]["target"]["format"][id.to_s])
 						when "Time"
-							text = time_blank_description(sub_analysis_result,
-																sub_question_issue,
-																:segment => component["value"]["target"]["format"][id.to_s])
 							sub_question_type = QuestionTypeEnum::TIME_BLANK_QUESTION
+							text = cross_description(sub_question_type,
+													sub_analysis_result,
+													question.issue,
+													sub_question_issue,
+													:segment => component["value"]["target"]["format"][id.to_s])
 						when "Address"
-							text = address_blank_description(sub_analysis_result, sub_question_issue)
 							sub_question_type = QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+							text = cross_description(sub_question_type,
+													sub_analysis_result,
+													question.issue,
+													sub_question_issue)
 						end
 						report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
-						chart_components = Report::DataAdapter.convert_single_data(sub_question_type,
+						chart_components = Report::DataAdapter.convert_cross_data(sub_question_type,
 																			sub_analysis_result,
+																			question.issue,
 																			sub_question_issue,
 																			component["chart_style"],
 																			:segment => component["value"]["target"]["format"][id.to_s])

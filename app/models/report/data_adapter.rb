@@ -201,8 +201,6 @@ class Report::DataAdapter
 				end
 			end
 			cur_result_without_row_id[:result] = cur_result
-			Rails.logger.info "1111111111111111111111111111"
-			Rails.logger.info cur_result_without_row_id[:result].inspect
 			chart_data = chart_data + convert_cross_choice_data(cur_result_without_row_id, question_issue, target_question_issue, chart_styles)
 		end
 		return chart_data

@@ -219,7 +219,7 @@ class Result
 	def analyze_blank(issue, answer_ary, opt={})
 		result = {}
 		issue["items"].each_with_index do |input, input_index|
-			segment = opt[:segment].nil? ? nil : opt[:segment][input["id"]]
+			segment = opt[:segment].nil? ? nil : opt[:segment][input["id"].to_s]
 			case input["data_type"]
 			when "Number"
 				result[input["id"].to_s] = analyze_number_blank(input["properties"],

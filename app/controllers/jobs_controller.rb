@@ -71,7 +71,7 @@ class JobsController < ApplicationController
 														:tot_answer_number => tot_answer_number,
 														:screened_answer_number => screened_answer_number,
 														:ref_result_id => existing_analysis_result._id)
-				return
+				render_json_auto(true) and return
 			end
 			survey.analysis_results << analysis_result
 			# analyze and save the analysis result
@@ -105,7 +105,7 @@ class JobsController < ApplicationController
 				report_result = ReportResult.create(:result_key => result_key,
 													:task_id => params["task_id"],
 													:ref_result_id => existing_report_result._id)
-				return
+				render_json_auto(true) and return
 			end
 
 			survey.report_results << report_result
