@@ -56,12 +56,23 @@ class JobsController < ApplicationController
 																					params[:include_screened_answer].to_s == "true",
 																					params[:task_id])
 			# generate the result_key
-			result_key = AnalysisResult.generate_result_key(answers)
-			# create analysis result
-			analysis_result = AnalysisResult.create(:result_key => result_key,
-													:task_id => params[:task_id],
-													:tot_answer_number => tot_answer_number,
-													:screened_answer_number => screened_answer_number)
+			result_key = AnalysisResult.generate_result_key(answers, tot_answer_number, screened_answer_number)
+			existing_analysis_result = AnalysisResult.find_by_result_key(result_key)
+			if existing_analysis_result.nil?
+				# create analysis result
+				analysis_result = AnalysisResult.create(:result_key => result_key,
+														:task_id => params[:task_id],
+														:tot_answer_number => tot_answer_number,
+														:screened_answer_number => screened_answer_number)
+			else
+				# create analysis result
+				analysis_result = AnalysisResult.create(:result_key => result_key,
+														:task_id => params[:task_id],
+														:tot_answer_number => tot_answer_number,
+														:screened_answer_number => screened_answer_number,
+														:ref_result_id => existing_analysis_result._id)
+				return
+			end
 			survey.analysis_results << analysis_result
 			# analyze and save the analysis result
 			retval = analysis_result.analysis(answers, params[:task_id])
@@ -79,13 +90,24 @@ class JobsController < ApplicationController
 				report_mockup = ReportMockup.find_by_id(params[:report_mockup_id])
 			end
 			# generate result key
-			result_key = ReportResult.generate_result_key(answers,
+			result_key = ReportResult.generate_result_key(survey.last_update_time,
+														answers,
 														report_mockup,
 														params[:report_type],
 														params[:report_style])
-			# create new result record
-			report_result = ReportResult.create(:result_key => result_key,
-												:task_id => params["task_id"])
+
+			existing_report_result = ReportResult.find_by_result_key(result_key)
+			if existing_report_result.nil?
+				# create new result record
+				report_result = ReportResult.create(:result_key => result_key,
+													:task_id => params["task_id"])
+			else
+				report_result = ReportResult.create(:result_key => result_key,
+													:task_id => params["task_id"],
+													:ref_result_id => existing_report_result._id)
+				return
+			end
+
 			survey.report_results << report_result
 			# transform the answers
 			answers_transform = {}

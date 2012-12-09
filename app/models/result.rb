@@ -18,8 +18,7 @@ class Result
 
 	def self.find_by_task_id(task_id)
 		result = Result.where(:task_id => task_id).first
-		#return nil if result.nil?
-		#return Result.where(:result_key => result.result_key, :ref_result_id => nil).first
+		return Result.where(:result_key => result.result_key, :ref_result_id => nil).first
 	end
 
 	def self.find_by_result_key(result_key)

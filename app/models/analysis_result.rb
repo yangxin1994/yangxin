@@ -17,9 +17,9 @@ class AnalysisResult < Result
 
 	belongs_to :survey
 
-	def self.generate_result_key(answers)
+	def self.generate_result_key(answers, tot_answer_number, screened_answer_number)
 		answer_ids = answers.map { |e| e._id.to_s }
-		result_key = Digest::MD5.hexdigest("analysis-#{answer_ids.to_s}")
+		result_key = Digest::MD5.hexdigest("analysis-#{answer_ids.to_s}-#{tot_answer_number}-#{screened_answer_number}")
 		return result_key
 	end
 
@@ -148,14 +148,16 @@ class AnalysisResult < Result
 	end
 
 	def self.get_data_list(task_id)
-		analysis_result = self.where(:task_id => task_id)[0]
+		# analysis_result = self.where(:task_id => task_id)[0]
+		analysis_result = self.find_by_task_id(task_id)
 		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
 		return {:result_key => analysis_result.result_key,
 				:answer_info => analysis_result.answer_info}
 	end
 
 	def self.get_stats(task_id)
-		analysis_result = self.where(:task_id => task_id)[0]
+		# analysis_result = self.where(:task_id => task_id)[0]
+		analysis_result = self.find_by_task_id(task_id)
 		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
 		return {:tot_answer_number => analysis_result.tot_answer_number,
 				:screened_answer_number => analysis_result.screened_answer_number,
@@ -166,7 +168,8 @@ class AnalysisResult < Result
 	end
 
 	def self.get_analysis_result(task_id, page_index)
-		analysis_result = self.where(:task_id => task_id)[0]
+		# analysis_result = self.where(:task_id => task_id)[0]
+		analysis_result = self.find_by_task_id(task_id)
 		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
 		page = analysis_result.survey.pages[page_index]
 		return ErrorEnum::OVERFLOW if page.nil?
