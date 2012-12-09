@@ -23,6 +23,7 @@ class ApplicationController < ActionController::Base
 
 		# 当没有block或者传入的是一个mongoid集合对象时就自动分页
 		# TODO : 更优的判断是否mongoid对象?
+		# instance_of?(Mongoid::Criteria) .by lcm
 		if block_given? 
 			if value.methods.include? :page
 				value = value.page(retval["current_page"]).per(retval["per_page"])

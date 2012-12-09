@@ -1,8 +1,20 @@
 class Admin::SurveysController < Admin::ApplicationController
 
-	def wait_to_community
-		@surveys = Survey.normal.where(:publish_status.gt => 2).asc(:show_in_community).desc(:created_at)
-		render_json_auto auto_paginate(@surveys)
+	def index
+		@surveys = Survey.normal.where(:publish_status => params[:publish_status].to_i).desc(:created_at)
+		@surveys = @surveys.where(:show_in_community => params["show_in_community"].to_s == 'true') if params[:show_in_community]
+		# search 
+		@surveys = @surveys.where(title: /.*#{params[:title]}.*/) if params[:title]
+		
+		if params[:email].nil?
+			render_json_auto auto_paginate(@surveys) and return
+		else
+			@surveys = @surveys.to_a.select do |s|
+				s.user.email.include?(params[:email].to_s)
+			end
+
+			render_json_auto auto_paginate(@surveys){@surveys.slice((page-1)*per_page, per_page)} and return
+		end
 	end
 
 	def show

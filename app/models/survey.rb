@@ -1922,4 +1922,14 @@ class Survey
 		end
 		return number
 	end
+
+	def last_update_time
+		last_update_time = self.updated_at.to_i
+		self.all_questions_id.each do |q_id|
+			q = BasicQuestion.find_by_id(q_id)
+			next if q.nil?
+			last_update_time = [last_update_time, q.updated_at.to_i].max
+		end
+		return last_update_time
+	end
 end

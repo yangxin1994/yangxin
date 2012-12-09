@@ -18,8 +18,7 @@ class Result
 
 	def self.find_by_task_id(task_id)
 		result = Result.where(:task_id => task_id).first
-		#return nil if result.nil?
-		#return Result.where(:result_key => result.result_key, :ref_result_id => nil).first
+		return Result.where(:result_key => result.result_key, :ref_result_id => nil).first
 	end
 
 	def self.find_by_result_key(result_key)
@@ -220,7 +219,7 @@ class Result
 	def analyze_blank(issue, answer_ary, opt={})
 		result = {}
 		issue["items"].each_with_index do |input, input_index|
-			segment = opt[:segment].nil? ? nil : opt[:segment][input["id"]]
+			segment = opt[:segment].nil? ? nil : opt[:segment][input["id"].to_s]
 			case input["data_type"]
 			when "Number"
 				result[input["id"].to_s] = analyze_number_blank(input["properties"],
@@ -298,7 +297,7 @@ class Result
 		scores.each do |key, score_ary|
 			result[key] = []
 			result[key] << score_ary.length
-			result[key] << (score_ary.blank? ? -1 : score_ary.mean)
+			result[key] << (score_ary.blank? ? 0 : score_ary.mean)
 		end
 	
 		return result

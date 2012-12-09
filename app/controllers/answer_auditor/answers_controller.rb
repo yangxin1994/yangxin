@@ -10,9 +10,11 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 		end
 		render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
 
+		# sometime, admin need to diff reject answers which are rejected by system or answer_auditor.
 		render_json_auto auto_paginate(survey.answers.where(
-			status: params[:status].to_i, 
-		)) and return if params[:status]
+			:status => params[:status].to_i, 
+			:reject_type.in => params[:reject_types]
+		)) and return if params[:status] && params[:reject_types] && params[:reject_types].is_a?(Array)
 
 		render_json_auto auto_paginate(survey.answers.where(
 			status: params[:status].to_i
@@ -24,13 +26,8 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 	def show
 		answer = Answer.find_by_id(params[:id])
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
-		# passing if not.
-		if answer.is_finish
-			answer["is_pass"] = true 
-			answer['auditor_email'] = answer.auditor.email if answer.auditor
-		else
-			answer["is_pass"] = false
-		end
+		# audited, if not.
+		answer['auditor_email'] = answer.auditor.email if answer.auditor
 
 		answer["question_content"] = []
 		answer.answer_content.each do |key, val|
@@ -372,7 +369,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 			
 		end
 
-		render_json_auto(answer, :only => [:question_content, :is_pass, :auditor_email, :audit_at, :audit_message])
+		render_json_auto(answer, :only => [:question_content, :auditor_email, :audit_at, :audit_message, :status])
 	end
 
 	def review
@@ -380,5 +377,11 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
 		retval = answer.review(params[:review_result].to_s == "true", @current_user, params[:message_content])
 		render_json_auto(retval)
+	end
+
+	def destroy
+		answer = Answer.find_by_id(params[:id])
+		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
+		render_json_auto(answer.destroy)
 	end
 end

@@ -48,7 +48,7 @@ OopsData::Application.routes.draw do
 
 		resources :surveys do 
 			collection do 
-				get 'wait_to_community' , 'show_user_attr_survey'
+				get 'show_user_attr_survey'
 				put 'add_template_question'
 			end
 			member do
