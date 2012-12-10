@@ -151,7 +151,7 @@ class Admin::UsersController < Admin::ApplicationController
 	end
 
 	def add_point
-		@reward_log = @current_user.operate_point(params[:point], params[:id])
+		@reward_log = @current_user.operate_point(params[:point], params[:cause_desc], params[:id])
 		render_json(@reward_log.valid?) do
 			@reward_log.as_retval
 		end
