@@ -81,14 +81,10 @@ class Admin::UsersController < Admin::ApplicationController
 
 	def orders
 		@user = User.find_by_id params[:id]
-		# binding.pry
 		render_json(@user.is_a? User) do |s|
 			if s
-				if params[:scope]
-					auto_paginate @user.orders.send(params[:scope].to_s)
-				else
-					auto_paginate @user.orders
-				end
+				params[:scope] = "all" if params[:scope].blank?	
+				auto_paginate @user.orders.send(params[:scope].to_s)
 			else
 				{
 					:error_code => ErrorEnum::USER_NOT_EXIST,
