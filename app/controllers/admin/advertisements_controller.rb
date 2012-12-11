@@ -17,37 +17,6 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 		elsif !params[:title].nil? then
 			@advertisements = Advertisement.list_by_title(params[:title]).desc(:updated_at)
 		else
-# <<<<<<< HEAD
-# 			@advertisements = Advertisement.all.desc(:activate, :created_at)
-# 		end
-# 		render_json true do
-# 			auto_paginate @advertisements do |ad|
-# 				ad
-# 			end
-# 		end
-
-# 	end
-
-# 	# GET
-# 	def count
-# 		render_json_auto Advertisement.count
-# 	end
-
-# 	#GET
-# 	def list_by_title_count
-# 		@advertisements = Advertisement.list_by_title(params[:title])
-# 		render_json_auto @advertisements.count
-# 	end
-
-# 	#GET
-# 	def activated_count
-# 		render_json_auto Advertisement.activated.count
-# 	end
-
-# 	#GET
-# 	def unactivate_acount
-# 		render_json_auto Advertisement.unactivate.count
-# =======
 			@advertisements = Advertisement.all.desc(:activate, :updated_at).page(page).per(per_page)
 		end		
 
@@ -91,36 +60,19 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 	# POST /admin/advertisements
 	# POST /admin/advertisements.json
 	def create
-		@advertisement = Advertisement.create_advertisement(params[:advertisement], @current_user)	
-			
-		respond_to do |format|
-			format.html  if @advertisement.instance_of?(Advertisement)
-			format.html { render action: "new" } if !@advertisement.instance_of?(Advertisement)
-			format.json { render_json_auto @advertisement}
-		end
+		render_json_auto Advertisement.create_advertisement(params[:advertisement], @current_user)	
 	end
 
 	# PUT /admin/advertisements/1
 	# PUT /admin/advertisements/1.json
 	def update
-		@advertisement = Advertisement.update_advertisement(params[:id], params[:advertisement], @current_user)
-
-		respond_to do |format|
-			format.html { redirect_to @advertisement} if @advertisement.instance_of?(Advertisement)
-			format.html { render action: "edit" } if !@advertisement.instance_of?(Advertisement)
-			format.json { render_json_auto @advertisement }
-		end
+		render_json_auto Advertisement.update_advertisement(params[:id], params[:advertisement], @current_user)
 	end
 
 	# DELETE /admin/advertisements/1
 	# DELETE /admin/advertisements/1.json
 	def destroy
-		@advertisement = Advertisement.destroy_by_id(params[:id])
-
-		respond_to do |format|
-			format.html { redirect_to advertisements_url }
-			format.json { render_json_auto @advertisement }
-		end
+		render_json_auto Advertisement.destroy_by_id(params[:id])
 	end
 
 end
