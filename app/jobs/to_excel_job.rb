@@ -1,7 +1,7 @@
 #encoding: utf-8
 module Jobs
   
-  class ToExcelJob < ResultJob
+  class ToExcelJob
     @queue = :to_excel_queue
 
     def perform
