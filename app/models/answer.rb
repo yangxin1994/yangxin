@@ -61,6 +61,11 @@ class Answer
 	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
 
 	STATUS_NAME_ARY = ["edit", "reject", "under_review", "finish", "redo"]
+	EDIT = 0
+	REJECT = 1
+	UNDER_REVIEW = 2
+	FINISH = 3
+	REDO = 4
 	##### answer import #####
 
 
@@ -762,10 +767,15 @@ class Answer
 		return ErrorEnum::WRONG_ANSWER_STATUS if !self.is_edit
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.answer_content.has_value?(nil)
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
-		self.set_under_review
-		self.finished_at = Time.now.to_i
+		old_status = self.status
 		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
-		self.set_finish if !self.survey.has_prize && (!self.survey.spreadable || self.survey.spread_point == 0)
+		if !self.survey.has_prize && (!self.survey.spreadable || self.survey.spread_point == 0)
+			self.set_finish
+		else
+			self.set_under_review
+		end
+		self.update_quota(old_status)
+		self.finished_at = Time.now.to_i
 		self.save
 		return true
 	end
@@ -781,12 +791,23 @@ class Answer
 		return remain_answer_time
 	end
 
-	def update_quota
-		quota_stats = self.survey.quota_stats
-		quota_rules = self.survey.quota["rules"]
-		quota_rules.each_with_index do |rule, rule_index|
-			if self.satisfy_conditions(rule["conditions"])
-				quota_stats["answer_number"][rule_index] = quota_stats["answer_number"][rule_index] + 1
+	def update_quota(old_status)
+		quota = self.survey.quota
+		quota["rules"].each do |rule|
+			next if self.satisfy_conditions(rule["conditions"])
+			if old_status == EDIT && self.is_under_review
+				# user submits the answer
+				rule["submitted_count"] += 1
+			elsif old_status == EDIT && self.is_finish
+				# user submits the answer, and the answer automatically passes review
+				rule["submitted_count"] += 1
+				rule["finished_count"] += 1
+			elsif old_status == UNDER_REVIEW && self.is_finish
+				# answer passes review
+				rule["finished_count"] += 1
+			elsif old_status == UNDER_REVIEW && self.is_reject
+				# answer fails review
+				rule["submitted_count"] = [rule["submitted_count"] - 1, 0].max
 			end
 		end
 		self.survey.save
@@ -796,13 +817,14 @@ class Answer
 	def review(review_result, answer_auditor, message_content)
 
 		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 2
+		old_status = self.status
 		if review_result
-			self.update_quota
 			self.set_finish
 		else
 			self.set_reject
 			self.reject_type = 2
 		end
+		self.update_quota(old_status)
 		self.auditor = answer_auditor
 		self.audit_at = Time.now.to_i
 

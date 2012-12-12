@@ -39,8 +39,8 @@ class Survey
 	field :publish_status, :type => Integer, default: 1
 	field :user_attr_survey, :type => Boolean, default: false
 	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
-	field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100], "is_exclusive" => true}
-	field :quota_stats, :type => Hash, default: {"quota_satisfied" => false, "answer_number" => [0]}
+	field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100, "finished_count" => 0, "submitted_count" => 0], "is_exclusive" => true, "quota_satisfied" => false, "finished_count" => 0 }
+	# field :quota_stats, :type => Hash, default: {"quota_satisfied" => false, "answer_number" => [0]}
 	field :filters, :type => Array, default: []
 	field :filters_stats, :type => Array, default: []
 	field :logic_control, :type => Array, default: []
@@ -247,9 +247,7 @@ class Survey
 			survey_obj[attr_name] = method_obj.call()
 		end
 		survey_obj["quota"] = Marshal.load(Marshal.dump(self.quota))
-		survey_obj["quota_stats"] = Marshal.load(Marshal.dump(self.quota_stats))
 		survey_obj["filters"] = Marshal.load(Marshal.dump(self.filters))
-		survey_obj["filters_stats"] = Marshal.load(Marshal.dump(self.filters_stats))
 		survey_obj["logic_control"] = Marshal.load(Marshal.dump(self.logic_control))
 		survey_obj["access_control_setting"] = Marshal.load(Marshal.dump(self.access_control_setting))
 		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
@@ -508,7 +506,6 @@ class Survey
 				end
 			end
 		end
-		new_instance.refresh_filters_stats
 
 		# clone logic control rules
 		new_instance.logic_control.each do |logic_control_rule|
@@ -1227,10 +1224,7 @@ class Survey
 
 		self.refresh_quota_stats
 		progress["quota"] = self.quota
-		progress["quota_stats"] = self.quota_stats
-		self.refresh_filters_stats
 		progress["filters"] = self.filters
-		progress["filters_stats"] = self.filters_stats
 		return progress
 	end
 
@@ -1279,39 +1273,48 @@ class Survey
 		return retval
 	end
 
-	def refresh_filters_stats
-		# only make statisics from the answers that are not preview answers
-		answers = self.answers.not_preview.finished
-		filters_stats = Array.new(self.filters.length, 0)
-		answers.each do |answer|
-			self.filters.each_with_index do |filter, filter_index|
-				conditions = filter["conditions"]
-				filters_stats[filter_index] = filters_stats[filter_index] + 1 if answer.satisfy_conditions(conditions)
-			end
-		end
-		self.filters_stats = filters_stats
-		self.save
-	end
-
 	def refresh_quota_stats
 		# only make statisics from the answers that are not preview answers
-		answers = self.answers.not_preview.finished
-		quota_stats = {"quota_satisfied" => true, "answer_number" => []}
-		self.quota["rules"].length.times { quota_stats["answer_number"] << 0 }
-		answers.each do |answer|
-			self.quota["rules"].each_with_index do |rule, rule_index|
+		finished_answers = self.answers.not_preview.finished
+		unreviewed_answers = self.answers.not_preview.unreviewed
+
+		# initialze the quota stats
+		self.quota["finished_count"] = 0
+		self.quota["rules"].each do |rule|
+			rule["finished_count"] = 0
+			rule["submitted_count"] = 0
+		end
+
+		# make stats for the finished answers
+		finished_answers.each do |answer|
+			self.quota["finished_count"] ||= 0
+			self.quota["finished_count"] += 1
+			self.quota["submitted_count"] ||= 0
+			self.quota["submitted_count"] += 1
+			self.quota["rules"].each do |rule|
 				if answer.satisfy_conditions(rule["conditions"])
-					quota_stats["answer_number"][rule_index] = quota_stats["answer_number"][rule_index] + 1
+					rule["finished_count"] += 1
+					rule["submitted_count"] += 1
 				end
 			end
 		end
-		quota_stats["answer_number"].each_with_index do |answer_number, index|
-			required_number = self.quota["rules"][index]["amount"]
-			quota_stats["quota_satisfied"] = quota_stats["quota_satisfied"] && answer_number >= required_number
+
+		# make stats for the unreviewed answers
+		unreviewed_answers.each do |answer|
+			self.quota["submitted_count"] += 1
+			self.quota["rules"].each do |rule|
+				if answer.satisfy_conditions(rule["conditions"])
+					rule["submitted_count"] += 1
+				end
+			end
 		end
-		self.quota_stats = quota_stats
+
+		# calculate whether quota is satisfied
+		quota["rules"].each do |rule|
+			self.quota["quota_satisfied"] &&= rule["finished_count"] >= rule["amount"]
+		end
 		self.save
-		return quota_stats
+		return quota
 	end
 
 	def set_exclusive(is_exclusive)
@@ -1780,11 +1783,9 @@ class Survey
 					end
 					rule["conditions"].delete_if { |c| c["value"].blank? }
 					rules.delete_at(rule_index) if rule["conditions"].blank?
-					self.refresh_filters_stats
 				when 'question_delete'
 					rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
 					rules.delete_at(rule_index) if rule["conditions"].blank?
-					self.refresh_filters_stats
 				end
 			end 
 			self.save
@@ -1918,7 +1919,7 @@ class Survey
 	def remaining_quota_amount
 		number = 0
 		self.quota["rules"].each_with_index do |rule, rule_index|
-			number += [rule["amount"] - quota_stats["answer_number"][rule_index], 0].max
+			number += [rule["amount"] - rule["submitted_count"], 0].max
 		end
 		return number
 	end
