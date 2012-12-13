@@ -1256,14 +1256,14 @@ class Survey
 		quota = Quota.new(self.quota)
 		retval = quota.add_rule(quota_rule, self)
 		self.refresh_quota_stats if retval
-		return retval
+		return self.quota["rules"][-1]
 	end
 
 	def update_quota_rule(quota_rule_index, quota_rule)
 		quota = Quota.new(self.quota)
 		retval = quota.update_rule(quota_rule_index, quota_rule, self)
 		self.refresh_quota_stats if retval
-		return retval
+		return self.quota["rules"][quota_rule_index]
 	end
 
 	def delete_quota_rule(quota_rule_index)
@@ -1570,7 +1570,7 @@ class Survey
 			@rules << rule
 			survey.quota = self.serialize
 			survey.save
-			return survey.quota
+			return @rules.length - 1
 		end
 
 		def delete_rule(rule_index, survey)
@@ -1603,7 +1603,7 @@ class Survey
 			@rules[rule_index] = rule
 			survey.quota = self.serialize
 			survey.save
-			return survey.quota
+			return rule_index
 		end
 
 		def set_exclusive(is_exclusive, survey)
