@@ -132,8 +132,8 @@ OopsData::Application.routes.draw do
 				get :for_publish, :activity, :finished
 			end
 			member do
-				get :auto_draw, :prize_records, :lottery_codes
-				put :assign_prize
+				get :auto_draw, :prize_records, :lottery_codes, :ctrl
+				put :assign_prize, :add_ctrl_rule
 			end
 		end
 

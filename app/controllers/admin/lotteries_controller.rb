@@ -4,66 +4,90 @@ class Admin::LotteriesController < Admin::ApplicationController
 		render_json { auto_paginate(Lottery.all)}
 	end
 
-	def create
-    material = Material.create(:material_type => 1, 
-                               :title => params[:lottery][:title],
-                               :value => params[:lottery][:photo],
-                               :picture_url => params[:lottery][:photo])
-    # logger.info "=========#{params[:lottery][:photo]}========="
-    params[:lottery][:photo] = material
-
-    lp_ids = params[:lottery][:prize_ids]
-    params[:lottery][:prize_ids] = nil
-		@lottery = Lottery.new(params[:lottery])
-    lp_ids.each do |i|
-      lp = Prize.where("_id"=> i).first
-      @lottery.prizes << lp #unless lp.nil?
-      lp.save
-    end unless lp_ids.nil?
-    @lottery.photo = material
-    material.save
+  def create
+    create_photo(:lottery)
+    @lottery = Lottery.new(params[:lottery])
+    add_prizes(get_prize_ids, @lottery)
     render_json @lottery.save do
-				#Material.create(:material => params[:material], :materials => @lottery)
-	    @lottery.as_retval
-		end
-			# TODO add admin_id
-	end
-
-  def update
-    @lottery = Lottery.find_by_id params[:id]
-    unless params[:lottery][:photo].nil?
-      if @lottery.photo.nil?
-        material = Material.create(:material_type => 1, 
-                                   :title => params[:lottery][:name],
-                                   :value => params[:lottery][:photo],
-                                   :picture_url => params[:lottery][:photo])
-        
-        @lottery.photo = material
-      end
-      @lottery.photo.value = params[:lottery][:photo]
-      @lottery.photo.picture_url = params[:lottery][:photo]
-      params[:lottery][:photo] = material
       @lottery.photo.save
-    end
-    # 增加奖品
-    lp_ids = params[:lottery][:prize_ids]
-    @lottery.prizes if lp_ids
-    params[:lottery][:prize_ids] = nil
-    #@lottery = Lottery.new(params[:lottery])
-    lp_ids.each do |i|
-      Prize.find_by_id(i) do |prize|
-        @lottery.prizes << prize 
-      end
-
-      # lp = Prize.where("_id"=> i).first
-      # @lottery.prizes << lp #unless lp.nil?
-      # lp.save
-    end unless lp_ids.nil?
-    # @lottery = Lottery.find_by_id params[:id]
-    render_json @lottery.update_attributes(params[:lottery]) do
       @lottery.as_retval
     end
   end
+
+  def update
+    render_json false do
+      Lottery.find_by_id(params[:id]) do |lottery|
+        update_photo(:lottery, lottery)
+        add_prizes(get_prize_ids, lottery)
+        if lottery.update_attributes(params[:lottery])
+          @is_success = true
+        end
+        lottery.as_retval
+      end
+    end
+    
+  end
+
+	# def create
+ #    material = Material.create(:material_type => 1, 
+ #                               :title => params[:lottery][:title],
+ #                               :value => params[:lottery][:photo],
+ #                               :picture_url => params[:lottery][:photo])
+ #    # logger.info "=========#{params[:lottery][:photo]}========="
+ #    params[:lottery][:photo] = material
+
+ #    lp_ids = params[:lottery][:prize_ids]
+ #    params[:lottery][:prize_ids] = nil
+	# 	@lottery = Lottery.new(params[:lottery])
+ #    lp_ids.each do |i|
+ #      lp = Prize.where("_id"=> i).first
+ #      @lottery.prizes << lp #unless lp.nil?
+ #      lp.save
+ #    end unless lp_ids.nil?
+ #    @lottery.photo = material
+ #    material.save
+ #    render_json @lottery.save do
+	# 			#Material.create(:material => params[:material], :materials => @lottery)
+	#     @lottery.as_retval
+	# 	end
+	# 		# TODO add admin_id
+	# end
+
+  # def update
+  #   @lottery = Lottery.find_by_id params[:id]
+  #   unless params[:lottery][:photo].nil?
+  #     if @lottery.photo.nil?
+  #       material = Material.create(:material_type => 1, 
+  #                                  :title => params[:lottery][:name],
+  #                                  :value => params[:lottery][:photo],
+  #                                  :picture_url => params[:lottery][:photo])
+        
+  #       @lottery.photo = material
+  #     end
+  #     @lottery.photo.value = params[:lottery][:photo]
+  #     @lottery.photo.picture_url = params[:lottery][:photo]
+  #     params[:lottery][:photo] = material
+  #     @lottery.photo.save
+  #   end
+  #   # 增加奖品
+  #   lp_ids = params[:lottery][:prize_ids]
+  #   @lottery.prizes if lp_ids
+  #   params[:lottery][:prize_ids] = nil
+  #   #@lottery = Lottery.new(params[:lottery])
+  #   lp_ids.each do |i|
+  #     Prize.find_by_id(i) do |prize|
+  #       @lottery.prizes << prize 
+  #     end
+
+  #     # lp = Prize.where("_id"=> i).first
+  #     # @lottery.prizes << lp #unless lp.nil?
+  #     # lp.save
+  #   end unless lp_ids.nil?
+  #   # @lottery = Lottery.find_by_id params[:id]
+  #   render_json @lottery.update_attributes(params[:lottery]) do
+  #     @lottery.as_retval
+  #   end
+  # end
   
   def_each :for_publish, :activity, :finished do |method_name|
     @lottery = auto_paginate(Lottery.send(method_name))
@@ -136,6 +160,30 @@ class Admin::LotteriesController < Admin::ApplicationController
     end
   end
 
+  def ctrl
+    render_json false do
+      Lottery.find_by_id(params[:id]) do |lottery|
+        success_true
+        lottery[:prizes] = lottery.prizes
+        ch = []
+        lottery.prizes.each do |prize|
+          ch += prize.ctrl_history
+        end
+        lottery[:ctrl_history] = ch
+        lottery
+      end
+    end
+  end
+
+  def add_ctrl_rule
+    render_json false do
+      Prize.find_by_id(params[:id]) do |prize|
+        success_true
+        prize.add_ctrl_rule(params[:ctrl_surplus], params[:ctrl_time], params[:weight])
+      end
+    end
+  end
+
   def destroy
     render_json do
       Lottery.find_by_id(params[:id]) do |e|
@@ -143,4 +191,23 @@ class Admin::LotteriesController < Admin::ApplicationController
       end
     end 
   end
+  # private
+  def get_prize_ids
+    params[:lottery][:prize_ids].split ',' unless params[:lottery][:prize_ids].nil?
+  end
+
+  def add_prizes(prize_ids, lottery)
+    return unless prize_ids
+    prize_ids.each do |id|    
+      Prize.find_by_id(id) do |prize|
+        params[:lottery].delete(:prize_ids)
+        prize.lottery = lottery #unless prize.lottery
+        binding.pry
+        lottery.save
+        prize.save
+        binding.pry
+      end
+    end
+  end
+
 end

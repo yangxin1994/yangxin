@@ -28,13 +28,13 @@ class BasicGift
 	before_save :make_status , :set_quantity
 
   def make_status
-    self.status = 1 if self.surplus > 0 && self.status == -1 
+    self.status = 0 if self.surplus > 0 && self.status == -1 
     self.status = -1 if self.surplus <= 0
   end
 
   def set_quantity
   	if changed_attributes["surplus"]
-  		self.quantity += (changed_attributes["surplus"]- self.surplus)
+  		self.quantity += (self.surplus - changed_attributes["surplus"])
   	end
   end
 
