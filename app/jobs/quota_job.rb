@@ -103,9 +103,7 @@ module Jobs
 			published_survey = Survey.get_published_active_surveys
 			published_survey.each do |survey|
 				cur_survey_rule_arr = []
-				survey.quota["rules"].each_with_index do |rule, rule_index|
-					rule_amount = rule["amount"].to_i
-
+				survey.quota["rules"].each do |rule|
 					# 1. get the conditions
 					conditions = []
 					rule["conditions"].each do |condition|
@@ -117,8 +115,7 @@ module Jobs
 					end
 
 					# 2. get the remainning number
-					answer_number = survey.quota_stats["answer_number"][rule_index].to_i
-					rest_number = rule_amount < answer_number ? 0 : rule_amount - answer_number
+					rest_number = [rule["amount"] - rule["submitted_count"], 0].max
 
 					# 3. combine the rule
 					if rest_number > 0
