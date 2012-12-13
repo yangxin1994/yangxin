@@ -1559,6 +1559,8 @@ class Survey
 		def add_rule(rule, survey)
 			# check errors
 			rule["amount"] = rule["amount"].to_i
+			rule["finished_count"] = 0
+			rule["submitted_count"] = 0
 			return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
 			rule["conditions"].each do |condition|
 				condition["condition_type"] = condition["condition_type"].to_i

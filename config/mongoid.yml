@@ -1,6 +1,6 @@
 development:
-  host: localhost
-  database: oops_data_development_from_oliver
+  host: 192.168.1.100
+  database: oops_data_development
 
 test:
   host: localhost
