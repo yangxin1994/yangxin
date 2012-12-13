@@ -62,15 +62,13 @@ OopsData::Application.configure do
 	config.action_mailer.delivery_method = :smtp
 	config.action_mailer.smtp_settings = {
 		:authentication => "plain",
-		:address				=> "smtp.mailgun.com",
+		:address				=> "",
 		:port						=> 25,
-		:domain					=> "oopsdata.net",
-		:user_name			=> "postmaster@oopsdata.net",
-		:password				=> "0nlnhy08vbk1",
-		:enable_starttls_auto => true,
-		:openssl_verify_mode  => 'none'
+		:domain					=> "",
+		:user_name			=> "",
+		:password				=> ""
 }
 
   config.task_web_service_uri = 'localhost:9000'
-  config.service_port = '80'
+  config.service_port = '8000'
 end

@@ -1403,6 +1403,8 @@ class Survey
 	def analysis(filter_index, include_screened_answer)
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
 		task_id = TaskClient.create_task({ task_type: "result",
+											host: "localhost"
+											port: Rails.application.config.service_port,
 											params: { result_type: "analysis",
 														survey_id: self._id,
 														filter_index: filter_index,
@@ -1419,6 +1421,8 @@ class Survey
 		end
 		return ErrorEnum::WRONG_REPORT_TYPE if !%w[word ppt pdf].include?(report_type)
 		task_id = TaskClient.create_task({ task_type: "result",
+											host: "localhost",
+											port: Rails.application.config.service_port,
 											params: { result_type: "report",
 														survey_id: self._id,
 														filter_index: filter_index,
