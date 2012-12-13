@@ -15,15 +15,18 @@ class Lottery
   default_scope where(:is_deleted => false).order_by(:created_at, :desc)
 
   scope :for_publish, where(:status => 0)
-  scope :activity, where(:status => 1)
-  scope :finished, where(:status => 2)
-  
+  scope :display, where(:status => 1)
+  scope :pause, where(:status => 2)
+  scope :activity, where(:status => 3)
+
   has_many :surveys
   has_many :prizes
   has_many :lottery_codes
   has_many :gifts
   has_one :photo, :class_name => "Material", :inverse_of => 'lottery'
   belongs_to :creator, :class_name => 'User'
+
+  validates_presence_of :title, :description
 
   def delete
   	is_deleted = true
