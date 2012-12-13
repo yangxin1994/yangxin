@@ -200,6 +200,7 @@ class Result
 		result = {}
 		answer_ary.each do |email_address|
 			domain_name = (email_address.split('@'))[-1]
+			domain_name.gsub!(".", "_")
 			result[domain_name] = 0 if result[domain_name].nil?
 			result[domain_name] = result[domain_name] + 1
 		end

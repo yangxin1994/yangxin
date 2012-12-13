@@ -82,18 +82,20 @@ class ReportResult < Result
 																		component["chart_style"])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::NUMBER_BLANK_QUESTION
+					segment = component["value"]["format"]["-1"]
 					analysis_result = analyze_number_blank(question.issue,
 														cur_question_answer,
-														:segment => component["value"]["format"]["-1"])
+														:segment => segment)
 					text = number_blank_description(analysis_result,
 													question.issue,
-													:segment => component["value"]["format"]["-1"])
+													:segment => segment)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					next if segment.blank?
 					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
 																		question.issue,
 																		component["chart_style"],
-																		:segment => component["value"]["format"]["-1"])
+																		:segment => segment)
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::TIME_BLANK_QUESTION
 					segment = component["value"]["format"]["-1"]
@@ -105,6 +107,7 @@ class ReportResult < Result
 												question.issue,
 												:segment => segment)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					next if segment.blank?
 					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
 																		question.issue,
@@ -126,31 +129,33 @@ class ReportResult < Result
 													cur_question_answer,
 													:segment => component["value"]["format"])
 					analysis_result.each do |id, sub_analysis_result|
-						sub_question_item = (question.issue["items"].select { |e| e["id"] == id })[0]
-						next if sub_question_issue.nil?
+						sub_question_item = (question.issue["items"].select { |e| e["id"].to_s == id })[0]
 						sub_question_type = sub_question_item["data_type"]
 						sub_question_issue = sub_question_item["properties"]
+						next if sub_question_issue.nil?
+						segment = component["value"]["format"].nil? ? nil : component["value"]["format"][id.to_s]
 						case sub_question_type
 						when "Number"
 							text = number_blank_description(sub_analysis_result,
 																	sub_question_issue,
-																	:segment => component["value"]["format"][id.to_s])
+																	:segment => segment)
 							sub_question_type = QuestionTypeEnum::NUMBER_BLANK_QUESTION
 						when "Time"
 							text = time_blank_description(sub_analysis_result,
 																sub_question_issue,
-																:segment => component["value"]["format"][id.to_s])
+																:segment => segment)
 							sub_question_type = QuestionTypeEnum::TIME_BLANK_QUESTION
 						when "Address"
 							text = address_blank_description(sub_analysis_result, sub_question_issue)
 							sub_question_type = QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 						end
 						report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+						next if [QuestionTypeEnum::NUMBER_BLANK_QUESTION, QuestionTypeEnum::TIME_BLANK_QUESTION].include?(sub_question_type) && segment.blank?
 						chart_components = Report::DataAdapter.convert_single_data(sub_question_type,
 																			sub_analysis_result,
 																			sub_question_issue,
 																			component["chart_style"],
-																			:segment => component["value"]["format"][id.to_s])
+																			:segment => segment)
 						report_data.push_chart_components(chart_components)
 					end
 				when QuestionTypeEnum::CONST_SUM_QUESTION
@@ -257,44 +262,48 @@ class ReportResult < Result
 																		component["chart_style"])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::NUMBER_BLANK_QUESTION
+					segment = component["value"]["target"]["format"]["-1"]
 					analysis_result = analyze_cross(target_question.question_type,
 													question.issue,
 													target_question.issue,
 													answers_transform[question_id],
 													answers_transform[target_question_id],
-													:segment => component["value"]["target"]["format"]["-1"])
+													:segment => segment)
 					text = cross_description(target_question.question_type,
 											analysis_result,
 											question.issue,
 											target_question.issue,
-											:segment => component["value"]["target"]["format"]["-1"])
+											:segment => segment)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					next if segment.blank?
 					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																		analysis_result,
 																		question.issue,
 																		target_question.issue,
 																		component["chart_style"],
-																		:segment => component["value"]["target"]["format"]["-1"])
+																		:segment => segment)
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::TIME_BLANK_QUESTION
+					segment = component["value"]["target"]["format"]["-1"]
 					analysis_result = analyze_cross(target_question.question_type,
 													question.issue,
 													target_question.issue,
 													answers_transform[question_id],
 													answers_transform[target_question_id],
-													:segment => component["value"]["target"]["format"]["-1"])
+													:segment => segment)
 					text = cross_description(target_question.question_type,
 											analysis_result,
 											question.issue,
 											target_question.issue,
-											:segment => component["value"]["target"]["format"]["-1"])
+											:segment => segment)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+					next if segment.blank?
 					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																		analysis_result,
 																		question.issue,
 																		target_question.issue,
 																		component["chart_style"],
-																		:segment => component["value"]["target"]["format"]["-1"])
+																		:segment => segment)
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 					analysis_result = analyze_cross(target_question.question_type,
@@ -330,6 +339,7 @@ class ReportResult < Result
 						analysis_result[:result].each do |item_id, sub_question_result|
 							sub_analysis_result[:result][item_id] = sub_question_result[id.to_s]
 						end
+						segment = component["value"]["target"]["format"].nil? ? nil : component["value"]["target"]["format"][id.to_s]
 						case sub_question_type
 						when "Number"
 							sub_question_type = QuestionTypeEnum::NUMBER_BLANK_QUESTION
@@ -353,6 +363,7 @@ class ReportResult < Result
 													sub_question_issue)
 						end
 						report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
+						next if [QuestionTypeEnum::TIME_BLANK_QUESTION, QuestionTypeEnum::NUMBER_BLANK_QUESTION].include?(sub_question_type) && segment.blank?
 						chart_components = Report::DataAdapter.convert_cross_data(sub_question_type,
 																			sub_analysis_result,
 																			question.issue,
@@ -645,7 +656,7 @@ class ReportResult < Result
 		histogram = analysis_result["histogram"]
 		mean = convert_time_mean_to_text(issue["format"], analysis_result["mean"])
 		text = opt[:cross] ? "" : "调查显示，"
-		return text + "被访者填写的平均值为#{mean.round(1)}。" if segment.blank?
+		return text + "被访者填写的平均值为#{mean}。" if segment.blank?
 		interval_text_ary = []
 		interval_text_ary << ReportResult.convert_time_interval_to_text(issue["format"], nil, segment[0])
 		segment[0..-2].each_with_index do |e, index|
@@ -668,7 +679,7 @@ class ReportResult < Result
 		return text + "；被访者填写的平均值为#{mean}。" if results.length == 1
 		text = text + "，其次是填写#{interval_text_ary[1]}的被访者，所占比例为#{ratio_ary[1].round(1)}%"
 		# two intervals
-		return text + "；被访者填写的平均值为#{mean.round(1)}。" if results.length == 2
+		return text + "；被访者填写的平均值为#{mean}。" if results.length == 2
 		if results.length == 3
 			# three intervals
 			text = text + "，填写#{interval_text_ary[2]}的比例为#{ratio_ary[2].round(1)}%"

@@ -16,7 +16,7 @@ class ScaleIssue < Issue
 		@items = []
 		@is_rand = false
 		@show_unknown = false
-		@labels = ["不满意", "一般", "满意"]
+		@labels = ["很不满意", "不太满意", "一般", "比较满意", "很满意"]
 		@show_style = 0
 
 		input_number = 4

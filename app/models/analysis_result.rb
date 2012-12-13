@@ -25,6 +25,9 @@ class AnalysisResult < Result
 
 
 	def analysis(answers, task_id = nil)
+		logger.info "@@@@@@@@@@@@@@@@@@@@@"
+		logger.info answers_result.inspect
+		logger.info "@@@@@@@@@@@@@@@@@@@@@"
 		region_result = Address.province_hash.merge(Address.city_hash)
 		channel_result = {}
 		duration_mean = []
@@ -96,13 +99,13 @@ class AnalysisResult < Result
 		TaskClient.set_progress(task_id, "analyze_answer_progress", 0.6) if !task_id.nil?
 
 		# make stats for the answers
-		answers_result = {}
+		aanswers_result = {}
 		i = 0
 		answers_transform.each do |q_id, question_answer_ary|
 			i = i + 1
 			question = Question.find_by_id(q_id)
 			next if question.nil?
-			answers_result[q_id] = [question_answer_ary.length, analyze_one_question_answers(question, question_answer_ary)]
+			aanswers_result[q_id] = [question_answer_ary.length, analyze_one_question_answers(question, question_answer_ary)]
 			TaskClient.set_progress(task_id, "analyze_answer_progress", 0.6 + 0.4 * i / answers_transform.length ) if !task_id.nil?
 		end
 
@@ -111,9 +114,10 @@ class AnalysisResult < Result
 		self.channel_result = channel_result
 		self.duration_mean = duration_mean
 		self.time_result = time_result
-		self.answers_result = answers_result
+		self.answers_result = aanswers_result
 		self.status = 1
-		return self.save
+		retval = self.save
+		return retval
 	end
 
 	def analyze_one_question_answers(question, answer_ary)
