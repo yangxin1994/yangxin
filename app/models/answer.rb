@@ -614,9 +614,8 @@ class Answer
 	def check_question_quota
 		# 1. get the corresponding survey, quota, and quota stats
 		quota = self.survey.show_quota
-		quota_stats = self.survey.quota_stats
 		# 2. if all quota rules are satisfied, the new answer should be rejected
-		if quota_stats["quota_satisfied"]
+		if quota["quota_satisfied"]
 			self.set_reject
 			self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
 			return false
@@ -624,11 +623,11 @@ class Answer
 		# 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
 		return true if !quota["is_exclusive"]
 		# 4. check the rules one by one
-		quota["rules"].each_with_index do |rule, rule_index|
+		quota["rules"].each do |rule|
 			# find out a rule that:
 			# a. the quota of the rule has not been satisfied
 			# b. this answer satisfies the rule
-			return true if quota_stats["answer_number"][rule_index] < rule["amount"] && self.satisfy_conditions(rule["conditions"], false)
+			return true if rule["submitted_count"] < rule["amount"] && self.satisfy_conditions(rule["conditions"], false)
 		end
 		self.set_reject
 		self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
@@ -638,9 +637,8 @@ class Answer
 	def check_channel_ip_address_quota
 		# 1. get the corresponding survey, quota, and quota stats
 		quota = self.survey.quota
-		quota_stats = self.survey.quota_stats
 		# 2. if all quota rules are satisfied, the new answer should be rejected
-		if quota_stats && quota_stats["quota_satisfied"]
+		if quota["quota_satisfied"]
 			self.set_reject
 			self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
 			return false
@@ -648,11 +646,9 @@ class Answer
 		# 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
 		return true if !quota["is_exclusive"]
 		# 4 the rules should be checked one by one to see whether this answer can be satisfied
-		quota = self.survey.quota
-		quota_stats = self.survey.quota_stats
-		quota["rules"].each_with_index do |rule, index|
+		quota["rules"].each do |rule|
 			# move to next rule if the quota of this rule is already satisfied
-			next if quota_stats["answer_number"][index] >= rule["amount"]
+			next if rule["submitted_count"] >= rule["amount"]
 			rule["conditions"].each do |condition|
 				# if the answer's ip, channel, or region violates one condition of the rule, move to the next rule
 				next if condition["condition_type"] == 2 && !Address.satisfy_region_code?(self.region, condition["value"])
