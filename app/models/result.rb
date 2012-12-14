@@ -18,6 +18,7 @@ class Result
 
 	def self.find_by_task_id(task_id)
 		result = Result.where(:task_id => task_id).first
+		return nil if result.nil?
 		return Result.where(:result_key => result.result_key, :ref_result_id => nil).first
 	end
 
@@ -49,6 +50,8 @@ class Result
 
 	def self.job_progress(task_id)
 		result = Result.find_by_task_id(task_id)
+		# if the result does not exist return 0
+		return 0 if result.nil?
 		# the task is finished, return
 		return 1 if result && result.status == 1
 

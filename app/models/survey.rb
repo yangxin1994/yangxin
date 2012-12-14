@@ -197,11 +197,11 @@ class Survey
 	# instance.update_deadline(Time.now+3.days)
 	def update_deadline(time)
 		time = time.to_i
-		return ErrorEnum::SURVEY_DEADLINE_ERROR if time <= Time.now.to_i
-		self.deadline = time
+		return ErrorEnum::SURVEY_DEADLINE_ERROR if time <= Time.now.to_i && time != -1
+		self.deadline = time == -1 ? nil : time
 		return ErrorEnum::UNKNOWN_ERROR unless self.save
 		#create or update job
-		Jobs.start(:SurveyDeadlineJob, time, survey_id: self.id)
+		#Jobs.start(:SurveyDeadlineJob, time, survey_id: self.id)
 		return true
 	end
 
