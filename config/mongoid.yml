@@ -1,6 +1,7 @@
 development:
   host: localhost
-  database: oops_data_development_from_oliver
+  # database: oops_data_development_from_oliver
+  database: oops_data_development
 
 test:
   host: localhost

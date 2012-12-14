@@ -166,8 +166,13 @@ class Admin::LotteriesController < Admin::ApplicationController
         success_true
         lottery[:prizes] = lottery.prizes
         ch = []
+        # 优化!!!
         lottery.prizes.each do |prize|
-          ch += prize.ctrl_history
+          if params[:only_active]
+            ch += prize.active_ctrl_history
+          else
+            ch += prize.ctrl_history
+          end
         end
         lottery[:ctrl_history] = ch
         lottery
