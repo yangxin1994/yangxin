@@ -24,7 +24,7 @@ production:
   port: 27017
   username: <%= ENV['MONGOID_USERNAME'] %>
   password: <%= ENV['MONGOID_PASSWORD'] %>
-  database: oops_data_development
+  database: oops_data_production
   # slaves:
   #   - host: slave1.local
   #     port: 27018
