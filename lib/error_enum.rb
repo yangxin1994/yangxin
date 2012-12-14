@@ -161,6 +161,7 @@ module ErrorEnum
 	MESSAGE_CONTENT_COULD_NOT_BE_BLANK = "error_21120"
 	# Prize Error Code (12)
 	PRIZE_NOT_ENOUGH = "error_21233"
+	PRIZE_NOT_FOUND = "error_21201"
 	# RewardLog Error Code (13)
 	REWARDLOG_POINT_NOT_A_NUNBER = "error_21311"
 	# Order Error Code (14)

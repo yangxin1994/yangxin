@@ -15,7 +15,7 @@ class Lottery
   default_scope where(:is_deleted => false).order_by(:created_at, :desc)
 
   scope :for_publish, where(:status => 0)
-  scope :display, where(:status => 1)
+  scope :is_display, where(:status => 1)
   scope :pause, where(:status => 2)
   scope :activity, where(:status => 3)
 

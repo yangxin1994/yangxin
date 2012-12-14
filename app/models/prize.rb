@@ -63,7 +63,7 @@ class Prize < BasicGift
   end
 
   def active_ctrl_history
-    [self.ctrl_history.last]
+    self.ctrl_history.last ? [self.ctrl_history.last] : []
   end
 
 end

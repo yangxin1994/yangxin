@@ -97,7 +97,11 @@ class Admin::LotteriesController < Admin::ApplicationController
   def show
     render_json false do
       Lottery.find_by_id(params[:id]) do |l|
-        l[:prizes] = l.prizes
+        l[:prizes] = l.prizes.map do |prize|
+          prize[:photo] = prize.photo.picture_url
+          prize
+        end
+        # binding.pry
         l[:prize_ids] = l.prizes.map(&:_id)
         l[:photo_src] = l.photo.picture_url unless l.photo.nil?
         @is_success = true
@@ -168,7 +172,7 @@ class Admin::LotteriesController < Admin::ApplicationController
         ch = []
         # 优化!!!
         lottery.prizes.each do |prize|
-          if params[:only_active]
+          if params[:only_active] == true
             ch += prize.active_ctrl_history
           else
             ch += prize.ctrl_history
