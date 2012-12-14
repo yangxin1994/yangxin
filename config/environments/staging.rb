@@ -70,5 +70,5 @@ OopsData::Application.configure do
 }
 
   config.task_web_service_uri = 'localhost:9000'
-  config.service_port = '8000'
+  config.service_port = '8001'
 end
