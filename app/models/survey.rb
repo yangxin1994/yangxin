@@ -197,11 +197,11 @@ class Survey
 	# instance.update_deadline(Time.now+3.days)
 	def update_deadline(time)
 		time = time.to_i
-		return ErrorEnum::SURVEY_DEADLINE_ERROR if time <= Time.now.to_i
-		self.deadline = time
+		return ErrorEnum::SURVEY_DEADLINE_ERROR if time <= Time.now.to_i && time != -1
+		self.deadline = time == -1 ? nil : time
 		return ErrorEnum::UNKNOWN_ERROR unless self.save
 		#create or update job
-		Jobs.start(:SurveyDeadlineJob, time, survey_id: self.id)
+		#Jobs.start(:SurveyDeadlineJob, time, survey_id: self.id)
 		return true
 	end
 
@@ -1256,14 +1256,14 @@ class Survey
 		quota = Quota.new(self.quota)
 		retval = quota.add_rule(quota_rule, self)
 		self.refresh_quota_stats if retval
-		return retval
+		return self.quota["rules"][-1]
 	end
 
 	def update_quota_rule(quota_rule_index, quota_rule)
 		quota = Quota.new(self.quota)
 		retval = quota.update_rule(quota_rule_index, quota_rule, self)
 		self.refresh_quota_stats if retval
-		return retval
+		return self.quota["rules"][quota_rule_index]
 	end
 
 	def delete_quota_rule(quota_rule_index)
@@ -1403,6 +1403,8 @@ class Survey
 	def analysis(filter_index, include_screened_answer)
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
 		task_id = TaskClient.create_task({ task_type: "result",
+											host: "localhost",
+											port: Rails.application.config.service_port,
 											params: { result_type: "analysis",
 														survey_id: self._id,
 														filter_index: filter_index,
@@ -1419,6 +1421,8 @@ class Survey
 		end
 		return ErrorEnum::WRONG_REPORT_TYPE if !%w[word ppt pdf].include?(report_type)
 		task_id = TaskClient.create_task({ task_type: "result",
+											host: "localhost",
+											port: Rails.application.config.service_port,
 											params: { result_type: "report",
 														survey_id: self._id,
 														filter_index: filter_index,
@@ -1555,6 +1559,8 @@ class Survey
 		def add_rule(rule, survey)
 			# check errors
 			rule["amount"] = rule["amount"].to_i
+			rule["finished_count"] = 0
+			rule["submitted_count"] = 0
 			return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
 			rule["conditions"].each do |condition|
 				condition["condition_type"] = condition["condition_type"].to_i
@@ -1564,7 +1570,7 @@ class Survey
 			@rules << rule
 			survey.quota = self.serialize
 			survey.save
-			return survey.quota
+			return @rules.length - 1
 		end
 
 		def delete_rule(rule_index, survey)
@@ -1597,7 +1603,7 @@ class Survey
 			@rules[rule_index] = rule
 			survey.quota = self.serialize
 			survey.save
-			return survey.quota
+			return rule_index
 		end
 
 		def set_exclusive(is_exclusive, survey)
