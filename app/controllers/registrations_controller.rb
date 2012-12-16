@@ -55,6 +55,8 @@ class RegistrationsController < ApplicationController
 		render_json_e(ErrorEnum::USER_ACTIVATED) and return if user.is_activated
 		# send activate email
 		TaskClient.create_task({ task_type: "email",
+								host: "localhost",
+								port: Rails.application.config.service_port,
 								params: { email_type: "activate",
 										email: user.email,
 										callback: params[:callback] } })

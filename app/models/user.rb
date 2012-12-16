@@ -284,14 +284,17 @@ class User
 								password: Encryption.encrypt_password(user["password"]),
 								registered_at: Time.now.to_i,
 								status: 1)
-		current_user = User.create if current_user.nil?
-		current_user.update_attributes(updated_attr)
+		existing_user = User.create if existing_user.nil?
+		existing_user.update_attributes(updated_attr)
 		# send welcome email
-		TaskClient.create_task({ task_type: "email", params: { email_type: "welcome", email: current_user.email, callback: callback } })
+		TaskClient.create_task({ task_type: "email",
+								host: "localhost",
+								port: Rails.application.config.service_port,
+								params: { email_type: "welcome", email: existing_user.email, callback: callback } })
 		if !third_party_user_id.nil?
 			# bind the third party user if the id is provided
 			third_party_user = ThirdPartyUser.find_by_id(third_party_user_id)
-			third_party_user.bind(current_user) if !third_party_user.nil?
+			third_party_user.bind(existing_user) if !third_party_user.nil?
 		end
 		return true
 	end
