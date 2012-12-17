@@ -52,7 +52,6 @@ class Prize < BasicGift
       self.is_in_ctrl = false
     end
     self.ctrl_history.last["ctrl_surplus"] = self.ctrl_surplus
-    binding.pry
     self.save
   end
 

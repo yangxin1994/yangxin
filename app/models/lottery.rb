@@ -57,7 +57,6 @@ class Lottery
     end
     #logger.info "======#{interval}======="
     interval.each do |i|
-      # binding.pry
       if r <= i[:weight]
         i[:prize].surplus -= 1
         i[:prize].update_ctrl_surplus
@@ -68,11 +67,9 @@ class Lottery
         #   )
         lottery_code.status = 2
         lottery_code.prize = i[:prize]
-        # binding.pry
         lottery_code.prize.save
         lottery_code.save
         lottery_code[:prize] = i[:prize]
-        # binding.pry
         return lottery_code
       end
     end
