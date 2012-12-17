@@ -119,7 +119,6 @@ class Order
   end
 
   def ck_lottery_code
-    binding.pry
     if self.lottery_code.blank? || self.lottery_code.status != 2
       @ret_error= {
         :error_code => ErrorEnum::INVALID_LOTTERYCODE_ID,
