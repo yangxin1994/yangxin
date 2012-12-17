@@ -172,7 +172,7 @@ class Admin::LotteriesController < Admin::ApplicationController
         ch = []
         # 优化!!!
         lottery.prizes.each do |prize|
-          if params[:only_active] == true
+          if params[:only_active].to_s == "true"
             ch += prize.active_ctrl_history
           else
             ch += prize.ctrl_history

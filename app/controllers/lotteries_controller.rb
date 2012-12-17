@@ -41,7 +41,7 @@ class LotteriesController < ApplicationController
 			if !s
 				@lottery_code.as_retval
 	       # binding.pry
-			elsif @lottery_code.lottery.status != 1
+			elsif @lottery_code.lottery.status != 3
 				@is_success = false
 				{:error_code => ErrorEnum::INVALID_LOTTERYCODE_ID,
 	       :error_message => "Lottery not activity"}
