@@ -43,8 +43,8 @@ module Tool
 	end
 
 	def self.check_choice_question_answer(question_id, answer, standard_answer, fuzzy)
-		question = Question.find_by_id(question_id)
-		issue = question.issue if question.nil?
+		question = BasicQuestion.find_by_id(question_id)
+		issue = question.issue if !question.nil?
 		if issue && issue["max_choice"] == 1
 			# for single choice question, check weather user's answer is included in the standard answer
 			return standard_answer.include?(answer[0])

@@ -1287,6 +1287,7 @@ class Survey
 
 		# initialze the quota stats
 		self.quota["finished_count"] = 0
+		self.quota["submitted_count"] = 0
 		self.quota["rules"].each do |rule|
 			rule["finished_count"] = 0
 			rule["submitted_count"] = 0

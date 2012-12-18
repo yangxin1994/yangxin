@@ -801,8 +801,22 @@ class Answer
 
 	def update_quota(old_status)
 		quota = self.survey.quota
+		if old_status == EDIT && self.is_under_review
+			# user submits the answer
+			quota["submitted_count"] += 1
+		elsif old_status == EDIT && self.is_finish
+			# user submits the answer, and the answer automatically passes review
+			quota["submitted_count"] += 1
+			quota["finished_count"] += 1
+		elsif old_status == UNDER_REVIEW && self.is_finish
+			# answer passes review
+			quota["finished_count"] += 1
+		elsif old_status == UNDER_REVIEW && self.is_reject
+			# answer fails review
+			quota["submitted_count"] = [quota["submitted_count"] - 1, 0].max
+		end
 		quota["rules"].each do |rule|
-			next if self.satisfy_conditions(rule["conditions"])
+			next if !self.satisfy_conditions(rule["conditions"])
 			if old_status == EDIT && self.is_under_review
 				# user submits the answer
 				rule["submitted_count"] += 1
