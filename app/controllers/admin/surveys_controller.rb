@@ -1,7 +1,14 @@
 class Admin::SurveysController < Admin::ApplicationController
 
 	def index
-		@surveys = Survey.normal.where(:publish_status => params[:publish_status].to_i).desc(:created_at)
+
+		@surveys = Survey.where(:user_attr_survey => false)
+		# use publish_status = 0 means status=-1
+		if params[:publish_status].to_i > 0
+			@surveys = @surveys.where(:status.gt => -1, :publish_status => params[:publish_status].to_i).desc(:created_at) 
+		else
+			@surveys = @surveys.where(:status => -1).desc(:created_at)
+		end
 		@surveys = @surveys.where(:show_in_community => params["show_in_community"].to_s == 'true') if params[:show_in_community]
 		# search 
 		@surveys = @surveys.where(title: /.*#{params[:title]}.*/) if params[:title]
@@ -78,6 +85,15 @@ class Admin::SurveysController < Admin::ApplicationController
 		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
 		retval = @survey.set_spread(params[:spread_point].to_i, params[:spreadable].to_s == "true")
 		render_json_auto(retval) and return
+	end
+
+	def destroy
+		@survey = Survey.find_by_id(params[:id])
+		# new_survey which is not edited should be remove from db
+		render_json_auto @survey.destroy and return if @survey && @survey.new_survey == true
+		# else just change status to -1
+		render_json_auto @survey.delete and return if @survey && @survey.new_survey == false
+		render_json_auto false
 	end
 
 end
