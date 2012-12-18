@@ -172,7 +172,7 @@ class Admin::LotteriesController < Admin::ApplicationController
         ch = []
         # 优化!!!
         lottery.prizes.each do |prize|
-          if params[:only_active] == true
+          if params[:only_active].to_s == "true"
             ch += prize.active_ctrl_history
           else
             ch += prize.ctrl_history
@@ -211,10 +211,10 @@ class Admin::LotteriesController < Admin::ApplicationController
       Prize.find_by_id(id) do |prize|
         params[:lottery].delete(:prize_ids)
         prize.lottery = lottery #unless prize.lottery
-        binding.pry
+        # binding.pry
         lottery.save
         prize.save
-        binding.pry
+        # binding.pry
       end
     end
   end

@@ -191,7 +191,6 @@ class Survey
 	#--
 	# update deadline and create a survey_deadline_job
 	#++
-
 	# Example:
 	#
 	# instance.update_deadline(Time.now+3.days)
@@ -200,8 +199,16 @@ class Survey
 		return ErrorEnum::SURVEY_DEADLINE_ERROR if time <= Time.now.to_i && time != -1
 		self.deadline = time == -1 ? nil : time
 		return ErrorEnum::UNKNOWN_ERROR unless self.save
+		retval = TaskClient.destroy_task("survey_deadline", {survey_id: self._id})
+		return ErrorEnum::TASK_DESTROY_FAILED if retval == ErrorEnum::TASK_DESTROY_FAILED
 		#create or update job
-		#Jobs.start(:SurveyDeadlineJob, time, survey_id: self.id)
+		if !self.deadline.nil?
+			task_id = TaskClient.create_task({ task_type: "survey_deadline",
+											host: "localhost",
+											port: Rails.application.config.service_port,
+											executed_at: time,
+											params: { survey_id: self._id} })
+		end
 		return true
 	end
 
@@ -1280,6 +1287,7 @@ class Survey
 
 		# initialze the quota stats
 		self.quota["finished_count"] = 0
+		self.quota["submitted_count"] = 0
 		self.quota["rules"].each do |rule|
 			rule["finished_count"] = 0
 			rule["submitted_count"] = 0

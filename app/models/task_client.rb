@@ -30,6 +30,20 @@ class TaskClient
 		end
 	end
 
+	def self.destroy_task(task_type, params)
+		begin
+			response = self.delete('/tasks/1.json', {:body => {:task_type => task_type, :params => params}})
+		rescue
+			return ErrorEnum::TASK_DESTROY_FAILED
+		end
+		result = response.parsed_response
+		if result && result["success"]
+			return result["value"]
+		else
+			return ErrorEnum::TASK_DESTROY_FAILED
+		end
+	end
+
 	def self.set_progress(task_id, progress_item, progress_value)
 		self.put("/tasks/#{task_id}", {:body => {:progress_item => progress_item, :progress_value => progress_value}})
 	end

@@ -7,10 +7,17 @@ class OrdersController < ApplicationController
 
   def show
     # TODO is owners request?
-    order =  @current_user.orders.find_by_id(params[:id])
-    render_json order.is_a?(Order) do
-      order.as_retval
-    end 
+    # order =  @current_user.orders.find_by_id(params[:id])
+    # render_json order.is_a?(Order) do
+    #   order.as_retval
+    # end 
+    @current_user.orders.find_by_id(params[:id]) do |order|
+      render_json false do
+        success_true
+        order[:gift] = order.gift || order.prize
+        order.as_retval
+      end
+    end
   end
 
   def create
@@ -34,6 +41,8 @@ class OrdersController < ApplicationController
     #   end
     # end
     # p @current_user
+    params[:order][:lottery_code_id] = params[:order][:_id]
+    # binding.pry
     @order = @current_user.orders.create(params[:order])
     render_json !@order.deleted? && @order.is_valid? do
       @order.as_retval
