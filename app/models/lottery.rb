@@ -67,7 +67,6 @@ class Lottery
         #   )
         lottery_code.status = 2
         lottery_code.prize = i[:prize]
-        # binding.pry
         lottery_code.prize.save
         lottery_code.save
         lottery_code[:prize] = i[:prize]
