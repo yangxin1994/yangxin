@@ -125,7 +125,8 @@ class QualityControlQuestion < BasicQuestion
 			volunteer_answer = question_answer["selection"]
 			case standard_answer.question_type
 			when QuestionTypeEnum::CHOICE_QUESTION
-				return Tool.check_choice_question_answer(question_answer["selection"], 
+				return Tool.check_choice_question_answer(quality_control_question_id,
+					question_answer["selection"], 
 					standard_answer.answer_content["items"],
 					standard_answer.answer_content["fuzzy"])
 			else
