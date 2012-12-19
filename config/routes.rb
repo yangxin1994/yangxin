@@ -7,6 +7,8 @@ OopsData::Application.routes.draw do
 		collection do
 			post :email_job
 			post :result_job
+			post :quota_job
+			post :survey_deadline_job
 		end
 	end
 

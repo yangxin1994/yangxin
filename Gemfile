@@ -56,7 +56,7 @@ gem 'mime-types'
 group :test, :development do
   gem 'guard-spork'
   gem "spork-minitest"
-  gem "guard-minitest", :git => 'https://github.com/karmaQ/guard-minitest.git'
+  gem "guard-minitest"#, :git => 'https://github.com/karmaQ/guard-minitest.git'
   gem 'minitest-rails'
   gem 'rb-fsevent', '~> 0.9.1'
   gem 'turn', :require => false
@@ -66,3 +66,5 @@ end
 group :production do
   gem 'passenger'
 end
+
+gem 'quill_common', :path => "../quill_common"

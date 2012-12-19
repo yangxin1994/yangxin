@@ -372,36 +372,15 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	#*method*: get
-	#
-	#*url*: /surveys/:survey_id/pause
-	#
-	#*description*: the owner of the survey pause the survey
-	#
-	#*params*:
-	#* survey_id: id of the suvey to be set
-	#* message: the message that the administrator wants to give the user
-	#
-	#*retval*:
-	#* true when the survey is successfully paused
-	#* ErrorEnum::SURVEY_NOT_EXIST
-	#* ErrorEnum::UNAUTHORIZED
-	#* ErrorEnum::WRONG_PUBLISH_STATUS
-	def pause
-		retval = @survey.pause(params[:message], @current_user)
-		respond_to do |format|
-			format.json	{ render_json_auto(retval) and return }
-		end
-	end
-
 	#*method*: put
 	#
 	#*url*: /surveys/:survey_id/update_deadline
 	#
-	#*description*: the owner of the survey pause the survey
+	#*description*: the owner of the survey updates the deadline of the survey
 	#
 	#*params*:
 	#* survey_id: id of the suvey to be set
+	#* deadline: deadline to be setted
 	def update_deadline
 		retval = @survey.update_deadline(params[:deadline])
 		respond_to do |format|

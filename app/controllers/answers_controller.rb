@@ -1,13 +1,12 @@
 # coding: utf-8
 require 'error_enum'
+require 'quill_common'
 class AnswersController < ApplicationController
 
 	# before_filter :require_user_exist
 	before_filter :check_survey_existence, :only => [:create]
 	before_filter :check_answer_existence, :except => [:get_my_answer, :create]
-
 	before_filter :check_my_answer_existence, :only => [:load_question, :submit_answer, :clear, :finish, :destroy_preview]
-
 	before_filter :check_ownerness_of_survey, :only => [:destroy, :show]
 
 	def check_ownerness_of_survey
@@ -51,7 +50,7 @@ class AnswersController < ApplicationController
 	######################
 
 	def create
-		if !params[:is_preview] && @survey.publish_status != 8
+		if !params[:is_preview] && @survey.publish_status != QuillCommon::PublishStatusEnum::PUBLISHED
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_PUBLISHED) and return }
 			end

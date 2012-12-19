@@ -1,6 +1,5 @@
 # encoding: utf-8
 require 'error_enum'
-require 'publish_status'
 require 'securerandom'
 require 'tool'
 class Answer
@@ -20,11 +19,11 @@ class Answer
 	# => logic_control_result is a hash, the key of which is question id, and the value of which has the following strucutre
 	# => => items : array of input ids that are hidden
 	# => => sub_questions : array of row ids that are hidden
-	field :finish_type, :type => Integer, default: 0
 	field :logic_control_result, :type => Hash, default: {}
 	field :repeat_time, :type => Integer, default: 0
 	# reject_type: 0 for rejected by quota, 1 for rejected by quliaty control (auto quality control), 2 for rejected by manual quality control, 3 for rejected by screen, 4 for timeout
 	field :reject_type, :type => Integer
+
 	field :username, :type => String, default: ""
 	field :password, :type => String, default: ""
 
@@ -33,7 +32,6 @@ class Answer
 	field :ip_address, :type => String, default: ""
 
 	field :is_scanned, :type => Boolean, default: false
-
 	field :is_preview, :type => Boolean, default: false
 
 	field :finished_at, :type => Integer
@@ -450,7 +448,10 @@ class Answer
 				if answer_content[question_id].nil?
 					satisfy = false
 				else
-					satisfy = Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], require_answer, condition["fuzzy"])
+					satisfy = Tool.check_choice_question_answer(question_id,
+															self.answer_content[question_id]["selection"],
+															require_answer,
+															condition["fuzzy"])
 				end
 			when "1"
 				question_id = condition["name"]
@@ -458,7 +459,10 @@ class Answer
 				if answer_content[question_id].nil?
 					satisfy = false
 				else
-					satisfy = Tool.check_choice_question_answer(self.answer_content[question_id]["selection"], require_answer, condition["fuzzy"])
+					satisfy = Tool.check_choice_question_answer(question_id,
+															self.answer_content[question_id]["selection"],
+															require_answer,
+															condition["fuzzy"])
 				end
 			when "2"
 				satisfy = Address.satisfy_region_code?(self.region, condition["value"])
@@ -600,7 +604,10 @@ class Answer
 			logic_control_rule["conditions"].each do |condition|
 				# if the volunteer has not answered this question, stop the checking of this rule
 				break if answer_content[condition["question_id"]].nil?
-				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]]["selection"], condition["answer"], condition["fuzzy"])
+				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]],
+																answer_content[condition["question_id"]]["selection"],
+																condition["answer"],
+																condition["fuzzy"])
 				if pass_condition
 					self.set_reject
 					self.update_attributes(reject_type: 3, finished_at: Time.now.to_i)
@@ -680,7 +687,10 @@ class Answer
 			logic_control_rule["conditions"].each do |condition|
 				# if the volunteer has not answered this question, stop the checking of this rule
 				satisfy_rule = false if answer_content[condition["question_id"]].nil?
-				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]]["selection"], condition["answer"], condition["fuzzy"])
+				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]],
+																answer_content[condition["question_id"]]["selection"],
+																condition["answer"],
+																condition["fuzzy"])
 				satisfy_rule = false if !pass_condition
 			end
 			next if !satisfy_rule
@@ -789,8 +799,22 @@ class Answer
 
 	def update_quota(old_status)
 		quota = self.survey.quota
+		if old_status == EDIT && self.is_under_review
+			# user submits the answer
+			quota["submitted_count"] += 1
+		elsif old_status == EDIT && self.is_finish
+			# user submits the answer, and the answer automatically passes review
+			quota["submitted_count"] += 1
+			quota["finished_count"] += 1
+		elsif old_status == UNDER_REVIEW && self.is_finish
+			# answer passes review
+			quota["finished_count"] += 1
+		elsif old_status == UNDER_REVIEW && self.is_reject
+			# answer fails review
+			quota["submitted_count"] = [quota["submitted_count"] - 1, 0].max
+		end
 		quota["rules"].each do |rule|
-			next if self.satisfy_conditions(rule["conditions"])
+			next if !self.satisfy_conditions(rule["conditions"])
 			if old_status == EDIT && self.is_under_review
 				# user submits the answer
 				rule["submitted_count"] += 1
@@ -872,5 +896,4 @@ class Answer
 		end
 		return true
 	end
-
 end

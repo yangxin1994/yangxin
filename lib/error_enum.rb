@@ -94,6 +94,7 @@ module ErrorEnum
 
 	TASK_NOT_EXIST = 'error_190'
 	TASK_CREATION_FAILED = 'error_200'
+	TASK_DESTROY_FAILED = 'error_201'
 
 	# lcm add for answer review
 	REWARD_ERROR = 'error_300'

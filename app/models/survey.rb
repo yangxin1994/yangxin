@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'error_enum'
 require 'quality_control_type_enum'
-require 'publish_status'
+require 'quill_common'
 require 'securerandom'
 require 'csv'
 #The survey object has the following structure
@@ -35,7 +35,7 @@ class Survey
 	field :alt_new_survey, :type => Boolean, default: false
 	# can be 0 (normal), or -1 (deleted)
 	field :status, :type => Integer, default: 0 
-	# can be 1 (closed), 2 (under review), 4 (paused), 8 (published)
+	# can be 1 (closed), 2 (under review), 8 (published), the 4(pause) has been removed
 	field :publish_status, :type => Integer, default: 1
 	field :user_attr_survey, :type => Boolean, default: false
 	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
@@ -207,7 +207,6 @@ class Survey
 	#--
 	# update deadline and create a survey_deadline_job
 	#++
-
 	# Example:
 	#
 	# instance.update_deadline(Time.now+3.days)
@@ -216,8 +215,16 @@ class Survey
 		return ErrorEnum::SURVEY_DEADLINE_ERROR if time <= Time.now.to_i && time != -1
 		self.deadline = time == -1 ? nil : time
 		return ErrorEnum::UNKNOWN_ERROR unless self.save
+		retval = TaskClient.destroy_task("survey_deadline", {survey_id: self._id})
+		return ErrorEnum::TASK_DESTROY_FAILED if retval == ErrorEnum::TASK_DESTROY_FAILED
 		#create or update job
-		#Jobs.start(:SurveyDeadlineJob, time, survey_id: self.id)
+		if !self.deadline.nil?
+			task_id = TaskClient.create_task({ task_type: "survey_deadline",
+											host: "localhost",
+											port: Rails.application.config.service_port,
+											executed_at: time,
+											params: { survey_id: self._id} })
+		end
 		return true
 	end
 
@@ -475,7 +482,7 @@ class Survey
 
 		# some information that cannot be cloned
 		new_instance.status = 0
-		new_instance.publish_status = (operator.is_admin || operator.is_super_admin) ? PublishStatus::PUBLISHED : PublishStatus::CLOSED
+		new_instance.publish_status = (operator.is_admin || operator.is_super_admin) ? QuillCommon::PublishStatus::PUBLISHED : QuillCommon::PublishStatus::CLOSED
 		new_instance.user_attr_survey = false
 
 		new_instance.is_star = false
@@ -590,14 +597,14 @@ class Survey
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
 	def submit(message, operator)
 		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_super_admin
-		return ErrorEnum::WRONG_PUBLISH_STATUS if ![PublishStatus::CLOSED, PublishStatus::PAUSED].include?(self.publish_status)
+		return ErrorEnum::WRONG_PUBLISH_STATUS if QuillCommon::PublishStatus::CLOSED != self.publish_status
 		before_publish_status = self.publish_status
 		if operator.is_admin || operator.is_super_admin
-			self.update_attributes(:publish_status => PublishStatus::PUBLISHED)
-			publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::PUBLISHED, message)
+			self.update_attributes(:publish_status => QuillCommon::PublishStatus::PUBLISHED)
+			publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatus::PUBLISHED, message)
 		else
-			self.update_attributes(:publish_status => PublishStatus::UNDER_REVIEW)
-			publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::UNDER_REVIEW, message)
+			self.update_attributes(:publish_status => QuillCommon::PublishStatus::UNDER_REVIEW)
+			publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatus::UNDER_REVIEW, message)
 		end
 		self.publish_status_historys << publish_status_history
 		return true
@@ -614,10 +621,10 @@ class Survey
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
 	def reject(message, operator)
 		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_survey_auditor
-		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != PublishStatus::UNDER_REVIEW
+		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != QuillCommon::PublishStatus::UNDER_REVIEW
 		before_publish_status = self.publish_status
-		self.update_attributes(:publish_status => PublishStatus::PAUSED)
-		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::PAUSED, message)
+		self.update_attributes(:publish_status => QuillCommon::PublishStatus::CLOSED)
+		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatus::CLOSED, message)
 		self.publish_status_historys << publish_status_history
 		# message
 		message ||={}
@@ -640,12 +647,12 @@ class Survey
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
 	def publish(message, operator)
 		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_survey_auditor
-		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != PublishStatus::UNDER_REVIEW
+		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != QuillCommon::PublishStatus::UNDER_REVIEW
 		before_publish_status = self.publish_status
-		self.update_attributes(:publish_status => PublishStatus::PUBLISHED)
+		self.update_attributes(:publish_status => QuillCommon::PublishStatus::PUBLISHED)
 		self.deadline = Time.now.to_i + 30.days.to_i if self.deadline.blank?
 		self.save
-		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::PUBLISHED, message)
+		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatus::PUBLISHED, message)
 		self.publish_status_historys << publish_status_history
 		# message
 		message ||={}
@@ -667,29 +674,10 @@ class Survey
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
 	def close(message, operator)
 		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_survey_auditor
-		return ErrorEnum::WRONG_PUBLISH_STATUS if ![PublishStatus::PUBLISHED, PublishStatus::UNDER_REVIEW].include?(self.publish_status)
+		return ErrorEnum::WRONG_PUBLISH_STATUS if ![QuillCommon::PublishStatus::PUBLISHED, QuillCommon::PublishStatus::UNDER_REVIEW].include?(self.publish_status)
 		before_publish_status = self.publish_status
-		self.update_attributes(:publish_status => PublishStatus::CLOSED)
-		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::CLOSED, message)
-		self.publish_status_historys << publish_status_history
-		return true
-	end
-
-	#*description*: pause a survey
-	#
-	#*params*:
-	#* the user doing this operation
-	#
-	#*retval*:
-	#* true
-	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
-	#* ErrorEnum ::WRONG_PUBLISH_STATUS
-	def pause(message, operator)
-		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_survey_auditor
-		return ErrorEnum::WRONG_PUBLISH_STATUS if ![PublishStatus::PUBLISHED, PublishStatus::UNDER_REVIEW].include?(self.publish_status)
-		before_publish_status = self.publish_status
-		self.update_attributes(:publish_status => PublishStatus::PAUSED)
-		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, PublishStatus::PAUSED, message)
+		self.update_attributes(:publish_status => QuillCommon::PublishStatus::CLOSED)
+		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatus::CLOSED, message)
 		self.publish_status_historys << publish_status_history
 		return true
 	end
@@ -1158,7 +1146,7 @@ class Survey
 	# return all the surveys that are published and are active
 	# it is needed to send emails and invite volunteers for these surveys
 	def self.get_published_active_surveys
-		return surveys = Survey.normal.in_community.where(:publish_status => PublishStatus::PUBLISHED)
+		return surveys = Survey.normal.in_community.where(:publish_status => QuillCommon::PublishStatus::PUBLISHED)
 	end
 
 	def check_password_for_preview(username, password, current_user)
@@ -1296,6 +1284,7 @@ class Survey
 
 		# initialze the quota stats
 		self.quota["finished_count"] = 0
+		self.quota["submitted_count"] = 0
 		self.quota["rules"].each do |rule|
 			rule["finished_count"] = 0
 			rule["submitted_count"] = 0
