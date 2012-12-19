@@ -66,3 +66,5 @@ end
 group :production do
   gem 'passenger'
 end
+
+gem 'quill_common', :path => "../quill_common"

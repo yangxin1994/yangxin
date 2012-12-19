@@ -1,6 +1,5 @@
 # encoding: utf-8
 require 'error_enum'
-require 'publish_status'
 require 'securerandom'
 require 'tool'
 class Answer
@@ -20,11 +19,11 @@ class Answer
 	# => logic_control_result is a hash, the key of which is question id, and the value of which has the following strucutre
 	# => => items : array of input ids that are hidden
 	# => => sub_questions : array of row ids that are hidden
-	field :finish_type, :type => Integer, default: 0
 	field :logic_control_result, :type => Hash, default: {}
 	field :repeat_time, :type => Integer, default: 0
 	# reject_type: 0 for rejected by quota, 1 for rejected by quliaty control (auto quality control), 2 for rejected by manual quality control, 3 for rejected by screen, 4 for timeout
 	field :reject_type, :type => Integer
+
 	field :username, :type => String, default: ""
 	field :password, :type => String, default: ""
 
@@ -33,7 +32,6 @@ class Answer
 	field :ip_address, :type => String, default: ""
 
 	field :is_scanned, :type => Boolean, default: false
-
 	field :is_preview, :type => Boolean, default: false
 
 	field :finished_at, :type => Integer
@@ -898,5 +896,4 @@ class Answer
 		end
 		return true
 	end
-
 end

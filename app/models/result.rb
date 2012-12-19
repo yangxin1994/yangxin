@@ -55,7 +55,7 @@ class Result
 		# the task is finished, return
 		return 1 if result && result.status == 1
 
-		# the task has not been finished, chech the progress
+		# the task has not been finished, check the progress
 		task = TaskClient.get_task(task_id)
 
 		return task if task == ErrorEnum::TASK_NOT_EXIST
