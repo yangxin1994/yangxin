@@ -5,7 +5,7 @@ class LotteriesController < ApplicationController
 	def index
 		render_json do
 			auto_paginate Lottery.activity do 
-				Lottery.activity.page(page).per(per_page).map do |e|
+				Lottery.quillme.page(page).per(per_page).map do |e|
 					e[:photo_src] = e.photo.picture_url unless e.photo.nil?
 					e
 				end

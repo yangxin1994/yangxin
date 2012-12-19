@@ -167,6 +167,22 @@ class Survey
 		end
 	end
 
+  def excel_header
+    headers =[]
+    self.all_questions.each_with_index do |e, i|
+      headers += e.excel_header("q#{i+1}")
+    end
+    headers
+  end
+
+  def csv_header
+    headers = []
+    self.all_questions.each_with_index do |e, i|
+  	  headers += e.csv_header("q#{i+1}")
+    end
+    headers
+  end
+
 	def answer_import(path = "public/import/test.csv")
 		q = []
 		batch = []

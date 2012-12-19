@@ -5,7 +5,7 @@ class Lottery
   include Mongoid::ValidationsExt
   field :title, :type => String
   field :description, :type => String
-  # 0 (for_publish) 1 (activity) 2 (finished)
+  # 0 0代表未发布 不显示, 1 代表显示未发布, 2代表发布不显示, 3代表显示并发布
   field :status, :type => Integer, :default => 0
   field :is_deleted, :type => Boolean, :default => false
   #field :point, :type => Integer
@@ -18,7 +18,9 @@ class Lottery
   scope :is_display, where(:status => 1)
   scope :pause, where(:status => 2)
   scope :activity, where(:status => 3)
-
+  # scope :quillme, where( '$or' => [:status => 1, :status => 3]).order_by(:status, :desc)
+  scope :quillme, where('$or' => [{:status => 1}, {:status => 3}]).order_by(:status, :desc)
+ 
   has_many :surveys
   has_many :prizes
   has_many :lottery_codes

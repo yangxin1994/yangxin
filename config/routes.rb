@@ -196,7 +196,7 @@ OopsData::Application.routes.draw do
 	end
 
 	namespace 'entry_clerk' do
-		resources :answers do
+		resources :surveys do
 			member do
 				get 'csv_header'
 				post 'import_answer'
