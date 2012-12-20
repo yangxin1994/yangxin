@@ -15,11 +15,11 @@ class PublishStatusHistory
 	# after_save :after_save_work
 
 	def self.start_publish_time
-		PublishStatusHistory.where(after_status: QuillCommon::PublishStatus::PUBLISHED).(sort: [[ :created_at, :desc ]]).map { |e| e.created_at.to_i }
+		PublishStatusHistory.where(after_status: QuillCommon::PublishStatusEnum::PUBLISHED).(sort: [[ :created_at, :desc ]]).map { |e| e.created_at.to_i }
 	end
 
 	def self.end_publish_time
-		PublishStatusHistory.where(before_status: QuillCommon::PublishStatus::PUBLISHED).(sort: [[ :created_at, :desc ]]).map { |e| e.created_at.to_i }
+		PublishStatusHistory.where(before_status: QuillCommon::PublishStatusEnum::PUBLISHED).(sort: [[ :created_at, :desc ]]).map { |e| e.created_at.to_i }
 	end
 
 	def self.create_new(operator_id, before_status, after_status, message)
