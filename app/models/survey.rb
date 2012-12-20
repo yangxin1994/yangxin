@@ -482,7 +482,7 @@ class Survey
 
 		# some information that cannot be cloned
 		new_instance.status = 0
-		new_instance.publish_status = (operator.is_admin || operator.is_super_admin) ? QuillCommon::PublishStatus::PUBLISHED : QuillCommon::PublishStatus::CLOSED
+		new_instance.publish_status = (operator.is_admin || operator.is_super_admin) ? QuillCommon::PublishStatusEnum::PUBLISHED : QuillCommon::PublishStatusEnum::CLOSED
 		new_instance.user_attr_survey = false
 
 		new_instance.is_star = false
@@ -597,14 +597,14 @@ class Survey
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
 	def submit(message, operator)
 		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_super_admin
-		return ErrorEnum::WRONG_PUBLISH_STATUS if QuillCommon::PublishStatus::CLOSED != self.publish_status
+		return ErrorEnum::WRONG_PUBLISH_STATUS if QuillCommon::PublishStatusEnum::CLOSED != self.publish_status
 		before_publish_status = self.publish_status
 		if operator.is_admin || operator.is_super_admin
-			self.update_attributes(:publish_status => QuillCommon::PublishStatus::PUBLISHED)
-			publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatus::PUBLISHED, message)
+			self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
+			publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::PUBLISHED, message)
 		else
-			self.update_attributes(:publish_status => QuillCommon::PublishStatus::UNDER_REVIEW)
-			publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatus::UNDER_REVIEW, message)
+			self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::UNDER_REVIEW)
+			publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::UNDER_REVIEW, message)
 		end
 		self.publish_status_historys << publish_status_history
 		return true
@@ -621,10 +621,10 @@ class Survey
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
 	def reject(message, operator)
 		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_survey_auditor
-		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != QuillCommon::PublishStatus::UNDER_REVIEW
+		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != QuillCommon::PublishStatusEnum::UNDER_REVIEW
 		before_publish_status = self.publish_status
-		self.update_attributes(:publish_status => QuillCommon::PublishStatus::CLOSED)
-		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatus::CLOSED, message)
+		self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::CLOSED)
+		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::CLOSED, message)
 		self.publish_status_historys << publish_status_history
 		# message
 		message ||={}
@@ -647,12 +647,12 @@ class Survey
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
 	def publish(message, operator)
 		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_survey_auditor
-		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != QuillCommon::PublishStatus::UNDER_REVIEW
+		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != QuillCommon::PublishStatusEnum::UNDER_REVIEW
 		before_publish_status = self.publish_status
-		self.update_attributes(:publish_status => QuillCommon::PublishStatus::PUBLISHED)
+		self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
 		self.deadline = Time.now.to_i + 30.days.to_i if self.deadline.blank?
 		self.save
-		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatus::PUBLISHED, message)
+		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::PUBLISHED, message)
 		self.publish_status_historys << publish_status_history
 		# message
 		message ||={}
@@ -674,10 +674,10 @@ class Survey
 	#* ErrorEnum ::WRONG_PUBLISH_STATUS
 	def close(message, operator)
 		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_survey_auditor
-		return ErrorEnum::WRONG_PUBLISH_STATUS if ![QuillCommon::PublishStatus::PUBLISHED, QuillCommon::PublishStatus::UNDER_REVIEW].include?(self.publish_status)
+		return ErrorEnum::WRONG_PUBLISH_STATUS if ![QuillCommon::PublishStatusEnum::PUBLISHED, QuillCommon::PublishStatusEnum::UNDER_REVIEW].include?(self.publish_status)
 		before_publish_status = self.publish_status
-		self.update_attributes(:publish_status => QuillCommon::PublishStatus::CLOSED)
-		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatus::CLOSED, message)
+		self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::CLOSED)
+		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::CLOSED, message)
 		self.publish_status_historys << publish_status_history
 		return true
 	end
@@ -1146,7 +1146,7 @@ class Survey
 	# return all the surveys that are published and are active
 	# it is needed to send emails and invite volunteers for these surveys
 	def self.get_published_active_surveys
-		return surveys = Survey.normal.in_community.where(:publish_status => QuillCommon::PublishStatus::PUBLISHED)
+		return surveys = Survey.normal.in_community.where(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
 	end
 
 	def check_password_for_preview(username, password, current_user)
