@@ -18,7 +18,7 @@ test:
 staging:
   host: localhost
   port: 27017
-  username: <%= "oopsdata_s" %>
+  username: <%= "oopsdata_p" %>
   password: <%= "tsinghua" %>
   database: oops_data_staging
   # slaves:
