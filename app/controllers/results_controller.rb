@@ -19,25 +19,13 @@ class ResultsController < ApplicationController
 	end
 
 	def to_spss
-		analysis_result = Result.find_by_result_key(params[:result_key])
-		render_json !analysis_result.nil? do 
-			if analysis_result.nil?
-				ErrorEnum::DATA_LIST_NOT_EXIST
-			else
-				Jobs::ToSpssJob.create(:data_list_result_id => analysis_result.id, :survey_id => @survey.id)
-			end
-		end
+		task_id = @survey.to_spss(params[:filter_index].to_i, params[:include_screened_answer])
+		render_json task_id
 	end
 
 	def to_excel
-		analysis_result = Result.find_by_result_key(params[:result_key])
-		render_json !analysis_result.nil? do |e|
-			if !e
-				ErrorEnum::DATA_LIST_NOT_EXIST
-			else
-				Jobs::ToExcelJob.create(:data_list_result_id => data_list_result.id, :survey_id => @survey.id)
-			end
-		end
+		task_id = @survey.to_excel(params[:filter_index].to_i, params[:include_screened_answer])
+		render_json task_id
 	end
 
 	def report
