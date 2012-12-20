@@ -6,7 +6,7 @@ class Admin::SurveysController < Admin::ApplicationController
 		# use publish_status = 0 means status=-1
 		if params[:publish_status].to_i > 0
 			@surveys = @surveys.where(:status.gt => -1, :publish_status => params[:publish_status].to_i).desc(:created_at) 
-		else
+		elsif params[:publish_status] && params[:publish_status].to_i == 0
 			@surveys = @surveys.where(:status => -1).desc(:created_at)
 		end
 		@surveys = @surveys.where(:show_in_community => params["show_in_community"].to_s == 'true') if params[:show_in_community]
