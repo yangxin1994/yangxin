@@ -5,6 +5,9 @@ development:
 
   # host: 192.168.1.100
 
+  port: 27017
+  username: <%= "oopsdata_d" %>
+  password: <%= "tsinghua" %>
   database: oops_data_development
 
 test:
@@ -15,8 +18,8 @@ test:
 staging:
   host: localhost
   port: 27017
-  username: <%= ENV['MONGOID_USERNAME'] %>
-  password: <%= ENV['MONGOID_PASSWORD'] %>
+  username: <%= "oopsdata_s" %>
+  password: <%= "tsinghua" %>
   database: oops_data_staging
   # slaves:
   #   - host: slave1.local
@@ -27,8 +30,8 @@ staging:
 production:
   host: localhost
   port: 27017
-  username: <%= ENV['MONGOID_USERNAME'] %>
-  password: <%= ENV['MONGOID_PASSWORD'] %>
+  username: <%= "oopsdata_p" %>
+  password: <%= "tsinghua" %>
   database: oops_data_production
   # slaves:
   #   - host: slave1.local
