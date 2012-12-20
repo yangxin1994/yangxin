@@ -687,7 +687,7 @@ class Answer
 			logic_control_rule["conditions"].each do |condition|
 				# if the volunteer has not answered this question, stop the checking of this rule
 				satisfy_rule = false if answer_content[condition["question_id"]].nil?
-				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]],
+				pass_condition = Tool.check_choice_question_answer(condition["question_id"],
 																answer_content[condition["question_id"]]["selection"],
 																condition["answer"],
 																condition["fuzzy"])
