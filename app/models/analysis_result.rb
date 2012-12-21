@@ -25,9 +25,6 @@ class AnalysisResult < Result
 
 
 	def analysis(answers, task_id = nil)
-		logger.info "@@@@@@@@@@@@@@@@@@@@@"
-		logger.info answers_result.inspect
-		logger.info "@@@@@@@@@@@@@@@@@@@@@"
 		region_result = Address.province_hash.merge(Address.city_hash)
 		channel_result = {}
 		duration_mean = []
@@ -51,7 +48,7 @@ class AnalysisResult < Result
 			info["email"] = a.user.nil? ? "" : a.user.email.to_s
 			info["full_name"] = a.user.nil? ? "" : a.user.full_name.to_s
 			info["answer_time"] = a.created_at.to_i
-			info["duration"] = a.finished_at - a.created_at.to_i
+			info["duration"] = (!a.finished_at.nil? && !a.created_at.nil?) ? a.finished_at - a.created_at.to_i : nil
 			info["region"] = a.region
 			answer_info << info
 			TaskClient.set_progress(task_id, "answer_info_progress", (index + 1).to_f / answers_length) if !task_id.nil?
