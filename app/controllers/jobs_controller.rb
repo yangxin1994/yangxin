@@ -136,8 +136,22 @@ class JobsController < ApplicationController
 												answers_transform)
 			render_json_auto(retval) and return
 		when "to_spss"
+			survey = Survey.find_by_id(params[:survey_id])
+			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
+			# from the analysis result, get the ids of the answers to be exported
+			analysis_result = Result.find_by_result_key(params[:data_list_key])
+			render_json_e(ErrorEnum::RESULT_NOT_EXIST) and return if analysis_result.nil?
+			answer_info = analysis_result.answer_info || []
+			answers_id = answer_info.map { |e| e["_id"] }
 
 		when "to_excel"
+			survey = Survey.find_by_id(params[:survey_id])
+			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
+			# from the analysis result, get the ids of the answers to be exported
+			analysis_result = Result.find_by_result_key(params[:data_list_key])
+			render_json_e(ErrorEnum::RESULT_NOT_EXIST) and return if analysis_result.nil?
+			answer_info = analysis_result.answer_info || []
+			answers_id = answer_info.map { |e| e["_id"] }
 			
 		end
 	end

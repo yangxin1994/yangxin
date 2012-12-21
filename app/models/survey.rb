@@ -167,17 +167,25 @@ class Survey
 		end
 	end
 
-
-	def to_spss
-		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
+	def to_spss(data_list_key)
+		return ErrorEnum::DATA_LIST_NOT_EXIST if Result.find_by_result_key(data_list_key).nil?
 		task_id = TaskClient.create_task({ task_type: "result",
 											host: "localhost",
 											port: Rails.application.config.service_port,
-											params: { result_type: "spss",
-																survey_id: self._id,
-																filter_index: filter_index,
-																include_screened_answer: include_screened_answer} })
+											params: { result_type: "to_spss",
+																survey_id: self._id.to_s,
+																data_list_key: data_list_key} })
 		return task_id
+	end
+
+	def to_excel(data_list_key)
+		return ErrorEnum::DATA_LIST_NOT_EXIST if Result.find_by_result_key(data_list_key).nil?
+		task_id = TaskClient.create_task({ task_type: "result",
+											host: "localhost",
+											port: Rails.application.config.service_port,
+											params: { result_type: "to_excel",
+																survey_id: self._id.to_s,
+																data_list_key: data_list_key} })
 	end
 
 	def to_spss_job(filter_index, include_screened_answer, task_id)
@@ -206,21 +214,21 @@ class Survey
     #                      "result_key" => @result.result_key}.to_yaml}
 	end
 
-  def excel_header
-    headers =[]
-    self.all_questions.each_with_index do |e, i|
-      headers += e.excel_header("q#{i+1}")
-    end
-    headers
-  end
+	def excel_header
+		headers =[]
+		self.all_questions.each_with_index do |e, i|
+			headers += e.excel_header("q#{i+1}")
+		end
+		headers
+	end
 
-  def csv_header
-    headers = []
-    self.all_questions.each_with_index do |e, i|
-  	  headers += e.csv_header("q#{i+1}")
-    end
-    headers
-  end
+	def csv_header
+		headers = []
+		self.all_questions.each_with_index do |e, i|
+			headers += e.csv_header("q#{i+1}")
+		end
+		headers
+	end
 
 	def answer_import(path = "public/import/test.csv")
 		q = []
@@ -1982,5 +1990,9 @@ class Survey
 			last_update_time = [last_update_time, q.updated_at.to_i].max
 		end
 		return last_update_time
+	end
+
+	def info_for_interviewer
+		
 	end
 end

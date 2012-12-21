@@ -47,6 +47,7 @@ class AnalysisResult < Result
 		answers_length = answers.length
 		answers.each_with_index do |a, index|
 			info = {}
+			info["_id"] = a._id.to_s
 			info["email"] = a.user.nil? ? "" : a.user.email.to_s
 			info["full_name"] = a.user.nil? ? "" : a.user.full_name.to_s
 			info["answer_time"] = a.created_at.to_i

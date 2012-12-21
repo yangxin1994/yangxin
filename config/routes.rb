@@ -206,6 +206,16 @@ OopsData::Application.routes.draw do
 		end
 	end
 
+	namespace 'interviewer' do
+		resources :surveys do
+		end
+		resources :answers do
+			collection do
+				post 'submit'
+			end
+		end
+	end
+
 	get "home/index"
 	match 'home' => 'home#index', :as => :home
 	post "home/get_tp_info"
