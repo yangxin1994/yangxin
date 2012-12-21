@@ -69,19 +69,12 @@ class Admin::TemplateQuestionsController < Admin::ApplicationController
 	end
 
 	def index
-		questions = TemplateQuestion.all.page(page).per(per_page)
-		respond_to do |format|
-			format.json	{ render_json_auto(questions) and return }
+		if params[:question_type]
+			questions = TemplateQuestion.where(question_type: params[:question_type].to_i).desc(:created_at)
+		else
+			questions = TemplateQuestion.all.desc(:created_at)
 		end
-	end
-
-	def count
-		render_json_auto TemplateQuestion.count
-	end
-
-	def list_by_type
-		questions = TemplateQuestion.where(question_type: params[:question_type].to_i)
-		render_json_auto auto_paginate(questions)
+		render_json_auto auto_paginate(questions) and return
 	end
 
 	#*method*: get

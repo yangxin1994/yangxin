@@ -17,34 +17,48 @@ class Admin::FeedbacksController < Admin::ApplicationController
 	# GET /admin/feedbacks
 	# GET /admin/feedbacks.json
 	def index
-		if !params[:feedback_type].nil? then
-			if !params[:value].nil? then
-				@feedbacks = Feedback.list_by_type_and_value(params[:feedback_type], params[:value])
-			elsif !params[:answer].nil? then
-				@feedbacks = Feedback.list_by_type_and_answer(params[:feedback_type], params[:answer].to_s.strip == "true")
-			else
-				@feedbacks = Feedback.list_by_type(params[:feedback_type])
-			end
+		# if !params[:feedback_type].nil? then
+		# 	if !params[:value].nil? then
+		# 		@feedbacks = Feedback.list_by_type_and_value(params[:feedback_type], params[:value])
+		# 	elsif !params[:answer].nil? then
+		# 		@feedbacks = Feedback.list_by_type_and_answer(params[:feedback_type], params[:answer].to_s.strip == "true")
+		# 	else
+		# 		@feedbacks = Feedback.list_by_type(params[:feedback_type])
+		# 	end
 
-			@feedbacks = slice((@feedbacks || []), page, per_page)
-		else
-			@feedbacks = Feedback.all.asc(:is_answer).desc(:created_at).page(page).per(per_page) 
+		# 	@feedbacks = slice((@feedbacks || []), page, per_page)
+		# else
+		# 	@feedbacks = Feedback.all.asc(:is_answer).desc(:created_at).page(page).per(per_page) 
+		# end
+
+		# @feedbacks = @feedbacks.map{|e| maping_question_user(e)}
+
+		# if !params[:feedback_type].nil? then
+		# 	if !params[:value].nil? then
+		# 		render_json_auto (auto_paginate(@feedbacks, Feedback.list_by_type_and_value(params[:feedback_type], params[:value]).count){@feedbacks}) and return 
+		# 	elsif !params[:answer].nil? then
+		# 		render_json_auto (auto_paginate(@feedbacks, Feedback.list_by_type_and_answer(params[:feedback_type], params[:answer].to_s.strip == "true").count){@feedbacks}) and return 
+		# 	else
+		# 		render_json_auto (auto_paginate(@feedbacks, Feedback.list_by_type(params[:feedback_type]).count){@feedbacks}) and return 
+		# 	end
+		# else
+		# 	render_json_auto (auto_paginate(@feedbacks, Feedback.count){@feedbacks}) and return 
+		# end
+
+		@feedbacks = Feedback.all 
+		if params[:feedback_type]
+			types = []
+			Feedback::MAX_TYPE.downto(0).each { |element| 
+				if params[:feedback_type].to_i / (2**element) == 1 then
+					types << 2**element
+				end
+			}
+			@feedbacks = @feedbacks.where(:feedback_type.in => types)
 		end
-
-		@feedbacks = @feedbacks.map{|e| maping_question_user(e)}
-
-		if !params[:feedback_type].nil? then
-			if !params[:value].nil? then
-				render_json_auto (auto_paginate(@feedbacks, Feedback.list_by_type_and_value(params[:feedback_type], params[:value]).count){@feedbacks}) and return 
-			elsif !params[:answer].nil? then
-				render_json_auto (auto_paginate(@feedbacks, Feedback.list_by_type_and_answer(params[:feedback_type], params[:answer].to_s.strip == "true").count){@feedbacks}) and return 
-			else
-				render_json_auto (auto_paginate(@feedbacks, Feedback.list_by_type(params[:feedback_type]).count){@feedbacks}) and return 
-			end
-		else
-			render_json_auto (auto_paginate(@feedbacks, Feedback.count){@feedbacks}) and return 
-		end
-
+		@feedbacks = @feedbacks.where(:value => Regexp.new(params[:value].to_s)) if params[:value]
+		@feedbacks =  @feedbacks.where(:is_answer => params[:answer].to_s == 'true') if params[:answer]
+			
+		render_json_auto auto_paginate(@feedbacks)
 	end
 	
 	# GET /admin/feedbacks/1 
