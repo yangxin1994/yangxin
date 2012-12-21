@@ -6,8 +6,8 @@ development:
   # host: 192.168.1.100
 
   port: 27017
-  username: <%= "oopsdata_d" %>
-  password: <%= "tsinghua" %>
+  # username: <%= "oopsdata_d" %>
+  # password: <%= "tsinghua" %>
   database: oops_data_development
 
 test:

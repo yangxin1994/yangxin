@@ -167,30 +167,6 @@ class Survey
 		end
 	end
 
-	def answer_contents
-    a = filtered_answers
-    @retval = []
-    q = @survey.all_questions_type
-    p "========= 准备完毕 ========="
-    @result.answers_count = a.size
-    a.each_with_index do |answer, index|
-      line_answer = []
-      i = -1
-        #begin
-          #TODO 异常处理
-        answer.answer_content.each do |k, v|
-          line_answer += q[i += 1].answer_content(v)
-        end
-      #end
-      set_status({"export_answers_progress" => (index + 1) * 1.0 / @result.answers_count })
-      
-      p "========= 转出 #{index} 条 进度 #{set_status["export_answers_progress"]} =========" if index%10 == 0
-      @retval << line_answer
-    end
-    @result.answer_contents = @retval
-    @result.save
-    @retval
-  end
 
 	def to_spss
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
@@ -202,6 +178,32 @@ class Survey
 																filter_index: filter_index,
 																include_screened_answer: include_screened_answer} })
 		return task_id
+	end
+
+	def to_spss_job(filter_index, include_screened_answer, task_id)
+    # a = get_answers(filter_index, include_screened_answer, task_id)
+    # as = []
+    # result = Result.find_by_task_id task_id
+    # q = self.all_questions_type
+    # p "========= 准备完毕 ========="
+    # result.answers_count = a.size
+    # a.each_with_index do |answer, index|
+    #   line_answer = []
+    #   i = -1
+    #     answer.answer_content.each do |k, v|
+    #       line_answer += q[i += 1].answer_content(v)
+    #     end
+    #   # set_status({"export_answers_progress" => (index + 1) * 1.0 / result.answers_count })
+      
+    #   p "========= 转出 #{index} 条 进度 #{set_status["export_answers_progress"]} =========" if index%10 == 0
+    #   as << line_answer
+    # end
+    # result.answer_contents = as
+    # result.save
+    #     {'spss_data' => {"spss_header" => spss_header,
+    #                      "answer_contents" => as,
+    #                      "header_name" => csv_header,
+    #                      "result_key" => @result.result_key}.to_yaml}
 	end
 
   def excel_header

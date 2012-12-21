@@ -14,7 +14,7 @@ class EntryClerk::SurveysController < EntryClerk::ApplicationController
 
 	def import_answer
 		survey = Survey.find_by_id params[:survey_id]
-		render_json(survey.is_valid?) do
+		render_json(survey.valid?) do
 			if is_success
 				survey.answer_import(params[:csv])
 			else

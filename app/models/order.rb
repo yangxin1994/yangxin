@@ -111,9 +111,9 @@ class Order
       }
       return false
     end
-    if self.gift.type == 3
-      self.gift.lottery.give_lottery_code_to(self.user) 
-    end
+    # if self.gift.type == 3
+    #   self.gift.lottery.give_lottery_code_to(self.user) 
+    # end
     self.gift.inc(:surplus, -1) 
     self.save
   end
@@ -131,17 +131,18 @@ class Order
   end
 
   def decrease_prize
-    if self.gift.blank? || self.gift.surplus <= 0
+    # binding.pry
+    if self.prize.blank? || self.prize.surplus < 0
       @ret_error= {
         :error_code => ErrorEnum::PRIZE_NOT_ENOUGH,
         :error_message => "prize not enough"
       }
       return false
     end
-    if self.gift.type == 3
-      self.gift.lottery.give_lottery_code_to(self.user) 
+    if self.prize.type == 3
+      self.prize.lottery.give_lottery_code_to(self.user) 
     end
-    self.gift.inc(:surplus, -1) 
+    # self.prize.inc(:surplus, -1) 
     self.save
   end
   # def decrease_gift

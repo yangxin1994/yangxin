@@ -136,8 +136,7 @@ class JobsController < ApplicationController
 												answers_transform)
 			render_json_auto(retval) and return
 		when "to_spss"
-			survey = Survey.find_by_id(params[:survey_id])
-			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
+
 		when "to_excel"
 			
 		end
