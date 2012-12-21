@@ -687,7 +687,7 @@ class Answer
 			logic_control_rule["conditions"].each do |condition|
 				# if the volunteer has not answered this question, stop the checking of this rule
 				satisfy_rule = false if answer_content[condition["question_id"]].nil?
-				pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]],
+				pass_condition = Tool.check_choice_question_answer(condition["question_id"],
 																answer_content[condition["question_id"]]["selection"],
 																condition["answer"],
 																condition["fuzzy"])
@@ -775,12 +775,12 @@ class Answer
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
 		old_status = self.status
 		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
-		if !self.survey.has_prize && (!self.survey.spreadable || self.survey.spread_point == 0)
+		if self.is_preview || (!self.survey.has_prize && (!self.survey.spreadable || self.survey.spread_point == 0))
 			self.set_finish
 		else
 			self.set_under_review
 		end
-		self.update_quota(old_status)
+		self.update_quota(old_status) if !self.is_preview
 		self.finished_at = Time.now.to_i
 		self.save
 		return true

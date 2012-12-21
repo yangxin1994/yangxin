@@ -369,7 +369,14 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 			
 		end
 
-		render_json_auto(answer, :only => [:question_content, :auditor_email, :audit_at, :audit_message, :status])
+		render_json_auto(answer, 
+			:only => [
+				:question_content, 
+				:auditor_email, 
+				:audit_at, 
+				:audit_message, 
+				:status, 
+				:reject_type])
 	end
 
 	def review

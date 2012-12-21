@@ -42,7 +42,7 @@ class SurveyAuditor::SurveysController < SurveyAuditor::ApplicationController
 		# respond_to do |format|
 		# 	format.json	{ render_json_auto(survey_list) and return }
 		# end
-		render_json_auto auto_paginate(Survey.normal.where(publish_status: PublishStatus::UNDER_REVIEW))
+		render_json_auto auto_paginate(Survey.normal.where(publish_status: 2))
 	end
 
 	# def count
