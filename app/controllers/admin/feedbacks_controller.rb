@@ -58,7 +58,7 @@ class Admin::FeedbacksController < Admin::ApplicationController
 		@feedbacks = @feedbacks.where(:value => Regexp.new(params[:value].to_s)) if params[:value]
 		@feedbacks =  @feedbacks.where(:is_answer => params[:answer].to_s == 'true') if params[:answer]
 			
-		render_json_auto auto_paginate(@feedbacks)
+		render_json_auto auto_paginate(@feedbacks.desc(:created_at))
 	end
 	
 	# GET /admin/feedbacks/1 

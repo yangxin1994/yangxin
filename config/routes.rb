@@ -59,9 +59,6 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :faqs do 
-			collection do 
-				get 'count', 'list_by_type_count', 'list_by_type_and_value_count'
-			end
 		end
 		resources :public_notices do 
 			collection do 
@@ -75,10 +72,6 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :feedbacks do
-			collection do 
-				get 'count', 'list_by_type_count', 'list_by_type_and_value_count', 
-					'list_by_type_and_answer_count'
-			end
 			member do 
 				post 'reply'
 			end

@@ -10,29 +10,42 @@ class Admin::FaqsController < Admin::ApplicationController
 	# GET /admin/faqs
 	# GET /admin/faqs.json
 	def index
-		if !params[:faq_type].nil? then
-			if !params[:value].nil? then
-				@faqs = Faq.list_by_type_and_value(params[:faq_type], params[:value])
-			else
-				@faqs = Faq.list_by_type(params[:faq_type])
-			end
+		# if !params[:faq_type].nil? then
+		# 	if !params[:value].nil? then
+		# 		@faqs = Faq.list_by_type_and_value(params[:faq_type], params[:value])
+		# 	else
+		# 		@faqs = Faq.list_by_type(params[:faq_type])
+		# 	end
 
-			@faqs = slice((@faqs || []), page, per_page)
-		else
-			@faqs = Faq.all.desc(:updated_at).page(page).per(per_page)
+		# 	@faqs = slice((@faqs || []), page, per_page)
+		# else
+		# 	@faqs = Faq.all.desc(:updated_at).page(page).per(per_page)
+		# end
+
+		# @faqs = @faqs.map{|e| maping(e)}
+
+		# if !params[:faq_type].nil? then
+		# 	if !params[:value].nil? then
+		# 		render_json_auto (auto_paginate(@faqs, Faq.list_by_type_and_value(params[:faq_type], params[:value]).count){@faqs}) and return
+		# 	else
+		# 		render_json_auto (auto_paginate(@faqs, Faq.list_by_type(params[:faq_type]).count){@faqs}) and return
+		# 	end
+		# else
+		# 	render_json_auto (auto_paginate(@faqs, Faq.count){@faqs}) and return
+		# end
+		@faqs = Faq.all 
+		if params[:faq_type]
+			types = []
+			FAQ::MAX_TYPE.downto(0).each { |element| 
+				if params[:faq_type].to_i / (2**element) == 1 then
+					types << 2**element
+				end
+			}
+			@faqs = @faqs.where(:faq_type.in => types)
 		end
-
-		@faqs = @faqs.map{|e| maping(e)}
-
-		if !params[:faq_type].nil? then
-			if !params[:value].nil? then
-				render_json_auto (auto_paginate(@faqs, Faq.list_by_type_and_value(params[:faq_type], params[:value]).count){@faqs}) and return
-			else
-				render_json_auto (auto_paginate(@faqs, Faq.list_by_type(params[:faq_type]).count){@faqs}) and return
-			end
-		else
-			render_json_auto (auto_paginate(@faqs, Faq.count){@faqs}) and return
-		end 		
+		@faqs = @faqs.where(:value => Regexp.new(params[:value].to_s)) if params[:value]
+			
+		render_json_auto auto_paginate(@faqs.desc(:created_at))	
 	end
 	
 	# GET /admin/faqs/1 
