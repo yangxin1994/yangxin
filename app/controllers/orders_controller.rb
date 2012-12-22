@@ -2,7 +2,14 @@ class OrdersController < ApplicationController
 #TO DO before_filter
   before_filter :require_user_exist
   def index
-    render_json { auto_paginate(@current_user.orders) }
+    render_json true do
+      auto_paginate @current_user.orders do |orders|
+        orders.map do |order|
+          order[:gift] = order[:prize] if order.is_prize == true
+          order
+        end
+      end
+    end
   end
 
   def show
@@ -41,7 +48,7 @@ class OrdersController < ApplicationController
     #   end
     # end
     # p @current_user
-    params[:order][:lottery_code_id] = params[:order][:_id]
+    # params[:order][:lottery_code_id] = params[:order][:_id] if params[:order][:lottery_code_id].nil?
     # binding.pry
     @order = @current_user.orders.create(params[:order])
     render_json !@order.deleted? && @order.is_valid? do
