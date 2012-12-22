@@ -1182,12 +1182,14 @@ class Survey
 		questions = []
 		survey.pages.each do |page|
 			page["questions"].each do |q_id|
-				q = TemplateQuestion.find_by_id(q_id)
+				q = BasicQuestion.find_by_id(q_id)
 				next if q.nil?
 				questions << q
 			end
 		end
-		return {survey._id.to_s => questions}
+		questions.sort!{|v1, v2| v2.created_at <=> v1.created_at} if questions.count > 1
+		logger.debug "#{questions}"
+		return {survey._id.to_s => questions, 'title' => survey.title}
 	end
 
 	# return all the surveys that are published and are active

@@ -8,6 +8,8 @@ class Feedback
 	field :title, :type => String
 	field :content, :type => String
 	field :is_answer, :type => Boolean, :default => false
+	# add attr to store reply message
+	field :reply_message, :type => String
 	
 	attr_accessible :feedback_type, :title, :content
 
@@ -272,7 +274,11 @@ class Feedback
 				message_content,
 				[feedback.question_user.id.to_s])
 
-			feedback.is_answer = true and feedback.save if retval.is_a? Message
+			if retval.is_a? Message
+				feedback.is_answer = true 
+				feedback.reply_message = message_content
+				feedback.save 
+			end
 					
 			return retval
 

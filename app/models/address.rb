@@ -179,4 +179,24 @@ class Address
 		end
 		return county_hash
 	end
+
+	# find all info by town
+	def self.find_province_city_town_by_code(code)
+		self.ensure_cache
+		find_address = @@all_address.select { |e| e[0].to_i == code.to_i }
+		if !find_address.blank? 
+
+			town = find_address[0]
+			town_label = town[1]
+
+			province_label = @@provinces.select{|elem| elem[0] < town[0]}.last[1]
+			city_label = @@all_cities.select{|elem| elem[0] < town[0]}.last[1]
+
+			return "#{province_label} - #{city_label} - #{town_label}"
+					
+		end
+
+		return ""
+
+	end
 end
