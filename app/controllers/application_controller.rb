@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::Base
+# test deployment
 	protect_from_forgery
 
 	before_filter :client_ip, :current_user#, :user_init
