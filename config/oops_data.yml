@@ -1,6 +1,29 @@
 production:
   words_per_second: 5
-  root_url: "166.111.112.18"
+  login_count_threshold: 1000
+  activate_expiration_time: 86400
+  password_expiration_time: 86400
+  cache_key_prefix: "oopsdata_"
+  redis_hostname: "orange02"
+  renren_app_id: "194585"
+  renren_api_key: "aa0e45712a7a4960af981ea3f6918b86"
+  renren_secret_key: "b2490c767d264f848a3ef026aadcace0"
+  renren_redirect_uri: "http://quill.oopsdata.com/renren_connect"
+  sina_app_key: "3198161770"
+  sina_app_secret: "2e1b16c7aba8755c22f60ca9f5cda090"
+  sina_redirect_uri: "http://quill.oopsdata.com/sina_connect"
+  qq_app_id: "100271825"
+  qq_app_key: "31d510c1ce2265b8e38d5ab6dbcea119"
+  qq_redirect_uri: "http://quill.oopsdata.com/qq_connect"
+  google_client_id: "739977487035.apps.googleusercontent.com"
+  google_client_secret: "L1TFXRqGFsGkMihTRY1J1bOf"
+  google_redirect_uri: "http://quill.oopsdata.com/google_connect"
+  qihu_app_id: "102205843"
+  qihu_app_key: "ca6d278b690138f21cf31ea6fd3f6e2e"
+  qihu_app_secret: "25e635ca1c06b32ef02f1fbfa996c74d"
+  qihu_redirect_uri: "http://quill.oopsdata.com/qihu_connect"
+staging:
+  words_per_second: 5
   login_count_threshold: 1000
   activate_expiration_time: 86400
   password_expiration_time: 86400
@@ -25,7 +48,6 @@ production:
   qihu_redirect_uri: "http://quill.oopsdata.com/qihu_connect"
 development:
   words_per_second: 5
-  root_url: "test.oopsdata.com"
   login_count_threshold: 100
   activate_expiration_time: 3600
   password_expiration_time: 3600
@@ -50,7 +72,6 @@ development:
   qihu_redirect_uri: "http://test.oopsdata.com/qihu_connect"
 test:
   words_per_second: 5
-  root_url: "localhost:3000"
   login_count_threshold: 100
   activate_expiration_time: 3600
   password_expiration_time: 3600

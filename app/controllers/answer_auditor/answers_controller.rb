@@ -188,7 +188,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# }	
 				show_answer.merge!({'question_type_label'=> '地址题'})
 
-				town =  Address.find_text_by_code(val["address"].to_i)
+				town =  Address.find_province_city_town_by_code(val["address"].to_i)
 
 				show_answer.merge!({"address"=> town, 
 					"detail" => val["detail"],
