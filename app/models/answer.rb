@@ -811,7 +811,7 @@ class Answer
 			quota["finished_count"] += 1
 		elsif old_status == UNDER_REVIEW && self.is_reject
 			# answer fails review
-			quota["submitted_count"] = [quota["submitted_count"] - 1, 0].max
+			quota["submitted_count"] = [quota["submitted_count"].to_i - 1, 0].max
 		end
 		quota["rules"].each do |rule|
 			next if !self.satisfy_conditions(rule["conditions"])

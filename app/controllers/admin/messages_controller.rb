@@ -10,21 +10,14 @@ class Admin::MessagesController < Admin::ApplicationController
 	end
 
 	def index
-# <<<<<<< HEAD
-# 		# (Message.all.desc(:created_at).page(page).per(per_page) || []).map{ |e| maping(e) }
-# 		#@messages = ErrorEnum::MessgaeNotFound if @messages.empty?
-# 		render_json true do
-# 			auto_paginate Message.all.desc(:created_at) do |messages|
-# 				(messages || []).map{ |e| maping(e) }
-# 			end
-# 		end
-# =======
 		@messages = Message.all.desc(:created_at)
+		if params[:receiver_email]
+			@messages = @messages.to_a.select{|elem| (elem.receiver.blank? || elem.receiver.include?(User.find_by_email(params[:receiver_email])))}
+		end
+
 		@show_messages = auto_paginate(@messages)
 		@show_messages['data'] = @show_messages['data'].map{ |e| maping(e) }
-		#@messages = ErrorEnum::MessgaeNotFound if @messages.empty?
-		render_json_auto @show_messages
-
+		render_json_auto @show_messages	and return
 	end
 
 	def count
@@ -40,12 +33,12 @@ class Admin::MessagesController < Admin::ApplicationController
 
 	def create
 		@message = current_user.create_message(params[:message][:title],params[:message][:content],params[:message][:receiver])
-		render_json @message.save do @message.as_retval end
+		render_json_auto @message.save do @message.as_retval end
 	end
 
 	def update
 		@message = current_user.update_message(params[:id], params[:message])
-		render_json @message.save do @message.as_retval end
+		render_json_auto @message
 	end
 
 	def destroy
