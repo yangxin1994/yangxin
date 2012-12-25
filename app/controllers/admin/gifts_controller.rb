@@ -27,16 +27,16 @@ class Admin::GiftsController < Admin::ApplicationController
                                :picture_url => params[:gift][:photo])
     params[:gift][:photo] = material
     @gift = Gift.create(params[:gift])
-    if params[:gift][:type] == 3
-      l = Lottery.where(:_id => params[:gift][:lottery]).first
-      if !l.nil?
-        params[:gift][:lottery] = l
-        @gift.lottery = l
-        @gift.lottery.save
-      else
-        render_json(false){ErrorEnum::LOTTERY_NOT_FOUND}
-      end
-    end
+    # if params[:gift][:type] == 3
+    #   l = Lottery.where(:_id => params[:gift][:lottery]).first
+    #   if !l.nil?
+    #     params[:gift][:lottery] = l
+    #     @gift.lottery = l
+    #     @gift.lottery.save
+    #   else
+    #     render_json(false){ErrorEnum::LOTTERY_NOT_FOUND}
+    #   end
+    # end
     
     @gift.photo = material
     material.save

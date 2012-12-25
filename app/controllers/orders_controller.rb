@@ -79,6 +79,7 @@ class OrdersController < ApplicationController
         end
         o.update_attribute(:status, -2)
         o.gift.inc(:surplus, 1)
+        o.lottery_code.update_attribute(:status, 2) if o.lottery_code
         o.update_attribute(:status_desc, params[:status_desc])
         o.reward_log.revoke_operation(current_user, params[:status_desc])
       end

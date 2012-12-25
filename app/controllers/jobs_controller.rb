@@ -143,7 +143,25 @@ class JobsController < ApplicationController
 			analysis_result = Result.find_by_result_key(params[:data_list_key])
 			render_json_e(ErrorEnum::RESULT_NOT_EXIST) and return if analysis_result.nil?
 			answer_info = analysis_result.answer_info || []
-			answers_id = answer_info.map { |e| e["_id"] }
+			answers = answer_info.map { |e| Answer.find_by_id e["_id"] }
+			# generate result key
+			result_key = ExportResult.generate_spss_result_key(survey.last_update_time,
+														answers)
+			existing_export_result = ExportResult.find_by_result_key(result_key)
+			if existing_export_result.nil?
+				# create new result record
+				export_result = ExportResult.create(:result_key => result_key,
+													:task_id => params["task_id"])
+			else
+				export_result = ExportResult.create(:result_key => result_key,
+													:task_id => params["task_id"],
+													:ref_result_id => existing_export_result._id)
+				render_json_auto(true) and return
+			end
+			render_json false do
+				survey.formated_answers(answers, result_key)
+				# 连接.net进行转换
+			end
 
 		when "to_excel"
 			survey = Survey.find_by_id(params[:survey_id])

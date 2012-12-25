@@ -6,6 +6,7 @@ class LotteryCode
 
 	field :num, :type => Integer, default: 0
 	field :code, :type => String
+	field :lottery, :type => String
 	field :email, :type => String
 	# 0 (待抽奖) 1 (未中奖) 2 (中奖未下订单) 4(中奖已下订单) 
 	field :status, :type => Integer, default: 0
@@ -29,7 +30,5 @@ class LotteryCode
 	def draw
 		self.lottery.draw(self) #unless self.status > 0
 	end
-
-	
 
 end

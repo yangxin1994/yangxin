@@ -6,7 +6,7 @@ class RewardLog
   # can be 1 (LotteryCode) 2 (Point)
   field :type, :type => Integer
   field :point, :type => Integer, :default => 0
-  # can be 0 (AdminOperate), 1 (InviteUser), 2 (FilledSurvey), 3 (ExtendSurvey), 4 (ExchangeGift), 5 (revoke)
+  # can be 0 (AdminOperate), 1 (InviteUser), 2 (FilledSurvey), 3 (ExtendSurvey), 4 (ExchangeGift), 5 (revoke), 6 (ExchangeLottery)
   field :cause, :type => Integer
   field :cause_desc, :type => String
   field :value, :type => Hash
@@ -30,10 +30,10 @@ class RewardLog
   # before_save :operated_point
   after_create :operate_user_point
 
-  def revoke_operation(admin, cause_desc)
+  def revoke_operation(user, cause_desc)
     RewardLog.create(:user_id => self.user.id,
                      :point => -self.point,
-                     :operator => admin,
+                     :operator => user,
                      :type => 2,
                      :ref => self._id,
                      :cause_desc => cause_desc,

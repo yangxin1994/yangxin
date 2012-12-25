@@ -8,7 +8,8 @@ class Lottery
   # 0 0代表未发布 不显示, 1 代表显示未发布, 2代表发布不显示, 3代表显示并发布
   field :status, :type => Integer, :default => 0
   field :is_deleted, :type => Boolean, :default => false
-  #field :point, :type => Integer
+  field :exchangeable, :type => Boolean, :default => false
+  field :point, :type => Integer
   field :weight, :type => Integer, :default => 100000
   #field :prize_interval, :type => Array, :default => []
 
@@ -28,7 +29,16 @@ class Lottery
   has_one :photo, :class_name => "Material", :inverse_of => 'lottery'
   belongs_to :creator, :class_name => 'User'
 
-  validates_presence_of :title, :description
+  validates_presence_of :title, :description, :point
+
+  def exchange(user)
+    return false if !exchangeable
+    user.reward_logs.create(:type => 2,
+      :point => self.point,
+      :cuase => 6)
+    self.give_lottery_code_to user
+    user.save
+  end
 
   def delete
   	is_deleted = true

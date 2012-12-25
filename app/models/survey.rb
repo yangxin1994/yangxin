@@ -138,7 +138,7 @@ class Survey
 
 	def all_questions_type
 		q = []
-		all_questions.each do |a|
+		self.all_questions.each do |a|
 			q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
 		end
 		q
@@ -165,6 +165,22 @@ class Survey
 		end
 	end
 
+  def spss_header
+    headers =[]
+    self.all_questions.each_with_index do |e, i|
+      headers += e.spss_header("q#{i+1}")
+    end
+    headers
+  end
+
+  def csv_header
+    headers = []
+    self.all_questions.each_with_index do |e, i|
+      headers += e.csv_header("q#{i+1}")
+    end
+    headers
+  end
+
 	def to_spss(data_list_key)
 		return ErrorEnum::DATA_LIST_NOT_EXIST if Result.find_by_result_key(data_list_key).nil?
 		task_id = TaskClient.create_task({ task_type: "result",
@@ -186,47 +202,44 @@ class Survey
 																data_list_key: data_list_key} })
 	end
 
-	def to_spss_job(filter_index, include_screened_answer, task_id)
-    # a = get_answers(filter_index, include_screened_answer, task_id)
-    # as = []
-    # result = Result.find_by_task_id task_id
-    # q = self.all_questions_type
-    # p "========= 准备完毕 ========="
-    # result.answers_count = a.size
-    # a.each_with_index do |answer, index|
-    #   line_answer = []
-    #   i = -1
-    #     answer.answer_content.each do |k, v|
-    #       line_answer += q[i += 1].answer_content(v)
-    #     end
-    #   # set_status({"export_answers_progress" => (index + 1) * 1.0 / result.answers_count })
-      
-    #   p "========= 转出 #{index} 条 进度 #{set_status["export_answers_progress"]} =========" if index%10 == 0
-    #   as << line_answer
-    # end
-    # result.answer_contents = as
-    # result.save
-    #     {'spss_data' => {"spss_header" => spss_header,
-    #                      "answer_contents" => as,
-    #                      "header_name" => csv_header,
-    #                      "result_key" => @result.result_key}.to_yaml}
+	def formated_answers(answers, result_key)
+    answer_c = []
+    q = self.all_questions_type
+    p "========= 准备完毕 ========="
+    answers.each_with_index do |answer, index|
+      line_answer = []
+      i = -1
+      answer.answer_content.each do |k, v|
+    		logger.debug q[i + 1]
+        line_answer += q[i += 1].answer_content(v)
+     		logger.debug v 
+    		logger.debug line_answer
+    	  logger.debug i
+      end
+      answer_c << line_answer
+    end
+    logger.info({'spss_data' => {"spss_header" => spss_header,
+                     "answer_contents" => answer_c,
+                     # "header_name" => csv_header,
+                     "header_name" => csv_header,
+                     "result_key" => result_key}})
 	end
 
-	def excel_header
-		headers =[]
-		self.all_questions.each_with_index do |e, i|
-			headers += e.excel_header("q#{i+1}")
-		end
-		headers
-	end
+  def excel_header
+    headers =[]
+    self.all_questions.each_with_index do |e, i|
+      headers += e.excel_header("q#{i+1}")
+    end
+    headers
+  end
 
-	def csv_header
-		headers = []
-		self.all_questions.each_with_index do |e, i|
-			headers += e.csv_header("q#{i+1}")
-		end
-		headers
-	end
+  def csv_header
+    headers = []
+    self.all_questions.each_with_index do |e, i|
+  	  headers += e.csv_header("q#{i+1}")
+    end
+    headers
+  end
 
 	def answer_import(path = "public/import/test.csv")
 		q = []
