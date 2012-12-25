@@ -1,5 +1,6 @@
 require 'array'
 require 'error_enum'
+require 'quill_common'
 class SurveysController < ApplicationController
 	before_filter :require_sign_in, :except => [:show, :estimate_answer_time, :list_surveys_in_community, :reward_info, :search_title]
 	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :update_deadline, :update_star]
@@ -50,7 +51,7 @@ class SurveysController < ApplicationController
 			survey = Survey.create
 			survey.alt_new_survey = false
 			@current_user.surveys << survey
-			survey.update_attributes(:publish_status => PublishStatus::PUBLISHED) if @current_user.is_admin || @current_user.is_super_admin
+			survey.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED) if @current_user.is_admin || @current_user.is_super_admin
 		end
 		respond_to do |format|
 			format.json	{ render_json_s(survey.serialize) and return }

@@ -1,9 +1,10 @@
+require 'quill_common'
 class JobsController < ApplicationController
 
 	def survey_deadline_job
 		survey = Survey.find_by_id(params[:survey_id])
 		# the publish status of the survey is set as closed
-		survey.update_attributes(publish_status: PublishStatus::CLOSED) if survey.publish_status == PublishStatus::PUBLISHED
+		survey.update_attributes(publish_status: QuillCommon::PublishStatusEnum::CLOSED) if survey.publish_status == QuillCommonPublishStatusEnum::PUBLISHED
 		survey.refresh_quota_stats
 		# delete the quota job for this survey
 		TaskClient.destroy_task("quota", {survey_id: survey._id})
