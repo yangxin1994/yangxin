@@ -95,8 +95,7 @@ class Order
       }
     return false 
     end
-    self.create_reward_log(:order => self,
-                           :type => 2,
+    self.create_reward_log(:type => 2,
                            :user => self.user,
                            :point => -self.gift.point,
                            :cause => 4)

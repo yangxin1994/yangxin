@@ -34,7 +34,7 @@ class Lottery
   def exchange(user)
     return false if !exchangeable
     user.reward_logs.create(:type => 2,
-      :point => self.point,
+      :point => -self.point,
       :cuase => 6)
     self.give_lottery_code_to user, 0
     user.save

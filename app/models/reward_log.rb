@@ -11,6 +11,7 @@ class RewardLog
   field :cause_desc, :type => String
   field :value, :type => Hash
   field :ref, :type => String
+  
   scope :point_logs, where( :type => 2).order_by("created_at","desc")
   scope :lottery_logs, where( :type => 1).order_by("created_at","desc")
 
@@ -22,8 +23,8 @@ class RewardLog
   belongs_to :order, :class_name => "Order", :inverse_of => :reward_log
 
   # TO DO validation
-  #validates_presence_of :point, :cause, :operator
-  validates :point, :numericality => true
+  # validates_presence_of :point, :cause, :operator
+  # validates :point, :numericality => true
   #validates :invited_user_id, :presence => true
   #validates :user_id, :presence => true
 
@@ -41,11 +42,7 @@ class RewardLog
   end
 
   def operate_user_point
-    logger.info "AAAAAAAAAAAAA"
-    logger.info user.inspect
     return false if user.blank?
-    logger.info "BBBBBBBBBBBBB"
-    logger.info point
     return true if point == 0
     if((self.point + user.point) >= 0)
       logger.info "CCCCCCCCCCCC"
