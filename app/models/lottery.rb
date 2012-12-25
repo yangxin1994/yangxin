@@ -36,7 +36,7 @@ class Lottery
     user.reward_logs.create(:type => 2,
       :point => self.point,
       :cuase => 6)
-    self.give_lottery_code_to user
+    self.give_lottery_code_to user, 0
     user.save
   end
 
@@ -53,8 +53,8 @@ class Lottery
     self.lottery_codes.create(attributes, options, &block)
   end
 
-  def give_lottery_code_to(user)
-    self.lottery_codes.create(:user => user)
+  def give_lottery_code_to(user, obtained_by = 2)
+    self.lottery_codes.create(:user => user, :obtained_by => obtained_by)
   end
 
   def draw(lottery_code)

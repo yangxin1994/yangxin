@@ -139,9 +139,9 @@ class Order
       }
       return false
     end
-    if self.prize.type == 3
-      self.prize.lottery.give_lottery_code_to(self.user) 
-    end
+    # if self.prize.type == 3
+    #   self.prize.lottery.give_lottery_code_to(self.user) 
+    # end
     # self.prize.inc(:surplus, -1) 
     self.save
   end
