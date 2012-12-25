@@ -184,6 +184,7 @@ module ErrorEnum
 	INVALID_PRIZE_ID = "error_21501"
 	# Lottery Error Code (16)
 	INVALID_LOTTERY_ID = "error_21602"
+	LOTTERY_CANNOT_EXCHANGE  = "error_21632"
 	# Lottery Code Error Code (17)
 	LOTTERYCODE_NOT_FOUND = "error_21701"
 	INVALID_LOTTERYCODE_ID = "error_21702"

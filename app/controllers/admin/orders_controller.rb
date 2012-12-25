@@ -31,14 +31,14 @@ class Admin::OrdersController < Admin::ApplicationController
 
   def verify
     render_json do
-      result = Order.find_by_id params[:id] do |o|
-        if o.type == 3
-          o.gift.lottery.give_lottery_code_to o.user
-          o.update_attribute(:status, 3)
-        else
-          o.update_attribute(:status, 1)
-        end
-      end
+      # result = Order.find_by_id params[:id] do |o|
+      #   if o.type == 3
+      #     o.gift.lottery.give_lottery_code_to o.user
+      #     o.update_attribute(:status, 3)
+      #   else
+      #     o.update_attribute(:status, 1)
+      #   end
+      # end
       @is_success = !(result.is_a? Hash)
       result
     end

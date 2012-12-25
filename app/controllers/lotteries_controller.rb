@@ -57,6 +57,11 @@ class LotteriesController < ApplicationController
 			Lottery.find_by_id params[:id] do |lottery|
 				if lottery.exchange(current_user)
 					success_true 
+				else
+					{
+						"error_code" => ErrorEnum::LOTTERY_CANNOT_EXCHANGE,
+						"error_message" => "lottery couldn't exchang"
+					}
 				end
 			end
 		end
