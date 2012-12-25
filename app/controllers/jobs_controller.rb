@@ -146,19 +146,19 @@ class JobsController < ApplicationController
 			# generate result key
 			result_key = ExportResult.generate_spss_result_key(survey.last_update_time,
 														answers)
-			existing_report_result = ReportResult.find_by_result_key(result_key)
-			if existing_report_result.nil?
+			existing_export_result = ExportResult.find_by_result_key(result_key)
+			if existing_export_result.nil?
 				# create new result record
 				export_result = ExportResult.create(:result_key => result_key,
 													:task_id => params["task_id"])
 			else
 				export_result = ExportResult.create(:result_key => result_key,
 													:task_id => params["task_id"],
-													:ref_result_id => existing_report_result._id)
+													:ref_result_id => existing_export_result._id)
 				render_json_auto(true) and return
 			end
 			render_json false do
-				survey.to_spss_job(answers)
+				survey.formated_answers(answers, result_key)
 				# 连接.net进行转换
 			end
 

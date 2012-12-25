@@ -51,6 +51,16 @@ class LotteriesController < ApplicationController
 			end
 		end
 	end
+
+	def exchange
+		render_json false do |s|
+			Lottery.find_by_id params[:id] do |lottery|
+				if lottery.exchange(current_user)
+					success_true 
+				end
+			end
+		end
+	end
 	# def_each :virtualgoods, :cash, :realgoods, :stockout do |method_name|
 	# 	@gifts = Gift.send(method_name).can_be_rewarded.page(page)
 	# 	@gifts = ErrorEnum::GiftNotFound if @gifts.empty? 

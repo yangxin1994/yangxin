@@ -140,7 +140,7 @@ class Survey
 
 	def all_questions_type
 		q = []
-		all_questions.each do |a|
+		self.all_questions.each do |a|
 			q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
 		end
 		q
@@ -167,20 +167,44 @@ class Survey
 		end
 	end
 
+  def spss_header
+    headers =[]
+    self.all_questions.each_with_index do |e, i|
+      headers += e.spss_header("q#{i+1}")
+    end
+    headers
+  end
 
-	def to_spss(filter_index, include_screened_answer)
-		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
+  def csv_header
+    headers = []
+    self.all_questions.each_with_index do |e, i|
+      headers += e.csv_header("q#{i+1}")
+    end
+    headers
+  end
+
+	def to_spss(data_list_key)
+		return ErrorEnum::DATA_LIST_NOT_EXIST if Result.find_by_result_key(data_list_key).nil?
 		task_id = TaskClient.create_task({ task_type: "result",
 											host: "localhost",
 											port: Rails.application.config.service_port,
 											params: { result_type: "to_spss",
-																survey_id: self._id,
-																filter_index: filter_index,
-																include_screened_answer: include_screened_answer} })
+																survey_id: self._id.to_s,
+																data_list_key: data_list_key} })
 		return task_id
 	end
 
-	def formated_answers(answers)
+	def to_excel(data_list_key)
+		return ErrorEnum::DATA_LIST_NOT_EXIST if Result.find_by_result_key(data_list_key).nil?
+		task_id = TaskClient.create_task({ task_type: "result",
+											host: "localhost",
+											port: Rails.application.config.service_port,
+											params: { result_type: "to_excel",
+																survey_id: self._id.to_s,
+																data_list_key: data_list_key} })
+	end
+
+	def formated_answers(answers, result_key)
     answer_c = []
     q = self.all_questions_type
     p "========= 准备完毕 ========="
@@ -188,14 +212,19 @@ class Survey
       line_answer = []
       i = -1
       answer.answer_content.each do |k, v|
+    		logger.debug q[i + 1]
         line_answer += q[i += 1].answer_content(v)
+     		logger.debug v 
+    		logger.debug line_answer
+    	  logger.debug i
       end
       answer_c << line_answer
     end
-    {'spss_data' => {"spss_header" => spss_header,
+    logger.info({'spss_data' => {"spss_header" => spss_header,
                      "answer_contents" => answer_c,
+                     # "header_name" => csv_header,
                      "header_name" => csv_header,
-                     "result_key" => result.result_key}}
+                     "result_key" => result_key}})
 	end
 
   def excel_header

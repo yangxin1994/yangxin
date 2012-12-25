@@ -380,6 +380,7 @@ OopsData::Application.routes.draw do
 		end
 		member do
 			get :draw
+			post :exchange
 		end
 	end
 	resources :gifts do
