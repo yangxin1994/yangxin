@@ -16,7 +16,7 @@ class LotteriesController < ApplicationController
 	def own
 		logger.info "==== #{current_user}======="
 		render_json do
-			[:for_draw, :drawed_w].map do |s|
+			[:for_draw, :drawed_w, :drawed_f].map do |s|
 				pl = params["#{s.to_s}_p".to_sym].to_i || 1
 				pl = 1 if pl <= 0
 				lc = auto_paginate current_user.lottery_codes.send(s) do
