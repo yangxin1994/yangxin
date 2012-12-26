@@ -107,4 +107,13 @@ class InterviewerTask
 		self.save
 		return self
 	end
+
+	def submit_answers(survey_id, answers)
+		answers.each do |a|
+			a.merge({:interviewer_task_id => self._id, :survey_id => self.survey_id, :channel => -2})
+		end
+		Answer.collection.insert(answers)
+		self.update_quota
+		return true
+	end
 end

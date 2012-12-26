@@ -846,6 +846,8 @@ class Answer
 			self.set_reject
 			self.reject_type = 2
 		end
+		interviewer_task = self.interviewer_task
+		interviewer_task.update_quota if !interviewer_task.nil?
 		self.update_quota(old_status)
 		self.auditor = answer_auditor
 		self.audit_at = Time.now.to_i
