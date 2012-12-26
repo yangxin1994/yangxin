@@ -4,26 +4,29 @@ require 'error_enum'
 class EntryClerk::SurveysController < EntryClerk::ApplicationController
 	
 	def csv_header
-		survey = Survey.find_by_id params[:survey_id]
-		return { :error_code => ErrorEnum::SURVEY_NOT_EXIST, 
-						 :error_message => "问卷不存在"} unless survey
-		render_json  do 
-			survey.csv_header
+		render_json(survey = Survey.find_by_id params[:survey_id]) do |s|
+			if s
+				survey.csv_header
+			else
+				{ :error_code => ErrorEnum::SURVEY_NOT_EXIST, 
+						 :error_message => "问卷不存在"}
+			end
 		end
 	end
 
 	def import_answer
-		survey = Survey.find_by_id params[:survey_id]
-		return { :error_code => ErrorEnum::SURVEY_NOT_EXIST, 
-						 :error_message => "问卷不存在"} unless survey
-		render_json false do 
-			if survey.answer_import(params[:csv])
-				success_true 
+		render_json(survey = Survey.find_by_id params[:survey_id]) do |s|
+			if s
+				unless survey.answer_import(params[:csv])
+					@is_success = false
+					{
+						:error_code => ErrorEnum::WRONG_ANSWERS,
+						:error_message => "答案有误"
+					}
+				end
 			else
-				{
-					:error_code => ErrorEnum::WRONG_ANSWERS,
-					:error_message => "答案有误"
-				}
+				{ :error_code => ErrorEnum::SURVEY_NOT_EXIST, 
+					:error_message => "问卷不存在"}
 			end
 		end
 	end
