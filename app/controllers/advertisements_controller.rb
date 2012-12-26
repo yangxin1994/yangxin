@@ -7,7 +7,7 @@ class AdvertisementsController < ApplicationController
 
 		respond_to do |format|
 			format.html # show.html.erb
-			format.json { render json: @advertisement }
+			format.json { render_json_auto @advertisement }
 		end
 	end
 

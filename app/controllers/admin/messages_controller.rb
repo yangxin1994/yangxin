@@ -20,11 +20,6 @@ class Admin::MessagesController < Admin::ApplicationController
 		render_json_auto @show_messages	and return
 	end
 
-	def count
-		count = Message.count
-		render_json_auto count
-	end
-
 	def show
 		@message = Message.find_by_id(params[:id])
 		@message = maping(@message) if @message.is_a? Message
