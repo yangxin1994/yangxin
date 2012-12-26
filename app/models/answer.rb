@@ -50,11 +50,13 @@ class Answer
 	scope :finished, lambda { where(:status => 3) }
 	scope :screened, lambda { where(:status => 1, :reject_type => 3) }
 	scope :finished_and_screened, lambda { any_of({:status => 3}, {:status => 1, :reject_type => 3}) }
+	scope :rejected, lambda { where(:status => 1) }
 
 	scope :unreviewed, lambda { where(:status => 2) }
 
 	belongs_to :user
 	belongs_to :survey
+	belongs_to :interviewer_task
 
 	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
 
@@ -844,6 +846,8 @@ class Answer
 			self.set_reject
 			self.reject_type = 2
 		end
+		interviewer_task = self.interviewer_task
+		interviewer_task.update_quota if !interviewer_task.nil?
 		self.update_quota(old_status)
 		self.auditor = answer_auditor
 		self.audit_at = Time.now.to_i

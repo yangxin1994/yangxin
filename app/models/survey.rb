@@ -86,8 +86,6 @@ class Survey
 	end
 	has_many :publish_status_historys
 	has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
-	has_and_belongs_to_many :entry_clerks, class_name: "User", inverse_of: :entry_clerk_allocated_surveys
-	has_and_belongs_to_many :interviewers, class_name: "User", inverse_of: :interviewer_allocated_surveys
 
 	has_many :answers
 	has_many :email_histories
@@ -2006,5 +2004,24 @@ class Survey
 			last_update_time = [last_update_time, q.updated_at.to_i].max
 		end
 		return last_update_time
+	end
+
+	def info_for_interviewer
+		survey_obj = Hash.new
+		survey_obj["_id"] = self._id.to_s
+		survey_obj["created_at"] = self.created_at
+		survey_obj["pages"] = Marshal.load(Marshal.dump(self.pages))
+		META_ATTR_NAME_ARY.each do |attr_name|
+			method_obj = self.method("#{attr_name}".to_sym)
+			survey_obj[attr_name] = method_obj.call()
+		end
+		survey_obj["logic_control"] = Marshal.load(Marshal.dump(self.logic_control))
+		survey_obj["access_control_setting"] = Marshal.load(Marshal.dump(self.access_control_setting))
+		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
+		info = {"survey" => survey_obj}
+		self.all_questions_id.each do |qid|
+			info = info.merge({qid => BasicQuestion.find_by_id(qid)})
+		end
+		return info
 	end
 end

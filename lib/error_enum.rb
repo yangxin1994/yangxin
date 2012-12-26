@@ -52,6 +52,9 @@ module ErrorEnum
 	REQUIRE_SURVEY_AUDITOR = "error_91"
 	WRONG_USER_ROLE = 'error_92'
 	WRONG_USER_COLOR = 'error_93'
+	REQUIRE_ANSWER_AUDITOR = 'error_94'
+	REQUIRE_ENTRY_CLERK = 'error_95'
+	REQUIRE_INTERVIEWER = 'error_96'
 
 	QUOTA_RULE_NOT_EXIST = "error_100"
 	WRONG_QUOTA_RULE_AMOUNT = "error_101"
@@ -98,6 +101,9 @@ module ErrorEnum
 
 	# lcm add for answer review
 	REWARD_ERROR = 'error_300'
+
+	INTERVIEWER_NOT_EXIST = 'error_301'
+	INTERVIEWER_TASK_NOT_EXIST = 'error_302'
 
 	UNKNOWN_ERROR = "error_100000"
 	SAVE_ERROR = "error_200000"
