@@ -194,7 +194,7 @@ OopsData::Application.routes.draw do
 		resources :surveys do
 			member do
 				get 'csv_header'
-				post 'import_answer'
+				put 'import_answer'
 			end
 		end
 	end

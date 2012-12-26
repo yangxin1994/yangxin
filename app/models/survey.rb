@@ -220,11 +220,11 @@ class Survey
       end
       answer_c << line_answer
     end
-    logger.info({'spss_data' => {"spss_header" => spss_header,
-                     "answer_contents" => answer_c,
-                     # "header_name" => csv_header,
-                     "header_name" => csv_header,
-                     "result_key" => result_key}})
+    send_data({'spss_data' => {"spss_header" => spss_header,
+                               "answer_contents" => answer_c,
+                     					 # "header_name" => csv_header,
+                     					 "header_name" => csv_header,
+                     					 "result_key" => result_key}})
 	end
 
   def excel_header
@@ -243,24 +243,25 @@ class Survey
     headers
   end
 
-	def answer_import(path = "public/import/test.csv")
+	def answer_import(csv_str)
 		q = []
 		batch = []
 		all_questions.each do |a|
 			q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
 		end 
-		CSV.foreach(path, :headers => true) do |row|
+		CSV.parse(csv_files, :headers => true) do |row|
 			row = row.to_hash
 			line_answer = {}
-			quota_qustions_count = quota_qustions.size
+			quota_qustions_count = 0 # quota_qustions.size
 			q.each_with_index do |e, i|
 				#q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
 				header_prefix = "q#{i + 1}"
 				line_answer.merge! e.answer_import(row, header_prefix)
 			end
-			batch << {:answer_content => line_answer, :survey => self._id}
+			p line_answer
+			batch << {:answer_content => line_answer, :channel => -1, :survey_id => self._id, :status => 3}
 		end
-		Survey.collection.insert(batch)
+		Answer.collection.insert(batch)
 		return self.save
 	end
 

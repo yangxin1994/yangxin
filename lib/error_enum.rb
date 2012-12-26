@@ -187,5 +187,7 @@ module ErrorEnum
 	POINT_NOT_ENOUGH = "error_21833"
 	# User Error (20)
 	USER_NOT_FOUND = "error_22001"
+	# Answer Error (21)
+	WRONG_ANSWERS = "error_121031"
 end
 
