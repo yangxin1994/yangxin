@@ -8,19 +8,20 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 	# GET /admin/advertisements
 	# GET /admin/advertisements.json
 	def index
-		if !params[:activate].nil? then
-			if params[:activate].to_s == "true" then
-				@advertisements = Advertisement.activated.desc(:updated_at)
-			elsif params[:activate].to_s == "false" then
-				@advertisements = Advertisement.unactivate.desc(:updated_at)
-			end
-		elsif !params[:title].nil? then
-			@advertisements = Advertisement.list_by_title(params[:title]).desc(:updated_at)
-		else
-			@advertisements = Advertisement.all.desc(:activate, :updated_at).page(page).per(per_page)
-		end		
-
-		render_json_auto auto_paginate(@advertisements) and return
+		@advertisements = Advertisement.all 
+		if params[:advertisement_type]
+			types = []
+			Advertisement::MAX_TYPE.downto(0).each { |element| 
+				if params[:advertisement_type].to_i / (2**element) == 1 then
+					types << 2**element
+				end
+			}
+			@advertisements = @advertisements.where(:advertisement_type.in => types)
+		end
+		@advertisements = @advertisements.where(:title => Regexp.new(params[:title].to_s)) if params[:title]
+		@advertisements =  @advertisements.where(:activate => params[:activate].to_s == 'true') if params[:activate]
+			
+		render_json_auto auto_paginate(@advertisements.desc(:created_at))
 
 	end
 	
