@@ -66,10 +66,16 @@ class Admin::UsersController < Admin::ApplicationController
 
 
 	def lottery_codes
-		@user = User.find_by_id params[:id]
+		@user = User.find_by_id_including_deleted params[:id]
+		
 		render_json(@user.is_a? User) do |s|
 			if s
-				auto_paginate @user.lottery_codes.desc(:created_at)
+				auto_paginate @user.lottery_codes.desc(:created_at) do |codes| 
+					codes.map do |code|
+						code['lottery_title'] = Lottery.find_by_id(code['lottery_id']).title
+						code 
+					end
+				end
 			else
 				{
 					:error_code => ErrorEnum::USER_NOT_EXIST,
@@ -80,7 +86,7 @@ class Admin::UsersController < Admin::ApplicationController
 	end
 
 	def orders
-		@user = User.find_by_id params[:id]
+		@user = User.find_by_id_including_deleted params[:id]
 		render_json(@user.is_a? User) do |s|
 			if s
 				params[:scope] = "all" if params[:scope].blank?	
@@ -201,20 +207,12 @@ class Admin::UsersController < Admin::ApplicationController
 		# display delete users if params[:deleted]
 		users.select!{|u| u.status >= 0} if params[:deleted] && params[:deleted].to_s == 'false'
 
-		paginated_users = auto_paginate(users) do |u|
-			u.slice((page - 1) * per_page, per_page)
-	    end
-
-	    render_json_auto paginated_users
+		render_json_auto auto_paginate(users) 
 	end
 
 	def get_introduced_users
 		user = User.find_by_id_including_deleted(params[:id])
 		render_json_e(ErrorEnum::USER_NOT_EXIST) if user.nil?
-
-		introduced_users = auto_paginate user.get_introduced_users do |u|
-			u.slice((page - 1) * per_page, per_page)
-		end
-		render_json_auto(introduced_users) and return
+		render_json_auto(auto_paginate user.get_introduced_users) and return
 	end
 end

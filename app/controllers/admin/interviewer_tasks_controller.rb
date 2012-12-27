@@ -5,7 +5,7 @@ class Admin::InterviewerTasksController < Admin::ApplicationController
 		@survey = Survey.find_by_id(params[:survey_id])
 		render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
 
-		interviewer_tasks = @survey.interviewer_tasks
+		interviewer_tasks = @survey.interviewer_tasks.to_a
 		render_json_auto(interviewer_tasks)	and return
 	end
 
