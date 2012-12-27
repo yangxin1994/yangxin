@@ -31,14 +31,14 @@ class Admin::OrdersController < Admin::ApplicationController
 
   def verify
     render_json do
-      # result = Order.find_by_id params[:id] do |o|
-      #   if o.type == 3
-      #     o.gift.lottery.give_lottery_code_to o.user
-      #     o.update_attribute(:status, 3)
-      #   else
-      #     o.update_attribute(:status, 1)
-      #   end
-      # end
+      result = Order.find_by_id params[:id] do |o|
+        # if o.type == 3
+        #   o.gift.lottery.give_lottery_code_to o.user
+        #   o.update_attribute(:status, 3)
+        # else
+          o.update_attribute(:status, 1)
+        # end
+      end
       @is_success = !(result.is_a? Hash)
       result
     end
@@ -81,9 +81,9 @@ class Admin::OrdersController < Admin::ApplicationController
     render_json do
       result = Order.find_by_id params[:id] do |o|
         o.update_attribute(:status, -3)
-        o.gift.inc(:surplus, 1)
+        o.gift.inc(:surplus, 1) unless o.is_prize
         o.update_attribute(:status_desc, params[:status_desc])
-        o.reward_log.revoke_operation(current_user, params[:status_desc])
+        o.reward_log.revoke_operation(current_user, params[:status_desc]) unless o.is_prize
       end
       @is_success = !(result.is_a? Hash)
       result
