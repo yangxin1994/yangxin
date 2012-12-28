@@ -34,8 +34,8 @@ class InterviewerTask
 		end
 		interviewer_task = InterviewerTask.create(quota: quota)
 
-		survey.interviewer_tasks << interviewer_task
-		interviewer.interviewer_task = interviewer_task
+		survey.interviewer_tasks << interviewer_task and survey.save
+		interviewer.interviewer_task = interviewer_task and interviewer.save
 		return interviewer_task
 	end
 

@@ -98,6 +98,7 @@ class Survey
 	has_many :analysis_results
 	has_many :report_results
 	has_many :report_mockups
+	has_many :interviewer_tasks
 
 
 	scope :all_but_new, lambda { where(:new_survey => false) }

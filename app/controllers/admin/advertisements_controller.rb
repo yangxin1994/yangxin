@@ -1,7 +1,8 @@
 class Admin::AdvertisementsController < Admin::ApplicationController
 
 	def maping(advertisement)
-		advertisement['user_email'] = User.find(advertisement['user_id'].to_s).email
+		user = User.find_by_id_including_deleted(advertisement['user_id'].to_s)
+		advertisement['user_email'] = user.email if user
 		advertisement
 	end
 

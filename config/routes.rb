@@ -58,6 +58,9 @@ OopsData::Application.routes.draw do
 			end
 		end
 
+		resources :interviewer_tasks do 
+		end	
+
 		resources :faqs do 
 		end
 		resources :public_notices do 
@@ -140,7 +143,6 @@ OopsData::Application.routes.draw do
 
 		resources :lottery_codes 
 
-		match 'messages/count' => 'messages#count'
 		resources :messages
 
 		resources :rewards, :only => [:index] do
