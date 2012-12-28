@@ -115,7 +115,7 @@ OopsData::Application.routes.draw do
 		end
 		resources :orders do
 			collection do
-				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
+				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed, :canceled
 			end
 			member do
 				put :verify, :verify_as_failed, :deliver, :deliver_success, :deliver_as_failed

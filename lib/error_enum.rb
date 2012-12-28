@@ -169,6 +169,7 @@ module ErrorEnum
 	# Prize Error Code (12)
 	PRIZE_NOT_ENOUGH = "error_21233"
 	PRIZE_NOT_FOUND = "error_21201"
+	PRIZE_CTRL_PARAMS_ERROR = "error_21207"
 	# RewardLog Error Code (13)
 	REWARDLOG_POINT_NOT_A_NUNBER = "error_21311"
 	# Order Error Code (14)
@@ -195,5 +196,7 @@ module ErrorEnum
 	USER_NOT_FOUND = "error_22001"
 	# Answer Error (21)
 	WRONG_ANSWERS = "error_121031"
+	# Photo Errot (22)
+	PHOTP_CANNOT_BE_BLANK = "error_122201"
 end
 

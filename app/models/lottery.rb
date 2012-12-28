@@ -35,7 +35,7 @@ class Lottery
     return false if !exchangeable
     user.reward_logs.create(:type => 2,
       :point => -self.point,
-      :cuase => 6)
+      :cause => 6)
     self.give_lottery_code_to user, 0
     user.save
   end
@@ -77,6 +77,7 @@ class Lottery
         #   :status => 2,
         #   :prize => i[:prize]
         #   )
+        lottery_code.drawed_at = Time.now
         lottery_code.status = 2
         lottery_code.prize = i[:prize]
         lottery_code.prize.save

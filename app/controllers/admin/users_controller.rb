@@ -15,17 +15,16 @@ class Admin::UsersController < Admin::ApplicationController
 	# GET /admin/users
 	# GET /admin/users.json
 	def index
-		if !params[:email].nil? then
+		if !params[:email].blank? then
 			@users = User.where(email: params[:email]).desc(:status, :created_at)
-		elsif !params[:full_name].nil? then	
+		elsif !params[:full_name].blank? then	
 			@users = User.where(full_name: params[:full_name]).desc(:status, :created_at)
-		elsif !params[:username].nil? then
+		elsif !params[:username].blank? then
 			filter = params[:username].to_s.gsub(/[*]/, ' ')
 			@users = User.where(username: /.*#{filter}.*/).desc(:status, :created_at)
 		else
 			@users = User.normal_list.where(:role.lt => 15).desc(:status, :created_at)
 		end			
-
 		render_json_auto (auto_paginate(@users)) and return
 	end
 

@@ -14,7 +14,11 @@ class Admin::PrizesController < Admin::ApplicationController
   end
 
   def create
-    create_photo(:prize)
+    unless create_photo(:prize)
+      render_json false do
+        ErrorEnum::PHOTP_CANNOT_BE_BLANK
+      end   
+    end 
     @prize = Prize.new(params[:prize])
 
     # if params[:prize][:type] == 3

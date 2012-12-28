@@ -4,22 +4,24 @@ class Prize < BasicGift
   field :weight, :type => Integer, :default => 10
 
   field :is_in_ctrl, :type => Boolean, :default => false
-  field :ctrl_surplus, :type => Integer
-  field :ctrl_quantity, :type => Integer
-  field :ctrl_time, :type => Integer
-  field :ctrl_start_time, :type => Time
+  field :ctrl_surplus, :type => Integer, :default => 0
+  field :ctrl_quantity, :type => Integer, :default => 0
+  field :ctrl_time, :type => Integer, :default => 0
+  field :ctrl_start_time, :type => Time, :default => Time.now
   field :ctrl_history, :type => Array, :default => []
   scope :can_be_draw, where('$and' => [:is_in_ctrl => true, :ctrl_surplus.gt => 0, :status.gt => -1])
   scope :for_lottery, where(:lottery_id => nil)
-  
+
   has_one :order
   belongs_to :lottery
   has_many :lottery_codes
   has_one :photo, :class_name => "Material", :inverse_of => 'prize'
 
-  before_save :update_ctrl_time 
+  before_save :update_ctrl_time
+
+  before_create :add_ctrl_history
   
-  def validates_ctrl
+  def validates_ctrl 
     
   end
 
@@ -36,14 +38,20 @@ class Prize < BasicGift
   end
 
   def add_ctrl_rule(ctrl_surplus, ctrl_time, weight)
-    self.is_in_ctrl = true
-    self.ctrl_surplus = ctrl_surplus
-    self.ctrl_quantity = ctrl_surplus
-    self.ctrl_start_time = Time.now
-    self.ctrl_time = ctrl_time
-    self.weight = weight
-    add_ctrl_history
-    self.save
+    unless ctrl_surplus.blank? || ctrl_time.blank? || weight.blank?
+      return false if ctrl_surplus.to_i > self.surplus
+      return false if ctrl_time.to_i == 0 || weight.to_i == 0
+      self.is_in_ctrl = true
+      self.ctrl_surplus = ctrl_surplus.to_i
+      self.ctrl_quantity = ctrl_surplus.to_i
+      self.ctrl_start_time = Time.now
+      self.ctrl_time = ctrl_time.to_i
+      self.weight = weight.to_i
+      add_ctrl_history
+      self.save
+    else
+      return false
+    end
   end
 
   def update_ctrl_surplus
