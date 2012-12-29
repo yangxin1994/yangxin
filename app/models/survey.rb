@@ -86,6 +86,7 @@ class Survey
 	end
 	has_many :publish_status_historys
 	has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
+	has_and_belongs_to_many :entry_clerks, class_name: "User", inverse_of: :entry_clerk_allocated_surveys
 
 	has_many :answers
 	has_many :email_histories
@@ -355,10 +356,6 @@ class Survey
 			return ErrorEnum::USER_NOT_EXIST if !(user.is_entry_clerk || user.is_admin)
 			self.entry_clerks << user if allocate
 			self.entry_clerks.delete(user) if !allocate
-		when "interviewer"
-			return ErrorEnum::USER_NOT_EXIST if !(user.is_interviewer || user.is_admin)
-			self.interviewers << user if allocate
-			self.interviewers.delete(user) if !allocate
 		else
 			return ErrorEnum::SYSTEM_USER_TYPE_ERROR
 		end
@@ -552,8 +549,7 @@ class Survey
 		new_instance.show_in_community = false
 		lottery = new_instance.lottery
 		lottery.surveys.delete(new_instance) if !lottery.nil?
-		new_instance.interviewers.each do |i| new_instance.interviewers.delete(i) end
-		new_instance.entry_clerks.each do |e| new_instance.entry_clerks.delete(e) end
+		new_instance.entry_clerks.each do |a| new_instance.entry_clerks.delete(a) end
 		new_instance.answer_auditors.each do |a| new_instance.answer_auditors.delete(a) end
 
 		# the mapping of question ids
@@ -1358,7 +1354,7 @@ class Survey
 			self.quota["submitted_count"] ||= 0
 			self.quota["submitted_count"] += 1
 			self.quota["rules"].each do |rule|
-				if answer.satisfy_conditions(rule["conditions"])
+				if answer.satisfy_conditions(rule["conditions"], false)
 					rule["finished_count"] += 1
 					rule["submitted_count"] += 1
 				end
@@ -1369,7 +1365,7 @@ class Survey
 		unreviewed_answers.each do |answer|
 			self.quota["submitted_count"] += 1
 			self.quota["rules"].each do |rule|
-				if answer.satisfy_conditions(rule["conditions"])
+				if answer.satisfy_conditions(rule["conditions"], false)
 					rule["submitted_count"] += 1
 				end
 			end
@@ -1515,7 +1511,7 @@ class Survey
 		not_screened_answer_number = 0
 		answers_length = answers.length
 		answers.each_with_index do |a, index|
-			next if !a.satisfy_conditions(filter_conditions)
+			next if !a.satisfy_conditions(filter_conditions, false)
 			tot_answer_number += 1
 			next if !include_screened_answer && a.is_screened
 			not_screened_answer_number += 1

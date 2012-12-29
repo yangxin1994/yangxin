@@ -297,9 +297,7 @@ class SurveysController < ApplicationController
 			e['finished_answer_number']=e.answers.not_preview.finished.length
 		end
 
-		paginated_surveys = auto_paginate survey_list do |s|
-			s.slice((page - 1) * per_page, per_page)
-		end
+		paginated_surveys = auto_paginate survey_list
 		render_json_auto(paginated_surveys)
 		
 	end
@@ -308,25 +306,19 @@ class SurveysController < ApplicationController
 		surveys = Survey.list_surveys_in_community(params[:reward].to_i,
 										params[:only_spreadable].to_s == "true",
 										@current_user)
-		paginated_surveys = auto_paginate surveys do |s|
-			s.slice((page - 1) * per_page, per_page)
-		end
+		paginated_surveys = auto_paginate surveys
 		render_json_auto(paginated_surveys)
 	end
 
 	def list_answered_surveys
 		surveys_with_answer_status = Survey.list_answered_surveys(@current_user)
-		paginated_surveys = auto_paginate surveys_with_answer_status do |s|
-			s.slice((page - 1) * per_page, per_page)
-		end
+		paginated_surveys = auto_paginate surveys_with_answer_status
 		render_json_auto(paginated_surveys)
 	end
 
 	def list_spreaded_surveys
 		surveys_with_spreaded_number = Survey.list_spreaded_surveys(@current_user)
-		paginated_surveys = auto_paginate surveys_with_spreaded_number do |s|
-			s.slice((page - 1) * per_page, per_page)
-		end
+		paginated_surveys = auto_paginate surveys_with_spreaded_number
 		render_json_auto(paginated_surveys)
 	end
 
@@ -431,9 +423,7 @@ class SurveysController < ApplicationController
 
 	def search_title
 		surveys = @current_user.surveys.search_title(params[:query])
-		paginated_surveys = auto_paginate surveys do |s|
-			s.slice((page - 1) * per_page, per_page)
-		end
+		paginated_surveys = auto_paginate surveys
 		render_json_auto(paginated_surveys)
 	end
 end

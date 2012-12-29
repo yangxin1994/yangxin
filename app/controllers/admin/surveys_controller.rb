@@ -20,7 +20,7 @@ class Admin::SurveysController < Admin::ApplicationController
 				s.user.email.include?(params[:email].to_s)
 			end
 
-			render_json_auto auto_paginate(@surveys){@surveys.slice((page-1)*per_page, per_page)} and return
+			render_json_auto auto_paginate(@surveys) and return
 		end
 	end
 

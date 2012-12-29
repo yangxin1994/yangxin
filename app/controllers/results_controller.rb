@@ -42,9 +42,7 @@ class ResultsController < ApplicationController
 
 	def get_data_list
 		result = AnalysisResult.get_data_list(params[:task_id])
-		result[:answer_info] = auto_paginate(result[:answer_info]) do |a|
-			a.slice((page - 1) * per_page, per_page)
-		end
+		result[:answer_info] = auto_paginate(result[:answer_info])
 		render_json_auto(result) and return
 	end
 

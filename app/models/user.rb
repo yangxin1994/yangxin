@@ -93,6 +93,7 @@ class User
 	has_many :survey_spreads
 
 	has_and_belongs_to_many :answer_auditor_allocated_surveys, class_name: "Survey", inverse_of: :answer_auditors
+	has_and_belongs_to_many :entry_clerk_allocated_surveys, class_name: "Survey", inverse_of: :entry_clerks
 	has_many :interviewer_tasks
 
 	has_many :reviewed_answers, class_name: "Answer", inverse_of: :auditor

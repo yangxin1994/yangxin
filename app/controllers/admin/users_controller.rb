@@ -201,9 +201,7 @@ class Admin::UsersController < Admin::ApplicationController
 		# display delete users if params[:deleted]
 		users.select!{|u| u.status >= 0} if params[:deleted] && params[:deleted].to_s == 'false'
 
-		paginated_users = auto_paginate(users) do |u|
-			u.slice((page - 1) * per_page, per_page)
-	    end
+		paginated_users = auto_paginate(users)
 
 	    render_json_auto paginated_users
 	end
@@ -212,9 +210,7 @@ class Admin::UsersController < Admin::ApplicationController
 		user = User.find_by_id_including_deleted(params[:id])
 		render_json_e(ErrorEnum::USER_NOT_EXIST) if user.nil?
 
-		introduced_users = auto_paginate user.get_introduced_users do |u|
-			u.slice((page - 1) * per_page, per_page)
-		end
+		introduced_users = auto_paginate user.get_introduced_users
 		render_json_auto(introduced_users) and return
 	end
 end
