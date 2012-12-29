@@ -3,9 +3,12 @@ class Admin::MessagesController < Admin::ApplicationController
 	def maping(message)
 		message['receiver_emails'] = []
 		message['receiver_ids'].each do |rec_id|
-			message['receiver_emails'] << User.find(rec_id).email
+			receiver = User.find_by_id_including_deleted(rec_id)
+			message['receiver_emails'] << receiver.email if receiver
 		end
-		message['sender_email'] = User.find(message['sender_id'].to_s).email
+		
+		sender=User.find_by_id_including_deleted(message['sender_id'].to_s)
+		message['sender_email'] = sender.email if sender
 		message
 	end
 
@@ -18,11 +21,6 @@ class Admin::MessagesController < Admin::ApplicationController
 		@show_messages = auto_paginate(@messages)
 		@show_messages['data'] = @show_messages['data'].map{ |e| maping(e) }
 		render_json_auto @show_messages	and return
-	end
-
-	def count
-		count = Message.count
-		render_json_auto count
 	end
 
 	def show

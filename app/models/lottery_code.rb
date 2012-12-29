@@ -11,6 +11,7 @@ class LotteryCode
 	field :email, :type => String
 	# 0 (待抽奖) 1 (未中奖) 2 (中奖未下订单) 4(中奖已下订单) 
 	field :status, :type => Integer, default: 0
+	field :drawed_at, :type => Time
 
 	belongs_to :prize
 	has_one :order

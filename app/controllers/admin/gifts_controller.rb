@@ -21,11 +21,11 @@ class Admin::GiftsController < Admin::ApplicationController
   end
 
   def create
-    material = Material.create(:material_type => 1, 
-                               :title => params[:gift][:name],
-                               :value => params[:gift][:photo],
-                               :picture_url => params[:gift][:photo])
-    params[:gift][:photo] = material
+    unless create_photo(:gift)
+      render_json false do
+        ErrorEnum::PHOTP_CANNOT_BE_BLANK
+      end   
+    end 
     @gift = Gift.create(params[:gift])
     # if params[:gift][:type] == 3
     #   l = Lottery.where(:_id => params[:gift][:lottery]).first
@@ -38,8 +38,8 @@ class Admin::GiftsController < Admin::ApplicationController
     #   end
     # end
     
-    @gift.photo = material
-    material.save
+    # @gift.photo = material
+    # material.save
     # TODO add admin_id
     render_json @gift.save do
       @gift.as_retval
@@ -87,7 +87,7 @@ class Admin::GiftsController < Admin::ApplicationController
     render_json false do
       result = Gift.find_by_id(params[:id]) do |gift|
         gift[:photo_src] = gift.photo.picture_url unless gift.photo.nil?
-        gift[:lottery_id] = gift.lottery._id unless gift.lottery.nil?
+        gift[:lottery_id] = gift.lottery_id
         @is_success = true
         gift
       end

@@ -5,7 +5,11 @@ class Admin::LotteriesController < Admin::ApplicationController
 	end
 
   def create
-    create_photo(:lottery)
+    unless create_photo(:lottery)
+      render_json false do
+        ErrorEnum::PHOTP_CANNOT_BE_BLANK
+      end   
+    end 
     @lottery = Lottery.new(params[:lottery])
     add_prizes(get_prize_ids, @lottery)
     render_json @lottery.save do
@@ -169,7 +173,9 @@ class Admin::LotteriesController < Admin::ApplicationController
       Lottery.find_by_id(params[:id]) do |lottery|
         success_true
         lottery[:prizes] = lottery.prizes
+        lottery[:photo_src] = lottery.photo.picture_url unless lottery.photo.nil?
         ch = []
+
         # 优化!!!
         lottery.prizes.each do |prize|
           if params[:only_active].to_s == "true"
@@ -187,8 +193,11 @@ class Admin::LotteriesController < Admin::ApplicationController
   def add_ctrl_rule
     render_json false do
       Prize.find_by_id(params[:id]) do |prize|
-        success_true
-        prize.add_ctrl_rule(params[:ctrl_surplus], params[:ctrl_time], params[:weight])
+        if prize.add_ctrl_rule(params[:ctrl_surplus], params[:ctrl_time], params[:weight])
+          success_true
+        else
+          ErrorEnum::PRIZE_CTRL_PARAMS_ERROR
+        end
       end
     end
   end

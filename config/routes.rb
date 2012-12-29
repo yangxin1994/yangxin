@@ -58,6 +58,9 @@ OopsData::Application.routes.draw do
 			end
 		end
 
+		resources :interviewer_tasks do 
+		end	
+
 		resources :faqs do 
 		end
 		resources :public_notices do 
@@ -115,7 +118,7 @@ OopsData::Application.routes.draw do
 		end
 		resources :orders do
 			collection do
-				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
+				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed, :canceled
 			end
 			member do
 				put :verify, :verify_as_failed, :deliver, :deliver_success, :deliver_as_failed
@@ -140,7 +143,6 @@ OopsData::Application.routes.draw do
 
 		resources :lottery_codes 
 
-		match 'messages/count' => 'messages#count'
 		resources :messages
 
 		resources :rewards, :only => [:index] do

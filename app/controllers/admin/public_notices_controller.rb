@@ -3,25 +3,14 @@
 class Admin::PublicNoticesController < Admin::ApplicationController	
 
 	def maping(public_notice)
-		public_notice['user_email'] = User.find(public_notice['user_id'].to_s).email
+		user = User.find_by_id_including_deleted(public_notice['user_id'].to_s)
+		public_notice['user_email'] = user.email if user
 		public_notice
 	end
 
 	# GET /admin/public_notices
 	# GET /admin/public_notices.json
 	def index
-		# if !params[:public_notice_type].nil? then
-		# 	if !params[:value].nil? then
-		# 		@public_notices = PublicNotice.list_by_type_and_value(params[:public_notice_type], params[:value])
-		# 	else
-		# 		@public_notices = PublicNotice.list_by_type(params[:public_notice_type]) 
-		# 	end
-		# else
-		# 	@public_notices = PublicNotice.all.desc(:updated_at)
-		# end
-
-		# @show_public_notices = slice((@public_notices || []), page, per_page)
-
 		@public_notices = PublicNotice.all.desc(:updated_at)
 		if params[:public_notice_type]
 			types = []
