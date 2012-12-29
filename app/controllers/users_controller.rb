@@ -31,9 +31,7 @@ class UsersController < ApplicationController
 	end	
 
 	def get_introduced_users
-		introduced_users = auto_paginate @current_user.get_introduced_users do |u|
-			u.slice((page - 1) * per_page, per_page)
-		end
+		introduced_users = auto_paginate @current_user.get_introduced_users
 		render_json_auto(introduced_users) and return
 	end
 end

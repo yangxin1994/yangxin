@@ -816,7 +816,7 @@ class Answer
 			quota["submitted_count"] = [quota["submitted_count"].to_i - 1, 0].max
 		end
 		quota["rules"].each do |rule|
-			next if !self.satisfy_conditions(rule["conditions"])
+			next if !self.satisfy_conditions(rule["conditions"], false)
 			if old_status == EDIT && self.is_under_review
 				# user submits the answer
 				rule["submitted_count"] += 1
@@ -846,8 +846,7 @@ class Answer
 			self.set_reject
 			self.reject_type = 2
 		end
-		interviewer_task = self.interviewer_task
-		interviewer_task.update_quota if !interviewer_task.nil?
+		self.interviewer_task.try(:update_quota)
 		self.update_quota(old_status)
 		self.auditor = answer_auditor
 		self.audit_at = Time.now.to_i
