@@ -3,6 +3,8 @@ class Lottery
   include Mongoid::Timestamps
   extend Mongoid::FindHelper
   include Mongoid::ValidationsExt
+  include Mongoid::CriteriaExt
+
   field :title, :type => String
   field :description, :type => String
   # 0 0代表未发布 不显示, 1 代表显示未发布, 2代表发布不显示, 3代表显示并发布
@@ -40,6 +42,11 @@ class Lottery
     user.save
   end
 
+  def present_quillme
+    present_attrs :title, :description, :status, :exchangeable, :point, :created_at
+    present_add :photo_src => self.photo.picture_url, :prizes => self.prizes.present_json('quillme')
+  end
+
   def delete
   	is_deleted = true
   	self.save
@@ -57,10 +64,11 @@ class Lottery
     self.lottery_codes.create(:user => user, :obtained_by => obtained_by)
   end
 
-  def draw(lottery_code)
+  def draw(lottery_code, auto = false)
     base_num = 0
     r = random_weight
-    interval = self.prizes.can_be_draw.map do |e|
+    lprizes = auto ? self.prizes.can_be_autodraw : self.prizes.can_be_draw
+    interval = lprizes.map do |e|
       base_num += self.weight / e.weight
       {
         :weight => base_num,
@@ -70,8 +78,8 @@ class Lottery
     #logger.info "======#{interval}======="
     interval.each do |i|
       if r <= i[:weight]
-        i[:prize].surplus -= 1
-        i[:prize].update_ctrl_surplus
+        i[:prize].inc('surplus', -1)
+        i[:prize].update_ctrl_surplus unless auto
         i[:prize].save
         # lottery_code.update_attributes(
         #   :status => 2,
@@ -95,11 +103,11 @@ class Lottery
   end
 
   def auto_draw
-    self.prizes.can_be_draw.map do |prize|
-      prize.update_attribute :ctrl_type, -1
-    end
+    # self.prizes.can_be_autodraw.map do |prize|
+    #   prize.update_attribute :ctrl_type, -1
+    # end
     self.lottery_codes.for_draw.each do |lc|
-      self.draw lc
+      self.draw lc, true
     end
   end
 

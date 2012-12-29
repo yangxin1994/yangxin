@@ -3,6 +3,8 @@ class BasicGift
 	include Mongoid::Timestamps
 	extend Mongoid::FindHelper
 	include Mongoid::ValidationsExt
+  include Mongoid::CriteriaExt
+	
 	field :name, :type => String
 	# can be 0 (Cash), 1 (RealGoods), 2 (VirtualGoods), 3 (Lottery)
 	field :type, :type => Integer

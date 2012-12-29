@@ -1,5 +1,4 @@
 class Prize < BasicGift
-  
   #field :budget, :type => Integer
   field :weight, :type => Integer, :default => 10
 
@@ -10,6 +9,7 @@ class Prize < BasicGift
   field :ctrl_start_time, :type => Time, :default => Time.now
   field :ctrl_history, :type => Array, :default => []
   scope :can_be_draw, where('$and' => [:is_in_ctrl => true, :ctrl_surplus.gt => 0, :status.gt => -1])
+  scope :can_be_autodraw, where(:status.gt => -1)
   scope :for_lottery, where(:lottery_id => nil)
 
   has_one :order
@@ -20,6 +20,11 @@ class Prize < BasicGift
   before_save :update_ctrl_time
 
   before_create :add_ctrl_history
+
+  def present_quillme
+    present_attrs :name, :type, :description, :surplus
+    present_add photo_src: self.photo.picture_url
+  end
   
   def validates_ctrl 
     

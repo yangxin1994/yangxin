@@ -87,7 +87,7 @@ class Admin::GiftsController < Admin::ApplicationController
     render_json false do
       result = Gift.find_by_id(params[:id]) do |gift|
         gift[:photo_src] = gift.photo.picture_url unless gift.photo.nil?
-        gift[:lottery_id] = gift.lottery._id unless gift.lottery.nil?
+        gift[:lottery_id] = gift.lottery_id
         @is_success = true
         gift
       end
