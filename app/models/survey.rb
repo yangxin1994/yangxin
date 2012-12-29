@@ -247,8 +247,9 @@ class Survey
 		batch = []
 		all_questions.each do |a|
 			q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
-		end 
-		CSV.parse(csv_files, :headers => true) do |row|
+		end
+		# binding.pry
+		CSV.parse(csv_str[0].to_s, :headers => true) do |row|
 			row = row.to_hash
 			line_answer = {}
 			quota_qustions_count = 0 # quota_qustions.size

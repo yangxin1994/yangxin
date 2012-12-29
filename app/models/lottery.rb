@@ -75,6 +75,7 @@ class Lottery
         :prize => e
       }
     end
+    lottery_code.drawed_at = Time.now
     #logger.info "======#{interval}======="
     interval.each do |i|
       if r <= i[:weight]
@@ -85,7 +86,6 @@ class Lottery
         #   :status => 2,
         #   :prize => i[:prize]
         #   )
-        lottery_code.drawed_at = Time.now
         lottery_code.status = 2
         lottery_code.prize = i[:prize]
         lottery_code.prize.save

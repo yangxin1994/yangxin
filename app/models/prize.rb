@@ -22,7 +22,7 @@ class Prize < BasicGift
   before_create :add_ctrl_history
 
   def present_quillme
-    present_attrs :name, :type, :description, :surplus
+    present_attrs :name, :type, :description, :surplus, :_id
     present_add photo_src: self.photo.picture_url
   end
   

@@ -15,22 +15,15 @@ class LotteriesController < ApplicationController
 	
 	def own
 		logger.info "==== #{current_user}======="
+		retval = {}
 		render_json do
-			[:for_draw, :drawed_w, :drawed_f].map do |s|
-				pl = params["#{s.to_s}_p".to_sym].to_i || 1
-				pl = 1 if pl <= 0
-				lc = auto_paginate current_user.lottery_codes.send(s) do
-						current_user.lottery_codes.send(s).page(pl).per(per_page).map do |e|
-						e[:for_lottery] = e.lottery.presence
-						e[:for_lottery][:photo_src] = e.lottery.photo.picture_url unless e.lottery.photo.nil?
-						e
-					end
+			[:for_draw, :drawed_w, :drawed_f].each do |scope|
+				params[:page] = params["#{scope.to_s}_p".to_sym].to_i
+				retval[scope] = auto_paginate(current_user.lottery_codes.send(scope)) do |lottery_codes|
+					lottery_codes.present_json("quillme")
 				end
-				lc["current_page"] = pl
-				lc["previous_page"] = (pl - 1 > 0 ? pl-1 : 1)
-	  		lc["next_page"] = (pl+1 <= lc["total_page"] ? pl+1: lc["total_page"])
-	  		lc
 			end
+			retval
 		end
 	end
 

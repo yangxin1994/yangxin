@@ -3,6 +3,7 @@ class LotteryCode
 	include Mongoid::Timestamps
 	extend Mongoid::FindHelper
 	include Mongoid::ValidationsExt
+	include Mongoid::CriteriaExt
 
 	field :num, :type => Integer, default: 0
 	# 0 为积分兑换, 1 为通过答题获取, 2 为系统添加
@@ -32,5 +33,18 @@ class LotteryCode
 	def draw
 		self.lottery.draw(self) #unless self.status > 0
 	end
+
+  def present_quillme
+    present_attrs :drawed_at, :created_at, :status, :_id
+    present_add :order_id => self.order._id if self.order
+    present_add(:prize_name => self.prize.name) if self.prize
+    present_add :for_lottery =>
+    	{ :title => self.lottery.title,
+    		:status => self.lottery.status,
+    		:photo_src => self.lottery.photo.picture_url,
+    		:exchangeable => self.lottery.exchangeable,
+    		:description => self.lottery.description
+    	}
+  end
 
 end
