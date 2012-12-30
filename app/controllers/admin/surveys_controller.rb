@@ -69,7 +69,7 @@ class Admin::SurveysController < Admin::ApplicationController
 		@survey = Survey.normal.find_by_id(params[:id])
 		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return unless @survey
 		params[:lottery] = Lottery.find_by_id(params[:lottery_id]) if params[:reward].to_i==1
-		s = params[:survey].select{|k,v| %w(reward point lottery).include?(k.to_s)}
+		s = params.select{|k,v| %w(reward point lottery).include?(k.to_s)}
 		render_json_auto @survey.update_attributes(s) and return
 	end	
 
