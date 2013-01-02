@@ -98,6 +98,20 @@ class Admin::LotteriesController < Admin::ApplicationController
     render_json { @lottery }
   end
 
+  def deleted
+    render_json do
+      auto_paginate(Lottery.deleted)
+    end
+  end
+
+  def revive
+    render_json false do
+      Lottery.find_by_id params[:id] do |lottery|
+        success_true if lottery.revive
+      end
+    end
+  end
+
   def show
     render_json false do
       Lottery.find_by_id(params[:id]) do |l|

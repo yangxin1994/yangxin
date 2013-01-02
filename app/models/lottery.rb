@@ -15,14 +15,15 @@ class Lottery
   field :weight, :type => Integer, :default => 100000
   #field :prize_interval, :type => Array, :default => []
 
-  default_scope where(:is_deleted => false).order_by(:created_at, :desc)
+  default_scope order_by(:created_at => :desc)
 
-  scope :for_publish, where(:status => 0)
-  scope :is_display, where(:status => 1)
-  scope :pause, where(:status => 2)
-  scope :activity, where(:status => 3)
+  scope :for_publish, where(:status => 0).where(:is_deleted => false)
+  scope :is_display, where(:status => 1).where(:is_deleted => false)
+  scope :pause, where(:status => 2).where(:is_deleted => false)
+  scope :activity, where(:status => 3).where(:is_deleted => false)
+  scope :deleted, where(:is_deleted => true)
   # scope :quillme, where( '$or' => [:status => 1, :status => 3]).order_by(:status, :desc)
-  scope :quillme, where('$or' => [{:status => 1}, {:status => 3}]).order_by(:status, :desc)
+  scope :quillme, where('$or' => [{:status => 1}, {:status => 3}]).where(:is_deleted => false).order_by(:created_at => :desc)
  
   has_many :surveys
   has_many :prizes
@@ -115,6 +116,7 @@ class Lottery
     lottery_code = give_lottery_code_to(user)
     lottery_code.prize = prize
     lottery_code.status = 2
+    lottery_code.drawed_at = Time.now
     lottery_code.prize.surplus -= 1
     lottery_code.prize.save
     lottery_code.save
@@ -126,6 +128,10 @@ class Lottery
       prize_interval << { :weight => prize_interval[-1][:weight] + a.weight, :prize_id => a.id.to_s }
     end
     prize_interval
+  end
+
+  def revive
+    self.update_attribute :is_deleted, false
   end
   
 end

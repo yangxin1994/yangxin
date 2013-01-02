@@ -91,7 +91,7 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :template_questions do
-			collection	 do 
+			collection do 
 				get 'count', 'list_by_type', 'list_by_type_count'
 			end
 			member do 
@@ -127,11 +127,11 @@ OopsData::Application.routes.draw do
 		
 		resources :lotteries do
 			collection do
-				get :for_publish, :activity, :finished
+				get :for_publish, :activity, :finished, :deleted
 			end
 			member do
 				get :auto_draw, :prize_records, :lottery_codes, :ctrl
-				put :assign_prize, :add_ctrl_rule
+				put :assign_prize, :add_ctrl_rule, :revive
 			end
 		end
 
@@ -388,7 +388,6 @@ OopsData::Application.routes.draw do
 	resources :gifts do
 		collection do
 			get :virtual, :cash, :entity, :lottery
-
 		end
 		member do
 			put :exchange
@@ -407,7 +406,6 @@ OopsData::Application.routes.draw do
 	resources :reward_logs do
 		collection do
 			get :for_points, :for_lotteries
-
 		end
 	end
 
@@ -418,7 +416,6 @@ OopsData::Application.routes.draw do
 			get :find_towns_by_city
 			post :send_email
 		end
-
 	end
 
 	# The priority is based upon order of creation:
