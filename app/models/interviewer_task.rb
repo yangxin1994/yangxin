@@ -14,28 +14,29 @@ class InterviewerTask
 
 
 	def self.find_by_id(interviewer_task_id)
-		return InterviewerTask.where(id: interviewer_task_id).first
+		return InterviewerTask.where(_id: interviewer_task_id).first
 	end
 
 	def self.create_interviewer_task(survey_id, user_id, quota)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		interviewer = User.find_by_id(user_id)
-		return ErrorEnum::INTERVIEWER_NOT_EXIST if user.nil?
+		return ErrorEnum::INTERVIEWER_NOT_EXIST if interviewer.nil?
 		return ErrorEnum::INTERVIEWER_NOT_EXIST if !interviewer.is_interviewer
 		quota.merge!({"finished_count" => 0,
 					"submitted_count" => 0,
 					"rejected_count" => 0})
 		quota["rules"] ||= []
-		quota["rules"].each do |r|
-			r["amount"] = 0
+		quota["rules"]=quota["rules"].map do |r|
+			r["amount"] = r["amount"] || 0
 			r["finished_count"] = 0
 			r["submitted_count"] = 0
+			r
 		end
-		interviewer_task = InterviewerTask.create(quota: quota)
+		interviewer_task = InterviewerTask.create(quota: quota, user: interviewer, survey: survey)
 
-		survey.interviewer_tasks << interviewer_task and survey.save
-		interviewer.interviewer_task = interviewer_task and interviewer.save
+		# survey.interviewer_tasks << interviewer_task and survey.save
+		# interviewer.interviewer_tasks << interviewer_task and interviewer.save
 		return interviewer_task
 	end
 
@@ -49,7 +50,7 @@ class InterviewerTask
 			r["submitted_count"] = 0
 		end
 		self.quota = quota
-		save
+		self.save
 		return self.update_quota
 	end
 

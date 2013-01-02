@@ -25,7 +25,15 @@ class Admin::InterviewerTasksController < Admin::ApplicationController
 	def update
 		@interviewer_task = InterviewerTask.find_by_id(params[:id])
 		render_json_auto(ErrorEnum::INTERVIEWER_TASK_NOT_EXIST) and return unless @interviewer_task
-		retval = @interviewer_task.update_quota(params[:quota])
+		logger.debug "#{JSON.parse(params[:quota].to_json)}"
+		retval = @interviewer_task.update(params[:quota])
 		render_json_auto retval
 	end
+
+	def destroy
+		@interviewer_task = InterviewerTask.find_by_id(params[:id])
+		render_json_auto(ErrorEnum::INTERVIEWER_TASK_NOT_EXIST) and return unless @interviewer_task
+		render_json_auto @interviewer_task.destroy
+	end
+
 end
