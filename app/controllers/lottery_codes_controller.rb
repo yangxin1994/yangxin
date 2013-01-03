@@ -10,10 +10,10 @@ class LotteryCodesController < ApplicationController
 		# end
 		LotteryCode.find_by_id params[:id] do |lottery_code|
 			render_json false do
-				lottery_code[:prize] = lottery_code.prize [2, 4].include?(lottery_code.status)
-				lottery_code[:lottery_status] = lottery_code.lottery.status
+				# lottery_code[:prize] = lottery_code.prize [2, 4].include?(lottery_code.status)
+				# lottery_code[:lottery_status] = lottery_code.lottery.status
 				success_true
-				lottery_code
+				lottery_code.present_quillme_draws
 			end
 		end
 	end

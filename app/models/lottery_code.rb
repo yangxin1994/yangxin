@@ -37,7 +37,10 @@ class LotteryCode
   def present_quillme
     present_attrs :drawed_at, :created_at, :status, :_id
     present_add :order_id => self.order._id if self.order
-    present_add(:prize_name => self.prize.name) if self.prize
+    if self.prize
+    	present_add(:prize_name => self.prize.name) 
+    	present_add(:prize_name => self.prize.name) 
+    end
     present_add :for_lottery =>
     	{ :title => self.lottery.title,
     		:status => self.lottery.status,
@@ -46,5 +49,13 @@ class LotteryCode
     		:description => self.lottery.description
     	}
   end
-
+  def present_quillme_draws
+    present_attrs :drawed_at, :created_at, :status, :_id
+    present_add :order_id => self.order._id if self.order
+    if self.prize
+    	present_add(:prize_name => self.prize.name) 
+    	present_add(:prize_photo => self.prize.photo.picture_url) 
+    end
+    present_add :lottery_status => self.lottery.status
+  end
 end
