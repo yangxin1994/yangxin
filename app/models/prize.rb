@@ -8,9 +8,10 @@ class Prize < BasicGift
   field :ctrl_time, :type => Integer, :default => 0
   field :ctrl_start_time, :type => Time, :default => Time.now
   field :ctrl_history, :type => Array, :default => []
-  scope :can_be_draw, where('$and' => [:is_in_ctrl => true, :ctrl_surplus.gt => 0, :status.gt => -1])
-  scope :can_be_autodraw, where(:status.gt => -1)
-  scope :for_lottery, where(:lottery_id => nil)
+  
+  scope :can_be_draw, where('$and' => [:is_in_ctrl => true, :ctrl_surplus.gt => 0, :status.gt => -1]).where(:is_deleted => false )
+  scope :can_be_autodraw, where(:status.gt => -1).where(:is_deleted => false )
+  scope :for_lottery, where(:lottery_id => nil).where(:is_deleted => false )
 
   has_one :order
   belongs_to :lottery

@@ -16,11 +16,11 @@ class Admin::UsersController < Admin::ApplicationController
 	# GET /admin/users.json
 	def index
 		if !params[:email].blank? then
-			@users = User.where(email: params[:email]).desc(:status, :created_at)
+			@users = User.where(email: params[:email].downcase).desc(:status, :created_at)
 		elsif !params[:full_name].blank? then	
-			@users = User.where(full_name: params[:full_name]).desc(:status, :created_at)
+			@users = User.where(full_name: params[:full_name].downcase).desc(:status, :created_at)
 		elsif !params[:username].blank? then
-			filter = params[:username].to_s.gsub(/[*]/, ' ')
+			filter = params[:username].to_s.gsub(/[*]/, ' ').downcase
 			@users = User.where(username: /.*#{filter}.*/).desc(:status, :created_at)
 		else
 			@users = User.normal_list.where(:role.lt => 15).desc(:status, :created_at)
