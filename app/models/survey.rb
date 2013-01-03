@@ -39,7 +39,7 @@ class Survey
 	field :publish_status, :type => Integer, default: 1
 	field :user_attr_survey, :type => Boolean, default: false
 	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
-	field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100, "finished_count" => 0, "submitted_count" => 0], "is_exclusive" => true, "quota_satisfied" => false, "finished_count" => 0 }
+	field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100, "finished_count" => 0, "submitted_count" => 0], "is_exclusive" => true, "quota_satisfied" => false, "finished_count" => 0, "submitted_count" => 0 }
 	# field :quota_stats, :type => Hash, default: {"quota_satisfied" => false, "answer_number" => [0]}
 	field :filters, :type => Array, default: []
 	field :filters_stats, :type => Array, default: []
