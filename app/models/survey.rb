@@ -23,6 +23,7 @@ require 'csv'
 class Survey
 	include Mongoid::Document
 	include Mongoid::Timestamps
+	include ConnectDotNet
 	field :title, :type => String, default: "调查问卷主标题"
 	field :subtitle, :type => String, default: "调查问卷副标题"
 	field :welcome, :type => String, default: "调查问卷欢迎语"
@@ -204,28 +205,56 @@ class Survey
 																data_list_key: data_list_key} })
 	end
 
+	def to_excel_job(answers, result_key)
+		logger.info csv_header
+		logger.info "==========="
+		logger.info "==========="
+		logger.info "==========="
+		logger.info "==========="
+    send_data('ToExcel.aspx') do 
+    	{'excel_data' => {"csv_header" => csv_header,
+                        "answer_contents" => formated_answers(answers, result_key),
+                     		"header_name" => csv_header,
+                     		"result_key" => result_key}}
+    end
+	end
+
+	def to_spss_job(answers, result_key)
+    send_data('ToSpss.aspx') do
+    	{'spss_data' => {"spss_header" => spss_header,
+                       "answer_contents" => formated_answers(answers, result_key),
+                     	 "header_name" => csv_header,
+                     	 "result_key" => result_key}}
+		end
+	end
+
 	def formated_answers(answers, result_key)
     answer_c = []
     q = self.all_questions_type
     p "========= 准备完毕 ========="
+    binding.pry
     answers.each_with_index do |answer, index|
       line_answer = []
       i = -1
       answer.answer_content.each do |k, v|
-    		logger.debug q[i + 1]
+      	binding.pry
+    		# logger.debug q[i + 1]
         line_answer += q[i += 1].answer_content(v)
-     		logger.debug v 
-    		logger.debug line_answer
-    	  logger.debug i
+     	# 	logger.debug v 
+    		# logger.debug line_answer
+    	 #  logger.debug i
       end
       answer_c << line_answer
     end
-    send_data({'spss_data' => {"spss_header" => spss_header,
-                               "answer_contents" => answer_c,
-                     					 # "header_name" => csv_header,
-                     					 "header_name" => csv_header,
-                     					 "result_key" => result_key}})
+    answer_c
+    # send_data({'spss_data' => {"spss_header" => spss_header,
+    #                            "answer_contents" => answer_c,
+    #                  					 # "header_name" => csv_header,
+    #                  					 "header_name" => csv_header,
+    #                  					 "result_key" => result_key}})
 	end
+
+
 
   def excel_header
     headers =[]
