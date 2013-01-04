@@ -40,7 +40,13 @@ class InterviewerTask
 		return interviewer_task
 	end
 
-	def update(quota)
+	# *************
+	#  Do not def update method ,
+	# it will take error: 
+	#    SystemStackError (stack level too deep):
+	# 
+	#  ******************
+	def update_q(quota)
 		quota.merge!({"finished_count" => 0,
 					"submitted_count" => 0,
 					"rejected_count" => 0})
