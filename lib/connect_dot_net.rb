@@ -6,7 +6,7 @@ module ConnectDotNet
       Net::HTTP.start(url.host, url.port) do |http| 
         r = Net::HTTP::Post.new(post_to)
         r.set_form_data(yield)
-        htp.read_timeout = 120
+        http.read_timeout = 120
         http.request(r)
       end
     rescue Errno::ECONNREFUSED
