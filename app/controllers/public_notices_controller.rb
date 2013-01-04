@@ -16,7 +16,16 @@ class PublicNoticesController < ApplicationController
 			@public_notices = @public_notices.where(:public_notice_type.in => types)
 		end
 		@public_notices = @public_notices.where(:title => Regexp.new(params[:title].to_s)) if params[:title]
-		render_json_auto auto_paginate(@public_notices) and return
+		 
+		@show_public_notices = auto_paginate(@public_notices) and return
+
+		if params[:show_content].to_s=="false" 
+			@show_public_notices['data'] = @show_public_notices['data'].map do |e|
+				e['content'] = nil
+				e
+			end
+		end
+		render_json_auto @show_public_notices
 	end
 	
 	# GET /public_notices/1 

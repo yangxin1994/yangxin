@@ -3,7 +3,9 @@
 class Admin::FaqsController < Admin::ApplicationController
 
 	def maping(faq)
-		faq['user_email'] = User.find(faq['user_id'].to_s).email
+		unless faq['user_id'].empty?
+			faq['user_email'] = User.find(faq['user_id'].to_s).email
+		end
 		faq
 	end
  
