@@ -25,11 +25,8 @@ class Admin::InterviewerTasksController < Admin::ApplicationController
 	def update
 		@interviewer_task = InterviewerTask.find_by_id(params[:id])
 		render_json_auto(ErrorEnum::INTERVIEWER_TASK_NOT_EXIST) and return unless @interviewer_task
-		logger.debug "#{JSON.parse(params[:quota].to_json)}"
-		retval = @interviewer_task.update_attributes(
-			{
-				quota: @interviewer_task.quota.merge(params[:quota])
-			})
+		# logger.debug "#{JSON.parse(params[:quota].to_json)}"
+		retval = @interviewer_task.update_q(params[:quota])
 		render_json_auto retval
 	end
 
