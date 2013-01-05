@@ -60,7 +60,7 @@ class InterviewerTask
 			})
 
 	 	
- 		return update_status if retval
+ 		return refresh_quota if retval
  		return false
 	end
 
@@ -86,7 +86,7 @@ class InterviewerTask
 
 	# update quota based answers 
 	# 
-	def update_quota
+	def refresh_quota
 		self.quota["finished_count"] = 0
 		self.quota["submitted_count"] = 0
 		self.quota["rejected_count"] = 0
@@ -135,7 +135,7 @@ class InterviewerTask
 			a.merge!({:interviewer_task_id => self._id, :survey_id => self.survey_id, :channel => -2})
 		end
 		Answer.collection.insert(answers)
-		self.update_quota
+		self.refresh_quota
 		return true
 	end
 end

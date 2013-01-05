@@ -1380,9 +1380,7 @@ class Survey
 
 		# make stats for the finished answers
 		finished_answers.each do |answer|
-			self.quota["finished_count"] ||= 0
 			self.quota["finished_count"] += 1
-			self.quota["submitted_count"] ||= 0
 			self.quota["submitted_count"] += 1
 			self.quota["rules"].each do |rule|
 				if answer.satisfy_conditions(rule["conditions"], false)
