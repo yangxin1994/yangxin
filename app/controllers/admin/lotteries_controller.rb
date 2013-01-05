@@ -1,7 +1,7 @@
 class Admin::LotteriesController < Admin::ApplicationController
 	
 	def index
-		render_json { auto_paginate(Lottery.all)}
+		render_json { auto_paginate(Lottery.where(:is_deleted => false))}
 	end
 
   def create

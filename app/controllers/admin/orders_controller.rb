@@ -81,10 +81,10 @@ class Admin::OrdersController < Admin::ApplicationController
   def deliver_as_failed
     render_json do
       result = Order.find_by_id params[:id] do |o|
+        o.reward_log.revoke_operation(current_user, params[:status_desc]) unless o.is_prize
         o.update_attribute(:status, -3)
         o.gift.inc(:surplus, 1) unless o.is_prize
         o.update_attribute(:status_desc, params[:status_desc])
-        o.reward_log.revoke_operation(current_user, params[:status_desc]) unless o.is_prize
       end
       @is_success = !(result.is_a? Hash)
       result

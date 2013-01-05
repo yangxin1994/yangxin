@@ -17,6 +17,14 @@ class Material
 
 	default_scope ->(o = 'ASC'){order_by("created_at", o) }
 
+	before_save :set_picture_url
+
+	def set_picture_url
+		if material_type == 1
+			picture_url ||= '/assets/images/img.png'
+		end
+	end
+
 	def self.find_by_id(material_id)
 		return Material.where(:_id => material_id).first
 	end

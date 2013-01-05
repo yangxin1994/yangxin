@@ -5,8 +5,8 @@ class Gift < BasicGift
 	has_many :orders, :class_name => "Order"
 	has_one :photo, :class_name => "Material", :inverse_of => 'gift'
 	belongs_to :lottery
-	scope :can_be_rewarded, where( :status => 1) 	
-	scope :expired, where( :status => 0)
+	scope :can_be_rewarded, where( :status => 1).where(:is_deleted => false )
+	scope :expired, where( :status => 0).where(:is_deleted => false )
 
 	# TO DO Validation
 	validates_presence_of :point
@@ -18,9 +18,4 @@ class Gift < BasicGift
 	validates :point, :presence => true,
 										:numericality => { :greater_than_or_equal_to => 0 }
 
-  def to_builder
-    person = Jbuilder.new
-    person.(self, :name, :point)
-    person
-  end 
 end

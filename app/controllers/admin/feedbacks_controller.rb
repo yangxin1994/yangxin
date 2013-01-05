@@ -3,12 +3,14 @@
 class Admin::FeedbacksController < Admin::ApplicationController
 
 	def maping_question_user(feedback)
-		feedback["question_user_email"] = User.find(feedback["question_user_id"].to_s).email
+		unless feedback["question_user_id"].empty?
+			feedback["question_user_email"] = User.find(feedback["question_user_id"].to_s).email
+		end
 		feedback
 	end
 
 	def maping_answer_user(feedback)
-		unless feedback["answer_user_id"].to_s.empty?
+		unless feedback["answer_user_id"].empty?
 			feedback["answer_user_email"] = User.find(feedback["answer_user_id"].to_s).email
 		end
 		feedback

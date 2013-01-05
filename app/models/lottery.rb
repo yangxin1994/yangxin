@@ -32,7 +32,12 @@ class Lottery
   has_one :photo, :class_name => "Material", :inverse_of => 'lottery'
   belongs_to :creator, :class_name => 'User'
 
-  validates_presence_of :title, :description, :point
+  validates_presence_of :title
+  validates_presence_of :point, :if => :exchangeable?
+
+  def exchangeable?
+    self.exchangeable
+  end
 
   def exchange(user)
     return false if !exchangeable

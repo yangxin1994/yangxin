@@ -1,6 +1,6 @@
 class Admin::PrizesController < Admin::ApplicationController
   def index
-    render_json { auto_paginate(Prize) }
+    render_json { auto_paginate(Prize.where(:is_deleted => false)) }
   end
 
 
