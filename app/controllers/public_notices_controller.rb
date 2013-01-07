@@ -17,7 +17,7 @@ class PublicNoticesController < ApplicationController
 		end
 		@public_notices = @public_notices.where(:title => Regexp.new(params[:title].to_s)) if params[:title]
 		 
-		@show_public_notices = auto_paginate(@public_notices) and return
+		@show_public_notices = auto_paginate(@public_notices) # and return
 
 		if params[:show_content].to_s=="false" 
 			@show_public_notices['data'] = @show_public_notices['data'].map do |e|
