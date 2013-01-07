@@ -23,7 +23,6 @@ class Admin::AdvertisementsController < Admin::ApplicationController
 		@advertisements =  @advertisements.where(:activate => params[:activate].to_s == 'true') if params[:activate]
 			
 		render_json_auto auto_paginate(@advertisements.desc(:created_at))
-
 	end
 	
 	# GET /admin/advertisements/1 
