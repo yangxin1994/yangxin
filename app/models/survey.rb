@@ -25,11 +25,11 @@ class Survey
 	include Mongoid::Timestamps
 	include ConnectDotNet
 	field :title, :type => String, default: "调查问卷主标题"
-	field :subtitle, :type => String, default: "调查问卷副标题"
+	field :subtitle, :type => String, default: ""
 	field :welcome, :type => String, default: "调查问卷欢迎语"
 	field :closing, :type => String, default: "调查问卷结束语"
-	field :header, :type => String, default: "调查问卷页眉"
-	field :footer, :type => String, default: "调查问卷页脚"
+	field :header, :type => String, default: ""
+	field :footer, :type => String, default: ""
 	field :description, :type => String, default: "调查问卷描述"
 	# indicates whether this is a new survey that has not been edited
 	field :new_survey, :type => Boolean, default: true
