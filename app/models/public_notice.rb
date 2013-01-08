@@ -11,7 +11,7 @@ class PublicNotice
 	
 	attr_accessible :title, :content, :attachment, :public_notice_type
 
-	validates_presence_of :title, :content, :public_notice_type
+	validates_presence_of :title, :public_notice_type
 	
 	# the max of multiple type value => 2**7
 	MAX_TYPE = 7

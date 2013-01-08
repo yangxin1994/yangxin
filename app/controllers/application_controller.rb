@@ -190,7 +190,7 @@ class ApplicationController < ActionController::Base
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
-		if !user_survey_auditor? || !user_admin?
+		if !user_survey_auditor? && !user_admin?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_SURVEY_AUDITOR) and return }
@@ -205,7 +205,7 @@ class ApplicationController < ActionController::Base
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
-		if !user_answer_auditor? || !user_admin?
+		if !user_answer_auditor? && !user_admin?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_ANSWER_AUDITOR) and return }
@@ -220,7 +220,7 @@ class ApplicationController < ActionController::Base
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
-		if !user_entry_clerk? || !user_admin?
+		if !user_entry_clerk? && !user_admin?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_ENTRY_CLERK) and return }
@@ -235,7 +235,7 @@ class ApplicationController < ActionController::Base
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
-		if !user_interviewer? || !user_admin?
+		if !user_interviewer? && !user_admin?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_INTERVIEWER) and return }

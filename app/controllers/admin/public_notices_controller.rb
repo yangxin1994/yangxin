@@ -26,10 +26,11 @@ class Admin::PublicNoticesController < Admin::ApplicationController
 
 		@show_public_notices = auto_paginate(@public_notices)
 		# if not show content
-		tmp = params[:show_content].to_s=="false" ? true : false
-		@show_public_notices['data'] = @show_public_notices['data'].map do |e|
-			e['content'] = nil if tmp
+		if params[:show_content].to_s=="false" 
+			@show_public_notices['data'] = @show_public_notices['data'].map do |e|
+				e['content'] = nil
 			maping(e)
+			end
 		end
 
 		render_json_auto @show_public_notices

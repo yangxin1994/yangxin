@@ -40,21 +40,53 @@ class InterviewerTask
 		return interviewer_task
 	end
 
-	def update(quota)
-		quota.merge!({"finished_count" => 0,
-					"submitted_count" => 0,
-					"rejected_count" => 0})
-		quota["rules"] ||= []
-		quota["rules"].each do |r|
-			r["finished_count"] = 0
-			r["submitted_count"] = 0
-		end
-		self.quota = quota
-		self.save
-		return self.update_quota
+	# *************
+	#  
+	#  update rule's "amount" which is a num of interviewer, 
+	#  then update status
+	# 
+	#  ******************
+	def update_q(quota)
+		# quota.merge!({"finished_count" => 0,
+		# 			"submitted_count" => 0,
+		# 			"rejected_count" => 0})
+		# quota["rules"] ||= []
+		# quota["rules"].each do |r|
+		# 	r["finished_count"] = 0
+		# 	r["submitted_count"] = 0
+		# end
+		retval = update_attributes({
+				quota: self.quota.merge(quota)
+			})
+
+	 	
+ 		return refresh_quota if retval
+ 		return false
 	end
 
-	def update_quota
+	# Just update status 
+	# 
+	def update_status
+		# calculate whether quota is satisfied
+		finished = true
+		under_review = true
+		self.quota["rules"].to_a.each do |rule|
+			finished = false if rule["finished_count"].to_i < rule["amount"].to_i
+			under_review = false if rule["submitted_count"].to_i < rule["amount"].to_i
+		end
+		if finished
+			self.status = 2
+		elsif under_review
+			self.status = 1
+		else
+			self.status = 0
+		end
+		self.save
+	end
+
+	# update quota based answers 
+	# 
+	def refresh_quota
 		self.quota["finished_count"] = 0
 		self.quota["submitted_count"] = 0
 		self.quota["rejected_count"] = 0
@@ -91,30 +123,19 @@ class InterviewerTask
 		# make stats for the rejected answers
 		self.quota["rejected_count"] = rejected_answers.length
 
-		# calculate whether quota is satisfied
-		finished = true
-		under_review = true
-		quota["rules"].each do |rule|
-			finished = false if rule["finished_count"] < rule["amount"]
-			under_review = false if rule["submitted_count"] < rule["amount"]
-		end
-		if finished
-			self.status = 2
-		elsif under_review
-			self.status = 1
-		else
-			self.status = 0
-		end
-		self.save
+		# update status
+		self.update_status
+
 		return self
 	end
 
+	# submit answers
 	def submit_answers(survey_id, answers)
 		answers.each do |a|
-			a.merge({:interviewer_task_id => self._id, :survey_id => self.survey_id, :channel => -2})
+			a.merge!({:interviewer_task_id => self._id, :survey_id => self.survey_id, :channel => -2})
 		end
 		Answer.collection.insert(answers)
-		self.update_quota
+		self.refresh_quota
 		return true
 	end
 end
