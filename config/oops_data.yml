@@ -27,6 +27,11 @@ production:
   kaixin_secret_key: "8cca39b07135cf667b162aefd6a7e616"
   douban_api_key: "06b0041f88738b9e14100c5e995aa2da"
   douban_secret_key: "5739d694a7c3d5ff"
+  baidu_app_id: "498046"
+  baidu_api_key: "STFYxeMfwouPVtMjseFymHGD"
+  baidu_api_secret: "G7Q3qF4QLLGcweyxFYiD5901ybgRZ8tk"
+  sohu_app_key: "9ab2466b42224c0c9b038e327db61b97"
+  sohu_app_secret: "7da1b4966cbc595abeddf75a697011f3"
 staging:
   words_per_second: 5
   login_count_threshold: 1000
@@ -56,6 +61,11 @@ staging:
   kaixin_secret_key: "8cca39b07135cf667b162aefd6a7e616"
   douban_api_key: "06b0041f88738b9e14100c5e995aa2da"
   douban_secret_key: "5739d694a7c3d5ff"
+  baidu_app_id: "498046"
+  baidu_api_key: "STFYxeMfwouPVtMjseFymHGD"
+  baidu_api_secret: "G7Q3qF4QLLGcweyxFYiD5901ybgRZ8tk"
+  sohu_app_key: "9ab2466b42224c0c9b038e327db61b97"
+  sohu_app_secret: "7da1b4966cbc595abeddf75a697011f3"
 development:
   words_per_second: 5
   login_count_threshold: 100
@@ -85,6 +95,11 @@ development:
   kaixin_secret_key: "8cca39b07135cf667b162aefd6a7e616"
   douban_api_key: "06b0041f88738b9e14100c5e995aa2da"
   douban_secret_key: "5739d694a7c3d5ff"
+  baidu_app_id: "498046"
+  baidu_api_key: "STFYxeMfwouPVtMjseFymHGD"
+  baidu_api_secret: "G7Q3qF4QLLGcweyxFYiD5901ybgRZ8tk"
+  sohu_app_key: "9ab2466b42224c0c9b038e327db61b97"
+  sohu_app_secret: "7da1b4966cbc595abeddf75a697011f3"
 test:
   words_per_second: 5
   login_count_threshold: 100
@@ -114,6 +129,11 @@ test:
   kaixin_secret_key: "8cca39b07135cf667b162aefd6a7e616"
   douban_api_key: "06b0041f88738b9e14100c5e995aa2da"
   douban_secret_key: "5739d694a7c3d5ff"
+  baidu_app_id: "498046"
+  baidu_api_key: "STFYxeMfwouPVtMjseFymHGD"
+  baidu_api_secret: "G7Q3qF4QLLGcweyxFYiD5901ybgRZ8tk"
+  sohu_app_key: "9ab2466b42224c0c9b038e327db61b97"
+  sohu_app_secret: "7da1b4966cbc595abeddf75a697011f3"
 
 
 question_default_settings:

@@ -35,6 +35,10 @@ class ThirdPartyUser
 			response_data = KaixinUser.get_access_token(code, redirect_uri)
 		when "douban"
 			response_data = DoubanUser.get_access_token(code, redirect_uri)
+		when "baidu"
+			response_data = BaiduUser.get_access_token(code, redirect_uri)
+		when "sohu"
+			response_data = SohuUser.get_access_token(code, redirect_uri)
 		else
 			response_data = {}
 		end
@@ -55,6 +59,10 @@ class ThirdPartyUser
 			tp_user = KaixinUser.save_tp_user(response_data)
 		when "douban"
 			tp_user = DoubanUser.save_tp_user(response_data)
+		when "baidu"
+			tp_user = BaiduUser.save_tp_user(response_data)
+		when "sohu"
+			tp_user = SohuUser.save_tp_user(response_data)
 		else
 			return ErrorEnum::WRONG_THIRD_PARTY_WEBSITE
 		end
