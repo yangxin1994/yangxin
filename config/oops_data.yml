@@ -22,6 +22,11 @@ production:
   qihu_app_key: "ca6d278b690138f21cf31ea6fd3f6e2e"
   qihu_app_secret: "25e635ca1c06b32ef02f1fbfa996c74d"
   qihu_redirect_uri: "http://quill.oopsdata.com/qihu_connect"
+  kaixin_app_id: "100046692"
+  kaixin_api_key: "173805652095b523553bc42aa44f8171"
+  kaixin_secret_key: "8cca39b07135cf667b162aefd6a7e616"
+  douban_api_key: "06b0041f88738b9e14100c5e995aa2da"
+  douban_secret_key: "5739d694a7c3d5ff"
 staging:
   words_per_second: 5
   login_count_threshold: 1000
@@ -46,6 +51,11 @@ staging:
   qihu_app_key: "ca6d278b690138f21cf31ea6fd3f6e2e"
   qihu_app_secret: "25e635ca1c06b32ef02f1fbfa996c74d"
   qihu_redirect_uri: "http://quill.oopsdata.com/qihu_connect"
+  kaixin_app_id: "100046692"
+  kaixin_api_key: "173805652095b523553bc42aa44f8171"
+  kaixin_secret_key: "8cca39b07135cf667b162aefd6a7e616"
+  douban_api_key: "06b0041f88738b9e14100c5e995aa2da"
+  douban_secret_key: "5739d694a7c3d5ff"
 development:
   words_per_second: 5
   login_count_threshold: 100
@@ -70,6 +80,11 @@ development:
   qihu_app_key: "ca6d278b690138f21cf31ea6fd3f6e2e"
   qihu_app_secret: "25e635ca1c06b32ef02f1fbfa996c74d"
   qihu_redirect_uri: "http://test.oopsdata.com/qihu_connect"
+  kaixin_app_id: "100046692"
+  kaixin_api_key: "173805652095b523553bc42aa44f8171"
+  kaixin_secret_key: "8cca39b07135cf667b162aefd6a7e616"
+  douban_api_key: "06b0041f88738b9e14100c5e995aa2da"
+  douban_secret_key: "5739d694a7c3d5ff"
 test:
   words_per_second: 5
   login_count_threshold: 100
@@ -94,6 +109,11 @@ test:
   qihu_app_key: "ca6d278b690138f21cf31ea6fd3f6e2e"
   qihu_app_secret: "25e635ca1c06b32ef02f1fbfa996c74d"
   qihu_redirect_uri: "http://quill.oopsdata.com/qihu_connect"
+  kaixin_app_id: "100046692"
+  kaixin_api_key: "173805652095b523553bc42aa44f8171"
+  kaixin_secret_key: "8cca39b07135cf667b162aefd6a7e616"
+  douban_api_key: "06b0041f88738b9e14100c5e995aa2da"
+  douban_secret_key: "5739d694a7c3d5ff"
 
 
 question_default_settings:

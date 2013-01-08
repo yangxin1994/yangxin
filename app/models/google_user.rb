@@ -40,6 +40,9 @@ class GoogleUser < ThirdPartyUser
 			"code" => code}
 		retval = Tool.send_post_request("https://accounts.google.com/o/oauth2/token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
+		logger.info "AAAAAAAAAAAAAAAAAAAAAAAAAA"
+		logger.info response_data
+		logger.info "AAAAAAAAAAAAAAAAAAAAAAAAAA"
 		return response_data
 	end
 
