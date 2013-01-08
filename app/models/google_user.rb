@@ -35,11 +35,13 @@ class GoogleUser < ThirdPartyUser
 		#get access_token
 		access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["google_client_id"],
 			"client_secret" => OOPSDATA[RailsEnv.get_rails_env]["google_client_secret"],
-			"redirect_uri" => redirect_uri || OOPSDATA[RailsEnv.get_rails_env]["google_redirect_uri"],
+			"redirect_uri" => redirect_uri,
 			"grant_type" => "authorization_code",
 			"code" => code}
 		retval = Tool.send_post_request("https://accounts.google.com/o/oauth2/token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
+		logger.info "AAAAAAAAAAAAAAAAAAAAAAAAAA"
+		logger.info access_token_params.inspect
 		logger.info "AAAAAAAAAAAAAAAAAAAAAAAAAA"
 		logger.info response_data
 		logger.info "AAAAAAAAAAAAAAAAAAAAAAAAAA"
