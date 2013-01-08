@@ -1,7 +1,7 @@
 #encoding: utf-8
 
 require 'error_enum'
-require 'CSV'
+require 'csv'
 class EntryClerk::SurveysController < EntryClerk::ApplicationController
     
   def csv_header
