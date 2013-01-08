@@ -21,12 +21,14 @@ class EntryClerk::SurveysController < EntryClerk::ApplicationController
     # csv = Marshal::load(params[:csv])
     render_json !!survey do |s| 
       if s
-        unless survey.answer_import(params[:csv])
+        if survey.answer_import(params[:csv])
+          true
+        else
           @is_success = false
           {
             :error_code => ErrorEnum::WRONG_ANSWERS,
             :error_message => "wrong answers"
-          }
+          }     
         end
       else
         { :error_code => ErrorEnum::SURVEY_NOT_EXIST, 

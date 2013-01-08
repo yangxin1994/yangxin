@@ -284,7 +284,7 @@ class Survey
 			q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
 		end
 		# binding.pry
-		CSV.parse(csv_str[0].to_s, :headers => true) do |row|
+		CSV.parse(csv_str.join, :headers => true) do |row|
 			row = row.to_hash
 			line_answer = {}
 			quota_qustions_count = 0 # quota_qustions.size
@@ -293,8 +293,14 @@ class Survey
 				header_prefix = "q#{i + 1}"
 				line_answer.merge! e.answer_import(row, header_prefix)
 			end
-			p line_answer
-			batch << {:answer_content => line_answer, :channel => -1, :survey_id => self._id, :status => 3}
+			line_answer
+			batch << {:answer_content => line_answer,
+								:channel => -1, 
+								:survey_id => self._id, 
+								:status => 3, 
+								:finished_at => Time.now.to_i,
+								:created_at => Time.now,
+								:updated_at => Time.now}
 		end
 		Answer.collection.insert(batch)
 		return self.save

@@ -56,8 +56,25 @@ class QuestionIo
   def clear_retval
     @retval = []
   end
+
   def ret
     @retval
+  end
+
+  def get_item(id)
+    self.issue["items"].each do |item|
+      return item if item["id"] == id
+    end
+  end
+
+  def get_item_id(index)
+    index = index.to_i - 1
+    if self.issue["other_item"]["has_other_item"] && self.issue["items"].count == index
+      return self.issue["other_item"]["id"]
+    else
+      return nil if self.issue["items"].count < index
+      self.issue["items"][index]["id"]
+    end
   end
 end
 
@@ -108,15 +125,15 @@ class ChoiceQuestionIo < QuestionIo
     return {} if v.nil?
     clear_retval
     if issue["max_choice"].to_i > 1
-      issue["items"].each_index do |i|
-        if v["selections"].include?( (i + 1).to_s)
+      issue["items"].each do |item|
+        if v["selections"].include? item["id"]
           @retval << "1"
         else
           @retval << "0"
         end
       end
     else
-      @retval << (v["selection"].empty? ? nil : v["selection"])
+      @retval << (v["selection"].empty? ? nil : get_item[v["selection"][0]])
     end
     if issue["other_item"]["has_other_item"]
       @retval << v["text_input"]
@@ -128,16 +145,27 @@ class ChoiceQuestionIo < QuestionIo
     @retval = {"text_input" => "",
                "selection" => []}
     if issue["max_choice"].to_i > 1
+      # TODO 验证最多选项和最少选项
       issue["items"].each_index do |i|
-        @retval["selection"] << (i + 1).to_s if row["#{header_prefix}_c#{i+1}"] == "1"
+        @retval["selection"] << get_item_id(i + 1) if row["#{header_prefix}_c#{i+1}"] == "1"
       end
     else
-      @retval["selection"] << row["header_prefix"] if !row["header_prefix"].nil?
+      @retval["selection"] << get_item_id(row[header_prefix]) if !row[header_prefix].nil?
     end
     if issue["other_item"]["has_other_item"]
       @retval["text_input"] = row["#{header_prefix}_input"]
     end
     return { "#{origin_id}" => @retval}
+  end
+
+  def get_item_id(index)
+    index = index.to_i - 1
+    if self.issue["other_item"]["has_other_item"] && self.issue["items"].count == index
+      return self.issue["other_item"]["id"]
+    else
+      return nil if self.issue["items"].count < index
+      self.issue["items"][index]["id"]
+    end
   end
 
 end
@@ -212,16 +240,22 @@ class MatrixChoiceQuestionIo < QuestionIo
       issue["rows"].each_index do |r|
         row_choices = []
         issue["items"].each_index do |c|
-          row_choices << (c + 1).to_s if row["#{header_prefix}_r#{r + 1}_c#{c + 1}"] == "1"
+          row_choices << get_item_id(c + 1) if row["#{header_prefix}_r#{r + 1}_c#{c + 1}"] == "1"
         end
         @retval << row_choices
       end
     else
       issue["rows"].each_index do |r|
-        @retval << row["#{header_prefix}_r#{r + 1}"]
+        # 单选为啥也要用数组? 不解
+        @retval << [get_item_id(row["#{header_prefix}_r#{r + 1}"])]
       end
     end
     return { "#{origin_id}" => @retval }  
+  end
+
+  def get_item_id(index)
+    index = index.to_i - 1
+    self.issue["items"][index]["id"]
   end
 
 end
