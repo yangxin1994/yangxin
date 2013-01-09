@@ -687,7 +687,7 @@ class ScaleQuestionIo < QuestionIo
   def answer_import(row, header_prefix)
     @retval = {}
     issue["items"].each_with_index do |item, index|
-      @retval[get_item_id(index).to_s] = row["#{header_prefix}_c#{index + 1}"]
+      @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : row["#{header_prefix}_c#{index + 1}"].to_i)
     end
     return { "#{origin_id}" => @retval} 
   end
