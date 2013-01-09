@@ -68,6 +68,7 @@ class QuestionIo
   end
 
   def get_item_id(index)
+    return nil if index.nil?
     index = index.to_i - 1
     if self.issue["other_item"]["has_other_item"] && self.issue["items"].count == index
       return self.issue["other_item"]["id"]
@@ -159,6 +160,7 @@ class ChoiceQuestionIo < QuestionIo
   end
 
   def get_item_id(index)
+    return nil if index.nil? 
     index = index.to_i - 1
     if self.issue["other_item"]["has_other_item"] && self.issue["items"].count == index
       return self.issue["other_item"]["id"]
@@ -254,6 +256,7 @@ class MatrixChoiceQuestionIo < QuestionIo
   end
 
   def get_item_id(index)
+    return nil if index.nil?
     index = index.to_i - 1
     self.issue["items"][index]["id"]
   end
@@ -340,7 +343,7 @@ class BlankQuestionIo < QuestionIo
                   "spss_type" => SPSS_STRING,
                   "spss_label" => issue["items"][i]["content"]["text"]}
     end
-    return @retval   
+    return @retval
   end
 
   def answer_content(v)
@@ -650,7 +653,46 @@ class TableQuestionIo < QuestionIo
 end
 
 class ScaleQuestionIo < QuestionIo
+
+  def csv_header(header_prefix)
+    issue["items"].each_index do |i|
+      @retval << header_prefix + "_c#{i + 1}"
+    end
+    return @retval
+  end
+
+  def spss_header(header_prefix)
+    issue["items"].each_index do |i|
+      @retval << {"spss_name" => header_prefix + "_c#{i + 1}",
+                  "spss_type" => SPSS_STRING,
+                  "spss_label" => issue["items"][i]["content"]["text"]}
+    end
+    return @retval   
+  end
+
   def answer_content(v)
-    return [{}]
+    return {} if v.nil?
+    clear_retval
+    issue["items"].each do |e|
+      @retval << v[e["input_id"]]
+      @retval << (v[e["input_id"]] == -1 ? 1 : 0 ) if e["has_unknow"]
+    end
+    if issue["other_item"]["has_other_item"]
+      @retval << v["text_input"]
+      @retval << v[issue["other_item"]["input_id"]]
+    end
+    return @retval
+  end
+
+  def answer_import(row, header_prefix)
+    @retval = {}
+    issue["items"].each_with_index do |item, index|
+      @retval[get_item_id(index).to_s] = row["#{header_prefix}_c#{index + 1}"]
+    end
+    return { "#{origin_id}" => @retval} 
+  end
+
+  def get_item_id(index)
+    self.issue["items"][index]["id"]
   end
 end
