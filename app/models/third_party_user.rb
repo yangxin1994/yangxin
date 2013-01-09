@@ -39,6 +39,8 @@ class ThirdPartyUser
 			response_data = BaiduUser.get_access_token(code, redirect_uri)
 		when "sohu"
 			response_data = SohuUser.get_access_token(code, redirect_uri)
+		when "qihu360"
+			response_data = QihuUser.get_access_token(code, redirect_uri)
 		else
 			response_data = {}
 		end
@@ -63,6 +65,8 @@ class ThirdPartyUser
 			tp_user = BaiduUser.save_tp_user(response_data)
 		when "sohu"
 			tp_user = SohuUser.save_tp_user(response_data)
+		when "qihu360"
+			tp_user = QihuUser.save_tp_user(response_data)
 		else
 			return ErrorEnum::WRONG_THIRD_PARTY_WEBSITE
 		end

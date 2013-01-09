@@ -1,48 +1,73 @@
-
 class QihuUser < ThirdPartyUser
-  
-  #***************** class methods *************
-  
-  def self.token(code)
-    access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["qihu_app_key"],
+
+	field :name, :type => String
+	field :sex, :type => String # male will return: 1
+	field :headurl, :type => String
+
+	alias gender sex
+
+	def locale
+		nil
+	end
+
+	#*description*: get access_token for other works
+	#
+	#*params*:
+	#* code: code from third party respond.
+	#
+	#*retval*:
+	#* response_data: it includes access_token, expires_in and user info
+	def self.get_access_token(code, redirect_uri)
+		access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["qihu_app_key"],
 			"client_secret" => OOPSDATA[RailsEnv.get_rails_env]["qihu_app_secret"],
-			"redirect_uri" => OOPSDATA[RailsEnv.get_rails_env]["qihu_redirect_uri"],
+			"redirect_uri" => redirect_uri,
 			"grant_type" => "authorization_code",
-			"code" => code
-      }
+			"code" => code}
 		retval = Tool.send_post_request("https://openapi.360.cn/oauth2/access_token", access_token_params, true)
 		response_data = JSON.parse(retval.body)
-		Logger.new("log/development.log").info(response_data.to_s)
-		access_token = response_data["access_token"]
-		retval = Tool.send_get_request("https://openapi.360.cn/user/me.json?access_token=#{access_token}", true)
-		response_data = JSON.parse(retval.body)
-		user_id = response_data["id"]
+		return response_data
+	end
+
+	#*description*: receive params, then
+	#
+	# 1. new or update qihu_user
+	#
+	#*params*: 
+	#* response_data: access_token, user_id and other
+	#
+	#*retval*:
+	#* qihu_user: new or updated.
+	def self.save_tp_user(response_data)
 		
-		qihu_user = QihuUser.where(:user_id => user_id)[0]
-		if qihu_user.nil? then
-      qihu_user = QihuUser.new(:website => "qihu", :user_id => user_id, :access_token => access_token)
-    else
-      hash = {}
-      hash[:access_token] = access_token
-      qihu_user.update_by_hash(hash)
-    end
-    
-    return [ErrorEnum::SAVE_FAILED, nil] if qihu_user.nil?
-    return [ErrorEnum::THIRD_PARTY_USER_NOT_BIND, qihu_user] if qihu_user.email.nil? || qihu_user.email =""
-    user = User.find_by_email(qihu_user.email)
-    if !user.nil? then
-      return [ErrorEnum::EMAIL_NOT_ACTIVATED, qihu_user] if user.status == 0
-    end
-    return [true, qihu_user]
-  rescue => e
-    puts "#{e.class}: #{e.message}"
-    raise e
-  end
-  
-  # ************instance methods**********
-  
-  def call_method(opts = {})
-   
-  end
-  
+		access_token = response_data["access_token"]
+		refresh_token = response_data["refresh_token"]
+		expires_in = response_data["expires_in"]
+
+		retval = Tool.send_get_request("https://openapi.360.cn/user/me?access_token=#{access_token}", true)
+
+		response_data = JSON.parse(retval.body)
+
+		website_id = response_data["id"]
+
+		#new or update qihu_user
+		qihu_user = QihuUser.where(:website_id => website_id)[0]
+		if qihu_user.nil?
+			qihu_user = QihuUser.new(:website => "qihu", :website_id => website_id, :access_token => access_token, 
+			:refresh_token => refresh_token, :expires_in => expires_in)
+			qihu_user.save
+		else 
+			#only update access_token, refresh_token, expires_in, remove other info which is un-useful.
+			response_data = {}
+			response_data["access_token"] = access_token 
+			response_data["refresh_token"] = refresh_token
+			response_data["expires_in"] = expires_in
+			# update info 
+			#qihu_user.update_by_hash(response_data)
+		end
+		
+		#qihu_user.update_user_info
+		
+		return qihu_user
+	end
+
 end
