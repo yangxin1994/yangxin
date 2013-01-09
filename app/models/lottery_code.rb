@@ -18,6 +18,7 @@ class LotteryCode
   has_one :order
   belongs_to :user
   belongs_to :lottery
+  belongs_to :reward_log
 
   default_scope order_by(:created_at, :desc)
 
