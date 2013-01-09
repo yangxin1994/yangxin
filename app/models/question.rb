@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'error_enum'
 require 'quality_control_type_enum'
 #The question object has the following structure
@@ -26,6 +27,9 @@ class Question < BasicQuestion
 		issue = Issue.create_issue(question_type)
 		question.issue = issue.serialize
 		question.question_type = question_type
+		if question_type == QuestionTypeEnum::PARAGRAPH
+			question.content = {"text" => "请在此输入文本描述", "image" => "", "audio" => "", "video" => ""}
+		end
 		question.save
 		return question
 	end

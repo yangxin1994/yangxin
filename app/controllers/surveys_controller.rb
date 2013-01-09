@@ -51,7 +51,12 @@ class SurveysController < ApplicationController
 			survey = Survey.create
 			survey.alt_new_survey = false
 			@current_user.surveys << survey
-			survey.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED) if @current_user.is_admin || @current_user.is_super_admin
+			if @current_user.is_admin || @current_user.is_super_admin
+				survey.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
+			else
+				survey.style_setting["has_advertisement"] = false
+				survey.save
+			end
 		end
 		respond_to do |format|
 			format.json	{ render_json_s(survey.serialize) and return }
