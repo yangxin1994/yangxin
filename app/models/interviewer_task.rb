@@ -59,7 +59,6 @@ class InterviewerTask
 				quota: self.quota.merge(quota)
 			})
 
-	 	
  		return refresh_quota if retval
  		return false
 	end
