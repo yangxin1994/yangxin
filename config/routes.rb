@@ -127,7 +127,7 @@ OopsData::Application.routes.draw do
 		
 		resources :lotteries do
 			collection do
-				get :for_publish, :activity, :finished, :deleted
+				get :for_publish, :activity, :finished, :deleted, :quillme
 			end
 			member do
 				get :auto_draw, :prize_records, :lottery_codes, :ctrl
