@@ -67,9 +67,9 @@ class AnalysisResult < Result
 			channel_result[channel] = channel_result[channel] + 1
 			
 			# analyze duration
-			duration_mean << answer.finished_at - answer.created_at.to_i
+			duration_mean << answer.finished_at - answer.created_at.to_i if answer.finished_at && answer.created_at
 			# analyze time
-			finish_time << answer.finished_at
+			finish_time << answer.finished_at if answer.finished_at
 			# re-organize answers
 			answer.answer_content.each do |q_id, question_answer|
 				answers_transform[q_id] ||= []

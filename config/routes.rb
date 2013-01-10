@@ -209,6 +209,8 @@ OopsData::Application.routes.draw do
 				post 'submit'
 			end
 		end
+		resources :interviewer_tasks do
+		end
 	end
 
 	get "home/index"
