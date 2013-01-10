@@ -93,7 +93,7 @@ class Admin::LotteriesController < Admin::ApplicationController
   #   end
   # end
   
-  def_each :for_publish, :activity, :finished do |method_name|
+  def_each :for_publish, :activity, :finished, :quillme do |method_name|
     @lottery = auto_paginate(Lottery.send(method_name))
     render_json { @lottery }
   end
