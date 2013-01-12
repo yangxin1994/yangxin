@@ -25,8 +25,8 @@ class ReportResult < Result
 									report_mockup.subtitle,
 									report_mockup.header,
 									report_mockup.footer,
-									report_mockup.author,
-									report_mockup.author,
+									report_mockup.author_chn,
+									report_mockup.author_eng,
 									report_style)
 		# analyze the result based on the report mockup
 		component_length = report_mockup.components.length
@@ -34,6 +34,7 @@ class ReportResult < Result
 			if component["component_type"] == 0
 				# this is a single question analysis
 				question_id = component["value"]["id"]
+				items_com = component["value"]["items_com"]
 				question_index = survey.all_questions_id.index(question_id)
 				next if question_index.nil?
 				report_data.push_component(1, "text" => "第#{question_index+1}题分析")
@@ -41,7 +42,7 @@ class ReportResult < Result
 				cur_question_answer = answers_transform[question_id].delete_if { |e| e.blank? }
 				case question.question_type
 				when QuestionTypeEnum::CHOICE_QUESTION
-					analysis_result = analyze_choice(question.issue, cur_question_answer)
+					analysis_result = analyze_choice(question.issue, cur_question_answer, items_com: items_com)
 					# judge whether this is a single choice or multiple choice
 					if question.issue["max_choice"] == 1
 						text = single_choice_description(analysis_result, question.issue)
@@ -82,10 +83,14 @@ class ReportResult < Result
 																		component["chart_style"])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::NUMBER_BLANK_QUESTION
+					logger.info "0000000000000000"
+					logger.info component["value"].inspect
+					logger.info "0000000000000000"
 					segment = component["value"]["format"]["-1"]
 					analysis_result = analyze_number_blank(question.issue,
 														cur_question_answer,
 														:segment => segment)
+					segment ||= analysis_result[:segment]
 					text = number_blank_description(analysis_result,
 													question.issue,
 													:segment => segment)
@@ -103,6 +108,7 @@ class ReportResult < Result
 					analysis_result = analyze_time_blank(question.issue,
 														cur_question_answer,
 														:segment => segment)
+					segment ||= analysis_result[:segment]
 					text = time_blank_description(analysis_result,
 												question.issue,
 												:segment => segment)
@@ -159,7 +165,7 @@ class ReportResult < Result
 						report_data.push_chart_components(chart_components)
 					end
 				when QuestionTypeEnum::CONST_SUM_QUESTION
-					analysis_result = analyze_const_sum(question.issue, cur_question_answer)
+					analysis_result = analyze_const_sum(question.issue, cur_question_answer, items_com: items_com)
 					text = const_sum_description(analysis_result, question.issue)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
@@ -168,7 +174,7 @@ class ReportResult < Result
 																		component["chart_style"])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::SORT_QUESTION
-					analysis_result = analyze_sort(question.issue, cur_question_answer)
+					analysis_result = analyze_sort(question.issue, cur_question_answer, items_com: items_com)
 					text = sort_description(analysis_result,
 											question.issue,
 											:answer_number => cur_question_answer.length)
@@ -179,7 +185,7 @@ class ReportResult < Result
 																		component["chart_style"])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::SCALE_QUESTION
-					analysis_result = analyze_scale(question.issue, cur_question_answer)
+					analysis_result = analyze_scale(question.issue, cur_question_answer, items_com: items_com)
 					text = scale_description(analysis_result, question.issue)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
@@ -193,7 +199,9 @@ class ReportResult < Result
 				end
 			else
 				question_id = component["value"]["id"]
+				items_com = component["value"]["items_com"]
 				target_question_id = component["value"]["target"]["id"]
+				target_items_com = component["value"]["target"]["items_com"]
 				question_index = survey.all_questions_id.index(question_id)
 				target_question_index = survey.all_questions_id.index(target_question_id)
 				next if question_index.nil? || target_question_index.nil?
@@ -207,7 +215,9 @@ class ReportResult < Result
 													question.issue,
 													target_question.issue,
 													answers_transform[question_id],
-													answers_transform[target_question_id])
+													answers_transform[target_question_id],
+													items_com: items_com,
+													target_items_com: target_items_com)
 					if question.issue["max_choice"] == 1
 						text = cross_description("single_choice",
 												analysis_result,
@@ -444,50 +454,75 @@ class ReportResult < Result
 
 	# cross analysis and description generation
 	def analyze_cross(question_type, question_issue, target_question_issue, question_answer_ary, target_question_answer_ary, opt={})
+		items_com = opt[:items_com]
+		target_items_com = opt[:target_items_com]
+		opt[:items_com] = target_items_com
+
+		# get the question items ids, with consideration if items combination
+		question_items_id = question_issue["items"].map { |e| e["id"] }
+		question_items_id << question_issue["other_item"]["id"] if question_issue["other_item"] && question_issue["has_other_item"]
+		items_com.each do |id_ary|
+			id_ary.each do |id|
+				question_items_id.delete(id)
+			end
+			question_items_id << id_ary.join(',')
+		end
+
 		target_question_sub_answer_ary = {}
 		target_question_answer_ary.each_with_index do |target_question_answer, index|
 			next if target_question_answer.blank?
 			question_answer = question_answer_ary[index]
-			question_answer["selection"].each do |item_id|
-				target_question_sub_answer_ary[item_id] ||= []
-				target_question_sub_answer_ary[item_id] << target_question_answer
+			question_items_id.each do |id_string|
+				id_ary = id_string.split(',')
+				if !(id_ary & (question_answer["selection"].map { |e| e.to_s })).blank?
+					target_question_sub_answer_ary[id_string] << target_question_answer
+				end
 			end
 		end
 		result = {:answer_number => {}, :result => {}}
-		question_issue["items"].each do |item|
+		question_items_id.each do |id|
 			case question_type
 			when QuestionTypeEnum::CHOICE_QUESTION
-				result[:result][item["id"].to_s] = analyze_choice(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_choice(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
 			when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
-				result[:result][item["id"].to_s] = analyze_matrix_choice(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_matrix_choice(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
 			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-				result[:result][item["id"].to_s] = analyze_number_blank(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_number_blank(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
 			when QuestionTypeEnum::TIME_BLANK_QUESTION
-				result[:result][item["id"].to_s] = analyze_time_blank(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_time_blank(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
 			when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
-				result[:result][item["id"].to_s] = analyze_address_blank(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_address_blank(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
 			when QuestionTypeEnum::BLANK_QUESTION
-				result[:result][item["id"].to_s] = analyze_blank(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_blank(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
 			when QuestionTypeEnum::CONST_SUM_QUESTION
-				result[:result][item["id"].to_s] = analyze_const_sum(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_const_sum(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
 			when QuestionTypeEnum::SORT_QUESTION
-				result[:result][item["id"].to_s] = analyze_sort(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_sort(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
 			when QuestionTypeEnum::SCALE_QUESTION
-				result[:result][item["id"].to_s] = analyze_scale(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_scale(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
 			end
-			result[:answer_number][item["id"].to_s] = (target_question_sub_answer_ary[item["id"]] || []).length
+			result[:answer_number][id] = (target_question_sub_answer_ary[id] || []).length
 		end
 		return result
 	end
 
 	def cross_description(question_type, analysis_result, issue, target_issue, opt={})
 		text = "调查显示："
+		items = issue["items"].clone
+		items << issue["other_item"] if issue["other_item"] && issue["other_item"]["has_other_item"]
 		analysis_result[:result].each do |item_id, result|
-			item = (issue["items"].select { |e| e["id"].to_s == item_id })[0]
-			next if item.nil?
+			item_not_found = false
+			item_id.split(',').each do |id|
+				item = (items.select { |e| e["id"].to_s == id })[0]
+				if item.nil?
+					item_not_found = true
+					break
+				end
+			end
+			next if item_not_found
 			answer_number = analysis_result[:answer_number][item_id]
-			text += "没有被访者选择选择#{item["content"]["text"]}。" and next if result.blank? || answer_number == 0
-			text += "选择#{item["content"]["text"]}的#{answer_number}名被访者中，"
+			text += "没有被访者选择选择#{get_item_text_by_id(items, item_id)}。" and next if result.blank? || answer_number == 0
+			text += "选择#{get_item_text_by_id(items, item_id)}的#{answer_number}名被访者中，"
 			case question_type
 			when "single_choice"
 				text += single_choice_description(result, target_issue, opt.merge({:cross => true}))
@@ -553,8 +588,10 @@ class ReportResult < Result
 		end
 		# handle the result for the first index
 		first_index_results = []
+		items = issue["items"].clone
+		items << issue["other_item"] if issue["other_item"] && issue["other_item"]["has_other_item"]
 		first_index_dist.each do |input_id, ratio|
-			item_text = get_item_text_by_id(issue["items"], input_id)
+			item_text = get_item_text_by_id(items, input_id)
 			next if item_text.nil?
 			first_index_results << { "text" => item_text, "ratio" => ratio }
 		end
@@ -571,8 +608,10 @@ class ReportResult < Result
 		end
 		# handle the result for the second index
 		second_index_results = []
+		items = issue["items"].clone
+		items << issue["other_item"] if issue["other_item"] && issue["other_item"]["has_other_item"]
 		second_index_dist.each do |input_id, ratio|
-			item_text = get_item_text_by_id(issue["items"], input_id)
+			item_text = get_item_text_by_id(items, input_id)
 			next if item_text.nil?
 			second_index_results << { "text" => item_text, "ratio" => ratio }
 		end
@@ -591,8 +630,10 @@ class ReportResult < Result
 	def const_sum_description(analysis_result, issue, opt={})
 		return "" if analysis_result.blank?
 		results = []
+		items = issue["items"].clone
+		items << issue["other_item"] if issue["other_item"] && issue["other_item"]["has_other_item"]
 		analysis_result.each do |input_id, mean_weight|
-			item_text = get_item_text_by_id(issue["items"], input_id)
+			item_text = get_item_text_by_id(items, input_id)
 			next if item_text.nil?
 			results << { "text" => item_text, "mean_weight" => mean_weight.to_f }
 		end
@@ -743,7 +784,7 @@ class ReportResult < Result
 		# get description for each row respectively
 		issue["rows"].each do |row|
 			row_id = row["id"]
-			row_text = get_item_text_by_id(issue["rows"], row_id)
+			row_text = get_item_text_by_id(issue["rows"], row_id.to_s)
 			# obtain all the results about this row
 			cur_row_analysis_result = analysis_result.select do |k, v|
 				k.start_with?(row_id.to_s)
@@ -775,8 +816,10 @@ class ReportResult < Result
 	def single_choice_description(analysis_result, issue, opt={})
 		total_number = 0
 		results = []
+		items = issue["items"].clone
+		items << issue["other_item"] if issue["other_item"] && issue["other_item"]["has_other_item"]
 		analysis_result.each do |input_id, select_number|
-			item_text = get_item_text_by_id(issue["items"], input_id)
+			item_text = get_item_text_by_id(items, input_id)
 			next if item_text.nil?
 			total_number = total_number + select_number
 			results << { "text" => item_text, "select_number" => select_number.to_f }
@@ -815,8 +858,10 @@ class ReportResult < Result
 		# the description for multiple choice question with pie chart is exactly the same as the single choice question
 		return single_choice_description(analysis_result, issue, opt) if chart_type == "pie"
 		results = []
+		items = issue["items"].clone
+		items << issue["other_item"] if issue["other_item"] && issue["other_item"]["has_other_item"]
 		analysis_result.each do |input_id, select_number|
-			item_text = get_item_text_by_id(issue["items"], input_id)
+			item_text = get_item_text_by_id(items, input_id)
 			next if item_text.nil?
 			results << { "text" => item_text, "select_number" => select_number.to_f }
 		end
@@ -841,12 +886,13 @@ class ReportResult < Result
 		return text + "，其他依次是#{item_ratio_string}。"
 	end
 
-
 	# tools
 	def get_item_text_by_id(items, id)
-		item = items.select { |e| e["id"].to_s == id.to_s }
-		return nil if item.nil?
-		item_text = item[0]["content"]["text"]
+		ids = id.split(',')
+		selected_items = items.select { |e| ids.include?(e["id"].to_s) }
+		return nil if selected_items.blank?
+		item_text_ary = selected_items.map { |item| item["content"]["text"] }
+		item_text = item_text_ary.join('或')
 		return item_text
 	end
 

@@ -110,21 +110,42 @@ class Result
 
 
 	def analyze_choice(issue, answer_ary, opt={})
+		items_com = opt[:items_com]
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		if !items_com.blank?
+			# combine items
+			items_com.each do |com|
+				com.each { |input_id| input_ids.delete(input_id) }
+			end
+			input_ids << items_com.join(',')
+		end
 		input_ids.map! { |e| e.to_s }
 		result = {}
 		input_ids.each { |input_id| result[input_id] = 0 }
 		answer_ary.each do |answer|
 			answer["selection"].each do |input_id|
-				result[input_id.to_s] = result[input_id.to_s] + 1 if !result[input_id.to_s].nil?
+				result.each_key do |k|
+					if k.split(',').include?(input_id.to_s)
+						result[k] = result[k] + 1
+						break
+					end
+				end
 			end
 		end
 		return result
 	end
 
 	def analyze_matrix_choice(issue, answer_ary, opt={})
+		items_com = opt[:items_com]
 		input_ids = issue["items"].map { |e| e["id"] }
+		if !items_com.blank?
+			# combine items
+			items_com.each do |com|
+				com.each { |input_id| input_ids.delete(input_id) }
+			end
+			input_ids << items_com.join(',')
+		end
 		input_ids.map! { |e| e.to_s }
 		result = {}
 		issue["rows"].each do |row|
@@ -132,11 +153,18 @@ class Result
 				result["#{row["id"]}-#{input_id}"] = 0
 			end
 		end
-			answer_ary.each do |answer|
+		answer_ary.each do |answer|
 			answer.each_with_index do |row_answer, row_index|
 				row_id = issue["rows"][row_index]["id"]
 				row_answer.each do |input_id|
-					result["#{row_id}-#{input_id}"] = result["#{row_id}-#{input_id}"] + 1 if !result["#{row_id}-#{input_id}"].nil?
+					result.each_key do |k|
+						k_row_id = k.split('-')[0]
+						k_input_ids = k.split('-')[1].split(',')
+						if k_row_id == row_id && k_input_ids.include?(input_id)
+							result[k] = result[k] + 1
+							break
+						end
+					end
 				end
 			end
 		end
@@ -243,15 +271,28 @@ class Result
 	end
 
 	def analyze_const_sum(issue, answer_ary, opt={})
+		items_com = opt[:items_com]
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		if !items_com.blank?
+			# combine items
+			items_com.each do |com|
+				com.each { |input_id| input_ids.delete(input_id) }
+			end
+			input_ids << items_com.join(',')
+		end
 		input_ids.map! { |e| e.to_s }
 		weights = {}
 		input_ids.each { |input_id| weights[input_id] = [] }
 
 		answer_ary.each do |answer|
 			answer.each do |input_id, value|
-				weights[input_id] << value.to_f if !weights[input_id].nil?
+				weights.each_key do |k|
+					if k.split(',').include?(input_id)
+						weights[k] << value.to_f
+						break
+					end
+				end
 			end
 		end
 
@@ -264,8 +305,16 @@ class Result
 	end
 
 	def analyze_sort(issue, answer_ary, opt={})
+		items_com = opt[:items_com]
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		if !items_com.blank?
+			# combine items
+			items_com.each do |com|
+				com.each { |input_id| input_ids.delete(input_id) }
+			end
+			input_ids << items_com.join(',')
+		end
 		input_ids.map! { |e| e.to_s }
 		
 		input_number = input_ids.length
@@ -276,7 +325,12 @@ class Result
 	
 		answer_ary.each do |answer|
 			answer["sort_result"].each_with_index do |input_id, sort_index|
-				result[input_id][sort_index] = result[input_id][sort_index] + 1 if sort_index < input_number
+				result.each_key do |k|
+					if k.split(',').include?(input_id)
+						result[k][sort_index] = result[k][sort_index] + 1 if sort_index < input_number
+						break
+					end
+				end
 			end
 		end
 	
@@ -284,7 +338,15 @@ class Result
 	end
 
 	def analyze_scale(issue, answer_ary, opt={})
+		items_com = opt[:items_com]
 		input_ids = issue["items"].map { |e| e["id"] }
+		if !items_com.blank?
+			# combine items
+			items_com.each do |com|
+				com.each { |input_id| input_ids.delete(input_id) }
+			end
+			input_ids << items_com.join(',')
+		end
 		input_ids.map! { |e| e.to_s }
 
 		scores = {}
@@ -293,17 +355,21 @@ class Result
 		answer_ary.each do |answer|
 			answer.each do |input_id, value|
 				# value is 0-based, should be converted to score-based
-				scores[input_id] << value + 1 if !scores[input_id].nil? && value.to_i != -1
+				input_ids.each do |k|
+					if k.split(',').include?(input_id)
+						scores[k] << value + 1 if value.to_i != -1
+						break
+					end
+				end
 			end
 		end
-	
+
 		result = {}
 		scores.each do |key, score_ary|
 			result[key] = []
 			result[key] << score_ary.length
 			result[key] << (score_ary.blank? ? 0 : score_ary.mean)
 		end
-	
 		return result
 	end
 end

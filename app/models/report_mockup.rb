@@ -23,17 +23,17 @@ class ReportMockup
 
 	def self.default_report_mockup(survey)
 		components = []
-		survey.all_question_ids.each do |q_id|
+		survey.all_questions_id.each do |q_id|
 			components << {"component_type" => 0,
 							"value" => {"id" => q_id,
-										"format" => []},
+										"format" => {}},
 							"chart_style" => -1}
 		end
 		report_mockup = ReportMockup.new(:title => survey.title,
 										:subtitle => survey.subtitle,
-										:header => "OopsData",
-										:footer => "OopsData",
-										:author_chn => "OopsData",
+										:header => "",
+										:footer => "",
+										:author_chn => "优数",
 										:author_eng => "OopsData",
 										:components => components)
 		
@@ -58,7 +58,8 @@ class ReportMockup
 			:subtitle => report_mockup["subtitle"],
 			:header => report_mockup["header"],
 			:footer => report_mockup["footer"],
-			:author => report_mockup["author"],
+			:author_chn => report_mockup["author"],
+			:author_eng => report_mockup["author"],
 			:components => report_mockup["components"])
 		report_mockup.save
 		survey.report_mockups << report_mockup
@@ -85,7 +86,8 @@ class ReportMockup
 			:subtitle => report_mockup["subtitle"],
 			:header => report_mockup["header"],
 			:footer => report_mockup["footer"],
-			:author => report_mockup["author"],
+			:author_chn => report_mockup["author"],
+			:author_eng => report_mockup["author"],
 			:components => report_mockup["components"])
 		return self
 	end
