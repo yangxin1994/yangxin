@@ -52,7 +52,7 @@ class ReportMockup
 				return ErrorEnum::WRONG_REPORT_MOCKUP_COMPONENT_TYPE
 			end
 			c["chart_style"] = c["chart_style"].to_i
-			return ErrorEnum::WRONG_REPORT_MOCKUP_CHART_STYLE if !(-1..4).to_a.include?(c["chart_style"])
+			return ErrorEnum::WRONG_REPORT_MOCKUP_CHART_STYLE if !(-1..5).to_a.include?(c["chart_style"])
 		end
 		report_mockup = ReportMockup.new(:title => report_mockup["title"],
 			:subtitle => report_mockup["subtitle"],
@@ -80,7 +80,7 @@ class ReportMockup
 				return ErrorEnum::WRONG_REPORT_MOCKUP_COMPONENT_TYPE
 			end
 			c["chart_style"] = c["chart_style"].to_i
-			return ErrorEnum::WRONG_REPORT_MOCKUP_CHART_STYLE if !(-1..4).to_a.include?(c["chart_style"])
+			return ErrorEnum::WRONG_REPORT_MOCKUP_CHART_STYLE if !(-1..5).to_a.include?(c["chart_style"])
 		end
 		self.update_attributes(:title => report_mockup["title"],
 			:subtitle => report_mockup["subtitle"],

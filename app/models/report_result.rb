@@ -83,9 +83,6 @@ class ReportResult < Result
 																		component["chart_style"])
 					report_data.push_chart_components(chart_components)
 				when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-					logger.info "0000000000000000"
-					logger.info component["value"].inspect
-					logger.info "0000000000000000"
 					segment = component["value"]["format"]["-1"]
 					analysis_result = analyze_number_blank(question.issue,
 														cur_question_answer,
@@ -467,6 +464,7 @@ class ReportResult < Result
 			end
 			question_items_id << id_ary.join(',')
 		end
+		question_items_id.map! { |e| e.to_s }
 
 		target_question_sub_answer_ary = {}
 		target_question_answer_ary.each_with_index do |target_question_answer, index|

@@ -9,6 +9,7 @@ OopsData::Application.routes.draw do
 			post :result_job
 			post :quota_job
 			post :survey_deadline_job
+			post :error
 		end
 	end
 

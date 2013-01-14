@@ -9,6 +9,8 @@ class Result
 	field :result_key, :type => String
 	field :status, :type => Integer, default: 0
 	field :ref_result_id, :type => String
+	field :error_code, :type => String
+	field :error_message, :type => String
 
 	belongs_to :survey
 
@@ -23,7 +25,7 @@ class Result
 	end
 
 	def self.find_by_result_key(result_key)
-		return Result.where(:result_key => result_key, :ref_result_id => nil).first
+		return Result.where(:result_key => result_key, :ref_result_id => nil, :status.gt => -1).first
 	end
 
 	def self.find_result_by_task_id(task_id)
@@ -53,7 +55,7 @@ class Result
 		# if the result does not exist return 0
 		return 0 if result.nil?
 		# the task is finished, return
-		return 1 if result && result.status == 1
+		return 1 if result && result.status == 1 || result.status == -1
 
 		# the task has not been finished, check the progress
 		task = TaskClient.get_task(task_id)

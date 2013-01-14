@@ -194,4 +194,14 @@ class JobsController < ApplicationController
 			end
 		end
 	end
+
+	def error
+		result = Result.find_by_task_id(params[:task_id])
+		render_json_auto(true) and return if result.nil?
+		result.status = -1
+		result.error_code = params[:error_code]
+		result.error_message = params[:error_message]
+		result.save
+		render_json_auto(true) and return
+	end
 end
