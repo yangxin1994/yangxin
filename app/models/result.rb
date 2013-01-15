@@ -247,6 +247,9 @@ class Result
 			result[region_code] = 0 if result[region_code].nil?
 			result[region_code] = result[region_code] + 1
 		end
+		result.each do |key, value|
+			result[key] = [value, Address.find_province_city_town_by_code(key)]
+		end
 		return result
 	end
 

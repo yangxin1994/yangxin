@@ -60,6 +60,9 @@ class AnalysisResult < Result
 			# analyze region
 			region = answer.region.to_s
 			region_result[region] = region_result[region] + 1 if !region_result[region].nil?
+			region_result.each do |key, value|
+				region_result[key] = [value, Address.find_province_city_town_by_code(key)]
+			end
 			
 			# analyze channel
 			channel = answer.channel.to_s

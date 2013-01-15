@@ -184,19 +184,26 @@ class Address
 	def self.find_province_city_town_by_code(code)
 		self.ensure_cache
 		find_address = @@all_address.select { |e| e[0].to_i == code.to_i }
-		if !find_address.blank? 
+		return "" if find_address.blank?
 
-			town = find_address[0]
-			town_label = town[1]
+		town = find_address[0]
+		town_label = town[1]
 
-			province_label = @@provinces.select{|elem| elem[0] < town[0]}.last[1]
-			city_label = @@all_cities.select{|elem| elem[0] < town[0]}.last[1]
+		province = @@provinces.select{|elem| elem[0] <= town[0]}.last
+		city = @@all_cities.select{|elem| elem[0] <= town[0]}.last
 
-			return "#{province_label} - #{city_label} - #{town_label}"
-					
+		if province[0] == town[0]
+			# a province
+			label = "#{province[1]}"
+		elsif city[0] == town[0]
+			# a city
+			label = "#{province[1]} - #{city[1]}"
+		else
+			# a town
+			label = "#{province[1]} - #{city[1]} - #{town_label}"
 		end
 
-		return ""
+		return label
 
 	end
 end
