@@ -135,8 +135,7 @@ class JobsController < ApplicationController
 												params[:report_type],
 												params[:report_style],
 												answers_transform)
-			# render_json_auto(retval) and return
-			render_json_e('error_161') and return
+			render_json_auto(retval) and return
 		when "to_spss"
 			survey = Survey.find_by_id(params[:survey_id])
 			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
