@@ -60,9 +60,6 @@ class AnalysisResult < Result
 			# analyze region
 			region = answer.region.to_s
 			region_result[region] = region_result[region] + 1 if !region_result[region].nil?
-			region_result.each do |key, value|
-				region_result[key] = [value, Address.find_province_city_town_by_code(key)]
-			end
 			
 			# analyze channel
 			channel = answer.channel.to_s
@@ -81,6 +78,9 @@ class AnalysisResult < Result
 			TaskClient.set_progress(task_id, "analyze_answer_progress", 0.5 * (index + 1) / answers.length) if !task_id.nil?
 		end
 		region_result.select! { |k,v| v != 0 }
+		region_result.each do |key, value|
+			region_result[key] = [value, Address.find_province_city_town_by_code(key)]
+		end
 		channel_result.select! { |k,v| v != 0 }
 		
 		# calculate the mean of duration
