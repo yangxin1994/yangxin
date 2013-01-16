@@ -442,9 +442,10 @@ class ReportResult < Result
 		logger.info report_data.serialize
 		logger.info "AAAAAAAAAAAAAAAAAA"
 		# call the webservice to generate the report
-		send_data "/ExportReport.aspx" do
-			{"report_data" => report_data.serialize, "task_id" => task_id}
+		retval = send_data "/ExportReport.aspx" do
+			{"report_data" => report_data.serialize, "job_id" => task_id}
 		end
+		self.filename = retval
 		self.status = 1
 		self.save
 	end
@@ -660,6 +661,7 @@ class ReportResult < Result
 		results = []
 		analysis_result.each do |region_code, number|
 			address_text = Address.find_text_by_code(region_code)
+			number = number[0]
 			next if address_text.blank?
 			total_number = total_number + number
 			results << { "text" => address_text, "number" => number.to_f }

@@ -370,6 +370,7 @@ OopsData::Application.routes.draw do
 			post 'finish'
 			get 'estimate_remain_answer_time'
 			delete 'destroy_preview'
+			get 'get_my_answer_by_id'
 		end
 	end
 
