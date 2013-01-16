@@ -382,7 +382,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 	def review
 		answer = Answer.find_by_id(params[:id])
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
-		retval = answer.review(params[:review_result].to_s == "true", @current_user, params[:message_content])
+		retval = answer.review(params[:review_result].to_s == "true", @current_user, params[:message_content], params[:callback])
 		render_json_auto(retval)
 	end
 

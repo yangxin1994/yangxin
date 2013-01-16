@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+	</head>
+	<body>
+		<p>
+			<%=@user.username%>
+		</p>
+		<br />
+		<p>
+			您由于回答调查问卷“<%=@survey.title%>”获得了抽奖机会，抽奖号为<%=@lottery_code%>。
+		</p>
+		<br />
+		<p>
+			请点击以下链接进行抽奖
+		</p>
+		<p>
+			<a href="<%= @callback %>"><%= @callback %></a>
+		</p>
+		<p>感谢您参与</p>
+		<br />
+		<p>Oops!Data团队</p>
+	</body>
+</html>

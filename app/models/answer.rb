@@ -836,41 +836,34 @@ class Answer
 	end
 
 	# the answer auditor reviews this answer, the review result can be 1 (pass review) or 2 (not pass)
-	def review(review_result, answer_auditor, message_content)
-
+	def review(review_result, answer_auditor, message_content, callback)
 		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 2
 		old_status = self.status
-		if review_result
-			self.set_finish
-		else
-			self.set_reject
-			self.reject_type = 2
-		end
+		user = self.user
 		self.interviewer_task.try(:update_quota)
 		self.update_quota(old_status)
 		self.auditor = answer_auditor
 		self.audit_at = Time.now.to_i
 
-		# message
 		if review_result
+			self.set_finish
 			message_content ||= "你的此问卷[#{self.survey.title}]的答案通过审核."
 		else
+			self.set_reject
+			self.reject_type = 2
 			message_content ||= "你的此问卷[#{self.survey.title}]的答案未通过审核."
 		end
-
 		answer_auditor.create_message(
 				"审核问卷答案消息",
 				message_content,
 				[] << self.user._id.to_s
-			) if !self.user.nil?
-
+			) if !user.nil?
 		self.audit_message = message_content
 		self.save
-
 		# no need to give points if the answer does not pass the review
 		return if self.is_reject
 
-		if [1,2].include?(self.survey.reward)
+		if [1,2].include?(self.survey.reward) && !user.nil?
 			# assign this user points, or a lottery code
 			# usage post_reward_to(user, :type => 2, :point => 100)
 			# 1 for lottery & 2 for point
@@ -880,6 +873,15 @@ class Answer
 				if self.survey.lottery
 					lc = self.survey.lottery.give_lottery_code_to(user)
 					self.survey.post_reward_to(user, :type => self.survey.reward, :lottery_code => lc, :cause => 2)
+					# send an email to the user
+					TaskClient.create_task({ task_type: "email",
+											host: "localhost",
+											port: Rails.application.config.service_port,
+											params: { email_type: "lottery_code",
+													email: user.email,
+													survey_id: self.survey._id.to_s,
+													lottery_code: lc,
+													callback: callback } })
 				end
 			elsif self.survey.reward == 2
 				self.survey.post_reward_to(user, :type => self.survey.reward, :point => self.survey.point, :cause => 2)
