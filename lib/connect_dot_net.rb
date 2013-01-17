@@ -12,12 +12,11 @@ module ConnectDotNet
       end
     rescue Errno::ECONNREFUSED
       logger.info  "servive refused"
+      return ErrorEnum::DOTNET_SERVICE_REFUSED
     rescue Timeout::Error
       logger.info  "timeout"
+      return ErrorEnum::DOTNET_TIMEOUT
     ensure
-      # export_process[:post] = 100
-      # self.save
-      logger.info  "error"
     end
   end
   

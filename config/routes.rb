@@ -341,6 +341,7 @@ OopsData::Application.routes.draw do
 			get :get_data_list
 			get :get_stats
 			get :get_analysis_result
+			get :get_file_uri
 		end
 	end
 

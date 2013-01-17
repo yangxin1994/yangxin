@@ -56,6 +56,11 @@ class ResultsController < ApplicationController
 		render_json_auto(analysis_result) and return
 	end
 
+	def get_file_uri
+		file_uri = Result.get_file_uri(params[:task_id])
+		render_json_auto(file_uri) and return
+	end
+
 	def check_progress
 		retval = @survey.check_progress(params[:detail])
 		respond_to do |format|

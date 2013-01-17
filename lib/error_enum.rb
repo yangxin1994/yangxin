@@ -99,6 +99,10 @@ module ErrorEnum
 	TASK_CREATION_FAILED = 'error_200'
 	TASK_DESTROY_FAILED = 'error_201'
 
+	DOTNET_TIMEOUT = 'error_210'
+	DOTNET_SERVICE_REFUSED = 'error_211'
+	DOTNET_HTTP_ERROR = 'error_212'
+
 	# lcm add for answer review
 	REWARD_ERROR = 'error_300'
 

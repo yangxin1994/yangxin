@@ -28,6 +28,12 @@ class Result
 		return Result.where(:result_key => result_key, :ref_result_id => nil, :status.gt => -1).first
 	end
 
+	def self.get_file_uri(task_id)
+		result = self.find_by_task_id(task_id)
+		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
+		return result.file_uri
+	end
+
 	def self.find_result_by_task_id(task_id)
 		result = Result.where(:task_id => task_id)[0]
 		return ErrorEnum::RESULT_NOT_EXIST if result.nil?
