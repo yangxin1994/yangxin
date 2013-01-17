@@ -21,6 +21,13 @@ class ToolsController < ApplicationController
 		end
 	end
 
+	def find_address_text_by_code
+		text = Address.find_text_by_code(params[:code])
+		respond_to do |format|
+			format.json	{ render_json_s(text) and return }
+		end
+	end
+
 	def send_email
 		Jobs.start(:EmailSendingJob,
 				Time.now.to_i,

@@ -419,6 +419,7 @@ OopsData::Application.routes.draw do
 			get :find_provinces
 			get :find_cities_by_province
 			get :find_towns_by_city
+			get :find_address_text_by_code
 			post :send_email
 		end
 	end
