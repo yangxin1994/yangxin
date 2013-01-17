@@ -441,18 +441,19 @@ class ReportResult < Result
 		logger.info "AAAAAAAAAAAAAAAAAA"
 		logger.info report_data.serialize
 		logger.info "AAAAAAAAAAAAAAAAAA"
+		return
 		# call the webservice to generate the report
 		retval = send_data "/ExportReport.aspx" do
 			{"report_data" => report_data.serialize, "job_id" => task_id}
 		end
-		self.filename = retval
+		self.file_uri = retval
 		self.status = 1
 		self.save
 	end
 
 	# cross analysis and description generation
 	def analyze_cross(question_type, question_issue, target_question_issue, question_answer_ary, target_question_answer_ary, opt={})
-		items_com = opt[:items_com]
+		items_com = opt[:items_com] || []
 		target_items_com = opt[:target_items_com]
 		opt[:items_com] = target_items_com
 
@@ -474,6 +475,7 @@ class ReportResult < Result
 			question_items_id.each do |id_string|
 				id_ary = id_string.split(',')
 				if !(id_ary & (question_answer["selection"].map { |e| e.to_s })).blank?
+					target_question_sub_answer_ary[id_string] ||= []
 					target_question_sub_answer_ary[id_string] << target_question_answer
 				end
 			end
@@ -482,23 +484,23 @@ class ReportResult < Result
 		question_items_id.each do |id|
 			case question_type
 			when QuestionTypeEnum::CHOICE_QUESTION
-				result[:result][id] = analyze_choice(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_choice(target_question_issue, target_question_sub_answer_ary[id] || [], opt)
 			when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
-				result[:result][id] = analyze_matrix_choice(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_matrix_choice(target_question_issue, target_question_sub_answer_ary[id] || [], opt)
 			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
-				result[:result][id] = analyze_number_blank(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_number_blank(target_question_issue, target_question_sub_answer_ary[id] || [], opt)
 			when QuestionTypeEnum::TIME_BLANK_QUESTION
-				result[:result][id] = analyze_time_blank(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_time_blank(target_question_issue, target_question_sub_answer_ary[id] || [], opt)
 			when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
-				result[:result][id] = analyze_address_blank(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_address_blank(target_question_issue, target_question_sub_answer_ary[id] || [], opt)
 			when QuestionTypeEnum::BLANK_QUESTION
-				result[:result][id] = analyze_blank(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_blank(target_question_issue, target_question_sub_answer_ary[id] || [], opt)
 			when QuestionTypeEnum::CONST_SUM_QUESTION
-				result[:result][id] = analyze_const_sum(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_const_sum(target_question_issue, target_question_sub_answer_ary[id] || [], opt)
 			when QuestionTypeEnum::SORT_QUESTION
-				result[:result][id] = analyze_sort(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_sort(target_question_issue, target_question_sub_answer_ary[id] || [], opt)
 			when QuestionTypeEnum::SCALE_QUESTION
-				result[:result][id] = analyze_scale(target_question_issue, target_question_sub_answer_ary[item["id"]] || [], opt)
+				result[:result][id] = analyze_scale(target_question_issue, target_question_sub_answer_ary[id] || [], opt)
 			end
 			result[:answer_number][id] = (target_question_sub_answer_ary[id] || []).length
 		end

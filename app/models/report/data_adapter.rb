@@ -357,6 +357,7 @@ class Report::DataAdapter
 		address_text = []
 		answer_number = []
 		analysis_result.each do |region_code, number|
+			number = number[0]
 			text = Address.find_text_by_code(region_code)
 			next if text.blank?
 			address_text << text
@@ -406,7 +407,7 @@ class Report::DataAdapter
 				items_id.each_with_index do |item_id, index|
 					number = []
 					region_code.each do |code|
-						number << analysis_result[:result][item_id][code].to_i
+						number << (analysis_result[:result][item_id][code].nil? ? 0 : analysis_result[:result][item_id][code][0].to_i)
 					end
 					data << [items_text[index]] + number
 				end
@@ -416,7 +417,7 @@ class Report::DataAdapter
 				region_code.each_with_index do |code, index|
 					number = []
 					analysis_result[:result].each do |item_id, target_result|
-						number << target_result[code].to_i
+						number << (target_result[code].nil? ? 0 : target_result[code][0].to_i)
 					end
 					data << [address_text[index]] + number
 				end
@@ -510,7 +511,7 @@ class Report::DataAdapter
 					items_id.each do |id|
 						order_result << analysis_result[id][e-1] || 0
 					end
-					data << ["第#{e}位", order_result]
+					data << ["第#{e}位"] + order_result
 				end
 			elsif [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT].include?(chart_style)
 				# the propotion for the first order

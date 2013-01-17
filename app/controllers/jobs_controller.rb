@@ -197,7 +197,7 @@ class JobsController < ApplicationController
 	end
 
 	def error
-		result = Result.find_by_task_id(params[:task_id])
+		result = Result.where(:task_id => params[:task_id]).first
 		render_json_auto(true) and return if result.nil?
 		result.status = -1
 		result.error_code = params[:error_code]

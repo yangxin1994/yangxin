@@ -54,8 +54,8 @@ class Result
 		result = Result.find_by_task_id(task_id)
 		# if the result does not exist return 0
 		return 0 if result.nil?
-		# the task is finished, return
-		return 1 if result && result.status == 1 || result.status == -1
+		# the task is finished or there is error, return
+		return result.status if result && result.status == 1 || result.status == -1
 
 		# the task has not been finished, check the progress
 		task = TaskClient.get_task(task_id)
@@ -112,7 +112,7 @@ class Result
 
 
 	def analyze_choice(issue, answer_ary, opt={})
-		items_com = opt[:items_com]
+		items_com = opt[:items_com] || []
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		if !items_com.blank?
@@ -139,7 +139,7 @@ class Result
 	end
 
 	def analyze_matrix_choice(issue, answer_ary, opt={})
-		items_com = opt[:items_com]
+		items_com = opt[:items_com] || []
 		input_ids = issue["items"].map { |e| e["id"] }
 		if !items_com.blank?
 			# combine items
@@ -157,12 +157,12 @@ class Result
 		end
 		answer_ary.each do |answer|
 			answer.each_with_index do |row_answer, row_index|
-				row_id = issue["rows"][row_index]["id"]
+				row_id = issue["rows"][row_index]["id"].to_s
 				row_answer.each do |input_id|
 					result.each_key do |k|
 						k_row_id = k.split('-')[0]
 						k_input_ids = k.split('-')[1].split(',')
-						if k_row_id == row_id && k_input_ids.include?(input_id)
+						if k_row_id == row_id && k_input_ids.include?(input_id.to_s)
 							result[k] = result[k] + 1
 							break
 						end
@@ -276,7 +276,7 @@ class Result
 	end
 
 	def analyze_const_sum(issue, answer_ary, opt={})
-		items_com = opt[:items_com]
+		items_com = opt[:items_com] || []
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		if !items_com.blank?
@@ -310,7 +310,7 @@ class Result
 	end
 
 	def analyze_sort(issue, answer_ary, opt={})
-		items_com = opt[:items_com]
+		items_com = opt[:items_com] || []
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
 		if !items_com.blank?
@@ -343,7 +343,7 @@ class Result
 	end
 
 	def analyze_scale(issue, answer_ary, opt={})
-		items_com = opt[:items_com]
+		items_com = opt[:items_com] || []
 		input_ids = issue["items"].map { |e| e["id"] }
 		if !items_com.blank?
 			# combine items
