@@ -119,8 +119,8 @@ class Result
 			# combine items
 			items_com.each do |com|
 				com.each { |input_id| input_ids.delete(input_id) }
+				input_ids << com.join(',')
 			end
-			input_ids << items_com.join(',')
 		end
 		input_ids.map! { |e| e.to_s }
 		result = {}
@@ -145,8 +145,8 @@ class Result
 			# combine items
 			items_com.each do |com|
 				com.each { |input_id| input_ids.delete(input_id) }
+				input_ids << com.join(',')
 			end
-			input_ids << items_com.join(',')
 		end
 		input_ids.map! { |e| e.to_s }
 		result = {}
@@ -283,8 +283,8 @@ class Result
 			# combine items
 			items_com.each do |com|
 				com.each { |input_id| input_ids.delete(input_id) }
+				input_ids << com.join(',')
 			end
-			input_ids << items_com.join(',')
 		end
 		input_ids.map! { |e| e.to_s }
 		weights = {}
@@ -317,8 +317,8 @@ class Result
 			# combine items
 			items_com.each do |com|
 				com.each { |input_id| input_ids.delete(input_id) }
+				input_ids << com.join(',')
 			end
-			input_ids << items_com.join(',')
 		end
 		input_ids.map! { |e| e.to_s }
 		
@@ -349,8 +349,8 @@ class Result
 			# combine items
 			items_com.each do |com|
 				com.each { |input_id| input_ids.delete(input_id) }
+				input_ids << com.join(',')
 			end
-			input_ids << items_com.join(',')
 		end
 		input_ids.map! { |e| e.to_s }
 
