@@ -762,7 +762,7 @@ class Answer
 		question_ids_with_qc_questions = []
 		question_ids.each do |qid|
 			question_ids_with_qc_questions << qid
-			question_ids_with_qc_questions += self.random_quality_control_locations[qid]
+			question_ids_with_qc_questions += self.random_quality_control_locations[qid] if !self.random_quality_control_locations[qid].blank?
 		end
 		return question_ids_with_qc_questions.index(question_id)
 	end
