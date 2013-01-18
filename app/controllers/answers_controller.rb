@@ -111,7 +111,7 @@ class AnswersController < ApplicationController
 			else
 				render_json_auto([questions,
 								@answer.answer_content.merge(@answer.random_quality_control_answer_content),
-								@answer.survey.all_questions_id.length,
+								@answer.survey.all_questions_id.length + @answer.random_quality_control_answer_content.length,
 								@answer.index_of(questions),
 								questions.estimate_answer_time,
 								@answer.repeat_time]) and return
