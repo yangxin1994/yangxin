@@ -9,6 +9,8 @@ class Result
 	field :result_key, :type => String
 	field :status, :type => Integer, default: 0
 	field :ref_result_id, :type => String
+	field :error_code, :type => String
+	field :error_message, :type => String
 
 	belongs_to :survey
 
@@ -23,7 +25,13 @@ class Result
 	end
 
 	def self.find_by_result_key(result_key)
-		return Result.where(:result_key => result_key, :ref_result_id => nil).first
+		return Result.where(:result_key => result_key, :ref_result_id => nil, :status.gt => -1).first
+	end
+
+	def self.get_file_uri(task_id)
+		result = self.find_by_task_id(task_id)
+		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
+		return result.file_uri
 	end
 
 	def self.find_result_by_task_id(task_id)
@@ -52,8 +60,8 @@ class Result
 		result = Result.find_by_task_id(task_id)
 		# if the result does not exist return 0
 		return 0 if result.nil?
-		# the task is finished, return
-		return 1 if result && result.status == 1
+		# the task is finished or there is error, return
+		return result.status if result && result.status == 1 || result.status == -1
 
 		# the task has not been finished, check the progress
 		task = TaskClient.get_task(task_id)
@@ -110,21 +118,42 @@ class Result
 
 
 	def analyze_choice(issue, answer_ary, opt={})
+		items_com = opt[:items_com] || []
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		if !items_com.blank?
+			# combine items
+			items_com.each do |com|
+				com.each { |input_id| input_ids.delete(input_id) }
+				input_ids << com.join(',')
+			end
+		end
 		input_ids.map! { |e| e.to_s }
 		result = {}
 		input_ids.each { |input_id| result[input_id] = 0 }
 		answer_ary.each do |answer|
 			answer["selection"].each do |input_id|
-				result[input_id.to_s] = result[input_id.to_s] + 1 if !result[input_id.to_s].nil?
+				result.each_key do |k|
+					if k.split(',').include?(input_id.to_s)
+						result[k] = result[k] + 1
+						break
+					end
+				end
 			end
 		end
 		return result
 	end
 
 	def analyze_matrix_choice(issue, answer_ary, opt={})
+		items_com = opt[:items_com] || []
 		input_ids = issue["items"].map { |e| e["id"] }
+		if !items_com.blank?
+			# combine items
+			items_com.each do |com|
+				com.each { |input_id| input_ids.delete(input_id) }
+				input_ids << com.join(',')
+			end
+		end
 		input_ids.map! { |e| e.to_s }
 		result = {}
 		issue["rows"].each do |row|
@@ -132,11 +161,18 @@ class Result
 				result["#{row["id"]}-#{input_id}"] = 0
 			end
 		end
-			answer_ary.each do |answer|
+		answer_ary.each do |answer|
 			answer.each_with_index do |row_answer, row_index|
-				row_id = issue["rows"][row_index]["id"]
+				row_id = issue["rows"][row_index]["id"].to_s
 				row_answer.each do |input_id|
-					result["#{row_id}-#{input_id}"] = result["#{row_id}-#{input_id}"] + 1 if !result["#{row_id}-#{input_id}"].nil?
+					result.each_key do |k|
+						k_row_id = k.split('-')[0]
+						k_input_ids = k.split('-')[1].split(',')
+						if k_row_id == row_id && k_input_ids.include?(input_id.to_s)
+							result[k] = result[k] + 1
+							break
+						end
+					end
 				end
 			end
 		end
@@ -217,6 +253,9 @@ class Result
 			result[region_code] = 0 if result[region_code].nil?
 			result[region_code] = result[region_code] + 1
 		end
+		result.each do |key, value|
+			result[key] = [value, Address.find_province_city_town_by_code(key)]
+		end
 		return result
 	end
 
@@ -243,15 +282,28 @@ class Result
 	end
 
 	def analyze_const_sum(issue, answer_ary, opt={})
+		items_com = opt[:items_com] || []
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		if !items_com.blank?
+			# combine items
+			items_com.each do |com|
+				com.each { |input_id| input_ids.delete(input_id) }
+				input_ids << com.join(',')
+			end
+		end
 		input_ids.map! { |e| e.to_s }
 		weights = {}
 		input_ids.each { |input_id| weights[input_id] = [] }
 
 		answer_ary.each do |answer|
 			answer.each do |input_id, value|
-				weights[input_id] << value.to_f if !weights[input_id].nil?
+				weights.each_key do |k|
+					if k.split(',').include?(input_id)
+						weights[k] << value.to_f
+						break
+					end
+				end
 			end
 		end
 
@@ -264,8 +316,16 @@ class Result
 	end
 
 	def analyze_sort(issue, answer_ary, opt={})
+		items_com = opt[:items_com] || []
 		input_ids = issue["items"].map { |e| e["id"] }
 		input_ids << issue["other_item"]["id"] if !issue["other_item"].nil? && issue["other_item"]["has_other_item"]
+		if !items_com.blank?
+			# combine items
+			items_com.each do |com|
+				com.each { |input_id| input_ids.delete(input_id) }
+				input_ids << com.join(',')
+			end
+		end
 		input_ids.map! { |e| e.to_s }
 		
 		input_number = input_ids.length
@@ -276,7 +336,12 @@ class Result
 	
 		answer_ary.each do |answer|
 			answer["sort_result"].each_with_index do |input_id, sort_index|
-				result[input_id][sort_index] = result[input_id][sort_index] + 1 if sort_index < input_number
+				result.each_key do |k|
+					if k.split(',').include?(input_id)
+						result[k][sort_index] = result[k][sort_index] + 1 if sort_index < input_number
+						break
+					end
+				end
 			end
 		end
 	
@@ -284,7 +349,15 @@ class Result
 	end
 
 	def analyze_scale(issue, answer_ary, opt={})
+		items_com = opt[:items_com] || []
 		input_ids = issue["items"].map { |e| e["id"] }
+		if !items_com.blank?
+			# combine items
+			items_com.each do |com|
+				com.each { |input_id| input_ids.delete(input_id) }
+				input_ids << com.join(',')
+			end
+		end
 		input_ids.map! { |e| e.to_s }
 
 		scores = {}
@@ -293,17 +366,21 @@ class Result
 		answer_ary.each do |answer|
 			answer.each do |input_id, value|
 				# value is 0-based, should be converted to score-based
-				scores[input_id] << value + 1 if !scores[input_id].nil? && value.to_i != -1
+				input_ids.each do |k|
+					if k.split(',').include?(input_id)
+						scores[k] << value + 1 if value.to_i != -1
+						break
+					end
+				end
 			end
 		end
-	
+
 		result = {}
 		scores.each do |key, score_ary|
 			result[key] = []
 			result[key] << score_ary.length
 			result[key] << (score_ary.blank? ? 0 : score_ary.mean)
 		end
-	
 		return result
 	end
 end

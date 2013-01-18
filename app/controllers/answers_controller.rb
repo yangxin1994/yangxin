@@ -111,7 +111,7 @@ class AnswersController < ApplicationController
 			else
 				render_json_auto([questions,
 								@answer.answer_content.merge(@answer.random_quality_control_answer_content),
-								@answer.survey.all_questions_id.length,
+								@answer.survey.all_questions_id.length + @answer.random_quality_control_answer_content.length,
 								@answer.index_of(questions),
 								questions.estimate_answer_time,
 								@answer.repeat_time]) and return
@@ -166,16 +166,20 @@ class AnswersController < ApplicationController
 		end
 	end
 
-	def get_my_answer
-		render_json_e(ErrorEnum::REQUIRE_LOGIN) and return if @current_user.nil?
-		@answer = Answer.find_by_survey_id_email_is_preview(params[:survey_id], @current_user.email, params[:is_preview])
-		if @answer.nil?
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
-			end
-		end
+	def get_reward_info
 		respond_to do |format|
-			format.json	{ render_json_auto(@answer) and return }
+			format.json	{ render_json_auto({reward: @answer.reward, point: @answer.point, lottery_id: @answer.lottery_id.to_s}) and return }
+		end
+	end
+
+	def get_my_answer_by_id
+		respond_to do |format|
+			format.json	{ render_json_auto({survey_id: @answer.survey_id.to_s,
+											is_preview: @answer.is_preview,
+											reward_type: @answer.reward,
+											point: @answer.point,
+											lottery_id: @answer.lottery_id.to_s,
+											lottery_title: @answer.lottery.try(:title)}) and return }
 		end
 	end
 

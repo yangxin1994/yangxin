@@ -29,6 +29,16 @@ class UserMailer < ActionMailer::Base
 					:subject => "重置Oops!Data密码",
 					:content_type => "text/html; charset=utf-8")
 	end
+	
+	def lottery_code_email(user, survey_id, lottery_code, callback)
+		@user = user
+		@survey = Survey.find_by_id(survey_id)
+		@lottery_code = lottery_code
+		@callback = callback
+		mail(:to => user.email, 
+					:subject => "重置Oops!Data密码",
+					:content_type => "text/html; charset=utf-8")
+	end
 
 	def survey_email(user_id, survey_id_ary)
 		@user = User.find_by_id(user_id)

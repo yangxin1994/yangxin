@@ -7,16 +7,18 @@ module ConnectDotNet
         r = Net::HTTP::Post.new(post_to)
         r.set_form_data(yield)
         http.read_timeout = 120
-        http.request(r)
+        retval = http.request(r)
+        return retval
       end
     rescue Errno::ECONNREFUSED
       logger.info  "servive refused"
+      return ErrorEnum::DOTNET_SERVICE_REFUSED
     rescue Timeout::Error
       logger.info  "timeout"
+      return ErrorEnum::DOTNET_TIMEOUT
     ensure
       # export_process[:post] = 100
       # self.save
-      logger.info  "===error==="
     end
   end
   

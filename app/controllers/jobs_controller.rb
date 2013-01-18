@@ -15,7 +15,6 @@ class JobsController < ApplicationController
 	def email_job
 		user = User.find_by_email(params[:email])
 		render_json_e(ErrorEnum::USER_NOT_EXIST) and return if user.nil?
-		callback = params[:callback]
 		case params[:email_type]
 		when 'welcome'
 			UserMailer.welcome_email(user, params[:callback]).deliver
@@ -23,6 +22,8 @@ class JobsController < ApplicationController
 			UserMailer.activate_email(user, params[:callback]).deliver
 		when 'password'
 			UserMailer.password_email(user, params[:callback]).deliver
+		when 'lottery_code'
+			UserMailer.lottery_code_email(user, params[:survey_id], params[:lottery_code], params[:callback]).deliver
 		end
 		render_json_s(true) and return
 	end
@@ -98,7 +99,7 @@ class JobsController < ApplicationController
 			answers, tot_answer_number, screened_answer_number = *survey.get_answers(params[:filter_index].to_i,
 																					params[:include_screened_answer].to_s == "true",
 																					params[:task_id])
-			if params[:report_mockup_id].nil?
+			if params[:report_mockup_id].blank?
 				report_mockup = ReportMockup.default_report_mockup(survey)
 			else
 				report_mockup = ReportMockup.find_by_id(params[:report_mockup_id])
@@ -195,5 +196,15 @@ class JobsController < ApplicationController
 				# 连接.net进行转换
 			end
 		end
+	end
+
+	def error
+		result = Result.where(:task_id => params[:task_id]).first
+		render_json_auto(true) and return if result.nil?
+		result.status = -1
+		result.error_code = params[:error_code]
+		result.error_message = params[:error_message]
+		result.save
+		render_json_auto(true) and return
 	end
 end

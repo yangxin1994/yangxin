@@ -9,6 +9,7 @@ OopsData::Application.routes.draw do
 			post :result_job
 			post :quota_job
 			post :survey_deadline_job
+			post :error
 		end
 	end
 
@@ -127,7 +128,7 @@ OopsData::Application.routes.draw do
 		
 		resources :lotteries do
 			collection do
-				get :for_publish, :activity, :finished, :deleted
+				get :for_publish, :activity, :finished, :deleted, :quillme
 			end
 			member do
 				get :auto_draw, :prize_records, :lottery_codes, :ctrl
@@ -208,6 +209,8 @@ OopsData::Application.routes.draw do
 			collection do
 				post 'submit'
 			end
+		end
+		resources :interviewer_tasks do
 		end
 	end
 
@@ -338,6 +341,7 @@ OopsData::Application.routes.draw do
 			get :get_data_list
 			get :get_stats
 			get :get_analysis_result
+			get :get_file_uri
 		end
 	end
 
@@ -367,6 +371,7 @@ OopsData::Application.routes.draw do
 			post 'finish'
 			get 'estimate_remain_answer_time'
 			delete 'destroy_preview'
+			get 'get_my_answer_by_id'
 		end
 	end
 
@@ -414,6 +419,7 @@ OopsData::Application.routes.draw do
 			get :find_provinces
 			get :find_cities_by_province
 			get :find_towns_by_city
+			get :find_address_text_by_code
 			post :send_email
 		end
 	end
