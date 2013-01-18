@@ -749,7 +749,12 @@ class Answer
 		return nil if questions.blank?
 		question_id = questions[0]._id.to_s
 		question_ids = self.survey.all_questions_id
-		return question_ids.index(question_id)
+		question_ids_with_qc_questions = []
+		question_ids.each do |qid|
+			question_ids_with_qc_questions << qid
+			question_ids_with_qc_questions += self.random_quality_control_locations[qid]
+		end
+		return question_ids_with_qc_questions.index(question_id)
 	end
 
 	#*description*: finish an answer
