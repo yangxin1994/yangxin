@@ -21,295 +21,320 @@ require 'csv'
 # }
 #Structure of question object can be found at Question
 class Survey
-	include Mongoid::Document
-	include Mongoid::Timestamps
-	include ConnectDotNet
-	field :title, :type => String, default: "调查问卷主标题"
-	field :subtitle, :type => String, default: "调查问卷副标题"
-	field :welcome, :type => String, default: "调查问卷欢迎语"
-	field :closing, :type => String, default: "调查问卷结束语"
-	field :header, :type => String, default: "调查问卷页眉"
-	field :footer, :type => String, default: "调查问卷页脚"
-	field :description, :type => String, default: "调查问卷描述"
-	# indicates whether this is a new survey that has not been edited
-	field :new_survey, :type => Boolean, default: true
-	field :alt_new_survey, :type => Boolean, default: false
-	# can be 0 (normal), or -1 (deleted)
-	field :status, :type => Integer, default: 0 
-	# can be 1 (closed), 2 (under review), 8 (published), the 4(pause) has been removed
-	field :publish_status, :type => Integer, default: 1
-	field :user_attr_survey, :type => Boolean, default: false
-	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
-	field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100, "finished_count" => 0, "submitted_count" => 0], "is_exclusive" => true, "quota_satisfied" => false, "finished_count" => 0, "submitted_count" => 0 }
-	# field :quota_stats, :type => Hash, default: {"quota_satisfied" => false, "answer_number" => [0]}
-	field :filters, :type => Array, default: []
-	field :filters_stats, :type => Array, default: []
-	field :logic_control, :type => Array, default: []
-	field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
-		"has_progress_bar" => true,
-		"has_question_number" => true,
-		"is_one_question_per_page" => false,
-		"has_advertisement" => true,
-		"has_oopsdata_link" => true,
-		"redirect_link" => "",
-		"allow_pageup" => false}
-	field :access_control_setting, :type => Hash, default: {"times_for_one_computer" => -1,
-		"has_captcha" => false,
-		"ip_restrictions" => [],
-		"password_control" => {"password_type" => -1,
-			"single_password" => "",
-			"password_list" => [],
-			"username_password_list" => []}}
-	# the type of inserting quality control question
-	#  0 for not inserting
-	#  1 for inserting manually
-	#  2 for inserting randomly
-	field :quality_control_questions_type, :type => Integer, default: 0
-	field :quality_control_questions_ids, :type => Array, default: []
-	field :deadline, :type => Integer
-	field :is_star, :type => Boolean, :default => false
-	field :point, :type => Integer, :default => 0
-	field :spread_point, :type => Integer, :default => 0
-	field :spreadable, :type => Boolean, :default => false
-	# reward: 0: nothing, 1: prize, 2: point 
-	field :reward, :type => Integer, :default => 0
 
-	field :show_in_community, :type => Boolean, default: false
+  include Mongoid::Document
+  include Mongoid::Timestamps
+  include ConnectDotNet
+  field :title, :type => String, default: "调查问卷主标题"
+  field :subtitle, :type => String, default: "调查问卷副标题"
+  field :welcome, :type => String, default: "调查问卷欢迎语"
+  field :closing, :type => String, default: "调查问卷结束语"
+  field :header, :type => String, default: "调查问卷页眉"
+  field :footer, :type => String, default: "调查问卷页脚"
+  field :description, :type => String, default: "调查问卷描述"
+  # indicates whether this is a new survey that has not been edited
+  field :new_survey, :type => Boolean, default: true
+  field :alt_new_survey, :type => Boolean, default: false
+  # can be 0 (normal), or -1 (deleted)
+  field :status, :type => Integer, default: 0 
+  # can be 1 (closed), 2 (under review), 8 (published), the 4(pause) has been removed
+  field :publish_status, :type => Integer, default: 1
+  field :user_attr_survey, :type => Boolean, default: false
+  field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
+  field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100, "finished_count" => 0, "submitted_count" => 0], "is_exclusive" => true, "quota_satisfied" => false, "finished_count" => 0, "submitted_count" => 0 }
+  # field :quota_stats, :type => Hash, default: {"quota_satisfied" => false, "answer_number" => [0]}
+  field :filters, :type => Array, default: []
+  field :filters_stats, :type => Array, default: []
+  field :logic_control, :type => Array, default: []
+  field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
+    "has_progress_bar" => true,
+    "has_question_number" => true,
+    "is_one_question_per_page" => false,
+    "has_advertisement" => true,
+    "has_oopsdata_link" => true,
+    "redirect_link" => "",
+    "allow_pageup" => false}
+  field :access_control_setting, :type => Hash, default: {"times_for_one_computer" => -1,
+    "has_captcha" => false,
+    "ip_restrictions" => [],
+    "password_control" => {"password_type" => -1,
+      "single_password" => "",
+      "password_list" => [],
+      "username_password_list" => []}}
+  # the type of inserting quality control question
+  #  0 for not inserting
+  #  1 for inserting manually
+  #  2 for inserting randomly
+  field :quality_control_questions_type, :type => Integer, default: 0
+  field :quality_control_questions_ids, :type => Array, default: []
+  field :deadline, :type => Integer
+  field :is_star, :type => Boolean, :default => false
+  field :point, :type => Integer, :default => 0
+  field :spread_point, :type => Integer, :default => 0
+  field :spreadable, :type => Boolean, :default => false
+  # reward: 0: nothing, 1: prize, 2: point 
+  field :reward, :type => Integer, :default => 0
 
-	belongs_to :user
-	has_and_belongs_to_many :tags do
-		def has_tag?(content)
-			@target.each do |tag|
-				return true if tag.content == content
-			end
-			return false
-		end
-	end
-	has_many :publish_status_historys
-	has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
-	has_and_belongs_to_many :entry_clerks, class_name: "User", inverse_of: :entry_clerk_allocated_surveys
+  field :show_in_community, :type => Boolean, default: false
 
-	has_many :answers
-	has_many :email_histories
+  belongs_to :user
+  has_and_belongs_to_many :tags do
+    def has_tag?(content)
+      @target.each do |tag|
+        return true if tag.content == content
+      end
+      return false
+    end
+  end
+  has_many :publish_status_historys
+  has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
+  has_and_belongs_to_many :entry_clerks, class_name: "User", inverse_of: :entry_clerk_allocated_surveys
 
-	has_many :survey_spreads
+  has_many :answers
+  has_many :email_histories
 
-	belongs_to :lottery
+  has_many :survey_spreads
 
-	has_many :export_results
-	has_many :analysis_results
-	has_many :report_results
-	has_many :report_mockups
-	has_many :interviewer_tasks
+  belongs_to :lottery
 
-
-	scope :all_but_new, lambda { where(:new_survey => false) }
-	scope :normal, lambda { where(:status.gt => -1) }
-	scope :normal_but_new, lambda { where(:status.gt => -1, :new_survey => false) }
-	scope :deleted, lambda { where(:status => -1) }
-	scope :deleted_but_new, lambda { where(:status => -1, :new_survey => false) }
-	# scope for star
-	scope :stars, where(:status.gt => -1, :is_star => true)
-
-	scope :in_community, lambda { where(:show_in_community => true) }
-
-	before_create :set_new
-
-	before_save :clear_survey_object
-	before_save :update_new
-	before_update :clear_survey_object
-	before_destroy :clear_survey_object
-
-	META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
-
-	public
-	
-	def all_questions
-		q = []
-		# quota_template_question_page.each do |page|
-		#   q << page[:questions]
-		# end
-		pages.each do |page|
-			q += page["questions"]
-		end
-		q.collect { |i| Question.find(i) }
-	end
-
-	def all_questions_id
-		return (pages.map {|p| p["questions"]}).flatten
-	end
-
-	def all_questions_type
-		q = []
-		self.all_questions.each do |a|
-			q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
-		end
-		q
-	end
-
-	#----------------------------------------------
-	#  
-	#     file export interface
-	#
-	#++++++++++++++++++++++++++++++++++++++++++++++
-
-	def to_csv(path = "public/import/test.csv")
-		c = CSV.open(path, "w") do |csv|
-			csv << csv_header
-			answer_content.each do |a|
-			csv << a
-			end
-		end
-	end
-
-	def get_csv_header(path = "public/import/test.csv")
-		c = CSV.open(path, "w") do |csv|
-			csv << csv_header
-		end
-	end
-
-	def spss_header
-		headers =[]
-		self.all_questions.each_with_index do |e, i|
-			headers += e.spss_header("q#{i+1}")
-		end
-		headers
-	end
-
-	def csv_header
-		headers = []
-		self.all_questions.each_with_index do |e, i|
-			headers += e.csv_header("q#{i+1}")
-		end
-		headers
-	end
-
-	def to_spss(data_list_key)
-		return ErrorEnum::DATA_LIST_NOT_EXIST if Result.find_by_result_key(data_list_key).nil?
-		task_id = TaskClient.create_task({ task_type: "result",
-											host: "localhost",
-											port: Rails.application.config.service_port,
-											params: { result_type: "to_spss",
-																survey_id: self._id.to_s,
-																data_list_key: data_list_key} })
-		return task_id
-	end
-
-	def to_excel(data_list_key)
-		return ErrorEnum::DATA_LIST_NOT_EXIST if Result.find_by_result_key(data_list_key).nil?
-		task_id = TaskClient.create_task({ task_type: "result",
-											host: "localhost",
-											port: Rails.application.config.service_port,
-											params: { result_type: "to_excel",
-																survey_id: self._id.to_s,
-																data_list_key: data_list_key} })
-	end
-
-	def to_excel_job(answers, result_key)
-		logger.info csv_header
-		logger.info "==========="
-		logger.info "==========="
-		File.open('public/uploads/excel_data.txt', 'w') do |f|
-			f.write({'excel_data' => {"csv_header" => csv_header,
-												"answer_contents" => formated_answers(answers, result_key),
-												"header_name" => csv_header,
-												"result_key" => result_key}}.to_json)
-		end
-		
-		send_data('ToExcel.aspx') do 
-			{'excel_data' => {"csv_header" => csv_header,
-												"answer_contents" => formated_answers(answers, result_key),
-												"header_name" => csv_header,
-												"result_key" => result_key}.to_json}
-		end
-	end
-
-	def to_spss_job(answers, result_key)
-		send_data('ToSpss.aspx') do
-			{'spss_data' => {"spss_header" => spss_header,
-											 "answer_contents" => formated_answers(answers, result_key),
-											 "header_name" => csv_header,
-											 "result_key" => result_key}}
-		end
-	end
-
-	def formated_answers(answers, result_key)
-		answer_c = []
-		q = self.all_questions_type
-		p "========= 准备完毕 ========="
-		# binding.pry
-		answers.each_with_index do |answer, index|
-			line_answer = []
-			i = -1
-			answer.answer_content.each do |k, v|
-				# binding.pry
-				# logger.debug q[i + 1]
-				line_answer += q[i += 1].answer_content(v)
-			#   logger.debug v 
-				# logger.debug line_answer
-			 #  logger.debug i
-			end
-			answer_c << line_answer
-		end
-		answer_c
-		# send_data({'spss_data' => {"spss_header" => spss_header,
-		#                            "answer_contents" => answer_c,
-		#                            # "header_name" => csv_header,
-		#                            "header_name" => csv_header,
-		#                            "result_key" => result_key}})
-	end
+  has_many :export_results
+  has_many :analysis_results
+  has_many :report_results
+  has_many :report_mockups
+  has_many :interviewer_tasks
 
 
+  scope :all_but_new, lambda { where(:new_survey => false) }
+  scope :normal, lambda { where(:status.gt => -1) }
+  scope :normal_but_new, lambda { where(:status.gt => -1, :new_survey => false) }
+  scope :deleted, lambda { where(:status => -1) }
+  scope :deleted_but_new, lambda { where(:status => -1, :new_survey => false) }
+  # scope for star
+  scope :stars, where(:status.gt => -1, :is_star => true)
 
-	def excel_header
-		headers =[]
-		self.all_questions.each_with_index do |e, i|
-			headers += e.excel_header("q#{i+1}")
-		end
-		headers
-	end
+  scope :in_community, lambda { where(:show_in_community => true) }
 
-	def csv_header
-		csv_headers = []
-		self.all_questions.each_with_index do |e, i|
-			csv_headers += e.csv_header("q#{i+1}")
-		end
-		csv_headers
-	end
+  before_create :set_new
 
-	def answer_import(csv_str)
-		q = []
-		batch = []
-		all_questions.each do |a|
-			q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
-		end
-		CSV.parse(csv_str.join, :headers => true) do |row|
-			return false if row.headers != self.csv_header
-			row = row.to_hash
-			line_answer = {}
-			quota_qustions_count = 0 # quota_qustions.size
-			begin
-				q.each_with_index do |e, i|
-					#q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
-					header_prefix = "q#{i + 1}"
-					line_answer.merge! e.answer_import(row, header_prefix)
-				end
-			rescue
-				"Error"
-			else
-				batch << {:answer_content => line_answer,
-									:channel => -1, 
-									:survey_id => self._id, 
-									:status => 3, 
-									:finished_at => Time.now.to_i,
-									:created_at => Time.now,
-									:updated_at => Time.now}
-			end
-		end
-		return false if batch.empty? 
-		Answer.collection.insert(batch)
-		return self.save
-	end
+  before_save :clear_survey_object
+  before_save :update_new
+  before_update :clear_survey_object
+  before_destroy :clear_survey_object
+
+  META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
+
+  public
+  
+  def all_questions
+    q = []
+    # quota_template_question_page.each do |page|
+    #   q << page[:questions]
+    # end
+    pages.each do |page|
+      q += page["questions"]
+    end
+    q.collect { |i| Question.find(i) }
+  end
+
+  def all_questions_id
+    return (pages.map {|p| p["questions"]}).flatten
+  end
+
+  def all_questions_type
+    q = []
+    self.all_questions.each do |a|
+      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+    end
+    q
+  end
+
+  #----------------------------------------------
+  #  
+  #     file export interface
+  #
+  #++++++++++++++++++++++++++++++++++++++++++++++
+
+  def to_csv(path = "public/import/test.csv")
+    c = CSV.open(path, "w") do |csv|
+      csv << csv_header
+      answer_content.each do |a|
+      csv << a
+      end
+    end
+  end
+
+  def get_csv_header(path = "public/import/test.csv")
+    c = CSV.open(path, "w") do |csv|
+      csv << csv_header
+    end
+  end
+
+  def spss_header
+    headers =[]
+    self.all_questions.each_with_index do |e, i|
+      headers += e.spss_header("q#{i+1}")
+    end
+    headers
+  end
+
+  def excel_header
+    headers =[]
+    self.all_questions.each_with_index do |e, i|
+      headers += e.excel_header("q#{i+1}")
+    end
+    headers
+  end
+
+  def csv_header(options = {})
+    if options[:with] == "import_id"
+      headers = ["import_id"]
+    else
+      headers = []
+    end
+    self.all_questions.each_with_index do |e, i|
+      headers += e.csv_header("q#{i+1}")
+    end
+    headers
+  end
+
+  # def csv_header
+  #   csv_headers = []
+  #   self.all_questions.each_with_index do |e, i|
+  #     csv_headers += e.csv_header("q#{i+1}")
+  #   end
+  #   csv_headers
+  # end
+
+  def to_spss(data_list_key)
+    return ErrorEnum::DATA_LIST_NOT_EXIST if Result.find_by_result_key(data_list_key).nil?
+    task_id = TaskClient.create_task({ task_type: "result",
+                      host: "localhost",
+                      port: Rails.application.config.service_port,
+                      params: { result_type: "to_spss",
+                                survey_id: self._id.to_s,
+                                data_list_key: data_list_key} })
+    return task_id
+  end
+
+  def to_excel(data_list_key)
+    return ErrorEnum::DATA_LIST_NOT_EXIST if Result.find_by_result_key(data_list_key).nil?
+    task_id = TaskClient.create_task({ task_type: "result",
+                      host: "localhost",
+                      port: Rails.application.config.service_port,
+                      params: { result_type: "to_excel",
+                                survey_id: self._id.to_s,
+                                data_list_key: data_list_key} })
+  end
+
+  def to_excel_job(answers, result_key)
+    logger.info csv_header
+    logger.info "==========="
+    logger.info "==========="
+    File.open('public/uploads/excel_data.txt', 'w') do |f|
+      f.write({'excel_data' => {"csv_header" => csv_header,
+                        "answer_contents" => formated_answers(answers, result_key),
+                        "header_name" => csv_header,
+                        "result_key" => result_key}}.to_json)
+    end
+    a = (send_data('/ToExcel.aspx') do 
+      {'excel_data' => {"csv_header" => csv_header,
+                        "answer_contents" => formated_answers(answers, result_key),
+                        "header_name" => csv_header,
+                        "result_key" => result_key}.to_json}
+    end)
+
+    p a
+  end
+
+  def to_spss_job(answers, result_key)
+    File.open('public/uploads/spss_data.txt', 'w') do |f|
+      f.write({'spss_data' => {"spss_header" => spss_header,
+                               "answer_contents" => formated_answers(answers, result_key),
+                               "header_name" => csv_header,
+                               "result_key" => result_key}}.to_json)
+    end
+    a = send_data('/ToSpss.aspx') do
+      {'spss_data' => {"spss_header" => spss_header,
+                       "answer_contents" => formated_answers(answers, result_key),
+                       "header_name" => csv_header,
+                       "result_key" => result_key}.to_json}
+    end
+    binding.pry
+  end
+
+  def formated_answers(answers, result_key)
+    answer_c = []
+    q = self.all_questions_type
+    p "========= 准备完毕 ========="
+    # binding.pry
+    answers.each_with_index do |answer, index|
+      line_answer = []
+      i = -1
+      answer.answer_content.each do |k, v|
+        # binding.pry
+        # logger.debug q[i + 1]
+        line_answer += q[i += 1].answer_content(v)
+      #   logger.debug v 
+        # logger.debug line_answer
+       #  logger.debug i
+      end
+      answer_c << line_answer
+    end
+    answer_c
+    # send_data({'spss_data' => {"spss_header" => spss_header,
+    #                            "answer_contents" => answer_c,
+    #                            # "header_name" => csv_header,
+    #                            "header_name" => csv_header,
+    #                            "result_key" => result_key}})
+  end
+
+  def answer_import(csv_str)
+    q = []
+    batch = []
+    all_questions.each do |a|
+      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+    end
+    CSV.parse(csv_str.join, :headers => true) do |row|
+      return false if row.headers != self.csv_header(:with => "import_id")
+      return false if Answer.where(:import_id => row["import_id"]).length > 0
+      row = row.to_hash
+      line_answer = {}
+      quota_qustions_count = 0 # quota_qustions.size
+      begin
+        q.each_with_index do |e, i|
+          #q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
+          header_prefix = "q#{i + 1}"
+          line_answer.merge! e.answer_import(row, header_prefix)
+        end
+      rescue Exception => test
+        binding.pry
+        test
+      else
+        batch << {:answer_content => line_answer,
+                  :answer_id => row["import_id"],
+                  :channel => -1, 
+                  :survey_id => self._id, 
+                  :status => 3,
+                  :random_quality_control_answer_content => {},
+                  :random_quality_control_locations => {},
+                  :logic_control_result => {},
+                  :username => "",
+                  :password => "",
+                  :region => -1,
+                  :ip_address => "",
+                  :audit_message => "",
+                  :is_scanned => false,
+                  :is_preview => false,
+                  :finished_at => Time.now.to_i,
+                  :created_at => Time.now,
+                  :updated_at => Time.now}
+      end
+    end
+    return false if batch.empty? 
+    Answer.collection.insert(batch)
+    self.refresh_quota_stats
+    return self.save
+  end
 
 	#--
 	# update deadline and create a survey_deadline_job
@@ -2066,4 +2091,5 @@ class Survey
 		end
 		return info
 	end
+
 end

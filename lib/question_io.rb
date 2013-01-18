@@ -67,6 +67,13 @@ class QuestionIo
     end
   end
 
+  def get_item_index(id)
+    self.issue["items"].each_with_index do |item, index|
+      return index + 1 if item["id"].to_s == id.to_s
+    end
+    return nil
+  end
+
   def get_item_id(index)
     return nil if index.nil?
     index = index.to_i - 1
@@ -127,14 +134,14 @@ class ChoiceQuestionIo < QuestionIo
     clear_retval
     if issue["max_choice"].to_i > 1
       issue["items"].each do |item|
-        if v["selections"].include? item["id"]
+        if v["selection"].include? item["id"]
           @retval << "1"
         else
           @retval << "0"
         end
       end
     else
-      @retval << (v["selection"].empty? ? nil : get_item[v["selection"][0]])
+      @retval << (v["selection"].empty? ? nil : get_item_index(v["selection"][0]))
     end
     if issue["other_item"]["has_other_item"]
       @retval << v["text_input"]
@@ -221,7 +228,7 @@ class MatrixChoiceQuestionIo < QuestionIo
     if issue["max_choice"].to_i > 1
       issue["rows"].each_index do |r|
         issue["items"].each_index do |c|
-          if v[r].include?( (c + 1).to_s)
+          if v[r].include?( get_item_id(c + 1))
             @retval << "1"
           else
             @retval << "0"
@@ -230,7 +237,7 @@ class MatrixChoiceQuestionIo < QuestionIo
       end
     else
       issue["rows"].each_index do |r|
-        @retval << v[r]
+        @retval << (v[r].empty? ? nil : get_item_index(v[r][0]))
       end
     end
     return @retval
@@ -297,12 +304,28 @@ class TimeBlankQuestionIo < QuestionIo
     #   @retval << "#{v[i]}#{e}" if v[i] != 0
     # end
     # return @retval
-    @retval << "#{v[0]}年#{v[1]}月#{v[2]}周#{v[3]}天#{v[4]}时#{v[5]}分#{v[6]}秒"
+    time = Time.at(v/1000)
+    case issue["format"]
+    when 0
+      @retval << "#{time.year}年"
+    when 1
+      @retval << "#{time.year}年#{time.month}月"
+    when 2
+      @retval << "#{time.year}年#{time.month}月#{time.day}日"
+    when 3
+      @retval << "#{time.year}年#{time.month}月#{time.day}日#{time.hour}时#{time.min}分"
+    when 4
+      @retval << "#{time.month}月#{time.day}日"
+    when 5
+      @retval << "#{time.hour}时#{time.min}分"
+    when 6
+      @retval << "#{time.hour}时#{time.min}分#{time.sec}秒"
+    end
+    @retval
   end
 
   def new_answer_content
     clear_retval
-    
   end
 
   def answer_import(row, header_prefix)
@@ -514,17 +537,23 @@ class SortQuestionIo < QuestionIo
   def answer_content(v)
     return {} if v.nil?
     clear_retval
-    v["sort_result"].each_with_index do |e, i|
-      if issue["other_item"]["has_other_item"]
-        break if i == v["sort_result"].size - 1
-      end
-      @retval[i] = e
+    issue["items"].each_with_index do |item, index|
+      rev = v["sort_result"].index(item["id"].to_s)
+      rev += 1 unless rev.nil?
+      @retval << rev
     end
+    # v["sort_result"].each_with_index do |e, i|
+    #   if issue["other_item"]["has_other_item"]
+    #     break if i == v["sort_result"].size - 1
+    #   end
+    #   @retval[i] = e
+    # end
 
     if issue["other_item"]["has_other_item"]
-
       @retval << v["text_input"]
-      @retval << v["sort_result"][-1] #这句就是个陷阱!!!
+      rev = v["sort_result"].index(issue["other_item"]["id"].to_s)
+      rev += 1 unless rev.nil?
+      @retval << rev #这句就是个陷阱!!!
     end
     return @retval
   end
@@ -605,7 +634,13 @@ class RankQuestionIo < QuestionIo
 end
 
 class ParagraphIo < QuestionIo
+  def csv_header
+    @retval = []
+  end
 
+  def answer_content
+    @retval = {}
+  end
 end
 
 class FileQuestionIo < QuestionIo
@@ -657,29 +692,36 @@ class ScaleQuestionIo < QuestionIo
   def csv_header(header_prefix)
     issue["items"].each_index do |i|
       @retval << header_prefix + "_c#{i + 1}"
+      if issue["show_unknown"]
+        @retval << header_prefix + "_c#{i + 1}" + UNKNOW
+      end
     end
+
     return @retval
   end
-
+  #TODO spss_value_label
   def spss_header(header_prefix)
     issue["items"].each_index do |i|
       @retval << {"spss_name" => header_prefix + "_c#{i + 1}",
-                  "spss_type" => SPSS_STRING,
+                  "spss_type" => SPSS_NUMERIC,
                   "spss_label" => issue["items"][i]["content"]["text"]}
+      if issue["show_unknown"]
+        @retval << {"spss_name" => header_prefix + "_c#{i + 1}" + UNKNOW,
+                    "spss_type" => SPSS_STRING,
+                    "spss_label" => SPSS_UNKOWN
+                    }  
+      end
     end
-    return @retval   
+
+    return @retval
   end
 
   def answer_content(v)
     return {} if v.nil?
     clear_retval
     issue["items"].each do |e|
-      @retval << v[e["input_id"]]
-      @retval << (v[e["input_id"]] == -1 ? 1 : 0 ) if e["has_unknow"]
-    end
-    if issue["other_item"]["has_other_item"]
-      @retval << v["text_input"]
-      @retval << v[issue["other_item"]["input_id"]]
+      @retval << v[e["id"].to_s]
+      @retval << (v[e["id"].to_s] == -1 ? 1 : 0 ) if e["show_unknow"]
     end
     return @retval
   end
@@ -687,7 +729,7 @@ class ScaleQuestionIo < QuestionIo
   def answer_import(row, header_prefix)
     @retval = {}
     issue["items"].each_with_index do |item, index|
-      @retval[get_item_id(index).to_s] = row["#{header_prefix}_c#{index + 1}"]
+      @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : row["#{header_prefix}_c#{index + 1}"].to_i)
     end
     return { "#{origin_id}" => @retval} 
   end

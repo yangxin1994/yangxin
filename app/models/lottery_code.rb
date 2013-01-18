@@ -45,7 +45,7 @@ class LotteryCode
     present_add :for_lottery =>
       { :title => self.lottery.title,
         :status => self.lottery.status,
-        :photo_src => self.lottery.photo.picture_url,
+        :photo_src => self.lottery.photo_url,
         :exchangeable => self.lottery.exchangeable,
         :description => self.lottery.description
       }

@@ -17,6 +17,8 @@ module ConnectDotNet
       logger.info  "timeout"
       return ErrorEnum::DOTNET_TIMEOUT
     ensure
+      # export_process[:post] = 100
+      # self.save
     end
   end
   
