@@ -174,20 +174,12 @@ class AnswersController < ApplicationController
 
 	def get_my_answer_by_id
 		respond_to do |format|
-			format.json	{ render_json_auto({survey_id: @answer.survey_id.to_s, is_preview: @answer.is_preview}) and return }
-		end
-	end
-
-	def get_my_answer
-		render_json_e(ErrorEnum::REQUIRE_LOGIN) and return if @current_user.nil?
-		@answer = Answer.find_by_survey_id_email_is_preview(params[:survey_id], @current_user.email, params[:is_preview])
-		if @answer.nil?
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
-			end
-		end
-		respond_to do |format|
-			format.json	{ render_json_auto(@answer) and return }
+			format.json	{ render_json_auto({survey_id: @answer.survey_id.to_s,
+											is_preview: @answer.is_preview,
+											reward_type: @answer.reward,
+											point: @answer.point,
+											lottery_id: @answer.lottery_id.to_s,
+											lottery_title: @answer.lottery,try(title)}) and return }
 		end
 	end
 
