@@ -179,7 +179,7 @@ class AnswersController < ApplicationController
 											reward_type: @answer.reward,
 											point: @answer.point,
 											lottery_id: @answer.lottery_id.to_s,
-											lottery_title: @answer.lottery,try(title)}) and return }
+											lottery_title: @answer.lottery.try(title)}) and return }
 		end
 	end
 
