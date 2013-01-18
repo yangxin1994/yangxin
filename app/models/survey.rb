@@ -2025,7 +2025,7 @@ class Survey
 		return {"reward_type" => self.reward,
 				"point" => self.point,
 				"lottery_id" => self.lottery_id,
-				"lottery_title" => self.lottery.try(title),
+				"lottery_title" => self.lottery.try(:title),
 				"spreadable" => self.spreadable,
 				"spread_point" => self.spread_point}
 	end
