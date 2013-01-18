@@ -168,7 +168,7 @@ class AnswersController < ApplicationController
 
 	def get_my_answer_by_id
 		respond_to do |format|
-			format.json	{ render_json_auto({survey_id: answer.survey_id.to_s, is_preview: @answer.is_preview}) and return }
+			format.json	{ render_json_auto({survey_id: @answer.survey_id.to_s, is_preview: @answer.is_preview}) and return }
 		end
 	end
 
