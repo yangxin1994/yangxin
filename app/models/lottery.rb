@@ -40,6 +40,14 @@ class Lottery
     self.exchangeable
   end
 
+  def photo_url
+    if photo
+      photo.picture_url
+    else
+      ""
+    end
+  end
+
   def exchange(user)
     return false if !exchangeable
     user.reward_logs.create(:type => 2,
