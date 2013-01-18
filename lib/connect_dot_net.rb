@@ -16,7 +16,7 @@ module ConnectDotNet
     ensure
       # export_process[:post] = 100
       # self.save
-      logger.info  "error"
+      logger.info  "===error==="
     end
   end
   

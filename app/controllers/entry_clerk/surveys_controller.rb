@@ -7,7 +7,7 @@ class EntryClerk::SurveysController < EntryClerk::ApplicationController
     survey = Survey.find_by_id(params[:id])
     render_json !!survey do |s|
       if s
-        survey.csv_header
+        survey.csv_header(:with => "import_id")
       else
         { :error_code => ErrorEnum::SURVEY_NOT_EXIST, 
           :error_message => "survey not exist"}
@@ -18,7 +18,7 @@ class EntryClerk::SurveysController < EntryClerk::ApplicationController
   def import_answer
     survey = Survey.find_by_id(params[:id])
     # csv = Marshal::load(params[:csv])
-    render_json !!survey do |s| 
+    render_json !!survey do |s|
       if s
         if survey.answer_import(params[:csv])
           true

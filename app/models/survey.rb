@@ -176,13 +176,33 @@ class Survey
     headers
   end
 
-  def csv_header
-    headers = []
+  def excel_header
+    headers =[]
+    self.all_questions.each_with_index do |e, i|
+      headers += e.excel_header("q#{i+1}")
+    end
+    headers
+  end
+
+  def csv_header(options = {})
+    if options[:with] == "import_id"
+      headers = ["import_id"]
+    else
+      headers = []
+    end
     self.all_questions.each_with_index do |e, i|
       headers += e.csv_header("q#{i+1}")
     end
     headers
   end
+
+  # def csv_header
+  #   csv_headers = []
+  #   self.all_questions.each_with_index do |e, i|
+  #     csv_headers += e.csv_header("q#{i+1}")
+  #   end
+  #   csv_headers
+  # end
 
   def to_spss(data_list_key)
     return ErrorEnum::DATA_LIST_NOT_EXIST if Result.find_by_result_key(data_list_key).nil?
@@ -215,22 +235,30 @@ class Survey
                         "header_name" => csv_header,
                         "result_key" => result_key}}.to_json)
     end
-    
-    send_data('ToExcel.aspx') do 
+    a = (send_data('/ToExcel.aspx') do 
       {'excel_data' => {"csv_header" => csv_header,
                         "answer_contents" => formated_answers(answers, result_key),
                         "header_name" => csv_header,
                         "result_key" => result_key}.to_json}
-    end
+    end)
+
+    p a
   end
 
   def to_spss_job(answers, result_key)
-    send_data('ToSpss.aspx') do
+    File.open('public/uploads/spss_data.txt', 'w') do |f|
+      f.write({'spss_data' => {"spss_header" => spss_header,
+                               "answer_contents" => formated_answers(answers, result_key),
+                               "header_name" => csv_header,
+                               "result_key" => result_key}}.to_json)
+    end
+    a = send_data('/ToSpss.aspx') do
       {'spss_data' => {"spss_header" => spss_header,
                        "answer_contents" => formated_answers(answers, result_key),
                        "header_name" => csv_header,
-                       "result_key" => result_key}}
+                       "result_key" => result_key}.to_json}
     end
+    binding.pry
   end
 
   def formated_answers(answers, result_key)
@@ -259,24 +287,6 @@ class Survey
     #                            "result_key" => result_key}})
   end
 
-
-
-  def excel_header
-    headers =[]
-    self.all_questions.each_with_index do |e, i|
-      headers += e.excel_header("q#{i+1}")
-    end
-    headers
-  end
-
-  def csv_header
-    csv_headers = []
-    self.all_questions.each_with_index do |e, i|
-      csv_headers += e.csv_header("q#{i+1}")
-    end
-    csv_headers
-  end
-
   def answer_import(csv_str)
     q = []
     batch = []
@@ -284,7 +294,8 @@ class Survey
       q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
     end
     CSV.parse(csv_str.join, :headers => true) do |row|
-      return false if row.headers != self.csv_header
+      return false if row.headers != self.csv_header(:with => "import_id")
+      return false if Answer.where(:import_id => row["import_id"]).length > 0
       row = row.to_hash
       line_answer = {}
       quota_qustions_count = 0 # quota_qustions.size
@@ -294,13 +305,25 @@ class Survey
           header_prefix = "q#{i + 1}"
           line_answer.merge! e.answer_import(row, header_prefix)
         end
-      rescue
-        "Error"
+      rescue Exception => test
+        binding.pry
+        test
       else
         batch << {:answer_content => line_answer,
+                  :answer_id => row["import_id"],
                   :channel => -1, 
                   :survey_id => self._id, 
-                  :status => 3, 
+                  :status => 3,
+                  :random_quality_control_answer_content => {},
+                  :random_quality_control_locations => {},
+                  :logic_control_result => {},
+                  :username => "",
+                  :password => "",
+                  :region => -1,
+                  :ip_address => "",
+                  :audit_message => "",
+                  :is_scanned => false,
+                  :is_preview => false,
                   :finished_at => Time.now.to_i,
                   :created_at => Time.now,
                   :updated_at => Time.now}
@@ -308,6 +331,7 @@ class Survey
     end
     return false if batch.empty? 
     Answer.collection.insert(batch)
+    self.refresh_quota_stats
     return self.save
   end
 
