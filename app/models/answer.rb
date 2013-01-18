@@ -44,6 +44,9 @@ class Answer
 	field :introducer_id, :type => String
 	field :point_to_introducer, :type => Integer
 
+	field :point, :type => Integer, :default => 0
+	field :reward, :type => Integer, :default => 0
+
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
 
@@ -57,6 +60,7 @@ class Answer
 	belongs_to :user
 	belongs_to :survey
 	belongs_to :interviewer_task
+	belongs_to :lottery
 
 	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
 
@@ -168,6 +172,12 @@ class Answer
 
 		# randomly generate quality control questions
 		answer = answer.genereate_random_quality_control_questions
+
+		# copy the reward info from the survey
+		answer.reward = answer.survey.reward
+		answer.point = answer.survey.point
+		answer.lottery = answer.survey.lottery
+		answer.save
 
 		return answer
 	end
@@ -868,16 +878,16 @@ class Answer
 		# no need to give points if the answer does not pass the review
 		return if self.is_reject
 
-		if [1,2].include?(self.survey.reward) && !user.nil?
+		if [1,2].include?(self.reward) && !user.nil?
 			# assign this user points, or a lottery code
 			# usage post_reward_to(user, :type => 2, :point => 100)
 			# 1 for lottery & 2 for point
 
 			# maybe lottery is nil
-			if self.survey.reward == 1
-				if self.survey.lottery
-					lc = self.survey.lottery.give_lottery_code_to(user)
-					self.survey.post_reward_to(user, :type => self.survey.reward, :lottery_code => lc, :cause => 2)
+			if self.reward == 1
+				if self.lottery
+					lc = self.lottery.give_lottery_code_to(user)
+					self.survey.post_reward_to(user, :type => self.reward, :lottery_code => lc, :cause => 2)
 					# send an email to the user
 					TaskClient.create_task({ task_type: "email",
 											host: "localhost",
@@ -888,8 +898,8 @@ class Answer
 													lottery_code: lc,
 													callback: callback } })
 				end
-			elsif self.survey.reward == 2
-				self.survey.post_reward_to(user, :type => self.survey.reward, :point => self.survey.point, :cause => 2)
+			elsif self.reward == 2
+				self.post_reward_to(user, :type => self.reward, :point => self.point, :cause => 2)
 			end
 		end
 		# give the introducer points
