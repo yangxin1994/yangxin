@@ -899,7 +899,7 @@ class Answer
 													callback: callback } })
 				end
 			elsif self.reward == 2
-				self.post_reward_to(user, :type => self.reward, :point => self.point, :cause => 2)
+				self.survey.post_reward_to(user, :type => self.reward, :point => self.point, :cause => 2)
 			end
 		end
 		# give the introducer points
