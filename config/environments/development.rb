@@ -42,7 +42,7 @@ OopsData::Application.configure do
   }
 
   config.task_web_service_uri = 'localhost:9000'
-  # config.dotnet_web_service_uri = 'http://192.168.1.116:80'
-  config.dotnet_web_service_uri = 'http://19.oopsdata.com'
+  config.dotnet_web_service_uri = 'http://192.168.1.116:80'
+  # config.dotnet_web_service_uri = 'http://19.oopsdata.com'
   config.service_port = '8000'
 end
