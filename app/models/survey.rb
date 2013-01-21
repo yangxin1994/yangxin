@@ -269,15 +269,11 @@ class Survey
     # binding.pry
     answers.each_with_index do |answer, index|
       line_answer = []
-      i = -1
-      answer.answer_content.each do |k, v|
-        # binding.pry
-        # logger.debug q[i + 1]
-        line_answer += q[i += 1].answer_content(v)
-      #   logger.debug v 
-        # logger.debug line_answer
-       #  logger.debug i
+
+      all_questions_id.each_with_index do |question, index|
+        line_answer += q[index].answer_content(answer.answer_content[question])
       end
+
       answer_c << line_answer
     end
     answer_c
