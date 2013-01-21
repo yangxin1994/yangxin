@@ -48,4 +48,8 @@ OopsData::Application.configure do
 
 	# configuration for roadie
 	config.action_mailer.default_url_options = {:host => 'quill.oopsdata.net', :port => '3000'}
+
+	# configuration for quill and quillme
+	config.quill_host = 'http://quill.oopsdata.net:3000'
+	config.quillme_host = 'http://quillme.oopsdata.net:3000'
 end

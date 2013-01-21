@@ -1,20 +1,4 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
-  </head>
-  <body>
-		<p>
-			<%=@user.username%>
-		</p>
-		<br />
-		<p>
-			您的调查问卷已经发布，您可以点击下面链接查看回收情况
-		</p>
-		<p>
-		</p>
-		<p>感谢您选择Oops!Data</p>
-		<br />
-		<p>Oops!Data团队</p>
-  </body>
-</html>
+<p>您的调查问卷《<%=@survey.title%>》已经成功发布，您可以点击下面链接查看回收情况：</p>
+<p><a class="activate-link" href="<%=@url%>"><%=@url%></a></p>
+<br />
+<p>感谢您选择优数调研</p>

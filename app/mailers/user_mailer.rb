@@ -49,6 +49,7 @@ class UserMailer < ActionMailer::Base
 		@survey = Survey.find_by_id(publish_status_history.survey_id)
 		@user = User.find_by_email(@survey.owner_email)
 		@message = publish_status_history.message
+		@url = "#{Rails.application.config.quill_host}/questionaires/#{@survey._id.to_s}/share"
 		mail(:to => @user.email, :subject => "您的调查问卷 #{@survey.title} 已经发布")
 	end
 	
@@ -56,6 +57,7 @@ class UserMailer < ActionMailer::Base
 		@survey = Survey.find_by_id(publish_status_history.survey_id)
 		@user = @survey.user
 		@message = publish_status_history.message
+		@url = "#{Rails.application.config.quill_host}/questionaires/#{@survey._id.to_s}"
 		mail(:to => @user.email, :subject => "您的调查问卷 #{@survey.title} 发布申请被拒绝")
 	end
 end
