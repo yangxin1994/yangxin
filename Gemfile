@@ -41,6 +41,8 @@ group :assets do
 	#gem 'mini_captcha', :path => "~/Rrojects/mini_captcha/"
 	# attachment
 	gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
+  # gem for compass.
+  # gem 'compass-rails'
 end
 
 
@@ -69,3 +71,4 @@ group :production do
 end
 
 gem 'quill_common', :path => "../quill_common"
+gem 'roadie'		# html email

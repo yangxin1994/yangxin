@@ -52,5 +52,8 @@ module OopsData
     config.assets.version = '1.0'
 
 		config.autoload_paths += Dir["#{config.root}/lib/**/"]
+
+		# configuration for roadie
+		config.action_mailer.default_url_options = {:host => 'res.oopsdata.com'}
   end
 end
