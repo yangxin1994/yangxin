@@ -3,7 +3,7 @@ require 'encryption'
 class UserMailer < ActionMailer::Base
 	layout 'email'
 
-  default from: "postmaster@oopsdata.net", charset: "UTF-8"
+  default from: "\"优数调研\" <postmaster@oopsdata.net>", charset: "UTF-8"
 
 	def welcome_email(user, callback)
 		@user = user
@@ -16,24 +16,28 @@ class UserMailer < ActionMailer::Base
 		@user = user
 		activate_info = {"email" => user.email, "time" => Time.now.to_i}
 		@activate_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
-		mail(:to => user.email, :subject => "激活优数调研账户")
+		mail(:to => user.email, :subject => "激活账户")
 	end
 	
 	def password_email(user, callback)
 		@user = user
 		password_info = {"email" => user.email, "time" => Time.now.to_i}
 		@password_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(password_info.to_json))
-		mail(:to => user.email, :subject => "重置优数调研密码")
+		mail(:to => user.email, :subject => "重置密码")
 	end
 	
 	def lottery_code_email(user, survey_id, lottery_code, callback)
 		@user = user
 		@survey = Survey.find_by_id(survey_id)
+		@survey_list_url = "#{Rails.application.config.quillme_host}/surveys"
+		@lottery_url = "#{Rails.application.config.quillme_host}/lotteries/own"
+		@lottery_title = ""	#TODO: get @lottery_title
 		@lottery_code = lottery_code
-		@callback = callback
-		mail(:to => user.email, :subject => "重置优数调研密码")
+		@lottery_code_url = callback
+		mail(:to => user.email, :subject => "恭喜您获得抽奖号")
 	end
 
+	# TODO
 	def survey_email(user_id, survey_id_ary)
 		@user = User.find_by_id(user_id)
 		@surveys = survey_id_ary.map { |e| Survey.find_by_id(e) }

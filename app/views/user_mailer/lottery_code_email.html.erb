@@ -1,25 +1,10 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
-	</head>
-	<body>
-		<p>
-			<%=@user.username%>
-		</p>
-		<br />
-		<p>
-			您由于回答调查问卷“<%=@survey.title%>”获得了抽奖机会，抽奖号为<%=@lottery_code%>。
-		</p>
-		<br />
-		<p>
-			请点击以下链接进行抽奖
-		</p>
-		<p>
-			<a href="<%= @callback %>"><%= @callback %></a>
-		</p>
-		<p>感谢您参与</p>
-		<br />
-		<p>Oops!Data团队</p>
-	</body>
-</html>
+<p>您由于回答问卷<strong>《<%=@survey.title%>》</strong>获得了一次“<a class="activate-link" href='<%=@lottery_url%>'><%=@lottery_title%></a>”抽奖机会，抽奖号为：</p>
+<p class='reason'><%=@lottery_code%></p>
+<br />
+<p>点击下面按钮查看抽奖号：</p>
+<p><a class='od-button' href="<%=@lottery_code_url%>">查看抽奖号</a></p>
+<br />
+<p>如果上述按钮无效，您也可点击下面链接进行查看：</p>
+<p><a class="activate-link" href="<%=@lottery_code_url%>"><%=@lottery_code_url%></a></p>
+<br />
+<p>感谢您的参与，点击<a class="activate-link" href='<%=@survey_list_url%>'>此处</a>可参加更多有奖调研。</p>
