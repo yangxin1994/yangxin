@@ -32,7 +32,7 @@ class UserMailer < ActionMailer::Base
 		@survey_list_url = "#{Rails.application.config.quillme_host}/surveys"
 		@lottery_url = "#{Rails.application.config.quillme_host}/lotteries/own"
 		@lottery_title = ""	#TODO: get @lottery_title
-		@lottery_code = lottery_code
+		@lottery_code = lottery_code # TODO: 此处渲染结果为 #<LotteryCode:0x007fecba626db8>，而不是抽奖号，需要修改
 		@lottery_code_url = callback
 		mail(:to => user.email, :subject => "恭喜您获得抽奖号")
 	end
