@@ -4,11 +4,8 @@ class LotteriesController < ApplicationController
 	before_filter :require_sign_in, :only => [:own, :draw]
 	def index
 		render_json do
-			auto_paginate Lottery.activity do 
-				Lottery.quillme.page(page).per(per_page).map do |e|
-					e[:photo_src] = e.photo.picture_url unless e.photo.nil?
-					e
-				end
+			auto_paginate Lottery.quillme do |lotteries|
+				lotteries.present_json("quillme")
 			end 
 		end
 	end
