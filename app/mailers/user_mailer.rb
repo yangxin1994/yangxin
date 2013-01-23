@@ -30,10 +30,11 @@ class UserMailer < ActionMailer::Base
 		@user = user
 		@survey = Survey.find_by_id(survey_id)
 		@lottery_code = LotteryCode.where(:_id => lottery_code_id).first
+		lottery = @lottery_code.try(:lottery)
 		@survey_list_url = "#{Rails.application.config.quillme_host}/surveys"
-		@lottery_url = "#{Rails.application.config.quillme_host}/lotteries/own"
-		@lottery_title = @lottery_code.try(:lottery).try(:title)
-		@lottery_code_url = callback
+		@lottery_url = "#{Rails.application.config.quillme_host}/lotteries/#{lottery.try(:_id)}"
+		@lottery_title = lottery.try(:title)
+		@lottery_code_url = "#{Rails.application.config.quillme_host}/lotteries/own"
 		mail(:to => user.email, :subject => "恭喜您获得抽奖号")
 	end
 
