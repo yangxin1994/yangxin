@@ -58,7 +58,7 @@ class Lottery
   end
 
   def present_quillme
-    present_attrs :title, :description, :status, :exchangeable, :point, :created_at
+    present_attrs :_id,:title, :description, :status, :exchangeable, :point, :created_at
     present_add :photo_src => self.photo.picture_url
     present_add :prizes => self.prizes.present_json('quillme')
   end
