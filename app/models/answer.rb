@@ -35,7 +35,8 @@ class Answer
 	field :is_preview, :type => Boolean, default: false
 
 	field :finished_at, :type => Integer
-
+	field :import_id, :type => String
+	
 	# audit time
 	field :audit_at, :type => Integer
 	# audit message content
