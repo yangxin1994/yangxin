@@ -26,13 +26,13 @@ class UserMailer < ActionMailer::Base
 		mail(:to => user.email, :subject => "重置密码")
 	end
 	
-	def lottery_code_email(user, survey_id, lottery_code, callback)
+	def lottery_code_email(user, survey_id, lottery_code_id, callback)
 		@user = user
 		@survey = Survey.find_by_id(survey_id)
+		@lottery_code = LotteryCode.where(:_id => lottery_code_id).first
 		@survey_list_url = "#{Rails.application.config.quillme_host}/surveys"
 		@lottery_url = "#{Rails.application.config.quillme_host}/lotteries/own"
-		@lottery_title = ""	#TODO: get @lottery_title
-		@lottery_code = lottery_code # TODO: 此处渲染结果为 #<LotteryCode:0x007fecba626db8>，而不是抽奖号，需要修改
+		@lottery_title = @lottery_code.try(:lottery).try(:title)
 		@lottery_code_url = callback
 		mail(:to => user.email, :subject => "恭喜您获得抽奖号")
 	end

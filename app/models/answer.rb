@@ -895,7 +895,7 @@ class Answer
 											params: { email_type: "lottery_code",
 													email: user.email,
 													survey_id: self.survey._id.to_s,
-													lottery_code: lc,
+													lottery_code_id: lc._id.to_s,
 													callback: callback } })
 				end
 			elsif self.reward == 2
