@@ -23,7 +23,7 @@ class JobsController < ApplicationController
 		when 'password'
 			UserMailer.password_email(user, params[:callback]).deliver
 		when 'lottery_code'
-			UserMailer.lottery_code_email(user, params[:survey_id], params[:lottery_code], params[:callback]).deliver
+			UserMailer.lottery_code_email(user, params[:survey_id], params[:lottery_code_id], params[:callback]).deliver
 		end
 		render_json_s(true) and return
 	end

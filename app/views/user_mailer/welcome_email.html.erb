@@ -1,21 +1,7 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
-  </head>
-  <body>
-		<p>
-			<%=@user.username%>
-		</p>
-		<br />
-		<p>
-			请点击以下链接激活
-		</p>
-		<p>
-			<a href="<%= @activate_link %>"><%= @activate_link %></a>
-		</p>
-		<p>感谢您注册</p>
-		<br />
-		<p>Oops!Data团队</p>
-  </body>
-</html>
+<p>请在 24 小时内点击下面按钮激活账户：</p>
+<p><a class='od-button' href="<%= @activate_link %>">激活账户</a></p>
+<br />
+<p>如果上述按钮无效，您也可点击下面链接激活账户：</p>
+<p><a class="activate-link" href="<%= @activate_link %>"><%= @activate_link %></a></p>
+<br />
+<p>感谢您注册优数调研。如果此邮件非您本人发起，请直接忽略。</p>

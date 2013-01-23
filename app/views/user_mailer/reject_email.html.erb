@@ -1,25 +1,10 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
-  </head>
-  <body>
-		<p>
-			<%=@user.username%>
-		</p>
-		<br />
-		<p>
-			您的调查问卷被拒绝发布，原因为：
-		<p>
-			<%=@message%>
-		</p>
-		<p>
-			您可以点击以下链接进行修改
-		</p>
-		<p>
-		</p>
-		<p>感谢您选择Oops!Data</p>
-		<br />
-		<p>Oops!Data团队</p>
-  </body>
-</html>
+<p>您的调查问卷<strong>《<%=@survey.title%>》</strong>的发布申请没有通过审核，原因如下：</p>
+<p class='reason'><%=@message%></p>
+<br />
+<p>点击下面按钮修改问卷：</p>
+<p><a class='od-button' href='<%=@url%>'>修改问卷</a></p>
+<br />
+<p>如果上述按钮无效，您也可点击下面链接进行修改：</p>
+<p><a class="activate-link" href="<%=@url%>"><%=@url%></a></p>
+<br />
+<p>感谢您选择优数调研。</p>
