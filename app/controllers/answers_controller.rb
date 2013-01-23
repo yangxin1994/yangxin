@@ -106,11 +106,14 @@ class AnswersController < ApplicationController
 		@answer.update_status	# check whether it is time out
 		if @answer.is_edit
 			questions = @answer.load_question(params[:question_id], params[:next_page].to_s == "true")
+			question_ids = questions.map { |e| e._id.to_s }
 			if @answer.is_finish
 				render_json_auto([@answer.status, @answer.reject_type, @answer.audit_message]) and return
 			else
+				answers = @answer.answer_content.merge(@answer.random_quality_control_answer_content)
+				answers = answers.select { |k, v| question_ids.include?(k) }
 				render_json_auto([questions,
-								@answer.answer_content.merge(@answer.random_quality_control_answer_content),
+								answers,
 								@answer.survey.all_questions_id.length + @answer.random_quality_control_answer_content.length,
 								@answer.index_of(questions),
 								questions.estimate_answer_time,
