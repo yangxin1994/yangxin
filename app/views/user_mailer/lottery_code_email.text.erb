@@ -1,7 +1,7 @@
 您由于回答问卷《<%=@survey.title%>》获得了一次“<%=@lottery_title%>”抽奖机会，抽奖号为：
 
 ----
-<%=@lottery_code%>
+<%=@lottery_code.try(:code)%>
 ----
 
 点击下面链接查看抽奖号：

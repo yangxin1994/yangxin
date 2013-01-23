@@ -29,7 +29,7 @@ class SortIssue < Issue
 		@items = []
 		@is_rand = false
 		@min = 2
-		@max = 4 
+		@max = -1 	# -1 means no limit
 
 		input_number = 4
 		1.upto(input_number) do |item_index|
