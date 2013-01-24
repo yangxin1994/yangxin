@@ -442,9 +442,9 @@ class ReportResult < Result
 		logger.info report_data.serialize
 		logger.info "AAAAAAAAAAAAAAAAAA"
 		# call the webservice to generate the report
-    File.open('public/uploads/export_report.txt', 'w') do |f|
-      f.write({"report_data" => report_data.serialize, "job_id" => task_id})
-    end
+    # File.open('public/uploads/export_report.txt', 'w') do |f|
+    #   f.write({"report_data" => report_data.serialize, "job_id" => task_id})
+    # end
 		retval = send_data "/ExportReport.aspx" do
 			{"report_data" => report_data.serialize, "job_id" => task_id}
 		end

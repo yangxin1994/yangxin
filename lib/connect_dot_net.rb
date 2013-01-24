@@ -2,12 +2,19 @@
 module ConnectDotNet
   def send_data(post_to)
     url = URI.parse(Rails.application.config.dotnet_web_service_uri)
+    logger.info "!!!!!!!!!!!!!!!!"
+    logger.info url.inspect
     begin
       Net::HTTP.start(url.host, url.port) do |http| 
         r = Net::HTTP::Post.new(post_to)
+        logger.info "@@@@@@@@@@@@@@@@"
         r.set_form_data(yield)
+        logger.info "$$$$$$$$$$$$$$$$"
         http.read_timeout = 120
+        logger.info "$$$$$$$$$$$$$$$$"
         retval = http.request(r)
+        logger.info "$$$$$$$$$$$$$$$$"
+        logger.info retval.inspect
         return retval
       end
     rescue Errno::ECONNREFUSED
