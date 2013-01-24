@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 #encoding: utf-8
 
 # coding: utf-8
@@ -334,8 +336,13 @@ class TimeBlankQuestionIo < QuestionIo
     #   @retval << "#{t}#{e}"
     # end
     clear_retval
-    pa=/[^\u0030-\u0040]/
-    @retval = row["#{header_prefix}"].gsub(pa, ',').split(",").collect{|s| s.to_i}
+    # pa=/[^\u0030-\u0040]/
+    # @retval = row["#{header_prefix}"].gsub(pa, ',').split(",").collect{|s| s.to_i}
+    if row["#{header_prefix}"]
+      @retval = row["#{header_prefix}"].to_i
+    else
+      @retval = nil
+    end
     return { "#{origin_id}" => @retval}
   end
 end
