@@ -21,5 +21,19 @@ module Mongoid
 			end
 			retval
 		end
+
+		# def method_miss(name, *params)
+		# 	name = name.to_s
+		# 	str_rxp = /\b\w+(?=_attrs\b)/
+		# 	ret_attrs = {}
+		# 	if((name =~ str_rxp) == 0)
+		# 		instance_obj = self.send(name.slice(str_rxp))
+		# 		params.each do |a|
+		# 			ret_attrs[a] => instance_obj.send(a)
+		# 		end
+		# 		return ret_attrs
+		# 	end
+		# 	super(name, *params)
+		# end
 	end
 end

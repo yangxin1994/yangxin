@@ -346,7 +346,7 @@ class Survey
       end
     end
     # return false if batch.empty? 
-    Answer.collection.insert(batch)
+    Answer.collection.insert(batch) unless batch.empty?
     self.refresh_quota_stats
     self.save
     {
