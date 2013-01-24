@@ -795,6 +795,10 @@ class Answer
 		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
 		if self.is_preview || (!self.survey.has_prize && (!self.survey.spreadable || self.survey.spread_point == 0))
 			self.set_finish
+		elsif !self.survey.answer_need_review
+			self.set_finish
+			self.assign_volunteer_reward
+			self.assign_introducer_reward
 		else
 			self.set_under_review
 		end
@@ -852,15 +856,13 @@ class Answer
 	end
 
 	# the answer auditor reviews this answer, the review result can be 1 (pass review) or 2 (not pass)
-	def review(review_result, answer_auditor, message_content, callback)
+	def review(review_result, answer_auditor, message_content)
 		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 2
+
 		old_status = self.status
 		user = self.user
-		self.interviewer_task.try(:update_quota)
-		self.update_quota(old_status)
-		self.auditor = answer_auditor
-		self.audit_at = Time.now.to_i
 
+		# execute the review operation
 		if review_result
 			self.set_finish
 			message_content ||= "你的此问卷[#{self.survey.title}]的答案通过审核."
@@ -869,43 +871,47 @@ class Answer
 			self.reject_type = 2
 			message_content ||= "你的此问卷[#{self.survey.title}]的答案未通过审核."
 		end
-		answer_auditor.create_message(
-				"审核问卷答案消息",
-				message_content,
-				[] << self.user._id.to_s
-			) if !user.nil?
+		answer_auditor.create_message("审核问卷答案消息", message_content, [user._id.to_s]) if !user.nil?
 		self.audit_message = message_content
+		self.auditor = answer_auditor
+		self.audit_at = Time.now.to_i
 		self.save
-		# no need to give points if the answer does not pass the review
-		return if self.is_reject
 
-		if [1,2].include?(self.reward) && !user.nil?
+		# update quota of the survey and the interviewer task if there is any
+		self.interviewer_task.try(:update_quota)
+		self.update_quota(old_status)
+		self.assign_volunteer_reward and self.assign_introducer_reward if self.is_finish
+		return true
+	end
+
+	def assign_volunteer_reward
+		if [1,2].include?(self.reward) && !self.user.nil?
 			# assign this user points, or a lottery code
 			# usage post_reward_to(user, :type => 2, :point => 100)
 			# 1 for lottery & 2 for point
-
 			# maybe lottery is nil
 			if self.reward == 1
 				if self.lottery
-					lc = self.lottery.give_lottery_code_to(user)
-					self.survey.post_reward_to(user, :type => self.reward, :lottery_code => lc, :cause => 2)
+					lc = self.lottery.give_lottery_code_to(self.user)
+					self.survey.post_reward_to(self.user, :type => self.reward, :lottery_code => lc, :cause => 2)
 					# send an email to the user
 					TaskClient.create_task({ task_type: "email",
 											host: "localhost",
 											port: Rails.application.config.service_port,
 											params: { email_type: "lottery_code",
-													email: user.email,
+													email: self.user.email,
 													survey_id: self.survey._id.to_s,
-													lottery_code_id: lc._id.to_s,
-													callback: callback } })
+													lottery_code_id: lc._id.to_s } })
 				end
 			elsif self.reward == 2
 				self.survey.post_reward_to(user, :type => self.reward, :point => self.point, :cause => 2)
 			end
 		end
+	end
+
+	def assign_introducer_reward
 		# give the introducer points
 		introducer = User.find_by_id(self.introducer_id)
-
 		if !introducer.nil?
 			# update the survey spread
 			SurveySpread.inc(introducer, self.survey)
@@ -915,6 +921,5 @@ class Answer
 				introducer.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.point_to_introducer}个积分奖励。", [introducer._id.to_s])
 			end
 		end
-		return true
 	end
 end

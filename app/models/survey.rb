@@ -70,12 +70,17 @@ class Survey
   field :deadline, :type => Integer
   field :is_star, :type => Boolean, :default => false
   field :point, :type => Integer, :default => 0
-  field :spread_point, :type => Integer, :default => 0
+  # whether this survey can be introduced to another person
   field :spreadable, :type => Boolean, :default => false
+  # reward for introducing others
+  field :spread_point, :type => Integer, :default => 0
   # reward: 0: nothing, 1: prize, 2: point 
   field :reward, :type => Integer, :default => 0
-
   field :show_in_community, :type => Boolean, default: false
+  # whether this survey can be promoted by emails or other ways
+  field :promotable, :type => Boolean, :default => false
+  # whether the answers of the survey need to be reviewed
+  field :answer_need_review, :type => Boolean, :default => true
 
   belongs_to :user
   has_and_belongs_to_many :tags do
