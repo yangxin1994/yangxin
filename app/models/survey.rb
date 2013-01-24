@@ -287,12 +287,17 @@ class Survey
   def answer_import(csv_str)
     q = []
     batch = []
+    import_error = []
+    imported_answer = nil
+    updated_count = 0
     all_questions.each do |a|
       q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
     end
     CSV.parse(csv_str.join, :headers => true) do |row|
       return false if row.headers != self.csv_header(:with => "import_id")
-      return false if Answer.where(:import_id => row["import_id"]).length > 0
+      if Answer.where(:import_id => row["import_id"]).length > 0
+        imported_answer = Answer.where(:import_id => row["import_id"].to_s).first
+      end
       row = row.to_hash
       line_answer = {}
       quota_qustions_count = 0 # quota_qustions.size
@@ -303,33 +308,44 @@ class Survey
           line_answer.merge! e.answer_import(row, header_prefix)
         end
       rescue Exception => test
-        binding.pry
-        test
+        import_error << row
       else
-        batch << {:answer_content => line_answer,
-                  :answer_id => row["import_id"],
-                  :channel => -1, 
-                  :survey_id => self._id, 
-                  :status => 3,
-                  :random_quality_control_answer_content => {},
-                  :random_quality_control_locations => {},
-                  :logic_control_result => {},
-                  :username => "",
-                  :password => "",
-                  :region => -1,
-                  :ip_address => "",
-                  :audit_message => "",
-                  :is_scanned => false,
-                  :is_preview => false,
-                  :finished_at => Time.now.to_i,
-                  :created_at => Time.now,
-                  :updated_at => Time.now}
+        if imported_answer
+          imported_answer.answer_content = line_answer
+          imported_answer.save
+          updated_count += 1
+          imported_answer = nil
+        else
+          batch << {:answer_content => line_answer,
+                    :import_id => row["import_id"],
+                    :channel => -1, 
+                    :survey_id => self._id, 
+                    :status => 3,
+                    :random_quality_control_answer_content => {},
+                    :random_quality_control_locations => {},
+                    :logic_control_result => {},
+                    :username => "",
+                    :password => "",
+                    :region => -1,
+                    :ip_address => "",
+                    :audit_message => "",
+                    :is_scanned => false,
+                    :is_preview => false,
+                    :finished_at => Time.now.to_i,
+                    :created_at => Time.now,
+                    :updated_at => Time.now}
+        end
       end
     end
-    return false if batch.empty? 
+    # return false if batch.empty? 
     Answer.collection.insert(batch)
     self.refresh_quota_stats
-    return self.save
+    self.save
+    {
+      :insert_count => batch.length,
+      :updated_count => updated_count,
+      :error => import_error
+    }
   end
 
 	#--
