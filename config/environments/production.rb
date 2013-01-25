@@ -76,8 +76,8 @@ OopsData::Application.configure do
   config.service_port = '8002'
 
   # donet web service
-  # config.dotnet_web_service_uri = 'http://19.oopsdata.com'
-  config.dotnet_web_service_uri = 'http://192.168.1.116:80'
+  config.dotnet_web_service_uri = 'http://19.oopsdata.com'
+  # config.dotnet_web_service_uri = 'http://192.168.1.116:80'
 
 	# configuration for roadie
 	config.action_mailer.default_url_options = {:host => 'res.oopsdata.com'}

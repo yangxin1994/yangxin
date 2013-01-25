@@ -30,7 +30,7 @@ class Result
 
 	def self.get_file_uri(task_id)
 		result = self.find_by_task_id(task_id)
-		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
+		return ErrorEnum::RESULT_NOT_EXIST if result.nil?
 		return result.file_uri
 	end
 
