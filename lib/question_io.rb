@@ -350,7 +350,7 @@ end
 class AddressBlankQuestionIo < QuestionIo
   def answer_content(v)
     clear_retval
-    @retval << "地址:#{v["address"]},详细:#{v["detail"]},邮编:#{v["postcode"]}"
+    @retval << "地址:#{Address.find_province_city_town_by_code(v["address"])},详细:#{v["detail"]},邮编:#{v["postcode"]}"
     # @retval << v.join(';')
   end
   def answer_import(row, header_prefix)
@@ -712,12 +712,12 @@ class ScaleQuestionIo < QuestionIo
       @retval << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_NUMERIC,
                   "spss_label" => issue["items"][i]["content"]["text"]}
-      if issue["show_unknown"]
-        @retval << {"spss_name" => header_prefix + "_c#{i + 1}" + UNKNOW,
-                    "spss_type" => SPSS_STRING,
-                    "spss_label" => SPSS_UNKOWN
-                    }  
-      end
+      # if issue["show_unknown"]
+      #   @retval << {"spss_name" => header_prefix + "_c#{i + 1}" + UNKNOW,
+      #               "spss_type" => SPSS_STRING,
+      #               "spss_label" => SPSS_UNKOWN
+      #               }  
+      # end
     end
 
     return @retval

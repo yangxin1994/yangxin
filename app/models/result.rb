@@ -30,30 +30,8 @@ class Result
 
 	def self.get_file_uri(task_id)
 		result = self.find_by_task_id(task_id)
-		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
+		return ErrorEnum::RESULT_NOT_EXIST if result.nil?
 		return result.file_uri
-	end
-
-	def self.find_result_by_task_id(task_id)
-		result = Result.where(:task_id => task_id)[0]
-		return ErrorEnum::RESULT_NOT_EXIST if result.nil?
-		result = result.ref_result_id.nil? ? result : Result.find_by_result_id(result.ref_result_id)
-		return ErrorEnum::RESULT_NOT_EXIST if result.nil?
-
-		# based on the result type, return results
-		case result._type
-		when "AnalysisResult"
-			return {"result_key" => result.result_key,
-					"answer_info" => result.answer_info,
-					"region_result" => result.region_result,
-					"time_result" => result.time_result,
-					"duration_mean" => result.duration_mean,
-					"channel_result" => result.channel_result,
-					"answers_result" => result.answers_result}
-		when "ReportResult"
-			# TODO 返回结果
-			return {"file_name" => "FinalReport#{result.task_id}.docx"}
-		end
 	end
 
 	def self.job_progress(task_id)

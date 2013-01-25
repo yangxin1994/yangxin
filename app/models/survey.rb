@@ -118,6 +118,7 @@ class Survey
   scope :stars, where(:status.gt => -1, :is_star => true)
 
   scope :in_community, lambda { where(:show_in_community => true) }
+  scope :is_promotable, lambda { where(:promotable => true) }
 
   before_create :set_new
 
@@ -1293,7 +1294,7 @@ class Survey
 	# return all the surveys that are published and are active
 	# it is needed to send emails and invite volunteers for these surveys
 	def self.get_published_active_surveys
-		return surveys = Survey.normal.in_community.where(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
+		return surveys = Survey.normal.in_community.is_promotable.where(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
 	end
 
 	def check_password_for_preview(username, password, current_user)

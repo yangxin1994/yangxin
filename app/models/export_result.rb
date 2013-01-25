@@ -19,32 +19,34 @@ class ExportResult < Result
 	end
 
 	def generate_excel(survey, answers, result_key)
-		retval = send_data('/ToExcel.aspx') do 
-			{'excel_data' => {"csv_header" => survey.csv_header,
+		excel_data_json = {"csv_header" => survey.csv_header,
 												"answer_contents" => survey.formated_answers(answers, result_key),
 												"header_name" => survey.csv_header,
-												"result_key" => result_key}.to_json,
-				'job_id' => task_id.to_s}
+												"result_key" => result_key}.to_json
+		retval = send_data('/ToExcel.aspx') do 
+			{'excel_data' => excel_data_json, 'job_id' => task_id.to_s}
 		end
-		logger.info "3333333333333333333333333"
-		logger.info retval.inspect
-		logger.info "4444444444444444444444444"
-		logger.info retval.body.inspect
-		logger.info "5555555555555555555555555"
+		return retval if retval.to_s.start_with?('error')
+		return ErrorEnum::DOTNET_HTTP_ERROR if retval.code != "200"
+		return ErrorEnum::DOTNET_INTERNAL_ERROR if retval.body.start_with?('error:')
 		self.file_uri = retval.body
 		self.status = 1
-		self.save
+		return self.save
 	end
 
 	def generate_spss(survey, answers, result_key)
+		spss_data_json = {"spss_header" => survey.spss_header,
+											 "answer_contents" => survey.formated_answers(answers, result_key),
+											 "header_name" => survey.csv_header,
+											 "result_key" => result_key}.to_json
 		retval = send_data('/ToSpss.aspx') do
-			{'spss_data' => {"spss_header" => spss_header,
-											 "answer_contents" => formated_answers(answers, result_key),
-											 "header_name" => csv_header,
-											 "result_key" => result_key}.to_json}
+			{'spss_data' => spss_data_json, 'job_id' => task_id.to_s}
 		end
+		return retval if retval.to_s.start_with?('error')
+		return ErrorEnum::DOTNET_HTTP_ERROR if retval.code != "200"
+		return ErrorEnum::DOTNET_INTERNAL_ERROR if retval.body.start_with?('error:')
 		self.file_uri = retval.body
 		self.status = 1
-		self.save
+		return self.save
 	end
 end
