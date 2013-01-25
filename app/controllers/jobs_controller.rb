@@ -68,8 +68,6 @@ class JobsController < ApplicationController
 			answers, tot_answer_number, screened_answer_number = *survey.get_answers(params[:filter_index].to_i,
 																					params[:include_screened_answer].to_s == "true",
 																					params[:task_id])
-			logger.info "AAAAAAAAAAAAAAAAAAAAAA"
-			logger.info tot_answer_number
 			# generate the result_key
 			result_key = AnalysisResult.generate_result_key(answers, tot_answer_number, screened_answer_number)
 			existing_analysis_result = AnalysisResult.find_by_result_key(result_key)
@@ -161,12 +159,9 @@ class JobsController < ApplicationController
 													:ref_result_id => existing_export_result._id)
 				render_json_auto(true) and return
 			end
-			TaskClient.set_progress(params["task_id"], "aaa", 0)
-			render_json false do
-				survey.to_spss_job(answers, result_key)
-				# 连接.net进行转换
-			end
-
+			survey.export_results << export_result
+			retval = export_result.generate_spss(survey, answers, result_key)
+			render_json_auto(retval) and return
 		when "to_excel"
 			survey = Survey.find_by_id(params[:survey_id])
 			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
@@ -190,11 +185,9 @@ class JobsController < ApplicationController
 													:ref_result_id => existing_export_result._id)
 				render_json_auto(true) and return
 			end
-			TaskClient.set_progress(params["task_id"], "to_excel", 60)
-			render_json false do
-				survey.to_excel_job(answers, result_key)
-				# 连接.net进行转换
-			end
+			survey.export_results << export_result
+			retval = export_result.generate_excel(survey, answers, result_key)
+			render_json_auto(retval) and return
 		end
 	end
 

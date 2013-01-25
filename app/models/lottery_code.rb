@@ -20,6 +20,8 @@ class LotteryCode
   belongs_to :lottery
   belongs_to :reward_log
 
+  delegate :title, :status, :photo_url , :exchangeable, :description, :to => :lottery, :prefix => true
+
   default_scope order_by(:created_at, :desc)
 
   scope :for_draw, where(:status => 0)
@@ -43,11 +45,11 @@ class LotteryCode
       present_add(:prize_name => self.prize.name) 
     end
     present_add :for_lottery =>
-      { :title => self.lottery.title,
-        :status => self.lottery.status,
-        :photo_src => self.lottery.photo_url,
-        :exchangeable => self.lottery.exchangeable,
-        :description => self.lottery.description
+      { :title => self.lottery_title,
+        :status => self.lottery_status,
+        :photo_src => self.lottery_photo_url,
+        :exchangeable => self.lottery_exchangeable,
+        :description => self.lottery_description
       }
   end
   def present_quillme_draws

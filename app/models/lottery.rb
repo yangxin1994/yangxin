@@ -48,6 +48,25 @@ class Lottery
     end
   end
 
+  def present_prizes(name)
+    if self.prizes
+      self.prizes.present_json(name)
+    else
+      []
+    end
+  end
+
+  def present_quillme
+    present_attrs :_id,:title, :description, :status, :exchangeable, :point, :created_at
+    present_add :photo_src => self.photo_url
+    present_add :prizes => self.present_prizes('quillme')
+  end
+
+  def delete
+  	is_deleted = true
+  	self.save
+  end
+
   def exchange(user)
     return false if !exchangeable
     user.reward_logs.create(:type => 2,
@@ -55,17 +74,6 @@ class Lottery
       :cause => 6)
     self.give_lottery_code_to user, 0
     user.save
-  end
-
-  def present_quillme
-    present_attrs :_id,:title, :description, :status, :exchangeable, :point, :created_at
-    present_add :photo_src => self.photo_url
-    present_add :prizes => self.prizes.present_json('quillme')
-  end
-
-  def delete
-  	is_deleted = true
-  	self.save
   end
 
   def add_prezi(attributes = nil, options = {}, &block)

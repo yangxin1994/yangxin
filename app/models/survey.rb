@@ -70,12 +70,17 @@ class Survey
   field :deadline, :type => Integer
   field :is_star, :type => Boolean, :default => false
   field :point, :type => Integer, :default => 0
-  field :spread_point, :type => Integer, :default => 0
+  # whether this survey can be introduced to another person
   field :spreadable, :type => Boolean, :default => false
+  # reward for introducing others
+  field :spread_point, :type => Integer, :default => 0
   # reward: 0: nothing, 1: prize, 2: point 
   field :reward, :type => Integer, :default => 0
-
   field :show_in_community, :type => Boolean, default: false
+  # whether this survey can be promoted by emails or other ways
+  field :promotable, :type => Boolean, :default => false
+  # whether the answers of the survey need to be reviewed
+  field :answer_need_review, :type => Boolean, :default => true
 
   belongs_to :user
   has_and_belongs_to_many :tags do
@@ -113,6 +118,7 @@ class Survey
   scope :stars, where(:status.gt => -1, :is_star => true)
 
   scope :in_community, lambda { where(:show_in_community => true) }
+  scope :is_promotable, lambda { where(:promotable => true) }
 
   before_create :set_new
 
@@ -225,18 +231,11 @@ class Survey
                                 survey_id: self._id.to_s,
                                 data_list_key: data_list_key} })
   end
-
-  def ensure_upload_folder
-    unless(File.exist?("public/uploads"))
-      Dir.mkdir("public/uploads")
-    end
-  end
-
+=begin
   def to_excel_job(answers, result_key)
     logger.info csv_header
     logger.info "==========="
     logger.info "==========="
-    ensure_upload_folder
     File.open('public/uploads/excel_data.txt', 'w') do |f|
       f.write({'excel_data' => {"csv_header" => csv_header,
                         "answer_contents" => formated_answers(answers, result_key),
@@ -254,7 +253,6 @@ class Survey
   end
 
   def to_spss_job(answers, result_key)
-  	ensure_upload_folder
     File.open('public/uploads/spss_data.txt', 'w') do |f|
       f.write({'spss_data' => {"spss_header" => spss_header,
                                "answer_contents" => formated_answers(answers, result_key),
@@ -267,8 +265,9 @@ class Survey
                        "header_name" => csv_header,
                        "result_key" => result_key}.to_json}
     end
-    # binding.pry
+    binding.pry
   end
+=end
 
   def formated_answers(answers, result_key)
     answer_c = []
@@ -346,7 +345,7 @@ class Survey
       end
     end
     # return false if batch.empty? 
-    Answer.collection.insert(batch)
+    Answer.collection.insert(batch) unless batch.empty?
     self.refresh_quota_stats
     self.save
     {
@@ -1295,7 +1294,7 @@ class Survey
 	# return all the surveys that are published and are active
 	# it is needed to send emails and invite volunteers for these surveys
 	def self.get_published_active_surveys
-		return surveys = Survey.normal.in_community.where(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
+		return surveys = Survey.normal.in_community.is_promotable.where(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
 	end
 
 	def check_password_for_preview(username, password, current_user)
