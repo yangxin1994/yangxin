@@ -38,7 +38,6 @@ class UserMailer < ActionMailer::Base
 		mail(:to => user.email, :subject => "恭喜您获得抽奖号")
 	end
 
-	# TODO
 	def survey_email(user_id, survey_id_ary)
 		@user = User.find_by_id(user_id)
 		@surveys = survey_id_ary.map { |e| Survey.find_by_id(e) }
@@ -47,6 +46,14 @@ class UserMailer < ActionMailer::Base
 			email_history.user = @user
 			email_history.survey = s
 		end
+		#TODO: 获取问卷的奖励信息，并修改 survey_email.html.erb、survey_email.text.erb 内容
+		@presents = []	
+		#TODO: presents 数组内容为显示在 quillme 的：一个抽奖、一个实物礼品、一个红包礼品，
+		# 元素结构为： {:title => "", :url => "", :img_url => ""}，
+		# url 里需要用到的 host 为：Rails.application.config.quillme_host
+		# 抽奖地址为："#{Rails.application.config.quillme_host}/lotteries/lottery_id"
+		# 礼品地址为："#{Rails.application.config.quillme_host}/gifts/gift_id"
+		# img_url为："#{Rails.application.config.quillme_host}/uploads/images/filename"
 		mail(:to => user.email, :subject => "邀请您参加问卷调查")
 	end
 	
