@@ -1563,8 +1563,9 @@ class Survey
 		return task_id
 	end
 
-	def report(filter_index, include_screened_answer, report_mockup_id, report_style, report_type)
-		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
+	# def report(filter_index, include_screened_answer, report_mockup_id, report_style, report_type)
+  def report(data_list_key, report_mockup_id, report_style, report_type)
+		# return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
 		# if report_mockup_id is nil, export all single questions analysis with default charts
 		if !report_mockup_id.blank?
 			report_mockup = self.report_mockups.find_by_id(report_mockup_id)
@@ -1576,8 +1577,9 @@ class Survey
 											port: Rails.application.config.service_port,
 											params: { result_type: "report",
 														survey_id: self._id,
-														filter_index: filter_index,
-														include_screened_answer: include_screened_answer,
+														# filter_index: filter_index,
+														# include_screened_answer: include_screened_answer,
+                            data_list_key: data_list_key,
 														report_mockup_id: report_mockup_id,
 														report_style: report_style,
 														report_type: report_type } })
