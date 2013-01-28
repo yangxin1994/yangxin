@@ -231,64 +231,22 @@ class Survey
                                 survey_id: self._id.to_s,
                                 data_list_key: data_list_key} })
   end
-=begin
-  def to_excel_job(answers, result_key)
-    logger.info csv_header
-    logger.info "==========="
-    logger.info "==========="
-    File.open('public/uploads/excel_data.txt', 'w') do |f|
-      f.write({'excel_data' => {"csv_header" => csv_header,
-                        "answer_contents" => formated_answers(answers, result_key),
-                        "header_name" => csv_header,
-                        "result_key" => result_key}}.to_json)
-    end
-    a = (send_data('/ToExcel.aspx') do 
-      {'excel_data' => {"csv_header" => csv_header,
-                        "answer_contents" => formated_answers(answers, result_key),
-                        "header_name" => csv_header,
-                        "result_key" => result_key}.to_json}
-    end)
-
-    p a
-  end
-
-  def to_spss_job(answers, result_key)
-    File.open('public/uploads/spss_data.txt', 'w') do |f|
-      f.write({'spss_data' => {"spss_header" => spss_header,
-                               "answer_contents" => formated_answers(answers, result_key),
-                               "header_name" => csv_header,
-                               "result_key" => result_key}}.to_json)
-    end
-    a = send_data('/ToSpss.aspx') do
-      {'spss_data' => {"spss_header" => spss_header,
-                       "answer_contents" => formated_answers(answers, result_key),
-                       "header_name" => csv_header,
-                       "result_key" => result_key}.to_json}
-    end
-    binding.pry
-  end
-=end
 
   def formated_answers(answers, result_key)
     answer_c = []
     q = self.all_questions_type
     p "========= 准备完毕 ========="
     # binding.pry
+    answer_length = answers.length
     answers.each_with_index do |answer, index|
       line_answer = []
-
       all_questions_id.each_with_index do |question, index|
         line_answer += q[index].answer_content(answer.answer_content[question])
       end
-
       answer_c << line_answer
+      TaskClient.set_progress(task_id, "data_conversion_progress", (index+1).to_f / answer_length)
     end
     answer_c
-    # send_data({'spss_data' => {"spss_header" => spss_header,
-    #                            "answer_contents" => answer_c,
-    #                            # "header_name" => csv_header,
-    #                            "header_name" => csv_header,
-    #                            "result_key" => result_key}})
   end
 
   def answer_import(csv_str)
