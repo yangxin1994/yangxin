@@ -97,7 +97,7 @@ class Admin::SurveysController < Admin::ApplicationController
 	def set_answer_need_review
 		@survey = Survey.normal.find_by_id(params[:id])
 		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-		@survey.promotable = params[:answer_need_review].to_s == "true"
+		@survey.answer_need_review = params[:answer_need_review].to_s == "true"
 		render_json_auto(@survey.save) and return
 	end
 

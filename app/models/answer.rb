@@ -48,6 +48,8 @@ class Answer
 	field :point, :type => Integer, :default => 0
 	field :reward, :type => Integer, :default => 0
 
+	field :attachment, :type => Hash, :default => {}
+
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
 

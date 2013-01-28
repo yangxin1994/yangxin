@@ -93,10 +93,11 @@ class JobsController < ApplicationController
 		when "report"
 			survey = Survey.find_by_id(params[:survey_id])
 			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
-			# find answers set
-			answers, tot_answer_number, screened_answer_number = *survey.get_answers(params[:filter_index].to_i,
-																					params[:include_screened_answer].to_s == "true",
-																					params[:task_id])
+			analysis_result = Result.find_by_result_key(params[:data_list_key])
+			render_json_e(ErrorEnum::RESULT_NOT_EXIST) and return if analysis_result.nil?
+			answer_info = analysis_result.answer_info || []
+			answers = answer_info.map { |e| Answer.find_by_id e["_id"] }
+			
 			if params[:report_mockup_id].blank?
 				report_mockup = ReportMockup.default_report_mockup(survey)
 			else
