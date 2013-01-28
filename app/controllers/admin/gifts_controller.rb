@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Admin::GiftsController < Admin::ApplicationController
 
 
@@ -15,8 +17,12 @@ class Admin::GiftsController < Admin::ApplicationController
   def create
     unless create_photo(:gift)
       render_json false do
-        ErrorEnum::PHOTP_CANNOT_BE_BLANK
-      end   
+        {
+          :error_code => ErrorEnum::PHOTP_CANNOT_BE_BLANK
+          :error_message => "请选择图片"
+        }
+      end
+      return
     end 
     @gift = Gift.create(params[:gift])
     # if params[:gift][:type] == 3

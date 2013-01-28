@@ -165,6 +165,7 @@ module ErrorEnum
 	GIFT_SURPLUS_NOT_A_NUNBER = "error_21041"
 	GIFT_NOT_ENOUGH = "error_21033"
 	GIFT_POINT_COULD_NOT_BE_BLANK = "error_21020"
+	GIFT_POINT_NOT_A_NUNBER = "error_21021"
 	# Messages Error Code (11)
 	MESSAGE_NOT_FOUND = "error_21101"
 	INVALID_MESSAGE_ID = "error_21102"
