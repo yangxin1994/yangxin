@@ -93,9 +93,9 @@ class JobsController < ApplicationController
 		when "report"
 			survey = Survey.find_by_id(params[:survey_id])
 			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
-			analysis_result = Result.find_by_result_key(params[:data_list_key])
-			render_json_e(ErrorEnum::RESULT_NOT_EXIST) and return if analysis_result.nil?
-			answer_info = analysis_result.answer_info || []
+			data_list = AnalysisResult.get_data_list(params[:analysis_task_id])
+			render_json_e(ErrorEnum::RESULT_NOT_EXIST) and return if data_list == ErrorEnum::RESULT_NOT_EXIST
+			answer_info = data_list[:answer_info] || []
 			answers = answer_info.map { |e| Answer.find_by_id e["_id"] }
 			
 			if params[:report_mockup_id].blank?
@@ -141,10 +141,9 @@ class JobsController < ApplicationController
 		when "to_spss"
 			survey = Survey.find_by_id(params[:survey_id])
 			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
-			# from the analysis result, get the ids of the answers to be exported
-			analysis_result = Result.find_by_result_key(params[:data_list_key])
-			render_json_e(ErrorEnum::RESULT_NOT_EXIST) and return if analysis_result.nil?
-			answer_info = analysis_result.answer_info || []
+			data_list = AnalysisResult.get_data_list(params[:analysis_task_id])
+			render_json_e(ErrorEnum::RESULT_NOT_EXIST) and return if data_list == ErrorEnum::RESULT_NOT_EXIST
+			answer_info = data_list[:answer_info] || []
 			answers = answer_info.map { |e| Answer.find_by_id e["_id"] }
 			# generate result key
 			result_key = ExportResult.generate_spss_result_key(survey.last_update_time,
@@ -166,11 +165,9 @@ class JobsController < ApplicationController
 		when "to_excel"
 			survey = Survey.find_by_id(params[:survey_id])
 			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
-			# from the analysis result, get the ids of the answers to be exported
-			analysis_result = Result.find_by_result_key(params[:data_list_key])
-			render_json_e(ErrorEnum::RESULT_NOT_EXIST) and return if analysis_result.nil?
-			answer_info = analysis_result.answer_info || []
-			answers_id = answer_info.map { |e| e["_id"] }
+			data_list = AnalysisResult.get_data_list(params[:analysis_task_id])
+			render_json_e(ErrorEnum::RESULT_NOT_EXIST) and return if data_list == ErrorEnum::RESULT_NOT_EXIST
+			answer_info = data_list[:answer_info] || []
 			answers = answer_info.map { |e| Answer.find_by_id e["_id"] }
 			# generate result key
 			result_key = ExportResult.generate_excel_result_key(survey.last_update_time,

@@ -1,6 +1,7 @@
 require 'error_enum'
 require 'array'
 require 'tool'
+require 'connect_dot_net'
 class Result
 	include Mongoid::Document
 	include Mongoid::Timestamps
@@ -63,8 +64,10 @@ class Result
 			if s1 < 1
 				s = s1 * 0.6
 			else
-				r = ConnectDotNet::get_data("/GetProgress") { task_id }
-				s2 = r["status"]
+				r = ConnectDotNet.get_data("/GetProgress.aspx?job_id=#{task_id}") do
+					{}
+				end
+				s2 = r.body.to_f
 				s = s1 * 0.6 + s2 * 0.4
 			end
 		when "to_excel"
@@ -72,8 +75,10 @@ class Result
 			if s1 < 1
 				s = s1 * 0.6
 			else
-				r = ConnectDotNet::get_data("/GetProgress") { task_id }
-				s2 = r["status"]
+				r = ConnectDotNet.get_data("/GetProgress.aspx?job_id=#{task_id}") do
+					{}
+				end
+				s2 = r.body.to_f
 				s = s1 * 0.6 + s2 * 0.4
 			end
 		when "report"
@@ -81,8 +86,10 @@ class Result
 			if s1 < 1
 				s = s1 * 0.3
 			else
-				r = ConnectDotNet::get_data("/GetProgress") { task_id }
-				s2 = r["status"]
+				r = ConnectDotNet.get_data("/GetProgress.aspx?job_id=#{task_id}") do
+					{}
+				end
+				s2 = r.body.to_f
 				s = s1 * 0.3 + s2 * 0.7
 			end
 		end

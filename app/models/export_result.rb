@@ -20,10 +20,10 @@ class ExportResult < Result
 
 	def generate_excel(survey, answers, result_key)
 		excel_data_json = {"csv_header" => survey.csv_header,
-												"answer_contents" => survey.formated_answers(answers, result_key),
+												"answer_contents" => survey.formated_answers(answers, result_key, task_id.to_s),
 												"header_name" => survey.csv_header,
 												"result_key" => result_key}.to_json
-		retval = send_data('/ToExcel.aspx') do 
+		retval = ConnectDotNet.send_data('/ToExcel.aspx') do 
 			{'excel_data' => excel_data_json, 'job_id' => task_id.to_s}
 		end
 		return retval if retval.to_s.start_with?('error')
@@ -36,10 +36,10 @@ class ExportResult < Result
 
 	def generate_spss(survey, answers, result_key)
 		spss_data_json = {"spss_header" => survey.spss_header,
-											 "answer_contents" => survey.formated_answers(answers, result_key),
+											 "answer_contents" => survey.formated_answers(answers, result_key, task_id.to_s),
 											 "header_name" => survey.csv_header,
 											 "result_key" => result_key}.to_json
-		retval = send_data('/ToSpss.aspx') do
+		retval = ConnectDotNet.send_data('/ToSpss.aspx') do
 			{'spss_data' => spss_data_json, 'job_id' => task_id.to_s}
 		end
 		return retval if retval.to_s.start_with?('error')
