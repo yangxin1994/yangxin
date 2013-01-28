@@ -234,16 +234,22 @@ class Survey
 
   def formated_answers(answers, result_key)
     answer_c = []
+    import_error = []
     q = self.all_questions_type
     p "========= 准备完毕 ========="
     # binding.pry
     answer_length = answers.length
     answers.each_with_index do |answer, index|
       line_answer = []
-      all_questions_id.each_with_index do |question, index|
-        line_answer += q[index].answer_content(answer.answer_content[question])
+      begin
+        all_questions_id.each_with_index do |question, index|
+          line_answer += q[index].answer_content(answer.answer_content[question])
+        end
+      rescue Exception => test
+        import_error << test
+      else
+        answer_c << line_answer
       end
-      answer_c << line_answer
       TaskClient.set_progress(task_id, "data_conversion_progress", (index+1).to_f / answer_length)
     end
     answer_c
