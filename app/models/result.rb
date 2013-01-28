@@ -30,30 +30,8 @@ class Result
 
 	def self.get_file_uri(task_id)
 		result = self.find_by_task_id(task_id)
-		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
+		return ErrorEnum::RESULT_NOT_EXIST if result.nil?
 		return result.file_uri
-	end
-
-	def self.find_result_by_task_id(task_id)
-		result = Result.where(:task_id => task_id)[0]
-		return ErrorEnum::RESULT_NOT_EXIST if result.nil?
-		result = result.ref_result_id.nil? ? result : Result.find_by_result_id(result.ref_result_id)
-		return ErrorEnum::RESULT_NOT_EXIST if result.nil?
-
-		# based on the result type, return results
-		case result._type
-		when "AnalysisResult"
-			return {"result_key" => result.result_key,
-					"answer_info" => result.answer_info,
-					"region_result" => result.region_result,
-					"time_result" => result.time_result,
-					"duration_mean" => result.duration_mean,
-					"channel_result" => result.channel_result,
-					"answers_result" => result.answers_result}
-		when "ReportResult"
-			# TODO 返回结果
-			return {"file_name" => "FinalReport#{result.task_id}.docx"}
-		end
 	end
 
 	def self.job_progress(task_id)
@@ -66,7 +44,7 @@ class Result
 		# the task has not been finished, check the progress
 		task = TaskClient.get_task(task_id)
 
-		return task if task == ErrorEnum::TASK_NOT_EXIST
+		return ErrorEnum::TASK_NOT_EXIST if task == ErrorEnum::TASK_NOT_EXIST
 		progress = task["progress"]
 
 		# calculate the status
@@ -81,35 +59,31 @@ class Result
 			s3 = progress["analyze_answer_progress"].to_f
 			s = s1 * 0.3 + s2 * 0.3 + s3 * 0.4
 		when "to_spss"
-			s1 = progress["export_answers_progress"].to_f
+			s1 = progress["data_conversion_progress"].to_f
 			if s1 < 1
 				s = s1 * 0.6
 			else
-				r = ConnectDotNet::get_data("/get_progress") { task_id }
+				r = ConnectDotNet::get_data("/GetProgress") { task_id }
 				s2 = r["status"]
 				s = s1 * 0.6 + s2 * 0.4
 			end
 		when "to_excel"
-			s1 = progress["export_answers_progress"]
+			s1 = progress["data_conversion_progress"]
 			if s1 < 1
 				s = s1 * 0.6
 			else
-				r = ConnectDotNet::get_data("/get_progress") { task_id }
+				r = ConnectDotNet::get_data("/GetProgress") { task_id }
 				s2 = r["status"]
 				s = s1 * 0.6 + s2 * 0.4
 			end
 		when "report"
-			s1 = progress["find_answers_progress"].to_f
+			s1 = progress["data_conversion_progress"].to_f
 			if s1 < 1
 				s = s1 * 0.3
 			else
-				s2 = progress["data_conversion_progress"].to_f
-#				if s2 < 2
-					s = s1 * 0.3 + s2 * 0.2
-#				else
-#					s3 = ConnectDotNet::get_data("/get_progress") { task_id }
-#					s = s1 * 0.3 + s2 * 0.2 + s3 * 0.5
-#				end
+				r = ConnectDotNet::get_data("/GetProgress") { task_id }
+				s2 = r["status"]
+				s = s1 * 0.3 + s2 * 0.7
 			end
 		end
 		# the job has not been finished, the progress cannot be greater than 0.99

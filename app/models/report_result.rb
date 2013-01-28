@@ -442,26 +442,15 @@ class ReportResult < Result
 		logger.info report_data.serialize
 		logger.info "AAAAAAAAAAAAAAAAAA"
 		# call the webservice to generate the report
-    File.open('public/uploads/export_report.txt', 'w') do |f|
-      f.write({"report_data" => report_data.serialize, "job_id" => task_id})
-    end
 		retval = send_data "/ExportReport.aspx" do
 			{"report_data" => report_data.serialize, "job_id" => task_id}
 		end
-		if retval.to_s.start_with?("error")
-			self.error_code = retval
-			self.status = -1
-		else
-			if retval.code == "200"
-				self.file_uri = retval.body
-				self.status = 1
-			else
-				self.error_code = ErrorEnum::DOTNET_HTTP_ERROR
-				self.error_message = retval.code
-				self.status = -1
-			end
-		end
-		self.save
+		return retval if retval.to_s.start_with?('error')
+		return ErrorEnum::DOTNET_HTTP_ERROR if retval.code != "200"
+		return ErrorEnum::DOTNET_INTERNAL_ERROR if retval.body.start_with?('error:')
+		self.file_uri = retval.body
+		self.status = 1
+		return self.save
 	end
 
 	# cross analysis and description generation

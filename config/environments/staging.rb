@@ -67,8 +67,19 @@ OopsData::Application.configure do
 		:domain					=> "",
 		:user_name			=> "",
 		:password				=> ""
-}
+	}
 
   config.task_web_service_uri = 'localhost:9000'
   config.service_port = '8001'
+
+  # donet web service
+  config.dotnet_web_service_uri = 'http://19.oopsdata.com'
+  # config.dotnet_web_service_uri = 'http://192.168.1.116:80'
+
+	# configuration for roadie
+	config.action_mailer.default_url_options = {:host => 'res.oopsdata.com'}
+
+	# configuration for quill and quillme
+	config.quill_host = 'http://www.oopsdata.com'
+	config.quillme_host = 'http://www.oopsdata.cn'
 end

@@ -53,7 +53,7 @@ class TaskClient
 		if result && result["success"]
 			return result["value"]
 		else
-			return ErrorEnum::PROGRESS_NOT_FOUND
+			return ErrorEnum::TASK_NOT_EXIST
 		end
 	end
 end

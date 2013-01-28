@@ -87,6 +87,20 @@ class Admin::SurveysController < Admin::ApplicationController
 		render_json_auto(retval) and return
 	end
 
+	def set_promotable
+		@survey = Survey.normal.find_by_id(params[:id])
+		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
+		@survey.promotable = params[:promotable].to_s == "true"
+		render_json_auto(@survey.save) and return
+	end
+
+	def set_answer_need_review
+		@survey = Survey.normal.find_by_id(params[:id])
+		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
+		@survey.answer_need_review = params[:answer_need_review].to_s == "true"
+		render_json_auto(@survey.save) and return
+	end
+
 	def destroy
 		@survey = Survey.find_by_id(params[:id])
 		# new_survey which is not edited should be remove from db

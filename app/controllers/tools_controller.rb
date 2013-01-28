@@ -22,7 +22,7 @@ class ToolsController < ApplicationController
 	end
 
 	def find_address_text_by_code
-		text = Address.find_text_by_code(params[:code])
+		text = Address.find_province_city_town_by_code(params[:code])
 		respond_to do |format|
 			format.json	{ render_json_s(text) and return }
 		end

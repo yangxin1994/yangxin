@@ -70,12 +70,17 @@ class Survey
   field :deadline, :type => Integer
   field :is_star, :type => Boolean, :default => false
   field :point, :type => Integer, :default => 0
-  field :spread_point, :type => Integer, :default => 0
+  # whether this survey can be introduced to another person
   field :spreadable, :type => Boolean, :default => false
+  # reward for introducing others
+  field :spread_point, :type => Integer, :default => 0
   # reward: 0: nothing, 1: prize, 2: point 
   field :reward, :type => Integer, :default => 0
-
   field :show_in_community, :type => Boolean, default: false
+  # whether this survey can be promoted by emails or other ways
+  field :promotable, :type => Boolean, :default => false
+  # whether the answers of the survey need to be reviewed
+  field :answer_need_review, :type => Boolean, :default => true
 
   belongs_to :user
   has_and_belongs_to_many :tags do
@@ -113,6 +118,7 @@ class Survey
   scope :stars, where(:status.gt => -1, :is_star => true)
 
   scope :in_community, lambda { where(:show_in_community => true) }
+  scope :is_promotable, lambda { where(:promotable => true) }
 
   before_create :set_new
 
@@ -226,70 +232,21 @@ class Survey
                                 data_list_key: data_list_key} })
   end
 
-  def ensure_upload_folder
-    unless(File.exist?("public/uploads"))
-      Dir.mkdir("public/uploads")
-    end
-  end
-
-  def to_excel_job(answers, result_key)
-    logger.info csv_header
-    logger.info "==========="
-    logger.info "==========="
-    ensure_upload_folder
-    File.open('public/uploads/excel_data.txt', 'w') do |f|
-      f.write({'excel_data' => {"csv_header" => csv_header,
-                        "answer_contents" => formated_answers(answers, result_key),
-                        "header_name" => csv_header,
-                        "result_key" => result_key}}.to_json)
-    end
-    a = (send_data('/ToExcel.aspx') do 
-      {'excel_data' => {"csv_header" => csv_header,
-                        "answer_contents" => formated_answers(answers, result_key),
-                        "header_name" => csv_header,
-                        "result_key" => result_key}.to_json}
-    end)
-
-    p a
-  end
-
-  def to_spss_job(answers, result_key)
-  	ensure_upload_folder
-    File.open('public/uploads/spss_data.txt', 'w') do |f|
-      f.write({'spss_data' => {"spss_header" => spss_header,
-                               "answer_contents" => formated_answers(answers, result_key),
-                               "header_name" => csv_header,
-                               "result_key" => result_key}}.to_json)
-    end
-    a = send_data('/ToSpss.aspx') do
-      {'spss_data' => {"spss_header" => spss_header,
-                       "answer_contents" => formated_answers(answers, result_key),
-                       "header_name" => csv_header,
-                       "result_key" => result_key}.to_json}
-    end
-    # binding.pry
-  end
-
   def formated_answers(answers, result_key)
     answer_c = []
     q = self.all_questions_type
     p "========= 准备完毕 ========="
     # binding.pry
+    answer_length = answers.length
     answers.each_with_index do |answer, index|
       line_answer = []
-
       all_questions_id.each_with_index do |question, index|
         line_answer += q[index].answer_content(answer.answer_content[question])
       end
-
       answer_c << line_answer
+      TaskClient.set_progress(task_id, "data_conversion_progress", (index+1).to_f / answer_length)
     end
     answer_c
-    # send_data({'spss_data' => {"spss_header" => spss_header,
-    #                            "answer_contents" => answer_c,
-    #                            # "header_name" => csv_header,
-    #                            "header_name" => csv_header,
-    #                            "result_key" => result_key}})
   end
 
   def answer_import(csv_str)
@@ -1295,7 +1252,7 @@ class Survey
 	# return all the surveys that are published and are active
 	# it is needed to send emails and invite volunteers for these surveys
 	def self.get_published_active_surveys
-		return surveys = Survey.normal.in_community.where(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
+		return surveys = Survey.normal.in_community.is_promotable.where(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
 	end
 
 	def check_password_for_preview(username, password, current_user)
@@ -1564,8 +1521,9 @@ class Survey
 		return task_id
 	end
 
-	def report(filter_index, include_screened_answer, report_mockup_id, report_style, report_type)
-		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
+	# def report(filter_index, include_screened_answer, report_mockup_id, report_style, report_type)
+  def report(data_list_key, report_mockup_id, report_style, report_type)
+		# return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
 		# if report_mockup_id is nil, export all single questions analysis with default charts
 		if !report_mockup_id.blank?
 			report_mockup = self.report_mockups.find_by_id(report_mockup_id)
@@ -1577,8 +1535,9 @@ class Survey
 											port: Rails.application.config.service_port,
 											params: { result_type: "report",
 														survey_id: self._id,
-														filter_index: filter_index,
-														include_screened_answer: include_screened_answer,
+														# filter_index: filter_index,
+														# include_screened_answer: include_screened_answer,
+                            data_list_key: data_list_key,
 														report_mockup_id: report_mockup_id,
 														report_style: report_style,
 														report_type: report_type } })

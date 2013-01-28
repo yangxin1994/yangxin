@@ -38,10 +38,12 @@ p,a,span,div,strong{margin:0;padding:0;}
 	border-top:none;
 	background: #fff;
 	line-height: 2em;
+	word-wrap: break-word;/*自动换行*/
+	word-break:break-all;/*强制英文单词断行*/
 }
-.content img{
+/*.content img{
 	margin-left:15px;
-}
+}*/
 .content a{color: #407abd;}
 .content a:hover{}
 .content .activate-link{
@@ -169,6 +171,60 @@ a.od-button {
   -moz-box-shadow: none;
   box-shadow: none;
   color:#999;
+}
+.reason {
+	border: 1px dotted #999;
+	border-left: none;
+	border-right: none;
+	padding: 15px 0;
+	font-weight: bold;
+	font-size: 15px;
+	margin-top: 10px;
+}
+.surveys {
+	border: 1px dotted #999;
+	border-left: none;
+	border-right: none;
+	padding: 15px 0;
+	margin-top: 10px;
+}
+.survey {
+	color: #666;
+}
+.s-link {
+	color: #407abd;
+	font-weight: bold;
+}
+.reward {
+	font-weight: bold;
+	margin: 0 5px;
+	color: #000;
+}
+.presents {
+}
+.present {
+	float: left;
+	margin: 10px;
+	width: 150px;
+	padding: 5px;
+	border: 1px solid #ccc;
+	color: #407abd;
+	text-decoration: none;
+	cursor: pointer;
+}
+.present-img {
+	display: block;
+	width: 150px;
+	border: none;
+	margin: 0px;
+	padding: 0;
+}
+.present-title {
+	display: block;
+	text-align: center;
+	padding: 5px 0 0 0;
+	width: 150px;
+	overflow: hidden;
 }
 	</style>
 </head>

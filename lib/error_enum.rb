@@ -102,6 +102,7 @@ module ErrorEnum
 	DOTNET_TIMEOUT = 'error_210'
 	DOTNET_SERVICE_REFUSED = 'error_211'
 	DOTNET_HTTP_ERROR = 'error_212'
+	DOTNET_INTERNAL_ERROR = 'error_213'
 
 	# lcm add for answer review
 	REWARD_ERROR = 'error_300'
