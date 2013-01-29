@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-#encoding: utf-8
+# encoding: utf-8
 
 # coding: utf-8
 class QuestionIo
@@ -45,7 +45,7 @@ class QuestionIo
   end
 
   def answer_content(v)
-    return {} if v.nil?
+    return @retval = [] if v.nil?
     clear_retval
     @retval << v
   end
@@ -132,7 +132,7 @@ class ChoiceQuestionIo < QuestionIo
   end
 
   def answer_content(v)
-    return {} if v.nil?
+    return @retval = [] if v.nil?
     clear_retval
     if issue["max_choice"].to_i > 1
       issue["items"].each do |item|
@@ -178,7 +178,6 @@ class ChoiceQuestionIo < QuestionIo
       self.issue["items"][index]["id"]
     end
   end
-
 end
 
 class MatrixChoiceQuestionIo < QuestionIo
@@ -225,7 +224,7 @@ class MatrixChoiceQuestionIo < QuestionIo
   end
 
   def answer_content(v)
-    return {} if v.nil?
+    return @retval = [] if v.nil?
     clear_retval
     if issue["max_choice"].to_i > 1
       issue["rows"].each_index do |r|
@@ -300,7 +299,7 @@ class TimeBlankQuestionIo < QuestionIo
   @time_unit = ["年", "月", "周", "天", "时", "分", "秒"]
   # @time_unit = ["Y", "M", "W", "D", "H", "M", "S"]
   def answer_content(v)
-    return {} if v.nil?
+    return @retval = [] if v.nil?
     clear_retval
     # @time_unit.each_with_index do |e, i|
     #   @retval << "#{v[i]}#{e}" if v[i] != 0
@@ -349,6 +348,7 @@ end
 
 class AddressBlankQuestionIo < QuestionIo
   def answer_content(v)
+    return @retval = [] if v.nil?
     clear_retval
     @retval << "地址:#{Address.find_province_city_town_by_code(v["address"])},详细:#{v["detail"]},邮编:#{v["postcode"]}"
     # @retval << v.join(';')
@@ -377,7 +377,7 @@ class BlankQuestionIo < QuestionIo
   end
 
   def answer_content(v)
-    return {} if v.nil?
+    return @retval = [] if v.nil?
     clear_retval
     issue["items"].each_index do |i|
       q = Question.new(:content => issue["items"][i]["content"],
@@ -424,7 +424,7 @@ class MatrixBlankQuestionIo < QuestionIo
   end
 
   def answer_content(v)
-    return {} if v.nil?
+    return @retval = [] if v.nil?
     clear_retval
     issue["row_id"].each_index do |r|
       issue["items"].each_index do |i|
@@ -485,7 +485,7 @@ class ConstSumQuestionIo < QuestionIo
     return @retval
   end
   def answer_content(v)
-    return {} if v.nil?
+    return @retval = [] if v.nil?
     clear_retval
     v.each do |k, c|
       unless k == "text_input" || k == issue["other_item"]["input_id"]
@@ -542,7 +542,7 @@ class SortQuestionIo < QuestionIo
     return @retval
   end
   def answer_content(v)
-    return {} if v.nil?
+    return @retval = [] if v.nil?
     clear_retval
     issue["items"].each_with_index do |item, index|
       rev = v["sort_result"].index(item["id"].to_s)
@@ -615,7 +615,7 @@ class RankQuestionIo < QuestionIo
     return @retval
   end
   def answer_content(v)
-    return {} if v.nil?
+    return @retval = [] if v.nil?
     clear_retval
     issue["items"].each do |e|
       @retval << v[e["input_id"]]
@@ -641,12 +641,12 @@ class RankQuestionIo < QuestionIo
 end
 
 class ParagraphIo < QuestionIo
-  def csv_header
+  def csv_header(header_prefix)
     @retval = []
   end
 
-  def answer_content
-    @retval = {}
+  def answer_content(v)
+    @retval = []
   end
 end
 
@@ -670,7 +670,7 @@ class TableQuestionIo < QuestionIo
     return @retval   
   end
   def answer_content(v)
-    return {} if v.nil?
+    return @retval = [] if v.nil?
     clear_retval
     issue["items"].each_index do |i|
       q = Question.new(:content => issue["items"][i]["content"],
@@ -724,7 +724,7 @@ class ScaleQuestionIo < QuestionIo
   end
 
   def answer_content(v)
-    return {} if v.nil?
+    return @retval = [] if v.nil?
     clear_retval
     issue["items"].each do |e|
       @retval << v[e["id"].to_s]

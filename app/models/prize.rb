@@ -46,7 +46,7 @@ class Prize < BasicGift
   def add_ctrl_rule(ctrl_surplus, ctrl_time, weight)
     unless ctrl_surplus.blank? || ctrl_time.blank? || weight.blank?
       return false if ctrl_surplus.to_i > self.surplus
-      return false if ctrl_time.to_i == 0 || weight.to_i == 0
+      return false if ctrl_time.to_i <= 0 || weight.to_i == 0
       self.is_in_ctrl = true
       self.ctrl_surplus = ctrl_surplus.to_i
       self.ctrl_quantity = ctrl_surplus.to_i
