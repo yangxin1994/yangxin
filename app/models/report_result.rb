@@ -39,7 +39,11 @@ class ReportResult < Result
 				next if question_index.nil?
 				report_data.push_component(1, "text" => "第#{question_index+1}题分析")
 				question = BasicQuestion.find_by_id(question_id)
-				cur_question_answer = answers_transform[question_id].delete_if { |e| e.blank? }
+				if answers_transform[question_id].nil?
+					cur_question_answer = []
+				else
+					cur_question_answer = answers_transform[question_id].delete_if { |e| e.blank? }
+				end
 				case question.question_type
 				when QuestionTypeEnum::CHOICE_QUESTION
 					analysis_result = analyze_choice(question.issue, cur_question_answer, items_com: items_com)
