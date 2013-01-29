@@ -224,6 +224,7 @@ class Survey
 
 	def formated_answers(answers, result_key, task_id)
 		answer_c = []
+    import_error = []
 		q = self.all_questions_type
 		p "========= 准备完毕 ========="
 		# binding.pry
@@ -255,7 +256,7 @@ class Survey
 		end
 		CSV.parse(csv_str.join, :headers => true) do |row|
 			return false if row.headers != self.csv_header(:with => "import_id")
-			if Answer.where(:import_id => row["import_id"]).length > 0
+			if self.answers.where(:import_id => row["import_id"]).length > 0
 				imported_answer = Answer.where(:import_id => row["import_id"].to_s).first
 			end
 			row = row.to_hash
@@ -301,7 +302,7 @@ class Survey
 		Answer.collection.insert(batch) unless batch.empty?
 		self.refresh_quota_stats
 		self.save
-		{
+		aaa={
 			:insert_count => batch.length,
 			:updated_count => updated_count,
 			:error => import_error

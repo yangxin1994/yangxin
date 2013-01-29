@@ -86,6 +86,11 @@ class QuestionIo
       self.issue["items"][index]["id"]
     end
   end
+
+  def only_num?(item)
+    (item =~ /^[0-9]+$/) == 0
+  end
+
 end
 
 class ChoiceQuestionIo < QuestionIo
@@ -160,7 +165,7 @@ class ChoiceQuestionIo < QuestionIo
         @retval["selection"] << get_item_id(i + 1) if row["#{header_prefix}_c#{i+1}"] == "1"
       end
     else
-      @retval["selection"] << get_item_id(row[header_prefix]) if !row[header_prefix].nil?
+      @retval["selection"] << get_item_id(row[header_prefix])
     end
     if issue["other_item"]["has_other_item"]
       @retval["text_input"] = row["#{header_prefix}_input"]
@@ -169,12 +174,13 @@ class ChoiceQuestionIo < QuestionIo
   end
 
   def get_item_id(index)
-    return nil if index.nil? 
+    return nil if index.nil?
+    raise "Not a Number" unless only_num?(index)
     index = index.to_i - 1
     if self.issue["other_item"]["has_other_item"] && self.issue["items"].count == index
       return self.issue["other_item"]["id"]
     else
-      return nil if self.issue["items"].count < index
+      raise "Wrond Answer" if (0..self.issue["items"].count).include? index
       self.issue["items"][index]["id"]
     end
   end
@@ -648,6 +654,14 @@ class ParagraphIo < QuestionIo
   def answer_content(v)
     @retval = []
   end
+
+  def answer_import(row, header_prefix)
+    @retval = []
+  end
+
+  def spss_header(header_prefix)
+    @retval = []
+  end
 end
 
 class FileQuestionIo < QuestionIo
@@ -736,7 +750,11 @@ class ScaleQuestionIo < QuestionIo
   def answer_import(row, header_prefix)
     @retval = {}
     issue["items"].each_with_index do |item, index|
-      @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : row["#{header_prefix}_c#{index + 1}"].to_i)
+      if only_num?(row["#{header_prefix}_c#{index + 1}"])
+        @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : row["#{header_prefix}_c#{index + 1}"].to_i)
+      else
+        raise "Not a Number"
+      end
     end
     return { "#{origin_id}" => @retval} 
   end
