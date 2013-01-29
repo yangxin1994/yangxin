@@ -19,22 +19,20 @@ class ResultsController < ApplicationController
 	end
 
 	def to_spss
-		task_id = @survey.to_spss(params[:data_list_key])
-		render_json task_id
+		# task_id = @survey.to_spss(params[:data_list_key])
+		task_id = @survey.to_spss(params[:analysis_task_id])
+		render_json task_id and return
 	end
 
 	def to_excel
-		task_id = @survey.to_spss(params[:data_list_key])
-		task_id = @survey.to_excel(params[:data_list_key])
-		render_json task_id
+		# task_id = @survey.to_excel(params[:data_list_key])
+		task_id = @survey.to_excel(params[:analysis_task_id])
+		render_json task_id and return
 	end
 
 	def report
-		# task_id = @survey.report(params[:filter_index].to_i, params[:include_screened_answer], params[:report_mockup_id], params[:report_style], params[:report_type])
-		task_id = @survey.report(params[:data_list_key], params[:report_mockup_id], params[:report_style], params[:report_type])
-		respond_to do |format|
-			format.json	{ render_json_auto(task_id) and return }
-		end
+		task_id = @survey.report(params[:analysis_task_id], params[:report_mockup_id], params[:report_style], params[:report_type])
+		render_json_auto(task_id) and return
 	end
 
 	def job_progress

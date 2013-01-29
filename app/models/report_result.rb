@@ -3,10 +3,10 @@ require 'error_enum'
 require 'array'
 require 'tool'
 require 'digest/md5'
+require 'connect_dot_net'
 class ReportResult < Result
 	include Mongoid::Document
 	include Mongoid::Timestamps
-	include ConnectDotNet
 
 	field :file_uri, :type => String
 
@@ -442,7 +442,7 @@ class ReportResult < Result
 		logger.info report_data.serialize
 		logger.info "AAAAAAAAAAAAAAAAAA"
 		# call the webservice to generate the report
-		retval = send_data "/ExportReport.aspx" do
+		retval = ConnectDotNet.send_data "/ExportReport.aspx" do
 			{"report_data" => report_data.serialize, "job_id" => task_id}
 		end
 		return retval if retval.to_s.start_with?('error')

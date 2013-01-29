@@ -18,7 +18,7 @@ class Admin::GiftsController < Admin::ApplicationController
     unless create_photo(:gift)
       render_json false do
         {
-          :error_code => ErrorEnum::PHOTP_CANNOT_BE_BLANK
+          :error_code => ErrorEnum::PHOTP_CANNOT_BE_BLANK,
           :error_message => "请选择图片"
         }
       end

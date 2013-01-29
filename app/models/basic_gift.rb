@@ -28,6 +28,11 @@ class BasicGift
 
 	before_create :set_surplus
 	before_save :make_status , :set_quantity
+	after_save :save_photo
+
+	def save_photo
+		self.photo.save if self.photo
+	end
 
   def make_status
     self.status = 0 if self.surplus > 0 && self.status == -1 

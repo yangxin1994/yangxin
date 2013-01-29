@@ -1,6 +1,6 @@
 #encoding: utf-8
 module ConnectDotNet
-  def send_data(post_to)
+  def self.send_data(post_to)
     url = URI.parse(Rails.application.config.dotnet_web_service_uri)
     begin
       Net::HTTP.start(url.host, url.port) do |http| 
@@ -20,7 +20,7 @@ module ConnectDotNet
     end
   end
   
-  def get_data(get_from)
+  def self.get_data(get_from)
     url = URI.parse(Rails.application.config.dotnet_web_service_uri)
     begin
       Net::HTTP.start(url.host, url.port) do |http| 
