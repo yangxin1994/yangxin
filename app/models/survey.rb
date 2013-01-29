@@ -224,7 +224,7 @@ class Survey
 
 	def formated_answers(answers, result_key, task_id)
 		answer_c = []
-    import_error = []
+    formated_error = []
 		q = self.all_questions_type
 		p "========= 准备完毕 ========="
 		# binding.pry
@@ -236,7 +236,7 @@ class Survey
           line_answer += q[index].answer_content(answer.answer_content[question])
         end
       rescue Exception => test
-        import_error << test
+        formated_error << test
       else
         answer_c << line_answer
       end
