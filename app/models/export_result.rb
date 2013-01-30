@@ -42,6 +42,7 @@ class ExportResult < Result
 		retval = ConnectDotNet.send_data('/ToSpss.aspx') do
 			{'spss_data' => spss_data_json, 'job_id' => task_id.to_s}
 		end
+		binding.pry
 		return retval if retval.to_s.start_with?('error')
 		return ErrorEnum::DOTNET_HTTP_ERROR if retval.code != "200"
 		return ErrorEnum::DOTNET_INTERNAL_ERROR if retval.body.start_with?('error:')

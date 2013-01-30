@@ -4,7 +4,7 @@
 
 # coding: utf-8
 class QuestionIo
-  attr_accessor :content, :issue, :question_type, :origin_id
+  attr_accessor :content, :issue, :question_type, :origin_id, :is_required
 
   def initialize(q)
     @retval = []
@@ -12,6 +12,7 @@ class QuestionIo
     self.issue = q.issue
     self.question_type = q.question_type
     self.origin_id = q.id
+    self.is_required = q.is_required
   end
   INPUT = "_input"
   VALUE = "_value"
@@ -51,6 +52,8 @@ class QuestionIo
   end
   
   def answer_import(row, header_prefix)
+    blank? row["#{header_prefix}"]
+    clear_retval
     @retval = row["#{header_prefix}"]
     return { "#{origin_id}" => @retval}
   end
@@ -61,6 +64,10 @@ class QuestionIo
 
   def ret
     @retval
+  end
+
+  def blank?(answer)
+    raise "什么都不填是不可以的!" if is_required && answer.blank?
   end
 
   def get_item(id)
@@ -87,8 +94,27 @@ class QuestionIo
     end
   end
 
-  def only_num?(item)
-    (item =~ /^[0-9]+$/) == 0
+  def only_num?(item, options ={})
+    binding.pry
+    if item.nil?
+      return true
+    else
+      if options[:dot]
+        rep = /^[-0-9.]+$/
+      elsif options[:negative]
+        rep = /^[-0-9]+$/
+      else
+        rep = /^[0-9]+$/
+      end
+      if ((item =~ rep) == 0)
+        if options[:range]
+          return (options[:range].include? item)
+        end
+        return true
+      else
+        return false
+      end
+    end
   end
 
 end
@@ -161,13 +187,18 @@ class ChoiceQuestionIo < QuestionIo
                "selection" => []}
     if issue["max_choice"].to_i > 1
       # TODO 验证最多选项和最少选项
+
       issue["items"].each_index do |i|
+        blank? row["#{header_prefix}_c#{i+1}"]
         @retval["selection"] << get_item_id(i + 1) if row["#{header_prefix}_c#{i+1}"] == "1"
       end
     else
+      blank? row["#{header_prefix}"]
       @retval["selection"] << get_item_id(row[header_prefix])
     end
     if issue["other_item"]["has_other_item"]
+      # TODO 检查一下
+
       @retval["text_input"] = row["#{header_prefix}_input"]
     end
     return { "#{origin_id}" => @retval}
@@ -175,7 +206,7 @@ class ChoiceQuestionIo < QuestionIo
 
   def get_item_id(index)
     return nil if index.nil?
-    raise "Not a Number" unless only_num?(index)
+    raise "您填写的不像是个时间!" unless only_num?(index)
     index = index.to_i - 1
     if self.issue["other_item"]["has_other_item"] && self.issue["items"].count == index
       return self.issue["other_item"]["id"]
@@ -256,6 +287,7 @@ class MatrixChoiceQuestionIo < QuestionIo
       issue["rows"].each_index do |r|
         row_choices = []
         issue["items"].each_index do |c|
+          blank? row["#{header_prefix}_r#{r + 1}_c#{c + 1}"]
           row_choices << get_item_id(c + 1) if row["#{header_prefix}_r#{r + 1}_c#{c + 1}"] == "1"
         end
         @retval << row_choices
@@ -263,6 +295,7 @@ class MatrixChoiceQuestionIo < QuestionIo
     else
       issue["rows"].each_index do |r|
         # 单选为啥也要用数组? 不解
+        blank? row["#{header_prefix}_r#{r + 1}"]
         @retval << [get_item_id(row["#{header_prefix}_r#{r + 1}"])]
       end
     end
@@ -278,7 +311,17 @@ class MatrixChoiceQuestionIo < QuestionIo
 end
 
 class TextBlankQuestionIo < QuestionIo
-
+  def answer_import(row, header_prefix)
+    blank? row["#{header_prefix}"]
+    if issue["max_length"] > 0 && row["#{header_prefix}"].length > issue["max_length"]
+      raise "您输入的文本有些太长了哦,重新检查一下吧!"
+    elsif issue["max_length"] > 0 && row["#{header_prefix}"].length < issue["max_length"]
+      raise "您输入的文本长度未免太短了吧,重新检查一下吧!"
+    else
+      @retval = row["#{header_prefix}"]
+    end
+    return { "#{origin_id}" => @retval}
+  end
 end
 
 class NumberBlankQuestionIo < QuestionIo
@@ -287,10 +330,29 @@ class NumberBlankQuestionIo < QuestionIo
                 "spss_type" => SPSS_NUMERIC,
                 "spss_label" => content["text"]}    
   end
+  def answer_import(row, header_prefix)
+    blank? row["#{header_prefix}"]
+    clear_retval
+    raise "这个看起来不像是一个数字啊?" unless only_num?(row["#{header_prefix}"],dot: true)
+    # todo 精度控制
+    if row["#{header_prefix}"] < issue["min_value"]
+      raise "这个数字是不是太小了啊"
+    elsif row["#{header_prefix}"] > issue["max_value"]
+      raise "这个数字是不是太大了啊"
+    end
+    @retval = row["#{header_prefix}"]
+    return { "#{origin_id}" => @retval}
+  end
 end
 
 class EmailBlankQuesionIo < QuestionIo
-
+  def answer_import(row, header_prefix)
+    blank? row["#{header_prefix}"]
+    clear_retval
+    raise "这个看起来不像是一个邮箱啊?重来一个试试?" unless( (row["#{header_prefix}"] =~ /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/) == 0)
+    @retval = row["#{header_prefix}"]
+    return { "#{origin_id}" => @retval}
+  end
 end
 
 class UrlBlankQuestionIo < QuestionIo
@@ -298,7 +360,32 @@ class UrlBlankQuestionIo < QuestionIo
 end
 
 class PhoneBlankQuestionIo < QuestionIo
-
+  def answer_import(row, header_prefix)
+    blank? row["#{header_prefix}"]
+    clear_retval
+    case issue["phone_type"]
+    when 1
+      if row["#{header_prefix}"] =~ /^((\d{11})|(\d{3}-\d{8})|(\d{4}-\d{7})|(\d{3}-\d{4}-\d{4}))$/
+        @retval = row["#{header_prefix}"] 
+      else
+        raise "您填写的这个...不太像是电话号码啊?"
+      end
+    when 2
+      if row["#{header_prefix}"] =~ /^0?(13\d|15[012356789]|18[0236789]|14[57])-?\d{3}-?\d{1}-?\d{4}$/
+        @retval = row["#{header_prefix}"] 
+      else
+        raise "您填写的这个...不太像是手机号码啊?"
+      end
+    when 3
+      if row["#{header_prefix}"] =~ /^0?(13\d|15[012356789]|18[0236789]|14[57])-?\d{3}-?\d{1}-?\d{4}$/ ||
+        row["#{header_prefix}"] =~ /^((\d{11})|(\d{3}-\d{8})|(\d{4}-\d{7})|(\d{3}-\d{4}-\d{4}))$/
+        @retval = row["#{header_prefix}"]
+      else
+        raise "您填写的这个...不太像是手机或者电话号码啊?"
+      end
+    end
+    return { "#{origin_id}" => @retval}
+  end
 end
 
 class TimeBlankQuestionIo < QuestionIo
@@ -311,6 +398,7 @@ class TimeBlankQuestionIo < QuestionIo
     #   @retval << "#{v[i]}#{e}" if v[i] != 0
     # end
     # return @retval
+    # raise "这个看起来不太像是时间吧?" unless only_num?(v)
     time = Time.at(v/1000)
     case issue["format"]
     when 0
@@ -336,19 +424,49 @@ class TimeBlankQuestionIo < QuestionIo
   end
 
   def answer_import(row, header_prefix)
+    blank? row["#{header_prefix}"]
+    clear_retval
     # @time_unit.each_with_index do |e, i|
     #   t = row["#{header_prefix}"][2 * i + 1] == e ? row["#{header_prefix}"][2 * i] : 0
     #   @retval << "#{t}#{e}"
     # end
-    clear_retval
+    time = row["#{header_prefix}"].split(";").map do |t|
+      raise "您填写的这个不太像是一个时间啊?" unless only_num?(t)
+      t
+    end
+    time_now = Time.now
+    case issue["format"]
+    when 0
+      @retval = Time.new(time[0]).to_i
+    when 1
+      @retval = Time.new(time[0], time[1]).to_i
+    when 2
+      @retval = Time.new(time[0], time[1], time[2]).to_i
+    when 3
+      @retval = Time.new(time[0], time[1], time[2], time[3]).to_i
+    when 4
+      @retval = Time.new(time_now.year, time[0], time[0]).to_i
+    when 5
+      @retval = Time.new(time_now.year, time_now.month, time_now.day, time[0], time[1]).to_i
+    when 6
+      @retval = Time.new(time_now.year, time_now.month, time_now.day,time[0], time[1], time[2].to_i).to_i
+    end
+
+    # if time < issue["min_time"]
+    #   raise "这个时间是不是太早了点?"
+    # elsif time > issue["max_time"]
+    #   raise "这个时间是不是有些晚了?"
+    # end
+
+
     # pa=/[^\u0030-\u0040]/
     # @retval = row["#{header_prefix}"].gsub(pa, ',').split(",").collect{|s| s.to_i}
-    if row["#{header_prefix}"]
-      @retval = row["#{header_prefix}"].to_i
-    else
-      @retval = nil
-    end
-    return { "#{origin_id}" => @retval}
+    # if row["#{header_prefix}"]
+    #   @retval = row["#{header_prefix}"].to_i
+    # else
+    #   @retval = nil
+    # end
+    return { "#{origin_id}" => @retval * 1000}
   end
 end
 
@@ -360,6 +478,7 @@ class AddressBlankQuestionIo < QuestionIo
     # @retval << v.join(';')
   end
   def answer_import(row, header_prefix)
+    blank? row["#{header_prefix}"]
     @retval = row["#{header_prefix}"].split(";")
     return { "#{origin_id}" => @retval}
   end
@@ -396,6 +515,7 @@ class BlankQuestionIo < QuestionIo
   end
 
   def answer_import(row, header_prefix)
+    blank? row["#{header_prefix}"]
     clear_retval
      issue["items"].each_index do |i|
       q = Question.new(:content => issue["items"][i]["content"],
@@ -506,12 +626,23 @@ class ConstSumQuestionIo < QuestionIo
   end
   def answer_import(row, header_prefix)
     @retval = {}
+    sum = 0
     issue["items"].each_with_index do |e, i|
-      @retval[e["input_id"]] = row["#{header_prefix}_c#{i + 1}"]
+      blank? row["#{header_prefix}_c#{i + 1}"]
+      only_num? row["#{header_prefix}_c#{i + 1}"]
+      sum += row["#{header_prefix}_c#{i + 1}"]
+      @retval[e["id"].to_s] = row["#{header_prefix}_c#{i + 1}"]
     end
     if issue["other_item"]["has_other_item"]
       @retval["text_input"] = row["#{header_prefix + INPUT}"]
-      @retval["#{issue["other_item"]["input_id"]}"] = row["#{header_prefix + INPUT + VALUE}"]
+      if @retval["text_input"]
+        only_num? row["#{header_prefix + INPUT + VALUE}"]
+        @retval["#{issue["other_item"]["input_id"]}"] = row["#{header_prefix + INPUT + VALUE}"]
+        sum += row["#{header_prefix + INPUT + VALUE}"]
+      end
+    end
+    if sum > issue["sum"]
+      raise "比重的总和超出了#{issue["sum"]}哦,重新检查一下吧!"
     end
     return { "#{origin_id}" => @retval}    
   end
@@ -573,6 +704,7 @@ class SortQuestionIo < QuestionIo
   def answer_import(row, header_prefix)
     @retval = {"sort_result" => []}
     issue["items"].each_index do |i|
+      blank? row["#{header_prefix}_c#{i + 1}"]
       @retval["sort_result"] << row["#{header_prefix}_c#{i + 1}"]
     end
     if issue["other_item"]["has_other_item"]
@@ -750,10 +882,11 @@ class ScaleQuestionIo < QuestionIo
   def answer_import(row, header_prefix)
     @retval = {}
     issue["items"].each_with_index do |item, index|
-      if only_num?(row["#{header_prefix}_c#{index + 1}"])
-        @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : row["#{header_prefix}_c#{index + 1}"].to_i)
+      blank? row["#{header_prefix}_c#{index + 1}"]
+      if only_num?(row["#{header_prefix}_c#{index + 1}"], range: 1...5)
+        @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : row["#{header_prefix}_c#{index + 1}"].to_i - 1)
       else
-        raise "Not a Number"
+        raise "您输入的范围好像不太对吧?"
       end
     end
     return { "#{origin_id}" => @retval} 

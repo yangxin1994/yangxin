@@ -26,6 +26,7 @@ class ResultsController < ApplicationController
 
 	def to_excel
 		# task_id = @survey.to_excel(params[:data_list_key])
+		task_id = @survey.to_spss(params[:analysis_task_id])
 		task_id = @survey.to_excel(params[:analysis_task_id])
 		render_json task_id and return
 	end

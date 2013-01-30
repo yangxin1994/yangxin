@@ -251,6 +251,7 @@ class Survey
 		import_error = []
 		imported_answer = nil
 		updated_count = 0
+		header_prefix = 0
 		all_questions.each do |a|
 			q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
 		end
@@ -269,7 +270,7 @@ class Survey
 					line_answer.merge! e.answer_import(row, header_prefix)
 				end
 			rescue Exception => test
-				import_error << row
+				import_error << {row:row, message:test.to_s}
 			else
 				if imported_answer
 					imported_answer.answer_content = line_answer
