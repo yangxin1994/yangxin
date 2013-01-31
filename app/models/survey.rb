@@ -270,7 +270,7 @@ class Survey
 					line_answer.merge! e.answer_import(row, header_prefix)
 				end
 			rescue Exception => test
-				import_error << {row:row, message:test.to_s}
+				import_error << {row:row, message:"第#{header_prefix}题:#{test.to_s}"}
 			else
 				if imported_answer
 					imported_answer.answer_content = line_answer
