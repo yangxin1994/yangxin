@@ -95,7 +95,6 @@ class QuestionIo
   end
 
   def only_num?(item, options ={})
-    binding.pry
     if item.nil?
       return true
     else
@@ -206,12 +205,12 @@ class ChoiceQuestionIo < QuestionIo
 
   def get_item_id(index)
     return nil if index.nil?
-    raise "您填写的不像是个时间!" unless only_num?(index)
+    raise "您填写的内容不像是个数字啊!" unless only_num?(index)
     index = index.to_i - 1
     if self.issue["other_item"]["has_other_item"] && self.issue["items"].count == index
       return self.issue["other_item"]["id"]
     else
-      raise "Wrond Answer" if (0..self.issue["items"].count).include? index
+      raise "您确定有这个选项吗?" unless (0..self.issue["items"].count).include? index
       self.issue["items"][index]["id"]
     end
   end
