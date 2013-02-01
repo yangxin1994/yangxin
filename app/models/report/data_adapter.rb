@@ -53,7 +53,7 @@ class Report::DataAdapter
 		if chart_style == -1
 			chart_styles = CHART_MATHCING[question_type]
 		else
-			chart_styles << chart_style if CHART_MATHCING[question_type].include?(chart_style) || chart_type == ChartStyleEnum::TABLE
+			chart_styles << chart_style if CHART_MATHCING[question_type].include?(chart_style) || chart_style == ChartStyleEnum::TABLE
 		end
 		case question_type
 		when QuestionTypeEnum::CHOICE_QUESTION
