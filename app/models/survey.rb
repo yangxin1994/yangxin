@@ -236,6 +236,7 @@ class Survey
           line_answer += q[index].answer_content(answer.answer_content[question])
         end
       rescue Exception => test
+      	binding.pry
         formated_error << test
       else
         answer_c << line_answer

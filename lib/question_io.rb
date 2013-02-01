@@ -1,8 +1,5 @@
 # encoding: utf-8
 
-# encoding: utf-8
-
-# coding: utf-8
 class QuestionIo
   attr_accessor :content, :issue, :question_type, :origin_id, :is_required
 
@@ -14,6 +11,7 @@ class QuestionIo
     self.origin_id = q.id
     self.is_required = q.is_required
   end
+
   INPUT = "_input"
   VALUE = "_value"
   UNKNOW = "_unkwon"
@@ -23,7 +21,6 @@ class QuestionIo
   SPSS_NOT_OPTED = "未选中"
   SPSS_ETC = "其它"
   SPSS_UNKOWN = "不清楚"
-
 
   # csv_header
   # spss_header
@@ -46,7 +43,6 @@ class QuestionIo
   end
 
   def answer_content(v)
-    return @retval = [] if v.nil?
     clear_retval
     @retval << v
   end
@@ -163,7 +159,6 @@ class ChoiceQuestionIo < QuestionIo
   end
 
   def answer_content(v)
-    return @retval = [] if v.nil?
     clear_retval
     if issue["max_choice"].to_i > 1
       issue["items"].each do |item|
@@ -202,10 +197,10 @@ class ChoiceQuestionIo < QuestionIo
     if issue["other_item"]["has_other_item"]
       unless row["#{header_prefix}_input"].blank?
         @retval["text_input"] = row["#{header_prefix}_input"] if row["#{header_prefix}_input"].blank?
-        # choiced += 1
+        choiced += 1 if issue["max_choice"].to_i > 1
       end
     end
-    if choiced < issue["min_choice"] || is_required
+    if choiced < issue["min_choice"]
       raise "您选择的有点少啊?至少#{issue["min_choice"]}个才可以."      
     elsif choiced > issue["max_choice"]
       raise "您选择的稍微多了点,只需要#{issue["max_choice"]}个就可以了~"      
@@ -270,7 +265,6 @@ class MatrixChoiceQuestionIo < QuestionIo
   end
 
   def answer_content(v)
-    return @retval = [] if v.nil?
     clear_retval
     if issue["max_choice"].to_i > 1
       issue["rows"].each_index do |r|
@@ -292,10 +286,10 @@ class MatrixChoiceQuestionIo < QuestionIo
 
   def answer_import(row, header_prefix)
     @retval = []
-    choiced = 0
     if issue["max_choice"].to_i > 1
       issue["rows"].each_index do |r|
         row_choices = []
+        choiced = 0
         issue["items"].each_index do |c|
           blank? row["#{header_prefix}_r#{r + 1}_c#{c + 1}"]
           if row["#{header_prefix}_r#{r + 1}_c#{c + 1}"] == "1"
@@ -303,21 +297,22 @@ class MatrixChoiceQuestionIo < QuestionIo
             choiced += 1
           end
         end
+        if choiced < issue["min_choice"]
+          raise "您选择的有点少啊?至少#{issue["min_choice"]}个才可以."      
+        elsif choiced > issue["max_choice"]
+          raise "您选择的稍微多了点,只需要#{issue["max_choice"]}就可以了~"      
+        end
         @retval << row_choices
       end
+
     else
       issue["rows"].each_index do |r|
         # 单选为啥也要用数组? 不解
-        choiced += 1
         blank? row["#{header_prefix}_r#{r + 1}"]
         @retval << [get_item_id(row["#{header_prefix}_r#{r + 1}"])]
       end
     end
-    if choiced < issue["min_choice"]
-      raise "您选择的有点少啊?至少#{issue["min_choice"]}个才可以."      
-    elsif choiced > issue["max_choice"]
-      raise "您选择的稍微多了点,只需要#{issue["max_choice"]}就可以了~"      
-    end
+
     return { "#{origin_id}" => @retval }  
   end
 
@@ -374,7 +369,7 @@ class EmailBlankQuesionIo < QuestionIo
   def answer_import(row, header_prefix)
     blank? row["#{header_prefix}"]
     clear_retval
-    raise "这个看起来不像是一个邮箱啊?重来一个试试?" unless( (row["#{header_prefix}"] =~ /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/) == 0)
+    raise "这个看起来不像是一个邮箱啊?重来一个试试?" unless( (row["#{header_prefix}"] =~ /^[-\w\.]+@([-\w]+\.)+[-\w]{2,4}$/) == 0)
     @retval = row["#{header_prefix}"]
     return { "#{origin_id}" => @retval}
   end
@@ -498,7 +493,6 @@ end
 
 class AddressBlankQuestionIo < QuestionIo
   def answer_content(v)
-    return @retval = [] if v.nil?
     clear_retval
     @retval << "地址:#{Address.find_province_city_town_by_code(v["address"])},详细:#{v["detail"]},邮编:#{v["postcode"]}"
     # @retval << v.join(';')
@@ -528,7 +522,6 @@ class BlankQuestionIo < QuestionIo
   end
 
   def answer_content(v)
-    return @retval = [] if v.nil?
     clear_retval
     issue["items"].each_index do |i|
       q = Question.new(:content => issue["items"][i]["content"],
@@ -576,7 +569,6 @@ class MatrixBlankQuestionIo < QuestionIo
   end
 
   def answer_content(v)
-    return @retval = [] if v.nil?
     clear_retval
     issue["row_id"].each_index do |r|
       issue["items"].each_index do |i|
@@ -781,7 +773,6 @@ class RankQuestionIo < QuestionIo
     return @retval
   end
   def answer_content(v)
-    return @retval = [] if v.nil?
     clear_retval
     issue["items"].each do |e|
       @retval << v[e["input_id"]]
@@ -844,7 +835,6 @@ class TableQuestionIo < QuestionIo
     return @retval   
   end
   def answer_content(v)
-    return @retval = [] if v.nil?
     clear_retval
     issue["items"].each_index do |i|
       q = Question.new(:content => issue["items"][i]["content"],
@@ -893,12 +883,10 @@ class ScaleQuestionIo < QuestionIo
       #               }  
       # end
     end
-
     return @retval
   end
 
   def answer_content(v)
-    return @retval = [] if v.nil?
     clear_retval
     issue["items"].each do |e|
       @retval << v[e["id"].to_s]
