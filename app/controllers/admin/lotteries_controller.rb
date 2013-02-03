@@ -119,11 +119,11 @@ class Admin::LotteriesController < Admin::ApplicationController
           prize[:photo] = prize.photo.picture_url
           prize
         end
-        # binding.pry
+    
         l[:prize_ids] = l.prizes.map(&:_id)
         l[:photo_src] = l.photo.picture_url unless l.photo.nil?
         @is_success = true
-        #binding.pry
+        #
         l
       end
     end
@@ -132,7 +132,7 @@ class Admin::LotteriesController < Admin::ApplicationController
   def auto_draw
     render_json false do
       Lottery.find_by_id(params[:id]) do |l|
-        # binding.pry
+    
         @is_success = true
         l.auto_draw
       end
@@ -234,10 +234,10 @@ class Admin::LotteriesController < Admin::ApplicationController
       Prize.find_by_id(id) do |prize|
         params[:lottery].delete(:prize_ids)
         prize.lottery = lottery #unless prize.lottery
-        # binding.pry
+    
         lottery.save
         prize.save
-        # binding.pry
+    
       end
     end
   end

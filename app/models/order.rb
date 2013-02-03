@@ -130,7 +130,7 @@ class Order
   end
 
   def decrease_prize
-    # binding.pry
+
     if self.prize.blank? || self.prize.surplus < 0
       @ret_error= {
         :error_code => ErrorEnum::PRIZE_NOT_ENOUGH,

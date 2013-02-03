@@ -49,7 +49,7 @@ class OrdersController < ApplicationController
     # end
     # p @current_user
     # params[:order][:lottery_code_id] = params[:order][:_id] if params[:order][:lottery_code_id].nil?
-    # binding.pry
+
     @order = @current_user.orders.create(params[:order])
     render_json !@order.deleted? && @order.is_valid? do
       @order.as_retval
