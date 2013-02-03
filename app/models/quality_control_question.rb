@@ -100,9 +100,10 @@ class QualityControlQuestion < BasicQuestion
 
 	def delete_quality_control_question(operator)
 		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_super_admin
+		matching_question_ids = []
 		if self.quality_control_type == QualityControlTypeEnum::OBJECTIVE
 			QualityControlQuestionAnswer.destroy_by_question_id([self._id])
-			return self.destroy
+			self.destroy
 		else
 			matching_question_ids = MatchingQuestion.get_matching_question_ids(self._id)
 			QualityControlQuestionAnswer.destroy_by_question_id(matching_question_ids)
@@ -112,8 +113,19 @@ class QualityControlQuestion < BasicQuestion
 				matching_question = MatchingQuestion.find_by_question_id(q_id)
 				matching_question.destroy
 			end
-			return true
 		end
+		# delte this quality control question in surveys
+		Survey.all.each do |s|
+			if s.quality_control_questions_type == 1
+				# the survey has quality control questions that are manually inserted
+				s.quality_control_questions_ids.delete(self._id.to_s)
+				matching_question_ids.each do |q_id|
+					s.quality_control_questions_ids.delete(q_id)
+				end
+				s.save
+			end
+		end
+		return true
 	end
 
 	def self.check_quality_control_answer(quality_control_question_id, answer)
@@ -154,5 +166,4 @@ class QualityControlQuestion < BasicQuestion
 			return false
 		end
 	end
-
 end

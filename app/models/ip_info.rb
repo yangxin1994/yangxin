@@ -1,5 +1,5 @@
 # coding: utf-8
-
+require 'quill_common'
 require 'iconv'
 
 class IpInfo
@@ -23,6 +23,27 @@ class IpInfo
 	#++
 	
 	class << self
+
+		def find_address_code_by_ip(ip_address)
+			# self.ensure_cache
+			ip_info = self.find_by_ip(ip_address)
+			# no province information in the ip info
+			return -1 if ip_info.class != Postcode || ip_info.province.blank?
+			target_province = nil
+			QuillCommon::AddressUtility.find_provinces.each do |province|
+				if province[1].gsub(/\s+/, "").include?(ip_info.province.gsub(/\s+/, ""))
+					target_province = province[0]
+				end
+			end
+			# the province cannot be found
+			return -1 if target_province.nil?
+			target_city = nil
+			QuillCommon::AddressUtility.find_cities_by_province(target_province).each do |city|
+				target_city = city[0] if city[1].gsub(/\s+/, "").include?(ip_info.city.gsub(/\s+/, ""))
+			end
+			# if city can be found, return city code, otherwise, return province code
+			return (target_city.nil? ? target_province : target_city)
+		end
 
 		#
 		#*description*: verify ip with regular expression

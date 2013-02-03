@@ -2,6 +2,7 @@ require 'error_enum'
 require 'array'
 require 'tool'
 require 'digest/md5'
+require 'quill_common'
 class AnalysisResult < Result
 	include Mongoid::Document
 	include Mongoid::Timestamps
@@ -25,7 +26,7 @@ class AnalysisResult < Result
 
 
 	def analysis(answers, task_id = nil)
-		region_result = Address.province_hash.merge(Address.city_hash)
+		region_result = QuillCommon::AddressUtility.province_hash.merge(QuillCommon::AddressUtility.city_hash)
 		channel_result = {}
 		duration_mean = []
 		finish_time = []
@@ -79,7 +80,7 @@ class AnalysisResult < Result
 		end
 		region_result.select! { |k,v| v != 0 }
 		region_result.each do |key, value|
-			region_result[key] = [value, Address.find_province_city_town_by_code(key)]
+			region_result[key] = [value, QuillCommon::AddressUtility.find_province_city_town_by_code(key)]
 		end
 		channel_result.select! { |k,v| v != 0 }
 		

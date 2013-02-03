@@ -1,5 +1,6 @@
 # coding: utf-8
 require 'error_enum'
+require 'quill_common'
 class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 	
 	def index
@@ -188,7 +189,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# }	
 				show_answer.merge!({'question_type_label'=> '地址题'})
 
-				town =  Address.find_province_city_town_by_code(val["address"].to_i)
+				town =  QuillCommon::AddressUtility.find_province_city_town_by_code(val["address"].to_i)
 
 				show_answer.merge!({"address"=> town, 
 					"detail" => val["detail"],
@@ -220,7 +221,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 					when 'Text','Time','Number','Phone','Email','Url'
 						sub_question.merge!({	'content'=> val[index]})
 					when 'Address'
-						town =  Address.find_text_by_code(val[index]["address"].to_i)
+						town =  QuillCommon::AddressUtility.find_text_by_code(val[index]["address"].to_i)
 						sub_question.merge!({	'content'=> 
 							{
 								"address"=> town, 

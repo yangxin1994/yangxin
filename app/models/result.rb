@@ -2,6 +2,7 @@ require 'error_enum'
 require 'array'
 require 'tool'
 require 'connect_dot_net'
+require 'quill_common'
 class Result
 	include Mongoid::Document
 	include Mongoid::Timestamps
@@ -235,7 +236,7 @@ class Result
 			result[region_code] = result[region_code] + 1
 		end
 		result.each do |key, value|
-			result[key] = [value, Address.find_province_city_town_by_code(key)]
+			result[key] = [value, QuillCommon::AddressUtility.find_province_city_town_by_code(key)]
 		end
 		return result
 	end

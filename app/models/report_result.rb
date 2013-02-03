@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'error_enum'
+require 'quill_common'
 require 'array'
 require 'tool'
 require 'digest/md5'
@@ -668,7 +669,7 @@ class ReportResult < Result
 		return "" if analysis_result.blank?
 		results = []
 		analysis_result.each do |region_code, number|
-			address_text = Address.find_text_by_code(region_code)
+			address_text = QuillCommon::AddressUtility.find_text_by_code(region_code)
 			number = number[0]
 			next if address_text.blank?
 			total_number = total_number + number

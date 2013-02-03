@@ -1,4 +1,5 @@
 # encoding: utf-8
+require 'quill_common'
 class Report::DataAdapter
 
 	CHART_MATHCING = {
@@ -358,7 +359,7 @@ class Report::DataAdapter
 		answer_number = []
 		analysis_result.each do |region_code, number|
 			number = number[0]
-			text = Address.find_text_by_code(region_code)
+			text = QuillCommon::AddressUtility.find_text_by_code(region_code)
 			next if text.blank?
 			address_text << text
 			answer_number << number
@@ -393,7 +394,7 @@ class Report::DataAdapter
 		analysis_result[:result].each do |id, cur_result|
 			cur_result.each do |code, number|
 				next if region_code.include?(code)
-				text = Address.find_text_by_code(code)
+				text = QuillCommon::AddressUtility.find_text_by_code(code)
 				next if text.blank?
 				region_code << code
 				address_text << text

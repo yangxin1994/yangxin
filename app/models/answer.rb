@@ -2,6 +2,7 @@
 require 'error_enum'
 require 'securerandom'
 require 'tool'
+require 'quill_common'
 class Answer
 	include Mongoid::Document
 	include Mongoid::Timestamps
@@ -126,7 +127,7 @@ class Answer
 	def self.create_answer(is_preview, introducer_id, email, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: Address.find_address_code_by_ip(ip), username: username, password: password)
+		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: IpInfo.find_address_code_by_ip(ip), username: username, password: password)
 		if !is_preview && introducer_id
 			introducer = User.find_by_id(introducer_id)
 			if !introducer.nil? && introducer.email != email
@@ -480,7 +481,7 @@ class Answer
 															condition["fuzzy"])
 				end
 			when "2"
-				satisfy = Address.satisfy_region_code?(self.region, condition["value"])
+				satisfy = QuillCommon::AddressUtility.satisfy_region_code?(self.region, condition["value"])
 			when "3"
 				satisfy = condition["value"] == self.channel.to_s
 			when "4"
@@ -673,7 +674,7 @@ class Answer
 			next if rule["submitted_count"] >= rule["amount"]
 			rule["conditions"].each do |condition|
 				# if the answer's ip, channel, or region violates one condition of the rule, move to the next rule
-				next if condition["condition_type"] == 2 && !Address.satisfy_region_code?(self.region, condition["value"])
+				next if condition["condition_type"] == 2 && !QuillCommon::AddressUtility.satisfy_region_code?(self.region, condition["value"])
 				next if condition["condition_type"] == 3 && self.channel != condition["value"]
 				next if condition["condition_type"] == 4 && Tool.check_ip_mask(self.ip_address, condition["value"])
 			end
@@ -780,12 +781,13 @@ class Answer
 	#* ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP
 	#* ErrorEnum::ANSWER_NOT_COMPLETE
 	def finish(auto = false)
-		# synchronize the questions in the survey and the qeustions in the answer content
+		# synchronize the normal questions in the survey and the qeustions in the answer content
 		survey_question_ids = self.survey.all_questions_id
 		self.answer_content.delete_if { |q_id, a| !survey_question_ids.include?(q_id) }
 		survey_question_ids.each do |q_id|
 			self.answer_content[q_id] ||= nil
 		end
+		self.random_quality_control_answer_content.delete_if { |q_id, a| QualityControlQuestion.find_by_id(q_id).nil? }
 		self.save
 		# surveys that allow page up cannot be finished automatically
 		return false if self.survey.is_pageup_allowed && auto
