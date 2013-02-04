@@ -581,7 +581,7 @@ class AddressBlankQuestionIo < QuestionIo
     blank? row["#{header_prefix}"+"_address"]
     @retval["address"] = row["#{header_prefix}"+"_address"]
     if issue["has_postcode"]
-      blank? row["#{header_prefix}"+"_detail"]
+      blank? row["#{header_prefix}"+"_postcode"]
       raise "您填写的不像是个邮编啊" unless only_num?(row["#{header_prefix}"+"_postcode"]) 
       @retval["postcode"] = row["#{header_prefix}"+"_postcode"]
     end

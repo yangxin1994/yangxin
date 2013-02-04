@@ -5,15 +5,11 @@ class Admin::LotteriesController < Admin::ApplicationController
 	end
 
   def create
-    unless create_photo(:lottery)
-      render_json false do
-        ErrorEnum::PHOTP_CANNOT_BE_BLANK
-      end   
-    end 
+    create_photo(:lottery)
     @lottery = Lottery.new(params[:lottery])
     add_prizes(get_prize_ids, @lottery)
     render_json @lottery.save do
-      @lottery.photo.save
+      @lottery.photo.save if @lottery.photo
       @lottery.as_retval
     end
   end
