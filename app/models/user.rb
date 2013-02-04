@@ -296,12 +296,16 @@ class User
 			third_party_user = ThirdPartyUser.find_by_id(third_party_user_id)
 			third_party_user.bind(existing_user) if !third_party_user.nil?
 		end
+		ImportEmail.destroy_by_email(user["email"])
 		return true
 	end
 
 	def self.find_or_create_new_visitor_by_email(email)
 		user = User.find_by_email(email)
-		user = User.create(email: email) if user.nil?
+		if user.nil?
+			user = User.create(email: email)
+			ImportEmail.destroy_by_email(email)
+		end
 		return user
 	end
 

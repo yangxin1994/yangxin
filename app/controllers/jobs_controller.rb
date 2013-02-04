@@ -39,6 +39,7 @@ class JobsController < ApplicationController
 		end
 		# 3. find out samples for surveys
 		surveys_for_user = {}
+		surveys_for_imported_email = {}
 		published_survey.each do |survey|
 			amount = e.remaining_quota_amount
 			email_number = amount * 3
@@ -50,10 +51,19 @@ class JobsController < ApplicationController
 				surveys_for_user[u_id] ||= []
 				surveys_for_user[u_id] << survey._id
 			end
+			if samples_found.length < email_number
+				ImportEmail.random_emails(email_number - samples_found.length).each do |email|
+					surveys_for_imported_email[email] ||= []
+					surveys_for_imported_email[email] << survey._id
+				end
+			end
 		end
 		# 4. send emails to the samples found
 		surveys_for_user.each do |u_id, s_id_ary|
 			UserMailer.survey_email(u_id, s_id_ary).deliver	
+		end
+		surveys_for_imported_email.each do |email, s_id_ary|
+			UserMailer.imported_email_survey_email(email, s_id_ary).deliver	
 		end
 		render_json_s(true) and return
 	end

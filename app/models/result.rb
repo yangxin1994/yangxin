@@ -2,6 +2,7 @@ require 'error_enum'
 require 'array'
 require 'tool'
 require 'connect_dot_net'
+require 'quill_common'
 class Result
 	include Mongoid::Document
 	include Mongoid::Timestamps
@@ -142,9 +143,11 @@ class Result
 				result["#{row["id"]}-#{input_id}"] = 0
 			end
 		end
+		row_ids = issue["rows"].map { |e| e["id"].to_s }
 		answer_ary.each do |answer|
-			answer.each_with_index do |row_answer, row_index|
-				row_id = issue["rows"][row_index]["id"].to_s
+			answer.each do |row_id, row_answer|
+				row_id = row_id.to_s
+				next if !row_ids.include?(row_id)
 				row_answer.each do |input_id|
 					result.each_key do |k|
 						k_row_id = k.split('-')[0]
@@ -235,7 +238,7 @@ class Result
 			result[region_code] = result[region_code] + 1
 		end
 		result.each do |key, value|
-			result[key] = [value, Address.find_province_city_town_by_code(key)]
+			result[key] = [value, QuillCommon::AddressUtility.find_province_city_town_by_code(key)]
 		end
 		return result
 	end
