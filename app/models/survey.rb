@@ -471,11 +471,15 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	def save_meta_data(survey_obj)
 		# this is an existing survey
-		META_ATTR_NAME_ARY.each do |attr_name|
-			method_obj = self.method("#{attr_name}=".to_sym)
-			method_obj.call(survey_obj[attr_name])
+		if !survey_obj.nil?
+			META_ATTR_NAME_ARY.each do |attr_name|
+				if !survey_obj[attr_name].nil?
+					method_obj = self.method("#{attr_name}=".to_sym)
+					method_obj.call(survey_obj[attr_name])
+				end
+			end
+			self.save
 		end
-		self.save
 		return self
 	end
 

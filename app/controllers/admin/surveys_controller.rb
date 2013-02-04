@@ -26,6 +26,7 @@ class Admin::SurveysController < Admin::ApplicationController
 
 	def show
 		@survey = Survey.normal.find_by_id(params[:id])
+		# logger.info @survey.inspect
 		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return unless @survey
 		render_json_auto @survey
 	end
