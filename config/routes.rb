@@ -205,12 +205,12 @@ OopsData::Application.routes.draw do
 	namespace 'interviewer' do
 		resources :surveys do
 		end
-		resources :answers do
-			collection do
-				post 'submit'
-			end
-		end
 		resources :interviewer_tasks do
+			resources :answers do
+				collection do
+					post 'submit'
+				end
+			end
 		end
 	end
 

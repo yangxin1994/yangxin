@@ -129,12 +129,21 @@ class InterviewerTask
 	end
 
 	# submit answers
-	def submit_answers(survey_id, answers)
+	def submit_answers(answers)
+		answers_to_inserted = []
 		answers.each do |a|
-			a.merge!({:interviewer_task_id => self._id, :survey_id => self.survey_id, :channel => -2})
+			# convert the gps or 3g location to a region code
+			region = -1
+			answers_to_inserted << {:interviewer_task_id => self._id,
+				:survey_id => self.survey_id,
+				:channel => -2,
+				:created_at => Time.at(a["created_at"]),
+				:answer_content => a["answer_content"],
+				:status => self.survey.answer_need_review ? Answer::UNDER_REVIEW : Answer::FINISH,
+				:region => region}
 		end
 		Answer.collection.insert(answers)
 		self.refresh_quota
-		return true
+		return self
 	end
 end
