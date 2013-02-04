@@ -1250,7 +1250,7 @@ class Survey
 	# return all the surveys that are published and are active
 	# it is needed to send emails and invite volunteers for these surveys
 	def self.get_published_active_surveys
-		return surveys = Survey.normal.in_community.is_promotable.where(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
+		return surveys = Survey.normal.is_promotable.where(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
 	end
 
 	def check_password_for_preview(username, password, current_user)

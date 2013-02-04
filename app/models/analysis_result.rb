@@ -18,7 +18,7 @@ class AnalysisResult < Result
 
 	belongs_to :survey
 
-	def self.generate_result_key(answers, tot_answer_number, screened_answer_number)
+	def self.generate_result_key(last_update_time, answers, tot_answer_number, screened_answer_number)
 		answer_ids = answers.map { |e| e._id.to_s }
 		result_key = Digest::MD5.hexdigest("analysis-#{answer_ids.to_s}-#{tot_answer_number}-#{screened_answer_number}")
 		return result_key

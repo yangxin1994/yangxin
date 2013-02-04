@@ -69,7 +69,7 @@ OopsData::Application.configure do
 		:password				=> ""
 	}
 
-  config.task_web_service_uri = 'localhost:9000'
+  config.task_web_service_uri = 'localhost:9001'
   config.service_port = '8001'
 
   # donet web service

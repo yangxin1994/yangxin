@@ -72,7 +72,7 @@ OopsData::Application.configure do
 	}
 
 	# task web service
-  config.task_web_service_uri = 'localhost:9000'
+  config.task_web_service_uri = 'localhost:9002'
   config.service_port = '8002'
 
   # donet web service

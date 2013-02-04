@@ -79,7 +79,10 @@ class JobsController < ApplicationController
 																					params[:include_screened_answer].to_s == "true",
 																					params[:task_id])
 			# generate the result_key
-			result_key = AnalysisResult.generate_result_key(answers, tot_answer_number, screened_answer_number)
+			result_key = AnalysisResult.generate_result_key(survey.last_update_time,
+				answers,
+				tot_answer_number,
+				screened_answer_number)
 			existing_analysis_result = AnalysisResult.find_by_result_key(result_key)
 			if existing_analysis_result.nil?
 				# create analysis result
