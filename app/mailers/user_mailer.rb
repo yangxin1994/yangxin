@@ -51,13 +51,14 @@ class UserMailer < ActionMailer::Base
 			email_history = EmailHistory.create
 			email_history.user = @user
 			email_history.survey = s
+			email_history.save
 		end
 		@presents = []	
 		# push a lottery
 		lottery = Lottery.quillme.first
 		@presents << {:title => lottery.title,
 			:url => "#{Rails.application.config.quillme_host}/lotteries/#{lottery._id.to_s}",
-			:img_url => Rails.application.config.quillme_host + lottery.photo.picture_url} if !lottery.nil?
+			:img_url => Rails.application.config.quillme_host + lottery.photo_url} if !lottery.nil?
 		# push a real gift
 		real_gift = BasicGift.where(:type => 1, :status => 1).first
 		@presents << {:title => real_gift.name,
@@ -73,7 +74,25 @@ class UserMailer < ActionMailer::Base
 	end
 
 	def imported_email_survey_email(email, survey_id_ary)
-		
+		@surveys = survey_id_ary.map { |e| Survey.find_by_id(e) }
+		@presents = []	
+		# push a lottery
+		lottery = Lottery.quillme.first
+		@presents << {:title => lottery.title,
+			:url => "#{Rails.application.config.quillme_host}/lotteries/#{lottery._id.to_s}",
+			:img_url => Rails.application.config.quillme_host + lottery.photo_url} if !lottery.nil?
+		# push a real gift
+		real_gift = BasicGift.where(:type => 1, :status => 1).first
+		@presents << {:title => real_gift.name,
+			:url => "#{Rails.application.config.quillme_host}/gifts/#{real_gift._id.to_s}",
+			:img_url => Rails.application.config.quillme_host + real_gift.photo.picture_url} if !real_gift.nil?
+		# push a cash gift
+		cash_gift = BasicGift.where(:type => 0, :status => 1).first
+		@presents << {:title => cash_gift.name,
+			:url => "#{Rails.application.config.quillme_host}/gifts/#{cash_gift._id.to_s}",
+			:img_url => Rails.application.config.quillme_host + cash_gift.photo.picture_url} if !cash_gift.nil?
+		email = Rails.env == "production" ? email : @@test_email
+		mail(:to => email, :subject => "邀请您参加问卷调查")
 	end
 	
 	def publish_email(publish_status_history)

@@ -1341,7 +1341,7 @@ class Survey
 	end
 
 	def get_user_ids_answered
-		return self.answers.map {|a| a.user_id.to_s}  
+		return self.answers.not_preview.map {|a| a.user_id.to_s}  
 	end
 
 	def estimate_answer_time
