@@ -143,9 +143,11 @@ class Result
 				result["#{row["id"]}-#{input_id}"] = 0
 			end
 		end
+		row_ids = issue["rows"].map { |e| e["id"].to_s }
 		answer_ary.each do |answer|
-			answer.each_with_index do |row_answer, row_index|
-				row_id = issue["rows"][row_index]["id"].to_s
+			answer.each do |row_id, row_answer|
+				row_id = row_id.to_s
+				next if !row_ids.include?(row_id)
 				row_answer.each do |input_id|
 					result.each_key do |k|
 						k_row_id = k.split('-')[0]
