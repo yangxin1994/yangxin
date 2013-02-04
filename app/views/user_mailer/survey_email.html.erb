@@ -3,9 +3,11 @@
 	<%- @surveys.each do |s| %>
 	<div class='survey'>
 		<a href="<%= Rails.application.config.quillme_host %>/s/<%= s._id %>" target="_blank" class='s-link'><%= s.title %></a>
-		<!-- TODO: 根据问卷的奖品类型，显示不同的文字 -->
-		<!-- （可获得<b class='reward'>10</b>积分） -->
-		<!-- （可参加抽奖：<a class='reward' href='javascript:void(0);'>新年抽 ipad</a>） -->
+		<%- if s.reward == 1 %>
+			<span>（可参加抽奖：<a class='reward' href='javascript:void(0);'><%= s.lottery.try(:title) %></a>）</span>
+		<%- elsif s.reward == 2 %>
+			<span>（可获得<b class='reward'><%= s.point %></b>积分）</span>
+		<%- end %>
 	</div>
 	<%- end %>
 </div>

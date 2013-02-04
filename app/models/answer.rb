@@ -49,6 +49,7 @@ class Answer
 	field :point, :type => Integer, :default => 0
 	field :reward, :type => Integer, :default => 0
 
+	# used for visitors to upload files
 	field :attachment, :type => Hash, :default => {}
 
 	scope :not_preview, lambda { where(:is_preview => false) }
