@@ -3,9 +3,11 @@
 	<%- @surveys.each do |s| %>
 	<div class='survey'>
 		<a href="<%= Rails.application.config.quillme_host %>/s/<%= s._id %>" target="_blank" class='s-link'><%= s.title %></a>
-		<!-- TODO: 根据问卷的奖品类型，显示不同的文字 -->
-		<!-- （可获得<b class='reward'>10</b>积分） -->
-		<!-- （可参加抽奖：<a class='reward' href='javascript:void(0);'>新年抽 ipad</a>） -->
+		<%- if s.reward == 1 %>
+			<span>（可参加抽奖：<a class='reward' href='javascript:void(0);' target="_blank"><%= s.lottery.try(:title) %></a>）</span>
+		<%- elsif s.reward == 2 %>
+			<span>（可获得<b class='reward'><%= s.point %></b>积分）</span>
+		<%- end %>
 	</div>
 	<%- end %>
 </div>
@@ -13,7 +15,7 @@
 <p>优数调研提供了丰富的礼品供您兑换，还有各种大奖等你来抽，快快参加调研吧！</p>
 <div class='presents'>
 	<%- @presents.each do |p| %>
-	<a class='present'>
+	<a class='present' target="_blank">
 		<img src="<%=p[:img_url]  %>" class='present-img' />
 		<span href="<%=p[:url]  %>" class='present-title'><%= p[:title] %></span>
 	</a>
