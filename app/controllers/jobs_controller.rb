@@ -53,7 +53,8 @@ class JobsController < ApplicationController
 				surveys_for_user[u_id] << survey._id.to_s
 			end
 			if samples_found.length < email_number
-				ImportEmail.random_emails(email_number - samples_found.length).each do |email|
+				emails_sent = EmailHistory.get_emails_sent(s_id)
+				ImportEmail.random_emails(email_number - samples_found.length, emails_sent).each do |email|
 					surveys_for_imported_email[email] ||= []
 					surveys_for_imported_email[email] << survey._id.to_s
 				end

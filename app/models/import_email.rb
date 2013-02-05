@@ -25,9 +25,11 @@ class ImportEmail
 		return self.find_by_email(email).try(:destroy)
 	end
 
-	def self.random_emails(number)
-		number = number > self.all.length ? self.all.length : number
-		selected_imported_email = self.all.shuffle[0..number-1]
-		return selected_imported_email.map { |e| e.email }
+	def self.random_emails(number, emails_sent)
+		emails = ImportEmail.all.map { |e| e.email }
+		emails = emails - emails_sent
+		number = number > emails.length ? emails.length : number
+		selected_email = emails.shuffle[0..number-1]
+		return selected_email
 	end
 end
