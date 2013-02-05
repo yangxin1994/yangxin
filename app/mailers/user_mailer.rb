@@ -77,17 +77,17 @@ class UserMailer < ActionMailer::Base
 		@presents << {:title => cash_gift.name,
 			:url => "#{Rails.application.config.quillme_host}/gifts/#{cash_gift._id.to_s}",
 			:img_url => Rails.application.config.quillme_host + cash_gift.photo.picture_url} if !cash_gift.nil?
-		email = Rails.env == "production" ? user.email : @@test_email
+		email = Rails.env == "production" ? @user.email : @@test_email
 		subject = "邀请您参加问卷调查"
-		subject += " --- to #{user.email}" if Rails.env != "production"
+		subject += " --- to #{@user.email}" if Rails.env != "production"
 		mail(:to => email, :subject => subject)
 	end
 
-	def imported_email_survey_email(email, survey_id_ary)
+	def imported_email_survey_email(user_email, survey_id_ary)
 		@surveys = survey_id_ary.map { |e| Survey.find_by_id(e) }
 		@surveys.each do |s|
 			email_history = EmailHistory.create
-			email_history.email = email
+			email_history.email = user_email
 			email_history.survey = s
 			email_history.save
 		end
@@ -107,9 +107,9 @@ class UserMailer < ActionMailer::Base
 		@presents << {:title => cash_gift.name,
 			:url => "#{Rails.application.config.quillme_host}/gifts/#{cash_gift._id.to_s}",
 			:img_url => Rails.application.config.quillme_host + cash_gift.photo.picture_url} if !cash_gift.nil?
-		email = Rails.env == "production" ? email : @@test_email
+		email = Rails.env == "production" ? user_email : @@test_email
 		subject = "邀请您参加问卷调查"
-		subject += " --- to #{email}" if Rails.env != "production"
+		subject += " --- to #{user_email}" if Rails.env != "production"
 		mail(:to => email, :subject => subject)
 	end
 	

@@ -10,7 +10,7 @@ class EmailHistory
 		survey = Survey.find_by_id(survey_id)
 		user_ids_sent = []
 		survey.email_histories.each do |e|
-			user_ids_sent << e.user_id if !e.user.nil?
+			user_ids_sent << e.user_id.to_s if !e.user.nil?
 		end
 		return user_ids_sent
 	end
