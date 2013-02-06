@@ -237,7 +237,7 @@ class Survey
       rescue Exception => test
         formated_error << test
       else
-        answer_c << line_answer
+      	answer_c << line_answer
       end
 			TaskClient.set_progress(task_id, "data_conversion_progress", (index+1).to_f / answer_length)
 		end

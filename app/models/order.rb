@@ -103,7 +103,7 @@ class Order
   end
 
   def decrease_gift
-    if self.gift.blank? || self.gift.surplus <= 0
+    if self.gift.blank? || self.gift.surplus <= 0 || self.gift.is_deleted
       @ret_error= {
         :error_code => ErrorEnum::GIFT_NOT_ENOUGH,
         :error_message => "gift not enough"

@@ -14,7 +14,7 @@ class Admin::ApplicationController < ApplicationController
 	def update_photo(param, ins)
     unless params[param][:photo].nil?
       if ins.photo.nil?
-	 			prize.photo = create_photo(param)
+	 			ins.photo = create_photo(param)
 	 		else
 	      ins.photo.title = params[param][:name]
 	      ins.photo.value = params[param][:photo]
