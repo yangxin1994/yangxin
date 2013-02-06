@@ -8,16 +8,13 @@ class ImportEmail
 	def self.import_email(file_name)
 		csv_text = File.read(file_name)
 		csv = CSV.parse(csv_text, :headers => false)
-		emails = []
 		csv.each do |row|
 			if row[0].to_s.include?("@")
 				# if User.find_by_email(row[0]).nil? && self.find_by_email(row[0]).nil?
-				# ImportEmail.create(:email => row[0], :username => row[0])
+				ImportEmail.create(:email => row[0], :username => row[0])
 				# end
-				emails << {:email => row[0], :username => row[0]}
 			end
 		end
-		ImportEmail.collection.insert(emails)
 	end
 
 	def self.find_by_email(email)
