@@ -138,7 +138,9 @@ class InterviewerTask
 				:survey_id => self.survey_id,
 				:channel => -2,
 				:created_at => Time.at(a["created_at"]),
+				:finished_at => Time.at(a["finished_at"]),
 				:answer_content => a["answer_content"],
+				:attachments => a["attachments"],
 				:status => self.survey.answer_need_review ? Answer::UNDER_REVIEW : Answer::FINISH,
 				:region => region}
 		end
