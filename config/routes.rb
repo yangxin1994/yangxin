@@ -212,6 +212,8 @@ OopsData::Application.routes.draw do
 				end
 			end
 		end
+		resources :materials do
+		end
 	end
 
 	get "home/index"
