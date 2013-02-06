@@ -205,12 +205,12 @@ OopsData::Application.routes.draw do
 	namespace 'interviewer' do
 		resources :surveys do
 		end
-		resources :answers do
-			collection do
-				post 'submit'
-			end
-		end
 		resources :interviewer_tasks do
+			resources :answers do
+				collection do
+					post 'submit'
+				end
+			end
 		end
 	end
 
@@ -474,6 +474,8 @@ OopsData::Application.routes.draw do
 	# You can have the root of your site routed with "root"
 	# just remember to delete public/index.html.
 	root :to => 'welcome#index'
+
+	match '/upload' => 'welcome#upload'
 
 	# See how all your routes lay out with "rake routes"
 

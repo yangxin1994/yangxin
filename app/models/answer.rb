@@ -459,27 +459,25 @@ class Answer
 		conditions.each do |condition|
 			satisfy = false
 			case condition["condition_type"].to_s
-			when "0"
-				question_id = condition["name"]
-				require_answer = condition["value"]
-				if answer_content[question_id].nil?
-					satisfy = false
-				else
-					satisfy = Tool.check_choice_question_answer(question_id,
-															self.answer_content[question_id]["selection"],
-															require_answer,
-															condition["fuzzy"])
-				end
 			when "1"
 				question_id = condition["name"]
-				require_answer = condition["value"]
-				if answer_content[question_id].nil?
-					satisfy = false
+				question = BasicQuestion.find_by_id(question_id)
+				if question.nil?
+					satisfy = true
 				else
-					satisfy = Tool.check_choice_question_answer(question_id,
-															self.answer_content[question_id]["selection"],
-															require_answer,
-															condition["fuzzy"])
+					require_answer = condition["value"]
+					if answer_content[question_id].nil?
+						satisfy = false
+					elsif question.question_type == QuestionTypeEnum::CHOICE_QUESTION
+						satisfy = Tool.check_choice_question_answer(question_id,
+																self.answer_content[question_id]["selection"],
+																require_answer,
+																condition["fuzzy"])
+					elsif question.question_type == QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+						satisfy = Tool.check_address_blank_question_answer(question_id,
+																self.answer_content[question_id]["selection"],
+																require_answer)
+					end
 				end
 			when "2"
 				satisfy = QuillCommon::AddressUtility.satisfy_region_code?(self.region, condition["value"])

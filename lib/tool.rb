@@ -2,6 +2,7 @@
 require 'net/http'
 require 'uri'
 require 'csv'
+require 'quill_common'
 
 module Tool
 
@@ -58,6 +59,11 @@ module Tool
 				return answer.length == standard_answer.length
 			end
 		end
+	end
+
+	def self.check_address_blank_question_answer(answer, standard_answer)
+		answer_region_code = answer["address"].to_i
+		QuillCommon::AddressUtility.check_region_answer(answer_region_code, standard_answer)
 	end
 
 	def self.check_text_question_answer(answer, standard_answer, fuzzy)

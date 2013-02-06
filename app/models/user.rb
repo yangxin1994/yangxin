@@ -528,7 +528,7 @@ class User
 	scope :deleted_users, where(status: -1)
 
 	def self.ids_not_in_blacklist
-		return User.any_of({color: 0}, {color: 1})
+		return User.any_of({color: 0}, {color: 1}).map { |e| e._id.to_s }
 	end
 
 	def create_user(new_user)

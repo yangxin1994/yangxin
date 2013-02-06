@@ -469,11 +469,15 @@ class Survey
 	#* ErrorEnum ::UNAUTHORIZED : if the user is unauthorized to do that
 	def save_meta_data(survey_obj)
 		# this is an existing survey
-		META_ATTR_NAME_ARY.each do |attr_name|
-			method_obj = self.method("#{attr_name}=".to_sym)
-			method_obj.call(survey_obj[attr_name])
+		if !survey_obj.nil?
+			META_ATTR_NAME_ARY.each do |attr_name|
+				if !survey_obj[attr_name].nil?
+					method_obj = self.method("#{attr_name}=".to_sym)
+					method_obj.call(survey_obj[attr_name])
+				end
+			end
+			self.save
 		end
-		self.save
 		return self
 	end
 
@@ -1248,7 +1252,7 @@ class Survey
 	# return all the surveys that are published and are active
 	# it is needed to send emails and invite volunteers for these surveys
 	def self.get_published_active_surveys
-		return surveys = Survey.normal.in_community.is_promotable.where(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
+		return surveys = Survey.normal.is_promotable.where(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
 	end
 
 	def check_password_for_preview(username, password, current_user)
@@ -1339,7 +1343,7 @@ class Survey
 	end
 
 	def get_user_ids_answered
-		return self.answers.map {|a| a.user_id.to_s}  
+		return self.answers.not_preview.map {|a| a.user_id.to_s}  
 	end
 
 	def estimate_answer_time

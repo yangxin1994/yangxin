@@ -60,16 +60,19 @@ OopsData::Application.configure do
 
 	config.action_mailer.perform_deliveries = true
 	config.action_mailer.delivery_method = :smtp
-	config.action_mailer.smtp_settings = {
-		:authentication => "plain",
-		:address				=> "",
-		:port						=> 25,
-		:domain					=> "",
-		:user_name			=> "",
-		:password				=> ""
-	}
+  config.action_mailer.smtp_settings = {
+    :authentication => "plain",
+    :address        => "smtp.mailgun.com",
+    :port           => 25,
+    :domain         => "oopsdata.net",
+    :user_name      => "postmaster@oopsdata.net",
+    :password       => "0nlnhy08vbk1",
+    :enable_starttls_auto => true,
+    :openssl_verify_mode  => 'none'
+  }
 
-  config.task_web_service_uri = 'localhost:9000'
+  # task web service
+  config.task_web_service_uri = 'localhost:9001'
   config.service_port = '8001'
 
   # donet web service

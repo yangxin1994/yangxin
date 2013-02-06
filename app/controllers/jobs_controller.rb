@@ -41,29 +41,32 @@ class JobsController < ApplicationController
 		surveys_for_user = {}
 		surveys_for_imported_email = {}
 		published_survey.each do |survey|
-			amount = e.remaining_quota_amount
+			s_id = survey._id.to_s
+			amount = survey.remaining_quota_amount
 			email_number = amount * 3
 			user_ids_answered = survey.get_user_ids_answered
 			user_ids_sent = EmailHistory.get_user_ids_sent(s_id)
-			user_ids = user_ids - user_ids_answered[s_id] - user_ids_sent[s_id]
-			samples_found = user_ids.length > email_number ? user_ids.shuffle[0..rule.email_number-1] : user_ids
+			user_ids = user_ids - user_ids_answered - user_ids_sent
+			samples_found = user_ids.length > email_number ? user_ids.shuffle[0..email_number-1] : user_ids
 			samples_found.each do |u_id|
 				surveys_for_user[u_id] ||= []
-				surveys_for_user[u_id] << survey._id
+				surveys_for_user[u_id] << survey._id.to_s
 			end
 			if samples_found.length < email_number
-				ImportEmail.random_emails(email_number - samples_found.length).each do |email|
+				emails_sent = EmailHistory.get_emails_sent(s_id)
+				ImportEmail.random_emails(email_number - samples_found.length, emails_sent).each do |email|
 					surveys_for_imported_email[email] ||= []
-					surveys_for_imported_email[email] << survey._id
+					surveys_for_imported_email[email] << survey._id.to_s
 				end
 			end
 		end
 		# 4. send emails to the samples found
+		# render_json_s(true) and return
 		surveys_for_user.each do |u_id, s_id_ary|
-			UserMailer.survey_email(u_id, s_id_ary).deliver	
+			UserMailer.survey_email(u_id, s_id_ary).deliver
 		end
 		surveys_for_imported_email.each do |email, s_id_ary|
-			UserMailer.imported_email_survey_email(email, s_id_ary).deliver	
+			UserMailer.imported_email_survey_email(email, s_id_ary).deliver
 		end
 		render_json_s(true) and return
 	end
@@ -79,7 +82,10 @@ class JobsController < ApplicationController
 																					params[:include_screened_answer].to_s == "true",
 																					params[:task_id])
 			# generate the result_key
-			result_key = AnalysisResult.generate_result_key(answers, tot_answer_number, screened_answer_number)
+			result_key = AnalysisResult.generate_result_key(survey.last_update_time,
+				answers,
+				tot_answer_number,
+				screened_answer_number)
 			existing_analysis_result = AnalysisResult.find_by_result_key(result_key)
 			if existing_analysis_result.nil?
 				# create analysis result
