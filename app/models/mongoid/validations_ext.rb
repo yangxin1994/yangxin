@@ -29,7 +29,8 @@ module Mongoid
       end
       unless is_valid?
         return retval = {:error_code => self.error_code,
-                         :error_message => self.error_message}
+                         :error_message => self.error_message,
+                         :item => self}
       end
       self
     end

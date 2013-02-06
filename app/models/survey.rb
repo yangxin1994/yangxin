@@ -227,7 +227,6 @@ class Survey
     formated_error = []
 		q = self.all_questions_type
 		p "========= 准备完毕 ========="
-		# binding.pry
 		answer_length = answers.length
 		answers.each_with_index do |answer, index|
       line_answer = []
@@ -236,10 +235,9 @@ class Survey
           line_answer += q[index].answer_content(answer.answer_content[question])
         end
       rescue Exception => test
-      	binding.pry
         formated_error << test
       else
-        answer_c << line_answer
+      	answer_c << line_answer
       end
 			TaskClient.set_progress(task_id, "data_conversion_progress", (index+1).to_f / answer_length)
 		end
@@ -256,10 +254,10 @@ class Survey
 		all_questions.each do |a|
 			q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
 		end
-		CSV.parse(csv_str.join, :headers => true) do |row|
+		CSV.parse(csv_str, :headers => true) do |row|
 			return false if row.headers != self.csv_header(:with => "import_id")
 			if self.answers.where(:import_id => row["import_id"]).length > 0
-				imported_answer = Answer.where(:import_id => row["import_id"].to_s).first
+				imported_answer = self.answers.where(:import_id => row["import_id"].to_s).first
 			end
 			row = row.to_hash
 			line_answer = {}
@@ -274,7 +272,7 @@ class Survey
 				import_error << {row:row, message:"第#{header_prefix}题:#{test.to_s}"}
 			else
 				if imported_answer
-					imported_answer.answer_content = line_answer
+					imported_answer.assign_attributes(:answer_content => line_answer)
 					imported_answer.save
 					updated_count += 1
 					imported_answer = nil

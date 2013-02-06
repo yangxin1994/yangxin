@@ -19,7 +19,7 @@ class ExportResult < Result
 	end
 
 	def generate_excel(survey, answers, result_key)
-		excel_data_json = {"csv_header" => survey.csv_header,
+		excel_data_json = {"excel_header" => survey.excel_header,
 												"answer_contents" => survey.formated_answers(answers, result_key, task_id.to_s),
 												"header_name" => survey.csv_header,
 												"result_key" => result_key}.to_json

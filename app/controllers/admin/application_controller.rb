@@ -3,6 +3,7 @@ class Admin::ApplicationController < ApplicationController
 
 	def create_photo(param)
 		return false unless params[param][:photo]
+		return false if params[param][:photo].blank?
     photo = Material.create(:material_type => 1, 
                     				:title => params[param][:name],
                     				:value => params[param][:photo],
@@ -24,7 +25,4 @@ class Admin::ApplicationController < ApplicationController
     end
 	end
 
-	def create_lottery(param)
-
-	end
 end

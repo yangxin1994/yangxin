@@ -1,5 +1,5 @@
 # encoding: utf-8
-
+require 'quill_common'
 class QuestionIo
   attr_accessor :content, :issue, :question_type, :origin_id, :is_required
 
@@ -17,6 +17,7 @@ class QuestionIo
   UNKNOW = "_unkwon"
   SPSS_NUMERIC = "Numeric"
   SPSS_STRING = "String"
+  SPSS_STRING_SHORT = "Short"
   SPSS_OPTED = "选中"
   SPSS_NOT_OPTED = "未选中"
   SPSS_ETC = "其它"
@@ -75,6 +76,9 @@ class QuestionIo
   def get_item_index(id)
     self.issue["items"].each_with_index do |item, index|
       return index + 1 if item["id"].to_s == id.to_s
+    end
+    if self.issue["other_item"]["has_other_item"] && issue["other_item"]["id"].to_s == id.to_s
+      return self.issue["items"].count + 1 
     end
     return nil
   end
@@ -135,7 +139,7 @@ class ChoiceQuestionIo < QuestionIo
    if issue["max_choice"].to_i > 1
       issue["items"].each_index do |i|
         @retval << {"spss_name" => header_prefix + "_c#{i + 1}",
-                    "spss_type" => SPSS_STRING,
+                    "spss_type" => SPSS_STRING_SHORT,
                     "spss_label" => issue["items"][i]["content"]["text"],
                     "spss_value_labels" => {"1" => SPSS_OPTED,
                                             "0" => SPSS_NOT_OPTED}}
@@ -146,7 +150,7 @@ class ChoiceQuestionIo < QuestionIo
         choices["#{i+1}"] = issue["items"][i]["content"]["text"]
       end
       @retval << {"spss_name" => header_prefix,
-                  "spss_type" => SPSS_STRING,
+                  "spss_type" => SPSS_STRING_SHORT,
                   "spss_label" => content["text"],
                   "spss_value_labels" => choices }
     end
@@ -189,17 +193,33 @@ class ChoiceQuestionIo < QuestionIo
           choiced += 1
         end
       end
+      if issue["other_item"]["has_other_item"]
+        if !row["#{header_prefix}_input"].blank? 
+          @retval["text_input"] = row["#{header_prefix}_input"]
+          choiced += 1
+        end
+      end
     else
-      blank? row["#{header_prefix}"] 
+      blank? row["#{header_prefix}"]
+      # 如果空就直接抛出异常了
       choiced += 1
       @retval["selection"] << get_item_id(row[header_prefix])
-    end
-    if issue["other_item"]["has_other_item"]
-      unless row["#{header_prefix}_input"].blank?
-        @retval["text_input"] = row["#{header_prefix}_input"] if row["#{header_prefix}_input"].blank?
-        choiced += 1 if issue["max_choice"].to_i > 1
+      if issue["other_item"]["has_other_item"]
+        if issue["other_item"]["id"].to_s == get_item_id(row[header_prefix]).to_s
+          if row["#{header_prefix}_input"].blank?
+            raise "您选了其他项,但是其他项却没有填写呢>.<"
+          else
+            @retval["text_input"] = row["#{header_prefix}_input"]
+          end
+        end
       end
     end
+    # if issue["other_item"]["has_other_item"]
+    #   if !row["#{header_prefix}_input"].blank? 
+    #     @retval["text_input"] = row["#{header_prefix}_input"]
+    #     choiced += 1 if issue["max_choice"].to_i > 1
+    #   end
+    # end
     if choiced < issue["min_choice"]
       raise "您选择的有点少啊?至少#{issue["min_choice"]}个才可以."      
     elsif choiced > issue["max_choice"]
@@ -243,7 +263,7 @@ class MatrixChoiceQuestionIo < QuestionIo
       issue["rows"].each_index do |r|
         issue["items"].each_index do |c|
           @retval << {"spss_name" => header_prefix  + "_r#{r + 1}" + "_c#{c + 1}",
-                      "spss_type" => SPSS_STRING,
+                      "spss_type" => SPSS_STRING_SHORT,
                       "spss_label" => issue["items"][c]["content"]["text"],
                       "spss_value_labels" => {"1" => SPSS_OPTED,
                                               "0" => SPSS_NOT_OPTED}}
@@ -256,7 +276,7 @@ class MatrixChoiceQuestionIo < QuestionIo
       end
       issue["rows"].each_with_index do |r, i|
         @retval << {"spss_name" => header_prefix + "_r#{i + 1}",
-                    "spss_type" => SPSS_STRING,
+                    "spss_type" => SPSS_STRING_SHORT,
                     "spss_label" => r["content"]["text"],
                     "spss_value_labels" => choices }
       end
@@ -267,9 +287,9 @@ class MatrixChoiceQuestionIo < QuestionIo
   def answer_content(v)
     clear_retval
     if issue["max_choice"].to_i > 1
-      issue["rows"].each_index do |r|
+      issue["rows"].each do |item|
         issue["items"].each_index do |c|
-          if v[r].include?( get_item_id(c + 1))
+          if v[item["id"].to_s].include?( get_item_id(c + 1))
             @retval << "1"
           else
             @retval << "0"
@@ -277,20 +297,20 @@ class MatrixChoiceQuestionIo < QuestionIo
         end
       end
     else
-      issue["rows"].each_index do |r|
-        @retval << (v[r].empty? ? nil : get_item_index(v[r][0]))
+      issue["rows"].each do |item|
+        @retval << (v[item["id"].to_s].empty? ? nil : get_item_index(v[item["id"].to_s][0]))
       end
     end
     return @retval
   end
 
   def answer_import(row, header_prefix)
-    @retval = []
+    @retval = {}
     if issue["max_choice"].to_i > 1
       issue["rows"].each_index do |r|
         row_choices = []
         choiced = 0
-        issue["items"].each_index do |c|
+        issue["items"].each_with_index do |item, c|
           blank? row["#{header_prefix}_r#{r + 1}_c#{c + 1}"]
           if row["#{header_prefix}_r#{r + 1}_c#{c + 1}"] == "1"
             row_choices << get_item_id(c + 1) 
@@ -302,14 +322,14 @@ class MatrixChoiceQuestionIo < QuestionIo
         elsif choiced > issue["max_choice"]
           raise "您选择的稍微多了点,只需要#{issue["max_choice"]}就可以了~"      
         end
-        @retval << row_choices
+        @retval[item["id"].to_s] = row_choices
       end
 
     else
-      issue["rows"].each_index do |r|
+      issue["rows"].each_with_index do |item, r|
         # 单选为啥也要用数组? 不解
         blank? row["#{header_prefix}_r#{r + 1}"]
-        @retval << [get_item_id(row["#{header_prefix}_r#{r + 1}"])]
+        @retval[item["id"].to_s] = [get_item_id(row["#{header_prefix}_r#{r + 1}"])]
       end
     end
 
@@ -328,6 +348,12 @@ class MatrixChoiceQuestionIo < QuestionIo
     raise "您确定有这个选项吗?" unless (0..(self.issue["items"].count)).include? index
     self.issue["items"][index]["id"]
   end
+  def get_item_index(id)
+    self.issue["rows"].each_with_index do |item, index|
+      return index + 1 if item["id"].to_s == id.to_s
+    end
+    return nil
+  end  
 end
 
 class TextBlankQuestionIo < QuestionIo
@@ -492,14 +518,86 @@ class TimeBlankQuestionIo < QuestionIo
 end
 
 class AddressBlankQuestionIo < QuestionIo
+  def csv_header(header_prefix)
+    @retval << "#{header_prefix}"+"_address"
+    if issue["format"] == 15
+      @retval << "#{header_prefix}"+"_detail"
+    end
+    if issue["has_postcode"]
+      @retval << "#{header_prefix}"+"_postcode"
+    end
+    @retval
+  end
+
+  def spss_header(header_prefix)
+    fom = []
+    case issue["format"]
+    when 1 , 2
+      fom = ['省']
+      fom_pre = ['province']
+    when 3 , 4
+      fom = ['省', '市']
+      fom_pre = ['province', 'city']
+    when 7 , 8 , 14
+      fom = ['省', '市', '县/区']
+      fom_pre = ['province', 'city', 'county']
+    when 15
+      fom = ['省', '市', '县/区', '详细']
+      fom_pre = ['province', 'city', 'county', 'detail']
+    end
+    fom.each_with_index do |f, index|
+      @retval << {"spss_name" => "#{header_prefix}_#{fom_pre[index]}",
+                  "spss_type" => SPSS_STRING,
+                  "spss_label" => f}     
+    end
+    if issue["has_postcode"]
+      @retval << {"spss_name" => "#{header_prefix}_postcode",
+                  "spss_type" => SPSS_STRING,
+                  "spss_label" => "邮编"}   
+    end
+    @retval
+  end
+
   def answer_content(v)
     clear_retval
-    @retval << "地址:#{Address.find_province_city_town_by_code(v["address"])},详细:#{v["detail"]},邮编:#{v["postcode"]}"
+    add = QuillCommon::AddressUtility.find_province_city_town_by_code(v["address"]).strip.split('-')
+    case issue["format"]
+    when 1 , 2
+      @retval << add[0]
+    when 3 , 4
+      @retval << add[0]
+      @retval << add[1]
+    when 7 , 8 , 14
+      @retval << add[0]
+      @retval << add[1]
+      @retval << add[2]
+    when 15
+      @retval << add[0]
+      @retval << add[1]
+      @retval << add[2]
+      @retval << v["detail"]
+    end
+    if issue["has_postcode"]
+      @retval << v["postcode"]
+    end
+    @retval
+    # @retval << "地址:#{Address.find_province_city_town_by_code(v["address"])},详细:#{v["detail"]},邮编:#{v["postcode"]}"
     # @retval << v.join(';')
   end
   def answer_import(row, header_prefix)
-    blank? row["#{header_prefix}"]
-    @retval = row["#{header_prefix}"].split(";")
+
+    @retval = {}
+    blank? row["#{header_prefix}"+"_address"]
+    @retval["address"] = row["#{header_prefix}"+"_address"]
+    if issue["has_postcode"]
+      blank? row["#{header_prefix}"+"_postcode"]
+      raise "您填写的不像是个邮编啊" unless only_num?(row["#{header_prefix}"+"_postcode"]) 
+      @retval["postcode"] = row["#{header_prefix}"+"_postcode"]
+    end
+    if issue["format"] == 15
+      blank? row["#{header_prefix}"+"_detail"]
+      @retval["detail"] = row["#{header_prefix}"+"_detail"]
+    end
     return { "#{origin_id}" => @retval}
   end
 end
@@ -628,6 +726,7 @@ class ConstSumQuestionIo < QuestionIo
     end
     return @retval
   end
+
   def answer_content(v)
     return @retval = [] if v.nil?
     clear_retval
@@ -642,6 +741,7 @@ class ConstSumQuestionIo < QuestionIo
     end
     return @retval
   end
+  
   def answer_import(row, header_prefix)
     @retval = {}
     sum = 0.0
@@ -670,8 +770,14 @@ end
 
 class SortQuestionIo < QuestionIo
   def csv_header(header_prefix)
-    issue["items"].each_index do |i|
-      @retval << header_prefix + "_c#{i + 1}"
+    if issue["max"] == -1
+      issue["items"].each_index do |i|
+        @retval << header_prefix + "_s#{i + 1}"
+      end
+    else
+      issue["max"].times do |i|
+        @retval << header_prefix + "_s#{i + 1}"
+      end
     end
     if issue["other_item"]["has_other_item"]
       @retval << header_prefix + INPUT
@@ -680,57 +786,71 @@ class SortQuestionIo < QuestionIo
     return @retval
   end
   def spss_header(header_prefix)
-    issue["items"].each_index do |i|
-      #spss_name << header_prefix + "_c#{i + 1}"
-      @retval << {"spss_name" => header_prefix + "_c#{i + 1}",
-                  "spss_type" => SPSS_STRING,
-                  "spss_label" => issue["items"][i]["content"]["text"]}        
+    if issue["max"] == -1
+      issue["items"].each_index do |i|
+        @retval << {"spss_name" => header_prefix + "_s#{i + 1}",
+                    "spss_type" => SPSS_STRING,
+                    "spss_label" => "第#{i+1}位"} 
+      end
+    else
+      issue["max"].times do |i|
+        @retval << {"spss_name" => header_prefix + "_c#{i + 1}",
+                    "spss_type" => SPSS_STRING,
+                    "spss_label" => "第#{i+1}位"} 
+      end
     end
     if issue["other_item"]["has_other_item"]
-      #spss_name << header_prefix + input
-      #spss_name << header_prefix + input + VALUE
       @retval << {"spss_name" => header_prefix + INPUT,
                   "spss_type" => SPSS_STRING,
                   "spss_label" => SPSS_ETC}
-      @retval << {"spss_name" => header_prefix + INPUT + VALUE,
-                  "spss_type" => SPSS_STRING,
-                  "spss_label" => issue["other_item"]["content"]["text"]}   
     end
     return @retval
   end
+
   def answer_content(v)
-    return @retval = [] if v.nil?
     clear_retval
-    issue["items"].each_with_index do |item, index|
-      rev = v["sort_result"].index(item["id"].to_s)
-      rev += 1 unless rev.nil?
-      @retval << rev
+    if issue["max"] == -1
+      issue["min"].times do |i|
+        @retval << get_item_index(v["sort_result"][i])
+      end
+    else
+      issue["max"].times do |i|
+        @retval << get_item_index(v["sort_result"][i])
+      end
     end
-    # v["sort_result"].each_with_index do |e, i|
-    #   if issue["other_item"]["has_other_item"]
-    #     break if i == v["sort_result"].size - 1
-    #   end
-    #   @retval[i] = e
-    # end
 
     if issue["other_item"]["has_other_item"]
       @retval << v["text_input"]
-      rev = v["sort_result"].index(issue["other_item"]["id"].to_s)
-      rev += 1 unless rev.nil?
-      @retval << rev #这句就是个陷阱!!!
     end
-    return @retval
+    @retval
   end
+
   def answer_import(row, header_prefix)
     @retval = {"sort_result" => []}
-    issue["items"].each_index do |i|
-      blank? row["#{header_prefix}_c#{i + 1}"]
-      @retval["sort_result"] << row["#{header_prefix}_c#{i + 1}"]
+    if issue["max"] == -1
+      issue["min"].times do |i|
+        blank? row["#{header_prefix}_s#{i + 1}"]
+        @retval["sort_result"] << get_item_id(row["#{header_prefix}_s#{i + 1}"]).to_s
+      end
+    else
+      issue["max"].times do |i|
+        blank? row["#{header_prefix}_s#{i + 1}"]
+        @retval["sort_result"] << get_item_id(row["#{header_prefix}_s#{i + 1}"]).to_s
+      end
     end
+    # issue["items"].each_index do |i|
+    #   blank? row["#{header_prefix}_c#{i + 1}"]
+    #   @retval["sort_result"] << get_item_id(row["#{header_prefix}_c#{i + 1}"]).to_s
+    # end
     if issue["other_item"]["has_other_item"]
       @retval["text_input"] = row["#{header_prefix}#{INPUT}"]
-      @retval["sort_result"] << row["#{header_prefix}#{INPUT+VALUE}"]
+      # @retval["sort_result"] << get_item_id(row["#{header_prefix}#{INPUT+VALUE}"]).to_s
     end
+    rc = 0
+    @retval.each do |a|
+      rc += 1 unless a.nil?
+    end
+    raise "至少要排#{issue["min"]}项才可以哦" if rc < issue["min"]
     return { "#{origin_id}" => @retval} 
   end
 end
@@ -749,12 +869,12 @@ class RankQuestionIo < QuestionIo
     end
     return @retval
   end
-  #TODO spss_value_label
+  #TODO spss_value_labels
   def spss_header(header_prefix)
     issue["items"].each_index do |i|
       @retval << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_NUMERIC,
-                  "spss_label" => issue["items"][i]["content"]["text"]}          
+                  "spss_label" => issue["items"][i]["content"]["text"]}
       if issue["items"][i]["has_unknow"]
         @retval << {"spss_name" => header_prefix + "_c#{i + 1}" + UNKNOW,
                     "spss_type" => SPSS_STRING,
@@ -870,12 +990,17 @@ class ScaleQuestionIo < QuestionIo
 
     return @retval
   end
-  #TODO spss_value_label
+  #TODO spss_value_labels
   def spss_header(header_prefix)
+    value_labels = {}
+    issue["labels"].each_with_index do |label, index|
+      value_labels[index + 1] = label
+    end
     issue["items"].each_index do |i|
       @retval << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_NUMERIC,
-                  "spss_label" => issue["items"][i]["content"]["text"]}
+                  "spss_label" => issue["items"][i]["content"]["text"],
+                  "spss_value_labels" => value_labels}
       # if issue["show_unknown"]
       #   @retval << {"spss_name" => header_prefix + "_c#{i + 1}" + UNKNOW,
       #               "spss_type" => SPSS_STRING,
@@ -889,8 +1014,8 @@ class ScaleQuestionIo < QuestionIo
   def answer_content(v)
     clear_retval
     issue["items"].each do |e|
-      @retval << v[e["id"].to_s]
-      @retval << (v[e["id"].to_s] == -1 ? 1 : 0 ) if e["show_unknow"]
+      @retval << v[e["id"].to_s] + 1
+      # @retval << (v[e["id"].to_s] == -1 ? 1 : 0 ) if e["show_unknow"]
     end
     return @retval
   end
@@ -899,7 +1024,7 @@ class ScaleQuestionIo < QuestionIo
     @retval = {}
     issue["items"].each_with_index do |item, index|
       blank? row["#{header_prefix}_c#{index + 1}"]
-      if only_num?(row["#{header_prefix}_c#{index + 1}"], range: 1..5)
+      if only_num?(row["#{header_prefix}_c#{index + 1}"], range: 1..issue["labels"].length)
         @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : row["#{header_prefix}_c#{index + 1}"].to_i - 1)
       else
         raise "您输入的范围好像不太对吧?"

@@ -20,7 +20,11 @@ class EntryClerk::SurveysController < EntryClerk::ApplicationController
     # csv = Marshal::load(params[:csv])
     render_json !!survey do |s|
       if s
-        if result = survey.answer_import(params[:csv])
+        c = params[:csv]
+        if params[:csv].is_a? Array
+          c = params[:csv].join
+        end
+        if result = survey.answer_import(c)
           result
         else
           @is_success = false
