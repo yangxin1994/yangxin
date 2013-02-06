@@ -1,5 +1,5 @@
 <p>您由于回答问卷<strong>《<%=@survey.title%>》</strong>获得了一次“<a class="activate-link" href='<%=@lottery_url%>' target="_blank"><%=@lottery_title%></a>”抽奖机会，抽奖号为：</p>
-<p class='reason'><%=@lottery_code.try(:code)%></p>
+<p class='reason'><%=@lottery_code.try(:_id) %></p>
 <br />
 <p>点击下面按钮查看抽奖号：</p>
 <p><a class='od-button' href="<%=@lottery_code_url%>" target="_blank">查看抽奖号</a></p>

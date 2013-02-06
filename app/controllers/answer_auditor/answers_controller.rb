@@ -89,7 +89,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				question.issue['rows'].each_with_index do |item, index|
 					rows << item['content']['text']
 					row_selected_choices = []
-					val[index].each do |choice_id|
+					(val[item['id'].to_s] || []).each do |choice_id|
 						question.issue["items"].each do |e|
 							row_selected_choices << e["content"]["text"] if choice_id.to_s == e['id'].to_s
 						end
@@ -174,7 +174,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# }	
 				show_answer.merge!({'question_type_label'=> '时间题'})
 
-				show_answer.merge!({"content"=> Time.at(val.to_s[0,10].to_i).strftime("%F")})
+				show_answer.merge!({"content"=> Time.at(val.to_i/1000).strftime("%F")})
 				answer["question_content"] << show_answer
 
 			when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
