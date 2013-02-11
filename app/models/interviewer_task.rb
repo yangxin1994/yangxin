@@ -102,7 +102,7 @@ class InterviewerTask
 			self.quota["finished_count"] += 1
 			self.quota["submitted_count"] += 1
 			self.quota["rules"].each do |rule|
-				if answer.satisfy_conditions(rule["conditions"], false)
+				if answer.satisfy_conditions(rule["conditions"] || [], false)
 					rule["finished_count"] += 1
 					rule["submitted_count"] += 1
 				end
