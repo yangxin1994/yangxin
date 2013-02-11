@@ -130,11 +130,10 @@ class InterviewerTask
 
 	# submit answers
 	def submit_answers(answers)
-		answers_to_insert = []
 		answers.each do |a|
 			# convert the gps or 3g location to a region code
 			region = -1
-			answers_to_insert << {:interviewer_task_id => self._id,
+			answer_to_insert = {:interviewer_task_id => self._id,
 				:survey_id => self.survey_id,
 				:channel => -2,
 				:created_at => Time.at(a["created_at"]),
@@ -143,8 +142,8 @@ class InterviewerTask
 				:attachments => a["attachments"],
 				:status => self.survey.answer_need_review ? Answer::UNDER_REVIEW : Answer::FINISH,
 				:region => region}
+			Answer.create(answer_to_insert)
 		end
-		Answer.collection.insert(answers_to_insert)
 		self.refresh_quota
 		return self
 	end
