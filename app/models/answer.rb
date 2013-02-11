@@ -881,7 +881,7 @@ class Answer
 		self.save
 
 		# update quota of the survey and the interviewer task if there is any
-		self.interviewer_task.try(:update_quota)
+		self.interviewer_task.try(:refresh_quota)
 		self.update_quota(old_status)
 		self.assign_volunteer_reward and self.assign_introducer_reward if self.is_finish
 		return true
