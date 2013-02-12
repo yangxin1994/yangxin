@@ -1,5 +1,5 @@
-require 'securerandom'
 # encoding: utf-8
+require 'securerandom'
 require 'error_enum'
 class Interviewer::MaterialsController < Interviewer::ApplicationController
 

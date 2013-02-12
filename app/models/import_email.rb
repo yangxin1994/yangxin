@@ -10,9 +10,9 @@ class ImportEmail
 		csv = CSV.parse(csv_text, :headers => false)
 		csv.each do |row|
 			if row[0].to_s.include?("@")
-				if User.find_by_email(row[0]).nil? && self.find_by_email(row[0]).nil?
-					ImportEmail.create(:email => row[0], :username => row[0])
-				end
+				# if User.find_by_email(row[0]).nil? && self.find_by_email(row[0]).nil?
+				ImportEmail.create(:email => row[0], :username => row[0])
+				# end
 			end
 		end
 	end

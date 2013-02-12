@@ -102,7 +102,7 @@ class InterviewerTask
 			self.quota["finished_count"] += 1
 			self.quota["submitted_count"] += 1
 			self.quota["rules"].each do |rule|
-				if answer.satisfy_conditions(rule["conditions"], false)
+				if answer.satisfy_conditions(rule["conditions"] || [], false)
 					rule["finished_count"] += 1
 					rule["submitted_count"] += 1
 				end
@@ -113,7 +113,7 @@ class InterviewerTask
 		unreviewed_answers.each do |answer|
 			self.quota["submitted_count"] += 1
 			self.quota["rules"].each do |rule|
-				if answer.satisfy_conditions(rule["conditions"], false)
+				if answer.satisfy_conditions(rule["conditions"] || [], false)
 					rule["submitted_count"] += 1
 				end
 			end
@@ -130,21 +130,20 @@ class InterviewerTask
 
 	# submit answers
 	def submit_answers(answers)
-		answers_to_inserted = []
 		answers.each do |a|
 			# convert the gps or 3g location to a region code
 			region = -1
-			answers_to_inserted << {:interviewer_task_id => self._id,
+			answer_to_insert = {:interviewer_task_id => self._id,
 				:survey_id => self.survey_id,
 				:channel => -2,
 				:created_at => Time.at(a["created_at"]),
-				:finished_at => Time.at(a["finished_at"]),
+				:finished_at => a["finished_at"].to_i,
 				:answer_content => a["answer_content"],
 				:attachments => a["attachments"],
 				:status => self.survey.answer_need_review ? Answer::UNDER_REVIEW : Answer::FINISH,
 				:region => region}
+			Answer.create(answer_to_insert)
 		end
-		Answer.collection.insert(answers)
 		self.refresh_quota
 		return self
 	end
