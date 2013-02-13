@@ -224,23 +224,28 @@ class Survey
 
 	def formated_answers(answers, result_key, task_id)
 		answer_c = []
-    formated_error = []
+		formated_error = []
 		q = self.all_questions_type
 		p "========= 准备完毕 ========="
 		answer_length = answers.length
+		last_time = Time.now.to_i
 		answers.each_with_index do |answer, index|
-      line_answer = []
-      begin
-        all_questions_id.each_with_index do |question, index|
-          line_answer += q[index].answer_content(answer.answer_content[question])
-        end
-      rescue Exception => test
-        formated_error << test
-      else
-      	answer_c << line_answer
-      end
-			TaskClient.set_progress(task_id, "data_conversion_progress", (index+1).to_f / answer_length)
+			line_answer = []
+			begin
+				all_questions_id.each_with_index do |question, index|
+					line_answer += q[index].answer_content(answer.answer_content[question])
+				end
+			rescue Exception => test
+				formated_error << test
+			else
+				answer_c << line_answer
+			end
+			if Time.now.to_i != last_time
+				TaskClient.set_progress(task_id, "data_conversion_progress", (index+1).to_f / answer_length)
+				last_time = Time.now.to_i
+			end
 		end
+		TaskClient.set_progress(task_id, "data_conversion_progress", 1.0)
 		answer_c
 	end
 
@@ -1557,15 +1562,19 @@ class Survey
 		tot_answer_number = 0
 		not_screened_answer_number = 0
 		answers_length = answers.length
+		last_time  =Time.now.to_i
 		answers.each_with_index do |a, index|
 			next if !a.satisfy_conditions(filter_conditions, false)
 			tot_answer_number += 1
 			next if !include_screened_answer && a.is_screened
 			not_screened_answer_number += 1
 			filtered_answers << a
-			#set_status({"find_answers_progress" => (index + 1) * 1.0 / answers_length})
-			TaskClient.set_progress(task_id, "find_answers_progress", (index + 1).to_f / answers_length) if !task_id.nil?
+			if Time.now.to_i != last_time
+				TaskClient.set_progress(task_id, "find_answers_progress", (index + 1).to_f / answers_length) if !task_id.nil?
+				last_time = Time.now.to_i
+			end
 		end
+		TaskClient.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
 		return [filtered_answers, tot_answer_number, tot_answer_number - not_screened_answer_number]
 	end
 

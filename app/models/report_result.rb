@@ -31,6 +31,7 @@ class ReportResult < Result
 									report_style)
 		# analyze the result based on the report mockup
 		component_length = report_mockup.components.length
+		last_time = Time.now.to_i
 		report_mockup.components.each_with_index do |component, i|
 			if component["component_type"] == 0
 				# this is a single question analysis
@@ -440,8 +441,12 @@ class ReportResult < Result
 					report_data.pop_component
 				end
 			end
-			TaskClient.set_progress(task_id, "data_conversion_progress", (i+1).to_f / component_length)
+			if Time.now.to_i != last_time
+				TaskClient.set_progress(task_id, "data_conversion_progress", (i+1).to_f / component_length)
+				last_time = Time.now.to_i
+			end
 		end
+		TaskClient.set_progress(task_id, "data_conversion_progress", 1.0 )
 
 		logger.info "AAAAAAAAAAAAAAAAAA"
 		logger.info report_data.serialize
