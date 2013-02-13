@@ -1,4 +1,5 @@
 require 'error_enum'
+require 'quill_common'
 class InterviewerTask
 	include Mongoid::Document 
 	include Mongoid::Timestamps
@@ -132,7 +133,7 @@ class InterviewerTask
 	def submit_answers(answers)
 		answers.each do |a|
 			# convert the gps or 3g location to a region code
-			region = -1
+			region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
 			answer_to_insert = {:interviewer_task_id => self._id,
 				:survey_id => self.survey_id,
 				:channel => -2,
@@ -140,6 +141,8 @@ class InterviewerTask
 				:finished_at => a["finished_at"].to_i,
 				:answer_content => a["answer_content"],
 				:attachments => a["attachments"],
+				:latitude => a["location"][0].to_s,
+				:longitude => a["location"][1].to_s,
 				:status => self.survey.answer_need_review ? Answer::UNDER_REVIEW : Answer::FINISH,
 				:region => region}
 			Answer.create(answer_to_insert)

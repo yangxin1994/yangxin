@@ -66,7 +66,10 @@ class JobsController < ApplicationController
 			UserMailer.survey_email(u_id, s_id_ary).deliver
 		end
 		surveys_for_imported_email.each do |email, s_id_ary|
-			UserMailer.imported_email_survey_email(email, s_id_ary).deliver
+			begin
+				UserMailer.imported_email_survey_email(email, s_id_ary).deliver
+			rescue
+			end
 		end
 		render_json_s(true) and return
 	end

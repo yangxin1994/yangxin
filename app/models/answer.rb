@@ -52,6 +52,9 @@ class Answer
 	# used for interviewer to upload attachments
 	field :attachment, :type => Hash, :default => {}
 
+	field :longitude, :type => String, :default => ""
+	field :latitude, :type => String, :default => ""
+
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
 
