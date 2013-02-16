@@ -61,16 +61,19 @@ class JobsController < ApplicationController
 			end
 		end
 		# 4. send emails to the samples found
-		# render_json_s(true) and return
-		surveys_for_user.each do |u_id, s_id_ary|
-			UserMailer.survey_email(u_id, s_id_ary).deliver
-		end
-		surveys_for_imported_email.each do |email, s_id_ary|
-			begin
-				UserMailer.imported_email_survey_email(email, s_id_ary).deliver
-			rescue
+		# since this may consume long time, we do this in a separate thread
+		Thread.new {
+			surveys_for_user.each do |u_id, s_id_ary|
+				UserMailer.survey_email(u_id, s_id_ary).deliver
 			end
-		end
+			surveys_for_imported_email.each do |email, s_id_ary|
+				begin
+					UserMailer.imported_email_survey_email(email, s_id_ary).deliver
+				rescue
+				end
+			end
+		}
+		# render_json_s(true) and return
 		render_json_s(true) and return
 	end
 

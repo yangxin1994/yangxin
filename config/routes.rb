@@ -33,6 +33,12 @@ OopsData::Application.routes.draw do
 	
 	resources :lottery_codes 
 
+	resources :browsers do
+		member do
+			put :update_history
+		end
+	end
+
 
 	# alias interface
 	match '/admin/surveys/new' => 'surveys#new'

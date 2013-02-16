@@ -111,6 +111,9 @@ module ErrorEnum
 	INTERVIEWER_NOT_EXIST = 'error_301'
 	INTERVIEWER_TASK_NOT_EXIST = 'error_302'
 
+	# extension error
+	BROWSER_EXTENSION_NOT_EXIST = 'error_400'
+
 	UNKNOWN_ERROR = "error_100000"
 	SAVE_ERROR = "error_200000"
 	FAQ_TYPE_ERROR = "error_100001"
