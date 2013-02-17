@@ -37,6 +37,7 @@ OopsData::Application.routes.draw do
 		member do
 			put :update_history
 			get :get_recommended_surveys
+			get :get_survey_info
 		end
 	end
 

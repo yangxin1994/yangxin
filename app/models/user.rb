@@ -627,4 +627,9 @@ class User
 		summary_info = introduced_users.map { |u| { _id: u._id.to_s, email: u.email, registered_at: u.registered_at } }
 		return summary_info
 	end
+
+	def get_survey_ids_answered
+		survey_ids = self.answers.map { |e| e.survey_id.to_s }
+		return survey_ids.uniq
+	end
 end

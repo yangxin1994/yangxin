@@ -33,4 +33,19 @@ class Browser
 		return true
 	end
 
+	def recommend_surveys_without_reward(exclude_survey_ids)
+		survey_ids = (Survey.normal.where(:reward => 0)).map { |e| e._id.to_s }
+		survey_ids = survey_ids[0..9] if survey_ids.length > 10
+		return survey_ids
+	end
+
+	def recommend_surveys_with_reward(exclude_survey_ids)
+		point_survey_ids = (Survey.normal.where(:reward => 2)).map { |e| e._id.to_s }
+		point_survey_ids = point_survey_ids[0..9] if point_survey_ids.length > 5
+		lottery_survey_ids = (Survey.normal.where(:reward => 1)).map { |e| e._id.to_s }
+		lottery_survey_ids = lottery_survey_ids[0..9] if lottery_survey_ids.length > 5
+		return {
+			:point => point_survey_ids,
+			:lottery => lottery_survey_ids }
+	end
 end
