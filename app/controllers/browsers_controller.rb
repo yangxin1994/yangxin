@@ -21,7 +21,21 @@ class BrowsersController < ApplicationController
 		@browser.update_attribute(:last_request_time => Time.now.to_i)
 
 		# update the history
-		render_json_s and return
+		retval = @browser.update_history(params[:browser_history_array])
+		if retval == true
+			render_json_auto({:version => @be.version}) and return
+		else
+			render_json_auto(retval) and return
+		end
 	end
 
+	def get_recommended_surveys
+		# get the browser instance
+		@browser = Browser.find_by_id(params[:id])
+		render_json_e(ErrorEnum::BROWSER_NOT_EXIST) and return if @browser.nil?
+		@browser.update_attribute(:last_request_time => Time.now.to_i)
+		
+		# obtain the recomended surveys
+		
+	end
 end
