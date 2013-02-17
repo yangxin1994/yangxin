@@ -38,6 +38,7 @@ class BrowsersController < ApplicationController
 		surveys_with_reward = @browser.recommend_surveys_with_reward(exclude_survey_ids)
 		surveys_without_reward = @browser.recommend_surveys_without_reward(exclude_survey_ids)
 		retval = {
+			:version => @be.version,
 			:recomended_surveys => [
 				surveys_without_reward,
 				surveys_with_reward[:point],
