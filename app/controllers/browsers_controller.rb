@@ -41,7 +41,7 @@ class BrowsersController < ApplicationController
 			:recomended_surveys => [
 				surveys_without_reward,
 				surveys_with_reward[:point],
-				surveys_with_reward[:lottery]]
+				surveys_with_reward[:lottery]],
 			:url_surveys => SurveyRecommendation.url_recommendations(exclude_survey_ids)
 			:key_word_surveys => SurveyRecommendation.key_word_recommendations(exclude_survey_ids)}
 		render_json_s(retval) and return
