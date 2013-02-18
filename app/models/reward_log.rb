@@ -32,7 +32,7 @@ class RewardLog
   after_create :operate_user_point
 
   def revoke_operation(user, cause_desc)
-    RewardLog.create(:user_id => self.user.id,
+    RewardLog.create(:user_id => user.id,
                      :point => -self.point,
                      :operator => user,
                      :type => 2,
@@ -45,8 +45,6 @@ class RewardLog
     return false if user.blank?
     return true if point == 0
     if((self.point + user.point) >= 0)
-      logger.info "CCCCCCCCCCCC"
-      logger.info self.point + user.point
       user.inc(:point, self.point)
     else
       self.delete

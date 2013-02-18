@@ -367,6 +367,7 @@ class User
 		self.last_login_client_type = client_type
 		self.login_count = 0 if self.last_login_time.blank? || Time.at(self.last_login_time).day != Time.now.day
 		return ErrorEnum::LOGIN_TOO_FREQUENT if self.login_count > OOPSDATA[RailsEnv.get_rails_env]["login_count_threshold"]
+		return ErrorEnum::USER_LOCKED if self.lock
 		self.login_count = self.login_count + 1
 		self.last_login_time = Time.now.to_i
 		self.auth_key = Encryption.encrypt_auth_key("#{self._id}&#{Time.now.to_i.to_s}")
@@ -523,8 +524,8 @@ class User
 	#++
 
 	scope :normal_list, where(:color => COLOR_NORMAL, :status.gt => -1)
-	scope :black_list, where(:color => COLOR_BLACK)
-	scope :white_list, where(:color => COLOR_WHITE)
+	scope :black_list, where(:color => COLOR_BLACK, :status.gt => -1)
+	scope :white_list, where(:color => COLOR_WHITE, :status.gt => -1)
 	scope :deleted_users, where(status: -1)
 
 	def self.ids_not_in_blacklist

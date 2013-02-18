@@ -58,6 +58,7 @@ class Order
   # TO DO validation verify
   # We must follow the Law of Demeter(summed up as "use only one dot"), and here is the code: 
   delegate :name, :to => :gift, :prefix => true
+  delegate :create, :to => :reward_log, :prefix => true
   #delegate :cash_order, :realgoods_order, :to => "self.need_verify", :prefix => true
   #after_create :decrease_point, :decrease_gift
   def as_retval
