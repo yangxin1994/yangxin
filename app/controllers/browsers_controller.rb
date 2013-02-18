@@ -11,7 +11,7 @@ class BrowsersController < ApplicationController
 	def check_browser_existence
 		@browser = Browser.find_by_id(params[:id])
 		render_json_e(ErrorEnum::BROWSER_NOT_EXIST) and return if @browser.nil?
-		@browser.update_attribute(:last_request_time => Time.now.to_i)
+		@browser.update_attributes(:last_request_time => Time.now.to_i)
 	end
 
 	def create
@@ -34,6 +34,9 @@ class BrowsersController < ApplicationController
 	def get_recommended_surveys
 		# obtain the recomended surveys
 		survey_ids_answered = @current_user.try(:get_survey_ids_answered) || []
+		logger.info "AAAAAAAAAAAAAAA"
+		logger.info survey_ids_answered
+		logger.info "AAAAAAAAAAAAAAA"
 		exclude_survey_ids = ((params[:exclude_survey_ids] || []) + survey_ids_answered).uniq
 		surveys_with_reward = @browser.recommend_surveys_with_reward(exclude_survey_ids)
 		surveys_without_reward = @browser.recommend_surveys_without_reward(exclude_survey_ids)
