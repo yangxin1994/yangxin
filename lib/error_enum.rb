@@ -113,6 +113,7 @@ module ErrorEnum
 
 	# extension error
 	BROWSER_EXTENSION_NOT_EXIST = 'error_400'
+	BROWSER_NOT_EXIST = 'error_401'
 
 	UNKNOWN_ERROR = "error_100000"
 	SAVE_ERROR = "error_200000"
