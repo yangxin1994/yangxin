@@ -23,7 +23,7 @@ class BrowsersController < ApplicationController
 
 	def update_history
 		# update the history
-		retval = @browser.update_history(params[:browser_history_array])
+		retval = @browser.update_history(JSON.parse(params[:browser_history_array]) || [])
 		if retval == true
 			render_json_auto({:version => @be.version}) and return
 		else
@@ -34,7 +34,7 @@ class BrowsersController < ApplicationController
 	def get_recommended_surveys
 		# obtain the recomended surveys
 		survey_ids_answered = @current_user.try(:get_survey_ids_answered) || []
-		exclude_survey_ids = ((params[:exclude_survey_ids] || []) + survey_ids_answered).uniq
+		exclude_survey_ids = ((JSON.parse(params[:exclude_survey_ids]) || []) + survey_ids_answered).uniq
 		surveys_with_reward = @browser.recommend_surveys_with_reward(exclude_survey_ids)
 		surveys_without_reward = @browser.recommend_surveys_without_reward(exclude_survey_ids)
 		retval = {
