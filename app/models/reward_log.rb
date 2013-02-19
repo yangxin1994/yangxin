@@ -11,7 +11,7 @@ class RewardLog
   field :cause_desc, :type => String
   field :value, :type => Hash
   field :ref, :type => String
-  
+
   scope :point_logs, where( :type => 2).order_by("created_at","desc")
   scope :lottery_logs, where( :type => 1).order_by("created_at","desc")
 
