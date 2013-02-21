@@ -1745,8 +1745,9 @@ class Survey
 		rules.each_with_index do |rule, rule_index|
 			case type
 			when 'question_update'
-				item_ids = question.issue["items"].map { |i| i["id"] }
-				row_ids = question.issue["rows"].map { |i| i["id"] } if !question.issue["rows"].nil?
+				next if question.issue["items"].nil? && question.issue["rows"].nil?
+				item_ids = (question.issue["items"].try(:map) { |i| i["id"] }) || []
+				row_ids = (question.issue["rows"].try(:map) { |i| i["id"] }) || []
 				# first handle conditions
 				if question.question_type == 0
 					# only choice questions can be conditions for logic control
