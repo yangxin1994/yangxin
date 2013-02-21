@@ -26,8 +26,8 @@ class NumberBlankIssue < Issue
 
 	def update_issue(issue_obj)
 		issue_obj["precision"] = issue_obj["precision"].to_i
-		issue_obj["min_value"] = issue_obj["min_value"].to_i
-		issue_obj["max_value"] = issue_obj["max_value"].to_i
+		issue_obj["min_value"] = issue_obj["min_value"].to_f
+		issue_obj["max_value"] = issue_obj["max_value"].to_f
 		issue_obj["unit_location"] = issue_obj["unit_location"].to_i
 		super(ATTR_NAME_ARY, issue_obj)
 	end
