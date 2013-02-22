@@ -78,7 +78,7 @@ class Survey
 	field :show_in_community, :type => Boolean, default: false
 	# whether this survey can be promoted by emails or other ways
 	field :promotable, :type => Boolean, :default => false
-	field :promte_email_number, :type => Integer, :default => 0
+	field :promote_email_number, :type => Integer, :default => 0
 	# whether the answers of the survey need to be reviewed
 	field :answer_need_review, :type => Boolean, :default => true
 
