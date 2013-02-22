@@ -234,7 +234,7 @@ a.od-button {
 			<img src="<%= Rails.application.config.quill_host %>/assets/email/logo.png" alt="优数调研">
 		</div>
 		<div class="content">
-			<p>尊敬的<strong class="username"><% if @user.blank? %>用户<% else %> <%=@user.username%> <% end %></strong>你好!</p>
+			<p>尊敬的<strong class="username"><% if @user.blank? || @user.username.blank? %>用户<% else %> <%= @user.username %> <% end %></strong>你好!</p>
 			<br />
 			<%=yield %>
 			<i class="divide"></i>

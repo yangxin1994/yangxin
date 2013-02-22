@@ -31,18 +31,14 @@ class JobsController < ApplicationController
 	def quota_job
 		# 1. get all samples, excluding those are in the blacklist
 		user_ids = User.ids_not_in_blacklist
-		# 2. get the promote email number for each survey
+		# 2. get the surveys that need to send emails
 		published_survey = Survey.get_published_active_surveys
-		email_number_ary = published_survey.map do |e|
-			email_number = e.promote_email_number || 0
-		end
 		# 3. find out samples for surveys
 		surveys_for_user = {}
 		surveys_for_imported_email = {}
 		published_survey.each do |survey|
 			s_id = survey._id.to_s
-			amount = survey.remaining_quota_amount
-			email_number = amount * 3
+			email_number = survey.promote_email_number
 			user_ids_answered = survey.get_user_ids_answered
 			user_ids_sent = EmailHistory.get_user_ids_sent(s_id)
 			user_ids = user_ids - user_ids_answered - user_ids_sent
