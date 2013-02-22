@@ -103,6 +103,12 @@ class User
 
   POINT_TO_INTRODUCER = 10
 
+  index({ email: 1 }, { background: true } )
+  index({ full_name: 1 }, { background: true } )
+  index({ color: 1, status: 1, role: 1 }, { background: true } )
+  index({ status: 1 }, { background: true } )
+  index({ introducer_id: 1, status: 1 }, { background: true } )
+
   private
   def set_updated_at
     self.updated_at = Time.now.to_i

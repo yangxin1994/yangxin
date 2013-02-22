@@ -8,6 +8,8 @@ class Tag
 	
 	has_and_belongs_to_many :surveys, validate: false
 
+	index({ content: 1 }, { background: true } )
+
 	validates_uniqueness_of :content
 
 

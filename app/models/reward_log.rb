@@ -22,6 +22,8 @@ class RewardLog
   belongs_to :operator, :class_name => "User", :inverse_of => :operate_reward_logs
   belongs_to :order, :class_name => "Order", :inverse_of => :reward_log
 
+  index({ type: 1 }, { background: true } )
+
   # TO DO validation
   # validates_presence_of :point, :cause, :operator
   # validates :point, :numericality => true

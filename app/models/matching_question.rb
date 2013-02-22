@@ -5,6 +5,8 @@ class MatchingQuestion
 	field :question_id, :type => String, default: ""
 	field :matching_ary, :type => Array, default: []
 
+	index({ question_id: 1 }, { background: true } )
+
 	def self.find_by_question_id(question_id)
 		matching = MatchingQuestion.where(:question_id => question_id).first
 		return matching

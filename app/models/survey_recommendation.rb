@@ -9,6 +9,8 @@ class SurveyRecommendation
 	field :status, :type => Integer, default: 0
 	has_and_belongs_to_many :surveys, inverse_of: nil
 
+	index({ recommendation_type: 1, status: 1 }, { background: true } )
+
 	def self.url_recommendations(exclude_survey_ids)
 		recommendations = self.where(:recommendation_type => 0, :status.gt => -1)
 		url_recommendations_hash = {}

@@ -18,6 +18,9 @@ class Prize < BasicGift
   has_many :lottery_codes
   has_one :photo, :class_name => "Material", :inverse_of => 'prize'
 
+  index({ is_deleted: 1, status: 1, is_in_ctrl: 1, ctrl_surplus: 1 }, { background: true } )
+  index({ is_deleted: 1, lottery_id: 1 }, { background: true } )
+
   before_save :update_ctrl_time
 
   before_create :add_ctrl_history

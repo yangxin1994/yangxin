@@ -80,6 +80,11 @@ class Answer
 	REDO = 4
 	##### answer import #####
 
+	index({ survey_id: 1, status: 1, reject_type: 1 }, { background: true } )
+	index({ survey_id: 1, is_preview: 1 }, { background: true } )
+	index({ username: 1, password: 1 }, { background: true } )
+	index({ user_id: 1 }, { background: true } )
+	index({ is_preview: 1, introducer_id: 1 }, { background: true } )
 
 	def load_csv(survey=1)
 		filename = "public/import/test.csv"

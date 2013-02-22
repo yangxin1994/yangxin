@@ -9,6 +9,8 @@ class IpInfo
 
 	belongs_to :postcode
 
+	index({ ip: 1 }, { background: true } )
+
 	#--
 	# instance methods
 	#++

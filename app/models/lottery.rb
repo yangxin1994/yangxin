@@ -36,6 +36,9 @@ class Lottery
   validates_presence_of :title
   validates_presence_of :point, :if => :exchangeable?
 
+  index({ is_deleted: 1 }, { background: true } )
+  index({ status: 1 }, { background: true } )
+
   def exchangeable?
     self.exchangeable
   end

@@ -21,6 +21,8 @@ class QualityControlQuestion < BasicQuestion
 	scope :objective_questions, lambda { where(:quality_control_type => 1) }
 	scope :matching_questions, lambda { where(:quality_control_type => 2, :is_first=> true) }
 
+	index({ quality_control_type: 1, is_first: 1 }, { background: true } )
+
 	def self.create_quality_control_question(quality_control_type, question_type, question_number, operator)
 		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_super_admin
 		return ErrorEnum::WRONG_QUESTION_TYPE if !self.has_question_type(question_type)

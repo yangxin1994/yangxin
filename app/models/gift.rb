@@ -18,4 +18,6 @@ class Gift < BasicGift
 	validates :point, :presence => true,
 										:numericality => { :greater_than_or_equal_to => 0 }
 
+	index({ is_deleted: 1, status: 1}, { background: true } )
+
 end

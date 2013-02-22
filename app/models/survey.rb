@@ -119,6 +119,19 @@ class Survey
 	scope :in_community, lambda { where(:show_in_community => true) }
 	scope :is_promotable, lambda { where(:promotable => true) }
 
+	index({ status: 1, publish_status: 1, show_in_community: 1, title: 1 }, { background: true } )
+	index({ show_in_community: 1, title: 1 }, { background: true } )
+	index({ title: 1 }, { background: true } )
+	index({ status: 1, show_in_community: 1, title: 1 }, { background: true } )
+	index({ status: 1, title: 1 }, { background: true } )
+	index({ status: 1, publish_status: 1, title: 1 }, { background: true } )
+	index({ new_survey: 1, publish_status: 1 }, { background: true } )
+	index({ status: 1, reward: 1, publish_status: 1 }, { background: true } )
+	index({ status: 1, new_survey: 1 }, { background: true } )
+	index({ status: 1, is_star: 1 }, { background: true } )
+	index({ status: 1, promotable: 1, publish_status: 1 }, { background: true } )
+	index({ spreadable: 1 }, { background: true } )
+
 	before_create :set_new
 
 	before_save :clear_survey_object

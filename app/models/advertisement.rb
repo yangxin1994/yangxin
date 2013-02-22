@@ -21,6 +21,9 @@ class Advertisement
 	scope :activated, where(activate: true)
 	scope :list_by_title, ->(title){ where(title: title.to_s.strip) }
 	
+	index({ title: 1, activate: 1 }, { background: true })
+	index({ activate: 1 }, { background: true })
+
 	#--
 	# instance methods
 	#++

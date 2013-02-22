@@ -16,6 +16,10 @@ class Result
 
 	belongs_to :survey
 
+	index({ task_id: 1 }, { background: true } )
+	index({ result_key: 1, ref_result_id: 1 }, { background: true } )
+	index({ result_key: 1, ref_result_id: 1, status: 1 }, { background: true } )
+
 	def self.find_by_result_id(result_id)
 		return Result.where(:_id => result_id)[0]
 	end

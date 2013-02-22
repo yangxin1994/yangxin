@@ -33,6 +33,8 @@ class LotteryCode
 
   validates :num, :numericality => { :greater_than_or_equal_to => 0 }
 
+  index({ status: 1 }, { background: true } )
+
   def draw
     self.lottery.draw(self) #unless self.status > 0
   end

@@ -15,6 +15,9 @@ class Faq
 		
 	#faq_type max number
 	MAX_TYPE = 7
+
+	index({ faq_type: 1, question: 1 }, { background: true } )
+	index({ faq_type: 1, answer: 1 }, { background: true } )
 	
 	#--
 	# class methods

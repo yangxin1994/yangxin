@@ -8,6 +8,9 @@ class PublicNotice
 	field :public_notice_type, :type => Integer
 
 	belongs_to :user
+
+	index({ title: 1, public_notice_type: 1 }, { background: true } )
+	index({ public_notice_type: 1, content: 1 }, { background: true } )
 	
 	attr_accessible :title, :content, :attachment, :public_notice_type
 

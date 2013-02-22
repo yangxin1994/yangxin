@@ -33,6 +33,15 @@ class Feedback
 	# class methods
 	#++
 	
+	index({ feedback_type: 1, title: 1, is_answer: 1 }, { background: true } )
+	index({ title: 1, is_answer: 1 }, { background: true } )
+	index({ is_answer: 1 }, { background: true } )
+	index({ feedback_type: 1, is_answer: 1 }, { background: true } )
+	index({ question_user_id: 1, feedback_type: 1, title: 1, is_answer: 1 }, { background: true } )
+	index({ question_user_id: 1, title: 1, is_answer: 1 }, { background: true } )
+	index({ question_user_id: 1, is_answer: 1 }, { background: true } )
+	index({ question_user_id: 1, feedback_type: 1, is_answer: 1 }, { background: true } )
+
 	class << self
 
 		#*description*: verify the feedback_type value
