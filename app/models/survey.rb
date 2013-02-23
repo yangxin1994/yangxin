@@ -1883,26 +1883,33 @@ class Survey
 		if question.question_type == 0
 			# only choice questions can be conditions of quotas
 			rules = self.quota["rules"]
+			need_refresh_quota = false
 			rules.each_with_index do |rule, rule_index|
 				next if rule["conditions"].blank?
 				case type
 				when 'question_update'
 					item_ids = question.issue["items"].map { |i| i["id"] }
 					row_ids = question.issue["items"].map { |i| i["id"] }
+					need_refresh_quota = false
 					rule["conditions"].each do |c|
 						next if c["condition_type"] != 1 || c["name"] != question_id
 						# this condition is about the updated question
+						l1 = c["value"].length
 						c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
+						need_refresh_quota = true if l1 != c["value"].length
 					end
 					rule["conditions"].delete_if { |c| c["value"].blank? }
 					rules.delete_at(rule_index) if rule["conditions"].blank?
-					self.refresh_quota_stats
 				when 'question_delete'
+					l1 = rule["conditions"].length
 					rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
-					rules.delete_at(rule_index) if rule["conditions"].blank?
-					self.refresh_quota_stats
+					if l1 != rule["conditions"].length
+						rules.delete_at(rule_index) if rule["conditions"].blank?
+						need_refresh_quota = true
+					end
 				end
 			end 
+			self.refresh_quota_stats if need_refresh_quota
 			self.save
 		end
 		# then adjust the filters
