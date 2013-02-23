@@ -21,6 +21,6 @@ class EmailHistory
 		selected_email_histories = survey.email_histories.select do |e|
 			!e.email.blank?
 		end
-		return selected_email_histories.map { |e| e.mail }
+		return selected_email_histories.map { |e| e.email }
 	end
 end
