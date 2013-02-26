@@ -4,7 +4,7 @@ class EmailHistory
 	field :success, :type => Boolean
 	field :email, :type => String
 	belongs_to :user
-	belongs_to :survey
+	belongs_to :survey, index: true
 	index({ survey_id: 1 }, { background: true } )
 
 	def self.get_user_ids_sent(survey_id)
