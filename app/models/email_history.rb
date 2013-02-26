@@ -18,9 +18,7 @@ class EmailHistory
 	def self.get_emails_sent(survey_id)
 		survey = Survey.find_by_id(survey_id)
 		emails_sent = []
-		selected_email_histories = survey.email_histories.select do |e|
-			!e.email.blank?
-		end
-		return selected_email_histories.map { |e| e.email }
+		selected_emails = survey.email_histories.map { |e| e.email }
+		return selected_emails.uniq
 	end
 end
