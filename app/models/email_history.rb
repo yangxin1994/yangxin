@@ -5,14 +5,13 @@ class EmailHistory
 	field :email, :type => String
 	belongs_to :user
 	belongs_to :survey
+	index({ survey_id: 1 }, { background: true } )
 
 	def self.get_user_ids_sent(survey_id)
 		survey = Survey.find_by_id(survey_id)
 		user_ids_sent = []
-		survey.email_histories.each do |e|
-			user_ids_sent << e.user_id.to_s if !e.user.nil?
-		end
-		return user_ids_sent
+		selected_user_ids = survey.email_histories.map { |e| e.user_id.to_s }
+		return selected_user_ids
 	end
 
 	def self.get_emails_sent(survey_id)
