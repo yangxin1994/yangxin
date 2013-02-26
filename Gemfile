@@ -10,7 +10,7 @@ gem 'httparty'
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 
 gem 'rack-protection'
-gem 'mongoid', " ~> 2.4"
+gem 'mongoid', " ~> 3.0"
 gem 'bson_ext'
 gem 'ezcrypto'
 gem 'log4r'
@@ -40,7 +40,7 @@ group :assets do
 	gem 'jquery-rails'
 	#gem 'mini_captcha', :path => "~/Rrojects/mini_captcha/"
 	# attachment
-	gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
+	# gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
   # gem for compass.
   # gem 'compass-rails'
 end

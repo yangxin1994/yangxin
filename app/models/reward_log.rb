@@ -12,8 +12,8 @@ class RewardLog
   field :value, :type => Hash
   field :ref, :type => String
 
-  scope :point_logs, where( :type => 2).order_by("created_at","desc")
-  scope :lottery_logs, where( :type => 1).order_by("created_at","desc")
+  scope :point_logs, where( :type => 2).order_by(:created_at.desc)
+  scope :lottery_logs, where( :type => 1).order_by(:created_at.desc)
 
   has_one :lottery_code
   belongs_to :filled_survey, :class_name => "Survey", :inverse_of => :reward_logs

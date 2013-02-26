@@ -40,14 +40,14 @@ class Order
 		:inclusion => { :in => -3..3 },
 		:numericality => true
 
-	default_scope where(:is_deleted => false).order_by(:created_at, :desc)
+	default_scope where(:is_deleted => false).order_by(:created_at.desc)
 
 	scope :for_cash, where( :type => 0)
 	scope :for_entity, where( :type => 1)
 	scope :for_virtual, where( :type => 2)
 	scope :for_lottery, where( :type => 3)
 
-	scope :need_verify, where( :status => 0).order_by(:created_at, :asc)
+	scope :need_verify, where( :status => 0).order_by(:created_at.asc)
 	scope :verified, where( :status => 1)
 	scope :verify_failed, where( :status => -1)
 	scope :canceled, where( :status => -2)

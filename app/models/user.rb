@@ -99,7 +99,6 @@ class User
   has_many :reviewed_answers, class_name: "Answer", inverse_of: :auditor
 
   scope :unregistered, where(status: 0)
-  scope :receive_email_user
 
   POINT_TO_INTRODUCER = 10
 

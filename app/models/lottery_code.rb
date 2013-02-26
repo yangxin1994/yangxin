@@ -22,14 +22,14 @@ class LotteryCode
 
   delegate :title, :status, :photo_url , :exchangeable, :description, :to => :lottery, :prefix => true
 
-  default_scope order_by(:updated_at, :desc)
+  default_scope order_by(:updated_at.desc)
 
   scope :for_draw, where(:status => 0)
-  scope :drawed, where(:status.gt => 0).order_by(:drawed_at, :desc)
-  scope :drawed_f, where(:status => 1).order_by(:drawed_at, :desc)
-  scope :drawed_w, where(:status.gt => 1).order_by(:drawed_at, :desc)
-  scope :drawed_w_n, where(:status => 2).order_by(:drawed_at, :desc)
-  scope :drawed_w_o, where(:status => 4).order_by(:drawed_at, :desc)
+  scope :drawed, where(:status.gt => 0).order_by(:drawed_at.desc)
+  scope :drawed_f, where(:status => 1).order_by(:drawed_at.desc)
+  scope :drawed_w, where(:status.gt => 1).order_by(:drawed_at.desc)
+  scope :drawed_w_n, where(:status => 2).order_by(:drawed_at.desc)
+  scope :drawed_w_o, where(:status => 4).order_by(:drawed_at.desc)
 
   validates :num, :numericality => { :greater_than_or_equal_to => 0 }
 
