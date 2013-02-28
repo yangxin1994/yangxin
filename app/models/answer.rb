@@ -65,7 +65,8 @@ class Answer
 
 	scope :unreviewed, lambda { where(:status => 2) }
 
-	belongs_to :user
+	# belongs_to :user
+	belongs_to :user, class_name: "User", inverse_of: :answers
 	belongs_to :survey
 	belongs_to :interviewer_task
 	belongs_to :lottery
