@@ -15,7 +15,7 @@ class Material
 	belongs_to :lottery, :inverse_of => 'photo'
 	belongs_to :user
 
-	default_scope ->(o = 'ASC'){order_by(:created_at.o) }
+	default_scope ->(o = 'ASC'){order_by(:created_at.try(o.to_sym)) }
 
 	before_save :set_picture_url
 
