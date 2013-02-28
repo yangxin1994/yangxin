@@ -15,15 +15,15 @@ class Lottery
   field :weight, :type => Integer, :default => 100000
   #field :prize_interval, :type => Array, :default => []
 
-  default_scope order_by(:created_at => :desc)
+  default_scope order_by(:created_at.desc)
 
   scope :for_publish, where(:status => 0).where(:is_deleted => false)
   scope :is_display, where(:status => 1).where(:is_deleted => false)
   scope :pause, where(:status => 2).where(:is_deleted => false)
   scope :activity, where(:status => 3).where(:is_deleted => false)
   scope :deleted, where(:is_deleted => true)
-  # scope :quillme, where( '$or' => [:status => 1, :status => 3]).order_by(:status, :desc)
-  scope :quillme, where('$or' => [{:status => 1}, {:status => 3}]).where(:is_deleted => false).order_by(:created_at => :desc)
+  # scope :quillme, where( '$or' => [:status => 1, :status => 3]).order_by(:status.desc)
+  scope :quillme, where('$or' => [{:status => 1}, {:status => 3}]).where(:is_deleted => false).order_by(:created_at.desc)
  
   has_many :surveys
   has_many :answers
