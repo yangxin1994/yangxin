@@ -259,6 +259,7 @@ class Survey
 				last_time = Time.now.to_i
 			end
 		end
+		binding.pry
 		TaskClient.set_progress(task_id, "data_conversion_progress", 1.0)
 		answer_c
 	end

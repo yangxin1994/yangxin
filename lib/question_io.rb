@@ -933,6 +933,7 @@ class ParagraphIo < QuestionIo
   end
 
   def answer_content(v, header_prefix)
+    clear_retval
     @retval = []
   end
 
