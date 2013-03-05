@@ -442,8 +442,8 @@ class TimeBlankQuestionIo < QuestionIo
   @time_unit = ["年", "月", "周", "天", "时", "分", "秒"]
   # @time_unit = ["Y", "M", "W", "D", "H", "M", "S"]
   def answer_content(v, header_prefix)
-    return Array.new(csv_header(header_prefix).count) if v.nil?
     clear_retval
+    return Array.new(csv_header(header_prefix).count) if v.nil?
     # @time_unit.each_with_index do |e, i|
     #   @retval << "#{v[i]}#{e}" if v[i] != 0
     # end
@@ -735,8 +735,8 @@ class ConstSumQuestionIo < QuestionIo
   end
 
   def answer_content(v, header_prefix)
-    return Array.new(csv_header(header_prefix).count) if v.nil?
     clear_retval
+    return Array.new(csv_header(header_prefix).count) if v.nil?
     v.each do |k, c|
       unless k == "text_input" || k == issue["other_item"]["input_id"]
         @retval << c
