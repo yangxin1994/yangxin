@@ -197,7 +197,7 @@ class Answer
 	end
 
 	def is_screened
-		return status == 1 && reject_type == 2
+		return status == 1 && reject_type == 3
 	end
 
 	def genereate_random_quality_control_questions

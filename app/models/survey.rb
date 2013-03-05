@@ -1581,8 +1581,8 @@ class Survey
 		answers.each_with_index do |a, index|
 			next if !a.satisfy_conditions(filter_conditions, false)
 			tot_answer_number += 1
+			not_screened_answer_number += 1 if !a.is_screened
 			next if !include_screened_answer && a.is_screened
-			not_screened_answer_number += 1
 			filtered_answers << a
 			if Time.now.to_i != last_time
 				TaskClient.set_progress(task_id, "find_answers_progress", (index + 1).to_f / answers_length) if !task_id.nil?
