@@ -37,7 +37,7 @@ class Survey
 	# can be 0 (normal), or -1 (deleted)
 	field :status, :type => Integer, default: 0 
 	# can be 1 (closed), 2 (under review), 8 (published), the 4(pause) has been removed
-	field :publish_status, :type => Integer, default: 1
+	field :publish_status, :type => Integer, default: 8
 	field :user_attr_survey, :type => Boolean, default: false
 	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
 	field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100, "finished_count" => 0, "submitted_count" => 0], "is_exclusive" => true, "quota_satisfied" => false, "finished_count" => 0, "submitted_count" => 0 }
@@ -80,7 +80,7 @@ class Survey
 	field :promotable, :type => Boolean, :default => false
 	field :promote_email_number, :type => Integer, :default => 0
 	# whether the answers of the survey need to be reviewed
-	field :answer_need_review, :type => Boolean, :default => true
+	field :answer_need_review, :type => Boolean, :default => false
 
 	belongs_to :user
 	has_and_belongs_to_many :tags do
