@@ -59,6 +59,7 @@ class QuestionIo
 
   def clear_retval
     @retval = []
+    @csv_header = []
   end
 
   def ret
