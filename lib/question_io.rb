@@ -44,9 +44,9 @@ class QuestionIo
     spss_header(header_prefix).map{|s| s['spss_label']}
   end
 
-  def answer_content(v)
+  def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(csv_header.count) if v.nil?
+    return Array.new(csv_header(header_prefix).count) if v.nil?
     @retval << v
   end
 
@@ -59,6 +59,7 @@ class QuestionIo
 
   def clear_retval
     @retval = []
+    @csv_header = []
   end
 
   def ret
@@ -164,9 +165,9 @@ class ChoiceQuestionIo < QuestionIo
     return @retval
   end
 
-  def answer_content(v)
+  def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(csv_header.count) if v.nil?
+    return Array.new(csv_header(header_prefix).count) if v.nil?
     if issue["max_choice"].to_i > 1
       issue["items"].each do |item|
         if v["selection"].include? item["id"]
@@ -287,9 +288,9 @@ class MatrixChoiceQuestionIo < QuestionIo
     return @retval
   end
 
-  def answer_content(v)
+  def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(csv_header.count) if v.nil?
+    return Array.new(csv_header(header_prefix).count) if v.nil?
     if issue["max_choice"].to_i > 1
       issue["rows"].each do |item|
         issue["items"].each_index do |c|
@@ -441,9 +442,9 @@ end
 class TimeBlankQuestionIo < QuestionIo
   @time_unit = ["年", "月", "周", "天", "时", "分", "秒"]
   # @time_unit = ["Y", "M", "W", "D", "H", "M", "S"]
-  def answer_content(v)
-    return Array.new(csv_header.count) if v.nil?
+  def answer_content(v, header_prefix)
     clear_retval
+    return Array.new(csv_header(header_prefix).count) if v.nil?
     # @time_unit.each_with_index do |e, i|
     #   @retval << "#{v[i]}#{e}" if v[i] != 0
     # end
@@ -562,9 +563,9 @@ class AddressBlankQuestionIo < QuestionIo
     @retval
   end
 
-  def answer_content(v)
+  def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(csv_header.count) if v.nil?
+    return Array.new(csv_header(header_prefix).count) if v.nil?
     add = QuillCommon::AddressUtility.find_province_city_town_by_code(v["address"]).strip.split('-')
     case issue["format"]
     when 1 , 2
@@ -624,9 +625,9 @@ class BlankQuestionIo < QuestionIo
     return @retval
   end
 
-  def answer_content(v)
+  def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(csv_header.count) if v.nil?
+    return Array.new(csv_header(header_prefix).count) if v.nil?
     issue["items"].each_index do |i|
       q = Question.new(:content => issue["items"][i]["content"],
                        :issue => issue["items"][i]["properties"],
@@ -672,9 +673,9 @@ class MatrixBlankQuestionIo < QuestionIo
     return @retval
   end
 
-  def answer_content(v)
+  def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(csv_header.count) if v.nil?
+    return Array.new(csv_header(header_prefix).count) if v.nil?
     issue["row_id"].each_index do |r|
       issue["items"].each_index do |i|
         q = Question.new(:content => issue["items"][i]["content"],
@@ -734,9 +735,9 @@ class ConstSumQuestionIo < QuestionIo
     return @retval
   end
 
-  def answer_content(v)
-    return Array.new(csv_header.count) if v.nil?
+  def answer_content(v, header_prefix)
     clear_retval
+    return Array.new(csv_header(header_prefix).count) if v.nil?
     v.each do |k, c|
       unless k == "text_input" || k == issue["other_item"]["input_id"]
         @retval << c
@@ -814,9 +815,9 @@ class SortQuestionIo < QuestionIo
     return @retval
   end
 
-  def answer_content(v)
+  def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(csv_header.count) if v.nil?
+    return Array.new(csv_header(header_prefix).count) if v.nil?
     if issue["max"] == -1
       issue["min"].times do |i|
         @retval << get_item_index(v["sort_result"][i])
@@ -900,9 +901,9 @@ class RankQuestionIo < QuestionIo
     end
     return @retval
   end
-  def answer_content(v)
+  def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(csv_header.count) if v.nil?
+    return Array.new(csv_header(header_prefix).count) if v.nil?
     issue["items"].each do |e|
       @retval << v[e["input_id"]]
       @retval << (v[e["input_id"]] == -1 ? 1 : 0 ) if e["has_unknow"]
@@ -931,7 +932,7 @@ class ParagraphIo < QuestionIo
     @csv_header = []
   end
 
-  def answer_content(v)
+  def answer_content(v, header_prefix)
     @retval = []
   end
 
@@ -963,9 +964,9 @@ class TableQuestionIo < QuestionIo
     end
     return @retval
   end
-  def answer_content(v)
+  def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(csv_header.count) if v.nil?
+    return Array.new(csv_header(header_prefix).count) if v.nil?
     issue["items"].each_index do |i|
       q = Question.new(:content => issue["items"][i]["content"],
                        :issue => issue["items"][i]["properties"],
@@ -1021,9 +1022,9 @@ class ScaleQuestionIo < QuestionIo
     return @retval
   end
 
-  def answer_content(v)
+  def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(csv_header.count) if v.nil?
+    return Array.new(csv_header(header_prefix).count) if v.nil?
     issue["items"].each do |e|
       @retval << v[e["id"].to_s] + 1
       # @retval << (v[e["id"].to_s] == -1 ? 1 : 0 ) if e["show_unknow"]
