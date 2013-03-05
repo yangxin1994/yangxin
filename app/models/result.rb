@@ -77,7 +77,7 @@ class Result
 				s = s1 * 0.6 + s2 * 0.4
 			end
 		when "to_excel"
-			s1 = progress["data_conversion_progress"] || 0
+			s1 = progress["data_conversion_progress"].to_f
 			if s1 < 1
 				s = s1 * 0.6
 			else
