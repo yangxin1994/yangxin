@@ -149,11 +149,13 @@ class JobsController < ApplicationController
 				end
 			end
 			# generate the report
-			retval = report_result.generate_report(report_mockup,
+			Thread.new {
+				report_result.generate_report(report_mockup,
 												params[:report_type],
 												params[:report_style],
 												answers_transform)
-			render_json_auto(retval) and return
+			}
+			render_json_auto(true) and return
 		when "to_spss"
 			survey = Survey.find_by_id(params[:survey_id])
 			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?

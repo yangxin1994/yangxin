@@ -456,11 +456,18 @@ class ReportResult < Result
 			{"report_data" => report_data.serialize, "job_id" => task_id}
 		end
 		return retval if retval.to_s.start_with?('error')
-		return ErrorEnum::DOTNET_HTTP_ERROR if retval.code != "200"
-		return ErrorEnum::DOTNET_INTERNAL_ERROR if retval.body.start_with?('error:')
-		self.file_uri = retval.body
-		self.status = 1
-		return self.save
+		if retval.code != "200"
+			self.status = -1
+			self.error_code = ErrorEnum::DOTNET_HTTP_ERROR
+		elsif retval.body.start_with?('error:')
+			return ErrorEnum::DOTNET_INTERNAL_ERROR
+			self.status = -1
+			self.error_code = ErrorEnum::DOTNET_INTERNAL_ERROR
+		else
+			self.status = 1
+			self.file_uri = retval.body
+		end
+		self.save
 	end
 
 	# cross analysis and description generation
