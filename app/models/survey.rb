@@ -35,7 +35,7 @@ class Survey
 	field :new_survey, :type => Boolean, default: true
 	field :alt_new_survey, :type => Boolean, default: false
 	# can be 0 (normal), or -1 (deleted)
-	field :status, :type => Integer, default: 0 
+	field :status, :type => Integer, default: 0
 	# can be 1 (closed), 2 (under review), 8 (published), the 4(pause) has been removed
 	field :publish_status, :type => Integer, default: 8
 	field :user_attr_survey, :type => Boolean, default: false
@@ -73,7 +73,7 @@ class Survey
 	field :spreadable, :type => Boolean, :default => false
 	# reward for introducing others
 	field :spread_point, :type => Integer, :default => 0
-	# reward: 0: nothing, 1: prize, 2: point 
+	# reward: 0: nothing, 1: prize, 2: point
 	field :reward, :type => Integer, :default => 0
 	field :show_in_community, :type => Boolean, default: false
 	# whether this survey can be promoted by emails or other ways
@@ -143,7 +143,7 @@ class Survey
 	META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
 
 	public
-	
+
 	def all_questions
 		q = []
 		# quota_template_question_page.each do |page|
@@ -168,7 +168,7 @@ class Survey
 	end
 
 	#----------------------------------------------
-	#  
+	#
 	#     file export interface
 	#
 	#++++++++++++++++++++++++++++++++++++++++++++++
@@ -247,7 +247,7 @@ class Survey
 			line_answer = []
 			begin
 				all_questions_id.each_with_index do |question, index|
-					line_answer += q[index].answer_content(answer.answer_content[question])
+					line_answer += q[index].answer_content(answer.answer_content[question], "q#{index + 1}")
 				end
 			rescue Exception => test
 				formated_error << test
@@ -298,8 +298,8 @@ class Survey
 				else
 					batch << {:answer_content => line_answer,
 										:import_id => row["import_id"],
-										:channel => -1, 
-										:survey_id => self._id, 
+										:channel => -1,
+										:survey_id => self._id,
 										:status => 3,
 										:random_quality_control_answer_content => {},
 										:random_quality_control_locations => {},
@@ -317,7 +317,7 @@ class Survey
 				end
 			end
 		end
-		# return false if batch.empty? 
+		# return false if batch.empty?
 		Answer.collection.insert(batch) unless batch.empty?
 		self.refresh_quota_stats
 		self.save
@@ -440,7 +440,7 @@ class Survey
 	def self.find_by_ids(survey_id_list)
 		return Survey.all.in(_id: survey_id_list)
 	end
-	
+
 	def self.find_new_by_user(user)
 		return user.surveys.where(:new_survey => true)[0]
 	end
@@ -512,7 +512,7 @@ class Survey
 
 	def update_access_control_setting(access_control_setting_obj)
 		access_control_setting_obj["times_for_one_computer"] = access_control_setting_obj["times_for_one_computer"].to_i
-		access_control_setting_obj["password_control"]["password_type"] = 
+		access_control_setting_obj["password_control"]["password_type"] =
 			access_control_setting_obj["password_control"]["password_type"].to_i
 		self.access_control_setting = access_control_setting_obj
 		self.save
@@ -676,7 +676,7 @@ class Survey
 
 		return new_instance
 	end
-		
+
 	#*description*: add a tag to the survey
 	#
 	#*params*:
@@ -752,8 +752,8 @@ class Survey
 		# message
 		message ||={}
 		operator.create_message(
-			message[:title] || '管理人员-拒绝问卷审核', 
-			message[:content] || '问卷有问题噢！', 
+			message[:title] || '管理人员-拒绝问卷审核',
+			message[:content] || '问卷有问题噢！',
 			[] << self.user.id.to_s)
 
 		return true
@@ -780,8 +780,8 @@ class Survey
 		# message
 		message ||={}
 		operator.create_message(
-			message[:title] || '管理人员-通过问卷审核', 
-			message[:content] || '问卷通过审核，己发布!', 
+			message[:title] || '管理人员-通过问卷审核',
+			message[:content] || '问卷通过审核，己发布!',
 			[] << self.user.id.to_s)
 		return true
 	end
@@ -869,7 +869,7 @@ class Survey
 	def insert_template_question(page_index, question_id, template_question_id)
 		template_question = TemplateQuestion.find_by_id(template_question_id)
 		return ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST if template_question.nil?
-		
+
 		current_page = self.pages[page_index]
 		return ErrorEnum::OVERFLOW if current_page == nil
 		if question_id.to_s == "-1"
@@ -1021,7 +1021,7 @@ class Survey
 	#*retval*:
 	#* the question object if successfully obtained
 	#* ErrorEnum ::UNAUTHORIZED
-	#* ErrorEnum ::QUESTION_NOT_EXIST 
+	#* ErrorEnum ::QUESTION_NOT_EXIST
 	def get_question_inst(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
 		question = Question.find_by_id(question_id)
@@ -1039,7 +1039,7 @@ class Survey
 	#* true if successfully deleted
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
-	#* ErrorEnum ::QUESTION_NOT_EXIST 
+	#* ErrorEnum ::QUESTION_NOT_EXIST
 	def delete_question(question_id)
 		question = BasicQuestion.find_by_id(question_id)
 		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
@@ -1070,7 +1070,7 @@ class Survey
 	#* true if successfully created
 	#* false
 	#* ErrorEnum ::UNAUTHORIZED
-	#* ErrorEnum ::OVERFLOW 
+	#* ErrorEnum ::OVERFLOW
 	def create_page(page_index, page_name)
 		return ErrorEnum::OVERFLOW if page_index < -1 or page_index > self.pages.length - 1
 		new_page = {"name" => page_name, "questions" => []}
@@ -1118,8 +1118,8 @@ class Survey
 	#
 	#*retval*:
 	#* the page object if successfully obtained
-	#* ErrorEnum ::UNAUTHORIZED 
-	#* ErrorEnum ::OVERFLOW 
+	#* ErrorEnum ::UNAUTHORIZED
+	#* ErrorEnum ::OVERFLOW
 	def show_page(page_index)
 		current_page = self.pages[page_index]
 		return ErrorEnum::OVERFLOW if current_page.nil?
@@ -1146,9 +1146,9 @@ class Survey
 	#
 	#*retval*:
 	#* the object of the cloned page if successfully cloned
-	#* ErrorEnum ::UNAUTHORIZED 
-	#* ErrorEnum ::OVERFLOW 
-	#* ErrorEnum ::QUESTION_NOT_EXIST 
+	#* ErrorEnum ::UNAUTHORIZED
+	#* ErrorEnum ::OVERFLOW
+	#* ErrorEnum ::QUESTION_NOT_EXIST
 	def clone_page(page_index_1, page_index_2)
 		current_page = self.pages[page_index_1]
 		return ErrorEnum::OVERFLOW if current_page == nil
@@ -1362,7 +1362,7 @@ class Survey
 	end
 
 	def get_user_ids_answered
-		return self.answers.not_preview.map {|a| a.user_id.to_s}  
+		return self.answers.not_preview.map {|a| a.user_id.to_s}
 	end
 
 	def estimate_answer_time
@@ -1908,7 +1908,7 @@ class Survey
 						need_refresh_quota = true
 					end
 				end
-			end 
+			end
 			self.refresh_quota_stats if need_refresh_quota
 			self.save
 		end
@@ -1933,7 +1933,7 @@ class Survey
 					rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
 					rules.delete_at(rule_index) if rule["conditions"].blank?
 				end
-			end 
+			end
 			self.save
 		end
 	end
