@@ -995,11 +995,10 @@ class ScaleQuestionIo < QuestionIo
   def csv_header(header_prefix)
     issue["items"].each_index do |i|
       @csv_header << header_prefix + "_c#{i + 1}"
-      if issue["show_unknown"]
-        @csv_header << header_prefix + "_c#{i + 1}" + UNKNOW
-      end
     end
-
+    issue["items"].each_index do |i|
+      @csv_header << header_prefix + "_c#{i + 1}",
+    end
     return @retval
   end
   #TODO spss_value_labels
