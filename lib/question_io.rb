@@ -997,7 +997,7 @@ class ScaleQuestionIo < QuestionIo
       @csv_header << header_prefix + "_c#{i + 1}"
     end
     issue["items"].each_index do |i|
-      @csv_header << header_prefix + "_c#{i + 1}",
+      @csv_header << header_prefix + "_c#{i + 1}"
     end
     return @retval
   end
