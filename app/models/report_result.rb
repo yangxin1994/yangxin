@@ -455,8 +455,10 @@ class ReportResult < Result
 		retval = ConnectDotNet.send_data "/ExportReport.aspx" do
 			{"report_data" => report_data.serialize, "job_id" => task_id}
 		end
-		return retval if retval.to_s.start_with?('error')
-		if retval.code != "200"
+		if retval.to_s.start_with?('error')
+			self.status = -1
+			self.error_code = retval
+		elsif retval.code != "200"
 			self.status = -1
 			self.error_code = ErrorEnum::DOTNET_HTTP_ERROR
 		elsif retval.body.start_with?('error:')

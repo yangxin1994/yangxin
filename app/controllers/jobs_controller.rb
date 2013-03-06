@@ -178,8 +178,10 @@ class JobsController < ApplicationController
 				render_json_auto(true) and return
 			end
 			survey.export_results << export_result
-			retval = export_result.generate_spss(survey, answers, result_key)
-			render_json_auto(retval) and return
+			Thread.new {
+				retval = export_result.generate_spss(survey, answers, result_key)
+			}
+			render_json_auto(true) and return
 		when "to_excel"
 			survey = Survey.find_by_id(params[:survey_id])
 			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
@@ -202,8 +204,10 @@ class JobsController < ApplicationController
 				render_json_auto(true) and return
 			end
 			survey.export_results << export_result
-			retval = export_result.generate_excel(survey, answers, result_key)
-			render_json_auto(retval) and return
+			Thread.new {
+				retval = export_result.generate_excel(survey, answers, result_key)
+			}
+			render_json_auto(true) and return
 		end
 	end
 
