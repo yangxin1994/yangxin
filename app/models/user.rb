@@ -42,7 +42,6 @@ class User
   field :auth_key_expire_time, :type => Integer
   field :level, :type => Integer, default: 0
   field :level_expire_time, :type => Integer, default: -1
-
   field :birthday, :type => Integer, default: -1
   field :gender, :type => Boolean
   field :address, :type => String
@@ -51,33 +50,25 @@ class User
   field :full_name, :type => String
   field :identity_card, :type => String
   field :company, :type => String
-
   field :bankcard_number, :type => String
   field :bank, :type => String
   field :alipay_account, :type => String
+  field :point, :type => Integer, :default => 0
+
+  attr_protected :role, :status, :level
 
   has_and_belongs_to_many :messages, class_name: "Message", inverse_of: :receiver
   has_many :sended_messages, :class_name => "Message", :inverse_of => :sender
-
   #################################
   # QuillMe
-  field :point, :type => Integer, :default => 0
   has_many :reward_logs, :class_name => "RewardLog", :inverse_of => :user
   has_many :orders, :class_name => "Order"
   has_many :lottery_codes
   # QuillAdmin
   has_many :operate_orders, :class_name => "Order", :foreign_key => "operator_id"
   has_many :operate_reward_logs, :class_name => "RewardLog", :inverse_of => :operator,:foreign_key => "operator_id"
-
-  #before_save :set_updated_at
-  #before_update :set_updated_at
-
-  # add role, full_name to create system_user
-  # attr_accessible :email, :username, :password, :registered_at, :introducer_id, :role, :full_name, :status
-  attr_protected :role, :status, :level
-
   has_many :third_party_users
-  has_many :surveys
+  has_many :surveys, class_name: "Survey", inverse_of: :user
   has_many :groups
   has_many :materials
   has_many :public_notices
@@ -85,18 +76,13 @@ class User
   has_many :answer_feedbacks, class_name: "Feedback", inverse_of: :answer_user
   has_many :faqs
   has_many :advertisements
-
-
   has_many :email_histories
-  # has_many :answers
   has_many :answers, class_name: "Answer", inverse_of: :user
   has_many :template_question_answers
   has_many :survey_spreads
-
   has_and_belongs_to_many :answer_auditor_allocated_surveys, class_name: "Survey", inverse_of: :answer_auditors
   has_and_belongs_to_many :entry_clerk_allocated_surveys, class_name: "Survey", inverse_of: :entry_clerks
   has_many :interviewer_tasks
-
   has_many :reviewed_answers, class_name: "Answer", inverse_of: :auditor
 
   scope :unregistered, where(status: 0)

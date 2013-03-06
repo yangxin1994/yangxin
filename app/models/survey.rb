@@ -82,7 +82,7 @@ class Survey
 	# whether the answers of the survey need to be reviewed
 	field :answer_need_review, :type => Boolean, :default => false
 
-	belongs_to :user
+	belongs_to :user, class_name: "User", inverse_of: :surveys
 	has_and_belongs_to_many :tags do
 		def has_tag?(content)
 			@target.each do |tag|
@@ -94,14 +94,10 @@ class Survey
 	has_many :publish_status_historys
 	has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
 	has_and_belongs_to_many :entry_clerks, class_name: "User", inverse_of: :entry_clerk_allocated_surveys
-
 	has_many :answers
 	has_many :email_histories
-
 	has_many :survey_spreads
-
 	belongs_to :lottery
-
 	has_many :export_results
 	has_many :analysis_results
 	has_many :report_results
@@ -116,7 +112,6 @@ class Survey
 	scope :deleted_but_new, lambda { where(:status => -1, :new_survey => false) }
 	# scope for star
 	scope :stars, where(:status.gt => -1, :is_star => true)
-
 	scope :in_community, lambda { where(:show_in_community => true) }
 	scope :is_promotable, lambda { where(:promotable => true) }
 
@@ -134,7 +129,6 @@ class Survey
 	index({ spreadable: 1 }, { background: true } )
 
 	before_create :set_new
-
 	before_save :clear_survey_object
 	before_save :update_new
 	before_update :clear_survey_object
