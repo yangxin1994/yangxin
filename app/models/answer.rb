@@ -11,7 +11,6 @@ class Answer
 	field :answer_content, :type => Hash, default: {}
 	field :random_quality_control_answer_content, :type => Hash, default: {}
 	field :random_quality_control_locations, :type => Hash, default: {}
-
 	# Due to the logic control rules, volunteer's answer will hide/show some questions/choices.
 	# The hide/show of questions can be recorded in the "answer_content" field
 	# => For those questions that are hidden, their answers are set as "{}", and they will not be loaded
@@ -24,53 +23,40 @@ class Answer
 	field :repeat_time, :type => Integer, default: 0
 	# reject_type: 0 for rejected by quota, 1 for rejected by quliaty control (auto quality control), 2 for rejected by manual quality control, 3 for rejected by screen, 4 for timeout
 	field :reject_type, :type => Integer
-
 	field :username, :type => String, default: ""
 	field :password, :type => String, default: ""
-
 	field :region, :type => Integer, default: -1
 	field :channel, :type => Integer
 	field :ip_address, :type => String, default: ""
-
 	field :is_scanned, :type => Boolean, default: false
 	field :is_preview, :type => Boolean, default: false
-
 	field :finished_at, :type => Integer
 	field :import_id, :type => String
-	
 	# audit time
 	field :audit_at, :type => Integer
 	# audit message content
 	field :audit_message, :type => String, default: ""
-
 	field :introducer_id, :type => String
 	field :point_to_introducer, :type => Integer
-
 	field :point, :type => Integer, :default => 0
 	field :reward, :type => Integer, :default => 0
-
 	# used for interviewer to upload attachments
 	field :attachment, :type => Hash, :default => {}
-
 	field :longitude, :type => String, :default => ""
 	field :latitude, :type => String, :default => ""
 
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
-
 	scope :finished, lambda { where(:status => 3) }
 	scope :screened, lambda { where(:status => 1, :reject_type => 3) }
 	scope :finished_and_screened, lambda { any_of({:status => 3}, {:status => 1, :reject_type => 3}) }
 	scope :rejected, lambda { where(:status => 1) }
-
 	scope :unreviewed, lambda { where(:status => 2) }
 
-	# belongs_to :user
 	belongs_to :user, class_name: "User", inverse_of: :answers
 	belongs_to :survey
 	belongs_to :interviewer_task
 	belongs_to :lottery
-
 	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
 
 	STATUS_NAME_ARY = ["edit", "reject", "under_review", "finish", "redo"]
