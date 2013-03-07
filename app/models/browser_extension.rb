@@ -5,7 +5,6 @@ class BrowserExtension
 
 	field :version, :type => String
 	field :browser_extension_type, :type => String
-
 	has_many :browsers
 
 

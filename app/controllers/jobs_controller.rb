@@ -104,8 +104,10 @@ class JobsController < ApplicationController
 			end
 			survey.analysis_results << analysis_result
 			# analyze and save the analysis result
-			retval = analysis_result.analysis(answers, params[:task_id])
-			render_json_auto(retval) and return
+			Thread.new {
+				analysis_result.analysis(answers, params[:task_id])
+			}
+			render_json_auto(true) and return
 		when "report"
 			survey = Survey.find_by_id(params[:survey_id])
 			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
