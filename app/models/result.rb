@@ -51,7 +51,11 @@ class Result
 		task_id = result.task_id
 		task = TaskClient.get_task(task_id)
 
-		return ErrorEnum::TASK_NOT_EXIST if task == ErrorEnum::TASK_NOT_EXIST
+		if task == ErrorEnum::TASK_NOT_EXIST
+			result.status = -1
+			result.save
+			return ErrorEnum::TASK_NOT_EXIST
+		end
 		progress = task["progress"]
 
 		# calculate the status
