@@ -77,6 +77,11 @@ class JobsController < ApplicationController
 			# get the survey instance
 			survey = Survey.find_by_id(params[:survey_id])
 			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
+			AnalysisWorker.perform_async(params[:survey_id],
+				params[:filter_index],
+				params[:include_screened_answer],
+				params[:task_id])
+=begin
 			# find answers set
 			answers, tot_answer_number, screened_answer_number = *survey.get_answers(params[:filter_index].to_i,
 																					params[:include_screened_answer].to_s == "true",
@@ -104,9 +109,8 @@ class JobsController < ApplicationController
 			end
 			survey.analysis_results << analysis_result
 			# analyze and save the analysis result
-			Thread.new {
-				analysis_result.analysis(answers, params[:task_id])
-			}
+			analysis_result.analysis(answers, params[:task_id])
+=end
 			render_json_auto(true) and return
 		when "report"
 			survey = Survey.find_by_id(params[:survey_id])

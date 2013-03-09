@@ -2,6 +2,8 @@ require 'securerandom'
 require 'quill_common'
 class WelcomeController < ApplicationController
 	def index
+		AnalysisWorker.perform_async
+		render :text => "done" and return
 		render :text => QuillCommon::AddressUtility.find_region_code_by_latlng(33.578015, 87.495117) and return
 		render :text => params and return
 		
