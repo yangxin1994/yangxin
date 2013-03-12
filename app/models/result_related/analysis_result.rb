@@ -33,8 +33,8 @@ class AnalysisResult < Result
 		answers_transform = {}
 		if answers.length == 0
 			if !task_id.nil?
-				TaskClient.set_progress(task_id, "analyze_answer_progress", 1.0)
-				TaskClient.set_progress(task_id, "answer_info_progress", 1.0)
+				Task.set_progress(task_id, "analyze_answer_progress", 1.0)
+				Task.set_progress(task_id, "answer_info_progress", 1.0)
 			end
 			self.status = 1
 			return self.save
@@ -54,11 +54,11 @@ class AnalysisResult < Result
 			info["region"] = a.region
 			answer_info << info
 			if Time.now.to_i != last_time
-				TaskClient.set_progress(task_id, "answer_info_progress", (index + 1).to_f / answers_length) if !task_id.nil?
+				Task.set_progress(task_id, "answer_info_progress", (index + 1).to_f / answers_length) if !task_id.nil?
 				last_time = Time.now.to_i
 			end
 		end
-		TaskClient.set_progress(task_id, "answer_info_progress", 1.0) if !task_id.nil?
+		Task.set_progress(task_id, "answer_info_progress", 1.0) if !task_id.nil?
 		self.answer_info = answer_info
 		
 		# get the analysis result
@@ -82,11 +82,11 @@ class AnalysisResult < Result
 				answers_transform[q_id] << question_answer if !question_answer.blank?
 			end
 			if Time.now.to_i != last_time
-				TaskClient.set_progress(task_id, "analyze_answer_progress", 0.5 * (index + 1) / answers.length) if !task_id.nil?
+				Task.set_progress(task_id, "analyze_answer_progress", 0.5 * (index + 1) / answers.length) if !task_id.nil?
 				last_time = Time.now.to_i
 			end
 		end
-		TaskClient.set_progress(task_id, "analyze_answer_progress", 0.5) if !task_id.nil?
+		Task.set_progress(task_id, "analyze_answer_progress", 0.5) if !task_id.nil?
 		region_result.select! { |k,v| v["count"] != 0 }
 		region_result.each do |key, value|
 			region_result[key] = [value, QuillCommon::AddressUtility.find_province_city_town_by_code(key)]
@@ -107,7 +107,7 @@ class AnalysisResult < Result
 			time_histogram[t / 86400 - min_finish_time / 86400] = time_histogram[t / 86400 - min_finish_time / 86400] + 1
 		end
 		time_result = {"start_day" => start_day, "time_histogram" => time_histogram}
-		TaskClient.set_progress(task_id, "analyze_answer_progress", 0.6) if !task_id.nil?
+		Task.set_progress(task_id, "analyze_answer_progress", 0.6) if !task_id.nil?
 
 		# make stats for the answers
 		aanswers_result = {}
@@ -118,11 +118,11 @@ class AnalysisResult < Result
 			next if question.nil?
 			aanswers_result[q_id] = [question_answer_ary.length, analyze_one_question_answers(question, question_answer_ary)]
 			if Time.now.to_i != last_time
-				TaskClient.set_progress(task_id, "analyze_answer_progress", 0.6 + 0.4 * i / answers_transform.length ) if !task_id.nil?
+				Task.set_progress(task_id, "analyze_answer_progress", 0.6 + 0.4 * i / answers_transform.length ) if !task_id.nil?
 				last_time = Time.now.to_i
 			end
 		end
-		TaskClient.set_progress(task_id, "analyze_answer_progress", 1.0 ) if !task_id.nil?
+		Task.set_progress(task_id, "analyze_answer_progress", 1.0 ) if !task_id.nil?
 
 		# update analysis result
 		self.region_result = region_result

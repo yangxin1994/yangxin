@@ -53,13 +53,7 @@ class RegistrationsController < ApplicationController
 		user = User.find_by_email(params[:email])
 		render_json_e(ErrorEnum::USER_NOT_EXIST) and return if user.nil?
 		render_json_e(ErrorEnum::USER_ACTIVATED) and return if user.is_activated
-		# send activate email
-		TaskClient.create_task({ task_type: "email",
-								host: "localhost",
-								port: Rails.application.config.service_port,
-								params: { email_type: "activate",
-										email: user.email,
-										callback: params[:callback] } })
+		EmailWorker.perform_async("activate", user.email, params[:callback])
 		render_json_s and return
 	end
 

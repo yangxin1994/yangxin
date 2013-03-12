@@ -53,6 +53,7 @@ module OopsData
     config.assets.version = '1.0'
 
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
+    config.autoload_paths += Dir["#{config.root}/app/models/*/"].find_all { |f| File.stat(f).directory? } 
 
   end
 end

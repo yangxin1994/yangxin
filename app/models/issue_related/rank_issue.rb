@@ -62,7 +62,12 @@ class RankIssue < Issue
 
 	def remove_hidden_items(items)
 		return if items.blank?
-		self.items.delete_if { |item| items["items"].include?(item["id"]) } if !items["items"].blank?
+		if !items["items"].blank?
+			self.items.delete_if { |item| items["items"].include?(item["id"]) }
+			if self.other_item["has_other_item"] == true && items["items"].include?(self.other_item["id"])
+				self.other_item = {"has_other_item" => false}
+			end
+		end
 	end
 
 	def estimate_answer_time
