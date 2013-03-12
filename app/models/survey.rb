@@ -211,22 +211,14 @@ class Survey
 	end
 
 	def to_spss(analysis_task_id)
-		task_id = TaskClient.create_task({ task_type: "result",
-											host: "localhost",
-											port: Rails.application.config.service_port,
-											params: { result_type: "to_spss",
-																survey_id: self._id.to_s,
-																analysis_task_id: analysis_task_id} })
+		task_id = Task.create(:task_type => "to_spss")._id.to_s
+		ToSpssWorker.perform_async(self._id.to_s, analysis_task_id, task_id)
 		return task_id
 	end
 
 	def to_excel(analysis_task_id)
-		task_id = TaskClient.create_task({ task_type: "result",
-											host: "localhost",
-											port: Rails.application.config.service_port,
-											params: { result_type: "to_excel",
-																survey_id: self._id.to_s,
-																analysis_task_id: analysis_task_id} })
+		task_id = Task.create(:task_type => "to_excel")._id.to_s
+		ToExcelWorker.perform_async(self._id.to_s, analysis_task_id, task_id)
 		return task_id
 	end
 
@@ -250,11 +242,11 @@ class Survey
 				answer_c << line_answer
 			end
 			if Time.now.to_i != last_time
-				TaskClient.set_progress(task_id, "data_conversion_progress", (index+1).to_f / answer_length)
+				Task.set_progress(task_id, "data_conversion_progress", (index+1).to_f / answer_length)
 				last_time = Time.now.to_i
 			end
 		end
-		TaskClient.set_progress(task_id, "data_conversion_progress", 1.0)
+		Task.set_progress(task_id, "data_conversion_progress", 1.0)
 		answer_c
 	end
 
@@ -333,16 +325,10 @@ class Survey
 		time = time.to_i
 		return ErrorEnum::SURVEY_DEADLINE_ERROR if time <= Time.now.to_i && time != -1
 		self.deadline = time == -1 ? nil : time
-		return ErrorEnum::UNKNOWN_ERROR unless self.save
-		retval = TaskClient.destroy_task("survey_deadline", {survey_id: self._id})
-		return ErrorEnum::TASK_DESTROY_FAILED if retval == ErrorEnum::TASK_DESTROY_FAILED
+		self.save
 		#create or update job
 		if !self.deadline.nil?
-			task_id = TaskClient.create_task({ task_type: "survey_deadline",
-											host: "localhost",
-											port: Rails.application.config.service_port,
-											executed_at: time,
-											params: { survey_id: self._id} })
+			Survey.delay_until(self.deadline, :retry => false, :timeout => 10).deadline_arrived(self._id.to_s)
 		end
 		return true
 	end
@@ -768,7 +754,7 @@ class Survey
 		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != QuillCommon::PublishStatusEnum::UNDER_REVIEW
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
-		self.deadline = Time.now.to_i + 30.days.to_i if self.deadline.blank?
+		# self.deadline = Time.now.to_i + 30.days.to_i if self.deadline.blank?
 		self.save
 		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::PUBLISHED, message)
 		self.publish_status_historys << publish_status_history
@@ -1525,13 +1511,8 @@ class Survey
 
 	def analysis(filter_index, include_screened_answer)
 		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
-		task_id = TaskClient.create_task({ task_type: "result",
-											host: "localhost",
-											port: Rails.application.config.service_port,
-											params: { result_type: "analysis",
-														survey_id: self._id,
-														filter_index: filter_index,
-														include_screened_answer: include_screened_answer} })
+		task_id = Task.create(:task_type => "analysis")._id.to_s
+		AnalysisWorker.perform_async(self._id.to_s, filter_index, include_screened_answer, task_id)
 		return task_id
 	end
 
@@ -1544,15 +1525,13 @@ class Survey
 		end
 		return ErrorEnum::WRONG_REPORT_TYPE if !%w[word ppt pdf].include?(report_type)
 		return ErrorEnum::WRONG_REPORT_STYLE if !(0..6).to_a.include?(report_style.to_i)
-		task_id = TaskClient.create_task({ task_type: "result",
-											host: "localhost",
-											port: Rails.application.config.service_port,
-											params: { result_type: "report",
-														survey_id: self._id,
-														analysis_task_id: analysis_task_id,
-														report_mockup_id: report_mockup_id,
-														report_style: report_style.to_i,
-														report_type: report_type } })
+		task_id = Task.create(:task_type => "report")._id.to_s
+		ReportWorker.perform_async(self._id.to_s,
+			analysis_task_id,
+			report_mockup_id,
+			report_type,
+			report_style,
+			task_id)
 		return task_id
 	end
 
@@ -1560,7 +1539,7 @@ class Survey
 		# answers = include_screened_answer ? self.answers.not_preview.finished_and_screened : self.answers.not_preview.finished
 		answers = self.answers.not_preview.finished_and_screened
 		if filter_index == -1
-			TaskClient.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
+			Task.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
 			#set_status({"find_answers_progress" => 1})
 			tot_answer_number = answers.length
 			answers = include_screened_answer ? answers : answers.finished
@@ -1579,11 +1558,11 @@ class Survey
 			next if !include_screened_answer && a.is_screened
 			filtered_answers << a
 			if Time.now.to_i != last_time
-				TaskClient.set_progress(task_id, "find_answers_progress", (index + 1).to_f / answers_length) if !task_id.nil?
+				Task.set_progress(task_id, "find_answers_progress", (index + 1).to_f / answers_length) if !task_id.nil?
 				last_time = Time.now.to_i
 			end
 		end
-		TaskClient.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
+		Task.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
 		return [filtered_answers, tot_answer_number, tot_answer_number - not_screened_answer_number]
 	end
 
@@ -2095,4 +2074,14 @@ class Survey
 		return info
 	end
 
+	def self.deadline_arrived(survey_id)
+		s = Survey.find_by_id(survey_id)
+		return if s.nil?
+		return if s.deadline.nil?
+		if Time.now.to_i - s.deadline < 20 && s.deadline - Time.now.to_i < 20
+			# close the survey and refresh the quota
+			s.update_attributes(publish_status: QuillCommon::PublishStatusEnum::CLOSED) if survey.publish_status == QuillCommonPublishStatusEnum::PUBLISHED
+			s.refresh_quota_stats
+		end
+	end
 end

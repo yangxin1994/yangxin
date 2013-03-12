@@ -1,5 +1,6 @@
 class AnalysisWorker
 	include Sidekiq::Worker
+	sidekiq_options :retry => false
 
 	def perform(survey_id, filter_index, include_screened_answer, task_id)
 		# get the survey instance
@@ -24,7 +25,7 @@ class AnalysisWorker
 		else
 			# create analysis result
 			analysis_result = AnalysisResult.create(:result_key => result_key,
-													:task_id => params[:task_id],
+													:task_id => task_id,
 													:tot_answer_number => tot_answer_number,
 													:screened_answer_number => screened_answer_number,
 													:ref_result_id => existing_analysis_result._id)

@@ -279,10 +279,7 @@ class User
     existing_user = User.create if existing_user.nil?
     existing_user.update_attributes(updated_attr)
     # send welcome email
-    TaskClient.create_task({ task_type: "email",
-                             host: "localhost",
-                             port: Rails.application.config.service_port,
-                             params: { email_type: "welcome", email: existing_user.email, callback: callback } })
+    EmailWorker.perform_async("welcome", existing_user.email, callback)
     if !third_party_user_id.nil?
       # bind the third party user if the id is provided
       third_party_user = ThirdPartyUser.find_by_id(third_party_user_id)

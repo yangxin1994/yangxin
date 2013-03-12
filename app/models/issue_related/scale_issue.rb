@@ -42,9 +42,6 @@ class ScaleIssue < Issue
 		return if items.blank?
 		if !items["items"].blank?
 			self.items.delete_if { |item| items["items"].include?(item["id"]) }
-			if self.other_item["has_other_item"] == true && items["items"].include?(self.other_item["id"])
-				self.other_item = {"has_other_item" => false}
-			end
 		end
 	end
 

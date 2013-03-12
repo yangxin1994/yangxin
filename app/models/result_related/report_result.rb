@@ -442,11 +442,11 @@ class ReportResult < Result
 				end
 			end
 			if Time.now.to_i != last_time
-				TaskClient.set_progress(task_id, "data_conversion_progress", (i+1).to_f / component_length)
+				Task.set_progress(task_id, "data_conversion_progress", (i+1).to_f / component_length)
 				last_time = Time.now.to_i
 			end
 		end
-		TaskClient.set_progress(task_id, "data_conversion_progress", 1.0 )
+		Task.set_progress(task_id, "data_conversion_progress", 1.0 )
 
 		logger.info "AAAAAAAAAAAAAAAAAA"
 		logger.info report_data.serialize
@@ -462,7 +462,6 @@ class ReportResult < Result
 			self.status = -1
 			self.error_code = ErrorEnum::DOTNET_HTTP_ERROR
 		elsif retval.body.start_with?('error:')
-			return ErrorEnum::DOTNET_INTERNAL_ERROR
 			self.status = -1
 			self.error_code = ErrorEnum::DOTNET_INTERNAL_ERROR
 		else

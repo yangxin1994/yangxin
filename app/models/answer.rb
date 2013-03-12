@@ -123,7 +123,12 @@ class Answer
 	def self.create_answer(is_preview, introducer_id, email, survey_id, channel, ip, username, password)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		answer = Answer.new(is_preview: is_preview, channel: channel, ip_address: ip, region: IpInfo.find_address_code_by_ip(ip), username: username, password: password)
+		answer = Answer.new(is_preview: is_preview,
+			channel: channel,
+			ip_address: ip,
+			region: QuillCommon::AddressUtility.find_address_code_by_ip(ip),
+			username: username,
+			password: password)
 		if !is_preview && introducer_id
 			introducer = User.find_by_id(introducer_id)
 			if !introducer.nil? && introducer.email != email
@@ -893,13 +898,11 @@ class Answer
 					lc = self.lottery.give_lottery_code_to(self.user)
 					self.survey.post_reward_to(self.user, :type => self.reward, :lottery_code => lc, :cause => 2)
 					# send an email to the user
-					TaskClient.create_task({ task_type: "email",
-											host: "localhost",
-											port: Rails.application.config.service_port,
-											params: { email_type: "lottery_code",
-													email: self.user.email,
-													survey_id: self.survey._id.to_s,
-													lottery_code_id: lc._id.to_s } })
+					EmailWorker.perform_async("lottery_code",
+						self.user.email,
+							"",
+						:survey_id => self.survey._id.to_s,
+						:lottery_code_id => lc._id.to_s)
 				end
 			elsif self.reward == 2
 				self.survey.post_reward_to(user, :type => self.reward, :point => self.point, :cause => 2)

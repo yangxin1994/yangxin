@@ -49,17 +49,17 @@ class Result
 
 		# the task has not been finished, check the progress
 		task_id = result.task_id
-		task = TaskClient.get_task(task_id)
+		task = Task.find_by_id(task_id)
 
-		if task == ErrorEnum::TASK_NOT_EXIST
+		if task.nil?
 			result.status = -1
 			result.save
 			return ErrorEnum::TASK_NOT_EXIST
 		end
-		progress = task["progress"]
+		progress = task.progress
 
 		# calculate the status
-		case task["params"]["result_type"]
+		case task.task_type
 		when "analysis"
 			# the analysis job consists of three parts
 			# the first part is to find the answers by the filter
