@@ -77,6 +77,11 @@ class JobsController < ApplicationController
 			# get the survey instance
 			survey = Survey.find_by_id(params[:survey_id])
 			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
+			AnalysisWorker.perform_async(params[:survey_id],
+				params[:filter_index],
+				params[:include_screened_answer],
+				params[:task_id])
+=begin
 			# find answers set
 			answers, tot_answer_number, screened_answer_number = *survey.get_answers(params[:filter_index].to_i,
 																					params[:include_screened_answer].to_s == "true",
@@ -104,8 +109,9 @@ class JobsController < ApplicationController
 			end
 			survey.analysis_results << analysis_result
 			# analyze and save the analysis result
-			retval = analysis_result.analysis(answers, params[:task_id])
-			render_json_auto(retval) and return
+			analysis_result.analysis(answers, params[:task_id])
+=end
+			render_json_auto(true) and return
 		when "report"
 			survey = Survey.find_by_id(params[:survey_id])
 			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
@@ -178,8 +184,10 @@ class JobsController < ApplicationController
 				render_json_auto(true) and return
 			end
 			survey.export_results << export_result
-			retval = export_result.generate_spss(survey, answers, result_key)
-			render_json_auto(retval) and return
+			Thread.new {
+				retval = export_result.generate_spss(survey, answers, result_key)
+			}
+			render_json_auto(true) and return
 		when "to_excel"
 			survey = Survey.find_by_id(params[:survey_id])
 			render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
@@ -202,8 +210,10 @@ class JobsController < ApplicationController
 				render_json_auto(true) and return
 			end
 			survey.export_results << export_result
-			retval = export_result.generate_excel(survey, answers, result_key)
-			render_json_auto(retval) and return
+			Thread.new {
+				retval = export_result.generate_excel(survey, answers, result_key)
+			}
+			render_json_auto(true) and return
 		end
 	end
 

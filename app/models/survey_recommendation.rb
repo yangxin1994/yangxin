@@ -15,7 +15,8 @@ class SurveyRecommendation
 		recommendations = self.where(:recommendation_type => 0, :status.gt => -1)
 		url_recommendations_hash = {}
 		recommendations.each do |e|
-			url_recommendations_hash[e.content] = (e.survey_ids.map { |e| e.to_s }).select { |e| !exclude_survey_ids.include?(e) }
+			survey_ids = (e.survey_ids.map { |e| e.to_s }).select { |e| !exclude_survey_ids.include?(e) }
+			url_recommendations_hash[e.content] = survey_ids if !survey_ids.blank?
 		end
 		return url_recommendations_hash
 	end
@@ -24,7 +25,8 @@ class SurveyRecommendation
 		recommendations = self.where(:recommendation_type => 1, :status.gt => -1)
 		key_word_recommendations_hash = {}
 		recommendations.each do |e|
-			key_word_recommendations_hash[e.content] = (e.survey_ids.map { |e| e.to_s }).select { |e| !exclude_survey_ids.include?(e) }
+			survey_ids = (e.survey_ids.map { |e| e.to_s }).select { |e| !exclude_survey_ids.include?(e) }
+			key_word_recommendations_hash[e.content] = survey_ids if !survey_ids.blank?
 		end
 		return key_word_recommendations_hash
 	end

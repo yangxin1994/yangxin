@@ -51,7 +51,11 @@ class Result
 		task_id = result.task_id
 		task = TaskClient.get_task(task_id)
 
-		return ErrorEnum::TASK_NOT_EXIST if task == ErrorEnum::TASK_NOT_EXIST
+		if task == ErrorEnum::TASK_NOT_EXIST
+			result.status = -1
+			result.save
+			return ErrorEnum::TASK_NOT_EXIST
+		end
 		progress = task["progress"]
 
 		# calculate the status
@@ -243,7 +247,9 @@ class Result
 			result[region_code] = result[region_code] + 1
 		end
 		result.each do |key, value|
-			result[key] = [value, QuillCommon::AddressUtility.find_province_city_town_by_code(key)]
+			result[key] = [value,
+						QuillCommon::AddressUtility.find_province_city_town_by_code(key),
+						QuillCommon::AddressUtility.find_latlng_by_region_code(key)]
 		end
 		return result
 	end

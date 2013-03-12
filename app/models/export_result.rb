@@ -26,12 +26,21 @@ class ExportResult < Result
 		retval = ConnectDotNet.send_data('/ToExcel.aspx') do
 			{'excel_data' => excel_data_json, 'job_id' => task_id.to_s}
 		end
-		return retval if retval.to_s.start_with?('error')
-		return ErrorEnum::DOTNET_HTTP_ERROR if retval.code != "200"
-		return ErrorEnum::DOTNET_INTERNAL_ERROR if retval.body.start_with?('error:')
-		self.file_uri = retval.body
-		self.status = 1
-		return self.save
+		if retval.to_s.start_with?('error')
+			self.status = -1
+			self.error_code = retval
+		elsif retval.code != "200"
+			self.status = -1
+			self.error_code = ErrorEnum::DOTNET_HTTP_ERROR
+		elsif retval.body.start_with?('error:')
+			return ErrorEnum::DOTNET_INTERNAL_ERROR
+			self.status = -1
+			self.error_code = ErrorEnum::DOTNET_INTERNAL_ERROR
+		else
+			self.status = 1
+			self.file_uri = retval.body
+		end
+		self.save
 	end
 
 	def generate_spss(survey, answers, result_key)
@@ -42,12 +51,20 @@ class ExportResult < Result
 		retval = ConnectDotNet.send_data('/ToSpss.aspx') do
 			{'spss_data' => spss_data_json, 'job_id' => task_id.to_s}
 		end
-		binding.pry
-		return retval if retval.to_s.start_with?('error')
-		return ErrorEnum::DOTNET_HTTP_ERROR if retval.code != "200"
-		return ErrorEnum::DOTNET_INTERNAL_ERROR if retval.body.start_with?('error:')
-		self.file_uri = retval.body
-		self.status = 1
-		return self.save
+		if retval.to_s.start_with?('error')
+			self.status = -1
+			self.error_code = retval
+		elsif retval.code != "200"
+			self.status = -1
+			self.error_code = ErrorEnum::DOTNET_HTTP_ERROR
+		elsif retval.body.start_with?('error:')
+			return ErrorEnum::DOTNET_INTERNAL_ERROR
+			self.status = -1
+			self.error_code = ErrorEnum::DOTNET_INTERNAL_ERROR
+		else
+			self.status = 1
+			self.file_uri = retval.body
+		end
+		self.save
 	end
 end

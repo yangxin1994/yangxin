@@ -65,7 +65,7 @@ class AnalysisResult < Result
 		answers.each_with_index do |answer, index|
 			# analyze region
 			region = answer.region.to_s
-			region_result[region] = region_result[region] + 1 if !region_result[region].nil?
+			region_result[region]["count"] = region_result[region]["count"] + 1 if !region_result[region].nil?
 			
 			# analyze channel
 			channel = answer.channel.to_s
@@ -87,7 +87,7 @@ class AnalysisResult < Result
 			end
 		end
 		TaskClient.set_progress(task_id, "analyze_answer_progress", 0.5) if !task_id.nil?
-		region_result.select! { |k,v| v != 0 }
+		region_result.select! { |k,v| v["count"] != 0 }
 		region_result.each do |key, value|
 			region_result[key] = [value, QuillCommon::AddressUtility.find_province_city_town_by_code(key)]
 		end
@@ -131,8 +131,7 @@ class AnalysisResult < Result
 		self.time_result = time_result
 		self.answers_result = aanswers_result
 		self.status = 1
-		retval = self.save
-		return retval
+		self.save
 	end
 
 	def analyze_one_question_answers(question, answer_ary)
