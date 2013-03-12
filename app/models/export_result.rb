@@ -36,9 +36,9 @@ class ExportResult < Result
 
 	def generate_spss(survey, answers, result_key)
 		spss_data_json = {"spss_header" => survey.spss_header,
-											 "answer_contents" => survey.formated_answers(answers, result_key, task_id.to_s),
-											 "header_name" => survey.csv_header,
-											 "result_key" => result_key}.to_json
+											"answer_contents" => survey.formated_answers(answers, result_key, task_id.to_s),
+											"header_name" => survey.csv_header,
+											"result_key" => result_key}.to_json
 		retval = ConnectDotNet.send_data('/ToSpss.aspx') do
 			{'spss_data' => spss_data_json, 'job_id' => task_id.to_s}
 		end
