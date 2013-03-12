@@ -26,8 +26,6 @@ gem 'oops-mail', '0.0.2', :path => "vendor/gems/oops-mail-0.0.2"
 gem 'faker'
 gem 'certified'
 
-gem 'pry-rails'
-
 gem 'rest-client'
 if HOST_OS =~ /linux/i
   gem 'therubyracer', '>= 0.8.2'
@@ -66,6 +64,7 @@ group :test, :development do
   gem 'rb-fsevent', '~> 0.9.1'
   gem 'turn', :require => false
 	gem 'factory_girl_rails', "~> 3.0"
+  gem 'pry-rails'
 end
 
 group :production do

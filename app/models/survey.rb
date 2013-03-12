@@ -256,6 +256,7 @@ class Survey
 		end
 		TaskClient.set_progress(task_id, "data_conversion_progress", 1.0)
 		answer_c
+		binding.pry
 	end
 
 	def answer_import(csv_str)

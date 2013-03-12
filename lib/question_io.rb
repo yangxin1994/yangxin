@@ -185,7 +185,7 @@ class ChoiceQuestionIo < QuestionIo
         end
       end
     else
-      @retval << (v["selection"].empty? ? nil : get_item_index(v["selection"][0]))
+      @retval << ((v["selection"] && !v["selection"].empty?) ? get_item_index(v["selection"][0]) : nil )
     end
     if issue["other_item"]["has_other_item"]
       @retval << v["text_input"]
@@ -303,7 +303,7 @@ class MatrixChoiceQuestionIo < QuestionIo
     if issue["max_choice"].to_i > 1
       issue["rows"].each do |item|
         issue["items"].each_index do |c|
-          if v[item["id"].to_s].include?( get_item_id(c + 1))
+          if v[item["id"].to_s] && v[item["id"].to_s].include?( get_item_id(c + 1))
             @retval << "1"
           else
             @retval << "0"
@@ -312,7 +312,7 @@ class MatrixChoiceQuestionIo < QuestionIo
       end
     else
       issue["rows"].each do |item|
-        @retval << (v[item["id"].to_s].empty? ? nil : get_item_index(v[item["id"].to_s][0]))
+        @retval << (v[item["id"].to_s] && v[item["id"].to_s].empty? ? nil : get_item_index(v[item["id"].to_s][0]))
       end
     end
     return @retval
@@ -836,11 +836,11 @@ class SortQuestionIo < QuestionIo
     return Array.new(header_count(header_prefix)) if v.nil?
     if issue["max"] == -1
       issue["min"].times do |i|
-        @retval << get_item_index(v["sort_result"][i])
+        @retval << v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil
       end
     else
       issue["max"].times do |i|
-        @retval << get_item_index(v["sort_result"][i])
+        @retval << v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil
       end
     end
 
@@ -922,8 +922,8 @@ class RankQuestionIo < QuestionIo
     clear_retval
     return Array.new(header_count(header_prefix)) if v.nil?
     issue["items"].each do |e|
-      @retval << v[e["input_id"]]
-      @retval << (v[e["input_id"]] == -1 ? 1 : 0 ) if e["has_unknow"]
+      @retval << e["input_id"] ? v[e["input_id"]] : nil
+      @retval << (e["input_id"] ? (v[e["input_id"]] == -1 ? 1 : 0) : nil ) if e["has_unknow"]
     end
     if issue["other_item"]["has_other_item"]
       @retval << v["text_input"]
@@ -1047,7 +1047,7 @@ class ScaleQuestionIo < QuestionIo
     clear_retval
     return Array.new(header_count(header_prefix)) if v.nil?
     issue["items"].each do |e|
-      @retval << v[e["id"].to_s] + 1
+      @retval << e["id"] ? v[e["id"].to_s] + 1 : nil
       # @retval << (v[e["id"].to_s] == -1 ? 1 : 0 ) if e["show_unknow"]
     end
     return @retval
