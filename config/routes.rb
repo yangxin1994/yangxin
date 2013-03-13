@@ -1,5 +1,6 @@
-require 'resque/server'
+require 'sidekiq/web'
 OopsData::Application.routes.draw do
+	mount Sidekiq::Web, at: "/sidekiq"
 
 	resources :faqs, :public_notices, :feedbacks, :advertisements
 	resources :data_generators do
@@ -47,7 +48,6 @@ OopsData::Application.routes.draw do
 
 		resources :surveys do 
 			collection do 
-				get 'show_user_attr_survey'
 				put 'add_template_question'
 			end
 			member do
@@ -227,8 +227,7 @@ OopsData::Application.routes.draw do
 
 	resources :sessions do
 		collection do
-			post :update_user_info, :init_basic_info, :init_user_attr_survey, :send_password_email
-			get :obtain_user_attr_survey, :skip_init_step
+			post :update_user_info, :init_basic_info, :send_password_email
 			post :new_password, :reset_password
 			post :login_with_auth_key
 			post :login_with_code
@@ -472,8 +471,6 @@ OopsData::Application.routes.draw do
 	# You can have the root of your site routed with "root"
 	# just remember to delete public/index.html.
 	root :to => 'welcome#index'
-
-	match '/upload' => 'welcome#upload'
 
 	# See how all your routes lay out with "rake routes"
 

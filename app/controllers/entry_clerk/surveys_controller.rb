@@ -1,5 +1,4 @@
 #encoding: utf-8
-
 require 'error_enum'
 class EntryClerk::SurveysController < EntryClerk::ApplicationController
     

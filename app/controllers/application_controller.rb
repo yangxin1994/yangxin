@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
 	protect_from_forgery
 
-	before_filter :client_ip, :current_user#, :user_init
+	before_filter :client_ip, :current_user
 
 	helper_method :user_signed_in?, :user_signed_out?
 ###################################################
@@ -83,22 +83,6 @@ class ApplicationController < ActionController::Base
 		return @current_user
 	end
 
-	def user_init
-		return if !user_signed_in?
-		case @current_user.status
-		when 2
-			if params[:controller] != "sessions" ||
-					!["init_basic_info", "skip_init_step"].include?(params[:action])
-				render_json_e(ErrorEnum::REQUIRE_INIT_STEP_1) and return 
-			end
-		when 3
-			if params[:controller] != "sessions" || 
-					!["init_user_attr_survey", "obtain_user_attr_survey", "skip_init_step"].include?(params[:action])
-				render_json_e(ErrorEnum::REQUIRE_INIT_STEP_2) and return 
-			end
-		end
-	end
-	
 	#obtain the ip address of the clien, and set it as @remote_ip
 	def client_ip
 		#@remote_ip = request.env["HTTP_X_FORWARDED_FOR"]

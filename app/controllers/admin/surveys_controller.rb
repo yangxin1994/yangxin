@@ -1,8 +1,7 @@
 class Admin::SurveysController < Admin::ApplicationController
 
 	def index
-
-		@surveys = Survey.where(:user_attr_survey => false)
+		@surveys = Survey.all
 		# use publish_status = 0 means status=-1
 		if params[:publish_status].to_i > 0
 			@surveys = @surveys.where(:status.gt => -1, :publish_status => params[:publish_status].to_i).desc(:created_at) 
@@ -31,32 +30,20 @@ class Admin::SurveysController < Admin::ApplicationController
 		render_json_auto @survey
 	end
 
-	def show_user_attr_survey
-		@survey = Survey.get_user_attr_survey
-		render_json_auto @survey
-	end
-
 	def add_template_question
-		# if params[:question_ids]
-			@survey = Survey.find_by_id(params[:id]) if params[:id]
-			unless @survey
-				@survey = Survey.create
-				@survey.alt_new_survey = false
-				@current_user.surveys << @survey
-				@survey.set_user_attr_survey(true)
-			end
-			if params[:question_id]
-				# insert
-				@survey.insert_template_question( params[:page_index].to_s.to_i, 
-						"-1", params[:question_id])
-				# convert
-				@survey.convert_template_question_to_normal_question(params[:question_id])
-			end
-
-			render_json_auto true
-		# else
-		# 	render_json_auto false
-		# end
+		@survey = Survey.find_by_id(params[:id]) if params[:id]
+		unless @survey
+			@survey = Survey.create
+			@current_user.surveys << @survey
+		end
+		if params[:question_id]
+			# insert
+			@survey.insert_template_question( params[:page_index].to_s.to_i, 
+					"-1", params[:question_id])
+			# convert
+			@survey.convert_template_question_to_normal_question(params[:question_id])
+		end
+		render_json_auto true
 	end
 
 	def allocate
@@ -105,11 +92,8 @@ class Admin::SurveysController < Admin::ApplicationController
 
 	def destroy
 		@survey = Survey.find_by_id(params[:id])
-		# new_survey which is not edited should be remove from db
-		render_json_auto @survey.destroy and return if @survey && @survey.new_survey == true
 		# else just change status to -1
-		render_json_auto @survey.delete and return if @survey && @survey.new_survey == false
-		render_json_auto false
+		render_json_auto @survey.try(:delete) and return
 	end
 
 end

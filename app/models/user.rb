@@ -95,11 +95,6 @@ class User
   index({ status: 1 }, { background: true } )
   index({ introducer_id: 1, status: 1 }, { background: true } )
 
-  private
-  def set_updated_at
-    self.updated_at = Time.now.to_i
-  end
-
 
   public
   #*description*: Find a user given an email, username and user id. Deleted users are not included.
@@ -159,15 +154,6 @@ class User
     return {"level" => self.level, "level_expire_time" => self.level_expire_time}
   end
 
-  def init_basic_info(user_info)
-    if self.update_basic_info(user_info)
-      self.status = self.status + 1
-      return self.save
-    else
-      return false
-    end
-  end
-
   def update_basic_info(user_info)
     self.birthday = user_info["birthday"].to_i
     self.gender = user_info["gender"].to_s == "true"
@@ -179,18 +165,6 @@ class User
     self.company = user_info["company"]
     return self.save
   end
-
-  def init_attr_survey(survey_id, answer_content)
-    retval Answer.create_user_attr_survey_answer(self, survey_id, answer_content)
-    return retval
-  end
-
-  def skip_init_step
-    self.status = self.status + 1 if self.status < 4
-    return false if !self.save
-    return {status: self.status}
-  end
-
 
   #*description*: check whether an email has been registered as an user
   #

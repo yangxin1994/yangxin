@@ -8,9 +8,8 @@ gem 'httparty'
 gem 'sidekiq'
 gem "kiqstand"
 gem 'whenever', :require => false
-
-# Bundle edge Rails instead:
-# gem 'rails',     :git => 'git://github.com/rails/rails.git'
+gem 'sinatra', require: false
+gem 'slim'
 
 gem 'rack-protection'
 gem 'mongoid', " ~> 3.0"
@@ -19,12 +18,6 @@ gem 'ezcrypto'
 gem 'log4r'
 gem 'memcache-client'
 gem 'kaminari'
-# gem 'jbuilder'
-gem 'resque'
-gem 'resque-status'
-gem 'resque-scheduler'
-gem 'oops-mail', '0.0.2', :path => "vendor/gems/oops-mail-0.0.2"
-gem 'faker'
 gem 'certified'
 
 gem 'pry-rails'
@@ -41,24 +34,10 @@ group :assets do
 	gem 'haml-rails'
 	gem 'sass'
 	gem 'jquery-rails'
-	#gem 'mini_captcha', :path => "~/Rrojects/mini_captcha/"
-	# attachment
-	# gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
-  # gem for compass.
-  # gem 'compass-rails'
 end
 
-
-
 gem 'mime-types'
-# gem 'mini_magick', :git => 'https://github.com/karmaQ/mini_magick.git'
-# Use unicorn as the web server
-# gem 'unicorn'
-# Deploy with Capistrano
-# gem 'capistrano'
 
-# To use debugger
-# gem 'ruby-debug19', :require => 'ruby-debug'
 group :test, :development do
   gem 'guard-spork'
   gem "spork-minitest"
