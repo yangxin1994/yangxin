@@ -1,6 +1,6 @@
 class AnalysisWorker
 	include Sidekiq::Worker
-	sidekiq_options :retry => false
+	sidekiq_options :retry => false, :queue => "oopsdata_#{Rails.env}".to_sym
 
 	def perform(survey_id, filter_index, include_screened_answer, task_id)
 		# get the survey instance

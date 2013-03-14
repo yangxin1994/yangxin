@@ -4,7 +4,7 @@ require 'error_enum'
 require 'tool'
 class SessionsController < ApplicationController
 
-	before_filter :require_sign_in, :only => [:destroy, :init_basic_info, :obtain_user_attr_survey, :init_user_attr_survey, :skip_init_step, :update_user_info, :reset_password, :get_level_information]
+	before_filter :require_sign_in, :only => [:destroy, :update_user_info, :reset_password, :get_level_information]
 
 	#*descryption*: user submits the login form
 	#
@@ -36,21 +36,6 @@ class SessionsController < ApplicationController
 	def init_basic_info
 		retval = @current_user.init_basic_info(params[:user_info])
 		render_json_auto(retval) and return
-	end
-
-	def init_user_attr_survey
-		retval = @current_user.init_attr_survey(params[:survey_id], params[:answer])
-		render_json_s(retval) and return
-	end
-
-	def obtain_user_attr_survey
-		questions = Survey.get_user_attr_survey
-		render_json_s(questions) and return
-	end
-
-	def skip_init_step
-		retval = @current_user.skip_init_step
-		render_json_s(retval) and return
 	end
 
 	def destroy
@@ -152,7 +137,6 @@ class SessionsController < ApplicationController
 		# => for google, qq, another request is needed to get the user id
 		response_data = ThirdPartyUser.get_access_token(params[:website], params[:code], params[:redirect_uri])
 		# with the response data, find the third party user in database, or create one
-		logger.info "00000000000000000"
 		tp_user = ThirdPartyUser.find_or_create_user(params[:website], response_data)
 		render_json_e(tp_user) and return if tp_user == ErrorEnum::WRONG_THIRD_PARTY_WEBSITE
 		# check whether this user has been bound to one quill account

@@ -46,18 +46,14 @@ class SurveysController < ApplicationController
 	#* a Survey object with default meta data and empty survey_id
 	#* ErrorEnum::EMAIL_NOT_EXIST
 	def new
-		survey = Survey.find_new_by_user(@current_user)
-		if survey.nil?
-			survey = Survey.create
-			survey.alt_new_survey = false
-			@current_user.surveys << survey
-			if @current_user.is_admin || @current_user.is_super_admin
-				survey.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
-			else
-				survey.style_setting["has_advertisement"] = false
-				survey.save
-			end
+		survey = Survey.new
+		survey.user = @current_user
+		if @current_user.is_admin || @current_user.is_super_admin
+			survey.publish_status = QuillCommon::PublishStatusEnum::PUBLISHED
+		else
+			survey.style_setting["has_advertisement"] = false
 		end
+		survey.save
 		respond_to do |format|
 			format.json	{ render_json_s(survey.serialize) and return }
 		end
@@ -289,22 +285,18 @@ class SurveysController < ApplicationController
 	#*retval*:
 	#* a list Survey objects
 	def index
-
 		if params[:stars] then
 			survey_list = @current_user.surveys.stars.desc(:created_at)
 		else
 			survey_list = @current_user.surveys.list(params[:status], params[:publish_status], params[:tags])
 		end	
-
 		# add answer_number
 		survey_list.map do |e| 
 			e['screened_answer_number']=e.answers.not_preview.screened.length
 			e['finished_answer_number']=e.answers.not_preview.finished.length
 		end
-
 		paginated_surveys = auto_paginate survey_list
 		render_json_auto(paginated_surveys)
-		
 	end
 
 	def list_surveys_in_community

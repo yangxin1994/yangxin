@@ -50,7 +50,7 @@ class QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if v.nil?
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
     @retval << (v == {} ? nil : v)
   end
 
@@ -178,14 +178,14 @@ class ChoiceQuestionIo < QuestionIo
     return Array.new(header_count(header_prefix)) if v.nil?
     if issue["max_choice"].to_i > 1
       issue["items"].each do |item|
-        if v["selection"] && (v["selection"].include? item["id"])
+        if v["selection"].try("include?", item["id"])
           @retval << "1"
         else
           @retval << "0"
         end
       end
     else
-      @retval << ((v["selection"] && !v["selection"].empty?) ? get_item_index(v["selection"][0]) : nil )
+      @retval <<  get_item_index(v["selection"].try('[]',0))
     end
     if issue["other_item"]["has_other_item"]
       @retval << v["text_input"]
@@ -299,7 +299,7 @@ class MatrixChoiceQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if v.nil?
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
     if issue["max_choice"].to_i > 1
       issue["rows"].each do |item|
         issue["items"].each_index do |c|
@@ -454,8 +454,8 @@ class TimeBlankQuestionIo < QuestionIo
   # @time_unit = ["Y", "M", "W", "D", "H", "M", "S"]
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if v.nil?
-    return "" if v == {}
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
+    return nil if v == {}
     # @time_unit.each_with_index do |e, i|
     #   @retval << "#{v[i]}#{e}" if v[i] != 0
     # end
@@ -574,7 +574,7 @@ class AddressBlankQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if v.nil? || v == {}
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?")) || v == {}
     add = QuillCommon::AddressUtility.find_province_city_town_by_code(v["address"]).strip.split('-')
     case issue["format"]
     when 1 , 2
@@ -637,7 +637,7 @@ class BlankQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if v.nil?
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
     issue["items"].each_index do |i|
       q = Question.new(:content => issue["items"][i]["content"],
                        :issue => issue["items"][i]["properties"],
@@ -686,7 +686,7 @@ class MatrixBlankQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if v.nil?
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
     issue["row_id"].each_index do |r|
       issue["items"].each_index do |i|
         q = Question.new(:content => issue["items"][i]["content"],
@@ -749,7 +749,7 @@ class ConstSumQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if v.nil?
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
     v.each do |k, c|
       unless k == "text_input" || k == issue["other_item"]["input_id"]
         @retval << c
@@ -830,7 +830,7 @@ class SortQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if v.nil?
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
     if issue["max"] == -1
       issue["min"].times do |i|
         @retval << v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil
@@ -917,7 +917,7 @@ class RankQuestionIo < QuestionIo
   end
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if v.nil?
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
     issue["items"].each do |e|
       @retval << v[e["input_id"]]
       (@retval << v[e["input_id"]] == -1 ? 1 : 0) if e["has_unknow"]
@@ -984,7 +984,7 @@ class TableQuestionIo < QuestionIo
   end
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if v.nil?
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
     issue["items"].each_index do |i|
       q = Question.new(:content => issue["items"][i]["content"],
                        :issue => issue["items"][i]["properties"],
@@ -1042,7 +1042,7 @@ class ScaleQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if v.nil?
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
     issue["items"].each do |e|
       @retval << (v[e["id"].to_s] ? v[e["id"].to_s] + 1 : nil)
       # @retval << (v[e["id"].to_s] == -1 ? 1 : 0 ) if e["show_unknow"]

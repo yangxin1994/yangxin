@@ -1,6 +1,6 @@
 class QuotaEmailWorker
 	include Sidekiq::Worker
-	sidekiq_options :retry => false
+	sidekiq_options :retry => false, :queue => "oopsdata_#{Rails.env}".to_sym
 
 	def perform
 		# 1. get all samples, excluding those are in the blacklist

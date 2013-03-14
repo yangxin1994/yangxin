@@ -51,6 +51,7 @@ class ExportResult < Result
 		retval = ConnectDotNet.send_data('/ToSpss.aspx') do
 			{'spss_data' => spss_data_json, 'job_id' => task_id.to_s}
 		end
+		# File.open("tmp/a.txt", "wb") { |file| file.puts(spss_header)}
 		if retval.to_s.start_with?('error')
 			self.status = -1
 			self.error_code = retval

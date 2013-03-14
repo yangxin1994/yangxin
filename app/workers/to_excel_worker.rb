@@ -1,6 +1,6 @@
 class ToExcelWorker
 	include Sidekiq::Worker
-	sidekiq_options :retry => false
+	sidekiq_options :retry => false, :queue => "oopsdata_#{Rails.env}".to_sym
 
 	def perform(survey_id, analysis_task_id, task_id)
 		survey = Survey.find_by_id(survey_id)

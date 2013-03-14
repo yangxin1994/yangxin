@@ -1,15 +1,6 @@
 # coding: utf-8
 require 'error_enum'
 require 'question_io'
-#The question object has the following structure
-# {
-#  "question_id" : id of the question(string),
-#  "question_type" : type of the question(string),
-#  "content" : content of the question(string),
-#  "note" : note of the question(string),
-#  "is_required" : whether the question is required to be answered(bool),
-#  other fields are related to question type
-# }
 #Structure of different type question object can be found at 
 # ChoiceQuestion, 
 # MatrixChoiceQuestion, 
