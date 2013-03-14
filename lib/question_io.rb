@@ -51,7 +51,7 @@ class QuestionIo
   def answer_content(v, header_prefix)
     clear_retval
     return Array.new(header_count(header_prefix)) if v.nil?
-    @retval << v
+    @retval << (v == {} ? nil : v)
   end
 
   def answer_import(row, header_prefix)
@@ -178,7 +178,7 @@ class ChoiceQuestionIo < QuestionIo
     return Array.new(header_count(header_prefix)) if v.nil?
     if issue["max_choice"].to_i > 1
       issue["items"].each do |item|
-        if v["selection"].include? item["id"]
+        if v["selection"] && (v["selection"].include? item["id"])
           @retval << "1"
         else
           @retval << "0"
@@ -418,7 +418,6 @@ class EmailBlankQuesionIo < QuestionIo
 end
 
 class UrlBlankQuestionIo < QuestionIo
-
 end
 
 class PhoneBlankQuestionIo < QuestionIo
@@ -456,6 +455,7 @@ class TimeBlankQuestionIo < QuestionIo
   def answer_content(v, header_prefix)
     clear_retval
     return Array.new(header_count(header_prefix)) if v.nil?
+    return "" if v == {}
     # @time_unit.each_with_index do |e, i|
     #   @retval << "#{v[i]}#{e}" if v[i] != 0
     # end
@@ -481,9 +481,6 @@ class TimeBlankQuestionIo < QuestionIo
     @retval
   end
 
-  def new_answer_content
-    clear_retval
-  end
 
   def answer_import(row, header_prefix)
     blank? row["#{header_prefix}"]
@@ -577,7 +574,7 @@ class AddressBlankQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if v.nil?
+    return Array.new(header_count(header_prefix)) if v.nil? || v == {}
     add = QuillCommon::AddressUtility.find_province_city_town_by_code(v["address"]).strip.split('-')
     case issue["format"]
     when 1 , 2
@@ -922,8 +919,8 @@ class RankQuestionIo < QuestionIo
     clear_retval
     return Array.new(header_count(header_prefix)) if v.nil?
     issue["items"].each do |e|
-      @retval << e["input_id"] ? v[e["input_id"]] : nil
-      @retval << (e["input_id"] ? (v[e["input_id"]] == -1 ? 1 : 0) : nil ) if e["has_unknow"]
+      @retval << v[e["input_id"]]
+      (@retval << v[e["input_id"]] == -1 ? 1 : 0) if e["has_unknow"]
     end
     if issue["other_item"]["has_other_item"]
       @retval << v["text_input"]
@@ -1047,7 +1044,7 @@ class ScaleQuestionIo < QuestionIo
     clear_retval
     return Array.new(header_count(header_prefix)) if v.nil?
     issue["items"].each do |e|
-      @retval << e["id"] ? v[e["id"].to_s] + 1 : nil
+      @retval << (v[e["id"].to_s] ? v[e["id"].to_s] + 1 : nil)
       # @retval << (v[e["id"].to_s] == -1 ? 1 : 0 ) if e["show_unknow"]
     end
     return @retval

@@ -225,6 +225,7 @@ class Survey
 	def formated_answers(answers, result_key, task_id)
 		answer_c = []
 		formated_error = []
+		qindex = 0
 		q = self.all_questions_type
 		p "========= 准备完毕 ========="
 		answer_length = answers.length
@@ -233,12 +234,13 @@ class Survey
 			line_answer = []
 			begin
 				all_questions_id.each_with_index do |question, index|
+					qindex = index
 					line_answer += q[index].answer_content(answer.answer_content[question], "q#{index + 1}")
 				end
 			rescue Exception => test
 				binding.pry
-				formated_error << test
-			else
+				formated_error << [test, index + 1, qindex + 1, q[index + 1].class]
+			ensure
 				answer_c << line_answer
 			end
 			if Time.now.to_i != last_time
@@ -247,8 +249,8 @@ class Survey
 			end
 		end
 		Task.set_progress(task_id, "data_conversion_progress", 1.0)
-		answer_c
 		binding.pry
+		answer_c
 	end
 
 	def answer_import(csv_str)
