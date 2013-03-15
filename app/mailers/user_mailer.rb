@@ -112,26 +112,4 @@ class UserMailer < ActionMailer::Base
 		subject += " --- to #{user_email}" if Rails.env != "production"
 		mail(:to => email, :subject => subject)
 	end
-	
-	def publish_email(publish_status_history)
-		@survey = Survey.find_by_id(publish_status_history.survey_id)
-		@user = User.find_by_email(@survey.owner_email)
-		@message = publish_status_history.message
-		@url = "#{Rails.application.config.quill_host}/questionaires/#{@survey._id.to_s}/share"
-		email = Rails.env == "production" ? @user.email : @@test_email
-		subject = "您的调查问卷 #{@survey.title} 已经发布"
-		subject += " --- to #{@user.email}" if Rails.env != "production"
-		mail(:to => email, :subject => subject)
-	end
-	
-	def reject_email(publish_status_history)
-		@survey = Survey.find_by_id(publish_status_history.survey_id)
-		@user = @survey.user
-		@message = publish_status_history.message
-		@url = "#{Rails.application.config.quill_host}/questionaires/#{@survey._id.to_s}"
-		email = Rails.env == "production" ? @user.email : @@test_email
-		subject = "您的调查问卷 #{@survey.title} 发布申请被拒绝"
-		subject += " --- to #{@user.email}" if Rails.env != "production"
-		mail(:to => email, :subject => subject)
-	end
 end

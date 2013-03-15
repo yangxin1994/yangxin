@@ -76,7 +76,6 @@ class Survey
 	# whether the answers of the survey need to be reviewed
 	field :answer_need_review, :type => Boolean, :default => false
 
-	has_many :publish_status_historys
 	has_many :answers
 	has_many :email_histories
 	has_many :survey_spreads
@@ -412,12 +411,9 @@ class Survey
 		before_publish_status = self.publish_status
 		if operator.is_admin || operator.is_super_admin
 			self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
-			publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::PUBLISHED, message)
 		else
 			self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::UNDER_REVIEW)
-			publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::UNDER_REVIEW, message)
 		end
-		self.publish_status_historys << publish_status_history
 		return true
 	end
 
@@ -426,8 +422,6 @@ class Survey
 		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != QuillCommon::PublishStatusEnum::UNDER_REVIEW
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::CLOSED)
-		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::CLOSED, message)
-		self.publish_status_historys << publish_status_history
 		# message
 		message ||={}
 		operator.create_message(
@@ -445,8 +439,6 @@ class Survey
 		self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
 		# self.deadline = Time.now.to_i + 30.days.to_i if self.deadline.blank?
 		self.save
-		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::PUBLISHED, message)
-		self.publish_status_historys << publish_status_history
 		# message
 		message ||={}
 		operator.create_message(
@@ -461,8 +453,6 @@ class Survey
 		return ErrorEnum::WRONG_PUBLISH_STATUS if ![QuillCommon::PublishStatusEnum::PUBLISHED, QuillCommon::PublishStatusEnum::UNDER_REVIEW].include?(self.publish_status)
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::CLOSED)
-		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::CLOSED, message)
-		self.publish_status_historys << publish_status_history
 		return true
 	end
 
@@ -1019,6 +1009,7 @@ class Survey
 		end
 	end
 
+=begin
 	def check_progress(detail)
 		progress = {}
 
@@ -1044,6 +1035,7 @@ class Survey
 		progress["filters"] = self.filters
 		return progress
 	end
+=end
 
 	def get_user_ids_answered
 		return self.answers.not_preview.map {|a| a.user_id.to_s}

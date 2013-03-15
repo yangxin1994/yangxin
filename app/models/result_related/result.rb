@@ -50,11 +50,15 @@ class Result
 		# the task has not been finished, check the progress
 		task_id = result.task_id
 		task = Task.find_by_id(task_id)
-
 		if task.nil?
 			result.status = -1
 			result.save
 			return ErrorEnum::TASK_NOT_EXIST
+		end
+		if Time.now.to_i - task.updated_at.to_i > 600
+			result.status = -1
+			result.save
+			return ErrorEnum::TASK_TIMEOUT
 		end
 		progress = task.progress
 
@@ -78,6 +82,9 @@ class Result
 					{}
 				end
 				s2 = r.body.to_f
+				if s2 != progress["export_spss_progress"].to_f
+					progress["export_spss_progress"] = s2
+				end
 				s = s1 * 0.6 + s2 * 0.4
 			end
 		when "to_excel"
@@ -89,6 +96,9 @@ class Result
 					{}
 				end
 				s2 = r.body.to_f
+				if s2 != progress["export_excel_progress"].to_f
+					progress["export_excel_progress"] = s2
+				end
 				s = s1 * 0.6 + s2 * 0.4
 			end
 		when "report"
@@ -100,9 +110,13 @@ class Result
 					{}
 				end
 				s2 = r.body.to_f
+				if s2 != progress["export_report_progress"].to_f
+					progress["export_report_progress"] = s2
+				end
 				s = s1 * 0.3 + s2 * 0.7
 			end
 		end
+		task.save
 		# the job has not been finished, the progress cannot be greater than 0.99
 		return [s, 0.99].min
 	end
