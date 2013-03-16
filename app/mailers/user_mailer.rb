@@ -55,12 +55,14 @@ class UserMailer < ActionMailer::Base
 	def survey_email(user_id, survey_id_ary)
 		@user = User.find_by_id(user_id)
 		@surveys = survey_id_ary.map { |e| Survey.find_by_id(e) }
+=begin
 		@surveys.each do |s|
 			email_history = EmailHistory.create
 			email_history.user = @user
 			email_history.survey = s
 			email_history.save
 		end
+=end
 		@presents = []	
 		# push a lottery
 		lottery = Lottery.quillme.first
@@ -85,12 +87,14 @@ class UserMailer < ActionMailer::Base
 
 	def imported_email_survey_email(user_email, survey_id_ary)
 		@surveys = survey_id_ary.map { |e| Survey.find_by_id(e) }
+=begin
 		@surveys.each do |s|
 			email_history = EmailHistory.create
 			email_history.email = user_email
 			email_history.survey = s
 			email_history.save
 		end
+=end
 		@presents = []	
 		# push a lottery
 		lottery = Lottery.quillme.first
