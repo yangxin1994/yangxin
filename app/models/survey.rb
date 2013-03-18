@@ -76,7 +76,6 @@ class Survey
 	# whether the answers of the survey need to be reviewed
 	field :answer_need_review, :type => Boolean, :default => false
 
-	has_many :publish_status_historys
 	has_many :answers
 	has_many :email_histories
 	has_many :survey_spreads
@@ -412,12 +411,9 @@ class Survey
 		before_publish_status = self.publish_status
 		if operator.is_admin || operator.is_super_admin
 			self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
-			publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::PUBLISHED, message)
 		else
 			self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::UNDER_REVIEW)
-			publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::UNDER_REVIEW, message)
 		end
-		self.publish_status_historys << publish_status_history
 		return true
 	end
 
@@ -426,8 +422,6 @@ class Survey
 		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != QuillCommon::PublishStatusEnum::UNDER_REVIEW
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::CLOSED)
-		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::CLOSED, message)
-		self.publish_status_historys << publish_status_history
 		# message
 		message ||={}
 		operator.create_message(
@@ -445,8 +439,6 @@ class Survey
 		self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
 		# self.deadline = Time.now.to_i + 30.days.to_i if self.deadline.blank?
 		self.save
-		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::PUBLISHED, message)
-		self.publish_status_historys << publish_status_history
 		# message
 		message ||={}
 		operator.create_message(
@@ -461,8 +453,6 @@ class Survey
 		return ErrorEnum::WRONG_PUBLISH_STATUS if ![QuillCommon::PublishStatusEnum::PUBLISHED, QuillCommon::PublishStatusEnum::UNDER_REVIEW].include?(self.publish_status)
 		before_publish_status = self.publish_status
 		self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::CLOSED)
-		publish_status_history = PublishStatusHistory.create_new(operator._id, before_publish_status, QuillCommon::PublishStatusEnum::CLOSED, message)
-		self.publish_status_historys << publish_status_history
 		return true
 	end
 
@@ -667,6 +657,9 @@ class Survey
 			when 'question_update'
 				next if question.issue["items"].nil? && question.issue["rows"].nil?
 				item_ids = (question.issue["items"].try(:map) { |i| i["id"] }) || []
+				if question.issue["other_item"] && question.issue["other_item"]["has_other_item"] == true
+					item_ids << question.issue["other_item"]["id"]
+				end
 				row_ids = (question.issue["rows"].try(:map) { |i| i["id"] }) || []
 				# first handle conditions
 				if question.question_type == 0
@@ -795,6 +788,9 @@ class Survey
 				case type
 				when 'question_update'
 					item_ids = question.issue["items"].map { |i| i["id"] }
+					if question.issue["other_item"] && question.issue["other_item"]["has_other_item"] == true
+						item_ids << question.issue["other_item"]["id"]
+					end
 					row_ids = question.issue["items"].map { |i| i["id"] }
 					need_refresh_quota = false
 					rule["conditions"].each do |c|
@@ -827,6 +823,9 @@ class Survey
 				when 'question_update'
 					question = Question.find_by_id(question_id)
 					item_ids = question.issue["items"].map { |i| i["id"] }
+					if question.issue["other_item"] && question.issue["other_item"]["has_other_item"] == true
+						item_ids << question.issue["other_item"]["id"]
+					end
 					row_ids = question.issue["items"].map { |i| i["id"] }
 					rule["conditions"].each do |c|
 						next if c["condition_type"] != 1 || c["name"] != question_id
@@ -1019,6 +1018,7 @@ class Survey
 		end
 	end
 
+=begin
 	def check_progress(detail)
 		progress = {}
 
@@ -1044,6 +1044,7 @@ class Survey
 		progress["filters"] = self.filters
 		return progress
 	end
+=end
 
 	def get_user_ids_answered
 		return self.answers.not_preview.map {|a| a.user_id.to_s}

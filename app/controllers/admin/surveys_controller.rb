@@ -79,7 +79,7 @@ class Admin::SurveysController < Admin::ApplicationController
 		@survey = Survey.normal.find_by_id(params[:id])
 		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
 		@survey.promotable = params[:promotable].to_s == "true"
-		@survey.promote_email_number = params[:promote_email_number].to_i
+		@survey.promote_email_number = params[:promote_email_number].to_i if !params[:promote_email_number].nil?
 		render_json_auto(@survey.save) and return
 	end
 

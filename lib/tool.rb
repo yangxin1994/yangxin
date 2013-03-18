@@ -21,11 +21,14 @@ module Tool
 		return response
 	end
 
-	def self.send_get_request(uri, ssl = false)
+	def self.send_get_request(uri, ssl = false, username = nil, password = nil)
 		uri = URI.parse(uri)
 		http = Net::HTTP.new(uri.host, uri.port)
 		http.use_ssl = ssl
 		request = Net::HTTP::Get.new(uri.request_uri)
+		if !username.nil?
+			request.basic_auth(username, password)
+		end
 		response = http.request(request)
 		return response
 	end

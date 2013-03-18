@@ -97,6 +97,7 @@ module ErrorEnum
 	ANSWER_REVIEWED = 'error_181'
 
 	TASK_NOT_EXIST = 'error_190'
+	TASK_TIMEOUT = 'error_191'
 	TASK_CREATION_FAILED = 'error_200'
 	TASK_DESTROY_FAILED = 'error_201'
 
