@@ -33,7 +33,7 @@ class ImportEmail
 		return selected_email
 	end
 
-	def remove_bounce_emails
+	def self.remove_bounce_emails
 		limit = 1000
 		skip = 0
 		loop do
@@ -41,7 +41,7 @@ class ImportEmail
 				true,
 				"api",
 				Rails.application.config.mailgun_api_key)
-			bounced_emails = retval.body["items"]
+			bounced_emails = JSON.parse(retval.body)["items"]
 			break if bounced_emails.blank?
 			bounced_emails.each do |email|
 				address = email["address"]
