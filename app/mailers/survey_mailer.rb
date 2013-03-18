@@ -7,8 +7,19 @@ class SurveyMailer < ActionMailer::Base
 
 	@@test_email = "test@oopsdata.com"
 
+	self.smtp_settings = {
+		:authentication => "plain",
+		:address        => "smtp.mailgun.com",
+		:port           => 25,
+		:domain         => "oopsdata.net",
+		:user_name      => "postmaster@oopsdata.net",
+		:password       => "0nlnhy08vbk1",
+		:enable_starttls_auto => true,
+		:openssl_verify_mode  => 'none'
+	}
+
 	def survey_email(user_id, survey_id_ary)
-		set_custom_smtp_setting
+		# set_custom_smtp_setting
 		@user = User.find_by_id(user_id)
 		@surveys = survey_id_ary.map { |e| Survey.find_by_id(e) }
 		@presents = []	
@@ -34,7 +45,7 @@ class SurveyMailer < ActionMailer::Base
 	end
 
 	def imported_email_survey_email(user_email, survey_id_ary)
-		set_custom_smtp_setting
+		# set_custom_smtp_setting
 		@surveys = survey_id_ary.map { |e| Survey.find_by_id(e) }
 		@presents = []	
 		# push a lottery
@@ -58,6 +69,7 @@ class SurveyMailer < ActionMailer::Base
 		mail(:to => email, :subject => subject)
 	end
 
+=begin
 	def set_custom_smtp_setting
 		@_temp_smtp_settings = @@smtp_settings
 		@@smtp_settings = Rails.application.config.survey_mailer_setting
@@ -71,6 +83,7 @@ class SurveyMailer < ActionMailer::Base
 		end
 		out
 	end
+=end
 
 	def remove_bounce_emails
 		limit = 1000
