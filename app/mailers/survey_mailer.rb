@@ -7,7 +7,9 @@ class SurveyMailer < ActionMailer::Base
 
 	@@test_email = "test@oopsdata.com"
 
-	self.smtp_settings = {
+	self.smtp_settings = Rails.application.config.survey_mailer_setting
+=begin
+	{
 		:authentication => "plain",
 		:address        => "smtp.mailgun.com",
 		:port           => 25,
@@ -17,6 +19,7 @@ class SurveyMailer < ActionMailer::Base
 		:enable_starttls_auto => true,
 		:openssl_verify_mode  => 'none'
 	}
+=end
 
 	def survey_email(user_id, survey_id_ary)
 		# set_custom_smtp_setting
@@ -67,39 +70,5 @@ class SurveyMailer < ActionMailer::Base
 		subject = "邀请您参加问卷调查"
 		subject += " --- to #{user_email}" if Rails.env != "production"
 		mail(:to => email, :subject => subject)
-	end
-
-=begin
-	def set_custom_smtp_setting
-		@_temp_smtp_settings = @@smtp_settings
-		@@smtp_settings = Rails.application.config.survey_mailer_setting
-	end
-
-	def deliver!(mail = @mail)
-		out = super
-		if @_temp_smtp_settings
-			@@smtp_settings = @_temp_smtp_settings
-			@_temp_smtp_settings = nil
-		end
-		out
-	end
-=end
-
-	def remove_bounce_emails
-		limit = 1000
-		skip = 0
-		loop do
-			retval = Tool.send_get_request("https://api.mailgun.net/v2/oopsdata.net/bounces?limit=#{limit}&skip=#{skip}",
-				true,
-				"api",
-				Rails.application.config.mailgun_api_key)
-			bounced_emails = retval.body["items"]
-			break if bounced_emails.blank?
-			bounced_emails.each do |email|
-				address = email["address"]
-				ImportEmail.destroy_by_email(address)
-			end
-			skip += limit
-		end
 	end
 end

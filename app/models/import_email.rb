@@ -32,4 +32,22 @@ class ImportEmail
 		selected_email = emails.shuffle[0..number-1]
 		return selected_email
 	end
+
+	def remove_bounce_emails
+		limit = 1000
+		skip = 0
+		loop do
+			retval = Tool.send_get_request("https://api.mailgun.net/v2/oopsdata.net/bounces?limit=#{limit}&skip=#{skip}",
+				true,
+				"api",
+				Rails.application.config.mailgun_api_key)
+			bounced_emails = retval.body["items"]
+			break if bounced_emails.blank?
+			bounced_emails.each do |email|
+				address = email["address"]
+				ImportEmail.destroy_by_email(address)
+			end
+			skip += limit
+		end
+	end
 end
