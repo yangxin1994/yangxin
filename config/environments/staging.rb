@@ -64,12 +64,25 @@ OopsData::Application.configure do
     :authentication => "plain",
     :address        => "smtp.mailgun.com",
     :port           => 25,
+    :domain         => "oopsdata.cn",
+    :user_name      => "postmaster@oopsdata.cn",
+    :password       => "73ve2nt6yxl9",
+    :enable_starttls_auto => true,
+    :openssl_verify_mode  => 'none'
+  }
+
+  config.survey_mailer_setting = {
+    :authentication => "plain",
+    :address        => "smtp.mailgun.com",
+    :port           => 25,
     :domain         => "oopsdata.net",
     :user_name      => "postmaster@oopsdata.net",
     :password       => "0nlnhy08vbk1",
     :enable_starttls_auto => true,
     :openssl_verify_mode  => 'none'
   }
+
+  config.mailgun_api_key = "key-9zcv6-e7j8aratn9viu3unvbn2zc92j3"
 
   # task web service
   config.task_web_service_uri = 'localhost:9001'
