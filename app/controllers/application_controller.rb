@@ -195,13 +195,15 @@ class ApplicationController < ActionController::Base
 	end
 	
 	def require_entry_clerk
+		@survey = Survey.find_by_id(params[:id])
+		render_json_e(ErrorEnum::SURVEY_NOT_EXIST) if @survey.nil?
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
-		if !user_entry_clerk? && !user_admin?
+		if !user_entry_clerk? && !user_admin? && current_user != @survey.user
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_ENTRY_CLERK) and return }
