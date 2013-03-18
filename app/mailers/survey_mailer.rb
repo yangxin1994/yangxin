@@ -3,7 +3,7 @@ require 'encryption'
 class SurveyMailer < ActionMailer::Base
 	layout 'email'
 
-	default from: "\"优数调研\" <postmaster@oopsdata.cn>", charset: "UTF-8"
+	default from: "\"优数调研\" <postmaster@oopsdata.net>", charset: "UTF-8"
 
 	@@test_email = "test@oopsdata.com"
 
