@@ -22,3 +22,7 @@
 every 1.hours do
   runner "QuotaEmailWorker.perform_async"
 end
+
+every 1.days do
+	runner "ImportEmail.remove_bounce_emails"
+end

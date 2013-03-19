@@ -46,6 +46,11 @@ class ImportEmail
 			bounced_emails.each do |email|
 				address = email["address"]
 				ImportEmail.destroy_by_email(address)
+				Tool.send_delete_request("https://api.mailgun.net/v2/oopsdata.net/bounces/#{address}",
+					{},
+					true,
+					"api",
+					Rails.application.config.mailgun_api_key)
 			end
 			skip += limit
 		end
