@@ -242,11 +242,12 @@ class User
   #*retval*:
   #* the new user instance: when successfully created
   def self.create_new_registered_user(user, current_user, third_party_user_id, callback)
+    user["email"].downcase!
     return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal?(user["email"])
     existing_user = self.find_by_email(user["email"])
     return ErrorEnum::EMAIL_EXIST if existing_user && existing_user.is_registered
     return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if user["password"] != user["password_confirmation"]
-    updated_attr = user.merge(email: user["email"].downcase,
+    updated_attr = user.merge(email: user["email"],
                               password: Encryption.encrypt_password(user["password"]),
                               registered_at: Time.now.to_i,
                               status: 1)
@@ -264,6 +265,7 @@ class User
   end
 
   def self.find_or_create_new_visitor_by_email(email)
+    email.downcase!
     user = User.find_by_email(email)
     if user.nil?
       user = User.create(email: email)
@@ -284,6 +286,7 @@ class User
   def self.activate(activate_info, client_ip, client_type)
     user = User.find_by_email(activate_info["email"])
     return ErrorEnum::USER_NOT_EXIST if user.nil?     # email account does not exist
+    return ErrorEnum::USER_NOT_REGISTERED if user.status == 0     # not registered
     return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i    # expired
     return user.login(client_ip, client_type, false)  if user.is_activated
     user = User.find_by_email(activate_info["email"])

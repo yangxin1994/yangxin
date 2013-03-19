@@ -6,6 +6,7 @@ module ErrorEnum
 	ILLEGAL_ACTIVATE_KEY = "error_02"
 	USER_NOT_ACTIVATED = "error_3"
 	USER_NOT_EXIST = "error_4"
+	USER_NOT_REGISTERED = "error_24"
 	ACTIVATE_EXPIRED = "error_5"
 	RESET_PASSWORD_EXPIRED = "error_6"
 	REQUIRE_LOGIN = "error_7"
