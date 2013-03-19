@@ -10,7 +10,7 @@ class ImportEmail
 	scope :confirmed, where(:confirm => true)
 	scope :not_confirmed, where(:confirm.in => [false, nil])
 
-	scope :not_sent, where(:sent => nil)
+	scope :not_sent, where(:sent.in => [false, nil])
 
 	index({ sent: 1 }, { background: true } )
 
