@@ -5,9 +5,12 @@ class ImportEmail
 	field :email, :type => String
 	field :username, :type => String
 	field :confirm, :type => Boolean, default: false
+	field :sent, :type => Boolean
 
 	scope :confirmed, where(:confirm => true)
 	scope :not_confirmed, where(:confirm.in => [false, nil])
+
+	scope :not_sent, where(:sent => nil)
 
 	def self.import_email(file_name)
 		csv_text = File.read(file_name)
