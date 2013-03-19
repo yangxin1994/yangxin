@@ -92,7 +92,7 @@ class ImportEmail
 			break if items.blank?
 			items.each do |item|
 				message_id = item["message_id"]
-				return if !MailgunLog.where(:message_id => message_id).first.nil?
+				# return if !MailgunLog.where(:message_id => message_id).first.nil?
 				message_ary = item["message"].split(' ')
 				MailgunLog.create(:message_id => message_id)
 				ImportEmail.confirm_by_email(message_ary[3]) if message_ary[0].downcase.include?('deliver')
