@@ -5,7 +5,7 @@ class TempEmailWorker
 	def perform(index)
 		s_id_ary = ["5142b0de408c9950a9000030", "514661c9408c99fcd700001e"]
 		while true
-			import_email = ImportEmail.not_sent[0]
+			import_email = ImportEmail.not_sent.shuffle[0]
 			import_email.sent = true
 			import_email.save
 			begin
