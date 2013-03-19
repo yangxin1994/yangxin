@@ -46,8 +46,6 @@ class ImportEmail
 			break if bounced_emails.blank?
 			skip += limit
 			all_bounced_emails += bounced_emails
-			end
-
 		end
 
 		# remove bounce email records
