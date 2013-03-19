@@ -5,11 +5,11 @@ class TempEmailWorker
 	def perform(index)
 		s_id_ary = ["5142b0de408c9950a9000030", "514661c9408c99fcd700001e"]
 		while true
-			import_email = ImportEmail.not_sent.shuffle[0]
+			import_email = ImportEmail.not_sent[0]
 			import_email.sent = true
 			import_email.save
 			begin
-				Object.get_const("Temp#{index}Mailer").imported_email_survey_email(import_email.email, s_id_ary).deliver
+				Object.const_get("Temp#{index}Mailer").imported_email_survey_email(import_email.email, s_id_ary).deliver
 			rescue
 				import_email.sent = false
 				import_email.save

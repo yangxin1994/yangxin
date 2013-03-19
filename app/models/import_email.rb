@@ -12,6 +12,8 @@ class ImportEmail
 
 	scope :not_sent, where(:sent => nil)
 
+	index({ sent: 1 }, { background: true } )
+
 	def self.import_email(file_name)
 		csv_text = File.read(file_name)
 		csv = CSV.parse(csv_text, :headers => false)
