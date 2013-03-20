@@ -86,7 +86,7 @@ class AnswersController < ApplicationController
 			retval = @survey.check_password_for_preview(params[:username], params[:password], @current_user)
 			render_json_auto(retval) and return if retval != true
 			# the first time to load questions, create the preview answer
-			answer = Answer.create_answer(params[:is_preview], params[:introducer_id], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password], params[:referrer_url])
+			answer = Answer.create_answer(params[:is_preview], params[:introducer_id], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password], params[:referrer])
 			render_json_auto(answer) and return if answer.class != Answer
 			render_json_auto(answer._id) and return
 		else
@@ -94,7 +94,7 @@ class AnswersController < ApplicationController
 			# check the password
 			retval = @survey.check_password(params[:username], params[:password], @current_user)
 			render_json_auto(retval) and return if retval != true
-			answer = Answer.create_answer(params[:is_preview], params[:introducer_id], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password], params[:referrer_url])
+			answer = Answer.create_answer(params[:is_preview], params[:introducer_id], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password], params[:referrer])
 			render_json_auto(answer) and return if answer.class != Answer
 			answer.check_channel_ip_address_quota
 			render_json_auto(answer._id) and return
