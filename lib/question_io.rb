@@ -833,11 +833,11 @@ class SortQuestionIo < QuestionIo
     return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
     if issue["max"] == -1
       issue["min"].times do |i|
-        @retval << v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil
+        @retval << (v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil)
       end
     else
       issue["max"].times do |i|
-        @retval << v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil
+        @retval << (v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil)
       end
     end
 
@@ -1055,7 +1055,7 @@ class ScaleQuestionIo < QuestionIo
     issue["items"].each_with_index do |item, index|
       blank? row["#{header_prefix}_c#{index + 1}"]
       if only_num?(row["#{header_prefix}_c#{index + 1}"], range: 1..issue["labels"].length)
-        @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : row["#{header_prefix}_c#{index + 1}"].to_i - 1)
+        @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : (row["#{header_prefix}_c#{index + 1}"].to_i) - 1)
       else
         raise "您输入的范围好像不太对吧?"
       end

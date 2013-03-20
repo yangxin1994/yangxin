@@ -36,7 +36,7 @@ end
 
 gem 'mime-types'
 
-group :test, :development do
+group :test, :development, :staging do
   gem 'guard-spork'
   gem "spork-minitest"
   gem "guard-minitest"#, :git => 'https://github.com/karmaQ/guard-minitest.git'
