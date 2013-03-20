@@ -1,0 +1,18 @@
+邀请您填写下列问卷：
+
+----
+<%- @surveys.each do |s| %>
+《<%= s.title %>》
+<%- if s.reward == 1 %>
+	（可参加抽奖：<%= s.lottery.try(:title) %>）
+<%- elsif s.reward == 2 %>
+	（可获得<%= s.point %>积分）
+<%- end %>
+<%= Rails.application.config.quillme_host %>/s/<%= s._id %>
+<%- end %>
+----
+
+优数调研提供了丰富的礼品供您兑换，还有各种大奖等你来抽，快快参加调研吧！
+<%- @presents.each do |p| %>
+<%= p[:title] %> <%=p[:url]  %>
+<%- end %>

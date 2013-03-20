@@ -657,6 +657,9 @@ class Survey
 			when 'question_update'
 				next if question.issue["items"].nil? && question.issue["rows"].nil?
 				item_ids = (question.issue["items"].try(:map) { |i| i["id"] }) || []
+				if question.issue["other_item"] && question.issue["other_item"]["has_other_item"] == true
+					item_ids << question.issue["other_item"]["id"]
+				end
 				row_ids = (question.issue["rows"].try(:map) { |i| i["id"] }) || []
 				# first handle conditions
 				if question.question_type == 0
@@ -785,6 +788,9 @@ class Survey
 				case type
 				when 'question_update'
 					item_ids = question.issue["items"].map { |i| i["id"] }
+					if question.issue["other_item"] && question.issue["other_item"]["has_other_item"] == true
+						item_ids << question.issue["other_item"]["id"]
+					end
 					row_ids = question.issue["items"].map { |i| i["id"] }
 					need_refresh_quota = false
 					rule["conditions"].each do |c|
@@ -817,6 +823,9 @@ class Survey
 				when 'question_update'
 					question = Question.find_by_id(question_id)
 					item_ids = question.issue["items"].map { |i| i["id"] }
+					if question.issue["other_item"] && question.issue["other_item"]["has_other_item"] == true
+						item_ids << question.issue["other_item"]["id"]
+					end
 					row_ids = question.issue["items"].map { |i| i["id"] }
 					rule["conditions"].each do |c|
 						next if c["condition_type"] != 1 || c["name"] != question_id

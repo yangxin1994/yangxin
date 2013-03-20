@@ -11,23 +11,42 @@ module Tool
 	end
 
 
-	def self.send_post_request(uri, params, ssl = false)
+	def self.send_post_request(uri, params, ssl = false, username = nil, password = nil)
 		uri = URI.parse(uri)
 		http = Net::HTTP.new(uri.host, uri.port)
 		http.use_ssl = ssl
 		request = Net::HTTP::Post.new(uri.request_uri)
 		request.set_form_data(params)
+		if @username.nil?
+			request.basic_auth(username, password)
+		end
 		response = http.request(request)
 		return response
 	end
 
-	def self.send_get_request(uri, ssl = false)
+	def self.send_get_request(uri, ssl = false, username = nil, password = nil)
 		uri = URI.parse(uri)
 		http = Net::HTTP.new(uri.host, uri.port)
 		http.use_ssl = ssl
 		request = Net::HTTP::Get.new(uri.request_uri)
+		if !username.nil?
+			request.basic_auth(username, password)
+		end
 		response = http.request(request)
 		return response
+	end
+
+	def self.send_delete_request(uri, params, ssl = false, username = nil, password = nil)
+		uri = URI.parse(uri)
+		http = Net::HTTP.new(uri.host, uri.port)
+		http.use_ssl = ssl
+		request = Net::HTTP::Delete.new(uri.request_uri)
+		request.set_form_data(params)
+		if @username.nil?
+			request.basic_auth(username, password)
+		end
+		response = http.request(request)
+		return response	
 	end
 
 	#

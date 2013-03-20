@@ -38,7 +38,7 @@ class QuestionIo
   def spss_header(header_prefix)
     @spss_header << {"spss_name" => header_prefix,
                 "spss_type" => SPSS_STRING,
-                "spss_label" => content["text"]}
+                "spss_label" => content["text"].gsub(/<[^>]*>/, '')}
     @header_count[header_prefix] ||= @spss_header.count
     @spss_header
   end
@@ -161,7 +161,7 @@ class ChoiceQuestionIo < QuestionIo
       end
       @spss_header << {"spss_name" => header_prefix,
                   "spss_type" => SPSS_STRING_SHORT,
-                  "spss_label" => content["text"],
+                  "spss_label" => content["text"].gsub(/<[^>]*>/, ''),
                   "spss_value_labels" => choices }
     end
     if issue["other_item"]["has_other_item"]
@@ -388,7 +388,7 @@ class NumberBlankQuestionIo < QuestionIo
   def spss_header(header_prefix)
     @spss_header << {"spss_name" => header_prefix,
                 "spss_type" => SPSS_NUMERIC,
-                "spss_label" => content["text"]}
+                "spss_label" => content["text"].gsub(/<[^>]*>/, '')}
     @header_count[header_prefix] ||= @spss_header.count
     @spss_header
   end
