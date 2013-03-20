@@ -16,7 +16,7 @@ class AnalysisResult < Result
 	field :time_result, :type => Hash, default: {}
 	field :region_result, :type => Hash, default: {}
 	field :channel_result, :type => Hash, default: {}
-	field :referrer_domain_result, :type => Hash, default: {}
+	field :referrer_result, :type => Hash, default: {}
 	field :answers_result, :type => Hash, default: {}
 
 	belongs_to :survey
@@ -30,7 +30,7 @@ class AnalysisResult < Result
 
 	def analysis(answers, task_id = nil)
 		region_result = QuillCommon::AddressUtility.province_hash.merge(QuillCommon::AddressUtility.city_hash)
-		referrer_domain_result = {}
+		referrer_result = {}
 		channel_result = {}
 		duration_mean = []
 		finish_time = []
@@ -72,10 +72,10 @@ class AnalysisResult < Result
 			region_result[region]["count"] = region_result[region]["count"] + 1 if !region_result[region].nil?
 
 			# analyze referrer domain
-			referrer_domain = a.referrer_domain
-			if !referrer_domain.blank?
-				referrer_domain_result[referrer_domain] ||= 0
-				referrer_domain_result[referrer_domain] += 1
+			referrer = a.referrer
+			if !referrer.blank?
+				referrer_result[referrer] ||= 0
+				referrer_result[referrer] += 1
 			end
 			
 			# analyze channel
@@ -137,7 +137,7 @@ class AnalysisResult < Result
 
 		# update analysis result
 		self.region_result = region_result
-		self.referrer_domain_result = referrer_domain_result
+		self.referrer_result = referrer_result
 		self.channel_result = channel_result
 		self.duration_mean = duration_mean
 		self.time_result = time_result

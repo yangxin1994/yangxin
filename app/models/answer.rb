@@ -44,7 +44,7 @@ class Answer
 	field :attachment, :type => Hash, :default => {}
 	field :longitude, :type => String, :default => ""
 	field :latitude, :type => String, :default => ""
-	field :referrer_domain, :type => String, :default => ""
+	field :referrer, :type => String, :default => ""
 
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
@@ -111,7 +111,7 @@ class Answer
 		return answer
 	end
 
-	def self.create_answer(is_preview, introducer_id, email, survey_id, channel, ip, username, password, referrer_domain)
+	def self.create_answer(is_preview, introducer_id, email, survey_id, channel, ip, username, password, referrer)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		answer = Answer.new(is_preview: is_preview,
@@ -120,7 +120,7 @@ class Answer
 			region: QuillCommon::AddressUtility.find_address_code_by_ip(ip),
 			username: username,
 			password: password,
-			referrer_domain: referrer_domain)
+			referrer: referrer)
 		if !is_preview && introducer_id
 			introducer = User.find_by_id(introducer_id)
 			if !introducer.nil? && introducer.email != email
