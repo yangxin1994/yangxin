@@ -7,7 +7,7 @@ class AnalysisWorker
 		survey = Survey.find_by_id(survey_id)
 		return false if survey.nil?
 		# find answers set
-		answers, tot_answer_number, screened_answer_number = *survey.get_answers(filter_index.to_i,
+		answers, tot_answer_number, screened_answer_number, ongoing_answer_number, wait_for_review_answer_number = *survey.get_answers(filter_index.to_i,
 			include_screened_answer.to_s == "true",
 			task_id)
 		# generate the result_key
@@ -21,14 +21,18 @@ class AnalysisWorker
 			analysis_result = AnalysisResult.create(:result_key => result_key,
 													:task_id => task_id,
 													:tot_answer_number => tot_answer_number,
-													:screened_answer_number => screened_answer_number)
+													:screened_answer_number => screened_answer_number,
+													:ongoing_answer_number => ongoing_answer_number,
+													:wait_for_review_answer_number => wait_for_review_answer_number)
 		else
 			# create analysis result
 			analysis_result = AnalysisResult.create(:result_key => result_key,
 													:task_id => task_id,
 													:tot_answer_number => tot_answer_number,
 													:screened_answer_number => screened_answer_number,
-													:ref_result_id => existing_analysis_result._id)
+													:ref_result_id => existing_analysis_result._id,
+													:ongoing_answer_number => ongoing_answer_number,
+													:wait_for_review_answer_number => wait_for_review_answer_number)
 			return true
 		end
 		survey.analysis_results << analysis_result

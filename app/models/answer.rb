@@ -44,6 +44,7 @@ class Answer
 	field :attachment, :type => Hash, :default => {}
 	field :longitude, :type => String, :default => ""
 	field :latitude, :type => String, :default => ""
+	field :referrer_url, :type => String, :default => ""
 
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
@@ -52,6 +53,8 @@ class Answer
 	scope :finished_and_screened, lambda { any_of({:status => 3}, {:status => 1, :reject_type => 3}) }
 	scope :rejected, lambda { where(:status => 1) }
 	scope :unreviewed, lambda { where(:status => 2) }
+	scope :ongoing, lambda {where(:status => 0)}
+	scope :wait_for_review, lambda {where(:status => 2)}
 
 	belongs_to :user, class_name: "User", inverse_of: :answers
 	belongs_to :survey
@@ -108,7 +111,7 @@ class Answer
 		return answer
 	end
 
-	def self.create_answer(is_preview, introducer_id, email, survey_id, channel, ip, username, password)
+	def self.create_answer(is_preview, introducer_id, email, survey_id, channel, ip, username, password, referrer_url)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		answer = Answer.new(is_preview: is_preview,
@@ -116,7 +119,8 @@ class Answer
 			ip_address: ip,
 			region: QuillCommon::AddressUtility.find_address_code_by_ip(ip),
 			username: username,
-			password: password)
+			password: password,
+			referrer_url: referrer_url)
 		if !is_preview && introducer_id
 			introducer = User.find_by_id(introducer_id)
 			if !introducer.nil? && introducer.email != email
