@@ -9,24 +9,28 @@ class AnalysisResult < Result
 
 	field :tot_answer_number, :type => Integer, default: 0
 	field :screened_answer_number, :type => Integer, default: 0
+	field :ongoing_answer_number, :type => Integer, default: 0
+	field :wait_for_review_answer_number, :type => Integer, default: 0
 	field :answer_info, :type => Array, default: []
 	field :duration_mean, :type => Float, default: 0
 	field :time_result, :type => Hash, default: {}
 	field :region_result, :type => Hash, default: {}
 	field :channel_result, :type => Hash, default: {}
+	field :referrer_result, :type => Hash, default: {}
 	field :answers_result, :type => Hash, default: {}
 
 	belongs_to :survey
 
-	def self.generate_result_key(last_update_time, answers, tot_answer_number, screened_answer_number)
+	def self.generate_result_key(last_update_time, answers, tot_answer_number, screened_answer_number, ongoing_answer_number, wait_for_review_answer_number)
 		answer_ids = answers.map { |e| e._id.to_s }
-		result_key = Digest::MD5.hexdigest("analysis-#{answer_ids.to_s}-#{tot_answer_number}-#{screened_answer_number}")
+		result_key = Digest::MD5.hexdigest("analysis-#{answer_ids.to_s}-#{tot_answer_number}-#{screened_answer_number}-#{ongoing_answer_number}-#{wait_for_review_answer_number}")
 		return result_key
 	end
 
 
 	def analysis(answers, task_id = nil)
-		region_result = QuillCommon::AddressUtility.province_hash.merge(QuillCommon::AddressUtility.city_hash)
+		region_result = QuillCommon::AddressUtility.province_hash.merge(QuillCommon::AddressUtility.city_hash).merge(QuillCommon::AddressUtility.county_hash)
+		referrer_result = {}
 		channel_result = {}
 		duration_mean = []
 		finish_time = []
@@ -66,6 +70,13 @@ class AnalysisResult < Result
 			# analyze region
 			region = answer.region.to_s
 			region_result[region]["count"] = region_result[region]["count"] + 1 if !region_result[region].nil?
+
+			# analyze referrer domain
+			referrer = answer.referrer
+			if !referrer.blank?
+				referrer_result[referrer] ||= 0
+				referrer_result[referrer] += 1
+			end
 			
 			# analyze channel
 			channel = answer.channel.to_s
@@ -126,6 +137,7 @@ class AnalysisResult < Result
 
 		# update analysis result
 		self.region_result = region_result
+		self.referrer_result = referrer_result
 		self.channel_result = channel_result
 		self.duration_mean = duration_mean
 		self.time_result = time_result
@@ -179,6 +191,8 @@ class AnalysisResult < Result
 		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
 		return {:tot_answer_number => analysis_result.tot_answer_number,
 				:screened_answer_number => analysis_result.screened_answer_number,
+				:ongoing_answer_number => analysis_result.ongoing_answer_number,
+				:wait_for_review_answer_number => analysis_result.wait_for_review_answer_number,
 				:duration_mean => analysis_result.duration_mean,
 				:time_result => analysis_result.time_result,
 				:region_result => analysis_result.region_result,
