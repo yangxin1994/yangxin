@@ -14,7 +14,9 @@ class AnalysisWorker
 		result_key = AnalysisResult.generate_result_key(survey.last_update_time,
 			answers,
 			tot_answer_number,
-			screened_answer_number)
+			screened_answer_number,
+			ongoing_answer_number,
+			wait_for_review_answer_number)
 		existing_analysis_result = AnalysisResult.find_by_result_key(result_key)
 		if existing_analysis_result.nil?
 			# create analysis result
