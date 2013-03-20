@@ -7,7 +7,7 @@ class TempEmailWorker
 		import_emails = ImportEmail.all.to_a
 		while true
 			import_email = import_emails[digit]
-			digit += 10
+			digit += 5
 			return if import_email.nil?
 			next if import_email.sent
 			import_email.sent = true
