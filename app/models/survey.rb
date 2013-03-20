@@ -1546,7 +1546,9 @@ class Survey
 			end
 		end
 		Task.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
-		return [filtered_answers, tot_answer_number, tot_answer_number - not_screened_answer_number]
+		ongoing_answer_number = self.answers.ongoing
+		wait_for_review_answer_number = self.answers.wait_for_review
+		return [filtered_answers, tot_answer_number, tot_answer_number - not_screened_answer_number, ongoing_answer_number, wait_for_review_answer_number]
 	end
 
 	#----------------------------------------------

@@ -9,6 +9,8 @@ class AnalysisResult < Result
 
 	field :tot_answer_number, :type => Integer, default: 0
 	field :screened_answer_number, :type => Integer, default: 0
+	field :ongoing_answer_number, :type => Integer, default: 0
+	field :wait_for_review_answer_number, :type => Integer, default: 0
 	field :answer_info, :type => Array, default: []
 	field :duration_mean, :type => Float, default: 0
 	field :time_result, :type => Hash, default: {}
@@ -179,6 +181,8 @@ class AnalysisResult < Result
 		return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
 		return {:tot_answer_number => analysis_result.tot_answer_number,
 				:screened_answer_number => analysis_result.screened_answer_number,
+				:ongoing_answer_number => analysis_result.ongoing_answer_number,
+				:wait_for_review_answer_number => analysis_result.wait_for_review_answer_number,
 				:duration_mean => analysis_result.duration_mean,
 				:time_result => analysis_result.time_result,
 				:region_result => analysis_result.region_result,

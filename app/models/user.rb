@@ -318,6 +318,7 @@ class User
   def self.login_with_email(email_username, password, client_ip, client_type, keep_signed_in, third_party_user_id)
     user = User.find_by_email(email_username)
     return ErrorEnum::USER_NOT_EXIST if user.nil?
+    return ErrorEnum::USER_NOT_REGISTERED if user.status == 0
     return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
     return ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(password)
     if !third_party_user_id.nil?
