@@ -29,7 +29,7 @@ class AnalysisResult < Result
 
 
 	def analysis(answers, task_id = nil)
-		region_result = QuillCommon::AddressUtility.province_hash.merge(QuillCommon::AddressUtility.city_hash)
+		region_result = QuillCommon::AddressUtility.province_hash.merge(QuillCommon::AddressUtility.city_hash).merge(QuillCommon::AddressUtility.county_hash)
 		referrer_result = {}
 		channel_result = {}
 		duration_mean = []
