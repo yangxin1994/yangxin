@@ -21,15 +21,15 @@ class AnalysisResult < Result
 
 	belongs_to :survey
 
-	def self.generate_result_key(last_update_time, answers, tot_answer_number, screened_answer_number)
+	def self.generate_result_key(last_update_time, answers, tot_answer_number, screened_answer_number, ongoing_answer_number, wait_for_review_answer_number)
 		answer_ids = answers.map { |e| e._id.to_s }
-		result_key = Digest::MD5.hexdigest("analysis-#{answer_ids.to_s}-#{tot_answer_number}-#{screened_answer_number}")
+		result_key = Digest::MD5.hexdigest("analysis-#{answer_ids.to_s}-#{tot_answer_number}-#{screened_answer_number}-#{ongoing_answer_number}-#{wait_for_review_answer_number}")
 		return result_key
 	end
 
 
 	def analysis(answers, task_id = nil)
-		region_result = QuillCommon::AddressUtility.province_hash.merge(QuillCommon::AddressUtility.city_hash)
+		region_result = QuillCommon::AddressUtility.province_hash.merge(QuillCommon::AddressUtility.city_hash).merge(QuillCommon::AddressUtility.county_hash)
 		referrer_result = {}
 		channel_result = {}
 		duration_mean = []
@@ -72,7 +72,7 @@ class AnalysisResult < Result
 			region_result[region]["count"] = region_result[region]["count"] + 1 if !region_result[region].nil?
 
 			# analyze referrer domain
-			referrer = a.referrer
+			referrer = answer.referrer
 			if !referrer.blank?
 				referrer_result[referrer] ||= 0
 				referrer_result[referrer] += 1

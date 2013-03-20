@@ -1521,12 +1521,14 @@ class Survey
 	def get_answers(filter_index, include_screened_answer, task_id = nil)
 		# answers = include_screened_answer ? self.answers.not_preview.finished_and_screened : self.answers.not_preview.finished
 		answers = self.answers.not_preview.finished_and_screened
+		ongoing_answer_number = self.answers.not_preview.ongoing.length
+		wait_for_review_answer_number = self.answers.not_preview.wait_for_review.length
 		if filter_index == -1
 			Task.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
 			#set_status({"find_answers_progress" => 1})
 			tot_answer_number = answers.length
 			answers = include_screened_answer ? answers : answers.finished
-			return [answers, tot_answer_number, self.answers.not_preview.screened.length]
+			return [answers, tot_answer_number, self.answers.not_preview.screened.length, ongoing_answer_number, wait_for_review_answer_number]
 		end
 		filter_conditions = self.filters[filter_index]["conditions"]
 		filtered_answers = []
@@ -1546,8 +1548,6 @@ class Survey
 			end
 		end
 		Task.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
-		ongoing_answer_number = self.answers.ongoing
-		wait_for_review_answer_number = self.answers.wait_for_review
 		return [filtered_answers, tot_answer_number, tot_answer_number - not_screened_answer_number, ongoing_answer_number, wait_for_review_answer_number]
 	end
 
