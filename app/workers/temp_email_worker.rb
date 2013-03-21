@@ -1,9 +1,8 @@
 class TempEmailWorker
 	include Sidekiq::Worker
 	sidekiq_options :retry => false, :queue => "oopsdata_#{Rails.env}".to_sym
-
 	def perform(index, digit)
-		s_id_ary = ["5142b0de408c9950a9000030", "514661c9408c99fcd700001e"]
+		s_id_ary = ["514661c9408c99fcd700001e"]
 		import_emails = ImportEmail.all.to_a
 		while true
 			import_email = import_emails[digit]
