@@ -149,18 +149,18 @@ class ChoiceQuestionIo < QuestionIo
    if issue["max_choice"].to_i > 1
       issue["items"].each_index do |i|
         @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
-                    "spss_type" => SPSS_STRING_SHORT,
+                    "spss_type" => SPSS_NUMERIC,
                     "spss_label" => issue["items"][i]["content"]["text"],
-                    "spss_value_labels" => {"1" => SPSS_OPTED,
-                                            "0" => SPSS_NOT_OPTED}}
+                    "spss_value_labels" => {1 => SPSS_OPTED,
+                                            0 => SPSS_NOT_OPTED}}
       end
     else
       choices = {}
       issue["items"].each_index do |i|
-        choices["#{i+1}"] = issue["items"][i]["content"]["text"]
+        choices[i+1] = issue["items"][i]["content"]["text"]
       end
       @spss_header << {"spss_name" => header_prefix,
-                  "spss_type" => SPSS_STRING_SHORT,
+                  "spss_type" => SPSS_NUMERIC,
                   "spss_label" => content["text"].gsub(/<[^>]*>/, ''),
                   "spss_value_labels" => choices }
     end
@@ -275,20 +275,20 @@ class MatrixChoiceQuestionIo < QuestionIo
       issue["rows"].each_index do |r|
         issue["items"].each_index do |c|
           @spss_header << {"spss_name" => header_prefix  + "_r#{r + 1}" + "_c#{c + 1}",
-                      "spss_type" => SPSS_STRING_SHORT,
+                      "spss_type" => SPSS_NUMERIC,
                       "spss_label" => issue["items"][c]["content"]["text"],
-                      "spss_value_labels" => {"1" => SPSS_OPTED,
-                                              "0" => SPSS_NOT_OPTED}}
+                      "spss_value_labels" => {1 => SPSS_OPTED,
+                                              0 => SPSS_NOT_OPTED}}
         end
       end
     else
       choices = {}
       issue["items"].each_index do |i|
-        choices["#{i+1}"] = issue["items"][i]["content"]["text"]
+        choices[i+1] = issue["items"][i]["content"]["text"]
       end
       issue["rows"].each_with_index do |r, i|
         @spss_header << {"spss_name" => header_prefix + "_r#{i + 1}",
-                    "spss_type" => SPSS_STRING_SHORT,
+                    "spss_type" => SPSS_NUMERIC,
                     "spss_label" => r["content"]["text"],
                     "spss_value_labels" => choices }
       end
@@ -809,13 +809,13 @@ class SortQuestionIo < QuestionIo
     if issue["max"] == -1
       issue["items"].each_index do |i|
         @spss_header << {"spss_name" => header_prefix + "_s#{i + 1}",
-                    "spss_type" => SPSS_STRING,
+                    "spss_type" => SPSS_NUMERIC,
                     "spss_label" => "第#{i+1}位"}
       end
     else
       issue["max"].times do |i|
         @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
-                    "spss_type" => SPSS_STRING,
+                    "spss_type" => SPSS_NUMERIC,
                     "spss_label" => "第#{i+1}位"}
       end
     end
