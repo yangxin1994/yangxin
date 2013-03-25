@@ -231,7 +231,6 @@ class Admin::LotteriesController < Admin::ApplicationController
       Prize.find_by_id(id) do |prize|
         params[:lottery].delete(:prize_ids)
         prize.lottery = lottery #unless prize.lottery
-        binding.pry
         lottery.save
         prize.save
 
