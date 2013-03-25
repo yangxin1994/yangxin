@@ -59,29 +59,43 @@ class ImportEmail
 	end
 
 	def self.remove_bounce_emails
-		limit = 1000
-		skip = 0
-		all_bounced_emails = []
-		loop do
-			retval = Tool.send_get_request("https://api.mailgun.net/v2/oopsdata.net/bounces?limit=#{limit}&skip=#{skip}",
-				true,
-				"api",
-				Rails.application.config.mailgun_api_key)
-			bounced_emails = JSON.parse(retval.body)["items"]
-			break if bounced_emails.blank?
-			skip += limit
-			all_bounced_emails += bounced_emails
-		end
+		mail_domain_ary = ["oopsdata.net",
+			"oopsdata.cn",
+			"one.mailgun.org",
+			"two.mailgun.org",
+			"three.mailgun.org",
+			"four.mailgun.org",
+			"five.mailgun.org",
+			"six.mailgun.org",
+			"seven.mailgun.org",
+			"eight.mailgun.org",
+			"nine.mailgun.org",
+			"ten.mailgun.org",]
 
-		# remove bounce email records
-		all_bounced_emails.each do |email|
-			address = email["address"]
-			ImportEmail.destroy_by_email(address)
-			Tool.send_delete_request("https://api.mailgun.net/v2/oopsdata.net/bounces/#{address}",
-				{},
-				true,
-				"api",
-				Rails.application.config.mailgun_api_key)
+		mail_domain_ary.each do |domain|
+			limit = 1000
+			skip = 0
+			all_bounced_emails = []
+			loop do
+				retval = Tool.send_get_request("https://api.mailgun.net/v2/#{domain}/bounces?limit=#{limit}&skip=#{skip}",
+					true,
+					"api",
+					Rails.application.config.mailgun_api_key)
+				bounced_emails = JSON.parse(retval.body)["items"]
+				break if bounced_emails.blank?
+				skip += limit
+				all_bounced_emails += bounced_emails
+			end
+			# remove bounce email records
+			all_bounced_emails.each do |email|
+				address = email["address"]
+				ImportEmail.destroy_by_email(address)
+				Tool.send_delete_request("https://api.mailgun.net/v2/#{domain}/bounces/#{address}",
+					{},
+					true,
+					"api",
+					Rails.application.config.mailgun_api_key)
+			end
 		end
 	end
 
