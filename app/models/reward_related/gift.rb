@@ -1,10 +1,10 @@
 class Gift < BasicGift
-	
+
 	field :point, :type => Integer
 	#field :start_time, :type => Date
-	has_many :orders, :class_name => "Order"
+	has_many :orders, :class_name => "Order", :inverse_of => 'gift'
 	has_one :photo, :class_name => "Material", :inverse_of => 'gift'
-	belongs_to :lottery
+	belongs_to :lottery, :class_name => "Lottery", :inverse_of => 'gift'
 	scope :can_be_rewarded, where( :status => 1).where(:is_deleted => false )
 	scope :expired, where( :status => 0).where(:is_deleted => false )
 

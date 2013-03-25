@@ -24,10 +24,10 @@ class Lottery
   scope :deleted, where(:is_deleted => true)
   # scope :quillme, where( '$or' => [:status => 1, :status => 3]).order_by(:status.desc)
   scope :quillme, where('$or' => [{:status => 1}, {:status => 3}]).where(:is_deleted => false).order_by(:created_at.desc)
- 
+
   has_many :surveys
   has_many :answers
-  has_many :prizes
+  has_many :prizes, :inverse_of => 'lottery'
   has_many :lottery_codes
   has_many :gifts
   has_one :photo, :class_name => "Material", :inverse_of => 'lottery'
@@ -159,6 +159,6 @@ class Lottery
   def revive
     self.update_attribute :is_deleted, false
   end
-  
+
 end
 
