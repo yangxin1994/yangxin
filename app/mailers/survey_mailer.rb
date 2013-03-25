@@ -45,6 +45,14 @@ class SurveyMailer < ActionMailer::Base
 		subject = "邀请您参加问卷调查"
 		subject += " --- to #{@user.email}" if Rails.env != "production"
 		mail(:to => email, :subject => subject)
+		# record the email hisotry
+		survey_id_ary.each do |survey_id|
+			email_history = EmailHistory.where(:survey_id => survey_id).where(:user_id => user_id).first
+			if !email_history.nil?
+				email_history.status = 1
+				email_history.save
+			end
+		end
 	end
 
 	def imported_email_survey_email(user_email, survey_id_ary)
@@ -70,5 +78,12 @@ class SurveyMailer < ActionMailer::Base
 		subject = "邀请您参加问卷调查"
 		subject += " --- to #{user_email}" if Rails.env != "production"
 		mail(:to => email, :subject => subject)
+		survey_id_ary.each do |survey_id|
+			email_history = EmailHistory.where(:survey_id => survey_id).where(:email => user_email).first
+			if !email_history.nil?
+				email_history.status = 1
+				email_history.save
+			end
+		end
 	end
 end
