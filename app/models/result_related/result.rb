@@ -186,6 +186,18 @@ class Result
 		return result
 	end
 
+	def analyze_text_blank(issue, answer_ary, opt={})
+		return answer_ary
+	end
+
+	def analyze_url_blank(issue, answer_ary, opt={})
+		return answer_ary
+	end
+
+	def analyze_phone_blank(issue, answer_ary, opt={})
+		return answer_ary
+	end
+
 	def analyze_number_blank(issue, answer_ary, opt={})
 		segment = opt[:segment]
 		result = {}		
