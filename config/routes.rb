@@ -35,6 +35,14 @@ OopsData::Application.routes.draw do
 	match '/admin/surveys/new' => 'surveys#new'
 	# 
 	namespace :admin do
+
+		resources :browsers do
+			collection do
+				get :role
+				get :tasks
+			end
+		end
+
 		resources :users do 
 			collection do 
 				get 'blacks', 'whites', 'deleteds','list_by_role'
