@@ -2,17 +2,9 @@
 require 'csv'
 class ImportEmail
 	include Mongoid::Document
+
 	field :email, :type => String
 	field :username, :type => String
-	field :confirm, :type => Boolean, default: false
-	field :sent, :type => Boolean
-
-	scope :confirmed, where(:confirm => true)
-	scope :not_confirmed, where(:confirm.in => [false, nil])
-
-	scope :not_sent, where(:sent.in => [false, nil])
-
-	index({ sent: 1 }, { background: true } )
 
 	def self.import_email(file_name)
 		csv_text = File.read(file_name)
@@ -34,75 +26,50 @@ class ImportEmail
 		return self.find_by_email(email).try(:destroy)
 	end
 
-	def self.confirm_by_email(email)
-		email = self.find_by_email(email)
-		return false if email.nil?
-		email.confirm = true
-		return email.save
-	end
-
-	def self.random_emails(number, emails_sent)
-		confirmed_emails = ImportEmail.confirmed.map { |e| e.email }
-		not_confirmed_emails = ImportEmail.not_confirmed.map { |e| e.email }
-
-		confirmed_emails = confirmed_emails - emails_sent
-		not_confirmed_emails = not_confirmed_emails - emails_sent
-
+	def self.random_emails(number, all_import_emails, emails_sent)
+		emails = all_import_emails - emails_sent
 		number = number > emails.length ? emails.length : number
-
-		not_confirmed_number = number / 20
-		confirmed_number = number - not_confirmed_number
-
-		selected_confirmed_email = confirmed_emails.shuffle[0..confirmed_number-1]
-		selected_not_confirmed_email = not_confirmed_emails.shuffle[0..not_confirmed_number-1]
-		return selected_confirmed_email + selected_not_confirmed_email
+		selected_email = emails.shuffle[0..number-1]
+		return selected_email
 	end
 
 	def self.remove_bounce_emails
-		limit = 1000
-		skip = 0
-		all_bounced_emails = []
-		loop do
-			retval = Tool.send_get_request("https://api.mailgun.net/v2/oopsdata.net/bounces?limit=#{limit}&skip=#{skip}",
-				true,
-				"api",
-				Rails.application.config.mailgun_api_key)
-			bounced_emails = JSON.parse(retval.body)["items"]
-			break if bounced_emails.blank?
-			skip += limit
-			all_bounced_emails += bounced_emails
-		end
-
-		# remove bounce email records
-		all_bounced_emails.each do |email|
-			address = email["address"]
-			ImportEmail.destroy_by_email(address)
-			Tool.send_delete_request("https://api.mailgun.net/v2/oopsdata.net/bounces/#{address}",
-				{},
-				true,
-				"api",
-				Rails.application.config.mailgun_api_key)
-		end
-	end
-
-	def self.confirm_good_emails
-		limit = 1000
-		skip = 0
-		loop do
-			retval = Tool.send_get_request("https://api.mailgun.net/v2/oopsdata.cn/log?limit=#{limit}&skip=#{skip}",
-				true,
-				"api",
-				Rails.application.config.mailgun_api_key)
-			items = JSON.parse(retval.body)["items"]
-			break if items.blank?
-			items.each do |item|
-				message_id = item["message_id"]
-				# return if !MailgunLog.where(:message_id => message_id).first.nil?
-				message_ary = item["message"].split(' ')
-				MailgunLog.create(:message_id => message_id)
-				ImportEmail.confirm_by_email(message_ary[3]) if message_ary[0].downcase.include?('deliver')
+		mail_domain_ary = ["oopsdata.net",
+			"oopsdata.cn",
+			"one.mailgun.org",
+			"two.mailgun.org",
+			"three.mailgun.org",
+			"four.mailgun.org",
+			"five.mailgun.org",
+			"six.mailgun.org",
+			"seven.mailgun.org",
+			"eight.mailgun.org",
+			"nine.mailgun.org",
+			"ten.mailgun.org",]
+		mail_domain_ary.each do |domain|
+			limit = 1000
+			skip = 0
+			all_bounced_emails = []
+			loop do
+				retval = Tool.send_get_request("https://api.mailgun.net/v2/#{domain}/bounces?limit=#{limit}&skip=#{skip}",
+					true,
+					"api",
+					Rails.application.config.mailgun_api_key)
+				bounced_emails = JSON.parse(retval.body)["items"]
+				break if bounced_emails.blank?
+				skip += limit
+				all_bounced_emails += bounced_emails
 			end
-			skip += limit
+			# remove bounce email records
+			all_bounced_emails.each do |email|
+				address = email["address"]
+				ImportEmail.destroy_by_email(address)
+				Tool.send_delete_request("https://api.mailgun.net/v2/#{domain}/bounces/#{address}",
+					{},
+					true,
+					"api",
+					Rails.application.config.mailgun_api_key)
+			end
 		end
 	end
 end

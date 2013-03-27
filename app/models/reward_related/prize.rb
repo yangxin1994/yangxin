@@ -8,13 +8,15 @@ class Prize < BasicGift
   field :ctrl_time, :type => Integer, :default => 0
   field :ctrl_start_time, :type => Time, :default => Time.now
   field :ctrl_history, :type => Array, :default => []
-  
+
   scope :can_be_draw, where('$and' => [:is_in_ctrl => true, :ctrl_surplus.gt => 0, :status.gt => -1]).where(:is_deleted => false )
   scope :can_be_autodraw, where(:status.gt => -1).where(:is_deleted => false )
   scope :for_lottery, where(:lottery_id => nil).where(:is_deleted => false )
 
-  has_one :order
-  belongs_to :lottery
+  attr_accessible :name, :type, :surplus, :description, :photo
+
+  has_one :order, :inverse_of => 'gift'
+  belongs_to :lottery, :inverse_of => 'prizes'
   has_many :lottery_codes
   has_one :photo, :class_name => "Material", :inverse_of => 'prize'
 
@@ -29,9 +31,9 @@ class Prize < BasicGift
     present_attrs :name, :type, :description, :surplus, :_id
     present_add photo_src: self.photo.picture_url
   end
-  
-  def validates_ctrl 
-    
+
+  def validates_ctrl
+
   end
 
   def add_ctrl_history
@@ -73,9 +75,9 @@ class Prize < BasicGift
   end
 
   def update_ctrl_time
-    return true if self.is_in_ctrl == false 
+    return true if self.is_in_ctrl == false
     if (self.ctrl_start_time + self.ctrl_time.days) <= Time.now
-      self.is_in_ctrl = false 
+      self.is_in_ctrl = false
       add_ctrl_history
     end
   end

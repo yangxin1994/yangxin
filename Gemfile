@@ -21,9 +21,11 @@ gem 'kaminari'
 gem 'certified'
 
 gem 'rest-client'
+=begin
 if HOST_OS =~ /linux/i
   gem 'therubyracer', '>= 0.8.2'
 end
+=end
 group :assets do
   gem 'sass-rails', "  ~> 3.1.4"
   gem 'coffee-rails', "~> 3.1.0"
@@ -36,7 +38,7 @@ end
 
 gem 'mime-types'
 
-group :test, :development do
+group :test, :development, :staging do
   gem 'guard-spork'
   gem "spork-minitest"
   gem "guard-minitest"#, :git => 'https://github.com/karmaQ/guard-minitest.git'

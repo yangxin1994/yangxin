@@ -29,7 +29,7 @@ class Order
 
 	has_one :reward_log, :class_name => "RewardLog"
 	belongs_to :lottery_code, :class_name => "LotteryCode"
-	belongs_to :gift, :class_name => "BasicGift"
+	belongs_to :gift, :class_name => "BasicGift", :inverse_of => :order
 	belongs_to :user, :class_name => "User", :inverse_of => :orders
 	belongs_to :operator, :class_name => "User", :inverse_of => :operate_orders
 
@@ -66,7 +66,7 @@ class Order
 	index({ is_deleted: 1 }, { background: true } )
 	index({ type: 1 }, { background: true } )
 	index({ status: 1 }, { background: true } )
-	
+
 	def as_retval
 		return @ret_error if @ret_error
 		super
@@ -191,7 +191,7 @@ class Order
 																	:phone => self.phone},
 																	:without_protection => true)
 		when 3
-			
+
 		end
 		#self.user.update_attributes(self.attributes, :without_protection => true)
 	end

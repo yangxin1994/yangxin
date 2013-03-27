@@ -152,6 +152,8 @@ class AnalysisResult < Result
 			return analyze_choice(question.issue, answer_ary)
 		when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
 			return analyze_matrix_choice(question.issue, answer_ary)
+		when QuestionTypeEnum::TEXT_BLANK_QUESTION
+			return analyze_text_blank(question.issue, answer_ary)
 		when QuestionTypeEnum::NUMBER_BLANK_QUESTION
 			return analyze_number_blank(question.issue, answer_ary)
 		when QuestionTypeEnum::TIME_BLANK_QUESTION
@@ -160,6 +162,10 @@ class AnalysisResult < Result
 			return analyze_email_blank(question.issue, answer_ary)
 		when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 			return analyze_address_blank(question.issue, answer_ary)
+		when QuestionTypeEnum::URL_BLANK_QUESTION
+			return analyze_url_blank(question.issue, answer_ary)
+		when QuestionTypeEnum::PHONE_BLANK_QUESTION
+			return analyze_phone_blank(question.issue, answer_ary)
 		when QuestionTypeEnum::BLANK_QUESTION
 			return analyze_blank(question.issue, answer_ary)
 		when QuestionTypeEnum::MATRIX_BLANK_QUESTION

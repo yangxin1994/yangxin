@@ -17,10 +17,9 @@ class Admin::PrizesController < Admin::ApplicationController
     unless create_photo(:prize)
       render_json false do
         ErrorEnum::PHOTP_CANNOT_BE_BLANK
-      end   
-    end 
+      end
+    end
     @prize = Prize.new(params[:prize])
-
     # if params[:prize][:type] == 3
     #   l = Lottery.where(:_id => params[:prize][:lottery]).first
     #   if !l.nil?
@@ -31,7 +30,7 @@ class Admin::PrizesController < Admin::ApplicationController
     #     render_json(false){ErrorEnum::LOTTERY_NOT_FOUND}
     #   end
     # end
-    render_json @prize.save do 
+    render_json @prize.save do
       @prize.photo.save
       @prize.as_retval
     end
@@ -42,7 +41,7 @@ class Admin::PrizesController < Admin::ApplicationController
     render_json false do
       Prize.find_by_id(params[:id]) do |prize|
         update_photo(:prize, prize)
-    
+
         if prize.update_attributes(params[:prize])
           @is_success = true
         end
@@ -50,7 +49,7 @@ class Admin::PrizesController < Admin::ApplicationController
       end
     end
 
-    
+
     # if params[:prize][:type] == 3
     #   l = Lottery.where(:_id => params[:prize][:lottery]).first
     #   if !l.nil?
@@ -63,7 +62,7 @@ class Admin::PrizesController < Admin::ApplicationController
     # end
 
   end
-  
+
   def show
     # @prize = Prize.find_by_id(params[:id])
     # @prize[:photo_src] = @prize.photo.picture_url unless @prize.photo.nil?

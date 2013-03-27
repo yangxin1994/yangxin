@@ -149,18 +149,18 @@ class ChoiceQuestionIo < QuestionIo
    if issue["max_choice"].to_i > 1
       issue["items"].each_index do |i|
         @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
-                    "spss_type" => SPSS_STRING_SHORT,
+                    "spss_type" => SPSS_NUMERIC,
                     "spss_label" => issue["items"][i]["content"]["text"],
-                    "spss_value_labels" => {"1" => SPSS_OPTED,
-                                            "0" => SPSS_NOT_OPTED}}
+                    "spss_value_labels" => {1 => SPSS_OPTED,
+                                            0 => SPSS_NOT_OPTED}}
       end
     else
       choices = {}
       issue["items"].each_index do |i|
-        choices["#{i+1}"] = issue["items"][i]["content"]["text"]
+        choices[i+1] = issue["items"][i]["content"]["text"]
       end
       @spss_header << {"spss_name" => header_prefix,
-                  "spss_type" => SPSS_STRING_SHORT,
+                  "spss_type" => SPSS_NUMERIC,
                   "spss_label" => content["text"].gsub(/<[^>]*>/, ''),
                   "spss_value_labels" => choices }
     end
@@ -179,9 +179,9 @@ class ChoiceQuestionIo < QuestionIo
     if issue["max_choice"].to_i > 1
       issue["items"].each do |item|
         if v["selection"].try("include?", item["id"])
-          @retval << "1"
+          @retval << 1
         else
-          @retval << "0"
+          @retval << 0
         end
       end
     else
@@ -275,20 +275,20 @@ class MatrixChoiceQuestionIo < QuestionIo
       issue["rows"].each_index do |r|
         issue["items"].each_index do |c|
           @spss_header << {"spss_name" => header_prefix  + "_r#{r + 1}" + "_c#{c + 1}",
-                      "spss_type" => SPSS_STRING_SHORT,
+                      "spss_type" => SPSS_NUMERIC,
                       "spss_label" => issue["items"][c]["content"]["text"],
-                      "spss_value_labels" => {"1" => SPSS_OPTED,
-                                              "0" => SPSS_NOT_OPTED}}
+                      "spss_value_labels" => {1 => SPSS_OPTED,
+                                              0 => SPSS_NOT_OPTED}}
         end
       end
     else
       choices = {}
       issue["items"].each_index do |i|
-        choices["#{i+1}"] = issue["items"][i]["content"]["text"]
+        choices[i+1] = issue["items"][i]["content"]["text"]
       end
       issue["rows"].each_with_index do |r, i|
         @spss_header << {"spss_name" => header_prefix + "_r#{i + 1}",
-                    "spss_type" => SPSS_STRING_SHORT,
+                    "spss_type" => SPSS_NUMERIC,
                     "spss_label" => r["content"]["text"],
                     "spss_value_labels" => choices }
       end
@@ -304,9 +304,9 @@ class MatrixChoiceQuestionIo < QuestionIo
       issue["rows"].each do |item|
         issue["items"].each_index do |c|
           if v[item["id"].to_s] && v[item["id"].to_s].include?( get_item_id(c + 1))
-            @retval << "1"
+            @retval << 1
           else
-            @retval << "0"
+            @retval << 0
           end
         end
       end
@@ -315,6 +315,30 @@ class MatrixChoiceQuestionIo < QuestionIo
         @retval << (v[item["id"].to_s] && v[item["id"].to_s].empty? ? nil : get_item_index(v[item["id"].to_s][0]))
       end
     end
+    return @retval
+  end
+
+  def answer_content_2(v, header_prefix)
+    clear_retval
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
+    if issue["max_choice"].to_i > 1
+      issue["rows"].each do |item|
+        issue["items"].each_index do |c|
+          if v[item["id"].to_s] && v[item["id"].to_s].include?( get_item_id(c + 1))
+            @retval << 1
+          else
+            @retval << 0
+          end
+        end
+      end
+    else
+      issue["rows"].each do |item|
+        p (v[item["id"].to_s] && v[item["id"].to_s].empty? ? nil : get_item_index(v[item["id"].to_s][0]))
+        p get_item_index(v[item["id"].to_s][0])
+        @retval << (v[item["id"].to_s] && v[item["id"].to_s].empty? ? nil : get_item_index(v[item["id"].to_s][0]))
+      end
+    end
+    p @retval
     return @retval
   end
 
@@ -363,7 +387,7 @@ class MatrixChoiceQuestionIo < QuestionIo
     self.issue["items"][index]["id"]
   end
   def get_item_index(id)
-    self.issue["rows"].each_with_index do |item, index|
+    self.issue["items"].each_with_index do |item, index|
       return index + 1 if item["id"].to_s == id.to_s
     end
     return nil
@@ -809,13 +833,13 @@ class SortQuestionIo < QuestionIo
     if issue["max"] == -1
       issue["items"].each_index do |i|
         @spss_header << {"spss_name" => header_prefix + "_s#{i + 1}",
-                    "spss_type" => SPSS_STRING,
+                    "spss_type" => SPSS_NUMERIC,
                     "spss_label" => "第#{i+1}位"}
       end
     else
       issue["max"].times do |i|
         @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
-                    "spss_type" => SPSS_STRING,
+                    "spss_type" => SPSS_NUMERIC,
                     "spss_label" => "第#{i+1}位"}
       end
     end
@@ -833,11 +857,11 @@ class SortQuestionIo < QuestionIo
     return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
     if issue["max"] == -1
       issue["min"].times do |i|
-        @retval << v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil
+        @retval << (v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil)
       end
     else
       issue["max"].times do |i|
-        @retval << v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil
+        @retval << (v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil)
       end
     end
 
@@ -1055,7 +1079,7 @@ class ScaleQuestionIo < QuestionIo
     issue["items"].each_with_index do |item, index|
       blank? row["#{header_prefix}_c#{index + 1}"]
       if only_num?(row["#{header_prefix}_c#{index + 1}"], range: 1..issue["labels"].length)
-        @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : row["#{header_prefix}_c#{index + 1}"].to_i - 1)
+        @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : (row["#{header_prefix}_c#{index + 1}"].to_i) - 1)
       else
         raise "您输入的范围好像不太对吧?"
       end
