@@ -38,7 +38,7 @@ class Admin::BrowsersController < Admin::ApplicationController
 			end
 		end
 
-		be = BrowserExtension.where(:browser_extension_type => "chrome_admin")
+		be = BrowserExtension.where(:browser_extension_type => "chrome_admin").first
 		version = be.try(:version)
 
 		render_json_s({ "answer_audit" => answers_wait_for_audit,
