@@ -17,12 +17,12 @@ class OrdersController < ApplicationController
     # order =  @current_user.orders.find_by_id(params[:id])
     # render_json order.is_a?(Order) do
     #   order.as_retval
-    # end 
+    # end
     @current_user.orders.find_by_id(params[:id]) do |order|
       render_json false do
         success_true
-        order[:gift] = order.gift || order.prize
-        order.as_retval
+        gift_hash = {"gift" => order.gift || order.prize}
+        order.as_retval.attributes.merge(gift_hash)
       end
     end
   end
@@ -40,7 +40,7 @@ class OrdersController < ApplicationController
     #   else
     #     if @gift.surplus <= 0
     #       ErrorEnum::GIFT_NOT_ENOUGH
-    #     elsif @gift.point > current_user.point 
+    #     elsif @gift.point > current_user.point
     #       ErrorEnum::POINT_NOT_ENOUGH
     #     else
     #       ErrorEnum::GIFT_NOT_FOUND
@@ -71,7 +71,7 @@ class OrdersController < ApplicationController
   def cancel
     render_json do
       result = current_user.orders.find_by_id params[:id] do |o|
-        if o.status != 0 
+        if o.status != 0
           break {
             :error_code => ErrorEnum::ORDER_CAN_NOT_BE_UPDATED,
             :error_message =>  "Order can not be updated"
