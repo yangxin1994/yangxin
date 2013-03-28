@@ -34,13 +34,16 @@ class Admin::BrowsersController < Admin::ApplicationController
 			Order.need_verify.each do |o|
 				orders_wait_for_handle << {"present_name" => o.gift.name,
 					"order_id" => o._id.to_s,
-					"link" => "http://api.oopsdata.com:3000/admin/orders?scope=need_verify"}
+					"link" => "http://oopsdata.com/admin/orders?scope=need_verify"}
 			end
 		end
 
+		be = BrowserExtension.where(:browser_extension_type => "chrome_admin")
+		version = be.try(:version)
+
 		render_json_s({ "answer_audit" => answers_wait_for_audit,
 			"survey_audit" => surveys_wait_for_audit,
-			"order" => orders_wait_for_handle })
-
+			"order" => orders_wait_for_handle,
+			"version" => version })
 	end	
 end
