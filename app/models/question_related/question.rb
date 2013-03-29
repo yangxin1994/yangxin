@@ -16,7 +16,7 @@ class Question < BasicQuestion
 		question.issue = issue.serialize
 		question.question_type = question_type
 		if question_type == QuestionTypeEnum::PARAGRAPH
-			question.content = {"text" => "请在此输入文本描述", "image" => "", "audio" => "", "video" => ""}
+			question.content = {"text" => "请在此输入文本描述", "image" => [], "audio" => [], "video" => []}
 		end
 		question.save
 		return question
