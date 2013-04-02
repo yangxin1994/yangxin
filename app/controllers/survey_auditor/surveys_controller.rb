@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'error_enum'
+require 'quill_common'
 class SurveyAuditor::SurveysController < SurveyAuditor::ApplicationController
 
 	before_filter :check_normal_survey_existence, :except => [:index, :count]
@@ -37,12 +38,12 @@ class SurveyAuditor::SurveysController < SurveyAuditor::ApplicationController
 		# # first parameter is survey status (0 for normal surveys)
 		# # second parameter is survey publish status (2 for under review surveys)
 		# # third parameter are tags
-		# survey_list = Survey.normal.list("normal", PublishStatus::UNDER_REVIEW, nil)
+		# survey_list = Survey.normal.list("normal", QuillCommon::PublishStatusEnum::UNDER_REVIEW, nil)
 		# survey_list = slice((survey_list || []), page, per_page)
 		# respond_to do |format|
 		# 	format.json	{ render_json_auto(survey_list) and return }
 		# end
-		render_json_auto auto_paginate(Survey.normal.where(publish_status: PublishStatus::UNDER_REVIEW))
+		render_json_auto auto_paginate(Survey.normal.where(publish_status: QuillCommon::PublishStatusEnum::UNDER_REVIEW))
 	end
 
 	# def count

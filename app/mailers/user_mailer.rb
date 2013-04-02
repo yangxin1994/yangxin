@@ -1,63 +1,54 @@
 # encoding: utf-8
 require 'encryption'
 class UserMailer < ActionMailer::Base
-  default from: "postmaster@oopsdata.net"
+	layout 'email'
+
+	default from: "\"优数调研\" <postmaster@oopsdata.cn>", charset: "UTF-8"
+
+	@@test_email = "test@oopsdata.com"
 
 	def welcome_email(user, callback)
 		@user = user
 		activate_info = {"email" => user.email, "time" => Time.now.to_i}
 		@activate_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
-		mail(:to => user.email, 
-					:subject => "欢迎注册Oops!Data",
-					:content_type => "text/html; charset=utf-8")
+		email = Rails.env == "production" ? user.email : @@test_email
+		subject = "欢迎注册优数调研"
+		subject += " --- to #{user.email}" if Rails.env != "production"
+		mail(:to => email, :subject => subject)
 	end
 
 	def activate_email(user, callback)
 		@user = user
 		activate_info = {"email" => user.email, "time" => Time.now.to_i}
 		@activate_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
-		mail(:to => user.email, 
-					:subject => "激活Oops!Data",
-					:content_type => "text/html; charset=utf-8")
+		email = Rails.env == "production" ? user.email : @@test_email
+		subject = "激活账户"
+		subject += " --- to #{user.email}" if Rails.env != "production"
+		mail(:to => email, :subject => subject)
 	end
 	
 	def password_email(user, callback)
 		@user = user
 		password_info = {"email" => user.email, "time" => Time.now.to_i}
 		@password_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(password_info.to_json))
-		mail(:to => user.email, 
-					:subject => "重置Oops!Data密码",
-					:content_type => "text/html; charset=utf-8")
-	end
-
-	def survey_email(user_id, survey_id_ary)
-		@user = User.find_by_id(user_id)
-		@surveys = survey_id_ary.map { |e| Survey.find_by_id(e) }
-		@surveys.each do |s|
-			email_history = EmailHistory.create
-			email_history.user = @user
-			email_history.survey = s
-		end
-		mail(:to => user.email, 
-					:subject => "invitation to take part in our surveys",
-					:content_type => "text/html; charset=utf-8")
+		email = Rails.env == "production" ? user.email : @@test_email
+		subject = "重置密码"
+		subject += " --- to #{user.email}" if Rails.env != "production"
+		mail(:to => email, :subject => subject)
 	end
 	
-	def publish_email(publish_status_history)
-		@survey = Survey.find_by_id(publish_status_history.survey_id)
-		@user = User.find_by_email(@survey.owner_email)
-		@message = publish_status_history.message
-		mail(:to => @user.email, 
-					:subject => "您的点查问卷 #{@survey.title} 已经发布",
-					:content_type => "text/html; charset=utf-8")
-	end
-	
-	def reject_email(publish_status_history)
-		@survey = Survey.find_by_id(publish_status_history.survey_id)
-		@user = @survey.user
-		@message = publish_status_history.message
-		mail(:to => @user.email, 
-					:subject => "您的点查问卷 #{@survey.title} 被拒绝发布",
-					:content_type => "text/html; charset=utf-8")
+	def lottery_code_email(user, survey_id, lottery_code_id, callback)
+		@user = user
+		@survey = Survey.find_by_id(survey_id)
+		@lottery_code = LotteryCode.where(:_id => lottery_code_id).first
+		lottery = @lottery_code.try(:lottery)
+		@survey_list_url = "#{Rails.application.config.quillme_host}/surveys"
+		@lottery_url = "#{Rails.application.config.quillme_host}/lotteries/#{lottery.try(:_id)}"
+		@lottery_title = lottery.try(:title)
+		@lottery_code_url = "#{Rails.application.config.quillme_host}/lotteries/own"
+		email = Rails.env == "production" ? user.email : @@test_email
+		subject = "恭喜您获得抽奖号"
+		subject += " --- to #{user.email}" if Rails.env != "production"
+		mail(:to => email, :subject => subject)
 	end
 end

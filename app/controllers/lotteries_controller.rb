@@ -4,33 +4,23 @@ class LotteriesController < ApplicationController
 	before_filter :require_sign_in, :only => [:own, :draw]
 	def index
 		render_json do
-			auto_paginate Lottery.activity do 
-				Lottery.activity.page(page).per(per_page).map do |e|
-					e[:photo_src] = e.photo.picture_url unless e.photo.nil?
-					e
-				end
+			auto_paginate Lottery.quillme do |lotteries|
+				lotteries.present_json("quillme")
 			end 
 		end
 	end
 	
 	def own
 		logger.info "==== #{current_user}======="
+		retval = {}
 		render_json do
-			[:for_draw, :drawed_w].map do |s|
-				pl = params["#{s.to_s}_p".to_sym].to_i || 1
-				pl = 1 if pl <= 0
-				lc = auto_paginate current_user.lottery_codes.send(s) do
-						current_user.lottery_codes.send(s).page(pl).per(per_page).map do |e|
-						e[:for_lottery] = e.lottery.presence
-						e[:for_lottery][:photo_src] = e.lottery.photo.picture_url unless e.lottery.photo.nil?
-						e
-					end
+			[:for_draw, :drawed_w, :drawed_f].each do |scope|
+				params[:page] = params["#{scope.to_s}_p".to_sym].to_i
+				retval[scope] = auto_paginate(current_user.lottery_codes.send(scope)) do |lottery_codes|
+					lottery_codes.present_json("quillme")
 				end
-				lc["current_page"] = pl
-				lc["previous_page"] = (pl - 1 > 0 ? pl-1 : 1)
-	  		lc["next_page"] = (pl+1 <= lc["total_page"] ? pl+1: lc["total_page"])
-	  		lc
 			end
+			retval
 		end
 	end
 
@@ -40,14 +30,29 @@ class LotteriesController < ApplicationController
 			# 直接找不到抽奖号比较好? 或者提示抽过奖了 ?
 			if !s
 				@lottery_code.as_retval
-	       # binding.pry
-			elsif @lottery_code.lottery.status != 1
+	   
+			elsif @lottery_code.lottery.status != 3
 				@is_success = false
 				{:error_code => ErrorEnum::INVALID_LOTTERYCODE_ID,
 	       :error_message => "Lottery not activity"}
-	       # binding.pry
+	   
 			else
 				@lottery_code.draw
+			end
+		end
+	end
+
+	def exchange
+		render_json false do |s|
+			Lottery.find_by_id params[:id] do |lottery|
+				if lottery.exchange(current_user)
+					success_true 
+				else
+					{
+						"error_code" => ErrorEnum::LOTTERY_CANNOT_EXCHANGE,
+						"error_message" => "lottery couldn't exchang"
+					}
+				end
 			end
 		end
 	end
@@ -61,8 +66,14 @@ class LotteriesController < ApplicationController
 	# end
 	 def show
     # TODO is owners request?
-    @lottery = Lottery.find_by_id(params[:id])
-    @lottery[:photo_src] = @lottery.photo.picture_url unless @lottery.photo.nil?
-    render_json { @lottery}
+    # @lottery = Lottery.find_by_id(params[:id])
+    # @lottery[:photo_src] = @lottery.photo.picture_url unless @lottery.photo.nil?
+    # @lottery[:prizes] = @lottery.prizes
+    render_json false do
+    	Lottery.find_by_id(params[:id]) do |lottery|
+    		success_true
+    		lottery.present_quillme
+    	end
+    end
   end
 end

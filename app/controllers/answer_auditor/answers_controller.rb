@@ -1,5 +1,6 @@
 # coding: utf-8
 require 'error_enum'
+require 'quill_common'
 class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 	
 	def index
@@ -49,6 +50,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 		'selected_choices' => ['aaa', 'bbb']
 				# 	}
 				show_answer.merge!({'question_type_label'=> '选择题'})
+				answer["question_content"] << show_answer and next if val.blank?
 
 				if question.issue["items"] 
 					choices = []
@@ -63,7 +65,6 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 					show_answer.merge!({"selected_choices"=> selected_choices})
 				end
 				answer["question_content"] << show_answer
-
 			when QuestionTypeEnum::MATRIX_CHOICE_QUESTION	
 				# 矩阵选择题
 				# Example:
@@ -75,6 +76,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 		'rows_selected_choices' => [["aaa",'bbb'], ['aaa']]
 				# }
 				show_answer.merge!({'question_type_label'=> '矩阵选择题'})
+				answer["question_content"] << show_answer and next if val.blank?
 
 				choices = []
 				rows = []
@@ -88,7 +90,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				question.issue['rows'].each_with_index do |item, index|
 					rows << item['content']['text']
 					row_selected_choices = []
-					val[index].each do |choice_id|
+					(val[item['id'].to_s] || []).each do |choice_id|
 						question.issue["items"].each do |e|
 							row_selected_choices << e["content"]["text"] if choice_id.to_s == e['id'].to_s
 						end
@@ -97,7 +99,6 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				end
 				show_answer.merge!({"rows"=>rows, "rows_selected_choices"=>rows_selected_choices})
 				answer["question_content"] << show_answer
-
 			when QuestionTypeEnum::TEXT_BLANK_QUESTION
 				# 文本填充题
 				# Example:
@@ -107,10 +108,10 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				#		'content' => 'XXXXXXXXXXX'
 				# }
 				show_answer.merge!({'question_type_label'=> '文本填充题'})
+				answer["question_content"] << show_answer and next if val.blank?
 
 				show_answer.merge!({"content"=> val.to_s})
 				answer["question_content"] << show_answer
-
 			when QuestionTypeEnum::NUMBER_BLANK_QUESTION
 				# 数值填充题
 				# Example:
@@ -120,10 +121,10 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				#		'content' => '23.5'
 				# }	
 				show_answer.merge!({'question_type_label'=> '数值填充题'})
+				answer["question_content"] << show_answer and next if val.blank?
 
 				show_answer.merge!({"content"=> val.to_s})
 				answer["question_content"] << show_answer
-
 			when QuestionTypeEnum::EMAIL_BLANK_QUESTION
 				# 邮箱题
 				# Example:
@@ -133,10 +134,10 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				#		'content' => '23.5'
 				# }	
 				show_answer.merge!({'question_type_label'=> '邮箱题'})
+				answer["question_content"] << show_answer and next if val.blank?
 
 				show_answer.merge!({"content"=> val.to_s})
 				answer["question_content"] << show_answer
-
 			when QuestionTypeEnum::URL_BLANK_QUESTION
 				# 网址链接题
 				# Example:
@@ -147,10 +148,10 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# }	
 
 				show_answer.merge!({'question_type_label'=> '网址链接题'})
+				answer["question_content"] << show_answer and next if val.blank?
 
 				show_answer.merge!({"content"=> val.to_s})
 				answer["question_content"] << show_answer
-
 			when QuestionTypeEnum::PHONE_BLANK_QUESTION
 				# 电话题
 				# Example:
@@ -160,6 +161,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				#		'content' => '010-8888-8888'
 				# }	
 				show_answer.merge!({'question_type_label'=> '电话题'})
+				answer["question_content"] << show_answer and next if val.blank?
 
 				show_answer.merge!({"content"=> val.to_s})
 				answer["question_content"] << show_answer
@@ -172,10 +174,10 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				#		'content' => '2012-01-01'
 				# }	
 				show_answer.merge!({'question_type_label'=> '时间题'})
+				answer["question_content"] << show_answer and next if val.blank?
 
-				show_answer.merge!({"content"=> Time.at(val.to_s[0,10].to_i).strftime("%F")})
+				show_answer.merge!({"content"=> Time.at(val.to_i/1000).strftime("%F")})
 				answer["question_content"] << show_answer
-
 			when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 				# 地址题
 				# Example:
@@ -187,8 +189,9 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				#		'postcode' => '100083',
 				# }	
 				show_answer.merge!({'question_type_label'=> '地址题'})
+				answer["question_content"] << show_answer and next if val.blank?
 
-				town =  Address.find_text_by_code(val["address"].to_i)
+				town =  QuillCommon::AddressUtility.find_province_city_town_by_code(val["address"].to_i)
 
 				show_answer.merge!({"address"=> town, 
 					"detail" => val["detail"],
@@ -220,7 +223,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 					when 'Text','Time','Number','Phone','Email','Url'
 						sub_question.merge!({	'content'=> val[index]})
 					when 'Address'
-						town =  Address.find_text_by_code(val[index]["address"].to_i)
+						town =  QuillCommon::AddressUtility.find_text_by_code(val[index]["address"].to_i)
 						sub_question.merge!({	'content'=> 
 							{
 								"address"=> town, 
@@ -254,6 +257,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 		]
 				# 	}
 				show_answer.merge!({'question_type_label'=> '比重题'})
+				answer["question_content"] << show_answer and next if val.blank?
 
 				show_answer['items'] = []
 				question.issue['items'].each do |item|
@@ -285,6 +289,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 		]
 				# 	}
 				show_answer.merge!({'question_type_label'=> '排序题'})
+				answer["question_content"] << show_answer and next if val.blank?
 
 				show_answer['items'] = []
 				val['sort_result'].each do |id_s|
@@ -300,7 +305,6 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				end
 
 				answer["question_content"] << show_answer
-
 			when QuestionTypeEnum::RANK_QUESTION
 				# 
 				# Example:
@@ -319,7 +323,6 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				show_answer.merge!({'question_type_label'=> '文本段'})
 				# show_answer.merge!({"content" => val.to_s})
 				answer["question_content"] << show_answer
-
 			when QuestionTypeEnum::FILE_QUESTION	
 				# 
 				# Example:
@@ -346,6 +349,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				# 		'selected_labels' => ["很不满意", "不满意", "满意"]
 				# 	}
 				show_answer.merge!({'question_type_label'=> '量表题'})
+				answer["question_content"] << show_answer and next if val.blank?
 
 				show_answer.merge!({"labels" => question.issue["labels"]})
 				if question.issue["items"] 
@@ -369,7 +373,14 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 			
 		end
 
-		render_json_auto(answer, :only => [:question_content, :auditor_email, :audit_at, :audit_message, :status])
+		render_json_auto(answer, 
+			:only => [
+				:question_content, 
+				:auditor_email, 
+				:audit_at, 
+				:audit_message, 
+				:status, 
+				:reject_type])
 	end
 
 	def review

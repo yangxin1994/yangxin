@@ -4,9 +4,7 @@ class MessagesController < ApplicationController
   before_filter :require_sign_in
 
   def index
-    @messages = auto_paginate current_user.show_messages do |m|
-      m.slice((page - 1) * per_page, per_page)
-    end
+    @messages = auto_paginate current_user.show_messages
     render_json { @messages }
   end
   

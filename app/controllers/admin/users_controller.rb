@@ -15,17 +15,16 @@ class Admin::UsersController < Admin::ApplicationController
 	# GET /admin/users
 	# GET /admin/users.json
 	def index
-		if !params[:email].nil? then
-			@users = User.where(email: params[:email]).desc(:status, :created_at)
-		elsif !params[:full_name].nil? then	
-			@users = User.where(full_name: params[:full_name]).desc(:status, :created_at)
-		elsif !params[:username].nil? then
-			filter = params[:username].to_s.gsub(/[*]/, ' ')
+		if !params[:email].blank? then
+			@users = User.where(email: params[:email].downcase).desc(:status, :created_at)
+		elsif !params[:full_name].blank? then	
+			@users = User.where(full_name: params[:full_name].downcase).desc(:status, :created_at)
+		elsif !params[:username].blank? then
+			filter = params[:username].to_s.gsub(/[*]/, ' ').downcase
 			@users = User.where(username: /.*#{filter}.*/).desc(:status, :created_at)
 		else
 			@users = User.normal_list.where(:role.lt => 15).desc(:status, :created_at)
 		end			
-
 		render_json_auto (auto_paginate(@users)) and return
 	end
 
@@ -66,10 +65,16 @@ class Admin::UsersController < Admin::ApplicationController
 
 
 	def lottery_codes
-		@user = User.find_by_id params[:id]
+		@user = User.find_by_id_including_deleted params[:id]
+		
 		render_json(@user.is_a? User) do |s|
 			if s
-				auto_paginate @user.lottery_codes.desc(:created_at)
+				auto_paginate @user.lottery_codes.desc(:created_at) do |codes| 
+					codes.map do |code|
+						code['lottery_title'] = Lottery.find_by_id(code['lottery_id']).title
+						code 
+					end
+				end
 			else
 				{
 					:error_code => ErrorEnum::USER_NOT_EXIST,
@@ -80,7 +85,7 @@ class Admin::UsersController < Admin::ApplicationController
 	end
 
 	def orders
-		@user = User.find_by_id params[:id]
+		@user = User.find_by_id_including_deleted params[:id]
 		render_json(@user.is_a? User) do |s|
 			if s
 				params[:scope] = "all" if params[:scope].blank?	
@@ -201,20 +206,12 @@ class Admin::UsersController < Admin::ApplicationController
 		# display delete users if params[:deleted]
 		users.select!{|u| u.status >= 0} if params[:deleted] && params[:deleted].to_s == 'false'
 
-		paginated_users = auto_paginate(users) do |u|
-			u.slice((page - 1) * per_page, per_page)
-	    end
-
-	    render_json_auto paginated_users
+		render_json_auto auto_paginate(users) 
 	end
 
 	def get_introduced_users
 		user = User.find_by_id_including_deleted(params[:id])
 		render_json_e(ErrorEnum::USER_NOT_EXIST) if user.nil?
-
-		introduced_users = auto_paginate user.get_introduced_users do |u|
-			u.slice((page - 1) * per_page, per_page)
-		end
-		render_json_auto(introduced_users) and return
+		render_json_auto(auto_paginate user.get_introduced_users) and return
 	end
 end

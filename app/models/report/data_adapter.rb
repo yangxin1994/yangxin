@@ -1,4 +1,5 @@
 # encoding: utf-8
+require 'quill_common'
 class Report::DataAdapter
 
 	CHART_MATHCING = {
@@ -53,7 +54,7 @@ class Report::DataAdapter
 		if chart_style == -1
 			chart_styles = CHART_MATHCING[question_type]
 		else
-			chart_styles << chart_style if CHART_MATHCING[question_type].include?(chart_style)
+			chart_styles << chart_style if CHART_MATHCING[question_type].include?(chart_style) || chart_style == ChartStyleEnum::TABLE
 		end
 		case question_type
 		when QuestionTypeEnum::CHOICE_QUESTION
@@ -81,7 +82,7 @@ class Report::DataAdapter
 		if chart_style == -1
 			chart_styles = [ChartStyleEnum::LINE, ChartStyleEnum::BAR, ChartStyleEnum::STACK]
 		else
-			chart_styles << chart_style if [ChartStyleEnum::LINE, ChartStyleEnum::BAR, ChartStyleEnum::STACK].include?(chart_style)
+			chart_styles << chart_style if [ChartStyleEnum::LINE, ChartStyleEnum::BAR, ChartStyleEnum::STACK, ChartStyleEnum::TABLE].include?(chart_style)
 		end
 		case target_question_type
 		when QuestionTypeEnum::CHOICE_QUESTION
@@ -103,23 +104,35 @@ class Report::DataAdapter
 		end
 	end
 
-	def self.get_item_id_and_text_array(issue)
-		items_id = issue["items"].map { |e| e["id"] }
-		items_text = issue["items"].map { |e| e["content"]["text"] }
-		if issue["other_item"] && issue["other_item"]["has_other_item"]
-			items_id << issue["other_item"]["id"]
-			items_text << issue["other_item"]["content"]["text"]
+	def self.get_item_id_and_text_array(issue, ids)
+		items = issue["items"]
+		items << issue["other_item"] if issue["other_item"] && issue["other_item"]["has_other_item"]
+		items_text = []
+		items_id = []
+		ids.each do |id|
+			item_text = self.get_item_text_by_id(items, id)
+			next if items_text.nil?
+			items_text << item_text
+			items_id << id
 		end
-		items_id.map! { |e| e.to_s }
 		return [items_id, items_text]
+	end
+
+	def self.get_item_text_by_id(items, id)
+		ids = id.split(',')
+		selected_items = items.select { |e| ids.include?(e["id"].to_s) }
+		return nil if selected_items.blank?
+		item_text_ary = selected_items.map { |item| item["content"]["text"] }
+		item_text = item_text_ary.join('或')
+		return item_text
 	end
 
 	def self.convert_single_choice_data(analysis_result, issue, chart_styles)
 		chart_data = []
-		items_id, items_text = *self.get_item_id_and_text_array(issue)
+		items_id, items_text = *self.get_item_id_and_text_array(issue, analysis_result.keys)
 		chart_styles.each do |chart_style|
 			data = []
-			if [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+			if [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
 				# multipe categories, one series
 				data << ["Categories"] + items_text
 				number = items_id.map { |id| analysis_result[id] || 0 }
@@ -138,11 +151,16 @@ class Report::DataAdapter
 
 	def self.convert_cross_choice_data(analysis_result, question_issue, target_question_issue, chart_styles)
 		chart_data = []
-		items_id, items_text = *self.get_item_id_and_text_array(question_issue)
-		target_items_id, target_items_text = *self.get_item_id_and_text_array(target_question_issue)
+
+		items_id = analysis_result[:result].keys
+		target_items_id = analysis_result[:result][items_id[0]].keys
+
+		items_id, items_text = *self.get_item_id_and_text_array(question_issue, items_id)
+		target_items_id, target_items_text = *self.get_item_id_and_text_array(target_question_issue, target_items_id)
+
 		chart_styles.each do |chart_style|
 			data = []
-			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
 				# categories correspond to target items, series correspond to items
 				data << ["Categories"] + target_items_text
 				items_id.each_with_index do |item_id, index|
@@ -217,7 +235,7 @@ class Report::DataAdapter
 		interval_text_ary << "#{segments[-1]}以上"
 		chart_styles.each do |chart_style|
 			data = []
-			if [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+			if [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
 				# multipe categories, one series
 				data << ["Categories"] + interval_text_ary
 				data << ["数量"] + histogram
@@ -235,7 +253,10 @@ class Report::DataAdapter
 
 	def self.convert_cross_number_blank_data(analysis_result, question_issue, target_question_issue, chart_styles, segments)
 		chart_data = []
-		items_id, items_text = *self.get_item_id_and_text_array(question_issue)
+
+		items_id = analysis_result[:result].keys
+
+		items_id, items_text = *self.get_item_id_and_text_array(question_issue, items_id)
 		interval_text_ary = []
 		interval_text_ary << "#{segments[0]}以下"
 		segments[0..-2].each_with_index do |e, index|
@@ -244,7 +265,7 @@ class Report::DataAdapter
 		interval_text_ary << "#{segments[-1]}以上"
 		chart_styles.each do |chart_style|
 			data = []
-			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
 				# categories correspond to target items, series correspond to items
 				data << ["Categories"] + interval_text_ary
 				items_id.each_with_index do |item_id, index|
@@ -279,7 +300,7 @@ class Report::DataAdapter
 		histogram = histogram = analysis_result["histogram"]
 		chart_styles.each do |chart_style|
 			data = []
-			if [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+			if [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
 				# multipe categories, one series
 				data << ["Categories"] + interval_text_ary
 				data << ["数量"] + histogram
@@ -297,7 +318,10 @@ class Report::DataAdapter
 
 	def self.convert_cross_time_blank_data(analysis_result, question_issue, target_question_issue, chart_styles, segments)
 		chart_data = []
-		items_id, items_text = *self.get_item_id_and_text_array(question_issue)
+
+		items_id = analysis_result[:result].keys
+
+		items_id, items_text = *self.get_item_id_and_text_array(question_issue, items_id)
 		interval_text_ary = []
 		interval_text_ary << ReportResult.convert_time_interval_to_text(target_question_issue["format"], nil, segments[0])
 		segments[0..-2].each_with_index do |e, index|
@@ -306,7 +330,7 @@ class Report::DataAdapter
 		interval_text_ary << ReportResult.convert_time_interval_to_text(target_question_issue["format"], segments[-1], nil)
 		chart_styles.each do |chart_style|
 			data = []
-			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
 				# categories correspond to target items, series correspond to items
 				data << ["Categories"] + interval_text_ary
 				items_id.each_with_index do |item_id, index|
@@ -334,7 +358,8 @@ class Report::DataAdapter
 		address_text = []
 		answer_number = []
 		analysis_result.each do |region_code, number|
-			text = Address.find_text_by_code(region_code)
+			number = number[0]
+			text = QuillCommon::AddressUtility.find_text_by_code(region_code)
 			next if text.blank?
 			address_text << text
 			answer_number << number
@@ -342,7 +367,7 @@ class Report::DataAdapter
 		chart_data = []
 		chart_styles.each do |chart_style|
 			data = []
-			if [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+			if [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
 				# multipe categories, one series
 				data << ["Categories"] + address_text
 				data << ["数量"] + answer_number
@@ -360,13 +385,16 @@ class Report::DataAdapter
 
 	def self.convert_cross_address_blank_data(analysis_result, question_issue, target_question_issue, chart_styles)
 		chart_data = []
-		items_id, items_text = *self.get_item_id_and_text_array(question_issue)
+
+		items_id = analysis_result[:result].keys
+
+		items_id, items_text = *self.get_item_id_and_text_array(question_issue, items_id)
 		address_text = []
 		region_code = []
 		analysis_result[:result].each do |id, cur_result|
 			cur_result.each do |code, number|
 				next if region_code.include?(code)
-				text = Address.find_text_by_code(code)
+				text = QuillCommon::AddressUtility.find_text_by_code(code)
 				next if text.blank?
 				region_code << code
 				address_text << text
@@ -374,13 +402,13 @@ class Report::DataAdapter
 		end
 		chart_styles.each do |chart_style|
 			data = []
-			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
 				# categories correspond to target items, series correspond to items
 				data << ["Categories"] + address_text
 				items_id.each_with_index do |item_id, index|
 					number = []
 					region_code.each do |code|
-						number << analysis_result[:result][item_id][code].to_i
+						number << (analysis_result[:result][item_id][code].nil? ? 0 : analysis_result[:result][item_id][code][0].to_i)
 					end
 					data << [items_text[index]] + number
 				end
@@ -390,7 +418,7 @@ class Report::DataAdapter
 				region_code.each_with_index do |code, index|
 					number = []
 					analysis_result[:result].each do |item_id, target_result|
-						number << target_result[code].to_i
+						number << (target_result[code].nil? ? 0 : target_result[code][0].to_i)
 					end
 					data << [address_text[index]] + number
 				end
@@ -402,10 +430,10 @@ class Report::DataAdapter
 
 	def self.convert_single_const_sum_data(analysis_result, issue, chart_styles)
 		chart_data = []
-		items_id, items_text = *self.get_item_id_and_text_array(issue)
+		items_id, items_text = *self.get_item_id_and_text_array(issue, analysis_result.keys)
 		chart_styles.each do |chart_style|
 			data = []
-			if [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+			if [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
 				# multipe categories, one series
 				data << ["Categories"] + items_text
 				score = items_id.map { |id| analysis_result[id] }
@@ -424,11 +452,15 @@ class Report::DataAdapter
 
 	def self.convert_cross_const_sum_data(analysis_result, question_issue, target_question_issue, chart_styles)
 		chart_data = []
-		items_id, items_text = *self.get_item_id_and_text_array(question_issue)
-		target_items_id, target_items_text = *self.get_item_id_and_text_array(target_question_issue)
+
+		items_id = analysis_result[:result].keys
+		target_items_id = analysis_result[:result][items_id[0]].keys
+
+		items_id, items_text = *self.get_item_id_and_text_array(question_issue, items_id)
+		target_items_id, target_items_text = *self.get_item_id_and_text_array(target_question_issue, target_items_id)
 		chart_styles.each do |chart_style|
 			data = []
-			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
 				# categories correspond to target items, series correspond to items
 				data << ["Categories"] + target_items_text
 				items_id.each_with_index do |item_id, index|
@@ -454,7 +486,7 @@ class Report::DataAdapter
 
 	def self.convert_single_sort_data(analysis_result, issue, chart_styles)
 		chart_data = []
-		items_id, items_text = *self.get_item_id_and_text_array(issue)
+		items_id, items_text = *self.get_item_id_and_text_array(issue, analysis_result.keys)
 		order_number = (analysis_result.map { |e| e.length }).max
 		order_text = []
 		1.upto(order_number) do |e|
@@ -462,7 +494,7 @@ class Report::DataAdapter
 		end
 		chart_styles.each do |chart_style|
 			data = []
-			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
 				# multipe categories, one series
 				data << ["Categories"] + order_text
 				1.upto(order_number) do |e|
@@ -480,7 +512,7 @@ class Report::DataAdapter
 					items_id.each do |id|
 						order_result << analysis_result[id][e-1] || 0
 					end
-					data << ["第#{e}位", order_result]
+					data << ["第#{e}位"] + order_result
 				end
 			elsif [ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT].include?(chart_style)
 				# the propotion for the first order
@@ -495,11 +527,15 @@ class Report::DataAdapter
 
 	def self.convert_cross_sort_data(analysis_result, question_issue, target_question_issue, chart_styles)
 		chart_data = []
-		items_id, items_text = *self.get_item_id_and_text_array(question_issue)
-		target_items_id, target_items_text = *self.get_item_id_and_text_array(target_question_issue)
+
+		items_id = analysis_result[:result].keys
+		target_items_id = analysis_result[:result][items_id[0]].keys
+
+		items_id, items_text = *self.get_item_id_and_text_array(question_issue, items_id)
+		target_items_id, target_items_text = *self.get_item_id_and_text_array(target_question_issue, target_items_id)
 		chart_styles.each do |chart_style|
 			data = []
-			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
 				# categories correspond to target items, series correspond to items
 				data << ["Categories"] + target_items_text
 				items_id.each_with_index do |item_id, index|
@@ -525,10 +561,10 @@ class Report::DataAdapter
 
 	def self.convert_single_scale_data(analysis_result, issue, chart_styles)
 		chart_data = []
-		items_id, items_text = *self.get_item_id_and_text_array(issue)
+		items_id, items_text = *self.get_item_id_and_text_array(issue, analysis_result.keys)
 		chart_styles.each do |chart_style|
 			data = []
-			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
 				# multipe categories, one series
 				data << ["Categories"] + items_text
 				score = items_id.map { |id| analysis_result[id][1] }
@@ -547,11 +583,15 @@ class Report::DataAdapter
 
 	def self.convert_cross_scale_data(analysis_result, question_issue, target_question_issue, chart_styles)
 		chart_data = []
-		items_id, items_text = *self.get_item_id_and_text_array(question_issue)
-		target_items_id, target_items_text = *self.get_item_id_and_text_array(target_question_issue)
+
+		items_id = analysis_result[:result].keys
+		target_items_id = analysis_result[:result][items_id[0]].keys
+
+		items_id, items_text = *self.get_item_id_and_text_array(question_issue, items_id)
+		target_items_id, target_items_text = *self.get_item_id_and_text_array(target_question_issue, target_items_id)
 		chart_styles.each do |chart_style|
 			data = []
-			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE].include?(chart_style)
+			if [ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
 				# categories correspond to target items, series correspond to items
 				data << ["Categories"] + target_items_text
 				items_id.each_with_index do |item_id, index|

@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
 	protect_from_forgery
 
-	before_filter :client_ip, :current_user#, :user_init
+	before_filter :client_ip, :current_user
 
 	helper_method :user_signed_in?, :user_signed_out?
 ###################################################
@@ -24,15 +24,24 @@ class ApplicationController < ActionController::Base
 		# 当没有block或者传入的是一个mongoid集合对象时就自动分页
 		# TODO : 更优的判断是否mongoid对象?
 		# instance_of?(Mongoid::Criteria) .by lcm
-		if block_given? 
+		# if block_given? 
 			if value.methods.include? :page
+				count ||= value.count
 				value = value.page(retval["current_page"]).per(retval["per_page"])
+			elsif value.is_a?(Array) and value.count > per_page
+				count ||= value.count
+				value = value.slice((page-1)*per_page, per_page)
 			end
-		  retval["data"] = yield(value)
-		else
-			#retval["data"] = eval(value + '.page(retval["current_page"]).per(retval["per_page"])' )
-			retval["data"] = value.page(retval["current_page"]).per(retval["per_page"])
-		end
+			
+	  		if block_given?
+	  			retval["data"] = yield(value) 
+	  		else
+	  			retval["data"] = value
+	  		end
+		# else
+		# 	#retval["data"] = eval(value + '.page(retval["current_page"]).per(retval["per_page"])' )
+		# 	retval["data"] = value.page(retval["current_page"]).per(retval["per_page"])
+		# end
 		retval["total_page"] = ( (count || value.count )/ per_page.to_f ).ceil
 		retval["total_page"] = retval["total_page"] == 0 ? 1 : retval["total_page"]
 		retval["next_page"] = (page+1 <= retval["total_page"] ? page+1: retval["total_page"])
@@ -74,22 +83,6 @@ class ApplicationController < ActionController::Base
 		return @current_user
 	end
 
-	def user_init
-		return if !user_signed_in?
-		case @current_user.status
-		when 2
-			if params[:controller] != "sessions" ||
-					!["init_basic_info", "skip_init_step"].include?(params[:action])
-				render_json_e(ErrorEnum::REQUIRE_INIT_STEP_1) and return 
-			end
-		when 3
-			if params[:controller] != "sessions" || 
-					!["init_user_attr_survey", "obtain_user_attr_survey", "skip_init_step"].include?(params[:action])
-				render_json_e(ErrorEnum::REQUIRE_INIT_STEP_2) and return 
-			end
-		end
-	end
-	
 	#obtain the ip address of the clien, and set it as @remote_ip
 	def client_ip
 		#@remote_ip = request.env["HTTP_X_FORWARDED_FOR"]
@@ -157,16 +150,13 @@ class ApplicationController < ActionController::Base
 	end
 
 	def require_admin
-		#logger.info "AAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 		if !user_signed_in?
-			#logger.info "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
 		if !user_admin?
-			#logger.info "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_ADMIN) and return }
@@ -181,7 +171,7 @@ class ApplicationController < ActionController::Base
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
-		if !user_survey_auditor? || !user_admin?
+		if !user_survey_auditor? && !user_admin?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_SURVEY_AUDITOR) and return }
@@ -196,7 +186,7 @@ class ApplicationController < ActionController::Base
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
-		if !user_answer_auditor? || !user_admin?
+		if !user_answer_auditor? && !user_admin?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_ANSWER_AUDITOR) and return }
@@ -205,13 +195,15 @@ class ApplicationController < ActionController::Base
 	end
 	
 	def require_entry_clerk
+		@survey = Survey.find_by_id(params[:id])
+		render_json_e(ErrorEnum::SURVEY_NOT_EXIST) if @survey.nil?
 		if !user_signed_in?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
-		if !user_entry_clerk? || !user_admin?
+		if !user_entry_clerk? && !user_admin? && current_user != @survey.user
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_ENTRY_CLERK) and return }
@@ -226,7 +218,7 @@ class ApplicationController < ActionController::Base
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
 			end
 		end
-		if !user_interviewer? || !user_admin?
+		if !user_interviewer? && !user_admin?
 			respond_to do |format|
 				format.html { redirect_to root_path and return }
 				format.json	{ render_json_e(ErrorEnum::REQUIRE_INTERVIEWER) and return }

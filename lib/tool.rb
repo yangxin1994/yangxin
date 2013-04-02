@@ -2,6 +2,7 @@
 require 'net/http'
 require 'uri'
 require 'csv'
+require 'quill_common'
 
 module Tool
 
@@ -10,23 +11,42 @@ module Tool
 	end
 
 
-	def self.send_post_request(uri, params, ssl = false)
+	def self.send_post_request(uri, params, ssl = false, username = nil, password = nil)
 		uri = URI.parse(uri)
 		http = Net::HTTP.new(uri.host, uri.port)
 		http.use_ssl = ssl
 		request = Net::HTTP::Post.new(uri.request_uri)
 		request.set_form_data(params)
+		if @username.nil?
+			request.basic_auth(username, password)
+		end
 		response = http.request(request)
 		return response
 	end
 
-	def self.send_get_request(uri, ssl = false)
+	def self.send_get_request(uri, ssl = false, username = nil, password = nil)
 		uri = URI.parse(uri)
 		http = Net::HTTP.new(uri.host, uri.port)
 		http.use_ssl = ssl
 		request = Net::HTTP::Get.new(uri.request_uri)
+		if !username.nil?
+			request.basic_auth(username, password)
+		end
 		response = http.request(request)
 		return response
+	end
+
+	def self.send_delete_request(uri, params, ssl = false, username = nil, password = nil)
+		uri = URI.parse(uri)
+		http = Net::HTTP.new(uri.host, uri.port)
+		http.use_ssl = ssl
+		request = Net::HTTP::Delete.new(uri.request_uri)
+		request.set_form_data(params)
+		if @username.nil?
+			request.basic_auth(username, password)
+		end
+		response = http.request(request)
+		return response	
 	end
 
 	#
@@ -42,15 +62,27 @@ module Tool
 		return true
 	end
 
-	def self.check_choice_question_answer(answer, standard_answer, fuzzy)
-		standard_answer.each do |standard_choice|
-			return false if !answer.include?(standard_choice)
-		end
-		if fuzzy.to_s == "true"
-			return true
+	def self.check_choice_question_answer(question_id, answer, standard_answer, fuzzy)
+		question = BasicQuestion.find_by_id(question_id)
+		issue = question.issue if !question.nil?
+		if issue && issue["max_choice"] == 1
+			# for single choice question, check weather user's answer is included in the standard answer
+			return standard_answer.include?(answer[0])
 		else
-			return answer.length == standard_answer.length
+			standard_answer.each do |standard_choice|
+				return false if !answer.include?(standard_choice)
+			end
+			if fuzzy.to_s == "true"
+				return true
+			else
+				return answer.length == standard_answer.length
+			end
 		end
+	end
+
+	def self.check_address_blank_question_answer(answer, standard_answer)
+		answer_region_code = answer["address"].to_i
+		QuillCommon::AddressUtility.check_region_answer(answer_region_code, standard_answer)
 	end
 
 	def self.check_text_question_answer(answer, standard_answer, fuzzy)

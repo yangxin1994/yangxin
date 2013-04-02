@@ -343,7 +343,7 @@ class SurveysControllerTest < ActionController::TestCase
 		get :show, :format => :json, :id => survey_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		survey_obj = result["value"]
-		assert_equal PublishStatus::UNDER_REVIEW, survey_obj["publish_status"]
+		assert_equal QuillCommon::PublishStatusEnum::UNDER_REVIEW, survey_obj["publish_status"]
 		sign_out(auth_key)
 		
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
@@ -373,7 +373,7 @@ class SurveysControllerTest < ActionController::TestCase
 		get :show, :format => :json, :id => published_survey_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		survey_obj = result["value"]
-		assert_equal PublishStatus::CLOSED, survey_obj["publish_status"]
+		assert_equal QuillCommon::PublishStatusEnum::CLOSED, survey_obj["publish_status"]
 		sign_out(auth_key)
 		
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))
@@ -403,7 +403,7 @@ class SurveysControllerTest < ActionController::TestCase
 		get :show, :format => :json, :id => published_survey_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		survey_obj = result["value"]
-		assert_equal PublishStatus::PAUSED, survey_obj["publish_status"]
+		assert_equal QuillCommon::PublishStatusEnum::PAUSED, survey_obj["publish_status"]
 		sign_out(auth_key)
 		
 		auth_key = sign_in(jesse.email, Encryption.decrypt_password(jesse.password))

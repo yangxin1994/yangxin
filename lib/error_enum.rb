@@ -6,6 +6,7 @@ module ErrorEnum
 	ILLEGAL_ACTIVATE_KEY = "error_02"
 	USER_NOT_ACTIVATED = "error_3"
 	USER_NOT_EXIST = "error_4"
+	USER_NOT_REGISTERED = "error_24"
 	ACTIVATE_EXPIRED = "error_5"
 	RESET_PASSWORD_EXPIRED = "error_6"
 	REQUIRE_LOGIN = "error_7"
@@ -52,6 +53,9 @@ module ErrorEnum
 	REQUIRE_SURVEY_AUDITOR = "error_91"
 	WRONG_USER_ROLE = 'error_92'
 	WRONG_USER_COLOR = 'error_93'
+	REQUIRE_ANSWER_AUDITOR = 'error_94'
+	REQUIRE_ENTRY_CLERK = 'error_95'
+	REQUIRE_INTERVIEWER = 'error_96'
 
 	QUOTA_RULE_NOT_EXIST = "error_100"
 	WRONG_QUOTA_RULE_AMOUNT = "error_101"
@@ -85,6 +89,7 @@ module ErrorEnum
 	WRONG_REPORT_MOCKUP_CHART_STYLE = "error_161"
 	WRONG_REPORT_MOCKUP_COMPONENT_TYPE = "error_162"
 	WRONG_REPORT_TYPE = "error_163"
+	WRONG_REPORT_STYLE = "error_164"
 
 	RESULT_NOT_EXIST = 'error_170'
 	DATA_LIST_NOT_EXIST = 'error_171'
@@ -93,10 +98,24 @@ module ErrorEnum
 	ANSWER_REVIEWED = 'error_181'
 
 	TASK_NOT_EXIST = 'error_190'
+	TASK_TIMEOUT = 'error_191'
 	TASK_CREATION_FAILED = 'error_200'
+	TASK_DESTROY_FAILED = 'error_201'
+
+	DOTNET_TIMEOUT = 'error_210'
+	DOTNET_SERVICE_REFUSED = 'error_211'
+	DOTNET_HTTP_ERROR = 'error_212'
+	DOTNET_INTERNAL_ERROR = 'error_213'
 
 	# lcm add for answer review
 	REWARD_ERROR = 'error_300'
+
+	INTERVIEWER_NOT_EXIST = 'error_301'
+	INTERVIEWER_TASK_NOT_EXIST = 'error_302'
+
+	# extension error
+	BROWSER_EXTENSION_NOT_EXIST = 'error_400'
+	BROWSER_NOT_EXIST = 'error_401'
 
 	UNKNOWN_ERROR = "error_100000"
 	SAVE_ERROR = "error_200000"
@@ -127,6 +146,7 @@ module ErrorEnum
 	SYSTEM_USER_NOT_EXIST = "error_100044"
 	SYSTEM_USER_IS_LOCK = "error_100045"
 	SYSTEM_USER_MUST_EMAIL_OR_USERNAME = "error_100046"
+	USER_LOCKED = "error_100047"
 
 	IP_FORMAT_ERROR = "error_100101"
 	IP_REQUEST_SINA_ERROR = "error_100102"
@@ -154,6 +174,7 @@ module ErrorEnum
 	GIFT_SURPLUS_NOT_A_NUNBER = "error_21041"
 	GIFT_NOT_ENOUGH = "error_21033"
 	GIFT_POINT_COULD_NOT_BE_BLANK = "error_21020"
+	GIFT_POINT_NOT_A_NUNBER = "error_21021"
 	# Messages Error Code (11)
 	MESSAGE_NOT_FOUND = "error_21101"
 	INVALID_MESSAGE_ID = "error_21102"
@@ -162,6 +183,7 @@ module ErrorEnum
 	# Prize Error Code (12)
 	PRIZE_NOT_ENOUGH = "error_21233"
 	PRIZE_NOT_FOUND = "error_21201"
+	PRIZE_CTRL_PARAMS_ERROR = "error_21207"
 	# RewardLog Error Code (13)
 	REWARDLOG_POINT_NOT_A_NUNBER = "error_21311"
 	# Order Error Code (14)
@@ -177,6 +199,7 @@ module ErrorEnum
 	INVALID_PRIZE_ID = "error_21501"
 	# Lottery Error Code (16)
 	INVALID_LOTTERY_ID = "error_21602"
+	LOTTERY_CANNOT_EXCHANGE  = "error_21632"
 	# Lottery Code Error Code (17)
 	LOTTERYCODE_NOT_FOUND = "error_21701"
 	INVALID_LOTTERYCODE_ID = "error_21702"
@@ -185,5 +208,9 @@ module ErrorEnum
 	POINT_NOT_ENOUGH = "error_21833"
 	# User Error (20)
 	USER_NOT_FOUND = "error_22001"
+	# Answer Error (21)
+	WRONG_ANSWERS = "error_121031"
+	# Photo Errot (22)
+	PHOTP_CANNOT_BE_BLANK = "error_122201"
 end
 

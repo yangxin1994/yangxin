@@ -10,14 +10,14 @@ class Report::Data
 	CHART_DATA = 3
 
 	def initialize(report_type, title, subtitle, header, footer, author_chn, author_eng, style)
-		@report_type = report_type
-		@title = title
-		@subtitle = subtitle
-		@header = header
-		@footer = footer
-		@author_chn = author_chn
-		@author_eng = author_eng
-		@style = style
+		@report_type = report_type.to_s
+		@title = title.to_s
+		@subtitle = subtitle.to_s
+		@header = header.to_s
+		@footer = footer.to_s
+		@author_chn = author_chn.to_s
+		@author_eng = author_eng.to_s
+		@style = style.to_s
 		@component_list = []
 	end
 

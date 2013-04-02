@@ -1,5 +1,6 @@
 require 'array'
 require 'error_enum'
+require 'quill_common'
 class SurveysController < ApplicationController
 	before_filter :require_sign_in, :except => [:show, :estimate_answer_time, :list_surveys_in_community, :reward_info, :search_title]
 	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :update_deadline, :update_star]
@@ -45,13 +46,14 @@ class SurveysController < ApplicationController
 	#* a Survey object with default meta data and empty survey_id
 	#* ErrorEnum::EMAIL_NOT_EXIST
 	def new
-		survey = Survey.find_new_by_user(@current_user)
-		if survey.nil?
-			survey = Survey.create
-			survey.alt_new_survey = false
-			@current_user.surveys << survey
-			survey.update_attributes(:publish_status => PublishStatus::PUBLISHED) if @current_user.is_admin || @current_user.is_super_admin
+		survey = Survey.new
+		survey.user = @current_user
+		if @current_user.is_admin || @current_user.is_super_admin
+			survey.publish_status = QuillCommon::PublishStatusEnum::PUBLISHED
+		else
+			survey.style_setting["has_advertisement"] = false
 		end
+		survey.save
 		respond_to do |format|
 			format.json	{ render_json_s(survey.serialize) and return }
 		end
@@ -283,49 +285,37 @@ class SurveysController < ApplicationController
 	#*retval*:
 	#* a list Survey objects
 	def index
-
 		if params[:stars] then
 			survey_list = @current_user.surveys.stars.desc(:created_at)
 		else
 			survey_list = @current_user.surveys.list(params[:status], params[:publish_status], params[:tags])
 		end	
-
 		# add answer_number
 		survey_list.map do |e| 
 			e['screened_answer_number']=e.answers.not_preview.screened.length
 			e['finished_answer_number']=e.answers.not_preview.finished.length
 		end
-
-		paginated_surveys = auto_paginate survey_list do |s|
-			s.slice((page - 1) * per_page, per_page)
-		end
+		paginated_surveys = auto_paginate survey_list
 		render_json_auto(paginated_surveys)
-		
 	end
 
 	def list_surveys_in_community
 		surveys = Survey.list_surveys_in_community(params[:reward].to_i,
 										params[:only_spreadable].to_s == "true",
 										@current_user)
-		paginated_surveys = auto_paginate surveys do |s|
-			s.slice((page - 1) * per_page, per_page)
-		end
+		paginated_surveys = auto_paginate surveys
 		render_json_auto(paginated_surveys)
 	end
 
 	def list_answered_surveys
 		surveys_with_answer_status = Survey.list_answered_surveys(@current_user)
-		paginated_surveys = auto_paginate surveys_with_answer_status do |s|
-			s.slice((page - 1) * per_page, per_page)
-		end
+		paginated_surveys = auto_paginate surveys_with_answer_status
 		render_json_auto(paginated_surveys)
 	end
 
 	def list_spreaded_surveys
 		surveys_with_spreaded_number = Survey.list_spreaded_surveys(@current_user)
-		paginated_surveys = auto_paginate surveys_with_spreaded_number do |s|
-			s.slice((page - 1) * per_page, per_page)
-		end
+		paginated_surveys = auto_paginate surveys_with_spreaded_number
 		render_json_auto(paginated_surveys)
 	end
 
@@ -372,36 +362,15 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	#*method*: get
-	#
-	#*url*: /surveys/:survey_id/pause
-	#
-	#*description*: the owner of the survey pause the survey
-	#
-	#*params*:
-	#* survey_id: id of the suvey to be set
-	#* message: the message that the administrator wants to give the user
-	#
-	#*retval*:
-	#* true when the survey is successfully paused
-	#* ErrorEnum::SURVEY_NOT_EXIST
-	#* ErrorEnum::UNAUTHORIZED
-	#* ErrorEnum::WRONG_PUBLISH_STATUS
-	def pause
-		retval = @survey.pause(params[:message], @current_user)
-		respond_to do |format|
-			format.json	{ render_json_auto(retval) and return }
-		end
-	end
-
 	#*method*: put
 	#
 	#*url*: /surveys/:survey_id/update_deadline
 	#
-	#*description*: the owner of the survey pause the survey
+	#*description*: the owner of the survey updates the deadline of the survey
 	#
 	#*params*:
 	#* survey_id: id of the suvey to be set
+	#* deadline: deadline to be setted
 	def update_deadline
 		retval = @survey.update_deadline(params[:deadline])
 		respond_to do |format|
@@ -451,9 +420,7 @@ class SurveysController < ApplicationController
 
 	def search_title
 		surveys = @current_user.surveys.search_title(params[:query])
-		paginated_surveys = auto_paginate surveys do |s|
-			s.slice((page - 1) * per_page, per_page)
-		end
+		paginated_surveys = auto_paginate surveys
 		render_json_auto(paginated_surveys)
 	end
 end

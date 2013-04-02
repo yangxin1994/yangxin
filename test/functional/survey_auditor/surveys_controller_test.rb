@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'test_helper'
+require 'quill_common'
 
 class SurveyAuditor::SurveysControllerTest < ActionController::TestCase
 =begin
@@ -31,7 +32,7 @@ class SurveyAuditor::SurveysControllerTest < ActionController::TestCase
 		get :show, :format => :json, :id => under_review_survey_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		survey_obj = result["value"]
-		assert_equal PublishStatus::PAUSED, survey_obj["publish_status"]
+		assert_equal QuillCommon::PublishStatusEnum::PAUSED, survey_obj["publish_status"]
 		sign_out(auth_key)
 	end
 
@@ -63,7 +64,7 @@ class SurveyAuditor::SurveysControllerTest < ActionController::TestCase
 		get :show, :format => :json, :id => under_review_survey_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		survey_obj = result["value"]
-		assert_equal PublishStatus::PUBLISHED, survey_obj["publish_status"]
+		assert_equal QuillCommon::PublishStatusEnum::PUBLISHED, survey_obj["publish_status"]
 		sign_out(auth_key)
 	end
 
@@ -88,7 +89,7 @@ class SurveyAuditor::SurveysControllerTest < ActionController::TestCase
 		get :show, :format => :json, :id => published_survey_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		survey_obj = result["value"]
-		assert_equal PublishStatus::CLOSED, survey_obj["publish_status"]
+		assert_equal QuillCommon::PublishStatusEnum::CLOSED, survey_obj["publish_status"]
 		sign_out(auth_key)
 		
 		auth_key = sign_in(survey_auditor.email, Encryption.decrypt_password(survey_auditor.password))
@@ -119,7 +120,7 @@ class SurveyAuditor::SurveysControllerTest < ActionController::TestCase
 		get :show, :format => :json, :id => published_survey_id, :auth_key => auth_key
 		result = JSON.parse(@response.body)
 		survey_obj = result["value"]
-		assert_equal PublishStatus::PAUSED, survey_obj["publish_status"]
+		assert_equal QuillCommon::PublishStatusEnum::PAUSED, survey_obj["publish_status"]
 		sign_out(auth_key)
 		
 		auth_key = sign_in(survey_auditor.email, Encryption.decrypt_password(survey_auditor.password))

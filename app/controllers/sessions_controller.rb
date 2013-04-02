@@ -4,7 +4,7 @@ require 'error_enum'
 require 'tool'
 class SessionsController < ApplicationController
 
-	before_filter :require_sign_in, :only => [:destroy, :init_basic_info, :obtain_user_attr_survey, :init_user_attr_survey, :skip_init_step, :update_user_info, :reset_password, :get_level_information]
+	before_filter :require_sign_in, :only => [:destroy, :update_user_info, :reset_password, :get_level_information]
 
 	#*descryption*: user submits the login form
 	#
@@ -38,21 +38,6 @@ class SessionsController < ApplicationController
 		render_json_auto(retval) and return
 	end
 
-	def init_user_attr_survey
-		retval = @current_user.init_attr_survey(params[:survey_id], params[:answer])
-		render_json_s(retval) and return
-	end
-
-	def obtain_user_attr_survey
-		questions = Survey.get_user_attr_survey
-		render_json_s(questions) and return
-	end
-
-	def skip_init_step
-		retval = @current_user.skip_init_step
-		render_json_s(retval) and return
-	end
-
 	def destroy
 		User.logout(params[:auth_key])
 		render_json_s and return
@@ -73,12 +58,7 @@ class SessionsController < ApplicationController
 	def send_password_email
 		user = User.find_by_email(params[:email])
 		render_json_e(ErrorEnum::USER_NOT_EXIST) and return if user.nil?
-		TaskClient.create_task({ task_type: "email",
-								host: "localhost",
-								port: Rails.application.config.service_port,
-								params: { email_type: "password",
-										email: user.email,
-										callback: params[:callback] } })
+		EmailWorker.perform_async("password", user.email, params[:callback])
 		render_json_s and return
 	end
 

@@ -1,14 +1,6 @@
-require 'resque/server'
+require 'sidekiq/web'
 OopsData::Application.routes.draw do
-
-	mount Resque::Server.new, :at => "/resque"
-
-	resources :jobs do
-		collection do
-			post :email_job
-			post :result_job
-		end
-	end
+	mount Sidekiq::Web, at: "/sidekiq"
 
 	resources :faqs, :public_notices, :feedbacks, :advertisements
 	resources :data_generators do
@@ -30,11 +22,27 @@ OopsData::Application.routes.draw do
 	
 	resources :lottery_codes 
 
+	resources :browsers do
+		member do
+			put :update_history
+			get :get_recommended_surveys
+			get :get_survey_info
+		end
+	end
+
 
 	# alias interface
 	match '/admin/surveys/new' => 'surveys#new'
 	# 
 	namespace :admin do
+
+		resources :browsers do
+			collection do
+				get :role
+				get :tasks
+			end
+		end
+
 		resources :users do 
 			collection do 
 				get 'blacks', 'whites', 'deleteds','list_by_role'
@@ -48,18 +56,17 @@ OopsData::Application.routes.draw do
 
 		resources :surveys do 
 			collection do 
-				get 'show_user_attr_survey'
 				put 'add_template_question'
 			end
 			member do
-				put 'allocate', 'add_reward', 'set_community', 'set_spread'
+				put 'allocate', 'add_reward', 'set_community', 'set_spread', 'set_promotable', 'set_answer_need_review'
 			end
 		end
 
+		resources :interviewer_tasks do 
+		end	
+
 		resources :faqs do 
-			collection do 
-				get 'count', 'list_by_type_count', 'list_by_type_and_value_count'
-			end
 		end
 		resources :public_notices do 
 			collection do 
@@ -73,10 +80,6 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :feedbacks do
-			collection do 
-				get 'count', 'list_by_type_count', 'list_by_type_and_value_count', 
-					'list_by_type_and_answer_count'
-			end
 			member do 
 				post 'reply'
 			end
@@ -93,7 +96,7 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :template_questions do
-			collection	 do 
+			collection do 
 				get 'count', 'list_by_type', 'list_by_type_count'
 			end
 			member do 
@@ -120,7 +123,7 @@ OopsData::Application.routes.draw do
 		end
 		resources :orders do
 			collection do
-				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
+				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed, :canceled
 			end
 			member do
 				put :verify, :verify_as_failed, :deliver, :deliver_success, :deliver_as_failed
@@ -129,11 +132,11 @@ OopsData::Application.routes.draw do
 		
 		resources :lotteries do
 			collection do
-				get :for_publish, :activity, :finished
+				get :for_publish, :activity, :finished, :deleted, :quillme
 			end
 			member do
 				get :auto_draw, :prize_records, :lottery_codes, :ctrl
-				put :assign_prize, :add_ctrl_rule
+				put :assign_prize, :add_ctrl_rule, :revive
 			end
 		end
 
@@ -145,7 +148,6 @@ OopsData::Application.routes.draw do
 
 		resources :lottery_codes 
 
-		match 'messages/count' => 'messages#count'
 		resources :messages
 
 		resources :rewards, :only => [:index] do
@@ -196,11 +198,25 @@ OopsData::Application.routes.draw do
 	end
 
 	namespace 'entry_clerk' do
-		resources :answers do
+		resources :surveys do
 			member do
 				get 'csv_header'
-				post 'import_answer'
+				put 'import_answer'
 			end
+		end
+	end
+
+	namespace 'interviewer' do
+		resources :surveys do
+		end
+		resources :interviewer_tasks do
+			resources :answers do
+				collection do
+					post 'submit'
+				end
+			end
+		end
+		resources :materials do
 		end
 	end
 
@@ -219,8 +235,7 @@ OopsData::Application.routes.draw do
 
 	resources :sessions do
 		collection do
-			post :update_user_info, :init_basic_info, :init_user_attr_survey, :send_password_email
-			get :obtain_user_attr_survey, :skip_init_step
+			post :update_user_info, :init_basic_info, :send_password_email
 			post :new_password, :reset_password
 			post :login_with_auth_key
 			post :login_with_code
@@ -276,7 +291,6 @@ OopsData::Application.routes.draw do
 			get 'update_deadline'
 
 			get 'show_quality_control'
-			get 'check_progress'
 			get 'estimate_answer_time'
 			put 'update_deadline'
 			post 'update_star'
@@ -331,6 +345,7 @@ OopsData::Application.routes.draw do
 			get :get_data_list
 			get :get_stats
 			get :get_analysis_result
+			get :get_file_uri
 		end
 	end
 
@@ -360,6 +375,7 @@ OopsData::Application.routes.draw do
 			post 'finish'
 			get 'estimate_remain_answer_time'
 			delete 'destroy_preview'
+			get 'get_my_answer_by_id'
 		end
 	end
 
@@ -375,12 +391,12 @@ OopsData::Application.routes.draw do
 		end
 		member do
 			get :draw
+			post :exchange
 		end
 	end
 	resources :gifts do
 		collection do
 			get :virtual, :cash, :entity, :lottery
-
 		end
 		member do
 			put :exchange
@@ -399,7 +415,6 @@ OopsData::Application.routes.draw do
 	resources :reward_logs do
 		collection do
 			get :for_points, :for_lotteries
-
 		end
 	end
 
@@ -408,9 +423,9 @@ OopsData::Application.routes.draw do
 			get :find_provinces
 			get :find_cities_by_province
 			get :find_towns_by_city
+			get :find_address_text_by_code
 			post :send_email
 		end
-
 	end
 
 	# The priority is based upon order of creation:

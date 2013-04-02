@@ -7,6 +7,9 @@ class SurveySpread
 	belongs_to :user
 	belongs_to :survey
 
+	index({ user_id: 1 }, { background: true } )
+	index({ survey_id: 1 }, { background: true } )
+
 
 	def self.inc(user, survey)
 		ss = SurveySpread.where(:user_id => user._id, :survey_id => survey._id)[0]

@@ -1,17 +1,20 @@
+# encoding: utf-8
+
 class Admin::OrdersController < Admin::ApplicationController
-  
+
   def index
     render_json true do
       auto_paginate(Order.all) do |orders|
         orders.map do |o|
           o["gift_name"] = o.gift.name unless o.gift.nil?
-          o["gift_name"] = o.prize.name if o.is_prize && !o.prize.nil?
+          o["gift_name"] = o.prize.name if o.is_prize
+          o["gift"] = o.prize if o.is_prize
           o
         end
       end
     end
   end
-  
+
   def destroy
     Order.find_by_id(params[:id]) do |r|
       r.delete
@@ -32,18 +35,22 @@ class Admin::OrdersController < Admin::ApplicationController
   def verify
     render_json do
       result = Order.find_by_id params[:id] do |o|
-        if o.type == 3
-          o.gift.lottery.give_lottery_code_to o.user
-          o.update_attribute(:status, 3)
-        else
+        # if o.type == 3
+        #   o.gift.lottery.give_lottery_code_to o.user
+        #   o.update_attribute(:status, 3)
+        # else
           o.update_attribute(:status, 1)
-        end
+          current_user.create_message("您的礼品兑换通过审核了~",
+            "您的礼品兑换通过审核了~",
+            [o.user._id]
+            )
+        # end
       end
       @is_success = !(result.is_a? Hash)
       result
     end
   end
-  
+
   def verify_as_failed
     render_json do
       result = Order.find_by_id params[:id] do |o|
@@ -51,6 +58,10 @@ class Admin::OrdersController < Admin::ApplicationController
         o.gift.inc(:surplus, 1)
         o.update_attribute(:status_desc, params[:status_desc])
         o.reward_log.revoke_operation(current_user, params[:status_desc])
+        current_user.create_message("您的礼品兑换未通过审核",
+          "您的礼品兑换未通过审核:\n#{params[:status_desc]}.",
+          [o.user._id]
+          )
       end
       @is_success = !(result.is_a? Hash)
       result
@@ -61,6 +72,10 @@ class Admin::OrdersController < Admin::ApplicationController
     render_json do
       result = Order.find_by_id params[:id] do |o|
         o.update_attribute(:status, 2)
+        current_user.create_message("您的礼品已经开始配送了",
+          "您的礼品已经开始配送了.",
+          [o.user._id]
+          )
       end
       @is_success = !(result.is_a? Hash)
       result
@@ -80,10 +95,14 @@ class Admin::OrdersController < Admin::ApplicationController
   def deliver_as_failed
     render_json do
       result = Order.find_by_id params[:id] do |o|
+        o.reward_log.revoke_operation(current_user, params[:status_desc]) unless o.is_prize
         o.update_attribute(:status, -3)
-        o.gift.inc(:surplus, 1)
+        o.gift.inc(:surplus, 1) unless o.is_prize
         o.update_attribute(:status_desc, params[:status_desc])
-        o.reward_log.revoke_operation(current_user, params[:status_desc])
+        current_user.create_message("您的礼品配送失败",
+          "您的礼品配送失败,我们将重新为您安排配送.",
+          [o.user._id]
+          )
       end
       @is_success = !(result.is_a? Hash)
       result
@@ -96,7 +115,7 @@ class Admin::OrdersController < Admin::ApplicationController
       @order.as_retval
     end
   end
-  
+
   def status
     Order.find_by_id params[:id] do |o|
       o.status = params[:status] || o.status
@@ -115,5 +134,5 @@ class Admin::OrdersController < Admin::ApplicationController
       end
     end
   end
-  
+
 end

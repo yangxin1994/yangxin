@@ -5,4 +5,5 @@ module ChartStyleEnum
 	LINE = 2
 	BAR = 3
 	STACK = 4
+	TABLE = 5
 end

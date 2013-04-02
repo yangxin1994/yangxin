@@ -2,6 +2,8 @@ class Admin::ApplicationController < ApplicationController
 	before_filter :require_admin
 
 	def create_photo(param)
+		return false unless params[param][:photo]
+		return false if params[param][:photo].blank?
     photo = Material.create(:material_type => 1, 
                     				:title => params[param][:name],
                     				:value => params[param][:photo],
@@ -12,7 +14,7 @@ class Admin::ApplicationController < ApplicationController
 	def update_photo(param, ins)
     unless params[param][:photo].nil?
       if ins.photo.nil?
-	 			prize.photo = create_photo(param)
+	 			ins.photo = create_photo(param)
 	 		else
 	      ins.photo.title = params[param][:name]
 	      ins.photo.value = params[param][:photo]
@@ -23,7 +25,4 @@ class Admin::ApplicationController < ApplicationController
     end
 	end
 
-	def create_lottery(param)
-
-	end
 end

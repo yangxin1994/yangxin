@@ -33,15 +33,28 @@ OopsData::Application.configure do
 	config.action_mailer.perform_deliveries = true
 	config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    :authentication => :plain,
-    :address => "smtp.mailgun.org",
-    :port => 25,
-    :domain => "oopsdata.net",
-    :user_name => "postmaster@oopsdata.net",
-    :password => "0nlnhy08vbk1"
+    :authentication => "plain",
+    :address        => "smtp.mailgun.com",
+    :port           => 25,
+    :domain         => "oopsdata.net",
+    :user_name      => "postmaster@oopsdata.net",
+    :password       => "0nlnhy08vbk1",
+    :enable_starttls_auto => true,
+    :openssl_verify_mode  => 'none'
   }
 
+  # task web service
   config.task_web_service_uri = 'localhost:9000'
-  config.dotnet_web_service_uri = 'http://192.168.1.107:3201'
   config.service_port = '8000'
+
+  # donet web service
+  # config.dotnet_web_service_uri = 'http://192.168.1.119:80'
+  config.dotnet_web_service_uri = 'http://19.oopsdata.com'
+
+	# configuration for roadie
+	config.action_mailer.default_url_options = {:host => 'quill.oopsdata.net', :port => '3000'}
+
+	# configuration for quill and quillme
+	config.quill_host = 'http://quill.oopsdata.net:3000'
+	config.quillme_host = 'http://quillme.oopsdata.net:3000'
 end

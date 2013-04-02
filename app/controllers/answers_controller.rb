@@ -1,13 +1,12 @@
 # coding: utf-8
 require 'error_enum'
+require 'quill_common'
 class AnswersController < ApplicationController
 
 	# before_filter :require_user_exist
 	before_filter :check_survey_existence, :only => [:create]
 	before_filter :check_answer_existence, :except => [:get_my_answer, :create]
-
 	before_filter :check_my_answer_existence, :only => [:load_question, :submit_answer, :clear, :finish, :destroy_preview]
-
 	before_filter :check_ownerness_of_survey, :only => [:destroy, :show]
 
 	def check_ownerness_of_survey
@@ -51,7 +50,7 @@ class AnswersController < ApplicationController
 	######################
 
 	def create
-		if !params[:is_preview] && @survey.publish_status != 8
+		if !params[:is_preview] && @survey.publish_status != QuillCommon::PublishStatusEnum::PUBLISHED
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_PUBLISHED) and return }
 			end
@@ -87,8 +86,7 @@ class AnswersController < ApplicationController
 			retval = @survey.check_password_for_preview(params[:username], params[:password], @current_user)
 			render_json_auto(retval) and return if retval != true
 			# the first time to load questions, create the preview answer
-			# answer = Answer.create_answer(params[:is_preview], @current_user, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
-			answer = Answer.create_answer(params[:is_preview], params[:introducer_id], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
+			answer = Answer.create_answer(params[:is_preview], params[:introducer_id], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password], params[:referrer])
 			render_json_auto(answer) and return if answer.class != Answer
 			render_json_auto(answer._id) and return
 		else
@@ -96,7 +94,7 @@ class AnswersController < ApplicationController
 			# check the password
 			retval = @survey.check_password(params[:username], params[:password], @current_user)
 			render_json_auto(retval) and return if retval != true
-			answer = Answer.create_answer(params[:is_preview], params[:introducer_id], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password])
+			answer = Answer.create_answer(params[:is_preview], params[:introducer_id], email, params[:survey_id], params[:channel], params[:_remote_ip], params[:username], params[:password], params[:referrer])
 			render_json_auto(answer) and return if answer.class != Answer
 			answer.check_channel_ip_address_quota
 			render_json_auto(answer._id) and return
@@ -107,12 +105,15 @@ class AnswersController < ApplicationController
 		@answer.update_status	# check whether it is time out
 		if @answer.is_edit
 			questions = @answer.load_question(params[:question_id], params[:next_page].to_s == "true")
+			question_ids = questions.map { |e| e._id.to_s }
 			if @answer.is_finish
 				render_json_auto([@answer.status, @answer.reject_type, @answer.audit_message]) and return
 			else
+				answers = @answer.answer_content.merge(@answer.random_quality_control_answer_content)
+				answers = answers.select { |k, v| question_ids.include?(k) }
 				render_json_auto([questions,
-								@answer.answer_content.merge(@answer.random_quality_control_answer_content),
-								@answer.survey.all_questions_id.length,
+								answers,
+								@answer.survey.all_questions_id.length + @answer.random_quality_control_answer_content.length,
 								@answer.index_of(questions),
 								questions.estimate_answer_time,
 								@answer.repeat_time]) and return
@@ -167,16 +168,33 @@ class AnswersController < ApplicationController
 		end
 	end
 
+	def get_reward_info
+		respond_to do |format|
+			format.json	{ render_json_auto({reward: @answer.reward, point: @answer.point, lottery_id: @answer.lottery_id.to_s}) and return }
+		end
+	end
+
+	def get_my_answer_by_id
+		respond_to do |format|
+			format.json	{ render_json_auto({survey_id: @answer.survey_id.to_s,
+											is_preview: @answer.is_preview,
+											reward_type: @answer.reward,
+											point: @answer.point,
+											lottery_id: @answer.lottery_id.to_s,
+											lottery_title: @answer.lottery.try(:title)}) and return }
+		end
+	end
+
 	def get_my_answer
 		render_json_e(ErrorEnum::REQUIRE_LOGIN) and return if @current_user.nil?
 		@answer = Answer.find_by_survey_id_email_is_preview(params[:survey_id], @current_user.email, params[:is_preview])
 		if @answer.nil?
 			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
+				format.json  { render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
 			end
 		end
 		respond_to do |format|
-			format.json	{ render_json_auto(@answer) and return }
+			format.json  { render_json_auto(@answer) and return }
 		end
 	end
 

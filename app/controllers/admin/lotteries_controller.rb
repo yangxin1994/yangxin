@@ -1,15 +1,16 @@
 class Admin::LotteriesController < Admin::ApplicationController
-	
+
 	def index
-		render_json { auto_paginate(Lottery.all)}
+		render_json { auto_paginate(Lottery.where(:is_deleted => false))}
 	end
 
   def create
     create_photo(:lottery)
+    prize_ids = get_prize_ids
     @lottery = Lottery.new(params[:lottery])
-    add_prizes(get_prize_ids, @lottery)
+    add_prizes(prize_ids, @lottery)
     render_json @lottery.save do
-      @lottery.photo.save
+      @lottery.photo.save if @lottery.photo
       @lottery.as_retval
     end
   end
@@ -25,11 +26,11 @@ class Admin::LotteriesController < Admin::ApplicationController
         lottery.as_retval
       end
     end
-    
+
   end
 
 	# def create
- #    material = Material.create(:material_type => 1, 
+ #    material = Material.create(:material_type => 1,
  #                               :title => params[:lottery][:title],
  #                               :value => params[:lottery][:photo],
  #                               :picture_url => params[:lottery][:photo])
@@ -57,11 +58,11 @@ class Admin::LotteriesController < Admin::ApplicationController
   #   @lottery = Lottery.find_by_id params[:id]
   #   unless params[:lottery][:photo].nil?
   #     if @lottery.photo.nil?
-  #       material = Material.create(:material_type => 1, 
+  #       material = Material.create(:material_type => 1,
   #                                  :title => params[:lottery][:name],
   #                                  :value => params[:lottery][:photo],
   #                                  :picture_url => params[:lottery][:photo])
-        
+
   #       @lottery.photo = material
   #     end
   #     @lottery.photo.value = params[:lottery][:photo]
@@ -76,7 +77,7 @@ class Admin::LotteriesController < Admin::ApplicationController
   #   #@lottery = Lottery.new(params[:lottery])
   #   lp_ids.each do |i|
   #     Prize.find_by_id(i) do |prize|
-  #       @lottery.prizes << prize 
+  #       @lottery.prizes << prize
   #     end
 
   #     # lp = Prize.where("_id"=> i).first
@@ -88,10 +89,24 @@ class Admin::LotteriesController < Admin::ApplicationController
   #     @lottery.as_retval
   #   end
   # end
-  
-  def_each :for_publish, :activity, :finished do |method_name|
+
+  def_each :for_publish, :activity, :finished, :quillme do |method_name|
     @lottery = auto_paginate(Lottery.send(method_name))
     render_json { @lottery }
+  end
+
+  def deleted
+    render_json do
+      auto_paginate(Lottery.deleted)
+    end
+  end
+
+  def revive
+    render_json false do
+      Lottery.find_by_id params[:id] do |lottery|
+        success_true if lottery.revive
+      end
+    end
   end
 
   def show
@@ -101,11 +116,11 @@ class Admin::LotteriesController < Admin::ApplicationController
           prize[:photo] = prize.photo.picture_url
           prize
         end
-        # binding.pry
+
         l[:prize_ids] = l.prizes.map(&:_id)
         l[:photo_src] = l.photo.picture_url unless l.photo.nil?
         @is_success = true
-        #binding.pry
+        #
         l
       end
     end
@@ -114,13 +129,13 @@ class Admin::LotteriesController < Admin::ApplicationController
   def auto_draw
     render_json false do
       Lottery.find_by_id(params[:id]) do |l|
-        # binding.pry
+
         @is_success = true
         l.auto_draw
       end
     end
   end
-  
+
   def assign_prize
     render_json false do
       Lottery.find_by_id(params[:id]) do |lottery|
@@ -141,9 +156,7 @@ class Admin::LotteriesController < Admin::ApplicationController
         success_true
         auto_paginate lottery.lottery_codes.drawed_w_n do |lottery_codes|
           lottery_codes.map do |lottery_code|
-            lottery_code[:prize] = lottery_code.prize
-            lottery_code[:user] = lottery_code.user
-            lottery_code
+            lottery_code.present_admin
           end
         end
       end
@@ -156,8 +169,7 @@ class Admin::LotteriesController < Admin::ApplicationController
         success_true
         auto_paginate lottery.lottery_codes.all do |lottery_codes|
           lottery_codes.map do |lottery_code|
-            lottery_code[:user] = lottery_code.user
-            lottery_code            
+            lottery_code.present_admin
           end
         end
       end
@@ -169,10 +181,12 @@ class Admin::LotteriesController < Admin::ApplicationController
       Lottery.find_by_id(params[:id]) do |lottery|
         success_true
         lottery[:prizes] = lottery.prizes
+        lottery[:photo_src] = lottery.photo.picture_url unless lottery.photo.nil?
         ch = []
+
         # 优化!!!
         lottery.prizes.each do |prize|
-          if params[:only_active] == true
+          if params[:only_active].to_s == "true"
             ch += prize.active_ctrl_history
           else
             ch += prize.ctrl_history
@@ -187,8 +201,11 @@ class Admin::LotteriesController < Admin::ApplicationController
   def add_ctrl_rule
     render_json false do
       Prize.find_by_id(params[:id]) do |prize|
-        success_true
-        prize.add_ctrl_rule(params[:ctrl_surplus], params[:ctrl_time], params[:weight])
+        if prize.add_ctrl_rule(params[:ctrl_surplus], params[:ctrl_time], params[:weight])
+          success_true
+        else
+          ErrorEnum::PRIZE_CTRL_PARAMS_ERROR
+        end
       end
     end
   end
@@ -198,23 +215,22 @@ class Admin::LotteriesController < Admin::ApplicationController
       Lottery.find_by_id(params[:id]) do |e|
         e.update_attribute("is_deleted", true)
       end
-    end 
+    end
   end
   # private
   def get_prize_ids
-    params[:lottery][:prize_ids].split ',' unless params[:lottery][:prize_ids].nil?
+    params[:lottery][:prize_ids] = params[:lottery][:prize_ids].split(',') unless params[:lottery][:prize_ids].nil?
   end
 
   def add_prizes(prize_ids, lottery)
     return unless prize_ids
-    prize_ids.each do |id|    
+    prize_ids.each do |id|
       Prize.find_by_id(id) do |prize|
         params[:lottery].delete(:prize_ids)
         prize.lottery = lottery #unless prize.lottery
-        binding.pry
         lottery.save
         prize.save
-        binding.pry
+
       end
     end
   end

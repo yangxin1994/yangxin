@@ -7,25 +7,25 @@ class FeedbacksController < ApplicationController
 	# GET /feedbacks
 	# GET /feedbacks.json
 	def index
-		if !params[:feedback_type].nil? then
-			if !params[:value].nil? then
-				@feedbacks = Feedback.list_by_type_and_value(params[:feedback_type], params[:value], @current_user)
-			elsif !params[:answer].nil? then
-				if params[:answer].to_s.strip == "true" then
-					@feedbacks = Feedback.list_by_type_and_answer(params[:feedback_type], true, @current_user)
-				elsif params[:answer].to_s.strip == "false" then
-					@feedbacks = Feedback.list_by_type_and_answer(params[:feedback_type], false, @current_user)
-				end
-			else
-				@feedbacks = Feedback.list_by_type(params[:feedback_type], @current_user)
-			end
-		else
+		if params[:mine].to_s == 'true'
 			@feedbacks = Feedback.where(question_user_id: @current_user.id)
+		else
+			@feedbacks = Feedback.all 
 		end
-
-		@show_feedbacks = slice((@feedbacks || []), params[:page], params[:per_page])
-
-		render_json_auto (auto_paginate(@show_feedbacks, @feedbacks.count){@show_feedbacks}) and return
+		
+		if params[:feedback_type]
+			types = []
+			Feedback::MAX_TYPE.downto(0).each { |element| 
+				if params[:feedback_type].to_i / (2**element) == 1 then
+					types << 2**element
+				end
+			}
+			@feedbacks = @feedbacks.where(:feedback_type.in => types)
+		end
+		@feedbacks = @feedbacks.where(:title => Regexp.new(params[:title].to_s)) if params[:title]
+		@feedbacks =  @feedbacks.where(:is_answer => params[:answer].to_s == 'true') if params[:answer]
+			
+		render_json_auto auto_paginate(@feedbacks.desc(:created_at))
 	end
 	
 	# GET /feedbacks/1 
@@ -35,7 +35,7 @@ class FeedbacksController < ApplicationController
 
 		respond_to do |format|
 			format.html # show.html.erb
-			format.json { render json: @feedback }
+			format.json { render_json_auto @feedback }
 		end
 	end
 
@@ -46,7 +46,7 @@ class FeedbacksController < ApplicationController
 
 		respond_to do |format|
 			format.html # new.html.erb
-			format.json { render json: @feedback }
+			format.json { render_json_auto @feedback }
 		end
 	end
 
@@ -56,7 +56,7 @@ class FeedbacksController < ApplicationController
 
 		respond _to do |format|
 			format.html # show.html.erb
-			format.json { render json: @feedback }
+			format.json { render_json_auto @feedback }
 		end
 	end
 	
@@ -68,7 +68,7 @@ class FeedbacksController < ApplicationController
 		respond_to do |format|
 			format.html  if @feedback.instance_of?(Feedback)
 			format.html { render action: "new" } if !@feedback.instance_of?(Feedback)
-			format.json { render :json => @feedback}
+			format.json { render_json_auto @feedback}
 		end
 	end
 
@@ -80,7 +80,7 @@ class FeedbacksController < ApplicationController
 		respond_to do |format|
 			format.html { redirect_to @feedback} if @feedback.instance_of?(Feedback)
 			format.html { render action: "edit" } if !@feedback.instance_of?(Feedback)
-			format.json { render :json => @feedback }
+			format.json { render_json_auto @feedback }
 		end
 	end
 
@@ -91,7 +91,7 @@ class FeedbacksController < ApplicationController
 
 		respond_to do |format|
 			format.html { redirect_to feedbacks_url }
-			format.json { render :json => retval }
+			format.json { render_json_auto retval }
 		end
 	end	
 end

@@ -3,33 +3,37 @@
 class Admin::PublicNoticesController < Admin::ApplicationController	
 
 	def maping(public_notice)
-		public_notice['user_email'] = User.find(public_notice['user_id'].to_s).email
+		user = User.find_by_id_including_deleted(public_notice['user_id'].to_s)
+		public_notice['user_email'] = user.email if user
 		public_notice
 	end
 
 	# GET /admin/public_notices
 	# GET /admin/public_notices.json
 	def index
-		if !params[:public_notice_type].nil? then
-			if !params[:value].nil? then
-				@public_notices = PublicNotice.list_by_type_and_value(params[:public_notice_type], params[:value])
-			else
-				@public_notices = PublicNotice.list_by_type(params[:public_notice_type]) 
-			end
-		else
-			@public_notices = PublicNotice.all.desc(:updated_at)
+		@public_notices = PublicNotice.all.desc(:updated_at)
+		if params[:public_notice_type]
+			types = []
+			PublicNotice::MAX_TYPE.downto(0).each { |element| 
+				if params[:public_notice_type].to_i / (2**element) == 1 then
+					types << 2**element
+				end
+			}
+			@public_notices = @public_notices.where(:public_notice_type.in => types)
 		end
+		@public_notices = @public_notices.where(:title => Regexp.new(params[:title].to_s)) if params[:title]
 
-		@show_public_notices = slice((@public_notices || []), page, per_page)
 
+		@show_public_notices = auto_paginate(@public_notices)
 		# if not show content
-		tmp = params[:show_content].to_s=="false" ? true : false
-		@show_public_notices = @show_public_notices.map do |e|
-			e.content = nil if tmp
+		if params[:show_content].to_s=="false" 
+			@show_public_notices['data'] = @show_public_notices['data'].map do |e|
+				e['content'] = nil
 			maping(e)
+			end
 		end
 
-		render_json_auto(auto_paginate(@show_public_notices, @public_notices.count){@show_public_notices}) and return
+		render_json_auto @show_public_notices
 	end
 	
 	# GET /admin/public_notices/1 
