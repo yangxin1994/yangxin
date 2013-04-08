@@ -18,7 +18,7 @@ class Admin::BrowsersController < Admin::ApplicationController
 			Survey.where(:publish_status => 2).each do |s|
 				surveys_wait_for_audit << {"survey_title" => s.title,
 					"survey_id" => s._id.to_s,
-					"link" => "http://oopsdata.com/admin/reviews"}
+					"link" => "/admin/reviews"}
 			end
 		end
 
@@ -26,7 +26,7 @@ class Admin::BrowsersController < Admin::ApplicationController
 			Answer.unreviewed.each do |a|
 				answers_wait_for_audit << {"survey_title" => a.survey.title,
 					"answer_id" => a._id.to_s,
-					"link" => "http://oopsdata.com/admin/review_answers/#{a.survey._id.to_s}/answers/#{a._id.to_s}"}
+					"link" => "/admin/review_answers/#{a.survey._id.to_s}/answers/#{a._id.to_s}"}
 			end
 		end
 
@@ -34,7 +34,7 @@ class Admin::BrowsersController < Admin::ApplicationController
 			Order.need_verify.each do |o|
 				orders_wait_for_handle << {"present_name" => o.gift.name,
 					"order_id" => o._id.to_s,
-					"link" => "http://oopsdata.com/admin/orders?scope=need_verify"}
+					"link" => "/admin/orders?scope=need_verify"}
 			end
 		end
 
