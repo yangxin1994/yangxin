@@ -137,7 +137,7 @@ class AnalysisResult < Result
 
 		# update analysis result
 		self.region_result = region_result
-		referrer_result_array  []
+		referrer_result_array = []
 		referrer_result.each do |k,v|
 			referrer_result_array << [k,v]
 		end
