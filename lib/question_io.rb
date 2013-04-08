@@ -10,6 +10,13 @@ class QuestionIo
     @header_count = {}
     self.content = q.content
     self.issue = q.issue
+    if self.issue["other_item"] && self.issue["other_item"]["has_other_item"]
+          issue["items"] << {
+            "id" => issue["other_item"]["id"],
+            "content" => issue["other_item"]["content"],
+            "is_exclusive" => issue["other_item"]["is_exclusive"]
+          }
+    end
     self.question_type = q.question_type
     self.origin_id = q.id
     self.is_required = q.is_required
@@ -23,7 +30,7 @@ class QuestionIo
   SPSS_STRING_SHORT = "Short"
   SPSS_OPTED = "选中"
   SPSS_NOT_OPTED = "未选中"
-  SPSS_ETC = "其它"
+  SPSS_ETC = "其它项(内容)"
   SPSS_UNKOWN = "不清楚"
 
   # csv_header

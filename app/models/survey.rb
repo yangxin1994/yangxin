@@ -625,17 +625,33 @@ class Survey
 		pages.each do |page|
 			q += page["questions"]
 		end
-		q.collect { |i| Question.find(i) }
+		ques = []
+		q.collect do |i|
+			que = Question.find(i)
+			ques << que if que.question_type != QuestionTypeEnum:: PARAGRAPH
+		end
+		return ques
 	end
 
 	def all_questions_id
-		return (pages.map {|p| p["questions"]}).flatten
+		q = []
+		pages.each do |page|
+			q += page["questions"]
+		end
+		ques = []
+		q.collect do |i|
+			que = Question.find(i)
+			ques << i if que.question_type != QuestionTypeEnum:: PARAGRAPH
+		end
+		return ques
 	end
 
 	def all_questions_type
 		q = []
-		self.all_questions.each do |a|
-			q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
+		self.all_questions.each do |que|
+			if que.question_type != QuestionTypeEnum:: PARAGRAPH
+				q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{que.question_type}"] + "Io").new(que)
+			end
 		end
 		q
 	end
@@ -646,7 +662,6 @@ class Survey
 		end
 		return false
 	end
-
 
 	def adjust_logic_control_quota_filter(type, question_id)
 		# first adjust the logic control

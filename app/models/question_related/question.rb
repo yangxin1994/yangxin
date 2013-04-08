@@ -1,4 +1,5 @@
-# coding: utf-8
+# encoding: utf-8
+
 require 'error_enum'
 require 'quality_control_type_enum'
 class Question < BasicQuestion
@@ -48,7 +49,7 @@ class Question < BasicQuestion
 
 	def estimate_answer_time
 		text_length = self.content["text"].length + self.note.length
-		return (text_length / OOPSDATA[RailsEnv.get_rails_env]["words_per_second"].to_i).ceil + 
+		return (text_length / OOPSDATA[RailsEnv.get_rails_env]["words_per_second"].to_i).ceil +
 			Issue.create_issue(self.question_type, self.issue).estimate_answer_time
 	end
 
