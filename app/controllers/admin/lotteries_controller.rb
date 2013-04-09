@@ -156,9 +156,7 @@ class Admin::LotteriesController < Admin::ApplicationController
         success_true
         auto_paginate lottery.lottery_codes.drawed_w_n do |lottery_codes|
           lottery_codes.map do |lottery_code|
-            lottery_code[:prize] = lottery_code.prize
-            lottery_code[:user] = lottery_code.user
-            lottery_code
+            lottery_code.present_admin
           end
         end
       end
@@ -171,8 +169,7 @@ class Admin::LotteriesController < Admin::ApplicationController
         success_true
         auto_paginate lottery.lottery_codes.all do |lottery_codes|
           lottery_codes.map do |lottery_code|
-            lottery_code[:user] = lottery_code.user
-            lottery_code
+            lottery_code.present_admin
           end
         end
       end

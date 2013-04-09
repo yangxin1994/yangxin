@@ -10,7 +10,7 @@ class LotteryCode
   field :obtained_by , :type => Integer
   field :code, :type => String
   field :email, :type => String
-  # 0 (待抽奖) 1 (未中奖) 2 (中奖未下订单) 4(中奖已下订单) 
+  # 0 (待抽奖) 1 (未中奖) 2 (中奖未下订单) 4(中奖已下订单)
   field :status, :type => Integer, default: 0
   field :drawed_at, :type => Time
 
@@ -41,10 +41,10 @@ class LotteryCode
 
   def present_quillme
     present_attrs :drawed_at, :created_at, :status, :_id
-  present_add :order_id => self.order._id if self.order
+    present_add :order_id => self.order._id if self.order
     if self.prize
-      present_add(:prize_name => self.prize.name) 
-      present_add(:prize_name => self.prize.name) 
+      present_add(:prize_name => self.prize.name)
+      present_add(:prize_name => self.prize.name)
     end
     present_add :for_lottery =>
       { :title => self.lottery_title,
@@ -54,6 +54,13 @@ class LotteryCode
         :description => self.lottery_description
       }
   end
+
+  def present_admin
+    present_attrs :drawed_at, :created_at, :status, :_id
+    present_add :user => self.user
+    present_add :prize => self.prize
+  end
+
   def present_quillme_draws
     present_attrs :drawed_at, :created_at, :status, :_id
     present_add :order_id => self.order._id if self.order

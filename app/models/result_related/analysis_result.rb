@@ -16,7 +16,7 @@ class AnalysisResult < Result
 	field :time_result, :type => Hash, default: {}
 	field :region_result, :type => Hash, default: {}
 	field :channel_result, :type => Hash, default: {}
-	field :referrer_result, :type => Hash, default: {}
+	field :referrer_result, :type => Array, default: []
 	field :answers_result, :type => Hash, default: {}
 
 	belongs_to :survey
@@ -137,7 +137,11 @@ class AnalysisResult < Result
 
 		# update analysis result
 		self.region_result = region_result
-		self.referrer_result = referrer_result
+		referrer_result_array = []
+		referrer_result.each do |k,v|
+			referrer_result_array << [k,v]
+		end
+		self.referrer_result = referrer_result_array
 		self.channel_result = channel_result
 		self.duration_mean = duration_mean
 		self.time_result = time_result
