@@ -1,1 +1,0 @@
-bundle exec sidekiq -q oopsdata_production -e production
