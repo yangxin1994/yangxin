@@ -26,7 +26,7 @@ class UserMailer < ActionMailer::Base
 		subject += " --- to #{user.email}" if Rails.env != "production"
 		mail(:to => email, :subject => subject)
 	end
-	
+
 	def password_email(user, callback)
 		@user = user
 		password_info = {"email" => user.email, "time" => Time.now.to_i}
@@ -36,7 +36,15 @@ class UserMailer < ActionMailer::Base
 		subject += " --- to #{user.email}" if Rails.env != "production"
 		mail(:to => email, :subject => subject)
 	end
-	
+
+	def sys_password_email(user, callback)
+		@user = user
+		email = user.email
+		subject = "您的邮箱刚刚创建了Oopsdata的账号"
+		subject += " --- to #{user.email}" if Rails.env != "production"
+		mail(:to => email, :subject => subject)
+	end
+
 	def lottery_code_email(user, survey_id, lottery_code_id, callback)
 		@user = user
 		@survey = Survey.find_by_id(survey_id)

@@ -504,11 +504,13 @@ class User
     return ErrorEnum::REQUIRE_SUPER_ADMIN if new_user["role"].to_s.to_i > 16 and !self.is_super_admin
     return ErrorEnum::EMAIL_EXIST if User.where(email: new_user["email"].to_s.strip).count >0
     return ErrorEnum::USERNAME_EXIST if new_user["username"].to_s.strip!="" && User.where(username: new_user["username"].to_s.strip).count >0
+    psw_flag = !new_user["password"]
     new_user["password"] = "oopsdata" unless new_user["password"]
     new_user["password"] = Encryption.encrypt_password(new_user["password"])
     one_user = User.new(new_user)
     one_user.role = new_user['role'].to_i # against a case of attr restrained
     one_user.status =4 # do not need activate
+    EmailWorker.perform_async('sys_password', one_user.email, nil) if psw_flag
     return ErrorEnum:SAVE_ERROR unless one_user.save
     return true
   end
