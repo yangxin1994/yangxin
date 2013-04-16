@@ -7,8 +7,9 @@ class Newsletter
   field :subject, type: String
   field :title, type: String
   field :status, type: Integer, default: 0
-  field :content, type: Array, :default => []
-  field :column, type: Array, :default => []
+  field :content, type: Array, default: []
+  field :column, type: Array, default: []
+  field :is_tested, type: Boolean, default: false
   field :is_deleted, type: Boolean, default: false
 
   has_and_belongs_to_many :subscribers
@@ -19,10 +20,19 @@ class Newsletter
   scope :delivered, where(:status => 1)
   scope :canceled, where(:status => -2)
 
-  def deliver_news
+  def deliver_news(content_html)
     Sidekiq.redis{|r| r.set('news_flag', '1')}
-    NewsletterWorker.perform_async(self._id)
+    NewsletterWorker.perform_async(self._id, content_html)
     self.status = -1
+    save
+    # Subscriber.all.each do |subscriber|
+    #   NewsletterMailer.news_email(subscriber).deliver
+    # end
+  end
+
+  def deliver_test_news(content_html, current_user)
+    NewsletterMailer.news_email(self, content_html, current_user).deliver
+    self.is_tested = true
     save
     # Subscriber.all.each do |subscriber|
     #   NewsletterMailer.news_email(subscriber).deliver

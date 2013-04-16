@@ -7,8 +7,9 @@ class NewsletterMailer < ActionMailer::Base
   default from:    "\"优数调研\" <postmaster@oopsdata.cn>",
           charset: "UTF-8"
 
-  def news_email(newsletter, subscriber)
+  def news_email(newsletter, content_html, subscriber)
     @newsletter = newsletter
+    @content_html = content_html
     mail(to:      subscriber.email,
          subject: newsletter.subject)
   end

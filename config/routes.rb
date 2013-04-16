@@ -59,6 +59,7 @@ OopsData::Application.routes.draw do
 			end
 			member do
 				post :deliver
+				post :test
 				delete :cancel
 			end
 		end
