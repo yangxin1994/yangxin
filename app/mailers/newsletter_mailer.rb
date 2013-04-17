@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'encryption'
 class NewsletterMailer < ActionMailer::Base
-  layout 'email'
+  layout 'newsletter'
 
   # default to:      -> { Subscriber.all.map { |e| e.email } },
   default from:    "\"优数调研\" <postmaster@oopsdata.cn>",

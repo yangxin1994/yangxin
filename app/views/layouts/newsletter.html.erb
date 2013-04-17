@@ -5,20 +5,165 @@
   <meta http-equiv="X-UA-Compatible" content="IE=7"/>
   <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7"/>
   <title>电子杂志</title>
-  <link href="/assets/pages/admin/ejournal-bundle.css?body=1" media="screen" rel="stylesheet" type="text/css" />
+  <style type="text/css">
+    body{
+      margin:0;
+      padding:20px;
+      background: #e7e9ea;
+      font: 13px '微软雅黑', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';
+    }
+    h2,h3,h4,p,a,span,div,strong{margin:0;padding:0;}
+    .l{float: left}
+    .r{float: right}
+    .img-l{float: left;margin-right:20px;}
+    .img-r{float:right;margin-left:20px;}
+    .fix{*zoom:1;}
+    .fix:after{
+      display:block;
+      content:"clear";
+      height:0;
+      clear:both;
+      overflow:hidden;
+      visibility:hidden;
+    }
+    .zine{
+      width: 650px;
+      margin: 20px auto;
+    }
+    .logo{
+      background: #212121;
+      padding: 10px 15px;
+      border-radius: 6px 6px 0 0;
+    }
+    .footer{
+      background: #212121;
+      height:55px;
+      line-height: 55px;
+      border-radius:0 0 6px 6px;
+    }
+    .footer span{
+      float: right;
+      margin-right:20px;
+      color: #999;
+    }
+    .footer a{
+      color: #4798ed;
+    }
+    .team{
+      text-align: right;
+      padding: 10px;
+      color: #999;
+    }
+    .team a{
+      font-size: 12px;
+      color: #4798ed;
+    }
+    .phone-number{
+      margin:5px 5px 0 0;
+      color: #FFF;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .phone-number:hover .ico-phone{
+      background: url('/assets/zine/phone_hover.png') no-repeat;
+    }
+    .phone-number .ico-phone{
+      width:26px;
+      height:26px;
+      display: inline-block;
+      position: relative;
+      bottom:-5px;
+      background: url('/assets/zine/phone.png') no-repeat;
+    }
+    .content{
+      padding:30px;
+      border:1px #cccdd0 solid;
+      border-top:none;
+      background: #fff;
+      word-wrap: break-word;/*自动换行*/
+      word-break: break-all;/*强制英文单词断行*/
+    }
+    .content h4{
+      margin-bottom:20px;
+      font-size: 18px;
+      font-weight: normal;
+    }
+    .content h3{
+      font-size: 16px;
+      margin:15px 0;
+    }
+    .content .article,
+    .content .product-news{
+      border-top:1px #dbdbdb solid;
+      padding:15px 0 30px 0;
+    }
+    .content .article .article-txt{
+      margin-top:25px;
+    }
+    .content .article .title a{
+      font-size: 14px;
+      color: #000;
+      text-decoration: none;
+    }
+    .content .article .date{
+      color: #999;
+    }
+    .content .product-news-txt{
+      min-height:70px;
+      margin-top:15px;
+      display: block;
+    }
+    .content .product-news .product-news-date{
+      float: left;
+      margin-right: 15px;
+      color: #ccc;
+    }
+    .content .product-news .product-news-date span{
+      display: block;
+      line-height: 0.9em;
+      font-weight: bold;
+    }
+    .content .product-news .product-news-date .month,
+    .content .product-news .product-news-date .day{
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+    .content .product-news .product-news-date .year{
+      font-size: 12px;
+      line-height:1.2em;
+    }
+    .content .product-news .title{
+      margin:-5px 0 0 0;
+      font-weight: normal;
+    }
+    .content .product-news h3 a{
+      font-size: 14px;
+      text-decoration: none;
+      color: #000;
+    }
+    .content .article p{
+      font-size: 14px;
+      margin-top:20px;
+      line-height: 1.6em;
+    }
+    .divide{
+      width:100%;
+      margin:35px 0 15px 0;
+      border-top:1px #dbdbdb solid;
+      display: inline-block;
+    }
+  </style>
 </head>
 <body>
   <div class="zine fix">
   <div class="logo">
-    <img src="/assets/logo-cn.png" alt="优数调研">
+    <img src="http://quill.oopsdata.com:3000/assets/logo-cn.png" alt="优数调研">
     <a href="http://oopsdata.com/contact" class="phone-number r">
       <span class="ico-phone"></span>
       <span class="number">联系我们</span>
     </a>
   </div>
-  <div class="content">
-    <%= yield %>
-  </div>
+  <%= yield %>
   <div class="footer fix">
     <a href="http://oopsdata.com/contact" class="phone-number l">
       <span class="number" style="margin-top:-5px;">联系我们</span>

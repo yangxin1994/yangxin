@@ -12,7 +12,8 @@ class Admin::NewslettersController < Admin::ApplicationController
 
   def create
     render_json true do
-      Newsletter.create(params[:newsletter])
+      nl = Newsletter.create(params[:newsletter])
+      nl.present_admin
     end
   end
 
@@ -20,7 +21,7 @@ class Admin::NewslettersController < Admin::ApplicationController
     render_json false do
       Newsletter.find_by_id(params[:id]) do |nl|
         success_true
-        nl
+        nl.present_admin
       end
     end
   end
@@ -38,9 +39,8 @@ class Admin::NewslettersController < Admin::ApplicationController
   def update
     render_json false do
       Newsletter.find_by_id(params[:id]) do |nl|
-        success_true
         nl.assign_attributes(params[:newsletter])
-        nl.save
+        success_true if nl.save
       end
     end
   end
@@ -49,7 +49,7 @@ class Admin::NewslettersController < Admin::ApplicationController
     render_json false do
       Newsletter.find_by_id(params[:id]) do |nl|
         success_true
-        nl.deliver_news
+        nl.deliver_news(params[:content])
       end
     end
   end
@@ -58,7 +58,7 @@ class Admin::NewslettersController < Admin::ApplicationController
     render_json false do
       Newsletter.find_by_id(params[:id]) do |nl|
         success_true
-        nl.deliver_test_news(current_user)
+        nl.deliver_test_news(current_user, params[:content])
       end
     end
   end
