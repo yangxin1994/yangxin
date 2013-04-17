@@ -22,7 +22,7 @@ production|staging|development)
 	;;
 esac
 
-cd ~/projects/Quill
+# cd ~/projects/Quill
 
 # check whether the pid file exists
 pid_file="tmp/pids/sidekiq.pid"

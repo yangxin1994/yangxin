@@ -85,11 +85,10 @@ OopsData::Application.configure do
   config.mailgun_api_key = "key-9zcv6-e7j8aratn9viu3unvbn2zc92j3"
 
   # task web service
-  config.task_web_service_uri = 'localhost:9001'
   config.service_port = '8001'
 
   # donet web service
-  config.dotnet_web_service_uri = 'http://19.oopsdata.com'
+  config.dotnet_web_service_uri = 'http://118.194.61.86'
   # config.dotnet_web_service_uri = 'http://192.168.1.116:80'
 
 	# configuration for roadie
