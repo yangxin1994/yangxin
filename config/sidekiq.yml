@@ -3,6 +3,8 @@
 :logfile: ./log/sidekiq.log
 staging:
   :concurrency: 5
+demo:
+  :concurrency: 5
 development:
   :concurrency: 5
 production:
