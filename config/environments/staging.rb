@@ -85,7 +85,6 @@ OopsData::Application.configure do
   config.mailgun_api_key = "key-9zcv6-e7j8aratn9viu3unvbn2zc92j3"
 
   # task web service
-  config.task_web_service_uri = 'localhost:9001'
   config.service_port = '8001'
 
   # donet web service

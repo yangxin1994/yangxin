@@ -13,16 +13,16 @@ start|stop|restart)
 	;;
 esac
 case $ENVIRONMENT in
-production|staging|development)
+production|staging|development|demo)
 	;;
 *)
 	echo "The environment $ENVIRONMENT is not supported."
-	echo "Supported environments include: production, staging, and development."
+	echo "Supported environments include: production, staging, development, and demo."
 	exit
 	;;
 esac
 
-cd ~/projects/Quill
+# cd ~/projects/Quill
 
 # check whether the pid file exists
 pid_file="tmp/pids/sidekiq.pid"

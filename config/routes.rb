@@ -19,8 +19,8 @@ OopsData::Application.routes.draw do
 
 	resources :quality_control_questions do
 	end
-	
-	resources :lottery_codes 
+
+	resources :lottery_codes
 
 	resources :browsers do
 		member do
@@ -33,7 +33,9 @@ OopsData::Application.routes.draw do
 
 	# alias interface
 	match '/admin/surveys/new' => 'surveys#new'
-	# 
+	#
+	match '/subscribe' , :to => 'subscribers#create', :as => '/subscribe'
+	match '/unsubscribe' , :to =>'subscribers#destroy', :as => '/subscribe'
 	namespace :admin do
 
 		resources :browsers do
@@ -43,8 +45,8 @@ OopsData::Application.routes.draw do
 			end
 		end
 
-		resources :users do 
-			collection do 
+		resources :users do
+			collection do
 				get 'blacks', 'whites', 'deleteds','list_by_role'
 			end
 
@@ -53,9 +55,20 @@ OopsData::Application.routes.draw do
 				put 'set_color', 'set_role', 'set_lock', 'system_pwd', 'recover','add_point'
 			end
 		end
-
-		resources :surveys do 
-			collection do 
+		resources :newsletters do
+			collection do
+				get :editing, :delivering, :delivered, :canceled
+			end
+			member do
+				post :deliver
+				post :test
+				delete :cancel
+			end
+		end
+		resources :subscriber do
+		end
+		resources :surveys do
+			collection do
 				put 'add_template_question'
 			end
 			member do
@@ -63,31 +76,31 @@ OopsData::Application.routes.draw do
 			end
 		end
 
-		resources :interviewer_tasks do 
-		end	
-
-		resources :faqs do 
+		resources :interviewer_tasks do
 		end
-		resources :public_notices do 
-			collection do 
+
+		resources :faqs do
+		end
+		resources :public_notices do
+			collection do
 				get 'count', 'list_by_type_count', 'list_by_type_and_value_count'
 			end
 		end
-		resources :advertisements do 
-			collection do 
+		resources :advertisements do
+			collection do
 				get 'count', 'list_by_title_count', 'activated_count', 'unactivate_count'
 			end
 		end
 
 		resources :feedbacks do
-			member do 
+			member do
 				post 'reply'
 			end
 		end
 
 		resources :quality_control_questions do
-			collection do 
-				get 'objective_questions', 'objective_questions_count', 
+			collection do
+				get 'objective_questions', 'objective_questions_count',
 					'matching_questions', 'matching_questions_count'
 			end
 			member do
@@ -96,10 +109,10 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :template_questions do
-			collection do 
+			collection do
 				get 'count', 'list_by_type', 'list_by_type_count'
 			end
-			member do 
+			member do
 				get 'get_text'
 			end
 		end
@@ -129,7 +142,7 @@ OopsData::Application.routes.draw do
 				put :verify, :verify_as_failed, :deliver, :deliver_success, :deliver_as_failed
 			end
 		end
-		
+
 		resources :lotteries do
 			collection do
 				get :for_publish, :activity, :finished, :deleted, :quillme
@@ -146,7 +159,7 @@ OopsData::Application.routes.draw do
 			end
 		end
 
-		resources :lottery_codes 
+		resources :lottery_codes
 
 		resources :messages
 
@@ -177,7 +190,7 @@ OopsData::Application.routes.draw do
 
 	namespace :survey_auditor do
 		resources :surveys do
-			collection do 
+			collection do
 				get 'count'
 			end
 			member do
@@ -189,9 +202,9 @@ OopsData::Application.routes.draw do
 		end
 	end
 
-	namespace :answer_auditor do 
-		resources :answers do 
-			collection do 
+	namespace :answer_auditor do
+		resources :answers do
+			collection do
 				get 'count'
 			end
 		end
@@ -244,15 +257,15 @@ OopsData::Application.routes.draw do
 	match 'logout' => 'sessions#destroy', :as => :logout
 	match 'login' => 'sessions#create', :as => :login
 
-	resources :users do 
-		collection do 
+	resources :users do
+		collection do
 			get :get_level_information
 			get :get_basic_info
 			get :get_introduced_users
 			get :point
 			get :lottery_codes
 		end
-		member do 
+		member do
 			get 'get_email'
 		end
 	end
@@ -380,7 +393,7 @@ OopsData::Application.routes.draw do
 	end
 
 	resources :messages do
-		collection do 
+		collection do
 			get :unread_count
 		end
 	end

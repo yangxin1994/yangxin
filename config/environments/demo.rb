@@ -60,7 +60,7 @@ OopsData::Application.configure do
 
 	config.action_mailer.perform_deliveries = true
 	config.action_mailer.delivery_method = :smtp
-	config.action_mailer.smtp_settings = {
+  config.action_mailer.smtp_settings = {
     :authentication => "plain",
     :address        => "smtp.mailgun.com",
     :port           => 25,
@@ -69,7 +69,7 @@ OopsData::Application.configure do
     :password       => "73ve2nt6yxl9",
     :enable_starttls_auto => true,
     :openssl_verify_mode  => 'none'
-	}
+  }
 
   config.survey_mailer_setting = {
     :authentication => "plain",
@@ -84,17 +84,17 @@ OopsData::Application.configure do
 
   config.mailgun_api_key = "key-9zcv6-e7j8aratn9viu3unvbn2zc92j3"
 
-	# task web service
-  config.service_port = '8002'
+  # task web service
+  config.service_port = '8003'
 
   # donet web service
-  config.dotnet_web_service_uri = 'http://export.oopsdata.com'
+  config.dotnet_web_service_uri = 'http://118.194.61.86'
   # config.dotnet_web_service_uri = 'http://192.168.1.116:80'
 
 	# configuration for roadie
 	config.action_mailer.default_url_options = {:host => 'res.oopsdata.com'}
 
 	# configuration for quill and quillme
-	config.quill_host = 'http://s.oopsdata.com'
-	config.quillme_host = 'http://oopsdata.cn'
+	config.quill_host = 'http://www.oopsdata.com'
+	config.quillme_host = 'http://quillme.netinsight.cn'
 end

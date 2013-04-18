@@ -620,7 +620,7 @@ class Survey
 		return true
 	end
 
-	def all_questions
+	def all_questions(include_prg = true)
 		q = []
 		pages.each do |page|
 			q += page["questions"]
@@ -628,12 +628,12 @@ class Survey
 		ques = []
 		q.collect do |i|
 			que = Question.find(i)
-			ques << que if que.question_type != QuestionTypeEnum:: PARAGRAPH
+			ques << que if (que.question_type != QuestionTypeEnum:: PARAGRAPH || include_prg)
 		end
 		return ques
 	end
 
-	def all_questions_id
+	def all_questions_id(include_prg = true)
 		q = []
 		pages.each do |page|
 			q += page["questions"]
@@ -641,15 +641,15 @@ class Survey
 		ques = []
 		q.collect do |i|
 			que = Question.find(i)
-			ques << i if que.question_type != QuestionTypeEnum:: PARAGRAPH
+			ques << i if (que.question_type != QuestionTypeEnum:: PARAGRAPH || include_prg)
 		end
 		return ques
 	end
 
-	def all_questions_type
+	def all_questions_type(include_prg = true)
 		q = []
 		self.all_questions.each do |que|
-			if que.question_type != QuestionTypeEnum:: PARAGRAPH
+			if que.question_type != QuestionTypeEnum:: PARAGRAPH || include_prg
 				q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{que.question_type}"] + "Io").new(que)
 			end
 		end
@@ -1440,7 +1440,7 @@ class Survey
 
 	def spss_header
 		headers =[]
-		self.all_questions.each_with_index do |e, i|
+		self.all_questions(false).each_with_index do |e, i|
 			headers += e.spss_header("q#{i+1}")
 		end
 		headers
@@ -1448,7 +1448,7 @@ class Survey
 
 	def excel_header
 		headers =[]
-		self.all_questions.each_with_index do |e, i|
+		self.all_questions(false).each_with_index do |e, i|
 			headers += e.excel_header("q#{i+1}")
 		end
 		headers
@@ -1460,7 +1460,7 @@ class Survey
 		else
 			headers = []
 		end
-		self.all_questions.each_with_index do |e, i|
+		self.all_questions(false).each_with_index do |e, i|
 			headers += e.csv_header("q#{i+1}")
 		end
 		headers
@@ -1482,14 +1482,14 @@ class Survey
 		answer_c = []
 		formated_error = []
 		qindex = 0
-		q = self.all_questions_type
+		q = self.all_questions_type(false)
 		p "========= 准备完毕 ========="
 		answer_length = answers.length
 		last_time = Time.now.to_i
 		answers.each_with_index do |answer, index|
 			line_answer = []
 			begin
-				all_questions_id.each_with_index do |question, index|
+				all_questions_id(false).each_with_index do |question, index|
 					qindex = index
 					line_answer += q[index].answer_content(answer.answer_content[question], "q#{index + 1}")
 				end
