@@ -21,6 +21,7 @@ gem 'kaminari'
 gem 'certified'
 
 gem 'rest-client'
+
 =begin
 if HOST_OS =~ /linux/i
   gem 'therubyracer', '>= 0.8.2'
