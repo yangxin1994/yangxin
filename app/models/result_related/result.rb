@@ -206,7 +206,11 @@ class Result
 		result["mean"] = answer_ary.mean
 		setment = opt[:segment] || []
 		if segment.blank?
-			segment = [answer_ary[0], (answer_ary[0].to_f + answer_ary[-1].to_f) / 2, answer_ary[-1]]
+			if answer_ary[0].to_f == answer_ary[-1].to_f
+				segment = [answer_ary[0]]
+			else
+				segment = [answer_ary[0], (answer_ary[0].to_f + answer_ary[-1].to_f) / 2, answer_ary[-1]]
+			end
 		end
 		if !segment.blank?
 			histogram = Array.new(segment.length + 1, 0)
@@ -234,7 +238,11 @@ class Result
 		answer_ary.sort!
 		result["mean"] = answer_ary.mean
 		if segment.blank?
-			segment = [answer_ary[0], (answer_ary[0].to_f + answer_ary[-1].to_f) / 2, answer_ary[-1]]
+			if answer_ary[0].to_f == answer_ary[-1].to_f
+				segment = [answer_ary[0]]
+			else
+				segment = [answer_ary[0], (answer_ary[0].to_f + answer_ary[-1].to_f) / 2, answer_ary[-1]]
+			end
 		end
 		if !segment.blank?
 			histogram = Array.new(segment.length + 1, 0)
