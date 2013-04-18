@@ -88,7 +88,7 @@ OopsData::Application.configure do
   config.service_port = '8001'
 
   # donet web service
-  config.dotnet_web_service_uri = 'http://118.194.61.86'
+  config.dotnet_web_service_uri = 'http://export.oopsdata.com'
   # config.dotnet_web_service_uri = 'http://192.168.1.116:80'
 
 	# configuration for roadie
@@ -96,5 +96,5 @@ OopsData::Application.configure do
 
 	# configuration for quill and quillme
 	config.quill_host = 'http://www.oopsdata.com'
-	config.quillme_host = 'http://quillme.netinsight.cn'
+	config.quillme_host = 'http://www.oopdata.cn'
 end
