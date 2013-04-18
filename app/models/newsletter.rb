@@ -3,6 +3,7 @@ class Newsletter
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt
   extend Mongoid::FindHelper
+  include Mongoid::CriteriaExt
 
   field :subject, type: String
   field :title, type: String
@@ -19,6 +20,14 @@ class Newsletter
   scope :delivering, where(:status => -1)
   scope :delivered, where(:status => 1)
   scope :canceled, where(:status => -2)
+
+
+  def present_admin
+    present_attrs :_id,:title, :status, :content, :column, :is_tested, :is_deleted, :created_at
+    present_add   :delivered_count => self.subscribers.count
+    present_add   :all_sub_count => Subscriber.count
+  end
+
 
   def deliver_news(content_html)
     Sidekiq.redis{|r| r.set('news_flag', '1')}
