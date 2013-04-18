@@ -7,6 +7,8 @@ class NewsletterMailer < ActionMailer::Base
   default from:    "\"优数调研\" <postmaster@oopsdata.cn>",
           charset: "UTF-8"
 
+  self.smtp_settings = Rails.application.config.survey_mailer_setting
+
   def news_email(newsletter, content_html, subscriber)
     @newsletter = newsletter
     @content_html = content_html
