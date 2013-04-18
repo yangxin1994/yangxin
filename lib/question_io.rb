@@ -822,38 +822,39 @@ end
 class SortQuestionIo < QuestionIo
   def csv_header(header_prefix)
     if issue["max"] == -1
-      issue["items"].each_index do |i|
-        @csv_header << header_prefix + "_s#{i + 1}"
-      end
+      item_count = issue["items"].count
     else
-      issue["max"].times do |i|
-        @csv_header << header_prefix + "_s#{i + 1}"
-      end
+      item_count = issue["max"]
+    end
+    item_count.times do |i|
+      @csv_header << header_prefix + "_s#{i + 1}"
     end
     if issue["other_item"]["has_other_item"]
       @csv_header << header_prefix + INPUT
-      @csv_header << header_prefix + INPUT + VALUE
     end
     return @csv_header
   end
   def spss_header(header_prefix)
     if issue["max"] == -1
-      issue["items"].each_index do |i|
-        @spss_header << {"spss_name" => header_prefix + "_s#{i + 1}",
-                    "spss_type" => SPSS_NUMERIC,
-                    "spss_label" => "第#{i+1}位"}
-      end
+      item_count = issue["items"].count
     else
-      issue["max"].times do |i|
-        @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
-                    "spss_type" => SPSS_NUMERIC,
-                    "spss_label" => "第#{i+1}位"}
-      end
+      item_count = issue["max"]
+    end
+    value_labels = {}
+    issue["items"].each_with_index do |item, index|
+      value_labels[index + 1] = item["content"]["text"]
+    end
+    item_count.times do |i|
+      @spss_header << {"spss_name" => header_prefix + "_s#{i + 1}",
+                       "spss_type" => SPSS_NUMERIC,
+                       "spss_label" => "第#{i+1}位",
+                       "spss_value_labels" => value_labels
+                     }
     end
     if issue["other_item"]["has_other_item"]
       @spss_header << {"spss_name" => header_prefix + INPUT,
-                  "spss_type" => SPSS_STRING,
-                  "spss_label" => SPSS_ETC}
+                       "spss_type" => SPSS_STRING,
+                       "spss_label" => SPSS_ETC}
     end
     @header_count[header_prefix] ||= @spss_header.count
     @spss_header
@@ -863,15 +864,13 @@ class SortQuestionIo < QuestionIo
     clear_retval
     return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
     if issue["max"] == -1
-      issue["min"].times do |i|
-        @retval << (v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil)
-      end
+      item_count = issue["items"].count
     else
-      issue["max"].times do |i|
-        @retval << (v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil)
-      end
+      item_count = issue["max"]
     end
-
+    item_count.times do |i|
+      @retval << (v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil)
+    end
     if issue["other_item"]["has_other_item"]
       @retval << v["text_input"]
     end
@@ -881,15 +880,13 @@ class SortQuestionIo < QuestionIo
   def answer_import(row, header_prefix)
     @retval = {"sort_result" => []}
     if issue["max"] == -1
-      issue["min"].times do |i|
-        blank? row["#{header_prefix}_s#{i + 1}"]
-        @retval["sort_result"] << get_item_id(row["#{header_prefix}_s#{i + 1}"]).to_s
-      end
+      item_count = issue["items"].count
     else
-      issue["max"].times do |i|
-        blank? row["#{header_prefix}_s#{i + 1}"]
-        @retval["sort_result"] << get_item_id(row["#{header_prefix}_s#{i + 1}"]).to_s
-      end
+      item_count = issue["max"]
+    end
+    item_count.times do |i|
+      blank? row["#{header_prefix}_s#{i + 1}"]
+      @retval["sort_result"] << get_item_id(row["#{header_prefix}_s#{i + 1}"]).to_s
     end
     # issue["items"].each_index do |i|
     #   blank? row["#{header_prefix}_c#{i + 1}"]
@@ -1043,9 +1040,9 @@ class ScaleQuestionIo < QuestionIo
   def csv_header(header_prefix)
     issue["items"].each_index do |i|
       @csv_header << header_prefix + "_c#{i + 1}"
-      if issue["show_unknown"]
-        @csv_header << header_prefix + "_c#{i + 1}" + UNKNOW
-      end
+      # if issue["show_unknown"]
+      #   @csv_header << header_prefix + "_c#{i + 1}" + UNKNOW
+      # end
     end
     return @retval
   end
@@ -1055,6 +1052,7 @@ class ScaleQuestionIo < QuestionIo
     issue["labels"].each_with_index do |label, index|
       value_labels[index + 1] = label
     end
+    value_labels[0] = "不清楚"
     issue["items"].each_index do |i|
       @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_NUMERIC,

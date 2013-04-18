@@ -34,6 +34,8 @@ OopsData::Application.routes.draw do
 	# alias interface
 	match '/admin/surveys/new' => 'surveys#new'
 	#
+	match '/subscribe' , :to => 'subscribers#create', :as => '/subscribe'
+	match '/unsubscribe' , :to =>'subscribers#destroy', :as => '/subscribe'
 	namespace :admin do
 
 		resources :browsers do
@@ -64,10 +66,6 @@ OopsData::Application.routes.draw do
 			end
 		end
 		resources :subscriber do
-			collection do
-				post   :subscribe
-				delete :unsubscribe
-			end
 		end
 		resources :surveys do
 			collection do
