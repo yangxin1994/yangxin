@@ -89,7 +89,7 @@ OopsData::Application.configure do
   config.service_port = '8001'
 
   # donet web service
-  config.dotnet_web_service_uri = 'http://19.oopsdata.com'
+  config.dotnet_web_service_uri = 'http://export.oopsdata.com'
   # config.dotnet_web_service_uri = 'http://192.168.1.116:80'
 
 	# configuration for roadie
