@@ -37,7 +37,6 @@ OopsData::Application.routes.draw do
 	match '/subscribe' , :to => 'subscribers#create', :as => '/subscribe'
 	match '/unsubscribe' , :to =>'subscribers#destroy', :as => '/subscribe'
 	namespace :admin do
-
 		resources :browsers do
 			collection do
 				get :role
@@ -65,7 +64,11 @@ OopsData::Application.routes.draw do
 				delete :cancel
 			end
 		end
-		resources :subscriber do
+		resources :subscribers do
+			collection do
+				get :subscribed, :unsubscribed, :search
+				put :unsubscribe
+			end
 		end
 		resources :surveys do
 			collection do

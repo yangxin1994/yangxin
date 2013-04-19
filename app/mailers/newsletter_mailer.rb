@@ -9,6 +9,7 @@ class NewsletterMailer < ActionMailer::Base
 
   def news_email(newsletter, content_html, subscriber)
     @newsletter = newsletter
+    @subscriber = subscriber
     @content_html = content_html
     mail(to:      subscriber.email,
          subject: newsletter.subject)

@@ -6,7 +6,7 @@ class NewsletterWorker
 
   def perform(newsletter_id, content_html)
     return unless newsletter = Newsletter.where(:_id => newsletter_id).first
-    Subscriber.all.each do |sub|
+    Subscriber.subscribed.each do |sub|
       return if '1' != Sidekiq.redis{|r| r.get('news_flag')}
       next if sub.newsletters.include? newsletter
       NewsletterMailer.news_email(newsletter, content_html, sub).deliver

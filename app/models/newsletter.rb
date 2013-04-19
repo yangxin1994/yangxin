@@ -23,11 +23,18 @@ class Newsletter
 
 
   def present_admin
-    present_attrs :_id,:title, :status, :content, :column, :is_tested, :is_deleted, :created_at
+    present_attrs :_id,:title, :subject, :status, :content, :column, :is_tested, :is_deleted
     present_add   :delivered_count => self.subscribers.count
-    present_add   :all_sub_count => Subscriber.count
+    present_add   :all_sub_count => Subscriber.subscribed.count
+    present_add   :created_at=> self.created_at.strftime("%Y-%m-%d")
   end
 
+  def present_list
+    present_attrs :_id,:title, :subject, :status, :is_deleted
+    present_add   :delivered_count => self.subscribers.count
+    present_add   :all_sub_count => Subscriber.subscribed.count
+    present_add   :created_at=> self.created_at.strftime("%Y-%m-%d")
+  end
 
   def deliver_news(content_html)
     Sidekiq.redis{|r| r.set('news_flag', '1')}

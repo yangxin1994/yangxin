@@ -3,6 +3,7 @@ class Order
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
 	extend Mongoid::FindHelper
+  include Mongoid::CriteriaExt
 	# can be 0 (Cash), 1 (Entity), 2 (Virtual), 3 (Lottery)
 	field :type, :type => Integer
 	# can be 0 (NeedVerify), 1 (Verified), -1 (VerifyFailed), 2 (Delivering), 3 (Delivered), -3 (DeliverFailed)
@@ -62,6 +63,20 @@ class Order
 	#delegate :cash_order, :realgoods_order, :to => "self.need_verify", :prefix => true
 	#after_create :decrease_point, :decrease_gift
 
+
+	def present_quillme
+    present_attrs :_id, :type, :status, :is_prize
+    present_add :gift => self.gift.present_attrs
+	end
+
+	def present_admin
+    present_attrs :_id, :type, :status, :is_prize, :gift, :created_at, :is_update_user,
+    	:full_name, :identity_card, :bank, :bankcard_number, :alipay_account,
+    	:phone, :address, :postcode, :email
+    present_add :gift_name => self.gift_name
+    present_add :gift => self.gift.present_attrs
+
+	end
 
 	index({ is_deleted: 1 }, { background: true } )
 	index({ type: 1 }, { background: true } )
