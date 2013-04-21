@@ -4,10 +4,7 @@ class OrdersController < ApplicationController
   def index
     render_json true do
       auto_paginate @current_user.orders do |orders|
-        orders.map do |order|
-          order[:gift] = order[:prize] if order.is_prize == true
-          order
-        end
+        orders.present_json("quillme")
       end
     end
   end

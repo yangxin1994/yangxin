@@ -849,7 +849,7 @@ class SortQuestionIo < QuestionIo
                        "spss_type" => SPSS_NUMERIC,
                        "spss_label" => "第#{i+1}位",
                        "spss_value_labels" => value_labels
-                     }
+                      }
     end
     if issue["other_item"]["has_other_item"]
       @spss_header << {"spss_name" => header_prefix + INPUT,

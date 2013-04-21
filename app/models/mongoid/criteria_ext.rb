@@ -18,7 +18,7 @@ module Mongoid
 			# end
 		end
 		def present_attrs(*attrs)
-			return @present_attrs if attrs.nil?
+			return @present_attrs = self.attributes if attrs.blank?
 			@present_attrs = {}
 			attrs.each do |k|
 				@present_attrs.store(k, self.attributes[k.to_s])

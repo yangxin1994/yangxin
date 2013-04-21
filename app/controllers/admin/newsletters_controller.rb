@@ -2,12 +2,12 @@ class Admin::NewslettersController < Admin::ApplicationController
 
   def index
     render_json true do
-      auto_paginate(Newsletter.all)
+      auto_paginate(Newsletter.all.present_json('list'))
     end
   end
 
   def_each :deleted, :editing, :delivering, :delivered, :canceled do |method_name|
-    render_json auto_paginate(Newsletter.send(method_name))
+    render_json auto_paginate(Newsletter.send(method_name).present_json('list'))
   end
 
   def create

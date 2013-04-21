@@ -6,12 +6,16 @@ class NewsletterWorker
 
   def perform(newsletter_id, content_html)
     return unless newsletter = Newsletter.where(:_id => newsletter_id).first
-    Subscriber.all.each do |sub|
+    Subscriber.subscribed.each do |sub|
       return if '1' != Sidekiq.redis{|r| r.get('news_flag')}
       next if sub.newsletters.include? newsletter
-      NewsletterMailer.news_email(newsletter, content_html, sub).deliver
-      sub.newsletters << newsletter
-      sub.save
+      begin
+        NewsletterMailer.news_email(newsletter, content_html, sub).deliver
+        sub.newsletters << newsletter
+        sub.save
+      rescue
+        p "发送出错"
+      end
     end
     newsletter.status = 1 #设置发送完成标识
     newsletter.save
