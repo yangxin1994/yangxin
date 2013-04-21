@@ -134,6 +134,11 @@ class InterviewerTask
 		answers.each do |a|
 			# convert the gps or 3g location to a region code
 			region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
+			if a["status"].to_i == 1
+				status = Answer::REJECT
+			else
+				status = self.survey.answer_need_review ? Answer::UNDER_REVIEW : Answer::FINISH
+			end
 			answer_to_insert = {:interviewer_task_id => self._id,
 				:survey_id => self.survey_id,
 				:channel => -2,
@@ -143,7 +148,8 @@ class InterviewerTask
 				:attachments => a["attachments"],
 				:latitude => a["location"][0].to_s,
 				:longitude => a["location"][1].to_s,
-				:status => self.survey.answer_need_review ? Answer::UNDER_REVIEW : Answer::FINISH,
+				:status => status,
+				:reject_type => a["reject_type"].to_i,
 				:region => region}
 			Answer.create(answer_to_insert)
 		end
