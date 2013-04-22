@@ -57,8 +57,13 @@ class Admin::NewslettersController < Admin::ApplicationController
   def test
     render_json false do
       Newsletter.find_by_id(params[:id]) do |nl|
-        success_true
-        nl.deliver_test_news(current_user, params[:content])
+        params[:email].split(',').each do |em|
+          if em.to_s.match(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/)
+            subscriber = Subscriber.find_or_create_by(:email => em.downcase)
+            nl.deliver_test_news(subscriber ,params[:content])
+            success_true
+          end
+        end
       end
     end
   end
