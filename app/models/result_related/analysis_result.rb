@@ -18,6 +18,7 @@ class AnalysisResult < Result
 	field :channel_result, :type => Hash, default: {}
 	field :referrer_result, :type => Array, default: []
 	field :answers_result, :type => Hash, default: {}
+	field :latlng_array, :type => Array, default: []
 
 	belongs_to :survey
 
@@ -134,6 +135,17 @@ class AnalysisResult < Result
 			end
 		end
 		Task.set_progress(task_id, "analyze_answer_progress", 1.0 ) if !task_id.nil?
+
+		# make stats of latitude and logitute data
+		latlng_array = []
+		answers.each do |a|
+			if !a.longitude.blank? && !a.latitude.blank?
+				latlng_array << {"lat"=>a.latitude, "lng"=>a.longitude}
+			else
+				latlng_array << QuillCommon::AddressUtility.find_province_city_town_by_code(a.region)
+			end
+		end
+		self.latlng_array = latlng_array
 
 		# update analysis result
 		self.region_result = region_result
