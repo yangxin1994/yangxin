@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Admin::NewslettersController < Admin::ApplicationController
 
   def index
@@ -57,7 +59,9 @@ class Admin::NewslettersController < Admin::ApplicationController
   def test
     render_json false do
       Newsletter.find_by_id(params[:id]) do |nl|
-        params[:email].split(',').each do |em|
+        subscribers = params[:email].gsub(' ','')
+        subscribers = subscribers.gsub('，',',')
+        subscribers.split(',').each do |em|
           if em.to_s.match(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/)
             subscriber = Subscriber.find_or_create_by(:email => em.downcase)
             nl.deliver_test_news(subscriber ,params[:content])
