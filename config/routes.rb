@@ -67,7 +67,7 @@ OopsData::Application.routes.draw do
 		resources :subscribers do
 			collection do
 				get :subscribed, :unsubscribed, :search
-				put :unsubscribe
+				put :unsubscribe, :delete
 			end
 		end
 		resources :surveys do

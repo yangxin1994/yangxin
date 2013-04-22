@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Admin::SubscribersController < Admin::ApplicationController
   before_filter :require_sign_in
 
@@ -11,7 +13,10 @@ class Admin::SubscribersController < Admin::ApplicationController
 
   def create
     render_json true do
-      subscribers = params[:subscribers].split(',')
+      subscribers = params[:subscribers].gsub('，',',')
+      subscribers = subscribers.gsub("\n",',')
+      subscribers = subscribers.gsub(' ','')
+      subscribers = subscribers.split(',')
       s_count = f_count = 0
       subscribers.each do |email|
         if subscribe?(email)
@@ -29,6 +34,18 @@ class Admin::SubscribersController < Admin::ApplicationController
       if params[:email].to_s.match(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/)
         if subscriber = Subscriber.where(:email => params[:email].downcase).first
           success_true if subscriber.unsubscribe
+        else
+          false
+        end
+      end
+    end
+  end
+
+  def delete
+    render_json false do
+      if params[:email].to_s.match(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/)
+        if subscriber = Subscriber.where(:email => params[:email].downcase).first
+          success_true if subscriber.destroy
         else
           false
         end
