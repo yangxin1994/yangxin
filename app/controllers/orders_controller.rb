@@ -58,6 +58,7 @@ class OrdersController < ApplicationController
     render_json @order.status == 1 do |s|
       if s
         @order.update_attributes(params[:order])
+        @order.save
         @order.as_retval
       else
         ErrorEnum::ORDER_CAN_NOT_BE_UPDATED

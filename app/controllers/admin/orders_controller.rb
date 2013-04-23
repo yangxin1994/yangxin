@@ -107,6 +107,7 @@ class Admin::OrdersController < Admin::ApplicationController
   def update
     @order = Order.find_by_id(params[:id])
     render_json @order.update_attributes(params[:order]) do
+      @order.save
       @order.as_retval
     end
   end

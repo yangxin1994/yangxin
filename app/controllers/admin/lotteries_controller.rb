@@ -20,7 +20,8 @@ class Admin::LotteriesController < Admin::ApplicationController
       Lottery.find_by_id(params[:id]) do |lottery|
         update_photo(:lottery, lottery)
         add_prizes(get_prize_ids, lottery)
-        if lottery.update_attributes(params[:lottery])
+        lottery.update_attributes(params[:lottery])
+        if lottery.save
           @is_success = true
         end
         lottery.as_retval

@@ -31,8 +31,8 @@ class Material
 
 	def self.check_and_create_new(current_user, material)
 		return ErrorEnum::WRONG_MATERIAL_TYPE unless [1, 2, 4, 8, 16, 32].include?(material["material_type"].to_i)
-		material_inst = Material.new(:material_type => material["material_type"].to_i, 
-			:value => material["value"], 
+		material_inst = Material.new(:material_type => material["material_type"].to_i,
+			:value => material["value"],
 			:title => material["title"],
 			:picture_url => material["picture_url"])
 		material_inst.save
@@ -53,9 +53,10 @@ class Material
 	end
 
 	def update_material(material)
-		return self.update_attributes(:material_type => material["material_type"], 
+	  self.update_attributes(:material_type => material["material_type"],
 			:value => material["value"],
 			:title => material["title"],
 			:picture_url => material["picture_url"])
+	  self.save
 	end
 end
