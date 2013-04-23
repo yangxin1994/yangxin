@@ -58,8 +58,7 @@ class Admin::SurveysController < Admin::ApplicationController
 		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return unless @survey
 		params[:lottery] = Lottery.find_by_id(params[:lottery_id]) if params[:reward].to_i==1
 		s = params.select{|k,v| %w(reward point lottery).include?(k.to_s)}
-		@survey.update_attributes(s)
-		render_json_auto @survey.save and return
+		render_json_auto @survey.update_attributes(s) and return
 	end
 
 	def set_community

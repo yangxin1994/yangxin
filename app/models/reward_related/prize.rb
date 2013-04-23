@@ -12,8 +12,8 @@ class Prize < BasicGift
   scope :can_be_draw, where('$and' => [:is_in_ctrl => true, :ctrl_surplus.gt => 0, :status.gt => -1]).where(:is_deleted => false )
   scope :can_be_autodraw, where(:status.gt => -1).where(:is_deleted => false )
   scope :for_lottery, where(:lottery_id => nil).where(:is_deleted => false )
-
-  attr_accessible :name, :type, :surplus, :description, :photo
+  scope :all_d, where(:is_deleted => false )
+  attr_accessible :name, :type, :surplus, :description, :photo, :is_deleted
 
   has_one :order, :inverse_of => 'gift'
   belongs_to :lottery, :inverse_of => 'prizes'
@@ -29,6 +29,12 @@ class Prize < BasicGift
 
   def present_quillme
     present_attrs :name, :type, :description, :surplus, :_id
+    present_add photo_src: self.photo.picture_url
+  end
+
+  def present_admin
+    present_attrs :name, :type, :description, :surplus, :_id, :ctrl_surplus,
+                  :ctrl_quantity, :ctrl_time, :ctrl_start_time, :ctrl_history
     present_add photo_src: self.photo.picture_url
   end
 

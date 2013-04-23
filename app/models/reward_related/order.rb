@@ -208,7 +208,6 @@ class Order
 		when 3
 
 		end
-		self.save
 		#self.user.update_attributes(self.attributes, :without_protection => true)
 	end
 end

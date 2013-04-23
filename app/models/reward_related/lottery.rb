@@ -53,7 +53,7 @@ class Lottery
 
   def present_prizes(name)
     if self.prizes
-      self.prizes.present_json(name)
+      self.prizes.all_d.present_json(name)
     else
       []
     end
@@ -63,6 +63,29 @@ class Lottery
     present_attrs :_id,:title, :description, :status, :exchangeable, :point, :created_at
     present_add :photo_src => self.photo_url
     present_add :prizes => self.present_prizes('quillme')
+  end
+
+  def present_admin
+    present_attrs :_id,:title, :description, :status, :exchangeable, :point, :created_at
+    present_add :photo_src => self.photo_url
+    present_add :prize_ids => self.prizes.all_d.map(&:_id)
+    present_add :prizes => self.present_prizes('admin')
+  end
+
+  def present_ctrl(only_active = false)
+    present_attrs :_id,:title, :description, :status, :exchangeable, :point, :created_at
+    ch = []
+    self.prizes.all_d.each do |prize|
+      if only_active.to_s == "true"
+        ch += prize.active_ctrl_history
+      else
+        ch += prize.ctrl_history
+      end
+    end
+    present_add :ctrl_history => ch
+    present_add :photo_src => self.photo_url
+    present_add :prize_ids => self.prizes.all_d.map(&:_id)
+    present_add :prizes => self.present_prizes('admin')
   end
 
   def delete

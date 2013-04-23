@@ -73,7 +73,6 @@ class Admin::GiftsController < Admin::ApplicationController
     end
     params[:gift].select!{ |k, v| !v.nil?}
     render_json @gift.update_attributes(params[:gift]) do
-      @gift.save
       @gift.as_retval
     end
   end
