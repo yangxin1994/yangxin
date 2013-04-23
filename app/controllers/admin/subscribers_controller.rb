@@ -31,24 +31,25 @@ class Admin::SubscribersController < Admin::ApplicationController
 
   def unsubscribe
     render_json false do
-      if params[:email].to_s.match(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/)
-        if subscriber = Subscriber.where(:email => params[:email].downcase).first
-          success_true if subscriber.unsubscribe
-        else
-          false
-        end
+      Subscriber.find_by_id(params[:id]) do |subscriber|
+        success_true if subscriber.unsubscribe
       end
     end
   end
 
-  def delete
+  def subscribe
     render_json false do
-      if params[:email].to_s.match(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/)
-        if subscriber = Subscriber.where(:email => params[:email].downcase).first
-          success_true if subscriber.destroy
-        else
-          false
-        end
+      Subscriber.find_by_id(params[:id]) do |subscriber|
+        success_true if subscriber.subscribe
+      end
+    end
+  end
+
+  def destroy
+    render_json false do
+      Subscriber.find_by_id(params[:id]) do |subscriber|
+        success_true
+        subscriber.destroy
       end
     end
   end

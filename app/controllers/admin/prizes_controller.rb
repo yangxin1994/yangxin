@@ -41,8 +41,8 @@ class Admin::PrizesController < Admin::ApplicationController
     render_json false do
       Prize.find_by_id(params[:id]) do |prize|
         update_photo(:prize, prize)
-
-        if prize.update_attributes(params[:prize])
+        prize.update_attributes(params[:prize])
+        if prize.save
           @is_success = true
         end
         prize.as_retval
