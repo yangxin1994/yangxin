@@ -64,6 +64,7 @@ class Admin::NewslettersController < Admin::ApplicationController
         subscribers.split(',').each do |em|
           if em.to_s.match(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/)
             subscriber = Subscriber.find_or_create_by(:email => em.downcase)
+            subscriber.is_deleted = true
             nl.deliver_test_news(subscriber ,params[:content])
             success_true
           end
