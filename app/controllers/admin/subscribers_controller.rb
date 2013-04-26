@@ -5,7 +5,7 @@ class Admin::SubscribersController < Admin::ApplicationController
 
   def index
     render_json true do
-      auto_paginate(Subscriber.page(page).present_json(:admin)) do |data|
+      auto_paginate(Subscriber.all) do |data|
         data.present_json(:admin)
       end
     end
@@ -13,7 +13,7 @@ class Admin::SubscribersController < Admin::ApplicationController
 
   def_each :unsubscribed, :subscribed do |method_name|
     render_json true do
-      auto_paginate(Subscriber.send(method_name).page(page)) do |data|
+      auto_paginate(Subscriber.send(method_name)) do |data|
         data.present_json(:admin)
       end
     end
