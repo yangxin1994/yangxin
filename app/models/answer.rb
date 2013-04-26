@@ -459,7 +459,7 @@ class Answer
 				else
 					require_answer = condition["value"]
 					if answer_content[question_id].nil?
-						satisfy = false
+						satisfy = true
 					elsif question.question_type == QuestionTypeEnum::CHOICE_QUESTION
 						satisfy = Tool.check_choice_question_answer(question_id,
 																self.answer_content[question_id]["selection"],
