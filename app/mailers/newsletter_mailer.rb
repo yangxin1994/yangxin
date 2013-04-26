@@ -9,14 +9,14 @@ class NewsletterMailer < ActionMailer::Base
 
   self.smtp_settings = Rails.application.config.survey_mailer_setting
 
-  def news_email(newsletter, content_html, subscriber,  = false)
+  def news_email(newsletter, content_html, subscriber,  is_test = false)
     @newsletter = newsletter
     @subscriber = subscriber
     @content_html = content_html
     
     email = Rails.env == "production" ? subscriber.email : 'xzqyqy@163.com'
     subject = newsletter.subject
-		subject += " --- to #{subscriber.email}" if Rails.env != "production"
+    subject += " --- to #{subscriber.email}" if (Rails.env != "production" || !is_test)
     subject += " --- (测试)" if is_test
     mail(to:      email,
          subject: subject)
