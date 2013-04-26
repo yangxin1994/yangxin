@@ -17,4 +17,12 @@ class NewsletterMailer < ActionMailer::Base
          subject: newsletter.subject)
   end
 
+  def test_news_email(newsletter, content_html, subscriber)
+    @newsletter = newsletter
+    @subscriber = subscriber
+    @content_html = content_html
+    mail(to:      subscriber.email,
+         subject: newsletter.subject + "(测试)")
+  end
+
 end
