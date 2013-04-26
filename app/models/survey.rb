@@ -639,11 +639,15 @@ class Survey
 			q += page["questions"]
 		end
 		ques = []
-		q.collect do |i|
-			que = Question.find(i)
-			ques << i if (que.question_type != QuestionTypeEnum:: PARAGRAPH || include_prg)
+		if include_prg
+			return q
+		else
+			q.collect do |i|
+				que = Question.find(i)
+				ques << i if (que.question_type != QuestionTypeEnum:: PARAGRAPH || include_prg)
+			end
+			return ques
 		end
-		return ques
 	end
 
 	def all_questions_type(include_prg = true)
