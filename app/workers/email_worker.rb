@@ -1,6 +1,6 @@
 class EmailWorker
 	include Sidekiq::Worker
-	sidekiq_options :retry => false, :queue => "oopsdata_#{Rails.env}".to_sym
+	sidekiq_options :retry => 10, :queue => "oopsdata_#{Rails.env}".to_sym
 
 	def perform(email_type, email, callback, opt={})
 		user = User.find_by_email(email)
