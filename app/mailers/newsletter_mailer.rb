@@ -4,7 +4,7 @@ class NewsletterMailer < ActionMailer::Base
   layout 'newsletter'
 
   # default to:      -> { Subscriber.all.map { |e| e.email } },
-  default from:    "\"优数调研\" <postmaster@oopsdata.cn>",
+  default from:    "\"优数调研\" <newsletter@oopsdata.net>",
           charset: "UTF-8"
 
   self.smtp_settings = Rails.application.config.survey_mailer_setting
