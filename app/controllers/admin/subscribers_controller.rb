@@ -4,11 +4,19 @@ class Admin::SubscribersController < Admin::ApplicationController
   before_filter :require_sign_in
 
   def index
-    render_json Subscriber.page(page).present_json(:admin)
+    render_json true do
+      auto_paginate(Subscriber.page(page).present_json(:admin)) do |data|
+        data.present_json(:admin)
+      end
+    end
   end
 
   def_each :unsubscribed, :subscribed do |method_name|
-    render_json Subscriber.send(method_name).page(page).present_json(:admin)
+    render_json true do
+      auto_paginate(Subscriber.send(method_name).page(page)) do |data|
+        data.present_json(:admin)
+      end
+    end
   end
 
   def create
