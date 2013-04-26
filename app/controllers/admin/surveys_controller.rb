@@ -4,14 +4,14 @@ class Admin::SurveysController < Admin::ApplicationController
 		@surveys = Survey.all
 		# use publish_status = 0 means status=-1
 		if params[:publish_status].to_i > 0
-			@surveys = @surveys.where(:status.gt => -1, :publish_status => params[:publish_status].to_i).desc(:created_at) 
+			@surveys = @surveys.where(:status.gt => -1, :publish_status => params[:publish_status].to_i).desc(:created_at)
 		elsif params[:publish_status] && params[:publish_status].to_i == 0
 			@surveys = @surveys.where(:status => -1).desc(:created_at)
 		end
 		@surveys = @surveys.where(:show_in_community => params["show_in_community"].to_s == 'true') if params[:show_in_community]
-		# search 
+		# search
 		@surveys = @surveys.where(title: /.*#{params[:title]}.*/) if params[:title]
-		
+
 		if params[:email].nil?
 			render_json_auto auto_paginate(@surveys) and return
 		else
@@ -38,7 +38,7 @@ class Admin::SurveysController < Admin::ApplicationController
 		end
 		if params[:question_id]
 			# insert
-			@survey.insert_template_question( params[:page_index].to_s.to_i, 
+			@survey.insert_template_question( params[:page_index].to_s.to_i,
 					"-1", params[:question_id])
 			# convert
 			@survey.convert_template_question_to_normal_question(params[:question_id])
@@ -59,7 +59,7 @@ class Admin::SurveysController < Admin::ApplicationController
 		params[:lottery] = Lottery.find_by_id(params[:lottery_id]) if params[:reward].to_i==1
 		s = params.select{|k,v| %w(reward point lottery).include?(k.to_s)}
 		render_json_auto @survey.update_attributes(s) and return
-	end	
+	end
 
 	def set_community
 		@survey = Survey.normal.find_by_id(params[:id])

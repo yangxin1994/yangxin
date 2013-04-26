@@ -23,7 +23,7 @@ class Admin::GiftsController < Admin::ApplicationController
         }
       end
       return
-    end 
+    end
     @gift = Gift.create(params[:gift])
     # if params[:gift][:type] == 3
     #   l = Lottery.where(:_id => params[:gift][:lottery]).first
@@ -35,7 +35,7 @@ class Admin::GiftsController < Admin::ApplicationController
     #     render_json(false){ErrorEnum::LOTTERY_NOT_FOUND}
     #   end
     # end
-    
+
     # @gift.photo = material
     # material.save
     # TODO add admin_id
@@ -48,7 +48,7 @@ class Admin::GiftsController < Admin::ApplicationController
     @gift = Gift.find_by_id params[:id]
     unless params[:gift][:photo].nil?
       if @gift.photo.nil?
-        material = Material.create(:material_type => 1, 
+        material = Material.create(:material_type => 1,
                                    :title => params[:gift][:name],
                                    :value => params[:gift][:photo],
                                    :picture_url => params[:gift][:photo])
@@ -60,10 +60,10 @@ class Admin::GiftsController < Admin::ApplicationController
       @gift.photo.save
     end
 
-    
+
     if params[:gift][:type] == 3
       l = Lottery.where(:_id => params[:gift][:lottery]).first
-      if !l.nil? 
+      if !l.nil?
         params[:gift].delete(:lottery)
         @gift.lottery = l
         @gift.lottery.save
@@ -76,7 +76,7 @@ class Admin::GiftsController < Admin::ApplicationController
       @gift.as_retval
     end
   end
-  
+
   def show
     # @gift = Gift.find_by_id(params[:id])
     # @gift[:photo_src] = @gift.photo.picture_url unless @gift.photo.nil?

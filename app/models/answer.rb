@@ -104,7 +104,7 @@ class Answer
 		return nil if survey.nil?
 		return nil if owner.nil?
 		return survey.answers.where(user_id: owner._id.to_s, :is_preview => is_preview)[0]
-	end	
+	end
 
 	def self.find_by_password(username, password)
 		answer = Answer.where(username: username, password: password)[0]
@@ -128,7 +128,7 @@ class Answer
 				answer.point_to_introducer = survey.spread_point
 			end
 		end
-		
+
 		# initialize the answer content
 		answer_content = {}
 		survey.pages.each do |page|
@@ -402,9 +402,9 @@ class Answer
 		if self.logic_control_result[question_id].nil?
 			self.logic_control_result[question_id] = {"items" => items, "sub_questions" => sub_questions}
 		else
-			self.logic_control_result[question_id]["items"] = 
+			self.logic_control_result[question_id]["items"] =
 				(self.logic_control_result[question_id]["items"].to_a + items.to_a).uniq
-			self.logic_control_result[question_id]["sub_questions"] = 
+			self.logic_control_result[question_id]["sub_questions"] =
 				(self.logic_control_result[question_id]["sub_questions"].to_a + sub_questions.to_a).uniq
 		end
 		return self.save

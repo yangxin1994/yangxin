@@ -4,17 +4,26 @@ class NewsletterMailer < ActionMailer::Base
   layout 'newsletter'
 
   # default to:      -> { Subscriber.all.map { |e| e.email } },
-  default from:    "\"优数调研\" <postmaster@oopsdata.cn>",
+  default from:    "\"优数咨询\" <newsletter@oopsdata.net>",
           charset: "UTF-8"
 
   self.smtp_settings = Rails.application.config.survey_mailer_setting
 
-  def news_email(newsletter, content_html, subscriber)
+  def news_email(newsletter, content_html, subscriber,  is_test = false)
     @newsletter = newsletter
     @subscriber = subscriber
     @content_html = content_html
-    mail(to:      subscriber.email,
-         subject: newsletter.subject)
+    subject = newsletter.subject
+    email = subscriber.email
+    if is_test
+      subject += " --- (测试)"
+    else
+      email = 'xzwyqy@163.com' if Rails.env == "production"
+      subject += " --- to #{subscriber.email}" if Rails.env != "production"
+    end
+    
+    mail(to:      email,
+         subject: subject)
   end
 
 end

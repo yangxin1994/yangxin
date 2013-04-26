@@ -4,11 +4,19 @@ class Admin::SubscribersController < Admin::ApplicationController
   before_filter :require_sign_in
 
   def index
-    render_json auto_paginate(Subscriber.all.present_json(:admin))
+    render_json true do
+      auto_paginate(Subscriber.all) do |data|
+        data.present_json(:admin)
+      end
+    end
   end
 
   def_each :unsubscribed, :subscribed do |method_name|
-    render_json auto_paginate(Subscriber.send(method_name).present_json(:admin))
+    render_json true do
+      auto_paginate(Subscriber.send(method_name)) do |data|
+        data.present_json(:admin)
+      end
+    end
   end
 
   def create
@@ -31,24 +39,25 @@ class Admin::SubscribersController < Admin::ApplicationController
 
   def unsubscribe
     render_json false do
-      if params[:email].to_s.match(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/)
-        if subscriber = Subscriber.where(:email => params[:email].downcase).first
-          success_true if subscriber.unsubscribe
-        else
-          false
-        end
+      Subscriber.find_by_id(params[:id]) do |subscriber|
+        success_true if subscriber.unsubscribe
       end
     end
   end
 
-  def delete
+  def subscribe
     render_json false do
-      if params[:email].to_s.match(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/)
-        if subscriber = Subscriber.where(:email => params[:email].downcase).first
-          success_true if subscriber.destroy
-        else
-          false
-        end
+      Subscriber.find_by_id(params[:id]) do |subscriber|
+        success_true if subscriber.subscribe
+      end
+    end
+  end
+
+  def destroy
+    render_json false do
+      Subscriber.find_by_id(params[:id]) do |subscriber|
+        success_true
+        subscriber.destroy
       end
     end
   end

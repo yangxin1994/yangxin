@@ -112,16 +112,8 @@ class Admin::LotteriesController < Admin::ApplicationController
   def show
     render_json false do
       Lottery.find_by_id(params[:id]) do |l|
-        l[:prizes] = l.prizes.map do |prize|
-          prize[:photo] = prize.photo.picture_url
-          prize
-        end
-
-        l[:prize_ids] = l.prizes.map(&:_id)
-        l[:photo_src] = l.photo.picture_url unless l.photo.nil?
-        @is_success = true
-        #
-        l
+        success_true
+        l.present_admin
       end
     end
   end
@@ -180,20 +172,20 @@ class Admin::LotteriesController < Admin::ApplicationController
     render_json false do
       Lottery.find_by_id(params[:id]) do |lottery|
         success_true
-        lottery[:prizes] = lottery.prizes
-        lottery[:photo_src] = lottery.photo.picture_url unless lottery.photo.nil?
-        ch = []
+        # lottery[:prizes] = lottery.prizes.all_d
+        # lottery[:photo_src] = lottery.photo.picture_url unless lottery.photo.nil?
+        # ch = []
 
-        # 优化!!!
-        lottery.prizes.each do |prize|
-          if params[:only_active].to_s == "true"
-            ch += prize.active_ctrl_history
-          else
-            ch += prize.ctrl_history
-          end
-        end
-        lottery[:ctrl_history] = ch
-        lottery
+        # # 优化!!!
+        # lottery.prizes.all_d.each do |prize|
+        #   if params[:only_active].to_s == "true"
+        #     ch += prize.active_ctrl_history
+        #   else
+        #     ch += prize.ctrl_history
+        #   end
+        # end
+        # lottery[:ctrl_history] = ch
+        lottery.present_ctrl(params[:only_active])
       end
     end
   end

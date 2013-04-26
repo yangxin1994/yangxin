@@ -6,7 +6,6 @@ class Subscriber
   include Mongoid::CriteriaExt
 
   field :email, type: String
-  field :status, type: Integer, default: 1
   field :is_deleted, type: Boolean, default: false
   field :unsubscribed_at, type: Time
 
@@ -19,7 +18,7 @@ class Subscriber
   scope :unsubscribed, where(:is_deleted => true)
 
   def present_admin
-    present_attrs :_id, :email, :status, :is_deleted
+    present_attrs :_id, :email, :is_deleted
     present_add   :delivered_count => self.newsletters.count
     if self.unsubscribed_at
       present_add   :unsubscribed_at => self.unsubscribed_at.strftime("%Y-%m-%d")

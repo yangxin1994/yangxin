@@ -47,7 +47,7 @@ class Newsletter
   end
 
   def deliver_test_news(user, content_html)
-    NewsletterMailer.news_email(self, content_html, user).deliver
+    NewsletterMailer.news_email(self, content_html, user, true).deliver
     self.is_tested = true
     save
     # Subscriber.all.each do |subscriber|
