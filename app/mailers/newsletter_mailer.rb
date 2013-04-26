@@ -19,7 +19,8 @@ class NewsletterMailer < ActionMailer::Base
     else
       email = Rails.env == "production" ? subscriber.email : 'xzwyqy@163.com'
       subject += " --- to #{subscriber.email}" if Rails.env != "production"
-
+    end
+    
     mail(to:      email,
          subject: subject)
   end
