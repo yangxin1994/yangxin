@@ -75,6 +75,7 @@ class LotteryCode
       lottery = lc.lottery
       survey = lottery.surveys[0]
       next if survey.nil?
+      next if !["517490baeb0e5b7fe3000003", "51787e9deb0e5be144000026"].include?(survey._id.to_s)
       next if user.nil? || user.email.blank?
       EmailWorker.perform_async("lottery_code",
             user.email,
