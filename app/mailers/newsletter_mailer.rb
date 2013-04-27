@@ -20,8 +20,10 @@ class NewsletterMailer < ActionMailer::Base
     if is_test
       subject += " --- (测试)"
     else
-      email = @@test_email if Rails.env != "production"
-      subject += " --- to #{subscriber.email}" if Rails.env != "production"
+      if Rails.env != "production"
+        email = @@test_email 
+        subject += " --- to #{subscriber.email}"
+      end
     end
     
     mail(to:      email,
