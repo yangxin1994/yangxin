@@ -81,6 +81,7 @@ OopsData::Application.configure do
     :password       => "cChzuCev9YBnhZ9Wr1H"
   }
 
+=begin
   config.survey_mailer_setting = {
     :authentication => "plain",
     :address        => "smtp.mailgun.com",
@@ -90,6 +91,15 @@ OopsData::Application.configure do
     :password       => "0nlnhy08vbk1",
     :enable_starttls_auto => true,
     :openssl_verify_mode  => 'none'
+  }
+=end
+  config.survey_mailer_setting = {
+    :authentication => "plain",
+    :address        => "smtp.critsend.com",
+    :port           => 25,
+    :domain         => "oopsdata.cn",
+    :user_name      => "info@oopsdata.com",
+    :password       => "cChzuCev9YBnhZ9Wr1H"
   }
 
   config.mailgun_api_key = "key-9zcv6-e7j8aratn9viu3unvbn2zc92j3"

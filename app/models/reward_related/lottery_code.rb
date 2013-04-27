@@ -67,4 +67,20 @@ class LotteryCode
     present_add :prize => self.prize.present_quillme if self.prize
     present_add :lottery_status => self.lottery.status
   end
+
+
+  def self.temp_lottery_code_email
+    LotteryCode.for_draw.each do |lc|
+      user = lc.user
+      lottery = lc.lottery
+      survey = lottery.surveys[0]
+      next if survey.nil?
+      next if user.nil? || user.email.blank?
+      EmailWorker.perform_async("lottery_code",
+            user.email,
+            "",
+            :survey_id => survey._id.to_s,
+            :lottery_code_id => lc._id.to_s)
+    end
+  end
 end
