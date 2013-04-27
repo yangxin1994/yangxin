@@ -116,5 +116,5 @@ OopsData::Application.configure do
 
 	# configuration for quill and quillme
 	config.quill_host = 'http://www.oopsdata.com'
-	config.quillme_host = 'http://www.oopdata.cn'
+	config.quillme_host = 'http://www.oopsdata.cn'
 end
