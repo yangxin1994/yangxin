@@ -60,6 +60,7 @@ OopsData::Application.configure do
 
 	config.action_mailer.perform_deliveries = true
 	config.action_mailer.delivery_method = :smtp
+=begin
 	config.action_mailer.smtp_settings = {
     :authentication => "plain",
     :address        => "smtp.mailgun.com",
@@ -70,6 +71,15 @@ OopsData::Application.configure do
     :enable_starttls_auto => true,
     :openssl_verify_mode  => 'none'
 	}
+=end
+  config.action_mailer.smtp_settings = {
+    :authentication => "plain",
+    :address        => "smtp.critsend.com",
+    :port           => 25,
+    :domain         => "oopsdata.cn",
+    :user_name      => "info@oopsdata.com",
+    :password       => "cChzuCev9YBnhZ9Wr1H"
+  }
 
   config.survey_mailer_setting = {
     :authentication => "plain",
