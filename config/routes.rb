@@ -22,6 +22,9 @@ OopsData::Application.routes.draw do
 
 	resources :lottery_codes
 
+	resources :browser_extensions do
+	end
+
 	resources :browsers do
 		member do
 			put :update_history
