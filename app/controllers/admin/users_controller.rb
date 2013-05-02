@@ -4,7 +4,7 @@ class Admin::UsersController < Admin::ApplicationController
 #--
 # ************** Quill Admin Manage User ************************************
 #++
-	
+
 	@@user_attrs_filter = %w(_id email color role status username full_name identity_card company birthday gender address phone postcode black white new_password lock color point)
 
 	def check_user_existence
@@ -17,18 +17,18 @@ class Admin::UsersController < Admin::ApplicationController
 	def index
 		if !params[:email].blank? then
 			@users = User.where(email: params[:email].downcase).desc(:status, :created_at)
-		elsif !params[:full_name].blank? then	
+		elsif !params[:full_name].blank? then
 			@users = User.where(full_name: params[:full_name].downcase).desc(:status, :created_at)
 		elsif !params[:username].blank? then
 			filter = params[:username].to_s.gsub(/[*]/, ' ').downcase
 			@users = User.where(username: /.*#{filter}.*/).desc(:status, :created_at)
 		else
 			@users = User.normal_list.where(:role.lt => 15).desc(:status, :created_at)
-		end			
+		end
 		render_json_auto (auto_paginate(@users)) and return
 	end
 
-	# GET /admin/users/1 
+	# GET /admin/users/1
 	# GET /admin/users/1.json
 	def show
 		respond_to do |format|
@@ -66,13 +66,13 @@ class Admin::UsersController < Admin::ApplicationController
 
 	def lottery_codes
 		@user = User.find_by_id_including_deleted params[:id]
-		
+
 		render_json(@user.is_a? User) do |s|
 			if s
-				auto_paginate @user.lottery_codes.desc(:created_at) do |codes| 
+				auto_paginate @user.lottery_codes.desc(:created_at) do |codes|
 					codes.map do |code|
 						code['lottery_title'] = Lottery.find_by_id(code['lottery_id']).title
-						code 
+						code
 					end
 				end
 			else
@@ -88,8 +88,23 @@ class Admin::UsersController < Admin::ApplicationController
 		@user = User.find_by_id_including_deleted params[:id]
 		render_json(@user.is_a? User) do |s|
 			if s
-				params[:scope] = "all" if params[:scope].blank?	
-				auto_paginate @user.orders.send(params[:scope].to_s)
+				#params[:scope] = "all" if params[:scope].blank?
+				auto_paginate @user.orders #.send(params[:scope].to_s)
+			else
+				{
+					:error_code => ErrorEnum::USER_NOT_EXIST,
+					:error_message => "User not exist"
+				}
+			end
+		end
+	end
+
+	def point_logs
+		@user = User.find_by_id_including_deleted params[:id]
+		render_json(@user.is_a? User) do |s|
+			if s
+				#params[:scope] = "all" if params[:scope].blank?
+				auto_paginate @user.reward_logs.point_logs #.send(params[:scope].to_s)
 			else
 				{
 					:error_code => ErrorEnum::USER_NOT_EXIST,
@@ -100,7 +115,7 @@ class Admin::UsersController < Admin::ApplicationController
 	end
 	#--
 	# **************************************
-	# Black List Operate 
+	# Black List Operate
 	# **************************************
 	#++
 
@@ -181,7 +196,7 @@ class Admin::UsersController < Admin::ApplicationController
 	def list_by_role
 		role = params[:role].to_i
 		if (role > 0) && (role < 64)
-			# not include role =0 
+			# not include role =0
 
 			users = User.where(:role.gt => 0).desc(:lock, :created_at).to_a
 			# logger.debug '+++++++++++'
@@ -206,7 +221,7 @@ class Admin::UsersController < Admin::ApplicationController
 		# display delete users if params[:deleted]
 		users.select!{|u| u.status >= 0} if params[:deleted] && params[:deleted].to_s == 'false'
 
-		render_json_auto auto_paginate(users) 
+		render_json_auto auto_paginate(users)
 	end
 
 	def get_introduced_users
