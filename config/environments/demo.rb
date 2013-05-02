@@ -100,4 +100,5 @@ OopsData::Application.configure do
 
   config.mailgun_api_key = 'key-9zcv6-e7j8aratn9viu3unvbn2zc92j3'
   config.survey_email_domain = 'oopsdata.net'
+  config.user_email_domain = 'oopsdata.cn'
 end

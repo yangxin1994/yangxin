@@ -3,8 +3,8 @@ class MailgunApi
 
 	@@test_email = "test@oopsdata.com"
 
-	@@survey_email_from = "postmaster@oopsdata.net"
-	@@survey_email_to = "postmaster@oopsdata.net"
+	@@survey_email_from = "\"优数调研\" <postmaster@oopsdata.net>"
+	@@user_email_from = "\"优数调研\" <postmaster@oopsdata.cn>"
 
 	def self.send_survey_email(user_id, email, survey_id_ary)
 		if user_id.blank?
@@ -14,7 +14,6 @@ class MailgunApi
 			@email = user.email
 			return if @email.blank?
 		end
-
 
 		@surveys = survey_id_ary.map { |e| Survey.find_by_id(e) }
 		@presents = []	
@@ -37,18 +36,127 @@ class MailgunApi
 		data = {}
 		data[:domain] = Rails.application.config.survey_email_domain
 		data[:from] = @@survey_email_from
-		data[:subject] = "邀请您参加问卷调查"
+
 		html_template_file_name = "#{Rails.root}/app/views/survey_mailer/survey_email.html.erb"
 		text_template_file_name = "#{Rails.root}/app/views/survey_mailer/survey_email.text.erb"
-
 		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
 		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
 		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
 		data[:html] = premailer.to_inline_css
 		data[:text] = text_template.result(binding)
 
+		data[:subject] = "邀请您参加问卷调查"
+		data[:subject] += " --- to #{@email}" if Rails.env == "production" 
 		data[:to] = Rails.env == "production" ? @email : @@test_email
-		data[:subject] = Rails.env == "production" ? "邀请您参加问卷调查" : "邀请您参加问卷调查 --- to #{@email}"
+		self.send_message(data)
+	end
+
+	def self.welcome_email(user, callback)
+		@user = user
+		activate_info = {"email" => user.email, "time" => Time.now.to_i}
+		@activate_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
+		data[:domain] = Rails.application.config.user_email_domain
+		data[:from] = @@user_email_from
+
+		html_template_file_name = "#{Rails.root}/app/views/user_mailer/welcome_email.html.erb"
+		text_template_file_name = "#{Rails.root}/app/views/user_mailer/welcome_email.text.erb"
+		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
+		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
+		data[:html] = premailer.to_inline_css
+		data[:text] = text_template.result(binding)
+
+		data[:html] = 
+		data[:subject] = "欢迎注册优数调研"
+		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
+		data[:to] = Rails.env == "production" ? user.email : @@test_email
+		self.send_message(data)
+	end
+
+	def self.activate_email(user, callback)
+		@user = user
+		activate_info = {"email" => user.email, "time" => Time.now.to_i}
+		@activate_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
+		data[:domain] = Rails.application.config.user_email_domain
+		data[:from] = @@user_email_from
+
+		html_template_file_name = "#{Rails.root}/app/views/user_mailer/activate_email.html.erb"
+		text_template_file_name = "#{Rails.root}/app/views/user_mailer/activate_email.text.erb"
+		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
+		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
+		data[:html] = premailer.to_inline_css
+		data[:text] = text_template.result(binding)
+
+		data[:subject] = "激活账户"
+		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
+		data[:to] = Rails.env == "production" ? user.email : @@test_email
+		self.send_message(data)
+	end
+
+	def self.password_email(user, callback)
+		@user = user
+		password_info = {"email" => user.email, "time" => Time.now.to_i}
+		@password_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(password_info.to_json))
+		data[:domain] = Rails.application.config.user_email_domain
+		data[:from] = @@user_email_from
+
+		html_template_file_name = "#{Rails.root}/app/views/user_mailer/password_email.html.erb"
+		text_template_file_name = "#{Rails.root}/app/views/user_mailer/password_email.text.erb"
+		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
+		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
+		data[:html] = premailer.to_inline_css
+		data[:text] = text_template.result(binding)
+
+		data[:subject] = "重置密码"
+		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
+		data[:to] = Rails.env == "production" ? user.email : @@test_email
+		self.send_message(data)
+	end
+
+	def self.sys_password_email(user, callback)
+		@user = user
+		data[:domain] = Rails.application.config.user_email_domain
+		data[:from] = @@user_email_from
+
+		html_template_file_name = "#{Rails.root}/app/views/user_mailer/sys_password_email.html.erb"
+		text_template_file_name = "#{Rails.root}/app/views/user_mailer/sys_password_email.text.erb"
+		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
+		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
+		data[:html] = premailer.to_inline_css
+		data[:text] = text_template.result(binding)
+
+		data[:subject] = "您的邮箱刚刚创建了Oopsdata的账号"
+		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
+		data[:to] = Rails.env == "production" ? user.email : @@test_email
+		self.send_message(data)
+	end
+
+	def self.lottery_code_email(user, survey_id, lottery_code_id, callback)
+		@user = user
+		@survey = Survey.find_by_id(survey_id)
+		@lottery_code = LotteryCode.where(:_id => lottery_code_id).first
+		lottery = @lottery_code.try(:lottery)
+		@survey_list_url = "#{Rails.application.config.quillme_host}/surveys"
+		@lottery_url = "#{Rails.application.config.quillme_host}/lotteries/#{lottery.try(:_id)}"
+		@lottery_title = lottery.try(:title)
+		@lottery_code_url = "#{Rails.application.config.quillme_host}/lotteries/own"
+		data[:domain] = Rails.application.config.user_email_domain
+		data[:from] = @@user_email_from
+
+		html_template_file_name = "#{Rails.root}/app/views/user_mailer/lottery_code_email.html.erb"
+		text_template_file_name = "#{Rails.root}/app/views/user_mailer/lottery_code_email.text.erb"
+		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
+		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
+		data[:html] = premailer.to_inline_css
+		data[:text] = text_template.result(binding)
+
+		data[:subject] = "恭喜您获得抽奖号"
+		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
+		data[:to] = Rails.env == "production" ? user.email : @@test_email
 		self.send_message(data)
 	end
 
