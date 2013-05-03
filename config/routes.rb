@@ -53,7 +53,7 @@ OopsData::Application.routes.draw do
 			end
 
 			member do
-				get 'get_email', 'get_introduced_users', 'lottery_codes', 'orders'
+				get 'get_email', 'get_introduced_users', 'lottery_codes', 'orders', 'point_logs'
 				put 'set_color', 'set_role', 'set_lock', 'system_pwd', 'recover','add_point'
 			end
 		end

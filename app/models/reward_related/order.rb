@@ -73,7 +73,10 @@ class Order
     present_attrs :_id, :type, :status, :is_prize, :gift, :created_at, :is_update_user,
     	:full_name, :identity_card, :bank, :bankcard_number, :alipay_account,
     	:phone, :address, :postcode, :email
+    present_add :email => self.user.email
+    present_add :user_id => self.user._id
     present_add :gift_name => self.gift_name
+    present_add :gift_id => self.gift._id
     present_add :gift => self.gift.present_attrs
 
 	end
