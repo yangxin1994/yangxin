@@ -5,9 +5,16 @@ class Admin::SubscribersController < Admin::ApplicationController
 
   def index
     render_json true do
-      auto_paginate(Subscriber.all) do |data|
-        data.present_json(:admin)
+      if params[:s]
+        email = params[:s].downcase
+        subscribers = Subscriber.any_of({ :email => /.*#{email}.*/ })
+                                .desc(:is_deleted, :created_at)
+      else
+        subscribers = Subscriber.all
       end
+      data = {}
+      data[:] = auto_paginate(subscribers) { |data| data.present_json(:admin) }
+
     end
   end
 
