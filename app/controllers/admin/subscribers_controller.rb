@@ -5,24 +5,34 @@ class Admin::SubscribersController < Admin::ApplicationController
 
   def index
     render_json true do
+      data = {}
       if params[:s]
         email = params[:s].downcase
         subscribers = Subscriber.any_of({ :email => /.*#{email}.*/ })
                                 .desc(:is_deleted, :created_at)
+        data[:search_count] = subscribers.count
       else
         subscribers = Subscriber.all
       end
-      data = {}
-      data[:] = auto_paginate(subscribers) { |data| data.present_json(:admin) }
-
+      data[:subscribers] = auto_paginate(subscribers) { |data| data.present_json(:admin) }
+      data[:max_count] = Subscriber.count
+      data[:active_count] = Subscriber.subscribed.count
+      data[:deleted_count] = Subscriber.unsubscribed.count
+      data
     end
   end
 
   def_each :unsubscribed, :subscribed do |method_name|
     render_json true do
-      auto_paginate(Subscriber.send(method_name)) do |data|
-        data.present_json(:admin)
+      data = {}
+      data[:subscribers] = auto_paginate(Subscriber.send(method_name)) do |subscribers|
+        subscribers.present_json(:admin)
       end
+      data[:max_count] = Subscriber.count
+      data[:max_count] = Subscriber.count
+      data[:max_count] = Subscriber.count
+
+      data
     end
   end
 
@@ -32,15 +42,22 @@ class Admin::SubscribersController < Admin::ApplicationController
       subscribers = subscribers.gsub("\n",',')
       subscribers = subscribers.gsub(' ','')
       subscribers = subscribers.split(',')
-      s_count = f_count = 0
+      s_count = f_count = e_count = 0
+      batch = []
       subscribers.each do |email|
-        if subscribe?(email)
-          s_count += 1
+        if email.to_s.match(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/)
+          if Subscriber.where(:email => email.downcase).exists?
+            e_count += 1
+          else
+            batch << {:email => email.downcase}
+            s_count += 1
+          end
         else
           f_count += 1
         end
       end
-      {:s_count => s_count, :f_count => f_count}
+      Subscriber.collection.insert(batch) unless batch.empty?
+      {:s_count => s_count, :e_count => e_count,:f_count => f_count}
     end
   end
 
@@ -69,11 +86,4 @@ class Admin::SubscribersController < Admin::ApplicationController
     end
   end
 
-  def subscribe?(email)
-    if email.to_s.match(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/)
-      subscriber = Subscriber.find_or_create_by(:email => email.downcase)
-      return subscriber.subscribe
-    end
-    return false
-  end
 end
