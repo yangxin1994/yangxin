@@ -7,15 +7,15 @@ class EmailWorker
 		return false if user.nil?
 		case email_type
 		when 'welcome'
-			UserMailer.welcome_email(user, callback).deliver
+			MailgunApi.welcome_email(user, callback)
 		when 'activate'
-			UserMailer.activate_email(user, callback).deliver
+			MailgunApi.activate_email(user, callback)
 		when 'password'
-			UserMailer.password_email(user, callback).deliver
+			MailgunApi.password_email(user, callback)
 		when 'sys_password'
-			UserMailer.sys_password_email(user, callback).deliver
+			MailgunApi.sys_password_email(user, callback)
 		when 'lottery_code'
-			UserMailer.lottery_code_email(user, opt["survey_id"], opt["lottery_code_id"], callback).deliver
+			MailgunApi.lottery_code_email(user, opt["survey_id"], opt["lottery_code_id"], callback)
 		end
 		return true
 	end

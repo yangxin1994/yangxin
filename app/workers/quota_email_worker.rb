@@ -41,13 +41,12 @@ class QuotaEmailWorker
 			end
 		end
 		# 4. send emails to the samples found
-		# since this may consume long time, we do this in a separate thread
 		surveys_for_user.each do |u_id, s_id_ary|
-			SurveyMailer.survey_email(u_id, s_id_ary).deliver
+			MailgunApi.send_survey_email(u_id, "", s_id_ary)
 		end
 		surveys_for_imported_email.each do |email, s_id_ary|
 			begin
-				SurveyMailer.imported_email_survey_email(email, s_id_ary).deliver
+				MailgunApi.send_survey_email("", email, s_id_ary)
 			rescue
 			end
 		end
