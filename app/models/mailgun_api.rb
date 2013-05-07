@@ -55,6 +55,7 @@ class MailgunApi
 		@user = user
 		activate_info = {"email" => user.email, "time" => Time.now.to_i}
 		@activate_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
+		data = {}
 		data[:domain] = Rails.application.config.user_email_domain
 		data[:from] = @@user_email_from
 
@@ -66,7 +67,6 @@ class MailgunApi
 		data[:html] = premailer.to_inline_css
 		data[:text] = text_template.result(binding)
 
-		data[:html] = 
 		data[:subject] = "欢迎注册优数调研"
 		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
 		data[:to] = Rails.env == "production" ? user.email : @@test_email
@@ -77,6 +77,7 @@ class MailgunApi
 		@user = user
 		activate_info = {"email" => user.email, "time" => Time.now.to_i}
 		@activate_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
+		data = {}
 		data[:domain] = Rails.application.config.user_email_domain
 		data[:from] = @@user_email_from
 
@@ -98,6 +99,7 @@ class MailgunApi
 		@user = user
 		password_info = {"email" => user.email, "time" => Time.now.to_i}
 		@password_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(password_info.to_json))
+		data = {}
 		data[:domain] = Rails.application.config.user_email_domain
 		data[:from] = @@user_email_from
 
@@ -117,6 +119,7 @@ class MailgunApi
 
 	def self.sys_password_email(user, callback)
 		@user = user
+		data = {}
 		data[:domain] = Rails.application.config.user_email_domain
 		data[:from] = @@user_email_from
 
@@ -143,6 +146,7 @@ class MailgunApi
 		@lottery_url = "#{Rails.application.config.quillme_host}/lotteries/#{lottery.try(:_id)}"
 		@lottery_title = lottery.try(:title)
 		@lottery_code_url = "#{Rails.application.config.quillme_host}/lotteries/own"
+		data = {}
 		data[:domain] = Rails.application.config.user_email_domain
 		data[:from] = @@user_email_from
 
