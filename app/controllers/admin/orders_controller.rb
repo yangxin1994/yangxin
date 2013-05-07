@@ -122,10 +122,7 @@ class Admin::OrdersController < Admin::ApplicationController
     render_json true do
       #Order.send(method_name).page(page)
       auto_paginate(Order.send(method_name)) do |orders|
-        orders.map do |o|
-          o["gift_name"] = o.gift.name unless o.gift.nil?
-          o
-        end
+        orders.present_json("admin")
       end
     end
   end

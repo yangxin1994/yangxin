@@ -1824,7 +1824,7 @@ class Survey
 		Answer.collection.insert(batch) unless batch.empty?
 		self.refresh_quota_stats
 		self.save
-		aaa={
+		{
 			:insert_count => batch.length,
 			:updated_count => updated_count,
 			:error => import_error
