@@ -56,3 +56,6 @@ end
 
 gem 'quill_common', :path => "../quill_common"
 gem 'roadie'		# html email
+#gem 'premailer'		# html email
+gem 'premailer-rails'
+gem 'nokogiri'
