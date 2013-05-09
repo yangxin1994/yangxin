@@ -1641,7 +1641,7 @@ class Survey
 
 	def self.list_surveys_in_community(reward, only_spreadable, user)
 		surveys = Survey.in_community
-		surveys = surveys.where(:spreadable => true) if only_spreadable
+		surveys = surveys.where(:spreadable => true, :publish_status => 8) if only_spreadable
 		surveys = surveys.where(:reward => reward) if reward.to_i != -1
 		surveys = surveys.order_by(:publish_status.desc).order_by(:created_at.desc)
 		return surveys.map { |s| {"survey" => s.serialize_in_short, "answer_status" => s.answer_status(user)} }
