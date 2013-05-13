@@ -46,7 +46,7 @@ class MailgunApi
 		data[:text] = text_template.result(binding)
 
 		data[:subject] = "邀请您参加问卷调查"
-		data[:subject] += " --- to #{@email}" if Rails.env == "production" 
+		data[:subject] += " --- to #{@email}" if Rails.env != "production" 
 		data[:to] = Rails.env == "production" ? @email : @@test_email
 		self.send_message(data)
 	end
