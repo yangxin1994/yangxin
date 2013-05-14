@@ -17,6 +17,8 @@ class Subscriber
   scope :subscribed, where(:is_deleted => false)
   scope :unsubscribed, where(:is_deleted => true)
 
+  validates_uniqueness_of :email
+
   def present_admin
     present_attrs :_id, :email, :is_deleted
     present_add   :delivered_count => self.newsletters.count

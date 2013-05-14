@@ -575,7 +575,7 @@ class ReportResult < Result
 			if ele[1] != -1
 				item_text = get_item_text_by_id(issue["items"], input_id)
 				next if item_text.nil?
-				results << { "text" => item_text, "score" => ele[1] } 
+				results << { "text" => item_text, "score" => ele[1] }
 			end
 		end
 		return "" if results.blank?
@@ -661,7 +661,7 @@ class ReportResult < Result
 		results.sort_by! { |e| -e["mean_weight"] }
 		item_text_ary = results.map { |e| e["text"] }
 		mean_weight_ary = results.map { |e| e["mean_weight"] }
-			
+
 		text = opt[:cross] ? "" : "调查显示，"
 		text += "被访者为#{item_text_ary[0]}分配的比重最高，平均为#{mean_weight_ary[0].round(1)}"
 		# one item
@@ -710,7 +710,7 @@ class ReportResult < Result
 		# six addresses
 		return text + "，另有#{ratio_ary[5].round(1)}%的人填写了#{address_text_ary[5]}。" if results.length == 6
 		# more than six addresses
-		other_ratio = 100 - ratio_array[1..4].sum
+		other_ratio = 100 - ratio_ary[1..4].sum
 		return text + "，另有#{other_ratio.round(1)}%的人填写了其他。"
 	end
 
@@ -726,7 +726,7 @@ class ReportResult < Result
 			interval_text_ary << ReportResult.convert_time_interval_to_text(issue["format"], e, segment[index+1])
 		end
 		interval_text_ary << ReportResult.convert_time_interval_to_text(issue["format"], segment[-1], nil)
-			
+
 		results = []
 		total_number = 0
 		histogram.each_with_index do |number, index|
@@ -769,7 +769,7 @@ class ReportResult < Result
 			interval_text_ary << "#{e}到#{segment[index+1]}"
 		end
 		interval_text_ary << "#{segment[-1]}以上"
-			
+
 		results = []
 		total_number = 0
 		histogram.each_with_index do |number, index|

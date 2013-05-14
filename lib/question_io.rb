@@ -352,7 +352,7 @@ class MatrixChoiceQuestionIo < QuestionIo
   def answer_import(row, header_prefix)
     @retval = {}
     if issue["max_choice"].to_i > 1
-      issue["rows"].each_index do |r|
+      issue["rows"].each_with_index do |row_p, r|
         row_choices = []
         choiced = 0
         issue["items"].each_with_index do |item, c|
@@ -367,9 +367,8 @@ class MatrixChoiceQuestionIo < QuestionIo
         elsif choiced > issue["max_choice"]
           raise "您选择的稍微多了点,只需要#{issue["max_choice"]}就可以了~"
         end
-        @retval[item["id"].to_s] = row_choices
+        @retval[row_p["id"].to_s] = row_choices
       end
-
     else
       issue["rows"].each_with_index do |item, r|
         # 单选为啥也要用数组? 不解
@@ -1044,7 +1043,7 @@ class ScaleQuestionIo < QuestionIo
       #   @csv_header << header_prefix + "_c#{i + 1}" + UNKNOW
       # end
     end
-    return @retval
+    return @csv_header
   end
   #TODO spss_value_labels
   def spss_header(header_prefix)
@@ -1083,7 +1082,7 @@ class ScaleQuestionIo < QuestionIo
     @retval = {}
     issue["items"].each_with_index do |item, index|
       blank? row["#{header_prefix}_c#{index + 1}"]
-      if only_num?(row["#{header_prefix}_c#{index + 1}"], range: 1..issue["labels"].length)
+      if only_num?(row["#{header_prefix}_c#{index + 1}"], negative: true, range: -1..issue["labels"].length)
         @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : (row["#{header_prefix}_c#{index + 1}"].to_i) - 1)
       else
         raise "您输入的范围好像不太对吧?"
