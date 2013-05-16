@@ -118,6 +118,18 @@ class Admin::OrdersController < Admin::ApplicationController
     end
   end
 
+  def to_excel
+    render_json do
+      params[:scope] ||= :all
+      if Order.scopes.include?(params[:scope].to_sym)
+        success_true
+        Order.to_excel(params[:scope])
+      else
+        Order.to_excel(:all)
+      end
+    end
+  end
+
   def_each :need_verify, :verified, :canceled, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed do |method_name|
     render_json true do
       #Order.send(method_name).page(page)

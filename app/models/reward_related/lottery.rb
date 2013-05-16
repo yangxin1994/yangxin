@@ -141,11 +141,11 @@ class Lottery
         lottery_code.prize.save
         lottery_code.save
         lottery_code[:prize] = i[:prize]
-        return lottery_code
+        return lottery_code.present_quillme_draws
       end
     end
     lottery_code.update_attribute(:status, 1)
-    lottery_code
+    lottery_code.present_quillme_draws
   end
 
   def random_weight
