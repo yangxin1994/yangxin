@@ -4,7 +4,7 @@ class OrdersController < ApplicationController
   def index
     render_json true do
       auto_paginate @current_user.orders do |orders|
-        orders.present_json("quillme")
+        orders.map &:present_quillme
       end
     end
   end
