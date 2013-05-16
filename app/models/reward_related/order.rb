@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Order
 	include Mongoid::Document
 	include Mongoid::Timestamps
@@ -63,6 +65,37 @@ class Order
 	#delegate :cash_order, :realgoods_order, :to => "self.need_verify", :prefix => true
 	#after_create :decrease_point, :decrease_gift
 
+	def self.to_excel(scope)
+		# csv= []
+		# csv << ["奖品名称", "时间", "用户名", "电话号码", "地址", "邮编", "电子邮箱", "姓名", "证件号", "开户行", "银行卡号", "支付宝"].join(',')
+		# Order.all.page(1).per(300).send(scope).map do |order|
+		# 	csv << [order.gift.name,
+		# 	  			order.created_at.strftime('%F %R'),
+		# 					order.user.username, order.phone,
+		# 					order.address,
+		# 					order.postcode,
+		# 					order.email,
+		# 					order.bank,
+		# 		   		order.bankcard_number,
+		# 					order.alipay_account].join(',')
+		# end
+		path = "public/import/order.csv"
+		c = CSV.open(path, "w") do |csv|
+			csv << ["奖品名称", "时间", "用户名", "电话号码", "地址", "邮编", "电子邮箱", "姓名", "证件号", "开户行", "银行卡号", "支付宝"]
+			Order.all.page(1).per(300).send(scope).map do |order|
+				csv << [order.gift.name,
+								order.created_at.strftime('%F %R'),
+								order.user.username, order.phone,
+								order.address,
+								order.postcode,
+								order.email,
+								order.bank,
+								order.bankcard_number,
+								order.alipay_account]
+			end
+		end
+		csv = File.read("public/import/order.csv")
+	end
 
 	def present_quillme
     present_attrs :_id, :type, :status, :is_prize
