@@ -6,10 +6,10 @@ class LotteriesController < ApplicationController
 		render_json do
 			auto_paginate Lottery.quillme do |lotteries|
 				lotteries.present_json("quillme")
-			end 
+			end
 		end
 	end
-	
+
 	def own
 		logger.info "==== #{current_user}======="
 		retval = {}
@@ -30,12 +30,12 @@ class LotteriesController < ApplicationController
 			# 直接找不到抽奖号比较好? 或者提示抽过奖了 ?
 			if !s
 				@lottery_code.as_retval
-	   
+
 			elsif @lottery_code.lottery.status != 3
 				@is_success = false
 				{:error_code => ErrorEnum::INVALID_LOTTERYCODE_ID,
 	       :error_message => "Lottery not activity"}
-	   
+
 			else
 				@lottery_code.draw
 			end
@@ -46,7 +46,7 @@ class LotteriesController < ApplicationController
 		render_json false do |s|
 			Lottery.find_by_id params[:id] do |lottery|
 				if lottery.exchange(current_user)
-					success_true 
+					success_true
 				else
 					{
 						"error_code" => ErrorEnum::LOTTERY_CANNOT_EXCHANGE,
@@ -58,9 +58,9 @@ class LotteriesController < ApplicationController
 	end
 	# def_each :virtualgoods, :cash, :realgoods, :stockout do |method_name|
 	# 	@gifts = Gift.send(method_name).can_be_rewarded.page(page)
-	# 	@gifts = ErrorEnum::GiftNotFound if @gifts.empty? 
+	# 	@gifts = ErrorEnum::GiftNotFound if @gifts.empty?
 	# 	respond_to do |format|
-	# 		#format.html 
+	# 		#format.html
 	# 		format.json { render json: @gifts}
 	# 	end
 	# end
