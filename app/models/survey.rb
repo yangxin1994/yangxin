@@ -911,7 +911,9 @@ class Survey
 		return ErrorEnum::OVERFLOW if current_page.nil?
 		page_object = {name: current_page["name"], questions: []}
 		current_page["questions"].each do |question_id|
-			page_object[:questions] << Question.get_question_object(question_id)
+			temp = Question.get_question_object(question_id)
+			temp["index"] = self.all_questions_id.index(question_id)
+			page_object[:questions] << temp
 		end
 		return page_object
 	end
