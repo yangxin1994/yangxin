@@ -752,7 +752,14 @@ class Answer
 	# return the index of the first given question in all the survey questions
 	def index_of(questions)
 		return nil if questions.blank?
-		question_id = questions[0]._id.to_s
+		question_id = nil
+		questions.each do |q|
+			if q.question_type != QuestionTypeEnum::PARAGRAPH
+				question_id = q._id.to_s
+				break
+			end
+		end
+		return nil if question_id.nil?
 		question_ids = self.survey.all_questions_id(false)
 		question_ids_with_qc_questions = []
 		question_ids.each do |qid|
