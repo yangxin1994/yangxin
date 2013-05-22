@@ -753,7 +753,7 @@ class Answer
 	def index_of(questions)
 		return nil if questions.blank?
 		question_id = questions[0]._id.to_s
-		question_ids = self.survey.all_questions_id
+		question_ids = self.survey.all_questions_id(false)
 		question_ids_with_qc_questions = []
 		question_ids.each do |qid|
 			question_ids_with_qc_questions << qid
