@@ -113,7 +113,7 @@ class AnswersController < ApplicationController
 				answers = answers.select { |k, v| question_ids.include?(k) }
 				render_json_auto([questions,
 								answers,
-								@answer.survey.all_questions_id.length + @answer.random_quality_control_answer_content.length,
+								@answer.survey.all_questions_id(false).length + @answer.random_quality_control_answer_content.length,
 								@answer.index_of(questions),
 								questions.estimate_answer_time,
 								@answer.repeat_time]) and return
