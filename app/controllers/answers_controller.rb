@@ -111,6 +111,9 @@ class AnswersController < ApplicationController
 			else
 				answers = @answer.answer_content.merge(@answer.random_quality_control_answer_content)
 				answers = answers.select { |k, v| question_ids.include?(k) }
+				Rails.logger.info "AAAAAAAAAAAAAAAAAAAAAAAA"
+				Rails.logger.info questions.inspect
+				Rails.logger.info "AAAAAAAAAAAAAAAAAAAAAAAA"
 				render_json_auto([questions,
 								answers,
 								@answer.survey.all_questions_id(false).length + @answer.random_quality_control_answer_content.length,
