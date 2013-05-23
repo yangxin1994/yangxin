@@ -17,8 +17,8 @@ class QuotaEmailWorker
 			next if email_number == 0
 			user_ids_answered = survey.get_user_ids_answered
 			user_ids_sent = EmailHistory.get_user_ids_sent(s_id)
-			user_ids = user_ids - user_ids_answered - user_ids_sent
-			samples_found = user_ids.length > email_number ? user_ids.shuffle[0..email_number-1] : user_ids
+			user_ids_available = user_ids - user_ids_answered - user_ids_sent
+			samples_found = user_ids_available.length > email_number ? user_ids_available.shuffle[0..email_number-1] : user_ids_available
 			user_email_history_batch = []
 			samples_found.each do |u_id|
 				surveys_for_user[u_id] ||= []
