@@ -83,6 +83,13 @@ class Admin::SurveysController < Admin::ApplicationController
 		render_json_auto(@survey.save) and return
 	end
 
+	def get_sent_email_number
+		@survey = Survey.normal.find_by_id(params[:id])
+		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
+		sent_email_number = @survey.email_histories.length
+		render_json_auto(sent_email_number) and return
+	end
+
 	def set_answer_need_review
 		@survey = Survey.normal.find_by_id(params[:id])
 		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?

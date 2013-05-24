@@ -81,6 +81,7 @@ OopsData::Application.routes.draw do
 			end
 			member do
 				put 'allocate', 'add_reward', 'set_community', 'set_spread', 'set_promotable', 'set_answer_need_review'
+				get 'get_sent_email_number'
 			end
 		end
 
