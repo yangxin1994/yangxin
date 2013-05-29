@@ -115,8 +115,8 @@ OopsData::Application.configure do
 	config.action_mailer.default_url_options = {:host => 'res.oopsdata.com'}
 
 	# configuration for quill and quillme
-	config.quill_host = 'http://www.oopsdata.com'
-	config.quillme_host = 'http://www.oopsdata.cn'
+	config.quill_host = 'http://s.oopsdata.com'
+	config.quillme_host = 'http://oopsdata.cn'
 
   config.mailgun_api_key = 'key-9zcv6-e7j8aratn9viu3unvbn2zc92j3'
   config.survey_email_domain = 'oopsdata.net'
