@@ -539,8 +539,8 @@ class Answer
 	#*retval*:
 	#* the status of the answer after updating
 	def update_status
-		# an answer expires only when the survey is not published
-		if Time.now.to_i - self.created_at.to_i > 2.days.to_i && self.survey.publish_status != 8
+		# an answer expires only when the survey is not published and the answer is in editting status
+		if Time.now.to_i - self.created_at.to_i > 2.days.to_i && self.survey.publish_status != 8 && self.status == 0
 			self.set_reject
 			self.update_attributes(reject_type: 4, finished_at: Time.now.to_i)
 		end
