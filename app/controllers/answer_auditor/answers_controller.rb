@@ -380,7 +380,8 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 				:audit_at, 
 				:audit_message, 
 				:status, 
-				:reject_type])
+				:reject_type,
+				:region])
 	end
 
 	def review
