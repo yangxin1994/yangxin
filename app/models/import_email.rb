@@ -34,18 +34,7 @@ class ImportEmail
 	end
 
 	def self.remove_bounce_emails
-		mail_domain_ary = ["oopsdata.net",
-			"oopsdata.cn",
-			"one.mailgun.org",
-			"two.mailgun.org",
-			"three.mailgun.org",
-			"four.mailgun.org",
-			"five.mailgun.org",
-			"six.mailgun.org",
-			"seven.mailgun.org",
-			"eight.mailgun.org",
-			"nine.mailgun.org",
-			"ten.mailgun.org",]
+		mail_domain_ary = ["oopsdata.net", "oopsdata.cn"]
 		mail_domain_ary.each do |domain|
 			limit = 1000
 			skip = 0
