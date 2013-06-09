@@ -12,7 +12,7 @@ class SampleAttribute
 	field :enum_array, :type => Array
 	field :DateType, :type => Integer
 	# status of the sample attribute, 1 for normal, 2 for deleted
-	field :status, :type => Integer, default: 0
+	field :status, :type => Integer, default: 1
 
 	has_many :sample_attribute_questions
 
@@ -36,6 +36,11 @@ class SampleAttribute
 	DateType_ARRAY = [DateType::YEAR,
 		DateType::YEAR_MONTH,
 		DateType::YEAR_MONTH_DAY]
+
+
+	def self.find_by_id(sample_attribute_id)
+		return self.normal.where(:_id => sample_attribute_id).first
+	end
 
 	def self.search(name)
 		return name.blank? ? self.normal.all : self.normal.where(:name => /.*#{name.to_s}*./)

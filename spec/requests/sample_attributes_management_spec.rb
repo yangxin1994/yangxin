@@ -3,10 +3,11 @@ require 'spec_helper'
 describe "sample attribute management" do
 
 	it "create sample attribute" do
-		post "/admin/advertisements",
+		post "/admin/sample_attributes",
 			sample_attribute: {name: "gender",
 				type: 8}
 		response.status.should be(200)
+
 		JSON.parse(response.body)["value"]["error_code"].should be(ErrorEnum::WRONG_SAMPLE_ATTRIBUTE_TYPE)
 	end
 
