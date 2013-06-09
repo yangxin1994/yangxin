@@ -1,4 +1,6 @@
 require 'data_type'
+require 'date_type'
+require 'error_enum'
 class SampleAttribute
 	include Mongoid::Document
 	include Mongoid::Timestamps
@@ -8,7 +10,7 @@ class SampleAttribute
 	field :type, :type => Integer
 	field :element_type, :type => Integer
 	field :enum_array, :type => Array
-	field :date_type, :type => Integer
+	field :DateType, :type => Integer
 	# status of the sample attribute, 1 for normal, 2 for deleted
 	field :status, :type => Integer, default: 0
 
@@ -16,24 +18,24 @@ class SampleAttribute
 
 	scope :normal, where(status: 1)
 
-	TYPE_ARRAY = [DATA_TYPE::STRING,
-		DATA_TYPE::ENUM,
-		DATA_TYPE::NUMBER,
-		DATA_TYPE::DATE,
-		DATA_TYPE::NUMBER_RANGE,
-		DATA_TYPE::DATE_RANGE,
-		DATA_TYPE::ADDRESS,
-		DATA_TYPE::ARRAY]
-	ELEMENT_TYPE_ARRAY = [DATA_TYPE::STRING,
-		DATA_TYPE::ENUM,
-		DATA_TYPE::NUMBER,
-		DATA_TYPE::DATE,
-		DATA_TYPE::NUMBER_RANGE,
-		DATA_TYPE::DATE_RANGE,
-		DATA_TYPE::ADDRESS]
-	DATE_TYPE_ARRAY = [DATE_TYPE::YEAR,
-		DATE_TYPE::YEAR_MONTH,
-		DATE_TYPE::YEAR_MONTH_DAY]
+	TYPE_ARRAY = [DataType::STRING,
+		DataType::ENUM,
+		DataType::NUMBER,
+		DataType::DATE,
+		DataType::NUMBER_RANGE,
+		DataType::DATE_RANGE,
+		DataType::ADDRESS,
+		DataType::ARRAY]
+	ELEMENT_TYPE_ARRAY = [DataType::STRING,
+		DataType::ENUM,
+		DataType::NUMBER,
+		DataType::DATE,
+		DataType::NUMBER_RANGE,
+		DataType::DATE_RANGE,
+		DataType::ADDRESS]
+	DateType_ARRAY = [DateType::YEAR,
+		DateType::YEAR_MONTH,
+		DateType::YEAR_MONTH_DAY]
 
 	def self.search(name)
 		return name.blank? ? self.normal.all : self.normal.where(:name => /.*#{name.to_s}*./)
@@ -61,12 +63,12 @@ class SampleAttribute
 		if !TYPE_ARRAY.include?(sample_attribute["type"])
 			return ErrorEnum::WRONG_SAMPLE_ATTRIBUTE_TYPE
 		end
-		if sample_attribute["type"] == DATA_TYPE::ARRAY && !ELEMENT_TYPE_ARRAY.include?(sample_attribute["type"])
+		if sample_attribute["type"] == DataType::ARRAY && !ELEMENT_TYPE_ARRAY.include?(sample_attribute["type"])
 			return ErrorEnum::WRONG_SAMPLE_ATTRIBUTE_TYPE
 		end
-		if sample_attribute["type"] == DATA_TYPE::DATE || SampleAttribute["type"] == DATA_TYPE::DATE_RANGE
-			if !DATE_TYPE_ARRAY.include?(sample_attribute["date_type"])
-				return ErrorEnum::WRONG_DATE_TYPE
+		if sample_attribute["type"] == DataType::DATE || SampleAttribute["type"] == DataType::DATE_RANGE
+			if !DateType_ARRAY.include?(sample_attribute["DateType"])
+				return ErrorEnum::WRONG_DateType
 			end
 		end
 		return true

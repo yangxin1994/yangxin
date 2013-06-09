@@ -1,5 +1,10 @@
 module ErrorEnum
 
+	SAMPLE_ATTRIBUTE_NOT_EXIST = "error__0"
+	WRONG_SAMPLE_ATTRIBUTE_TYPE = "error__1"
+	WRONG_DATE_TYPE = "error__2"
+	
+
 	LOGIN_TOO_FREQUENT = "error_0"
 	ILLEGAL_EMAIL = "error_1"
 	USER_ACTIVATED = "error_2"
