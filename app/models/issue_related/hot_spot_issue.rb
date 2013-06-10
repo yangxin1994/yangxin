@@ -3,7 +3,7 @@ require 'error_enum'
 require 'tool'
 require 'securerandom'
 
-class HOTSpotIssue < Issue
+class HotSpotIssue < Issue
 	
 	attr_accessor :visible_type,:min_choice,:max_choice,:image,:items
 
