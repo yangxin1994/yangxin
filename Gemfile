@@ -51,7 +51,7 @@ group :test, :development, :staging do
   # gem 'minitest-rails'
   gem 'rb-fsevent', '~> 0.9.1', :require => false if RUBY_PLATFORM =~ /linux/ 
   gem 'turn', :require => false
-	gem 'factory_girl_rails', "~> 3.0"
+	gem 'factory_girl_rails', "~> 4.1"
   gem 'pry-rails'
   gem 'unicorn'
 end
