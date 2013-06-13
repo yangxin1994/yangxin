@@ -14,7 +14,7 @@ class SampleAttribute
 	# status of the sample attribute, 1 for normal, 2 for deleted
 	field :status, :type => Integer, default: 1
 
-	has_many :sample_attribute_questions
+	has_many :questions
 
 	scope :normal, where(status: 1)
 
@@ -57,6 +57,14 @@ class SampleAttribute
 		retval = self.check_params(sample_attribute)
 		return retval if retval != true
 		return self.update_attributes(sample_attribute)
+	end
+
+	def bind_question(question_id, relation)
+		question = BasicQuestion.find_by_id(question_id)
+		return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
+		question.sample_attribute = self
+		question.sample_attribute_relation = relation
+		return question.save
 	end
 
 	def delete

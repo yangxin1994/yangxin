@@ -1,5 +1,5 @@
 class Admin::SampleAttributesController < Admin::ApplicationController
-	before_filter :check_sample_attribute_existence, :only => [:update, :destroy]
+	before_filter :check_sample_attribute_existence, :only => [:update, :destroy, :bind_question]
 
 	def check_sample_attribute_existence
 		@sample_attribute = SampleAttribute.normal.find_by_id(params[:sample_attribute_id])
@@ -24,5 +24,9 @@ class Admin::SampleAttributesController < Admin::ApplicationController
 
 	def destroy
 		render_json_auto (@sample_attribute.delete) and return
+	end
+
+	def bind_question
+		render_json_auto (@sample_attribute.bind_question(params[:question_id], params[:relation])) and return
 	end
 end
