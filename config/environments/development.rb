@@ -45,7 +45,6 @@ OopsData::Application.configure do
 
   # task web service
   config.service_port = '8000'
-
   # donet web service
   # config.dotnet_web_service_uri = 'http://192.168.1.119:80'
   config.dotnet_web_service_uri = 'http://export.oopsdata.com'

@@ -17,6 +17,8 @@ module QuestionTypeEnum
 	FILE_QUESTION = 15
 	TABLE_QUESTION = 16
 	SCALE_QUESTION = 17
+	HEAT_MAP_QUESTION = 18
+	HOT_SPOT_QUESTION = 19
 
 
 	QUESTION_TYPE_HASH = {
@@ -37,7 +39,9 @@ module QuestionTypeEnum
 		"14" => "Paragraph",
 		"15" => "FileQuestion",
 		"16" => "TableQuestion",
-		"17" => "ScaleQuestion"
+		"17" => "ScaleQuestion",
+		"18" => "HeatMapQuestion",
+		"19" => "HotSpotQuestion"
 	}
 
 	BLANK_QUESTION_TYPE = {

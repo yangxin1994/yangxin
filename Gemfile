@@ -1,9 +1,10 @@
 require 'rbconfig'
 HOST_OS = RbConfig::CONFIG['host_os']
-source 'http://rubygems.org'
+#source 'http://rubygems.org'
+source 'http://ruby.taobao.org'
 
 gem 'rails', '3.1.0'
-
+gem 'tilt','~> 1.3.2'
 gem 'httparty'
 gem 'sidekiq'
 gem "kiqstand"
@@ -27,6 +28,8 @@ if HOST_OS =~ /linux/i
   gem 'therubyracer', '>= 0.8.2'
 end
 =end
+
+
 group :assets do
   gem 'sass-rails', "  ~> 3.1.4"
   gem 'coffee-rails', "~> 3.1.0"
@@ -50,6 +53,7 @@ group :test, :development, :staging do
   gem 'turn', :require => false
 	gem 'factory_girl_rails', "~> 3.0"
   gem 'pry-rails'
+  gem 'unicorn'
 end
 
 group :test do
