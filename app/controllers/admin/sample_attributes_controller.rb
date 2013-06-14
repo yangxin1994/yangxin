@@ -2,7 +2,7 @@ class Admin::SampleAttributesController < Admin::ApplicationController
 	before_filter :check_sample_attribute_existence, :only => [:update, :destroy, :bind_question]
 
 	def check_sample_attribute_existence
-		@sample_attribute = SampleAttribute.normal.find_by_id(params[:sample_attribute_id])
+		@sample_attribute = SampleAttribute.normal.find_by_id(params[:id])
 		if @sample_attribute.nil?
 			render_json_e(ErrorEnum::SAMPLE_ATTRIBUTE_NOT_EXIST) and return
 		end

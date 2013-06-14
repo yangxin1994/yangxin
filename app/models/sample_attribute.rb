@@ -10,7 +10,7 @@ class SampleAttribute
 	field :type, :type => Integer
 	field :element_type, :type => Integer
 	field :enum_array, :type => Array
-	field :DateType, :type => Integer
+	field :date_type, :type => Integer
 	# status of the sample attribute, 1 for normal, 2 for deleted
 	field :status, :type => Integer, default: 1
 
@@ -33,7 +33,7 @@ class SampleAttribute
 		DataType::NUMBER_RANGE,
 		DataType::DATE_RANGE,
 		DataType::ADDRESS]
-	DateType_ARRAY = [DateType::YEAR,
+	DATE_TYPE_ARRAY = [DateType::YEAR,
 		DateType::YEAR_MONTH,
 		DateType::YEAR_MONTH_DAY]
 
@@ -47,14 +47,20 @@ class SampleAttribute
 	end
 
 	def self.create_sample_attribute(sample_attribute)
+		sample_attribute["type"] = sample_attribute["type"].to_i
+		sample_attribute["date_type"] = sample_attribute["date_type"].to_i
+		sample_attribute["element_type"] = sample_attribute["element_type"].to_i
 		retval = self.check_params(sample_attribute)
 		return retval if retval != true
 		new_sample_attribute = self.new(sample_attribute)
 		return new_sample_attribute.save
 	end
 
-	def update_sample_attribute
-		retval = self.check_params(sample_attribute)
+	def update_sample_attribute(sample_attribute)
+		sample_attribute["type"] = sample_attribute["type"].to_i
+		sample_attribute["date_type"] = sample_attribute["date_type"].to_i
+		sample_attribute["element_type"] = sample_attribute["element_type"].to_i
+		retval = SampleAttribute.check_params(sample_attribute)
 		return retval if retval != true
 		return self.update_attributes(sample_attribute)
 	end
@@ -68,7 +74,7 @@ class SampleAttribute
 	end
 
 	def delete
-		self.status = 1
+		self.status = 2
 		return self.save
 	end
 
@@ -76,12 +82,12 @@ class SampleAttribute
 		if !TYPE_ARRAY.include?(sample_attribute["type"])
 			return ErrorEnum::WRONG_SAMPLE_ATTRIBUTE_TYPE
 		end
-		if sample_attribute["type"] == DataType::ARRAY && !ELEMENT_TYPE_ARRAY.include?(sample_attribute["type"])
+		if sample_attribute["type"] == DataType::ARRAY && !ELEMENT_TYPE_ARRAY.include?(sample_attribute["element_type"])
 			return ErrorEnum::WRONG_SAMPLE_ATTRIBUTE_TYPE
 		end
-		if sample_attribute["type"] == DataType::DATE || SampleAttribute["type"] == DataType::DATE_RANGE
-			if !DateType_ARRAY.include?(sample_attribute["DateType"])
-				return ErrorEnum::WRONG_DateType
+		if sample_attribute["type"] == DataType::DATE || sample_attribute["type"] == DataType::DATE_RANGE
+			if !DATE_TYPE_ARRAY.include?(sample_attribute["date_type"])
+				return ErrorEnum::WRONG_DATE_TYPE
 			end
 		end
 		return true

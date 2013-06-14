@@ -44,3 +44,21 @@ Spork.each_run do
   # This code will be run each time you run your specs.
 
 end
+
+
+def admin_signin
+    admin = FactoryGirl.create(:admin)
+    original_password = Encryption.decrypt_password(admin.password)
+    post "/sessions",
+      user: {email_username: admin.email,
+        password: original_password},
+      keep_signed_in: true
+    response.status.should be(200)
+    auth_key = JSON.parse(response.body)["value"]["auth_key"]
+
+    return auth_key
+end
+
+def clear(model_name)
+  Object::const_get(model_name).destroy_all
+end
