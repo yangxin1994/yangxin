@@ -293,7 +293,6 @@ OopsData::Application.routes.draw do
 			get 'list_answered_surveys'
 			get 'list_spreaded_surveys'
 			get 'search_title'
-			resources :reward_schemes, :except => [:new, :edit]
 		end
 		member do
 			put 'save_meta_data'
@@ -322,6 +321,7 @@ OopsData::Application.routes.draw do
 			put 'update_deadline'
 			post 'update_star'
 			get 'reward_info'
+			resources :reward_schemes, :except => [:new, :edit]
 		end
 		resources :pages do
 			member do
