@@ -20,27 +20,13 @@ class RewardSchemesController < ApplicationController
 
 	def update
 		retval = RewardScheme.update_review_scheme(params[:reward_scheme_id], params[:reward_scheme_setting])
-
-		respond_to do |format|
-			if retval
-				format.json	{ render_json_auto(retval) and return }
-			else
-				format.json	{ render_json_e(ErrorEnum::REWARE_SCHEME_NOT_EXIST) and return }
-			end
-		end	
+		format.json	{ render_json_auto(retval) and return }
 	end
 
 	def destory
-		reward_scheme = RewardScheme.where( :id => params[:reward_scheme_id] )
-		retval = reward_scheme.destroy
-
-		respond_to do |format|
-			if retval
-				format.json	{ render_json_auto(retval) and return }
-			else
-				format.json	{ render_json_e(ErrorEnum::REWARD_SCHEME_NOT_EXIST) and return }
-			end
-		end	
+		reward_scheme = RewardScheme.find_by_id(params[:id])
+		retval = (reward_scheme == nil ? ErrorEnum::REWARD_SCHEME_NOT_EXIST : reward_scheme.destory)
+		render_json_auto(retval) and return
 	end
 
 end

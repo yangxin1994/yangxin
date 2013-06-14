@@ -25,7 +25,8 @@ class RewardScheme
 		return ErrorEnum::SURVEY_NOT_EXIST if Survey.find_by_id(survey_id)
 		retval = verify_reward_scheme_type(reward_scheme)
 		return retval if !retval == true
-		RewardScheme.find_by_id(reward_scheme)	
+		reward = RewardScheme.find_by_id(reward_scheme[:id])
+		reward.update_attributes(reward_scheme)
 	end
 
 	def verify_reward_scheme_type(reward_scheme)
