@@ -47,9 +47,6 @@ class SampleAttribute
 	end
 
 	def self.create_sample_attribute(sample_attribute)
-		sample_attribute["type"] = sample_attribute["type"].to_i
-		sample_attribute["date_type"] = sample_attribute["date_type"].to_i
-		sample_attribute["element_type"] = sample_attribute["element_type"].to_i
 		retval = self.check_params(sample_attribute)
 		return retval if retval != true
 		new_sample_attribute = self.new(sample_attribute)
@@ -57,9 +54,6 @@ class SampleAttribute
 	end
 
 	def update_sample_attribute(sample_attribute)
-		sample_attribute["type"] = sample_attribute["type"].to_i
-		sample_attribute["date_type"] = sample_attribute["date_type"].to_i
-		sample_attribute["element_type"] = sample_attribute["element_type"].to_i
 		retval = SampleAttribute.check_params(sample_attribute)
 		return retval if retval != true
 		return self.update_attributes(sample_attribute)
