@@ -15,17 +15,15 @@ class RewardScheme
 	end
 
 	def self.create_reward_scheme(survey_id, reward_scheme)
-		return ErrorEnum::SURVEY_NOT_EXIST if Survey.find_by_id(survey_id)
 		retval = verify_reward_scheme_type(reward_scheme)
 		return retval if !retval == true
 		RewardScheme.create(reward_scheme)
 	end
 
-	def self.update_review_scheme(survey_id, reward_scheme)
-		return ErrorEnum::SURVEY_NOT_EXIST if Survey.find_by_id(survey_id)
+	def self.update_review_scheme(reward_scheme_id, reward_scheme)
 		retval = verify_reward_scheme_type(reward_scheme)
 		return retval if !retval == true
-		reward = RewardScheme.find_by_id(reward_scheme[:id])
+		reward = RewardScheme.find_by_id(reward_scheme_id)
 		reward.update_attributes(reward_scheme)
 	end
 
