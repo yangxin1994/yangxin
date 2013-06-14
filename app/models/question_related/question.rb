@@ -5,6 +5,9 @@ require 'quality_control_type_enum'
 class Question < BasicQuestion
 	include Mongoid::Document
 	field :is_required, :type => Boolean, default: true
+	field :sample_attribute_relation, :type => Hash, default: {}
+
+	belongs_to :sample_attribute
 
 	before_save :clear_question_object
 	before_update :clear_question_object
