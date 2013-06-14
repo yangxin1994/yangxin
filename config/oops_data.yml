@@ -136,7 +136,7 @@ development:
   sohu_app_secret: "7da1b4966cbc595abeddf75a697011f3"
 test:
   words_per_second: 5
-  login_count_threshold: 100
+  login_count_threshold: 100000
   activate_expiration_time: 3600
   password_expiration_time: 3600
   cache_key_prefix: "oopsdata_"
