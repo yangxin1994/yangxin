@@ -412,4 +412,64 @@ class Result
 		end
 		return result
 	end
+
+
+
+
+###############################################################
+# issue 某个question的issue
+# answer_ary 根据需要分析的question的id，去answers表中找到对应的答案的内容
+###############################################################
+	def analyze_heat_map(issue, answer_ary, opt={})
+      region_ids = issue["items"].map{|region| region["id"]}
+      result = {}
+      region_ids.map{|region_id| result[region_id] = [] }
+      answer_ary.each do |point|
+      	result.each do |key|
+      	  issue["items"].each do |region|
+      	  	if in_region?(region["region"],point)
+      	  	  result[key] << point if region["id"] == key
+      	  	end
+      	  end 		
+      	end
+      end
+      return result
+	end
+
+
+	
+
+###############################################################
+# issue 某个question的issue
+# answer_ary 根据需要分析的question的id，去answers表中找到对应的答案的内容
+###############################################################
+	def analyze_hot_spot(issue, answer_ary, opt={})
+      region_ids = issue["items"].map{|region| region["id"]}
+      result = {}
+      region_ids.map{|region_id| result[region_id] = [] }
+      answer_ary.each_with_index do |answer|
+        result[region_ids[index]] << answer
+      end
+      return result
+	end
+
+
+private
+
+    def in_region?(region,point)
+      x_start = region["x_start"]
+      y_start = region["y_start"]
+      x_end   = region["x_end"]
+      y_end   = region["y_end"]
+      point_x = point[0]
+      point_y = point[1]
+
+      if x_start < point_x && point_x < x_end &&  y_end < point_y && point_y < y_start   
+      	return true
+      else
+      	return false
+      end
+    	
+    end
+
 end
