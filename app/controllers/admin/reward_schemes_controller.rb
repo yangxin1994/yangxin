@@ -28,7 +28,7 @@ class Admin::RewardSchemesController < Admin::ApplicationController
 		format.json	{ render_json_auto(retval) and return }
 	end
 
-	def destory
+	def destroy
 		reward_scheme = RewardScheme.find_by_id(params[:id])
 		retval = (reward_scheme.nil? ? ErrorEnum::REWARD_SCHEME_NOT_EXIST : reward_scheme.destory)
 		render_json_auto(retval) and return
