@@ -90,6 +90,7 @@ class User
 	has_and_belongs_to_many :entry_clerk_allocated_surveys, class_name: "Survey", inverse_of: :entry_clerks
 	has_many :interviewer_tasks
 	has_many :reviewed_answers, class_name: "Answer", inverse_of: :auditor
+	has_many :logs
 
 	scope :unregistered, where(status: 0)
 	scope :sample, where(user_role: 1)
@@ -717,5 +718,46 @@ class User
 				analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
 			end
 			return [completion, analyze_result]
+		end
+
+		def point_logs
+			logs = self.logs.point_logs
+			ret_logs = logs.map do |e|
+				{
+					"created_at" => e.created_at,
+					"amount" => e.data["amount"],
+					"reason" => e.data["reason"],
+					"survey_title" => e.data["survey_title"],
+					"gift_name" => e.data["gift_name"],
+					"remark" => e.data["remark"]
+				}
+			end
+			return ret_logs
+		end
+
+		def redeem_logs
+			logs = self.logs.redeem_logs
+			ret_logs = logs.map do |e|
+				{
+					"created_at" => e.created_at,
+					"amount" => e.data["amount"],
+					"order_id" => e.data["order_id"],
+					"gift_name" => e.data["gift_name"]
+				}
+			end
+			return ret_logs
+		end
+
+		def lottery_logs
+			logs = self.logs.lottery_logs
+			ret_logs = logs.map do |e|
+				{
+					"created_at" => e.created_at,
+					"result" => e.data["result"],
+					"order_id" => e.data["order_id"],
+					"prize_name" => e.data["prize_name"]
+				}
+			end
+			return ret_logs
 		end
 	end

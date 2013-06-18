@@ -1,5 +1,5 @@
 class Admin::SampleController < Admin::ApplicationController
-	before_filter :check_sample_attribute_existence, :only => []
+	before_filter :check_sample_attribute_existence, :only => [:point_log, :redeem_log, :lottery_log]
 
 	def check_sample_attribute_existence
 		@sample_attribute = SampleAttribute.normal.find_by_id(params[:id])
@@ -36,14 +36,14 @@ class Admin::SampleController < Admin::ApplicationController
 	end
 
 	def point_log
-		
+		render_json_auto(auto_paginate(@sample.point_logs)) and return
 	end
 
 	def redeem_log
-		
+		render_json_auto(auto_paginate(@sample.redeem_logs)) and return
 	end
 
 	def lottery_log
-		
+		render_json_auto(auto_paginate(@sample.lottery_logs)) and return
 	end
 end

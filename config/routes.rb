@@ -59,6 +59,9 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :samples do
+			member do
+				get :point_logs, :redeem_logs, :lottery_logs
+			end
 		end
 
 		resources :browsers do
