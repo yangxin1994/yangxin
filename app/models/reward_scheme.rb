@@ -18,6 +18,7 @@ class RewardScheme
 		retval = verify_reward_scheme_type(reward_scheme)
 		return retval if !retval == true
 		RewardScheme.create(reward_scheme)
+		return true
 	end
 
 	def self.update_review_scheme(reward_scheme_id, reward_scheme)
@@ -25,15 +26,21 @@ class RewardScheme
 		return retval if !retval == true
 		reward = RewardScheme.find_by_id(reward_scheme_id)
 		reward.update_attributes(reward_scheme)
+		return true
 	end
 
-	def verify_reward_scheme_type(reward_scheme)
-		[1, 2, 4, 8].include?(reward_scheme[:type]) ? reward_scheme[:type] : 4   ##Verify type
+	def self.verify_reward_scheme_type(reward_scheme)
+		retval = true
+		reward_scheme["rewards"].each do |scheme|
+			scheme["type"] = ([1, 2, 4, 8].include?(scheme["type"].to_i) ? scheme["type"] : 4)   ##Verify type
 
-		##Verify prize data
-		return ErrorEnum::INVALID_PRIZE_ID if Prize.where(:id => reward_scheme[:prize][:id]).first == nil
-		reward_scheme[:prize][:deadline] = reward_scheme[:prize][:deadline].to_i
-		reward_scheme[:need_review] = false if !reward_scheme[:need_review].is_a?(Boolean)
-		return true
+			##Verify prize data
+			if scheme["type"] == 8
+				retval = ErrorEnum::INVALID_PRIZE_ID if Prize.where("id" => scheme["prize"]["id"]).first == nil
+				reward_scheme["prize"]["deadline"] = reward_scheme["prize"]["deadline"].to_i
+			end
+		end
+		reward_scheme["need_review"] = false if reward_scheme["need_review"].nil?
+		return retval
 	end
 end

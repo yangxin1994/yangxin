@@ -114,6 +114,7 @@ module ErrorEnum
 
 	# lcm add for answer review
 	REWARD_ERROR = 'error_300'
+	REWARD_SCHEME_NOT_EXIST = 'error_101010'  ##TODO ErrorEnum has not rule yet
 
 	INTERVIEWER_NOT_EXIST = 'error_301'
 	INTERVIEWER_TASK_NOT_EXIST = 'error_302'
