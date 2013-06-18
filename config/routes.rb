@@ -42,12 +42,23 @@ OopsData::Application.routes.draw do
 	namespace :admin do
 
 		resources :questions do
+			collection do
+				get :count, :active_count, :attributes_completion, :attributes_statistics
+				post :send_message
+			end
+			member do
+				get :point_log, :redeem_log, :lottery_log
+				post :block
+			end
 		end
 
 		resources :sample_attributes do
 			member do
 				put :bind_question
 			end
+		end
+
+		resources :samples do
 		end
 
 		resources :browsers do

@@ -30,3 +30,7 @@ end
 every 1.days do
 	command "cd ~/db_bak/; mongodump -d oops_data_production -o './' -u oopsdata -password=o2psllyscdata; tar -zcf oops_data_production_$(date +%d-%m-%y).tar.gz oops_data_production; rm -rf oops_data_production"
 end
+
+every 1.days do
+	runner "SampleAttribute.make_statistics"
+end

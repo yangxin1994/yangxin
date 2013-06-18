@@ -13,6 +13,9 @@ class SampleAttribute
 	field :date_type, :type => Integer
 	# status of the sample attribute, 1 for normal, 2 for deleted
 	field :status, :type => Integer, default: 1
+	field :completion, :type => Integer, default: 0
+	filed :analyze_requirement, :type => Hash, default: {}
+	filed :analyze_result, :type => Hash, default: {}
 
 	has_many :questions
 
@@ -85,5 +88,13 @@ class SampleAttribute
 			end
 		end
 		return true
+	end
+
+	def self.make_statistics
+		self.each do |sample_attribute|
+			sample_attribute.completion, sample_attribute.analyze_result = 
+				*User.make_sample_attribute_statistics(sample_attribute)
+			sample_attribute.save
+		end
 	end
 end

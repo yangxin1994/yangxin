@@ -114,4 +114,21 @@ module Tool
 	def self.rand_id
 		return (rand * 10**16).floor
 	end
+
+	def self.calculate_segmentation_distribution(segmentation, data)
+		segmentation ||= []
+		distribution = Array.new(segmentation.length + 1) {0}
+		data.each do |e|
+			segmentation.each_with_index do |seg, index|
+				if e <= seg
+					distribution[index] += + 1
+					break
+				end
+			end
+			if segmentation[-1].nil? || e > segmentation[-1]
+				distribution[segmentation.length] += 1
+			end
+		end
+		return distribution
+	end
 end
