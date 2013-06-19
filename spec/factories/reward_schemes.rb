@@ -10,23 +10,29 @@ FactoryGirl.define do
 	factory :mobile_reward_scheme, parent: :reward_scheme do  ## Use for batch create reward schemes
 		type 1
 		amount 10
-		prizes []
+		prizes {}
 	end
 
 	factory :alipay_reward_scheme, parent: :reward_scheme do  ## Use for batch create reward schemes
 		type 2
 		amount 5
-		prizes []
+		prizes {}
 	end
 
 	factory :you_reward_scheme, parent: :reward_scheme do  ## Use for batch create reward schemes
 		type 4
 		amount 50
-		prizes []
+		prizes {}
 	end
 
 	factory :lottery_reward_scheme, parent: :reward_scheme do  ## Use for batch create reward schemes
 		type 8
+		amount 0
+		prizes {[{ :id => '87asdfsd9f7sdf', :prob => 0.01, :deadline => (Time.now.to_i + 86400), :amount => 10 }]}
+	end
+
+	factory :illegel_reward_scheme_type, parent: :reward_scheme do  ## Use for batch create reward schemes
+		type 6
 		amount 0
 		prizes {[{ :id => '87asdfsd9f7sdf', :prob => 0.01, :deadline => (Time.now.to_i + 86400), :amount => 10 }]}
 	end
