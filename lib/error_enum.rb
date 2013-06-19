@@ -6,11 +6,11 @@ module ErrorEnum
 	SAMPLE_ATTRIBUTE_NAME_EXIST = "error__3"
 	SAMPLE_NOT_EXIST = "error__4"
 	AGENT_TASK_NOT_EXIST = "error__5"
-	
+
 
 
 	REWARD_SCHEME_NOT_EXIST = 'error___0'  ##TODO ErrorEnum has not rule yet
-	ORDER_TYPE_ERROR = 'error___1'	
+	ORDER_TYPE_ERROR = 'error___1'
 
 	LOGIN_TOO_FREQUENT = "error_0"
 	ILLEGAL_EMAIL = "error_1"
@@ -181,7 +181,7 @@ module ErrorEnum
 	GIFT_NOT_FOUND = "error_21001"
 
 	INVALID_GIFT_ID = "error_21002"
-	
+
 	GIFT_QUANTITY_NOT_A_NUNBER = "error_21031"
 	GIFT_SURPLUS_NOT_A_NUNBER = "error_21041"
 	GIFT_NOT_ENOUGH = "error_21033"
