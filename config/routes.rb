@@ -107,6 +107,7 @@ OopsData::Application.routes.draw do
 				put 'allocate', 'add_reward', 'set_community', 'set_spread', 'set_promotable', 'set_answer_need_review'
 				get 'get_sent_email_number'
 			end
+			resources :reward_schemes, :except => [:new, :edit]
 		end
 
 		resources :interviewer_tasks do
