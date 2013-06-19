@@ -1,7 +1,7 @@
 require 'error_enum'
 class Log
 	include Mongoid::Document
-	include Mongoid::TimeStamps
+	include Mongoid::Timestamps
 	# log type, 1 for answering surveys, 2 for lottery, 4 for gift redeem, 8 for point change
 	field :type, :type => Integer
 	field :data, :type => Hash, default: {}

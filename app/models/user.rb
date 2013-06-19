@@ -1,5 +1,5 @@
-require 'data_type'
 #encoding: utf-8
+require 'data_type'
 require 'encryption'
 require 'error_enum'
 require 'tool'
@@ -48,17 +48,17 @@ class User
 	field :auth_key_expire_time, :type => Integer
 	field :level, :type => Integer, default: 0
 	field :level_expire_time, :type => Integer, default: -1
-	field :birthday, :type => Integer, default: -1
-	field :gender, :type => Boolean
-	field :address, :type => String
-	field :postcode, :type => String
-	field :phone, :type => String
-	field :full_name, :type => String
-	field :identity_card, :type => String
-	field :company, :type => String
-	field :bankcard_number, :type => String
-	field :bank, :type => String
-	field :alipay_account, :type => String
+	# field :birthday, :type => Integer, default: -1
+	# field :gender, :type => Boolean
+	# field :address, :type => String
+	# field :postcode, :type => String
+	# field :phone, :type => String
+	# field :full_name, :type => String
+	# field :identity_card, :type => String
+	# field :company, :type => String
+	# field :bankcard_number, :type => String
+	# field :bank, :type => String
+	# field :alipay_account, :type => String
 	field :point, :type => Integer, :default => 0
 
 	attr_protected :role, :level
@@ -611,10 +611,9 @@ class User
 			return survey_ids.uniq
 		end
 
-
-
 		def self.search_sample(email, mobile, is_block)
-			samples = User.sample.where(:is_block => is_block)
+			samples = User.sample
+			samples = sample.where(:is_block => is_block) if !is_block.blank?
 			samples = samples.where(:email => /.*#{email.to_s}*./) if !email.blank?
 			samples = samples.where(:mobile => /.*#{mobile.to_s}*./) if !mobile.blank?
 			return samples
@@ -671,15 +670,15 @@ class User
 
 			analyze_result = {}
 			attributes = User.only(name).where(name.ne => nil)
-			switch sample_attribute.type
-			case DateType::ENUM
+			case sample_attribute.type
+			when DataType::ENUM
 				distribution = Array.new(sample_attribute.enum_array.length) { 0 }
 				attributes.each do |e|
 					attribute = e.name
 					distribution[attribute] = distribution[attribute] + 1
 				end
 				analyze_result["distribution"] = distribution
-			case DateType::ARRAY
+			when DataType::ARRAY
 				distribution = Array.new(sample_attribute.enum_array.length) { 0 }
 				attribute.each do |e|
 					attribute = e.name
@@ -688,7 +687,7 @@ class User
 					end
 				end
 				analyze_result["distribution"] = distribution
-			case DateType::ADDRESS
+			when DataType::ADDRESS
 				distribution = QuillCommon::AddressUtility.province_hash
 				attribute.each do |e|
 					address = e.name
@@ -700,19 +699,19 @@ class User
 					end
 				end
 				analyze_result["distribution"] = distribution
-			case DateType::NUMBER
+			when DataType::NUMBER
 				segmentation = analyze_requirement["segmentation"] || []
 				attribute_value = attribute.map { |e| e.name }
 				analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
-			case DateType::NUMBER_RANGE
+			when DataType::NUMBER_RANGE
 				segmentation = analyze_requirement["segmentation"] || []
 				attribute_value = attribute.map { |e| e.name.mean }
 				analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
-			case DateType::DATE
+			when DataType::DATE
 				segmentation = analyze_requirement["segmentation"] || []
 				attribute_value = attribute.map { |e| e.name }
 				analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
-			case DateType::DATE_RANGE
+			when DataType::DATE_RANGE
 				segmentation = analyze_requirement["segmentation"] || []
 				attribute_value = attribute.map { |e| e.name.mean }
 				analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
@@ -759,5 +758,44 @@ class User
 				}
 			end
 			return ret_logs
+		end
+
+		def block(block)
+			self.is_block = block.to_s == "true"
+			return self.save
+		end
+
+		def basic_info
+			attributes = {}
+			SampleAttribute.normal.each do |e|
+				name = e.name
+				case e.type
+				when DataType::STRING
+					attributes[name] = self.read_attribute(e.name)
+				when DataType::ENUM
+					attributes[name] = e.enum_array[self.read_attribute(e.name)]
+				when DataType::ARRAY
+					attributes[name] = []
+					self.read_attribute(e.name).each { |m| attributes[name] << e.enum_array[m] }
+				when DataType::NUMBER
+					attributes[name] = self.read_attribute(e.name)
+				when DataType::DATE
+					attributes[name] = {
+						"date_type" => e.date_type,
+						"value" => self.read_attribute(e.name)
+						}
+				when DataType::NUMBER_RANGE
+					attributes[name] = self.read_attribute(e.name)
+				when DataType::DATE_RANGE
+					attributes[name] = {
+						"date_type" => e.date_type,
+						"value" => self.read_attribute(e.name)
+						}
+				end
+			end
+			return {:email => self.email,
+				:mobile => self.mobile,
+				:point => self.point,
+				:attributes => attributes}
 		end
 	end

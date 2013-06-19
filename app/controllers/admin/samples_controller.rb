@@ -1,4 +1,4 @@
-class Admin::SampleController < Admin::ApplicationController
+class Admin::SamplesController < Admin::ApplicationController
 	before_filter :check_sample_attribute_existence, :only => [:point_log, :redeem_log, :lottery_log]
 
 	def check_sample_attribute_existence
@@ -24,15 +24,15 @@ class Admin::SampleController < Admin::ApplicationController
 	end
 
 	def show
-		
+		render_json_auto(@sample.basic_info) and return
 	end
 
 	def send_message
-		
+		render_json_auto(@current_user.create_message(params[:title], params[:content], params[:sample_ids])) and return
 	end
 
 	def block
-		
+		render_json_auto(@sample.block(params[:block])) and return
 	end
 
 	def point_log

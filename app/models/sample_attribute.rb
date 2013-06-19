@@ -14,8 +14,8 @@ class SampleAttribute
 	# status of the sample attribute, 1 for normal, 2 for deleted
 	field :status, :type => Integer, default: 1
 	field :completion, :type => Integer, default: 0
-	filed :analyze_requirement, :type => Hash, default: {}
-	filed :analyze_result, :type => Hash, default: {}
+	field :analyze_requirement, :type => Hash, default: {}
+	field :analyze_result, :type => Hash, default: {}
 
 	has_many :questions
 
@@ -52,6 +52,8 @@ class SampleAttribute
 	def self.create_sample_attribute(sample_attribute)
 		retval = self.check_params(sample_attribute)
 		return retval if retval != true
+		attribute = self.normal.where(:name => sample_attribute["name"]).first
+		return ErrorEnum::SAMPLE_ATTRIBUTE_NAME_EXIST if !attribute.nil?
 		new_sample_attribute = self.new(sample_attribute)
 		return new_sample_attribute.save
 	end

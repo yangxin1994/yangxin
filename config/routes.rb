@@ -46,10 +46,6 @@ OopsData::Application.routes.draw do
 				get :count, :active_count, :attributes_completion, :attributes_statistics
 				post :send_message
 			end
-			member do
-				get :point_log, :redeem_log, :lottery_log
-				post :block
-			end
 		end
 
 		resources :sample_attributes do
@@ -61,6 +57,10 @@ OopsData::Application.routes.draw do
 		resources :samples do
 			member do
 				get :point_logs, :redeem_logs, :lottery_logs
+				post :block
+			end
+			collection do
+				post :send_message
 			end
 		end
 
