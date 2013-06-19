@@ -26,16 +26,37 @@ describe "samples management" do
 	end
 
 	def populate_samples
-		5.times { FactoryGirl.create(:sample) }
+		6.times { FactoryGirl.create(:sample) }
 	end
 
 	it "search samples", :populate_samples => true do
+=begin
 		get "/admin/samples",
 			page: 1,
 			per_page: 10,
 			auth_key: @auth_key
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
-		retval["data"].length.should be 5
+		retval["data"].length.should be 6
+
+		get "admin/samples",
+			page: 1,
+			per_page: 10,
+			is_block: true,
+			auth_key: @auth_key
+		response.status.should be(200)
+		retval = JSON.parse(response.body)["value"]
+		retval["data"].length.should be 3
+=end
+
+		get "admin/samples",
+			page: 1,
+			per_page: 10,
+			is_block: true,
+			email: "foo1",
+			auth_key: @auth_key
+		response.status.should be(200)
+		retval = JSON.parse(response.body)["value"]
+		retval["data"].length.should be 2
 	end
 end

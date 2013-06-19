@@ -10,7 +10,6 @@ FactoryGirl.define do
 
 	factory :sample, class: User do |f|
 		f.sequence(:email) { |n| "foo#{n}@example.com" }
-		f.sequence(:username) { |n| "foo#{n}" }
-		f.is_block false
+		f.sequence(:is_block) { |n| (n%2)==0 }
 	end
 end

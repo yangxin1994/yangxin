@@ -9,7 +9,7 @@ class Admin::SamplesController < Admin::ApplicationController
 	end
 
 	def index
-		@samples = User.search_sample(params[:email], params[:mobile], params[:is_block])
+		@samples = User.search_sample(params[:email], params[:mobile], params[:is_block].to_s == "true")
 		render_json_auto(auto_paginate(@samples)) and return
 	end
 
