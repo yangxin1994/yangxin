@@ -22,7 +22,7 @@ class RewardScheme
 		return true
 	end
 
-	def self.update_review_scheme(reward_scheme_id, reward_scheme)
+	def self.update_reward_scheme(reward_scheme_id, reward_scheme)
 		retval = verify_reward_scheme_type(reward_scheme)
 		return retval if !(retval.to_s == "true")
 		reward = RewardScheme.find_by_id(reward_scheme_id)
