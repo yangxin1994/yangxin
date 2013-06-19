@@ -16,12 +16,12 @@ class Admin::RewardSchemesController < Admin::ApplicationController
 
 	def show
 		reward_scheme = RewardScheme.find_by_id(params[:id])
-		retval = (reward_scheme.nil? ? REWARD_SCHEME_NOT_EXIST : reward_scheme)
+		retval = (reward_scheme.nil? ? ErrorEnum::REWARD_SCHEME_NOT_EXIST : reward_scheme)
 		render_json_auto(retval)
 	end
 
 	def create
-		retval = RewardScheme.create_reward_scheme(@survey.id, params[:reward_scheme_setting])
+		retval = RewardScheme.create_reward_scheme(@survey, params[:reward_scheme_setting])
 		render_json_auto(retval) and return
 	end
 

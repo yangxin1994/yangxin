@@ -3,7 +3,9 @@ module ErrorEnum
 	SAMPLE_ATTRIBUTE_NOT_EXIST = "error__0"
 	WRONG_SAMPLE_ATTRIBUTE_TYPE = "error__1"
 	WRONG_DATE_TYPE = "error__2"
-	
+
+
+	REWARD_SCHEME_NOT_EXIST = 'error___0'  ##TODO ErrorEnum has not rule yet	
 
 	LOGIN_TOO_FREQUENT = "error_0"
 	ILLEGAL_EMAIL = "error_1"
@@ -114,7 +116,6 @@ module ErrorEnum
 
 	# lcm add for answer review
 	REWARD_ERROR = 'error_300'
-	REWARD_SCHEME_NOT_EXIST = 'error_101010'  ##TODO ErrorEnum has not rule yet
 
 	INTERVIEWER_NOT_EXIST = 'error_301'
 	INTERVIEWER_TASK_NOT_EXIST = 'error_302'
