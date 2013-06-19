@@ -40,14 +40,6 @@ describe 'visit reward_schemes' do
 			expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
 		end
 
-		it "the /destroy of reward scheme should return SURVEY_NOT_EXIST" do
-			delete "/admin/surveys/1/reward_schemes/1",
-		    	auth_key: @auth_key
-			response.status.should be(200)
-			retval = JSON.parse(response.body)["value"]["error_code"]
-			expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
-		end
-
 	end
 
 	describe 'with survey exist' do
@@ -67,6 +59,7 @@ describe 'visit reward_schemes' do
 
 		it "the /index of reward scheme should return 5 messages" do
 			reward_list = FactoryGirl.create_list(:reward_scheme, 5) { |scheme| @survey.reward_schemes << scheme}
+			p reward_list.first
 			RewardScheme.all.length.should be(5)
 			get "/admin/surveys/#{@survey.id}/reward_schemes", 
 		    	page: 1,
@@ -122,19 +115,6 @@ describe 'visit reward_schemes' do
 			expect(retval).to eq(true)
 			expect(scheme_in_db.need_review).to eq(true)
 			expect(scheme_in_db.rewards[0]["prizes"][0]["deadline"].to_s).to eq(new_deadline)
-		end
-
-		it "the /delete of reward scheme should return true and data be destroy" do
-			reward_scheme = FactoryGirl.create_list(:reward_scheme, 10)
-			RewardScheme.all.length.should be(10)
-			delete_scheme = RewardScheme.all[0]
-			delete "/admin/surveys/#{@survey.id}/reward_schemes/#{delete_scheme.id}", 
-				auth_key: @auth_key
-			response.status.should be(200)
-			retval = JSON.parse(response.body)["value"]
-			expect(retval).to eq(true)
-			RewardScheme.all.length.should be(9)
-			RewardScheme.find_by_id(delete_scheme.id).should be(nil)
 		end
 
 		describe "verify respone message correct" do
@@ -203,17 +183,6 @@ describe 'visit reward_schemes' do
 				retval = JSON.parse(response.body)["value"]["error_code"]
 				expect(ErrorEnum::INVALID_PRIZE_ID).to eq(retval)
 			end
-
-			it "the /delete should return REWARD_SCHEME_NOT_EXIST when survey_id not exist" do
-	    		reward_scheme = FactoryGirl.create_list(:reward_scheme, 10)
-	    		RewardScheme.all.length.should be(10)
-	    		delete_scheme = RewardScheme.all[9]
-	    		delete "/admin/surveys/#{@survey.id}/reward_schemes/#{delete_scheme.id.to_s.next}", 
-	    			auth_key: @auth_key
-	    		response.status.should be(200)
-	    		retval = JSON.parse(response.body)["value"]['error_code']
-	    		expect(ErrorEnum::REWARD_SCHEME_NOT_EXIST).to eq(retval)
-	    	end
 		end
 
 		after(:each) do
