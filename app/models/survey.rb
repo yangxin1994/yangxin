@@ -84,6 +84,7 @@ class Survey
 	has_many :report_results
 	has_many :report_mockups
 	has_many :interviewer_tasks
+	has_many :reward_schemes
 	has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
 	has_and_belongs_to_many :entry_clerks, class_name: "User", inverse_of: :entry_clerk_allocated_surveys
 	has_and_belongs_to_many :tags do
