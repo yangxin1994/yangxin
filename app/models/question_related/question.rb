@@ -50,6 +50,14 @@ class Question < BasicQuestion
 		return self
 	end
 
+	def remove_sample_attribute
+		self.sample_attribute_relation = {}
+		self.save
+		sample_attribute = self.sample_attribute
+		sample_attribute.questions.delete(self) if !sample_attribute.nil?
+		return true
+	end
+
 	def estimate_answer_time
 		text_length = self.content["text"].length + self.note.length
 		return (text_length / OOPSDATA[RailsEnv.get_rails_env]["words_per_second"].to_i).ceil +

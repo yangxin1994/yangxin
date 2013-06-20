@@ -42,9 +42,8 @@ OopsData::Application.routes.draw do
 	namespace :admin do
 
 		resources :questions do
-			collection do
-				get :count, :active_count, :attributes_completion, :attributes_statistics
-				post :send_message
+			member do
+				put :remove_sample_attribute
 			end
 		end
 
@@ -61,7 +60,7 @@ OopsData::Application.routes.draw do
 			end
 			collection do
 				post :send_message
-				get :count, :active_count
+				get :count, :active_count, :attributes_completion, :attributes_statistics
 			end
 		end
 
