@@ -40,6 +40,10 @@ describe 'visit reward_schemes' do
 			expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
 		end
 
+		it "test" do
+			get "/admin/samples",
+				auth_key: @auth_key
+		end
 	end
 
 	describe 'with survey exist' do

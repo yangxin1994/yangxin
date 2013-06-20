@@ -181,7 +181,7 @@ OopsData::Application.routes.draw do
 		end
 		resources :orders, :only => [:index, :update] do
 			collection do
-				put :update_status 
+				put :update_status
 			end
 		end
 		resources :lotteries do
