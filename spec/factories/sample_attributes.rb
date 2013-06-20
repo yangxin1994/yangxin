@@ -7,7 +7,7 @@ FactoryGirl.define do
 	factory :gender, class: SampleAttribute do
 		name "gender"
 		type 1
-		enum_array ["mail", "female"]
+		enum_array ["male", "female"]
 	end
 
 	factory :weight, class: SampleAttribute do

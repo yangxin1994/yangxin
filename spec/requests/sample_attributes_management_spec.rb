@@ -191,5 +191,14 @@ describe "sample attributes management" do
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
 		expect(retval["sample_attribute_relation"]).to eq(gender_relation)
+
+		put "/admin/questions/#{@choice_question._id.to_s}/remove_sample_attribute",
+			JSON.dump(auth_key: @auth_key),
+			"CONTENT_TYPE" => "application/json"
+		response.status.should be 200
+		retval = JSON.parse(response.body)["value"]
+		retval.should be true
+		q = Question.find_by_id(@choice_question._id)
+		q.sample_attribute.should be nil
 	end
 end

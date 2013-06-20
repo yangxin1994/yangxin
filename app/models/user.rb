@@ -9,6 +9,7 @@ class User
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
 	field :email, :type => String
+	field :mobile, :type => String
 	field :username, :type => String
 	field :password, :type => String
 	# 0 unregistered
@@ -575,227 +576,224 @@ class User
 		# generate rand number
 		sys_pwd = 1
 		while sys_pwd < 16**7 do
-				sys_pwd = rand(16**8-1)
-			end
-			sys_pwd = sys_pwd.to_s(16)
-			self.password = Encryption.encrypt_password(sys_pwd)
-			if !self.save then
-				return ErrorEnum::USER_SAVE_FAILED
-			end
-			self[:new_password] = sys_pwd
-			return self
+			sys_pwd = rand(16**8-1)
 		end
-
-		def self.list_system_user(role, lock)
-			role = role.to_i & 15
-			selected_users = []
-			users = User.where(:role.gt => 0)
-			users.each do |u|
-				next if u.role & role == 0
-				if !lock.nil?
-					next if u.lock != lock
-				end
-				selected_users << u
-			end
-			return selected_users
+		sys_pwd = sys_pwd.to_s(16)
+		self.password = Encryption.encrypt_password(sys_pwd)
+		if !self.save then
+			return ErrorEnum::USER_SAVE_FAILED
 		end
-
-		def get_introduced_users
-			introduced_users = User.where(:introducer_id => self._id.to_s, :status.gt => 1).desc(:created_at)
-			summary_info = introduced_users.map { |u| { _id: u._id.to_s, email: u.email, registered_at: u.registered_at } }
-			return summary_info
-		end
-
-		def get_survey_ids_answered
-			survey_ids = self.answers.map { |e| e.survey_id.to_s }
-			return survey_ids.uniq
-		end
-
-		def self.search_sample(email, mobile, is_block)
-			samples = User.sample
-			samples = sample.where(:is_block => is_block) if !is_block.blank?
-			samples = samples.where(:email => /.*#{email.to_s}*./) if !email.blank?
-			samples = samples.where(:mobile => /.*#{mobile.to_s}*./) if !mobile.blank?
-			return samples
-		end
-
-		def self.count_sample(period, time_length)
-			normal_sample_number = User.sample.where(:is_block => false).length
-			block_sample_number = User.sample.where(:is_block => true).length
-
-			seconds_per_period_ary = {"year" => 1.years.to_i,
-				"month" => 1.months.to_i,
-				"week" => 1.weeks.to_i,
-				"day" => 1.days.to_i}
-			seconds_per_period = seconds_per_period_ary.has_key?(period) ? seconds_per_period_ary[period] : 1.months.to_i
-			time_duration = time_length * seconds_per_period
-			start_time = Time.at(Time.now.to_i - time_duration)
-			new_samples = User.sample.where(:created_at.gt start_time)
-
-			time_point_ary = (0..time_length-1).to_a
-			time_point_ary.map! { |e| e * seconds_per_period + start_time}
-			new_sample_number = []
-			time_point_ary.each do |time_point|
-				new_sample_number << User.sample.and(:created_at.gte => Time.at(time_point), :created_at.lt => Time.at(time_point + seconds_per_period)).length
-			end
-			return {"normal_sample_number" => normal_sample_number,
-				"block_sample_number" => block_sample_number,
-				"new_sample_number" => new_sample_number}
-		end
-
-		def self.count_active_sample(period, time_length)
-			seconds_per_period_ary = {"year" => 1.years.to_i,
-				"month" => 1.months.to_i,
-				"week" => 1.weeks.to_i,
-				"day" => 1.days.to_i}
-			seconds_per_period = seconds_per_period_ary.has_key?(period) ? seconds_per_period_ary[period] : 1.months.to_i
-			time_duration = time_length * seconds_per_period
-			start_time = Time.at(Time.now.to_i - time_duration)
-			time_point_ary = (0..time_length-1).to_a
-			time_point_ary.map! { |e| e * seconds_per_period + start_time}
-
-			active_sample_number = []
-			time_point_ary.each do |time_point|
-				logs = SampleLog.only(:sample_id).and(:created_at.gte => Time.at(time_point), :created_at.lt => Time.at(time_point + seconds_per_period))
-				active_sample_number << logs.uniq.length
-			end
-			return active_sample_number
-		end
-
-		def self.make_sample_attribute_statistics(sample_attribute)
-			name = sample_attribute.name.to_sym
-			analyze_requirement = sample_attribute.analyze_requirement
-
-			completion = 100 - User.where(name => nil).length * 100 / User.all.length
-
-			analyze_result = {}
-			attributes = User.only(name).where(name.ne => nil)
-			case sample_attribute.type
-			when DataType::ENUM
-				distribution = Array.new(sample_attribute.enum_array.length) { 0 }
-				attributes.each do |e|
-					attribute = e.name
-					distribution[attribute] = distribution[attribute] + 1
-				end
-				analyze_result["distribution"] = distribution
-			when DataType::ARRAY
-				distribution = Array.new(sample_attribute.enum_array.length) { 0 }
-				attribute.each do |e|
-					attribute = e.name
-					attribute.each do |a|
-					distribution[a] = distribution[a] + 1
-					end
-				end
-				analyze_result["distribution"] = distribution
-			when DataType::ADDRESS
-				distribution = QuillCommon::AddressUtility.province_hash
-				attribute.each do |e|
-					address = e.name
-					distribution.each do |k, v|
-						if QuillCommon::AddressUtility.satisfy_region_code?(e.name, k)
-							v["count"] += 1
-							break
-						end
-					end
-				end
-				analyze_result["distribution"] = distribution
-			when DataType::NUMBER
-				segmentation = analyze_requirement["segmentation"] || []
-				attribute_value = attribute.map { |e| e.name }
-				analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
-			when DataType::NUMBER_RANGE
-				segmentation = analyze_requirement["segmentation"] || []
-				attribute_value = attribute.map { |e| e.name.mean }
-				analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
-			when DataType::DATE
-				segmentation = analyze_requirement["segmentation"] || []
-				attribute_value = attribute.map { |e| e.name }
-				analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
-			when DataType::DATE_RANGE
-				segmentation = analyze_requirement["segmentation"] || []
-				attribute_value = attribute.map { |e| e.name.mean }
-				analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
-			end
-			return [completion, analyze_result]
-		end
-
-		def point_logs
-			logs = self.logs.point_logs
-			ret_logs = logs.map do |e|
-				{
-					"created_at" => e.created_at,
-					"amount" => e.data["amount"],
-					"reason" => e.data["reason"],
-					"survey_title" => e.data["survey_title"],
-					"gift_name" => e.data["gift_name"],
-					"remark" => e.data["remark"]
-				}
-			end
-			return ret_logs
-		end
-
-		def redeem_logs
-			logs = self.logs.redeem_logs
-			ret_logs = logs.map do |e|
-				{
-					"created_at" => e.created_at,
-					"amount" => e.data["amount"],
-					"order_id" => e.data["order_id"],
-					"gift_name" => e.data["gift_name"]
-				}
-			end
-			return ret_logs
-		end
-
-		def lottery_logs
-			logs = self.logs.lottery_logs
-			ret_logs = logs.map do |e|
-				{
-					"created_at" => e.created_at,
-					"result" => e.data["result"],
-					"order_id" => e.data["order_id"],
-					"prize_name" => e.data["prize_name"]
-				}
-			end
-			return ret_logs
-		end
-
-		def block(block)
-			self.is_block = block.to_s == "true"
-			return self.save
-		end
-
-		def basic_info
-			attributes = {}
-			SampleAttribute.normal.each do |e|
-				name = e.name
-				case e.type
-				when DataType::STRING
-					attributes[name] = self.read_attribute(e.name)
-				when DataType::ENUM
-					attributes[name] = e.enum_array[self.read_attribute(e.name)]
-				when DataType::ARRAY
-					attributes[name] = []
-					self.read_attribute(e.name).each { |m| attributes[name] << e.enum_array[m] }
-				when DataType::NUMBER
-					attributes[name] = self.read_attribute(e.name)
-				when DataType::DATE
-					attributes[name] = {
-						"date_type" => e.date_type,
-						"value" => self.read_attribute(e.name)
-						}
-				when DataType::NUMBER_RANGE
-					attributes[name] = self.read_attribute(e.name)
-				when DataType::DATE_RANGE
-					attributes[name] = {
-						"date_type" => e.date_type,
-						"value" => self.read_attribute(e.name)
-						}
-				end
-			end
-			return {:email => self.email,
-				:mobile => self.mobile,
-				:point => self.point,
-				:attributes => attributes}
-		end
+		self[:new_password] = sys_pwd
+		return self
 	end
+
+	def self.list_system_user(role, lock)
+		role = role.to_i & 15
+		selected_users = []
+		users = User.where(:role.gt => 0)
+		users.each do |u|
+			next if u.role & role == 0
+			if !lock.nil?
+				next if u.lock != lock
+			end
+			selected_users << u
+		end
+		return selected_users
+	end
+
+	def get_introduced_users
+		introduced_users = User.where(:introducer_id => self._id.to_s, :status.gt => 1).desc(:created_at)
+		summary_info = introduced_users.map { |u| { _id: u._id.to_s, email: u.email, registered_at: u.registered_at } }
+		return summary_info
+	end
+
+	def get_survey_ids_answered
+		survey_ids = self.answers.map { |e| e.survey_id.to_s }
+		return survey_ids.uniq
+	end
+
+	def self.search_sample(email, mobile, is_block)
+		samples = User.sample
+		samples = samples.where(:is_block => is_block) if !is_block.blank?
+		samples = samples.where(:email => /#{email.to_s}/) if !email.blank?
+		samples = samples.where(:mobile => /#{mobile.to_s}/) if !mobile.blank?
+		return samples
+	end
+
+	def self.count_sample(period, time_length)
+		normal_sample_number = User.sample.where(:is_block => false).length
+		block_sample_number = User.sample.where(:is_block => true).length
+		seconds_per_period_ary = {"year" => 1.years.to_i,
+			"month" => 1.months.to_i,
+			"week" => 1.weeks.to_i,
+			"day" => 1.days.to_i}
+		seconds_per_period = seconds_per_period_ary.has_key?(period) ? seconds_per_period_ary[period] : 1.months.to_i
+		time_duration = time_length * seconds_per_period
+		start_time = Time.at(Time.now.to_i - time_duration)
+		new_samples = User.sample.where(:created_at.gt => start_time)
+		time_point_ary = (0..time_length-1).to_a
+		time_point_ary.map! { |e| e * seconds_per_period + start_time.to_i}
+		new_sample_number = []
+		time_point_ary.each do |time_point|
+			new_sample_number << User.sample.and(:created_at.gte => Time.at(time_point), :created_at.lt => Time.at(time_point + seconds_per_period)).length
+		end
+		return {"normal_sample_number" => normal_sample_number,
+			"block_sample_number" => block_sample_number,
+			"new_sample_number" => new_sample_number}
+	end
+
+	def self.count_active_sample(period, time_length)
+		seconds_per_period_ary = {"year" => 1.years.to_i,
+			"month" => 1.months.to_i,
+			"week" => 1.weeks.to_i,
+			"day" => 1.days.to_i}
+		seconds_per_period = seconds_per_period_ary.has_key?(period) ? seconds_per_period_ary[period] : 1.months.to_i
+		time_duration = time_length * seconds_per_period
+		start_time = Time.at(Time.now.to_i - time_duration)
+		time_point_ary = (0..time_length-1).to_a
+		time_point_ary.map! { |e| e * seconds_per_period + start_time.to_i}
+		active_sample_number = []
+		time_point_ary.each do |time_point|
+			logs = Log.only(:user_id).and(:created_at.gte => Time.at(time_point), :created_at.lt => Time.at(time_point + seconds_per_period))
+			active_sample_number << logs.map {|e| e.user_id}.uniq.length
+		end
+		return active_sample_number
+	end
+
+	def self.make_sample_attribute_statistics(sample_attribute)
+		name = sample_attribute.name.to_sym
+		analyze_requirement = sample_attribute.analyze_requirement
+		completion = 100 - User.where(name => nil).length * 100 / User.all.length
+		analyze_result = {}
+		attributes = User.only(name).where(name.ne => nil)
+		case sample_attribute.type
+		when DataType::ENUM
+			distribution = Array.new(sample_attribute.enum_array.length) { 0 }
+			attributes.each do |e|
+				attribute = e.name
+				distribution[attribute] = distribution[attribute] + 1
+			end
+			analyze_result["distribution"] = distribution
+		when DataType::ARRAY
+			distribution = Array.new(sample_attribute.enum_array.length) { 0 }
+			attribute.each do |e|
+				attribute = e.name
+				attribute.each do |a|
+				distribution[a] = distribution[a] + 1
+				end
+			end
+			analyze_result["distribution"] = distribution
+		when DataType::ADDRESS
+			distribution = QuillCommon::AddressUtility.province_hash
+			attribute.each do |e|
+				address = e.name
+				distribution.each do |k, v|
+					if QuillCommon::AddressUtility.satisfy_region_code?(e.name, k)
+						v["count"] += 1
+						break
+					end
+				end
+			end
+			analyze_result["distribution"] = distribution
+		when DataType::NUMBER
+			segmentation = analyze_requirement["segmentation"] || []
+			attribute_value = attribute.map { |e| e.name }
+			analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
+		when DataType::NUMBER_RANGE
+			segmentation = analyze_requirement["segmentation"] || []
+			attribute_value = attribute.map { |e| e.name.mean }
+			analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
+		when DataType::DATE
+			segmentation = analyze_requirement["segmentation"] || []
+			attribute_value = attribute.map { |e| e.name }
+			analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
+		when DataType::DATE_RANGE
+			segmentation = analyze_requirement["segmentation"] || []
+			attribute_value = attribute.map { |e| e.name.mean }
+			analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
+		end
+		return [completion, analyze_result]
+	end
+
+	def point_logs
+		logs = self.logs.point_logs
+		ret_logs = logs.map do |e|
+			{
+				"created_at" => e.created_at,
+				"amount" => e.data["amount"],
+				"reason" => e.data["reason"],
+				"survey_title" => e.data["survey_title"],
+				"gift_name" => e.data["gift_name"],
+				"remark" => e.data["remark"]
+			}
+		end
+		return ret_logs
+	end
+
+	def redeem_logs
+		logs = self.logs.redeem_logs
+		ret_logs = logs.map do |e|
+			{
+				"created_at" => e.created_at,
+				"amount" => e.data["amount"],
+				"order_id" => e.data["order_id"],
+				"gift_name" => e.data["gift_name"]
+			}
+		end
+		return ret_logs
+	end
+
+	def lottery_logs
+		logs = self.logs.lottery_logs
+		ret_logs = logs.map do |e|
+			{
+				"created_at" => e.created_at,
+				"result" => e.data["result"],
+				"order_id" => e.data["order_id"],
+				"prize_name" => e.data["prize_name"]
+			}
+		end
+		return ret_logs
+	end
+
+	def block(block)
+		self.is_block = block.to_s == "true"
+		return self.save
+	end
+
+	def basic_info
+		attributes = {}
+		SampleAttribute.normal.each do |e|
+			name = e.name
+			case e.type
+			when DataType::STRING
+				attributes[name] = self.read_attribute(e.name)
+			when DataType::ENUM
+				gender = self.read_attribute(e.name)
+				attributes[name] = gender.nil? ? nil : e.enum_array[gender]
+			when DataType::ARRAY
+				attributes[name] = []
+				(self.read_attribute(e.name) || []).each { |m| attributes[name] << e.enum_array[m] }
+			when DataType::NUMBER
+				attributes[name] = self.read_attribute(e.name)
+			when DataType::DATE
+				attributes[name] = {
+					"date_type" => e.date_type,
+					"value" => self.read_attribute(e.name)
+					}
+			when DataType::NUMBER_RANGE
+				attributes[name] = self.read_attribute(e.name)
+			when DataType::DATE_RANGE
+				attributes[name] = {
+					"date_type" => e.date_type,
+					"value" => self.read_attribute(e.name)
+					}
+			end
+		end
+		return {:email => self.email,
+			:mobile => self.mobile,
+			:point => self.point,
+			:attributes => attributes,
+			:is_block => self.is_block}
+	end
+end

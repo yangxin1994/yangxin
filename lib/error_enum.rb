@@ -4,6 +4,7 @@ module ErrorEnum
 	WRONG_SAMPLE_ATTRIBUTE_TYPE = "error__1"
 	WRONG_DATE_TYPE = "error__2"
 	SAMPLE_ATTRIBUTE_NAME_EXIST = "error__3"
+	SAMPLE_NOT_EXIST = "error__4"
 	
 
 
