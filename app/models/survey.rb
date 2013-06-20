@@ -31,10 +31,10 @@ class Survey
 	field :header, :type => String, default: "调查问卷页眉"
 	field :footer, :type => String, default: "调查问卷页脚"
 	field :description, :type => String, default: "调查问卷描述"
-	# can be 0 (normal), or -1 (deleted)
-	field :status, :type => Integer, default: 0
-	# can be 1 (closed), 2 (under review), 8 (published), the 4(pause) has been removed
-	field :publish_status, :type => Integer, default: 8
+	# can be 1 (closed), 2 (published), 4 (deleted)
+	field :status, :type => Integer, default: 1
+	# can be 1 (closed), 2 (published), 4 (deleted)
+	# field_remove :publish_status, :type => Integer, default: 1
 	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
 	field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100, "finished_count" => 0, "submitted_count" => 0], "is_exclusive" => true, "quota_satisfied" => false, "finished_count" => 0, "submitted_count" => 0 }
 	field :filters, :type => Array, default: []
@@ -87,13 +87,13 @@ class Survey
 	}
 
 	# reward: 0: nothing, 1: priPze, 2: point
-	# field :reward, :type => Integer, :default => 0
-	# field :show_in_community, :type => Boolean, default: false
+	# field_remove :reward, :type => Integer, :default => 0
+	# field_remove :show_in_community, :type => Boolean, default: false
 	# whether this survey can be promoted by emails or other ways
-	# field :promotable, :type => Boolean, :default => false
-	# field :promote_email_number, :type => Integer, :default => 0
+	# field_remove :promotable, :type => Boolean, :default => false
+	# field_remove :promote_email_number, :type => Integer, :default => 0
 	# whether the answers of the survey need to be reviewed
-	# field :answer_need_review, :type => Boolean, :default => false
+	# field_remove :answer_need_review, :type => Boolean, :default => false
 
 	has_many :answers
 	has_many :email_histories
