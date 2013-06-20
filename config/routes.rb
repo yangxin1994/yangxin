@@ -56,11 +56,12 @@ OopsData::Application.routes.draw do
 
 		resources :samples do
 			member do
-				get :point_logs, :redeem_logs, :lottery_logs
+				get :point_log, :redeem_log, :lottery_log
 				post :block
 			end
 			collection do
 				post :send_message
+				get :count, :active_count
 			end
 		end
 

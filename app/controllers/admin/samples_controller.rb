@@ -1,10 +1,10 @@
 class Admin::SamplesController < Admin::ApplicationController
-	before_filter :check_sample_attribute_existence, :only => [:point_log, :redeem_log, :lottery_log]
+	before_filter :check_sample_existence, :only => [:point_log, :redeem_log, :lottery_log, :show, :block]
 
-	def check_sample_attribute_existence
-		@sample_attribute = SampleAttribute.normal.find_by_id(params[:id])
-		if @sample_attribute.nil?
-			render_json_e(ErrorEnum::SAMPLE_ATTRIBUTE_NOT_EXIST) and return
+	def check_sample_existence
+		@sample = User.sample.find_by_id(params[:id])
+		if @sample.nil?
+			render_json_e(ErrorEnum::SAMPLE_NOT_EXIST) and return
 		end
 	end
 
@@ -19,7 +19,7 @@ class Admin::SamplesController < Admin::ApplicationController
 	end
 
 	def active_count
-		@active_samples_count = User.count_active_sample(params[:period], params[:time_length])
+		@active_samples_count = User.count_active_sample(params[:period], params[:time_length].to_i)
 		render_json_auto(@active_samples_count) and return
 	end
 
