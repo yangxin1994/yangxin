@@ -10,6 +10,12 @@ FactoryGirl.define do
 
 	factory :sample, class: User do |f|
 		f.sequence(:email) { |n| "foo#{n}@example.com" }
-		f.sequence(:is_block) { |n| (n%2)==0 }
+		f.sequence(:is_block) { |n| (n%2)==1 }
+		f.user_role 1
+	end
+
+	factory :sample_with_attributes, class: User do
+		email "foo@test.com"
+		gender 0
 	end
 end
