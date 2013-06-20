@@ -67,14 +67,33 @@ class Survey
 	field :spreadable, :type => Boolean, :default => false
 	# reward for introducing others
 	field :spread_point, :type => Integer, :default => 0
-	# reward: 0: nothing, 1: prize, 2: point
-	field :reward, :type => Integer, :default => 0
-	field :show_in_community, :type => Boolean, default: false
+	field :quillme_promote, :type => Boolean, :default => false
+	field :email_promote, :type => Hash, default: {
+		"promotable" => false,
+		"email_amount" => 0,
+		"promote_to_undefined_sample" => false,
+		"promote_email_amount" => 0
+	}
+	field :sms_promote, :type => Hash, default: {
+		"promotable" => false,
+		"sms_amount" => 0,
+		"promote_to_undefined_sample" => false,
+		"promote_sms_count" => 0
+	}
+	field :borswer_extension_promote, :type => Hash, default: {
+		"promotable" => false,
+		"login_sample_promote_only" => false,
+		"filter" => [[{"key_word" => [""], "url" => ""}]]
+	}
+
+	# reward: 0: nothing, 1: priPze, 2: point
+	# field :reward, :type => Integer, :default => 0
+	# field :show_in_community, :type => Boolean, default: false
 	# whether this survey can be promoted by emails or other ways
-	field :promotable, :type => Boolean, :default => false
-	field :promote_email_number, :type => Integer, :default => 0
+	# field :promotable, :type => Boolean, :default => false
+	# field :promote_email_number, :type => Integer, :default => 0
 	# whether the answers of the survey need to be reviewed
-	field :answer_need_review, :type => Boolean, :default => false
+	# field :answer_need_review, :type => Boolean, :default => false
 
 	has_many :answers
 	has_many :email_histories
