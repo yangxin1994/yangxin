@@ -198,7 +198,7 @@ class AnalysisResult < Result
 			return analyze_scale(question.issue, answer_ary)
 	    when QuestionTypeEnum::HEAT_MAP_QUESTION
 	    	return analyze_heat_map(question.issue, answer_ary)
-	    when HOT_SPOT_QUESTION
+	    when QuestionTypeEnum::HOT_SPOT_QUESTION
             return analyze_hot_spot(question.issue, answer_ary)
 		end
 	end

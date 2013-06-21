@@ -418,21 +418,21 @@ class Result
 
 ###############################################################
 # issue 某个question的issue
-# answer_ary 根据需要分析的question的id，去answers表中找到对应的答案的内容
+# answer_ary 代表某个具体的问题的所有样本的回答的集合
 ###############################################################
 	def analyze_heat_map(issue, answer_ary, opt={})
       region_ids = issue["items"].map{|region| region["id"]}
       result = {}
       region_ids.map{|region_id| result[region_id] = [] }
+      
+      tmp_point = []  # 临时数组，用来盛放 region 内的point
       answer_ary.each do |point|
-      	result.each do |key|
-      	  issue["items"].each do |region|
-      	  	if in_region?(region["region"],point)
-      	  	  result[key] << point if region["id"] == key
-      	  	end
-      	  end 		
-      	end
+        item = issue["items"].select{|region| in_region?(region,point)}
+        item = item.first	
+        result[item["id"]] << point
+        tmp_point << point  
       end
+      result["-1"] = answer_ary - tmp_point  #所有region外的point 记作其他
       return result
 	end
 
@@ -441,14 +441,15 @@ class Result
 
 ###############################################################
 # issue 某个question的issue
-# answer_ary 根据需要分析的question的id，去answers表中找到对应的答案的内容
+# answer_ary 代表某个具体的问题的所有样本的回答的集合
 ###############################################################
 	def analyze_hot_spot(issue, answer_ary, opt={})
       region_ids = issue["items"].map{|region| region["id"]}
       result = {}
-      region_ids.map{|region_id| result[region_id] = [] }
-      answer_ary.each_with_index do |answer|
-        result[region_ids[index]] << answer
+      region_ids.map{|region_id| result[region_id] = '' }
+      result.each_key do |region_id|
+        b = answer_ary.map{|answer| answer.values_at("#{region_id}")}.flatten.sort.inject(Hash.new(0)) { |total, e| total[e] += 1 ;total}
+        retult[region_id] =  b.values.join(',')
       end
       return result
 	end
@@ -461,8 +462,8 @@ private
       y_start = region["y_start"]
       x_end   = region["x_end"]
       y_end   = region["y_end"]
-      point_x = point[0]
-      point_y = point[1]
+      point_x = point[0] #横坐标 
+      point_y = point[1] #纵坐标
 
       if x_start < point_x && point_x < x_end &&  y_end < point_y && point_y < y_start   
       	return true

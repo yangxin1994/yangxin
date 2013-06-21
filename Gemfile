@@ -63,3 +63,5 @@ gem 'roadie'		# html email
 #gem 'premailer'		# html email
 gem 'premailer-rails'
 gem 'nokogiri'
+gem "yomu", "~> 0.1.6"
+
