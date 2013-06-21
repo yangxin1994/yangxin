@@ -3,15 +3,11 @@ class QuotaEmailWorker
 	sidekiq_options :retry => false, :queue => "oopsdata_#{Rails.env}".to_sym
 
 	def perform
-		puts "aaaaaaaaaaaaaa"
 		# 1. get all samples, excluding those are in the blacklist
-		# user_ids = User.ids_not_in_blacklist
-		user_ids = []
+		user_ids = User.ids_not_in_blacklist
 		# 2. get the surveys that need to send emails
 		published_survey = Survey.get_published_active_surveys
 		# 3. find out samples for surveys
-		puts "bbbbbbbbbbbbbb"
-		puts published_survey.map { |e| e.title }
 		surveys_for_user = {}
 		surveys_for_imported_email = {}
 		all_import_emails = ImportEmail.all.map { |e| e.email }
