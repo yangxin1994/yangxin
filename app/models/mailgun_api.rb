@@ -8,7 +8,7 @@ class MailgunApi
 
 	def self.batch_send_survey_email(survey_id_ary, user_id_ary, email_ary)
 		@emails = email_ary.blank? ? user_id_ary.map { |e| User.find_by_id(e).try(:email) } : email_ary
-		group_size = 2
+		group_size = 900
 		@group_emails = []
 		@group_recipient_variables = []
 		while @emails.length >= group_size
