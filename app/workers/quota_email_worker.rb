@@ -3,11 +3,15 @@ class QuotaEmailWorker
 	sidekiq_options :retry => false, :queue => "oopsdata_#{Rails.env}".to_sym
 
 	def perform
+		puts "aaaaaaaaaaaaaa"
 		# 1. get all samples, excluding those are in the blacklist
-		user_ids = User.ids_not_in_blacklist
+		# user_ids = User.ids_not_in_blacklist
+		user_ids = []
 		# 2. get the surveys that need to send emails
 		published_survey = Survey.get_published_active_surveys
 		# 3. find out samples for surveys
+		puts "bbbbbbbbbbbbbb"
+		puts published_survey.map { |e| e.title }
 		surveys_for_user = {}
 		surveys_for_imported_email = {}
 		all_import_emails = ImportEmail.all.map { |e| e.email }
@@ -15,6 +19,7 @@ class QuotaEmailWorker
 			s_id = survey._id.to_s
 			email_number = survey.promote_email_number
 			next if email_number == 0
+
 			user_ids_answered = survey.get_user_ids_answered
 			user_ids_sent = EmailHistory.get_user_ids_sent(s_id)
 			user_ids_available = user_ids - user_ids_answered - user_ids_sent
@@ -40,15 +45,23 @@ class QuotaEmailWorker
 				EmailHistory.collection.insert(imported_email_history_batch)
 			end
 		end
-		# 4. send emails to the samples found
+		# 4. transform data
+		users_for_surveys = {}
 		surveys_for_user.each do |u_id, s_id_ary|
-			MailgunApi.send_survey_email(u_id, "", s_id_ary)
+			users_for_surveys[s_id_ary] ||= []
+			users_for_surveys[s_id_ary] << u_id
 		end
+		imported_emails_for_surveys = {}
 		surveys_for_imported_email.each do |email, s_id_ary|
-			begin
-				MailgunApi.send_survey_email("", email, s_id_ary)
-			rescue
-			end
+			imported_emails_for_surveys[s_id_ary] ||= []
+			imported_emails_for_surveys[s_id_ary] << email
+		end
+		# 5. send emails to the samples found
+		users_for_surveys.each do |s_id_ary, user_id_ary|
+			MailgunApi.batch_send_survey_email(s_id_ary, user_id_ary, [])
+		end
+		imported_emails_for_surveys.each do |s_id_ary, email_ary|
+			MailgunApi.batch_send_survey_email(s_id_ary, [], email_ary)
 		end
 		return true
 	end
