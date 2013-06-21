@@ -133,12 +133,13 @@ module Tool
 	end
 
 	def self.convert_int_to_base_arr(num)
-		binary_arr = []
-		binary_num = num.to_s(2)
-		binary_length = binary_num.length
-		0.upto(binary_num.size - 1) do |byte|
-			binary_arr << (2 ** byte) if binary_num[binary_length - byte - 1] == 49
+		base_arr = []
+		digit = 1
+		while num > 0
+			base_arr << digit if num%2 == 1
+			num = num/2
+			digit *= 2
 		end
-		return binary_arr
+		return base_arr
 	end
 end
