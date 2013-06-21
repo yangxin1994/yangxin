@@ -131,4 +131,14 @@ module Tool
 		end
 		return distribution
 	end
+
+	def self.convert_int_to_base_arr(num)
+		binary_arr = []
+		binary_num = num.to_s(2)
+		binary_length = binary_num.length
+		0.upto(binary_num.size - 1) do |byte|
+			binary_arr << (2 ** byte) if binary_num[binary_length - byte - 1] == 49
+		end
+		return binary_arr
+	end
 end
