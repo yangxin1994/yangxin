@@ -136,8 +136,9 @@ describe "sample attributes management" do
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
 		expect(retval["data"].length).to eq(2)
-		expect(retval["data"][1]["name"]).to eq("gender")
-		expect(retval["data"][1]["type"]).to eq(1)
+
+		expect(retval["data"].map { |e| e["name"] }).to include("gender")
+		expect(retval["data"].map { |e| e["name"] }).to include("birth")
 
 		get "/admin/sample_attributes",
 			page: 1,
