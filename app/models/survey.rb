@@ -62,6 +62,7 @@ class Survey
 	field :quality_control_questions_ids, :type => Array, default: []
 	field :deadline, :type => Integer
 	field :is_star, :type => Boolean, :default => false
+	field :delta, :type => Boolean, :default => true
 	field :point, :type => Integer, :default => 0
 	# whether this survey can be introduced to another person
 	field :spreadable, :type => Boolean, :default => false
