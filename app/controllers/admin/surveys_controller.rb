@@ -1,6 +1,6 @@
 class Admin::SurveysController < Admin::ApplicationController
 	before_filter :check_survey_existence, :except => [:index]
-	before_filter :check_reward_scheme_existence, :only => [:quillme_promote, :email_promote, :sms_promote, :weibo_promote]
+	before_filter :check_reward_scheme_existence, :only => [:quillme_promote, :email_promote, :sms_promote, :weibo_promote, :broswer_extension_promote, ]
 
 	def check_survey_existence
 		@survey = Survey.find_by_id(params[:id])
@@ -13,19 +13,18 @@ class Admin::SurveysController < Admin::ApplicationController
 	end
 
 	def index
-		@surveys = Survey.all.desc(:created_at)
-		# status filter
-		status_filter = Tool.convert_int_to_base_arr(param[:status].to_i)
-		@surveys = @surveys.in(:status => status_filter)
+		select_fileds = {}
+		if !params[:status].blank?
+			status_filter = Tool.convert_int_to_base_arr(params[:status].to_i)
+			select_fileds[:status] = {"$in" => status_filter}
+		end
+		select_fileds[:title] = /.*#{params[:title]}.*/ if !params[:title].blank?
+		@surveys = Survey.find_by_fields(select_fileds)
 		
-		# title filter
-		@surveys = @surveys.where(title: /.*#{params[:title]}.*/) if !params[:title].blank?
-
-		# mobile and email filter
 		[:moblie, :email].each do |field|
 			if !params[field].blank?
 				@surveys = @surveys.to_a.select do |s|
-					s.user.email.include?(params[field].to_s)
+					s.user.send(field).include?(params[field].to_s)
 				end
 			end
 		end
@@ -33,6 +32,7 @@ class Admin::SurveysController < Admin::ApplicationController
 		@surveys = @surveys.map do |s|
 			s[:mobile] = s.user.mobile
 			s[:email] = s.user.email
+			s
 		end
 
 		@surveys = @surveys.map { |s| s.serialize_for([:title, :email, :mobile, :created_at]) }
@@ -40,7 +40,10 @@ class Admin::SurveysController < Admin::ApplicationController
 	end
 
 	def show
-		render_json_auto @survey
+	    s = @survey.attributes
+		s['created_at'] = s['created_at'].to_i
+		s['updated_at'] = s['updated_at'].to_i
+		render_json_auto s
 	end
 
 	def promote
@@ -48,38 +51,39 @@ class Admin::SurveysController < Admin::ApplicationController
 		retval["quillme"] = @survey.quillme_promote
 		retval["email"] = @survey.email_promote
 		retval["sms"] = @survey.sms_promote
-		retval["borswer_extension"] = @survey.borswer_extension_promote
+		retval["broswer_extension"] = @survey.broswer_extension_promote
+		retval["weibo"] = @survey.weibo_promote
 		render_json_auto retval and return
 	end
 
 	def quillme_promote
-		@survey.update_attributes({'quillme_promote' => params['quillme_promote_setting']})
-		return true
+		@survey.update_attributes({'quillme_promote' => params[:quillme_promote_setting]})
+		render_json_auto true and return
 	end
 
 	def email_promote
-		@survey.update_attributes({'email_promote' => params['email_promote_setting']})
-		return true
+		@survey.update_attributes({'email_promote' => params[:email_promote_setting]})
+		render_json_auto true and return
 	end
 
 	def sms_promote
-		@survey.update_attributes({'sms_promote' => params['sms_promote_setting']})
-		return true
+		@survey.update_attributes({'sms_promote' => params[:sms_promote_setting]})
+		render_json_auto true and return
 	end
 
 	def broswer_extension_promote
-		@survey.update_attributes({'broswer_extension_promote' => params['broswer_extension_promote_setting']})
-		return true
+		@survey.update_attributes({'broswer_extension_promote' => params[:broswer_extension_promote_setting]})
+		render_json_auto true and return
 	end
 
 	def weibo_promote
-		@survey.update_attributes({'weibo_promote' => params['weibo_promote_setting']})
-		return true
+		@survey.update_attributes({'weibo_promote' => params[:weibo_promote_setting]})
+		render_json_auto true and return
 	end
 
 	def  background_survey
-		@survey.update_attributes({'delta' => params['delta_setting']})
-		return true
+		@survey.update_attributes({'delta' => params[:delta_setting]})
+		render_json_auto true and return
 	end
 
 	def add_template_question

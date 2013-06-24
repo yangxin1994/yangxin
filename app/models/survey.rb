@@ -81,7 +81,7 @@ class Survey
 		"promote_to_undefined_sample" => false,
 		"promote_sms_count" => 0
 	}
-	field :borswer_extension_promote, :type => Hash, default: {
+	field :broswer_extension_promote, :type => Hash, default: {
 		"promotable" => false,
 		"login_sample_promote_only" => false,
 		"filter" => [[{"key_word" => [""], "url" => ""}]]
@@ -164,6 +164,11 @@ class Survey
 
 	def self.find_by_ids(survey_id_list)
 		return Survey.all.in(_id: survey_id_list)
+	end
+
+	def self.find_by_fields(h_fields)
+		return Survey.all.desc(:created_at) if h_fields.blank?
+		return Survey.where(h_fields).desc(:created_at)
 	end
 
 	#----------------------------------------------
@@ -1772,7 +1777,11 @@ class Survey
 	def serialize_for(arr_fields)
 		survey_obj = {"id" => self.id.to_s}
 		arr_fields.each do |field|
-			survey_obj[field] = self.send(field)
+			if [:created_at, :updated_at].include?(field)
+			    survey_obj[field] = self.send(field).to_i
+			else
+				survey_obj[field] = self.send(field)
+			end
 		end
 		return survey_obj
 	end
