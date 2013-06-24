@@ -1,6 +1,8 @@
 # encoding: utf-8
 class Admin::GiftsController < Admin::ApplicationController
 
+  before_filter :check_gift_existence, :only => [:update, :destroy]
+
   def check_gift_existence
     @gift = Gift.find_by_id(params[:id])
     render_json_auto(ErrorEnum::GIFT_NOT_EXIST) and return if @gift.nil?
@@ -12,9 +14,12 @@ class Admin::GiftsController < Admin::ApplicationController
   end
 
   def create
+    @gift = Gift.create_gift(params[:gift])
+    render_json_auto(@gift) and return
   end
 
   def update
+    render_json_auto(@gift.update(params[:gift])) and return
   end
 
   def destroy

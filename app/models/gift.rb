@@ -1,3 +1,4 @@
+require 'tool'
 class Gift
 	include Mongoid::Document
 	include Mongoid::Timestamps
@@ -24,6 +25,40 @@ class Gift
 	index({ type: 1, status: 1 }, { background: true } )
 
 	def find_by_id(gift_id)
-		return self.normal.
+		return self.normal.where(:_id => gift_id).first
+	end
+
+	def self.create_gift(gift)
+		material_id = gift.delete("material_id")
+		material = Material.find_by_id(material_id)
+		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+		gift = Gift.new(gift)
+		gift.material = material
+		return gift.save
+	end
+
+	def update_gift(gift)
+		
+	end
+
+	def self.search_gift(title, status, type)
+		gifts = Gift.normal
+		gifts = gifts.where(:title => /#{title}/) if !title.blank?
+		gifts = gifts.where(:status.in => Tool.convert_int_to_base_arr(status)) if !status.blank?
+		gifts = gifts.where(:type.in => Tool.convert_int_to_base_arr(type)) if !type.blank?
+		return gifts
+	end
+
+	def delete_gift
+		self.status = 4
+		return self.save
+	end
+
+	def self.check_params(gift)
+		material_id = gift["material_id"]
+		material = Material.find_by_id(material_id)
+		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+		return Errorenum::WRONG_GIFT_TYPE if ![1,2,4].include?(gift["type"].to_i)
+		return true
 	end
 end
