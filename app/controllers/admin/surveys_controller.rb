@@ -15,27 +15,24 @@ class Admin::SurveysController < Admin::ApplicationController
 	def index
 		@surveys = Survey.all.desc(:created_at)
 		# status filter
-		if params[:status].to_i > 0 and params[:status] < 8
-			status_filter = Tool.convert_int_to_base_arr(param)
-			@surveys = @surveys.in(:status => status_filter)
-		end
+		status_filter = Tool.convert_int_to_base_arr(param[:status].to_i)
+		@surveys = @surveys.in(:status => status_filter)
 		
 		# title filter
-		@surveys = @surveys.where(title: /.*#{params[:title]}.*/) if params[:title]
+		@surveys = @surveys.where(title: /.*#{params[:title]}.*/) if !params[:title].blank?
 
 		# mobile and email filter
 		[:moblie, :email].each do |field|
-			if params[field]
+			if !params[field].blank?
 				@surveys = @surveys.to_a.select do |s|
 					s.user.email.include?(params[field].to_s)
 				end
 			end
 		end
 
-		@surveys = @surveys.collect do |s|
+		@surveys = @surveys.map do |s|
 			s[:mobile] = s.user.mobile
 			s[:email] = s.user.email
-			s
 		end
 
 		@surveys = @surveys.map { |s| s.serialize_for([:title, :email, :mobile, :created_at]) }
