@@ -8,13 +8,13 @@ describe 'visit surveys' do
 
 	describe 'without survey exist' do
 
-		# it "the /index of one survey should return []" do
-		# 	get "/admin/surveys", 
-		#     	auth_key: @auth_key
-		# 	response.status.should be(200)
-		# 	retval = JSON.parse(response.body)["value"]["data"]
-		# 	expect(retval).to eq([])
-		# end
+		it "the /index of one survey should return []" do
+			get "/admin/surveys", 
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval).to eq([])
+		end
 
 		it "the /show of one survey should return SURVEY_NOT_EXIST" do
 			get "/admin/surveys/1", 
@@ -96,7 +96,81 @@ describe 'visit surveys' do
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
 			expect(retval.length).to eq(1)
+			retval[0].each do |k, v|
+				if (k != "email" and k != "mobile")
+					expect(v).to eq(@survey.send(k).to_s)
+				else
+					expect(v).to eq(@survey.user.send(k).to_s)
+				end
+			end
 		end
+
+		it "the /show of one survey should return survey detail" do
+			get "/admin/surveys/#{@survey.id}", 
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			p response.body
+			retval = JSON.parse(response.body)["value"]
+			expect(retval).to eq(@survey)
+		end
+
+		# it "the /promote of surveys should return SURVEY_NOT_EXIST" do
+		# 	get "/admin/surveys/1/promote", 
+		#     	auth_key: @auth_key
+		# 	response.status.should be(200)
+		# 	retval = JSON.parse(response.body)["value"]["error_code"]
+		# 	expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
+		# end
+
+		# it "the /quillme_promote of survey should return SURVEY_NOT_EXIST" do
+		# 	post "/admin/surveys/1/quillme_promote", 
+		#     	auth_key: @auth_key
+		# 	response.status.should be(200)
+		# 	retval = JSON.parse(response.body)["value"]["error_code"]
+		# 	expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
+		# end
+
+		# it "the /email_promote of survey should return SURVEY_NOT_EXIST" do
+		# 	post "/admin/surveys/1/email_promote", 
+		#     	auth_key: @auth_key
+		# 	response.status.should be(200)
+		# 	retval = JSON.parse(response.body)["value"]["error_code"]
+		# 	expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
+		# end
+
+		# it "the /sms_promote of survey should return SURVEY_NOT_EXIST" do
+		# 	post "/admin/surveys/1/sms_promote", 
+		#     	auth_key: @auth_key
+		# 	response.status.should be(200)
+		# 	retval = JSON.parse(response.body)["value"]["error_code"]
+		# 	expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
+		# end
+
+		# it "the /broswer_extension_promote of survey should return SURVEY_NOT_EXIST" do
+		# 	post "/admin/surveys/1/broswer_extension_promote", 
+		#     	auth_key: @auth_key
+		# 	response.status.should be(200)
+		# 	retval = JSON.parse(response.body)["value"]["error_code"]
+		# 	expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
+		# end
+
+		# it "the /weibo_promote of survey should return SURVEY_NOT_EXIST" do
+		# 	post "/admin/surveys/1/weibo_promote", 
+		#     	auth_key: @auth_key
+		# 	response.status.should be(200)
+		# 	retval = JSON.parse(response.body)["value"]["error_code"]
+		# 	expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
+		# end
+
+		# it "the /background_survey of survey should return SURVEY_NOT_EXIST" do
+		# 	put "/admin/surveys/1/background_survey", 
+		#     	auth_key: @auth_key
+		# 	response.status.should be(200)
+		# 	retval = JSON.parse(response.body)["value"]["error_code"]
+		# 	expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
+		# end
+
+
 
 	end
 
