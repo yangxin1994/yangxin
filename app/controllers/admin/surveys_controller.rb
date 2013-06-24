@@ -1,34 +1,88 @@
 class Admin::SurveysController < Admin::ApplicationController
+	before_filter :check_survey_existence, :except => [:index]
+	before_filter :check_reward_scheme_existence, :only => [:quillme_promote, :email_promote, :sms_promote, :weibo_promote]
+
+	def check_survey_existence
+		@survey = Survey.find_by_id(params[:id])
+		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
+	end
+
+	def check_reward_scheme_existence
+		@reward_scheme = RewardScheme.find_by_id(params[:reward_scheme_id])
+		render_json_auto(ErrorEnum::REWARD_SCHEME_NOT_EXIST) and return if @reward_scheme.nil?
+	end
 
 	def index
-		@surveys = Survey.all
-		# use publish_status = 0 means status=-1
-		if params[:status].to_i > 0
+		@surveys = Survey.all.desc(:created_at)
+		# status filter
+		if params[:status].to_i > 0 and params[:status] < 8
 			status_filter = Tool.convert_int_to_base_arr(param)
-			@surveys = @surveys.where(:status.gt => -1, :publish_status => params[:publish_status].to_i).desc(:created_at)
-		elsif params[:publish_status] && params[:publish_status].to_i == 0
-			@surveys = @surveys.where(:status => -1).desc(:created_at)
+			@surveys = @surveys.in(:status => status_filter)
 		end
-		@surveys = @surveys.where(:show_in_community => params["show_in_community"].to_s == 'true') if params[:show_in_community]
-		# search
+		
+		# title filter
 		@surveys = @surveys.where(title: /.*#{params[:title]}.*/) if params[:title]
 
-		if params[:email].nil?
-			render_json_auto auto_paginate(@surveys) and return
-		else
-			@surveys = @surveys.to_a.select do |s|
-				s.user.email.include?(params[:email].to_s)
+		# mobile and email filter
+		[:moblie, :email].each do |field|
+			if params[field]
+				@surveys = @surveys.to_a.select do |s|
+					s.user.email.include?(params[field].to_s)
+				end
 			end
-
-			render_json_auto auto_paginate(@surveys) and return
 		end
+
+		@surveys = @surveys.collect do |s|
+			s[:mobile] = s.user.mobile
+			s[:email] = s.user.email
+			s
+		end
+
+		@surveys = @surveys.map { |s| s.serialize_for([:title, :email, :mobile, :created_at]) }
+		render_json_auto auto_paginate(@surveys) and return
 	end
 
 	def show
-		@survey = Survey.normal.find_by_id(params[:id])
-		# logger.info @survey.inspect
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return unless @survey
 		render_json_auto @survey
+	end
+
+	def promote
+		retval = {}
+		retval["quillme"] = @survey.quillme_promote
+		retval["email"] = @survey.email_promote
+		retval["sms"] = @survey.sms_promote
+		retval["borswer_extension"] = @survey.borswer_extension_promote
+		render_json_auto retval and return
+	end
+
+	def quillme_promote
+		@survey.update_attributes({'quillme_promote' => params['quillme_promote_setting']})
+		return true
+	end
+
+	def email_promote
+		@survey.update_attributes({'email_promote' => params['email_promote_setting']})
+		return true
+	end
+
+	def sms_promote
+		@survey.update_attributes({'sms_promote' => params['sms_promote_setting']})
+		return true
+	end
+
+	def broswer_extension_promote
+		@survey.update_attributes({'broswer_extension_promote' => params['broswer_extension_promote_setting']})
+		return true
+	end
+
+	def weibo_promote
+		@survey.update_attributes({'weibo_promote' => params['weibo_promote_setting']})
+		return true
+	end
+
+	def  background_survey
+		@survey.update_attributes({'delta' => params['delta_setting']})
+		return true
 	end
 
 	def add_template_question
