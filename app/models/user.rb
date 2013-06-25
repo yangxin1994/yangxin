@@ -614,7 +614,7 @@ class User
 
 	def self.search_sample(email, mobile, is_block)
 		samples = User.sample
-		samples = samples.where(:is_block => is_block) if !is_block.blank?
+		samples = samples.where(:is_block => false) if !is_block
 		samples = samples.where(:email => /#{email.to_s}/) if !email.blank?
 		samples = samples.where(:mobile => /#{mobile.to_s}/) if !mobile.blank?
 		return samples

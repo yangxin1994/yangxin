@@ -93,6 +93,7 @@ class Survey
 		"video" => "",
 		"audio" => ""
 	}
+	field :quillme_hot, :type => Boolean, default: false
 
 	# reward: 0: nothing, 1: priPze, 2: point
 	# field_remove :reward, :type => Integer, :default => 0
@@ -1911,6 +1912,16 @@ class Survey
 	def clear_survey_object
 		Cache.write(self._id, nil)
 		return true
+	end
+
+	def set_quillme_hot
+		s = Survey.where(:quillme_hot => true).first
+		if !s.nil?
+			s.quillme_hot = false
+			s.save
+		end
+		self.quillme_hot = true
+		return self.save
 	end
 
 end
