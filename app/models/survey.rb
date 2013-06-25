@@ -62,6 +62,7 @@ class Survey
 	field :quality_control_questions_ids, :type => Array, default: []
 	field :deadline, :type => Integer
 	field :is_star, :type => Boolean, :default => false
+	field :delta, :type => Boolean, :default => true
 	field :point, :type => Integer, :default => 0
 	# whether this survey can be introduced to another person
 	field :spreadable, :type => Boolean, :default => false
@@ -81,10 +82,16 @@ class Survey
 		"promote_to_undefined_sample" => false,
 		"promote_sms_count" => 0
 	}
-	field :borswer_extension_promote, :type => Hash, default: {
+	field :broswer_extension_promote, :type => Hash, default: {
 		"promotable" => false,
 		"login_sample_promote_only" => false,
 		"filter" => [[{"key_word" => [""], "url" => ""}]]
+	}
+	field :weibo_promote, :type => Hash, default: {
+		"text" => "",
+		"image" => "",
+		"video" => "",
+		"audio" => ""
 	}
 
 	# reward: 0: nothing, 1: priPze, 2: point
@@ -158,6 +165,18 @@ class Survey
 
 	def self.find_by_ids(survey_id_list)
 		return Survey.all.in(_id: survey_id_list)
+	end
+
+	def self.find_by_fields(h_fields)
+		return Survey.all.desc(:created_at) if h_fields.blank?
+		return Survey.where(h_fields).desc(:created_at)
+	end
+
+	def append_user_fields(arr_fields)
+		arr_fields.each do |field|
+			self[field] = self.user.send(field)
+		end
+		return self
 	end
 
 	#----------------------------------------------
@@ -1760,6 +1779,18 @@ class Survey
 		survey_obj["created_at"] = self.created_at.to_i
 		survey_obj["reward_info"] = self.reward_info
 		survey_obj["publish_status"] = self.publish_status
+		return survey_obj
+	end
+
+	def serialize_for(arr_fields)
+		survey_obj = {"id" => self.id.to_s}
+		arr_fields.each do |field|
+			if [:created_at, :updated_at].include?(field)
+			    survey_obj[field] = self.send(field).to_i
+			else
+				survey_obj[field] = self.send(field)
+			end
+		end
 		return survey_obj
 	end
 
