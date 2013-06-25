@@ -284,11 +284,254 @@ describe 'visit surveys' do
 				expect(weibo_promote).to eq(survey.weibo_promote)
 			end
 		end
+
+		after(:each) do
+			clear(:Survey)
+			clear(:RewardScheme)
+			clear(:Prize)
+		end
 	end
 
-	after(:each) do
-		clear(:Survey)
-		clear(:RewardScheme)
-		clear(:Prize)
+	describe "verify respone message correct" do
+		before(:all) do
+			@surveys = FactoryGirl.create_list(:survey, 20)
+			@creator1 = FactoryGirl.create(:survey_creator)
+			@creator2 = FactoryGirl.create(:survey_creator)
+			@surveys[0..9].each { |s| @creator1.surveys << s}
+			@surveys[10..19].each { |s| @creator2.surveys << s}
+		end
+
+        ### status filter test
+		it "the /index select by status 1 should find 6 results" do
+			get "/admin/surveys",
+			    status: 1,
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(7)
+		end
+
+		it "the /index select by status 4 should find 6 results" do
+			get "/admin/surveys",
+			    status: 4,
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(6)
+		end
+
+		it "the /index select by status 6 should find 10 results" do
+			get "/admin/surveys",
+			    status: 6,
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(10)
+		end
+
+		it "the /index select by status 6 with per_page 15 should find 13 results" do
+			get "/admin/surveys",
+			    status: 6,
+			    page: 1,
+			    per_page: 15,
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(13)
+		end
+
+		it "the /index select by status 7 with per_page 18 should find 18 results" do
+			get "/admin/surveys",
+			    status: 7,
+			    page: 1,
+			    per_page: 18,
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(18)
+		end
+
+		## title filter test
+		it "the /index select by title title3 should find 6 results" do
+			get "/admin/surveys",
+			    title: "title3",
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(7)
+		end
+
+		it "the /index select by title 38 should find 1 results" do
+			get "/admin/surveys",
+			    title: "38",
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(1)
+		end
+
+		it "the /index select by title 3news should find 2 results" do
+			get "/admin/surveys",
+			    title: "3news",
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(2)
+		end
+
+		## email filter test
+
+		it "the /index select by user_email of creator1 should find 10 results" do
+			get "/admin/surveys",
+			    email: @creator1.email,
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(10)
+		end
+
+		it "the /index select by user_email unknown should find 0 results" do
+			get "/admin/surveys",
+			    email: "unknown@text.com",
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(0)
+		end
+
+		## mobile filter test
+
+		it "the /index select by user_mobile of creator1 should find 10 results" do
+			get "/admin/surveys",
+			    mobile: @creator1.mobile,
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(10)
+		end
+
+		it "the /index select by user_mobile unknown should find 0 results" do
+			get "/admin/surveys",
+			    mobile: "18354586800",
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(0)
+		end
+
+		## complex filter test
+		it "the /index select by status|title should find 3 results" do
+			get "/admin/surveys",
+			    status: 1,
+			    title: "title3",
+			    mobile: "",
+			    email: "",
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(3)
+		end
+
+		it "the /index select by status|mobile should find 4 results" do
+			get "/admin/surveys",
+			    status: 1,
+			    title: "",
+			    mobile: @creator1.mobile,
+			    email: "",
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(4)
+		end
+
+		it "the /index select by status|email should find 4 results" do
+			get "/admin/surveys",
+			    status: 1,
+			    title: "",
+			    mobile: "",
+			    email: @creator1.email,
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(4)
+		end
+
+		it "the /index select by title|email should find 7 results" do
+			get "/admin/surveys",
+			    status: "",
+			    title: "title3",
+			    mobile: @creator1.mobile,
+			    email: "",
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(7)
+		end
+
+		it "the /index select by title|email should find 7 results" do
+			get "/admin/surveys",
+			    status: "",
+			    title: "title3",
+			    mobile: "",
+			    email: @creator1.email,
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(7)
+		end
+
+		it "the /index select by mobile|email should find 0 results" do
+			get "/admin/surveys",
+			    status: "",
+			    title: "",
+			    mobile: @creator2.mobile,
+			    email: @creator1.email,
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(0)
+		end
+
+		it "the /index select by status|mobile|email should find 4 results" do
+			get "/admin/surveys",
+			    status: 1,
+			    title: "",
+			    mobile: @creator1.mobile,
+			    email: @creator1.email,
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(4)
+		end
+
+		it "the /index select by title|mobile|email should find 7 results" do
+			get "/admin/surveys",
+			    status: "",
+			    title: "title3",
+			    mobile: @creator1.mobile,
+			    email: @creator1.email,
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(7)
+		end
+
+		it "the /index select by status|title|mobile|email should find 4 results" do
+			get "/admin/surveys",
+			    status: 6,
+			    title: "title3",
+			    mobile: @creator1.mobile,
+			    email: @creator1.email,
+		    	auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["data"]
+			expect(retval.length).to eq(4)
+		end
+
+
+		after(:all) do
+			clear(:Survey)
+		end
 	end
+
 end

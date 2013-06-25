@@ -171,6 +171,13 @@ class Survey
 		return Survey.where(h_fields).desc(:created_at)
 	end
 
+	def append_user_fields(arr_fields)
+		arr_fields.each do |field|
+			self[field] = self.user.send(field)
+		end
+		return self
+	end
+
 	#----------------------------------------------
 	#
 	#     tags manupulation

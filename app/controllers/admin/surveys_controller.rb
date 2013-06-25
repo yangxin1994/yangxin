@@ -14,27 +14,15 @@ class Admin::SurveysController < Admin::ApplicationController
 
 	def index
 		select_fileds = {}
-		if !params[:status].blank?
+		if !params[:status].blank?   ## status filter
 			status_filter = Tool.convert_int_to_base_arr(params[:status].to_i)
 			select_fileds[:status] = {"$in" => status_filter}
 		end
-		select_fileds[:title] = /.*#{params[:title]}.*/ if !params[:title].blank?
+		select_fileds[:title] = /.*#{params[:title]}.*/ if !params[:title].blank?  ## title filter
 		@surveys = Survey.find_by_fields(select_fileds)
-		
-		[:moblie, :email].each do |field|
-			if !params[field].blank?
-				@surveys = @surveys.to_a.select do |s|
-					s.user.send(field).include?(params[field].to_s)
-				end
-			end
-		end
 
-		@surveys = @surveys.map do |s|
-			s[:mobile] = s.user.mobile
-			s[:email] = s.user.email
-			s
-		end
-
+		@surveys = find_by_user_fields(@surveys, [:email, :mobile])  ## user moblile and email filter
+		@surveys = @surveys.map { |s| s.append_user_fields([:email, :mobile]) }
 		@surveys = @surveys.map { |s| s.serialize_for([:title, :email, :mobile, :created_at]) }
 		render_json_auto auto_paginate(@surveys) and return
 	end
@@ -84,6 +72,17 @@ class Admin::SurveysController < Admin::ApplicationController
 	def  background_survey
 		@survey.update_attributes({'delta' => params[:delta_setting]})
 		render_json_auto true and return
+	end
+
+	def find_by_user_fields(surveys, arr_fields)
+		arr_fields.each do |field|
+			if !params[field].blank?
+				surveys = surveys.to_a.select do |s|
+					s.user.send(field).include?(params[field].to_s)
+				end
+			end
+		end
+		surveys
 	end
 
 	def add_template_question
