@@ -107,6 +107,7 @@ OopsData::Application.routes.draw do
 				put 'allocate', 'add_reward', 'set_community', 'set_spread', 'set_promotable', 'set_answer_need_review', 'background_survey',
 				    'quillme_promote', 'email_promote', 'sms_promote', 'broswer_extension_promote', "weibo_promote"
 				get 'get_sent_email_number', 'promote'
+				put :quillme_hot
 			end
 			resources :reward_schemes, :except => [:new, :edit, :destroy]
 		end
