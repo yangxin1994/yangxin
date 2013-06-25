@@ -475,6 +475,42 @@ OopsData::Application.routes.draw do
 		end
 	end
 
+
+    namespace :sample do
+      resources :surveys do
+        collection do
+          get :get_hot_spot_survey,:as => :get_hot_spot_survey
+          get :get_recommends,:as => :get_recommends
+        end
+      end
+
+      resources :public_notices do
+        collection do
+          get :get_newest,:as => :get_newest
+        end
+      end
+
+      resources :gifts do
+        collection do
+          get :hotest,:as => :hotest
+        end
+      end
+
+      resources :users do
+        collection do
+          get :get_top_ranks,:as => :get_top_ranks
+        end
+      end
+
+      resources :logs do
+        collection do
+          get :fresh_news,:as => :fresh_news
+        end
+      end
+    end
+
+
+
 	# The priority is based upon order of creation:
 	# first created -> highest priority.
 

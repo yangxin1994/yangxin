@@ -68,6 +68,7 @@ class Survey
 	# reward for introducing others
 	field :spread_point, :type => Integer, :default => 0
 	field :quillme_promote, :type => Boolean, :default => false
+	field :quillme_hot, :type => Boolean, :default => false #是否为热点小调查(quillme用)
 	field :email_promote, :type => Hash, default: {
 		"promotable" => false,
 		"email_amount" => 0,

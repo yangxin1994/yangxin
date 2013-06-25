@@ -62,7 +62,7 @@ class User
 	# field :alipay_account, :type => String
 	field :point, :type => Integer, :default => 0
 
-	attr_protected :role, :level
+	attr_protected :role, :level, :user_role
 
 	has_and_belongs_to_many :messages, class_name: "Message", inverse_of: :receiver
 	has_many :sended_messages, :class_name => "Message", :inverse_of => :sender
