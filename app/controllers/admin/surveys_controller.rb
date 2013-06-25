@@ -31,7 +31,7 @@ class Admin::SurveysController < Admin::ApplicationController
 	    s = @survey.attributes
 		s['created_at'] = s['created_at'].to_i
 		s['updated_at'] = s['updated_at'].to_i
-		render_json_auto s
+		render_json_auto s and return
 	end
 
 	def promote
@@ -83,6 +83,10 @@ class Admin::SurveysController < Admin::ApplicationController
 			end
 		end
 		surveys
+	end
+
+	def quillme_hot
+		render_json_auto @survey.set_quillme_hot and return
 	end
 
 	def add_template_question
