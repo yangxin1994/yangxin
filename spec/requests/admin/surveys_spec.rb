@@ -299,25 +299,31 @@ describe 'visit surveys' do
 			@creator2 = FactoryGirl.create(:survey_creator)
 			@surveys[0..9].each { |s| @creator1.surveys << s}
 			@surveys[10..19].each { |s| @creator2.surveys << s}
+			@results = []
+			@surveys.each {|s| @results << [s.status, s.title, s.user.email, s.user.mobile] }
 		end
 
         ### status filter test
-		it "the /index select by status 1 should find 6 results" do
+		it "the /index select by status 1 should find 6|7 results" do
 			get "/admin/surveys",
 			    status: 1,
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
-			expect(retval.length).to eq(7)
+			count = 0
+			@results.each { |s| count += 1 if s[0] == 1 }
+			expect(retval.length).to eq(count)
 		end
 
-		it "the /index select by status 4 should find 6 results" do
+		it "the /index select by status 4 should find 6|7 results" do
 			get "/admin/surveys",
 			    status: 4,
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
-			expect(retval.length).to eq(6)
+			count = 0
+			@results.each { |s| count += 1 if s[0] == 4 }
+			expect(retval.length).to eq(count)
 		end
 
 		it "the /index select by status 6 should find 10 results" do
@@ -329,7 +335,7 @@ describe 'visit surveys' do
 			expect(retval.length).to eq(10)
 		end
 
-		it "the /index select by status 6 with per_page 15 should find 13 results" do
+		it "the /index select by status 6 with per_page 15 should find 13|14 results" do
 			get "/admin/surveys",
 			    status: 6,
 			    page: 1,
@@ -337,7 +343,9 @@ describe 'visit surveys' do
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
-			expect(retval.length).to eq(13)
+			count = 0
+			@results.each { |s| count += 1 if s[0] != 1 }
+			expect(retval.length).to eq(count)
 		end
 
 		it "the /index select by status 7 with per_page 18 should find 18 results" do
@@ -352,18 +360,22 @@ describe 'visit surveys' do
 		end
 
 		## title filter test
-		it "the /index select by title title3 should find 6 results" do
+		it "the /index select by title should find 7 results" do
+			title = @results[0][1][0..5]
 			get "/admin/surveys",
-			    title: "title3",
+			    title: title,
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
-			expect(retval.length).to eq(7)
+			count = 0
+			@results.each { |s| count += 1 if s[1].include?(title) }
+			expect(retval.length).to eq(count)
 		end
 
-		it "the /index select by title 38 should find 1 results" do
+		it "the /index select by only title should find 1 results" do
+			title = @results[0][1][5..6]
 			get "/admin/surveys",
-			    title: "38",
+			    title: title,
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
@@ -371,12 +383,15 @@ describe 'visit surveys' do
 		end
 
 		it "the /index select by title 3news should find 2 results" do
+			title = @results[-1][1][6..-1]
 			get "/admin/surveys",
-			    title: "3news",
+			    title: title,
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
-			expect(retval.length).to eq(2)
+			count = 0
+			@results.each { |s| count += 1 if s[1].include?(title) }
+			expect(retval.length).to eq(count)
 		end
 
 		## email filter test
@@ -421,18 +436,21 @@ describe 'visit surveys' do
 
 		## complex filter test
 		it "the /index select by status|title should find 3 results" do
+			title = @results[0][1][0..5]
 			get "/admin/surveys",
 			    status: 1,
-			    title: "title3",
+			    title: title,
 			    mobile: "",
 			    email: "",
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
-			expect(retval.length).to eq(3)
+			count = 0
+			@results.each { |s| count += 1 if s[1].include?(title) and s[0] == 1}
+			expect(retval.length).to eq(count)
 		end
 
-		it "the /index select by status|mobile should find 4 results" do
+		it "the /index select by status|mobile should find right results" do
 			get "/admin/surveys",
 			    status: 1,
 			    title: "",
@@ -441,10 +459,12 @@ describe 'visit surveys' do
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
-			expect(retval.length).to eq(4)
+			count = 0
+			@results.each { |s| count += 1 if s[3] == @creator1.mobile and s[0] == 1}
+			expect(retval.length).to eq(count)
 		end
 
-		it "the /index select by status|email should find 4 results" do
+		it "the /index select by status|email should find right results" do
 			get "/admin/surveys",
 			    status: 1,
 			    title: "",
@@ -453,31 +473,39 @@ describe 'visit surveys' do
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
-			expect(retval.length).to eq(4)
+			count = 0
+			@results.each { |s| count += 1 if s[2] == @creator1.email and s[0] == 1}
+			expect(retval.length).to eq(count)
 		end
 
-		it "the /index select by title|email should find 7 results" do
+		it "the /index select by title|email should find right results" do
+			title = @results[0][1][0..5]
 			get "/admin/surveys",
 			    status: "",
-			    title: "title3",
+			    title: title,
 			    mobile: @creator1.mobile,
 			    email: "",
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
-			expect(retval.length).to eq(7)
+			count = 0
+			@results.each { |s| count += 1 if s[1].include?(title) and s[3] == @creator1.mobile}
+			expect(retval.length).to eq(count)
 		end
 
-		it "the /index select by title|email should find 7 results" do
+		it "the /index select by title|email should find right results" do
+			title = @results[0][1][0..5]
 			get "/admin/surveys",
 			    status: "",
-			    title: "title3",
+			    title: title,
 			    mobile: "",
 			    email: @creator1.email,
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
-			expect(retval.length).to eq(7)
+			count = 0
+			@results.each { |s| count += 1 if s[1].include?(title) and s[2] == @creator1.email}
+			expect(retval.length).to eq(count)
 		end
 
 		it "the /index select by mobile|email should find 0 results" do
@@ -492,7 +520,7 @@ describe 'visit surveys' do
 			expect(retval.length).to eq(0)
 		end
 
-		it "the /index select by status|mobile|email should find 4 results" do
+		it "the /index select by status|mobile|email should find right results" do
 			get "/admin/surveys",
 			    status: 1,
 			    title: "",
@@ -501,31 +529,39 @@ describe 'visit surveys' do
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
-			expect(retval.length).to eq(4)
+			count = 0
+			@results.each { |s| count += 1 if s[0] == 1 and s[2] == @creator1.email and s[3] == @creator1.mobile}
+			expect(retval.length).to eq(count)
 		end
 
-		it "the /index select by title|mobile|email should find 7 results" do
+		it "the /index select by title|mobile|email should find right results" do
+			title = @results[0][1][0..5]
 			get "/admin/surveys",
 			    status: "",
-			    title: "title3",
+			    title: title,
 			    mobile: @creator1.mobile,
 			    email: @creator1.email,
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
+			count = 0
+			@results.each { |s| count += 1 if s[1].include?(title) and s[2] == @creator1.email and s[3] == @creator1.mobile}
 			expect(retval.length).to eq(7)
 		end
 
-		it "the /index select by status|title|mobile|email should find 4 results" do
+		it "the /index select by status|title|mobile|email should find right results" do
+			title = @results[0][1][0..5]
 			get "/admin/surveys",
 			    status: 6,
-			    title: "title3",
+			    title: title,
 			    mobile: @creator1.mobile,
 			    email: @creator1.email,
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
-			expect(retval.length).to eq(4)
+			count = 0
+			@results.each { |s| count += 1 if s[1].include?(title) and s[2] == @creator1.email and s[3] == @creator1.mobile and s[0] != 1}
+			expect(retval.length).to eq(count)
 		end
 
 
