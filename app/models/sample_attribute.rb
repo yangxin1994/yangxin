@@ -46,7 +46,7 @@ class SampleAttribute
 	end
 
 	def self.search(name)
-		return name.blank? ? self.normal.all : self.normal.where(:name => /.*#{name.to_s}*./)
+		return name.blank? ? self.normal.all : self.normal.where(:name => /.*#{name.to_s}.*/)
 	end
 
 	def self.create_sample_attribute(sample_attribute)
