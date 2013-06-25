@@ -1,28 +1,28 @@
 # encoding: utf-8
 class Admin::GiftsController < Admin::ApplicationController
 
-  before_filter :check_gift_existence, :only => [:update, :destroy]
+	before_filter :check_gift_existence, :only => [:update, :destroy]
 
-  def check_gift_existence
-    @gift = Gift.find_by_id(params[:id])
-    render_json_auto(ErrorEnum::GIFT_NOT_EXIST) and return if @gift.nil?
-  end
+	def check_gift_existence
+		@gift = Gift.find_by_id(params[:id])
+		render_json_auto(ErrorEnum::GIFT_NOT_EXIST) and return if @gift.nil?
+	end
 
-  def index
-    @gifts = Gift.search_gift(params[:title], params[:status].to_i, params[:type].to_i)
-    render_json_auto(auto_paginate(@gifts)) and return
-  end
+	def index
+		@gifts = Gift.search_gift(params[:title], params[:status].to_i, params[:type].to_i)
+		render_json_auto(auto_paginate(@gifts)) and return
+	end
 
-  def create
-    @gift = Gift.create_gift(params[:gift])
-    render_json_auto(@gift) and return
-  end
+	def create
+		@gift = Gift.create_gift(params[:gift])
+		render_json_auto(@gift) and return
+	end
 
-  def update
-    render_json_auto(@gift.update(params[:gift])) and return
-  end
+	def update
+		render_json_auto(@gift.update_gift(params[:gift])) and return
+	end
 
-  def destroy
-    render_json_auto(@gift.delete_gift) and return
-  end
+	def destroy
+		render_json_auto(@gift.delete_gift) and return
+	end
 end

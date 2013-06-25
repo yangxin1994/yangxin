@@ -12,11 +12,11 @@ class Gift
 	field :quantity, :type => Integer, default: 0
 	field :point, :type => Integer, default: 0
 
-	has_one :material
+	has_one :photo, :class_name => "Material", :inverse_of => 'gift'
 
 	default_scope order_by(:created_at.desc)
 
-	scope :normal, where(:status => 1)
+	scope :normal, where(:status.in => [1, 2])
 	scope :virtual, normal.where(:type.in => [1,2])
 	scope :virtual_one, normal.where(:type => 1)
 	scope :virtual_multiple, normal.where(:type => 2)
@@ -24,7 +24,7 @@ class Gift
 
 	index({ type: 1, status: 1 }, { background: true } )
 
-	def find_by_id(gift_id)
+	def self.find_by_id(gift_id)
 		return self.normal.where(:_id => gift_id).first
 	end
 
@@ -33,19 +33,24 @@ class Gift
 		material = Material.find_by_id(material_id)
 		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
 		gift = Gift.new(gift)
-		gift.material = material
+		gift.photo = material
 		return gift.save
 	end
 
 	def update_gift(gift)
-		
+		material_id = gift.delete("material_id")
+		material = Material.find_by_id(material_id)
+		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+		self.update_attributes(gift)
+		self.photo = material
+		return self.save
 	end
 
 	def self.search_gift(title, status, type)
 		gifts = Gift.normal
 		gifts = gifts.where(:title => /#{title}/) if !title.blank?
-		gifts = gifts.where(:status.in => Tool.convert_int_to_base_arr(status)) if !status.blank?
-		gifts = gifts.where(:type.in => Tool.convert_int_to_base_arr(type)) if !type.blank?
+		gifts = gifts.where(:status.in => Tool.convert_int_to_base_arr(status)) if !status.blank? && status != 0
+		gifts = gifts.where(:type.in => Tool.convert_int_to_base_arr(type)) if !type.blank? && status != 0
 		return gifts
 	end
 
