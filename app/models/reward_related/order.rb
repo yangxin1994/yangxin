@@ -5,45 +5,42 @@ class Order
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
 	extend Mongoid::FindHelper
-  include Mongoid::CriteriaExt
-	# can be 0 (Cash), 1 (Entity), 2 (Virtual), 3 (Lottery)
-	field :type, :type => Integer
-	# can be 0 (NeedVerify), 1 (Verified), -1 (VerifyFailed), 2 (Delivering), 3 (Delivered), -3 (DeliverFailed)
-	field :is_prize, :type => Boolean, :default => false
-	field :status, :type => Integer, :default => 0
-	field :status_desc, :type => String
-	field :is_deleted, :type => Boolean, :default => false
+    include Mongoid::CriteriaExt
 
-	field :is_update_user, :type => Boolean, :default => false
-	field :full_name, :type => String
-	field :identity_card, :type => String
-	field :bank, :type => String
-	field :bankcard_number, :type => String
+    field :code, :type => String, :default => "unkonwn"
+	# can be 1 (small amount phone charge), 2 (large amount phone charge), 4 (alipay), 8(alijf)
+	# 16 (Q currency), 32 (prize), 64 (virtual gift)
+	field :type, :type => Integer
+	# can be 1 (wait for deal), 2 (dealing), 4 (deal success), 8 (deal fail), 16 (cancel)
+	field :status, :type => Integer, :default => 1
+	field :source, :type => String, :default => "unkonwn"
+	field :remark, :type => String, :default => "正常"
+	field :amount, :type => Integer, :default => 0
 	field :alipay_account, :type => String
-	field :phone, :type => String
+	field :mobile, :type => String
+	field :qq, :type => String
 	field :address, :type => String
 	field :postcode, :type => String
-	field :email, :type => String
 
 	# embeds_one :cash_receive_info, :class_name => "CashReceiveInfo"
 	# embeds_one :entity_receive_info, :class_name => "EntityReceiveInfo"
 	# embeds_one :virtual_receive_info, :class_name => "VirtualReceiveInfo"
 	# embeds_one :lottery_receive_info, :class_name => "LotteryReceiveInfo"
 
-	has_one :reward_log, :class_name => "RewardLog"
-	belongs_to :lottery_code, :class_name => "LotteryCode"
-	belongs_to :gift, :class_name => "BasicGift", :inverse_of => :order
-	belongs_to :user, :class_name => "User", :inverse_of => :orders
+	belongs_to :prize
+	belongs_to :survey
+	belongs_to :gift
+	belongs_to :sample, :class_name => "User", :inverse_of => :orders
 	belongs_to :operator, :class_name => "User", :inverse_of => :operate_orders
 
 	validates :type, :presence_ext => true,
-		:inclusion => { :in => 0..3 },
+		:inclusion => { :in => [1, 2, 4, 8, 16, 32, 64] },
 		:numericality => true
 	validates :status, :presence_ext => true,
-		:inclusion => { :in => -3..3 },
+		:inclusion => { :in => [1, 2, 4, 8, 16] },
 		:numericality => true
 
-	default_scope where(:is_deleted => false).order_by(:created_at.desc)
+	# default_scope where(:is_deleted => false).order_by(:created_at.desc)
 
 	scope :for_cash, where( :type => 0)
 	scope :for_entity, where( :type => 1)
@@ -64,6 +61,21 @@ class Order
 	delegate :create, :to => :reward_log, :prefix => true
 	#delegate :cash_order, :realgoods_order, :to => "self.need_verify", :prefix => true
 	#after_create :decrease_point, :decrease_gift
+
+	def self.create_order(params)
+	end
+
+	def self.cancel_order(params)
+	end
+
+	def self.handling_order(params)
+	end
+
+	def self.set_order_status(params)
+	end
+
+	def self.search_order(params)
+	end
 
 	def self.to_excel(scope)
 		# csv= []
