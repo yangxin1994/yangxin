@@ -93,7 +93,7 @@ class Survey
 		"video" => "",
 		"audio" => ""
 	}
-	field :quillme_hot, :type => Boolean, default: false
+
 
 	# reward: 0: nothing, 1: priPze, 2: point
 	# field_remove :reward, :type => Integer, :default => 0
