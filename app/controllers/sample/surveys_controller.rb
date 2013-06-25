@@ -23,7 +23,8 @@ class Sample::SurveysController < ApplicationController
   #返回的参数:一个盛放推荐调研问卷的列表
   #############################	
   def get_recommends
-    @surveys = Survey.where(:quillme_promote => true,:quillme_hot => true,:spreadable => true,:status => 2)
+    @surveys = Survey.where(:quillme_promote => true,:spreadable => true,:status => 2)
+    @surveys = auto_paginate(@surveys)
     render_json { @surveys }
   end
 

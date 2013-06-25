@@ -21,6 +21,9 @@ class Sample::GiftsController < ApplicationController
   #############################		
   def show
     @gift = Gift.find_by_id(params[:id])
+    logger.info("-------------------------")
+    logger.info(@gift.inspect)
+    logger.info("-------------------------")
     @gift[:photo_src] = @gift.photo.nil? ? nil : @gift.photo.picture_url 
     render_json { @gift }
   end
