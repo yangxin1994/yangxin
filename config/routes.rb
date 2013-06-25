@@ -40,6 +40,8 @@ OopsData::Application.routes.draw do
 	match '/subscribe' , :to => 'subscribers#create', :as => '/subscribe'
 	match '/unsubscribe' , :to =>'subscribers#destroy', :as => '/subscribe'
 	namespace :admin do
+		resources :materials do
+		end
 
 		resources :questions do
 			member do
