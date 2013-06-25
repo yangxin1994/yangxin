@@ -62,6 +62,7 @@ class Survey
 	field :quality_control_questions_ids, :type => Array, default: []
 	field :deadline, :type => Integer
 	field :is_star, :type => Boolean, :default => false
+	field :delta, :type => Boolean, :default => true
 	field :point, :type => Integer, :default => 0
 	# whether this survey can be introduced to another person
 	field :spreadable, :type => Boolean, :default => false
@@ -84,6 +85,12 @@ class Survey
 		"promotable" => false,
 		"login_sample_promote_only" => false,
 		"filter" => [[{"key_word" => [""], "url" => ""}]]
+	}
+	field :weibo_promote, :type => Hash, default: {
+		"text" => "",
+		"image" => "",
+		"video" => "",
+		"audio" => ""
 	}
 
 	# reward: 0: nothing, 1: priPze, 2: point
@@ -1759,6 +1766,14 @@ class Survey
 		survey_obj["created_at"] = self.created_at.to_i
 		survey_obj["reward_info"] = self.reward_info
 		survey_obj["publish_status"] = self.publish_status
+		return survey_obj
+	end
+
+	def serialize_for(arr_fields)
+		survey_obj = {"id" => self.id.to_s}
+		arr_fields.each do |field|
+			survey_obj[field] = self.send(field)
+		end
 		return survey_obj
 	end
 

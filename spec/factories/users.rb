@@ -18,4 +18,9 @@ FactoryGirl.define do
 		email "foo@test.com"
 		gender 0
 	end
+
+	factory :survey_creator, class: User do |c|
+		c.sequence(:email) { |n| "creator_#{n}@example.com"}
+		c.mobile {"183#{[*(1..8)].shuffle.join}"}   ##random string
+	end
 end
