@@ -40,6 +40,15 @@ OopsData::Application.routes.draw do
 	match '/subscribe' , :to => 'subscribers#create', :as => '/subscribe'
 	match '/unsubscribe' , :to =>'subscribers#destroy', :as => '/subscribe'
 	namespace :admin do
+		resources :agent_tasks do
+			member do
+				put :reset_password
+				post :send_email
+			end
+		end
+
+		resources :materials do
+		end
 
 		resources :questions do
 			member do
@@ -107,6 +116,7 @@ OopsData::Application.routes.draw do
 				put 'allocate', 'add_reward', 'set_community', 'set_spread', 'set_promotable', 'set_answer_need_review', 'background_survey',
 				    'quillme_promote', 'email_promote', 'sms_promote', 'broswer_extension_promote', "weibo_promote"
 				get 'get_sent_email_number', 'promote'
+				put :quillme_hot
 			end
 			resources :reward_schemes, :except => [:new, :edit, :destroy]
 		end
@@ -471,6 +481,42 @@ OopsData::Application.routes.draw do
 			post :send_email
 		end
 	end
+
+
+    namespace :sample do
+      resources :surveys do
+        collection do
+          get :get_hot_spot_survey,:as => :get_hot_spot_survey
+          get :get_recommends,:as => :get_recommends
+        end
+      end
+
+      resources :public_notices do
+        collection do
+          get :get_newest,:as => :get_newest
+        end
+      end
+
+      resources :gifts do
+        collection do
+          get :hotest,:as => :hotest
+        end
+      end
+
+      resources :users do
+        collection do
+          get :get_top_ranks,:as => :get_top_ranks
+        end
+      end
+
+      resources :logs do
+        collection do
+          get :fresh_news,:as => :fresh_news
+        end
+      end
+    end
+
+
 
 	# The priority is based upon order of creation:
 	# first created -> highest priority.

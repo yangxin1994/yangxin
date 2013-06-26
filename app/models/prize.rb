@@ -5,16 +5,15 @@ class Prize
 
 	NORMAL = 1
 	DELETED = 2
-	REAL = 1
-	VIRTUAL = 2
+	VIRTUAL = 1
+	REAL = 2
 
 	# 1 normal, 2 deleted
 	field :status, :type => Integer, default: NORMAL
-	# 1 for real prize, 2 for virtual prize
+	# 1 for virtual prize, 2 for real prize
 	field :type, :type => Integer, default: REAL
 	field :title, :type => String, default: ""
 	field :description, :type => String, default: ""
-	field :quantity, :type => Integer, default: 0
 
 	has_one :photo, :class_name => "Material", :inverse_of => 'prize'
 
@@ -35,8 +34,10 @@ class Prize
 		material = Material.find_by_id(material_id)
 		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
 		prize = Prize.new(prize)
+		prize.save
 		prize.photo = material
-		return prize.save
+		prize["photo_url"] = material.value
+		return prize
 	end
 
 	def update_prize(prize)
@@ -52,6 +53,9 @@ class Prize
 		prizes = Prize.normal
 		prizes = prizes.where(:title => /#{title}/) if !title.blank?
 		prizes = prizes.where(:type.in => Tool.convert_int_to_base_arr(type)) if !type.blank? && type != 0
+		prizes.each do |p|
+			p["photo_url"] = p.photo.try(:value)
+		end
 		return prizes
 	end
 

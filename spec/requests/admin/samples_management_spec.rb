@@ -24,7 +24,7 @@ describe "samples management" do
 			auth_key: @auth_key
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
-		retval["data"].length.should be 6
+		retval["data"].length.should be 3
 
 		get "/admin/samples",
 			page: 1,
@@ -33,7 +33,7 @@ describe "samples management" do
 			auth_key: @auth_key
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
-		retval["data"].length.should be 3
+		retval["data"].length.should be 6
 	end
 
 	it "show a sample" do

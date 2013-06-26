@@ -69,6 +69,7 @@ class Survey
 	# reward for introducing others
 	field :spread_point, :type => Integer, :default => 0
 	field :quillme_promote, :type => Boolean, :default => false
+	field :quillme_hot, :type => Boolean, :default => false #是否为热点小调查(quillme用)
 	field :email_promote, :type => Hash, default: {
 		"promotable" => false,
 		"email_amount" => 0,
@@ -93,6 +94,7 @@ class Survey
 		"audio" => ""
 	}
 
+
 	# reward: 0: nothing, 1: priPze, 2: point
 	# field_remove :reward, :type => Integer, :default => 0
 	# field_remove :show_in_community, :type => Boolean, default: false
@@ -111,6 +113,7 @@ class Survey
 	has_many :report_mockups
 	has_many :interviewer_tasks
 	has_many :reward_schemes
+	has_many :agent_tasks
 	has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
 	has_and_belongs_to_many :entry_clerks, class_name: "User", inverse_of: :entry_clerk_allocated_surveys
 	has_and_belongs_to_many :tags do
@@ -1910,6 +1913,16 @@ class Survey
 	def clear_survey_object
 		Cache.write(self._id, nil)
 		return true
+	end
+
+	def set_quillme_hot
+		s = Survey.where(:quillme_hot => true).first
+		if !s.nil?
+			s.quillme_hot = false
+			s.save
+		end
+		self.quillme_hot = true
+		return self.save
 	end
 
 end

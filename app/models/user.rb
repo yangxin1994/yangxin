@@ -62,7 +62,7 @@ class User
 	# field :alipay_account, :type => String
 	field :point, :type => Integer, :default => 0
 
-	attr_protected :role, :level
+	attr_protected :role, :level, :user_role
 
 	has_and_belongs_to_many :messages, class_name: "Message", inverse_of: :receiver
 	has_many :sended_messages, :class_name => "Message", :inverse_of => :sender
@@ -614,7 +614,7 @@ class User
 
 	def self.search_sample(email, mobile, is_block)
 		samples = User.sample
-		samples = samples.where(:is_block => is_block) if !is_block.blank?
+		samples = samples.where(:is_block => false) if !is_block
 		samples = samples.where(:email => /#{email.to_s}/) if !email.blank?
 		samples = samples.where(:mobile => /#{mobile.to_s}/) if !mobile.blank?
 		return samples
