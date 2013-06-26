@@ -6,5 +6,6 @@ FactoryGirl.define do
 		f.sequence(:description) { |n| "description of the #{n}th gift" }
 		f.quantity 100
 		f.point 100
+		f.sequence(:exchange_count){|n| n + 30}
 	end
 end
