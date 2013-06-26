@@ -37,7 +37,7 @@ describe "prizes management" do
 			auth_key: @auth_key
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
-		retval["data"].length.should be 4
+		retval["data"].length.should be 3
 	end
 
 	it "create prize" do
