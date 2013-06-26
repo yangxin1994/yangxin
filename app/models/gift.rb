@@ -42,12 +42,13 @@ class Gift
 	end
 
 	def update_gift(gift)
-		material_id = gift.delete("material_id")
-		material = Material.find_by_id(material_id)
-		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+		if gift['material_id']
+			material_id = gift.delete("material_id")
+			material = Material.find_by_id(material_id)
+			return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+			self.photo = material
+		end
 		self.update_attributes(gift)
-		self.photo = material
-		return self.save
 	end
 
 	def self.search_gift(title, status, type)
