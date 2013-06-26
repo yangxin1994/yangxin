@@ -5,16 +5,15 @@ class Prize
 
 	NORMAL = 1
 	DELETED = 2
-	REAL = 1
-	VIRTUAL = 2
+	VIRTUAL = 1
+	REAL = 2
 
 	# 1 normal, 2 deleted
 	field :status, :type => Integer, default: NORMAL
-	# 1 for real prize, 2 for virtual prize
+	# 1 for virtual prize, 2 for real prize
 	field :type, :type => Integer, default: REAL
 	field :title, :type => String, default: ""
 	field :description, :type => String, default: ""
-	field :quantity, :type => Integer, default: 0
 
 	has_one :photo, :class_name => "Material", :inverse_of => 'prize'
 

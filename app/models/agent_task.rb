@@ -9,9 +9,9 @@ class AgentTask
 	field :password, :type => String
 	field :description, :type => String
 	field :count, :type => Integer
-	field :under_review_count, :type => Integer
-	field :finished_count, :type => Integer
-	field :reject_count, :type => Integer
+	field :under_review_count, :type => Integer, default: 0
+	field :finished_count, :type => Integer, default: 0
+	field :reject_count, :type => Integer, default: 0
 
 	belongs_one :survey
 
@@ -24,20 +24,32 @@ class AgentTask
 	end
 
 	def self.create_agent_task(agent_task)
+		survey = Survey.find_by_id(agent_task["survey_id"])
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		agent_task["password"] = Encryption.encrypt_password(agent_task["password"])
 		agent_task = AgentTask.new(agent_task)
-		return agent_task.save
+		agent_task.save
+		return agent_task
 	end
 
 	def update_agent_task(agent_task)
-		return nself.update_attributes(agent_task)
+		return self.update_attributes(agent_task)
 	end
 
-	def self.search_agent_task(title, status)
-		agent_tasks = AgentTask.normal
+	def self.search_agent_task(survey_id, email, status)
+		if survey_id.blank?
+			agent_tasks = AgentTask.normal
+		else
+			survey = Survey.find_by_id(survey_id)
+			return [] if survey.nil?
+			agent_tasks = survey.agent_tasks.normal
+		end
 		status_ary = Tool.convert_int_to_base_arr(params[:status].to_i)
 		agent_tasks = agent_tasks.where(:status.in => status_ary)
 		agent_tasks = agent_tasks.where(:email => /#{email}/) if !email.blank?
+		agent_tasks.each do |a|
+			a["survey_title"] = a.survey.try(:title)
+		end
 		return agent_tasks
 	end
 

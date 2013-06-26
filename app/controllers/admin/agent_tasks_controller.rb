@@ -9,7 +9,7 @@ class Admin::AgentTasksController < Admin::ApplicationController
 	end
 
 	def index
-		@agent_tasks = AgentTask.search_agent()
+		@agent_tasks = AgentTask.search_agent(params[:survey_id], params[:email], params[:status].to_i)
 		render_json_auto(auto_paginate(@agent_tasks)) and return
 	end
 
