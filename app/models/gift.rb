@@ -56,7 +56,7 @@ class Gift
 		gifts = gifts.where(:status.in => Tool.convert_int_to_base_arr(status)) if !status.blank? && status != 0
 		gifts = gifts.where(:type.in => Tool.convert_int_to_base_arr(type)) if !type.blank? && status != 0
 		gifts.each do |g|
-			g["photo_url"] = g.photo.value
+			g["photo_url"] = g.photo.try(:value)
 		end
 		return gifts
 	end

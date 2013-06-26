@@ -55,7 +55,7 @@ class Prize
 		prizes = prizes.where(:title => /#{title}/) if !title.blank?
 		prizes = prizes.where(:type.in => Tool.convert_int_to_base_arr(type)) if !type.blank? && type != 0
 		prizes.each do |p|
-			p["photo_url"] = p.photo.value
+			p["photo_url"] = p.photo.try(:value)
 		end
 		return prizes
 	end
