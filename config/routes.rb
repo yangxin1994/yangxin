@@ -41,8 +41,10 @@ OopsData::Application.routes.draw do
 	match '/unsubscribe' , :to =>'subscribers#destroy', :as => '/subscribe'
 	namespace :admin do
 		resources :agent_tasks do
-			put :reset_password
-			post :send_email
+			member do
+				put :reset_password
+				post :send_email
+			end
 		end
 
 		resources :materials do

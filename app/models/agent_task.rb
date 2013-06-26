@@ -13,7 +13,7 @@ class AgentTask
 	field :finished_count, :type => Integer, default: 0
 	field :reject_count, :type => Integer, default: 0
 
-	belongs_one :survey
+	belongs_to :survey
 
 	default_scope order_by(:created_at.desc)
 
@@ -44,8 +44,10 @@ class AgentTask
 			return [] if survey.nil?
 			agent_tasks = survey.agent_tasks.normal
 		end
-		status_ary = Tool.convert_int_to_base_arr(params[:status].to_i)
-		agent_tasks = agent_tasks.where(:status.in => status_ary)
+		if !status.blank? && status != 0
+			status_ary = Tool.convert_int_to_base_arr(status.to_i)
+			agent_tasks = agent_tasks.where(:status.in => status_ary)
+		end
 		agent_tasks = agent_tasks.where(:email => /#{email}/) if !email.blank?
 		agent_tasks.each do |a|
 			a["survey_title"] = a.survey.try(:title)

@@ -13,6 +13,10 @@ describe "agent tasks management" do
 	end
 
 	def populate_agent_tasks
+		6.times do
+			survey = FactoryGirl.create(:survey)
+			FactoryGirl.create(:agent_task, :survey => survey)
+		end
 	end
 
 	it "search agent_tasks", :populate_agent_tasks => true do
@@ -28,7 +32,7 @@ describe "agent tasks management" do
 			page: 1,
 			per_page: 10,
 			title: "the",
-			status: 7,
+			status: 1,
 			auth_key: @auth_key
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
@@ -39,43 +43,50 @@ describe "agent tasks management" do
 		survey = FactoryGirl.create(:survey)
 		post "admin/agent_tasks",
 			JSON.dump(agent_task: {survey_id: survey._id.to_s,
+					email: "test@test.com",
+					password: "111111",
+					count: 100,
 					description: "description of the new agent task"},
 				auth_key: @auth_key),
 			"CONTENT_TYPE" => "application/json"
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
-		puts "11111111111111"
-		puts retval.inspect
-		puts "11111111111111"
 		AgentTask.all.length.should be 1
 		expect(AgentTask.all.first.description).to eq "description of the new agent task"
 	end
 
-	it "update gift", :populate_gifts => true do
-		material = FactoryGirl.create(:material)
-		gift = Gift.first
-		put "admin/gifts/#{gift._id.to_s}",
-			JSON.dump(gift: {title: "updated gift",
-					description: "description of the updated gift",
-					quantity: 1,
-					type: 1,
-					point: 100,
-					material_id: material._id.to_s},
+	it "update agent task", :populate_agent_tasks => true do
+		agent_task = AgentTask.first
+		put "admin/agent_tasks/#{agent_task._id.to_s}",
+			JSON.dump(agent_task: {email: "update@test.com",
+					description: "description of the updated agent task",
+					count: 200},
 				auth_key: @auth_key),
 			"CONTENT_TYPE" => "application/json"
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
 		retval.should be(true)
-		updated_gift = Gift.find_by_id(gift._id.to_s)
-		expect(updated_gift.title).to eq "updated gift"
+		updated_agent_task = AgentTask.find_by_id(agent_task._id.to_s)
+		expect(updated_agent_task.email).to eq "update@test.com"
+		expect(updated_agent_task.description).to eq "description of the updated agent task"
+		expect(updated_agent_task.count).to eq 200
 	end
 
-	it "delete gift", :populate_gifts => true do
-		delete "/admin/gifts/#{Gift.all.first._id}",
+	it "delete agent task", :populate_agent_tasks => true do
+		delete "/admin/agent_tasks/#{AgentTask.all.first._id}",
 			auth_key: @auth_key
 		response.status.should be(200)
 		JSON.parse(response.body)["value"].should be true
-		Gift.normal.all.length.should be 5
+		AgentTask.normal.all.length.should be 5
 	end
 
+	it "reset password", :populate_agent_tasks => true do
+		agent_task = AgentTask.normal.first
+		put "admin/agent_tasks/#{agent_task._id.to_s}/reset_password",
+			password: "123456",
+			auth_key: @auth_key
+		response.status.should be(200)
+		JSON.parse(response.body)["value"].should be true
+		expect(Encryption.decrypt_password(AgentTask.find_by_id(agent_task._id).password)).to eq "123456"
+	end
 end
