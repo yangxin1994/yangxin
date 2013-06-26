@@ -13,8 +13,10 @@ describe "prizes management" do
 	end
 
 	def populate_prizes
-		material = FactoryGirl.create(:material)
-		6.times { FactoryGirl.create(:prize, :photo => material) }
+		6.times do
+			prize = FactoryGirl.create(:prize)
+			material = FactoryGirl.create(:material, :prize => prize)
+		end
 	end
 
 	it "search prizes", :populate_prizes => true do
@@ -49,7 +51,7 @@ describe "prizes management" do
 			"CONTENT_TYPE" => "application/json"
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
-		retval.should be(true)
+		expect(retval["photo_url"]).to eq "/image/1.jpg"
 		Prize.all.length.should be 1
 		expect(Prize.all.first.title).to eq "new prize"
 	end

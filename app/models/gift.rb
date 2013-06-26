@@ -34,7 +34,9 @@ class Gift
 		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
 		gift = Gift.new(gift)
 		gift.photo = material
-		return gift.save
+		gift.save
+		gift["photo_url"] = material.value
+		return gift
 	end
 
 	def update_gift(gift)
@@ -51,6 +53,9 @@ class Gift
 		gifts = gifts.where(:title => /#{title}/) if !title.blank?
 		gifts = gifts.where(:status.in => Tool.convert_int_to_base_arr(status)) if !status.blank? && status != 0
 		gifts = gifts.where(:type.in => Tool.convert_int_to_base_arr(type)) if !type.blank? && status != 0
+		gifts.each do |g|
+			g["photo_url"] = g.photo.value
+		end
 		return gifts
 	end
 

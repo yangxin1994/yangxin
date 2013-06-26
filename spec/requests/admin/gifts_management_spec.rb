@@ -13,8 +13,10 @@ describe "gifts management" do
 	end
 
 	def populate_gifts
-		material = FactoryGirl.create(:material)
-		6.times { FactoryGirl.create(:gift, :photo => material) }
+		6.times do
+			gift = FactoryGirl.create(:gift)
+			FactoryGirl.create(:material, :gift => gift)
+		end
 	end
 
 	it "search gifts", :populate_gifts => true do
@@ -51,7 +53,7 @@ describe "gifts management" do
 			"CONTENT_TYPE" => "application/json"
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
-		retval.should be(true)
+		expect(retval["photo_url"]).to eq "/image/1.jpg"
 		Gift.all.length.should be 1
 		expect(Gift.all.first.title).to eq "new gift"
 	end

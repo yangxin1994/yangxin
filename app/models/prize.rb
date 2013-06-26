@@ -36,7 +36,9 @@ class Prize
 		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
 		prize = Prize.new(prize)
 		prize.photo = material
-		return prize.save
+		prize.save
+		prize["photo_url"] = material.value
+		return prize
 	end
 
 	def update_prize(prize)
@@ -52,6 +54,9 @@ class Prize
 		prizes = Prize.normal
 		prizes = prizes.where(:title => /#{title}/) if !title.blank?
 		prizes = prizes.where(:type.in => Tool.convert_int_to_base_arr(type)) if !type.blank? && type != 0
+		prizes.each do |p|
+			p["photo_url"] = p.photo.value
+		end
 		return prizes
 	end
 
