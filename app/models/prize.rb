@@ -35,8 +35,8 @@ class Prize
 		material = Material.find_by_id(material_id)
 		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
 		prize = Prize.new(prize)
-		prize.photo = material
 		prize.save
+		prize.photo = material
 		prize["photo_url"] = material.value
 		return prize
 	end

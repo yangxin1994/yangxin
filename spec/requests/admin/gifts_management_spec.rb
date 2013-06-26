@@ -5,6 +5,7 @@ describe "gifts management" do
 	before(:each) do
 		clear(:User)
 		clear(:Gift)
+		clear(:Material)
 		@auth_key = admin_signin
 	end
 

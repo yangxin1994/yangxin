@@ -35,8 +35,8 @@ class Gift
 		material = Material.find_by_id(material_id)
 		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
 		gift = Gift.new(gift)
-		gift.photo = material
 		gift.save
+		gift.photo = material
 		gift["photo_url"] = material.value
 		return gift
 	end
