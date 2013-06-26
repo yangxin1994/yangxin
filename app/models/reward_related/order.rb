@@ -8,17 +8,18 @@ class Order
     include Mongoid::CriteriaExt
 
     field :code, :type => String, :default => "unkonwn"
-	# can be 1 (small amount phone charge), 2 (large amount phone charge), 4 (alipay), 8(alijf)
-	# 16 (Q currency), 32 (prize), 64 (virtual gift)
+	# can be 1 (small mobile charge), 2 (large mobile charge), 4 (alipay), 8(alijf)
+	# 16 (Q coins), 32 (prize), 64 (virtual prize)
 	field :type, :type => Integer
 	# can be 1 (wait for deal), 2 (dealing), 4 (deal success), 8 (deal fail), 16 (cancel)
 	field :status, :type => Integer, :default => 1
-	field :source, :type => String, :default => "unkonwn"
+	field :source, :type => Integer
 	field :remark, :type => String, :default => "正常"
 	field :amount, :type => Integer, :default => 0
 	field :alipay_account, :type => String
 	field :mobile, :type => String
 	field :qq, :type => String
+	field :user_name, :type => String
 	field :address, :type => String
 	field :postcode, :type => String
 
@@ -62,21 +63,85 @@ class Order
 	#delegate :cash_order, :realgoods_order, :to => "self.need_verify", :prefix => true
 	#after_create :decrease_point, :decrease_gift
 
+	def self.find_by_id(order_id)
+		return Order.where(:_id => order_id).first
+	end
+
 	def self.create_order(params)
+		order_type = {
+			1 => "mobile",  ## small_mobile_charge
+			2 => "mobile",  ## large_mobile_charge
+			4 => "alipay_account",
+			8 => "alipay_account",  ## alijf
+			16 => "qq",
+			32 => "prize",
+			64 => "virtual_prize"
+		}
+		return ErrorEnum::ORDER_TYPE_ERROR if !order_type.keys.include?(params[:type])
+		new_order = Order.create({"code" => code_generater, "type" => params[:type], "source" => params[:source]})
+		User.where("_id" => params[:user_id]).first.orders << new_order
+		if params(:type) < 32
+			new_order.send "create_charge_order(params, order_type)"
+		else
+			new_order.send "create_#{order[params[:type]]}_order(params)"
+		end
 	end
 
-	def self.cancel_order(params)
+	def create_charge_order(params, order_type)
+		self.update_attributes({"amount" => params[:amount],
+			order_type[params[:type]] => params[order_type[params[:type]].to_sym]})
+		return true
 	end
 
-	def self.handling_order(params)
+	def create_prize_order(params)
+		self.update_attributes({"address" => params[:address],
+			"postcode" => params[:postcode]},
+			"user_name" => params[:user_name],
+			"mobile" => params[:mobile]
+			)
+		Prize.where("_id" => params[:prize_id]).first.orders << self
+		return true
 	end
 
-	def self.set_order_status(params)
+	def create_virtual_prize_order(params)
+		Prize.where("_id" => params[:prize_id]).first.orders << self
 	end
 
-	def self.search_order(params)
+	def update_order_status(status, remark)
+		status_message = {"status" => status}
+		status_message["remark"] = remark if status == 8 and !remark.blank?
+		self.update_attributes(status_message)
+		return true
 	end
 
+	def set_order_result(params)
+		self.update_attributes("status" => params[:status], "remark" => params[:remark])
+		return true
+	end
+
+	def self.search_orders(params)
+		select_fileds = {}
+		[:type, :code, :status, :source].each do |field|
+			select_fileds[field] = params[field.to_sym] if !params[field.to_sym].blank?
+		end
+		order_list = (select_fileds.blank? ? Order.all : Order.where(select_fileds))
+
+		[:email, :mobile].each do |user_field|
+			 if !params[user_field].blank?
+			 	order_list = order_list.delete_if { |order|
+			 		order.sample.send(user_field) != params[user_field] }
+			 end
+		end
+		return order_list
+	end
+
+	def self.code_generater
+		rand_code = Time.now.strftime("%Y%m%d") + sprintf("%05d",rand(10000))
+		return rand_code
+	end
+
+	##---------------------------------------TODO:be deleted-------------------------------------------------------
+=begin
 	def self.to_excel(scope)
 		# csv= []
 		# csv << ["奖品名称", "时间", "用户名", "电话号码", "地址", "邮编", "电子邮箱", "姓名", "证件号", "开户行", "银行卡号", "支付宝"].join(',')
@@ -258,4 +323,5 @@ class Order
 		end
 		#self.user.update_attributes(self.attributes, :without_protection => true)
 	end
+=end
 end
