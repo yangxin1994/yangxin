@@ -69,7 +69,7 @@ class User
 	#################################
 	# QuillMe
 	has_many :reward_logs, :class_name => "RewardLog", :inverse_of => :user
-	has_many :orders, :class_name => "Order"
+	has_many :orders, :class_name => "Order", :inverse_of => :sample
 	has_many :lottery_codes
 	# QuillAdmin
 	has_many :operate_orders, :class_name => "Order", :foreign_key => "operator_id"

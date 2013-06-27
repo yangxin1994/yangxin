@@ -179,15 +179,11 @@ OopsData::Application.routes.draw do
 				get :expired, :index, :virtual, :cash, :entity, :stockout
 			end
 		end
-		resources :orders do
+		resources :orders, :only => [:index, :update] do
 			collection do
-				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed, :canceled, :to_excel
-			end
-			member do
-				put :verify, :verify_as_failed, :deliver, :deliver_success, :deliver_as_failed
+				put :update_status 
 			end
 		end
-
 		resources :lotteries do
 			collection do
 				get :for_publish, :activity, :finished, :deleted, :quillme

@@ -11,6 +11,7 @@ FactoryGirl.define do
 	factory :sample, class: User do |f|
 		f.sequence(:username) { |n| "foo#{n}@example.com" }
 		f.sequence(:email) { |n| "foo#{n}@example.com" }
+		f.mobile {"183#{[*(1..8)].shuffle.join}"}   ##random string
 		f.sequence(:is_block) { |n| (n%2)==1 }
 		f.user_role 1
 	end

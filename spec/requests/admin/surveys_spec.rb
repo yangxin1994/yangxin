@@ -544,7 +544,7 @@ describe 'visit surveys' do
 			retval = JSON.parse(response.body)["value"]["data"]
 			count = 0
 			@results.each { |s| count += 1 if s[1].include?(title) and s[2] == @creator1.email and s[3] == @creator1.mobile}
-			expect(retval.length).to eq(7)
+			expect(retval.length).to eq(count)
 		end
 
 		it "the /index select by status|title|mobile|email should find right results" do
