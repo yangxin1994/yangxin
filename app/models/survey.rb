@@ -1925,4 +1925,29 @@ class Survey
 		return self.save
 	end
 
+	def info_for_admin
+		survey_obj = {}
+		survey_obj["id"] = self._id.to_s
+		survey_obj["created_at"] = self.created_at.to_i
+		survey_obj["pages"] = Marshal.load(Marshal.dump(self.pages))
+		META_ATTR_NAME_ARY.each do |attr_name|
+			method_obj = self.method("#{attr_name}".to_sym)
+			survey_obj[attr_name] = method_obj.call()
+		end
+		survey_obj["logic_control"] = Marshal.load(Marshal.dump(self.logic_control))
+		survey_obj["access_control_setting"] = Marshal.load(Marshal.dump(self.access_control_setting))
+		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
+		user_obj = {}
+		user_obj["id"] = self.user._id.to_s
+		user_obj["email"] = self.user.email
+		user_obj["mobile"] = self.user.mobile
+		questions = {}
+		self.all_questions_id.each do |qid|
+			questions[qid] = BasicQuestion.find_by_id(qid)
+		end
+		info = {"survey" => survey_obj,
+			"user" => user_obj,
+			"questions" => questions}
+		return info
+	end
 end
