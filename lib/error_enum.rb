@@ -9,7 +9,8 @@ module ErrorEnum
 	
 
 
-	REWARD_SCHEME_NOT_EXIST = 'error___0'  ##TODO ErrorEnum has not rule yet	
+	REWARD_SCHEME_NOT_EXIST = 'error___0'  ##TODO ErrorEnum has not rule yet
+	ORDER_TYPE_ERROR = 'error___1'	
 
 	LOGIN_TOO_FREQUENT = "error_0"
 	ILLEGAL_EMAIL = "error_1"
