@@ -114,11 +114,6 @@ class Order
 		return true
 	end
 
-	def set_order_result(params)
-		self.update_attributes("status" => params[:status], "remark" => params[:remark])
-		return true
-	end
-
 	def self.search_orders(params)
 		select_fileds = {}
 		[:type, :code, :status, :source].each do |field|

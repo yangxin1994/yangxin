@@ -2,6 +2,12 @@ require 'sidekiq/web'
 OopsData::Application.routes.draw do
 	mount Sidekiq::Web, at: "/sidekiq"
 
+	resources :ofcards do
+		collection do
+			post :confirm
+		end
+	end
+
 	resources :faqs, :public_notices, :feedbacks, :advertisements
 	resources :data_generators do
 		collection do

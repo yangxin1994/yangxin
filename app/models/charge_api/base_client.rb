@@ -10,8 +10,6 @@ class BaseClient
 	def initialize(uri_prefix)
 		@uri_prefix = uri_prefix
 		@userid = "A830057"
-		# @userpws = Digest::MD5.hexdigest('o2ps@llysc.data')
-		# @userpws = Digest::MD5.hexdigest('o2ps@llysc.data')
 		@userpws = Digest::MD5.hexdigest('oopsdata@2013')
 		@version = "6.0"
 		@mobile_card_id = "140101"
