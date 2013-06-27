@@ -3,17 +3,13 @@ require 'securerandom'
 require 'error_enum'
 class Admin::MaterialsController < Admin::ApplicationController
 	def create
-		material = Material.check_and_create_new(@current_user, params[:material])
-		case material
-		when ErrorEnum::WRONG_MATERIAL_TYPE
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::WRONG_MATERIAL_TYPE) and return }
-			end
-		else
-			flash[:notice] = "资源已成功创建"
-			respond_to do |format|
-				format.json	{ render_json_auto(material) and return }
-			end
-		end
+		@material = Material.check_and_create_new(@current_user, params[:material])
+		render_json_auto @material and return
+	end
+
+	def show
+		@material = Material.find_by_id(@material)
+		render_json_auto ErrorEnum::MATERIAL_NOT_EXIST and return if !@material.nil?
+		render_json_auto @material and return
 	end
 end

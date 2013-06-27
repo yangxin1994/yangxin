@@ -1,7 +1,7 @@
 # encoding: utf-8
 class Admin::GiftsController < Admin::ApplicationController
 
-	before_filter :check_gift_existence, :only => [:update, :destroy]
+	before_filter :check_gift_existence, :only => [:show, :update, :destroy]
 
 	def check_gift_existence
 		@gift = Gift.find_by_id(params[:id])
@@ -11,6 +11,11 @@ class Admin::GiftsController < Admin::ApplicationController
 	def index
 		@gifts = Gift.search_gift(params[:title], params[:status].to_i, params[:type].to_i)
 		render_json_auto(auto_paginate(@gifts)) and return
+	end
+
+	def show
+		@gift['photo_url'] = @gift.photo.value
+		render_json_auto(@gift)
 	end
 
 	def create
