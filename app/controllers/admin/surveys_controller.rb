@@ -28,10 +28,7 @@ class Admin::SurveysController < Admin::ApplicationController
 	end
 
 	def show
-	    s = @survey.attributes
-		s['created_at'] = s['created_at'].to_i
-		s['updated_at'] = s['updated_at'].to_i
-		render_json_auto s and return
+		render_json_auto @survey.info_for_admin and return
 	end
 
 	def promote
