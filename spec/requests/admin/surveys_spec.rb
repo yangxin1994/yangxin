@@ -114,12 +114,10 @@ describe 'visit surveys' do
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]
-			survey = Survey.where("id" => @survey.id).first.attributes
-			survey['created_at'] = survey['created_at'].to_i
-			survey['updated_at'] = survey['updated_at'].to_i
-			retval.each do |k, v|
-				expect(survey[k].to_s).to eq(v.to_s)
-			end
+			expect(retval["user"]["id"]).to eq(@survey.user._id.to_s)
+			expect(retval["user"]["email"]).to eq(@survey.user.email)
+			expect(retval["user"]["mobile"]).to eq(@survey.user.mobile)
+			expect(retval["survey"]["id"]).to eq(@survey._id.to_s)
 		end
 
 		it "the /promote of surveys should return true" do
