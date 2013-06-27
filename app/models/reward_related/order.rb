@@ -127,7 +127,7 @@ class Order
 		order_list = (select_fileds.blank? ? Order.all : Order.where(select_fileds))
 
 		[:email, :mobile].each do |user_field|
-			 if !params[user_field].blank?
+			 if !params[user_field].blank? and !order_list[0].blank?
 			 	order_list = order_list.delete_if { |order|
 			 		order.sample.send(user_field) != params[user_field] }
 			 end

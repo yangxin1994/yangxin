@@ -21,8 +21,11 @@ class Admin::OrdersController < Admin::ApplicationController
     retval = {}
     params[:order_ids].each do |order_id|
       order = Order.find_by_id(order_id)
-      retval[order_id] = ErrorEnum::ORDER_NOT_FOUND if order.blank?
-      order.update_order_status(params[:status], params[:remark])
+      if order.blank?
+        retval[order_id] = ErrorEnum::ORDER_NOT_FOUND
+      else
+        order.update_order_status(params[:status], params[:remark])
+      end
     end
     retval = true if retval.blank?
     render_json_auto retval and return

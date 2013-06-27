@@ -175,8 +175,10 @@ class Survey
 	end
 
 	def append_user_fields(arr_fields)
-		arr_fields.each do |field|
-			self[field] = self.user.send(field)
+		if !self.blank?
+			arr_fields.each do |field|
+				self[field] = self.user.send(field)
+			end
 		end
 		return self
 	end
