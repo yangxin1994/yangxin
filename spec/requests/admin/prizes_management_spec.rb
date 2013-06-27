@@ -33,7 +33,7 @@ describe "prizes management" do
 			per_page: 10,
 			title: "the",
 			status: 1,
-			type: 3,
+			type: 1,
 			auth_key: @auth_key
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
