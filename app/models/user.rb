@@ -76,7 +76,6 @@ class User
 	has_many :operate_reward_logs, :class_name => "RewardLog", :inverse_of => :operator,:foreign_key => "operator_id"
 	has_many :third_party_users
 	has_many :surveys, class_name: "Survey", inverse_of: :user
-	has_many :groups
 	has_many :materials
 	has_many :public_notices
 	has_many :question_feedbacks, class_name: "Feedback", inverse_of: :question_user
