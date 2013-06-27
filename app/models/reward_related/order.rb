@@ -33,7 +33,7 @@ class Order
 	belongs_to :gift
 	belongs_to :sample, :class_name => "User", :inverse_of => :orders
 	belongs_to :operator, :class_name => "User", :inverse_of => :operate_orders
-
+=begin
 	validates :type, :presence_ext => true,
 		:inclusion => { :in => [1, 2, 4, 8, 16, 32, 64] },
 		:numericality => true
@@ -62,7 +62,7 @@ class Order
 	delegate :create, :to => :reward_log, :prefix => true
 	#delegate :cash_order, :realgoods_order, :to => "self.need_verify", :prefix => true
 	#after_create :decrease_point, :decrease_gift
-
+=end
 	def self.find_by_id(order_id)
 		return Order.where(:_id => order_id).first
 	end
