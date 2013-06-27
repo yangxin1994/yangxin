@@ -41,12 +41,13 @@ class Prize
 	end
 
 	def update_prize(prize)
-		material_id = prize.delete("material_id")
-		material = Material.find_by_id(material_id)
-		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+		if prize['material_id']
+			material_id = prize.delete("material_id")
+			material = Material.find_by_id(material_id)
+			return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+			self.photo = material
+		end
 		self.update_attributes(prize)
-		self.photo = material
-		return self.save
 	end
 
 	def self.search_prize(title, type)

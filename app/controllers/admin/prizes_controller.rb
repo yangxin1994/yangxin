@@ -1,10 +1,15 @@
 class Admin::PrizesController < Admin::ApplicationController
 
-	before_filter :check_prize_existence, :only => [:update, :destroy]
+	before_filter :check_prize_existence, :only => [:show, :update, :destroy]
 
 	def check_prize_existence
 		@prize = Prize.find_by_id(params[:id])
 		render_json_auto ErrorEnum::PRIZE_NOT_EXIST and return if @prize.nil?
+	end
+
+	def show
+		@prize['photo_url'] = @prize.photo.value
+		render_json_auto(@prize)
 	end
 
 	def index
