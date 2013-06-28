@@ -1,6 +1,6 @@
 class Admin::PrizesController < Admin::ApplicationController
 
-	before_filter :check_prize_existence, :only => [:update, :destroy]
+	before_filter :check_prize_existence, :only => [:update, :destroy, :show]
 
 	def check_prize_existence
 		@prize = Prize.find_by_id(params[:id])
@@ -9,6 +9,11 @@ class Admin::PrizesController < Admin::ApplicationController
 
 	def index
 		render_json { auto_paginate(Prize.search_prize(params[:title], params[:type].to_i)) }
+	end
+
+	def show
+		@prize['photo_url'] = @prize.photo.value
+		render_json_auto(@prize)
 	end
 
 	def create

@@ -179,9 +179,12 @@ OopsData::Application.routes.draw do
 				get :expired, :index, :virtual, :cash, :entity, :stockout
 			end
 		end
-		resources :orders, :only => [:index, :update] do
+		resources :orders do
 			collection do
-				put :update_status 
+				put :bulk_handle, :bulk_finish 
+			end
+			member do
+				put :handle, :finish 
 			end
 		end
 		resources :lotteries do

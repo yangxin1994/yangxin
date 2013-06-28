@@ -5,10 +5,11 @@ describe "order management" do
 	before(:all) do
 		@auth_key = admin_signin
 		@samples = FactoryGirl.create_list(:sample, 2)
+		clear(:Order)
 	end
 
 	describe "visit /index" do
-		before(:all) do
+		before(:each) do
 			@orders = FactoryGirl.create_list(:order, 20)
 			@orders[0..9].each { |o| @samples[0].orders << o}
 			@orders[10..19].each { |o| @samples[1].orders << o}
@@ -26,7 +27,7 @@ describe "order management" do
 			expect(retval.length).to eq(20)
 		end
 
-		it "search type should return right message" do
+		it "search type should return right message", :focus => true do
 			get "/admin/orders",
 			    page: 1,
 			    per_page: 20,
@@ -137,103 +138,82 @@ describe "order management" do
 		end
 	end
 
-	describe "visit /update" do
-		before(:all) do
-			@order = FactoryGirl.create(:order) { |o| @samples[0].orders << o }
-		end
-
-		it " should return ORDER_TYPE_ERROR when order_id not exist" do
-			put "/admin/orders/#{@order.id}",
-			    JSON.dump(
-				    status: 3,
-			    	auth_key: @auth_key),
-			    "CONTENT_TYPE" => "application/json"
-			response.status.should be(200)
-			retval = JSON.parse(response.body)["value"]["error_code"]
-			expect(retval).to eq(ErrorEnum::ORDER_TYPE_ERROR)
-		end
-
-		it " should return ORDER_NOT_FOUND" do
-			put "/admin/orders/#{@order.id.to_s.next}",
-			    JSON.dump(
-				    status: 2,
-			    	auth_key: @auth_key),
-			    "CONTENT_TYPE" => "application/json"
-			response.status.should be(200)
-			retval = JSON.parse(response.body)["value"]["error_code"]
-			expect(retval).to eq(ErrorEnum::ORDER_NOT_FOUND)
-		end
-
-		it " should return true" do
-			put "/admin/orders/#{@order.id}",
-			    JSON.dump(
-				    status: 2,
-			    	auth_key: @auth_key),
-			    "CONTENT_TYPE" => "application/json"
-			response.status.should be(200)
-			retval = JSON.parse(response.body)["value"]
-			expect(retval).to eq(true)
-			expect(Order.find_by_id(@order.id).status).to eq(2)
-		end
-
-		after(:all) do
-			clear(:Order)
-		end
+	it "begin to handle order" do
+		order = FactoryGirl.create(:wait_order)
+		put "/admin/orders/#{order._id.to_s}/handle",
+		    JSON.dump(
+		    	auth_key: @auth_key),
+		    "CONTENT_TYPE" => "application/json"
+		response.status.should be(200)
+		retval = JSON.parse(response.body)["value"]
+		expect(retval).to be true
+		expect(Order.find_by_id(order._id.to_s).status).to eq Order::HANDLE
+		put "/admin/orders/#{order._id.to_s}/handle",
+		    JSON.dump(
+		    	auth_key: @auth_key),
+		    "CONTENT_TYPE" => "application/json"
+		response.status.should be(200)
+		retval = JSON.parse(response.body)["value"]["error_code"]
+		expect(retval).to eq ErrorEnum::WRONG_ORDER_STATUS
 	end
 
-	describe "visit /update_status" do
+	it "begin to bulk handel order" do
+		orders = []
+		orders << FactoryGirl.create(:wait_order)
+		orders << FactoryGirl.create(:wait_order)
+		put "/admin/orders/bulk_handle",
+		    JSON.dump(
+		    	order_ids: orders.map { |e| e._id.to_s },
+		    	auth_key: @auth_key),
+		    "CONTENT_TYPE" => "application/json"
+		response.status.should be(200)
+		retval = JSON.parse(response.body)["value"]
+		expect(retval).to be true
+		expect(Order.find_by_id(orders[0]._id.to_s).status).to eq Order::HANDLE
+		expect(Order.find_by_id(orders[1]._id.to_s).status).to eq Order::HANDLE
+	end
 
-		before(:each) do
-			@orders = FactoryGirl.create_list(:order, 5)
-			@order_ids = @orders.collect { |o| o.id.to_s}
-		end
+	it "begin to finish order" do
+		order = FactoryGirl.create(:handle_order)
+		put "/admin/orders/#{order._id.to_s}/finish",
+		    JSON.dump(
+		    	success: true,
+		    	remark: "remark",
+		    	auth_key: @auth_key),
+		    "CONTENT_TYPE" => "application/json"
+		response.status.should be(200)
+		retval = JSON.parse(response.body)["value"]
+		expect(retval).to be true
+		order = Order.find_by_id(order._id.to_s)
+		expect(order.status).to eq Order::SUCCESS
+		expect(order.remark).to eq "remark"
 
-		it " should return ORDER_TYPE_ERROR when order_id not exist" do
-			put "/admin/orders/update_status",
-			    JSON.dump(
-				    status: 3,
-				    order_ids: @order_ids,
-			    	auth_key: @auth_key),
-			    "CONTENT_TYPE" => "application/json"
-			response.status.should be(200)
-			retval = JSON.parse(response.body)["value"]["error_code"]
-			expect(retval).to eq(ErrorEnum::ORDER_TYPE_ERROR)
-		end
+		put "/admin/orders/#{order._id.to_s}/finish",
+		    JSON.dump(
+		    	success: true,
+		    	remark: "remark",
+		    	auth_key: @auth_key),
+		    "CONTENT_TYPE" => "application/json"
+		response.status.should be(200)
+		retval = JSON.parse(response.body)["value"]["error_code"]
+		expect(retval).to eq ErrorEnum::WRONG_ORDER_STATUS
+	end
 
-		it " should return true" do
-			put "/admin/orders/update_status",
-			    JSON.dump(
-				    status: 2,
-				    order_ids: @order_ids,
-			    	auth_key: @auth_key),
-			    "CONTENT_TYPE" => "application/json"
-			response.status.should be(200)
-			retval = JSON.parse(response.body)["value"]
-			expect(retval).to eq(true)
-			expect(Order.find_by_id(@order_ids[0]).status).to eq(2)
-		end
-
-		it " should return a hash error when one order id error" do
-			order_ids = Array.new(@order_ids)
-			status =Order.find_by_id(@order_ids[4]).status
-			order_ids[4] = order_ids[4].next
-			put "/admin/orders/update_status",
-			    JSON.dump(
-				    status: 2,
-				    order_ids: order_ids,
-			    	auth_key: @auth_key),
-			    "CONTENT_TYPE" => "application/json"
-			response.status.should be(200)
-			retval = JSON.parse(response.body)["value"]
-			expect(retval).to eq({order_ids[4] => ErrorEnum::ORDER_NOT_FOUND})
-			expect(Order.find_by_id(@order_ids[3]).status).to eq(2)
-			expect(Order.find_by_id(@order_ids[4]).status).to eq(status)
-		end
-
-		after(:all) do
-			clear(:Order)
-		end
-
+	it "begin to bulk finish order" do
+		orders = []
+		orders << FactoryGirl.create(:handle_order)
+		orders << FactoryGirl.create(:handle_order)
+		put "/admin/orders/bulk_finish",
+		    JSON.dump(
+		    	order_ids: orders.map { |e| e._id.to_s },
+		    	success: true,
+		    	auth_key: @auth_key),
+		    "CONTENT_TYPE" => "application/json"
+		response.status.should be(200)
+		retval = JSON.parse(response.body)["value"]
+		expect(retval).to be true
+		expect(Order.find_by_id(orders[0]._id.to_s).status).to eq Order::SUCCESS
+		expect(Order.find_by_id(orders[1]._id.to_s).status).to eq Order::SUCCESS
 	end
 
 	after(:all) do

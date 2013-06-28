@@ -6,6 +6,7 @@ module ErrorEnum
 	SAMPLE_ATTRIBUTE_NAME_EXIST = "error__3"
 	SAMPLE_NOT_EXIST = "error__4"
 	AGENT_TASK_NOT_EXIST = "error__5"
+	WRONG_ORDER_STATUS = "error__5"
 	
 
 

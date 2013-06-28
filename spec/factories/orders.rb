@@ -12,4 +12,36 @@ FactoryGirl.define do
 		address {"beijing" if type == 32}
 		postcode {"108012" if type == 32}
 	end
+
+	factory :wait_order, class: Order do |f|
+		f.code { Time.now.strftime("%Y%m%d") + sprintf("%05d",rand(10000)) }
+		f.sequence(:type) { |n| 2**(n%7) }
+		f.status Order::WAIT
+		f.sequence(:source) { |n| 2**(n%3) }
+		f.amount 10
+	end
+
+	factory :handle_order, class: Order do |f|
+		f.code { Time.now.strftime("%Y%m%d") + sprintf("%05d",rand(10000)) }
+		f.sequence(:type) { |n| 2**(n%7) }
+		f.status Order::HANDLE
+		f.sequence(:source) { |n| 2**(n%3) }
+		f.amount 10
+	end
+
+	factory :success_order, class: Order do |f|
+		f.code { Time.now.strftime("%Y%m%d") + sprintf("%05d",rand(10000)) }
+		f.sequence(:type) { |n| 2**(n%7) }
+		f.status Order::SUCCESS
+		f.sequence(:source) { |n| 2**(n%3) }
+		f.amount 10
+	end
+
+	factory :fail_order, class: Order do |f|
+		f.code { Time.now.strftime("%Y%m%d") + sprintf("%05d",rand(10000)) }
+		f.sequence(:type) { |n| 2**(n%7) }
+		f.status Order::FAIL
+		f.sequence(:source) { |n| 2**(n%3) }
+		f.amount 10
+	end
 end
