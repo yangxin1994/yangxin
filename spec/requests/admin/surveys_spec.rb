@@ -122,11 +122,16 @@ describe 'visit surveys' do
 
 		it "the /promote of surveys should return true" do
 			promote = {}
-			promote['quillme'] = @survey.quillme_promote
-			promote['email'] = @survey.email_promote
-			promote['sms'] = @survey.sms_promote
-			promote['broswer_extension'] = @survey.broswer_extension_promote
-			promote['weibo'] = @survey.weibo_promote
+			promote["quillme_promotable"] = @survey.quillme_promotable
+			promote['quillme_promote_info'] = @survey.quillme_promote_info
+			promote["email_promotable"] = @survey.email_promotable
+			promote['email_promote_info'] = @survey.email_promote_info
+			promote["sms_promotable"] = @survey.sms_promotable
+			promote['sms_promote_info'] = @survey.sms_promote_info
+			promote["broswer_extension_promotable"] = @survey.broswer_extension_promotable
+			promote['broswer_extension_promote_info'] = @survey.broswer_extension_promote_info
+			promote["weibo_promotable"] = @survey.weibo_promotable
+			promote['weibo_promote_info'] = @survey.weibo_promote_info
 			get "/admin/surveys/#{@survey.id}/promote", 
 		    	auth_key: @auth_key
 			response.status.should be(200)
@@ -158,32 +163,60 @@ describe 'visit surveys' do
 			end
 
 			it "the /email_promote of survey should return REWARD_SCHEME_NOT_EXIST" do
+				email_promote_setting = {}
+				email_promote_setting["email_amount"] = 5000
+				email_promote_setting["promote_to_undefined_sample"] = true
+				email_promote_setting["reward_scheme_id"] = ""
 				put "/admin/surveys/#{@survey.id}/email_promote", 
-			    	auth_key: @auth_key
+				    JSON.dump(
+				    	promotable: true,
+				    	email_promote_setting: email_promote_setting,
+				    	auth_key: @auth_key),
+			    	"CONTENT_TYPE" => "application/json"
 				response.status.should be(200)
 				retval = JSON.parse(response.body)["value"]["error_code"]
 				expect(retval).to eq(ErrorEnum::REWARD_SCHEME_NOT_EXIST)
 			end
 
 			it "the /sms_promote of survey should return REWARD_SCHEME_NOT_EXIST" do
+				sms_promote_setting = {}
+				sms_promote_setting["sms_amount"] = 5000
+				sms_promote_setting["promote_to_undefined_sample"] = true
+				sms_promote_setting["reward_scheme_id"] = ""
 				put "/admin/surveys/#{@survey.id}/sms_promote", 
-			    	auth_key: @auth_key
+			    	JSON.dump(
+				    	promotable: true,
+				    	sms_promote_setting: sms_promote_setting,
+				    	auth_key: @auth_key),
+			    	"CONTENT_TYPE" => "application/json"
 				response.status.should be(200)
 				retval = JSON.parse(response.body)["value"]["error_code"]
 				expect(retval).to eq(ErrorEnum::REWARD_SCHEME_NOT_EXIST)
 			end
 
 			it "the /broswer_extension_promote of survey should return REWARD_SCHEME_NOT_EXIST" do
+				broswer_extension_promote_setting = {}
+				broswer_extension_promote_setting["reward_scheme_id"] = ""
 				put "/admin/surveys/#{@survey.id}/broswer_extension_promote", 
-			    	auth_key: @auth_key
+			    	JSON.dump(
+				    	promotable: true,
+				    	broswer_extension_promote_setting: broswer_extension_promote_setting,
+				    	auth_key: @auth_key),
+			    	"CONTENT_TYPE" => "application/json"
 				response.status.should be(200)
 				retval = JSON.parse(response.body)["value"]["error_code"]
 				expect(retval).to eq(ErrorEnum::REWARD_SCHEME_NOT_EXIST)
 			end
 
 			it "the /weibo_promote of survey should return all promote value" do
+				weibo_promote_setting = {}
+				weibo_promote_setting["reward_scheme_id"] = ""
 				put "/admin/surveys/#{@survey.id}/weibo_promote", 
-			    	auth_key: @auth_key
+			    	JSON.dump(
+				    	promotable: true,
+				    	weibo_promote_setting: weibo_promote_setting,
+				    	auth_key: @auth_key),
+			    	"CONTENT_TYPE" => "application/json"
 				response.status.should be(200)
 				retval = JSON.parse(response.body)["value"]["error_code"]
 				expect(retval).to eq(ErrorEnum::REWARD_SCHEME_NOT_EXIST)
@@ -192,94 +225,99 @@ describe 'visit surveys' do
 
 		describe "with reward_scheme exist" do
 			before(:each) do
-				@reward_scheme = FactoryGirl.create(:reward_scheme)
+				@rs = FactoryGirl.create(:reward_scheme)
 			end
 
 			it "submit /quillme_promote of survey should return true" do
 				put "/admin/surveys/#{@survey.id}/quillme_promote",
-				    quillme_promote_setting: true,
-				    reward_scheme_id: @reward_scheme.id,
-			    	auth_key: @auth_key
-				response.status.should be(200)
-				retval = JSON.parse(response.body)["value"]
-				expect(retval).to eq(true)
-				survey = Survey.where("id" => @survey.id).first
-				expect(survey.quillme_promote).to eq(true)
-			end
-
-			it "submit /email_promote of survey should return true" do
-				email_promote = @survey.email_promote
-				email_promote['promotable'] = true
-				email_promote['email_amount'] = 5000
-				email_promote['promote_to_undefined_sample'] = false
-				put "/admin/surveys/#{@survey.id}/email_promote",
 				    JSON.dump(
-				    email_promote_setting: email_promote,
-				    reward_scheme_id: @reward_scheme.id.to_s,
-			    	auth_key: @auth_key),
+				    	promotable: true,
+				    	quillme_promote_setting: {"reward_scheme_id" => @rs.id.to_s},
+				    	auth_key: @auth_key),
 			    	"CONTENT_TYPE" => "application/json"
 				response.status.should be(200)
 				retval = JSON.parse(response.body)["value"]
 				expect(retval).to eq(true)
-				survey = Survey.where("id" => @survey.id).first
-				expect(email_promote).to eq(survey.email_promote)
+				survey = Survey.find_by_id(@survey.id)
+				expect(survey.quillme_promotable).to eq(true)
+			end
+
+			it "submit /email_promote of survey should return true" do
+				email_promote = {}
+				email_promote['email_amount'] = 5000
+				email_promote['promote_to_undefined_sample'] = true
+				email_promote["reward_scheme_id"] = @rs.id.to_s
+				put "/admin/surveys/#{@survey.id}/email_promote",
+				    JSON.dump(
+				    	email_promotable: true,
+				    	email_promote_setting: email_promote,
+				    	auth_key: @auth_key),
+			    	"CONTENT_TYPE" => "application/json"
+				response.status.should be(200)
+				retval = JSON.parse(response.body)["value"]
+				expect(retval).to eq(true)
+				survey = Survey.find_by_id(@survey.id)
+				email_promote["promote_email_count"] = 0
+				expect(email_promote).to eq(survey.email_promote_info)
 			end
 
 			it "submit /sms_promote of survey should return true" do
-				sms_promote = @survey.sms_promote
-				sms_promote['promotable'] = true
+				sms_promote = {}
 				sms_promote['sms_amount'] = 5000
 				sms_promote['promote_to_undefined_sample'] = false
+				sms_promote["reward_scheme_id"] = @rs.id.to_s
 				put "/admin/surveys/#{@survey.id}/sms_promote",
 				    JSON.dump(
-				    sms_promote_setting: sms_promote,
-				    reward_scheme_id: @reward_scheme.id.to_s,
-			    	auth_key: @auth_key),
+				    	sms_promotable: true,
+				    	sms_promote_setting: sms_promote,
+    			    	auth_key: @auth_key),
 			    	"CONTENT_TYPE" => "application/json"				    
 				response.status.should be(200)
 				retval = JSON.parse(response.body)["value"]
 				expect(retval).to eq(true)
-				survey = Survey.where("id" => @survey.id).first
-				expect(sms_promote).to eq(survey.sms_promote)
+				survey = Survey.find_by_id(@survey.id)
+				sms_promote["promote_sms_count"] = 0
+				expect(sms_promote).to eq(survey.sms_promote_info)
 			end
 
 			it "submit /broswer_extension_promote of survey should return true" do
-				broswer_extension_promote = @survey.broswer_extension_promote
-				broswer_extension_promote['promotable'] = true
+				broswer_extension_promote = {}
 				broswer_extension_promote['login_sample_promote_only'] = true
 				broswer_extension_promote['filter'] = 
 				[ [{"key_word" => ["hello"], "url" => "sina"}],
 				[{"key_word" => ["bye"], "url" => "qq"}] ]
+				broswer_extension_promote["reward_scheme_id"] = @rs.id.to_s
 				put "/admin/surveys/#{@survey.id}/broswer_extension_promote", 
 				    JSON.dump(
-				    broswer_extension_promote_setting: broswer_extension_promote,
-				    reward_scheme_id: @reward_scheme.id.to_s,
-			    	auth_key: @auth_key),
+				    	broswer_extension_promotable: true,
+				    	broswer_extension_promote_setting: broswer_extension_promote,
+				    	auth_key: @auth_key),
 			    	"CONTENT_TYPE" => "application/json"
 				response.status.should be(200)
 				retval = JSON.parse(response.body)["value"]
 				expect(retval).to eq(true)
-				survey = Survey.where("id" => @survey.id).first
-				expect(broswer_extension_promote).to eq(survey.broswer_extension_promote)
+				survey = Survey.find_by_id(@survey.id)
+				expect(broswer_extension_promote).to eq(survey.broswer_extension_promote_info)
 			end
 
 			it "submit /weibo_promote of survey should return true" do
-				weibo_promote = @survey.weibo_promote
+				weibo_promote = {}
 				weibo_promote['text'] = "welcome to our website"
 				weibo_promote['image'] = "https://secure.gravatar.com/avatar/1d41b66ab243250e4268869049dfffc4?s=140&d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png"
 				weibo_promote['vidio'] = "http://youku.com"
 				weibo_promote['audio'] = "http://mp3.baidu.com"
+				weibo_promote["reward_scheme_id"] = @rs.id.to_s
 				put "/admin/surveys/#{@survey.id}/weibo_promote",
 				    JSON.dump(
-				    weibo_promote_setting: weibo_promote,
-				    reward_scheme_id: @reward_scheme.id.to_s,
-			    	auth_key: @auth_key),
+				    	weibo_promotable: true,
+				    	weibo_promote_setting: weibo_promote,
+    			    	auth_key: @auth_key),
 			    	"CONTENT_TYPE" => "application/json"
 				response.status.should be(200)
 				retval = JSON.parse(response.body)["value"]
 				expect(retval).to eq(true)
-				survey = Survey.where("id" => @survey.id).first
-				expect(weibo_promote).to eq(survey.weibo_promote)
+				survey = Survey.find_by_id(@survey.id)
+				expect(weibo_promote).to eq(survey.weibo_promote_info)
 			end
 		end
 

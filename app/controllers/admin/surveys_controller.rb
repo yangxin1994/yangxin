@@ -8,8 +8,9 @@ class Admin::SurveysController < Admin::ApplicationController
 	end
 
 	def check_reward_scheme_existence
-		@reward_scheme = RewardScheme.find_by_id(params[:reward_scheme_id])
-		render_json_auto(ErrorEnum::REWARD_SCHEME_NOT_EXIST) and return if @reward_scheme.nil?
+		reward_scheme_id = params[(params[:action] + "_setting").to_sym]["reward_scheme_id"]
+		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
+		render_json_auto(ErrorEnum::REWARD_SCHEME_NOT_EXIST) and return if reward_scheme.nil?
 	end
 
 	def index
@@ -32,37 +33,51 @@ class Admin::SurveysController < Admin::ApplicationController
 	end
 
 	def promote
-		retval = {}
-		retval["quillme"] = @survey.quillme_promote
-		retval["email"] = @survey.email_promote
-		retval["sms"] = @survey.sms_promote
-		retval["broswer_extension"] = @survey.broswer_extension_promote
-		retval["weibo"] = @survey.weibo_promote
+		retval = @survey.get_all_promote_settings
 		render_json_auto retval and return
 	end
 
 	def quillme_promote
-		@survey.update_attributes({'quillme_promote' => params[:quillme_promote_setting]})
+		@survey.update_attributes({
+			"quillme_promotable" => params[:promotable],
+			'quillme_promote_info' => params[:quillme_promote_setting]
+			})
 		render_json_auto true and return
 	end
 
 	def email_promote
-		@survey.update_attributes({'email_promote' => params[:email_promote_setting]})
+		email_promote_setting = params[:email_promote_setting]
+		email_promote_setting["promote_email_count"] = @survey.email_promote_info["promote_email_count"]
+		@survey.update_attributes({
+			"email_promotable" => params[:promotable],
+			'email_promote_info' => email_promote_setting
+			})
 		render_json_auto true and return
 	end
 
 	def sms_promote
-		@survey.update_attributes({'sms_promote' => params[:sms_promote_setting]})
+		sms_promote_setting = params[:sms_promote_setting]
+		sms_promote_setting["promote_sms_count"] = @survey.sms_promote_info["promote_sms_count"]
+		@survey.update_attributes({
+			"sms_promotable" => params[:promotable],
+			'sms_promote_info' => sms_promote_setting
+			})
 		render_json_auto true and return
 	end
 
 	def broswer_extension_promote
-		@survey.update_attributes({'broswer_extension_promote' => params[:broswer_extension_promote_setting]})
+		@survey.update_attributes({
+			"broswer_extension_promotable" => params[:promotable],
+			'broswer_extension_promote_info' => params[:broswer_extension_promote_setting]
+			})
 		render_json_auto true and return
 	end
 
 	def weibo_promote
-		@survey.update_attributes({'weibo_promote' => params[:weibo_promote_setting]})
+		@survey.update_attributes({
+			"weibo_promotable" => params[:promotable],
+			'weibo_promote_info' => params[:weibo_promote_setting]
+			})
 		render_json_auto true and return
 	end
 
