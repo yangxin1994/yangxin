@@ -2,7 +2,7 @@ require 'sidekiq/web'
 OopsData::Application.routes.draw do
 	mount Sidekiq::Web, at: "/sidekiq"
 
-	resources :faqs, :public_notices, :feedbacks, :advertisements
+	resources :faqs, :feedbacks, :advertisements
 	resources :data_generators do
 		collection do
 			get 'generate'
@@ -126,11 +126,7 @@ OopsData::Application.routes.draw do
 
 		resources :faqs do
 		end
-		resources :public_notices do
-			collection do
-				get 'count', 'list_by_type_count', 'list_by_type_and_value_count'
-			end
-		end
+		resources :public_notices , :except => [:new, :edit]
 		resources :advertisements do
 			collection do
 				get 'count', 'list_by_title_count', 'activated_count', 'unactivate_count'
