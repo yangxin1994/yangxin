@@ -63,7 +63,6 @@ describe 'visit reward_schemes' do
 
 		it "the /index of reward scheme should return 5 messages" do
 			reward_list = FactoryGirl.create_list(:reward_scheme, 5) { |scheme| @survey.reward_schemes << scheme}
-			p reward_list.first
 			RewardScheme.all.length.should be(5)
 			get "/admin/surveys/#{@survey.id}/reward_schemes",
 		    	page: 1,
