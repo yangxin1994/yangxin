@@ -42,14 +42,13 @@ describe "gifts management" do
 	end
 
 	it "create gift" do
-		material = FactoryGirl.create(:material)
 		post "admin/gifts",
 			JSON.dump(gift: {title: "new gift",
 					description: "description of the new gift",
 					quantity: 1,
 					type: 1,
 					point: 100,
-					material_id: material._id.to_s},
+					photo_url: "/image/1.jpg"},
 				auth_key: @auth_key),
 			"CONTENT_TYPE" => "application/json"
 		response.status.should be(200)
@@ -68,7 +67,7 @@ describe "gifts management" do
 					quantity: 1,
 					type: 1,
 					point: 100,
-					material_id: material._id.to_s},
+					photo_url: "/image/2.jpg"},
 				auth_key: @auth_key),
 			"CONTENT_TYPE" => "application/json"
 		response.status.should be(200)
@@ -76,6 +75,13 @@ describe "gifts management" do
 		retval.should be(true)
 		updated_gift = Gift.find_by_id(gift._id.to_s)
 		expect(updated_gift.title).to eq "updated gift"
+
+		get "admin/gifts/#{gift._id.to_s}",
+			auth_key: @auth_key
+		response.status.should be(200)
+		retval = JSON.parse(response.body)["value"]
+		expect(retval["photo_url"]).to eq "/image/2.jpg"
+
 	end
 
 	it "delete gift", :populate_gifts => true do

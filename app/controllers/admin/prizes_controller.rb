@@ -16,6 +16,11 @@ class Admin::PrizesController < Admin::ApplicationController
 		render_json { auto_paginate(Prize.search_prize(params[:title], params[:type].to_i)) }
 	end
 
+	def show
+		@prize['photo_url'] = @prize.photo.value
+		render_json_auto(@prize)
+	end
+
 	def create
 		render_json Prize.create_prize(params[:prize]) and return
 	end

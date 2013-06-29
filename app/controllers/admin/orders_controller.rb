@@ -1,34 +1,45 @@
 class Admin::OrdersController < Admin::ApplicationController
 
-  def index
-    order_list = Order.search_orders(params)
-    render_json_auto auto_paginate(order_list)
-  end
+  before_filter :check_order_existence, :only => [:show, :handle, :finish]
 
-
-  def update
-    render_json_auto ErrorEnum::ORDER_TYPE_ERROR and return if ![1, 2, 4, 8].include?(params[:status])
-
+  def check_order_existence
     @order = Order.find_by_id(params[:id])
-    render_json_auto ErrorEnum::ORDER_NOT_FOUND and return if @order.blank?
-
-    retval = @order.update_order_status(params[:status], params[:remark])
-    render_json_auto retval and return
+    render_json_auto ErrorEnum::ORDER_NOT_EXIST and return if @order.nil?
   end
 
-  def update_status
-    render_json_auto ErrorEnum::ORDER_TYPE_ERROR and return if ![1, 2, 4, 8].include?(params[:status])
-    retval = {}
+  def index
+    order_list = Order.search_orders(params[:email], 
+      params[:mobile],
+      params[:code],
+      params[:status].to_i,
+      params[:source].to_i,
+      params[:type].to_i)
+    render_json_auto auto_paginate(order_list) and return
+  end
+
+  def show
+    render_json_auto @order and return
+  end
+
+  def handle
+    render_json_auto @order.handle and return
+  end
+
+  def bulk_handle
     params[:order_ids].each do |order_id|
-      order = Order.find_by_id(order_id)
-      if order.blank?
-        retval[order_id] = ErrorEnum::ORDER_NOT_FOUND
-      else
-        order.update_order_status(params[:status], params[:remark])
-      end
+      Order.find_by_id(order_id).try(:handle)
     end
-    retval = true if retval.blank?
-    render_json_auto retval and return
+    render_json_auto true and return
   end
 
+  def finish
+    render_json_auto @order.finish(params[:success], params[:remark]) and return
+  end
+
+  def bulk_finish
+    params[:order_ids].each do |order_id|
+      Order.find_by_id(order_id).try(:finish, params[:success])
+    end
+    render_json_auto true and return
+  end
 end

@@ -4,25 +4,38 @@ class Gift
 	include Mongoid::Document
 	include Mongoid::Timestamps
 
+	OFF_THE_SHELF = 1
+	ON_THE_SHELF = 2
+	DELETED = 4
+
+	VIRTUAL = 1
+	REAL = 2
+	MOBILE_CHARGE = 4
+	ALIPAY = 8
+	JIFENBAO = 16
+	QQ_COIN = 32
+
+	SINGLE = 1
+	INTERVAL = 2
+	ARRAY = 4
+
+
 	# 1 off the shelf, 2 on the shelf, 4 deleted
 	field :status, :type => Integer, default: 1
-	# 1 for one virtual gift, 2 for virtual gift whose number can be selected, 4 for real gift
+	# 1 for virtual gift, 2 for virtual gift whose number can be selected, 4 for real gift
 	field :type, :type => Integer, default: 1
 	field :title, :type => String, default: ""
 	field :description, :type => String, default: ""
 	field :quantity, :type => Integer, default: 0
 	field :point, :type => Integer, default: 0
     field :exchange_count, :type => Integer, default: 0
+    field :redeem_number, :type => Hash, default: {"mode" => SINGLE}
 
 	has_one :photo, :class_name => "Material", :inverse_of => 'gift'
 
 	default_scope order_by(:created_at.desc)
 
-	scope :normal, where(:status.in => [1, 2])
-	scope :virtual, normal.where(:type.in => [1,2])
-	scope :virtual_one, normal.where(:type => 1)
-	scope :virtual_multiple, normal.where(:type => 2)
-	scope :real, normal.where(:type => 4)
+	scope :normal, where(:status.in => [OFF_THE_SHELF, ON_THE_SHELF])
 
 	index({ type: 1, status: 1 }, { background: true } )
 
@@ -31,9 +44,8 @@ class Gift
 	end
 
 	def self.create_gift(gift)
-		material_id = gift.delete("material_id")
-		material = Material.find_by_id(material_id)
-		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+		photo_url = gift.delete("photo_url")
+		material = Material.create_image(photo_url)
 		gift = Gift.new(gift)
 		gift.save
 		gift.photo = material
@@ -42,13 +54,12 @@ class Gift
 	end
 
 	def update_gift(gift)
-		if gift['material_id']
-			material_id = gift.delete("material_id")
-			material = Material.find_by_id(material_id)
-			return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+		photo_url = gift.delete("photo_url")
+		if !photo_url.blank? && photo_url != self.photo.value
+			material = Material.create_image(photo_url)
 			self.photo = material
 		end
-		self.update_attributes(gift)
+		return self.update_attributes(gift)
 	end
 
 	def self.search_gift(title, status, type)
@@ -63,7 +74,7 @@ class Gift
 	end
 
 	def delete_gift
-		self.status = 4
+		self.status = DELETED
 		return self.save
 	end
 

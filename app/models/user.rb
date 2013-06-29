@@ -115,26 +115,31 @@ class User
 	#* the user instance: when the user exists
 	#* nil: when the user does not exist
 	def self.find_by_email_username(email_username)
-		user = User.where(:email => email_username, :status.gt => -1)[0]
-		user = User.where(:username => email_username, :status.gt => -1)[0] if user.nil?
+		user = self.where(:email => email_username, :status.gt => -1)[0]
+		user = self.where(:username => email_username, :status.gt => -1)[0] if user.nil?
 		return user
 	end
 
 	def self.find_by_email(email)
 		return nil if email.blank?
-		return User.where(:email => email.downcase, :status.gt => -1).first
+		return self.where(:email => email.downcase, :status.gt => -1).first
+	end
+
+	def self.find_by_mobile(mobile)
+		return nil if mobile.blank?
+		return self.where(:mobile => mobile, :status.gt => -1).first
 	end
 
 	def self.find_by_username(username)
-		return User.where(:username => username, :status.gt => -1).first
+		return self.where(:username => username, :status.gt => -1).first
 	end
 
 	def self.find_by_id(user_id)
-		return User.where(:_id => user_id, :status.gt => -1).first
+		return self.where(:_id => user_id, :status.gt => -1).first
 	end
 
 	def self.find_by_id_including_deleted(user_id)
-		return User.where(:_id => user_id).first
+		return self.where(:_id => user_id).first
 	end
 
 	def self.find_by_auth_key(auth_key)
@@ -796,4 +801,5 @@ class User
 			:attributes => attributes,
 			:is_block => self.is_block}
 	end
+
 end
