@@ -10,6 +10,7 @@ describe "order management" do
 
 	describe "visit /index" do
 		before(:each) do
+			clear(:Order)
 			@orders = FactoryGirl.create_list(:order, 20)
 			@orders[0..9].each { |o| @samples[0].orders << o}
 			@orders[10..19].each { |o| @samples[1].orders << o}
@@ -19,9 +20,9 @@ describe "order management" do
 
 		it "should return all orders" do
 			get "/admin/orders",
-			    page: 1,
-			    per_page: 20,
-			    auth_key: @auth_key
+				page: 1,
+				per_page: 20,
+				auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
 			expect(retval.length).to eq(20)
@@ -29,10 +30,10 @@ describe "order management" do
 
 		it "search type should return right message", :focus => true do
 			get "/admin/orders",
-			    page: 1,
-			    per_page: 20,
-			    type: 2,
-			    auth_key: @auth_key
+				page: 1,
+				per_page: 20,
+				type: 2,
+				auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
 			count = 0
@@ -43,10 +44,10 @@ describe "order management" do
 		it "search code should return right message" do
 			code = @orders[6].code
 			get "/admin/orders",
-			    page: 1,
-			    per_page: 20,
-			    code: code,
-			    auth_key: @auth_key
+				page: 1,
+				per_page: 20,
+				code: code,
+				auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
 			expect(retval.length).to eq(1)
@@ -54,10 +55,10 @@ describe "order management" do
 
 		it "search status should return right message" do
 			get "/admin/orders",
-			    page: 1,
-			    per_page: 20,
-			    status: 4,
-			    auth_key: @auth_key
+				page: 1,
+				per_page: 20,
+				status: 4,
+				auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
 			count = 0
@@ -67,10 +68,10 @@ describe "order management" do
 
 		it "search source should return right message" do
 			get "/admin/orders",
-			    page: 1,
-			    per_page: 20,
-			    source: 2,
-			    auth_key: @auth_key
+				page: 1,
+				per_page: 20,
+				source: 2,
+				auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
 			count = 0
@@ -82,10 +83,10 @@ describe "order management" do
 			email = @orders[8].sample.email
 			o = Order.where(:id => @orders[8].id)
 			get "/admin/orders",
-			    page: 1,
-			    per_page: 20,
-			    email: email,
-			    auth_key: @auth_key
+				page: 1,
+				per_page: 20,
+				email: email,
+				auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
 			expect(retval.length).to eq(10)
@@ -94,10 +95,10 @@ describe "order management" do
 		it "search mobile should return right message" do
 			mobile = @orders[10].sample.mobile
 			get "/admin/orders",
-			    page: 1,
-			    per_page: 20,
-			    mobile: mobile,
-			    auth_key: @auth_key
+				page: 1,
+				per_page: 20,
+				mobile: mobile,
+				auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
 			expect(retval.length).to eq(10)
@@ -105,11 +106,11 @@ describe "order management" do
 
 		it "search status|type should return right message" do
 			get "/admin/orders",
-			    page: 1,
-			    per_page: 20,
-			    status: 2,
-			    type: 4,
-			    auth_key: @auth_key
+				page: 1,
+				per_page: 20,
+				status: 2,
+				type: 4,
+				auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
 			count = 0
@@ -121,11 +122,11 @@ describe "order management" do
 			mobile = @orders[10].sample.mobile
 			status = @orders[10].status
 			get "/admin/orders",
-			    page: 1,
-			    per_page: 20,
-			    status: status,
-			    mobile: mobile,
-			    auth_key: @auth_key
+				page: 1,
+				per_page: 20,
+				status: status,
+				mobile: mobile,
+				auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["data"]
 			count = 0
@@ -141,17 +142,17 @@ describe "order management" do
 	it "begin to handle order" do
 		order = FactoryGirl.create(:wait_order)
 		put "/admin/orders/#{order._id.to_s}/handle",
-		    JSON.dump(
-		    	auth_key: @auth_key),
-		    "CONTENT_TYPE" => "application/json"
+			JSON.dump(
+				auth_key: @auth_key),
+			"CONTENT_TYPE" => "application/json"
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
 		expect(retval).to be true
 		expect(Order.find_by_id(order._id.to_s).status).to eq Order::HANDLE
 		put "/admin/orders/#{order._id.to_s}/handle",
-		    JSON.dump(
-		    	auth_key: @auth_key),
-		    "CONTENT_TYPE" => "application/json"
+			JSON.dump(
+				auth_key: @auth_key),
+			"CONTENT_TYPE" => "application/json"
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]["error_code"]
 		expect(retval).to eq ErrorEnum::WRONG_ORDER_STATUS
@@ -162,10 +163,10 @@ describe "order management" do
 		orders << FactoryGirl.create(:wait_order)
 		orders << FactoryGirl.create(:wait_order)
 		put "/admin/orders/bulk_handle",
-		    JSON.dump(
-		    	order_ids: orders.map { |e| e._id.to_s },
-		    	auth_key: @auth_key),
-		    "CONTENT_TYPE" => "application/json"
+			JSON.dump(
+				order_ids: orders.map { |e| e._id.to_s },
+				auth_key: @auth_key),
+			"CONTENT_TYPE" => "application/json"
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
 		expect(retval).to be true
@@ -176,11 +177,11 @@ describe "order management" do
 	it "begin to finish order" do
 		order = FactoryGirl.create(:handle_order)
 		put "/admin/orders/#{order._id.to_s}/finish",
-		    JSON.dump(
-		    	success: true,
-		    	remark: "remark",
-		    	auth_key: @auth_key),
-		    "CONTENT_TYPE" => "application/json"
+			JSON.dump(
+				success: true,
+				remark: "remark",
+				auth_key: @auth_key),
+			"CONTENT_TYPE" => "application/json"
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
 		expect(retval).to be true
@@ -189,11 +190,11 @@ describe "order management" do
 		expect(order.remark).to eq "remark"
 
 		put "/admin/orders/#{order._id.to_s}/finish",
-		    JSON.dump(
-		    	success: true,
-		    	remark: "remark",
-		    	auth_key: @auth_key),
-		    "CONTENT_TYPE" => "application/json"
+			JSON.dump(
+				success: true,
+				remark: "remark",
+				auth_key: @auth_key),
+			"CONTENT_TYPE" => "application/json"
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]["error_code"]
 		expect(retval).to eq ErrorEnum::WRONG_ORDER_STATUS
@@ -204,11 +205,11 @@ describe "order management" do
 		orders << FactoryGirl.create(:handle_order)
 		orders << FactoryGirl.create(:handle_order)
 		put "/admin/orders/bulk_finish",
-		    JSON.dump(
-		    	order_ids: orders.map { |e| e._id.to_s },
-		    	success: true,
-		    	auth_key: @auth_key),
-		    "CONTENT_TYPE" => "application/json"
+			JSON.dump(
+				order_ids: orders.map { |e| e._id.to_s },
+				success: true,
+				auth_key: @auth_key),
+			"CONTENT_TYPE" => "application/json"
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
 		expect(retval).to be true
