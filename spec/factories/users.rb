@@ -25,4 +25,10 @@ FactoryGirl.define do
 		c.sequence(:email) { |n| "creator_#{n}@example.com"}
 		c.mobile {"183#{[*(1..8)].shuffle.join}"}   ##random string
 	end
+
+	factory :answer_auditor, class: User do |aa|
+		aa.sequence(:email) { |n| "creator_#{n}@example.com"}
+		aa.mobile {"183#{[*(1..8)].shuffle.join}"}   ##random string
+		aa.user_role 9
+	end
 end
