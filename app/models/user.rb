@@ -37,7 +37,7 @@ class User
 	# entry clerk
 	field :role, :type => Integer, default: 0
 
-	# 1 for sample, 2 for client, 4 for admin
+	# 1 for sample, 2 for client, 4 for admin, 8 for answer auditor, 16 for interviewer
 	field :user_role, :type => Integer, default: 1
 	field :is_block, :type => Boolean, default: false
 
