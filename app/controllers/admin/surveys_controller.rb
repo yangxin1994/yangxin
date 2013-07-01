@@ -101,6 +101,11 @@ class Admin::SurveysController < Admin::ApplicationController
 		render_json_auto @survey.set_quillme_hot and return
 	end
 
+	def allocate_answer_auditors
+		retval = @survey.allocate_answer_auditors(params[:answer_auditor_ids])
+		render_json_auto(retval) and return
+	end
+
 	def add_template_question
 		@survey = Survey.find_by_id(params[:id]) if params[:id]
 		unless @survey
@@ -115,13 +120,6 @@ class Admin::SurveysController < Admin::ApplicationController
 			@survey.convert_template_question_to_normal_question(params[:question_id])
 		end
 		render_json_auto true
-	end
-
-	def allocate
-		@survey = Survey.normal.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-		retval = @survey.allocate(params[:system_user_type], params[:user_id], params[:allocate].to_s == "true")
-		render_json_auto(retval) and return
 	end
 
 	def add_reward
