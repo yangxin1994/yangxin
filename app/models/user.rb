@@ -156,6 +156,14 @@ class User
 		end
 	end
 
+	def self.find_answer_auditors
+		answer_auditors = []
+		User.all.each do |user|
+			answer_auditors << user.serialize_for(["email", "mobile"]) if user.is_answer_auditor?
+		end
+		return answer_auditors
+	end
+
 	def self.logout(auth_key)
 		user = User.find_by_auth_key(auth_key)
 		if !user.nil?
@@ -238,6 +246,10 @@ class User
 
 	def is_answer_auditor
 		return (self.role.to_i & 4) > 0
+	end
+
+	def is_answer_auditor?
+		return (self.user_role.to_i & 8) > 0
 	end
 
 	def is_interviewer
@@ -800,6 +812,18 @@ class User
 			:point => self.point,
 			:attributes => attributes,
 			:is_block => self.is_block}
+	end
+
+	def serialize_for(arr_fields)
+		user_obj = {"id" => self.id.to_s}
+		arr_fields.each do |field|
+			if [:created_at, :updated_at].include?(field)
+			  user_obj[field] = self.send(field).to_i
+			else
+				user_obj[field] = self.send(field)
+			end
+		end
+		return user_obj
 	end
 
 end
