@@ -210,6 +210,7 @@ class User
 	#
 	#*retval*:
 	#* true or false
+	## TODO to be remove by checking user.role
 	def self.user_activate_by_email?(email)
 		user = User.find_by_email(email)
 		return !!(user && user.status == 1)
@@ -238,6 +239,10 @@ class User
 
 	def is_admin
 		return (self.role.to_i & 16) > 0
+	end
+
+	def is_admin?
+		return (self.user_role.to_i & 4) > 0
 	end
 
 	def is_survey_auditor
