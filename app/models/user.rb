@@ -94,7 +94,7 @@ class User
 	has_many :logs
 
 	scope :unregistered, where(status: 0)
-	scope :sample, where(user_role: 1)
+	scope :sample, mod(:user_role => [2, 1])
 
 	POINT_TO_INTRODUCER = 10
 
@@ -210,6 +210,7 @@ class User
 	#
 	#*retval*:
 	#* true or false
+	## TODO to be remove by checking user.role
 	def self.user_activate_by_email?(email)
 		user = User.find_by_email(email)
 		return !!(user && user.status == 1)
@@ -238,6 +239,10 @@ class User
 
 	def is_admin
 		return (self.role.to_i & 16) > 0
+	end
+
+	def is_admin?
+		return (self.user_role.to_i & 4) > 0
 	end
 
 	def is_survey_auditor
@@ -560,6 +565,14 @@ class User
 	def set_role(role)
 		return ErrorEnum::WRONG_USER_ROLE if !(0..63).to_a.include?(role)
 		self.role = role
+		return self.save
+	end
+
+	def set_sample_role(role)
+		retval = true
+		role.each { |r| retval = false if [4, 8, 16].include?(r) }
+		return ErrorEnum::WRONG_USER_ROLE if retval
+		self.user_role = (role.sum + 1)
 		return self.save
 	end
 

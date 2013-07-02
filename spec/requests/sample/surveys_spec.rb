@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "surveys api" do
 
   before(:each) do
-    10.times {@survey = FactoryGirl.create(:survey)}
+    @surveys = FactoryGirl.create_list(:survey, 10)
   end
 
   it "return hot survey" do
@@ -26,8 +26,14 @@ describe "surveys api" do
       response.status.should be(200)
       retval = JSON.parse(response.body)["success"]
       ret    = JSON.parse(response.body)["value"]
+      count = 0
+      Survey.all.each {|s|count += 1 if s.status == 2}
       expect(retval).to eq(true)
-      ret['data'].length.should be 4
+      ret['data'].length.should be count
+  end
+
+  after(:each) do
+    clear(:Survey)
   end
 
 end

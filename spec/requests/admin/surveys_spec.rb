@@ -159,12 +159,30 @@ describe 'visit surveys' do
 		end
 
 		it "the /allocate_answer_auditors should return true" do
+			answer_auditor = FactoryGirl.create(:answer_auditor)
+			expect(User.find_by_id(answer_auditor.id.to_s).answer_auditor_allocated_surveys.length).to eq(0)
 			put "/admin/surveys/#{@survey.id}/allocate_answer_auditors",
-			  answer_auditor_ids: [@creator.id.to_s],
+			  answer_auditor_ids: [answer_auditor.id.to_s],
+			  allocate: true,
 			  auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]
 			expect(retval).to eq(true)
+			expect(User.find_by_id(answer_auditor.id.to_s).answer_auditor_allocated_surveys.length).to eq(1)
+		end
+
+		it "the /allocate_answer_auditors should return true" do
+			answer_auditor = FactoryGirl.create(:answer_auditor)
+			answer_auditor.answer_auditor_allocated_surveys << @survey
+			expect(User.find_by_id(answer_auditor.id.to_s).answer_auditor_allocated_surveys.length).to eq(1)
+			put "/admin/surveys/#{@survey.id}/allocate_answer_auditors",
+			  answer_auditor_ids: [answer_auditor.id.to_s],
+			  allocate: false,
+			  auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]
+			expect(retval).to eq(true)
+			expect(User.find_by_id(answer_auditor.id.to_s).answer_auditor_allocated_surveys.length).to eq(0)
 		end
 
 		describe "with reward_scheme not exist" do

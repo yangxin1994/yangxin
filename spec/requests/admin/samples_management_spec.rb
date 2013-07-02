@@ -154,4 +154,43 @@ describe "samples management" do
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
 	end
+
+	it "visit /set_sample_role should return SAMPLE_NOT_EXIST" do
+		sample = FactoryGirl.create(:admin_another)
+		put "/admin/samples/#{sample.id}/set_sample_role",
+		  role: [8, 16],
+		  auth_key: @auth_key
+		response.status.should be(200)
+		retval = JSON.parse(response.body)["value"]["error_code"]
+		expect(retval).to eq(ErrorEnum::SAMPLE_NOT_EXIST)
+	end
+
+	it "visit /set_sample_role should return WRONG_USER_ROLE" do
+		sample = FactoryGirl.create(:answer_auditor)
+		put "/admin/samples/#{sample.id}/set_sample_role",
+		  role: [8, 15],
+		  auth_key: @auth_key
+		response.status.should be(200)
+		retval = JSON.parse(response.body)["value"]["error_code"]
+		expect(retval).to eq(ErrorEnum::WRONG_USER_ROLE)
+	end
+
+	it "visit /set_sample_role should return true" do
+		sample = FactoryGirl.create(:answer_auditor)
+		put "/admin/samples/#{sample.id}/set_sample_role",
+		  JSON.dump(
+		  	role: [8, 16],
+		  	auth_key: @auth_key),
+		  "CONTENT_TYPE" => "application/json"		  
+		response.status.should be(200)
+		retval = JSON.parse(response.body)["value"]
+		expect(retval).to eq(true)
+		expect(User.find_by_id(sample.id.to_s).user_role).to eq(25)
+	end
+
+	after(:all) do
+		clear(:User)
+		clear(:SampleAttribute)
+		clear(:Log)
+	end
 end

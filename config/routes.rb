@@ -67,6 +67,7 @@ OopsData::Application.routes.draw do
 			member do
 				get :point_log, :redeem_log, :lottery_log
 				post :block
+				put :set_sample_role
 			end
 			collection do
 				post :send_message
@@ -114,7 +115,7 @@ OopsData::Application.routes.draw do
 				put 'add_template_question'
 			end
 			member do
-				put 'allocate', 'add_reward', 'set_community', 'set_spread', 'set_promotable', 'set_answer_need_review', 'background_survey',
+				put 'add_reward', 'set_community', 'set_spread', 'set_promotable', 'set_answer_need_review', 'background_survey',
 				    'quillme_promote', 'email_promote', 'sms_promote', 'broswer_extension_promote', "weibo_promote"
 				get 'get_sent_email_number', 'promote'
 				put :quillme_hot, :allocate_answer_auditors
@@ -222,9 +223,12 @@ OopsData::Application.routes.draw do
 	namespace :answer_auditor do
 		resources :surveys do
 		end
-		resources :answers do
+		resources :answers , :only => [:index, :show, :destroy] do
 			member do
 				put 'review'
+			end
+			collection do
+				put "review_agent_answers"
 			end
 		end
 	end
@@ -239,14 +243,6 @@ OopsData::Application.routes.draw do
 				get 'publish'
 				get 'close'
 				get 'pause'
-			end
-		end
-	end
-
-	namespace :answer_auditor do
-		resources :answers do
-			collection do
-				get 'count'
 			end
 		end
 	end
