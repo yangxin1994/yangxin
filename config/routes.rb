@@ -67,6 +67,7 @@ OopsData::Application.routes.draw do
 			member do
 				get :point_log, :redeem_log, :lottery_log
 				post :block
+				put :set_sample_role
 			end
 			collection do
 				post :send_message

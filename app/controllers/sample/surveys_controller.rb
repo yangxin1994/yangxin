@@ -12,7 +12,7 @@ class Sample::SurveysController < ApplicationController
   #############################	
   def get_hot_spot_survey
     #查询条件:必须是发布在社区的调查问卷，必须是热点小调查，必须是已经发布的问卷,必须是可推广的调查问卷
-    @survey = Survey.where(:quillme_promote => true,:quillme_hot => true,:spreadable => true,:status => 2).first
+    @survey = Survey.where(:quillme_promotable => true,:quillme_hot => true,:spreadable => true,:status => 2).first
     render_json { @survey }
   end
 
@@ -23,7 +23,7 @@ class Sample::SurveysController < ApplicationController
   #返回的参数:一个盛放推荐调研问卷的列表
   #############################	
   def get_recommends
-    @surveys = Survey.where(:quillme_promote => true,:spreadable => true,:status => 2)
+    @surveys = Survey.where(:quillme_promotable => true,:spreadable => true,:status => 2)
     @surveys = auto_paginate(@surveys)
     render_json { @surveys }
   end

@@ -1,5 +1,5 @@
 class Admin::SamplesController < Admin::ApplicationController
-	before_filter :check_sample_existence, :only => [:point_log, :redeem_log, :lottery_log, :show, :block]
+	before_filter :check_sample_existence, :only => [:point_log, :redeem_log, :lottery_log, :show, :block, :set_sample_role]
 
 	def check_sample_existence
 		@sample = User.sample.find_by_id(params[:id])
@@ -45,5 +45,10 @@ class Admin::SamplesController < Admin::ApplicationController
 
 	def lottery_log
 		render_json_auto(auto_paginate(@sample.lottery_logs)) and return
+	end
+
+	def set_sample_role
+		retval = @sample.set_sample_role(params[:role])
+		render_json_auto(retval) and return
 	end
 end

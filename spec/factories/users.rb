@@ -8,6 +8,15 @@ FactoryGirl.define do
 		user_role 4
 	end
 
+	factory :admin_another, parent: :admin do |a|
+		a.sequence(:username) { |n| "admin_#{n}"}
+		a.sequence(:email) { |n| "admin_#{n}@test.com"}
+		a.password Encryption.encrypt_password('123456')
+		a.role 63
+		a.status 4
+		a.user_role 4
+	end
+
 	factory :sample, class: User do |f|
 		f.sequence(:username) { |n| "foo#{n}@example.com" }
 		f.sequence(:email) { |n| "foo#{n}@example.com" }
