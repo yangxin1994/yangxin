@@ -79,7 +79,15 @@ describe 'visit surveys' do
 			retval = JSON.parse(response.body)["value"]["error_code"]
 			expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
 		end
-		
+
+		it "the /allocate_answer_auditors should return SURVEY_NOT_EXIST" do
+			put "/admin/surveys/1/allocate_answer_auditors",
+			  answer_auditor_ids: [],
+			  auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["error_code"]
+			expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
+		end
 	end
 
 	describe "with survey exist" do
@@ -148,6 +156,15 @@ describe 'visit surveys' do
 			expect(retval).to eq(true)
 			survey = Survey.where("id" => @survey.id).first
 			expect(survey.delta).to eq(false)
+		end
+
+		it "the /allocate_answer_auditors should return true" do
+			put "/admin/surveys/#{@survey.id}/allocate_answer_auditors",
+			  answer_auditor_ids: [@creator.id.to_s],
+			  auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]
+			expect(retval).to eq(true)
 		end
 
 		describe "with reward_scheme not exist" do

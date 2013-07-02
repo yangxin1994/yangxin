@@ -1922,22 +1922,17 @@ class Survey
 		RewardLog.create(options).created_at ? true : false
 	end
 
-	def allocate(system_user_type, user_id, allocate)
-		user = User.find_by_id(user_id)
-		return ErrorEnum::USER_NOT_EXIST if user.nil?
-		case system_user_type
-		when "answer_auditor"
-			return ErrorEnum::USER_NOT_EXIST if !(user.is_answer_auditor || user.is_admin)
-			self.answer_auditors << user if allocate
-			self.answer_auditors.delete(user) if !allocate
-		when "entry_clerk"
-			return ErrorEnum::USER_NOT_EXIST if !(user.is_entry_clerk || user.is_admin)
-			self.entry_clerks << user if allocate
-			self.entry_clerks.delete(user) if !allocate
-		else
-			return ErrorEnum::SYSTEM_USER_TYPE_ERROR
+	def allocate_answer_auditors(answer_auditor_ids)
+		retval = {}
+		answer_auditor_ids.each do |id|
+  		answer_auditor = User.find_by_id(id)
+  		retval[id] = USER_NOT_EXIST and next if user.blank? or user.is_answer_auditor?
+  		self.answer_auditors << answer_auditor
+  		result = self.save
+  		retval[id] = ErrorEnum::SYSTEM_USER_TYPE_ERROR if !result
 		end
-		return self.save
+		retval = (retval.blank? ? true : retval)
+		return retval
 	end
 
 	def clear_survey_object
