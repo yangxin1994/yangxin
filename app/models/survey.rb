@@ -1922,14 +1922,17 @@ class Survey
 		RewardLog.create(options).created_at ? true : false
 	end
 
-	def allocate_answer_auditors(answer_auditor_ids)
+	def allocate_answer_auditors(answer_auditor_ids, allocate)
 		retval = {}
 		answer_auditor_ids.each do |id|
   		answer_auditor = User.find_by_id(id)
   		retval[id] = USER_NOT_EXIST and next if user.blank? or user.is_answer_auditor?
-  		self.answer_auditors << answer_auditor
-  		result = self.save
-  		retval[id] = ErrorEnum::SYSTEM_USER_TYPE_ERROR if !result
+  		if allocate
+  			self.answer_auditors << answer_auditor
+  		else
+  			self.answer_auditors.delete(answer_auditor)
+  		end
+  		self.save
 		end
 		retval = (retval.blank? ? true : retval)
 		return retval

@@ -58,6 +58,29 @@ describe "answers management" do
       expect(retval).to eq(ErrorEnum::AGENT_TASK_NOT_EXIST)
     end
 
+    it "search has_reward should return 0 messages" do
+      @current_user.answer_auditor_allocated_surveys << @survey
+      get "/answer_auditor/answers",
+        survey_id: @survey.id.to_s,
+        has_reward: true,
+        auth_key: @auth_key
+      response.status.should be(200)
+      retval = JSON.parse(response.body)["value"]["data"]
+      expect(retval.length).to eq(0)
+    end
+
+    it "search has_reward should return 10 messages" do
+      @current_user.answer_auditor_allocated_surveys << @survey
+      @answers.each {|a| a.rewards = ["prize"]; a.save}
+      get "/answer_auditor/answers",
+        survey_id: @survey.id.to_s,
+        has_reward: true,
+        auth_key: @auth_key
+      response.status.should be(200)
+      retval = JSON.parse(response.body)["value"]["data"]
+      expect(retval.length).to eq(10)
+    end
+
     it "search agent_task should return 5 messages" do
       @current_user.answer_auditor_allocated_surveys << @survey
       @survey.agent_tasks << @agent_task
@@ -99,21 +122,85 @@ describe "answers management" do
     end
   end
 
-  describe "visit /reward" do
+  describe "visit /review" do
     before(:each) do
       @answer = FactoryGirl.create(:answer)
+      @survey = FactoryGirl.create(:survey)
+      @survey.answers << @answer
     end
 
-    it "answer status should be 4 after review" do
+    it "should return ANSWER_NOT_FINISHED when status is not 4" do
+      put "/answer_auditor/answers/#{@answer.id}/review",
+        review_result: true,
+        message_content: "good",
+        auth_key: @auth_key
+      retval = JSON.parse(response.body)["value"]["error_code"]
+      expect(retval).to eq(ErrorEnum::ANSWER_NOT_FINISHED)
+    end
+
+    it "should return true when finish" do
+      @answer.status = 4
+      @answer.save
       put "/answer_auditor/answers/#{@answer.id}/review",
         review_result: true,
         message_content: "good",
         auth_key: @auth_key
       retval = JSON.parse(response.body)["value"]
       expect(retval).to eq(true)
+      expect(Answer.all.first.status).to eq(8)
     end
 
     after(:each) do
+      clear(:Survey)
+      clear(:Answer)
+    end
+  end
+
+  describe "visit /review_agent_answers" do
+    before(:each) do
+      @survey = FactoryGirl.create(:survey)
+      @agent_task = FactoryGirl.create(:agent_task)
+      @survey.agent_tasks << @agent_task
+      @answers = FactoryGirl.create_list(:answer, 5) { |a| @survey.answers << a; @agent_task.answers << a }
+    end
+
+    it "should return SURVEY_NOT_EXIST when status is not 4" do
+      put "/answer_auditor/answers/review_agent_answers",
+        survey_id: @survey.id.to_s.next,
+        agent_task_id: @agent_task.id.to_s,
+        review_result: true,
+        message_content: "good",
+        auth_key: @auth_key
+      retval = JSON.parse(response.body)["value"]["error_code"]
+      expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
+    end
+    
+    it "should return AGENT_TASK_NOT_EXIST when status is not 4" do
+      put "/answer_auditor/answers/review_agent_answers",
+        survey_id: @survey.id.to_s,
+        agent_task_id: @agent_task.id.to_s.next,
+        review_result: true,
+        message_content: "good",
+        auth_key: @auth_key
+      retval = JSON.parse(response.body)["value"]["error_code"]
+      expect(retval).to eq(ErrorEnum::AGENT_TASK_NOT_EXIST)
+    end
+
+    it "should return true when finish" do
+      @answers.each { |a| a.status = 4; a.save }
+      put "/answer_auditor/answers/review_agent_answers",
+        survey_id: @survey.id.to_s,
+        agent_task_id: @agent_task.id.to_s,
+        review_result: true,
+        message_content: "good",
+        auth_key: @auth_key
+      retval = JSON.parse(response.body)["value"]
+      expect(retval).to eq(true)
+      expect(Answer.all.first.status).to eq(8)
+    end
+
+    after(:each) do
+      clear(:Survey)
       clear(:Answer)
     end
   end

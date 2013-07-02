@@ -102,7 +102,7 @@ class Admin::SurveysController < Admin::ApplicationController
 	end
 
 	def allocate_answer_auditors
-		retval = @survey.allocate_answer_auditors(params[:answer_auditor_ids])
+		retval = @survey.allocate_answer_auditors(params[:answer_auditor_ids], params[:allocate].to_s == "true")
 		render_json_auto(retval) and return
 	end
 
