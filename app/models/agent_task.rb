@@ -14,6 +14,7 @@ class AgentTask
 	field :reject_count, :type => Integer, default: 0
 
 	belongs_to :survey
+	has_many :answers
 
 	default_scope order_by(:created_at.desc)
 

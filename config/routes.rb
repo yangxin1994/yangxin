@@ -222,9 +222,12 @@ OopsData::Application.routes.draw do
 	namespace :answer_auditor do
 		resources :surveys do
 		end
-		resources :answers do
+		resources :answers , :only => [:index, :show, :destroy] do
 			member do
 				put 'review'
+			end
+			collection do
+				put "review_agent_answers"
 			end
 		end
 	end
@@ -239,14 +242,6 @@ OopsData::Application.routes.draw do
 				get 'publish'
 				get 'close'
 				get 'pause'
-			end
-		end
-	end
-
-	namespace :answer_auditor do
-		resources :answers do
-			collection do
-				get 'count'
 			end
 		end
 	end

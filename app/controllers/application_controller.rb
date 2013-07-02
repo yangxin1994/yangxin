@@ -115,10 +115,6 @@ class ApplicationController < ActionController::Base
 		user_signed_in? && (@current_user.is_survey_auditor || @current_user.is_admin || @current_user.is_super_admin)
 	end
 
-	def user_answer_auditor?
-		user_signed_in? && (@current_user.is_answer_auditor || @current_user.is_admin || @current_user.is_super_admin)
-	end
-
 	#judge whether the current user is entry clerk
 	def user_entry_clerk?
 		user_signed_in? && (@current_user.is_entry_clerk || @current_user.is_admin || @current_user.is_super_admin)
@@ -131,7 +127,7 @@ class ApplicationController < ActionController::Base
 
 	#judge whether the current user is answer auditor
 	def user_answer_auditor?
-		user_signed_in? && (@current_user.is_answer_auditor || @current_user.is_admin || @current_user.is_super_admin)
+		user_signed_in? && (@current_user.is_answer_auditor? || @current_user.is_admin?)
 	end
 	
 	def require_super_admin
@@ -180,18 +176,8 @@ class ApplicationController < ActionController::Base
 	end
 	
 	def require_answer_auditor
-		if !user_signed_in?
-			respond_to do |format|
-				format.html { redirect_to root_path and return }
-				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
-			end
-		end
-		if !user_answer_auditor? && !user_admin?
-			respond_to do |format|
-				format.html { redirect_to root_path and return }
-				format.json	{ render_json_e(ErrorEnum::REQUIRE_ANSWER_AUDITOR) and return }
-			end
-		end
+		render_json_e(ErrorEnum::REQUIRE_LOGIN) and return if !user_signed_in?
+		render_json_e(ErrorEnum::REQUIRE_ANSWER_AUDITOR) and return if !user_answer_auditor?
 	end
 	
 	def require_entry_clerk
