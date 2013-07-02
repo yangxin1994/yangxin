@@ -6,6 +6,68 @@ class MailgunApi
 	@@survey_email_from = "\"优数调研\" <postmaster@oopsdata.net>"
 	@@user_email_from = "\"优数调研\" <postmaster@oopsdata.cn>"
 
+	def self.batch_send_survey_email(survey_id_ary, user_id_ary, email_ary)
+		@emails = email_ary.blank? ? user_id_ary.map { |e| User.find_by_id(e).try(:email) } : email_ary
+		group_size = 900
+		@group_emails = []
+		@group_recipient_variables = []
+		while @emails.length >= group_size
+			temp_emails = @emails[0..group_size-1]
+			@group_emails << temp_emails
+			@emails = @emails[group_size..-1]
+			temp_recipient_variables = {}
+			temp_emails.each do |e|
+				temp_recipient_variables[e] = {}
+			end
+			@group_recipient_variables << temp_recipient_variables
+		end
+		@group_emails << @emails
+		temp_recipient_variables = {}
+		@emails.each do |e|
+			temp_recipient_variables[e] = {}
+		end
+		@group_recipient_variables << temp_recipient_variables
+
+		@surveys = survey_id_ary.map { |e| Survey.find_by_id(e) }
+		@presents = []	
+		# push a lottery
+		lottery = Lottery.quillme.first
+		@presents << {:title => lottery.title,
+			:url => "#{Rails.application.config.quillme_host}/lotteries/#{lottery._id.to_s}",
+			:img_url => Rails.application.config.quillme_host + lottery.photo_url} if !lottery.nil?
+		# push a real gift
+		real_gift = BasicGift.where(:type => 1, :status => 1).first
+		@presents << {:title => real_gift.name,
+			:url => "#{Rails.application.config.quillme_host}/gifts/#{real_gift._id.to_s}",
+			:img_url => Rails.application.config.quillme_host + real_gift.photo.picture_url} if !real_gift.nil?
+		# push a cash gift
+		cash_gift = BasicGift.where(:type => 0, :status => 1).first
+		@presents << {:title => cash_gift.name,
+			:url => "#{Rails.application.config.quillme_host}/gifts/#{cash_gift._id.to_s}",
+			:img_url => Rails.application.config.quillme_host + cash_gift.photo.picture_url} if !cash_gift.nil?
+
+		data = {}
+		data[:domain] = Rails.application.config.survey_email_domain
+		data[:from] = @@survey_email_from
+
+		html_template_file_name = "#{Rails.root}/app/views/survey_mailer/survey_email.html.erb"
+		text_template_file_name = "#{Rails.root}/app/views/survey_mailer/survey_email.text.erb"
+		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
+		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
+		data[:html] = premailer.to_inline_css
+		data[:text] = text_template.result(binding)
+
+		data[:subject] = "邀请您参加问卷调查"
+		data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
+		@group_emails.each_with_index do |emails, i|
+			data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
+			data[:'recipient-variables'] = @group_recipient_variables[i].to_json
+			self.send_message(data)
+		end
+	end
+
+=begin
 	def self.send_survey_email(user_id, email, survey_id_ary)
 		if user_id.blank?
 			@email = email
@@ -50,6 +112,7 @@ class MailgunApi
 		data[:to] = Rails.env == "production" ? @email : @@test_email
 		self.send_message(data)
 	end
+=end
 
 	def self.welcome_email(user, callback)
 		@user = user
@@ -117,6 +180,31 @@ class MailgunApi
 		self.send_message(data)
 	end
 
+	def self.agent_task_email(email, callback, agent_task_id)
+		@agent_task = AgentTask.find_by_id(agent_task_id)
+		@survey = @agent_task.survey
+		@survey_title = @survey.title
+		@preview_link = "#{callback}/questionaires/#{@survey._id.to_s}/preview"
+		@email = email
+		@password = Encryption.decrypt_password(@agent_task.password)
+		data = {}
+		data[:domain] = Rails.application.config.user_email_domain
+		data[:from] = @@user_email_from
+
+		html_template_file_name = "#{Rails.root}/app/views/agent_mailer/agent_task_email.html.erb"
+		text_template_file_name = "#{Rails.root}/app/views/agent_mailer/agent_task_email.text.erb"
+		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
+		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
+		data[:html] = premailer.to_inline_css
+		data[:text] = text_template.result(binding)
+
+		data[:subject] = "优数代理推广任务启动通知"
+		data[:subject] += " --- to #{email}" if Rails.env != "production" 
+		data[:to] = Rails.env == "production" ? email : @@test_email
+		self.send_message(data)
+	end
+
 	def self.sys_password_email(user, callback)
 		@user = user
 		data = {}
@@ -165,7 +253,8 @@ class MailgunApi
 	end
 
 	def self.send_message(data)
-		domain = data.delete(:domain)
+		# domain = data.delete(:domain)
+		domain = data[:domain]
 		retval = RestClient.post("https://api:#{Rails.application.config.mailgun_api_key}"\
 		  "@api.mailgun.net/v2/#{domain}/messages", data)
 		begin

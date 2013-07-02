@@ -5,10 +5,12 @@ module ErrorEnum
 	WRONG_DATE_TYPE = "error__2"
 	SAMPLE_ATTRIBUTE_NAME_EXIST = "error__3"
 	SAMPLE_NOT_EXIST = "error__4"
-	
+	AGENT_TASK_NOT_EXIST = "error__5"
+	WRONG_ORDER_STATUS = "error__6"
 
 
-	REWARD_SCHEME_NOT_EXIST = 'error___0'  ##TODO ErrorEnum has not rule yet	
+	REWARD_SCHEME_NOT_EXIST = 'error___0'  ##TODO ErrorEnum has not rule yet
+	ORDER_TYPE_ERROR = 'error___1'
 
 	LOGIN_TOO_FREQUENT = "error_0"
 	ILLEGAL_EMAIL = "error_1"
@@ -133,8 +135,7 @@ module ErrorEnum
 	FAQ_RANGE_ERROR = "error_100002"
 	FAQ_SAVE_FAILED = "error_100003"
 	FAQ_NOT_EXIST = "error_100004"
-	PUBLIC_NOTICE_TYPE_ERROR = "error_100011"
-	PUBLIC_NOTICE_RANGE_ERROR = "error_100012"
+	PUBLIC_NOTICE_STATUS_ERROR = "error_100011"
 	PUBLIC_NOTICE_SAVE_FAILED = "error_100013"
 	PUBLIC_NOTICE_NOT_EXIST = "error_100014"
 	FEEDBACK_TYPE_ERROR = "error_100021"
@@ -179,7 +180,7 @@ module ErrorEnum
 	GIFT_NOT_FOUND = "error_21001"
 
 	INVALID_GIFT_ID = "error_21002"
-	
+
 	GIFT_QUANTITY_NOT_A_NUNBER = "error_21031"
 	GIFT_SURPLUS_NOT_A_NUNBER = "error_21041"
 	GIFT_NOT_ENOUGH = "error_21033"

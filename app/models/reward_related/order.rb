@@ -5,245 +5,182 @@ class Order
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
 	extend Mongoid::FindHelper
-  include Mongoid::CriteriaExt
-	# can be 0 (Cash), 1 (Entity), 2 (Virtual), 3 (Lottery)
-	field :type, :type => Integer
-	# can be 0 (NeedVerify), 1 (Verified), -1 (VerifyFailed), 2 (Delivering), 3 (Delivered), -3 (DeliverFailed)
-	field :is_prize, :type => Boolean, :default => false
-	field :status, :type => Integer, :default => 0
-	field :status_desc, :type => String
-	field :is_deleted, :type => Boolean, :default => false
+    include Mongoid::CriteriaExt
 
-	field :is_update_user, :type => Boolean, :default => false
-	field :full_name, :type => String
-	field :identity_card, :type => String
-	field :bank, :type => String
-	field :bankcard_number, :type => String
+    field :code, :type => String, default: ->{ Time.now.strftime("%Y%m%d") + sprintf("%05d",rand(10000)) }
+	# can be 1 (small mobile charge), 2 (large mobile charge), 4 (alipay), 8(alijf)
+	# 16 (Q coins), 32 (prize), 64 (virtual prize)
+	field :type, :type => Integer
+	# can be 1 (wait for deal), 2 (dealing), 4 (deal success), 8 (deal fail), 16 (cancel)
+	field :status, :type => Integer, :default => 1
+	field :source, :type => Integer
+	field :remark, :type => String, :default => "正常"
+	field :amount, :type => Integer, :default => 0
 	field :alipay_account, :type => String
-	field :phone, :type => String
+	field :mobile, :type => String
+	field :qq, :type => String
+	field :user_name, :type => String
 	field :address, :type => String
 	field :postcode, :type => String
-	field :email, :type => String
 
 	# embeds_one :cash_receive_info, :class_name => "CashReceiveInfo"
 	# embeds_one :entity_receive_info, :class_name => "EntityReceiveInfo"
 	# embeds_one :virtual_receive_info, :class_name => "VirtualReceiveInfo"
 	# embeds_one :lottery_receive_info, :class_name => "LotteryReceiveInfo"
 
-	has_one :reward_log, :class_name => "RewardLog"
-	belongs_to :lottery_code, :class_name => "LotteryCode"
-	belongs_to :gift, :class_name => "BasicGift", :inverse_of => :order
-	belongs_to :user, :class_name => "User", :inverse_of => :orders
-	belongs_to :operator, :class_name => "User", :inverse_of => :operate_orders
+	belongs_to :prize
+	belongs_to :survey
+	belongs_to :gift
+	belongs_to :sample, :class_name => "User", :inverse_of => :orders
 
-	validates :type, :presence_ext => true,
-		:inclusion => { :in => 0..3 },
-		:numericality => true
-	validates :status, :presence_ext => true,
-		:inclusion => { :in => -3..3 },
-		:numericality => true
+	# status
+	WAIT = 1
+	HANDLE = 2
+	SUCCESS = 4
+	FAIL = 8
+	CANCEL = 16
 
-	default_scope where(:is_deleted => false).order_by(:created_at.desc)
+	# type
+	SMALL_MOBILE_CHARGE = 1
+	MOBILE_CHARGE = 2
+	ALIPAY = 4
+	JIFENBAO = 8
+	QQ_COIN = 16
+	REAL_GOOD = 32
+	VIRTUAL_GOOD = 64
 
-	scope :for_cash, where( :type => 0)
-	scope :for_entity, where( :type => 1)
-	scope :for_virtual, where( :type => 2)
-	scope :for_lottery, where( :type => 3)
+	# source
+	ANSWER_SURVEY = 1
+	WIN_IN_LOTTERY = 2
+	REDEEM_GIFT = 4
 
-	scope :need_verify, where( :status => 0).order_by(:created_at.asc)
-	scope :verified, where( :status => 1)
-	scope :verify_failed, where( :status => -1)
-	scope :canceled, where( :status => -2)
-	scope :delivering, where( :status => 2)
-	scope :delivered, where( :status => 3)
-	scope :deliver_failed, where( :status => -3)
+	attr_accessible :mobile, :alipay_account, :qq, :user_name, :address, :postcode
 
-	# TO DO validation verify
-	# We must follow the Law of Demeter(summed up as "use only one dot"), and here is the code:
-	delegate :name, :to => :gift, :prefix => true
-	delegate :create, :to => :reward_log, :prefix => true
-	#delegate :cash_order, :realgoods_order, :to => "self.need_verify", :prefix => true
-	#after_create :decrease_point, :decrease_gift
+	def self.find_by_id(order_id)
+		return Order.where(:_id => order_id).first
+	end
 
-	def self.to_excel(scope)
-		# csv= []
-		# csv << ["奖品名称", "时间", "用户名", "电话号码", "地址", "邮编", "电子邮箱", "姓名", "证件号", "开户行", "银行卡号", "支付宝"].join(',')
-		# Order.all.page(1).per(300).send(scope).map do |order|
-		# 	csv << [order.gift.name,
-		# 	  			order.created_at.strftime('%F %R'),
-		# 					order.user.username, order.phone,
-		# 					order.address,
-		# 					order.postcode,
-		# 					order.email,
-		# 					order.bank,
-		# 		   		order.bankcard_number,
-		# 					order.alipay_account].join(',')
-		# end
-		path = "public/import/order.csv"
-		c = CSV.open(path, "w") do |csv|
-			csv << ["奖品名称", "时间", "用户名", "电话号码", "地址", "邮编", "电子邮箱", "姓名", "证件号", "开户行", "银行卡号", "支付宝"]
-			Order.all.page(1).per(300).send(scope).map do |order|
-				csv << [order.gift.name,
-								order.created_at.strftime('%F %R'),
-								order.user.username, order.phone,
-								order.address,
-								order.postcode,
-								order.email,
-								order.bank,
-								order.bankcard_number,
-								order.alipay_account]
-			end
+	def self.create_redeem_order(sample_id, gift_id, amount, opt = {})
+		sample = User.sample.find_by_id(sample_id)
+		return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
+		gift = Gift.find_by_id(gift_id)
+		return ErrorEnum::GIFT_NOT_EXIST if gift.nil?
+		order = Order.create(:source => REDEEM_GIFT, :amount => amount)
+		order.sample = sample
+		order.gift = gift
+		case gift.type
+		when Gift::MOBILE_CHARGE
+			order.mobile = opt["mobile"]
+		when Gift::ALIPAY
+			order.alipay_account = opt["alipay_account"]
+		when Gift::JIFENBAO
+			order.alipay_account = opt["alipay_account"]
+		when Gift::QQ_COIN
+			order.qq = opt["qq"]
+		when Gift::VIRTUAL
+		when Gift::REAL
+			order.user_name = opt["user_name"]
+			order.address = opt["address"]
+			order.postcode = opt["postcode"]
 		end
-		csv = File.read("public/import/order.csv")
+		order.save
+		return order
 	end
 
-	def present_quillme
-    present_attrs :_id, :type, :status, :is_prize
-    present_add :gift => self.gift.present_attrs
-	end
-
-	def present_admin
-    present_attrs :_id, :type, :status, :is_prize, :gift, :created_at, :is_update_user,
-    	:full_name, :identity_card, :bank, :bankcard_number, :alipay_account,
-    	:phone, :address, :postcode, :email
-    present_add :email => self.user.email
-    present_add :user_id => self.user._id
-    present_add :gift_name => self.gift_name
-    present_add :gift_id => self.gift._id
-    present_add :gift => self.gift.present_attrs
-
-	end
-
-	index({ is_deleted: 1 }, { background: true } )
-	index({ type: 1 }, { background: true } )
-	index({ status: 1 }, { background: true } )
-
-	def as_retval
-		return @ret_error if @ret_error
-		super
-	end
-	def prize
-		self.gift
-	end
-	# TO DO I18n
-	#after_create :decrease_gift, :update_user_info
-	after_create :exchange
-	private
-	def exchange
-		if !(is_prize ? ex_prize : ex_gift)
-			self.is_deleted = true
-			self.delete
+	def self.create_lottery_order(sample_id, survey_id, prize_id, opt = {})
+		sample = User.sample.find_by_id(sample_id)
+		return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		prize = Prize.find_by_id(prize_id)
+		return ErrorEnum::PRIZE_NOT_EXIST if prize.nl?
+		order = Order.create(:source => WIN_IN_LOTTERY)
+		order.sample = sample
+		order.survey = survey
+		order.prize = prize
+		case prize.type
+		when Prize::MOBILE_CHARGE
+			order.mobile = opt["mobile"]
+		when Prize::ALIPAY
+			order.alipay_account = opt["alipay_account"]
+		when Prize::JIFENBAO
+			order.alipay_account = opt["alipay_account"]
+		when Prize::QQ_COIN
+			order.qq = opt["qq"]
+		when Prize::VIRTUAL
+		when Prize::REAL
+			order.user_name = opt["user_name"]
+			order.address = opt["address"]
+			order.postcode = opt["postcode"]
 		end
+		order.save
+		return order
 	end
 
-	def ex_gift
-		decrease_point && decrease_gift && update_user_info
-	end
-
-	def ex_prize
-		ck_lottery_code && decrease_prize && update_user_info
-	end
-
-	def decrease_point
-		# p self
-		if self.gift.blank? || self.user.blank? || self.gift.point > self.user.point
-			@ret_error= {
-				:error_code => ErrorEnum::POINT_NOT_ENOUGH,
-				:error_message => "point not enough"
-			}
-			return false
+	def self.create_answer_order(sample_id, survey_id, type, amount, opt = {})
+		sample = User.sample.find_by_id(sample_id)
+		return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+		order = Order.create(:source => ANSWER_SURVEY, :amount => amount)
+		order.sample = sample
+		order.survey = survey
+		case type
+		when SMALL_MOBILE_CHARGE
+			order.mobile = opt["mobile"]
+		when ALIPAY
+			order.alipay_account = opt["alipay_account"]
 		end
-		self.create_reward_log(:type => 2,
-													 :user => self.user,
-													 :point => -self.gift.point,
-													 :cause => 4)
-		self.save
+		order.save
+		return order
 	end
 
-	def decrease_gift
-		if self.gift.blank? || self.gift.surplus <= 0 || self.gift.is_deleted
-			@ret_error= {
-				:error_code => ErrorEnum::GIFT_NOT_ENOUGH,
-				:error_message => "gift not enough"
-			}
-			return false
-		end
-		# if self.gift.type == 3
-		#   self.gift.lottery.give_lottery_code_to(self.user)
-		# end
-		self.gift.inc(:surplus, -1)
-		self.save
+	def update_order(order)
+		return self.update_attributes(order)
 	end
 
-	def ck_lottery_code
-		if self.lottery_code.blank? || self.lottery_code.status != 2
-			@ret_error= {
-				:error_code => ErrorEnum::INVALID_LOTTERYCODE_ID,
-				:error_message => "Invalid lottery code"
-			}
-			return false
-		end
-		self.lottery_code.status = 4
-		self.lottery_code.save
+	def handle
+		return ErrorEnum::WRONG_ORDER_STATUS if self.status != WAIT
+		self.status = HANDLE
+		return self.save
 	end
 
-	def decrease_prize
-
-		if self.prize.blank? || self.prize.surplus < 0
-			@ret_error= {
-				:error_code => ErrorEnum::PRIZE_NOT_ENOUGH,
-				:error_message => "prize not enough"
-			}
-			return false
-		end
-		# if self.prize.type == 3
-		#   self.prize.lottery.give_lottery_code_to(self.user)
-		# end
-		# self.prize.inc(:surplus, -1)
-		self.save
+	def cancel
+		return ErrorEnum::WRONG_ORDER_STATUS if self.status != WAIT
+		self.status = wait
+		return self.save
 	end
-	# def decrease_gift
-	#   return false if self.gift.blank? || self.user.blank? || self.gift.point > self.user.point
-	#   self.create_reward_log(:order => self,
-	#                          :type => 1,
-	#                          :user => self.user,
-	#                          :point => -self.gift.point,
-	#                          :cause => 4)
-	#   if self.gift.type == 3
-	#     self.gift.lottery.give_lottery_code_to(self.user)
-	#   end
-	#   self.gift.inc(:surplus, -1)
-	#   self.save
-	# end
 
-	def update_user_info
-		return false if self.user.blank?
-		return true unless self.is_update_user
-		case self.type
-		when 0
-			self.user.update_attributes({
-																		:full_name => self.full_name,
-																		:identity_card => self.identity_card,
-																		:bank => self.bank,
-																		:bankcard_number => self.bankcard_number,
-																		:alipay_account => self.alipay_account,
-																		:phone => self.phone},
-																		:without_protection => true)
-		when 1
-			self.user.update_attributes({
-																		:full_name => self.full_name,
-																		:address => self.address,
-																		:postcode => self.postcode,
-																	:phone => self.phone},
-																	:without_protection => true)
-		when 2
-			self.user.update_attributes({
-																		:full_name => self.full_name,
-																	:phone => self.phone},
-																	:without_protection => true)
-		when 3
+	def finish(success, remark = "")
+		return ErrorEnum::WRONG_ORDER_STATUS if self.status != HANDLE
+		self.status = success ? SUCCESS : FAIL
+		self.remark = remark
+		return self.save
+	end
 
+	def self.search_orders(email, mobile, code, status, source, type)
+		if !email.blank?
+			orders = User.sample.find_by_email(email).try(:orders) || []
+		elsif !mobile.blank?
+			orders = User.sample.find_by_mobile(mobile).try(:orders) || []
+		elsif !code.blank?
+			orders = Order.where(:code => /#{code}/)
+		else
+			orders = Order.all
 		end
-		#self.user.update_attributes(self.attributes, :without_protection => true)
+
+		if !status.blank? && status != 0
+			status_ary = Tool.convert_int_to_base_arr(status)
+			orders = orders.where(:status.in => status_ary)
+		end
+		if !source.blank? && source != 0
+			source_ary = Tool.convert_int_to_base_arr(source)
+			orders = orders.where(:source.in => source_ary)
+		end
+		if !type.blank? && type != 0
+			type_ary = Tool.convert_int_to_base_arr(type)
+			orders = orders.where(:type.in => type_ary)
+		end
+		return orders
 	end
 end

@@ -42,7 +42,7 @@ end
 
 Spork.each_run do
   # This code will be run each time you run your specs.
-
+  FactoryGirl.reload
 end
 
 
@@ -51,6 +51,19 @@ def admin_signin
     original_password = Encryption.decrypt_password(admin.password)
     post "/sessions",
       user: {email_username: admin.email,
+        password: original_password},
+      keep_signed_in: true
+    response.status.should be(200)
+    auth_key = JSON.parse(response.body)["value"]["auth_key"]
+
+    return auth_key
+end
+
+def user_signin(user)
+  @signin_user = FactoryGirl.create(user)
+    original_password = Encryption.decrypt_password(@signin_user.password)
+    post "/sessions",
+      user: {email_username: @signin_user.email,
         password: original_password},
       keep_signed_in: true
     response.status.should be(200)

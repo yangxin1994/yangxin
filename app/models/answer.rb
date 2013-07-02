@@ -6,7 +6,7 @@ require 'quill_common'
 class Answer
 	include Mongoid::Document
 	include Mongoid::Timestamps
-	# status: 0 for editting, 1 for reject, 2 for under review, 3 for finish, 4 for redo
+	# status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo
 	field :status, :type => Integer, default: 0
 	field :answer_content, :type => Hash, default: {}
 	field :random_quality_control_answer_content, :type => Hash, default: {}
@@ -21,11 +21,12 @@ class Answer
 	# => => sub_questions : array of row ids that are hidden
 	field :logic_control_result, :type => Hash, default: {}
 	field :repeat_time, :type => Integer, default: 0
-	# reject_type: 0 for rejected by quota, 1 for rejected by quliaty control (auto quality control), 2 for rejected by manual quality control, 3 for rejected by screen, 4 for timeout
+	# reject_type: 1 for rejected by quota, 2 for rejected by quliaty control (auto quality control), 4 for rejected by manual quality control, 8 for rejected by screen, 16 for timeout
 	field :reject_type, :type => Integer
 	field :username, :type => String, default: ""
 	field :password, :type => String, default: ""
 	field :region, :type => Integer, default: -1
+	#channel: 1（调研社区）2（邮件订阅），4（短信订阅），8（浏览器插件推送），16（微博发布），32（Folwy发布），64（线上代理发布)
 	field :channel, :type => Integer
 	field :ip_address, :type => String, default: ""
 	field :is_scanned, :type => Boolean, default: false
@@ -39,7 +40,9 @@ class Answer
 	field :introducer_id, :type => String
 	field :point_to_introducer, :type => Integer
 	field :point, :type => Integer, :default => 0
-	field :reward, :type => Integer, :default => 0
+	field :rewards, :type => Array
+	field :reward_need_review, :type => Boolean
+
 	# used for interviewer to upload attachments
 	field :attachment, :type => Hash, :default => {}
 	field :longitude, :type => String, :default => ""
@@ -57,17 +60,18 @@ class Answer
 	scope :wait_for_review, lambda {where(:status => 2)}
 
 	belongs_to :user, class_name: "User", inverse_of: :answers
+	belongs_to :agent_task
 	belongs_to :survey
 	belongs_to :interviewer_task
 	belongs_to :lottery
 	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
 
 	STATUS_NAME_ARY = ["edit", "reject", "under_review", "finish", "redo"]
-	EDIT = 0
-	REJECT = 1
-	UNDER_REVIEW = 2
-	FINISH = 3
-	REDO = 4
+	EDIT = 1
+	REJECT = 2
+	UNDER_REVIEW = 4
+	FINISH = 8
+	REDO = 16
 	##### answer import #####
 
 	index({ survey_id: 1, status: 1, reject_type: 1 }, { background: true } )
@@ -85,8 +89,8 @@ class Answer
 
 	def self.def_status_attr
 		STATUS_NAME_ARY.each_with_index do |status_name, index|
-			define_method("is_#{status_name}".to_sym) { return index == self.status }
-			define_method("set_#{status_name}".to_sym) { self.status = index; self.save}
+			define_method("is_#{status_name}".to_sym) { return 2**index == self.status }
+			define_method("set_#{status_name}".to_sym) { self.status = 2**index; self.save}
 		end
 	end
 	def_status_attr
@@ -109,6 +113,10 @@ class Answer
 	def self.find_by_password(username, password)
 		answer = Answer.where(username: username, password: password)[0]
 		return answer
+	end
+
+	def self.find_by_status(status)
+		return self.in("status" => Tool.convert_int_to_base_arr(status.to_i))
 	end
 
 	def self.create_answer(is_preview, introducer_id, email, survey_id, channel, ip, username, password, referrer)
@@ -177,6 +185,10 @@ class Answer
 		answer.save
 
 		return answer
+	end
+
+	def has_rewards
+		return !self.rewards.blank?
 	end
 
 	def is_screened
@@ -799,7 +811,7 @@ class Answer
 			self.set_finish
 		elsif !self.survey.answer_need_review
 			self.set_finish
-			self.assign_volunteer_reward
+			self.assign_sample_reward
 			self.assign_introducer_reward
 		else
 			self.set_under_review
@@ -859,7 +871,7 @@ class Answer
 
 	# the answer auditor reviews this answer, the review result can be 1 (pass review) or 2 (not pass)
 	def review(review_result, answer_auditor, message_content)
-		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 2
+		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 4
 
 		old_status = self.status
 		user = self.user
@@ -870,7 +882,7 @@ class Answer
 			message_content ||= "你的此问卷[#{self.survey.title}]的答案通过审核."
 		else
 			self.set_reject
-			self.reject_type = 2
+			self.reject_type = REJECT
 			message_content ||= "你的此问卷[#{self.survey.title}]的答案未通过审核."
 		end
 		answer_auditor.create_message("审核问卷答案消息", message_content, [user._id.to_s]) if !user.nil?
@@ -882,30 +894,30 @@ class Answer
 		# update quota of the survey and the interviewer task if there is any
 		self.interviewer_task.try(:refresh_quota)
 		self.update_quota(old_status)
-		self.assign_volunteer_reward and self.assign_introducer_reward if self.is_finish
+		self.assign_sample_reward and self.assign_introducer_reward if self.is_finish
 		return true
 	end
 
-	def assign_volunteer_reward
-		if [1,2].include?(self.reward) && !self.user.nil?
+	def assign_sample_reward  ##TODO to be complete
+		if !self.rewards.blank? && !self.user.nil?
 			# assign this user points, or a lottery code
 			# usage post_reward_to(user, :type => 2, :point => 100)
 			# 1 for lottery & 2 for point
 			# maybe lottery is nil
-			if self.reward == 1
-				if self.lottery
-					lc = self.lottery.give_lottery_code_to(self.user)
-					self.survey.post_reward_to(self.user, :type => self.reward, :lottery_code => lc, :cause => 2)
-					# send an email to the user
-					EmailWorker.perform_async("lottery_code",
-						self.user.email,
-							"",
-						:survey_id => self.survey._id.to_s,
-						:lottery_code_id => lc._id.to_s)
-				end
-			elsif self.reward == 2
-				self.survey.post_reward_to(user, :type => self.reward, :point => self.point, :cause => 2)
-			end
+			# if self.reward == 1
+			# 	if self.lottery
+			# 		lc = self.lottery.give_lottery_code_to(self.user)
+			# 		self.survey.post_reward_to(self.user, :type => self.reward, :lottery_code => lc, :cause => 2)
+			# 		# send an email to the user
+			# 		EmailWorker.perform_async("lottery_code",
+			# 			self.user.email,
+			# 				"",
+			# 			:survey_id => self.survey._id.to_s,
+			# 			:lottery_code_id => lc._id.to_s)
+			# 	end
+			# elsif self.reward == 2
+			# 	self.survey.post_reward_to(user, :type => self.reward, :point => self.point, :cause => 2)
+			# end
 		end
 	end
 

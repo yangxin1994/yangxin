@@ -2,7 +2,7 @@ require 'sidekiq/web'
 OopsData::Application.routes.draw do
 	mount Sidekiq::Web, at: "/sidekiq"
 
-	resources :faqs, :public_notices, :feedbacks, :advertisements
+	resources :faqs, :feedbacks, :advertisements
 	resources :data_generators do
 		collection do
 			get 'generate'
@@ -40,11 +40,20 @@ OopsData::Application.routes.draw do
 	match '/subscribe' , :to => 'subscribers#create', :as => '/subscribe'
 	match '/unsubscribe' , :to =>'subscribers#destroy', :as => '/subscribe'
 	namespace :admin do
+		resources :answer_auditors, :only => [:index]
+		resources :agent_tasks do
+			member do
+				put :reset_password
+				post :send_email
+			end
+		end
+
+		resources :materials do
+		end
 
 		resources :questions do
-			collection do
-				get :count, :active_count, :attributes_completion, :attributes_statistics
-				post :send_message
+			member do
+				put :remove_sample_attribute
 			end
 		end
 
@@ -61,7 +70,7 @@ OopsData::Application.routes.draw do
 			end
 			collection do
 				post :send_message
-				get :count, :active_count
+				get :count, :active_count, :attributes_completion, :attributes_statistics
 			end
 		end
 
@@ -105,8 +114,10 @@ OopsData::Application.routes.draw do
 				put 'add_template_question'
 			end
 			member do
-				put 'allocate', 'add_reward', 'set_community', 'set_spread', 'set_promotable', 'set_answer_need_review'
-				get 'get_sent_email_number'
+				put 'add_reward', 'set_community', 'set_spread', 'set_promotable', 'set_answer_need_review', 'background_survey',
+				    'quillme_promote', 'email_promote', 'sms_promote', 'broswer_extension_promote', "weibo_promote"
+				get 'get_sent_email_number', 'promote'
+				put :quillme_hot, :allocate_answer_auditors
 			end
 			resources :reward_schemes, :except => [:new, :edit, :destroy]
 		end
@@ -116,11 +127,7 @@ OopsData::Application.routes.draw do
 
 		resources :faqs do
 		end
-		resources :public_notices do
-			collection do
-				get 'count', 'list_by_type_count', 'list_by_type_and_value_count'
-			end
-		end
+		resources :public_notices , :except => [:new, :edit]
 		resources :advertisements do
 			collection do
 				get 'count', 'list_by_title_count', 'activated_count', 'unactivate_count'
@@ -171,13 +178,12 @@ OopsData::Application.routes.draw do
 		end
 		resources :orders do
 			collection do
-				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed, :canceled, :to_excel
+				put :bulk_handle, :bulk_finish 
 			end
 			member do
-				put :verify, :verify_as_failed, :deliver, :deliver_success, :deliver_as_failed
+				put :handle, :finish 
 			end
 		end
-
 		resources :lotteries do
 			collection do
 				get :for_publish, :activity, :finished, :deleted, :quillme
@@ -216,9 +222,12 @@ OopsData::Application.routes.draw do
 	namespace :answer_auditor do
 		resources :surveys do
 		end
-		resources :answers do
+		resources :answers , :only => [:index, :show, :destroy] do
 			member do
 				put 'review'
+			end
+			collection do
+				put "review_agent_answers"
 			end
 		end
 	end
@@ -233,14 +242,6 @@ OopsData::Application.routes.draw do
 				get 'publish'
 				get 'close'
 				get 'pause'
-			end
-		end
-	end
-
-	namespace :answer_auditor do
-		resources :answers do
-			collection do
-				get 'count'
 			end
 		end
 	end
@@ -475,6 +476,42 @@ OopsData::Application.routes.draw do
 			post :send_email
 		end
 	end
+
+
+    namespace :sample do
+      resources :surveys do
+        collection do
+          get :get_hot_spot_survey,:as => :get_hot_spot_survey
+          get :get_recommends,:as => :get_recommends
+        end
+      end
+
+      resources :public_notices do
+        collection do
+          get :get_newest,:as => :get_newest
+        end
+      end
+
+      resources :gifts do
+        collection do
+          get :hotest,:as => :hotest
+        end
+      end
+
+      resources :users do
+        collection do
+          get :get_top_ranks,:as => :get_top_ranks
+        end
+      end
+
+      resources :logs do
+        collection do
+          get :fresh_news,:as => :fresh_news
+        end
+      end
+    end
+
+
 
 	# The priority is based upon order of creation:
 	# first created -> highest priority.

@@ -37,7 +37,7 @@ class User
 	# entry clerk
 	field :role, :type => Integer, default: 0
 
-	# 1 for sample, 2 for client, 4 for admin
+	# 1 for sample, 2 for client, 4 for admin, 8 for answer auditor, 16 for interviewer
 	field :user_role, :type => Integer, default: 1
 	field :is_block, :type => Boolean, default: false
 
@@ -62,14 +62,14 @@ class User
 	# field :alipay_account, :type => String
 	field :point, :type => Integer, :default => 0
 
-	attr_protected :role, :level
+	attr_protected :role, :level, :user_role
 
 	has_and_belongs_to_many :messages, class_name: "Message", inverse_of: :receiver
 	has_many :sended_messages, :class_name => "Message", :inverse_of => :sender
 	#################################
 	# QuillMe
 	has_many :reward_logs, :class_name => "RewardLog", :inverse_of => :user
-	has_many :orders, :class_name => "Order"
+	has_many :orders, :class_name => "Order", :inverse_of => :sample
 	has_many :lottery_codes
 	# QuillAdmin
 	has_many :operate_orders, :class_name => "Order", :foreign_key => "operator_id"
@@ -115,26 +115,31 @@ class User
 	#* the user instance: when the user exists
 	#* nil: when the user does not exist
 	def self.find_by_email_username(email_username)
-		user = User.where(:email => email_username, :status.gt => -1)[0]
-		user = User.where(:username => email_username, :status.gt => -1)[0] if user.nil?
+		user = self.where(:email => email_username, :status.gt => -1)[0]
+		user = self.where(:username => email_username, :status.gt => -1)[0] if user.nil?
 		return user
 	end
 
 	def self.find_by_email(email)
 		return nil if email.blank?
-		return User.where(:email => email.downcase, :status.gt => -1).first
+		return self.where(:email => email.downcase, :status.gt => -1).first
+	end
+
+	def self.find_by_mobile(mobile)
+		return nil if mobile.blank?
+		return self.where(:mobile => mobile, :status.gt => -1).first
 	end
 
 	def self.find_by_username(username)
-		return User.where(:username => username, :status.gt => -1).first
+		return self.where(:username => username, :status.gt => -1).first
 	end
 
 	def self.find_by_id(user_id)
-		return User.where(:_id => user_id, :status.gt => -1).first
+		return self.where(:_id => user_id, :status.gt => -1).first
 	end
 
 	def self.find_by_id_including_deleted(user_id)
-		return User.where(:_id => user_id).first
+		return self.where(:_id => user_id).first
 	end
 
 	def self.find_by_auth_key(auth_key)
@@ -149,6 +154,14 @@ class User
 			user.save
 			return nil
 		end
+	end
+
+	def self.find_answer_auditors
+		answer_auditors = []
+		User.all.each do |user|
+			answer_auditors << user.serialize_for(["email", "mobile"]) if user.is_answer_auditor?
+		end
+		return answer_auditors
 	end
 
 	def self.logout(auth_key)
@@ -197,6 +210,7 @@ class User
 	#
 	#*retval*:
 	#* true or false
+	## TODO to be remove by checking user.role
 	def self.user_activate_by_email?(email)
 		user = User.find_by_email(email)
 		return !!(user && user.status == 1)
@@ -227,12 +241,20 @@ class User
 		return (self.role.to_i & 16) > 0
 	end
 
+	def is_admin?
+		return (self.user_role.to_i & 4) > 0
+	end
+
 	def is_survey_auditor
 		return (self.role.to_i & 8) > 0
 	end
 
 	def is_answer_auditor
 		return (self.role.to_i & 4) > 0
+	end
+
+	def is_answer_auditor?
+		return (self.user_role.to_i & 8) > 0
 	end
 
 	def is_interviewer
@@ -614,7 +636,7 @@ class User
 
 	def self.search_sample(email, mobile, is_block)
 		samples = User.sample
-		samples = samples.where(:is_block => is_block) if !is_block.blank?
+		samples = samples.where(:is_block => false) if !is_block
 		samples = samples.where(:email => /#{email.to_s}/) if !email.blank?
 		samples = samples.where(:mobile => /#{mobile.to_s}/) if !mobile.blank?
 		return samples
@@ -796,4 +818,17 @@ class User
 			:attributes => attributes,
 			:is_block => self.is_block}
 	end
+
+	def serialize_for(arr_fields)
+		user_obj = {"id" => self.id.to_s}
+		arr_fields.each do |field|
+			if [:created_at, :updated_at].include?(field)
+			  user_obj[field] = self.send(field).to_i
+			else
+				user_obj[field] = self.send(field)
+			end
+		end
+		return user_obj
+	end
+
 end

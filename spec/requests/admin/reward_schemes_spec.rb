@@ -9,7 +9,7 @@ describe 'visit reward_schemes' do
 	describe 'without survey exist' do
 
 		it "the /index of reward scheme should return SURVEY_NOT_EXIST" do
-			get "/admin/surveys/1/reward_schemes", 
+			get "/admin/surveys/1/reward_schemes",
 				auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["error_code"]
@@ -17,7 +17,7 @@ describe 'visit reward_schemes' do
 		end
 
 		it "the /show of reward scheme should return SURVEY_NOT_EXIST" do
-			get "/admin/surveys/1/reward_schemes/1", 
+			get "/admin/surveys/1/reward_schemes/1",
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["error_code"]
@@ -25,7 +25,7 @@ describe 'visit reward_schemes' do
 		end
 
 		it "the /create of reward scheme should return SURVEY_NOT_EXIST" do
-			post "/admin/surveys/1/reward_schemes", 
+			post "/admin/surveys/1/reward_schemes",
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["error_code"]
@@ -33,7 +33,7 @@ describe 'visit reward_schemes' do
 		end
 
 		it "the /update of reward scheme should return SURVEY_NOT_EXIST" do
-			put "/admin/surveys/1/reward_schemes/1", 
+			put "/admin/surveys/1/reward_schemes/1",
 		    	auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]["error_code"]
@@ -64,7 +64,7 @@ describe 'visit reward_schemes' do
 		it "the /index of reward scheme should return 5 messages" do
 			reward_list = FactoryGirl.create_list(:reward_scheme, 5) { |scheme| @survey.reward_schemes << scheme}
 			RewardScheme.all.length.should be(5)
-			get "/admin/surveys/#{@survey.id}/reward_schemes", 
+			get "/admin/surveys/#{@survey.id}/reward_schemes",
 		    	page: 1,
 		    	per_page: 8,
 		    	auth_key: @auth_key
@@ -76,7 +76,7 @@ describe 'visit reward_schemes' do
 		it "the /show of reward scheme should return reward_scheme details" do
 			reward_scheme = FactoryGirl.create(:reward_scheme)
 			scheme_in_db = RewardScheme.find_by_id(reward_scheme.id)
-			get "/admin/surveys/#{@survey.id}/reward_schemes/#{reward_scheme.id}", 
+			get "/admin/surveys/#{@survey.id}/reward_schemes/#{reward_scheme.id}",
 				auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]
@@ -86,7 +86,7 @@ describe 'visit reward_schemes' do
 		it "the /create of reward scheme should return true" do
 			reward_scheme = FactoryGirl.build(:reward_scheme)
 			RewardScheme.all.length.should be(0)
-			post "/admin/surveys/#{@survey.id}/reward_schemes/", 
+			post "/admin/surveys/#{@survey.id}/reward_schemes/",
 				reward_scheme_setting: {
 					"rewards" => reward_scheme.rewards,
 					"need_review" => reward_scheme.need_review
@@ -106,7 +106,7 @@ describe 'visit reward_schemes' do
 			new_deadline = Time.now.to_i.to_s
 			rewards_in_db[0][:prizes][0][:deadline] = new_deadline
 			rewards_in_db[0][:prizes][0][:id] = prize.id
-			put "/admin/surveys/#{@survey.id}/reward_schemes/#{reward_scheme.id}", 
+			put "/admin/surveys/#{@survey.id}/reward_schemes/#{reward_scheme.id}",
 				reward_scheme_setting: {
 					"rewards" => rewards_in_db,
 					"need_review" => true
@@ -149,7 +149,7 @@ describe 'visit reward_schemes' do
 			it "/show should return REWARD_SCHEME_NOT_EXIST when reward_scheme id not found" do
 				reward_scheme = FactoryGirl.create(:reward_scheme)
 				scheme_in_db = RewardScheme.find_by_id(reward_scheme.id)
-				get "/admin/surveys/#{@survey.id}/reward_schemes/#{reward_scheme.id.to_s.next}", 
+				get "/admin/surveys/#{@survey.id}/reward_schemes/#{reward_scheme.id.to_s.next}",
 				    auth_key: @auth_key
 				response.status.should be(200)
 				retval = retval = JSON.parse(response.body)["value"]["error_code"]
@@ -175,7 +175,7 @@ describe 'visit reward_schemes' do
 				rewards_in_db = reward_scheme.rewards
 				new_deadline = Time.now.to_i.to_s
 				rewards_in_db[0][:prizes][0][:deadline] = new_deadline
-				put "/admin/surveys/#{@survey.id}/reward_schemes/#{reward_scheme.id}", 
+				put "/admin/surveys/#{@survey.id}/reward_schemes/#{reward_scheme.id}",
 					reward_scheme_setting: {
 						"rewards" => rewards_in_db,
 						"need_review" => true
@@ -195,6 +195,8 @@ describe 'visit reward_schemes' do
 		end
 	end
 
-
+	after(:all) do
+		clear(:User)
+	end
 
 end

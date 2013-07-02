@@ -131,4 +131,15 @@ module Tool
 		end
 		return distribution
 	end
+
+	def self.convert_int_to_base_arr(num)
+		base_arr = []
+		digit = 1
+		while num > 0
+			base_arr << digit if num%2 == 1
+			num = num/2
+			digit *= 2
+		end
+		return base_arr
+	end
 end
