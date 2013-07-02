@@ -106,6 +106,11 @@ class Admin::SurveysController < Admin::ApplicationController
 		render_json_auto(retval) and return
 	end
 
+	def set_result_visible
+		@survey.update_attributes({'publish_result' => (params[:visible].to_s == "true")})
+		render_json_auto true and return
+	end
+
 	def add_template_question
 		@survey = Survey.find_by_id(params[:id]) if params[:id]
 		unless @survey
