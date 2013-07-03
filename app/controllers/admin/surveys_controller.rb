@@ -102,8 +102,13 @@ class Admin::SurveysController < Admin::ApplicationController
 	end
 
 	def allocate_answer_auditors
-		retval = @survey.allocate_answer_auditors(params[:answer_auditor_ids])
+		retval = @survey.allocate_answer_auditors(params[:answer_auditor_ids], params[:allocate].to_s == "true")
 		render_json_auto(retval) and return
+	end
+
+	def set_result_visible
+		@survey.update_attributes({'publish_result' => (params[:visible].to_s == "true")})
+		render_json_auto true and return
 	end
 
 	def add_template_question

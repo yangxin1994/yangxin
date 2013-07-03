@@ -33,8 +33,6 @@ class Survey
 	field :description, :type => String, default: "调查问卷描述"
 	# can be 1 (closed), 2 (published), 4 (deleted)
 	field :status, :type => Integer, default: 1
-	# can be 1 (closed), 2 (published), 4 (deleted)
-	# field_remove :publish_status, :type => Integer, default: 1
 	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
 	field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100, "finished_count" => 0, "submitted_count" => 0], "is_exclusive" => true, "quota_satisfied" => false, "finished_count" => 0, "submitted_count" => 0 }
 	field :filters, :type => Array, default: []
@@ -62,6 +60,7 @@ class Survey
 	field :quality_control_questions_ids, :type => Array, default: []
 	field :deadline, :type => Integer
 	field :is_star, :type => Boolean, :default => false
+	field :publish_result, :type => Boolean, :default => false
 	field :delta, :type => Boolean, :default => true
 	field :point, :type => Integer, :default => 0
 	# whether this survey can be introduced to another person
@@ -1930,14 +1929,17 @@ class Survey
 		RewardLog.create(options).created_at ? true : false
 	end
 
-	def allocate_answer_auditors(answer_auditor_ids)
+	def allocate_answer_auditors(answer_auditor_ids, allocate)
 		retval = {}
 		answer_auditor_ids.each do |id|
   		answer_auditor = User.find_by_id(id)
   		retval[id] = USER_NOT_EXIST and next if user.blank? or user.is_answer_auditor?
-  		self.answer_auditors << answer_auditor
-  		result = self.save
-  		retval[id] = ErrorEnum::SYSTEM_USER_TYPE_ERROR if !result
+  		if allocate
+  			self.answer_auditors << answer_auditor
+  		else
+  			self.answer_auditors.delete(answer_auditor)
+  		end
+  		self.save
 		end
 		retval = (retval.blank? ? true : retval)
 		return retval

@@ -188,7 +188,7 @@ class Answer
 		return answer
 	end
 
-	def is_reward_answer
+	def has_rewards
 		return !self.rewards.blank?
 	end
 
@@ -812,7 +812,7 @@ class Answer
 			self.set_finish
 		elsif !self.survey.answer_need_review
 			self.set_finish
-			self.assign_volunteer_reward
+			self.assign_sample_reward
 			self.assign_introducer_reward
 		else
 			self.set_under_review
@@ -895,30 +895,30 @@ class Answer
 		# update quota of the survey and the interviewer task if there is any
 		self.interviewer_task.try(:refresh_quota)
 		self.update_quota(old_status)
-		self.assign_volunteer_reward and self.assign_introducer_reward if self.is_finish
+		self.assign_sample_reward and self.assign_introducer_reward if self.is_finish
 		return true
 	end
 
-	def assign_volunteer_reward
-		if [1,2].include?(self.reward) && !self.user.nil?
+	def assign_sample_reward  ##TODO to be complete
+		if !self.rewards.blank? && !self.user.nil?
 			# assign this user points, or a lottery code
 			# usage post_reward_to(user, :type => 2, :point => 100)
 			# 1 for lottery & 2 for point
 			# maybe lottery is nil
-			if self.reward == 1
-				if self.lottery
-					lc = self.lottery.give_lottery_code_to(self.user)
-					self.survey.post_reward_to(self.user, :type => self.reward, :lottery_code => lc, :cause => 2)
-					# send an email to the user
-					EmailWorker.perform_async("lottery_code",
-						self.user.email,
-							"",
-						:survey_id => self.survey._id.to_s,
-						:lottery_code_id => lc._id.to_s)
-				end
-			elsif self.reward == 2
-				self.survey.post_reward_to(user, :type => self.reward, :point => self.point, :cause => 2)
-			end
+			# if self.reward == 1
+			# 	if self.lottery
+			# 		lc = self.lottery.give_lottery_code_to(self.user)
+			# 		self.survey.post_reward_to(self.user, :type => self.reward, :lottery_code => lc, :cause => 2)
+			# 		# send an email to the user
+			# 		EmailWorker.perform_async("lottery_code",
+			# 			self.user.email,
+			# 				"",
+			# 			:survey_id => self.survey._id.to_s,
+			# 			:lottery_code_id => lc._id.to_s)
+			# 	end
+			# elsif self.reward == 2
+			# 	self.survey.post_reward_to(user, :type => self.reward, :point => self.point, :cause => 2)
+			# end
 		end
 	end
 

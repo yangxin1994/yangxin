@@ -88,6 +88,15 @@ describe 'visit surveys' do
 			retval = JSON.parse(response.body)["value"]["error_code"]
 			expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
 		end
+
+		it "the /set_result_visible should return SURVEY_NOT_EXIST" do
+			put "/admin/surveys/1/set_result_visible",
+			  visible: false,
+			  auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]["error_code"]
+			expect(retval).to eq(ErrorEnum::SURVEY_NOT_EXIST)
+		end
 	end
 
 	describe "with survey exist" do
@@ -159,12 +168,41 @@ describe 'visit surveys' do
 		end
 
 		it "the /allocate_answer_auditors should return true" do
+			answer_auditor = FactoryGirl.create(:answer_auditor)
+			expect(User.find_by_id(answer_auditor.id.to_s).answer_auditor_allocated_surveys.length).to eq(0)
 			put "/admin/surveys/#{@survey.id}/allocate_answer_auditors",
-			  answer_auditor_ids: [@creator.id.to_s],
+			  answer_auditor_ids: [answer_auditor.id.to_s],
+			  allocate: true,
 			  auth_key: @auth_key
 			response.status.should be(200)
 			retval = JSON.parse(response.body)["value"]
 			expect(retval).to eq(true)
+			expect(User.find_by_id(answer_auditor.id.to_s).answer_auditor_allocated_surveys.length).to eq(1)
+		end
+
+		it "the /allocate_answer_auditors should return true" do
+			answer_auditor = FactoryGirl.create(:answer_auditor)
+			answer_auditor.answer_auditor_allocated_surveys << @survey
+			expect(User.find_by_id(answer_auditor.id.to_s).answer_auditor_allocated_surveys.length).to eq(1)
+			put "/admin/surveys/#{@survey.id}/allocate_answer_auditors",
+			  answer_auditor_ids: [answer_auditor.id.to_s],
+			  allocate: false,
+			  auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]
+			expect(retval).to eq(true)
+			expect(User.find_by_id(answer_auditor.id.to_s).answer_auditor_allocated_surveys.length).to eq(0)
+		end
+
+		it "the /set_result_visible should return true" do
+			expect(Survey.find_by_id(@survey.id.to_s).publish_result).to eq(false)
+			put "/admin/surveys/#{@survey.id}/set_result_visible",
+			  visible: true,
+			  auth_key: @auth_key
+			response.status.should be(200)
+			retval = JSON.parse(response.body)["value"]
+			expect(retval).to eq(true)
+			expect(Survey.find_by_id(@survey.id.to_s).publish_result).to eq(true)
 		end
 
 		describe "with reward_scheme not exist" do

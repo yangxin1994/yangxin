@@ -21,7 +21,7 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 		end
 
 		answers = answers.find_by_status(params[:status]) if !params[:status].blank?
-		answers = answers.delete_if { |a| a.is_reward_answer} if !params[:has_reward].blank?
+		answers = answers.delete_if { |a| !a.has_rewards} if !params[:has_reward].blank?
 
 		render_json_auto auto_paginate(answers) and return
 	end
