@@ -16,6 +16,12 @@ OopsData::Application.routes.draw do
 				put :reset_password
 			end
 		end
+
+		resources :surveys do
+		end
+
+		resources :answers do
+		end
 	end
 
 	namespace :super_admin do

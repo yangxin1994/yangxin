@@ -56,6 +56,7 @@ class Answer
 	scope :ongoing, lambda {where(:status => 0)}
 	scope :wait_for_review, lambda {where(:status => 2)}
 
+	belongs_to :agent_task
 	belongs_to :user, class_name: "User", inverse_of: :answers
 	belongs_to :survey
 	belongs_to :interviewer_task

@@ -83,7 +83,8 @@ describe "agent tasks management" do
 	it "reset password", :populate_agent_tasks => true do
 		agent_task = AgentTask.normal.first
 		put "admin/agent_tasks/#{agent_task._id.to_s}/reset_password",
-			password: "123456",
+			old_password: Encryption.decrypt_password(agent_task.password),
+			new_password: "123456",
 			auth_key: @auth_key
 		response.status.should be(200)
 		JSON.parse(response.body)["value"].should be true

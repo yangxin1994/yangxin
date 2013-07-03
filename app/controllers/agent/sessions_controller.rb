@@ -22,7 +22,7 @@ class Agent::SessionsController < Agent::ApplicationController
 	end
 
 	def login_with_auth_key
-		retval = AgentTask.login_with_auth_key(params[:id])
+		retval = AgentTask.login_with_auth_key(params[:auth_key])
 		render_json_auto(retval) and return
 	end
 end

@@ -9,9 +9,8 @@ class Agent::AnswersController < Agent::ApplicationController
 	def check_answer_existence
 		@answer = @agent_task.find_answer_by_id(params[:id])
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if @answer.nil?
-		
 	end
-	
+
 	def index
 		render_json_auto auto_paginate(survey.answers) and return
 	end

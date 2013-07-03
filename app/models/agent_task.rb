@@ -18,6 +18,7 @@ class AgentTask
 	field :auth_key, :type => String
 
 	belongs_to :survey
+	has_many :answers
 
 	default_scope order_by(:created_at.desc)
 
@@ -30,15 +31,8 @@ class AgentTask
 	def self.find_by_auth_key(auth_key)
 		return nil if auth_key.blank?
 		agent_task = AgentTask.normal.where(:auth_key => auth_key).first
-		return nil if user.nil?
-		# for visitor users, auth_key_expire_time is set as -1
-		if user.auth_key_expire_time > Time.now.to_i || user.auth_key_expire_time == -1
-			return user
-		else
-			user.auth_key = nil
-			user.save
-			return nil
-		end
+		return nil if agent_task.nil?
+		return agent_task
 	end
 
 	def self.create_agent_task(agent_task)
@@ -94,7 +88,7 @@ class AgentTask
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::AGENT_TASK_NOT_EXIST if survey.nil?
 		encrypted_password = Encryption.encrypt_password(password)
-		agent_task = survey.agent_tasks.where(:email => email, :password => encrypt_password)
+		agent_task = survey.agent_tasks.where(:email => email, :password => encrypted_password).first
 		return ErrorEnum::AGENT_TASK_NOT_EXIST if agent_task.nil?
 		agent_task.auth_key = Encryption.encrypt_auth_key("#{agent_task._id}&#{Time.now.to_i.to_s}")
 		agent_task.save

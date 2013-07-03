@@ -59,6 +59,16 @@ def admin_signin
     return auth_key
 end
 
+def agent_signin
+  agent_task = FactoryGirl.create(:agent_task)
+  original_password = Encryption.decrypt_password(agent_task.password)
+  post "/agent/sessions",
+    agent_task: {email: agent_task.email,
+      password: original_password}
+    response.status.should be(200)
+    auth_key = JSON.parse(response.body)["value"]["auth_key"]
+end
+
 def clear(model_name)
   Object::const_get(model_name).destroy_all
 end
