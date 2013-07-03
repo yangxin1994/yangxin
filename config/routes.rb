@@ -9,10 +9,27 @@ OopsData::Application.routes.draw do
 		end
 	end
 
+	namespace :agent do
+		resources :sessions do
+			collection do
+				get :login_with_auth_key
+				put :reset_password
+			end
+		end
+
+		resources :surveys do
+		end
+
+		resources :answers do
+		end
+	end
+
 	namespace :super_admin do
 		resources :users do
 			member do
-				put 'set_admin'
+				put :set_admin
+			end
+			collection do
 			end
 		end
 	end

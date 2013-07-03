@@ -137,6 +137,7 @@ class Survey
 	belongs_to :user, class_name: "User", inverse_of: :surveys
 
 
+	scope :published, lambda { where(:status  => 2) }
 	scope :normal, lambda { where(:status.gt => -1) }
 	scope :deleted, lambda { where(:status => -1) }
 	scope :stars, where(:status.gt => -1, :is_star => true)
@@ -1827,7 +1828,7 @@ class Survey
 	end
 
 	def info_for_interviewer
-		survey_obj = Hash.new
+		survey_obj = {}
 		survey_obj["_id"] = self._id.to_s
 		survey_obj["created_at"] = self.created_at
 		survey_obj["pages"] = Marshal.load(Marshal.dump(self.pages))
@@ -1843,6 +1844,13 @@ class Survey
 			info = info.merge({qid => BasicQuestion.find_by_id(qid)})
 		end
 		return info
+	end
+
+	def info_for_agent
+		survey_obj = {}
+		survey_obj["_id"] = self._id.to_s
+		survey_obj["title"] = self.title
+		return survey_obj
 	end
 
 
