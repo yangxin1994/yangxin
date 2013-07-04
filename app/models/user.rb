@@ -8,6 +8,8 @@ class User
 	include Mongoid::Document
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
+    include DymanicAttr
+
 	field :email, :type => String
 	field :mobile, :type => String
 	field :username, :type => String
@@ -49,6 +51,8 @@ class User
 	field :auth_key_expire_time, :type => Integer
 	field :level, :type => Integer, default: 0
 	field :level_expire_time, :type => Integer, default: -1
+
+
 	# field :birthday, :type => Integer, default: -1
 	# field :gender, :type => Boolean
 	# field :address, :type => String
@@ -71,6 +75,7 @@ class User
 	has_many :reward_logs, :class_name => "RewardLog", :inverse_of => :user
 	has_many :orders, :class_name => "Order"
 	has_many :lottery_codes
+	has_one  :survey_subscribe, :class_name => "SurveySubscribe",:inverse_of => :user
 	# QuillAdmin
 	has_many :operate_orders, :class_name => "Order", :foreign_key => "operator_id"
 	has_many :operate_reward_logs, :class_name => "RewardLog", :inverse_of => :operator,:foreign_key => "operator_id"
@@ -78,6 +83,7 @@ class User
 	has_many :surveys, class_name: "Survey", inverse_of: :user
 	has_many :groups
 	has_many :materials
+	has_one  :avatar, :class_name => "Material", :inverse_of => :user
 	has_many :public_notices
 	has_many :question_feedbacks, class_name: "Feedback", inverse_of: :question_user
 	has_many :answer_feedbacks, class_name: "Feedback", inverse_of: :answer_user
@@ -92,6 +98,7 @@ class User
 	has_many :interviewer_tasks
 	has_many :reviewed_answers, class_name: "Answer", inverse_of: :auditor
 	has_many :logs
+    has_one  :affiliated, :class_name => "Affiliated", :inverse_of => :user
 
 	scope :unregistered, where(status: 0)
 	scope :sample, where(user_role: 1)
@@ -106,6 +113,8 @@ class User
 
 
 	public
+
+
 	#*description*: Find a user given an email, username and user id. Deleted users are not included.
 	#
 	#*params*:
@@ -173,6 +182,15 @@ class User
 		self.identity_card = user_info["identity_card"]
 		self.company = user_info["company"]
 		return self.save
+	end
+
+    
+	def update_avatar(avatar)
+	  self.create_avatar(avatar)
+	end
+
+	def update_receive_info(receiver_info)
+	  self.create_affiliated(receiver_info)	
 	end
 
 	#*description*: check whether an email has been registered as an user

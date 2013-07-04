@@ -488,6 +488,17 @@ OopsData::Application.routes.draw do
 
 
     namespace :sample do
+      resources :accounts do 
+        collection do
+          get :get_basic_info,:as => :get_basic_info
+          get :get_spread_count,:as => :get_spread_count
+          get :get_answer_count,:as => :get_answer_count
+          post :update_avatar,:as => :update_avatar
+          get :get_receive_info,:as => :get_receive_info
+          post :update_receive_info,:as => :update_receive_info
+          post :reset_password,:as => :reset_password
+        end	
+      end
       resources :surveys do
         collection do
           get :get_hot_spot_survey,:as => :get_hot_spot_survey
@@ -507,6 +518,12 @@ OopsData::Application.routes.draw do
         end
       end
 
+      resources :prizes do
+        collection do
+          get :get_prizes,:as => :get_prizes
+        end
+      end      
+
       resources :users do
         collection do
           get :get_top_ranks,:as => :get_top_ranks
@@ -516,8 +533,26 @@ OopsData::Application.routes.draw do
       resources :logs do
         collection do
           get :fresh_news,:as => :fresh_news
+          get :get_disciplinal_news,:as => :get_disciplinal_news
+          get :get_newst_exchange_logs,:as => :get_newst_exchange_logs
         end
       end
+
+      resources :answers do 
+      	collection do 
+      	  get :get_today_answers_count,:as => :get_today_answers_count
+      	  get :get_today_spread_count, :as => :get_today_spread_count
+      	end
+      end
+
+      resources :survey_subscribes do 
+      	collection do
+      	  post :subscribe_able,:as => :subscribe_able
+      	  post :make_subscribe_active,:as => :make_subscribe_active 
+      	end
+      end
+
+
     end
 
 

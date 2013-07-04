@@ -70,6 +70,8 @@ class Survey
 	field :spread_point, :type => Integer, :default => 0
 	field :quillme_promote, :type => Boolean, :default => false
 	field :quillme_hot, :type => Boolean, :default => false #是否为热点小调查(quillme用)
+    field :recommend_position, :type => Integer, :default => nil  #推荐位
+
 	field :email_promote, :type => Hash, default: {
 		"promotable" => false,
 		"email_amount" => 0,
@@ -133,6 +135,15 @@ class Survey
 	scope :stars, where(:status.gt => -1, :is_star => true)
 	scope :in_community, lambda { where(:show_in_community => true) }
 	scope :is_promotable, lambda { where(:promotable => true) }
+    
+ 
+    scope :status, lambda {|st| where(:status => st)}
+    scope :opend, lambda { where(:status => 2)}
+    scope :closed, lambda { where(:status => 1)}
+    scope :quillme_promote, lambda { where(:quillme_promote => true)}
+    scope :quillme_hot, lambda {where(:quillme_hot => true)}
+    scope :not_quillme_hot, lambda {where(:quillme_hot => false)}
+
 
 	index({ status: 1, publish_status: 1, show_in_community: 1, title: 1 }, { background: true } )
 	index({ show_in_community: 1, title: 1 }, { background: true } )
@@ -154,6 +165,35 @@ class Survey
 	META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
 
 	public
+
+    
+	def self.get_recommends(sta=2)
+	  sta = 2 unless sta.present?  
+	  surveys = Survey.quillme_promote.not_quillme_hot.status(sta).desc(:created_at)
+	  scheme_type_hash = {}
+	  survey_data = {}	  
+	  if surveys.present?
+	  	surveys.map{|survey| survey_data[survey.id] = survey }
+	  	RewardScheme::RewardType.each do |rtype|
+	  	  current_type_arr = []
+	  	  survey_data.each do |survey_id,survey|
+	  	    scheme_id = survey.quillme_promote_info['reward_scheme_id']
+	  	    if scheme_id
+	  	      rs = RewardScheme.find(scheme_id)
+	  	      if rs
+	  	        if rs.rewards.select{|ele| ele['type'].to_s ==  rtype.to_s }
+	  	          current_type_arr << survey_id
+	  	          scheme_type_hash[rtype] = current_type_arr  
+	  	        end 
+	  	      end
+	  	    end	
+	  	  end
+	  	end
+	  end
+	  scheme_datas = {}
+	  RewardScheme.all.map{|rs| scheme_datas[rs.id] = {'reward' => rs.rewards} }
+      return [surveys,scheme_type_hash,survey_data,scheme_datas]   
+	end
 
 	#----------------------------------------------
 	#

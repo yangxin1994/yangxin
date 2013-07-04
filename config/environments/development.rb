@@ -43,6 +43,17 @@ OopsData::Application.configure do
     :openssl_verify_mode  => 'none'
   }
 
+  config.survey_mailer_setting = {
+    :authentication => "plain",
+    :address        => "smtp.mailgun.com",
+    :port           => 25,
+    :domain         => "oopsdata.net",
+    :user_name      => "postmaster@oopsdata.net",
+    :password       => "0nlnhy08vbk1",
+    :enable_starttls_auto => true,
+    :openssl_verify_mode  => 'none'
+  }  
+
   # task web service
   config.service_port = '8000'
   # donet web service
