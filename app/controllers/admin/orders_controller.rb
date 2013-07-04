@@ -1,6 +1,6 @@
 class Admin::OrdersController < Admin::ApplicationController
 
-  before_filter :check_order_existence, :only => [:show, :handle, :finish]
+  before_filter :check_order_existence, :only => [:show, :handle, :finish, :update_remark, :update_express_info]
 
   def check_order_existence
     @order = Order.find_by_id(params[:id])
@@ -41,5 +41,13 @@ class Admin::OrdersController < Admin::ApplicationController
       Order.find_by_id(order_id).try(:finish, params[:success])
     end
     render_json_auto true and return
+  end
+
+  def update_express_info
+    render_json_auto @order.update_express_info and return
+  end
+
+  def update_remark
+    render_json_auto @order.update_remark and return
   end
 end
