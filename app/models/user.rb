@@ -346,8 +346,13 @@ class User
 	#* EMAIL_NOT_EXIST
 	#* EMAIL_NOT_ACTIVATED
 	#* WRONG_PASSWORD
-	def self.login_with_email(email_username, password, client_ip, client_type, keep_signed_in, third_party_user_id)
-		user = User.find_by_email(email_username)
+	def self.login_with_email_mobile(email_mobile, password, client_ip, client_type, keep_signed_in, third_party_user_id)
+		user = nil
+		if email_mobile.match(/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/)  ## match email
+			user = User.find_by_email(email_mobile)
+		elsif email_mobile.match(/^\d{11}$/)  ## match mobile
+			user = User.find_by_mobile(email_mobile)
+		end
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
 		return ErrorEnum::USER_NOT_REGISTERED if user.status == 0
 		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated

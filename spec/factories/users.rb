@@ -11,6 +11,7 @@ FactoryGirl.define do
 	factory :admin_another, parent: :admin do |a|
 		a.sequence(:username) { |n| "admin_#{n}"}
 		a.sequence(:email) { |n| "admin_#{n}@test.com"}
+		a.mobile {"183#{[*(1..8)].shuffle.join}"}
 		a.password Encryption.encrypt_password('123456')
 		a.role 63
 		a.status 4
