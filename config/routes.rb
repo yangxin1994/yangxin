@@ -184,7 +184,7 @@ OopsData::Application.routes.draw do
 				put :bulk_handle, :bulk_finish 
 			end
 			member do
-				put :handle, :finish 
+				put :handle, :finish, :update_express_info, :update_remark
 			end
 		end
 		resources :lotteries do

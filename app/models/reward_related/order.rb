@@ -22,6 +22,10 @@ class Order
 	field :user_name, :type => String
 	field :address, :type => String
 	field :postcode, :type => String
+	field :express_info, :type => Hash
+	field :handled_at, :type => Integer
+	field :finished_at, :type => Integer
+	field :canceled_at, :type => Integer
 
 	# embeds_one :cash_receive_info, :class_name => "CashReceiveInfo"
 	# embeds_one :entity_receive_info, :class_name => "EntityReceiveInfo"
@@ -142,12 +146,14 @@ class Order
 	def handle
 		return ErrorEnum::WRONG_ORDER_STATUS if self.status != WAIT
 		self.status = HANDLE
+		self.handled_at = Time.now.to_i
 		return self.save
 	end
 
 	def cancel
 		return ErrorEnum::WRONG_ORDER_STATUS if self.status != WAIT
 		self.status = wait
+		self.canceled_at = Time.now.to_i
 		return self.save
 	end
 
@@ -155,6 +161,7 @@ class Order
 		return ErrorEnum::WRONG_ORDER_STATUS if self.status != HANDLE
 		self.status = success ? SUCCESS : FAIL
 		self.remark = remark
+		self.finished_at = Time.now.to_i
 		return self.save
 	end
 
@@ -182,5 +189,15 @@ class Order
 			orders = orders.where(:type.in => type_ary)
 		end
 		return orders
+	end
+
+	def update_express_info(express_info)
+		self.express_info = express_info
+		return self.save
+	end
+
+	def update_remark(remark)
+		self.remark = remark
+		return self.save
 	end
 end
