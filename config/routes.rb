@@ -293,10 +293,10 @@ OopsData::Application.routes.draw do
 	post "home/get_more_info"
 
 
-	resources :registrations do
+	resources :registrations, :only => [:create] do
 		collection do
-			post :send_activate_email
-			post :activate
+			post :send_activate_key
+			post :email_activate, :mobile_activate
 		end
 	end
 
