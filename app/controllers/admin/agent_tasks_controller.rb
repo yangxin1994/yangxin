@@ -26,7 +26,7 @@ class Admin::AgentTasksController < Admin::ApplicationController
 	end
 
 	def reset_password
-		render_json_auto @agent_task.reset_password(params[:password]) and return
+		render_json_auto @agent_task.reset_password(params[:old_password], params[:new_password]) and return
 	end
 
 	def send_email
