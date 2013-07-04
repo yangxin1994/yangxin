@@ -300,16 +300,12 @@ OopsData::Application.routes.draw do
 		end
 	end
 
-	resources :sessions do
+	resources :sessions, :only => [:create] do
 		collection do
-			post :update_user_info, :init_basic_info, :send_password_email
-			post :new_password, :reset_password
-			post :login_with_auth_key
-			post :login_with_code
+			post :login_with_auth_key, :third_party_sign_in
+			delete :destroy
 		end
 	end
-	match 'logout' => 'sessions#destroy', :as => :logout
-	match 'login' => 'sessions#create', :as => :login
 
 	resources :users do
 		collection do
