@@ -4,71 +4,36 @@ require 'tool'
 require 'encryption'
 
 class RegistrationsController < ApplicationController
-
-	before_filter :require_sign_out, :except => [:email_illegal, :destroy]
-
-	#*descryption*: user submits registration form
-	#
-	#*http* *method*: post
-	#
-	#*url*: /registrations
-	#
-	#*params*:
-	#* user: the user hash, the keys of which include:
-	#  - email
-	#  - username
-	#  - password
-	#  - password_confirmation
-	#* third_party_user_id: a key if user registrates with a third party website account
-	#
-	#*retval*:
-	#* true if successfully registrated
-	#* ErrorEnum ::ILLEGAL_EMAIL
-	#* ErrorEnum ::EMAIL_ACTIVATED
-	#* ErrorEnum ::EMAIL_NOT_ACTIVATED
-	#* ErrorEnum ::WRONG_PASSWORD_CONFIRMATION
+	
 	def create
-		# create user model
-		retval = User.create_new_registered_user(params[:user],
-												@current_user,
-												params[:third_party_user_id],
-												params[:callback])
+		retval = User.create_new_registered_user(
+			params[:email_mobile],
+			params[:password],
+			@current_user,
+			params[:third_party_user_id],
+			params[:callback])
 		render_json_auto(retval) and return
 	end
 
-	#*description*: submit email address to send activate email
-	#
-	#*http* *method*: post
-	#
-	#*url*: /send_activate_email
-	#
-	#*params*:
-	#* email
-	#
-	#*retval*:
-	#* true if the activate email is sent out
-	#* Errorenum ::USER_NOT_EXIST
-	#* Errorenum ::USER_ACTIVATED
-	def send_activate_email
-		user = User.find_by_email(params[:email])
+	def send_activate_key
+		user = nil
+		if params[:email_mobile].match(/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/)  ## match email
+			user = User.find_by_email(params[:email_mobile].downcase)
+		elsif params[:email_mobile].match(/^\d{11}$/)  ## match mobile
+			user = User.find_by_mobile(params[:email_mobile])
+		end
 		render_json_e(ErrorEnum::USER_NOT_EXIST) and return if user.nil?
 		render_json_e(ErrorEnum::USER_NOT_REGISTERED) and return if user.status == 0
 		render_json_e(ErrorEnum::USER_ACTIVATED) and return if user.is_activated
-		EmailWorker.perform_async("activate", user.email, params[:callback])
+		if params[:email_mobile].match(/^\d{11}$/)
+			##TODO send_mobile_message()
+		else
+			EmailWorker.perform_async("activate", user.email, params[:callback])
+		end
 		render_json_s and return
 	end
 
-	#*description*: click activate link to activate an user
-	#
-	#*http* *method*: get
-	#
-	#*url*: /activate
-	#
-	#*params*:
-	#* activate_key
-	#
-	#*retval*:
-	def activate
+	def email_activate
 		begin
 			activate_info_json = Encryption.decrypt_activate_key(params[:activate_key])
 			activate_info = JSON.parse(activate_info_json)
@@ -79,9 +44,11 @@ class RegistrationsController < ApplicationController
 		render_json_auto(retval) and return
 	end
 
-	# delete account
-	def destroy
-		retval = @current_user.destroy
+	def mobile_activate
+		activate_info = {"mobile" => params[:mobile],
+				"password" => params[:password],
+				"verification_code" => params[:verification_code]}
+		retval = User.activate(activate_info, @remote_ip, params[:_client_type])
 		render_json_auto(retval) and return
 	end
 end

@@ -25,6 +25,8 @@ class User
 	field :last_login_ip, :type => String
 	field :last_login_client_type, :type => String
 	field :login_count, :type => Integer, default: 0
+	field :sms_verification_code, :type => String
+	field :sms_verification_timeout, :type => Integer
 	field :activate_time, :type => Integer
 	field :introducer_id, :type => String
 	field :last_read_messeges_time, :type => Time, :default => Time.now
@@ -272,26 +274,41 @@ class User
 	#
 	#*retval*:
 	#* the new user instance: when successfully created
-	def self.create_new_registered_user(user, current_user, third_party_user_id, callback)
-		user["email"].downcase!
-		return ErrorEnum::ILLEGAL_EMAIL if Tool.email_illegal?(user["email"])
-		existing_user = self.find_by_email(user["email"])
-		return ErrorEnum::EMAIL_EXIST if existing_user && existing_user.is_registered
-		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if user["password"] != user["password_confirmation"]
-		updated_attr = user.merge(email: user["email"],
-															password: Encryption.encrypt_password(user["password"]),
-															registered_at: Time.now.to_i,
-															status: 1)
-		existing_user = User.create if existing_user.nil?
+	def self.create_new_registered_user(email_mobile, password, current_user, third_party_user_id, callback)
+		account = {}
+		if email_mobile.match(/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/)  ## match email
+			account[:email] = email_mobile.downcase
+		elsif email_mobile.match(/^\d{11}$/)  ## match mobile
+			account[:mobile] = email_mobile
+		end
+		return ErrorEnum::ILLEGAL_EMAIL_OR_MOBILE if account.blank?
+
+		check_exist = nil
+		existing_user = nil
+		if account[:email]
+			existing_user = self.find_by_email(account[:email])
+			check_exist = true if existing_user && existing_user.is_registered
+		elsif account[:mobile]
+  		existing_user = self.find_by_mobile(account[:mobile]) if account[:mobile]
+  		check_exist = true if existing_user && existing_user.is_registered && !existing_user.password.nil?
+  	end
+		return ErrorEnum::EMAIL_OR_MOBILE_EXIST if check_exist
+		password = Encryption.encrypt_password(password) if account[:email]
+		updated_attr = account.merge(
+			password: password,
+			registered_at: Time.now.to_i,
+			status: 1)
+		existing_user = User.create if check_exist.nil?
 		existing_user.update_attributes(updated_attr)
 		# send welcome email
-		EmailWorker.perform_async("welcome", existing_user.email, callback)
+		EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
+		## TODO  send_mobile_message() if account[:mobile]
 		if !third_party_user_id.nil?
 			# bind the third party user if the id is provided
 			third_party_user = ThirdPartyUser.find_by_id(third_party_user_id)
 			third_party_user.bind(existing_user) if !third_party_user.nil?
 		end
-		ImportEmail.destroy_by_email(user["email"])
+		ImportEmail.destroy_by_email(account[:email]) if account[:email]
 		return true
 	end
 
@@ -314,15 +331,18 @@ class User
 	#
 	#*retval*:
 	#* true: when successfully activated or already activated
-	def self.activate(activate_info, client_ip, client_type)
-		user = User.find_by_email(activate_info["email"])
+	def self.activate(activate_info, client_ip, client_type, password = nil)
+		user = User.find_by_email(activate_info["email"]) if !activate_info["email"].blank?
+		user = User.find_by_mobile(activate_info["mobile"]) if !activate_info["mobile"].blank?
 		return ErrorEnum::USER_NOT_EXIST if user.nil?     # email account does not exist
 		return ErrorEnum::USER_NOT_REGISTERED if user.status == 0     # not registered
-		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i    # expired
+		return ErrorEnum::ACTIVATE_EXPIRED if !activate_info["email"].blank? && Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i    # expired
+		return ErrorEnum::ILLEGAL_ACTIVATE_KEY if !activate_info["mobile"].blank? && 
+  		(Time.now.to_i  > user.sms_verification_timeout or user.sms_verification_code != activate_info["verification_code"])
 		return user.login(client_ip, client_type, false)  if user.is_activated
-		user = User.find_by_email(activate_info["email"])
 		user.status = 2
 		user.activate_time = Time.now.to_i
+		user.password = Encryption.encrypt_password(activate_info["password"]) if !activate_info["mobile"].blank?
 		user.save
 		# pay introducer points
 		introducer = User.find_by_id(user.introducer_id)
@@ -349,7 +369,7 @@ class User
 	def self.login_with_email_mobile(email_mobile, password, client_ip, client_type, keep_signed_in, third_party_user_id)
 		user = nil
 		if email_mobile.match(/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/)  ## match email
-			user = User.find_by_email(email_mobile)
+			user = User.find_by_email(email_mobile.downcase)
 		elsif email_mobile.match(/^\d{11}$/)  ## match mobile
 			user = User.find_by_mobile(email_mobile)
 		end

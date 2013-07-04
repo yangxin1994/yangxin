@@ -111,8 +111,8 @@ module Tool
 		return result
 	end
 
-	def self.rand_id
-		return (rand * 10**16).floor
+	def self.rand_id(length = 16)
+		return (rand * 10**length).floor
 	end
 
 	def self.calculate_segmentation_distribution(segmentation, data)
