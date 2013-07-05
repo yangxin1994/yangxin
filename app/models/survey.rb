@@ -1139,6 +1139,11 @@ class Survey
 		return answer_time
 	end
 
+	def estimate_price
+		# todo: estimate price
+		return 10
+	end
+
 	#----------------------------------------------
 	#
 	#     manipulate on quotas
@@ -1972,6 +1977,8 @@ class Survey
 		survey_obj["logic_control"] = Marshal.load(Marshal.dump(self.logic_control))
 		survey_obj["access_control_setting"] = Marshal.load(Marshal.dump(self.access_control_setting))
 		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
+		survey_obj["answer_time"] = self.estimate_answer_time
+		survey_obj["price"] = self.estimate_price
 		user_obj = {}
 		user_obj["id"] = self.user._id.to_s
 		user_obj["email"] = self.user.email
