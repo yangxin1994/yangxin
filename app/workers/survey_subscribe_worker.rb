@@ -6,7 +6,7 @@ class SurveySubscribeWorker
 	  ss = SurveySubscribe.where(:subscribe_channel => email).first
 	  if ss.present?
 	    code = ss.active_code
-	    MailgunApi.generate_active_code_email(email,code,callback)   
+	    MailgunApi.generate_active_code_email(email,code,callback)  
 	  end
 	      	
 	  return true

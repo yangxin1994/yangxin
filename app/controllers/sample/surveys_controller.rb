@@ -29,15 +29,32 @@ class Sample::SurveysController < ApplicationController
   #############################	
   def get_recommends
     status = params[:status].present?  ? params[:status] : nil
-    @surveys = Survey.get_recommends(status)
+    @surveys = Survey.get_recommends(params[:page],params[:per_page],status)
     if !params[:status].present?
-      @surveys.slice!(1,2)     
-      @surveys = auto_paginate(@surveys)
+      @surveys = @surveys.slice!(0,2)     
+      #@surveys = auto_paginate(@surveys)
     else
       @surveys.shift
     end
     render_json { @surveys }
   end
 
+  def show
+    @survey = Survey.find_by_id(params[:id])
+    render_json { @survey }
+  end
+
+
+  def list_answered_surveys
+    surveys_with_answer_status = Survey.list_answered_surveys(@current_user)
+    paginated_surveys = auto_paginate surveys_with_answer_status
+    render_json_auto(paginated_surveys)
+  end
+
+  def list_spreaded_surveys
+    surveys_with_spreaded_number = Survey.list_spreaded_surveys(@current_user)
+    paginated_surveys = auto_paginate surveys_with_spreaded_number
+    render_json_auto(paginated_surveys)
+  end
 
 end

@@ -503,6 +503,8 @@ OopsData::Application.routes.draw do
         collection do
           get :get_hot_spot_survey,:as => :get_hot_spot_survey
           get :get_recommends,:as => :get_recommends
+          get :list_answered_surveys,:as => :list_answered_surveys
+		  get :list_spreaded_surveys,:as => :list_spreaded_surveys
         end
       end
 
@@ -548,7 +550,7 @@ OopsData::Application.routes.draw do
       resources :survey_subscribes do 
       	collection do
       	  post :subscribe_able,:as => :subscribe_able
-      	  post :make_subscribe_active,:as => :make_subscribe_active 
+      	  get :make_subscribe_active,:as => :make_subscribe_active 
       	end
       end
 

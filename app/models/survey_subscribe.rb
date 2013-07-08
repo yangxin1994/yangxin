@@ -20,12 +20,12 @@ class SurveySubscribe
   end
 
   def self.activate(active_info)
-    code  = active_info[:code]
-    email = active_info[:email]
-    time  = active_info[:time]
+    code  = active_info['code']
+    email = active_info['email']
+    time  = active_info['time']   
     ss    = SurveySubscribe.where(:subscribe_channel => email).first
     return ErrorEnum::USER_NOT_EXIST if !ss.present?
-    return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i        
+    return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - time.to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i        
     user = User.find_by_email(email)
     if user.present?
       ss.update_attributes(:user_id => user.id)

@@ -34,6 +34,12 @@ class AccountsController < ApplicationController
     render_json_auto(retval) and return     
   end
 
+
+  def update_basic_info
+    retval = @current_user.update_basic_info(params[:receive_info])
+    render_json_auto(retval) and return   	
+  end
+
   def reset_password
     retval = @current_user.reset_password(params[:old_password], params[:new_password], params[:new_password_confirmation])
     render_json_auto(retval) and return

@@ -8,7 +8,7 @@ class User
 	include Mongoid::Document
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
-    include DymanicAttr
+    #include DymanicAttr
 
 	field :email, :type => String
 	field :mobile, :type => String
@@ -172,16 +172,24 @@ class User
 		return {"level" => self.level, "level_expire_time" => self.level_expire_time}
 	end
 
-	def update_basic_info(user_info)
-		self.birthday = user_info["birthday"].to_i
-		self.gender = user_info["gender"].to_s == "true"
-		self.address = user_info["address"]
-		self.postcode = user_info["postcode"]
-		self.phone = user_info["phone"]
-		self.full_name = user_info["full_name"]
-		self.identity_card = user_info["identity_card"]
-		self.company = user_info["company"]
-		return self.save
+	# def update_basic_info(user_info)
+	# 	self.birthday = user_info["birthday"].to_i
+	# 	self.gender = user_info["gender"].to_s == "true"
+	# 	self.address = user_info["address"]
+	# 	self.postcode = user_info["postcode"]
+	# 	self.phone = user_info["phone"]
+	# 	self.full_name = user_info["full_name"]
+	# 	self.identity_card = user_info["identity_card"]
+	# 	self.company = user_info["company"]
+	# 	return self.save
+	# end
+
+	def update_basic_info(basic_info)
+	  if self.affiliated.present?
+	  	self.update_affiliated(basic_info)
+	  else
+	  	self.create_affiliated(basic_info)
+	  end
 	end
 
     
@@ -190,7 +198,11 @@ class User
 	end
 
 	def update_receive_info(receiver_info)
-	  self.create_affiliated(receiver_info)	
+	  if self.affiliated.present?
+	  	self.update_affiliated(receiver_info)
+	  else
+	  	self.create_affiliated(receiver_info)
+	  end	
 	end
 
 	#*description*: check whether an email has been registered as an user
@@ -617,6 +629,10 @@ class User
 			selected_users << u
 		end
 		return selected_users
+	end
+
+	def spread_count
+	  Answer.where(:introducer_id => self.id).finished.count	
 	end
 
 	def get_introduced_users

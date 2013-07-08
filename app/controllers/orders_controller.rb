@@ -9,6 +9,23 @@ class OrdersController < ApplicationController
     end
   end
 
+  def get_my_orders
+    case params[:source]
+    when 'priz'
+      source = [2]
+    when 'gift'
+      source = [1,4]
+    end
+    orders = @current_user.orders.where('source.in' => source).page(params[:pagte]).per(params[:per_page]).desc(:created_at)
+    render_json { orders }
+  end
+
+
+  def order_show
+    order =  @current_user.orders.find_by_id(params[:id])
+    render_json{order}  
+  end
+
   def show
     # TODO is owners request?
     # order =  @current_user.orders.find_by_id(params[:id])
@@ -23,6 +40,8 @@ class OrdersController < ApplicationController
       end
     end
   end
+
+
 
   def create
     # @gift = Gift.find_by_id(params[:id])

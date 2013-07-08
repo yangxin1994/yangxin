@@ -10,8 +10,8 @@ class Sample::GiftsController < ApplicationController
   def hotest
     sort_type = params[:sort_type].present? ? params[:sort_type]  : 'exchange_count' 
     @gifts = Gift.desc("#{sort_type}").page(params[:page]).per(params[:per_page])
-    #@gifts = auto_paginate(@gifts)
-    render_json { @gifts }
+    @gifts = @gifts.map{|g| g['photo'] = g.photo.nil? ? nil : g.photo.picture_url;g}
+    render_json_auto(@gifts)
   end
 
   #############################

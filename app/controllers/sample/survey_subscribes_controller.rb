@@ -37,6 +37,7 @@ class Sample::SurveySubscribesController < ApplicationController
 
 
   def make_subscribe_active
+
     begin
       activate_info_json = Encryption.decrypt_activate_key(CGI::unescape(params[:key]))
       activate_info = JSON.parse(activate_info_json)

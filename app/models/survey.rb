@@ -68,7 +68,7 @@ class Survey
 	field :spreadable, :type => Boolean, :default => false
 	# reward for introducing others
 	field :spread_point, :type => Integer, :default => 0
-	field :quillme_promote, :type => Boolean, :default => false
+	field :quillme_promotable, :type => Boolean, :default => false
 	field :quillme_hot, :type => Boolean, :default => false #是否为热点小调查(quillme用)
     field :recommend_position, :type => Integer, :default => nil  #推荐位
 
@@ -140,7 +140,7 @@ class Survey
     scope :status, lambda {|st| where(:status => st)}
     scope :opend, lambda { where(:status => 2)}
     scope :closed, lambda { where(:status => 1)}
-    scope :quillme_promote, lambda { where(:quillme_promote => true)}
+    scope :quillme_promote, lambda { where(:quillme_promotable => true)}
     scope :quillme_hot, lambda {where(:quillme_hot => true)}
     scope :not_quillme_hot, lambda {where(:quillme_hot => false)}
 
@@ -166,20 +166,30 @@ class Survey
 
 	public
 
-    
-	def self.get_recommends(sta=2)
-	  sta = 2 unless sta.present?  
-	  surveys = Survey.quillme_promote.not_quillme_hot.status(sta).desc(:created_at)
+    #return value
+    # surveys 盛放survey对象的list
+    # survey_data 以survey的id为key，以survey对象为value的hash
+    # scheme_type_hash 以奖励类型为key，以survey的id为元素的数组最为value  
+    # scheme_datas  以奖励方案的id为key，以每个奖励方案的内容为value 
+	def self.get_recommends(page,per_page,sta=2)
+	  sta = 2 unless sta.present?
+	  if page && per_page
+	    surveys = Survey.quillme_promote.not_quillme_hot.status(sta).page(page).per(per_page).desc(:created_at)	
+	  else
+        surveys = Survey.quillme_promote.not_quillme_hot.status(sta).desc(:created_at)	
+	  end  
+	  
 	  scheme_type_hash = {}
 	  survey_data = {}	  
 	  if surveys.present?
 	  	surveys.map{|survey| survey_data[survey.id] = survey }
 	  	RewardScheme::RewardType.each do |rtype|
 	  	  current_type_arr = []
-	  	  survey_data.each do |survey_id,survey|
+	  	  survey_data.each_pair do |survey_id,survey|
 	  	    scheme_id = survey.quillme_promote_info['reward_scheme_id']
 	  	    if scheme_id
-	  	      rs = RewardScheme.find(scheme_id)
+	  	      #rs = RewardScheme.find(scheme_id)
+	  	      rs = RewardScheme.where(:id => scheme_id).first
 	  	      if rs
 	  	        if rs.rewards.select{|ele| ele['type'].to_s ==  rtype.to_s }
 	  	          current_type_arr << survey_id
@@ -192,7 +202,7 @@ class Survey
 	  end
 	  scheme_datas = {}
 	  RewardScheme.all.map{|rs| scheme_datas[rs.id] = {'reward' => rs.rewards} }
-      return [surveys,scheme_type_hash,survey_data,scheme_datas]   
+      return [surveys,scheme_datas,scheme_type_hash,survey_data]   
 	end
 
 	#----------------------------------------------
