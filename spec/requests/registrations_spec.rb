@@ -71,6 +71,7 @@ describe "registrations controller" do
       response.status.should be(200)
       retval = JSON.parse(response.body)["value"]
       expect(retval.keys).to eq(["auth_key"])
+      expect(User.find_by_id(sample.id.to_s).email_activation).to eq(true)
     end
   end
 
@@ -89,6 +90,7 @@ describe "registrations controller" do
       response.status.should be(200)
       retval = JSON.parse(response.body)["value"]
       expect(retval.keys).to eq(["auth_key"])
+      expect(User.find_by_id(sample.id.to_s).mobile_activation).to eq(true)
     end
   end
 
