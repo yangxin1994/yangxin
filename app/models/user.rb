@@ -359,6 +359,22 @@ class User
 	  self.third_party_users.map(&:website)	
 	end
 
+	def completed_info
+	  affiliated = self.affiliated
+	  if affiliated
+	  	complete = 0
+        affiliated.attributes.each do |attr|
+          if SampleAttribute::DEFAULT_ATTR.include?(attr)
+          	complete += 1
+          end	
+        end
+	  	default_attr = SampleAttribute::DEFAULT_ATTR.length
+	  	return (complete.quo(default_attr)).to_f 
+	  else
+	    return 0 
+	  end 	
+	end
+
 	#*description*: activate a user
 	#
 	#*params*:
