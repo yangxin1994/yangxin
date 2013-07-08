@@ -354,6 +354,11 @@ class User
 		return user
 	end
 
+
+	def third_party_users
+	  self.third_party_users.map(&:website)	
+	end
+
 	#*description*: activate a user
 	#
 	#*params*:

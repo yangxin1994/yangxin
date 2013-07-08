@@ -8,8 +8,9 @@ class Sample::LogsController < ApplicationController
   #返回的参数:一个盛放新鲜事的列表
   #############################	
   def fresh_news
-    @logs = Log.where(:type => 8).any_of({'data.reason' => 1},{'data.reason' => 2},{'data.reason' => 4}).desc(:updated_at).limit(5)
-  	render_json { @logs }
+    @logs = Log.desc(:created_at).limit(5)
+    @logs = @logs.map{|log| log['username'] = log.user.username;log}
+  	render_json_auto(@logs)
   end
 
 
