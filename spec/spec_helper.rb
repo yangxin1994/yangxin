@@ -50,13 +50,37 @@ def admin_signin
     admin = FactoryGirl.create(:admin)
     original_password = Encryption.decrypt_password(admin.password)
     post "/sessions",
-      user: {email_username: admin.email,
-        password: original_password},
+      email_mobile: admin.email,
+      password: original_password,
       keep_signed_in: true
     response.status.should be(200)
     auth_key = JSON.parse(response.body)["value"]["auth_key"]
 
     return auth_key
+end
+
+def user_signin(user)
+  @signin_user = FactoryGirl.create(user)
+    original_password = Encryption.decrypt_password(@signin_user.password)
+    post "/sessions",
+      email_mobile: @signin_user.email,
+      password: original_password,
+      keep_signed_in: true
+    response.status.should be(200)
+    auth_key = JSON.parse(response.body)["value"]["auth_key"]
+
+    return auth_key
+end
+
+def agent_signin
+  agent_task = FactoryGirl.create(:agent_task)
+  original_password = Encryption.decrypt_password(agent_task.password)
+  post "/agent/sessions",
+    email_mobile: agent_task.email,
+    password: original_password
+    response.status.should be(200)
+    auth_key = JSON.parse(response.body)["value"]["auth_key"]
+  return auth_key
 end
 
 def clear(model_name)

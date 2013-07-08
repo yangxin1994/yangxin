@@ -239,10 +239,10 @@ a.od-button {
 			<p>以下是代理详情：</p>
 			<br />
 			<p>问卷标题：<%= @survey_title %></p>
-			<p><a class='od-button' href="<%= @preview_link %>" target="_blank">预览链接</a></p>
+			<p><a class='activate-link' href="<%= @preview_link %>" target="_blank"><%= @preview_link %></a></p>
 			<p>说明：<%= @agent_task.description %></p>
 			<p>回收数量要求：<%= @agent_task.count %></p>
-			<p><a class='od-button' href="" target="_blank">代理信息查看链接</a></p>
+			<p><a class='activate-link' href="" target="_blank">代理信息查看链接</a></p>
 			<p>登录邮箱：<%= @email %></p>
 			<p>登录密码：<%= @password %></p>
 			<br />

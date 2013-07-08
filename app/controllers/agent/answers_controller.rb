@@ -1,37 +1,21 @@
 # coding: utf-8
 require 'error_enum'
 require 'quill_common'
-class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
-	
+class Agent::AnswersController < Agent::ApplicationController
+
+	before_filter :require_agent_task
+	before_filter :check_answer_existence, :except => [:index]
+
+	def check_answer_existence
+		@answer = @agent_task.find_answer_by_id(params[:id])
+		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if @answer.nil?
+	end
+
 	def index
-		if @current_user.is_admin?
-			survey = Survey.find_by_id(params[:survey_id])
-		else
-			survey = @current_user.answer_auditor_allocated_surveys.find_by_id(params[:survey_id])
-		end
-		render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.blank?
-
-		answers = []
-		if params[:agent_task_id].blank?
-			answers = survey.answers
-		else
-			agent_task = survey.agent_tasks.find_by_id(params[:agent_task_id])
-			render_json_e(ErrorEnum::AGENT_TASK_NOT_EXIST) and return if agent_task.blank?
-			answers = agent_task.answers 
-		end
-
-		answers = answers.find_by_status(params[:status]) if !params[:status].blank?
-		answers = answers.delete_if { |a| !a.has_rewards} if !params[:has_reward].blank?
-
-		render_json_auto auto_paginate(answers) and return
+		render_json_auto auto_paginate(survey.answers) and return
 	end
 
 	def show
-		answer = Answer.find_by_id(params[:id])
-		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
-		# audited, if not.
-		answer['auditor_email'] = answer.auditor.email if answer.auditor
-
 		answer["question_content"] = []
 		answer.answer_content.each do |key, val|
 			# key is question id
@@ -387,24 +371,9 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 	end
 
 	def review
-		answer = Answer.find_by_id(params[:id])
+		answer = @agent_task.find_answer_by_id(params[:id])
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
-		retval = answer.review(params[:review_result].to_s == "true", @current_user, params[:message_content])
-		render_json_auto(retval)
-	end
-
-	def review_agent_answers
-		survey = Survey.find_by_id(params[:survey_id])
-		render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.blank?
-		agent_task = survey.agent_tasks.find_by_id(params[:agent_task_id])
-		render_json_e(ErrorEnum::AGENT_TASK_NOT_EXIST) and return if agent_task.blank?
-		answers = agent_task.answers
-		retval = {}
-		answers.each do |answer|
-			result = answer.review(params[:review_result].to_s == "true", @current_user, params[:message_content])
-			retval[answer.id.to_s] = result if !result
-		end
-		retval = true if retval.blank?
+		retval = answer.agent_review(params[:review_result].to_s == "true")
 		render_json_auto(retval)
 	end
 

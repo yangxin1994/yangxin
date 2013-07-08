@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "public notices api" do
 
   before(:each) do
-    20.times {FactoryGirl.create(:public_notice)}
+    FactoryGirl.create_list(:public_notice, 20)
   end
 
   it "return newest public notices" do
@@ -15,6 +15,10 @@ describe "public notices api" do
       expect(retval).to eq(true)
       ret    = JSON.parse(response.body)["value"]["data"]
       ret.length.should be 4
+  end
+
+  after(:each) do
+    clear(:PublicNotice)
   end
 
 end

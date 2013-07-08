@@ -19,10 +19,10 @@ guard 'spork', :rspec_env => { 'RAILS_ENV' => 'test' } do
 end
 
 guard 'rspec', :version => 2, :cli => '--drb', :all_on_start => false, :all_after_pass => false do
-  watch(%r{^spec/(.+)\.rb$})    { |m| "spec/#{m[1]}\.rb" } 
+  watch(%r{^spec/(.+)\.rb$})    { |m| "spec/#{m[1]}\.rb" }
 
   ## Warning :this will run all requests tests
-  watch(%r{^app/(.+)\.rb$})                           { "spec/requests/" } 
+  watch(%r{^app/(.+)\.rb$})                           { "spec/requests/" }
 
   # Capybara features specs
   watch(%r{^app/views/(.+)/.*\.(erb|haml)$})          { |m| "spec/features/#{m[1]}_spec.rb" }

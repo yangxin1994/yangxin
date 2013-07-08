@@ -33,7 +33,7 @@ describe "prizes management" do
 			per_page: 10,
 			title: "the",
 			status: 1,
-			type: 3,
+			type: 1,
 			auth_key: @auth_key
 		response.status.should be(200)
 		retval = JSON.parse(response.body)["value"]
@@ -46,7 +46,7 @@ describe "prizes management" do
 			JSON.dump(prize: {title: "new prize",
 					description: "description of the new prize",
 					type: 1,
-					material_id: material._id.to_s},
+					photo_url: "/image/1.jpg"},
 				auth_key: @auth_key),
 			"CONTENT_TYPE" => "application/json"
 		response.status.should be(200)
@@ -63,7 +63,7 @@ describe "prizes management" do
 			JSON.dump(prize: {title: "updated prize",
 					description: "description of the updated prize",
 					type: 1,
-					material_id: material._id.to_s},
+					photo_url: "/image/2.jpg"},
 				auth_key: @auth_key),
 			"CONTENT_TYPE" => "application/json"
 		response.status.should be(200)
@@ -71,6 +71,13 @@ describe "prizes management" do
 		retval.should be(true)
 		updated_prize = Prize.find_by_id(prize._id.to_s)
 		expect(updated_prize.title).to eq "updated prize"
+
+		get "admin/prizes/#{prize._id.to_s}",
+			auth_key: @auth_key
+		response.status.should be(200)
+		retval = JSON.parse(response.body)["value"]
+		expect(retval["photo_url"]).to eq "/image/2.jpg"
+
 	end
 
 	it "delete prize", :populate_prizes => true do

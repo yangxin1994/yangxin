@@ -9,11 +9,16 @@ class AgentTask
 	field :password, :type => String
 	field :description, :type => String
 	field :count, :type => Integer
+	field :agent_under_review_count, :type => Integer, default: 0
+	field :agent_finished_count, :type => Integer, default: 0
+	field :agent_reject_count, :type => Integer, default: 0
 	field :under_review_count, :type => Integer, default: 0
 	field :finished_count, :type => Integer, default: 0
 	field :reject_count, :type => Integer, default: 0
+	field :auth_key, :type => String
 
 	belongs_to :survey
+	has_many :answers
 
 	default_scope order_by(:created_at.desc)
 
@@ -21,6 +26,13 @@ class AgentTask
 
 	def self.find_by_id(agent_task_id)
 		return self.normal.where(:_id => agent_task_id).first
+	end
+
+	def self.find_by_auth_key(auth_key)
+		return nil if auth_key.blank?
+		agent_task = AgentTask.normal.where(:auth_key => auth_key).first
+		return nil if agent_task.nil?
+		return agent_task
 	end
 
 	def self.create_agent_task(agent_task)
@@ -60,13 +72,40 @@ class AgentTask
 		return self.save
 	end
 
-	def reset_password(password)
-		self.password = Encryption.encrypt_password(password)
+	def reset_password(old_password, new_password)
+		return ErrorEnum::WRONG_PASSWORD if self.password != Encryption.encrypt_password(old_password)
+		self.password = Encryption.encrypt_password(new_password)
 		return self.save
 	end
 
 	def send_email(callback)
 		EmailWorker.perform_async("agent_task", self.email, callback, :agent_task_id => self._id)
 		return true
+	end
+
+
+	def self.login(email, password, survey_id)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::AGENT_TASK_NOT_EXIST if survey.nil?
+		encrypted_password = Encryption.encrypt_password(password)
+		agent_task = survey.agent_tasks.where(:email => email, :password => encrypted_password).first
+		return ErrorEnum::AGENT_TASK_NOT_EXIST if agent_task.nil?
+		agent_task.auth_key = Encryption.encrypt_auth_key("#{agent_task._id}&#{Time.now.to_i.to_s}")
+		agent_task.save
+		return {"auth_key" => agent_task.auth_key}
+	end
+
+	def self.logout(auth_key)
+		agent_task = AgentTask.find_by_auth_key(auth_key)
+		if !agent_task.nil?
+			agent_task.auth_key = nil
+			agent_task.save
+		end
+	end
+
+	def self.login_with_auth_key(auth_key)
+		agent_task = AgentTask.find_by_auth_key(auth_key)
+		return ErrorEnum::AGENT_TASK_NOT_EXIST if agent_task.nil?
+		return agent_task
 	end
 end

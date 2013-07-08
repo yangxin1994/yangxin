@@ -2,17 +2,34 @@ require 'sidekiq/web'
 OopsData::Application.routes.draw do
 	mount Sidekiq::Web, at: "/sidekiq"
 
-	resources :faqs, :public_notices, :feedbacks, :advertisements
+	resources :faqs, :feedbacks, :advertisements
 	resources :data_generators do
 		collection do
 			get 'generate'
 		end
 	end
 
+	namespace :agent do
+		resources :sessions do
+			collection do
+				get :login_with_auth_key
+				put :reset_password
+			end
+		end
+
+		resources :surveys do
+		end
+
+		resources :answers do
+		end
+	end
+
 	namespace :super_admin do
 		resources :users do
 			member do
-				put 'set_admin'
+				put :set_admin
+			end
+			collection do
 			end
 		end
 	end
@@ -40,6 +57,7 @@ OopsData::Application.routes.draw do
 	match '/subscribe' , :to => 'subscribers#create', :as => '/subscribe'
 	match '/unsubscribe' , :to =>'subscribers#destroy', :as => '/subscribe'
 	namespace :admin do
+		resources :answer_auditors, :only => [:index]
 		resources :agent_tasks do
 			member do
 				put :reset_password
@@ -66,6 +84,7 @@ OopsData::Application.routes.draw do
 			member do
 				get :point_log, :redeem_log, :lottery_log
 				post :block
+				put :set_sample_role
 			end
 			collection do
 				post :send_message
@@ -113,10 +132,10 @@ OopsData::Application.routes.draw do
 				put 'add_template_question'
 			end
 			member do
-				put 'allocate', 'add_reward', 'set_community', 'set_spread', 'set_promotable', 'set_answer_need_review', 'background_survey',
+				put 'add_reward', 'set_community', 'set_spread', 'set_promotable', 'set_answer_need_review', 'background_survey',
 				    'quillme_promote', 'email_promote', 'sms_promote', 'broswer_extension_promote', "weibo_promote"
 				get 'get_sent_email_number', 'promote'
-				put :quillme_hot
+				put :quillme_hot, :allocate_answer_auditors, :set_result_visible
 			end
 			resources :reward_schemes, :except => [:new, :edit, :destroy]
 		end
@@ -126,11 +145,7 @@ OopsData::Application.routes.draw do
 
 		resources :faqs do
 		end
-		resources :public_notices do
-			collection do
-				get 'count', 'list_by_type_count', 'list_by_type_and_value_count'
-			end
-		end
+		resources :public_notices , :except => [:new, :edit]
 		resources :advertisements do
 			collection do
 				get 'count', 'list_by_title_count', 'activated_count', 'unactivate_count'
@@ -181,13 +196,12 @@ OopsData::Application.routes.draw do
 		end
 		resources :orders do
 			collection do
-				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed, :canceled, :to_excel
+				put :bulk_handle, :bulk_finish 
 			end
 			member do
-				put :verify, :verify_as_failed, :deliver, :deliver_success, :deliver_as_failed
+				put :handle, :finish, :update_express_info, :update_remark
 			end
 		end
-
 		resources :lotteries do
 			collection do
 				get :for_publish, :activity, :finished, :deleted, :quillme
@@ -226,9 +240,12 @@ OopsData::Application.routes.draw do
 	namespace :answer_auditor do
 		resources :surveys do
 		end
-		resources :answers do
+		resources :answers , :only => [:index, :show, :destroy] do
 			member do
 				put 'review'
+			end
+			collection do
+				put "review_agent_answers"
 			end
 		end
 	end
@@ -243,14 +260,6 @@ OopsData::Application.routes.draw do
 				get 'publish'
 				get 'close'
 				get 'pause'
-			end
-		end
-	end
-
-	namespace :answer_auditor do
-		resources :answers do
-			collection do
-				get 'count'
 			end
 		end
 	end
@@ -284,23 +293,19 @@ OopsData::Application.routes.draw do
 	post "home/get_more_info"
 
 
-	resources :registrations do
+	resources :registrations, :only => [:create] do
 		collection do
-			post :send_activate_email
-			post :activate
+			post :send_activate_key
+			post :email_activate, :mobile_activate
 		end
 	end
 
-	resources :sessions do
+	resources :sessions, :only => [:create] do
 		collection do
-			post :update_user_info, :init_basic_info, :send_password_email
-			post :new_password, :reset_password
-			post :login_with_auth_key
-			post :login_with_code
+			post :login_with_auth_key, :third_party_sign_in
+			delete :destroy
 		end
 	end
-	match 'logout' => 'sessions#destroy', :as => :logout
-	match 'login' => 'sessions#create', :as => :login
 
 	resources :users do
 		collection do

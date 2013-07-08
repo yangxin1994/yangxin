@@ -30,6 +30,12 @@ class Material
 		return Material.where(:_id => material_id).first
 	end
 
+	def self.create_image(image_url)
+		material = Material.new(:material_type => 1, :value => image_url)
+		material.save
+		return material
+	end
+
 	def self.check_and_create_new(current_user, material)
 		return ErrorEnum::WRONG_MATERIAL_TYPE unless [1, 2, 4, 8, 16, 32].include?(material["material_type"].to_i)
 		material_inst = Material.new(:material_type => material["material_type"].to_i,

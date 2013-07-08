@@ -1,142 +1,53 @@
-# encoding: utf-8
-
 class Admin::OrdersController < Admin::ApplicationController
 
-  def index
-    render_json true do
-      auto_paginate(Order.all) do |orders|
-        orders.present_json("admin")
-      end
-    end
-  end
+  before_filter :check_order_existence, :only => [:show, :handle, :finish, :update_remark, :update_express_info]
 
-  def destroy
-    Order.find_by_id(params[:id]) do |r|
-      r.delete
-    end
-    render_json{ @orders }
-  end
-
-  def operate
-    @orders = []
-    params[:ids].to_a.each do |id|
-      @orders << (Order.find_by_id id do |r|
-        r.operate 1
-      end)
-    end
-    render_json{@orders }
-  end
-
-  def verify
-    render_json do
-      result = Order.find_by_id params[:id] do |o|
-        # if o.type == 3
-        #   o.gift.lottery.give_lottery_code_to o.user
-        #   o.update_attribute(:status, 3)
-        # else
-          o.update_attribute(:status, 1)
-          current_user.create_message("您的礼品兑换通过审核了~",
-            "您的礼品兑换通过审核了~",
-            [o.user._id]
-            )
-        # end
-      end
-      @is_success = !(result.is_a? Hash)
-      result
-    end
-  end
-
-  def verify_as_failed
-    render_json do
-      result = Order.find_by_id params[:id] do |o|
-        o.update_attribute(:status, -1)
-        o.gift.inc(:surplus, 1)
-        o.update_attribute(:status_desc, params[:status_desc])
-        o.reward_log.revoke_operation(current_user, params[:status_desc])
-        current_user.create_message("您的礼品兑换未通过审核",
-          "您的礼品兑换未通过审核:\n#{params[:status_desc]}.",
-          [o.user._id]
-          )
-      end
-      @is_success = !(result.is_a? Hash)
-      result
-    end
-  end
-
-  def deliver
-    render_json do
-      result = Order.find_by_id params[:id] do |o|
-        o.update_attribute(:status, 2)
-        current_user.create_message("您的礼品已经开始配送了",
-          "您的礼品已经开始配送了.",
-          [o.user._id]
-          )
-      end
-      @is_success = !(result.is_a? Hash)
-      result
-    end
-  end
-
-  def deliver_success
-    render_json do
-      result = Order.find_by_id params[:id] do |o|
-        o.update_attribute(:status, 3)
-      end
-      @is_success = !(result.is_a? Hash)
-      result
-    end
-  end
-
-  def deliver_as_failed
-    render_json do
-      result = Order.find_by_id params[:id] do |o|
-        o.reward_log.revoke_operation(current_user, params[:status_desc]) unless o.is_prize
-        o.update_attribute(:status, -3)
-        o.gift.inc(:surplus, 1) unless o.is_prize
-        o.update_attribute(:status_desc, params[:status_desc])
-        current_user.create_message("您的礼品配送失败",
-          "您的礼品配送失败,我们将重新为您安排配送.",
-          [o.user._id]
-          )
-      end
-      @is_success = !(result.is_a? Hash)
-      result
-    end
-  end
-
-  def update
+  def check_order_existence
     @order = Order.find_by_id(params[:id])
-    render_json @order.update_attributes(params[:order]) do
-      @order.as_retval
-    end
+    render_json_auto ErrorEnum::ORDER_NOT_EXIST and return if @order.nil?
   end
 
-  def status
-    Order.find_by_id params[:id] do |o|
-      o.status = params[:status] || o.status
-      o.save
-    end
+  def index
+    order_list = Order.search_orders(params[:email], 
+      params[:mobile],
+      params[:code],
+      params[:status].to_i,
+      params[:source].to_i,
+      params[:type].to_i)
+    render_json_auto auto_paginate(order_list) and return
   end
 
-  def to_excel
-    render_json do
-      params[:scope] ||= :all
-      if Order.scopes.include?(params[:scope].to_sym)
-        success_true
-        Order.to_excel(params[:scope])
-      else
-        Order.to_excel(:all)
-      end
-    end
+  def show
+    render_json_auto @order and return
   end
 
-  def_each :need_verify, :verified, :canceled, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed do |method_name|
-    render_json true do
-      #Order.send(method_name).page(page)
-      auto_paginate(Order.send(method_name)) do |orders|
-        orders.present_json("admin")
-      end
-    end
+  def handle
+    render_json_auto @order.handle and return
   end
 
+  def bulk_handle
+    params[:order_ids].each do |order_id|
+      Order.find_by_id(order_id).try(:handle)
+    end
+    render_json_auto true and return
+  end
+
+  def finish
+    render_json_auto @order.finish(params[:success], params[:remark]) and return
+  end
+
+  def bulk_finish
+    params[:order_ids].each do |order_id|
+      Order.find_by_id(order_id).try(:finish, params[:success])
+    end
+    render_json_auto true and return
+  end
+
+  def update_express_info
+    render_json_auto @order.update_express_info and return
+  end
+
+  def update_remark
+    render_json_auto @order.update_remark and return
+  end
 end

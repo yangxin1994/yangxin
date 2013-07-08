@@ -5,8 +5,14 @@ class Prize
 
 	NORMAL = 1
 	DELETED = 2
+
 	VIRTUAL = 1
 	REAL = 2
+	MOBILE_CHARGE = 4
+	ALIPAY = 8
+	JIFENBAO = 16
+	QQ_COIN = 32
+
 
 	# 1 normal, 2 deleted
 	field :status, :type => Integer, default: NORMAL
@@ -14,6 +20,7 @@ class Prize
 	field :type, :type => Integer, default: REAL
 	field :title, :type => String, default: ""
 	field :description, :type => String, default: ""
+	field :amount, :type => Integer, default: 1
 
 	has_one :photo, :class_name => "Material", :inverse_of => 'prize'
 
@@ -30,9 +37,8 @@ class Prize
 	end
 
 	def self.create_prize(prize)
-		material_id = prize.delete("material_id")
-		material = Material.find_by_id(material_id)
-		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
+		photo_url = prize.delete("photo_url")
+		material = Material.create_image(photo_url)
 		prize = Prize.new(prize)
 		prize.save
 		prize.photo = material
@@ -41,12 +47,12 @@ class Prize
 	end
 
 	def update_prize(prize)
-		material_id = prize.delete("material_id")
-		material = Material.find_by_id(material_id)
-		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
-		self.update_attributes(prize)
-		self.photo = material
-		return self.save
+		photo_url = prize.delete("photo_url")
+		if !photo_url.blank? && photo_url != self.photo.value
+			material = Material.create_image(photo_url)
+			self.photo = material
+		end
+		return self.update_attributes(prize)
 	end
 
 	def self.search_prize(title, type)

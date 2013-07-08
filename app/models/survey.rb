@@ -33,8 +33,6 @@ class Survey
 	field :description, :type => String, default: "调查问卷描述"
 	# can be 1 (closed), 2 (published), 4 (deleted)
 	field :status, :type => Integer, default: 1
-	# can be 1 (closed), 2 (published), 4 (deleted)
-	# field_remove :publish_status, :type => Integer, default: 1
 	field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
 	field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100, "finished_count" => 0, "submitted_count" => 0], "is_exclusive" => true, "quota_satisfied" => false, "finished_count" => 0, "submitted_count" => 0 }
 	field :filters, :type => Array, default: []
@@ -62,38 +60,48 @@ class Survey
 	field :quality_control_questions_ids, :type => Array, default: []
 	field :deadline, :type => Integer
 	field :is_star, :type => Boolean, :default => false
+	field :publish_result, :type => Boolean, :default => false
 	field :delta, :type => Boolean, :default => true
 	field :point, :type => Integer, :default => 0
 	# whether this survey can be introduced to another person
 	field :spreadable, :type => Boolean, :default => false
 	# reward for introducing others
-	field :spread_point, :type => Integer, :default => 0
-	field :quillme_promotable, :type => Boolean, :default => false
+	field :spread_point, :type => Integer, default: 0
+	field :quillme_promotable, :type => Boolean, default: false
 	field :quillme_hot, :type => Boolean, :default => false #是否为热点小调查(quillme用)
-    field :recommend_position, :type => Integer, :default => nil  #推荐位
+	field :recommend_position, :type => Integer, :default => nil  #推荐位
+	field :email_promotable, :type => Boolean, default: false
+	field :sms_promotable, :type => Boolean, default: false
+	field :broswer_extension_promotable, :type => Boolean, default: false
+	field :weibo_promotable, :type => Boolean, default: false
 
-	field :email_promote, :type => Hash, default: {
-		"promotable" => false,
+	field :quillme_hot, :type => Boolean, :default => false #是否为热点小调查(quillme用)
+	field :quillme_promote_info, :type => Hash, :default => {
+		"reward_scheme_id" => ""
+	} 
+	field :email_promote_info, :type => Hash, default: {
 		"email_amount" => 0,
 		"promote_to_undefined_sample" => false,
-		"promote_email_amount" => 0
+		"promote_email_count" => 0,
+		"reward_scheme_id" => ""
 	}
-	field :sms_promote, :type => Hash, default: {
-		"promotable" => false,
+	field :sms_promote_info, :type => Hash, default: {
 		"sms_amount" => 0,
 		"promote_to_undefined_sample" => false,
-		"promote_sms_count" => 0
+		"promote_sms_count" => 0,		
+		"reward_scheme_id" => ""
 	}
-	field :broswer_extension_promote, :type => Hash, default: {
-		"promotable" => false,
+	field :broswer_extension_promote_info, :type => Hash, default: {
 		"login_sample_promote_only" => false,
-		"filter" => [[{"key_word" => [""], "url" => ""}]]
+		"filter" => [[{"key_word" => [""], "url" => ""}]],
+		"reward_scheme_id" => ""
 	}
-	field :weibo_promote, :type => Hash, default: {
+	field :weibo_promote_info, :type => Hash, default: {
 		"text" => "",
 		"image" => "",
 		"video" => "",
-		"audio" => ""
+		"audio" => "",
+		"reward_scheme_id" => ""
 	}
 
 
@@ -107,6 +115,7 @@ class Survey
 	# field_remove :answer_need_review, :type => Boolean, :default => false
 
 	has_many :answers
+	has_many :reward_schemes
 	has_many :email_histories
 	has_many :survey_spreads
 	has_many :export_results
@@ -114,7 +123,6 @@ class Survey
 	has_many :report_results
 	has_many :report_mockups
 	has_many :interviewer_tasks
-	has_many :reward_schemes
 	has_many :agent_tasks
 	has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
 	has_and_belongs_to_many :entry_clerks, class_name: "User", inverse_of: :entry_clerk_allocated_surveys
@@ -130,6 +138,7 @@ class Survey
 	belongs_to :user, class_name: "User", inverse_of: :surveys
 
 
+	scope :published, lambda { where(:status  => 2) }
 	scope :normal, lambda { where(:status.gt => -1) }
 	scope :deleted, lambda { where(:status => -1) }
 	scope :stars, where(:status.gt => -1, :is_star => true)
@@ -225,10 +234,16 @@ class Survey
 	end
 
 	def append_user_fields(arr_fields)
-		arr_fields.each do |field|
-			self[field] = self.user.send(field)
+		if !self.blank?
+			arr_fields.each do |field|
+				self[field] = self.user.send(field)
+			end
 		end
 		return self
+	end
+
+	def get_all_promote_settings
+		return self.serialize_in_promote_setting
 	end
 
 	#----------------------------------------------
@@ -1174,6 +1189,11 @@ class Survey
 		return answer_time
 	end
 
+	def estimate_price
+		# todo: estimate price
+		return 10
+	end
+
 	#----------------------------------------------
 	#
 	#     manipulate on quotas
@@ -1846,8 +1866,23 @@ class Survey
 		return survey_obj
 	end
 
-	def info_for_interviewer
+	def serialize_in_promote_setting
 		survey_obj = Hash.new
+		survey_obj["quillme_promotable"] = self.quillme_promotable
+		survey_obj["quillme_promote_info"] = Marshal.load(Marshal.dump(self.quillme_promote_info))
+		survey_obj["email_promotable"] = self.email_promotable
+		survey_obj["email_promote_info"] = Marshal.load(Marshal.dump(self.email_promote_info))
+		survey_obj["sms_promotable"] = self.sms_promotable
+		survey_obj["sms_promote_info"] = Marshal.load(Marshal.dump(self.sms_promote_info))
+		survey_obj["broswer_extension_promotable"] = self.broswer_extension_promotable
+		survey_obj["broswer_extension_promote_info"] = Marshal.load(Marshal.dump(self.broswer_extension_promote_info))
+		survey_obj["weibo_promotable"] = self.weibo_promotable
+		survey_obj["weibo_promote_info"] = Marshal.load(Marshal.dump(self.weibo_promote_info))
+		return survey_obj
+	end
+
+	def info_for_interviewer
+		survey_obj = {}
 		survey_obj["_id"] = self._id.to_s
 		survey_obj["created_at"] = self.created_at
 		survey_obj["pages"] = Marshal.load(Marshal.dump(self.pages))
@@ -1863,6 +1898,13 @@ class Survey
 			info = info.merge({qid => BasicQuestion.find_by_id(qid)})
 		end
 		return info
+	end
+
+	def info_for_agent
+		survey_obj = {}
+		survey_obj["_id"] = self._id.to_s
+		survey_obj["title"] = self.title
+		return survey_obj
 	end
 
 
@@ -1942,22 +1984,20 @@ class Survey
 		RewardLog.create(options).created_at ? true : false
 	end
 
-	def allocate(system_user_type, user_id, allocate)
-		user = User.find_by_id(user_id)
-		return ErrorEnum::USER_NOT_EXIST if user.nil?
-		case system_user_type
-		when "answer_auditor"
-			return ErrorEnum::USER_NOT_EXIST if !(user.is_answer_auditor || user.is_admin)
-			self.answer_auditors << user if allocate
-			self.answer_auditors.delete(user) if !allocate
-		when "entry_clerk"
-			return ErrorEnum::USER_NOT_EXIST if !(user.is_entry_clerk || user.is_admin)
-			self.entry_clerks << user if allocate
-			self.entry_clerks.delete(user) if !allocate
-		else
-			return ErrorEnum::SYSTEM_USER_TYPE_ERROR
+	def allocate_answer_auditors(answer_auditor_ids, allocate)
+		retval = {}
+		answer_auditor_ids.each do |id|
+  		answer_auditor = User.find_by_id(id)
+  		retval[id] = USER_NOT_EXIST and next if user.blank? or user.is_answer_auditor?
+  		if allocate
+  			self.answer_auditors << answer_auditor
+  		else
+  			self.answer_auditors.delete(answer_auditor)
+  		end
+  		self.save
 		end
-		return self.save
+		retval = (retval.blank? ? true : retval)
+		return retval
 	end
 
 	def clear_survey_object
@@ -1975,4 +2015,31 @@ class Survey
 		return self.save
 	end
 
+	def info_for_admin
+		survey_obj = {}
+		survey_obj["id"] = self._id.to_s
+		survey_obj["created_at"] = self.created_at.to_i
+		survey_obj["pages"] = Marshal.load(Marshal.dump(self.pages))
+		META_ATTR_NAME_ARY.each do |attr_name|
+			method_obj = self.method("#{attr_name}".to_sym)
+			survey_obj[attr_name] = method_obj.call()
+		end
+		survey_obj["logic_control"] = Marshal.load(Marshal.dump(self.logic_control))
+		survey_obj["access_control_setting"] = Marshal.load(Marshal.dump(self.access_control_setting))
+		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
+		survey_obj["answer_time"] = self.estimate_answer_time
+		survey_obj["price"] = self.estimate_price
+		user_obj = {}
+		user_obj["id"] = self.user._id.to_s
+		user_obj["email"] = self.user.email
+		user_obj["mobile"] = self.user.mobile
+		questions = {}
+		self.all_questions_id.each do |qid|
+			questions[qid] = BasicQuestion.find_by_id(qid)
+		end
+		info = {"survey" => survey_obj,
+			"user" => user_obj,
+			"questions" => questions}
+		return info
+	end
 end
