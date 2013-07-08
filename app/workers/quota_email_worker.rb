@@ -56,9 +56,11 @@ class QuotaEmailWorker
 		users_for_surveys.each do |s_id_ary, user_id_ary|
 			MailgunApi.batch_send_survey_email(s_id_ary, user_id_ary, [])
 		end
+=begin
 		imported_emails_for_surveys.each do |s_id_ary, email_ary|
 			MailgunApi.batch_send_survey_email(s_id_ary, [], email_ary)
 		end
+=end
 		return true
 	end
 end

@@ -412,6 +412,7 @@ class Survey
 		new_instance = self.clone
 		new_instance.user = operator
 		new_instance.title = title || new_instance.title
+		new_instance.created_at = Time.now
 
 		# some information that cannot be cloned
 		new_instance.status = 0
