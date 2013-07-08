@@ -1043,17 +1043,12 @@ class Survey
 	#     for answering process
 	#
 	#++++++++++++++++++++++++++++++++++++++++++++++
-
-	def check_password_for_preview(username, password, current_user)
+	def check_password(username, password, is_preview)
 		case self.access_control_setting["password_control"]["password_type"]
 		when -1
 			return true
 		when 0
-			if self.access_control_setting["password_control"]["single_password"] == password
-				return true
-			else
-				return ErrorEnum::WRONG_SURVEY_PASSWORD
-			end
+			return self.access_control_setting["password_control"]["single_password"] == password
 		when 1
 			list = self.access_control_setting["password_control"]["password_list"]
 			password_element = list.select { |ele| ele["content"] == password }[0]
@@ -1061,68 +1056,16 @@ class Survey
 			list = self.access_control_setting["password_control"]["username_password_list"]
 			password_element = list.select { |ele| ele["content"] == [username, password] }[0]
 		end
-		if password_element.nil?
-			return ErrorEnum::WRONG_SURVEY_PASSWORD
-		else
-			return true
-		end
-	end
-
-	def check_password(username, password, current_user)
-		case self.access_control_setting["password_control"]["password_type"]
-		when -1
-			return true
-		when 0
-			if self.access_control_setting["password_control"]["single_password"] == password
-				return true
-			else
-				return ErrorEnum::WRONG_SURVEY_PASSWORD
-			end
-		when 1
-			list = self.access_control_setting["password_control"]["password_list"]
-			password_element = list.select { |ele| ele["content"] == password }[0]
-		when 2
-			list = self.access_control_setting["password_control"]["username_password_list"]
-			password_element = list.select { |ele| ele["content"] == [username, password] }[0]
-		end
-		if password_element.nil?
-			return ErrorEnum::WRONG_SURVEY_PASSWORD
-		elsif password_element["used"] == false
+		return false if password_element.nil?
+		return true if is_preview
+		if password_element["used"] == false
 			password_element["used"] = true
 			self.save
 			return true
 		else
-			return ErrorEnum::SURVEY_PASSWORD_USED
+			return false
 		end
 	end
-
-=begin
-	def check_progress(detail)
-		progress = {}
-
-		progress["screened_answer_number"] = self.answers.not_preview.screened.length
-		progress["finished_answer_number"] = self.answers.not_preview.finished.length
-		progress["answer_number"] = progress["screened_answer_number"] + progress["finished_answer_number"]
-
-		return progress if detail.to_s == "true"
-
-		start_publish_time_ary = self.publish_status_historys.start_publish_time
-		end_publish_time_ary = self.publish_status_historys.end_publish_time
-
-		if start_publish_time_ary.blank?
-			progress["duration"] = 0
-		elsif end_publish_time_ary.blank?
-			progress["duration"] = Time.now.to_i - start_publish_time_ary[0]
-		else
-			progress["duration"] = end_publish_time_ary[0] - start_publish_time_ary[0]
-		end
-
-		self.refresh_quota_stats
-		progress["quota"] = self.quota
-		progress["filters"] = self.filters
-		return progress
-	end
-=end
 
 	def get_user_ids_answered
 		return self.answers.not_preview.map {|a| a.user_id.to_s}

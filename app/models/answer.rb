@@ -39,7 +39,6 @@ class Answer
 	field :audit_message, :type => String, default: ""
 	field :introducer_id, :type => String
 	field :point_to_introducer, :type => Integer
-	field :point, :type => Integer, :default => 0
 	field :rewards, :type => Array
 	field :reward_need_review, :type => Boolean
 
@@ -103,26 +102,16 @@ class Answer
 		return answer
 	end
 
-	def self.find_by_survey_id_email_is_preview(survey_id, email, is_preview)
-		survey = Survey.find_by_id(survey_id)
-		owner = User.find_by_email(email)
-		return nil if survey.nil?
-		return nil if owner.nil?
-		return survey.answers.where(user_id: owner._id.to_s, :is_preview => is_preview)[0]
-	end
-
-	def self.find_by_password(username, password)
-		answer = Answer.where(username: username, password: password)[0]
-		return answer
+	def self.find_by_survey_id_sample_id_is_preview(survey_id, sample_id, is_preview)
+		return Answer.where(user_id: sample_id, survey_id: survey_id, :is_preview => is_preview).first
 	end
 
 	def self.find_by_status(status)
 		return self.in("status" => Tool.convert_int_to_base_arr(status.to_i))
 	end
 
-	def self.create_answer(is_preview, introducer_id, email, survey_id, channel, ip, username, password, referrer)
-		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+	def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, channel, referrer, remote_ip, username, password)
+		# create the answer
 		answer = Answer.new(is_preview: is_preview,
 			channel: channel,
 			ip_address: ip,
@@ -130,13 +119,24 @@ class Answer
 			username: username,
 			password: password,
 			referrer: referrer)
+		# record introducer information
 		if !is_preview && introducer_id
-			introducer = User.find_by_id(introducer_id)
-			if !introducer.nil? && introducer.email != email
+			introducer = User.sample.find_by_id(introducer_id)
+			if !introducer.nil?
 				answer.introducer_id = introducer_id
 				answer.point_to_introducer = survey.spread_point
 			end
 		end
+		# record the reward information
+		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
+		answer.reward_scheme = reward_scheme
+
+		answer.save
+		survey = Survey.normal.find_by_id(survey_id)
+		survey.answers << answer
+	end
+
+	def self.create_answer(is_preview, introducer_id, email, survey_id, channel, ip, username, password, referrer)
 
 		# initialize the answer content
 		answer_content = {}
@@ -152,13 +152,6 @@ class Answer
 			end
 		end
 		answer.answer_content = answer_content
-
-		answer.save
-		if !email.nil?
-			owner = User.find_by_email(email)
-			owner.answers << answer if !owner.nil?
-		end
-		survey.answers << answer
 
 		# initialize the logic control result
 		answer.logic_control_result = {}
@@ -178,13 +171,6 @@ class Answer
 
 		# randomly generate quality control questions
 		answer = answer.genereate_random_quality_control_questions
-
-		# copy the reward info from the survey
-		answer.reward = answer.survey.reward
-		answer.point = answer.survey.point
-		answer.lottery = answer.survey.lottery
-		answer.save
-
 		return answer
 	end
 
