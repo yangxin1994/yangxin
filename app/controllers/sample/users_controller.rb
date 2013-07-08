@@ -9,11 +9,11 @@ class Sample::UsersController < ApplicationController
   #返回的参数:一个盛放排行榜用户的列表
   #############################		
   def get_top_ranks
-  	@users = User.only(:point,:username).sample.where(:is_block => false,:username.ne => "",:username.exists => true).desc(:point).limit(5)
-    #某个样本完成答题的个数，3代表完成
-    #u.answers.where(:status => 3).count
-    #某个样本推广的个数
-    #u.get_introduced_users.size
+  	@users = User.sample.where(:is_block => false,:username.ne => "",:username.exists => true).desc(:point).limit(5)
+    @users = @users.map{|user| user['spread_count'] = user.spread_count;user['answer_count'] = user.answers.not_preview.count;user['avatar_src']= user.avatar? ? user.avatar.picture_url : nil;user}
     render_json { @users }
   end
+
+  
+
 end

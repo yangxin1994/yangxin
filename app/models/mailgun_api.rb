@@ -205,6 +205,26 @@ class MailgunApi
 		self.send_message(data)
 	end
 
+
+	def self.generate_active_code_email(email,code,callback)
+	  activate_info = {"email" => email, "code" => code, "time" => Time.now.to_i}
+      data = {}
+      data[:domain] = Rails.application.config.user_email_domain
+	  data[:from] = @@user_email_from
+	  @survey_subscribe_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
+  	  html_template_file_name = "#{Rails.root}/app/views/user_mailer/survey_subscribe_email.html.erb"
+	  text_template_file_name = "#{Rails.root}/app/views/user_mailer/survey_subscribe_email.text.erb"
+	  html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
+	  text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+	  premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
+	  data[:html] = premailer.to_inline_css
+	  data[:text] = text_template.result(binding)
+  	  data[:subject] = "oopsdata.cn邮件预订激活码邮件"
+	  data[:subject] += " --- to #{email}" if Rails.env != "production" 
+	  data[:to] = Rails.env == "production" ? email : @@test_email
+	  self.send_message(data)
+	end
+
 	def self.sys_password_email(user, callback)
 		@user = user
 		data = {}
