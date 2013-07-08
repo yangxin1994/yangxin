@@ -9,15 +9,16 @@ class User
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
 	field :email, :type => String
+	field :email_activation, :type => Boolean, default: false
 	field :mobile, :type => String
+	field :mobile_activation, :type => Boolean, default: false
 	field :username, :type => String
 	field :password, :type => String
-	# 0 unregistered
-	# 1 registered but not activated
-	# 2 registered, activated, but not signed in
-	# 3, 4, ... 用户首次登录后，需要填写一些个人信息，状态可以记录用户填写个人信息到了哪一步，以便用户填写过程中关闭浏览器，再次打开后可以继续填写
+	# 1 unregistered
+	# 2 registered but not signed in
+	# 4 registered and signed in
 	# -1 deleted
-	field :status, :type => Integer, default: 0
+	field :status, :type => Integer, default: 1
 	field :registered_at, :type => Integer, default: 0
 	# true: the user is locked and cannot login
 	field :lock, :type => Boolean, default: false
@@ -95,7 +96,7 @@ class User
 	has_many :reviewed_answers, class_name: "Answer", inverse_of: :auditor
 	has_many :logs
 
-	scope :unregistered, where(status: 0)
+	scope :unregistered, where(status: 1)
 	scope :sample, mod(:user_role => [2, 1])
 
 	POINT_TO_INTRODUCER = 10
@@ -215,9 +216,10 @@ class User
 	## TODO to be remove by checking user.role
 	def self.user_activate_by_email?(email)
 		user = User.find_by_email(email)
-		return !!(user && user.status == 1)
+		return !!(user && user.email_activation == true)
 	end
 
+	##TODO this may deleted
 	def self.user_activate_by_username?(username)
 		user = User.find_by_username(username)
 		return !!(user && user.status == 1)
@@ -228,11 +230,11 @@ class User
 	end
 
 	def is_registered
-		return self.status > 0
+		return self.status > 1
 	end
 
 	def is_activated
-		return self.status > 1
+		return self.status == 4
 	end
 
 	def is_super_admin
@@ -297,7 +299,7 @@ class User
 		updated_attr = account.merge(
 			password: password,
 			registered_at: Time.now.to_i,
-			status: 1)
+			status: 2)
 		existing_user = User.create if check_exist.nil?
 		existing_user.update_attributes(updated_attr)
 		# send welcome email
@@ -335,14 +337,19 @@ class User
 		user = User.find_by_email(activate_info["email"]) if !activate_info["email"].blank?
 		user = User.find_by_mobile(activate_info["mobile"]) if !activate_info["mobile"].blank?
 		return ErrorEnum::USER_NOT_EXIST if user.nil?     # email account does not exist
-		return ErrorEnum::USER_NOT_REGISTERED if user.status == 0     # not registered
+		return ErrorEnum::USER_NOT_REGISTERED if user.status == 2     # not registered
 		return ErrorEnum::ACTIVATE_EXPIRED if !activate_info["email"].blank? && Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i    # expired
 		return ErrorEnum::ILLEGAL_ACTIVATE_KEY if !activate_info["mobile"].blank? && 
   		(Time.now.to_i  > user.sms_verification_timeout or user.sms_verification_code != activate_info["verification_code"])
 		return user.login(client_ip, client_type, false)  if user.is_activated
-		user.status = 2
+		user.status = 4
 		user.activate_time = Time.now.to_i
-		user.password = Encryption.encrypt_password(activate_info["password"]) if !activate_info["mobile"].blank?
+		if !activate_info["mobile"].blank?
+			user.password = Encryption.encrypt_password(activate_info["password"])
+			user.mobile_activation = true
+		elsif !activate_info["email"].blank?
+			user.email_activation = true
+		end
 		user.save
 		# pay introducer points
 		introducer = User.find_by_id(user.introducer_id)
@@ -374,7 +381,7 @@ class User
 			user = User.find_by_mobile(email_mobile)
 		end
 		return ErrorEnum::USER_NOT_EXIST if user.nil?
-		return ErrorEnum::USER_NOT_REGISTERED if user.status == 0
+		return ErrorEnum::USER_NOT_REGISTERED if user.status == 1
 		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
 		return ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(password)
 		if !third_party_user_id.nil?
