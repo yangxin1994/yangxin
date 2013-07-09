@@ -195,7 +195,8 @@ class AnswersController < ApplicationController
 	def change_sample_account
 		login = User.login_with_email_mobile(params[:email_mobile], params[:password], @remote_ip, params[:_client_type], false, nil)
 		u = User.find_by_auth_key(login["auth_key"])
-		render_json_auto @answer.change_sample_account(u) and return
+		@answer.change_sample_account(u)
+		render_json_auto login and return
 	end
 
 	def logout

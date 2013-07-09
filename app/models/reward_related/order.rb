@@ -134,6 +134,8 @@ class Order
 			order.mobile = opt["mobile"]
 		when ALIPAY
 			order.alipay_account = opt["alipay_account"]
+		when JIFENBAO
+			order.alipay_account = opt["alipay_account"]
 		end
 		order.save
 		return order

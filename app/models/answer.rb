@@ -40,7 +40,7 @@ class Answer
 	field :introducer_id, :type => String
 	field :point_to_introducer, :type => Integer
 	field :rewards, :type => Array
-	field :reward_need_review, :type => Boolean
+	field :need_review, :type => Boolean
 
 	# used for interviewer to upload attachments
 	field :attachment, :type => Hash, :default => {}
@@ -129,7 +129,13 @@ class Answer
 		end
 		# record the reward information
 		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
-		answer.reward_scheme = reward_scheme
+		if !reward_scheme.nil?
+			answer.rewards = reward_scheme.rewards
+			answer.need_review = reward_scheme.need_review
+		else
+			answer.rewards = []
+			answer.need_review = false
+		end
 
 		answer.save
 		survey = Survey.normal.find_by_id(survey_id)
@@ -768,15 +774,6 @@ class Answer
 		return question_ids_with_qc_questions.index(question_id)
 	end
 
-	#*description*: finish an answer
-	#
-	#*params*:
-	#
-	#*retval*:
-	#* true: when the answer is set as finished
-	#* ErrorEnum::WRONG_ANSWER_STATUS
-	#* ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP
-	#* ErrorEnum::ANSWER_NOT_COMPLETE
 	def finish(auto = false)
 		# synchronize the normal questions in the survey and the qeustions in the answer content
 		survey_question_ids = self.survey.all_questions_id
@@ -794,19 +791,14 @@ class Answer
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
 		old_status = self.status
 		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
-		if self.is_preview || (self.reward == 0 && self.introducer_id.nil?)
+		if self.is_preview || self.need_review
 			self.set_finish
-		elsif !self.survey.answer_need_review
-			self.set_finish
-			self.assign_sample_reward
-			self.assign_introducer_reward
 		else
 			self.set_under_review
 		end
 		self.update_quota(old_status) if !self.is_preview
 		self.finished_at = Time.now.to_i
-		self.save
-		return true
+		return self.save
 	end
 
 	def estimate_remain_answer_time
@@ -920,5 +912,162 @@ class Answer
 				introducer.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.point_to_introducer}个积分奖励。", [introducer._id.to_s])
 			end
 		end
+	end
+
+	def change_sample_account(sample)
+		sample.answers.delete(self) if !self.user.nil?
+		sample.answers << self
+		return true
+	end
+
+	def logout_sample_account
+		self.user.answers.delete(self) if !self.user.nil?
+	end
+
+	def select_reward(reward_index, mobile, alipay_account)
+		# select reward
+		reward = self.rewards[reward_index]
+		return ErrorEnum::REWARD_NOT_EXIST if reward.nil?
+		self.rewards.each do |r|
+			r["checked"] = false
+		end
+		reward["checked"] = true
+
+		# record the mobile or alipay account
+		if reward["type"].to_i == 1
+			# need to record mobile number
+			reward["mobile"] = mobile
+		elsif [2, 16].include?(reward["type"].to_i)
+			# need to record alipay account
+			reward["alipay_account"] = alipay_account
+		end
+		self.save
+
+		return self.deliver_reward
+
+	end
+
+	def deliver_reward
+		# reward has been delivered
+		return true if self.reward_delivered
+
+		# find out the selected reward
+		reward = nil
+		self.rewards.each do |r|
+			if r["checked"] = true
+				reward = r
+				break
+			end
+		end
+		return ErrorEnum::REWARD_NOT_SELECTED if reward.nil?
+		
+		case reward["type"].to_i
+		when RewardScheme::MOBILE
+			return ErrorEnum::REPEAT_ORDER if self.survey.answers.check_repeat_mobile(reward["mobile"])
+			return ErrorEnum::ANSWER_NEED_REVIEW if self.need_review
+			sample = User.find_or_create_new_visitor_by_email_mobile(reward["mobile"])
+			Order.create_answer_order(sample._id.to_s,
+				self.survey._id.to_s,
+				Order::SMALL_MOBILE_CHARGE,
+				reward["amount"],
+				"mobile" => reward["mobile"])
+			assign_introducer_reward
+			self.reward_delivered = true
+			return self.save
+		when RewardScheme::ALIPAY
+			return ErrorEnum::REPEAT_ORDER if self.survey.answers.check_repeat_alipay(reward["alipay_account"])
+			return ErrorEnum::ANSWER_NEED_REVIEW if self.need_review
+			sample = User.find_or_create_new_visitor_by_email_mobile(reward["alipay_account"])
+			Order.create_answer_order(sample._id.to_s,
+				self.survey._id.to_s,
+				Order::ALIPAY,
+				reward["amount"],
+				"alipay_account" => reward["alipay_account"])
+			assign_introducer_reward
+			self.reward_delivered = true
+			return self.save
+		when RewardScheme::JIFENBAO
+			return ErrorEnum::REPEAT_ORDER if self.survey.answers.check_repeat_jifenbao(reward["alipay_account"])
+			return ErrorEnum::ANSWER_NEED_REVIEW if self.need_review
+			sample = User.find_or_create_new_visitor_by_email_mobile(reward["alipay_account"])
+			Order.create_answer_order(sample._id.to_s,
+				self.survey._id.to_s,
+				Order::JIFENBAO,
+				reward["amount"],
+				"alipay_account" => reward["alipay_account"])
+			assign_introducer_reward
+			self.reward_delivered = true
+			return self.save
+		when RewardScheme::POINT
+			return ErrorEnum::SAMPLE_NOT_EXIST if self.user.nil?
+			return ErrorEnum::ANSWER_NEED_REVIEW if self.need_review
+			sample = self.user
+			sample.point += reward["amount"]
+			assign_introducer_reward
+			self.reward_delivered = true
+			return self.save
+		when RewardScheme::LOTTERY
+			if self.need_review
+				return self.user.nil? ? ErrorEnum::SAMPLE_NOT_EXIST : ErrorEnum::ANSWER_NEED_REVIEW
+			else
+				return true
+			end
+		end
+	end
+
+	def self.check_repeat_mobile(mobile)
+		self.all.each do |a|
+			selected_reward = a.rewards.select { |r| r["checked"] == true }
+			next if selected_reward.blank?
+			return true if selected_reward[0]["type"] == RewardScheme::MOBILE && selected_reward[0]["mobile"] == mobile
+		end
+		return false
+	end
+
+	def self.check_repeat_alipay(alipay_account)
+		self.all.each do |a|
+			selected_reward = a.rewards.select { |r| r["checked"] == true }
+			next if selected_reward.blank?
+			return true if selected_reward[0]["type"] == RewardScheme::ALIPAY && selected_reward[0]["alipay_account"] == alipay_account
+		end
+		return false
+	end
+
+	def self.check_repeat_jifenbao(alipay_account)
+		self.all.each do |a|
+			selected_reward = a.rewards.select { |r| r["checked"] == true }
+			next if selected_reward.blank?
+			return true if selected_reward[0]["type"] == RewardScheme::JIFENBAO && selected_reward[0]["alipay_account"] == alipay_account
+		end
+		return false
+	end
+
+	def bind_sample(email_mobile)
+		sample = User.find_or_create_new_visitor_by_email_mobile(email_mobile)
+		sample.answers << self
+		return true
+	end
+
+	def draw_lottery
+		return ErrorEnum::REWARD_DELIVERED if self.reward_delivered
+		reward = (self.rewards.select { |r| r["checked"] == true }).first
+		return ErrorEnum::REWORD_NOT_SELECTED if reward.nil?
+		return ErrorEnum::NOT_LOTTERY_REWARD if reward["type"] != RewardScheme::LOTTERY
+
+		# draw lottery
+
+		self.reward_delivered = true
+		self.save
+	end
+
+	def create_lottery_order
+		return ErrorEnum::REWARD_NOT_DELIVERED if self.reward_delivered
+		reward = (self.rewards.select { |r| r["checked"] == true }).first
+		return ErrorEnum::REWORD_NOT_SELECTED if reward.nil?
+		return ErrorEnum::NOT_LOTTERY_REWARD if reward["type"] != RewardScheme::LOTTERY
+		prize = (reward["prizes"].select { |p| p["win"] == true }).first
+		return ErrorEnum::NOT_WIN if prize.nil?
+
+		# create lottery order
 	end
 end

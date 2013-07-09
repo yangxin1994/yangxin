@@ -8,6 +8,12 @@ class RewardScheme
 	field :rewards, type: Array, default: []
 	field :need_review, type: Boolean, default: false
 
+	MOBILE = 1
+	ALIPAY = 2
+	POINT = 4
+	LOTTERY = 8
+	JIFENBAO = 16
+
 	belongs_to :survey
 
 	def self.find_by_id(reward_scheme_id)

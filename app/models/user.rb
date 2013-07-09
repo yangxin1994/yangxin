@@ -322,6 +322,10 @@ class User
 		return user
 	end
 
+	def self.find_or_create_new_visitor_by_email_mobile(email_mobile)
+		
+	end
+
 	#*description*: activate a user
 	#
 	#*params*:
