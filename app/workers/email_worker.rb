@@ -17,7 +17,7 @@ class EmailWorker
 		when 'agent_task'
 			MailgunApi.agent_task_email(email, callback, opt["agent_task_id"])
 		when 'lottery_code'
-			MailgunApi.lottery_code_email(user, opt["survey_id"], opt["lottery_code_id"], callback)
+			MailgunApi.lottery_code_email(user, opt["survey_id"], opt["lottery_code_id"], callback)    	
 		end
 		return true
 	end

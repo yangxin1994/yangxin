@@ -8,9 +8,10 @@ class Sample::GiftsController < ApplicationController
   #可能返回的参数:一个盛放礼品的列表
   #############################		
   def hotest
-    @gifts = Gift.desc(:exchange_count)
-    @gifts = auto_paginate(@gifts)
-    render_json { @gifts }
+    sort_type = params[:sort_type].present? ? params[:sort_type]  : 'exchange_count' 
+    @gifts = Gift.desc("#{sort_type}").page(params[:page]).per(params[:per_page])
+    @gifts = @gifts.map{|g| g['photo'] = g.photo.nil? ? nil : g.photo.picture_url;g}
+    render_json_auto(@gifts)
   end
 
   #############################
@@ -21,11 +22,9 @@ class Sample::GiftsController < ApplicationController
   #############################		
   def show
     @gift = Gift.find_by_id(params[:id])
-    logger.info("-------------------------")
-    logger.info(@gift.inspect)
-    logger.info("-------------------------")
     @gift[:photo_src] = @gift.photo.nil? ? nil : @gift.photo.picture_url 
     render_json { @gift }
   end
+
   	
 end

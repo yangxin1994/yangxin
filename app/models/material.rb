@@ -14,6 +14,7 @@ class Material
 	belongs_to :prize, :inverse_of => 'photo'
 	belongs_to :lottery, :inverse_of => 'photo'
 	belongs_to :user
+	belongs_to :user,:inverse_of => 'avatar'
 
 	default_scope ->(o = 'ASC'){order_by(:created_at.try(o.to_sym)) }
 

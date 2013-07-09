@@ -6,6 +6,14 @@ require 'quill_common'
 
 module Tool
 
+	def self.generate_active_mobile_code
+	  Random.rand(1000..9999).to_i	
+	end
+
+	def self.generate_active_email_token
+	  SecureRandom.base64.tr("+/", "-_")	
+	end
+
 	def self.email_illegal?(email)
 		!email.to_s.include?("@")
 	end

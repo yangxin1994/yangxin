@@ -43,6 +43,17 @@ OopsData::Application.configure do
     :openssl_verify_mode  => 'none'
   }
 
+  config.survey_mailer_setting = {
+    :authentication => "plain",
+    :address        => "smtp.mailgun.com",
+    :port           => 25,
+    :domain         => "oopsdata.net",
+    :user_name      => "postmaster@oopsdata.net",
+    :password       => "0nlnhy08vbk1",
+    :enable_starttls_auto => true,
+    :openssl_verify_mode  => 'none'
+  }  
+
   # task web service
   config.service_port = '8000'
   # donet web service
@@ -59,4 +70,9 @@ OopsData::Application.configure do
   config.mailgun_api_key = 'key-9zcv6-e7j8aratn9viu3unvbn2zc92j3'
   config.survey_email_domain = 'oopsdata.net'
   config.user_email_domain = 'oopsdata.cn'
+
+  # ofcard uri
+  config.ofcard_service_uri = "http://api2.ofpay.com/"
+  config.ofcard_key_str = "OFCARD"
+  config.ret_url = "http://221.221.17.98:4000/orders/confirm"
 end

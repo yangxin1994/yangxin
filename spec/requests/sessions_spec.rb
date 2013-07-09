@@ -37,8 +37,8 @@ describe "sessions controller" do
       expect(retval).to eq(ErrorEnum::USER_NOT_EXIST)
     end
 
-    it "should return USER_NOT_REGISTERED when user status is 0" do
-      @user.status = 0
+    it "should return USER_NOT_REGISTERED when user status is 1" do
+      @user.status = 1
       @user.save
       post '/sessions',
         email_mobile: @user.email,
@@ -49,8 +49,8 @@ describe "sessions controller" do
       expect(retval).to eq(ErrorEnum::USER_NOT_REGISTERED)
     end
 
-    it "should return USER_NOT_ACTIVATED when user status is 1" do
-      @user.status = 1
+    it "should return USER_NOT_ACTIVATED when user status is 2" do
+      @user.status = 2
       @user.save
       post '/sessions',
         email_mobile: @user.email,

@@ -12,22 +12,49 @@ class Sample::SurveysController < ApplicationController
   #############################	
   def get_hot_spot_survey
     #查询条件:必须是发布在社区的调查问卷，必须是热点小调查，必须是已经发布的问卷,必须是可推广的调查问卷
-    @survey = Survey.where(:quillme_promotable => true,:quillme_hot => true,:spreadable => true,:status => 2).first
+    @survey = Survey.only('id').quillme_promote.quillme_hot.opend.first
     render_json { @survey }
   end
 
   #############################
-  #功能:用户点击“立即参与”，获取最新的热点小调查
+  #功能:获取推荐的调研列表
   #http method：get
-  #传入参数: 无
+  #传入参数: 
+  #    page 当前页数
+  #    per_page 每页显示多少条
+  #    status 开放状态 1表示关闭 2表示开放中
+  #    在首页的时候，不许要传递status
+  #在列表页的时候，开放中的问卷、已结束的问卷都要传递status，值分别对应2和1
   #返回的参数:一个盛放推荐调研问卷的列表
   #############################	
   def get_recommends
-    @surveys = Survey.where(:quillme_promotable => true,:spreadable => true,:status => 2)
-    @surveys = auto_paginate(@surveys)
+    status = params[:status].present?  ? params[:status] : nil
+    @surveys = Survey.get_recommends(params[:page],params[:per_page],status)
+    if !params[:status].present?
+      @surveys = @surveys.slice!(0,2)     
+      #@surveys = auto_paginate(@surveys)
+    else
+      @surveys.shift
+    end
     render_json { @surveys }
   end
 
+  def show
+    @survey = Survey.find_by_id(params[:id])
+    render_json { @survey }
+  end
 
+
+  def list_answered_surveys
+    surveys_with_answer_status = Survey.list_answered_surveys(@current_user)
+    paginated_surveys = auto_paginate surveys_with_answer_status
+    render_json_auto(paginated_surveys)
+  end
+
+  def list_spreaded_surveys
+    surveys_with_spreaded_number = Survey.list_spreaded_surveys(@current_user)
+    paginated_surveys = auto_paginate surveys_with_spreaded_number
+    render_json_auto(paginated_surveys)
+  end
 
 end
