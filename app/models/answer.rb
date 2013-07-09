@@ -65,6 +65,7 @@ class Answer
 	belongs_to :interviewer_task
 	belongs_to :lottery
 	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
+	has_one :order
 
 	STATUS_NAME_ARY = ["edit", "reject", "under_review", "finish", "redo"]
 	EDIT = 1
@@ -132,6 +133,7 @@ class Answer
 		if !reward_scheme.nil?
 			answer.rewards = reward_scheme.rewards
 			answer.need_review = reward_scheme.need_review
+			reward_scheme.answers << self
 		else
 			answer.rewards = []
 			answer.need_review = false
@@ -850,7 +852,7 @@ class Answer
 
 	# the answer auditor reviews this answer, the review result can be 1 (pass review) or 2 (not pass)
 	def review(review_result, answer_auditor, message_content)
-		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 4
+		return ErrorEnum::WRONG_ANSWER_STATUS if self.status != UNDER_REVIEW
 
 		old_status = self.status
 		user = self.user
@@ -873,7 +875,7 @@ class Answer
 		# update quota of the survey and the interviewer task if there is any
 		self.interviewer_task.try(:refresh_quota)
 		self.update_quota(old_status)
-		self.assign_sample_reward and self.assign_introducer_reward if self.is_finish
+		self.deliver_reward
 		return true
 	end
 
@@ -944,7 +946,6 @@ class Answer
 		self.save
 
 		return self.deliver_reward
-
 	end
 
 	def deliver_reward
@@ -964,7 +965,7 @@ class Answer
 		case reward["type"].to_i
 		when RewardScheme::MOBILE
 			return ErrorEnum::REPEAT_ORDER if self.survey.answers.check_repeat_mobile(reward["mobile"])
-			return ErrorEnum::ANSWER_NEED_REVIEW if self.need_review
+			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
 			sample = User.find_or_create_new_visitor_by_email_mobile(reward["mobile"])
 			Order.create_answer_order(sample._id.to_s,
 				self.survey._id.to_s,
@@ -976,7 +977,7 @@ class Answer
 			return self.save
 		when RewardScheme::ALIPAY
 			return ErrorEnum::REPEAT_ORDER if self.survey.answers.check_repeat_alipay(reward["alipay_account"])
-			return ErrorEnum::ANSWER_NEED_REVIEW if self.need_review
+			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
 			sample = User.find_or_create_new_visitor_by_email_mobile(reward["alipay_account"])
 			Order.create_answer_order(sample._id.to_s,
 				self.survey._id.to_s,
@@ -988,7 +989,7 @@ class Answer
 			return self.save
 		when RewardScheme::JIFENBAO
 			return ErrorEnum::REPEAT_ORDER if self.survey.answers.check_repeat_jifenbao(reward["alipay_account"])
-			return ErrorEnum::ANSWER_NEED_REVIEW if self.need_review
+			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
 			sample = User.find_or_create_new_visitor_by_email_mobile(reward["alipay_account"])
 			Order.create_answer_order(sample._id.to_s,
 				self.survey._id.to_s,
@@ -1000,17 +1001,20 @@ class Answer
 			return self.save
 		when RewardScheme::POINT
 			return ErrorEnum::SAMPLE_NOT_EXIST if self.user.nil?
-			return ErrorEnum::ANSWER_NEED_REVIEW if self.need_review
+			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
 			sample = self.user
 			sample.point += reward["amount"]
 			assign_introducer_reward
 			self.reward_delivered = true
 			return self.save
 		when RewardScheme::LOTTERY
-			if self.need_review
-				return self.user.nil? ? ErrorEnum::SAMPLE_NOT_EXIST : ErrorEnum::ANSWER_NEED_REVIEW
-			else
-				return true
+			return true if self.status == UNDER_REVIEW
+			assign_introducer_reward
+			order = self.order
+			if order && order.status == Order::FROZEN
+				order.status = Order::WAIT
+				order.save
+				order.auto_handle
 			end
 		end
 	end
@@ -1056,12 +1060,44 @@ class Answer
 
 		# draw lottery
 
+		reward_scheme = self.reward_scheme
+		reward_index = -1
+		reward_scheme.rewards.each_with_index do |r, i|
+			if r["type"] == RewardScheme::LOTTERY
+				reward_index = i
+				break
+			end
+		end
+		if reward_index == -1
+			self.reward_delivered = true
+			self.save
+			return false
+		end
+		prizes = reward["prizes"]
+		return ErrorEnum::REWARD_SCHEME_NOT_EXIST if reward_scheme.nil?
+		reward["prizes"].each do |p|
+			next if rand > p["prob"]
+			prizes.each do |reward_scheme_p|
+				next if p["prize_id"] != reward_scheme_p["prize_id"]
+				if reward_scheme_p["deadline"] < Time.now.to_i && reward_scheme_p["amount"] > reward_scheme_p["win_amount"]
+					# win lottery
+					p["win"] = true
+					self.save
+					reward_scheme_p["win_amount"] ||= 0
+					reward_scheme_p["win_amount"] += 1
+					reward_scheme.save
+					return p["prize_id"]
+				end
+			end
+		end
 		self.reward_delivered = true
 		self.save
+		return false
 	end
 
-	def create_lottery_order
-		return ErrorEnum::REWARD_NOT_DELIVERED if self.reward_delivered
+	def create_lottery_order(order_info)
+		return ErrorEnum::SAMPLE_NOT_EXIST if self.user.nil?
+		return ErrorEnum::REWARD_DELIVERED if self.reward_delivered
 		reward = (self.rewards.select { |r| r["checked"] == true }).first
 		return ErrorEnum::REWORD_NOT_SELECTED if reward.nil?
 		return ErrorEnum::NOT_LOTTERY_REWARD if reward["type"] != RewardScheme::LOTTERY
@@ -1069,5 +1105,11 @@ class Answer
 		return ErrorEnum::NOT_WIN if prize.nil?
 
 		# create lottery order
+		order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
+		order = Order.create_lottery_order(self.user._id.to_s,
+			self.survey._id.to_s,
+			prize["prize_id"],
+			order_info)
+		return true
 	end
 end

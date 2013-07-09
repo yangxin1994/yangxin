@@ -11,7 +11,7 @@ class Order
 	# can be 1 (small mobile charge), 2 (large mobile charge), 4 (alipay), 8(alijf)
 	# 16 (Q coins), 32 (prize), 64 (virtual prize)
 	field :type, :type => Integer
-	# can be 1 (wait for deal), 2 (dealing), 4 (deal success), 8 (deal fail), 16 (cancel)
+	# can be 1 (wait for deal), 2 (dealing), 4 (deal success), 8 (deal fail), 16 (cancel), 32 (frozen)
 	field :status, :type => Integer, :default => 1
 	field :source, :type => Integer
 	field :remark, :type => String, :default => "正常"
@@ -35,6 +35,7 @@ class Order
 	belongs_to :prize
 	belongs_to :survey
 	belongs_to :gift
+	belongs_to :answer
 	belongs_to :sample, :class_name => "User", :inverse_of => :orders
 
 	# status
@@ -43,6 +44,7 @@ class Order
 	SUCCESS = 4
 	FAIL = 8
 	CANCEL = 16
+	FROZEN = 32
 
 	# type
 	SMALL_MOBILE_CHARGE = 1
@@ -88,6 +90,7 @@ class Order
 			order.postcode = opt["postcode"]
 		end
 		order.save
+		order.auto_handle
 		return order
 	end
 
@@ -98,7 +101,7 @@ class Order
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		prize = Prize.find_by_id(prize_id)
 		return ErrorEnum::PRIZE_NOT_EXIST if prize.nl?
-		order = Order.create(:source => WIN_IN_LOTTERY)
+		order = Order.new(:source => WIN_IN_LOTTERY)
 		order.sample = sample
 		order.survey = survey
 		order.prize = prize
@@ -117,7 +120,9 @@ class Order
 			order.address = opt["address"]
 			order.postcode = opt["postcode"]
 		end
+		order.status = FROZEN if opt["status"] == FROZEN
 		order.save
+		order.auto_handle
 		return order
 	end
 
@@ -138,6 +143,7 @@ class Order
 			order.alipay_account = opt["alipay_account"]
 		end
 		order.save
+		order.auto_handle
 		return order
 	end
 
@@ -145,7 +151,17 @@ class Order
 		return self.update_attributes(order)
 	end
 
-	def handle
+	def auto_handle
+		return false if self.status != WAIT
+		return false if ![MOBILE_CHARGE, JIFENBAO, QQ_COIN].include?(self.type)
+		case self.type
+		when MOBILE_CHARGE
+		when JIFENBAO
+		when QQ_COIN
+		end
+	end
+
+	def manu_handle
 		return ErrorEnum::WRONG_ORDER_STATUS if self.status != WAIT
 		self.status = HANDLE
 		self.handled_at = Time.now.to_i

@@ -22,7 +22,7 @@ class Admin::OrdersController < Admin::ApplicationController
   end
 
   def handle
-    render_json_auto @order.handle and return
+    render_json_auto @order.manu_handle and return
   end
 
   def bulk_handle
