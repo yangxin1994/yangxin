@@ -14,6 +14,24 @@ class Sample::UsersController < ApplicationController
     render_json { @users }
   end
 
+  def get_my_third_party_user
+    users = @current_user.third_party_users
+    render_json_auto(users)
+  end
+
+  def mobile_banding
+    render_json_auto(@current_user.mobile_activation)
+  end
+
+  def email_banding
+    render_json_auto(@current_user.email_activation)    
+  end
+
+  def info_precent_complete
+    render_json_auto(@current_user.completed_info) 
+  end
+
+
   
 
 end

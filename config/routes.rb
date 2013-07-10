@@ -540,6 +540,10 @@ OopsData::Application.routes.draw do
       resources :users do
         collection do
           get :get_top_ranks,:as => :get_top_ranks
+          get :get_my_third_party_user,:as => :get_my_third_party_user
+          get :mobile_banding,:as => :mobile_banding
+          get :email_banding,:as => :email_banding
+          get :info_precent_complete,:as => :info_precent_complete
         end
       end
 
