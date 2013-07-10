@@ -4,64 +4,25 @@ require 'error_enum'
 require 'quill_common'
 class Sample::AnswersController < ApplicationController
 
-	# before_filter :require_user_exist
-	# before_filter :check_survey_existence, :only => [:create]
-	before_filter :check_answer_existence, :except => [:get_my_answer, :create]
-	before_filter :check_my_answer_existence, :only => [:load_question, :submit_answer, :clear, :finish, :destroy_preview]
-	before_filter :check_ownerness_of_survey, :only => [:destroy, :show]
-
-	def check_ownerness_of_survey
-		owner = @answer.survey.user
-		if @current_user.nil? || (!@current_user.is_admin && !@current_user.is_super_admin && owner != @current_user)
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
-			end
-		end
-	end
+	before_filter :check_answer_existence, :except => [:get_my_answer, :create, :get_today_answers_count, :get_today_spread_count]
 
 	def check_answer_existence
 		@answer = Answer.find_by_id(params[:id])
-		if @answer.nil?
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
-			end
-		end
+		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if @answer.nil?
 	end
-
-	def check_my_answer_existence
-		@answer = Answer.find_by_id(params[:id])
-		owner = @answer.user
-		# if the owner of the answer is a registered user, and the current user is not the owner, return ANSWER_NOT_EXIST
-		if @answer.nil? || ( !owner.nil? && owner.is_registered && owner != @current_user )
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
-			end
-		end
-	end
-
-	def check_survey_existence
-		@survey = Survey.normal.find_by_id(params[:survey_id])
-		if @survey.nil?
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
-			end
-		end
-	end
-
-	######################
 
 	def create
 		survey = Survey.normal.find_by_id(params[:survey_id])
 		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if survey.nil?
 		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if !is_preivew && survey.publish_status != QuillCommon::PublishStatusEnum::PUBLISHED
 		sample = User.sample.find_by_email_mobile(params[:email_mobile])
-		answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], params[:sample_id], params[:is_preview])
+		answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], sample.try(:_id), params[:is_preview] || false)
 		render_json_s(answer._id.to_s) and return if !answer.nil?
-		retval = survey.check_password(username, password, is_preview)
+		retval = survey.check_password(params[:username], params[:password], params[:is_preview] || false)
 		render_json_e ErrorEnum::WRONG_SURVEY_PASSWORD if retval != true
 		answer = Answer.create_answer(params[:survey_id],
 			params[:reward_scheme_id],
-			params[:is_preview],
+			params[:is_preview] || false,
 			params[:introducer_id],
 			params[:channel],
 			params[:referrer],
@@ -96,10 +57,7 @@ class Sample::AnswersController < ApplicationController
 	end
 
 	def clear
-		retval = @answer.clear
-		respond_to do |format|
-			format.json	{ render_json_auto(retval) and return }
-		end
+		render_json_auto @answer.clear and return
 	end
 
 	def submit_answer
@@ -128,46 +86,18 @@ class Sample::AnswersController < ApplicationController
 	end
 
 	def finish
-		retval = @answer.finish
-		respond_to do |format|
-			format.json	{ render_json_auto(retval) and return }
-		end
+		render_json_auto @answer.finish and return
 	end
 
 	def show
-		respond_to do |format|
-			format.json	{ render_json_auto(@answer) and return }
-		end
+		render_json_auto @answer.info_for_sample and return
 	end
 
-	def get_reward_info
-		respond_to do |format|
-			format.json	{ render_json_auto({reward: @answer.reward, point: @answer.point, lottery_id: @answer.lottery_id.to_s}) and return }
-		end
-	end
-
-	def get_my_answer_by_id
-		respond_to do |format|
-			format.json	{ render_json_auto({survey_id: @answer.survey_id.to_s,
-											is_preview: @answer.is_preview,
-											reward_type: @answer.reward,
-											point: @answer.point,
-											lottery_id: @answer.lottery_id.to_s,
-											lottery_title: @answer.lottery.try(:title)}) and return }
-		end
-	end
-
-	def get_my_answer
+	def get_answer_id_by_auth_key
 		render_json_e(ErrorEnum::REQUIRE_LOGIN) and return if @current_user.nil?
-		@answer = Answer.find_by_survey_id_email_is_preview(params[:survey_id], @current_user.email, params[:is_preview])
-		if @answer.nil?
-			respond_to do |format|
-				format.json  { render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return }
-			end
-		end
-		respond_to do |format|
-			format.json  { render_json_auto(@answer) and return }
-		end
+		@answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], @current_user._id.to_s, params[:is_preview]||false)
+		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if @answer.nil?
+		render_json_auto(@answer._id.to_s) and return
 	end
 
 	def destroy_preview
@@ -181,23 +111,11 @@ class Sample::AnswersController < ApplicationController
 		end
 	end
 
-	def destroy
-		retval = @answer.delete
-		render_json_auto(retval) and return 
-	end
-
-	def estimate_remain_answer_time
-		render_json_auto(@survey.estimate_answer_time) and return if @answer.nil?
-		render_json_auto(@answer.estimate_remain_answer_time) and return
-	end
-
-
-
 	def change_sample_account
-		login = User.login_with_email_mobile(params[:email_mobile], params[:password], @remote_ip, params[:_client_type], false, nil)
-		u = User.find_by_auth_key(login["auth_key"])
+		u = User.sample.find_by_auth_key(params[:auth_key])
+		render_json_e ErrorEnum::SAMPLE_NOT_EXIST if u.nil?
 		@answer.change_sample_account(u)
-		render_json_auto login and return
+		render_json_s and return
 	end
 
 	def logout
@@ -217,7 +135,7 @@ class Sample::AnswersController < ApplicationController
 	end
 
 	def create_lottery_order
-		
+		render_json_auto @answer.create_lottery_order(params[:order_info]) and return
 	end
 
 	#############################
