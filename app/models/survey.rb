@@ -172,6 +172,9 @@ class Survey
 	before_destroy :clear_survey_object
 
 	META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
+	CLOSED = 1
+	PUBLISHED = 2
+	DELETED = 4
 
 	public
 
@@ -1702,7 +1705,7 @@ class Survey
 		surveys = surveys.where(:spreadable => true, :publish_status => 8) if only_spreadable
 		surveys = surveys.where(:reward => reward) if reward.to_i != -1
 		surveys = surveys.order_by(:publish_status.desc).order_by(:created_at.desc)
-		return surveys.map { |s| {"survey" => s.serialize_in_short, "answer_status" => s.answer_status(user)} }
+		return surveys.map { |s| {"survey" => s.info_for_sample, "answer_status" => s.answer_status(user)} }
 	end
 
 	def self.list_answered_surveys(user)
@@ -1710,7 +1713,7 @@ class Survey
 		surveys_with_answer_status = []
 		answers.each do |a|
 			next if a.survey.nil?
-			surveys_with_answer_status << {"survey" => a.survey.serialize_in_short, "answer_status" => a.status}
+			surveys_with_answer_status << {"survey" => a.survey.info_for_sample, "answer_status" => a.status}
 		end
 		return surveys_with_answer_status
 	end
@@ -1720,7 +1723,7 @@ class Survey
 		surveys_with_spread_number = []
 		user.survey_spreads.each do |ss|
 			survey = ss.survey
-			surveys_with_spread_number << {"survey" => survey.serialize_in_short, "answer_status" => survey.answer_status(user), "spread_number" => ss.times}
+			surveys_with_spread_number << {"survey" => survey.info_for_sample, "answer_status" => survey.answer_status(user), "spread_number" => ss.times}
 		end
 		return surveys_with_spread_number
 	end
@@ -1772,7 +1775,7 @@ class Survey
 	end
 
 	def serialize_in_list_page
-		survey_obj = Hash.new
+		survey_obj = {}
 		survey_obj["_id"] = self._id.to_s
 		survey_obj["title"] = self.title.to_s
 		survey_obj["subtitle"] = self.subtitle.to_s
@@ -1787,8 +1790,8 @@ class Survey
 		return survey_obj
 	end
 
-	def serialize_in_short
-		survey_obj = Hash.new
+	def info_for_sample
+		survey_obj = {}
 		survey_obj["_id"] = self._id.to_s
 		survey_obj["title"] = self.title.to_s
 		survey_obj["subtitle"] = self.subtitle.to_s

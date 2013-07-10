@@ -52,6 +52,6 @@ class BrowsersController < ApplicationController
 	def get_survey_info
 		survey = Survey.normal.find_by_id(params[:survey_id])
 		render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if survey.nil?
-		render_json_auto(survey.serialize_in_short) and return
+		render_json_auto(survey.info_for_sample) and return
 	end
 end

@@ -33,6 +33,14 @@ class Browser
 		return true
 	end
 
+	def recommend_surveys(exclude_survey_ids)
+		surveys = Survey.normal.where(:status => Survey::PUBLISHED, :browser_extension_promotable => true).desc(:created_at)
+		survey_ids = surveys.map { |e| e._id.to_s }
+		survey_ids = survey_ids - exclude_survey_ids
+		survey_ids = survey_ids[0..9] if survey_ids.length > 10
+		
+	end
+
 	def recommend_surveys_without_reward(exclude_survey_ids)
 		survey_ids = (Survey.normal.where(:reward => 0, :publish_status => 8, :show_in_community => true)).map { |e| e._id.to_s }
 		survey_ids = survey_ids - exclude_survey_ids
