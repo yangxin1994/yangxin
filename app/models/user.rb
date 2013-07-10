@@ -851,6 +851,24 @@ class User
 		return ret_logs
 	end
 
+	def answer_logs
+		answers = self.answers.not_preview.desc(:created_at)
+		ret_logs = answers.map do |e|
+			selected_reward = (e.rewards.select { |e| e["checked"] == true }).first
+			reward_type = selected_reward.nil? ? 0 : selected_reward["type"]
+			reward_amount = selected_reward.nil? ? 0 : selected_reward["amount"]
+			{
+				"_id" => e._id.to_s,
+				"title" => e.survey.title,
+				"created_at" => e.created_at,
+				"finished_at" => Time.at(e.finished_at),
+				"reject_type" => e.reject_type,
+				"reward_type" => reward_type,
+				"reward_amount" => reward_amount
+			}
+		end
+	end
+
 	def block(block)
 		self.is_block = block.to_s == "true"
 		return self.save

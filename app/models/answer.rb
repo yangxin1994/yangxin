@@ -40,7 +40,7 @@ class Answer
 	field :introducer_id, :type => String
 	field :point_to_introducer, :type => Integer
 	field :point, :type => Integer, :default => 0
-	field :rewards, :type => Array
+	field :rewards, :type => Array, :default => []
 	field :reward_need_review, :type => Boolean
 
 	# used for interviewer to upload attachments
