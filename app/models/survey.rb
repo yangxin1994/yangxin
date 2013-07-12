@@ -103,6 +103,7 @@ class Survey
 		"audio" => "",
 		"reward_scheme_id" => ""
 	}
+	field :sample_attributes_for_promote, :type => Array, default: []
 
 
 	# reward: 0: nothing, 1: priPze, 2: point
@@ -1708,22 +1709,12 @@ class Survey
 		return surveys.map { |s| {"survey" => s.info_for_sample, "answer_status" => s.answer_status(user)} }
 	end
 
-	def self.list_answered_surveys(user)
-		answers = user.answers.not_preview
-		surveys_with_answer_status = []
-		answers.each do |a|
-			next if a.survey.nil?
-			surveys_with_answer_status << {"survey" => a.survey.info_for_sample, "answer_status" => a.status}
-		end
-		return surveys_with_answer_status
-	end
-
 	def self.list_spreaded_surveys(user)
-		answers = Answer.finished.where(:is_preview => false, :introducer_id => user._id)
+		answers = Answer.not_preview.where(:introducer_id => user._id)
 		surveys_with_spread_number = []
 		user.survey_spreads.each do |ss|
 			survey = ss.survey
-			surveys_with_spread_number << {"survey" => survey.info_for_sample, "answer_status" => survey.answer_status(user), "spread_number" => ss.times}
+			surveys_with_spread_number << survey.info_for_sample.merge({"spread_number" => ss.times})
 		end
 		return surveys_with_spread_number
 	end
@@ -1731,10 +1722,6 @@ class Survey
 	def self.search_title(query)
 		surveys = Survey.where(title: Regexp.new(query.to_s)).desc(:created_at)
 		return surveys.map { |s| s.serialize_in_list_page }
-	end
-
-	def self.get_published_active_surveys
-		return surveys = Survey.normal.is_promotable.where(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
 	end
 
 	def answer_status(user)
@@ -1796,8 +1783,20 @@ class Survey
 		survey_obj["title"] = self.title.to_s
 		survey_obj["subtitle"] = self.subtitle.to_s
 		survey_obj["created_at"] = self.created_at.to_i
-		survey_obj["reward_info"] = self.reward_info
-		survey_obj["publish_status"] = self.publish_status
+		survey_obj["rewards"] = self.rewards
+		survey_obj["status"] = self.status
+		survey_obj["spreadable"] = self.spreadable
+		survey_obj["spread_point"] = self.spread_point
+		return survey_obj
+	end
+
+	def info_for_browser
+		survey_obj = {}
+		survey_obj["_id"] = self._id.to_s
+		survey_obj["title"] = self.title.to_s
+		survey_obj["created_at"] = self.created_at.to_i
+		survey_obj["broswer_extension_promote_info"] = self.broswer_extension_promote_info
+		survey_obj["rewards"] = self.rewards
 		return survey_obj
 	end
 
@@ -1988,5 +1987,17 @@ class Survey
 			"user" => user_obj,
 			"questions" => questions}
 		return info
+	end
+
+	def add_sample_attribute_for_promote(sample_attribute)
+		s = SampleAttribute.normal.find_by_id(sample_attribute["sample_attribute_id"])
+		return ErrorEnum::SAMPLE_ATTRIBUTE_NOT_EXIST if s.nil?
+		self.sample_attributes_for_promote << sample_attribute
+		return self.save
+	end
+
+	def remove_sample_attribute_for_promote(index)
+		self.sample_attributes_for_promote.delete(index)
+		return self.save
 	end
 end

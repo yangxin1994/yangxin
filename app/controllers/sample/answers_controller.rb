@@ -164,5 +164,13 @@ class Sample::AnswersController < ApplicationController
 		today_end = Time.utc(date.year, date.month, date.day+1)
 		@survey = Answer.where(:created_at.gte => today_start,:created_at.lt => today_end,:introducer_id.ne => nil).count
 		render_json { @survey }
-	end  
+	end
+
+	def index
+		render_json_e ErrorEnum::REQUIRE_LOGIN if @current_user.nil?
+		@answers = @current_user.answers.not_preview
+		@paginate_answers = auto_paginate(@answers)
+		render_json_auto @paginate_answers.map { |e| e.info_for_answer_list_for_sample }
+		
+	end
 end

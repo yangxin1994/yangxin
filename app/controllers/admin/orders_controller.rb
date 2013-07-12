@@ -27,7 +27,7 @@ class Admin::OrdersController < Admin::ApplicationController
 
   def bulk_handle
     params[:order_ids].each do |order_id|
-      Order.find_by_id(order_id).try(:handle)
+      Order.find_by_id(order_id).try(:manu_handle)
     end
     render_json_auto true and return
   end

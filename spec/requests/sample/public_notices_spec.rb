@@ -13,6 +13,7 @@ describe "public notices api" do
       response.status.should be(200)
       retval = JSON.parse(response.body)["success"]
       expect(retval).to eq(true)
+      puts JSON.parse(response.body)["value"].inspect
       ret    = JSON.parse(response.body)["value"]["data"]
       ret.length.should be 4
   end

@@ -36,16 +36,7 @@ class BrowsersController < ApplicationController
 		# obtain the recomended surveys
 		survey_ids_answered = @current_user.try(:get_survey_ids_answered) || []
 		exclude_survey_ids = (params[:exclude_survey_ids].split(',') + survey_ids_answered).uniq
-		surveys_with_reward = @browser.recommend_surveys_with_reward(exclude_survey_ids)
-		surveys_without_reward = @browser.recommend_surveys_without_reward(exclude_survey_ids)
-		retval = {
-			:version => @be.version,
-			:recommended_surveys => [
-				surveys_without_reward,
-				surveys_with_reward[:point],
-				surveys_with_reward[:lottery]],
-			:url_surveys => SurveyRecommendation.url_recommendations(exclude_survey_ids),
-			:key_word_surveys => SurveyRecommendation.key_word_recommendations(exclude_survey_ids)}
+		render_json_auto @browser.recommended_surveys(exclude_survey_ids)
 		render_json_s(retval) and return
 	end
 

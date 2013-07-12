@@ -12,8 +12,10 @@ class User
 
 	field :email, :type => String
 	field :email_activation, :type => Boolean, default: false
+	field :email_subscribe, :type => Boolean, default: false
 	field :mobile, :type => String
 	field :mobile_activation, :type => Boolean, default: false
+	field :mobile_subscribe, :type => Boolean, default: false
 	field :username, :type => String
 	field :password, :type => String
 	# 1 unregistered
@@ -49,7 +51,6 @@ class User
 	# 0 normal users
 	# 1 in the white list
 	# 2 in the black list
-	field :color, :type => Integer, default: 0
 	field :auth_key, :type => String
 	field :auth_key_expire_time, :type => Integer
 	field :level, :type => Integer, default: 0
@@ -591,10 +592,6 @@ class User
 	scope :white_list, where(:color => COLOR_WHITE, :status.gt => -1)
 	scope :deleted_users, where(status: -1)
 
-	def self.ids_not_in_blacklist
-		return User.where(:status.gt => -1).any_of({color: 0}, {color: 1}).map { |e| e._id.to_s }
-	end
-
 	def create_user(new_user)
 		return ErrorEnum::REQUIRE_ADMIN unless self.is_admin || self.is_super_admin
 		return ErrorEnum::REQUIRE_SUPER_ADMIN if new_user["role"].to_s.to_i > 16 and !self.is_super_admin
@@ -908,4 +905,27 @@ class User
 		return user_obj
 	end
 
+	def read_sample_attribute(name)
+		sa = SampleAttribute.find_by_name(name)
+		return nil if sa.nil?
+		return self.affiliated.read_attribute(sa.name.to_sym)
+	end
+
+	def read_sample_attribute_by_id(sa_id)
+		sa = SampleAttribute.find_by_id(sa_id)
+		return nil if sa.nil?
+		return self.affiliated.read_attribute(sa.name.to_sym)
+	end
+
+	def write_sample_attribute(name, value)
+		sa = SampleAttribute.find_by_name(name)
+		return nil if sa.nil?
+		sa.affiliated.write_attribute(sa.name.to_sym, value)
+	end
+
+	def write_sample_attribute_by_id(sa_id, value)
+		sa = SampleAttribute.find_by_id(sa_id)
+		return false if sa.nli?
+		sa.affiliated.write_attribute(sa.name.to_sym, value)
+	end
 end

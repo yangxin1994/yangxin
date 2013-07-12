@@ -40,7 +40,8 @@ class Answer
 	field :introducer_id, :type => String
 	field :point_to_introducer, :type => Integer
 	field :introducer_reward_assigned, :type => Boolean, default: false
-	field :rewards, :type => Array
+	field :rewards, :type => Array, default: []
+	field :reward_delivered, :type => Boolean, default: false
 	field :need_review, :type => Boolean
 
 	# used for interviewer to upload attachments
@@ -903,11 +904,12 @@ class Answer
 			return ErrorEnum::REPEAT_ORDER if self.survey.answers.check_repeat_mobile(reward["mobile"])
 			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
 			sample = User.find_or_create_new_visitor_by_email_mobile(reward["mobile"])
-			Order.create_answer_order(sample._id.to_s,
+			order = Order.create_answer_order(sample._id.to_s,
 				self.survey._id.to_s,
 				Order::SMALL_MOBILE_CHARGE,
 				reward["amount"],
 				"mobile" => reward["mobile"])
+			self.order = order
 			assign_introducer_reward
 			self.reward_delivered = true
 			return self.save
@@ -915,11 +917,12 @@ class Answer
 			return ErrorEnum::REPEAT_ORDER if self.survey.answers.check_repeat_alipay(reward["alipay_account"])
 			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
 			sample = User.find_or_create_new_visitor_by_email_mobile(reward["alipay_account"])
-			Order.create_answer_order(sample._id.to_s,
+			order = Order.create_answer_order(sample._id.to_s,
 				self.survey._id.to_s,
 				Order::ALIPAY,
 				reward["amount"],
 				"alipay_account" => reward["alipay_account"])
+			self.order = order
 			assign_introducer_reward
 			self.reward_delivered = true
 			return self.save
@@ -927,11 +930,12 @@ class Answer
 			return ErrorEnum::REPEAT_ORDER if self.survey.answers.check_repeat_jifenbao(reward["alipay_account"])
 			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
 			sample = User.find_or_create_new_visitor_by_email_mobile(reward["alipay_account"])
-			Order.create_answer_order(sample._id.to_s,
+			order = Order.create_answer_order(sample._id.to_s,
 				self.survey._id.to_s,
 				Order::JIFENBAO,
 				reward["amount"],
 				"alipay_account" => reward["alipay_account"])
+			self.order = order
 			assign_introducer_reward
 			self.reward_delivered = true
 			return self.save
@@ -1060,6 +1064,16 @@ class Answer
 		answer_obj["survey_id"] = self.survey_id.to_s
 		answer_obj["survey_title"] = self.survey.title
 		answer_obj["is_preview"] = self.is_preview
+		answer_obj["rewards"] = self.rewards
+		return answer_obj
+	end
+
+	def info_for_answer_list_for_sample
+		answer_obj = {}
+		answer_obj["survey_id"] = self.survey_id.to_s
+		answer_obj["survey_title"] = self.survey.title
+		answer_obj["order_id"] = self.order._id.to_s
+		answer_obj["created_at"] = self.created_at.to_i
 		answer_obj["rewards"] = self.rewards
 		return answer_obj
 	end

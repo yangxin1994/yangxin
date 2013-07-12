@@ -45,6 +45,10 @@ class SampleAttribute
 		return self.normal.where(:_id => sample_attribute_id).first
 	end
 
+	def self.find_by_name(name)
+		return self.normal.where(:name => name).first
+	end
+
 	def self.search(name)
 		return name.blank? ? self.normal.all : self.normal.where(:name => /.*#{name.to_s}.*/)
 	end

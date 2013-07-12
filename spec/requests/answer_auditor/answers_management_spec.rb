@@ -135,7 +135,7 @@ describe "answers management" do
         message_content: "good",
         auth_key: @auth_key
       retval = JSON.parse(response.body)["value"]["error_code"]
-      expect(retval).to eq(ErrorEnum::ANSWER_NOT_FINISHED)
+      expect(retval).to eq(ErrorEnum::WRONG_ANSWER_STATUS)
     end
 
     it "should return true when finish" do
