@@ -7,7 +7,7 @@ class SessionsController < ApplicationController
 	before_filter :require_sign_in, :only => [:destroy]
 
 	def create
-		login = User.login_with_email_mobile(params[:user]["email_username"], params[:user]["password"], @remote_ip, params[:_client_type], params[:keep_signed_in], params[:third_party_user_id])
+		login = User.login_with_email_mobile(params[:email_mobile], params[:password], @remote_ip, params[:_client_type], params[:keep_signed_in], params[:third_party_user_id])
 		render_json_auto(login) and return
 	end
 
