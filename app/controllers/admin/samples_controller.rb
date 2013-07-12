@@ -24,7 +24,7 @@ class Admin::SamplesController < Admin::ApplicationController
 	end
 
 	def show
-		render_json_auto(@sample.basic_info) and return
+		render_json_auto(@sample.sample_attributes) and return
 	end
 
 	def send_message
