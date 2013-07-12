@@ -2,7 +2,7 @@
 require 'rubygems'
 require 'httparty'
 
-class SMS # 短信接口
+class SmsApi # 短信接口
 
 	attr_reader :phone_number, :message
 

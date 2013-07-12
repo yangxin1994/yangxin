@@ -2,7 +2,13 @@ require 'sidekiq/web'
 OopsData::Application.routes.draw do
 	mount Sidekiq::Web, at: "/sidekiq"
 
-	resources :faqs, :feedbacks, :advertisements
+	resources :faqs, :public_notices, :feedbacks, :advertisements
+	resources :ofcards do
+		collection do
+			post :confirm
+		end
+	end
+
 	resources :data_generators do
 		collection do
 			get 'generate'
@@ -136,6 +142,7 @@ OopsData::Application.routes.draw do
 				    'quillme_promote', 'email_promote', 'sms_promote', 'broswer_extension_promote', "weibo_promote"
 				get 'get_sent_email_number', 'promote'
 				put :quillme_hot, :allocate_answer_auditors, :set_result_visible
+				put :add_sample_attribute_for_promote, :remove_sample_attribute_for_promote
 			end
 			resources :reward_schemes, :except => [:new, :edit, :destroy]
 		end
@@ -306,6 +313,8 @@ OopsData::Application.routes.draw do
 			delete :destroy
 		end
 	end
+	match 'logout' => 'sessions#destroy', :as => :logout
+	match 'login' => 'sessions#create', :as => :login
 
 	resources :users do
 		collection do

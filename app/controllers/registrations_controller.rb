@@ -6,7 +6,7 @@ require 'encryption'
 class RegistrationsController < ApplicationController
 	
 	def create
-		retval = User.create_new_registered_user(
+		retval = User.create_new_user(
 			params[:email_mobile],
 			params[:password],
 			@current_user,
@@ -40,7 +40,7 @@ class RegistrationsController < ApplicationController
 		rescue
 			render_json_e(ErrorEnum::ILLEGAL_ACTIVATE_KEY) and return
 		end
-		retval = User.activate(activate_info, @remote_ip, params[:_client_type])
+		retval = User.activate("email", activate_info, @remote_ip, params[:_client_type])
 		render_json_auto(retval) and return
 	end
 
@@ -48,7 +48,7 @@ class RegistrationsController < ApplicationController
 		activate_info = {"mobile" => params[:mobile],
 				"password" => params[:password],
 				"verification_code" => params[:verification_code]}
-		retval = User.activate(activate_info, @remote_ip, params[:_client_type])
+		retval = User.activate("mobile", activate_info, @remote_ip, params[:_client_type])
 		render_json_auto(retval) and return
 	end
 end

@@ -111,64 +111,11 @@ class Admin::SurveysController < Admin::ApplicationController
 		render_json_auto true and return
 	end
 
-	def add_template_question
-		@survey = Survey.find_by_id(params[:id]) if params[:id]
-		unless @survey
-			@survey = Survey.create
-			@current_user.surveys << @survey
-		end
-		if params[:question_id]
-			# insert
-			@survey.insert_template_question( params[:page_index].to_s.to_i,
-					"-1", params[:question_id])
-			# convert
-			@survey.convert_template_question_to_normal_question(params[:question_id])
-		end
-		render_json_auto true
-	end
-
-	def add_reward
-		@survey = Survey.normal.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return unless @survey
-		params[:lottery] = Lottery.find_by_id(params[:lottery_id]) if params[:reward].to_i==1
-		s = params.select{|k,v| %w(reward point lottery).include?(k.to_s)}
-		render_json_auto @survey.update_attributes(s) and return
-	end
-
-	def set_community
-		@survey = Survey.normal.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-		retval = @survey.set_community(params[:show_in_community].to_s == "true")
-		render_json_auto(retval) and return
-	end
-
 	def set_spread
 		@survey = Survey.normal.find_by_id(params[:id])
 		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
 		retval = @survey.set_spread(params[:spread_point].to_i, params[:spreadable].to_s == "true")
 		render_json_auto(retval) and return
-	end
-
-	def set_promotable
-		@survey = Survey.normal.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-		@survey.promotable = params[:promotable].to_s == "true"
-		@survey.promote_email_number = params[:promote_email_number].to_i if !params[:promote_email_number].nil?
-		render_json_auto(@survey.save) and return
-	end
-
-	def get_sent_email_number
-		@survey = Survey.normal.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-		sent_email_number = @survey.email_histories.length
-		render_json_auto(sent_email_number) and return
-	end
-
-	def set_answer_need_review
-		@survey = Survey.normal.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-		@survey.answer_need_review = params[:answer_need_review].to_s == "true"
-		render_json_auto(@survey.save) and return
 	end
 
 	def destroy
@@ -177,4 +124,11 @@ class Admin::SurveysController < Admin::ApplicationController
 		render_json_auto @survey.try(:delete) and return
 	end
 
+	def add_sample_attribute_for_promote
+		
+	end
+
+	def remove_sample_attribute_for_promote
+		
+	end
 end

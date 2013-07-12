@@ -103,6 +103,7 @@ class Survey
 		"audio" => "",
 		"reward_scheme_id" => ""
 	}
+	field :sample_attributes_for_promote, :type => Array, default: []
 
 
 	# reward: 0: nothing, 1: priPze, 2: point
@@ -172,6 +173,9 @@ class Survey
 	before_destroy :clear_survey_object
 
 	META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
+	CLOSED = 1
+	PUBLISHED = 2
+	DELETED = 4
 
 	public
 
@@ -1100,17 +1104,12 @@ class Survey
 	#     for answering process
 	#
 	#++++++++++++++++++++++++++++++++++++++++++++++
-
-	def check_password_for_preview(username, password, current_user)
+	def check_password(username, password, is_preview)
 		case self.access_control_setting["password_control"]["password_type"]
 		when -1
 			return true
 		when 0
-			if self.access_control_setting["password_control"]["single_password"] == password
-				return true
-			else
-				return ErrorEnum::WRONG_SURVEY_PASSWORD
-			end
+			return self.access_control_setting["password_control"]["single_password"] == password
 		when 1
 			list = self.access_control_setting["password_control"]["password_list"]
 			password_element = list.select { |ele| ele["content"] == password }[0]
@@ -1118,68 +1117,16 @@ class Survey
 			list = self.access_control_setting["password_control"]["username_password_list"]
 			password_element = list.select { |ele| ele["content"] == [username, password] }[0]
 		end
-		if password_element.nil?
-			return ErrorEnum::WRONG_SURVEY_PASSWORD
-		else
-			return true
-		end
-	end
-
-	def check_password(username, password, current_user)
-		case self.access_control_setting["password_control"]["password_type"]
-		when -1
-			return true
-		when 0
-			if self.access_control_setting["password_control"]["single_password"] == password
-				return true
-			else
-				return ErrorEnum::WRONG_SURVEY_PASSWORD
-			end
-		when 1
-			list = self.access_control_setting["password_control"]["password_list"]
-			password_element = list.select { |ele| ele["content"] == password }[0]
-		when 2
-			list = self.access_control_setting["password_control"]["username_password_list"]
-			password_element = list.select { |ele| ele["content"] == [username, password] }[0]
-		end
-		if password_element.nil?
-			return ErrorEnum::WRONG_SURVEY_PASSWORD
-		elsif password_element["used"] == false
+		return false if password_element.nil?
+		return true if is_preview
+		if password_element["used"] == false
 			password_element["used"] = true
 			self.save
 			return true
 		else
-			return ErrorEnum::SURVEY_PASSWORD_USED
+			return false
 		end
 	end
-
-=begin
-	def check_progress(detail)
-		progress = {}
-
-		progress["screened_answer_number"] = self.answers.not_preview.screened.length
-		progress["finished_answer_number"] = self.answers.not_preview.finished.length
-		progress["answer_number"] = progress["screened_answer_number"] + progress["finished_answer_number"]
-
-		return progress if detail.to_s == "true"
-
-		start_publish_time_ary = self.publish_status_historys.start_publish_time
-		end_publish_time_ary = self.publish_status_historys.end_publish_time
-
-		if start_publish_time_ary.blank?
-			progress["duration"] = 0
-		elsif end_publish_time_ary.blank?
-			progress["duration"] = Time.now.to_i - start_publish_time_ary[0]
-		else
-			progress["duration"] = end_publish_time_ary[0] - start_publish_time_ary[0]
-		end
-
-		self.refresh_quota_stats
-		progress["quota"] = self.quota
-		progress["filters"] = self.filters
-		return progress
-	end
-=end
 
 	def get_user_ids_answered
 		return self.answers.not_preview.map {|a| a.user_id.to_s}
@@ -1765,25 +1712,15 @@ class Survey
 		surveys = surveys.where(:spreadable => true, :publish_status => 8) if only_spreadable
 		surveys = surveys.where(:reward => reward) if reward.to_i != -1
 		surveys = surveys.order_by(:publish_status.desc).order_by(:created_at.desc)
-		return surveys.map { |s| {"survey" => s.serialize_in_short, "answer_status" => s.answer_status(user)} }
-	end
-
-	def self.list_answered_surveys(user)
-		answers = user.answers.not_preview
-		surveys_with_answer_status = []
-		answers.each do |a|
-			next if a.survey.nil?
-			surveys_with_answer_status << {"survey" => a.survey.serialize_in_short, "answer_status" => a.status}
-		end
-		return surveys_with_answer_status
+		return surveys.map { |s| {"survey" => s.info_for_sample, "answer_status" => s.answer_status(user)} }
 	end
 
 	def self.list_spreaded_surveys(user)
-		answers = Answer.finished.where(:is_preview => false, :introducer_id => user._id)
+		answers = Answer.not_preview.where(:introducer_id => user._id)
 		surveys_with_spread_number = []
 		user.survey_spreads.each do |ss|
 			survey = ss.survey
-			surveys_with_spread_number << {"survey" => survey.serialize_in_short, "answer_status" => survey.answer_status(user), "spread_number" => ss.times}
+			surveys_with_spread_number << survey.info_for_sample.merge({"spread_number" => ss.times})
 		end
 		return surveys_with_spread_number
 	end
@@ -1791,10 +1728,6 @@ class Survey
 	def self.search_title(query)
 		surveys = Survey.where(title: Regexp.new(query.to_s)).desc(:created_at)
 		return surveys.map { |s| s.serialize_in_list_page }
-	end
-
-	def self.get_published_active_surveys
-		return surveys = Survey.normal.is_promotable.where(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
 	end
 
 	def answer_status(user)
@@ -1835,7 +1768,7 @@ class Survey
 	end
 
 	def serialize_in_list_page
-		survey_obj = Hash.new
+		survey_obj = {}
 		survey_obj["_id"] = self._id.to_s
 		survey_obj["title"] = self.title.to_s
 		survey_obj["subtitle"] = self.subtitle.to_s
@@ -1850,14 +1783,26 @@ class Survey
 		return survey_obj
 	end
 
-	def serialize_in_short
-		survey_obj = Hash.new
+	def info_for_sample
+		survey_obj = {}
 		survey_obj["_id"] = self._id.to_s
 		survey_obj["title"] = self.title.to_s
 		survey_obj["subtitle"] = self.subtitle.to_s
 		survey_obj["created_at"] = self.created_at.to_i
-		survey_obj["reward_info"] = self.reward_info
-		survey_obj["publish_status"] = self.publish_status
+		survey_obj["rewards"] = self.rewards
+		survey_obj["status"] = self.status
+		survey_obj["spreadable"] = self.spreadable
+		survey_obj["spread_point"] = self.spread_point
+		return survey_obj
+	end
+
+	def info_for_browser
+		survey_obj = {}
+		survey_obj["_id"] = self._id.to_s
+		survey_obj["title"] = self.title.to_s
+		survey_obj["created_at"] = self.created_at.to_i
+		survey_obj["broswer_extension_promote_info"] = self.broswer_extension_promote_info
+		survey_obj["rewards"] = self.rewards
 		return survey_obj
 	end
 
@@ -2048,5 +1993,17 @@ class Survey
 			"user" => user_obj,
 			"questions" => questions}
 		return info
+	end
+
+	def add_sample_attribute_for_promote(sample_attribute)
+		s = SampleAttribute.normal.find_by_id(sample_attribute["sample_attribute_id"])
+		return ErrorEnum::SAMPLE_ATTRIBUTE_NOT_EXIST if s.nil?
+		self.sample_attributes_for_promote << sample_attribute
+		return self.save
+	end
+
+	def remove_sample_attribute_for_promote(index)
+		self.sample_attributes_for_promote.delete(index)
+		return self.save
 	end
 end

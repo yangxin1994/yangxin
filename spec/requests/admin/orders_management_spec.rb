@@ -28,7 +28,7 @@ describe "order management" do
 			expect(retval.length).to eq(20)
 		end
 
-		it "search type should return right message", :focus => true do
+		it "search type should return right message" do
 			get "/admin/orders",
 				page: 1,
 				per_page: 20,
