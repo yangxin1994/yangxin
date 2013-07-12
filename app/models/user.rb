@@ -856,11 +856,30 @@ class User
 				"title" => e.survey.title,
 				"created_at" => e.created_at,
 				"finished_at" => Time.at(e.finished_at),
+				"status" => e.status
 				"reject_type" => e.reject_type,
 				"reward_type" => reward_type,
 				"reward_amount" => reward_amount
 			}
 		end
+		return ret_logs
+	end
+
+	def spread_logs
+		answers = Answer.where(:introducer_id => self._id.to_s)
+		ret_logs = answers.map do |e|
+			{
+				"_id" => e._id.to_s,
+				"title" => e.survey.title,
+				"created_at" => e.created_at,
+				"finished_at" => Time.at(e.finished_at),
+				"email" => e.user.try(:email),
+				"mobile" => e.user.try(:mobile),
+				"status" => e.status,
+				"reject_type" => e.reject_type
+			}
+		end
+		return ret_logs
 	end
 
 	def block(block)

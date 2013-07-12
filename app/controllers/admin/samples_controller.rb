@@ -51,6 +51,10 @@ class Admin::SamplesController < Admin::ApplicationController
 		render_json_auto(auto_paginate(@sample.answer_logs)) and return
 	end
 
+	def spread_log
+		render_json_auto(auto_paginate(@sample.spread_logs)) and return
+	end
+
 	def set_sample_role
 		retval = @sample.set_sample_role(params[:role])
 		render_json_auto(retval) and return
