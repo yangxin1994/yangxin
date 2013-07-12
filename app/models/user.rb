@@ -116,8 +116,6 @@ class User
 
 
 	public
-
-
 	#*description*: Find a user given an email, username and user id. Deleted users are not included.
 	#
 	#*params*:
@@ -374,6 +372,16 @@ class User
 	    return 0 
 	  end 	
 	end
+
+
+	def answerd?(survey_id)
+      answer = self.answers.where(:survey_id => survey_id).first
+      if answer.present?
+        return true
+      else
+        return false
+      end
+    end
 
 	#*description*: activate a user
 	#

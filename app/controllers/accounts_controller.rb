@@ -2,6 +2,7 @@
 require 'error_enum'
 require 'quill_common'
 class AccountsController < ApplicationController
+
   def get_basic_info
     user = User.find_by_id(params[:id]) if params[:id]
     user = @current_user if user.nil?
