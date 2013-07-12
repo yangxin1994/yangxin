@@ -44,14 +44,8 @@ class Sample::SurveysController < ApplicationController
     render_json { @survey }
   end
 
-
-  def list_answered_surveys
-    surveys_with_answer_status = Survey.list_answered_surveys(@current_user)
-    paginated_surveys = auto_paginate surveys_with_answer_status
-    render_json_auto(paginated_surveys)
-  end
-
   def list_spreaded_surveys
+    render_json_auto ErrorEnum::REQUIRE_LOGIN if @current_user.nil?
     surveys_with_spreaded_number = Survey.list_spreaded_surveys(@current_user)
     paginated_surveys = auto_paginate surveys_with_spreaded_number
     render_json_auto(paginated_surveys)

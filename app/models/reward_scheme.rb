@@ -8,8 +8,15 @@ class RewardScheme
     # 1 表示话费，2表示支付宝转账，4表示优币，8表示抽奖 
     RewardType = [1,2,4,8]
 
+	field :name, type: String, default: ""
 	field :rewards, type: Array, default: []
 	field :need_review, type: Boolean, default: false
+
+	MOBILE = 1
+	ALIPAY = 2
+	POINT = 4
+	LOTTERY = 8
+	JIFENBAO = 16
 
 	belongs_to :survey
 

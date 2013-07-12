@@ -22,12 +22,12 @@ class Admin::OrdersController < Admin::ApplicationController
   end
 
   def handle
-    render_json_auto @order.handle and return
+    render_json_auto @order.manu_handle and return
   end
 
   def bulk_handle
     params[:order_ids].each do |order_id|
-      Order.find_by_id(order_id).try(:handle)
+      Order.find_by_id(order_id).try(:manu_handle)
     end
     render_json_auto true and return
   end

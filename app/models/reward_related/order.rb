@@ -11,7 +11,7 @@ class Order
 	# can be 1 (small mobile charge), 2 (large mobile charge), 4 (alipay), 8(alijf)
 	# 16 (Q coins), 32 (prize), 64 (virtual prize)
 	field :type, :type => Integer
-	# can be 1 (wait for deal), 2 (dealing), 4 (deal success), 8 (deal fail), 16 (cancel)
+	# can be 1 (wait for deal), 2 (dealing), 4 (deal success), 8 (deal fail), 16 (cancel), 32 (frozen)
 	field :status, :type => Integer, :default => 1
 	field :source, :type => Integer
 	field :remark, :type => String, :default => "正常"
@@ -26,6 +26,7 @@ class Order
 	field :handled_at, :type => Integer
 	field :finished_at, :type => Integer
 	field :canceled_at, :type => Integer
+	field :ofcard_order_id, :type => String, :default => ""
 
 	# embeds_one :cash_receive_info, :class_name => "CashReceiveInfo"
 	# embeds_one :entity_receive_info, :class_name => "EntityReceiveInfo"
@@ -35,6 +36,7 @@ class Order
 	belongs_to :prize
 	belongs_to :survey
 	belongs_to :gift
+	belongs_to :answer
 	belongs_to :sample, :class_name => "User", :inverse_of => :orders
 
 	# status
@@ -43,6 +45,7 @@ class Order
 	SUCCESS = 4
 	FAIL = 8
 	CANCEL = 16
+	FROZEN = 32
 
 	# type
 	SMALL_MOBILE_CHARGE = 1
@@ -88,6 +91,7 @@ class Order
 			order.postcode = opt["postcode"]
 		end
 		order.save
+		order.auto_handle
 		return order
 	end
 
@@ -98,7 +102,7 @@ class Order
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		prize = Prize.find_by_id(prize_id)
 		return ErrorEnum::PRIZE_NOT_EXIST if prize.nl?
-		order = Order.create(:source => WIN_IN_LOTTERY)
+		order = Order.new(:source => WIN_IN_LOTTERY)
 		order.sample = sample
 		order.survey = survey
 		order.prize = prize
@@ -117,7 +121,9 @@ class Order
 			order.address = opt["address"]
 			order.postcode = opt["postcode"]
 		end
+		order.status = FROZEN if opt["status"] == FROZEN
 		order.save
+		order.auto_handle
 		return order
 	end
 
@@ -134,8 +140,11 @@ class Order
 			order.mobile = opt["mobile"]
 		when ALIPAY
 			order.alipay_account = opt["alipay_account"]
+		when JIFENBAO
+			order.alipay_account = opt["alipay_account"]
 		end
 		order.save
+		order.auto_handle
 		return order
 	end
 
@@ -143,7 +152,19 @@ class Order
 		return self.update_attributes(order)
 	end
 
-	def handle
+	def auto_handle
+		return false if self.status != WAIT
+		return false if ![MOBILE_CHARGE, JIFENBAO, QQ_COIN].include?(self.type)
+		case self.type
+		when MOBILE_CHARGE
+			ChargeClient.mobile_charge(self.mobile, self.amount, self._id.to_s)
+		when JIFENBAO
+		when QQ_COIN
+			ChargeClient.qq_charge(self.qq, self.amount, self._id.to_s)
+		end
+	end
+
+	def manu_handle
 		return ErrorEnum::WRONG_ORDER_STATUS if self.status != WAIT
 		self.status = HANDLE
 		self.handled_at = Time.now.to_i
@@ -199,5 +220,78 @@ class Order
 	def update_remark(remark)
 		self.remark = remark
 		return self.save
+	end
+
+	def callback_confirm(ret_code, err_msg)
+		self.remark = err_msg
+		case ret_code.to_i
+		when 1
+			self.status = SUCCESS
+			# send sample short message
+			if self.type == MOBILE_CHARGE
+				SmsApi.send_sms(self.mobile, "")
+			end
+		when 9
+			self.status = FAIL
+		end
+		self.finished_at = Time.now.to_i
+		return self.save
+	end
+
+	def self.wait_small_charge_orders
+		orders = Order.where(:type => SMALL_MOBILE_CHARGE, :status => WAIT)
+		max_number = 0
+		amount = 0
+		1.up_to(9) do |e|
+			number = orders.where(:amount => e).length
+			if number > max_number
+				amount = e
+				max_number = number
+			end
+		end
+		orders = orders.where(:amount => e).limit(100)
+		orders_for_ofcard = []
+		orders.each do |o|
+			o.status = HANDLE
+			o.handled_at = Time.now.to_i
+			o.save
+			orders_for_ofcard << [o._id.to_s, o.mobile, e]
+		end
+		return orders_for_ofcard
+	end
+
+	def self.merge_order_id(orders)
+		orders.each do |o|
+			order = Order.find_by_id(o["orderid"])
+			next if order.nil?
+			order.ofcard_order_id = o["billid"]
+			if o["stat"] == "成功"
+				order.status = SUCCESS
+				SmsApi.send_sms(order.mobile, "")
+			elsif o["stat"] == "撤销"
+				order.status = FAIL
+			end
+			order.save
+		end
+		return true
+	end
+
+	def self.handled_orders
+		orders = Order.where(:type => SMALL_MOBILE_CHARGE, :status => HANDLE, :ofcard_order_id.ne => "").asc(:handled_at).limit(100)
+		return orders.map { |e| e.ofcard_order_id }
+	end
+
+	def self.update_order_stat(orders)
+		orders.each do |o|
+			order = Order.find_by_ofcard_order_id(o["billid"])
+			next if order.nil?
+			if o["stat"] == "成功"
+				order.status = SUCCESS
+				SmsApi.send_sms(order.mobile, "")
+			elsif o["stat"] == "撤销"
+				order.status = FAIL
+			end
+		end
+		return true
 	end
 end

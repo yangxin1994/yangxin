@@ -41,7 +41,9 @@ class Answer
 	field :point_to_introducer, :type => Integer
 	field :point, :type => Integer, :default => 0
 	field :rewards, :type => Array, :default => []
-	field :reward_need_review, :type => Boolean
+	field :introducer_reward_assigned, :type => Boolean, default: false
+	field :reward_delivered, :type => Boolean, default: false
+	field :need_review, :type => Boolean
 
 	# used for interviewer to upload attachments
 	field :attachment, :type => Hash, :default => {}
@@ -66,6 +68,7 @@ class Answer
 	belongs_to :interviewer_task
 	belongs_to :lottery
 	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
+	has_one :order
 
 	STATUS_NAME_ARY = ["edit", "reject", "under_review", "finish", "redo"]
 	EDIT = 1
@@ -99,30 +102,19 @@ class Answer
 	public
 
 	def self.find_by_id(answer_id)
-		answer = Answer.where(:_id => answer_id).first
-		return answer
+		return Answer.where(:_id => answer_id).first
 	end
 
-	def self.find_by_survey_id_email_is_preview(survey_id, email, is_preview)
-		survey = Survey.find_by_id(survey_id)
-		owner = User.find_by_email(email)
-		return nil if survey.nil?
-		return nil if owner.nil?
-		return survey.answers.where(user_id: owner._id.to_s, :is_preview => is_preview)[0]
-	end
-
-	def self.find_by_password(username, password)
-		answer = Answer.where(username: username, password: password)[0]
-		return answer
+	def self.find_by_survey_id_sample_id_is_preview(survey_id, sample_id, is_preview)
+		return Answer.where(user_id: sample_id, survey_id: survey_id, :is_preview => is_preview).first
 	end
 
 	def self.find_by_status(status)
 		return self.in("status" => Tool.convert_int_to_base_arr(status.to_i))
 	end
 
-	def self.create_answer(is_preview, introducer_id, email, survey_id, channel, ip, username, password, referrer)
-		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
+	def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, channel, referrer, remote_ip, username, password)
+		# create the answer
 		answer = Answer.new(is_preview: is_preview,
 			channel: channel,
 			ip_address: ip,
@@ -130,62 +122,29 @@ class Answer
 			username: username,
 			password: password,
 			referrer: referrer)
+		# record introducer information
 		if !is_preview && introducer_id
-			introducer = User.find_by_id(introducer_id)
-			if !introducer.nil? && introducer.email != email
+			introducer = User.sample.find_by_id(introducer_id)
+			if !introducer.nil?
 				answer.introducer_id = introducer_id
 				answer.point_to_introducer = survey.spread_point
 			end
 		end
-
-		# initialize the answer content
-		answer_content = {}
-		survey.pages.each do |page|
-			answer_content = answer_content.merge(Hash[page["questions"].map { |ele| [ele, nil] }])
+		# record the reward information
+		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
+		if !reward_scheme.nil?
+			answer.rewards = reward_scheme.rewards
+			answer.rewards[0]["checked"] = true if answer.rewards.length == 1
+			answer.need_review = reward_scheme.need_review
+			reward_scheme.answers << self
+		else
+			answer.rewards = []
+			answer.need_review = false
 		end
-		logic_control = survey.show_logic_control
-		logic_control.each do |rule|
-			if rule["rule_type"] == 1
-				rule["result"].each do |q_id|
-					answer_content[q_id] = {}
-				end
-			end
-		end
-		answer.answer_content = answer_content
 
 		answer.save
-		if !email.nil?
-			owner = User.find_by_email(email)
-			owner.answers << answer if !owner.nil?
-		end
+		survey = Survey.normal.find_by_id(survey_id)
 		survey.answers << answer
-
-		# initialize the logic control result
-		answer.logic_control_result = {}
-		logic_control.each do |rule|
-			if rule["rule_type"] == 3
-				rule["result"].each do |ele|
-					answer.add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
-				end
-			elsif rule["rule_type"] == 5
-				items_to_be_added = []
-				rule["result"]["items"].each do |input_ids|
-					items_to_be_added << input_ids[1]
-				end
-				answer.add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
-			end
-		end
-
-		# randomly generate quality control questions
-		answer = answer.genereate_random_quality_control_questions
-
-		# copy the reward info from the survey
-		answer.reward = answer.survey.reward
-		answer.point = answer.survey.point
-		answer.lottery = answer.survey.lottery
-		answer.save
-
-		return answer
 	end
 
 	def has_rewards
@@ -782,15 +741,6 @@ class Answer
 		return question_ids_with_qc_questions.index(question_id)
 	end
 
-	#*description*: finish an answer
-	#
-	#*params*:
-	#
-	#*retval*:
-	#* true: when the answer is set as finished
-	#* ErrorEnum::WRONG_ANSWER_STATUS
-	#* ErrorEnum::SURVEY_NOT_ALLOW_PAGEUP
-	#* ErrorEnum::ANSWER_NOT_COMPLETE
 	def finish(auto = false)
 		# synchronize the normal questions in the survey and the qeustions in the answer content
 		survey_question_ids = self.survey.all_questions_id
@@ -808,19 +758,14 @@ class Answer
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
 		old_status = self.status
 		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
-		if self.is_preview || (self.reward == 0 && self.introducer_id.nil?)
+		if self.is_preview || self.need_review
 			self.set_finish
-		elsif !self.survey.answer_need_review
-			self.set_finish
-			self.assign_sample_reward
-			self.assign_introducer_reward
 		else
 			self.set_under_review
 		end
 		self.update_quota(old_status) if !self.is_preview
 		self.finished_at = Time.now.to_i
-		self.save
-		return true
+		return self.save
 	end
 
 	def estimate_remain_answer_time
@@ -872,7 +817,7 @@ class Answer
 
 	# the answer auditor reviews this answer, the review result can be 1 (pass review) or 2 (not pass)
 	def review(review_result, answer_auditor, message_content)
-		return ErrorEnum::ANSWER_NOT_FINISHED if self.status != 4
+		return ErrorEnum::WRONG_ANSWER_STATUS if self.status != UNDER_REVIEW
 
 		old_status = self.status
 		user = self.user
@@ -895,37 +840,14 @@ class Answer
 		# update quota of the survey and the interviewer task if there is any
 		self.interviewer_task.try(:refresh_quota)
 		self.update_quota(old_status)
-		self.assign_sample_reward and self.assign_introducer_reward if self.is_finish
+		self.deliver_reward
 		return true
-	end
-
-	def assign_sample_reward  ##TODO to be complete
-		if !self.rewards.blank? && !self.user.nil?
-			# assign this user points, or a lottery code
-			# usage post_reward_to(user, :type => 2, :point => 100)
-			# 1 for lottery & 2 for point
-			# maybe lottery is nil
-			# if self.reward == 1
-			# 	if self.lottery
-			# 		lc = self.lottery.give_lottery_code_to(self.user)
-			# 		self.survey.post_reward_to(self.user, :type => self.reward, :lottery_code => lc, :cause => 2)
-			# 		# send an email to the user
-			# 		EmailWorker.perform_async("lottery_code",
-			# 			self.user.email,
-			# 				"",
-			# 			:survey_id => self.survey._id.to_s,
-			# 			:lottery_code_id => lc._id.to_s)
-			# 	end
-			# elsif self.reward == 2
-			# 	self.survey.post_reward_to(user, :type => self.reward, :point => self.point, :cause => 2)
-			# end
-		end
 	end
 
 	def assign_introducer_reward
 		# give the introducer points
 		introducer = User.find_by_id(self.introducer_id)
-		if !introducer.nil?
+		if !introducer.nil? && self.introducer_reward_assigned == false
 			# update the survey spread
 			SurveySpread.inc(introducer, self.survey)
 			if point_to_introducer > 0
@@ -933,6 +855,227 @@ class Answer
 				# send the introducer a message about the rewarded points
 				introducer.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.point_to_introducer}个积分奖励。", [introducer._id.to_s])
 			end
+			self.introducer_reward_assigned = true
 		end
+	end
+
+	def change_sample_account(sample)
+		sample.answers.delete(self) if !self.user.nil?
+		sample.answers << self
+		return true
+	end
+
+	def logout_sample_account
+		self.user.answers.delete(self) if !self.user.nil?
+	end
+
+	def select_reward(reward_index, mobile, alipay_account)
+		# select reward
+		reward = self.rewards[reward_index]
+		return ErrorEnum::REWARD_NOT_EXIST if reward.nil?
+		self.rewards.each { |r|	r["checked"] = false }
+		reward["checked"] = true
+
+		# record the mobile or alipay account
+		if reward["type"].to_i == RewardScheme::MOBILE
+			# need to record mobile number
+			reward["mobile"] = mobile
+		elsif [RewardScheme::ALIPAY, RewardScheme::JIFENBAO].include?(reward["type"].to_i)
+			# need to record alipay account
+			reward["alipay_account"] = alipay_account
+		end
+		self.save
+
+		return self.deliver_reward
+	end
+
+	def deliver_reward
+		# reward has been delivered
+		return true if self.reward_delivered
+
+		# find out the selected reward
+		reward = nil
+		self.rewards.each do |r|
+			reward = r and break if r["checked"] == true
+		end
+		return ErrorEnum::REWARD_NOT_SELECTED if reward.nil?
+		
+		case reward["type"].to_i
+		when RewardScheme::MOBILE
+			return ErrorEnum::REPEAT_ORDER if self.survey.answers.check_repeat_mobile(reward["mobile"])
+			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
+			sample = User.find_or_create_new_visitor_by_email_mobile(reward["mobile"])
+			order = Order.create_answer_order(sample._id.to_s,
+				self.survey._id.to_s,
+				Order::SMALL_MOBILE_CHARGE,
+				reward["amount"],
+				"mobile" => reward["mobile"])
+			self.order = order
+			assign_introducer_reward
+			self.reward_delivered = true
+			return self.save
+		when RewardScheme::ALIPAY
+			return ErrorEnum::REPEAT_ORDER if self.survey.answers.check_repeat_alipay(reward["alipay_account"])
+			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
+			sample = User.find_or_create_new_visitor_by_email_mobile(reward["alipay_account"])
+			order = Order.create_answer_order(sample._id.to_s,
+				self.survey._id.to_s,
+				Order::ALIPAY,
+				reward["amount"],
+				"alipay_account" => reward["alipay_account"])
+			self.order = order
+			assign_introducer_reward
+			self.reward_delivered = true
+			return self.save
+		when RewardScheme::JIFENBAO
+			return ErrorEnum::REPEAT_ORDER if self.survey.answers.check_repeat_jifenbao(reward["alipay_account"])
+			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
+			sample = User.find_or_create_new_visitor_by_email_mobile(reward["alipay_account"])
+			order = Order.create_answer_order(sample._id.to_s,
+				self.survey._id.to_s,
+				Order::JIFENBAO,
+				reward["amount"],
+				"alipay_account" => reward["alipay_account"])
+			self.order = order
+			assign_introducer_reward
+			self.reward_delivered = true
+			return self.save
+		when RewardScheme::POINT
+			return ErrorEnum::SAMPLE_NOT_EXIST if self.user.nil?
+			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
+			sample = self.user
+			sample.point += reward["amount"]
+			assign_introducer_reward
+			self.reward_delivered = true
+			return self.save
+		when RewardScheme::LOTTERY
+			return true if self.status == UNDER_REVIEW
+			assign_introducer_reward
+			order = self.order
+			if order && order.status == Order::FROZEN
+				order.status = Order::WAIT
+				order.save
+				order.auto_handle
+			end
+			return true
+		end
+	end
+
+	def self.check_repeat_mobile(mobile)
+		self.all.each do |a|
+			selected_reward = a.rewards.select { |r| r["checked"] == true }
+			next if selected_reward.blank?
+			return true if selected_reward[0]["type"] == RewardScheme::MOBILE && selected_reward[0]["mobile"] == mobile
+		end
+		return false
+	end
+
+	def self.check_repeat_alipay(alipay_account)
+		self.all.each do |a|
+			selected_reward = a.rewards.select { |r| r["checked"] == true }
+			next if selected_reward.blank?
+			return true if selected_reward[0]["type"] == RewardScheme::ALIPAY && selected_reward[0]["alipay_account"] == alipay_account
+		end
+		return false
+	end
+
+	def self.check_repeat_jifenbao(alipay_account)
+		self.all.each do |a|
+			selected_reward = a.rewards.select { |r| r["checked"] == true }
+			next if selected_reward.blank?
+			return true if selected_reward[0]["type"] == RewardScheme::JIFENBAO && selected_reward[0]["alipay_account"] == alipay_account
+		end
+		return false
+	end
+
+	def bind_sample(email_mobile)
+		sample = User.find_or_create_new_visitor_by_email_mobile(email_mobile)
+		answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id, sample._id, false)
+		return ErrorEnum::ANSWER_EXIST if !answer.nil?
+		sample.answers << self
+		return self.deliver_reward
+	end
+
+	def draw_lottery
+		return ErrorEnum::LOTTERY_DRAWED if self.reward_delivered
+		reward = (self.rewards.select { |r| r["checked"] == true }).first
+		return ErrorEnum::REWORD_NOT_SELECTED if reward.nil?
+		return ErrorEnum::NOT_LOTTERY_REWARD if reward["type"] != RewardScheme::LOTTERY
+		return ErrorEnum::LOTTERY_DRAWED if !reward["win"].nil?
+
+		# draw lottery
+		reward_scheme = self.reward_scheme
+		reward_index = -1
+		reward_scheme.rewards.each_with_index do |r, i|
+			if r["type"] == RewardScheme::LOTTERY
+				reward_index = i
+				break
+			end
+		end
+		if reward_index == -1
+			self.reward_delivered = true
+			self.save
+			return false
+		end
+		prizes = reward["prizes"]
+		return ErrorEnum::REWARD_SCHEME_NOT_EXIST if reward_scheme.nil?
+		reward["prizes"].each do |p|
+			next if rand > p["prob"]
+			prizes.each do |reward_scheme_p|
+				next if p["prize_id"] != reward_scheme_p["prize_id"]
+				if reward_scheme_p["deadline"] < Time.now.to_i && reward_scheme_p["amount"] > reward_scheme_p["win_amount"]
+					# win lottery
+					reward["win"] = true
+					reward["prize_id"] = p["prize_id"]
+					self.save
+					reward_scheme_p["win_amount"] ||= 0
+					reward_scheme_p["win_amount"] += 1
+					reward_scheme.save
+					return p["prize_id"]
+				end
+			end
+		end
+		reward["win"] = false
+		self.reward_delivered = true
+		self.save
+		return false
+	end
+
+	def create_lottery_order(order_info)
+		return ErrorEnum::SAMPLE_NOT_EXIST if self.user.nil?
+		return ErrorEnum::ORDER_CREATED if !self.order.nil?
+		reward = (self.rewards.select { |r| r["checked"] == true }).first
+		return ErrorEnum::REWORD_NOT_SELECTED if reward.nil?
+		return ErrorEnum::NOT_LOTTERY_REWARD if reward["type"] != RewardScheme::LOTTERY
+		prize = (reward["prizes"].select { |p| p["win"] == true }).first
+		return ErrorEnum::NOT_WIN if prize.nil?
+
+		# create lottery order
+		order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
+		order = Order.create_lottery_order(self.user._id.to_s,
+			self.survey._id.to_s,
+			prize["prize_id"],
+			order_info)
+		self.order = order
+		return true
+	end
+
+	def info_for_sample
+		answer_obj = {}
+		answer_obj["survey_id"] = self.survey_id.to_s
+		answer_obj["survey_title"] = self.survey.title
+		answer_obj["is_preview"] = self.is_preview
+		answer_obj["rewards"] = self.rewards
+		return answer_obj
+	end
+
+	def info_for_answer_list_for_sample
+		answer_obj = {}
+		answer_obj["survey_id"] = self.survey_id.to_s
+		answer_obj["survey_title"] = self.survey.title
+		answer_obj["order_id"] = self.order._id.to_s
+		answer_obj["created_at"] = self.created_at.to_i
+		answer_obj["rewards"] = self.rewards
+		return answer_obj
 	end
 end
