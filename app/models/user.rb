@@ -176,27 +176,6 @@ class User
 		return {"level" => self.level, "level_expire_time" => self.level_expire_time}
 	end
 
-	# def update_basic_info(user_info)
-	# 	self.birthday = user_info["birthday"].to_i
-	# 	self.gender = user_info["gender"].to_s == "true"
-	# 	self.address = user_info["address"]
-	# 	self.postcode = user_info["postcode"]
-	# 	self.phone = user_info["phone"]
-	# 	self.full_name = user_info["full_name"]
-	# 	self.identity_card = user_info["identity_card"]
-	# 	self.company = user_info["company"]
-	# 	return self.save
-	# end
-
-	def update_basic_info(basic_info)
-		if self.affiliated.present?
-			self.update_affiliated(basic_info)
-		else
-			self.create_affiliated(basic_info)
-		end
-	end
-
-		
 	def update_avatar(avatar)
 		self.create_avatar(avatar)
 	end
@@ -207,40 +186,6 @@ class User
 		else
 			self.create_affiliated(receiver_info)
 		end	
-	end
-
-	#*description*: check whether an email has been registered as an user
-	#
-	#*params*:
-	#* email of the user
-	#
-	#*retval*:
-	#* true or false
-	def self.user_exist_by_username?(username)
-		return exists?(conditions: { username: username })
-	end
-
-	def self.user_exist_by_email?(email)
-		return exists?(conditions: { email: email })
-	end
-
-	#*description*: check whether an user has activated
-	#
-	#*params*:
-	#* email of the user
-	#
-	#*retval*:
-	#* true or false
-	## TODO to be remove by checking user.role
-	def self.user_activate_by_email?(email)
-		user = User.find_by_email(email)
-		return !!(user && user.email_activation == true)
-	end
-
-	##TODO this may deleted
-	def self.user_activate_by_username?(username)
-		user = User.find_by_username(username)
-		return !!(user && user.status == 1)
 	end
 
 	def is_deleted
@@ -933,6 +878,17 @@ class User
 			end
 		end
 		return user_obj
+	end
+
+	def sample_attributes
+		sample = {
+			"email" => self.email,
+			"mobile" => self.mobile
+		}
+		SampleAttribute.normal.each do |s|
+			sample[s.name] = self.read_sample_attribute(s.name)
+		end
+		return sample
 	end
 
 	def read_sample_attribute(name)

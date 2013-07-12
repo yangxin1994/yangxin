@@ -51,4 +51,9 @@ class RegistrationsController < ApplicationController
 		retval = User.activate("mobile", activate_info, @remote_ip, params[:_client_type])
 		render_json_auto(retval) and return
 	end
+
+	def registered_user_exist
+		u = User.find_by_email_mobile(params[:email_mobile])
+		render_json_auto {"exist" => (u && u.status == REGISTERED) } and return
+	end
 end

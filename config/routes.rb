@@ -304,6 +304,7 @@ OopsData::Application.routes.draw do
 		collection do
 			post :send_activate_key
 			post :email_activate, :mobile_activate
+			get :registered_user_exist
 		end
 	end
 
