@@ -1716,7 +1716,6 @@ class Survey
 	end
 
 	def self.list_spreaded_surveys(user)
-		answers = Answer.not_preview.where(:introducer_id => user._id)
 		surveys_with_spread_number = []
 		user.survey_spreads.each do |ss|
 			survey = ss.survey
