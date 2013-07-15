@@ -3,7 +3,7 @@ require 'error_enum'
 require 'quill_common'
 class Agent::AnswersController < Agent::ApplicationController
 
-	before_filter :require_agent_task
+	before_filter :require_agent
 	before_filter :check_answer_existence, :except => [:index]
 
 	def check_answer_existence
@@ -12,7 +12,6 @@ class Agent::AnswersController < Agent::ApplicationController
 	end
 
 	def index
-		render_json_auto auto_paginate(survey.answers) and return
 	end
 
 	def show
