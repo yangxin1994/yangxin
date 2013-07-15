@@ -6,7 +6,7 @@ require 'quill_common'
 class Answer
 	include Mongoid::Document
 	include Mongoid::Timestamps
-	# status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo
+	# status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo, 32 for under agents' review
 	field :status, :type => Integer, default: 0
 	field :answer_content, :type => Hash, default: {}
 	field :random_quality_control_answer_content, :type => Hash, default: {}
@@ -50,6 +50,11 @@ class Answer
 	field :longitude, :type => String, :default => ""
 	field :latitude, :type => String, :default => ""
 	field :referrer, :type => String, :default => ""
+
+	field :agent_feedback_name
+	field :agent_feedback_email
+	field :agent_feedback_mobile
+
 
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
