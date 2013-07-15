@@ -180,32 +180,6 @@ class MailgunApi
 		self.send_message(data)
 	end
 
-	def self.agent_task_email(email, callback, agent_task_id)
-		@agent_task = AgentTask.find_by_id(agent_task_id)
-		@survey = @agent_task.survey
-		@survey_title = @survey.title
-		@preview_link = "#{callback}/questionaires/#{@survey._id.to_s}/preview"
-		@email = email
-		@password = Encryption.decrypt_password(@agent_task.password)
-		data = {}
-		data[:domain] = Rails.application.config.user_email_domain
-		data[:from] = @@user_email_from
-
-		html_template_file_name = "#{Rails.root}/app/views/agent_mailer/agent_task_email.html.erb"
-		text_template_file_name = "#{Rails.root}/app/views/agent_mailer/agent_task_email.text.erb"
-		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
-		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
-		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
-		data[:html] = premailer.to_inline_css
-		data[:text] = text_template.result(binding)
-
-		data[:subject] = "优数代理推广任务启动通知"
-		data[:subject] += " --- to #{email}" if Rails.env != "production" 
-		data[:to] = Rails.env == "production" ? email : @@test_email
-		self.send_message(data)
-	end
-
-
 	def self.generate_active_code_email(email,code,callback)
 	  activate_info = {"email" => email, "code" => code, "time" => Time.now.to_i}
       data = {}
