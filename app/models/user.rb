@@ -30,7 +30,7 @@ class User
 	field :last_login_client_type, :type => String
 	field :login_count, :type => Integer, default: 0
 	field :sms_verification_code, :type => String
-	field :sms_verification_expiration_time, :type => Integer
+	field :sms_verification_expiration_time, :type => Integer,default:  -> {(Time.now + 1.minutes).to_i }
 	field :activate_time, :type => Integer
 	field :introducer_id, :type => String
 	field :last_read_messeges_time, :type => Time, :default => Time.now
@@ -243,20 +243,34 @@ class User
 		if email_mobile.match(/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/)  ## match email
 			account[:email] = email_mobile.downcase
 		elsif email_mobile.match(/^\d{11}$/)  ## match mobile
-			account[:mobile] = email_mobile
+            active_code = Random.rand(100000..999999).to_i
+  			account[:mobile] = email_mobile
 		end
 		return ErrorEnum::ILLEGAL_EMAIL_OR_MOBILE if account.blank?
 		existing_user = account[:email] ? self.find_by_email(account[:email]) : self.find_by_mobile(account[:mobile])
 		return ErrorEnum::USER_REGISTERED if existing_user && existing_user.status == REGISTERED
 		password = Encryption.encrypt_password(password) if account[:email]
+        account[:status] = account[:email].present? ? REGISTERED : VISITOR
+        account[:sms_verification_code] = active_code if account[:mobile]
 		updated_attr = account.merge(
 			password: password,
 			registered_at: Time.now.to_i)
-		account[:status] = account[:email] ? REGISTERED : VISITOR
-		existing_user = User.create if check_exist.nil?
+
+		#existing_user = User.create if check_exist.nil?
+		existing_user = User.create if existing_user.nil?
 		existing_user.update_attributes(updated_attr)
+        
+        if active_code.present?
+          	## TODO   generate active code when user regist with mobile
+          	## TODO   store the random code and mobile in session with a expire time 60 sec.     
+			# SmsInvitationWorker
+        else
+            # send welcome email
+			EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
+        end
+
 		# send welcome email
-		EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
+		#EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
 		## TODO  send_mobile_message() if account[:mobile]
 		if !third_party_user_id.nil?
 			# bind the third party user if the id is provided
@@ -810,7 +824,7 @@ class User
 				"title" => e.survey.title,
 				"created_at" => e.created_at,
 				"finished_at" => Time.at(e.finished_at),
-				"status" => e.status
+				"status" => e.status,
 				"reject_type" => e.reject_type,
 				"reward_type" => reward_type,
 				"reward_amount" => reward_amount
