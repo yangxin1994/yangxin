@@ -322,8 +322,9 @@ class User
 			user.activate_time = Time.now.to_i
 		else
 			# mobile activate
+			return ErrorEnum::USER_NOT_REGISTERED if user.status == VISITOR
 			return ErrorEnum::ILLEGAL_ACTIVATE_KEY if user.sms_verification_code != activate_info["verification_code"]
-			return ErrorEnum::ILLEGAL_ACTIVATE_KEY if Time.now.to_i  > user.sms_verification_expiration_time
+			return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i  > user.sms_verification_expiration_time
 			user.password = Encryption.encrypt_password(activate_info["password"])
 			user.mobile_activation = true
 			user.activate_time = Time.now.to_i
