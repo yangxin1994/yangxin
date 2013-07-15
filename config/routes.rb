@@ -537,7 +537,7 @@ OopsData::Application.routes.draw do
 
       resources :prizes do
         collection do
-          get :get_prizes,:as => :get_prizes
+          post :get_prizes,:as => :get_prizes
         end
       end      
 

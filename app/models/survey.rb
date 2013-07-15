@@ -184,7 +184,7 @@ class Survey
     # survey_data 以survey的id为key，以survey对象为value的hash
     # scheme_type_hash 以奖励类型为key，以survey的id为元素的数组最为value  
     # scheme_datas  以奖励方案的id为key，以每个奖励方案的内容为value 
-	def self.get_recommends(page,per_page,sta=2)
+	def self.get_recommends(page,per_page,sta=2,user_id=nil)
 	  sta = 2 unless sta.present?
 	  if page && per_page
 	    surveys = Survey.quillme_promote.not_quillme_hot.status(sta).page(page).per(per_page).desc(:created_at)	
@@ -201,7 +201,6 @@ class Survey
 	  	  survey_data.each_pair do |survey_id,survey|
 	  	    scheme_id = survey.quillme_promote_info['reward_scheme_id']
 	  	    if scheme_id
-	  	      #rs = RewardScheme.find(scheme_id)
 	  	      rs = RewardScheme.where(:id => scheme_id).first
 	  	      if rs
 	  	        if rs.rewards.select{|ele| ele['type'].to_s ==  rtype.to_s }
@@ -214,10 +213,16 @@ class Survey
 	  	end
 	  end
 	  scheme_datas = {}
-	  RewardScheme.all.map{|rs| scheme_datas[rs.id] = {'reward' => rs.rewards} }
+	  RewardScheme.all.map{|rs| scheme_datas[rs.id] = rs.rewards[0] }
+	  surveys = surveys.map{|survey| survey['answer_count'] = survey.answers.count;survey['time'] = survey.estimate_answer_time;survey['answerd'] = survey.answered(user_id);survey}
       return [surveys,scheme_datas,scheme_type_hash,survey_data]   
 	end
 
+
+    def answered(user)
+      u = self.answers.where(:user_id => user_id).first if user.present?
+      return u    	
+    end
 
 	#----------------------------------------------
 	#

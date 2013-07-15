@@ -45,15 +45,17 @@ class RegistrationsController < ApplicationController
 	end
 
 	def mobile_activate
+		Rails.logger.info("111111111111111111111111111111")
 		activate_info = {"mobile" => params[:mobile],
 				"password" => params[:password],
 				"verification_code" => params[:verification_code]}
 		retval = User.activate("mobile", activate_info, @remote_ip, params[:_client_type])
+		Rails.logger.info("333333333333333333333333333333")
 		render_json_auto(retval) and return
 	end
 
 	def registered_user_exist
 		u = User.find_by_email_mobile(params[:email_mobile])
-		render_json_auto {"exist" => (u && u.status == REGISTERED) } and return
+		render_json_auto({"exist" => (u && u.status == User::REGISTERED)}) and return
 	end
 end
