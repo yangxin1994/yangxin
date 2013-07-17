@@ -1715,15 +1715,6 @@ class Survey
 		return surveys.map { |s| {"survey" => s.info_for_sample, "answer_status" => s.answer_status(user)} }
 	end
 
-	def self.list_spreaded_surveys(user)
-		surveys_with_spread_number = []
-		user.survey_spreads.each do |ss|
-			survey = ss.survey
-			surveys_with_spread_number << survey.info_for_sample.merge({"spread_number" => ss.times})
-		end
-		return surveys_with_spread_number
-	end
-
 	def self.search_title(query)
 		surveys = Survey.where(title: Regexp.new(query.to_s)).desc(:created_at)
 		return surveys.map { |s| s.serialize_in_list_page }

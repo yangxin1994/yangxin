@@ -46,9 +46,12 @@ class Sample::SurveysController < ApplicationController
 
   def list_spreaded_surveys
     render_json_auto ErrorEnum::REQUIRE_LOGIN if @current_user.nil?
-    surveys_with_spreaded_number = Survey.list_spreaded_surveys(@current_user)
-    paginated_surveys = auto_paginate surveys_with_spreaded_number
-    render_json_auto(paginated_surveys)
+    surveys_with_spreaded_number = auto_paginate @current_user.survey_spreads do |paginated_survey_spreads|
+      paginated_survey_spreads.map do |e|
+        e.survey.info_for_sample.merge({"spread_number" => e.times})
+      end
+    end
+    render_json_auto surveys_with_spreaded_number and return
   end
 
 end
