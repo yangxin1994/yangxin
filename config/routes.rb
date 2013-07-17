@@ -561,6 +561,7 @@ OopsData::Application.routes.draw do
           get :fresh_news,:as => :fresh_news
           get :get_disciplinal_news,:as => :get_disciplinal_news
           get :get_newst_exchange_logs,:as => :get_newst_exchange_logs
+          get 'get_point_change_log'
         end
       end
 
