@@ -1711,7 +1711,6 @@ class Survey
 		survey_obj["title"] = self.title.to_s
 		survey_obj["subtitle"] = self.subtitle.to_s
 		survey_obj["created_at"] = self.created_at.to_i
-		survey_obj["rewards"] = self.rewards
 		survey_obj["status"] = self.status
 		survey_obj["spreadable"] = self.spreadable
 		survey_obj["spread_point"] = self.spread_point
