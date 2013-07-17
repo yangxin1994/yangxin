@@ -23,7 +23,10 @@ OopsData::Application.routes.draw do
 			end
 		end
 
-		resources :surveys do
+		resources :agent_tasks do
+			member do
+				put :close
+			end
 		end
 
 		resources :answers do
@@ -66,9 +69,11 @@ OopsData::Application.routes.draw do
 		resources :answer_auditors, :only => [:index]
 		resources :agent_tasks do
 			member do
-				put :reset_password
-				post :send_email
+				put :close, :open
 			end
+		end
+
+		resources :agents do
 		end
 
 		resources :materials do
