@@ -49,7 +49,7 @@ class SurveysController < ApplicationController
 		survey = Survey.new
 		survey.user = @current_user
 		if @current_user.is_admin || @current_user.is_super_admin
-			survey.publish_status = QuillCommon::PublishStatusEnum::PUBLISHED
+			survey.status = Survey::PUBLISHED
 		else
 			survey.style_setting["has_advertisement"] = false
 		end
@@ -271,24 +271,11 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	#*method*: post
-	#
-	#*url*: /surveys/list
-	#
-	#*description*: obtain a list of survey objects given a list tags
-	#
-	#*params*:
-	#* tags: array of tags
-	#* status: can be "all", "deleted", "normal"
-	#* publish_status
-	#
-	#*retval*:
-	#* a list Survey objects
 	def index
 		if params[:stars] then
-			survey_list = @current_user.surveys.stars.desc(:created_at)
+			survey_list = @current_user.surveys.stars
 		else
-			survey_list = @current_user.surveys.list(params[:status], params[:publish_status], params[:tags])
+			survey_list = @current_user.surveys.list(params[:status])
 		end	
 		# add answer_number
 		survey_list.map do |e| 
@@ -411,12 +398,14 @@ class SurveysController < ApplicationController
 		end
 	end
 
+=begin
 	def reward_info
 		survey = Survey.normal.find_by_id(params[:id])
 		respond_to do |format|
 			format.json	{ render_json_auto(survey.nil? ? ErrorEnum::SURVEY_NOT_EXIST : survey.reward_info) and return }
 		end
 	end
+=end
 
 	def search_title
 		surveys = @current_user.surveys.search_title(params[:query])
