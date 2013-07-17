@@ -27,16 +27,27 @@ class Sample::SurveysController < ApplicationController
   #在列表页的时候，开放中的问卷、已结束的问卷都要传递status，值分别对应2和1
   #返回的参数:一个盛放推荐调研问卷的列表
   #############################	
+  # def get_recommends
+  #   status = params[:status].present?  ? params[:status] : nil
+  #   @surveys = Survey.get_recommends(params[:page],params[:per_page],status,current_user)
+  #   if !params[:status].present?
+  #     @surveys = @surveys.slice!(0,2)     
+  #     #@surveys = auto_paginate(@surveys)
+  #   else
+  #     @surveys.shift
+  #   end
+  #   render_json_auto(@surveys)
+  # end
+
+
   def get_recommends
-    status = params[:status].present?  ? params[:status] : nil
-    @surveys = Survey.get_recommends(params[:page],params[:per_page],status,current_user)
-    if !params[:status].present?
-      @surveys = @surveys.slice!(0,2)     
-      #@surveys = auto_paginate(@surveys)
-    else
-      @surveys.shift
+    # status 1 or 2
+    #reward_type should be [1,2]
+    surveys = Survey.get_recommends(params[:status],params[:reward_type])
+    survey_obj = auto_paginate(surveys) do |paginated_surveys|
+      paginated_surveys.map { |e| e.excute_sample_data(@current_user) } 
     end
-    render_json { @surveys }
+    render_json_auto survey_obj
   end
 
   def show
