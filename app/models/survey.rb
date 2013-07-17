@@ -155,17 +155,16 @@ class Survey
     scope :not_quillme_hot, lambda {where(:quillme_hot => false)}
 
 
-	index({ status: 1, publish_status: 1, show_in_community: 1, title: 1 }, { background: true } )
+	index({ status: 1, show_in_community: 1, title: 1 }, { background: true } )
 	index({ show_in_community: 1, title: 1 }, { background: true } )
 	index({ title: 1 }, { background: true } )
 	index({ status: 1, show_in_community: 1, title: 1 }, { background: true } )
 	index({ status: 1, title: 1 }, { background: true } )
-	index({ status: 1, publish_status: 1, title: 1 }, { background: true } )
-	index({ publish_status: 1 }, { background: true } )
-	index({ status: 1, reward: 1, publish_status: 1 }, { background: true } )
+	index({ status: 1, title: 1 }, { background: true } )
+	index({ status: 1, reward: 1}, { background: true } )
 	index({ status: 1 }, { background: true } )
 	index({ status: 1, is_star: 1 }, { background: true } )
-	index({ status: 1, promotable: 1, publish_status: 1 }, { background: true } )
+	index({ status: 1, promotable: 1}, { background: true } )
 	index({ spreadable: 1 }, { background: true } )
 
 	before_save :clear_survey_object
@@ -254,6 +253,13 @@ class Survey
 
 	def get_all_promote_settings
 		return self.serialize_in_promote_setting
+	end
+
+	def update_quillme_reward_type
+		reward_scheme = RewardScheme.find_by_id(self.quillme_promote_info["reward_scheme_id"])
+		self.update_attributes({"quillme_reward_type" => 0}) and return if reward_scheme.nil?
+		self.update_attributes({"quillme_reward_type" => 0}) and return if reward_scheme.rewards.blank?
+		self.update_attributes({"quillme_reward_type" => reward_scheme.rewards[0]["type"].to_i})
 	end
 
 	#----------------------------------------------
@@ -370,6 +376,7 @@ class Survey
 		return self.save
 	end
 
+=begin
 	def reward_info
 		return {"reward_type" => self.reward,
 				"point" => self.point,
@@ -378,6 +385,7 @@ class Survey
 				"spreadable" => self.spreadable,
 				"spread_point" => self.spread_point}
 	end
+=end
 
 	def has_prize
 		reward > 0 ? true : false
@@ -395,7 +403,7 @@ class Survey
 		return if s.deadline.nil?
 		if Time.now.to_i - s.deadline < 20 && s.deadline - Time.now.to_i < 20
 			# close the survey and refresh the quota
-			s.update_attributes(publish_status: QuillCommon::PublishStatusEnum::CLOSED) if survey.publish_status == QuillCommonPublishStatusEnum::PUBLISHED
+			s.update_attributes(status: CLOSED) if survey.status == PUBLISHED
 			s.refresh_quota_stats
 		end
 	end
@@ -425,7 +433,7 @@ class Survey
 
 		# some information that cannot be cloned
 		new_instance.status = 0
-		new_instance.publish_status = (operator.is_admin || operator.is_super_admin) ? QuillCommon::PublishStatusEnum::PUBLISHED : QuillCommon::PublishStatusEnum::CLOSED
+		new_instance.status = (operator.is_admin || operator.is_super_admin) ? PUBLISHED : CLOSED
 
 		new_instance.is_star = false
 		new_instance.point = 0
@@ -523,54 +531,10 @@ class Survey
 	#
 	#++++++++++++++++++++++++++++++++++++++++++++++
 
-	def submit(message, operator)
-		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_super_admin
-		return ErrorEnum::WRONG_PUBLISH_STATUS if QuillCommon::PublishStatusEnum::CLOSED != self.publish_status
-		before_publish_status = self.publish_status
-		if operator.is_admin || operator.is_super_admin
-			self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
-		else
-			self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::UNDER_REVIEW)
-		end
-		return true
-	end
-
-	def reject(message, operator)
-		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_survey_auditor
-		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != QuillCommon::PublishStatusEnum::UNDER_REVIEW
-		before_publish_status = self.publish_status
-		self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::CLOSED)
-		# message
-		message ||={}
-		operator.create_message(
-			message[:title] || '管理人员-拒绝问卷审核',
-			message[:content] || '问卷有问题噢！',
-			[] << self.user.id.to_s)
-
-		return true
-	end
-
-	def publish(message, operator)
-		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_survey_auditor
-		return ErrorEnum::WRONG_PUBLISH_STATUS if self.publish_status != QuillCommon::PublishStatusEnum::UNDER_REVIEW
-		before_publish_status = self.publish_status
-		self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::PUBLISHED)
-		# self.deadline = Time.now.to_i + 30.days.to_i if self.deadline.blank?
-		self.save
-		# message
-		message ||={}
-		operator.create_message(
-			message[:title] || '管理人员-通过问卷审核',
-			message[:content] || '问卷通过审核，己发布!',
-			[] << self.user.id.to_s)
-		return true
-	end
-
 	def close(message, operator)
 		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_survey_auditor
-		return ErrorEnum::WRONG_PUBLISH_STATUS if ![QuillCommon::PublishStatusEnum::PUBLISHED, QuillCommon::PublishStatusEnum::UNDER_REVIEW].include?(self.publish_status)
-		before_publish_status = self.publish_status
-		self.update_attributes(:publish_status => QuillCommon::PublishStatusEnum::CLOSED)
+		return ErrorEnum::WRONG_STATUS if self.status != PUBLISHED
+		self.update_attributes(:status => CLOSED)
 		return true
 	end
 
@@ -1681,48 +1645,9 @@ class Survey
 	#
 	#++++++++++++++++++++++++++++++++++++++++++++++
 
-	def self.list(status, publish_status, tags)
-		puts "status:: #{status}"
-		puts "publish_status:: #{publish_status}, type: #{publish_status.class}"
-		survey_list = []
-		case status
-		when "all"
-			surveys = Survey.all
-		when "deleted"
-			surveys = Survey.deleted
-		when "normal"
-			surveys = Survey.normal
-		else
-			surveys = []
-		end
-
-		surveys.each do |survey|
-			if tags.nil? ||  tags.empty? || survey.has_one_tag_of(tags)
-				if publish_status.nil? ||publish_status == '' || survey.publish_status == publish_status.to_i
-					survey_list << survey
-				end
-			end
-		end
-		# sort by created_at
-		return survey_list.sort{|v1,v2| v2.created_at <=> v1.created_at}
-	end
-
-	def self.list_surveys_in_community(reward, only_spreadable, user)
-		surveys = Survey.in_community
-		surveys = surveys.where(:spreadable => true, :publish_status => 8) if only_spreadable
-		surveys = surveys.where(:reward => reward) if reward.to_i != -1
-		surveys = surveys.order_by(:publish_status.desc).order_by(:created_at.desc)
-		return surveys.map { |s| {"survey" => s.info_for_sample, "answer_status" => s.answer_status(user)} }
-	end
-
-	def self.list_spreaded_surveys(user)
-		answers = Answer.not_preview.where(:introducer_id => user._id)
-		surveys_with_spread_number = []
-		user.survey_spreads.each do |ss|
-			survey = ss.survey
-			surveys_with_spread_number << survey.info_for_sample.merge({"spread_number" => ss.times})
-		end
-		return surveys_with_spread_number
+	def self.list(status)
+		status_ary = Tool.convert_int_to_base_arr(status)
+		return Survey.where(:status.in => status_ary).desc(:created_at).map { |s| s.serialize_in_list_page }
 	end
 
 	def self.search_title(query)
@@ -1758,7 +1683,6 @@ class Survey
 		survey_obj["logic_control"] = Marshal.load(Marshal.dump(self.logic_control))
 		survey_obj["access_control_setting"] = Marshal.load(Marshal.dump(self.access_control_setting))
 		survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
-		survey_obj["publish_status"] = self.publish_status
 		survey_obj["status"] = self.status
 		survey_obj["quality_control_questions_type"] = self.quality_control_questions_type
 		survey_obj["quality_control_questions_ids"] = self.quality_control_questions_ids
@@ -1774,8 +1698,6 @@ class Survey
 		survey_obj["subtitle"] = self.subtitle.to_s
 		survey_obj["created_at"] = self.created_at
 		survey_obj["updated_at"] = self.updated_at
-		survey_obj["reward"] = self.reward
-		survey_obj["publish_status"] = self.publish_status
 		survey_obj["status"] = self.status
 		survey_obj["is_star"] = self.is_star
 		survey_obj['screened_answer_number']=self.answers.not_preview.screened.length
@@ -1789,7 +1711,8 @@ class Survey
 		survey_obj["title"] = self.title.to_s
 		survey_obj["subtitle"] = self.subtitle.to_s
 		survey_obj["created_at"] = self.created_at.to_i
-		survey_obj["rewards"] = self.rewards
+		# survey_obj["rewards"] = self.rewards
+		survey_obj["rewards"] = []
 		survey_obj["status"] = self.status
 		survey_obj["spreadable"] = self.spreadable
 		survey_obj["spread_point"] = self.spread_point

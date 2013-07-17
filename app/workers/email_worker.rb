@@ -14,8 +14,6 @@ class EmailWorker
 			MailgunApi.password_email(user, callback)
 		when 'sys_password'
 			MailgunApi.sys_password_email(user, callback)
-		when 'agent_task'
-			MailgunApi.agent_task_email(email, callback, opt["agent_task_id"])
 		when 'lottery_code'
 			MailgunApi.lottery_code_email(user, opt["survey_id"], opt["lottery_code_id"], callback)    	
 		end

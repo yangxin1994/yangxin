@@ -4,7 +4,7 @@ require 'error_enum'
 require 'quill_common'
 class Sample::AnswersController < ApplicationController
 
-	before_filter :check_answer_existence, :except => [:get_my_answer, :create, :get_today_answers_count, :get_today_spread_count]
+	before_filter :check_answer_existence, :except => [:index, :get_my_answer, :create, :get_today_answers_count, :get_today_spread_count]
 
 	def check_answer_existence
 		@answer = Answer.find_by_id(params[:id])
@@ -169,8 +169,9 @@ class Sample::AnswersController < ApplicationController
 	def index
 		render_json_e ErrorEnum::REQUIRE_LOGIN if @current_user.nil?
 		@answers = @current_user.answers.not_preview
-		@paginate_answers = auto_paginate(@answers)
-		render_json_auto @paginate_answers.map { |e| e.info_for_answer_list_for_sample }
-		
+		@paginate_answers_info = auto_paginate @answers do |paginate_answers|
+			paginate_answers.map { |e| e.info_for_answer_list_for_sample }
+		end
+		render_json_auto @paginate_answers_info
 	end
 end

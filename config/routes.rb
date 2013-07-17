@@ -23,7 +23,10 @@ OopsData::Application.routes.draw do
 			end
 		end
 
-		resources :surveys do
+		resources :agent_tasks do
+			member do
+				put :close
+			end
 		end
 
 		resources :answers do
@@ -66,9 +69,11 @@ OopsData::Application.routes.draw do
 		resources :answer_auditors, :only => [:index]
 		resources :agent_tasks do
 			member do
-				put :reset_password
-				post :send_email
+				put :close, :open
 			end
+		end
+
+		resources :agents do
 		end
 
 		resources :materials do
@@ -556,6 +561,7 @@ OopsData::Application.routes.draw do
           get :fresh_news,:as => :fresh_news
           get :get_disciplinal_news,:as => :get_disciplinal_news
           get :get_newst_exchange_logs,:as => :get_newst_exchange_logs
+          get 'get_point_change_log'
         end
       end
 
