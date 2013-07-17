@@ -1079,6 +1079,8 @@ class Answer
 		answer_obj["survey_id"] = self.survey_id.to_s
 		answer_obj["survey_title"] = self.survey.title
 		answer_obj["order_id"] = self.order.try(:_id).to_s
+		answer_obj["answer_status"] = self.status
+		answer_obj["answer_reject_type"] = self.reject_type
 		answer_obj["created_at"] = self.created_at.to_i
 		answer_obj["rewards"] = self.rewards
 		return answer_obj
