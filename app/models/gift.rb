@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'tool'
 class Gift
 	include Mongoid::Document
