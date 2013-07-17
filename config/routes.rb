@@ -455,7 +455,6 @@ OopsData::Application.routes.draw do
 		end
 	end
 
-
 	namespace :sample do
 		resources :accounts do 
 			collection do
@@ -473,7 +472,7 @@ OopsData::Application.routes.draw do
 				get :get_hot_spot_survey,:as => :get_hot_spot_survey
 				get :get_recommends,:as => :get_recommends
 				get :list_answered_surveys,:as => :list_answered_surveys
-		get :list_spreaded_surveys,:as => :list_spreaded_surveys
+				get :list_spreaded_surveys,:as => :list_spreaded_surveys
 			end
 		end
 		resources :public_notices do
@@ -505,6 +504,7 @@ OopsData::Application.routes.draw do
 				get :fresh_news,:as => :fresh_news
 				get :get_disciplinal_news,:as => :get_disciplinal_news
 				get :get_newst_exchange_logs,:as => :get_newst_exchange_logs
+				get :get_point_change_log
 			end
 		end
 		resources :answers do 
@@ -536,8 +536,6 @@ OopsData::Application.routes.draw do
 			end
 		end
 	end
-
-
 
 	# The priority is based upon order of creation:
 	# first created -> highest priority.
