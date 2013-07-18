@@ -7,7 +7,7 @@ class Answer
 	include Mongoid::Document
 	include Mongoid::Timestamps
 	# status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo, 32 for under agents' review
-	field :status, :type => Integer, default: 0
+	field :status, :type => Integer, default: 1
 	field :answer_content, :type => Hash, default: {}
 	field :random_quality_control_answer_content, :type => Hash, default: {}
 	field :random_quality_control_locations, :type => Hash, default: {}
@@ -1095,6 +1095,7 @@ class Answer
 
 	def info_for_answer_list_for_sample
 		answer_obj = {}
+		answer_obj["answer_id"] = self._id.to_s
 		answer_obj["survey_id"] = self.survey_id.to_s
 		answer_obj["survey_title"] = self.survey.title
 		answer_obj["order_id"] = self.order.try(:_id).to_s
