@@ -4,7 +4,7 @@ require 'error_enum'
 require 'quill_common'
 class Sample::AnswersController < ApplicationController
 
-	before_filter :check_answer_existence, :except => [:get_my_answer, :create, :get_today_answers_count, :get_today_spread_count]
+	before_filter :check_answer_existence, :except => [:list_spreaded_answers, :index, :get_my_answer, :create, :get_today_answers_count, :get_today_spread_count]
 
 	def check_answer_existence
 		@answer = Answer.find_by_id(params[:id])
@@ -14,7 +14,7 @@ class Sample::AnswersController < ApplicationController
 	def create
 		survey = Survey.normal.find_by_id(params[:survey_id])
 		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if survey.nil?
-		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if !is_preivew && survey.publish_status != QuillCommon::PublishStatusEnum::PUBLISHED
+		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if !params[:is_preview] && survey.publish_status != QuillCommon::PublishStatusEnum::PUBLISHED
 		sample = User.sample.find_by_email_mobile(params[:email_mobile])
 		answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], sample.try(:_id), params[:is_preview] || false)
 		render_json_s(answer._id.to_s) and return if !answer.nil?
@@ -26,7 +26,7 @@ class Sample::AnswersController < ApplicationController
 			params[:introducer_id],
 			params[:channel],
 			params[:referrer],
-			params[:remote_ip],
+			params[:_remote_ip],
 			params[:username],
 			params[:password])
 		sample.answers << answer if !sample.nil?
@@ -173,5 +173,15 @@ class Sample::AnswersController < ApplicationController
 			paginate_answers.map { |e| e.info_for_answer_list_for_sample }
 		end
 		render_json_auto @paginate_answers_info
+	end
+
+	def list_spreaded_answers
+		render_json_e ErrorEnum::REQUIRE_LOGIN if @current_user.nil?
+		@survey = Survey.find_by_id(params[:survey_id])
+		render_json_e ErrorEnum::SURVEY_NOT_EXIST if @survey.nil?
+		@answers = @survey.answers.not_preview.where(:introducer_id => @current_user._id.to_s).desc(:status)
+		render_json_auto auto_paginate @answers do |paginate_answers|
+			paginate_answers.map { |e| e.info_for_spread_details }
+		end
 	end
 end
