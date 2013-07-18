@@ -7,7 +7,7 @@ class Answer
 	include Mongoid::Document
 	include Mongoid::Timestamps
 	# status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo, 32 for under agents' review
-	field :status, :type => Integer, default: 0
+	field :status, :type => Integer, default: 1
 	field :answer_content, :type => Hash, default: {}
 	field :random_quality_control_answer_content, :type => Hash, default: {}
 	field :random_quality_control_locations, :type => Hash, default: {}
