@@ -11,7 +11,7 @@ class Order
 	# can be 1 (small mobile charge), 2 (large mobile charge), 4 (alipay), 8(alijf)
 	# 16 (Q coins), 32 (prize), 64 (virtual prize)
 	field :type, :type => Integer
-	# can be 1 (wait for deal), 2 (dealing), 4 (deal success), 8 (deal fail), 16 (cancel), 32 (frozen)
+	# can be 1 (wait for deal), 2 (dealing), 4 (deal success), 8 (deal fail), 16 (cancel), 32 (frozen), 64 (reject)
 	field :status, :type => Integer, :default => 1
 	field :source, :type => Integer
 	field :remark, :type => String, :default => "正常"
@@ -46,6 +46,7 @@ class Order
 	FAIL = 8
 	CANCEL = 16
 	FROZEN = 32
+	REJECT = 32
 
 	# type
 	SMALL_MOBILE_CHARGE = 1
