@@ -527,6 +527,7 @@ OopsData::Application.routes.draw do
 				post :bind_sample
 				put :draw_lottery
 				post :create_lottery_order
+				get :list_spreaded_surveys
 			end
 		end
 		resources :survey_subscribes do 

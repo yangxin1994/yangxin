@@ -79,8 +79,9 @@ class Answer
 	EDIT = 1
 	REJECT = 2
 	UNDER_REVIEW = 4
-	FINISH = 8
+	UNDER_AGENT_REVIEW = 8
 	REDO = 16
+	FINISH = 32
 	##### answer import #####
 
 	index({ survey_id: 1, status: 1, reject_type: 1 }, { background: true } )
@@ -1103,6 +1104,18 @@ class Answer
 		answer_obj["answer_reject_type"] = self.reject_type
 		answer_obj["created_at"] = self.created_at.to_i
 		answer_obj["rewards"] = self.rewards
+		return answer_obj
+	end
+
+	def info_for_spread_details
+		answer_obj = {}
+		answer_obj["answer_status"] = self.status
+		answer_obj["answer_reject_type"] = self.reject_type
+		answer_obj["created_at"] = self.created_at.to_i
+		if !self.user.nil?
+			answer_obj["sample_nickname"] = self.user.read_sample_attribute(:nickname) || self.user.email || self.user.mobile
+			answer_obj["sample_avatar"] = self.user.avatar.try(:picture_url)
+		end
 		return answer_obj
 	end
 end
