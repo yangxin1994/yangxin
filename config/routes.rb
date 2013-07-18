@@ -9,12 +9,6 @@ OopsData::Application.routes.draw do
 		end
 	end
 
-	resources :data_generators do
-		collection do
-			get 'generate'
-		end
-	end
-
 	namespace :agent do
 		resources :sessions do
 			collection do
@@ -30,16 +24,6 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :answers do
-		end
-	end
-
-	namespace :super_admin do
-		resources :users do
-			member do
-				put :set_admin
-			end
-			collection do
-			end
 		end
 	end
 
@@ -144,7 +128,7 @@ OopsData::Application.routes.draw do
 			end
 			member do
 				put 'add_reward', 'set_community', 'set_spread', 'set_promotable', 'set_answer_need_review', 'background_survey',
-				    'quillme_promote', 'email_promote', 'sms_promote', 'broswer_extension_promote', "weibo_promote"
+						'quillme_promote', 'email_promote', 'sms_promote', 'broswer_extension_promote', "weibo_promote"
 				get 'get_sent_email_number', 'promote'
 				put :quillme_hot, :allocate_answer_auditors, :set_result_visible
 				put :add_sample_attribute_for_promote, :remove_sample_attribute_for_promote
@@ -258,29 +242,6 @@ OopsData::Application.routes.draw do
 			end
 			collection do
 				put "review_agent_answers"
-			end
-		end
-	end
-
-	namespace :survey_auditor do
-		resources :surveys do
-			collection do
-				get 'count'
-			end
-			member do
-				get 'reject'
-				get 'publish'
-				get 'close'
-				get 'pause'
-			end
-		end
-	end
-
-	namespace 'entry_clerk' do
-		resources :surveys do
-			member do
-				get 'csv_header'
-				put 'import_answer'
 			end
 		end
 	end
@@ -443,18 +404,6 @@ OopsData::Application.routes.draw do
 	end
 
 	resources :answers do
-		collection do
-			get 'get_my_answer'
-		end
-		member do
-			get 'load_question'
-			post 'clear'
-			post 'submit_answer'
-			post 'finish'
-			get 'estimate_remain_answer_time'
-			delete 'destroy_preview'
-			get 'get_my_answer_by_id'
-		end
 	end
 
 	resources :messages do
@@ -506,82 +455,87 @@ OopsData::Application.routes.draw do
 		end
 	end
 
-
-    namespace :sample do
-      resources :accounts do 
-        collection do
-          get :get_basic_info,:as => :get_basic_info
-          get :get_spread_count,:as => :get_spread_count
-          get :get_answer_count,:as => :get_answer_count
-          post :update_avatar,:as => :update_avatar
-          get :get_receive_info,:as => :get_receive_info
-          post :update_receive_info,:as => :update_receive_info
-          post :reset_password,:as => :reset_password
-        end	
-      end
-      resources :surveys do
-        collection do
-          get :get_hot_spot_survey,:as => :get_hot_spot_survey
-          get :get_recommends,:as => :get_recommends
-          get :list_answered_surveys,:as => :list_answered_surveys
-		  get :list_spreaded_surveys,:as => :list_spreaded_surveys
-        end
-      end
-
-      resources :public_notices do
-        collection do
-          get :get_newest,:as => :get_newest
-        end
-      end
-
-      resources :gifts do
-        collection do
-          get :hotest,:as => :hotest
-        end
-      end
-
-      resources :prizes do
-        collection do
-          post :get_prizes,:as => :get_prizes
-        end
-      end      
-
-      resources :users do
-        collection do
-          get :get_top_ranks,:as => :get_top_ranks
-          get :get_my_third_party_user,:as => :get_my_third_party_user
-          get :mobile_banding,:as => :mobile_banding
-          get :email_banding,:as => :email_banding
-          get :info_precent_complete,:as => :info_precent_complete
-        end
-      end
-
-      resources :logs do
-        collection do
-          get :fresh_news,:as => :fresh_news
-          get :get_disciplinal_news,:as => :get_disciplinal_news
-          get :get_newst_exchange_logs,:as => :get_newst_exchange_logs
-        end
-      end
-
-      resources :answers do 
-      	collection do 
-      	  get :get_today_answers_count,:as => :get_today_answers_count
-      	  get :get_today_spread_count, :as => :get_today_spread_count
-      	end
-      end
-
-      resources :survey_subscribes do 
-      	collection do
-      	  post :subscribe_able,:as => :subscribe_able
-      	  get :make_subscribe_active,:as => :make_subscribe_active 
-      	end
-      end
-
-
-    end
-
-
+	namespace :sample do
+		resources :accounts do 
+			collection do
+				get :get_basic_info,:as => :get_basic_info
+				get :get_spread_count,:as => :get_spread_count
+				get :get_answer_count,:as => :get_answer_count
+				post :update_avatar,:as => :update_avatar
+				get :get_receive_info,:as => :get_receive_info
+				post :update_receive_info,:as => :update_receive_info
+				post :reset_password,:as => :reset_password
+			end	
+		end
+		resources :surveys do
+			collection do
+				get :get_hot_spot_survey,:as => :get_hot_spot_survey
+				get :get_recommends,:as => :get_recommends
+				get :list_answered_surveys,:as => :list_answered_surveys
+				get :list_spreaded_surveys,:as => :list_spreaded_surveys
+			end
+		end
+		resources :public_notices do
+			collection do
+				get :get_newest,:as => :get_newest
+			end
+		end
+		resources :gifts do
+			collection do
+				get :hotest,:as => :hotest
+			end
+		end
+		resources :prizes do
+			collection do
+				post :get_prizes,:as => :get_prizes
+			end
+		end      
+		resources :users do
+			collection do
+				get :get_top_ranks,:as => :get_top_ranks
+				get :get_my_third_party_user,:as => :get_my_third_party_user
+				get :mobile_banding,:as => :mobile_banding
+				get :email_banding,:as => :email_banding
+				get :info_precent_complete,:as => :info_precent_complete
+			end
+		end
+		resources :logs do
+			collection do
+				get :fresh_news,:as => :fresh_news
+				get :get_disciplinal_news,:as => :get_disciplinal_news
+				get :get_newst_exchange_logs,:as => :get_newst_exchange_logs
+				get :get_point_change_log
+			end
+		end
+		resources :answers do 
+			collection do 
+				get :get_today_answers_count,:as => :get_today_answers_count
+				get :get_today_spread_count, :as => :get_today_spread_count
+				get :get_my_answer
+			end
+			member do
+				get :load_question
+				post :clear
+				post :submit_answer
+				post :finish
+				get :estimate_remain_answer_time
+				delete :destroy_preview
+				get :get_answer_id_by_auth_key
+				post :change_sample_account
+				delete :logout
+				put :select_reward
+				post :bind_sample
+				put :draw_lottery
+				post :create_lottery_order
+			end
+		end
+		resources :survey_subscribes do 
+			collection do
+				post :subscribe_able,:as => :subscribe_able
+				get :make_subscribe_active,:as => :make_subscribe_active 
+			end
+		end
+	end
 
 	# The priority is based upon order of creation:
 	# first created -> highest priority.
