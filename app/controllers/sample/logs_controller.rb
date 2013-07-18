@@ -8,8 +8,9 @@ class Sample::LogsController < ApplicationController
   #返回的参数:一个盛放新鲜事的列表
   #############################	
   def fresh_news
-    @logs = Log.where(:type => 8).any_of({'data.reason' => 1},{'data.reason' => 2},{'data.reason' => 4}).desc(:updated_at).limit(5)
-  	render_json { @logs }
+    @logs = Log.desc(:created_at).limit(5)
+    @logs = @logs.map{|log| log['username'] = log.user.username;log}
+  	render_json_auto(@logs)
   end
 
 
@@ -33,15 +34,15 @@ class Sample::LogsController < ApplicationController
   end
 
   def get_point_change_log
-    if params[:reason].present? && params[:reason] == 'own'
-      @logs = Log.where(:type => 8,:user_id => @current_user.id,'data.reason.in' => [1,2]).desc(:created_at).page(params[:page]).per(params[:per_page])
-    elsif params[:reason].present? && params[:reason] == 'cost' 
-      @logs = Log.where(:type => 8,:user_id => @current_user.id,'data.reason.in' => [4,16]).desc(:created_at).page(params[:page]).per(params[:per_page])  
+    if params[:scope].present? && params[:scope] == 'in'
+      @logs = Log.where(:type => 8,:user_id => @current_user.id, 'data.amount.gt' => 0).desc(:created_at).page(params[:page]).per(params[:per_page])
+    elsif params[:scope].present? && params[:scope] == 'out' 
+      @logs = Log.where(:type => 8,:user_id => @current_user.id, 'data.amount.lt' => 0).desc(:created_at).page(params[:page]).per(params[:per_page])  
     else
       @logs = Log.where(:type => 8,:user_id => @current_user.id).desc(:created_at).page(params[:page]).per(params[:per_page]) 
     end
     
-    render_json{@logs}
+    render_json_auto auto_paginate @logs
   end
 
 

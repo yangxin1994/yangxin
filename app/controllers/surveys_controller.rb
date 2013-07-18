@@ -2,9 +2,9 @@ require 'array'
 require 'error_enum'
 require 'quill_common'
 class SurveysController < ApplicationController
-	before_filter :require_sign_in, :except => [:show, :estimate_answer_time, :list_surveys_in_community, :reward_info, :search_title]
+	before_filter :require_sign_in, :except => [:show, :estimate_answer_time, :list_surveys_in_community, :search_title]
 	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :update_deadline, :update_star]
-	before_filter :check_normal_survey_existence, :except => [:new, :index, :list_surveys_in_community, :list_answered_surveys, :list_spreaded_surveys, :recover, :clear, :add_tag, :remove_tag, :show, :estimate_answer_time, :reward_info, :update_star, :search_title]
+	before_filter :check_normal_survey_existence, :except => [:new, :index, :list_surveys_in_community, :list_answered_surveys, :list_spreaded_surveys, :recover, :clear, :add_tag, :remove_tag, :show, :estimate_answer_time, :update_star, :search_title]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
 	
 	def check_survey_existence
@@ -49,7 +49,7 @@ class SurveysController < ApplicationController
 		survey = Survey.new
 		survey.user = @current_user
 		if @current_user.is_admin || @current_user.is_super_admin
-			survey.publish_status = QuillCommon::PublishStatusEnum::PUBLISHED
+			survey.status = Survey::PUBLISHED
 		else
 			survey.style_setting["has_advertisement"] = false
 		end
@@ -271,24 +271,11 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	#*method*: post
-	#
-	#*url*: /surveys/list
-	#
-	#*description*: obtain a list of survey objects given a list tags
-	#
-	#*params*:
-	#* tags: array of tags
-	#* status: can be "all", "deleted", "normal"
-	#* publish_status
-	#
-	#*retval*:
-	#* a list Survey objects
 	def index
 		if params[:stars] then
-			survey_list = @current_user.surveys.stars.desc(:created_at)
+			survey_list = @current_user.surveys.stars
 		else
-			survey_list = @current_user.surveys.list(params[:status], params[:publish_status], params[:tags])
+			survey_list = @current_user.surveys.list(params[:status])
 		end	
 		# add answer_number
 		survey_list.map do |e| 
@@ -411,12 +398,14 @@ class SurveysController < ApplicationController
 		end
 	end
 
+=begin
 	def reward_info
 		survey = Survey.normal.find_by_id(params[:id])
 		respond_to do |format|
 			format.json	{ render_json_auto(survey.nil? ? ErrorEnum::SURVEY_NOT_EXIST : survey.reward_info) and return }
 		end
 	end
+=end
 
 	def search_title
 		surveys = @current_user.surveys.search_title(params[:query])

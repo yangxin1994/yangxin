@@ -24,7 +24,7 @@ class Admin::SamplesController < Admin::ApplicationController
 	end
 
 	def show
-		render_json_auto(@sample.basic_info) and return
+		render_json_auto(@sample.sample_attributes) and return
 	end
 
 	def send_message
@@ -45,6 +45,14 @@ class Admin::SamplesController < Admin::ApplicationController
 
 	def lottery_log
 		render_json_auto(auto_paginate(@sample.lottery_logs)) and return
+	end
+
+	def answer_log
+		render_json_auto(auto_paginate(@sample.answer_logs)) and return
+	end
+
+	def spread_log
+		render_json_auto(auto_paginate(@sample.spread_logs)) and return
 	end
 
 	def set_sample_role

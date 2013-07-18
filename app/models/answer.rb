@@ -6,7 +6,7 @@ require 'quill_common'
 class Answer
 	include Mongoid::Document
 	include Mongoid::Timestamps
-	# status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo
+	# status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo, 32 for under agents' review
 	field :status, :type => Integer, default: 0
 	field :answer_content, :type => Hash, default: {}
 	field :random_quality_control_answer_content, :type => Hash, default: {}
@@ -39,8 +39,9 @@ class Answer
 	field :audit_message, :type => String, default: ""
 	field :introducer_id, :type => String
 	field :point_to_introducer, :type => Integer
+	field :point, :type => Integer, :default => 0
+	field :rewards, :type => Array, :default => []
 	field :introducer_reward_assigned, :type => Boolean, default: false
-	field :rewards, :type => Array, default: []
 	field :reward_delivered, :type => Boolean, default: false
 	field :need_review, :type => Boolean
 
@@ -49,6 +50,11 @@ class Answer
 	field :longitude, :type => String, :default => ""
 	field :latitude, :type => String, :default => ""
 	field :referrer, :type => String, :default => ""
+
+	field :agent_feedback_name
+	field :agent_feedback_email
+	field :agent_feedback_mobile
+
 
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
@@ -1072,7 +1078,9 @@ class Answer
 		answer_obj = {}
 		answer_obj["survey_id"] = self.survey_id.to_s
 		answer_obj["survey_title"] = self.survey.title
-		answer_obj["order_id"] = self.order._id.to_s
+		answer_obj["order_id"] = self.order.try(:_id).to_s
+		answer_obj["answer_status"] = self.status
+		answer_obj["answer_reject_type"] = self.reject_type
 		answer_obj["created_at"] = self.created_at.to_i
 		answer_obj["rewards"] = self.rewards
 		return answer_obj

@@ -8,7 +8,7 @@ class User
 	include Mongoid::Document
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
-    #include DymanicAttr
+		#include DymanicAttr
 
 	field :email, :type => String
 	field :email_activation, :type => Boolean, default: false
@@ -21,7 +21,6 @@ class User
 	# 1 unregistered
 	# 2 registered but not signed in
 	# 4 registered and signed in
-	# -1 deleted
 	field :status, :type => Integer, default: 1
 	field :registered_at, :type => Integer, default: 0
 	# true: the user is locked and cannot login
@@ -31,7 +30,7 @@ class User
 	field :last_login_client_type, :type => String
 	field :login_count, :type => Integer, default: 0
 	field :sms_verification_code, :type => String
-	field :sms_verification_timeout, :type => Integer
+	field :sms_verification_expiration_time, :type => Integer,default:  -> {(Time.now + 1.minutes).to_i }
 	field :activate_time, :type => Integer
 	field :introducer_id, :type => String
 	field :last_read_messeges_time, :type => Time, :default => Time.now
@@ -101,12 +100,13 @@ class User
 	has_many :interviewer_tasks
 	has_many :reviewed_answers, class_name: "Answer", inverse_of: :auditor
 	has_many :logs
-    has_one  :affiliated, :class_name => "Affiliated", :inverse_of => :user
+		has_one  :affiliated, :class_name => "Affiliated", :inverse_of => :user
 
 	scope :unregistered, where(status: 1)
 	scope :sample, mod(:user_role => [2, 1])
 
-	POINT_TO_INTRODUCER = 10
+	VISITOR = 1
+	REGISTERED = 2
 
 	index({ email: 1 }, { background: true } )
 	index({ full_name: 1 }, { background: true } )
@@ -117,37 +117,24 @@ class User
 
 	public
 
-
-	#*description*: Find a user given an email, username and user id. Deleted users are not included.
-	#
-	#*params*:
-	#* email / username / user_id of the user
-	#
-	#*retval*:
-	#* the user instance: when the user exists
-	#* nil: when the user does not exist
-	def self.find_by_email_username(email_username)
-		user = self.where(:email => email_username, :status.gt => -1)[0]
-		user = self.where(:username => email_username, :status.gt => -1)[0] if user.nil?
+	def self.find_by_email_mobile(email_mobile)
+		user = self.where(:email => email_mobile).first
+		user = self.where(:mobile => email_mobile).first if user.nil?
 		return user
 	end
 
 	def self.find_by_email(email)
 		return nil if email.blank?
-		return self.where(:email => email.downcase, :status.gt => -1).first
+		return self.where(:email => email.try(:downcase)).first
 	end
 
 	def self.find_by_mobile(mobile)
 		return nil if mobile.blank?
-		return self.where(:mobile => mobile, :status.gt => -1).first
-	end
-
-	def self.find_by_username(username)
-		return self.where(:username => username, :status.gt => -1).first
+		return self.where(:mobile => mobile).first
 	end
 
 	def self.find_by_id(user_id)
-		return self.where(:_id => user_id, :status.gt => -1).first
+		return self.where(:_id => user_id).first
 	end
 
 	def self.find_by_id_including_deleted(user_id)
@@ -188,71 +175,16 @@ class User
 		return {"level" => self.level, "level_expire_time" => self.level_expire_time}
 	end
 
-	# def update_basic_info(user_info)
-	# 	self.birthday = user_info["birthday"].to_i
-	# 	self.gender = user_info["gender"].to_s == "true"
-	# 	self.address = user_info["address"]
-	# 	self.postcode = user_info["postcode"]
-	# 	self.phone = user_info["phone"]
-	# 	self.full_name = user_info["full_name"]
-	# 	self.identity_card = user_info["identity_card"]
-	# 	self.company = user_info["company"]
-	# 	return self.save
-	# end
-
-	def update_basic_info(basic_info)
-	  if self.affiliated.present?
-	  	self.update_affiliated(basic_info)
-	  else
-	  	self.create_affiliated(basic_info)
-	  end
-	end
-
-    
 	def update_avatar(avatar)
-	  self.create_avatar(avatar)
+		self.create_avatar(avatar)
 	end
 
 	def update_receive_info(receiver_info)
-	  if self.affiliated.present?
-	  	self.update_affiliated(receiver_info)
-	  else
-	  	self.create_affiliated(receiver_info)
-	  end	
-	end
-
-	#*description*: check whether an email has been registered as an user
-	#
-	#*params*:
-	#* email of the user
-	#
-	#*retval*:
-	#* true or false
-	def self.user_exist_by_username?(username)
-		return exists?(conditions: { username: username })
-	end
-
-	def self.user_exist_by_email?(email)
-		return exists?(conditions: { email: email })
-	end
-
-	#*description*: check whether an user has activated
-	#
-	#*params*:
-	#* email of the user
-	#
-	#*retval*:
-	#* true or false
-	## TODO to be remove by checking user.role
-	def self.user_activate_by_email?(email)
-		user = User.find_by_email(email)
-		return !!(user && user.email_activation == true)
-	end
-
-	##TODO this may deleted
-	def self.user_activate_by_username?(username)
-		user = User.find_by_username(username)
-		return !!(user && user.status == 1)
+		if self.affiliated.present?
+			self.update_affiliated(receiver_info)
+		else
+			self.create_affiliated(receiver_info)
+		end	
 	end
 
 	def is_deleted
@@ -260,11 +192,11 @@ class User
 	end
 
 	def is_registered
-		return self.status > 1
+		return self.status == REGISTERED
 	end
 
 	def is_activated
-		return self.status == 4
+		return self.mobile_activation || self.email_activation
 	end
 
 	def is_super_admin
@@ -306,41 +238,45 @@ class User
 	#
 	#*retval*:
 	#* the new user instance: when successfully created
-	def self.create_new_registered_user(email_mobile, password, current_user, third_party_user_id, callback)
+	def self.create_new_user(email_mobile, password, current_user, third_party_user_id, callback)
 		account = {}
 		if email_mobile.match(/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/)  ## match email
 			account[:email] = email_mobile.downcase
 		elsif email_mobile.match(/^\d{11}$/)  ## match mobile
-			account[:mobile] = email_mobile
+            active_code = Random.rand(100000..999999).to_i
+  			account[:mobile] = email_mobile
 		end
 		return ErrorEnum::ILLEGAL_EMAIL_OR_MOBILE if account.blank?
-
-		check_exist = nil
-		existing_user = nil
-		if account[:email]
-			existing_user = self.find_by_email(account[:email])
-			check_exist = true if existing_user && existing_user.is_registered
-		elsif account[:mobile]
-  		existing_user = self.find_by_mobile(account[:mobile]) if account[:mobile]
-  		check_exist = true if existing_user && existing_user.is_registered && !existing_user.password.nil?
-  	end
-		return ErrorEnum::EMAIL_OR_MOBILE_EXIST if check_exist
+		existing_user = account[:email] ? self.find_by_email(account[:email]) : self.find_by_mobile(account[:mobile])
+		return ErrorEnum::USER_REGISTERED if existing_user && existing_user.status == REGISTERED
 		password = Encryption.encrypt_password(password) if account[:email]
+        account[:status] = account[:email].present? ? REGISTERED : VISITOR
+        account[:sms_verification_code] = active_code if account[:mobile]
 		updated_attr = account.merge(
 			password: password,
-			registered_at: Time.now.to_i,
-			status: 2)
-		existing_user = User.create if check_exist.nil?
+			registered_at: Time.now.to_i)
+
+		#existing_user = User.create if check_exist.nil?
+		existing_user = User.create if existing_user.nil?
 		existing_user.update_attributes(updated_attr)
+        
+        if active_code.present?
+          	## TODO   generate active code when user regist with mobile
+          	## TODO   store the random code and mobile in session with a expire time 60 sec.     
+			# SmsInvitationWorker
+        else
+            # send welcome email
+			EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
+        end
+
 		# send welcome email
-		EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
+		#EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
 		## TODO  send_mobile_message() if account[:mobile]
 		if !third_party_user_id.nil?
 			# bind the third party user if the id is provided
 			third_party_user = ThirdPartyUser.find_by_id(third_party_user_id)
 			third_party_user.bind(existing_user) if !third_party_user.nil?
 		end
-		ImportEmail.destroy_by_email(account[:email]) if account[:email]
 		return true
 	end
 
@@ -354,9 +290,39 @@ class User
 		return user
 	end
 
+	def third_party_users
+		# self.third_party_users.map(&:website)	
+	end
+
+	def completed_info
+		affiliated = self.affiliated
+		if affiliated
+			complete = 0
+				affiliated.attributes.each do |attr|
+					if SampleAttribute::DEFAULT_ATTR.include?(attr)
+						complete += 1
+					end	
+				end
+			default_attr = SampleAttribute::DEFAULT_ATTR.length
+			return (complete.quo(default_attr)).to_f 
+		else
+			return 0 
+		end
+	end
+
 	def self.find_or_create_new_visitor_by_email_mobile(email_mobile)
 		
 	end
+
+
+	def answerd?(survey_id)
+      answer = self.answers.where(:survey_id => survey_id).first
+      if answer.present?
+        return true
+      else
+        return false
+      end
+    end
 
 	#*description*: activate a user
 	#
@@ -367,31 +333,27 @@ class User
 	#
 	#*retval*:
 	#* true: when successfully activated or already activated
-	def self.activate(activate_info, client_ip, client_type, password = nil)
-		user = User.find_by_email(activate_info["email"]) if !activate_info["email"].blank?
-		user = User.find_by_mobile(activate_info["mobile"]) if !activate_info["mobile"].blank?
+	def self.activate(activate_type, activate_info, client_ip, client_type, password = nil)
+		user = User.find_by_email(activate_info["email"]) if activate_type == "email"
+		user = User.find_by_mobile(activate_info["mobile"]) if activate_type == "mobile"
 		return ErrorEnum::USER_NOT_EXIST if user.nil?     # email account does not exist
-		return ErrorEnum::USER_NOT_REGISTERED if user.status == 2     # not registered
-		return ErrorEnum::ACTIVATE_EXPIRED if !activate_info["email"].blank? && Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i    # expired
-		return ErrorEnum::ILLEGAL_ACTIVATE_KEY if !activate_info["mobile"].blank? && 
-  		(Time.now.to_i  > user.sms_verification_timeout or user.sms_verification_code != activate_info["verification_code"])
-		return user.login(client_ip, client_type, false)  if user.is_activated
-		user.status = 4
-		user.activate_time = Time.now.to_i
-		if !activate_info["mobile"].blank?
+		if activate_type == "email"
+			# email activate
+			return ErrorEnum::USER_NOT_REGISTERED if user.status == VISITOR
+			return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i    # expired
+			user.email_activation = true
+			user.activate_time = Time.now.to_i
+		else
+			# mobile activate
+			return ErrorEnum::USER_NOT_REGISTERED if user.status == VISITOR
+			return ErrorEnum::ILLEGAL_ACTIVATE_KEY if user.sms_verification_code != activate_info["verification_code"]
+			return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i  > user.sms_verification_expiration_time
 			user.password = Encryption.encrypt_password(activate_info["password"])
 			user.mobile_activation = true
-		elsif !activate_info["email"].blank?
-			user.email_activation = true
+			user.activate_time = Time.now.to_i
+			user.status = REGISTERED
 		end
 		user.save
-		# pay introducer points
-		introducer = User.find_by_id(user.introducer_id)
-		if !introducer.nil?
-			RewardLog.create(:user => introducer, :type => 2, :point => POINT_TO_INTRODUCER, :invited_user_id => user._id, :cause => 1)
-			# send a message to the introducer
-			introducer.create_message("邀请好友注册积分奖励", "您邀请的用户#{user.email}注册激活成功，您获得了#{POINT_TO_INTRODUCER}个积分奖励。", [introducer._id])
-		end
 		return user.login(client_ip, client_type, false)
 	end
 
@@ -694,7 +656,7 @@ class User
 	end
 
 	def spread_count
-	  Answer.where(:introducer_id => self.id).finished.count	
+		Answer.where(:introducer_id => self.id).finished.count	
 	end
 
 	def get_introduced_users
@@ -852,6 +814,43 @@ class User
 		return ret_logs
 	end
 
+	def answer_logs
+		answers = self.answers.not_preview.desc(:created_at)
+		ret_logs = answers.map do |e|
+			selected_reward = (e.rewards.select { |e| e["checked"] == true }).first
+			reward_type = selected_reward.nil? ? 0 : selected_reward["type"]
+			reward_amount = selected_reward.nil? ? 0 : selected_reward["amount"]
+			{
+				"_id" => e._id.to_s,
+				"title" => e.survey.title,
+				"created_at" => e.created_at,
+				"finished_at" => Time.at(e.finished_at),
+				"status" => e.status,
+				"reject_type" => e.reject_type,
+				"reward_type" => reward_type,
+				"reward_amount" => reward_amount
+			}
+		end
+		return ret_logs
+	end
+
+	def spread_logs
+		answers = Answer.where(:introducer_id => self._id.to_s)
+		ret_logs = answers.map do |e|
+			{
+				"_id" => e._id.to_s,
+				"title" => e.survey.title,
+				"created_at" => e.created_at,
+				"finished_at" => Time.at(e.finished_at),
+				"email" => e.user.try(:email),
+				"mobile" => e.user.try(:mobile),
+				"status" => e.status,
+				"reject_type" => e.reject_type
+			}
+		end
+		return ret_logs
+	end
+
 	def block(block)
 		self.is_block = block.to_s == "true"
 		return self.save
@@ -897,12 +896,23 @@ class User
 		user_obj = {"id" => self.id.to_s}
 		arr_fields.each do |field|
 			if [:created_at, :updated_at].include?(field)
-			  user_obj[field] = self.send(field).to_i
+				user_obj[field] = self.send(field).to_i
 			else
 				user_obj[field] = self.send(field)
 			end
 		end
 		return user_obj
+	end
+
+	def sample_attributes
+		sample = {
+			"email" => self.email,
+			"mobile" => self.mobile
+		}
+		SampleAttribute.normal.each do |s|
+			sample[s.name] = self.read_sample_attribute(s.name)
+		end
+		return sample
 	end
 
 	def read_sample_attribute(name)

@@ -12,8 +12,8 @@ class Sample::SurveysController < ApplicationController
   #############################	
   def get_hot_spot_survey
     #查询条件:必须是发布在社区的调查问卷，必须是热点小调查，必须是已经发布的问卷,必须是可推广的调查问卷
-    @survey = Survey.only('id').quillme_promote.quillme_hot.opend.first
-    render_json { @survey }
+    @hot_survey = Survey.only('_id','title').quillme_promote.quillme_hot.opend.first
+    render_json { @hot_survey }
   end
 
   #############################
@@ -29,7 +29,7 @@ class Sample::SurveysController < ApplicationController
   #############################	
   def get_recommends
     status = params[:status].present?  ? params[:status] : nil
-    @surveys = Survey.get_recommends(params[:page],params[:per_page],status)
+    @surveys = Survey.get_recommends(params[:page],params[:per_page],status,current_user)
     if !params[:status].present?
       @surveys = @surveys.slice!(0,2)     
       #@surveys = auto_paginate(@surveys)
@@ -46,9 +46,12 @@ class Sample::SurveysController < ApplicationController
 
   def list_spreaded_surveys
     render_json_auto ErrorEnum::REQUIRE_LOGIN if @current_user.nil?
-    surveys_with_spreaded_number = Survey.list_spreaded_surveys(@current_user)
-    paginated_surveys = auto_paginate surveys_with_spreaded_number
-    render_json_auto(paginated_surveys)
+    surveys_with_spreaded_number = auto_paginate @current_user.survey_spreads do |paginated_survey_spreads|
+      paginated_survey_spreads.map do |e|
+        e.survey.info_for_sample.merge({"spread_number" => e.times})
+      end
+    end
+    render_json_auto surveys_with_spreaded_number and return
   end
 
 end

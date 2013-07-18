@@ -19,7 +19,7 @@ describe "agent tasks management" do
 		end
 	end
 
-	it "search agent_tasks", :populate_agent_tasks => true do
+	it "search agent_tasks", :focus => true, :populate_agent_tasks => true do
 		get "/admin/agent_tasks",
 			page: 1,
 			per_page: 10,
