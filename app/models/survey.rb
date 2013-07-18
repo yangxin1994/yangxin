@@ -78,7 +78,11 @@ class Survey
 	field :quillme_hot, :type => Boolean, :default => false #是否为热点小调查(quillme用)
 	field :quillme_promote_info, :type => Hash, :default => {
 		"reward_scheme_id" => ""
-	} 
+	}
+
+    # 0 免费, 1 表示话费，2表示支付宝转账，4表示优币，8表示抽奖，16表示发放集分宝
+    field :quillme_promote_reward_type,:type => Integer, default: nil
+
 	field :email_promote_info, :type => Hash, default: {
 		"email_amount" => 0,
 		"promote_to_undefined_sample" => false,
@@ -148,6 +152,7 @@ class Survey
     
  
     scope :status, lambda {|st| where(:status => st)}
+    scope :reward_type,lambda {|rt| where(:quillme_promote_reward_type.in => rt)}
     scope :opend, lambda { where(:status => 2)}
     scope :closed, lambda { where(:status => 1)}
     scope :quillme_promote, lambda { where(:quillme_promotable => true)}
@@ -183,44 +188,74 @@ class Survey
     # survey_data 以survey的id为key，以survey对象为value的hash
     # scheme_type_hash 以奖励类型为key，以survey的id为元素的数组最为value  
     # scheme_datas  以奖励方案的id为key，以每个奖励方案的内容为value 
-	def self.get_recommends(page,per_page,sta=2,user_id=nil)
-	  sta = 2 unless sta.present?
-	  if page && per_page
-	    surveys = Survey.quillme_promote.not_quillme_hot.status(sta).page(page).per(per_page).desc(:created_at)	
-	  else
-        surveys = Survey.quillme_promote.not_quillme_hot.status(sta).desc(:created_at)	
-	  end  
+	# def self.get_recommends(page,per_page,sta=2,user_id=nil)
+	#   sta = 2 unless sta.present?
+	#   if page && per_page
+	#     surveys = Survey.quillme_promote.not_quillme_hot.status(sta).page(page).per(per_page).desc(:created_at)	
+	#   else
+ #        surveys = Survey.quillme_promote.not_quillme_hot.status(sta).desc(:created_at)	
+	#   end  	
 	  
-	  scheme_type_hash = {}
-	  survey_data = {}	  
-	  if surveys.present?
-	  	surveys.map{|survey| survey_data[survey.id] = survey }
-	  	RewardScheme::RewardType.each do |rtype|
-	  	  current_type_arr = []
-	  	  survey_data.each_pair do |survey_id,survey|
-	  	    scheme_id = survey.quillme_promote_info['reward_scheme_id']
-	  	    if scheme_id
-	  	      rs = RewardScheme.where(:id => scheme_id).first
-	  	      if rs
-	  	        if rs.rewards.select{|ele| ele['type'].to_s ==  rtype.to_s }
-	  	          current_type_arr << survey_id
-	  	          scheme_type_hash[rtype] = current_type_arr  
-	  	        end 
-	  	      end
-	  	    end	
-	  	  end
-	  	end
+	#   scheme_type_hash = {}
+	#   survey_data = {}	  
+	#   if surveys.present?
+	#   	surveys.map{|survey| survey_data[survey.id] = survey }
+	#   	RewardScheme::RewardType.each do |rtype|
+	#   	  current_type_arr = []
+	#   	  survey_data.each_pair do |survey_id,survey|
+	#   	    scheme_id = survey.quillme_promote_info['reward_scheme_id']
+	#   	    if scheme_id
+	#   	      rs = RewardScheme.where(:id => scheme_id).first
+	#   	      if rs
+	#   	        if rs.rewards.select{|ele| ele['type'].to_s ==  rtype.to_s }
+	#   	          current_type_arr << survey_id
+	#   	          scheme_type_hash[rtype] = current_type_arr  
+	#   	        end 
+	#   	      end
+	#   	    end	
+	#   	  end
+	#   	end
+	#   end
+	#   scheme_datas = {}
+	#   RewardScheme.all.map{|rs| scheme_datas[rs.id] = rs.rewards[0] }
+	#   surveys = surveys.map{|survey| survey['answer_count'] = survey.answers.count;survey['time'] = survey.estimate_answer_time;survey['answerd'] = survey.answered(user_id);survey}
+ #      return [surveys,scheme_datas,scheme_type_hash,survey_data]   
+	# end
+
+	def self.get_recommends(status=2,reward_type=nil)
+	  status = 2 unless status.present?
+	  reward_type = nil unless reward_type.present?
+	  if reward_type.present?
+	  	reward_type = reward_type.split(',')
 	  end
-	  scheme_datas = {}
-	  RewardScheme.all.map{|rs| scheme_datas[rs.id] = rs.rewards[0] }
-	  surveys = surveys.map{|survey| survey['answer_count'] = survey.answers.count;survey['time'] = survey.estimate_answer_time;survey['answerd'] = survey.answered(user_id);survey}
-      return [surveys,scheme_datas,scheme_type_hash,survey_data]   
+	  if reward_type.present?
+        surveys = Survey.quillme_promote.not_quillme_hot.status(status).reward_type(reward_type).desc(:created_at)		
+	  else
+        surveys = Survey.quillme_promote.not_quillme_hot.status(status).desc(:created_at)		
+	  end	
+      return surveys
 	end
 
 
     def answered(user)
-      u = self.answers.where(:user_id => user_id).first if user.present?
-      return u    	
+      answer  = self.answers.where(:user_id => user.id).first if user.present?
+      return [answer.try(:status),answer.try(:reject_type)]   	
+    end
+
+    def reward_type_info
+    	rs = RewardScheme.where(:_id => self.quillme_promote_info['reward_scheme_id']).first
+    	info = rs.rewards[0] if rs
+    	return info
+    end
+
+
+    def excute_sample_data(user)
+        self['answer_count'] = self.answers.count
+        self['time'] = self.estimate_answer_time
+        self['answer_status'] = self.answered(user)[0]
+        self['answer_reject_type'] = self.answered(user)[1]
+        self['reward_type_info'] = self.reward_type_info
+        return self
     end
 
 	#----------------------------------------------

@@ -454,7 +454,7 @@ OopsData::Application.routes.draw do
 			post :send_email
 		end
 	end
-
+	
 	namespace :sample do
 		resources :accounts do 
 			collection do
@@ -466,7 +466,7 @@ OopsData::Application.routes.draw do
 				post :update_receive_info,:as => :update_receive_info
 				post :reset_password,:as => :reset_password
 			end	
-		end
+		end	
 		resources :surveys do
 			collection do
 				get :get_hot_spot_survey,:as => :get_hot_spot_survey
@@ -474,7 +474,7 @@ OopsData::Application.routes.draw do
 				get :list_answered_surveys,:as => :list_answered_surveys
 				get :list_spreaded_surveys,:as => :list_spreaded_surveys
 			end
-		end
+		end		
 		resources :public_notices do
 			collection do
 				get :get_newest,:as => :get_newest
@@ -484,7 +484,7 @@ OopsData::Application.routes.draw do
 			collection do
 				get :hotest,:as => :hotest
 			end
-		end
+		end  		
 		resources :prizes do
 			collection do
 				post :get_prizes,:as => :get_prizes
@@ -529,7 +529,7 @@ OopsData::Application.routes.draw do
 				post :create_lottery_order
 				get :list_spreaded_surveys
 			end
-		end
+		end	
 		resources :survey_subscribes do 
 			collection do
 				post :subscribe_able,:as => :subscribe_able
