@@ -1749,7 +1749,7 @@ class Survey
 		survey_obj["status"] = self.status
 		survey_obj["spreadable"] = self.spreadable
 		survey_obj["spread_point"] = self.spread_point
-		survey_obj["quillme_reward_type"] = self.quillme_reward_type
+		survey_obj["quillme_promote_reward_type"] = self.quillme_promote_reward_type.to_i
 		return survey_obj
 	end
 
