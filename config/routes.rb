@@ -519,12 +519,13 @@ OopsData::Application.routes.draw do
           post :reset_password,:as => :reset_password
         end	
       end
+
       resources :surveys do
         collection do
           get :get_hot_spot_survey,:as => :get_hot_spot_survey
           get :get_recommends,:as => :get_recommends
           get :list_answered_surveys,:as => :list_answered_surveys
-		  get :list_spreaded_surveys,:as => :list_spreaded_surveys
+		      get :list_spreaded_surveys,:as => :list_spreaded_surveys
         end
       end
 
