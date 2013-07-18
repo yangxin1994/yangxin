@@ -75,7 +75,7 @@ class Answer
 	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
 	has_one :order
 
-	STATUS_NAME_ARY = ["edit", "reject", "under_review", "finish", "redo"]
+	STATUS_NAME_ARY = ["edit", "reject", "under_review", "under_agent_review", "redo", "finish"]
 	EDIT = 1
 	REJECT = 2
 	UNDER_REVIEW = 4
@@ -147,6 +147,42 @@ class Answer
 			answer.rewards = []
 			answer.need_review = false
 		end
+
+
+		# initialize the answer content
+		answer_content = {}
+		survey.pages.each do |page|
+			answer_content = answer_content.merge(Hash[page["questions"].map { |ele| [ele, nil] }])
+		end
+		logic_control = survey.show_logic_control
+		logic_control.each do |rule|
+			if rule["rule_type"] == 1
+				rule["result"].each do |q_id|
+					answer_content[q_id] = {}
+				end
+			end
+		end
+		answer.answer_content = answer_content
+
+
+		# initialize the logic control result
+		answer.logic_control_result = {}
+		logic_control.each do |rule|
+			if rule["rule_type"] == 3
+				rule["result"].each do |ele|
+					answer.add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
+				end
+			elsif rule["rule_type"] == 5
+				items_to_be_added = []
+				rule["result"]["items"].each do |input_ids|
+					items_to_be_added << input_ids[1]
+				end
+				answer.add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
+			end
+		end
+
+		# randomly generate quality control questions
+		answer = answer.genereate_random_quality_control_questions
 
 		answer.save
 		survey = Survey.normal.find_by_id(survey_id)
