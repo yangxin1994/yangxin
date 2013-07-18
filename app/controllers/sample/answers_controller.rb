@@ -26,7 +26,7 @@ class Sample::AnswersController < ApplicationController
 			params[:introducer_id],
 			params[:channel],
 			params[:referrer],
-			params[:remote_ip],
+			params[:_remote_ip],
 			params[:username],
 			params[:password])
 		sample.answers << answer if !sample.nil?

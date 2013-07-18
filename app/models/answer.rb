@@ -122,8 +122,8 @@ class Answer
 		# create the answer
 		answer = Answer.new(is_preview: is_preview,
 			channel: channel,
-			ip_address: ip,
-			region: QuillCommon::AddressUtility.find_address_code_by_ip(ip),
+			ip_address: remote_ip,
+			region: QuillCommon::AddressUtility.find_address_code_by_ip(remote_ip),
 			username: username,
 			password: password,
 			referrer: referrer)
@@ -150,6 +150,7 @@ class Answer
 		answer.save
 		survey = Survey.normal.find_by_id(survey_id)
 		survey.answers << answer
+		return answer
 	end
 
 	def has_rewards
