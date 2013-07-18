@@ -1094,6 +1094,7 @@ class Answer
 
 	def info_for_answer_list_for_sample
 		answer_obj = {}
+		answer_obj["answer_id"] = self._id.to_s
 		answer_obj["survey_id"] = self.survey_id.to_s
 		answer_obj["survey_title"] = self.survey.title
 		answer_obj["order_id"] = self.order.try(:_id).to_s
