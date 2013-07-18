@@ -290,11 +290,11 @@ class Survey
 		return self.serialize_in_promote_setting
 	end
 
-	def update_quillme_reward_type
+	def update_quillme_promote_reward_type
 		reward_scheme = RewardScheme.find_by_id(self.quillme_promote_info["reward_scheme_id"])
-		self.update_attributes({"quillme_reward_type" => 0}) and return if reward_scheme.nil?
-		self.update_attributes({"quillme_reward_type" => 0}) and return if reward_scheme.rewards.blank?
-		self.update_attributes({"quillme_reward_type" => reward_scheme.rewards[0]["type"].to_i})
+		self.update_attributes({"quillme_promote_reward_type" => 0}) and return if reward_scheme.nil?
+		self.update_attributes({"quillme_promote_reward_type" => 0}) and return if reward_scheme.rewards.blank?
+		self.update_attributes({"quillme_promote_reward_type" => reward_scheme.rewards[0]["type"].to_i})
 	end
 
 	#----------------------------------------------
