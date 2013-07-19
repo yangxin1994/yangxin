@@ -4,7 +4,7 @@ require 'error_enum'
 require 'quill_common'
 class Sample::AnswersController < ApplicationController
 
-	before_filter :check_answer_existence, :except => [:list_spreaded_answers, :index, :get_my_answer, :create, :get_today_answers_count, :get_today_spread_count]
+	before_filter :check_answer_existence, :except => [:spreaded_answer_number, :list_spreaded_answers, :index, :get_my_answer, :create, :get_today_answers_count, :get_today_spread_count]
 
 	def check_answer_existence
 		@answer = Answer.find_by_id(params[:id])
