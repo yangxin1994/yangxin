@@ -47,7 +47,7 @@ class Order
 	FAIL = 8
 	CANCEL = 16
 	FROZEN = 32
-	REJECT = 32
+	REJECT = 64
 
 	# type
 	SMALL_MOBILE_CHARGE = 1
