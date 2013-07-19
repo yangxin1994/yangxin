@@ -537,6 +537,8 @@ OopsData::Application.routes.draw do
 				get :make_subscribe_active,:as => :make_subscribe_active 
 			end
 		end
+		resources :orders do
+		end
 	end
 
 	# The priority is based upon order of creation:
