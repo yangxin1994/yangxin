@@ -193,8 +193,9 @@ class Sample::AnswersController < ApplicationController
 		@total_answer_number = @answers.length
 		@finished_answer_number = @answers.finished.length
 		@editting_answer_number = @answers.where(:status => Answer::EDIT).length
-		render_json_auto {"total_answer_number" => @total_answer_number,
+		@spreaded_answer_number = {"total_answer_number" => @total_answer_number,
 			"finished_answer_number" => @finished_answer_number,
-			"editting_answer_number" => @editting_answer_number} and return
+			"editting_answer_number" => @editting_answer_number}
+		render_json_auto @spreaded_answer_number and return
 	end
 end
