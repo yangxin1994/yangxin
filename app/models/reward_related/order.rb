@@ -27,6 +27,7 @@ class Order
 	field :finished_at, :type => Integer
 	field :canceled_at, :type => Integer
 	field :ofcard_order_id, :type => String, :default => ""
+	field :point, :type => Integer, :default => 0
 
 	# embeds_one :cash_receive_info, :class_name => "CashReceiveInfo"
 	# embeds_one :entity_receive_info, :class_name => "EntityReceiveInfo"
@@ -68,12 +69,12 @@ class Order
 		return Order.where(:_id => order_id).first
 	end
 
-	def self.create_redeem_order(sample_id, gift_id, amount, opt = {})
+	def self.create_redeem_order(sample_id, gift_id, amount, point, opt = {})
 		sample = User.sample.find_by_id(sample_id)
 		return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
 		gift = Gift.find_by_id(gift_id)
 		return ErrorEnum::GIFT_NOT_EXIST if gift.nil?
-		order = Order.create(:source => REDEEM_GIFT, :amount => amount)
+		order = Order.create(:source => REDEEM_GIFT, :amount => amount, :point => point)
 		order.sample = sample
 		order.gift = gift
 		case gift.type
@@ -133,7 +134,7 @@ class Order
 		return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		order = Order.create(:source => ANSWER_SURVEY, :amount => amount)
+		order = Order.create(:source => ANSWER_SURVEY, :amount => amount, :type => type)
 		order.sample = sample
 		order.survey = survey
 		case type
@@ -294,5 +295,21 @@ class Order
 			end
 		end
 		return true
+	end
+
+	def info_for_sample
+		order_obj = {}
+		order_obj["created_at"] = self.created_at.to_i
+		order_obj["status"] = self.statsu
+		order_obj["source"] = self.source
+		order_obj["amount"] = self.amount
+		if self.source == REDEEM_GIFT
+			order_obj["point"] = self.point
+			order_obj["gift_title"] = self.gift.try(:title)
+		elsif self.source == WIN_IN_LOTTERY
+			order_obj["prize_title"] = self.prize.try(:title)
+		elsif self.srouce == ANSWER_SURVEY
+			order_obj["type"] = self.type
+		end
 	end
 end

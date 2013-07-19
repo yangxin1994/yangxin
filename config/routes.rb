@@ -512,6 +512,7 @@ OopsData::Application.routes.draw do
 				get :get_today_answers_count,:as => :get_today_answers_count
 				get :get_today_spread_count, :as => :get_today_spread_count
 				get :get_my_answer
+				get :list_spreaded_surveys
 			end
 			member do
 				get :load_question
@@ -527,7 +528,6 @@ OopsData::Application.routes.draw do
 				post :bind_sample
 				put :draw_lottery
 				post :create_lottery_order
-				get :list_spreaded_surveys
 			end
 		end	
 		resources :survey_subscribes do 
