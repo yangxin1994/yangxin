@@ -14,7 +14,15 @@ class Sample::PublicNoticesController < ApplicationController
 
   def show
     @public_notice = PublicNotice.find(params[:id])
-    render_json { @public_notice }
+    pids = PublicNotice.where(:status => 2).desc(:updated_at)
+    if pids.present?
+      tmp_hash = {}
+      pids.each_with_index do |pid,index|
+        tmp_hash["#{pid['_id']}"] = index
+      end
+    end
+    tmp_hash['current_notice'] = @public_notice
+    render_json { tmp_hash }
   end
 
 end

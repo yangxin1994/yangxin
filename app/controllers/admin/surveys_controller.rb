@@ -42,7 +42,7 @@ class Admin::SurveysController < Admin::ApplicationController
 			"quillme_promotable" => params[:promotable],
 			'quillme_promote_info' => params[:quillme_promote_setting]
 			})
-		@survey.update_quillme_reward_type
+		@survey.update_quillme_promote_reward_type
 		render_json_auto true and return
 	end
 
