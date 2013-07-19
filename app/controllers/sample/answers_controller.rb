@@ -174,4 +174,27 @@ class Sample::AnswersController < ApplicationController
 		end
 		render_json_auto @paginate_answers_info
 	end
+
+	def list_spreaded_answers
+		render_json_e ErrorEnum::REQUIRE_LOGIN and return if @current_user.nil?
+		@survey = Survey.find_by_id(params[:survey_id])
+		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
+		@answers = @survey.answers.not_preview.where(:introducer_id => @current_user._id.to_s).desc(:status)
+		render_json_auto auto_paginate @answers do |paginate_answers|
+			paginate_answers.map { |e| e.info_for_spread_details }
+		end
+	end
+
+	def spreaded_answer_number
+		render_json_e ErrorEnum::REQUIRE_LOGIN and return if @current_user.nil?
+		@survey = Survey.find_by_id(params[:survey_id])
+		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
+		@answers = @survey.answers.not_preview.where(:introducer_id => @current_user._id.to_s)
+		@total_answer_number = @answers.length
+		@finished_answer_number = @answers.finished.length
+		@editting_answer_number = @answers.where(:status => Answer::EDIT).length
+		render_json_auto {"total_answer_number" => @total_answer_number,
+			"finished_answer_number" => @finished_answer_number,
+			"editting_answer_number" => @editting_answer_number} and return
+	end
 end

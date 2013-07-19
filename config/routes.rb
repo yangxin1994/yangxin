@@ -512,7 +512,8 @@ OopsData::Application.routes.draw do
 				get :get_today_answers_count,:as => :get_today_answers_count
 				get :get_today_spread_count, :as => :get_today_spread_count
 				get :get_my_answer
-				get :list_spreaded_surveys
+				get :list_spreaded_answers
+				get :spreaded_answer_nubmer
 			end
 			member do
 				get :load_question
