@@ -312,4 +312,8 @@ class Order
 			order_obj["type"] = self.type
 		end
 	end
+
+	def info_for_sample_detail
+		
+	end
 end
