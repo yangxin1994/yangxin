@@ -180,9 +180,10 @@ class Sample::AnswersController < ApplicationController
 		@survey = Survey.find_by_id(params[:survey_id])
 		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
 		@answers = @survey.answers.not_preview.where(:introducer_id => @current_user._id.to_s).desc(:status)
-		render_json_auto auto_paginate @answers do |paginate_answers|
+		@answers_info = auto_paginate @answers do |paginate_answers|
 			paginate_answers.map { |e| e.info_for_spread_details }
 		end
+		render_json_auto @answers_info and return
 	end
 
 	def spreaded_answer_number
