@@ -12,6 +12,7 @@ class Sample::OrdersController < ApplicationController
 
 	def show
 		@order = Order.find_by_id(params[:id])
+		render_json_e ErrorEnum::ORDER_NOT_EXIST and return if @order.nil?
 		render_json_auto @order.info_for_sample_detail and return
 	end
 end

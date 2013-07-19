@@ -23,9 +23,11 @@ class Order
 	field :address, :type => String
 	field :postcode, :type => String
 	field :express_info, :type => Hash
+	field :reviewed_at, :type => Integer
 	field :handled_at, :type => Integer
 	field :finished_at, :type => Integer
 	field :canceled_at, :type => Integer
+	field :rejected_at, :type => Integer
 	field :ofcard_order_id, :type => String, :default => ""
 	field :point, :type => Integer, :default => 0
 
@@ -299,6 +301,7 @@ class Order
 
 	def info_for_sample
 		order_obj = {}
+		order_obj["_id"] = self._id.to_s
 		order_obj["created_at"] = self.created_at.to_i
 		order_obj["status"] = self.statsu
 		order_obj["source"] = self.source
@@ -314,6 +317,7 @@ class Order
 	end
 
 	def info_for_sample_detail
-		
+		self["created_at"] = self.created_at.to_i
+		return self
 	end
 end
