@@ -24,6 +24,9 @@ OopsData::Application.routes.draw do
 		end
 
 		resources :answers do
+			member do
+				put :review
+			end
 		end
 	end
 

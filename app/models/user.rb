@@ -100,7 +100,7 @@ class User
 	has_many :interviewer_tasks
 	has_many :reviewed_answers, class_name: "Answer", inverse_of: :auditor
 	has_many :logs
-		has_one  :affiliated, :class_name => "Affiliated", :inverse_of => :user
+	has_one  :affiliated, :class_name => "Affiliated", :inverse_of => :user
 
 	scope :unregistered, where(status: 1)
 	scope :sample, mod(:user_role => [2, 1])
@@ -179,7 +179,7 @@ class User
 		self.create_avatar(avatar)
 	end
 
-	def update_receive_info(receiver_info)
+	def set_receiver_info(receiver_info)
 		if self.affiliated.present?
 			self.update_affiliated(receiver_info)
 		else
@@ -299,12 +299,12 @@ class User
 		if affiliated
 			complete = 0
 				affiliated.attributes.each do |attr|
-					if SampleAttribute::DEFAULT_ATTR.include?(attr)
+					if SampleAttribute::BASIC_ATTR.include?(attr)
 						complete += 1
 					end	
 				end
-			default_attr = SampleAttribute::DEFAULT_ATTR.length
-			return (complete.quo(default_attr)).to_f 
+			basic_attr = SampleAttribute::BASIC_ATTR.length
+			return (complete.quo(basic_attr)).to_f 
 		else
 			return 0 
 		end
@@ -937,5 +937,13 @@ class User
 		sa = SampleAttribute.find_by_id(sa_id)
 		return false if sa.nli?
 		sa.affiliated.write_attribute(sa.name.to_sym, value)
+	end
+
+	def get_basic_attributes
+		
+	end
+
+	def set_basic_attributes
+		
 	end
 end
