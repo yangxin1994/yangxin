@@ -14,6 +14,7 @@ module ErrorEnum
 	ORDER_TYPE_ERROR = 'error___1'
 	ILLEGAL_EMAIL_OR_MOBILE = 'error___2'
 	EMAIL_OR_MOBILE_EXIST = 'error___3'
+	ACTIVATE_CODE_ERROR   = 'error___4'
 
 	LOGIN_TOO_FREQUENT = "error_0"
 	ILLEGAL_EMAIL = "error_1"

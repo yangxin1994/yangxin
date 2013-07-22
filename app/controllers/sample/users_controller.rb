@@ -31,6 +31,33 @@ class Sample::UsersController < ApplicationController
     render_json_auto(@current_user.completed_info) 
   end
 
+  def make_rss_activate
+    retval = User.create_rss_user(params[:rss_channel],params[:callback])
+    render_json_auto retval
+  end 
+
+  def make_subscribe_active
+    begin
+      activate_info_json = Encryption.decrypt_activate_key(CGI::unescape(params[:key]))
+      activate_info = JSON.parse(activate_info_json)
+    rescue
+      render_json_e(ErrorEnum::ILLEGAL_ACTIVATE_KEY) and return
+    end
+
+    retval = User.activate_rss_subscribe(activate_info)
+    render_json_auto(retval) and return    
+  end
+
+
+  def make_rss_mobile_activate
+    mobile = params[:email_mobile]
+    code   = params[:code]
+    user   = User.find_by_mobile("#{mobile}")
+    return USER_NOT_EXIST  if !user.present?
+    retval = user.make_mobile_rss_activate(code)           
+    render_json_auto(retval)
+  end
+
 
   
 

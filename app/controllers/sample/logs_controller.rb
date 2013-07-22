@@ -8,8 +8,7 @@ class Sample::LogsController < ApplicationController
   #返回的参数:一个盛放新鲜事的列表
   #############################	
   def fresh_news
-    @logs = Log.desc(:created_at).limit(5)
-    @logs = @logs.map{|log| log['username'] = log.user.username;log}
+    @logs = Log.get_new_logs(params[:limit],params[:type])
   	render_json_auto(@logs)
   end
 
@@ -23,13 +22,13 @@ class Sample::LogsController < ApplicationController
   #返回的参数:记录惩罚的列表
   ############################# 
   def get_disciplinal_news
-    @logs = Log.where(:type => 8,'data.reason' => 16).desc(:created_at).limit(3)
-    render_json { @logs }
+    @logs = Log.get_new_logs(3,64)
+    render_json_auto(@logs)
   end
 
 
   def get_newst_exchange_logs
-    @logs = Log.where(:type => 4,'data.reason' => 8).desc(:updated_at).limit(5)
+    @logs = Log.get_newst_exchange_logs
     render_json { @logs }          
   end
 

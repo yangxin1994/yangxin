@@ -183,45 +183,6 @@ class Survey
 
 	public
 
-    #return value
-    # surveys 盛放survey对象的list
-    # survey_data 以survey的id为key，以survey对象为value的hash
-    # scheme_type_hash 以奖励类型为key，以survey的id为元素的数组最为value  
-    # scheme_datas  以奖励方案的id为key，以每个奖励方案的内容为value 
-	# def self.get_recommends(page,per_page,sta=2,user_id=nil)
-	#   sta = 2 unless sta.present?
-	#   if page && per_page
-	#     surveys = Survey.quillme_promote.not_quillme_hot.status(sta).page(page).per(per_page).desc(:created_at)	
-	#   else
- #        surveys = Survey.quillme_promote.not_quillme_hot.status(sta).desc(:created_at)	
-	#   end  	
-	  
-	#   scheme_type_hash = {}
-	#   survey_data = {}	  
-	#   if surveys.present?
-	#   	surveys.map{|survey| survey_data[survey.id] = survey }
-	#   	RewardScheme::RewardType.each do |rtype|
-	#   	  current_type_arr = []
-	#   	  survey_data.each_pair do |survey_id,survey|
-	#   	    scheme_id = survey.quillme_promote_info['reward_scheme_id']
-	#   	    if scheme_id
-	#   	      rs = RewardScheme.where(:id => scheme_id).first
-	#   	      if rs
-	#   	        if rs.rewards.select{|ele| ele['type'].to_s ==  rtype.to_s }
-	#   	          current_type_arr << survey_id
-	#   	          scheme_type_hash[rtype] = current_type_arr  
-	#   	        end 
-	#   	      end
-	#   	    end	
-	#   	  end
-	#   	end
-	#   end
-	#   scheme_datas = {}
-	#   RewardScheme.all.map{|rs| scheme_datas[rs.id] = rs.rewards[0] }
-	#   surveys = surveys.map{|survey| survey['answer_count'] = survey.answers.count;survey['time'] = survey.estimate_answer_time;survey['answerd'] = survey.answered(user_id);survey}
- #      return [surveys,scheme_datas,scheme_type_hash,survey_data]   
-	# end
-
 	def self.get_recommends(status=2,reward_type=nil)
 	  status = 2 unless status.present?
 	  reward_type = nil unless reward_type.present?
@@ -256,6 +217,17 @@ class Survey
         self['answer_reject_type'] = self.answered(user)[1]
         self['reward_type_info'] = self.reward_type_info
         return self
+    end
+
+
+    def self.get_reward_type_count(status=2)
+    	status = 2 unless status.present?
+    	reward_types = Survey.quillme_promote.not_quillme_hot.status(status).map{|s| s.quillme_promote_reward_type}
+    	reward_data = {}
+    	reward_types.each do |rt|
+    		reward_data[rt] = Survey.where(:quillme_promote_reward_type => rt).count
+    	end
+    	return reward_data
     end
 
 	#----------------------------------------------

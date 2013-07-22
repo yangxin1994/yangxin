@@ -29,18 +29,29 @@ class Gift
 	field :quantity, :type => Integer, default: 0
 	field :point, :type => Integer, default: 0
     field :exchange_count, :type => Integer, default: 0
+    field :price, :type => Float, default: 0.0
     field :redeem_number, :type => Hash, default: {"mode" => SINGLE}
 
 	has_one :photo, :class_name => "Material", :inverse_of => 'gift'
 
-	default_scope order_by(:created_at.desc)
+	#default_scope order_by(:created_at.desc)
 
 	scope :normal, where(:status.in => [OFF_THE_SHELF, ON_THE_SHELF])
+
+	scope :on_shelf, where(:status => ON_THE_SHELF)
+
+	scope :real, where(:type => 4)
 
 	index({ type: 1, status: 1 }, { background: true } )
 
 	def self.find_by_id(gift_id)
 		return self.normal.where(:_id => gift_id).first
+	end
+
+	def self.find_real_gift(desc_type)
+		gifts = self.on_shelf.real.desc("#{desc_type}")
+		gifts.map{|gift| gift['photo'] = gift.photo.present? ? gift.photo.picture_url : nil}
+		return gifts
 	end
 
 	def self.create_gift(gift)

@@ -50,6 +50,12 @@ class Sample::SurveysController < ApplicationController
     render_json_auto survey_obj
   end
 
+  def get_reward_type_count
+    data_obj = Survey.get_reward_type_count(params[:status])
+    render_json_auto data_obj
+  end
+
+
   def show
     @survey = Survey.find_by_id(params[:id])
     render_json { @survey }

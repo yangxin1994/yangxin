@@ -473,6 +473,7 @@ OopsData::Application.routes.draw do
 				get :get_recommends,:as => :get_recommends
 				get :list_answered_surveys,:as => :list_answered_surveys
 				get :list_spreaded_surveys,:as => :list_spreaded_surveys
+				get :get_reward_type_count,:as => :get_reward_type_count
 			end
 		end		
 		resources :public_notices do
@@ -497,6 +498,9 @@ OopsData::Application.routes.draw do
 				get :mobile_banding,:as => :mobile_banding
 				get :email_banding,:as => :email_banding
 				get :info_precent_complete,:as => :info_precent_complete
+				post :make_rss_activate,:as => :make_rss_activate
+				get :make_subscribe_active,:as => :make_subscribe_active
+				get :make_rss_mobile_activate,:as => :make_rss_mobile_activate
 			end
 		end
 		resources :logs do
