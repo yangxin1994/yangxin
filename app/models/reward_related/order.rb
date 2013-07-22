@@ -301,7 +301,7 @@ class Order
 		order_obj = {}
 		order_obj["_id"] = self._id.to_s
 		order_obj["created_at"] = self.created_at.to_i
-		order_obj["status"] = self.statsu
+		order_obj["status"] = self.status
 		order_obj["source"] = self.source
 		order_obj["amount"] = self.amount
 		if self.source == REDEEM_GIFT
