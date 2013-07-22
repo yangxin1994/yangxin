@@ -12,6 +12,12 @@ class Agent::AnswersController < Agent::ApplicationController
 	end
 
 	def index
+		agent_task = AgentTask.find_by_id(params[:agent_task_id])
+		render_json_e ErrorEnum::AGENT_TASK_NOT_EXIST if agent_task.nil?
+
+		answers = agent_task.answers.find_by_status(params[:status]) if !params[:status].blank?
+
+		render_json_auto auto_paginate(answers) and return
 	end
 
 	def show
@@ -370,15 +376,9 @@ class Agent::AnswersController < Agent::ApplicationController
 	end
 
 	def review
-		answer = @agent_task.find_answer_by_id(params[:id])
+		answer = Answer.find_by_id(params[:id])
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
 		retval = answer.agent_review(params[:review_result].to_s == "true")
 		render_json_auto(retval)
-	end
-
-	def destroy
-		answer = Answer.find_by_id(params[:id])
-		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
-		render_json_auto(answer.destroy)
 	end
 end

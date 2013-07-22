@@ -58,23 +58,23 @@ class Answer
 
 	scope :not_preview, lambda { where(:is_preview => false) }
 	scope :preview, lambda { where(:is_preview => true) }
-	scope :finished, lambda { where(:status => 3) }
-	scope :screened, lambda { where(:status => 1, :reject_type => 3) }
-	scope :finished_and_screened, lambda { any_of({:status => 3}, {:status => 1, :reject_type => 3}) }
-	scope :rejected, lambda { where(:status => 1) }
-	scope :unreviewed, lambda { where(:status => 2) }
-	scope :ongoing, lambda {where(:status => 0)}
-	scope :wait_for_review, lambda {where(:status => 2)}
+	scope :finished, lambda { where(:status => FINISH) }
+	scope :screened, lambda { where(:status => REJECT, :reject_type => REJECT_BY_SCREEN) }
+	scope :finished_and_screened, lambda { any_of({:status => FINISH}, {:status => REJECT, :reject_type => REJECT_BY_SCREEN}) }
+	scope :rejected, lambda { where(:status => REJECT) }
+	scope :unreviewed, lambda { where(:status => UNDER_REVIEW) }
+	scope :ongoing, lambda {where(:status => EDIT)}
+	scope :wait_for_review, lambda {where(:status => UNDER_REVIEW)}
 
 	belongs_to :agent_task
 	belongs_to :user, class_name: "User", inverse_of: :answers
-	belongs_to :agent_task
 	belongs_to :survey
 	belongs_to :interviewer_task
 	belongs_to :lottery
 	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
 	has_one :order
 
+	# status
 	STATUS_NAME_ARY = ["edit", "reject", "under_review", "under_agent_review", "redo", "finish"]
 	EDIT = 1
 	REJECT = 2
@@ -82,7 +82,14 @@ class Answer
 	UNDER_AGENT_REVIEW = 8
 	REDO = 16
 	FINISH = 32
-	##### answer import #####
+
+	# reject type
+	REJECT_BY_QUOTA = 1
+	REJECT_BY_QUALITY_CONTROL = 2
+	REJECT_BY_REVIEW = 4
+	REJECT_BY_SCREEN = 8
+	REJECT_BY_TIMEOUT = 16
+	REJECT_BY_AGENT_REVIEW = 32
 
 	index({ survey_id: 1, status: 1, reject_type: 1 }, { background: true } )
 	index({ survey_id: 1, is_preview: 1 }, { background: true } )
@@ -803,6 +810,8 @@ class Answer
 		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
 		if self.is_preview || self.need_review
 			self.set_finish
+		elsif !self.agent.nil?
+			self.set_under_agent_review
 		else
 			self.set_under_review
 		end
@@ -855,6 +864,8 @@ class Answer
 				rule["submitted_count"] = [rule["submitted_count"] - 1, 0].max
 			end
 		end
+		self.interviewer_task.try(:refresh_quota)
+		self.agent_task.try(:refresh_quota)
 		self.survey.save
 	end
 
@@ -871,7 +882,7 @@ class Answer
 			message_content ||= "你的此问卷[#{self.survey.title}]的答案通过审核."
 		else
 			self.set_reject
-			self.reject_type = REJECT
+			self.reject_type = REJECT_BY_REVIEW
 			message_content ||= "你的此问卷[#{self.survey.title}]的答案未通过审核."
 		end
 		answer_auditor.create_message("审核问卷答案消息", message_content, [user._id.to_s]) if !user.nil?
@@ -884,6 +895,22 @@ class Answer
 		self.interviewer_task.try(:refresh_quota)
 		self.update_quota(old_status)
 		self.deliver_reward
+		return true
+	end
+
+	def agent_review(review_result)
+		return ErrorEnum::WRONG_ANSWER_STATUS if self.status != UNDER_AGENT_REVIEW
+
+		old_status = self.status
+		user = self.user
+		if review_result
+			self.set_under_review
+		else
+			self.set_reject
+			self.reject_type = REJECT_BY_AGENT_REVIEW
+		end
+		self.save
+		self.agent_task.try(:refresh_quota)
 		return true
 	end
 
@@ -956,8 +983,8 @@ class Answer
 				assign_introducer_reward
 				self.update_attributes({"reward_delivered" => true})
 			elsif self.order.status == Order::FROZEN
-				self.order.update_attributes({"status" => Order::WAIT}) if self.status == FINISH
-				self.order.update_attributes({"status" => Order::REJECT}) if self.status == REJECT
+				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
+				self.order.update_attributes({"status" => Order::REJECT, "rejected_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
@@ -976,8 +1003,8 @@ class Answer
 				assign_introducer_reward
 				self.update_attributes({"reward_delivered" => true})
 			elsif self.order.status == Order::FROZEN
-				self.order.update_attributes({"status" => Order::WAIT}) if self.status == FINISH
-				self.order.update_attributes({"status" => Order::REJECT}) if self.status == REJECT
+				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
+				self.order.update_attributes({"status" => Order::REJECT, "rejected_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
@@ -996,8 +1023,8 @@ class Answer
 				assign_introducer_reward
 				self.update_attributes({"reward_delivered" => true})
 			else
-				self.order.update_attributes({"status" => Order::WAIT}) if self.status == FINISH
-				self.order.update_attributes({"status" => Order::REJECT}) if self.status == REJECT
+				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
+				self.order.update_attributes({"status" => Order::REJECT, "rejected_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
@@ -1151,6 +1178,7 @@ class Answer
 		if !self.user.nil?
 			answer_obj["sample_nickname"] = self.user.read_sample_attribute(:nickname) || self.user.email || self.user.mobile
 			answer_obj["sample_avatar"] = self.user.avatar.try(:picture_url)
+			answer_obj["sample_id"] = self.user._id.to_s
 		end
 		return answer_obj
 	end
