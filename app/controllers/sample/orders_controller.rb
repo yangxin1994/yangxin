@@ -7,6 +7,9 @@ class Sample::OrdersController < ApplicationController
 		@orders_list = auto_paginate(@orders) do |paginated_orders|
 			paginated_orders.map { |e| e.info_for_sample }
 		end
+		logger.info "AAAAAAAAAAAAAAAAAAA"
+		logger.info @orders_list.inspect
+		logger.info "AAAAAAAAAAAAAAAAAAA"
 		render_json_auto @orders_list and return
 	end
 

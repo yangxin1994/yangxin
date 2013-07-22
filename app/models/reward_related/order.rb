@@ -311,9 +311,10 @@ class Order
 		elsif self.source == WIN_IN_LOTTERY
 			order_obj["title"] = self.prize.try(:title)
 			order_obj["picture_url"] = self.prize.try(:photo).try(:picture_url)
-		elsif self.srouce == ANSWER_SURVEY
+		elsif self.source == ANSWER_SURVEY
 			order_obj["type"] = self.type
 		end
+		return order_obj
 	end
 
 	def info_for_sample_detail
