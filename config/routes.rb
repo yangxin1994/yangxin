@@ -459,15 +459,16 @@ OopsData::Application.routes.draw do
 	end
 	
 	namespace :sample do
-		resources :accounts do 
+		resources :reward_schemes do
+		end
+		resources :accounts do
 			collection do
-				get :get_basic_info,:as => :get_basic_info
-				get :get_spread_count,:as => :get_spread_count
-				get :get_answer_count,:as => :get_answer_count
-				post :update_avatar,:as => :update_avatar
-				get :get_receive_info,:as => :get_receive_info
-				post :update_receive_info,:as => :update_receive_info
-				post :reset_password,:as => :reset_password
+				get :get_basic_info
+				get :get_basic_attributes
+				put :set_basic_attributes
+				get :get_receiver_info
+				put :set_receiver_info
+				put :reset_password
 			end	
 		end	
 		resources :surveys do

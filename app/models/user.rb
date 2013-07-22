@@ -435,8 +435,7 @@ class User
 	#*retval*:
 	#* true: when successfully login
 	#* WRONG_PASSWORD
-	def reset_password(old_password, new_password, new_password_confirmation)
-		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if new_password != new_password_confirmation
+	def reset_password(old_password, new_password)
 		return ErrorEnum::WRONG_PASSWORD if self.password != Encryption.encrypt_password(old_password)  # wrong password
 		self.password = Encryption.encrypt_password(new_password)
 		return self.save
@@ -940,10 +939,17 @@ class User
 	end
 
 	def get_basic_attributes
-		
+		basic_attributes = {}
+		SampleAttribute::BASIC_ATTR.each do |attr_name|
+			basic_attributes[attr_name] = self.read_sample_attribute(attr_name)
+		end
+		return basic_attributes
 	end
 
-	def set_basic_attributes
-		
+	def set_basic_attributes(basic_attributes)
+		SampleAttribute::BASIC_ATTR.each do |attr_name|
+			self.write_sample_attribute(attr_name, basic_attributes[attr_name])
+		end
+		return true
 	end
 end

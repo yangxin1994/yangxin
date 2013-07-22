@@ -1,7 +1,8 @@
 # coding: utf-8
 require 'error_enum'
 require 'quill_common'
-class AccountsController < ApplicationController
+class Sample::AccountsController < ApplicationController
+	before_filter :require_sign_in
 
 	def get_basic_info
 		# answer number, spread number, third party accounts
@@ -11,6 +12,14 @@ class AccountsController < ApplicationController
 		["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
 			@third_party_bind_info[website] = !@current_user.third_party_users.where(:website => website).blank?
 		end
+		@completed_info = @current_user.completed_info
+		@basic_info = {
+			"answer_number" => @answer_number,
+			"spread_number" => @spread_number,
+			"third_party_bind_info" => @third_party_bind_info,
+			"completed_info" => @completed_info
+		}
+		render_json_auto @basic_info and return
 	end
 
 	def get_basic_attributes
@@ -20,7 +29,7 @@ class AccountsController < ApplicationController
 	end
 
 	def set_basic_attributes
-		retval = @current_user.update_basic_info(params[:receive_info])
+		retval = @current_user.set_basic_info(params[:basic_attributes])
 		render_json_auto(retval) and return   	
 	end
 
@@ -35,7 +44,7 @@ class AccountsController < ApplicationController
 	end
 
 	def reset_password
-		retval = @current_user.reset_password(params[:old_password], params[:new_password], params[:new_password_confirmation])
+		retval = @current_user.reset_password(params[:old_password], params[:new_password])
 		render_json_auto(retval) and return
 	end
 end
