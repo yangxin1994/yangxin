@@ -319,6 +319,8 @@ class Order
 
 	def info_for_sample_detail
 		self["created_at"] = self.created_at.to_i
+		self["survey_title"] = self.survey.title if !self.survey.nil?
+		self["survey_id"] = self.survey._id.to_s if !self.survey.nil?
 		return self
 	end
 end

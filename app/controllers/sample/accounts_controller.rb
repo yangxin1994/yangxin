@@ -26,9 +26,7 @@ class Sample::AccountsController < ApplicationController
 	end
 
 	def get_basic_attributes
-		user = User.find_by_id(params[:id]) if params[:id]
-		user = @current_user if user.nil?
-		render_json_auto(user) and return
+		render_json_auto(@current_user.get_basic_attributes) and return
 	end
 
 	def set_basic_attributes
@@ -37,12 +35,12 @@ class Sample::AccountsController < ApplicationController
 	end
 
 	def get_receiver_info
-		receiver_info = @current_user.affiliated.receive_info
+		receiver_info = @current_user.affiliated.receiver_info
 		render_json_auto(receiver_info) and return
 	end
 
 	def set_receiver_info
-		retval = @current_user.update_receive_info(params[:receive_info])
+		retval = @current_user.set_receiver_info(params[:receiver_info])
 		render_json_auto(retval) and return     
 	end
 

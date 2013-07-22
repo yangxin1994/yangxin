@@ -185,6 +185,7 @@ class User
 		else
 			self.create_affiliated(receiver_info)
 		end	
+		return true
 	end
 
 	def is_deleted
