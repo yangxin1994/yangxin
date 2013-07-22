@@ -48,4 +48,19 @@ class Sample::AccountsController < ApplicationController
 		retval = @current_user.reset_password(params[:old_password], params[:new_password])
 		render_json_auto(retval) and return
 	end
+
+	def get_bind_info
+		@bind_info = {}
+		if @current_user.email_activation?
+			@bind_info["email"] = [@current_user.email, @current_user.email_subscribe]
+		end
+		if @current_user.mobile_activation
+			@bind_info["mobile"] = [@current_user.mobile, @current_user.mobile_subscribe]
+		end
+		["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
+			third_party_user = ThirdPartyUser.where(:user_id => @current_user._id.to_s, :website => website).first
+			@bind_info[website] = [third_party_user.name, third_party_user.share] if !third_party_user.nil?
+		end
+		render_json_auto @bind_info and return
+	end
 end

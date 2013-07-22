@@ -25,7 +25,7 @@ class Agent
 	end
 
 	def self.find_by_email(agent_email)
-		return self.normal.where(:email => email).first
+		return self.normal.where(:email => agent_email).first
 	end
 
 	def self.find_by_auth_key(auth_key)
@@ -59,7 +59,7 @@ class Agent
 	end
 
 	def info
-		self["open_agent_task_number"] = self.agent_tasks.where(:status.in => [AgentTask::OPEN, AgentTask::AGENT_CLOSED])
+		self["open_agent_task_number"] = AgentTask.where(:agent_id => self._id.to_s, :status.in => [AgentTask::OPEN, AgentTask::AGENT_CLOSED]).length
 		return self
 	end
 
