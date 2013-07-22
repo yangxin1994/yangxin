@@ -8,15 +8,18 @@ class Sample::AccountsController < ApplicationController
 		# answer number, spread number, third party accounts
 		@answer_number = @current_user.answers.not_preview.finished.length
 		@spread_number = Answer.where(:introducer_id => @current_user._id).not_preview.finished.length
-		@third_party_bind_info = {}
+		@bind_info = {}
 		["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
-			@third_party_bind_info[website] = !@current_user.third_party_users.where(:website => website).blank?
+			@bind_info[website] = !ThirdPartyUser.where(:user_id => @current_user._id.to_s, :website => website).blank?
 		end
+		@bind_info["email"] = @current_user.email_activation
+		@bind_info["mobile"] = @current_user.mobile_activation
+
 		@completed_info = @current_user.completed_info
 		@basic_info = {
 			"answer_number" => @answer_number,
 			"spread_number" => @spread_number,
-			"third_party_bind_info" => @third_party_bind_info,
+			"bind_info" => @bind_info,
 			"completed_info" => @completed_info
 		}
 		render_json_auto @basic_info and return
