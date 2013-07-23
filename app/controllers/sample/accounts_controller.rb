@@ -38,7 +38,7 @@ class Sample::AccountsController < ApplicationController
 	end
 
 	def get_receiver_info
-		receiver_info = @current_user.affiliated.receiver_info
+		receiver_info = @current_user.affiliated.try(:receiver_info) || {}
 		render_json_auto(receiver_info) and return
 	end
 

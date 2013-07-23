@@ -8,6 +8,7 @@ module ErrorEnum
 	AGENT_TASK_NOT_EXIST = "error__5"
 	WRONG_ORDER_STATUS = "error__6"
 	REWARD_NOT_SELECTED = "error__7"
+	AGENT_NOT_EXIST = "error__8"
 
 
 	REWARD_SCHEME_NOT_EXIST = 'error___0'  ##TODO ErrorEnum has not rule yet
