@@ -5,7 +5,7 @@ class AnswerAuditor::SurveysController < AnswerAuditor::ApplicationController
 	def index
 		if @current_user.is_admin
 			@surveys = Survey.where(
-					:publish_status => 8
+					:status => Survey::PUBLISHED
 				).desc(:created_at)
 		else
 			@surveys = @current_user.answer_auditor_allocated_surveys.desc(:created_at)
