@@ -19,7 +19,7 @@ class Sample::AnswersController < ApplicationController
 		answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], sample.try(:_id), params[:is_preview] || false)
 		render_json_s(answer._id.to_s) and return if !answer.nil?
 		retval = survey.check_password(params[:username], params[:password], params[:is_preview] || false)
-		render_json_e ErrorEnum::WRONG_SURVEY_PASSWORD if retval != true
+		render_json_e ErrorEnum::WRONG_SURVEY_PASSWORD and return if retval != true
 		answer = Answer.create_answer(params[:survey_id],
 			params[:reward_scheme_id],
 			params[:is_preview] || false,
