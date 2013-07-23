@@ -16,5 +16,4 @@ class Log
 		log = Log.where(:_id => log_id).first
 		return log
 	end
-
 end
