@@ -14,8 +14,8 @@ class Sample::AnswersController < ApplicationController
 	def create
 		survey = Survey.normal.find_by_id(params[:survey_id])
 		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if survey.nil?
-		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if !params[:is_preview] && survey.publish_status != QuillCommon::PublishStatusEnum::PUBLISHED
-		sample = User.sample.find_by_email_mobile(params[:email_mobile])
+		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if !params[:is_preview] && survey.status != Survey::PUBLISHED
+		sample = User.sample.find_by_auth_key(params[:auth_key])
 		answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], sample.try(:_id), params[:is_preview] || false)
 		render_json_s(answer._id.to_s) and return if !answer.nil?
 		retval = survey.check_password(params[:username], params[:password], params[:is_preview] || false)

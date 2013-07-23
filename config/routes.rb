@@ -469,6 +469,7 @@ OopsData::Application.routes.draw do
 				get :get_receiver_info
 				put :set_receiver_info
 				put :reset_password
+				get :messages
 			end	
 		end	
 		resources :surveys do

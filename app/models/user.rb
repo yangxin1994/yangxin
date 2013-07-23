@@ -306,6 +306,7 @@ class User
 				end
 			basic_attr = SampleAttribute::BASIC_ATTR.length
 			return (complete.quo(basic_attr)).to_f 
+			return complete * 100 / basic_attr
 		else
 			return 0 
 		end

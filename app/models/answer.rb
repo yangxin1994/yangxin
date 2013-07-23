@@ -127,6 +127,7 @@ class Answer
 	end
 
 	def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, channel, referrer, remote_ip, username, password)
+		survey = Survey.normal.find_by_id(survey_id)
 		# create the answer
 		answer = Answer.new(is_preview: is_preview,
 			channel: channel,
@@ -154,7 +155,6 @@ class Answer
 			answer.rewards = []
 			answer.need_review = false
 		end
-
 
 		# initialize the answer content
 		answer_content = {}
@@ -187,13 +187,12 @@ class Answer
 				answer.add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
 			end
 		end
-
+		answer.save
+		survey.answers << answer
 		# randomly generate quality control questions
 		answer = answer.genereate_random_quality_control_questions
-
 		answer.save
-		survey = Survey.normal.find_by_id(survey_id)
-		survey.answers << answer
+
 		return answer
 	end
 
@@ -562,7 +561,7 @@ class Answer
 	#* the status of the answer after updating
 	def update_status
 		# an answer expires only when the survey is not published and the answer is in editting status
-		if Time.now.to_i - self.created_at.to_i > 2.days.to_i && self.survey.publish_status != 8 && self.status == 0
+		if Time.now.to_i - self.created_at.to_i > 2.days.to_i && self.survey.status != Survey::PUBLISHED && self.status == EDIT
 			self.set_reject
 			self.update_attributes(reject_type: 4, finished_at: Time.now.to_i)
 		end
