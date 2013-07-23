@@ -69,6 +69,19 @@ class Sample::AccountsController < ApplicationController
 
 	def messages
 		@messages = @current_user.messages
-		render_json_auto @messages and return
+		@paginated_messages = auto_paginate @messages do |paginated_messages|
+			paginated_messages.map { |e| e.info_for_sample }
+		end
+		render_json_auto @paginated_messages and return
+	end
+
+	def destroy_message
+		@message = Message.find_by_id(params[:message_id])
+		render_json_e ErrorEnum::MESSAGE_NOT_EXIST if @message.user != @current_user
+		render_json_auto @message.destroy and return
+	end
+
+	def destroy_all_messages
+		render_json_auto @current_user.messages.destroy_all and return
 	end
 end

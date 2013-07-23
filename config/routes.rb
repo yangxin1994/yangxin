@@ -470,6 +470,8 @@ OopsData::Application.routes.draw do
 				put :set_receiver_info
 				put :reset_password
 				get :messages
+				delete :destroy_message
+				delete :destroy_all_messages
 			end	
 		end	
 		resources :surveys do
