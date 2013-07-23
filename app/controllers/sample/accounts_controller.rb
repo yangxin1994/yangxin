@@ -54,7 +54,7 @@ class Sample::AccountsController < ApplicationController
 
 	def get_bind_info
 		@bind_info = {}
-		if @current_user.email_activation?
+		if @current_user.email_activation
 			@bind_info["email"] = [@current_user.email, @current_user.email_subscribe]
 		end
 		if @current_user.mobile_activation
