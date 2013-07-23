@@ -181,9 +181,9 @@ class User
 
 	def set_receiver_info(receiver_info)
 		if self.affiliated.present?
-			self.update_affiliated(receiver_info)
+			self.affiliated.update_attributes(:receiver_info => receiver_info)
 		else
-			self.create_affiliated(receiver_info)
+			self.create_affiliated(:receiver_info => receiver_info)
 		end	
 		return true
 	end
