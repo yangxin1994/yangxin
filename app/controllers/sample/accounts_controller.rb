@@ -66,4 +66,9 @@ class Sample::AccountsController < ApplicationController
 		end
 		render_json_auto @bind_info and return
 	end
+
+	def messages
+		@messages = @current_user.messages
+		render_json_auto @messages and return
+	end
 end
