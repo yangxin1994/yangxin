@@ -25,7 +25,7 @@ class Agent
 	end
 
 	def self.find_by_email(agent_email)
-		return self.normal.where(:email => email).first
+		return self.normal.where(:email => agent_email).first
 	end
 
 	def self.find_by_auth_key(auth_key)
@@ -59,7 +59,7 @@ class Agent
 	end
 
 	def info
-		self["open_agent_task_number"] = self.agent_tasks.where(:status.in => [AgentTask::OPEN, AgentTask::AGENT_CLOSED])
+		self["open_agent_task_number"] = AgentTask.where(:agent_id => self._id.to_s, :status.in => [AgentTask::OPEN, AgentTask::AGENT_CLOSED]).length
 		return self
 	end
 
@@ -81,7 +81,7 @@ class Agent
 		return ErrorEnum::WRONG_PASSWORD if agent.password != encrypted_password
 		agent.auth_key = Encryption.encrypt_auth_key("#{agent.email}&#{Time.now.to_i.to_s}")
 		agent.save
-		return {"auth_key" => agent_task.auth_key}
+		return {"auth_key" => agent.auth_key}
 	end
 
 	def self.logout(auth_key)
