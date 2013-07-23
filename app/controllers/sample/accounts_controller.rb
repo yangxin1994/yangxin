@@ -23,15 +23,6 @@ class Sample::AccountsController < ApplicationController
 		# 	"completed_info" => @completed_info
 		# }
 
-		@basic_info = {
-			"answer_number" => @answer_number,
-			"spread_number" => @spread_number,
-			"bind_info" => @bind_info,
-			"completed_info" => @completed_info,
-			"point"          => @current_user.point,
-			"username"       => @current_user.email || @current_user.mobile
-		}
-
 		render_json_auto @basic_info and return
 	end
 
