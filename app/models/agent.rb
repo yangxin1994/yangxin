@@ -77,11 +77,11 @@ class Agent
 	def self.login(email, password)
 		encrypted_password = Encryption.encrypt_password(password)
 		agent = self.find_by_email(email)
-		return ErrorEnum::AGENT_NOT_EXIST if !agent.nil?
+		return ErrorEnum::AGENT_NOT_EXIST if agent.nil?
 		return ErrorEnum::WRONG_PASSWORD if agent.password != encrypted_password
 		agent.auth_key = Encryption.encrypt_auth_key("#{agent.email}&#{Time.now.to_i.to_s}")
 		agent.save
-		return {"auth_key" => agent_task.auth_key}
+		return {"auth_key" => agent.auth_key}
 	end
 
 	def self.logout(auth_key)
