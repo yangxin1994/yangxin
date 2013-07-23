@@ -19,19 +19,18 @@ class Order
 	field :alipay_account, :type => String
 	field :mobile, :type => String
 	field :qq, :type => String
-	field :user_name, :type => String
+	field :receiver, :type => String
 	field :address, :type => String
+	field :street_info, :type => String
 	field :postcode, :type => String
 	field :express_info, :type => Hash
+	field :reviewed_at, :type => Integer
 	field :handled_at, :type => Integer
 	field :finished_at, :type => Integer
 	field :canceled_at, :type => Integer
+	field :rejected_at, :type => Integer
 	field :ofcard_order_id, :type => String, :default => ""
-
-	# embeds_one :cash_receive_info, :class_name => "CashReceiveInfo"
-	# embeds_one :entity_receive_info, :class_name => "EntityReceiveInfo"
-	# embeds_one :virtual_receive_info, :class_name => "VirtualReceiveInfo"
-	# embeds_one :lottery_receive_info, :class_name => "LotteryReceiveInfo"
+	field :point, :type => Integer, :default => 0
 
 	belongs_to :prize
 	belongs_to :survey
@@ -46,7 +45,7 @@ class Order
 	FAIL = 8
 	CANCEL = 16
 	FROZEN = 32
-	REJECT = 32
+	REJECT = 64
 
 	# type
 	SMALL_MOBILE_CHARGE = 1
@@ -62,18 +61,25 @@ class Order
 	WIN_IN_LOTTERY = 2
 	REDEEM_GIFT = 4
 
-	attr_accessible :mobile, :alipay_account, :qq, :user_name, :address, :postcode
+	#attr_accessible :mobile, :alipay_account, :qq, :user_name, :address, :postcode
 
 	def self.find_by_id(order_id)
 		return Order.where(:_id => order_id).first
 	end
 
-	def self.create_redeem_order(sample_id, gift_id, amount, opt = {})
+
+	def self.create_redeem_order(sample_id, gift_id, amount, point, opt = {})
+
+		gift  = Gift.find_by_id(gift_id)
+		return ErrorEnum::ORDER_ERROR if amount.to_i < 1
+
+		point = gift.point.to_i  * amount.to_i
 		sample = User.sample.find_by_id(sample_id)
+		return ErrorEnum::POINT_NOT_ENOUGH if sample.point.to_i < point.to_i 
 		return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
 		gift = Gift.find_by_id(gift_id)
 		return ErrorEnum::GIFT_NOT_EXIST if gift.nil?
-		order = Order.create(:source => REDEEM_GIFT, :amount => amount)
+		order = Order.create(:source => REDEEM_GIFT, :amount => amount, :point => point)
 		order.sample = sample
 		order.gift = gift
 		case gift.type
@@ -87,8 +93,10 @@ class Order
 			order.qq = opt["qq"]
 		when Gift::VIRTUAL
 		when Gift::REAL
-			order.user_name = opt["user_name"]
+			order.receiver = opt["receiver"]
+			order.mobile = opt["mobile"]
 			order.address = opt["address"]
+			order.street_info = opt["street_info"]
 			order.postcode = opt["postcode"]
 		end
 		order.save
@@ -133,7 +141,7 @@ class Order
 		return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		order = Order.create(:source => ANSWER_SURVEY, :amount => amount)
+		order = Order.create(:source => ANSWER_SURVEY, :amount => amount, :type => type)
 		order.sample = sample
 		order.survey = survey
 		case type
@@ -294,5 +302,32 @@ class Order
 			end
 		end
 		return true
+	end
+
+	def info_for_sample
+		order_obj = {}
+		order_obj["_id"] = self._id.to_s
+		order_obj["created_at"] = self.created_at.to_i
+		order_obj["status"] = self.status
+		order_obj["source"] = self.source
+		order_obj["amount"] = self.amount
+		if self.source == REDEEM_GIFT
+			order_obj["point"] = self.point
+			order_obj["title"] = self.gift.try(:title)
+			order_obj["picture_url"] = self.gift.try(:photo).try(:picture_url)
+		elsif self.source == WIN_IN_LOTTERY
+			order_obj["title"] = self.prize.try(:title)
+			order_obj["picture_url"] = self.prize.try(:photo).try(:picture_url)
+		elsif self.source == ANSWER_SURVEY
+			order_obj["type"] = self.type
+		end
+		return order_obj
+	end
+
+	def info_for_sample_detail
+		self["created_at"] = self.created_at.to_i
+		self["survey_title"] = self.survey.title if !self.survey.nil?
+		self["survey_id"] = self.survey._id.to_s if !self.survey.nil?
+		return self
 	end
 end

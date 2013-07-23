@@ -103,7 +103,7 @@ class User
 	has_many :interviewer_tasks
 	has_many :reviewed_answers, class_name: "Answer", inverse_of: :auditor
 	has_many :logs
-		has_one  :affiliated, :class_name => "Affiliated", :inverse_of => :user
+	has_one  :affiliated, :class_name => "Affiliated", :inverse_of => :user
 
 	scope :unregistered, where(status: 1)
 	scope :sample, mod(:user_role => [2, 1])
@@ -182,12 +182,13 @@ class User
 		self.create_avatar(avatar)
 	end
 
-	def update_receive_info(receiver_info)
+	def set_receiver_info(receiver_info)
 		if self.affiliated.present?
 			self.update_affiliated(receiver_info)
 		else
 			self.create_affiliated(receiver_info)
 		end	
+		return true
 	end
 
 	def is_deleted
@@ -363,12 +364,12 @@ class User
 		if affiliated
 			complete = 0
 				affiliated.attributes.each do |attr|
-					if SampleAttribute::DEFAULT_ATTR.include?(attr)
+					if SampleAttribute::BASIC_ATTR.include?(attr)
 						complete += 1
 					end	
 				end
-			default_attr = SampleAttribute::DEFAULT_ATTR.length
-			return (complete.quo(default_attr)).to_f 
+			basic_attr = SampleAttribute::BASIC_ATTR.length
+			return (complete.quo(basic_attr)).to_f 
 		else
 			return 0 
 		end
@@ -499,8 +500,7 @@ class User
 	#*retval*:
 	#* true: when successfully login
 	#* WRONG_PASSWORD
-	def reset_password(old_password, new_password, new_password_confirmation)
-		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if new_password != new_password_confirmation
+	def reset_password(old_password, new_password)
 		return ErrorEnum::WRONG_PASSWORD if self.password != Encryption.encrypt_password(old_password)  # wrong password
 		self.password = Encryption.encrypt_password(new_password)
 		return self.save
@@ -1001,5 +1001,20 @@ class User
 		sa = SampleAttribute.find_by_id(sa_id)
 		return false if sa.nli?
 		sa.affiliated.write_attribute(sa.name.to_sym, value)
+	end
+
+	def get_basic_attributes
+		basic_attributes = {}
+		SampleAttribute::BASIC_ATTR.each do |attr_name|
+			basic_attributes[attr_name] = self.read_sample_attribute(attr_name)
+		end
+		return basic_attributes
+	end
+
+	def set_basic_attributes(basic_attributes)
+		SampleAttribute::BASIC_ATTR.each do |attr_name|
+			self.write_sample_attribute(attr_name, basic_attributes[attr_name])
+		end
+		return true
 	end
 end

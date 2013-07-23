@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'tool'
+require 'error_enum'
 class Gift
 	include Mongoid::Document
 	include Mongoid::Timestamps
@@ -64,6 +65,15 @@ class Gift
 		return gift
 	end
 
+	def self.generate_opt(order,gift)
+		opt = {}
+		opt['mobile'] = order[:account] if gift == 'phone_num'
+		opt['alipay_account'] = order[:account] if gift == 'ali_num'
+		opt['alipay_account'] = order[:account] if gift == 'jifen_num'
+		opt['qq'] = order[:account] if gift == 'qq_num'
+		return opt
+	end
+
 	def update_gift(gift)
 		photo_url = gift.delete("photo_url")
 		if !photo_url.blank? && photo_url != self.photo.value
@@ -96,6 +106,23 @@ class Gift
 		return Errorenum::WRONG_GIFT_TYPE if ![1,2,4].include?(gift["type"].to_i)
 		return true
 	end
+
+
+	def self.generate_gift_id(order_type)
+		case order_type.to_s
+		when 'phone_num'
+			return self.where(:type => MOBILE_CHARGE).on_shelf.first.try(:_id) 
+		when 'jifen_num'
+			return self.where(:type => JIFENBAO).on_shelf.first.try(:_id)
+		when 'ali_num'
+			return self.where(:type => ALIPAY).on_shelf.first.try(:_id)
+		when 'qq_num'
+			return self.where(:type => QQ_COIN).on_shelf.first.try(:_id)
+		else
+			return false
+		end
+	end
+
 
     #订单(兑换)流程走完之后该值加一，表示该礼品兑换的次数
 	def inc_exchange_count

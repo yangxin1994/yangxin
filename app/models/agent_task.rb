@@ -98,4 +98,24 @@ class AgentTask
 		self.status = DELETED
 		return self.save
 	end
+
+	def refresh_quota
+		self.agent_under_review_count = 0
+		self.under_review_count = 0
+		self.finished_count = 0
+		self.reject_count = 0
+		self.answers.not_preview.each do |e|
+			case e.status
+			when Answer::UNDER_AGENT_REVIEW
+				self.agent_under_review_count += 1
+			when Answer::FINISH
+				self.finished_count += 1
+			when Answer::REJECT
+				self.reject_count += 1 if e.reject_type == Answer::REJECT_BY_REVIEW
+			when Answer::UNDER_REVIEW
+				self.under_review_count += 1
+			end
+		end
+		return self.save
+	end
 end

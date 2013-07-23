@@ -59,6 +59,4 @@ class Sample::UsersController < ApplicationController
   end
 
 
-  
-
 end

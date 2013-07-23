@@ -21,7 +21,7 @@ class SampleAttribute
 
 	scope :normal, where(status: 1)
 
-    DEFAULT_ATTR = ['nickname','username','gender','birthday','born_address','live_address','married','children','income_person','income_family','education_level','major','industry','position','seniority']
+    BASIC_ATTR = ['nickname','username','gender','birthday','born_address','live_address','married','children','income_person','income_family','education_level','major','industry','position','seniority']
 
 	TYPE_ARRAY = [DataType::STRING,
 		DataType::ENUM,
