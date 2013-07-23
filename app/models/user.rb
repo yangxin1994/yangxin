@@ -554,22 +554,6 @@ class User
 	scope :white_list, where(:color => COLOR_WHITE, :status.gt => -1)
 	scope :deleted_users, where(status: -1)
 
-	def create_user(new_user)
-		return ErrorEnum::REQUIRE_ADMIN unless self.is_admin || self.is_super_admin
-		return ErrorEnum::REQUIRE_SUPER_ADMIN if new_user["role"].to_s.to_i > 16 and !self.is_super_admin
-		return ErrorEnum::EMAIL_EXIST if User.where(email: new_user["email"].to_s.strip).count >0
-		return ErrorEnum::USERNAME_EXIST if new_user["username"].to_s.strip!="" && User.where(username: new_user["username"].to_s.strip).count >0
-		psw_flag = !new_user["password"]
-		new_user["password"] = "oopsdata" unless new_user["password"]
-		new_user["password"] = Encryption.encrypt_password(new_user["password"])
-		one_user = User.new(new_user)
-		one_user.role = new_user['role'].to_i # against a case of attr restrained
-		one_user.status =4 # do not need activate
-		EmailWorker.perform_async('sys_password', one_user.email, nil) if psw_flag
-		return ErrorEnum:SAVE_ERROR unless one_user.save
-		return true
-	end
-
 	def update_user(attributes)
 		select_attrs = %w(status birthday gender address phone postcode company identity_card username full_name)
 		attributes.select!{|k,v| select_attrs.include?(k.to_s)}
@@ -952,5 +936,14 @@ class User
 			self.write_sample_attribute(attr_name, basic_attributes[attr_name])
 		end
 		return true
+	end
+
+	def nickname
+		nickname = self.read_sample_attribute("nickname")
+		if nickname.nil?
+			nickname = self.email.split('@')[0] if !self.email.blank?
+			nickname ||= self.mobile
+		end
+		return nickname
 	end
 end
