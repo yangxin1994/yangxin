@@ -67,6 +67,29 @@ class Sample::AccountsController < ApplicationController
 		render_json_auto @bind_info and return
 	end
 
+	def unbind
+		third_party_user = ThirdPartyUser.where(:website => params[:website], :user_id => @current_user._id.to_s).first
+		third_party_user.destroy if !third_party_user.nil?
+		render_json_auto true and return
+	end
+
+	def set_share
+		third_party_user = ThirdPartyUser.where(:website => params[:website], :user_id => @current_user._id.to_s).first
+		render_json_e ErrorEnum::THIRD_PARTY_USER_NOT_EXIST and return if third_party_user.nil?
+		third_party_user.share = params[:share] == "true"
+		third_party_user.save
+		render_json_auto true and return
+	end
+
+	def set_subscribe
+		if params[:type] == "email"
+			@current_user.email_subscribe = params[:subscribe].to_s == "true" if @current_user.email_activation
+		else
+			@current_user.mobile_subscribe = params[:subscribe].to_s == "true" if @current_user.mobile_activation
+		end
+		render_json_auto @current_user.save and return
+	end
+
 	def messages
 		@messages = @current_user.messages
 		@paginated_messages = auto_paginate @messages do |paginated_messages|

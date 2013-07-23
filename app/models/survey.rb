@@ -564,10 +564,17 @@ class Survey
 	#
 	#++++++++++++++++++++++++++++++++++++++++++++++
 
-	def close(message, operator)
+	def close(operator)
 		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_survey_auditor
 		return ErrorEnum::WRONG_STATUS if self.status != PUBLISHED
 		self.update_attributes(:status => CLOSED)
+		return true
+	end
+
+	def publish(operator)
+		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_survey_auditor
+		return ErrorEnum::WRONG_STATUS if self.status != CLOSED
+		self.update_attributes(:status => PUBLISHED)
 		return true
 	end
 

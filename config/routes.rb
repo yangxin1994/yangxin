@@ -318,11 +318,8 @@ OopsData::Application.routes.draw do
 			put 'update_tags'
 			put 'add_tag'
 			put 'remove_tag'
-			put 'submit'
+			put 'publish'
 			put 'close'
-			get 'reject'
-			get 'publish'
-			get 'pause'
 			put 'update_style_setting'
 			get 'show_style_setting'
 			put 'update_access_control_setting'
@@ -472,6 +469,10 @@ OopsData::Application.routes.draw do
 				get :messages
 				delete :destroy_message
 				delete :destroy_all_messages
+				get :get_bind_info
+				put :unbind
+				put :set_share
+				put :set_subscribe
 			end	
 		end	
 		resources :surveys do
