@@ -38,7 +38,7 @@ class Sample::AccountsController < ApplicationController
 	end
 
 	def get_receiver_info
-		receiver_info = @current_user.affiliated.receiver_info
+		receiver_info = @current_user.affiliated.try(:receiver_info) || {}
 		render_json_auto(receiver_info) and return
 	end
 
@@ -65,5 +65,10 @@ class Sample::AccountsController < ApplicationController
 			@bind_info[website] = [third_party_user.name, third_party_user.share] if !third_party_user.nil?
 		end
 		render_json_auto @bind_info and return
+	end
+
+	def messages
+		@messages = @current_user.messages
+		render_json_auto @messages and return
 	end
 end

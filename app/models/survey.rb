@@ -80,8 +80,8 @@ class Survey
 		"reward_scheme_id" => ""
 	}
 
-    # 0 免费, 1 表示话费，2表示支付宝转账，4表示优币，8表示抽奖，16表示发放集分宝
-    field :quillme_promote_reward_type,:type => Integer, default: nil
+	# 0 免费, 1 表示话费，2表示支付宝转账，4表示优币，8表示抽奖，16表示发放集分宝
+	field :quillme_promote_reward_type,:type => Integer, default: nil
 
 	field :email_promote_info, :type => Hash, default: {
 		"email_amount" => 0,
@@ -149,15 +149,15 @@ class Survey
 	scope :stars, where(:status.gt => -1, :is_star => true)
 	scope :in_community, lambda { where(:show_in_community => true) }
 	scope :is_promotable, lambda { where(:promotable => true) }
-    
+	
  
-    scope :status, lambda {|st| where(:status => st)}
-    scope :reward_type,lambda {|rt| where(:quillme_promote_reward_type.in => rt)}
-    scope :opend, lambda { where(:status => 2)}
-    scope :closed, lambda { where(:status => 1)}
-    scope :quillme_promote, lambda { where(:quillme_promotable => true)}
-    scope :quillme_hot, lambda {where(:quillme_hot => true)}
-    scope :not_quillme_hot, lambda {where(:quillme_hot => false)}
+	scope :status, lambda {|st| where(:status => st)}
+	scope :reward_type,lambda {|rt| where(:quillme_promote_reward_type.in => rt)}
+	scope :opend, lambda { where(:status => 2)}
+	scope :closed, lambda { where(:status => 1)}
+	scope :quillme_promote, lambda { where(:quillme_promotable => true)}
+	scope :quillme_hot, lambda {where(:quillme_hot => true)}
+	scope :not_quillme_hot, lambda {where(:quillme_hot => false)}
 
 
 	index({ status: 1, show_in_community: 1, title: 1 }, { background: true } )
@@ -183,11 +183,11 @@ class Survey
 
 	public
 
-    #return value
-    # surveys 盛放survey对象的list
-    # survey_data 以survey的id为key，以survey对象为value的hash
-    # scheme_type_hash 以奖励类型为key，以survey的id为元素的数组最为value  
-    # scheme_datas  以奖励方案的id为key，以每个奖励方案的内容为value 
+	#return value
+	# surveys 盛放survey对象的list
+	# survey_data 以survey的id为key，以survey对象为value的hash
+	# scheme_type_hash 以奖励类型为key，以survey的id为元素的数组最为value  
+	# scheme_datas  以奖励方案的id为key，以每个奖励方案的内容为value 
 	# def self.get_recommends(page,per_page,sta=2,user_id=nil)
 	#   sta = 2 unless sta.present?
 	#   if page && per_page
@@ -195,7 +195,7 @@ class Survey
 	#   else
  #        surveys = Survey.quillme_promote.not_quillme_hot.status(sta).desc(:created_at)	
 	#   end  	
-	  
+		
 	#   scheme_type_hash = {}
 	#   survey_data = {}	  
 	#   if surveys.present?
@@ -223,40 +223,38 @@ class Survey
 	# end
 
 	def self.get_recommends(status=2,reward_type=nil)
-	  status = 2 unless status.present?
-	  reward_type = nil unless reward_type.present?
-	  if reward_type.present?
-	  	reward_type = reward_type.split(',')
-	  end
-	  if reward_type.present?
-        surveys = Survey.quillme_promote.not_quillme_hot.status(status).reward_type(reward_type).desc(:created_at)		
-	  else
-        surveys = Survey.quillme_promote.not_quillme_hot.status(status).desc(:created_at)		
-	  end	
-      return surveys
+		status = 2 unless status.present?
+		reward_type = nil unless reward_type.present?
+		if reward_type.present?
+		reward_type = reward_type.split(',')
+		end
+		if reward_type.present?
+		surveys = Survey.quillme_promote.not_quillme_hot.status(status).reward_type(reward_type).desc(:created_at)		
+		else
+		surveys = Survey.quillme_promote.not_quillme_hot.status(status).desc(:created_at)		
+		end	
+		return surveys
 	end
 
+	def answered(user)
+		answer  = self.answers.where(:user_id => user.id).first if user.present?
+		return [answer.try(:status),answer.try(:reject_type)]   	
+	end
 
-    def answered(user)
-      answer  = self.answers.where(:user_id => user.id).first if user.present?
-      return [answer.try(:status),answer.try(:reject_type)]   	
-    end
+	def reward_type_info
+		rs = RewardScheme.where(:_id => self.quillme_promote_info['reward_scheme_id']).first
+		info = rs.rewards[0] if rs
+		return info
+	end
 
-    def reward_type_info
-    	rs = RewardScheme.where(:_id => self.quillme_promote_info['reward_scheme_id']).first
-    	info = rs.rewards[0] if rs
-    	return info
-    end
-
-
-    def excute_sample_data(user)
-        self['answer_count'] = self.answers.count
-        self['time'] = self.estimate_answer_time
-        self['answer_status'] = self.answered(user)[0]
-        self['answer_reject_type'] = self.answered(user)[1]
-        self['reward_type_info'] = self.reward_type_info
-        return self
-    end
+	def excute_sample_data(user)
+		self['answer_count'] = self.answers.count
+		self['time'] = self.estimate_answer_time
+		self['answer_status'] = self.answered(user)[0]
+		self['answer_reject_type'] = self.answered(user)[1]
+		self['reward_type_info'] = self.reward_type_info
+		return self
+	end
 
 	#----------------------------------------------
 	#
@@ -1674,12 +1672,6 @@ class Survey
 		return report_mockup.update_report_mockup(report_mockup_obj)
 	end
 
-	#----------------------------------------------
-	#
-	#     list surveys
-	#
-	#++++++++++++++++++++++++++++++++++++++++++++++
-
 	def self.list(status)
 		status_ary = Tool.convert_int_to_base_arr(status)
 		return Survey.where(:status.in => status_ary).desc(:created_at).map { |s| s.serialize_in_list_page }
@@ -1696,12 +1688,6 @@ class Survey
 		return nil if answer.nil?
 		return answer.status
 	end
-
-	#----------------------------------------------
-	#
-	#     serialize
-	#
-	#++++++++++++++++++++++++++++++++++++++++++++++
 
 	def serialize
 		survey_obj = Hash.new
@@ -1767,7 +1753,7 @@ class Survey
 		survey_obj = {"id" => self.id.to_s}
 		arr_fields.each do |field|
 			if [:created_at, :updated_at].include?(field)
-			    survey_obj[field] = self.send(field).to_i
+				survey_obj[field] = self.send(field).to_i
 			else
 				survey_obj[field] = self.send(field)
 			end
@@ -1815,13 +1801,6 @@ class Survey
 		survey_obj["title"] = self.title
 		return survey_obj
 	end
-
-
-	#----------------------------------------------
-	#
-	#     import answers
-	#
-	#++++++++++++++++++++++++++++++++++++++++++++++
 
 	def answer_import(csv_str)
 		q = []
@@ -1896,14 +1875,14 @@ class Survey
 	def allocate_answer_auditors(answer_auditor_ids, allocate)
 		retval = {}
 		answer_auditor_ids.each do |id|
-  		answer_auditor = User.find_by_id(id)
-  		retval[id] = USER_NOT_EXIST and next if user.blank? or user.is_answer_auditor?
-  		if allocate
-  			self.answer_auditors << answer_auditor
-  		else
-  			self.answer_auditors.delete(answer_auditor)
-  		end
-  		self.save
+		answer_auditor = User.find_by_id(id)
+		retval[id] = USER_NOT_EXIST and next if user.blank? or user.is_answer_auditor?
+		if allocate
+			self.answer_auditors << answer_auditor
+		else
+			self.answer_auditors.delete(answer_auditor)
+		end
+		self.save
 		end
 		retval = (retval.blank? ? true : retval)
 		return retval

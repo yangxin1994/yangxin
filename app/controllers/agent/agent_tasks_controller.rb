@@ -1,5 +1,5 @@
 class Agent::AgentTasksController < Agent::ApplicationController
-	before_filter :check_agent_task_existence, :except => [:close, :show]
+	before_filter :check_agent_task_existence, :only => [:close, :show]
 
 	def check_agent_task_existence
 		@agent_task = AgentTask.normal.find_by_id(params[:id])
@@ -7,9 +7,11 @@ class Agent::AgentTasksController < Agent::ApplicationController
 	end
 
 	def index
-		agent_tasks = AgentTask.search_agent_task(params[:agent_id], nil)
-		paginated_agent_tasks = auto_paginate @agent_tasks
-		render_json_auto(paginated_agent_tasks.map { |e| e.info }) and return
+		@agent_tasks = AgentTask.search_agent_task(params[:agent_id], nil)
+		@paginated_agent_tasks = auto_paginate(@agent_tasks) do |paginated_agent_tasks|
+			paginated_agent_tasks.map { |e| e.info }
+		end
+		render_json_auto(@paginated_agent_tasks) and return
 	end
 
 	def show

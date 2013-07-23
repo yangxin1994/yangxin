@@ -15,7 +15,7 @@ class Admin::BrowsersController < Admin::ApplicationController
 		orders_wait_for_handle = []
 
 		if survey_audit
-			Survey.where(:publish_status => 2).each do |s|
+			Survey.where(:status => 2).each do |s|
 				surveys_wait_for_audit << {"survey_title" => s.title,
 					"survey_id" => s._id.to_s,
 					"link" => "/admin/reviews"}
