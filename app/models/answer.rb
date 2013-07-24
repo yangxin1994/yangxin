@@ -561,7 +561,7 @@ class Answer
 	#* the status of the answer after updating
 	def update_status
 		# an answer expires only when the survey is not published and the answer is in editting status
-		if Time.now.to_i - self.created_at.to_i > 2.days.to_i && self.survey.status != Survey::PUBLISHED && self.status == EDIT
+		if Time.now.to_i - self.created_at.to_i > 10.seconds.to_i && self.survey.status != Survey::PUBLISHED && self.status == EDIT
 			self.set_reject
 			self.update_attributes(reject_type: 4, finished_at: Time.now.to_i)
 		end
