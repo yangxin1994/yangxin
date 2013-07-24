@@ -946,7 +946,8 @@ class User
 	end
 
 	def set_basic_attributes(basic_attributes)
-		SampleAttribute::BASIC_ATTR.each do |attr_name|
+		basic_attributes.each do |attr_name, attr_value|
+			next if !SampleAttribute::BASIC_ATTR.include?(attr_name)
 			if self.need_update_attribute(attr_name, basic_attributes[attr_name])
 				self.write_sample_attribute(attr_name, basic_attributes[attr_name])
 			end
