@@ -519,7 +519,8 @@ OopsData::Application.routes.draw do
 			collection do 
 				get :get_today_answers_count,:as => :get_today_answers_count
 				get :get_today_spread_count, :as => :get_today_spread_count
-				get :get_my_answer
+				get :get_answer_id_by_auth_key
+				# get :get_my_answer
 				get :list_spreaded_answers
 				get :spreaded_answer_number
 			end
@@ -530,7 +531,6 @@ OopsData::Application.routes.draw do
 				post :finish
 				get :estimate_remain_answer_time
 				delete :destroy_preview
-				get :get_answer_id_by_auth_key
 				post :change_sample_account
 				delete :logout
 				put :select_reward
