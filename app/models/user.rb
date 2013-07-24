@@ -900,6 +900,19 @@ class User
 		return sample
 	end
 
+	def need_update_attribute(attr_name, updated_value)
+		sa = SampleAttribute.find_by_name(attr_name)
+		return false if sa.nil?
+		return true if ![DataType::NUMBER_RANGE, DataType::DATE_RANGE].include?(sa.data_type)
+		sa_value = self.read_sample_attribute(attr_name)
+		return true if sa_value.nil?
+		begin
+			return false if sa_value[0] > updated_value[0] && sa_value[1] < updated_value[1]
+		rescue
+		end
+		return true
+	end
+
 	def read_sample_attribute(name)
 		sa = SampleAttribute.find_by_name(name)
 		return nil if sa.nil?
@@ -934,7 +947,9 @@ class User
 
 	def set_basic_attributes(basic_attributes)
 		SampleAttribute::BASIC_ATTR.each do |attr_name|
-			self.write_sample_attribute(attr_name, basic_attributes[attr_name])
+			if self.need_update_attribute(attr_name, basic_attributes[attr_name])
+				self.write_sample_attribute(attr_name, basic_attributes[attr_name])
+			end
 		end
 		return true
 	end
