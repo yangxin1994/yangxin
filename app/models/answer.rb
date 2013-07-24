@@ -72,6 +72,7 @@ class Answer
 	belongs_to :interviewer_task
 	belongs_to :lottery
 	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
+	belongs_to :reward_scheme
 	has_one :order
 
 	# status
