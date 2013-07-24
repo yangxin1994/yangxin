@@ -100,7 +100,7 @@ class Sample::AccountsController < ApplicationController
 
 	def destroy_message
 		@message = Message.find_by_id(params[:message_id])
-		render_json_e ErrorEnum::MESSAGE_NOT_EXIST if @message.user != @current_user
+		render_json_e ErrorEnum::MESSAGE_NOT_EXIST and return if !@current_user.messages.include?(@message)
 		render_json_auto @message.destroy and return
 	end
 

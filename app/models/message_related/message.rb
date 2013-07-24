@@ -20,6 +20,8 @@ class Message
 	# 1 the message is sent to special users
 	field :type, :type => Integer, default: 0
 
+	default_scope order_by(:created_at.desc)
+
 	belongs_to :sender, :class_name => "User", :inverse_of => :sended_messages
 	has_and_belongs_to_many :receiver, class_name: "User", inverse_of: :messages
 
@@ -37,6 +39,7 @@ class Message
 
 	def info_for_sample
 		message_obj = {}
+		message_obj["_id"] = self._id.to_s
 		message_obj["title"] = self.title
 		message_obj["content"] = self.content
 		message_obj["created_at"] = self.created_at.to_i
