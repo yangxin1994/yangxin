@@ -201,7 +201,7 @@ class Answer
 	end
 
 	def is_screened
-		return status == 1 && reject_type == 3
+		return status == REJECT && reject_type == REJECT_BY_SCREEN
 	end
 
 	def genereate_random_quality_control_questions
@@ -563,7 +563,7 @@ class Answer
 		# an answer expires only when the survey is not published and the answer is in editting status
 		if Time.now.to_i - self.created_at.to_i > 2.days.to_i && self.survey.status != Survey::PUBLISHED && self.status == EDIT
 			self.set_reject
-			self.update_attributes(reject_type: 4, finished_at: Time.now.to_i)
+			self.update_attributes(reject_type: REJECT_BY_TIMEOUT, finished_at: Time.now.to_i)
 		end
 		return self.status
 	end
@@ -609,7 +609,7 @@ class Answer
 					self.set_redo
 				else
 					self.set_reject
-					self.update_attributes(reject_type: 1, finished_at: Time.now.to_i)
+					self.update_attributes(reject_type: REJECT_BY_QUALITY_CONTROL, finished_at: Time.now.to_i)
 				end
 				return false
 			end
@@ -638,7 +638,7 @@ class Answer
 																condition["fuzzy"])
 				if pass_condition
 					self.set_reject
-					self.update_attributes(reject_type: 3, finished_at: Time.now.to_i)
+					self.update_attributes(reject_type: REJECT_BY_SCREEN, finished_at: Time.now.to_i)
 					return false
 				end
 			end
@@ -652,7 +652,7 @@ class Answer
 		# 2. if all quota rules are satisfied, the new answer should be rejected
 		if quota["quota_satisfied"]
 			self.set_reject
-			self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
+			self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
 			return false
 		end
 		# 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
@@ -665,7 +665,7 @@ class Answer
 			return true if rule["submitted_count"] < rule["amount"] && self.satisfy_conditions(rule["conditions"], false)
 		end
 		self.set_reject
-		self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
+		self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
 		return false
 	end
 
@@ -675,7 +675,7 @@ class Answer
 		# 2. if all quota rules are satisfied, the new answer should be rejected
 		if quota["quota_satisfied"]
 			self.set_reject
-			self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
+			self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
 			return false
 		end
 		# 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
@@ -695,7 +695,7 @@ class Answer
 		end
 		# 5 cannot find a quota rule to accept this new answer
 		self.set_reject
-		self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
+		self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
 		return false
 	end
 
