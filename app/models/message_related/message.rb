@@ -37,6 +37,7 @@ class Message
 
 	def info_for_sample
 		message_obj = {}
+		message_obj["_id"] = self._id.to_s
 		message_obj["title"] = self.title
 		message_obj["content"] = self.content
 		message_obj["created_at"] = self.created_at.to_i
