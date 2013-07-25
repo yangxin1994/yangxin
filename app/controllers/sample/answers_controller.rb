@@ -8,6 +8,7 @@ class Sample::AnswersController < ApplicationController
 
 	def check_answer_existence
 		@answer = Answer.find_by_id(params[:id])
+
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if @answer.nil?
 	end
 
@@ -58,6 +59,11 @@ class Sample::AnswersController < ApplicationController
 
 	def clear
 		render_json_auto @answer.clear and return
+	end
+
+
+	def find_lottery_answers
+		render_json_auto @answer.find_lottery_answers
 	end
 
 	def submit_answer

@@ -201,6 +201,7 @@ OopsData::Application.routes.draw do
 				put :handle, :finish, :update_express_info, :update_remark
 			end
 		end
+		
 		resources :lotteries do
 			collection do
 				get :for_publish, :activity, :finished, :deleted, :quillme
@@ -514,6 +515,7 @@ OopsData::Application.routes.draw do
 				get :get_disciplinal_news,:as => :get_disciplinal_news
 				get :get_newst_exchange_logs,:as => :get_newst_exchange_logs
 				get :get_point_change_log
+				get :find_lottery_logs
 			end
 		end
 		resources :answers do 
@@ -538,14 +540,9 @@ OopsData::Application.routes.draw do
 				post :bind_sample
 				put :draw_lottery
 				post :create_lottery_order
+				get :find_lottery_answers
 			end
 		end	
-		# resources :survey_subscribes do 
-		# 	collection do
-		# 		post :subscribe_able,:as => :subscribe_able
-		# 		get :make_subscribe_active,:as => :make_subscribe_active 
-		# 	end
-		# end
 		resources :orders do
 			collection do
 				post :create_gift_order, :as => :create_gift_order 

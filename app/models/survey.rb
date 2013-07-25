@@ -183,6 +183,18 @@ class Survey
 
 	public
 
+	def self.can_lottery?(survey_id,answer_id)
+		survey = Survey.find_by_id(survey_id)
+		return ErrorEnum::SURVEY_NOT_EXIST unless survey.present?
+		return ErrorEnum::SURVEY_CLOSED if survey.status ==  CLOSED
+		return ErrorEnum::SUEVEY_DELETED if survey.status == DELETED
+		answer = Answer.find_by_id(answer_id)
+
+		return ErrorEnum::ANSWER_NOT_EXIST unless answer.present?
+		
+
+	end
+
 	def self.get_recommends(status=2,reward_type=nil)
 		status = 2 unless status.present?
 		reward_type = nil unless reward_type.present?

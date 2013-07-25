@@ -100,6 +100,7 @@ class Order
 			order.postcode = opt["postcode"]
 		end
 		order.save
+		RedeemLog.create_gift_exchange_logs(amount,order.id,gift_id,sample_id)
 		order.auto_handle
 		return order
 	end

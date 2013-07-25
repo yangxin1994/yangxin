@@ -16,29 +16,6 @@ class Sample::SurveysController < ApplicationController
     render_json { @hot_survey }
   end
 
-  #############################
-  #功能:获取推荐的调研列表
-  #http method：get
-  #传入参数: 
-  #    page 当前页数
-  #    per_page 每页显示多少条
-  #    status 开放状态 1表示关闭 2表示开放中
-  #    在首页的时候，不许要传递status
-  #在列表页的时候，开放中的问卷、已结束的问卷都要传递status，值分别对应2和1
-  #返回的参数:一个盛放推荐调研问卷的列表
-  #############################	
-  # def get_recommends
-  #   status = params[:status].present?  ? params[:status] : nil
-  #   @surveys = Survey.get_recommends(params[:page],params[:per_page],status,current_user)
-  #   if !params[:status].present?
-  #     @surveys = @surveys.slice!(0,2)     
-  #     #@surveys = auto_paginate(@surveys)
-  #   else
-  #     @surveys.shift
-  #   end
-  #   render_json_auto(@surveys)
-  # end
-
 
   def get_recommends
     # status 1 or 2

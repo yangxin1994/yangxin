@@ -32,6 +32,10 @@ class Sample::LogsController < ApplicationController
     render_json { @logs }          
   end
 
+  def find_lottery_logs
+    render_json_auto  LotteryLog.find_lottery_logs(params[:id])
+  end
+
   def get_point_change_log
     if params[:scope].present? && params[:scope] == 'in'
       @logs = Log.where(:type => 8,:user_id => @current_user.id, 'data.amount.gt' => 0).desc(:created_at).page(params[:page]).per(params[:per_page])

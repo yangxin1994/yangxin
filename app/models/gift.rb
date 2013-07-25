@@ -41,7 +41,7 @@ class Gift
 
 	scope :on_shelf, where(:status => ON_THE_SHELF)
 
-	scope :real, where(:type => 4)
+	scope :real, where(:type => REAL)
 
 	index({ type: 1, status: 1 }, { background: true } )
 
@@ -67,10 +67,21 @@ class Gift
 
 	def self.generate_opt(order,gift)
 		opt = {}
-		opt['mobile'] = order[:account] if gift == 'phone_num'
-		opt['alipay_account'] = order[:account] if gift == 'ali_num'
-		opt['alipay_account'] = order[:account] if gift == 'jifen_num'
-		opt['qq'] = order[:account] if gift == 'qq_num'
+		real_gift = self.find_by_id(gift)
+
+		if real_gift.present?
+			opt["receiver"]    = order[:receiver]	
+			opt["mobile"]      = order[:mobile]
+			opt["address"]     = order[:address]
+			opt["street_info"] = order[:street_info]
+			opt["postcode"]    = order[:postcode]			
+		else
+			opt['mobile'] = order[:account] if gift == 'phone_num'
+			opt['alipay_account'] = order[:account] if gift == 'ali_num'
+			opt['alipay_account'] = order[:account] if gift == 'jifen_num'
+			opt['qq'] = order[:account] if gift == 'qq_num'			
+		end
+
 		return opt
 	end
 
@@ -109,17 +120,22 @@ class Gift
 
 
 	def self.generate_gift_id(order_type)
-		case order_type.to_s
-		when 'phone_num'
-			return self.where(:type => MOBILE_CHARGE).on_shelf.first.try(:_id) 
-		when 'jifen_num'
-			return self.where(:type => JIFENBAO).on_shelf.first.try(:_id)
-		when 'ali_num'
-			return self.where(:type => ALIPAY).on_shelf.first.try(:_id)
-		when 'qq_num'
-			return self.where(:type => QQ_COIN).on_shelf.first.try(:_id)
+		gift = self.find_by_id(order_type)
+		if gift.present?
+			return gift._id
 		else
-			return false
+			case order_type.to_s
+			when 'phone_num'
+				return self.where(:type => MOBILE_CHARGE).on_shelf.first.try(:_id) 
+			when 'jifen_num'
+				return self.where(:type => JIFENBAO).on_shelf.first.try(:_id)
+			when 'ali_num'
+				return self.where(:type => ALIPAY).on_shelf.first.try(:_id)
+			when 'qq_num'
+				return self.where(:type => QQ_COIN).on_shelf.first.try(:_id)
+			else
+				return false
+			end
 		end
 	end
 

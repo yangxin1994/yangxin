@@ -126,6 +126,20 @@ class Answer
 		return self.in("status" => Tool.convert_int_to_base_arr(status.to_i))
 	end
 
+	def find_lottery_answers
+		lottery_data = {}
+		prizes_arr = []
+		prize_ids = self.rewards.first['prizes'].map{|p| p['prize_id']}
+		prizes = Prize.where(:id.in => prize_ids).map{|p| p['photo_src'] = p.photo.present? ? p.photo.picture_url : Prize::DEFAULT_IMG;p}
+		prizes.each do |pri|
+			prizes_arr  << {'id' => pri.id,'title' => pri.title,'price' => pri.price,'photo_src' => pri.photo_src}	
+		end
+		lottery_data['survey_id'] = self.survey.id
+		lottery_data['survey_title'] = self.survey.title
+		lottery_data['prizes'] = prizes_arr
+		return lottery_data
+	end
+
 	def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, channel, referrer, remote_ip, username, password)
 		survey = Survey.normal.find_by_id(survey_id)
 		# create the answer

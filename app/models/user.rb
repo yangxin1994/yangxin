@@ -312,7 +312,8 @@ class User
 		end
 		return ErrorEnum::ILLEGAL_EMAIL_OR_MOBILE if account.blank?
 		existing_user = account[:email] ? self.find_by_email(account[:email]) : self.find_by_mobile(account[:mobile])
-		return ErrorEnum::USER_REGISTERED if existing_user && existing_user.status == REGISTERED
+		#return ErrorEnum::USER_REGISTERED if existing_user && existing_user.status == REGISTERED
+		return ErrorEnum::USER_REGISTERED if existing_user && existing_user.is_activated
 		password = Encryption.encrypt_password(password) if account[:email]
 		account[:status] =  REGISTERED
 		account[:sms_verification_code] = active_code if account[:mobile]
@@ -324,7 +325,6 @@ class User
 		#existing_user = User.create if check_exist.nil?
 		existing_user = User.create if existing_user.nil?
 		existing_user.update_attributes(updated_attr)
-		
 		if active_code.present?
 			## TODO   generate active code when user regist with mobile
 			## TODO   store the random code and mobile in session with a expire time 60 sec.     
