@@ -1,4 +1,4 @@
-# coding: utf-8
+ # coding: utf-8
 require 'error_enum'
 require 'quill_common'
 class Sample::AccountsController < ApplicationController
@@ -33,7 +33,7 @@ class Sample::AccountsController < ApplicationController
 	end
 
 	def set_basic_attributes
-		retval = @current_user.set_basic_info(params[:basic_attributes])
+		retval = @current_user.set_basic_attributes(params[:basic_attributes])
 		render_json_auto(retval) and return   	
 	end
 
