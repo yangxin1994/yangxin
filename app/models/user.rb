@@ -32,7 +32,9 @@ class User
 	field :sms_verification_code, :type => String
 	field :sms_verification_expiration_time, :type => Integer,default:  -> {(Time.now + 1.minutes).to_i }
 	field :email_to_be_changed, :type => String
+	field :change_email_expiration_time, :type => Integer
 	field :mobile_to_be_changed, :type => String
+	field :change_mobile_expiration_time, :type => Integer
 	field :activate_time, :type => Integer
 	field :introducer_id, :type => String
 	field :last_read_messeges_time, :type => Time, :default => Time.now

@@ -108,23 +108,40 @@ class Sample::AccountsController < ApplicationController
 		render_json_auto @current_user.messages.destroy_all and return
 	end
 
-	def change_email
+	def send_change_email
 		@current_user.email_to_be_changed = params[:email]
+		@current_user.change_email_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
 		@current_user.save
-		EmailWorker.perform_async("activate", params[:email_mobile], params[:callback])
+		EmailWorker.perform_async("change_email", params[:email], params[:callback])
 		render_json_s and return
 	end
 
-	def change_mobile
+	def send_change_sms
 		@current_user.mobile_to_be_changed = params[:mobile]
+		@current_user.sms_verification_code = Random.rand(100000..999999).to_s
+		@current_user.sms_verification_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
 		@current_user.save
 		## todo: send message to the mobile
 		render_json_s and return
 	end
 
-	def mobile_activate
-		# params[:verification_code]}
-		retval = User.activate("mobile", activate_info, @remote_ip, params[:_client_type])
-		render_json_auto(retval) and return
+	def change_email
+		begin
+			activate_info_json = Encryption.decrypt_activate_key(params[:activate_key])
+			activate_info = JSON.parse(activate_info_json)
+		rescue
+			render_json_e(ErrorEnum::ILLEGAL_ACTIVATE_KEY) and return
+		end
+		render_json_e ErrorEnum::EMAIL_NOT_EXIST and return if @current_user.email_to_be_changed != activate_info["email"]
+	end
+
+	def change_mobile
+		render_json_e ErrorEnum::MOBILE_NOT_EXIST and return if @current_user.mobile_to_be_changed != params[:mobile]
+		if @current_user.sms_verification_code == params[:verification_code]}
+			@current_user.mobile = @current_user.mobile_to_be_changed
+			render_json_e @current_user.save and return
+		else
+			render_json_e ErrorEnum::ILLEGAL_ACTIVATE_KEY and return
+		end
 	end
 end
