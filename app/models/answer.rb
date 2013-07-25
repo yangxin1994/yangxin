@@ -824,7 +824,7 @@ class Answer
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
 		old_status = self.status
 		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
-		if self.is_preview || self.need_review
+		if self.is_preview || !self.need_review
 			self.set_finish
 		elsif !self.agent_task.nil?
 			self.set_under_agent_review
@@ -1119,7 +1119,7 @@ class Answer
 		if reward_index == -1
 			self.reward_delivered = true
 			self.save
-			return false
+			return {"result" => false}
 		end
 		prizes = reward["prizes"]
 		return ErrorEnum::REWARD_SCHEME_NOT_EXIST if reward_scheme.nil?
@@ -1135,14 +1135,16 @@ class Answer
 					reward_scheme_p["win_amount"] ||= 0
 					reward_scheme_p["win_amount"] += 1
 					reward_scheme.save
-					return p["prize_id"]
+					return {"result" => true,
+						"prize_id" => p["prize_id"],
+						"prize_title" => Prize.find_by_id(p["prize_id"]).try(:title)}
 				end
 			end
 		end
 		reward["win"] = false
 		self.reward_delivered = true
 		self.save
-		return false
+		return {"result" => false}
 	end
 
 	def create_lottery_order(order_info)
