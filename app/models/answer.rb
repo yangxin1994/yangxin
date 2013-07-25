@@ -811,7 +811,7 @@ class Answer
 		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
 		if self.is_preview || self.need_review
 			self.set_finish
-		elsif !self.agent.nil?
+		elsif !self.agent_task.nil?
 			self.set_under_agent_review
 		else
 			self.set_under_review
