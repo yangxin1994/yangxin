@@ -1105,7 +1105,7 @@ class Answer
 		if reward_index == -1
 			self.reward_delivered = true
 			self.save
-			return false
+			return {"result" => false}
 		end
 		prizes = reward["prizes"]
 		return ErrorEnum::REWARD_SCHEME_NOT_EXIST if reward_scheme.nil?
@@ -1121,14 +1121,16 @@ class Answer
 					reward_scheme_p["win_amount"] ||= 0
 					reward_scheme_p["win_amount"] += 1
 					reward_scheme.save
-					return p["prize_id"]
+					return {"result" => true,
+						"prize_id" => p["prize_id"],
+						"prize_title" => Prize.find_by_id(p["prize_id"]).try(:title)}
 				end
 			end
 		end
 		reward["win"] = false
 		self.reward_delivered = true
 		self.save
-		return false
+		return {"result" => false}
 	end
 
 	def create_lottery_order(order_info)
