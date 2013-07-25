@@ -548,10 +548,17 @@ class Survey
 	#
 	#++++++++++++++++++++++++++++++++++++++++++++++
 
-	def close(message, operator)
+	def close(operator)
 		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_survey_auditor
 		return ErrorEnum::WRONG_STATUS if self.status != PUBLISHED
 		self.update_attributes(:status => CLOSED)
+		return true
+	end
+
+	def publish(operator)
+		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_survey_auditor
+		return ErrorEnum::WRONG_STATUS if self.status != CLOSED
+		self.update_attributes(:status => PUBLISHED)
 		return true
 	end
 
@@ -1925,5 +1932,10 @@ class Survey
 	def remove_sample_attribute_for_promote(index)
 		self.sample_attributes_for_promote.delete(index)
 		return self.save
+	end
+
+	def create_default_reward_scheme
+		r = RewardScheme.create(:name => "默认奖励方案", :rewards => [], :need_review => false)
+		self.reward_schemes << r
 	end
 end

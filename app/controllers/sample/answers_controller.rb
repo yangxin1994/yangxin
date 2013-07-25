@@ -4,7 +4,7 @@ require 'error_enum'
 require 'quill_common'
 class Sample::AnswersController < ApplicationController
 
-	before_filter :check_answer_existence, :except => [:spreaded_answer_number, :list_spreaded_answers, :index, :get_my_answer, :create, :get_today_answers_count, :get_today_spread_count]
+	before_filter :check_answer_existence, :except => [:get_answer_id_by_auth_key, :spreaded_answer_number, :list_spreaded_answers, :index, :get_my_answer, :create, :get_today_answers_count, :get_today_spread_count]
 
 	def check_answer_existence
 		@answer = Answer.find_by_id(params[:id])
@@ -41,19 +41,27 @@ class Sample::AnswersController < ApplicationController
 			questions = @answer.load_question(params[:question_id], params[:next_page].to_s == "true")
 			question_ids = questions.map { |e| e._id.to_s }
 			if @answer.is_finish
-				render_json_auto([@answer.status, @answer.reject_type, @answer.audit_message]) and return
+				retval = {"answer_status" => @answer.status,
+					"answer_reject_type" => @answer.reject_type,
+					"answer_audit_message" => @answer.audit_message}
+				render_json_auto(retval) and return
 			else
 				answers = @answer.answer_content.merge(@answer.random_quality_control_answer_content)
 				answers = answers.select { |k, v| question_ids.include?(k) }
-				render_json_auto([questions,
-								answers,
-								@answer.survey.all_questions_id(false).length + @answer.random_quality_control_answer_content.length,
-								@answer.index_of(questions),
-								questions.estimate_answer_time,
-								@answer.repeat_time]) and return
+				retval = {"answer_status" => @answer.status,
+					"questions" => questions,
+					"answers" => answers,
+					"question_number" => @answer.survey.all_questions_id(false).length + @answer.random_quality_control_answer_content.length,
+					"answer_index" => @answer.index_of(questions),
+					"estimate_answer_time" => questions.estimate_answer_time,
+					"repeat_time" => @answer.repeat_time}
+				render_json_auto(retval) and return
 			end
 		else
-			render_json_auto([@answer.status, @answer.reject_type, @answer.audit_message]) and return
+			retval = {"answer_status" => @answer.status,
+				"answer_reject_type" => @answer.reject_type,
+				"answer_audit_message" => @answer.audit_message}
+			render_json_auto(retval) and return
 		end
 	end
 
@@ -100,8 +108,9 @@ class Sample::AnswersController < ApplicationController
 	end
 
 	def get_answer_id_by_auth_key
+		is_preview = params[:is_preview].blank? ? false : (params[:is_preview].to_s == "true")
 		render_json_e(ErrorEnum::REQUIRE_LOGIN) and return if @current_user.nil?
-		@answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], @current_user._id.to_s, params[:is_preview]||false)
+		@answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], @current_user._id.to_s, is_preview)
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if @answer.nil?
 		render_json_auto(@answer._id.to_s) and return
 	end

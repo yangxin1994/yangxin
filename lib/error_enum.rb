@@ -1,5 +1,7 @@
 module ErrorEnum
 
+
+
 	SAMPLE_ATTRIBUTE_NOT_EXIST = "error__0"
 	WRONG_SAMPLE_ATTRIBUTE_TYPE = "error__1"
 	WRONG_DATE_TYPE = "error__2"
@@ -9,6 +11,10 @@ module ErrorEnum
 	WRONG_ORDER_STATUS = "error__6"
 	REWARD_NOT_SELECTED = "error__7"
 	AGENT_NOT_EXIST = "error__8"
+	MOBILE_NOT_EXIST = "error_9"
+	REWORD_NOT_SELECTED = "error__10"
+	LOTTERY_DRAWED = "error__11"
+	NOT_LOTTERY_REWARD = "error__12"
 
 
 	REWARD_SCHEME_NOT_EXIST = 'error___0'  ##TODO ErrorEnum has not rule yet

@@ -54,6 +54,7 @@ class SurveysController < ApplicationController
 			survey.style_setting["has_advertisement"] = false
 		end
 		survey.save
+		survey.create_default_reward_scheme
 		respond_to do |format|
 			format.json	{ render_json_s(survey.serialize) and return }
 		end
@@ -306,58 +307,20 @@ class SurveysController < ApplicationController
 		render_json_auto(paginated_surveys)
 	end
 
-	#*method*: put
-	#
-	#*url*: /surveys/:survey_id/submit
-	#
-	#*description*: submit a survey to the administrator for reviewing
-	#
-	#*params*:
-	#* survey_id: id of the suvey submitted
-	#* message: the message that the user wants to give the administrator
-	#
-	#*retval*:
-	#* true when the survey is successfully submitted
-	#* ErrorEnum::SURVEY_NOT_EXIST
-	#* ErrorEnum::WRONG_PUBLISH_STATUS
-	def submit
-		retval = @survey.submit(params[:message], @current_user)
+	def publish
+		retval = @survey.publish(@current_user)
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
-	#*method*: put
-	#
-	#*url*: /surveys/:survey_id/close
-	#
-	#*description*: close a suvey
-	#
-	#*params*:
-	#* survey_id: id of the suvey to be closed
-	#* message: the message that the user wants to give the administrator
-	#
-	#*retval*:
-	#* true when the survey is successfully closed
-	#* ErrorEnum::SURVEY_NOT_EXIST
-	#* ErrorEnum::UNAUTHORIZED
-	#* ErrorEnum::WRONG_PUBLISH_STATUS
 	def close
-		retval = @survey.close(params[:message], @current_user)
+		retval = @survey.close(@current_user)
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
 	end
 
-	#*method*: put
-	#
-	#*url*: /surveys/:survey_id/update_deadline
-	#
-	#*description*: the owner of the survey updates the deadline of the survey
-	#
-	#*params*:
-	#* survey_id: id of the suvey to be set
-	#* deadline: deadline to be setted
 	def update_deadline
 		retval = @survey.update_deadline(params[:deadline])
 		respond_to do |format|
@@ -372,18 +335,6 @@ class SurveysController < ApplicationController
 		end
 	end
 	
-	#*method*: POST
-	#
-	#*url*: /surveys/:survey_id/update_star
-	#
-	#*description*: set or remove one survey to a star
-	#
-	#*params*:
-	#* survey_id: id of the suvey to be set
-	#* is_star: bool. is star or not
-	#
-	#*retval*:
-	# true or false
 	def update_star
 		retval = @survey.update_star(params[:is_star])
 		respond_to do |format|

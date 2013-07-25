@@ -72,6 +72,7 @@ class Answer
 	belongs_to :interviewer_task
 	belongs_to :lottery
 	belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
+	belongs_to :reward_scheme
 	has_one :order
 
 	# status
@@ -119,6 +120,7 @@ class Answer
 	end
 
 	def self.find_by_survey_id_sample_id_is_preview(survey_id, sample_id, is_preview)
+		return nil if sample_id.blank?
 		return Answer.where(user_id: sample_id, survey_id: survey_id, :is_preview => is_preview).first
 	end
 
@@ -150,6 +152,7 @@ class Answer
 			username: username,
 			password: password,
 			referrer: referrer)
+		answer.save
 		# record introducer information
 		if !is_preview && introducer_id
 			introducer = User.sample.find_by_id(introducer_id)
@@ -164,7 +167,7 @@ class Answer
 			answer.rewards = reward_scheme.rewards
 			answer.rewards[0]["checked"] = true if answer.rewards.length == 1
 			answer.need_review = reward_scheme.need_review
-			reward_scheme.answers << self
+			reward_scheme.answers << answer
 		else
 			answer.rewards = []
 			answer.need_review = false
@@ -215,7 +218,7 @@ class Answer
 	end
 
 	def is_screened
-		return status == 1 && reject_type == 3
+		return status == REJECT && reject_type == REJECT_BY_SCREEN
 	end
 
 	def genereate_random_quality_control_questions
@@ -577,7 +580,7 @@ class Answer
 		# an answer expires only when the survey is not published and the answer is in editting status
 		if Time.now.to_i - self.created_at.to_i > 2.days.to_i && self.survey.status != Survey::PUBLISHED && self.status == EDIT
 			self.set_reject
-			self.update_attributes(reject_type: 4, finished_at: Time.now.to_i)
+			self.update_attributes(reject_type: REJECT_BY_TIMEOUT, finished_at: Time.now.to_i)
 		end
 		return self.status
 	end
@@ -623,7 +626,7 @@ class Answer
 					self.set_redo
 				else
 					self.set_reject
-					self.update_attributes(reject_type: 1, finished_at: Time.now.to_i)
+					self.update_attributes(reject_type: REJECT_BY_QUALITY_CONTROL, finished_at: Time.now.to_i)
 				end
 				return false
 			end
@@ -652,7 +655,7 @@ class Answer
 																condition["fuzzy"])
 				if pass_condition
 					self.set_reject
-					self.update_attributes(reject_type: 3, finished_at: Time.now.to_i)
+					self.update_attributes(reject_type: REJECT_BY_SCREEN, finished_at: Time.now.to_i)
 					return false
 				end
 			end
@@ -666,7 +669,7 @@ class Answer
 		# 2. if all quota rules are satisfied, the new answer should be rejected
 		if quota["quota_satisfied"]
 			self.set_reject
-			self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
+			self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
 			return false
 		end
 		# 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
@@ -679,7 +682,7 @@ class Answer
 			return true if rule["submitted_count"] < rule["amount"] && self.satisfy_conditions(rule["conditions"], false)
 		end
 		self.set_reject
-		self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
+		self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
 		return false
 	end
 
@@ -689,7 +692,7 @@ class Answer
 		# 2. if all quota rules are satisfied, the new answer should be rejected
 		if quota["quota_satisfied"]
 			self.set_reject
-			self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
+			self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
 			return false
 		end
 		# 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
@@ -709,7 +712,7 @@ class Answer
 		end
 		# 5 cannot find a quota rule to accept this new answer
 		self.set_reject
-		self.update_attributes(reject_type: 0, finished_at: Time.now.to_i)
+		self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
 		return false
 	end
 
@@ -823,7 +826,7 @@ class Answer
 		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
 		if self.is_preview || self.need_review
 			self.set_finish
-		elsif !self.agent.nil?
+		elsif !self.agent_task.nil?
 			self.set_under_agent_review
 		else
 			self.set_under_review

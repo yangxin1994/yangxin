@@ -16,6 +16,7 @@ class RewardScheme
 	JIFENBAO = 16
 
 	belongs_to :survey
+	has_many :answers
 
 	def self.find_by_id(reward_scheme_id)
 		return RewardScheme.where(:_id => reward_scheme_id).first
