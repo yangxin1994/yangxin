@@ -137,6 +137,7 @@ class Answer
 			username: username,
 			password: password,
 			referrer: referrer)
+		answer.save
 		# record introducer information
 		if !is_preview && introducer_id
 			introducer = User.sample.find_by_id(introducer_id)
@@ -151,7 +152,7 @@ class Answer
 			answer.rewards = reward_scheme.rewards
 			answer.rewards[0]["checked"] = true if answer.rewards.length == 1
 			answer.need_review = reward_scheme.need_review
-			reward_scheme.answers << self
+			reward_scheme.answers << answer
 		else
 			answer.rewards = []
 			answer.need_review = false
