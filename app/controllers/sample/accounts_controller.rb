@@ -107,4 +107,24 @@ class Sample::AccountsController < ApplicationController
 	def destroy_all_messages
 		render_json_auto @current_user.messages.destroy_all and return
 	end
+
+	def change_email
+		@current_user.email_to_be_changed = params[:email]
+		@current_user.save
+		EmailWorker.perform_async("activate", params[:email_mobile], params[:callback])
+		render_json_s and return
+	end
+
+	def change_mobile
+		@current_user.mobile_to_be_changed = params[:mobile]
+		@current_user.save
+		## todo: send message to the mobile
+		render_json_s and return
+	end
+
+	def mobile_activate
+		# params[:verification_code]}
+		retval = User.activate("mobile", activate_info, @remote_ip, params[:_client_type])
+		render_json_auto(retval) and return
+	end
 end
