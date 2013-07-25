@@ -1949,4 +1949,9 @@ class Survey
 		self.sample_attributes_for_promote.delete(index)
 		return self.save
 	end
+
+	def create_default_reward_scheme
+		r = RewardScheme.create(:name => "默认奖励方案", :rewards => [], :need_review => false)
+		self.reward_schemes << r
+	end
 end

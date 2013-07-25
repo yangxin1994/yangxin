@@ -54,6 +54,7 @@ class SurveysController < ApplicationController
 			survey.style_setting["has_advertisement"] = false
 		end
 		survey.save
+		survey.create_default_reward_scheme
 		respond_to do |format|
 			format.json	{ render_json_s(survey.serialize) and return }
 		end
