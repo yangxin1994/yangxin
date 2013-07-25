@@ -137,7 +137,7 @@ class Sample::AccountsController < ApplicationController
 
 	def change_mobile
 		render_json_e ErrorEnum::MOBILE_NOT_EXIST and return if @current_user.mobile_to_be_changed != params[:mobile]
-		if @current_user.sms_verification_code == params[:verification_code]}
+		if @current_user.sms_verification_code == params[:verification_code]
 			@current_user.mobile = @current_user.mobile_to_be_changed
 			render_json_e @current_user.save and return
 		else
