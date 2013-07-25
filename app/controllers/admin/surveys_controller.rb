@@ -112,11 +112,18 @@ class Admin::SurveysController < Admin::ApplicationController
 		render_json_auto true and return
 	end
 
+	def get_result_visible
+		render_json_auto @survey.publish_result and return
+	end
+
 	def set_spread
-		@survey = Survey.normal.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
 		retval = @survey.set_spread(params[:spread_point].to_i, params[:spreadable].to_s == "true")
 		render_json_auto(retval) and return
+	end
+
+	def get_spread
+		@spread_info = {"spread_point" => @survey.spread_point, "spreadable" => @survey.spreadable}
+		render_json_auto @spread_info and return
 	end
 
 	def destroy
