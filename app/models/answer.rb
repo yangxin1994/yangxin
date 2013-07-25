@@ -1107,33 +1107,21 @@ class Answer
 		return ErrorEnum::NOT_LOTTERY_REWARD if reward["type"] != RewardScheme::LOTTERY
 		return ErrorEnum::LOTTERY_DRAWED if !reward["win"].nil?
 
-		# draw lottery
 		reward_scheme = self.reward_scheme
-		reward_index = -1
-		reward_scheme.rewards.each_with_index do |r, i|
-			if r["type"] == RewardScheme::LOTTERY
-				reward_index = i
-				break
-			end
-		end
-		if reward_index == -1
-			self.reward_delivered = true
-			self.save
-			return {"result" => false}
-		end
-		prizes = reward["prizes"]
-		return ErrorEnum::REWARD_SCHEME_NOT_EXIST if reward_scheme.nil?
+		return {"result" => false} if reward_scheme.nil? || reward_scheme.rewards[0]["type"].to_i != RewardScheme::LOTTERY
+		rewards_from_scheme = reward_scheme.rewards[0]
+
+		# draw lottery
 		reward["prizes"].each do |p|
 			next if rand > p["prob"]
-			prizes.each do |reward_scheme_p|
-				next if p["prize_id"] != reward_scheme_p["prize_id"]
-				if reward_scheme_p["deadline"] < Time.now.to_i && reward_scheme_p["amount"] > reward_scheme_p["win_amount"]
-					# win lottery
+			rewards_from_scheme["prizes"].each do |prize_from_scheme|
+				next if p["prize_id"] != prize_from_scheme["prize_id"]
+				if prize_from_scheme["deadline"] > Time.now.to_i && prize_from_scheme["amount"] > prize_from_scheme["win_amount"].to_i
 					reward["win"] = true
 					reward["prize_id"] = p["prize_id"]
 					self.save
-					reward_scheme_p["win_amount"] ||= 0
-					reward_scheme_p["win_amount"] += 1
+					prize_from_scheme["win_amount"] ||= 0
+					prize_from_scheme["win_amount"] += 1
 					reward_scheme.save
 					return {"result" => true,
 						"prize_id" => p["prize_id"],
