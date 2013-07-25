@@ -810,7 +810,7 @@ class Answer
 		return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
 		old_status = self.status
 		# if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
-		if self.is_preview || self.need_review
+		if self.is_preview || !self.need_review
 			self.set_finish
 		elsif !self.agent_task.nil?
 			self.set_under_agent_review
