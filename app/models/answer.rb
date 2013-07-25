@@ -120,6 +120,7 @@ class Answer
 	end
 
 	def self.find_by_survey_id_sample_id_is_preview(survey_id, sample_id, is_preview)
+		return nil if sample_id.blank?
 		return Answer.where(user_id: sample_id, survey_id: survey_id, :is_preview => is_preview).first
 	end
 
