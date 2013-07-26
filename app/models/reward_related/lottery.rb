@@ -126,7 +126,6 @@ class Lottery
       }
     end
     lottery_code.drawed_at = Time.now
-    #logger.info "======#{interval}======="
     interval.each do |i|
       if r <= i[:weight]
         i[:prize].inc('surplus', -1)

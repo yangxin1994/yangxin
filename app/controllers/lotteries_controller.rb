@@ -11,7 +11,6 @@ class LotteriesController < ApplicationController
 	end
 
 	def own
-		logger.info "==== #{current_user}======="
 		retval = {}
 		render_json do
 			[:for_draw, :drawed_w, :drawed_f].each do |scope|

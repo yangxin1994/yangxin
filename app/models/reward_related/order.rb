@@ -138,12 +138,14 @@ class Order
 		order.auto_handle
 
 		##synchro  reverver info 
-		if params['opt']['info_sys'].to_s == 'true'
-			options = {:receiver => opt["receiver"],:address => opt["address"],
-						:postcode => opt["postcode"],:mobile => opt["mobile"],
-						:street_info => opt["street_info"]
-					}
-			sample.set_receiver_info(options) if sample.present?
+		if opt['info_sys'].to_s == 'true'
+			option = {}
+			option["receiver"]    = order[:receiver]	
+			option["mobile"]      = order[:mobile]
+			option["address"]     = order[:address]
+			option["street_info"] = order[:street_info]
+			option["postcode"]    = order[:postcode]
+			sample.set_receiver_info(option) if sample.present?
 		end	
 				   
 		LotteryLog.create_succ_lottery_Log(answer_id,order.id,survey_id,sample_id,ip_address,prize_id)

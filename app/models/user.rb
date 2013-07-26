@@ -193,7 +193,7 @@ class User
 			self.affiliated.update_attributes(:receiver_info => receiver_info)
 		else
 			self.create_affiliated(:receiver_info => receiver_info)
-		end	
+		end		
 		return true
 	end
 
