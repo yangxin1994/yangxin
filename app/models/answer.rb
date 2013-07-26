@@ -1126,14 +1126,13 @@ class Answer
 		reward = (self.rewards.select { |r| r["checked"] == true }).first
 		return ErrorEnum::REWORD_NOT_SELECTED if reward.nil?
 		return ErrorEnum::NOT_LOTTERY_REWARD if reward["type"] != RewardScheme::LOTTERY
-		prize = (reward["prizes"].select { |p| p["win"] == true }).first
-		return ErrorEnum::NOT_WIN if prize.nil?
+		return ErrorEnum::NOT_WIN if reward["win"] != true
 
 		# create lottery order
 		order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
 		order = Order.create_lottery_order(self.user._id.to_s,
 			self.survey._id.to_s,
-			prize["prize_id"],
+			reward["prize_id"],
 			order_info)
 		self.order = order
 		return true
