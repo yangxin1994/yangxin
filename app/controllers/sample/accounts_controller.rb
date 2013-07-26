@@ -148,6 +148,6 @@ class Sample::AccountsController < ApplicationController
 		render_json_e ErrorEnum::ILLEGAL_ACTIVATE_KEY and return if @current_user.sms_verification_code != params[:verification_code]
 		render_json_e ErrorEnum::ACTIVATE_EXPIRED if @current_user.sms_verification_expiration_time < Time.now.to_i
 		@current_user.mobile = @current_user.mobile_to_be_changed
-		render_json_e @current_user.save and return
+		render_json_auto @current_user.save and return
 	end
 end

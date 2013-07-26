@@ -837,6 +837,7 @@ class Answer
 		end
 		self.update_quota(old_status) if !self.is_preview
 		self.finished_at = Time.now.to_i
+		self.deliver_reward
 		return self.save
 	end
 
@@ -1046,7 +1047,6 @@ class Answer
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::POINT
-			return ErrorEnum::SAMPLE_NOT_EXIST if self.user.nil?
 			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
 			sample = self.user
 			sample.point += reward["amount"] unless sample.nil?
@@ -1097,6 +1097,7 @@ class Answer
 		answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id.to_s, sample._id.to_s, false)
 		return ErrorEnum::ANSWER_EXIST if !answer.nil?
 		sample.answers << self
+		# handle rewards
 		return true
 	end
 
