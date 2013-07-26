@@ -1,7 +1,7 @@
 class Affiliated
 	include Mongoid::Document
 	include Mongoid::Timestamps
-		field :receive_info,:type => Hash, default: {"receiver" => "",
+		field :receiver_info,:type => Hash, default: {"receiver" => "",
 		"address" => -1,
 		"street_info" => '',
 		"mobile" => '',

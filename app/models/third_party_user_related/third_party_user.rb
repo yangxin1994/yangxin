@@ -11,6 +11,7 @@ class ThirdPartyUser
 	field :refresh_token, :type => String
 	field :expires_in, :type => String
 	field :scope, :type => String
+	field :share, :type => Boolean, default: false
 
 	belongs_to :user
 

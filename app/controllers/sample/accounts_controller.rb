@@ -54,7 +54,7 @@ class Sample::AccountsController < ApplicationController
 
 	def get_bind_info
 		@bind_info = {}
-		if @current_user.email_activation?
+		if @current_user.email_activation
 			@bind_info["email"] = [@current_user.email, @current_user.email_subscribe]
 		end
 		if @current_user.mobile_activation
@@ -67,8 +67,81 @@ class Sample::AccountsController < ApplicationController
 		render_json_auto @bind_info and return
 	end
 
+	def unbind
+		third_party_user = ThirdPartyUser.where(:website => params[:website], :user_id => @current_user._id.to_s).first
+		third_party_user.destroy if !third_party_user.nil?
+		render_json_auto true and return
+	end
+
+	def set_share
+		third_party_user = ThirdPartyUser.where(:website => params[:website], :user_id => @current_user._id.to_s).first
+		render_json_e ErrorEnum::THIRD_PARTY_USER_NOT_EXIST and return if third_party_user.nil?
+		third_party_user.share = params[:share] == "true"
+		third_party_user.save
+		render_json_auto true and return
+	end
+
+	def set_subscribe
+		if params[:type] == "email"
+			@current_user.email_subscribe = params[:subscribe].to_s == "true" if @current_user.email_activation
+		else
+			@current_user.mobile_subscribe = params[:subscribe].to_s == "true" if @current_user.mobile_activation
+		end
+		render_json_auto @current_user.save and return
+	end
+
 	def messages
 		@messages = @current_user.messages
-		render_json_auto @messages and return
+		@paginated_messages = auto_paginate @messages do |paginated_messages|
+			paginated_messages.map { |e| e.info_for_sample }
+		end
+		render_json_auto @paginated_messages and return
+	end
+
+	def destroy_message
+		@message = Message.find_by_id(params[:message_id])
+		render_json_e ErrorEnum::MESSAGE_NOT_EXIST and return if !@current_user.messages.include?(@message)
+		render_json_auto @message.destroy and return
+	end
+
+	def destroy_all_messages
+		render_json_auto @current_user.messages.destroy_all and return
+	end
+
+	def send_change_email
+		@current_user.email_to_be_changed = params[:email]
+		@current_user.change_email_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
+		@current_user.save
+		EmailWorker.perform_async("change_email", params[:email], params[:callback])
+		render_json_s and return
+	end
+
+	def send_change_sms
+		@current_user.mobile_to_be_changed = params[:mobile]
+		@current_user.sms_verification_code = Random.rand(100000..999999).to_s
+		@current_user.sms_verification_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
+		@current_user.save
+		## todo: send message to the mobile
+		render_json_s and return
+	end
+
+	def change_email
+		begin
+			activate_info_json = Encryption.decrypt_activate_key(params[:activate_key])
+			activate_info = JSON.parse(activate_info_json)
+		rescue
+			render_json_e(ErrorEnum::ILLEGAL_ACTIVATE_KEY) and return
+		end
+		render_json_e ErrorEnum::EMAIL_NOT_EXIST and return if @current_user.email_to_be_changed != activate_info["email"]
+	end
+
+	def change_mobile
+		render_json_e ErrorEnum::MOBILE_NOT_EXIST and return if @current_user.mobile_to_be_changed != params[:mobile]
+		if @current_user.sms_verification_code == params[:verification_code]
+			@current_user.mobile = @current_user.mobile_to_be_changed
+			render_json_e @current_user.save and return
+		else
+			render_json_e ErrorEnum::ILLEGAL_ACTIVATE_KEY and return
+		end
 	end
 end

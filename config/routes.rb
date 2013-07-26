@@ -130,11 +130,12 @@ OopsData::Application.routes.draw do
 				put 'add_template_question'
 			end
 			member do
-				put 'add_reward', 'set_community', 'set_spread', 'set_promotable', 'set_answer_need_review', 'background_survey',
+				put 'add_reward', 'set_community', 'set_promotable', 'set_answer_need_review', 'background_survey',
 						'quillme_promote', 'email_promote', 'sms_promote', 'broswer_extension_promote', "weibo_promote"
 				get 'get_sent_email_number', 'promote'
-				put :quillme_hot, :allocate_answer_auditors, :set_result_visible
+				put :quillme_hot, :allocate_answer_auditors, :set_result_visible, :set_spread
 				put :add_sample_attribute_for_promote, :remove_sample_attribute_for_promote
+				get :get_spread, :get_result_visible
 			end
 			resources :reward_schemes, :except => [:new, :edit, :destroy]
 		end
@@ -318,11 +319,8 @@ OopsData::Application.routes.draw do
 			put 'update_tags'
 			put 'add_tag'
 			put 'remove_tag'
-			put 'submit'
+			put 'publish'
 			put 'close'
-			get 'reject'
-			get 'publish'
-			get 'pause'
 			put 'update_style_setting'
 			get 'show_style_setting'
 			put 'update_access_control_setting'
@@ -470,6 +468,12 @@ OopsData::Application.routes.draw do
 				put :set_receiver_info
 				put :reset_password
 				get :messages
+				delete :destroy_message
+				delete :destroy_all_messages
+				get :get_bind_info
+				put :unbind
+				put :set_share
+				put :set_subscribe
 			end	
 		end	
 		resources :surveys do
@@ -516,7 +520,8 @@ OopsData::Application.routes.draw do
 			collection do 
 				get :get_today_answers_count,:as => :get_today_answers_count
 				get :get_today_spread_count, :as => :get_today_spread_count
-				get :get_my_answer
+				get :get_answer_id_by_auth_key
+				# get :get_my_answer
 				get :list_spreaded_answers
 				get :spreaded_answer_number
 			end
@@ -527,7 +532,6 @@ OopsData::Application.routes.draw do
 				post :finish
 				get :estimate_remain_answer_time
 				delete :destroy_preview
-				get :get_answer_id_by_auth_key
 				post :change_sample_account
 				delete :logout
 				put :select_reward
