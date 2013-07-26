@@ -109,6 +109,7 @@ class Sample::AccountsController < ApplicationController
 	end
 
 	def send_change_email
+		render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST if !User.find_by_email(params[:email]).nil?
 		@current_user.email_to_be_changed = params[:email]
 		@current_user.change_email_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
 		@current_user.save
@@ -117,6 +118,7 @@ class Sample::AccountsController < ApplicationController
 	end
 
 	def send_change_sms
+		render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST if !User.find_by_email(params[:mobile]).nil?
 		@current_user.mobile_to_be_changed = params[:mobile]
 		@current_user.sms_verification_code = Random.rand(100000..999999).to_s
 		@current_user.sms_verification_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
