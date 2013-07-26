@@ -146,6 +146,5 @@ class Sample::AccountsController < ApplicationController
 		render_json_e ErrorEnum::ACTIVATE_EXPIRED if @current_user.change_mobile_expiration_time < Time.now.to_i
 		@current_user.mobile = @current_user.mobile_to_be_changed
 		render_json_e @current_user.save and return
-		end
 	end
 end
