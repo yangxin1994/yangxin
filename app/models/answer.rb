@@ -142,6 +142,10 @@ class Answer
 		return lottery_data
 	end
 
+	def get_lottery_counts
+		LotteryLog.get_lottery_counts(self.survey.id) 
+	end
+
 	def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, channel, referrer, remote_ip, username, password)
 		survey = Survey.normal.find_by_id(survey_id)
 		# create the answer
@@ -1100,18 +1104,17 @@ class Answer
 		return self.deliver_reward
 	end
 
-	def draw_lottery
-		return ErrorEnum::LOTTERY_DRAWED if self.reward_delivered
+	def draw_lottery(user_id)
+		#return ErrorEnum::LOTTERY_DRAWED if self.reward_delivered
 		reward = (self.rewards.select { |r| r["checked"] == true }).first
 		return ErrorEnum::REWORD_NOT_SELECTED if reward.nil?
 		return ErrorEnum::NOT_LOTTERY_REWARD if reward["type"] != RewardScheme::LOTTERY
-		return ErrorEnum::LOTTERY_DRAWED if !reward["win"].nil?
+		#return ErrorEnum::LOTTERY_DRAWED if !reward["win"].nil?
 
 		reward_scheme = self.reward_scheme
 		return {"result" => false} if reward_scheme.nil? || reward_scheme.rewards[0]["type"].to_i != RewardScheme::LOTTERY
 		rewards_from_scheme = reward_scheme.rewards[0]
 
-		# draw lottery
 		reward["prizes"].each do |p|
 			next if rand > p["prob"]
 			rewards_from_scheme["prizes"].each do |prize_from_scheme|
@@ -1132,11 +1135,14 @@ class Answer
 		reward["win"] = false
 		self.reward_delivered = true
 		self.save
+		LotteryLog.create_fail_lottery_log(self.survey.id,self.survey.title,user_id,self.ip_address) if user_id.present?
 		return {"result" => false}
 	end
 
+
+
 	def create_lottery_order(order_info)
-		return ErrorEnum::SAMPLE_NOT_EXIST if self.user.nil?
+		#return ErrorEnum::SAMPLE_NOT_EXIST if self.user.nil?
 		return ErrorEnum::ORDER_CREATED if !self.order.nil?
 		reward = (self.rewards.select { |r| r["checked"] == true }).first
 		return ErrorEnum::REWORD_NOT_SELECTED if reward.nil?

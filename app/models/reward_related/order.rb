@@ -106,6 +106,9 @@ class Order
 	end
 
 	def self.create_lottery_order(sample_id, survey_id, prize_id, opt = {})
+		Rails.logger.info("-------------------------")
+		Rails.logger.info(opt.inspect)
+		Rails.logger.info("-------------------------")
 		sample = User.sample.find_by_id(sample_id)
 		return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
 		survey = Survey.find_by_id(survey_id)
@@ -127,9 +130,11 @@ class Order
 			order.qq = opt["qq"]
 		when Prize::VIRTUAL
 		when Prize::REAL
-			order.user_name = opt["user_name"]
+			order.user_name = opt["receiver"]
 			order.address = opt["address"]
 			order.postcode = opt["postcode"]
+			order.mobile = opt["mobile"]
+			order.street_info = opt["street_info"]
 		end
 		order.status = FROZEN if opt["status"] == FROZEN
 		order.save

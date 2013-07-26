@@ -74,6 +74,10 @@ class Sample::AnswersController < ApplicationController
 		render_json_auto @answer.find_lottery_answers
 	end
 
+	def get_lottery_counts  
+	  render_json_auto @answer.get_lottery_counts
+	end
+
 	def submit_answer
 		# 0. check the answer's status
 		render_json_e(ErrorEnum::WRONG_ANSWER_STATUS) and return if !@answer.is_edit
@@ -146,7 +150,7 @@ class Sample::AnswersController < ApplicationController
 	end
 
 	def draw_lottery
-		render_json_auto @answer.draw_lottery and return
+		render_json_auto @answer.draw_lottery(@current_user.try(:id)) and return
 	end
 
 	def create_lottery_order

@@ -545,6 +545,7 @@ OopsData::Application.routes.draw do
 				put :draw_lottery
 				post :create_lottery_order
 				get :find_lottery_answers
+				get :get_lottery_counts
 			end
 		end	
 		resources :orders do

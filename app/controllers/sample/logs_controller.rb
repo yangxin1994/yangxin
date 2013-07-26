@@ -33,7 +33,7 @@ class Sample::LogsController < ApplicationController
   end
 
   def find_lottery_logs
-    render_json_auto  LotteryLog.find_lottery_logs(params[:id])
+    render_json_auto  LotteryLog.find_lottery_logs(params[:id],params[:status],params[:limit])
   end
 
   def get_point_change_log
