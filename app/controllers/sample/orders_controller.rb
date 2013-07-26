@@ -15,4 +15,19 @@ class Sample::OrdersController < ApplicationController
 		render_json_e ErrorEnum::ORDER_NOT_EXIST and return if @order.nil?
 		render_json_auto @order.info_for_sample_detail and return
 	end
+
+	def create_gift_order
+		amount  = params['order'].delete('amount')
+		point   = params['order'].delete('point')
+		order_t = params['order'].delete('gift_id')
+		gift_id = Gift.generate_gift_id(order_t)
+		opt     = Gift.generate_opt(params[:order],order_t)
+
+		#synchro  reverver info 
+		if params['order']['info_sys'].to_s == 'true'
+			@current_user.set_receiver_info(opt)
+		end		 	
+		return ErrorEnum::INVALID_GIFT_ID  unless gift_id
+		render_json_auto Order.create_redeem_order(@current_user._id,gift_id,amount,point,opt)
+	end
 end

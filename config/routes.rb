@@ -202,6 +202,7 @@ OopsData::Application.routes.draw do
 				put :handle, :finish, :update_express_info, :update_remark
 			end
 		end
+		
 		resources :lotteries do
 			collection do
 				get :for_publish, :activity, :finished, :deleted, :quillme
@@ -474,6 +475,10 @@ OopsData::Application.routes.draw do
 				put :unbind
 				put :set_share
 				put :set_subscribe
+				put :send_change_email
+				put :send_change_sms
+				put :change_email
+				put :change_mobile
 			end	
 		end	
 		resources :surveys do
@@ -482,6 +487,7 @@ OopsData::Application.routes.draw do
 				get :get_recommends,:as => :get_recommends
 				get :list_answered_surveys,:as => :list_answered_surveys
 				get :list_spreaded_surveys,:as => :list_spreaded_surveys
+				get :get_reward_type_count,:as => :get_reward_type_count
 			end
 		end		
 		resources :public_notices do
@@ -506,6 +512,9 @@ OopsData::Application.routes.draw do
 				get :mobile_banding,:as => :mobile_banding
 				get :email_banding,:as => :email_banding
 				get :info_precent_complete,:as => :info_precent_complete
+				post :make_rss_activate,:as => :make_rss_activate
+				get :make_subscribe_active,:as => :make_subscribe_active
+				get :make_rss_mobile_activate,:as => :make_rss_mobile_activate
 			end
 		end
 		resources :logs do
@@ -514,6 +523,7 @@ OopsData::Application.routes.draw do
 				get :get_disciplinal_news,:as => :get_disciplinal_news
 				get :get_newst_exchange_logs,:as => :get_newst_exchange_logs
 				get :get_point_change_log
+				get :find_lottery_logs
 			end
 		end
 		resources :answers do 
@@ -538,15 +548,14 @@ OopsData::Application.routes.draw do
 				post :bind_sample
 				put :draw_lottery
 				post :create_lottery_order
+				get :find_lottery_answers
+				get :get_lottery_counts
 			end
 		end	
-		resources :survey_subscribes do 
-			collection do
-				post :subscribe_able,:as => :subscribe_able
-				get :make_subscribe_active,:as => :make_subscribe_active 
-			end
-		end
 		resources :orders do
+			collection do
+				post :create_gift_order, :as => :create_gift_order 
+			end
 		end
 	end
 

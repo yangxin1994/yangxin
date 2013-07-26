@@ -8,6 +8,7 @@ class Sample::AnswersController < ApplicationController
 
 	def check_answer_existence
 		@answer = Answer.find_by_id(params[:id])
+
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if @answer.nil?
 	end
 
@@ -66,6 +67,15 @@ class Sample::AnswersController < ApplicationController
 
 	def clear
 		render_json_auto @answer.clear and return
+	end
+
+
+	def find_lottery_answers
+		render_json_auto @answer.find_lottery_answers
+	end
+
+	def get_lottery_counts  
+	  render_json_auto @answer.get_lottery_counts
 	end
 
 	def submit_answer
@@ -136,11 +146,13 @@ class Sample::AnswersController < ApplicationController
 	end
 
 	def bind_sample
-		render_json_auto @answer.bind_sample(params[:email_mobile]) and return
+		sample = User.find_by_auth_key(params[:auth_key])
+		render_json_e ErrorEnum::ANSWER_BOUND and return if !@answer.user.nil?
+		render_json_auto @answer.bind_sample(sample) and return
 	end
 
 	def draw_lottery
-		render_json_auto @answer.draw_lottery and return
+		render_json_auto @answer.draw_lottery(@current_user.try(:id)) and return
 	end
 
 	def create_lottery_order

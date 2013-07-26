@@ -54,6 +54,7 @@ class RegistrationsController < ApplicationController
 
 	def registered_user_exist
 		u = User.find_by_email_mobile(params[:email_mobile])
-		render_json_auto({"exist" => (u && u.status == User::REGISTERED)}) and return
+		render_json_auto({"exist" => (u &&  u.is_activated)}) and return
+		#render_json_auto({"exist" => (u && u.status == User::REGISTERED)}) and return
 	end
 end

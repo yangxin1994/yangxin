@@ -1,5 +1,9 @@
 module ErrorEnum
 
+	REWORD_NOT_SELECTED = "error__10"
+	LOTTERY_DRAWED = "error__11"
+	NOT_LOTTERY_REWARD = "error__12"
+
 	SAMPLE_ATTRIBUTE_NOT_EXIST = "error__0"
 	WRONG_SAMPLE_ATTRIBUTE_TYPE = "error__1"
 	WRONG_DATE_TYPE = "error__2"
@@ -11,11 +15,15 @@ module ErrorEnum
 	AGENT_NOT_EXIST = "error__8"
 	MOBILE_NOT_EXIST = "error_9"
 
+	
+	ANSWER_BOUND = "error_11"
+
 
 	REWARD_SCHEME_NOT_EXIST = 'error___0'  ##TODO ErrorEnum has not rule yet
 	ORDER_TYPE_ERROR = 'error___1'
 	ILLEGAL_EMAIL_OR_MOBILE = 'error___2'
 	EMAIL_OR_MOBILE_EXIST = 'error___3'
+	ACTIVATE_CODE_ERROR   = 'error___4'
 
 	LOGIN_TOO_FREQUENT = "error_0"
 	ILLEGAL_EMAIL = "error_1"
@@ -94,11 +102,15 @@ module ErrorEnum
 	ANSWER_NOT_EXIST = "error_141"
 	VIOLATE_QUALITY_CONTROL_ONCE = "error_142"
 	VIOLATE_QUALITY_CONTROL_TWICE = "error_143"
+
 	SURVEY_NOT_PUBLISHED = "error_144"
+	SURVEY_CLOSED = "error__145"
+	SUEVEY_DELETED = "error__146"
 	SURVEY_PASSWORD_USED = "error_145"
 	WRONG_ANSWER_STATUS = "error_146"
 	SURVEY_NOT_ALLOW_PAGEUP = "error_147"
 	ANSWER_NOT_COMPLETE = "error_148"
+
 
 	WRONG_FILTER_CONDITION_TYPE = "error_150"
 	FILTER_NOT_EXIST = "error_151"

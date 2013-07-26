@@ -8,7 +8,10 @@ class User
 	include Mongoid::Document
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
-		#include DymanicAttr
+  	EmailRexg  = '\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z'
+  	MobileRexg = '^(13[0-9]|15[0|1|2|3|6|7|8|9]|18[8|9])\d{8}$' 
+
+  	DEFAULT_IMG = '/assets/image/sample/avatar/user_default.png'
 
 	field :email, :type => String
 	field :email_activation, :type => Boolean, default: false
@@ -31,6 +34,8 @@ class User
 	field :login_count, :type => Integer, default: 0
 	field :sms_verification_code, :type => String
 	field :sms_verification_expiration_time, :type => Integer,default:  -> {(Time.now + 1.minutes).to_i }
+  	field :rss_verification_code, :type => String
+  	field :rss_verification_expiration_time, :type => Integer,default:  -> {(Time.now + 1.minutes).to_i }	
 	field :email_to_be_changed, :type => String
 	field :change_email_expiration_time, :type => Integer
 	field :mobile_to_be_changed, :type => String
@@ -236,6 +241,66 @@ class User
 		return (self.role.to_i & 1) > 0
 	end
 
+	def self.create_rss_user(email_mobile,callback=nil)
+		user = find_by_email_mobile(email_mobile)
+
+		account = {}
+		if email_mobile.match(/#{EmailRexg}/i)
+			account[:email] = email_mobile.downcase	    
+		elsif email_mobile.match(/#{MobileRexg}/i)
+			active_code = Tool.generate_active_mobile_code
+			account[:mobile] = email_mobile
+			account[:rss_verification_code] = active_code
+			account[:rss_verification_expiration_time] = (Time.now + 1.minutes).to_i
+		end
+
+		new_user = true  # default imagagine the user is a new user
+		if user.present? && user.status == REGISTERED
+			if email_mobile.match(/#{EmailRexg}/i)
+				account[:email_subscribe] = true
+			else
+				account[:mobile_subscribe] = true
+			end
+			user.update_attributes(account)
+			new_user = false		
+		else
+			if user.present? && email_mobile.match(/#{MobileRexg}/i)
+				user.update_attributes(account)
+			elsif !user.present?
+				account[:registered_at] = Time.now.to_i
+				account[:status] = VISITOR
+				user = User.create(account)				 
+			end				
+
+			if active_code.present?
+				## TODO   generate active code when user regist with mobile
+				## TODO   store the random code and mobile in session with a expire time 60 sec.     
+				# SmsInvitationWorker
+			else
+				EmailWorker.perform_async("rss_subscribe",user.email, callback) if account[:email]					
+			end			
+		end		
+		return {:success => true,:new_user => new_user}
+	end
+
+
+	def self.activate_rss_subscribe(active_info)
+    email = active_info['email']
+    time  = active_info['time']   
+    user  = User.where(:email => email).first
+    return ErrorEnum::USER_NOT_EXIST if !user.present?
+    return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - time.to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i        
+    user.update_attributes(:email_subscribe => true )
+    return {:success => true}		 
+	end
+
+
+	def make_mobile_rss_activate(code)
+		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i  > self.rss_verification_expiration_time
+    return ErrorEnum::ACTIVATE_CODE_ERROR if self.rss_verification_code != code
+    return self.update_attributes(:mobile_subscribe => true)
+	end
+
 	#*description*: create a new user
 	#
 	#*params*:
@@ -245,18 +310,20 @@ class User
 	#* the new user instance: when successfully created
 	def self.create_new_user(email_mobile, password, current_user, third_party_user_id, callback)
 		account = {}
-		if email_mobile.match(/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/)  ## match email
+		if email_mobile.match(/#{EmailRexg}/i)  ## match email
 			account[:email] = email_mobile.downcase
-		elsif email_mobile.match(/^\d{11}$/)  ## match mobile
-            active_code = Random.rand(100000..999999).to_i
-  			account[:mobile] = email_mobile
+		elsif email_mobile.match(/#{MobileRexg}/i)  ## match mobile
+			active_code = Tool.generate_active_mobile_code
+			account[:mobile] = email_mobile
 		end
 		return ErrorEnum::ILLEGAL_EMAIL_OR_MOBILE if account.blank?
 		existing_user = account[:email] ? self.find_by_email(account[:email]) : self.find_by_mobile(account[:mobile])
-		return ErrorEnum::USER_REGISTERED if existing_user && existing_user.status == REGISTERED
+		#return ErrorEnum::USER_REGISTERED if existing_user && existing_user.status == REGISTERED
+		return ErrorEnum::USER_REGISTERED if existing_user && existing_user.is_activated
 		password = Encryption.encrypt_password(password) if account[:email]
-        account[:status] = account[:email].present? ? REGISTERED : VISITOR
-        account[:sms_verification_code] = active_code if account[:mobile]
+		account[:status] =  REGISTERED
+		account[:sms_verification_code] = active_code if account[:mobile]
+		account[:sms_verification_expiration_time]  = (Time.now + 1.minutes).to_i
 		updated_attr = account.merge(
 			password: password,
 			registered_at: Time.now.to_i)
@@ -264,15 +331,14 @@ class User
 		#existing_user = User.create if check_exist.nil?
 		existing_user = User.create if existing_user.nil?
 		existing_user.update_attributes(updated_attr)
-        
-        if active_code.present?
-          	## TODO   generate active code when user regist with mobile
-          	## TODO   store the random code and mobile in session with a expire time 60 sec.     
+		if active_code.present?
+			## TODO   generate active code when user regist with mobile
+			## TODO   store the random code and mobile in session with a expire time 60 sec.     
 			# SmsInvitationWorker
-        else
-            # send welcome email
+		else
+			# send welcome email
 			EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
-        end
+		end
 
 		# send welcome email
 		#EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
@@ -322,13 +388,13 @@ class User
 
 
 	def answerd?(survey_id)
-      answer = self.answers.where(:survey_id => survey_id).first
-      if answer.present?
-        return true
-      else
-        return false
-      end
-    end
+	  answer = self.answers.where(:survey_id => survey_id).first
+	  if answer.present?
+		return true
+	  else
+		return false
+	  end
+	end
 
 	#*description*: activate a user
 	#
@@ -351,7 +417,7 @@ class User
 			user.activate_time = Time.now.to_i
 		else
 			# mobile activate
-			return ErrorEnum::USER_NOT_REGISTERED if user.status == VISITOR
+			#return ErrorEnum::USER_NOT_REGISTERED if user.status == VISITOR
 			return ErrorEnum::ILLEGAL_ACTIVATE_KEY if user.sms_verification_code != activate_info["verification_code"]
 			return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i  > user.sms_verification_expiration_time
 			user.password = Encryption.encrypt_password(activate_info["password"])
@@ -377,9 +443,9 @@ class User
 	#* WRONG_PASSWORD
 	def self.login_with_email_mobile(email_mobile, password, client_ip, client_type, keep_signed_in, third_party_user_id)
 		user = nil
-		if email_mobile.match(/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/)  ## match email
+		if email_mobile.match(/#{EmailRexg}/i)  ## match email
 			user = User.find_by_email(email_mobile.downcase)
-		elsif email_mobile.match(/^\d{11}$/)  ## match mobile
+		elsif email_mobile.match(/#{MobileRexg}/i)  ## match mobile
 			user = User.find_by_mobile(email_mobile)
 		end
 		return ErrorEnum::USER_NOT_EXIST if user.nil?

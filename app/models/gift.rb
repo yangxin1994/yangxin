@@ -1,4 +1,5 @@
 require 'tool'
+require 'error_enum'
 class Gift
 	include Mongoid::Document
 	include Mongoid::Timestamps
@@ -28,18 +29,29 @@ class Gift
 	field :quantity, :type => Integer, default: 0
 	field :point, :type => Integer, default: 0
     field :exchange_count, :type => Integer, default: 0
+    field :price, :type => Float, default: 0.0
     field :redeem_number, :type => Hash, default: {"mode" => SINGLE}
 
 	has_one :photo, :class_name => "Material", :inverse_of => 'gift'
 
-	default_scope order_by(:created_at.desc)
+	#default_scope order_by(:created_at.desc)
 
 	scope :normal, where(:status.in => [OFF_THE_SHELF, ON_THE_SHELF])
+
+	scope :on_shelf, where(:status => ON_THE_SHELF)
+
+	scope :real, where(:type => REAL)
 
 	index({ type: 1, status: 1 }, { background: true } )
 
 	def self.find_by_id(gift_id)
 		return self.normal.where(:_id => gift_id).first
+	end
+
+	def self.find_real_gift(desc_type)
+		gifts = self.on_shelf.real.desc("#{desc_type}")
+		gifts.map{|gift| gift['photo'] = gift.photo.present? ? gift.photo.picture_url : nil}
+		return gifts
 	end
 
 	def self.create_gift(gift)
@@ -50,6 +62,26 @@ class Gift
 		gift.photo = material
 		gift["photo_url"] = material.value
 		return gift
+	end
+
+	def self.generate_opt(order,gift)
+		opt = {}
+		real_gift = self.find_by_id(gift)
+
+		if real_gift.present?
+			opt["receiver"]    = order[:receiver]	
+			opt["mobile"]      = order[:mobile]
+			opt["address"]     = order[:address]
+			opt["street_info"] = order[:street_info]
+			opt["postcode"]    = order[:postcode]			
+		else
+			opt['mobile'] = order[:account] if gift == 'phone_num'
+			opt['alipay_account'] = order[:account] if gift == 'ali_num'
+			opt['alipay_account'] = order[:account] if gift == 'jifen_num'
+			opt['qq'] = order[:account] if gift == 'qq_num'			
+		end
+
+		return opt
 	end
 
 	def update_gift(gift)
@@ -84,6 +116,28 @@ class Gift
 		return Errorenum::WRONG_GIFT_TYPE if ![1,2,4].include?(gift["type"].to_i)
 		return true
 	end
+
+
+	def self.generate_gift_id(order_type)
+		gift = self.find_by_id(order_type)
+		if gift.present?
+			return gift._id
+		else
+			case order_type.to_s
+			when 'phone_num'
+				return self.where(:type => MOBILE_CHARGE).on_shelf.first.try(:_id) 
+			when 'jifen_num'
+				return self.where(:type => JIFENBAO).on_shelf.first.try(:_id)
+			when 'ali_num'
+				return self.where(:type => ALIPAY).on_shelf.first.try(:_id)
+			when 'qq_num'
+				return self.where(:type => QQ_COIN).on_shelf.first.try(:_id)
+			else
+				return false
+			end
+		end
+	end
+
 
     #订单(兑换)流程走完之后该值加一，表示该礼品兑换的次数
 	def inc_exchange_count

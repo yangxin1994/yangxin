@@ -1,4 +1,4 @@
-# coding: utf-8
+ # coding: utf-8
 require 'error_enum'
 require 'quill_common'
 class Sample::AccountsController < ApplicationController
@@ -16,6 +16,7 @@ class Sample::AccountsController < ApplicationController
 		@bind_info["mobile"] = @current_user.mobile_activation
 
 		@completed_info = @current_user.completed_info
+		
 		@basic_info = {
 			"answer_number" => @answer_number,
 			"spread_number" => @spread_number,
@@ -25,6 +26,7 @@ class Sample::AccountsController < ApplicationController
 			"sample_id" => @current_user._id.to_s,
 			"nickname" => @current_user.nickname
 		}
+
 		render_json_auto @basic_info and return
 	end
 
@@ -33,7 +35,7 @@ class Sample::AccountsController < ApplicationController
 	end
 
 	def set_basic_attributes
-		retval = @current_user.set_basic_info(params[:basic_attributes])
+		retval = @current_user.set_basic_attributes(params[:basic_attributes])
 		render_json_auto(retval) and return   	
 	end
 
@@ -44,7 +46,7 @@ class Sample::AccountsController < ApplicationController
 
 	def set_receiver_info
 		retval = @current_user.set_receiver_info(params[:receiver_info])
-		render_json_auto(retval) and return     
+		render_json_auto(retval) and return
 	end
 
 	def reset_password
@@ -109,6 +111,7 @@ class Sample::AccountsController < ApplicationController
 	end
 
 	def send_change_email
+		render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST if !User.find_by_email(params[:email]).nil?
 		@current_user.email_to_be_changed = params[:email]
 		@current_user.change_email_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
 		@current_user.save
@@ -117,8 +120,10 @@ class Sample::AccountsController < ApplicationController
 	end
 
 	def send_change_sms
+		render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST if !User.find_by_email(params[:mobile]).nil?
 		@current_user.mobile_to_be_changed = params[:mobile]
-		@current_user.sms_verification_code = Random.rand(100000..999999).to_s
+		# @current_user.sms_verification_code = Random.rand(100000..999999).to_s
+		@current_user.sms_verification_code = "111111"
 		@current_user.sms_verification_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
 		@current_user.save
 		## todo: send message to the mobile
@@ -133,15 +138,16 @@ class Sample::AccountsController < ApplicationController
 			render_json_e(ErrorEnum::ILLEGAL_ACTIVATE_KEY) and return
 		end
 		render_json_e ErrorEnum::EMAIL_NOT_EXIST and return if @current_user.email_to_be_changed != activate_info["email"]
+		render_json_e ErrorEnum::ACTIVATE_EXPIRED if @current_user.change_email_expiration_time < Time.now.to_i
+		@current_user.email = @current_user.email_to_be_changed
+		render_json_auto @current_user.save and return
 	end
 
 	def change_mobile
 		render_json_e ErrorEnum::MOBILE_NOT_EXIST and return if @current_user.mobile_to_be_changed != params[:mobile]
-		if @current_user.sms_verification_code == params[:verification_code]
-			@current_user.mobile = @current_user.mobile_to_be_changed
-			render_json_e @current_user.save and return
-		else
-			render_json_e ErrorEnum::ILLEGAL_ACTIVATE_KEY and return
-		end
+		render_json_e ErrorEnum::ILLEGAL_ACTIVATE_KEY and return if @current_user.sms_verification_code != params[:verification_code]
+		render_json_e ErrorEnum::ACTIVATE_EXPIRED if @current_user.sms_verification_expiration_time < Time.now.to_i
+		@current_user.mobile = @current_user.mobile_to_be_changed
+		render_json_auto @current_user.save and return
 	end
 end

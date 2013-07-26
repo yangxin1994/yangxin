@@ -61,14 +61,21 @@ class Order
 	WIN_IN_LOTTERY = 2
 	REDEEM_GIFT = 4
 
-	attr_accessible :mobile, :alipay_account, :qq, :user_name, :address, :postcode
+	#attr_accessible :mobile, :alipay_account, :qq, :user_name, :address, :postcode
 
 	def self.find_by_id(order_id)
 		return Order.where(:_id => order_id).first
 	end
 
+
 	def self.create_redeem_order(sample_id, gift_id, amount, point, opt = {})
+
+		gift  = Gift.find_by_id(gift_id)
+		return ErrorEnum::ORDER_ERROR if amount.to_i < 1
+
+		point = gift.point.to_i  * amount.to_i
 		sample = User.sample.find_by_id(sample_id)
+		return ErrorEnum::POINT_NOT_ENOUGH if sample.point.to_i < point.to_i 
 		return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
 		gift = Gift.find_by_id(gift_id)
 		return ErrorEnum::GIFT_NOT_EXIST if gift.nil?
@@ -93,19 +100,20 @@ class Order
 			order.postcode = opt["postcode"]
 		end
 		order.save
+		RedeemLog.create_gift_exchange_logs(amount,order.id,gift_id,sample_id)
 		order.auto_handle
 		return order
 	end
 
-	def self.create_lottery_order(sample_id, survey_id, prize_id, opt = {})
+	def self.create_lottery_order(answer_id,sample_id, survey_id, prize_id,ip_address, opt = {})
+
 		sample = User.sample.find_by_id(sample_id)
-		return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		prize = Prize.find_by_id(prize_id)
-		return ErrorEnum::PRIZE_NOT_EXIST if prize.nl?
+		return ErrorEnum::PRIZE_NOT_EXIST if prize.nil?
 		order = Order.new(:source => WIN_IN_LOTTERY)
-		order.sample = sample
+		order.sample = sample unless sample.present?
 		order.survey = survey
 		order.prize = prize
 		case prize.type
@@ -119,23 +127,25 @@ class Order
 			order.qq = opt["qq"]
 		when Prize::VIRTUAL
 		when Prize::REAL
-			order.user_name = opt["user_name"]
+			order.receiver = opt["receiver"]
 			order.address = opt["address"]
 			order.postcode = opt["postcode"]
+			order.mobile = opt["mobile"]
+			order.street_info = opt["street_info"]
 		end
 		order.status = FROZEN if opt["status"] == FROZEN
 		order.save
-		order.auto_handle
+		order.auto_handle	   
+		LotteryLog.create_succ_lottery_Log(answer_id,order.id,survey_id,sample_id,ip_address,prize_id)
 		return order
 	end
 
 	def self.create_answer_order(sample_id, survey_id, type, amount, opt = {})
 		sample = User.sample.find_by_id(sample_id)
-		return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		order = Order.create(:source => ANSWER_SURVEY, :amount => amount, :type => type)
-		order.sample = sample
+		order.sample = sample unless sample.present?
 		order.survey = survey
 		case type
 		when SMALL_MOBILE_CHARGE

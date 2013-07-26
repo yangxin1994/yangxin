@@ -64,16 +64,22 @@ class LotteriesController < ApplicationController
 	# 		format.json { render json: @gifts}
 	# 	end
 	# end
-	 def show
-    # TODO is owners request?
-    # @lottery = Lottery.find_by_id(params[:id])
-    # @lottery[:photo_src] = @lottery.photo.picture_url unless @lottery.photo.nil?
-    # @lottery[:prizes] = @lottery.prizes
-    render_json false do
-    	Lottery.find_by_id(params[:id]) do |lottery|
-    		success_true
-    		lottery.present_quillme
+	def show
+    	# TODO is owners request?
+    	# @lottery = Lottery.find_by_id(params[:id])
+    	# @lottery[:photo_src] = @lottery.photo.picture_url unless @lottery.photo.nil?
+    	# @lottery[:prizes] = @lottery.prizes
+    	render_json false do
+    		Lottery.find_by_id(params[:id]) do |lottery|
+    			success_true
+    			lottery.present_quillme
+    		end
     	end
-    end
-  end
+  	end
+
+  	def can_lottery
+  		render_json_auto Survey.can_lottery?(params[:survey_id],params[:answer_id])
+  	end
+
+
 end

@@ -128,6 +128,24 @@ class Answer
 		return self.in("status" => Tool.convert_int_to_base_arr(status.to_i))
 	end
 
+	def find_lottery_answers
+		lottery_data = {}
+		prizes_arr = []
+		prize_ids = self.rewards.first['prizes'].map{|p| p['prize_id']}
+		prizes = Prize.where(:id.in => prize_ids).map{|p| p['photo_src'] = p.photo.present? ? p.photo.picture_url : Prize::DEFAULT_IMG;p}
+		prizes.each do |pri|
+			prizes_arr  << {'id' => pri.id,'title' => pri.title,'price' => pri.price,'photo_src' => pri.photo_src}	
+		end
+		lottery_data['survey_id'] = self.survey.id
+		lottery_data['survey_title'] = self.survey.title
+		lottery_data['prizes'] = prizes_arr
+		return lottery_data
+	end
+
+	def get_lottery_counts
+		LotteryLog.get_lottery_counts(self.survey.id) 
+	end
+
 	def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, channel, referrer, remote_ip, username, password)
 		survey = Survey.normal.find_by_id(survey_id)
 		# create the answer
@@ -819,6 +837,7 @@ class Answer
 		end
 		self.update_quota(old_status) if !self.is_preview
 		self.finished_at = Time.now.to_i
+		self.deliver_reward
 		return self.save
 	end
 
@@ -973,10 +992,9 @@ class Answer
 		when RewardScheme::MOBILE
 			return ErrorEnum::REPEAT_ORDER if self.check_repeat_mobile(reward["mobile"])
 			if self.order.nil?
-				sample = self.user || User.find_or_create_new_visitor_by_email_mobile(reward["mobile"])
 				order_info = { "mobile" => reward["mobile"] }
 				order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
-				self.order = Order.create_answer_order(sample._id.to_s,
+				self.order = Order.create_answer_order(self.user.try(:_id),
 					self.survey._id.to_s,
 					Order::SMALL_MOBILE_CHARGE,
 					reward["amount"],
@@ -993,10 +1011,9 @@ class Answer
 		when RewardScheme::ALIPAY
 			return ErrorEnum::REPEAT_ORDER if self.check_repeat_alipay(reward["alipay_account"])
 			if self.order.nil?
-				sample = self.user || User.find_or_create_new_visitor_by_email_mobile(reward["alipay_account"])
 				order_info = { "alipay_account" => reward["alipay_account"] }
 				order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
-				self.order = Order.create_answer_order(sample._id.to_s,
+				self.order = Order.create_answer_order(self.user.try(:_id),
 					self.survey._id.to_s,
 					Order::ALIPAY,
 					reward["amount"],
@@ -1013,10 +1030,9 @@ class Answer
 		when RewardScheme::JIFENBAO
 			return ErrorEnum::REPEAT_ORDER if self.check_repeat_jifenbao(reward["alipay_account"])
 			if self.order.nil?
-				sample = self.user || User.find_or_create_new_visitor_by_email_mobile(reward["alipay_account"])
 				order_info = { "alipay_account" => reward["alipay_account"] }
 				order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
-				self.order = Order.create_answer_order(sample._id.to_s,
+				self.order = Order.create_answer_order(self.user.try(:_id),
 					self.survey._id.to_s,
 					Order::JIFENBAO,
 					reward["amount"],
@@ -1031,10 +1047,11 @@ class Answer
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::POINT
-			return ErrorEnum::SAMPLE_NOT_EXIST if self.user.nil?
 			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
 			sample = self.user
-			sample.point += reward["amount"]
+			sample.point += reward["amount"] unless sample.nil?
+			sample.save
+			PointLog.create(:amount => reward["amount"], :reason => PointLog::ANSWER, :survey_id => self.survey._id.to_s, :survey_title => self.survey.title)
 			assign_introducer_reward
 			self.update_attributes({"reward_delivered" => true})
 		when RewardScheme::LOTTERY
@@ -1078,48 +1095,54 @@ class Answer
 		return false
 	end
 
-	def bind_sample(email_mobile)
-		sample = User.find_or_create_new_visitor_by_email_mobile(email_mobile)
-		answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id, sample._id, false)
+	def bind_sample(sample)
+		answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id.to_s, sample._id.to_s, false)
 		return ErrorEnum::ANSWER_EXIST if !answer.nil?
 		sample.answers << self
-		return self.deliver_reward
+		# handle rewards
+		reward = nil
+		self.rewards.each do |r|
+			reward = r and break if r["checked"] == true
+		end
+		return true if reward.nil?
+		case reward["type"].to_i
+		when RewardScheme::MOBILE
+			sample.orders << self.order unless self.order.nil
+		when RewardScheme::ALIPAY
+			sample.orders << self.order unless self.order.nil
+		when RewardScheme::JIFENBAO
+			sample.orders << self.order unless self.order.nil
+		when RewardScheme::LOTTERY
+			sample.orders << self.order unless self.order.nil
+		when RewardScheme::POINT
+			sample.point += reward["amount"]
+			sample.save
+			PointLog.create(:amount => reward["amount"], :reason => PointLog::ANSWER, :survey_id => self.survey._id.to_s, :survey_title => self.survey.title)
+		end
+		return true
 	end
 
-	def draw_lottery
-		return ErrorEnum::LOTTERY_DRAWED if self.reward_delivered
+	def draw_lottery(user_id)
+		#return ErrorEnum::LOTTERY_DRAWED if self.reward_delivered
 		reward = (self.rewards.select { |r| r["checked"] == true }).first
 		return ErrorEnum::REWORD_NOT_SELECTED if reward.nil?
 		return ErrorEnum::NOT_LOTTERY_REWARD if reward["type"] != RewardScheme::LOTTERY
-		return ErrorEnum::LOTTERY_DRAWED if !reward["win"].nil?
+		#return ErrorEnum::LOTTERY_DRAWED if !reward["win"].nil?
 
-		# draw lottery
 		reward_scheme = self.reward_scheme
-		reward_index = -1
-		reward_scheme.rewards.each_with_index do |r, i|
-			if r["type"] == RewardScheme::LOTTERY
-				reward_index = i
-				break
-			end
-		end
-		if reward_index == -1
-			self.reward_delivered = true
-			self.save
-			return {"result" => false}
-		end
-		prizes = reward["prizes"]
-		return ErrorEnum::REWARD_SCHEME_NOT_EXIST if reward_scheme.nil?
+		return {"result" => false} if reward_scheme.nil? || reward_scheme.rewards[0]["type"].to_i != RewardScheme::LOTTERY
+		rewards_from_scheme = reward_scheme.rewards[0]
+
 		reward["prizes"].each do |p|
 			next if rand > p["prob"]
-			prizes.each do |reward_scheme_p|
-				next if p["prize_id"] != reward_scheme_p["prize_id"]
-				if reward_scheme_p["deadline"] < Time.now.to_i && reward_scheme_p["amount"] > reward_scheme_p["win_amount"]
-					# win lottery
+			rewards_from_scheme["prizes"].each do |prize_from_scheme|
+				next if p["prize_id"] != prize_from_scheme["prize_id"]
+				if prize_from_scheme["deadline"] > Time.now.to_i && prize_from_scheme["amount"] > prize_from_scheme["win_amount"].to_i
 					reward["win"] = true
 					reward["prize_id"] = p["prize_id"]
 					self.save
-					reward_scheme_p["win_amount"] ||= 0
-					reward_scheme_p["win_amount"] += 1
+					prize_from_scheme["win_amount"] ||= 0
+					prize_from_scheme["win_amount"] += 1
 					reward_scheme.save
 					return {"result" => true,
 						"prize_id" => p["prize_id"],
@@ -1130,23 +1153,26 @@ class Answer
 		reward["win"] = false
 		self.reward_delivered = true
 		self.save
+		LotteryLog.create_fail_lottery_log(self.id,self.survey.id,self.survey.title,user_id,self.ip_address) if user_id.present?
 		return {"result" => false}
 	end
 
+
+
 	def create_lottery_order(order_info)
-		return ErrorEnum::SAMPLE_NOT_EXIST if self.user.nil?
+		#return ErrorEnum::SAMPLE_NOT_EXIST if self.user.nil?
 		return ErrorEnum::ORDER_CREATED if !self.order.nil?
 		reward = (self.rewards.select { |r| r["checked"] == true }).first
 		return ErrorEnum::REWORD_NOT_SELECTED if reward.nil?
 		return ErrorEnum::NOT_LOTTERY_REWARD if reward["type"] != RewardScheme::LOTTERY
-		prize = (reward["prizes"].select { |p| p["win"] == true }).first
-		return ErrorEnum::NOT_WIN if prize.nil?
+		return ErrorEnum::NOT_WIN if reward["win"] != true
 
 		# create lottery order
 		order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
-		order = Order.create_lottery_order(self.user._id.to_s,
+		order = Order.create_lottery_order(self.id,self.user.try(:_id),
 			self.survey._id.to_s,
-			prize["prize_id"],
+			reward["prize_id"],
+			self.ip_address,
 			order_info)
 		self.order = order
 		return true
@@ -1158,6 +1184,7 @@ class Answer
 		answer_obj["survey_title"] = self.survey.title
 		answer_obj["is_preview"] = self.is_preview
 		answer_obj["rewards"] = self.rewards
+		answer_obj["sample_id"] = self.user.nil? ? nil : self.user._id.to_s
 		return answer_obj
 	end
 
