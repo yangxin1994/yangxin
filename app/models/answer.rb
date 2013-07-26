@@ -991,10 +991,9 @@ class Answer
 		when RewardScheme::MOBILE
 			return ErrorEnum::REPEAT_ORDER if self.check_repeat_mobile(reward["mobile"])
 			if self.order.nil?
-				sample = self.user || User.find_or_create_new_visitor_by_email_mobile(reward["mobile"])
 				order_info = { "mobile" => reward["mobile"] }
 				order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
-				self.order = Order.create_answer_order(sample._id.to_s,
+				self.order = Order.create_answer_order(self.user.try(:_id),
 					self.survey._id.to_s,
 					Order::SMALL_MOBILE_CHARGE,
 					reward["amount"],
@@ -1011,10 +1010,9 @@ class Answer
 		when RewardScheme::ALIPAY
 			return ErrorEnum::REPEAT_ORDER if self.check_repeat_alipay(reward["alipay_account"])
 			if self.order.nil?
-				sample = self.user || User.find_or_create_new_visitor_by_email_mobile(reward["alipay_account"])
 				order_info = { "alipay_account" => reward["alipay_account"] }
 				order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
-				self.order = Order.create_answer_order(sample._id.to_s,
+				self.order = Order.create_answer_order(self.user.try(:_id),
 					self.survey._id.to_s,
 					Order::ALIPAY,
 					reward["amount"],
@@ -1031,10 +1029,9 @@ class Answer
 		when RewardScheme::JIFENBAO
 			return ErrorEnum::REPEAT_ORDER if self.check_repeat_jifenbao(reward["alipay_account"])
 			if self.order.nil?
-				sample = self.user || User.find_or_create_new_visitor_by_email_mobile(reward["alipay_account"])
 				order_info = { "alipay_account" => reward["alipay_account"] }
 				order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
-				self.order = Order.create_answer_order(sample._id.to_s,
+				self.order = Order.create_answer_order(self.user.try(:_id),
 					self.survey._id.to_s,
 					Order::JIFENBAO,
 					reward["amount"],
@@ -1052,7 +1049,7 @@ class Answer
 			return ErrorEnum::SAMPLE_NOT_EXIST if self.user.nil?
 			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
 			sample = self.user
-			sample.point += reward["amount"]
+			sample.point += reward["amount"] unless sample.nil?
 			assign_introducer_reward
 			self.update_attributes({"reward_delivered" => true})
 		when RewardScheme::LOTTERY
