@@ -1079,6 +1079,8 @@ class Answer
 	end
 
 	def bind_sample(sample)
+		answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id.to_s, sample._id.to_s, false)
+		return ErrorEnum::ANSWER_EXIST if !answer.nil?
 		sample.answers << self
 		return true
 	end
