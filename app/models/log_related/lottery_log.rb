@@ -7,6 +7,7 @@ class LotteryLog < Log
 	field :prize_id, :type => String
 	field :prize_name, :type => String
 	field :survey_id, :type => String
+	field :answer_id, :type => String
 	field :survey_title, :type => String
 	field :land, :type => String #归属地
 
@@ -30,10 +31,18 @@ class LotteryLog < Log
 		return data
 	end
 
-	def self.create_fail_lottery_log(survey_id,survey_title,user_id,ip_address)
+	def self.create_fail_lottery_log(answer_id,survey_id,survey_title,user_id,ip_address)
 		address_code = QuillCommon::AddressUtility.find_address_code_by_ip(ip_address)
 		land = QuillCommon::AddressUtility.find_province_city_town_by_code(address_code)
-		self.create(:survey_id =>survey_id,:survey_title => survey_title,:user_id => user_id,:land => land)
+		self.create(:answer_id => answer_id,:survey_id =>survey_id,:survey_title => survey_title,:user_id => user_id,:land => land)
+	end
+
+	def self.create_succ_lottery_Log(answer_id,order_id,survey_id,user_id,ip_address,prize_id)
+		prize_name 	= Prize.find_by_id(prize_id).try(:title)
+		survey_title = Survey.find_by_id(survey_id).try(:title)
+		address_code = QuillCommon::AddressUtility.find_address_code_by_ip(ip_address)
+		land = QuillCommon::AddressUtility.find_province_city_town_by_code(address_code)		
+		self.create(:answer_id => answer_id,:order_id => order_id,:prize_id => prize_id,:prize_name => prize_name,:survey_id =>survey_id,:survey_title => survey_title,:user_id => user_id,:land => land,:result => true)
 	end
 
 	def self.get_lottery_counts(survey_id)

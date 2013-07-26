@@ -105,18 +105,15 @@ class Order
 		return order
 	end
 
-	def self.create_lottery_order(sample_id, survey_id, prize_id, opt = {})
-		Rails.logger.info("-------------------------")
-		Rails.logger.info(opt.inspect)
-		Rails.logger.info("-------------------------")
+	def self.create_lottery_order(answer_id,sample_id, survey_id, prize_id,ip_address, opt = {})
+
 		sample = User.sample.find_by_id(sample_id)
-		return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		prize = Prize.find_by_id(prize_id)
-		return ErrorEnum::PRIZE_NOT_EXIST if prize.nl?
+		return ErrorEnum::PRIZE_NOT_EXIST if prize.nil?
 		order = Order.new(:source => WIN_IN_LOTTERY)
-		order.sample = sample
+		order.sample = sample unless sample.present?
 		order.survey = survey
 		order.prize = prize
 		case prize.type
@@ -130,7 +127,7 @@ class Order
 			order.qq = opt["qq"]
 		when Prize::VIRTUAL
 		when Prize::REAL
-			order.user_name = opt["receiver"]
+			order.receiver = opt["receiver"]
 			order.address = opt["address"]
 			order.postcode = opt["postcode"]
 			order.mobile = opt["mobile"]
@@ -138,17 +135,17 @@ class Order
 		end
 		order.status = FROZEN if opt["status"] == FROZEN
 		order.save
-		order.auto_handle
+		order.auto_handle	   
+		LotteryLog.create_succ_lottery_Log(answer_id,order.id,survey_id,sample_id,ip_address,prize_id)
 		return order
 	end
 
 	def self.create_answer_order(sample_id, survey_id, type, amount, opt = {})
 		sample = User.sample.find_by_id(sample_id)
-		return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		order = Order.create(:source => ANSWER_SURVEY, :amount => amount, :type => type)
-		order.sample = sample
+		order.sample = sample unless sample.present?
 		order.survey = survey
 		case type
 		when SMALL_MOBILE_CHARGE

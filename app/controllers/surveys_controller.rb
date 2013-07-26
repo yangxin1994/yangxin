@@ -229,20 +229,6 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	#*method*: put
-	#
-	#*url*: /surveys/:survey_id/add_tag
-	#
-	#*description*: add a tag to a survey
-	#
-	#*params*:
-	#* survey_id: id of the survey
-	#* tag: tag to be added
-	#
-	#*retval*:
-	#* the survey object
-	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
-	#* ErrorEnum ::TAG_EXIST : when the survey already has the tag
 	def add_tag
 		retval = @survey.add_tag(params[:tag])
 		respond_to do |format|
@@ -250,21 +236,6 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	#*method*: put
-	#
-	#*url*: /surveys/:survey_id/remove_tag
-	#
-	#*description*: remove a tag from a survey
-	#
-	#*params*:
-	#* survey_id: id of the survey
-	#* tags: tag to be removed
-	#
-	#*retval*:
-	#* the survey object
-	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
-	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
-	#* ErrorEnum ::TAG_NOT_EXIST : when the survey does not have the tag
 	def remove_tag
 		retval = @survey.remove_tag(params[:tag])
 		respond_to do |format|
@@ -348,15 +319,6 @@ class SurveysController < ApplicationController
 			format.json	{ render_json_auto(survey.nil? ? ErrorEnum::SURVEY_NOT_EXIST : survey.estimate_answer_time) and return }
 		end
 	end
-
-=begin
-	def reward_info
-		survey = Survey.normal.find_by_id(params[:id])
-		respond_to do |format|
-			format.json	{ render_json_auto(survey.nil? ? ErrorEnum::SURVEY_NOT_EXIST : survey.reward_info) and return }
-		end
-	end
-=end
 
 	def search_title
 		surveys = @current_user.surveys.search_title(params[:query])

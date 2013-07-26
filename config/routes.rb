@@ -475,6 +475,8 @@ OopsData::Application.routes.draw do
 				put :unbind
 				put :set_share
 				put :set_subscribe
+				put :send_change_email
+				put :send_change_sms
 			end	
 		end	
 		resources :surveys do

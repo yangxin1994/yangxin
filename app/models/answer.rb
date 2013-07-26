@@ -1096,12 +1096,11 @@ class Answer
 		return false
 	end
 
-	def bind_sample(email_mobile)
-		sample = User.find_or_create_new_visitor_by_email_mobile(email_mobile)
-		answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id, sample._id, false)
+	def bind_sample(sample)
+		answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id.to_s, sample._id.to_s, false)
 		return ErrorEnum::ANSWER_EXIST if !answer.nil?
 		sample.answers << self
-		return self.deliver_reward
+		return true
 	end
 
 	def draw_lottery(user_id)
@@ -1135,7 +1134,7 @@ class Answer
 		reward["win"] = false
 		self.reward_delivered = true
 		self.save
-		LotteryLog.create_fail_lottery_log(self.survey.id,self.survey.title,user_id,self.ip_address) if user_id.present?
+		LotteryLog.create_fail_lottery_log(self.id,self.survey.id,self.survey.title,user_id,self.ip_address) if user_id.present?
 		return {"result" => false}
 	end
 
@@ -1147,14 +1146,14 @@ class Answer
 		reward = (self.rewards.select { |r| r["checked"] == true }).first
 		return ErrorEnum::REWORD_NOT_SELECTED if reward.nil?
 		return ErrorEnum::NOT_LOTTERY_REWARD if reward["type"] != RewardScheme::LOTTERY
-		prize = (reward["prizes"].select { |p| p["win"] == true }).first
-		return ErrorEnum::NOT_WIN if prize.nil?
+		return ErrorEnum::NOT_WIN if reward["win"] != true
 
 		# create lottery order
 		order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
-		order = Order.create_lottery_order(self.user._id.to_s,
+		order = Order.create_lottery_order(self.id,self.user.try(:_id),
 			self.survey._id.to_s,
-			prize["prize_id"],
+			reward["prize_id"],
+			self.ip_address,
 			order_info)
 		self.order = order
 		return true
@@ -1166,6 +1165,7 @@ class Answer
 		answer_obj["survey_title"] = self.survey.title
 		answer_obj["is_preview"] = self.is_preview
 		answer_obj["rewards"] = self.rewards
+		answer_obj["sample_id"] = self.user.nil? ? nil : self.user._id.to_s
 		return answer_obj
 	end
 

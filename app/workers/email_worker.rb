@@ -18,6 +18,8 @@ class EmailWorker
 			MailgunApi.lottery_code_email(user, opt["survey_id"], opt["lottery_code_id"], callback)    	
 		when 'rss_subscribe'
 			MailgunApi.rss_subscribe_email(user, callback)    	
+		when 'change_email'
+			MailgunApi.activate_email(user, callback)
 		end
 		return true
 	end

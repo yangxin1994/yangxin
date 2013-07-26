@@ -146,7 +146,9 @@ class Sample::AnswersController < ApplicationController
 	end
 
 	def bind_sample
-		render_json_auto @answer.bind_sample(params[:email_mobile]) and return
+		sample = User.find_by_auth_key(params[:auth_key])
+		render_json_e ErrorEnum::ANSWER_BOUND and return if !@answer.user.nil?
+		render_json_auto @answer.bind_sample(sample) and return
 	end
 
 	def draw_lottery
