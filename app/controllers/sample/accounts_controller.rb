@@ -44,7 +44,7 @@ class Sample::AccountsController < ApplicationController
 
 	def set_receiver_info
 		retval = @current_user.set_receiver_info(params[:receiver_info])
-		render_json_auto(retval) and return     
+		render_json_auto(retval) and return
 	end
 
 	def reset_password
@@ -133,15 +133,17 @@ class Sample::AccountsController < ApplicationController
 			render_json_e(ErrorEnum::ILLEGAL_ACTIVATE_KEY) and return
 		end
 		render_json_e ErrorEnum::EMAIL_NOT_EXIST and return if @current_user.email_to_be_changed != activate_info["email"]
+		render_json_e ErrorEnum::ACTIVATE_EXPIRED if @current_user.change_email_expiration_time < Time.now.to_i
+		@current_user.email = @current_user.email_to_be_changed
+		render_json_auto @current_user.save and return
 	end
 
 	def change_mobile
 		render_json_e ErrorEnum::MOBILE_NOT_EXIST and return if @current_user.mobile_to_be_changed != params[:mobile]
-		if @current_user.sms_verification_code == params[:verification_code]
-			@current_user.mobile = @current_user.mobile_to_be_changed
-			render_json_e @current_user.save and return
-		else
-			render_json_e ErrorEnum::ILLEGAL_ACTIVATE_KEY and return
+		render_json_e ErrorEnum::ILLEGAL_ACTIVATE_KEY and return if @current_user.sms_verification_code != params[:verification_code]
+		render_json_e ErrorEnum::ACTIVATE_EXPIRED if @current_user.change_mobile_expiration_time < Time.now.to_i
+		@current_user.mobile = @current_user.mobile_to_be_changed
+		render_json_e @current_user.save and return
 		end
 	end
 end

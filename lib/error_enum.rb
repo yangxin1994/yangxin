@@ -10,6 +10,8 @@ module ErrorEnum
 	REWARD_NOT_SELECTED = "error__7"
 	AGENT_NOT_EXIST = "error__8"
 	MOBILE_NOT_EXIST = "error_9"
+	
+	ANSWER_BOUND = "error_11"
 
 
 	REWARD_SCHEME_NOT_EXIST = 'error___0'  ##TODO ErrorEnum has not rule yet

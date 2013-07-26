@@ -1078,12 +1078,9 @@ class Answer
 		return false
 	end
 
-	def bind_sample(email_mobile)
-		sample = User.find_or_create_new_visitor_by_email_mobile(email_mobile)
-		answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id, sample._id, false)
-		return ErrorEnum::ANSWER_EXIST if !answer.nil?
+	def bind_sample(sample)
 		sample.answers << self
-		return self.deliver_reward
+		return true
 	end
 
 	def draw_lottery
