@@ -16,6 +16,8 @@ class EmailWorker
 			MailgunApi.sys_password_email(user, callback)
 		when 'lottery_code'
 			MailgunApi.lottery_code_email(user, opt["survey_id"], opt["lottery_code_id"], callback)    	
+		when 'change_email'
+			MailgunApi.activate_email(user, callback)
 		end
 		return true
 	end
