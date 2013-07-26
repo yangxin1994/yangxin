@@ -1050,6 +1050,8 @@ class Answer
 			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
 			sample = self.user
 			sample.point += reward["amount"] unless sample.nil?
+			sample.save
+			PointLog.create(:amount => reward["amount"], :reason => PointLog::ANSWER, :survey_id => self.survey._id.to_s, :survey_title => self.survey.title)
 			assign_introducer_reward
 			self.update_attributes({"reward_delivered" => true})
 		when RewardScheme::LOTTERY
@@ -1098,6 +1100,25 @@ class Answer
 		return ErrorEnum::ANSWER_EXIST if !answer.nil?
 		sample.answers << self
 		# handle rewards
+		reward = nil
+		self.rewards.each do |r|
+			reward = r and break if r["checked"] == true
+		end
+		return true if reward.nil?
+		case reward["type"].to_i
+		when RewardScheme::MOBILE
+			sample.orders << self.order unless self.order.nil
+		when RewardScheme::ALIPAY
+			sample.orders << self.order unless self.order.nil
+		when RewardScheme::JIFENBAO
+			sample.orders << self.order unless self.order.nil
+		when RewardScheme::LOTTERY
+			sample.orders << self.order unless self.order.nil
+		when RewardScheme::POINT
+			sample.point += reward["amount"]
+			sample.save
+			PointLog.create(:amount => reward["amount"], :reason => PointLog::ANSWER, :survey_id => self.survey._id.to_s, :survey_title => self.survey.title)
+		end
 		return true
 	end
 
