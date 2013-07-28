@@ -8,7 +8,7 @@ class Sample::PrizesController < ApplicationController
 	end
 
 	def show
-		@prize = Prize.find_by_id(:id)
+		@prize = Prize.find_by_id(params[:id])
 		render_json_e ErrorEnum::PRIZE_NOT_EXIST and return if @prize.nil?
 		render_json_auto @prize and return
 	end
