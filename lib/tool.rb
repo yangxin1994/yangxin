@@ -7,11 +7,11 @@ require 'quill_common'
 module Tool
 
 	def self.generate_active_mobile_code
-	  Random.rand(100000..999999).to_i	
+		Random.rand(100000..999999).to_i	
 	end
 
 	def self.generate_active_email_token
-	  SecureRandom.base64.tr("+/", "-_")	
+		SecureRandom.base64.tr("+/", "-_")	
 	end
 
 	def self.email_illegal?(email)
@@ -149,5 +149,36 @@ module Tool
 			digit *= 2
 		end
 		return base_arr
+	end
+
+	def self.time_string(seconds)
+		if seconds < 60
+			return "刚刚"
+		elsif seconds < 3600
+			return "#{seconds/60}分钟前"
+		elsif seconds < 3600 * 24
+			return "#{seconds/3600}小时前"
+		else
+			return "#{seconds/3600/24}天前"
+		end
+	end
+
+	def self.get_avatar(user_id, version="thumb")
+		return "/assets/avatar/#{version}_default.png" if user_id.nil?
+		md5 = Digest::MD5.hexdigest(user_id)
+		return "/uploads/avatar/#{version}_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/#{md5}.png")
+		return "/assets/avatar/#{version}_default.png"
+	end
+
+	def self.thumb_avatar(user_id)
+		get_avatar(user_id)
+	end
+
+	def self.small_avatar(user_id)
+		get_avatar(user_id, 'small')
+	end
+
+	def self.mini_avatar(user_id)
+		get_avatar(user_id, 'mini')
 	end
 end

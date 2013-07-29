@@ -52,12 +52,14 @@ class EmailInvitationWorker
 		# 4. transform data
 		samples_for_surveys = {}
 		surveys_for_sample.each do |u_id, s_id_ary|
-			samples_for_surveys[s_id_ary] ||= []
-			samples_for_surveys[s_id_ary] << u_id
+			s_id_ary.each do |s_id|
+				samples_for_surveys[s_id] ||= []
+				samples_for_surveys[s_id] << u_id
+			end
 		end
 		# 5. send emails to the samples found
-		samples_for_surveys.each do |s_id_ary, sample_id_ary|
-			MailgunApi.batch_send_survey_email(s_id_ary, sample_id_ary, [])
+		samples_for_surveys.each do |s_id, sample_id_ary|
+			MailgunApi.batch_send_survey_email(s_id, sample_id_ary)
 		end
 		return true
 	end

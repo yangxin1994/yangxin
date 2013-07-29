@@ -999,7 +999,7 @@ class Answer
 					Order::SMALL_MOBILE_CHARGE,
 					reward["amount"],
 					order_info)
-				return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
+				return true if self.status == UNDER_REVIEW
 				assign_introducer_reward
 				self.update_attributes({"reward_delivered" => true})
 			elsif self.order.status == Order::FROZEN
@@ -1018,7 +1018,7 @@ class Answer
 					Order::ALIPAY,
 					reward["amount"],
 					order_info)
-				return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
+				return true if self.status == UNDER_REVIEW
 				assign_introducer_reward
 				self.update_attributes({"reward_delivered" => true})
 			elsif self.order.status == Order::FROZEN
@@ -1037,7 +1037,7 @@ class Answer
 					Order::JIFENBAO,
 					reward["amount"],
 					order_info)
-				return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
+				return true if self.status == UNDER_REVIEW
 				assign_introducer_reward
 				self.update_attributes({"reward_delivered" => true})
 			else
@@ -1047,7 +1047,7 @@ class Answer
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::POINT
-			return ErrorEnum::ANSWER_NEED_REVIEW if self.status == UNDER_REVIEW
+			return true if self.status == UNDER_REVIEW
 			sample = self.user
 			sample.point += reward["amount"] unless sample.nil?
 			sample.save

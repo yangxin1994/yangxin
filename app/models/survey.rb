@@ -1938,4 +1938,9 @@ class Survey
 		r = RewardScheme.create(:name => "默认奖励方案", :rewards => [], :need_review => false)
 		self.reward_schemes << r
 	end
+
+	def remain_quota_number
+		# todo: calculate remainning quota number
+		return 100
+	end
 end

@@ -13,10 +13,11 @@ module ErrorEnum
 	WRONG_ORDER_STATUS = "error__6"
 	REWARD_NOT_SELECTED = "error__7"
 	AGENT_NOT_EXIST = "error__8"
-	MOBILE_NOT_EXIST = "error_9"
+	MOBILE_NOT_EXIST = "error__9"
 
 	
-	ANSWER_BOUND = "error_11"
+	ANSWER_BOUND = "error__11"
+	REPEAT_ORDER = "error__12"
 
 
 	REWARD_SCHEME_NOT_EXIST = 'error___0'  ##TODO ErrorEnum has not rule yet

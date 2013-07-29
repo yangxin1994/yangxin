@@ -43,7 +43,9 @@ class Sample::AnswersController < ApplicationController
 			if @answer.is_finish
 				retval = {"answer_status" => @answer.status,
 					"answer_reject_type" => @answer.reject_type,
-					"answer_audit_message" => @answer.audit_message}
+					"answer_audit_message" => @answer.audit_message,
+					"order_id" => @answer.order.try(:id),
+					"order_status" => @answer.order.try(:status)}
 				render_json_auto(retval) and return
 			else
 				answers = @answer.answer_content.merge(@answer.random_quality_control_answer_content)
@@ -54,13 +56,17 @@ class Sample::AnswersController < ApplicationController
 					"question_number" => @answer.survey.all_questions_id(false).length + @answer.random_quality_control_answer_content.length,
 					"answer_index" => @answer.index_of(questions),
 					"estimate_answer_time" => questions.estimate_answer_time,
-					"repeat_time" => @answer.repeat_time}
+					"repeat_time" => @answer.repeat_time,
+					"order_id" => @answer.order.try(:_id),
+					"order_status" => @answer.order.try(:status)}
 				render_json_auto(retval) and return
 			end
 		else
 			retval = {"answer_status" => @answer.status,
 				"answer_reject_type" => @answer.reject_type,
-				"answer_audit_message" => @answer.audit_message}
+				"answer_audit_message" => @answer.audit_message,
+				"order_id" => @answer.order.try(:_id),
+				"order_status" => @answer.order.try(:status)}
 			render_json_auto(retval) and return
 		end
 	end
