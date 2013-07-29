@@ -41,7 +41,7 @@ class RewardScheme
 	def self.verify_reward_scheme_type(reward_scheme)
 		retval = true
 		reward_scheme["rewards"].each do |reward|
-			reward["type"] = ([1, 2, 4, 8].include?(reward["type"].to_i) ? reward["type"] : 4)   ##Verify type
+			reward["type"] = ([1, 2, 4, 8, 16].include?(reward["type"].to_i) ? reward["type"] : 4)   ##Verify type
 		end
 		reward_scheme["need_review"] = false if !(reward_scheme["need_review"].to_s == "true")
 		return retval
