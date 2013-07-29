@@ -1,5 +1,5 @@
 class Admin::SampleAttributesController < Admin::ApplicationController
-	before_filter :check_sample_attribute_existence, :only => [:update, :destroy, :bind_question]
+	before_filter :check_sample_attribute_existence, :only => [:show, :update, :destroy, :bind_question]
 
 	def check_sample_attribute_existence
 		@sample_attribute = SampleAttribute.normal.find_by_id(params[:id])
@@ -11,6 +11,10 @@ class Admin::SampleAttributesController < Admin::ApplicationController
 	def index
 		@sample_attributes = SampleAttribute.search(params[:name])
 		render_json_auto (auto_paginate(@sample_attributes)) and return
+	end
+
+	def show
+		render_json_auto @sample_attribute and return
 	end
 
 	def create
