@@ -36,9 +36,31 @@ class MigrateDb
 			s.email_promote_info = { "email_amount" => 0,
 				"promote_to_undefined_sample" => false,
 				"promote_email_count" => s.email_histories.length,
-				"reward_scheme_id" => reward_scheme._id.to_s }
+				"reward_scheme_id" => "" }
 
+			# the sms promote related
+			s.sms_promotable = false
+			s.sms_promote_info = { "sms_amount" => 0,
+				"promote_to_undefined_sample" => false,
+				"promote_sms_count" => 0,
+				"reward_scheme_id" => "" }
 
+			# the browser promote related
+			s.broswer_extension_promotable = false
+			s.broswer_extension_promote_info = { "login_sample_promote_only" => false,
+				"filter" => [[{"key_word" => [""], "url" => ""}]],
+				"reward_scheme_id" => "" }
+
+			# the weibo promote related
+			s.weibo_promotable = false
+			s.weibo_promote_info = { "text" => "",
+				"image" => "",
+				"video" => "",
+				"audio" => "","reward_scheme_id" => "" }
+
+			s.sample_attributes_for_promote = []
+
+			s.save
 		end
 	end
 end

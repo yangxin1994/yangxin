@@ -36,6 +36,7 @@ class Sample::AnswersController < ApplicationController
 	end
 
 	def load_question
+		render_json_e ErrorEnum::REQUIRE_LOGIN if @answer.user.present && @answer.user != @current_user
 		@answer.update_status	# check whether it is time out
 		if @answer.is_edit
 			questions = @answer.load_question(params[:question_id], params[:next_page].to_s == "true")
