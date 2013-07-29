@@ -72,24 +72,6 @@ class MailgunApi
 					:avatar_url => Rails.application.config.quillme_host + Tool.mini_avatar(lottery_log.user.try(:_id))}
 			end
 		end
-=begin
-		@presents = []	
-		# push a lottery
-		lottery = Lottery.quillme.first
-		@presents << {:title => lottery.title,
-			:url => "#{Rails.application.config.quillme_host}/lotteries/#{lottery._id.to_s}",
-			:img_url => Rails.application.config.quillme_host + lottery.photo_url} if !lottery.nil?
-		# push a real gift
-		real_gift = BasicGift.where(:type => 1, :status => 1).first
-		@presents << {:title => real_gift.name,
-			:url => "#{Rails.application.config.quillme_host}/gifts/#{real_gift._id.to_s}",
-			:img_url => Rails.application.config.quillme_host + real_gift.photo.picture_url} if !real_gift.nil?
-		# push a cash gift
-		cash_gift = BasicGift.where(:type => 0, :status => 1).first
-		@presents << {:title => cash_gift.name,
-			:url => "#{Rails.application.config.quillme_host}/gifts/#{cash_gift._id.to_s}",
-			:img_url => Rails.application.config.quillme_host + cash_gift.photo.picture_url} if !cash_gift.nil?
-=end
 
 		data = {}
 		data[:domain] = Rails.application.config.survey_email_domain
