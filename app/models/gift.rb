@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'tool'
 require 'error_enum'
 class Gift
