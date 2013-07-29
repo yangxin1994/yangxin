@@ -18,7 +18,7 @@ module ErrorEnum
 	
 	ANSWER_BOUND = "error__11"
 	REPEAT_ORDER = "error__12"
-
+	ANSWER_EXIST = "error__13"
 
 	REWARD_SCHEME_NOT_EXIST = 'error___0'  ##TODO ErrorEnum has not rule yet
 	ORDER_TYPE_ERROR = 'error___1'
