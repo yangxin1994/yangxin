@@ -23,7 +23,7 @@ class EmailInvitationWorker
 				current_sample = User.sample.find_by_id(e)
 				survey.sample_attribtes_for_promote.each do |sample_attribute|
 					v = current_sample.read_sample_attribute_by_id(sample_attribute["sample_attribute_by_id"])
-					match = Tool.check_sample_attribute(v, sample_attribute["value"])
+					match = Tool.check_sample_attribute(sample_attribute._id.to_s, v, sample_attribute["value"])
 					next if match == false
 					if match == true
 						sample_ids_selected << e

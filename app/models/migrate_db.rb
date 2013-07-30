@@ -63,4 +63,12 @@ class MigrateDb
 			s.save
 		end
 	end
+
+	def self.migrate_answer
+		
+	end
+
+	def self.migrate_user
+		
+	end
 end

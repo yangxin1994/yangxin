@@ -20,6 +20,8 @@ module ErrorEnum
 	REPEAT_ORDER = "error__12"
 	ANSWER_EXIST = "error__13"
 
+	HOT_SURVEY = "error_15"
+
 	REWARD_SCHEME_NOT_EXIST = 'error___0'  ##TODO ErrorEnum has not rule yet
 	ORDER_TYPE_ERROR = 'error___1'
 	ILLEGAL_EMAIL_OR_MOBILE = 'error___2'

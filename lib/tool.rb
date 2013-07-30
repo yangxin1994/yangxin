@@ -181,4 +181,20 @@ module Tool
 	def self.mini_avatar(user_id)
 		get_avatar(user_id, 'mini')
 	end
+
+	# check whenre value satisfies standard value
+	def self.check_sample_attribute(sample_attribute_id, value, standard_value)
+		sample_attribute = SampleAttribute.find_by_id(sample_attribute_id)
+		return false if sample_attribute.nil?
+		case sample_attribute.type
+		when DataType::STRING
+		when DataType::ENUM
+		when DataType::NUMBER
+		when DataType::DATE
+		when DataType::NUMBER_RANGE
+		when DataType::DATE_RANGE
+		when DataType::ADDRESS
+		when DataType::ARRAY
+		end
+	end
 end

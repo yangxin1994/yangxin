@@ -74,8 +74,6 @@ class Survey
 	field :sms_promotable, :type => Boolean, default: false
 	field :broswer_extension_promotable, :type => Boolean, default: false
 	field :weibo_promotable, :type => Boolean, default: false
-
-	field :quillme_hot, :type => Boolean, :default => false #是否为热点小调查(quillme用)
 	field :quillme_promote_info, :type => Hash, :default => {
 		"reward_scheme_id" => ""
 	}

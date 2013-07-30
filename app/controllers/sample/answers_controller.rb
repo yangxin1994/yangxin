@@ -149,7 +149,7 @@ class Sample::AnswersController < ApplicationController
 	end
 
 	def select_reward
-		render_json_auto @answer.select_reward(params[:reward_index], params[:mobile], params[:alipay_account]) and return
+		render_json_auto @answer.select_reward(params[:reward_index], params[:mobile], params[:alipay_account], @current_user) and return
 	end
 
 	def bind_sample

@@ -960,7 +960,8 @@ class Answer
 		self.user.answers.delete(self) if !self.user.nil?
 	end
 
-	def select_reward(reward_index, mobile, alipay_account)
+	def select_reward(reward_index, mobile, alipay_account, current_sample)
+		return ErrorEnum::HOT_SURVEY if self.check_for_hot_survey(mobile, alipay_account, current_sample)
 		# select reward
 		reward = self.rewards[reward_index]
 		return ErrorEnum::REWARD_NOT_EXIST if reward.nil?
@@ -978,6 +979,18 @@ class Answer
 		return self.deliver_reward
 	end
 
+	def check_for_hot_survey(mobile, alipay_account, current_sample)
+		return true if self.survey.quillme_hot == true
+		if self.user.nil?
+			return true if self.user.answers.not_preview.length > 0
+		else
+			return true if current_sample.answers.not_preview.length > 0
+		end
+		sample = User.sample.find_by_email_mobile(mobile) || User.sample.find_by_email_mobile(alipay_account)
+		return true if sample.answers && sample.answers.not_preview.length > 0
+		return false
+	end
+
 	def deliver_reward
 		# reward has been delivered
 		return true if self.reward_delivered
@@ -990,7 +1003,7 @@ class Answer
 		
 		case reward["type"].to_i
 		when RewardScheme::MOBILE
-			return ErrorEnum::REPEAT_ORDER if self.check_repeat_mobile(reward["mobile"])
+			return ErrorEnum::REPEAT_ORDER if self.check_repeat_order(reward["mobile"])
 			if self.order.nil?
 				order_info = { "mobile" => reward["mobile"] }
 				order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
@@ -1009,7 +1022,7 @@ class Answer
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::ALIPAY
-			return ErrorEnum::REPEAT_ORDER if self.check_repeat_alipay(reward["alipay_account"])
+			return ErrorEnum::REPEAT_ORDER if self.check_repeat_order(reward["alipay_account"])
 			if self.order.nil?
 				order_info = { "alipay_account" => reward["alipay_account"] }
 				order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
@@ -1028,7 +1041,7 @@ class Answer
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::JIFENBAO
-			return ErrorEnum::REPEAT_ORDER if self.check_repeat_jifenbao(reward["alipay_account"])
+			return ErrorEnum::REPEAT_ORDER if self.check_repeat_order(reward["alipay_account"])
 			if self.order.nil?
 				order_info = { "alipay_account" => reward["alipay_account"] }
 				order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
@@ -1065,32 +1078,12 @@ class Answer
 		return true
 	end
 
-	def check_repeat_mobile(mobile)
+	def check_repeat_order(account)
 		self.survey.answers.each do |a|
 			next if a._id.to_s == self._id.to_s
 			selected_reward = a.rewards.select { |r| r["checked"] == true }
 			next if selected_reward.blank?
-			return true if selected_reward[0]["type"] == RewardScheme::MOBILE && selected_reward[0]["mobile"] == mobile
-		end
-		return false
-	end
-
-	def check_repeat_alipay(alipay_account)
-		self.survey.answers.each do |a|
-			next if a._id.to_s == self._id.to_s
-			selected_reward = a.rewards.select { |r| r["checked"] == true }
-			next if selected_reward.blank?
-			return true if selected_reward[0]["type"] == RewardScheme::ALIPAY && selected_reward[0]["alipay_account"] == alipay_account
-		end
-		return false
-	end
-
-	def check_repeat_jifenbao(alipay_account)
-		self.survey.answers.each do |a|
-			next if a._id.to_s == self._id.to_s
-			selected_reward = a.rewards.select { |r| r["checked"] == true }
-			next if selected_reward.blank?
-			return true if selected_reward[0]["type"] == RewardScheme::JIFENBAO && selected_reward[0]["alipay_account"] == alipay_account
+			return true if selected_reward[0]["mobile"] == account && selected_reward[0]["alipay_account"] == account
 		end
 		return false
 	end
