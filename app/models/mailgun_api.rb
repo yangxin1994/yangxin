@@ -3,8 +3,8 @@ class MailgunApi
 
 	@@test_email = "test@oopsdata.com"
 
-	@@survey_email_from = "\"优数调研\" <postmaster@oopsdata.net>"
-	@@user_email_from = "\"优数调研\" <postmaster@oopsdata.cn>"
+	@@survey_email_from = "\"问卷吧\" <postmaster@wenjuanba.net>"
+	@@user_email_from = "\"问卷吧\" <postmaster@wenjuanba.cn>"
 
 	def self.batch_send_survey_email(survey_id, user_id_ary)
 		@emails = user_id_ary.map { |e| User.find_by_id(e).try(:email) }
@@ -110,7 +110,7 @@ class MailgunApi
 		data[:html] = premailer.to_inline_css
 		data[:text] = text_template.result(binding)
 
-		data[:subject] = "欢迎注册优数调研"
+		data[:subject] = "欢迎注册问卷吧"
 		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
 		data[:to] = Rails.env == "production" ? user.email : @@test_email
 		self.send_message(data)
@@ -223,7 +223,7 @@ class MailgunApi
 		data[:html] = premailer.to_inline_css
 		data[:text] = text_template.result(binding)
 
-		data[:subject] = "欢迎订阅优数调研"
+		data[:subject] = "欢迎订阅问卷吧"
 		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
 		#data[:to] = Rails.env == "production" ? user.email : @@test_email
 		data[:to] = Rails.env == "production" ? user.email : user.email
