@@ -134,7 +134,9 @@ OopsData::Application.routes.draw do
 						'quillme_promote', 'email_promote', 'sms_promote', 'broswer_extension_promote', "weibo_promote"
 				get 'get_sent_email_number', 'promote'
 				put :quillme_hot, :allocate_answer_auditors, :set_result_visible, :set_spread
-				put :add_sample_attribute_for_promote, :remove_sample_attribute_for_promote
+				get :list_sample_attributes_for_promote
+				post :add_sample_attribute_for_promote
+				delete :remove_sample_attribute_for_promote
 				get :get_spread, :get_result_visible
 			end
 			resources :reward_schemes, :except => [:new, :edit, :destroy]
