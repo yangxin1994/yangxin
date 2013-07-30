@@ -332,7 +332,6 @@ OopsData::Application.routes.draw do
 			get 'update_deadline'
 
 			get 'show_quality_control'
-			get 'estimate_answer_time'
 			put 'update_deadline'
 			post 'update_star'
 			get 'reward_info'
@@ -488,6 +487,9 @@ OopsData::Application.routes.draw do
 				get :list_answered_surveys,:as => :list_answered_surveys
 				get :list_spreaded_surveys,:as => :list_spreaded_surveys
 				get :get_reward_type_count,:as => :get_reward_type_count
+			end
+			member do
+				get :estimate_answer_time, :as => :estimate_answer_time
 			end
 		end		
 		resources :public_notices do

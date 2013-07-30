@@ -1107,13 +1107,13 @@ class Answer
 		return true if reward.nil?
 		case reward["type"].to_i
 		when RewardScheme::MOBILE
-			sample.orders << self.order unless self.order.nil
+			sample.orders << self.order unless self.order.nil?
 		when RewardScheme::ALIPAY
-			sample.orders << self.order unless self.order.nil
+			sample.orders << self.order unless self.order.nil?
 		when RewardScheme::JIFENBAO
-			sample.orders << self.order unless self.order.nil
+			sample.orders << self.order unless self.order.nil?
 		when RewardScheme::LOTTERY
-			sample.orders << self.order unless self.order.nil
+			sample.orders << self.order unless self.order.nil?
 		when RewardScheme::POINT
 			sample.point += reward["amount"]
 			sample.save
