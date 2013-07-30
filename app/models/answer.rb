@@ -43,7 +43,6 @@ class Answer
 	field :rewards, :type => Array, :default => []
 	field :introducer_reward_assigned, :type => Boolean, default: false
 	field :reward_delivered, :type => Boolean, default: false
-	field :need_review, :type => Boolean
 
 	# used for interviewer to upload attachments
 	field :attachment, :type => Hash, :default => {}

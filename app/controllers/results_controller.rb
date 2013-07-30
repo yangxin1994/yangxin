@@ -1,7 +1,8 @@
 class ResultsController < ApplicationController
-	before_filter :require_sign_in
+	before_filter :require_sign_in, :only => [:to_excel, :to_spss]
 	before_filter :check_normal_survey_existence, :only => [:analysis, :to_spss, :to_excel, :report]
 	before_filter :check_analysis_result_existence, :only => [:to_spss, :to_excel, :report]
+	before_filter :check_authority, :except => [:to_excel, :to_spss]
 
 	def check_normal_survey_existence
 		@survey = (@current_user.is_admin || @current_user.is_super_admin) ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
@@ -15,6 +16,10 @@ class ResultsController < ApplicationController
 	def check_analysis_result_existence
 		data_list = AnalysisResult.get_data_list(params[:analysis_task_id])
 		render_json_e(ErrorEnum::RESULT_NOT_EXIST) and return if data_list == ErrorEnum::RESULT_NOT_EXIST
+	end
+
+	def check_authority
+		require_sign_in if !@survey.publish_result
 	end
 
 	def analysis

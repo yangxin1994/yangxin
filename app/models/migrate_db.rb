@@ -7,7 +7,6 @@ class MigrateDb
 	end
 
 	def self.migrate_survey
-		# survey
 		Survey.all.each do |s|
 			# the status field
 			if s.status == -1
@@ -65,7 +64,39 @@ class MigrateDb
 	end
 
 	def self.migrate_answer
-		
+		Answer.all.each do |a|
+			# the status field
+			if a.status == 0
+				a.status = Answer::EDIT
+			elsif s.status == 1
+				a.status = Answer::REJECT
+			elsif s.status == 2
+				a.status = Answer::UNDER_REVIEW
+			elsif s.status == 3
+				a.status = Answer::FINISH
+			elsif s.status == 4
+				a.status == Answer::REDO
+			end
+			# the reject type field
+			if a.reject_type == 0
+				a.reject_type = Answer::REJECT_BY_QUOTA
+			elsif reject_type == 1
+				a.reject_type = Answer::REJECT_BY_QUALITY_CONTROL
+			elsif reject_type == 2
+				a.reject_type == Answer::REJECT_BY_REVIEW
+			elsif reject_type == 3
+				a.reject_type = Answer::REJECT_BY_SCREEN
+			elsif reject_type == 4
+				a.reject_type = Answer::TIMEOUT
+			end
+			# the introducer_reward_assigned field
+			a.introducer_reward_assigned = a.status == Answer::FINISH
+			# the reward_delivered field
+			a.reward_delivered = a.status == Answer::FINISH
+			# the rewards field
+			a.rewards = []
+			a.save
+		end
 	end
 
 	def self.migrate_user
