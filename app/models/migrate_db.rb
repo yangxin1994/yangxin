@@ -100,6 +100,51 @@ class MigrateDb
 	end
 
 	def self.migrate_user
-		
+		User.all.each do |u|
+			# remove the password_confirmation
+			u.password_confirmation = nil
+			# the email activation field
+			u.email_activation = u.status > 1
+			# the email subscribe field
+			u.email_subscribe = true
+			# the user_role field
+			user_role = 1
+			user_role += 2 if u.surveys.present?
+			user_role += 4 if [16, 32].include?(u.role)
+			u.user_role = user_role
+			# the status field
+			u.status = u.status == 0 ? User::VISITOR : User::REGISTERED
+			u.save
+		end
+	end
+
+	def self.migrate_gift
+		Gift.all.each do |g|
+			# the type field
+			g.type = g.type == 1 ? Gfit::REAL : Gift::VIRTUAL
+			# the exchange count field
+			g.exchange_count = 0
+			# the status field
+			g.status = [-1,0].include?(g.status) ? Gift::OFF_THE_SHELF : Gift::ON_THE_SHELF
+			g.status = Gift::DELETED if g.is_deleted
+			g.save
+		end
+	end
+
+	def self.migrate_prize
+		Prize.all.each do |p|
+			# the type field
+			g.type = g.type == 1 ? Gfit::REAL : Gift::VIRTUAL
+			# the status field
+			p.status = p.is_deleted ? Prize::DELETED : Prize::NORMAL
+			p.save
+		end
+	end
+
+	def self.migrate_order
+		Order.all.each do |o|
+			# the code field
+			o.code = o.created_at.strftime("%Y%m%d") + sprintf("%05d",rand(10000))
+		end
 	end
 end

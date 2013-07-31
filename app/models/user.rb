@@ -19,11 +19,9 @@ class User
 	field :mobile, :type => String
 	field :mobile_activation, :type => Boolean, default: false
 	field :mobile_subscribe, :type => Boolean, default: false
-	field :username, :type => String
 	field :password, :type => String
 	# 1 unregistered
-	# 2 registered but not signed in
-	# 4 registered and signed in
+	# 2 registered
 	field :status, :type => Integer, default: 1
 	field :registered_at, :type => Integer, default: 0
 	# true: the user is locked and cannot login
@@ -87,7 +85,6 @@ class User
 	has_many :reward_logs, :class_name => "RewardLog", :inverse_of => :user
 	has_many :orders, :class_name => "Order", :inverse_of => :sample
 	has_many :lottery_codes
-	has_one  :survey_subscribe, :class_name => "SurveySubscribe",:inverse_of => :user
 	# QuillAdmin
 	has_many :operate_orders, :class_name => "Order", :foreign_key => "operator_id"
 	has_many :operate_reward_logs, :class_name => "RewardLog", :inverse_of => :operator,:foreign_key => "operator_id"
