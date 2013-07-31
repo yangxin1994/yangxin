@@ -119,24 +119,32 @@ class MigrateDb
 	end
 
 	def self.migrate_gift
-		Gift.all.each do |g|
+		Gift.destroy_all
+		BasicGift.all.each do |bg|
+			next if bg._type != "Gift"
+			g = Gift.new
 			# the type field
-			g.type = g.type == 1 ? Gfit::REAL : Gift::VIRTUAL
+			g.type = bg.type == 1 ? Gfit::REAL : Gift::VIRTUAL
 			# the exchange count field
 			g.exchange_count = 0
 			# the status field
-			g.status = [-1,0].include?(g.status) ? Gift::OFF_THE_SHELF : Gift::ON_THE_SHELF
-			g.status = Gift::DELETED if g.is_deleted
+			g.status = [-1,0].include?(bg.status) ? Gift::OFF_THE_SHELF : Gift::ON_THE_SHELF
+			g.status = Gift::DELETED if bg.is_deleted
+			g.write_attribute(:basic_gift_id, bg._id.to_s)
 			g.save
 		end
 	end
 
 	def self.migrate_prize
-		Prize.all.each do |p|
+		Prize.destroy_all
+		BasicGift.all.each do |bg|
+			next if bg._type != "Prize"
+			p = Prize.new
 			# the type field
-			g.type = g.type == 1 ? Gfit::REAL : Gift::VIRTUAL
+			p.type = bg.type == 1 ? Gfit::REAL : Gift::VIRTUAL
 			# the status field
-			p.status = p.is_deleted ? Prize::DELETED : Prize::NORMAL
+			p.status = bg.is_deleted ? Prize::DELETED : Prize::NORMAL
+			p.write_attribute(:basic_gift_id, bg._id.to_s)
 			p.save
 		end
 	end

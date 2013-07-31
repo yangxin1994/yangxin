@@ -2,7 +2,7 @@ class ResultsController < ApplicationController
 	before_filter :require_sign_in, :only => [:to_excel, :to_spss]
 	before_filter :check_normal_survey_existence, :only => [:analysis, :to_spss, :to_excel, :report]
 	before_filter :check_analysis_result_existence, :only => [:to_spss, :to_excel, :report]
-	before_filter :check_authority, :except => [:to_excel, :to_spss]
+	before_filter :check_authority, :only => [:analysis, :report]
 
 	def check_normal_survey_existence
 		@survey = Survey.find_by_id(params[:survey_id])
@@ -15,6 +15,8 @@ class ResultsController < ApplicationController
 	end
 
 	def check_authority
+		return if @current_user && @current_user.is_admin?
+		return if @current_user && @survey.user == @current_user
 		require_sign_in if !@survey.publish_result
 	end
 
