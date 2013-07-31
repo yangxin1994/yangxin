@@ -124,7 +124,7 @@ class MigrateDb
 			next if bg._type != "Gift"
 			g = Gift.new
 			# the type field
-			g.type = bg.type == 1 ? Gfit::REAL : Gift::VIRTUAL
+			g.type = bg.type == 1 ? Gift::REAL : Gift::VIRTUAL
 			# the exchange count field
 			g.exchange_count = 0
 			# the status field
@@ -141,7 +141,7 @@ class MigrateDb
 			next if bg._type != "Prize"
 			p = Prize.new
 			# the type field
-			p.type = bg.type == 1 ? Gfit::REAL : Gift::VIRTUAL
+			p.type = bg.type == 1 ? Gift::REAL : Gift::VIRTUAL
 			# the status field
 			p.status = bg.is_deleted ? Prize::DELETED : Prize::NORMAL
 			p.write_attribute(:basic_gift_id, bg._id.to_s)
@@ -153,6 +153,47 @@ class MigrateDb
 		Order.all.each do |o|
 			# the code field
 			o.code = o.created_at.strftime("%Y%m%d") + sprintf("%05d",rand(10000))
+			lottery_code_id = o.read_attribute("lottery_code_id")
+			if lottery_code_id.nil?
+				# this is a redeem order
+				# the source field
+				o.source = Order::REDEEM_GIFT
+				gift_id = o.gift_id
+				gift = Gift.where(:basic_gift_id => gift_id)
+				# the type field
+				o.type = gift.type == Gift::REAL ? Order::REAL_GOOD : Order::VIRTUAL_GOOD
+				# the gift association
+				o.gift_id = gift._id.to_s
+				# the point field
+				o.point = gift.point
+			else
+				# this is a lottery order
+				# the source field
+				o.source = Order::WIN_IN_LOTTERY
+				prize_id = o.gift_id
+				prize = Pirze.where(:basic_gift_id => prize_id)
+				# the type field
+				o.type = prize.type == Prize::REAL ? Order::REAL_GOOD : Order::VIRTUAL_GOOD
+				# the prize association
+				o.prize_id = prize._id.to_s
+			end
+			# the sample association
+			o.sample_id = o.user_id
+			# the status field
+			if o.status == 0 || o.status == 1
+				# NeedVerify and Verified
+				o.status = Order::WAIT
+			elsif o.status == -1
+				o.status = Order::REJECT
+			elsif o.status == 2
+				o.status = Order::HANDLE
+			elsif o.status == 3
+				o.status = Order::SUCCESS
+			elsif o.status == -3
+				o.status = Order::FAIL
+			end
+				
+			o.save
 		end
 	end
 end
