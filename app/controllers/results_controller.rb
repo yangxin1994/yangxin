@@ -5,12 +5,8 @@ class ResultsController < ApplicationController
 	before_filter :check_authority, :except => [:to_excel, :to_spss]
 
 	def check_normal_survey_existence
-		@survey = (@current_user.is_admin || @current_user.is_super_admin) ? Survey.normal.find_by_id(params[:survey_id]) : @current_user.surveys.normal.find_by_id(params[:survey_id])
-		if @survey.nil?
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
-			end
-		end
+		@survey = Survey.find_by_id(params[:survey_id])
+		render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
 	end
 
 	def check_analysis_result_existence
