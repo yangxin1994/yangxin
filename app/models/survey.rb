@@ -448,7 +448,7 @@ class Survey
 
 		# some information that cannot be cloned
 		new_instance.status = 0
-		new_instance.status = (operator.is_admin || operator.is_super_admin) ? PUBLISHED : CLOSED
+		new_instance.status = operator.is_admin? ? PUBLISHED : CLOSED
 
 		new_instance.is_star = false
 		new_instance.point = 0

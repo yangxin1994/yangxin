@@ -114,6 +114,12 @@ class User
 	VISITOR = 1
 	REGISTERED = 2
 
+	SAMPLE = 1
+	CLIENT = 2
+	ADMIN = 4
+	ANSWER_AUDITOR = 8
+	INTERVIEWER = 16
+
 	index({ email: 1 }, { background: true } )
 	index({ full_name: 1 }, { background: true } )
 	index({ color: 1, status: 1, role: 1 }, { background: true } )
@@ -206,36 +212,16 @@ class User
 		return self.mobile_activation || self.email_activation
 	end
 
-	def is_super_admin
-		return (self.role.to_i & 32) > 0
-	end
-
-	def is_admin
-		return (self.role.to_i & 16) > 0
-	end
-
 	def is_admin?
-		return (self.user_role.to_i & 4) > 0
-	end
-
-	def is_survey_auditor
-		return (self.role.to_i & 8) > 0
-	end
-
-	def is_answer_auditor
-		return (self.role.to_i & 4) > 0
+		return (self.user_role.to_i & ADMIN) > 0
 	end
 
 	def is_answer_auditor?
-		return (self.user_role.to_i & 8) > 0
+		return (self.user_role.to_i & ANSWER_AUDITOR) > 0
 	end
 
 	def is_interviewer
-		return (self.role.to_i & 2) > 0
-	end
-
-	def is_entry_clerk
-		return (self.role.to_i & 1) > 0
+		return (self.user_role.to_i & INTERVIEWER) > 0
 	end
 
 	def self.create_rss_user(email_mobile,callback=nil)

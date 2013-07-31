@@ -5,7 +5,7 @@ class QuestionsController < ApplicationController
 
 
 	def check_normal_survey_existence
-		if @current_user.is_admin || @current_user.is_super_admin 
+		if @current_user.is_admin?
 			@survey = Survey.normal.find_by_id(params[:survey_id])
 		else
 			@survey = @current_user.surveys.normal.find_by_id(params[:survey_id])
