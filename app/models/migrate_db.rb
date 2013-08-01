@@ -29,13 +29,15 @@ class MigrateDb
 			reward_scheme_setting = { "name" => "default scheme",
 				"rewards" => [],
 				"need_review" => s.answer_need_review }
+			s.quillme_promote_reward_type = 0
 			if s.point > 0
 				reward_scheme_setting["rewards"] << {"type" => RewardScheme::POINT, "amount" => s.point }
+				s.quillme_promote_reward_type = RewardScheme::POINT
 			end
 			RewardScheme.create_reward_scheme(s, reward_scheme_setting)
 			reward_scheme = s.reward_schemes[0]
 			s.quillme_promote_info = { "reward_scheme_id" => reward_scheme._id.to_s }
-			s.quillme_promote_reward_type = 0
+
 
 			# the email promote related
 			s.email_promotable = false

@@ -28,11 +28,18 @@ class Log
 		else
 			@logs = Log.fresh_logs.desc(:created_at).limit(limit)
 		end
-    	@logs = @logs.map{|log| log['username'] = log.user.try(:nickname);log['avatar'] = log.user.avatar? ? user.avatar.picture_url : nil;log}
+    	@logs = @logs.map do |log|
+    		log['username'] = log.user.try(:nickname)
+    		log['avatar'] = log.user.avatar? ? log.user.avatar.picture_url : nil
+    		log
+    	end
 	end
 
 	def self.get_newst_exchange_logs
 		logs = self.redeem_logs.desc(:updated_at).limit(5);
-		@logs = logs.map{|log| log['username'] = log.user.nickname;log}
+		@logs = logs.map do |log|
+			log['username'] = log.user.nickname
+			log
+		end
 	end
 end
