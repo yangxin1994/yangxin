@@ -20,6 +20,7 @@ class Gift
 	INTERVAL = 2
 	ARRAY = 4
 
+	DEFAULT_IMG = '/assets/od-quillme/gifts/erji.jpg'
 
 	# 1 off the shelf, 2 on the shelf, 4 deleted
 	field :status, :type => Integer, default: 1
@@ -51,7 +52,7 @@ class Gift
 
 	def self.find_real_gift(desc_type)
 		gifts = self.on_shelf.real.desc("#{desc_type}")
-		gifts.map{|gift| gift['photo'] = gift.photo.present? ? gift.photo.picture_url : nil}
+		gifts.map{|gift| gift['photo'] = gift.photo.present? ? gift.photo.picture_url : DEFAULT_IMG}
 		return gifts
 	end
 

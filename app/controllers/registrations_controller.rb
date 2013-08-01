@@ -33,6 +33,7 @@ class RegistrationsController < ApplicationController
 		render_json_s and return
 	end
 
+  #注册后邮箱激活
 	def email_activate
 		begin
 			activate_info_json = Encryption.decrypt_activate_key(params[:activate_key])
