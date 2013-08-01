@@ -78,7 +78,8 @@ class MigrateDb
 		puts "Migrating answers......"
 		# answers = Answer.where(:updated => nil).to_a
 		# answers.each_with_index do |a, index|
-		Answer.all.each_with_index do |a, index|
+		update_time = Time.now
+		Answer.where(:updated_at.lt => update_time).each_with_index do |a, index|
 			puts index if index%100 == 0
 			# the status field
 			if a.status == 0
