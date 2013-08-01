@@ -74,9 +74,10 @@ class MigrateDb
 
 	def self.migrate_answer
 		puts "Migrating answers......"
-		answers = Answer.where(:updated => nil).to_a
-		answers.each_with_index do |a, index|
-			puts index if index%10 == 0
+		# answers = Answer.where(:updated => nil).to_a
+		# answers.each_with_index do |a, index|
+		Answer.all.each_with_index do |a, index|
+			puts index if index%100 == 0
 			# the status field
 			if a.status == 0
 				a.status = Answer::EDIT
@@ -109,8 +110,6 @@ class MigrateDb
 			a.rewards = []
 			# the need review field
 			a.need_review = a.survey.try(:answer_need_review)
-		end
-		answers.each do |a|
 			a.write_attribute("updated", true)
 			a.save
 		end
