@@ -9,7 +9,7 @@ gem 'httparty', '~> 0.10.2'
 gem 'sidekiq', '~> 2.8.0'
 gem "kiqstand", '~> 1.0.0'
 gem 'whenever', '~> 0.8.2', :require => false
-gem 'sinatra', '~> 1.3.3', require: false
+gem 'sinatra', require: false
 gem 'slim', '~> 1.3.6'
 
 gem 'rack-protection', '~> 1.3.2'
