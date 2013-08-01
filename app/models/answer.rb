@@ -1200,7 +1200,7 @@ class Answer
 		answer_obj["answer_reject_type"] = self.reject_type
 		answer_obj["created_at"] = self.created_at.to_i
 		if !self.user.nil?
-			answer_obj["sample_nickname"] = self.user.read_sample_attribute(:nickname) || self.user.email || self.user.mobile
+			answer_obj["sample_nickname"] = self.user.nickname
 			answer_obj["sample_avatar"] = self.user.avatar.try(:picture_url)
 			answer_obj["sample_id"] = self.user._id.to_s
 		end
