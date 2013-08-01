@@ -5,9 +5,9 @@ class Order
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
 	extend Mongoid::FindHelper
-    include Mongoid::CriteriaExt
+	include Mongoid::CriteriaExt
 
-    field :code, :type => String, default: ->{ Time.now.strftime("%Y%m%d") + sprintf("%05d",rand(10000)) }
+	field :code, :type => String, default: ->{ Time.now.strftime("%Y%m%d") + sprintf("%05d",rand(10000)) }
 	# can be 1 (small mobile charge), 2 (large mobile charge), 4 (alipay), 8(alijf)
 	# 16 (Q coins), 32 (prize), 64 (virtual prize)
 	field :type, :type => Integer

@@ -6,21 +6,11 @@ class Admin::BrowsersController < Admin::ApplicationController
 	end
  
 	def tasks
-		survey_audit = @current_user.is_super_admin || @current_user.is_admin || @current_user.is_survey_auditor
-		answer_audit = @current_user.is_survey_auditor || @current_user.is_admin || @current_user.is_answer_auditor
-		handle_order = @current_user.is_super_admin || @current_user.is_admin
+		answer_audit = @current_user.is_admin? || @current_user.is_answer_auditor?
+		handle_order = @current_user.is_admin?
 
-		surveys_wait_for_audit = []
 		answers_wait_for_audit = []
 		orders_wait_for_handle = []
-
-		if survey_audit
-			Survey.where(:status => 2).each do |s|
-				surveys_wait_for_audit << {"survey_title" => s.title,
-					"survey_id" => s._id.to_s,
-					"link" => "/admin/reviews"}
-			end
-		end
 
 		if answer_audit
 			Answer.unreviewed.each do |a|
@@ -42,7 +32,6 @@ class Admin::BrowsersController < Admin::ApplicationController
 		version = be.try(:version)
 
 		render_json_s({ "answer_audit" => answers_wait_for_audit,
-			"survey_audit" => surveys_wait_for_audit,
 			"order" => orders_wait_for_handle,
 			"version" => version })
 	end	

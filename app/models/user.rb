@@ -19,11 +19,9 @@ class User
 	field :mobile, :type => String
 	field :mobile_activation, :type => Boolean, default: false
 	field :mobile_subscribe, :type => Boolean, default: false
-	field :username, :type => String
 	field :password, :type => String
 	# 1 unregistered
-	# 2 registered but not signed in
-	# 4 registered and signed in
+	# 2 registered
 	field :status, :type => Integer, default: 1
 	field :registered_at, :type => Integer, default: 0
 	# true: the user is locked and cannot login
@@ -87,7 +85,6 @@ class User
 	has_many :reward_logs, :class_name => "RewardLog", :inverse_of => :user
 	has_many :orders, :class_name => "Order", :inverse_of => :sample
 	has_many :lottery_codes
-	has_one  :survey_subscribe, :class_name => "SurveySubscribe",:inverse_of => :user
 	# QuillAdmin
 	has_many :operate_orders, :class_name => "Order", :foreign_key => "operator_id"
 	has_many :operate_reward_logs, :class_name => "RewardLog", :inverse_of => :operator,:foreign_key => "operator_id"
@@ -116,6 +113,12 @@ class User
 
 	VISITOR = 1
 	REGISTERED = 2
+
+	SAMPLE = 1
+	CLIENT = 2
+	ADMIN = 4
+	ANSWER_AUDITOR = 8
+	INTERVIEWER = 16
 
 	index({ email: 1 }, { background: true } )
 	index({ full_name: 1 }, { background: true } )
@@ -209,36 +212,16 @@ class User
 		return self.mobile_activation || self.email_activation
 	end
 
-	def is_super_admin
-		return (self.role.to_i & 32) > 0
-	end
-
-	def is_admin
-		return (self.role.to_i & 16) > 0
-	end
-
 	def is_admin?
-		return (self.user_role.to_i & 4) > 0
-	end
-
-	def is_survey_auditor
-		return (self.role.to_i & 8) > 0
-	end
-
-	def is_answer_auditor
-		return (self.role.to_i & 4) > 0
+		return (self.user_role.to_i & ADMIN) > 0
 	end
 
 	def is_answer_auditor?
-		return (self.user_role.to_i & 8) > 0
+		return (self.user_role.to_i & ANSWER_AUDITOR) > 0
 	end
 
 	def is_interviewer
-		return (self.role.to_i & 2) > 0
-	end
-
-	def is_entry_clerk
-		return (self.role.to_i & 1) > 0
+		return (self.user_role.to_i & INTERVIEWER) > 0
 	end
 
 	def self.create_rss_user(email_mobile,callback=nil)

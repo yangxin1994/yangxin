@@ -1,15 +1,12 @@
 # encoding: utf-8
 require 'error_enum'
 class PagesController < ApplicationController
-	before_filter :require_sign_in, :check_survey_existence
+	before_filter :require_sign_in, :except => [:show]
+	before_filter :check_survey_existence
 
 	def check_survey_existence
-		@survey = (@current_user.is_admin || @current_user.is_super_admin) ? Survey.find_by_id(params[:survey_id]) : @current_user.surveys.find_by_id(params[:survey_id])
-		if @survey.nil?
-			respond_to do |format|
-				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
-			end
-		end
+		@survey = Survey.find_by_id(params[:survey_id])
+		render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
 	end
 
 	#*method*: get
@@ -28,6 +25,7 @@ class PagesController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def show
+		require_sign_in if !@survey.publish_result
 		retval = @survey.show_page(params[:id].to_i)
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }

@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'tool'
 require 'error_enum'
 class Gift
@@ -23,26 +22,22 @@ class Gift
 
 	# 1 off the shelf, 2 on the shelf, 4 deleted
 	field :status, :type => Integer, default: 1
-	# 1 for virtual gift, 2 for virtual gift whose number can be selected, 4 for real gift
+	# 1 for virtual gift, 2 for real goods gift, 4 for mobile change, 8 for alypay transfer, 16 for jifenbao, 32 for qq coin
 	field :type, :type => Integer, default: 1
 	field :title, :type => String, default: ""
 	field :description, :type => String, default: ""
 	field :quantity, :type => Integer, default: 0
 	field :point, :type => Integer, default: 0
-    field :exchange_count, :type => Integer, default: 0
-    field :price, :type => Float, default: 0.0
-    field :redeem_number, :type => Hash, default: {"mode" => SINGLE}
+	field :exchange_count, :type => Integer, default: 0
+	field :price, :type => Float, default: 0.0
+	field :redeem_number, :type => Hash, default: {"mode" => SINGLE}
 
 	has_one :photo, :class_name => "Material", :inverse_of => 'gift'
 
 	#default_scope order_by(:created_at.desc)
-
 	scope :normal, where(:status.in => [OFF_THE_SHELF, ON_THE_SHELF])
-
 	scope :on_shelf, where(:status => ON_THE_SHELF)
-
 	scope :real, where(:type => REAL)
-
 	index({ type: 1, status: 1 }, { background: true } )
 
 	def self.find_by_id(gift_id)

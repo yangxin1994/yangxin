@@ -2,13 +2,13 @@ require 'array'
 require 'error_enum'
 require 'quill_common'
 class SurveysController < ApplicationController
-	before_filter :require_sign_in, :except => [:show, :estimate_answer_time, :list_surveys_in_community, :search_title]
+	before_filter :require_sign_in, :except => [:show, :list_surveys_in_community, :search_title]
 	before_filter :check_survey_existence, :only => [:add_tag, :remove_tag, :update_deadline, :update_star]
-	before_filter :check_normal_survey_existence, :except => [:new, :index, :list_surveys_in_community, :list_answered_surveys, :list_spreaded_surveys, :recover, :clear, :add_tag, :remove_tag, :show, :estimate_answer_time, :update_star, :search_title]
+	before_filter :check_normal_survey_existence, :except => [:new, :index, :list_surveys_in_community, :list_answered_surveys, :list_spreaded_surveys, :recover, :clear, :add_tag, :remove_tag, :show, :update_star, :search_title]
 	before_filter :check_deleted_survey_existence, :only => [:recover, :clear]
 	
 	def check_survey_existence
-		@survey = (@current_user.is_admin || @current_user.is_super_admin) ? Survey.find_by_id(params[:id]) : @current_user.surveys.find_by_id(params[:id])
+		@survey = @current_user.is_admin? ? Survey.find_by_id(params[:id]) : @current_user.surveys.find_by_id(params[:id])
 		if @survey.nil?
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
@@ -17,7 +17,7 @@ class SurveysController < ApplicationController
 	end
 
 	def check_normal_survey_existence
-		@survey = (@current_user.is_admin || @current_user.is_super_admin) ? Survey.normal.find_by_id(params[:id]) : @current_user.surveys.normal.find_by_id(params[:id])
+		@survey = @current_user.is_admin? ? Survey.normal.find_by_id(params[:id]) : @current_user.surveys.normal.find_by_id(params[:id])
 		if @survey.nil?
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
@@ -26,7 +26,7 @@ class SurveysController < ApplicationController
 	end
 
 	def check_deleted_survey_existence
-		@survey = (@current_user.is_admin || @current_user.is_super_admin) ? Survey.deleted.find_by_id(params[:id]) : @current_user.surveys.deleted.find_by_id(params[:id])
+		@survey = @current_user.is_admin? ? Survey.deleted.find_by_id(params[:id]) : @current_user.surveys.deleted.find_by_id(params[:id])
 		if @survey.nil?
 			respond_to do |format|
 				format.json	{ render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return }
@@ -48,7 +48,7 @@ class SurveysController < ApplicationController
 	def new
 		survey = Survey.new
 		survey.user = @current_user
-		if @current_user.is_admin || @current_user.is_super_admin
+		if @current_user.is_admin?
 			survey.status = Survey::PUBLISHED
 		else
 			survey.style_setting["has_advertisement"] = false
@@ -310,13 +310,6 @@ class SurveysController < ApplicationController
 		retval = @survey.update_star(params[:is_star])
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
-		end
-	end
-
-	def estimate_answer_time
-		survey = Survey.normal.find_by_id(params[:id])
-		respond_to do |format|
-			format.json	{ render_json_auto(survey.nil? ? ErrorEnum::SURVEY_NOT_EXIST : survey.estimate_answer_time) and return }
 		end
 	end
 

@@ -7,11 +7,11 @@ require 'quill_common'
 module Tool
 
 	def self.generate_active_mobile_code
-	  Random.rand(100000..999999).to_i	
+		Random.rand(100000..999999).to_i	
 	end
 
 	def self.generate_active_email_token
-	  SecureRandom.base64.tr("+/", "-_")	
+		SecureRandom.base64.tr("+/", "-_")	
 	end
 
 	def self.email_illegal?(email)
@@ -149,5 +149,61 @@ module Tool
 			digit *= 2
 		end
 		return base_arr
+	end
+
+	def self.time_string(seconds)
+		if seconds < 60
+			return "刚刚"
+		elsif seconds < 3600
+			return "#{seconds/60}分钟前"
+		elsif seconds < 3600 * 24
+			return "#{seconds/3600}小时前"
+		else
+			return "#{seconds/3600/24}天前"
+		end
+	end
+
+	def self.get_avatar(user_id, version="thumb")
+		return "/assets/avatar/#{version}_default.png" if user_id.nil?
+		md5 = Digest::MD5.hexdigest(user_id)
+		return "/uploads/avatar/#{version}_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/#{md5}.png")
+		return "/assets/avatar/#{version}_default.png"
+	end
+
+	def self.thumb_avatar(user_id)
+		get_avatar(user_id)
+	end
+
+	def self.small_avatar(user_id)
+		get_avatar(user_id, 'small')
+	end
+
+	def self.mini_avatar(user_id)
+		get_avatar(user_id, 'mini')
+	end
+
+	# check wheather value satisfies standard value
+	def self.check_sample_attribute(sample_attribute_id, value, standard_value)
+		sample_attribute = SampleAttribute.find_by_id(sample_attribute_id)
+		return false if sample_attribute.nil?
+		case sample_attribute.type
+		when DataType::STRING
+			return true if value == standard_value
+		when DataType::ENUM
+			return true if standard_value.include?(value)
+		when DataType::NUMBER
+			return true if value >= standard_value[0] && value <= standard_value[1]
+		when DataType::DATE
+			return true if value >= standard_value[0] && value <= standard_value[1]
+		when DataType::NUMBER_RANGE
+			return true if value >= standard_value[0] && value <= standard_value[1]
+		when DataType::DATE_RANGE
+			return true if value >= standard_value[0] && value <= standard_value[1]
+		when DataType::ADDRESS
+			return true if standard_value.include?(value)
+		when DataType::ARRAY
+			return true if (standard_value & value).present?
+		end
+		return false
 	end
 end

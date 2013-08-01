@@ -8,8 +8,7 @@ class Newsletter
   field :subject, type: String
   field :title, type: String
   field :status, type: Integer, default: 0
-  field :content, type: Array, default: []
-  field :column, type: Array, default: []
+  field :columns, type: Hash, default: {}
   field :is_tested, type: Boolean, default: false
   field :is_deleted, type: Boolean, default: false
 
@@ -23,9 +22,7 @@ class Newsletter
 
 
   def present_admin
-    present_attrs :_id,:title, :subject, :status, :content, :column, :is_tested, :is_deleted
-    present_add   :delivered_count => self.subscribers.count
-    present_add   :all_sub_count => Subscriber.subscribed.count
+    present_attrs :_id, :title, :subject, :status, :columns, :is_tested, :is_deleted
     present_add   :created_at=> self.created_at.strftime("%Y-%m-%d")
   end
 

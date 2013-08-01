@@ -23,7 +23,7 @@ class EmailInvitationWorker
 				current_sample = User.sample.find_by_id(e)
 				survey.sample_attribtes_for_promote.each do |sample_attribute|
 					v = current_sample.read_sample_attribute_by_id(sample_attribute["sample_attribute_by_id"])
-					match = Tool.check_sample_attribute(v, sample_attribute["value"])
+					match = Tool.check_sample_attribute(sample_attribute._id.to_s, v, sample_attribute["value"])
 					next if match == false
 					if match == true
 						sample_ids_selected << e
@@ -52,12 +52,14 @@ class EmailInvitationWorker
 		# 4. transform data
 		samples_for_surveys = {}
 		surveys_for_sample.each do |u_id, s_id_ary|
-			samples_for_surveys[s_id_ary] ||= []
-			samples_for_surveys[s_id_ary] << u_id
+			s_id_ary.each do |s_id|
+				samples_for_surveys[s_id] ||= []
+				samples_for_surveys[s_id] << u_id
+			end
 		end
 		# 5. send emails to the samples found
-		samples_for_surveys.each do |s_id_ary, sample_id_ary|
-			MailgunApi.batch_send_survey_email(s_id_ary, sample_id_ary, [])
+		samples_for_surveys.each do |s_id, sample_id_ary|
+			MailgunApi.batch_send_survey_email(s_id, sample_id_ary)
 		end
 		return true
 	end

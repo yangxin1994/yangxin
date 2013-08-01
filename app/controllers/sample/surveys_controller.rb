@@ -48,4 +48,11 @@ class Sample::SurveysController < ApplicationController
     render_json_auto surveys_with_spreaded_number and return
   end
 
+	def estimate_answer_time
+		survey = Survey.normal.find_by_id(params[:id])
+		respond_to do |format|
+			format.json	{ render_json_auto(survey.nil? ? ErrorEnum::SURVEY_NOT_EXIST : survey.estimate_answer_time) and return }
+		end
+	end
+
 end
