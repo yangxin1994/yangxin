@@ -20,6 +20,8 @@ class EmailWorker
 			MailgunApi.rss_subscribe_email(user, callback)    	
 		when 'change_email'
 			MailgunApi.activate_email(user, callback)
+		when 'find_password'
+			MailgunApi.find_password_email(user, callback)
 		end
 		return true
 	end

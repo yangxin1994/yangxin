@@ -135,7 +135,19 @@ class Order
 		end
 		order.status = FROZEN if opt["status"] == FROZEN
 		order.save
-		order.auto_handle	   
+		order.auto_handle
+
+		##synchro  reverver info 
+		if opt['info_sys'].to_s == 'true'
+			option = {}
+			option["receiver"]    = order[:receiver]	
+			option["mobile"]      = order[:mobile]
+			option["address"]     = order[:address]
+			option["street_info"] = order[:street_info]
+			option["postcode"]    = order[:postcode]
+			sample.set_receiver_info(option) if sample.present?
+		end	
+				   
 		LotteryLog.create_succ_lottery_Log(answer_id,order.id,survey_id,sample_id,ip_address,prize_id)
 		return order
 	end
