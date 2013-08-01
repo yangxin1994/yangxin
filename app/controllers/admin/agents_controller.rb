@@ -1,4 +1,4 @@
-class Admin::AgentController < Admin::ApplicationController
+class Admin::AgentsController < Admin::ApplicationController
 
 	before_filter :check_agent_existence, :only => [:show, :update, :destroy]
 
@@ -9,8 +9,7 @@ class Admin::AgentController < Admin::ApplicationController
 
 	def index
 		agents = Agent.search_agent(params[:email], params[:region])
-		paginated_agents = auto_paginate(agents)
-		render_json_auto(paginated_agents.map { |e| e.info }) and return
+		render_json_auto(auto_paginate(agents){|agents| agents.map { |e| e.info } }) and return
 	end
 
 	def show

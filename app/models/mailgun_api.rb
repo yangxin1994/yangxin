@@ -3,11 +3,11 @@ class MailgunApi
 
 	@@test_email = "test@oopsdata.com"
 
-	@@survey_email_from = "\"优数调研\" <postmaster@oopsdata.net>"
-	@@user_email_from = "\"优数调研\" <postmaster@oopsdata.cn>"
+	@@survey_email_from = "\"问卷吧\" <postmaster@wenjuanba.net>"
+	@@user_email_from = "\"问卷吧\" <postmaster@wenjuanba.cn>"
 
-	def self.batch_send_survey_email(survey_id_ary, user_id_ary, email_ary)
-		@emails = email_ary.blank? ? user_id_ary.map { |e| User.find_by_id(e).try(:email) } : email_ary
+	def self.batch_send_survey_email(survey_id, user_id_ary)
+		@emails = user_id_ary.map { |e| User.find_by_id(e).try(:email) }
 		group_size = 900
 		@group_emails = []
 		@group_recipient_variables = []
@@ -28,23 +28,50 @@ class MailgunApi
 		end
 		@group_recipient_variables << temp_recipient_variables
 
-		@surveys = survey_id_ary.map { |e| Survey.find_by_id(e) }
-		@presents = []	
-		# push a lottery
-		lottery = Lottery.quillme.first
-		@presents << {:title => lottery.title,
-			:url => "#{Rails.application.config.quillme_host}/lotteries/#{lottery._id.to_s}",
-			:img_url => Rails.application.config.quillme_host + lottery.photo_url} if !lottery.nil?
-		# push a real gift
-		real_gift = BasicGift.where(:type => 1, :status => 1).first
-		@presents << {:title => real_gift.name,
-			:url => "#{Rails.application.config.quillme_host}/gifts/#{real_gift._id.to_s}",
-			:img_url => Rails.application.config.quillme_host + real_gift.photo.picture_url} if !real_gift.nil?
-		# push a cash gift
-		cash_gift = BasicGift.where(:type => 0, :status => 1).first
-		@presents << {:title => cash_gift.name,
-			:url => "#{Rails.application.config.quillme_host}/gifts/#{cash_gift._id.to_s}",
-			:img_url => Rails.application.config.quillme_host + cash_gift.photo.picture_url} if !cash_gift.nil?
+		@survey = Survey.find_by_id(survey_id)
+		@reward_scheme_id = @survey.email_promote_info["reward_scheme_id"]
+
+		@reward_scheme = RewardScheme.find_by_id(@reward_scheme_id)
+		@reward_type = @reward_scheme.rewards[0]["type"]
+		if [RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::POINT].include? @reward_type
+			amount = @reward_scheme.rewards[0]["amount"]
+			@amount = @reward == Reward::JIFENBAO ? amount / 100 : amount
+		end
+
+		if [RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::POINT].include? @reward_type
+			# list some hot gifts
+			@gifts = []
+			Gift.all.desc(:exchange_count).limit(3).each do |g|
+				@gifts << { :title => g.title,
+					:url => Rails.application.config.quillme_host + "/gifts/" + g._id.to_s,
+					:img_url => Rails.application.config.quillme_host + g.photo.picture_url }
+			end
+			# get redeem logs
+			@redeem_logs = []
+			RedeemLog.all.desc(:created_at).limit(3).each do |redeem_log|
+				time = Tool.time_string(Time.now.to_i - redeem_log.created_at.to_i)
+				@redeem_logs << { :time => time,
+					:nickname => redeem_log.user.nickname,
+					:amount => redeem_log.amount,
+					:gift_title => redeem_log.gift_title }
+			end
+		else
+			# list the prizes
+			@prizes = []
+			@reward_scheme.rewards[0]["prizes"].each do |p|
+				prize = Prize.find_by_id(p["prize_id"])
+				next if prize.nli?
+				@prizes << { :title => prize.title,
+					:img_url => Rails.application.config.quillme_host + prize.photo.picture_url }
+			end
+			# get lottery logs
+			@lottery_logs = []
+			LotteryLog.all.desc(:created_at).limit(9).each do |lottery_log|
+				@lottery_logs << { :nickname => lottery_log.user.try(:nickname) || "游客", 
+					:region => lottery_log.land,
+					:avatar_url => Rails.application.config.quillme_host + Tool.mini_avatar(lottery_log.user.try(:_id))}
+			end
+		end
 
 		data = {}
 		data[:domain] = Rails.application.config.survey_email_domain
@@ -67,53 +94,6 @@ class MailgunApi
 		end
 	end
 
-=begin
-	def self.send_survey_email(user_id, email, survey_id_ary)
-		if user_id.blank?
-			@email = email
-		else
-			user = User.find_by_id(user_id)
-			@email = user.email
-			return if @email.blank?
-		end
-
-		@surveys = survey_id_ary.map { |e| Survey.find_by_id(e) }
-		@presents = []	
-		# push a lottery
-		lottery = Lottery.quillme.first
-		@presents << {:title => lottery.title,
-			:url => "#{Rails.application.config.quillme_host}/lotteries/#{lottery._id.to_s}",
-			:img_url => Rails.application.config.quillme_host + lottery.photo_url} if !lottery.nil?
-		# push a real gift
-		real_gift = BasicGift.where(:type => 1, :status => 1).first
-		@presents << {:title => real_gift.name,
-			:url => "#{Rails.application.config.quillme_host}/gifts/#{real_gift._id.to_s}",
-			:img_url => Rails.application.config.quillme_host + real_gift.photo.picture_url} if !real_gift.nil?
-		# push a cash gift
-		cash_gift = BasicGift.where(:type => 0, :status => 1).first
-		@presents << {:title => cash_gift.name,
-			:url => "#{Rails.application.config.quillme_host}/gifts/#{cash_gift._id.to_s}",
-			:img_url => Rails.application.config.quillme_host + cash_gift.photo.picture_url} if !cash_gift.nil?
-
-		data = {}
-		data[:domain] = Rails.application.config.survey_email_domain
-		data[:from] = @@survey_email_from
-
-		html_template_file_name = "#{Rails.root}/app/views/survey_mailer/survey_email.html.erb"
-		text_template_file_name = "#{Rails.root}/app/views/survey_mailer/survey_email.text.erb"
-		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
-		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
-		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
-		data[:html] = premailer.to_inline_css
-		data[:text] = text_template.result(binding)
-
-		data[:subject] = "邀请您参加问卷调查"
-		data[:subject] += " --- to #{@email}" if Rails.env != "production" 
-		data[:to] = Rails.env == "production" ? @email : @@test_email
-		self.send_message(data)
-	end
-=end
-
 	def self.welcome_email(user, callback)
 		@user = user
 		activate_info = {"email" => user.email, "time" => Time.now.to_i}
@@ -130,7 +110,7 @@ class MailgunApi
 		data[:html] = premailer.to_inline_css
 		data[:text] = text_template.result(binding)
 
-		data[:subject] = "欢迎注册优数调研"
+		data[:subject] = "欢迎注册问卷吧"
 		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
 		data[:to] = Rails.env == "production" ? user.email : @@test_email
 		self.send_message(data)
@@ -179,25 +159,6 @@ class MailgunApi
 		data[:to] = Rails.env == "production" ? user.email : @@test_email
 		self.send_message(data)
 	end
-
-	# def self.generate_active_code_email(email,code,callback)
-	#   activate_info = {"email" => email, "code" => code, "time" => Time.now.to_i}
- #      data = {}
- #      data[:domain] = Rails.application.config.user_email_domain
-	#   data[:from] = @@user_email_from
-	#   @survey_subscribe_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
- #  	  html_template_file_name = "#{Rails.root}/app/views/user_mailer/survey_subscribe_email.html.erb"
-	#   text_template_file_name = "#{Rails.root}/app/views/user_mailer/survey_subscribe_email.text.erb"
-	#   html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
-	#   text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
-	#   premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
-	#   data[:html] = premailer.to_inline_css
-	#   data[:text] = text_template.result(binding)
- #  	  data[:subject] = "oopsdata.cn邮件预订激活码邮件"
-	#   data[:subject] += " --- to #{email}" if Rails.env != "production" 
-	#   data[:to] = Rails.env == "production" ? email : @@test_email
-	#   self.send_message(data)
-	# end
 
 	def self.find_password_email(user, callback)
 		@user = user
@@ -284,7 +245,7 @@ class MailgunApi
 		data[:html] = premailer.to_inline_css
 		data[:text] = text_template.result(binding)
 
-		data[:subject] = "欢迎订阅优数调研"
+		data[:subject] = "欢迎订阅问卷吧"
 		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
 		data[:to] = Rails.env == "production" ? user.email : @@test_email
 		self.send_message(data)

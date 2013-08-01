@@ -208,14 +208,14 @@ class Admin::UsersController < Admin::ApplicationController
 
 			# super_admin can search all with role in fix.
 			# admin all, but super_admin and admin.
-			users.select!{|u| u.role.to_i < 15} if !@current_user.is_super_admin
+			users.select!{|u| u.role.to_i < 15} if !@current_user.is_admin?
 		elsif role==0
 			# only for role=0
 			users = User.where(role: role).desc(:lock, :created_at).to_a
 		else
 			# all of user
 			users = User.all.desc(:lock, :created_at).to_a
-			users.select!{|u| u.role.to_i < 15} if !@current_user.is_super_admin
+			users.select!{|u| u.role.to_i < 15} if !@current_user.is_admin?
 		end
 
 		# display delete users if params[:deleted]

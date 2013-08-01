@@ -64,7 +64,7 @@ class AgentTask
 		self["survey_title"] = self.survey.title
 		self["agent_email"] = self.agent.email
 		self["agent_name"] = self.agent.name
-		return info
+		return self
 	end
 
 	def open

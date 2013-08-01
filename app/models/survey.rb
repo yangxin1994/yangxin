@@ -74,8 +74,6 @@ class Survey
 	field :sms_promotable, :type => Boolean, default: false
 	field :broswer_extension_promotable, :type => Boolean, default: false
 	field :weibo_promotable, :type => Boolean, default: false
-
-	field :quillme_hot, :type => Boolean, :default => false #是否为热点小调查(quillme用)
 	field :quillme_promote_info, :type => Hash, :default => {
 		"reward_scheme_id" => ""
 	}
@@ -451,7 +449,7 @@ class Survey
 
 		# some information that cannot be cloned
 		new_instance.status = 0
-		new_instance.status = (operator.is_admin || operator.is_super_admin) ? PUBLISHED : CLOSED
+		new_instance.status = operator.is_admin? ? PUBLISHED : CLOSED
 
 		new_instance.is_star = false
 		new_instance.point = 0
@@ -1938,5 +1936,10 @@ class Survey
 	def create_default_reward_scheme
 		r = RewardScheme.create(:name => "默认奖励方案", :rewards => [], :need_review => false)
 		self.reward_schemes << r
+	end
+
+	def remain_quota_number
+		# todo: calculate remainning quota number
+		return 100
 	end
 end

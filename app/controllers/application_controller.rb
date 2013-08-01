@@ -100,29 +100,14 @@ class ApplicationController < ActionController::Base
 		!user_signed_in?
 	end
 
-	#judge whether the current user is a super admin
-	def user_super_admin?
-		user_signed_in? && @current_user.is_super_admin
-	end
-
 	#judge whether the current user is admin
 	def user_admin?
-		user_signed_in? && (@current_user.is_admin || @current_user.is_super_admin)
-	end
-
-	#judge whether the current user is survey auditor
-	def user_survey_auditor?
-		user_signed_in? && (@current_user.is_survey_auditor || @current_user.is_admin || @current_user.is_super_admin)
-	end
-
-	#judge whether the current user is entry clerk
-	def user_entry_clerk?
-		user_signed_in? && (@current_user.is_entry_clerk || @current_user.is_admin || @current_user.is_super_admin)
+		user_signed_in? && @current_user.is_admin?
 	end
 
 	#judge whether the current user is interviewer
 	def user_interviewer?
-		user_signed_in? && (@current_user.is_interviewer || @current_user.is_admin || @current_user.is_super_admin)
+		user_signed_in? && (@current_user.is_interviewer || @current_user.is_admin?)
 	end
 
 	#judge whether the current user is answer auditor
@@ -130,21 +115,6 @@ class ApplicationController < ActionController::Base
 		user_signed_in? && (@current_user.is_answer_auditor? || @current_user.is_admin?)
 	end
 	
-	def require_super_admin
-		if !user_signed_in?
-			respond_to do |format|
-				format.html { redirect_to root_path and return }
-				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
-			end
-		end
-		if !user_super_admin?
-			respond_to do |format|
-				format.html { redirect_to root_path and return }
-				format.json	{ render_json_e(ErrorEnum::REQUIRE_SUPER_ADMIN) and return }
-			end
-		end
-	end
-
 	def require_admin
 		if !user_signed_in?
 			respond_to do |format|
@@ -160,41 +130,9 @@ class ApplicationController < ActionController::Base
 		end
 	end
 	
-	def require_survey_auditor
-		if !user_signed_in?
-			respond_to do |format|
-				format.html { redirect_to root_path and return }
-				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
-			end
-		end
-		if !user_survey_auditor? && !user_admin?
-			respond_to do |format|
-				format.html { redirect_to root_path and return }
-				format.json	{ render_json_e(ErrorEnum::REQUIRE_SURVEY_AUDITOR) and return }
-			end
-		end
-	end
-	
 	def require_answer_auditor
 		render_json_e(ErrorEnum::REQUIRE_LOGIN) and return if !user_signed_in?
 		render_json_e(ErrorEnum::REQUIRE_ANSWER_AUDITOR) and return if !user_answer_auditor?
-	end
-	
-	def require_entry_clerk
-		@survey = Survey.find_by_id(params[:id])
-		render_json_e(ErrorEnum::SURVEY_NOT_EXIST) if @survey.nil?
-		if !user_signed_in?
-			respond_to do |format|
-				format.html { redirect_to root_path and return }
-				format.json	{ render_json_e(ErrorEnum::REQUIRE_LOGIN) and return }
-			end
-		end
-		if !user_entry_clerk? && !user_admin? && current_user != @survey.user
-			respond_to do |format|
-				format.html { redirect_to root_path and return }
-				format.json	{ render_json_e(ErrorEnum::REQUIRE_ENTRY_CLERK) and return }
-			end
-		end
 	end
 	
 	def require_interviewer
