@@ -390,8 +390,9 @@ class Result
 		input_ids.map! { |e| e.to_s }
 
 		scores = {}
+		label_number = issue["labels"].length
 		input_ids.each do |input_id|
-			scores[input_id] = { "histogram" => [], "mean" => [] }
+			scores[input_id] = { "histogram" => Array.new(label_number+1){0}, "mean" => [] }
 		end
 		
 		answer_ary.each do |answer|
