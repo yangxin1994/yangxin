@@ -721,7 +721,7 @@ class ReportResult < Result
 		# six addresses
 		return text + "，另有#{ratio_ary[5].round(1)}%的人填写了#{address_text_ary[5]}。" if results.length == 6
 		# more than six addresses
-		other_ratio = 100 - ratio_array[1..4].sum
+		other_ratio = 100 - ratio_ary[1..4].sum
 		return text + "，另有#{other_ratio.round(1)}%的人填写了其他。"
 	end
 

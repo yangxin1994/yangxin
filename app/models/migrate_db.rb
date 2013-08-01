@@ -1,5 +1,5 @@
+#encoding: utf-8
 class MigrateDb
-
 
 	def self.migrate
 		self.migrate_point_log

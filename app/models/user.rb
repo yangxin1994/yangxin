@@ -397,13 +397,12 @@ class User
 		affiliated = self.affiliated
 		if affiliated
 			complete = 0
-				affiliated.attributes.each do |attr|
-					if SampleAttribute::BASIC_ATTR.include?(attr)
-						complete += 1
-					end	
-				end
+			affiliated.attributes.each_key do |attr_name|
+				if SampleAttribute::BASIC_ATTR.include?(attr_name)
+					complete += 1
+				end	
+			end
 			basic_attr = SampleAttribute::BASIC_ATTR.length
-			return (complete.quo(basic_attr)).to_f 
 			return complete * 100 / basic_attr
 		else
 			return 0 
@@ -1009,7 +1008,7 @@ class User
 	def need_update_attribute(attr_name, updated_value)
 		sa = SampleAttribute.find_by_name(attr_name)
 		return false if sa.nil?
-		return true if ![DataType::NUMBER_RANGE, DataType::DATE_RANGE].include?(sa.data_type)
+		return true if ![DataType::NUMBER_RANGE, DataType::DATE_RANGE].include?(sa.type)
 		sa_value = self.read_sample_attribute(attr_name)
 		return true if sa_value.nil?
 		begin
@@ -1034,7 +1033,8 @@ class User
 	def write_sample_attribute(name, value)
 		sa = SampleAttribute.find_by_name(name)
 		return nil if sa.nil?
-		sa.affiliated.write_attribute(sa.name.to_sym, value)
+		self.affiliated.write_attribute(sa.name.to_sym, value)
+		return self.affiliated.save
 	end
 
 	def write_sample_attribute_by_id(sa_id, value)
