@@ -163,6 +163,10 @@ class MigrateDb
 			g.save
 			# the photo association
 			g.photo = bg.photo
+			# the point field
+			g.point = bg.point
+			# the price field
+			g.price = bg.point / 100
 			# record the previous basic_gift_id
 			g.write_attribute(:basic_gift_id, bg._id.to_s)
 			g.save
