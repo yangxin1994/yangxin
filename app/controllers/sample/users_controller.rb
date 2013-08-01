@@ -9,8 +9,8 @@ class Sample::UsersController < ApplicationController
   #返回的参数:一个盛放排行榜用户的列表
   #############################		
   def get_top_ranks
-  	@users = User.sample.where(:is_block => false,:username.ne => "",:username.exists => true).desc(:point).limit(5)
-    @users = @users.map{|user| user['spread_count'] = user.spread_count;user['answer_count'] = user.answers.not_preview.count;user['avatar_src']= user.avatar? ? user.avatar.picture_url : nil;user}
+  	@users = User.sample.where(:is_block => false).desc(:point).limit(5)
+    @users = @users.map{|user| user['nickname'] = user.nickname;user['spread_count'] = user.spread_count;user['answer_count'] = user.answers.not_preview.count;user['avatar_src']= user.avatar? ? user.avatar.picture_url : User::DEFAULT_IMG;user}
     render_json { @users }
   end
 
@@ -38,7 +38,7 @@ class Sample::UsersController < ApplicationController
 
   def make_subscribe_active
     begin
-      activate_info_json = Encryption.decrypt_activate_key(CGI::unescape(params[:key]))
+      activate_info_json = Encryption.decrypt_activate_key(params[:activate_key])
       activate_info = JSON.parse(activate_info_json)
     rescue
       render_json_e(ErrorEnum::ILLEGAL_ACTIVATE_KEY) and return
@@ -58,5 +58,30 @@ class Sample::UsersController < ApplicationController
     render_json_auto(retval)
   end
 
+  def send_forget_pass_code
+    email_mobile = params[:email_mobile]
+    callback  = params[:callback]
+    render_json_auto User.send_forget_pass_code(email_mobile,callback)
+  end
+
+  def make_forget_pass_activate
+    mobile = params[:mobile]
+    code   = params[:code]
+    render_json_auto User.make_forget_pass_activate(mobile,code)
+  end
+
+  def generate_new_password
+    render_json_auto User.generate_new_password(params[:email_mobile],params[:password])
+  end
+
+  def get_account_by_activate_key
+    begin
+      activate_info_json = Encryption.decrypt_activate_key(params[:activate_key])
+      activate_info = JSON.parse(activate_info_json)
+      render_json_auto User.get_account_by_activate_key(activate_info)
+    rescue
+      render_json_e(ErrorEnum::ILLEGAL_ACTIVATE_KEY) and return
+    end
+  end
 
 end

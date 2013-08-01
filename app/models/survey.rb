@@ -221,9 +221,10 @@ class Survey
 	def excute_sample_data(user)
 		self['answer_count'] = self.answers.count
 		self['time'] = self.estimate_answer_time
-		self['answer_status'] = self.answered(user)[0]
-		self['answer_reject_type'] = self.answered(user)[1]
+		self['answer_status'] = self.answered(user)[0].to_i
+		self['answer_reject_type'] = self.answered(user)[1].to_i
 		self['reward_type_info'] = self.reward_type_info
+		self['scheme_id'] = self.quillme_promote_info['reward_scheme_id']
 		return self
 	end
 

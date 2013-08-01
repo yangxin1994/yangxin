@@ -17,7 +17,7 @@ class LotteryLog < Log
 		survey_id = answer.survey.id
 		data = []
 		log_data = {}
-		self.where(:survey_id => survey_id,:result => status).desc(:created).limit(limit).each do |log|
+		self.where(:survey_id => survey_id,:result => status,:user_id.ne => nil).desc(:created).limit(limit).each do |log|
 			pri = Prize.find_by_id(log.prize_id)
 			log_data['nickname'] = log.user.nickname
 			log_data['created_at'] = log.created_at

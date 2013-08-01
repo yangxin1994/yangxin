@@ -519,6 +519,10 @@ OopsData::Application.routes.draw do
 				post :make_rss_activate,:as => :make_rss_activate
 				get :make_subscribe_active,:as => :make_subscribe_active
 				get :make_rss_mobile_activate,:as => :make_rss_mobile_activate
+				put :send_forget_pass_code,:as => :send_forget_pass_code
+				put :make_forget_pass_activate,:as => :make_forget_pass_activate
+				put :generate_new_password,:as => :generate_new_password
+				get :get_account_by_activate_key,:as => :get_account_by_activate_key
 			end
 		end
 		resources :logs do

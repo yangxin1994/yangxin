@@ -1116,11 +1116,11 @@ class Answer
 	end
 
 	def draw_lottery(user_id)
-		#return ErrorEnum::LOTTERY_DRAWED if self.reward_delivered
+		return ErrorEnum::LOTTERY_DRAWED if self.reward_delivered
 		reward = (self.rewards.select { |r| r["checked"] == true }).first
 		return ErrorEnum::REWORD_NOT_SELECTED if reward.nil?
 		return ErrorEnum::NOT_LOTTERY_REWARD if reward["type"] != RewardScheme::LOTTERY
-		#return ErrorEnum::LOTTERY_DRAWED if !reward["win"].nil?
+		return ErrorEnum::LOTTERY_DRAWED if !reward["win"].nil?
 
 		reward_scheme = self.reward_scheme
 		return {"result" => false} if reward_scheme.nil? || reward_scheme.rewards[0]["type"].to_i != RewardScheme::LOTTERY

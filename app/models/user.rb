@@ -196,7 +196,7 @@ class User
 			self.affiliated.update_attributes(:receiver_info => receiver_info)
 		else
 			self.create_affiliated(:receiver_info => receiver_info)
-		end	
+		end		
 		return true
 	end
 
@@ -282,6 +282,51 @@ class User
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i  > self.rss_verification_expiration_time
     return ErrorEnum::ACTIVATE_CODE_ERROR if self.rss_verification_code != code
     return self.update_attributes(:mobile_subscribe => true)
+	end
+
+	def self.send_forget_pass_code(email_mobile,callback)
+		sample = self.find_by_email_mobile(email_mobile) 
+		if sample.present?
+			if(email_mobile.match(/#{MobileRexg}/i))
+				active_code = Tool.generate_active_mobile_code	
+				## TODO   generate active code when user regist with mobile
+				## TODO   store the random code and mobile in session with a expire time 60 sec.     
+				# SmsInvitationWorker
+				return sample.update_attributes(:sms_verification_code => active_code,:sms_verification_expiration_time => (Time.now + 1.minutes).to_i)
+			else
+				return EmailWorker.perform_async("find_password", email_mobile, callback)
+			end
+		else
+			return ErrorEnum::USER_NOT_EXIST
+		end
+	end
+
+
+	def self.make_forget_pass_activate(mobile,code)
+		sample = self.find_by_mobile(mobile)
+		if sample.present?
+			return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i  > sample.sms_verification_expiration_time
+			return ErrorEnum::ACTIVATE_CODE_ERROR if sample.sms_verification_code != code
+			return true
+		else
+			return ErrorEnum::USER_NOT_EXIST
+		end
+	end
+
+	def self.generate_new_password(email_mobile,password)
+		sample = self.find_by_email_mobile(email_mobile)		
+		if sample.present?
+			password = Encryption.encrypt_password(password)
+			return sample.update_attributes(:password => password)
+		else
+			return ErrorEnum::USER_NOT_EXIST
+		end
+	end
+
+	def self.get_account_by_activate_key(activate_key)
+
+    return ErrorEnum::USER_NOT_EXIST if !user.present?
+    return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - time.to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i        
 	end
 
 	#*description*: create a new user
@@ -410,6 +455,14 @@ class User
 		end
 		user.save
 		return user.login(client_ip, client_type, false)
+	end
+
+
+	def self.get_account_by_activate_key(activate_info)
+		user = User.find_by_email(activate_info["email"])
+		return ErrorEnum::USER_NOT_EXIST if user.nil? 
+		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
+		return activate_info["email"]
 	end
 
 	#*description*: user login

@@ -150,4 +150,5 @@ class Sample::AccountsController < ApplicationController
 		@current_user.mobile = @current_user.mobile_to_be_changed
 		render_json_auto @current_user.save and return
 	end
+	
 end
