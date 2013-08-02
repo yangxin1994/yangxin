@@ -284,6 +284,8 @@ class MigrateDb
 			# the gift name field
 			if pl.reason == PointLog::REDEEM
 				pl.gift_name = rl.order.try(:gift).try(:name)
+				pl.gift_id = rl.order.try(:gift).try(:_id).to_s
+				pl.gift_picture_url = rl.order.try(:gift).try(:photo).try(:picture_url)
 			end
 			# the user association
 			pl.user_id = rl.user_id
