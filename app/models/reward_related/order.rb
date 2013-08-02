@@ -102,6 +102,7 @@ class Order
 		order.save
 		sample.point -= point 
 		sample.save
+		PointLog.create_reedm_point_log(point,gift_id,sample_id)
 		RedeemLog.create_gift_exchange_logs(amount,order.id,gift_id,sample_id)
 		order.auto_handle
 		return order
