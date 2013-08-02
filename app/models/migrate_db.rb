@@ -150,7 +150,7 @@ class MigrateDb
 			g.status = [-1,0].include?(bg.status) ? Gift::OFF_THE_SHELF : Gift::ON_THE_SHELF
 			g.status = Gift::DELETED if bg.is_deleted
 			# the title field
-			g.title = bg.title
+			g.title = bg.name
 			# the description field
 			g.description = bg.description
 			g.save
@@ -178,7 +178,7 @@ class MigrateDb
 			# the status field
 			p.status = bg.is_deleted ? Prize::DELETED : Prize::NORMAL
 			# the title field
-			p.title = bg.title
+			p.title = bg.name
 			# the description field
 			p.description = bg.description
 			p.save
@@ -244,7 +244,7 @@ class MigrateDb
 
 	def self.migrate_point_log
 		PointLog.destroy_all
-		puts "Migrating orders......"
+		puts "Migrating point logs......"
 		RewardLog.all.each_with_index do |rl, index|
 			puts index if index%100 == 0
 			next if rl.type == 1 # lottery log
