@@ -1924,6 +1924,7 @@ class Survey
 	def add_sample_attribute_for_promote(sample_attribute)
 		s = SampleAttribute.normal.find_by_id(sample_attribute["sample_attribute_id"])
 		return ErrorEnum::SAMPLE_ATTRIBUTE_NOT_EXIST if s.nil?
+		sample_attribute[:type] = s.type
 		self.sample_attributes_for_promote << sample_attribute
 		return self.save
 	end
