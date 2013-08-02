@@ -243,7 +243,7 @@ class MigrateDb
 	end
 
 	def self.migrate_point_log
-		Rewardlog.all.each_with_index do |rl, index|
+		RewardLog.all.each_with_index do |rl, index|
 			next if rl.type == 1 # lottery log
 			pl = PointLog.new
 			# the amount field
