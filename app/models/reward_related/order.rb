@@ -48,13 +48,13 @@ class Order
 	REJECT = 64
 
 	# type
-	SMALL_MOBILE_CHARGE = 1
-	MOBILE_CHARGE = 2
-	ALIPAY = 4
-	JIFENBAO = 8
-	QQ_COIN = 16
-	REAL_GOOD = 32
-	VIRTUAL_GOOD = 64
+	VIRTUAL = 1
+	REAL = 2
+	MOBILE_CHARGE = 4
+	ALIPAY = 8
+	JIFENBAO = 16
+	QQ_COIN = 32
+	SMALL_MOBILE_CHARGE = 64
 
 	# source
 	ANSWER_SURVEY = 1
@@ -79,7 +79,7 @@ class Order
 		return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
 		gift = Gift.find_by_id(gift_id)
 		return ErrorEnum::GIFT_NOT_EXIST if gift.nil?
-		order = Order.create(:source => REDEEM_GIFT, :amount => amount, :point => point)
+		order = Order.create(:source => REDEEM_GIFT, :amount => amount, :point => point, :type => gift.type)
 		order.sample = sample
 		order.gift = gift
 		case gift.type
@@ -329,6 +329,7 @@ class Order
 		order_obj["status"] = self.status
 		order_obj["source"] = self.source
 		order_obj["amount"] = self.amount
+		order_obj["type"] = self.type
 		if self.source == REDEEM_GIFT
 			order_obj["point"] = self.point
 			order_obj["title"] = self.gift.try(:title)
@@ -336,8 +337,6 @@ class Order
 		elsif self.source == WIN_IN_LOTTERY
 			order_obj["title"] = self.prize.try(:title)
 			order_obj["picture_url"] = self.prize.try(:photo).try(:picture_url)
-		elsif self.source == ANSWER_SURVEY
-			order_obj["type"] = self.type
 		end
 		return order_obj
 	end
