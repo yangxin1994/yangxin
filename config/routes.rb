@@ -136,6 +136,7 @@ OopsData::Application.routes.draw do
 				put :quillme_hot, :allocate_answer_auditors, :set_result_visible, :set_spread
 				get :list_sample_attributes_for_promote
 				post :add_sample_attribute_for_promote
+				put :update_sample_attribute_for_promote
 				delete :remove_sample_attribute_for_promote
 				get :get_spread, :get_result_visible
 			end
