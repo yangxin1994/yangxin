@@ -243,7 +243,10 @@ class MigrateDb
 	end
 
 	def self.migrate_point_log
+		PointLog.destroy_all
+		puts "Migrating orders......"
 		RewardLog.all.each_with_index do |rl, index|
+			puts index if index%100 == 0
 			next if rl.type == 1 # lottery log
 			pl = PointLog.new
 			# the amount field
@@ -282,6 +285,8 @@ class MigrateDb
 			if pl.reason == PointLog::REDEEM
 				pl.gift_name = rl.order.try(:gift).try(:name)
 			end
+			# the user association
+			pl.user_id = rl.user_id
 			pl.save
 		end
 	end

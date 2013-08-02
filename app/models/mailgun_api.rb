@@ -35,7 +35,7 @@ class MailgunApi
 		@reward_type = @reward_scheme.rewards[0]["type"]
 		if [RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::POINT].include? @reward_type
 			amount = @reward_scheme.rewards[0]["amount"]
-			@amount = @reward == Reward::JIFENBAO ? amount / 100 : amount
+			@amount = @reward == RewardScheme::JIFENBAO ? amount / 100 : amount
 		end
 
 		if [RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::POINT].include? @reward_type
@@ -77,8 +77,8 @@ class MailgunApi
 		data[:domain] = Rails.application.config.survey_email_domain
 		data[:from] = @@survey_email_from
 
-		html_template_file_name = "#{Rails.root}/app/views/survey_mailer/survey_email.html.erb"
-		text_template_file_name = "#{Rails.root}/app/views/survey_mailer/survey_email.text.erb"
+		html_template_file_name = "#{Rails.root}/app/views/survey_mailer/push_email.html.erb"
+		text_template_file_name = "#{Rails.root}/app/views/survey_mailer/push_email.text.erb"
 		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
 		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
 		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
@@ -87,7 +87,10 @@ class MailgunApi
 
 		data[:subject] = "邀请您参加问卷调查"
 		data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
+		puts "AAAAAAAAAAAAAAAAAAAAAA"
 		@group_emails.each_with_index do |emails, i|
+			puts "BBBBBBBBBBBBBBBBBBBBBB"
+			puts emails.inspect
 			data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
 			data[:'recipient-variables'] = @group_recipient_variables[i].to_json
 			self.send_message(data)
