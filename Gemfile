@@ -65,7 +65,7 @@ group :test do
 end
 
 group :production do
-  gem 'passenger', '~> 3.0.19'
+  gem 'passenger'#, '~> 3.0.19'
 end
 
 gem 'quill_common', :path => "../quill_common"
