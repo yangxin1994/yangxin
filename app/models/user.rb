@@ -512,7 +512,7 @@ class User
 	def self.login_with_auth_key(auth_key)
 		user = User.find_by_auth_key(auth_key)
 		return ErrorEnum::AUTH_KEY_NOT_EXIST if user.nil?
-		return {"user_id" => user._id, "email" => user.email, "status" => user.status, "auth_key" => user.auth_key, "expire_at" => user.auth_key_expire_time, "role" => user.role}
+		return {"user_id" => user._id, "email" => user.email, "mobile" => user.mobile, "status" => user.status, "auth_key" => user.auth_key, "expire_at" => user.auth_key_expire_time, "role" => user.user_role}
 	end
 
 	#*description*: reset password for an user, used when the user forgets its password

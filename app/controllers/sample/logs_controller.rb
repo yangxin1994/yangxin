@@ -47,6 +47,6 @@ class Sample::LogsController < ApplicationController
     @paginated_logs = auto_paginate @logs.desc(:created_at) do |paginated_logs|
       paginated_logs.map { |e| e.info_for_sample }
     end
-    render_json_auto auto_paginate @paginated_logs
+    render_json_auto @paginated_logs
   end
 end
