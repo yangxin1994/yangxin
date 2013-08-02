@@ -28,7 +28,8 @@ class RegistrationsController < ApplicationController
 		if params[:email_mobile].match(/^\d{11}$/)
 			##TODO send_mobile_message()
 		else
-			EmailWorker.perform_async("activate", user.email, params[:callback])
+			#EmailWorker.perform_async("activate", user.email, params[:callback])
+			EmailWorker.perform_async("welcome", user.email, params[:callback])
 		end
 		render_json_s and return
 	end

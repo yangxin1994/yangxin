@@ -31,14 +31,16 @@ class Sample::UsersController < ApplicationController
     render_json_auto(@current_user.completed_info) 
   end
 
+  #生成订阅用户并发激活码或者邮件
   def make_rss_activate
     retval = User.create_rss_user(params[:rss_channel],params[:callback])
     render_json_auto retval
   end 
 
-  def make_subscribe_active
+  #订阅邮件激活
+  def make_subscribe_active  
     begin
-      activate_info_json = Encryption.decrypt_activate_key(params[:activate_key])
+      activate_info_json = Encryption.decrypt_activate_key(params[:key])
       activate_info = JSON.parse(activate_info_json)
     rescue
       render_json_e(ErrorEnum::ILLEGAL_ACTIVATE_KEY) and return
@@ -47,6 +49,27 @@ class Sample::UsersController < ApplicationController
     retval = User.activate_rss_subscribe(activate_info)
     render_json_auto(retval) and return    
   end
+
+
+  # def send_activate_key
+  #   user = nil
+  #   if params[:email_mobile].match(/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/)  ## match email
+  #     user = User.find_by_email(params[:email_mobile].downcase)
+  #   elsif params[:email_mobile].match(/^\d{11}$/)  ## match mobile
+  #     user = User.find_by_mobile(params[:email_mobile])
+  #   end
+  #   render_json_e(ErrorEnum::USER_NOT_EXIST) and return if user.nil?
+  #   render_json_e(ErrorEnum::USER_NOT_REGISTERED) and return if user.status == 0
+  #   render_json_e(ErrorEnum::USER_ACTIVATED) and return if user.is_activated
+  #   if params[:email_mobile].match(/^\d{11}$/)
+  #     ##TODO send_mobile_message()
+  #   else
+  #     #EmailWorker.perform_async("activate", user.email, params[:callback])
+  #     EmailWorker.perform_async("welcome", user.email, params[:callback])
+  #   end
+  #   render_json_s and return
+  # end
+
 
 
   def make_rss_mobile_activate

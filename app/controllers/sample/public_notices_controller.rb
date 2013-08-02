@@ -8,7 +8,7 @@ class Sample::PublicNoticesController < ApplicationController
   #可能返回的参数:一个盛放公告的列表
   #############################		
   def get_newest
-    @public_notices = auto_paginate PublicNotice.where(:status => 2).desc(:updated_at)
+    @public_notices = auto_paginate PublicNotice.opend.desc(:updated_at)
     render_json_auto @public_notices and return
   end
 

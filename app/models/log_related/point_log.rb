@@ -32,4 +32,12 @@ class PointLog < Log
 		return point_log_obj
 		
 	end
+
+	#创建礼品兑换产生的积分变化记录
+	def self.create_reedm_point_log(amount,gift_id,sample_id)
+		gift = Gift.find_by_id(gift_id)
+		gift_name = gift.try(:title)
+		gift_picture_url = gift.photo.present? ? gift.photo.picture_url  :  Gift::DEFAULT_IMG
+		self.create(:amount => amount,:gift_id => gift_id,:gift_name => gift_name,:reason => 8,:gift_picture_url => gift_picture_url,:user_id => sample_id)
+	end
 end

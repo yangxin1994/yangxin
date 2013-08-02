@@ -15,6 +15,9 @@ class PublicNotice
 	
 	# attr_accessible :title, :content, :attachment, :status#, :public_notice_type
 
+	scope :opend, where(:status => 2)
+	scope :closed, where(:status => 1)
+
 	validates_presence_of :title#, :public_notice_type
 		
 	class << self
