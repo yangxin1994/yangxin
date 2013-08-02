@@ -290,6 +290,8 @@ class MigrateDb
 			# the user association
 			pl.user_id = rl.user_id
 			pl.save
+			pl.created_at = rl.created_at
+			pl.save
 		end
 	end
 end
