@@ -390,27 +390,29 @@ class Result
 		input_ids.map! { |e| e.to_s }
 
 		scores = {}
-		input_ids.each { |input_id| scores[input_id] = [] }
+		label_number = issue["labels"].length
+		input_ids.each do |input_id|
+			scores[input_id] = { "histogram" => Array.new(label_number+1){0}, "mean" => [] }
+		end
 		
 		answer_ary.each do |answer|
 			answer.each do |input_id, value|
 				# value is 0-based, should be converted to score-based
 				input_ids.each do |k|
 					if k.split(',').include?(input_id)
-						scores[k] << value + 1 if value.to_i != -1
+						scores[k]["histogram"][value+1] ||= 0
+						scores[k]["histogram"][value+1] += 1
+						scores[k]["mean"] << value + 1 if value.to_i != -1
 						break
 					end
 				end
 			end
 		end
 
-		result = {}
 		scores.each do |key, score_ary|
-			result[key] = []
-			result[key] << score_ary.length
-			result[key] << (score_ary.blank? ? 0 : score_ary.mean)
+			scores[key]["mean"] = scores[key]["mean"].mean
 		end
-		return result
+		return scores
 	end
 
 

@@ -37,18 +37,16 @@ class Sample::LogsController < ApplicationController
   end
 
   def get_point_change_log
-    if params[:scope].present? && params[:scope] == 'in'
-      @logs = Log.where(:type => 8,:user_id => @current_user.id, 'data.amount.gt' => 0).desc(:created_at).page(params[:page]).per(params[:per_page])
-    elsif params[:scope].present? && params[:scope] == 'out' 
-      @logs = Log.where(:type => 8,:user_id => @current_user.id, 'data.amount.lt' => 0).desc(:created_at).page(params[:page]).per(params[:per_page])  
+    if params[:scope] == 'in'
+      @logs = PointLog.where(:user_id => @current_user.id, :amount.gt => 0)
+    elsif params[:scope] == 'out' 
+      @logs = PointLog.where(:user_id => @current_user.id, :amount.lt => 0)
     else
-      @logs = Log.where(:type => 8,:user_id => @current_user.id).desc(:created_at).page(params[:page]).per(params[:per_page]) 
+      @logs = PointLog.where(:user_id => @current_user.id)
     end
-    
-    render_json_auto auto_paginate @logs
+    @paginated_logs = auto_paginate @logs.desc(:created_at) do |paginated_logs|
+      paginated_logs.map { |e| e.info_for_sample }
+    end
+    render_json_auto auto_paginate @paginated_logs
   end
-
-
-
-
 end

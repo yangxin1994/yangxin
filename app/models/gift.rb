@@ -34,6 +34,7 @@ class Gift
 	field :redeem_number, :type => Hash, default: {"mode" => SINGLE}
 
 	has_one :photo, :class_name => "Material", :inverse_of => 'gift'
+	has_many :orders
 
 	#default_scope order_by(:created_at.desc)
 	scope :normal, where(:status.in => [OFF_THE_SHELF, ON_THE_SHELF])
