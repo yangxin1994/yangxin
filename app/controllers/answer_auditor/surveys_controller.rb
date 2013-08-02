@@ -3,7 +3,7 @@ require 'error_enum'
 class AnswerAuditor::SurveysController < AnswerAuditor::ApplicationController
 
 	def index
-		if @current_user.is_admin
+		if @current_user.is_admin?
 			@surveys = Survey.where(
 					:status => Survey::PUBLISHED
 				).desc(:created_at)
