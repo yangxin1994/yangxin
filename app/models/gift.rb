@@ -4,8 +4,8 @@ class Gift
 	include Mongoid::Document
 	include Mongoid::Timestamps
 
-	OFF_THE_SHELF = 1
-	ON_THE_SHELF = 2
+	OFF_THE_SHELF = 2
+	ON_THE_SHELF = 1
 	DELETED = 4
 
 	VIRTUAL = 1
@@ -34,6 +34,7 @@ class Gift
 	field :redeem_number, :type => Hash, default: {"mode" => SINGLE}
 
 	has_one :photo, :class_name => "Material", :inverse_of => 'gift'
+	has_many :orders
 
 	#default_scope order_by(:created_at.desc)
 	scope :normal, where(:status.in => [OFF_THE_SHELF, ON_THE_SHELF])
@@ -116,6 +117,9 @@ class Gift
 
 
 	def self.generate_gift_id(order_type)
+		Rails.logger.info("^^^^^^^^^^^^^^^^^^^^^^^")
+		Rails.logger.info(order_type)
+		Rails.logger.info("^^^^^^^^^^^^^^^^^^^^^^^")
 		gift = self.find_by_id(order_type)
 		if gift.present?
 			return gift._id

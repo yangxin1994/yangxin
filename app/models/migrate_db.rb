@@ -1,7 +1,8 @@
+#encoding: utf-8
 class MigrateDb
 
-
 	def self.migrate
+		self.migrate_point_log
 		self.migrate_gift
 		self.migrate_prize
 		self.migrate_order
@@ -12,8 +13,8 @@ class MigrateDb
 
 	def self.migrate_survey
 		puts "Migrating surveys......"
-		surveys = Survey.where(:updated => nil).to_a
-		surveys.each_with_index do |s, index|
+		update_time = Time.now
+		Survey.where(:updated_at.lt => update_time).each_with_index do |s, index|
 			puts index if index%10 == 0
 			# the status field
 			if s.status == -1
@@ -67,17 +68,12 @@ class MigrateDb
 				"audio" => "","reward_scheme_id" => "" }
 
 			s.sample_attributes_for_promote = []
-		end
-		surveys.each do |s|
-			s.write_attribute("updated", true)
 			s.save
 		end
 	end
 
 	def self.migrate_answer
 		puts "Migrating answers......"
-		# answers = Answer.where(:updated => nil).to_a
-		# answers.each_with_index do |a, index|
 		update_time = Time.now
 		Answer.where(:updated_at.lt => update_time).each_with_index do |a, index|
 			puts index if index%100 == 0
@@ -113,15 +109,14 @@ class MigrateDb
 			a.rewards = []
 			# the need review field
 			a.need_review = a.survey.try(:answer_need_review)
-			a.write_attribute("updated", true)
 			a.save
 		end
 	end
 
 	def self.migrate_user
 		puts "Migrating users......"
-		users = User.where(:updated => nil).to_a
-		users.each_with_index do |u, index|
+		update_time = Time.now
+		User.where(:updated_at.lt => update_time).each_with_index do |u, index|
 			puts index if index%10 == 0
 			# remove the password_confirmation
 			u.password_confirmation = nil if u.read_attribute("password_confirmation").present?
@@ -136,9 +131,6 @@ class MigrateDb
 			u.user_role = user_role
 			# the status field
 			u.status = u.status == 0 ? User::VISITOR : User::REGISTERED
-		end
-		users.each do |u|
-			u.write_attribute("updated", true)
 			u.save
 		end
 	end
@@ -158,7 +150,7 @@ class MigrateDb
 			g.status = [-1,0].include?(bg.status) ? Gift::OFF_THE_SHELF : Gift::ON_THE_SHELF
 			g.status = Gift::DELETED if bg.is_deleted
 			# the title field
-			g.title = bg.title
+			g.title = bg.name
 			# the description field
 			g.description = bg.description
 			g.save
@@ -186,7 +178,7 @@ class MigrateDb
 			# the status field
 			p.status = bg.is_deleted ? Prize::DELETED : Prize::NORMAL
 			# the title field
-			p.title = bg.title
+			p.title = bg.name
 			# the description field
 			p.description = bg.description
 			p.save
@@ -200,8 +192,8 @@ class MigrateDb
 
 	def self.migrate_order
 		puts "Migrating orders......"
-		orders = Order.all.where(:updated => nil).to_a
-		orders.each_with_index do |o, index|
+		update_time = Time.now
+		Order.where(:updated_at.lt => update_time).each_with_index do |o, index|
 			puts index if index%100 == 0
 			# the code field
 			o.code = o.created_at.strftime("%Y%m%d") + sprintf("%05d",rand(10000))
@@ -213,7 +205,7 @@ class MigrateDb
 				gift_id = o.gift_id.to_s
 				gift = Gift.where(:basic_gift_id => gift_id)[0]
 				# the type field
-				o.type = gift.type == Gift::REAL ? Order::REAL_GOOD : Order::VIRTUAL_GOOD
+				o.type = gift.type == Gift::REAL ? Order::REAL : Order::VIRTUAL
 				# the gift association
 				o.gift_id = gift._id
 				# the point field
@@ -225,7 +217,7 @@ class MigrateDb
 				prize_id = o.gift_id.to_s
 				prize = Prize.where(:basic_gift_id => prize_id)[0]
 				# the type field
-				o.type = prize.type == Prize::REAL ? Order::REAL_GOOD : Order::VIRTUAL_GOOD
+				o.type = prize.type == Prize::REAL ? Order::REAL : Order::VIRTUAL
 				# the prize association
 				o.prize_id = prize._id
 			end
@@ -246,11 +238,60 @@ class MigrateDb
 			elsif o.status == -3
 				o.status = Order::FAIL
 			end
-				
-		end
-		orders.each do |o|
-			o.write_attribute("updated", true)
 			o.save
+		end
+	end
+
+	def self.migrate_point_log
+		PointLog.destroy_all
+		puts "Migrating point logs......"
+		RewardLog.all.each_with_index do |rl, index|
+			puts index if index%100 == 0
+			next if rl.type == 1 # lottery log
+			pl = PointLog.new
+			# the amount field
+			pl.amount = rl.point
+			# the reason field
+			if rl.cause == 0
+				pl.reason = PointLog::ADMIN_OPERATE
+			elsif rl.cause == 1
+				pl.reason = PointLog::INVITE_USER
+			elsif rl.cause == 2
+				pl.reason = PointLog::ANSWER
+			elsif rl.cause == 3
+				pl.reason = PointLog::SPREAD
+			elsif rl.cause == 4
+				pl.reason = PointLog::REDEEM
+			elsif rl.cause == 5
+				pl.reason = PointLog::REVOKE
+			end
+			# the remark field
+			pl.remark = rl.cause_desc
+			if pl.reason == PointLog::REVOKE
+				pl.remark = "订单撤销"
+			end
+			if pl.reason == PointLog::INVITE_USER
+				pl.remark = "邀请样本注册"
+			end
+			if pl.reason == PointLog::SPREAD
+				pl.remark = "邀请样本填写问卷"
+			end
+			# the survey_id and survey_title field
+			if pl.reason == PointLog::ANSWER
+				pl.survey_id = rl.filled_survey.try(:_id).to_s
+				pl.survey_title = rl.filled_survey.try(:title).to_s
+			end
+			# the gift name field
+			if pl.reason == PointLog::REDEEM
+				pl.gift_name = rl.order.try(:gift).try(:name)
+				pl.gift_id = rl.order.try(:gift).try(:_id).to_s
+				pl.gift_picture_url = rl.order.try(:gift).try(:photo).try(:picture_url)
+			end
+			# the user association
+			pl.user_id = rl.user_id
+			pl.save
+			pl.created_at = rl.created_at
+			pl.save
 		end
 	end
 end

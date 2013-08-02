@@ -6,7 +6,7 @@ class PublicNotice
 	field :content, :type => String
 	field :attachment, :type => String
 	## status can be 1(close)，2(publish) 4(deleted, just can be change by destroy method)
-	field :status, :type => Integer, :default => 1
+	field :status, :type => Integer, :default => 2
 
 	belongs_to :user
 
@@ -14,6 +14,9 @@ class PublicNotice
 	# index({ public_notice_type: 1, content: 1 }, { background: true } )
 	
 	# attr_accessible :title, :content, :attachment, :status#, :public_notice_type
+
+	scope :opend, where(:status => 2)
+	scope :closed, where(:status => 1)
 
 	validates_presence_of :title#, :public_notice_type
 		
@@ -35,7 +38,6 @@ class PublicNotice
 		end
 
 		def create_public_notice(new_public_notice, user)
-            return ErrorEnum::PUBLIC_NOTICE_STATUS_ERROR if ![1, 2].include?(new_public_notice[:status])
 			public_notice = PublicNotice.new(new_public_notice)
 			user.public_notices << public_notice if user && user.instance_of?(User)
 			return public_notice.save			

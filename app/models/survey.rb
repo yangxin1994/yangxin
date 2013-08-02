@@ -1929,6 +1929,13 @@ class Survey
 		return self.save
 	end
 
+	def update_sample_attribute_for_promote(index, sample_attribute)
+		s = SampleAttribute.normal.find_by_id(sample_attribute["sample_attribute_id"])
+		return ErrorEnum::SAMPLE_ATTRIBUTE_NOT_EXIST if s.nil?
+		self.sample_attributes_for_promote[index] = sample_attribute
+		return self.save
+	end
+
 	def remove_sample_attribute_for_promote(index)
 		self.sample_attributes_for_promote.delete(index)
 		return self.save

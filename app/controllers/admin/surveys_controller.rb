@@ -140,6 +140,10 @@ class Admin::SurveysController < Admin::ApplicationController
 		render_json_auto @survey.add_sample_attribute_for_promote(params[:sample_attribute]) and return
 	end
 
+	def update_sample_attribute_for_promote
+		render_json_auto @survey.update_sample_attribute_for_promote(params[:sample_attribute_index], params[:sample_attribute]) and return
+	end
+
 	def remove_sample_attribute_for_promote
 		render_json_auto @survey.remove_sample_attribute_for_promote(params[:sample_attribute_index]) and return
 	end

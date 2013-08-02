@@ -224,6 +224,7 @@ class User
 		return (self.user_role.to_i & INTERVIEWER) > 0
 	end
 
+	#生成订阅用户并发激活码或者邮件
 	def self.create_rss_user(email_mobile,callback=nil)
 		user = find_by_email_mobile(email_mobile)
 
@@ -266,7 +267,7 @@ class User
 		return {:success => true,:new_user => new_user}
 	end
 
-
+	#订阅邮件激活
 	def self.activate_rss_subscribe(active_info)
     email = active_info['email']
     time  = active_info['time']   
@@ -397,13 +398,12 @@ class User
 		affiliated = self.affiliated
 		if affiliated
 			complete = 0
-				affiliated.attributes.each do |attr|
-					if SampleAttribute::BASIC_ATTR.include?(attr)
-						complete += 1
-					end	
-				end
+			affiliated.attributes.each_key do |attr_name|
+				if SampleAttribute::BASIC_ATTR.include?(attr_name)
+					complete += 1
+				end	
+			end
 			basic_attr = SampleAttribute::BASIC_ATTR.length
-			return (complete.quo(basic_attr)).to_f 
 			return complete * 100 / basic_attr
 		else
 			return 0 
@@ -461,7 +461,6 @@ class User
 	def self.get_account_by_activate_key(activate_info)
 		user = User.find_by_email(activate_info["email"])
 		return ErrorEnum::USER_NOT_EXIST if user.nil? 
-		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
 		return activate_info["email"]
 	end
 
@@ -513,7 +512,7 @@ class User
 	def self.login_with_auth_key(auth_key)
 		user = User.find_by_auth_key(auth_key)
 		return ErrorEnum::AUTH_KEY_NOT_EXIST if user.nil?
-		return {"user_id" => user._id, "email" => user.email, "status" => user.status, "auth_key" => user.auth_key, "expire_at" => user.auth_key_expire_time, "role" => user.role}
+		return {"user_id" => user._id, "email" => user.email, "mobile" => user.mobile, "status" => user.status, "auth_key" => user.auth_key, "expire_at" => user.auth_key_expire_time, "role" => user.user_role}
 	end
 
 	#*description*: reset password for an user, used when the user forgets its password
@@ -1009,7 +1008,7 @@ class User
 	def need_update_attribute(attr_name, updated_value)
 		sa = SampleAttribute.find_by_name(attr_name)
 		return false if sa.nil?
-		return true if ![DataType::NUMBER_RANGE, DataType::DATE_RANGE].include?(sa.data_type)
+		return true if ![DataType::NUMBER_RANGE, DataType::DATE_RANGE].include?(sa.type)
 		sa_value = self.read_sample_attribute(attr_name)
 		return true if sa_value.nil?
 		begin
@@ -1034,7 +1033,8 @@ class User
 	def write_sample_attribute(name, value)
 		sa = SampleAttribute.find_by_name(name)
 		return nil if sa.nil?
-		sa.affiliated.write_attribute(sa.name.to_sym, value)
+		self.affiliated.write_attribute(sa.name.to_sym, value)
+		return self.affiliated.save
 	end
 
 	def write_sample_attribute_by_id(sa_id, value)

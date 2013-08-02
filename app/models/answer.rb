@@ -942,7 +942,7 @@ class Answer
 			# update the survey spread
 			SurveySpread.inc(introducer, self.survey)
 			if point_to_introducer > 0
-				RewardLog.create(:user => introducer, :type => 2, :point => self.point_to_introducer, :extended_survey_id => self.survey_id, :cause => 3)
+				PointLog.create(:amount => self.point_to_introducer, :reason => PointLog::SPREAD, :survey_id => self.survey._id.to_s, :survey_title => self.survey.title)
 				# send the introducer a message about the rewarded points
 				introducer.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.point_to_introducer}个积分奖励。", [introducer._id.to_s])
 			end
