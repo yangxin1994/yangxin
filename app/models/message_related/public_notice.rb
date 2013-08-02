@@ -6,7 +6,7 @@ class PublicNotice
 	field :content, :type => String
 	field :attachment, :type => String
 	## status can be 1(close)，2(publish) 4(deleted, just can be change by destroy method)
-	field :status, :type => Integer, :default => 1
+	field :status, :type => Integer, :default => 2
 
 	belongs_to :user
 
@@ -35,7 +35,6 @@ class PublicNotice
 		end
 
 		def create_public_notice(new_public_notice, user)
-            return ErrorEnum::PUBLIC_NOTICE_STATUS_ERROR if ![1, 2].include?(new_public_notice[:status])
 			public_notice = PublicNotice.new(new_public_notice)
 			user.public_notices << public_notice if user && user.instance_of?(User)
 			return public_notice.save			
