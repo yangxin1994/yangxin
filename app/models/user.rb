@@ -224,6 +224,7 @@ class User
 		return (self.user_role.to_i & INTERVIEWER) > 0
 	end
 
+	#生成订阅用户并发激活码或者邮件
 	def self.create_rss_user(email_mobile,callback=nil)
 		user = find_by_email_mobile(email_mobile)
 
@@ -266,7 +267,7 @@ class User
 		return {:success => true,:new_user => new_user}
 	end
 
-
+	#订阅邮件激活
 	def self.activate_rss_subscribe(active_info)
     email = active_info['email']
     time  = active_info['time']   
@@ -461,7 +462,6 @@ class User
 	def self.get_account_by_activate_key(activate_info)
 		user = User.find_by_email(activate_info["email"])
 		return ErrorEnum::USER_NOT_EXIST if user.nil? 
-		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
 		return activate_info["email"]
 	end
 
