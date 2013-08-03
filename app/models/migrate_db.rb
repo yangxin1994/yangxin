@@ -205,7 +205,7 @@ class MigrateDb
 				gift_id = o.gift_id.to_s
 				gift = Gift.where(:basic_gift_id => gift_id)[0]
 				# the type field
-				o.type = gift.type == Gift::REAL ? Order::REAL_GOOD : Order::VIRTUAL_GOOD
+				o.type = gift.type == Gift::REAL ? Order::REAL : Order::VIRTUAL
 				# the gift association
 				o.gift_id = gift._id
 				# the point field
@@ -217,7 +217,7 @@ class MigrateDb
 				prize_id = o.gift_id.to_s
 				prize = Prize.where(:basic_gift_id => prize_id)[0]
 				# the type field
-				o.type = prize.type == Prize::REAL ? Order::REAL_GOOD : Order::VIRTUAL_GOOD
+				o.type = prize.type == Prize::REAL ? Order::REAL : Order::VIRTUAL
 				# the prize association
 				o.prize_id = prize._id
 			end

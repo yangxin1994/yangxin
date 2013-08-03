@@ -33,6 +33,10 @@ class PointLog < Log
 		
 	end
 
+	def self.create_admin_operate_point_log(amount, remark)
+		self.create(:amount => amount, :reason => ADMIN_OPERATE, :remark => remark)
+	end
+
 	#创建礼品兑换产生的积分变化记录
 	def self.create_reedm_point_log(amount,gift_id,sample_id)
 		gift = Gift.find_by_id(gift_id)

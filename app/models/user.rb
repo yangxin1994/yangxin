@@ -619,14 +619,11 @@ class User
 	############### operations about point #################
 	#++
 	# admin inc
-	def operate_point(point, cause_desc, user_id)
-		u = User.find_by_id_including_deleted(user_id)
-		operate_reward_logs.create(
-			:point => point,
-			:cause_desc => cause_desc,
-			:user => u,
-			:type => 2,
-		:cause => 0)
+	def operate_point(amount, remark)
+		self.point += amount.to_i
+		self.save
+		PointLog.create_admin_operate_point_log(amount, remark)
+		return true
 	end
 	#--
 	############### operations about charge #################
