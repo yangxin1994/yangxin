@@ -233,8 +233,8 @@ class Survey
     	status = 2 unless status.present?
     	reward_types = Survey.quillme_promote.not_quillme_hot.status(status).map{|s| s.quillme_promote_reward_type}
     	reward_data = {}
-    	reward_types.each do |rt|
-    		reward_data[rt] = Survey.where(:quillme_promote_reward_type => rt).count
+    	reward_types.uniq.each do |rt|
+    		reward_data[rt] = Survey.quillme_promote.not_quillme_hot.status(status).where(:quillme_promote_reward_type => rt).count
     	end
     	return reward_data
     end
