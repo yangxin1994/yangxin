@@ -233,8 +233,8 @@ class Survey
     	status = 2 unless status.present?
     	reward_types = Survey.quillme_promote.not_quillme_hot.status(status).map{|s| s.quillme_promote_reward_type}
     	reward_data = {}
-    	reward_types.each do |rt|
-    		reward_data[rt] = Survey.where(:quillme_promote_reward_type => rt).count
+    	reward_types.uniq.each do |rt|
+    		reward_data[rt] = Survey.quillme_promote.not_quillme_hot.status(status).where(:quillme_promote_reward_type => rt).count
     	end
     	return reward_data
     end
@@ -1925,6 +1925,13 @@ class Survey
 		s = SampleAttribute.normal.find_by_id(sample_attribute["sample_attribute_id"])
 		return ErrorEnum::SAMPLE_ATTRIBUTE_NOT_EXIST if s.nil?
 		self.sample_attributes_for_promote << sample_attribute
+		return self.save
+	end
+
+	def update_sample_attribute_for_promote(index, sample_attribute)
+		s = SampleAttribute.normal.find_by_id(sample_attribute["sample_attribute_id"])
+		return ErrorEnum::SAMPLE_ATTRIBUTE_NOT_EXIST if s.nil?
+		self.sample_attributes_for_promote[index] = sample_attribute
 		return self.save
 	end
 
