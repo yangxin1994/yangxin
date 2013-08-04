@@ -1,5 +1,5 @@
 # encoding: utf-8
-class PublishLog < Log
+class SpreadLog < Log
 	field :type, :type => Integer, :default => 32
 	field :survey_id, :type => String
 	field :survey_title, :type => String
