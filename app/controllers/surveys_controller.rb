@@ -318,4 +318,8 @@ class SurveysController < ApplicationController
 		paginated_surveys = auto_paginate surveys
 		render_json_auto(paginated_surveys)
 	end
+
+	def default_reward_scheme_id
+		render_json_auto @survey.reward_schemes.where(:default => true).first.try(:_id) and return
+	end
 end

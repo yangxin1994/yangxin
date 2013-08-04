@@ -95,7 +95,7 @@ class Survey
 	}
 	field :broswer_extension_promote_info, :type => Hash, default: {
 		"login_sample_promote_only" => false,
-		"filter" => [[{"key_word" => [""], "url" => ""}]],
+		"filter" => [{"key_word" => [""], "url" => ""}],
 		"reward_scheme_id" => ""
 	}
 	field :weibo_promote_info, :type => Hash, default: {
@@ -1941,7 +1941,7 @@ class Survey
 	end
 
 	def create_default_reward_scheme
-		r = RewardScheme.create(:name => "默认奖励方案", :rewards => [], :need_review => false)
+		r = RewardScheme.create(:name => "默认奖励方案", :rewards => [], :need_review => false, :default => true)
 		self.reward_schemes << r
 	end
 

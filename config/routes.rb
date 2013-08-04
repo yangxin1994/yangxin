@@ -339,6 +339,7 @@ OopsData::Application.routes.draw do
 			put 'update_deadline'
 			post 'update_star'
 			get 'reward_info'
+			get :default_reward_scheme_id
 		end
 		resources :pages do
 			member do

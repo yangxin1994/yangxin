@@ -8,6 +8,7 @@ class RewardScheme
 	field :name, type: String, default: ""
 	field :rewards, type: Array, default: []
 	field :need_review, type: Boolean, default: false
+	field :default, type: Boolean, default: false
 
 	MOBILE = 1
 	ALIPAY = 2
@@ -17,6 +18,8 @@ class RewardScheme
 
 	belongs_to :survey
 	has_many :answers
+
+	scope :not_default, where(default: false)
 
 	def self.find_by_id(reward_scheme_id)
 		return RewardScheme.where(:_id => reward_scheme_id).first
@@ -33,7 +36,7 @@ class RewardScheme
 	def self.update_reward_scheme(reward_scheme_id, reward_scheme)
 		retval = verify_reward_scheme_type(reward_scheme)
 		return retval if !(retval.to_s == "true")
-		reward = RewardScheme.find_by_id(reward_scheme_id)
+		reward = RewardScheme.not_default.find_by_id(reward_scheme_id)
 		reward.update_attributes(reward_scheme)
 		return true
 	end
