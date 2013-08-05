@@ -9,7 +9,7 @@ class Admin::RewardSchemesController < Admin::ApplicationController
 	end
 
 	def index
-		reward_schemes = @survey.reward_schemes
+		reward_schemes = @survey.reward_schemes.not_default
 		render_json_auto( auto_paginate(reward_schemes) )  and return
 	end
 

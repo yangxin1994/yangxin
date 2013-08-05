@@ -83,6 +83,7 @@ OopsData::Application.routes.draw do
 				get :point_log, :redeem_log, :lottery_log
 				post :block
 				put :set_sample_role
+				put :operate_point
 			end
 			collection do
 				post :send_message
@@ -338,6 +339,7 @@ OopsData::Application.routes.draw do
 			put 'update_deadline'
 			post 'update_star'
 			get 'reward_info'
+			get :default_reward_scheme_id
 		end
 		resources :pages do
 			member do
