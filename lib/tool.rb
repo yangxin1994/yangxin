@@ -7,7 +7,8 @@ require 'quill_common'
 module Tool
 
 	def self.generate_active_mobile_code
-		Random.rand(100000..999999).to_i	
+		# Random.rand(100000..999999).to_i	
+		return 111111
 	end
 
 	def self.generate_active_email_token
