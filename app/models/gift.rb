@@ -117,9 +117,6 @@ class Gift
 
 
 	def self.generate_gift_id(order_type)
-		Rails.logger.info("^^^^^^^^^^^^^^^^^^^^^^^")
-		Rails.logger.info(order_type)
-		Rails.logger.info("^^^^^^^^^^^^^^^^^^^^^^^")
 		gift = self.find_by_id(order_type)
 		if gift.present?
 			return gift._id
