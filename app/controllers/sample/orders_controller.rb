@@ -28,6 +28,6 @@ class Sample::OrdersController < ApplicationController
 			@current_user.set_receiver_info(opt)
 		end		 	
 		render_json_e ErrorEnum::INVALID_GIFT_ID and return unless gift_id
-		render_json_auto Order.create_redeem_order(@current_user._id,gift_id,amount,point,opt) and return
+		render_json_auto Order.create_redeem_order(@current_user._id, gift_id, amount, point, opt) and return
 	end
 end
