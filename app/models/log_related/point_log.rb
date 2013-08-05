@@ -41,7 +41,17 @@ class PointLog < Log
 	def self.create_reedm_point_log(amount,gift_id,sample_id)
 		gift = Gift.find_by_id(gift_id)
 		gift_name = gift.try(:title)
-		gift_picture_url = gift.photo.present? ? gift.photo.picture_url  :  Gift::DEFAULT_IMG
-		self.create(:amount => amount,:gift_id => gift_id,:gift_name => gift_name,:reason => 8,:gift_picture_url => gift_picture_url,:user_id => sample_id)
+		gift_picture_url = gift.photo.present? ? gift.photo.picture_url : Gift::DEFAULT_IMG
+		case gift.type
+		when Gift::MOBILE_CHARGE
+			gift_name = "#{amount}元话费"
+		when Gift::ALIPAY
+			gift_name = "#{amount}元支付宝"
+		when Gift::JIFENBAO
+			gift_name = "#{amount}集分宝"
+		when Gift::QQ_COIN
+			gift_name = "#{amount}元Q币"
+		end
+		self.create(:amount => -amount,:gift_id => gift_id,:gift_name => gift_name,:reason => PointLog::REDEEM,:gift_picture_url => gift_picture_url,:user_id => sample_id)
 	end
 end
