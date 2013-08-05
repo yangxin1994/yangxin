@@ -2,7 +2,7 @@
 class MigrateDb
 
 	def self.migrate
-		self.migrate_point_log
+		# self.migrate_point_log
 		self.migrate_gift
 		self.migrate_prize
 		self.migrate_order
@@ -36,7 +36,11 @@ class MigrateDb
 				s.quillme_promote_reward_type = RewardScheme::POINT
 			end
 			RewardScheme.create_reward_scheme(s, reward_scheme_setting)
-			reward_scheme = s.reward_schemes[0]
+			default_reward_scheme_setting = { "name" => "default scheme",
+				"rewards" => [],
+				"need_review" => false }
+			RewardScheme.create_reward_scheme(s, default_reward_scheme_setting)
+			reward_scheme = s.reward_schemes.not_default[0]
 			s.quillme_promote_info = { "reward_scheme_id" => reward_scheme._id.to_s }
 
 
@@ -132,6 +136,15 @@ class MigrateDb
 			# the status field
 			u.status = u.status == 0 ? User::VISITOR : User::REGISTERED
 			u.save
+
+			# point log
+			if u.point != 0
+				pl = PointLog.new
+				pl.amount = u.point
+				pl.user_id = u._id.to_s
+				pl.reason = PointLog::IMPORT
+				pl.save
+			end
 		end
 	end
 
@@ -242,6 +255,7 @@ class MigrateDb
 		end
 	end
 
+=begin
 	def self.migrate_point_log
 		PointLog.destroy_all
 		puts "Migrating point logs......"
@@ -294,4 +308,5 @@ class MigrateDb
 			pl.save
 		end
 	end
+=end
 end

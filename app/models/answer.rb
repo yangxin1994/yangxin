@@ -980,8 +980,8 @@ class Answer
 	end
 
 	def check_for_hot_survey(mobile, alipay_account, current_sample)
-		return true if self.survey.quillme_hot == true
-		if self.user.nil?
+		return false if self.survey.quillme_hot != true
+		if !self.user.nil?
 			return true if self.user.answers.not_preview.length > 0
 		else
 			return true if current_sample.answers.not_preview.length > 0

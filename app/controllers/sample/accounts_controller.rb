@@ -1,6 +1,7 @@
  # coding: utf-8
 require 'error_enum'
 require 'quill_common'
+require 'tool'
 class Sample::AccountsController < ApplicationController
 	before_filter :require_sign_in
 
@@ -123,7 +124,7 @@ class Sample::AccountsController < ApplicationController
 		render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST if !User.find_by_email(params[:mobile]).nil?
 		@current_user.mobile_to_be_changed = params[:mobile]
 		# @current_user.sms_verification_code = Random.rand(100000..999999).to_s
-		@current_user.sms_verification_code = "111111"
+		@current_user.sms_verification_code = Tool.generate_active_mobile_code
 		@current_user.sms_verification_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
 		@current_user.save
 		## todo: send message to the mobile

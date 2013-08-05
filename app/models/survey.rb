@@ -95,7 +95,7 @@ class Survey
 	}
 	field :broswer_extension_promote_info, :type => Hash, default: {
 		"login_sample_promote_only" => false,
-		"filter" => [[{"key_word" => [""], "url" => ""}]],
+		"filter" => [{"key_word" => [""], "url" => ""}],
 		"reward_scheme_id" => ""
 	}
 	field :weibo_promote_info, :type => Hash, default: {
@@ -141,10 +141,7 @@ class Survey
 	belongs_to :user, class_name: "User", inverse_of: :surveys
 
 
-	scope :published, lambda { where(:status  => 2) }
-	scope :normal, lambda { where(:status.gt => -1) }
-	scope :deleted, lambda { where(:status => -1) }
-	scope :stars, where(:status.gt => -1, :is_star => true)
+	
 	scope :in_community, lambda { where(:show_in_community => true) }
 	scope :is_promotable, lambda { where(:promotable => true) }
 	
@@ -178,6 +175,13 @@ class Survey
 	CLOSED = 1
 	PUBLISHED = 2
 	DELETED = 4
+
+
+	scope :stars, ->{where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
+	scope :published, lambda { where(:status  => 2) }
+	scope :normal, lambda { where(:status.gt => -1) }
+	scope :closed, lambda { where(:status => 1) }
+	scope :deleted, lambda { where(:status => 4) }
 
 	public
 
@@ -525,19 +529,30 @@ class Survey
 	#
 	#++++++++++++++++++++++++++++++++++++++++++++++
 
-	def delete
-		return self.update_attributes(:status => -1)
+	def delete(operator)
+		# old version
+		# return self.update_attributes(:status => -1)
+
+		# new version
+		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
+		return self.update_attributes(:status => DELETED)
 	end
 
-	def recover
-		return self.update_attributes(:status => 0)
+	def recover(operator)
+		# old version
+		# return self.update_attributes(:status => 0)
+
+		# new version
+		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
+		return self.update_attributes(:status => CLOSED)
 	end
 
-	def clear
-		return ErrorEnum::SURVEY_NOT_EXIST if self.status != -1
-		self.tags.each do |tag|
-			tag.destroy if tag.surveys.length == 1
-		end
+	def clear(operator)
+		# return ErrorEnum::SURVEY_NOT_EXIST if self.status != -1
+		# self.tags.each do |tag|
+		# 	tag.destroy if tag.surveys.length == 1
+		# end
+		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
 		return self.destroy
 	end
 
@@ -548,14 +563,14 @@ class Survey
 	#++++++++++++++++++++++++++++++++++++++++++++++
 
 	def close(operator)
-		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_survey_auditor
+		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin? && !operator.is_survey_auditor
 		return ErrorEnum::WRONG_STATUS if self.status != PUBLISHED
 		self.update_attributes(:status => CLOSED)
 		return true
 	end
 
 	def publish(operator)
-		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin && !operator.is_survey_auditor
+		return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin? && !operator.is_survey_auditor
 		return ErrorEnum::WRONG_STATUS if self.status != CLOSED
 		self.update_attributes(:status => PUBLISHED)
 		return true
@@ -1664,12 +1679,15 @@ class Survey
 
 	def self.list(status)
 		status_ary = Tool.convert_int_to_base_arr(status)
-		return Survey.where(:status.in => status_ary).desc(:created_at).map { |s| s.serialize_in_list_page }
+		# To solve different version status,
+		# status = 4 and  status = -1 are deleted status
+		status_ary << -1 if status_ary.include?(4)
+		return Survey.where(:status.in => status_ary).desc(:created_at)
 	end
 
-	def self.search_title(query)
-		surveys = Survey.where(title: Regexp.new(query.to_s)).desc(:created_at)
-		return surveys.map { |s| s.serialize_in_list_page }
+	def self.search_title(query, operate_user)
+		return Survey.where(title: Regexp.new(query.to_s)).desc(:created_at) if operate_user.is_admin?
+		return operate_user.surveys.where(title: Regexp.new(query.to_s)).desc(:created_at)
 	end
 
 	def answer_status(user)
@@ -1941,7 +1959,7 @@ class Survey
 	end
 
 	def create_default_reward_scheme
-		r = RewardScheme.create(:name => "默认奖励方案", :rewards => [], :need_review => false)
+		r = RewardScheme.create(:name => "默认奖励方案", :rewards => [], :need_review => false, :default => true)
 		self.reward_schemes << r
 	end
 
