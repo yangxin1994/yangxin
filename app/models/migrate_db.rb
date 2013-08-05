@@ -2,7 +2,7 @@
 class MigrateDb
 
 	def self.migrate
-		self.migrate_point_log
+		# self.migrate_point_log
 		self.migrate_gift
 		self.migrate_prize
 		self.migrate_order
@@ -136,6 +136,15 @@ class MigrateDb
 			# the status field
 			u.status = u.status == 0 ? User::VISITOR : User::REGISTERED
 			u.save
+
+			# point log
+			if u.point != 0
+				pl = PointLog.new
+				pl.amount = u.point
+				pl.user_id = u._id.to_s
+				pl.reason = PointLog::IMPORT
+				pl.save
+			end
 		end
 	end
 
@@ -246,6 +255,7 @@ class MigrateDb
 		end
 	end
 
+=begin
 	def self.migrate_point_log
 		PointLog.destroy_all
 		puts "Migrating point logs......"
@@ -298,4 +308,5 @@ class MigrateDb
 			pl.save
 		end
 	end
+=end
 end

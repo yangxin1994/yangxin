@@ -31,7 +31,7 @@ class Material
 	end
 
 	def self.create_image(image_url)
-		material = Material.new(:material_type => 1, :value => image_url)
+		material = Material.new(:material_type => 1, :value => image_url, :picture_url => image_url)
 		material.save
 		return material
 	end
