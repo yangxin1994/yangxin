@@ -136,8 +136,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def destroy
-		@survey.close("", @current_user)
-		retval = @survey.delete
+		retval = @survey.delete(@current_user)
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
@@ -157,7 +156,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist in the trash
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def recover
-		retval = @survey.recover
+		retval = @survey.recover(@current_user)
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
@@ -177,7 +176,7 @@ class SurveysController < ApplicationController
 	#* ErrorEnum ::SURVEY_NOT_EXIST : when the survey does not exist in the trash
 	#* ErrorEnum ::UNAUTHORIZED : when the survey does not belong to the current user
 	def clear
-		retval = @survey.clear
+		retval = @survey.clear(@current_user)
 		respond_to do |format|
 			format.json	{ render_json_auto(retval) and return }
 		end
@@ -249,13 +248,17 @@ class SurveysController < ApplicationController
 		else
 			survey_list = @current_user.surveys.list(params[:status])
 		end	
-		# add answer_number
-		survey_list.map do |e| 
-			e['screened_answer_number']=e.answers.not_preview.screened.length
-			e['finished_answer_number']=e.answers.not_preview.finished.length
-		end
+		
 		paginated_surveys = auto_paginate survey_list
-		render_json_auto(paginated_surveys)
+
+		# add answer_number
+		data = paginated_surveys["data"].map do |e| 
+			e.serialize_in_list_page
+		end
+
+		paginated_surveys["data"] = data
+
+		render_json_auto paginated_surveys
 	end
 
 	def list_surveys_in_community
@@ -285,13 +288,6 @@ class SurveysController < ApplicationController
 		end
 	end
 
-	def close
-		retval = @survey.close(@current_user)
-		respond_to do |format|
-			format.json	{ render_json_auto(retval) and return }
-		end
-	end
-
 	def update_deadline
 		retval = @survey.update_deadline(params[:deadline])
 		respond_to do |format|
@@ -314,7 +310,7 @@ class SurveysController < ApplicationController
 	end
 
 	def search_title
-		surveys = @current_user.surveys.search_title(params[:query])
+		surveys = Survey.search_title(params[:query], @current_user)
 		paginated_surveys = auto_paginate surveys
 		render_json_auto(paginated_surveys)
 	end

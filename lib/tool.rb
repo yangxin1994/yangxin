@@ -141,12 +141,12 @@ module Tool
 	end
 
 	def self.convert_int_to_base_arr(num)
+		num = num.to_i
 		base_arr = []
-		digit = 1
-		while num > 0
-			base_arr << digit if num%2 == 1
-			num = num/2
-			digit *= 2
+		digit = 0
+		while num > 0 and digit < 7
+			base_arr << 2**digit if num & 2**digit == 2**digit
+			digit = digit + 1
 		end
 		return base_arr
 	end
