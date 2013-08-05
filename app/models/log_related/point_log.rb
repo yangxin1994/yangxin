@@ -28,6 +28,7 @@ class PointLog < Log
 		point_log_obj["survey_title"] = self.survey_title
 		point_log_obj["survey_id"] = self.survey_id
 		point_log_obj["gift_name"] = self.gift_name
+		point_log_obj["gift_type"] = self.gift_type
 		point_log_obj["gift_id"] = self.gift_id
 		point_log_obj["gift_picture_url"] = self.gift_picture_url
 		point_log_obj["remark"] = self.remark
