@@ -36,12 +36,20 @@ class PointLog < Log
 		
 	end
 
-	def self.create_admin_operate_point_log(amount, remark)
-		self.create(:amount => amount, :reason => ADMIN_OPERATE, :remark => remark)
+	def self.create_admin_operate_point_log(amount, remark, sample_id)
+		self.create(:amount => amount, :reason => ADMIN_OPERATE, :remark => remark, :user_id => sample_id)
+	end
+
+	def self.create_answer_point_log(amount, survey_id, survey_title, sample_id)
+		self.create(:amount => amount, :reason => ANSWER, :survey_id => survey_id, :survey_title => survey_title, :user_id => sample_id)
+	end
+
+	def self.create_spread_point_log(amount, survey_id, survey_title, sample_id)
+		self.create(:amount => amount, :reason => SPREAD, :survey_id => survey_id, :survey_title => survey_title, :user_id => sample_id)
 	end
 
 	#创建礼品兑换产生的积分变化记录
-	def self.create_reedm_point_log(amount, gift_id, sample_id)
+	def self.create_redeem_point_log(amount, gift_id, sample_id)
 		gift = Gift.find_by_id(gift_id)
 		gift_name = gift.try(:title)
 		gift_picture_url = gift.photo.present? ? gift.photo.picture_url : Gift::DEFAULT_IMG

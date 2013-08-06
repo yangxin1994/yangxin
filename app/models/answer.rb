@@ -869,7 +869,7 @@ class Answer
 			quota["submitted_count"] = [quota["submitted_count"].to_i - 1, 0].max
 		end
 		quota["rules"].each do |rule|
-			next if !self.satisfy_conditions(rule["conditions"], false)
+			next if !self.satisfy_conditions(rule["conditions"] || [], false)
 			if old_status == EDIT && self.is_under_review
 				# user submits the answer
 				rule["submitted_count"] += 1
@@ -942,7 +942,7 @@ class Answer
 			# update the survey spread
 			SurveySpread.inc(introducer, self.survey)
 			if point_to_introducer > 0
-				PointLog.create(:amount => self.point_to_introducer, :reason => PointLog::SPREAD, :survey_id => self.survey._id.to_s, :survey_title => self.survey.title)
+				PointLog.create_spread_point_log(self.point_to_introducer, self.survey._id.to_s, self.survey.title, introducer._id)
 				# send the introducer a message about the rewarded points
 				introducer.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.point_to_introducer}个积分奖励。", [introducer._id.to_s])
 			end
@@ -1062,11 +1062,13 @@ class Answer
 		when RewardScheme::POINT
 			return true if self.status == UNDER_REVIEW
 			sample = self.user
-			sample.point += reward["amount"] unless sample.nil?
-			sample.save
-			PointLog.create(:amount => reward["amount"], :reason => PointLog::ANSWER, :survey_id => self.survey._id.to_s, :survey_title => self.survey.title)
+			if sample.present?
+				sample.point += reward["amount"]
+				sample.save
+				PointLog.create_answer_point_log(reward["amount"], self.survey_id.to_s, self.survey.title, sample._id)
+				self.update_attributes({"reward_delivered" => true})
+			end
 			assign_introducer_reward
-			self.update_attributes({"reward_delivered" => true})
 		when RewardScheme::LOTTERY
 			return true if self.status == UNDER_REVIEW
 			assign_introducer_reward
