@@ -19,9 +19,10 @@ class RedeemLog < Log
 			gift_name = "#{amount}集分宝"
 		when Gift::QQ_COIN
 			gift_name = "#{amount}元Q币"
+		when Gift::REAL
+			gift_name = gift.try(:title)
 		end
 
-		gift_name = gift.try(:title)
 		self.create(:amount => amount,:point => point,:gift_type => gift_type,:order_id => order_id,:gift_id => gift_id,:gift_name => gift_name,:user_id => user_id)
 	end
 
