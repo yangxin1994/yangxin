@@ -411,9 +411,9 @@ class Survey
 		reward > 0 ? true : false
 	end
 
-	def set_spread(spread_point, spreadable)
+	def set_spread(spread_point)
 		self.spread_point = spread_point
-		self.spreadable = spreadable
+		self.spreadable = spread_point > 0
 		return self.save
 	end
 

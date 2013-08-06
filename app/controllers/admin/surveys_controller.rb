@@ -121,12 +121,12 @@ class Admin::SurveysController < Admin::ApplicationController
 	end
 
 	def set_spread
-		retval = @survey.set_spread(params[:spread_point].to_i, params[:spreadable].to_s == "true")
+		retval = @survey.set_spread(params[:spread_point].to_i)
 		render_json_auto(retval) and return
 	end
 
 	def get_spread
-		@spread_info = {"spread_point" => @survey.spread_point, "spreadable" => @survey.spreadable}
+		@spread_info = {"spread_point" => @survey.spread_point}
 		render_json_auto @spread_info and return
 	end
 
