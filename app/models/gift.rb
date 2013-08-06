@@ -19,7 +19,7 @@ class Gift
 	INTERVAL = 2
 	ARRAY = 4
 
-	DEFAULT_IMG = '/assets/od-quillme/gifts/erji.jpg'
+	DEFAULT_IMG = '/assets/od-quillme/gifts/default.png'
 
 	# 1 off the shelf, 2 on the shelf, 4 deleted
 	field :status, :type => Integer, default: 1
@@ -48,7 +48,10 @@ class Gift
 
 	def self.find_real_gift(desc_type)
 		gifts = self.on_shelf.real.desc("#{desc_type}")
-		gifts.map{|gift| gift['photo'] = gift.photo.present? ? gift.photo.picture_url : DEFAULT_IMG}
+		gifts = gifts.map do |gift| 
+			gift['photo_src'] = gift.photo.nil? ? Gift::DEFAULT_IMG : gift.photo.picture_url
+			gift
+		end
 		return gifts
 	end
 
@@ -84,7 +87,7 @@ class Gift
 
 	def update_gift(gift)
 		photo_url = gift.delete("photo_url")
-		if !photo_url.blank? && photo_url != self.photo.value
+		if !photo_url.blank? && photo_url != self.photo.picture_url
 			material = Material.create_image(photo_url)
 			self.photo = material
 		end
