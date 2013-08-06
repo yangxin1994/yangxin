@@ -622,7 +622,7 @@ class User
 	def operate_point(amount, remark)
 		self.point += amount.to_i
 		self.save
-		PointLog.create_admin_operate_point_log(amount, remark)
+		PointLog.create_admin_operate_point_log(amount, remark, self._id)
 		return true
 	end
 	#--

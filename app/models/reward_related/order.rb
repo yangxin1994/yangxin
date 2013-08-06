@@ -102,7 +102,7 @@ class Order
 		order.save
 		sample.point -= point 
 		sample.save
-		PointLog.create_reedm_point_log(point,gift_id,sample_id)
+		PointLog.create_redeem_point_log(point,gift_id,sample_id)
 		RedeemLog.create_gift_exchange_logs(amount,point,gift.type,order.id,gift_id,sample_id)
 		order.auto_handle
 		return order
@@ -184,10 +184,10 @@ class Order
 		return false if ![MOBILE_CHARGE, JIFENBAO, QQ_COIN].include?(self.type)
 		case self.type
 		when MOBILE_CHARGE
-			ChargeClient.mobile_charge(self.mobile, self.amount, self._id.to_s)
+			# ChargeClient.mobile_charge(self.mobile, self.amount, self._id.to_s)
 		when JIFENBAO
 		when QQ_COIN
-			ChargeClient.qq_charge(self.qq, self.amount, self._id.to_s)
+			# ChargeClient.qq_charge(self.qq, self.amount, self._id.to_s)
 		end
 	end
 

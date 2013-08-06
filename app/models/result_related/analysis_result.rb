@@ -24,7 +24,7 @@ class AnalysisResult < Result
 
 	def self.generate_result_key(last_update_time, answers, tot_answer_number, screened_answer_number, ongoing_answer_number, wait_for_review_answer_number)
 		answer_ids = answers.map { |e| e._id.to_s }
-		result_key = Digest::MD5.hexdigest("analysis-#{answer_ids.to_s}-#{tot_answer_number}-#{screened_answer_number}-#{ongoing_answer_number}-#{wait_for_review_answer_number}")
+		result_key = Digest::MD5.hexdigest("analysis-#{last_update_time.to_s}-#{answer_ids.to_s}-#{tot_answer_number}-#{screened_answer_number}-#{ongoing_answer_number}-#{wait_for_review_answer_number}")
 		return result_key
 	end
 
@@ -108,17 +108,22 @@ class AnalysisResult < Result
 		# calculate the mean of duration
 		duration_mean = duration_mean.mean
 
-		# make stats of the finish time
-		min_finish_time = finish_time.min
-		# min_finish_date = Time.at(min_finish_time).to_date
-		# start_day = [min_finish_date.year, min_finish_date.month, min_finish_date.day]
-		start_day = min_finish_time
-		day_number = (finish_time.max / 86400 - min_finish_time / 86400) + 1
-		time_histogram = Array.new(day_number, 0)
-		finish_time.each do |t|
-			time_histogram[t / 86400 - min_finish_time / 86400] = time_histogram[t / 86400 - min_finish_time / 86400] + 1
+		if finish_time.present?
+			# make stats of the finish time
+			min_finish_time = finish_time.min
+			max_finish_time = finish_time.max
+			# min_finish_date = Time.at(min_finish_time).to_date
+			# start_day = [min_finish_date.year, min_finish_date.month, min_finish_date.day]
+			start_day = min_finish_time
+			day_number = (max_finish_time / 86400 - min_finish_time / 86400) + 1
+			time_histogram = Array.new(day_number, 0)
+			finish_time.each do |t|
+				time_histogram[t / 86400 - min_finish_time / 86400] = time_histogram[t / 86400 - min_finish_time / 86400] + 1
+			end
+			time_result = {"start_day" => start_day, "time_histogram" => time_histogram}
+		else
+			time_result = {"start_day" => nil, "time_histogram" => []}
 		end
-		time_result = {"start_day" => start_day, "time_histogram" => time_histogram}
 		Task.set_progress(task_id, "analyze_answer_progress", 0.6) if !task_id.nil?
 
 		# make stats for the answers
