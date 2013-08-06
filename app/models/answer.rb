@@ -705,7 +705,7 @@ class Answer
 		quota["rules"].each do |rule|
 			# move to next rule if the quota of this rule is already satisfied
 			next if rule["submitted_count"] >= rule["amount"]
-			rule["conditions"].each do |condition|
+			(rule["conditions"] || []).each do |condition|
 				# if the answer's ip, channel, or region violates one condition of the rule, move to the next rule
 				next if condition["condition_type"] == 2 && !QuillCommon::AddressUtility.satisfy_region_code?(self.region, condition["value"])
 				next if condition["condition_type"] == 3 && self.channel != condition["value"]
