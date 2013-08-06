@@ -1902,14 +1902,21 @@ class Survey
 		return true
 	end
 
-	def set_quillme_hot
-		s = Survey.where(:quillme_hot => true).first
-		if !s.nil?
-			s.quillme_hot = false
-			s.save
+	def set_quillme_hot(quillme_hot)
+		if quillme_hot == true
+			Survey.where(:quillme_hot => true).each do |s|
+				s.quilme_hot = false
+				s.save
+			end
+			self.quillme_hot = true
+		else
+			self.quillme_hot = false
 		end
-		self.quillme_hot = true
 		return self.save
+	end
+
+	def get_quillme_host
+		return self.quillme_hot == true
 	end
 
 	def info_for_admin

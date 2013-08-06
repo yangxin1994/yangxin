@@ -98,8 +98,12 @@ class Admin::SurveysController < Admin::ApplicationController
 		surveys
 	end
 
-	def quillme_hot
-		render_json_auto @survey.set_quillme_hot and return
+	def get_quillme_hot
+		render_json_auto {"quillme_hot" => @survey.get_quillme_hot} and return
+	end
+
+	def set_quillme_hot
+		render_json_auto @survey.set_quillme_hot(params[:quillme_hot]) and return
 	end
 
 	def allocate_answer_auditors
