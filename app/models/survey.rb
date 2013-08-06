@@ -201,12 +201,12 @@ class Survey
 		status = 2 unless status.present?
 		reward_type = nil unless reward_type.present?
 		if reward_type.present?
-		reward_type = reward_type.split(',')
+			reward_type = reward_type.split(',')
 		end
 		if reward_type.present?
-		surveys = Survey.quillme_promote.not_quillme_hot.status(status).reward_type(reward_type).desc(:created_at)		
+			surveys = Survey.quillme_promote.not_quillme_hot.status(status).reward_type(reward_type).desc(:created_at)		
 		else
-		surveys = Survey.quillme_promote.not_quillme_hot.status(status).desc(:created_at)		
+			surveys = Survey.quillme_promote.not_quillme_hot.status(status).desc(:created_at)		
 		end	
 		return surveys
 	end
