@@ -196,7 +196,7 @@ class Sample::AnswersController < ApplicationController
 
 	def index
 		render_json_e ErrorEnum::REQUIRE_LOGIN if @current_user.nil?
-		@answers = @current_user.answers.not_preview
+		@answers = @current_user.answers.not_preview.desc(:created_at)
 		@paginate_answers_info = auto_paginate @answers do |paginate_answers|
 			paginate_answers.map { |e| e.info_for_answer_list_for_sample }
 		end
