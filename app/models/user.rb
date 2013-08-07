@@ -454,6 +454,7 @@ class User
 			user.status = REGISTERED
 		end
 		user.save
+		RegistLog.create_regist_log(user.id)
 		return user.login(client_ip, client_type, false)
 	end
 

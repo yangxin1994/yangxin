@@ -131,7 +131,10 @@ class Answer
 	def find_lottery_answers
 		lottery_data = {}
 		prizes_arr = []
-		prize_ids = self.rewards.first['prizes'].map{|p| p['prize_id']}
+		prize_ids = self.rewards.first['prizes'].map{|p| p['id']}
+		# Rails.logger.info("--------------------")
+		# Rails.logger.info(self.rewards)
+		# Rails.logger.info("--------------------")
 		prizes = Prize.where(:id.in => prize_ids).map{|p| p['photo_src'] = p.photo.present? ? p.photo.picture_url : Prize::DEFAULT_IMG;p}
 		prizes.each do |pri|
 			prizes_arr  << {'id' => pri.id,'title' => pri.title,'price' => pri.price,'photo_src' => pri.photo_src}	

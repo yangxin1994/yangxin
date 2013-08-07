@@ -197,24 +197,45 @@ class Survey
 
 	end
 
-	def self.get_recommends(status=2,reward_type=nil)
+	def self.get_recommends(status=2,reward_type=nil,answer_status=nil,sample=nil)
 		status = 2 unless status.present?
 		reward_type = nil unless reward_type.present?
+		answer_status = nil unless answer_status.present?
+		total_ids = Survey.quillme_promote.not_quillme_hot.map(&:id)
+
 		if reward_type.present?
 			reward_type = reward_type.split(',')
 		end
+
 		if reward_type.present?
 			surveys = Survey.quillme_promote.not_quillme_hot.status(status).reward_type(reward_type).desc(:created_at)		
 		else
 			surveys = Survey.quillme_promote.not_quillme_hot.status(status).desc(:created_at)		
 		end	
+
+		surveys = get_filter_surveys(surveys,total_ids,answer_status,sample)
+		return surveys
+
+	end
+
+	def self.get_filter_surveys(surveys,total_ids,answer_status,sample)
+		if sample.present?
+			if answer_status.present? && answer_status.to_i != 0
+				survey_ids = sample.answers.not_preview.where(:status.in => answer_status.split(',')).map(&:survey_id)
+			elsif answer_status.present? && answer_status.to_i == 0  # 待参与
+				survey_ids = sample.answers.not_preview.map(&:survey_id)
+				survey_ids = total_ids - survey_ids
+			end	
+			surveys = surveys.where(:_id.in => survey_ids) if survey_ids
+		end
+
 		return surveys
 	end
 
-	def answered(user)
-		answer  = self.answers.where(:user_id => user.id).first if user.present?
-		return [answer.try(:status),answer.try(:reject_type)]   	
-	end
+	# def answered(user)
+	# 	answer  = self.answers.where(:user_id => user.id).first if user.present?
+	# 	return [answer.try(:status),answer.try(:reject_type)]   	
+	# end
 
 	def reward_type_info
 		rs = RewardScheme.where(:_id => self.quillme_promote_info['reward_scheme_id']).first
@@ -225,8 +246,14 @@ class Survey
 	def excute_sample_data(user)
 		self['answer_count'] = self.answers.count
 		self['time'] = self.estimate_answer_time
-		self['answer_status'] = self.answered(user)[0].to_i
-		self['answer_reject_type'] = self.answered(user)[1].to_i
+		if user.present?
+			self['answer_status'] = Answer.find_by_survey_id_sample_id_is_preview(self.id, user.id, false).try(:status)
+			self['answer_reject_type'] = Answer.find_by_survey_id_sample_id_is_preview(self.id, user.id, false).try(:reject_type)			
+		else
+			self['answer_status'] = 0
+			self['answer_reject_type'] = 0
+		end
+
 		self['reward_type_info'] = self.reward_type_info
 		self['scheme_id'] = self.quillme_promote_info['reward_scheme_id']
 		return self

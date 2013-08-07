@@ -1,10 +1,11 @@
 # encoding: utf-8
 class PointLog < Log
 	field :type, :type => Integer, :default => 8
-	field :amount, :type => Integer
+	field :amount, :type => Integer #花费积分数
 	field :reason, :type => Integer #1（回答问卷），2（推广问卷），4（礼品兑换）， 8（管理员操作）,16(处罚操作), 32(邀请样本)，64(撤销订单), 128(原有系统导入)
 	field :survey_title, :type => String
 	field :survey_id, :type => String
+	field :scheme_id, :type => String
 	field :gift_name, :type => String
 	field :gift_type, :type => Integer
 	field :gift_id, :type => String
