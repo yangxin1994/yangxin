@@ -1131,17 +1131,17 @@ class Answer
 		reward["prizes"].each do |p|
 			next if rand > p["prob"]
 			rewards_from_scheme["prizes"].each do |prize_from_scheme|
-				next if p["prize_id"] != prize_from_scheme["prize_id"]
+				next if p["id"] != prize_from_scheme["id"]
 				if prize_from_scheme["deadline"] > Time.now.to_i && prize_from_scheme["amount"] > prize_from_scheme["win_amount"].to_i
 					reward["win"] = true
-					reward["prize_id"] = p["prize_id"]
+					reward["prize_id"] = p["id"]
 					self.save
 					prize_from_scheme["win_amount"] ||= 0
 					prize_from_scheme["win_amount"] += 1
 					reward_scheme.save
 					return {"result" => true,
-						"prize_id" => p["prize_id"],
-						"prize_title" => Prize.find_by_id(p["prize_id"]).try(:title)}
+						"prize_id" => p["id"],
+						"prize_title" => Prize.find_by_id(p["id"]).try(:title)}
 				end
 			end
 		end
