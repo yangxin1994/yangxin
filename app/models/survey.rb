@@ -93,7 +93,7 @@ class Survey
 	}
 	field :broswer_extension_promote_info, :type => Hash, default: {
 		"login_sample_promote_only" => false,
-		"filter" => [{"key_word" => [""], "url" => ""}],
+		"filters" => [{"key_words" => [""], "url" => ""}],
 		"reward_scheme_id" => ""
 	}
 	field :weibo_promote_info, :type => Hash, default: {
