@@ -490,7 +490,7 @@ class Answer
 		# only answers that are finished contribute to quotas
 		return false if !self.is_finish && refresh_quota
 		# check the conditions one by one
-		conditions.each do |condition|
+		(conditions || []).each do |condition|
 			satisfy = false
 			case condition["condition_type"].to_s
 			when "1"

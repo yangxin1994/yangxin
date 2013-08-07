@@ -63,8 +63,6 @@ class Survey
 	field :publish_result, :type => Boolean, :default => false
 	field :delta, :type => Boolean, :default => true
 	field :point, :type => Integer, :default => 0
-	# whether this survey can be introduced to another person
-	field :spreadable, :type => Boolean, :default => false
 	# reward for introducing others
 	field :spread_point, :type => Integer, default: 0
 	field :quillme_promotable, :type => Boolean, default: false
@@ -165,7 +163,6 @@ class Survey
 	index({ status: 1 }, { background: true } )
 	index({ status: 1, is_star: 1 }, { background: true } )
 	index({ status: 1, promotable: 1}, { background: true } )
-	index({ spreadable: 1 }, { background: true } )
 
 	before_save :clear_survey_object
 	before_update :clear_survey_object
@@ -396,24 +393,12 @@ class Survey
 		return self.save
 	end
 
-=begin
-	def reward_info
-		return {"reward_type" => self.reward,
-				"point" => self.point,
-				"lottery_id" => self.lottery_id,
-				"lottery_title" => self.lottery.try(:title),
-				"spreadable" => self.spreadable,
-				"spread_point" => self.spread_point}
-	end
-=end
-
 	def has_prize
 		reward > 0 ? true : false
 	end
 
 	def set_spread(spread_point)
 		self.spread_point = spread_point
-		self.spreadable = spread_point > 0
 		return self.save
 	end
 
@@ -458,7 +443,6 @@ class Survey
 		new_instance.is_star = false
 		new_instance.point = 0
 		new_instance.spread_point = 0
-		new_instance.spreadable = false
 		new_instance.reward = 0
 		new_instance.show_in_community = false
 		lottery = new_instance.lottery
@@ -1742,7 +1726,6 @@ class Survey
 		survey_obj["subtitle"] = self.subtitle.to_s
 		survey_obj["created_at"] = self.created_at.to_i
 		survey_obj["status"] = self.status
-		survey_obj["spreadable"] = self.spreadable
 		survey_obj["spread_point"] = self.spread_point
 		survey_obj["quillme_promote_reward_type"] = self.quillme_promote_reward_type.to_i
 		return survey_obj

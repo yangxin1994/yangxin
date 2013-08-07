@@ -261,14 +261,6 @@ class SurveysController < ApplicationController
 		render_json_auto paginated_surveys
 	end
 
-	def list_surveys_in_community
-		surveys = Survey.list_surveys_in_community(params[:reward].to_i,
-										params[:only_spreadable].to_s == "true",
-										@current_user)
-		paginated_surveys = auto_paginate surveys
-		render_json_auto(paginated_surveys)
-	end
-
 	def list_answered_surveys
 		surveys_with_answer_status = Survey.list_answered_surveys(@current_user)
 		paginated_surveys = auto_paginate surveys_with_answer_status
