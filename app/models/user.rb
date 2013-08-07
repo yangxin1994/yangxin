@@ -681,9 +681,6 @@ class User
 	end
 
 	def set_sample_role(role)
-		retval = true
-		role.each { |r| retval = false if [4, 8, 16].include?(r) }
-		return ErrorEnum::WRONG_USER_ROLE if retval
 		self.user_role = (role.sum + 1)
 		return self.save
 	end
