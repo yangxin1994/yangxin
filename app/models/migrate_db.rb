@@ -14,6 +14,7 @@ class MigrateDb
 	def self.migrate_survey
 		puts "Migrating surveys......"
 		update_time = Time.now
+		RewardScheme.destroy_all
 		Survey.where(:updated_at.lt => update_time).each_with_index do |s, index|
 			puts index if index%10 == 0
 			# the status field
