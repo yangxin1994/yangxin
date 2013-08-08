@@ -290,6 +290,7 @@ OopsData::Application.routes.draw do
 	resources :sessions, :only => [:create] do
 		collection do
 			post :login_with_auth_key, :third_party_sign_in
+			post :auto_login
 			delete :destroy
 		end
 	end
