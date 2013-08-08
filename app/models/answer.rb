@@ -490,7 +490,7 @@ class Answer
 		# only answers that are finished contribute to quotas
 		return false if !self.is_finish && refresh_quota
 		# check the conditions one by one
-		conditions.each do |condition|
+		(conditions || []).each do |condition|
 			satisfy = false
 			case condition["condition_type"].to_s
 			when "1"
@@ -705,7 +705,7 @@ class Answer
 		quota["rules"].each do |rule|
 			# move to next rule if the quota of this rule is already satisfied
 			next if rule["submitted_count"] >= rule["amount"]
-			rule["conditions"].each do |condition|
+			(rule["conditions"] || []).each do |condition|
 				# if the answer's ip, channel, or region violates one condition of the rule, move to the next rule
 				next if condition["condition_type"] == 2 && !QuillCommon::AddressUtility.satisfy_region_code?(self.region, condition["value"])
 				next if condition["condition_type"] == 3 && self.channel != condition["value"]
@@ -1017,7 +1017,7 @@ class Answer
 				self.update_attributes({"reward_delivered" => true})
 			elsif self.order.status == Order::FROZEN
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
-				self.order.update_attributes({"status" => Order::REJECT, "rejected_at" => Time.now.to_i}) if self.status == REJECT
+				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
@@ -1036,7 +1036,7 @@ class Answer
 				self.update_attributes({"reward_delivered" => true})
 			elsif self.order.status == Order::FROZEN
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
-				self.order.update_attributes({"status" => Order::REJECT, "rejected_at" => Time.now.to_i}) if self.status == REJECT
+				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
@@ -1055,7 +1055,7 @@ class Answer
 				self.update_attributes({"reward_delivered" => true})
 			else
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
-				self.order.update_attributes({"status" => Order::REJECT, "rejected_at" => Time.now.to_i}) if self.status == REJECT
+				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
@@ -1073,7 +1073,8 @@ class Answer
 			return true if self.status == UNDER_REVIEW
 			assign_introducer_reward
 			if self.order && self.order.status == Order::FROZEN
-				self.order.update_attributes( {"status" => Order::WAIT} )
+				self.order.update_attributes( {"status" => Order::WAIT, "reviewed_at" => Time.now.to_i} ) if self.status == FINISH
+				self.order.update_attributes( {"status" => Order::REJECT, "reviewed_at" => Time.now.to_i} ) if self.status == REJECT
 				self.update_attributes({"reward_delivered" => true})
 			end
 		end
@@ -1129,19 +1130,19 @@ class Answer
 		rewards_from_scheme = reward_scheme.rewards[0]
 
 		reward["prizes"].each do |p|
-			next if rand > p["prob"]
+			next if rand > p["prob"].to_f
 			rewards_from_scheme["prizes"].each do |prize_from_scheme|
-				next if p["prize_id"] != prize_from_scheme["prize_id"]
-				if prize_from_scheme["deadline"] > Time.now.to_i && prize_from_scheme["amount"] > prize_from_scheme["win_amount"].to_i
+				next if p["id"] != prize_from_scheme["id"]
+				if prize_from_scheme["deadline"] > Time.now.to_i && prize_from_scheme["amount"].to_i > prize_from_scheme["win_amount"].to_i
 					reward["win"] = true
-					reward["prize_id"] = p["prize_id"]
+					reward["prize_id"] = p["id"]
 					self.save
 					prize_from_scheme["win_amount"] ||= 0
 					prize_from_scheme["win_amount"] += 1
 					reward_scheme.save
 					return {"result" => true,
-						"prize_id" => p["prize_id"],
-						"prize_title" => Prize.find_by_id(p["prize_id"]).try(:title)}
+						"prize_id" => p["id"],
+						"prize_title" => Prize.find_by_id(p["id"]).try(:title)}
 				end
 			end
 		end

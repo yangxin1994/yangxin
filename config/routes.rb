@@ -2,6 +2,10 @@ require 'sidekiq/web'
 OopsData::Application.routes.draw do
 	mount Sidekiq::Web, at: "/sidekiq"
 
+	match '/:unique_key' => 'mongoid_shortener/shortened_urls#translate', :via => :get, :constraints => { :unique_key => /~.+/ }
+
+	resources :short_urls
+
 	resources :faqs, :public_notices, :feedbacks, :advertisements
 	resources :ofcards do
 		collection do
@@ -134,8 +138,8 @@ OopsData::Application.routes.draw do
 				put 'add_reward', 'set_community', 'set_promotable', 'set_answer_need_review', 'background_survey',
 						'quillme_promote', 'email_promote', 'sms_promote', 'broswer_extension_promote', "weibo_promote"
 				get 'get_sent_email_number', 'promote'
-				put :quillme_hot, :allocate_answer_auditors, :set_result_visible, :set_spread
-				get :list_sample_attributes_for_promote
+				put :set_quillme_hot, :allocate_answer_auditors, :set_result_visible, :set_spread
+				get :get_quillme_hot, :list_sample_attributes_for_promote
 				post :add_sample_attribute_for_promote
 				put :update_sample_attribute_for_promote
 				delete :remove_sample_attribute_for_promote
@@ -286,6 +290,7 @@ OopsData::Application.routes.draw do
 	resources :sessions, :only => [:create] do
 		collection do
 			post :login_with_auth_key, :third_party_sign_in
+			post :auto_login
 			delete :destroy
 		end
 	end
@@ -626,4 +631,5 @@ OopsData::Application.routes.draw do
 	# This is a legacy wild controller route that's not recommended for RESTful applications.
 	# Note: This route will make all actions in every controller accessible via GET requests.
 	# match ':controller(/:action(/:id(.:format)))'
+
 end

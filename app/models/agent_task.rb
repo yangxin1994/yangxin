@@ -21,6 +21,7 @@ class AgentTask
 
 	belongs_to :survey
 	belongs_to :agent
+	belongs_to :reward_schemes
 	has_many :answers
 
 	default_scope order_by(:created_at.desc)
@@ -41,7 +42,7 @@ class AgentTask
 		agent_task = AgentTask.new(agent_task)
 		agent_task.save
 		survey.agent_tasks << agent_task
-		survey.agent_tasks << agent_task
+		agent.agent_tasks << agent_task
 		return agent_task
 	end
 

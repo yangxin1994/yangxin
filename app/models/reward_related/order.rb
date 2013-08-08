@@ -108,15 +108,14 @@ class Order
 		return order
 	end
 
-	def self.create_lottery_order(answer_id,sample_id, survey_id, prize_id,ip_address, opt = {})
-
+	def self.create_lottery_order(answer_id, sample_id, survey_id, prize_id, ip_address, opt = {})
 		sample = User.sample.find_by_id(sample_id)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		prize = Prize.find_by_id(prize_id)
 		return ErrorEnum::PRIZE_NOT_EXIST if prize.nil?
-		order = Order.new(:source => WIN_IN_LOTTERY)
-		order.sample = sample unless sample.present?
+		order = Order.new(:source => WIN_IN_LOTTERY, :type => prize.type)
+		order.sample = sample if sample.present?
 		order.survey = survey
 		order.prize = prize
 		case prize.type
@@ -150,7 +149,6 @@ class Order
 			option["postcode"]    = order[:postcode]
 			sample.set_receiver_info(option) if sample.present?
 		end	
-				   
 		LotteryLog.create_succ_lottery_Log(answer_id,order.id,survey_id,sample_id,ip_address,prize_id)
 		return order
 	end
@@ -160,7 +158,7 @@ class Order
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		order = Order.create(:source => ANSWER_SURVEY, :amount => amount, :type => type)
-		order.sample = sample unless sample.present?
+		order.sample = sample if sample.present?
 		order.survey = survey
 		case type
 		when SMALL_MOBILE_CHARGE
@@ -170,6 +168,7 @@ class Order
 		when JIFENBAO
 			order.alipay_account = opt["alipay_account"]
 		end
+		order.status = opt["status"] if opt["status"].present?
 		order.save
 		order.auto_handle
 		return order
@@ -342,9 +341,10 @@ class Order
 	end
 
 	def info_for_sample_detail
-		self["created_at"] = self.created_at.to_i
-		self["survey_title"] = self.survey.title if !self.survey.nil?
-		self["survey_id"] = self.survey._id.to_s if !self.survey.nil?
-		return self
+		order_obj = JSON.parse(self.to_json)
+		order_obj["created_at"] = self.created_at.to_i
+		order_obj["survey_title"] = self.survey.title if !self.survey.nil?
+		order_obj["survey_id"] = self.survey._id.to_s if !self.survey.nil?
+		return order_obj
 	end
 end

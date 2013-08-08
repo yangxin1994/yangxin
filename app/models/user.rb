@@ -495,6 +495,19 @@ class User
 		return user.login(client_ip, client_type, keep_signed_in)
 	end
 
+	def self.auto_login_with_email_mobile(email_mobile, client_ip, client_type)
+		user = nil
+		if email_mobile.match(/#{EmailRexg}/i)  ## match email
+			user = User.find_by_email(email_mobile.downcase)
+		elsif email_mobile.match(/#{MobileRexg}/i)  ## match mobile
+			user = User.find_by_mobile(email_mobile)
+		end
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
+		return ErrorEnum::USER_NOT_REGISTERED if user.status == 1
+		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
+		return user.login(client_ip, client_type, keep_signed_in)
+	end
+
 	def login(client_ip, client_type, keep_signed_in=false)
 		self.last_login_ip = client_ip
 		self.last_login_client_type = client_type
@@ -680,9 +693,6 @@ class User
 	end
 
 	def set_sample_role(role)
-		retval = true
-		role.each { |r| retval = false if [4, 8, 16].include?(r) }
-		return ErrorEnum::WRONG_USER_ROLE if retval
 		self.user_role = (role.sum + 1)
 		return self.save
 	end

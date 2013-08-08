@@ -63,8 +63,6 @@ class Survey
 	field :publish_result, :type => Boolean, :default => false
 	field :delta, :type => Boolean, :default => true
 	field :point, :type => Integer, :default => 0
-	# whether this survey can be introduced to another person
-	field :spreadable, :type => Boolean, :default => false
 	# reward for introducing others
 	field :spread_point, :type => Integer, default: 0
 	field :quillme_promotable, :type => Boolean, default: false
@@ -95,7 +93,7 @@ class Survey
 	}
 	field :broswer_extension_promote_info, :type => Hash, default: {
 		"login_sample_promote_only" => false,
-		"filter" => [{"key_word" => [""], "url" => ""}],
+		"filters" => [{"key_words" => [""], "url" => ""}],
 		"reward_scheme_id" => ""
 	}
 	field :weibo_promote_info, :type => Hash, default: {
@@ -165,7 +163,6 @@ class Survey
 	index({ status: 1 }, { background: true } )
 	index({ status: 1, is_star: 1 }, { background: true } )
 	index({ status: 1, promotable: 1}, { background: true } )
-	index({ spreadable: 1 }, { background: true } )
 
 	before_save :clear_survey_object
 	before_update :clear_survey_object
@@ -201,12 +198,12 @@ class Survey
 		status = 2 unless status.present?
 		reward_type = nil unless reward_type.present?
 		if reward_type.present?
-		reward_type = reward_type.split(',')
+			reward_type = reward_type.split(',')
 		end
 		if reward_type.present?
-		surveys = Survey.quillme_promote.not_quillme_hot.status(status).reward_type(reward_type).desc(:created_at)		
+			surveys = Survey.quillme_promote.not_quillme_hot.status(status).reward_type(reward_type).desc(:created_at)		
 		else
-		surveys = Survey.quillme_promote.not_quillme_hot.status(status).desc(:created_at)		
+			surveys = Survey.quillme_promote.not_quillme_hot.status(status).desc(:created_at)		
 		end	
 		return surveys
 	end
@@ -396,24 +393,12 @@ class Survey
 		return self.save
 	end
 
-=begin
-	def reward_info
-		return {"reward_type" => self.reward,
-				"point" => self.point,
-				"lottery_id" => self.lottery_id,
-				"lottery_title" => self.lottery.try(:title),
-				"spreadable" => self.spreadable,
-				"spread_point" => self.spread_point}
-	end
-=end
-
 	def has_prize
 		reward > 0 ? true : false
 	end
 
-	def set_spread(spread_point, spreadable)
+	def set_spread(spread_point)
 		self.spread_point = spread_point
-		self.spreadable = spreadable
 		return self.save
 	end
 
@@ -458,7 +443,6 @@ class Survey
 		new_instance.is_star = false
 		new_instance.point = 0
 		new_instance.spread_point = 0
-		new_instance.spreadable = false
 		new_instance.reward = 0
 		new_instance.show_in_community = false
 		lottery = new_instance.lottery
@@ -1256,6 +1240,7 @@ class Survey
 			rule["finished_count"] = 0
 			rule["submitted_count"] = 0
 			return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
+			rule["conditinos"] ||= []
 			rule["conditions"].each do |condition|
 				condition["condition_type"] = condition["condition_type"].to_i
 				return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
@@ -1741,7 +1726,6 @@ class Survey
 		survey_obj["subtitle"] = self.subtitle.to_s
 		survey_obj["created_at"] = self.created_at.to_i
 		survey_obj["status"] = self.status
-		survey_obj["spreadable"] = self.spreadable
 		survey_obj["spread_point"] = self.spread_point
 		survey_obj["quillme_promote_reward_type"] = self.quillme_promote_reward_type.to_i
 		return survey_obj
@@ -1901,14 +1885,21 @@ class Survey
 		return true
 	end
 
-	def set_quillme_hot
-		s = Survey.where(:quillme_hot => true).first
-		if !s.nil?
-			s.quillme_hot = false
-			s.save
+	def set_quillme_hot(quillme_hot)
+		if quillme_hot == true
+			Survey.where(:quillme_hot => true).each do |s|
+				s.quilme_hot = false
+				s.save
+			end
+			self.quillme_hot = true
+		else
+			self.quillme_hot = false
 		end
-		self.quillme_hot = true
 		return self.save
+	end
+
+	def get_quillme_host
+		return self.quillme_hot == true
 	end
 
 	def info_for_admin

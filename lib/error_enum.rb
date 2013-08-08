@@ -2,6 +2,8 @@ module ErrorEnum
 
 
 	ORDER_CREATED = "error__13"
+	NOT_WIN = "error__14"
+
 
 	REWORD_NOT_SELECTED = "error__10"
 	LOTTERY_DRAWED = "error__11"
