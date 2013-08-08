@@ -18,6 +18,7 @@ class RewardScheme
 
 	belongs_to :survey
 	has_many :answers
+	has_many :agent_tasks
 
 	scope :not_default, where(default: false)
 

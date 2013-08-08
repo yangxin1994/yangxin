@@ -1,6 +1,6 @@
 class Admin::SurveysController < Admin::ApplicationController
 	before_filter :check_survey_existence, :except => [:index]
-	before_filter :check_reward_scheme_existence, :only => [:quillme_promote, :email_promote, :sms_promote, :weibo_promote, :broswer_extension_promote, ]
+	before_filter :check_reward_scheme_existence, :only => [:quillme_promote, :email_promote, :sms_promote, :weibo_promote, :broswer_extension_promote]
 
 	def check_survey_existence
 		@survey = Survey.find_by_id(params[:id])

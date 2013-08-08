@@ -3,7 +3,7 @@ class Admin::AgentsController < Admin::ApplicationController
 	before_filter :check_agent_existence, :only => [:show, :update, :destroy]
 
 	def check_agent_existence
-		@agent = Agent.find_by_id(:id)
+		@agent = Agent.find_by_id(params[:id])
 		render_json_auto ErrorEnum::AGENT_NOT_EXIST if @agent.nil?
 	end
 
