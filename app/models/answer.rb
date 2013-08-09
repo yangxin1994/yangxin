@@ -1061,6 +1061,10 @@ class Answer
 			end
 		when RewardScheme::POINT
 			return true if self.status == UNDER_REVIEW
+			if self.status == REJECT
+				self.update_attributes({"reward_delivered" => true})
+				return true
+			end
 			sample = self.user
 			if sample.present?
 				sample.point += reward["amount"]

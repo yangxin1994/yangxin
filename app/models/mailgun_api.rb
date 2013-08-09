@@ -17,14 +17,16 @@ class MailgunApi
 			@emails = @emails[group_size..-1]
 			temp_recipient_variables = {}
 			temp_emails.each do |e|
-				temp_recipient_variables[e] = {"email" => e}
+				unsubscribe_key = CGI::escape(Encryption.encrypt_activate_key({"email_mobile" => e}.to_json))
+				temp_recipient_variables[e] = {"email" => e, "unsubscribe_key" => unsubscribe_key}
 			end
 			@group_recipient_variables << temp_recipient_variables
 		end
 		@group_emails << @emails
 		temp_recipient_variables = {}
 		@emails.each do |e|
-			temp_recipient_variables[e] = {"email" => e}
+			unsubscribe_key = CGI::escape(Encryption.encrypt_activate_key({"email_mobile" => e}.to_json))
+			temp_recipient_variables[e] = {"email" => e, "unsubscribe_key" => unsubscribe_key}
 		end
 		@group_recipient_variables << temp_recipient_variables
 

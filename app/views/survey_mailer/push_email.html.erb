@@ -176,7 +176,7 @@
 				<td colspan="3" height="20"></td>
 			</tr>
 			<tr>
-				<td colspan="3" align="right" height="40"><span style="font-size:12px;">若不是您订阅的邮件，点击<a href="javascript:void(0);">退订</a></span></td>
+				<td colspan="3" align="right" height="40"><span style="font-size:12px;">若不是您订阅的邮件，点击<a href="<%= Rails.application.config.quillme_host %>/surveys/cancel_subscribe?key=%recipient.unsubscribe_key%">退订</a></span></td>
 			</tr>
 		</table>
 		</td>
