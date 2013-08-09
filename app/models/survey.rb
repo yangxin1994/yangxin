@@ -1888,8 +1888,10 @@ class Survey
 	def set_quillme_hot(quillme_hot)
 		if quillme_hot == true
 			Survey.where(:quillme_hot => true).each do |s|
-				s.quillme_hot = false
-				s.save
+				if s._id != self._id
+					s.quillme_hot = false
+					s.save
+				end
 			end
 			self.quillme_hot = true
 		else
