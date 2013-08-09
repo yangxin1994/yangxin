@@ -23,7 +23,7 @@ class LotteryLog < Log
 		else
 			logs = self.where(:survey_id => survey_id,:user_id.ne => nil).desc(:created).limit(limit)
 		end
-		logs.each do |log|
+		logs.each_with_index do |log,index|
 			pri = Prize.find_by_id(log.prize_id)
 			log_data['nickname'] = log.user.nickname
 			log_data['created_at'] = log.created_at
@@ -32,7 +32,8 @@ class LotteryLog < Log
 			log_data['price'] = pri.try(:price)
 			log_data['land'] = log.land 
 			log_data['photo_src'] = pri.photo.present? ? pri.photo.picture_url : Prize::DEFAULT_IMG  if pri.present?
-			data << log_data
+			data[index] = log_data
+			log_data = {}
 		end
 		return data
 	end
@@ -52,8 +53,8 @@ class LotteryLog < Log
 	end
 
 	def self.get_lottery_counts(survey_id)
-		total_count = self.where(:survey_id => survey_id).count
-		succ_count  = self.where(:survey_id => survey_id,:result => true).count
+		total_count = self.where(:survey_id => survey_id,:user_id.ne => nil).count
+		succ_count  = self.where(:survey_id => survey_id,:result => true,:user_id.ne => nil).count
 		return {'total' => total_count,'succ' => succ_count}
 	end
 

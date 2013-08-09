@@ -22,8 +22,7 @@ class Sample::LogsController < ApplicationController
   #返回的参数:记录惩罚的列表
   ############################# 
   def get_disciplinal_news
-    @logs = Log.get_new_logs(3,64)
-    render_json_auto(@logs)
+    render_json_auto PunishLog.desc(:created_at).limit(3)
   end
 
 

@@ -93,6 +93,7 @@ class Sample::AccountsController < ApplicationController
 		render_json_auto @current_user.save and return
 	end
 
+
 	def messages
 		@messages = @current_user.messages
 		@paginated_messages = auto_paginate @messages do |paginated_messages|

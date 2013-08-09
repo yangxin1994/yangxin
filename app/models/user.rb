@@ -11,7 +11,7 @@ class User
   	EmailRexg  = '\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z'
   	MobileRexg = '^(13[0-9]|15[0|1|2|3|6|7|8|9]|18[8|9])\d{8}$' 
 
-  	DEFAULT_IMG = '/assets/image/sample/avatar/user_default.png'
+  	DEFAULT_IMG = '/assets/avatar/small_default.png'
 
 	field :email, :type => String
 	field :email_activation, :type => Boolean, default: false
@@ -283,6 +283,16 @@ class User
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i  > self.rss_verification_expiration_time
     return ErrorEnum::ACTIVATE_CODE_ERROR if self.rss_verification_code != code
     return self.update_attributes(:mobile_subscribe => true)
+	end
+
+	def self.cancel_subscribe(active_info)
+		email_mobile  = active_info['email_mobile']
+		mobile = active_info['mobile']
+		user = User.find_by_email_mobile(email_mobile)
+		return ErrorEnum::USER_NOT_EXIST unless user.present?
+		user.update_attributes(:email_subscribe => false) if email_mobile.match(/#{EmailRexg}/i)
+		user.update_attributes(:mobile_subscribe => false) if email_mobile.match(/#{MobileRexg}/i)
+		return {:success => true}
 	end
 
 	def self.send_forget_pass_code(email_mobile,callback)

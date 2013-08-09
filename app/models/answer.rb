@@ -132,9 +132,6 @@ class Answer
 		lottery_data = {}
 		prizes_arr = []
 		prize_ids = self.rewards.first['prizes'].map{|p| p['id']}
-		# Rails.logger.info("--------------------")
-		# Rails.logger.info(self.rewards)
-		# Rails.logger.info("--------------------")
 		prizes = Prize.where(:id.in => prize_ids).map{|p| p['photo_src'] = p.photo.present? ? p.photo.picture_url : Prize::DEFAULT_IMG;p}
 		prizes.each do |pri|
 			prizes_arr  << {'id' => pri.id,'title' => pri.title,'price' => pri.price,'photo_src' => pri.photo_src}	
@@ -908,6 +905,7 @@ class Answer
 			self.set_reject
 			self.reject_type = REJECT_BY_REVIEW
 			message_content ||= "你的此问卷[#{self.survey.title}]的答案未通过审核."
+			PunishLog.create_punish_log(user.id)
 		end
 		answer_auditor.create_message("审核问卷答案消息", message_content, [user._id.to_s]) if !user.nil?
 		self.audit_message = message_content
