@@ -8,7 +8,12 @@ class Sample::LogsController < ApplicationController
   #返回的参数:一个盛放新鲜事的列表
   #############################	
   def fresh_news
-    @logs = Log.get_new_logs(params[:limit],params[:type])
+    logs = Log.get_new_logs(params[:limit],params[:type])
+    @logs = logs.each do |log|
+      log['avatar'] = log.user.avatar.present? ? log.user.avatar.picture_url : User::DEFAULT_IMG
+      log['username'] = log.user.try(:nickname)
+      log      
+    end
   	render_json_auto(@logs)
   end
 
