@@ -1018,7 +1018,7 @@ class Answer
 				self.update_attributes({"reward_delivered" => true})
 			elsif self.order.status == Order::FROZEN
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
-				self.order.update_attributes({"status" => Order::REJECT, "rejected_at" => Time.now.to_i}) if self.status == REJECT
+				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
@@ -1037,7 +1037,7 @@ class Answer
 				self.update_attributes({"reward_delivered" => true})
 			elsif self.order.status == Order::FROZEN
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
-				self.order.update_attributes({"status" => Order::REJECT, "rejected_at" => Time.now.to_i}) if self.status == REJECT
+				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
@@ -1056,12 +1056,16 @@ class Answer
 				self.update_attributes({"reward_delivered" => true})
 			else
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
-				self.order.update_attributes({"status" => Order::REJECT, "rejected_at" => Time.now.to_i}) if self.status == REJECT
+				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::POINT
 			return true if self.status == UNDER_REVIEW
+			if self.status == REJECT
+				self.update_attributes({"reward_delivered" => true})
+				return true
+			end
 			sample = self.user
 			if sample.present?
 				sample.point += reward["amount"]
@@ -1074,7 +1078,8 @@ class Answer
 			return true if self.status == UNDER_REVIEW
 			assign_introducer_reward
 			if self.order && self.order.status == Order::FROZEN
-				self.order.update_attributes( {"status" => Order::WAIT} )
+				self.order.update_attributes( {"status" => Order::WAIT, "reviewed_at" => Time.now.to_i} ) if self.status == FINISH
+				self.order.update_attributes( {"status" => Order::REJECT, "reviewed_at" => Time.now.to_i} ) if self.status == REJECT
 				self.update_attributes({"reward_delivered" => true})
 			end
 		end

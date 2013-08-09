@@ -2,6 +2,10 @@ require 'sidekiq/web'
 OopsData::Application.routes.draw do
 	mount Sidekiq::Web, at: "/sidekiq"
 
+	match '/:unique_key' => 'mongoid_shortener/shortened_urls#translate', :via => :get, :constraints => { :unique_key => /~.+/ }
+
+	resources :short_urls
+
 	resources :faqs, :public_notices, :feedbacks, :advertisements
 	resources :ofcards do
 		collection do
@@ -80,7 +84,7 @@ OopsData::Application.routes.draw do
 
 		resources :samples do
 			member do
-				get :point_log, :redeem_log, :lottery_log
+				get :point_log, :redeem_log, :lottery_log, :answer_log
 				post :block
 				put :set_sample_role
 				put :operate_point
@@ -286,6 +290,7 @@ OopsData::Application.routes.draw do
 	resources :sessions, :only => [:create] do
 		collection do
 			post :login_with_auth_key, :third_party_sign_in
+			post :auto_login
 			delete :destroy
 		end
 	end
@@ -627,4 +632,5 @@ OopsData::Application.routes.draw do
 	# This is a legacy wild controller route that's not recommended for RESTful applications.
 	# Note: This route will make all actions in every controller accessible via GET requests.
 	# match ':controller(/:action(/:id(.:format)))'
+
 end

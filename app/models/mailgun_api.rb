@@ -17,16 +17,19 @@ class MailgunApi
 			@emails = @emails[group_size..-1]
 			temp_recipient_variables = {}
 			temp_emails.each do |e|
-				temp_recipient_variables[e] = {}
+				unsubscribe_key = CGI::escape(Encryption.encrypt_activate_key({"email_mobile" => e}.to_json))
+				temp_recipient_variables[e] = {"email" => e, "unsubscribe_key" => unsubscribe_key}
 			end
 			@group_recipient_variables << temp_recipient_variables
 		end
 		@group_emails << @emails
 		temp_recipient_variables = {}
 		@emails.each do |e|
-			temp_recipient_variables[e] = {}
+			unsubscribe_key = CGI::escape(Encryption.encrypt_activate_key({"email_mobile" => e}.to_json))
+			temp_recipient_variables[e] = {"email" => e, "unsubscribe_key" => unsubscribe_key}
 		end
 		@group_recipient_variables << temp_recipient_variables
+
 
 		@survey = Survey.find_by_id(survey_id)
 		@reward_scheme_id = @survey.email_promote_info["reward_scheme_id"]
@@ -60,7 +63,7 @@ class MailgunApi
 			@prizes = []
 			@reward_scheme.rewards[0]["prizes"].each do |p|
 				prize = Prize.find_by_id(p["prize_id"])
-				next if prize.nli?
+				next if prize.nil?
 				@prizes << { :title => prize.title,
 					:img_url => Rails.application.config.quillme_host + prize.photo.picture_url }
 			end
@@ -71,7 +74,9 @@ class MailgunApi
 					:region => lottery_log.land,
 					:avatar_url => Rails.application.config.quillme_host + Tool.mini_avatar(lottery_log.user.try(:_id))}
 			end
+			@lottery_logs = @lottery_logs.each_slice(3).to_a
 		end
+
 
 		data = {}
 		data[:domain] = Rails.application.config.survey_email_domain
@@ -87,10 +92,7 @@ class MailgunApi
 
 		data[:subject] = "邀请您参加问卷调查"
 		data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
-		puts "AAAAAAAAAAAAAAAAAAAAAA"
 		@group_emails.each_with_index do |emails, i|
-			puts "BBBBBBBBBBBBBBBBBBBBBB"
-			puts emails.inspect
 			data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
 			data[:'recipient-variables'] = @group_recipient_variables[i].to_json
 			self.send_message(data)

@@ -14,7 +14,7 @@ class Agent
 	field :status, :type => Integer, default: NORMAL
 	field :auth_key, :type => String
 
-	belongs_to :agent_tasks
+	has_many :agent_tasks
 
 	default_scope order_by(:created_at.desc)
 

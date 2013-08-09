@@ -1,5 +1,5 @@
 class Admin::SamplesController < Admin::ApplicationController
-	before_filter :check_sample_existence, :only => [:point_log, :redeem_log, :lottery_log, :show, :block, :set_sample_role, :operate_point]
+	before_filter :check_sample_existence, :only => [:point_log, :redeem_log, :lottery_log, :answer_log, :show, :block, :set_sample_role, :operate_point]
 
 	def check_sample_existence
 		@sample = User.sample.find_by_id(params[:id])

@@ -1,4 +1,3 @@
-#encoding: utf-8
 require 'data_type'
 require 'encryption'
 require 'error_enum'
@@ -503,6 +502,19 @@ class User
 			third_party_user = ThirdPartyUser.find_by_id(third_party_user_id)
 			third_party_user.bind(user) if !third_party_user.nil?
 		end
+		return user.login(client_ip, client_type, keep_signed_in)
+	end
+
+	def self.auto_login_with_email_mobile(email_mobile, client_ip, client_type)
+		user = nil
+		if email_mobile.match(/#{EmailRexg}/i)  ## match email
+			user = User.find_by_email(email_mobile.downcase)
+		elsif email_mobile.match(/#{MobileRexg}/i)  ## match mobile
+			user = User.find_by_mobile(email_mobile)
+		end
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
+		return ErrorEnum::USER_NOT_REGISTERED if user.status == 1
+		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
 		return user.login(client_ip, client_type, keep_signed_in)
 	end
 

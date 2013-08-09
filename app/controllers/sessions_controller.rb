@@ -19,6 +19,11 @@ class SessionsController < ApplicationController
 		retval = User.login_with_auth_key(params[:auth_key])
 		render_json_auto(retval) and return
 	end
+
+	def auto_login
+		login = User.auto_login_with_email_mobile(params[:email_mobile], @remote_ip, params[:_client_type])
+		render_json_auto login and return
+	end
 	
 	def third_party_sign_in
 		response_data = ThirdPartyUser.get_access_token(params[:website], params[:code], params[:redirect_uri])

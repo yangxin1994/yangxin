@@ -108,13 +108,13 @@ class Order
 		return order
 	end
 
-	def self.create_lottery_order(answer_id, sample_id, survey_id, prize_id,ip_address, opt = {})
+	def self.create_lottery_order(answer_id, sample_id, survey_id, prize_id, ip_address, opt = {})
 		sample = User.sample.find_by_id(sample_id)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		prize = Prize.find_by_id(prize_id)
 		return ErrorEnum::PRIZE_NOT_EXIST if prize.nil?
-		order = Order.new(:source => WIN_IN_LOTTERY)
+		order = Order.new(:source => WIN_IN_LOTTERY, :type => prize.type)
 		order.sample = sample if sample.present?
 		order.survey = survey
 		order.prize = prize
@@ -149,7 +149,6 @@ class Order
 			option["postcode"]    = order[:postcode]
 			sample.set_receiver_info(option) if sample.present?
 		end	
-				   
 		LotteryLog.create_succ_lottery_Log(answer_id,order.id,survey_id,sample_id,ip_address,prize_id)
 		return order
 	end

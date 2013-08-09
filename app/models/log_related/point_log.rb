@@ -37,6 +37,8 @@ class PointLog < Log
 		
 	end
 
+	alias :data :info_for_sample
+
 	def self.create_admin_operate_point_log(amount, remark, sample_id)
 		self.create(:amount => amount, :reason => ADMIN_OPERATE, :remark => remark, :user_id => sample_id)
 	end
