@@ -1898,7 +1898,7 @@ class Survey
 		return self.save
 	end
 
-	def get_quillme_host
+	def get_quillme_hot
 		return self.quillme_hot == true
 	end
 
