@@ -44,10 +44,10 @@ class Admin::OrdersController < Admin::ApplicationController
 	end
 
 	def update_express_info
-		render_json_auto @order.update_express_info and return
+		render_json_auto @order.update_express_info(params[:express_info]) and return
 	end
 
 	def update_remark
-		render_json_auto @order.update_remark and return
+		render_json_auto @order.update_remark(params[:remark]) and return
 	end
 end

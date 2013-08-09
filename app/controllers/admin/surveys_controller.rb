@@ -99,7 +99,7 @@ class Admin::SurveysController < Admin::ApplicationController
 	end
 
 	def get_quillme_hot
-		retval = { 'quillme_hot' => @survey.get_quillme_hot }
+		retval = { 'quillme_hot' => @survey.quillme_hot }
 		render_json_auto retval and return
 	end
 
