@@ -146,7 +146,7 @@ class Answer
 		LotteryLog.get_lottery_counts(self.survey.id) 
 	end
 
-	def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, channel, referrer, remote_ip, username, password)
+	def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, agent_task_id, channel, referrer, remote_ip, username, password)
 		survey = Survey.normal.find_by_id(survey_id)
 		# create the answer
 		answer = Answer.new(is_preview: is_preview,
@@ -158,12 +158,17 @@ class Answer
 			referrer: referrer)
 		answer.save
 		# record introducer information
-		if !is_preview && introducer_id
+		if !is_preview && introducer_id.present?
 			introducer = User.sample.find_by_id(introducer_id)
-			if !introducer.nil?
+			if introducer.present?
 				answer.introducer_id = introducer_id
 				answer.point_to_introducer = survey.spread_point
 			end
+		end
+		# record the agent task information
+		if !is_preview && agent_task_id.present?
+			agent_task = AgentTask.find_by_id(params[:agent_task_id])
+			agent_task.answers << answer if agent_task.present?
 		end
 		# record the reward information
 		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
@@ -191,7 +196,6 @@ class Answer
 			end
 		end
 		answer.answer_content = answer_content
-
 
 		# initialize the logic control result
 		answer.logic_control_result = {}

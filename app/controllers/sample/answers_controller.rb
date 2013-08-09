@@ -25,6 +25,7 @@ class Sample::AnswersController < ApplicationController
 			params[:reward_scheme_id],
 			params[:is_preview] || false,
 			params[:introducer_id],
+			params[:agent_task_id],
 			params[:channel],
 			params[:referrer],
 			params[:_remote_ip],
