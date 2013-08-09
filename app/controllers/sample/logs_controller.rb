@@ -22,7 +22,12 @@ class Sample::LogsController < ApplicationController
   #返回的参数:记录惩罚的列表
   ############################# 
   def get_disciplinal_news
-    render_json_auto PunishLog.desc(:created_at).limit(3)
+    logs = PunishLog.desc(:created_at).limit(3).map do |log|
+      log['avatar'] = log.user.avatar.present? ? log.user.avatar.picture_url : User::DEFAULT_IMG
+      log['username'] = log.user.try(:nickname)
+      log
+    end
+    render_json_auto logs
   end
 
 
