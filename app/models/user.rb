@@ -869,67 +869,6 @@ class User
 		return [completion, analyze_result]
 	end
 
-	def point_logs
-		logs = self.logs.point_logs
-		ret_logs = logs.map do |e|
-			{
-				"created_at" => e.created_at,
-				"amount" => e.data["amount"],
-				"reason" => e.data["reason"],
-				"survey_title" => e.data["survey_title"],
-				"gift_name" => e.data["gift_name"],
-				"remark" => e.data["remark"]
-			}
-		end
-		return ret_logs
-	end
-
-	def redeem_logs
-		logs = self.logs.redeem_logs
-		ret_logs = logs.map do |e|
-			{
-				"created_at" => e.created_at,
-				"amount" => e.data["amount"],
-				"order_id" => e.data["order_id"],
-				"gift_name" => e.data["gift_name"]
-			}
-		end
-		return ret_logs
-	end
-
-	def lottery_logs
-		logs = self.logs.lottery_logs
-		ret_logs = logs.map do |e|
-			{
-				"created_at" => e.created_at,
-				"result" => e.data["result"],
-				"order_id" => e.data["order_id"],
-				"prize_name" => e.data["prize_name"]
-			}
-		end
-		return ret_logs
-	end
-
-	def answer_logs
-		answers = self.answers.not_preview.desc(:created_at)
-		ret_logs = answers.map do |e|
-			selected_reward = (e.rewards.select { |e| e["checked"] == true }).first
-			reward_type = selected_reward.nil? ? 0 : selected_reward["type"]
-			reward_amount = selected_reward.nil? ? 0 : selected_reward["amount"]
-			{
-				"_id" => e._id.to_s,
-				"title" => e.survey.title,
-				"created_at" => e.created_at,
-				"finished_at" => Time.at(e.finished_at),
-				"status" => e.status,
-				"reject_type" => e.reject_type,
-				"reward_type" => reward_type,
-				"reward_amount" => reward_amount
-			}
-		end
-		return ret_logs
-	end
-
 	def spread_logs
 		answers = Answer.where(:introducer_id => self._id.to_s)
 		ret_logs = answers.map do |e|

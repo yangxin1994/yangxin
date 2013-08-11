@@ -84,7 +84,7 @@ OopsData::Application.routes.draw do
 
 		resources :samples do
 			member do
-				get :point_log, :redeem_log, :lottery_log, :answer_log
+				get :point_log, :redeem_log, :lottery_log, :answer_log, :spread_log
 				post :block
 				put :set_sample_role
 				put :operate_point

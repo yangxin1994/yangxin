@@ -26,4 +26,13 @@ class RedeemLog < Log
 		self.create(:amount => amount,:point => point,:gift_type => gift_type,:order_id => order_id,:gift_id => gift_id,:gift_name => gift_name,:user_id => user_id)
 	end
 
+	def info_for_admin
+		redeem_log_obj = {}
+		redeem_log_obj["created_at"] = self.created_at.to_i
+		redeem_log_obj["amount"] = self.amount.to_s
+		redeem_log_obj["order_id"] = self.order_id
+		redeem_log_obj["gift_name"] = self.gift_name
+		return redeem_log_obj
+	end
+
 end

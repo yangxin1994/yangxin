@@ -1,5 +1,5 @@
 class Admin::SamplesController < Admin::ApplicationController
-	before_filter :check_sample_existence, :only => [:point_log, :redeem_log, :lottery_log, :answer_log, :show, :block, :set_sample_role, :operate_point]
+	before_filter :check_sample_existence, :only => [:point_log, :redeem_log, :lottery_log, :answer_log, :spread_log, :show, :block, :set_sample_role, :operate_point]
 
 	def check_sample_existence
 		@sample = User.sample.find_by_id(params[:id])
@@ -36,23 +36,63 @@ class Admin::SamplesController < Admin::ApplicationController
 	end
 
 	def point_log
-		render_json_auto(auto_paginate(@sample.point_logs)) and return
+		@paginated_point_logs = auto_paginate(@sample.logs.point_logs) do |paginated_point_logs|
+			paginated_point_logs.map { |e| e.info_for_admin }
+		end
+		render_json_auto(auto_paginate(@paginated_point_logs)) and return
 	end
 
 	def redeem_log
-		render_json_auto(auto_paginate(@sample.redeem_logs)) and return
+		@paginated_redeem_logs = auto_paginate(@sample.logs.redeem_logs) do |paginated_redeem_logs|
+			paginated_redeem_logs.map { |e| e.info_for_admin }
+		end
+		render_json_auto(auto_paginate(@paginated_redeem_logs)) and return
 	end
 
 	def lottery_log
-		render_json_auto(auto_paginate(@sample.lottery_logs)) and return
+		@paginated_lottery_logs = auto_paginate(@sample.logs.lottery_logs) do |paginated_lottery_logs|
+			paginated_lottery_logs .map { |e| e.info_for_admin }
+		end
+		render_json_auto(auto_paginate(@paginated_lottery_logs)) and return
 	end
 
 	def answer_log
-		render_json_auto(auto_paginate(@sample.answer_logs)) and return
+		@paginated_answer_logs = auto_paginate(@sample.answers.not_preview.desc(:created_at)) do |paginated_answer_logs|
+			paginated_answer_logs.map do |e|
+				selected_reward = (e.rewards.select { |e| e["checked"] == true }).first
+				reward_type = selected_reward.nil? ? 0 : selected_reward["type"]
+				reward_amount = selected_reward.nil? ? 0 : selected_reward["amount"]
+				{
+					"_id" => e._id.to_s,
+					"title" => e.survey.title,
+					"created_at" => e.created_at,
+					"finished_at" => e.finished_at.present? ? e.finished_at.to_i : nil,
+					"status" => e.status,
+					"reject_type" => e.reject_type,
+					"reward_type" => reward_type,
+					"reward_amount" => reward_amount
+				}
+			end
+		end
+		render_json_auto(auto_paginate(@paginated_answer_logs)) and return
 	end
 
 	def spread_log
-		render_json_auto(auto_paginate(@sample.spread_logs)) and return
+		@paginated_spread_logs = auto_paginate(Answer.where(:introducer_id => @sample._id.to_s)) do |paginated_spread_logs|
+			paginated_spread_logs.map do |e|
+				{
+					"_id" => e._id.to_s,
+					"title" => e.survey.title,
+					"created_at" => e.created_at,
+					"finished_at" => e.finished_at.present? ? e.finished_at.to_i : nil,
+					"email" => e.user.try(:email),
+					"mobile" => e.user.try(:mobile),
+					"status" => e.status,
+					"reject_type" => e.reject_type
+				}
+			end
+		end
+		render_json_auto(auto_paginate(@paginated_spread_logs)) and return
 	end
 
 	def set_sample_role
