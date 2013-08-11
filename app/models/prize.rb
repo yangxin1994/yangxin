@@ -13,7 +13,7 @@ class Prize
 	JIFENBAO = 16
 	QQ_COIN = 32
 
-	DEFAULT_IMG = '/assets/image/quillme/lotteries/entity.jpg'
+	DEFAULT_IMG = '/assets/od-quillme/gifts/default.png'
 
 
 	# 1 normal, 2 deleted
@@ -23,7 +23,7 @@ class Prize
 	field :title, :type => String, default: ""
 	field :description, :type => String, default: ""
 	field :amount, :type => Integer, default: 1
-	field :price,:type => Float
+	field :price,:type => Float, default: 0.0
 
 	has_one :photo, :class_name => "Material", :inverse_of => 'prize'
 	has_many :orders

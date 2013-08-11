@@ -175,8 +175,8 @@ class Sample::AnswersController < ApplicationController
 	#############################	
 	def get_today_answers_count
 		date = Date.today
-		today_start = Time.utc(date.year, date.month, date.day)
-		today_end = Time.utc(date.year, date.month, date.day+1)
+		today_start = Time.local(date.year, date.month, date.day,0,0,0)
+		today_end   = Time.local(date.year, date.month, date.day+1,0,0,0)
 		@survey = Answer.where(:created_at.gte => today_start,:created_at.lt => today_end).count
 		render_json { @survey }
 	end
@@ -189,8 +189,8 @@ class Sample::AnswersController < ApplicationController
 	############################# 
 	def get_today_spread_count
 		date = Date.today
-		today_start = Time.utc(date.year, date.month, date.day)
-		today_end = Time.utc(date.year, date.month, date.day+1)
+		today_start = Time.local(date.year, date.month, date.day,0,0,0)
+		today_end   = Time.local(date.year, date.month, date.day+1,0,0,0)
 		@survey = Answer.where(:created_at.gte => today_start,:created_at.lt => today_end,:introducer_id.ne => nil).count
 		render_json { @survey }
 	end

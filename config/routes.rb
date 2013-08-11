@@ -531,6 +531,7 @@ OopsData::Application.routes.draw do
 				put :make_forget_pass_activate,:as => :make_forget_pass_activate
 				put :generate_new_password,:as => :generate_new_password
 				get :get_account_by_activate_key,:as => :get_account_by_activate_key
+				get :cancel_subscribe,:as => :cancel_subscribe
 			end
 		end
 		resources :logs do

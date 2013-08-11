@@ -20,7 +20,7 @@ class Sample::SurveysController < ApplicationController
   def get_recommends
     # status 1 or 2
     #reward_type should be [1,2]
-    surveys = Survey.get_recommends(params[:status],params[:reward_type])
+    surveys = Survey.get_recommends(params[:status],params[:reward_type],params[:answer_status],@current_user)
     survey_obj = auto_paginate(surveys) do |paginated_surveys|
       paginated_surveys.map { |e| e.excute_sample_data(@current_user) } 
     end
