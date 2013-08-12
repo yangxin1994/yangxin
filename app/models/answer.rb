@@ -1024,6 +1024,7 @@ class Answer
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
 				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
+				assign_introducer_reward if self.status == FINISH
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::ALIPAY
@@ -1043,6 +1044,7 @@ class Answer
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
 				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
+				assign_introducer_reward if self.status == FINISH
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::JIFENBAO
@@ -1062,6 +1064,7 @@ class Answer
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
 				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
+				assign_introducer_reward if self.status == FINISH
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::POINT
@@ -1077,10 +1080,10 @@ class Answer
 				PointLog.create_answer_point_log(reward["amount"], self.survey_id.to_s, self.survey.title, sample._id)
 				self.update_attributes({"reward_delivered" => true})
 			end
-			assign_introducer_reward
+			assign_introducer_reward if self.status == FINISH
 		when RewardScheme::LOTTERY
 			return true if self.status == UNDER_REVIEW
-			assign_introducer_reward
+			assign_introducer_reward if self.status == FINISH
 			if self.order && self.order.status == Order::FROZEN
 				self.order.update_attributes( {"status" => Order::WAIT, "reviewed_at" => Time.now.to_i} ) if self.status == FINISH
 				self.order.update_attributes( {"status" => Order::REJECT, "reviewed_at" => Time.now.to_i} ) if self.status == REJECT

@@ -978,18 +978,25 @@ class User
 	def read_sample_attribute(name)
 		sa = SampleAttribute.find_by_name(name)
 		return nil if sa.nil?
+		return nil if self.affiliated.nil?
 		return self.affiliated.read_attribute(sa.name.to_sym)
 	end
 
 	def read_sample_attribute_by_id(sa_id)
 		sa = SampleAttribute.find_by_id(sa_id)
 		return nil if sa.nil?
+		return nil if self.affiliated.nil?
 		return self.affiliated.read_attribute(sa.name.to_sym)
 	end
 
 	def write_sample_attribute(name, value)
 		sa = SampleAttribute.find_by_name(name)
-		return nil if sa.nil?
+		return false if sa.nil?
+		if self.affiliated.nil?
+			a = Affiliated.create
+			a.user = self
+			a.save
+		end
 		self.affiliated.write_attribute(sa.name.to_sym, value)
 		return self.affiliated.save
 	end
@@ -997,6 +1004,11 @@ class User
 	def write_sample_attribute_by_id(sa_id, value)
 		sa = SampleAttribute.find_by_id(sa_id)
 		return false if sa.nli?
+		if self.affiliated.nil?
+			a = Affiliated.create
+			a.user = self
+			a.save
+		end
 		sa.affiliated.write_attribute(sa.name.to_sym, value)
 	end
 

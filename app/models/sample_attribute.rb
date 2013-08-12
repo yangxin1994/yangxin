@@ -8,7 +8,7 @@ class SampleAttribute
 	field :name, :type => String
 	# data type of the sample attribute
 	field :type, :type => Integer
-	field :element_type, :type => Integer
+	field :element_type, :type => Integer, default: 0
 	field :enum_array, :type => Array
 	field :date_type, :type => Integer
 	# status of the sample attribute, 1 for normal, 2 for deleted
