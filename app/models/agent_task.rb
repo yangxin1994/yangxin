@@ -40,13 +40,17 @@ class AgentTask
 		agent = Agent.find_by_id(agent_id)
 		return ErrorEnum::AGENT_NOT_EXIST if agent.nil?
 		agent_task = AgentTask.new(agent_task)
+		agent_task.reward_schemes_id = agent_task["reward_schemes_id"]
 		agent_task.save
 		survey.agent_tasks << agent_task
 		agent.agent_tasks << agent_task
+		agent_task.reward_schemes_id = agent_task["reward_schemes_id"]
 		return agent_task
 	end
 
 	def update_agent_task(agent_task)
+		self.reward_schemes_id = agent_task["reward_schemes_id"]
+		save
 		return self.update_attributes(agent_task)
 	end
 
