@@ -322,23 +322,12 @@ class Order
 	end
 
 	def info_for_admin
-		order_obj = {}
-		order_obj = {}
-		order_obj["_id"] = self._id.to_s
-		order_obj["created_at"] = self.created_at
-		order_obj["status"] = self.status
-		order_obj["source"] = self.source
-		order_obj["amount"] = self.amount
-		order_obj["type"] = self.type
 		if self.source == REDEEM_GIFT
-			order_obj["point"] = self.point
-			order_obj["title"] = self.gift.try(:title)
-			order_obj["picture_url"] = self.gift.try(:photo).try(:picture_url)
+			self.write_attribute(:gift_name, self.gift.try(:title))
 		elsif self.source == WIN_IN_LOTTERY
-			order_obj["title"] = self.prize.try(:title)
-			order_obj["picture_url"] = self.prize.try(:photo).try(:picture_url)
+			self.write_attribute(:prize_name, self.prize.try(:title))
 		end
-		return order_obj
+		return self
 	end
 
 	def info_for_sample
