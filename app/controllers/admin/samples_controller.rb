@@ -39,21 +39,21 @@ class Admin::SamplesController < Admin::ApplicationController
 		@paginated_point_logs = auto_paginate(@sample.logs.point_logs) do |paginated_point_logs|
 			paginated_point_logs.map { |e| e.info_for_admin }
 		end
-		render_json_auto(auto_paginate(@paginated_point_logs)) and return
+		render_json_auto(@paginated_point_logs) and return
 	end
 
 	def redeem_log
 		@paginated_redeem_logs = auto_paginate(@sample.logs.redeem_logs) do |paginated_redeem_logs|
 			paginated_redeem_logs.map { |e| e.info_for_admin }
 		end
-		render_json_auto(auto_paginate(@paginated_redeem_logs)) and return
+		render_json_auto(@paginated_redeem_logs) and return
 	end
 
 	def lottery_log
 		@paginated_lottery_logs = auto_paginate(@sample.logs.lottery_logs) do |paginated_lottery_logs|
 			paginated_lottery_logs .map { |e| e.info_for_admin }
 		end
-		render_json_auto(auto_paginate(@paginated_lottery_logs)) and return
+		render_json_auto(@paginated_lottery_logs) and return
 	end
 
 	def answer_log
@@ -74,7 +74,7 @@ class Admin::SamplesController < Admin::ApplicationController
 				}
 			end
 		end
-		render_json_auto(auto_paginate(@paginated_answer_logs)) and return
+		render_json_auto(@paginated_answer_logs) and return
 	end
 
 	def spread_log
@@ -84,7 +84,7 @@ class Admin::SamplesController < Admin::ApplicationController
 					"_id" => e._id.to_s,
 					"title" => e.survey.title,
 					"created_at" => e.created_at,
-					"finished_at" => e.finished_at.present? ? e.finished_at.to_i : nil,
+					"finished_at" => e.finished_at.present? ? Time.at(e.finished_at.to_i) : nil,
 					"email" => e.user.try(:email),
 					"mobile" => e.user.try(:mobile),
 					"status" => e.status,
@@ -92,7 +92,7 @@ class Admin::SamplesController < Admin::ApplicationController
 				}
 			end
 		end
-		render_json_auto(auto_paginate(@paginated_spread_logs)) and return
+		render_json_auto(@paginated_spread_logs) and return
 	end
 
 	def set_sample_role

@@ -38,7 +38,7 @@ class PointLog < Log
 
 	def info_for_admin
 		point_log_obj = {}
-		point_log_obj["created_at"] = self.created_at.to_i
+		point_log_obj["created_at"] = Time.at(self.created_at.to_i)
 		point_log_obj["amount"] = self.amount
 		point_log_obj["reason"] = self.reason
 		point_log_obj["survey_title"] = self.survey_title

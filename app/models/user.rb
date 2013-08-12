@@ -129,6 +129,7 @@ class User
 	public
 
 	def self.find_by_email_mobile(email_mobile)
+		return nil if email_mobile.nil?
 		user = self.where(:email => email_mobile).first
 		user = self.where(:mobile => email_mobile).first if user.nil?
 		return user
