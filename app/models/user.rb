@@ -1,4 +1,3 @@
-#encoding: utf-8
 require 'data_type'
 require 'encryption'
 require 'error_enum'
@@ -11,7 +10,7 @@ class User
   	EmailRexg  = '\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z'
   	MobileRexg = '^(13[0-9]|15[0|1|2|3|6|7|8|9]|18[8|9])\d{8}$' 
 
-  	DEFAULT_IMG = '/assets/image/sample/avatar/user_default.png'
+  	DEFAULT_IMG = '/assets/avatar/small_default.png'
 
 	field :email, :type => String
 	field :email_activation, :type => Boolean, default: false
@@ -130,6 +129,7 @@ class User
 	public
 
 	def self.find_by_email_mobile(email_mobile)
+		return nil if email_mobile.nil?
 		user = self.where(:email => email_mobile).first
 		user = self.where(:mobile => email_mobile).first if user.nil?
 		return user
@@ -283,6 +283,16 @@ class User
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i  > self.rss_verification_expiration_time
     return ErrorEnum::ACTIVATE_CODE_ERROR if self.rss_verification_code != code
     return self.update_attributes(:mobile_subscribe => true)
+	end
+
+	def self.cancel_subscribe(active_info)
+		email_mobile  = active_info['email_mobile']
+		mobile = active_info['mobile']
+		user = User.find_by_email_mobile(email_mobile)
+		return ErrorEnum::USER_NOT_EXIST unless user.present?
+		user.update_attributes(:email_subscribe => false) if email_mobile.match(/#{EmailRexg}/i)
+		user.update_attributes(:mobile_subscribe => false) if email_mobile.match(/#{MobileRexg}/i)
+		return {:success => true}
 	end
 
 	def self.send_forget_pass_code(email_mobile,callback)
@@ -454,6 +464,7 @@ class User
 			user.status = REGISTERED
 		end
 		user.save
+		RegistLog.create_regist_log(user.id)
 		return user.login(client_ip, client_type, false)
 	end
 
@@ -492,6 +503,19 @@ class User
 			third_party_user = ThirdPartyUser.find_by_id(third_party_user_id)
 			third_party_user.bind(user) if !third_party_user.nil?
 		end
+		return user.login(client_ip, client_type, keep_signed_in)
+	end
+
+	def self.auto_login_with_email_mobile(email_mobile, client_ip, client_type)
+		user = nil
+		if email_mobile.match(/#{EmailRexg}/i)  ## match email
+			user = User.find_by_email(email_mobile.downcase)
+		elsif email_mobile.match(/#{MobileRexg}/i)  ## match mobile
+			user = User.find_by_mobile(email_mobile)
+		end
+		return ErrorEnum::USER_NOT_EXIST if user.nil?
+		return ErrorEnum::USER_NOT_REGISTERED if user.status == 1
+		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
 		return user.login(client_ip, client_type, keep_signed_in)
 	end
 
@@ -680,9 +704,6 @@ class User
 	end
 
 	def set_sample_role(role)
-		retval = true
-		role.each { |r| retval = false if [4, 8, 16].include?(r) }
-		return ErrorEnum::WRONG_USER_ROLE if retval
 		self.user_role = (role.sum + 1)
 		return self.save
 	end
@@ -860,67 +881,6 @@ class User
 		return [completion, analyze_result]
 	end
 
-	def point_logs
-		logs = self.logs.point_logs
-		ret_logs = logs.map do |e|
-			{
-				"created_at" => e.created_at,
-				"amount" => e.data["amount"],
-				"reason" => e.data["reason"],
-				"survey_title" => e.data["survey_title"],
-				"gift_name" => e.data["gift_name"],
-				"remark" => e.data["remark"]
-			}
-		end
-		return ret_logs
-	end
-
-	def redeem_logs
-		logs = self.logs.redeem_logs
-		ret_logs = logs.map do |e|
-			{
-				"created_at" => e.created_at,
-				"amount" => e.data["amount"],
-				"order_id" => e.data["order_id"],
-				"gift_name" => e.data["gift_name"]
-			}
-		end
-		return ret_logs
-	end
-
-	def lottery_logs
-		logs = self.logs.lottery_logs
-		ret_logs = logs.map do |e|
-			{
-				"created_at" => e.created_at,
-				"result" => e.data["result"],
-				"order_id" => e.data["order_id"],
-				"prize_name" => e.data["prize_name"]
-			}
-		end
-		return ret_logs
-	end
-
-	def answer_logs
-		answers = self.answers.not_preview.desc(:created_at)
-		ret_logs = answers.map do |e|
-			selected_reward = (e.rewards.select { |e| e["checked"] == true }).first
-			reward_type = selected_reward.nil? ? 0 : selected_reward["type"]
-			reward_amount = selected_reward.nil? ? 0 : selected_reward["amount"]
-			{
-				"_id" => e._id.to_s,
-				"title" => e.survey.title,
-				"created_at" => e.created_at,
-				"finished_at" => Time.at(e.finished_at),
-				"status" => e.status,
-				"reject_type" => e.reject_type,
-				"reward_type" => reward_type,
-				"reward_amount" => reward_amount
-			}
-		end
-		return ret_logs
-	end
-
 	def spread_logs
 		answers = Answer.where(:introducer_id => self._id.to_s)
 		ret_logs = answers.map do |e|
@@ -1018,18 +978,25 @@ class User
 	def read_sample_attribute(name)
 		sa = SampleAttribute.find_by_name(name)
 		return nil if sa.nil?
+		return nil if self.affiliated.nil?
 		return self.affiliated.read_attribute(sa.name.to_sym)
 	end
 
 	def read_sample_attribute_by_id(sa_id)
 		sa = SampleAttribute.find_by_id(sa_id)
 		return nil if sa.nil?
+		return nil if self.affiliated.nil?
 		return self.affiliated.read_attribute(sa.name.to_sym)
 	end
 
 	def write_sample_attribute(name, value)
 		sa = SampleAttribute.find_by_name(name)
-		return nil if sa.nil?
+		return false if sa.nil?
+		if self.affiliated.nil?
+			a = Affiliated.create
+			a.user = self
+			a.save
+		end
 		self.affiliated.write_attribute(sa.name.to_sym, value)
 		return self.affiliated.save
 	end
@@ -1037,6 +1004,11 @@ class User
 	def write_sample_attribute_by_id(sa_id, value)
 		sa = SampleAttribute.find_by_id(sa_id)
 		return false if sa.nli?
+		if self.affiliated.nil?
+			a = Affiliated.create
+			a.user = self
+			a.save
+		end
 		sa.affiliated.write_attribute(sa.name.to_sym, value)
 	end
 

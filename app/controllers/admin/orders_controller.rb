@@ -14,7 +14,10 @@ class Admin::OrdersController < Admin::ApplicationController
 			params[:status].to_i,
 			params[:source].to_i,
 			params[:type].to_i)
-		render_json_auto auto_paginate(order_list) and return
+		@paginated_order_list = auto_paginate(order_list) do |paginated_order_list|
+			paginated_order_list.map { |e| e.info_for_admin }
+		end
+		render_json_auto @paginated_order_list and return
 	end
 
 	def show
@@ -44,10 +47,10 @@ class Admin::OrdersController < Admin::ApplicationController
 	end
 
 	def update_express_info
-		render_json_auto @order.update_express_info and return
+		render_json_auto @order.update_express_info(params[:express_info]) and return
 	end
 
 	def update_remark
-		render_json_auto @order.update_remark and return
+		render_json_auto @order.update_remark(params[:remark]) and return
 	end
 end

@@ -17,16 +17,19 @@ class MailgunApi
 			@emails = @emails[group_size..-1]
 			temp_recipient_variables = {}
 			temp_emails.each do |e|
-				temp_recipient_variables[e] = {}
+				unsubscribe_key = CGI::escape(Encryption.encrypt_activate_key({"email_mobile" => e}.to_json))
+				temp_recipient_variables[e] = {"email" => e, "unsubscribe_key" => unsubscribe_key}
 			end
 			@group_recipient_variables << temp_recipient_variables
 		end
 		@group_emails << @emails
 		temp_recipient_variables = {}
 		@emails.each do |e|
-			temp_recipient_variables[e] = {}
+			unsubscribe_key = CGI::escape(Encryption.encrypt_activate_key({"email_mobile" => e}.to_json))
+			temp_recipient_variables[e] = {"email" => e, "unsubscribe_key" => unsubscribe_key}
 		end
 		@group_recipient_variables << temp_recipient_variables
+
 
 		@survey = Survey.find_by_id(survey_id)
 		@reward_scheme_id = @survey.email_promote_info["reward_scheme_id"]
@@ -52,15 +55,15 @@ class MailgunApi
 				time = Tool.time_string(Time.now.to_i - redeem_log.created_at.to_i)
 				@redeem_logs << { :time => time,
 					:nickname => redeem_log.user.nickname,
-					:amount => redeem_log.amount,
-					:gift_title => redeem_log.gift_title }
+					:point => redeem_log.point,
+					:gift_name => redeem_log.gift_name }
 			end
 		else
 			# list the prizes
 			@prizes = []
 			@reward_scheme.rewards[0]["prizes"].each do |p|
-				prize = Prize.find_by_id(p["prize_id"])
-				next if prize.nli?
+				prize = Prize.find_by_id(p["id"])
+				next if prize.nil?
 				@prizes << { :title => prize.title,
 					:img_url => Rails.application.config.quillme_host + prize.photo.picture_url }
 			end
@@ -71,6 +74,7 @@ class MailgunApi
 					:region => lottery_log.land,
 					:avatar_url => Rails.application.config.quillme_host + Tool.mini_avatar(lottery_log.user.try(:_id))}
 			end
+			@lottery_logs = @lottery_logs.each_slice(3).to_a
 		end
 
 		data = {}
@@ -87,11 +91,9 @@ class MailgunApi
 
 		data[:subject] = "邀请您参加问卷调查"
 		data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
-		puts "AAAAAAAAAAAAAAAAAAAAAA"
 		@group_emails.each_with_index do |emails, i|
-			puts "BBBBBBBBBBBBBBBBBBBBBB"
-			puts emails.inspect
-			data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
+			# data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
+			data[:to] = emails.join(', ')
 			data[:'recipient-variables'] = @group_recipient_variables[i].to_json
 			self.send_message(data)
 		end

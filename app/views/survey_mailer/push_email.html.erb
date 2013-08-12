@@ -34,7 +34,7 @@
 				<span style="font-size:16px;margin-left:15px;color:#fff;">本期调研：</span>
 				<a href="javascript:void(0);" style="font-size:16px;color:#fff;text-decoration:none;"><%= @survey.title %></a>
 			</td>
-			<td><a style="font-size:14px;display:block;text-align:center;background:#fff;color:#f25f5d;height:30px;line-height:30px;text-decoration:none;width:90px;" href="<%= Rails.application.config.quillme_host %>/s/<%= @reward_scheme_id %>">立即参与</a></td>
+			<td><a style="font-size:14px;display:block;text-align:center;background:#fff;color:#f25f5d;height:30px;line-height:30px;text-decoration:none;width:90px;" href="<%= Rails.application.config.quillme_host %>/s/<%= @reward_scheme_id %>?email=%recipient.email%">立即参与</a></td>
 		　</tr>
 		</table>
 
@@ -48,7 +48,7 @@
 		  		<% if !@survey.deadline.nil? %>
 		  			本调研将在 <span style="color:#f25d5d;"><%= Time.at(@survey.deadline).strftime("%Y年%m月%d日%H时%M分") %></span>截止。
 		  		<% end %>
-		  		本调研还需回收<%= @survey.remain_quota_number %> 份答案
+		  		本调研还需回收<%= @survey.remain_quota_number %> 份答案。
 		  		<% if [RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO].include?(@reward_type) %>
 			  		参与本次调研即可获得 <span style="color:#ff6600;font-size:14px;">￥<%= @amount %></span> 元奖励，支持多种发放形式，快来参与吧！
 		  		<% end %>
@@ -137,7 +137,7 @@
 			  	<% @redeem_logs.each do |log| %>
 					<tr height="24">
 						<td colspan="3" style="font-size:12px;">
-							<span style="color:#999;margin-right:5px;"><%=log[:time]%></span><span style="color:#666;margin-right:5px;"><%=log[:nickname]%></span><span style="color:#999;margin-right:5px;">使用<b style="margin-left:2px;margin-right:2px;color:#ff6600;"><%=log[:amount]%></b>积分</span><span style="color:#999;margin-right:5px;">兑换了</span><a href="javascript:void(0);"><%=log[:gift_title]%></a>
+							<span style="color:#999;margin-right:5px;"><%=log[:time]%></span><span style="color:#666;margin-right:5px;"><%=log[:nickname]%></span><span style="color:#999;margin-right:5px;">使用<b style="margin-left:2px;margin-right:2px;color:#ff6600;"><%=log[:point]%></b>积分</span><span style="color:#999;margin-right:5px;">兑换了</span><a href="javascript:void(0);"><%=log[:gift_name]%></a>
 						</td>
 					</tr>
 				<% end %>
@@ -176,7 +176,7 @@
 				<td colspan="3" height="20"></td>
 			</tr>
 			<tr>
-				<td colspan="3" align="right" height="40"><span style="font-size:12px;">若不是您订阅的邮件，点击<a href="javascript:void(0);">退订</a></span></td>
+				<td colspan="3" align="right" height="40"><span style="font-size:12px;">若不是您订阅的邮件，点击<a href="<%= Rails.application.config.quillme_host %>/surveys/cancel_subscribe?key=%recipient.unsubscribe_key%">退订</a></span></td>
 			</tr>
 		</table>
 		</td>

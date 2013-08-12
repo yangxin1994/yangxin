@@ -13,7 +13,8 @@ class Sample::OrdersController < ApplicationController
 	def show
 		@order = Order.find_by_id(params[:id])
 		render_json_e ErrorEnum::ORDER_NOT_EXIST and return if @order.nil?
-		render_json_auto @order.info_for_sample_detail and return
+		order_object = @order.info_for_sample_detail
+		render_json_auto order_object and return
 	end
 
 	def create_gift_order

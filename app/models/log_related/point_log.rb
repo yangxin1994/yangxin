@@ -1,10 +1,11 @@
 # encoding: utf-8
 class PointLog < Log
 	field :type, :type => Integer, :default => 8
-	field :amount, :type => Integer
+	field :amount, :type => Integer #花费积分数
 	field :reason, :type => Integer #1（回答问卷），2（推广问卷），4（礼品兑换）， 8（管理员操作）,16(处罚操作), 32(邀请样本)，64(撤销订单), 128(原有系统导入)
 	field :survey_title, :type => String
 	field :survey_id, :type => String
+	field :scheme_id, :type => String
 	field :gift_name, :type => String
 	field :gift_type, :type => Integer
 	field :gift_id, :type => String
@@ -23,8 +24,8 @@ class PointLog < Log
 	def info_for_sample
 		point_log_obj = {}
 		point_log_obj["created_at"] = self.created_at.to_i
-		point_log_obj["amount"] = self.amount.to_s
-		point_log_obj["reason"] = self.reason.to_s
+		point_log_obj["amount"] = self.amount
+		point_log_obj["reason"] = self.reason
 		point_log_obj["survey_title"] = self.survey_title
 		point_log_obj["survey_id"] = self.survey_id
 		point_log_obj["gift_name"] = self.gift_name
@@ -33,8 +34,24 @@ class PointLog < Log
 		point_log_obj["gift_picture_url"] = self.gift_picture_url
 		point_log_obj["remark"] = self.remark
 		return point_log_obj
-		
 	end
+
+	def info_for_admin
+		point_log_obj = {}
+		point_log_obj["created_at"] = Time.at(self.created_at.to_i)
+		point_log_obj["amount"] = self.amount
+		point_log_obj["reason"] = self.reason
+		point_log_obj["survey_title"] = self.survey_title
+		point_log_obj["survey_id"] = self.survey_id
+		point_log_obj["gift_name"] = self.gift_name
+		point_log_obj["gift_type"] = self.gift_type
+		point_log_obj["gift_id"] = self.gift_id
+		point_log_obj["gift_picture_url"] = self.gift_picture_url
+		point_log_obj["remark"] = self.remark
+		return point_log_obj
+	end
+
+	alias :data :info_for_sample
 
 	def self.create_admin_operate_point_log(amount, remark, sample_id)
 		self.create(:amount => amount, :reason => ADMIN_OPERATE, :remark => remark, :user_id => sample_id)

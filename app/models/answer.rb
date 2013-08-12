@@ -131,7 +131,7 @@ class Answer
 	def find_lottery_answers
 		lottery_data = {}
 		prizes_arr = []
-		prize_ids = self.rewards.first['prizes'].map{|p| p['prize_id']}
+		prize_ids = self.rewards.first['prizes'].map{|p| p['id']}
 		prizes = Prize.where(:id.in => prize_ids).map{|p| p['photo_src'] = p.photo.present? ? p.photo.picture_url : Prize::DEFAULT_IMG;p}
 		prizes.each do |pri|
 			prizes_arr  << {'id' => pri.id,'title' => pri.title,'price' => pri.price,'photo_src' => pri.photo_src}	
@@ -146,7 +146,7 @@ class Answer
 		LotteryLog.get_lottery_counts(self.survey.id) 
 	end
 
-	def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, channel, referrer, remote_ip, username, password)
+	def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, agent_task_id, channel, referrer, remote_ip, username, password)
 		survey = Survey.normal.find_by_id(survey_id)
 		# create the answer
 		answer = Answer.new(is_preview: is_preview,
@@ -158,12 +158,17 @@ class Answer
 			referrer: referrer)
 		answer.save
 		# record introducer information
-		if !is_preview && introducer_id
+		if !is_preview && introducer_id.present?
 			introducer = User.sample.find_by_id(introducer_id)
-			if !introducer.nil?
+			if introducer.present?
 				answer.introducer_id = introducer_id
 				answer.point_to_introducer = survey.spread_point
 			end
+		end
+		# record the agent task information
+		if !is_preview && agent_task_id.present?
+			agent_task = AgentTask.find_by_id(params[:agent_task_id])
+			agent_task.answers << answer if agent_task.present?
 		end
 		# record the reward information
 		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
@@ -191,7 +196,6 @@ class Answer
 			end
 		end
 		answer.answer_content = answer_content
-
 
 		# initialize the logic control result
 		answer.logic_control_result = {}
@@ -490,7 +494,7 @@ class Answer
 		# only answers that are finished contribute to quotas
 		return false if !self.is_finish && refresh_quota
 		# check the conditions one by one
-		conditions.each do |condition|
+		(conditions || []).each do |condition|
 			satisfy = false
 			case condition["condition_type"].to_s
 			when "1"
@@ -705,7 +709,7 @@ class Answer
 		quota["rules"].each do |rule|
 			# move to next rule if the quota of this rule is already satisfied
 			next if rule["submitted_count"] >= rule["amount"]
-			rule["conditions"].each do |condition|
+			(rule["conditions"] || []).each do |condition|
 				# if the answer's ip, channel, or region violates one condition of the rule, move to the next rule
 				next if condition["condition_type"] == 2 && !QuillCommon::AddressUtility.satisfy_region_code?(self.region, condition["value"])
 				next if condition["condition_type"] == 3 && self.channel != condition["value"]
@@ -905,6 +909,7 @@ class Answer
 			self.set_reject
 			self.reject_type = REJECT_BY_REVIEW
 			message_content ||= "你的此问卷[#{self.survey.title}]的答案未通过审核."
+			PunishLog.create_punish_log(user.id)
 		end
 		answer_auditor.create_message("审核问卷答案消息", message_content, [user._id.to_s]) if !user.nil?
 		self.audit_message = message_content
@@ -981,13 +986,13 @@ class Answer
 
 	def check_for_hot_survey(mobile, alipay_account, current_sample)
 		return false if self.survey.quillme_hot != true
-		if !self.user.nil?
+		if self.user.present?
 			return true if self.user.answers.not_preview.length > 0
 		else
-			return true if current_sample.answers.not_preview.length > 0
+			return true if current_sample && current_sample.answers.not_preview.length > 0
 		end
 		sample = User.sample.find_by_email_mobile(mobile) || User.sample.find_by_email_mobile(alipay_account)
-		return true if sample.answers && sample.answers.not_preview.length > 0
+		return true if sample && sample.answers.not_preview.length > 0
 		return false
 	end
 
@@ -1017,8 +1022,9 @@ class Answer
 				self.update_attributes({"reward_delivered" => true})
 			elsif self.order.status == Order::FROZEN
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
-				self.order.update_attributes({"status" => Order::REJECT, "rejected_at" => Time.now.to_i}) if self.status == REJECT
+				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
+				assign_introducer_reward if self.status == FINISH
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::ALIPAY
@@ -1036,8 +1042,9 @@ class Answer
 				self.update_attributes({"reward_delivered" => true})
 			elsif self.order.status == Order::FROZEN
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
-				self.order.update_attributes({"status" => Order::REJECT, "rejected_at" => Time.now.to_i}) if self.status == REJECT
+				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
+				assign_introducer_reward if self.status == FINISH
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::JIFENBAO
@@ -1055,12 +1062,17 @@ class Answer
 				self.update_attributes({"reward_delivered" => true})
 			else
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
-				self.order.update_attributes({"status" => Order::REJECT, "rejected_at" => Time.now.to_i}) if self.status == REJECT
+				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
+				assign_introducer_reward if self.status == FINISH
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::POINT
 			return true if self.status == UNDER_REVIEW
+			if self.status == REJECT
+				self.update_attributes({"reward_delivered" => true})
+				return true
+			end
 			sample = self.user
 			if sample.present?
 				sample.point += reward["amount"]
@@ -1068,12 +1080,13 @@ class Answer
 				PointLog.create_answer_point_log(reward["amount"], self.survey_id.to_s, self.survey.title, sample._id)
 				self.update_attributes({"reward_delivered" => true})
 			end
-			assign_introducer_reward
+			assign_introducer_reward if self.status == FINISH
 		when RewardScheme::LOTTERY
 			return true if self.status == UNDER_REVIEW
-			assign_introducer_reward
+			assign_introducer_reward if self.status == FINISH
 			if self.order && self.order.status == Order::FROZEN
-				self.order.update_attributes( {"status" => Order::WAIT} )
+				self.order.update_attributes( {"status" => Order::WAIT, "reviewed_at" => Time.now.to_i} ) if self.status == FINISH
+				self.order.update_attributes( {"status" => Order::REJECT, "reviewed_at" => Time.now.to_i} ) if self.status == REJECT
 				self.update_attributes({"reward_delivered" => true})
 			end
 		end
@@ -1129,19 +1142,19 @@ class Answer
 		rewards_from_scheme = reward_scheme.rewards[0]
 
 		reward["prizes"].each do |p|
-			next if rand > p["prob"]
+			next if rand > p["prob"].to_f
 			rewards_from_scheme["prizes"].each do |prize_from_scheme|
-				next if p["prize_id"] != prize_from_scheme["prize_id"]
-				if prize_from_scheme["deadline"] > Time.now.to_i && prize_from_scheme["amount"] > prize_from_scheme["win_amount"].to_i
+				next if p["id"] != prize_from_scheme["id"]
+				if prize_from_scheme["deadline"] > Time.now.to_i && prize_from_scheme["amount"].to_i > prize_from_scheme["win_amount"].to_i
 					reward["win"] = true
-					reward["prize_id"] = p["prize_id"]
+					reward["prize_id"] = p["id"]
 					self.save
 					prize_from_scheme["win_amount"] ||= 0
 					prize_from_scheme["win_amount"] += 1
 					reward_scheme.save
 					return {"result" => true,
-						"prize_id" => p["prize_id"],
-						"prize_title" => Prize.find_by_id(p["prize_id"]).try(:title)}
+						"prize_id" => p["id"],
+						"prize_title" => Prize.find_by_id(p["id"]).try(:title)}
 				end
 			end
 		end

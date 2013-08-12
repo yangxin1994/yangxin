@@ -3,6 +3,9 @@ HOST_OS = RbConfig::CONFIG['host_os']
 #source 'http://rubygems.org'
 source 'http://ruby.taobao.org'
 
+gem 'mongoid_shortener'
+gem 'yab62', require: 'yab62'
+
 gem 'rails', '3.1.0'
 gem 'tilt','~> 1.3.2'
 gem 'httparty', '~> 0.10.2'

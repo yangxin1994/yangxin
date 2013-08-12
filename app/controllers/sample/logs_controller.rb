@@ -8,7 +8,12 @@ class Sample::LogsController < ApplicationController
   #返回的参数:一个盛放新鲜事的列表
   #############################	
   def fresh_news
-    @logs = Log.get_new_logs(params[:limit],params[:type])
+    logs = Log.get_new_logs(params[:limit],params[:type])
+    @logs = logs.each do |log|
+      log['avatar'] = log.user.avatar.present? ? log.user.avatar.picture_url : User::DEFAULT_IMG
+      log['username'] = log.user.try(:nickname)
+      log      
+    end
   	render_json_auto(@logs)
   end
 
@@ -22,8 +27,12 @@ class Sample::LogsController < ApplicationController
   #返回的参数:记录惩罚的列表
   ############################# 
   def get_disciplinal_news
-    @logs = Log.get_new_logs(3,64)
-    render_json_auto(@logs)
+    logs = PunishLog.desc(:created_at).limit(3).map do |log|
+      log['avatar'] = log.user.avatar.present? ? log.user.avatar.picture_url : User::DEFAULT_IMG
+      log['username'] = log.user.try(:nickname)
+      log
+    end
+    render_json_auto logs
   end
 
 
