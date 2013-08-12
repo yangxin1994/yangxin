@@ -125,10 +125,11 @@ class Sample::AccountsController < ApplicationController
 		render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST if !User.find_by_email(params[:mobile]).nil?
 		@current_user.mobile_to_be_changed = params[:mobile]
 		# @current_user.sms_verification_code = Random.rand(100000..999999).to_s
-		@current_user.sms_verification_code = Tool.generate_active_mobile_code
-		@current_user.sms_verification_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
+		code = Tool.generate_active_mobile_code
+		@current_user.sms_verification_code = code
+		@current_user.sms_verification_expiration_time = Time.now.to_i + 2.hours.to_i
 		@current_user.save
-		## todo: send message to the mobile
+		SmsWorker.perform_async("change_mobile", params[:mobile], "", :code => code)
 		render_json_s and return
 	end
 

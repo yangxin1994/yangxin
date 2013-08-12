@@ -213,6 +213,9 @@ class Order
 	end
 
 	def self.search_orders(email, mobile, code, status, source, type)
+		logger.info "AAAAAAAAAAAAAAAA"
+		logger.info type.inspect
+		logger.info "AAAAAAAAAAAAAAAA"
 		if !email.blank?
 			orders = User.sample.find_by_email(email).try(:orders) || []
 		elsif !mobile.blank?
@@ -233,6 +236,9 @@ class Order
 		end
 		if !type.blank? && type != 0
 			type_ary = Tool.convert_int_to_base_arr(type)
+			logger.info "BBBBBBBBBBBBBBBBBBBB"
+			logger.info type_ary.inspect
+			logger.info "BBBBBBBBBBBBBBBBBBBB"
 			orders = orders.where(:type.in => type_ary)
 		end
 		return orders
@@ -255,7 +261,8 @@ class Order
 			self.status = SUCCESS
 			# send sample short message
 			if self.type == MOBILE_CHARGE
-				SmsApi.send_sms(self.mobile, "")
+				gift_name = "#{self.amount}元话费"
+				return SmsApi.charge_confirm_sms(self.mobile, "", :gift_name => gift_name)
 			end
 		when 9
 			self.status = FAIL
@@ -293,7 +300,6 @@ class Order
 			order.ofcard_order_id = o["billid"]
 			if o["stat"] == "成功"
 				order.status = SUCCESS
-				SmsApi.send_sms(order.mobile, "")
 			elsif o["stat"] == "撤销"
 				order.status = FAIL
 			end
@@ -313,7 +319,6 @@ class Order
 			next if order.nil?
 			if o["stat"] == "成功"
 				order.status = SUCCESS
-				SmsApi.send_sms(order.mobile, "")
 			elsif o["stat"] == "撤销"
 				order.status = FAIL
 			end

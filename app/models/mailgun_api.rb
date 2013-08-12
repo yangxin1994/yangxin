@@ -166,10 +166,6 @@ class MailgunApi
 	end
 
 	def self.find_password_email(user, callback)
-		Rails.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-		Rails.logger.info(user)
-		Rails.logger.info(callback)
-		Rails.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 		@user = user
 		password_info = {"email" => user.email, "time" => Time.now.to_i}
 		@password_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(password_info.to_json))

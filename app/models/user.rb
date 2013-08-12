@@ -235,7 +235,7 @@ class User
 			active_code = Tool.generate_active_mobile_code
 			account[:mobile] = email_mobile
 			account[:rss_verification_code] = active_code
-			account[:rss_verification_expiration_time] = (Time.now + 1.minutes).to_i
+			account[:rss_verification_expiration_time] = (Time.now + 2.hours).to_i
 		end
 
 		new_user = true  # default imagagine the user is a new user
@@ -257,9 +257,7 @@ class User
 			end				
 
 			if active_code.present?
-				## TODO   generate active code when user regist with mobile
-				## TODO   store the random code and mobile in session with a expire time 60 sec.     
-				# SmsInvitationWorker
+				SmsWorker.perform_async("rss_subscribe", user.mobile, callback, :code => active_code)
 			else
 				EmailWorker.perform_async("rss_subscribe",user.email, callback) if account[:email]					
 			end			
@@ -295,15 +293,13 @@ class User
 		return {:success => true}
 	end
 
-	def self.send_forget_pass_code(email_mobile,callback)
+	def self.send_forget_pass_code(email_mobile, callback)
 		sample = self.find_by_email_mobile(email_mobile) 
 		if sample.present?
 			if(email_mobile.match(/#{MobileRexg}/i))
 				active_code = Tool.generate_active_mobile_code	
-				## TODO   generate active code when user regist with mobile
-				## TODO   store the random code and mobile in session with a expire time 60 sec.     
-				# SmsInvitationWorker
-				return sample.update_attributes(:sms_verification_code => active_code,:sms_verification_expiration_time => (Time.now + 1.minutes).to_i)
+				sample.update_attributes(:sms_verification_code => active_code, :sms_verification_expiration_time => (Time.now + 2.hours).to_i)
+				return SmsWorker.perform_async("find_password", email_mobile, "", :code => active_code)
 			else
 				return EmailWorker.perform_async("find_password", email_mobile, callback)
 			end
@@ -362,7 +358,7 @@ class User
 		password = Encryption.encrypt_password(password) if account[:email]
 		account[:status] =  REGISTERED
 		account[:sms_verification_code] = active_code if account[:mobile]
-		account[:sms_verification_expiration_time]  = (Time.now + 1.minutes).to_i
+		account[:sms_verification_expiration_time]  = (Time.now + 2.hours).to_i
 		updated_attr = account.merge(
 			password: password,
 			registered_at: Time.now.to_i)
@@ -371,11 +367,8 @@ class User
 		existing_user = User.create if existing_user.nil?
 		existing_user.update_attributes(updated_attr)
 		if active_code.present?
-			## TODO   generate active code when user regist with mobile
-			## TODO   store the random code and mobile in session with a expire time 60 sec.     
-			# SmsInvitationWorker
+			SmsWorker.perform_async("welcome", existing_user.mobile, callback, :active_code => active_code)
 		else
-			# send welcome email
 			EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
 		end
 
