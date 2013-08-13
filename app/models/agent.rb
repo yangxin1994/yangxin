@@ -44,6 +44,7 @@ class Agent
 	end
 
 	def update_agent(agent)
+		agent[:password] = Encryption.encrypt_password(agent[:password])
 		return self.update_attributes(agent)
 	end
 

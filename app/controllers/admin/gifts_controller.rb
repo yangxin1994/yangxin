@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Admin::GiftsController < Admin::ApplicationController
 
 	before_filter :check_gift_existence, :only => [:show, :update, :destroy]
@@ -14,7 +13,7 @@ class Admin::GiftsController < Admin::ApplicationController
 	end
 
 	def show
-		@gift['photo_url'] = @gift.photo.value
+		@gift['photo_url'] = @gift.photo.try 'value'
 		render_json_auto(@gift)
 	end
 

@@ -24,7 +24,7 @@ class Gift
 	# 1 off the shelf, 2 on the shelf, 4 deleted
 	field :status, :type => Integer, default: 1
 	# 1 for virtual gift, 2 for real goods gift, 4 for mobile change, 8 for alypay transfer, 16 for jifenbao, 32 for qq coin
-	field :type, :type => Integer, default: 1
+	field :type, :type => Integer, default: 0
 	field :title, :type => String, default: ""
 	field :description, :type => String, default: ""
 	field :quantity, :type => Integer, default: 0
@@ -59,6 +59,7 @@ class Gift
 		photo_url = gift.delete("photo_url")
 		material = Material.create_image(photo_url)
 		gift = Gift.new(gift)
+		gift.price = gift.point / 100 if gift.price.blank?
 		gift.save
 		gift.photo = material
 		gift["photo_url"] = material.value
