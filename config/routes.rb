@@ -24,6 +24,8 @@ OopsData::Application.routes.draw do
 		resources :agent_tasks do
 			member do
 				put :close
+				put :open
+				get :refresh
 			end
 		end
 
