@@ -23,7 +23,6 @@ class Sample::OrdersController < ApplicationController
 		order_t = params['order'].delete('gift_id')
 		gift_id = Gift.generate_gift_id(order_t)
 		opt     = Gift.generate_opt(params[:order],order_t)
-
 		#synchro  reverver info 
 		if params['order']['info_sys'].to_s == 'true'
 			@current_user.set_receiver_info(opt)

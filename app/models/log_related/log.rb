@@ -32,7 +32,7 @@ class Log
 	end
 
 	def self.get_newst_exchange_logs
-		logs = self.redeem_logs.desc(:updated_at).limit(6);
+		logs = self.redeem_logs.desc(:updated_at).limit(5);
 		@logs = logs.map{|log| log['username'] = log.user.nickname;log}
 	end
 end
