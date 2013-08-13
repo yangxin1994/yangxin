@@ -146,7 +146,7 @@ class Answer
 		LotteryLog.get_lottery_counts(self.survey.id) 
 	end
 
-	def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, channel, referrer, remote_ip, username, password)
+	def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, agent_task_id, channel, referrer, remote_ip, username, password)
 		survey = Survey.normal.find_by_id(survey_id)
 		# create the answer
 		answer = Answer.new(is_preview: is_preview,
@@ -158,12 +158,17 @@ class Answer
 			referrer: referrer)
 		answer.save
 		# record introducer information
-		if !is_preview && introducer_id
+		if !is_preview && introducer_id.present?
 			introducer = User.sample.find_by_id(introducer_id)
-			if !introducer.nil?
+			if introducer.present?
 				answer.introducer_id = introducer_id
 				answer.point_to_introducer = survey.spread_point
 			end
+		end
+		# record the agent task information
+		if !is_preview && agent_task_id.present?
+			agent_task = AgentTask.find_by_id(params[:agent_task_id])
+			agent_task.answers << answer if agent_task.present?
 		end
 		# record the reward information
 		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
@@ -191,7 +196,6 @@ class Answer
 			end
 		end
 		answer.answer_content = answer_content
-
 
 		# initialize the logic control result
 		answer.logic_control_result = {}
@@ -982,13 +986,13 @@ class Answer
 
 	def check_for_hot_survey(mobile, alipay_account, current_sample)
 		return false if self.survey.quillme_hot != true
-		if !self.user.nil?
+		if self.user.present?
 			return true if self.user.answers.not_preview.length > 0
 		else
-			return true if current_sample.answers.not_preview.length > 0
+			return true if current_sample && current_sample.answers.not_preview.length > 0
 		end
 		sample = User.sample.find_by_email_mobile(mobile) || User.sample.find_by_email_mobile(alipay_account)
-		return true if sample.answers && sample.answers.not_preview.length > 0
+		return true if sample && sample.answers.not_preview.length > 0
 		return false
 	end
 
@@ -1020,6 +1024,7 @@ class Answer
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
 				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
+				assign_introducer_reward if self.status == FINISH
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::ALIPAY
@@ -1039,6 +1044,7 @@ class Answer
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
 				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
+				assign_introducer_reward if self.status == FINISH
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::JIFENBAO
@@ -1058,6 +1064,7 @@ class Answer
 				self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
 				self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
 				self.order.auto_handle
+				assign_introducer_reward if self.status == FINISH
 				self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
 			end
 		when RewardScheme::POINT
@@ -1073,10 +1080,10 @@ class Answer
 				PointLog.create_answer_point_log(reward["amount"], self.survey_id.to_s, self.survey.title, sample._id)
 				self.update_attributes({"reward_delivered" => true})
 			end
-			assign_introducer_reward
+			assign_introducer_reward if self.status == FINISH
 		when RewardScheme::LOTTERY
 			return true if self.status == UNDER_REVIEW
-			assign_introducer_reward
+			assign_introducer_reward if self.status == FINISH
 			if self.order && self.order.status == Order::FROZEN
 				self.order.update_attributes( {"status" => Order::WAIT, "reviewed_at" => Time.now.to_i} ) if self.status == FINISH
 				self.order.update_attributes( {"status" => Order::REJECT, "reviewed_at" => Time.now.to_i} ) if self.status == REJECT
@@ -1186,6 +1193,7 @@ class Answer
 		answer_obj["is_preview"] = self.is_preview
 		answer_obj["rewards"] = self.rewards
 		answer_obj["sample_id"] = self.user.nil? ? nil : self.user._id.to_s
+		answer_obj["reward_scheme_id"] = self.reward_scheme_id.to_s
 		return answer_obj
 	end
 

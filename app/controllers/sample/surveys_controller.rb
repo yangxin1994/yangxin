@@ -3,7 +3,6 @@ require 'array'
 require 'error_enum'
 require 'quill_common'
 class Sample::SurveysController < ApplicationController
-
   #############################
   #功能:用户点击“立即参与”，获取最新的热点小调查
   #http method：get

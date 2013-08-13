@@ -25,7 +25,5 @@ class SurveySpread
 
 	def self.surveys_with_spread_hash(user)
 		ss_array = user.survey_spreads
-
-		
 	end
 end

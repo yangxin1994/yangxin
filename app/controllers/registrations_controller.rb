@@ -26,15 +26,18 @@ class RegistrationsController < ApplicationController
 		render_json_e(ErrorEnum::USER_NOT_REGISTERED) and return if user.status == 0
 		render_json_e(ErrorEnum::USER_ACTIVATED) and return if user.is_activated
 		if params[:email_mobile].match(/^\d{11}$/)
-			##TODO send_mobile_message()
+			active_code = Tool.generate_active_mobile_code
+			user.sms_verification_code = active_code
+			user.sms_verification_expiration_time  = (Time.now + 2.hours).to_i
+			user.save
+			SmsWorker.perform_async("activate", user.mobile, "", :active_code => active_code)
 		else
-			#EmailWorker.perform_async("activate", user.email, params[:callback])
 			EmailWorker.perform_async("welcome", user.email, params[:callback])
 		end
 		render_json_s and return
 	end
 
-  #注册后邮箱激活
+	#注册后邮箱激活
 	def email_activate
 		begin
 			activate_info_json = Encryption.decrypt_activate_key(params[:activate_key])
@@ -57,6 +60,5 @@ class RegistrationsController < ApplicationController
 	def registered_user_exist
 		u = User.find_by_email_mobile(params[:email_mobile])
 		render_json_auto({"exist" => (u &&  u.is_activated)}) and return
-		#render_json_auto({"exist" => (u && u.status == User::REGISTERED)}) and return
 	end
 end

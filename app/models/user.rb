@@ -129,6 +129,7 @@ class User
 	public
 
 	def self.find_by_email_mobile(email_mobile)
+		return nil if email_mobile.nil?
 		user = self.where(:email => email_mobile).first
 		user = self.where(:mobile => email_mobile).first if user.nil?
 		return user
@@ -234,7 +235,7 @@ class User
 			active_code = Tool.generate_active_mobile_code
 			account[:mobile] = email_mobile
 			account[:rss_verification_code] = active_code
-			account[:rss_verification_expiration_time] = (Time.now + 1.minutes).to_i
+			account[:rss_verification_expiration_time] = (Time.now + 2.hours).to_i
 		end
 
 		new_user = true  # default imagagine the user is a new user
@@ -256,9 +257,7 @@ class User
 			end				
 
 			if active_code.present?
-				## TODO   generate active code when user regist with mobile
-				## TODO   store the random code and mobile in session with a expire time 60 sec.     
-				# SmsInvitationWorker
+				SmsWorker.perform_async("rss_subscribe", user.mobile, callback, :code => active_code)
 			else
 				EmailWorker.perform_async("rss_subscribe",user.email, callback) if account[:email]					
 			end			
@@ -294,15 +293,13 @@ class User
 		return {:success => true}
 	end
 
-	def self.send_forget_pass_code(email_mobile,callback)
+	def self.send_forget_pass_code(email_mobile, callback)
 		sample = self.find_by_email_mobile(email_mobile) 
 		if sample.present?
 			if(email_mobile.match(/#{MobileRexg}/i))
 				active_code = Tool.generate_active_mobile_code	
-				## TODO   generate active code when user regist with mobile
-				## TODO   store the random code and mobile in session with a expire time 60 sec.     
-				# SmsInvitationWorker
-				return sample.update_attributes(:sms_verification_code => active_code,:sms_verification_expiration_time => (Time.now + 1.minutes).to_i)
+				sample.update_attributes(:sms_verification_code => active_code, :sms_verification_expiration_time => (Time.now + 2.hours).to_i)
+				return SmsWorker.perform_async("find_password", email_mobile, "", :code => active_code)
 			else
 				return EmailWorker.perform_async("find_password", email_mobile, callback)
 			end
@@ -361,7 +358,7 @@ class User
 		password = Encryption.encrypt_password(password) if account[:email]
 		account[:status] =  REGISTERED
 		account[:sms_verification_code] = active_code if account[:mobile]
-		account[:sms_verification_expiration_time]  = (Time.now + 1.minutes).to_i
+		account[:sms_verification_expiration_time]  = (Time.now + 2.hours).to_i
 		updated_attr = account.merge(
 			password: password,
 			registered_at: Time.now.to_i)
@@ -370,11 +367,8 @@ class User
 		existing_user = User.create if existing_user.nil?
 		existing_user.update_attributes(updated_attr)
 		if active_code.present?
-			## TODO   generate active code when user regist with mobile
-			## TODO   store the random code and mobile in session with a expire time 60 sec.     
-			# SmsInvitationWorker
+			SmsWorker.perform_async("welcome", existing_user.mobile, callback, :active_code => active_code)
 		else
-			# send welcome email
 			EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
 		end
 
@@ -880,67 +874,6 @@ class User
 		return [completion, analyze_result]
 	end
 
-	def point_logs
-		logs = self.logs.point_logs
-		ret_logs = logs.map do |e|
-			{
-				"created_at" => e.created_at,
-				"amount" => e.data["amount"],
-				"reason" => e.data["reason"],
-				"survey_title" => e.data["survey_title"],
-				"gift_name" => e.data["gift_name"],
-				"remark" => e.data["remark"]
-			}
-		end
-		return ret_logs
-	end
-
-	def redeem_logs
-		logs = self.logs.redeem_logs
-		ret_logs = logs.map do |e|
-			{
-				"created_at" => e.created_at,
-				"amount" => e.data["amount"],
-				"order_id" => e.data["order_id"],
-				"gift_name" => e.data["gift_name"]
-			}
-		end
-		return ret_logs
-	end
-
-	def lottery_logs
-		logs = self.logs.lottery_logs
-		ret_logs = logs.map do |e|
-			{
-				"created_at" => e.created_at,
-				"result" => e.data["result"],
-				"order_id" => e.data["order_id"],
-				"prize_name" => e.data["prize_name"]
-			}
-		end
-		return ret_logs
-	end
-
-	def answer_logs
-		answers = self.answers.not_preview.desc(:created_at)
-		ret_logs = answers.map do |e|
-			selected_reward = (e.rewards.select { |e| e["checked"] == true }).first
-			reward_type = selected_reward.nil? ? 0 : selected_reward["type"]
-			reward_amount = selected_reward.nil? ? 0 : selected_reward["amount"]
-			{
-				"_id" => e._id.to_s,
-				"title" => e.survey.title,
-				"created_at" => e.created_at,
-				"finished_at" => Time.at(e.finished_at),
-				"status" => e.status,
-				"reject_type" => e.reject_type,
-				"reward_type" => reward_type,
-				"reward_amount" => reward_amount
-			}
-		end
-		return ret_logs
-	end
-
 	def spread_logs
 		answers = Answer.where(:introducer_id => self._id.to_s)
 		ret_logs = answers.map do |e|
@@ -1038,18 +971,25 @@ class User
 	def read_sample_attribute(name)
 		sa = SampleAttribute.find_by_name(name)
 		return nil if sa.nil?
+		return nil if self.affiliated.nil?
 		return self.affiliated.read_attribute(sa.name.to_sym)
 	end
 
 	def read_sample_attribute_by_id(sa_id)
 		sa = SampleAttribute.find_by_id(sa_id)
 		return nil if sa.nil?
+		return nil if self.affiliated.nil?
 		return self.affiliated.read_attribute(sa.name.to_sym)
 	end
 
 	def write_sample_attribute(name, value)
 		sa = SampleAttribute.find_by_name(name)
-		return nil if sa.nil?
+		return false if sa.nil?
+		if self.affiliated.nil?
+			a = Affiliated.create
+			a.user = self
+			a.save
+		end
 		self.affiliated.write_attribute(sa.name.to_sym, value)
 		return self.affiliated.save
 	end
@@ -1057,6 +997,11 @@ class User
 	def write_sample_attribute_by_id(sa_id, value)
 		sa = SampleAttribute.find_by_id(sa_id)
 		return false if sa.nli?
+		if self.affiliated.nil?
+			a = Affiliated.create
+			a.user = self
+			a.save
+		end
 		sa.affiliated.write_attribute(sa.name.to_sym, value)
 	end
 

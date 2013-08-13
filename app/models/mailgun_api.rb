@@ -55,14 +55,14 @@ class MailgunApi
 				time = Tool.time_string(Time.now.to_i - redeem_log.created_at.to_i)
 				@redeem_logs << { :time => time,
 					:nickname => redeem_log.user.nickname,
-					:amount => redeem_log.amount,
-					:gift_title => redeem_log.gift_title }
+					:point => redeem_log.point,
+					:gift_name => redeem_log.gift_name }
 			end
 		else
 			# list the prizes
 			@prizes = []
 			@reward_scheme.rewards[0]["prizes"].each do |p|
-				prize = Prize.find_by_id(p["prize_id"])
+				prize = Prize.find_by_id(p["id"])
 				next if prize.nil?
 				@prizes << { :title => prize.title,
 					:img_url => Rails.application.config.quillme_host + prize.photo.picture_url }
@@ -76,7 +76,6 @@ class MailgunApi
 			end
 			@lottery_logs = @lottery_logs.each_slice(3).to_a
 		end
-
 
 		data = {}
 		data[:domain] = Rails.application.config.survey_email_domain
@@ -93,7 +92,8 @@ class MailgunApi
 		data[:subject] = "邀请您参加问卷调查"
 		data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
 		@group_emails.each_with_index do |emails, i|
-			data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
+			# data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
+			data[:to] = emails.join(', ')
 			data[:'recipient-variables'] = @group_recipient_variables[i].to_json
 			self.send_message(data)
 		end
@@ -166,10 +166,6 @@ class MailgunApi
 	end
 
 	def self.find_password_email(user, callback)
-		Rails.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-		Rails.logger.info(user)
-		Rails.logger.info(callback)
-		Rails.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 		@user = user
 		password_info = {"email" => user.email, "time" => Time.now.to_i}
 		@password_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(password_info.to_json))

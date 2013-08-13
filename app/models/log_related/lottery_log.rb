@@ -38,6 +38,15 @@ class LotteryLog < Log
 		return data
 	end
 
+	def info_for_admin
+		lottery_log_obj = {}
+		lottery_log_obj["created_at"] = self.created_at.to_i
+		lottery_log_obj["result"] = self.result.to_s
+		lottery_log_obj["order_id"] = self.order_id
+		lottery_log_obj["prize_name"] = self.prize_name
+		return lottery_log_obj
+	end
+
 	def self.create_fail_lottery_log(answer_id,survey_id,survey_title,user_id,ip_address)
 		address_code = QuillCommon::AddressUtility.find_address_code_by_ip(ip_address)
 		land = QuillCommon::AddressUtility.find_province_city_town_by_code(address_code)

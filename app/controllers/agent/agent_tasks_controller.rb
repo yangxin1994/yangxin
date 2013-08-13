@@ -1,5 +1,5 @@
 class Agent::AgentTasksController < Agent::ApplicationController
-	before_filter :check_agent_task_existence, :only => [:close, :show]
+	before_filter :check_agent_task_existence, :only => [:show, :close, :open, :refresh]
 
 	def check_agent_task_existence
 		@agent_task = AgentTask.normal.find_by_id(params[:id])
@@ -20,5 +20,14 @@ class Agent::AgentTasksController < Agent::ApplicationController
 
 	def close
 		render_json_auto @agent_task.agent_close and return
+	end
+
+	def open
+		render_json_auto @agent_task.agent_open and return
+	end
+
+	def refresh
+		@agent_task.refresh_quota
+		render_json_auto @agent_task.info and return
 	end
 end
