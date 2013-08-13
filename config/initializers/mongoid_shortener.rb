@@ -1,2 +1,2 @@
-MongoidShortener.root_url = "http://wenjuanba.com"
-MongoidShortener.prefix_url = "http://wenjuanba.com/~"
+MongoidShortener.root_url = "#{Rails.application.config.quillme_host}"
+MongoidShortener.prefix_url = "#{Rails.application.config.quillme_host}/~"
