@@ -3,7 +3,7 @@ HOST_OS = RbConfig::CONFIG['host_os']
 #source 'http://rubygems.org'
 source 'http://ruby.taobao.org'
 
-gem 'mongoid_shortener'
+gem 'mongoid_shortener', :path => "../mongoid_shortener"
 gem 'yab62', require: 'yab62'
 
 gem 'rails', '3.1.0'

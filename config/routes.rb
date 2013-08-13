@@ -2,9 +2,7 @@ require 'sidekiq/web'
 OopsData::Application.routes.draw do
 	mount Sidekiq::Web, at: "/sidekiq"
 
-	match '/:unique_key' => 'mongoid_shortener/shortened_urls#translate', :via => :get, :constraints => { :unique_key => /~.+/ }
-
-	resources :short_urls
+	resources :short_urls, :only => [:create, :show]
 
 	resources :faqs, :public_notices, :feedbacks, :advertisements
 	resources :ofcards do
@@ -24,6 +22,8 @@ OopsData::Application.routes.draw do
 		resources :agent_tasks do
 			member do
 				put :close
+				put :open
+				get :refresh
 			end
 		end
 
