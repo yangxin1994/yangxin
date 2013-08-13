@@ -194,7 +194,7 @@ class Survey
 
 	end
 
-	def self.get_recommends(status=2,reward_type=nil,answer_status=nil,sample=nil)
+	def self.get_recommends(status=2,reward_type=nil,answer_status=nil,sample=nil,home_page=nil)
 		status = 2 unless status.present?
 		reward_type = nil unless reward_type.present?
 		answer_status = nil unless answer_status.present?
@@ -209,13 +209,12 @@ class Survey
 		else
 			surveys = Survey.quillme_promote.not_quillme_hot.status(status).desc(:created_at)		
 		end	
-
-		surveys = get_filter_surveys(surveys,total_ids,answer_status,sample)
+		surveys = get_filter_surveys(surveys,total_ids,answer_status,sample,home_page)
 		return surveys
 
 	end
 
-	def self.get_filter_surveys(surveys,total_ids,answer_status,sample)
+	def self.get_filter_surveys(surveys,total_ids,answer_status,sample,home_page)
 		if sample.present?
 			if answer_status.present? && answer_status.to_i != 0
 				survey_ids = sample.answers.not_preview.where(:status.in => answer_status.split(',')).map(&:survey_id)
@@ -224,6 +223,10 @@ class Survey
 				survey_ids = total_ids - survey_ids
 			end	
 			surveys = surveys.where(:_id.in => survey_ids) if survey_ids
+		end
+		if home_page.present? && surveys.count.to_i < 9
+			extend_surveys = Survey.quillme_promote.not_quillme_hot.closed.desc(:created_at).limit(9 - surveys.count.to_i)
+			surveys = surveys.to_ary + extend_surveys.to_ary
 		end
 
 		return surveys
