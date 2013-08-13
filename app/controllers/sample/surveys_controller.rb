@@ -12,7 +12,7 @@ class Sample::SurveysController < ApplicationController
   #############################	
   def get_hot_spot_survey
     #查询条件:必须是发布在社区的调查问卷，必须是热点小调查，必须是已经发布的问卷,必须是可推广的调查问卷
-    @hot_survey = Survey.only('_id','title').quillme_promote.quillme_hot.opend.first
+    @hot_survey = Survey.quillme_promote.quillme_hot.opend.first
     render_json { @hot_survey }
   end
 
