@@ -82,6 +82,43 @@ class SmsApi # 短信接口
 
 	################### different types of sms ########################
 
+	def self.invitation_sms(survey_id, sample_id, callback, opt)
+		sample = User.find_by_id(sample_id)
+		return if sample.nil? || sample.mobile.blank?
+		mobile = sample.mobile
+		survey = Survey.find_by_id(survey_id)
+		@survey_title = survey.title
+		reward_scheme_id = survey.sms_promote_info["reward_scheme_id"]
+		@survey_link = "#{Rails.application.config.quillme_host}/s/#{reward_scheme_id}"
+		@survey_link = MongoidShortener.generate @survey_link
+		unsubscribe_key = CGI::escape(Encryption.encrypt_activate_key({"email_mobile" => mobile}.to_json))
+		@unsubscribe_link = "#{Rails.application.config.quillme_host}/surveys/cancel_subscribe?key=#{unsubscribe_key}"
+		@unsubscribe_link = MongoidShortener.generate @unsubscribe_link
+
+		@reward = ""
+		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
+		if reward_scheme.rewards[0].present?
+			case reward_scheme.rewards[0]["type"]
+			when RewardScheme::MOBILE
+				@reward = "#{reward_scheme.rewards[0]["amount"]}现金奖励"
+			when RewardScheme::ALIPAY
+				@reward = "#{reward_scheme.rewards[0]["amount"]}现金奖励"
+			when RewardScheme::JIFENBAO
+				@reward = "#{reward_scheme.rewards[0]["amount"]}现金奖励"
+			when RewardScheme::POINT
+				@reward = "#{reward_scheme.rewards[0]["amount"]}积分奖励"
+			when RewardScheme::LOTTERY
+				@reward = "一次抽奖机会"
+			end
+		end
+
+		text_template_file_name = "#{Rails.root}/app/views/sms_text/invitation_sms.text.erb"
+		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+		text = text_template.result(binding)
+		return text
+		self.send_sms(mobile, text)
+	end
+
 	def self.find_password_sms(mobile, callback, opt)
 		@code = opt[:code].to_s
 		text_template_file_name = "#{Rails.root}/app/views/sms_text/find_password_sms.text.erb"

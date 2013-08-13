@@ -60,9 +60,7 @@ class SmsInvitationWorker
 		# 5. send sms to the samples found
 		samples_for_surveys.each do |s_id, sample_id_ary|
 			sample_id_ary.each do |sample_id|
-				sample = User.sample.find_by_id(sample_id)
-				sms_text = ""
-				SmsApi.send_sms(sample.mobile, sms_text)
+				SmsApi.invitation_sms(s_id, sample_id, "")
 			end
 		end
 		return true
