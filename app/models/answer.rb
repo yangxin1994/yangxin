@@ -1193,6 +1193,7 @@ class Answer
 		answer_obj["is_preview"] = self.is_preview
 		answer_obj["rewards"] = self.rewards
 		answer_obj["sample_id"] = self.user.nil? ? nil : self.user._id.to_s
+		answer_obj["reward_scheme_id"] = self.reward_scheme_id.to_s
 		return answer_obj
 	end
 
