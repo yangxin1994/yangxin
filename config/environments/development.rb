@@ -56,16 +56,16 @@ OopsData::Application.configure do
 
   # task web service
   config.service_port = '8000'
-  # donet web service
-  # config.dotnet_web_service_uri = 'http://192.168.1.119:80'
-  config.dotnet_web_service_uri = 'http://export.oopsdata.com'
 
-	# configuration for roadie
-	config.action_mailer.default_url_options = {:host => 'quill.oopsdata.net', :port => '3000'}
+  # donet web service
+  config.dotnet_web_service_uri = 'http://export.oopsdata.com'
 
 	# configuration for quill and quillme
 	config.quill_host = 'http://quill.oopsdata.net:3000'
 	config.quillme_host = 'http://quillme.oopsdata.net:3000'
+
+	# configuration for roadie
+	config.action_mailer.default_url_options = {:host => 'quill.oopsdata.net', :port => '3000'}
 
   config.mailgun_api_key = 'key-9zcv6-e7j8aratn9viu3unvbn2zc92j3'
   config.survey_email_domain = 'oopsdata.net'
