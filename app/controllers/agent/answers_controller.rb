@@ -20,10 +20,16 @@ class Agent::AnswersController < Agent::ApplicationController
 		render_json_e ErrorEnum::AGENT_TASK_NOT_EXIST if agent_task.nil?
 		answers = Answer.where(:agent_task_id => agent_task._id.to_s)
 		answers = answers.find_by_status(params[:status]) if !params[:status].blank?
-		render_json_auto auto_paginate(answers) and return
+		@paginated_answers = auto_paginate(answers) do |paginated_answers|
+			paginated_answers.map { |e| e.info_for_auditor }
+		end
+		render_json_auto @paginated_answers and return
 	end
 
 	def show
+		answer = Answer.find_by_id(params[:id])
+		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
+		
 		answer["question_content"] = []
 		answer.answer_content.each do |key, val|
 			# key is question id

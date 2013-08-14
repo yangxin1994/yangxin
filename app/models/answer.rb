@@ -167,7 +167,7 @@ class Answer
 		end
 		# record the agent task information
 		if !is_preview && agent_task_id.present?
-			agent_task = AgentTask.find_by_id(params[:agent_task_id])
+			agent_task = AgentTask.find_by_id(agent_task_id)
 			agent_task.answers << answer if agent_task.present?
 		end
 		# record the reward information
@@ -1190,6 +1190,12 @@ class Answer
 			order_info)
 		self.order = order
 		return true
+	end
+
+	def info_for_auditor
+		sample_name = self.user.try(:email) || self.user.try(:mobile) || "visitor"
+		self.write_attribute('sample_name', sample_name)
+		return self
 	end
 
 	def info_for_sample

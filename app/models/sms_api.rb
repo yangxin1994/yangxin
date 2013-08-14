@@ -90,10 +90,10 @@ class SmsApi # 短信接口
 		@survey_title = survey.title
 		reward_scheme_id = survey.sms_promote_info["reward_scheme_id"]
 		@survey_link = "#{Rails.application.config.quillme_host}/s/#{reward_scheme_id}"
-		@survey_link = MongoidShortener.generate @survey_link
+		@survey_link = Rails.application.config.quillme_host + "/" + MongoidShortener.generate(@survey_link)
 		unsubscribe_key = CGI::escape(Encryption.encrypt_activate_key({"email_mobile" => mobile}.to_json))
 		@unsubscribe_link = "#{Rails.application.config.quillme_host}/surveys/cancel_subscribe?key=#{unsubscribe_key}"
-		@unsubscribe_link = MongoidShortener.generate @unsubscribe_link
+		@unsubscribe_link = Rails.application.config.quillme_host + "/" + MongoidShortener.generate(@unsubscribe_link)
 
 		@reward = ""
 		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
@@ -115,12 +115,11 @@ class SmsApi # 短信接口
 		text_template_file_name = "#{Rails.root}/app/views/sms_text/invitation_sms.text.erb"
 		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
 		text = text_template.result(binding)
-		return text
 		self.send_sms(mobile, text)
 	end
 
 	def self.find_password_sms(mobile, callback, opt)
-		@code = opt[:code].to_s
+		@code = opt["code"].to_s
 		text_template_file_name = "#{Rails.root}/app/views/sms_text/find_password_sms.text.erb"
 		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
 		text = text_template.result(binding)
@@ -128,7 +127,7 @@ class SmsApi # 短信接口
 	end
 
 	def self.change_mobile_sms(mobile, callback, opt)
-		@code = opt[:code].to_s
+		@code = opt["code"].to_s
 		text_template_file_name = "#{Rails.root}/app/views/sms_text/change_mobile_sms.text.erb"
 		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
 		text = text_template.result(binding)
@@ -136,7 +135,7 @@ class SmsApi # 短信接口
 	end
 	
 	def self.rss_subscribe_sms(mobile, callback, opt)
-		@code = opt[:code].to_s
+		@code = opt["code"].to_s
 		text_template_file_name = "#{Rails.root}/app/views/sms_text/rss_subscribe_sms.text.erb"
 		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
 		text = text_template.result(binding)
@@ -144,7 +143,7 @@ class SmsApi # 短信接口
 	end
 
 	def self.activate_sms(mobile, callback, opt)
-		@activate_code = opt[:active_code].to_s
+		@code = opt["code"].to_s
 		text_template_file_name = "#{Rails.root}/app/views/sms_text/activate_sms.text.erb"
 		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
 		text = text_template.result(binding)
@@ -152,7 +151,7 @@ class SmsApi # 短信接口
 	end
 
 	def self.welcome_sms(mobile, callback, opt)
-		@activate_code = opt[:active_code].to_s
+		@code = opt["active_code"].to_s
 		text_template_file_name = "#{Rails.root}/app/views/sms_text/welcome_sms.text.erb"
 		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
 		text = text_template.result(binding)
