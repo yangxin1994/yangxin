@@ -827,18 +827,38 @@ class Answer
 			attr_value = nil
 			if sa.type == DataType::STRING
 				case question.question_type
-				when QuestionTypeEnum::TEXT_BLANK
+				when QuestionTypeEnum::TEXT_BLANK_QUESTION
 					attr_value = q_answer
 				end
 				next if attr_value.nil?
 				self.user.write_sample_attribute(sa.name, attr_value) if self.user.need_update_attribute(sa.name, attr_value)
-			elsif [DataType::DATE, DataType::DATE_RANGE, DataType::NUMBER, DataType::NUMBER_RANGE].include?(sa.type)
+			elsif [DataType::DATE_RANGE, DataType::NUMBER_RANGE].include?(sa.type)
 				case question.question_type
 				when QuestionTypeEnum::CHOICE_QUESTION
 					attr_value = question.sample_attribute_relation[q_answer["selection"][0].to_s]
 				end
 				next if attr_value.nil?
 				self.user.write_sample_attribute(sa.name, attr_value) if self.user.need_update_attribute(sa.name, attr_value)
+			elsif [DataType::DATE, DataType::NUMBER].include?(sa.type)
+				case question.question_type
+				when QuestionTypeEnum::NUMBER_BLANK_QUESTION
+					attr_value = question.sample_attribute_relation[q_answer]
+				when QuestionTypeEnum::TIME_BLANK_QUESTION
+					attr_value = question.sample_attribute_relation[q_answer]
+				when QuestionTypeEnum::CHOICE_QUESTION
+					attr_value = question.sample_attribute_relation[q_answer["selection"][0].to_s]
+				end
+				next if attr_value.nil?
+				self.user.write_sample_attribute(sa.name, attr_value) if self.user.need_update_attribute(sa.name, attr_value)
+			elsif sa.type == DataType::ENUM
+				case question.question_type
+				when QuestionTypeEnum::CHOICE_QUESTION
+					attr_value = question.sample_attribute_relation[q_answer["selection"][0].to_s]
+				end
+				next if attr_value.nil?
+				self.user.write_sample_attribute(sa.name, attr_value) if self.user.need_update_attribute(sa.name, attr_value)
+			elsif sa.type == DataType::ADDRESS
+			elsif sa.type == DataType::ARRAY
 			end
 		end
 	end
