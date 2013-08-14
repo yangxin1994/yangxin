@@ -6,14 +6,14 @@ class Log
 
 	field :type, :type => Integer
 	# field :data, :type => Hash, default: {}
-	scope :lottery_logs, lambda { where(:type => 2,:user_id.ne => nil) }
-	scope :redeem_logs, lambda { where(:type => 4,:user_id.ne => nil) }
-	scope :point_logs, lambda { where(:type => 8,:user_id.ne => nil) }
-	scope :answer_logs, lambda {where(:type => 1,:user_id.ne => nil)}
-	scope :special_logs,lambda { |t| where(:type => t,:user_id.ne => nil)}
-	#scope :fresh_logs, lambda { where(:type.ne => 8,:type.ne => 64,:user_id.ne => nil)}
+	scope :lottery_logs, lambda { where(:type => 2) }
+	scope :redeem_logs, lambda { where(:type => 4) }
+	scope :point_logs, lambda { where(:type => 8) }
+	scope :answer_logs, lambda {where(:type => 1)}
+	scope :special_logs,lambda { |t| where(:type => t)}
+	#scope :fresh_logs, lambda { where(:type.ne => 8,:type.ne => 64)}
 	scope :fresh_logs, lambda { where(:type.in => [2,8,16])}
-	scope :disciplinal_logs, lambda { where(:type => 64,:user_id.ne => nil)}
+	scope :disciplinal_logs, lambda { where(:type => 64)}
 
 	belongs_to :user
 
