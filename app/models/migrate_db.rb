@@ -138,6 +138,11 @@ class MigrateDb
 			u.status = u.status == 0 ? User::VISITOR : User::REGISTERED
 			u.save
 
+			# affliated
+			a = Affiliated.create
+			a.user = u
+			u.save
+
 			# point log
 			if u.point != 0
 				pl = PointLog.new
