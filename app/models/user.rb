@@ -446,6 +446,7 @@ class User
 			return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i    # expired
 			user.email_activation = true
 			user.activate_time = Time.now.to_i
+			user.email_subscribe = true
 		else
 			# mobile activate
 			#return ErrorEnum::USER_NOT_REGISTERED if user.status == VISITOR
@@ -454,7 +455,7 @@ class User
 			user.password = Encryption.encrypt_password(activate_info["password"])
 			user.mobile_activation = true
 			user.activate_time = Time.now.to_i
-			user.status = REGISTERED
+			user.mobile_subscribe = true
 		end
 		user.save
 		RegistLog.create_regist_log(user.id)
@@ -597,6 +598,12 @@ class User
 	#++
 	#ctreate
 	def create_message(title, content, receiver = [])
+		logger.info "AAAAAAAAAAAAAAAAAAAA"
+		logger.info self._id.to_s
+		logger.info title
+		logger.info content
+		logger.info receiver.inspect
+		logger.info "AAAAAAAAAAAAAAAAAAAA"
 		m = sended_messages.create(:title => title, :content => content, :type => 0) if receiver.size == 0
 		m = sended_messages.create(:title => title, :content => content, :type => 1) if receiver.size >= 1
 		return m unless m.is_a? Message

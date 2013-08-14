@@ -71,6 +71,7 @@ class AgentTask
 		self["survey_title"] = self.survey.title
 		self["agent_email"] = self.agent.email
 		self["agent_name"] = self.agent.name
+		self["reward_scheme_id"] = self.reward_scheme.try(:_id).to_s
 		return self
 	end
 
