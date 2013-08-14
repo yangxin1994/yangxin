@@ -963,7 +963,7 @@ class User
 		sa_value = self.read_sample_attribute(attr_name)
 		return true if sa_value.nil?
 		begin
-			return false if sa_value[0] > updated_value[0] && sa_value[1] < updated_value[1]
+			return false if (sa_value[0] < updated_value[0] || sa_value[0] == -1) && (sa_value[1] > updated_value[1] || sa_value[1] == -1)
 		rescue
 		end
 		return true
