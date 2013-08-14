@@ -9,6 +9,8 @@ class Agent::AnswersController < Agent::ApplicationController
 	before_filter :check_answer_existence, :except => [:index]
 
 	def check_answer_existence
+		@agent_task = AgentTask.find_by_id(params[:agent_task_id])
+		render_json_e(ErrorEnum::AGENT_TASK_NOT_EXIST) and return if @agent_task.nil?
 		@answer = @agent_task.find_answer_by_id(params[:id])
 		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if @answer.nil?
 	end
@@ -16,7 +18,8 @@ class Agent::AnswersController < Agent::ApplicationController
 	def index
 		agent_task = AgentTask.find_by_id(params[:agent_task_id])
 		render_json_e ErrorEnum::AGENT_TASK_NOT_EXIST if agent_task.nil?
-		answers = Answer.where(:agent_task_id => agent_task._id.to_s).find_by_status(params[:status]) if !params[:status].blank?
+		answers = Answer.where(:agent_task_id => agent_task._id.to_s)
+		answers = answers.find_by_status(params[:status]) if !params[:status].blank?
 		render_json_auto auto_paginate(answers) and return
 	end
 
