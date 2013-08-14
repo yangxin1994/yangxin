@@ -598,6 +598,12 @@ class User
 	#++
 	#ctreate
 	def create_message(title, content, receiver = [])
+		logger.info "AAAAAAAAAAAAAAAAAAAA"
+		logger.info self._id.to_s
+		logger.info title
+		logger.info content
+		logger.info receiver.inspect
+		logger.info "AAAAAAAAAAAAAAAAAAAA"
 		m = sended_messages.create(:title => title, :content => content, :type => 0) if receiver.size == 0
 		m = sended_messages.create(:title => title, :content => content, :type => 1) if receiver.size >= 1
 		return m unless m.is_a? Message

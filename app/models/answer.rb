@@ -909,9 +909,9 @@ class Answer
 			self.set_reject
 			self.reject_type = REJECT_BY_REVIEW
 			message_content ||= "你的此问卷[#{self.survey.title}]的答案未通过审核."
-			PunishLog.create_punish_log(user.id)
+			PunishLog.create_punish_log(user.id) if user.present?
 		end
-		answer_auditor.create_message("审核问卷答案消息", message_content, [user._id.to_s]) if !user.nil?
+		answer_auditor.create_message("审核问卷答案消息", message_content, [user._id.to_s]) if user.present?
 		self.audit_message = message_content
 		self.auditor = answer_auditor
 		self.audit_at = Time.now.to_i
@@ -1105,8 +1105,13 @@ class Answer
 
 	def bind_sample(sample)
 		answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id.to_s, sample._id.to_s, false)
-		return ErrorEnum::ANSWER_EXIST if !answer.nil?
+		return ErrorEnum::ANSWER_EXIST if answer.present?
 		sample.answers << self
+		PunishLog.create_punish_log(sample.id) if self.status == REJECT
+		if answer.auditor.present?
+			answer.auditor.create_message("审核问卷答案消息", answer.audit_message, [sample._id.to_s])
+		end
+
 		# handle rewards
 		reward = nil
 		self.rewards.each do |r|
