@@ -21,8 +21,8 @@ class Gift
 
 	DEFAULT_IMG = '/assets/od-quillme/gifts/default.png'
 
-	# 1 off the shelf, 2 on the shelf, 4 deleted
-	field :status, :type => Integer, default: 1
+	# 2 off the shelf, 1 on the shelf, 4 deleted
+	field :status, :type => Integer, default: 2
 	# 1 for virtual gift, 2 for real goods gift, 4 for mobile change, 8 for alypay transfer, 16 for jifenbao, 32 for qq coin
 	field :type, :type => Integer, default: 1
 	field :title, :type => String, default: ""
