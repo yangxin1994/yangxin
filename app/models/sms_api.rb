@@ -90,10 +90,10 @@ class SmsApi # 短信接口
 		@survey_title = survey.title
 		reward_scheme_id = survey.sms_promote_info["reward_scheme_id"]
 		@survey_link = "#{Rails.application.config.quillme_host}/s/#{reward_scheme_id}"
-		@survey_link = MongoidShortener.generate @survey_link
+		@survey_link = Rails.application.config.quillme_host + "/" + MongoidShortener.generate(@survey_link)
 		unsubscribe_key = CGI::escape(Encryption.encrypt_activate_key({"email_mobile" => mobile}.to_json))
 		@unsubscribe_link = "#{Rails.application.config.quillme_host}/surveys/cancel_subscribe?key=#{unsubscribe_key}"
-		@unsubscribe_link = MongoidShortener.generate @unsubscribe_link
+		@unsubscribe_link = Rails.application.config.quillme_host + "/" + MongoidShortener.generate(@unsubscribe_link)
 
 		@reward = ""
 		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)

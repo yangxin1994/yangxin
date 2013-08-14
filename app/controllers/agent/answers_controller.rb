@@ -27,6 +27,9 @@ class Agent::AnswersController < Agent::ApplicationController
 	end
 
 	def show
+		answer = Answer.find_by_id(params[:id])
+		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if answer.nil?
+		
 		answer["question_content"] = []
 		answer.answer_content.each do |key, val|
 			# key is question id
