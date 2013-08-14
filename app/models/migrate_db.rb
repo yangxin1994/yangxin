@@ -120,6 +120,7 @@ class MigrateDb
 
 	def self.migrate_user
 		puts "Migrating users......"
+		PointLog.destroy_all
 		update_time = Time.now
 		User.where(:updated_at.lt => update_time).each_with_index do |u, index|
 			puts index if index%10 == 0
@@ -136,6 +137,11 @@ class MigrateDb
 			u.user_role = user_role
 			# the status field
 			u.status = u.status == 0 ? User::VISITOR : User::REGISTERED
+			u.save
+
+			# affliated
+			a = Affiliated.create
+			a.user = u
 			u.save
 
 			# point log

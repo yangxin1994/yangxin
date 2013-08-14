@@ -963,10 +963,11 @@ class User
 		sa_value = self.read_sample_attribute(attr_name)
 		return true if sa_value.nil?
 		begin
-			return false if sa_value[0] > updated_value[0] && sa_value[1] < updated_value[1]
+			return true if sa_value[0] > updated_value[0]
+			return true if sa_value[1] < updated_value[1] || (sa_value[1] != -1 && updated_value[1] == -1)
 		rescue
 		end
-		return true
+		return false
 	end
 
 	def read_sample_attribute(name)
@@ -986,11 +987,7 @@ class User
 	def write_sample_attribute(name, value)
 		sa = SampleAttribute.find_by_name(name)
 		return false if sa.nil?
-		if self.affiliated.nil?
-			a = Affiliated.create
-			a.user = self
-			a.save
-		end
+		self.create_affiliated if self.affiliated.nil?
 		self.affiliated.write_attribute(sa.name.to_sym, value)
 		return self.affiliated.save
 	end
@@ -998,12 +995,9 @@ class User
 	def write_sample_attribute_by_id(sa_id, value)
 		sa = SampleAttribute.find_by_id(sa_id)
 		return false if sa.nli?
-		if self.affiliated.nil?
-			a = Affiliated.create
-			a.user = self
-			a.save
-		end
-		sa.affiliated.write_attribute(sa.name.to_sym, value)
+		self.create_affiliated if self.affiliated.nil?
+		self.affiliated.write_attribute(sa.name.to_sym, value)
+		return self.affiliated.save
 	end
 
 	def get_basic_attributes
