@@ -12,7 +12,7 @@ class Log
 	scope :answer_logs, lambda {where(:type => 1)}
 	scope :special_logs,lambda { |t| where(:type => t)}
 	#scope :fresh_logs, lambda { where(:type.ne => 8,:type.ne => 64)}
-	scope :fresh_logs, lambda { where(:type.in => [2,8,16])}
+	# scope :fresh_logs, lambda { where(:type.in => [2,8,16])}
 	scope :disciplinal_logs, lambda { where(:type => 64)}
 	scope :have_user,lambda {where(:user_id.ne => nil)}
 
@@ -21,6 +21,10 @@ class Log
 	def self.find_by_id(log_id)
 		log = Log.where(:_id => log_id).first
 		return log
+	end
+
+	def self.fresh_logs
+		return self.where(:type.in => [2,8,16], :reason.ne => PointLog::IMPORT)
 	end
 
 	def self.get_new_logs(limit=5,type=nil)
