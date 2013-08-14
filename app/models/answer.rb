@@ -1192,6 +1192,12 @@ class Answer
 		return true
 	end
 
+	def info_for_auditor
+		sample_name = self.user.try(:email) || self.user.try(:mobile) || "visitor"
+		self.write_attribute('sample_name', sample_name)
+		return self
+	end
+
 	def info_for_sample
 		answer_obj = {}
 		answer_obj["survey_id"] = self.survey_id.to_s
