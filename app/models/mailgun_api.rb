@@ -92,8 +92,7 @@ class MailgunApi
 		data[:subject] = "邀请您参加问卷调查"
 		data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
 		@group_emails.each_with_index do |emails, i|
-			# data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
-			data[:to] = emails.join(', ')
+			data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
 			data[:'recipient-variables'] = @group_recipient_variables[i].to_json
 			self.send_message(data)
 		end
@@ -118,6 +117,28 @@ class MailgunApi
 		data[:subject] = "欢迎注册问卷吧"
 		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
 		data[:to] = Rails.env == "production" ? user.email : @@test_email
+		self.send_message(data)
+	end
+
+	def self.change_email(user, callback)
+		@user = user
+		activate_info = {"email" => user.email, "time" => Time.now.to_i}
+		@activate_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
+		data = {}
+		data[:domain] = Rails.application.config.user_email_domain
+		data[:from] = @@user_email_from
+
+		html_template_file_name = "#{Rails.root}/app/views/user_mailer/activate_email.html.erb"
+		text_template_file_name = "#{Rails.root}/app/views/user_mailer/activate_email.text.erb"
+		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
+		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
+		data[:html] = premailer.to_inline_css
+		data[:text] = text_template.result(binding)
+
+		data[:subject] = "激活账户"
+		data[:subject] += " --- to #{user.email_to_be_changed}" if Rails.env != "production" 
+		data[:to] = Rails.env == "production" ? user.email_to_be_changed : @@test_email
 		self.send_message(data)
 	end
 
