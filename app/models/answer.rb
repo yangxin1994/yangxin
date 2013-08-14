@@ -815,6 +815,26 @@ class Answer
 		return question_ids_with_qc_questions.index(question_id)
 	end
 
+	def update_sample_attribute
+		return if self.status != FINISH
+		return if self.user.nil?
+		self.answer_content.each do |qid, q_answer|
+			next if q_answer.blank?
+			question = Question.find_by_id(qid)
+			next if question.nil? || question.sample_attribute_relation.blank? || question.sample_attribute.blank?
+			sa = question.sample_attribute
+			attr_value = nil
+			case question.question_type
+			when QuestionTypeEnum::CHOICE_QUESTION
+				attr_value = question.sample_attribute_relation[q_answer["selection"][0].to_s]
+			end
+			next if attr_value.nil?
+			if self.user.need_update_attribute(sa.name, attr_value)
+				self.user.write_sample_attribute(sa.name, attr_value)
+			end
+		end
+	end
+
 	def finish(auto = false)
 		# synchronize the normal questions in the survey and the qeustions in the answer content
 		survey_question_ids = self.survey.all_questions_id
@@ -842,6 +862,7 @@ class Answer
 		self.update_quota(old_status) if !self.is_preview
 		self.finished_at = Time.now.to_i
 		self.deliver_reward
+		self.update_sample_attribute
 		return self.save
 	end
 
@@ -905,6 +926,7 @@ class Answer
 		if review_result
 			self.set_finish
 			message_content = "你的此问卷[#{self.survey.title}]的答案通过审核." if message_content.blank?
+			self.update_sample_attribute
 		else
 			self.set_reject
 			self.reject_type = REJECT_BY_REVIEW
@@ -1129,10 +1151,8 @@ class Answer
 			sample.orders << self.order unless self.order.nil?
 		when RewardScheme::POINT
 			self.deliver_reward
-			# sample.point += reward["amount"]
-			# sample.save
-			# PointLog.create(:amount => reward["amount"], :reason => PointLog::ANSWER, :survey_id => self.survey._id.to_s, :survey_title => self.survey.title)
 		end
+		self.update_sample_attribute
 		return true
 	end
 

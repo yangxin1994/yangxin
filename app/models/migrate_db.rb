@@ -62,7 +62,7 @@ class MigrateDb
 			# the browser promote related
 			s.broswer_extension_promotable = false
 			s.broswer_extension_promote_info = { "login_sample_promote_only" => false,
-				"filters" => [[{"key_words" => [""], "url" => ""}]],
+				"filters" => [{"key_words" => [""], "url" => ""}],
 				"reward_scheme_id" => "" }
 
 			# the weibo promote related
