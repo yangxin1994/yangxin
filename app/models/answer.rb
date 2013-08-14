@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'error_enum'
+require 'data_type'
 require 'securerandom'
 require 'tool'
 require 'quill_common'
@@ -824,13 +825,20 @@ class Answer
 			next if question.nil? || question.sample_attribute_relation.blank? || question.sample_attribute.blank?
 			sa = question.sample_attribute
 			attr_value = nil
-			case question.question_type
-			when QuestionTypeEnum::CHOICE_QUESTION
-				attr_value = question.sample_attribute_relation[q_answer["selection"][0].to_s]
-			end
-			next if attr_value.nil?
-			if self.user.need_update_attribute(sa.name, attr_value)
-				self.user.write_sample_attribute(sa.name, attr_value)
+			if sa.type == DataType::STRING
+				case question.question_type
+				when QuestionTypeEnum::TEXT_BLANK
+					attr_value = q_answer
+				end
+				next if attr_value.nil?
+				self.user.write_sample_attribute(sa.name, attr_value) if self.user.need_update_attribute(sa.name, attr_value)
+			elsif [DataType::DATE, DataType::DATE_RANGE, DataType::NUMBER, DataType::NUMBER_RANGE].include?(sa.type)
+				case question.question_type
+				when QuestionTypeEnum::CHOICE_QUESTION
+					attr_value = question.sample_attribute_relation[q_answer["selection"][0].to_s]
+				end
+				next if attr_value.nil?
+				self.user.write_sample_attribute(sa.name, attr_value) if self.user.need_update_attribute(sa.name, attr_value)
 			end
 		end
 	end

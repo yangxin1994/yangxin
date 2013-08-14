@@ -213,17 +213,14 @@ class Order
 	end
 
 	def self.search_orders(email, mobile, code, status, source, type)
-		logger.info "AAAAAAAAAAAAAAAA"
-		logger.info type.inspect
-		logger.info "AAAAAAAAAAAAAAAA"
 		if !email.blank?
-			orders = User.sample.find_by_email(email).try(:orders) || []
+			orders = User.sample.find_by_email(email).try(:orders).desc(:created_at) || []
 		elsif !mobile.blank?
-			orders = User.sample.find_by_mobile(mobile).try(:orders) || []
+			orders = User.sample.find_by_mobile(mobile).try(:orders).desc(:created_at) || []
 		elsif !code.blank?
-			orders = Order.where(:code => /#{code}/)
+			orders = Order.where(:code => /#{code}/).desc(:created_at)
 		else
-			orders = Order.all
+			orders = Order.all.desc(:created_at)
 		end
 
 		if !status.blank? && status != 0
@@ -236,9 +233,6 @@ class Order
 		end
 		if !type.blank? && type != 0
 			type_ary = Tool.convert_int_to_base_arr(type)
-			logger.info "BBBBBBBBBBBBBBBBBBBB"
-			logger.info type_ary.inspect
-			logger.info "BBBBBBBBBBBBBBBBBBBB"
 			orders = orders.where(:type.in => type_ary)
 		end
 		return orders
