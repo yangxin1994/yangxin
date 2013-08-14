@@ -53,7 +53,7 @@ class AnalysisResult < Result
 			info = {}
 			info["_id"] = a._id.to_s
 			info["email"] = a.user.nil? ? "" : a.user.email.to_s
-			info["full_name"] = a.user.nil? ? "访客" : a.user.nickname.to_s
+			info["full_name"] = a.user.nil? ? "guest" : a.user.nickname.to_s
 			info["answer_time"] = a.created_at.to_i
 			info["duration"] = (!a.finished_at.nil? && !a.created_at.nil?) ? a.finished_at - a.created_at.to_i : nil
 			info["region"] = a.region
