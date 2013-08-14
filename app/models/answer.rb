@@ -1123,9 +1123,10 @@ class Answer
 		when RewardScheme::LOTTERY
 			sample.orders << self.order unless self.order.nil?
 		when RewardScheme::POINT
-			sample.point += reward["amount"]
-			sample.save
-			PointLog.create(:amount => reward["amount"], :reason => PointLog::ANSWER, :survey_id => self.survey._id.to_s, :survey_title => self.survey.title)
+			self.deliver_reward
+			# sample.point += reward["amount"]
+			# sample.save
+			# PointLog.create(:amount => reward["amount"], :reason => PointLog::ANSWER, :survey_id => self.survey._id.to_s, :survey_title => self.survey.title)
 		end
 		return true
 	end
@@ -1201,7 +1202,7 @@ class Answer
 		answer_obj = {}
 		answer_obj["answer_id"] = self._id.to_s
 		answer_obj["survey_id"] = self.survey_id.to_s
-		answer_obj["survey_title"] = self.survey.title
+		answer_obj["survey_title"] = self.survey.try(:title).to_s
 		answer_obj["order_id"] = self.order.try(:_id).to_s
 		answer_obj["answer_status"] = self.status
 		answer_obj["answer_reject_type"] = self.reject_type
