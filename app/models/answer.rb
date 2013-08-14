@@ -904,11 +904,11 @@ class Answer
 		# execute the review operation
 		if review_result
 			self.set_finish
-			message_content ||= "你的此问卷[#{self.survey.title}]的答案通过审核."
+			message_content = "你的此问卷[#{self.survey.title}]的答案通过审核." if message_content.blank?
 		else
 			self.set_reject
 			self.reject_type = REJECT_BY_REVIEW
-			message_content ||= "你的此问卷[#{self.survey.title}]的答案未通过审核."
+			message_content = "你的此问卷[#{self.survey.title}]的答案未通过审核." if message_content.blank?
 			PunishLog.create_punish_log(user.id) if user.present?
 		end
 		answer_auditor.create_message("审核问卷答案消息", message_content, [user._id.to_s]) if user.present?
@@ -1108,8 +1108,8 @@ class Answer
 		return ErrorEnum::ANSWER_EXIST if answer.present?
 		sample.answers << self
 		PunishLog.create_punish_log(sample.id) if self.status == REJECT
-		if answer.auditor.present?
-			answer.auditor.create_message("审核问卷答案消息", answer.audit_message, [sample._id.to_s])
+		if self.auditor.present?
+			self.auditor.create_message("审核问卷答案消息", self.audit_message, [sample._id.to_s])
 		end
 
 		# handle rewards
