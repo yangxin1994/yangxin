@@ -120,6 +120,7 @@ class MigrateDb
 
 	def self.migrate_user
 		puts "Migrating users......"
+		PointLog.destroy_all
 		update_time = Time.now
 		User.where(:updated_at.lt => update_time).each_with_index do |u, index|
 			puts index if index%10 == 0
