@@ -5,15 +5,15 @@ class SmsWorker
 	def perform(sms_type, mobile, callback, opt={})
 		case sms_type
 		when 'welcome'
-			SmsApi.welcome_sms(mobile, callback, opt)
+			retval = SmsApi.welcome_sms(mobile, callback, opt)
 		when 'activate'
-			SmsApi.activate_sms(mobile, callback, opt)
+			retval = SmsApi.activate_sms(mobile, callback, opt)
 		when 'rss_subscribe'
-			SmsApi.rss_subscribe_sms(mobile, callback, opt)    	
+			retval = SmsApi.rss_subscribe_sms(mobile, callback, opt)    	
 		when 'change_mobile'
-			SmsApi.activate_sms(mobile, callback, opt)
+			retval = SmsApi.activate_sms(mobile, callback, opt)
 		when 'find_password'
-			SmsApi.find_password_sms(mobile, callback, opt)
+			retval = SmsApi.find_password_sms(mobile, callback, opt)
 		end
 		return true
 	end
