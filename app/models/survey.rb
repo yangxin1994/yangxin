@@ -1552,6 +1552,14 @@ class Survey
 		self.all_questions(false).each_with_index do |e, i|
 			headers += e.csv_header("q#{i+1}")
 		end
+		if options[:text] == true
+			excel_headers = []
+			self.all_questions(false).each_with_index do |e, i|
+				excel_headers += e.csv_header("q#{i+1}")
+			end
+			return [headers, excel_headers]
+		end
+
 		headers
 	end
 
