@@ -1,0 +1,175 @@
+<% content_for :app_head do %>
+	<%= stylesheet_link_tag    "layouts/quillhome-layout" %>
+	<%= javascript_include_tag "layouts/quillhome-layout" %>
+	<script type="text/javascript">
+	jQuery(function($) {
+		// 设置下拉菜单
+		$(".account-setting").powerFloat({
+			offsets: { x: 0, y: 20 },
+			eventType: "hover",
+		    target: $(".account-setting-box"),
+		    position:"2-3"
+		});
+		/*导航下拉菜单*/
+		 /*下拉菜单1*/
+		$(".dropdown1").powerFloat({
+			offsets: { x: 13, y: 0 },
+		    target: $(".dropdown-box1"),
+		    position:"2-3" ,
+		    showCall: function() {
+            	$(this).addClass("hover");    
+	        },
+	        hideCall: function() {
+	            $(this).removeClass("hover");
+	        }   
+		});
+		 /*下拉菜单2*/
+		$(".dropdown2").powerFloat({
+			offsets: { x: 13, y: 0 },
+		    target: $(".dropdown-box2"),
+		    position:"2-3" ,
+		    showCall: function() {
+            	$(this).addClass("hover");    
+	        },
+	        hideCall: function() {
+	            $(this).removeClass("hover");
+	        }   
+		});
+		 /*下拉菜单3*/
+		$(".dropdown3").powerFloat({
+			offsets: { x: -11, y: 0 },
+		    target: $(".dropdown-box3"),
+		    showCall: function() {
+            	$(this).addClass("hover");    
+	        },
+	        hideCall: function() {
+	            $(this).removeClass("hover");
+	        }   
+		});
+		$('.account-setting-box ul li:even').addClass('bf2');
+
+		// acitvate menu
+		$('.menu1:eq(<%= @activate_menu.to_i %>)').addClass('active');
+	});
+	</script>
+
+	<%= yield :head %>
+<% end %>
+
+<% content_for :app_content do %>
+<!-- 头部 -->
+<div class="head">
+	<div class="w900">
+		<div class="head-top">	
+			<!-- logo/登录 -->
+			<a href="/" class="logo l mt20"></a>
+			<% if user_signed_in %>
+			<div class="login-panel r">
+
+					<a href="javascript:void(0);" class="account-setting white-txt mr10" >
+						<%=email%><span class="ml5">▼</span>
+					</a>
+					<div class="account-setting-box dn">
+						<i class="trigon">▲</i>
+						<ul>
+							<% if is_admin %>
+							<li><a href="<%=admin_path %>?publish_status=8">管理员操作</a></li>
+							<% end %>
+							<li><a href="<%=profile_path %>">账户设置</a></li>
+							<li><a href="<%=messages_path %>">消息中心</a></li>
+							<li><a href="<%=signout_path %>">退出</a></li>
+						</ul>
+					</div>
+
+				<a href="<%=questionaires_path %>" class="btn access">进入系统</a>
+			</div>
+			<% else %>
+			<div class="login-panel r">
+				<a href="<%=signin_path %>" class="btn login mr10">登 录</a>
+				<a href="<%=signup_path %>" class="btn reg">注 册</a>
+			</div>
+			<% end %>
+		</div>
+		<!-- 导航 --> 
+		<div class="nav b0">
+			<ul>
+				<li class="l">
+					<a class="f14 white-txt menu1" href="/">首页</a>
+				</li>
+				<li class="l">
+					<a class="dropdown1 f14 white-txt menu1" href="<%= design_doc_path %>">系统功能</a>
+					<ul class="dropdown-box1 dn">
+						<li><a href="<%= design_doc_path %>">设计问卷</a></li>
+						<li><a href="<%= share_doc_path %>#style">美化问卷</a></li>
+						<li><a href="<%= share_doc_path %>#share">发布问卷</a></li>
+						<li><a href="<%= result_doc_path %>#analysis">结果分析</a></li>
+						<li><a href="<%= result_doc_path %>#report">导出报告</a></li>
+					</ul>
+				</li>
+				<li class="l" style='display:none;'>
+					<a class="dropdown2 f14 white-txt menu1" href="<%= customer_path %>">成功案例</a>
+					<ul class="dropdown-box2 dn">
+						<li><a href="<%= customer_path %>#c1">高校及科研单位</a></li>
+						<li><a href="<%= customer_path %>#c2">政府机构</a></li>
+						<li><a href="<%= customer_path %>#c3">企业客户</a></li>
+						<li><a href="<%= customer_path %>#c4">协会组织</a></li>
+						<li><a href="<%= customer_path %>#c5">公益组织</a></li>
+					</ul>
+				</li>
+				<li class="l" style='display:none;'>
+					<a class="dropdown3 f14 white-txt menu1" href="<%= aboutus_path %>">关于我们</a>
+					<ul class="dropdown-box3 dn">
+						<li><a href="<%= aboutus_path %>">公司介绍</a></li>
+						<li><a href="<%= aboutus_path %>#contact">联系我们</a></li>
+					</ul>
+				</li>
+
+			</ul>
+			<span class="tel r"><a class="white-txt" href="javascript:void(0);">400-6506-905<i class="telphone"></i></a></span>
+		</div>
+	</div>	
+</div>
+<!-- 头部 结束 -->
+<div class='main'>
+	<div class='main-content'>
+<%= yield %>
+	</div>
+</div>
+<!-- 页尾 开始 -->	
+<div class="footer">
+	<div class="footer-logo">
+		<img src="/assets/od-quill/logo2.png" alt='<%= corp_name %>'/>
+		<p><%= raw copyright_html %></p>
+		<p><%= icp_info %></p>
+	</div>
+	<dl>
+		<dt>结果及报告</dt>
+		<dd><a href="<%= result_doc_path %>#analysis">结果分析</a></dd>
+		<dd><a href="<%= result_doc_path %>#datalist">数据列表</a></dd>
+		<dd><a href="<%= result_doc_path %>#import">导入导出数据</a></dd>
+		<dd><a href="<%= result_doc_path %>#report">自动生成报告</a></dd>
+	</dl>
+	<dl>
+		<dt>美化及发布</dt>
+		<dd><a href="<%= share_doc_path %>#style">美化答题界面</a></dd>
+		<dd><a href="<%= share_doc_path %>#quota">针对问题配额</a></dd>
+		<dd><a href="<%= share_doc_path %>#share">分享至社交网络</a></dd>
+	</dl>
+	<dl>
+		<dt>问卷设置</dt>
+		<dd><a href="<%= design_doc_path %>#questions">问题及选项跳转</a></dd>
+		<dd><a href="<%= design_doc_path %>#quality">控制答题质量</a></dd>
+		<dd><a href="<%= design_doc_path %>#auth">设置访问权限</a></dd>
+		<dd><a href="<%= design_doc_path %>#other_setting">高级设置</a></dd>
+	</dl>
+	<dl>
+		<dt>设计问卷</dt>
+		<dd><a href="<%= design_doc_path %>#questions">题型介绍</a></dd>
+		<dd><a href="<%= design_doc_path %>#basic_setting">标题及子标题</a></dd>
+		<dd><a href="<%= design_doc_path %>#basic_setting">欢迎语和结束语</a></dd>
+		<dd><a href="<%= design_doc_path %>#basic_setting">页眉页脚</a></dd>
+	</dl>
+</div>
+<% end %>
+
+<%= render :template => 'layouts/app' %>

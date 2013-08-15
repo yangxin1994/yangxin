@@ -1,0 +1,74 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/review_answers-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/review_answers-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+<% if @surveys.success %>
+<div class="surveys"> 
+	<div class="title">
+		<h5>待审核答案问卷管理<h5>
+	</div>
+
+	<div class="table">
+		<div class="head">
+			<h5 class="iFrames">
+				列表
+			</h5>
+		</div>
+				
+		<table cellspacing="0" cellpadding="0" border="0" id="example" class="display">
+			<thead>
+				<tr>
+					<th class="" rowspan="1" colspan="1" style="width: 10px;">
+						<input class="check-all" type="checkbox" />
+					</th>
+					<th width="40%">问卷标题/id</th>
+					<th>创建人</th>
+					<th title="状态`完成`,审核状态`未审核`">未审核答案数</th>
+					<th>创建时间</th>
+					<th rowspan="1" colspan="1" style="width: 60px;"></th>
+				</tr>
+			</thead>
+	 
+			<tbody>
+				<% @surveys.value["data"].to_a.each do |survey|%>
+					<tr id="<%= survey['_id']%>">
+						<td><input type="checkbox" /></td>
+						<td>                           
+							<a href="/questionaires/<%= survey['_id']%>" class="show" title="点击查看详细">
+								<%= survey["title"] %></a>
+						</td>
+						<td class="user_id" value="<%= survey['user_id'] %>"></td>
+						<td><%= survey['not_review_answer_num'] %></td>
+						<td><%= survey["created_at"][0,16].gsub(/[T]/, ' ') %></td>
+						<td>
+							<!-- Icons -->
+							<a href="/<%= is_admin ? 'admin' : 'answer_auditor' %>/review_answers/<%= survey['_id']%>" class="show" title="查看答案">审核答案</a>
+						</td>
+					</tr>
+				<%- end %>
+			</tbody>
+
+			<tfoot>
+				<tr>
+					<td colspan="6">
+						<div class="delete-selected-panel">
+							<input type="button" class="blueBtn delete-selected" value="批量删除"/>
+						</div>
+
+						<%= paginator_tag @surveys.value %>
+					</td>
+				</tr>
+			</tfoot>			
+		</table>
+				
+	</div>
+</div>
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @surveys.value %></p>
+</div>
+<%end%>		

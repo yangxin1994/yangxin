@@ -1,0 +1,31 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/account/registrations/activate"%>
+<% end %>
+	<!--激活账号完成注册 开始 -->
+<div class="activate">
+	<div class="blackbg left"></div>
+	<div class="blackbg-content">
+		<div class="content-top">
+			<a href="/login" class="od-close3-btn r mt20 mr15" title="关闭"></a>
+			<h3 class="title g9 b f16">激活账号完成注册</h2>
+			<p class="send-email dn"><%= params[:email] %></p>
+			<p class="g9 operate-info"><b class="b mr">OopsData!</b> 向 <b class="b"><%= params[:email] || " Not Found email parameter " %></b>发送了一封激活邮件，你需要点击邮件里的激活链接完成注册。</p>
+		  <button class="od-button mt20 l">
+          <em class="btn-bg-l"></em>
+          <b class="btn-bg-c">查看激活邮件</b>
+          <em class="btn-bg-r"></em>
+    	</button>
+    	<div class="fix"></div>
+    	<dl class="activate-lose">
+    		<dt class="g9"><em class="icon-key dib"></em>没有收到激活邮件?</dt>
+    		<dd class="g9">- 试试到邮箱中的垃圾邮件，广告目录文件中找找</dd>
+    		<dd class="g9">- 或者，<a href="javascript:void(0);" class="re-send yellow">重发确认邮件</a></dd>
+    	</dl>
+		</div>
+		<div class="content-bottom">
+			<p class="g9 l mt15 ml30">如果仍然无法完成激活，请将意见描述发送给...</p>
+			<a id="login-btn-s" class="r" href="<%=signin_path %>">登 录</a>
+		</div>
+	</div>
+	<div class="blackbg right"></div>
+</div>

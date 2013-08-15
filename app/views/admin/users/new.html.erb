@@ -1,0 +1,57 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/users-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/users-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+<div class="users">
+	<div class="title">
+		<h5>用户管理: 新建用户</h5>
+		<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/users">返回用户列表</a><h5>
+	</div>
+
+	<div class="content-box-content">
+
+		<!-- edit tab start -->
+		<div class="tab-content" id="new-tab">
+			<div>
+				<form action="#" method="post">
+					<p>
+				        <label class="child-title f14 pl2">邮箱</label>
+				        <input class='tw3' name="user[:email]" type ='text' />
+				        <span class="alertSpan red"></span>
+			        </p>
+			        <p>
+				        <label class="child-title f14 pl2">姓名</label>
+				        <input class='tw3' name="user[:full_name]" type ='text'/>
+			        </p>
+			        <p>
+				        <label class="child-title f14 pl2">
+				        	<span class="password_text">系统密码</span>
+				        	<input class="password" class="ml10" type="checkbox" checked="checked" title="系统密码" />
+				        </label>
+				        <input class='tw3' name="user[:password]" type ="text"  disabled="disabled"/>
+				        <span class="sp-tip alertSpan red" style="display:inline"> * 系统初始密码为 oopsdata</span>
+				        <span class="alertSpan red"></span>
+			        </p>
+			        <p>
+			        	<label class="child-title f14 pl2">角色</label>
+			        	<select name="type">
+							<option value="8">问卷审核员</option>
+							<option value="4">答案审核员</option>
+							<option value="1">数据录入员</option>
+							<option value="2">访问员</option>
+						</select>
+			        </p>
+			        <p>
+						<input class="blueBtn btn-new-ok" type="button" value="确 定" />
+					</p>
+
+				</form>
+			</div>
+
+		</div>
+		<!-- new tab end -->
+	</div>
+</div>

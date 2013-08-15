@@ -1,0 +1,70 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+		window.survey_filters = <%= raw (@survey['filters'] || []).to_json %>;
+		window.report_mockups = <%= raw @report_mockups.to_json %>;
+		console.log(survey_filters);
+		console.log(report_mockups);
+	</script>
+	<%= javascript_include_tag "pages/quill/report_mockups-bundle" %>
+	<%= stylesheet_link_tag "pages/quill/report_mockups-bundle", :media => "all" %>
+<% end %>
+
+<!-- content for left menus -->
+<% content_for :left_menus do %>
+	<%= render :partial => "partials/left_menus_result", :locals => { :left_active => 3 } %>
+<% end %>
+
+<!-- put html code below -->
+
+<div class="page">	
+	<div class="seperator top gray"></div>	
+	
+	<div class="q-render gray">
+		<h2 class="title b f14 g3">调研报告列表</h2>
+		<i class="css-white-gray" style="margin-left:3px"></i>		
+	</div>
+
+	<div class="q-render tintgray" style='padding-bottom: 30px;'>
+		<div class="edit-panel dib">
+
+			<div class="rm-wrap">
+				<div class="fix be6 report-title">
+					<h2 class="title f14 blue b l">默认报告</h2>
+					<span class="manage-btn r">
+						<em class="icon icon-share" title="分享"></em>
+					</span>
+				</div>
+				<div class="fix bf2" style="display:none;">
+					<h2 class="title f14 blue b pt20">分享报告</h2>
+					<input type="text" name="link-address" class="link-address">
+					<button class="od-button" href="#">复制问卷链接</button>
+					<button class="od-button disabled" href="#">邮件分享</button>
+					<ul class="share">
+						<li class="l">
+							<a class="icon icon-gmail" href="javascript:void(0);" title="gmail"></a>
+						</li>
+						<li class="l">
+							<a class="icon icon-douban" href="javascript:void(0);" title="豆瓣"></a>
+						</li>
+						<li class="l">
+							<a class="icon icon-renren" href="javascript:void(0);" title="人人"></a>
+						</li>
+						<li class="l">
+							<a class="icon icon-diandian" href="javascript:void(0);" title="点点"></a>
+						</li>
+						<li class="l">
+							<a class="icon icon-sina" href="javascript:void(0);" title="新浪微博"></a>
+						</li>
+					</ul>
+				</div>
+				<dl class="filter-list"></dl>
+			</div>
+
+		</div>
+	</div>
+
+	<div class="seperator bottom tintgray"></div>	<!-- 下方圆角，白色 -->
+
+	<div id="add_report"></div>
+</div>

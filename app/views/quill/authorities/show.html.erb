@@ -1,0 +1,96 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+		window.survey_authority = <%= raw @authority.to_json %>;
+	</script>
+	<%= javascript_include_tag "pages/quill/authority-bundle" %>
+	<%= stylesheet_link_tag "pages/quill/authority-bundle", :media => "all" %>
+<% end %>
+
+<!-- content for left menus -->
+<% content_for :left_menus do %>
+	<%= render :partial => "partials/left_menus_setting", :locals => { :left_active => 2 } %>
+<% end %>
+
+<div class="page">
+		<div class="seperator top gray"></div>
+			<div class="q-render gray">	
+				<div class="pw-option">
+					<h2 class="f14" style="border:none">
+						<label>
+							<input class="list-check l" type="checkbox" id="password-control">
+							<span class="f14 g3 mr10">设置密码</span>
+						</label>
+					</h2>
+				</div>
+			</div>
+			
+		<div class="question_main l" id="question-main" style=' border-bottom: 1px #DBDBDB solid;' >
+			<i class="css-white-gray" style='margin-left: 3px;'></i>
+			<div class="question_content l">
+				<form class="pw" id="pw-form">
+					<div id="single-password" style="display:none;">
+						<label for="password">输入密码</label>
+						<input type="text" name="password" id="password" lang="en">
+					</div>
+					<div id="multi-password" style="display:none;">
+						<label for="password">密码列表<span>（每行为一个密码）</span></label>
+						<textarea id="password"></textarea>
+					</div>
+					<div id="user-password" style="display:none;">
+						<label for="password">密码列表<span>（每行为一组用户名及密码，用户名和密码之间以逗号隔开）</span></label>
+						<textarea id="password"></textarea>
+					</div>
+				</form>
+
+			</div>
+
+			<!--边栏 开始-->
+			<div class="question_sidebar l">
+			<h2 class="radioNav-title blue b">约束类型</h2>
+			        <!--单选按钮-->
+                  <ul class="radiobox radioNav" id="radiobox">
+                        <li><em class="radioBtn"></em>单个密码</li>
+                        <li><em class="radioBtn"></em>多个密码</li>
+                        <li><em class="radioBtn"></em>用户名密码</li>
+                  </ul>
+			</div>
+
+			<!--边栏 结束-->
+		</div>
+<!--
+		<div class="q-render gray">	
+			<div class="pw-option">
+				 <h2>
+					<label>
+						<input class="list-check l" type="checkbox" id="has-captcha">
+						<span class="f14 g3 mr10">启用验证码</span>
+					</label>
+					<span class="g9">(样本开始答题前需要正确输入验证码图片里的内容，才能开始填写) </span>
+				</h2>
+				<h2>
+					<label>
+						<input class="list-check l" type="checkbox" id="times-for-pc">
+						<span class="f14 g3 mr10">限制答题次数</span>
+					</label>
+					<span class="g9">(每台电脑只能答题一次) </span>
+				</h2> -->
+				<!-- <h2>
+					<input class="list-check l" type="checkbox">
+					<span class="f14 g3 mr10">限制IP地址</span>
+					<span class="g9">(样本开始答题前需要正确输入验证码图片里的内容，才能开始填写) </span>
+				</h2> 
+			</div>
+		</div>
+-->		
+		<div class="seperator bottom gray"></div>
+</div>
+
+<div class="page" id="authority-cfmbtn">	
+	<div class="seperator top white"></div>	
+	<div class="q-render white"></div>
+		<div class="q-render white tc">
+			<span id="confirm_btn"><button class='od-button'>确 定</button></span>
+		</div>
+	<div class="seperator bottom white"></div>	
+</div>

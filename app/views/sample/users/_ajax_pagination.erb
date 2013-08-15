@@ -1,0 +1,32 @@
+<% 
+    visi = 'visible'
+    visi = 'hidden' if @common_value['data'].to_a.length < @common_value['per_page'].to_i && (@common_value["current_page"].to_i == 1 || (@common_value["current_page"] != @common_value["total_page"] && @common_value["current_page"].to_i != 1) )
+%>
+
+<div class="pagination" style="visibility: <%= visi %>">
+    <% if @common_value['data'].to_a.length > 0 %>
+        <a href="javascript: void(0);" <%= 'disabled' if @common_value["current_page"] == @common_value['previous_page'] %> class="<%= @common_value["current_page"] %>-prev"><</a>
+        <!-- ... -->
+        <% if (@common_value["current_page"]-2) > 1 %>
+            <a onclick="return false;" href="#">...</a>
+        <% end %>
+        <!-- two before pages -->
+        <% ((@common_value["current_page"]-2)...@common_value["current_page"]).select{|e| e > 0}.each do |e| %>
+            <a href="javascript: void(0);"><%= e %></a>
+        <% end %>
+        <!-- current page -->
+        <a href="javascript: void(0);" class="active"><%= @common_value["current_page"] %></a>
+        <!-- two after pages -->
+        <% ((@common_value["current_page"]+1)..(@common_value["current_page"]+2)).select{|e| e <= @common_value["total_page"]}.each do |e| %>
+            <a href="javascript: void(0);"><%= e %></a>
+        <% end %>
+        <!-- ... -->
+        <% if (@common_value["current_page"]+2) < @common_value["total_page"] %>
+            <a onclick="return false;" href="#">...</a>
+        <% end %>
+        <a href="javascript: void(0);" <%= 'disabled' if @common_value["current_page"] == @common_value["total_page"] %> class="<%= @common_value["current_page"] %>-next">></a>
+    <% else %>
+        <!-- just work for css -->
+        <a/>
+    <% end %>
+</div>

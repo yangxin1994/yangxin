@@ -1,0 +1,76 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/sample/users-bundle", "pages/sample/users_avatar-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/sample/users-bundle", "pages/sample/users_avatar-bundle", :media => "all" %>
+<% end %>
+
+<%= render "sample_nav", :@path => 'setting', :@text => "用户设置" %>
+
+<div class="inner-page main-content">
+    <!-- main -->
+    <div class="part-left">
+        <div class="setting tabs">
+            <div class="l">
+                <a href="/users/setting" class="tab <%= 'active' if action_name == 'basic_info' %>" id="tab-edit-info">个人资料</a>
+                <a href="/users/setting/avatar" class="tab <%= 'active' if action_name == 'avatar' %>" id="tab--edit-avatar">修改头像</a>
+                <a href="/users/setting/bindings" class="tab <%= 'active' if action_name == 'bindings' %>" id="tab-edit-bindings">帐户绑定</a>
+                <a href="/users/setting/address" class="tab <%= 'active' if action_name == 'address' %>" id="tab-edit-address">收货地址</a>
+                <a href="/users/setting/password" class="tab <%= 'active' if action_name == 'password' %>" id="tab-edit-password">修改密码</a>
+            </div>
+            <div style="clear:both;"></div>
+            <div class="nav2-dashed-line"></div>
+        </div>
+
+        <div style="clear:both;"></div>
+
+        <div id="edit-avatar">
+            <div class="upload-area">
+                <div class="select-box" id="preview">
+                    <!-- <input id="select_img" class="btn btn3"  type="button" value="选择图片"/> -->
+                </div>
+
+                <p style="padding-top: 20px;">支持JPG、JPEG、PNG格式</p>
+                <p>(小于2Mb，宽和高像素大于104px，</p>
+                <p style="padding-bottom: 20px;">未移动截图会默认按全图截取)</p>
+            </div>
+            
+            <div class="views r">
+                <div class="view-104x104">
+                    <div class="box thumb"></div>
+                    <p>大头像尺寸104*104</p>
+                </div>
+                <div class="view-36x36">
+                    <div class="box thumb"></div>
+                    <p>小头像尺寸36*36</p>
+                </div>
+                <div class="view-20x20">
+                    <div class="box thumb"></div>
+                    <p>微头像尺寸20*20</p>
+                </div>
+            </div>
+            <!-- <div class="actions" style="display: none; margin-left: 70px;">
+                <input type="button" style="margin-right: 20px;" class="btn btn1" value="确认提交"/>
+                <input type="button" class="btn btn2" onclick="" value="重新选择"/>
+            </div> -->
+        </div>
+
+        <div class="avataria" style="display: inline-block;">
+            <div class="cont">
+                <!-- application/x-www-form-urlencoded -->
+                <form method="post" enctype="multipart/form-data" action="/users/setting/upload_avatar">
+                    <input name="avatar" type="file" id="file" accept="image/*" onerror="alert(&#39;请选择一个图片&#39;)">
+                    &nbsp;
+                    <input type="submit" id="hidden-submit" class="ui_button" value="保存">
+                    <input name="crop" type="hidden">
+                </form>
+
+                <!-- <div style="margin: 10px 0;">
+                    <p>由于不同浏览器会有不同的问题，</p>
+                    <p>如果第一次选择上传不成功，请您重新再操作一次！</p>
+                </div> -->
+            </div>
+        </div>
+    </div>
+
+    <!-- user tabs -->
+    <%= render "right_partial" %>
+</div>

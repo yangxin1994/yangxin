@@ -1,0 +1,19 @@
+<div class="panel">
+  <label style="width: auto">设置区间(用于分析时数据分段)</label>
+  <% if segs %>
+    <% segs.each do |seg| %>
+      <div class="date-seg-wrapper">
+        <div class="date-content" data-val="<%= seg %>"></div><a class="del-date-btn" href="#">&times;</a>
+      </div>
+    <% end %>
+  <% else %>
+    <% 4.times do  %>
+      <div class="date-seg-wrapper">
+        <div class="date-content"></div><a class="del-date-btn" href="#">&times;</a>
+      </div>
+    <% end %>
+  <% end %>
+  <p class="segment-new">
+    <button id="" type="button" class="blueBtn add-date-btn">添加</button>
+  </p>
+</div>

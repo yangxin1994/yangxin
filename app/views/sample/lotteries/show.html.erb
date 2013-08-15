@@ -1,0 +1,202 @@
+<% content_for :head do %>
+	<script type="text/javascript">
+		window._id = <%= raw params[:id].to_json %>;
+		<% if user_signed_in %>
+	    window.username    = "<%=  @current_sample['nickname']   %>"
+	    window.sample_receiver = "<%= @recerver_info['receiver'] if @recerver_info %>"
+    	window.sample_mobile   = "<%= @recerver_info['mobile'] if @recerver_info %>"
+    	window.sample_postcode = "<%= @recerver_info['postcode'] if @recerver_info %>"
+    	window.sample_address  = "<%= @recerver_info['address'] if @recerver_info %>"
+    	window.sample_street_info = "<%= @recerver_info['street_info'] if @recerver_info %>"
+		<% end %>
+
+		window.win_prize_id = "<%= session['win_prize_id'] %>"
+		window.win_prize_title = "<%= session['win_prize_title'] %>"
+	</script>
+	<%= javascript_include_tag "pages/sample/lotteries-bundle" %>
+	<%= stylesheet_link_tag "pages/sample/lotteries-bundle", :media => "all" %>
+<% end %>
+
+<div class="site_nav">
+	<span class="biao"></span><a href="<%= home_path %>"><span>首页</span></a>
+	<span>></span><span class="curr">参与抽奖</span>
+</div>
+
+<div class="inner-page">
+ 	<div class="research-list  l m_container">
+		<div class="slot-container mb20">
+		<div id="od_pb"></div>
+		<div class="background0"></div>
+		<div class="background1"></div>
+		<div class="background2"></div>
+		<div class="slot-machine">
+			<div class="machine-head">
+				<div class="neon0"></div>
+				<div class="neon1"></div>
+				<div class="neon2"></div>
+				<div class="welcome0"></div>
+				<div class="welcome1"></div>		
+			</div>
+			<div class="machine-body">
+				<div class="icons0"><div class="icons-rotate0"></div></div>
+				<div class="icons1"><div class="icons-rotate1"></div></div>
+				<div class="icons2"><div class="icons-rotate2"></div></div>
+			</div>
+			<div class="machine-button">
+				<div class="button0"></div>
+				<div class="button1"></div>
+				<div class="buttonpress"></div>
+				<div class="machine-start"></div>
+			</div>
+		</div>
+		<div class="fireworks">
+			<div class="fly1"></div>
+			<div class="fly2"></div>
+			<div class="fly3"></div>
+			<div class="fly4"></div>
+			<div class="fly5"></div>
+			<div class="fly6"></div>
+			<div class="fly7"></div>
+			<div class="fly8"></div>
+			<div class="fly9"></div>
+			<div class="fly10"></div>
+			<div class="fly11"></div>
+			<div class="fly12"></div>
+			<div class="fly13"></div>
+			<div class="fly14"></div>
+			<div class="fly15"></div>
+			<div class="fly16"></div>
+			<div class="fly17"></div>
+			<div class="fly18"></div>
+			<div class="fly19"></div>
+		</div>
+		<div class="win">
+			<p>恭喜您！抽到了一朵云彩！</p>
+			<button>领取</button>
+		</div>
+		<div class="lose">
+			<p>很抱歉！您这次没有中奖...不要气馁，再接再厉！</p>
+			<button>返回</button>
+		</div>
+		</div>		
+	</div>
+
+	
+	<div class="rank dashed-box l">
+		<div class="dashed-box-inner">
+			<div class="dashed-box-inner-top">
+				<div class="reward-info">
+					已有<%= @lottery_counts['total'] %>人参与，<span><%= @lottery_counts['succ'] %></span>人中奖
+				</div>
+				<div class="dashed-top-tit">
+					<ul>
+						<li class="recoard current  fail_log ">
+							参与记录
+						</li>
+						<li class="succ_log">
+							中奖名单
+						</li>
+					</ul>
+				</div>
+			</div>
+
+			<% if @fail_lottery_logs.present? %>
+				<ul class="rank-list fail_log">
+					<% @fail_lottery_logs.each_with_index do |log,index|%>
+					<li <%= hide_border?(@fail_lottery_logs,index) %>>
+						<span class="rank-list-left l">
+							<a class="userhead l" href="javascript:void(0);">
+								<img src="<%= log['avatar'] %>" alt="<%= log['nickname']%>">
+							</a>
+							<span class="username l">
+								<a href="javascript:void(0);">
+									<%= log['user_id']%>
+									<%= log['nickname']%>
+								</a>
+							</span>
+							<span class="integral l">
+								<span class="province">
+									<span><%= log['land']%></span>
+								</span>
+							</span>
+						</span>
+						<span class="rank-list-right r">
+							<span class="answer"><%= ch_time(log['created_at']) %></span>
+						</span> 
+					</li>																
+					<% end %>		
+				</ul>
+			<% end %>
+			<% if @succ_lottery_logs.present? %>
+				<ul class="rank-list succ_log" style="display:none;">
+					<% @succ_lottery_logs.each do |log|%>
+						<li>
+						<span class="rank-list-left l">
+							<a class="userhead l" href="javascript:void(0);">
+								<img src="<%= log['avatar'] %>" alt="<%= log['nickname']%>">
+							</a>
+							<span class="username l">
+								<a href="javascript:void(0);">
+									<%= log['nickname'] %>
+								</a>
+							</span>
+							<span class="integral l">
+								<span class="province"><%= log['land']%></span >
+							</span>
+						</span>
+						<span class="rank-list-right r">
+							<span class="answer"><%= ch_time(log['created_at']) %></span>
+						</span>
+						<span class="win_prize l">
+								<i></i>
+								<span class="rank-list-left l">
+									<a class="userhead l" href="javascript:void(0);">
+										<img class="prize_photo" src="<%= log['photo_src']%>" alt="<%= log['prize_name']%>">
+									</a>
+									<span class="username l prize_desc">
+											<%= log['prize_name']%>
+									</span>
+									<span class="integral l prize_desc">￥<%= log['price']%></span>
+								</span>
+						</span> 
+						</li>		
+					<% end %>		
+				</ul>
+			<% end %>
+		</div>
+	</div>
+	<div style="clear:both"></div> 
+</div>
+
+
+<% if @lottery.present? %>
+<div class="inner-page  other_like">
+	<div class="research-list dashed-box l">
+		<div class="dashed-box-inner">
+			<div class="dashed-box-inner-top survey_prizes">
+				<span>来自调研<a href="<%= survey_path(@lottery['survey_id'])%>"><%= @lottery['survey_title']%></a>下的奖品</span>
+			</div>
+			<div class="other_gifts">
+				<ul>
+					<% @lottery['prizes'].each_with_index do |prize,index|%>
+
+						<li class="<% if index.to_i == 0 %>first<% end %>">
+								<div>
+									<a href="javascript:void(0);"><img src="<%= prize['photo_src']%>" alt="<%= prize['title']%>" width="130" height="130"></a>
+								</div>
+								<div class="other_detail">
+									<span><%= prize['title']%></span>
+									<div>价值: <span class="p_price">￥<%= prize['price']%></span></div>
+								</div>
+						</li>
+					<% end %>									
+				</ul>
+				<div style="clear:both;"></div>
+			</div>
+		</div>
+	</div>
+	<div style="clear:both;"></div>
+</div>
+
+<% end %>
+<%= render :partial => "popup" %>

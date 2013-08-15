@@ -1,0 +1,115 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/sample/users-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/sample/users-bundle", :media => "all" %>
+<% end %>
+
+<%= render "sample_nav", :@path => 'points', :@text => "积分记录" %>
+
+<div class="inner-page main-content">
+    <!-- main -->
+    <div class="part-left">
+        <div class="points tabs">
+            <div class="l">
+                <%
+                    status = 0 
+                    status = 1 if params[:scope].to_s == "in"
+                    status = 2 if params[:scope].to_s == "out"
+                %>
+                <a href="/users/points" class="tab <%= 'active' if status == 0 %>" id="tab-points-all">全部明细</a>
+                <a href="/users/points?scope=in" class="tab <%= 'active' if status == 1 %>" id="tab-points-in">全部收入</a>
+                <a href="/users/points?scope=out" class="tab <%= 'active' if status == 2 %>" id="tab-points-out">全部支出</a>
+            </div>
+            <div style="clear:both;"></div>
+            <div class="nav2-dashed-line"></div>
+        </div>
+
+        <div style="clear:both;"></div>
+        <div class="table-box">
+            <table class="points">
+                <thead>
+                    <% if params[:scope] == 'in' %>
+                        <tr>
+                            <th style="width: 100px;">时间</th>
+                            <th style="width: 440px;">来源/用途</th>
+                            <th style="width: 100px;">收入</th>
+                            <th></th>
+                            <th style="width: 80px;">备注</th>
+                        </tr>
+                    <% elsif params[:scope] == 'out' %>
+                        <tr>
+                            <th style="width: 100px;">时间</th>
+                            <th style="width: 440px;">来源/用途</th>
+                            <th></th>
+                            <th style="width: 100px;">支出</th>
+                            <th style="width: 80px;">备注</th>
+                        </tr>
+                    <% else %>
+                        <tr>
+                            <th style="width: 100px;">时间</th>
+                            <th style="width: 340px;">来源/用途</th>
+                            <th style="width: 100px;">收入</th>
+                            <th style="width: 100px;">支出</th>
+                            <th style="width: 80px;">备注</th>
+                        </tr>
+                    <% end %>
+                    
+                </thead>
+                <tbody>
+                    <% @point_logs.value["data"].to_a.each do |log| %>
+                        <tr>
+                            <td><%= int_time_to_date(log["created_at"].to_i) %></td>
+                            <td>
+                                <% if !log["survey_id"].blank? %>
+                                    <span><%= truncate(log["survey_title"], length: 22) %></span>
+                                <% elsif !log["gift_type"].blank? %>
+                                    <% case log["gift_type"].to_i %>
+                                    <% when ConstVar::Type::MOBILE_CHARGE, ConstVar::Type::SMALL_MOBILE_CHARGE %>
+                                        <i class="icon-order icon-phonepay"></i>
+                                        <span><%= truncate(log["gift_name"], length: 22) %></span>
+                                    <% when ConstVar::Type::ALIPAY %>
+                                        <i class="icon-order icon-alipay"></i>
+                                        <span><%= truncate(log["gift_name"], length: 22) %></span>
+                                    <% when ConstVar::Type::JIFENBAO %>
+                                        <i class="icon-order icon-jfb"></i>
+                                        <span><%= truncate(log["gift_name"], length: 22) %></span>
+                                    <% when ConstVar::Type::QQ_COIN %>
+                                        <i class="icon-order icon-qb"></i>
+                                        <span><%= truncate(log["gift_name"], length: 22) %></span>
+                                    <% else %>
+                                        <img src="<%= log["gift_picture_url"] %>">
+                                        <a target="_blank" href="/gifts/<%= log["gift_id"] %>"><%= truncate(log["gift_name"], length: 22) %></a>
+                                    <% end %>
+                                <% elsif log["reason"].to_i == 128 %>
+                                    <span>原有系统导入积分记录</span>
+                                <% end %>
+                                
+                            </td>
+                            <% if log["amount"].to_i < 0%>
+                                <td>
+                                </td>
+                                <td>
+                                    <span><%= -(log["amount"].to_i) %>积分</span>
+                                </td>
+                            <% else %>
+                                <td>
+                                    <span><%= log["amount"].to_i %>积分</span>
+                                </td>
+                                <td>
+                                </td>
+                            <% end %>
+                            <td>
+                                <span><%= change_point_reason_type(log["reason"]) %></span>
+                            </td>
+                        </tr>
+                    <% end %>
+                    
+                </tbody>
+            </table>
+        </div>
+
+        <%= render "pagination", :@common => @point_logs, :@path => "/users/points" %>
+    </div>
+
+    <!-- user tabs -->
+    <%= render "right_partial" %>
+</div>

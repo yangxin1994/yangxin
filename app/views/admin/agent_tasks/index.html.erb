@@ -1,0 +1,72 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/agent_tasks/index-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+  <li>
+    <a href="/admin/agents">
+    <i class="icon-chevron-right"></i>
+    代理列表
+    </a>
+  </li>
+  <li>
+    <a href="/admin/agents/new">
+      <i class="icon-chevron-right"></i>
+      新建代理
+    </a>
+  </li>
+  <li class="active">
+    <a href="/admin/agent_tasks">
+    <i class="icon-chevron-right"></i>
+    代理任务列表
+    </a>
+  </li>  
+<% end %>
+
+<div>
+  <span>
+    <form class="form-search" style="display:inline">
+      <div class="input-append">
+        <input type="text" name="keyword" class="span6 search-query">
+        <button type="submit" class="btn">Search</button>
+      </div>
+    </form>
+  </span>
+  <span class="pull-right">
+    <%= paginator_mini @agent_tasks %>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu pull-right">
+        <li><a href="?">全部</a></li>
+        <li class="divider"></li>
+      </ul>
+    </div>
+  </span>
+</div>
+
+<div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>问卷名称</th>
+      <th>代理</th>
+      <th>回收情况</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @agent_tasks["data"].each do |task| %>
+    <tr>
+      <td><a href="/admin/agent_tasks/<%= task["_id"] %>"><%= task["survey_title"] %></a></td>
+      <td><%= task["agent_name"] %>:<%= task["agent_email"] %></td>
+      <td><%= task["region"] %></td>
+      <td>
+        <%= task["under_review_count"] %>/
+        <%= task["finished_count"] %>/
+        <%= task["reject_count"] %>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+</div>

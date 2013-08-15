@@ -1,0 +1,100 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/gifts/index-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+  <li class="active">
+    <a href="/admin/gifts">
+    <i class="icon-chevron-right"></i>
+    礼品列表
+    </a>
+  </li>
+  <li>
+    <a href="/admin/gifts/new">
+      <i class="icon-chevron-right"></i>
+      新建礼品
+    </a>
+  </li>
+<% end %>
+
+<div>
+  <span>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown">⃞&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        <li><a href="?" class="select-all-btn"><input type="checkbox" value="">&nbsp;全部</a></li>
+        <li class="divider"></li>
+
+        <li><a href="?type=4" class="select-suc-btn"><input type="checkbox" value="">&nbsp;话费充值</a></li>
+        <li><a href="?type=8" class="select-suc-btn"><input type="checkbox" value="">&nbsp;支付宝转账</a></li>
+        <li><a href="?type=16" class="select-suc-btn"><input type="checkbox" value="">&nbsp;集分宝兑换</a></li>
+        <li><a href="?type=32" class="select-suc-btn"><input type="checkbox" value="">&nbsp;Q币充值</a></li>
+        <li class="divider"></li>
+        <li><a href="?type=2" class="select-failed-btn"><input type="checkbox" value="">&nbsp;实物礼品</a></li>
+        <li><a href="?type=1" class="select-failed-btn"><input type="checkbox" value="">&nbsp;其他虚拟礼品</a></li>
+      </ul>
+    </div>
+    <form class="form-search" style="display:inline">
+      <div class="input-append">
+        <input type="text" name="title" class="span6 search-query" required>
+        <button type="submit" class="btn">Search</button>
+      </div>
+    </form>
+  </span>
+  <span class="pull-right">
+    <%= paginator_mini @gifts %>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu pull-right">
+        <li><a href="?status=1">已上架</a></li>
+        <li><a href="?status=2">已下架</a></li>
+        <li class="divider"></li>
+        <li><a href="?">全部</a></li>
+      </ul>
+    </div>
+  </span>
+</div>
+
+<div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th width="30%">礼品名称</th>
+        <th >剩余数量</th>
+        <th >所需积分</th>
+        <th >礼品状态</th>
+        <th >礼品操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @gifts["data"].each_with_index do |g, i| %>
+      <tr>
+        <td><%= gift_type_tag(g["type"]) %>&nbsp;<a href="<%= gifts_path %>/<%= g["_id"] %>"><%= g["title"] %></a></td>
+        <td><%= g["quantity"] %></td>
+        <td><%= g["point"] %></td>
+        <td>
+          <%= if g["status"] == 1 then "上架中" else "已下架" end%>
+        </td>
+        <td>
+          <div class="btn-group">
+            <a class="btn" href="<%= admin_gifts_path %>/<%= g["_id"] %>/edit" target="_blank"><i class="icon-edit"></i>编辑</a>
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="od-delete" href="<%= g["_id"] %>" title="Delete"><i class="icon-remove"></i>删除</a></li>
+              <% if g["status"] == 2 %>
+              <li><a href="<%= g["_id"] %>" class="od-stockin">上架</a></li>
+              <% elsif g["status"] == 1 %>
+              <li><a href="<%= g["_id"] %>" class="od-outstock">下架</a></li>
+              <% end %>
+            </ul>
+          </div>
+        </td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+</div>

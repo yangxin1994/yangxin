@@ -1,0 +1,131 @@
+<% content_for :app_head do %>
+	<%= stylesheet_link_tag    "layouts/quill-layout" %>
+	<%= javascript_include_tag "layouts/quill-layout" %>
+	<script type="text/javascript">
+	jQuery(function($) {
+		// check browser
+		if($.browser.msie && parseFloat($.browser.version) < 8) {
+			setTimeout(function() { $('#browser').slideDown(); }, 500);
+		} else {
+			$('#browser').remove();
+		}
+
+		// set survey id globally
+		window.survey_id = <%= @survey ? raw("'#{@survey['_id']}'") : "null" %>;
+
+		// serach survey
+		$('#search_ipt').placeholder();
+
+		// 设置下拉菜单
+		$(".account-setting").powerFloat({
+			offsets: {
+				x: 40,
+				y: 20
+			},
+			eventType: "hover",
+		    target: $(".account-setting-box"),
+		    position:"2-3"
+		});
+		/* Left menus related
+		 * ================== */
+
+		// make left menus float
+		$("#left_float_menus").smartFloat();
+
+		// mouse over and out
+		$('.left-menu-icon em').each(function(i, v) {
+			$(this).data('icon', $(this).attr('class'));
+		});
+		$('.left-menus a').hover(function() {
+			var icon = $('.left-menu-icon em', this);
+			icon.addClass(icon.data('icon') + '-hover');
+		}, function() {
+			var icon = $('.left-menu-icon em', this);
+			icon.removeClass(icon.data('icon') + '-hover');
+		});
+
+		$('#search_btn').click(function(){
+			var _title = $('input.search').val().trim();
+			if(_title==""){
+				$.od.odPopup({content: '搜索内容不能为空'});
+				return false;
+			}
+			window.location.replace('/questionaires?title='+_title);
+			return false;
+		});
+
+		$('.account-setting-box ul li:even').addClass('bf2');
+	});
+	</script>
+	<%= yield :head %>
+<% end %>
+
+<% content_for :app_content do %>
+
+<div id='browser'>
+	<span>您的浏览器版本较低，部分功能可能无法使用，推荐您下载最新的谷歌浏览器</span>
+	<a href="http://down.tech.sina.com.cn/content/40975.html" class='chrome' target='_blank' title='点击下载谷歌浏览器'></a>
+	<a href="http://www.firefox.com.cn/download/" class='firefox' target='_blank' title='点击下载火狐浏览器'></a>
+	<a href="http://info.msn.com.cn/ie9/" class='ie' target='_blank' title='点击下载IE9浏览器'></a>
+</div>
+<!-- 黑色banner -->
+<div id='banner'>
+	<div class="od-container">
+		<a class='logo' href='<%=root_path %>' ></a>
+		<ul class='menus'>
+			<li><a class='list-survey' href="<%=questionaires_path %>">调研列表</a></li>
+			<li><a class='new-survey' href="<%=new_questionaire_path %>">新建</a></li>
+		</ul>
+		<form id="search_form" onsubmit='return false;'>
+			<a class='account-setting' href="javascript:void(0);">
+				<% if unread_message_count > 0 %>
+				<em class="BallonToolTip" ><%=unread_message_count %></em>
+				<% end %>
+			</a>
+			<div class="account-setting-box dn">
+				<i class="trigon">▲</i>
+				<ul>
+					<% if is_admin %>
+					<li><a href="<%=admin_path %>?publish_status=8">管理员操作</a></li>
+					<% end %>
+					<li><a href="<%=profile_path %>">账户设置</a></li>
+					<li><a href="<%=messages_path %>">消息中心</a></li>
+					<li><a href="<%= design_doc_path %>">使用帮助</a></li>
+					<li><a href="<%=signout_path %>">退出</a></li>
+				</ul>
+			</div>
+			<button id="search_btn" class="r" ></button>
+			<input id='search_ipt' placeholder='搜索' class="search r" type="text" x-webkit-speech />
+		</form>
+	</div>
+</div>
+<!-- 灰色菜单 -->
+<div id='top_menus'>
+	<div class='od-container'>
+		<!-- menus -->
+		<% if @survey %>
+		<%= render "partials/survey_menus" %>
+		<% elsif @is_account_mgr %>
+		<%= render "partials/account_menus" %>
+		<% else @is_account_mgr %>
+		<%= render "partials/survey_list_menus" %>
+		<% end %>
+	</div>
+</div>
+<!-- 下部分 -->
+<div class="od-container od-body">
+	<% if @hide_left_sidebar %>
+	<%= yield %>
+	<% else %>
+	<div class="left-sidebar" id="left_float_menus">
+		<%= yield :left_menus %>
+	</div>
+	<div class='right-sidebar'>
+		<%= yield %>
+	</div>
+	<% end %>
+	<div class='cl-line'></div>
+</div>
+<% end %>
+
+<%= render :template => 'layouts/app' %>

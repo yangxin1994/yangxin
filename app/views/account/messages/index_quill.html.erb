@@ -1,0 +1,63 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+		window.total_page = <%= raw (@messages ? @messages["total_page"] : 0) %>;
+	</script>
+	<%= javascript_include_tag "pages/account/messages-bundle" %>
+	<%= stylesheet_link_tag "pages/account/messages_quill-bundle", :media => "all" %>
+<% end %>
+<!-- content for left menus -->
+<% content_for :left_menus do %>
+	<%= render :partial => "partials/left_menus_account", :locals => { :left_active => 1 } %>
+<% end %>
+
+<!-- put html code below -->
+<div class="page">	
+		<div class="seperator top gray"></div>	
+		
+		<div class="q-render gray">
+			<h2 class="page-title">消息中心</h2>
+		<i class="css-white-gray" style="margin-left:3px"></i>
+				
+		</div>
+
+		<div class="q-render white">			
+
+			<ul class="messages">
+				<% if @messages != nil %>
+				<% @messages["data"].each do |message| %>
+					<li>
+						<span class="messages-number"><%= @messages["data"].index(message) + 1 %>.</span>
+						<span class="messages-title"><%= message["title"] %></span>
+						<span class="messages-time"><%= Time.iso8601(message["updated_at"]).localtime.strftime("(%Y.%m.%d %H:%M)") %></span>
+						<!-- <span class="unread">未读</span> -->
+						<p style="display:none;"><%= message["content"] %></p>
+					</li>
+				<% end %>
+				<% end %>
+				<!--
+				<li class="graybg">
+					<span class="messages-number">4.</span>
+					<span class="messages-title">您的“2012满意度调查”<b class="blue b">问卷审核结果</b>提醒。</span>
+					<span class="messages-time">(2012.9.8 10:50)</span>
+					<span class="read">已读</span>
+					<p>
+						这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字
+					</p>
+				</li>
+				-->
+			</ul>
+
+
+			<div class="messages-bottom">
+				<span id="pagination">
+					<span class="previous" title="上一页"></span>
+					<span class="current"></span>
+					<span class="next" title="下一页"></span>
+				</span>
+			</div>
+		
+		</div>
+
+		<div class="seperator bottom white"></div>	<!-- 下方圆角，白色 -->
+</div>

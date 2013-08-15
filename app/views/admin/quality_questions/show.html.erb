@@ -1,0 +1,133 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+	jQuery(function($) {
+		// window.quality_question = <%= raw (@quality_question.value).to_json %>;
+		window.question_objects = <%= raw (@question_objects).to_json %>;
+		window.quality_control_question_answer = <%= raw (@quality_control_question_answer).to_json %>;
+		// console.log(window.quality_question);
+		// console.log(window.question_objects);
+		// console.log(window.quality_control_question_answer);
+	});
+	</script>
+	<%= javascript_include_tag "pages/admin/quality_questions-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/quality_questions-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+<% if @quality_question.success %>
+<div class="quality_questions"> 
+	<div class="title">
+		<h5>质控题管理: 编辑<h5>
+		<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/quality_questions/matching">返回匹配题列表</a><h5>
+		<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/quality_questions/objective">返回客观题列表</a><h5>
+	</div>		
+
+	<div class="nNote nWarning hideit">
+		<!-- <p><strong>注意: </strong></p> -->
+		<p>在删除题目中选项的同时,　答案中的选项也相应会删除(如果未对题目/答案保存,　后台的题目/答案数据仍然存在). 如果误删选项,　请在保存前刷新页面,　重新操作;　或者,　添加新的一样选项!</p>
+	</div>
+	
+	<!-- edit tab start -->
+	<div id="edit-tab">
+		<% @question_objects.each_with_index do |object, index|%>
+			<div id="<%=object["_id"]%>" class="quality_question">
+				<form action="#" method="post">	
+					<p>
+						<b class="f-orange">质控题 <%= index+1 %></b> 
+					</p>
+					<hr/>
+					<p>
+						<label class="child-title f14 pl2">质控类型</label>
+						<select name="quality_control_type" disabled="disabled">
+							<option value="1" <%if object["quality_control_type"].to_i ==1 %>selected<%end%>>客观题</option>
+							<option value="2" <%if object["quality_control_type"].to_i ==2 %>selected<%end%>>匹配题</option> 
+						</select>
+						<label style="width:100px;"></label>
+						<label class="child-title f14 pl2">问题类型</label>
+						<select name="question_type" disabled="disabled">
+							<option value="0" <%if object["question_type"].to_i ==0 %>selected<%end%>>选择题</option>
+							<option value="2" <%if object["question_type"].to_i ==2 %>selected<%end%>>文本填充题</option> 
+							<option value="3" <%if object["question_type"].to_i ==3 %>selected<%end%>>数值填充题</option>  
+						</select>
+					</p>
+					<p>
+						<label class="child-title f14 pl2">选项</label>
+						<span class="f14">最小数</span>
+						 <input class="text-input" type="text" style="width:40px;" name="quality_question[:min_choice]" value="<%= object["issue"]["min_choice"] %>"></input>
+						 <span class="alertSpan dn red"></span> 
+					</p>
+					<p>
+						 <label class="child-title f14 pl2">选项</label>
+						<span class="f14">最大数</span>
+						 <input class="text-input" type="text" style="width:40px;" name="quality_question[:max_choice]" value="<%= object["issue"]["max_choice"] %>"></input> 
+						 <span class="alertSpan dn red"></span>
+					</p>
+					<p>
+						<label class="child-title f14 pl2">问题名称</label>
+						<input class="text-input" type="text"  name="quality_question[:content]" value="<%= object["content"]["text"] %>"></input>
+						<label style="width:40px;"></label>
+					</p>
+					<p>
+						<label class="child-title f14 pl2">选项</label>
+						<input class="blueBtn new-choice" type="button" value="添加新选项"/>
+					</p>
+					<div class="choices">
+						<%object["issue"]["items"].each do |item|%>
+							<div class="choice" id="choice-<%= item["id"]%>">
+								<span class="drag-choice">拖拽</span>
+								<input type="text" class="choice-text text-input f14" value="<%= item["content"]["text"]%>"/>
+								<input type="button" class="redBtn btn-choice-delete" value="删除"/>
+							</div>
+						<%end%>
+					</div>
+
+				</form>	
+			</div>
+		<%end%>
+
+		<!--  -->
+		<div id="<%= @quality_control_question_answer["_id"] %>" class="quality_control_question_answer">
+			<form action="#" method="post">	
+				<p>
+					<b class="f-orange">质控题答案</b> 
+				</p>
+				<hr/>
+				<p>
+					<label class="child-title f14 pl2">质控类型</label>
+					<select name="quality_control_type" disabled="disabled">
+						<option value="1" <%if @quality_control_question_answer["quality_control_type"].to_i ==1 %>selected<%end%>>客观题</option>
+						<option value="2" <%if @quality_control_question_answer["quality_control_type"].to_i ==2 %>selected<%end%>>匹配题</option> 
+					</select>
+					<label style="width:100px;"></label>
+					<label class="child-title f14 pl2">问题类型</label>
+					<select name="question_type" disabled="disabled">
+						<option value="0" <%if @quality_control_question_answer["question_type"].to_i ==0 %>selected<%end%>>选择题</option>
+						<option value="2" <%if @quality_control_question_answer["question_type"].to_i ==2 %>selected<%end%>>文本填充题</option> 
+						<option value="3" <%if @quality_control_question_answer["question_type"].to_i ==3 %>selected<%end%>>数值填充题</option>  
+					</select>
+				</p>
+				 <div class="answer-choices">
+
+				 </div>
+			</form>
+		</div>
+		<p>
+			<input class="blueBtn btn-edit-ok" type="button" value="确 定" />
+		</p>
+	<!-- edit tab end -->
+	</div>
+</div>
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @reviews.value %></p>
+</div>
+<%end%>	
+
+<!-- html template for js clone -->
+<div id="choice-item" class="dn">
+	<span class="drag-choice">拖拽</span>
+	<input type="text" class="choice-text text-input f14" value="新选项"/>
+	<input type="button" class="redBtn btn-choice-delete" value="删除"/>
+</div>

@@ -1,0 +1,54 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/quill/property_more-bundle" %>
+	<%= stylesheet_link_tag "pages/quill/property_more-bundle", :media => "all" %>
+<% end %>
+
+<!-- content for left menus -->
+<% content_for :left_menus do %>
+	<%= render :partial => "partials/left_menus_setting", :locals => { :left_active => 4 } %>
+<% end %>
+
+<!-- put html code below -->
+
+<div class="page property-more">	
+	<div class="seperator top tintgray"></div>	
+	<div class="q-render tintgray">
+		<div class='moreSelector'>
+			<ul>
+				<li>
+					<label><input type='checkbox' class="choice" <%=@style_setting['has_progress_bar'] ? "checked='checked'" : "" %> id='more1'/>
+					<p>显示进度条</p></label>
+				</li>
+				<li>
+					<label><input type='checkbox' class="choice" <%=@style_setting['is_one_question_per_page'] ? "checked=checked" : "" %> id='more2'/>
+					<p>强制每题作为一页单独显示</p></label>
+				</li>
+				<li>
+					<label><input type='checkbox' class="choice" <%=@style_setting['has_question_number'] ? "checked=checked" : ""  %>  id='more3'/>
+					<p>显示题目自动编号</p></label>
+				</li>
+				<li>
+					<label><input type='checkbox' class="choice" <%=@style_setting['allow_pageup'] ? "checked" : "" %> id='more4'/>
+					<p>允许向前翻页（逻辑控制将失效）</p></label>
+				</li>
+				<li>
+					<label><input type='checkbox' class="choice" <%=@style_setting['has_advertisement'] ? "checked=checked" : "" %> id='more5'/>
+					<p>带广告（友好提示：广告不会影响答题结果，支持我们请不要取消）</p></label>
+				</li>
+				<li>
+					<label><input type='checkbox' class="choice" <%=@style_setting['has_oopsdata_link'] ? "checked" : "" %> id='more6'/>
+					<p>带 Oops!Data 链接</p></label>
+				</li>
+				<li >
+					<label><input class="redirect_li" type='checkbox' <%=@style_setting['redirect_link']!="" ? "checked=checked" : "" %>  id='more7'/>
+					<p>答题完成后自动跳转至</p></label>
+					<input class="redirect" type="text" value="<%= @style_setting['redirect_link'] %>" />
+					<img class="accept" src="/assets/od-icon/icon_accept.png" />
+					<img class="wait" src="/assets/widgets/load-white.gif" />
+				</li>
+			</ul>			
+		</div>
+		</div>
+	<div class="seperator bottom tintgray"></div>	
+</div>

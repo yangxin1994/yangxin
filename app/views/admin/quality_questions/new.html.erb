@@ -1,0 +1,44 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/quality_questions-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/quality_questions-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+<div class="quality_questions"> 
+	<div class="title">
+		<h5>质控题管理:新建<h5>
+		<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/quality_questions/matching">返回匹配题列表</a><h5>
+		<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/quality_questions/objective">返回客观题列表</a><h5>
+	</div>
+
+	<div class="tab-content" id="new-tab">
+		
+		<form action="#" method="post">	
+			<p>
+				<label class="child-title f14 pl2">质控类型</label>
+				<select name="quality_control_type">
+					<option value="1">客观题</option>
+					<option value="2">匹配题</option> 
+				</select>
+			</p>
+			<p>
+				<label class="child-title f14 pl2">问题类型</label>
+				<select name="question_type">
+					<option value="0">选择题</option>
+				</select>
+			</p>
+			<p>
+				<label class="child-title f14 pl2">问题数量</label>
+				<input class='tw3' name="question_number" disabled="disabled" type ="text" />
+			</p>
+			<p>
+				<input class="blueBtn btn-new-ok" type="button" value="确 定" />
+			</p>
+
+		</form>	
+
+	</div>
+	<!-- new tab end -->
+
+</div>

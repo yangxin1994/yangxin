@@ -1,0 +1,59 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/sample/users-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/sample/users-bundle", :media => "all" %>
+<% end %>
+
+<%= render "sample_nav", :@path => 'join_surveys', :@text => "我的调研" %>
+
+<div class="inner-page main-content">
+    <!-- main -->
+    <div class="part-left">
+        <div class="tabs">
+            <div class="l">
+                <a href="/users/join_surveys" class="tab active" id="tab-join-surveys">我参加的调研</a>
+                <a href="/users/spread_surveys" class="tab" id="tab-spread-surveys">我推广的调研</a>
+            </div>
+            <div style="clear:both;"></div>
+            <div class="nav2-dashed-line"></div>
+        </div>
+
+        <div style="clear:both;"></div>
+
+        <div class="table-box">
+            <table class="join_surveys">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">时间</th>
+                        <th style="width: 440px;">调研名称</th>
+                        <th style="width: 60px;">状态</th>
+                        <th style="width: 100px;">获得奖励</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% @my_answer_surveys.value['data'].to_a.each do |survey| %>
+                        <tr>
+                            <td><%= int_time_to_date(survey["created_at"]) %></td>
+                            <td>
+                                <a target="_blank" href="/a/<%= survey["answer_id"] %>">
+                                    <%= truncate(survey["survey_title"].strip, length: 30) %>
+                                    <% if survey["answer_status"].to_i == 1 %>
+                                        <span class="c-blue">(继续答题..)</span>
+                                    <% end %>
+                                </a>
+                            </td>
+                            <td><%= answered?(survey["answer_status"], survey["answer_reject_type"], survey["free_reward"]) %></td>
+                            <td>
+                                <%= sanitize survey["select_reward"], attributes: %w(id class href target) %>
+                            </td>
+                        </tr>
+                    <% end %>
+                </tbody>
+            </table>
+        </div>
+
+        <%= render "pagination", :@common => @my_answer_surveys, :@path => "/users/join_surveys" %>
+    </div>
+
+    <!-- user tabs -->
+    <%= render "right_partial" %>
+</div>

@@ -1,0 +1,253 @@
+<% content_for :head do %>
+	<%= stylesheet_link_tag "pages/sample/homes-bundle", :media => "all" %>
+	<%= javascript_include_tag "pages/sample/homes-bundle" %>
+	<script type="text/javascript">
+		<% if user_signed_in %>
+		 	window.current_user_id = "<%=  @current_sample['sample_id'] %>"
+		<% end %>		
+	</script>
+
+
+<% end %>
+<% if @hot_survey.present? %>
+<div class="hot-research-banner inner-page">
+		<strong>
+			<a href="javascript:void(0);">
+				<%= @hot_survey['title']%>
+			</a>
+		</strong>
+		<%= link_to "立即参与","/s/#{@hot_survey['quillme_promote_info']['reward_scheme_id']}",:class => 'involved-btn' %>
+</div>
+<% end %>
+<div class="inner-page fix">
+	<!-- 焦点图切换 -->
+	<div id="slideBox" class="slider">
+		<div class="hd">
+			<ul><li>1</li><li>2</li><li>3</li></ul>
+		</div>
+		<div class="bd">
+			<ul>
+				<li><img src="/assets/od-quillme/banner/banner_1.png" /></li>
+				<li><img src="/assets/od-quillme/banner/banner_2.png" /></li>
+				<li><img src="/assets/od-quillme/banner/banner_3.png" /></li>
+			</ul>
+		</div>
+	</div>
+	<!-- 公告 -->
+	<div class="bulletin dashed-box r">
+		<div class="dashed-box-inner">
+
+			<div class="dashed-box-inner-top">
+				<h3 class="box-title">站内公告</h3>
+				<a href="<%= public_notices_path %>" class="more">更多</a>
+			</div>
+			<% if @public_notices.present? %>
+			<ul>
+				<% @public_notices['data'].each_with_index do |pn,index| %>
+					<li <%= hide_border?(@public_notices['data'],index) %>>
+						<a href="<%= public_notice_path(pn['_id']) %>">
+							<span class="bulletin-title"><%= truncate("#{pn['title']}", :length => 25)%></span>
+						</a>
+						<span class="time">
+							<%= Date.strptime("#{pn['created_at']}", "%Y-%m-%d") %></span>
+					</li>
+				<% end %>
+			</ul>
+			<% end %>
+		</div>
+	</div>
+</div>
+
+<div class="gift-list-main dashed-box inner-page">
+	<div class="dashed-box-inner">
+
+		<div class="dashed-box-inner-top">
+			<h3 class="box-title">推荐礼品</h3>
+			<a href="<%= gifts_path %>" class="more">更多</a>
+		</div>
+		<% if @hotest_gifts.present? %>
+			<ul class="gift-list">
+				<% @hotest_gifts['data'].each do |gift|%>
+					<li>
+						<a href="<%= gift_path(gift['_id']) %>">
+							<span class="gift-img">
+								<img src="<%= show_image(gift['photo_src'],'gifts') %> " alt="<%= gift['title'] %>">
+							</span>
+							<span class="gift-name"><%= gift['title'] %></span>
+							<span class="gift-mask"></span>
+							<span class="gift-remark">
+									 <span class="integral l"><b><%= gift['point']%></b>积分</span>
+								<span class="gift-remark-right">
+									 <span class="nop">人气：<b><%= gift['exchange_count']%></b></span>
+									 <span class="price">价值：<b><%= show_gift_price(gift['price'])%></b> 元</span>
+								</span>     
+							</span>
+						</a>
+					</li>
+				<% end %>    		
+			</ul>
+		<% end %>
+	</div>
+</div>
+
+
+<!-- 热门兑换 -->
+
+<!-- 调研推荐&排行榜&新鲜事 -->
+<div class="inner-page">
+	<div class="research-list dashed-box l">
+		<div class="dashed-box-inner">
+			<div class="dashed-box-inner-top">
+				<h3 class="box-title">调研推荐</h3>
+				<a href="<%= surveys_path(:status => 2) %>" class="more">更多</a>
+			</div>
+			<% if @rsl.present? %>
+				<ul>
+					<% @rsl = @rsl['data'] %>
+					<% @rsl.each_with_index do |survey,index| %>
+						<li class="research-content" <%= hide_border?(@rsl,index) %>>
+							<% if [1,2,16].include?(survey['quillme_promote_reward_type']) %>
+								<span class="reward rmb <%= survey['status'].to_s ==  Sample::SurveyClient::CLOSED.to_s  ? 'finished' :  'unfinished' %>">
+									<b>￥<%= survey['reward_type_info']['amount'] if survey['reward_type_info']%></b>
+								</span>
+							<% elsif [4].include?(survey['quillme_promote_reward_type']) %>
+								<span class="reward integral <%= survey['status'].to_s ==  Sample::SurveyClient::CLOSED.to_s ? 'finished' :  'unfinished' %>">
+									<b>
+										<% if survey['reward_type_info']%>
+										<%= survey['reward_type_info']['amount']%>
+										<% else %>
+												0
+										<% end %>
+									</b>
+									<em>积分</em>
+								</span>
+							<% elsif [8].include?(survey['quillme_promote_reward_type']) %>
+								<span class="reward lottery <%= survey['status'].to_s ==  Sample::SurveyClient::CLOSED.to_s ?  'finished' :  'unfinished' %>">
+									<b>抽奖机会</b> 
+								</span>   
+							<% elsif [0].include?(survey['quillme_promote_reward_type']) %>
+								<span class="reward lottery <%= survey['status'].to_s ==  Sample::SurveyClient::CLOSED.to_s ?  'finished' :  'unfinished' %>">
+									<b>免费调研</b> 
+								</span>         
+							<% end %>
+
+							<span class="research-title">
+								<a href="/s/<%= survey['scheme_id']%>">
+								<%= truncate(survey['title'],:length => 30)%>
+							</a>
+							<%# if index == 0%>
+								<!-- <i class="new"></i> -->
+							<%# else %>
+								<!-- <i class="top"></i> -->
+							<%# end %>
+							</span>
+							<% if user_signed_in %>
+								<% if survey['status'].to_s ==  Sample::SurveyClient::PUBLISHED.to_s %>
+									<span class="status  <%= survey['answer_status'].to_i == 0 ? 'unfinished' : ''%>"><%= answered?(survey['answer_status'],survey['reject_type'])%></span>
+								<% end %>
+							<% end %>
+
+							<% if survey['status'].to_s ==  Sample::SurveyClient::PUBLISHED.to_s %>
+								<span class="share">
+									<% if survey['spread_point'].to_i > 0 %>
+										<a class="btn share-btn" href="#<%= user_signed_in ? 's_survey' : 'share_survey'%>" data="<%= survey['spread_point']%>" survey_id="<%= survey['_id']%>" scheme_id = "<%= survey['scheme_id']%>" >
+										 		分享奖励<b><%= survey['spread_point']%></b> 积分
+									<% else %>
+										<a class="btn share-btn" href="#s_survey" data="<%= survey['spread_point']%>" survey_id="<%= survey['_id']%>" scheme_id = "<%= survey['scheme_id']%>" >
+										 		分享
+									<% end %>
+										</a>
+								</span>
+							<% end %>
+
+							<span class="research-meta">
+								<% if survey['deadline'].present? %>
+									<span class="countdown">
+										<!-- <i class="icon16 hourglass"></i> -->
+										<%=can_answer?(survey['deadline'])%>
+									</span>
+								<% end %>
+								<span class="estimate"><!-- <i class="icon16 clock"> --></i><%= rounding(survey['time']) %>分钟</span>
+								<span class="divide">/</span>
+								<span class="people">
+									<!-- <i class="icon16 research-people"></i> -->
+									<em><%= survey['answer_count']%></em>人已参与</span>
+								<!-- 收起奖品 -->
+								<% if survey['quillme_promote_reward_type'].to_i == 8 %>
+									<%  ids = survey['reward_type_info']['prizes'].map{|priz| priz['id']	}
+										ids = ids.join(',')
+									%>
+									<span class="stretch">
+										<a href="javascript:void(0);" class="unfold-btn" data="<%= ids  %>" 	survey_id="<%= survey['_id'] %>" scheme_id ="<%= survey['scheme_id']%>">
+											<i class="icon16 open"></i><span>展开</span>
+										</a>
+									</span>
+								<% end %>
+							</span>
+							<% if survey['quillme_promote_reward_type'].to_i == 8 %>
+								<ul class="reward_list" style="display:none;">
+								</ul>
+						<% end%>
+						</li>
+					<% end %>
+				</ul>
+			<% end %>
+		</div>
+	</div>
+
+
+<div class="rank dashed-box l">
+	<div class="dashed-box-inner">
+		<div class="dashed-box-inner-top">
+			<h3 class="box-title">排行榜</h3>
+		</div>
+		<% if @top_rank_users.present? %>
+			<ul class="rank-list">
+				<% @top_rank_users.each_with_index do |user,index| %>
+
+					<li <%= hide_border?(@top_rank_users,index) %>>
+						<span class="rank-list-left l">
+							<span class="number l"><%= index + 1 %></span>
+							<a class="userhead l" href="javascript:void(0);<%#= user_path(user['_id'])%>">
+								<img src="<%= show_image(user['avatar_src'],'avatar') %> " alt="<%= user['username']%>">
+							</a>
+							<span class="username">
+								<a href="javascript:void(0);<%#= user_path(user['_id'])%>">
+									<%= truncate("#{user['nickname']}", :length => 15) %>
+								</a>
+							</span>
+							<span class="integral">积分：<b><%= truncate("#{user['point']}", :length => 15) %></b></span>
+						</span>
+						<span class="rank-list-right r">
+							<span class="answer">答题：<b><%= user['answer_count'] %></b></span>
+							<span class="spread">推广：<b><%= user['spread_count'] %></b></span>
+						</span> 
+					</li>
+				<% end %>
+			</ul>
+		<% end %>
+	</div>
+</div>  
+
+<!-- 新鲜事 -->
+ <div class="forums dashed-box l">
+	<div class="dashed-box-inner">
+		<div class="dashed-box-inner-top">
+				 <h3 class="box-title">新鲜事</h3>
+		</div>
+		<% if @fresh_news.present? %>
+			<ul class="forums-list">
+				<% @fresh_news.each_with_index do |news,index|%>
+					<li <%= hide_border?(@fresh_news,index) %>>
+						<span class="time"><%= ch_time(news['created_at']) %></span>
+						<%= user_behavor(news) %>
+					</li>
+				<% end %>
+			</ul>
+		<% end %>
+	</div>
+</div> 
+
+
+
+<%= render :partial => "/sample/survey_share" %>

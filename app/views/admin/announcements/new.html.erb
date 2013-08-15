@@ -1,0 +1,44 @@
+
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/announcements-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/announcements-bundle", :media => "all" %>
+<% end %>
+
+<div id="edit-tab">
+	<div class="title">
+		<h5>公告管理: 创建<h5>
+		<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/announcements">返回公告列表</a><h5>
+	</div>
+
+	<form action="/admin/announcements" name="announcements" enctype="multipart/form-data" method="post">
+		<input name="_method" id="_method" type="hidden" value="post" />        
+		<fieldset>
+			<p>
+				<label>公告类型</label>
+				<select name="type">
+					<option value="1">Quill公告</option>
+					<option value="2">QuillMe公告</option>
+				</select>
+			</p>
+			<p>
+				<label>公告标题</label>
+				<input class="wrap-text" type="text" name="title"/>
+			</p>
+			<p>
+				<label>公告内容</label>
+				<textarea  class="wysiwyg" name="content" style="width: 600px;min-height: 100px;"></textarea> 
+			</p>
+			<p>
+				<label>附件</label>
+				<input type="file" name="attachment" class="fileToUpload" style="margin-top: 10px;">
+			</p>
+			<p>
+				<input class="blueBtn btn-new-ok" type="submit" value="确 定" />
+			</p>          
+		</fieldset>
+						
+	</form> 
+
+	<hr/>
+</div>

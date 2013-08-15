@@ -1,0 +1,24 @@
+<% @answers.value["data"].to_a.each do |answer| %>
+  <div class="tab">
+    <img class="avatar" src="<%= small_avatar(answer['sample_id']) %>"/>
+    <div class="cont">
+      <p class="username"><%= truncate(answer['sample_nickname'].to_s.strip, length: 16) %>
+        <% 
+          status_color = ''
+          case answer['answer_status'].to_i
+          when 1
+            status_color="c-yellow"
+          when 32
+            status_color='c-green'
+          else
+            status_color='c-red'
+          end 
+        %>
+        <span class="<%= status_color %>">（<%= answered?(answer['answer_status']) %>）</span>
+      </p>
+      <p class="time">参与时间：<%= int_time_to_date(answer['created_at'].to_i) %></p>
+    </div>
+  </div>
+<% end %>
+
+<%= render 'ajax_pagination', :@common_value => @answers.value %>

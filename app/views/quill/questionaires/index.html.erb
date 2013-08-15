@@ -1,0 +1,127 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+		jQuery(function($) {
+			$('#new_survey_btn').click(function() {
+				location.href = '<%= new_questionaire_path %>'
+			});
+			$('#banner .list-survey').addClass('active');
+			window.page = <%= raw (params[:page] || 1).to_json %>;
+			window.per_page = <%= raw (params[:per_page] || 10).to_json %>;
+		});
+	</script>
+	<%= javascript_include_tag "pages/quill/questionaires-bundle" %>
+	<%= stylesheet_link_tag "pages/quill/questionaires-bundle", :media => "all" %>
+<% end %>
+
+<!-- content for left menus -->
+<% content_for :left_menus do %>
+	<button class="left-sidebar-title">调研列表</button>
+	<ul class="left-menus">
+		<li class='small'><a href="/questionaires"><span class="left-menu-name">全部</span></a></li>
+		<li class='small'><a href="/questionaires?stars=true"><span class="left-menu-name">加星</span></a></li>
+		<li class='small'><a href="/questionaires?status=1"><span class="left-menu-name">关闭</span></a></li>
+		<li class='small'><a href="/questionaires?status=2"><span class="left-menu-name">发布</span></a></li>
+		<li class='small last'><a href="/questionaires?status=4"><span class="left-menu-name" >已删除</span></a></li>
+	</ul>
+	<div class="left-sidebar-end"></div>
+<% end %>
+
+		<!--问题列表-->
+		<div class='page'>	
+		<div class='seperator top gray'></div>	<!-- 上方圆角，灰色 -->
+		<div class="questions-box">
+			<% if @surveys.success %>
+				<% if @surveys.value['data'].length == 0 %>
+					<% if !params[:stars] && !params[:status]  %>
+						<div class="white" style='padding: 40px; text-align: center; font-size: 14px;'>
+							<p style='margin-bottom: 10px;'>暂无问卷，点击下面按钮可新建调研。</p>
+							<p><button id='new_survey_btn' class='od-button'>新建调研</button></p>
+						</div>
+					<% else %>
+						<div class="white" style='padding: 40px; text-align: center; font-size: 14px;'>
+							<p style='margin-bottom: 10px;'>暂无相应问卷</p>
+						</div>
+					<% end %>
+
+				<% end %>
+
+				<% if params[:title] %>
+					<div class="white" style='padding: 20px; text-align: center; font-size: 14px;'>
+						<p>搜索标题中含有 “<%=h params[:title] %>” 的问卷：</p>
+					</div>
+				<%end%>
+
+				<% @surveys.value['data'].each do |survey| %>
+				<!--问题列表1 开始-->
+					<div class="question-box" id="<%= survey['_id'] %>">	
+						<div class='q-render gray'>
+							<div class="question-list">
+								<% if survey['status'] >= 0 %>
+									<input class="list-check" type="checkbox" />
+								<% end %>
+								<a href="javascript:void(0);">
+									<em class="icon icon-star <%= survey['is_star'] ? 'star-active' : ''%>"></em>
+								</a>
+								<span class='s-title'>
+									<%= link_to survey['title'], (survey['status'] < 0 ? 'javascript:void(0);' : questionaire_path(survey['_id'])), :class => "f14" %>
+									<!-- <b class="f12 g9 ml10">归属文件夹（标签）</b> -->
+								</span>
+
+								<span class="r mr20">
+									<span class="g9 mr10">
+										<%= survey_status(survey['status']) %>
+									</span>
+									<span class="g9 mr10" title="甄别数量">
+										<%= survey['screened_answer_number'] %>份
+									</span>
+									<span class="g9 mr10" title="完成数量">
+										<%= survey['finished_answer_number'] %>份
+									</span>
+									<span class="blue b"><%= survey['created_at'].split("T")[0] %></span>
+								</span>
+							</div>	
+						</div>
+
+						<% if survey['status'] < 0 || survey['status'] == 4 %>
+							<div class='q-render white'>
+								<div class="question-list-edit">
+									<a href="javascript:void(0);" class="<%= survey['_id'] %>">
+										<em class="icon icon-recover" title="还原"></em>
+									</a>
+									<a href="javascript:void(0);" class="<%= survey['_id'] %>">
+										<em class="icon icon-remove" title="彻底删除"></em>
+									</a>
+								</div>
+							</div>
+						<% else %>
+							<div class='q-render white'>
+								<div class="question-list-edit">
+									<a href="<%= questionaire_path(survey['_id']) %>">
+										<em class="icon icon-edit" title="编辑"></em>
+									</a>
+									<a href="<%= questionaire_customization_path(survey['_id']) %>">
+										<em class="icon icon-customization" title="美化"></em>
+									</a>
+									<a href="<%= questionaire_share_path(survey['_id']) %>">
+										<em class="icon icon-share" title="发布"></em>
+									</a>
+									<a href="<%= questionaire_result_path(survey['_id']) %>">
+										<em class="icon icon-filters" title="结果"></em>
+									</a>
+									<a href="javascript:void(0);">
+										<em class="icon icon-del" title="删除"></em>
+									</a>
+								</div>
+							</div>
+						<% end %>
+					</div>
+					<!--问题列表1 结束-->
+
+				<% end %>
+			<% end %>
+		</div>
+
+		<div class='seperator bottom white'></div>
+		
+	</div>

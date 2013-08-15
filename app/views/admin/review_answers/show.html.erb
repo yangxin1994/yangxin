@@ -1,0 +1,131 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/review_answers-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/review_answers-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+<% if @answers.success %>
+<div class="answers"> 
+	<div class="title">
+		<h5>答案管理<h5>
+		<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/review_answers">返回问卷列表</a><h5>
+	</div>
+		
+	<div class="stats">
+		<ul class="content-box-tabs">
+			<li><a class="count green <%if params[:scope].nil? || params[:scope]=='unreview'%>red<%end%>" href="/<%= is_admin ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>?scope=unreview">待审核</a></li> 
+			<li><a class="count green <%if params[:scope].to_s=='review_pass'%>red<%end%>"  href="/<%= is_admin ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>?scope=review_pass">审核通过</a></li> 
+			<li><a class="count green <%if params[:scope].to_s=='review_reject'%>red<%end%>" href="/<%= is_admin ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>?scope=review_reject">审核不通过</a></li> 
+			<li><a class="count green <%if params[:scope].to_s=='system_reject'%>red<%end%>" href="/<%= is_admin ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>?scope=system_reject">系统拒绝</a></li>
+		</ul>
+		<div class="fix"></div>
+	</div>
+			
+	<div class="table">
+		<div class="head">
+			<h5 class="iFrames">
+				列表
+			</h5>
+		</div>
+				
+		<table cellspacing="0" cellpadding="0" border="0" id="example" class="display">
+			<thead>
+				<tr>
+					<th class="" rowspan="1" colspan="1" style="width: 10px;">
+						<input class="check-all" type="checkbox" />
+					<th>回答人</th>
+					<% if params[:scope].to_s == 'review_pass'%>
+						<th>审核人</th>
+					<% elsif params[:scope].to_s == 'review_reject'%>
+						<th>审核人</th>
+						<th>拒绝原因</th>
+					<% elsif params[:scope].to_s == 'system_reject'%>
+						<th>拒绝原因</th>
+					<%end%>
+					<th rowspan="1" colspan="1" style="width: 60px;"></th>
+					<th rowspan="1" colspan="1" style="width: 60px;"></th>
+				</tr>
+			</thead>
+					 
+			<tbody>
+				<% @answers.value["data"].to_a.each do |answer|%>
+					<tr id="<%= answer['_id']%>">
+						<td><input type="checkbox" /></td>
+						<td>                           
+							<span class="user_id f-coral" value="<%= answer['user_id'] %>"></span> 于 
+							<%= answer["created_at"][0,16].gsub(/[T]/, ' ') %>
+						</td>
+						<% if params[:scope].to_s == 'review_pass'%>
+							<%if answer['auditor_id']%>
+								<td>
+									<span class="user_id f-orange"  value="<%= answer['auditor_id'] %>"></span> 于 
+									<%= (Time.at(answer["audit_at"].to_i).to_s)[0,16].gsub(/[T]/, ' ') %>
+								</td>
+							<%else%>
+								<td>系统自动通过</td>
+							<%end%>
+						<% elsif params[:scope].to_s == 'review_reject'%>
+							<%if answer['auditor_id']%>
+								<td>
+									<span class="user_id f-orange" value="<%= answer['auditor_id'] %>"></span> 于 
+									<%= (Time.at(answer["audit_at"].to_i).to_s)[0,16].gsub(/[T]/, ' ') %>
+								</td>
+								<td class="audit_message_short">
+									<%= (answer["audit_message"].strip)[0,10] %>...
+									<span class="audit_message_all dn"><%= answer["audit_message"] %></span>
+								</td>
+							<%else%>
+								<td></td>
+								<td></td>
+							<%end%>
+						<% elsif params[:scope].to_s == 'system_reject'%>
+							<%case answer["reject_type"].to_i %>
+							<%when 0 %>
+								<td>配额已满</td>	
+							<%when 1 %>
+								<td>未通过自动质控</td>
+							<%when 3 %>
+								<td>甄别题</td>
+							<%when 4 %>
+								<td>超时</td>
+							<%end%>
+						<%end%>
+						<td>
+							<!-- Icons -->
+							<a href="/<%= is_admin ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>/answers/<%= answer['_id']%>" class="show" title="查看答案">查看答案</a>
+						</td>
+						<td>
+							<!-- Icons -->
+							<a href="#" class="delete" title="删除">删除</a>
+						</td>
+					</tr>
+				<%- end %>
+			</tbody>	
+			<tfoot>
+				<tr>
+					<td colspan="6">
+						<div class="delete-selected-panel">
+							<input type="button" class="blueBtn delete-selected" value="批量删除"/>
+						</div>
+
+						<%= paginator_tag @answers.value %>
+					</td>
+				</tr>
+			</tfoot>			
+		</table>
+
+	</div>
+</div>
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @answers.value %></p>
+</div>
+<%end%>	
+
+<div id="message" class="dn">
+	<p>
+		<textarea class="text-input textarea" cols="60" rows="6"></textarea>
+	</p>
+</div>
