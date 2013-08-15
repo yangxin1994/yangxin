@@ -68,7 +68,8 @@ class Sample::AnswersController < ApplicationController
 				"answer_reject_type" => @answer.reject_type,
 				"answer_audit_message" => @answer.audit_message,
 				"order_id" => @answer.order.try(:_id),
-				"order_status" => @answer.order.try(:status)}
+				"order_status" => @answer.order.try(:status),
+				"order_code" => @answer.order.try(:code)}
 			render_json_auto(retval) and return
 		end
 	end
