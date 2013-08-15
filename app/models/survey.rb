@@ -1546,16 +1546,17 @@ class Survey
 	def csv_header(options = {})
 		if options[:with] == "import_id"
 			headers = ["import_id"]
+			excel_headers = ["import_id"]
 		else
+			excel_headers = []
 			headers = []
 		end
 		self.all_questions(false).each_with_index do |e, i|
 			headers += e.csv_header("q#{i+1}")
 		end
 		if options[:text] == true
-			excel_headers = []
 			self.all_questions(false).each_with_index do |e, i|
-				excel_headers += e.csv_header("q#{i+1}")
+				excel_headers += e.excel_header("q#{i+1}").map { |e| e.gsub(',', ' ') }
 			end
 			return headers.to_csv + excel_headers.to_csv
 		end
