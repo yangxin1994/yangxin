@@ -1,24 +1,44 @@
-# coding: utf-8
-require 'array'
-require 'error_enum'
-require 'quill_common'
-class Admin::AnswersController < Admin::ApplicationController
+class Admin::AnswersController < Admin::AdminController
 
-	before_filter :check_answer_existence
+  layout "layouts/admin-todc"
 
-	def check_answer_existence
-		@answer = Answer.find_by_id(params[:id])
-		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if @answer.nil?
-	end
+  before_filter :require_sign_in, :only => [:index, :create, :update, :destroy]
 
-	def show
-		respond_to do |format|
-			format.json	{ render_json_auto(@answer) and return }
-		end
-	end
+  before_filter :get_answer_client
 
-	def destroy
-		retval = @answer.delete
-		render_json_auto(retval) and return 
-	end
+  def get_answer_client
+    @answer_client = Admin::AnswerClient.new(session_info)
+  end
+
+  def index
+    result = @answer_client.index(params)
+    if result.success
+      @surveys = result.value
+    else
+      render :json => result
+    end
+  end
+
+  def show
+    result = @answer_client.show(params)
+    if result.success
+      @answers = result.value
+    else
+      render :json => result
+    end
+  end
+
+  def review
+    result = @answer_client.review(params)
+    if result.success
+      @questions = result.value
+    else
+      render :json => result
+    end  
+  end
+
+  def update
+    render :json => @answer_client.update(params) 
+  end
+
 end

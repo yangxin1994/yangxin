@@ -1,230 +1,223 @@
-class Admin::LotteriesController < Admin::ApplicationController
+#encoding: utf-8
 
-	def index
-		render_json { auto_paginate(Lottery.where(:is_deleted => false))}
-	end
+class Admin::LotteriesController < Admin::AdminController
 
-  def create
-    create_photo(:lottery)
-    prize_ids = get_prize_ids
-    @lottery = Lottery.new(params[:lottery])
-    add_prizes(prize_ids, @lottery)
-    render_json @lottery.save do
-      @lottery.photo.save if @lottery.photo
-      @lottery.as_retval
-    end
+  layout "layouts/admin_new"
+
+  before_filter :require_sign_in, :only => [:index, :create, :update, :destroy]
+
+  before_filter :get_lottery_client
+
+  def get_lottery_client
+    @lottery_client = Admin::LotteryClient.new(session_info)
   end
 
-  def update
-    render_json false do
-      Lottery.find_by_id(params[:id]) do |lottery|
-        update_photo(:lottery, lottery)
-        add_prizes(get_prize_ids, lottery)
-        if lottery.update_attributes(params[:lottery])
-          @is_success = true
+  def index
+    @lottery_scopes = {
+      "all" => "所有抽奖",
+      "quillme" => "QM显示的抽奖",
+      "for_publish" => "待发布的抽奖活动",
+      "activity" => "进行中的抽奖",
+      "finished" => "已结束的抽将"
+    }
+    @lottery_scope = params[:scope] || 'all'
+    #@lottery_client.uri_prefix = "/lotteries"
+    result = @lottery_client.index(page, per_page, @lottery_scope)
+    pc = Admin::PrizeClient.new(session_info).for_lottery
+    if result.success && pc.success
+      respond_to do |format|
+        format.html do
+          @lotteries = result.value
+          @prizes = pc.value
+          if params[:partial]
+            render :partial => 'lotteries'
+          end
         end
-        lottery.as_retval
+        format.json do
+          render :json => result
+        end
       end
-    end
 
-  end
-
-	# def create
- #    material = Material.create(:material_type => 1,
- #                               :title => params[:lottery][:title],
- #                               :value => params[:lottery][:photo],
- #                               :picture_url => params[:lottery][:photo])
- #    # logger.info "=========#{params[:lottery][:photo]}========="
- #    params[:lottery][:photo] = material
-
- #    lp_ids = params[:lottery][:prize_ids]
- #    params[:lottery][:prize_ids] = nil
-	# 	@lottery = Lottery.new(params[:lottery])
- #    lp_ids.each do |i|
- #      lp = Prize.where("_id"=> i).first
- #      @lottery.prizes << lp #unless lp.nil?
- #      lp.save
- #    end unless lp_ids.nil?
- #    @lottery.photo = material
- #    material.save
- #    render_json @lottery.save do
-	# 			#Material.create(:material => params[:material], :materials => @lottery)
-	#     @lottery.as_retval
-	# 	end
-	# 		# TODO add admin_id
-	# end
-
-  # def update
-  #   @lottery = Lottery.find_by_id params[:id]
-  #   unless params[:lottery][:photo].nil?
-  #     if @lottery.photo.nil?
-  #       material = Material.create(:material_type => 1,
-  #                                  :title => params[:lottery][:name],
-  #                                  :value => params[:lottery][:photo],
-  #                                  :picture_url => params[:lottery][:photo])
-
-  #       @lottery.photo = material
-  #     end
-  #     @lottery.photo.value = params[:lottery][:photo]
-  #     @lottery.photo.picture_url = params[:lottery][:photo]
-  #     params[:lottery][:photo] = material
-  #     @lottery.photo.save
-  #   end
-  #   # 增加奖品
-  #   lp_ids = params[:lottery][:prize_ids]
-  #   @lottery.prizes if lp_ids
-  #   params[:lottery][:prize_ids] = nil
-  #   #@lottery = Lottery.new(params[:lottery])
-  #   lp_ids.each do |i|
-  #     Prize.find_by_id(i) do |prize|
-  #       @lottery.prizes << prize
-  #     end
-
-  #     # lp = Prize.where("_id"=> i).first
-  #     # @lottery.prizes << lp #unless lp.nil?
-  #     # lp.save
-  #   end unless lp_ids.nil?
-  #   # @lottery = Lottery.find_by_id params[:id]
-  #   render_json @lottery.update_attributes(params[:lottery]) do
-  #     @lottery.as_retval
-  #   end
-  # end
-
-  def_each :for_publish, :activity, :finished, :quillme do |method_name|
-    @lottery = auto_paginate(Lottery.send(method_name))
-    render_json { @lottery }
-  end
-
-  def deleted
-    render_json do
-      auto_paginate(Lottery.deleted)
-    end
-  end
-
-  def revive
-    render_json false do
-      Lottery.find_by_id params[:id] do |lottery|
-        success_true if lottery.revive
-      end
+    else
+      render :json => result.success ? pc : result
     end
   end
 
   def show
-    render_json false do
-      Lottery.find_by_id(params[:id]) do |l|
-        success_true
-        l.present_admin
-      end
-    end
-  end
-
-  def auto_draw
-    render_json false do
-      Lottery.find_by_id(params[:id]) do |l|
-
-        @is_success = true
-        l.auto_draw
-      end
-    end
-  end
-
-  def assign_prize
-    render_json false do
-      Lottery.find_by_id(params[:id]) do |lottery|
-        lottery.prizes.find_by_id(params[:prize_id]) do |prize|
-          user = User.find_by_id(params[:user_id])
-          unless user.nil?
-            @is_success = true
-            lottery.assign_prize(user, prize)
-          end
+    respond_to do |format|
+      format.html do
+        # @lottery = @lottery_client.show(params[:id])
+        @lottery = @lottery_client.ctrl(params[:id], true)
+        # @users = BaseClient.new(session_info, "/admin/users")._get(
+        #   :page => params[:page],
+        #   :per_page => params[:per_page] || 10)
+        if @lottery.success #&& @users.success
+          #@users = @users.value
+          @lottery = @lottery.value
+          @prizes = @lottery["prizes"]
+        else
+          render :json => @lottery
         end
       end
+      format.json do
+        render :json => @lottery_client.show(params[:id])
+      end
     end
   end
 
-  def prize_records
-    render_json false do
-      Lottery.find_by_id(params[:id]) do |lottery|
-        success_true
-        auto_paginate lottery.lottery_codes.drawed_w_n do |lottery_codes|
-          lottery_codes.map do |lottery_code|
-            lottery_code.present_admin
-          end
-        end
+  def new
+    @lottery = {}
+  end
+
+  def edit
+
+    @lottery = @lottery_client.show(params[:id])
+    # binding.pry
+    if @lottery.success
+      @lottery = @lottery.value
+      @prizes = @lottery["prizes"]
+    else
+      render :json => @lottery
+    end
+  end
+
+  def reward_records
+    @lottery = @lottery_client.show(params[:id])
+    @lottery_codes = @lottery_client.prize_records(params[:id], page)
+    if @lottery_codes.success
+      @lottery_codes = @lottery_codes.value
+      @lottery = @lottery.value
+      if params[:partial]
+        render :partial => "lottery_codes"
       end
     end
   end
 
   def lottery_codes
-    render_json false do
-      Lottery.find_by_id(params[:id]) do |lottery|
-        success_true
-        auto_paginate lottery.lottery_codes.all do |lottery_codes|
-          lottery_codes.map do |lottery_code|
-            lottery_code.present_admin
-          end
-        end
+    @lottery = @lottery_client.show(params[:id])
+    @lottery_codes = @lottery_client.lottery_codes(params[:id], page)
+    if @lottery_codes.success
+      @lottery_codes = @lottery_codes.value
+      @lottery = @lottery.value
+      if params[:partial]
+        render :partial => "lottery_codes"
       end
     end
   end
 
-  def ctrl
-    render_json false do
-      Lottery.find_by_id(params[:id]) do |lottery|
-        success_true
-        # lottery[:prizes] = lottery.prizes.all_d
-        # lottery[:photo_src] = lottery.photo.picture_url unless lottery.photo.nil?
-        # ch = []
+  def create
+    #render :json => @lottery_client.send_data
+    photo = ImageUploader.new
+    photo.store!(params[:lottery][:photo])
+    params[:lottery][:photo] = photo.url
+    params[:lottery][:exchangeable] = !!params[:lottery][:exchangeable]
+    @lottery = @lottery_client.create(params[:lottery])
+    # render :json => @lottery
+    if @lottery.success
+      flash.keep[:success] = "活动被成功创建了~"
+      redirect_to admin_lotteries_path + "/#{@lottery.value["_id"]}"
+    else
+      flash.now[:failure] = "是不是哪里填错了?再检查一遍吧"
+      @lottery = {}
+      render :new
+    end
+  end
 
-        # # 优化!!!
-        # lottery.prizes.all_d.each do |prize|
-        #   if params[:only_active].to_s == "true"
-        #     ch += prize.active_ctrl_history
-        #   else
-        #     ch += prize.ctrl_history
-        #   end
-        # end
-        # lottery[:ctrl_history] = ch
-        lottery.present_ctrl(params[:only_active])
+  def update
+    unless params[:lottery][:photo].nil?
+      photo = ImageUploader.new
+      photo.store!(params[:lottery][:photo])
+      params[:lottery][:photo] = photo.url
+    end
+    params[:lottery][:exchangeable] = !!params[:lottery][:exchangeable]
+    @lottery = @lottery_client.update(params[:id], params[:lottery])
+    if @lottery.success
+      flash.keep[:success] = "活动被成功修改了~"
+      redirect_to admin_lotteries_path + "/#{@lottery.value["_id"]}"
+    else
+      flash.keep[:success] = "是不是哪里填错了?再检查一遍吧"
+      redirect_to admin_lotteries_path + "/#{params[:id]}/edit"
+    end
+  end
+
+  def deleted
+    @lotteries = @lottery_client.index(page, per_page, 'deleted')
+    if @lotteries.success
+      @lotteries = @lotteries.value
+      if params[:partial]
+        render :partial => 'deleted_lotteries'
       end
+    end
+  end
+
+  def status
+    params[:lottery] = {}
+    params[:lottery][:status] = params[:status]
+    render json: @lottery_client.update(params[:id], params[:lottery])
+  end
+
+  def list_user
+    @users = BaseClient.new(session_info, "/admin/users")._get(
+      :page => params[:page],
+      :per_page => params[:per_page] || 10)
+    @lottery = @lottery_client.show(params[:id])
+    if @users.success && @lottery.success
+      @users = @users.value
+      @prizes = @lottery.value['prizes']
+    end
+    render :partial => "list_user"
+  end
+
+  def ctrl
+    @lottery = @lottery_client.ctrl(params[:id], params[:only_active])
+    if @lottery.success
+      @lottery = @lottery.value
+    else
+      render :json => @lottery
     end
   end
 
   def add_ctrl_rule
-    render_json false do
-      Prize.find_by_id(params[:id]) do |prize|
-        if prize.add_ctrl_rule(params[:ctrl_surplus], params[:ctrl_time], params[:weight])
-          success_true
-        else
-          ErrorEnum::PRIZE_CTRL_PARAMS_ERROR
-        end
+    render :json => @lottery_client.add_ctrl_rule(params[:ctrl_prize],
+     params[:ctrl_surplus],
+     params[:ctrl_time],
+     params[:weight])
+  end
+
+  def assign_prize
+    @users = BaseClient.new(session_info, "/admin/users")._get(
+      :page => params[:page],
+      :per_page => params[:per_page] || 10,
+      :email => params[:email],
+      :full_name => params[:full_name],
+      :username => params[:username])
+    @lottery = @lottery_client.show(params[:id])
+    if @users.success && @lottery.success
+      @users = @users.value
+      @prizes = @lottery.value['prizes']
+      @lottery = @lottery.value
+      if params["partial"]
+        render 'user_list'
       end
+    else
+      render :json => @lottery
     end
+  end
+
+  def revive
+    render :json => @lottery_client.revive(params[:id])
+  end
+
+  def assign_prize_to
+    render :json => @lottery_client.assign_prize(params[:id], params[:user_id], params[:prize_id])
   end
 
   def destroy
-    render_json do
-      Lottery.find_by_id(params[:id]) do |e|
-        e.update_attribute("is_deleted", true)
-      end
-    end
-  end
-  # private
-  def get_prize_ids
-    params[:lottery][:prize_ids] = params[:lottery][:prize_ids].split(',') unless params[:lottery][:prize_ids].nil?
+    render :json => @lottery_client.destroy(params[:id])
   end
 
-  def add_prizes(prize_ids, lottery)
-    return unless prize_ids
-    prize_ids.each do |id|
-      Prize.find_by_id(id) do |prize|
-        params[:lottery].delete(:prize_ids)
-        prize.lottery = lottery #unless prize.lottery
-        lottery.save
-        prize.save
-
-      end
-    end
+  def auto_draw
+    render :json => @lottery_client.auto_draw(params[:id])
   end
 
 end

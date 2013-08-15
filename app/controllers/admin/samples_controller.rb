@@ -1,107 +1,173 @@
-class Admin::SamplesController < Admin::ApplicationController
-	before_filter :check_sample_existence, :only => [:point_log, :redeem_log, :lottery_log, :answer_log, :spread_log, :show, :block, :set_sample_role, :operate_point]
+require 'string/utf8'
+class Admin::SamplesController < Admin::AdminController
 
-	def check_sample_existence
-		@sample = User.sample.find_by_id(params[:id])
-		if @sample.nil?
-			render_json_e(ErrorEnum::SAMPLE_NOT_EXIST) and return
-		end
-	end
+  layout "layouts/admin-todc"
 
-	def index
-		@samples = User.search_sample(params[:email], params[:mobile], params[:is_block].to_s == "true")
-		render_json_auto(auto_paginate(@samples)) and return
-	end
+  before_filter :require_sign_in
 
-	def count
-		@samples_count = User.count_sample(params[:period].to_s, params[:time_length].to_i)
-		render_json_auto(@samples_count) and return
-	end
+  before_filter :get_samples_client
 
-	def active_count
-		@active_samples_count = User.count_active_sample(params[:period], params[:time_length].to_i)
-		render_json_auto(@active_samples_count) and return
-	end
+  def get_samples_client
+    @samples_client = Admin::SampleClient.new(session_info)
+  end
 
-	def show
-		render_json_auto(@sample.sample_attributes) and return
-	end
+  def index
+    result = @samples_client.index(params)
+    if result.success
+      @samples = result.value
+    else
+      render :json => result
+    end
+  end
 
-	def send_message
-		render_json_auto(@current_user.create_message(params[:title], params[:content], params[:sample_ids])) and return
-	end
+  def edit
+    result = @samples_client.edit(params[:id])
+    if result.success
+      @sample = result.value
+    else
+      render :json => result
+    end
+  end
 
-	def block
-		render_json_auto(@sample.block(params[:block])) and return
-	end
+  def show
+    @sample = @samples_client.show(params[:id])
+    gon.push({:sample => @sample})
+  end
+  # ##########################
+  #
+  # index当页操作相关
+  #
+  # ##########################
 
-	def point_log
-		@paginated_point_logs = auto_paginate(@sample.logs.point_logs) do |paginated_point_logs|
-			paginated_point_logs.map { |e| e.info_for_admin }
-		end
-		render_json_auto(@paginated_point_logs) and return
-	end
+  def operate_point
+    render :json => @samples_client.operate_point(params)
+  end
 
-	def redeem_log
-		@paginated_redeem_logs = auto_paginate(@sample.logs.redeem_logs) do |paginated_redeem_logs|
-			paginated_redeem_logs.map { |e| e.info_for_admin }
-		end
-		render_json_auto(@paginated_redeem_logs) and return
-	end
+  def set_sample_role
+    render :json => @samples_client.set_sample_role(params)
+  end
 
-	def lottery_log
-		@paginated_lottery_logs = auto_paginate(@sample.logs.lottery_logs) do |paginated_lottery_logs|
-			paginated_lottery_logs .map { |e| e.info_for_admin }
-		end
-		render_json_auto(@paginated_lottery_logs) and return
-	end
+  # ##########################
+  #
+  # 样本日志相关
+  #
+  # ##########################
+  def redeem_log
+    result = @samples_client.redeem_log(params)
+    if result.success
+      @redeem_log = result.value
+    else
+      render :json => result
+    end
+  end
 
-	def answer_log
-		@paginated_answer_logs = auto_paginate(@sample.answers.not_preview.desc(:created_at)) do |paginated_answer_logs|
-			paginated_answer_logs.map do |e|
-				selected_reward = (e.rewards.select { |e| e["checked"] == true }).first
-				reward_type = selected_reward.nil? ? 0 : selected_reward["type"]
-				reward_amount = selected_reward.nil? ? 0 : selected_reward["amount"]
-				{
-					"_id" => e._id.to_s,
-					"title" => e.survey.title,
-					"created_at" => e.created_at,
-					"finished_at" => e.finished_at.present? ? e.finished_at.to_i : nil,
-					"status" => e.status,
-					"reject_type" => e.reject_type,
-					"reward_type" => reward_type,
-					"reward_amount" => reward_amount
-				}
-			end
-		end
-		render_json_auto(@paginated_answer_logs) and return
-	end
+  def point_log
+    result = @samples_client.point_log(params)
+    if result.success
+      @point_log = result.value
+    else
+      render :json => result
+    end
+  end
 
-	def spread_log
-		@paginated_spread_logs = auto_paginate(Answer.where(:introducer_id => @sample._id.to_s)) do |paginated_spread_logs|
-			paginated_spread_logs.map do |e|
-				{
-					"_id" => e._id.to_s,
-					"title" => e.survey.title,
-					"created_at" => e.created_at,
-					"finished_at" => e.finished_at.present? ? Time.at(e.finished_at.to_i) : nil,
-					"email" => e.user.try(:email),
-					"mobile" => e.user.try(:mobile),
-					"status" => e.status,
-					"reject_type" => e.reject_type
-				}
-			end
-		end
-		render_json_auto(@paginated_spread_logs) and return
-	end
+  def lottery_log
+    result = @samples_client.lottery_log(params)
+    if result.success
+      @lottery_log = result.value
+    else
+      render :json => result
+    end
+  end
 
-	def set_sample_role
-		retval = @sample.set_sample_role(params[:role])
-		render_json_auto(retval) and return
-	end
+  def answer_log
+    result = @samples_client.answer_log(params)
+    if result.success
+      @answer_log = result.value
+    else
+      render :json => result
+    end
+  end
 
-	def operate_point
-		retval = @sample.operate_point(params[:amount], params[:remark])
-		render_json_auto retval and return
-	end
+  def spread_log
+    result = @samples_client.spread_log(params)
+    if result.success
+      @spread_log = result.value
+    else
+      render :json => result
+    end
+  end
+  # ##########################
+  #
+  # 样本属性相关
+  #
+  # ##########################
+  def attributes
+    sample_attr_client = Admin::SampleAttributeClient.new(session_info)
+    result = sample_attr_client.index(params)
+    if result.success
+      @attributes = result.value
+    else
+      render :json => @attributes
+    end
+  end
+
+  def add_attributes
+    sample_attr_client = Admin::SampleAttributeClient.new(session_info)
+    params[:attribute][:type] = params[:attribute][:type].to_i
+    if params[:attribute][:id].present?
+      sample_attr_client.update_attribute(params[:attribute])
+      redirect_to "/admin/samples/#{params[:attribute][:id]}/edit_attributes"
+    else
+      sample_attr_client.create_attribute(params[:attribute])
+      redirect_to "/admin/samples/attributes"
+    end
+  end
+
+  def new_attributes
+    @attribute = {}
+  end
+
+  def edit_attributes
+    sample_attr_client = Admin::SampleAttributeClient.new(session_info)
+    result = sample_attr_client.show(params[:id])
+    @attribute = result
+  end
+
+  def destroy_attributes
+    sample_attr_client = Admin::SampleAttributeClient.new(session_info)
+    render :json => sample_attr_client.delete_attribute(params[:id])
+  end
+  # ##########################
+  #
+  # 样本数据统计
+  #
+  # ##########################
+  def status
+    _client = Admin::SampleClient.new(session_info)
+    @sample_count = _client.get_sample_count.value
+    data = _client.get_sample_count('day', 2).value['new_sample_number']
+    @new_user_by_day = data[1] - data[0]
+    data = _client.get_sample_count('week', 2).value['new_sample_number']
+    @new_user_by_week = data[1] - data[0]
+    data = _client.get_active_sample_count('day', 1).value
+    @active_user_by_day = data[0]
+    data = _client.get_active_sample_count('week', 1).value
+    @active_user_by_week = data[0]
+  end
+
+  def get_sample_count
+    _client = Admin::SampleClient.new(session_info)
+    render json: _client.get_sample_count(params[:period], params[:time_length]).value
+  end
+
+  def get_active_sample_count
+    _client = Admin::SampleClient.new(session_info)
+    render json: _client.get_active_sample_count(params[:period], params[:time_length]).value
+  end
+
+  def send_message
+    result = @samples_client.send_message(params)
+    render :json => result
+  end
+
 end

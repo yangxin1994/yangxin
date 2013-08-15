@@ -1,31 +1,38 @@
-require 'error_enum'
+class Admin::RewardSchemesController < Admin::AdminController
 
-class Admin::RewardSchemesController < Admin::ApplicationController
-	before_filter :check_survey_existence
+  before_filter :get_client
 
-	def check_survey_existence
-		@survey = Survey.find_by_id(params[:survey_id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-	end
+  layout "layouts/admin-todc"
 
-	def index
-		reward_schemes = @survey.reward_schemes.not_default
-		render_json_auto( auto_paginate(reward_schemes) )  and return
-	end
+  def get_client
+    @client = Admin::RewardSchemeClient.new(session_info)
+  end
 
-	def show
-		reward_scheme = RewardScheme.find_by_id(params[:id])
-		retval = (reward_scheme.nil? ? ErrorEnum::REWARD_SCHEME_NOT_EXIST : reward_scheme)
-		render_json_auto(retval)
-	end
+  # *****************************
 
-	def create
-		retval = RewardScheme.create_reward_scheme(@survey, params[:reward_scheme_setting])
-		render_json_auto(retval) and return
-	end
+  def create
+    result = @client.create(params[:reward_scheme])
+    if result.success
+      @reward_scheme = result
+      redirect_to "#{reward_schemes_admin_path(:id => params[:reward_scheme][:survey_id])}"
+    else
+      render result
+    end
+  end
 
-	def update
-		retval = RewardScheme.update_reward_scheme(params[:id], params[:reward_scheme_setting])
-		render_json_auto(retval) and return
-	end
+  def update
+    result = @client.update(params[:reward_scheme])
+    if result.success
+      @reward_scheme = result
+      redirect_to "#{reward_schemes_admin_path(:id => params[:reward_scheme][:survey_id])}?editing=#{params[:id]}"
+    else
+      render result
+    end
+  end
+
+  def destroy
+    result = @client.destroy(params)
+    render :json => {:success => result.success}
+  end
+
 end

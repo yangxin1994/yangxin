@@ -1,36 +1,90 @@
-class Admin::SampleAttributesController < Admin::ApplicationController
-	before_filter :check_sample_attribute_existence, :only => [:show, :update, :destroy, :bind_question]
+class Admin::SampleAttributesController< Admin::AdminController
+  include SampleAttributesHelper
+  layout "layouts/admin_new"
 
-	def check_sample_attribute_existence
-		@sample_attribute = SampleAttribute.normal.find_by_id(params[:id])
-		if @sample_attribute.nil?
-			render_json_e(ErrorEnum::SAMPLE_ATTRIBUTE_NOT_EXIST) and return
-		end
-	end
+	before_filter :require_sign_in
+	before_filter :require_admin
+  before_filter :get_client
+  before_filter :params_convert, only: [:create, :update]
 
-	def index
-		@sample_attributes = SampleAttribute.search(params[:name])
-		render_json_auto (auto_paginate(@sample_attributes)) and return
-	end
+  def index
+    params[:page] ||= 1
+    resp = @client.get_attributes(params)
+    @attributes = resp.value["data"]
+    @paginate = resp.value
+  end
 
-	def show
-		render_json_auto @sample_attribute and return
-	end
+  def create
+    @client.create_attribute(params[:attribute])
+    redirect_to :back
+  end
 
-	def create
-		@sample_attribute = SampleAttribute.create_sample_attribute(params[:sample_attribute])
-		render_json_auto (@sample_attribute) and return
-	end
+  def update
+    @client.update_attribute(params[:id], params[:attribute])
+    redirect_to :back
+  end
 
-	def update
-		render_json_auto (@sample_attribute.update_sample_attribute(params[:sample_attribute])) and return
-	end
+  def destroy
+    @client.delete_attribute(params[:id])
+    redirect_to :back
+  end
 
-	def destroy
-		render_json_auto (@sample_attribute.delete) and return
-	end
+  def bind_question
+    if request.get?
+      @question_client = Admin::QuestionClient.new(session_info)
+      @question = @question_client.get_question(params[:id]).value
+      @attrs = @client.get_all_attributes(params).value["data"]
 
-	def bind_question
-		render_json_auto (@sample_attribute.bind_question(params[:question_id], params[:relation])) and return
-	end
+      case @question['question_type']
+      when 0 # choice
+        if @question['issue']['max_choice'] == 1
+          @attrs = @attrs.select {|attr| attr['type'] != 7} # except array
+        else
+          @attrs = @attrs.select {|attr| attr['type'] == 7} # only array
+        end
+      when 2 # text_blank
+        @attrs = @attrs.select {|attr| attr['type'] == 0}
+      when 3 # number_blank
+        @attrs = @attrs.select {|attr| [2, 4].include? attr['type']}
+      when 7 # time_blank
+        @attrs = @attrs.select {|attr| [3, 5].include? attr['type']}
+      when 8 # addr
+        @attrs = @attrs.select {|attr| attr['type'] == 6}
+      end
+      @addr_precision = 0
+      if @question['sample_attribute_id']
+        @attr = @attrs.select {|attr| attr['_id'] == @question['sample_attribute_id']}[0]
+        if @attr['type'] == 6
+          @question['sample_attribute_relation'].each do |key, value|
+            addr = QuillCommon::AddressUtility.find_province_city_town_by_code(value)
+            next if addr.blank?
+            @addr_precision = addr.split(/\s+\-\s+/).length - 1
+            break
+          end
+        end
+      end
+    elsif request.put?
+      params[:relation] = JSON.parse params[:relation]
+      @client.bind_attribute(params[:id], params[:attribute_id], params[:relation])
+      render json: {}
+    elsif request.delete?
+      @question_client = Admin::QuestionClient.new(session_info)
+      @question_client.remove_attribute_bind(params[:id])
+      redirect_to :back
+    end
+  end
+
+  private
+  def get_client
+    @client = Admin::SampleAttributeClient.new(session_info)
+  end
+
+  def params_convert
+    params[:attribute][:type] = params[:attribute][:type].to_i
+    params[:attribute][:element_type] = params[:attribute][:element_type].to_i if params[:attribute][:element_type]
+    params[:attribute][:date_type] = params[:attribute][:date_type].to_i if params[:attribute][:date_type]
+    if params[:attribute][:analyze_requirement] && params[:attribute][:analyze_requirement][:segmentation]
+      params[:attribute][:analyze_requirement][:segmentation].map! { |val| val.to_i }
+    end
+  end
 end

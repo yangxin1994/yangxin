@@ -1,30 +1,36 @@
-# encoding: utf-8
-class Sample::GiftsController < ApplicationController
+class Sample::GiftsController < Sample::SampleController
 
-  #############################
-  #功能:获取热门兑换礼品列表
-  #http method：get
-  #传入参数: page(页数)，如果不需要分页的话，这个参数可以不传
-  #可能返回的参数:一个盛放礼品的列表
-  #############################		
-  def hotest
-    sort_type = params[:sort_type].present? ? params[:sort_type]  : 'exchange_count' 
-    @gifts = Gift.find_real_gift(sort_type)
-    @gifts = auto_paginate @gifts
-    render_json_auto(@gifts)
-  end
 
-  #############################
-  #功能:获取热门兑换礼品
-  #http method：get
-  #传入参数: 礼品的id
-  #可能返回的参数:一个具体的礼品对象
-  #############################		
-  def show
-    @gift = Gift.find_by_id(params[:id])
-    @gift[:photo_src] = @gift.photo.nil? ? Gift::DEFAULT_IMG : @gift.photo.picture_url 
-    render_json { @gift }
-  end
+	def index
+	  gc              = Sample::GiftClient.new(session_info)
+	  lc              = Sample::LogClient.new(session_info)
+	  @sort_type       =  params[:sort_type].present? ? params[:sort_type] : "exchange_count"
+	  @hotest_gifts   = gc.get_hoest(params[:page],params[:per_page],@sort_type)  
+	  @hotest_gifts   = @hotest_gifts.success ? @hotest_gifts.value : nil 
+	  @gift_rank      = gc.get_hoest(1,5,'exchange_count')
+	  @gift_rank      = @gift_rank.success ? @gift_rank.value : nil
+	  
+	  @new_ex_history = lc.get_newest_exchange_history 
+	  @new_ex_history = @new_ex_history.success ? @new_ex_history.value : nil
+	end
 
-  	
+	def get_special_type_data
+		gc              = Sample::GiftClient.new(session_info)
+		@sort_type       =  params[:status].present? ? params[:status] : "exchange_count"
+		@hotest_gifts   = gc.get_hoest(params[:page],params[:per_page],@sort_type)  
+	  @hotest_gifts   = @hotest_gifts.success ? @hotest_gifts.value : nil  
+	end
+
+	def show
+	  user_client = Account::UserClient.new(session_info)
+
+	  @gift_rank      = Sample::GiftClient.new(session_info).get_hoest(1,5,'exchange_count')
+	  @gift_rank      = @gift_rank.success ? @gift_rank.value : nil
+
+	  @recerver_info =  Sample::UserClient.new(session_info).get_logistic_address
+	  @recerver_info =  @recerver_info.success ? @recerver_info.value : nil
+	  @gift = Sample::GiftClient.new(session_info).show(params[:id])
+	  @gift.success ? @gift = @gift.value : @gift = nil
+	end
+
 end
