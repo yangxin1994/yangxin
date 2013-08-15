@@ -406,9 +406,9 @@ end
 class TextBlankQuestionIo < QuestionIo
   def answer_import(row, header_prefix)
     blank? row["#{header_prefix}"]
-    if issue["max_length"] > 0 && row["#{header_prefix}"].length > issue["max_length"]
+    if issue["max_length"] > 0 && row["#{header_prefix}"].to_s.length > issue["max_length"]
       raise "您输入的文本有些太长了哦,重新检查一下吧!"
-    elsif issue["min_length"] > 0 && row["#{header_prefix}"].length < issue["min_length"]
+    elsif issue["min_length"] > 0 && row["#{header_prefix}"].to_s.length < issue["min_length"]
       raise "您输入的文本长度未免太短了些,重新检查一下吧!"
     else
       @retval = row["#{header_prefix}"]
@@ -1085,7 +1085,7 @@ class ScaleQuestionIo < QuestionIo
     @retval = {}
     issue["items"].each_with_index do |item, index|
       blank? row["#{header_prefix}_c#{index + 1}"]
-      if only_num?(row["#{header_prefix}_c#{index + 1}"], range: 1..issue["labels"].length)
+      if only_num?(row["#{header_prefix}_c#{index + 1}"], range: 1..(issue["labels"].try('length') || 1))
         @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : (row["#{header_prefix}_c#{index + 1}"].to_i) - 1)
       else
         raise "您输入的范围好像不太对吧?"
