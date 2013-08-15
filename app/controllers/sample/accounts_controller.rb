@@ -113,11 +113,11 @@ class Sample::AccountsController < ApplicationController
 	end
 
 	def send_change_email
-		render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST if !User.find_by_email(params[:email]).nil?
+		render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST and return if !User.find_by_email(params[:email]).nil?
 		@current_user.email_to_be_changed = params[:email]
 		@current_user.change_email_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
 		@current_user.save
-		EmailWorker.perform_async("change_email", params[:email], params[:callback])
+		EmailWorker.perform_async("change_email", params[:email], params[:callback], :user_id => @current_user._id.to_s)
 		render_json_s and return
 	end
 

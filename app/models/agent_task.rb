@@ -33,6 +33,10 @@ class AgentTask
 		return self.normal.where(:_id => agent_task_id).first
 	end
 
+	def find_answer_by_id(answer_id)
+		return self.answers.where(:_id => answer_id).first
+	end
+
 	def self.create_agent_task(agent_task, survey_id, agent_id)
 		survey = Survey.find_by_id(survey_id)
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
@@ -71,6 +75,7 @@ class AgentTask
 		self["survey_title"] = self.survey.title
 		self["agent_email"] = self.agent.email
 		self["agent_name"] = self.agent.name
+		self["reward_scheme_id"] = self.reward_scheme.try(:_id).to_s
 		return self
 	end
 

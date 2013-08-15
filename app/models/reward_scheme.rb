@@ -31,7 +31,7 @@ class RewardScheme
 		return retval if !(retval.to_s == "true")
 		new_reward_scheme = RewardScheme.create(reward_scheme)
 		survey.reward_schemes << new_reward_scheme
-		return true
+		return new_reward_scheme
 	end
 
 	def self.update_reward_scheme(reward_scheme_id, reward_scheme)

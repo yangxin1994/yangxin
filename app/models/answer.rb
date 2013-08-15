@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'error_enum'
+require 'data_type'
 require 'securerandom'
 require 'tool'
 require 'quill_common'
@@ -167,7 +168,7 @@ class Answer
 		end
 		# record the agent task information
 		if !is_preview && agent_task_id.present?
-			agent_task = AgentTask.find_by_id(params[:agent_task_id])
+			agent_task = AgentTask.find_by_id(agent_task_id)
 			agent_task.answers << answer if agent_task.present?
 		end
 		# record the reward information
@@ -815,6 +816,53 @@ class Answer
 		return question_ids_with_qc_questions.index(question_id)
 	end
 
+	def update_sample_attribute
+		return if self.status != FINISH
+		return if self.user.nil?
+		self.answer_content.each do |qid, q_answer|
+			next if q_answer.blank?
+			question = Question.find_by_id(qid)
+			next if question.nil? || question.sample_attribute_relation.blank? || question.sample_attribute.blank?
+			sa = question.sample_attribute
+			attr_value = nil
+			if sa.type == DataType::STRING
+				case question.question_type
+				when QuestionTypeEnum::TEXT_BLANK_QUESTION
+					attr_value = q_answer
+				end
+				next if attr_value.nil?
+				self.user.write_sample_attribute(sa.name, attr_value) if self.user.need_update_attribute(sa.name, attr_value)
+			elsif [DataType::DATE_RANGE, DataType::NUMBER_RANGE].include?(sa.type)
+				case question.question_type
+				when QuestionTypeEnum::CHOICE_QUESTION
+					attr_value = question.sample_attribute_relation[q_answer["selection"][0].to_s]
+				end
+				next if attr_value.nil?
+				self.user.write_sample_attribute(sa.name, attr_value) if self.user.need_update_attribute(sa.name, attr_value)
+			elsif [DataType::DATE, DataType::NUMBER].include?(sa.type)
+				case question.question_type
+				when QuestionTypeEnum::NUMBER_BLANK_QUESTION
+					attr_value = question.sample_attribute_relation[q_answer]
+				when QuestionTypeEnum::TIME_BLANK_QUESTION
+					attr_value = question.sample_attribute_relation[q_answer]
+				when QuestionTypeEnum::CHOICE_QUESTION
+					attr_value = question.sample_attribute_relation[q_answer["selection"][0].to_s]
+				end
+				next if attr_value.nil?
+				self.user.write_sample_attribute(sa.name, attr_value) if self.user.need_update_attribute(sa.name, attr_value)
+			elsif sa.type == DataType::ENUM
+				case question.question_type
+				when QuestionTypeEnum::CHOICE_QUESTION
+					attr_value = question.sample_attribute_relation[q_answer["selection"][0].to_s]
+				end
+				next if attr_value.nil?
+				self.user.write_sample_attribute(sa.name, attr_value) if self.user.need_update_attribute(sa.name, attr_value)
+			elsif sa.type == DataType::ADDRESS
+			elsif sa.type == DataType::ARRAY
+			end
+		end
+	end
+
 	def finish(auto = false)
 		# synchronize the normal questions in the survey and the qeustions in the answer content
 		survey_question_ids = self.survey.all_questions_id
@@ -842,6 +890,7 @@ class Answer
 		self.update_quota(old_status) if !self.is_preview
 		self.finished_at = Time.now.to_i
 		self.deliver_reward
+		self.update_sample_attribute
 		return self.save
 	end
 
@@ -904,14 +953,15 @@ class Answer
 		# execute the review operation
 		if review_result
 			self.set_finish
-			message_content ||= "你的此问卷[#{self.survey.title}]的答案通过审核."
+			message_content = "你的此问卷[#{self.survey.title}]的答案通过审核." if message_content.blank?
+			self.update_sample_attribute
 		else
 			self.set_reject
 			self.reject_type = REJECT_BY_REVIEW
-			message_content ||= "你的此问卷[#{self.survey.title}]的答案未通过审核."
-			PunishLog.create_punish_log(user.id)
+			message_content = "你的此问卷[#{self.survey.title}]的答案未通过审核." if message_content.blank?
+			PunishLog.create_punish_log(user.id) if user.present?
 		end
-		answer_auditor.create_message("审核问卷答案消息", message_content, [user._id.to_s]) if !user.nil?
+		answer_auditor.create_message("审核问卷答案消息", message_content, [user._id.to_s]) if user.present?
 		self.audit_message = message_content
 		self.auditor = answer_auditor
 		self.audit_at = Time.now.to_i
@@ -1105,8 +1155,13 @@ class Answer
 
 	def bind_sample(sample)
 		answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id.to_s, sample._id.to_s, false)
-		return ErrorEnum::ANSWER_EXIST if !answer.nil?
+		return ErrorEnum::ANSWER_EXIST if answer.present?
 		sample.answers << self
+		PunishLog.create_punish_log(sample.id) if self.status == REJECT
+		if self.auditor.present?
+			self.auditor.create_message("审核问卷答案消息", self.audit_message, [sample._id.to_s])
+		end
+
 		# handle rewards
 		reward = nil
 		self.rewards.each do |r|
@@ -1124,10 +1179,8 @@ class Answer
 			sample.orders << self.order unless self.order.nil?
 		when RewardScheme::POINT
 			self.deliver_reward
-			# sample.point += reward["amount"]
-			# sample.save
-			# PointLog.create(:amount => reward["amount"], :reason => PointLog::ANSWER, :survey_id => self.survey._id.to_s, :survey_title => self.survey.title)
 		end
+		self.update_sample_attribute
 		return true
 	end
 
@@ -1185,6 +1238,12 @@ class Answer
 			order_info)
 		self.order = order
 		return true
+	end
+
+	def info_for_auditor
+		sample_name = self.user.try(:email) || self.user.try(:mobile) || "visitor"
+		self.write_attribute('sample_name', sample_name)
+		return self
 	end
 
 	def info_for_sample

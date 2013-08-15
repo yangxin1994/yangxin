@@ -26,7 +26,7 @@ class Message
 	has_and_belongs_to_many :receiver, class_name: "User", inverse_of: :messages
 
 	validates :title, :presence => true
-	validates :content, :presence => true
+	# validates :content, :presence => true
 
 	scope :unread, ->(t){where(:updated_at.gt => t)}
 	scope :readed, ->(t){where(:updated_at.lt => t)}

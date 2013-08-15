@@ -23,7 +23,12 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 		answers = answers.find_by_status(params[:status]) if !params[:status].blank?
 		answers = answers.delete_if { |a| !a.has_rewards} if !params[:has_reward].blank?
 
-		render_json_auto auto_paginate(answers) and return
+		@paginated_answers = auto_paginate(answers) do |paginated_answers|
+			paginated_answers.map { |e| e.info_for_auditor }
+		end
+		render_json_auto @paginated_answers and return
+
+		# render_json_auto auto_paginate(answers) and return
 	end
 
 	def show

@@ -3,7 +3,11 @@ class EmailWorker
 	sidekiq_options :retry => 10, :queue => "oopsdata_#{Rails.env}".to_sym
 
 	def perform(email_type, email, callback, opt={})
-		user = User.find_by_email(email)
+		if email_type != "change_email"
+			user = User.find_by_email(email)
+		else
+			user = User.find_by_id(opt["user_id"])
+		end
 		return false if user.nil?
 		case email_type
 		when 'welcome'
@@ -19,7 +23,7 @@ class EmailWorker
 		when 'rss_subscribe'
 			MailgunApi.rss_subscribe_email(user, callback)    	
 		when 'change_email'
-			MailgunApi.activate_email(user, callback)
+			MailgunApi.change_email(user, callback)
 		when 'find_password'
 			MailgunApi.find_password_email(user, callback)
 		end

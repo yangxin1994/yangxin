@@ -39,7 +39,8 @@ class MigrateDb
 			RewardScheme.create_reward_scheme(s, reward_scheme_setting)
 			default_reward_scheme_setting = { "name" => "default scheme",
 				"rewards" => [],
-				"need_review" => false }
+				"need_review" => false,
+				"default" => true }
 			RewardScheme.create_reward_scheme(s, default_reward_scheme_setting)
 			reward_scheme = s.reward_schemes.not_default[0]
 			s.quillme_promote_info = { "reward_scheme_id" => reward_scheme._id.to_s }
@@ -62,7 +63,7 @@ class MigrateDb
 			# the browser promote related
 			s.broswer_extension_promotable = false
 			s.broswer_extension_promote_info = { "login_sample_promote_only" => false,
-				"filters" => [[{"key_words" => [""], "url" => ""}]],
+				"filters" => [{"key_words" => [""], "url" => ""}],
 				"reward_scheme_id" => "" }
 
 			# the weibo promote related
@@ -120,6 +121,7 @@ class MigrateDb
 
 	def self.migrate_user
 		puts "Migrating users......"
+		PointLog.destroy_all
 		update_time = Time.now
 		User.where(:updated_at.lt => update_time).each_with_index do |u, index|
 			puts index if index%10 == 0
@@ -136,6 +138,11 @@ class MigrateDb
 			u.user_role = user_role
 			# the status field
 			u.status = u.status == 0 ? User::VISITOR : User::REGISTERED
+			u.save
+
+			# affliated
+			a = Affiliated.create
+			a.user = u
 			u.save
 
 			# point log
