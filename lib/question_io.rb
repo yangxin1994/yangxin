@@ -404,13 +404,14 @@ end
 class TextBlankQuestionIo < QuestionIo
   def answer_import(row, header_prefix)
     blank? row["#{header_prefix}"]
-    if issue["max_length"] > 0 && row["#{header_prefix}"].to_s.length > issue["max_length"]
-      raise "您输入的文本有些太长了哦,重新检查一下吧!(#{row["#{header_prefix}"].to_s.length}/#{issue["max_length"]})"
-    elsif issue["min_length"] > 0 && row["#{header_prefix}"].to_s.length < issue["min_length"]
-      raise "您输入的文本长度未免太短了些,重新检查一下吧!(#{row["#{header_prefix}"].to_s.length}/#{issue["min_length"]})"
-    else
-      @retval = row["#{header_prefix}"]
-    end
+    # if issue["max_length"] > 0 && row["#{header_prefix}"].to_s.length > issue["max_length"]
+    #   raise "您输入的文本有些太长了哦,重新检查一下吧!(#{row["#{header_prefix}"].to_s.length}/#{issue["max_length"]})"
+    # elsif issue["min_length"] > 0 && row["#{header_prefix}"].to_s.length < issue["min_length"]
+    #   raise "您输入的文本长度未免太短了些,重新检查一下吧!(#{row["#{header_prefix}"].to_s.length}/#{issue["min_length"]})"
+    # else
+    #   @retval = row["#{header_prefix}"]
+    # end
+    @retval = row["#{header_prefix}"]
     return { "#{origin_id}" => @retval}
   end
 end
