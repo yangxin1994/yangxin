@@ -27,9 +27,7 @@ class Account::SigninsController < ApplicationController
                                           params[:permanent_signed_in], 
                                           params[:third_party_user_id])
 		refresh_session(result['auth_key'])
-    binding.pry
-    
-  	render :json => result
+  	render_json { result }
   end
   
 end
