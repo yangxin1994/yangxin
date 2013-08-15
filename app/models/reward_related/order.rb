@@ -209,6 +209,12 @@ class Order
 		self.status = success ? SUCCESS : FAIL
 		self.remark = remark
 		self.finished_at = Time.now.to_i
+		if self.status == FAIL && self.source == REDEEM_GIFT
+			sample = self.sample
+			sample.point = sample.point + point
+			sample.save
+			PointLog.create_admin_operate_point_log(point, "兑换失败，积分返还", sample._id.to_s)
+		end
 		return self.save
 	end
 
