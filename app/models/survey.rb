@@ -1475,7 +1475,7 @@ class Survey
 			self.all_questions(false).each_with_index do |e, i|
 				excel_headers += e.csv_header("q#{i+1}")
 			end
-			return [headers, excel_headers]
+			return [headers.to_csv, excel_headers.to_csv]
 		end
 
 		headers
