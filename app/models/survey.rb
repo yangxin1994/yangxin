@@ -1784,11 +1784,11 @@ class Survey
 		imported_answer = nil
 		updated_count = 0
 		header_prefix = 0
-		all_questions.each do |a|
+		all_questions(false).each do |a|
 			q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
 		end
 		CSV.parse(csv_str, :headers => true) do |row|
-			return false if row.headers != self.csv_header(:with => "import_id")
+			#return false if row.headers != self.csv_header(:with => "import_id")
 			if self.answers.where(:import_id => row["import_id"]).length > 0
 				imported_answer = self.answers.where(:import_id => row["import_id"].to_s).first
 			end
@@ -1802,7 +1802,8 @@ class Survey
 					line_answer.merge! e.answer_import(row, header_prefix)
 				end
 			rescue Exception => test
-				import_error << {row:row, message:"第#{header_prefix}题:#{test.to_s}"}
+				row
+				import_error << {row:{}, message:"第#{header_prefix}题:#{test.to_s}"} if import_error.size < 30
 			else
 				if imported_answer
 					imported_answer.assign_attributes(:answer_content => line_answer)
@@ -1828,6 +1829,7 @@ class Survey
 										:finished_at => Time.now.to_i,
 										:created_at => Time.now,
 										:updated_at => Time.now}
+				
 				end
 			end
 		end

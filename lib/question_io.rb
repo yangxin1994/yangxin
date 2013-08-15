@@ -206,8 +206,10 @@ class ChoiceQuestionIo < QuestionIo
     choiced = 0
     if issue["max_choice"].to_i > 1
       issue["items"].each_index do |i|
-        blank? row["#{header_prefix}_c#{i+1}"] if row["#{header_prefix}_input"].blank?
-        if row["#{header_prefix}_c#{i+1}"] == "1"
+        # blank? row["#{header_prefix}_c#{i+1}"] if row["#{header_prefix}_input"].blank?
+        row["#{header_prefix}_c#{i+1}"] = "0" if row["#{header_prefix}_c#{i+1}"].blank?
+	blank? row["#{header_prefix}_c#{i+1}"] if row["#{header_prefix}_input"].blank?
+	if row["#{header_prefix}_c#{i+1}"] == "1"
           @retval["selection"] << get_item_id(i + 1)
           choiced += 1
         end
@@ -1089,6 +1091,7 @@ class ScaleQuestionIo < QuestionIo
         raise "您输入的范围好像不太对吧?"
       end
     end
+    binding.pry
     return { "#{origin_id}" => @retval}
   end
 
