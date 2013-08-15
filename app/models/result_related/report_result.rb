@@ -52,6 +52,7 @@ class ReportResult < Result
 					# judge whether this is a single choice or multiple choice
 					if question.issue["max_choice"] == 1
 						text = single_choice_description(analysis_result, question.issue)
+						text = ActionView::Base.full_sanitizer.sanitize(text)
 						report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 						chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																			analysis_result,
@@ -63,10 +64,12 @@ class ReportResult < Result
 																question.issue,
 																:answer_number => cur_question_answer.length,
 																:chart_type => 'pie')
+						pie_text = ActionView::Base.full_sanitizer.sanitize(pie_text)
 						bar_text = multiple_choice_description(analysis_result,
 																question.issue,
 																:answer_number => cur_question_answer.length,
 																:chart_type => 'bar')
+						bar_text = ActionView::Base.full_sanitizer.sanitize(bar_text)
 						chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																			analysis_result,
 																			question.issue,
@@ -82,6 +85,7 @@ class ReportResult < Result
 				when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
 					analysis_result = analyze_matrix_choice(question.issue, cur_question_answer)
 					text = matrix_choice_description(analysis_result, question.issue)
+					text = ActionView::Base.full_sanitizer.sanitize(text)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
@@ -97,6 +101,7 @@ class ReportResult < Result
 					text = number_blank_description(analysis_result,
 													question.issue,
 													:segment => segment)
+					text = ActionView::Base.full_sanitizer.sanitize(text)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					next if segment.blank?
 					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
@@ -115,6 +120,7 @@ class ReportResult < Result
 					text = time_blank_description(analysis_result,
 												question.issue,
 												:segment => segment)
+					text = ActionView::Base.full_sanitizer.sanitize(text)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					next if segment.blank?
 					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
@@ -127,6 +133,7 @@ class ReportResult < Result
 					analysis_result = analyze_address_blank(question.issue,
 															cur_question_answer)
 					text = address_blank_description(analysis_result, question.issue)
+					text = ActionView::Base.full_sanitizer.sanitize(text)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
@@ -158,6 +165,7 @@ class ReportResult < Result
 							text = address_blank_description(sub_analysis_result, sub_question_issue)
 							sub_question_type = QuestionTypeEnum::ADDRESS_BLANK_QUESTION
 						end
+						text = ActionView::Base.full_sanitizer.sanitize(text)
 						report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 						next if [QuestionTypeEnum::NUMBER_BLANK_QUESTION, QuestionTypeEnum::TIME_BLANK_QUESTION].include?(sub_question_type) && segment.blank?
 						chart_components = Report::DataAdapter.convert_single_data(sub_question_type,
@@ -170,6 +178,7 @@ class ReportResult < Result
 				when QuestionTypeEnum::CONST_SUM_QUESTION
 					analysis_result = analyze_const_sum(question.issue, cur_question_answer, items_com: items_com)
 					text = const_sum_description(analysis_result, question.issue)
+					text = ActionView::Base.full_sanitizer.sanitize(text)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
@@ -181,6 +190,7 @@ class ReportResult < Result
 					text = sort_description(analysis_result,
 											question.issue,
 											:answer_number => cur_question_answer.length)
+					text = ActionView::Base.full_sanitizer.sanitize(text)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
@@ -190,6 +200,7 @@ class ReportResult < Result
 				when QuestionTypeEnum::SCALE_QUESTION
 					analysis_result = analyze_scale(question.issue, cur_question_answer, items_com: items_com)
 					text = scale_description(analysis_result, question.issue)
+					text = ActionView::Base.full_sanitizer.sanitize(text)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_single_data(question.question_type,
 																		analysis_result,
@@ -226,6 +237,7 @@ class ReportResult < Result
 												analysis_result,
 												question.issue,
 												target_question.issue)
+						text = ActionView::Base.full_sanitizer.sanitize(text)
 						report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 						chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																			analysis_result,
@@ -239,11 +251,13 @@ class ReportResult < Result
 												question.issue,
 												target_question.issue,
 												:chart_type => 'pie')
+						pie_text = ActionView::Base.full_sanitizer.sanitize(pie_text)
 						bar_text = cross_description("multiple_choice",
 												analysis_result,
 												question.issue,
 												target_question.issue,
 												:chart_type => 'bar')
+						bar_text = ActionView::Base.full_sanitizer.sanitize(bar_text)
 						chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																			analysis_result,
 																			question.issue,
@@ -267,6 +281,7 @@ class ReportResult < Result
 											analysis_result,
 											question.issue,
 											target_question.issue)
+					text = ActionView::Base.full_sanitizer.sanitize(text)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																		analysis_result,
@@ -287,6 +302,7 @@ class ReportResult < Result
 											question.issue,
 											target_question.issue,
 											:segment => segment)
+					text = ActionView::Base.full_sanitizer.sanitize(text)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					next if segment.blank?
 					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
@@ -309,6 +325,7 @@ class ReportResult < Result
 											question.issue,
 											target_question.issue,
 											:segment => segment)
+					text = ActionView::Base.full_sanitizer.sanitize(text)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					next if segment.blank?
 					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
@@ -328,6 +345,7 @@ class ReportResult < Result
 											analysis_result,
 											question.issue,
 											target_question.issue)
+					text = ActionView::Base.full_sanitizer.sanitize(text)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																		analysis_result,
@@ -375,6 +393,7 @@ class ReportResult < Result
 													question.issue,
 													sub_question_issue)
 						end
+						text = ActionView::Base.full_sanitizer.sanitize(text)
 						report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 						next if [QuestionTypeEnum::TIME_BLANK_QUESTION, QuestionTypeEnum::NUMBER_BLANK_QUESTION].include?(sub_question_type) && segment.blank?
 						chart_components = Report::DataAdapter.convert_cross_data(sub_question_type,
@@ -395,6 +414,7 @@ class ReportResult < Result
 											analysis_result,
 											question.issue,
 											target_question.issue)
+					text = ActionView::Base.full_sanitizer.sanitize(text)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																		analysis_result,
@@ -412,6 +432,7 @@ class ReportResult < Result
 											analysis_result,
 											question.issue,
 											target_question.issue)
+					text = ActionView::Base.full_sanitizer.sanitize(text)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																		analysis_result,
@@ -429,6 +450,7 @@ class ReportResult < Result
 											analysis_result,
 											question.issue,
 											target_question.issue)
+					text = ActionView::Base.full_sanitizer.sanitize(text)
 					report_data.push_component(Report::Data::DESCRIPTION, "text" => text)
 					chart_components = Report::DataAdapter.convert_cross_data(target_question.question_type,
 																		analysis_result,
