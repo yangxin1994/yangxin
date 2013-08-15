@@ -1477,7 +1477,7 @@ class Survey
 			end
 			return headers.to_csv + excel_headers.to_csv
 		end
-		headers.to_csv
+		headers
 	end
 
 	def to_spss(analysis_task_id)
