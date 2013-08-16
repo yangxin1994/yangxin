@@ -1,0 +1,107 @@
+/*
+ *=require ui/widgets/od_address_selector
+ *=require ui/widgets/od_time_selector
+ */
+
+.title-link {
+  color: white;
+}
+
+.pull-right {
+  display: block !important;
+  float: right !important;
+  background: none !important;
+}
+
+#properties_panel {
+  margin-top: 1em;
+  h5 {
+    font-weight: bold;
+  }
+  .properties-list {
+    margin: 10px 0;
+  }
+  .widget.sample-property-list {
+    margin-top: 5px;
+    .pull-right a {
+      color: black;
+    }
+  }
+}
+
+.del-btn, .del-date-btn {
+  margin: 10px;
+  font-size: 16px;
+}
+
+@mixin label_style {
+  width: 100px;
+  display: inline-block;
+  font-weight: bold;
+}
+
+.panel {
+  padding: 0;
+  table {
+    border: 1px solid #e7e7e7;
+    margin-top: 12px;
+  }
+  td {
+    min-width: 30%;
+  }
+}
+
+.enum-panel, .array-panel, .panel {
+  margin-top: 12px;
+  label {
+    @include label_style;
+  }
+
+  .add-enum-btn {
+    margin-left: 10px;
+  }
+
+  .enum-new {
+    border-top: 1px solid silver;
+    margin-top: 10px;
+  }
+}
+
+.searchWidget input {
+  font-size: 12px !important;
+}
+
+.num-range-panel {
+  .moreFields {
+    text-align: center;
+    .range-input {
+      width: 6em;
+      padding: 3px 6px;
+    }
+  }
+}
+
+.date-selector {
+  label {
+    float: left;
+    text-align: center;
+  }
+}
+
+div.date-seg-wrapper {
+  margin-top: 12px;
+  position: relative;
+  padding: 7px 10px;
+  &:hover {
+    background-color: #f1f1f1;
+  }
+  .del-date-btn {
+    position: absolute;
+    right: 10px;
+    top: 0px;
+  }
+}
+
+.pie_chart_container {
+  height: 350px;
+}

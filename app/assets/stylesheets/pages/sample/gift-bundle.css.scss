@@ -1,0 +1,775 @@
+//=require 	ui/widgets/od_address_selector
+//=require  jquery.fancybox
+
+@import "common";
+@import "compass/css3/box-shadow";
+@import "compass/css3/border-radius";
+@import "compass/utilities/general/clearfix";
+@import "compass/css3/opacity";
+
+.icon-rank{background: image-url('od-quillme/icons/rank.png') no-repeat left;}
+
+.ex{
+	margin-top:28px;
+	.slider{
+		position:relative;
+		width:610px;
+		height:202px;
+		border:10px #fff solid;
+		background: #fff;
+		@include box-shadow(0 1px 1px #999);
+		@include border-radius(9px);
+		float: left;
+		.regist_bt{
+			line-height:32px;
+			text-align:center;
+			font-size:14px;
+			font-weight:bold;
+			position:absolute;
+			top:36px;
+			right:34px;
+			border:3px solid #fff;
+			@include border-radius(4px);
+			width:90px;
+			height:32px;
+			background:#ec1717;
+			color:#fff;
+
+		}
+	}
+	.bulletin{
+		width:295px;
+		.exc{
+			float:left;
+			color:#ec1717;
+		}
+		.exc_info{
+			margin:10px;
+			color:#999;
+			.exc_detail{
+				div{
+    				select {
+    				    background: #fff;
+    				    border: 1px solid #ccc;
+    				    @include border-radius(4px);
+    				    height: 26px;
+    				    line-height:26px;
+    				    padding:1px 0px 1px 10px;
+    				    font-size: 12px;
+    				    width: 212px;
+    				    cursor: pointer;
+    				}
+					margin-bottom:27px;
+					position:relative;
+					label{
+						margin-right:10px;
+						span{
+							width:65px;
+							display:inline-block;
+							text-align:right;
+						}
+					}
+					span.phone_cust{
+						margin-right:10px;
+					}
+					input{
+						width:160px;
+						height:22px;
+						line-height:22px;
+						padding-left:10px;
+						padding:1px 2px;
+					}
+					#phone_num{
+						width:206px;
+					}
+					.acc_notice{
+						position:absolute;
+						top: 7px;
+						right: 12px;
+						color:#333;
+					}
+					.number_notice{
+						position:absolute;
+						top: 7px;
+						right: 12px;
+						color:#333;
+					}					
+					.err{
+						position:absolute;
+						top:34px;
+						left:44px;
+						.number_err{
+							background: image-url('/assets/od-quillme/faild.png') no-repeat;
+							width:20px;
+							height:20px;
+							display:inline-block;
+						}						
+					}
+
+					b{
+						color: #ff6600;
+					}
+
+					button{
+						border: 0px;
+						background: #f25d5d;
+						color: #fff;
+						@include border-radius(4px);
+						@include box-shadow(0 1px 1px #999);
+						width:80px;
+						height:28px;
+						float:right;
+						cursor:pointer;
+					}
+				}
+			}
+		}
+	}		
+}
+
+.dashed-box{
+	.dashed-box-inner{
+		.dashed-box-inner-top{
+			ul{
+				float:right;
+				height:24px;
+				line-height:24px;
+				position: relative;
+				top: -3px;				
+				li{
+					height:24px;
+					line-height:24px;				
+					float:left;
+					margin-left:20px;
+					cursor:pointer;
+					&.current{
+						border-bottom:2px solid #f25d5d;
+					}
+				}
+			}
+			.sh_type{
+				float: left;
+				height: 24px;
+				line-height: 24px;
+				position: relative;
+				top: -3px;
+				li{
+					height: 24px;
+					line-height: 24px;
+					float: left;
+					margin-left: 20px;
+					cursor: pointer;
+					&.active{
+						border-bottom:2px solid #f25d5d;
+					}				
+				}
+
+				/*position:absolute;
+				div{
+					float:left;
+					margin-right:22px;
+					padding-bottom:5px;
+					cursor:pointer;
+				}
+				div.active{
+					border-bottom:2px solid #ec1717;
+				}
+				margin-left:120px;
+				clear:both;*/
+			}
+			.more{
+				float: right;
+				color: #999;
+			}
+		}		
+	}
+}
+
+
+.team-title{
+	@include one-line(30px);
+	@include clearfix;
+	margin-top:15px;
+	border-bottom:1px #ccc solid;
+	h3{
+		font-size: 16px;
+		color:$red1;
+	}
+	.more{
+		color:#999;
+	}
+}
+.gift-list-main{
+	width:940px;
+	margin-top:30px;
+	margin-bottom:15px;
+	.gift-list{
+		width:930px;
+		padding-bottom:40px;
+		@include clearfix;
+		li{
+			width:220px;
+			height:290px;
+			float: left;
+			margin:12px 12px 0 0;
+			a{
+				width:220px;
+				height:280px;
+				display: block;
+				border:1px #f2f2f2 solid;
+				&:hover{
+					.gift-mask{
+						background:red;
+					}
+				}	
+				.gift-img{
+					width:220px;
+					margin:0 auto;
+					display: block;
+					img{
+						width:220px;
+						height:220px;
+						display: block;	
+					}
+				}
+				.gift-name{
+					width:220px;
+					height:30px;
+					line-height: 30px;
+					text-align: center;
+					display: block;
+					font-size: 14px;
+					color: #fff;
+					position: relative;
+					z-index: 999;
+					top:-30px;			
+				}
+				.gift-mask{
+					width:220px;
+					height:30px;
+					display: block;
+					margin-top:-60px;
+					background: #000;
+					@include opacity(0.5);
+				}
+				.gift-remark{
+					width:209px;
+					margin:0 auto;
+					display: block;
+					@include clearfix;
+					.integral{
+						width:100px;
+						margin-top:5px;
+						@include one-line(50px);
+						text-align: center;
+						color:#999;
+						b{
+							color:#ff9900;
+							font-size: 20px;
+							margin-right:3px;
+						}
+					}
+					.gift-remark-right{
+						float: right;
+						margin-top:10px;
+						width:80px;
+						padding-left:20px;
+						border-left:1px #dbdbdb dashed;
+						span{
+							color:#999;
+							text-align: left;
+							display: block;
+							@include one-line(20px);
+						}
+					}
+
+				}
+			}
+		}
+	}
+}
+
+.research-list{
+	width:665px;
+	float: left;
+	ul{
+		width:570px;
+		margin: 0 auto;
+		.research-content{
+			padding:10px 0 10px 0;
+			@include clearfix;
+			color:#999;
+			span{
+				margin-right:24px;
+				overflow:hidden;
+				text-align:right;
+				display:inline-block;
+				b{
+					color: #ff6600;
+				}
+			}
+			.ago{
+				width:50px;
+			}
+			.l_mame{
+				color:#333;
+				width:100px;
+			}
+			.point{
+				width:90px;
+			}
+		}
+	}
+}
+.other_like{
+	margin-top:20px;
+	ul{
+		width:645px;
+		padding:20px 0px 20px 0;
+		@include clearfix;
+		li{
+			margin-right:25px;
+			float:left;
+			a{
+				span{display: block;}
+				.gift-img{	
+					img{
+						border:1px solid #dbdbdb;
+						@include size(140px,140px);
+					}
+				}
+				.gift-title{
+					@include one-line(28px);
+					color:#999;
+				}
+				.integral{
+					color: #ff6600;
+				}	
+				&:hover{
+					img{
+						border:1px $red1 solid;
+					}
+					.gift-title{
+						color:#333;
+					}
+				}
+			}		
+		}
+	}
+}
+.guess{
+	width:240px;
+	float: right;
+	ul{
+		padding:5px 0 0 0;
+		li{
+			@include one-line(28px);
+			@include clearfix;
+			a{
+				width:155px;
+				overflow: hidden;
+				color:#888;
+				&:hover{
+					color:#333;
+				}
+			}
+			.gift-title{
+				float: left;
+			}
+			.integral{
+				float: right;
+				color: #ff6600;
+			}
+		}
+	}
+}
+
+
+
+// show gifts path 
+
+.site_nav{
+	margin:26px auto 12px;
+    width:960px;
+	height:20px;
+	line-height:20px;
+	a{
+		color:#999;
+	}
+	span{
+		margin-right:3px;
+		margin-left:3px;
+	}
+	span.curr{
+		color:#ec1717;
+	}
+	span.biao{
+	  vertical-align: middle;
+		width:20px;
+		height:20px;
+		display:inline-block;
+		background: image-url('od-quillme/icons/pub_icon.png') no-repeat;
+		background-position:-20px -2px;
+	}
+}
+
+		.gift_info{
+			height:310px;
+			border-bottom:1px #dbdbdb dashed;
+			.gift_sub_info{
+				float:left;
+				width:330px;
+				.gift_name{
+					color:#333;
+					font-size:18px;
+					overflow:hidden;
+					margin-bottom:30px;
+				}
+				.gift_detail{
+					color:#999;
+					div{
+						float:none;
+						font-size:14px;
+						margin-bottom:10px;
+						span{
+							margin-right:5px;
+						}
+						.gift_num{
+							color:green;
+						}
+					}
+					.special_desc{
+						overflow:hidden;
+						border:1px solid #999;
+						width:280px;
+						height:88px;
+						padding:10px;
+					}
+					button{
+						width:120px;
+						height:36px;
+						border:0px;
+						margin-top:18px;
+						cursor:pointer;
+						font-size:16px;
+						@include border-radius(4px);
+						background: $red;
+						color:#fff;
+						&:hover{
+							background:$red1;
+						}
+						&:active{
+							background:$red2;
+						}
+					}
+				}
+			}
+			.gift_img{
+				float:left;
+				margin-right:30px;
+				img{
+					border:1px solid #dbdbdb;					
+				}
+
+			}
+		}
+		.gift_desc{
+			margin-top:20px;
+			h3{
+				width: 120px;
+				font-size: 14px;
+				font-weight: bold;
+				color: #EC1717;
+			}
+			.gift_intro{
+				margin:10px 0px;
+				line-height: 20px;
+				color: #999;
+				font-size: 14px;
+			}
+		}
+
+
+
+
+/* for popup */
+
+.exc_notices{
+  width:440px;
+  padding:20px;
+  color:#b3b3b3;
+  font-size:14px;
+  h1{
+    font-size:16px;
+  	color:#333;
+  	margin-bottom:20px;
+  }
+  h2{
+    color:#8cc63f;
+  	text-align:center;
+  	font-size:16px;
+  	position:relative;
+  	margin-bottom:30px;
+  	img{
+  		position:absolute;
+  		top:-10px;
+  		left:90px;
+  	}
+  }
+  div.p_notice{
+  	margin:0px 120px;
+  	margin-bottom:10px;
+  	clear:both;
+  	font-size:16px;
+  	color:#ec1717;
+  	img{
+  		vertical-align:middle;
+  		float:left;
+  		margin-right:10px;
+  	}
+  	span{
+  		height:30px;
+  		line-height:30px;
+  		float:left;
+  	}
+  }
+  .order_details{
+  	width:310px;
+  	margin:0 auto;
+  	text-align: center;
+  	line-height:24px;
+  	a{
+  		color:#3D97ED;
+	}
+	.unenough{
+		color:#ff6600;
+	}
+	.answer_look{
+			input{
+			  float:left;
+			  width:110px;
+			  height:32px;
+			  border:0px;
+			  text-align:center;
+			  line-height:32px;
+			  color:#fff;
+			  margin-top:20px;
+			  cursor:pointer;
+			  @include border-radius(4px);
+			}
+			.answer{
+				font-size:16px;
+				background:#ec1717;
+				margin:20px 20px 0px 40px;
+			}
+			.look_over{
+				font-size:16px;
+				background:#65ADF1;
+			}		
+		} 
+	}
+	.more_integral{
+  	color:#b3b3b3;
+  	margin-top:20px;
+  	display:block;
+  	float:right;
+	}
+  .sub_infor{
+  	margin:0px 20px;
+  	.basic_document{
+			input{
+				float:left;
+			  color:#b3b3b3;
+			  height:14px;
+			  line-height:14px;
+			  padding:5px 10px;
+			}
+			input.name,input.postcode{
+				width:80px;
+			}
+			input.phone_num{
+				  width:150px;
+  				margin:0px 10px;
+			}
+			span{  
+				margin-right:10px;	
+			}
+			
+  	}
+  	.address{
+  		margin:20px 0px;
+  		select{
+  			width:90px;
+  			color:#b3b3b3;
+  		}
+		} 
+		textarea{
+  		width:380px;
+  		height:50px;
+  		padding:10px;
+  		color:#b3b3b3;
+  		line-height:20px;
+		}
+		.tj_sub{
+  		margin:20px 0px 0px 0px;
+  		.synchro{
+  			float:left;
+  			height:14px;
+  			line-height:14px;
+  			margin-top:18px;
+  			input{
+  				float:left;
+  				margin-right:10px;
+  			}
+  			span{
+  			  float:left;
+  				font-size:12px;
+  			}
+			}
+			.sub_btn{
+  			@include border-radius(4px);
+  			width:90px;
+  			height:32px;
+  			background:#ec1717;
+  			border:0px;
+  			float:right;
+  			color:#fff;
+  			cursor:pointer;
+			}
+			input.con_sub_btn{
+  			float:left;
+  			margin-left:110px;
+			}
+			a{
+  			float:left;
+  			margin-left:10px;
+  			display:block;
+  			height:32px;
+  			line-height:32px;
+  			color:blue;
+			}
+		}
+	}
+
+}
+
+.exc_box{
+  width:750px;
+  height:326px;
+  .exc_left{
+  	position:relative;
+  	float:left;
+  	width:286px;
+  	h3{
+  		font-size:20px;
+  		margin-bottom:30px;
+		}
+		.wel_cont{
+			.login_btn{
+				font-size:14px;
+  			width:230px;
+  			@include one-line(34px);
+  			background:$red;
+  			border:0px;
+  			margin-top:30px;
+  			text-align:center;
+  			color:#fff;
+  			clear:both;
+  			cursor:pointer;
+  			@include border-radius(4px);
+  			&:hover{
+  				background: $red1;
+  			}
+  			&:active{
+  				background: $red2;
+  			}
+  			span{
+  				display:inline;
+  				margin-right:20px;
+  				}
+			}
+			.login_username{
+  			margin-bottom:20px;
+			}
+			.login_password{
+  			margin-bottom:10px;
+			}
+			div{
+				input{
+  				width:210px;
+  				height:30px;
+  				line-height:30px;
+  				padding:0px 10px;
+  				color:#bdbdbd;
+  				margin-top:10px;
+				}
+			}
+			span{
+				display:block;
+				a{
+  				margin-left:110px;
+  				color:#bdbdbd;
+				}
+				span{
+  				float:left;
+				}
+				input{
+  				width:12px;
+  				height:12px;
+  				border:1px solid #b3b3b3;
+  				margin-right:10px;
+  				float:left;
+  				display:inline;
+  				border:0px;
+				}
+			}
+		} 
+	}
+	.err_notice{
+		position:absolute;
+		width:200px;
+		height:14px;
+		top:106px;
+		left:260px;
+		display:none;
+		color:#ec1717;
+		a{
+			color:#3d97ed;
+		}
+	}
+	.exc_middle{
+		margin-left:150px;
+		width:8px;
+		height:326px;
+		float:left;
+		background:url('/assets/od-quillme/login_line.png')
+	}	
+	.exc_right{
+  		width:250px;
+  		height:250px;
+  		background:url(/assets/od-quillme/pop_login.png) no-repeat;
+  		float:right;
+  		position:relative;
+  		button{
+	  			font-size:14px;
+	  			width:90px;
+	  			height:32px;
+	  			text-align:center;
+	  			line-height:32px;
+	  			color:#fff;
+	  			background:$blue;
+	  			border:0px;
+	  			cursor:pointer;
+	  			position:absolute;
+	  			bottom:-50px;
+	  			left:68px;
+	  			@include border-radius(4px);
+  				&:hover{
+  					background: $blue1;
+  				}
+  				&:active{
+  					background: $blue2;
+  				}
+			}
+		}
+}

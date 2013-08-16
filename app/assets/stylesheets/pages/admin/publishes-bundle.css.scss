@@ -1,0 +1,31 @@
+div.show_community {
+	padding-right: 10px;
+	margin-top: 10px;
+	float: right;
+}
+
+ul.tasks {
+	background-color: white;
+	padding: 2px;
+
+	> li {
+		background-color: #ebebe4;
+		padding: 4px 0px;
+		min-height: 26px;
+		margin: 4px 0;
+
+		> div {
+			display: inline-block;
+
+			&:first-child{
+				width: 300px;
+				padding: 0 4px;
+			}
+
+			&:last-child{
+				width: 120px;
+				float: right;
+			}
+		}
+	}
+}

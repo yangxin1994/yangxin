@@ -1,0 +1,64 @@
+@import "common";
+@import "compass/css3/inline-block";
+@import "compass/css3/opacity";
+
+/* media preview */
+.media-preview-con {}
+.media-small, .media-medium, .media-big {
+	position: relative;
+	@include inline-block;
+	cursor: pointer;
+}
+@mixin media($name, $width, $height, $inner-width, $inner-height) {
+	text-align: left;
+	@include size($width, $height);
+	background: image-url("materials/media-#{$name}.png");
+	.media-preview {
+		@include size($inner-width, $inner-height);
+		margin-top: 11px;
+		margin-left: 15px;
+	}
+	.media-hover {
+		@include size($width, $height);
+		position: absolute;
+		top: 0;
+		left: 0;
+		vertical-align: middle;
+		text-align: center;
+		line-height: $height;
+		> em {
+			@include size(38px, 38px);
+			margin: auto;
+			&.media-action-normal {
+				@include opacity(0.3);
+				background-image: image-url('materials/image.png');
+				@include inline-block;
+			}
+			&.media-action-hover {
+				background-image: image-url('materials/image_hover.png');
+				display: none;
+			}
+		}
+	}
+	&:hover {
+		.media-hover {
+			> em {
+				&.media-action-normal { display: none; }
+				&.media-action-hover { @include inline-block; }
+			}
+		}
+	}
+}
+.media-small, .media-medium, .media-big {
+	&.media-type-video, &.media-type-audio {
+		.media-hover {
+			> em {
+				&.media-action-normal { background-image: image-url('materials/video.png'); }
+				&.media-action-hover { background-image: image-url('materials/video_hover.png'); }
+			}
+		}
+	}
+}
+.media-small { @include media(small, 166px, 128px, 136px, 102px); }
+.media-medium { @include media(medium, 214px, 164px, 184, 138px); }
+.media-big { @include media(big, 514px, 400px, 484px, 363px); }

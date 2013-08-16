@@ -1,0 +1,157 @@
+@import "common";
+@import "compass/css3/box-shadow";
+@import "compass/css3/border-radius";
+@import "compass/utilities/general/clearfix";
+@import "compass/css3/opacity";
+
+	.login_con{
+		width:760px;
+		margin:40px auto 0px auto;
+		background:#fff;
+		padding:20px 0px 30px 200px;
+		-moz-box-shadow:0px 0px 10px rgba(0,0,0,.2);
+		-webkit-box-shadow:0px 02px 10px rgba(0,0,0,.2);
+		box-shadow:0px 0px 10px rgba(0,0,0,.2);
+		zoom:1;
+		position:relative;
+
+		h1{
+			color:#8CC63F;
+			font-weight:bold;
+			font-size:24px; 
+			span{
+				display:inline-block;
+			}   
+		}
+		.sucess_img{
+			position:absolute;
+			top:12px;
+			left:140px;    
+		}
+		.reture_index{
+			display:block;
+			width:64px;
+			height:22px;
+			border:1px solid #e6e6e6;
+			background:#f2f2f2;
+			text-align:center;
+			line-height:22px;
+			color:#666;
+			margin:10px 0px 20px 0px;   
+			@include border-radius(4px); 
+		}
+		.nickname{
+			span{
+				color:#3e98ee;    
+			}
+			a{
+				color:#f14646;
+			}
+		}
+		.login_email{
+			color:#999;
+			width:452px;
+			height:100px;
+			border:1px solid #ccc;
+			margin-top:20px;
+			padding:20px 130px 0px 30px;
+			line-height:24px;
+			p{
+				a{
+					color:#666;      
+				}
+				a.mail{
+					color:#3e98ee;      
+				}
+				span.binding{
+					display:block;
+					margin-bottom: 16px;
+					color:#ffa400;
+					font-size:16px;
+					b{
+						font-size:26px;
+					}
+				}
+				.y_mail{
+					margin-right:10px;
+				}
+			}
+			/*
+			div.input_email{
+				font-size:14px;
+				input{
+					font-size: 16px;
+					padding: 4px 10px;
+					margin-right:10px;
+				}
+				button{
+					border:0px;
+					width: 100px;
+					height: 34px;
+					background: #F04646;
+					border: 0px;
+					text-align: center;
+					line-height: 34px;
+					color: white;
+					font-size: 16px;
+					cursor: pointer;
+					@include border-radius(4px); 
+				}
+				.re_notice{
+					display:none;
+					float:left;
+					height:24px;
+					line-height:24px;
+					position: relative;
+					top: -30px;
+					right: -380px;					
+					span#notice{
+						display:inline-block;
+						width:20px;
+						height:20px;
+						background:url(/assets/od-quillme/success.png) no-repeat;
+						margin:2px 5px 0px 20px;
+						float:left;        
+					}
+					font{
+						float:left;
+					}            
+				}				
+			}
+			*/
+			.log_maibtn{
+				margin-top:20px;
+				height:24px;
+				a{
+					display:block;
+					width:66px;
+					height:24px;
+					background:#f14646;
+					text-align:center;
+					line-height:24px;
+					color:#fff;
+					float:left; 
+					@include border-radius(4px);  
+					@include box-shadow(0 1px 1px #999);      
+				}
+				.re_notice{
+					display:none;
+					float:left;
+					height:24px;
+					line-height:24px;
+					span{
+						display:inline-block;
+						width:20px;
+						height:20px;
+						background:url(/assets/od-quillme/success.png) no-repeat;
+						margin:2px 5px 0px 20px;
+						float:left;        
+					}
+					font{
+						float:left;
+					}            
+				}
+
+			}    
+		}
+	}

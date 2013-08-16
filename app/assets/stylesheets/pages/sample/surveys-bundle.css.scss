@@ -1,0 +1,575 @@
+//=require jquery.fancybox
+@import "common";
+@import "compass/css3/box-shadow";
+@import "compass/css3/border-radius";
+@import "compass/utilities/general/clearfix";
+@import "compass/css3/opacity";
+
+$colorA: #666666;
+$colorB: #b3b3b3;
+
+.rl{
+	position:relative;
+	margin-top:12px;
+	.rl_h{
+		position:absolute;
+		width:630px;
+		height:48px;
+		background:#f25d5d;
+		@include border-top-radius(6px);
+		top:0;
+		li{
+			float:left;
+			width:112px;
+			height:32px;
+			line-height: 12px;
+			margin:14px 0px 0px 14px;
+			text-align:center;
+			padding-top:10px;
+			font-size:14px;
+			font-weight:bold;
+			@include border-top-radius(4px);
+			&:hover{
+				cursor:pointer;
+			}
+			a{
+				color:#fff;
+			}			
+
+		}
+		.current{
+			background:#fff;
+			a{
+				color:#ec1717;	
+			}
+		}		
+	}
+	.s_a_c{
+		float: right;
+		margin: -34px 28px 10px;
+		color:#fff;
+	}
+}
+
+.hot-research-banner{
+	position:relative;
+	margin:0 auto;
+	margin-top:15px;
+	margin-bottom:20px;
+	width:940px;
+	height:100px;
+	border:8px #fff solid;
+	@include border-radius(12px);
+	@include box-shadow(0 1px 1px #999);
+	background: image-url('/assets/od-quillme/banner/survey_banner.png') no-repeat;
+	.popup-close{
+		float: right;
+		margin:-5px -5px 0px 0px;
+		&:hover{
+			cursor: pointer;
+		}
+	}
+	.chrome_p{
+		float:right;
+		width:188px;
+		@include one-line(40px);
+		@include inline-block;
+		margin:30px 40px 0 30px;
+		border:2px #fff solid;
+		@include border-radius(9px);
+		color:#fff;
+		background:$red;
+		cursor:pointer;
+		&:hover{
+			background: $red1;
+		}
+		&:active{
+			background: $red2;
+		}
+		.download{
+			background: image-url('/assets/od-quillme/icons/dow_arrow.png');
+			float:left;
+			width:20px;
+			height:20px;
+			@include size(20px,20px);
+			margin:10px 6px 10px 10px;
+		}
+		.down{
+			float:left;
+			font-size: 14px;
+		}
+	}
+}
+
+
+.dashed-box{
+	#s_list{
+		min-height:534px;
+	}
+	.s_top{
+		margin:50px 0 10px 0;
+		height: 26px;
+		padding-bottom: 10px;
+		border-bottom:1px #f9b9b9 dashed;
+		.s_type{
+			.reward_type{
+				width:auto;
+				height:20px;
+				float:left;
+				li{
+					float:left;
+					margin-right:15px;
+					height:30px;
+					line-height: 20px;
+					text-align: center;
+					span{margin:0 1px;}	
+					a{
+						color:#999;
+					}
+					&.current{
+						a{
+							color:$red1;
+						}
+					}		
+				}
+			}
+			.select{
+				float:right;
+				top:-6px;
+				.triangle{
+					top:11px;
+				}
+				ul{
+					display:none;
+					top:27px;
+					width:85px;
+				}
+			}
+
+		}
+	}
+}
+
+.select{
+	ul{
+		li{
+			@include one-line(16px);
+		}
+	}
+	.select-content{
+		.select-txt{
+			@include one-line(16px);		
+		}
+	}
+}
+
+
+.bulletin{
+	width:295px;
+	margin-top:20px;
+	ul{
+		@include clearfix;
+		width:265px;
+		li{
+			border-bottom:1px #dbdbdb dashed;
+			@include one-line(30px);
+			a{
+				color: #333;
+			}
+		}
+		.bulletin-title{
+			width:180px;
+			overflow: hidden;
+			float:left;
+			margin-right:15px;
+			&:hover{
+					color: $red1;
+					text-decoration: underline;
+				}
+		}
+		.time{
+			width:70px;
+			color: #999;
+			float: right;
+			text-align: right;
+		}
+	}
+}
+.team-title{
+	@include one-line(30px);
+	@include clearfix;
+	margin-top:15px;
+	padding-top: 15px;
+	clear:both;
+	border-bottom:1px #ccc solid;
+	h3{
+		font-size: 16px;
+		color:$red1;
+	}
+	.more{
+		color:#999;
+	}
+}
+.gift-list{
+	width:980px;
+	margin:0 0 20px -3px;
+	padding:0 0 3px 2px;
+	@include clearfix;
+	li{
+		width:231px;
+		height:280px;
+		float: left;
+		@include border-radius(5px);
+		margin:12px 12px 0 0;
+		a{
+			width:230px;
+			height:280px;
+			display: block;
+			background: #f8f8f8;
+			border:1px #f8f8f8 solid;
+			@include box-shadow(0 1px 1px #999);
+			@include border-radius(5px);
+			.gift-img{
+				width:230px;
+				margin:0 auto;
+				display: block;
+				img{
+					width:230px;
+					height:220px;
+					display: block;	
+					@include border-top-radius(5px);
+				}
+			}
+			.gift-name{
+				width:209px;
+				margin:0 auto;
+				margin-top:5px;
+				display: block;
+				font-size: 14px;
+				line-height: 2em;
+				color:#333333;			
+			}
+			.gift-remark{
+				width:209px;
+				margin:0 auto;
+				display: block;
+				@include clearfix;
+				.integral,.nop{
+					color:#999;
+					b{
+						color:#ff9900;
+						margin-right:3px;
+					}
+				}
+				.ub-number{
+					float:left;
+					b{
+						color:#ff6600;
+					}
+				}
+				.research-people{
+					float:right;
+				}	
+			}	
+			&:hover{
+				background: $red1;
+				border:1px $red1 solid;
+				.gift-name,.integral,.nop{
+					color:#fff;
+					b{color:#fff;}
+				}
+			}
+		}
+	}
+}
+
+.rank{
+	width:295px;
+	margin-left:15px;
+	.rank-list{
+		li{
+			padding:10px 0;
+			@include clearfix;
+			border-bottom:1px #dbdbdb dashed;
+			span{
+				display:block;
+				color: #999;
+				.integral{
+						b{color:#ff6600;}
+					}
+				}
+			.rank-list-left{
+				width:200px;
+				.userhead {
+					margin-right: 10px;
+					img{
+						@include size(36px,36px);					
+					}
+				}
+				.username{
+					width:120px;
+					height:20px;
+					float:left;
+					overflow:hidden;
+				}
+				.integral{
+					float:left;													
+				}
+			}
+			.answer{
+				height:20px;
+			}
+		}
+	}
+}
+
+.rss{
+	width:315px;
+	margin-left:15px;
+	margin-bottom:12px;
+	padding:0px;
+	height:118px;
+	background: #fff;
+	@include border-radius(6px);
+	@include box-shadow(0 1px 1px #999);
+	.header{
+		@include border-top-radius(6px);
+		height:48px;
+		background: #f25d5d url(/assets/od-quillme/rss.png) no-repeat;
+		span{
+			display:inline-block;
+			margin:16px 0px 0px 30px;
+			top:16px;
+			left:30px;
+			font-size:14px;
+			font-weight:bold;
+			font-size:14px;
+			color:#fff;
+		}
+	}
+			.content{
+				height:61px;
+				margin: 0px 8px 8px;
+				@include border-bottom-radius(6px);				
+				border-top:none;
+				.info{
+					border-top: none;
+					height:60px;
+					div{
+						float:left;
+						margin: 20px 0 12px 20px;
+						input{
+							width:180px;
+							padding:5px;
+							margin-right:5px;
+							color:#999;
+						}
+						.rss-btn{
+							position:relative;
+							color:#fff;
+							margin-top:-3px\9;
+							width:30px;
+							text-align: center;
+							letter-spacing: 2px;
+							@include one-line(19px);
+							@include inline-block;
+							@include border-radius(3px);
+							background:$red;
+							&:hover{
+								background: $red1;
+							}
+							&:active{
+								background: $red2;
+							}
+							&.disabled{
+								background: #ddd;
+								color:#999;
+								cursor: default;
+							}
+
+						}
+					}
+				}
+			}
+
+}
+
+.help{
+	margin: 15px 0 0 15px;
+	width: 295px;
+	background: #fff;
+	padding: 10px;
+	@include border-radius(12px);
+	@include box-shadow(0 1px 1px #999);
+	.help_inner{
+		padding: 10px 15px 5px 10px;
+		border: 1px #f9b9b9 dashed;
+		@include border-radius(4px);
+		.top{
+			height: 20px;
+			line-height: 20px;
+			padding-bottom: 5px;
+			margin-bottom: 5px;
+			border-bottom: 1px #f9b9b9 dashed;
+			font-size: 14px;
+			font-weight: bolder;
+			color: #ec1717;
+		}
+		dl{
+			height: 28px;
+			dt{
+				vertical-align: middle;
+				margin-top: 4px;
+				width: 20px;
+				height: 20px;
+				float: left;
+				background: url(/assets/od-quillme/icons/arrow_hui.png) no-repeat;
+			}
+			dd{
+				line-height: 20px;
+				float: left;
+				color: #999999;
+				&:hover{
+					color:#ec1717;
+				}
+			}
+		}
+	}	
+}
+
+.news{
+	margin-top:12px;
+	li{
+		padding: 10px 0;
+		overflow: hidden;
+		border-bottom: 1px #dbdbdb dashed;	
+		img{
+			@include size(36px,36px);					
+		}
+		.new_info{
+			float:left;
+			margin-left:15px;
+			.username,.new_detail{
+				margin-bottom:10px;
+				color:#333;
+				display:block;
+				a{
+					color:#333;
+				}
+				.behavior{
+					color:#999;
+					margin-right:10px;
+				}
+			}
+		}
+
+	}
+}
+
+
+.no_data{
+	text-align: center;
+font-size: 14px;
+color: #999;
+margin-top: 200px;
+}
+.rss_notice{
+	width:466px;
+	height:210px;
+	padding-top: 20px;
+	.title{
+	  padding-left: 20px;
+		margin-bottom:20px;
+		color:#999;
+		font-size:16px;
+		font-weight:bolder;	
+	}
+	.rss_content{
+		margin:auto 50px;
+		font-size:14px;
+		color:#333;
+		line-height:2.5em;
+		.mail,.mobi{
+			color:#fbaf3a;
+		}		
+		.sub_content{
+			position:relative;
+			font-size:12px;
+			color:#b3b3b3;
+			a{
+				cursor:pointer;
+				color:#3e98ee;
+			}		
+		}
+		.finish{
+			text-align: center;
+			margin-top: 50px;
+			font-size:16px;
+			color:#8CC63F;
+			img{
+				vertical-align:middle;
+			}
+			span{
+				height:30px;
+				line-height:30px;
+			}
+		}
+
+	}
+	 .activate{
+	 	text-align: center;
+	 	margin-top:30px;
+	 	&.send_code{
+	 		padding-left:40px;
+	 		span{
+	 			float:left;
+	 			margin-right:4px;
+	 		}
+	 		input{
+		 		height:30px;
+	 			height:24px\9; 	
+	 			margin-right:4px;
+	 			float:left;		
+	 		}
+	 		button{
+	 			text-align:center;
+	 			letter-spacing:2px;
+	 			float:left;
+	 	 		margin-top:2px;
+	 			margin-top:0px\9;			
+	 		}
+	 	}
+	 	span{
+	 		height:36px;
+	 		line-height:36px;
+	 		height:30px\9;
+	 		line-height:30px\9;	 		
+	 		font-size:14px;
+	 		color:#b3b3b3;
+	 	}
+	 	input{	
+	 		width:216px;
+	 		@include border-radius(4px);
+	 		border:1px solid #b3b3b3;
+	 		padding:2px 0px 2px 8px;
+	 		font-size:12px;
+	 		color:#b3b3b3;
+	 	}
+	 	button{
+	 		width:90px;
+	 		height:32px;
+	 		border:0px;
+	 		background: #ec1717;
+	 		color: #fff;
+	 		text-align: center;
+	 		line-height: 32px;
+	 		font-size:16px;
+	 		cursor: pointer;
+	 		@include border-radius(4px);
+	 		@include box-shadow(0 1px 1px #999);			
+	 	}
+	 	.error{
+	 		color:red;
+	 	}
+	 }		
+}

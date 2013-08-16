@@ -1,0 +1,14 @@
+.stats ul li {
+  display: block;
+  float: left;
+  margin-left: 40px;
+  vertical-align: middle;
+  width: 151px;
+  span {
+    font-size: 13px;
+  }
+}
+
+.action-bar {
+  margin-bottom: 10px;
+}

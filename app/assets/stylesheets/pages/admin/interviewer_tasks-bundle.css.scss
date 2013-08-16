@@ -1,0 +1,31 @@
+ul.rules{
+	> li{
+		margin: 4px 0px;
+		padding: 10px;
+		border: solid 1px #CCC;
+		background-color: white;
+
+		&:hover{
+			border: solid 1px #f9ff56;
+		}
+
+		&.selected {
+			border: solid 1px #fc0521;
+		}
+
+		ul.conditions {
+			> li {
+				margin: 4px 0;
+				background-color: #ebebe4;
+			}
+
+			ul.choices {
+
+				> li {
+					padding: 4px;
+					display: inline-block;
+				}
+			}
+		}
+	}
+}
