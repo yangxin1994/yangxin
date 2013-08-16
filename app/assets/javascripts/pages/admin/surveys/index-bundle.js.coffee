@@ -11,9 +11,8 @@ $ ->
       method: "GET"
       success: (ret)->
         if ret.success
-          console.log ret.value
-          $("#ck_hot").prop("checked", true) if ret.value.hot.quillme_hot
-          $("#point").val(ret.value.spread.spread_point)
+          $("#ck_hot").prop("checked", ret.value.hot)
+          $("#point").val(ret.value.spread)
           $("#ck_visible").prop("checked", true) if ret.value.visible
           $('#info_modal').modal('show')
         else
@@ -30,7 +29,7 @@ $ ->
       method: 'PUT'
       data:
         hot: $("#ck_hot").prop("checked")
-        point: $("#point").val()
+        spread: $("#point").val()
         visible: $("#ck_visible").prop("checked")
       success: (ret)->
         if ret.success
