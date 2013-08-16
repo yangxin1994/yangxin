@@ -5,9 +5,7 @@ log/*.log
 log
 tmp/
 .sass-cache/
-public/assets/*
 db/*.lock
 db/journal
 .DS_Store
-public/uploads/*
 config/mongoid.yml
