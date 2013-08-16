@@ -1,22 +1,20 @@
 class Admin::SurveysController < Admin::AdminController
 
-	before_filter :get_client
-
   layout "layouts/admin-todc"
-
-	def get_client
-		@client = Admin::SurveyClient.new(session_info)
-	end
 
 	# *****************************
 
   def index
-    result = @client.index(params)
-    if result.success
-      @surveys = result.value
-    else
-      render :json => result
-    end 
+    if params[:status].present?  
+      select_fileds[:status] = {"$in" => 
+        Tool.convert_int_to_base_arr(Tool.convert_int_to_base_arr(params[:status].to_i)}
+    end
+    if params[:title].present?
+      select_fileds[:title] = /.*#{params[:title]}.*/
+    end
+    auto_paginate Survey.find_by_fields(select_fileds) do |survey|
+      
+    end
   end
 
   def more_info
