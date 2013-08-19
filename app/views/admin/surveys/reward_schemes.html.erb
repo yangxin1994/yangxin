@@ -30,7 +30,7 @@
 <% end %>
 <div class="well">
   <ul class="">
-  <% @reward_schemes["data"].each_with_index do |reward_scheme, index| %>
+  <% @reward_schemes.each_with_index do |reward_scheme, index| %>
     <li><a href="?editing=<%= reward_scheme["_id"] %>">方案-<%= "#{index} #{reward_scheme['name']}" %> </a></li>
   <% end %>
     <li><a href="?">创建奖励方案 </a></li>
@@ -206,7 +206,7 @@
               <span class="caret"></span>
             </button>
             <ul class="dropdown-menu dropselect prize">
-              <% @prizes["data"].each do |prize| %>
+              <% @prizes.each do |prize| %>
                 <li><a href="#prize-<%= prize['_id'] %>"><%= prize['title'] %></a></li>
               <% end %>
             </ul>
@@ -222,7 +222,7 @@
     <div>
       <div class="control-group broswer_extension-info">
         <div class="controls">
-          <a href="#add_prize" id="add_prize" data-toggle="<%= @prizes["data"].try('size') || 0 %>" class="btn btn-link">添加一组</a>
+          <a href="#add_prize" id="add_prize" data-toggle="<%= @prizes.try('size') || 0 %>" class="btn btn-link">添加一组</a>
         </div>
       </div>
     </div>

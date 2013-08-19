@@ -38,6 +38,37 @@ class Admin::SurveysController < Admin::AdminController
     end
   end
 
+  def reward_schemes
+    survey = Survey.where(:_id => params[:id]).first
+    @reward_schemes = survey.reward_schemes.not_default
+    @prizes = Prize.all
+    if @editing_rs = RewardScheme.where(:id => params[:editing]).first
+      @editing_rs["rewards"].each do |reward|
+        case reward["type"].to_i
+        when 1
+          @editing_rs["tel_charge"] = reward["amount"]
+        when 2
+          @editing_rs["alipay"] = reward["amount"]
+        when 4
+          @editing_rs["point"] = reward["amount"]
+        when 8
+          @editing_rs["prizes"] = reward["prizes"]
+        when 16
+          @editing_rs["jifenbao"] = reward["amount"]
+        else
+
+        end
+      end
+      if @editing_rs["rewards"].present?
+        @editing_rs['is_free'] = "no" 
+      else
+        @editing_rs['is_free'] = "yes" 
+      end
+    else
+      @editing_rs ={}
+    end    
+  end  
+
   def show
     @survey = Survey.where(:_id => params[:id])
     # @survey = Survey.where(:_id => params[:id])
@@ -53,6 +84,8 @@ class Admin::SurveysController < Admin::AdminController
 
 
   def promote
+    survey = Survey.where(:_id => params[:id])
+    reward_schemes = RewardScheme.where(:survey_id => survey._id)
     result = @client.promote(params)
     if result.success
       @promote = result.value

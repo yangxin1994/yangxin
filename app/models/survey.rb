@@ -1819,6 +1819,11 @@ class Survey
     survey_obj["broswer_extension_promote_info"] = Marshal.load(Marshal.dump(self.broswer_extension_promote_info))
     survey_obj["weibo_promotable"] = self.weibo_promotable
     survey_obj["weibo_promote_info"] = Marshal.load(Marshal.dump(self.weibo_promote_info))
+    survey_obj["reward_schemes"] = Marshal.load(Marshal.dump(self.reward_schemes))
+    survey_obj["agent_promote_info"] = info_for_agent
+    if survey_obj["agent_promote_info"].present?
+      survey_obj['agent_promotable'] = true
+    end
     return survey_obj
   end
 
