@@ -1819,11 +1819,39 @@ class Survey
     survey_obj["broswer_extension_promote_info"] = Marshal.load(Marshal.dump(self.broswer_extension_promote_info))
     survey_obj["weibo_promotable"] = self.weibo_promotable
     survey_obj["weibo_promote_info"] = Marshal.load(Marshal.dump(self.weibo_promote_info))
-    survey_obj["reward_schemes"] = Marshal.load(Marshal.dump(self.reward_schemes))
+    survey_obj["reward_schemes"] = self.reward_schemes.not_default
     survey_obj["agent_promote_info"] = info_for_agent
     if survey_obj["agent_promote_info"].present?
-      survey_obj['agent_promotable'] = true
+      survey_obj["agent_promotable"] = true
     end
+    survey_obj["agent_promote_info"]["agents"] = Agent.all
+    survey_obj["agent_promote_info"]["agent_tasks"] = self.agent_tasks
+    smp_attrs = sample_attributes_for_promote
+
+    smp_attrs.each_with_index do |smp_attr, index|
+      case smp_attr['type'].to_i
+      when 0
+        _value = smp_attr['value']
+      when 1
+        _value = smp_attr['value'].join("\n")
+      when 2, 4
+        _value = smp_attr['value'].map{|es| es.map { |e| e.join(',') }}.join("\n")
+      when 3, 5
+        _value = smp_attr['value'].map{|es| es.map { |e| e.strftime("%Y/%m/%d") }}.join("\n")
+      when 6
+        _value = smp_attr['value'].join("\n")
+      when 7
+        _value = smp_attr['value'].join("\n")
+      end
+      smp_attrs[index]['value'] = _value
+    end
+    if SampleAttribute.count > 0
+      survey_obj["sample_attributes_list"] = SampleAttribute.all
+      binding.pry
+    else
+      survey_obj["sample_attributes_list"] = [{}]
+    end    
+    survey_obj["sample_attributes"] = smp_attrs
     return survey_obj
   end
 

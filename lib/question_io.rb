@@ -459,11 +459,15 @@ class PhoneBlankQuestionIo < QuestionIo
     when 1
       if row["#{header_prefix}"] =~ /^((\d{11})|(\d{3}-\d{8})|(\d{4}-\d{7})|(\d{3}-\d{4}-\d{4}))$/
         @retval = row["#{header_prefix}"]
+      elsif row["#{header_prefix}"].blank?
+        @retval = row["#{header_prefix}"]
       else
         raise "您填写的这个...不太像是电话号码啊?"
       end
     when 2
       if row["#{header_prefix}"] =~ /^0?(13\d|15[012356789]|18[0236789]|14[57])-?\d{3}-?\d{1}-?\d{4}$/
+        @retval = row["#{header_prefix}"]
+      elsif row["#{header_prefix}"].blank?
         @retval = row["#{header_prefix}"]
       else
         raise "您填写的这个...不太像是手机号码啊?"
@@ -471,6 +475,8 @@ class PhoneBlankQuestionIo < QuestionIo
     when 3
       if row["#{header_prefix}"] =~ /^0?(13\d|15[012356789]|18[0236789]|14[57])-?\d{3}-?\d{1}-?\d{4}$/ ||
         row["#{header_prefix}"] =~ /^((\d{11})|(\d{3}-\d{8})|(\d{4}-\d{7})|(\d{3}-\d{4}-\d{4}))$/
+        @retval = row["#{header_prefix}"]
+      elsif row["#{header_prefix}"].blank?
         @retval = row["#{header_prefix}"]
       else
         raise "您填写的这个...不太像是手机或者电话号码啊?"
@@ -576,13 +582,13 @@ class AddressBlankQuestionIo < QuestionIo
   def spss_header(header_prefix)
     fom = []
     case issue["format"]
-    when 1 , 2
+    when 8
       fom = ['省']
       fom_pre = ['province']
-    when 3 , 4
+    when 12
       fom = ['省', '市']
       fom_pre = ['province', 'city']
-    when 7 , 8 , 14
+    when 14
       fom = ['省', '市', '县/区']
       fom_pre = ['province', 'city', 'county']
     when 15

@@ -1,7 +1,7 @@
 <% content_for :head do %>
   <%= javascript_include_tag "pages/admin/surveys/promote-bundle" %>
   <script type="text/javascript">
-    window.smp_attr = <%= raw @promote['sample_attributes_list'].to_json %>
+
   </script>
 <% end %>
 <% content_for :sidenav do %>
@@ -214,7 +214,7 @@
           </label>
       </div>
     </div>
-    <% (@promote['broswer_extension_promote_info']['filter'] || [{'key_words' => '', 'url' => ''}]).each_with_index do |filter, index| %>
+    <% (@promote['broswer_extension_promote_info']['filter'][0] || [{'key_words' => '', 'url' => ''}]).each_with_index do |filter, index| %>
       <div class="control-group broswer_extension-info">
         <label class="control-label" >浏览器插件详细设置:</label>
         <div class="controls">

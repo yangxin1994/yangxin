@@ -84,13 +84,10 @@ class Admin::SurveysController < Admin::AdminController
 
 
   def promote
-    survey = Survey.where(:_id => params[:id])
-    reward_schemes = RewardScheme.where(:survey_id => survey._id)
-    result = @client.promote(params)
-    if result.success
-      @promote = result.value
+    if survey = Survey.where(:_id => params[:id]).first
+      @promote = survey.get_all_promote_settings
     else
-      render :json => result
+
     end
   end
 
