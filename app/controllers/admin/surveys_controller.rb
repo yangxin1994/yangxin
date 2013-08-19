@@ -5,23 +5,7 @@ class Admin::SurveysController < Admin::AdminController
 	# *****************************
 
   def index
-    if params[:keyword]
-      if params[:keyword] =~ /^.+@.+$/
-        uid = User.where(:email => params[:keyword]).first.try '_id'
-        surveys = Survey.where(:user_id => uid)
-      else
-        surveys = Survey.where(:title => /.*#{params[:keyword]}.*/)
-      end  
-    else
-      surveys = Survey
-    end
-    select_fileds = {}
-    if params[:status]
-      select_fileds[:status] = {
-        "$in" => Tool.convert_int_to_base_arr(params[:status])
-      }
-    end
-    @surveys = auto_paginate surveys.find_by_fields(select_fileds) do |surs|
+    @surveys = auto_paginate Survey.search(params) do |surs|
       surs.map do |sur|
         sur.append_user_fields([:email, :mobile])
         sur.serialize_for([:title, :email, :mobile, :created_at])
@@ -55,6 +39,7 @@ class Admin::SurveysController < Admin::AdminController
   end
 
   def show
+    @survey = Survey.where(:_id => params[:id])
     # @survey = Survey.where(:_id => params[:id])
     # result = @client.show(params)
     # if result[:success] || result.try(:success)
@@ -65,22 +50,7 @@ class Admin::SurveysController < Admin::AdminController
     # end
   end
 
-  def reward_schemes
-    result = @client.reward_schemes(params)
-    _prize_result = Admin::PrizeClient.new(session_info)._get({:per_page => 100},'')
-    if result.success && _prize_result.success
-      @reward_schemes = result.value
-      @prizes = _prize_result.value
-      @editing_rs = @reward_schemes['editing_rs']
-      (@editing_rs['prizes'] || []).each_with_index do |prize, index|
-        prize['deadline'] = Time.at(prize['deadline']).strftime("%Y/%m/%d")
-        @editing_rs['prizes'][index] = prize
-      end
-      gon.push @reward_schemes
-    else
-      render result
-    end
-  end
+
 
   def promote
     result = @client.promote(params)
