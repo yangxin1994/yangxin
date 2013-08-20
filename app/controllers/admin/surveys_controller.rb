@@ -70,7 +70,29 @@ class Admin::SurveysController < Admin::AdminController
   end  
 
   def show
-    @survey = Survey.where(:_id => params[:id])
+    _r = Survey.find(params[:id]).info_for_admin
+    @survey = _r["survey"]
+    @questions = {}
+    binding.pry
+    _r['questions'].each do |question_id, question|
+      @survey["logic_control"].each do |lc|
+        lc["conditions"].each do |condition|
+          if condition["question_id"] == question_id
+            question["is_logic_control"] = true
+            # question["logic_control_type"] = lc["rule_type"]
+            question["issue"]["items"] = question["issue"]["items"].try('map') do |item|
+              if condition["answer"].include? item["id"]
+                item["is_fuzzy"] = condition["fuzzy"]
+                item["is_logic_control"] = true
+                item["logic_control_type"] = lc["rule_type"]
+              end
+              item
+            end
+          end
+        end
+      end
+      @questions[question_id] = question
+    end    
     # @survey = Survey.where(:_id => params[:id])
     # result = @client.show(params)
     # if result[:success] || result.try(:success)
