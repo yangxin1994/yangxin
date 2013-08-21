@@ -541,6 +541,7 @@ OopsData::Application.routes.draw do
 				get :get_newst_exchange_logs,:as => :get_newst_exchange_logs
 				get :get_point_change_log
 				get :find_lottery_logs
+				get :get_order_by_answer_sample
 			end
 		end
 		resources :answers do 

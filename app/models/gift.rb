@@ -46,14 +46,33 @@ class Gift
 		return self.normal.where(:_id => gift_id).first
 	end
 
-	def self.find_real_gift(desc_type)
-		gifts = self.on_shelf.real.desc("#{desc_type}")
-		gifts = gifts.map do |gift| 
-			gift['photo_src'] = gift.photo.nil? ? Gift::DEFAULT_IMG : gift.photo.picture_url
-			gift
-		end
+	# def self.find_real_gift(desc_type)
+	# 	gifts = self.on_shelf.real.desc("#{desc_type}")
+	# 	gifts = gifts.map do |gift| 
+	# 		gift['photo_src'] = gift.photo.nil? ? Gift::DEFAULT_IMG : gift.photo.picture_url
+	# 		gift
+	# 	end
+	# 	return gifts
+	# end
+
+	def self.find_real_gift(desc_type,point)
+    	if point.present?
+    		gifts = self.on_shelf.real.where(:point.lte => point.to_i)
+    	else
+    		gifts = self.on_shelf.real	
+    	end	
+		gifts = gifts.asc("#{desc_type}")  if desc_type.to_s == 'point'
+		gifts = gifts.desc("#{desc_type}") if desc_type.to_s  != 'point'  
 		return gifts
 	end
+
+	def info_for_gifts
+		self['photo_src'] = self.photo.nil? ?  Gift::DEFAULT_IMG : self.photo.picture_url
+		return self
+	end
+
+
+
 
 	def self.create_gift(gift)
 		photo_url = gift.delete("photo_url")

@@ -45,6 +45,10 @@ class Sample::LogsController < ApplicationController
     render_json_auto  LotteryLog.find_lottery_logs(params[:id],params[:status],params[:limit])
   end
 
+  def get_order_by_answer_sample
+    render_json_auto LotteryLog.get_order_by_answer_sample(params[:id])
+  end
+
   def get_point_change_log
     if params[:scope] == 'in'
       @logs = PointLog.where(:user_id => @current_user.id, :amount.gt => 0)
