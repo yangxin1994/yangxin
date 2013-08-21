@@ -1,5 +1,5 @@
-# finish migrating
 #encoding: utf-8
+# finish migrating
 require 'error_enum'
 class EntryClerk::SurveysController < ApplicationController
     

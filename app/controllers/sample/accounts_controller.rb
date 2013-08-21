@@ -18,14 +18,7 @@ class Sample::AccountsController < Sample::SampleController
                                           params[:permanent_signed_in], 
                                           params[:third_party_user_id])
     refresh_session(result['auth_key'])
-    render_json { result } and return
-
-=begin
-    result = Sample::AccountClient.new(session_info).login(params[:email_mobile], params[:password], 
-    params[:third_party_user_id], params[:permanent_signed_in])
-    refresh_session(result.value['auth_key'])
-  	render :json => result
-=end
+    render_json_auto result and return
   end
   
   # PAGE
@@ -60,9 +53,6 @@ class Sample::AccountsController < Sample::SampleController
     end
   end
 
-
-
-
   def check_email_mobile
     u = User.find_by_email_mobile(params[:phone])
     render_json_auto({"exist" => (u &&  u.is_activated)}) and return
@@ -79,8 +69,6 @@ class Sample::AccountsController < Sample::SampleController
         params[:third_party_user_id],
         '#{request.protocol}#{request.host_with_port}/account/email_activate')
       render_json_auto(retval) and return
-      # result = Sample::AccountClient.new(session_info).create_sample(params[:phone],params[:password],"#{request.protocol}#{request.host_with_port}/account/email_activate",params['third_party_user_id'])
-      # render :json => result            
     end
   end
 
@@ -160,8 +148,6 @@ class Sample::AccountsController < Sample::SampleController
       "nickname" => @current_user.nickname
     }
     render_json_auto @basic_info and return
-
-    # render :json =>  Sample::UserClient.new(session_info).get_basic_info
   end
 
   def forget_password
@@ -187,7 +173,7 @@ class Sample::AccountsController < Sample::SampleController
     begin
       activate_info_json = Encryption.decrypt_activate_key(params[:key])
       activate_info = JSON.parse(activate_info_json)
-      user = User.find_by_email(activate_info_json['email'])
+      user = User.find_by_email(activate_info['email'])
       render_404 if user.nil?
       redirect_to forget_password_account_path(:key => Base64.encode64(user.email).chomp())
     rescue
@@ -199,17 +185,13 @@ class Sample::AccountsController < Sample::SampleController
     session[:forget_account] = params[:email_mobile]
     render_json_auto User.send_forget_pass_code(params[:email_mobile], 
       "#{request.protocol}#{request.host_with_port}/account/get_account") and return
-    # result = Sample::UserClient.new(session_info).send_forget_pass_code(params[:email_mobile],"#{request.protocol}#{request.host_with_port}/account/get_account")
-    # render :json =>  result
   end
 
   def make_forget_pass_activate
     render_json_auto User.make_forget_pass_activate(params[:phone], params[:code]) and return
-    # render :json =>  Sample::UserClient.new(session_info).make_forget_pass_activate(params[:phone],params[:code])
   end
 
   def generate_new_password
     render_json_auto User.generate_new_password(params[:email_mobile],params[:password])
-    # render :json =>  Sample::UserClient.new(session_info).generate_new_password(params[:email_mobile],params[:password])
   end
 end

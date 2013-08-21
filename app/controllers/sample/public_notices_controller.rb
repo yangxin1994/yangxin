@@ -14,11 +14,12 @@ class Sample::PublicNoticesController < Sample::SampleController
 			end
 		end
 		tmp_hash['current_notice'] = @public_notice
-		render_json { tmp_hash }
+		@public_notice = tmp_hash
 
 
-		@public_notice = @pclient.show(params[:id])
-		@public_notice.success ? @public_notice = @public_notice.value : @public_notice = nil
+
+		# @public_notice = @pclient.show(params[:id])
+		# @public_notice.success ? @public_notice = @public_notice.value : @public_notice = nil
 	end
 
 	def index
