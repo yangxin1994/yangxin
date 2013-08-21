@@ -1,15 +1,15 @@
-<% if surveys['data'].present? %>
+<% if surveys.present? %>
 
 	<% surveys = surveys['data'] %>
 	<% surveys.each_with_index do |survey,index|%>
 		<li class="research-content" <%= hide_border?(surveys,index) %>>
 			<% if [1,2,16].include?(survey['quillme_promote_reward_type']) %>
-				<span class="reward rmb <%= survey['status'].to_i == Sample::SurveyClient::CLOSED ? 'finished' : 'unfinished' %>">
+				<span class="reward rmb <%= survey['status'].to_i == Survey::CLOSED ? 'finished' : 'unfinished' %>">
 					<b>￥<%= survey['reward_type_info']['amount'] if survey['reward_type_info']%>
 					</b>
 				</span>
 			<% elsif [4].include?(survey['quillme_promote_reward_type']) %>
-				<span class="reward integral <%= survey['status'].to_i == Sample::SurveyClient::CLOSED ? 'finished' : 'unfinished' %>">
+				<span class="reward integral <%= survey['status'].to_i == Survey::CLOSED ? 'finished' : 'unfinished' %>">
 					<b>
 						<% if survey['reward_type_info']%>
 							<%= survey['reward_type_info']['amount']   %>
@@ -20,11 +20,11 @@
 					<em>积分</em>
 				</span>
 			<% elsif [8].include?(survey['quillme_promote_reward_type']) %>
-				<span class="reward lottery <%= survey['status'].to_i == Sample::SurveyClient::CLOSED ? 'finished' : 'unfinished' %>">
+				<span class="reward lottery <%= survey['status'].to_i == Survey::CLOSED ? 'finished' : 'unfinished' %>">
 					<b>抽奖机会</b> 
 				</span>   
 			<% elsif [0].include?(survey['quillme_promote_reward_type']) %>
-				<span class="reward lottery <%= survey['status'].to_i == Sample::SurveyClient::CLOSED ? 'finished' : 'unfinished' %>">
+				<span class="reward lottery <%= survey['status'].to_i == Survey::CLOSED ? 'finished' : 'unfinished' %>">
 					<b>免费调研</b> 
 				</span>         
 			<% end %>
@@ -44,7 +44,7 @@
 				-->
 			</span>
 			<% if user_signed_in%>
-				<span class="status  <%= survey['status'].to_s == "#{Sample::SurveyClient::CLOSED.to_s}" ? 'finished' : (survey['answer_status'].to_i == 0 ? 'unfinished' : '') %>"><%= answered?(survey['answer_status'])%></span>
+				<span class="status  <%= survey['status'].to_s == "#{Survey::CLOSED.to_s}" ? 'finished' : (survey['answer_status'].to_i == 0 ? 'unfinished' : '') %>"><%= answered?(survey['answer_status'])%></span>
 			<% end %>
 
 			<% if survey['status'].to_i == 2 %>

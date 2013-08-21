@@ -77,6 +77,7 @@ class Answer
 
 	# status
 	STATUS_NAME_ARY = ["edit", "reject", "under_review", "under_agent_review", "redo", "finish"]
+	NOT_EXIST = 0
 	EDIT = 1
 	REJECT = 2
 	UNDER_REVIEW = 4
@@ -947,6 +948,8 @@ class Answer
 			# update the survey spread
 			SurveySpread.inc(introducer, self.survey)
 			if point_to_introducer > 0
+				introducer.point += point_to_introducer
+				introducer.save
 				PointLog.create_spread_point_log(self.point_to_introducer, self.survey._id.to_s, self.survey.title, introducer._id)
 				# send the introducer a message about the rewarded points
 				introducer.create_message("问卷推广积分奖励", "您推荐填写的问卷通过了审核，您获得了#{self.point_to_introducer}个积分奖励。", [introducer._id.to_s])

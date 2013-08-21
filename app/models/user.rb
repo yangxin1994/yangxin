@@ -273,7 +273,8 @@ class User
     return ErrorEnum::USER_NOT_EXIST if !user.present?
     return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - time.to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i        
     user.update_attributes(:email_subscribe => true )
-    return {:success => true}		 
+    # return {:success => true}		 
+    return true
 	end
 
 
@@ -328,12 +329,6 @@ class User
 		else
 			return ErrorEnum::USER_NOT_EXIST
 		end
-	end
-
-	def self.get_account_by_activate_key(activate_key)
-
-    return ErrorEnum::USER_NOT_EXIST if !user.present?
-    return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - time.to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i        
 	end
 
 	#*description*: create a new user

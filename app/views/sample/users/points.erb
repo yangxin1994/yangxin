@@ -55,7 +55,7 @@
                     
                 </thead>
                 <tbody>
-                    <% @point_logs.value["data"].to_a.each do |log| %>
+                    <% @point_logs["data"].to_a.each do |log| %>
                         <tr>
                             <td><%= int_time_to_date(log["created_at"].to_i) %></td>
                             <td>
@@ -63,16 +63,16 @@
                                     <span><%= truncate(log["survey_title"], length: 22) %></span>
                                 <% elsif !log["gift_type"].blank? %>
                                     <% case log["gift_type"].to_i %>
-                                    <% when ConstVar::Type::MOBILE_CHARGE, ConstVar::Type::SMALL_MOBILE_CHARGE %>
+                                    <% when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE %>
                                         <i class="icon-order icon-phonepay"></i>
                                         <span><%= truncate(log["gift_name"], length: 22) %></span>
-                                    <% when ConstVar::Type::ALIPAY %>
+                                    <% when Order::ALIPAY %>
                                         <i class="icon-order icon-alipay"></i>
                                         <span><%= truncate(log["gift_name"], length: 22) %></span>
-                                    <% when ConstVar::Type::JIFENBAO %>
+                                    <% when Order::JIFENBAO %>
                                         <i class="icon-order icon-jfb"></i>
                                         <span><%= truncate(log["gift_name"], length: 22) %></span>
-                                    <% when ConstVar::Type::QQ_COIN %>
+                                    <% when Order::QQ_COIN %>
                                         <i class="icon-order icon-qb"></i>
                                         <span><%= truncate(log["gift_name"], length: 22) %></span>
                                     <% else %>

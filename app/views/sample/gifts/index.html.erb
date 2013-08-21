@@ -170,7 +170,7 @@
 							<span class="l_mame"><%= log['username'] %></span>
 							<span class="point">使用了<b><%= log['point']%></b>积分</span>
 							<span class="exchange">兑换了</span>
-							<% if log['gift_type'].to_s == Sample::GiftClient::REAL %>
+							<% if log['gift_type'].to_s == Gift::REAL %>
 								<span class="l_mame"><a href="/gifts/<%= log['gift_id']%>"><%= log['	gift_name']%></a></span>
 							<% else %>
 								<span class="l_mame"><%= log['gift_name']%></span>
@@ -189,8 +189,8 @@
 				<h3 class="box-title">兑换排行</h3>
 			</div>
 			<ul class="rank-list">
-				<% @gift_rank['data'].each_with_index do |gift,index|%>
-					<li <%= hide_border?(@gift_rank['data'],index)%> >
+				<% @gift_rank.each_with_index do |gift,index|%>
+					<li <%= hide_border?(@gift_rank,index)%> >
 						<span class="rank-list-left l">
 							<span class="number l"><%= index + 1 %></span>
 							<span class="username"><a href="/gifts/<%= gift['_id']%>">

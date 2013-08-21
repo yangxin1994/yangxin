@@ -6,15 +6,12 @@ class Admin::SurveysController < Admin::AdminController
 
   def index
     if params[:status].present?  
-      select_fileds[:status] = {"$in" => 
-        Tool.convert_int_to_base_arr(Tool.convert_int_to_base_arr(params[:status].to_i)}
+      select_fileds[:status] = {"$in" => Tool.convert_int_to_base_arr(Tool.convert_int_to_base_arr())}
     end
     if params[:title].present?
       select_fileds[:title] = /.*#{params[:title]}.*/
     end
-    auto_paginate Survey.find_by_fields(select_fileds) do |survey|
-      
-    end
+    auto_paginate Survey.find_by_fields(select_fileds)
   end
 
   def more_info
@@ -75,5 +72,4 @@ class Admin::SurveysController < Admin::AdminController
    result = @client.destroy_attributes(params)
    render :json => result
   end
-
 end

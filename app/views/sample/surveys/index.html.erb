@@ -18,13 +18,13 @@
 <div class="inner-page rl">
 	<div class="rl_h">
 		<ul>
-			<li class="<%= current_tab?("#{Sample::SurveyClient::PUBLISHED}",params[:status].present? ? params[:status] : "#{Sample::SurveyClient::PUBLISHED}" )%> opend" data="2">
-				<a href="<%= surveys_path(:status => Sample::SurveyClient::PUBLISHED)%>">
+			<li class="<%= current_tab?("#{Survey::PUBLISHED}",params[:status].present? ? params[:status] : "#{Survey::PUBLISHED}" )%> opend" data="2">
+				<a href="<%= surveys_path(:status => Survey::PUBLISHED)%>">
 			 		开放中的问卷
 				</a> 
 			</li>
-			<li class="<%= current_tab?("#{Sample::SurveyClient::CLOSED}",params[:status])%> closed" data="1">
-				<a href="<%= surveys_path(:status => Sample::SurveyClient::CLOSED)%>">
+			<li class="<%= current_tab?("#{Survey::CLOSED}",params[:status])%> closed" data="1">
+				<a href="<%= surveys_path(:status => Survey::CLOSED)%>">
 			 		已结束的问卷 
 			 	</a>
 			</li>
@@ -42,23 +42,23 @@
 								全部 (<span class="all_t"><%= @reward_count.values.reduce(:+).to_i %></span>)
 							</a>
 						</li>
-						<li reward_type="4" class="<%= current_tab?("#{Sample::SurveyClient::POINT_REWARD}",params[:reward_type])%>">
-							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{Sample::SurveyClient::POINT_REWARD}")%>">
+						<li reward_type="4" class="<%= current_tab?("4",params[:reward_type])%>">
+							<a href="<%= surveys_path(:status => params[:status],:reward_type => "4")%>">
 								积分奖励 (<span class="u_t"><%= @reward_count["4"].to_i %></span>)
 							</a>
 						</li>
-						<li reward_type="8"  class="<%= current_tab?("#{Sample::SurveyClient::LOTTERY_REWARD}",params[:reward_type])%>">
-							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{Sample::SurveyClient::LOTTERY_REWARD}")%>">
+						<li reward_type="8"  class="<%= current_tab?("8",params[:reward_type])%>">
+							<a href="<%= surveys_path(:status => params[:status],:reward_type => "8")%>">
 								抽奖机会 (<span class="c_t"><%= @reward_count["8"].to_i %></span>)
 							</a>
 						</li>
-						<li reward_type="1,2,16" class="<%= current_tab?("#{Sample::SurveyClient::CASH_REWARD}",params[:reward_type])%>">
-							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{Sample::SurveyClient::CASH_REWARD}")%>">
+						<li reward_type="1,2,16" class="<%= current_tab?("1,2,16",params[:reward_type])%>">
+							<a href="<%= surveys_path(:status => params[:status],:reward_type => "1,2,16")%>">
 								现金奖励 (<span class="x_t"><%= @reward_count["1"].to_i + @reward_count["2"].to_i + @reward_count["16"].to_i %></span>)
 							</a>
 						</li>
-						<li reward_type="0" class="<%= current_tab?("#{Sample::SurveyClient::FREE_REWARD}",params[:reward_type])%>">
-							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{Sample::SurveyClient::FREE_REWARD}")%>">
+						<li reward_type="0" class="<%= current_tab?("0",params[:reward_type])%>">
+							<a href="<%= surveys_path(:status => params[:status],:reward_type => "0")%>">
 								免费调研 (<span class="m_t"><%= @reward_count["0"].to_i %></span>)
 							</a>
 						</li>
@@ -71,11 +71,11 @@
 								<i class="triangle"></i>
 							</div>	
 							<ul class="w50">
-								<li data="<%= Sample::AnswerClient::WAITANSWER%>">待参与</li>
-								<li data="<%= Sample::AnswerClient::ANSWING%>">答题中</li>
-								<li data="<%= Sample::AnswerClient::CHECKING%>">待审核</li>
-								<li data="<%= Sample::AnswerClient::REJECT%>">被拒绝</li>
-								<li class="bbr" data="<%= Sample::AnswerClient::COMPLETE%>">已完成</li>
+								<li data="<%= Answer::NOT_EXIST %>">待参与</li>
+								<li data="<%= Answer::EDIT %>">答题中</li>
+								<li data="<%= "#{Answer::UNDER_REVIEW},#{Answer::UNDER_AGENT_REVIEW}" %>">待审核</li>
+								<li data="<%= Answer::REJECT %>">被拒绝</li>
+								<li class="bbr" data="<%= Answer::FINISH %>">已完成</li>
 							</ul>
 						</div>						
 					<% end %>

@@ -1,3 +1,4 @@
+# finish migrating
 class Filler::FillerController < ApplicationController
 	# has_mobile_fu
  #  before_filter :set_mobile_format, :check_mobile_param
@@ -17,13 +18,10 @@ class Filler::FillerController < ApplicationController
 	end
 
 	def ensure_survey(survey_id)
-		result = Sample::SurveyClient.new(session_info).show(survey_id)
-		if !result.success || result.value['status'] == 4
-			# render 500 exception or 
-			# if survey not exist or survey is deleted, return error
-			result.unknown_error? ? render_500 : render_404
+		@survey = Survey.find_by_id(survey_id)
+		if @survey.nil?
+			render_404
 		end
-		@survey = result.value
 	end
 
 	def ensure_reward(reward_scheme_id, rewards)
@@ -43,23 +41,18 @@ class Filler::FillerController < ApplicationController
 						@reward_scheme_type = 2
 						@reward_point = r['amount']
 						# get hottest gift
-						@hot_gift = nil
-						gifts = Sample::GiftClient.new(session_info).get_hoest(1, 1, 'exchange_count')
-						if gifts.success && gifts.value['data'] && gifts.value['data'].length > 0
-							@hot_gift = gifts.value['data'][0]
-						end
+						@hot_gift = Gift.on_shelf.real.desc(:exchange_count).first.info
 						break
 					end
 				when 8
 					if r['prizes'].length > 0
 						@reward_scheme_type = 3 
-						p_client = Sample::PrizeClient.new(session_info)
 						@prizes = r['prizes'].map do |p|
-							prize = p_client.show_one(p['id'])
+							prize = Prize.find_by_id(p['id'])
 							{
-								title: prize.value['title'],
+								title: prize.title,
 								amount: p['amount'],
-								photo_url: prize.value['photo_url']
+								photo_url: prize.photo.picture_url
 							}
 						end || []
 						break
@@ -80,10 +73,8 @@ class Filler::FillerController < ApplicationController
 		@spread_url = nil
 		if user_signed_in && survey['spread_point'] > 0
 			@spread_url = "#{Rails.application.config.quillme_host}#{show_s_path(reward_scheme_id)}?i=#{user_id}"
-			result = ::ShortUrlClient.new(session_info).create(@spread_url)
-			if result.success && !result.value.blank?
-				@spread_url = "#{Rails.application.config.quillme_host}/#{result.value}"
-			end
+			result = MongoidShortener.generate(@spread_url)
+			@spread_url = "#{Rails.application.config.quillme_host}/#{result}"
 		end
 	end
 
@@ -102,9 +93,9 @@ class Filler::FillerController < ApplicationController
 		# 2. get survey_id from rewarc_scheme
 		# 3. ensure survey exist and not deleted
 		render_404 if reward_scheme_id.nil?
-		reward_scheme = Sample::RewardSchemeClient.new(session_info, reward_scheme_id).show()
-		render_404 if !reward_scheme.success
-		survey_id = reward_scheme.value['survey_id']
+		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
+		render_404 if reward_scheme.nil?
+		survey_id = reward_scheme.survey_id
 		ensure_survey(survey_id)
 
 		# 4. Check whether an answer for this survey is already exist.
@@ -113,61 +104,51 @@ class Filler::FillerController < ApplicationController
 		#    If answer exists, get percentage
 		answer_id = nil
 		if user_signed_in
-			result = Sample::AnswerClient.new(session_info).get_answer_id_by_auth_key(survey_id, is_preview)
-			if result.success
-				answer_id = result.value
-			elsif result.value['error_code'] == 'error_7'	
-				# if the current session in QuillWeb is valid but authkey in Quill is invalid, logout
-				_sign_out request.url and return
-			end
+			answer = Answer.find_by_survey_id_sample_id_is_preview(survey_id, @current_user._id.to_s, is_preview)
+			answer_id = answer._id.to_s if answer.present?
 		else
 			answer_id = cookies[cookie_key(survey_id, is_preview)]
 		end
 		@percentage = 0
-		if !answer_id.blank?
+		answer = answer_id.present? ? Answer.find_by_id(answer_id) : nil
+		if answer.present?
 			# if answer exist, load next page questions
-			data = Sample::AnswerClient.new(session_info, answer_id).load_questions
-			if data.success
-				if data.value['answer_status'] == 1 && data.value['questions'].length > 0
-					# if data.value['questions'].length == 0
-					# survey has no question or the user has finished all question but not submitted the survey yet
-					@percentage = data.value['answer_index'].to_f / data.value['question_number'].to_f
-				else
-					redirect_to show_a_path(answer_id) and return
-				end
-			else
-				# if failed to load next page. and the user is not signin, clear this illegal answer id in cookie
+			if answer.user.present? && answer.user != @current_user
 				answer_id = nil
 				cookies.delete(cookie_key(survey_id, is_preview), :domain => :all)
 			end
+			answer.update_status
+			questions = answer.load_question(nil, true) if answer.is_edit
+
+			if answer.is_edit
+				answer_index = answer.index_of(questions)
+				question_number = answer.survey.all_questions_id(false).length + answer.random_quality_control_answer_content.length,
+				@percentage = answer_index.to_f / question_number.to_f
+			else
+				redirect_to show_a_path(answer_id) and return
+			end
+
 		end
 
 		# 5. get real reward
 		#    If answer exists, reward is in answer; 
 		#    if answer does not exist, reward is in reward scheme
-		answer = nil
-		if !answer_id.blank?
-			answer = Sample::AnswerClient.new(session_info, answer_id).show
-			answer.success ? answer = answer.value : answer = nil;
-		end
-		ensure_reward(reward_scheme_id, answer.nil? ? reward_scheme.value['rewards'] : answer['rewards'])
+		ensure_reward(reward_scheme_id, answer.nil? ? reward_scheme.rewards : answer.rewards)
 
 		# 6. Check whether survey is closed or not
 		@survey_closed = false
-		if !@is_preview && @survey['status'] != 2
+		if !@is_preview && @survey.status != Survey::PUBLISHED
 			# if is filler and survey's status is not published
 			@survey_closed = true
 		end
 
 		# 7. Estimate survey filler time
-		result = Sample::SurveyClient.new(session_info).estimate_answer_time(survey_id)
-		@left_time = (result.success ? result.value : -1)
+		@left_time = @survey.estimate_answer_time
 
 		# 8. If is hot survey and user is signed in, check whether is new user or not
-		@answer_count_empty = true
-		if @survey['quillme_hot'] && user_signed_in
-			result = Sample::UserClient.new(session_info).get_basic_info
-			@answer_count_empty = (result.success && result.value['answer_number'] == 0)
+		@answer_count_empty = false
+		if @survey.quillme_hot && user_signed_in
+			@answer_count_empty = @current_user.answers.not_preview.length
 		end
 
 		# 10. get request referer and channel
@@ -186,5 +167,4 @@ class Filler::FillerController < ApplicationController
 		# 11. ensure spread url
 		ensure_spread(@survey, reward_scheme_id)
 	end
-
 end

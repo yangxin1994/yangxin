@@ -1,11 +1,12 @@
 # -*- encoding: utf-8 -*-
-
+require 'core/nil_class'
+require 'core/string'
 class ApplicationController < ActionController::Base
   protect_from_forgery
 
   layout 'quill'
 
-  before_filter :init,:current_sample_info
+  before_filter :init, :current_user, :current_sample_info
   helper_method :user_signed_in, :user_id, :email, :mobile, :unread_message_count, :is_admin, :social_auth_link
 
   # init action
@@ -54,7 +55,7 @@ class ApplicationController < ActionController::Base
       # 1.2. If auth_key is not equal to session's value.
       #      It means we should check the auth_key with Quill. And refresh the current user session
       result = User.login_with_auth_key(auth_key)
-      if result
+      if result != ErrorEnum::AUTH_KEY_NOT_EXIST
         # If auth_key is valid. Setup user session and return true
         cookies[:auth_key] = {
           :value => auth_key,
@@ -106,6 +107,29 @@ class ApplicationController < ActionController::Base
                      :success => @is_success
     }, :except => options[:except], :only => options[:only]   
   end
+  def return_json(is_success, value, options = {})
+    options[:only] = options[:only].to_a + [:success, :value] if options[:only]
+    render :json => {
+        :success => is_success,
+        :value => value
+      },
+      :except => options[:except], 
+      :only => options[:only]
+  end
+  def render_json_e(error_code)
+    error_code_obj = {
+      :error_code => error_code,
+      :error_message => ""
+    }
+    return_json(false, error_code_obj)
+  end
+  def render_json_s(value = true, options={})
+    return_json(true, value, options)
+  end
+  def render_json_auto(value = true, options={})
+    is_success = !((value.class == String && value.start_with?('error_')) || value.to_s.to_i < 0)
+    is_success ? render_json_s(value, options) : render_json_e(value)
+  end
 
   def success_true
     @is_success = true
@@ -155,6 +179,30 @@ class ApplicationController < ActionController::Base
 
 
   def current_sample_info
+    return if @current_user.nil?
+
+    # answer number, spread number, third party accounts
+    answer_number = @current_user.answers.not_preview.finished.length
+    spread_number = Answer.where(:introducer_id => @current_user._id).not_preview.finished.length
+    bind_info = {}
+    ["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
+      bind_info[website] = !ThirdPartyUser.where(:user_id => @current_user._id.to_s, :website => website).blank?
+    end
+    bind_info["email"] = @current_user.email_activation
+    bind_info["mobile"] = @current_user.mobile_activation
+
+    completed_info = @current_user.completed_info
+    
+    @current_sample = {
+      "answer_number" => answer_number,
+      "spread_number" => spread_number,
+      "bind_info" => bind_info,
+      "completed_info" => completed_info,
+      "point" => @current_user.point,
+      "sample_id" => @current_user._id.to_s,
+      "nickname" => @current_user.nickname
+    }
+
     # @current_sample = Sample::UserClient.new(session_info).get_basic_info
     # @current_sample = @current_sample.value
     # result = Sample::UserClient.new(session_info).get_basic_info  unless session[:current_sample].present?

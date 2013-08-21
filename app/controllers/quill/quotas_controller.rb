@@ -1,29 +1,28 @@
+# finish migrating
 class Quill::QuotasController < Quill::QuillController
+	before_filter :ensure_survey
 	
-	before_filter :get_ws_client, :only => [:destroy, :update, :create, :refresh]
-	
-	def get_ws_client
-		@ws_client = Quill::QuotaClient.new(session_info, params[:questionaire_id])
-	end
-
 	# AJAX: destory a quota by its index
 	def destroy
-		render :json => @ws_client.remove(params[:id].to_i)
+		retval = @survey.delete_quota_rule(params[:id].to_i)
+		render_json_auto retval and return
 	end
 
 	# AJAX: update s quota by its index
 	def update
-		render :json => @ws_client.update(params[:id].to_i, params[:quota])
+		retval = @survey.update_quota_rule(params[:id].to_i, params[:quota])
+		render_json_auto retval and return
 	end
 
 	# AJAX: create a new quota
 	def create
-		render :json => @ws_client.create(params[:quota])
+		retval = @survey.add_quota_rule(params[:quota])
+		render_json_auto retval and return
 	end
 
 	# AJAX: refresh quotas stat
 	def refresh
-		render :json => @ws_client.refresh
+		retval = @survey.refresh_quota_stats
+		render_json_auto retval and return
 	end
-	
 end

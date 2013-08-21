@@ -473,10 +473,10 @@ class Survey
 		new_instance.is_star = false
 		new_instance.point = 0
 		new_instance.spread_point = 0
-		new_instance.reward = 0
+		# new_instance.reward = 0
 		new_instance.show_in_community = false
-		lottery = new_instance.lottery
-		lottery.surveys.delete(new_instance) if !lottery.nil?
+		# lottery = new_instance.lottery
+		# lottery.surveys.delete(new_instance) if !lottery.nil?
 		new_instance.entry_clerks.each do |a| new_instance.entry_clerks.delete(a) end
 		new_instance.answer_auditors.each do |a| new_instance.answer_auditors.delete(a) end
 
@@ -1270,7 +1270,7 @@ class Survey
 			rule["finished_count"] = 0
 			rule["submitted_count"] = 0
 			return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
-			rule["conditinos"] ||= []
+			rule["conditions"] ||= []
 			rule["conditions"].each do |condition|
 				condition["condition_type"] = condition["condition_type"].to_i
 				return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
@@ -1605,7 +1605,7 @@ class Survey
 	end
 
 	def analysis(filter_index, include_screened_answer)
-		return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
+		return nil if filter_index >= self.filters.length
 		task_id = Task.create(:task_type => "analysis")._id.to_s
 		AnalysisWorker.perform_async(self._id.to_s, filter_index, include_screened_answer, task_id)
 		return task_id
@@ -1614,7 +1614,7 @@ class Survey
 	def report(analysis_task_id, report_mockup_id, report_style, report_type)
 		# return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
 		# if report_mockup_id is nil, export all single questions analysis with default charts
-		if !report_mockup_id.blank?
+		if report_mockup_id.present?
 			report_mockup = self.report_mockups.find_by_id(report_mockup_id)
 			return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
 		end
@@ -1676,7 +1676,6 @@ class Survey
 
 	def show_report_mockup(report_mockup_id)
 		report_mockup = self.report_mockups.find_by_id(report_mockup_id)
-		return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
 		return report_mockup
 	end
 

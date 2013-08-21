@@ -1,17 +1,12 @@
+# finish migrating
 class Quill::FiltersController < Quill::QuillController
 	
-	before_filter :ensure_survey, :only => [:show, :index]
-
-	before_filter :get_ws_client, :only => [:destroy, :update, :create]
+	before_filter :ensure_survey
 
 	def initialize
 		super(4)
 	end
 	
-	def get_ws_client
-		@ws_client = Quill::FilterClient.new(session_info, params[:questionaire_id])
-	end
-
 	# PAGE: index survey filters
 	def index
 		@survey_questions = get_survey_questions
@@ -21,7 +16,7 @@ class Quill::FiltersController < Quill::QuillController
 	def show
 		@survey_questions = get_survey_questions
 
-		filters = @survey['filters'] || []
+		filters = @survey.filters || []
 		@current_index = -1
 		@current_filter = nil
 		index = params[:id].to_s
@@ -36,17 +31,19 @@ class Quill::FiltersController < Quill::QuillController
 
 	# AJAX: destory a filter by its index
 	def destroy
-		render :json => @ws_client.remove(params[:id].to_i)
+		retval = @survey.delete_filter(params[:id].to_i)
+		render_json_auto retval and return
 	end
 
 	# AJAX: update filter by its index
 	def update
-		render :json => @ws_client.update(params[:id].to_i, params[:filter])
+		retval = @survey.update_filter(params[:id].to_i, params[:filter])
+		render_json_auto retval and return
 	end
 
 	# AJAX: create a new filter
 	def create
-		render :json => @ws_client.create(params[:filter])
+		retval = @survey.add_filter(params[:filter])
+		render_json_auto retval and return
 	end
-
 end

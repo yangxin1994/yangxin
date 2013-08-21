@@ -84,7 +84,7 @@ jQuery(function($) {
 	<!--右上交互功能区-->
 	<ul class="sub-banner-menus">
 		<li <%= (@current_step == 1) ? "class='now'" : "" %> title="编辑问卷"><a href="<%=questionaire_path(@survey['_id'])%>" title=""><em class="edit"></em></a></li>
-		<!-- <li <%= (@current_step == 2) ? "class='now'" : "" %> title="美化问卷"><a href="<%=questionaire_customization_path(@survey['_id'])%>" title=""><em class="mobang"></em></a></li> -->
+		<li <%= (@current_step == 2) ? "class='now'" : "" %> title="美化问卷"><a href="<%=questionaire_customization_path(@survey['_id'])%>" title=""><em class="mobang"></em></a></li>
 		<li <%= (@current_step == 3) ? "class='now'" : "" %> title="发布问卷"><a href="<%=questionaire_share_path(@survey['_id'])%>" title=""><em class="share"></em></a></li>
 		<li <%= (@current_step == 4) ? "class='now'" : "" %> title="查看结果"><a href="<%=questionaire_result_path(@survey['_id'])%>" title=""><em class="stat"></em></a></li>
 		<li title='预览问卷' class='preview-survey'><a href="<%=questionaire_preview_path(@survey['_id'])%>" title="" target="_blank"><em class="preview"></em></a></li>

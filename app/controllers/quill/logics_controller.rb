@@ -1,12 +1,7 @@
+# finish migrating
 class Quill::LogicsController < Quill::QuillController
 	
-	before_filter :ensure_survey, :only => [:show, :index]
-
-	before_filter :get_ws_client, :only => [:destroy, :update, :create]
-	
-	def get_ws_client
-		@ws_client = Quill::LogicClient.new(session_info, params[:questionaire_id])
-	end
+	before_filter :ensure_survey
 
 	# PAGE: index survey logics
 	def index
@@ -16,7 +11,7 @@ class Quill::LogicsController < Quill::QuillController
 	# PAGE: show survey logic
 	def show
 		@survey_questions = get_survey_questions
-		logics = @survey['logic_control'] || []
+		logics = @survey.logic_control || []
 		@current_index = -1
 		@current_logic = nil
 		index = params[:id].to_s
@@ -31,17 +26,19 @@ class Quill::LogicsController < Quill::QuillController
 
 	# AJAX: destory a logic by its index
 	def destroy
-		render :json => @ws_client.remove(params[:id].to_i)
+		retval = @survey.delete_logic_control_rule(params[:id].to_i)
+		render_json_auto retval and return
 	end
 
 	# AJAX: update s logic by its index
 	def update
-		render :json => @ws_client.update(params[:id].to_i, params[:logic])
+		retval = @survey.update_logic_control_rule(params[:id].to_i, params[:logic])
+		render_json_auto retval and return
 	end
 
 	# AJAX: create a new logic
 	def create
-		render :json => @ws_client.create(params[:logic])
+		retval = @survey.add_logic_control_rule(params[:logic])
+		render_json_auto retval and return
 	end
-
 end

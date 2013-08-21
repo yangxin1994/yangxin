@@ -1,37 +1,37 @@
-<% if @common.success %>
+<% if @common.present? %>
 
     <% 
         visi = 'visible'
-        visi = 'hidden' if @common.value['data'].to_a.length < @common.value['per_page'].to_i && (@common.value["current_page"].to_i == 1 || (@common.value["current_page"] != @common.value["total_page"] && @common.value["current_page"].to_i != 1) )
+        visi = 'hidden' if @common['data'].to_a.length < @common['per_page'].to_i && (@common["current_page"].to_i == 1 || (@common["current_page"] != @common["total_page"] && @common["current_page"].to_i != 1) )
     %>
 
     <div class="pagination" style="visibility: <%= visi %>">
-        <% if @common.value['data'].to_a.length > 0 %>
+        <% if @common['data'].to_a.length > 0 %>
             <% 
                 extend_string = ""
                 extend_string+="&per_page=#{params[:per_page]}" if params[:per_page]
                 extend_string+="&scope=#{params[:scope]}" if params[:scope]
             %>
-            <a href="<%= @path %>?page=<%= @common.value["previous_page"] %><%= extend_string %>" onclick="<%= 'return false' if @common.value["previous_page"] == @common.value["current_page"] %>"><</a>
+            <a href="<%= @path %>?page=<%= @common["previous_page"] %><%= extend_string %>" onclick="<%= 'return false' if @common["previous_page"] == @common["current_page"] %>"><</a>
             <!-- ... -->
-            <% if (@common.value["current_page"]-2) > 1 %>
+            <% if (@common["current_page"]-2) > 1 %>
                 <a onclick="return false;" href="javascript: void(0);">...</a>
             <% end %>
             <!-- two before pages -->
-            <% ((@common.value["current_page"]-2)...@common.value["current_page"]).select{|e| e > 0}.each do |e| %>
+            <% ((@common["current_page"]-2)...@common["current_page"]).select{|e| e > 0}.each do |e| %>
                 <a href="<%= @path %>?page=<%= e %><%= extend_string %>"><%= e %></a>
             <% end %>
             <!-- current page -->
-            <a href="javascript: void(0);" class="active"><%= @common.value["current_page"] %></a>
+            <a href="javascript: void(0);" class="active"><%= @common["current_page"] %></a>
             <!-- two after pages -->
-            <% ((@common.value["current_page"]+1)..(@common.value["current_page"]+2)).select{|e| e <= @common.value["total_page"]}.each do |e| %>
+            <% ((@common["current_page"]+1)..(@common["current_page"]+2)).select{|e| e <= @common["total_page"]}.each do |e| %>
                 <a href="<%= @path %>?page=<%= e %><%= extend_string %>"><%= e %></a>
             <% end %>
             <!-- ... -->
-            <% if (@common.value["current_page"]+2) < @common.value["total_page"] %>
+            <% if (@common["current_page"]+2) < @common["total_page"] %>
                 <a onclick="return false;" href="javascript: void(0);">...</a>
             <% end %>
-            <a href="<%= @path %>?page=<%= @common.value["next_page"] %><%= extend_string %>" onclick="<%= 'return false' if @common.value["current_page"] == @common.value["total_page"] %>">></a>
+            <a href="<%= @path %>?page=<%= @common["next_page"] %><%= extend_string %>" onclick="<%= 'return false' if @common["current_page"] == @common["total_page"] %>">></a>
         <% else %>
             <!-- just work for css -->
             <a/>

@@ -1,4 +1,4 @@
-//= require "/assets/jquery.timeago"
+//= require "jquery.timeago"
 
 jQuery(function($) {
   jQuery.timeago.settings.strings = {
