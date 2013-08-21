@@ -100,12 +100,12 @@ class ApplicationController < ActionController::Base
     return @current_user
   end
 
-  def render_json(is_success = true, options = {}, &block)
-    options[:only]+= [:value, :success] unless options[:only].nil?
-    @is_success = is_success
-    render :json => {:value => block_given? ? yield(@is_success) : @is_success ,
-                     :success => @is_success
-    }, :except => options[:except], :only => options[:only]   
+  def render_json(is_success = true, &block)
+    @is_success = is_success.present?
+    render :json => {
+                :value => block_given? ? yield(is_success) : is_success ,
+                :success => @is_success
+              }
   end
   def return_json(is_success, value, options = {})
     options[:only] = options[:only].to_a + [:success, :value] if options[:only]
@@ -131,8 +131,8 @@ class ApplicationController < ActionController::Base
     is_success ? render_json_s(value, options) : render_json_e(value)
   end
 
-  def success_true
-    @is_success = true
+  def success_true(_is = true)
+    @is_success = _is
   end
 
   def session_info

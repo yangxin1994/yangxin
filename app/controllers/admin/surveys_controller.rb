@@ -5,56 +5,111 @@ class Admin::SurveysController < Admin::AdminController
 	# *****************************
 
   def index
-    if params[:status].present?  
-      select_fileds[:status] = {"$in" => Tool.convert_int_to_base_arr(Tool.convert_int_to_base_arr())}
+    @surveys = auto_paginate Survey.search(params) do |surs|
+      surs.map do |sur|
+        sur.append_user_fields([:email, :mobile])
+        sur.serialize_for([:title, :email, :mobile, :created_at])
+        sur
+      end
     end
-    if params[:title].present?
-      select_fileds[:title] = /.*#{params[:title]}.*/
-    end
-    auto_paginate Survey.find_by_fields(select_fileds)
   end
 
   def more_info
-    render :json => @client.more_info(params)
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      {
+        :hot => survey.quillme_hot,
+        :spread => survey.spread_point,
+        :visible => survey.publish_result
+      }
+    end
   end
 
   def set_info
-    render :json => @client.set_info(params)
-  end
-
-  def show
-    result = @client.show(params)
-    if result[:success] || result.try(:success)
-      @questions = result[:questions]
-      @survey = result[:survey]
-    else
-      render :json => result
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      @is_succuess = 
+        survey.set_quillme_hot(params[:hot].to_s == "true") &&
+        survey.set_spread(params[:spread].to_i) &&
+        survey.update_attributes({'publish_result' => (params[:visible].to_s == "true")})
+      {
+        :hot => survey.quillme_hot,
+        :spread => survey.spread_point,
+        :visible => survey.publish_result
+      }
     end
   end
 
   def reward_schemes
-    result = @client.reward_schemes(params)
-    _prize_result = Admin::PrizeClient.new(session_info)._get({:per_page => 100},'')
-    if result.success && _prize_result.success
-      @reward_schemes = result.value
-      @prizes = _prize_result.value
-      @editing_rs = @reward_schemes['editing_rs']
-      (@editing_rs['prizes'] || []).each_with_index do |prize, index|
-        prize['deadline'] = Time.at(prize['deadline']).strftime("%Y/%m/%d")
-        @editing_rs['prizes'][index] = prize
+    survey = Survey.where(:_id => params[:id]).first
+    @reward_schemes = survey.reward_schemes.not_default
+    @prizes = Prize.all
+    if @editing_rs = RewardScheme.where(:id => params[:editing]).first
+      @editing_rs["rewards"].each do |reward|
+        case reward["type"].to_i
+        when 1
+          @editing_rs["tel_charge"] = reward["amount"]
+        when 2
+          @editing_rs["alipay"] = reward["amount"]
+        when 4
+          @editing_rs["point"] = reward["amount"]
+        when 8
+          @editing_rs["prizes"] = reward["prizes"]
+        when 16
+          @editing_rs["jifenbao"] = reward["amount"]
+        else
+
+        end
       end
-      gon.push @reward_schemes
+      if @editing_rs["rewards"].present?
+        @editing_rs['is_free'] = "no" 
+      else
+        @editing_rs['is_free'] = "yes" 
+      end
     else
-      render result
-    end
+      @editing_rs ={}
+    end    
+  end  
+
+  def show
+    _r = Survey.find(params[:id]).info_for_admin
+    @survey = _r["survey"]
+    @questions = {}
+    binding.pry
+    _r['questions'].each do |question_id, question|
+      @survey["logic_control"].each do |lc|
+        lc["conditions"].each do |condition|
+          if condition["question_id"] == question_id
+            question["is_logic_control"] = true
+            # question["logic_control_type"] = lc["rule_type"]
+            question["issue"]["items"] = question["issue"]["items"].try('map') do |item|
+              if condition["answer"].include? item["id"]
+                item["is_fuzzy"] = condition["fuzzy"]
+                item["is_logic_control"] = true
+                item["logic_control_type"] = lc["rule_type"]
+              end
+              item
+            end
+          end
+        end
+      end
+      @questions[question_id] = question
+    end    
+    # @survey = Survey.where(:_id => params[:id])
+    # result = @client.show(params)
+    # if result[:success] || result.try(:success)
+    #   @questions = result[:questions]
+    #   @survey = result[:survey]
+    # else
+    #   render :json => result
+    # end
   end
 
+
+
   def promote
-    result = @client.promote(params)
-    if result.success
-      @promote = result.value
+    if survey = Survey.where(:_id => params[:id]).first
+      @promote = survey.get_all_promote_settings
     else
-      render :json => result
+
     end
   end
 

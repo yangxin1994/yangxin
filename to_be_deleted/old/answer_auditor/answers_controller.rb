@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # coding: utf-8
 require 'error_enum'
 require 'quill_common'
