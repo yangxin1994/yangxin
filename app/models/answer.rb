@@ -1587,6 +1587,4 @@ class Answer
     end
     answer
   end
-
->>>>>>> 29018f02687cd1ef67987740b3f3b1716aad18e0
 end
