@@ -5,33 +5,23 @@ class Admin::SamplesController < Admin::AdminController
 
   before_filter :require_sign_in
 
-  before_filter :get_samples_client
-
-  def get_samples_client
-    @samples_client = Admin::SampleClient.new(session_info)
-  end
-
   def index
-    result = @samples_client.index(params)
-    if result.success
-      @samples = result.value
-    else
-      render :json => result
+    if params[:keyword]
+      if params[:keyword] =~ /^.+@.+$/
+        params[:email] = params[:keyword]
+      else
+        params[:mobile] = params[:keyword]
+      end
     end
+    @samples = auto_paginate(User.search_sample(params[:email], params[:mobile], params[:is_block].to_s == "true"))
   end
 
   def edit
-    result = @samples_client.edit(params[:id])
-    if result.success
-      @sample = result.value
-    else
-      render :json => result
-    end
+    @sample = Sample.sample.find(params[:id]).sample_attributes
   end
 
   def show
-    @sample = @samples_client.show(params[:id])
-    gon.push({:sample => @sample})
+    @sample = Sample.sample.find(params[:id]).sample_attributes
   end
   # ##########################
   #
@@ -40,11 +30,18 @@ class Admin::SamplesController < Admin::AdminController
   # ##########################
 
   def operate_point
-    render :json => @samples_client.operate_point(params)
+    render_json Sample.where(:_id => params[:id]).first do |sample|
+      sample.operate_point(params[:amount], params[:remark])
+    end  
   end
 
   def set_sample_role
-    render :json => @samples_client.set_sample_role(params)
+    render_json Sample.where(:_id => params[:id]).first do |sample|
+      {
+        :role => sample.set_sample_role(params[:role]),
+        :block => sample.block(params[:block])
+      }
+    end
   end
 
   # ##########################
@@ -53,47 +50,37 @@ class Admin::SamplesController < Admin::AdminController
   #
   # ##########################
   def redeem_log
-    result = @samples_client.redeem_log(params)
-    if result.success
-      @redeem_log = result.value
-    else
-      render :json => result
+    @sample = Sample.sample.find(params[:id])
+    @redeem_log = auto_paginate(@sample.logs.point_logs) do |logs|
+      logs.map { |e| e.info_for_admin }
     end
   end
 
   def point_log
-    result = @samples_client.point_log(params)
-    if result.success
-      @point_log = result.value
-    else
-      render :json => result
+    @sample = Sample.sample.find(params[:id])
+    @point_log = auto_paginate(@sample.logs.point_logs) do |logs|
+      logs.map { |e| e.info_for_admin }
     end
   end
 
   def lottery_log
-    result = @samples_client.lottery_log(params)
-    if result.success
-      @lottery_log = result.value
-    else
-      render :json => result
+    @sample = Sample.sample.find(params[:id])
+    @lottery_log = auto_paginate(@sample.logs.lottery_logs) do |logs|
+      logs.map { |e| e.info_for_admin }
     end
   end
 
   def answer_log
-    result = @samples_client.answer_log(params)
-    if result.success
-      @answer_log = result.value
-    else
-      render :json => result
+    @sample = Sample.sample.find(params[:id])
+    @answer_log = auto_paginate(@sample.logs.answer_logs) do |logs|
+      logs.map { |e| e.info_for_admin }
     end
   end
 
   def spread_log
-    result = @samples_client.spread_log(params)
-    if result.success
-      @spread_log = result.value
-    else
-      render :json => result
+    @sample = Sample.sample.find(params[:id])
+    @spread_log = auto_paginate(@sample.logs.spread_logs) do |logs|
+      logs.map { |e| e.info_for_admin }
     end
   end
   # ##########################
@@ -102,23 +89,17 @@ class Admin::SamplesController < Admin::AdminController
   #
   # ##########################
   def attributes
-    sample_attr_client = Admin::SampleAttributeClient.new(session_info)
-    result = sample_attr_client.index(params)
-    if result.success
-      @attributes = result.value
-    else
-      render :json => @attributes
-    end
+    @attributes = auto_paginate SampleAttribute.search(params[:name])
   end
 
   def add_attributes
-    sample_attr_client = Admin::SampleAttributeClient.new(session_info)
     params[:attribute][:type] = params[:attribute][:type].to_i
+    attrs = make_attrs params[:attribute]
     if params[:attribute][:id].present?
-      sample_attr_client.update_attribute(params[:attribute])
+      SampleAttribute.normal.find(params[:attribute][:id]).update_sample_attribute(attrs)
       redirect_to "/admin/samples/#{params[:attribute][:id]}/edit_attributes"
     else
-      sample_attr_client.create_attribute(params[:attribute])
+      SampleAttribute.create_sample_attribute(attrs)
       redirect_to "/admin/samples/attributes"
     end
   end
@@ -128,15 +109,70 @@ class Admin::SamplesController < Admin::AdminController
   end
 
   def edit_attributes
-    sample_attr_client = Admin::SampleAttributeClient.new(session_info)
-    result = sample_attr_client.show(params[:id])
-    @attribute = result
+    attr = SampleAttribute.normal.find(params[:id])
+    if attr["enum_array"].is_a? Array
+      attr['enum_array'] = attr["enum_array"].join("\n")
+    end
+    attr["analyze_requirement"]['segmentation'] ||= []
+    case attr['type'].to_i
+    when 0
+      attr['value_0'] = attr["analyze_requirement"]['segmentation']
+    when 1
+      attr['value_1'] = attr["analyze_requirement"]['segmentation']
+    when 2
+      attr['value_2'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.join(',') }}.join("\n")
+    when 3
+      attr['date_type_3'] = attr["date_type"]
+      attr['value_3'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.strftime("%Y/%m/%d") }}.join("\n")
+    when 4
+      attr['value_4'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.join(',') }}.join("\n")
+    when 5
+      attr['date_type_5'] = attr["date_type"]
+      attr['value_5'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.strftime("%Y/%m/%d") }}.join("\n")
+    when 6
+      attr['value_6'] = attr["analyze_requirement"]['segmentation']
+    when 7
+      attr['element_type'] = attr["element_type"]
+      attr['enum_array_6'] = attr["enum_array"]
+      attr['value_7'] = attr["analyze_requirement"]['segmentation']
+    end
+    @attribute = attr
   end
 
   def destroy_attributes
-    sample_attr_client = Admin::SampleAttributeClient.new(session_info)
-    render :json => sample_attr_client.delete_attribute(params[:id])
+    render_json SampleAttribute.normal.where(:_id => params[:id]) do |attribute|
+      attribute.delete
+    end
   end
+
+  def make_attrs(attr)
+    attr[:analyze_requirement] = {}
+    case attr[:type]
+    when 0
+      attr[:analyze_requirement][:segmentation] = attr[:value_0].split(' ')
+    when 1
+      attr[:enum_array] = attr[:enum_array].split(' ')
+      attr[:analyze_requirement][:segmentation] = attr[:value_1].split(' ')
+    when 2
+      attr[:analyze_requirement][:segmentation] = attr[:value_2].split(' ').map { |e| e.split(',') }
+    when 3
+      attr[:date_type] = attr[:date_type_3].to_i
+      attr[:analyze_requirement][:segmentation] = attr[:value_3].split(' ').map { |e| Time.parse(e.split(',')).to_i }
+    when 4
+      attr[:analyze_requirement][:segmentation] = attr[:value_4].split(' ').map { |e| e.split(',') }
+    when 5
+      attr[:date_type] = attr[:date_type_5].to_i
+      attr[:analyze_requirement][:segmentation] = attr[:value_5].split(' ').map { |e| Time.parse(e.split(',')).to_i }
+    when 6
+      attr[:analyze_requirement][:segmentation] = attr[:value_6].split(' ')
+    when 7
+      attr[:element_type] = attr[:element_type].to_i
+      attr[:enum_array] = attr[:enum_array_6].split(' ')
+      attr[:analyze_requirement][:segmentation] = attr[:value_7].split(' ')
+    end
+    attr
+  end
+
   # ##########################
   #
   # 样本数据统计

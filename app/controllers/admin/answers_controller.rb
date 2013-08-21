@@ -4,41 +4,28 @@ class Admin::AnswersController < Admin::AdminController
 
   before_filter :require_sign_in, :only => [:index, :create, :update, :destroy]
 
-  before_filter :get_answer_client
-
-  def get_answer_client
-    @answer_client = Admin::AnswerClient.new(session_info)
-  end
-
   def index
-    result = @answer_client.index(params)
-    if result.success
-      @surveys = result.value
-    else
-      render :json => result
-    end
+    @surveys = auto_paginate(Survey)
   end
 
   def show
-    result = @answer_client.show(params)
-    if result.success
-      @answers = result.value
+    if current_user.is_admin?
+      survey = Survey.find(params[:id])
     else
-      render :json => result
+      survey = current_user.answer_auditor_allocated_surveys.find(params[:id])
     end
+
+    @answers = auto_paginate survey.answers.find_by_status(params[:status])
   end
 
   def review
-    result = @answer_client.review(params)
-    if result.success
-      @questions = result.value
-    else
-      render :json => result
-    end  
+    @questions = Answer.find(params[:id]).present_auditor
   end
 
   def update
-    render :json => @answer_client.update(params) 
+    render_json Answer.find(params[:id]) do |answer|
+      answer.review(params[:review_result].to_s == "true", current_user, params[:message_content])
+    end 
   end
 
 end
