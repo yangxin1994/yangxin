@@ -5,7 +5,7 @@ class Admin::AnswersController < Admin::AdminController
   before_filter :require_sign_in, :only => [:index, :create, :update, :destroy]
 
   def index
-    @surveys = auto_paginate(Survey)
+    @surveys = auto_paginate(Survey.search(params))
   end
 
   def show

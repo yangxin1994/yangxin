@@ -4,18 +4,9 @@ class Admin::AgentsController < Admin::AdminController
 
   before_filter :require_sign_in, :only => [:index, :create, :update, :destroy]
 
-  before_filter :get_agent_client
-
-  def get_agent_client
-    @agent_client = Admin::AgentClient.new(session_info)
-  end
-
   def index
-    result = @agent_client.index(params)
-    if result.success
-      @agents = result.value
-    else
-      render :json => result
+    @agents = auto_paginate Agent.search_agent(params[:email], params[:region]) do |agents|
+      agents.map { |e| e.info }
     end
   end
 
@@ -25,26 +16,21 @@ class Admin::AgentsController < Admin::AdminController
   end
 
   def create
-    @agent = @agent_client.create(params[:agent])
-    if @agent.success
+    @agent = Agent.create(params[:agent])
+    if @agent.created_at
       redirect_to admin_agents_path
     else
-      render :json => @agent
+      render :new
     end
   end
 
   def edit
-    result = @agent_client.show(params[:id])
-    if result.success
-      @agent = result.value
-    else
-      render :json => result
-    end
+    @agent = Agent.find(params[:id]).info
   end
 
   def update
-    @agent = @agent_client.update(params[:id], params[:agent])
-    if @agent.success
+    @agent = Agent.find(params[:id])
+    if @agent.update_agent(params[:agent])
       redirect_to admin_agents_path
     else
       render :json => result
@@ -52,8 +38,9 @@ class Admin::AgentsController < Admin::AdminController
   end
 
   def destroy
-    render :json => @agent_client.destroy(params[:id])
+    render_json @agent = Gift.where(:_id =>params[:id]).first do |agent|
+      success_true agent.delete_agent
+    end    
+    
   end
-
-
 end

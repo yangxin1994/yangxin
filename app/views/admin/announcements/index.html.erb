@@ -62,7 +62,7 @@
 	      <td>                           
 	      	<a href="/admin/announcements/<%= announcement["_id"] %>" title="点击查看/回复"><%= announcement["title"] %></a></td>
 	      <td><%= announcement["user_email"] %></td>
-	      <td><%= announcement["created_at"][0,16].gsub(/[T]/, ' ') %></td>
+	      <td><%= announcement["created_at"].strftime("%F %T") %></td>
 	      <td>
           <a class="btn delete" href="javascript:void(0);" data-aid="<%= announcement["_id"] %>" target="_blank"><i class="icon-remove"></i>删除</a>
         </td>

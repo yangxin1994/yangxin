@@ -28,13 +28,11 @@ class PublicNotice
 		end
 
 		def find_valid_notice
-			retval = PublicNotice.in(status: [1, 2]).desc(:updated_at)
-			return retval
+			PublicNotice.in(status: [1, 2]).desc(:updated_at)
 		end
 
 		def find_by_title(title)
-			retval = self.where(:title => /.*#{title}.*/)
-			return retval
+			title.blank? ? self : self.where(:title => /.*#{title}.*/)
 		end
 
 		def create_public_notice(new_public_notice, user)
