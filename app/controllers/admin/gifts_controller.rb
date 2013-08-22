@@ -2,8 +2,6 @@ class Admin::GiftsController < Admin::AdminController
 
   layout "layouts/admin-todc"
 
-  before_filter :convert_params
-
   def index
     @gifts = auto_paginate Gift.search_gift(params[:title], params[:status].to_i, params[:type].to_i)
   end
@@ -25,8 +23,9 @@ class Admin::GiftsController < Admin::AdminController
     params[:gift].delete(:photo)
     params[:gift][:photo_url] = photo.url
 
-    @gift = @gift_client.create(params[:gift])
-    if @gift.updated_at
+    @gift = Gift.create(params[:gift])
+    @gift.update_gift(params[:gift])
+    if @gift.created_at
       redirect_to admin_gifts_path
     else
       render :new
@@ -65,13 +64,6 @@ class Admin::GiftsController < Admin::AdminController
   def stockup
     render_json @gift = Gift.where(:_id =>params[:id]).first do |gift|
       success_true gift.update_attributes(:status => 1)
-    end
-  end
-
-  private
-  def convert_params
-    if params[:redeem_number] and params[:number_ary]
-      params[:redeem_number][:number_ary] = params[:redeem_number][:number_ary].split()
     end
   end
 
