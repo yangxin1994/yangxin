@@ -9,6 +9,17 @@ class Admin::OrdersController < Admin::AdminController
   before_filter :require_sign_in, :only => [:index, :update, :destroy]
 
   def index
+    params.each{|k, v| params.delete(k) unless v.present?}
+    if params[:keyword]
+      if params[:keyword] =~ /^.+@.+$/
+        params[:email] = params[:keyword]
+      elsif params[:keyword].length == 13
+        params[:code] = params[:keyword]
+      else
+        params[:mobile] = params[:keyword]
+      end
+      params.delete :keyword
+    end
     order_list = Order.search_orders(params[:email], 
       params[:mobile],
       params[:code],
