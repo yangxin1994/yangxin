@@ -16,7 +16,7 @@ class Filler::BindSamplesController < Filler::FillerController
 			# 	answer = answer.value
 			# bind answer to the current user
 			next if answer.user.present?
-			answer.bind_sample(@current_user) and return
+			answer.bind_sample(@current_user)
 
 			redirect_to_answer_id = aid 
 			# delete filler id
@@ -31,7 +31,7 @@ class Filler::BindSamplesController < Filler::FillerController
 		# delete answer ids in cookie
 		cookies.delete(Rails.application.config.bind_answer_id_cookie_key, :domain => :all)
 
-		if !params[:ref].blank?
+		if params[:ref].present?
 			redirect_to params[:ref]
 		elsif !redirect_to_answer_id.nil?
 			redirect_to show_a_path(redirect_to_answer_id)
@@ -39,5 +39,4 @@ class Filler::BindSamplesController < Filler::FillerController
 			redirect_to root_path
 		end
 	end
-
 end
