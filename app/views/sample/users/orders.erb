@@ -22,7 +22,7 @@
 
         <div class="table-box">
           <!-- answer 's orders -->
-          <% if ![ConstVar::OSource::WIN_IN_LOTTERY, ConstVar::OSource::REDEEM_GIFT].include?(params[:scope].to_i) %>
+          <% if ![Order::WIN_IN_LOTTERY, Order::REDEEM_GIFT].include?(params[:scope].to_i) %>
 
               <table class="orders_by_answer">
                   <thead>
@@ -33,11 +33,11 @@
                           <th style="width: 60px;">详情</th>
                       </tr>
                   </thead>
-                      <% @orders.value["data"].to_a.each do |order| %>
+                      <% @orders["data"].to_a.each do |order| %>
                         <tr id="order-<%= order["_id"] %>">
                             <td><%= int_time_to_date(order["created_at"].to_i) %></td>
                             <% case order["type"].to_i %>
-                            <% when ConstVar::Type::MOBILE_CHARGE, ConstVar::Type::SMALL_MOBILE_CHARGE %>
+                            <% when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE %>
                               <!-- phone -->                            
                               <td>
                                   <i class="icon-order icon-phonepay"></i>
@@ -50,7 +50,7 @@
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-phone-charge-detail">订单详情</a>
                               </td>
                             
-                            <% when ConstVar::Type::ALIPAY %>
+                            <% when Order::ALIPAY %>
                               <!-- aplipay -->
                               <td>
                                   <i class="icon-order icon-alipay"></i>
@@ -63,7 +63,7 @@
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-alipay-detail">订单详情</a>
                               </td>
                             
-                            <% when ConstVar::Type::JIFENBAO %>
+                            <% when Order::JIFENBAO %>
                               <!-- jifenbao -->
                               <td>
                                   <i class="icon-order icon-jfb"></i>
@@ -75,7 +75,7 @@
                               <td>
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-jifenbao-detail">订单详情</a>
                               </td>
-                            <% when ConstVar::Type::QQ_COIN %>
+                            <% when Order::QQ_COIN %>
                               <!-- Ｑ币 -->
                               <td>
                                   <i class="icon-order icon-qb"></i>
@@ -87,7 +87,7 @@
                               <td>
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-qb-detail">订单详情</a>
                               </td>
-                            <% when ConstVar::Type::REAL, ConstVar::Type::VIRTUAL %>
+                            <% when Order::REAL, Order::VIRTUAL %>
                               <!-- 礼品 -->
                               <td>
                                   <img src="<%= order['picture_url'] %>" style="width: 36px; height: 36px;"/>
@@ -109,7 +109,7 @@
                   </tbody>
               </table>
               
-          <% elsif ConstVar::OSource::WIN_IN_LOTTERY == params[:scope].to_i %>
+          <% elsif Order::WIN_IN_LOTTERY == params[:scope].to_i %>
               <!-- orders by lottery -->
               <table class="orders_by_lottery">
                   <thead >
@@ -121,11 +121,11 @@
                       </tr>
                   </thead>
                   <tbody>
-                      <% @orders.value["data"].to_a.each do |order| %>
+                      <% @orders["data"].to_a.each do |order| %>
                         <tr id="order-<%= order["_id"] %>">
                             <td><%= int_time_to_date(order["created_at"].to_i) %></td>
                             <% case order["type"].to_i %>
-                            <% when ConstVar::Type::MOBILE_CHARGE, ConstVar::Type::SMALL_MOBILE_CHARGE  %>
+                            <% when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE  %>
                               <!-- phone -->                            
                               <td>
                                   <i class="icon-order icon-phonepay"></i>
@@ -138,7 +138,7 @@
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-phone-charge-detail">订单详情</a>
                               </td>
                             
-                            <% when ConstVar::Type::ALIPAY %>
+                            <% when Order::ALIPAY %>
                               <!-- aplipay -->
                               <td>
                                   <i class="icon-order icon-alipay"></i>
@@ -151,7 +151,7 @@
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-alipay-detail">订单详情</a>
                               </td>
                             
-                            <% when ConstVar::Type::JIFENBAO %>
+                            <% when Order::JIFENBAO %>
                               <!-- jifenbao -->
                               <td>
                                   <i class="icon-order icon-jfb"></i>
@@ -164,7 +164,7 @@
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-jifenbao-detail">订单详情</a>
                               </td>
                             
-                            <% when ConstVar::Type::QQ_COIN %>
+                            <% when Order::QQ_COIN %>
                               <!-- Ｑ币 -->
                               <td>
                                   <i class="icon-order icon-qb"></i>
@@ -176,7 +176,7 @@
                               <td>
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-qb-detail">订单详情</a>
                               </td>
-                            <% when ConstVar::Type::REAL, ConstVar::Type::VIRTUAL %>
+                            <% when Order::REAL, Order::VIRTUAL %>
                               <!-- 奖品 -->
                               <td>
                                   <img src="<%= order['picture_url'] %>" style="width: 36px; height: 36px;"/>
@@ -197,7 +197,7 @@
                       <% end %>
                   </tbody>
               </table>
-          <% elsif ConstVar::OSource::REDEEM_GIFT == params[:scope].to_i %>
+          <% elsif Order::REDEEM_GIFT == params[:scope].to_i %>
               <table class="orders_by_point">
                 <!-- orders  by point -->
                    <thead>
@@ -210,11 +210,11 @@
                       </tr>
                   </thead>
                   <tbody>
-                     <% @orders.value["data"].to_a.each do |order| %>
+                     <% @orders["data"].to_a.each do |order| %>
                         <tr id="order-<%= order["_id"] %>">
                             <td><%= int_time_to_date(order["created_at"].to_i) %></td>
                             <% case order["type"].to_i %>
-                            <% when ConstVar::Type::MOBILE_CHARGE, ConstVar::Type::SMALL_MOBILE_CHARGE  %>
+                            <% when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE  %>
                               <!-- phone -->                            
                               <td>
                                   <i class="icon-order icon-phonepay"></i>
@@ -228,7 +228,7 @@
                                   <a class="fancybox" name="<%= order["_id"] %>" href="#order-phone-charge-detail">订单详情</a>
                               </td>
                             
-                            <% when ConstVar::Type::ALIPAY %>
+                            <% when Order::ALIPAY %>
                               <!-- aplipay -->
                               <td>
                                   <i class="icon-order icon-alipay"></i>
@@ -242,7 +242,7 @@
                                   <a class="fancybox" name="<%= order["_id"] %>" href="#order-alipay-detail">订单详情</a>
                               </td>
                             
-                            <% when ConstVar::Type::JIFENBAO %>
+                            <% when Order::JIFENBAO %>
                               <!-- jifenbao -->
                               <td>
                                   <i class="icon-order icon-jfb"></i>
@@ -256,7 +256,7 @@
                                   <a class="fancybox" name="<%= order["_id"] %>" href="#order-jifenbao-detail">订单详情</a>
                               </td>
                             
-                            <% when ConstVar::Type::QQ_COIN %>
+                            <% when Order::QQ_COIN %>
                               <!-- Ｑ币 -->
                               <td>
                                   <i class="icon-order icon-qb"></i>
@@ -269,7 +269,7 @@
                               <td>
                                   <a class="fancybox" name="<%= order["_id"] %>" href="#order-qb-detail">订单详情</a>
                               </td>
-                            <% when ConstVar::Type::REAL, ConstVar::Type::VIRTUAL %>
+                            <% when Order::REAL, Order::VIRTUAL %>
                               <!-- 礼品 -->
                               <td>
                                   <img src="<%= order['picture_url'] %>" style="width: 36px; height: 36px;"/>

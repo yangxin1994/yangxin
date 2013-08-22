@@ -94,6 +94,7 @@ $(function(){
 			/* render pages one by one
 			 * =============================== */
 			var _render_page = $.proxy(function(page_index) {
+				console.log(page_index);
 				if(page_index >= this.model.pageCount()) {
 					this.refreshPageIndexes();
 					this.refreshQuestionIndexes();

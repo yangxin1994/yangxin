@@ -149,7 +149,7 @@
 					<% alter = !alter %>
 				<li id=<%= r["_id"] %> <%= alter ? "class='alter'" : '' %>>
 					<em class='radio'></em>
-					<%= r['title'] %><span><%= Time.parse(r["created_at"]).strftime("（%Y.%m.%d）") %></span>
+					<%= r['title'] %><span><%= r["created_at"].strftime("（%Y.%m.%d）") %></span>
 					<a class="icon icon-del" title="删除" href='javascript:void(0);'></a>
 					<a class="icon icon-edit" title="编辑" href='<%= questionaire_report_mockup_path(@survey["_id"], r["_id"]) %>' target='blank'></a>
 				</li>
@@ -157,7 +157,7 @@
 				<% end %>
 			</ul>
 			<div class="add-report">
-				<a href="javascript:void(0);" class="add-btn" style='display:none;'>
+				<a href="javascript:void(0);" class="add-btn">
 					<span class='add-btn-left'><i class="icon-add">+</i></span>
 					<span class="add-btn-right">添加调研报告</span>
 				</a>

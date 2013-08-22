@@ -1,27 +1,16 @@
 # -*- encoding: utf-8 -*-
-
+require 'core/nil_class'
+require 'core/string'
 class ApplicationController < ActionController::Base
   protect_from_forgery
 
   layout 'quill'
 
-  before_filter :init,:current_sample_info
+  before_filter :init, :current_user, :current_sample_info
   helper_method :user_signed_in, :user_id, :email, :mobile, :unread_message_count, :is_admin, :social_auth_link
 
   # init action
   def init
-    # get request referer
-    # begin
-    #   if !request.referer.blank?
-    #     ref_uri = URI.parse(request.referer)
-    #     if !ref_uri.host.downcase.end_with?(request.domain.downcase)
-    #       session[:referer] = ref_uri.host.downcase
-    #     end
-    #   end
-    # rescue => ex
-    #   logger.debug ex
-    # end
-
     # Use param value to override cookies value
     refresh_session(params[:auth_key] || cookies[:auth_key])
   end
@@ -38,7 +27,6 @@ class ApplicationController < ActionController::Base
   # =============================
 
   def refresh_session(auth_key)
-
     # 1. If auth_key is not empty. Check auth_key
     if !auth_key.blank?
 
@@ -54,20 +42,13 @@ class ApplicationController < ActionController::Base
       # 1.2. If auth_key is not equal to session's value.
       #      It means we should check the auth_key with Quill. And refresh the current user session
       result = User.login_with_auth_key(auth_key)
-      if result
+      if result != ErrorEnum::AUTH_KEY_NOT_EXIST
         # If auth_key is valid. Setup user session and return true
         cookies[:auth_key] = {
           :value => auth_key,
           :expires => (result['expire_at'] < 0 ? Rails.application.config.permanent_signed_in_months.months.from_now : nil),
           :domain => :all
         }
-        if !cookies[:guest_key].blank?
-          cookies[:guest_key] = {
-            :value => cookies[:guest_key],
-            :expires => Rails.application.config.permanent_signed_in_months.months.from_now,
-            :domain => :all
-          }
-        end
         session[:auth_key] = auth_key
         session[:role] = result['role']
         session[:status] = result['status']
@@ -80,18 +61,9 @@ class ApplicationController < ActionController::Base
       end
     end
 
-    # 2. If auth_key is empty or not valid, and guest_key is not empty and is not equal to auth_key
-    #    Try using guest_key to refresh session instead
-    if !cookies[:guest_key].blank? && cookies[:guest_key] != auth_key
-      return refresh_session(cookies[:guest_key])
-    end
-
-    # 3. If both auth_key and guest_key is not valid, destroy session and return false
     cookies.delete(:auth_key, :domain => :all)
-    cookies.delete(:guest_key, :domain => :all)
     reset_session
     return false
-
   end
 
   def current_user
@@ -106,6 +78,29 @@ class ApplicationController < ActionController::Base
                 :success => @is_success
               }
   end
+  def return_json(is_success, value, options = {})
+    options[:only] = options[:only].to_a + [:success, :value] if options[:only]
+    render :json => {
+        :success => is_success,
+        :value => value
+      },
+      :except => options[:except], 
+      :only => options[:only]
+  end
+  def render_json_e(error_code)
+    error_code_obj = {
+      :error_code => error_code,
+      :error_message => ""
+    }
+    return_json(false, error_code_obj)
+  end
+  def render_json_s(value = true, options={})
+    return_json(true, value, options)
+  end
+  def render_json_auto(value = true, options={})
+    is_success = !((value.class == String && value.start_with?('error_')) || value.to_s.to_i < 0)
+    is_success ? render_json_s(value, options) : render_json_e(value)
+  end
 
   def success_true(_is = true)
     @is_success = _is
@@ -116,45 +111,57 @@ class ApplicationController < ActionController::Base
   end
 
   def has_role(role)
-    if (session[:status].to_i == QuillCommon::UserStatusEnum::VISITOR || session[:role].nil?) 
+    if (session[:status].to_i == User::VISITOR || session[:role].nil?) 
       return false
     else
       return ((session[:role].to_i & role) > 0)
     end
   end
   def is_admin
-    return has_role(QuillCommon::UserRoleEnum::ADMIN)
+    return has_role(User::ADMIN)
   end
   def user_signed_in
-    return has_role(QuillCommon::UserRoleEnum::SAMPLE) || has_role(QuillCommon::UserRoleEnum::CLIENT)
+    return @current_user && @current_user.status == User::REGISTERED
+    # return has_role(User::SAMPLE) || has_role(User::CLIENT)
   end
   def email
-    return session[:email]
+    return @current_user.try(:email)
   end
   def mobile
-    return session[:mobile]
+    return @current_user.try(:mobile)
   end
   def user_id
-    return session[:user_id]
+    return @current_user.nil? ? nil : @current_user._id.to_s
   end
   def unread_message_count
-    return session[:unread_message_count].blank? ? 0 : session[:unread_message_count]
+    return @current_user.try(:unread_messages_count).to_i
   end
 
-  # def current_user_info
-  #   user_info = nil
-  #   result = Account::UserClient.new(session_info).get_basic_info
-  #   if result.success
-  #     user_info = {}
-  #     %w[address alipay_account bank bankcard_number birthday full_name identity_card phone postcode].each do |attr_name|
-  #       user_info[attr_name] = result.value[attr_name]
-  #     end
-  #   end
-  #   return user_info
-  # end
-
-
   def current_sample_info
+    return if @current_user.nil?
+
+    # answer number, spread number, third party accounts
+    answer_number = @current_user.answers.not_preview.finished.length
+    spread_number = Answer.where(:introducer_id => @current_user._id).not_preview.finished.length
+    bind_info = {}
+    ["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
+      bind_info[website] = !ThirdPartyUser.where(:user_id => @current_user._id.to_s, :website => website).blank?
+    end
+    bind_info["email"] = @current_user.email_activation
+    bind_info["mobile"] = @current_user.mobile_activation
+
+    completed_info = @current_user.completed_info
+    
+    @current_sample = {
+      "answer_number" => answer_number,
+      "spread_number" => spread_number,
+      "bind_info" => bind_info,
+      "completed_info" => completed_info,
+      "point" => @current_user.point,
+      "sample_id" => @current_user._id.to_s,
+      "nickname" => @current_user.nickname
+    }
+
     # @current_sample = Sample::UserClient.new(session_info).get_basic_info
     # @current_sample = @current_sample.value
     # result = Sample::UserClient.new(session_info).get_basic_info  unless session[:current_sample].present?

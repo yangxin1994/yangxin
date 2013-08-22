@@ -1,4 +1,4 @@
-<% @answers.value["data"].to_a.each do |answer| %>
+<% @answers["data"].to_a.each do |answer| %>
   <div class="tab">
     <img class="avatar" src="<%= small_avatar(answer['sample_id']) %>"/>
     <div class="cont">
@@ -21,4 +21,4 @@
   </div>
 <% end %>
 
-<%= render 'ajax_pagination', :@common_value => @answers.value %>
+<%= render 'ajax_pagination', :@common_value => @answers %>

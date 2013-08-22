@@ -10,7 +10,7 @@ class Sample::PrizesController < ApplicationController
 	def show
 		@prize = Prize.find_by_id(params[:id])
 		render_json_e ErrorEnum::PRIZE_NOT_EXIST and return if @prize.nil?
-		@prize['photo_url'] = @prize.photo.value
+		@prize['photo_url'] = @gift.photo.nil? ? Prize::DEFAULT_IMG : @prize.photo.picture_url
 		render_json_auto @prize and return
 	end
 end

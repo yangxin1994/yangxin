@@ -1,6 +1,10 @@
+# finish migrating
+require 'error_enum'
 class Quill::QuestionairesController < Quill::QuillController
 
-	before_filter :get_ws_client, :except => [:show]
+	# before_filter :get_ws_client, :except => [:show]
+
+	before_filter :require_sign_in, :only => [:index, :show]
 
 	before_filter :ensure_survey, :only => [:show]
 
@@ -12,81 +16,97 @@ class Quill::QuestionairesController < Quill::QuillController
 	# GET
 	def index
 		# add stars survey in Index action
-		@stars = params[:stars].to_b
-		@status = params[:status]
+		@stars = params[:stars].to_s == "true"
+		@status = params[:status] || 3
 		if !params[:title].nil?
-			@surveys =@ws_client.search_title(params[:title], page, per_page)
-		elsif params[:stars].nil? then
-			@surveys = @ws_client.survey_list(params[:status], page, per_page) || []
+			@surveys = Survey.search_title(params[:title], @current_user)
+		elsif params[:stars].nil?
+			@surveys = @current_user.surveys.list(@status)
 		else
-			@surveys = @ws_client.stars(page, per_page) || []
+			@surveys = @current_user.surveys.stars
 		end	
-
+		@surveys = auto_paginate @surveys
 		respond_to do |format|
-			format.html {
-				# Avoid: session is not time out but authkey time out. 
-				# Quill Web thinks that the user is signed in so the before_filter of require_sign_in return true, 
-				# however, web serivce returns require_login_in error
-				# TODO: to be more elegance
-				_sign_out and return if @surveys.require_login?
-			}# index.html.erb
+			format.html { }
 			format.json { render json: @surveys}
 		end
 	end
 
 	# PAGE
 	def new
-		result = @ws_client.new_survey
-		redirect_to result.success ? questionaire_path(result.value['_id']) : questionaires_path
+		@survey = Survey.new
+		@survey.user = @current_user
+		if @current_user.is_admin?
+			@survey.status = Survey::PUBLISHED
+		else
+			@survey.style_setting["has_advertisement"] = false
+		end
+		@survey.save
+		@survey.create_default_reward_scheme
+		redirect_to questionaire_path(@survey._id) and return
 	end
 
 	# AJAX: clone survey
 	def clone
-		render :json => @ws_client.clone(params[:id], params[:title])
+		@survey = Survey.find_by_id(params[:id])
+		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
+		new_survey = @survey.clone_survey(@current_user, params[:title])
+		render_json_auto(new_survey.serialize) and return
 	end
 
 	# PAGE: show and edit survey
 	def show
-		@locked = (!is_admin && @survey['publish_status'] == 8) 
+		@locked = (!is_admin && @survey.publish_status == 8) 
 	end
 
 	# AJAX: delete survey
 	def destroy
-		render :json => @ws_client.delete(params[:questionaire_id])
+		@survey = Survey.find_by_id(params[:questionaire_id])
+		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
+		retval = @survey.delete(@current_user)
+		render_json_auto(retval) and return
 	end
 
 	# PUT
 	def recover
-		render :json => @ws_client.recover(params[:id])
+		@survey = Survey.find_by_id(params[:id])
+		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
+		render_json_auto @survey.recover(@current_user)
 	end
 
 	#GET
 	def remove
-		result = @ws_client.clear(params[:id])
-		# sign_out and return if result.require_login?
-		render :json => result
+		@survey = Survey.find_by_id(params[:id])
+		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
+		render_json_auto @survey.clear(@current_user)
 	end
 
 	# get
 	def update_star
-		result = @ws_client.update_star(params[:id], params[:is_star])
-		# sign_out and return if result.require_login?
-		render :json => result
+		@survey = Survey.find_by_id(params[:id])
+		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
+		render_json_auto @survey.update_star(params[:is_star].to_s == "true")
 	end
 
 	# AJAX: publish survey
 	def publish
-		render :json => @ws_client.publish(params[:id])
+		@survey = Survey.find_by_id(params[:id])
+		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
+		render_json_auto @survey.publish(@current_user)
 	end
 	
 	# AJAX: set deadline
 	def deadline
-		render :json => @ws_client.set_deadline(params[:id], params[:deadline].to_i)
+		@survey = Survey.find_by_id(params[:id])
+		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
+		render_json_auto @survey.publish(@current_user)
+		render_json_auto @survey.update_deadline(params[:deadline].to_i)
 	end
 
 	# AJAX: close a published survey
 	def close
-		render :json => @ws_client.close(params[:id])
+		@survey = Survey.find_by_id(params[:id])
+		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
+		render_json_auto @survey.close(@current_user)
 	end
-
 end

@@ -5,11 +5,11 @@
 		<% if user_signed_in %>
 	    	window.username    = "<%=  @current_sample['nickname']   %>"
 	    	window.total_point = "<%=  @current_sample['point']  %>"
-	    	window.sample_receiver = "<%= @recerver_info['receiver'] %>"
-    	  	window.sample_mobile   = "<%= @recerver_info['mobile'] %>"
-    	  	window.sample_postcode = "<%= @recerver_info['postcode'] %>"
-    	  	window.sample_address  = "<%= @recerver_info['address'] %>"
-    	  	window.sample_street_info = "<%= @recerver_info['street_info'] %>"
+	    	window.sample_receiver = "<%= @receiver_info['receiver'] %>"
+    	  	window.sample_mobile   = "<%= @receiver_info['mobile'] %>"
+    	  	window.sample_postcode = "<%= @receiver_info['postcode'] %>"
+    	  	window.sample_address  = "<%= @receiver_info['address'] %>"
+    	  	window.sample_street_info = "<%= @receiver_info['street_info'] %>"
 		<% end %>
 		window.point_value = "<%= @gift['point'] %>"
 		window.gift_id  = "<%= @gift['_id'] %>"
@@ -72,7 +72,7 @@
 				<h3 class="box-title icon-like">猜你喜欢</h3>
 			</div>
 			<ul>
-				<% @gift_rank['data'].each_with_index do |g,index| %>
+				<% @gift_rank.each_with_index do |g,index| %>
 				<li>
 					<span class="gift-title"><a href="<%= gift_path(g['_id'])%>"><%= g['title']%></a></span>
 					<span class="integral"><%= g['point']%>积分</span>
@@ -93,7 +93,7 @@
 				<h3 class="box-title icon-gift">热门兑换</h3>
 			</div>
 			<ul>
-				<% @gift_rank['data'].each_with_index do |g,index|%>
+				<% @gift_rank.each_with_index do |g,index|%>
 					<% if index < 4%>
 						<li <%= index == 3 ? 'style=margin-right:0px' : '' %>>
 							<a href="javascript:void(0);">

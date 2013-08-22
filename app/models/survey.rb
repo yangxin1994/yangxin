@@ -261,7 +261,7 @@ class Survey
 
 
     def self.get_reward_type_count(status=2)
-      status = 2 unless status.present?
+      status = 2 if status.blank?
       reward_types = Survey.quillme_promote.not_quillme_hot.status(status).map{|s| s.quillme_promote_reward_type}
       reward_data = {}
       reward_types.uniq.each do |rt|

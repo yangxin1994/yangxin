@@ -67,7 +67,7 @@
 		</div>
 		<% if @hotest_gifts.present? %>
 			<ul class="gift-list">
-				<% @hotest_gifts['data'].each do |gift|%>
+				<% @hotest_gifts.each do |gift|%>
 					<li>
 						<a href="<%= gift_path(gift['_id']) %>">
 							<span class="gift-img">
@@ -107,11 +107,11 @@
 					<% @rsl.each_with_index do |survey,index| %>
 						<li class="research-content" <%= hide_border?(@rsl,index) %>>
 							<% if [1,2,16].include?(survey['quillme_promote_reward_type']) %>
-								<span class="reward rmb <%= survey['status'].to_s ==  Sample::SurveyClient::CLOSED.to_s  ? 'finished' :  'unfinished' %>">
+								<span class="reward rmb <%= survey['status'].to_s ==  Survey::CLOSED.to_s  ? 'finished' :  'unfinished' %>">
 									<b>￥<%= survey['reward_type_info']['amount'] if survey['reward_type_info']%></b>
 								</span>
 							<% elsif [4].include?(survey['quillme_promote_reward_type']) %>
-								<span class="reward integral <%= survey['status'].to_s ==  Sample::SurveyClient::CLOSED.to_s ? 'finished' :  'unfinished' %>">
+								<span class="reward integral <%= survey['status'].to_s ==  Survey::CLOSED.to_s ? 'finished' :  'unfinished' %>">
 									<b>
 										<% if survey['reward_type_info']%>
 										<%= survey['reward_type_info']['amount']%>
@@ -122,11 +122,11 @@
 									<em>积分</em>
 								</span>
 							<% elsif [8].include?(survey['quillme_promote_reward_type']) %>
-								<span class="reward lottery <%= survey['status'].to_s ==  Sample::SurveyClient::CLOSED.to_s ?  'finished' :  'unfinished' %>">
+								<span class="reward lottery <%= survey['status'].to_s ==  Survey::CLOSED.to_s ?  'finished' :  'unfinished' %>">
 									<b>抽奖机会</b> 
 								</span>   
 							<% elsif [0].include?(survey['quillme_promote_reward_type']) %>
-								<span class="reward lottery <%= survey['status'].to_s ==  Sample::SurveyClient::CLOSED.to_s ?  'finished' :  'unfinished' %>">
+								<span class="reward lottery <%= survey['status'].to_s ==  Survey::CLOSED.to_s ?  'finished' :  'unfinished' %>">
 									<b>免费调研</b> 
 								</span>         
 							<% end %>
@@ -142,12 +142,12 @@
 							<%# end %>
 							</span>
 							<% if user_signed_in %>
-								<% if survey['status'].to_s ==  Sample::SurveyClient::PUBLISHED.to_s %>
+								<% if survey['status'].to_s ==  Survey::PUBLISHED.to_s %>
 									<span class="status  <%= survey['answer_status'].to_i == 0 ? 'unfinished' : ''%>"><%= answered?(survey['answer_status'],survey['reject_type'])%></span>
 								<% end %>
 							<% end %>
 
-							<% if survey['status'].to_s ==  Sample::SurveyClient::PUBLISHED.to_s %>
+							<% if survey['status'].to_s ==  Survey::PUBLISHED.to_s %>
 								<span class="share">
 									<% if survey['spread_point'].to_i > 0 %>
 										<a class="btn share-btn" href="#<%= user_signed_in ? 's_survey' : 'share_survey'%>" data="<%= survey['spread_point']%>" survey_id="<%= survey['_id']%>" scheme_id = "<%= survey['scheme_id']%>" >

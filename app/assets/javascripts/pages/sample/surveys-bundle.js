@@ -213,6 +213,7 @@ jQuery(function($) {
 				button.html('').append('<img style="margin-top:2px;" src="/assets/od-quillme/rss_loading.gif">').addClass('disabled')
 			},
 			success:function(retval){
+				console.log(retval)
 					if(retval['success']){
 						if(retval['new_user']){
 							if(email_partten.test(channel)){
@@ -266,62 +267,4 @@ jQuery(function($) {
 			}
     );
 	}
-
-	//查询每种奖励类型的调研数量
-	// function get_reward_type_count(status){
-	// 	$.ajax({
-	// 		type: "POST",
-	// 		url: '/surveys/get_reward_type_count',
-	// 		data: {status:status},
-	// 		success:function(retval){
-	// 			console.log(retval)
-	// 			if(retval){
-	// 				all_count  = 0;
-	// 				cash_count = 0;
-	// 				console.log(retval)
-	// 				$.each(retval,function(index,value){
-	// 					all_count += value
-	// 					if(index == 1 || index == 2 || index == 16 ){
-	// 						cash_count += value
-	// 					}
-	// 					if(index == 8){
-	// 						$('span.c_t').text(value);
-	// 					}
-	// 					if(index == 0){
-	// 						$('span.m_t').text(value);
-	// 					}
-	// 					if(index == 4){
-	// 						$('span.u_t').text(value);
-	// 					}	  				
-	// 				})
-	// 				$('span.all_t').text(all_count);
-	// 				$('span.x_t').text(cash_count);
-	
-	// 				$('ul.reward_type li:first').find('span').text(all_count);
-	// 			}else{
-	// 				$('ul.reward_type li span').text(0)
-	// 			}
-	// 		}
-	// 	});
-	// }
-
-	//ajax request 获取特定状态/类型的调研列表
-	// function get_special_status_surveys(status,reward_type,page){
-	// 	$.ajax({
-	// 		type: "GET",
-	// 		cache: true,
-	// 		beforeSend:function(){
-	// 			$('ul.list').children().remove()
-	// 			if($('div.s_convert').length < 1){
-	// 				$('<div class="s_convert"><img src="/assets/od-quillme/s_loading.gif"></div>').appendTo('ul.list')			
-	// 			}
-				
-	// 		},
-	// 		complete:function(){
-	// 			$('div.s_convert').remove()
-	// 		},
-	// 		url: '/surveys/get_special_status_surveys',
-	// 		data: {status:status,reward_type:reward_type,page:page}
-	// 	});
-	// }
 });

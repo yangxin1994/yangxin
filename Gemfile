@@ -3,6 +3,7 @@ source 'http://ruby.taobao.org'
 
 gem 'rails', '~> 3.2.6'
 
+gem "binding_of_caller", "~> 0.7.2", :group => :development
 gem 'tilt','~> 1.3.2'
 gem 'httparty', '~> 0.10.2'
 gem 'sidekiq', '~> 2.8.0'

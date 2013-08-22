@@ -192,7 +192,7 @@ module ApplicationHelper
 	# 			}.html_safe
 	# 		end
 	# 	when 4
-	# 		if news['gift_type'].to_i == Sample::GiftClient::REAL.to_i
+	# 		if news['gift_type'].to_i == Gift::REAL.to_i
 	# 			behavor = %Q{
 	# 			使用<b>#{news['point']}</b>积分兑换了<a href="/gifts/#{news['gift_id']}">#{news['gift_name']}</a>
 	# 		}.html_safe	
@@ -268,7 +268,7 @@ module ApplicationHelper
 				end
 	
 			when 4
-				if news['gift_type'].to_i == Sample::GiftClient::REAL.to_i
+				if news['gift_type'].to_i == Gift::REAL.to_i
 					behavor = %Q{
 						使用<b>#{news['amount'].abs}</b>积分兑换了<a href="/gifts/#{news['gift_id']}">#{news['gift_name']}</a>
 					}.html_safe	
@@ -465,19 +465,19 @@ module ApplicationHelper
 		# int_step: 1, 2
 		retval = ""
 		case int_status.to_i
-		when ConstVar::Type::MOBILE_CHARGE, ConstVar::Type::SMALL_MOBILE_CHARGE 
+		when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE 
 			if int_step.to_i == 1
 				retval = "准备充值中"
 			else
 				retval = "充值成功，请注意查收"
 			end
-		when ConstVar::Type::ALIPAY
+		when Order::ALIPAY
 			if int_step.to_i == 1
 				retval = "准备转账中"
 			else
 				retval = "转账成功，请注意查收"
 			end   
-		when ConstVar::Type::REAL
+		when Order::REAL
 			if int_step.to_i == 1
 				retval = "正在安排配送"
 			else
@@ -496,13 +496,13 @@ module ApplicationHelper
 	def order_process(int_status)
 		retval = ""
 		case int_status.to_i
-		when ConstVar::Type::QQ_COIN, ConstVar::Type::JIFENBAO
+		when Order::QQ_COIN, Order::JIFENBAO
 			retval = "运营商处理"
-		when ConstVar::Type::ALIPAY
+		when Order::ALIPAY
 			retval = "安排转账"
-		when ConstVar::Type::MOBILE_CHARGE, ConstVar::Type::SMALL_MOBILE_CHARGE 
+		when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE 
 			retval = "安排充值"
-		when ConstVar::Type::REAL
+		when Order::REAL
 			retval = "安排配送" 
 		else
 			retval = "正在处理"

@@ -30,7 +30,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% @my_answer_surveys.value['data'].to_a.each do |survey| %>
+                    <% @my_answer_surveys['data'].to_a.each do |survey| %>
                         <tr>
                             <td><%= int_time_to_date(survey["created_at"]) %></td>
                             <td>

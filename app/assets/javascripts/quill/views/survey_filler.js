@@ -46,6 +46,7 @@ $(function(){
 			// spread point
 			if(this.options.spread_point == undefined)
 				this.options.spread_point = 0;
+			console.log(this.options);
 		},
 
 		_uri: function(path) {

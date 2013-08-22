@@ -55,6 +55,12 @@ class Gift
 		return gifts
 	end
 
+	def info
+		photo_src = self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url
+		self.write_attribute(:photo_src, photo_src)
+		return self
+	end
+
 	def self.create_gift(gift)
 		photo_url = gift.delete("photo_url")
 		material = Material.create_image(photo_url)

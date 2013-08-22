@@ -9,3 +9,5 @@ db/*.lock
 db/journal
 .DS_Store
 config/mongoid.yml
+public/uploads/*
+public/uploads/avatar/*

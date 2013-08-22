@@ -6,9 +6,4 @@ class Sample::SampleController < ApplicationController
 		@current_menu = current_menu
 		super()
 	end
-
-	# def hide_right
-	# 	@hide_right = true
-	# end
-
 end

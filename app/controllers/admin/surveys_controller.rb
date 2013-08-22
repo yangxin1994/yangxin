@@ -127,5 +127,4 @@ class Admin::SurveysController < Admin::AdminController
    result = @client.destroy_attributes(params)
    render :json => result
   end
-
 end
