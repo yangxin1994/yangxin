@@ -44,22 +44,22 @@
 						</li>
 						<li reward_type="4" class="<%= current_tab?("4",params[:reward_type])%>">
 							<a href="<%= surveys_path(:status => params[:status],:reward_type => "4")%>">
-								积分奖励 (<span class="u_t"><%= @reward_count["4"].to_i %></span>)
+								积分奖励 (<span class="u_t"><%= @reward_count[4].to_i %></span>)
 							</a>
 						</li>
 						<li reward_type="8"  class="<%= current_tab?("8",params[:reward_type])%>">
 							<a href="<%= surveys_path(:status => params[:status],:reward_type => "8")%>">
-								抽奖机会 (<span class="c_t"><%= @reward_count["8"].to_i %></span>)
+								抽奖机会 (<span class="c_t"><%= @reward_count[8].to_i %></span>)
 							</a>
 						</li>
 						<li reward_type="1,2,16" class="<%= current_tab?("1,2,16",params[:reward_type])%>">
 							<a href="<%= surveys_path(:status => params[:status],:reward_type => "1,2,16")%>">
-								现金奖励 (<span class="x_t"><%= @reward_count["1"].to_i + @reward_count["2"].to_i + @reward_count["16"].to_i %></span>)
+								现金奖励 (<span class="x_t"><%= @reward_count[1].to_i + @reward_count[2].to_i + @reward_count[16].to_i %></span>)
 							</a>
 						</li>
 						<li reward_type="0" class="<%= current_tab?("0",params[:reward_type])%>">
 							<a href="<%= surveys_path(:status => params[:status],:reward_type => "0")%>">
-								免费调研 (<span class="m_t"><%= @reward_count["0"].to_i %></span>)
+								免费调研 (<span class="m_t"><%= @reward_count[0].to_i %></span>)
 							</a>
 						</li>
 						<div style="clear:both;"></div>

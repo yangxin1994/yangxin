@@ -213,6 +213,7 @@ jQuery(function($) {
 				button.html('').append('<img style="margin-top:2px;" src="/assets/od-quillme/rss_loading.gif">').addClass('disabled')
 			},
 			success:function(retval){
+				console.log(retval)
 					if(retval['success']){
 						if(retval['new_user']){
 							if(email_partten.test(channel)){

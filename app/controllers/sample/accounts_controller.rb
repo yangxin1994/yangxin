@@ -1,5 +1,4 @@
 # encoding: utf-8
-# finish migrating
 class Sample::AccountsController < Sample::SampleController
   layout 'sample_account'
 

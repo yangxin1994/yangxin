@@ -262,26 +262,24 @@ class User
 				EmailWorker.perform_async("rss_subscribe",user.email, callback) if account[:email]					
 			end			
 		end		
-		return {:success => true,:new_user => new_user}
+		return {:success => true, :new_user => new_user}
 	end
 
 	#订阅邮件激活
 	def self.activate_rss_subscribe(active_info)
-    email = active_info['email']
-    time  = active_info['time']   
-    user  = User.where(:email => email).first
-    return ErrorEnum::USER_NOT_EXIST if !user.present?
-    return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - time.to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i        
-    user.update_attributes(:email_subscribe => true )
-    # return {:success => true}		 
-    return true
+		email = active_info['email']
+		time  = active_info['time']   
+		user  = User.where(:email => email).first
+		return ErrorEnum::USER_NOT_EXIST if !user.present?
+		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - time.to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i        
+		user.update_attributes(:email_subscribe => true )
+		return true
 	end
-
 
 	def make_mobile_rss_activate(code)
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i  > self.rss_verification_expiration_time
-    return ErrorEnum::ACTIVATE_CODE_ERROR if self.rss_verification_code != code
-    return self.update_attributes(:mobile_subscribe => true)
+		return ErrorEnum::ACTIVATE_CODE_ERROR if self.rss_verification_code != code
+		return self.update_attributes(:mobile_subscribe => true)
 	end
 
 	def self.cancel_subscribe(active_info)

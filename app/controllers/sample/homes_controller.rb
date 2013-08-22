@@ -1,4 +1,3 @@
-# finish migrating
 class Sample::HomesController < Sample::SampleController
 
 	def show

@@ -11,18 +11,6 @@ class ApplicationController < ActionController::Base
 
   # init action
   def init
-    # get request referer
-    # begin
-    #   if !request.referer.blank?
-    #     ref_uri = URI.parse(request.referer)
-    #     if !ref_uri.host.downcase.end_with?(request.domain.downcase)
-    #       session[:referer] = ref_uri.host.downcase
-    #     end
-    #   end
-    # rescue => ex
-    #   logger.debug ex
-    # end
-
     # Use param value to override cookies value
     refresh_session(params[:auth_key] || cookies[:auth_key])
   end
@@ -39,7 +27,6 @@ class ApplicationController < ActionController::Base
   # =============================
 
   def refresh_session(auth_key)
-
     # 1. If auth_key is not empty. Check auth_key
     if !auth_key.blank?
 
@@ -62,13 +49,6 @@ class ApplicationController < ActionController::Base
           :expires => (result['expire_at'] < 0 ? Rails.application.config.permanent_signed_in_months.months.from_now : nil),
           :domain => :all
         }
-        if !cookies[:guest_key].blank?
-          cookies[:guest_key] = {
-            :value => cookies[:guest_key],
-            :expires => Rails.application.config.permanent_signed_in_months.months.from_now,
-            :domain => :all
-          }
-        end
         session[:auth_key] = auth_key
         session[:role] = result['role']
         session[:status] = result['status']
@@ -81,18 +61,9 @@ class ApplicationController < ActionController::Base
       end
     end
 
-    # 2. If auth_key is empty or not valid, and guest_key is not empty and is not equal to auth_key
-    #    Try using guest_key to refresh session instead
-    if !cookies[:guest_key].blank? && cookies[:guest_key] != auth_key
-      return refresh_session(cookies[:guest_key])
-    end
-
-    # 3. If both auth_key and guest_key is not valid, destroy session and return false
     cookies.delete(:auth_key, :domain => :all)
-    cookies.delete(:guest_key, :domain => :all)
     reset_session
     return false
-
   end
 
   def current_user
@@ -140,43 +111,31 @@ class ApplicationController < ActionController::Base
   end
 
   def has_role(role)
-    if (session[:status].to_i == QuillCommon::UserStatusEnum::VISITOR || session[:role].nil?) 
+    if (session[:status].to_i == User::VISITOR || session[:role].nil?) 
       return false
     else
       return ((session[:role].to_i & role) > 0)
     end
   end
   def is_admin
-    return has_role(QuillCommon::UserRoleEnum::ADMIN)
+    return has_role(User::ADMIN)
   end
   def user_signed_in
-    return has_role(QuillCommon::UserRoleEnum::SAMPLE) || has_role(QuillCommon::UserRoleEnum::CLIENT)
+    return @current_user && @current_user.status == User::REGISTERED
+    # return has_role(User::SAMPLE) || has_role(User::CLIENT)
   end
   def email
-    return session[:email]
+    return @current_user.try(:email)
   end
   def mobile
-    return session[:mobile]
+    return @current_user.try(:mobile)
   end
   def user_id
-    return session[:user_id]
+    return @current_user.nil? ? nil : @current_user._id.to_s
   end
   def unread_message_count
-    return session[:unread_message_count].blank? ? 0 : session[:unread_message_count]
+    return @current_user.try(:unread_messages_count).to_i
   end
-
-  # def current_user_info
-  #   user_info = nil
-  #   result = Account::UserClient.new(session_info).get_basic_info
-  #   if result.success
-  #     user_info = {}
-  #     %w[address alipay_account bank bankcard_number birthday full_name identity_card phone postcode].each do |attr_name|
-  #       user_info[attr_name] = result.value[attr_name]
-  #     end
-  #   end
-  #   return user_info
-  # end
-
 
   def current_sample_info
     return if @current_user.nil?
