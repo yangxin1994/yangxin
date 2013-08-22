@@ -8,7 +8,7 @@ class User
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
   	EmailRexg  = '\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z'
-  	MobileRexg = '^(13[0-9]|15[0|1|2|3|6|7|8|9]|18[8|9])\d{8}$' 
+  	MobileRexg = '^(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$' 
 
   	DEFAULT_IMG = '/assets/avatar/small_default.png'
 
@@ -181,6 +181,16 @@ class User
 			user.auth_key = nil
 			user.save
 		end
+	end
+
+	##TODO  临时用于 popup弹出框后，用户登录状态刷新，获取小头像
+	def mini_avatar
+		md5 = Digest::MD5.hexdigest(self.id)
+		return "/uploads/avatar/mini_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/mini_#{md5}.png")
+		%w( mini small thumb).each do |ver|
+			return "/uploads/avatar/#{ver}_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/#{ver}_#{md5}.png")	
+		end
+		return "/assets/avatar/mini_default.png"	
 	end
 
 	def get_level_information
@@ -458,7 +468,7 @@ class User
 			user.mobile_subscribe = true
 		end
 		user.save
-		RegistLog.create_regist_log(user.id)
+		RegistLog.create_regist_log(user.id) unless RegistLog.find_by_user_id(user.id).present?
 		return user.login(client_ip, client_type, false)
 	end
 

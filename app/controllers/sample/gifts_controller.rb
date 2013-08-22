@@ -9,8 +9,13 @@ class Sample::GiftsController < ApplicationController
   #############################		
   def hotest
     sort_type = params[:sort_type].present? ? params[:sort_type]  : 'exchange_count' 
-    @gifts = Gift.find_real_gift(sort_type)
-    @gifts = auto_paginate @gifts
+    point     = params[:point].to_i  if params[:point].present?
+    gifts = Gift.find_real_gift(sort_type,point)
+
+    @gifts = auto_paginate(gifts) do |paginated_gifts|
+      paginated_gifts.map { |e| e.info_for_gifts } 
+    end
+
     render_json_auto(@gifts)
   end
 

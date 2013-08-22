@@ -138,8 +138,11 @@ class Answer
 			prizes_arr  << {'id' => pri.id,'title' => pri.title,'price' => pri.price,'photo_src' => pri.photo_src}	
 		end
 		lottery_data['survey_id'] = self.survey.id
+		lottery_data['scheme_id'] = self.survey.quillme_promote_info['reward_scheme_id']
 		lottery_data['survey_title'] = self.survey.title
 		lottery_data['prizes'] = prizes_arr
+		lottery_data['user_id'] = self.user_id
+		lottery_data['status']  = self.status
 		return lottery_data
 	end
 
@@ -1157,6 +1160,8 @@ class Answer
 		answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id.to_s, sample._id.to_s, false)
 		return ErrorEnum::ANSWER_EXIST if answer.present?
 		sample.answers << self
+		a = Answer.find_by_id(self._id.to_s)
+		logger.info a.user_id
 		PunishLog.create_punish_log(sample.id) if self.status == REJECT
 		if self.auditor.present?
 			self.auditor.create_message("审核问卷答案消息", self.audit_message, [sample._id.to_s])
