@@ -9,9 +9,7 @@ class Admin::PublicNoticesController < Admin::ApplicationController
 	end
 
 	def index
-		@public_notices = PublicNotice.find_valid_notice
-		@public_notices = @public_notices.find_by_title(params[:title]) if params[:title].blank?
-		render_json_auto auto_paginate(@public_notices) and return
+		render_json auto_paginate(PublicNotice.find_valid_notice.find_by_title(params[:title])) 
 	end
 	
 	def show

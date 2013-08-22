@@ -1,8 +1,5 @@
-<%if @announcement.success %>
-
-<!-- content for head -->
 <% content_for :head do %>
-	<%= javascript_include_tag "/kindeditor/kindeditor-min", "/kindeditor/lang/zh_CN" %>
+  <%= javascript_include_tag "/kindeditor/kindeditor-min", "/kindeditor/lang/zh_CN" %>
   <%= javascript_include_tag "pages/admin/announcements-bundle" %>
   <%= stylesheet_link_tag "pages/admin/announcements-bundle", :media => "all" %>
 <% end %>
@@ -20,46 +17,40 @@
     </div>
   <% end%>
 
-	<form action="/admin/announcements/<%= @announcement.value['_id'] %>" name="announcements" enctype="multipart/form-data" method="post">
-		<input name="_method" id="_method" type="hidden" value="put" />				
-		<fieldset>
-			<p>
-				<label>公告类型</label>
-				<select name="type">
-					<option <% if @announcement.value["public_notice_type"].to_i ==1%>selected<%end%> value="1">Quill公告</option>
-					<option <% if @announcement.value["public_notice_type"].to_i ==2%>selected<%end%> value="2">QuillMe公告</option>
-				</select>
-				<!-- <input class="wrap-text dn" type="text" name="type" value="<%= @announcement.value["public_notice_type"]%>"/> -->
-			</p>
-			<p>
-				<label>公告标题</label>
-				<input class="wrap-text" type="text" name="title" value="<%= @announcement.value["title"] %>"/>
-			</p>
-			<p>
-				<label>公告内容</label>
-				<textarea class="wysiwyg" name="content" style="width: 600px;min-height: 100px;"><%= @announcement.value['content'] %></textarea> 
-			</p>
-			<p>
-				<label>附件</label>
-				<input type="file" name="attachment" class="fileToUpload" style="margin-top: 10px;">
-				<%if @announcement.value['attachment'].to_s.delete("/upload/images")!="" %>
-					<a href="<%= @announcement.value['attachment'].to_s %>">
-						<%= @announcement.value['attachment'].to_s.split('/').last %>
-					</a>
-				<%end%>
-			</p>
-			<p>
-				<input class="blueBtn btn-edit-ok" type="submit" value="确 定" />
-			</p>					
-		</fieldset>
-						
-	</form>	
+  <form action="/admin/announcements/<%= @announcement['_id'] %>" name="announcements" enctype="multipart/form-data" method="post">
+    <input name="_method" id="_method" type="hidden" value="put" />       
+    <fieldset>
+      <p>
+        <label>公告类型</label>
+        <select name="type">
+          <option <% if @announcement["public_notice_type"].to_i ==1%>selected<%end%> value="1">Quill公告</option>
+          <option <% if @announcement["public_notice_type"].to_i ==2%>selected<%end%> value="2">QuillMe公告</option>
+        </select>
+        <!-- <input class="wrap-text dn" type="text" name="type" value="<%= @announcement["public_notice_type"]%>"/> -->
+      </p>
+      <p>
+        <label>公告标题</label>
+        <input class="wrap-text" type="text" name="title" value="<%= @announcement["title"] %>"/>
+      </p>
+      <p>
+        <label>公告内容</label>
+        <textarea class="wysiwyg" name="content" style="width: 600px;min-height: 100px;"><%= @announcement['content'] %></textarea> 
+      </p>
+      <p>
+        <label>附件</label>
+        <input type="file" name="attachment" class="fileToUpload" style="margin-top: 10px;">
+        <%if @announcement['attachment'].to_s.delete("/upload/images")!="" %>
+          <a href="<%= @announcement['attachment'].to_s %>">
+            <%= @announcement['attachment'].to_s.split('/').last %>
+          </a>
+        <%end%>
+      </p>
+      <p>
+        <input class="blueBtn btn-edit-ok" type="submit" value="确 定" />
+      </p>          
+    </fieldset>
+            
+  </form> 
 
   <hr/>
 </div>
-<%else%>
-<div class="nNote nFailure hideit">
-  <p><strong>错误: </strong>哇! 数据加载错误!</p>
-  <p><strong>代号: </strong><%= @announcement.value %></p>
-</div>
-<%end%>

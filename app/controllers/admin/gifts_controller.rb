@@ -51,7 +51,7 @@ class Admin::GiftsController < Admin::AdminController
 
   def destroy
     render_json @gift = Gift.where(:_id =>params[:id]).first do |gift|
-      success_true gift.destroy
+      success_true gift.delete_gift
     end
   end
 
