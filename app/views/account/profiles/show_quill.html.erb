@@ -27,37 +27,37 @@
 
           <p class="email">
             <label for="mail">邮箱</label>
-            <input type="text" id="mail" disabled='disabled' value="<%= @common_user.value['email'] %>"/>
+            <input type="text" id="mail" disabled='disabled' value="<%= @common_user.email %>"/>
           </p>
 
           <p class="username">
             <label for="username">用户名</label>
-            <input type="text" id="username" value="<%= @common_user.value['username'] %>"/>
+            <input type="text" id="username" value="<%= @common_user.username %>"/>
           </p>
 
           <p class="name">
             <label for="name">姓名</label>
-            <input type="text" id="name" value="<%= @common_user.value['full_name'] %>"/>
+            <input type="text" id="name" value="<%=  %>"/>
           </p>
 
           <p class="card">
             <label for="card">证件号</label>
-            <input type="text" id="card" value="<%= @common_user.value['identity_card'] %>"/>
+            <input type="text" id="card" value="<%=  %>"/>
           </p>
 
           <p class="company">
             <label for="company">公司</label>
-            <input type="text" id="company" value="<%= @common_user.value['company'] %>"/>
+            <input type="text" id="company" value="<%=  %>"/>
           </p>
 
           <p class="phone">
             <label for="phone">手机号码</label>
-            <input type="text" id="phone" value="<%= @common_user.value['phone'] %>"/>
+            <input type="text" id="phone" value="<%= @common_user.mobile %>"/>
           </p>
 
           <p class="address">
             <label for="address" style="vertical-align:top;margin-top:0;">地址</label>
-            <textarea id="address" ><%= h @common_user.value['address'] %></textarea>
+            <textarea id="address" ><%=  %></textarea>
           </p>
 
           <button class="od-button btnOK">确  定</button>
@@ -70,17 +70,17 @@
 
           <p class="oldPass">
             <label for="oldPass">旧密码</label>
-            <input type="password" id="oldPass" value="<%= @common_user.value['oldPass'] %>"/>
+            <input type="password" id="oldPass" value="<%=  %>"/>
           </p>
 
           <p class="newPass">
             <label for="newPass">新密码</label>
-            <input type="password" id="newPass" value="<%= @common_user.value['newPass'] %>"/>
+            <input type="password" id="newPass" value="<%=  %>"/>
           </p>
 
           <p class="againPass">
             <label for="againPass">确认密码</label>
-            <input type="password" id="againPass" value="<%= @common_user.value['againPass'] %>"/>
+            <input type="password" id="againPass" value="<%=  %>"/>
           </p>
 
           <button class='od-button btnOKPass'>确  定</button>
