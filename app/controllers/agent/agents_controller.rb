@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Agent::AgentsController < ApplicationController
   
   layout "agent-todc"
@@ -8,7 +10,7 @@ class Agent::AgentsController < ApplicationController
 
   def require_agent
     # if !is_admin  # is_admin only check admin and super admin.
-    true
+    session[:auth_key] == current_agent.try('auth_key')
   end
 
   def session_info
@@ -17,8 +19,10 @@ class Agent::AgentsController < ApplicationController
   end
 
   def current_agent
-    @current_agent = session[:auth_key].nil? ? nil : Agent.find_by_auth_key(session[:auth_key])
-    return @current_agent
+    unless @current_agent = Agent.find_by_auth_key(session[:auth_key])
+      redirect_to "/agent/signin", :notice => "您需要登录才能继续操作!" and return
+    end
+    @current_agent
   end
 
   def get_email

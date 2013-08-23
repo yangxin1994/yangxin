@@ -2,6 +2,8 @@
 
 class Agent::Sessions::SigninController < Agent::AgentsController
 
+  before_filter :require_agent, :except => [:index, :create]
+
   # PAGE: show sign in
   def index
 
