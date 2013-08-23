@@ -238,7 +238,8 @@ class ApplicationController < ActionController::Base
     if !user_signed_in
       respond_to do |format|
         format.html { redirect_to sign_in_path({ref: request.url}) and return }
-        format.json { render :json => Common::ResultInfo.error_require_login and return }
+        # format.json { render :json => Common::ResultInfo.error_require_login and return }
+        format.json { render_json_e ErrorEnum::REQUIRE_LOGIN and return }
       end
     end
   end

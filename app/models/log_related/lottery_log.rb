@@ -67,6 +67,9 @@ class LotteryLog < Log
 		return {'total' => total_count,'succ' => succ_count}
 	end
 
+	def self.get_order_by_answer_sample(answer_id)
+		order = self.where(:answer_id => answer_id).first
+	end
 end
 
 

@@ -376,7 +376,7 @@
 			position: absolute;
 			top: -350px;
 			z-index: 2;
-			margin-left: 110px;
+			margin-left: 120px;
 			width: 390px;
 			height: 330px;
 			background-image: url("/assets/image/quillme/slotMachine/win.png");	
@@ -410,7 +410,7 @@
 			position: absolute;
 			top: -350px;
 			z-index: 2;
-			margin-left: 122px;
+			margin-left: 120px;
 			width: 390px;
 			height: 330px;
 			background-image: url("/assets/image/quillme/slotMachine/lose.png");	
@@ -455,7 +455,7 @@
 	@include box-shadow(0 1px 1px #999);
 	.dashed-box-inner{
 		padding:10px 10px 5px 10px;
-		border:1px #f9b9b9 dashed;
+		/*border:1px #f9b9b9 dashed;*/
 		@include border-radius(9px);
 		.dashed-box-inner-top{
 			position:relative;
@@ -792,6 +792,9 @@
   			float:right;
   			color:#fff;
   			cursor:pointer;
+				&:hover{
+  				background: #F25D5D;
+  			}  
 			}
 			input.con_sub_btn{
   			float:left;
@@ -803,7 +806,7 @@
   			display:block;
   			height:32px;
   			line-height:32px;
-  			color:blue;
+  			color:#3D97ED;
 			}
 		}
 	}
