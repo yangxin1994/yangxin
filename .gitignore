@@ -11,3 +11,4 @@ db/journal
 config/mongoid.yml
 public/uploads/*
 public/uploads/avatar/*
+public/assets/*

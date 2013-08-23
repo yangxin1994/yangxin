@@ -57,7 +57,6 @@ OopsData::Application.configure do
   config.authkeys = {
     sina: '3198161770',
     renren: '194585',
-    # qq: '100271825',
     qq: '100418792',
     google: '36926710043',
     qihu360: 'c83cf3b2688f4f1c695bc9906a2dcf14',
