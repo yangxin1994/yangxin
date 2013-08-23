@@ -266,13 +266,13 @@ $(function(){
 								error_con = $('.award_money_info .ami_error');
 						var infos = {//TODO: zhifubao != email
 							chongzhi: { h1: '请输入您要充值的手机号', h2: '您要充值的手机号是', btn: '请输入正确的手机号', btn_ok: '确认充值', 
-								error_12: '此手机号已经参加过本次调研，不能重复充值。', error_15: '此手机号已参加过' + window.config.corp_name + '其他调研，无法申请本热点调查奖励。',
+								error__12: '此手机号已经参加过本次调研，不能重复充值。', error__15: '此手机号已参加过' + window.config.corp_name + '其他调研，无法申请本热点调查奖励。',
 								ipt_value: this.options.mobile },
 							zhifubao: { h1: '请输入您的支付宝注册邮箱或手机号', h2: '您要转账的支付宝账号是', btn: '请输入正确的支付宝账号', btn_ok: '确认向支付宝转账', 
-								error_12: '此支付宝账号已经参加过本次调研，不能重复转账。', error_15: '此支付宝账号已参加过' + window.config.corp_name + '其他调研，无法申请本热点调查奖励。',
+								error__12: '此支付宝账号已经参加过本次调研，不能重复转账。', error__15: '此支付宝账号已参加过' + window.config.corp_name + '其他调研，无法申请本热点调查奖励。',
 								ipt_value: this.options.email },
 							jifenbao: { h1: '请输入您的集分宝注册邮箱或手机号', h2: '您的集分宝账号是', btn: '请输入正确的集分宝账号', btn_ok: '确认向集分宝转入积分', 
-								error_12: '此集分宝账号已经参加过本次调研，不能重复转账。', error_15: '此集分宝账号已参加过' + window.config.corp_name + '其他调研，无法申请本热点调查奖励。',
+								error__12: '此集分宝账号已经参加过本次调研，不能重复转账。', error__15: '此集分宝账号已参加过' + window.config.corp_name + '其他调研，无法申请本热点调查奖励。',
 								ipt_value: this.options.email }
 						}
 						function _get_award_type() {

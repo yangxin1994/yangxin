@@ -139,11 +139,14 @@ class Answer
     prize_ids = self.rewards.first['prizes'].map{|p| p['id']}
     prizes = Prize.where(:id.in => prize_ids).map{|p| p['photo_src'] = p.photo.present? ? p.photo.picture_url : Prize::DEFAULT_IMG;p}
     prizes.each do |pri|
-      prizes_arr  << {'id' => pri.id,'title' => pri.title,'price' => pri.price,'photo_src' => pri.photo_src}  
+      prizes_arr << {'id' => pri.id,'title' => pri.title,'price' => pri.price,'photo_src' => pri.photo_src}
     end
     lottery_data['survey_id'] = self.survey.id
+    lottery_data['scheme_id'] = self.survey.quillme_promote_info['reward_scheme_id']
     lottery_data['survey_title'] = self.survey.title
     lottery_data['prizes'] = prizes_arr
+    lottery_data['user_id'] = self.user_id.to_s
+    lottery_data['status'] = self.status
     return lottery_data
   end
 

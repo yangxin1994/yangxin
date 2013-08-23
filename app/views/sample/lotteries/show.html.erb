@@ -3,15 +3,18 @@
 		window._id = <%= raw params[:id].to_json %>;
 		<% if user_signed_in %>
 	    window.username    = "<%=  @current_sample['nickname']   %>"
-	    window.sample_receiver = "<%= @recerver_info['receiver'] if @recerver_info %>"
-    	window.sample_mobile   = "<%= @recerver_info['mobile'] if @recerver_info %>"
-    	window.sample_postcode = "<%= @recerver_info['postcode'] if @recerver_info %>"
-    	window.sample_address  = "<%= @recerver_info['address'] if @recerver_info %>"
-    	window.sample_street_info = "<%= @recerver_info['street_info'] if @recerver_info %>"
+	    window.sample_receiver = "<%= @receiver_info['receiver'] if @receiver_info %>"
+    	window.sample_mobile   = "<%= @receiver_info['mobile'] if @receiver_info %>"
+    	window.sample_postcode = "<%= @receiver_info['postcode'] if @receiver_info %>"
+    	window.sample_address  = "<%= @receiver_info['address'] if @receiver_info %>"
+    	window.sample_street_info = "<%= @receiver_info['street_info'] if @receiver_info %>"
 		<% end %>
 
-		window.win_prize_id = "<%= session['win_prize_id'] %>"
-		window.win_prize_title = "<%= session['win_prize_title'] %>"
+		window.win_prize_id = "<%= @win_prize_id %>"
+		window.win_prize_title = "<%= @win_prize_title %>"
+		window.error_code      = "<%= @error_code %>"
+		window.lottery_result  = "<%= @lottery_result %>"
+		window.win_order_id    = "<%= @win_order_id %>"
 	</script>
 	<%= javascript_include_tag "pages/sample/lotteries-bundle" %>
 	<%= stylesheet_link_tag "pages/sample/lotteries-bundle", :media => "all" %>
@@ -106,11 +109,10 @@
 					<li <%= hide_border?(@fail_lottery_logs,index) %>>
 						<span class="rank-list-left l">
 							<a class="userhead l" href="javascript:void(0);">
-								<img src="<%= log['avatar'] %>" alt="<%= log['nickname']%>">
+								<img src="<%= show_image(log['avatar'],'avatar') %>" alt="<%= log['nickname']%>">
 							</a>
 							<span class="username l">
 								<a href="javascript:void(0);">
-									<%= log['user_id']%>
 									<%= log['nickname']%>
 								</a>
 							</span>
@@ -129,11 +131,11 @@
 			<% end %>
 			<% if @succ_lottery_logs.present? %>
 				<ul class="rank-list succ_log" style="display:none;">
-					<% @succ_lottery_logs.each do |log|%>
-						<li>
+					<% @succ_lottery_logs.each_with_index do |log,index|%>
+						<li <%= hide_border?(@succ_lottery_logs,index) %>>
 						<span class="rank-list-left l">
 							<a class="userhead l" href="javascript:void(0);">
-								<img src="<%= log['avatar'] %>" alt="<%= log['nickname']%>">
+								<img src="<%= show_image(log['avatar'],'avatar') %>" alt="<%= log['nickname']%>">
 							</a>
 							<span class="username l">
 								<a href="javascript:void(0);">
@@ -174,7 +176,7 @@
 	<div class="research-list dashed-box l">
 		<div class="dashed-box-inner">
 			<div class="dashed-box-inner-top survey_prizes">
-				<span>来自调研<a href="<%= survey_path(@lottery['survey_id'])%>"><%= @lottery['survey_title']%></a>下的奖品</span>
+				<span>来自调研<a href="/s/<%= (@lottery['scheme_id'])%>"><%= @lottery['survey_title']%></a>下的奖品</span>
 			</div>
 			<div class="other_gifts">
 				<ul>

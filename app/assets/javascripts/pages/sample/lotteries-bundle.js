@@ -2,6 +2,31 @@
 //=require ui/widgets/od_address_selector
 $(function(){
 	var postcode_reg    = /^[0-9]{6}$/
+	var receiver_reg  = /[a-zA-z0-9\u4E00-\u9FA5]/
+	var default_receiver = /姓名/	
+	var street_info_partten = /街道地址（不需要填写省\/市\/区）/
+	var mobile_partten = /^(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$/
+
+  function placeholder_for_ie(){
+		$('input[placeholder]').each(function(){  
+		    var input = $(this);        
+		    $(input).val(input.attr('placeholder'));
+		                
+		    $(input).focus(function(){
+		        if (input.val() == input.attr('placeholder')) {
+		           input.val('');
+		        }
+		    });
+		        
+		    $(input).blur(function(){
+		       if (input.val() == '' || input.val() == input.attr('placeholder')) {
+		           input.val(input.attr('placeholder'));
+		       }
+		    });
+		});
+  }
+
+
 
 	$('div.dashed-top-tit li').click(function(){
 		$(this).addClass('current').siblings('li').removeClass('current')
@@ -118,6 +143,35 @@ $(function(){
 	};
 	/* Initialize End */
 
+
+	if(typeof(window.win_order_id) !== 'undefined' && window.win_order_id != ''){
+		//中奖，已提交订单，刷新页面情况	
+		$(".win").children('p').text("恭喜您！抽到了" + window.win_prize_title + "！").end().animate({"top": "65px"}, 800, "easeOutBounce");
+		$(".win button").text('查看').click(function() {
+			window.location.href = '/users/orders?scope=2';
+		})		
+	}else if(typeof(window.win_prize_id) !== 'undefined' && window.win_prize_id != ''){
+		//中奖,未提交订单，刷新页面
+		$(".win").children('p').text("恭喜您！抽到了" + window.win_prize_title + "！").end().animate({"top": "65px"}, 800, "easeOutBounce");
+		$(".win button").click(function() {
+			popup_address_page();
+		})		
+	}else if(typeof(window.error_code != 'undefined') && window.error_code != ''){
+		//违规操作未中奖情况
+		if(window.error_code == 'error__11'){
+			$(".lose p").text("对不起,该次回答的抽奖机会已被领取,请不要继续抽奖！");
+		}else{
+			$(".lose p").text("对不起,该问卷不存在抽奖机会！");
+		}		
+	}else if(window.lottery_result == 'false'){
+		//正常抽奖未中的情况
+		$(".lose").animate({"top": "65px"}, 800, "easeOutBounce");
+		$(".lose button").click(function() {
+			window.location.href = '/home';
+		});			
+	}		
+
+
 	$(".machine-start").mousedown(function() {
 			if(!isplaying) {
 				window.clearInterval(button);
@@ -149,7 +203,7 @@ $(function(){
 							window.win_prize_title = retval.value.prize_title
 							$(".win p").text("恭喜您！抽到了" + retval.value.prize_title + "！");
 							$(".win button").click(function() {
-								$(".win").hide();
+								//$(".win").hide();
 								popup_address_page()
 							})
 						} else {
@@ -246,7 +300,6 @@ $(function(){
 	});
 
 
-
 	//共用的弹出框函数
 	function popup(obj,redirect,another_redirect){
     	$.fancybox.open([
@@ -254,6 +307,7 @@ $(function(){
     		],
 				{
 					beforeShow: function(){
+						placeholder_for_ie()
     	  		$(".fancybox-skin").css({"backgroundColor":"#fff"}); 
 	
     	  		if(redirect){
@@ -360,8 +414,8 @@ $(function(){
 
 	function popup_address_page(){
 		//获取收获地址
-    get_recerver_info()
 		popup("#recever")
+    get_recerver_info()
 	}
 	
 
@@ -420,14 +474,16 @@ $(function(){
 
 
   function generate_orders(button,order_obj){
+    button.val('正在提交......').attr('disabled',true).addClass('disabled')  	
     $.postJSON('/orders/create_lottery_order.json',{order_info:order_obj},function(retval){
-    	button.val('正在提交......')
-    	button.attr('disapled',true);
       	if(retval.success){
-      		button.val('继续提交')
+      		button.val('继续提交').attr('disabled',false).removeClass('disabled')
       		$.postJSON('/answers/'+ window._id+ '/start_bind',{},function(result){
      				console.log(result)
-      		} )
+      		} )			
+      		$(".win button").text('查看').off('click').on('click', function(){
+      			window.location.href = '/users/orders?scope=2';
+      		});		   		
       		popup_order_ok_page();
       	}else{
       		console.log(retval)
@@ -519,15 +575,15 @@ $(function(){
 		var street_info = $('textarea[name="street_info"]').val()
 
 		var go = false
-		if(receiver.length < 1){
+		if(!receiver_reg.test(receiver) || default_receiver.test(receiver)){
 			$('input[name="receiver"]').addClass('error')
-		}else if(mobile.length < 1){
+		}else if(!mobile_partten.test(mobile)){
 			$('input[name="mobile"]').addClass('error')
-		}else if(postcode.length < 1 || !postcode_reg.test(postcode)){
+		}else if(!postcode_reg.test(postcode)){
 			$('input[name="postcode"]').addClass('error')
 		}else if(province < 0 || city < 0 || town < 0){
 			$('span.notice').show()	
-		}else if(street_info.length < 1){
+		}else if(street_info.length < 1 || street_info_partten.test(street_info)){
 			$('textarea').addClass('error')
 		} else{
 			$('span.notice').hide()	
@@ -536,7 +592,8 @@ $(function(){
 
 		return go
 				
-	}		
+	}
+
 
 
 
