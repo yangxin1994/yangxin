@@ -17,11 +17,28 @@ class Admin::SamplesController < Admin::AdminController
   end
 
   def edit
-    @sample = Sample.sample.find(params[:id]).sample_attributes
+    @sample = User.sample.find(params[:id]).sample_attributes
   end
 
   def show
-    @sample = Sample.sample.find(params[:id]).sample_attributes
+    @attrs = User.sample.find(params[:id]).sample_attributes
+    @sample_attributes = SampleAttribute.normal.map do |sample_attribute|
+      {
+        'name' => sample_attribute[:name],
+        'type' => sample_attribute[:type],
+        'element_type' => sample_attribute[:element_type],
+        'enum_array' => sample_attribute[:enum_array],
+        'date_type' => sample_attribute[:date_type],
+        'status' => sample_attribute[:status],
+        'completion' => sample_attribute[:completion],
+        'analyze_requirement' => sample_attribute[:analyze_requirement],
+        'analyze_result' => sample_attribute[:analyze_result],
+        '_id' => sample_attribute[:_id]
+      }
+    end
+    @sample_attributes.each do |sample_attribute|
+      sample_attribute['value'] = @attrs[sample_attribute['name']]
+    end
   end
   # ##########################
   #
@@ -30,15 +47,15 @@ class Admin::SamplesController < Admin::AdminController
   # ##########################
 
   def operate_point
-    render_json Sample.where(:_id => params[:id]).first do |sample|
+    render_json User.where(:_id => params[:id]).first do |sample|
       sample.operate_point(params[:amount], params[:remark])
     end  
   end
 
   def set_sample_role
-    render_json Sample.where(:_id => params[:id]).first do |sample|
+    render_json User.where(:_id => params[:id]).first do |sample|
       {
-        :role => sample.set_sample_role(params[:role]),
+        :role => sample.set_sample_role(params[:roles].map(&:to_i)),
         :block => sample.block(params[:block])
       }
     end
@@ -50,36 +67,36 @@ class Admin::SamplesController < Admin::AdminController
   #
   # ##########################
   def redeem_log
-    @sample = Sample.sample.find(params[:id])
-    @redeem_log = auto_paginate(@sample.logs.point_logs) do |logs|
+    @sample = User.find(params[:id])
+    @redeem_log = auto_paginate(@sample.logs.redeem_logs) do |logs|
       logs.map { |e| e.info_for_admin }
     end
   end
 
   def point_log
-    @sample = Sample.sample.find(params[:id])
+    @sample = User.find(params[:id])
     @point_log = auto_paginate(@sample.logs.point_logs) do |logs|
       logs.map { |e| e.info_for_admin }
     end
   end
 
   def lottery_log
-    @sample = Sample.sample.find(params[:id])
+    @sample = User.find(params[:id])
     @lottery_log = auto_paginate(@sample.logs.lottery_logs) do |logs|
       logs.map { |e| e.info_for_admin }
     end
   end
 
   def answer_log
-    @sample = Sample.sample.find(params[:id])
+    @sample = User.find(params[:id])
     @answer_log = auto_paginate(@sample.logs.answer_logs) do |logs|
       logs.map { |e| e.info_for_admin }
     end
   end
 
   def spread_log
-    @sample = Sample.sample.find(params[:id])
-    @spread_log = auto_paginate(@sample.logs.spread_logs) do |logs|
+    @sample = User.find(params[:id])
+    @spread_log = auto_paginate(@sample.spread_logs) do |logs|
       logs.map { |e| e.info_for_admin }
     end
   end
@@ -179,31 +196,27 @@ class Admin::SamplesController < Admin::AdminController
   #
   # ##########################
   def status
-    _client = Admin::SampleClient.new(session_info)
-    @sample_count = _client.get_sample_count.value
-    data = _client.get_sample_count('day', 2).value['new_sample_number']
+    @sample_count = User.count_sample(params[:period].to_s, params[:time_length].to_i)
+    data = User.count_sample('day', 2)['new_sample_number']
     @new_user_by_day = data[1] - data[0]
-    data = _client.get_sample_count('week', 2).value['new_sample_number']
+    data = User.count_sample('week', 2)['new_sample_number']
     @new_user_by_week = data[1] - data[0]
-    data = _client.get_active_sample_count('day', 1).value
+    data = User.count_active_sample('day', 1)
     @active_user_by_day = data[0]
-    data = _client.get_active_sample_count('week', 1).value
+    data = User.count_active_sample('week', 1)
     @active_user_by_week = data[0]
   end
 
   def get_sample_count
-    _client = Admin::SampleClient.new(session_info)
-    render json: _client.get_sample_count(params[:period], params[:time_length]).value
+    render_json User.count_sample(params[:period].to_s, params[:time_length].to_i)
   end
 
   def get_active_sample_count
-    _client = Admin::SampleClient.new(session_info)
-    render json: _client.get_active_sample_count(params[:period], params[:time_length]).value
+    render_json User.count_active_sample(params[:period], params[:time_length].to_i)
   end
 
   def send_message
-    result = @samples_client.send_message(params)
-    render :json => result
+    render_json current_user.create_message(params[:title], params[:content], params[:sample_ids])
   end
 
 end

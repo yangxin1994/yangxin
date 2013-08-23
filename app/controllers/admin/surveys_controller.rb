@@ -73,7 +73,6 @@ class Admin::SurveysController < Admin::AdminController
     _r = Survey.find(params[:id]).info_for_admin
     @survey = _r["survey"]
     @questions = {}
-    binding.pry
     _r['questions'].each do |question_id, question|
       @survey["logic_control"].each do |lc|
         lc["conditions"].each do |condition|

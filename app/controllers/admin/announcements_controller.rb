@@ -16,6 +16,10 @@ class Admin::AnnouncementsController < Admin::AdminController
     @announcement = PublicNotice.find params[:id]
   end
 
+  def new
+    @announcement ={}
+  end
+
   # POST
   def create
     params[:type] = params[:type].to_i
@@ -28,13 +32,13 @@ class Admin::AnnouncementsController < Admin::AdminController
           :public_notice_type => params[:type].to_i,
           :title =>  params[:title],
           :content =>  params[:content],
-          :attachment => photo.url.to_s
+          :attachment => photo.try('url')
         }, current_user)
 
     if @announcement.updated_at
       redirect_to :action => :index
     else
-      redirect_to :render => :new
+      render :new
     end
     # render :json => @result
   end
@@ -66,7 +70,7 @@ class Admin::AnnouncementsController < Admin::AdminController
           :public_notice_type => params[:type].to_i,
           :title =>  params[:title],
           :content =>  params[:content],
-          :attachment => photo.url.to_s
+          :attachment => photo.try('url')
         }
       }, "/#{params[:id]}")
     else

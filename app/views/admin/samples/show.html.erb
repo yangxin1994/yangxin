@@ -52,16 +52,16 @@
       </tr>
     </thead>
     <tbody>
-       <% attrs = @sample.pop %>
       <tr>
         <td>邮箱:</td>
-        <td><%= attrs['email'] %></td>
+        <td><%= @attrs['email'] %></td>
       </tr>
       <tr>
         <td>手机:</td>
-        <td><%= attrs['mobile'] %></td>
+        <td><%= @attrs['mobile'] %></td>
       </tr>
-      <% @sample.each do |attr| %>
+      <% @sample_attributes.each do |attr| %>
+
         <% case attr['type'].to_i %>
         <% when 0 %>
           <tr>
@@ -71,7 +71,7 @@
         <% when 1 %>
           <tr>
             <td><%= attr['name'] %>:</td>
-            <td><%=attr['enum_array'][attr['value']] %></td>
+            <td><%=attr['enum_array'][attr['value']] if attr['value'].present? %></td>
           </tr>
         <% when 2 %>
           <tr>
@@ -91,7 +91,7 @@
               <td><%= attr['value'][0] %></td>
             <% else %>
               <td><%= attr['value'][0] %> ~ <%= attr['value'][1] %></td>
-            <% end %>            
+            <% end if attr['value'].present? %>            
           </tr>
         <% when 5 %>
           <tr>
@@ -110,7 +110,7 @@
               <td><%= Time.at(attr['value'][0]).strftime(attr['strf']) %></td>
             <% else %>
               <td><%= Time.at(attr['value'][0]).strftime(attr['strf']) %> ~ <%= Time.at(attr['value'][1]).strftime(attr['strf']) %></td>
-            <% end %>
+            <% end if attr['value'].present? %>
           </tr>
         <% when 6 %>
           <tr>
