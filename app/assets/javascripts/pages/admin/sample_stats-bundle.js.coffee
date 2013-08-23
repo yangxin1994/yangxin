@@ -113,8 +113,8 @@ $ ->
   sample_chart = new SampleStatChartWidget(
     '#sample_stats_panel',
     'sample_stats_charts',
-    '/admin/sample_stats/get_sample_count',
+    '/admin/samples/get_sample_count',
     '样本个数',
     (data) -> data.new_sample_number
   )
-  active_sample_chart = new SampleStatChartWidget('#active_sample_stats_panel', 'active_sample_stats_charts', '/admin/sample_stats/get_active_sample_count', '活跃样本个数')
+  active_sample_chart = new SampleStatChartWidget('#active_sample_stats_panel', 'active_sample_stats_charts', '/admin/samples/get_active_sample_count', '活跃样本个数')
