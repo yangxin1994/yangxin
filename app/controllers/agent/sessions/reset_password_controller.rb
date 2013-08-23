@@ -1,13 +1,9 @@
+# encoding: utf-8
+
 class Agent::Sessions::ResetPasswordController < Agent::AgentsController
   
 
-  before_filter :require_agent, :only => [:index, :update]
-
-  before_filter :get_session_client
-
-  def get_session_client
-    @session_client = Agent::SessionClient.new(session_info)
-  end  
+  before_filter :require_agent, :only => [:index, :create]
 
   # PAGE: show sign in
   def index
@@ -15,9 +11,12 @@ class Agent::Sessions::ResetPasswordController < Agent::AgentsController
   end
 
   def create
-    result = @session_client.new_password(params[:agent][:password], params[:agent][:new_password], params[:agent][:password_confirmation] )
-    refresh_session(result.value['auth_key'])
-    render :json => result
+    if current_agent.reset_password(params[:agent][:password], params[:agent][:new_password])
+      flash[:success] = "密码修改成功!"
+      render :index
+    else
+      flash[:success] = "密码修改失败!"
+    end
   end
 
 end

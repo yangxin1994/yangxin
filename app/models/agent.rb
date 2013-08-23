@@ -76,13 +76,10 @@ class Agent
   end
 
   def self.login(email, password)
-    encrypted_password = Encryption.encrypt_password(password)
-    agent = self.find_by_email(email)
-    return ErrorEnum::AGENT_NOT_EXIST if agent.nil?
-    return ErrorEnum::WRONG_PASSWORD if agent.password != encrypted_password
-    agent.auth_key = Encryption.encrypt_auth_key("#{agent.email}&#{Time.now.to_i.to_s}")
-    agent.save
-    return {"auth_key" => agent.auth_key}
+    Agent.find_by(:email => email, :password => Encryption.encrypt_password(password)) do |agent|
+      agent.auth_key = Encryption.encrypt_auth_key("#{agent.email}&#{Time.now.to_i.to_s}")
+      agent.save
+    end.auth_key
   end
 
   def self.logout(auth_key)
@@ -98,4 +95,10 @@ class Agent
     return ErrorEnum::AGENT_NOT_EXIST if agent.nil?
     return agent
   end
+
+  def login
+    self.auth_key = Encryption.encrypt_auth_key("#{self.email}&#{Time.now.to_i}")
+    save and auth_key
+  end
+
 end
