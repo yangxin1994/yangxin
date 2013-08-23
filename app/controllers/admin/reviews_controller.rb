@@ -4,11 +4,12 @@ class Admin::ReviewsController < ApplicationController
 	before_filter :get_client, :is_survey_auditor
 
 	def layout_select
-		is_admin ? 'admin_new' : 'survey_auditor'
+		current_user.is_admin? ? 'admin_new' : 'survey_auditor'
 	end
 
+	# no survey audtor role
 	def is_survey_auditor
-		has_role(8) || has_role(16)
+		false
 	end
 
 	private :layout_select, :is_survey_auditor

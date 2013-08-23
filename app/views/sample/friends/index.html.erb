@@ -18,7 +18,7 @@
 		<div class="share-panel dib">
 			<p style='font-size: 12px; line-hight: 2em; color: #666;'>将下面链接分享给好友，邀请好友加入 OopsData 调研社区，每成功邀请一位好友，您将获得<em style='margin: 0 5px; color: #B37DC9; font-size: 20px; font-weight: bold;'>10</em>积分的奖励。</p>
 			<p style="font-size: 12px; font-weight: bold; line-hight: 2em; color: #666; padding: 10px 0 20px 0;">我们将对新注册的用户进行电话复核，若发现虚假用户等作弊现象，介绍人所获积分奖励将被扣除，并且介绍人将被列入黑名单。</p>
-			<input type="text" name="link-address" id="link-address"  value='<%= "#{request.protocol}#{request.host_with_port}#{signup_path({i: user_id})}" %>' style='color:#666;' />
+			<input type="text" name="link-address" id="link-address"  value='<%= "#{request.protocol}#{request.host_with_port}#{signup_path({i: current._id})}" %>' style='color:#666;' />
 			<a class="od-button od-button-purple ml10 copyLink" href="javascript:void(0);">复制推荐链接</a>
 			<ul>
 				<li><a href="javascript:void(0);" class="gmail-share" title="GMail"><img src="../assets/social/gmail-01.png" /></a></li>

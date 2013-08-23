@@ -14,7 +14,7 @@ class Filler::AnswersController < Filler::FillerController
 		survey = Survey.normal.find_by_id(params[:survey_id])
 		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if survey.nil?
 		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if !params[:is_preview] && survey.status != Survey::PUBLISHED
-		answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], @current_user.try(:_id), params[:is_preview] || false)
+		answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], current_user.try(:_id), params[:is_preview] || false)
 		render_json_s(answer._id.to_s) and return if !answer.nil?
 		retval = survey.check_password(params[:username], params[:password], params[:is_preview] || false)
 		render_json_e ErrorEnum::WRONG_SURVEY_PASSWORD and return if retval != true
@@ -28,7 +28,7 @@ class Filler::AnswersController < Filler::FillerController
 			request.remote_ip,
 			params[:username],
 			params[:password])
-		@current_user.answers << answer if @current_user.present?
+		current_user.answers << answer if current_user.present?
 		answer.check_channel_ip_address_quota
 		if !user_signed_in
 			# If a new answer for the survey is created, and the user is not signed in
@@ -49,7 +49,7 @@ class Filler::AnswersController < Filler::FillerController
 		render_404 if @answer.nil?
 
 		# load data
-		redirect_to sign_in_path({ref: request.url}) and return if @answer.user.present? && @answer.user != @current_user
+		redirect_to sign_in_path({ref: request.url}) and return if @answer.user.present? && @answer.user != current_user
 		@answer.update_status	# check whether it is time out
 		if @answer.is_edit
 			questions = @answer.load_question(nil, true)
@@ -98,7 +98,7 @@ class Filler::AnswersController < Filler::FillerController
 		ensure_spread(@survey, @answer.reward_scheme_id)
 
 		# load user bind info
-		@binded = user_signed_in ? (@current_user.email_activation || @current_user.mobile_activation) : false
+		@binded = user_signed_in ? (current_user.email_activation || current_user.mobile_activation) : false
 	end
 
 	# AJAX
@@ -154,7 +154,7 @@ class Filler::AnswersController < Filler::FillerController
 	def load_questions
 		@answer = Answer.find_by_id(params[:id])
 		render_json_e ErrorEnum::ANSWER_NOT_EXIST and return if @answer.nil?
-		render_json_e ErrorEnum::REQUIRE_LOGIN and return if @answer.user.present? && @answer.user != @current_user
+		render_json_e ErrorEnum::REQUIRE_LOGIN and return if @answer.user.present? && @answer.user != current_user
 		@answer.update_status	# check whether it is time out
 		if @answer.is_edit
 			questions = @answer.load_question(params[:start_from_question], params[:load_next_page].to_s == "true")
@@ -232,7 +232,7 @@ class Filler::AnswersController < Filler::FillerController
 				end
 			end
 		end
-		retval = answer.select_reward(reward_index, mobile, alipay_account, @current_user)
+		retval = answer.select_reward(reward_index, mobile, alipay_account, current_user)
 		render_json_auto retval and return
 	end
 

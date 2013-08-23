@@ -89,9 +89,6 @@ module ApplicationHelper
 		return notice_information(flash[:info]) if flash[:info]
 	end
 
-	def application_name
-	end
-
 	# ICP info
 	# TODO: update
 	def icp_info
@@ -294,7 +291,7 @@ module ApplicationHelper
 		when 2
 			reward = '元支付宝转账'
 		when 4
-			reward = '优币'
+			reward = '积分'
 		when 8
 			reward = '抽奖机会'
 		when 16

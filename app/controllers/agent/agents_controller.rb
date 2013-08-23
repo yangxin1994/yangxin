@@ -11,13 +11,14 @@ class Agent::AgentsController < ApplicationController
     true
   end
 
-  def session_info
-    session[:auth_key] ||= cookies[:auth_key]
-    return Common::SessionInfo.new(session[:auth_key], request.remote_ip)
-  end  
+  # TODO: remove
+  # def session_info
+  #   # session[:auth_key] ||= cookies[:auth_key]
+  #   # return Common::SessionInfo.new(session[:auth_key], request.remote_ip)
+  # end  
 
   def get_email
-    _sign_out and return if session[:role].to_s.to_i==0
+    _sign_out and return if current_user.user_role==0
     render :json => BaseClient.new(session_info, "/users")._get({}, "/#{params[:id]}/get_email")
   end
 

@@ -71,7 +71,7 @@
 				</h5>
 			</div>
 			<div class="roles">
-					<%if session['role'].to_i & 32 > 0 %>
+					<%if current_user.user_role & 32 > 0 %>
 							<div class="role role_32">
 									<input <%if role_arr.include?(32) %>checked<%end%> value="32" type="checkbox"/>
 									<span class="f14 pl2">SuperAdmin</span>

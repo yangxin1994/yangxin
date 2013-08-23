@@ -470,18 +470,19 @@ OopsData::Application.routes.draw do
   constraints :subdomain => "admin" do
     root :to => 'admin/publishes#index', as: :admin_root
   end
-  constraints :subdomain => "quillme" do
-    root :to => 'sample/homes#show', as: :quillme_root
-  end
-  constraints :subdomain => "quillmeapi" do
-    root :to => 'sample/homes#show', as: :quillmeapi_root
-  end
-  constraints :subdomain => "quillmedev" do
-    root :to => 'sample/homes#show', as: :quillmedev_root
-  end
-  root :to => "sample/homes#show", :constraints => { :domain => "oopsdata.cn" }, as: :oopsdatacn_root
-  root :to => "sample/homes#show", :constraints => { :domain => "wenjuanba.com" }, as: :wenjuanbacom_root
-  root :to => 'quill/indices#show'
+  # constraints :subdomain => "quillme" do
+  #   root :to => 'sample/homes#show', as: :quillme_root
+  # end
+  # constraints :subdomain => "quillmeapi" do
+  #   root :to => 'sample/homes#show', as: :quillmeapi_root
+  # end
+  # constraints :subdomain => "quillmedev" do
+  #   root :to => 'sample/homes#show', as: :quillmedev_root
+  # end
+  # root :to => "sample/homes#show", :constraints => { :domain => "oopsdata.cn" }, as: :oopsdatacn_root
+  # root :to => "sample/homes#show", :constraints => { :domain => "wenjuanba.com" }, as: :wenjuanbacom_root
+  # root :to => 'quill/indices#show'
+  root :to => "sample/homes#show"
 
   # Just for test
   resource :odwidgets, :only => [:show]

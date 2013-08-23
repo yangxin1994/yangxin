@@ -64,7 +64,7 @@ class Sample::AccountsController < Sample::SampleController
       retval = User.create_new_user(
         params[:phone],
         params[:password],
-        @current_user,
+        current_user,
         params[:third_party_user_id],
         '#{request.protocol}#{request.host_with_port}/account/email_activate')
       render_json_auto(retval) and return
@@ -126,25 +126,25 @@ class Sample::AccountsController < Sample::SampleController
 
   def get_basic_info_by_auth_key
     # answer number, spread number, third party accounts
-    @answer_number = @current_user.answers.not_preview.finished.length
-    @spread_number = Answer.where(:introducer_id => @current_user._id).not_preview.finished.length
+    @answer_number = current_user.answers.not_preview.finished.length
+    @spread_number = Answer.where(:introducer_id => current_user._id).not_preview.finished.length
     @bind_info = {}
     ["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
-      @bind_info[website] = !ThirdPartyUser.where(:user_id => @current_user._id.to_s, :website => website).blank?
+      @bind_info[website] = !ThirdPartyUser.where(:user_id => current_user._id.to_s, :website => website).blank?
     end
-    @bind_info["email"] = @current_user.email_activation
-    @bind_info["mobile"] = @current_user.mobile_activation
+    @bind_info["email"] = current_user.email_activation
+    @bind_info["mobile"] = current_user.mobile_activation
 
-    @completed_info = @current_user.completed_info
+    @completed_info = current_user.completed_info
     
     @basic_info = {
       "answer_number" => @answer_number,
       "spread_number" => @spread_number,
       "bind_info" => @bind_info,
       "completed_info" => @completed_info,
-      "point" => @current_user.point,
-      "sample_id" => @current_user._id.to_s,
-      "nickname" => @current_user.nickname
+      "point" => current_user.point,
+      "sample_id" => current_user._id.to_s,
+      "nickname" => current_user.nickname
     }
     render_json_auto @basic_info and return
   end

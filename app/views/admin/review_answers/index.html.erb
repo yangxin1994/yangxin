@@ -45,7 +45,7 @@
 						<td><%= survey["created_at"][0,16].gsub(/[T]/, ' ') %></td>
 						<td>
 							<!-- Icons -->
-							<a href="/<%= is_admin ? 'admin' : 'answer_auditor' %>/review_answers/<%= survey['_id']%>" class="show" title="查看答案">审核答案</a>
+							<a href="/<%= current_user.is_admin? ? 'admin' : 'answer_auditor' %>/review_answers/<%= survey['_id']%>" class="show" title="查看答案">审核答案</a>
 						</td>
 					</tr>
 				<%- end %>

@@ -5,14 +5,7 @@ class Account::SignupsController < ApplicationController
   # PAGE
   def show
   	@signin_btn = true
-  	
-  	case application_name
-  	when 'quillme'
-  		@hide_right = true
-			render :template => 'account/signups/show_quillme', :layout => 'quillme'
-		else
-			render :template => 'account/signups/show_quill', :layout => 'sign'
-		end
+		render :template => 'account/signups/show_quill', :layout => 'sign'
   end
 
   # AJAX

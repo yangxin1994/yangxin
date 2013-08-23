@@ -7,7 +7,7 @@ class Sample::LotteriesController < Sample::SampleController
 	def draw
 		@answer = Answer.find_by_id(params[:id])
 		render_json_e ErrorEnum::ANSWER_NOT_EXIST if @answer.nil?
-		result = @answer.draw_lottery(@current_user.try(:id))
+		result = @answer.draw_lottery(current_user.try(:id))
 		# client = Sample::LotteryClient.new(session_info)
 		# result = client.draw(params[:id])
 
@@ -76,12 +76,11 @@ class Sample::LotteriesController < Sample::SampleController
 		if sample_create
 			#如果是会员创建，当前访问用户没有登录，需要先登录,如果不是会员创建，不需要登录
 			if !user_signed_in
-			# if session[:auth_key].blank?
 				redirect_to sign_in_path(:ref => "#{request.protocol}#{request.host_with_port}#{request.fullpath}") and return 
 			end
 
 			#如果当前登录用户不是问卷的创建者，那么要无权参加抽奖
-			if @lottery['user_id'] != @current_user.try(:_id).to_s
+			if @lottery['user_id'] != current_user.try(:_id).to_s
 				redirect_to "/s/#{@lottery['scheme_id']}" and return
 			end			
 		end
@@ -94,7 +93,7 @@ class Sample::LotteriesController < Sample::SampleController
 		end
 
 		#获取当前登录用户的收获地址信息
-		@receiver_info = @current_user.nil? ? nil : @current_user.affiliated.try(:receiver_info) || {}
+		@receiver_info = current_user.nil? ? nil : current_user.affiliated.try(:receiver_info) || {}
 		# @receiver_info =  Sample::UserClient.new(session_info).get_logistic_address
 		# @receiver_info =  @recerver_info.success ? @recerver_info.value : nil	
 

@@ -11,9 +11,9 @@ class Sample::SurveysController < Sample::SampleController
 		@surveys = Survey.get_recommends(params[:status],
 			params[:reward_type],
 			params[:answer_status],
-			@current_user,
+			current_user,
 			nil)
-		@surveys = @surveys.map { |e| e.excute_sample_data(@current_user) }
+		@surveys = @surveys.map { |e| e.excute_sample_data(current_user) }
 		@surveys = auto_paginate @surveys
 		date = Date.today
 		today_start = Time.local(date.year, date.month, date.day,0,0,0)

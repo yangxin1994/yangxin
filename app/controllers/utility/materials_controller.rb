@@ -13,7 +13,7 @@ class Utility::MaterialsController < ApplicationController
 
 	# Ajax: get materials list
 	def index
-		materials = @current_user.materials.find_by_type(params[:material_type].to_i)
+		materials = current_user.materials.find_by_type(params[:material_type].to_i)
 		render_json_auto materials and return
 		# render :json => @ws_client.index(params[:material_type])
 	end
@@ -38,7 +38,7 @@ class Utility::MaterialsController < ApplicationController
 			# @ws_client = Utility::MaterialClient.new(session_info)
 		end
 
-		material = Material.check_and_create_new(@current_user, params[:material])
+		material = Material.check_and_create_new(current_user, params[:material])
 		render_json_auto material
 
 		# render :json => @ws_client.create(params[:material])
@@ -57,7 +57,7 @@ class Utility::MaterialsController < ApplicationController
 
 	# AJAX
 	def destroy
-		material = @current_user.materials.find_by_id(params[:id])
+		material = current_user.materials.find_by_id(params[:id])
 		material.destroy if !material.nil?
 		render_json_s and return
 
@@ -85,7 +85,7 @@ class Utility::MaterialsController < ApplicationController
 
 	# AJAX
 	def update
-		material = @current_user.materials.find_by_id(params[:id])
+		material = current_user.materials.find_by_id(params[:id])
 		render_json_e ErrorEnum::MATERIAL_NOT_EXIST and return if material.nil?
 		retval = material.update_material(params[:material])
 		render_json_e material and return

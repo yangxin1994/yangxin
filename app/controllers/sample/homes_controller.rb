@@ -3,10 +3,10 @@ class Sample::HomesController < Sample::SampleController
 	def show
 		@hot_survey     = Survey.quillme_promote.quillme_hot.opend.first
 
-		surveys = Survey.get_recommends(nil, nil, nil, @current_user, nil)
+		surveys = Survey.get_recommends(nil, nil, nil, current_user, nil)
 		params[:per_page] = 9
 		@rsl = auto_paginate(surveys) do |paginated_surveys|
-		  paginated_surveys.map { |e| e.excute_sample_data(@current_user) } 
+		  paginated_surveys.map { |e| e.excute_sample_data(current_user) } 
 		end
 
 		@public_notices = auto_paginate PublicNotice.opend.desc(:updated_at)

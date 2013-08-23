@@ -220,7 +220,7 @@ class User
 		return (self.user_role.to_i & ANSWER_AUDITOR) > 0
 	end
 
-	def is_interviewer
+	def is_interviewer?
 		return (self.user_role.to_i & INTERVIEWER) > 0
 	end
 

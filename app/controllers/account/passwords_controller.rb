@@ -6,13 +6,7 @@ class Account::PasswordsController < ApplicationController
 	def find
   	@signin_btn = true
   	
-  	case application_name
-  	when 'quillme'
-  		@hide_right = true
-			render :template => 'account/passwords/find_quillme', :layout => 'quillme'
-		else
-			render :template => 'account/passwords/find_quill', :layout => 'sign'
-		end
+		render :template => 'account/passwords/find_quill', :layout => 'sign'
 	end
 
 	# AJAX
@@ -25,13 +19,7 @@ class Account::PasswordsController < ApplicationController
 	def reset
   	@signin_btn = true
   	
-  	case application_name
-  	when 'quillme'
-  		@hide_right = true
-			render :template => 'account/passwords/reset_quillme', :layout => 'quillme'
-		else
-			render :template => 'account/passwords/reset_quill', :layout => 'sign'
-		end
+		render :template => 'account/passwords/reset_quill', :layout => 'sign'
 	end
 
 	# AJAX

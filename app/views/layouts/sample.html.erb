@@ -72,10 +72,11 @@
 								</a>
 							</li>
 							<li>
-								<a class="inform-btn <% if unread_message_count > 0 %>active<% end %>" href="<%= notifications_users_path%>" >
+								<% @unread_messages_count = (user_signed_in ? current_user.unread_messages_count : 0) %>
+								<a class="inform-btn <% if @unread_messages_count > 0 %>active<% end %>" href="<%= notifications_users_path%>" >
 									<i class="icon inform"></i>
 									<span>
-										通知（<%= unread_message_count %>）
+										通知（<%= @unread_messages_count %>）
 									</span>
 								</a>
 							</li>

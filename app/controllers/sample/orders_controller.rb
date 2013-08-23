@@ -16,10 +16,10 @@ class Sample::OrdersController < Sample::SampleController
 		opt     = Gift.generate_opt(params[:order],order_t)
 		#synchro  reverver info 
 		if params[:order]['info_sys'].to_s == 'true'
-			@current_user.set_receiver_info(opt)
+			current_user.set_receiver_info(opt)
 		end		 	
 		render_json_e ErrorEnum::INVALID_GIFT_ID and return unless gift_id
-		render_json_auto Order.create_redeem_order(@current_user._id, gift_id, amount, point, opt) and return
+		render_json_auto Order.create_redeem_order(current_user._id, gift_id, amount, point, opt) and return
 	end
 
 	def create_lottery_order
