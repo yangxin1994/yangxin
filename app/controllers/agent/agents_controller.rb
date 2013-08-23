@@ -14,7 +14,12 @@ class Agent::AgentsController < ApplicationController
   def session_info
     session[:auth_key] ||= cookies[:auth_key]
     return Common::SessionInfo.new(session[:auth_key], request.remote_ip)
-  end  
+  end
+
+  def current_agent
+    @current_agent = session[:auth_key].nil? ? nil : Agent.find_by_auth_key(session[:auth_key])
+    return @current_agent
+  end
 
   def get_email
     _sign_out and return if session[:role].to_s.to_i==0

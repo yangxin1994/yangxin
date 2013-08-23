@@ -12,7 +12,9 @@ class ApplicationController < ActionController::Base
   # init action
   def init
     # Use param value to override cookies value
+    # _flashes = flash.instance_variable_get('@flashes').dup
     refresh_session(params[:auth_key] || cookies[:auth_key])
+    # flash.instance_variable_set('@flashes', _flashes)
   end
 
   # =============================
@@ -62,7 +64,6 @@ class ApplicationController < ActionController::Base
     end
 
     cookies.delete(:auth_key, :domain => :all)
-    reset_session
     return false
   end
 

@@ -57,7 +57,7 @@
       <tr>
         <td><%= answer["sample_name"] %></td>
         <td><%= answer_type_tag answer["status"] %></td>
-        <td><%= Time.parse(answer["created_at"]).strftime('%F %R') %></td>
+        <td><%= answer["created_at"].strftime('%F %R') %></td>
         <td>
           <a class="btn handle" href="answers/<%= answer["_id"] %>?agent_task_id=<%= params[:agent_task_id] %>" ><i class="icon-list-alt"></i>查看详细</a>
         </td>

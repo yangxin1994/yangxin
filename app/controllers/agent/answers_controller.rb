@@ -1,29 +1,17 @@
 class Agent::AnswersController < Agent::AgentsController
 
-  before_filter :require_agent
-
-  before_filter :get_answer_client
-
-  def get_answer_client
-    @answer_client = Agent::AnswerClient.new(session_info)
-  end
-
   def index
-    result = @answer_client.index(params)
-    if result.success
-      @answers = result.value
-    else
-      render :json => result
+    agent_task = current_agent.agent_tasks.where(:id => params[:agent_task_id]).first
+
+    @answers = auto_paginate agent_task.answers do |answers|
+      answers.map { |e| e.info_for_auditor }
     end
+
   end
 
   def show
-    result = @answer_client.show(params)
-    if result.success
-      @questions = result.value
-    else
-      render :json => result
-    end
+    agent_task = current_agent.agent_tasks.find(params[:agent_task_id])
+    @questions = agent_task.answers.find(params[:id]).present_auditor
   end
 
   def review
@@ -35,6 +23,8 @@ class Agent::AnswersController < Agent::AgentsController
     end
   end
   def update
-    render :json => @answer_client.update(params) 
+    render_json Answer.find(params[:id]) do |answer|
+      answer.agent_review(params[:review_result].to_s == "true")
+    end 
   end
 end
