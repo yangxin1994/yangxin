@@ -121,7 +121,7 @@ class ApplicationController < ActionController::Base
     return has_role(User::ADMIN)
   end
   def user_signed_in
-    return @current_user && @current_user.status == User::REGISTERED
+    return !!@current_user && @current_user.status == User::REGISTERED
     # return has_role(User::SAMPLE) || has_role(User::CLIENT)
   end
   def email

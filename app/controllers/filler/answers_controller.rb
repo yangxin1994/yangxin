@@ -8,9 +8,7 @@ class Filler::AnswersController < Filler::FillerController
 		# Used to avoid creating multiple answers when user click the back key in the keyboard when answeing survey
 		if !user_signed_in
 			answer_id = cookies[cookie_key(params[:survey_id], params[:is_preview])]
-			if !answer_id.blank?
-				render :json => { success: true, value: answer_id } and return
-			end
+			render_json_auto answer_id and return if answer_id.present?
 		end
 
 		survey = Survey.normal.find_by_id(params[:survey_id])
@@ -61,6 +59,7 @@ class Filler::AnswersController < Filler::FillerController
 					"answer_reject_type" => @answer.reject_type,
 					"answer_audit_message" => @answer.audit_message,
 					"order_id" => @answer.order.try(:id),
+					"order_code" => @answer.order.try(:code),
 					"order_status" => @answer.order.try(:status)}
 			else
 				answers = @answer.answer_content.merge(@answer.random_quality_control_answer_content)
@@ -73,6 +72,7 @@ class Filler::AnswersController < Filler::FillerController
 					"estimate_answer_time" => questions.estimate_answer_time,
 					"repeat_time" => @answer.repeat_time,
 					"order_id" => @answer.order.try(:_id),
+					"order_code" => @answer.order.try(:code),
 					"order_status" => @answer.order.try(:status)}
 			end
 		else
@@ -80,6 +80,7 @@ class Filler::AnswersController < Filler::FillerController
 				"answer_reject_type" => @answer.reject_type,
 				"answer_audit_message" => @answer.audit_message,
 				"order_id" => @answer.order.try(:_id),
+				"order_code" => @answer.order.try(:code),
 				"order_status" => @answer.order.try(:status)}
 		end
 		@data = {:success => true, :value => retval}
@@ -204,7 +205,7 @@ class Filler::AnswersController < Filler::FillerController
 		alipay_account = nil
 		answer = Answer.find_by_id(params[:id])
 		render_json_e ErrorEnum::ANSWER_NOT_EXIST and return if answer.nil?
-		answer.value['rewards'].each_with_index do |r, i|
+		answer.rewards.each_with_index do |r, i|
 			case r['type']
 			when 1
 				if r['amount'] > 0 && params[:type] == 'chongzhi'
@@ -231,7 +232,7 @@ class Filler::AnswersController < Filler::FillerController
 				end
 			end
 		end
-		retval = @answer.select_reward(reward_index, mobile, alipay_account, @current_user)
+		retval = answer.select_reward(reward_index, mobile, alipay_account, @current_user)
 		render_json_auto retval and return
 	end
 
@@ -245,6 +246,7 @@ class Filler::AnswersController < Filler::FillerController
 			:expires => Rails.application.config.answer_id_time_out_in_hours.hours.from_now ,
 				:domain => :all
 		}
-		render :json => Common::ResultInfo.ok
+		render_json_auto
+		# render :json => Common::ResultInfo.ok
 	end
 end

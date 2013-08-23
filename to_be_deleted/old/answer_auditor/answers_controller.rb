@@ -29,8 +29,6 @@ class AnswerAuditor::AnswersController < AnswerAuditor::ApplicationController
 			paginated_answers.map { |e| e.info_for_auditor }
 		end
 		render_json_auto @paginated_answers and return
-
-		# render_json_auto auto_paginate(answers) and return
 	end
 
 	def show

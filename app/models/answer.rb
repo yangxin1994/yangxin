@@ -1103,7 +1103,7 @@ class Answer
       next if a._id.to_s == self._id.to_s
       selected_reward = a.rewards.select { |r| r["checked"] == true }
       next if selected_reward.blank?
-      return true if selected_reward[0]["mobile"] == account && selected_reward[0]["alipay_account"] == account
+      return true if selected_reward[0]["mobile"] == account || selected_reward[0]["alipay_account"] == account
     end
     return false
   end

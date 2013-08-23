@@ -29,7 +29,7 @@
 					<li>
 						<span class="messages-number"><%= @messages["data"].index(message) + 1 %>.</span>
 						<span class="messages-title"><%= message["title"] %></span>
-						<span class="messages-time"><%= message["updated_at"].strftime("(%Y.%m.%d %H:%M)") %></span>
+						<span class="messages-time"><%= message["updated_at"].localtime.strftime("(%Y.%m.%d %H:%M)") %></span>
 						<!-- <span class="unread">未读</span> -->
 						<p style="display:none;"><%= message["content"] %></p>
 					</li>

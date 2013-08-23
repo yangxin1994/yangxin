@@ -64,6 +64,6 @@ class Material
 			:value => material["value"],
 			:title => material["title"],
 			:picture_url => material["picture_url"])
-	  self.save
+	  return self.save
 	end
 end

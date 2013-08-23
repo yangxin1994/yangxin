@@ -10,10 +10,11 @@ class Account::ProfilesController < ApplicationController
 	# PAGE: show profile
 	def show
 		@is_account_mgr = true
-		@common_user = Account::UserClient.new(session_info).get_basic_info
-  	case application_name
-  	when 'quillme'
-  		@hide_right = true
+
+		@common_user = @current_user
+		case application_name
+		when 'quillme'
+			@hide_right = true
 			render :template => 'account/profiles/show_quillme', :layout => 'quillme'
 		else
 			render :template => 'account/profiles/show_quill', :layout => 'quill'
@@ -31,8 +32,11 @@ class Account::ProfilesController < ApplicationController
 
 	# AJAX
 	def update_password
-		render :json => Account::UserClient.new(session_info).reset_password(params[:old_password], 
-						params[:new_password], params[:new_password_confirmation])
+		retval = @current_user.reset_password(email, new_password, new_password_confirmation)
+		render_json_auto retval
+
+		# render :json => Account::UserClient.new(session_info).reset_password(params[:old_password], 
+		# 				params[:new_password], params[:new_password_confirmation])
 	end
 
 end
