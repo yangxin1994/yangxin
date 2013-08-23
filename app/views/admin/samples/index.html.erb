@@ -79,13 +79,13 @@
         <td><%= sample["mobile"] %></td>
         <td data-sid="<%= sample['_id'] %>" data-is_blcok="<%= sample['is_block'] %>" data-roles="<%= sample['user_role'] %>">
           <div class="btn-group">
-            <a class="btn roles" href="#roles"><i class="icon-list-alt"></i>样本权限设置</a>
+            <a href="/admin/samples/<%= sample["_id"] %>" class="btn"><i class="icon-list-alt"></i>样本信息查看</a>
             <button class="btn dropdown-toggle" data-toggle="dropdown">
               <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
               <!-- <li><a href="javascript:$('#point_modal').modal('show');" ><i class="icon-list-alt"></i>样本积分操作</a></li> -->
-              <li><a href="/admin/samples/<%= sample["_id"] %>" ><i class="icon-list-alt"></i>样本信息查看</a></li>
+              <li><a class="roles" href="#roles"><i class="icon-list-alt"></i>样本权限设置</a></li>
               <li class="divider"></li>
               <li><a href="/admin/samples/<%= sample["_id"] %>/redeem_log" ><i class="icon-list-alt"></i>礼品兑换记录</a></li>
               <li><a href="/admin/samples/<%= sample["_id"] %>/lottery_log" ><i class="icon-list-alt"></i>抽奖记录</a></li>

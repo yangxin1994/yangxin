@@ -17,11 +17,11 @@ class Admin::SamplesController < Admin::AdminController
   end
 
   def edit
-    @sample = User.sample.find(params[:id]).sample_attributes
+    @sample = User.find(params[:id]).sample_attributes
   end
 
   def show
-    @attrs = User.sample.find(params[:id]).sample_attributes
+    @attrs = User.find(params[:id]).sample_attributes
     @sample_attributes = SampleAttribute.normal.map do |sample_attribute|
       {
         'name' => sample_attribute[:name],
