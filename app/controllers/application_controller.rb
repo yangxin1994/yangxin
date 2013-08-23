@@ -23,7 +23,7 @@ class ApplicationController < ActionController::Base
   # =============================
   def refresh_session(auth_key)
     # 1. get current user
-    @current_user = User.find_by_auth_key(auth_key)
+    @current_user = auth_key.blank? ? nil : User.find_by_auth_key(auth_key)
     if !current_user.nil?
       # If current user is not empty, set cookie
       cookies[:auth_key] = {

@@ -484,7 +484,4 @@ OopsData::Application.routes.draw do
   # root :to => 'quill/indices#show'
   root :to => "sample/homes#show"
 
-  # Just for test
-  resource :odwidgets, :only => [:show]
-
 end
