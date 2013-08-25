@@ -470,7 +470,6 @@ class Sample::UsersController < Sample::SampleController
   # PUT
   def update_password
     @retval = @current_user.reset_password(params[:old_password], params[:new_password])
-    # @retval = @uclient.reset_password(params[:old_password], params[:new_password])
 
     respond_to do |format|
       format.html { }
@@ -486,7 +485,8 @@ class Sample::UsersController < Sample::SampleController
       paginated_messages.map { |e| e.info_for_sample }
     end
 
-    # @notices = @uclient.notifications(page, per_page)
+    @current_user.last_read_messeges_time = Time.now
+    @current_user.save
 
     respond_to do |format|
       format.html 
