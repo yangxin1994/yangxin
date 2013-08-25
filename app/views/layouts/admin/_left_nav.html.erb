@@ -3,7 +3,7 @@
 			<li class="graphs" id="nav-surveys"><a href="#" title="" class="exp"><span>调研管理</span></a>
 				<ul  class="sub">
 					<li><a href="<%=admin_reviews_path %>">审核问卷</a></li>
-					<li><a href="<%=admin_publishes_path %>?email=<%= session[:email]%>">管理问卷</a></li>
+					<li><a href="<%=admin_publishes_path %>?email=<%= current_user.email%>">管理问卷</a></li>
 					<li class="dn"><a href="<%=admin_costs_path %>">成本统计</a></li>
 					<li><a href="<%=admin_review_answers_path %>">审核答案</a></li>
 					<li><a href="<%=admin_template_questions_path %>">模板题</a></li>
@@ -51,7 +51,7 @@
 					<li><a href="/admin/users/new">创建用户</a></li>
           <li><%= link_to "样本数据统计",  admin_sample_stats_path %></li>
           <li><%= link_to "样本属性管理", admin_sample_attributes_path %></li>
-					<% if session['role'].to_i & 32 != 0 %>
+					<% if current_user.user_role & 32 != 0 %>
 					<li><a href="/admin/users?role=64">所有用户</a></li>
 					<li><a href="/admin/users?role=32">超级管理员</a></li>
 					<li><a href="/admin/users?role=16">管理员</a></li>

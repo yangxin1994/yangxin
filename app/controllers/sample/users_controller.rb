@@ -34,7 +34,7 @@ class Sample::UsersController < Sample::SampleController
   # 我参加的调研
   # GET
   def join_surveys
-    @answers = @current_user.answers.not_preview.desc(:created_at)
+    @answers = current_user.answers.not_preview.desc(:created_at)
     @my_answer_surveys = auto_paginate @answers do |paginate_answers|
       paginate_answers.map { |e| e.info_for_answer_list_for_sample }
     end
@@ -90,7 +90,7 @@ class Sample::UsersController < Sample::SampleController
   # GET
   def spread_surveys
 
-    @my_spread_surveys = auto_paginate @current_user.survey_spreads.desc(:created_at) do |paginated_survey_spreads|
+    @my_spread_surveys = auto_paginate current_user.survey_spreads.desc(:created_at) do |paginated_survey_spreads|
       paginated_survey_spreads.map do |e|
         e.survey.info_for_sample.merge({"spread_number" => e.times})
       end
@@ -109,7 +109,7 @@ class Sample::UsersController < Sample::SampleController
 
     @survey = Survey.find_by_id(params[:id])
     render_404 and return if @survey.nil?
-    @answers = @survey.answers.not_preview.where(:introducer_id => @current_user._id.to_s).desc(:status)
+    @answers = @survey.answers.not_preview.where(:introducer_id => current_user._id.to_s).desc(:status)
     params[:per_page] = 9
     @answers = auto_paginate @answers do |paginate_answers|
       paginate_answers.map { |e| e.info_for_spread_details }
@@ -128,7 +128,7 @@ class Sample::UsersController < Sample::SampleController
   def spread_counter
     @survey = Survey.find_by_id(params[:id])
     render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
-    @answers = @survey.answers.not_preview.where(:introducer_id => @current_user._id.to_s)
+    @answers = @survey.answers.not_preview.where(:introducer_id => current_user._id.to_s)
     @total_answer_number = @answers.length
     @finished_answer_number = @answers.finished.length
     @editting_answer_number = @answers.where(:status => Answer::EDIT).length
@@ -151,11 +151,11 @@ class Sample::UsersController < Sample::SampleController
   # params[:scope] = :all | :in | :out
   def points
     if params[:scope] == 'in'
-      @logs = PointLog.where(:user_id => @current_user.id, :amount.gt => 0)
+      @logs = PointLog.where(:user_id => current_user.id, :amount.gt => 0)
     elsif params[:scope] == 'out' 
-      @logs = PointLog.where(:user_id => @current_user.id, :amount.lt => 0)
+      @logs = PointLog.where(:user_id => current_user.id, :amount.lt => 0)
     else
-      @logs = PointLog.where(:user_id => @current_user.id)
+      @logs = PointLog.where(:user_id => current_user.id)
     end
     @point_logs = auto_paginate @logs.desc(:created_at) do |paginated_logs|
       paginated_logs.map { |e| e.info_for_sample }
@@ -176,7 +176,7 @@ class Sample::UsersController < Sample::SampleController
   # 
   def orders
     scope = [1,2,4].include?(params[:scope].to_i) ? params[:scope].to_i : 1
-    @orders = @current_user.orders.where(:source => scope).desc(:created_at)
+    @orders = current_user.orders.where(:source => scope).desc(:created_at)
     @orders = auto_paginate(@orders) do |paginated_orders|
       paginated_orders.map { |e| e.info_for_sample }
     end
@@ -217,7 +217,7 @@ class Sample::UsersController < Sample::SampleController
   #个人资料
   # GET
   def basic_info
-    @user_info = @current_user.get_basic_attributes
+    @user_info = current_user.get_basic_attributes
     # @user_info = @uclient.basic_attrs
 
     respond_to do |format|
@@ -269,7 +269,7 @@ class Sample::UsersController < Sample::SampleController
       param_attrs[item] = param_attrs[item].to_i if param_attrs[item]
     end
 
-    @retval = @current_user.set_basic_attributes(param_attrs)
+    @retval = current_user.set_basic_attributes(param_attrs)
     # render_json_auto(retval) and return
 
     # @retval = @uclient.update_attrs(param_attrs)
@@ -312,14 +312,14 @@ class Sample::UsersController < Sample::SampleController
   def bindings
 
     @bindings = {}
-    if @current_user.email_activation
-      @bindings["email"] = [@current_user.email, @current_user.email_subscribe]
+    if current_user.email_activation
+      @bindings["email"] = [current_user.email, current_user.email_subscribe]
     end
-    if @current_user.mobile_activation
-      @bindings["mobile"] = [@current_user.mobile, @current_user.mobile_subscribe]
+    if current_user.mobile_activation
+      @bindings["mobile"] = [current_user.mobile, current_user.mobile_subscribe]
     end
     ["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
-      third_party_user = ThirdPartyUser.where(:user_id => @current_user._id.to_s, :website => website).first
+      third_party_user = ThirdPartyUser.where(:user_id => current_user._id.to_s, :website => website).first
       @bindings[website] = [third_party_user.name, third_party_user.share] if !third_party_user.nil?
     end
 
@@ -334,7 +334,7 @@ class Sample::UsersController < Sample::SampleController
   #取消绑定具体账户
   # PUT /users/setting/unbind/:website
   def unbind
-    third_party_user = ThirdPartyUser.where(:website => params[:website], :user_id => @current_user._id.to_s).first
+    third_party_user = ThirdPartyUser.where(:website => params[:website], :user_id => current_user._id.to_s).first
     third_party_user.destroy if !third_party_user.nil?
     render_json_s and return
 =begin
@@ -352,7 +352,7 @@ class Sample::UsersController < Sample::SampleController
   # 绑定分享
   # PUT /users/setting/share?website=&share=
   def bind_share
-    third_party_user = ThirdPartyUser.where(:website => params[:website], :user_id => @current_user._id.to_s).first
+    third_party_user = ThirdPartyUser.where(:website => params[:website], :user_id => current_user._id.to_s).first
     render_json_e ErrorEnum::THIRD_PARTY_USER_NOT_EXIST and return if third_party_user.nil?
     third_party_user.share = params[:share] == "true"
     third_party_user.save
@@ -373,11 +373,11 @@ class Sample::UsersController < Sample::SampleController
   # PUT /users/setting/subscribe?type=&sub=
   def bind_subscribe
     if params[:type] == "email"
-      @current_user.email_subscribe = params[:sub].to_s == "true" if @current_user.email_activation
+      current_user.email_subscribe = params[:sub].to_s == "true" if current_user.email_activation
     else
-      @current_user.mobile_subscribe = params[:sub].to_s == "true" if @current_user.mobile_activation
+      current_user.mobile_subscribe = params[:sub].to_s == "true" if current_user.mobile_activation
     end
-    render_json_auto @current_user.save and return
+    render_json_auto current_user.save and return
 
 =begin
     @retval = @uclient.set_subscribe(params[:type], params[:sub])
@@ -393,12 +393,12 @@ class Sample::UsersController < Sample::SampleController
   # PUT /users/setting/change_mobile?m=
   def change_mobile
     render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST if User.find_by_email(params[:m]).present?
-    @current_user.mobile_to_be_changed = params[:m]
-    # @current_user.sms_verification_code = Random.rand(100000..999999).to_s
+    current_user.mobile_to_be_changed = params[:m]
+    # current_user.sms_verification_code = Random.rand(100000..999999).to_s
     code = Tool.generate_active_mobile_code
-    @current_user.sms_verification_code = code
-    @current_user.sms_verification_expiration_time = Time.now.to_i + 2.hours.to_i
-    tmp = @current_user.save
+    current_user.sms_verification_code = code
+    current_user.sms_verification_expiration_time = Time.now.to_i + 2.hours.to_i
+    tmp = current_user.save
     SmsWorker.perform_async("change_mobile", params[:m], "", :code => code)
     render_json_s and return
 
@@ -410,12 +410,12 @@ class Sample::UsersController < Sample::SampleController
   # 根据手机号和验证短信码激活手机
   # PUT /users/setting/check_mobile_verify_code?m=&code=
   def check_mobile_verify_code
-    render_json_e ErrorEnum::MOBILE_NOT_EXIST and return if @current_user.mobile_to_be_changed != params[:m]
-    render_json_e ErrorEnum::ILLEGAL_ACTIVATE_KEY and return if @current_user.sms_verification_code != params[:code]
-    render_json_e ErrorEnum::ACTIVATE_EXPIRED if @current_user.sms_verification_expiration_time < Time.now.to_i
-    @current_user.mobile = @current_user.mobile_to_be_changed
-    @current_user.mobile_activation = true
-    render_json_auto @current_user.save and return
+    render_json_e ErrorEnum::MOBILE_NOT_EXIST and return if current_user.mobile_to_be_changed != params[:m]
+    render_json_e ErrorEnum::ILLEGAL_ACTIVATE_KEY and return if current_user.sms_verification_code != params[:code]
+    render_json_e ErrorEnum::ACTIVATE_EXPIRED if current_user.sms_verification_expiration_time < Time.now.to_i
+    current_user.mobile = current_user.mobile_to_be_changed
+    current_user.mobile_activation = true
+    render_json_auto current_user.save and return
 
     # @retval = @uclient.check_mobile_verify_code(params[:m], params[:code])
     # render :json => @retval 
@@ -425,10 +425,10 @@ class Sample::UsersController < Sample::SampleController
   # PUT /users/setting/change_mobile?email=
   def change_email
     render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST and return if !User.find_by_email(params[:email]).nil?
-    @current_user.email_to_be_changed = params[:email]
-    @current_user.change_email_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
-    @current_user.save
-    EmailWorker.perform_async("change_email", params[:email], "", :user_id => @current_user._id.to_s)
+    current_user.email_to_be_changed = params[:email]
+    current_user.change_email_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
+    current_user.save
+    EmailWorker.perform_async("change_email", params[:email], "", :user_id => current_user._id.to_s)
     render_json_s and return
 
 =begin
@@ -440,7 +440,7 @@ class Sample::UsersController < Sample::SampleController
   #收获地址
   # GET
   def address
-    @receiver_info = @current_user.affiliated.try(:receiver_info) || {}
+    @receiver_info = current_user.affiliated.try(:receiver_info) || {}
     # @receiver_info = @uclient.get_logistic_address
 
     respond_to do |format|
@@ -451,7 +451,7 @@ class Sample::UsersController < Sample::SampleController
 
   # PUT
   def update_logistic_address
-    @retval = @current_user.set_receiver_info(params[:receiver_info])
+    @retval = current_user.set_receiver_info(params[:receiver_info])
 
     # @retval = @uclient.update_logistic_address(params[:receiver_info])
 
@@ -469,7 +469,7 @@ class Sample::UsersController < Sample::SampleController
 
   # PUT
   def update_password
-    @retval = @current_user.reset_password(params[:old_password], params[:new_password])
+    @retval = current_user.reset_password(params[:old_password], params[:new_password])
 
     respond_to do |format|
       format.html { }
@@ -480,7 +480,7 @@ class Sample::UsersController < Sample::SampleController
   # ************* notifications ******************    
 
   def notifications
-    @messages = @current_user.messages
+    @messages = current_user.messages
     @notices = auto_paginate @messages do |paginated_messages|
       paginated_messages.map { |e| e.info_for_sample }
     end
@@ -498,7 +498,7 @@ class Sample::UsersController < Sample::SampleController
   # Delete notice from id
   def destroy_notification
     @message = Message.find_by_id(params[:id])
-    render_json_e ErrorEnum::MESSAGE_NOT_EXIST and return if !@current_user.messages.include?(@message)
+    render_json_e ErrorEnum::MESSAGE_NOT_EXIST and return if !current_user.messages.include?(@message)
 
     # @retval = @uclient.del_notice(params[:id])
 
@@ -511,7 +511,7 @@ class Sample::UsersController < Sample::SampleController
   # DELETE
   # Delete All notifications
   def remove_notifications
-    @retval = @current_user.messages.destroy_all
+    @retval = current_user.messages.destroy_all
     # @retval = @uclient.del_all_notices
 
     respond_to do |format|
@@ -531,29 +531,29 @@ class Sample::UsersController < Sample::SampleController
   end
 
   def get_self_extend_info
-    # @current_user  = @uclient.get_basic_info.value
+    # current_user  = @uclient.get_basic_info.value
 
 
     # answer number, spread number, third party accounts
-    @answer_number = @current_user.answers.not_preview.finished.length
-    @spread_number = Answer.where(:introducer_id => @current_user._id).not_preview.finished.length
+    @answer_number = current_user.answers.not_preview.finished.length
+    @spread_number = Answer.where(:introducer_id => current_user._id).not_preview.finished.length
     @bind_info = {}
     ["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
-      @bind_info[website] = !ThirdPartyUser.where(:user_id => @current_user._id.to_s, :website => website).blank?
+      @bind_info[website] = !ThirdPartyUser.where(:user_id => current_user._id.to_s, :website => website).blank?
     end
-    @bind_info["email"] = @current_user.email_activation
-    @bind_info["mobile"] = @current_user.mobile_activation
+    @bind_info["email"] = current_user.email_activation
+    @bind_info["mobile"] = current_user.mobile_activation
 
-    @completed_info = @current_user.completed_info
+    @completed_info = current_user.completed_info
     
     @current_user_info = {
       "answer_number" => @answer_number,
       "spread_number" => @spread_number,
       "bind_info" => @bind_info,
       "completed_info" => @completed_info,
-      "point" => @current_user.point,
-      "sample_id" => @current_user._id.to_s,
-      "nickname" => @current_user.nickname
+      "point" => current_user.point,
+      "sample_id" => current_user._id.to_s,
+      "nickname" => current_user.nickname
     }
   end
 

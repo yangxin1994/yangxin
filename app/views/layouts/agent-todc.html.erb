@@ -8,6 +8,17 @@
 
   <%= javascript_include_tag "layouts/admin-todc-layout" %>
   <%= include_gon %>
+  <script type="text/javascript">
+  $(function(){
+    <% if flash.notice %>
+      alert_msg.show('info', "<%= flash.notice %>")
+    <% elsif flash.alert %>
+      alert_msg.show('error', "<%= flash.alert %>")
+    <% elsif flash[:success] %>
+      alert_msg.show('success', "<%= flash[:success] %>")      
+    <% end -%> 
+  })
+  </script>  
   <%= yield :head %>
   <%= csrf_meta_tags %>
 
@@ -25,7 +36,7 @@
         <ul class="nav pull-right">
           <li id="fat-menu" class="dropdown">
             <a href="/profile" id="drop3" role="button" class="dropdown-toggle" data-toggle="dropdown"> <i class="icon-user"></i>
-              <%=session[:email]%> <b class="caret"></b>
+              <%=current_user.email%> <b class="caret"></b>
             </a>
             <ul class="dropdown-menu" role="menu" aria-labelledby="drop3">
 
@@ -34,7 +45,7 @@
               </li>
               <li role="presentation" class="divider"></li>
               <li role="presentation">
-                <a role="menuitem" tabindex="-1" href="<%= signout_path %>">退出登录</a>
+                <a role="menuitem" tabindex="-1" href="/agent/signout">退出登录</a>
               </li>
             </ul>
           </li>

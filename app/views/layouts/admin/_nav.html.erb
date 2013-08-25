@@ -1,6 +1,6 @@
 <div class="fixed">
     <div class="wrapper">
-        <div class="welcome"><a href="#" title=""><img src="/assets/images/userPic.png" alt="" /></a><span>你好!  <b><%=session[:email]%></b></span></div>
+        <div class="welcome"><a href="#" title=""><img src="/assets/images/userPic.png" alt="" /></a><span>你好!  <b><%=current_user.email %></b></span></div>
         <div class="userNav">
             <ul>
                 <li><a href="<%= questionaires_path %> " title=""><img src="/assets/images/icons/topnav/tasks.png" alt="" /><span>进入 Quill</span></a></li>

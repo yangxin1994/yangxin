@@ -78,14 +78,15 @@
 		</ul>
 		<form id="search_form" onsubmit='return false;'>
 			<a class='account-setting' href="javascript:void(0);">
-				<% if unread_message_count > 0 %>
-				<em class="BallonToolTip" ><%=unread_message_count %></em>
+				<% @unread_messages_count = (user_signed_in ? current_user.unread_messages_count : 0) 
+					if @unread_messages_count > 0 %>
+				<em class="BallonToolTip" ><%=@unread_messages_count %></em>
 				<% end %>
 			</a>
 			<div class="account-setting-box dn">
 				<i class="trigon">▲</i>
 				<ul>
-					<% if is_admin %>
+					<% if current_user.is_admin? %>
 					<li><a href="<%=admin_path %>?publish_status=8">管理员操作</a></li>
 					<% end %>
 					<li><a href="<%=profile_path %>">账户设置</a></li>

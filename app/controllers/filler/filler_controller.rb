@@ -72,7 +72,7 @@ class Filler::FillerController < ApplicationController
 		# get spread url
 		@spread_url = nil
 		if user_signed_in && survey['spread_point'] > 0
-			@spread_url = "#{Rails.application.config.quillme_host}#{show_s_path(reward_scheme_id)}?i=#{user_id}"
+			@spread_url = "#{Rails.application.config.quillme_host}#{show_s_path(reward_scheme_id)}?i=#{current_user._id}"
 			result = MongoidShortener.generate(@spread_url)
 			@spread_url = "#{Rails.application.config.quillme_host}/#{result}"
 		end
@@ -104,7 +104,7 @@ class Filler::FillerController < ApplicationController
 		#    If answer exists, get percentage
 		answer_id = nil
 		if user_signed_in
-			answer = Answer.find_by_survey_id_sample_id_is_preview(survey_id, @current_user._id.to_s, is_preview)
+			answer = Answer.find_by_survey_id_sample_id_is_preview(survey_id, current_user._id.to_s, is_preview)
 			answer_id = answer._id.to_s if answer.present?
 		else
 			answer_id = cookies[cookie_key(survey_id, is_preview)]
@@ -113,7 +113,7 @@ class Filler::FillerController < ApplicationController
 		answer = answer_id.present? ? Answer.find_by_id(answer_id) : nil
 		if answer.present?
 			# if answer exist, load next page questions
-			if answer.user.present? && answer.user != @current_user
+			if answer.user.present? && answer.user != current_user
 				answer_id = nil
 				cookies.delete(cookie_key(survey_id, is_preview), :domain => :all)
 			end
@@ -148,7 +148,7 @@ class Filler::FillerController < ApplicationController
 		# 8. If is hot survey and user is signed in, check whether is new user or not
 		@answer_count_empty = false
 		if @survey.quillme_hot && user_signed_in
-			@answer_count_empty = @current_user.answers.not_preview.length
+			@answer_count_empty = current_user.answers.not_preview.length
 		end
 
 		# 10. get request referer and channel

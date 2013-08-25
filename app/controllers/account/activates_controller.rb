@@ -1,4 +1,5 @@
 class Account::ActivatesController < ApplicationController
+	# layout 'sign'
 
   before_filter :require_sign_out
 
@@ -6,13 +7,7 @@ class Account::ActivatesController < ApplicationController
 	def new
   	@signin_btn = true
   	
-  	case application_name
-  	when 'quillme'
-  		@hide_right = true
-			render :template => 'account/activates/new_quillme', :layout => 'quillme'
-		else
-			render :template => 'account/activates/new_quill', :layout => 'sign'
-		end
+		render :template => 'account/activates/new_quill', :layout => 'sign'
 
 	end
 
@@ -41,13 +36,7 @@ class Account::ActivatesController < ApplicationController
 
   	@is_register = params[:r].to_b
 
-  	case application_name
-  	when 'quillme'
-  		@hide_right = true
-			render :template => 'account/activates/done_quillme', :layout => 'quillme'
-		else
-			render :template => 'account/activates/done_quill', :layout => 'sign'
-		end
+		render :template => 'account/activates/done_quill', :layout => 'sign'
 	end
 
 	# PAGE. Check the activate key
@@ -63,13 +52,7 @@ class Account::ActivatesController < ApplicationController
 			refresh_session(result.value['auth_key'])
 		end
 
-  	case application_name
-  	when 'quillme'
-  		@hide_right = true
-			render :template => 'account/activates/show_quillme', :layout => 'quillme'
-		else
-			render :template => 'account/activates/show_quill', :layout => 'sign'
-		end
+		render :template => 'account/activates/show_quill', :layout => 'sign'
 	end
 
 end

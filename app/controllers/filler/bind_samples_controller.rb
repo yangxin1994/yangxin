@@ -16,7 +16,7 @@ class Filler::BindSamplesController < Filler::FillerController
 			# 	answer = answer.value
 			# bind answer to the current user
 			next if answer.user.present?
-			answer.bind_sample(@current_user)
+			answer.bind_sample(current_user)
 
 			redirect_to_answer_id = aid 
 			# delete filler id

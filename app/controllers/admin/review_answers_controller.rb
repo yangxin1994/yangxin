@@ -1,14 +1,14 @@
 class Admin::ReviewAnswersController < ApplicationController
 	
 	layout :layout_select
-	before_filter :get_client, :is_answer_auditor
+	before_filter :require_sign_in, :get_client, :is_answer_auditor
 
 	def layout_select
-		is_admin ? 'admin_new' : 'answer_auditor'
+		current_user.is_admin? ? 'admin_new' : 'answer_auditor'
 	end
 
 	def is_answer_auditor
-		has_role(4) || has_role(16)
+		return current_user.is_answer_auditor?
 	end
 
 	private :layout_select, :is_answer_auditor

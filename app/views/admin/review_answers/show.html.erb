@@ -14,10 +14,10 @@
 		
 	<div class="stats">
 		<ul class="content-box-tabs">
-			<li><a class="count green <%if params[:scope].nil? || params[:scope]=='unreview'%>red<%end%>" href="/<%= is_admin ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>?scope=unreview">待审核</a></li> 
-			<li><a class="count green <%if params[:scope].to_s=='review_pass'%>red<%end%>"  href="/<%= is_admin ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>?scope=review_pass">审核通过</a></li> 
-			<li><a class="count green <%if params[:scope].to_s=='review_reject'%>red<%end%>" href="/<%= is_admin ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>?scope=review_reject">审核不通过</a></li> 
-			<li><a class="count green <%if params[:scope].to_s=='system_reject'%>red<%end%>" href="/<%= is_admin ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>?scope=system_reject">系统拒绝</a></li>
+			<li><a class="count green <%if params[:scope].nil? || params[:scope]=='unreview'%>red<%end%>" href="/<%= current_user.is_admin? ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>?scope=unreview">待审核</a></li> 
+			<li><a class="count green <%if params[:scope].to_s=='review_pass'%>red<%end%>"  href="/<%= current_user.is_admin? ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>?scope=review_pass">审核通过</a></li> 
+			<li><a class="count green <%if params[:scope].to_s=='review_reject'%>red<%end%>" href="/<%= current_user.is_admin? ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>?scope=review_reject">审核不通过</a></li> 
+			<li><a class="count green <%if params[:scope].to_s=='system_reject'%>red<%end%>" href="/<%= current_user.is_admin? ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>?scope=system_reject">系统拒绝</a></li>
 		</ul>
 		<div class="fix"></div>
 	</div>
@@ -93,7 +93,7 @@
 						<%end%>
 						<td>
 							<!-- Icons -->
-							<a href="/<%= is_admin ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>/answers/<%= answer['_id']%>" class="show" title="查看答案">查看答案</a>
+							<a href="/<%= current_user.is_admin? ? 'admin' : 'answer_auditor' %>/review_answers/<%=params[:id]%>/answers/<%= answer['_id']%>" class="show" title="查看答案">查看答案</a>
 						</td>
 						<td>
 							<!-- Icons -->

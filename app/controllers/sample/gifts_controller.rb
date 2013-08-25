@@ -28,7 +28,7 @@ class Sample::GiftsController < Sample::SampleController
 		render_404 if @gift.nil?
 		@gift[:photo_src] = @gift.photo.nil? ? Gift::DEFAULT_IMG : @gift.photo.picture_url 
 
-		@receiver_info = @current_user.nil? ? nil : @current_user.affiliated.try(:receiver_info) || {}
+		@receiver_info = current_user.nil? ? nil : current_user.affiliated.try(:receiver_info) || {}
 
 	end
 end

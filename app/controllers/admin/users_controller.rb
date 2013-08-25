@@ -96,7 +96,7 @@ class Admin::UsersController < Admin::AdminController
 		@user = @client._get({}, "/#{params[:id]}")
 		# if user who is not super admin wants to get a admin user info,
 		#  replace to sign in page.
-		_sign_out and return if @user.value['role'].to_i >= 16 && !has_role(32)
+		# _sign_out and return if @user.value['role'].to_i >= 16 && !has_role(32)	# has no super admin any more
 		respond_to do |format|
 			format.html
 			format.json { render json: @user}

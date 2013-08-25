@@ -76,7 +76,7 @@ class Survey
     "reward_scheme_id" => ""
   }
 
-  # 0 免费, 1 表示话费，2表示支付宝转账，4表示优币，8表示抽奖，16表示发放集分宝
+  # 0 免费, 1 表示话费，2表示支付宝转账，4表示积分，8表示抽奖，16表示发放集分宝
   field :quillme_promote_reward_type,:type => Integer, default: nil
 
   field :email_promote_info, :type => Hash, default: {
