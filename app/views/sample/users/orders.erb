@@ -90,7 +90,7 @@
                             <% when Order::REAL, Order::VIRTUAL %>
                               <!-- 礼品 -->
                               <td>
-                                  <img src="<%= order['picture_url'] %>" style="width: 36px; height: 36px;"/>
+                                  <img src="<%= small_gift_image(order['picture_url']) %>" style="width: 36px; height: 36px;"/>
                                   <span><%= truncate(order["title"].to_s.strip, length: 22) %></span>
                               </td>
                               <td>
@@ -179,7 +179,7 @@
                             <% when Order::REAL, Order::VIRTUAL %>
                               <!-- 奖品 -->
                               <td>
-                                  <img src="<%= order['picture_url'] %>" style="width: 36px; height: 36px;"/>
+                                  <img src="<%= small_gift_image(order['picture_url']) %>" style="width: 36px; height: 36px;"/>
                                   <span><%= truncate(order["title"].to_s.strip, length: 22) %></span>
                               </td>
                               <td>
@@ -272,7 +272,7 @@
                             <% when Order::REAL, Order::VIRTUAL %>
                               <!-- 礼品 -->
                               <td>
-                                  <img src="<%= order['picture_url'] %>" style="width: 36px; height: 36px;"/>
+                                  <img src="<%= small_gift_image(order['picture_url']) %>" style="width: 36px; height: 36px;"/>
                                   <a target="_blank" href="/gifts/<%= order["gift_id"] %>"><%= truncate(order["title"].to_s.strip, length: 22) %></a>
                               </td>
                               <td><%= order["point"] %>积分</td>
@@ -295,7 +295,7 @@
           <% end %>
         </div>
 
-        <%= render "pagination", :@common => @orders, :@path => "/users/orders" %>    
+        <%= render "pagination", :@common_value => @orders, :@path => "/users/orders" %>    
     </div>
 
     <!-- user tabs -->
