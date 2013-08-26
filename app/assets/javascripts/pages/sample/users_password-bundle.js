@@ -6,6 +6,7 @@ jQuery(function($) {
 
 		// checked first time
 		if ($('.error:not(#cpwd)').length > 0){ return false;}
+		$('input[type=password]').removeClass('error');
 		$('.alert-error').addClass('alert-hide');
 
 		// verified
@@ -34,6 +35,8 @@ jQuery(function($) {
 				$('.alert-cpwd2').removeClass('alert-hide');
 			}  
 		}
+
+		console.log('.......'+$('.error').length+'......')
 
 		// checked
 		if ($('.error').length > 0) { return false; };
