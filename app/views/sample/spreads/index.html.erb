@@ -31,7 +31,7 @@ m = @my_spread_survey ? @my_spread_survey["current_page"] : 1
 		<h1><em><%= index %>.</em><%= spread_survey["survey"]["title"] %><span>推广奖励<em><%= spread_survey["survey"]["reward_info"].nil? ? '0' : spread_survey["survey"]["reward_info"]['spread_point'] %></em>积分</span></h1>
 		<div class='spread-survey-detail'>
 			<% if user_signed_in %>
-			<input type="text" name="link-address" id="link-address" value='<%= "#{request.protocol}#{request.host_with_port}#{show_s_path(spread_survey["survey"]["_id"])}?i=#{current_user._id}" %>' />
+			<input type="text" name="link-address" id="link-address" value='<%= "#{request.protocol}#{request.host_with_port}#{show_s_path(spread_survey["survey"]["_id"])}?i=#{current_user._id.to_s}" %>' />
 			<button class="od-button od-button-blue copyLink">复制推广链接</button>
 			<ul>
 				<li><a href="javascript:void(0);" class="gmail-share" title="GMail"><img src="../assets/social/gmail-01.png" /></a></li>

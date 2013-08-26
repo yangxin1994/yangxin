@@ -3,7 +3,7 @@
 	<%= javascript_include_tag "pages/sample/surveys-bundle" %>
 	<script type="text/javascript">
 		<% if user_signed_in %>
-		 	window.current_user_id = "<%=  @current_sample['sample_id'] %>"
+		 	window.current_user_id = "<%=  current_user._id.to_s %>"
 		<% end %>	
 	</script>	
 <% end %>

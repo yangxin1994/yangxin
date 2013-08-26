@@ -3,8 +3,8 @@
 	<%= javascript_include_tag "pages/sample/gifts-bundle" %>
 	<script type="text/javascript">
 	    <% if user_signed_in %>
-	    	window.username    = "<%=  @current_sample['nickname']   %>"
-	    	window.total_point = "<%=  @current_sample['point']  %>"
+	    	window.username    = "<%=  current_user.nickname   %>"
+	    	window.total_point = "<%=  current_user.point  %>"
 	    <% end %>
 	</script>
 <% end %>

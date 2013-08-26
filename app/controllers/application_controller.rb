@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
 
   attr_reader :current_user
 
-  before_filter :init, :current_sample_info
+  before_filter :init
   helper_method :user_signed_in, :current_user, :social_auth_link
 
   # init action
@@ -104,38 +104,6 @@ class ApplicationController < ActionController::Base
   def success_true(_is = true)
     @is_success = _is
   end
-
-  def current_sample_info
-    return if current_user.nil?
-
-    # answer number, spread number, third party accounts
-    answer_number = current_user.answers.not_preview.finished.length
-    spread_number = Answer.where(:introducer_id => current_user._id).not_preview.finished.length
-    bind_info = {}
-    ["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
-      bind_info[website] = !ThirdPartyUser.where(:user_id => current_user._id.to_s, :website => website).blank?
-    end
-    bind_info["email"] = current_user.email_activation
-    bind_info["mobile"] = current_user.mobile_activation
-
-    completed_info = current_user.completed_info
-    
-    @current_sample = {
-      "answer_number" => answer_number,
-      "spread_number" => spread_number,
-      "bind_info" => bind_info,
-      "completed_info" => completed_info,
-      "point" => current_user.point,
-      "sample_id" => current_user._id.to_s,
-      "nickname" => current_user.nickname
-    }
-
-    # @current_sample = Sample::UserClient.new(session_info).get_basic_info
-    # @current_sample = @current_sample.value
-    # result = Sample::UserClient.new(session_info).get_basic_info  unless session[:current_sample].present?
-    # session[:current_sample]  ||= result.value
-    # return session[:current_sample]   
-  end 
 
   # =============================
   # Social redirect uri
@@ -243,5 +211,4 @@ class ApplicationController < ActionController::Base
     # retval["next_page"] = [page + 1, retval["total_page"]].min
     retval
   end
-
 end
