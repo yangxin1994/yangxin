@@ -163,10 +163,10 @@ jQuery(function($) {
         clearInterval(timer);
         timer = setInterval(function() { 
             sec--;
-            // console.log('.......:'+sec+'............');
+            console.log('.......:'+sec+'............');
             if ($('iframe#avatar_return_iframe').contents().find('#retval input').val() == "true" || sec == -1) {
                 clearInterval(timer);
-                // console.log('.......Done!!!!............');
+                console.log('.......Done!!!!............');
                 window.location.replace('/users/setting/avatar')
             } 
         }, 1000);
@@ -175,7 +175,7 @@ jQuery(function($) {
         $('<iframe id="avatar_return_iframe" name="avatar_return_iframe"></iframe>').addClass('dn').appendTo('.avataria');
         $(this).attr('target', 'avatar_return_iframe')
         $('#loading-img').removeClass('dn');
-        // console.log('............loading............');
+        console.log('............loading............');
         myTimer();
         return true;
     });
