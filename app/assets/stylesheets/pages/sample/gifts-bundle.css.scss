@@ -234,6 +234,16 @@ ul.exc_nav{
 		}				
 	}
 }
+.can_change{
+	float: right;
+	color: 
+	#666;
+	line-height: 24px;
+	height: 24px;
+	&:hover{
+		cursor:pointer;
+	}
+}
 .team-title{
 	@include one-line(30px);
 	@include clearfix;
@@ -251,9 +261,9 @@ ul.exc_nav{
 	width:940px;
 	margin-top:30px;
 	margin-bottom:15px;
+	@include clearfix;
 	.gift-list{
 		width:930px;
-		padding-bottom:40px;
 		@include clearfix;
 		li{
 			width:220px;
@@ -282,8 +292,8 @@ ul.exc_nav{
 				}
 				.gift-name{
 					width:220px;
-					height:30px;
-					line-height: 30px;
+					@include one-line(30px);
+					overflow: hidden;
 					text-align: center;
 					display: block;
 					font-size: 14px;
@@ -335,6 +345,27 @@ ul.exc_nav{
 			}
 		}
 	}
+	.no_data{
+		height: 400px;
+		line-height: 400px;
+		text-align: center;
+		font-size: 16px;
+		color: 
+		#999;
+		img{
+			vertical-align: middle;
+			margin-right: 20px;
+		}
+		span{
+			display: inline-block;
+			height: 50px;
+			line-height: 50px;
+			a{
+				color:#3D97ED;
+				cursor:pointer;
+			}
+		}
+	}
 }
 
 .research-list{
@@ -357,7 +388,14 @@ ul.exc_nav{
 				}
 			}
 			.l_mame{
-				color:#333;
+				color:#666;
+				cursor: default;
+			}
+			.l_mame a{
+				color:#666;
+				&:hover{
+					color:$red1;
+				}
 			}
 			.point{
 				margin-right:5px;
@@ -407,6 +445,12 @@ ul.exc_nav{
 					height:20px;
 					overflow:hidden;
 					font-size: 13px;
+					a{
+						color:#666;
+						&:hover{
+							color:$red1;
+						}
+					}
 				}
 				.number{
 					font-family: Georgia;
@@ -572,8 +616,8 @@ ul.exc_nav{
 /* for popup */
 
 .exc_notices{
+	@include clearfix;
   width:500px;
-  height:200px;
   padding:20px;
   color:#b3b3b3;
   font-size:14px;
@@ -605,7 +649,7 @@ ul.exc_nav{
   	width:310px;
   	height:30px;
   	margin-left:130px;
-  	clear:both;
+  	@include clearfix;
   	font-size:16px;
   	color:#ec1717;
   	img{
@@ -619,23 +663,30 @@ ul.exc_nav{
   	}
   }
 	.order_details{
-  		width:500px;
-  		margin:10px 80px;
-  		line-height:24px;
-  		div.order_inf{
-  			clear:both;
-  			div{
-  				float:left;
-  				width:200px;
-  			}
-  		}
-  		a{
-  			color:#3E98EE;
+/*	
+		width: 500px;
+		margin: 10px 80px;
+*/		
+		line-height: 36px;
+		padding: 0px 50px;
+		.o_t{
+			text-align:center;
+		}		
+		div.order_inf{
+			@include clearfix;
+			div{
+				float:left;
+				width: 180px;
+			}
+		}
+		a{
+			color:#3E98EE;
 		}
 		.answer_look{
-			margin-top:30px;
+			text-align:center;
+			/*margin-top:30px;*/
 			input{
-			  float:left;
+			  /*float:left;*/
 			  width:110px;
 			  height:32px;
 			  border:0px;
@@ -649,14 +700,57 @@ ul.exc_nav{
 			}
 			.answer{
 				font-size:16px;
-  				background:#ec1717;
-  				margin-right:90px;
+  			background:#ec1717;
+  			margin-right:70px;
+  			&:hover{
+					background:#F25D5D;
+				}	
 			}
+			.answer.disabled{
+				cursor:default;
+				background:#E6E6E6;
+				color:#B3B3B3;
+				&:hover{
+					background:#e6e6e6;
+					color:#b3b3b3;
+				} 
+			}			
 			.look_over{
 				font-size:16px;
-  				background:#65ADF1;
-			}		
+  			background:#65ADF1;
+  			&:hover{
+					background:#6FA0F0;
+				}
+			}
+			.look_over.disabled{
+				cursor:default;
+				background:#E6E6E6;
+				color:#B3B3B3;
+				&:hover{
+					background:#e6e6e6;
+					color:#b3b3b3;
+				} 
+			}						
 		} 
+		.answer_look.inf{
+			text-align:left;
+			padding:0px;
+		}
+		.share_gift{
+			display:none;
+			margin-top: 30px;
+			border-top: 1px solid;
+			div{
+				background:#fff;
+				width: 200px;
+				margin: -15px auto 0px;
+				text-align: center;				
+				a{
+					margin-right:10px;
+				}
+			}
+		}
+
 	}
 	.more_integral{
   		color:#b3b3b3;
@@ -729,6 +823,11 @@ ul.exc_nav{
   			float:right;
   			color:#fff;
   			cursor:pointer;
+  			&:disabled, &.disabled{
+  				cursor:default;
+					background:#E6E6E6;
+					color:#B3B3B3;  
+  			}
 			}
 			input.con_sub_btn{
   			float:left;
@@ -759,33 +858,54 @@ ul.exc_nav{
   		margin-bottom:30px;
 		}
 		.wel_cont{
+			span{
+				display:inline-block;
+				width:56px;
+				text-align:right;
+			}
 			.login_btn{
 				@include border-radius(4px);
 				font-size:14px;
-  				width:230px;
-  				height:30px;
-  				background:#f14646;
-  				border:0px;
-  				margin-top:30px;
-  				text-align:center;
-  				line-height:30px;
-  				color:#fff;
-  				clear:both;
-  				cursor:pointer;
-  				span{
-  					display:inline;
-  					margin-right:20px;
-  				}
+  			width:220px;
+  			height:30px;
+  			background:#f14646;
+  			border:0px;
+  			margin-left:60px;
+  			margin-top:24px;
+  			text-align:center;
+  			line-height:30px;
+  			color:#fff;
+  			@include clearfix;
+  			cursor:pointer;
+  			&:hover{
+  				background: $red1;
+  			}
+  			&:active{
+  				background: $red2;
+  			}  			
+  			span{
+  				display:inline;
+  				margin-right:20px;
+  			}
 			}
+  		.login_btn.disabled{
+  			cursor:default;
+				background:#E6E6E6;
+				color:#B3B3B3; 
+				&:hover{
+					background:#e6e6e6;
+					color:#b3b3b3;
+				} 				
+  		}
 			.login_username{
-  				margin-bottom:20px;
+  				margin-bottom:30px;
 			}
 			.login_password{
-  			margin-bottom:10px;
+  			margin-bottom:20px;
 			}
-			.l_last{
-				height:16px;
-				margin:0px;
+			#l_last{
+				height:20px;
+				margin: 0px auto auto 60px;
 				input#rem{
 					float:left;
 					width:14px;
@@ -794,16 +914,20 @@ ul.exc_nav{
 				}
 				label{
 					float:left;
+					height:14px;
+					line-height:14px;					
 				}
 				a{
 					float:left;
-					margin-left: 98px;
+					height:14px;
+					line-height:14px;							
+					margin-left: 88px;
 					color: #3d97ed;
 				}
 			}
 			div{
 				input{
-  				width:210px;
+  				width:200px;
   				height:20px;
   				line-height:20px;
   				padding:5px 10px;
@@ -812,51 +936,59 @@ ul.exc_nav{
   				@include border-radius(4px);
 				}
 			}
-			span{
-				display:block;
-				a{
-  				margin-left:110px;
-  				color:#bdbdbd;
-				}
-				span{
-  				float:left;
-				}
-				input{
-  				width:12px;
-  				height:12px;
-  				border:1px solid #b3b3b3;
-  				margin-right:10px;
-  				float:left;
-  				display:inline;
-  				border:0px;
-				}
-			}
-		} 
+		}  
 	}
+
+
 	.err_notice{
+		border: 1px solid #f47474;
+		text-align: center;
+		font-size: 14px;	
 		position:absolute;
-		width:200px;
-		height:14px;
+		width:220px;
+		height:30px;
+  	background:#fff7eb;
+  	line-height:30px;
 		top:106px;
-		left:260px;
+		left:80px;
 		display:none;
 		color:#ec1717;
+		@include border-radius(4px);
 		a{
 			color:#3d97ed;
 		}
+		i{
+			margin-right: 4px;
+			top: 4px;
+			position: relative;
+			display:inline-block;
+			width:20px;
+			height:20px;
+			background: image-url('/assets/od-quillme/faild.png') no-repeat;
+		}
+		span{
+			height:20px;
+			line-height:20px;
+			a{
+				color: #65ADF1;
+			}
+		}
 	}
+
 	.exc_middle{
-		margin-left:150px;
+		margin-left:120px;
 		width:8px;
 		height:326px;
 		float:left;
 		background:url('/assets/od-quillme/login_line.png')
 	}	
 	.exc_right{
-  		width:250px;
-  		height:250px;
+			margin-top:20px;
+			margin-left:30px;
+  		width:226px;
+  		height:266px;
   		background:url(/assets/od-quillme/pop_login.png) no-repeat;
-  		float:right;
+  		float:left;
   		position:relative;
   		button{
 	  			font-size:14px;
@@ -869,7 +1001,7 @@ ul.exc_nav{
 	  			border:0px;
 	  			cursor:pointer;
 	  			position:absolute;
-	  			bottom:-50px;
+	  			bottom:0px;
 	  			left:68px;
 	  			@include border-radius(4px);
 	  			&:hover{
@@ -880,4 +1012,6 @@ ul.exc_nav{
 	  			}
 			}
 		}
+
+
 }

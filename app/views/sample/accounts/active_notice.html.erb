@@ -10,12 +10,11 @@
 			已注册成功!
 		</h1>
 		<a class="reture_index" href="<%= home_path %>">返回首页</a>
-		<div class="nickname">
+<!-- 		<div class="nickname">
 			您的昵称：<span><%= @account %></span>会展示在新鲜事与抽奖记录等地方
-			<!-- ，如不希望暴露，请您：<a href="/sample/users">修改昵称</a> -->
-		</div>
+		</div> -->
 		<div class="login_email">
-			<% if @account.match(/^(13[0-9]|15[0|1|2|3|6|7|8|9]|18[8|9])\d{8}$/i)%>
+			<% if @account.match(/^(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$/i)%>
 				<p>
 					<span class="binding">超过了<b>80%</b>的用户选择了立即验证邮箱,账户安全更放心!
 					</span>

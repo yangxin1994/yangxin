@@ -426,6 +426,7 @@ i {
 
     .part-right {
         width: 200px;
+        width: auto\9;
         min-height: 800px;
         display: inline-block;
 
@@ -583,6 +584,7 @@ i {
             .tab.active {
                 background-color: #ffffff;
                 width: 206px;
+                width: auto\9;
                 position: relative;
                 left: -6px;
                 padding: 18px 0;

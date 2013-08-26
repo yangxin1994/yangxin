@@ -357,12 +357,48 @@ $colorB: #b3b3b3;
 					height:60px;
 					div{
 						float:left;
+						position:relative;
 						margin: 20px 0 12px 20px;
 						input{
 							width:180px;
 							padding:5px;
 							margin-right:5px;
 							color:#999;
+						}
+						.channel_err{
+							margin:0px;
+							border: 1px solid #f47474;
+							text-align: center;
+							font-size: 14px;	
+							position:absolute;
+							width:190px;
+							height:30px;
+  						background:#fff7eb;
+  						line-height:30px;
+							top:28px;
+							left:0px;
+							display:none;
+							color:#ec1717;
+							@include border-radius(4px);
+							a{
+								color:#3d97ed;
+							}
+							i{
+								margin-right: 4px;
+								top: 4px;
+								position: relative;
+								display:inline-block;
+								width:20px;
+								height:20px;
+								background: image-url('/assets/od-quillme/faild.png') no-repeat;
+							}
+							span{
+								height:20px;
+								line-height:20px;
+								a{
+									color: #65ADF1;
+								}
+							}
 						}
 						.rss-btn{
 							position:relative;
@@ -475,8 +511,7 @@ margin-top: 200px;
 }
 .rss_notice{
 	width:466px;
-	height:210px;
-	padding-top: 20px;
+	padding: 20px 0px;
 	.title{
 	  padding-left: 20px;
 		margin-bottom:20px;
@@ -503,7 +538,7 @@ margin-top: 200px;
 		}
 		.finish{
 			text-align: center;
-			margin-top: 50px;
+			margin-bottom: 20px;
 			font-size:16px;
 			color:#8CC63F;
 			img{
@@ -518,9 +553,11 @@ margin-top: 200px;
 	}
 	 .activate{
 	 	text-align: center;
-	 	margin-top:30px;
+	 	/*margin-top:30px;*/
 	 	&.send_code{
+	 		position:relative;
 	 		padding-left:40px;
+	 		margin-bottom:20px;
 	 		span{
 	 			float:left;
 	 			margin-right:4px;
@@ -532,12 +569,48 @@ margin-top: 200px;
 	 			float:left;		
 	 		}
 	 		button{
-	 			text-align:center;
-	 			letter-spacing:2px;
-	 			float:left;
-	 	 		margin-top:2px;
-	 			margin-top:0px\9;			
+				font-size: 16px;
+				line-height: 36px;
+				height: 36px;
+				line-height: 30px\9;
+				height: 30px\9;				
+				text-align: center;
+				letter-spacing: 2px;
+				float: left;
 	 		}
+			.code_exp{
+				border: 1px solid #f47474;
+				text-align: center;
+				font-size: 14px;
+				left: 86px;
+				top: 40px;
+				display:none;
+				color:#ec1717;
+				height:30px;
+				background:#fff7eb;
+				line-height:30px;
+				position:absolute;
+				width: 250px;
+				@include border-radius(4px);
+				i{
+					margin-right: 4px;
+					top: 4px;
+					position: relative;
+					display:inline-block;
+					width:20px;
+					height:20px;
+					background: image-url('/assets/od-quillme/faild.png') no-repeat;
+				}
+				span{
+					height:20px;
+					line-height:20px;
+					float:none;
+					margin:0px;
+					a{
+						color: #65ADF1;
+					}
+				}
+			}
 	 	}
 	 	span{
 	 		height:36px;
@@ -550,23 +623,25 @@ margin-top: 200px;
 	 	input{	
 	 		width:216px;
 	 		@include border-radius(4px);
-	 		border:1px solid #b3b3b3;
 	 		padding:2px 0px 2px 8px;
 	 		font-size:12px;
 	 		color:#b3b3b3;
 	 	}
 	 	button{
 	 		width:90px;
-	 		height:32px;
+	 		height:30px;
 	 		border:0px;
 	 		background: #ec1717;
 	 		color: #fff;
 	 		text-align: center;
-	 		line-height: 32px;
+	 		line-height: 30px;
 	 		font-size:16px;
 	 		cursor: pointer;
 	 		@include border-radius(4px);
-	 		@include box-shadow(0 1px 1px #999);			
+	 		@include box-shadow(0 1px 1px #999);		
+	 		&:hover{
+	 			background:$red1;
+	 		}	
 	 	}
 	 	.error{
 	 		color:red;
