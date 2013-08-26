@@ -386,15 +386,21 @@ class Survey
       end
     end
 
+    _promote_email_count = email_promote_info["promote_email_count"]
+    _promote_sms_count = sms_promote_info["promote_sms_count"]
+
     [:quillme, :email, :sms, :broswer_extension, :weibo].each do |promote_type|
       _params = options[promote_type]
       self.update_attributes(
       "#{promote_type}_promotable".to_sym => _params[:promotable],
       "#{promote_type}_promote_info".to_sym => _params["#{promote_type}_promote_setting".to_sym]
       )
-
+      update_quillme_promote_reward_type if options[promote_type] == :quillme
     end
 
+    email_promote_info["promote_email_count"] = _promote_email_count
+    sms_promote_info["promote_sms_count"] = _promote_sms_count
+    save
     serialize_in_promote_setting
     # result.value['survey_id'] = options[:id]
     # _r = _get({}, "/#{options[:id]}/reward_schemes")

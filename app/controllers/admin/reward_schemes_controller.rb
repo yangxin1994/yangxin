@@ -13,7 +13,7 @@ class Admin::RewardSchemesController < Admin::AdminController
 
   def update
     options = make_attr(params[:reward_scheme])
-    @reward_scheme = survey.reward_schemes.find(params[:id])
+    @reward_scheme = RewardScheme.find(params[:id])
     @reward_scheme.update_attributes(options)
     redirect_to "#{reward_schemes_admin_path(:id => params[:reward_scheme][:survey_id])}?editing=#{params[:id]}"
   end
