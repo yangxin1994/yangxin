@@ -2,14 +2,14 @@
   $('ul.gift-list').html("<%= escape_javascript(render :partial => 'gifts_list', :locals => { :gifts => @hotest_gifts }) %>") 
   <% if @hotest_gifts['total_page'].to_i > 1 %> 
     if($('div.pagination').length > 0 ){
-      $('div.pagination').replaceWith("<%= escape_javascript(sample_paginator_ajax(@hotest_gifts,@sort_type,nil)) %>")  	
+      $('div.pagination').replaceWith("<%= escape_javascript(sample_paginator_ajax(@hotest_gifts,@sort_type,nil,@point)) %>")   
     }else{
-      $('ul.gift-list').append("<%= escape_javascript(sample_paginator_ajax(@hotest_gifts,@sort_type,nil)) %>")	
+      $('ul.gift-list').after("<%= escape_javascript(sample_paginator_ajax(@hotest_gifts,@sort_type,nil,@point)) %>") 
     } 
   <% else %>
-  	 $('div.pagination').remove();
+     $('div.pagination').remove();
   <% end %>
 <% else %>
-  $('ul.gift-list').html('<div class="no_data">没有查到数据</div>')
+  $('ul.gift-list').html('<div class="no_data"><div><img src="/assets/od-quillme/reg_fail.png" /><span> 您当前积分不足以兑换任何礼品,您可以<a href="/surveys">答题赚积分</a></span></div></div>')
   $('div.pagination').remove();
 <% end %>

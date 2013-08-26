@@ -117,7 +117,11 @@
 		}
 		.bulletin-title{
 			width:180px;
+			height:30px;
 			overflow: hidden;
+			white-space: nowrap;
+		    -o-text-overflow: ellipsis;
+		    text-overflow: ellipsis;
 			float:left;
 			margin-right:15px;
 			&:hover{color: $red1;}
@@ -177,8 +181,8 @@
 				}
 				.gift-name{
 					width:220px;
-					height:30px;
-					line-height: 30px;
+					@include one-line(30px);
+					overflow: hidden;
 					text-align: center;
 					display: block;
 					font-size: 14px;
@@ -257,6 +261,9 @@
 			}
 			span{
 				margin:0 3px;
+				&.u{
+					color:#666;
+				}
 			}
 		}
 	}
@@ -295,6 +302,7 @@
 					}
 				}
 				.username{
+					color:#666;
 					width:100px;
 					height:20px;
 					overflow: hidden;

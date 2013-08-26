@@ -14,7 +14,59 @@
 	-moz-box-shadow:0px 0px 10px rgba(0,0,0,.2);
 	-webkit-box-shadow:0px 0px 10px rgba(0,0,0,.2);
 	box-shadow:0px 0px 10px rgba(0,0,0,.2);
-	@include border-radius(9px);	
+	@include border-radius(9px);
+	/* 404 & 500 */
+	.error-box{
+		width:700px;
+		margin:0 auto;
+		padding-top:30px;
+		.expression{
+			float: left;
+		}
+		.describe{
+			float: left;
+			margin-left:50px;
+			h6{
+				font-size: 150px;
+				color:#ccc;
+				font-weight: bold;
+			}
+			h4{
+				font-size:20px;
+				line-height: 2em;
+			}
+			p{
+				font-size:14px;
+			}
+			.btn{
+				@include inline-block;
+				padding:8px 15px;
+				font-size: 14px;
+				color:#fff;
+				@include border-radius(4px);
+				margin:30px 15px 0 0;
+				&.red{
+					background: $red;
+					&:hover{
+						background: $red1;
+					}
+					&:active{
+						background: $red2;
+					}
+				}
+				&.blue{
+					background: $blue;
+					&:hover{
+						background: $blue1;
+					}
+					&:active{
+						background: $blue2;
+					}
+				}
+			}
+		}	
+	}
+		
 	.con_login{
 		float: left;
 		width:570px;
@@ -23,37 +75,44 @@
 		h3{
 			font-size:18px;
 		}
-
 		div.form{ 
 			div{
 				margin-bottom:16px;
 				input{
+					float:left;
 					font-size:16px;
+					line-height:normal\9;
 					width:260px;
 					padding:8px 10px;
 					color:#bdbdbd;
 					margin-top:14px; 
 					background-color: #fff;     
 				}
-				&.l_last{
-					height:16px;
-					margin:0px;
-					input#rem{
-						float:left;
-						width:14px;
-						height:14px;
-						margin: 1px 8px 0px 0px;
-					}
-					label{
-						float:left;
-					}
-					a{
-						float:left;
-						margin-left: 148px;
-						color: #3d97ed;
-					}
+			}
+			div#l_last{
+				height:20px;
+				margin:0px;
+				input#rem{
+					float:left;
+					width:14px;
+					height:14px;
+					margin: 1px 8px 0px 0px;
+					padding:0px;
+				}
+				label{
+					height:14px;
+					line-height:14px;
+					float:left;
+				}
+				a{
+					height:14px;
+					line-height:14px;
+					float:left;
+					margin-left: 148px;
+					color: #3d97ed;
 				}
 			}
+
 			.identifying_code{
 				input{
 					width:70px;
@@ -80,8 +139,18 @@
 					color:#3e98ee;      
 				}
 			}
+			span.faild{
+				float:left;
+				display:inline-block;
+				width:20px;
+				height:20px;
+				margin:22px 0px 0px 16px;
+				background:url(/assets/od-quillme/faild.png) no-repeat;          
+			}
 			span.notice{
-				display:inline;
+				margin-top: 25px;
+				float: left;
+				display: inline-block;
 				margin-left:10px;
 				color:#ec1717;
 				a{
@@ -101,21 +170,25 @@
 				clear:both;
 				cursor:pointer;
 				@include border-radius(4px);
-				span.lo{
-					display:inline;
-					margin-right:20px;
-				} 
-				&:disabled{
+				letter-spacing:5px; 
+				&:hover{
+					background:#F25D5D
+				}             
+			}
+			.login_btn.disabled{
+				cursor:default;
+				background:#e6e6e6;
+				color:#b3b3b3;
+				&:hover{
 					background:#e6e6e6;
 					color:#b3b3b3;
-				}           
-			}
+					letter-spacing:5px;
+				}
+			}  			
 		}
+		
+
 	}
-
-
-
-
  
 	.line{
 		width:8px;
@@ -170,8 +243,9 @@
 		}
 	}
 	h1{
-		font-size:20px;
-		margin-bottom:30px;  
+		font-size: 24px;
+		margin-bottom: 26px; 
+		font-family:'微软雅黑', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';
 	}
 	.none_account{
 		font-size:14px;

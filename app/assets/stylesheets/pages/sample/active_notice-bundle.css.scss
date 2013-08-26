@@ -76,7 +76,7 @@
 					margin-right:10px;
 				}
 			}
-			/*
+		
 			div.input_email{
 				font-size:14px;
 				input{
@@ -104,7 +104,14 @@
 					line-height:24px;
 					position: relative;
 					top: -30px;
-					right: -380px;					
+					right: -380px;	
+					span{
+						display:inline-block;
+						width:20px;
+						height:20px;
+						float:left; 
+						margin-left:20px;						
+					}				
 					span#notice{
 						display:inline-block;
 						width:20px;
@@ -114,11 +121,13 @@
 						float:left;        
 					}
 					font{
+						height:20px;
+						line-height:20px;
 						float:left;
 					}            
 				}				
 			}
-			*/
+		
 			.log_maibtn{
 				margin-top:20px;
 				height:24px;

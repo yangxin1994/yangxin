@@ -3,7 +3,7 @@
 	<%= javascript_include_tag "pages/sample/surveys-bundle" %>
 	<script type="text/javascript">
 		<% if user_signed_in %>
-		 	window.current_user_id = "<%=  current_user._id.to_s %>"
+		 	window.current_user_id = "<%=  @current_sample['sample_id'] %>"
 		<% end %>	
 	</script>	
 <% end %>
@@ -42,24 +42,24 @@
 								全部 (<span class="all_t"><%= @reward_count.values.reduce(:+).to_i %></span>)
 							</a>
 						</li>
-						<li reward_type="4" class="<%= current_tab?("4",params[:reward_type])%>">
-							<a href="<%= surveys_path(:status => params[:status],:reward_type => "4")%>">
-								积分奖励 (<span class="u_t"><%= @reward_count[4].to_i %></span>)
+						<li reward_type="<%= RewardScheme::POINT.to_s %>" class="<%= current_tab?("#{RewardScheme::POINT.to_s}",params[:reward_type])%>">
+							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::POINT.to_s}")%>">
+								积分奖励 (<span class="u_t"><%= @reward_count["4"].to_i %></span>)
 							</a>
 						</li>
-						<li reward_type="8"  class="<%= current_tab?("8",params[:reward_type])%>">
-							<a href="<%= surveys_path(:status => params[:status],:reward_type => "8")%>">
-								抽奖机会 (<span class="c_t"><%= @reward_count[8].to_i %></span>)
+						<li reward_type="<%= RewardScheme::LOTTERY.to_s %>"  class="<%= current_tab?("#{RewardScheme::LOTTERY.to_s}",params[:reward_type])%>">
+							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::LOTTERY.to_s}")%>">
+								抽奖机会 (<span class="c_t"><%= @reward_count["8"].to_i %></span>)
+							</a>
+						</li>  
+						<li reward_type="<%= RewardScheme::CASH_REWARD %>" class="<%= current_tab?("#{RewardScheme::CASH_REWARD}",params[:reward_type])%>">
+							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::CASH_REWARD }")%>">
+								现金奖励 (<span class="x_t"><%= @reward_count["1"].to_i + @reward_count["2"].to_i + @reward_count["16"].to_i %></span>)
 							</a>
 						</li>
-						<li reward_type="1,2,16" class="<%= current_tab?("1,2,16",params[:reward_type])%>">
-							<a href="<%= surveys_path(:status => params[:status],:reward_type => "1,2,16")%>">
-								现金奖励 (<span class="x_t"><%= @reward_count[1].to_i + @reward_count[2].to_i + @reward_count[16].to_i %></span>)
-							</a>
-						</li>
-						<li reward_type="0" class="<%= current_tab?("0",params[:reward_type])%>">
-							<a href="<%= surveys_path(:status => params[:status],:reward_type => "0")%>">
-								免费调研 (<span class="m_t"><%= @reward_count[0].to_i %></span>)
+						<li reward_type="0" class="<%= current_tab?("#{RewardScheme::FREE}",params[:reward_type])%>">
+							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::FREE}")%>">
+								免费调研 (<span class="m_t"><%= @reward_count["0"].to_i %></span>)
 							</a>
 						</li>
 						<div style="clear:both;"></div>
@@ -67,15 +67,15 @@
 					<%if user_signed_in %>
 						<div class="select" name="answer_status">  
 							<div class="select-content w50" tabindex="0">
-								<%= show_default_select_option(params[:answer_status])%>
+								<%= show_default_select_option(params[:answer_status],params[:status])%>
 								<i class="triangle"></i>
 							</div>	
 							<ul class="w50">
-								<li data="<%= Answer::NOT_EXIST %>">待参与</li>
+								<li data="<%=Answer::NOT_EXIST %>"><%= opend_nav?(params[:status]) ? '待参与' : '未参与' %></li>
 								<li data="<%= Answer::EDIT %>">答题中</li>
-								<li data="<%= "#{Answer::UNDER_REVIEW},#{Answer::UNDER_AGENT_REVIEW}" %>">待审核</li>
-								<li data="<%= Answer::REJECT %>">被拒绝</li>
-								<li class="bbr" data="<%= Answer::FINISH %>">已完成</li>
+								<li data="<%= "#{Answer::UNDER_REVIEW},#{Answer::UNDER_AGENT_REVIEW}"%>">待审核</li>
+								<li data="<%= Answer::REJECT%>">被拒绝</li>
+								<li class="bbr" data="<%= Answer::FINISH%>">已完成</li>
 							</ul>
 						</div>						
 					<% end %>
@@ -99,6 +99,7 @@
 		<div class="content">
 			<div class="info">
 				<div>
+					<div class='channel_err'><i></i><span>帐号有误,请重新输入</span></div>
 					<input type="text" name="contact" placeholder="手机号/电子邮件" />
 					<a href="javascript:void(0);" class="btn rss-btn">订阅</a>
 				</div>
@@ -118,7 +119,7 @@
 					<li <%= hide_border?(@disciplinal,index) %>>
 					<span class="rank-list-left l">
 						<a class="userhead l" href="javascript:void(0);<%#= user_path(log['user_id'])%>">
-							<img src="<%= show_image(log['avatar'],'avatar') %>" alt="<%= log['username']%>">
+							<img src="<%= small_avatar(log['user_id'])%>" alt="<%= log['username']%>">
 						</a>
 						<span class="username">
 							<a href="<%= user_path(log['user_id'])%>"><%= log['username']%></a>
@@ -183,13 +184,13 @@
 			<dl>
 				<a href="">
 					<dt></dt>  
-					<dd><span>什么是积分?</span></dd>
+					<dd><span>什么是优币?</span></dd>
 				</a>
 			</dl>
 			<dl>  
 				<a href="">
 					<dt></dt>
-					<dd><span>积分怎么获得? </span></dd>
+					<dd><span>优币怎么获得? </span></dd>
 				</a>
 			</dl>
 			<dl>  

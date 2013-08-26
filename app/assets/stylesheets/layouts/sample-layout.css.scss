@@ -177,7 +177,7 @@ $colorB: #b3b3b3;
 	padding:5px 10px;
 	@include border-radius(4px);
 	color:#999;
-	background: #f5f5f5;
+	background: #eee;
 	}
 .s-font{
 	font:bold italic 20px "Georgia";
@@ -271,6 +271,24 @@ body{background: image-url('od-quillme/bg.png');}
 					color:#666;
 				}			
 			}
+			ul.no_login>li{
+				margin-right:14px;
+				float: left;
+				&.out-login{
+					margin-top:-2px;
+					padding:0 5px 0 15px;
+				}
+				a{
+					float: left;
+					margin-right:16px;
+					.icon{margin:-2px 5px 0 0;}
+					color:#666;
+					&:hover{
+						color:#f25d5d;
+					}
+				}			
+			}
+			
 			.quit{
 				@include one-line(20px);
 				padding-left:23px;
@@ -579,7 +597,6 @@ body{background: image-url('od-quillme/bg.png');}
 					b{
 						font-size: 14px;
 						display: block;
-						margin-top:6px;
 						padding:0 3px;
 					}
 				}
@@ -743,8 +760,7 @@ body{background: image-url('od-quillme/bg.png');}
 	    img{
 	      width:216px;
 	      height:216px;
-	    border:1px #ccc solid;
-	    @include border-radius(9px);	      
+	    	border:1px #ccc solid;      
 	    }
 	  }
 	  .prize_intro{
@@ -822,7 +838,7 @@ body{background: image-url('od-quillme/bg.png');}
 
 .share_cont{
   width:488px;
-  height:240px;
+  height:220px;
   padding-left:22px;
 	@include border-radius(4px);
   h1{
@@ -941,7 +957,17 @@ body{background: image-url('od-quillme/bg.png');}
 						color: #65ADF1;
 					}
 				}
-			}			
+			}
+			input#remember{
+				float:left;
+				padding:0px;
+				width: 14px;
+				height: 14px;
+				border: 1px solid #B3B3B3;
+				margin-right: 5px;
+				display: inline;
+				border: 0px;
+			}						
 			input{
 				width:208px;
 				line-height: 18px;
@@ -957,15 +983,6 @@ body{background: image-url('od-quillme/bg.png');}
 				font-size: 14px;	
 				margin-right:10px;			
 			}
-			#remember{
-				width: 12px;
-				height: 12px;
-				border: 1px solid #B3B3B3;
-				margin-right: 5px;
-				display: inline;
-				border: 0px;
-			}
-
 			.pass{
 				margin:20px 0px 10px 0px;
 			}
@@ -987,17 +1004,26 @@ body{background: image-url('od-quillme/bg.png');}
 				background:$red;
 				text-align:center;
 				border:0px;
-		  	  	font-size:14px;          
-		  	  	@include border-radius(4px);
-		  	  	cursor: pointer;
-		  	  	letter-spacing: 5px;
-		  	  	&:hover{
-		  	  		background: $red1;
-		  	  	}	        
-		  	  	&:active{
-		  	  		background: $red2;
-		  	  	}    				
+		  	font-size:14px;          
+		  	@include border-radius(4px);
+		  	cursor: pointer;
+		  	letter-spacing: 5px;
+		  	&:hover{
+		  		background: $red1;
+		  	}	        
+		  	&:active{
+		  		background: $red2;
+		  	}    				
 			}
+  		button.disabled{
+  			cursor:default;
+				background:#E6E6E6;
+				color:#B3B3B3; 
+				&:hover{
+					background:#e6e6e6;
+					color:#b3b3b3;
+				} 				
+  		}			
 		}
 	}
 	.share_m{
@@ -1057,27 +1083,47 @@ body{background: image-url('od-quillme/bg.png');}
   		  &:active{
   		  	background: $red2;
   		  }
+  		}
+  		.share-notice{
+  			margin-top: 10px;
+  			display:none;
+  			i{
+  				float: left;
+				display: inline-block;
+				width: 20px;
+				height: 20px;
+				background: url(/assets/od-quillme/success.png) no-repeat;	
+  			}
+  			span{
+  				height: 20px;
+				line-height: 20px;
+				color: #666;
+  			}
   		}    
 	}
 }
-
-
 .pagination {
-	padding-top: 20px;
-	text-align: right;
-	padding-bottom: 20px;
-	a {
-		color: $colorA;
-		border: 1px solid $colorB;
-		padding: 2px 6px;
+	padding:10px 0;
+	@include clearfix;
+	a{
+		width:24px;
+		@include one-line(24px);
+		text-align: center;
+		float: left;
+		color: #999;
+		border: 1px solid #dbdbdb;
 		margin-right: 10px;
 		@include border-radius(3px);
-	}
-
-	a.active {
-		color:#fff;
-		background-color: #ec1717;
-		border: 1px solid #ec1717;
+		&:hover{
+			border-color:$red1;
+			color:$red1;
+		}
+		&.active {
+			color:#fff;
+			background-color: $red1;
+			border: 1px solid $red1;
+			cursor: default;
+		}
 	}
 }
 input[type='text'],input[type='password'],textarea{

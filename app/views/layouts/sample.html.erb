@@ -33,18 +33,19 @@
 			<div class="header-top">
 				<div class="follow-us l">
 					<span>关注我们：</span>
-					<a href="http://e.weibo.com/u/3432515240?ref=http%3A%2F%2Flogin.sina.com.cn%2Fsso%2Flogin.php" target="_blank"><i class="icon16 f-sina"></i></a>
-					<a href="http://t.qq.com/ys2523562014" target="_blank"><i class="icon16 f-qq"></i></a>
+					<a href="http://weibo.com/wenjuanba" target="_blank"><i class="icon16 f-sina"></i></a>
+					<a href="http://t.qq.com/wenjuanba" target="_blank"><i class="icon16 f-qq"></i></a>
 				</div>
 				<div class="login_methods r">
 					<ul>
 						<% if user_signed_in %>
+						<ul>
 							<li>
 								<a class="user-head-box" href="<%=setting_users_path%>">
 									<span class="userhead">
-										<img src="<%= mini_avatar(current_user._id.to_s)%>" alt="username">
+										<img src="<%= mini_avatar(@current_sample['sample_id'])%>" alt="username">
 									</span>
-									<span class="username"><%= current_user.nickname %></span>
+									<span class="username"><%= @current_sample['nickname'] %></span>
 									<i class="triangle"></i>
 								</a>
 								<ul id="account-pull-down" class="dn">
@@ -63,28 +64,30 @@
 								</ul>
 							</li>
 							<li>
-								<a class="quit"href="/sign_out" class="quit-btn">退出</a>
-							</li>
-							<li>
 								<a class="integral-btn" href="<%= points_users_path %>" >
 									<i class="icon integral"></i>
-									<span><%= current_user.point %>积分</span>
+									<span><%= @current_sample['point'] %>积分</span>
 								</a>
 							</li>
 							<li>
-								<% @unread_messages_count = (user_signed_in ? current_user.unread_messages_count : 0) %>
-								<a class="inform-btn <% if @unread_messages_count > 0 %>active<% end %>" href="<%= notifications_users_path%>" >
+								<a class="inform-btn <% if unread_message_count > 0 %>active<% end %>" href="<%= notifications_users_path%>" >
 									<i class="icon inform"></i>
 									<span>
-										通知（<%= @unread_messages_count %>）
+										通知（<%= unread_message_count %>）
 									</span>
 								</a>
 							</li>
+							<li>
+								<a class="quit"href="/sign_out" class="quit-btn">退出</a>
+							</li>
+						</ul>	
 						<% else %>
+						<ul class="no_login">
 							<li>
 								<a href="/sign_up">注册</a>
 								<a href="/sign_in">登录</a>
 							</li>
+						</ul>	
 						<% end %>
 						<!-- <li>
 							<a href="javacsript:void(0);">注册</a>
