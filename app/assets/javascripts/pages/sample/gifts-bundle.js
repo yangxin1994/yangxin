@@ -1,28 +1,69 @@
 //=require ui/widgets/od_address_selector
 $(function(){
 
-	var yidong_number   = /^1(3[4-9]|5[012789]|8[78])\d{8}$/
-	var dianxin_number  = /^18[0-9]\d{8}$/
-	var liantong_number = /^1(3[0-2]|5[56]|8[56])\d{8}$/
-	var cdma_number     = /^1[35]3\d{8}$/
-	var postcode_reg    = /^[0-9]{6}$/
-	var mobile_partten = /^(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$/
-	var email_partten = /^(\w)+(\.\w+)*@(\w)+((\.\w{2,3}){1,3})$/
-	var qq_partten = /^\d{6,}$/;
 
-  document.onkeydown = function(e){ 
-    if(!e) e = window.event;//火狐中是 window.event 
-      if((e.keyCode || e.which) == 13){ 
-        $('button.login_btn').click()
-    } 
-  } 
+	var yidong_number   = $.yidong_number();
+	var dianxin_number  = $.dianxin_number();
+	var liantong_number = $.liantong_number();
+
+	var postcode_reg    = $.postcode_reg();
+	var mobile_partten = $.mobile_partten();
+	var email_partten = $.email_partten();
+	var qq_partten = $.qq_partten();
+
+	var receiver_reg  = $.receiver_reg();
+	var default_receiver = $.default_receiver();
+	var street_info_partten = $.street_info_partten();
+
+
+	var unit       = null;
+
+
+
+	var partial_ul = null;
+	var share_gift_point = null; //分享时用的积分
+  var share_gift_title = null; //分享时的礼品名称
+
+	$('.share_gift a').on('click',function(){
+		share_gift_point = (share_gift_point ? (share_gift_point) : window.point_value);
+		share_gift_title = (share_gift_title ? (share_gift_title) : window.gift_name);		
+		var s_uri = window.location.href = window.location.protocol + "//" + window.location.host;
+		$.social['shareTo' + $(this).attr('s_to')](s_uri, '我刚刚在问卷吧使用' + share_gift_point +  '积分兑换了' + share_gift_title + ',参与答题奖励多多,话费,现金,集分宝,积分换礼,快来参与吧 ! ^_^ [' + s_uri + '] ');
+	})
+
+
+	//账户中心下拉菜单
+	$.powerfloat();
+
+
+	function refresh_login_status(user){
+		partial_ul = $('ul.login').clone();
+		partial_ul.find('img.avatar').attr('src',user['avatar']);
+		partial_ul.find('span.username').text(user['nickname']);
+		partial_ul.find('i.integral').next('span').text(user['point'] + '积分');
+		partial_ul.css('display','block')
+		$('div.login_methods').children('ul').replaceWith(partial_ul)
+		$.powerfloat();
+	}
+
+  //相应回车提交表单事件
+  $.enterSubmit($('button.login_btn'))  
+
 
 	//礼品排行切换
 	$('.sh_type li').click(function(){
 		$(this).siblings('li').removeClass('active').end().addClass('active')
 		var sor_type = $(this).attr('type');
 		$('.pagination a').attr('status',sor_type);
-		get_special_type_data(sor_type,null)
+		$('.can_change').attr('sortype',sor_type);
+		get_special_type_data(sor_type,null,null)
+	})
+
+	// 查看我能兑换的礼品
+	$('.can_change').click(function(){
+		var point = $(this).attr('point')
+		var sort_type = $(this).attr('sortype')
+		get_special_type_data(sort_type,null,point);
 	})
 
 	//订单类型的切换
@@ -51,8 +92,8 @@ $(function(){
 
 	//输入框获得光标后错误提示消失
 	$('input[name="custom_num"]').on('focus',function(){
-		$('.number_notice').hide();
-		$('.acc_notice').hide();
+		$('.number_notice').removeClass('err').hide();
+		$('.acc_notice').removeClass('err').hide();
 		$(this).parent('div').removeClass('error');
 	})	
 
@@ -73,9 +114,7 @@ $(function(){
 		})
 	}
 
-  	//下拉框选项点击事件
-
-
+  //下拉框选项点击事件
 	$("body").click(function(e){
 		var select = $(e.target).hasClass('select2') || $(e.target).parents('div').hasClass('select2')
 		if(select && $(e.target).prop('tagName') != 'LI'){	
@@ -96,7 +135,7 @@ $(function(){
   	})
 
 
-	$('input.v').on('blur',function(){
+	$('input.v').on('blur keyup',function(){
 		var num = $(this).val();
 		num = parseInt(num)
 		var order_type = $(this).closest('div').prev().find('input.account').attr('id')
@@ -114,10 +153,7 @@ $(function(){
 			}
 			
 		}
-		
 	})
-
-
 
 	//礼品列表页 立即兑换按钮点击事件
 	$('.exc_detail div button').click(function(){
@@ -164,21 +200,23 @@ $(function(){
 	$('.pagination a').live('click',function(e){
 			var status = $(this).attr('status');
 			var page   = $(this).attr('page');	
-			get_special_type_data(status,page)
+			var point  = $(this).attr('point');
+			get_special_type_data(status,page,point);
 			return false;
 	})
 
 
 	//popup window  input elements focus 
 	$('div.exc_notices  input').on('focus',function(){
-		$(this).removeClass('error')
+		$(this).removeClass('error');
+		$('div.err_notice').hide();
 	})
 
 	//弹出框内的登录按钮
 	$('button.login_btn').on('click',function(){
 		var username = $('input[name="username"]').val();
 		var password = $('input[name="password"]').val();
-		var remembr  = $('input[name="remember"]').attr('checked')
+		var remembr  = $('input[name="remember"]').attr('checked');
 		var order_data = $('.order_data').attr('data');
 
 		var thid_id  = null  //第三方 账户id
@@ -196,11 +234,16 @@ $(function(){
 	$('input.close_f').on('click',function(){
 		var redirect = $(this).attr('data');
 		if(redirect){
-			window.location.href = window.location.origin + "/" + redirect;
+			window.location.href = window.location.protocol + "//" + window.location.host + "/" + redirect;
 		}else{
 			$.fancybox.close();	
 		}
 		
+	})
+
+	//点击分享给好友按钮
+	$('input.look_over').on('click',function(){
+		$(this).parent('div.answer_look').siblings('.share_gift').show();
 	})
 
 	$('input.order_confirm').on('click',function(){
@@ -211,6 +254,7 @@ $(function(){
 			name = $(this).attr('name')
 			order_data[name] = $(this).attr('data');
 		})
+				
 		generate_orders($(this),order_data)
 	})
 
@@ -242,19 +286,25 @@ $(function(){
 
 	function popup_order_ok_page(){
 		var current_p =  current_page();
+		var order_ok  = null;		
 		if(current_p == 'gifts'){
 			popup("#order_ok")
+			window.amount_value + unit
+			order_ok = '<div class="o_t">系统审核通过后我们会把' + window.amount_value + unit + '充值到您的账户</div>'
 		}else{
 			popup("#order_ok",'surveys','gifts')
+
+			order_ok = '<div class="o_t">系统会在审核通过后将礼品寄送到您的收货地址</div>'
 		}
 
+		$('div.order_details').prepend(order_ok);
 		
 	}
 
 	function popup_address_page(){
 		//获取收获地址
-		get_recerver_info()
 		popup("#recever")
+		get_recerver_info()
 	}
 
 	function popup_address_confirm_page(){
@@ -308,11 +358,11 @@ $(function(){
 
 
 	//按照指定的排序规则查找gifts
-	function get_special_type_data(sor_type,p){
+	function get_special_type_data(sor_type,p,point){
 		$.ajax({
 			type: "get",
 			url: '/gifts/get_special_type_data',
-			data: {status:sor_type,page:p}
+			data: {status:sor_type,page:p,point:point}
 		});
 	}
 
@@ -345,7 +395,8 @@ $(function(){
 						value.parent('div').addClass('error');
 						$('.number_notice').addClass('err').text('请输入0元以上整数').show();						
 					}
-				}	
+				}
+				break;	
 			default:
 				if(acc.length > 0 && num_reg.test(number)){
 					go_on = true
@@ -357,7 +408,6 @@ $(function(){
 						value.parent('div').addClass('error');
 						$('.number_notice').addClass('err').text('请输入0元以上整数').show();						
 					}
-
 				}
 				break;
 		}
@@ -375,8 +425,6 @@ $(function(){
 			$('.acc_notice').text('中国电信').show();
 		}else if(liantong_number.test(number)){
 			$('.acc_notice').text('中国联通').show();
-		}else if(cdma_number.test(number)){
-			$('.acc_notice').text('CDMA').show();
 		}else{
 			if(event_type == 'click'){
 				obj.parent('div').addClass('error');
@@ -396,6 +444,7 @@ $(function(){
 			],
 			{
 				beforeShow: function(){
+					$.placeholder();
 					$(".fancybox-skin").css({"backgroundColor":"#fff"}); 
 
 					if(redirect){
@@ -416,6 +465,9 @@ $(function(){
 					fill_order_confirm_data(obj)
 															
 				},
+				afterClose:function(){
+					$('.order_details').children('div.o_t').remove()
+				},
 				width:500,
 				padding:10,
 				scrolling:  'no'
@@ -425,35 +477,56 @@ $(function(){
 
 	function fill_order_confirm_data(obj){
 		//充值订单确认页
-		var o_username = $('span.o_username')
-		var o_type     = $('span.o_type')
-		var o_target   = $('span.o_target')
-		var o_amount   = $('span.o_amount')
-		var o_point    = $('span.o_point')
-		var o_ramain_point = $('span.o_remain_point')
-		var unenough   = $('span.unenough') 
+		var o_username = $('span.o_username');
+		var o_type     = $('span.o_type');
+		var o_target   = $('span.o_target');
+		var o_amount   = $('span.o_amount');
+		var o_point    = $('span.o_point');
+		var o_ramain_point = $('span.o_remain_point');
+		var unenough   = $('span.unenough');
+		
+
+		switch (window.order_type_value){
+			case '话费兑换':
+				unit = '元话费'
+				break;
+			case '现金兑换':
+				unit = '元现金'
+				break;	
+			case '集分宝兑换':
+				unit = '集分宝'
+				break;	
+			case 'Q币兑换':
+				unit = 'Q币'
+				break;	
+		}
+
+
+		share_gift_title =   window.amount_value + unit ;
+		share_gift_point =   window.point_value ; 
+
 
 		if(o_username.length > 0 ){
 			o_username.text(window.username);
 		}
 		if(o_type.length > 0){
-			o_type.attr('data',window.exc_order_type)
+			o_type.attr('data',window.exc_order_type);
 			o_type.text(window.order_type_value);
 		}   
 		if(o_target.length > 0){
-			o_target.attr('data',window.account_value)
+			o_target.attr('data',window.account_value);
 			o_target.text(window.account_value);
 		}     
 		if(o_point.length > 0){
-			o_point.attr('data',window.point_value)
+			o_point.attr('data',window.point_value);
 			o_point.text(window.point_value);
 		} 
 		if(o_ramain_point.length > 0){
 			o_ramain_point.text(parseInt(window.total_point) - parseInt(window.point_value));
 		} 
 		if(o_amount.length > 0){
-			o_amount.attr('data',window.amount_value)
-			o_amount.text(window.amount_value);
+			o_amount.attr('data',window.amount_value);
+			o_amount.text(window.amount_value + unit);
 		}	
 
 		//积分不足页面
@@ -468,24 +541,20 @@ $(function(){
 		$('span[name="address"]').attr('data',window.sample_address).text(window.sample_real_address)
 		$('span[name="info_sys"]').attr('data',window.info_sys)
 		$('span[name="street_info"]').attr('data',window.sample_street_info).text(window.sample_street_info)
-
-
-
-
 	}
 
 	function login(obj,account,pass,thid_id,signed_in,order_data){
-			obj.html('登录中......')
+			obj.attr('disabled',true).addClass('disabled').html('登录中');
 			$.postJSON('/account/login.json',{email_mobile:account,password:pass,third_party_user_id:thid_id,permanent_signed_in:signed_in},function(retval){
 				if(retval.success){
 					$('button.exc_login').removeClass('exc_login').addClass('exc_right');
 					if($('button.reedm_right_now').hasClass('not_login')){
-						$('button').removeClass('not_login')
+						$('button').removeClass('not_login');
 					}
-					get_user_basic_info(retval.value['auth_key'])
+					get_user_basic_info(retval.value['auth_key']);
 				}else{
-					obj.html('<span>登</span>录')
-					jduge_error_type(retval.value['error_code'])
+					obj.html('登录').attr('disabled',false).removeClass('disabled');
+					jduge_error_type(retval.value['error_code']);
 				}
 			})  	
 	}
@@ -494,6 +563,7 @@ $(function(){
 	function get_user_basic_info(authkey){
 		$.postJSON('/account/get_basic_info_by_auth_key.json',{auth_key:authkey},function(retval){
 			if(retval.success){       	
+				refresh_login_status(retval.value)
 				window.username = retval.value['nickname']  
 				window.total_point    = retval.value['point']			
 				can_freedm = parseInt(window.total_point) - parseInt(window.point_value) 
@@ -553,13 +623,21 @@ $(function(){
 
 	//
 	function generate_orders(button,order_obj){
+		button.val('兑换中......').attr('disabled',true).addClass('disabled');
+		button.prev('input.answer').attr('disabled',true).addClass('disabled');
+		var alink = button.siblings('a');
+		if(alink.length > 0){
+			alink.bind('click', false);
+		}
 		$.postJSON('/orders.json',{order:order_obj},function(retval){
-			button.val('兑换中......')
-			button.attr('disabled',true);
 			if(retval.success){
 				window.total_point =  window.total_point  - parseInt(order_obj['point'])
 				button.val('继续提交') 
-				button.attr('disabled',false);
+				button.attr('disabled',false).removeClass('disabled');
+				button.prev('input.answer').attr('disabled',false).removeClass('disabled');
+				if(alink.length > 0){
+					alink.unbind('click', false);
+				}				
 				popup_order_ok_page();
 			}else{
 				console.log(retval)
@@ -570,21 +648,23 @@ $(function(){
 
 	function jduge_error_type(error_type){
 		var err_notice = null
+		var top_n = '115px'
 		switch(error_type){
 			case 'error_3':
-					err_notice = "<span>账户未激活,您可以<a href='/account/sign_up'>重新激活</a></span>"
+					err_notice = "<i></i><span>账户未激活,您可以<a href='/account/sign_up'>重新激活</a></span>"
 				break;
 			case 'error_4':
-				err_notice = "<span>账户不存在 ,您可以<a href='/account/sign_up'>注册</a></span>"
+				err_notice = "<i></i><span>账户不存在 ,您可以<a href='/account/sign_up'>注册</a></span>"
 				break;
 			case 'error_11':
-				err_notice = "<span>用户名或密码错误</span>"
+			top_n = '185px'
+				err_notice = "<i></i><span>密码错误</span>"
 				break;
 			case 'error_24':
-				err_notice = "<span>账户未激活,您可以<a href='/account/sign_up'>重新激活</a></span>"
+				err_notice = "<i></i><span>账户未激活,您可以<a href='/account/sign_up'>重新激活</a></span>"
 				break;
 		}
-		$('.err_notice').html(err_notice).show();
+		$('.err_notice').html(err_notice).show().css("top",top_n);
 	}
 
 
@@ -641,15 +721,15 @@ $(function(){
 		var street_info = $('textarea[name="street_info"]').val()
 
 		var go = false
-		if(receiver.length < 1){
+		if(!receiver_reg.test(receiver) || default_receiver.test(receiver)){
 			$('input[name="receiver"]').addClass('error')
-		}else if(mobile.length < 1){
+		}else if(!mobile_partten.test(mobile)){
 			$('input[name="mobile"]').addClass('error')
-		}else if(postcode.length < 1 || !postcode_reg.test(postcode)){
+		}else if(!postcode_reg.test(postcode)){
 			$('input[name="postcode"]').addClass('error')
 		}else if(province < 0 || city < 0 || town < 0){
 			$('span.notice').show()	
-		}else if(street_info.length < 1){
+		}else if(street_info.length < 1 || street_info_partten.test(street_info)){
 			$('textarea').addClass('error')
 		} else{
 			$('span.notice').hide()	

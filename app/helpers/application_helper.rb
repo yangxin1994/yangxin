@@ -357,7 +357,7 @@ module ApplicationHelper
 	end
 
 	def hide_border?(arr,index)
-		sty = "style='border-bottom:none'"  if index.to_i == (arr.length - 1)
+		sty = "style=border-bottom:none"  if index.to_i == (arr.length - 1)
 	end
 	# 
 	# Order ***********
