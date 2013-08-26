@@ -3,7 +3,7 @@
 	<%= javascript_include_tag "pages/sample/homes-bundle" %>
 	<script type="text/javascript">
 		<% if user_signed_in %>
-		 	window.current_user_id = "<%= @current_user['sample_id'] %>"
+		 	window.current_user_id = "<%= @current_user.id %>"
 		<% end %>		
 	</script>
 
@@ -140,7 +140,7 @@
 							<% if user_signed_in %>
 								<% if survey['status'].to_s ==  Survey::PUBLISHED.to_s %>
 									<span class="status  <%= survey['answer_status'].to_i == 0 ? 'unfinished' : ''%>">
-										<%= answered?(survey['answer_status'],survey['reject_type'])%>
+										<%= raw( answered?(survey['answer_status'],survey['reject_type']) )%>
 									</span>
 								<% end %>
 							<% end %>

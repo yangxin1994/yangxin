@@ -188,7 +188,7 @@ module ApplicationHelper
 				end
 	
 			when 4
-				if news['gift_type'].to_i == Sample::GiftClient::REAL.to_i
+				if news['gift_type'].to_i == Gift::REAL.to_i
 					behavor = %Q{
 						使用<b>#{news['amount'].abs}</b>积分兑换了<a href="/gifts/#{news['gift_id']}">#{news['gift_name']}</a>
 					}.html_safe	

@@ -37,9 +37,9 @@
 			<% if user_signed_in%>
 				<span class="status  <%= survey['status'].to_s == "#{Survey::CLOSED.to_s}" ? 'finished' : (survey['answer_status'].to_i == 0 ? 'unfinished' : '') %>">
 					<% if params[:status].to_s == '1' %>
-						<%= answered?(survey['answer_status']) == '待参与' ? '未参与' : answered?(survey['answer_status'])  %>
+						<%= raw( answered?(survey['answer_status']) == '待参与' ? '未参与' : answered?(survey['answer_status']) )  %>
 					<% else %>
-						<%= answered?(survey['answer_status'])%>
+						<%= raw( answered?(survey['answer_status']) )%>
 					<% end %>
 					
 				</span>
