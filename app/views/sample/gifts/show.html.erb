@@ -5,14 +5,15 @@
 		<% if user_signed_in %>
 	    	window.username    = "<%=  @current_user.nickname   %>"
 	    	window.total_point = "<%=  @current_user.point  %>"
-	    	window.sample_receiver = "<%= @receiver_info['receiver'] %>"
-    	  	window.sample_mobile   = "<%= @receiver_info['mobile'] %>"
-    	  	window.sample_postcode = "<%= @receiver_info['postcode'] %>"
-    	  	window.sample_address  = "<%= @receiver_info['address'] %>"
-    	  	window.sample_street_info = "<%= @receiver_info['street_info'] %>"
+	    	window.sample_receiver = "<%= @recerver_info['receiver'] %>"
+    	  	window.sample_mobile   = "<%= @recerver_info['mobile'] %>"
+    	  	window.sample_postcode = "<%= @recerver_info['postcode'] %>"
+    	  	window.sample_address  = "<%= @recerver_info['address'] %>"
+    	  	window.sample_street_info = "<%= @recerver_info['street_info'] %>"
 		<% end %>
 		window.point_value = "<%= @gift['point'] %>"
-		window.gift_id  = "<%= @gift['_id'] %>"
+		window.gift_id    = "<%= @gift['_id'] %>"
+		window.gift_name  = "<%= @gift['title'] %>"
 	</script>
 <% end %>
 
@@ -96,7 +97,7 @@
 				<% @gift_rank.each_with_index do |g,index|%>
 					<% if index < 4%>
 						<li <%= index == 3 ? 'style=margin-right:0px' : '' %>>
-							<a href="javascript:void(0);">
+							<a href="<%= gift_path(g['_id'])%>">
 								<span class="gift-img">
 									<img src="<%= show_image(g['photo_src'],'gifts') %>" alt="<%= g['title']%>" 	width="	140" height="140">
 								</span>

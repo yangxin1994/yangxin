@@ -145,86 +145,9 @@ module ApplicationHelper
 		end   
 	end
 
-	# def user_behavor(news)
-	# 	#username = %Q{<a href="#{user_path(news['user_id'])}">#{news['username']}</a>}.html_safe
-	# 	username = %Q{<a href="javascript:void(0)">#{news['username']}</a>}.html_safe
-	# 	behavor  = ''
-	# 	result   = ''
-	# 	case news['type'].to_i
-	# 	when 1
-	# 		behavor = %Q{
-	# 			回答了<a href="/s/#{(news['scheme_id'])}">#{news['survey_title']}</a>获得了
-	# 		}.html_safe      
-	# 		case news['type'].to_i
-	# 		when 1
-	# 			result = %Q{
-	# 				<b>#{news['amount']}</b>元话费
-	# 			}.html_safe        
-	# 		when 2
-	# 			result = %Q{
-	# 				<b>#{news['amount']}</b>支付宝转账
-	# 			}.html_safe  
-	# 		when 4
-	# 			result = %Q{
-	# 				<b>#{news['amount']}</b>U币
-	# 			}.html_safe         
-				
-	# 		when 8
-	# 			result = %Q{
-	# 				一次抽奖机会
-	# 			}.html_safe  
-	# 		when 16
-	# 			result = %Q{
-	# 				<b>#{news['amount']}</b>集分宝
-	# 			}.html_safe       
-	# 		end
-	# 	when 2
-	# 		if(news['result'])
-	# 			behavor = %Q{
-	# 				抽得了<a href="#{survey_path(news['prize_id'])}">#{news['prize_name']}</a>
-	# 			}.html_safe        
-	# 		else
-	# 			behavor = %Q{
-	# 				参与了一次抽奖  
-	# 			}.html_safe
-	# 		end
-	# 	when 4
-	# 		if news['gift_type'].to_i == Gift::REAL.to_i
-	# 			behavor = %Q{
-	# 			使用<b>#{news['point']}</b>积分兑换了<a href="/gifts/#{news['gift_id']}">#{news['gift_name']}</a>
-	# 		}.html_safe	
-	# 		else
-	# 			behavor = %Q{
-	# 			使用<b>#{news['point']}</b>积分兑换了<a href="javascript:void(0);">#{news['gift_name']}</a>
-	# 		}.html_safe
-	# 		end
-	# 	when 8
-	# 		case news['reason'].to_i
-	# 		when 1
-	# 			behavor = %Q{
-	# 			回答了<a href="/s/#{(news['scheme_id'])}">#{news['survey_title']}</a>获得了	
-	# 		}.html_safe				
-	# 		when 2
-
-	# 		when 4
-
-	# 		end
-	# 	when 16
-	# 		behavor = %Q{
-	# 			加入了问卷吧
-	# 		}.html_safe
-	# 	when 32
-	# 		behavor = %Q{
-	# 			推广了<a href="#{news['survey_id']}">#{news['survey_title']}</a>获得了<b>#{news['amount']}</b>积分
-	# 		}.html_safe  
-	# 	end
-	# 	return username + behavor + result
-	# end
-
-
 	def user_behavor(news)
 		#username = %Q{<a href="#{user_path(news['user_id'])}">#{news['username']}</a>}.html_safe
-		username = %Q{<a href="javascript:void(0)">#{news['username']}</a>}.html_safe
+		username = %Q{<span class="u">#{news['username']}</span>}.html_safe
 		behavor  = ''
 		result   = ''
 		case news['type'].to_i
@@ -271,7 +194,7 @@ module ApplicationHelper
 					}.html_safe	
 				else
 					behavor = %Q{
-						使用<b>#{news['amount'].abs}</b>积分兑换了<a href="javascript:void(0);">#{news['gift_name']}</a>
+						使用<b>#{news['amount'].abs}</b>积分兑换了<span class="u">#{news['gift_name']}</span>
 					}.html_safe
 				end
 			end
@@ -291,7 +214,7 @@ module ApplicationHelper
 		when 2
 			reward = '元支付宝转账'
 		when 4
-			reward = '积分'
+			reward = '优币'
 		when 8
 			reward = '抽奖机会'
 		when 16
@@ -347,8 +270,8 @@ module ApplicationHelper
 		render :partial => "/sample/application/pagination", :locals => {:common => items, :path => url}      
 	end
 
-	def sample_paginator_ajax(items,status,reward_type)
-		render :partial => "/sample/application/pagination_ajax", :locals => {:common => items,:sta => status,:reward => reward_type}
+	def sample_paginator_ajax(items,status,reward_type,point)
+		render :partial => "/sample/application/pagination_ajax", :locals => {:common => items,:sta => status,:reward => reward_type,:point => point}
 	end
 
 	def int_time_to_datetime(int_time)
@@ -379,7 +302,7 @@ module ApplicationHelper
 			end
 		when 4,8
 			return "已完成" if free_reward
-			return "待审核"
+			return "<span class='c-red'>待审核</span>"
 		when 32
 			return "已完成"
 		when 16
@@ -412,7 +335,10 @@ module ApplicationHelper
 	def get_avatar(user_id, version="thumb")
 		return "/assets/avatar/#{version}_default.png" if user_id.nil?
 		md5 = Digest::MD5.hexdigest(user_id)
-		return "/uploads/avatar/#{version}_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/#{md5}.png")
+		return "/uploads/avatar/#{version}_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/#{version}_#{md5}.png")
+		%w( mini small thumb).each do |ver|
+			return "/uploads/avatar/#{ver}_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/#{ver}_#{md5}.png")	
+		end
 		return "/assets/avatar/#{version}_default.png"
 	end
 
@@ -429,7 +355,7 @@ module ApplicationHelper
 	end
 
 	def hide_border?(arr,index)
-		sty = "style='border-bottom:none'"  if index.to_i == (arr.length - 1)
+		sty = "style=border-bottom:none"  if index.to_i == (arr.length - 1)
 	end
 	# 
 	# Order ***********
@@ -462,7 +388,7 @@ module ApplicationHelper
 		# int_step: 1, 2
 		retval = ""
 		case int_status.to_i
-		when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE 
+		when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE
 			if int_step.to_i == 1
 				retval = "准备充值中"
 			else
@@ -497,7 +423,7 @@ module ApplicationHelper
 			retval = "运营商处理"
 		when Order::ALIPAY
 			retval = "安排转账"
-		when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE 
+		when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE
 			retval = "安排充值"
 		when Order::REAL
 			retval = "安排配送" 
@@ -573,12 +499,19 @@ module ApplicationHelper
 		return price.to_s.split('.').first
 	end
 
-	def show_default_select_option(answer_status)
+	def show_default_select_option(answer_status,nav_status)
 		case answer_status.to_s
 		when "0"
-			current_option = %Q{
-			<span class="select-txt" data="0">待参与</span>
-		}.html_safe	
+			if nav_status.to_s == '1'
+				current_option = %Q{
+					<span class="select-txt" data="0">未参与</span>
+				}.html_safe
+			else
+				current_option = %Q{
+					<span class="select-txt" data="0">待参与</span>
+				}.html_safe	
+			end
+				
 		when "1"
 			current_option = %Q{
 			<span class="select-txt" data="1">答题中</span>
@@ -602,5 +535,15 @@ module ApplicationHelper
 		end
 		return current_option
 	end
+
+	def opend_nav?(status)
+		opend = status.to_s == '1' ? false : true
+	end
 	
+	# used in user-center
+	def small_gift_image(img_path)
+		return "/assets/od-quillme/uc/gift_36X36.png" if img_path.to_s.empty? || !File.exist?("#{Rails.root}/public#{img_path}")
+		return img_path
+	end	
+
 end

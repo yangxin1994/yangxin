@@ -2,12 +2,12 @@
   $('ul.list').html("<%= escape_javascript(render :partial => 'survey_list', :locals => { :surveys => @surveys }) %>") 
   <% if @surveys['total_page'].to_i > 1 %> 
     if($('div.pagination').length > 0 ){
-      $('div.pagination').replaceWith("<%= escape_javascript(sample_paginator_ajax(@surveys,@status,@reward_type)) %>")  	
+      $('div.pagination').replaceWith("<%= escape_javascript(sample_paginator_ajax(@surveys,@status,@reward_type)) %>")   
     }else{
-      $('ul.list').append("<%= escape_javascript(sample_paginator_ajax(@surveys,@status,@reward_type)) %>")	
+      $('ul.list').append("<%= escape_javascript(sample_paginator_ajax(@surveys,@status,@reward_type)) %>") 
     } 
   <% else %>
-  	 $('div.pagination').remove();
+     $('div.pagination').remove();
   <% end %>
 <% else %>
   $('ul.list').html('<div class="no_data">该分类下没有任何问卷</div>')

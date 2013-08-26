@@ -3,8 +3,8 @@
 	<%= javascript_include_tag "pages/sample/gifts-bundle" %>
 	<script type="text/javascript">
 	    <% if user_signed_in %>
-	    	window.username    = "<%=  current_user.nickname   %>"
-	    	window.total_point = "<%=  current_user.point  %>"
+	    	window.username    = "<%=  @current_user.nickname %>"
+	    	window.total_point = "<%=  @current_user.point  %>"
 	    <% end %>
 	</script>
 <% end %>
@@ -148,11 +148,14 @@
 					<li class="active" type="exchange_count">最热门</li>
 					<li type="point">积分数</li>
 				</ul>
+				<% if user_signed_in %>
+					<div class="can_change" sortype="exchange_count" point="<%= @current_user.point %>">查看我能兑换的</div>
+				<% end %>
 			</div>
 			<ul class="gift-list">
 				<%=  render :partial => "gifts_list",  :locals => {:gifts => @hotest_gifts} %> 
 			</ul>
-			<%= sample_paginator_ajax(@hotest_gifts,@sort_type,nil) %>
+			<%= sample_paginator_ajax(@hotest_gifts,@sort_type,nil,nil) %>
 		</div>
 </div>
 
@@ -171,7 +174,7 @@
 							<span class="point">使用了<b><%= log['point']%></b>积分</span>
 							<span class="exchange">兑换了</span>
 							<% if log['gift_type'].to_s == Gift::REAL %>
-								<span class="l_mame"><a href="/gifts/<%= log['gift_id']%>"><%= log['	gift_name']%></a></span>
+								<span class="l_mame"><a href="/gifts/<%= log['gift_id']%>"><%= log['gift_name']%></a></span>
 							<% else %>
 								<span class="l_mame"><%= log['gift_name']%></span>
 							<% end %>

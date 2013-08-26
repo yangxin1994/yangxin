@@ -1,5 +1,5 @@
 <div id="recever" style="display:none;">
-	<div class="exc_notices">
+  <div class="exc_notices">
     <h1>补全收货人地址</h1>
     <div class="sub_infor">
       <div class="basic_document">
@@ -13,7 +13,7 @@
         <span class="notice" style="display:none;color:#ec1717;">请输入正确的地址信息</span>
         <div id="recerver_address"></div>
       </div>
-      <textarea name="street_info">街道地址（不需要填写省/市/区）</textarea>
+      <textarea name="street_info" placeholder="街道地址（不需要填写省/市/区）"></textarea>
       <div class="tj_sub">
         <div class="synchro">
           <input type="checkbox" name="info_sys"/><span>同步到个人资料</span>
@@ -30,12 +30,18 @@
   <div class="exc_notices">
     <h2><img src="/assets/od-quillme/order_s.png" /><span>恭喜您，订单提交成功！</span></h2>
     <div class="order_details">
-      系统审核通过后我们会把礼品充值到您的账户<br />
-      您可以进入个人中心<a href="/users/orders?scope=4">我的订单</a>中查看订单状态，或者
       <div class="answer_look">
-        <input class="answer close_f"  data="/surveys" type="button" value="答题赚积分" />
-        <input class="look_over close_f "  type="button" value="查看其他礼品" />
-        <div style="clear:both;"></div>
+        <input class="answer close_f"  data="/users/orders?scope=4" type="button" value="查看订单" />
+        <input class="look_over "  type="button" value="分享给好友" />
+      </div>
+      <div class="share_gift">
+        <div>
+          <a href="javascript:void(0);" s_to="SinaWeibo" target="_blank"><img src="/assets/image/sample/sina.png"  width="20" height="20" /></a>
+          <a href="javascript:void(0);" s_to="TencentWeibo" target="_blank"><img src="/assets/image/sample/tecent.png"  width="20" height="20" /></a>
+          <a href="javascript:void(0);" s_to="Douban" target="_blank"><img src="/assets/image/sample/dou.png" width="  20" height="20" /></a>
+          <a href="javascript:void(0);" s_to="Renren" target="_blank"><img src="/assets/image/sample/ren.png" width="20" height="20" /></a>          
+        </div>
+
       </div>
     </div>
   </div>
@@ -51,7 +57,6 @@
       <div class="answer_look">
         <input class="answer close_f"  type="button" value="答题赚积分" />
         <input class="look_over close_f "  type="button" value="查看其他礼品" />
-        <div style="clear:both;"></div>
       </div>
     </div>
   </div>
@@ -71,11 +76,9 @@
       <div class="answer_look">
         <input class="answer close_f" type="button" data="/surveys" value="答题赚积分" />
         <input class="look_over close_f" type="button" data="/gifts" value="查看其他礼品" />
-        <div style="clear:both;"></div>
       </div>
     </div>
     <!-- <a href="" class="more_integral">获得更多积分的途径？</a> -->
-    <div style="clear:both;"></div>
   </div>
 </div>
 
@@ -102,21 +105,18 @@
         </div>  
         <div>
           <span>剩余积分:</span><span class="o_remain_point "></span>
-        </div> 
-        <div style="clear:both;"></div>                                       
+        </div>                                       
       </div>
-      <div class="answer_look">
+      <div class="answer_look inf">
         <input class="answer close_f" type="button" value="取消" />
         <input class="look_over order_confirm"  type="button" value="确认兑换" />
-        <div style="clear:both;"></div>
       </div>
     </div>
     <!-- <a href="" class="more_integral">获得更多积分的途径？</a> -->
-    <div style="clear:both;"></div>
   </div>
 </div>
 <div id="recever_confirm" style="display:none;">
-	<div class="exc_notices">
+  <div class="exc_notices">
     <h1>确认收货地址</h1>
     <div class="sub_infor">
       <div class="basic_document">
@@ -141,23 +141,25 @@
 </div>
 
 <div id="gift_login" style="display:none;">
-	<div class="exc_box">
+  <div class="exc_box">
     <div class="exc_notices exc_left">
       <h3>欢迎回来！</h3>
       <div class='err_notice'></div>
       <div class="wel_cont">
-        <div class="login_username"><label for="username">用户名：</label><br /><input type="text" name="username" value="" id="username"/></div>
-        <div class="login_password"><label for="password">密码：</label><br /><input type="password" name="password" value="" id="password" /></div>
-        <div class="l_last">
+        <div class="login_username">
+          <span><label for="username">用户名：</label></span>
+          <input type="text" name="username" value="" id="username"/>
+        </div>
+        <div class="login_password">
+          <span><label for="password">密码：</label></span>
+          <input type="password" name="password" value="" id="password" />
+        </div>
+        <div id="l_last">
           <input type="checkbox" name="remember" id="rem"/>
           <label for="rem">记住我</label>
           <a href="/account/forget_password" target="_blank">忘记密码？</a>
         </div>
-<!--         <span>
-          <input type="checkbox" name="remember"/>
-          <span>记住我<a href="/account/forget_password" target="_blank">忘记密码？</a></span>
-        </span><br /> -->
-        <button class="login_btn"><span>登</span>录</button>
+        <button class="login_btn">登录</button>
       </div>
     </div>
     <div class="exc_middle"></div>

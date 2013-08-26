@@ -3,11 +3,11 @@
 		window._id = <%= raw params[:id].to_json %>;
 		<% if user_signed_in %>
 	    window.username    = "<%=  @current_user.nickname   %>"
-	    window.sample_receiver = "<%= @receiver_info['receiver'] if @receiver_info %>"
-    	window.sample_mobile   = "<%= @receiver_info['mobile'] if @receiver_info %>"
-    	window.sample_postcode = "<%= @receiver_info['postcode'] if @receiver_info %>"
-    	window.sample_address  = "<%= @receiver_info['address'] if @receiver_info %>"
-    	window.sample_street_info = "<%= @receiver_info['street_info'] if @receiver_info %>"
+	    window.sample_receiver = "<%= @recerver_info['receiver'] if @recerver_info %>"
+    	window.sample_mobile   = "<%= @recerver_info['mobile'] if @recerver_info %>"
+    	window.sample_postcode = "<%= @recerver_info['postcode'] if @recerver_info %>"
+    	window.sample_address  = "<%= @recerver_info['address'] if @recerver_info %>"
+    	window.sample_street_info = "<%= @recerver_info['street_info'] if @recerver_info %>"
 		<% end %>
 
 		window.win_prize_id = "<%= @win_prize_id %>"

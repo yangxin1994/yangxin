@@ -2,7 +2,7 @@
   <div class="tab">
     <img class="avatar" src="<%= small_avatar(answer['sample_id']) %>"/>
     <div class="cont">
-      <p class="username"><%= truncate(answer['sample_nickname'].to_s.strip, length: 16) %>
+      <p class="username"><%= truncate(answer['sample_nickname'].to_s.strip, length: 9) %>
         <% 
           status_color = ''
           case answer['answer_status'].to_i

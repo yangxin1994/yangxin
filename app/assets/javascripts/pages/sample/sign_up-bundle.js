@@ -2,16 +2,11 @@
 //=require utility/ajax
 //=require base64
 $(function(){
-	var mobile_partten = /^(1(([35][0-9])|(47)|[8][0126789]))\d{8}$/;
-	var email_partten = /^(\w)+(\.\w+)*@(\w)+((\.\w{2,3}){1,3})$/;
+	var mobile_partten = $.mobile_partten();
+	var email_partten  = $.email_partten();
 
-
-	document.onkeydown = function(e){ 
-		if(!e) e = window.event;//火狐中是 window.event 
-			if((e.keyCode || e.which) == 13){ 
-				$('.login_btn').click()
-		} 
-	}
+  //相应回车提交表单事件
+  $.enterSubmit($('.login_btn'))	
 
 	
 	var refresh;
@@ -209,7 +204,7 @@ $(function(){
 
 
 	function create_email_sample(email,pass){
-		$('input.login_btn').val('正在注册......')
+		$('input.login_btn').val('正在注册')
 		$('input.login_btn').attr('disabled',true).addClass('disabled')
 		$.postJSON('/account/create_sample.json',{phone:email,password:pass},function(retval){
 			if(retval.success){
@@ -222,12 +217,11 @@ $(function(){
 	}
 
 	function create_mobile_sample(account,pass,code){
-		$('input.login_btn').val('正在注册......')
+		$('input.login_btn').val('正在注册')
 		$('input.login_btn').attr('disabled',true).addClass('disabled')
 		$.postJSON('/account/mobile_activate.json',{mobile:account,password:pass,verification_code:code},function(retval){
 			if(retval.success){
 				window.location.href="/account/active_notice?k=" + Base64.encode(account)
-				//window.location.href="/home"
 			}else{
 				$('input.login_btn').val('立 即 注 册')
 				$('input.login_btn').attr('disabled',false).removeClass('disabled')
@@ -266,6 +260,7 @@ $(function(){
 			case 'error_5':
 					$('.send_code').after('<span class="faild"></span><span class="notice">验证码过期,请重新发送验证码</span>')
 				break;
+			case 'error_4':
 			case 'error_02':
 				$('.send_code').after('<span class="faild"></span><span class="notice">验证码不正确</span>')
 				break;

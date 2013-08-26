@@ -1,12 +1,6 @@
 //=require 'jquery.fancybox.pack'
 
 jQuery(function($) {
-    $('.part-right .data .tab').mouseover(function(){
-        $(this).addClass('active');
-    }).mouseout(function(){
-        $(this).removeClass('active');
-    });
-
     // right partial avatar link
     $(".avatar").mouseover(function(){
         $('.avatar .change_avatar').css('visibility','visible');
@@ -50,6 +44,7 @@ jQuery(function($) {
             }
             var _options = $.extend(_defaults, options);
 
+            $('#popup-success, #popup-fail').remove();
             if (_options.success){
                 html = '<div id="popup-success" class="popup" >'+
                     '<div class="detail-title">提示信息'+
@@ -74,6 +69,7 @@ jQuery(function($) {
                         }
                     }
                 );
+                $('#popup-success .btn.btn-over').focus();
             }else{
                 html = '<div id="popup-fail" class="popup" >'+
                     '<div class="detail-title">提示信息'+
@@ -98,7 +94,8 @@ jQuery(function($) {
                         }
                     }
                 );
-            }
+                $('#popup-fail .btn.btn-over').focus();
+            }            
         } 
     });
 
@@ -110,14 +107,16 @@ jQuery(function($) {
 
     $('.part-left div, .part-left span, .part-left i').not(".select, .select-content, .select-txt, .triangle").unbind('click').click(function(){
         $('.select ul').css('display', 'none');
-        $('.select').removeClass('active');
+        $('.select .select-content').removeClass('active');
         // return false;
     })
 
     $('.part-left').unbind('click').on('click', '.select .select-content', function(){
         $('.select ul').css('display', 'none');
-        $(this).parent('.select').addClass('active');
-        $(this).parent('.select').children('ul').css('display', 'inline-block');
+        if ($(this).parent('.select').find('ul li').length != 0){
+            $(this).addClass('active');
+            $(this).parent('.select').children('ul').css('display', 'inline-block');
+        }        
         return false;
     });
 
@@ -132,6 +131,6 @@ jQuery(function($) {
                 .text($(this).text());
         }
         $('.select ul').css('display', 'none');
-        $(this).parent('ul').parent('.select').removeClass('active');
-    })
+        $(this).parent('ul').parent('.select').find('.select-content').removeClass('active');
+    });
 });

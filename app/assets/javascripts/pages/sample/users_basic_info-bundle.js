@@ -91,6 +91,7 @@ jQuery(function($) {
 
 	function _setupAddressSelector(jq_obj, code){
 		var default_code = parseInt(code);
+		if (default_code == -1) return false;
 		var provice_code = _getPovinceCode(default_code);
 		var city_code = _getCityCode(default_code);
 		// console.log(default_code+',  '+provice_code+',  '+city_code);
@@ -141,7 +142,7 @@ jQuery(function($) {
         var _click_name = jq_click_li.attr('name');
         var _select_txt = jq_select.find('.select-txt');
         $('.select ul').css('display', 'none');
-        jq_select.removeClass('active');
+        jq_select.find('.select-content').removeClass('active');
         // if click one is the same as selected item, return false
         if (_click_name == _select_txt.attr('name')){
             return false;
@@ -173,21 +174,21 @@ jQuery(function($) {
 		$('.select-date .year ul').empty();
 		var initYears='';
 		for (var i = 0; i < 70; i++) {
-			initYears=initYears + '<li name="'+(now_year-i)+'">'+(now.getFullYear()-i)+'</li>';
+			initYears=initYears + '<li name="'+(now_year-i)+'">'+(now.getFullYear()-i)+' 年</li>';
 		};
 		$('.select-date .year ul').append(initYears);
 
 		$('.select-date .month ul').empty();      
 		var initMonths='';
 		for (var i = 1; i <= 12; i++) {
-			initMonths=initMonths + '<li name='+ i +'>'+ i +'</li>';
+			initMonths=initMonths + '<li name='+ i +'>'+ i +' 月</li>';
 		};
 		$('.select-date .month ul').append(initMonths);
 
 		$('.select-date .day ul').empty();
 		var initDays='';
 		for (var i = 1; i <= 31; i++) {
-			initDays=initDays + '<li name="'+ i +'">'+ i +'</li>';
+			initDays=initDays + '<li name="'+ i +'">'+ i +' 日</li>';
 		};
 		$('.select-date .day ul').append(initDays);     
 		
@@ -198,7 +199,7 @@ jQuery(function($) {
 			if($.inArray(current_month, [1,3,5,7,8,10,12]) != -1){
 				for (var i = 29; i <= 31; i++) {
 					if ($('.select-date .day ul li[name='+i+']').length == 0) {
-						$('.select-date .day ul').append('<li name="'+ i +'">'+ i +'</li>');
+						$('.select-date .day ul').append('<li name="'+ i +'">'+ i +' 日</li>');
 					};
 				};
 			}                
@@ -208,11 +209,11 @@ jQuery(function($) {
 				};
 				for (var i = 29; i <= 30; i++) {
 					if ($('.select-date .day ul li[name='+i+']').length == 0) {
-						$('.select-date .day ul').append('<li name="'+ i +'">'+ i +'</li>');
+						$('.select-date .day ul').append('<li name="'+ i +'">'+ i +' 日</li>');
 					};
 				};
 				if (parseInt($('.select-date .day').find('.select-txt').attr('name')) == 31) {
-					$('.select-date .day').find('.select-txt').attr('name', '1').text('1');
+					$('.select-date .day').find('.select-txt').attr('name', '1').text('1  日');
 				};
 			}
 			if (current_month == 2){
@@ -222,9 +223,9 @@ jQuery(function($) {
 					};
 				};
 				if((current_year % 100 == 0 && current_year % 400 == 0) || (current_year % 4 == 0)){
-					$('.select-date .day ul').append('<li name="29">29</li>');
+					$('.select-date .day ul').append('<li name="29">29 日</li>');
 				}
-				$('.select-date .day').find('.select-txt').attr('name', '1').text('1');
+				$('.select-date .day').find('.select-txt').attr('name', '1').text('1 日');
 			}
 		});
 		$('.select-date .year ul').on('click','li',function(){
@@ -239,17 +240,17 @@ jQuery(function($) {
 			if((current_year % 100 == 0 && current_year % 400 == 0) || (current_year % 4 == 0)){
 				// console.log(' ....2....')
 				if ($('.select-date .day ul li[name=29]').length == 0) {
-					$('.select-date .day ul').append('<li name="29">29</li>');
+					$('.select-date .day ul').append('<li name="29">29 日</li>');
 				};
 
 				if($.inArray(parseInt($('.select-date .day').find('.select-txt').attr('name')), [30,31]) != -1){
-					$('.select-date .day').find('.select-txt').attr('name', '1').text('1');
+					$('.select-date .day').find('.select-txt').attr('name', '1').text('1 日');
 				}
 			}else{
 				$('.select-date .day ul li[name=29]').remove();
 
 				if($.inArray(parseInt($('.select-date .day').find('.select-txt').attr('name')),[29,30,31]) != -1){
-					$('.select-date .day').find('.select-txt').attr('name', '1').text('1');
+					$('.select-date .day').find('.select-txt').attr('name', '1').text('1 日');
 				}
 			}
 		});
@@ -524,7 +525,7 @@ jQuery(function($) {
 	// AJAX
 	// ******************************
 
-	$('.actions').on("click", ".btn.btn-submit",function(){
+	$('.actions').on("click", ".btn.btn-submit:not(.disabled)",function(){
 		var b1 = $('#birthday .year .select-txt').attr('name') == '-1';
 		var b2 = $('#birthday .month .select-txt').attr('name') == '-1';
 		var b3 = $('#birthday .day .select-txt').attr('name') == '-1';
@@ -565,6 +566,9 @@ jQuery(function($) {
 		// 			'position: '+position+', '+
 		// 			'seniority: '+seniority+', ')
 
+		var _this = $(this);
+		_this.addClass('disabled').val("提交中...");
+
 		$.putJSON(
 			'/users/setting/update_basic_info',
 			{
@@ -587,6 +591,7 @@ jQuery(function($) {
 				}
 			}, function(data){
 				// console.log(data);
+				_this.removeClass('disabled').val("确认提交");
 				if (data.success && data.value){
 					$.popupFancybox({success: true, cont: "个人资料更新成功！"});
 				}else {

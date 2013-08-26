@@ -2,7 +2,7 @@
 //=require utility/ajax
 $(function(){
     $('a.re_mail').click(function(){
-  	  re_mail($(this).attr('data'))
+      re_mail($(this).attr('data'))
     })
 
 
@@ -13,7 +13,7 @@ $(function(){
         }else{
           console.log(retval.value)
         }
-      })    	
+      })      
     }
 
 })
