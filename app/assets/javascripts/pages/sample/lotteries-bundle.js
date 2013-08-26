@@ -1,30 +1,12 @@
 //=require ui/widgets/od_progressbar
 //=require ui/widgets/od_address_selector
 $(function(){
-	var postcode_reg    = /^[0-9]{6}$/
-	var receiver_reg  = /[a-zA-z0-9\u4E00-\u9FA5]/
-	var default_receiver = /姓名/	
-	var street_info_partten = /街道地址（不需要填写省\/市\/区）/
-	var mobile_partten = /^(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$/
 
-  function placeholder_for_ie(){
-		$('input[placeholder]').each(function(){  
-		    var input = $(this);        
-		    $(input).val(input.attr('placeholder'));
-		                
-		    $(input).focus(function(){
-		        if (input.val() == input.attr('placeholder')) {
-		           input.val('');
-		        }
-		    });
-		        
-		    $(input).blur(function(){
-		       if (input.val() == '' || input.val() == input.attr('placeholder')) {
-		           input.val(input.attr('placeholder'));
-		       }
-		    });
-		});
-  }
+	var postcode_reg    = $.postcode_reg();
+	var receiver_reg  = $.receiver_reg();
+	var default_receiver = $.default_receiver();	
+	var street_info_partten = $.street_info_partten();
+	var mobile_partten = $.mobile_partten();
 
 
 
@@ -307,7 +289,8 @@ $(function(){
     		],
 				{
 					beforeShow: function(){
-						placeholder_for_ie()
+						//placeholder_for_ie()
+						$.placeholder();
     	  		$(".fancybox-skin").css({"backgroundColor":"#fff"}); 
 	
     	  		if(redirect){
@@ -352,66 +335,6 @@ $(function(){
 
 
 
-	// function popup_login_window(){
-	// 	if(typeof(window.username) == 'undefined'){
-	// 		popup_login()
-	// 	}else{
-	// 		popup_address_page()
-	// 	}
-	// }
-
-	// function popup_login(){
-	// 	popup('#lottery_login')
-	// }
-
-	// function popup_regist(){
-	// 	popup('#lottery_regist')	
-	// }
-
-  // function login(obj,account,pass,thid_id,signed_in){
-  //     obj.html('登录中......')
-  //     $.postJSON('/account/login.json',{email_mobile:account,password:pass,third_party_user_id:thid_id,permanent_signed_in:signed_in},function(retval){
-  //       if(retval.success){
-  //       	get_user_basic_info(retval.value['auth_key'])
-  //       }else{
-  //         obj.html('<span>登</span>录')
-  //         jduge_error_type(retval.value['error_code'])
-  //       }
-  //     })  	
-  // }	
-
-
-
-  // function jduge_error_type(error_type){
-  // 	switch(error_type){
-  // 		case 'error_3':
-  // 				err_notice = "<span>账户未激活,您可以<a href='/account/sign_up'>重新激活</a></span>"
-  // 		  break;
-  // 		case 'error_4':
-  // 			err_notice = "<span>账户不存在 ,您可以<a href='/account/sign_up'>注册</a></span>"
-  // 		  break;
-  // 		case 'error_11':
-  // 			err_notice = "<span>密码错误</span>"
-  // 		  break;
-  // 		case 'error_24':
-  // 			err_notice = "<span>账户未激活,您可以<a href='/account/sign_up'>重新激活</a></span>"
-  // 		  break;
-  // 	}
-  // 	$('.err_notice').html(err_notice).show();
-  // }
-
-
-
-  // function get_user_basic_info(authkey){
-  //   $.postJSON('/account/get_basic_info_by_auth_key.json',{auth_key:authkey},function(retval){
-  //     if(retval.success){       	
-  //     	window.username = retval.value['nickname']  
-		// 		popup_address_page()       	
-  //     }
-  //   })
-  // } 
-
-
 	function popup_address_page(){
 		//获取收获地址
 		popup("#recever")
@@ -427,22 +350,6 @@ $(function(){
       	$('input[name="postcode"]').val(window.sample_postcode)
       	$('textarea[name="street_info"]').val(window.sample_street_info)
       }
-
-      // else{
-    		// $.getJSON('/users/get_logistic_address.json',{},function(retval){
-    		//   if(retval.success){		  	
-    		//   	window.sample_receiver = retval.value['receiver'] 
-    		//   	window.sample_mobile   = retval.value['mobile'] 
-    		//   	window.sample_postcode = retval.value['postcode'] 
-    		//   	window.sample_address  = retval.value['address'] 
-    		//   	window.sample_street_info = retval.value['street_info']
-    		//   	$('input[name="receiver"]').val(window.sample_receiver)
-    		//   	$('input[name="mobile"]').val(window.sample_mobile)
-    		//   	$('input[name="postcode"]').val(window.sample_postcode)
-    		//   	$('textarea[name="street_info"]').val(window.sample_street_info)
-    		//   }
-    		// }) 
-      // }
 
       if($('div.address-slt').length < 1){
 				window.addressSelector = $.od.odAddressSelector({ precision: 2, // 0. province, 1. city, 2. town, 3. detail 
@@ -500,23 +407,6 @@ $(function(){
 		}
 		
   }
-
-  //弹出框内的登录按钮
-	// $('button.login_btn').on('click',function(){
-	// 	username = $('input[name="username"]').val();
-	// 	password = $('input[name="password"]').val();
-	// 	remembr  = $('input[name="remember"]').attr('checked')
-
- //    thid_id  = null  //第三方 账户id
-	// 	if(username.length < 1 ){
-	// 		$('input[name="username"]').addClass('error')
-	// 	}else if(password.length < 1 ){
-	// 		$('input[name="password"]').addClass('error')
-	// 	}else{
-	// 		login($(this),username,password,thid_id,remembr)
-	// 	}
-		
-	// })
 
 
   	//popup window  input elements focus 
@@ -593,8 +483,4 @@ $(function(){
 		return go
 				
 	}
-
-
-
-
 })

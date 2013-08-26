@@ -3,8 +3,8 @@
 	<%= javascript_include_tag "pages/sample/gifts-bundle" %>
 	<script type="text/javascript">
 	    <% if user_signed_in %>
-	    	window.username    = "<%=  @current_sample['nickname']   %>"
-	    	window.total_point = "<%=  @current_sample['point']  %>"
+	    	window.username    = "<%=  @current_user['nickname']   %>"
+	    	window.total_point = "<%=  @current_user['point']  %>"
 	    <% end %>
 	</script>
 <% end %>
@@ -149,7 +149,7 @@
 					<li type="point">积分数</li>
 				</ul>
 				<% if user_signed_in %>
-					<div class="can_change" sortype="exchange_count" point="<%= @current_sample['point'] %>">查看我能兑换的</div>
+					<div class="can_change" sortype="exchange_count" point="<%= @current_user['point'] %>">查看我能兑换的</div>
 				<% end %>
 			</div>
 			<ul class="gift-list">

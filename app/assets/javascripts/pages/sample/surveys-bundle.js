@@ -1,9 +1,8 @@
 //=require jquery.placeholder
 //=require jquery.cookie
 jQuery(function($) {
-	//var mobile_partten = /^(1(([35][0-9])|(47)|[8][0126789]))\d{8}$/;
-	var mobile_partten = /^(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$/
-	var email_partten = /^(\w)+(\.\w+)*@(\w)+((\.\w{2,3}){1,3})$/;
+	var mobile_partten = $.mobile_partten();
+	var email_partten  = $.email_partten();
 
 	//如果用户已经关闭了安装插件提示，那么24小时内不再提示安装
 	if($.cookie('ignore_plugin')){
@@ -17,14 +16,8 @@ jQuery(function($) {
 		$.cookie('ignore_plugin', 'true', { expires: 1 });
 	})
 
-
-	// $('select[name="answer_status"]').change(function(){
-	// 	status = ($.util.param('status') ? ($.util.param('status')) : '')
-	// 	reward_type = ($.util.param('reward_type') ? ($.util.param('reward_type')) : '')
-	// 	answer_status = $(this).val()
-	// 	window.location.href = "/surveys?status=" + status  + "&reward_type=" + reward_type + "&answer_status=" + answer_status
-	// })
-
+  //相应回车提交表单事件
+  $.enterSubmit($('.rss-btn'))	
 
   //下拉框点击事件
 	$("body").click(function(e){
@@ -64,62 +57,6 @@ jQuery(function($) {
 	var answer_status = $(this).attr('data')
   	window.location.href = "/surveys?status=" + status  + "&reward_type=" + reward_type + "&answer_status=" + answer_status
   })
-
-
-	//用户点击开放状态tab，发送ajax请求
-	// $('.rl_h ul li').on('click',function(){
-	//   $(this).siblings('li').removeClass('current').end().addClass('current');	  
-	//   status = $(this).attr('data')
-	//   $('ul.reward_type li').removeClass('current').attr('status',status).first().addClass('current');
-	// 	$('select option').attr('status',status);
-	// 	$('select option:first').attr('selected','selected');
-	// 	$('.pagination a').attr('status',status);
-	// 	get_reward_type_count(status)
-	// 	get_special_status_surveys(status)
-	// })
-
-	//用户点击奖励类型tab发送ajax请求
-	// $('ul.reward_type li').on('click',function(){
-	// 	$(this).siblings('li').removeClass('current').end().addClass('current');
-	// 	status      = $(this).attr('status')
-	// 	reward_type = $(this).attr('reward_type')
-	// 	status      = status === "undefined" ? 2 : status
-	// 	$('.pagination a').attr('status',status);
-	// 	$('.pagination a').attr('reward_type',reward_type);
-	// 	if(reward_type){
-	// 	  $('select option[value="'+ reward_type +'"]').attr('selected','selected');	
-	// 	}else{
-	// 		$('select option:first').attr('selected','selected');	
-	// 	}
-		
-	// 	get_special_status_surveys(status,reward_type)
-	// })
-
-	//用户利用下拉框来展示不同类型的调研
-	// $('select').change(function(){
-	// 	reward_type = $(this).val();
-	// 	status      = $(this).attr('status')
-	// 	status      = status === "undefined" ? 2 : status
-	// 	$('.pagination a').attr('status',status);
-	// 	if (reward_type){
-	// 		$('ul.reward_type').find("[reward_type='"+reward_type+"']").siblings().removeClass('current').end().addClass('current');	
-	// 		$('.pagination a').attr('reward_type',reward_type);
-	// 	}else{
-	// 		$('ul.reward_type li:first').siblings().removeClass('current').end().addClass('current');
-	// 	}
-	// 	get_special_status_surveys(status,reward_type) 
-	// })
-
-	//ajax  分页
-	// $('.pagination a').live('click',function(){
-	// 	page        = $(this).attr('page')
-	// 	status      = $(this).attr('status')
-	// 	status      = status === "undefined" ? 2 : status
-	// 	reward_type = $(this).attr('reward_type')
-	// 	reward_type = reward_type === "undefined" ? 0 : reward_type
-	// 	get_special_status_surveys(status,reward_type,page)
-	// 	return false;
-	// })
 
   //关闭弹出框
 	$('button.close_f').live('click',function(){
@@ -163,7 +100,7 @@ jQuery(function($) {
 					if(retval){
 						popup('#mobile_finish',null,null)	
 					}else{
-						butt.after('<div>验证码错误或者已过期,请重新生成</div>');
+						butt.next('.code_exp').show();
 					}
 					
 				}
@@ -174,15 +111,24 @@ jQuery(function($) {
 
 	})
 
+	$('input[name="code"]').focus(function(){
+		$('button.next_f').next('.code_exp').hide();
+	});
+
   //订阅按钮
 	$('input[name="contact"]').next('a').click(function(){
 		var channel = $('input[name="contact"]').val();
 		if(email_partten.test(channel) || mobile_partten.test(channel) ){
 			make_rss_activate(channel,$(this))
 		}else{
-			$('input[name="contact"]').focus();
+			$('input[name="contact"]').prev('.channel_err').show();
 		}
 	})
+
+	$('input[name="contact"]').focus(function(){
+		$(this).prev('.channel_err').hide();
+	})
+
 
   //重新发送激活链接或激活码
 	function re_generate_email_activate(obj,email){
@@ -191,14 +137,23 @@ jQuery(function($) {
 			url: '/surveys/make_rss_activate',
 			data: {rss_channel:email},
 			beforeSend:function(){
-				obj.next('span').remove();
-				if(obj.next('span').length < 1){
-					obj.after('<span ><img class="loading" src="/assets/image/sample/fancybox_loading@2x.gif" width="16" height="16" style="position:absolute;right:14px;top:8px;" /></span>')
+				obj.next('img').remove();
+				if(obj.next('img').length < 1){
+					if(email_partten.test(email)){
+						obj.after('<img class="loading" src="/assets/image/sample/fancybox_loading@2x.gif" width="16" height="16" style="position:absolute;left:64px;top:44px;" />')
+					}else{
+						obj.after('<img class="loading" src="/assets/image/sample/fancybox_loading@2x.gif" width="16" height="16" style="position:absolute;right:50px;top:9x;" />')
+					}
+					
 				}				
 			},
 			success:function(retval){
-				obj.next('span').remove();
-				obj.after('<span ><img class="loading" src="/assets/od-quillme/success.png" width="16" height="16" style="position:absolute;right:14px;top:8px;" /></span>')
+				obj.next('img').remove();
+				if(email_partten.test(email)){
+					obj.after('<img class="loading" src="/assets/od-quillme/success.png" width="16" height="16" style="position:absolute;left:64px;top:44px;" />')
+				}else{
+					obj.after('<img class="loading" src="/assets/od-quillme/success.png" width="16" height="16" style="position:absolute;rigt:50px;top:9px;" />')
+				}				
 			}
 		});		
 	}
@@ -213,12 +168,18 @@ jQuery(function($) {
 				button.html('').append('<img style="margin-top:2px;" src="/assets/od-quillme/rss_loading.gif">').addClass('disabled')
 			},
 			success:function(retval){
-				console.log(retval)
 					if(retval['success']){
 						if(retval['new_user']){
 							if(email_partten.test(channel)){
-								var mail_host = channel.split('@')[1]
-								var mail_to   = 'mail.' + mail_host
+        						if(channel.indexOf('gmail.com') > -1){
+        						  var mail_to = 'http://gmail.com';
+        						}else if(channel.indexOf('@tencent.') > -1){
+        						  var mail_to = 'http://mail.qq.com';
+        						}else if(channel.indexOf('@qq.') > -1){
+        						  var mail_to = 'http://mail.qq.com';
+        						}else{
+        						  var mail_to = 'http://mail.'  + channel.split('@')[1];
+        						}
 								//邮件订阅成功提示页
      							popup('#mail_success',channel,mail_to)
 							}else{
@@ -259,7 +220,9 @@ jQuery(function($) {
       		
     		},
     		afterClose:function(){
-    			$('a.rss-btn').html('订阅').removeClass('disabled')
+    			$('a.rss-btn').html('订阅').removeClass('disabled');
+    			$('input[name="code"]').val('');
+    			$('.code_exp').hide();
     		},
     		width:500,
     		height:180,
