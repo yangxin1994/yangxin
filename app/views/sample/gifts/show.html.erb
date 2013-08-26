@@ -3,13 +3,13 @@
 	<%= stylesheet_link_tag "pages/sample/gift-bundle", :media => "all" %>
 	<script type="text/javascript">
 		<% if user_signed_in %>
-	    	window.username    = "<%=  @current_user.nickname   %>"
-	    	window.total_point = "<%=  @current_user.point  %>"
-	    	window.sample_receiver = "<%= @recerver_info['receiver'] %>"
-    	  	window.sample_mobile   = "<%= @recerver_info['mobile'] %>"
-    	  	window.sample_postcode = "<%= @recerver_info['postcode'] %>"
-    	  	window.sample_address  = "<%= @recerver_info['address'] %>"
-    	  	window.sample_street_info = "<%= @recerver_info['street_info'] %>"
+	    	window.username    = "<%=  @current_user.nickname  if @receiver_info %>"
+	    	window.total_point = "<%=  @current_user.point if @receiver_info  %>"
+	    	window.sample_receiver = "<%= @receiver_info['receiver']  if @receiver_info %>"
+    	  	window.sample_mobile   = "<%= @receiver_info['mobile']  if @receiver_info %>"
+    	  	window.sample_postcode = "<%= @receiver_info['postcode'] if @receiver_info  %>"
+    	  	window.sample_address  = "<%= @receiver_info['address'] if @receiver_info %>"
+    	  	window.sample_street_info = "<%= @receiver_info['street_info'] if @receiver_info %>"
 		<% end %>
 		window.point_value = "<%= @gift['point'] %>"
 		window.gift_id    = "<%= @gift['_id'] %>"

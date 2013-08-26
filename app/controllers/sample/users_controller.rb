@@ -475,7 +475,7 @@ class Sample::UsersController < Sample::SampleController
 
     respond_to do |format|
       format.html { }
-      format.json { render_json_auto and return }
+      format.json { render_json_auto(@retval) and return }
     end
   end
 

@@ -183,6 +183,16 @@ class User
 		end
 	end
 
+	def mini_avatar
+		md5 = Digest::MD5.hexdigest(self.id)
+		return "/uploads/avatar/mini_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/mini_#{md5}.png")
+		%w( mini small thumb).each do |ver|
+			return "/uploads/avatar/#{ver}_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/#{ver}_#{md5}.png")	
+		end
+		return "/assets/avatar/mini_default.png"	
+	end
+
+
 	def get_level_information
 		return {"level" => self.level, "level_expire_time" => self.level_expire_time}
 	end
