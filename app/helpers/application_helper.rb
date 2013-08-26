@@ -89,6 +89,9 @@ module ApplicationHelper
 		return notice_information(flash[:info]) if flash[:info]
 	end
 
+	def application_name
+	end
+
 	# ICP info
 	# TODO: update
 	def icp_info
@@ -189,7 +192,7 @@ module ApplicationHelper
 	# 			}.html_safe
 	# 		end
 	# 	when 4
-	# 		if news['gift_type'].to_i == Gift::REAL.to_i
+	# 		if news['gift_type'].to_i == Sample::GiftClient::REAL.to_i
 	# 			behavor = %Q{
 	# 			使用<b>#{news['point']}</b>积分兑换了<a href="/gifts/#{news['gift_id']}">#{news['gift_name']}</a>
 	# 		}.html_safe	
@@ -265,7 +268,7 @@ module ApplicationHelper
 				end
 	
 			when 4
-				if news['gift_type'].to_i == Gift::REAL.to_i
+				if news['gift_type'].to_i == Sample::GiftClient::REAL.to_i
 					behavor = %Q{
 						使用<b>#{news['amount'].abs}</b>积分兑换了<a href="/gifts/#{news['gift_id']}">#{news['gift_name']}</a>
 					}.html_safe	
@@ -291,7 +294,7 @@ module ApplicationHelper
 		when 2
 			reward = '元支付宝转账'
 		when 4
-			reward = '积分'
+			reward = '优币'
 		when 8
 			reward = '抽奖机会'
 		when 16
@@ -379,7 +382,7 @@ module ApplicationHelper
 			end
 		when 4,8
 			return "已完成" if free_reward
-			return "待审核"
+			return "<span class='c-red'>待审核</span>"
 		when 32
 			return "已完成"
 		when 16
@@ -602,5 +605,10 @@ module ApplicationHelper
 		end
 		return current_option
 	end
-	
+
+	# used in user-center
+	def small_gift_image(img_path)
+		return "/assets/od-quillme/uc/gift_36X36.png" if img_path.to_s.empty? || !File.exist?("#{Rails.root}/public#{img_path}")
+		return img_path
+	end	
 end

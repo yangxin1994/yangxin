@@ -41,7 +41,7 @@
                                     <% end %>
                                 </a>
                             </td>
-                            <td><%= answered?(survey["answer_status"], survey["answer_reject_type"], survey["free_reward"]) %></td>
+                            <td><%= sanitize(answered?(survey["answer_status"], survey["answer_reject_type"], survey["free_reward"])) %></td>
                             <td>
                                 <%= sanitize survey["select_reward"], attributes: %w(id class href target) %>
                             </td>
@@ -51,7 +51,7 @@
             </table>
         </div>
 
-        <%= render "pagination", :@common => @my_answer_surveys, :@path => "/users/join_surveys" %>
+        <%= render "pagination", :@common_value => @my_answer_surveys, :@path => "/users/join_surveys" %>
     </div>
 
     <!-- user tabs -->

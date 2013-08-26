@@ -76,7 +76,7 @@
                                         <i class="icon-order icon-qb"></i>
                                         <span><%= truncate(log["gift_name"], length: 22) %></span>
                                     <% else %>
-                                        <img src="<%= log["gift_picture_url"] %>">
+                                        <img src="<%= small_gift_image(log['gift_picture_url']) %>" style="width: 36px; height: 36px;"/>
                                         <a target="_blank" href="/gifts/<%= log["gift_id"] %>"><%= truncate(log["gift_name"], length: 22) %></a>
                                     <% end %>
                                 <% elsif log["reason"].to_i == 128 %>
@@ -107,7 +107,7 @@
             </table>
         </div>
 
-        <%= render "pagination", :@common => @point_logs, :@path => "/users/points" %>
+        <%= render "pagination", :@common_value => @point_logs, :@path => "/users/points" %>
     </div>
 
     <!-- user tabs -->
