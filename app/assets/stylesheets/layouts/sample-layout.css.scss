@@ -1105,6 +1105,9 @@ body{background: image-url('od-quillme/bg.png');}
 .pagination {
 	padding:10px 0;
 	@include clearfix;
+	div{
+		float:right;
+	}
 	a{
 		width:24px;
 		@include one-line(24px);

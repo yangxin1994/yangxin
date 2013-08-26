@@ -29,6 +29,8 @@ class Sample::GiftsController < Sample::SampleController
 		@gift[:photo_src] = @gift.photo.nil? ? Gift::DEFAULT_IMG : @gift.photo.picture_url 
 
 		@receiver_info = current_user.nil? ? nil : current_user.affiliated.try(:receiver_info) || {}
-
+		Rails.logger.info("-------------------------------")
+		Rails.logger.info(@receiver_info.inspect)
+		Rails.logger.info("-------------------------------")
 	end
 end
