@@ -291,6 +291,7 @@ class Sample::UsersController < Sample::SampleController
   #更新头像信息
   # POST
   def update_avatar
+    @update_retval = false
     if @current_user_info
       avatar = Avatar.new 
       avatar.uid = @current_user_info['sample_id']
@@ -303,8 +304,9 @@ class Sample::UsersController < Sample::SampleController
       end
       avatar.image = params[:avatar]
       avatar.store_image!
+      @update_retval = true
     end
-    redirect_to action: 'avatar'
+    render action: 'avatar'
   end
 
   #账户绑定

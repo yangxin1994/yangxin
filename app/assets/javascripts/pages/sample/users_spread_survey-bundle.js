@@ -17,12 +17,10 @@ jQuery(function($) {
         $('#spread-detail tbody tr td:eq(2)').html($('tbody tr#sid-'+sid+' td:eq(1) a').html());
         $('#spread-detail tbody tr td:eq(3)').html($('tbody tr#sid-'+sid+' td:eq(5)').html());
         $('#spread-detail tbody tr td:eq(6)').html($('tbody tr#sid-'+sid+' td:eq(4)').html());
+        $('#spread-detail span.point').removeClass('point');
 
         // spread users nubmer
-        $.ajax({
-            type: "GET",
-            url: '/users/spread_counter/'+sid+'.json'
-        }).done(function(data){
+        $.getJSON('/users/spread_counter/'+sid+'.json', function(data){
             $('#spread-detail tbody tr td:eq(4)').html(data.value.total_answer_number+'人（'+data.value.editting_answer_number+'人正在答题）');
             $('#spread-detail tbody tr td:eq(5)').html(data.value.finished_answer_number+'人');
         })
@@ -61,7 +59,7 @@ jQuery(function($) {
         if ( pager.toString() == "NaN" ){
             // should be prev or next a tag
             pager = parseInt($(this).attr('class'));
-            if ($(this).attr('class').indexOf('prev')){
+            if ($(this).attr('class').indexOf('prev') != -1){
                 pager = pager - 1;
             }else {
                 pager = pager + 1;
