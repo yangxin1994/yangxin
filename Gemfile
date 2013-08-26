@@ -61,7 +61,7 @@ group :assets do
   # gem 'compass-rails', github: "milgner/compass-rails", ref: "1749c06f15dc4b058427e7969810457213647fb8" 
   gem 'jquery-rails', "~> 2.2.1"
   # gem for bootstrap.
-  gem "bootstrap-sass-rails", "2.3.0.0"
+  gem "bootstrap-sass-rails", "~> 2.3.0.0"
   # gem 'anjlab-bootstrap-rails', :require => 'bootstrap-rails',
   #                             :github => 'anjlab/bootstrap-rails',
   #                             :branch => '3.0.0'
