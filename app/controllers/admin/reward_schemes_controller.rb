@@ -6,7 +6,8 @@ class Admin::RewardSchemesController < Admin::AdminController
 
   def create
     options = make_attr(params[:reward_scheme])
-    @reward_scheme = RewardScheme.create(options)
+    survey = Survey.find params[:reward_scheme][:survey_id]
+    @reward_scheme = survey.reward_schemes.create(options)
     redirect_to "#{reward_schemes_admin_path(:id => params[:reward_scheme][:survey_id])}?editing=#{@reward_scheme._id}"
   end
 
