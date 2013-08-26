@@ -2,7 +2,7 @@
 	<script type="text/javascript">
 		window._id = <%= raw params[:id].to_json %>;
 		<% if user_signed_in %>
-	    window.username    = "<%=  @current_user['nickname']   %>"
+	    window.username    = "<%=  @current_user.nickname   %>"
 	    window.sample_receiver = "<%= @recerver_info['receiver'] if @recerver_info %>"
     	window.sample_mobile   = "<%= @recerver_info['mobile'] if @recerver_info %>"
     	window.sample_postcode = "<%= @recerver_info['postcode'] if @recerver_info %>"

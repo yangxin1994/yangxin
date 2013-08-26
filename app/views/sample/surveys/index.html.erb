@@ -3,7 +3,7 @@
 	<%= javascript_include_tag "pages/sample/surveys-bundle" %>
 	<script type="text/javascript">
 		<% if user_signed_in %>
-		 	window.current_user_id = "<%=  @current_user['sample_id'] %>"
+		 	window.current_user_id = "<%=  @current_user.id %>"
 		<% end %>	
 	</script>	
 <% end %>
@@ -44,22 +44,22 @@
 						</li>
 						<li reward_type="<%= RewardScheme::POINT.to_s %>" class="<%= current_tab?("#{RewardScheme::POINT.to_s}",params[:reward_type])%>">
 							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::POINT.to_s}")%>">
-								积分奖励 (<span class="u_t"><%= @reward_count["4"].to_i %></span>)
+								积分奖励 (<span class="u_t"><%= @reward_count[4].to_i %></span>)
 							</a>
 						</li>
 						<li reward_type="<%= RewardScheme::LOTTERY.to_s %>"  class="<%= current_tab?("#{RewardScheme::LOTTERY.to_s}",params[:reward_type])%>">
 							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::LOTTERY.to_s}")%>">
-								抽奖机会 (<span class="c_t"><%= @reward_count["8"].to_i %></span>)
+								抽奖机会 (<span class="c_t"><%= @reward_count[8].to_i %></span>)
 							</a>
 						</li>  
 						<li reward_type="<%= RewardScheme::CASH_REWARD %>" class="<%= current_tab?("#{RewardScheme::CASH_REWARD}",params[:reward_type])%>">
 							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::CASH_REWARD }")%>">
-								现金奖励 (<span class="x_t"><%= @reward_count["1"].to_i + @reward_count["2"].to_i + @reward_count["16"].to_i %></span>)
+								现金奖励 (<span class="x_t"><%= @reward_count[1].to_i + @reward_count["2"].to_i + @reward_count["16"].to_i %></span>)
 							</a>
 						</li>
 						<li reward_type="0" class="<%= current_tab?("#{RewardScheme::FREE}",params[:reward_type])%>">
 							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::FREE}")%>">
-								免费调研 (<span class="m_t"><%= @reward_count["0"].to_i %></span>)
+								免费调研 (<span class="m_t"><%= @reward_count[0].to_i %></span>)
 							</a>
 						</li>
 						<div style="clear:both;"></div>
