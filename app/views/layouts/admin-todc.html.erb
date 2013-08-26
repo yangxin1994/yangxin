@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quill Admin</title>
+
+  <%= stylesheet_link_tag "layouts/admin-todc-layout", :media => :all %>
+
+  <%= javascript_include_tag "layouts/admin-todc-layout" %>
+  <%= include_gon %>
+  <script type="text/javascript">
+  <% if flash.notice %>
+    alert_msg.show('info', "<%= flash.notice %>")
+  <% elsif flash.alert %>
+    alert_msg.show('error', "<%= flash.alert %>")
+  <% elsif flash[:success] %>
+    alert_msg.show('success', "<%= flash[:success] %>")          
+  <% end -%>  
+  </script>  
+  <%= yield :head %>
+  <%= csrf_meta_tags %>
+
+</head>
+<body>
+  <div class="navbar navbar-googlebar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="/admin">Quill Admin</a>
+          <ul class="nav">
+            <li class="">
+              <a href="/admin/surveys">问卷</a>
+            </li>
+            <li class="">
+              <a href="/admin/samples">样本</a>
+            </li>
+            <li class="">
+              <a href="/admin/answers">答案</a>
+            </li>            
+            <li class="">
+              <a href="/admin/gifts">礼品</a>
+            </li>
+            <li class="">
+              <a href="/admin/prizes">奖品</a>
+            </li>
+            <li class="">
+              <a href="/admin/orders">订单</a>
+            </li>
+            <li class="">
+              <a href="/admin/announcements">公告</a>
+            </li>
+            <li class="">
+              <a href="/admin/agents">代理</a>
+            </li>
+          </ul>
+        <ul class="nav pull-right">
+          <li id="fat-menu" class="dropdown">
+            <a href="/profile" id="drop3" role="button" class="dropdown-toggle" data-toggle="dropdown"> <i class="icon-user"></i>
+              <%=current_user.email%> <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="drop3">
+
+              <li role="presentation">
+                <a role="menuitem" tabindex="-1" href="/messages">消息</a>
+              </li>
+              <li role="presentation" class="divider"></li>
+              <li role="presentation">
+                <a role="menuitem" tabindex="-1" href="<%=signout_path %>">退出登录</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div class="row-fluid">
+      <div class="span3 flowy-admin-sidebar">
+        <ul class="nav nav-list flowy-admin-sidenav affix">
+          <%= yield :sidenav %>
+        </ul>
+      </div>
+      <div class="span9">
+        <div id="alert_placeholder">
+
+        </div>
+        <%= yield %>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Quill Admin Ver 3.0 Beta</p>
+    </div>
+  </footer>
+</body>
+</html>

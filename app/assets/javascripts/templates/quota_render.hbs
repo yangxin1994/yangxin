@@ -1,0 +1,17 @@
+<li>
+	<h4>配额 {{number}}</h4>
+	<div>
+		<div class='sum'>期望回收 <b>{{amount}}</b> 份 已回收 <b class="yellow">{{finished_count}}</b> 份
+			<div class='icons'>
+				<em class="icon-edit" title="编辑"></em>
+				<em class="icon-del" title="删除"></em>
+			</div>
+		</div>
+		<ul class='questions'>
+			{{#rules}}
+			<li><em>{{number}}</em>{{title}}<span>（{{answer}}）</span></li>
+			{{/rules}}
+		</ul>
+		<div class="progress"></div>
+	</div>
+</li>

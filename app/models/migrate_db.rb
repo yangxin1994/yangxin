@@ -39,7 +39,8 @@ class MigrateDb
 			RewardScheme.create_reward_scheme(s, reward_scheme_setting)
 			default_reward_scheme_setting = { "name" => "default scheme",
 				"rewards" => [],
-				"need_review" => false }
+				"need_review" => false,
+				"default" => true }
 			RewardScheme.create_reward_scheme(s, default_reward_scheme_setting)
 			reward_scheme = s.reward_schemes.not_default[0]
 			s.quillme_promote_info = { "reward_scheme_id" => reward_scheme._id.to_s }
@@ -62,7 +63,7 @@ class MigrateDb
 			# the browser promote related
 			s.broswer_extension_promotable = false
 			s.broswer_extension_promote_info = { "login_sample_promote_only" => false,
-				"filters" => [[{"key_words" => [""], "url" => ""}]],
+				"filters" => [{"key_words" => [""], "url" => ""}],
 				"reward_scheme_id" => "" }
 
 			# the weibo promote related

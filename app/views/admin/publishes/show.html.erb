@@ -1,0 +1,197 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/publishes-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/publishes-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+
+<% if @survey.success == true %>
+	<div class="publishes"> 
+	<!-- edit tab start -->					
+	<div class="tab-content" id="edit-tab">
+		<div class="title">
+			<h5>问卷管理<h5>
+			<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/publishes">返回问卷列表</a><h5>
+		</div>
+
+		<form action="#">
+
+				<p>
+					<label class="child-title f14 pl2">问卷名称</label>
+					<%= link_to @survey.value['title'], questionaire_path(@survey.value['_id']), { :title=>'点击查看问卷' } %>
+				</p>
+				<span style="float:right;">
+					<b class="f-orange f14"><input class="btn-community-ok" type='checkbox' <%if @survey.value["show_in_community"]%>checked<%end%>/> 将问卷发布至 Quillme</b> | 
+					<b class="f-orange f14"><input id='reviewable_ckb' type='checkbox' <%if !@survey.value["answer_need_review"]%>checked<%end%>/> 此问卷答案无需审核</b>
+				</span>		
+				
+			<hr/>
+				<div>
+					<h5><b>设置奖励</b><h5>
+				</div>
+				<p>
+					<label class="child-title f14 pl2">是否奖励</label>
+					<input id="set-reward" type='checkbox' <%if @survey.value["reward"].to_i != 0%>checked<%end%>/>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">奖品设置</label>				
+					<select id="reward-prize" class="reward">
+					</select>
+					<input type="radio" <%if @survey.value['reward'].to_i == 1 %>checked<%end%> name="reward" value="1"/>
+					<span class="current-lottery dn" name="<%= @survey.value['lottery_id'] %>" ></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">积分设置</label>
+					<input id="reward-point" class="input-int" style="width: 100px;" name="survey[:point]" type ='text' value="<%= @survey.value['point']%>"/>
+					<input type="radio" <%if @survey.value['reward'].to_i !=1 %>checked<%end%> name="reward" value="2"/>
+					<span class="alertSpan red"></span>
+				</p>
+				<p><input type="button" class='blueBtn btn-ok btn-reward-ok' value="更新奖励信息"/></p>
+
+				<hr/>
+				<div>
+					<h5><b>设置推广</b><h5>
+				</div>
+
+				<p>
+					<label class="child-title f14 pl2">是否推广</label>
+					<input type="checkbox" <%if @survey.value['spreadable']==true%>checked<%end%> name="survey[:spreadable]"/>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">推广积分</label>
+					<input style="width: 100px;" class="input-int" type ='text' name="survey[:spread_point]" value="<%= @survey.value['spread_point']%>"/>
+					<span class="alertSpan red"></span>
+				</p>
+				<p><input type="button" class='blueBtn btn-ok btn-spread-ok' value="更新推广信息"></p>
+			<hr/>
+				<div>
+					<h5><b>邮件邀请</b><h5>
+				</div>
+				<p>
+					<label class="child-title f14 pl2">发送邮件邀请</label>
+					<input id='promotable_ckb' type="checkbox" <%if @survey.value['promotable']%>checked<%end%> />
+					允许系统发邮件邀请用户填写此问卷
+				</p>
+				<p>
+					<label class="child-title f14 pl2">每小时发送</label>
+					<input id='promotable_ipt' style="width: 100px;" type="text" value="<%= @survey.value['promote_email_number'] %>" /> 封
+				</p>
+				<p>
+					<label class="child-title f14 pl2">已经发出</label>
+					<span style='font-size: 14px; color: #f00; font-weight:bold;'><%= @sent_email_number %></span> 封邀请
+				</p>
+				<p><input id='promotable_btn' type="button" class='blueBtn' value="更新邮件邀请设置"><span style='color: #f00'>（会对样本产生干扰，请谨慎开启）</span></p>
+			<hr/>
+				<div>
+					<h5><b>设置审核员/录入员</b><h5>
+				</div>
+				<p>
+					<label class="child-title f14 pl2">人员类型</label>
+					<select class="system_user_type" name="system_user_type">
+						<option value="4">答案审核员</option>
+						<!-- <option value="2">访问员</option> -->
+						<option value="1">数据录入员</option>
+					</select>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">选择人员</label>
+					<select class="system_user" name="system_user">
+					</select>
+				</p>
+				<p>
+					<input class="blueBtn btn-allocate-ok" type="button" value="添加" title="点击`-`按钮删除"/>
+				</p>
+				<div class="allocate_users">
+					<label class="child-title f14 pl2">答案审核员</label>
+					<div class="bg-gray answer_auditors" id="answer_auditor">
+						<% @survey.value["answer_auditor_ids"].to_a.each do |id| %>
+							<div class="bg-orange allocate_user" name="<%=id%>">
+								<span class="allocate_user_id"><%=id%></span>
+								<a href="#set_system_user" class="bg-red allocate_user_delete"> - </a>
+							</div>
+						<% end %>
+					</div>
+					<label class="child-title f14 pl2">数据录入员</label>
+					<div class="bg-gray entry_clerks" id="entry_clerk">
+						<% if @survey.value['entry_clerk_ids'] %>
+						<% @survey.value["entry_clerk_ids"].to_a.each do |id| %>
+							<div class="bg-orange allocate_user" name="<%=id%>">
+								<span class="allocate_user_id"><%=id%></span>
+								<a href="#set_system_user" class="bg-red allocate_user_delete"> - </a>
+							</div>
+						<% end %>
+						<% end %>
+					</div>
+					<!-- <label class="child-title f14 pl2">访问员</label>
+					<div class="bg-gray interviewers" id="interviewer">
+						<% if @survey.value['interviewer_ids'] %>
+						<% @survey.value["interviewer_ids"].each do |id| %>
+							<div class="bg-orange allocate_user" name="<%=id%>">
+								<span class="allocate_user_id"><%=id%></span>
+								<a href="#set_system_user" class="bg-red allocate_user_delete"> - </a>
+							</div>
+						<% end %>
+						<% end %>
+					</div> -->
+				</div>
+			<hr/>
+				<div style="margin-bottom: 20px;">
+					<h5><b>设置访问员及任务</b><h5>
+				</div>
+
+				<div class="new-task">
+					<span style="margin-right: 20px;">
+						<span>选择访问员</span>
+						<select class="select-interviewer"></select>
+					</span>
+					<span style="margin-right: 20px;">
+						<span>回收数量</span>
+						<input name="task-amount"/>
+					</span>
+					<input class="blueBtn new-task-ok" type="button" value="新建访问员任务"/>
+				</div>
+				<%if @tasks && @tasks.success%>
+					<ul class="tasks">
+						<% @tasks.value.to_a.each do |task|%>
+							<li id="<%=task['_id']%>" name="<%=task['user_id']%>">
+								<div class="interviewer allocate_user_id"></div>
+								<div>
+									<input class="input-int" name="task-amount" value="<%=task['quota']['rules'][0]['amount']%>"/>
+								</div>
+								<div>
+									<input type="button" class="blueBtn update-task-ok" value="更新"/>
+									<input type="button" class="redBtn delete-task" value="删除"/>
+								</div>
+							</li>
+						<% end%>
+					</ul>
+				<%end%>
+
+				<li id="" class="dn interviewer-task-item" name="">
+					<div class="interviewer"></div>
+					<div>
+						<input class="input-int" name="task-amount" value=""/>
+					</div>
+					<div>
+						<input type="button" class="blueBtn update-task-ok" value="更新"/>
+						<input type="button" class="redBtn delete-task" value="删除"/>
+					</div>
+				</li>
+			<hr/>
+				<div style="margin-bottom: 20px;">
+					<h5><b>其它操作</b><h5>
+				</div>
+				<% if @survey.value["publish_status"].to_i != 1 %>
+					<input type="button" class="blueBtn close-survey ml20" title="问卷关闭后,答案审核员将不能从列表中查看!" value="关闭问卷"/>
+				<% end %>
+			<hr/>
+		</form>
+	</div>
+	<!-- edit tab end -->
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @survey.value %></p>
+</div>
+<%end%>

@@ -1,0 +1,26 @@
+  <div class="well well-small">
+
+  </div>
+<% qcount = 0 %>
+<% @questions['question_content'].each do |question| %>
+
+  <div class="well well-small">
+    <p> Q<%= "#{qcount += 1}. <#{question['question_type_label']}> #{"[逻辑控制]" if question['is_logic_control']} #{question['title']}" %> 
+    </p>
+    <ul>
+      <% question["choices"].try('each') do |choice| %>
+      <li>
+        <%= choice %> 
+      </li>
+      <% end -%>
+      <% if question["selected_choices"].present? %>
+        <p>-----------</p>
+      <%- end %>
+      <% question["selected_choices"].try('each') do |choice| %>
+      <li>
+        <%= choice %> 
+      </li>
+      <% end -%>
+    </ul>
+  </div>
+<% end -%>

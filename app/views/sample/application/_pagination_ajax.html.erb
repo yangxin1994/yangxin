@@ -1,0 +1,29 @@
+<% if common["total_page"] > 1 %>
+<div class="pagination">
+	<div>
+		<a href="#" page="<%= common["previous_page"] %>" status="<%= sta %>" reward_type="<%=reward %>"><</a>
+	
+		<!-- two before pages -->
+		<% ((common["current_page"]-2)...common["current_page"]).select{|e| e > 0}.each do |e|	 %>
+			<a href="javascript:void(0);" page="<%= e %>" status="<%= sta %>" reward_type="<%= 	reward %>" ><%= e %></a>
+		<% end %>
+	
+		<!-- ... -->
+		<% if (common["current_page"]-2) > 1 %>
+			<a onclick="return false;" href="#">...</a>
+		<% end %>
+	
+		<!-- current page --> 
+		<a onclick="return false;" href="#" page="<%= common["current_page"] %>" class="active	" status="<%= sta %>" reward_type="<%= reward %>"><%= common["current_page"] %></a>
+		<!-- two after pages -->
+		<% ((common["current_page"]+1)..(common["current_page"]+2)).select{|e| e <= common["total_page"]}.each do |e| %>
+			<a href="#" page="<%= e %>" status="<%= sta %>" reward_type="<%= reward %>"><%= e %>	</a>
+		<% end %>
+		<!-- ... -->
+		<% if (common["current_page"]+2) < common["total_page"] %>
+			<a onclick="return false;" href="#" status="<%= sta %>" reward_type="<%= reward %>">	...</a>
+		<% end %>
+		<a href="#" page=<%= common["next_page"] %> status="<%= sta %>" reward_type="<%= reward %>" >></a>
+	</div>
+</div>
+<% end %>

@@ -16,7 +16,7 @@ class Material
 	belongs_to :user
 	belongs_to :user,:inverse_of => 'avatar'
 
-	default_scope ->(o = 'ASC'){order_by(:created_at.try(o.to_sym)) }
+	# default_scope ->(o = 'ASC'){order_by(:created_at.try(o.to_sym)) }
 
 	before_save :set_picture_url
 
@@ -64,6 +64,6 @@ class Material
 			:value => material["value"],
 			:title => material["title"],
 			:picture_url => material["picture_url"])
-	  self.save
+	  return self.save
 	end
 end

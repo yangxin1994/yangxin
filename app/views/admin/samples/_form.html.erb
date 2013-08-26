@@ -1,0 +1,126 @@
+<form action="<%= admin_samples_path + (@sample["created_at"].nil? ? '' : "/#{@sample["_id"]}") %>"
+      name="sample"
+      enctype="multipart/form-data"
+      method="post"
+      id="sample_form"
+      class="form-horizontal"
+>
+  <input value="<%= @sample["created_at"].present? ? 'put' : 'post' %>" type='hidden' name="_method">
+
+  <legend>样本属性</legend>
+
+  <div class="control-group">
+    <label class="control-label" >用户名:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[username]" value="<%= @sample["username"] %>" />
+       <%= "* 已删除" if @sample["status"] == 2 %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >昵称:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[nickname]" value="<%= @sample["nickname"] %>" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >性别:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[gender]" value="<%= @sample["gender"] %>" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >生日:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[birthday]" value="<%= @sample["birthday"] %>" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >出生地:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[born_address]" value="<%= @sample["born_address"] %>" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >居住地:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[live_address]" value="<%= @sample["live_address"] %>" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >婚姻状况:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[married]" value="<%= @sample["married"] %>" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >是否有子女:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[gender]" value="<%= @sample["gender"] %>" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >个人月收入:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[birthday]" value="<%= @sample["birthday"] %>" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >家庭月收入:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[birthday]" value="<%= @sample["birthday"] %>" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >教育程度:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[birthday]" value="<%= @sample["birthday"] %>" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >专业领域:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[birthday]" value="<%= @sample["birthday"] %>" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >所在行业:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[birthday]" value="<%= @sample["birthday"] %>" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >担任职位:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[birthday]" value="<%= @sample["birthday"] %>" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >工作年限:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="sample[seniority]" value="<%= @sample["seniority"] %>" />
+    </div>
+  </div>
+
+
+  <div class="pull-right">
+  <%= link_to "<<返回列表", admin_samples_path %>
+  <button type="submit" class="btn btn-primary">确认无误</button>
+
+  </div>
+
+
+</form>

@@ -1,0 +1,1114 @@
+//=require ui/widgets/od_selector
+//=require ui/widgets/od_white_button
+//=require ui/widgets/od_progressbar
+//=require ui/widgets/od_popup
+//=require ui/widgets/od_waiting
+//=require ui/widgets/od_bmap
+//=require ui/plugins/od_button_text
+//=require swfupload/swfupload-new
+//=require swfupload/handlers-new
+//=require swfupload/fileprogress-new
+//=require highcharts
+//=require templates/result_data_table
+//=require templates/result_data_tr
+//=require templates/result_data_pagination
+//=require templates/answer_analysis_title
+//=require templates/answer_analysis_content
+//=require templates/filter_render
+//=require jquery.cookie.js
+
+jQuery(function($) {
+	var TIME_STEP = 500;
+	var COLORS = ['#f5c000', '#6EA5E1', '#E06C1D', '#CDDD24', '#3D96AE', '#DB843D', '#92A8CD', '#A47D7C', '#B5CA92'];
+
+	/* ===========================
+	 * Import data 
+	 * =========================== */
+	$('#import_data').click(function() {
+		// 上传的 csv 文件的目标地址是 /questionaires/{survey_id}/result/import_data, post 请求
+		var beforeContent='<span>1、请</span><a target="_blank" href="/questionaires/' + window.survey_id + '/result/csv_header">点击此处</a><span>下载 Excel 模板文件</span>';
+		var swfButton='<div class="up"><span>2、上传 Excel 录入文件</span><div class="importButton"><span id="spanButtonPlaceHolder"></span></div>';
+		var beforeUpload=$('<div />').addClass('before-upload').html(beforeContent+swfButton);
+		var importContent='<span>正在上传 Excel 录入文件</span><div class="upload-bar"><div id="fsUploadProgress" class="fsUpload"></div>';
+		var importData=$('<div />').addClass('import-data').html(importContent);
+		var popContent = $('<div />').addClass('od-import').append(importData).append(beforeUpload);
+
+		$.od.odPopup({ type:"", title:"导入数据", content:popContent, size:{width:280,height:150} });
+		createUpload('/questionaires/'+window.survey_id+'/result/import_data');
+	});
+	function createUpload(url){
+		var key ="";
+		if($.cookie("auth_key"))
+			key=$.cookie("auth_key");
+		var settings= {
+			flash_url:"/assets/swfupload/swfupload.swf",
+			upload_url:url,
+			post_params: {import_file:'',auth_key:key},
+			file_post_name:"import_file",
+			file_size_limit : "1000 MB",
+			file_types : "*.csv",//允许上传的文件类型
+			file_types_description : "csv files", //文件类型描述
+			file_upload_limit : 100,//限定用户一次性最多上传多少个文件，在上传过程中，该数字会累加，如果设置为“0”，则表示没有限制
+			custom_settings : { //自定义设置
+				importData:true,
+				progressTarget : "fsUploadProgress",
+				uploadButton:"btnUpload",
+			},
+			button_image_url: "/assets/widgets/upload_import_data.png",
+			button_width: "99",
+			button_height: "24",
+			button_placeholder_id: "spanButtonPlaceHolder",
+
+			//是否打开调试信息，默认为false
+			//debug: true,
+			file_dialog_start_handler : fileDialogStart, //当文件选取对话框弹出前出发的事件处理函数
+			file_queued_handler : fileQueued,
+			file_queue_error_handler : fileQueueError,
+			file_dialog_complete_handler : fileDialogComplete,
+			upload_start_handler : uploadStart, //开始上传文件前触发的事件处理函数
+			upload_progress_handler : uploadProgress,
+			upload_error_handler : uploadError,
+			upload_success_handler : uploadSuccess, //文件上传成功后触发的事件处理函数
+			upload_complete_handler : uploadComplete,
+			queue_complete_handler : queueComplete  // Queue plugin event}
+		};
+		var swfu = new SWFUpload(settings);
+	};
+
+	/* ===========================
+	 * Filters 
+	 * =========================== */
+	// selector
+	var filters = _.map(window.survey_filters, function(f) { return f.name; });
+	filters.splice(0, 0, '所有答卷');
+	$.od.odSelector({
+		values: filters,
+		index: window.filter_index,
+		onChange: function(index) {
+			$.util.param('fi', index);
+		}
+	}).appendTo('#filter_slt');
+	if(window.filter_index == 0) {
+		$('.filter-info').hide();
+	} else {
+		// adjust questions
+		var questions = _.compact(_.flatten(_.map(window.survey_questions.pages, function(page) {
+			return _.map(page.questions, function(q) {
+				return (q.question_type == 14) ? null : q;
+			});
+		})));
+		for (var i = 0; i < questions.length; i++) {
+			var q = questions[i];
+			q.number = $.util.printNumber(i + 1);
+			q.title = $.richtext.print(q.content);
+		};
+		//show filter information
+		var questions = _.compact(_.flatten(_.map(window.survey_questions.pages, function(page) {
+			return _.map(page.questions, function(q) {
+				return (q.question_type == 14) ? null : q;
+			});
+		})));
+		var filter = window.survey_filters[window.filter_index - 1];
+		var rules = _.map(filter.conditions, function(cond) {
+			var target_q = _.find(questions, function(q) { return (q._id == cond.name); });
+			var is_single = (target_q.issue.option_type < 2);
+			return {
+				number: target_q.number,
+				title: $.richtext.print(target_q.content),
+				answer: ((is_single || !cond.fuzzy) ? '选择' : '答案包含') + _.compact(_.map(cond.value, function(input_id) {
+						var target_item = null;
+						if(target_q.issue.other_item.has_other_item && target_q.issue.other_item.id == input_id)
+							target_item = target_q.issue.other_item;
+						else
+							target_item = _.find(target_q.issue.items, function(item) { return item.id == input_id; }); 
+						return '“' + (target_item ? $.richtext.print(target_item.content) : null) + '”';
+					})).join(is_single ? '，或' : '和') 
+			};
+		});
+		$(HandlebarsTemplates['filter_render']({rules: rules})).appendTo('.filter-info');
+	}
+	// edit filters
+	$('#filter_edit').tooltip({placement: 'bottom'});
+	$.od.odWhiteButton({icon: 'filter'}).appendTo('#filter_edit').click(function() {
+		location.href = '/questionaires/' + window.survey_id + '/filters';
+	});
+	// include 
+	if(window.include)
+		$('#include_ckb').attr('checked', 'checked');
+	$('#include_ckb').change(function() {
+		$.util.param('i', $(this).is(':checked'));
+	});
+
+	/* ===========================
+	 * Show statistic 
+	 * =========================== */
+	$('.result-charts .right ul li').click(function() {
+		$('.result-charts .right ul li').each(function() {$(this).removeClass('active');});
+		$(this).addClass('active');
+		$('.result-charts .right .chart-analysis').each(function() {$(this).hide();});
+		$('#' + $(this).attr('id').replace('menu', 'chart')).show();
+	});
+	function loadStats(job_id) {
+		$.getJSON('/jobs/' + job_id + '/stats.json', function(retval) {
+			// statistic
+			var tot_answer_number = 0, screened_answer_number = 0, ongoing_answer_number = 0;
+			if(retval.success) {
+				tot_answer_number = retval.value.tot_answer_number;
+				screened_answer_number = retval.value.screened_answer_number;
+				ongoing_answer_number = retval.value.ongoing_answer_number;
+			}
+			$('#legal_count').text(tot_answer_number - screened_answer_number);
+			$('#illegal_count').text(screened_answer_number);
+			$('#ongoing_count').text(ongoing_answer_number);
+			// stats chart
+			var summary_chart = new Highcharts.Chart({
+				chart: { renderTo: 'chart_summary', type: 'bar' },
+				title: { text: '回收数量统计' },
+				colors: COLORS,
+				xAxis: { categories: ['合格', '不合格', '正在答题']},
+				yAxis: { title: { text: "" }, allowDecimals: false },
+				series: [{
+					name: "答题人数",
+					data: [tot_answer_number - screened_answer_number, screened_answer_number, ongoing_answer_number]
+				}]
+			});
+			// time chart
+			var time_chart = new Highcharts.Chart({
+				chart: {  
+					renderTo: 'time_chart',
+					type: 'line',
+					width: 547,
+					height: 292
+				},
+				colors: COLORS,
+				title: { text: "答题时间分析" },
+				xAxis: {
+					type: "datetime",
+					dateTimeLabelFormats: { day: "%b %e" },
+					minRange: 24 * 3600 * 1000
+				},
+				yAxis: {
+					title: { text: "" },
+					allowDecimals: false
+				},			
+				series: [{
+					name: "答题人数",
+					pointStart: retval.value.time_result.start_day * 1000,
+					pointInterval: 24 * 3600 * 1000,
+					data: retval.value.time_result.time_histogram
+				}]
+			});
+			// region result
+			var bmap = $.od.odBmap({id_name: "region-result", width: 547, height: 292});
+			bmap.appendTo('#region_chart');
+			bmap.odBmap("init");
+			var regions = retval.value.region_result;
+			var lat = 103.966951, lng = 36.026247;
+			for(var code in regions) {
+				var region = regions[code][1].split(" - ").join("");
+				lat = Number(regions[code][0]["lat"]);
+				lng = Number(regions[code][0]["lng"]);
+				var count = String(regions[code][0]["count"])
+				bmap.odBmap("setMarkerLL", region, "答题人数", count, lat, lng);
+			};
+		});
+	};
+
+	/* ===========================
+	 * Show data list result
+	 * =========================== */
+	// Excel and spss button
+	var excel_spss_uri_cache = {};
+	function exportResult(analysis_task_id, type) {
+		if(!analysis_task_id) return;
+		function _finished(file_uri) {
+			excel_spss_uri_cache[analysis_task_id + '_' + type] = file_uri;
+			var url = '<%=Rails.application.config.dotnet_web_service_uri  %>' + file_uri;
+			var info_con = $('<div >导出完成，浏览器将自动下载结果，您也可以 <a style="color: #6d91a9" target="_blank">点击此处</a> 手动下载。</div>');
+			$('a', info_con).attr('href', url);
+			$.od.odPopup({ title: '导出完成', content: info_con });
+			window.open(url);
+		};
+		if(excel_spss_uri_cache[analysis_task_id + '_' + type] != null) {
+			_finished(excel_spss_uri_cache[analysis_task_id + '_' + type]);
+			return;
+		}
+		var pop_con = $('<div style="text-align:center; padding-top: 10px;"/>');
+		var export_pb = $.od.odProgressbar({width: 160}).appendTo(pop_con);
+		var waiting_pop = $.od.odPopup({ type:null, title: '正在导出到 ' + type + ' ...', content: pop_con, closeButton: false });
+		function _failed() {
+			if(waiting_pop) waiting_pop.odPopup('destroy');
+			$.od.odPopup({ title: '导出失败', content: '导出失败，请重试。' });
+		};
+		$.getJSON('/questionaires/' + window.survey_id + '/result/' + type + '.json', {
+			analysis_task_id: analysis_task_id
+		}, function(retval) {
+			if(retval.success) {
+				// check export progress
+				function _getExportResult(job_id) {
+					$.getJSON('/jobs/' + job_id + '.json', function(retval) {
+						if(retval.success && retval.value >= 0) {
+							export_pb.odProgressbar('option', 'value', retval.value);
+							if(retval.value >= 1) {
+								if(waiting_pop) waiting_pop.odPopup('destroy');
+								// get url
+								$.getJSON('/jobs/' + job_id + '/file_uri.json', function(retval) {
+									if(retval.success) {
+										_finished(retval.value);
+									} else {
+										_failed();
+									}
+								});
+							} else {
+								setTimeout(function() { _getExportResult(job_id); }, TIME_STEP);
+							}
+						} else {
+							_failed();
+						}
+					});
+				};
+				_getExportResult(retval.value);
+			} else {
+				_failed();
+			}
+		});
+	};
+	// load data table
+	var PER_PAGE = 10;
+	function loadDatalist(job_id, page) {
+		var waiting_dom = $.od.odWaiting({
+			type: 2, contentId: '.data-list', message: '正在加载数据...', backColor: 'transparent'
+		});
+		waiting_dom.odWaiting('open');
+		$.getJSON('/jobs/' + job_id + '/data_list.json', {
+			page: page, per_page: PER_PAGE
+		}, function(retval) {
+			waiting_dom.odWaiting('destroy');
+			// 1 data table
+			var answers = retval.value.answer_info || { data: [], current_page: 0, total_page: 0, per_page: PER_PAGE };
+			answers.data = answers.data || [];
+			$('.data-con').empty();
+			var tb = $(HandlebarsTemplates['result_data_table']({ })).appendTo('.data-con');
+			for (var i = 0; i < answers.data.length; i++) {
+				var value = answers.data[i];
+				var d = new Date(value.answer_time * 1000);
+				tb.append(HandlebarsTemplates['result_data_tr']({ 
+					index: (answers.current_page - 1) * answers.per_page + (i + 1),
+					alter: (i % 2 == 1),
+					name: value.full_name,
+					email: value.email,
+					region_name: !value.region_name ? '--' : value.region_name,
+					answer_time: (d.getMonth() + 1) + '.' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes(),
+					duration: $.util.printTimeFriendly(value.duration)
+				}));
+			};
+			// 2. pagination
+			$('.pagination').remove();
+			var pagination_dom = $(HandlebarsTemplates['result_data_pagination']({
+				pagination: answers.current_page + ' / ' + answers.total_page
+			})).appendTo('.data-list');
+			if(answers.current_page > 1) {
+				$('.previous', pagination_dom).click(function() {
+					loadDatalist(job_id, answers.current_page - 1);
+				});
+			} else {
+				$('.previous', pagination_dom).addClass('disable');
+			}
+			if(answers.current_page < answers.total_page) {
+				$('.next', pagination_dom).click(function() {
+					loadDatalist(job_id, answers.current_page + 1);
+				});
+			} else {
+				$('.next', pagination_dom).addClass('disable');
+			}
+		});
+	}
+
+	/* ===========================
+	 * Reports
+	 * =========================== */
+	$('.reports li').click(function() {
+		$('.reports li').removeClass('active');
+		$(this).addClass('active');
+	});
+	$('.reports li a').click(function(e) { e.stopPropagation(); });
+	// add report
+	var adding = false;
+	$('.add-btn').click(function() {
+		if(adding) return;
+		adding = true;
+		$.postJSON('/questionaires/' + window.survey_id + '/report_mockups.json', {
+			report_mockup: { survey_id: window.survey_id, title: '自定义报告' }
+		}, function(retval) {
+			if(retval.success) {
+				window.location = '/questionaires/' +	window.survey_id + '/report_mockups/' + retval.value._id;
+			} else {
+				adding = false;
+				$.od.odPopup({title: "提示", content: "添加出错 :(.<br/>错误代码：" + retval.value.error_code});
+			}
+		});
+	});
+	// delete report
+	$('.reports li a.icon-del').click(function(e) {
+		var self = $(this), report_id = self.parent().attr('id');
+		self.parent().addClass('locked');
+		var confirm_dom = $('<div style="text-align:center; padding: 15px 0; width: 200px" />');
+		var delete_ok_btn = $('<button class="od-button" />').text('确定删除此报告').appendTo(confirm_dom);
+		var delete_cancel_btn = $('<button class="od-button od-button-white" style="margin-left: 10px;" />').text('取消').appendTo(confirm_dom);
+		var delete_tip = $.od.odTip({
+			title: false,
+			tipContent: confirm_dom,
+			clickBtn: self,
+			hideCallback: function() {
+				self.parent().removeClass('locked');
+				delete_tip.odTip('destroy');
+			}
+		});
+		delete_cancel_btn.click(function() { delete_tip.odTip('hide'); });
+		delete_ok_btn.click(function() {
+			$('.failed', confirm_dom).remove();
+			$.util.disable(delete_ok_btn, delete_cancel_btn);
+			delete_ok_btn.odButtonText({ text: '正在删除...'});
+			$.deleteJSON('/questionaires/' + window.survey_id + '/report_mockups/' + report_id + '.json', function(retval) {
+				if(retval.success) {
+					delete_tip.odTip('hide');
+					self.parent().remove();
+				} else {
+					delete_ok_btn.odButtonText('restore');
+					$.util.enable(delete_ok_btn, delete_cancel_btn);
+					$('<div class="failed" />').text('删除报告失败，请重试。').appendTo(confirm_dom);
+				}
+			});
+		});
+		delete_tip.odTip('show');
+	});
+	// export word、pdf、ppt report
+	var style_dropdown = $('.export-btn-dropdown');
+	var change_style_btn = $('#change_style').powerFloat({
+		eventType: 'click', 
+		position: '1-3',
+		offsets: { x: -2, y: 0 },
+		target: style_dropdown
+	});
+	$('li', style_dropdown).click(function() {
+		style_dropdown.hide();
+		$('#report_style_preview').attr('class', '').addClass($('i', this).attr('class'));
+		$('.change-style-btn', change_style_btn).text($('span', this).text());
+	});
+	var report_uri_cache = {};
+	function exportReport(analysis_task_id, report_type) {
+		if(!analysis_task_id) return;
+		if($('.reports li.active').length == 0) return;
+		var report_mockup_id = $('.reports li.active').attr('id');
+		var report_style = parseInt($('#report_style_preview').attr('class').split('-')[1]) || 0;
+		function _finished(file_uri) {
+			report_uri_cache[analysis_task_id + '_' + report_type + '_' + report_style + '_' + report_mockup_id] = file_uri;
+			var url = '<%=Rails.application.config.dotnet_web_service_uri  %>' + file_uri;
+			var info_con = $('<div >导出完成，浏览器将自动下载结果，您也可以 <a style="color: #6d91a9" target="_blank">点击此处</a> 手动下载。</div>');
+			$('a', info_con).attr('href', url);
+			$.od.odPopup({ title: '导出完成', content: info_con });
+			window.open(url);
+		};
+		if(report_uri_cache[analysis_task_id + '_' + report_type + '_' + report_style + '_' + report_mockup_id] != null) {
+			_finished(report_uri_cache[analysis_task_id + '_' + report_type + '_' + report_style]);
+			return;
+		}
+		var pop_con = $('<div style="text-align:center; padding-top: 10px;"/>');
+		var export_pb = $.od.odProgressbar({width: 160}).appendTo(pop_con);
+		var waiting_pop = $.od.odPopup({ type:null, title: '正在导出 ...', content: pop_con, closeButton: false });
+		function _failed() {
+			if(waiting_pop) waiting_pop.odPopup('destroy');
+			$.od.odPopup({ title: '导出失败', content: '导出失败，请重试。' });
+		};
+		// 1. get export job id
+		$.getJSON('/questionaires/' + window.survey_id + '/result/report.json', {
+			report_mockup_id: report_mockup_id,
+			report_style: report_style,
+			report_type: report_type,
+			analysis_task_id: analysis_task_id
+		}, function(retval) {
+			if(retval.success) {
+				// 2. check export job progress
+				function _getExportResult(job_id) {
+					$.getJSON('/jobs/' + job_id + '.json', function(retval) {
+						if(retval.success && retval.value >= 0) {
+							export_pb.odProgressbar('option', 'value', retval.value);
+							if(retval.value >= 1) {
+								if(waiting_pop) waiting_pop.odPopup('destroy');
+								// get url
+								$.getJSON('/jobs/' + job_id + '/file_uri.json', function(retval) {
+									if(retval.success) {
+										_finished(retval.value);
+									} else {
+										_failed();
+									}
+								});
+							} else {
+								setTimeout(function() { _getExportResult(job_id); }, TIME_STEP);
+							}
+						} else {
+							_failed();
+						}
+					});
+				};
+				_getExportResult(retval.value);
+			} else {
+				_failed();
+			}
+		});
+	};
+
+	/* ===========================
+	 * Answer analysis
+	 * =========================== */
+	var loading_id = 0;
+	var waiting_answers = null;
+	function loadAnswers(job_id, page_index) {
+		if(page_index < 0 || page_index >= window.survey_questions.pages.length) return;
+		if($('.survey-pages li:eq(' + page_index + ')').hasClass('active')) return;
+		$('.survey-pages li').removeClass('active');
+		$('.survey-pages li:eq(' + page_index + ')').addClass('active');
+
+		var questions = window.survey_questions.pages[page_index].questions;
+		if(questions == null || questions.length == 0) {
+			$('.answer-analysis').html('<div style="padding: 30px; text-align:center;">无题目</div>');
+			return;
+		}
+		var current_loading_id = ++loading_id;
+		if(waiting_answers == null) {
+			var waiting_answers = $.od.odWaiting({
+				type: 2, contentId: '.answer-analysis', message: '正在加载分析结果...'//, backColor: 'transparent'
+			});
+			waiting_answers.odWaiting('open');
+		}
+		$.getJSON('/jobs/' + job_id + '/analysis_result.json', { 
+			page_index: page_index 
+		}, function(retval) {
+			if(current_loading_id != loading_id) return;
+			waiting_answers.odWaiting('destroy');
+			waiting_answers = null;
+			if(retval.success) {
+				// TODO: what about images in question?
+				var con = $('.answer-analysis').empty();
+				var index = 0;
+				for (var i = 0; i < page_index; i++) {
+					 var qs = window.survey_questions.pages[i].questions;
+					 if(qs) index += qs.length;
+				};
+				for (var q_idx = 0; q_idx < questions.length; q_idx++) {
+					var q = questions[q_idx], a = retval.value[q._id];
+					index++;
+					if(q.question_type != 14) {
+						// 1. question title
+						var title_con = $(HandlebarsTemplates['answer_analysis_title']({ 
+							index: index,
+							text: q.content.text
+						})).appendTo(con);
+						if(q_idx == 0) title_con.css('borderTop', 'none');
+						// 2. question content
+						// if answer is null, it means that the question is a newly added question
+						// and the answer statistic cache has no cache about it 
+						var content_con = $(HandlebarsTemplates['answer_analysis_content']({ 
+							id: q._id
+						})).appendTo(con);
+						var SUPPORTED_LABEL_LENGTH = [999, 18, 10, 6, 5, 4, 3];	//SIZE 1, MAX LENGTH 18; SIZE > 6, MAX LENGTH 2
+						var formatter = function(str, il) {
+							if(il < SUPPORTED_LABEL_LENGTH.length) {
+								if(str.length < SUPPORTED_LABEL_LENGTH[il])
+									return str
+								else
+									return str.substr(0, SUPPORTED_LABEL_LENGTH[il]) + '...';
+							} else
+								return str.substr(0,2) + '...';
+						};					
+						if(q.question_type == 0) {
+							// Choice
+							if(!a) a = [0, {}];
+							var categories = [], data = [];
+							var items = [];
+							for(var m = 0; m < q.issue.items.length; m ++)
+								items.push(q.issue.items[m]);
+							if(q.issue.other_item.has_other_item) 
+								items.push(q.issue.other_item);
+							for (var i = 0; i < items.length; i++) {
+								categories.push(items[i].content.text);
+								var a_count = 0;
+								if(a[1][items[i].id] != undefined)
+									a_count = a[1][items[i].id];
+								data.push(a_count);
+							};
+							// chart 
+							if(q.issue.option_type > 1) {
+								var chart = new Highcharts.Chart({
+									chart: { renderTo: q._id + '_chart', type: 'column' },
+									title: { text: '' },
+									colors: COLORS,
+									xAxis: { categories: categories,
+										labels: {formatter: function() {
+											if(this.value != undefined) {
+												var cl = categories.length;
+												if(cl < SUPPORTED_LABEL_LENGTH.length) {
+													if(this.value.length < SUPPORTED_LABEL_LENGTH[cl])
+														return this.value
+													else
+														return this.value.substr(0, SUPPORTED_LABEL_LENGTH[cl]) + '...';
+												} else
+													return this.value.substr(0,2) + '...';
+											}
+										}}
+									},
+									yAxis: { title: { text: "" }, allowDecimals: false },
+									plotOptions: {column: {dataLabels: {enabled: true}}},
+									series: [{ name: "选择人数", data: data }]
+								});
+							} else {
+								var chart = new Highcharts.Chart({
+									chart: { renderTo: q._id + '_chart' },
+									title: { text: '' },
+									colors: COLORS,
+									plotOptions: {
+										pie: { allowPointSelect: true, cursor: 'pointer',
+											dataLabels: {formatter: function() {
+												if(this.point.name != undefined) {
+													var cl = categories.length;
+													if(cl < SUPPORTED_LABEL_LENGTH.length) {
+														if(this.point.name.length < SUPPORTED_LABEL_LENGTH[cl])
+															return this.point.name + ': ' + this.percentage.toFixed(1) + '%'
+														else
+															return this.point.name.substr(0, SUPPORTED_LABEL_LENGTH[cl]) + '...' + ': ' + this.percentage.toFixed(1) + '%';
+													} else
+														return this.point.name.substr(0,2) + '...' + ': ' + this.percentage.toFixed(1) + '%';
+												}
+											}}
+										}
+									},
+									series: [{
+										type: 'pie',
+										name: '选择人数',
+										data: _.zip(categories, data)
+									}]
+								});
+							}
+							// table
+							var tb = $('table', content_con);
+							for (var i = 0; i < categories.length; i++) {
+								var tr = $('<tr />').appendTo(tb);
+								if(i % 2 == 1) tr.addClass('interval');
+								$('<td />').text(categories[i]).appendTo(tr);
+								$('<td />').text(data[i]).appendTo(tr);
+							};
+							var tr = $('<tr />').appendTo(tb);
+							$('<th />').text('合计').appendTo(tr);
+							$('<th />').text(a[0]).appendTo(tr);
+						} else if (q.question_type == 1) {
+							// MatrixChoice
+							if(!a) a = [0, {}];
+							var categories = [], series = [];
+							var rows = q.issue.rows || [];
+							var items = q.issue.items || [];
+							for(var i = 0; i < rows.length; i ++)
+								categories.push(rows[i].content.text);
+
+							for(var i = 0; i < items.length; i ++) {
+								var name = formatter(items[i].content.text, items.length);
+								var spectrum = {
+									name: name,
+									data: []
+								};
+								for(var j = 0; j < rows.length; j ++) {
+									var key = rows[j].id + "-" + items[i].id;
+									spectrum["data"].push(a[1][key] || 0);
+								};
+								series.push(spectrum);												
+							};
+							// chart
+							var chart = new Highcharts.Chart({
+								chart: { renderTo: q._id + '_chart', type: 'column' },
+								title: { text: '' },
+								colors: COLORS,
+								xAxis: { categories: categories,
+									labels: {formatter: function() {
+										if(this.value != undefined) {
+											var cl = categories.length;
+											if(cl < SUPPORTED_LABEL_LENGTH.length) {
+												if(this.value.length < SUPPORTED_LABEL_LENGTH[cl])
+													return this.value
+												else
+													return this.value.substr(0, SUPPORTED_LABEL_LENGTH[cl]) + '...';
+											} else
+												return this.value.substr(0,2) + '...';
+										}
+									}}
+								},
+								yAxis: { min: 0, title: { text: "" }, allowDecimals: false },
+								plotOptions: {column: {dataLabels: {enabled: true}}},
+								series: series							
+							});
+							// table
+							var tb = $('table', content_con);
+							tb.find("th").first().attr("colspan", "2");
+							for (var i = 0; i < categories.length; i++) {
+								for(var j = 0; j < series.length; j ++) {
+									var tr = $('<tr />').appendTo(tb);
+									if(j == 0) 
+										$('<td rowspan="' + series.length + '" />').text(categories[i]).appendTo(tr);					
+									if(j % 2 == 1) tr.addClass('interval');
+									$('<td />').text(series[j]["name"]).appendTo(tr);
+									$('<td />').text(series[j]["data"][i]).appendTo(tr);								
+								};
+							};
+							var tr = $('<tr />').appendTo(tb);
+							$('<th colspan="2" />').text('人数合计').appendTo(tr);
+							$('<th />').text(a[0]).appendTo(tr);
+						} else if (q.question_type == 3) {
+							// NumberBlank
+							if(!a) a = [0, {mean: "", histogram: [], segment: []}];
+							var categories = [], data = [];
+							for(var i = 0; i < a[1]["histogram"].length; i ++) {	//minimum histogram length: 2
+								data.push(a[1]["histogram"][i]);
+								if(i == 0)
+									categories.push('不大于' + a[1]["segment"][i])
+								else if(i == a[1]["segment"].length)
+									categories.push("大于" + a[1]["segment"][i-1])
+								else
+									categories.push("大于" + a[1]["segment"][i-1] + "且不大于" + a[1]["segment"][i]);
+							};
+							// chart
+							var chart = new Highcharts.Chart({
+								chart: { renderTo: q._id + '_chart', type: 'column' },
+								title: { text: '' },
+								colors: COLORS,
+								xAxis: { categories: categories},
+								yAxis: { title: { text: "" }, allowDecimals: false },
+								plotOptions: {column: {dataLabels: {enabled: true}}},
+								series: [{ name: "选择人数", data: data }]							
+							});	
+							// table
+							var tb = $('table', content_con);
+							for (var i = 0; i < categories.length; i++) {
+								var tr = $('<tr />').appendTo(tb);
+								if(i % 2 == 1) tr.addClass('interval');
+								$('<td />').text(categories[i]).appendTo(tr);
+								$('<td />').text(data[i]).appendTo(tr);
+							};
+							var tr = $('<tr />').appendTo(tb);
+							$('<th />').text('合计').appendTo(tr);
+							$('<th />').text(a[0]).appendTo(tr);											
+						} else if (q.question_type == 7) {
+							// TimeBlank
+							if(!a) a = [0, {mean: "", histogram: [], segment: []}];
+							var categories = [], data = [];
+							switch(q.issue.format) {
+								case 0:
+									for(var t = 0; t < a[1]["segment"].length; t ++) {
+										var time = new Date();
+										time.setTime(a[1]["segment"][t] * 1000);
+										a[1]["segment"][t] = time.getFullYear();
+									};
+									break;
+								case 1:
+									for(var t = 0; t < a[1]["segment"].length; t ++) {
+										var time = new Date();
+										time.setTime(a[1]["segment"][t] * 1000);
+										a[1]["segment"][t] = time.getFullYear() + '/' + (time.getMonth() + 1);
+									};
+									break;
+								case 2:
+									for(var t = 0; t < a[1]["segment"].length; t ++) {
+										var time = new Date();
+										time.setTime(a[1]["segment"][t] * 1000);
+										a[1]["segment"][t] = time.getFullYear() + '/' + (time.getMonth() + 1) + '/' + time.getDate();
+									};
+									break;
+								case 3:
+									for(var t = 0; t < a[1]["segment"].length; t ++) {
+										var time = new Date();
+										time.setTime(a[1]["segment"][t] * 1000);
+										var hour = String(time.getHours());
+										if(hour.length == 1)
+											hour = '0' + hour;
+										var minute = String(time.getMinutes());
+										if(minute.length == 1)
+											minute = '0' + minute;
+										a[1]["segment"][t] = time.getFullYear() + '/' + (time.getMonth() + 1) + '/' + time.getDate() + ' ' 
+											+ hour + ':' + minute;
+									};
+									break;
+								case 4:
+									for(var t = 0; t < a[1]["segment"].length; t ++) {
+										var time = new Date();
+										time.setTime(a[1]["segment"][t] * 1000);
+										a[1]["segment"][t] = (time.getMonth() + 1) + '/' + time.getDate();
+									};
+									break;
+								case 5:
+									for(var t = 0; t < a[1]["segment"].length; t ++) {
+										var time = new Date();
+										time.setTime(a[1]["segment"][t] * 1000);
+										var hour = String(time.getHours());
+										if(hour.length == 1)
+											hour = '0' + hour;
+										var minute = String(time.getMinutes());
+										if(minute.length == 1)
+											minute = '0' + minute;
+										a[1]["segment"][t] = hour + ':' + minute;
+									};
+									break;
+								case 6:
+									for(var t = 0; t < a[1]["segment"].length; t ++) {
+										var time = new Date();
+										time.setTime(a[1]["segment"][t] * 1000);
+										var hour = String(time.getHours());
+										if(hour.length == 1)
+											hour = '0' + hour;
+										var minute = String(time.getMinutes());
+										if(minute.length == 1)
+											minute = '0' + minute;
+										var second = String(time.getSeconds());
+										if(second.length == 1)
+											second = '0' + second;
+										a[1]["segment"][t] = hour + ':' + minute + ':' + second;
+									};
+									break;
+							}
+							for(var i = 0; i < a[1]["histogram"].length; i ++) {
+								data.push(a[1]["histogram"][i]);
+								if(i == 0)
+									categories.push(a[1]["segment"][i] + "之前（含）")
+								else if(i == a[1]["segment"].length)
+									categories.push(a[1]["segment"][i-1] + "之后")
+								else
+									categories.push(a[1]["segment"][i-1] + "至" + a[1]["segment"][i] + "（含）");
+							};
+							// chart
+							var chart = new Highcharts.Chart({
+								chart: { renderTo: q._id + '_chart', type: 'column' },
+								title: { text: '' },
+								colors: COLORS,
+								xAxis: { categories: categories},
+								yAxis: { title: { text: "" }, allowDecimals: false },
+								plotOptions: {column: {dataLabels: {enabled: true}}},
+								series: [{ name: "选择人数", data: data }]							
+							});	
+							// table
+							var tb = $('table', content_con);
+							for (var i = 0; i < categories.length; i++) {
+								var tr = $('<tr />').appendTo(tb);
+								if(i % 2 == 1) tr.addClass('interval');
+								$('<td />').text(categories[i]).appendTo(tr);
+								$('<td />').text(data[i]).appendTo(tr);
+							};
+							var tr = $('<tr />').appendTo(tb);
+							$('<th />').text('合计').appendTo(tr);
+							$('<th />').text(a[0]).appendTo(tr);											
+						} else if (q.question_type == 4) {
+							// EmailBlank
+							if(!a) a = [0, {}];
+							var categories = [], data = [];
+							for(var mail in a[1]) {
+								categories.push(mail.replace(/_/g, "."));
+								data.push(a[1][mail]);
+							};
+							// chart
+							var chart = new Highcharts.Chart({
+								chart: { renderTo: q._id + '_chart', type: 'column' },
+								title: { text: '' },
+								colors: COLORS,
+								xAxis: { categories: categories,
+									labels: {formatter: function() {
+										if(this.value != undefined) {
+											var cl = categories.length;
+											if(cl < SUPPORTED_LABEL_LENGTH.length) {
+												if(this.value.length < SUPPORTED_LABEL_LENGTH[cl])
+													return this.value
+												else
+													return this.value.substr(0, SUPPORTED_LABEL_LENGTH[cl]) + '...';
+											} else
+												return this.value.substr(0,2) + '...';
+										}
+									}}
+								},
+								yAxis: { title: { text: "" }, allowDecimals: false },
+								plotOptions: {column: {dataLabels: {enabled: true}}},
+								series: [{ name: "选择人数", data: data }]							
+							});
+							// table
+							var tb = $('table', content_con);
+							for (var i = 0; i < categories.length; i++) {
+								var tr = $('<tr />').appendTo(tb);
+								if(i % 2 == 1) tr.addClass('interval');
+								$('<td />').text(categories[i]).appendTo(tr);
+								$('<td />').text(data[i]).appendTo(tr);
+							};
+							var tr = $('<tr />').appendTo(tb);
+							$('<th />').text('合计').appendTo(tr);
+							$('<th />').text(a[0]).appendTo(tr);
+						} else if (q.question_type == 8) {
+							// AddressBlank
+							if(!a) a = [0, {}];
+							var categories = [], locations = [];
+							for(var address in a[1]) {
+								categories.push(address);
+								locations.push(a[1][address]);
+							};
+							// chart
+							var mc = [];
+							var chart = $.od.odBmap({id_name: "chart-map", width: 520, height: 300});
+							chart.appendTo('#' + q._id + '_chart');
+							chart.odBmap('init');
+							for(var x = 0; x < locations.length; x ++) {
+								var location = locations[x][1].split(" - ").join("");
+								var lat = Number(locations[x][2]["lat"]);
+								var lng = Number(locations[x][2]["lng"]);
+								var count = String(locations[x][0]);
+								chart.odBmap("setMarkerLL", location, "选择人数", count, lat, lng);
+							};
+							// table
+							var tb = $('table', content_con);
+							for (var i = 0; i < categories.length; i++) {
+								var tr = $('<tr />').appendTo(tb);
+								if(i % 2 == 1) tr.addClass('interval');
+								$('<td />').text(locations[i][1].split(" - ").join("")).appendTo(tr);
+								$('<td />').text(locations[i][0]).appendTo(tr);
+							};
+							var tr = $('<tr />').appendTo(tb);
+							$('<th />').text('合计').appendTo(tr);
+							$('<th />').text(a[0]).appendTo(tr);
+						} else if (q.question_type == 11) {
+							//ConstSum
+							if(!a) a = [0, {}];
+							var categories = [], data = [];
+							var items = [];
+							for(var m = 0; m < q.issue.items.length; m ++)
+								items.push(q.issue.items[m]);
+							if(q.issue.other_item.has_other_item) 
+								items.push(q.issue.other_item);
+							for (var i = 0; i < items.length; i++) {
+								categories.push(items[i].content.text);
+								var a_count = 0;
+								if(a[1][items[i].id] != undefined)
+									a_count = a[1][items[i].id];
+								data.push(Number(a_count.toFixed(1)));
+							};
+							// chart 
+							var chart = new Highcharts.Chart({
+								chart: { renderTo: q._id + '_chart' },
+								title: { text: '' },
+								colors: COLORS,
+								tooltip: {
+									pointFormat: '{series.name}: <b>{point.percentage}%</b>'
+								},
+								plotOptions: {
+									pie: { allowPointSelect: true, cursor: 'pointer', 
+										dataLabels: {formatter: function() {
+											if(this.point.name != undefined) {
+												var cl = categories.length;
+												if(cl < SUPPORTED_LABEL_LENGTH.length) {
+													if(this.point.name.length < SUPPORTED_LABEL_LENGTH[cl])
+														return this.point.name + ': ' + this.percentage.toFixed(1) + '%'
+													else
+														return this.point.name.substr(0, SUPPORTED_LABEL_LENGTH[cl]) + '...' + ': ' + this.percentage.toFixed(1) + '%';
+												} else
+													return this.point.name.substr(0,2) + '...' + ': ' + this.percentage.toFixed(1) + '%';
+											}
+										}}
+									}
+								},
+								series: [{
+									type: 'pie',
+									name: '平均比重',
+									data: _.zip(categories, data)
+								}]
+							});
+							// table
+							var tb = $('table', content_con);
+							tb.find("th").eq(1).text("平均比重");						
+							for (var i = 0; i < categories.length; i++) {
+								var tr = $('<tr />').appendTo(tb);
+								if(i % 2 == 1) tr.addClass('interval');
+								$('<td />').text(categories[i]).appendTo(tr);
+								$('<td />').text(data[i] + '%').appendTo(tr);
+							};
+							var tr = $('<tr />').appendTo(tb);
+							$('<th />').text('答题人数').appendTo(tr);
+							$('<th />').text(a[0]).appendTo(tr);						
+						} else if (q.question_type == 12) {
+							// Sort
+							if(!a) a = [0, {}];
+							var categories = [], series = [];
+							var items = [];
+							for(var m = 0; m < q.issue.items.length; m ++)
+								items.push(q.issue.items[m]);
+							if(q.issue.other_item.has_other_item) 
+								items.push(q.issue.other_item);
+							var num = 1;
+							for(var id in a[1]) {
+								categories.push("第" + num + "位");
+								var spectrum = {
+									name: "",
+									data: a[1][id] || []
+								};
+								for(var i = 0; i < items.length; i ++)
+									if(items[i]["id"] == id) {
+										spectrum["name"] = items[i].content.text;
+										break;
+									};
+								series.push(spectrum);
+								num ++;
+							};
+							// chart
+							var chart = new Highcharts.Chart({
+								chart: { renderTo: q._id + '_chart', type: 'column' },
+								title: { text: '' },
+								colors: COLORS,
+								xAxis: { categories: categories},
+								yAxis: { min: 0, title: { text: "" }, allowDecimals: false },
+								plotOptions: {column: {dataLabels: {enabled: true}}},
+								series: series							
+							});
+							// table
+							var tb = $('table', content_con);
+							tb.find("th").first().attr("colspan", "2");
+							for (var i = 0; i < categories.length; i++) {
+								for(var j = 0; j < series.length; j ++) {
+									var tr = $('<tr />').appendTo(tb);
+									if(j == 0) 
+										$('<td rowspan="' + series.length + '" />').text(categories[i]).appendTo(tr);					
+									if(j % 2 == 1) tr.addClass('interval');
+									$('<td />').text(series[j]["name"]).appendTo(tr);
+									$('<td />').text(series[j]["data"][i]).appendTo(tr);								
+								};
+							};
+							var tr = $('<tr />').appendTo(tb);
+							$('<th colspan="2" />').text('人数合计').appendTo(tr);
+							$('<th />').text(a[0]).appendTo(tr);						
+						} else if (q.question_type == 17) {
+							// Scale
+							// if(!a) a = [0, {}];
+							// var categories = [];
+							// var series = [
+							// 	{name: "回答人数", data: [], yAxis: 0},
+							// 	{name: "平均得分", data: [], yAxis: 1}
+							// ];
+							// var items = q.issue.items || [];
+							// for(var i = 0; i < items.length; i ++) {
+							// 	categories.push(items[i].content.text);
+							// 		if(a[1][items[i].id] != undefined) {
+							// 		series[0]["data"].push(a[1][items[i].id][0]);
+							// 		if(a[1][items[i].id][0] != 0)
+							// 			series[1]["data"].push(Number(a[1][items[i].id][1].toFixed(1)))
+							// 		else
+							// 			series[1]["data"].push(0);							
+							// 	};
+							// };
+							// // chart
+							// var chart = new Highcharts.Chart({
+							// 	chart: { renderTo: q._id + '_chart', type: 'line' },
+							// 	title: { text: '' },
+							// 	colors: COLORS,
+							// 	xAxis: { categories: categories,
+							// 		labels: {formatter: function() {
+							// 			if(this.value != undefined) {
+							// 				var cl = categories.length;
+							// 				if(cl < SUPPORTED_LABEL_LENGTH.length) {
+							// 					if(this.value.length < SUPPORTED_LABEL_LENGTH[cl])
+							// 						return this.value
+							// 					else
+							// 						return this.value.substr(0, SUPPORTED_LABEL_LENGTH[cl]) + '...';
+							// 				} else
+							// 					return this.value.substr(0,2) + '...';
+							// 			}
+							// 		}}
+							// 	},
+							// 	yAxis: [
+							// 		{ min: 0, title: { text: "样本数量" }, allowDecimals: false },
+							// 		{ min: 0, title: { text: "平均得分" }, allowDecimals: true, opposite: true }
+							// 	],
+							// 	tooltip: {
+							// 		formatter: function() {return ''+ this.x +': '+ this.y;}
+					  //           },
+							// 	plotOptions: {line: {dataLabels: {enabled: true}}},
+							// 	series: series							
+							// });
+							// // table
+							// var tb = $('table', content_con);
+							// var $score = $('<th />').text('平均得分').appendTo($('tr', tb));
+							// for (var i = 0; i < categories.length; i++) {
+							// 	var tr = $('<tr />').appendTo(tb);
+							// 	if(i % 2 == 1) tr.addClass('interval');
+							// 	$('<td />').text(categories[i]).appendTo(tr);
+							// 	$('<td />').text(series[0]["data"][i]).appendTo(tr);
+							// 	$('<td />').text(series[1]["data"][i]).appendTo(tr);
+							// };
+							// var tr = $('<tr />').appendTo(tb);
+							// $('<th />').text('回答数量').appendTo(tr);
+							// $('<th colspan="2" />').text(a[0]).appendTo(tr);						
+						} else if (q.question_type == 2 || q.question_type == 5 || q.question_type == 6) {
+							// TextBlank, UrlBlank, PhoneBlank
+							if(!a) a = [0, []];
+							content_con.empty();
+							content_con.css("height", "300px");
+							content_con.css("overflow", "auto");
+							for(var tb = 0; tb < a[1].length; tb ++) {
+								var $p = $('<p />');
+								$p.addClass('blanks').text(a[1][tb]).appendTo(content_con);								
+							}
+
+						} 
+					}
+				};
+			}
+		});
+	};
+
+	/* ===========================
+	 * Get job progress
+	 * =========================== */
+	var pb = $.od.odProgressbar({ width: 300 });
+	pb.appendTo('#progress > div');
+	function startAnalysis(job_id) {
+		if(!job_id) {
+			pb.odProgressbar('destroy');
+			$('#progress').text('加载数据出错');
+			return;
+		};
+		$.getJSON('/jobs/' + job_id + '.json', function(retval) {
+			if(retval.success && retval.value >= 0) {
+				pb.odProgressbar('option', 'value', retval.value);
+				if(retval.value >= 1) {
+					// framework
+					$('#progress').remove();
+					$('#result').show();
+					// statistic
+					loadStats(job_id);
+					// datalist and spss/excel button
+					loadDatalist(job_id, 1);
+					var export_excel_btn = $('.derive-excel').off('click').click(function() { 
+						exportResult(job_id, 'excel'); 
+					});
+					var export_spss_btn = $('.derive-button').off('click').click(function() { 
+						exportResult(job_id, 'spss'); 
+					});
+					// report
+					$('#export_word').off('click').click(function() {
+						exportReport(job_id, 'word');
+					});
+					$('#export_ppt').off('click').click(function() {
+						exportReport(job_id, 'ppt');
+					});
+					$('#export_pdf').off('click').click(function() {
+						exportReport(job_id, 'pdf');
+					});
+					// answers
+					loadAnswers(job_id, 0);
+					$('ul.survey-pages li').click(function() {
+						loadAnswers(job_id, $(this).index());
+					});
+				} else {
+					setTimeout(function() { startAnalysis(job_id); }, TIME_STEP);
+				}
+			}
+		});
+	}
+	startAnalysis(window.job_id);
+});

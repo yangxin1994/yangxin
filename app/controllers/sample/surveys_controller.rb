@@ -1,57 +1,110 @@
-# encoding: utf-8
-require 'array'
-require 'error_enum'
-require 'quill_common'
-class Sample::SurveysController < ApplicationController
-  #############################
-  #功能:用户点击“立即参与”，获取最新的热点小调查
-  #http method：get
-  #传入参数: 无
-  #返回的参数:调查问卷的id
-  #############################	
-  def get_hot_spot_survey
-    #查询条件:必须是发布在社区的调查问卷，必须是热点小调查，必须是已经发布的问卷,必须是可推广的调查问卷
-    @hot_survey = Survey.quillme_promote.quillme_hot.opend.first
-    render_json { @hot_survey }
-  end
+class Sample::SurveysController < Sample::SampleController
 
+	layout :resolve_layout
 
-  def get_recommends
-    # status 1 or 2
-    #reward_type should be [1,2]
-    surveys = Survey.get_recommends(params[:status],params[:reward_type],params[:answer_status],@current_user,params[:home_page])
-    survey_obj = auto_paginate(surveys) do |paginated_surveys|
-      paginated_surveys.map { |e| e.excute_sample_data(@current_user) } 
-    end
-    render_json_auto survey_obj
-  end
+	def initialize
+		super('survey')
+	end
 
-  def get_reward_type_count
-    data_obj = Survey.get_reward_type_count(params[:status])
-    render_json_auto data_obj
-  end
-
-
-  def show
-    @survey = Survey.find_by_id(params[:id])
-    render_json { @survey }
-  end
-
-  def list_spreaded_surveys
-    render_json_auto ErrorEnum::REQUIRE_LOGIN if @current_user.nil?
-    surveys_with_spreaded_number = auto_paginate @current_user.survey_spreads.desc(:created_at) do |paginated_survey_spreads|
-      paginated_survey_spreads.map do |e|
-        e.survey.info_for_sample.merge({"spread_number" => e.times})
-      end
-    end
-    render_json_auto surveys_with_spreaded_number and return
-  end
-
-	def estimate_answer_time
-		survey = Survey.normal.find_by_id(params[:id])
-		respond_to do |format|
-			format.json	{ render_json_auto(survey.nil? ? ErrorEnum::SURVEY_NOT_EXIST : survey.estimate_answer_time) and return }
+	# PAGE
+	def index
+		@surveys = Survey.get_recommends(params[:status],
+			params[:reward_type],
+			params[:answer_status],
+			current_user,
+			nil)
+		@surveys = @surveys.map { |e| e.excute_sample_data(current_user) }
+		@surveys = auto_paginate @surveys
+		date = Date.today
+		today_start = Time.local(date.year, date.month, date.day,0,0,0)
+		today_end   = Time.local(date.year, date.month, date.day+1,0,0,0)
+		@answer_count = Answer.where(:created_at.gte => today_start,:created_at.lt => today_end).count
+		date = Date.today
+		today_start = Time.local(date.year, date.month, date.day,0,0,0)
+		today_end   = Time.local(date.year, date.month, date.day+1,0,0,0)
+		@spread_count = Answer.where(:created_at.gte => today_start,:created_at.lt => today_end,:introducer_id.ne => nil).count
+		@disciplinal = PunishLog.desc(:created_at).limit(3).map do |log|
+			log['avatar'] = log.user.avatar.present? ? log.user.avatar.picture_url : User::DEFAULT_IMG
+			log['username'] = log.user.try(:nickname)
+			log
+		end
+		@reward_count = Survey.get_reward_type_count(params[:status])
+		@fresh_news = Log.get_new_logs(3, 1).each do |log|
+			log['avatar'] = log.user.avatar.present? ? log.user.avatar.picture_url : User::DEFAULT_IMG
+			log['username'] = log.user.try(:nickname)
+			log      
 		end
 	end
 
+	#重新生成订阅 短信激活码  或者邮件
+	def make_rss_activate
+		retval = User.create_rss_user(params[:rss_channel], "#{request.protocol}#{request.host_with_port}/surveys/active_rss_able")
+		render :json => retval and return
+	end
+
+
+	def make_rss_mobile_activate
+		user   = User.find_by_mobile(params[:rss_channel])
+		return ErrorEnum::USER_NOT_EXIST  if user.nil?
+		retval = user.make_mobile_rss_activate(params[:code])
+		render_json_auto retval and return
+	end
+
+	#订阅邮件 callback链接
+	def active_rss_able
+		begin
+			activate_info_json = Encryption.decrypt_activate_key(params[:key])
+			activate_info = JSON.parse(activate_info_json)
+			retval = User.activate_rss_subscribe(activate_info)
+			@success = false and return if retval != true
+			@success = true
+			@email = activate_info["email"]
+		rescue
+			@success = false and return
+		end
+	end
+
+	#取消订阅 
+	def cancel_subscribe
+		begin
+			activate_info_json = Encryption.decrypt_activate_key(params[:key])
+			activate_info = JSON.parse(activate_info_json)
+			retval = User.cancel_subscribe(activate_info)
+		rescue
+			render_500
+		end
+	end
+
+	def show		
+	end	
+
+	# Show survey result
+	def result
+		@survey = Survey.find_by_id(params[:id])
+		# @survey = @client.show(params[:id])
+		render_404 and return if !@survey.nil?
+
+		# get survey questions
+		@survey_questions = { :pages => [] }
+		page_client = Quill::PageClient.new(session_info, @survey._id.to_s)
+		(@survey.pages || []).each_with_index do |page, i|
+			@survey_questions[:pages] << @survey.show_page(params[:id].to_i)
+		end
+
+		@job_id = @survey.analysis(-1, params[:false])
+		@job_id = nil if @job_id.start_with?("error_")
+
+		render :layout => 'app'
+	end
+
+	def resolve_layout
+  		case action_name
+  		when "active_rss_able"
+  			"sample_account"
+  		when "cancel_subscribe"
+  			"sample_account"
+  		else
+  			"sample"
+  		end
+  	end
 end

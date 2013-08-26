@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=7"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7"/>
+	<title>电子杂志</title>
+	<%= yield :head %>
+
+</head>
+<body>
+<div class="zine fix">
+	<div class="zine-logo">
+		<img src="/assets/logo-cn.png" alt="优数调研">
+		<a href="http://oopsdata.com/contact" class="phone-number r">
+			<span class="ico-phone"></span>
+			<span class="number">联系我们</span>
+		</a>
+	</div>
+	<div class="content">
+		<h4>智能数据挖掘 智慧管理咨询</h4>
+		<p class="description">优数咨询是国内领先的网络调研公司和管理咨询机构，为您提供优质的网络调研和管理咨询服务。</p>
+		<label class="showInEdit">邮件主题：<input id="etitle" type="text" value="" /></label>
+		<button class="showInEdit od-button" id="addColumn">添加栏目</button>
+
+		<div id="article-end" style="display:none;"></div>
+		<div class="article" style="background:#f5f5f5;">
+			<h3>关于我们</h3>
+			<div class="article-txt">
+				<p>优数咨询是国内领先的网络调研公司，拥有自主知识产权的网络问卷调查系统、研究报告自动导出系统、社交网络用户调研系统、神秘顾客暗访解决方和移动终端面访管理系统，为您开展问卷调查，筛选深度访谈和座谈会对象、开展神秘顾客暗访提供最为多样化的智能调研平台。</p>
+				<p>优数咨询是国内领先的智慧管理咨询机构，致力于促进传统民意调查、市场研究、管理咨询方法与IT技术的有机融合，在智慧旅游管理、智慧电力营销管理、智慧市政管理等领积累了丰富的项目经验。</p>
+			</div>
+			<h3 style="margin-top:30px;">产品介绍</h3>
+			<div class="article-txt">
+				<h2 class="title"><a href="javascript:void(0);">OopsQ网络调研平台</a></h2>
+				<p class="fix">
+				OopsQ 智能网络调研平台致力于打造科学严谨的网络调研系统，借助社会化媒体、云计算、可视化分析等信息技术改变传统调研模式，从调研设计、样本筛选、数据采集、质量控制、数据分析、报告生成等方面提升调研的科学性和严谨性，让调研更精准、更科学。
+				</p>
+				<p>
+					<a style="display:inline-block;margin-right:10px;" href="http://oopsdata.com/oopsr">OopsR 报告智能分析云平台</a>
+					<a style="display:inline-block;margin-right:10px;" href="http://oopsdata.com/oopss">OopsS 社交网络用户调研系统</a>
+					<a style="display:inline-block;margin-right:10px;" href="http://oopsdata.com/oopsi">OopsI 移动终端面访管理系统</a>
+					<a style="display:inline-block;margin-right:10px;" href="http://oopsdata.com/oopsm">OopsM 神秘客暗访系统</a>
+					<a style="display:inline-block;margin-right:10px;" href="http://oopsdata.com/travel">智慧旅游管理</a>
+					<a style="display:inline-block;margin-right:10px;" href="http://oopsdata.com/electricity">智慧电力服务品质管理</a>
+					<a style="display:inline-block;margin-right:10px;" href="http://oopsdata.com/city">智慧市政管理</a>
+				</p>
+			</div>
+			<img style="margin-top:40px;" src="/assets/zine/5.png" alt="">
+				<p><h2 class="title" style="font-size:16px;">联系我们</h2><br>
+				电话：(+86)-010-8243-2259 <br>
+				邮件：<a href="http://oopsdata.com/contact">sales@oopsdata.com</a></p>
+		</div>
+	</div>
+	<div class="footer fix">
+		<a href="http://oopsdata.com/contact" class="phone-number l">
+			<span class="number" style="margin-top:-5px;">联系我们</span>
+			<span class="ico-phone" style="bottom: -8px;left: 15px;"></span>
+		</a>
+		<span>了解更多请访问 <a href="http://oopsdata.com/">www.oopsdata.com</a></span>
+	</div>
+	<div class='team'>
+		如果您错误的接收到了电子杂志，或者不想接受我们的电子杂志，请 
+		<a href="javascript:void(0);">取消订阅</a>
+	</div>
+	<%= yield %>	
+</div>
+</body>
+</html>

@@ -1,32 +1,70 @@
-class Admin::GiftsController < Admin::ApplicationController
+class Admin::GiftsController < Admin::AdminController
 
-	before_filter :check_gift_existence, :only => [:show, :update, :destroy]
+  layout "layouts/admin-todc"
 
-	def check_gift_existence
-		@gift = Gift.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::GIFT_NOT_EXIST) and return if @gift.nil?
-	end
+  def index
+    @gifts = auto_paginate Gift.search_gift(params[:title], params[:status].to_i, params[:type].to_i)
+  end
 
-	def index
-		@gifts = Gift.search_gift(params[:title], params[:status].to_i, params[:type].to_i)
-		render_json_auto(auto_paginate(@gifts)) and return
-	end
+  def show
+    #render :json => @gift_client.show(params[:id])
+    @gift = Gift.find(params[:id])
+    @gift['photo_url'] = @gift.photo.try 'value'
+  end
 
-	def show
-		@gift['photo_url'] = @gift.photo.try 'value'
-		render_json_auto(@gift)
-	end
+  def new
+    @gift = {}
+  end
 
-	def create
-		@gift = Gift.create_gift(params[:gift])
-		render_json_auto(@gift) and return
-	end
+  def create
+    photo = ImageUploader.new
+    photo.store!(params[:gift][:photo])
 
-	def update
-		render_json_auto(@gift.update_gift(params[:gift])) and return
-	end
+    params[:gift].delete(:photo)
+    params[:gift][:photo_url] = photo.url
 
-	def destroy
-		render_json_auto(@gift.delete_gift) and return
-	end
+    @gift = Gift.create(params[:gift])
+    @gift.update_gift(params[:gift])
+    if @gift.created_at
+      redirect_to admin_gifts_path
+    else
+      render :new
+    end
+  end
+
+  def edit
+    @gift = Gift.find(params[:id])
+    @gift['photo_url'] = @gift.photo.try 'value'
+  end
+
+  def update
+    if params[:gift][:photo]
+      photo = ImageUploader.new
+      photo.store!(params[:gift][:photo])
+      params[:gift].delete(:photo)
+      params[:gift][:photo_url] = photo.url
+    end
+    @gift = Gift.find params[:id]
+    @gift.update_gift(params[:gift])
+    redirect_to edit_admin_gift_path(params[:id])
+  end
+
+  def destroy
+    render_json @gift = Gift.where(:_id =>params[:id]).first do |gift|
+      success_true gift.delete_gift
+    end
+  end
+
+  def outstock
+    render_json @gift = Gift.where(:_id =>params[:id]).first do |gift|
+      success_true gift.update_attributes(:status => 2)
+    end
+  end
+
+  def stockup
+    render_json @gift = Gift.where(:_id =>params[:id]).first do |gift|
+      success_true gift.update_attributes(:status => 1)
+    end
+  end
+
 end

@@ -1,0 +1,93 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/admin/samples-bundle" %>
+  <%= javascript_include_tag "pages/admin/samples/form-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/edit">
+    <i class="icon-chevron-right"></i>
+    基本属性
+    </a>
+  </li>
+  <li class="active">
+    <a href="/admin/samples/<%= params["id"] %>/answer_log">
+    <i class="icon-chevron-right"></i>
+    礼品兑换记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/point_log">
+      <i class="icon-chevron-right"></i>
+      积分变化记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/lottery_log">
+      <i class="icon-chevron-right"></i>
+      抽奖记录
+    </a>
+  </li>
+  <li class="active">
+    <a href="/admin/samples/<%= params["id"] %>/answer_log">
+      <i class="icon-chevron-right"></i>
+      回答历史记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/spread_log">
+      <i class="icon-chevron-right"></i>
+      问卷推广记录
+    </a>
+  </li>
+<% end %>
+<div>
+  <span>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown">⃞&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        <li><a href="?" class="select-all-btn"><input type="checkbox" value="">&nbsp;全部</a></li>
+        <li class="divider"></li>
+      </ul>
+    </div>
+    <form class="form-search" style="display:inline">
+      <div class="input-append">
+        <input type="text" name="title" class="span6 search-query">
+        <button type="submit" class="btn">Search</button>
+      </div>
+    </form>
+  </span>
+  <span class="pull-right">
+    <%= paginator_mini @answer_log %>
+  </span>
+</div>
+
+<div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>问卷标题</th>
+        <th>答案创建时间</th>
+        <th>结束答题时间</th>
+        <th>奖励方案</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @answer_log["data"].each_with_index do |log_item, i| %>
+      <tr>
+        <td><a href=""><%= log_item["title"] %> - <%= log_item["status"] %>- <%= log_item['reject_type'] %></a></td>
+        <td><%= log_item["created_at"] %></td>
+        <td>
+          <%= log_item['finished_at'] %>
+        </td>
+        <td>
+          <%= log_item['reward_type']  %>-
+          <%= log_item['reward_amount']  %>
+          
+        </td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

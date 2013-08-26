@@ -1,30 +1,34 @@
-# encoding: utf-8
-class Sample::GiftsController < ApplicationController
+# finish migrating
+class Sample::GiftsController < Sample::SampleController
 
-  #############################
-  #功能:获取热门兑换礼品列表
-  #http method：get
-  #传入参数: page(页数)，如果不需要分页的话，这个参数可以不传
-  #可能返回的参数:一个盛放礼品的列表
-  #############################		
-  def hotest
-    sort_type = params[:sort_type].present? ? params[:sort_type]  : 'exchange_count' 
-    @gifts = Gift.find_real_gift(sort_type)
-    @gifts = auto_paginate @gifts
-    render_json_auto(@gifts)
-  end
 
-  #############################
-  #功能:获取热门兑换礼品
-  #http method：get
-  #传入参数: 礼品的id
-  #可能返回的参数:一个具体的礼品对象
-  #############################		
-  def show
-    @gift = Gift.find_by_id(params[:id])
-    @gift[:photo_src] = @gift.photo.nil? ? Gift::DEFAULT_IMG : @gift.photo.picture_url 
-    render_json { @gift }
-  end
+	def index
+	    @sort_type = params[:sort_type].present? ? params[:sort_type]  : 'exchange_count' 
+	    params[:per_page] = 12
+	    @hotest_gifts = Gift.on_shelf.real.desc(@sort_type)
+		@hotest_gifts = auto_paginate(@hotest_gifts) do |e|
+			e.map { |e| e.info }
+		end
+		@gift_rank = Gift.on_shelf.real.desc(@sort_type).limit(5).map { |e| e.info }
+		@new_ex_history = Log.get_newest_exchange_logs
+	end
 
-  	
+	def get_special_type_data
+		@sort_type = params[:status].present? ? params[:status]  : 'exchange_count' 
+		params[:per_page] = 12
+		@hotest_gifts = Gift.on_shelf.real.desc(@sort_type)
+		@hotest_gifts = auto_paginate(@hotest_gifts) do |e|
+			e.map { |e| e.info }
+		end
+	end
+
+	def show
+		@gift_rank = Gift.on_shelf.real.desc(@sort_type).limit(5).map { |e| e.info }
+		@gift = Gift.find_by_id(params[:id])
+		render_404 if @gift.nil?
+		@gift[:photo_src] = @gift.photo.nil? ? Gift::DEFAULT_IMG : @gift.photo.picture_url 
+
+		@receiver_info = current_user.nil? ? nil : current_user.affiliated.try(:receiver_info) || {}
+
+	end
 end

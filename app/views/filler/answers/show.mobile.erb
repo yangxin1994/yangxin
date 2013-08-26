@@ -1,0 +1,29 @@
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/filler/answer-mobile" %>
+	<%= stylesheet_link_tag    "pages/filler/answer-mobile" %>
+
+	<script type="text/javascript">
+	jQuery(function($) {
+		var survey_model = new quill.models.Survey(<%= raw @survey.to_json %>);	
+		var survey_filler = new quill.views.SurveyFiller({
+			model: survey_model,
+			is_preview: <%=@is_preview %>,
+			reward: <%=@reward.nil? ? "null" : (raw @reward.to_json) %>,
+			answer_id: '<%="#{params[:id]}" %>',
+			data: <%=@data ? (raw @data.to_json) : 'null' %>,
+			signin: <%= user_signed_in %>
+		});
+	});
+	</script>
+<% end %>
+
+
+
+<h2 class="title"><%= @survey['title'] %></h2>
+<% if @survey['style_setting']['has_progress_bar'] %>
+<div class="progress" id="progress"><em style="width:100px;"></em>
+	<span class="progress-number" id="progress_txt"></span>
+</div>
+<% end %>
+
+<div id="f_body"></div>

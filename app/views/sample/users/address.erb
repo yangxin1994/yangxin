@@ -1,0 +1,93 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag  "pages/sample/users-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/sample/users-bundle","pages/sample/users_address-bundle", :media => "all" %>
+<% end %>
+
+<%= render "sample_nav", :@path => 'setting', :@text => "用户设置" %>
+
+<div class="inner-page main-content">
+    <!-- main -->
+    <div class="part-left">
+        <div class="setting tabs">
+            <div class="l">
+                <a href="/users/setting" class="tab <%= 'active' if action_name == 'basic_info' %>" id="tab-edit-info">个人资料</a>
+                <a href="/users/setting/avatar" class="tab <%= 'active' if action_name == 'avatar' %>" id="tab--edit-avatar">修改头像</a>
+                <a href="/users/setting/bindings" class="tab <%= 'active' if action_name == 'bindings' %>" id="tab-edit-bindings">帐户绑定</a>
+                <a href="/users/setting/address" class="tab <%= 'active' if action_name == 'address' %>" id="tab-edit-address">收货地址</a>
+                <a href="/users/setting/password" class="tab <%= 'active' if action_name == 'password' %>" id="tab-edit-password">修改密码</a>
+            </div>
+            <div style="clear:both;"></div>
+            <div class="nav2-dashed-line"></div>
+        </div>
+
+        <div style="clear:both;"></div>
+
+        <div id="address">
+            <div>
+                <div class="th receiver">
+                    <div class="title">收货人：</div>
+                    <input type="text" class="td2" id="receiver" value="<%= @receiver_info["receiver"] %>">
+                    <span class="alert-hide alert-receiver alert-error">请填写正确填写姓名，以保证收到订单</span>
+                </div>
+                <div  id="address-area" class="th pcas live_in">
+                    <input style="display: none;" id="address-code" value="<%= @receiver_info["address"].blank? ? -1 : @receiver_info["address"] %>"></input>
+                    <div class="title" style="position:relative; top: 3px\9;">所在地：</div>
+                    <div class="select provice td1">
+                        <div class="select-content"> <!-- 点击后请用js 加上 .active -->
+                            <span name="-1" class="select-txt">请选择..</span>
+                            <i class="triangle"></i>
+                        </div>  
+                        <ul class="w100">
+                            <!-- 最后一个li的class bbr -->
+                        </ul>
+                    </div>
+
+                    <div class="select city td1">
+                        <div class="select-content"> <!-- 点击后请用js 加上 .active -->
+                            <span name="-1" class="select-txt">请选择..</span>
+                            <i class="triangle"></i>
+                        </div>  
+                        <ul class="w200">
+                            <!-- 最后一个li的class bbr -->
+                        </ul>
+                    </div>
+
+                    <div class="select town td1">
+                        <div class="select-content"> <!-- 点击后请用js 加上 .active -->
+                            <span name="-1" class="select-txt">请选择..</span>
+                            <i class="triangle"></i>
+                        </div>  
+                        <ul class="w-max">
+                            <!-- 最后一个li的class bbr -->
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="th street">
+                    <div class="title">街道地址：</div>
+                    <textarea id="street"><%= @receiver_info["street_info"] %></textarea>
+                    <span style="vertical-align: top;" class="alert-hide alert-street alert-error">请填写能够接收订单的地址</span>
+                </div>
+            </div>
+
+            <div class="th phone">
+                <div class="title">手机号：</div>
+                <input type="text"  class="td2" id="mobile" value="<%= @receiver_info["mobile"] %>"/>
+                <div class="title">邮政编码：</div>
+                <input type="text" class="td" id="postcode" value="<%= @receiver_info["postcode"] %>"/>
+            </div>
+
+            <div style="height: 20px;">
+                <span style="margin-left: 110px;" class="alert-hide alert-mobile alert-error">请填写正确手机号码</span>
+                <span style="margin-left: 160px;" class="alert-hide alert-postcode alert-error">请填写正确邮政编码</span>
+            </div>
+            
+            <div class="actions" style="margin-top: 10px;">
+                <input class="btn btn-submit" type="button" value="确认提交"/>
+            </div>
+        </div>
+    </div>
+
+    <!-- user tabs -->
+    <%= render "right_partial" %>
+</div>

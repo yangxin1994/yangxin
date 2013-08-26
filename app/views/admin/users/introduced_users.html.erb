@@ -1,0 +1,63 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/users-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/users-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+<%if @users.success %>
+<div class="users"> 
+	<div class="title">
+		<h5>邀请的好友<h5>
+		<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/users/<%=params[:id]%>">返回个人用户管理</a><h5>
+	</div>
+	
+	<div class="table">
+		<div class="head">
+			<h5 class="iFrames">
+				列表
+			</h5>
+		</div>
+				
+		<table cellspacing="0" cellpadding="0" border="0" id="example" class="display">
+			<thead>
+				<tr>
+					<th class="" rowspan="1" colspan="1" style="width: 10px;">
+						<input class="check-all" type="checkbox" />
+					</th>
+					<th>邮箱</th>
+					<th>注册时间</th>
+					<th rowspan="1" colspan="1" style="width: 60px;"></th>
+				</tr>
+			</thead>
+	 		
+			<tbody>
+				<% @users.value['data'].to_a.each do |user|%>
+					<tr id="<%= user['_id']%>">
+						<td><input type="checkbox" /></td>
+					  	<td>                           
+                        	<a href="/admin/users/<%= user['_id']%>" class="show" title="点击查看详细">
+                        		<%= truncate(user["email"], :length => 24, :omission => "...") %></a>
+                        </td>
+                        <td><%= user['registered_at'] == 0 ? '' : Time.at(user["registered_at"]).to_s[0,16].gsub(/[T]/, ' ') %></td>
+						<td>
+							<!-- Icons -->
+							 <a href="/admin/users/<%= user['_id']%>" class="show" title="编辑"><img src="../../../assets/od-icon/pencil.png" alt="编辑" /></a> 
+						</td>
+					</tr>
+				<%- end %>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="6"><%= paginator_tag @users.value %></td>
+				</tr>
+			</tfoot>	
+		</table>
+	</div>
+</div>
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @users.value %></p>
+</div>
+<%end%>	

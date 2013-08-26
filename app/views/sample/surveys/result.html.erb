@@ -1,0 +1,79 @@
+<%
+	@page_title = "查看问卷结果 - #{@survey['title']}"
+%>
+
+<% content_for :app_head do %>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=1.4"></script>
+	<script type="text/javascript">
+	jQuery(function($) {
+		window.survey_id = <%= raw @survey['_id'].to_json %>;
+		window.survey_title = <%= raw @survey['title'].to_json %>;
+		window.survey_questions = <%= raw @survey_questions.to_json %>;
+		window.job_id = <%= raw @job_id.to_json %>;
+	});
+	</script>
+	<%= javascript_include_tag "pages/sample/surveys_result-bundle" %>
+	<%= stylesheet_link_tag    "pages/sample/surveys_result-bundle" %>
+<% end %>
+
+<% content_for :app_content do %>
+
+<div id='sf'>
+	
+<div id='sf_banner'>
+	<div class='sf_banner_top'>
+		<div class='inner'>
+			<a id='logo' href="http://oopsdata.com">
+				<img src="/assets/filler/default/logo.png" />
+			</a>
+		</div>
+	</div>
+	<div class='sf_banner_bottom'></div>
+</div>
+
+<div id='sf_menus'>
+	<div id='sf_menus_sticky'>
+		<div class='inner'>
+			<h1 title='<%= @survey['title'] %>'><%= @survey['title'] %></h1>
+			<div class='export-con'>
+				<button class='word' title='导出为 word' disabled ></button>
+				<button class='pdf' title='导出为 pdf' disabled ></button>
+			</div>
+			<ol>
+				<li class='weibo' title='分享到新浪微博'></li>
+				<li class='tengxun' title='分享到腾讯微博'></li>
+			</ol>
+			<div class='stat-con'></div>
+		</div>
+	</div>
+</div>
+
+<div id='result'>
+	<% if @survey['publish_result'] %>
+		<% if @job_id.nil? %>
+		<div class='page'>
+			<div class='q-filler'>
+				<div class='error'>
+					加载结果报告失败，请<a href=''>刷新</a>重试。
+				</div>
+			</div>
+		</div>
+		<% else %>
+		<% end %>
+	<% else %>
+	<div class='page'>
+		<div class='q-filler'>
+			<div class='error'>
+				对不起，您无权限查看本问卷结果报告。
+			</div>
+		</div>
+	</div>
+	<% end %>
+</div>
+
+<div id='sf_footer'>
+	<a href='/' target="_blank">调查数据来源 <%= corp_name %></a>
+</div>
+
+</div>
+<% end %>

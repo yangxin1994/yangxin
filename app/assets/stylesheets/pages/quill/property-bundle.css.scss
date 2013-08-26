@@ -1,0 +1,33 @@
+//=require ui/widgets/od_popup
+@import "common";
+
+.property {
+	form {
+		margin-left: 35px;
+		padding-top: 10px;
+		padding-bottom: 40px;
+		h2 {
+			font: bold 14px '微软雅黑';
+			margin-bottom: 10px;
+			margin-top: 25px;
+		}
+		span {
+			input {
+				font: 12px '微软雅黑';
+				width: 570px;
+				height: 24px;
+			}
+			textarea {
+				width: 570px;
+				height: 100px;
+			}
+		}
+	}
+	.property-bottom {
+		margin: 0 auto;
+		button {
+			margin: 15px 0;
+			float: right;
+		}
+	}
+}

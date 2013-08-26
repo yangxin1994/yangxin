@@ -1,0 +1,85 @@
+		  <ul id="menu">
+			<li class="dash"><a href="#" title="" class="active"><span>管理面板</span></a></li>
+			<li class="graphs" id="nav-surveys"><a href="#" title="" class="exp"><span>调研管理</span></a>
+				<ul  class="sub">
+					<li><a href="<%=admin_reviews_path %>">审核问卷</a></li>
+					<li><a href="<%=admin_publishes_path %>?email=<%= current_user.email%>">管理问卷</a></li>
+					<li class="dn"><a href="<%=admin_costs_path %>">成本统计</a></li>
+					<li><a href="<%=admin_review_answers_path %>">审核答案</a></li>
+					<li><a href="<%=admin_template_questions_path %>">模板题</a></li>
+					<li><a href="<%=admin_quality_questions_path %>">质量控制题</a></li>
+					<li><a href="<%=admin_volunteer_surveys_path %>">样本背景调研</a></li>
+				</ul>
+			</li>
+			<li class="forms" id="nav-gifts"><a href="<%= admin_gifts_path %>" title="" class="exp"><span>礼品管理</span></a>
+				<ul  class="sub">
+					<li><a href="<%= admin_gifts_path %>">全部</a></li>
+          <li><a href="<%= admin_gifts_path %>?type=1">虚拟礼品</a></li>
+          <li><a href="<%= admin_gifts_path %>?type=2">实物礼品</a></li>
+          <li><a href="<%= admin_gifts_path %>?type=4">话费充值</a></li>
+          <li><a href="<%= admin_gifts_path %>?type=8">支付宝转账</a></li>
+          <li><a href="<%= admin_gifts_path %>?type=16">集分宝兑换</a></li>
+          <li><a href="<%= admin_gifts_path %>?type=32">Q币充值</a></li>
+					<li><a href="<%= admin_gifts_path %>/new">新建礼品</a></li>
+				</ul>
+			</li>
+			<li class="login" id="nav-prizes"><a href="#" title="" class="exp"><span>奖品管理</span></a>
+			  <ul class="sub">
+				<li><a href="<%= admin_prizes_path %>">全部奖品列表</a> </li>
+        <li><a href="<%= admin_prizes_path %>?type=1">虚拟奖品</a></li>
+        <li><a href="<%= admin_prizes_path %>?type=2">实物奖品</a></li>
+        <li><a href="<%= admin_prizes_path %>?type=4">话费充值</a></li>
+        <li><a href="<%= admin_prizes_path %>?type=8">支付宝转账</a></li>
+        <li><a href="<%= admin_prizes_path %>?type=16">集分宝兑换</a></li>
+        <li><a href="<%= admin_prizes_path %>?type=32">Q币充值</a></li>
+				<li><a href="<%= new_admin_prize_path %>">新建奖品</a> </li>
+			  </ul>
+			</li>
+			<li class="typo" id="nav-orders"><a href="#" title="" class="exp"><span>订单管理</span></a>
+			  <ul class="sub">
+				<li><a href="<%= admin_orders_path %>?scope=all">全部</a> </li>
+				<li><a href="<%= admin_orders_path %>?scope=need_verify">待审核</a> </li>
+				<li><a href="<%= admin_orders_path %>?scope=verified">审核通过</a> </li>
+				<li><a href="<%= admin_orders_path %>?scope=verify_failed">已拒绝</a> </li>
+				<li><a href="<%= admin_orders_path %>?scope=delivering">配送中</a> </li>
+				<li><a href="<%= admin_orders_path %>?scope=deliver_failed">配送失败</a> </li>
+				<li class="last"><a href="<%=admin_orders_path %>?scope=delivered">已完成</a> </li>
+			  </ul>
+			</li>
+			<li class="login" id="nav-users"><a href="tables.html" title="" class="exp"><span>用户管理</span></a>
+				<ul class="sub">
+					<li><a href="/admin/users/new">创建用户</a></li>
+          <li><%= link_to "样本数据统计",  admin_sample_stats_path %></li>
+          <li><%= link_to "样本属性管理", admin_sample_attributes_path %></li>
+					<% if current_user.user_role & 32 != 0 %>
+					<li><a href="/admin/users?role=64">所有用户</a></li>
+					<li><a href="/admin/users?role=32">超级管理员</a></li>
+					<li><a href="/admin/users?role=16">管理员</a></li>
+					<%else%>
+					<li><a href="/admin/users?role=64" title="非SuperAdmin，所有将不会显示admin及以上权限的用户！">所有</a></li>
+					<%end%>
+					<li><a href="/admin/users?role=8">问卷审核员</a></li>
+					<li><a href="/admin/users?role=4">答案审核员</a></li>
+					<li><a href="/admin/users?role=2">访问员</a></li>
+					<li><a href="/admin/users?role=1">答案录入员</a></li>
+					<li><a href="/admin/users?role=0">非管理人员</a></li>
+				</ul>
+			</li>
+			<li class="cal" id="nav-others"><a href="#" title="" class="exp"><span>消息管理</span></a>
+				<ul class="sub">
+					<li><a href="<%=admin_messages_path %>">消息管理</a></li>
+					<li><a href="<%=admin_announcements_path %>">公告管理</a></li>
+					<li><a href="<%=admin_advertisements_path %>">广告管理</a></li>
+					<li><a href="<%=admin_feedbacks_path %>">反馈管理</a></li>
+					<li><a href="<%=admin_faqs_path %>">FAQ管理</a></li>
+				</ul>
+			</li>
+			<li class="cal" id="nav-ejournals"><a href="#" title="" class="exp"><span>电子杂志管理</span></a>
+				<ul class="sub">
+					<li><a href="<%= admin_ejournals_path %>">电子杂志列表</a></li>
+					<li><a href="<%= new_admin_ejournal_path %>">新建电子杂志</a></li>
+					<li><a href="<%= admin_subscribers_path %>">订阅者管理</a></li>
+					<li><a href="<%= new_admin_subscriber_path %>">新增订阅者</a></li>
+				</ul>
+			</li>
+		</ul>

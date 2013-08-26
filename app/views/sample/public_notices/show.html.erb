@@ -1,0 +1,81 @@
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/sample/public_notices-bundle" %>
+	<%= stylesheet_link_tag "pages/sample/public_notices-bundle", :media => "all" %>
+<% end %>
+
+<div class="site_nav"><span class="biao"></span><a href="<%= home_path %>"><span>首页</span></a><span>></span><a href="<%= public_notices_path %>"><span>站内公告</span></a>><span class="curr">公告详情</span></div>
+<% 
+  @pn = @public_notice['current_notice']
+  @current_v = @public_notice["#{@pn['_id']}"]
+
+  @prev_v =  @current_v.to_i - 1
+  @next_v =   @current_v.to_i + 1
+  @prev_notice = @public_notice.key(@prev_v)
+  @next_notice = @public_notice.key(@next_v)
+
+%>
+<div class="inner-page">
+  <div class="pub_list">
+  	<div class="pub_inner">
+  		<div class="pub_title"><%= @pn['title']%></div>
+  		<div class="pub_detail">
+  		  <div class= "pub_at">
+  		    <span class="">发表于:</span>
+  		    <span><%= Date.strptime("#{@pn['created_at']}", "%Y-%m-%d") %></span>
+  	      </div>
+  		  <div class="share_to">
+  		    <span class="share">分享到:</span>
+  		    <a href="javascript:void(0);" class="SinaWeibo"><span class="sina"></span></a>
+  		    <a href="javascript:void(0);" class="TencentWeibo"><span class="tecent"></span></a>
+  		    <a href="javascript:void(0);" class="Douban"><span class="dou"></span></a>
+  	      </div>  	    
+  	    </div>
+  	    <div class="content">
+  	    	<%= raw(@pn['content']) %>
+  	    </div> 
+        <div class="page_nav">
+          <% if @prev_notice.present? %>
+            <span><a href="<%= public_notice_path(@prev_notice)%>"><< 上一篇 </a></span>
+          <% else%>
+            <span>已是第一篇</span>
+          <% end %>
+  	    	
+          <span><a href="<%= public_notices_path %>">返回公告列表 </a></span>
+          <% if @next_notice.present? %>
+            <span><a href="<%= public_notice_path(@next_notice)%>">下一篇  >></a></span>
+          <% else%>
+            <span>已是最后一篇</span>
+          <% end %>
+  	    </div>
+  	</div>
+  </div>
+  <div class="help">
+  	<div class="help_inner">
+  		<div class="top"><span class="h_icon"></span><span class="h">帮助</span></div>
+  		<dl>
+        <a href="<%= reward_help_path %>#reward">
+  			  <dt></dt>  
+  			  <dd><span>积分的作用?</span></dd>
+        </a>
+  		</dl>
+  		<dl>	
+        <a href="<%= reward_help_path %>#get_reward">
+  			  <dt></dt>
+  			  <dd><span>如何获取积分? </span></dd>
+        </a>
+  		</dl>
+  		<dl>	
+        <a href="<%= lottery_help_path %>#qualification">
+  			  <dt></dt>
+  			  <dd><span>怎样才能参加抽奖? </span></dd>
+        </a>  
+  		</dl>
+  		<dl>	
+        <a href="<%= lottery_help_path %>#flow">
+  			  <dt></dt>
+  			  <dd><span>抽中的奖品何时可以收到?</span></dd>
+        </a>
+  		</dl>
+  	</div>
+  </div>
+</div>

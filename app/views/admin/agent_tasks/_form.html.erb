@@ -1,0 +1,55 @@
+  <%= form_for :new_agent_task, :url=> admin_agent_tasks_path, :html => { :class => "form-horizontal"} do |f| %>
+
+    <div class="control-group">
+      <label class="control-label">问卷选择:</label>
+      <div class="controls">
+        <div class="btn-group">
+          <button class="btn dropdown-toggle" data-toggle="dropdown">
+            问卷选择
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu dropselect" id="survey_select">
+            <% @agent_task[:surveys]['data'].each do |survey| %>
+            <li><a href="#survey-<%= survey['id'] %>"><%= survey['title'] %></a></li>
+            <% end -%>
+          </ul>
+        </div>
+        <%= f.hidden_field :survey_id, :id => "survey_id" %>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">代理选择:</label>
+      <div class="controls">
+        <div class="btn-group">
+          <button class="btn dropdown-toggle" data-toggle="dropdown">
+            代理选择
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu dropselect" id="agent_select">
+            <% @agent_task[:agents]['data'].each do |agent| %>
+            <li><a href="#agent-<%= agent['_id'] %>"><%= agent['email'] %></a></li>
+            <% end -%>
+          </ul>
+        </div>
+        <%= f.hidden_field :agent_id, :id => "agent_id" %>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">回收数量:</label>
+      <div class="controls">
+        <%= f.text_field :count, :class => "input-large"%>
+      </div>
+    </div>   
+    <div class="control-group">
+      <label class="control-label">描述:</label>
+      <div class="controls">
+        <%= f.text_area :description, :class => "input-middle", :rows => '5' %>
+      </div>
+    </div>   
+    <div class="control-group">
+      <div class="controls">
+        <%= f.submit "确定",:class => "btn" %>
+      </div>
+    </div>   
+    
+  <% end %>

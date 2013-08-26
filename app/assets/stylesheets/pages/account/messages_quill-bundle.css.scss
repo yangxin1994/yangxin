@@ -1,0 +1,57 @@
+@import "common";
+@import "compass/utilities/general/clearfix";
+.page-title{
+	@include one-line(40px);
+	vertical-align: middle;
+	padding-left: 35px;
+	font-weight: bold;
+	font-size: 14px;
+}
+.messages{
+	padding-top:5px;
+	padding-bottom:10px;
+	@include clearfix;
+	li{
+		width:715px;
+		margin:15px 0 10px 5px;
+		padding:10px 30px;
+		line-height:2em;
+		cursor: pointer;
+		.messages-number{
+			float: left;
+			margin-right:10px;
+			font-weight: bold;
+			color: #6D91A9;
+		}
+		.messages-title{
+			float: left;
+		}
+		.messages-time{
+			float: left;
+			margin-left: 10px;
+		}
+		p{
+			width:660px;
+			margin-left:20px;
+			clear:both;
+			color:#999;
+		}
+		.unread{color:#f5c000;float: right;}
+		.read{color:#999;float: right;}
+	}
+}
+.messages-bottom{
+	width:760px;
+	margin:0 auto;
+	border-top:1px #dbdbdb dashed;
+	#pagination {
+		float:none;
+		margin-left:350px;
+		height: 50px;
+	}
+}
+.graybg{
+	background:#f1f1f3;
+	position:relative;
+	top:12px;
+}

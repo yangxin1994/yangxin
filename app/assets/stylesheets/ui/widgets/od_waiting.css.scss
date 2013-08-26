@@ -1,0 +1,34 @@
+@import "compass/css3/opacity";
+
+.od-waiting{
+	@include opacity(0.5);
+	position:absolute;
+
+	.wait-img{
+		position:absolute;
+		left:50%;
+		top:50%;
+	}
+
+	.mark-waiting{
+		color: #000;
+		@include opacity(1);
+		position:absolute;
+		left:0%;
+		top:5px;
+		background:#e6e6e6;
+		padding:5px 10px;
+		min-width:80px;
+		border-radius: 5px;
+		-moz-border-radius: 5px;
+		-webkit-border-radius: 5px;
+
+		.small-wait-img {
+			margin-right: 10px;
+			vertical-align: middle;
+		}
+		span{
+			vertical-align: middle;
+		}
+	}
+}

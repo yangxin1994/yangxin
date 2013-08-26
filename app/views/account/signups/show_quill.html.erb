@@ -1,0 +1,50 @@
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/account/signup_quill-bundle" %>
+<% end %>
+<div class='signup'>
+	<div class="signups-left">
+		<p>
+			<em class="icon icon-mail l"></em>
+			<input type="text" id="email" name="userName" placeholder="请输入注册邮箱" param='e' autofocus />
+		</p>
+		<p>
+			<em class="icon icon-i l"></em>
+			<input type="password" id="password" name="password" placeholder="输入登录密码"/>
+		</p>
+		<p>
+			<em class="icon icon-o l"></em>
+			<input type="password" id="password_repeat" name="password_repeat" placeholder="重复输入密码" />
+		</p>	
+		<p>
+			<label><input type="checkbox" name="i-green-protocol" id="i_green_protocol" checked />同意</label>
+			<a id='open_protocol' class="protocol-link" href="javascript:void(0);">注册协议</a>
+		</p>
+		<p>
+			<button id='reg_btn' class="od-button">注 册</button>
+		</p>
+	</div>
+	<div class="signups-right">
+	<% if params[:tpui].blank? %>
+	<%= render "partials/social_connect_quill" %>
+	<% else %>
+	<ul class='other-login-link'>
+		<li>注册完成后，系统会将您刚才所授权的第三方账户和您在<%= corp_name %>的账户进行关联，下次您便可直接通过第三方账户进行登录。</li>
+	</ul>
+	<% end %>
+	</div>
+</div>
+
+<!-- 协议书 -->
+<div class="protocol dn">
+	<div class="protocol-box">
+		<h2>《 <%= corp_name %>服务使用协议 》</h2>
+		<div class="protocol-txt">
+			<iframe src="/agreement.html"></iframe>
+		</div>
+		<a href="javascript:void(0);" class="close_protocol"></a>
+	</div>
+	<p class="i-green">
+		<label><input type="checkbox" name="i-green" id="i_green" checked /> 同意注册协议</label>
+	</p>
+
+</div>

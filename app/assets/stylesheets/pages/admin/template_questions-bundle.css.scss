@@ -1,0 +1,14 @@
+.choices{
+	width: 100%;
+	margin: 10px 0;
+	.choice {
+		display: inline-block;
+		margin-right: 20px;
+		padding: 4px;
+		border: 1px solid gray;
+	}
+	.new-choice {
+		display: inline-block;
+		margin-right: 20px;
+	}
+}

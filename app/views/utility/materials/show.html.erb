@@ -1,0 +1,15 @@
+<% if @material.nil? || !@material.success %>
+	<div class='error'>加载资源错误</div>
+<% else %>
+	<% case @material.value['material_type'] %>
+	<% when 1 %>
+	<% url = @material.value['picture_url'] %>
+	<% url = '/materials/no-image.png' if url.blank? %>
+	<img src='<%=url %>' />
+	<% when 2 %>
+	<embed src="http://www.tudou.com/v/<%=@material.value['value'] %>/&autoPlay=false/v.swf" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" wmode="opaque" width="480" height="135"></embed> 
+	<% when 4 %>
+	<embed src="http://www.tudou.com/v/<%=@material.value['value'] %>/&autoPlay=false/v.swf" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" wmode="opaque" width="480" height="400"></embed> 
+	<% else %>
+	<% end %>
+<% end %>

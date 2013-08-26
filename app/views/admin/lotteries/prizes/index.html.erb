@@ -1,0 +1,25 @@
+    <div class="widget first">
+      <div class="head"><h5 class="iFrames">奖品列表</h5></div>
+      <table cellpadding="0" cellspacing="0" width="100%" class="tableStatic">
+        <thead>
+          <tr>
+            <td width="20%">活动名称</td>
+            <td width="20%">状态</td>
+            <td width="30%">日期</td>
+            <td width="30%">操作</td>
+          </tr>
+        </thead>
+        <tbody>
+          <% @lotteries["data"].each_with_index do |lottery, i| %>
+          <tr>
+            <td>
+              <a href="lotteries/<%= lottery["_id"]%>" rel="modal" title="title"><%= lottery["title"] %></a>
+            </td>
+            <td><%= lottery_status lottery["status"] %></td>
+            <td><%= lottery["created_at"] %></td>
+            <td>在这里来一些操作</td>
+          </tr>
+          <% end -%>
+        </tbody>
+      </table>
+    </div>

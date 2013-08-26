@@ -1,0 +1,111 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/publishes-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/publishes-bundle", :media => "all" %>
+<% end %>
+
+<% 
+	add_url = "&per_page=#{params[:per_page]}" if params[:per_page]
+	add_url = add_url.to_s + "&publish_status=#{params[:publish_status]}" if params[:publish_status]
+	add_url = add_url.to_s + "&title=#{params[:title]}" if params[:title]
+	add_url = add_url.to_s + "&email=#{params[:email]}" if params[:email]
+%>
+
+<!-- put html code below -->
+<% if @surveys.success == true %>
+<div class="surveys">
+<div id="list-tab">
+	<div class="title">
+		<h5>问卷管理<h5>
+	</div>
+
+	<div class="search">
+		<form action="#">
+			<select name="search">
+				<option value="title">标题</option> 
+				<option value="email">创建人邮箱</option>
+			</select>
+			<input name="search" type ='text'/>
+			<input type="submit" class="blueBtn btn-search" value="搜"/>
+			<span class="red">注意：搜索结果不分类</span>
+		</form>
+	</div>
+
+	<div class="stats">
+		<ul>
+			<li><a title="" class="count green<%if params[:publish_status].to_i == 2%> red<%end%>" href="/admin/publishes?publish_status=2">待审核</a></li>
+			<li><a title="" class="count green<%if params[:publish_status].to_i == 1%> red<%end%>" href="/admin/publishes?publish_status=1">关闭中</a></li>
+			<!-- <li><a title="" class="count green<%if params[:publish_status].to_i == 4%> red<%end%>" href="/admin/publishes?publish_status=4">暂停中</a></li> -->
+			<li class="last"><a title="" class="count green<%if params[:publish_status].to_i==8%> red<%end%>" href="/admin/publishes?publish_status=8">己发布</a></li>
+			<li><a title="" class="count green<%if params[:publish_status] && params[:publish_status].to_i == 0%> red<%end%>" href="/admin/publishes?publish_status=0">删除箱</a></li>
+		</ul>
+		<div class="fix"></div>
+	</div>
+	
+	<div class="table">
+		<div class="head">
+			<h5 class="iFrames">
+				列表
+			</h5>
+
+			<div class="show_community" params="<%= add_url %>">
+				<input type="checkbox" <%if params[:show_in_community].to_s == "true"%>checked<%end%> name="is_show_in_community" />
+				<span>只显示发布在 Quillme 的问卷</span>
+			</div>
+		</div>
+
+		<table cellspacing="0" cellpadding="0" border="0" id="example" class="display">
+			<thead>
+				<tr>
+					<th class="" rowspan="1" colspan="1" style="width: 10px;">
+						<input class="check-all" type="checkbox" />
+					</th>
+					<th>标题</th>
+					<th>创建者</th>
+					<th>创建时间</th>
+					<th>QM</th>
+					<th>操作</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% @surveys.value["data"].to_a.each do |survey|%>
+					<tr id="<%= survey['_id']%>">
+						<td><input type="checkbox" /></td>
+						<td style="max-width: 300px;">                           
+							<%= link_to survey['title'], questionaire_path(survey['id']), { :class => "show", :title=>'点击查看详情' } %>
+						</td>
+						<td><span class="user_id f-orange" name="<%= survey['user_id'] %>"></span></td>
+						<td><%= Time.at(survey["created_at"]).strftime("%Y-%m-%d %H:%M:%S") %></td>
+						<td><%= (survey['show_in_community']==true) ? "是" : "否"  %></td>
+						<td>
+							<a href="/admin/publishes/<%= survey['_id']%>" >管理问卷</a>
+						</td>
+						<td>
+							<a href="/admin/review_answers/<%= survey['_id']%>">审核答案</a>
+						</td>
+					</tr>
+				<%- end %>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="8">
+						<%if params[:publish_status].to_i > 0%>
+							<!-- <div class="delete-selected-panel">
+								<input type="button" class="blueBtn delete-selected" value="批量删除"/>
+							</div> -->
+						<%end%>
+						<%= paginator_tag @surveys.value %>
+					</td>
+				</tr>
+			</tfoot>		
+		</table>
+	</div>
+</div>
+</div>
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @surveys.value %></p>
+</div>
+<%- end %>	

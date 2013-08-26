@@ -1,0 +1,18 @@
+	<ul class="top-option">
+		<li class="edit"><a href="<%=questionaire_path %>"><strong>编辑问卷</strong></a></li>
+		<li class="option"><a class="current" href="<%=questionaire_property_path %>"><strong>问卷设置</strong></a></li>
+	</ul>
+	<div class="current-option-name">问卷设置</div>
+<ul class="left-menus">
+	<li class='<% if (left_active == 0) %>active<%end%>'><a href="<%=questionaire_property_path %>"><span class="left-menu-icon"><em class="setting"></em></span><span class="left-menu-name">基本属性</span></a></li>
+	<li class='<% if (left_active == 1) %>active<%end%>'><a href="<%=questionaire_logics_path %>"><span class="left-menu-icon"><em class="logic"></em></span><span class="left-menu-name">逻辑控制</span></a></li>
+	<li class='<% if (left_active == 2) %>active<%end%>'><a href="<%=questionaire_authority_path %>"><span class="left-menu-icon"><em class="accesscontrol"></em></span><span class="left-menu-name">访问权限</span></a></li>
+	<li class='<% if (left_active == 3) %>active<%end%>'><a href="<%=questionaire_quality_path %>"><span class="left-menu-icon"><em class="volunteer"></em></span><span class="left-menu-name">质量控制</span></a></li>
+	<li class='last <% if (left_active == 4) %>active<%end%>'><a href="<%=more_questionaire_property_path %>"><span class="left-menu-icon"><em class="moresetting"></em></span><span class="left-menu-name">其他设置</span></a></li>
+</ul>
+<div class="left-sidebar-end"></div>
+<script type="text/javascript">
+jQuery(function($) {
+	$('#edit_survey').tooltip({ placement: 'right', delay: {show: 500, hide: 0}	});
+});
+</script>
