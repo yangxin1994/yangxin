@@ -1,0 +1,169 @@
+<%
+	@page_title = '错误 - 问卷已经关闭' if @survey_closed
+%>
+
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/filler/survey-bundle" %>
+	<%= stylesheet_link_tag    "pages/filler/survey-bundle" %>
+
+	<script type="text/javascript">
+	jQuery(function($) {
+		// referer and channel
+		window.rsi = '<%=params[:id]  %>';
+		window.referer = "<%= raw escape_javascript(@referer_host) %>";
+		window.channel = <%= @channel %>;
+
+		// set start button text
+		<% if @percentage > 0 %>
+		$('#start_btn').text('继续答题（已完成' + Math.round(<%= @percentage * 100 %> ) + '%）');
+		<% else %>
+		var left_time = <%=@left_time %>;
+		$('#start_btn').text('开始答题' + (left_time > 0 ? '（耗时' + $.util.printTimeFriendly(left_time) + '）' : ''));
+		<% end %>
+	});
+	</script>
+<% end %>
+
+<div id='sf_main'>
+	<div class='welcome <% if @reward_scheme_type == 0 %>no_reward<% end %>' >
+		<div class='inner'>
+
+			<% if @survey_closed %>
+
+			<h1><%= @survey['title'] %></h1>
+			<div class='msg purple'>
+				<em></em>
+				<span>
+					<b>该问卷已经关闭！</b><br />
+					该问卷已经达到回收数量并关闭，下次记得早点来哦~
+				</span>
+			</div>
+			<div class='follow-con'>	
+				<h3>您可以通过以下方式及时获得调查通知：</h3>
+				<ul>
+					<li>
+						<a href="/surveys">
+							<em class='wenjuanba'></em>
+							<span>问卷吧官网</span>
+						</a>
+					</li>
+					<li>
+						<a href="http://weibo.com/u/3676626710">
+							<em class='weibo'></em>
+							<span>新浪微博</span>
+						</a>
+					</li>
+					<li>
+						<a href="http://t.qq.com/wenjuanba">
+							<em class='tencent'></em>
+							<span>腾讯微博</span>
+						</a>
+					</li>
+				</ul>
+				<ul>
+					<!-- <li>
+						<a href="/surveys#subscribe">
+							<em class='browser'></em>
+							<span>浏览器插件</span>
+						</a>
+					</li> -->
+					<li>
+						<a href="/surveys#subscribe">	<!-- TODO: subscribe plugin -->
+							<em class='email'></em>
+							<span>邮件订阅</span>
+						</a>
+					</li>
+					<li>
+						<a href="/surveys#subscribe">	<!-- TODO: subscribe plugin -->
+							<em class='sms'></em>
+							<span>短信订阅</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+
+			<% elsif @survey['quillme_hot'] && @reward_scheme_type > 0 && !@answer_count_empty %>
+
+			<!-- signed in user is not allowed -->
+			<h1><%= @survey['title'] %></h1>
+			<div class='msg purple'>
+				<em></em>
+				<span>
+					<b>本问卷只面向未参加过<%= corp_name %>调研的用户</b><br />
+					<% if @survey['spread_point'] > 0 %>
+					<%= corp_name %>会员每成功邀请一位好友答题可获<em><%= @survey['spread_point'] %></em>积分。<a id='start_invite' href='javascript:void(0);'>开始邀请</a>
+					<% else %>
+					您已经参加过<%= corp_name %>其他调研，不能参加本次调研。
+					<% end %>
+				</span>
+			</div>
+
+			<% else %>
+
+			<h1><%= @survey['title'] %></h1>
+			<h2><%= @survey['subtitle'] %></h2>
+			<div class='desc'><%= raw @survey['welcome'] %></div>
+			<% if @survey['quillme_hot'] && @reward_scheme_type > 0 %>
+			<div class='quillme_hot_note'>注意：本问卷仅面向未参加过<%= corp_name %>调研的用户，已参加过其他调研的用户将无法提交奖励申请。</div>
+			<% end %>
+			<div class='form'>
+				<% password_type = @survey['access_control_setting']['password_control']['password_type'] %>
+				<% if password_type == 2 %>
+					<input id='username_ipt' type="text" class='username' placeholder="输入答题用户名" autofocus />
+				<% end %>
+				<% if password_type >= 0 %>
+					<input id='password_ipt' type="password" placeholder="输入答题密码" autofocus />
+				<% end %>
+				<button id='start_btn'>开始答题</button>
+				<% if @survey['publish_result'] %>
+				<div class='view-result-text'>（完成答题后可查看问卷结果报告）</div>
+				<% end %>
+			</div>
+			
+			<% end %>
+
+		</div>
+		<% if @reward_scheme_type > 0 %>
+		<div class='reward'>
+			<% if @reward_scheme_type == 1 %>
+			<h1>答题奖励<em>￥<%= @reward_money %></em>元</h1>
+			<h2>奖励兑换方式：</h2>
+			<div class='awards'>
+				<em class='chongzhi' data-content='向您的手机号充值￥<%= @reward_money %>元' data-trigger='hover' data-placement='bottom'></em>
+				<em class='zhifubao' data-content='向您的支付宝账号转账￥<%= @reward_money %>元' data-trigger='hover' data-placement='bottom'></em>
+				<!-- <em class='jifenbao' data-content='向您的集分宝转账<%= @reward_money * 100 %>积分' data-trigger='hover' data-placement='bottom'></em> -->
+			</div>
+			<% elsif @reward_scheme_type == 2 %>
+			<h1>答题奖励<em><%= @reward_point %></em>积分</h1>
+			<% if !@hot_gift.nil? %>
+			<h2>热门兑换礼品：</h2>
+			<a class='gifts-preview' href='<%= gift_path(@hot_gift['_id']) %>' target='_blank'>
+				<img src='<%= @hot_gift['photo_src'] %>' />
+				<h3><%= @hot_gift['title'] %></h3>
+			</a>
+			<div class='gifts-info'>
+				<span class='l'><%= @hot_gift['point'] %>积分</span>
+				<span class='r'><%= @hot_gift['exchange_count'] %>人兑换</span>
+			</div>
+			<% end %>
+			<% elsif @reward_scheme_type == 3 %>
+			<h1>答题<em>参与抽奖</em></h1>
+			<h2><%= @prizes.length > 1 ? '奖品列表：' : '奖品：' %></h2>
+			<% @prizes.each do |p| %>
+			<div class='gifts-preview' title='<%= p[:title] %>'>
+				<img src='<%=p[:photo_url]%>' />
+				<h3>（数量<%= p[:amount] %>）<%= p[:title] %></h3>
+			</div>
+			<% end %>
+			<% if @prizes.length > 1 %>
+			<div class='gifts-list'>
+			<% @prizes.each do |p| %>
+				<img src="<%=p[:photo_url]%>" title='<%= p[:title] %>' />
+			<% end %>
+			</div>
+			<% end %>
+			<% end %>
+		</div>
+		<% end %>
+	</div>
+</div>

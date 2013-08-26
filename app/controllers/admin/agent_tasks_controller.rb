@@ -1,39 +1,47 @@
-class Admin::AgentTasksController < Admin::ApplicationController
-	before_filter :check_agent_task_existence, :except => [:index, :create]
+class Admin::AgentTasksController < Admin::AdminController
+  layout "layouts/admin-todc"
 
-	def check_agent_task_existence
-		@agent_task = AgentTask.normal.find_by_id(params[:id])
-		render_json_e(ErrorEnum::AGENT_TASK_NOT_EXIST) and return if @agent_task.nil?
-	end
+  before_filter :require_sign_in, :only => [:index, :create, :update, :destroy]
 
-	def index
+  before_filter :get_agent_task_client
 
-		@agent_tasks = AgentTask.search_agent_task(params[:agent_id], params[:survey_id])
-		@paginated_agent_tasks = 
-		render_json true do
-			auto_paginate @agent_tasks do |paginated_agent_tasks|
-				paginated_agent_tasks.map { |e| e.info }
-			end
-		end
-	end
+  def get_agent_task_client
+    @agent_task_client = Admin::AgentTaskClient.new(session_info)
+  end
 
-	def create
-		render_json_auto AgentTask.create_agent_task(params[:agent_task], params[:survey_id], params[:agent_id]) and return
-	end
+  def index
+    result = @agent_task_client.index(params)
+    if result.success
+      @agent_tasks = result.value
+    else
+      render :json => result
+    end
+  end
 
-	def update
-		render_json_auto @agent_task.update_agent_task(params[:agent_task]) and return
-	end
+  def new
+    result = @agent_task_client.new()
+    if result[:success]
+      @agent_task = result
+    else
+      render :json => result
+    end
+  end
 
-	def close
-		render_json_auto @agent_task.close and return
-	end
+  def create
+    result = @agent_task_client.create(params[:new_agent_task])
+    if result.success
+      redirect_to "/admin/agent_tasks"
+    else
+      render :json => result
+    end
+  end
 
-	def open
-		render_json_auto @agent_task.open and return
-	end
+  def show
+    
+  end
 
-	def destroy
-		render_json_auto @agent_task.delete_agent_task and return
-	end
+  def close
+    
+  end
+
 end

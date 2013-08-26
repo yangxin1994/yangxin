@@ -1,0 +1,239 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/review_answers-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/review_answers-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+<% if @answer.success == true %>
+<div class="answer">
+	<div class="title">
+		<h5>审核答案<h5>
+		<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/review_answers/<%= params[:id]%>">返回答案列表</a><h5>
+	</div>
+	
+	<div>答题所在地： <%= @address %></div>
+
+	<!-- edit tab start -->		
+	<div class="tab-content" id="edit-tab">
+		<form action="#">
+			
+			<% if @answer.value['status'].to_i!=2 && @answer.value['auditor_email'] %>
+				<!-- if someone audits the answer, show... -->
+				<p>
+					<label>此问卷已经审核</label>
+				</p>
+				<p>
+					<span class="child-title f14">审核人员</span>
+					<span class="bg-orange"><%= @answer.value['auditor_email'] %></span>
+					<span class="child-title f14">于</span>
+					<span class="f-orange"><%= (Time.at(@answer.value["audit_at"].to_i).to_s)[0,16].gsub(/[T]/, ' ') %></span>
+					<span class="child-title f14">审核</span>
+					<% case @answer.value['status'].to_i %>
+					<% when 3 %>
+						<span class="f-orange"><em>通过</em></span>
+					<% when 1 %>
+						<span class="f-orange"><em>拒绝</em></span>
+					<%end%>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">审核消息</label>
+					<span class="bg-orange"><%= @answer.value['audit_message'] %></span>
+				</p>
+			
+			<% elsif @answer.value['status'].to_i==1 && @answer.value["reject_type"].to_i !=2 %>
+				<!-- if system reject, show ... -->
+				<p>
+					<label>此问卷为系统拒绝</label>
+				</p>
+				<p class='f-red'>
+					<%case @answer.value["reject_type"].to_i %>
+					<%when 0 %>
+						<span>配额已满</span>	
+					<%when 1 %>
+						<span>未通过自动质控</span>
+					<%when 3 %>
+						<span>甄别题</span>
+					<%when 4 %>
+						<span>超时</span>
+					<%end%>
+				</p>
+				
+			<%end%>	
+			<!-- end -->
+
+			<hr/>
+			<% @answer.value["question_content"].to_a.each_with_index do |item, item_index|%>
+				<p>
+					<label class="child-title f14 pl2"><%= item_index+1 %><span class="f12 f-red">(<%= item['question_type_label'] %>)</span></label>
+					<span class='tw3'><b><%= item['title'] %></b></span>
+				</p>
+
+				<% case item['question_type'].to_i %>
+				<% when 0 %>									
+					<p>
+						<label class="child-title f14 pl2">选项</label>
+						<% item["choices"].to_a.each do |choice|%>
+							<span class='tw3' style='background:#ff9; padding: 5px;'><%= choice %></span>
+						<%end%>
+					</p>
+					
+					<p>
+						<label class="child-title f14 pl2">答案</label>
+						<% item["selected_choices"].to_a.each do |selected_choice|%>
+							<span class='tw3 bg-orange'><%= selected_choice %></span>
+						<%end%>
+					</p>
+				<% when 1 %>
+					<p>
+						<label class="child-title f14 pl2">选项</label>
+						<% item["choices"].to_a.each do |choice|%>
+							<span class='tw3' style='background:#ff9; padding: 5px;'><%= choice %></span>
+						<%end%>
+					</p>
+					
+					<% item["rows"].to_a.each_with_index do |row, index|%>
+						<p>
+							<label class="child-title f14 pl2 bg-coral">
+								<%= row %>
+							</label>
+							<% item["rows_selected_choices"][index].each do |choice|%>
+								<span class='tw3 bg-orange'><%= choice %></span>
+							<%end%>
+						</p>
+					<%end%>
+				
+				<% when 2 %>
+				
+					<p>
+						<label class="child-title f14 pl2">答案</label>
+						<span class="bg-orange"><%= item['content'] %></span>
+					</p>
+
+				<% when 3..7 %>
+				
+					<p>
+						<label class="child-title f14 pl2">答案</label>
+						<span class="bg-orange"><%= item['content'] %></span>
+					</p>
+
+				<% when 8 %>
+					<p>
+						<label class="child-title f14 pl2">地址</label>
+						<span class="bg-orange"><%= item['address'] %></span>
+					</p>
+
+					<p>
+						<label class="child-title f14 pl2">邮编</label>
+						<span class="bg-orange"><%= item['postcode'] %></span>
+					</p>
+
+					<p>
+						<label class="child-title f14 pl2">详细地址</label>
+						<span class="bg-orange"><%= item['detail'] %></span>
+					</p>
+
+				<% when 9 %>
+					
+					<p>
+						<label class="child-title f14 orange pl2">子问题列表</label>
+					</p>
+
+					<% item['items'].to_a.each do |question|%>
+						<p>
+							<span><b><em><%= question['title'] %></em></b></span>
+						</p>
+						<% if question['data_type'] == 'Address' %>
+							
+							<p>
+								<label class="child-title f14 pl2">地址</label>
+								<span class="bg-orange"><%= question['content']['address'] %></span>
+							</p>
+
+							<p>
+								<label class="child-title f14 pl2">邮编</label>
+								<span class="bg-orange"><%= question['content']['postcode'] %></span>
+							</p>
+
+							<p>
+								<label class="child-title f14 pl2">详细地址</label>
+								<span class="bg-orange"><%= question['content']['detail'] %></span>
+							</p>
+						<%else%>
+							<p>
+								<span class="bg-orange"><%= question['content'] %></span>
+							</p>
+						<%end%>
+
+					<%end%>
+
+				<% when 11 %>
+
+					<% item['items'].to_a.each do |question|%>
+
+					<p>
+						<label class="bg-coral f14 pl2"><%= question['title']%></label>
+						<span class="bg-orange"><%= question['content'] %></span>
+					</p>
+
+					<%end%>
+
+				<% when 12 %>
+					
+					<p>
+						<label class="child-title f14 pl2">排序结果</label>
+
+						<% item['items'].to_a.each do |question|%>
+							<span class="bg-orange f14 pl2"><%= question['title']%></span>
+						<%end%>
+					</p>
+
+				<% when 14 %>
+				<!-- nothing -->
+				<% when 17 %>
+				
+					<p>
+						<label class="child-title f14 pl2">选项</label>
+						<% item["choices"].to_a.each do |choice|%>
+							<span class='tw3' style='background:#ff9; padding: 5px;'><%= choice %></span>
+						<%end%>
+					</p>
+
+					<p>
+						<label class="child-title f14 pl2">答案</label>
+						<% item["selected_labels"].to_a.each do |label|%>
+							<span class='tw3 bg-orange'><%= label %></span>
+						<%end%>
+					</p>
+					
+				<%end%>
+				<hr/>
+			<%end%>
+
+			<% unless @answer.value['status'].to_i != 2 %>
+				<p>
+					<input class="greenBtn pub" type="button" value="通过" />
+					<input class="redBtn rej" type="button" value="拒绝" />
+				</p>
+			<%end%>
+		</form>
+	</div>
+
+	<div id="new-message" class="dn">
+		<hr/>
+		<p>
+			<textarea class="text-input textarea" name="message[:content]" cols="60" rows="6"></textarea>
+			<span class="opt-id dn"></span>
+		</p>
+		<input class="od-button blueBtn publish" type="button" value="确定"/>
+		<input class="od-button redBtn reject" type="button" value="确定"/>
+	</div>
+	<!-- edit tab end -->
+
+</div>
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @reviews.value %></p>
+</div>
+<%end%>	

@@ -1,0 +1,24 @@
+<% if gifts.present? %>
+	<% gifts['data'].each do |gift|%>
+		<li>
+			<a href="<%=gift_path(gift['_id'])%>">
+				<span class="gift-img">
+					<img src="<%= show_image(gift['photo_src'],'gifts') %>" alt="<%= gift['title'] %>">
+				</span>
+				<span class="gift-name"><%= gift['title'] %></span>
+				<span class="gift-mask"></span>
+				<span class="gift-remark">
+					<span class="integral l">
+						<b><%= gift['point'] %></b>积分
+					</span>
+					<span class="gift-remark-right">
+						 <span class="nop">人气：
+							<b><%= gift['exchange_count'] %></b>
+						 </span>
+						 <span class="price">价值：<b><%= show_gift_price(gift['price']) %></b> 元</span>
+					</span>     
+				</span>
+			</a>
+		</li>
+	<% end %>
+<% end %> 

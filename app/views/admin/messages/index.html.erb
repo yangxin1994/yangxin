@@ -1,0 +1,94 @@
+<%if @messages.success %>
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+	jQuery(function($) {
+		window.messages = <%= raw (@messages.value['data'] || []).to_json %>;
+		window.messages_count = <%= raw (@messages.value['total_page'].to_i).to_json %>;
+	});
+	</script>
+
+	<%= javascript_include_tag "pages/admin/messages-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/messages-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+
+<div class="messages"> 
+<div id="list-tab">
+	<div class="title">
+		<h5>消息管理<h5>
+	</div>
+
+	<div class="search">
+		<form action="#">
+			<select name="search" class="select2">
+				<option value="receiver_email">接收人邮箱</option> 
+			</select>
+			<input name="search" type ='text'/>
+			<input type="submit" class="blueBtn btn-search" value="搜"/>
+		</form>
+	</div>
+	
+	<div class="table">
+		<div class="head">
+			<h5 class="iFrames">
+				消息列表
+			</h5>
+			<a class="new" href="/admin/messages/new">新建消息</a>
+		</div>
+		
+		<table cellspacing="0" cellpadding="0" border="0" id="example" class="display">
+			<thead>
+				<tr>
+					<th class="" rowspan="1" colspan="1" style="width: 10px;">
+						<input class="check-all" type="checkbox" />
+					</th>
+					<th>系统消息标题</th>
+					<th>发送者</th>
+					<th class="time">发送时间</th>
+					<th>接受者</th>
+					<th rowspan="1" colspan="1" style="width: 60px;"></th>
+				</tr>
+			</thead>
+
+			<tbody>
+				<% @messages.value["data"].to_a.each do |message|%>
+					<tr id="<%= message['_id']%>">
+						<td><input type="checkbox" /></td>
+						<td>                           
+							<a href="/admin/messages/<%= message["_id"] %>" title="点击查看/回复"><%= message["title"] %></a></td>
+						<td><%= message["sender_email"] %></td>
+						<td class="time"><%= message["created_at"][0,16].gsub(/[T]/, ' ') %></td>
+						<td><%= message["receiver_emails"] %></td>
+						<td>
+							<!-- Icons -->
+							 <a href="#" class="delete" title="删除"><img src="../../assets/od-icon/cross.png" alt="删除" /></a> 
+						</td>
+					</tr>
+				<%- end %>
+			</tbody>
+
+			<tfoot>
+				<tr>
+					<td colspan="6">
+						<div>
+							<div class="delete-selected-panel">
+								<input type="button" class="blueBtn delete-selected" value="批量删除"/>
+							</div>
+
+							<%= paginator_tag @messages.value %>
+						</div>
+					</td>
+				</tr>
+			</tfoot>			
+		</table>
+
+	</div>
+</div>
+</div>
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @messages.value %></p>
+<%end%>	

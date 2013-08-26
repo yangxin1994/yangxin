@@ -1,232 +1,232 @@
+class Admin::UsersController < Admin::AdminController
 
-class Admin::UsersController < Admin::ApplicationController
-	before_filter :check_user_existence, :only => [:show, :edit, :set_color, :set_role, :set_lock, :destroy, :update, :system_pwd, :recover, :add_point]
-#--
-# ************** Quill Admin Manage User ************************************
-#++
+	layout 'layouts/admin_new'
 
-	@@user_attrs_filter = %w(_id email color role status username full_name identity_card company birthday gender address phone postcode black white new_password lock color point)
+	before_filter :get_client
 
-	def check_user_existence
-		@user = User.find_by_id_including_deleted(params[:id])
-		render_json_auto(ErrorEnum::USER_NOT_EXIST) and return if @user.nil?
+	def get_client
+		@client = BaseClient.new(session_info, "/admin/users")
+    @sample_client = Admin::SampleClient.new(session_info)
 	end
 
-	# GET /admin/users
-	# GET /admin/users.json
+	# ****************************
+
 	def index
-		if !params[:email].blank? then
-			@users = User.where(email: params[:email].downcase).desc(:status, :created_at)
-		elsif !params[:full_name].blank? then
-			@users = User.where(full_name: params[:full_name].downcase).desc(:status, :created_at)
-		elsif !params[:username].blank? then
-			filter = params[:username].to_s.gsub(/[*]/, ' ').downcase
-			@users = User.where(username: /.*#{filter}.*/).desc(:status, :created_at)
+		params_hash ={:page => page,:per_page => per_page}
+		if params[:role]
+			params_hash.merge!({:role => params[:role]})
+			params_hash.merge!({:deleted => params[:deleted]}) if params[:deleted]
+			@users = @client._get(params_hash, "/list_by_role")
 		else
-			@users = User.normal_list.where(:role.lt => 15).desc(:status, :created_at)
+			params_hash.merge!({:username => params[:username]}) if params[:username]
+			params_hash.merge!({:email => params[:email]}) if params[:email]
+			params_hash.merge!({:full_name => params[:full_name]}) if params[:full_name]
+			params_hash.merge!({:mobile => params[:mobile]}) if params[:mobile]
+			if params[:include_block] == '1'
+				params_hash.merge!({:is_block => true})
+			else
+				params_hash.merge!({:is_block => false})
+			end
+			@users = @sample_client.get_samples(params_hash)
 		end
-		render_json_auto (auto_paginate(@users)) and return
+
+		_sign_out and return if @users.require_admin?
+
+		respond_to do |format|
+			format.html
+			format.json { render json: @users}
+		end
 	end
 
-	# GET /admin/users/1
-	# GET /admin/users/1.json
+	def create
+		if !params[:password].nil? then
+			@result = @client._post(
+				{
+					:user => {
+							email: params[:email],
+							full_name: params[:full_name],
+							password: params[:password],
+							role: params[:system_user_type]
+						}
+				})
+		else
+			@result = @client._post(
+				{
+					:user => {
+							email: params[:email],
+							full_name: params[:full_name],
+							role: params[:system_user_type]
+						}
+				})
+		end
+		render_result
+	end
+
+	#GET
+	def blacks
+		@users = @client._get({:page => page,:per_page => per_page}, '/blacks')
+		_sign_out and return if @users.require_admin?
+		respond_to do |format|
+			format.html
+			format.json { render json: @users}
+		end
+	end
+
+	#GET
+	def whites
+		@users = @client._get({:page => page,:per_page => per_page}, '/whites')
+		_sign_out and return if @users.require_admin?
+		respond_to do |format|
+			format.html
+			format.json { render json: @users}
+		end
+	end
+
+	#GET
+	def deleted
+		@users = @client._get({:page => page,:per_page => per_page}, '/deleteds')
+		_sign_out and return if @users.require_admin?
+		respond_to do |format|
+			format.html
+			format.json { render json: @users}
+		end
+	end
+
 	def show
+		@user = @client._get({}, "/#{params[:id]}")
+		# if user who is not super admin wants to get a admin user info,
+		#  replace to sign in page.
+		# _sign_out and return if @user.value['role'].to_i >= 16 && !has_role(32)	# has no super admin any more
 		respond_to do |format|
-			format.json { render_json_auto @user, :only => @@user_attrs_filter}
+			format.html
+			format.json { render json: @user}
 		end
 	end
 
-	# GET /admin/users/1/edit
-	def edit
-		respond_to do |format|
-			format.json { render_json_auto @user, :only => @@user_attrs_filter }
-		end
-	end
+	# def create
+	# end
 
-	# PUT /admin/users/1
-	# PUT /admin/users/1.json
 	def update
-		retval = @user.update_user(params[:user])
-		respond_to do |format|
-			format.json { render_json_auto retval }
-		end
+		@result = @client._put({
+				:user => params[:user]
+			}, "/#{params[:id]}")
+		render_result
 	end
 
-	# DELETE /admin/users/1
-	# DELETE /admin/users/1.json
 	def destroy
-		render_json_auto @user.remove_user
+		@result = @client._delete({}, "/#{params[:id]}")
+		render_result
+	end
+
+	# ******************
+
+	#PUT
+	def recover
+		@result = @client._put({}, "/#{params[:id]}/recover")
+		render_result
+	end
+
+	#PUT
+	def set_role
+		@result = @client._put(
+			{
+				:role => params[:role]
+			}, "/#{params[:id]}/set_role")
+		render_result
+	end
+
+	#PUT
+	def set_color
+		@result = @client._put(
+			{
+				:color => params[:color]
+			}, "/#{params[:id]}/set_color")
+		render_result
+	end
+
+	#PUT
+	def set_lock
+		@result = @client._put({lock: params[:lock]}, "/#{params[:id]}/set_lock")
+		render_result
+	end
+
+	#PUT
+	def reset_password
+		@result = @client._put({}, "/#{params[:id]}/system_pwd")
+		render_result
 	end
 
 	# PUT
-	def recover
-		render_json_auto @user.recover
-	end
-
-
-	def lottery_codes
-		@user = User.find_by_id_including_deleted params[:id]
-
-		render_json(@user.is_a? User) do |s|
-			if s
-				auto_paginate @user.lottery_codes.desc(:created_at) do |codes|
-					codes.map do |code|
-						code['lottery_title'] = Lottery.find_by_id(code['lottery_id']).title
-						code
-					end
-				end
-			else
-				{
-					:error_code => ErrorEnum::USER_NOT_EXIST,
-					:error_message => "User not exist"
-				}
-			end
-		end
-	end
-
-	def orders
-		@user = User.find_by_id_including_deleted params[:id]
-		render_json(@user.is_a? User) do |s|
-			if s
-				#params[:scope] = "all" if params[:scope].blank?
-				auto_paginate @user.orders #.send(params[:scope].to_s)
-			else
-				{
-					:error_code => ErrorEnum::USER_NOT_EXIST,
-					:error_message => "User not exist"
-				}
-			end
-		end
-	end
-
-	def point_logs
-		@user = User.find_by_id_including_deleted params[:id]
-		render_json(@user.is_a? User) do |s|
-			if s
-				#params[:scope] = "all" if params[:scope].blank?
-				auto_paginate @user.reward_logs.point_logs #.send(params[:scope].to_s)
-			else
-				{
-					:error_code => ErrorEnum::USER_NOT_EXIST,
-					:error_message => "User not exist"
-				}
-			end
-		end
-	end
-	#--
-	# **************************************
-	# Black List Operate
-	# **************************************
-	#++
-
-	# GET /admin/users/blacks(.json)
-	def blacks
-		@users = User.black_list.desc(:created_at)
-
-		respond_to do |format|
-			format.html # index.html.erb
-			format.json { render_json_auto auto_paginate(@users)}
-		end
-	end
-
-	# GET /admin/users/whites(.json)
-	def whites
-		@users = User.white_list.desc(:created_at)
-
-		respond_to do |format|
-			format.html # index.html.erb
-			format.json { render_json_auto auto_paginate(@users)}
-		end
-	end
-
-	def deleteds
-		@users = User.deleted_users.desc(:created_at)
-
-		respond_to do |format|
-			format.html # index.html.erb
-			format.json { render_json_auto auto_paginate(@users)}
-		end
-	end
-
-	def set_role
-		# admin can only set the latter 4 digits of the role field
-		retval = @user.set_role(params[:role].to_i)
-		respond_to do |format|
-			format.json { render_json_auto retval }
-		end
-	end
-
-	def set_color
-		retval = @user.set_color(params[:color].to_i)
-		respond_to do |format|
-			format.json { render_json_auto retval }
-		end
-	end
-
-	def set_lock
-		retval = @user.set_lock(params[:lock].to_s=='true')
-		respond_to do |format|
-			format.json { render_json_auto retval }
-		end
-	end
-
 	def add_point
-		@reward_log = @current_user.operate_point(params[:point], params[:cause_desc], params[:id])
-		render_json(@reward_log.valid?) do
-			@reward_log.as_retval
+		@result = @client._put({point: params[:point],
+			cause_desc: params[:cause_desc]},
+			"/#{params[:id]}/add_point"
+		 )
+		render_result
+	end
+
+	#GET /admin/users/:id/rewards
+	def rewards
+		@orders = @client._get(
+			{
+				page: page,
+				per_page: per_page,
+				scope: params[:scope]
+			},
+			"/#{params[:id]}/orders"
+		)
+		respond_to do |format|
+			format.html
+			format.json { render json: @orders}
 		end
 	end
 
-	def system_pwd
-		@user.change_to_system_password
+	#GET /admin/users/:id/point_logs
+	def point_logs
+		@point_logs = @client._get(
+			{
+				page: page,
+				per_page: per_page,
+				scope: params[:scope]
+			},
+			"/#{params[:id]}/point_logs"
+		)
+		respond_to do |format|
+			format.html
+			format.json { render json: @point_logs}
+		end
+	end
+
+	#GET /admin/users/:id/lottery_record
+	def lottery_record
+		@lottery_codes = @client._get(
+			{
+				page: page,
+				per_page: per_page,
+				scope: params[:scope]
+			},
+			"/#{params[:id]}/lottery_codes"
+		 )
+		respond_to do |format|
+			format.html
+			format.json { render json: @lottery_codes}
+		end
+	end
+
+	#GET /admin/users/:id/lottery_record
+	def introduced_users
+		@users = @client._get(
+			{
+				page: page,
+				per_page: per_page
+			},
+			"/#{params[:id]}/get_introduced_users"
+		 )
 
 		respond_to do |format|
-			format.json { render_json_auto @user, :only => @@user_attrs_filter }
+			format.html
+			format.json { render json: @users}
 		end
 	end
 
-	# add diff class system_user interface
-	def create
-		retval = @current_user.create_user(params[:user])
-		respond_to do |format|
-			format.json { render_json_auto retval }
-		end
-	end
-
-	def list_by_role
-		role = params[:role].to_i
-		if (role > 0) && (role < 64)
-			# not include role =0
-
-			users = User.where(:role.gt => 0).desc(:lock, :created_at).to_a
-			# logger.debug '+++++++++++'
-			# logger.debug users.length
-			users.select! do |u|
-				u.role.to_i & role > 0
-			end
-			# logger.debug users.to_a.length
-
-			# super_admin can search all with role in fix.
-			# admin all, but super_admin and admin.
-			users.select!{|u| u.role.to_i < 15} if !@current_user.is_admin?
-		elsif role==0
-			# only for role=0
-			users = User.where(role: role).desc(:lock, :created_at).to_a
-		else
-			# all of user
-			users = User.all.desc(:lock, :created_at).to_a
-			users.select!{|u| u.role.to_i < 15} if !@current_user.is_admin?
-		end
-
-		# display delete users if params[:deleted]
-		users.select!{|u| u.status >= 0} if params[:deleted] && params[:deleted].to_s == 'false'
-
-		render_json_auto auto_paginate(users)
-	end
-
-	def get_introduced_users
-		user = User.find_by_id_including_deleted(params[:id])
-		render_json_e(ErrorEnum::USER_NOT_EXIST) if user.nil?
-		render_json_auto(auto_paginate user.get_introduced_users) and return
-	end
 end

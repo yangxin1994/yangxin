@@ -5,10 +5,10 @@ log/*.log
 log
 tmp/
 .sass-cache/
-public/assets/*
 db/*.lock
 db/journal
 .DS_Store
-public/uploads/*
-app/assets
 config/mongoid.yml
+public/uploads/*
+public/uploads/avatar/*
+public/assets/*

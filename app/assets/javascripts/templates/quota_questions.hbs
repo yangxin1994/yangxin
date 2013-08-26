@@ -1,0 +1,15 @@
+<div class="popup">
+	<ul class="questions">
+		{{#each questions}}
+		<li>
+			<label title="{{title}}">
+				<input id='{{_id}}' type="checkbox"/>
+				<strong>{{number}}</strong>
+				<span>{{title}}</span>
+			</label>
+		</li>
+		{{/each}}
+	</ul>
+	<button class="od-button od-button-white cancel-btn">取 消</button>
+	<button class="od-button confirm-btn">确 定</button>
+</div>

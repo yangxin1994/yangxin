@@ -1,0 +1,116 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/surveys/index-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+  <li class="active">
+    <a href="">
+    <i class="icon-chevron-right"></i>
+    调研列表
+    </a>
+  </li>
+<% end %>
+
+<div>
+  <span>
+    <form class="form-search" style="display:inline">
+    <div class="input-append">
+      <input class="span6 search-query" name="keyword" id="" type="text" placeholder="标题或创建人邮箱">
+      <button class="btn">搜索</button>
+    </div>
+    </form>
+  </span>
+  <span class="pull-right">
+    <%= paginator_mini @surveys %>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu pull-right">
+        <li><a href="?">全部</a></li>
+        <li class="divider"></li>
+        <li><a href="?status=1">关闭中</a></li>
+        <li><a href="?status=2">已发布</a></li>
+        <li><a href="?status=4">已删除</a></li>
+      </ul>
+    </div>
+  </span>
+</div>
+
+<div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th width="20%">标题</th>
+        <th >创建者邮箱</th>
+        <th >创建时间</th>
+        <th >操作</th>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr>
+
+      </tr>
+    </tfoot>
+    <tbody>
+      <% @surveys['data'].each do |survey| %>
+      <tr>
+        <td><a href="/questionaires/<%= survey["_id"] %>"><%= survey["title"] %></a></td>
+        <td><%= survey["email"] %></td>
+        <td><%= Time.at(survey["created_at"]).strftime('%F %R') %></td>
+        <td data-sid="<%= survey["_id"] %>">
+        <div class="btn-group">
+          <a class="btn handle" href="/admin/surveys/<%= survey["_id"] %>" target="_blank"><i class="icon-list-alt"></i>查看问卷</a>
+          <button class="btn dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a href="#info" class="info"><i class="icon-wrench"></i>问卷基本设置</a></li>
+            <li><a href="/admin/surveys/<%= survey["_id"] %>/reward_schemes" ><i class="icon-wrench"></i>奖励方案设置</a></li>
+            <li><a href="/admin/surveys/<%= survey["_id"] %>/promote" ><i class="icon-share"></i>推送渠道设置</a></li>
+          </ul>
+        </div>
+        </td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+</div>
+
+  <div class="modal hide fade" id="info_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>样本权限设置</h3>
+    </div>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <input type="hidden" name="sid" id="sid"> 
+        <div class="control-group">
+          <label class="control-label" for="block">热点小调查</label>
+          <div class="controls">
+            <label class="checkbox">
+              <input type="checkbox" name="is_hot" id="ck_hot"> 
+            </label>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="block">推广积分</label>
+          <div class="controls">
+            <input type="text" class="input-medium" name="point" id="point"> 
+          </div>
+        </div>        
+        <div class="control-group">
+          <label class="control-label" for="roles">是否公开调研结果</label>
+          <div class="controls">
+            <label class="checkbox">
+              <input type="checkbox" id="ck_visible" name="visible"> 
+            </label>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#info_modal').modal('hide');">取消</a>
+      <button type="button" class="btn btn-primary" data-loading-text="保存中..." id="send_info">确定修改</button>
+    </div>
+  </div>

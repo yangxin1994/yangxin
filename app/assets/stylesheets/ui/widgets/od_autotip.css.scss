@@ -1,0 +1,38 @@
+@import "common";
+@import "compass/css3/border-radius";
+.od-autotip{
+	top:0;
+	min-width:100px;
+	left:0px;
+	position:absolute;
+	z-index: 999;
+	padding:3px 5px;
+	line-height: 2em;
+	font-size: 13px;
+
+	.info{
+		background: $yellow;
+	}
+	.error{
+		background: #f33;
+	}
+	.info, .error{
+		@include border-radius(3px);
+		// height:17px;
+		text-align:center;
+		position:relative;
+		padding-left:10px;
+		padding-right:30px;
+	}
+	/*关闭按钮2*/
+	.close-tip{		
+		@include inline-block;
+		overflow: hidden;
+		border:none;
+		cursor: pointer;
+		position:absolute;
+		top:-1px;
+		right:0px;
+	}
+
+}

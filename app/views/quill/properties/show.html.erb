@@ -1,0 +1,34 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "/kindeditor/kindeditor-min", "/kindeditor/lang/zh_CN" %>
+	<%= javascript_include_tag "pages/quill/property-bundle" %>
+	<%= stylesheet_link_tag "pages/quill/property-bundle", :media => "all" %>
+<% end %>
+
+<!-- content for left menus -->
+<% content_for :left_menus do %>
+	<%= render :partial => "partials/left_menus_setting", :locals => { :left_active => 0 } %>
+<% end %>
+
+<!-- put html code below -->
+<div class="page property">	
+	<div class="seperator top white"></div>	
+		<div class="q-render white">
+			<form>
+				<h2>主标题</h2>
+				<span class='p-title'><input type="text" id="dd" name="p-title" value="<%=@survey['title'] %>" maxlength="24" /><b></b></span>
+				<h2>副标题</h2>
+				<span class='p-subtitle'><input type="text" name="p-subtile" value="<%=@survey['subtitle'] %>" maxlength="40" /></span>
+				<h2>欢迎语</h2>
+				<span class='p-welcome'><textarea id="p-welcome" name="p-welcome"><%=@survey['welcome'] %></textarea></span>
+<!-- 				<h2>结束语</h2>
+				<span class='p-closing'><textarea id="p-closing" name="p-closing"><%=@survey['closing'] %></textarea></span>
+ -->				<h2>页眉</h2>
+				<span class='p-header'><input type="text" name="p-header" value="<%=@survey['header'] %>" /></span>
+				<h2>页脚</h2>
+				<span class='p-footer'><input type="text" name="p-footer" value="<%=@survey['footer'] %>" /></span>
+			</form>
+		</div>
+	<div class="seperator bottom white"></div>
+	<div class='property-bottom'><button class='od-button'>确定</button></div>
+</div>

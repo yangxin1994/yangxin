@@ -36,7 +36,7 @@ class Log
     	@logs = @logs.map{|log| log['username'] = log.user.try(:nickname);log['avatar'] = log.user.avatar ? log.user.avatar.picture_url : nil;log}
 	end
 
-	def self.get_newst_exchange_logs
+	def self.get_newest_exchange_logs
 		logs = self.redeem_logs.have_user.desc(:updated_at).limit(5);
 		@logs = logs.map{|log| log['username'] = log.user.nickname;log}
 	end

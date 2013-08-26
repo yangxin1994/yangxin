@@ -1,0 +1,73 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+		window.total_page = <%= raw (@lotteries ? @lotteries["total_page"] : 0) %>;
+		window.lotteries = <%=raw @lotteries.to_json %>;
+		window.total_point = <%= raw @total_point.to_json %>;
+		console.log(window.total_point);
+		console.log(window.lotteries);
+	</script>
+	<%= javascript_include_tag "pages/quillme/lotteries-bundle" %>
+	<%= stylesheet_link_tag "pages/quillme/lotteries-bundle", :media => "all" %>
+<% end %>
+
+<!-- content for main -->
+<% content_for :left do %>
+<div class="content-left-box orangeBorder">
+	<h3 class="content-left-title whiteTxt f14 b orangeBg">正在进行的抽奖活动</h3>
+	<span class="marked integral"></span>
+		<ul class="img-list">
+			<% if @lotteries != nil %>
+			<% @lotteries["data"].each do |lottery| %>
+				<li>
+					<span class="img l ml20 mr20"><a href=<%= lottery["photo_src"] || "../assets/image/quillme/lotteries/lottery.png" %>
+						><img src=<%= lottery["photo_src"] || "../assets/image/quillme/lotteries/lottery.png" %> alt=""></a></span>
+					<span class="w320 f14 b g3 l"><a href="<%= lottery_path(lottery['_id']) %>"><%= lottery["title"] %></a></span>
+					<% if lottery["status"] == 3 && lottery["exchangeable"] %>
+					<span class="w160 r tr g6"><b class="orangeTxt fg"><%= lottery["point"] %></b>积分</span>
+					<% end %>
+					<% ld = lottery["description"] %>
+					<span class="txt w320 g9 l mt10"><%= ld.length > 50 ? ld[0..49] + "..." : ld  %></span>	
+					<span class="w160 g9 r tr">
+						<% case lottery["status"] %>
+							<% when 1 %>
+								未发布
+							<% when 3 %>
+								进行中
+						<% end %>
+					</span>
+					<span class="w320 l mt10"><a class="css-btn orange" href="<%= lottery_path(lottery['_id']) %>">查看</a></span>
+					<% if lottery["status"] == 3 && lottery["exchangeable"] %>
+						<span class="w320 l mt10"><a class="css-btn orange exchange-lotterycode" href="javascript:void(0);" id='<%= lottery["_id"] %>' point='<%= lottery["point"] %>'>兑换抽奖号</a></span>
+					<% end %>
+				</li>
+			<% end %>
+			<% end %>
+		</ul>
+		<div class="pagination">
+			<a href="?page=<%= (@lotteries ? @lotteries["current_page"] : 1) - 1 %>" class="prev-gray"></a>
+			<span class="current g9 f14"></span>
+			<a href="?page=<%= (@lotteries ? @lotteries["current_page"] : 1) + 1 %>"  class="next-gray"></a>
+		</div>
+</div>
+<% end %>
+
+<!-- content for right -->
+<% content_for :right do %>
+<div class="sidebar-box img-orangeBg">
+	<h3 class="sidebar-title f14 b g3">抽奖规则</h3>
+	<ul>
+		<li>每个抽奖活动有固定的开奖时间，开奖期间您可以使用抽奖号进行抽奖</li>
+		<li>一个抽奖号为一次抽奖机会</li>
+		<li>中奖的用户请在中奖后提交您的配送信息，以便我们配送奖品</li>
+	</ul>
+	<h3 class="sidebar-title f14 b g3 mt10">抽奖流程</h3>
+	<ul>
+		<li>参加问卷调查或者通过积分兑换抽奖号</li>
+		<li>等待抽奖活动开奖</li>
+		<li>开奖期间，点击抽奖号进行抽奖</li>
+		<li>中奖之后填写配送信息</li>
+		<li>管理员审核通过后，配送礼品</li>
+	</ul>
+</div>
+<% end %>

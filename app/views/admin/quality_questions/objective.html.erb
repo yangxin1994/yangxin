@@ -1,0 +1,86 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/quality_questions-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/quality_questions-bundle", :media => "all" %>
+<% end %>
+
+<!--  -->
+<%
+	quality_control_types = ["", "客观题", "匹配题"] #[0] not use
+	question_types=["选择题", "矩阵选择题", "文本填充题", "数值填充题"] #[1] not use
+%>
+
+<!-- put html code below -->
+<%if @quality_questions.success %>
+<div class="quality_questions"> 
+	<div class="title">
+		<h5>质控题管理<h5>
+	</div>
+
+	<div class="stats">
+		<ul>
+			<li><a class="count blue" href="/admin/quality_questions/new">新建</a></li>
+			<li><a class="count red" href="/admin/quality_questions/objective">客观题</a></li>
+			<li><a class="count green" href="/admin/quality_questions/matching">匹配题</a></li>
+		</ul>
+		<div class="fix"></div>
+	</div>
+
+	<div class="table">
+		<div class="head">
+			<h5 class="iFrames">
+				列表
+			</h5>
+		</div>
+
+		<table cellspacing="0" cellpadding="0" border="0" id="example" class="display">
+			<thead>
+				<tr>
+					<th class="" rowspan="1" colspan="1" style="width: 10px;">
+						<input class="check-all" type="checkbox" />
+					</th>
+					<th>质控标题</th>
+					<th>问题类型</th>
+					<th>创建时间</th>
+					<th rowspan="1" colspan="1" style="width: 60px;"></th>
+				</tr>
+			</thead>
+					 
+			<tbody>
+				<% @quality_questions.value["data"].to_a.each do |quality_question|%>
+					<tr id="<%= quality_question['_id']%>">
+						<td><input type="checkbox" /></td>
+						<td>                           
+							<a href="/admin/quality_questions/<%= quality_question['_id']%>" class="show" title="点击查看详细">
+								<%= quality_question["content"]["text"] %></a>
+						</td>
+						<td><%= question_types[quality_question["question_type"].to_i] %></td>
+						<td><%= quality_question["created_at"][0,16].gsub(/[T]/, ' ') %></td>
+						<td>
+							<!-- Icons -->
+							 <a href="/admin/quality_questions/<%= quality_question['_id']%>" class="show" title="编辑"><img src="../../assets/od-icon/pencil.png" alt="编辑" /></a>
+							 <a href="#" class="delete" title="删除"><img src="../../assets/od-icon/cross.png" alt="删除" /></a> 
+						</td>
+					</tr>
+				<%- end %>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="6">
+						<div class="delete-selected-panel">
+							<input type="button" class="blueBtn delete-selected" value="批量删除"/>
+						</div>
+
+						<%= paginator_tag @quality_questions.value %>
+					</td>
+				</tr>
+			</tfoot>	
+		</table>
+	</div>
+</div>
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @quality_questions.value %></p>
+</div>
+<%end%>	

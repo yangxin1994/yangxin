@@ -1,35 +1,63 @@
-class Admin::PrizesController < Admin::ApplicationController
+class Admin::PrizesController < Admin::AdminController
+  before_filter :require_sign_in, :only => [:index, :create, :update, :destroy]
 
-	before_filter :check_prize_existence, :only => [:show, :update, :destroy]
+  layout "layouts/admin-todc"
 
-	def check_prize_existence
-		@prize = Prize.find_by_id(params[:id])
-		render_json_auto ErrorEnum::PRIZE_NOT_EXIST and return if @prize.nil?
-	end
+  def index
+    @prizes = auto_paginate Prize.search_prize(params[:keyword], params[:type].to_i)
+  end
 
-	def show
-		@prize['photo_url'] = @prize.photo.value
-		render_json_auto(@prize)
-	end
+  def new
+    @prize = {}
+  end
 
-	def index
-		render_json { auto_paginate(Prize.search_prize(params[:title], params[:type].to_i)) }
-	end
+  def show
+    @prize = Prize.find(params[:id])
+  end
 
-	def show
-		@prize['photo_url'] = @prize.photo.value
-		render_json_auto(@prize)
-	end
+  def edit
+    @prize = Prize.find(params[:id])
+  end
 
-	def create
-		render_json Prize.create_prize(params[:prize]) and return
-	end
+  def create
+    photo = ImageUploader.new
+    photo.store!(params[:prize][:photo])
 
-	def update
-		render_json_auto @prize.update_prize(params[:prize]) and return
-	end
+    params[:prize].delete(:photo)
+    params[:prize][:photo_url] = photo.url
 
-	def destroy
-		render_json_auto @prize.delete_prize and return
-	end
+    @prize = Prize.create(params[:prize])
+    @prize.update_gift(params[:prize])
+    if @prize.success
+      redirect_to admin_prizes_path
+    else
+      @prize = @prize.value
+      render :new
+    end
+  end
+
+  def update
+    @prize = Prize.find(params[:id])
+    if params[:prize][:photo]
+      photo = ImageUploader.new
+      photo.store!(params[:prize][:photo])
+
+      params[:prize].delete(:photo)
+      params[:prize][:photo_url] = photo.url
+    end
+    @prize.update_attributes(params[:prize])
+    if @prize.update_attributes(params[:prize])
+      redirect_to admin_prizes_path
+    else
+      @prize = params[:prize]
+      render :edit
+    end
+  end
+
+  def destroy
+    render_json @prize = Prize.where(:_id =>params[:id]).first do |prize|
+      success_true prize.delete_gift
+    end
+  end
+  
 end

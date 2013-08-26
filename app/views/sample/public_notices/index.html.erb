@@ -1,0 +1,56 @@
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/sample/public_notices-bundle" %>
+	<%= stylesheet_link_tag "pages/sample/public_notices-bundle", :media => "all" %>
+<% end %>
+
+<div class="site_nav"><span class="biao"></span><a href="<%= home_path %>"><span>首页</span></a><span>></span><span class="curr">站内公告</span></div>
+<div class="inner-page">
+  <div class="pub_list">
+  	<div class="pub_inner">
+  	  <div class="top"><span class="h_icon"></span><span class="h">站内公告</span></div>	
+  	  <ul>
+      <% if @public_notices['data'].length > 0 %>
+        <% @public_notices['data'].each_with_index do |pn,index| %>
+          <li>
+            <a href="<%= public_notice_path(pn['_id'])%>">
+        	    <span class="pn_l"><%= pn['title']%></span>
+            </a>
+        	  <span class="pn_r"><%= Date.strptime("#{pn['created_at']}", "%Y-%m-%d") %></span>
+            
+          </li>
+        <% end %>
+      <% end %>
+      </ul>
+      <%= sample_paginator(@public_notices) %>
+  	</div>
+  </div>
+  <div class="help">
+  	<div class="help_inner">
+  		<div class="top"><span class="h_icon"></span><span class="h">帮助</span></div>
+  		<dl>
+        <a href="<%= reward_help_path %>#reward">
+  			  <dt></dt>  
+  			  <dd><span>积分的作用?</span></dd>
+        </a>
+  		</dl>
+  		<dl>	
+        <a href="<%= reward_help_path %>#get_reward">
+  			  <dt></dt>
+  			  <dd><span>如何获取积分? </span></dd>
+        </a>
+  		</dl>
+  		<dl>	
+        <a href="<%= lottery_help_path %>#qualification">
+  			  <dt></dt>
+  			  <dd><span>怎样才能参加抽奖? </span></dd>
+        </a>  
+  		</dl>
+  		<dl>	
+        <a href="<%= lottery_help_path %>#flow">
+  			  <dt></dt>
+  			  <dd><span>抽中的奖品何时可以收到?</span></dd>
+        </a>
+  		</dl>
+  	</div>
+  </div>
+</div>

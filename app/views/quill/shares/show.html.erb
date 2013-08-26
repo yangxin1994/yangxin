@@ -1,0 +1,117 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+	jQuery(function($) {
+		window.survey_questions = <%= raw @survey_questions.to_json %>;
+		window.survey_quota = <%= raw @survey_quota.to_json %>;
+		window.survey_status = <%= @survey['status'].blank? ? 'null' : @survey['status'] %>;
+		window.survey_deadline = <%= @survey['deadline'].nil? ? -1 : @survey['deadline'] %>;
+	});
+	</script>
+	<%= javascript_include_tag "pages/quill/share-bundle" %>
+	<%= stylesheet_link_tag "pages/quill/share-bundle", :media => "all" %>
+<% end %>
+<div class="wide-panel">
+	<div class="panel-head">
+		<h1>
+			发布问卷
+			<div class='head-option'>
+				<input type='text' class='deadline-input' />
+				<button id='close_survey' class='od-button od-button-white'>现在关闭</button>
+			</div>
+		</h1>
+		<div class='close_publish dn'><!-- 未审核 -->
+			<div class="prompt-img"></div>
+			<h3>问卷处于关闭状态，开放之后被访者才可以开始答题。</h3>
+			<button id='submit_survey' class="od-button">开放问卷</button>
+		</div>
+		<div class='publish dn'>
+			<p>问卷链接地址<span>（通过下列链接可填写问卷）</span></p>
+			<input type="text" id="link-address" value='<%= @short_url %>'/><button class="od-button copy-link">复制问卷链接</button>
+			<ul class="share-link">
+				<li><a class='SinaWeibo' title='分享到新浪微博' href="javascript:void(0);"></a></li>
+				<li><a class='TencentWeibo' title='分享到腾讯微薄' href="javascript:void(0);"></a></li>
+				<li><a class='Renren' title='分享到人人网' href="javascript:void(0);"></a></li>
+				<li><a class='Douban' title='分享到豆瓣网' href="javascript:void(0);"></a></li>
+				<li><a class='QQSpace' title='分享到 QQ 空间' href="javascript:void(0);"></a></li>
+				<li><a class='Kaixin001' title='分享到开心网' href="javascript:void(0);"></a></li>
+				<li><a class='Diandian' title='分享到点点网' href="javascript:void(0);"></a></li>
+				<li><a class='Gmail' title='分享到 Gmail' href="javascript:void(0);"></a></li>
+				<li><a class='Fetion' title='分享到飞信' href="javascript:void(0);"></a></li>
+			</ul>
+		</div>
+	</div>
+
+	<div id='quotas_con'>
+	<div class='quotas-sum'>
+		<!-- <span>期望回收约 <b class="blue b"><%= @total_count %></b> 份</span>  -->
+		<span>已回收<b id='total_finished_count' class="blue b f24" style='color: #f90; margin: 0 0.5em;'></b>份有效答卷</span>
+		<span id="add_btn" class="r"></span>
+		<span title='刷新' id="refresh_btn" class="r mr10"></span>
+	</div>
+	<ul class='quotas'>
+		<!-- <li>
+			<h4>配额 02</h4>
+			<div>
+				<div class='sum'>期望回收 <b></b> 份 已回收 <b class="yellow"></b> 份
+					<div class='icons'>
+						<em class="icon-edit" title="编辑"></em>
+						<em class="icon-del" title="删除"></em>
+					</div>
+				</div>
+				<ul>
+					<li>性别（男）</li>
+					<li>婚姻状况（未婚）</li>
+				</ul>
+				<div class="progress"></div>
+				<div class='info'>
+					<span class="l">创建时间：2012.8.27</span>
+					<span class="r">完成时间：2012.9.7</span>
+				</div>
+			</div>
+		</li>
+		<li class='edit-quota last'>
+			<h4>配额 01</h4>
+			<div>
+				<div class='sum'>期望回收 <input type="text" class="quantity"/> 份</div>
+				<ul class='questions'>
+					<li>
+						<button title="关闭"></button>
+						<div class='question-title'>请问您的性别是?
+							<label><input type="radio" checked="checked" name="mate">精确匹配</label>
+							<label><input type="radio" name="mate">模糊匹配</label>
+						</div>
+						<ul>
+							<li><label><input type="checkbox">选项1</label></li>
+							<li><label><input type="checkbox">选项1</label></li>
+							<li><label><input type="checkbox">选项1</label></li>
+							<li><label><input type="checkbox">选项1</label></li>
+						</ul>
+					</li>
+					<li>
+						<button title="关闭"></button>
+						<div class='question-title'>请问您的性别是?
+							<label><input type="radio" checked="checked" name="mate">精确匹配</label>
+							<label><input type="radio" name="mate">模糊匹配</label>
+						</div>
+						<ul>
+							<li><label><input type="checkbox">选项1</label></li>
+							<li><label><input type="checkbox">选项1</label></li>
+							<li><label><input type="checkbox">选项1</label></li>
+							<li><label><input type="checkbox">选项1</label></li>
+						</ul>
+					</li>
+				</ul>
+				<div class="add-confirm">
+					<a href="javascript:void(0);" class="add-btn">
+						<span class='add-btn-left'><i class="icon-add">+</i></span>
+						<span class="add-btn-right">添加约束题目</span>
+					</a>
+					<a href="javascript:void(0);" class="od-button ml15">编辑完成</a>
+				</div>
+			</div>
+		</li> -->
+	</ul>
+	</div>
+
+</div>

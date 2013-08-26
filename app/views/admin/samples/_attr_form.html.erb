@@ -1,0 +1,132 @@
+<%= form_for "attribute" ,:url => "/admin/samples/add_attributes" , :html => { :class => "form-horizontal"} do %>
+
+  <div class="control-group">
+    <input type="hidden" name="attribute[id]" value="<%= @attribute["_id"] %>">
+    <label class="control-label" >属性名称:</label>
+    <div class="controls">
+        <div class="input-append">
+        <input class="input-medium" type="text" name="attribute[name]" placeholder="属性名称" value=<%= @attribute['name'] %> >
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              选择类型
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropselect" id="attr_select">
+              <li><a href="#attr-0">字符串</a></li>
+              <li><a href="#attr-1">枚举</a></li>
+              <li><a href="#attr-2">数值</a></li>
+              <li><a href="#attr-3">日期</a></li>
+              <li><a href="#attr-4">数值范围</a></li>
+              <li><a href="#attr-5">日期范围</a></li>
+              <li><a href="#attr-6">地址</a></li>
+              <li><a href="#attr-7">数组</a></li>
+            </ul>
+            <input type="hidden" id="attribute_type" name="attribute[type]" value="<%= @attribute["type"] %>">
+          </div>
+        </div>
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" >属性设置:</label>
+      <div class="attr-0 attr-ipt">
+        <div class="controls">
+         <textarea rows="6" name="attribute[value_0]" placeholder="字符串"></textarea>
+        </div>
+      </div>
+      <div class="attr-1 attr-ipt">
+        <div class="controls">
+          <textarea rows="6" name="attribute[enum_array]" placeholder="枚举，每一行元素代表一个枚举值"><%= @attribute["enum_array"] %></textarea>
+        </div>
+        <br/>
+        <div class="controls">
+          <textarea rows="6" name="attribute[value_1]" placeholder="整型数组，每一个元素代表一个枚举值"></textarea>
+        </div>
+      </div>
+      <div class="attr-2 attr-ipt">
+        <div class="controls">
+          <input type="text"  name="attribute[value_2]" placeholder="浮点数"/>
+        </div>
+      </div>
+      <div class="attr-3 attr-ipt">
+        <div class="controls">
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              选择日期格式类型
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropselect datef-select" >
+              <li><a href="#datef-0">年</a></li>
+              <li><a href="#datef-1">年月</a></li>
+              <li><a href="#datef-2">年月日</a></li>
+            </ul>
+            <input type="hidden" name="attribute[date_type_3]" class="date-type-input" value="<%= @attribute["date_type"] %>">
+          </div>
+        </div>
+        <br/>        
+        <div class="controls">
+          <input type="text"  name="attribute[value_3]" placeholder="日期格式:YYYY/MM/DD"/>
+        </div>
+      </div>
+      <div class="attr-4 attr-ipt">
+        <div class="controls">
+          <textarea rows="6" name="attribute[value_4]" placeholder="数值范围:每行包含两个元素的数组，两个元素均为浮点型用逗号隔开，分别代表数值范围的最小值和最大值"></textarea>
+        </div>
+      </div>
+      <div class="attr-5 attr-ipt">
+        <div class="controls">
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              选择类型
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropselect datef-select" >
+              <li><a href="#datef-0">年</a></li>
+              <li><a href="#datef-1">年月</a></li>
+              <li><a href="#datef-2">年月日</a></li>
+            </ul>
+            <input type="hidden" name="attribute[date_type_5]" class="date-type-input" value="<%= @attribute["date_type"] %>">
+          </div>
+        </div>
+        <br/>        
+        <div class="controls">
+          <textarea rows="6" name="attribute[value_5]" placeholder="日期范围:每行包含两个元素的数组，两个元素均为YYYY/MM/DD,用逗号分隔，分别代表日期范围的最小值和最大值"></textarea>
+        </div>
+      </div>
+      <div class="attr-6 attr-ipt">
+        <div class="controls">
+          <input type="text" name="attribute[value_6]" placeholder="相应的地址码"/>
+        </div>
+      </div>
+      <div class="attr-7 attr-ipt">
+        <div class="controls">
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              选择类型
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropselect" id="eattr_select">
+              <li><a href="#eattr-0">字符串</a></li>
+              <li><a href="#eattr-1">枚举</a></li>
+              <li><a href="#eattr-2">数值</a></li>
+              <li><a href="#eattr-3">日期</a></li>
+              <li><a href="#eattr-6">地址</a></li>
+            </ul>
+            <input type="hidden" name="attribute[element_type]" id="eattr_ipt" value="<%= @attribute["element_type"] %>">
+          </div>
+        </div>
+        <br/>
+        <div class="controls enum attr-ipt">
+          <textarea rows="6" name="attribute[enum_array_6]" id="ipt_enum_array" placeholder="枚举，每一行元素代表一个枚举值"><%= @attribute["enum_array_6"] %></textarea>
+        </div>
+        <br/>        
+        <div class="controls">
+          <textarea rows="6" name="attribute[value_7]" placeholder="每一行元素代表一个枚举值"/></textarea>
+        </div>
+      </div>
+  </div>
+  <div class="control-group">
+    <div class="controls">
+      <button type="submit" class="btn btn-primary">确认无误</button>
+    </div>
+  </div>    
+<% end -%>

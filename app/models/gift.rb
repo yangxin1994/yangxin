@@ -24,7 +24,7 @@ class Gift
 	# 2 off the shelf, 1 on the shelf, 4 deleted
 	field :status, :type => Integer, default: 2
 	# 1 for virtual gift, 2 for real goods gift, 4 for mobile change, 8 for alypay transfer, 16 for jifenbao, 32 for qq coin
-	field :type, :type => Integer, default: 1
+	field :type, :type => Integer, default: 0
 	field :title, :type => String, default: ""
 	field :description, :type => String, default: ""
 	field :quantity, :type => Integer, default: 0
@@ -55,10 +55,17 @@ class Gift
 		return gifts
 	end
 
+	def info
+		photo_src = self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url
+		self.write_attribute(:photo_src, photo_src)
+		return self
+	end
+
 	def self.create_gift(gift)
 		photo_url = gift.delete("photo_url")
 		material = Material.create_image(photo_url)
 		gift = Gift.new(gift)
+		gift.price = gift.point / 100 if gift.price.blank?
 		gift.save
 		gift.photo = material
 		gift["photo_url"] = material.value
@@ -87,7 +94,7 @@ class Gift
 
 	def update_gift(gift)
 		photo_url = gift.delete("photo_url")
-		if !photo_url.blank? && photo_url != self.photo.picture_url
+		if !photo_url.blank? && photo_url != self.photo.try("photo_url")
 			material = Material.create_image(photo_url)
 			self.photo = material
 		end

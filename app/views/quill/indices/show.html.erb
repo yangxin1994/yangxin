@@ -1,0 +1,74 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<!-- <meta property="wb:webmaster" content="7518916ce386bb0c" /> -->
+	
+	<%= javascript_include_tag "pages/quill/index-bundle" %>
+	<%= stylesheet_link_tag "pages/quill/index-bundle", :media => "all" %>
+	
+	<script type="text/javascript">
+	jQuery(function($) {
+		$('#uslider').uSlider();
+	});
+	</script>
+<% end %>
+
+<!-- 正文内容 开始 -->
+<div class="explain">
+	<div class="explain-box l">
+		<p class="white-txt">
+			[2013.01.01] Quill 4.0 数字化调研解决方案正式发布。
+		</p>
+		<p class="white-txt">
+			<%= corp_name %>是专业从事数字化调研的第三方服务商，拥有国内领先的数字化调研平台，能够为客户提供专业科学的数字化调研和研究咨询服务。
+		</p>
+		<div class="explain-box-bg"></div>
+	</div>
+	<div class="slider slide-wrapper r">
+		<div class="radiusBg"></div>
+		<ul id="uslider" class="uslider">
+			<li>
+				<img src="assets/image/quill/slider/4.png" />
+			</li>
+			<li>
+				<img src="assets/image/quill/slider/3.png" />
+			</li>
+			<li>
+				<img src="assets/image/quill/slider/2.png" />
+			</li>
+			<li>
+				<img src="assets/image/quill/slider/1.png" />
+			</li>
+		</ul>
+	</div>
+</div>	
+<!-- 成功案列 -->
+<div class="showcase l mt20">
+	<h3 class="title f14 b">成功案列</h3>
+	<ul class="mt10">
+		<li class="l"><a href="<%= customer_path %>"><img src="assets/image/quill/showcase/1.png" alt=""></a></li>
+		<li class="l"><a href="<%= customer_path %>"><img src="assets/image/quill/showcase/2.png" alt=""></a></li>
+		<li class="l"><a href="<%= customer_path %>"><img src="assets/image/quill/showcase/3.png" alt=""></a></li>
+		<li class="l"><a href="<%= customer_path %>"><img src="assets/image/quill/showcase/4.png" alt=""></a></li>
+		<li class="l"><a href="<%= customer_path %>"><img src="assets/image/quill/showcase/5.png" alt=""></a></li>
+		<li class="l"><a href="<%= customer_path %>"><img src="assets/image/quill/showcase/6.png" alt=""></a></li>
+	</ul>
+</div>
+<!-- 关注我们 -->
+ <div class="followed-our l mt20">
+ 	<h3 class="title f14 b">关注我们</h3>
+ 	<div class="followed-link mt10">
+ 		<ul>
+	 		<li class="l"><a class="other-icon sina_weibo" href="javascript:void(0);"></a></li>
+	 		<li class="l"><a class="other-icon renren" href="javascript:void(0);"></a></li>
+	 		<li class="l"><a class="other-icon t_weibo" href="javascript:void(0);"></a></li>
+	 		<li class="l"><a class="other-icon douban" href="javascript:void(0);"></a></li>
+	 		<li class="l"><a class="other-icon msn" href="javascript:void(0);"></a></li>
+	 		<li class="l"><a class="other-icon diandian" href="javascript:void(0);"></a></li>
+	 	</ul>
+	 	<a href="<%= aboutus_path %>" class="more r mr20">敬请期待</a>
+ 	</div>
+ </div> 
+</div>
+<!-- 正文内容 结束 -->
+
+

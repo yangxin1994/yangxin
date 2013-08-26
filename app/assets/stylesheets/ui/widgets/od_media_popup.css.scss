@@ -1,0 +1,77 @@
+.od-upload{
+
+	/*****更改上传样式******/
+	.progress_box{
+	width:204px;
+	line-height: 24px;
+	margin: 10px 0 0 10px;
+	float: left;
+	}
+	.progress_box p{
+		float:left;
+		color:#333;
+	}
+	.progress_box i{
+		font-style: normal;
+		color:#ccc;
+		float: left;
+		margin-left:5px;	
+	}
+	.progressBarInProgress,.progressBarComplete,.progressBarError {
+		font-size: 0;
+		width: 0%;
+		height: 2px;
+		background-color: blue;
+		margin-top: 2px;
+	}
+	.progressBarComplete {
+		width: 100%;
+		background-color: green;
+		visibility: hidden;
+	}
+	.progressBarError {
+		width: 100%;
+		background-color: red;
+		visibility: hidden;
+	}
+	.progress_bar
+	{
+		width: 150px;
+		height: 8px;
+		border:1px #c8c8c8 solid;
+		float: left;
+		margin-top:7px;
+	}
+	.progress_live{
+		width:0%;
+		height:8px;
+		background: #f4bf00;	
+		float: left;
+	}
+	a.cancel{
+		color:#666;
+		float: right;
+		padding-right:10px;
+	}
+	a:hover.cancel{
+		color:#333;
+	}
+	.img_preview{
+		width: 210px;
+		height: 130px;
+		margin-top:10px;
+	}
+	.img_upload{
+		width:210px;
+		height:130px;
+	}
+	.uploadOverBtn{
+		display:none;
+		text-align:center;
+		margin-top:-8px;
+		margin-bottom: 10px;
+	}
+	a.sure{
+		padding-right:0px;
+	}
+}

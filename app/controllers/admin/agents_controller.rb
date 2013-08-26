@@ -1,30 +1,46 @@
-class Admin::AgentsController < Admin::ApplicationController
+class Admin::AgentsController < Admin::AdminController
 
-	before_filter :check_agent_existence, :only => [:show, :update, :destroy]
+  layout "layouts/admin-todc"
 
-	def check_agent_existence
-		@agent = Agent.find_by_id(params[:id])
-		render_json_auto ErrorEnum::AGENT_NOT_EXIST if @agent.nil?
-	end
+  before_filter :require_sign_in, :only => [:index, :create, :update, :destroy]
 
-	def index
-		agents = Agent.search_agent(params[:email], params[:region])
-		render_json_auto(auto_paginate(agents){|agents| agents.map { |e| e.info } }) and return
-	end
+  def index
+    @agents = auto_paginate Agent.search_agent(params[:email], params[:region]) do |agents|
+      agents.map { |e| e.info }
+    end
+  end
 
-	def show
-		render_json_auto(@agent.info) and return
-	end
 
-	def create
-		render_json_auto Agent.create_agent(params[:agent]) and return
-	end
+  def new
+    @agent = {}
+  end
 
-	def update
-		render_json_auto @agent.update_agent(params[:agent]) and return
-	end
+  def create
+    @agent = Agent.create(params[:agent])
+    if @agent.created_at
+      redirect_to admin_agents_path
+    else
+      render :new
+    end
+  end
 
-	def destroy
-		render_json_auto @agent.delete_agent and return
-	end
+  def edit
+    @agent = Agent.find(params[:id]).info
+  end
+
+  def update
+    @agent = Agent.find(params[:id])
+    if @agent.update_agent(params[:agent])
+      redirect_to admin_agents_path
+    else
+      render :json => result
+    end
+  end
+
+  def destroy
+    render_json @agent = Gift.where(:_id =>params[:id]).first do |agent|
+      success_true agent.delete_agent
+    end    
+    
+  end
 end

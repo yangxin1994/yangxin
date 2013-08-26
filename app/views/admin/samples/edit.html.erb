@@ -1,0 +1,45 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/admin/samples-bundle" %>
+  <%= javascript_include_tag "pages/admin/samples/form-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+
+  <li class="active">
+    <a href="/admin">
+    <i class="icon-chevron-right"></i>
+    基本属性
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/redeem_log">
+    <i class="icon-chevron-right"></i>
+    礼品兑换记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/point_log">
+      <i class="icon-chevron-right"></i>
+      积分变化记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/lottery_log">
+      <i class="icon-chevron-right"></i>
+      抽奖记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/answer_log">
+      <i class="icon-chevron-right"></i>
+      回答历史记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/lottery_log">
+      <i class="icon-chevron-right"></i>
+      问卷推广记录
+    </a>
+  </li>
+<% end %>
+

@@ -1,0 +1,28 @@
+@import "common";
+@import "compass/css3/inline-block";
+@import "od-button/*.png";
+
+.od-radio {
+	@include inline-block;
+	cursor: pointer;
+	
+	em {
+		@include inline-block;
+		@include size(14px, 14px);
+		@include od-button-sprite(radio);
+		margin:0 8px 0 0;
+
+		&.hover {
+			@include od-button-sprite(radio_hover);
+		}
+
+		&.checked {
+			@include od-button-sprite(radio_active);
+		}
+	}
+	
+	span {
+		@include one-line(14px);
+	}
+	
+}

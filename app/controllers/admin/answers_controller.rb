@@ -1,24 +1,31 @@
-# coding: utf-8
-require 'array'
-require 'error_enum'
-require 'quill_common'
-class Admin::AnswersController < Admin::ApplicationController
+class Admin::AnswersController < Admin::AdminController
 
-	before_filter :check_answer_existence
+  layout "layouts/admin-todc"
 
-	def check_answer_existence
-		@answer = Answer.find_by_id(params[:id])
-		render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return if @answer.nil?
-	end
+  before_filter :require_sign_in, :only => [:index, :create, :update, :destroy]
 
-	def show
-		respond_to do |format|
-			format.json	{ render_json_auto(@answer) and return }
-		end
-	end
+  def index
+    @surveys = auto_paginate(Survey.search(params))
+  end
 
-	def destroy
-		retval = @answer.delete
-		render_json_auto(retval) and return 
-	end
+  def show
+    if current_user.is_admin?
+      survey = Survey.find(params[:id])
+    else
+      survey = current_user.answer_auditor_allocated_surveys.find(params[:id])
+    end
+
+    @answers = auto_paginate survey.answers.find_by_status(params[:status])
+  end
+
+  def review
+    @questions = Answer.find(params[:id]).present_auditor
+  end
+
+  def update
+    render_json Answer.find(params[:id]) do |answer|
+      answer.review(params[:review_result].to_s == "true", current_user, params[:message_content])
+    end 
+  end
+
 end

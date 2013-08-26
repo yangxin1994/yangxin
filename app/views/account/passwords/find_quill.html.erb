@@ -1,0 +1,21 @@
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/account/password_find_quill-bundle" %>
+<% end %>
+<div class="find-pw">
+	<h1>找回密码</h1>
+	<div id='input_con'>
+		<span>系统将向您的注册邮箱发送重置密码邮件：</span>
+		<p>
+			<em class="icon icon-mail"></em>
+			<input id='email_ipt' type='text' param='e' class="l" name="mail" placeholder="请输入您的注册邮箱" autofocus />
+			<span id='error' class="error-prompt" style='display:none;'>
+				<span class="error-prompt-t"></span><!-- 
+				 --><span class="error-prompt-txt"></span><!-- 
+				 --><a href="javascript:void(0);" class="close-error"></a><!-- 
+				 --><span class="error-prompt-r"></span>
+			</span>
+		</p>
+		<button id='find_btn' class="od-button l" style='width: 90px;'>重置密码</button>
+	</div>
+	<span id='success' style='display:none; line-height: 1.8em; color:#f5c000'>重置密码链接已发送至<strong class="mail-address"></strong>，请在 24 小时内访问链接修改密码。</span>
+</div>

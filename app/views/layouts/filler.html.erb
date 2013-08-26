@@ -1,0 +1,67 @@
+<%
+	@page_title = "#{@is_preview ? '模拟答题 - ' : ''}#{@survey['title']}"
+%>
+
+<% content_for :app_head do %>
+	<%= javascript_include_tag "layouts/filler-layout" %>
+	<%= stylesheet_link_tag    "layouts/filler-layout" %>
+
+	<script type="text/javascript">
+		window.survey_id = '<%= @survey["_id"] %>';
+		window.is_preview = <%= @is_preview.blank? ? 'false' : @is_preview %>;
+		window.spread_url = <%= raw @spread_url.to_json %>;
+	</script>
+
+	<%= yield :head %>
+
+	<% if @survey['style_setting']['style_sheet_name'].blank? %>
+	<%= stylesheet_link_tag "quill/views/filler_styles/default-bundle" %>
+	<% else %>
+	<%= stylesheet_link_tag "quill/views/filler_styles/#{@survey['style_setting']['style_sheet_name']}-bundle" %>
+	<% end %>
+<% end %>
+
+<% content_for :app_content do %>
+
+<% if @is_preview %>
+<div id='pv_bar'>
+	<img src="/assets/filler/preview.png"><span>您正在模拟答题，答案不会被记录。</span><button>重新开始</button>
+</div>
+<% end %>
+
+<div id='sf'>
+	
+<div id='sf_banner'>
+	<div id='sf_banner_sticky'>
+		<div class='sf_banner_top'>
+			<div class='inner'>
+				<a id='logo' href="http://oopsdata.com">
+					<img src="/assets/filler/default/logo.png" />
+				</a>
+				<% if @survey['style_setting']['has_progress_bar'] %>
+				<div id='progress_con'>
+					<div id='progress_info'></div>
+					<div id='progress_bar'><em></em></div>
+				</div>
+				<% end %>
+			</div>
+		</div>
+		<div class='sf_banner_bottom'></div>
+	</div>
+</div>
+
+<%= yield %>
+
+<div id='sf_footer'>
+	<% if @survey['style_setting']['has_oopsdata_link'] %>
+	<a href='/' target="_blank">技术支持 <%= corp_name %></a>
+	<% end %>
+	<% if @survey['style_setting']['has_advertisement'] %>
+	<div class='ad'></div>
+	<% end %>
+</div>
+
+</div>
+<% end %>
+
+<%= render :template => 'layouts/app' %>

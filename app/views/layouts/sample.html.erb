@@ -1,0 +1,168 @@
+<% content_for :app_head do %>
+	<%= stylesheet_link_tag    "layouts/sample-layout" %>
+	<%= javascript_include_tag "layouts/sample-layout" %>
+	<script type="text/javascript">
+	jQuery(function($) {
+		//账户中心下拉菜单
+		$(".user-head-box").powerFloat({
+			offsets: {
+				x:0,
+				y:-1
+			},
+			zIndex:888,
+			eventType: "hover",
+		    target: $("#account-pull-down"),
+		    position:"1-3",
+		    showCall: function() {
+        	$(this).addClass("hover");    
+	        },
+	        hideCall: function() {
+	            $(this).removeClass("hover");
+	        }  
+		});
+	});
+	</script>
+
+	<%= yield :head %>
+
+<% end %>
+
+<% content_for :app_content do %>
+	<div class="header">
+		<div class="inner-page">
+			<div class="header-top">
+				<div class="follow-us l">
+					<span>关注我们：</span>
+					<a href="http://e.weibo.com/u/3432515240?ref=http%3A%2F%2Flogin.sina.com.cn%2Fsso%2Flogin.php" target="_blank"><i class="icon16 f-sina"></i></a>
+					<a href="http://t.qq.com/ys2523562014" target="_blank"><i class="icon16 f-qq"></i></a>
+				</div>
+				<div class="login_methods r">
+					<ul>
+						<% if user_signed_in %>
+							<li>
+								<a class="user-head-box" href="<%=setting_users_path%>">
+									<span class="userhead">
+										<img src="<%= mini_avatar(current_user._id.to_s)%>" alt="username">
+									</span>
+									<span class="username"><%= current_user.nickname %></span>
+									<i class="triangle"></i>
+								</a>
+								<ul id="account-pull-down" class="dn">
+									<li>
+										<a class="my-survey" href="<%= surveys_users_path %>"><i class="icon survey	"></i>我的调研</a>
+									</li>
+									<li>
+										<a class="credits-log" href="<%= points_users_path %>"><i class="icon 	credits"></i>积分记录</a>
+									</li>
+									<li>
+										<a class="my-orders" href="<%= orders_users_path %>"><i class="icon orders	"></i>我的订单</a>
+									</li>
+									<li>
+										<a class="account-setting" href="<%= setting_users_path %>"><i class="icon 	account"></i>账户设置</a>
+									</li>
+								</ul>
+							</li>
+							<li>
+								<a class="quit"href="/sign_out" class="quit-btn">退出</a>
+							</li>
+							<li>
+								<a class="integral-btn" href="<%= points_users_path %>" >
+									<i class="icon integral"></i>
+									<span><%= current_user.point %>积分</span>
+								</a>
+							</li>
+							<li>
+								<% @unread_messages_count = (user_signed_in ? current_user.unread_messages_count : 0) %>
+								<a class="inform-btn <% if @unread_messages_count > 0 %>active<% end %>" href="<%= notifications_users_path%>" >
+									<i class="icon inform"></i>
+									<span>
+										通知（<%= @unread_messages_count %>）
+									</span>
+								</a>
+							</li>
+						<% else %>
+							<li>
+								<a href="/sign_up">注册</a>
+								<a href="/sign_in">登录</a>
+							</li>
+						<% end %>
+						<!-- <li>
+							<a href="javacsript:void(0);">注册</a>
+							<a href="javacsript:void(0);">登录</a>
+						</li>
+						 <li class="out-login">
+							<a href="javacsript:void(0);"><i class="icon login-sina"></i>微博登录</a>
+							<a href="javacsript:void(0);"><i class="icon login-qq"></i>QQ登录</a>
+							<a href="javacsript:void(0);"><i class="icon login-alipay"></i>支付宝登录</a>
+						</li> --> 
+
+					</ul>
+				</div>
+			</div>
+			<div class="header-bottom">
+				<a href="<%= home_path%>" class="logo">
+					<img src="/assets/od-quillme/logo.png" alt="问卷吧">
+				</a>
+				<ul class="nav">
+					<li><a class="<%= controller_name == 'homes' ? 'active' : '' %>" href="<%= home_path %>">首页</a></li>
+					<li><a class="<%= controller_name == 'surveys' ? 'active' : ''%>" href="<%= surveys_path %>">参与调研</a></li>
+					<li><a class="<%= controller_name == 'gifts' ? 'active' : ''%>" href="<%= gifts_path %>">礼品兑换</a></li>
+				</ul>
+				<ul class="contact">
+					<li class="qq">
+						<a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=2523562014&site=qq&menu=yes">
+							<i class="icon contact-qq"></i><span>在线客服</span>
+						</a>
+					</li>
+					<li class="phone"><a href="javascript:void(0);"><i class="icon contact-phone"></i><span>400-650-7905</span></a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+  <%= yield %>
+  <div style="clear:both;"></div>
+	<div class="footer">
+		<div class="inner-page">
+			<div class="footer-logo">
+				<img src="/assets/od-quillme/logo.png" alt="问卷吧">
+				<p><%= raw copyright_html %></p>
+				<p style='margin-top: 5px;'><%= icp_info %></p>
+			</div>
+			<dl>
+				<dt>参加调研</dt>
+				<dd><%= link_to '抽奖调研', "/help/survey#lottery_survey" %></dd>
+				<dd><%= link_to '积分调研', "/help/survey#point_survey" %></dd>
+				<dd><%= link_to '免费调研', "/help/survey#free_survey" %></dd>
+				<dd><%= link_to '推广问卷', "/help/survey#spread" %></dd>
+			</dl>
+			<dl>
+				<dt>参与抽奖</dt>
+				<dd><%= link_to '抽奖规则', "/help/lottery#rule" %></dd>
+				<dd><%= link_to '抽奖流程', "/help/lottery#flow" %></dd>
+				<dd><%= link_to '抽奖资格', "/help/lottery#qualification" %></dd>
+			</dl>
+			<dl>
+				<dt>礼品兑换</dt>
+				<dd><%= link_to '兑换规则', "/help/gift#rule" %></dd>
+				<dd><%= link_to '兑换流程', "/help/gift#flow" %></dd>
+				<dd><%= link_to '兑换资格', "/help/gift#qualification" %></dd>
+			</dl>
+			<dl>
+				<dt>我的积分</dt>
+				<dd><%= link_to '积分的作用', "/help/reward#reward" %></dd>
+				<dd><%= link_to '如何获得积分', "/help/reward#get_reward" %></dd>
+			</dl>
+			<dl>
+				<dt>关于我们</dt>
+				<dd><%= link_to '公司介绍', "/help/aboutus#intro" %></dd>
+				<dd><%= link_to '联系我们', "/help/aboutus#contact" %></dd>
+			</dl>
+			<div class="two-dimension-code">
+				<p>微信关注</p>
+				<img src="/assets/od-quillme/two-dimension-code.png" alt="微信关注问卷吧">
+			</div>
+		</div>
+	</div>
+<% end %>
+
+<%= parent_layout 'app' %>

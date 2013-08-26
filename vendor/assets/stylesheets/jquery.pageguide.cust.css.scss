@@ -1,0 +1,15 @@
+//=require jquery.pageguide
+
+#pageGuideWrapper #pageGuideToggle {
+	display:none;
+}
+#pageGuideWrapper #pageGuideMessage .pageguide-back,
+#pageGuideWrapper #pageGuideMessage .pageguide-fwd {
+  background-image: image-url("pageguide/pageguide_arrow.png");
+}
+#pageGuideWrapper .pageguide-guide li.expanded {
+	display: none;
+}
+#pageGuideWrapper .pageguide-guide li.pageguide-active {
+	display: block;
+}

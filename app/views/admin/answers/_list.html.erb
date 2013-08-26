@@ -1,0 +1,54 @@
+<div>
+  <span>
+    <form class="form-search" style="display:inline">
+    <div class="input-append">
+      <input class="span6 search-query" name="keyword" id="" type="text" placeholder="创建人邮箱">
+      <button class="btn">搜索</button>
+    </div>
+    </form>
+  </span>
+  <span class="pull-right">
+    <%= paginator_mini @answers %>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu pull-right">
+        <li><a href="?">全部</a></li>
+        <li class="divider"></li>
+        <li><a href="?status=4">待审核</a></li>
+        <li><a href="?status=2">被拒绝</a></li>
+        <li><a href="?status=32">审核完毕</a></li>
+      </ul>
+    </div>
+  </span>
+</div>
+
+<div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th width="20%">答案创建者</th>
+        <th >状态</th>
+        <th >创建时间</th>
+        <th >操作</th>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr>
+
+      </tr>
+    </tfoot>
+    <tbody>
+      <% @answers['data'].each do |answer| %>
+      <tr>
+        <td><%= answer["sample_name"] %></td>
+        <td><%= answer_type_tag answer["status"] %></td>
+        <td><%= answer["created_at"].strftime('%F %R') %></td>
+        <td>
+          <a class="btn handle" href="<%= answer["_id"] %>/review" ><i class="icon-list-alt"></i>查看详细</a>
+        </td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+</div>

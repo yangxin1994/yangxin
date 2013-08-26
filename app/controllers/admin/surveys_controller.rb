@@ -1,155 +1,129 @@
-class Admin::SurveysController < Admin::ApplicationController
-	before_filter :check_survey_existence, :except => [:index]
-	before_filter :check_reward_scheme_existence, :only => [:quillme_promote, :email_promote, :sms_promote, :weibo_promote, :broswer_extension_promote]
+class Admin::SurveysController < Admin::AdminController
 
-	def check_survey_existence
-		@survey = Survey.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-	end
+  layout "layouts/admin-todc"
 
-	def check_reward_scheme_existence
-		reward_scheme_id = params[(params[:action] + "_setting").to_sym]["reward_scheme_id"]
-		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
-		render_json_auto(ErrorEnum::REWARD_SCHEME_NOT_EXIST) and return if reward_scheme.nil?
-	end
+	# *****************************
 
-	def index
-		select_fileds = {}
-		if !params[:status].blank?   ## status filter
-			status_filter = Tool.convert_int_to_base_arr(params[:status].to_i)
-			select_fileds[:status] = {"$in" => status_filter}
-		end
-		select_fileds[:title] = /.*#{params[:title]}.*/ if !params[:title].blank?  ## title filter
-		@surveys = Survey.find_by_fields(select_fileds)
+  def index
+    @surveys = auto_paginate Survey.search(params) do |surs|
+      surs.map do |sur|
+        sur.append_user_fields([:email, :mobile])
+        sur.serialize_for([:title, :email, :mobile, :created_at])
+        sur
+      end
+    end
+  end
 
-		@surveys = find_by_user_fields(@surveys, [:email, :mobile])  ## user moblile and email filter
-		@surveys = @surveys.map { |s| s.append_user_fields([:email, :mobile]) }
-		@surveys = @surveys.map { |s| s.serialize_for([:title, :email, :mobile, :created_at]) }
-		render_json_auto auto_paginate(@surveys) and return
-	end
+  def more_info
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      {
+        :hot => survey.quillme_hot,
+        :spread => survey.spread_point,
+        :visible => survey.publish_result
+      }
+    end
+  end
 
-	def show
-		render_json_auto @survey.info_for_admin and return
-	end
+  def set_info
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      @is_succuess = 
+        survey.set_quillme_hot(params[:hot].to_s == "true") &&
+        survey.set_spread(params[:spread].to_i) &&
+        survey.update_attributes({'publish_result' => (params[:visible].to_s == "true")})
+      {
+        :hot => survey.quillme_hot,
+        :spread => survey.spread_point,
+        :visible => survey.publish_result
+      }
+    end
+  end
 
-	def promote
-		retval = @survey.get_all_promote_settings
-		render_json_auto retval and return
-	end
+  def reward_schemes
+    survey = Survey.where(:_id => params[:id]).first
+    @reward_schemes = survey.reward_schemes.not_default
+    @prizes = Prize.all
+    if @editing_rs = RewardScheme.where(:id => params[:editing]).first
+      @editing_rs["rewards"].each do |reward|
+        case reward["type"].to_i
+        when 1
+          @editing_rs["tel_charge"] = reward["amount"]
+        when 2
+          @editing_rs["alipay"] = reward["amount"]
+        when 4
+          @editing_rs["point"] = reward["amount"]
+        when 8
+          @editing_rs["prizes"] = reward["prizes"]
+        when 16
+          @editing_rs["jifenbao"] = reward["amount"]
+        else
 
-	def quillme_promote
-		@survey.update_attributes({
-			"quillme_promotable" => params[:promotable],
-			'quillme_promote_info' => params[:quillme_promote_setting]
-			})
-		@survey.update_quillme_promote_reward_type
-		render_json_auto true and return
-	end
+        end
+      end
+      if @editing_rs["rewards"].present?
+        @editing_rs['is_free'] = "no" 
+      else
+        @editing_rs['is_free'] = "yes" 
+      end
+    else
+      @editing_rs ={}
+    end    
+  end  
 
-	def email_promote
-		email_promote_setting = params[:email_promote_setting]
-		email_promote_setting["promote_email_count"] = @survey.email_promote_info["promote_email_count"]
-		@survey.update_attributes({
-			"email_promotable" => params[:promotable],
-			'email_promote_info' => email_promote_setting
-			})
-		render_json_auto true and return
-	end
+  def show
+    _r = Survey.find(params[:id]).info_for_admin
+    @survey = _r["survey"]
+    @questions = {}
+    _r['questions'].each do |question_id, question|
+      @survey["logic_control"].each do |lc|
+        lc["conditions"].each do |condition|
+          if condition["question_id"] == question_id
+            question["is_logic_control"] = true
+            # question["logic_control_type"] = lc["rule_type"]
+            question["issue"]["items"] = question["issue"]["items"].try('map') do |item|
+              if condition["answer"].include? item["id"]
+                item["is_fuzzy"] = condition["fuzzy"]
+                item["is_logic_control"] = true
+                item["logic_control_type"] = lc["rule_type"]
+              end
+              item
+            end
+          end
+        end
+      end
+      @questions[question_id] = question
+    end    
+    # @survey = Survey.where(:_id => params[:id])
+    # result = @client.show(params)
+    # if result[:success] || result.try(:success)
+    #   @questions = result[:questions]
+    #   @survey = result[:survey]
+    # else
+    #   render :json => result
+    # end
+  end
 
-	def sms_promote
-		sms_promote_setting = params[:sms_promote_setting]
-		sms_promote_setting["promote_sms_count"] = @survey.sms_promote_info["promote_sms_count"]
-		@survey.update_attributes({
-			"sms_promotable" => params[:promotable],
-			'sms_promote_info' => sms_promote_setting
-			})
-		render_json_auto true and return
-	end
 
-	def broswer_extension_promote
-		@survey.update_attributes({
-			"broswer_extension_promotable" => params[:promotable],
-			'broswer_extension_promote_info' => params[:broswer_extension_promote_setting]
-			})
-		render_json_auto true and return
-	end
 
-	def weibo_promote
-		@survey.update_attributes({
-			"weibo_promotable" => params[:promotable],
-			'weibo_promote_info' => params[:weibo_promote_setting]
-			})
-		render_json_auto true and return
-	end
+  def promote
+    if survey = Survey.where(:_id => params[:id]).first
+      @promote = survey.get_all_promote_settings
+    else
 
-	def  background_survey
-		@survey.update_attributes({'delta' => params[:delta_setting]})
-		render_json_auto true and return
-	end
+    end
+  end
 
-	def find_by_user_fields(surveys, arr_fields)
-		arr_fields.each do |field|
-			if !params[field].blank?
-				surveys = surveys.to_a.select do |s|
-					s.user.send(field).include?(params[field].to_s)
-				end
-			end
-		end
-		surveys
-	end
+  def update_promote
+    result = @client.update_promote(params)
+    if result.success
+      @promote = result.value
+      redirect_to "/admin/surveys/#{params[:id]}/promote"
+    else
+      render :json => result
+    end
+  end
 
-	def get_quillme_hot
-		retval = { 'quillme_hot' => @survey.quillme_hot }
-		render_json_auto retval and return
-	end
-
-	def set_quillme_hot
-		render_json_auto @survey.set_quillme_hot(params[:quillme_hot].to_s == "true") and return
-	end
-
-	def allocate_answer_auditors
-		retval = @survey.allocate_answer_auditors(params[:answer_auditor_ids], params[:allocate].to_s == "true")
-		render_json_auto(retval) and return
-	end
-
-	def set_result_visible
-		@survey.update_attributes({'publish_result' => (params[:visible].to_s == "true")})
-		render_json_auto true and return
-	end
-
-	def get_result_visible
-		render_json_auto @survey.publish_result and return
-	end
-
-	def set_spread
-		retval = @survey.set_spread(params[:spread_point].to_i)
-		render_json_auto(retval) and return
-	end
-
-	def get_spread
-		@spread_info = {"spread_point" => @survey.spread_point}
-		render_json_auto @spread_info and return
-	end
-
-	def destroy
-		@survey = Survey.find_by_id(params[:id])
-		# else just change status to -1
-		render_json_auto @survey.try(:delete) and return
-	end
-
-	def list_sample_attributes_for_promote
-		render_json_auto @survey.sample_attributes_for_promote and return
-	end
-
-	def add_sample_attribute_for_promote
-		render_json_auto @survey.add_sample_attribute_for_promote(params[:sample_attribute]) and return
-	end
-
-	def update_sample_attribute_for_promote
-		render_json_auto @survey.update_sample_attribute_for_promote(params[:sample_attribute_index], params[:sample_attribute]) and return
-	end
-
-	def remove_sample_attribute_for_promote
-		render_json_auto @survey.remove_sample_attribute_for_promote(params[:sample_attribute_index]) and return
-	end
+  def destroy_attributes
+   result = @client.destroy_attributes(params)
+   render :json => result
+  end
 end

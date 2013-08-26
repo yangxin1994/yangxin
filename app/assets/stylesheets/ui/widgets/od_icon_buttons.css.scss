@@ -1,0 +1,64 @@
+/*
+ *=require ./../../icons
+ */
+@import "common";
+@import "compass/css3/inline-block";
+
+// load bootstrap tooltip css
+@import "twitter/bootstrap/variables";
+@import "twitter/bootstrap/mixins";
+@import "twitter/bootstrap/tooltip";
+
+.od-icon-buttons {
+	@include inline-block;
+	line-height: 20px;
+	li {
+		@include inline-block;
+		button {
+			width: 42px;
+			@include one-line(20px);
+			text-align: center;
+			border: none;
+			cursor: pointer;
+			.icon {
+				@include square(16px);
+				display:block;
+				margin-left:auto;
+				margin-right:auto;
+			}
+		}
+	}
+	
+	@mixin bg($top, $left) {
+		background: $url-widgets-bg	no-repeat $top $left;
+		/*多按钮左经过*/
+		&:hover  {
+			@include bp($top, $left - 20);
+		}
+		/*多按钮左点击*/
+		&:active, &.active {
+			@include bp($top, $left - 40);
+		}
+		
+		&.active {
+			cursor: default;
+		}
+	}
+	
+	.icon-btn button {
+		@include bg(-50px, -105px);
+	}
+	
+	.icon-btn-l button {
+		@include bg(-8px, -65px);
+	}
+	
+	.icon-btn-r button {
+		@include bg(-92px, -145px);
+	}
+	
+	.icon-btn-single button {
+		@include bg(0px, 0px);
+	}
+}
+

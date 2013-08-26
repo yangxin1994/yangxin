@@ -1,0 +1,42 @@
+<!-- content for head -->
+<% content_for :head do %>
+<%= javascript_include_tag "pages/admin/common/od_admin_tab-bundle" %>
+<%= javascript_include_tag "pages/admin/subscriber-bundle" %>
+  <script type="text/javascript">
+    window.subscribers = <%= raw @subscribers.to_json %>;
+    console.log(window.subscribers);
+  </script>
+<% end %>
+
+<!-- put html code below -->
+<%= notice_auto %>
+<div class="title"><h5>订阅者管理</h5></div>
+<div class="widgets">
+  <div class="searchWidget">
+    <form action="">
+      <input type="text" name="search" id="od-search-ipt" placeholder="请输入要查找的邮箱">
+      <input type="submit" id="od-search-btn" name="find" value="">
+    </form>
+  </div>
+</div>
+
+<div class="widget tabsRight">
+  <div class="head"><h5 class="iFrames">订阅者列表</h5></div>
+  <ul class="tabs">
+    <!-- 链接必须指向对应DIV的ID标签 -->
+    <li><a href="#all" class="tab-label default-tab" id="tab-all">全部</a></li>
+    <li><a href="#subscribed" class="tab-label" id="tab-subscribed">订阅者</a></li>
+    <li><a href="#unsubscribed" class="tab-label" id="tab-unsubscribed">已退订</a></li>
+  </ul>
+
+  <div class="tab_container">
+    <div class="tab_content nopadding" id="all"><%= ajax_loader_img %></div> <!--#tab1 结束 -->
+    <div class="tab-content nopadding" id="subscribed"><%= ajax_loader_img %></div>
+    <div class="tab-content nopadding" id="unsubscribed"><%= ajax_loader_img %></div>
+  </div>
+  <div class="fix"></div>
+<div class="widgets" id="max-count">
+  <p>总共有<%= @subscribers['max_count'] %>位订阅者, 其中 <%= @subscribers['deleted_count'] %>已退订, 剩余<%= @subscribers['active_count'] %> 位.
+  </p>
+</div>
+</div>

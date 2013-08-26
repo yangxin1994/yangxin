@@ -1,0 +1,16 @@
+<div class="head">
+	<h5 class="iLoading"><%= @prize.value["name"] %></h5>
+	<div class="loader"><img src="/assets/images/loaders/loader.gif" alt=""></div>
+</div>
+<div class="body">
+	<% if @prize.success %>
+	奖品名称:<%= @prize.value["name"] %></br>
+	<img src=<%= @prize.value["photo_src"] %> /></br>
+	奖品总数:<%= @prize.value["quantity"] %></br>
+	剩余数量:<%= @prize.value["surplus"] %></br>
+	总计抽出:<%= @prize.value["quantity"] - @prize.value["surplus"]%></br>
+	奖品描述:<%= @prize.value["description"] %></br>
+	<% else %>
+	加载失败
+	<% end -%>
+</div>

@@ -1,15 +1,14 @@
-# encoding: utf-8
-require 'securerandom'
-require 'error_enum'
-class Admin::MaterialsController < Admin::ApplicationController
+require 'pp'
+class Admin::MaterialsController < Admin::AdminController
+
 	def create
-		@material = Material.check_and_create_new(@current_user, params[:material])
-		render_json_auto @material and return
+    unless params["our-file"].nil?
+      photo = ImageUploader.new
+      photo.store!(params["our-file"])
+      @material = params["our-file"] = photo.url
+    end
+    render :text => @material
+    # render :inline => "<img src=\"#{@material}\" alt=\"\" id=\"prize_photo_src\">"
 	end
 
-	def show
-		@material = Material.find_by_id(@material)
-		render_json_auto ErrorEnum::MATERIAL_NOT_EXIST and return if !@material.nil?
-		render_json_auto @material and return
-	end
 end

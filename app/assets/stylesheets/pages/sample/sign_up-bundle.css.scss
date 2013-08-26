@@ -1,0 +1,202 @@
+@import "common";
+@import "compass/css3/box-shadow";
+@import "compass/css3/border-radius";
+@import "compass/utilities/general/clearfix";
+@import "compass/css3/opacity";
+
+.login_con{
+	color:#b3b3b3;
+	width:960px;
+	padding-bottom:30px;
+	margin:auto;
+	background:#fff;
+	-moz-box-shadow:0px 0px 10px rgba(0,0,0,.2);
+	-webkit-box-shadow:0px 02px 10px rgba(0,0,0,.2);
+	box-shadow:0px 0px 10px rgba(0,0,0,.2);
+	@include border-radius(9px);	
+	.con_login{
+		float: left;
+		padding-top: 20px; 
+		margin-left:50px; 
+		width:570px;
+		h1{
+			margin-bottom:30px;
+			font-size:24px;
+		}
+	}
+	div.form{
+		@include border-radius(4px);
+		div.wraper{
+			margin-bottom:16px;
+			font-size:14px;
+			input{
+				font-size:16px;
+				float:left;
+				width:260px;
+				padding:8px 10px;
+				color:#bdbdbd;
+				margin-top:14px;   
+			}
+			input.verify_code{
+				width:100px;
+			}
+			span.success{
+				float:left;
+				display:inline-block;
+				width:20px;
+				height:20px;
+				margin:25px 0px 0px 16px;
+				background:url(/assets/od-quillme/success.png) no-repeat;
+			}
+			span.faild{
+				float:left;
+				display:inline-block;
+				width:20px;
+				height:20px;
+				margin:22px 0px 0px 16px;
+				background:url(/assets/od-quillme/faild.png) no-repeat;          
+			}
+			span.notice{
+				display:inline-block;
+				margin:25px 0px 0px 8px;
+				float:left;
+				color:red;
+			}
+			button{
+				width:128px;
+				font-size:12px;
+				height:42px;
+				line-height:42px;
+				color:#fff;
+				margin-top:14px;
+				border:0px;
+				background:#64acf1;
+				margin-left:10px;
+				cursor:pointer;
+				@include border-radius(4px);
+				float:left;                     
+			}
+			&:disabled,&.disabled{
+				background:#e6e6e6;
+				color:#b3b3b3;
+			}      
+		}    
+		.identifying_code{
+			input{
+				width:70px;
+			}
+		}    
+		div.pro{
+			padding-top:4px;
+			display:block;
+			input{
+				width:12px;
+				height:12px;
+				border:1px solid #b3b3b3;
+				margin-right:10px;
+				float:left;
+				display:inline;
+				border:0px; 
+				@include border-radius(2px);              
+			}
+			span.faild{
+				float:left;
+				display:inline-block;
+				width:20px;
+				height:18px;
+				margin:-4px 0px 0px 20px;
+			}
+			span.notice{
+				display:inline-block;
+				margin:0px 0px 0px 45px;
+				float:left;
+				color:red;
+			} 
+			span{
+				float:left;
+			}
+			a{
+				margin-left:10px;
+				color:#3e98ee;      
+			}
+		}
+		.login_btn{
+			width:280px;
+			height:42px;
+			background:#f04646;
+			border:0px;
+			margin-top:30px;
+			text-align:center;
+			line-height:42px;
+			color:#fff;
+			font-size:16px;
+			clear:both;
+			cursor:pointer;
+			@include border-radius(4px);    
+			&:disabled{
+				background:#e6e6e6;
+				color:#b3b3b3;
+			}      
+		}
+	}
+	.line{
+		width:8px;
+		height:356px;
+		background:url(/assets/od-quillme/login_regist_line.png) no-repeat;
+		float:left;
+		margin-top:28px;  
+	} 
+	.con_regist{
+		width:220px;
+		float:left;
+		padding:24px 0px 0px 40px;  
+		.none_account a{
+			width: 90px;
+			@include one-line(32px);
+			@include inline-block;
+			background: $blue;
+			text-align: center;
+			color: #fff;
+			margin-left: 10px;
+			font-size: 14px;
+			@include border-radius(4px); 
+			&:hover{
+				background: $blue1;
+			}   
+			&:active{
+				background: $blue2;
+			}
+		}
+		.other_login dl{
+			height:20px;
+			line-height:20px;
+			float:left;
+			margin:18px 30px 0px 0px;
+			width:78px;
+			dt{
+				float:left;
+				margin-right:10px;
+				display:inline;      
+			} 
+			dd{
+				float:left;
+				a{
+					color:#bdbdbd;
+				}
+				a:hover{
+					color:#f14646;
+				}
+			}   
+		}
+	}
+	h3{
+		font-size:20px;
+		margin-bottom:30px;  
+	}
+	.none_account{
+		font-size: 14px;
+		height: 40px;
+		border-bottom: 1px dashed #bdbdbd;
+		margin-bottom: 24px;
+	}  
+}  

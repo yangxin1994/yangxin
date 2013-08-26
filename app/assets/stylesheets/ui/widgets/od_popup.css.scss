@@ -1,0 +1,79 @@
+@import "common";
+@import "od-button/*.png";
+@import "compass/css3/border-radius";
+
+.od-popup, .od-uploadtip{
+	font-size: 12px;
+	text-align: left;
+	/*弹出层外层透明背景*/
+	.layer_bg{
+	        width:240px;
+	        min-height:110px;
+	        position: relative;
+	        /* left:10px;
+	        top:10px; */
+	        background: image-url('widgets/layer_bg.png') repeat;
+	        @include border-radius(6px);
+	}
+	/*弹出层内容*/
+	.layer_main{
+	        width:230px;
+	        min-height:100px;
+	        background: #FFF;
+	        position: absolute;
+	        top:4px;
+	        left:4px;
+	        @include border-radius(4px);
+	}
+	/************功能面板************/
+	.popup_panel{
+		width:220px;
+		@include one-line(20px);
+		padding: 5px;
+		@include border-top-radius(2px);
+	}
+	/*确定按钮*/
+	.btn_ok{
+		//margin-right:30px;
+	}
+	.btn_cancel{
+		margin-left:20px;
+	}
+	.popup_content{
+		word-wrap: break-word;
+		word-break: normal;
+		padding:10px;
+		p {
+			line-height: 1.5em;
+		}
+	}
+	.blackBg{background: #e5e5e5;}
+	.redBg{background: #d93631;}
+	.whiteTxt{color: #fff;}
+	.blackTxt{color: #333;}
+	.redBorder{border:2px #d93631 solid;}
+	.blackBorder{border:1px #989898 solid;}
+	/*关闭按钮2*/
+	.btn_close2{
+		width:8px;
+		height:8px;
+		margin:5px 5px 0 0;
+		display: inline-block;
+		overflow: hidden;
+		border:none;
+		cursor: pointer;
+		@include od-button-sprite(close2);
+	}
+	/*关闭按钮3*/
+	.btn_close3{
+		width:8px;
+		height:8px;
+		margin:5px 5px 0 0;
+		display: inline-block;
+		overflow: hidden;
+		border:none;
+		cursor: pointer;
+		@include od-button-sprite(close3);
+	}
+
+}

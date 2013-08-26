@@ -1,0 +1,133 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/admin/samples-bundle" %>
+  <%= javascript_include_tag "pages/admin/samples/form-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+
+  <li class="active">
+    <a href="javascript(void(0));">
+    <i class="icon-chevron-right"></i>
+    基本属性
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/redeem_log">
+    <i class="icon-chevron-right"></i>
+    礼品兑换记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/point_log">
+      <i class="icon-chevron-right"></i>
+      积分变化记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/lottery_log">
+      <i class="icon-chevron-right"></i>
+      抽奖记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/lottery_log">
+      <i class="icon-chevron-right"></i>
+      回答历史记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/lottery_log">
+      <i class="icon-chevron-right"></i>
+      问卷推广记录
+    </a>
+  </li>
+<% end %>
+
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>样本属性</th>
+        <th></th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>邮箱:</td>
+        <td><%= @attrs['email'] %></td>
+      </tr>
+      <tr>
+        <td>手机:</td>
+        <td><%= @attrs['mobile'] %></td>
+      </tr>
+      <% @sample_attributes.each do |attr| %>
+
+        <% case attr['type'].to_i %>
+        <% when 0 %>
+          <tr>
+            <td><%= attr['name'] %>:</td>
+            <td><%= attr['value'] %></td>
+          </tr>
+        <% when 1 %>
+          <tr>
+            <td><%= attr['name'] %>:</td>
+            <td><%=attr['enum_array'][attr['value']] if attr['value'].present? %></td>
+          </tr>
+        <% when 2 %>
+          <tr>
+            <td><%= attr['name'] %>:</td>
+            <td><%= attr['value'] %></td>
+          </tr>
+        <% when 3 %>
+          <tr>
+            <td><%= attr['name'] %>:</td>
+            <td><%= attr['value'] %></td>
+          </tr>
+        <% when 4 %>
+          <tr>
+            <td><%= attr['name'] %>:</td>
+            <td><%= attr['value'] %></td>
+            <% if attr['value'][0] == attr['value'][0] %>
+              <td><%= attr['value'][0] %></td>
+            <% else %>
+              <td><%= attr['value'][0] %> ~ <%= attr['value'][1] %></td>
+            <% end if attr['value'].present? %>            
+          </tr>
+        <% when 5 %>
+          <tr>
+            <td><%= attr['name'] %>:</td>
+            <%
+              case attr['date_type']
+              when 0
+                attr['strf'] = "%Y"
+              when 1
+                attr['strf'] = "%Y-%m"
+              when 2
+                attr['strf'] = "%F"
+              end
+            %>
+            <% if attr['value'][0] == attr['value'][0] %>
+              <td><%= Time.at(attr['value'][0]).strftime(attr['strf']) %></td>
+            <% else %>
+              <td><%= Time.at(attr['value'][0]).strftime(attr['strf']) %> ~ <%= Time.at(attr['value'][1]).strftime(attr['strf']) %></td>
+            <% end if attr['value'].present? %>
+          </tr>
+        <% when 6 %>
+          <tr>
+            <td><%= attr['name'] %>:</td>
+            <td><%= attr['value'] %></td>
+          </tr>
+        <% when 7 %>
+          <tr>
+            <td><%= attr['name'] %>:</td>
+            <td><%= attr['value'] %></td>
+          </tr>          
+        <% end %>
+      <% end %> 
+    </tbody>
+  </table>
+
+ 
+
+
+      

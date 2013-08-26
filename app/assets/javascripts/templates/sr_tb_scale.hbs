@@ -1,0 +1,24 @@
+<table cellspacing='0' cellpadding='0'>
+	<tr>
+		<th class='tt tl'></th>
+		{{#iterateTo column_count}}
+		<th class='tt'></th>
+		{{/iterateTo}}
+		{{#if unknown}}
+		<th class='tt'>不清楚</th>
+		{{/if}}
+		<th class='tt tr'>平均分</th>
+	</tr>
+	{{#iterateTo row_count}}
+	<tr>
+		<th class='tl'></td>
+		{{#iterateTo ../column_count}}
+		<td></td>
+		{{/iterateTo}}
+		{{#if ../unknown}}
+		<td></td>
+		{{/if}}
+		<th class='tr'></th>
+	</tr>
+	{{/iterateTo}}
+</table>

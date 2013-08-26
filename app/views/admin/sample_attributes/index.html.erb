@@ -1,0 +1,198 @@
+<% attr_types = [["字符串", 0], ["枚举", 1], ["数值", 2], ["日期", 3], ["数值范围", 4], ["日期范围", 5], ["地址", 6], ["数组", 7]] %>
+
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/admin/sample_attributes-bundle", :meida => 'all' %>
+  <%= javascript_include_tag "jquery.serializeobject" %>
+  <%= javascript_include_tag "jquery-interdependencies" %>
+  <%= javascript_include_tag "pages/admin/sample_attributes-bundle" %>
+<% end %>
+<div class="sample_properties">
+  <div class="title">
+    <h5>样本属性管理</h5>
+  </div>
+
+  <div class="searchWidget">
+    <%= form_tag '', method: 'get' do %>
+      <input type="text" name="name" placeholder="属性名">
+      <input type="submit" name="find" value="">
+    <% end %>
+  </div>
+
+  <div class="widget first" id="properties_panel">
+    <div class="head">
+      <h5>属性列表</h5>
+    </div>
+    <div class="body">
+      <div class="widget sample-property-list">
+        <% @attributes.each do |attribute| %>
+          <%= form_tag admin_sample_attribute_path(attribute["_id"]), method: "put" do %>
+          <div class="head opened" id="">
+            <h5>属性 <%= attribute["name"] %></h5>
+          </div>
+          <div class="body">
+
+            <h6>属性基本信息</h6>
+            <p>
+              <label>属性名称</label>
+              <input type="text" name="attribute[name]" class="validate[required]" value="<%= attribute['name'] %>"/>
+            </p>
+            <p>
+              <label>属性类型</label>
+              <%= select_tag('attribute[type]', options_for_select(attr_types, attribute['type'])) %>
+            </p>
+            <div class="date-panel">
+              <fieldset>
+                <p>
+                  <label>时间类型</label>
+                  <% if attribute['date_type'] %>
+                    <%= select_tag('attribute[date_type]', options_for_select([['年', 0], ['年月', 1], ['年月日', 2]], attribute['date_type'])) %>
+                  <% else %>
+                    <%= select(:attribute, :date_type, [['年', 0], ['年月', 1], ['年月日', 2]]) %>
+                  <% end %>
+                </p>
+                <% if attribute['analyze_requirement'] and attribute['analyze_requirement']['segmentation'] %>
+                <%= render("date_segmentation", segs: attribute['analyze_requirement']['segmentation']) %>
+                <% else %>
+                <%= render("date_segmentation", segs: nil) %>
+                <% end %>
+              </fieldset>
+            </div>
+            <div class="num-panel">
+              <% if attribute['analyze_requirement'] and attribute['analyze_requirement']['segmentation'] %>
+                <%= render("num_segmentation", segs: attribute['analyze_requirement']['segmentation']) %>
+              <% else %>
+                <%= render("num_segmentation", segs: nil) %>
+              <% end %>
+            </div>
+            <div class="enum-panel">
+              <fieldset>
+                <label>枚举内容</label> <br />
+                <div class="enum-list">
+                  <% if attribute['enum_array'] %>
+                    <% attribute['enum_array'].each do |enum_value| %>
+                      <p><input type="text" name="attribute[enum_array][]" value="<%= enum_value %>" /><a class="del-btn" href="#">&times;</a> </p>
+                    <% end %>
+                  <% else %>
+                    <% 4.times do  %>
+                      <p> <input type="text" name="attribute[enum_array][]" /> <a class="del-btn" href="#">&times;</a> </p>
+                    <% end %>
+                  <% end %>
+                </div>
+                <p class="enum-new">
+                  <input type="text" />
+                  <button id="" type="button" class="blueBtn add-enum-btn">添加</button>
+                </p>
+              </fieldset>
+            </div>
+            <div class="array-panel">
+              <fieldset>
+                <label>允许的内容</label> <br />
+                <input type="hidden" name="attribute[element_type]" value="1" />
+                <div class="enum-list">
+                  <% if attribute['enum_array'] %>
+                    <% attribute['enum_array'].each do |enum_value| %>
+                      <p><input type="text" name="attribute[enum_array][]" value="<%= enum_value %>" /><a class="del-btn" href="#">&times;</a> </p>
+                    <% end %>
+                  <% else %>
+                    <% 4.times do  %>
+                      <p> <input type="text" name="attribute[enum_array][]" /> <a class="del-btn" href="#">&times;</a> </p>
+                    <% end %>
+                  <% end %>
+                </div>
+                <p class="enum-new">
+                  <input type="text" />
+                  <button type="button" class="blueBtn add-enum-btn">添加</button>
+                </p>
+              </fieldset>
+            </div>
+
+            <br />
+            <input type="submit" class="blueBtn" value="更新" />
+            <%= link_to "删除", admin_sample_attribute_path(attribute["_id"]), method: :delete, confirm: "确定要删除这个属性么", class: "submitForm greyishBtn button" %>
+            <hr />
+            <%= render 'admin/sample_attributes/sample_stats', attribute: attribute %>
+          </div>
+          <% end %>
+        <% end %>
+      </div>
+      <%= paginator_tag @paginate %>
+    </div>
+  </div>
+
+  <div id="new_property_panel" class="widget">
+    <div class="head">
+      <h5>添加属性</h5>
+    </div>
+
+    <%= form_tag admin_sample_attributes_path, method: "post" do %>
+      <div class="body">
+        <p>
+        <label>属性名称</label>
+        <input type="text" name="attribute[name]" class="validate[required]" />
+        </p>
+        <p>
+          <label>属性类型</label>
+          <%= select(:attribute, :type, attr_types, {}, class: "prop_type" ) %>
+        </p>
+        <div class="num-panel">
+          <%= render "num_segmentation", segs: nil %>
+        </div>
+        <div class="enum-panel">
+          <fieldset>
+            <label>枚举内容</label> <br />
+            <div class="enum-list">
+            <% 4.times do  %>
+              <p> <input type="text" name="attribute[enum_array][]" /> <a class="del-btn" href="#">&times;</a> </p>
+            <% end %>
+            </div>
+            <p class="enum-new">
+            <input type="text" />
+            <button class="blueBtn add-enum-btn">添加</button>
+            </p>
+          </fieldset>
+        </div>
+        <div class="date-panel">
+          <fieldset>
+            <p>
+              <label>时间类型</label>
+              <%= select(:attribute, :date_type, [['年', 0], ['年月', 1], ['年月日', 2]]) %>
+            </p>
+            <%= render "date_segmentation", segs: nil %>
+          </fieldset>
+        </div>
+        <div class="array-panel">
+          <fieldset>
+            <label>允许的内容</label> <br />
+            <input type="hidden" name="attribute[element_type]" value="1" />
+            <div class="enum-list">
+            <% 4.times do  %>
+              <p> <input type="text" name="attribute[enum_array][]" /> <a class="del-btn" href="#">&times;</a> </p>
+            <% end %>
+            </div>
+            <p class="enum-new">
+            <input type="text" />
+            <button class="blueBtn add-enum-btn">添加</button>
+            </p>
+          </fieldset>
+        </div>
+        <br />
+        <input type="submit" value="添加" class="blueBtn" />
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script id="enum_input_tmpl" type="text/template">
+  <p><input type="text" value="{{value}}" name="attribute[enum_array][]" /> <a class="del-btn" href="#">&times;</a></p>
+</script>
+
+<script id="num_input_tmpl" type="text/template">
+  <p><input type="text" value="{{value}}" name="attribute[enum_array][]" /> <a class="del-btn" href="#">&times;</a></p>
+</script>
+
+<script type="text/template" id="date_input_tmpl">
+  <div class="date-seg-wrapper">
+    <div class="date-content"></div>
+    <a class="del-date-btn" href="#">&times;</a>
+  </div>
+</script>

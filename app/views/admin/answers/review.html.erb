@@ -1,0 +1,27 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/answers/review-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+  <li>
+    <a href="/admin/answers/<%= @questions.survey._id %>">
+      <i class="icon-chevron-right"></i>
+      答案审核列表
+    </a>
+  </li>
+  <li class="active">
+    <a href="javascript:void(0);">
+      <i class="icon-chevron-right"></i>
+      查看答案
+    </a>
+  </li>  
+<% end %>
+
+<legend></legend>
+<%= render :partial => "admin/answers/detail" %>
+<% if @questions['status'].to_i == 4 %>
+  <span class="pull-right">
+    <button class="btn" type="button" id="btn_reject" data-answer_id="<%= params[:id] %>">拒绝</button>
+    <button class="btn btn-large btn-primary" type="button" id="btn_pass" data-answer_id="<%= params[:id] %>">通过</button> 
+  </span>
+<% end -%>

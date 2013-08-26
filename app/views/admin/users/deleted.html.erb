@@ -1,0 +1,98 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/users-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/users-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+<%if @users.success %>
+<div class="users">
+<div id="list-tab">
+	<div class="title">
+		<h5>用户管理<h5>
+	</div>
+
+	<div class="search">
+		<span class="red">注意：搜索不分类(正常用户、黑白名单等)</span>
+		<form action="#">
+			<select name="search" class="select2">
+				<option value="email">邮箱</option> 
+				<option value="true_name">姓名</option>
+				<option value="username">用户名</option>
+			</select>
+			<input name="search" type ='text'/>
+			<input type="submit" class="button btn-search" value="搜"/>
+		</form>
+	</div>
+
+	<div class="stats">
+		<ul>
+			<li><a class="count blue" href="/admin/users/new">创建用户</a></li>
+			<li><a class="count green" href="/admin/users/blacks">黑名单</a></li>
+			<li><a class="count green" href="/admin/users/whites">白名单</a></li>
+			<li><a class="count red" href="/admin/users/deleted">已删除名单</a></li>
+		</ul>
+		<div class="fix"></div>
+	</div>
+
+	<div class="table">
+		<div class="head">
+			<h5 class="iFrames">
+				列表
+			</h5>
+		</div>
+		
+		<table cellspacing="0" cellpadding="0" border="0" id="example" class="display">
+			<thead>
+				<tr>
+					<th class="" rowspan="1" colspan="1" style="width: 10px;">
+						<input class="check-all" type="checkbox" />
+					</th>
+					<th>邮箱</th>
+					<th>创建时间</th>
+					<th>是否锁定</th>
+					<th rowspan="1" colspan="1" style="width: 60px;"></th>
+				</tr>
+			</thead>
+			
+			<tbody>
+				 <% @users.value['data'].to_a.each do |user|%>
+					<tr id="<%= user['_id']%>">
+						<td><input type="checkbox" /></td>
+						<td>                           
+							<a href="/admin/users/<%= user['_id']%>" class="show" title="点击查看详细">
+								<%= truncate(user["email"], :length => 24, :omission => "...") %></a>
+						</td>
+						<td><%= user["created_at"][0,16].gsub(/[T]/, ' ') %></td>
+						<% if user["lock"] == false then %>
+							<td>否</td>
+						<% else %>
+							<td>是</td>
+						<% end %>
+						<td>
+							<!-- Icons -->
+							 <a href="/admin/users/<%= user['_id']%>" class="show" title="编辑"><img src="../../assets/od-icon/pencil.png" alt="编辑" /></a>
+							 <a href="#" class="delete" title="删除"><img src="../../assets/od-icon/cross.png" alt="删除" /></a> 
+						</td>
+					</tr>
+				<%- end %>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="6">
+						<%= paginator_tag @users.value %>
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+			
+	</div>
+
+</div>
+</div>
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @users.value %></p>
+</div>
+<%end%>	

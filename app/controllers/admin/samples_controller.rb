@@ -1,107 +1,222 @@
-class Admin::SamplesController < Admin::ApplicationController
-	before_filter :check_sample_existence, :only => [:point_log, :redeem_log, :lottery_log, :answer_log, :spread_log, :show, :block, :set_sample_role, :operate_point]
+require 'string/utf8'
+class Admin::SamplesController < Admin::AdminController
 
-	def check_sample_existence
-		@sample = User.sample.find_by_id(params[:id])
-		if @sample.nil?
-			render_json_e(ErrorEnum::SAMPLE_NOT_EXIST) and return
-		end
-	end
+  layout "layouts/admin-todc"
 
-	def index
-		@samples = User.search_sample(params[:email], params[:mobile], params[:is_block].to_s == "true")
-		render_json_auto(auto_paginate(@samples)) and return
-	end
+  before_filter :require_sign_in
 
-	def count
-		@samples_count = User.count_sample(params[:period].to_s, params[:time_length].to_i)
-		render_json_auto(@samples_count) and return
-	end
+  def index
+    if params[:keyword]
+      if params[:keyword] =~ /^.+@.+$/
+        params[:email] = params[:keyword]
+      else
+        params[:mobile] = params[:keyword]
+      end
+    end
+    @samples = auto_paginate(User.search_sample(params[:email], params[:mobile], params[:is_block].to_s == "true"))
+  end
 
-	def active_count
-		@active_samples_count = User.count_active_sample(params[:period], params[:time_length].to_i)
-		render_json_auto(@active_samples_count) and return
-	end
+  def edit
+    @sample = User.find(params[:id]).sample_attributes
+  end
 
-	def show
-		render_json_auto(@sample.sample_attributes) and return
-	end
+  def show
+    @attrs = User.find(params[:id]).sample_attributes
+    @sample_attributes = SampleAttribute.normal.map do |sample_attribute|
+      {
+        'name' => sample_attribute[:name],
+        'type' => sample_attribute[:type],
+        'element_type' => sample_attribute[:element_type],
+        'enum_array' => sample_attribute[:enum_array],
+        'date_type' => sample_attribute[:date_type],
+        'status' => sample_attribute[:status],
+        'completion' => sample_attribute[:completion],
+        'analyze_requirement' => sample_attribute[:analyze_requirement],
+        'analyze_result' => sample_attribute[:analyze_result],
+        '_id' => sample_attribute[:_id]
+      }
+    end
+    @sample_attributes.each do |sample_attribute|
+      sample_attribute['value'] = @attrs[sample_attribute['name']]
+    end
+  end
+  # ##########################
+  #
+  # index当页操作相关
+  #
+  # ##########################
 
-	def send_message
-		render_json_auto(@current_user.create_message(params[:title], params[:content], params[:sample_ids])) and return
-	end
+  def operate_point
+    render_json User.where(:_id => params[:id]).first do |sample|
+      sample.operate_point(params[:amount], params[:remark])
+    end  
+  end
 
-	def block
-		render_json_auto(@sample.block(params[:block])) and return
-	end
+  def set_sample_role
+    render_json User.where(:_id => params[:id]).first do |sample|
+      {
+        :role => sample.set_sample_role(params[:roles].map(&:to_i)),
+        :block => sample.block(params[:block])
+      }
+    end
+  end
 
-	def point_log
-		@paginated_point_logs = auto_paginate(@sample.logs.point_logs) do |paginated_point_logs|
-			paginated_point_logs.map { |e| e.info_for_admin }
-		end
-		render_json_auto(@paginated_point_logs) and return
-	end
+  # ##########################
+  #
+  # 样本日志相关
+  #
+  # ##########################
+  def redeem_log
+    @sample = User.find(params[:id])
+    @redeem_log = auto_paginate(@sample.logs.redeem_logs) do |logs|
+      logs.map { |e| e.info_for_admin }
+    end
+  end
 
-	def redeem_log
-		@paginated_redeem_logs = auto_paginate(@sample.logs.redeem_logs) do |paginated_redeem_logs|
-			paginated_redeem_logs.map { |e| e.info_for_admin }
-		end
-		render_json_auto(@paginated_redeem_logs) and return
-	end
+  def point_log
+    @sample = User.find(params[:id])
+    @point_log = auto_paginate(@sample.logs.point_logs) do |logs|
+      logs.map { |e| e.info_for_admin }
+    end
+  end
 
-	def lottery_log
-		@paginated_lottery_logs = auto_paginate(@sample.logs.lottery_logs) do |paginated_lottery_logs|
-			paginated_lottery_logs .map { |e| e.info_for_admin }
-		end
-		render_json_auto(@paginated_lottery_logs) and return
-	end
+  def lottery_log
+    @sample = User.find(params[:id])
+    @lottery_log = auto_paginate(@sample.logs.lottery_logs) do |logs|
+      logs.map { |e| e.info_for_admin }
+    end
+  end
 
-	def answer_log
-		@paginated_answer_logs = auto_paginate(@sample.answers.not_preview.desc(:created_at)) do |paginated_answer_logs|
-			paginated_answer_logs.map do |e|
-				selected_reward = (e.rewards.select { |e| e["checked"] == true }).first
-				reward_type = selected_reward.nil? ? 0 : selected_reward["type"]
-				reward_amount = selected_reward.nil? ? 0 : selected_reward["amount"]
-				{
-					"_id" => e._id.to_s,
-					"title" => e.survey.title,
-					"created_at" => e.created_at,
-					"finished_at" => e.finished_at.present? ? e.finished_at.to_i : nil,
-					"status" => e.status,
-					"reject_type" => e.reject_type,
-					"reward_type" => reward_type,
-					"reward_amount" => reward_amount
-				}
-			end
-		end
-		render_json_auto(@paginated_answer_logs) and return
-	end
+  def answer_log
+    @sample = User.find(params[:id])
+    @answer_log = auto_paginate(@sample.logs.answer_logs) do |logs|
+      logs.map { |e| e.info_for_admin }
+    end
+  end
 
-	def spread_log
-		@paginated_spread_logs = auto_paginate(Answer.where(:introducer_id => @sample._id.to_s)) do |paginated_spread_logs|
-			paginated_spread_logs.map do |e|
-				{
-					"_id" => e._id.to_s,
-					"title" => e.survey.title,
-					"created_at" => e.created_at,
-					"finished_at" => e.finished_at.present? ? Time.at(e.finished_at.to_i) : nil,
-					"email" => e.user.try(:email),
-					"mobile" => e.user.try(:mobile),
-					"status" => e.status,
-					"reject_type" => e.reject_type
-				}
-			end
-		end
-		render_json_auto(@paginated_spread_logs) and return
-	end
+  def spread_log
+    @sample = User.find(params[:id])
+    @spread_log = auto_paginate(@sample.spread_logs) do |logs|
+      logs.map { |e| e.info_for_admin }
+    end
+  end
+  # ##########################
+  #
+  # 样本属性相关
+  #
+  # ##########################
+  def attributes
+    @attributes = auto_paginate SampleAttribute.search(params[:name])
+  end
 
-	def set_sample_role
-		retval = @sample.set_sample_role(params[:role])
-		render_json_auto(retval) and return
-	end
+  def add_attributes
+    params[:attribute][:type] = params[:attribute][:type].to_i
+    attrs = make_attrs params[:attribute]
+    if params[:attribute][:id].present?
+      SampleAttribute.normal.find(params[:attribute][:id]).update_sample_attribute(attrs)
+      redirect_to "/admin/samples/#{params[:attribute][:id]}/edit_attributes"
+    else
+      SampleAttribute.create_sample_attribute(attrs)
+      redirect_to "/admin/samples/attributes"
+    end
+  end
 
-	def operate_point
-		retval = @sample.operate_point(params[:amount], params[:remark])
-		render_json_auto retval and return
-	end
+  def new_attributes
+    @attribute = {}
+  end
+
+  def edit_attributes
+    attr = SampleAttribute.normal.find(params[:id])
+    if attr["enum_array"].is_a? Array
+      attr['enum_array'] = attr["enum_array"].join("\n")
+    end
+    attr["analyze_requirement"]['segmentation'] ||= []
+    case attr['type'].to_i
+    when 0
+      attr['value_0'] = attr["analyze_requirement"]['segmentation']
+    when 1
+      attr['value_1'] = attr["analyze_requirement"]['segmentation']
+    when 2
+      attr['value_2'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.join(',') }}.join("\n")
+    when 3
+      attr['date_type_3'] = attr["date_type"]
+      attr['value_3'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.strftime("%Y/%m/%d") }}.join("\n")
+    when 4
+      attr['value_4'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.join(',') }}.join("\n")
+    when 5
+      attr['date_type_5'] = attr["date_type"]
+      attr['value_5'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.strftime("%Y/%m/%d") }}.join("\n")
+    when 6
+      attr['value_6'] = attr["analyze_requirement"]['segmentation']
+    when 7
+      attr['element_type'] = attr["element_type"]
+      attr['enum_array_6'] = attr["enum_array"]
+      attr['value_7'] = attr["analyze_requirement"]['segmentation']
+    end
+    @attribute = attr
+  end
+
+  def destroy_attributes
+    render_json SampleAttribute.normal.where(:_id => params[:id]) do |attribute|
+      attribute.delete
+    end
+  end
+
+  def make_attrs(attr)
+    attr[:analyze_requirement] = {}
+    case attr[:type]
+    when 0
+      attr[:analyze_requirement][:segmentation] = attr[:value_0].split(' ')
+    when 1
+      attr[:enum_array] = attr[:enum_array].split(' ')
+      attr[:analyze_requirement][:segmentation] = attr[:value_1].split(' ')
+    when 2
+      attr[:analyze_requirement][:segmentation] = attr[:value_2].split(' ').map { |e| e.split(',') }
+    when 3
+      attr[:date_type] = attr[:date_type_3].to_i
+      attr[:analyze_requirement][:segmentation] = attr[:value_3].split(' ').map { |e| Time.parse(e.split(',')).to_i }
+    when 4
+      attr[:analyze_requirement][:segmentation] = attr[:value_4].split(' ').map { |e| e.split(',') }
+    when 5
+      attr[:date_type] = attr[:date_type_5].to_i
+      attr[:analyze_requirement][:segmentation] = attr[:value_5].split(' ').map { |e| Time.parse(e.split(',')).to_i }
+    when 6
+      attr[:analyze_requirement][:segmentation] = attr[:value_6].split(' ')
+    when 7
+      attr[:element_type] = attr[:element_type].to_i
+      attr[:enum_array] = attr[:enum_array_6].split(' ')
+      attr[:analyze_requirement][:segmentation] = attr[:value_7].split(' ')
+    end
+    attr
+  end
+
+  # ##########################
+  #
+  # 样本数据统计
+  #
+  # ##########################
+  def status
+    @sample_count = User.count_sample(params[:period].to_s, params[:time_length].to_i)
+    data = User.count_sample('day', 2)['new_sample_number']
+    @new_user_by_day = data[1] - data[0]
+    data = User.count_sample('week', 2)['new_sample_number']
+    @new_user_by_week = data[1] - data[0]
+    data = User.count_active_sample('day', 1)
+    @active_user_by_day = data[0]
+    data = User.count_active_sample('week', 1)
+    @active_user_by_week = data[0]
+  end
+
+  def get_sample_count
+    render_json User.count_sample(params[:period].to_s, params[:time_length].to_i)
+  end
+
+  def get_active_sample_count
+    render_json User.count_active_sample(params[:period], params[:time_length].to_i)
+  end
+
+  def send_message
+    render_json current_user.create_message(params[:title], params[:content], params[:sample_ids])
+  end
+
 end

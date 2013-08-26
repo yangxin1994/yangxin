@@ -1,0 +1,15 @@
+<% if @hotest_gifts['data'].length > 0  %>
+  $('ul.gift-list').html("<%= escape_javascript(render :partial => 'gifts_list', :locals => { :gifts => @hotest_gifts }) %>") 
+  <% if @hotest_gifts['total_page'].to_i > 1 %> 
+    if($('div.pagination').length > 0 ){
+      $('div.pagination').replaceWith("<%= escape_javascript(sample_paginator_ajax(@hotest_gifts,@sort_type,nil)) %>")  	
+    }else{
+      $('ul.gift-list').append("<%= escape_javascript(sample_paginator_ajax(@hotest_gifts,@sort_type,nil)) %>")	
+    } 
+  <% else %>
+  	 $('div.pagination').remove();
+  <% end %>
+<% else %>
+  $('ul.gift-list').html('<div class="no_data">没有查到数据</div>')
+  $('div.pagination').remove();
+<% end %>

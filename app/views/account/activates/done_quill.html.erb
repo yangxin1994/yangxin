@@ -1,0 +1,11 @@
+<div class="activate">
+	<h1><%= @is_register ? '激活账户完成注册' : '激活账户' %></h1>
+	<span>我们已经将激活链接发送至 <strong><%= @signup_email %></strong> ，请在 24 小时内点击激活链接完成激活。</span>
+	<a href="<%= @mail_url %>" target='blank' class="od-button view-mail">查看激活邮件</a>
+	<h2>没有激活邮件？</h2>
+	<ul>
+		<li>- 试试到您的广告邮件、垃圾邮件里找找</li>
+		<li>- 或者 <a param='e' class="resend" href="<%= new_activate_path %>">重发激活邮件</a></li>
+		<li>- 如果仍然无法完成激活，请联系我们</li>
+	</ul>
+</div>

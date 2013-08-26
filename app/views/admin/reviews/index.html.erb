@@ -1,0 +1,88 @@
+<!-- content for head -->
+<%
+	publish_status={1=>"关闭中", 2=>"待审核", 4=>"暂停中", 8=>"己发布"}
+%>
+
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/reviews-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/reviews-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+<%if @reviews.success %>
+<div class="reviews"> 
+<div id="list-tab">
+	<div class="title">
+		<h5>待审核问卷管理<h5>
+	</div>
+	
+	<div class="table">
+		<div class="head">
+			<h5 class="iFrames">
+				列表
+			</h5>
+		</div>
+
+		<table cellspacing="0" cellpadding="0" border="0" id="example" class="display">
+			<thead>
+				<tr>
+					<th class="" rowspan="1" colspan="1" style="width: 10px;">
+						<input class="check-all" type="checkbox" />
+					</th>
+					<th>标题</th>
+					<th>状态</th>
+					<th>创建人</th>
+					<th>创建时间</th>
+					<th rowspan="1" colspan="1" style="width: 80px;"></th>
+				</tr>
+			</thead>
+
+			<tbody>
+				<% @reviews.value["data"].to_a.each do |review|%>
+					<tr id="<%= review['_id']%>">
+						<td><input type="checkbox" /></td>
+						<td>                           
+							<a href="/questionaires/<%= review['_id']%>" class="show" title="点击查看详细">
+								<%= review["title"] %></a>
+						</td>
+						<td class="publish_status"><%= publish_status[review['publish_status'].to_i] %></td>
+						<td class="user_id"><%= review['user_id'] %></td>
+						<td><%= review["created_at"][0,16].gsub(/[T]/, ' ') %></td>
+						<td>
+							<!-- Icons -->
+							<a href="#" class="opt-message pub" title="发布">发布</a>
+							<a href="#" class="opt-message rej" title="拒绝">拒绝</a>
+							<!-- <a href="#" class="pause" title="暂停">暂停</a>
+							<a href="#" class="close" title="关闭">关闭</a> -->
+						</td>
+					</tr>
+				<%- end %>
+			</tbody>
+			<!-- page and delete-all -->
+			<tfoot>
+				<tr>
+					<td colspan="6">
+						<%= paginator_tag @reviews.value %>
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+</div>
+<!-- list tab end -->
+</div>
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @reviews.value %></p>
+</div>
+<% end %>
+
+<div id="new-message" class="dn">
+	<p>
+		<textarea class="text-input textarea" name="message[:content]" cols="60" rows="6"></textarea>
+		<span class="opt-id dn"></span>
+	</p>
+	<input type="button" class="blueBtn publish" value="确定">
+	<input type="button" class="blueBtn reject" value="确定">
+</div>

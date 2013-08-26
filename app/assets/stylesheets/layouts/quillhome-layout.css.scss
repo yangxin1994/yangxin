@@ -1,0 +1,287 @@
+@import "common";
+@import "compass/css3/opacity";
+@import "compass/css3/border-radius";
+@import "compass/utilities/general/clearfix";
+@import "login/other-login-icon/*.png";
+@import "od-quill/*.png";
+body{
+	background: #e6e6e6;
+}
+.other-icon{
+	width:32px;
+	height:32px;
+	@include inline-block;
+}
+.main{
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	background: #fff;
+	@include clearfix;
+	.main-content {
+		width: 900px;
+		padding: 0;
+		margin: 0 auto;
+	}
+}
+.sina_weibo{@include other-login-icon-sprite(sina_weibo);}
+.renren{@include other-login-icon-sprite(renren);}
+.t_weibo{@include other-login-icon-sprite(t_weibo);}
+.douban{@include other-login-icon-sprite(douban);}
+.qq{@include other-login-icon-sprite(qq);}
+.msn{@include other-login-icon-sprite(msn);}
+.diandian{@include other-login-icon-sprite(diandian);}
+.w900{width:900px;margin:0 auto;}
+.white-txt{color:#fff;}
+.yellow-txt{color:#f5c000;}
+.bf2{background:#f2f2f2;}
+.head{
+	background:#323232;
+	.head-top{
+		height:70px;
+		.logo{
+			width:145px;
+			height:32px;
+			background: image-url("logo.png") no-repeat 0 0;
+		}
+		.login-panel{
+			padding-top:20px;
+			.account-setting-box{
+				position:relative;
+				.trigon{
+					position:absolute;
+					top:-14px;
+					left:42px;
+					font-family:Arial;
+					font-size:16px;
+					text-shadow: 0px -2px 3px #999;
+					color:#fff;
+					cursor:default;
+				}
+				 ul{
+					padding:5px 0;
+					@include border-radius(5px);
+					@include box-shadow(0 0 6px #888);
+					background:#fff;
+					li{
+						padding:0;	
+						position:relative;
+						a{
+							color:#666;
+							width:100px;
+							border:1px #fff solid;
+							@include one-line(26px);
+							text-align:center;
+							display:block;
+							&:hover{
+								background:#f5c000;
+								border:1px #f8b71d solid;
+								color:#fff;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	.nav{
+		padding:0 20px;
+		// font-weight: bold;
+		@include one-line(40px);
+		@include border-top-radius(5px);
+		li{
+			width:90px;
+			text-align:center;
+			margin-right:25px;
+			.white-txt{
+				width:90px;
+				height:36px;
+				line-height:34px;
+				border-top:2px #000 solid;
+				border-bottom:2px #000 solid;
+				display:block;
+				&.active,&:hover,&.hover{
+					color:#f5c000;
+					// border-top:2px #f5c000 solid;
+					font-weight:bold;
+				}
+			}		
+			.dropdown-box1,.dropdown-box2,.dropdown-box3{
+				background:#222;
+				opacity:0.9;
+				li{
+					a{
+						width:115px;
+						@include one-line(30px);
+						text-align:center;
+						display:block;
+						color:#fff;
+						&:hover{
+							color:#f5c000;
+							background:#000;					
+						}
+					}
+				}
+			}
+		}
+		.tel{
+			.telphone{
+				width:20px;
+				height:20px;
+				@include inline-block;
+				@include od-quill-sprite(tel);
+				position:relative;
+				top:-5px;
+			}
+		}
+	}
+}
+.footer{
+	width: 900px;
+	margin: 0 auto;
+	padding: 30px 0 40px 0;
+	color: #666;
+	@include clearfix;
+	.footer-logo{
+		width:182px;
+		margin:5px 0;
+		float: left;
+		img {height: 32px; margin-bottom: 10px;}
+		p { margin-top: 5px; }
+	}
+	dl{
+		float: right;
+		margin: 0 25px 0 65px;
+		line-height:2em;
+		dt{
+			font-size:14px;
+			font-weight:bold;
+			color:#333;
+			margin-bottom: 5px;
+		}
+		dd {
+			a { color: #666; }
+			a:hover {color: #000;}
+		}
+	}
+}
+/*登录注册按钮*/
+.btn{
+	width:70px;
+	@include one-line(26px);
+	@include inline-block;
+	@include border-radius(3px);
+	text-align:center;
+	font-weight:bold;
+	cursor: pointer;
+}
+.login,.access{
+	color:#000;
+	background:#f5c000;
+	border:1px #f7931e solid;
+	background-repeat: repeat-x;
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f8d040', endColorstr='#f5c000', GradientType=0);
+	box-shadow: 0 1px 0 #1a1a1a;
+	&:hover{
+		background:#f5c000;
+		background-image: -webkit-linear-gradient(top, #f8d452, #f5c000);
+		background-image: -moz-linear-gradient(top, #f8d452, #f5c000);
+		background-image: -ms-linear-gradient(top, #f8d452, #f5c000);
+		background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f8d452), to(#f5c000));
+		background-image: -o-linear-gradient(top, #f8d452, #f5c000);
+		background-image: linear-gradient(top, #f8d452, #f5c000);
+		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f8d452', endColorstr='#f5c000', GradientType=0);
+	}
+	&:active{
+		background:#e7b300;
+		background-image: -webkit-linear-gradient(top, #e7b300, #e7b300);
+		background-image: -moz-linear-gradient(top, #e7b300, #e7b300);
+		background-image: -ms-linear-gradient(top, #e7b300, #e7b300);
+		background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#e7b300), to(#e7b300));
+		background-image: -o-linear-gradient(top, #e7b300, #e7b300);
+		background-image: linear-gradient(top, #e7b300, #e7b300);
+		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e7b300', endColorstr='#e7b300', GradientType=0);
+		box-shadow: 0 1px 0 #6b6b6b;
+		border:1px #714512 solid;
+	}
+}
+.reg{
+	color:#fff;
+	background:#3c3c3c;
+	border:1px #1a1a1a solid;
+	background-image: -webkit-linear-gradient(top, #343434, #3c3c3c);
+	background-image: -moz-linear-gradient(top, #343434, #3c3c3c);
+	background-image: -ms-linear-gradient(top, #343434, #3c3c3c);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#343434), to(#3c3c3c));
+	background-image: -o-linear-gradient(top, #343434, #3c3c3c);
+	background-image: linear-gradient(top, #343434, #3c3c3c);
+	background-repeat: repeat-x;
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#343434', endColorstr='#3c3c3c', GradientType=0);
+	box-shadow: 0 1px 0 #514f51;
+	&:hover{
+		background:#333;
+		background-image: -webkit-linear-gradient(top, #2c2c2c, #333);
+		background-image: -moz-linear-gradient(top, #2c2c2c, #333);
+		background-image: -ms-linear-gradient(top, #2c2c2c, #333);
+		background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#2c2c2c), to(#333));
+		background-image: -o-linear-gradient(top, #2c2c2c, #333);
+		background-image: linear-gradient(top, #2c2c2c, #333);
+		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#2c2c2c', endColorstr='#333', GradientType=0);
+	}
+	&:active{
+		background:#282828;
+		background-image: -webkit-linear-gradient(top, #252525, #282828);
+		background-image: -moz-linear-gradient(top, #252525, #282828);
+		background-image: -ms-linear-gradient(top, #252525, #282828);
+		background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#252525), to(#282828));
+		background-image: -o-linear-gradient(top, #252525, #282828);
+		background-image: linear-gradient(top, #252525, #282828);
+		filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#252525', endColorstr='#282828', GradientType=0);
+	}
+}
+.reg.disable{
+	color:#666;
+	background:#3c3c3c;
+	background-image: -webkit-linear-gradient(top, #343434, #3c3c3c);
+	background-image: -moz-linear-gradient(top, #343434, #3c3c3c);
+	background-image: -ms-linear-gradient(top, #343434, #3c3c3c);
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#343434), to(#3c3c3c));
+	background-image: -o-linear-gradient(top, #343434, #3c3c3c);
+	background-image: linear-gradient(top, #343434, #3c3c3c);
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#252525', endColorstr='#3c3c3c', GradientType=0);
+}
+/*帮助页*/
+.design{
+	border:1px #ccc solid;
+	background:#f2f2f2 image-url("od-quill/design_bg.png") repeat-x;
+	@include border-bottom-radius(5px);
+	margin-bottom:75px;
+	padding:50px 55px;
+	font-size: 16px;
+	color: #333;
+	line-height: 1.7em;
+	h3{
+		font-size: 18px;
+		font-weight: bold;
+		margin-bottom:25px;
+	}
+	h4{
+		font-weight: bold;
+		margin-bottom: 20px;
+	}
+	p,ul{margin-bottom: 20px;text-indent: 2em;}
+	h3.orange{color:#f15a24;}
+	h3.pink{color:#ff6175;}
+	h3.green{color:#80b54a;}
+	h3.blue{color:#3880c7;}
+	h4.orange{color:#fbab3b;}
+	h4.pink{color:#ff91a6;}
+	h4.green{color:#a6d424;}
+	h4.blue{color:#4d9ed1;}
+	.img{
+			@include size(200px,150px);
+			background: #FFF;
+			float: right;
+			margin:0 0 15px 15px;
+		}
+}

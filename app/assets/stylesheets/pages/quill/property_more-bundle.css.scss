@@ -1,0 +1,42 @@
+//=require ui/widgets/od_popup
+
+@import "common";
+
+
+.property-more{
+	font-size:14px;
+
+	.moreSelector, .moreSelector li p{
+		display:inline-block;
+	}
+	.moreSelector ul{
+		margin-top: 35px;
+		margin-bottom: 5px;
+		margin-left: 35px;
+	}
+	.moreSelector li p{
+		padding-left: 18px;
+	}
+	.moreSelector li {
+		padding-bottom: 30px;
+	}
+	.bold{
+		font-weight:bold;
+	}	
+}
+.save-share{
+	font-size:14px;
+	margin-top:20px;
+	margin-bottom:20px;
+	float:right;
+}
+.save-share b{
+	font-size:14px;
+	width:100px;
+}
+
+.redirect{
+	margin-left: 10px;
+	width: 255px;
+	padding: 2px;
+}
