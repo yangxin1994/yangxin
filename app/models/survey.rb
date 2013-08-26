@@ -240,6 +240,20 @@ class Survey
   def reward_type_info
     rs = RewardScheme.where(:_id => self.quillme_promote_info['reward_scheme_id']).first
     info = rs.rewards[0] if rs
+    
+    if info.present? && info['type'].to_i == RewardScheme::LOTTERY
+      info['prize_arr'] = []
+      ids = info['prizes'].map{|priz| priz['id']}
+      prizes = Prize.where(:_id.in => ids)
+      prize_info = {}
+      prizes = prizes.each do |prize|
+        prize_info['prize_id']  = prize.id
+        prize_info['prize_src'] = prize.photo.present? ? prize.photo.picture_url : Prize::DEFAULT_IMG 
+        info['prize_arr'] << prize_info
+        prize_info = {}  
+      end       
+    end
+
     return info
   end
 

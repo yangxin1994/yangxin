@@ -162,7 +162,6 @@ $(document).ready(function(){
 		
 		beforeShow: function(){
 			$(".fancybox-skin").css({"backgroundColor":"#fff"});
-			console.log($(this.element).parent('span').siblings('ul.reward_list').find('img').length)
 			var point 		 = $(this.element).attr('data');
 			var survey_id 	 = $(this.element).attr('survey_id');
 			var scheme_id 	 = $(this.element).attr('scheme_id');
@@ -237,6 +236,7 @@ $(document).ready(function(){
 	$('.share_s_btn').on('click',function(){
 		var uname = $('input#username').val();
 		var passw = $('input#password').val();
+		
 		var remeb = $('input[name="remember"]').attr('checked');
 		if(uname.length  < 1){
 			$('input#username').addClass('error');
