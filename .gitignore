@@ -11,3 +11,4 @@ db/journal
 public/uploads/*
 app/assets
 config/mongoid.yml
+Gemfile.lock
