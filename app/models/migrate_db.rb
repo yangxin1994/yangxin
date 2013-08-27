@@ -263,6 +263,14 @@ class MigrateDb
 		end
 	end
 
+	def self.migrate_survey_spreads
+		SurveySpread.all.each do |ss|
+			s = ss.survey
+			ss.survey_creation_time = s.created_at.to_i if s.present?
+			ss.save
+		end
+	end
+
 =begin
 	def self.migrate_point_log
 		PointLog.destroy_all

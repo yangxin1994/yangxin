@@ -90,7 +90,7 @@ class Sample::UsersController < Sample::SampleController
   # GET
   def spread_surveys
 
-    @my_spread_surveys = auto_paginate current_user.survey_spreads.desc(:created_at) do |paginated_survey_spreads|
+    @my_spread_surveys = auto_paginate current_user.survey_spreads.desc(:survey_creation_time) do |paginated_survey_spreads|
       paginated_survey_spreads.map do |e|
         e.survey.info_for_sample.merge({"spread_number" => e.times})
       end

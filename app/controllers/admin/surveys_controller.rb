@@ -120,6 +120,7 @@ class Admin::SurveysController < Admin::AdminController
   def update_promote
     survey = Survey.find params[:id]
     if @promote = survey.update_promote(params)
+      survey.update_quillme_promote_reward_type
       redirect_to "/admin/surveys/#{params[:id]}/promote",:flash => {:success => "推送渠道设置成功"}
     else
       flash.alert = "发生错误!请检查输入数据!"
