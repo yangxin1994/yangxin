@@ -30,6 +30,7 @@ class Filler::AnswersController < Filler::FillerController
 			params[:password])
 		current_user.answers << answer if current_user.present?
 		answer.check_channel_ip_address_quota
+		answer.check_max_num_per_ip
 		if !user_signed_in
 			# If a new answer for the survey is created, and the user is not signed in
 			# store the answer id in the cookie

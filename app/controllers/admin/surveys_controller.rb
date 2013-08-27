@@ -21,7 +21,8 @@ class Admin::SurveysController < Admin::AdminController
       {
         :hot => survey.quillme_hot,
         :spread => survey.spread_point,
-        :visible => survey.publish_result
+        :visible => survey.publish_result,
+        :max_num_per_ip => survey.max_num_per_ip
       }
     end
   end
@@ -31,11 +32,13 @@ class Admin::SurveysController < Admin::AdminController
       @is_succuess = 
         survey.set_quillme_hot(params[:hot].to_s == "true") &&
         survey.set_spread(params[:spread].to_i) &&
-        survey.update_attributes({'publish_result' => (params[:visible].to_s == "true")})
+        survey.update_attributes({'publish_result' => (params[:visible].to_s == "true"),
+                                  'max_num_per_ip' => params[:max_num_per_ip].to_i})
       {
         :hot => survey.quillme_hot,
         :spread => survey.spread_point,
-        :visible => survey.publish_result
+        :visible => survey.publish_result,
+        :max_num_per_ip => survey.max_num_per_ip
       }
     end
   end
@@ -117,6 +120,7 @@ class Admin::SurveysController < Admin::AdminController
   def update_promote
     survey = Survey.find params[:id]
     if @promote = survey.update_promote(params)
+      survey.update_quillme_promote_reward_type
       redirect_to "/admin/surveys/#{params[:id]}/promote",:flash => {:success => "推送渠道设置成功"}
     else
       flash.alert = "发生错误!请检查输入数据!"
