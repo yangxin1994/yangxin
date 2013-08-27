@@ -10,5 +10,6 @@ db/journal
 config/mongoid.yml
 Gemfile.lock
 public/uploads/*
+
 public/uploads/avatar/*
 public/assets/*
