@@ -27,9 +27,9 @@
 							<li>
 								<a class="user-head-box" href="<%=setting_users_path%>">
 									<span class="userhead">
-										<img src="<%= mini_avatar(@current_user.id)%>" alt="<%= @current_user.nickname%>">
+										<img src="<%= mini_avatar(current_user.id)%>" alt="<%= current_user.nickname%>">
 									</span>
-									<span class="username"><%= @current_user.nickname %></span>
+									<span class="username"><%= current_user.nickname %></span>
 									<i class="triangle"></i>
 								</a>
 								<ul id="account-pull-down" class="dn">
@@ -50,14 +50,14 @@
 							<li>
 								<a class="integral-btn" href="<%= points_users_path %>" >
 									<i class="icon integral"></i>
-									<span><%= @current_user.point %>积分</span>
+									<span><%= current_user.point %>积分</span>
 								</a>
 							</li>
 							<li>
-								<a class="inform-btn <% if @current_user.unread_messages_count > 0 %>active<% end %>" href="<%= notifications_users_path%>" >
+								<a class="inform-btn <% if current_user.unread_messages_count > 0 %>active<% end %>" href="<%= notifications_users_path%>" >
 									<i class="icon inform"></i>
 									<span>
-										通知（<%= @current_user.unread_messages_count %>）
+										通知（<%= current_user.unread_messages_count %>）
 									</span>
 								</a>
 							</li>

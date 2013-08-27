@@ -248,6 +248,9 @@ class Survey
       prize_info = {}
       prizes = prizes.each do |prize|
         prize_info['prize_id']  = prize.id
+        prize_info['title'] = prize.title
+        prize_info['price'] = prize.price
+        prize_info['description'] = prize.description
         prize_info['prize_src'] = prize.photo.present? ? prize.photo.picture_url : Prize::DEFAULT_IMG 
         info['prize_arr'] << prize_info
         prize_info = {}  
