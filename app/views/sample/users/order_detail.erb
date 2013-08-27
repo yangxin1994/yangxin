@@ -150,7 +150,7 @@
       
       <% if [2,4,8].include?(@order["status"].to_i) %>
         <li>
-          <span class="time"><%= int_time_to_datetime(@order["reviewed_at"].to_i) %></span>
+          <span class="time"><%= int_time_to_datetime(@order["handled_at"].to_i) %></span>
           <span class="text"><%= order_list(@order["type"].to_i, 1) %></span>
         </li>
       <% end %>
