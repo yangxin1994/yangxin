@@ -10,9 +10,9 @@
     <div class="part-left orders">
         <div class="tabs">
             <div class="l">
-                <a href="/users/orders" class="tab <%= 'active' unless [2,4].include?(params[:scope].to_i) %>" id="tab-lottery">答题奖励</a>
-                <a href="/users/orders?scope=2" class="tab <%= 'active' if params[:scope].to_i == 2 %>" id="tab-lottery">抽奖所得</a>
-                <a href="/users/orders?scope=4" class="tab <%= 'active' if params[:scope].to_i == 4 %>" id="tab-point">积分兑换</a>
+                <a href="/users/orders" class="tab <%= 'active' unless [Order::WIN_IN_LOTTERY, Order::REDEEM_GIFT].include?(params[:scope].to_i) %>" id="tab-lottery">答题奖励</a>
+                <a href="/users/orders?scope=2" class="tab <%= 'active' if params[:scope].to_i == Order::WIN_IN_LOTTERY %>" id="tab-lottery">抽奖所得</a>
+                <a href="/users/orders?scope=4" class="tab <%= 'active' if params[:scope].to_i == Order::REDEEM_GIFT %>" id="tab-point">积分兑换</a>
             </div>
             <div style="clear:both;"></div>
             <div class="nav2-dashed-line"></div>

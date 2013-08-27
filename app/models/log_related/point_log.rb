@@ -12,6 +12,7 @@ class PointLog < Log
 	field :gift_picture_url, :type => String
 	field :remark, :type => String
 
+	# reason
 	ANSWER = 1
 	SPREAD = 2
 	REDEEM = 4
