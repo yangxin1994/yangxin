@@ -79,8 +79,8 @@
                                         <img src="<%= small_gift_image(log['gift_picture_url']) %>" style="width: 36px; height: 36px;"/>
                                         <a target="_blank" href="/gifts/<%= log["gift_id"] %>"><%= truncate(log["gift_name"], length: 22) %></a>
                                     <% end %>
-                                <% elsif log["reason"].to_i == 128 %>
-                                    <span>原有系统导入积分记录</span>
+                                <% elsif log["reason"].to_i == PointLog::IMPORT %>
+                                    <span><%= change_point_reason_type(PointLog::IMPORT) %>记录</span>
                                 <% end %>
                                 
                             </td>

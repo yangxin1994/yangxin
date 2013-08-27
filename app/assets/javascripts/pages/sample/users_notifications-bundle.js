@@ -44,6 +44,9 @@ jQuery(function($) {
         if (data.success && data.value){
           // console.log('success....');
           _this.closest('tr').remove();
+          if ($('table tbody tr').length == 0 ){
+            window.location.replace('/users/notifications');
+          }
         }else {
           $.popupFancybox({cont: "操作失败，请刷新后重新操作"});
           _this.removeClass('disabled').text('删除');
@@ -59,7 +62,6 @@ jQuery(function($) {
         // console.log('success....');
         $('tbody tr, .pagination').remove();
         $('#delete-all').hide();
-        $.fancybox.close(true);
       }else {
         $.popupFancybox({cont: "操作失败，请刷新后重新操作"});
       }

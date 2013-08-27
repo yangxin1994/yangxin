@@ -280,32 +280,34 @@ module ApplicationHelper
 
 	def answered?(status, reject_type=0, free_reward=false)
 		case status.to_i
-		when 1
+		when Answer::EDIT
 			return "答题中"
-		when 2
+		when Answer::REJECT
 			case reject_type.to_i
 			when 0
 				return "被拒绝"
-			when 1
+			when Answer::REJECT_BY_QUOTA
 				return "配额拒绝"
-			when 2
+			when Answer::REJECT_BY_QUALITY_CONTROL
 				return "质控拒绝"
-			when 4
+			when Answer::REJECT_BY_REVIEW, Answer::REJECT_BY_AGENT_REVIEW
 				return "已完成" if free_reward
 				return "审核拒绝"
-			when 8 
+			when Answer::REJECT_BY_SCREEN
 				return "甄别拒绝"
-			when 16 
+			when Answer::REJECT_BY_TIMEOUT
 				return "超时拒绝"
+			when Answer::REJECT_BY_IP_RESTRICT
+				return "IP拒绝"
 			else
-				return reject_type
+				return reject_type.to_s
 			end
-		when 4,8
+		when Answer::UNDER_REVIEW, Answer::UNDER_AGENT_REVIEW
 			return "已完成" if free_reward
 			return "<span class='c-red'>待审核</span>"
-		when 32
+		when Answer::FINISH
 			return "已完成"
-		when 16
+		when Answer::REDO
 			return "需重答"
 		else
 			#return status
@@ -313,6 +315,7 @@ module ApplicationHelper
 		end
 	end
 
+	# In my spread_surveys page
 	def survey_type?(type)
 		case type.to_i 
 		when 0
@@ -365,19 +368,19 @@ module ApplicationHelper
 
 	def order_status(int_status)
 		case int_status.to_i
-		when 1
+		when Order::WAIT
 			return "等待处理"
-		when 2
+		when Order::HANDLE
 			return "正在处理"
-		when 4
+		when Order::SUCCESS
 			return "订单完成"
-		when 8
+		when Order::FAIL
 			return "处理失败"
-		when 16
+		when Order::CANCEL
 			return "撤消订单"
-		when 32 
+		when Order::FROZEN
 			return "等待审核"
-		when 64
+		when Order::REJECT
 			return "未通过审核"
 		else
 			return int_status.to_s    
@@ -436,21 +439,21 @@ module ApplicationHelper
 	def change_point_reason_type(int_type)
 		retval = ""
 		case int_type.to_i
-		when 1
+		when PointLog::ANSWER
 			retval = "答题奖励"
-		when 2
+		when PointLog::SPREAD
 			retval = "推广问卷"
-		when 4
+		when PointLog::REDEEM
 			retval = "礼品兑换"
-		when 8
+		when PointLog::ADMIN_OPERATE
 			retval = "管理员操作"
-		when 16
+		when PointLog::PUNISH
 			retval = "处罚操作" 
-		when 32
+		when PointLog::INVITE_USER
 			retval = "邀请样本"
-		when 64
+		when PointLog::REVOKE
 			retval = "撤销订单"
-		when 128
+		when PointLog::IMPORT
 			retval = "原有系统导入" 
 		end
 		return retval
