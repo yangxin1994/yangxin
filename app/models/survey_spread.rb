@@ -2,7 +2,7 @@
 require 'error_enum'
 class SurveySpread
 	include Mongoid::Document
-	include Mongoid::TimeStamps
+	include Mongoid::Timestamps
 	field :times, :type => Integer, default: 0
 	field :survey_creation_time, :type => Integer
 
