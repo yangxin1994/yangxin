@@ -57,8 +57,10 @@
 				background:url(/assets/od-quillme/faild.png) no-repeat;          
 			}
 			span.notice{
+				height:20px;
+				line-height:20px;
 				display:inline-block;
-				margin:25px 0px 0px 8px;
+				margin:22px 0px 0px 8px;
 				float:left;
 				color:red;
 			}
@@ -74,18 +76,20 @@
 				margin-left:10px;
 				cursor:pointer;
 				@include border-radius(4px);
-				float:left;                     
-			}
-			&:disabled,&.disabled{
-				background:#e6e6e6;
-				color:#b3b3b3;
-			}      
+				float:left;     
+				&:disabled,&.disabled{
+					cursor:default;
+					background:#e6e6e6;
+					color:#b3b3b3;
+				}  	                
+			}    
 		}    
 		.identifying_code{
 			input{
 				width:70px;
 			}
-		}    
+		} 
+		/*   
 		div.pro{
 			padding-top:4px;
 			display:block;
@@ -120,6 +124,7 @@
 				color:#3e98ee;      
 			}
 		}
+		*/
 		.login_btn{
 			width:280px;
 			height:42px;
@@ -133,11 +138,19 @@
 			clear:both;
 			cursor:pointer;
 			@include border-radius(4px);    
-			&:disabled{
-				background:#e6e6e6;
-				color:#b3b3b3;
+			&:hover{
+				background:#F25D5D
 			}      
 		}
+		.login_btn.disabled{
+			cursor:default;
+			background:#e6e6e6;
+			color:#b3b3b3;
+			&:hover{
+				background:#e6e6e6;
+				color:#b3b3b3;	
+			}				
+		}		
 	}
 	.line{
 		width:8px;
@@ -190,8 +203,9 @@
 		}
 	}
 	h3{
-		font-size:20px;
-		margin-bottom:30px;  
+		font-size: 24px;
+		margin-bottom: 26px; 
+		font-family:'微软雅黑', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';
 	}
 	.none_account{
 		font-size: 14px;

@@ -131,7 +131,7 @@ class Answer
     if status.present?
       self.in("status" => Tool.convert_int_to_base_arr(status.to_i))
     else
-      self
+      self.criteria
     end
   end
 

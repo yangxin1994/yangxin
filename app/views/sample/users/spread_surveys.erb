@@ -39,16 +39,16 @@
                         <tr id="sid-<%= survey["_id"] %>">
                             <td><%= int_time_to_date(survey["created_at"]) %></td>
                             <td>
-                                <a target="_blank" href="javascript: void(0);"><%= truncate(survey["title"].strip, length: 24) %></a>
+                                <span><%= truncate(survey["title"].to_s.strip, length: 24) %></span>
                             </td>
                             <td>
-                                <span><%= survey["spread_point"] %>积分/人</span>
+                                <span class="point"><%= survey["spread_point"] %>积分/人</span>
                             </td>
                             <td>
                                  <span><%= survey["spread_number"] %>份</span>
                             </td>
                             <td>
-                                <span><%= survey["spread_point"].to_i * survey["spread_number"].to_i %>积分</span>
+                                <span class="point"><%= survey["spread_point"].to_i * survey["spread_number"].to_i %>积分</span>
                             </td>
                             <td style="display: none;"><%= survey_type?(survey["quillme_promote_reward_type"]) %></td>
                             <td>
@@ -60,7 +60,7 @@
             </table>
         </div>
 
-        <%= render "pagination", :@common => @my_spread_surveys, :@path => "/users/spread_surveys" %>
+        <%= render "pagination", :@common_value => @my_spread_surveys, :@path => "/users/spread_surveys" %>
     </div>
 
     <!-- user tabs -->
@@ -91,12 +91,12 @@
         <!-- position element -->
         <td></td>
 
-        <td>2012-05-01</td>
+        <td></td>
         <td>重建社会信任，中国红十字会需要做些什么</td>
         <td>有奖调研</td>
-        <td>9人（3人正在答题）</td>
-        <td>3人</td>
-        <td>150积分</td>
+        <td>0人（0人正在答题）</td>
+        <td>0人</td>
+        <td>0积分</td>
       </tr>
     </tbody>
   </table>

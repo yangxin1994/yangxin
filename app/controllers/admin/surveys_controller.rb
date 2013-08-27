@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Admin::SurveysController < Admin::AdminController
 
   layout "layouts/admin-todc"
@@ -116,12 +118,11 @@ class Admin::SurveysController < Admin::AdminController
   end
 
   def update_promote
-    result = @client.update_promote(params)
-    if result.success
-      @promote = result.value
-      redirect_to "/admin/surveys/#{params[:id]}/promote"
+    survey = Survey.find params[:id]
+    if @promote = survey.update_promote(params)
+      redirect_to "/admin/surveys/#{params[:id]}/promote",:flash => {:success => "推送渠道设置成功"}
     else
-      render :json => result
+      flash.alert = "发生错误!请检查输入数据!"
     end
   end
 

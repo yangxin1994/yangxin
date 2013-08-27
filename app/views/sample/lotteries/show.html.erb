@@ -7,7 +7,7 @@
     	window.sample_mobile   = "<%= @receiver_info['mobile'] if @receiver_info %>"
     	window.sample_postcode = "<%= @receiver_info['postcode'] if @receiver_info %>"
     	window.sample_address  = "<%= @receiver_info['address'] if @receiver_info %>"
-    	window.sample_street_info = "<%= @receiver_info['street_info'] if @receiver_info %>"
+    	window.sample_street_info = "<%=@receiver_info['street_info'] if @receiver_info %>"
 		<% end %>
 
 		window.win_prize_id = "<%= @win_prize_id %>"

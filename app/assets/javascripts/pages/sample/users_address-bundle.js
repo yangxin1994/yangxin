@@ -48,6 +48,7 @@ jQuery(function($) {
 
 	function _setupAddressSelector(jq_obj, code){
 		var default_code = parseInt(code);
+		if (default_code == -1) return false;
 		var provice_code = _getPovinceCode(default_code);
 		var city_code = _getCityCode(default_code);
 		// console.log(default_code+',  '+provice_code+',  '+city_code);
@@ -98,7 +99,7 @@ jQuery(function($) {
 		var _click_name = jq_click_li.attr('name');
 		var _select_txt = jq_select.find('.select-txt');
 		$('.select ul').css('display', 'none');
-		jq_select.removeClass('active');
+		jq_select.find('.select-content').removeClass('active');
 		// if click one is the same as selected item, return false
 		if (_click_name == _select_txt.attr('name')){
 			return false;
@@ -221,10 +222,11 @@ jQuery(function($) {
 			return false;
 		};
 
-		$.ajax({
-			type: 'PUT',
-			url: '/users/setting/address.json',
-			data: {
+		var _this = $(this);
+		_this.addClass('disabled').val("提交中...");
+
+		$.putJSON('/users/setting/address',
+			{
 				receiver_info: {
 					receiver: receiver,
 					address: address,
@@ -232,24 +234,26 @@ jQuery(function($) {
 					mobile: mobile,
 					postcode: postcode
 				}
+			}, function(data){
+				// console.log(data);
+				_this.removeClass('disabled').val("确认提交");
+				if (data.success && data.value){
+					$.popupFancybox({success: true, cont: "收货地址更新成功！"});
+				}else {
+					$.popupFancybox({cont: "操作失败，请保证数据完整！"});
+				}
 			}
-		}).done(function(data){
-			// console.log(data);
-			if (data.success && data.value){
-				$.popupFancybox({success: true, cont: "收货地址更新成功！"});
-			}else {
-				$.popupFancybox({cont: "操作失败，请保证数据完整！"});
-			}
-		});
+		);
 	});
 
+	$('.receiver .alert-receiver, .street .alert-street').hide();
 	$('#receiver, #street').blur(function(){
 		if( $.trim($(this).val()).length == 0 ) {
 			$(this).addClass('error');
-			$('.alert-'+$(this).attr('id')).removeClass('alert-hide');
+			$('.alert-'+$(this).attr('id')).removeClass('alert-hide').show();
 		}else{
 			$(this).removeClass('error');
-			$('.alert-'+$(this).attr('id')).addClass('alert-hide');
+			$('.alert-'+$(this).attr('id')).addClass('alert-hide').hide();
 		}
 	});
 

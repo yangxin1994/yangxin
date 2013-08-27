@@ -144,6 +144,7 @@ class Sample::AccountsController < Sample::SampleController
       "completed_info" => @completed_info,
       "point" => current_user.point,
       "sample_id" => current_user._id.to_s,
+      "avatar" => current_user.mini_avatar,
       "nickname" => current_user.nickname
     }
     render_json_auto @basic_info and return

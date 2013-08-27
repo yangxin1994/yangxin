@@ -15,6 +15,9 @@ class RewardScheme
 	POINT = 4
 	LOTTERY = 8
 	JIFENBAO = 16
+	
+	CASH_REWARD = "1,2,16"
+	FREE = "0"
 
 	belongs_to :survey
 	has_many :answers

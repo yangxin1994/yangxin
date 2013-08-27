@@ -10,9 +10,9 @@
     <div class="part-left orders">
         <div class="tabs">
             <div class="l">
-                <a href="/users/orders" class="tab <%= 'active' unless [2,4].include?(params[:scope].to_i) %>" id="tab-lottery">答题奖励</a>
-                <a href="/users/orders?scope=2" class="tab <%= 'active' if params[:scope].to_i == 2 %>" id="tab-lottery">抽奖所得</a>
-                <a href="/users/orders?scope=4" class="tab <%= 'active' if params[:scope].to_i == 4 %>" id="tab-point">积分兑换</a>
+                <a href="/users/orders" class="tab <%= 'active' unless [Order::WIN_IN_LOTTERY, Order::REDEEM_GIFT].include?(params[:scope].to_i) %>" id="tab-lottery">答题奖励</a>
+                <a href="/users/orders?scope=2" class="tab <%= 'active' if params[:scope].to_i == Order::WIN_IN_LOTTERY %>" id="tab-lottery">抽奖所得</a>
+                <a href="/users/orders?scope=4" class="tab <%= 'active' if params[:scope].to_i == Order::REDEEM_GIFT %>" id="tab-point">积分兑换</a>
             </div>
             <div style="clear:both;"></div>
             <div class="nav2-dashed-line"></div>
@@ -90,7 +90,7 @@
                             <% when Order::REAL, Order::VIRTUAL %>
                               <!-- 礼品 -->
                               <td>
-                                  <img src="<%= order['picture_url'] %>" style="width: 36px; height: 36px;"/>
+                                  <img src="<%= small_gift_image(order['picture_url']) %>" style="width: 36px; height: 36px;"/>
                                   <span><%= truncate(order["title"].to_s.strip, length: 22) %></span>
                               </td>
                               <td>
@@ -179,7 +179,7 @@
                             <% when Order::REAL, Order::VIRTUAL %>
                               <!-- 奖品 -->
                               <td>
-                                  <img src="<%= order['picture_url'] %>" style="width: 36px; height: 36px;"/>
+                                  <img src="<%= small_gift_image(order['picture_url']) %>" style="width: 36px; height: 36px;"/>
                                   <span><%= truncate(order["title"].to_s.strip, length: 22) %></span>
                               </td>
                               <td>
@@ -272,7 +272,7 @@
                             <% when Order::REAL, Order::VIRTUAL %>
                               <!-- 礼品 -->
                               <td>
-                                  <img src="<%= order['picture_url'] %>" style="width: 36px; height: 36px;"/>
+                                  <img src="<%= small_gift_image(order['picture_url']) %>" style="width: 36px; height: 36px;"/>
                                   <a target="_blank" href="/gifts/<%= order["gift_id"] %>"><%= truncate(order["title"].to_s.strip, length: 22) %></a>
                               </td>
                               <td><%= order["point"] %>积分</td>
@@ -295,7 +295,7 @@
           <% end %>
         </div>
 
-        <%= render "pagination", :@common => @orders, :@path => "/users/orders" %>    
+        <%= render "pagination", :@common_value => @orders, :@path => "/users/orders" %>    
     </div>
 
     <!-- user tabs -->

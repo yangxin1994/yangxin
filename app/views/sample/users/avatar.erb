@@ -56,18 +56,26 @@
         <div class="avataria" style="display: inline-block;">
             <div class="cont">
                 <!-- application/x-www-form-urlencoded -->
-                <form method="post" enctype="multipart/form-data" action="/users/setting/upload_avatar">
-                    <input name="avatar" type="file" id="file" accept="image/*" onerror="alert(&#39;请选择一个图片&#39;)">
-                    &nbsp;
-                    <input type="submit" id="hidden-submit" class="ui_button" value="保存">
+                <form method="post" enctype="multipart/form-data" action="/users/setting/upload_avatar" >
+                    <div>
+                        <div style="width: 76px;padding: 0;margin-left: 70px;height: 36px;" class="btn l">
+                            <span class="l" style="padding: 10px; padding-top: 8px\9;">选择图片</span>
+                            <input style="filter:alpha(opacity=0);width: 76px;opacity: 0;position: relative;top: -36px;height: 36px;width: 64px\9;" name="avatar" type="file" id="file" accept="image/*" onerror="alert(&#39;请选择一个图片&#39;)">
+                        </div>                    
+
+                        <div class="r">
+                            <input style="height: 36px;margin-left: 20px;width: 76px;" class="btn" type="submit" id="hidden-submit" value="保存">
+                            <img id="loading-img" style="vertical-align: middle;" class="dn" src="/assets/od-quillme/uc/loading.gif"/>
+                        </div>
+                    </div>
                     <input name="crop" type="hidden">
                 </form>
-
-                <!-- <div style="margin: 10px 0;">
-                    <p>由于不同浏览器会有不同的问题，</p>
-                    <p>如果第一次选择上传不成功，请您重新再操作一次！</p>
-                </div> -->
             </div>
+
+            <div id="retval">
+                <input type="text" class="dn" value="<%= @update_retval %>">
+            </div>
+
         </div>
     </div>
 
