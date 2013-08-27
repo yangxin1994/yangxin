@@ -691,7 +691,7 @@ class User
 	end
 
 	def set_sample_role(role)
-		self.user_role = (role.sum + 1)
+		self.user_role = role.sum
 		return self.save
 	end
 

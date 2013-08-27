@@ -4,5 +4,4 @@ class Filler::SurveysController < Filler::FillerController
 	def show
 		load_survey(params[:id])
 	end
-
 end

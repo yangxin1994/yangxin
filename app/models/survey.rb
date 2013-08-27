@@ -58,6 +58,7 @@ class Survey
   #  2 for inserting randomly
   field :quality_control_questions_type, :type => Integer, default: 0
   field :quality_control_questions_ids, :type => Array, default: []
+  field :max_num_per_ip, :type => Integer, default: 3
   field :deadline, :type => Integer
   field :is_star, :type => Boolean, :default => false
   field :publish_result, :type => Boolean, :default => false
