@@ -1,4 +1,4 @@
-<% if @order["status"].to_i == 64 %>
+<% if @order["status"].to_i == Order::REJECT %>
   <!-- 3 步 -->
 
   <!-- 订单详情 -->
@@ -45,7 +45,7 @@
       <div class="line"></div>
     </div>
   </div>
-<% elsif @order["status"].to_i == 32 || @order["reviewed_at"] %>
+<% elsif @order["status"].to_i == Order::FROZEN || @order["reviewed_at"] %>
   <!-- 4 步 -->
   <div class="order-info">
     <div class="title">
@@ -70,21 +70,21 @@
         </li>
       <% end %>
       
-      <% if  [2,4,8].include?(@order["status"].to_i) %>
+      <% if [Order::HANDLE,Order::SUCCESS,Order::FAIL].include?(@order["status"].to_i) %>
         <li>
           <span class="time"><%= int_time_to_datetime(@order["handled_at"].to_i) %></span>
           <span class="text"><%= order_list(@order["type"].to_i, 1) %></span>
         </li>
       <% end %>
 
-      <% if  @order["status"].to_i == 4 %>
+      <% if  @order["status"].to_i == Order::SUCCESS %>
         <li>
           <span class="time"><%= int_time_to_datetime(@order["finished_at"].to_i) %></span>
           <span class="text"><%= order_list(@order["type"].to_i, 2) %></span>
         </li>
       <% end %>
 
-      <% if  @order["status"].to_i == 8 %>
+      <% if  @order["status"].to_i == Order::FAIL %>
         <li>
           <span class="time"><%= int_time_to_datetime(@order["finished_at"].to_i) %></span>
           <span class="text"><%= @order["remark"] %></span>
@@ -95,33 +95,33 @@
 
   <!-- steps -->
   <div class="steps steps4">
-    <div class="step <%= 'actived' if @order["status"].to_i == 32 %> <%= 'fixed' if @order["status"].to_i != 32%> ">
+    <div class="step <%= 'actived' if @order["status"].to_i == Order::FROZEN %> <%= 'fixed' if @order["status"].to_i != Order::FROZEN %> ">
       <div class="text">提交订单</div>
-      <i class="icon-step icon-step1 <%= 'actived' if @order["status"].to_i == 32 %> <%= 'fixed' if @order["status"].to_i != 32 %> "></i>
+      <i class="icon-step icon-step1 <%= 'actived' if @order["status"].to_i == Order::FROZEN %> <%= 'fixed' if @order["status"].to_i != Order::FROZEN %> "></i>
         <div class="line"></div>
     </div>
 
-    <div class="step <%= 'actived' if @order["status"].to_i == 1 %> <%= 'fixed' if @order["status"].to_i != 32  && @order["status"].to_i > 1 %>">
+    <div class="step <%= 'actived' if @order["status"].to_i == Order::WAIT %> <%= 'fixed' if @order["status"].to_i != Order::FROZEN  && @order["status"].to_i > Order::WAIT %>">
       <div class="text">审核通过</div>
-      <i class="icon-step icon-step2 <%= 'actived' if @order["status"].to_i == 1 %> <%= 'fixed' if @order["status"].to_i != 32  && @order["status"].to_i > 1 %>"></i>
+      <i class="icon-step icon-step2 <%= 'actived' if @order["status"].to_i == Order::WAIT %> <%= 'fixed' if @order["status"].to_i != Order::FROZEN  && @order["status"].to_i > Order::WAIT %>"></i>
         <div class="line"></div>
     </div>
 
-    <div class="step <%= 'actived' if @order["status"].to_i == 2 %> <%= 'fixed' if [4,8].include?(@order["status"].to_i) %>">
+    <div class="step <%= 'actived' if @order["status"].to_i == Order::HANDLE %> <%= 'fixed' if [Order::SUCCESS,Order::FAIL].include?(@order["status"].to_i) %>">
       <div class="text"><%= order_process(@order["type"].to_i) %></div>
-      <i class="icon-step icon-step3 <%= 'actived' if @order["status"].to_i == 2 %> <%= 'fixed' if [4,8].include?(@order["status"].to_i) %>"></i>
+      <i class="icon-step icon-step3 <%= 'actived' if @order["status"].to_i == Order::HANDLE %> <%= 'fixed' if [Order::SUCCESS,Order::FAIL].include?(@order["status"].to_i) %>"></i>
         <div class="line"></div>
     </div>
 
-    <% if @order["status"].to_i != 8 %>
-      <div class="step <%= 'actived' if @order["status"].to_i == 4 %>">
+    <% if @order["status"].to_i != Order::FAIL %>
+      <div class="step <%= 'actived' if @order["status"].to_i == Order::SUCCESS %>">
         <div class="text">完成</div>
-        <i class="icon-step icon-step4 <%= 'actived' if @order["status"].to_i == 4 %>"></i>
+        <i class="icon-step icon-step4 <%= 'actived' if @order["status"].to_i == Order::SUCCESS %>"></i>
         <div class="line"></div>
       </div>
     <% end %>
 
-    <% if  @order["status"].to_i == 8 %>
+    <% if  @order["status"].to_i == Order::FAIL %>
       <div class="step actived">
         <div class="text">失败</div>
         <i class="icon-step icon-step4 actived"></i>
@@ -148,21 +148,21 @@
         <span class="text">你提交了订单</span>
       </li>
       
-      <% if [2,4,8].include?(@order["status"].to_i) %>
+      <% if [Order::HANDLE,Order::SUCCESS,Order::FAIL].include?(@order["status"].to_i) %>
         <li>
           <span class="time"><%= int_time_to_datetime(@order["handled_at"].to_i) %></span>
           <span class="text"><%= order_list(@order["type"].to_i, 1) %></span>
         </li>
       <% end %>
 
-      <% if  @order["status"].to_i == 4 %>
+      <% if  @order["status"].to_i == Order::SUCCESS %>
         <li>
           <span class="time"><%= int_time_to_datetime(@order["finished_at"].to_i) %></span>
           <span class="text"><%= order_list(@order["type"].to_i, 2) %></span>
         </li>
       <% end %>
 
-      <% if  @order["status"].to_i == 8 %>
+      <% if  @order["status"].to_i == Order::FAIL %>
         <li>
           <span class="time"><%= int_time_to_datetime(@order["finished_at"].to_i) %></span>
           <span class="text"><%= @order["remark"] %></span>
@@ -173,29 +173,29 @@
 
   <!-- steps -->
   <div class="steps">
-    <div class="step <%= 'actived' if @order["status"].to_i == 1 %> <%= 'fixed' if @order["status"].to_i > 1 %>">
+    <div class="step <%= 'actived' if @order["status"].to_i == Order::WAIT %> <%= 'fixed' if @order["status"].to_i > Order::WAIT %>">
       <div class="text">提交订单</div>
-      <i class="icon-step icon-step1 <%= 'actived' if @order["status"].to_i == 1 %> <%= 'fixed' if @order["status"].to_i > 1 %>"></i>
+      <i class="icon-step icon-step1 <%= 'actived' if @order["status"].to_i == Order::WAIT %> <%= 'fixed' if @order["status"].to_i > Order::WAIT %>"></i>
       <div class="line">
       </div>
     </div>
 
-    <div class="step  <%= 'actived' if @order["status"].to_i == 2 %> <%= 'fixed' if [4,8].include?(@order["status"].to_i) %> ">
+    <div class="step  <%= 'actived' if @order["status"].to_i == Order::HANDLE %> <%= 'fixed' if [Order::SUCCESS,Order::FAIL].include?(@order["status"].to_i) %> ">
       <div class="text"><%= order_process(@order["type"].to_i) %></div>
-      <i class="icon-step icon-step2 <%= 'actived' if @order["status"].to_i == 2 %> <%= 'fixed' if [4,8].include?(@order["status"].to_i) %> "></i>
+      <i class="icon-step icon-step2 <%= 'actived' if @order["status"].to_i == Order::HANDLE %> <%= 'fixed' if [Order::SUCCESS,Order::FAIL].include?(@order["status"].to_i) %> "></i>
       <div class="line">
       </div>
     </div>
 
-    <% if @order["status"].to_i != 8 %>
-      <div class="step <%= 'actived' if @order["status"].to_i == 4 %>">
+    <% if @order["status"].to_i != Order::FAIL %>
+      <div class="step <%= 'actived' if @order["status"].to_i == Order::SUCCESS %>">
         <div class="text">完成</div>
-        <i class="icon-step icon-step3 <%= 'actived' if @order["status"].to_i == 4 %>"></i>
+        <i class="icon-step icon-step3 <%= 'actived' if @order["status"].to_i == Order::SUCCESS %>"></i>
         <div class="line"></div>
       </div>
     <% end %>
 
-    <% if  @order["status"].to_i == 8 %>
+    <% if  @order["status"].to_i == Order::FAIL %>
       <div class="step actived">
         <div class="text">失败</div>
         <i class="icon-step icon-step3 actived"></i>
