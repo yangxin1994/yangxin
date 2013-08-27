@@ -26,7 +26,7 @@
                         <th style="width: 100px;" class="time">时间</th>
                         <th style="width: 300px;" class="name">调研名称</th>
                         <th style="width: 80px;" class="type">奖励</th>
-                        <th style="width: 80px;" class="reward">已推广</th>
+                        <th style="width: 80px;" class="reward">完成／推广</th>
                         <th style="width: 60px;" class="type">总计</th>
                         <!-- work for survey detail -->
                         <th style="display: none;" class="type">调研类型</th>
@@ -42,13 +42,13 @@
                                 <span><%= truncate(survey["title"].to_s.strip, length: 22) %></span>
                             </td>
                             <td>
-                                <span class="point"><%= survey["spread_point"] %>积分/人</span>
+                                <span class="point"><%= survey["spread_point"] %>积分/份</span>
                             </td>
                             <td>
-                                 <span><%= survey["finish_number"].to_i %>/<%= survey["spread_number"] %>份</span>
+                                 <span><%= survey["finish_number"].to_i %>/<%= survey["spread_number"] %> 份</span>
                             </td>
                             <td>
-                                <span class="point"><%= survey["spread_point"].to_i * survey["spread_number"].to_i %>积分</span>
+                                <span class="point"><%= survey["spread_point"].to_i * survey["finish_number"].to_i %>积分</span>
                             </td>
                             <td style="display: none;"><%= survey_type?(survey["quillme_promote_reward_type"]) %></td>
                             <td>
