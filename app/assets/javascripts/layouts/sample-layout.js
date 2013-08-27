@@ -33,23 +33,27 @@ $(document).ready(function(){
 			
 		$('a.' + v).click(function() {
 			var s_imgs = null;
+
+			String.prototype.replaceAll  = function(s1,s2){   
+				return this.replace(new RegExp(s1,"gm"),s2);   
+			}  
+
 			if(share_imgs){
 				switch(v){
 				case 'SinaWeibo':
-					var s_imgs =   share_imgs.replace(',','||')
+					var s_imgs =   share_imgs.replaceAll(',','||');
 					break;
 				case 'TencentWeibo':
-					var s_imgs =  share_imgs.replace(',','|')
+					var s_imgs =  share_imgs.replaceAll(',','|');
 					break;
 				case 'Renren':
-					var s_imgs = share_imgs.replace(',','||')
+					var s_imgs = share_imgs.replaceAll(',','||');
 					break;
 				case 'Douban':
-					var s_imgs = share_imgs.replace(',','||')
+					var s_imgs = share_imgs.replaceAll(',','||');
 					break;			
 				}			
 			}
-
 			$.social['shareTo' + v](share_url, '问卷吧邀您参加:'+ survey_title + ',我们非常希望能得到您的宝贵意见',s_imgs);
 		});
 
@@ -65,83 +69,12 @@ $(document).ready(function(){
   // placeholder for IE 
   $.placeholder();
 
- //  var prizes_container = null
-	// $('.unfold-btn').on('click',function(){
-	// 	var ico = $(this).children('i')
-	// 	var open  = null
-	// 	if(ico.hasClass('open')){
-	// 		open = true  
-	// 	}else{
-	// 		open = false
-	// 	}
-			
-	// 	var link = $(this);
-	// 	if(open){
-	// 		ico.replaceWith("<img class='pr_loading' src='/assets/od-quillme/icons/loading.gif' style='vertical-align:middle;width:16px;height:14px;margiin:-2px 2px 0 0'>")
-	// 		var prize_ids = $(this).attr('data');
-	// 		var survey_id = $(this).attr('survey_id');
-	// 		var scheme_id = $(this).attr('scheme_id');
-	// 		prizes_container = $(this).parents('span.research-meta').siblings('ul.reward_list');
-	// 		// ajax request
-	// 		$.postJSON('/prizes/find_by_ids.json',{ids:prize_ids},function(retval){
-	// 			if(retval.success){
-	// 				link.children('i').removeClass('open').addClass('close').next('span').html('收起');          	
-	// 				$(".loading").remove();
-	// 				link.parents('.research-meta').siblings('.reward_list').show();
-	// 				$.each(retval.value,function(index){
-	// 					var priz_index = 'priz' + index
-	// 					var tmp = '<li id="'+ survey_id + this._id +'">\
-	// 						<a href="#' + this._id + survey_id + '" class="pop" rel="survey_' + survey_id + prize_ids + 'data="'+ this._id +'" index="'+ index +'" >\
-	// 							<img src=" ' + this.photo_src + ' " alt="">\
-	// 							<span class="gift-mask"></span>\
-	// 							<div class="gift-name">\
-	// 								<div>' + this.title +   '</div>\
-	// 							</div></a></li>'
-	// 						if($('#'+survey_id+this._id).length < 1){
-	// 							$(tmp).appendTo(prizes_container)	
-	// 						}
-								
-	// 					var popup = '<div id="' + this._id + survey_id + '" style="display:none;" class="pri1"> \
-	// 						<div class="prize_info"> \
-	// 							<div class="detail"> \
-	// 								<div class="title">参与本次调研就有机会获得如下奖品</div> \
-	// 									<div class="prize_img"> \
-	// 										<img src="' + this.photo_src + '"/> \
-	// 									</div> \
-	// 								<div class="prize_intro"> \
-	// 								<p class="prize_title">' +  this.title + '</p> \
-	// 								<p class="prize_price">市场价: <span class="price_info">￥' + this.price + '</span></p> \
-	// 								<p> \
-	// 									<span class="p_intro">奖品介绍 :</span><br/> \
-	// 									<span class="intro_info">' + this.description + '</span>  \
-	// 								</p> \
-	// 								<a class="prize_btn" href="/s/'+scheme_id+'" target="_blank">立即参与</a>\
-	// 							</div> \
-	// 							<div style="clear:both;"></div> \
-	// 							<div class="slide_nav"> '
-	// 					var lis = ''
-	// 					$.each(prize_ids.split(','),function(i){
-	// 						lis += '<li class="slide"></li>'  
-	// 					})
-	// 					var popup_1 = '</div></div></div></div>'
-	// 					$(popup + lis + popup_1 ).appendTo(prizes_container)
-	// 				})
-	// 				$('img.pr_loading').replaceWith('<i class="icon16 close"></i>')
-	// 				$('i.close').next('span').html('收起');
-	// 			}else{
-	// 				console.log(retval.value)      
-	// 			}
-	// 		})
-	// 	}else{
-	// 		$(this).parents('.research-meta').siblings('.reward_list').hide();
-	// 		$(this).children('i').removeClass('close').addClass('open').next('span').html('展开');
-	// 		prizes_container.html('');
-	// 	}
-	// })
 
 	$('.unfold-btn').toggle(function(){
+		$(this).children('i').removeClass('open').addClass('close').next('span').html('收起');
 		$(this).parents('.research-meta').siblings('.reward_list').show();
 	},function(){
+		$(this).children('i').removeClass('close').addClass('open').next('span').html('展开');
 		$(this).parents('.research-meta').siblings('.reward_list').hide();
 	})
 
@@ -196,7 +129,8 @@ $(document).ready(function(){
 			survey_title = $(this.element).attr('s_title')
 			copy_button = 'c_survey'
 			if(typeof(window.current_user_id) == 'undefined'){
-				share_url =  window.location.protocol + '//' + window.location.hostname + '/s/' + scheme_id
+
+				share_url =  window.location.protocol + "//" + window.location.hostname + window.location.host + '/s/' + scheme_id
 				if(parseInt(point) > 0){
 					copy_button = 'copy_survey'
 					$('.share_point').text(point)	
@@ -215,7 +149,7 @@ $(document).ready(function(){
 				}else{
 					$('#s_survey').find('.share_cont').css("height",'220px');
 				}
-				share_url =  window.location.protocol + '//' + window.location.hostname + '/s/' + scheme_id + '?i=' + window.current_user_id
+				share_url =  window.location.protocol + "//" + window.location.hostname + window.location.host + '/s/' + scheme_id + '?i=' + window.current_user_id
 				$("#s_survey").find('.share_url').val(share_url);  
 				var href = $('#s_url').val();      
 			}
