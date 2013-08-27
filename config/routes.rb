@@ -387,11 +387,16 @@ OopsData::Application.routes.draw do
         get 'get_email', 'orders', 'rewards', 'lottery_record', 'point_logs','introduced_users'
       end
     end
-    resources :ejournals do
+    resources :newsletters do
       member do
         post   :deliver
-        post     :test
+        post   :test
         delete :cancel
+      end
+      collection do
+        post   :column
+        post   :article
+        post   :product_news
       end
     end
     resources :subscribers do
