@@ -218,19 +218,19 @@
       <div class="control-group broswer_extension-info">
         <label class="control-label" >浏览器插件详细设置:</label>
         <div class="controls">
-          <input type="text" placeholder="在这里输入关键字"  value="<%= filter['key_words'] %>" id="weibo_text" name="broswer_extension[broswer_extension_promote_setting][filter][<%= index + 1 %>][key_words]" />
+          <input type="text" placeholder="在这里输入关键字"  value="<%= filter['key_words'] %>" id="weibo_text" name="broswer_extension[broswer_extension_promote_setting][filters][<%= index + 1 %>][key_words]" />
         </div>
       </div>
       <div class="control-group broswer_extension-info">
         <div class="controls">
-          <input type="text" placeholder="在这里输入网址" value="<%= filter['url'] %>" id="weibo_text" name="broswer_extension[broswer_extension_promote_setting][filter][<%= index + 1%>][url]" />
+          <input type="text" placeholder="在这里输入网址" value="<%= filter['url'] %>" id="weibo_text" name="broswer_extension[broswer_extension_promote_setting][filters][<%= index + 1%>][url]" />
         </div>
       </div>  
     <% end -%>
       <div>
         <div class="control-group broswer_extension-info">
           <div class="controls">
-            <a href="#add_browser_extension_setting" id="add_browser_extension_setting" data-toggle="<%= @promote['broswer_extension_promote_info']['filter'].try('size') || 0 %>" class="btn btn-link">添加一组</a>
+            <a href="#add_browser_extension_setting" id="add_browser_extension_setting" data-toggle="<%= @promote['broswer_extension_promote_info']['filters'].try('size') || 0 %>" class="btn btn-link">添加一组</a>
           </div>
         </div>
       </div>
@@ -310,7 +310,7 @@
                   <li><a href="#reward-<%= reward_scheme['_id'] %>"><%= reward_scheme['name'] %></a></li>
                 <% end %>
               </ul>
-              <input value="<%= agent_task['reward_schemes_id'] %>" type='hidden' name="agent[agent_promote_setting][agents][<%= index %>][reward_schemes_id]" palceholder=""/>
+              <input value="<%= agent_task['reward_scheme_id'] %>" type='hidden' name="agent[agent_promote_setting][agents][<%= index %>][reward_schemes_id]" palceholder=""/>
             </div>
           </div>
         </div>

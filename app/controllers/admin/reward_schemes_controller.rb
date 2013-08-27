@@ -13,11 +13,8 @@ class Admin::RewardSchemesController < Admin::AdminController
 
   def update
     options = make_attr(params[:reward_scheme])
-    if @reward_scheme = RewardScheme.where(:_id => params[:id]).first
-      @reward_scheme.update_attributes(options)
-    else
-      # 输出错误信息
-    end
+    @reward_scheme = RewardScheme.find(params[:id])
+    @reward_scheme.update_attributes(options)
     redirect_to "#{reward_schemes_admin_path(:id => params[:reward_scheme][:survey_id])}?editing=#{params[:id]}"
   end
 
