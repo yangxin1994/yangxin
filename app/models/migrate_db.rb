@@ -123,7 +123,7 @@ class MigrateDb
 		puts "Migrating users......"
 		PointLog.destroy_all
 		update_time = Time.now
-		User.where(:updated_at.lt => update_time).each_with_index do |u, index|
+		User.where(:updated_at.lt => update_time, :migrate.ne => true).each_with_index do |u, index|
 			puts index if index%10 == 0
 			# remove the password_confirmation
 			u.password_confirmation = nil if u.read_attribute("password_confirmation").present?
@@ -138,6 +138,7 @@ class MigrateDb
 			u.user_role = user_role
 			# the status field
 			u.status = u.status == 0 ? User::VISITOR : User::REGISTERED
+			u.write_attribute(:migrate, true)
 			u.save
 
 			# affliated
