@@ -23,7 +23,7 @@ class Sample::UsersController < Sample::SampleController
     @retval = QuillCommon::MobileUtility.region_and_carrier(params[:m])
     render :json => false and return if @retval["retmsg"].to_s != "OK"
     @retval = "#{@retval['city']}, 中国 #{@retval['carrier']}"
-    render :json => @retval and return
+    render_json_auto @retval and return
   end
 
   # *********************************
@@ -104,7 +104,7 @@ class Sample::UsersController < Sample::SampleController
 
     respond_to do |format|
       format.html 
-      format.json { render :json => @my_spread_surveys }
+      format.json { render_json_auto @my_spread_surveys }
     end
   end
 
@@ -124,7 +124,7 @@ class Sample::UsersController < Sample::SampleController
       format.html {
         render :layout => false if request.headers["OJAX"]
       }
-      format.json { render :json => @answers }
+      format.json { render_json_auto @answers }
     end
   end
 
@@ -209,7 +209,7 @@ class Sample::UsersController < Sample::SampleController
       format.html {
         render :layout => false if request.headers["OJAX"]
       }
-      format.json { render :json => @order }
+      format.json { render_json_auto @order, :only => [:success] and return }
     end
   end
 
@@ -333,7 +333,7 @@ class Sample::UsersController < Sample::SampleController
 
     respond_to do |format|
       format.html { }
-      format.json { render :json => @bindings }
+      format.json { render_json_auto @bindings }
     end
   end
 
@@ -350,7 +350,7 @@ class Sample::UsersController < Sample::SampleController
       format.html {
         render :text => "error!", action: 'bindings' and return unless @retval.success
       }
-      format.json { render :json => @retval }
+      format.json { render_json_auto @retval }
     end
 =end
   end
@@ -370,7 +370,7 @@ class Sample::UsersController < Sample::SampleController
       format.html {
         render :text => "error!", action: 'bindings' and return unless @retval.success
       }
-      format.json { render :json => @retval }
+      format.json { render_json_auto @retval }
     end
 =end
   end
@@ -390,7 +390,7 @@ class Sample::UsersController < Sample::SampleController
 
     respond_to do |format|
       format.html { }
-      format.json { render :json => @retval }
+      format.json { render_json_auto @retval }
     end
 =end
   end
@@ -410,7 +410,7 @@ class Sample::UsersController < Sample::SampleController
 
     # @retval = @uclient.change_mobile(params[:m])
 
-    # render :json => @retval 
+    # render_json_auto @retval 
   end
 
   # 根据手机号和验证短信码激活手机
@@ -424,7 +424,7 @@ class Sample::UsersController < Sample::SampleController
     render_json_auto current_user.save and return
 
     # @retval = @uclient.check_mobile_verify_code(params[:m], params[:code])
-    # render :json => @retval 
+    # render_json_auto @retval 
   end
 
   # 根据邮箱绑定
@@ -439,7 +439,7 @@ class Sample::UsersController < Sample::SampleController
 
 =begin
     @retval = @uclient.change_email(params[:email], "")
-    render :json => @retval 
+    render_json_auto @retval 
 =end
   end
 
@@ -451,7 +451,7 @@ class Sample::UsersController < Sample::SampleController
 
     respond_to do |format|
       format.html { }
-      format.json { render :json => @receiver_info }
+      format.json { render_json_auto @receiver_info }
     end
   end
 
@@ -496,7 +496,7 @@ class Sample::UsersController < Sample::SampleController
 
     respond_to do |format|
       format.html 
-      format.json { render :json => @notices }
+      format.json { render_json_auto @notices }
     end
   end
 
