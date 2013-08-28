@@ -575,11 +575,11 @@ $(function(){
 				generate_address(window.sample_address)
 			}else{
 				$.getJSON('/users/setting/address.json',{},function(retval){
-						window.sample_receiver = retval.receiver; 
-						window.sample_mobile   = retval.mobile; 
-						window.sample_postcode = retval.postcode;
-						window.sample_address  = retval.address;
-						window.sample_street_info = retval.street_info;
+						window.sample_receiver = retval.value.receiver; 
+						window.sample_mobile   = retval.value.mobile; 
+						window.sample_postcode = retval.value.postcode;
+						window.sample_address  = retval.value.address;
+						window.sample_street_info = retval.value.street_info;
 						$('input[name="receiver"]').val(window.sample_receiver);
 						$('input[name="mobile"]').val(window.sample_mobile);
 						$('input[name="postcode"]').val(window.sample_postcode);
