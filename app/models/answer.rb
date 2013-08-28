@@ -1192,7 +1192,7 @@ class Answer
     reward["win"] = false
     self.reward_delivered = true
     self.save
-    LotteryLog.create_fail_lottery_log(self.id,self.survey.id,self.survey.title,user_id,self.ip_address) if user_id.present?
+    LotteryLog.create_fail_lottery_log(self.id,self.survey.id,self.survey.title,user_id,self.ip_address)
     return {"result" => false}
   end
 

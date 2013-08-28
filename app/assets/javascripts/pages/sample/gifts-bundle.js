@@ -575,9 +575,6 @@ $(function(){
 				generate_address(window.sample_address)
 			}else{
 				$.getJSON('/users/setting/address.json',{},function(retval){
-					console.log("----------------------------------")
-					console.log(retval)
-					console.log("----------------------------------")
 						window.sample_receiver = retval.receiver; 
 						window.sample_mobile   = retval.mobile; 
 						window.sample_postcode = retval.postcode;

@@ -134,20 +134,21 @@ jQuery(function($) {
 			type: "POST",
 			url: '/surveys/make_rss_activate',
 			data: {rss_channel:email},
+			
 			beforeSend:function(){
 				obj.next('img').remove();
 				if(obj.next('img').length < 1){
-					if($.form.isEmail.test(email)){
+					if($.form.isEmail(email)){
 						obj.after('<img class="loading" src="/assets/image/sample/fancybox_loading@2x.gif" width="16" height="16" style="position:absolute;left:64px;top:44px;" />')
 					}else{
-						obj.after('<img class="loading" src="/assets/image/sample/fancybox_loading@2x.gif" width="16" height="16" style="position:absolute;right:50px;top:9x;" />')
+						obj.after('<img class="loading" src="/assets/image/sample/fancybox_loading@2x.gif" width="16" height="16" style="position:absolute;right:50px;top:8px;" />')
 					}
 					
 				}				
 			},
 			success:function(retval){
 				obj.next('img').remove();
-				if($.form.isEmail.test(email)){
+				if($.form.isEmail(email)){
 					obj.after('<img class="loading" src="/assets/od-quillme/success.png" width="16" height="16" style="position:absolute;left:64px;top:44px;" />')
 				}else{
 					obj.after('<img class="loading" src="/assets/od-quillme/success.png" width="16" height="16" style="position:absolute;rigt:50px;top:9px;" />')
@@ -168,7 +169,7 @@ jQuery(function($) {
 			success:function(retval){
 					if(retval['success']){
 						if(retval['new_user']){
-							if(email_partten.test(channel)){
+							if($.form.isEmail(channel)){
         						if(channel.indexOf('gmail.com') > -1){
         						  var mail_to = 'http://gmail.com';
         						}else if(channel.indexOf('@tencent.') > -1){
@@ -185,7 +186,12 @@ jQuery(function($) {
 							}
 
 						}else{
-							popup('#mobile_finish',null,null)	
+							if($.form.isEmail(channel)){
+								popup('#email_finish',null,null)
+							}else{
+								popup('#mobile_finish',null,null)	
+							}
+								
 						}
 					}else{
 						//订阅过程出错提示页
