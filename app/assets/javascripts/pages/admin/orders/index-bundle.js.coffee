@@ -102,7 +102,7 @@ $ ->
   $(".express").click ->
     $this = $(this)
     if $this.data("express")
-      _express = JSON.parse($this.data("express")) 
+      _express = $this.data("express")
       $("#company").val(_express.company)
       $("#tracking_number").val(_express.tracking_number)
       $("#sent_at").val(_express.sent_at)
@@ -111,17 +111,20 @@ $ ->
     $('#info_modal').modal('show')
 
   $("#send_info").click ->
+    $this = $(this)
     $('#info_modal').modal('hide');
     alert_msg.show('info', "正在处理,请稍后...")
-    _ep: 
+    $this._ep = {
       company: $("#company").val()
       tracking_number: $("#tracking_number").val()
-      sent_at: $("#sent_at").val()
+      sent_at: $("#sent_at").val()    
+    } 
+
     $.ajax
       url: "/admin/orders/#{$("#oid").val()}/update_express_info"
       method: 'PUT'
       data:
-        express_info:_ep
+        express_info: $this._ep
       success: (ret)->
         if ret.success
           alert_msg.show('success', "操作完成!")
