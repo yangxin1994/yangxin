@@ -235,7 +235,7 @@ class User
 	end
 
 	#生成订阅用户并发激活码或者邮件
-	def self.create_rss_user(email_mobile,callback=nil)
+	def self.create_rss_user(email_mobile, callback=nil)
 		user = find_by_email_mobile(email_mobile)
 
 		account = {}

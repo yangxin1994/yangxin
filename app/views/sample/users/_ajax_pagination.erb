@@ -1,9 +1,9 @@
 <% 
-    visi = 'visible'
-    visi = 'hidden' if @common_value['data'].to_a.length < @common_value['per_page'].to_i && (@common_value["current_page"].to_i == 1 || (@common_value["current_page"] != @common_value["total_page"] && @common_value["current_page"].to_i != 1) )
+    visi = 'inline-block'
+    visi = 'none' if @common_value['data'].to_a.length < @common_value['per_page'].to_i && (@common_value["current_page"].to_i == 1 || (@common_value["current_page"] != @common_value["total_page"] && @common_value["current_page"].to_i != 1) )
 %>
 
-<div class="pagination" style="visibility: <%= visi %>">
+<div class="pagination" style="display: <%= visi %>">
     <div>
         <% if @common_value['data'].to_a.length > 0 %>
             <a href="javascript: void(0);" <%= 'disabled' if @common_value["current_page"] == @common_value['previous_page'] %> class="<%= @common_value["current_page"] %>-prev"><</a>

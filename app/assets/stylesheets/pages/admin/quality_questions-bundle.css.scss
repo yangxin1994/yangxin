@@ -1,14 +1,6 @@
-.choices, .answer-choices{
+.answer-choices{
 	width: 100%;
 	margin: 10px 0;
-	.choice {
-		display: inline-block;
-		// margin-right: 20px;
-		margin: 6px 20px 6px 0px;
-		padding: 4px;
-		border: 1px solid gray;
-	}
-
 	.group{
 		background-color: #f3a266;
 		margin-top:2px;
@@ -25,9 +17,9 @@
 
 	.drag-choice {
 		display: inline-block;
-		color: white;
-		background-color: #2B2A2A;
 		cursor: pointer;
-		padding: 2px;
 	}
+}
+.display-none{
+	display: none;
 }

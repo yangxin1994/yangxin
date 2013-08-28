@@ -40,7 +40,7 @@
     <tbody>
       <% @answers['data'].each do |answer| %>
       <tr>
-        <td><%= answer["sample_name"] %></td>
+        <td><%= answer["user_email_mobile"] %></td>
         <td><%= answer_type_tag answer["status"] %></td>
         <td><%= answer["created_at"].strftime('%F %R') %></td>
         <td>

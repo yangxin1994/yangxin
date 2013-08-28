@@ -1225,6 +1225,15 @@ i {
 
                 > * {
                     display: inline-block;
+                    line-height: 1.5em;
+                }
+
+                .time {
+                    vertical-align: top;
+                }
+
+                .text {
+                    width: 444px;
                 }
             }
         }
@@ -1336,10 +1345,8 @@ i {
     color: $colorB;
     width: 710px;
     margin: 0 8px;
-    min-height: 220px;
     display: none;
     font-size: 12px;
-    margin-bottom: 30px;
 
     > * {
         margin: 10px 10px;
@@ -1380,6 +1387,8 @@ i {
 
 
     .spread-users {
+        min-height: 64px;
+
         > .tab {
             width: 227px;
             display: inline-block;
@@ -1410,9 +1419,10 @@ i {
 
     .pagination {
         /*height: 36px;*/
-        padding: 28px 0 0 0;
+        padding-bottom: 0px;
         margin-top: 0px;
         margin-top: 0px;
+        width: 100%;
     }
 
 }
