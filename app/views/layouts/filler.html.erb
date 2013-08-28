@@ -9,7 +9,8 @@
 	<script type="text/javascript">
 		window.survey_id = '<%= @survey["_id"] %>';
 		window.is_preview = <%= @is_preview.blank? ? 'false' : @is_preview %>;
-		window.spread_url = <%= raw @spread_url.to_json %>;
+		window.spread_url = <%= raw @spread_url.to_json %>;	//TODO: spread url is not used
+		window.current_user_id = '<%= raw current_user._id %>';
 	</script>
 
 	<%= yield :head %>
