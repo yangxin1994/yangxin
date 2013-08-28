@@ -434,20 +434,14 @@ class Sample::UsersController < Sample::SampleController
     current_user.email_to_be_changed = params[:email]
     current_user.change_email_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
     current_user.save
-    EmailWorker.perform_async("change_email", params[:email], "", :user_id => current_user._id.to_s)
+    EmailWorker.perform_async("change_email", params[:email], "#{request.protocol}#{request.host_with_port}", :user_id => current_user._id.to_s)
     render_json_s and return
-
-=begin
-    @retval = @uclient.change_email(params[:email], "")
-    render_json_auto @retval 
-=end
   end
 
   #收获地址
   # GET
   def address
     @receiver_info = current_user.affiliated.try(:receiver_info) || {}
-    # @receiver_info = @uclient.get_logistic_address
 
     respond_to do |format|
       format.html { }
