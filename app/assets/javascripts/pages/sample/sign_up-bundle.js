@@ -2,18 +2,16 @@
 //=require utility/ajax
 //=require base64
 $(function(){
-	var mobile_partten = $.mobile_partten();
-	var email_partten  = $.email_partten();
 
   //相应回车提交表单事件
-  $.enterSubmit($('.login_btn'))	
+  $.form.enterSubmit($('.login_btn'))	
 
 	
 	var refresh;
 	$('.account').blur(function(){
 		var account = $(this).val();
 		var notice_class = $(this).next().attr('class');
-		if(mobile_partten.test(account)){
+		if($.form.isMobile(account)){
 			var code_html = '<div class="identifying_code  wraper">验证码：<br />\
 							<input type="text" name="verify_code" class="verify_code"  placeholder="请输入验证码"  />\
 							<button class="send_code disabled" disabled="disabled">免费获取手机验证码</button>\
@@ -27,7 +25,7 @@ $(function(){
 		}else{
 			// remove the button  when the account is not a mobile 	
 			$('.identifying_code').remove();
-			if(email_partten.test(account)){
+			if($.form.isEmail(account)){
 				//SEND AJAX  REQUEST FOR CHECKING ACCOUNT IF EXIST
 				check_account_exist(account,notice_class)       	
 			}else{
@@ -70,7 +68,7 @@ $(function(){
 		var notice_class = acc_obj.next().attr('class');
 		
 
-		if(mobile_partten.test(account) || email_partten.test(account)){
+		if($.form.isMobile(account) || $.form.isEmail(account)){
 			if(acc_obj.next('span.success').length < 1){
 				check_account_exist(account,notice_class)  
 			}        
@@ -89,7 +87,7 @@ $(function(){
 		if($('span.faild').length < 1 && $('span.notice').length < 1){
 			var account = $('input.account').val();
 			var pass    = $('[name="password"]').val();
-			if(email_partten.test(account)){
+			if($.form.isEmail(account)){
 				// create a new sample with email
 				create_email_sample(account,pass)
 			}else{
@@ -178,7 +176,7 @@ $(function(){
 							$('input.account').removeClass('error')
 							$('input.account').next('span.success').remove();
 							$('input.account').after('<span class="success"></span>')
-							if(mobile_partten.test(account)){
+							if($.form.isMobile(account)){
 								// when the mobile is correct and not exist enabled the button
 								$('button.send_code').attr('disabled',false).removeClass('disabled')
 							}	
@@ -193,7 +191,7 @@ $(function(){
 
 	$(".send_code").live('click',function(){
 		var account = $('.account').val();    
-		if (account.length > 0 && mobile_partten.test(account)){
+		if (account.length > 0 && $.form.isMobile(account)){
 			send_active_code(account)
 		}else{
 			$('input.account').addClass('error')

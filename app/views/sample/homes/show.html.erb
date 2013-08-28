@@ -1,6 +1,5 @@
 <% content_for :head do %>
 	<%= stylesheet_link_tag "pages/sample/homes-bundle", :media => "all" %>
-	<%= javascript_include_tag "pages/sample/homes-bundle" %>
 	<script type="text/javascript">
 		<% if user_signed_in %>
 		 	window.current_user_id = "<%= current_user.id %>"
