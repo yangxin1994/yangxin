@@ -2,6 +2,7 @@
 //=require ../models/survey
 //=require ./fillers
 //=require ui/widgets/od_popup
+//=require ui/widgets/od_share
 //=require ui/plugins/od_button_text
 //=require ui/plugins/od_enter
 //=require jquery.scrollTo
@@ -46,7 +47,6 @@ $(function(){
 			// spread point
 			if(this.options.spread_point == undefined)
 				this.options.spread_point = 0;
-			console.log(this.options);
 		},
 
 		_uri: function(path) {
@@ -58,7 +58,13 @@ $(function(){
 		},
 
 		_spread: function() {
-			//TODO: spread
+			if(this.options.spread_point <= 0) return;
+			$.od.odShare({
+				point: this.options.spread_point,
+				survey_title: this.model.get('title'),
+				scheme_id: this.options.reward.id,
+				images: ""	//TODO: images for lottery
+			});
 		},
 
 		_render: function() {
@@ -99,7 +105,6 @@ $(function(){
 			// If success, setup page
 			$('#f_body').empty();
 			var value = data.value;
-			console.log(value);
 			value.answer_status == 1 ? $('#progress_con').show() : $('#progress_con').hide();	// hide progress bar 
 			if(value.answer_status == 1) {
 				// answer_status: 1（正在回答）
@@ -360,7 +365,7 @@ $(function(){
 						$('#my_order_btn').click(function() { location.href = '/users/orders'; });
 						var signin_btn = $('#signin_btn').click($.proxy(function() { 
 							$.util.disable(signin_btn.text('正在跳转...'));
-							$.postJSON(this._uri('/start_bind'), function(retval) { location.href = '/sign_in?ref=' + encodeURIComponent(location.href); });
+							$.postJSON(this._uri('/start_bind'), function(retval) { location.href = '/sign_in?ref=' + encodeURIComponent('/users/orders'); });
 						}, this));
 						$('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));
 					}
@@ -381,7 +386,7 @@ $(function(){
 					$('#my_rewards_btn').click(function() { location.href = '/users/points'; });
 					var signin_btn = $('#signin_btn').click($.proxy(function() { 
 						$.util.disable(signin_btn.text('正在跳转...'));
-						$.postJSON(this._uri('/start_bind'), function(retval) { location.href = '/sign_in?ref=' + encodeURIComponent(location.href); });
+						$.postJSON(this._uri('/start_bind'), function(retval) { location.href = '/sign_in?ref=' + encodeURIComponent('/users/points'); });
 					}, this));
 				} else if(this.options.reward.reward_scheme_type == 3) {
 					// lottery

@@ -19,7 +19,7 @@ $(document).ready(function(){
 			scheme_id:$(this).attr('scheme_id'),
 			images:$(this).parents('li').find('a.unfold-btn').attr('prize_src')
 		});
-	})
+	});
 
 
 

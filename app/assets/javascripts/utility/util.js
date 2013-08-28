@@ -167,12 +167,12 @@
 	$.extend($.util, {
 		disable: function(doms) {
 			$.each(arguments, function(i, v) {
-				v.attr('disabled', 'disabled');
+				$(v).attr('disabled', 'disabled');
 			});
 		},
 		enable: function(doms) {
 			$.each(arguments, function(i, v) {
-				v.attr('disabled', null);
+				$(v).attr('disabled', null);
 			});
 		}
 	});

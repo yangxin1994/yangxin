@@ -335,7 +335,7 @@ class Order
 		if self.type == 2
 			self.write_attribute(:address_str, 
 				QuillCommon::AddressUtility.find_province_city_town_by_code(self.address) + " " +
-				self.street_info + " " + self.postcode + " " + self.receiver)
+				self.street_info.to_s + " " + self.postcode.to_s + " " + self.receiver.to_s)
 		end
 		return self
 	end
