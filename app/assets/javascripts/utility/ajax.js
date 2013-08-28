@@ -16,8 +16,8 @@
 			}
 			// hack callback for requiring login
 			var success = function(retval) {
-				// Console method hould be commented in production
-				console.log('====');console.log(retval);
+				// Console method should be commented in production
+				// console.log('====');console.log(retval);
 				if(retval && !retval.success && retval.value && retval.value.error_code == 'error_7') {
 					location.href = '/signout?ref=' + encodeURIComponent('/sign_in?ref=' + location.href);
 				} else {
