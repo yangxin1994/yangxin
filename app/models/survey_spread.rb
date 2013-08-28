@@ -2,7 +2,9 @@
 require 'error_enum'
 class SurveySpread
 	include Mongoid::Document
-	field :times, :type => Integer, default: 1
+	include Mongoid::Timestamps
+	field :times, :type => Integer, default: 0
+	field :survey_creation_time, :type => Integer
 
 	belongs_to :user
 	belongs_to :survey
@@ -14,11 +16,21 @@ class SurveySpread
 	def self.inc(user, survey)
 		ss = SurveySpread.where(:user_id => user._id, :survey_id => survey._id)[0]
 		if ss.nil?
-			ss = SurveySpread.create
+			ss = SurveySpread.create(:times => 1)
 			user.survey_spreads << ss
 			survey.survey_spreads << ss
 		else
 			ss.times = ss.times + 1
+		end
+		ss.save
+	end
+
+	def self.create_new(user, survey)
+		ss = SurveySpread.where(:user_id => user._id, :survey_id => survey._id)[0]
+		if ss.nil?
+			ss = SurveySpread.create(survey_creation_time: survey.created_at.to_i)
+			user.survey_spreads << ss
+			survey.survey_spreads << ss
 		end
 		ss.save
 	end

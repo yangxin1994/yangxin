@@ -20,6 +20,7 @@ class Newsletter
   scope :delivered, where(:status => 1)
   scope :canceled, where(:status => -2)
 
+  scope :find_by_status, ->(_status) { _status.present? ? where(:status => _status) : self.all }
 
   def present_admin
     present_attrs :_id, :title, :subject, :status, :columns, :is_tested, :is_deleted
