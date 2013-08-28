@@ -25,6 +25,7 @@
       class="form-horizontal"
 >
   <input value="put" type='hidden' name="_method">
+  <input type='hidden' name="quality_control_type" value="<%=@question['quality_control_type']%>">
 
   <div class="bs-docs-example">
     <ul id="myTab" class="nav nav-tabs">
@@ -57,10 +58,10 @@
             <label>选项</label>
             <div class="controls">
 
-              <% object["issue"]["items"].each_with_index do |item, _i|%>
+              <% object["issue"]["items"].each do |item|%>
               <div class="input-prepend input-append choice" data-id="choice-<%= item["id"]%>">
                 <span class="add-on drag-choice">拖拽</span>
-                <input class="span7 choice-text" id="appendedPrependedInput" type="text" value="<%= item["content"]["text"]%>" name="questions[<%= object._id %>][items][<%= _i %>]">
+                <input class="span7 choice-text" id="appendedPrependedInput" type="text" value="<%= item["content"]["text"]%>" name="questions[<%= object._id %>][items][<%= item["id"]%>]">
                 <span class="add-on delete"><a href="#" class="btn-choice-delete"><i class="icon-remove"></i></a></span>
               </div>
               <p></p>
@@ -81,7 +82,14 @@
 
     <div id="<%= @quality_control_question_answer["_id"] %>" class="quality_control_question_answer">
       <div class="answer-choices" height="200px">
-        <div class="group group-1 ui-droppable"><div title="唯一组不能删除">拖拽</div></div>
+        <div class="group group-1 ui-droppable"><div title="唯一组不能删除">拖拽</div>
+        <% @quality_control_question_answer.answer_content["items"].each do |item| %>
+
+<div class="input-prepend input-append choice ui-draggable" data-id="choice-<%= item %>">
+                <span class="add-on drag-choice ui-draggable">拖拽: <%= @question.issue["items"].select{|a| a['id'] == item }[0]["content"]["text"] %></span>
+              </div>
+          <% end %>
+        </div>
       </div>
       <input type="hidden" name="answers" id="answers">
 

@@ -76,8 +76,12 @@ $ ->
     _p.remove()
 
   $("#btn_sub").click ->
-    $('#answers').val()
-
+    _answers = ""
+    $('.answer-choices .choice').each ->
+      $this = $(this)
+      window.$this = $this
+      _answers += ",#{$this.data('id').split('-')[1]}"
+    $('#answers').val(_answers)
 
   do ->
     $("#qtab-0").click()
