@@ -25,6 +25,7 @@ $(document).ready(function(){
 
 	jQuery(".slider").slide( { mainCell:".bd ul",effect:"leftLoop",autoPlay:true} );
 
+	$('input, textarea').placeholder();
   	// placeholder for IE 
   	//$.form.placeholder();
 
