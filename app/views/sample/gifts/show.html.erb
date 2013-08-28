@@ -3,8 +3,8 @@
 	<%= stylesheet_link_tag "pages/sample/gift-bundle", :media => "all" %>
 	<script type="text/javascript">
 		<% if user_signed_in %>
-	    	window.username    = "<%=  @current_user.nickname  if @receiver_info %>"
-	    	window.total_point = "<%=  @current_user.point if @receiver_info  %>"
+	    	window.username    = "<%=  current_user.nickname  if @receiver_info %>"
+	    	window.total_point = "<%=  current_user.point if @receiver_info  %>"
 	    	window.sample_receiver = "<%= @receiver_info['receiver']  if @receiver_info %>"
     	  	window.sample_mobile   = "<%= @receiver_info['mobile']  if @receiver_info %>"
     	  	window.sample_postcode = "<%= @receiver_info['postcode'] if @receiver_info  %>"

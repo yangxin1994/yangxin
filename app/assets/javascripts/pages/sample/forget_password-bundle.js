@@ -2,7 +2,7 @@
 $(function(){
 
   //相应回车提交表单事件
-  $.enterSubmit($('button.next'))
+  $.form.enterSubmit($('button.next'))
 
 
   var params = null; 
@@ -16,10 +16,10 @@ $(function(){
 
     if(uri.indexOf('?acc') <=0){     
       var acc  = Base64.decode(params);
-      if(mobile_partten.test(acc)){
+      if($.form.isMobile(acc)){
         window.forget_mobile = acc
         counter($('.send_code'));
-      }else if(email_partten.test(acc)){
+      }else if($.form.isEmail(acc)){
         if(acc.indexOf('gmail.com') > -1){
           var mail_to = 'http://gmail.com';
         }else if(acc.indexOf('@tencent.') > -1){
@@ -47,7 +47,7 @@ $(function(){
       window.forget_mobile = v
       if(v.length < 1){
         $('input[name="account"]').addClass('error')
-      }else if( !mobile_partten.test(v) && !email_partten.test(v) ){
+      }else if( !$.form.isMobile(v) && !$.form.isEmail(v) ){
         $('input[name="account"]').addClass('error')
       }else{
         send_activate_code($(this),v)
