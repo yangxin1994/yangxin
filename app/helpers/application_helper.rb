@@ -297,6 +297,8 @@ module ApplicationHelper
 				return "甄别拒绝"
 			when Answer::REJECT_BY_TIMEOUT
 				return "超时拒绝"
+			when Answer::REJECT_BY_IP_RESTRICT
+				return "IP拒绝"
 			else
 				return reject_type.to_s
 			end

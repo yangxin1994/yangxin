@@ -2,19 +2,19 @@
   <div class="tab">
     <img class="avatar" src="<%= small_avatar(answer['sample_id']) %>"/>
     <div class="cont">
-      <p class="username"><%= truncate(answer['sample_nickname'].to_s.strip, length: 9) %>
+      <p class="username" title="<%= answer['sample_nickname'] %>"><%= truncate(answer['sample_nickname'].to_s.strip, length: 9) %>
         <% 
           status_color = ''
           case answer['answer_status'].to_i
-          when 1
+          when Answer::EDIT
             status_color="c-yellow"
-          when 32
+          when Answer::FINISH
             status_color='c-green'
           else
             status_color='c-red'
           end 
         %>
-        <span class="<%= status_color %>">（<%= answered?(answer['answer_status']) %>）</span>
+        <span class="<%= status_color %>">(<%= sanitize answered?(answer['answer_status'],answer["answer_reject_type"]) %>)</span>
       </p>
       <p class="time">参与时间：<%= int_time_to_date(answer['created_at'].to_i) %></p>
     </div>

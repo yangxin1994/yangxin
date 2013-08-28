@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Admin::AgentTasksController < Admin::AdminController
   layout "layouts/admin-todc"
 
@@ -32,6 +34,7 @@ class Admin::AgentTasksController < Admin::AdminController
     if result.success
       redirect_to "/admin/agent_tasks"
     else
+      flash.alert = "代理创建失败, 请检查参数, 错误信息: #{result}"
       render :json => result
     end
   end
