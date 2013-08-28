@@ -23,6 +23,7 @@ class Admin::QualityQuestionsController < Admin::AdminController
     @quality_question = @question.show_quality_control_question
     @question_objects = @quality_question[0, @quality_question.length-1]
     @quality_control_question_answer = @quality_question[@quality_question.length-1]
+    binding.pry
   end
 
   def edit
@@ -38,10 +39,11 @@ class Admin::QualityQuestionsController < Admin::AdminController
       params[:question_type].to_i, 
       params[:question_number].to_i, 
       current_user)
+    binding.pry
     if quality_question[0].present?
-      redirect_to admin_quality_question_path(quality_question._id)
+      redirect_to admin_quality_question_path(quality_question[0]._id)
     else
-      redirect_to admin_quality_question_path(quality_question._id)
+      render :new
     end
   end
 

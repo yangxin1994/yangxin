@@ -6,10 +6,17 @@ $ ->
   #
   # ######################
 
-  $(document).on 'click', '.qnumber a', ->
+  # $(document).on 'click', '.qnumber a', ->
+  #   $this = $(this)
+  #   info = $this.attr('href').split('-')
+  #   $this.parent().parent().next().val(info[1])
+
+  $('.dropdown-menu a').click ->
     $this = $(this)
     info = $this.attr('href').split('-')
     $this.parent().parent().next().val(info[1])
+
+
 
   # ######################
   #
@@ -69,6 +76,31 @@ $ ->
       containment: "document",
       helper: "clone",
       cursor: "move"
+
+  $(".add-answers").click ->
+    $this = $(this)
+    choice_index = $(".group").length    
+    html = """
+      <div class="answer-choices">
+        <div class="group group-#{choice_index + 1} ui-droppable"><div>拖拽</div>
+        </div>
+      </div>
+    """ 
+
+    group = $(html).appendTo($('.quality_control_question_answer')).find('.group').droppable
+      accept: ".choices .choice"
+      activeClass: ""
+      drop: (event, ui) ->
+        $item = ui.draggable
+        if $(group).children("#" + $item.attr("id")).length is 0
+          $ic = $item.clone()
+          $ic.children('.drag-choice').html("拖拽: #{$item.children("input[type=text]").val()}")
+          $ic.children('span.delete').remove()
+          $ic.children('input').remove()
+          console.log $ic
+          $ic.appendTo group
+    false
+
 
   $(".controls").on 'click', '.btn-choice-delete', ->
     _p = $(this).parent().parent()

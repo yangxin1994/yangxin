@@ -88,12 +88,14 @@
 <div class="input-prepend input-append choice ui-draggable" data-id="choice-<%= item %>">
                 <span class="add-on drag-choice ui-draggable">拖拽: <%= @question.issue["items"].select{|a| a['id'] == item }[0]["content"]["text"] %></span>
               </div>
-          <% end %>
+          <% end if @quality_control_question_answer.answer_content.present? %>
         </div>
       </div>
+
       <input type="hidden" name="answers" id="answers">
 
     </div>
+      <a href="#" class="btn add-answers">增加答案组</a>
 
 
   <div class="pull-right">
@@ -102,10 +104,3 @@
 
   </div>
 </form>
-
-
-<div style="display:none" id="choice-item">
-  <span class="drag-choice">拖拽</span>
-  <input type="text" class="choice-text text-input f14" value="新选项"/>
-  <span class="add-on"><a href="#" class="btn-choice-delete"><i class="icon-remove"></i></a></span>
-</div>

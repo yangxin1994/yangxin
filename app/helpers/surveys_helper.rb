@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module SurveysHelper
 
   def logic_control_tag(question ,logic_controls)
@@ -12,6 +14,16 @@ module SurveysHelper
         end
       end
     end
+  end
+
+  def quality_question_tag(type)
+    case type.to_i
+    when 1
+      "客观题"
+    when 1
+      "匹配题"
+    end
+      
   end
 
 end
