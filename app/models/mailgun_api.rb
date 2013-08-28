@@ -3,7 +3,7 @@ class MailgunApi
 
 	@@test_email = "test@oopsdata.com"
 
-	@@survey_email_from = "\"问卷吧\" <postmaster@oopsdata.net>"
+	@@survey_email_from = "\"问卷吧\" <postmaster@wenjuanba.net>"
 	@@user_email_from = "\"问卷吧\" <postmaster@oopsdata.cn>"
 
 	def self.batch_send_survey_email(survey_id, user_id_ary)

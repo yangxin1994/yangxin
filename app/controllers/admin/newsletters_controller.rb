@@ -15,7 +15,6 @@ class Admin::NewslettersController < ApplicationController
 
   def edit
     @newsletter = Newsletter.find(params[:id]).present_admin
-    binding.pry
     @oops_column = @newsletter[:columns]['0']
     @pdct_column = @newsletter[:columns]['1']
     @columns = @newsletter[:columns].map do |order, column|
