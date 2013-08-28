@@ -21,6 +21,7 @@ jQuery(function($) {
 
         // spread users nubmer
         $.getJSON('/users/spread_counter/'+sid+'.json', function(data){
+            // console.log(data);
             $('#spread-detail tbody tr td:eq(4)').html(data.value.total_answer_number+'人（'+data.value.editting_answer_number+'人正在答题）');
             $('#spread-detail tbody tr td:eq(5)').html(data.value.finished_answer_number+'人');
         })

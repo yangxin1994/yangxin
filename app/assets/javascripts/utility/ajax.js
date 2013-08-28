@@ -16,11 +16,11 @@
 			}
 			// hack callback for requiring login
 			var success = function(retval) {console.log('====');console.log(retval);
-				// if(retval && !retval.success && retval.value && retval.value.error_code == 'error_7') {
-				// 	location.href = '/signout?ref=' + encodeURIComponent('/sign_in?ref=' + location.href);
-				// } else {
+				if(retval && !retval.success && retval.value && retval.value.error_code == 'error_7') {
+					location.href = '/signout?ref=' + encodeURIComponent('/sign_in?ref=' + location.href);
+				} else {
 					callback(retval);
-				// }
+				}
 			};
 			return $.ajax($.extend({
 				type: method,
