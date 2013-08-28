@@ -2,8 +2,10 @@
 $(function(){
 
   //相应回车提交表单事件
-  $.form.enterSubmit($('button.next'))
-
+  function submit_form(){
+    $('button.next').click();
+  }
+  $('div.acc input').odEnter({enter: submit_form});
 
   var params = null; 
   var uri = decodeURIComponent(window.location.href)
@@ -16,10 +18,10 @@ $(function(){
 
     if(uri.indexOf('?acc') <=0){     
       var acc  = Base64.decode(params);
-      if($.form.isMobile(acc)){
+      if($.regex.isMobile(acc)){
         window.forget_mobile = acc
         counter($('.send_code'));
-      }else if($.form.isEmail(acc)){
+      }else if($.regex.isEmail(acc)){
         if(acc.indexOf('gmail.com') > -1){
           var mail_to = 'http://gmail.com';
         }else if(acc.indexOf('@tencent.') > -1){
@@ -47,7 +49,7 @@ $(function(){
       window.forget_mobile = v
       if(v.length < 1){
         $('input[name="account"]').addClass('error')
-      }else if( !$.form.isMobile(v) && !$.form.isEmail(v) ){
+      }else if( !$.regex.isMobile(v) && !$.regex.isEmail(v) ){
         $('input[name="account"]').addClass('error')
       }else{
         send_activate_code($(this),v)

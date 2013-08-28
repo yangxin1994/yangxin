@@ -301,7 +301,6 @@ OopsData::Application.routes.draw do
       end
     end
 
-    get 'quality_questions' => "quality_questions#objective"
     resources :quality_questions do
       collection do
         get 'objective', 'matching'
@@ -466,9 +465,6 @@ OopsData::Application.routes.draw do
         delete :destroy_preview
         put :select_reward
         post :start_bind
-      end
-      collection do
-        get :check_ip_restrict
       end
     end
     resource :bind_sample, :only => [:show]

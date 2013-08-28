@@ -81,14 +81,12 @@ class Sample::SurveysController < Sample::SampleController
 	# Show survey result
 	def result
 		@survey = Survey.find_by_id(params[:id])
-		# @survey = @client.show(params[:id])
-		render_404 and return if !@survey.nil?
+		render_404 and return if @survey.nil?
 
 		# get survey questions
 		@survey_questions = { :pages => [] }
-		page_client = Quill::PageClient.new(session_info, @survey._id.to_s)
 		(@survey.pages || []).each_with_index do |page, i|
-			@survey_questions[:pages] << @survey.show_page(params[:id].to_i)
+			@survey_questions[:pages] << @survey.show_page(i)
 		end
 
 		@job_id = @survey.analysis(-1, params[:false])

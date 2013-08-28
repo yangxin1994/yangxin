@@ -54,8 +54,8 @@ class SmsApi # 短信接口
 	def self.send_sms(phone, message)
 		return if Rails.env != "production"
 		result = get('/sdkproxy/sendsms.action',
-				:query => {:cdkey    => SMS::CDKEY,
-									 :password => SMS::PASSWORD,
+				:query => {:cdkey    => SmsApi::CDKEY,
+									 :password => SmsApi::PASSWORD,
 									 :phone    => phone,
 									 :message  => message
 									})
@@ -64,8 +64,8 @@ class SmsApi # 短信接口
 	#查询短信剩余条数
 	def self.get_remainder
 		result = get('/sdkproxy/querybalance.action',
-			:query => {:cdkey    => SMS::CDKEY,
-			:password => SMS::PASSWORD  
+			:query => {:cdkey    => SmsApi::CDKEY,
+			:password => SmsApi::PASSWORD  
 			})
 		puts result.parsed_response
 		remainder = result.parsed_response['response']['message'].to_f * 10 
@@ -76,8 +76,8 @@ class SmsApi # 短信接口
 	#sendtime format : yyyymmddhhnnss
 	def self.send_time_sms(phone,message, sendtime)
 		get('/sdkproxy/sendtimesms.action',
-				:query => {:cdkey    => SMS::CDKEY,
-									 :password => SMS::PASSWORD,
+				:query => {:cdkey    => SmsApi::CDKEY,
+									 :password => SmsApi::PASSWORD,
 									 :phone    => phone,
 									 :message  => message + AUTOGRAPH,
 									 :sendtime => sendtime
