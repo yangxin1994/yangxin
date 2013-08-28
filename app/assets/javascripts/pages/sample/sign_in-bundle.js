@@ -25,7 +25,7 @@ $(function(){
   })
 
   //相应回车提交表单事件
-  $.enterSubmit($('.login_btn'))  
+  $.form.enterSubmit($('.login_btn'))  
 
 
   function login(obj,account,pass,thid_id,signed_in){

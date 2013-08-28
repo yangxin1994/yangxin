@@ -249,6 +249,9 @@ class Survey
       prize_info = {}
       prizes = prizes.each do |prize|
         prize_info['prize_id']  = prize.id
+        prize_info['title'] = prize.title
+        prize_info['price'] = prize.price
+        prize_info['description'] = prize.description
         prize_info['prize_src'] = prize.photo.present? ? prize.photo.picture_url : Prize::DEFAULT_IMG 
         info['prize_arr'] << prize_info
         prize_info = {}  
@@ -2136,5 +2139,15 @@ class Survey
   def remain_quota_number
     # todo: calculate remainning quota number
     return 100
+  end
+
+  def max_num_per_ip_reached?(ip_address)
+    return false if max_num_per_ip.blank? || max_num_per_ip == -1
+    return false if ip_address.blank?
+    num_per_ip = self.answers.not_preview.where(ip_address: ip_address).length
+    if num_per_ip >= self.max_num_per_ip
+      return true
+    end
+    return false
   end
 end

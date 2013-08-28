@@ -76,7 +76,7 @@ class Sample::AccountsController < Sample::SampleController
     @account = Base64.decode64(@account)
 
     user = nil
-    if @account.match(/\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/)  ## match email
+    if @account.match(User::EmailRexg)  ## match email
       user = User.find_by_email(@account.downcase)
     elsif @account.match(/^\d{11}$/)  ## match mobile
       user = User.find_by_mobile(@account)
@@ -100,17 +100,23 @@ class Sample::AccountsController < Sample::SampleController
   def email_activate
     activate_info = {}
     begin
-      activate_info_json = Encryption.decrypt_activate_key(params[:activate_key])
+      activate_info_json = Encryption.decrypt_activate_key(params[:key])
       activate_info = JSON.parse(activate_info_json)
     rescue
       @success = false and return
     end
-    retval = User.activate("email", activate_info, @remote_ip, params[:_client_type])
-    @success = false and return if retval.class == String && retval.start_with?("error_")
-    @success = true
-    refresh_session(retval['auth_key'])
-    user = User.find_by_auth_key(retval['auth_key'])
-    @email  = Base64.encode64(user.email).chomp()
+
+    retval = User.activate("email", activate_info, @remote_ip, params[:_client_type])  
+    if retval.class == String && retval.start_with?("error_")
+      @success = false
+    else
+      @success = true
+      refresh_session(retval['auth_key'])
+      user = User.find_by_auth_key(retval['auth_key'])
+      @email  = Base64.encode64(user.email).chomp()
+    end
+
+
   end
 
   def mobile_activate
@@ -151,8 +157,8 @@ class Sample::AccountsController < Sample::SampleController
   end
 
   def forget_password
-    mobilerexg = '^(13[0-9]|15[0|1|2|3|6|7|8|9]|18[8|9])\d{8}$'
-    emailrexg  = '\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z'
+    mobilerexg = User::MobileRexg
+    emailrexg  = User::EmailRexg
     @acc = Base64.decode64(params[:k]) if params[:k]
     @acc = Base64.decode64(params[:key])  if params[:key]
     @code = Base64.decode64(params[:c]) if params[:c]
