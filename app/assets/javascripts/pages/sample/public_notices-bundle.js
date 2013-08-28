@@ -1,4 +1,10 @@
 jQuery(function($) {
-	share_url = window.location.href
-    len = $('.inner-page .pub_list .pub_inner ul li:last').css("border-bottom",'none');
+	var share_url = window.location.href;
+	var title     = $('div.pub_title').text();
+	$.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace', 
+		'Kaixin001', 'Diandian', 'Gmail', 'Fetion'], function(index,v) {
+		$('a.' + v).click(function() {
+			$.social['shareTo' + v](share_url,title);
+		});
+	}); 
 });

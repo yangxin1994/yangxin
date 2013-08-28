@@ -1,7 +1,6 @@
 //=require base64
 //=require utility/ajax
 $(function(){
-	var email_partten = /^(\w)+(\.\w+)*@(\w)+((\.\w{2,3}){1,3})$/;
 
 	var uri = location.href;
 	var params = uri.substring(uri.indexOf('?')+3,uri.length);
@@ -17,7 +16,7 @@ $(function(){
 
 		$('button.binding_now').click(function(){
 			var email = $('#y_mail').val()
-			if (email.length < 1 || !email_partten.test(email)){
+			if (email.length < 1 || !$.form.isEmail(email)){
 				$('#y_mail').addClass('error')
 			}else{
 				$.putJSON('/users/setting/change_email',{email: email.trim()}, function(data){

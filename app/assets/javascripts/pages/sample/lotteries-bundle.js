@@ -2,14 +2,6 @@
 //=require ui/widgets/od_address_selector
 $(function(){
 
-	var postcode_reg    = $.postcode_reg();
-	var receiver_reg  = $.receiver_reg();
-	var default_receiver = $.default_receiver();	
-	var street_info_partten = $.street_info_partten();
-	var mobile_partten = $.mobile_partten();
-
-
-
 	$('div.dashed-top-tit li').click(function(){
 		$(this).addClass('current').siblings('li').removeClass('current')
 		if($(this).hasClass('fail_log')){
@@ -290,7 +282,7 @@ $(function(){
 				{
 					beforeShow: function(){
 						//placeholder_for_ie()
-						$.placeholder();
+						$.form.placeholder();
     	  		$(".fancybox-skin").css({"backgroundColor":"#fff"}); 
 	
     	  		if(redirect){
@@ -465,15 +457,15 @@ $(function(){
 		var street_info = $('textarea[name="street_info"]').val()
 
 		var go = false
-		if(!receiver_reg.test(receiver) || default_receiver.test(receiver)){
+		if(!$.form.isReceiver(receiver) || $.form.isDefaultReceiver(receiver)){
 			$('input[name="receiver"]').addClass('error')
-		}else if(!mobile_partten.test(mobile)){
+		}else if(!$.form.isMobile(mobile)){
 			$('input[name="mobile"]').addClass('error')
-		}else if(!postcode_reg.test(postcode)){
+		}else if(!$.form.isPostcode(postcode)){
 			$('input[name="postcode"]').addClass('error')
 		}else if(province < 0 || city < 0 || town < 0){
 			$('span.notice').show()	
-		}else if(street_info.length < 1 || street_info_partten.test(street_info)){
+		}else if(street_info.length < 1 || $.form.isStreet(street_info)){
 			$('textarea').addClass('error')
 		} else{
 			$('span.notice').hide()	
