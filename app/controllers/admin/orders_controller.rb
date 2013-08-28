@@ -29,6 +29,10 @@ class Admin::OrdersController < Admin::AdminController
     @orders = auto_paginate(order_list) do |orders|
       orders.map { |e| e.info_for_admin }
     end
+    respond_to do |format|
+      format.json { render_json_auto @orders }
+      format.html { }
+    end
   end
 
   def handle

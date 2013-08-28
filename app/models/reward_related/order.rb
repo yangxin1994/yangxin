@@ -114,7 +114,7 @@ class Order
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		prize = Prize.find_by_id(prize_id)
 		return ErrorEnum::PRIZE_NOT_EXIST if prize.nil?
-		order = Order.new(:source => WIN_IN_LOTTERY, :type => prize.type)
+		order = Order.new(:source => WIN_IN_LOTTERY, :type => prize.type, :amount => prize.amount)
 		order.sample = sample if sample.present?
 		order.survey = survey
 		order.prize = prize
@@ -330,6 +330,12 @@ class Order
 			self.write_attribute(:gift_name, self.gift.try(:title))
 		elsif self.source == WIN_IN_LOTTERY
 			self.write_attribute(:prize_name, self.prize.try(:title))
+		end
+		self.write_attribute(:user_email_mobile, self.sample.try(:email) || self.sample.try(:mobile))
+		if self.type == 2
+			self.write_attribute(:address_str, 
+				QuillCommon::AddressUtility.find_province_city_town_by_code(self.address) + " " +
+				self.street_info + " " + self.postcode + " " + self.receiver)
 		end
 		return self
 	end
