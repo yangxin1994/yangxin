@@ -18,6 +18,9 @@
 		$('#start_btn').text('继续答题（已完成' + Math.round(<%= @percentage * 100 %> ) + '%）');
 		<% else %>
 		var left_time = <%=@left_time %>;
+		if(window.survey_id == '51e35eb2eb0e5b0cba00007a') {
+			left_time = 10 * 60;
+		}
 		$('#start_btn').text('开始答题' + (left_time > 0 ? '（耗时' + $.util.printTimeFriendly(left_time) + '）' : ''));
 		<% end %>
 	});
@@ -114,7 +117,11 @@
 				<% if password_type >= 0 %>
 					<input id='password_ipt' type="password" placeholder="输入答题密码" autofocus />
 				<% end %>
-				<button id='start_btn'>开始答题</button>
+				<% if @forbidden_ip %>
+				<button disabled>您所在的IP地址答题次数超过限制</button>
+				<% else %>
+				<button id='start_btn' >开始答题</button>
+				<% end %>
 				<% if @survey['publish_result'] %>
 				<div class='view-result-text'>（完成答题后可查看问卷结果报告）</div>
 				<% end %>

@@ -25,7 +25,7 @@
   		}
   	},
 
-  	_share_socol:function(option){
+  	_share_social:function(option){
 			$.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace', 
 				'Kaixin001', 'Diandian', 'Gmail', 'Fetion'], function(index,v) {
 				$('a.' + v).click(function() {
@@ -170,7 +170,7 @@
 					},
 					afterShow:function(){
 						url_input.select();
-						$pop._share_socol(opt);
+						$pop._share_social(opt);
 						copy_button.zclip({
 							path:'/assets/ZeroClipboard.swf',
 							copy:href,

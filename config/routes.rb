@@ -466,9 +466,6 @@ OopsData::Application.routes.draw do
         put :select_reward
         post :start_bind
       end
-      collection do
-        get :check_ip_restrict
-      end
     end
     resource :bind_sample, :only => [:show]
   end

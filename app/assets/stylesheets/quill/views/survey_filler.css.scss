@@ -1,7 +1,9 @@
 //=require ./fillers/base
 //=require ui/widgets/od_popup
+//=require jquery.fancybox
 
 @import "common";
+@import "popup";
 @import "compass/css3";
 @import "compass/utilities/general/min";
 @import "compass/utilities/general/clearfix";

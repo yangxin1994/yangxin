@@ -9,7 +9,8 @@
 	<script type="text/javascript">
 		window.survey_id = '<%= @survey["_id"] %>';
 		window.is_preview = <%= @is_preview.blank? ? 'false' : @is_preview %>;
-		window.spread_url = <%= raw @spread_url.to_json %>;
+		window.spread_url = <%= raw @spread_url.to_json %>;	//TODO: spread url is not used
+		window.current_user_id = <%=  raw (current_user.nil? ? nil.to_json : current_user._id.to_s.to_json) %>;
 	</script>
 
 	<%= yield :head %>
@@ -35,9 +36,12 @@
 	<div id='sf_banner_sticky'>
 		<div class='sf_banner_top'>
 			<div class='inner'>
-				<a id='logo' href="http://oopsdata.com">
+				<% if @survey['_id'].to_s != '51e35eb2eb0e5b0cba00007a' %>
+				<!-- hack 51e35eb2eb0e5b0cba00007a -->
+				<a id='logo' href="/">
 					<img src="/assets/filler/default/logo.png" />
 				</a>
+				<% end %>
 				<% if @survey['style_setting']['has_progress_bar'] %>
 				<div id='progress_con'>
 					<div id='progress_info'></div>
