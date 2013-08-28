@@ -64,7 +64,7 @@
       <td><%= agent["email"] %></td>
       <td><%= agent["region"] %></td>
       <td>
-        <%= agent["status"] %>
+        <%= agent_status_tag agent["status"] %>
       </td>
       <td>
         <%= agent["open_agent_task_number"] %>
@@ -76,7 +76,7 @@
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a href="/admin/agents/<%= agent["_id"] %>" title="Delete" data-id="<%= agent["_id"] %>"><i class="icon-remove"></i>删除</a></li>
+            <li><a href="javascript:void(0);" title="Delete" data-id="<%= agent["_id"] %>" class="delete"><i class="icon-remove"></i>删除</a></li>
           </ul>
         </div>
       </td>

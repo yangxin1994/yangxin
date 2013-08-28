@@ -45,7 +45,7 @@ jQuery(function($) {
           // console.log('success....');
           _this.closest('tr').remove();
           if ($('table tbody tr').length == 0 ){
-            $('#delete-all').hide();
+            window.location.replace('/users/notifications');
           }
         }else {
           $.popupFancybox({cont: "操作失败，请刷新后重新操作"});

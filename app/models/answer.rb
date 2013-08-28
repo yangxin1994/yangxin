@@ -93,6 +93,7 @@ class Answer
   REJECT_BY_SCREEN = 8
   REJECT_BY_TIMEOUT = 16
   REJECT_BY_AGENT_REVIEW = 32
+  REJECT_BY_IP_RESTRICT = 64
 
   index({ survey_id: 1, status: 1, reject_type: 1 }, { background: true } )
   index({ survey_id: 1, is_preview: 1 }, { background: true } )
@@ -172,6 +173,7 @@ class Answer
       if introducer.present?
         answer.introducer_id = introducer_id
         answer.point_to_introducer = survey.spread_point
+        SurveySpread.create_new(introducer, survey) 
       end
     end
     # record the agent task information
@@ -703,6 +705,18 @@ class Answer
     return false
   end
 
+  def check_max_num_per_ip
+    return true if self.survey.max_num_per_ip.blank? || self.survey.max_num_per_ip == -1
+    return true if self.is_preview || self.ip_address.blank?
+    num_per_ip = self.survey.answers.not_preview.where(ip_address: self.ip_address).length
+    if num_per_ip >= self.survey.max_num_per_ip
+      self.set_reject
+      self.update_attributes(reject_type: REJECT_BY_IP_RESTRICT)
+      return false
+    end
+    return true
+  end
+
   def check_channel_ip_address_quota
     # 1. get the corresponding survey, quota, and quota stats
     quota = self.survey.quota
@@ -950,6 +964,7 @@ class Answer
   end
 
   def assign_introducer_reward
+    return unless self.status == FINISH
     # give the introducer points
     introducer = User.find_by_id(self.introducer_id)
     if !introducer.nil? && self.introducer_reward_assigned == false
@@ -1006,6 +1021,7 @@ class Answer
   end
 
   def deliver_reward
+    assign_introducer_reward
     # reward has been delivered
     return true if self.reward_delivered
     # find out the selected reward
@@ -1027,13 +1043,13 @@ class Answer
           reward["amount"],
           order_info)
         return true if self.status == UNDER_REVIEW
-        assign_introducer_reward
+        # assign_introducer_reward
         self.update_attributes({"reward_delivered" => true})
       elsif self.order.status == Order::FROZEN
         self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
         self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
         self.order.auto_handle
-        assign_introducer_reward if self.status == FINISH
+        # assign_introducer_reward if self.status == FINISH
         self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
       end
     when RewardScheme::ALIPAY
@@ -1047,13 +1063,13 @@ class Answer
           reward["amount"],
           order_info)
         return true if self.status == UNDER_REVIEW
-        assign_introducer_reward
+        # assign_introducer_reward
         self.update_attributes({"reward_delivered" => true})
       elsif self.order.status == Order::FROZEN
         self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
         self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
         self.order.auto_handle
-        assign_introducer_reward if self.status == FINISH
+        # assign_introducer_reward if self.status == FINISH
         self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
       end
     when RewardScheme::JIFENBAO
@@ -1067,13 +1083,13 @@ class Answer
           reward["amount"],
           order_info)
         return true if self.status == UNDER_REVIEW
-        assign_introducer_reward
+        # assign_introducer_reward
         self.update_attributes({"reward_delivered" => true})
       else
         self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
         self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
         self.order.auto_handle
-        assign_introducer_reward if self.status == FINISH
+        # assign_introducer_reward if self.status == FINISH
         self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
       end
     when RewardScheme::POINT
@@ -1089,10 +1105,10 @@ class Answer
         PointLog.create_answer_point_log(reward["amount"], self.survey_id.to_s, self.survey.title, sample._id)
         self.update_attributes({"reward_delivered" => true})
       end
-      assign_introducer_reward if self.status == FINISH
+      # assign_introducer_reward if self.status == FINISH
     when RewardScheme::LOTTERY
       return true if self.status == UNDER_REVIEW
-      assign_introducer_reward if self.status == FINISH
+      # assign_introducer_reward if self.status == FINISH
       if self.order && self.order.status == Order::FROZEN
         self.order.update_attributes( {"status" => Order::WAIT, "reviewed_at" => Time.now.to_i} ) if self.status == FINISH
         self.order.update_attributes( {"status" => Order::REJECT, "reviewed_at" => Time.now.to_i} ) if self.status == REJECT
@@ -1236,8 +1252,9 @@ class Answer
     answer_obj["answer_status"] = self.status
     answer_obj["answer_reject_type"] = self.reject_type
     answer_obj["created_at"] = self.created_at.to_i
-    if !self.user.nil?
-      answer_obj["sample_nickname"] = self.user.nickname
+    answer_obj["sample_nickname"] = self.user.try(:nickname) || "游客"
+    if self.user.present?
+      # answer_obj["sample_nickname"] = self.user.nickname
       answer_obj["sample_avatar"] = self.user.avatar.try(:picture_url)
       answer_obj["sample_id"] = self.user._id.to_s
     end

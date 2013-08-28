@@ -12,6 +12,10 @@ jQuery(function($) {
 
         var oid = $(this).attr('name');
         // console.log('loading oid: '+oid);
+
+        // Is login?
+        $.getJSON('/users/order_detail/'+oid+'.json', function(data){})
+
         var _this = $(this);
 
         $.ajax({

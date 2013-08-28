@@ -14,6 +14,7 @@ $ ->
           $("#ck_hot").prop("checked", ret.value.hot)
           $("#point").val(ret.value.spread)
           $("#ck_visible").prop("checked", true) if ret.value.visible
+          $("#max_num_per_ip").val(ret.value.max_num_per_ip)
           $('#info_modal').modal('show')
         else
           console.log ret
@@ -31,6 +32,7 @@ $ ->
         hot: $("#ck_hot").prop("checked")
         spread: $("#point").val()
         visible: $("#ck_visible").prop("checked")
+        max_num_per_ip: $("#max_num_per_ip").val()
       success: (ret)->
         if ret.success
           alert_msg.show('success', "操作完成!")

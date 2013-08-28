@@ -15,12 +15,14 @@
 				data = undefined;
 			}
 			// hack callback for requiring login
-			var success = function(retval) {console.log('====');console.log(retval);
-				// if(retval && !retval.success && retval.value && retval.value.error_code == 'error_7') {
-				// 	location.href = '/signout?ref=' + encodeURIComponent('/sign_in?ref=' + location.href);
-				// } else {
+			var success = function(retval) {
+				// Console method hould be commented in production
+				console.log('====');console.log(retval);
+				if(retval && !retval.success && retval.value && retval.value.error_code == 'error_7') {
+					location.href = '/signout?ref=' + encodeURIComponent('/sign_in?ref=' + location.href);
+				} else {
 					callback(retval);
-				// }
+				}
 			};
 			return $.ajax($.extend({
 				type: method,
