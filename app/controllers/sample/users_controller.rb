@@ -114,7 +114,7 @@ class Sample::UsersController < Sample::SampleController
     @survey = Survey.find_by_id(params[:id])
     render_404 and return if @survey.nil?
     @answers = @survey.answers.not_preview.where(:introducer_id => current_user._id.to_s).desc(:status)
-    params[:per_page] = 9
+    params[:per_page] = 3
     @answers = auto_paginate @answers do |paginate_answers|
       paginate_answers.map { |e| e.info_for_spread_details }
     end
