@@ -56,9 +56,9 @@ class QualityControlQuestion < BasicQuestion
 
 	def update_question(question_obj, operator)
 		return ErrorEnum::UNAUTHORIZED if !operator.is_admin?
-		self.content = question_obj[:content]
-		self.note = question_obj[:note]
-		issue = Issue.create_issue(self.question_type, question_obj[:issue])
+		self.content = question_obj['content']
+		self.note = question_obj['note']
+		issue = Issue.create_issue(self.question_type, question_obj['issue'])
 		return ErrorEnum::WRONG_DATA_TYPE if issue == ErrorEnum::WRONG_DATA_TYPE
 		self.issue = issue.serialize
 		self.save

@@ -22,7 +22,7 @@ class Admin::QualityQuestionsController < Admin::AdminController
     @question = QualityControlQuestion.find(params[:id])
     @quality_question = @question.show_quality_control_question
     @question_objects = @quality_question[0, @quality_question.length-1]
-    @quality_control_question_answer = @quality_question[@quality_question.length-1]      
+    @quality_control_question_answer = @quality_question[@quality_question.length-1]
   end
 
   def edit
@@ -39,9 +39,9 @@ class Admin::QualityQuestionsController < Admin::AdminController
       params[:question_number].to_i, 
       current_user)
     if quality_question[0].present?
-      # redirect_to :edit
+      redirect_to admin_quality_question_path(quality_question._id)
     else
-      render :show
+      redirect_to admin_quality_question_path(quality_question._id)
     end
   end
 
@@ -49,21 +49,41 @@ class Admin::QualityQuestionsController < Admin::AdminController
     params[:questions].each do |qid, options|
       question = QualityControlQuestion.find(qid)
       _question = {
-        content: {text: options[:content], audio: "", image: "", video: ""}, 
-        note: "",
-        issue: {
-          max_choice: options[:max_choice].to_i,
-          min_choice: options[:min_choice].to_i,
-          items: [],
-          option_type: (options[:min_choice].to_i == 1 && options[:max_choice].to_i == 1) ? 0 : 6
+        'content' => {'text' => options['content'], 'audio' => "", 'image' => "", 'video' => ""}, 
+        'note'=>  "",
+        'issue' => {
+          'max_choice' => options['max_choice'].to_i,
+          'min_choice' => options['min_choice'].to_i,
+          'items' => [],
+          'option_type' => (options['min_choice'].to_i == 1 && options['max_choice'].to_i == 1) ? 0 : 6
         }
       }
-      options[:items].each do |k, v|
-        _question[:issue][:items] << v
-      end if options[:items].present?    
+      options['items'].each do |k, v|
+        _question['issue']['items'] << {
+          'content' => {
+            'text' => v,
+            'video' => "",
+            'image' => "",
+            'audio' => ""
+          }, 
+          'id' => k
+        }
+        _question['issue']['rows'] = _question['issue']['items']
+      end if options['items'].present?
       question.update_question(_question, current_user)
+      if params[:quality_control_type].to_i == 1
+        answer_content ={
+          :fuzzy => true,
+          :items => params[:answers].split(',').select{|a| a.present?}
+      }
+      else 
+        answer_content = {
+          :matching_items => [params[:answers].split(',').select{|a| a.present?}]
+        }
+      end
+      QualityControlQuestionAnswer.update_answer(qid, params[:quality_control_type].to_i, answer_content)     
     end
-
+    redirect_to admin_quality_question_path(params[:id])
   end
 
   def update_answer
