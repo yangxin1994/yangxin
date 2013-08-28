@@ -1,7 +1,7 @@
 //=require base64
 //=require utility/ajax
 $(function(){
-	//var email_partten = /^(\w)+(\.\w+)*@(\w)+((\.\w{2,3}){1,3})$/;
+	var email_partten = /^(\w)+(\.\w+)*@(\w)+((\.\w{2,3}){1,3})$/;
 
 	var uri = location.href;
 	var params = uri.substring(uri.indexOf('?')+3,uri.length);
