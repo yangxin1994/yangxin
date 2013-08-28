@@ -457,15 +457,15 @@ $(function(){
 		var street_info = $('textarea[name="street_info"]').val()
 
 		var go = false
-		if(!$.form.isReceiver(receiver) || $.form.isDefaultReceiver(receiver)){
+		if(!$.regex.isReceiver(receiver) || $.regex.isDefaultReceiver(receiver)){
 			$('input[name="receiver"]').addClass('error')
-		}else if(!$.form.isMobile(mobile)){
+		}else if(!$.regex.isMobile(mobile)){
 			$('input[name="mobile"]').addClass('error')
-		}else if(!$.form.isPostcode(postcode)){
+		}else if(!$.regex.isPostcode(postcode)){
 			$('input[name="postcode"]').addClass('error')
 		}else if(province < 0 || city < 0 || town < 0){
 			$('span.notice').show()	
-		}else if(street_info.length < 1 || $.form.isStreet(street_info)){
+		}else if(street_info.length < 1 || $.regex.isStreet(street_info)){
 			$('textarea').addClass('error')
 		} else{
 			$('span.notice').hide()	

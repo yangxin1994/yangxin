@@ -15,14 +15,45 @@
 			return /^((\d{11})|(\d{3}-\d{8})|(\d{4}-\d{7})|(\d{3}-\d{4}-\d{4}))$/.test(phone);
 		},
 		isMobile: function(mobile) {
-			return /^0?(13\d|15[012356789]|18[02356789]|14[57])-?\d{3}-?\d{1}-?\d{4}$/.test(mobile);
+			return (/^(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$/.test(mobile));
 		},
+
+		isYidongNumber:function(number){
+			return (/^1(3[4-9]|4[7]|5[012789]|8[2378])\d{8}$/.test(number));
+		},
+
+		isDianxinNumber:function(number){
+			return (/^1([35]3|8[09])\d{8}$/.test(number));
+		},
+
+		isLianTongNumber:function(number){
+			return (/^1(3[0-2]|4[5]|5[56]|8[0156])\d{8}$/.test(number));
+		},
+
 		isIDCard:function(idcard){
 			return /^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}(\d|(x|X))$/.test(idcard);
 		},
 		isPostcode: function(postcode) {
 			return /\d{6}/.test(postcode);
 		},
+
+		isQq:function(qq){
+			return (/^\d{5,}$/.test(qq));
+		},
+
+		isReceiver:function(receiver){
+			return (/[a-zA-z0-9\u4E00-\u9FA5]/.test(receiver));
+		},
+
+		isDefaultReceiver:function(receiver){
+			return (/姓名/.test(receiver));
+		},
+
+		isStreet:function(street){
+			return (/街道地址/.test(street));
+		},
+
+
 		isUrl: function(url) {
 			if(!url) return false;
 			var prefix = url.split('?')[0].split('#')[0];

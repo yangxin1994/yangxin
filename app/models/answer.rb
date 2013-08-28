@@ -908,7 +908,7 @@ class Answer
   end
 
   # the answer auditor reviews this answer, the review result can be 1 (pass review) or 2 (not pass)
-  def review(review_result, answer_auditor, message_content)
+  def review(review_result, answer_auditor, message)
     return ErrorEnum::WRONG_ANSWER_STATUS if self.status != UNDER_REVIEW
 
     old_status = self.status
@@ -917,14 +917,17 @@ class Answer
     # execute the review operation
     if review_result
       self.set_finish
+      message_title = "恭喜,您参与的问卷通过审核!"
       message_content = "你的此问卷[#{self.survey.title}]的答案通过审核." if message_content.blank?
     else
       self.set_reject
       self.reject_type = REJECT_BY_REVIEW
-      message_content = "你的此问卷[#{self.survey.title}]的答案未通过审核." if message_content.blank?
+      message_title = "对不起,您参与的问卷未通过审核!"
+      message_content = "您参与的问卷[#{self.survey.title}]没有通过管理员审核"
+      message_content += ", 拒绝原因: #{message}" if message.present?
       PunishLog.create_punish_log(user.id) if user.present?
     end
-    answer_auditor.create_message("审核问卷答案消息", message_content, [user._id.to_s]) if user.present?
+    answer_auditor.create_message(message_title, message_content, [user._id.to_s]) if user.present?
     self.audit_message = message_content
     self.auditor = answer_auditor
     self.audit_at = Time.now.to_i

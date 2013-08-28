@@ -166,5 +166,8 @@ class Filler::FillerController < ApplicationController
 
 		# 11. ensure spread url
 		ensure_spread(@survey, reward_scheme_id)
+
+		# 12. check ip restrict
+		@forbidden_ip = !is_preview && !answer.present? && @survey.max_num_per_ip_reached?(request.remote_ip)
 	end
 end
