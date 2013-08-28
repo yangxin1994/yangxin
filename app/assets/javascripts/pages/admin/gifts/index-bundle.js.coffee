@@ -43,12 +43,12 @@ $ ->
       console.log e
       $.ajax
         type: 'DELETE'
-        url: "/admin/gifts/#{$(this).attr('href')}"
+        url: "/admin/gifts/#{$this.attr('href')}"
         success: (ret)->
           if ret.success
             $this.closest('tr').fadeOut()
             alert_msg.show('success', "礼品已经删除!")
           else
             alert_msg.show('error', "删除失败 (╯‵□′)╯︵┻━┻")
-          error: ->
-            alert_msg.show('error', "删除失败 (╯‵□′)╯︵┻━┻")
+        error: ->
+          alert_msg.show('error', "删除失败 (╯‵□′)╯︵┻━┻")

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Admin::AgentsController < Admin::AdminController
 
   layout "layouts/admin-todc"
@@ -18,8 +20,9 @@ class Admin::AgentsController < Admin::AdminController
   def create
     @agent = Agent.create(params[:agent])
     if @agent.created_at
-      redirect_to admin_agents_path
+      redirect_to admin_agents_path, :flash => {:success => "代理创建成功!"}
     else
+      flash.alert = "代理创建失败, 请检查参数, 错误信息: #{result}"
       render :new
     end
   end
@@ -31,14 +34,15 @@ class Admin::AgentsController < Admin::AdminController
   def update
     @agent = Agent.find(params[:id])
     if @agent.update_agent(params[:agent])
-      redirect_to admin_agents_path
+      redirect_to admin_agents_path, :flash => {:success => "代理创建成功!"}
     else
+      flash.alert = "代理更新失败, 请检查参数, 错误信息: #{result}"
       render :json => result
     end
   end
 
   def destroy
-    render_json @agent = Gift.where(:_id =>params[:id]).first do |agent|
+    render_json @agent = Agent.where(:_id =>params[:id]).first do |agent|
       success_true agent.delete_agent
     end    
     
