@@ -21,9 +21,10 @@ jQuery(function($) {
 
         // spread users nubmer
         $.getJSON('/users/spread_counter/'+sid+'.json', function(data){
-            // console.log(data);
-            $('#spread-detail tbody tr td:eq(4)').html(data.value.total_answer_number+'人（'+data.value.editting_answer_number+'人正在答题）');
-            $('#spread-detail tbody tr td:eq(5)').html(data.value.finished_answer_number+'人');
+            if (data.success){
+                $('#spread-detail tbody tr td:eq(4)').html(data.value.total_answer_number+'人（'+data.value.editting_answer_number+'人正在答题）');
+                $('#spread-detail tbody tr td:eq(5)').html(data.value.finished_answer_number+'人');
+            }
         })
 
         // init survey info
@@ -55,6 +56,15 @@ jQuery(function($) {
         // loading gif
         $('#spread-detail .spread-users').empty().append('<div style="position: relative; top: 10px; left: 320px; width: 40px; display: inline-block;">'+
                                                     '<img class="loading" src="/assets/od-icon/loading.gif"/></div>')
+
+        // spread users nubmer which is useful to check signined or not.
+        $.getJSON('/users/spread_counter/'+sid+'.json', function(data){
+            if (data.success){
+                $('#spread-detail tbody tr td:eq(4)').html(data.value.total_answer_number+'人（'+data.value.editting_answer_number+'人正在答题）');
+                $('#spread-detail tbody tr td:eq(5)').html(data.value.finished_answer_number+'人');
+            }
+        })
+
         // want to page
         var pager = parseInt($(this).text());
         if ( pager.toString() == "NaN" ){

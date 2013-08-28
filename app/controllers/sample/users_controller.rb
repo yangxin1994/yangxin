@@ -209,7 +209,7 @@ class Sample::UsersController < Sample::SampleController
       format.html {
         render :layout => false if request.headers["OJAX"]
       }
-      format.json { render_json_auto @orders and return }
+      format.json { render_json_auto @order, :only => [:success] and return }
     end
   end
 
