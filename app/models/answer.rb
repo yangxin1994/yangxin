@@ -30,6 +30,7 @@ class Answer
   #channel: 1（调研社区）2（邮件订阅），4（短信订阅），8（浏览器插件推送），16（微博发布），32（Folwy发布），64（线上代理发布)
   field :channel, :type => Integer
   field :ip_address, :type => String, default: ""
+  field :http_user_agent, :type => String, default: ""
   field :is_scanned, :type => Boolean, default: false
   field :is_preview, :type => Boolean, default: false
   field :finished_at, :type => Integer
@@ -156,7 +157,7 @@ class Answer
     LotteryLog.get_lottery_counts(self.survey.id) 
   end
 
-  def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, agent_task_id, channel, referrer, remote_ip, username, password)
+  def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, agent_task_id, channel, referrer, remote_ip, username, password, http_user_agent)
     survey = Survey.normal.find_by_id(survey_id)
     # create the answer
     answer = Answer.new(is_preview: is_preview,
@@ -165,7 +166,8 @@ class Answer
       region: QuillCommon::AddressUtility.find_address_code_by_ip(remote_ip),
       username: username,
       password: password,
-      referrer: referrer)
+      referrer: referrer,
+      http_user_agent: http_user_agent)
     answer.save
     # record introducer information
     if !is_preview && introducer_id.present?
@@ -703,18 +705,6 @@ class Answer
     self.set_reject
     self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
     return false
-  end
-
-  def check_max_num_per_ip
-    return true if self.survey.max_num_per_ip.blank? || self.survey.max_num_per_ip == -1
-    return true if self.is_preview || self.ip_address.blank?
-    num_per_ip = self.survey.answers.not_preview.where(ip_address: self.ip_address).length
-    if num_per_ip >= self.survey.max_num_per_ip
-      self.set_reject
-      self.update_attributes(reject_type: REJECT_BY_IP_RESTRICT)
-      return false
-    end
-    return true
   end
 
   def check_channel_ip_address_quota

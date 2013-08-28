@@ -2137,4 +2137,14 @@ class Survey
     # todo: calculate remainning quota number
     return 100
   end
+
+  def max_num_per_ip_reached?(ip_address)
+    return false if max_num_per_ip.blank? || max_num_per_ip == -1
+    return false if ip_address.blank?
+    num_per_ip = self.answers.not_preview.where(ip_address: ip_address).length
+    if num_per_ip >= self.max_num_per_ip
+      return true
+    end
+    return false
+  end
 end
