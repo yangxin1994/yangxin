@@ -68,27 +68,22 @@ class ApplicationController < ActionController::Base
     @is_success = is_success.present?
     render :json => {
                 :value => block_given? ? yield(is_success) : is_success ,
-                :success => @is_success
+                :success => !!@is_success
               }
-  end
-  def return_json(is_success, value, options = {})
-    options[:only] = options[:only].to_a + [:success, :value] if options[:only]
-    render :json => {
-        :success => is_success,
-        :value => value
-      },
-      :except => options[:except], 
-      :only => options[:only]
   end
   def render_json_e(error_code)
     error_code_obj = {
       :error_code => error_code,
       :error_message => ""
     }
-    return_json(false, error_code_obj)
+    render_json false do 
+      error_code_obj
+    end
   end
   def render_json_s(value = true, options={})
-    return_json(true, value, options)
+    render_json true do 
+      value
+    end
   end
   def render_json_auto(value = true, options={})
     is_success = !((value.class == String && value.start_with?('error_')) || value.to_s.to_i < 0)

@@ -1,0 +1,75 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/quality_questions/index-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+  <li class="active">
+    <a href="">
+    <i class="icon-chevron-right"></i>
+    调研列表
+    </a>
+  </li>
+<% end %>
+
+<div>
+  <span>
+    <form class="form-search" style="display:inline">
+    <div class="input-append">
+      <input class="span6 search-query" name="keyword" id="" type="text" placeholder="标题或创建人邮箱">
+      <button class="btn">搜索</button>
+    </div>
+    </form>
+  </span>
+  <span class="pull-right">
+    <%= paginator_mini @quality_questions %>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu pull-right">
+        <li><a href="?">全部</a></li>
+        <li class="divider"></li>
+        <li><a href="?type=1">客观题</a></li>
+        <li><a href="?type=2">匹配题</a></li>
+      </ul>
+    </div>
+  </span>
+</div>
+
+<div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th width="50%">标题</th>
+        <th >问题类型</th>
+        <th >创建时间</th>
+        <th >操作</th>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr>
+
+      </tr>
+    </tfoot>
+    <tbody>
+      <% @quality_questions['data'].each do |quality_question| %>
+      <tr>
+        <td><a href="/admin/quality_questions/<%= quality_question['_id']%>"><%= quality_question["content"]["text"] %></a></td>
+        <td><%= quality_question["quality_control_type"].to_i %></td>
+        <td><%= Time.at(quality_question["created_at"]).strftime('%F %R') %></td>
+        <td data-sid="<%= quality_question["_id"] %>">
+        <div class="btn-group">
+          <a class="btn handle" href="/admin/quality_questions/<%= quality_question["_id"] %>" target="_blank"><i class="icon-list-alt"></i>编辑</a>
+          <button class="btn dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a href="/admin/quality_questions/<%= quality_question["_id"] %>/reward_schemes" ><i class="icon-wrench"></i>删除</a></li>
+          </ul>
+        </div>
+        </td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+</div>

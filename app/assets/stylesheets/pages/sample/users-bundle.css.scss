@@ -1225,6 +1225,15 @@ i {
 
                 > * {
                     display: inline-block;
+                    line-height: 1.5em;
+                }
+
+                .time {
+                    vertical-align: top;
+                }
+
+                .text {
+                    width: 444px;
                 }
             }
         }

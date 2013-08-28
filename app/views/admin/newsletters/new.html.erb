@@ -1,0 +1,15 @@
+<!-- content for head -->
+<% content_for :head do %>
+
+<% end %>
+
+<% content_for :button do %>
+  <button class="save-btn od-button" id="newsletter-create-btn">创建</button>
+  <button class="od-button" id="newsletter-test-btn" style="display:none">测试</button>
+  <button class="od-button" id="newsletter-deliver-btn" style="display:none">发送</button>
+  <button class="od-button" id="newsletter-delete-btn" style="display:none">删除</button>
+<% end %>
+
+
+
+<%= render :partial => 'content' %>
