@@ -1,3 +1,4 @@
+@import "od-quillme/icons/*.png";
 .share_cont{
   width:488px;
   height:220px;
@@ -282,3 +283,23 @@ textarea.error {
   @include box-shadow(0 0 2px 1px rgba(236, 23, 23, 0.5));
   border-color: #ec1717;
 }
+
+.popup-close{@include icons-sprite(popup-close);}
+
+.icon16{
+	width:16px;
+	height:16px;
+	@include inline-block;
+	margin:-2px 2px 0 0;
+}
+
+
+.icon16.open{@include icons-sprite(open);}
+.icon16.close{@include icons-sprite(close);}
+.icon16.f-qq{@include icons-sprite(f_qq);}
+.icon16.f-sina{@include icons-sprite(f_sina);}
+
+
+.icon16.hourglass{background: image-url('od-quillme/icons/hourglass.png') no-repeat left top;}
+.icon16.clock{background: image-url('od-quillme/icons/clock.png') no-repeat left top;}
+.icon16.research-people{background: image-url('od-quillme/icons/people.png') no-repeat left top;}

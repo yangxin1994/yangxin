@@ -635,6 +635,7 @@ body{background: image-url('od-quillme/bg.png');}
 					@include border-radius(3px);
 					&:hover{
 						background: #f1f1f1;
+						cursor: pointer;
 					}
 					b{
 						margin-left:3px;

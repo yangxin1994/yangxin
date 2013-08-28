@@ -1,6 +1,3 @@
-//=require jquery.placeholder
-//=require utility/ajax
-
 $(function(){
 
   $('.form  input').focus(function(){
@@ -24,9 +21,11 @@ $(function(){
     
   })
 
-  //相应回车提交表单事件
-  $.form.enterSubmit($('.login_btn'))  
-
+  //相应回车提交表单事件 
+  function submit_form(){
+    $('.login_btn').click();
+  }
+  $('input[name="password"]').odEnter({enter: submit_form});
 
   function login(obj,account,pass,thid_id,signed_in){
       $('.login_btn').html('登录中')

@@ -8,7 +8,7 @@ class User
 	include Mongoid::Timestamps
 	include Mongoid::ValidationsExt
   	EmailRexg  = '\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z'
-  	MobileRexg = '^(13[0-9]|15[0|1|2|3|6|7|8|9]|18[8|9])\d{8}$' 
+  	MobileRexg = '^(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$' 
 
   	DEFAULT_IMG = '/assets/avatar/small_default.png'
 

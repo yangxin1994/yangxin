@@ -6,6 +6,7 @@ $(function(){
 	var share_gift_point = null; //分享时用的积分
   var share_gift_title = null; //分享时的礼品名称
 
+
 	$('.share_gift a').on('click',function(e){
 		e.preventDefault;
 		share_gift_point = (share_gift_point ? (share_gift_point) : window.point_value);
@@ -30,7 +31,10 @@ $(function(){
 	}
 
   //相应回车提交表单事件
-  $.form.enterSubmit($('button.login_btn'))  
+  function submit_form(){
+  	$('button.login_btn').click();
+  }
+  $('input[name="password"]').odEnter({enter: submit_form});
 
 
 	//礼品排行切换
@@ -358,20 +362,20 @@ $(function(){
 		var go_on   = false
 		switch (order_type){
 			case 'ali_num':
-				if(($.form.isMobile(acc) || $.form.isEmail(acc)) && (number >= 10 && num_reg.test(number))){
+				if(($.regex.isMobile(acc) || $.regex.isEmail(acc)) && (number >= 10 && num_reg.test(number))){
 					go_on = true
 				}else{
-					if(!$.form.isMobile(acc) && !$.form.isEmail(acc)){
+					if(!$.regex.isMobile(acc) && !$.regex.isEmail(acc)){
 						account.parent('div').addClass('error')
 						$('.acc_notice').addClass('err').text('请输入手机或邮箱').show();
 					}
 				}			
 				break;
 			case 'qq_num':
-				if($.form.isQq(acc) && num_reg.test(number)){
+				if($.regex.isQq(acc) && num_reg.test(number)){
 					go_on = true
 				}else{
-					if(!$.form.isQq(acc)){
+					if(!$.regex.isQq(acc)){
 						account.parent('div').addClass('error')
 						$('.acc_notice').addClass('err').text('请输入正确信息').show();
 					}else{
@@ -402,11 +406,11 @@ $(function(){
 	function check_mobile_number(obj,event_type){
 		var number = obj.val();
 		var number_ok = true
-		if($.form.isYidongNumber(number)){
+		if($.regex.isYidongNumber(number)){
 			$('.acc_notice').text('中国移动').show();
-		}else if($.form.isDianxinNumber(number)){
+		}else if($.regex.isDianxinNumber(number)){
 			$('.acc_notice').text('中国电信').show();
-		}else if($.form.isLianTongNumber(number)){
+		}else if($.regex.isLianTongNumber(number)){
 			$('.acc_notice').text('中国联通').show();
 		}else{
 			if(event_type == 'click'){
@@ -427,7 +431,7 @@ $(function(){
 			],
 			{
 				beforeShow: function(){
-					$.form.placeholder();
+					//$.form.placeholder();
 					$(".fancybox-skin").css({"backgroundColor":"#fff"}); 
 
 					if(redirect){
@@ -702,15 +706,15 @@ $(function(){
 		var street_info = $('textarea[name="street_info"]').val()
 
 		var go = false
-		if(!$.form.isReceiver(receiver) || $.form.isDefaultReceiver(receiver)){
+		if(!$.regex.isReceiver(receiver) || $.regex.isDefaultReceiver(receiver)){
 			$('input[name="receiver"]').addClass('error')
-		}else if(!$.form.isMobile(mobile)){
+		}else if(!$.regex.isMobile(mobile)){
 			$('input[name="mobile"]').addClass('error')
-		}else if(!$.form.isPostcode(postcode)){
+		}else if(!$.regex.isPostcode(postcode)){
 			$('input[name="postcode"]').addClass('error')
 		}else if(province < 0 || city < 0 || town < 0){
 			$('span.notice').show()	
-		}else if(street_info.length < 1 || $.form.isStreet(street_info)){
+		}else if(street_info.length < 1 || $.regex.isStreet(street_info)){
 			$('textarea').addClass('error')
 		} else{
 			$('span.notice').hide()	
