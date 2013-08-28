@@ -180,11 +180,10 @@ class Order
 
 	def auto_handle
 		return false if self.status != WAIT
-		return false if ![MOBILE_CHARGE, JIFENBAO, QQ_COIN].include?(self.type)
+		return false if ![MOBILE_CHARGE, QQ_COIN].include?(self.type)
 		case self.type
 		when MOBILE_CHARGE
 			# ChargeClient.mobile_charge(self.mobile, self.amount, self._id.to_s)
-		when JIFENBAO
 		when QQ_COIN
 			# ChargeClient.qq_charge(self.qq, self.amount, self._id.to_s)
 		end
