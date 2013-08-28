@@ -3,6 +3,13 @@ require 'array'
 class Filler::AnswersController < Filler::FillerController
 	
 	# AJAX
+	def check_ip_restrict
+		survey = Survey.find_by_id(params[:survey_id])
+		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if survey.nil?
+		render_json_auto({max_num_reached: survey.max_num_per_ip_reached?(request.remote_ip)}) and return
+	end
+
+	# AJAX
 	def create
 		# hack: if the cookie has already has an answer_id and is not signed in, return the answer_id
 		# Used to avoid creating multiple answers when user click the back key in the keyboard when answeing survey
@@ -14,6 +21,7 @@ class Filler::AnswersController < Filler::FillerController
 		survey = Survey.normal.find_by_id(params[:survey_id])
 		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if survey.nil?
 		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if !params[:is_preview] && survey.status != Survey::PUBLISHED
+		render_json_e ErrorEnum::MAX_NUM_PER_IP_REACHED and return if survey.max_num_per_ip_reached?(request.remote_ip)
 		answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], current_user.try(:_id), params[:is_preview] || false)
 		render_json_s(answer._id.to_s) and return if !answer.nil?
 		retval = survey.check_password(params[:username], params[:password], params[:is_preview] || false)
@@ -27,10 +35,10 @@ class Filler::AnswersController < Filler::FillerController
 			params[:referrer],
 			request.remote_ip,
 			params[:username],
-			params[:password])
+			params[:password],
+			request.env['HTTP_USER_AGENT'] )
 		current_user.answers << answer if current_user.present?
 		answer.check_channel_ip_address_quota
-		answer.check_max_num_per_ip
 		if !user_signed_in
 			# If a new answer for the survey is created, and the user is not signed in
 			# store the answer id in the cookie

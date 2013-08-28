@@ -8,6 +8,7 @@ module ErrorEnum
 	REWORD_NOT_SELECTED = "error__10"
 	LOTTERY_DRAWED = "error__11"
 	NOT_LOTTERY_REWARD = "error__12"
+	MAX_NUM_PER_IP_REACHED = "error__13"
 
 	SAMPLE_ATTRIBUTE_NOT_EXIST = "error__0"
 	WRONG_SAMPLE_ATTRIBUTE_TYPE = "error__1"

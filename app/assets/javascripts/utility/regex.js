@@ -15,7 +15,7 @@
 			return /^((\d{11})|(\d{3}-\d{8})|(\d{4}-\d{7})|(\d{3}-\d{4}-\d{4}))$/.test(phone);
 		},
 		isMobile: function(mobile) {
-			return /^0?(13\d|15[012356789]|18[0236789]|14[57])-?\d{3}-?\d{1}-?\d{4}$/.test(mobile);
+			return /^0?(13\d|15[012356789]|18[02356789]|14[57])-?\d{3}-?\d{1}-?\d{4}$/.test(mobile);
 		},
 		isIDCard:function(idcard){
 			return /^[1-9]\d{5}[1-9]\d{3}((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])\d{3}(\d|(x|X))$/.test(idcard);
