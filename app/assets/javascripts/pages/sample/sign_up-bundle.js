@@ -4,28 +4,33 @@
 $(function(){
 
   //相应回车提交表单事件
-  $.form.enterSubmit($('.login_btn'))	
+  function submit_form(){
+    $('.login_btn').click();
+  }
 
+	$('input[name="password_confirmation"]').odEnter({enter: submit_form});	
+  
 	
 	var refresh;
 	$('.account').blur(function(){
 		var account = $(this).val();
 		var notice_class = $(this).next().attr('class');
-		if($.form.isMobile(account)){
+		if($.regex.isMobile(account)){
 			var code_html = '<div class="identifying_code  wraper">验证码：<br />\
 							<input type="text" name="verify_code" class="verify_code"  placeholder="请输入验证码"  />\
 							<button class="send_code disabled" disabled="disabled">免费获取手机验证码</button>\
 							<div style="clear:both"></div>\
 						</div>'
 			if($('.identifying_code').length < 1){
-				$('.login_password').after(code_html);	
+				$('.login_password').after(code_html);
+				$('input[name="verify_code"]').odEnter({enter: submit_form});	
 			}
 			//SEND AJAX  REQUEST FOR CHECKING ACCOUNT IF EXIST
 			check_account_exist(account,notice_class) 
 		}else{
 			// remove the button  when the account is not a mobile 	
 			$('.identifying_code').remove();
-			if($.form.isEmail(account)){
+			if($.regex.isEmail(account)){
 				//SEND AJAX  REQUEST FOR CHECKING ACCOUNT IF EXIST
 				check_account_exist(account,notice_class)       	
 			}else{
@@ -68,7 +73,7 @@ $(function(){
 		var notice_class = acc_obj.next().attr('class');
 		
 
-		if($.form.isMobile(account) || $.form.isEmail(account)){
+		if($.regex.isMobile(account) || $.regex.isEmail(account)){
 			if(acc_obj.next('span.success').length < 1){
 				check_account_exist(account,notice_class)  
 			}        
@@ -87,7 +92,7 @@ $(function(){
 		if($('span.faild').length < 1 && $('span.notice').length < 1){
 			var account = $('input.account').val();
 			var pass    = $('[name="password"]').val();
-			if($.form.isEmail(account)){
+			if($.regex.isEmail(account)){
 				// create a new sample with email
 				create_email_sample(account,pass)
 			}else{
@@ -176,7 +181,7 @@ $(function(){
 							$('input.account').removeClass('error')
 							$('input.account').next('span.success').remove();
 							$('input.account').after('<span class="success"></span>')
-							if($.form.isMobile(account)){
+							if($.regex.isMobile(account)){
 								// when the mobile is correct and not exist enabled the button
 								$('button.send_code').attr('disabled',false).removeClass('disabled')
 							}	
@@ -191,7 +196,7 @@ $(function(){
 
 	$(".send_code").live('click',function(){
 		var account = $('.account').val();    
-		if (account.length > 0 && $.form.isMobile(account)){
+		if (account.length > 0 && $.regex.isMobile(account)){
 			send_active_code(account)
 		}else{
 			$('input.account').addClass('error')

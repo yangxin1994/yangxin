@@ -16,7 +16,7 @@ $(function(){
 
 		$('button.binding_now').click(function(){
 			var email = $('#y_mail').val()
-			if (email.length < 1 || !$.form.isEmail(email)){
+			if (email.length < 1 || !$.regex.isEmail(email)){
 				$('#y_mail').addClass('error')
 			}else{
 				$.putJSON('/users/setting/change_email',{email: email.trim()}, function(data){

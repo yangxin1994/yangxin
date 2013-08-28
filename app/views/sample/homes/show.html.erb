@@ -147,9 +147,9 @@
 							<% if survey['status'].to_s ==  Survey::PUBLISHED.to_s %>
 								<span class="share">
 									<% if survey['spread_point'].to_i > 0 %>
-										<a class="btn share-btn" href="#<%= user_signed_in ? 's_survey' : 'share_survey'%>" data="<%= survey['spread_point']%>" survey_id="<%= survey['_id']%>" scheme_id = "<%= survey['scheme_id']%>" s_title="<%= survey['title'] %>" >分享奖励<b><%= survey['spread_point']%></b> 积分</a>
+										<a class="btn share-btn"  data="<%= survey['spread_point']%>" survey_id="<%= survey['_id']%>" scheme_id = "<%= survey['scheme_id']%>" s_title="<%= survey['title'] %>" >分享奖励<b><%= survey['spread_point']%></b> 积分</a>
 									<% else %>
-										<a class="btn share-btn" href="#s_survey" data="<%= survey['spread_point']%>" survey_id="<%= survey['_id']%>" scheme_id = "<%= survey['scheme_id']%>" s_title="<%= survey['title'] %>" >分享</a>
+										<a class="btn share-btn"  data="<%= survey['spread_point']%>" survey_id="<%= survey['_id']%>" scheme_id = "<%= survey['scheme_id']%>" s_title="<%= survey['title'] %>" >分享</a>
 									<% end %>		
 								</span>
 							<% end %>

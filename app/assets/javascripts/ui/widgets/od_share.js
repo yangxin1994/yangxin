@@ -5,6 +5,7 @@
 //=require ui/plugins/od_button_text
 //=require jquery-powerFloat-min
 //=require utility/form
+//=require ui/plugins/od_enter
 //=require ./_templates/od_share
 (function($){
 	var page = '';
@@ -51,9 +52,13 @@
 			});  		
   	},
 
-  	_login:function(){
+  	_handle_login:function(){
+  		$('button.share_s_btn').click();
+  	},
 
-  		$.form.enterSubmit($('button.share_s_btn'))
+  	_login:function(){
+  		//相应回车提交表单事件 
+  		$('input[name="password"]').odEnter({enter: $pop._handle_login})
 
 			$('input[name="username"]').focus(function(){
 				$(this).removeClass('error');
@@ -154,7 +159,7 @@
 					beforeShow: function(){
 						$(".fancybox-skin").css({"backgroundColor":"#fff"});
 						url_input.mouseover(function(e) { $(e.target).select(); });	
-						var share_url =  window.location.protocol + "//" + window.location.hostname + window.location.host + '/s/' + opt.scheme_id		
+						var share_url =  window.location.protocol + "//"  + window.location.host + '/s/' + opt.scheme_id		
 						if(typeof(window.current_user_id) != 'undefined'){
 							var share_url =  share_url  + '?i=' + window.current_user_id;  
 							if(parseInt(opt.point) > 0){
