@@ -1,8 +1,6 @@
 //=require jquery.placeholder
 //=require jquery.cookie
 jQuery(function($) {
-	var mobile_partten = $.mobile_partten();
-	var email_partten  = $.email_partten();
 
 	//如果用户已经关闭了安装插件提示，那么24小时内不再提示安装
 	if($.cookie('ignore_plugin')){
@@ -17,7 +15,7 @@ jQuery(function($) {
 	})
 
   //相应回车提交表单事件
-  $.enterSubmit($('.rss-btn'))	
+  $.form.enterSubmit($('.rss-btn'))	
 
   //下拉框点击事件
 	$("body").click(function(e){
@@ -118,7 +116,7 @@ jQuery(function($) {
   //订阅按钮
 	$('input[name="contact"]').next('a').click(function(){
 		var channel = $('input[name="contact"]').val();
-		if(email_partten.test(channel) || mobile_partten.test(channel) ){
+		if($.form.isEmail(channel) || $.form.isMobile(channel) ){
 			make_rss_activate(channel,$(this))
 		}else{
 			$('input[name="contact"]').prev('.channel_err').show();
@@ -136,20 +134,21 @@ jQuery(function($) {
 			type: "POST",
 			url: '/surveys/make_rss_activate',
 			data: {rss_channel:email},
+			
 			beforeSend:function(){
 				obj.next('img').remove();
 				if(obj.next('img').length < 1){
-					if(email_partten.test(email)){
+					if($.form.isEmail(email)){
 						obj.after('<img class="loading" src="/assets/image/sample/fancybox_loading@2x.gif" width="16" height="16" style="position:absolute;left:64px;top:44px;" />')
 					}else{
-						obj.after('<img class="loading" src="/assets/image/sample/fancybox_loading@2x.gif" width="16" height="16" style="position:absolute;right:50px;top:9x;" />')
+						obj.after('<img class="loading" src="/assets/image/sample/fancybox_loading@2x.gif" width="16" height="16" style="position:absolute;right:50px;top:8px;" />')
 					}
 					
 				}				
 			},
 			success:function(retval){
 				obj.next('img').remove();
-				if(email_partten.test(email)){
+				if($.form.isEmail(email)){
 					obj.after('<img class="loading" src="/assets/od-quillme/success.png" width="16" height="16" style="position:absolute;left:64px;top:44px;" />')
 				}else{
 					obj.after('<img class="loading" src="/assets/od-quillme/success.png" width="16" height="16" style="position:absolute;rigt:50px;top:9px;" />')
@@ -170,7 +169,7 @@ jQuery(function($) {
 			success:function(retval){
 					if(retval['success']){
 						if(retval['new_user']){
-							if(email_partten.test(channel)){
+							if($.form.isEmail(channel)){
         						if(channel.indexOf('gmail.com') > -1){
         						  var mail_to = 'http://gmail.com';
         						}else if(channel.indexOf('@tencent.') > -1){
@@ -187,7 +186,12 @@ jQuery(function($) {
 							}
 
 						}else{
-							popup('#mobile_finish',null,null)	
+							if($.form.isEmail(channel)){
+								popup('#email_finish',null,null)
+							}else{
+								popup('#mobile_finish',null,null)	
+							}
+								
 						}
 					}else{
 						//订阅过程出错提示页
