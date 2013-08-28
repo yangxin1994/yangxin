@@ -301,7 +301,6 @@ OopsData::Application.routes.draw do
       end
     end
 
-    get 'quality_questions' => "quality_questions#objective"
     resources :quality_questions do
       collection do
         get 'objective', 'matching'
