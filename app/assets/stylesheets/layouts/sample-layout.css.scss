@@ -26,7 +26,7 @@ $colorB: #b3b3b3;
 		border:1px #dbdbdb solid;
 		@include border-radius(4px);
 		background: #fff;
-		color:#999;
+		color:#666;
 		.select-txt{
 			@include inline-block;
 			@include one-line(24px);
@@ -177,7 +177,7 @@ $colorB: #b3b3b3;
 .btn{
 	padding:5px 10px;
 	@include border-radius(4px);
-	color:#999;
+	color:#666;
 	background: #eee;
 	}
 .s-font{

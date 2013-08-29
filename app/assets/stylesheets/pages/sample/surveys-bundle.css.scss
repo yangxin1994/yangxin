@@ -124,7 +124,7 @@ $colorB: #b3b3b3;
 					text-align: center;
 					span{margin:0 1px;}	
 					a{
-						color:#999;
+						color:#666;
 					}
 					&.current{
 						a{
@@ -630,14 +630,13 @@ margin-top: 200px;
 	 		width:90px;
 	 		height:30px;
 	 		border:0px;
-	 		background: #ec1717;
+	 		background: #f14646;
 	 		color: #fff;
 	 		text-align: center;
 	 		line-height: 30px;
 	 		font-size:16px;
 	 		cursor: pointer;
-	 		@include border-radius(4px);
-	 		@include box-shadow(0 1px 1px #999);		
+	 		@include border-radius(4px);		
 	 		&:hover{
 	 			background:$red1;
 	 		}	

@@ -30,6 +30,7 @@ class Gift
 	field :quantity, :type => Integer, default: 0
 	field :point, :type => Integer, default: 0
 	field :exchange_count, :type => Integer, default: 0
+	field :view_count, :type => Integer, default: 0
 	field :price, :type => Float, default: 0.0
 	field :redeem_number, :type => Hash, default: {"mode" => SINGLE}
 
@@ -150,5 +151,9 @@ class Gift
     #订单(兑换)流程走完之后该值加一，表示该礼品兑换的次数
 	def inc_exchange_count
       inc(:exchange_count, 1)
+	end
+
+	def inc_view_count
+		inc(:view_count,1)
 	end
 end
