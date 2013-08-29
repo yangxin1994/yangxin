@@ -10,25 +10,25 @@ class Admin::AgentTasksController < Admin::AdminController
   end
 
   def update
-    render_json agent_task = AgentTask.where(:id => params[:id]) do
+    render_json agent_task = AgentTask.where(:id => params[:id]).first do
       agent_task.update_agent_task(params[:agent_task])
     end
   end
 
   def close
-    render_json agent_task = AgentTask.where(:id => params[:id]) do
+    render_json agent_task = AgentTask.where(:id => params[:id]).first do
       agent_task.close
     end    
   end
 
   def open
-    render_json agent_task = AgentTask.where(:id => params[:id]) do
+    render_json agent_task = AgentTask.where(:id => params[:id]).first do
       agent_task.open
     end    
   end
 
   def destroy
-    render_json agent_task = AgentTask.where(:id => params[:id]) do
+    render_json agent_task = AgentTask.where(:id => params[:id]).first do
       agent_task.delete_agent_task
     end    
   end

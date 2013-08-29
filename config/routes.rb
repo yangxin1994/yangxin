@@ -422,7 +422,11 @@ OopsData::Application.routes.draw do
     delete "sample_attributes/bind_question/:id" => "sample_attributes#bind_question", as: :sample_attribute_bind
 
     resources :agents
-    resources :agent_tasks
+    resources :agent_tasks do
+      member do
+        put :close, :open
+      end
+    end
     
     resources :sample_stats, :only => [:index] do
       collection do
