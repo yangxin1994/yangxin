@@ -38,7 +38,9 @@ class Sample::SurveysController < Sample::SampleController
 
 	#重新生成订阅 短信激活码  或者邮件
 	def make_rss_activate
-		retval = User.create_rss_user(params[:rss_channel], "#{request.protocol}#{request.host_with_port}/surveys/active_rss_able")
+		retval = User.create_rss_user(params[:rss_channel],
+			{protocol_hostname: "#{request.protocol}#{request.host_with_port}",
+				path: "/surveys/active_rss_able"})
 		render :json => retval and return
 	end
 

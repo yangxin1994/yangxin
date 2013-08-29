@@ -15,57 +15,6 @@
 	-webkit-box-shadow:0px 0px 10px rgba(0,0,0,.2);
 	box-shadow:0px 0px 10px rgba(0,0,0,.2);
 	@include border-radius(9px);
-	/* 404 & 500 */
-	.error-box{
-		width:700px;
-		margin:0 auto;
-		padding-top:30px;
-		.expression{
-			float: left;
-		}
-		.describe{
-			float: left;
-			margin-left:50px;
-			h6{
-				font-size: 150px;
-				color:#ccc;
-				font-weight: bold;
-			}
-			h4{
-				font-size:20px;
-				line-height: 2em;
-			}
-			p{
-				font-size:14px;
-			}
-			.btn{
-				@include inline-block;
-				padding:8px 15px;
-				font-size: 14px;
-				color:#fff;
-				@include border-radius(4px);
-				margin:30px 15px 0 0;
-				&.red{
-					background: $red;
-					&:hover{
-						background: $red1;
-					}
-					&:active{
-						background: $red2;
-					}
-				}
-				&.blue{
-					background: $blue;
-					&:hover{
-						background: $blue1;
-					}
-					&:active{
-						background: $blue2;
-					}
-				}
-			}
-		}	
-	}
 		
 	.con_login{
 		float: left;
@@ -77,6 +26,7 @@
 		}
 		div.form{ 
 			div{
+				@include clearfix;
 				margin-bottom:16px;
 				input{
 					float:left;
@@ -92,6 +42,7 @@
 			div#l_last{
 				height:20px;
 				margin:0px;
+				@include clearfix;
 				input#rem{
 					float:left;
 					width:14px;
@@ -144,7 +95,7 @@
 				display:inline-block;
 				width:20px;
 				height:20px;
-				margin:22px 0px 0px 16px;
+				margin:25px 0px 0px 16px;
 				background:url(/assets/od-quillme/faild.png) no-repeat;          
 			}
 			span.notice{

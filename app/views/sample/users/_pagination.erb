@@ -31,7 +31,7 @@
             <% if (@common_value["current_page"]+2) < @common_value["total_page"] %>
                 <a onclick="return false;" href="javascript: void(0);">...</a>
             <% end %>
-            <a href="<%= @path %>?page=<%= @common_value["next_page"] %><%= extend_string %>" onclick="<%= 'return false' if @common_value["current_page"] == @common_value["total_page"] %>" class="<%= 'disabled' if @common_value["current_page"] == @common_value["total_page"] %>">></a>
+            <a href="<%= @path %>?page=<%= @common_value["next_page"] %><%= extend_string %>" onclick="<%= 'return false' if @common_value["current_page"] == @common_value["total_page"] %>" class="last-child <%= 'disabled' if @common_value["current_page"] == @common_value["total_page"] %>">></a>
         <% end %>
     </div>
 </div>

@@ -66,7 +66,8 @@ class Sample::AccountsController < Sample::SampleController
         params[:password],
         current_user,
         params[:third_party_user_id],
-        "#{request.protocol}#{request.host_with_port}/account/email_activate")
+        {protocal_hostname: "#{request.protocol}#{request.host_with_port}",
+          path: "/account/email_activate"})
       render_json_auto(retval) and return
     end
   end
@@ -91,7 +92,10 @@ class Sample::AccountsController < Sample::SampleController
       user.save
       SmsWorker.perform_async("activate", user.mobile, "", :active_code => active_code)
     else
-      EmailWorker.perform_async("welcome", user.email, "#{request.protocol}#{request.host_with_port}/account/email_activate")
+      EmailWorker.perform_async("welcome",
+        user.email,
+        "#{request.protocol}#{request.host_with_port}",
+        "/account/email_activate")
     end
     render_json_s and return
   end
@@ -187,8 +191,10 @@ class Sample::AccountsController < Sample::SampleController
 
   def send_forget_pass_code
     session[:forget_account] = params[:email_mobile]
-    render_json_auto User.send_forget_pass_code(params[:email_mobile], 
-      "#{request.protocol}#{request.host_with_port}/account/get_account") and return
+    retval = User.send_forget_pass_code(params[:email_mobile],
+      {protocol_hostname: "#{request.protocol}#{request.host_with_port}",
+        path: "/account/get_account"})
+    render_json_auto retval and return
   end
 
   def make_forget_pass_activate
