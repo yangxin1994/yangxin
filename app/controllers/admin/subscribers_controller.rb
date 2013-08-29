@@ -34,6 +34,7 @@ class Admin::SubscribersController < Admin::AdminController
         end
       end
       Subscriber.collection.insert(batch) unless batch.empty?
+      binding.pry
       {:s_count => s_count, :e_count => e_count,:f_count => f_count}
     end
   end
