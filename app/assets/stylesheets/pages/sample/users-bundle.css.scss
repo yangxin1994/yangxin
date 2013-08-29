@@ -502,6 +502,11 @@ i {
                 border: none;
             }
 
+            /*IE8*/
+            .tab:first-child + div + div {
+                border: none;
+            }
+
             .tab.active {
                 /*color: #ec1717;*/
             }
