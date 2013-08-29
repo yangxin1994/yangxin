@@ -23,7 +23,7 @@ every 10.minutes do
 	runner "EmailInvitationWorker.perform_async"
 end
 
-every 10.minutes do
+every 1.days do
 	runner "SmsInvitationWorker.perform_async"
 end
 
