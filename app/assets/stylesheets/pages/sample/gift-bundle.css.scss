@@ -574,7 +574,7 @@
 			}
 			.answer{
 				font-size:16px;
-  			background:#ec1717;
+  			background:#f14646;
   			margin-right:70px;
   			&:hover{
 					background:#F25D5D;
@@ -684,11 +684,12 @@
   				font-size:12px;
   			}
 			}
+
 			.sub_btn{
   			@include border-radius(4px);
   			width:90px;
   			height:32px;
-  			background:#ec1717;
+  			background:#F14646;
   			border:0px;
   			float:right;
   			color:#fff;
@@ -696,7 +697,15 @@
   			&:disabled, &.disabled{
   				cursor:default;
 					background:#E6E6E6;
-					color:#B3B3B3;  
+					color:#B3B3B3;
+					  &:hover{
+						background:#e6e6e6;
+						color:#b3b3b3;
+  					cursor:default;
+  				}  
+  			}
+  			&:hover{
+  				background:#F25D5D;
   			}			
 			}
 			input.con_sub_btn{

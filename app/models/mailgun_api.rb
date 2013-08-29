@@ -98,10 +98,12 @@ class MailgunApi
 		end
 	end
 
-	def self.welcome_email(user, callback)
+	def self.welcome_email(user, protocol_hostname, callback)
 		@user = user
 		activate_info = {"email" => user.email, "time" => Time.now.to_i}
-		@activate_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
+		@activate_link = "#{protocol_hostname}#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
+		result = MongoidShortener.generate(@activate_link)
+		@activate_link = "#{protocol_hostname}/#{result}" if result.present?
 		data = {}
 		data[:domain] = Rails.application.config.user_email_domain
 		data[:from] = @@user_email_from
@@ -120,10 +122,12 @@ class MailgunApi
 		self.send_message(data)
 	end
 
-	def self.change_email(user, callback)
+	def self.change_email(user, protocol_hostname, callback)
 		@user = user
 		activate_info = {"email" => user.email, "email_to_be_changed" => user.email_to_be_changed, "time" => Time.now.to_i}
-		@activate_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
+		@activate_link = "#{protocol_hostname}#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
+		result = MongoidShortener.generate(@activate_link)
+		@activate_link = "#{protocol_hostname}/#{result}" if result.present?
 		data = {}
 		data[:domain] = Rails.application.config.user_email_domain
 		data[:from] = @@user_email_from
@@ -142,54 +146,12 @@ class MailgunApi
 		self.send_message(data)
 	end
 
-	def self.activate_email(user, callback)
-		@user = user
-		activate_info = {"email" => user.email, "time" => Time.now.to_i}
-		@activate_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
-		data = {}
-		data[:domain] = Rails.application.config.user_email_domain
-		data[:from] = @@user_email_from
-
-		html_template_file_name = "#{Rails.root}/app/views/user_mailer/activate_email.html.erb"
-		text_template_file_name = "#{Rails.root}/app/views/user_mailer/activate_email.text.erb"
-		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
-		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
-		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
-		data[:html] = premailer.to_inline_css
-		data[:text] = text_template.result(binding)
-
-		data[:subject] = "激活账户"
-		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
-		data[:to] = Rails.env == "production" ? user.email : @@test_email
-		self.send_message(data)
-	end
-
-	def self.password_email(user, callback)
+	def self.find_password_email(user, protocol_hostname, callback)
 		@user = user
 		password_info = {"email" => user.email, "time" => Time.now.to_i}
-		@password_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(password_info.to_json))
-		data = {}
-		data[:domain] = Rails.application.config.user_email_domain
-		data[:from] = @@user_email_from
-
-		html_template_file_name = "#{Rails.root}/app/views/user_mailer/password_email.html.erb"
-		text_template_file_name = "#{Rails.root}/app/views/user_mailer/password_email.text.erb"
-		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
-		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
-		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
-		data[:html] = premailer.to_inline_css
-		data[:text] = text_template.result(binding)
-
-		data[:subject] = "重置密码"
-		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
-		data[:to] = Rails.env == "production" ? user.email : @@test_email
-		self.send_message(data)
-	end
-
-	def self.find_password_email(user, callback)
-		@user = user
-		password_info = {"email" => user.email, "time" => Time.now.to_i}
-		@password_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(password_info.to_json))
+		@password_link = "#{protocol_hostname}#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(password_info.to_json))
+		result = MongoidShortener.generate(@password_link)
+		@password_link = "#{protocol_hostname}/#{result}" if result.present?
 		data = {}
 		data[:domain] = Rails.application.config.user_email_domain
 		data[:from] = @@user_email_from
@@ -208,57 +170,12 @@ class MailgunApi
 		self.send_message(data)	
 	end
 
-	def self.sys_password_email(user, callback)
-		@user = user
-		data = {}
-		data[:domain] = Rails.application.config.user_email_domain
-		data[:from] = @@user_email_from
-
-		html_template_file_name = "#{Rails.root}/app/views/user_mailer/sys_password_email.html.erb"
-		text_template_file_name = "#{Rails.root}/app/views/user_mailer/sys_password_email.text.erb"
-		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
-		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
-		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
-		data[:html] = premailer.to_inline_css
-		data[:text] = text_template.result(binding)
-
-		data[:subject] = "您的邮箱刚刚创建了Oopsdata的账号"
-		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
-		data[:to] = Rails.env == "production" ? user.email : @@test_email
-		self.send_message(data)
-	end
-
-	def self.lottery_code_email(user, survey_id, lottery_code_id, callback)
-		@user = user
-		@survey = Survey.find_by_id(survey_id)
-		@lottery_code = LotteryCode.where(:_id => lottery_code_id).first
-		lottery = @lottery_code.try(:lottery)
-		@survey_list_url = "#{Rails.application.config.quillme_host}/surveys"
-		@lottery_url = "#{Rails.application.config.quillme_host}/lotteries/#{lottery.try(:_id)}"
-		@lottery_title = lottery.try(:title)
-		@lottery_code_url = "#{Rails.application.config.quillme_host}/lotteries/own"
-		data = {}
-		data[:domain] = Rails.application.config.user_email_domain
-		data[:from] = @@user_email_from
-
-		html_template_file_name = "#{Rails.root}/app/views/user_mailer/lottery_code_email.html.erb"
-		text_template_file_name = "#{Rails.root}/app/views/user_mailer/lottery_code_email.text.erb"
-		html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
-		text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
-		premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
-		data[:html] = premailer.to_inline_css
-		data[:text] = text_template.result(binding)
-
-		data[:subject] = "恭喜您获得抽奖号"
-		data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
-		data[:to] = Rails.env == "production" ? user.email : @@test_email
-		self.send_message(data)
-	end
-
-	def self.rss_subscribe_email(user, callback)
+	def self.rss_subscribe_email(user, protocol_hostname, callback)
 		@user = user
 		activate_info = {"email" => user.email, "time" => Time.now.to_i}
-		@activate_link = "#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
+		@activate_link = "#{protocol_hostname}#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
+		result = MongoidShortener.generate(@activate_link)
+		@activate_link = "#{protocol_hostname}/#{result}" if result.present?
 		data = {}
 		data[:domain] = Rails.application.config.user_email_domain
 		data[:from] = @@user_email_from
