@@ -185,21 +185,22 @@ module Tool
 
 	# check wheather value satisfies standard value
 	def self.check_sample_attribute(sample_attribute_id, value, standard_value)
+		return nil if value.blank?
 		sample_attribute = SampleAttribute.find_by_id(sample_attribute_id)
-		return false if sample_attribute.nil?
+		return nil if sample_attribute.nil?
 		case sample_attribute.type
 		when DataType::STRING
 			return true if value == standard_value
 		when DataType::ENUM
 			return true if standard_value.include?(value)
 		when DataType::NUMBER
-			return true if value >= standard_value[0] && value <= standard_value[1]
+			return true if value == standard_value
 		when DataType::DATE
-			return true if value >= standard_value[0] && value <= standard_value[1]
+			return true if value == standard_value
 		when DataType::NUMBER_RANGE
-			return true if value >= standard_value[0] && value <= standard_value[1]
+			return true if value[0] >= standard_value[0] && value[1] <= standard_value[1]
 		when DataType::DATE_RANGE
-			return true if value >= standard_value[0] && value <= standard_value[1]
+			return true if value[0] >= standard_value[0] && value[1] <= standard_value[1]
 		when DataType::ADDRESS
 			return true if standard_value.include?(value)
 		when DataType::ARRAY

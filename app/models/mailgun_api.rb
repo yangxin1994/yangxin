@@ -35,16 +35,17 @@ class MailgunApi
 		@reward_scheme_id = @survey.email_promote_info["reward_scheme_id"]
 
 		@reward_scheme = RewardScheme.find_by_id(@reward_scheme_id)
-		@reward_type = @reward_scheme.rewards[0]["type"]
+
+		@reward_type = @reward_scheme.rewards.length > 0 ? @reward_scheme.rewards[0]["type"] : nil
 		if [RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::POINT].include? @reward_type
 			amount = @reward_scheme.rewards[0]["amount"]
 			@amount = @reward == RewardScheme::JIFENBAO ? amount / 100 : amount
 		end
 
-		if [RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::POINT].include? @reward_type
+		if [RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::POINT].include? @reward_type || @reward_type.nil?
 			# list some hot gifts
 			@gifts = []
-			Gift.all.desc(:exchange_count).limit(3).each do |g|
+			Gift.real_and_virtual.desc(:exchange_count).limit(3).each do |g|
 				@gifts << { :title => g.title,
 					:url => Rails.application.config.quillme_host + "/gifts/" + g._id.to_s,
 					:img_url => Rails.application.config.quillme_host + g.photo.picture_url }
@@ -58,7 +59,7 @@ class MailgunApi
 					:point => redeem_log.point,
 					:gift_name => redeem_log.gift_name }
 			end
-		else
+		elsif @reward_type.present?
 			# list the prizes
 			@prizes = []
 			@reward_scheme.rewards[0]["prizes"].each do |p|

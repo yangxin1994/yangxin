@@ -91,7 +91,7 @@ class SmsApi # 短信接口
 
 	################### different types of sms ########################
 
-	def self.invitation_sms(survey_id, sample_id, callback, opt)
+	def self.invitation_sms(survey_id, sample_id, callback, opt = {})
 		sample = User.find_by_id(sample_id)
 		return if sample.nil? || sample.mobile.blank?
 		mobile = sample.mobile
@@ -109,11 +109,11 @@ class SmsApi # 短信接口
 		if reward_scheme.rewards[0].present?
 			case reward_scheme.rewards[0]["type"]
 			when RewardScheme::MOBILE
-				@reward = "#{reward_scheme.rewards[0]["amount"]}现金奖励"
+				@reward = "#{reward_scheme.rewards[0]["amount"]}元现金奖励"
 			when RewardScheme::ALIPAY
-				@reward = "#{reward_scheme.rewards[0]["amount"]}现金奖励"
+				@reward = "#{reward_scheme.rewards[0]["amount"]}元现金奖励"
 			when RewardScheme::JIFENBAO
-				@reward = "#{reward_scheme.rewards[0]["amount"]}现金奖励"
+				@reward = "#{reward_scheme.rewards[0]["amount"]}元现金奖励"
 			when RewardScheme::POINT
 				@reward = "#{reward_scheme.rewards[0]["amount"]}积分奖励"
 			when RewardScheme::LOTTERY

@@ -41,6 +41,7 @@ class Gift
 	scope :normal, where(:status.in => [OFF_THE_SHELF, ON_THE_SHELF])
 	scope :on_shelf, where(:status => ON_THE_SHELF)
 	scope :real, where(:type => REAL)
+	scope :real_and_virtual, where(:type.in => [VIRTUAL, REAL])
 	index({ type: 1, status: 1 }, { background: true } )
 
 	def self.find_by_id(gift_id)

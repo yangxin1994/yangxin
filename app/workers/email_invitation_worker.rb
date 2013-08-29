@@ -21,7 +21,8 @@ class EmailInvitationWorker
 			sample_ids_unknow = []
 			sample_ids_available.each do |e|
 				current_sample = User.sample.find_by_id(e)
-				survey.sample_attribtes_for_promote.each do |sample_attribute|
+				sample_ids_selected << e if survey.sample_attributes_for_promote.blank?
+				survey.sample_attributes_for_promote.each do |sample_attribute|
 					v = current_sample.read_sample_attribute_by_id(sample_attribute["sample_attribute_by_id"])
 					match = Tool.check_sample_attribute(sample_attribute._id.to_s, v, sample_attribute["value"])
 					next if match == false
@@ -44,7 +45,7 @@ class EmailInvitationWorker
 				surveys_for_sample[u_id] ||= []
 				surveys_for_sample[u_id] << survey._id.to_s
 				sample = User.sample.find_by_id(u_id)
-				sample_email_history_batch << { :user_id => sample._id, :survey_id => survey._id, :type => "email" } if !user.nil?
+				sample_email_history_batch << { :user_id => sample._id, :survey_id => survey._id, :type => "email" } if sample.present?
 			end
 			# update email history for samples
 			SurveyInvitationHistory.collection.insert(sample_email_history_batch)
