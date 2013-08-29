@@ -5,7 +5,7 @@ class EmailInvitationWorker
 		# 1. get all samples, excluding those are in the blacklist
 		sample_ids = User.sample.where(:email_subscribe => true, :is_block => false).map { |e| e._id.to_s }
 		# 2. get the surveys that need to send emails
-		published_survey = Survey.where(:email_promotable => true, status => Survey::PUBLISHED)
+		published_survey = Survey.where(:email_promotable => true, :status => Survey::PUBLISHED)
 		# 3. find out samples for surveys
 		surveys_for_sample = {}
 		published_survey.each do |survey|

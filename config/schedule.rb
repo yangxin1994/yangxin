@@ -20,7 +20,11 @@
 # Learn more: http://github.com/javan/whenever
 
 every 10.minutes do
-	runner "QuotaEmailWorker.perform_async"
+	runner "EmailInvitationWorker.perform_async"
+end
+
+every 10.minutes do
+	runner "SmsInvitationWorker.perform_async"
 end
 
 every 1.days do
