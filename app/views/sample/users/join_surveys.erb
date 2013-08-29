@@ -24,9 +24,9 @@
                 <thead>
                     <tr>
                         <th style="width: 100px;">时间</th>
-                        <th style="width: 440px;">调研名称</th>
+                        <th style="width: 450px;">调研名称</th>
                         <th style="width: 60px;">状态</th>
-                        <th style="width: 100px;">获得奖励</th>
+                        <th class="last-child" style="width: 100px;">获得奖励</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -42,7 +42,7 @@
                                 </a>
                             </td>
                             <td><%= sanitize(answered?(survey["answer_status"], survey["answer_reject_type"], survey["free_reward"])) %></td>
-                            <td>
+                            <td class="last-child">
                                 <%= sanitize survey["select_reward"], attributes: %w(id class href target) %>
                             </td>
                         </tr>

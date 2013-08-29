@@ -31,7 +31,7 @@
                         <!-- work for survey detail -->
                         <th style="display: none;" class="type">调研类型</th>
                         <!--  -->
-                        <th style="width: 80px;" class="reward">查看详情</th>
+                        <th class="last-child" style="width: 80px;" class="reward">查看详情</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -51,7 +51,7 @@
                                 <span class="point"><%= survey["spread_point"].to_i * survey["finish_number"].to_i %>积分</span>
                             </td>
                             <td style="display: none;"><%= survey_type?(survey["quillme_promote_reward_type"]) %></td>
-                            <td>
+                            <td class="last-child">
                                 <a href="#spread-detail" name="<%= survey["_id"] %>" class="fancybox">推广详情</a>
                             </td>
                         </tr>
