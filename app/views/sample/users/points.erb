@@ -33,7 +33,7 @@
                             <th style="width: 440px;">来源/用途</th>
                             <th style="width: 100px;">收入</th>
                             <th></th>
-                            <th style="width: 80px;">备注</th>
+                            <th class="last-child" style="width: 80px;">备注</th>
                         </tr>
                     <% elsif params[:scope] == 'out' %>
                         <tr>
@@ -41,7 +41,7 @@
                             <th style="width: 440px;">来源/用途</th>
                             <th></th>
                             <th style="width: 100px;">支出</th>
-                            <th style="width: 80px;">备注</th>
+                            <th class="last-child" style="width: 80px;">备注</th>
                         </tr>
                     <% else %>
                         <tr>
@@ -49,7 +49,7 @@
                             <th style="width: 340px;">来源/用途</th>
                             <th style="width: 100px;">收入</th>
                             <th style="width: 100px;">支出</th>
-                            <th style="width: 80px;">备注</th>
+                            <th class="last-child" style="width: 80px;">备注</th>
                         </tr>
                     <% end %>
                     
@@ -97,7 +97,7 @@
                                 <td>
                                 </td>
                             <% end %>
-                            <td>
+                            <td  class="last-child">
                                 <span><%= change_point_reason_type(log["reason"]) %></span>
                             </td>
                         </tr>
