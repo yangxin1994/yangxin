@@ -7,9 +7,15 @@
   <li class="active">
     <a href="">
     <i class="icon-chevron-right"></i>
-    调研列表
+    质控题列表
     </a>
   </li>
+  <li>
+    <a href="/admin/quality_questions/new">
+    <i class="icon-chevron-right"></i>
+    新建质控题
+    </a>
+  </li>  
 <% end %>
 
 <div>
@@ -54,7 +60,7 @@
       <% @quality_questions['data'].each do |quality_question| %>
       <tr>
         <td><a href="/admin/quality_questions/<%= quality_question['_id']%>"><%= quality_question["content"]["text"] %></a></td>
-        <td><%= quality_question["quality_control_type"].to_i %></td>
+        <td><%= quality_question_tag quality_question["quality_control_type"] %></td>
         <td><%= Time.at(quality_question["created_at"]).strftime('%F %R') %></td>
         <td data-sid="<%= quality_question["_id"] %>">
         <div class="btn-group">
@@ -63,7 +69,7 @@
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a href="/admin/quality_questions/<%= quality_question["_id"] %>/reward_schemes" ><i class="icon-wrench"></i>删除</a></li>
+            <li><a href="javascript:void(0);" data-id="<%= quality_question["_id"] %>" class="od-delete"><i class="icon-wrench"></i>删除</a></li>
           </ul>
         </div>
         </td>
