@@ -1,12 +1,13 @@
 # coding: utf-8
 class Sample::UsersController < Sample::SampleController
+  layout :resolve_layout
 
-  before_filter :require_sign_in# , :get_client
+  before_filter :require_sign_in, :except => [:change_email_verify_key]
   before_filter :get_self_extend_info, :except => [:survey_detail, :spread_counter, 
                                       :update_logistic_address, :update_password, 
                                       :destroy_notification, :remove_notifications,
                                       :unbind, :bind_share, :bind_subscribe, :update_basic_info,
-                                      :change_mobile, :check_mobile_verify_code, :change_email]
+                                      :change_mobile, :check_mobile_verify_code, :change_email, :change_email_verify_key]
   before_filter :setting_nav,:only => [:basic_info, :avatar, :update_avatar ,:bandings,:address, :password, :bindings, :reset_pass]
   before_filter :survey_nav,:only => [:join_surveys,:index, :spread_surveys, :survey_detail]
   before_filter :point_nav,:only => [:points]
@@ -434,8 +435,44 @@ class Sample::UsersController < Sample::SampleController
     current_user.email_to_be_changed = params[:email]
     current_user.change_email_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
     current_user.save
-    EmailWorker.perform_async("change_email", params[:email], "#{request.protocol}#{request.host_with_port}", :user_id => current_user._id.to_s)
+    EmailWorker.perform_async("change_email", params[:email], "#{request.protocol}#{request.host_with_port}/users/setting/change_email_verify_key", :user_id => current_user._id.to_s)
     render_json_s and return
+  end
+
+  def change_email_verify_key
+    activate_info = {}
+    begin
+      activate_info_json = Encryption.decrypt_activate_key(params[:key])
+      activate_info = JSON.parse(activate_info_json)
+    rescue
+      @success = false
+      return
+    end
+
+    user = User.find_by_email(activate_info["email"])
+    if user.nil?
+      @success = false
+      return
+    end
+
+    retval = user.change_email(@remote_ip)
+    if retval == false
+      @success = false
+      return
+    end
+    refresh_session(retval['auth_key'])
+    @success = true
+=begin
+    retval = User.activate("email", activate_info, @remote_ip, params[:_client_type])  
+    if retval.class == String && retval.start_with?("error_")
+      @success = false
+    else
+      @success = true
+      refresh_session(retval['auth_key'])
+      user = User.find_by_auth_key(retval['auth_key'])
+      @email  = Base64.encode64(user.email).chomp()
+    end
+=end
   end
 
   #收获地址
@@ -580,5 +617,14 @@ class Sample::UsersController < Sample::SampleController
   def notification_nav
     @current_nav = 'notifications'
   end
+
+  def resolve_layout
+      case action_name
+      when "change_email_verify_key"
+        "sample_account"
+      else
+        "sample"
+      end
+    end
 
 end

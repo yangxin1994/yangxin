@@ -115,8 +115,6 @@ class Sample::AccountsController < Sample::SampleController
       user = User.find_by_auth_key(retval['auth_key'])
       @email  = Base64.encode64(user.email).chomp()
     end
-
-
   end
 
   def mobile_activate

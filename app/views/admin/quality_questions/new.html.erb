@@ -34,9 +34,9 @@
           选择类型
           <span class="caret"></span>
         </button>
-        <ul class="dropdown-menu dropselect" id="type_select">
-          <li><a href="#type-2">客观题</a></li>
-          <li><a href="#type-4">匹配题</a></li>
+        <ul class="dropdown-menu dropselect">
+          <li><a href="#type-1">客观题</a></li>
+          <li><a href="#type-2">匹配题</a></li>
         </ul>
         <input type="hidden" name="quality_control_type" id="quality_control_type" value="<%= @quality_question["quality_control_type"] || 1 %>">
       </div>
@@ -50,7 +50,7 @@
           选择类型
           <span class="caret"></span>
         </button>
-        <ul class="dropdown-menu dropselect" id="type_select">
+        <ul class="dropdown-menu dropselect">
           <li><a href="#qtype-1">选择题</a></li>
         </ul>
         <input type="hidden" name="question_type" id="question_type" value="<%= @quality_question["question_type"] || 1 %>">
