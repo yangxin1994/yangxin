@@ -117,8 +117,6 @@ i {
         margin-right: 8px;
         vertical-align: middle;
 
-        /*<i class="icon-binding icon-phone"/>*/
-
         &.icon-mobile.active {
             background: image-url('od-quillme/uc/bindings.png') no-repeat;
         }
@@ -183,10 +181,13 @@ i {
             background: image-url('od-quillme/uc/bindings.png') no-repeat 0 -420px;
         }
 
-        &:last-child {
+        &.last-child {
             margin-right: 0px;
         }
 
+        &:last-child {
+            margin-right: 0px;
+        }
     }
 
     /* right partial navs */
@@ -313,16 +314,6 @@ i {
 
         &.icon-step4.fixed {
             background: image-url('od-quillme/uc/steps.png') no-repeat 0 -220px;
-        }
-    }
-}
-
-@media screen and (-webkit-min-device-pixel-ratio:0) {
-    i.icon-binding {
-        margin-right: 10px;
-
-        &:last-child {
-            margin-right: 0px;
         }
     }
 }
@@ -493,22 +484,21 @@ i {
                 width: 48px;
                 text-align: center;
 
-                p:last-child {
+                p.last-child {
                     padding-top: 4px;
                 }
+
+                p:last-child {
+                    padding-top: 4px;   
+                }
+            }
+
+            .tab.last-child {
+                border: none;
             }
 
             .tab:last-child {
                 border: none;
-            }
-
-            /*IE8*/
-            .tab:first-child + div + div {
-                border: none;
-            }
-
-            .tab.active {
-                /*color: #ec1717;*/
             }
         }
 
@@ -566,10 +556,14 @@ i {
             i {
                 cursor:  pointer;
             }
-        }
 
-        .bindings:last-child {
-            padding-top: 6px;
+            &.last-child {
+                padding-top: 6px;
+            }
+
+            &:last-child {
+                padding-top: 6px;
+            }
         }
 
         .user-tabs {
@@ -601,6 +595,7 @@ i {
                 width: auto\9;
                 position: relative;
                 left: -6px;
+                left: -8px\9;
                 padding: 18px 0;
                 border-top: 1px solid #e6e6e6;
                 border-bottom: 1px solid #e6e6e6;
@@ -665,27 +660,10 @@ i {
 
         table {
             tr {
+
                 font-size: 12px;
                 border-bottom: 1px dashed #dbdbdb;
                 height: 58px;
-
-                > td:first-child {
-                    color: $colorB;
-                }
-
-                > td:last-child {
-                    text-align: right;
-                }
-
-                td img {
-                    vertical-align: middle;
-                    width: 36px;
-                    height: 36px;
-                    margin-right: 4px;
-                }
-            }
-
-            thead{
 
                 th {
                     font-weight: bold;
@@ -696,9 +674,26 @@ i {
                     vertical-align: bottom;
                 }
 
-                th:last-child{
+                > td:first-child {
+                    color: $colorB;
+                }
+
+                /* IE8 does not support last-child */                
+                th.last-child, td.last-child {
                     text-align: right;
                     padding-right: 0px;
+                }
+
+                th:last-child, td:last-child{
+                    text-align: right;
+                    padding-right: 0px;
+                }
+
+                td img {
+                    vertical-align: middle;
+                    width: 36px;
+                    height: 36px;
+                    margin-right: 4px;
                 }
             }
         }
@@ -708,10 +703,6 @@ i {
                 td:nth-child(4n+3) {
                     color: $colorB;
                 }
-
-                /*td:nth-child(2n){
-                    color: $colorA;
-                }*/
 
                 td:first-child + td + td {
                     color: $colorB;
@@ -832,6 +823,11 @@ i {
         @include border-radius(3px);
     }
 
+    /**/
+    a.last-child {
+        margin-right: 0px;
+    }
+
     a:last-child {
         margin-right: 0px;
     }
@@ -857,10 +853,6 @@ i {
     span.orange_yellow {
         color: #fbaf3a;
     }
-
-    /*input[type=button].btn {
-        font-size: 14px;
-    }*/
 
     .th {
         padding: 8px;
@@ -1144,9 +1136,13 @@ i {
             padding-left: 0;
         }
 
-        td:last-child {
+        td.last-child {
             padding-right: 0;
         }
+
+        td:last-child {
+            padding-right: 0;
+        }       
 
     }
 
@@ -1384,7 +1380,15 @@ i {
                 @include border-radius(4px 0 0 4px);
             }
 
-            td:last-child {
+            th.last-child{
+                @include border-radius(0 4px 4px 0);
+            }
+
+            td.last-child {
+                @include border-radius(0 4px 4px 0);
+            }
+
+            th:last-child, td:last-child {
                 @include border-radius(0 4px 4px 0);
             }
         }

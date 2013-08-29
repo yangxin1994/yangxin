@@ -1,0 +1,46 @@
+<form action="<%= admin_announcements_path + (@announcement["created_at"].nil? ? '' : "/#{@announcement["_id"]}") %>"
+      name="announcement"
+      enctype="multipart/form-data"
+      method="post"
+      id="announcement_form"
+      class="form-horizontal"
+>
+  <input value="<%= @announcement["created_at"].present? ? 'put' : 'post' %>" type='hidden' name="_method">
+
+  <legend></legend>
+
+  <div class="control-group">
+    <label class="control-label" >公告标题:</label>
+    <div class="controls">
+      <div class="input-append">
+      <input class="input-medium" type="text" name="announcement[title]" placeholder="您好,..." value="<%=@announcement["title"]%>">
+        <div class="btn-group">
+          <button class="btn dropdown-toggle" data-toggle="dropdown">
+            选择类型
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu dropselect" id="type_select">
+            <li><a href="#type-2">QuillMe公告</a></li>
+            <li><a href="#type-1">Quill公告</a></li>
+          </ul>
+          <input type="hidden" name="announcement[type]" />
+        </div>
+      </div>
+  </div>
+  </div>
+
+  <input type="hidden" name="announcement[type]" id="announcement_type" value="<%= @announcement["type"] || 1 %>">
+  
+  <div class="control-group">
+    <label class="control-label" >公告正文:</label>
+    <div class="controls">
+      <textarea class="textarea" name="announcement[content]" id="content_body" cols="7" placeholder="请输入公告正文"><%= @announcement["content"] %></textarea>
+    </div>
+  </div>
+
+  <div class="pull-right">
+  <%= link_to "<<返回列表", admin_announcements_path %>
+  <button type="submit" class="btn btn-primary">确认无误</button>
+
+  </div>
+</form>

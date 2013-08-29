@@ -435,7 +435,11 @@ class Sample::UsersController < Sample::SampleController
     current_user.email_to_be_changed = params[:email]
     current_user.change_email_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
     current_user.save
-    EmailWorker.perform_async("change_email", params[:email], "#{request.protocol}#{request.host_with_port}/users/setting/change_email_verify_key", :user_id => current_user._id.to_s)
+    EmailWorker.perform_async("change_email",
+      params[:email],
+      "#{request.protocol}#{request.host_with_port}",
+      "/users/setting/change_email_verify_key",
+      :user_id => current_user._id.to_s)
     render_json_s and return
   end
 
