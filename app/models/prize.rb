@@ -52,7 +52,7 @@ class Prize
 
 	def update_prize(prize)
 		photo_url = prize.delete("photo_url")
-		if !photo_url.blank? && photo_url != self.photo.picture_url
+		if !photo_url.blank? && photo_url != self.photo.try(:picture_url)
 			material = Material.create_image(photo_url)
 			self.photo = material
 		end

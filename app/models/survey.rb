@@ -118,7 +118,7 @@ class Survey
 
   has_many :answers
   has_many :reward_schemes
-  has_many :email_histories
+  has_many :survey_invitation_histories
   has_many :survey_spreads
   has_many :export_results
   has_many :analysis_results

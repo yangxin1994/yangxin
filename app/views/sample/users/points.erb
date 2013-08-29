@@ -61,6 +61,8 @@
                             <td>
                                 <% if !log["survey_id"].blank? %>
                                     <span><%= truncate(log["survey_title"], length: 22) %></span>
+                                <% elsif PointLog::ADMIN_OPERATE == log["reason"].to_i %>
+                                    <span><%= truncate(log["remark"], length: 22) %></span>
                                 <% elsif !log["gift_type"].blank? %>
                                     <% case log["gift_type"].to_i %>
                                     <% when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE %>

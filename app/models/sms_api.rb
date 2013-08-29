@@ -52,6 +52,10 @@ class SmsApi # 短信接口
 
 	#同步发送即时短信
 	def self.send_sms(phone, message)
+		puts "AAAAAAAAAAAAAA"
+		puts phone
+		puts message
+		puts "AAAAAAAAAAAAAA"
 		return if Rails.env != "production"
 		result = get('/sdkproxy/sendsms.action',
 				:query => {:cdkey    => SmsApi::CDKEY,
