@@ -33,7 +33,10 @@ class Log
 		else
 			@logs = Log.fresh_logs.have_user.desc(:created_at).limit(limit)
 		end
-    	@logs = @logs.map{|log| log['username'] = log.user.try(:nickname);log['avatar'] = log.user.avatar ? log.user.avatar.picture_url : nil;log}
+    	@logs = @logs.map do |log|
+    		log['username'] = log.user.try(:nickname)
+    		log['avatar'] = log.user.avatar ? log.user.avatar.picture_url : nil;log
+    	end
 	end
 
 	def self.get_newest_exchange_logs

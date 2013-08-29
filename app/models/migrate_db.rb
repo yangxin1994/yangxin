@@ -2,6 +2,7 @@
 class MigrateDb
 
 	def self.migrate
+		Log.destroy_all
 		# self.migrate_point_log
 		self.migrate_survey_spreads
 		self.migrate_gift
