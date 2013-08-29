@@ -109,7 +109,7 @@
 					<li <%= hide_border?(@fail_lottery_logs,index) %>>
 						<span class="rank-list-left l">
 							<a class="userhead l" href="javascript:void(0);">
-								<img src="<%= get_avatar(log['user_id'],'small') %>" alt="<%= log['nickname']%>">
+								<img src="<%= small_avatar(log['user_id']) %>" alt="<%= log['nickname']%>">
 							</a>
 							<span class="username l">
 								<a href="javascript:void(0);">
@@ -135,7 +135,7 @@
 						<li <%= hide_border?(@succ_lottery_logs,index) %>>
 						<span class="rank-list-left l">
 							<a class="userhead l" href="javascript:void(0);">
-								<img src="<%= show_image(log['avatar'],'avatar') %>" alt="<%= log['nickname']%>">
+								<img src="<%= small_avatar(log['user_id']) %>" alt="<%= log['nickname']%>">
 							</a>
 							<span class="username l">
 								<a href="javascript:void(0);">
