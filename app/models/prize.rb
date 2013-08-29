@@ -46,13 +46,13 @@ class Prize
 		prize = Prize.new(prize)
 		prize.save
 		prize.photo = material
-		prize["photo_url"] = material.value
+		prize["photo_url"] = material.picture_url
 		return prize
 	end
 
 	def update_prize(prize)
 		photo_url = prize.delete("photo_url")
-		if !photo_url.blank? && photo_url != self.photo.value
+		if !photo_url.blank? && photo_url != self.photo.picture_url
 			material = Material.create_image(photo_url)
 			self.photo = material
 		end
@@ -64,7 +64,7 @@ class Prize
 		prizes = prizes.where(:title => /#{title}/) if !title.blank?
 		prizes = prizes.where(:type.in => Tool.convert_int_to_base_arr(type)) if !type.blank? && type != 0
 		prizes.each do |p|
-			p["photo_url"] = p.photo.try(:value)
+			p["photo_url"] = p.photo.try(:picture_url)
 		end
 		return prizes
 	end

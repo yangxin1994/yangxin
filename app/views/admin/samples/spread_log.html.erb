@@ -1,12 +1,11 @@
 <% content_for :head do %>
-  <%= stylesheet_link_tag "pages/admin/samples-bundle" %>
   <%= javascript_include_tag "pages/admin/samples/form-bundle" %>
 <% end %>
 
 <% content_for :sidenav do %>
 
   <li>
-    <a href="/admin/samples/<%= params["id"] %>/edit">
+    <a href="/admin/samples/<%= params["id"] %>">
     <i class="icon-chevron-right"></i>
     基本属性
     </a>
