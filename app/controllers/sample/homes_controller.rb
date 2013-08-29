@@ -11,7 +11,7 @@ class Sample::HomesController < Sample::SampleController
 
 		@public_notices = auto_paginate PublicNotice.opend.desc(:updated_at)
 
-    	@hotest_gifts = Gift.on_shelf.real.desc(:exchange_count).limit(8).map { |e| e.info }
+    	@hotest_gifts = Gift.on_shelf.real.desc(:view_count).limit(8).map { |e| e.info }
 
 		@top_rank_users = User.sample.where(:is_block => false).desc(:point).limit(5)
 		@top_rank_users = @top_rank_users.map do |user|

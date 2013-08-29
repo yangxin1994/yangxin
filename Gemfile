@@ -81,6 +81,7 @@ group :test do
 end
 
 group :development do
+  gem 'thin'
   gem 'pry-rails', "~> 0.2.2"
   gem "better_errors", "~> 0.8.0"
 end
