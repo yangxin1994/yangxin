@@ -6,7 +6,6 @@
 			window.announcements_count = <%= raw (@announcements['total_page'].to_i).to_json %>;
 		});
 	</script>	
-  <%= stylesheet_link_tag "pages/admin/announcements-bundle", :media => "all" %>  
 	<%= javascript_include_tag "pages/admin/announcements/index-bundle" %>
 <% end %>
 <% content_for :sidenav do %>
