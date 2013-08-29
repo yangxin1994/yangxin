@@ -4,36 +4,35 @@ class Admin::SampleAttributesController< Admin::AdminController
 
 	before_filter :require_sign_in
 	before_filter :require_admin
-  before_filter :get_client
   before_filter :params_convert, only: [:create, :update]
 
   def index
     params[:page] ||= 1
-    resp = @client.get_attributes(params)
+    resp = @modle.get_attributes(params)
     @attributes = resp.value["data"]
     @paginate = resp.value
   end
 
   def create
-    @client.create_attribute(params[:attribute])
+    @modle.create_attributes(params[:attribute])
     redirect_to :back
   end
 
   def update
-    @client.update_attribute(params[:id], params[:attribute])
+    @modle.update_attributes(params[:id], params[:attribute])
     redirect_to :back
   end
 
   def destroy
-    @client.delete_attribute(params[:id])
+    @modle.delete_attribute(params[:id])
     redirect_to :back
   end
 
   def bind_question
     if request.get?
-      @question_client = Admin::QuestionClient.new(session_info)
-      @question = @question_client.get_question(params[:id]).value
-      @attrs = @client.get_all_attributes(params).value["data"]
+      @question_modle = Admin::QuestionClient.new(session_info)
+      @question = @question_modle.get_question(params[:id]).value
+      @attrs = @modle.get_all_attributes(params).value["data"]
 
       case @question['question_type']
       when 0 # choice
@@ -65,19 +64,16 @@ class Admin::SampleAttributesController< Admin::AdminController
       end
     elsif request.put?
       params[:relation] = JSON.parse params[:relation]
-      @client.bind_attribute(params[:id], params[:attribute_id], params[:relation])
+      @modle.bind_attribute(params[:id], params[:attribute_id], params[:relation])
       render json: {}
     elsif request.delete?
-      @question_client = Admin::QuestionClient.new(session_info)
-      @question_client.remove_attribute_bind(params[:id])
+      @question_modle = Admin::QuestionClient.new(session_info)
+      @question_modle.remove_attribute_bind(params[:id])
       redirect_to :back
     end
   end
 
   private
-  def get_client
-    @client = Admin::SampleAttributeClient.new(session_info)
-  end
 
   def params_convert
     params[:attribute][:type] = params[:attribute][:type].to_i

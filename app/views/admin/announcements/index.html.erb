@@ -1,11 +1,5 @@
 <!-- content for head -->
 <% content_for :head do %>
-	<script type="text/javascript">
-		jQuery(function($) {
-			window.announcements = <%= raw (@announcements['data'] || []).to_json %>;
-			window.announcements_count = <%= raw (@announcements['total_page'].to_i).to_json %>;
-		});
-	</script>	
 	<%= javascript_include_tag "pages/admin/announcements/index-bundle" %>
 <% end %>
 <% content_for :sidenav do %>

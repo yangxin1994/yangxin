@@ -22,7 +22,7 @@ class SmsApi # 短信接口
 	CDKEY = "3SDK-EMY-0130-PIWST"
 	PASSWORD = '349473'
 	CODE = 4699
-	AUTOGRAPH = '［优数调研］'
+	AUTOGRAPH = '［问卷吧］'
 	##### 注意: 不能使用短信接口发送个人信息(如"老地方见","你在哪"之类)                   #####
 	##### 否则短信平台会封掉接口，测试时只写两个字"内部测试"加其他必要的程序信息(如校验码)#####
 	##### 注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意注意!!注意!#####
@@ -52,6 +52,10 @@ class SmsApi # 短信接口
 
 	#同步发送即时短信
 	def self.send_sms(phone, message)
+		puts "AAAAAAAAAAAAAA"
+		puts phone
+		puts message
+		puts "AAAAAAAAAAAAAA"
 		return if Rails.env != "production"
 		result = get('/sdkproxy/sendsms.action',
 				:query => {:cdkey    => SmsApi::CDKEY,
