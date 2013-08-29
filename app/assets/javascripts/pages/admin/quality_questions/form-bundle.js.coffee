@@ -61,11 +61,14 @@ $ ->
 
   $(".add-choice").click ->
     $this = $(this)
+    _qid = $this.closest('.choices').data('qid')
     choice_index = $this.parent().find(".choice").length
+    ran = "#{Date.now()}#{choice_index}"
+
     html = """
-      <div class="input-prepend input-append choice" data-id="choice-#{Date.now()}#{choice_index}">
+      <div class="input-prepend input-append choice" data-id="choice-#{ran}">
         <span class="add-on drag-choice">拖拽</span>
-        <input class="span7 choice-text" id="appendedPrependedInput" type="text" value="新选项">
+        <input class="span7 choice-text" id="appendedPrependedInput" type="text" value="新选项" name="questions[#{_qid}][items][#{ran}]">
         <span class="add-on delete"><a href="#" class="btn-choice-delete"><i class="icon-remove"></i></a></span>
       </div>
       <p></p>
@@ -97,7 +100,6 @@ $ ->
           $ic.children('.drag-choice').html("拖拽: #{$item.children("input[type=text]").val()}")
           $ic.children('span.delete').remove()
           $ic.children('input').remove()
-          console.log $ic
           $ic.appendTo group
     false
 
@@ -108,12 +110,16 @@ $ ->
     _p.remove()
 
   $("#btn_sub").click ->
-    _answers = ""
-    $('.answer-choices .choice').each ->
+    _answer_groups = []
+    $('.group').each ->
+      _answers = []
       $this = $(this)
-      window.$this = $this
-      _answers += ",#{$this.data('id').split('-')[1]}"
-    $('#answers').val(_answers)
+      $this.find('.choice').each ->
+        $choice = $(this)
+        _answers.push $choice.data('id').split('-')[1]
+      _answer_groups.push _answers.join(',')
+    _answer_groups = _answer_groups.join(';')
+    $('#answers').val(_answer_groups)
 
   do ->
     $("#qtab-0").click()

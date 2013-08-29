@@ -53,7 +53,7 @@
           </div>
         </div>
 
-        <div class="choices">
+        <div class="choices" data-qid="<%= object._id %>">
           <div class="control-group">
             <label>选项</label>
             <div class="controls">
@@ -82,21 +82,32 @@
 
     <div id="<%= @quality_control_question_answer["_id"] %>" class="quality_control_question_answer">
       <div class="answer-choices" height="200px">
+      <% case @quality_control_question_answer["quality_control_type"].to_i %>
+      <% when 1 %>        
         <div class="group group-1 ui-droppable"><div title="唯一组不能删除">拖拽</div>
         <% @quality_control_question_answer.answer_content["items"].each do |item| %>
-
-<div class="input-prepend input-append choice ui-draggable" data-id="choice-<%= item %>">
-                <span class="add-on drag-choice ui-draggable">拖拽: <%= @question.issue["items"].select{|a| a['id'] == item }[0]["content"]["text"] %></span>
-              </div>
-          <% end if @quality_control_question_answer.answer_content.present? %>
+          <div class="input-prepend input-append choice ui-draggable" data-id="choice-<%= item %>">
+            <span class="add-on drag-choice ui-draggable">拖拽: <%= @question.issue["items"].select{|a| a['id'] == item }[0]["content"]["text"] %></span>
+          </div>
+        <% end if @quality_control_question_answer.answer_content.present? %>
         </div>
       </div>
-
+      <% when 2 %>
+        <% @quality_control_question_answer.answer_content['matching_items'].each_with_index do |rows, index| %>
+        <div class="group group-<%= index + 1%> ui-droppable"><div title="唯一组不能删除">拖拽</div>
+          <% rows.each do |item| %>
+          <div class="input-prepend input-append choice ui-draggable" data-id="choice-<%= item %>">
+            <span class="add-on drag-choice ui-draggable">拖拽: <%= @question_objects.map { |e| e.issue["items"].select{|a| a['id'] == item }.inject(&:+)}.compact[0]["content"]["text"] %></span>
+          </div>
+          <% end %>
+        </div>
+        <% end if @quality_control_question_answer.answer_content.present? %>
+      </div>
       <input type="hidden" name="answers" id="answers">
-
+      <% end %>
     </div>
-      <a href="#" class="btn add-answers">增加答案组</a>
 
+      <a href="#" class="btn add-answers">增加答案组</a>
 
   <div class="pull-right">
   <%= link_to "<<返回列表", admin_quality_questions_path %>
