@@ -61,8 +61,6 @@
                             <td>
                                 <% if !log["survey_id"].blank? %>
                                     <span><%= truncate(log["survey_title"], length: 22) %></span>
-                                <% elsif PointLog::ADMIN_OPERATE == log["reason"].to_i %>
-                                    <span><%= truncate(log["remark"], length: 22) %></span>
                                 <% elsif !log["gift_type"].blank? %>
                                     <% case log["gift_type"].to_i %>
                                     <% when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE %>
@@ -81,6 +79,8 @@
                                         <img src="<%= small_gift_image(log['gift_picture_url']) %>" style="width: 36px; height: 36px;"/>
                                         <a target="_blank" href="/gifts/<%= log["gift_id"] %>"><%= truncate(log["gift_name"], length: 22) %></a>
                                     <% end %>
+                                <% elsif [PointLog::ADMIN_OPERATE, PointLog::PUNISH, PointLog::INVITE_USER, PointLog::REVOKE].include?(log["reason"].to_i) %>
+                                    <span><%= truncate(log["remark"], length: 22) %></span>
                                 <% elsif log["reason"].to_i == PointLog::IMPORT %>
                                     <span><%= change_point_reason_type(PointLog::IMPORT) %>记录</span>
                                 <% end %>
