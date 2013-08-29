@@ -76,7 +76,7 @@
 						<span class="gift-remark">
 							<span class="integral l"><b><%= gift['point']%></b>积分</span>
 							<span class="gift-remark-right">
-								<span class="nop">人气：<b><%= gift['exchange_count']%></b></span>
+								<span class="nop">人气：<b><%= gift['view_count']%></b></span>
 								<span class="price">价值：<b><%= show_gift_price(gift['price'])%></b> 元</span>
 							</span>     
 						</span>
@@ -261,12 +261,12 @@
 		</div>
 	</div> 
 
+	<% if @fresh_news.present? %>
 	<div class="forums dashed-box l">
 		<div class="dashed-box-inner">
 			<div class="dashed-box-inner-top">
 				<h3 class="box-title">新鲜事</h3>
 			</div>
-			<% if @fresh_news.present? %>
 				<ul class="forums-list">
 					<% @fresh_news.each_with_index do |news,index|%>
 						<li <%= hide_border?(@fresh_news,index) %>>
@@ -275,13 +275,8 @@
 						</li>
 					<% end %>
 				</ul>
-			<% end %>
 		</div>
 	</div> 
-
+	<% end %>
 
 </div> 
-
-
-
-<%= render :partial => "/sample/survey_share" %>

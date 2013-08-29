@@ -465,6 +465,11 @@ class User
 		return user.login(client_ip, client_type, false)
 	end
 
+	def change_email(client_ip)
+		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i > change_email_expiration_time
+		self.email = self.email_to_be_changed
+		return self.login(client_ip, nil, false)
+	end
 
 	def self.get_account_by_activate_key(activate_info)
 		user = User.find_by_email(activate_info["email"])
@@ -1031,4 +1036,5 @@ class User
 		end
 		return nickname
 	end
+
 end

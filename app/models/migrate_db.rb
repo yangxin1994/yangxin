@@ -172,6 +172,8 @@ class MigrateDb
 			g.type = bg.type == 1 ? Gift::REAL : Gift::VIRTUAL
 			# the exchange count field
 			g.exchange_count = 0
+			# the view_count filed
+			g.view_count = Random.rand(0..9999).to_i
 			# the status field
 			g.status = [-1,0].include?(bg.status) ? Gift::OFF_THE_SHELF : Gift::ON_THE_SHELF
 			g.status = Gift::DELETED if bg.is_deleted

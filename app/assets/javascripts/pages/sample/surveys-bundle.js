@@ -98,7 +98,7 @@ jQuery(function($) {
 				},
 				success:function(retval){
 					butt.next('span').remove();
-					if(retval){
+					if(retval.success){
 						popup('#mobile_finish',null,null)	
 					}else{
 						butt.next('.code_exp').show();
