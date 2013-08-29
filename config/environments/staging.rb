@@ -112,7 +112,7 @@ OopsData::Application.configure do
 
 	# configuration for quill and quillme
 	config.quill_host = 'http://s.oopsdata.com'
-	config.quillme_host = 'http://wenjuanba.com'
+	config.quillme_host = 'http://staging.wenjuanba.com'
 
 	# configuration for roadie
 	config.action_mailer.default_url_options = {:host => 'res.oopsdata.com'}
