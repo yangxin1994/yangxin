@@ -14,10 +14,12 @@ class Quill::SharesController < Quill::QuillController
 		@survey_quota = @survey.quota
 		reward_scheme_id = @survey.reward_schemes.where(:default => true).first.try(:_id)
 		if reward_scheme_id.present?
-			@short_url = "#{Rails.application.config.quillme_host}#{show_s_path(reward_scheme_id)}"
-			result = MongoidShortener.generate(@short_url)	
+			# @short_url = "#{Rails.application.config.quillme_host}#{show_s_path(reward_scheme_id)}"
+			@short_url = "#{request.protocol}#{request.host_with_port}#{show_s_path(reward_scheme_id)}"
+			result = MongoidShortener.generate(@short_url)
 			if result.present?
-				@short_url = "#{Rails.application.config.quillme_host}/#{result}"
+				# @short_url = "#{Rails.application.config.quillme_host}/#{result}"
+				@short_url = "#{request.protocol}#{request.host_with_port}/#{result}"
 			end
 		end
 	end

@@ -83,7 +83,6 @@ class User
 	# QuillMe
 	has_many :reward_logs, :class_name => "RewardLog", :inverse_of => :user
 	has_many :orders, :class_name => "Order", :inverse_of => :sample
-	has_many :lottery_codes
 	# QuillAdmin
 	has_many :operate_orders, :class_name => "Order", :foreign_key => "operator_id"
 	has_many :operate_reward_logs, :class_name => "RewardLog", :inverse_of => :operator,:foreign_key => "operator_id"
@@ -235,7 +234,7 @@ class User
 	end
 
 	#生成订阅用户并发激活码或者邮件
-	def self.create_rss_user(email_mobile, callback=nil)
+	def self.create_rss_user(email_mobile, callback)
 		user = find_by_email_mobile(email_mobile)
 
 		account = {}
@@ -267,9 +266,14 @@ class User
 			end				
 
 			if active_code.present?
-				SmsWorker.perform_async("rss_subscribe", user.mobile, callback, :code => active_code)
+				SmsWorker.perform_async("rss_subscribe", user.mobile, "", :code => active_code)
 			else
-				EmailWorker.perform_async("rss_subscribe",user.email, callback) if account[:email]					
+				if account[:email]					
+					EmailWorker.perform_async("rss_subscribe",
+						user.email,
+						callback[:protocol_hostname],
+						callback[:path])
+				end
 			end			
 		end		
 		return {:success => true, :new_user => new_user}
@@ -310,7 +314,10 @@ class User
 				sample.update_attributes(:sms_verification_code => active_code, :sms_verification_expiration_time => (Time.now + 2.hours).to_i)
 				return SmsWorker.perform_async("find_password", email_mobile, "", :code => active_code)
 			else
-				return EmailWorker.perform_async("find_password", email_mobile, callback)
+				return EmailWorker.perform_async("find_password",
+					email_mobile,
+					callback[:protocol_hostname],
+					callback[:path])
 			end
 		else
 			return ErrorEnum::USER_NOT_EXIST
@@ -370,13 +377,17 @@ class User
 		existing_user = User.create if existing_user.nil?
 		existing_user.update_attributes(updated_attr)
 		if active_code.present?
-			SmsWorker.perform_async("welcome", existing_user.mobile, callback, :active_code => active_code)
+			SmsWorker.perform_async("welcome", existing_user.mobile, "", :active_code => active_code)
 		else
-			EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
+			if account[:email]
+				EmailWorker.perform_async("welcome",
+					existing_user.email,
+					callback[:protocol_hostname],
+					callback[:path])
+			end
 		end
 
 		# send welcome email
-		#EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
 		## TODO  send_mobile_message() if account[:mobile]
 		if !third_party_user_id.nil?
 			# bind the third party user if the id is provided
