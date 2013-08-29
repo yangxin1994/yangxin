@@ -26,20 +26,13 @@ class Admin::AnnouncementsController < Admin::AdminController
 
   # POST
   def create
-    params[:type] = params[:type].to_i
-    if params[:announcement][:attachment]
-      photo = ImageUploader.new
-      photo.store!(params[:announcement][:attachment])
-    end
-
     @announcement = PublicNotice.create_public_notice({
           :public_notice_type => params[:announcement][:type].to_i,
           :title =>  params[:announcement][:title],
-          :content =>  params[:announcement][:content],
-          :attachment => photo.try('url')
+          :content =>  params[:announcement][:content]
         }, current_user)
     if @announcement.created_at
-      redirect_to :action => :index, :flash => {:success => "公告已成功发送."}
+      redirect_to :index, :flash => {:success => "公告已成功发送."}
     else
       flash.alert = "公告创建失败,请检查参数!"
       render :new
@@ -50,35 +43,10 @@ class Admin::AnnouncementsController < Admin::AdminController
   # PUT
   def update
     @announcement = PublicNotice.find params[:id]
-    
-    photo = ImageUploader.new
-
-    photo.retrieve_from_store!(params[:announcement]['attachment'].to_s.split('/').last)
-    
-    if params[:attachment]
-      # del before
-      # but not work!
-      begin
-        photo.remove!
-      rescue Exception => e
-        
-      end
-      # store new one
-      photo.store!(params[:announcement][:attachment])
-    end
-
-    if photo.url.to_s.strip != ""
-      @announcement.update_attributes(
-          :public_notice_type => params[:announcement][:type].to_i,
-          :title =>  params[:announcement][:title],
-          :content =>  params[:announcement][:content],
-          :attachment => photo.try('url'))
-    else
-      @announcement.update_attributes(
-          :public_notice_type => params[:announcement][:type].to_i,
-          :title =>  params[:announcement][:title],
-          :content =>  params[:announcement][:content])
-    end
+    @announcement.update_attributes(
+        :public_notice_type => params[:announcement][:type].to_i,
+        :title =>  params[:announcement][:title],
+        :content =>  params[:announcement][:content])
     if @announcement.save
       redirect_to :action => :index, :flash => {:success => "公告已成功发送."}
     else

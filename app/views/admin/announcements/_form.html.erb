@@ -6,9 +6,6 @@
       class="form-horizontal"
 >
   <input value="<%= @announcement["created_at"].present? ? 'put' : 'post' %>" type='hidden' name="_method">
-  <p class="text-center">
-    <img src="<%= @announcement['photo_url'] %>" alt="" id="announcement_photo_src" class="img-circle" style="width: 260px; height: 260px;">
-  </p>
 
   <legend></legend>
 
@@ -16,7 +13,7 @@
     <label class="control-label" >公告标题:</label>
     <div class="controls">
       <div class="input-append">
-      <input class="input-medium" type="text" name="announcement[title]" placeholder="奖品名称" <%= "value=#{@announcement["title"]}" if @announcement["title"] %>>
+      <input class="input-medium" type="text" name="announcement[title]" placeholder="您好,..." value="<%=@announcement["title"]%>">
         <div class="btn-group">
           <button class="btn dropdown-toggle" data-toggle="dropdown">
             选择类型
@@ -26,6 +23,7 @@
             <li><a href="#type-2">QuillMe公告</a></li>
             <li><a href="#type-1">Quill公告</a></li>
           </ul>
+          <input type="hidden" name="announcement[type]" />
         </div>
       </div>
   </div>
@@ -39,14 +37,6 @@
       <textarea class="textarea" name="announcement[content]" id="content_body" cols="7" placeholder="请输入公告正文"><%= @announcement["content"] %></textarea>
     </div>
   </div>
-
-  <div class="control-group">
-    <label class="control-label">上传图片:</label>
-    <div class="controls">
-      <input type="file" name="announcement[attachment]" id="announcement_photo"/>
-    </div>
-  </div>
-
 
   <div class="pull-right">
   <%= link_to "<<返回列表", admin_announcements_path %>
