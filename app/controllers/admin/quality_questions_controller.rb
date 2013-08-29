@@ -38,7 +38,6 @@ class Admin::QualityQuestionsController < Admin::AdminController
       params[:question_type].to_i, 
       params[:question_number].to_i, 
       current_user)
-    binding.pry
     if quality_question[0].present?
       redirect_to admin_quality_question_path(quality_question[0]._id)
     else
@@ -107,8 +106,9 @@ class Admin::QualityQuestionsController < Admin::AdminController
   end
 
   def destroy
-    @result = @client._delete({}, "/#{params[:id]}")
-    render_result
+    render_json QualityControlQuestion.where(:_id => params[:id]).first do |question|
+      question.destroy
+    end
   end
 
 end

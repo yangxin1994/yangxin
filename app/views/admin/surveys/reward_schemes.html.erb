@@ -214,7 +214,7 @@
           </div>
           <input name="reward_scheme[prizes][<%= index %>][prob]" class="input-mini" type="text"  placeholder="中奖率" value="<%= prize['prob'] %>">
           <input name="reward_scheme[prizes][<%= index %>][amount]" class="input-mini" type="text" placeholder="个数" value="<%= prize['amount'] %>">
-          <input name="reward_scheme[prizes][<%= index %>][deadline]" class="input-small reward-time" type="text" placeholder="YY/MM/DD" value="<%= prize['deadline'] %>">
+          <input name="reward_scheme[prizes][<%= index %>][deadline]" class="input-small reward-time" type="text" placeholder="YY/MM/DD" value="<%= Time.at(prize['deadline']).strftime("%y/%m/%d") %>">
         </div>
       </div>
     </div>

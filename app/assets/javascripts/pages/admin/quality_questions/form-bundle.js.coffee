@@ -119,6 +119,7 @@ $ ->
         _answers.push $choice.data('id').split('-')[1]
       _answer_groups.push _answers.join(',')
     _answer_groups = _answer_groups.join(';')
+    console.log _answer_groups
     $('#answers').val(_answer_groups)
 
   do ->

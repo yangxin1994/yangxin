@@ -20,7 +20,7 @@ module SurveysHelper
     case type.to_i
     when 1
       "客观题"
-    when 1
+    when 2
       "匹配题"
     end
       
