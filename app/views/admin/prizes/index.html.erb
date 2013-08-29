@@ -1,6 +1,6 @@
 <!-- content for head -->
 <% content_for :head do %>
-  <%= javascript_include_tag "pages/admin/prizes/form-bundle" %>
+  <%= javascript_include_tag "pages/admin/prizes/index-bundle" %>
 <% end %>
 <% content_for :sidenav do %>
   <li class="active">
@@ -67,7 +67,7 @@
               <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
-              <li><a href="/admin/prizes/<%= prize["_id"] %>" title="Delete" data-id="<%= prize["_id"] %>"><i class="icon-remove"></i>删除</a></li>
+              <li><a href="javascript:void(0)" title="Delete" data-id="<%= prize["_id"] %>" class="od-delete"><i class="icon-remove"></i>删除</a></li>
             </ul>
           </div>
         </td>
