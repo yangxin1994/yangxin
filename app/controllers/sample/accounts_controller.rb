@@ -66,7 +66,7 @@ class Sample::AccountsController < Sample::SampleController
         params[:password],
         current_user,
         params[:third_party_user_id],
-        '#{request.protocol}#{request.host_with_port}/account/email_activate')
+        "#{request.protocol}#{request.host_with_port}/account/email_activate")
       render_json_auto(retval) and return
     end
   end
