@@ -74,7 +74,7 @@
       <% @point_log["data"].each_with_index do |log_item, i| %>
       <tr>
         <td><%= point_reason log_item["reason"] %></td>
-        <td><%= Time.parse(log_item["created_at"]).strftime("%F %T") %></td>
+        <td><%= Time.parse(log_item["created_at"].to_s).strftime("%F %T") %></td>
         <td>
           <%= log_item['amount'] %>
         </td>

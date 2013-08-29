@@ -3,7 +3,7 @@ class Sample::GiftsController < Sample::SampleController
 
 
 	def index
-		@sort_type = params[:sort_type].present? ? params[:sort_type]  : 'exchange_count' 
+		@sort_type = params[:sort_type].present? ? params[:sort_type]  : 'view_count' 
 		params[:per_page] = 12
 		@hotest_gifts = Gift.on_shelf.real.desc(@sort_type)
 		@hotest_gifts = auto_paginate(@hotest_gifts) do |e|

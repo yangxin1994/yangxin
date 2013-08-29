@@ -26,7 +26,7 @@ class Agent::Sessions::SigninController < Agent::AgentsController
       render :index
     else
       session[:auth_key] = auth_key
-      redirect_to agent_tasks_url, :flash => { :success => "登陆成功!" }
+      redirect_to agent_tasks_url, :flash => { :success => "登录成功!" }
     end
   end
   
