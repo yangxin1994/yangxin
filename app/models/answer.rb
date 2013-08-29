@@ -917,8 +917,8 @@ class Answer
     # execute the review operation
     if review_result
       self.set_finish
-      message_title = "恭喜,您参与的问卷通过审核!"
-      message_content = "你的此问卷[#{self.survey.title}]的答案通过审核." if message_content.blank?
+      message_title = "问卷[#{self.survey.title}]通过审核!"
+      message_content = "您参与的[#{self.survey.title}]已通过审核,感谢参与."
     else
       self.set_reject
       self.reject_type = REJECT_BY_REVIEW

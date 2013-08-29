@@ -124,5 +124,5 @@ OopsData::Application.configure do
   # ofcard uri
   config.ofcard_service_uri = "http://api2.ofpay.com/"
   config.ofcard_key_str = "OFCARD"
-  config.ret_url = "http://221.221.17.98:4000/orders/confirm"
+  config.ret_url = "http://staging.wenjuanba.com/orders/confirm"
 end
