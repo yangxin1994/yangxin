@@ -44,7 +44,7 @@ class SmsInvitationWorker
 				surveys_for_sample[u_id] ||= []
 				surveys_for_sample[u_id] << survey._id.to_s
 				sample = User.sample.find_by_id(u_id)
-				sample_sms_history_batch << { :sample_id => sample._id, :survey_id => survey._id, :type => "sms" } if !user.nil?
+				sample_sms_history_batch << { :user_id => sample._id, :survey_id => survey._id, :type => "sms" } if !user.nil?
 			end
 			# update sms history for samples
 			SurveyInvitationHistory.collection.insert(sample_sms_history_batch)
