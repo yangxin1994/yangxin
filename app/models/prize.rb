@@ -46,7 +46,7 @@ class Prize
 		prize = Prize.new(prize)
 		prize.save
 		prize.photo = material
-		prize["photo_url"] = material.value
+		prize["photo_url"] = material.picture_url
 		return prize
 	end
 
@@ -64,7 +64,7 @@ class Prize
 		prizes = prizes.where(:title => /#{title}/) if !title.blank?
 		prizes = prizes.where(:type.in => Tool.convert_int_to_base_arr(type)) if !type.blank? && type != 0
 		prizes.each do |p|
-			p["photo_url"] = p.photo.try(:value)
+			p["photo_url"] = p.photo.try(:picture_url)
 		end
 		return prizes
 	end

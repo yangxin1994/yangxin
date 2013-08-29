@@ -26,12 +26,10 @@ class Admin::PrizesController < Admin::AdminController
     params[:prize].delete(:photo)
     params[:prize][:photo_url] = photo.url
 
-    @prize = Prize.create(params[:prize])
-    @prize.update_gift(params[:prize])
-    if @prize.success
+    
+    if @prize = Prize.create_prize(params[:prize])
       redirect_to admin_prizes_path
     else
-      @prize = @prize.value
       render :new
     end
   end
@@ -45,8 +43,7 @@ class Admin::PrizesController < Admin::AdminController
       params[:prize].delete(:photo)
       params[:prize][:photo_url] = photo.url
     end
-    @prize.update_attributes(params[:prize])
-    if @prize.update_attributes(params[:prize])
+    if @prize.update_prize(params[:prize])
       redirect_to admin_prizes_path
     else
       @prize = params[:prize]

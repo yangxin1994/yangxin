@@ -7,7 +7,7 @@
 >
   <input value="<%= @prize["created_at"].present? ? 'put' : 'post' %>" type='hidden' name="_method">
   <p class="text-center">
-    <img src="<%= @prize['photo_url'] %>" alt="" id="prize_photo_src" class="img-circle" style="width: 260px; height: 260px;">
+    <img src="<%= @prize.photo.picture_url %>" alt="" id="prize_photo_src" class="img-circle" style="width: 260px; height: 260px;">
   </p>
 
   <legend></legend>
