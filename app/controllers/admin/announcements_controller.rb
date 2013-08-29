@@ -16,6 +16,10 @@ class Admin::AnnouncementsController < Admin::AdminController
     @announcement = PublicNotice.find params[:id]
   end
 
+  def edit
+    @announcement = PublicNotice.find params[:id]
+  end
+
   def new
     @announcement ={}
   end

@@ -49,7 +49,7 @@ class Admin::OrdersController < Admin::AdminController
 
   def finish
     render_json Order.where(:_id => params[:id]).first do |order|
-      order.finish(params[:success], params[:remark])
+      order.finish(params[:success] == 'true', params[:remark])
     end
   end
 

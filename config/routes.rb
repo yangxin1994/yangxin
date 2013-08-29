@@ -196,6 +196,7 @@ OopsData::Application.routes.draw do
             put 'setting/change_mobile' => 'users#change_mobile' 
             put 'setting/check_mobile_verify_code' => 'users#check_mobile_verify_code'
             put 'setting/change_email' => 'users#change_email'
+            get 'setting/change_email_verify_key' => 'users#change_email_verify_key'
             get 'setting/address' => 'users#address'
             put 'setting/address' => 'users#update_logistic_address'
             get 'setting/password' => 'users#password'
@@ -246,6 +247,12 @@ OopsData::Application.routes.draw do
       end
     end
     resources :short_urls, :only => [:show]
+    resources :ofcards do
+      collection do
+        get :confirm
+        post :confirm
+      end
+    end
   end
 
   namespace :answer_auditor, :module => 'admin' do
