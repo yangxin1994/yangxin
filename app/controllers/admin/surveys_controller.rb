@@ -139,8 +139,6 @@ class Admin::SurveysController < Admin::AdminController
 # ###########################
 
   def bind_question
-      binding.pry
-
     if request.get?
       _bind_question
     elsif request.put?
