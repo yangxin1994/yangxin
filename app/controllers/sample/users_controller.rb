@@ -401,7 +401,7 @@ class Sample::UsersController < Sample::SampleController
   # 根据手机号发送验证短信
   # PUT /users/setting/change_mobile?m=
   def change_mobile
-    render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST if User.find_by_email(params[:m]).present?
+    render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST and return if User.find_by_mobile(params[:m]).present?
     current_user.mobile_to_be_changed = params[:m]
     # current_user.sms_verification_code = Random.rand(100000..999999).to_s
     code = Tool.generate_active_mobile_code

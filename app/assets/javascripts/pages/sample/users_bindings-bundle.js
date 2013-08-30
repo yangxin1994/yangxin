@@ -121,7 +121,10 @@ jQuery(function($) {
 					$('#step2 .cont .resend-mobile').removeClass('active').addClass('c-lgray');
 					myTimer();
 				}else {
-					$.popupFancybox();
+					if (data.value.error_code=="error___3") {
+						$('#phone-binding .cont').empty().append('<p>此手机已经被使用，请选择其它手机</p>')
+					}
+					$('#verify-code').addClass('error')
 				}
 			}
 		)
