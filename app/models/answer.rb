@@ -1147,9 +1147,6 @@ class Answer
       sample.orders << self.order unless self.order.nil?
     when RewardScheme::POINT
       self.deliver_reward
-      # sample.point += reward["amount"]
-      # sample.save
-      # PointLog.create(:amount => reward["amount"], :reason => PointLog::ANSWER, :survey_id => self.survey._id.to_s, :survey_title => self.survey.title)
     end
     return true
   end

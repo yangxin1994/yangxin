@@ -834,7 +834,7 @@ class User
 		time_point_ary.map! { |e| e * seconds_per_period + start_time.to_i}
 		active_sample_number = []
 		time_point_ary.each do |time_point|
-			logs = Log.only(:user_id).and(:created_at.gte => Time.at(time_point), :created_at.lt => Time.at(time_point + seconds_per_period))
+			logs = Log.where(:created_at.gte => Time.at(time_point), :created_at.lt => Time.at(time_point + seconds_per_period))
 			active_sample_number << logs.map {|e| e.user_id}.uniq.length
 		end
 		return active_sample_number

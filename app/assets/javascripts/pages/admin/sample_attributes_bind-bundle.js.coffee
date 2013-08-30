@@ -4,7 +4,7 @@
 #= require ui/widgets/od_address_selector
 #= require ui/widgets/od_time_selector
 #= require_tree ./templates
-##  require handlebars.runtime // handlerbars is already used in layout
+#= require handlebars.runtime
 
 $ ->
   to_panel_class = (name) ->
