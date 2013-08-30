@@ -212,7 +212,8 @@ class Admin::SamplesController < Admin::AdminController
   end
 
   def get_active_sample_count
-    render_json User.count_active_sample(params[:period], params[:time_length].to_i)
+    retval = User.count_active_sample(params[:period], params[:time_length].to_i)
+    render_json retval and return
   end
 
   def send_message

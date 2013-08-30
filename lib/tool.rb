@@ -199,9 +199,9 @@ module Tool
 		when DataType::DATE
 			return true if value == standard_value
 		when DataType::NUMBER_RANGE
-			return true if value[0] >= standard_value[0] && value[1] <= standard_value[1]
+			return true if self.range_compare(standard_value, value) == 1
 		when DataType::DATE_RANGE
-			return true if value[0] >= standard_value[0] && value[1] <= standard_value[1]
+			return true if self.range_compare(standard_value, value) == 1
 		when DataType::ADDRESS
 			return true if standard_value.include?(value)
 		when DataType::ARRAY
@@ -217,19 +217,5 @@ module Tool
 		return 1 if r1[0] <= r2[0] && r1[1] >= r2[1]
 		return -1 if r1[0] >= r2[0] && r1[1] <= r2[1]
 		return 0
-	end
-
-	def self.set_infinity(attr_name, attr_value)
-		sa = SampleAttribute.find_by_name(attr_name)
-		if ![DataType::NUMBER_RANGE, DataType::DATE_RANGE].include?(sa.type)
-			return attr_value
-		end
-		if attr_value[0] == -1
-			attr_value[0] = -1.0/0.0
-		end
-		if attr_value[1] == -1
-			attr_value[1] = 1.0/0.0
-		end
-		return attr_value
 	end
 end
