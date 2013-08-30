@@ -1,5 +1,4 @@
 //=require jquery
-//=require pages/admin/common/od_popup
 class Column
   constructor: (title) ->
     @title = title
