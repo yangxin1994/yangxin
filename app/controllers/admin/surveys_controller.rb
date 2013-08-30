@@ -132,3 +132,69 @@ class Admin::SurveysController < Admin::AdminController
    render :json => result
   end
 end
+
+# ###########################
+#
+# 问题属性绑定
+#
+# ###########################
+
+  def bind_question
+    if request.get?
+      _bind_question
+    elsif request.put?
+      _update_bind
+    elsif request.delete?
+      _unbind_question
+    end
+  end
+
+  private
+
+  def _bind_question
+
+    @question = Question.find_by_id(params[:id])
+    @attrs = SampleAttribute.all
+
+    case @question['question_type']
+    when 0 # choice
+      if @question['issue']['max_choice'] == 1
+        @attrs = @attrs.select {|attr| attr['type'] != 7} # except array
+      else
+        @attrs = @attrs.select {|attr| attr['type'] == 7} # only array
+      end
+    when 2 # text_blank
+      @attrs = @attrs.select {|attr| attr['type'] == 0}
+    when 3 # number_blank
+      @attrs = @attrs.select {|attr| [2, 4].include? attr['type']}
+    when 7 # time_blank
+      @attrs = @attrs.select {|attr| [3, 5].include? attr['type']}
+    when 8 # addr
+      @attrs = @attrs.select {|attr| attr['type'] == 6}
+    end
+    @addr_precision = 0
+    if @question['sample_attribute_id']
+      @attr = @attrs.select {|attr| attr['_id'] == @question['sample_attribute_id']}[0]
+      if @attr['type'] == 6
+        @question['sample_attribute_relation'].each do |key, value|
+          addr = QuillCommon::AddressUtility.find_province_city_town_by_code(value)
+          next if addr.blank?
+          @addr_precision = addr.split(/\s+\-\s+/).length - 1
+          break
+        end
+      end
+    end
+  end
+
+  def _unbind_question
+    @question = Question.find_by_id(params[:id])
+    @question.remove_attribute_bind
+    redirect_to :back
+  end
+
+  def _update_bind
+    params[:relation] = JSON.parse params[:relation]
+    @question = @question.find params[:id]
+    @question.bind_question(params[:question_id], params[:relation])
+    render json: {}
+  end
