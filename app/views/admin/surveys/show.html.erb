@@ -36,7 +36,7 @@
 
   <div class="well well-small">
     <p> Q<%= "#{qcount += 1}. <#{question['question_type']}> #{"[逻辑控制]" if question['is_logic_control']} #{question['content']['text'].gsub(/<[^>]*>/, '')}" %> 
-      <a href="/admin/sample_attributes/bind_question/<%= question_id %>" target="_blank"><i class="icon-edit"></i></a>
+      <a href="#" data-id="/admin/sample_attributes/bind_question/<%= question_id %>" target="_blank"><i class="icon-edit"></i></a>
     </p>
     <ul>
       <% question["issue"]["items"].try('each') do |item| %>
