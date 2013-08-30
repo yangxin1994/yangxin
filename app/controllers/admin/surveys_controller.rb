@@ -131,7 +131,6 @@ class Admin::SurveysController < Admin::AdminController
    result = @client.destroy_attributes(params)
    render :json => result
   end
-end
 
 # ###########################
 #
@@ -140,6 +139,8 @@ end
 # ###########################
 
   def bind_question
+      binding.pry
+
     if request.get?
       _bind_question
     elsif request.put?
@@ -155,7 +156,6 @@ end
 
     @question = Question.find_by_id(params[:id])
     @attrs = SampleAttribute.all
-
     case @question['question_type']
     when 0 # choice
       if @question['issue']['max_choice'] == 1
@@ -198,3 +198,6 @@ end
     @question.bind_question(params[:question_id], params[:relation])
     render json: {}
   end
+  
+end
+

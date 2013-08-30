@@ -31,7 +31,7 @@ class Admin::SampleAttributesController< Admin::AdminController
   def bind_question
     if request.get?
       @question_modle = Admin::QuestionClient.new(session_info)
-      @question = @question_modle.get_question(params[:id]).value
+      @question = @question_modle.get_question(params[:id])
       @attrs = @modle.get_all_attributes(params).value["data"]
 
       case @question['question_type']
