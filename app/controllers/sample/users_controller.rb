@@ -461,7 +461,7 @@ class Sample::UsersController < Sample::SampleController
       return
     end
 
-    retval = user.change_email(@remote_ip)
+    retval = user.change_email(request.remote_ip)
     if retval == false
       @success = false
       return
@@ -469,7 +469,7 @@ class Sample::UsersController < Sample::SampleController
     refresh_session(retval['auth_key'])
     @success = true
 =begin
-    retval = User.activate("email", activate_info, @remote_ip, params[:_client_type])  
+    retval = User.activate("email", activate_info, request.remote_ip, params[:_client_type])  
     if retval.class == String && retval.start_with?("error_")
       @success = false
     else

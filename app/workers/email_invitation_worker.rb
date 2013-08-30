@@ -49,6 +49,8 @@ class EmailInvitationWorker
 			end
 			# update email history for samples
 			SurveyInvitationHistory.collection.insert(sample_email_history_batch)
+			survey.email_promote_info["promote_email_count"] += sample_email_history_batch.length
+			survey.save
 		end
 		# 4. transform data
 		samples_for_surveys = {}

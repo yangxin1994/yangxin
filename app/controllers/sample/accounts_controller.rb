@@ -12,7 +12,7 @@ class Sample::AccountsController < Sample::SampleController
   def login
     result = User.login_with_email_mobile(params[:email_mobile],
                                           params[:password], 
-                                          @remote_ip, 
+                                          request.remote_ip, 
                                           params[:_client_type], 
                                           params[:permanent_signed_in], 
                                           params[:third_party_user_id])
@@ -110,7 +110,7 @@ class Sample::AccountsController < Sample::SampleController
       @success = false and return
     end
 
-    retval = User.activate("email", activate_info, @remote_ip, params[:_client_type])  
+    retval = User.activate("email", activate_info, request.remote_ip, params[:_client_type])  
     if retval.class == String && retval.start_with?("error_")
       @success = false
     else
@@ -125,7 +125,7 @@ class Sample::AccountsController < Sample::SampleController
     activate_info = {"mobile" => params[:mobile],
         "password" => params[:password],
         "verification_code" => params[:verification_code]}
-    retval = User.activate("mobile", activate_info, @remote_ip, params[:_client_type])
+    retval = User.activate("mobile", activate_info, request.remote_ip, params[:_client_type])
 
     render_json_e retval and return if retval.class == String && retval.start_with?("error_")
     refresh_session(retval['auth_key'])

@@ -103,6 +103,12 @@ class SmsApi # 短信接口
 		@survey_title = survey.title
 		reward_scheme_id = survey.sms_promote_info["reward_scheme_id"]
 		@survey_link = "#{Rails.application.config.quillme_host}/s/#{reward_scheme_id}"
+		if sample.status == User::REGISTERED
+			sample.auth_key = Encryption.encrypt_auth_key("#{sample._id}&#{Time.now.to_i.to_s}")
+			sample.auth_key_expire_time =  -1
+			sample.save
+			@survey_link += "?auth_key=#{sample.auth_key}"
+		end
 		@survey_link = Rails.application.config.quillme_host + "/" + MongoidShortener.generate(@survey_link)
 		unsubscribe_key = CGI::escape(Encryption.encrypt_activate_key({"email_mobile" => mobile}.to_json))
 		@unsubscribe_link = "#{Rails.application.config.quillme_host}/surveys/cancel_subscribe?key=#{unsubscribe_key}"
@@ -110,7 +116,7 @@ class SmsApi # 短信接口
 
 		@reward = ""
 		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
-		if reward_scheme.rewards[0].present?
+		if reward_scheme && reward_scheme.rewards[0].present?
 			case reward_scheme.rewards[0]["type"]
 			when RewardScheme::MOBILE
 				@reward = "#{reward_scheme.rewards[0]["amount"]}元现金奖励"
