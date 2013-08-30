@@ -1,5 +1,4 @@
-//=require jquery-ui.min
-
+//=require jquery-ui-dialog
 # 这里是预置的事件绑定
 window.d_c = new ()->
   {
