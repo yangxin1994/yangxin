@@ -227,10 +227,12 @@ class Sample::UsersController < Sample::SampleController
 
     respond_to do |format|
       format.html {
-
-        @user_info["income_person"][1] = 99999999 if @user_info["income_person"].is_a?(Array) and @user_info["income_person"][1] == -1
-        @user_info["income_family"][1] = 99999999 if @user_info["income_family"].is_a?(Array) and @user_info["income_family"][1] == -1
-        @user_info["seniority"][1] = 99999999 if @user_info["seniority"].is_a?(Array) and @user_info["seniority"][1] == -1
+        @user_info["income_person"][1] = 99999999 if @user_info["income_person"].is_a?(Array) and @user_info["income_person"][1] == 1.0/0.0
+        @user_info["income_family"][1] = 99999999 if @user_info["income_family"].is_a?(Array) and @user_info["income_family"][1] == 1.0/0.0
+        @user_info["seniority"][1] = 99999999 if @user_info["seniority"].is_a?(Array) and @user_info["seniority"][1] == 1.0/0.0
+        @user_info["income_person"][0] = -99999999 if @user_info["income_person"].is_a?(Array) and @user_info["income_person"][0] == -1.0/0.0
+        @user_info["income_family"][0] = -99999999 if @user_info["income_family"].is_a?(Array) and @user_info["income_family"][0] == -1.0/0.0
+        @user_info["seniority"][0] = -99999999 if @user_info["seniority"].is_a?(Array) and @user_info["seniority"][0] == -1.0/0.0
       }
       format.json { render_json_auto @user_info }
     end
@@ -258,15 +260,15 @@ class Sample::UsersController < Sample::SampleController
     # format attrs
     param_attrs["income_person"] = param_attrs["income_person"].split('_').collect!{|e| e.to_i } if param_attrs["income_person"]
     # change 99999999 to -1
-    param_attrs["income_person"][1] = -1 if param_attrs["income_person"].is_a?(Array) and param_attrs["income_person"][1] == 99999999
+    param_attrs["income_person"][1] = 1.0/0.0 if param_attrs["income_person"].is_a?(Array) and param_attrs["income_person"][1] == 99999999
 
     param_attrs["income_family"] = param_attrs["income_family"].split('_').collect!{|e| e.to_i} if param_attrs["income_family"]
     # change 99999999 to -1
-    param_attrs["income_family"][1] = -1 if param_attrs["income_family"].is_a?(Array) and param_attrs["income_family"][1] == 99999999
+    param_attrs["income_family"][1] = 1.0/0.0 if param_attrs["income_family"].is_a?(Array) and param_attrs["income_family"][1] == 99999999
 
     param_attrs["seniority"] = param_attrs["seniority"].split('_').collect!{|e| e.to_i} if param_attrs["seniority"]
     # change 99999999 to -1
-    param_attrs["seniority"][1] = -1 if param_attrs["seniority"].is_a?(Array) and param_attrs["seniority"][1] == 99999999
+    param_attrs["seniority"][1] = 1.0/0.0 if param_attrs["seniority"].is_a?(Array) and param_attrs["seniority"][1] == 99999999
     
     param_attrs["birthday"] = [param_attrs["birthday"].to_i, param_attrs["birthday"].to_i] if param_attrs["birthday"]    
 

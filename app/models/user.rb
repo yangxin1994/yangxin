@@ -982,13 +982,8 @@ class User
 		return true if ![DataType::NUMBER_RANGE, DataType::DATE_RANGE].include?(sa.type)
 		sa_value = self.read_sample_attribute(attr_name)
 		return true if sa_value.nil?
-		begin
-			return true if sa_value[0] < updated_value[0]
-			return true if sa_value[1] > updated_value[1] && updated_value[1] != -1 && sa_value[1] != -1
-			return true if sa_value[1] == -1 && updated_value[1] != -1
-		rescue
-		end
-		return false
+		return false if Tool.range_compare(sa_value, updated_value) == -1
+		return true
 	end
 
 	def read_sample_attribute(name)
@@ -1032,8 +1027,8 @@ class User
 	def set_basic_attributes(basic_attributes)
 		basic_attributes.each do |attr_name, attr_value|
 			next if !SampleAttribute::BASIC_ATTR.include?(attr_name)
-			if self.need_update_attribute(attr_name, basic_attributes[attr_name])
-				self.write_sample_attribute(attr_name, basic_attributes[attr_name])
+			if self.need_update_attribute(attr_name, attr_value)
+				self.write_sample_attribute(attr_name, attr_value)
 			end
 		end
 		return true

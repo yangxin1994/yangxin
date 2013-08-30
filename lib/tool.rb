@@ -3,6 +3,7 @@ require 'net/http'
 require 'uri'
 require 'csv'
 require 'quill_common'
+require 'data_type'
 
 module Tool
 
@@ -207,5 +208,28 @@ module Tool
 			return true if (standard_value & value).present?
 		end
 		return false
+	end
+
+	# if r1 includes r2, return 1
+	# if r2 includes r1, return -1
+	# else, return 0
+	def self.range_compare(r1, r2)
+		return 1 if r1[0] <= r2[0] && r1[1] >= r2[1]
+		return -1 if r1[0] >= r2[0] && r1[1] <= r2[1]
+		return 0
+	end
+
+	def self.set_infinity(attr_name, attr_value)
+		sa = SampleAttribute.find_by_name(attr_name)
+		if ![DataType::NUMBER_RANGE, DataType::DATE_RANGE].include?(sa.type)
+			return attr_value
+		end
+		if attr_value[0] == -1
+			attr_value[0] = -1.0/0.0
+		end
+		if attr_value[1] == -1
+			attr_value[1] = 1.0/0.0
+		end
+		return attr_value
 	end
 end

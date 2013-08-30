@@ -52,6 +52,10 @@ class SmsApi # 短信接口
 
 	#同步发送即时短信
 	def self.send_sms(phone, message)
+		Rails.logger.info "AAAAAAAAAAAAAA"
+		Rails.logger.info phone
+		Rails.logger.info message
+		Rails.logger.info "AAAAAAAAAAAAAA"
 		puts "AAAAAAAAAAAAAA"
 		puts phone
 		puts message
