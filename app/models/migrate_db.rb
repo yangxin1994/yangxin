@@ -286,7 +286,7 @@ class MigrateDb
 		EmailHistory.all.each do |e|
 			u = User.find_by_email(e.email) || e.user
 			s = e.survey
-			next if n.nil?
+			next if u.nil?
 			next if s.nil?
 			h = SurveyInvitationHistory.new
 			h.user = u
