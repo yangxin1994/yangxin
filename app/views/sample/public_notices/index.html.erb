@@ -7,11 +7,11 @@
 <div class="inner-page">
   <div class="pub_list">
     <div class="pub_inner">
-      <div class="top"><span class="h_icon"></span><span class="h">站内公告</span></div>  
+      <div class="top"><!-- <span class="h_icon"></span> --><span class="h">站内公告</span></div>  
       <ul>
       <% if @public_notices['data'].length > 0 %>
         <% @public_notices['data'].each_with_index do |pn,index| %>
-          <li>
+          <li <%= hide_border?(@public_notices['data'],index)%>>
             <a href="<%= public_notice_path(pn['_id'])%>">
               <span class="pn_l"><%= pn['title']%></span>
             </a>
@@ -36,7 +36,7 @@
       <dl>  
         <a href="/help/reward#get_reward">
           <dt></dt>
-          <dd><span>优币怎么获得? </span></dd>
+          <dd><span>积分怎么获得? </span></dd>
         </a>
       </dl>
       <dl>  

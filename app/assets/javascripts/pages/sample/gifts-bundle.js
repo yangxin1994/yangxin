@@ -279,7 +279,7 @@ $(function(){
 			window.amount_value + unit
 			order_ok = '<div class="o_t">系统审核通过后我们会把' + window.amount_value + unit + '充值到您的账户</div>'
 		}else{
-			popup("#order_ok",'surveys','gifts')
+			popup("#order_ok",'users/orders?scope=4','gifts')
 
 			order_ok = '<div class="o_t">系统会在审核通过后将礼品寄送到您的收货地址</div>'
 		}

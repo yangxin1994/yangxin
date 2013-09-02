@@ -1,5 +1,4 @@
 <% content_for :head do %>
-  <%= stylesheet_link_tag "pages/admin/surveys-bundle" %>
   <%= javascript_include_tag "pages/admin/surveys/show-bundle" %>
 <% end %>
 
@@ -37,7 +36,7 @@
 
   <div class="well well-small">
     <p> Q<%= "#{qcount += 1}. <#{question['question_type']}> #{"[逻辑控制]" if question['is_logic_control']} #{question['content']['text'].gsub(/<[^>]*>/, '')}" %> 
-      <a href="/admin/sample_attributes/bind_question/<%= question_id %>" target="_blank"><i class="icon-edit"></i></a>
+      <a href="/admin/surveys/<%= question_id %>/bind_question" data-id="/admin/sample_attributes/bind_question/<%= question_id %>" target="_blank"><i class="icon-edit"></i></a>
     </p>
     <ul>
       <% question["issue"]["items"].try('each') do |item| %>

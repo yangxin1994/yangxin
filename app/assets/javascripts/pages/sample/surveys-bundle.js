@@ -7,6 +7,8 @@ jQuery(function($) {
 		$('div.hot-research-banner').remove();
 	}
 
+	//$('div.content').effect("highlight", {color: 'blue'}, 3000)
+
 	//用户点击关闭安装插件提示，生成cookie，记录用户决定
 	$('.hot-research-banner .popup-close').click(function(){
 		$(this).parent('.hot-research-banner').remove();
@@ -98,7 +100,7 @@ jQuery(function($) {
 				},
 				success:function(retval){
 					butt.next('span').remove();
-					if(retval){
+					if(retval.success){
 						popup('#mobile_finish',null,null)	
 					}else{
 						butt.next('.code_exp').show();

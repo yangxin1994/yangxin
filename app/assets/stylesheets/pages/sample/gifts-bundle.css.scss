@@ -674,10 +674,14 @@ ul.exc_nav{
 		}		
 		div.order_inf{
 			@include clearfix;
+			padding-left:40px;
 			div{
 				float:left;
 				width: 180px;
 			}
+		}
+		div.order_inf + .answer_look.inf{
+			padding-left:40px;
 		}
 		a{
 			color:#3E98EE;
@@ -700,7 +704,7 @@ ul.exc_nav{
 			}
 			.answer{
 				font-size:16px;
-  			background:#ec1717;
+  			background:#f14646;
   			margin-right:70px;
   			&:hover{
 					background:#F25D5D;

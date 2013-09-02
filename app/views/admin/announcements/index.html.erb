@@ -1,14 +1,6 @@
 <!-- content for head -->
 <% content_for :head do %>
-	<script type="text/javascript">
-		jQuery(function($) {
-			window.announcements = <%= raw (@announcements['data'] || []).to_json %>;
-			window.announcements_count = <%= raw (@announcements['total_page'].to_i).to_json %>;
-		});
-	</script>	
-
 	<%= javascript_include_tag "pages/admin/announcements/index-bundle" %>
-	<%= stylesheet_link_tag "pages/admin/announcements-bundle", :media => "all" %>  
 <% end %>
 <% content_for :sidenav do %>
   <li class="active">
@@ -60,7 +52,7 @@
       <% @announcements["data"].each_with_index do |announcement, i| %>
       <tr>
 	      <td>                           
-	      	<a href="/admin/announcements/<%= announcement["_id"] %>" title="点击查看/回复"><%= announcement["title"] %></a></td>
+	      	<a href="/admin/announcements/<%= announcement["_id"] %>/edit" title="点击查看/回复"><%= announcement["title"] %></a></td>
 	      <td><%= announcement["user_email"] %></td>
 	      <td><%= announcement["created_at"].strftime("%F %T") %></td>
 	      <td>

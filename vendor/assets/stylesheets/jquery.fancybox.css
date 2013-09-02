@@ -122,12 +122,12 @@
 
 .fancybox-nav {
 	position: absolute;
+	margin: 10px 0px;
 	top: 0;
 	width: 10%;
 	height: 100%;
 	cursor: pointer;
 	text-decoration: none;
-	background: transparent; /* helps IE */
 	-webkit-tap-highlight-color: rgba(0,0,0,0);
 	z-index: 8040;
 }

@@ -30,7 +30,7 @@
                           <th style="width: 100px;">提交时间</th>
                           <th style="width: 500px;">答题奖励</th>
                           <th style="width: 80px;">订单状态</th>
-                          <th style="width: 60px;">详情</th>
+                          <th class="last-child" style="width: 60px;">详情</th>
                       </tr>
                   </thead>
                       <% @orders["data"].to_a.each do |order| %>
@@ -46,7 +46,7 @@
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-phone-charge-detail">订单详情</a>
                               </td>
                             
@@ -59,7 +59,7 @@
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-alipay-detail">订单详情</a>
                               </td>
                             
@@ -72,7 +72,7 @@
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-jifenbao-detail">订单详情</a>
                               </td>
                             <% when Order::QQ_COIN %>
@@ -84,7 +84,7 @@
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-qb-detail">订单详情</a>
                               </td>
                             <% when Order::REAL, Order::VIRTUAL %>
@@ -96,7 +96,7 @@
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-gift-detail">订单详情</a>
                               </td>
                             <% else %>
@@ -117,7 +117,7 @@
                           <th style="width: 100px;">兑换日期</th>
                           <th style="width: 500px;">所得奖品</th>
                           <th style="width: 80px;">订单状态</th>
-                          <th style="width: 60px;">详情</th>
+                          <th class="last-child" style="width: 60px;">详情</th>
                       </tr>
                   </thead>
                   <tbody>
@@ -134,7 +134,7 @@
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-phone-charge-detail">订单详情</a>
                               </td>
                             
@@ -147,7 +147,7 @@
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-alipay-detail">订单详情</a>
                               </td>
                             
@@ -160,7 +160,7 @@
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-jifenbao-detail">订单详情</a>
                               </td>
                             
@@ -173,7 +173,7 @@
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-qb-detail">订单详情</a>
                               </td>
                             <% when Order::REAL, Order::VIRTUAL %>
@@ -185,7 +185,7 @@
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>"  href="#order-gift-detail">订单详情</a>
                               </td>
                             <% else %>
@@ -206,7 +206,7 @@
                           <th style="width: 400px;">我兑换的礼品</th>
                           <th style="width: 80px;">消费积分</th>
                           <th style="width: 80px;">订单状态</th>
-                          <th style="width: 60px;">详情</th>
+                          <th class="last-child" style="width: 60px;">详情</th>
                       </tr>
                   </thead>
                   <tbody>
@@ -220,11 +220,13 @@
                                   <i class="icon-order icon-phonepay"></i>
                                   <span><%= order["amount"] %>元话费</span>
                               </td>
-                              <td><%= order["point"] %>积分</td>
+                              <td>
+                                <span class="point"><%= order["point"] %>积分</span>
+                              </td>
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>" href="#order-phone-charge-detail">订单详情</a>
                               </td>
                             
@@ -234,11 +236,13 @@
                                   <i class="icon-order icon-alipay"></i>
                                   <span><%= order["amount"] %>元支付宝</span>
                               </td>
-                              <td><%= order["point"] %>积分</td>
+                              <td>
+                                <span class="point"><%= order["point"] %>积分</span>
+                              </td>
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>" href="#order-alipay-detail">订单详情</a>
                               </td>
                             
@@ -248,11 +252,13 @@
                                   <i class="icon-order icon-jfb"></i>
                                   <span><%= order["amount"] %>集分宝</span>
                               </td>
-                              <td><%= order["point"] %>积分</td>
+                              <td>
+                                <span class="point"><%= order["point"] %>积分</span>
+                              </td>
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>" href="#order-jifenbao-detail">订单详情</a>
                               </td>
                             
@@ -262,11 +268,13 @@
                                   <i class="icon-order icon-qb"></i>
                                   <span><%= order["amount"] %>Ｑ币</span>
                               </td>
-                              <td><%= order["point"] %>积分</td>
+                              <td>
+                                <span class="point"><%= order["point"] %>积分</span>
+                              </td>
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>" href="#order-qb-detail">订单详情</a>
                               </td>
                             <% when Order::REAL, Order::VIRTUAL %>
@@ -275,11 +283,13 @@
                                   <img src="<%= small_gift_image(order['picture_url']) %>" style="width: 36px; height: 36px;"/>
                                   <a target="_blank" href="/gifts/<%= order["gift_id"] %>"><%= truncate(order["title"].to_s.strip, length: 22) %></a>
                               </td>
-                              <td><%= order["point"] %>积分</td>
+                              <td>
+                                <span class="point"><%= order["point"] %>积分</span>
+                              </td>
                               <td>
                                  <span><%= order_status(order["status"].to_i) %></span>
                               </td>
-                              <td>
+                              <td class="last-child">
                                   <a class="fancybox" name="<%= order["_id"] %>" href="#order-gift-detail">订单详情</a>
                               </td>
                             <% else %>

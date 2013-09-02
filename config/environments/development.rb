@@ -29,7 +29,6 @@ OopsData::Application.configure do
   config.assets.debug = true
 
 	#config.cache_store = :mem_cache_store, 'localhost:11211'
-
 	config.action_mailer.perform_deliveries = true
 	config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
@@ -74,13 +73,13 @@ OopsData::Application.configure do
 
 	# configuration for quill and quillme
 	config.quill_host = 'http://quill.oopsdata.net:3000'
-	config.quillme_host = 'http://quillme.oopsdata.net:3000'
+	config.quillme_host = 'http://localhost:8000'
 
 	# configuration for roadie
 	config.action_mailer.default_url_options = {:host => 'quill.oopsdata.net', :port => '3000'}
 
   config.mailgun_api_key = 'key-9zcv6-e7j8aratn9viu3unvbn2zc92j3'
-  config.survey_email_domain = 'oopsdata.net'
+  config.survey_email_domain = 'wenjuanba.net'
   config.user_email_domain = 'oopsdata.cn'
 
   # ofcard uri

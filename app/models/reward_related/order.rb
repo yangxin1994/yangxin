@@ -69,7 +69,6 @@ class Order
 
 
 	def self.create_redeem_order(sample_id, gift_id, amount, point, opt = {})
-
 		gift  = Gift.find_by_id(gift_id)
 		return ErrorEnum::ORDER_ERROR if amount.to_i < 1
 

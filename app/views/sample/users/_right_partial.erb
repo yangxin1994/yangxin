@@ -11,17 +11,17 @@
     <div class="data">
         <div class="tab" title="当前用户完成答题数量">
             <p>答题</p>
-            <p class="answer_count"><%= @current_user_info["answer_number"] %></p>
+            <p class="last-child answer_count"><%= @current_user_info["answer_number"] %></p>
             
         </div>
         <div class="tab" title="接受您推广的用户完成答题数量">
             <p>推广</p>
-            <p class="spread_count"><%= @current_user_info["spread_number"] %></p>
+            <p class="last-child spread_count"><%= @current_user_info["spread_number"] %></p>
             
         </div>
-        <div class="tab" title="当前用户的积分">
+        <div class="tab last-child" title="当前用户的积分">
             <p>积分</p>
-            <p class="point_count"><%= @current_user_info["point"] %></p>
+            <p class="last-child point_count"><%= @current_user_info["point"] %></p>
             
         </div>
     </div>
@@ -39,14 +39,14 @@
         <i class="icon-binding icon-mobile <%= 'active' if @current_user_info['bind_info']['mobile'] %>"></i>
         <i class="icon-binding icon-email <%= 'active' if @current_user_info['bind_info']['email'] %>"></i>
         <i class="icon-binding icon-sina<%= 'active' if @current_user_info['bind_info']['sina'] %>"></i>
-        <i class="icon-binding icon-renren <%= 'active' if @current_user_info['bind_info']['renren'] %>"></i>
+        <i class="last-child icon-binding icon-renren <%= 'active' if @current_user_info['bind_info']['renren'] %>"></i>
     </div>
 
     <!-- <div class="bindings icons">
         <i class="icon-binding icon-qzone <%= 'active' if @current_user_info['bind_info']['qzone'] %>"></i>
         <i class="icon-binding icon-weixin <%= 'active' if @current_user_info['bind_info']['weixin'] %>"></i>
         <i class="icon-binding icon-tx_weibo <%= 'active' if @current_user_info['bind_info']['tx_weibo'] %>"></i>
-        <i class="icon-binding icon-alipay <%= 'active' if @current_user_info['bind_info']['alipay'] %>"></i>
+        <i class="last-child icon-binding icon-alipay <%= 'active' if @current_user_info['bind_info']['alipay'] %>"></i>
     </div> -->
 
     <div class="user-tabs">

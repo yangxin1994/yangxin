@@ -16,28 +16,25 @@ class Admin::AnnouncementsController < Admin::AdminController
     @announcement = PublicNotice.find params[:id]
   end
 
+  def edit
+    @announcement = PublicNotice.find params[:id]
+  end
+
   def new
     @announcement ={}
   end
 
   # POST
   def create
-    params[:type] = params[:type].to_i
-    if params[:attachment]
-      photo = ImageUploader.new
-      photo.store!(params[:attachment])
-    end
-
     @announcement = PublicNotice.create_public_notice({
-          :public_notice_type => params[:type].to_i,
-          :title =>  params[:title],
-          :content =>  params[:content],
-          :attachment => photo.try('url')
+          :public_notice_type => params[:announcement][:type].to_i,
+          :title =>  params[:announcement][:title],
+          :content =>  params[:announcement][:content]
         }, current_user)
-
-    if @announcement.updated_at
-      redirect_to :action => :index
+    if @announcement.created_at
+      redirect_to :action => :index, :flash => {:success => "公告已成功发送."}
     else
+      flash.alert = "公告创建失败,请检查参数!"
       render :new
     end
     # render :json => @result
@@ -46,69 +43,23 @@ class Admin::AnnouncementsController < Admin::AdminController
   # PUT
   def update
     @announcement = PublicNotice.find params[:id]
-    
-    photo = ImageUploader.new
-
-    retval = @client._get({}, "/#{params[:id]}")
-    photo.retrieve_from_store!(retval.value['attachment'].to_s.split('/').last)
-    
-    if params[:attachment]
-      # del before
-      # but not work!
-      begin
-        photo.remove!
-      rescue Exception => e
-        
-      end
-      # store new one
-      photo.store!(params[:attachment])
-    end
-
-    if photo.url.to_s.strip != ""
-      @result = @client._put({
-        :public_notice => {
-          :public_notice_type => params[:type].to_i,
-          :title =>  params[:title],
-          :content =>  params[:content],
-          :attachment => photo.try('url')
-        }
-      }, "/#{params[:id]}")
+    @announcement.update_attributes(
+        :public_notice_type => params[:announcement][:type].to_i,
+        :title =>  params[:announcement][:title],
+        :content =>  params[:announcement][:content])
+    if @announcement.save
+      redirect_to :action => :index, :flash => {:success => "公告已成功发送."}
     else
-      @result = @client._put({
-        :public_notice => {
-          :public_notice_type => params[:type].to_i,
-          :title =>  params[:title],
-          :content =>  params[:content]
-        }
-      }, "/#{params[:id]}")
+      flash.alert = "公告创建失败,请检查参数!"
+      render :new
     end
-
-    if @result.success
-      flash[:notice] ="更新成功!"
-    else
-      flash[:notice] = "更新失败!请重新更新,并保证完整性和标题唯一性!"
-    end
-
-    redirect_to request.url
   end
 
   # DELETE
   def destroy
-    photo = ImageUploader.new
-    retval = @client._get({}, "/#{params[:id]}")
-
-    @result = @client._delete({}, "/#{params[:id]}")
-
-    if @result.success
-      photo.retrieve_from_store!(retval.value['attachment'].to_s.split('/').last)
-      begin
-        photo.remove!
-      rescue Exception => e
-        
-      end
+    render_json PublicNotice.where(:_id => params[:id]).first do |public_notice|
+      public_notice.destroy
     end
-
-    render :json => @result
   end
 
 end

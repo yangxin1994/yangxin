@@ -5,7 +5,7 @@ class EmailInvitationWorker
 		# 1. get all samples, excluding those are in the blacklist
 		sample_ids = User.sample.where(:email_subscribe => true, :is_block => false).map { |e| e._id.to_s }
 		# 2. get the surveys that need to send emails
-		published_survey = Survey.where(:email_promotable => true, status => Survey::PUBLISHED)
+		published_survey = Survey.where(:email_promotable => true, :status => Survey::PUBLISHED)
 		# 3. find out samples for surveys
 		surveys_for_sample = {}
 		published_survey.each do |survey|
@@ -21,7 +21,8 @@ class EmailInvitationWorker
 			sample_ids_unknow = []
 			sample_ids_available.each do |e|
 				current_sample = User.sample.find_by_id(e)
-				survey.sample_attribtes_for_promote.each do |sample_attribute|
+				sample_ids_selected << e if survey.sample_attributes_for_promote.blank?
+				survey.sample_attributes_for_promote.each do |sample_attribute|
 					v = current_sample.read_sample_attribute_by_id(sample_attribute["sample_attribute_by_id"])
 					match = Tool.check_sample_attribute(sample_attribute._id.to_s, v, sample_attribute["value"])
 					next if match == false
@@ -44,10 +45,12 @@ class EmailInvitationWorker
 				surveys_for_sample[u_id] ||= []
 				surveys_for_sample[u_id] << survey._id.to_s
 				sample = User.sample.find_by_id(u_id)
-				sample_email_history_batch << { :sample_id => sample._id, :survey_id => survey._id, :type => "email" } if !user.nil?
+				sample_email_history_batch << { :user_id => sample._id, :survey_id => survey._id, :type => "email" } if sample.present?
 			end
 			# update email history for samples
 			SurveyInvitationHistory.collection.insert(sample_email_history_batch)
+			survey.email_promote_info["promote_email_count"] += sample_email_history_batch.length
+			survey.save
 		end
 		# 4. transform data
 		samples_for_surveys = {}

@@ -112,7 +112,7 @@ OopsData::Application.configure do
 
 	# configuration for quill and quillme
 	config.quill_host = 'http://s.oopsdata.com'
-	config.quillme_host = 'http://wenjuanba.com'
+	config.quillme_host = 'http://staging.wenjuanba.com'
 
 	# configuration for roadie
 	config.action_mailer.default_url_options = {:host => 'res.oopsdata.com'}
@@ -124,5 +124,5 @@ OopsData::Application.configure do
   # ofcard uri
   config.ofcard_service_uri = "http://api2.ofpay.com/"
   config.ofcard_key_str = "OFCARD"
-  config.ret_url = "http://221.221.17.98:4000/orders/confirm"
+  config.ret_url = "http://staging.wenjuanba.com/orders/confirm"
 end

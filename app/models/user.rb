@@ -83,7 +83,6 @@ class User
 	# QuillMe
 	has_many :reward_logs, :class_name => "RewardLog", :inverse_of => :user
 	has_many :orders, :class_name => "Order", :inverse_of => :sample
-	has_many :lottery_codes
 	# QuillAdmin
 	has_many :operate_orders, :class_name => "Order", :foreign_key => "operator_id"
 	has_many :operate_reward_logs, :class_name => "RewardLog", :inverse_of => :operator,:foreign_key => "operator_id"
@@ -96,7 +95,7 @@ class User
 	has_many :answer_feedbacks, class_name: "Feedback", inverse_of: :answer_user
 	has_many :faqs
 	has_many :advertisements
-	has_many :email_histories
+	has_many :survey_invitation_histories
 	has_many :answers, class_name: "Answer", inverse_of: :user
 	has_many :template_question_answers
 	has_many :survey_spreads
@@ -235,7 +234,7 @@ class User
 	end
 
 	#生成订阅用户并发激活码或者邮件
-	def self.create_rss_user(email_mobile, callback=nil)
+	def self.create_rss_user(email_mobile, callback)
 		user = find_by_email_mobile(email_mobile)
 
 		account = {}
@@ -267,9 +266,14 @@ class User
 			end				
 
 			if active_code.present?
-				SmsWorker.perform_async("rss_subscribe", user.mobile, callback, :code => active_code)
+				SmsWorker.perform_async("rss_subscribe", user.mobile, "", :code => active_code)
 			else
-				EmailWorker.perform_async("rss_subscribe",user.email, callback) if account[:email]					
+				if account[:email]					
+					EmailWorker.perform_async("rss_subscribe",
+						user.email,
+						callback[:protocol_hostname],
+						callback[:path])
+				end
 			end			
 		end		
 		return {:success => true, :new_user => new_user}
@@ -310,7 +314,10 @@ class User
 				sample.update_attributes(:sms_verification_code => active_code, :sms_verification_expiration_time => (Time.now + 2.hours).to_i)
 				return SmsWorker.perform_async("find_password", email_mobile, "", :code => active_code)
 			else
-				return EmailWorker.perform_async("find_password", email_mobile, callback)
+				return EmailWorker.perform_async("find_password",
+					email_mobile,
+					callback[:protocol_hostname],
+					callback[:path])
 			end
 		else
 			return ErrorEnum::USER_NOT_EXIST
@@ -370,13 +377,17 @@ class User
 		existing_user = User.create if existing_user.nil?
 		existing_user.update_attributes(updated_attr)
 		if active_code.present?
-			SmsWorker.perform_async("welcome", existing_user.mobile, callback, :active_code => active_code)
+			SmsWorker.perform_async("welcome", existing_user.mobile, "", :active_code => active_code)
 		else
-			EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
+			if account[:email]
+				EmailWorker.perform_async("welcome",
+					existing_user.email,
+					callback[:protocol_hostname],
+					callback[:path])
+			end
 		end
 
 		# send welcome email
-		#EmailWorker.perform_async("welcome", existing_user.email, callback) if account[:email]
 		## TODO  send_mobile_message() if account[:mobile]
 		if !third_party_user_id.nil?
 			# bind the third party user if the id is provided
@@ -465,6 +476,11 @@ class User
 		return user.login(client_ip, client_type, false)
 	end
 
+	def change_email(client_ip)
+		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i > change_email_expiration_time
+		self.email = self.email_to_be_changed
+		return self.login(client_ip, nil, false)
+	end
 
 	def self.get_account_by_activate_key(activate_info)
 		user = User.find_by_email(activate_info["email"])
@@ -818,7 +834,7 @@ class User
 		time_point_ary.map! { |e| e * seconds_per_period + start_time.to_i}
 		active_sample_number = []
 		time_point_ary.each do |time_point|
-			logs = Log.only(:user_id).and(:created_at.gte => Time.at(time_point), :created_at.lt => Time.at(time_point + seconds_per_period))
+			logs = Log.where(:created_at.gte => Time.at(time_point), :created_at.lt => Time.at(time_point + seconds_per_period))
 			active_sample_number << logs.map {|e| e.user_id}.uniq.length
 		end
 		return active_sample_number
@@ -966,13 +982,8 @@ class User
 		return true if ![DataType::NUMBER_RANGE, DataType::DATE_RANGE].include?(sa.type)
 		sa_value = self.read_sample_attribute(attr_name)
 		return true if sa_value.nil?
-		begin
-			return true if sa_value[0] < updated_value[0]
-			return true if sa_value[1] > updated_value[1] && updated_value[1] != -1 && sa_value[1] != -1
-			return true if sa_value[1] == -1 && updated_value[1] != -1
-		rescue
-		end
-		return false
+		return false if Tool.range_compare(sa_value, updated_value) == -1
+		return true
 	end
 
 	def read_sample_attribute(name)
@@ -1016,8 +1027,8 @@ class User
 	def set_basic_attributes(basic_attributes)
 		basic_attributes.each do |attr_name, attr_value|
 			next if !SampleAttribute::BASIC_ATTR.include?(attr_name)
-			if self.need_update_attribute(attr_name, basic_attributes[attr_name])
-				self.write_sample_attribute(attr_name, basic_attributes[attr_name])
+			if self.need_update_attribute(attr_name, attr_value)
+				self.write_sample_attribute(attr_name, attr_value)
 			end
 		end
 		return true
@@ -1031,4 +1042,5 @@ class User
 		end
 		return nickname
 	end
+
 end

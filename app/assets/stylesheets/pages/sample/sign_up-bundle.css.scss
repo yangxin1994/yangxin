@@ -28,8 +28,10 @@
 		@include border-radius(4px);
 		div.wraper{
 			margin-bottom:16px;
+			@include clearfix;
 			font-size:14px;
 			input{
+				line-height:normal\9;
 				font-size:16px;
 				float:left;
 				width:260px;

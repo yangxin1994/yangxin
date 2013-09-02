@@ -12,7 +12,7 @@ class Sample::AccountsController < Sample::SampleController
   def login
     result = User.login_with_email_mobile(params[:email_mobile],
                                           params[:password], 
-                                          @remote_ip, 
+                                          request.remote_ip, 
                                           params[:_client_type], 
                                           params[:permanent_signed_in], 
                                           params[:third_party_user_id])
@@ -66,7 +66,8 @@ class Sample::AccountsController < Sample::SampleController
         params[:password],
         current_user,
         params[:third_party_user_id],
-        '#{request.protocol}#{request.host_with_port}/account/email_activate')
+        {protocal_hostname: "#{request.protocol}#{request.host_with_port}",
+          path: "/account/email_activate"})
       render_json_auto(retval) and return
     end
   end
@@ -91,7 +92,10 @@ class Sample::AccountsController < Sample::SampleController
       user.save
       SmsWorker.perform_async("activate", user.mobile, "", :active_code => active_code)
     else
-      EmailWorker.perform_async("welcome", user.email, "#{request.protocol}#{request.host_with_port}/account/email_activate")
+      EmailWorker.perform_async("welcome",
+        user.email,
+        "#{request.protocol}#{request.host_with_port}",
+        "/account/email_activate")
     end
     render_json_s and return
   end
@@ -106,7 +110,7 @@ class Sample::AccountsController < Sample::SampleController
       @success = false and return
     end
 
-    retval = User.activate("email", activate_info, @remote_ip, params[:_client_type])  
+    retval = User.activate("email", activate_info, request.remote_ip, params[:_client_type])  
     if retval.class == String && retval.start_with?("error_")
       @success = false
     else
@@ -115,15 +119,13 @@ class Sample::AccountsController < Sample::SampleController
       user = User.find_by_auth_key(retval['auth_key'])
       @email  = Base64.encode64(user.email).chomp()
     end
-
-
   end
 
   def mobile_activate
     activate_info = {"mobile" => params[:mobile],
         "password" => params[:password],
         "verification_code" => params[:verification_code]}
-    retval = User.activate("mobile", activate_info, @remote_ip, params[:_client_type])
+    retval = User.activate("mobile", activate_info, request.remote_ip, params[:_client_type])
 
     render_json_e retval and return if retval.class == String && retval.start_with?("error_")
     refresh_session(retval['auth_key'])
@@ -189,8 +191,10 @@ class Sample::AccountsController < Sample::SampleController
 
   def send_forget_pass_code
     session[:forget_account] = params[:email_mobile]
-    render_json_auto User.send_forget_pass_code(params[:email_mobile], 
-      "#{request.protocol}#{request.host_with_port}/account/get_account") and return
+    retval = User.send_forget_pass_code(params[:email_mobile],
+      {protocol_hostname: "#{request.protocol}#{request.host_with_port}",
+        path: "/account/get_account"})
+    render_json_auto retval and return
   end
 
   def make_forget_pass_activate

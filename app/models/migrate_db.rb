@@ -2,7 +2,12 @@
 class MigrateDb
 
 	def self.migrate
+		Log.destroy_all
+		AgentTask.destroy_all
+		Agent.destroy_all
 		# self.migrate_point_log
+		self.migrate_survey_invitation_histories
+		self.migrate_survey_spreads
 		self.migrate_gift
 		self.migrate_prize
 		self.migrate_order
@@ -15,7 +20,7 @@ class MigrateDb
 		puts "Migrating surveys......"
 		update_time = Time.now
 		RewardScheme.destroy_all
-		Survey.where(:updated_at.lt => update_time).each_with_index do |s, index|
+		Survey.where(:updated_at.lt => update_time, :migrate.ne => true).each_with_index do |s, index|
 			puts index if index%10 == 0
 			# the status field
 			if s.status == -1
@@ -74,6 +79,7 @@ class MigrateDb
 				"audio" => "","reward_scheme_id" => "" }
 
 			s.sample_attributes_for_promote = []
+			s.write_attribute(:migrate, true)
 			s.save
 		end
 	end
@@ -81,7 +87,7 @@ class MigrateDb
 	def self.migrate_answer
 		puts "Migrating answers......"
 		update_time = Time.now
-		Answer.where(:updated_at.lt => update_time).each_with_index do |a, index|
+		Answer.where(:updated_at.lt => update_time, :migrate.ne => true).each_with_index do |a, index|
 			puts index if index%100 == 0
 			# the status field
 			if a.status == 0
@@ -115,6 +121,7 @@ class MigrateDb
 			a.rewards = []
 			# the need review field
 			a.need_review = a.survey.try(:answer_need_review)
+			a.write_attribute(:migrate, true)
 			a.save
 		end
 	end
@@ -123,7 +130,7 @@ class MigrateDb
 		puts "Migrating users......"
 		PointLog.destroy_all
 		update_time = Time.now
-		User.where(:updated_at.lt => update_time).each_with_index do |u, index|
+		User.where(:updated_at.lt => update_time, :migrate.ne => true).each_with_index do |u, index|
 			puts index if index%10 == 0
 			# remove the password_confirmation
 			u.password_confirmation = nil if u.read_attribute("password_confirmation").present?
@@ -138,6 +145,7 @@ class MigrateDb
 			u.user_role = user_role
 			# the status field
 			u.status = u.status == 0 ? User::VISITOR : User::REGISTERED
+			u.write_attribute(:migrate, true)
 			u.save
 
 			# affliated
@@ -167,6 +175,8 @@ class MigrateDb
 			g.type = bg.type == 1 ? Gift::REAL : Gift::VIRTUAL
 			# the exchange count field
 			g.exchange_count = 0
+			# the view_count filed
+			g.view_count = Random.rand(0..9999).to_i
 			# the status field
 			g.status = [-1,0].include?(bg.status) ? Gift::OFF_THE_SHELF : Gift::ON_THE_SHELF
 			g.status = Gift::DELETED if bg.is_deleted
@@ -268,6 +278,21 @@ class MigrateDb
 			s = ss.survey
 			ss.survey_creation_time = s.created_at.to_i if s.present?
 			ss.save
+		end
+	end
+
+	def self.migrate_survey_invitation_histories
+		SurveyInvitationHistory.destroy_all
+		EmailHistory.all.each do |e|
+			u = User.find_by_email(e.email) || e.user
+			s = e.survey
+			next if u.nil?
+			next if s.nil?
+			h = SurveyInvitationHistory.new
+			h.user = u
+			h.survey = s
+			h.type = "email"
+			h.save
 		end
 	end
 

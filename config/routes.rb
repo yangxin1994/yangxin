@@ -196,6 +196,7 @@ OopsData::Application.routes.draw do
             put 'setting/change_mobile' => 'users#change_mobile' 
             put 'setting/check_mobile_verify_code' => 'users#check_mobile_verify_code'
             put 'setting/change_email' => 'users#change_email'
+            get 'setting/change_email_verify_key' => 'users#change_email_verify_key'
             get 'setting/address' => 'users#address'
             put 'setting/address' => 'users#update_logistic_address'
             get 'setting/password' => 'users#password'
@@ -246,6 +247,12 @@ OopsData::Application.routes.draw do
       end
     end
     resources :short_urls, :only => [:show]
+    resources :ofcards do
+      collection do
+        get :confirm
+        post :confirm
+      end
+    end
   end
 
   namespace :answer_auditor, :module => 'admin' do
@@ -323,15 +330,17 @@ OopsData::Application.routes.draw do
     resources :prizes
     resources :surveys, :as => :s do
       member do
-        get :reward_schemes, :promote, :more_info
-        put :update_promote, :set_info
+        get :reward_schemes, :promote, :more_info, :bind_question
+        put :update_promote, :set_info, :bind_question
         post :update_promote
-        delete :destroy_attributes
+        delete :destroy_attributes, :bind_question
       end
       collection do
 
       end
     end
+
+
 
     resources :reward_schemes
 
@@ -422,7 +431,11 @@ OopsData::Application.routes.draw do
     delete "sample_attributes/bind_question/:id" => "sample_attributes#bind_question", as: :sample_attribute_bind
 
     resources :agents
-    resources :agent_tasks
+    resources :agent_tasks do
+      member do
+        put :close, :open
+      end
+    end
     
     resources :sample_stats, :only => [:index] do
       collection do

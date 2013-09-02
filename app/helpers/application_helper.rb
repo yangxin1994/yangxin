@@ -197,6 +197,10 @@ module ApplicationHelper
 						使用<b>#{news['amount'].abs}</b>积分兑换了<span class="u">#{news['gift_name']}</span>
 					}.html_safe
 				end
+			when 8
+				behavor = %Q{
+					兑换失败,返还了<b>#{news['amount'].abs}</b>积分
+				}.html_safe				
 			end
 		when 16
 			behavor = %Q{
@@ -336,21 +340,29 @@ module ApplicationHelper
 	# mini: 20x20
 	# 
 	def get_avatar(user_id, version="thumb")
-		return "/assets/avatar/#{version}_default.png" if user_id.nil?
-		md5 = Digest::MD5.hexdigest(user_id)
+		md5 = Digest::MD5.hexdigest(user_id)  if user_id.present?
 		return "/uploads/avatar/#{version}_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/#{version}_#{md5}.png")
-		%w( mini small thumb).each do |ver|
-			return "/uploads/avatar/#{ver}_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/#{ver}_#{md5}.png")	
+		avatar = nil
+		%w( mini small thumb).each do |ver|		
+			if File.exist?("#{Rails.root}/public/uploads/avatar/#{ver}_#{md5}.png")
+				avatar =  "/uploads/avatar/#{ver}_#{md5}.png" 	
+				break
+			end
 		end
-		return "/assets/avatar/#{version}_default.png"
+			
+		if avatar.present?
+			return avatar 
+		else
+			return "/assets/avatar/#{version}_default.png"
+		end	
 	end
 
 	def thumb_avatar(user_id)
 		get_avatar(user_id)
 	end
 
-	def small_avatar(user_id)
-		get_avatar(user_id, 'small')
+	def small_avatar(user_id)		
+		get_avatar(user_id, 'small')		
 	end
 
 	def mini_avatar(user_id)

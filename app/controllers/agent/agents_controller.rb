@@ -4,12 +4,9 @@ class Agent::AgentsController < ApplicationController
   
   layout "agent-todc"
 
-  # because only user_id of user is from return data in many times.
-  # so add get_email method to replace user_id to email by AJAX.
-  before_filter :require_agent, :except => [:get_email]
+  before_filter :require_agent
 
   def require_agent
-    # if !is_admin  # is_admin only check admin and super admin.
     session[:auth_key] == current_agent.try('auth_key')
   end
 

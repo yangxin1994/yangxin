@@ -22,7 +22,7 @@ class SmsApi # 短信接口
 	CDKEY = "3SDK-EMY-0130-PIWST"
 	PASSWORD = '349473'
 	CODE = 4699
-	AUTOGRAPH = '［优数调研］'
+	AUTOGRAPH = '［问卷吧］'
 	##### 注意: 不能使用短信接口发送个人信息(如"老地方见","你在哪"之类)                   #####
 	##### 否则短信平台会封掉接口，测试时只写两个字"内部测试"加其他必要的程序信息(如校验码)#####
 	##### 注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意注意!!注意!#####
@@ -52,6 +52,14 @@ class SmsApi # 短信接口
 
 	#同步发送即时短信
 	def self.send_sms(phone, message)
+		Rails.logger.info "AAAAAAAAAAAAAA"
+		Rails.logger.info phone
+		Rails.logger.info message
+		Rails.logger.info "AAAAAAAAAAAAAA"
+		puts "AAAAAAAAAAAAAA"
+		puts phone
+		puts message
+		puts "AAAAAAAAAAAAAA"
 		return if Rails.env != "production"
 		result = get('/sdkproxy/sendsms.action',
 				:query => {:cdkey    => SmsApi::CDKEY,
@@ -87,7 +95,7 @@ class SmsApi # 短信接口
 
 	################### different types of sms ########################
 
-	def self.invitation_sms(survey_id, sample_id, callback, opt)
+	def self.invitation_sms(survey_id, sample_id, callback, opt = {})
 		sample = User.find_by_id(sample_id)
 		return if sample.nil? || sample.mobile.blank?
 		mobile = sample.mobile
@@ -95,6 +103,12 @@ class SmsApi # 短信接口
 		@survey_title = survey.title
 		reward_scheme_id = survey.sms_promote_info["reward_scheme_id"]
 		@survey_link = "#{Rails.application.config.quillme_host}/s/#{reward_scheme_id}"
+		if sample.status == User::REGISTERED
+			sample.auth_key = Encryption.encrypt_auth_key("#{sample._id}&#{Time.now.to_i.to_s}")
+			sample.auth_key_expire_time =  -1
+			sample.save
+			@survey_link += "?auth_key=#{sample.auth_key}"
+		end
 		@survey_link = Rails.application.config.quillme_host + "/" + MongoidShortener.generate(@survey_link)
 		unsubscribe_key = CGI::escape(Encryption.encrypt_activate_key({"email_mobile" => mobile}.to_json))
 		@unsubscribe_link = "#{Rails.application.config.quillme_host}/surveys/cancel_subscribe?key=#{unsubscribe_key}"
@@ -102,14 +116,14 @@ class SmsApi # 短信接口
 
 		@reward = ""
 		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
-		if reward_scheme.rewards[0].present?
+		if reward_scheme && reward_scheme.rewards[0].present?
 			case reward_scheme.rewards[0]["type"]
 			when RewardScheme::MOBILE
-				@reward = "#{reward_scheme.rewards[0]["amount"]}现金奖励"
+				@reward = "#{reward_scheme.rewards[0]["amount"]}元现金奖励"
 			when RewardScheme::ALIPAY
-				@reward = "#{reward_scheme.rewards[0]["amount"]}现金奖励"
+				@reward = "#{reward_scheme.rewards[0]["amount"]}元现金奖励"
 			when RewardScheme::JIFENBAO
-				@reward = "#{reward_scheme.rewards[0]["amount"]}现金奖励"
+				@reward = "#{reward_scheme.rewards[0]["amount"]}元现金奖励"
 			when RewardScheme::POINT
 				@reward = "#{reward_scheme.rewards[0]["amount"]}积分奖励"
 			when RewardScheme::LOTTERY

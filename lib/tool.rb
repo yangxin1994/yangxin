@@ -3,12 +3,13 @@ require 'net/http'
 require 'uri'
 require 'csv'
 require 'quill_common'
+require 'data_type'
 
 module Tool
 
 	def self.generate_active_mobile_code
-		# Random.rand(100000..999999).to_i	
-		return 111111
+		return 111111 if Rails.env != "production"
+		return Random.rand(100000..999999).to_i	
 	end
 
 	def self.generate_active_email_token
@@ -185,26 +186,36 @@ module Tool
 
 	# check wheather value satisfies standard value
 	def self.check_sample_attribute(sample_attribute_id, value, standard_value)
+		return nil if value.blank?
 		sample_attribute = SampleAttribute.find_by_id(sample_attribute_id)
-		return false if sample_attribute.nil?
+		return nil if sample_attribute.nil?
 		case sample_attribute.type
 		when DataType::STRING
 			return true if value == standard_value
 		when DataType::ENUM
 			return true if standard_value.include?(value)
 		when DataType::NUMBER
-			return true if value >= standard_value[0] && value <= standard_value[1]
+			return true if value == standard_value
 		when DataType::DATE
-			return true if value >= standard_value[0] && value <= standard_value[1]
+			return true if value == standard_value
 		when DataType::NUMBER_RANGE
-			return true if value >= standard_value[0] && value <= standard_value[1]
+			return true if self.range_compare(standard_value, value) == 1
 		when DataType::DATE_RANGE
-			return true if value >= standard_value[0] && value <= standard_value[1]
+			return true if self.range_compare(standard_value, value) == 1
 		when DataType::ADDRESS
 			return true if standard_value.include?(value)
 		when DataType::ARRAY
 			return true if (standard_value & value).present?
 		end
 		return false
+	end
+
+	# if r1 includes r2, return 1
+	# if r2 includes r1, return -1
+	# else, return 0
+	def self.range_compare(r1, r2)
+		return 1 if r1[0] <= r2[0] && r1[1] >= r2[1]
+		return -1 if r1[0] >= r2[0] && r1[1] <= r2[1]
+		return 0
 	end
 end

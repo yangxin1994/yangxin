@@ -7,13 +7,13 @@
   <li class="active">
     <a href="/admin/newsletters">
     <i class="icon-chevron-right"></i>
-    礼品列表
+    电子杂志列表
     </a>
   </li>
   <li>
     <a href="/admin/newsletters/new">
       <i class="icon-chevron-right"></i>
-      新建礼品
+      新建电子杂志
     </a>
   </li>
 <% end %>
@@ -25,14 +25,6 @@
       <ul class="dropdown-menu">
         <li><a href="?" class="select-all-btn"><input type="checkbox" value="">&nbsp;全部</a></li>
         <li class="divider"></li>
-
-        <li><a href="?type=4" class="select-suc-btn"><input type="checkbox" value="">&nbsp;话费充值</a></li>
-        <li><a href="?type=8" class="select-suc-btn"><input type="checkbox" value="">&nbsp;支付宝转账</a></li>
-        <li><a href="?type=16" class="select-suc-btn"><input type="checkbox" value="">&nbsp;集分宝兑换</a></li>
-        <li><a href="?type=32" class="select-suc-btn"><input type="checkbox" value="">&nbsp;Q币充值</a></li>
-        <li class="divider"></li>
-        <li><a href="?type=2" class="select-failed-btn"><input type="checkbox" value="">&nbsp;实物礼品</a></li>
-        <li><a href="?type=1" class="select-failed-btn"><input type="checkbox" value="">&nbsp;其他虚拟礼品</a></li>
       </ul>
     </div>
     <form class="form-search" style="display:inline">
@@ -47,10 +39,11 @@
     <div class="btn-group">
       <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
       <ul class="dropdown-menu pull-right">
-        <li><a href="?status=1">已上架</a></li>
-        <li><a href="?status=2">已下架</a></li>
-        <li class="divider"></li>
         <li><a href="?">全部</a></li>
+        <li class="divider"></li>
+        <li><a href="?status=1">草稿</a></li>
+        <li><a href="?status=2">已发送</a></li>
+        <li><a href="?status=-2">被取消</a></li>
       </ul>
     </div>
   </span>
@@ -79,7 +72,7 @@
               <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
-              <li><a class="od-delete" href="<%= newsletter._id %>" title="Delete"><i class="icon-remove"></i>删除</a></li>
+              <li><a class="od-delete" href="javascript:void(0)" data-id="<%= newsletter._id %>" title="Delete"><i class="icon-remove"></i>删除</a></li>
             </ul>
           </div>
         </td>

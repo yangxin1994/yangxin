@@ -26,6 +26,7 @@ class LotteryLog < Log
 		logs.each_with_index do |log,index|
 			pri = Prize.find_by_id(log.prize_id)
 			log_data['nickname'] = log.user.try(:nickname) || '游客'
+			log_data['user_id']  = log.user.try(:id)
 			log_data['created_at'] = log.created_at
 			log_data['avatar']  = log.user.present? ? (log.user.avatar.present? ? log.user.avatar.picture_url : User::DEFAULT_IMG) : User::DEFAULT_IMG
 			log_data['prize_name'] = log.prize_name

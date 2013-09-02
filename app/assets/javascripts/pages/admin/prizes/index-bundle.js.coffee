@@ -1,13 +1,16 @@
 $ ->
   $(document).on 'click', '.od-delete', (e)->
-    e.preventDefault()
-    self = $(this)
-    console.log self
+    $this = $(this)
     if confirm "确定要删除吗?"
-      console.log e
       $.ajax
         type: 'DELETE'
-        url: "#{$(this).attr('href')}"
-        success: ->
-          self.parent().html("已删除")
+        url: "/admin/prizes/#{$(this).data('id')}"
+        success: (ret)->
+          if ret.success
+            $this.closest('tr').fadeOut()
+            alert_msg.show('success', "奖品已经删除!")
+          else
+            alert_msg.show('error', "删除失败 (╯‵□′)╯︵┻━┻")
+        error: ->
+          alert_msg.show('error', "删除失败 (╯‵□′)╯︵┻━┻")
           

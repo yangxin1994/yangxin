@@ -7,15 +7,17 @@
   <%= stylesheet_link_tag "layouts/admin-todc-layout", :media => :all %>
 
   <%= javascript_include_tag "layouts/admin-todc-layout" %>
-  <%= include_gon %>
   <script type="text/javascript">
-  <% if flash.notice %>
-    alert_msg.show('info', "<%= flash.notice %>")
-  <% elsif flash.alert %>
-    alert_msg.show('error', "<%= flash.alert %>")
-  <% elsif flash[:success] %>
-    alert_msg.show('success', "<%= flash[:success] %>")          
-  <% end -%>  
+  $(function(){
+    <% if flash.notice %>
+      alert_msg.show('info', "<%= flash.notice %>");
+    <% elsif flash.alert %>
+      alert_msg.show('error', "<%= flash.alert %>");
+    <% elsif flash[:success] %>
+      alert_msg.show('success', "<%= flash[:success] %>");       
+    <% end -%>  
+  });
+
   </script>  
   <%= yield :head %>
   <%= csrf_meta_tags %>
@@ -49,7 +51,7 @@
               <a href="/admin/announcements">公告</a>
             </li>
             <li>
-              <a href="/admin/newsletter">杂志</a>
+              <a href="/admin/newsletters">杂志</a>
             </li>
             <li>
               <a href="/admin/agents">代理</a>

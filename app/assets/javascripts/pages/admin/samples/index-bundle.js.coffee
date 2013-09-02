@@ -72,7 +72,7 @@ $ ->
           alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
 
 
-  $('#send_point').click ->
+  $('#send_list').click ->
     $('#point_modal').modal('hide');
     alert_msg.show('info', "正在处理,请稍后...")
     $.ajax

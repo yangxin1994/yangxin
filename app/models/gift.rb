@@ -30,6 +30,7 @@ class Gift
 	field :quantity, :type => Integer, default: 0
 	field :point, :type => Integer, default: 0
 	field :exchange_count, :type => Integer, default: 0
+	field :view_count, :type => Integer, default: 0
 	field :price, :type => Float, default: 0.0
 	field :redeem_number, :type => Hash, default: {"mode" => SINGLE}
 
@@ -40,6 +41,7 @@ class Gift
 	scope :normal, where(:status.in => [OFF_THE_SHELF, ON_THE_SHELF])
 	scope :on_shelf, where(:status => ON_THE_SHELF)
 	scope :real, where(:type => REAL)
+	scope :real_and_virtual, where(:type.in => [VIRTUAL, REAL])
 	index({ type: 1, status: 1 }, { background: true } )
 
 	def self.find_by_id(gift_id)
@@ -94,7 +96,7 @@ class Gift
 
 	def update_gift(gift)
 		photo_url = gift.delete("photo_url")
-		if !photo_url.blank? && photo_url != self.photo.try("photo_url")
+		if !photo_url.blank? && photo_url != self.photo.try(:picture_url)
 			material = Material.create_image(photo_url)
 			self.photo = material
 		end
@@ -150,5 +152,9 @@ class Gift
     #订单(兑换)流程走完之后该值加一，表示该礼品兑换的次数
 	def inc_exchange_count
       inc(:exchange_count, 1)
+	end
+
+	def inc_view_count
+		inc(:view_count,1)
 	end
 end
