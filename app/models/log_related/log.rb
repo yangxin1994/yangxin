@@ -13,6 +13,7 @@ class Log
 	scope :special_logs,lambda { |t| where(:type => t)}
 	#scope :fresh_logs, lambda { where(:type.ne => 8,:type.ne => 64)}
 	# scope :fresh_logs, lambda { where(:type.in => [2,8,16])}
+	scope :spread_logs, lambda { where(:type => 32)}
 	scope :disciplinal_logs, lambda { where(:type => 64)}
 	scope :have_user,lambda {where(:user_id.ne => nil)}
 

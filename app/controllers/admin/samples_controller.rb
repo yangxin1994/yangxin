@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'string/utf8'
 class Admin::SamplesController < Admin::AdminController
 
@@ -88,17 +89,60 @@ class Admin::SamplesController < Admin::AdminController
   end
 
   def answer_log
-    @sample = User.find(params[:id])
-    @answer_log = auto_paginate(@sample.logs.answer_logs) do |logs|
-      logs.map { |e| e.info_for_admin }
+    @answers = @current_user.answers.not_preview.desc(:created_at)
+    @answers = auto_paginate(@answers) do |paginated_answers|
+      paginated_answers.map { |e| e.info_for_admin }
     end
+    data = @answers['data'].map do |item|
+      # Need attrs: rewards, answer_status, answer_id, amount
+      # maybe it has too many attrs, so i did not use helper method.
+      # select reward
+      item["select_reward"] = ""
+      # 
+      item["free_reward"] = item["rewards"].to_a.empty?
+      item["rewards"].to_a.each do |rew|
+        # if rejected, reward in empty
+        item["select_reward"] = "" and break if item["answer_status"].to_i == 2 
+
+        if rew["checked"]
+          case rew["type"].to_i
+          when 1
+            item["select_reward"] = "#{rew["amount"].to_i}元话费"
+          when 2
+            item["select_reward"] = "#{rew["amount"].to_i}元支付宝"
+          when 4 
+            item["select_reward"] = "#{rew["amount"].to_i}积分"
+          when 8
+            item["select_reward"] = "抽奖机会"
+          when 16
+            item["select_reward"] = "#{rew["amount"].to_i}集分宝"
+          end
+
+          break
+        end
+      end
+      # return
+      item 
+    end
+    @answers['data'] = data
   end
 
   def spread_log
     @sample = User.find(params[:id])
-    @spread_log = auto_paginate(@sample.spread_logs) do |logs|
-      logs.map { |e| e.info_for_admin }
+    @answers = Answer.not_preview.finished.where(:introducer_id => @sample._id.to_s)
+    @answers = auto_paginate(@answers) do |paginated_answers|
+      paginated_answers.map { |e| e.info_for_admin }
     end
+    data = @answers['data'].map do |item|
+      a = Answer.find_by_id(item["answer_id"])
+      if a.user.present?
+        item["sample_email_mobile"] = a.user.email || a.user.mobile
+      else
+        item["sample_email_mobile"] = "游客"
+      end
+      item
+    end
+    @answers['data'] = data
   end
   # ##########################
   #
