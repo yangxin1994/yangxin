@@ -35,7 +35,7 @@
 				<span style="font-size:16px;margin-left:15px;color:#fff;">本期调研：</span>
 				<a href="javascript:void(0);" style="font-size:16px;color:#fff;text-decoration:none;"><%= @survey.title %></a>
 			</td>
-			<td><a style="font-size:14px;display:block;text-align:center;background:#fff;color:#f25f5d;height:30px;line-height:30px;text-decoration:none;width:90px;" href="<%= Rails.application.config.quillme_host %>/s/<%= @reward_scheme_id %>?email=%recipient.email%">立即参与</a></td>
+			<td><a style="font-size:14px;display:block;text-align:center;background:#fff;color:#f25f5d;height:30px;line-height:30px;text-decoration:none;width:90px;" href="<%= Rails.application.config.quillme_host %>/s/<%= @reward_scheme_id %>?auth_key=%recipient.auth_key%">立即参与</a></td>
 		　</tr>
 		</table>
 
@@ -80,7 +80,7 @@
 				<td width="200" align="center">
 					<table width="182" height="60" style="border:1px #dbdbdb solid;">
 						<tr>
-							<td align="center" rowspan="2" width="50" ><img src="<%= Rails.application.config.quillme_host + "/assets/email/alypay.png" %>"/></td>
+							<td align="center" rowspan="2" width="50" ><img src="<%= Rails.application.config.quillme_host + "/assets/email/alipay.png" %>"/></td>
 							<td align="left" style="vertical-align: bottom;"><span style="font-size:14px;">支付宝转账</span></td>
 						</tr>
 						<tr>

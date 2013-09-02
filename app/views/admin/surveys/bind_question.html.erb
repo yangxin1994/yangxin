@@ -1,0 +1,76 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/admin/sample_attributes-bundle", :meida => 'all' %>
+  <%= javascript_include_tag "jquery-interdependencies" %>
+  <%= javascript_include_tag "pages/admin/sample_attributes_bind-bundle" %>
+  <%= javascript_tag do  %>
+    // only show in this page, will not pollute others.
+    var question = <%= raw @question.to_json %>;
+    var attrs = <%= raw @attrs.to_json %>;
+    var addr_precision = <%= raw @addr_precision %>;
+  <% end %>
+<% end %>
+
+
+<% content_for :sidenav do %>
+  <li>
+    <a href="/admin/surveys">
+    <i class="icon-chevron-right"></i>
+    调研列表
+    </a>
+  </li>
+  <li>
+    <a href="/admin/surveys/<%= params[:id]%>">
+      <i class="icon-chevron-right"></i>
+      问卷查看
+    </a>
+  </li>
+  <li>
+    <a href="/admin/surveys/<%= params[:id]%>/reward_schemes">
+      <i class="icon-chevron-right"></i>
+      奖励方案
+    </a>
+  </li>
+  <li>
+    <a href="/admin/surveys/<%= params[:id]%>/promote">
+      <i class="icon-chevron-right"></i>
+      推送渠道
+    </a>
+  </li>
+  <li class="active">
+    <a href="javascript:void(0);">
+      <i class="icon-chevron-right"></i>
+      绑定样本属性
+    </a>
+  </li>  
+<% end %>
+
+<div class="sample_properties">
+  <%= form_tag("", method: 'put', name: 'attribute_bind_form', class: 'form-horizontal' ) do %>
+    <div class="control-group">
+      <label class="control-label">问题标题:</label>
+      <div class="controls">
+        <%= @question['content']['text'] %>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">选择绑定属性:</label>
+      <div class="controls">
+        <select name="type" class="validate[required]">
+          <option value=""></option>
+          <% @attrs.each do |attr| %>
+            <option data-id="<%= attr['type'] %>" value="<%= attr['_id'] %>"><%= attr['name'] %></option>
+          <% end %>
+        </select>
+      </div>
+    </div>
+    <div class="panel-wrapper"><!-- extra view for bind attr -->
+    </div>
+    <div class="control-group">
+      <label class="control-label">问题标题:</label>
+      <div class="controls">
+        <input class="btn" id="submit_bind" type="submit" value="确 定">
+        <%= link_to "删除属性绑定", admin_sample_attribute_bind_path(@question['_id']), method: :delete, confirm: "确定要删除吗", class: "submitForm btn"   %>
+      </div>
+    </div>    
+  <% end %>
+</div>

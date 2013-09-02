@@ -29,7 +29,7 @@ class Account::SigninsController < ApplicationController
   def create
     result = User.login_with_email_mobile(params[:email],
                                           params[:password], 
-                                          @remote_ip, 
+                                          request.remote_ip, 
                                           params[:_client_type], 
                                           params[:permanent_signed_in], 
                                           params[:third_party_user_id])

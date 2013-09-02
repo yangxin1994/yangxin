@@ -49,6 +49,8 @@ class SmsInvitationWorker
 			end
 			# update sms history for samples
 			SurveyInvitationHistory.collection.insert(sample_sms_history_batch)
+			survey.sms_promote_info["promote_sms_count"] += sample_sms_history_batch.length
+			survey.save
 		end
 		# 4. transform data
 		samples_for_surveys = {}

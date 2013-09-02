@@ -81,8 +81,6 @@ class SampleStatChartWidget
   _generate_sample_stats_charts = (opts) ->
     {chart_container, chart_title, chart_data, chart_labels} = opts
 
-    console.log chart_container
-
     sample_stats_charts = new Highcharts.Chart
       title:
         text: null
@@ -115,6 +113,14 @@ $ ->
     'sample_stats_charts',
     '/admin/samples/get_sample_count',
     '样本个数',
-    (data) -> data.new_sample_number
+    (data) ->
+      data = data.value
+      data.new_sample_number
   )
-  active_sample_chart = new SampleStatChartWidget('#active_sample_stats_panel', 'active_sample_stats_charts', '/admin/samples/get_active_sample_count', '活跃样本个数')
+  active_sample_chart = new SampleStatChartWidget(
+    '#active_sample_stats_panel',
+    'active_sample_stats_charts',
+    '/admin/samples/get_active_sample_count', 
+    '活跃样本个数',
+    (data) ->
+      data = data.value)

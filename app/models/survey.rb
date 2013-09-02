@@ -34,7 +34,7 @@ class Survey
   # can be 1 (closed), 2 (published), 4 (deleted)
   field :status, :type => Integer, default: 1
   field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
-  field :quota, :type => Hash, default: {"rules" => ["conditions" => [], "amount" => 100, "finished_count" => 0, "submitted_count" => 0], "is_exclusive" => true, "quota_satisfied" => false, "finished_count" => 0, "submitted_count" => 0 }
+  field :quota, :type => Hash, default: {"rules" => [{"conditions" => [], "amount" => 100, "finished_count" => 0, "submitted_count" => 0}], "is_exclusive" => true, "quota_satisfied" => false, "finished_count" => 0, "submitted_count" => 0 }
   field :filters, :type => Array, default: []
   field :logic_control, :type => Array, default: []
   field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
@@ -2138,8 +2138,12 @@ class Survey
   end
 
   def remain_quota_number
+    amount = 0
+    self.quota["rules"].each do |r|
+      amount += r["amount"] - r["finished_count"]
+    end
     # todo: calculate remainning quota number
-    return 100
+    return amount
   end
 
   def max_num_per_ip_reached?(ip_address)

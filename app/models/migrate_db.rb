@@ -6,6 +6,7 @@ class MigrateDb
 		AgentTask.destroy_all
 		Agent.destroy_all
 		# self.migrate_point_log
+		self.migrate_survey_invitation_histories
 		self.migrate_survey_spreads
 		self.migrate_gift
 		self.migrate_prize
@@ -277,6 +278,21 @@ class MigrateDb
 			s = ss.survey
 			ss.survey_creation_time = s.created_at.to_i if s.present?
 			ss.save
+		end
+	end
+
+	def self.migrate_survey_invitation_histories
+		SurveyInvitationHistory.destroy_all
+		EmailHistory.all.each do |e|
+			u = User.find_by_email(e.email) || e.user
+			s = e.survey
+			next if u.nil?
+			next if s.nil?
+			h = SurveyInvitationHistory.new
+			h.user = u
+			h.survey = s
+			h.type = "email"
+			h.save
 		end
 	end
 

@@ -330,15 +330,17 @@ OopsData::Application.routes.draw do
     resources :prizes
     resources :surveys, :as => :s do
       member do
-        get :reward_schemes, :promote, :more_info
-        put :update_promote, :set_info
+        get :reward_schemes, :promote, :more_info, :bind_question
+        put :update_promote, :set_info, :bind_question
         post :update_promote
-        delete :destroy_attributes
+        delete :destroy_attributes, :bind_question
       end
       collection do
 
       end
     end
+
+
 
     resources :reward_schemes
 

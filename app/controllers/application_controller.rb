@@ -16,7 +16,6 @@ class ApplicationController < ActionController::Base
     # Use param value to override cookies value
     # _flashes = flash.instance_variable_get('@flashes').dup
     refresh_session(params[:auth_key] || cookies[:auth_key])
-    @remote_ip = request.remote_ip
     # flash.instance_variable_set('@flashes', _flashes)
   end
 

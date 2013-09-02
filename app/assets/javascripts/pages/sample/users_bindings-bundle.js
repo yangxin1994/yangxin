@@ -9,6 +9,31 @@ jQuery(function($) {
 		$('#step2 .cont').empty().append('<p class="normal">请查收你的短信，如果<span class="timer-box">超过<span style="padding: 0px 8px;" id="timer">60</span>秒</span>未收到信息，请<a class="resend-mobile active c-blue">重新发送</a></p>');
 		$('#email-binding-2 .cont').empty().append('<p>系统已向您的邮箱 <span class="c-orange"></span> 发送了一封验证邮件，请您登录邮箱，点击邮件链接完成邮箱验证。如果您超过10分钟未收到邮件，您可以重新操作或<a class="resend-email active c-blue">重新发送</a></p>');
 	})
+
+	$.getJSON(
+		'/users/setting/bindings.json',
+		function(data){
+			// console.log(data)
+			if (data.success && data.value) {
+				// $.popupFancybox({cont: '操作成功', success: true})
+				if (data.value.email){
+					if (data.value.email[1]){
+						$('input[type=checkbox][name=email]').attr('checked','checked');
+					}else {
+						$('input[type=checkbox][name=email]').removeAttr('checked');
+					}
+				}
+
+				if (data.value.mobile){
+					if (data.value.mobile[1]){
+						$('input[type=checkbox][name=mobile]').attr('checked','checked');
+					}else {
+						$('input[type=checkbox][name=mobile]').removeAttr('checked');
+					}
+				}
+			}
+		}
+	)
 	
 	// share
 	$('#bindings tr').on('click', 'input[type=checkbox].share', function(){
@@ -96,7 +121,10 @@ jQuery(function($) {
 					$('#step2 .cont .resend-mobile').removeClass('active').addClass('c-lgray');
 					myTimer();
 				}else {
-					$.popupFancybox();
+					if (data.value.error_code=="error___3") {
+						$('#phone-binding .cont').empty().append('<p>此手机已经被使用，请选择其它手机</p>')
+					}
+					$('#verify-code').addClass('error')
 				}
 			}
 		)

@@ -32,7 +32,7 @@ class Admin::AnnouncementsController < Admin::AdminController
           :content =>  params[:announcement][:content]
         }, current_user)
     if @announcement.created_at
-      redirect_to :index, :flash => {:success => "公告已成功发送."}
+      redirect_to :action => :index, :flash => {:success => "公告已成功发送."}
     else
       flash.alert = "公告创建失败,请检查参数!"
       render :new
