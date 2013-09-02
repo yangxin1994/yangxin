@@ -1,6 +1,90 @@
 #encoding: utf-8
 class MigrateDb
 
+=begin
+	def self.temp
+		row_export = []
+		csv = CSV.parse(File.read('lib/pure_data.csv'), :headers => false)
+		CSV.open("lib/output.csv", "wb") do |csv_export|
+			csv.each_with_index do |row, index|
+				if index%30 == 0
+					# the first row of a user
+					csv_export << row_export if row_export.present?
+					row_export = []
+					content = row[0].split(' ')
+					row_export[0] = content[0][0..4]
+					row_export[1] = content[0][5..14]
+					row_export[2] = content[0][15..-1]
+					row_export[3] = content[1][0..10]
+					row_export[4] = content[1][11..-1].to_s + ":" + content[2]
+					row_export[5] = content[3] + ":" + content[4]
+					row_export[6] = content[5][0]
+				else
+					content = row[0]
+					content = content.gsub(/\s+/, "")
+					content = content.delete("!")
+					content = content.split(//)
+					row_export += content
+				end
+			end
+		end
+	end
+=end
+
+	def self.migrate_netranking_points
+		csv = CSV.parse(File.read("lib/data.csv"), :headers => false)
+		# the structure of the csv file
+		# number # email # mobile # money # apple
+		CSV.open("lib/fail_data.csv", 'wb') do |csv_export|
+			csv.each_with_index do |row, index|
+				puts index if index%100 == 0
+				email = row[1]
+				mobile = row[2]
+				point = (row[3].to_f * 100 + row[4].to_f * 10).round
+				u = User.find_by_email(email) || User.find_by_mobile(mobile)
+				if u.present?
+					netranking_log = u.logs.point_logs.where(:reason => PointLog::NETRANKING_IMPORT)
+					if netranking_log.present?
+						# record it: multiple accounts for one user
+						row_export = []
+						row_export[0] = "multiple accounts"
+						row_export[1] = row[1]
+						row_export[2] = row[2]
+						row_export[3] = row[3]
+						row_export[4] = row[4]
+						csv_export << row_export
+						next
+					end
+				else
+					# check the style of email and mobile
+					email_rexg  = '\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z'
+					mobile_rexg = '^(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$' 
+					email = email.to_s.strip.downcase
+					mobile = mobile.to_s.strip
+					email = email.to_s.match(/#{email_rexg}/i) ? email : nil
+					mobile = mobile.to_s.match(/#{mobile_rexg}/i) ? mobile : nil
+					if email.nil? && mobile.nil?
+						# record it: illegal email and mobile
+						row_export = []
+						row_export[0] = "illegal email and mobile"
+						row_export[1] = row[1]
+						row_export[2] = row[2]
+						row_export[3] = row[3]
+						row_export[4] = row[4]
+						csv_export << row_export
+						next
+					end
+					u = User.create(:email => email, :mobile => mobile)
+				end
+				pl = PointLog.new
+				pl.amount = point
+				pl.user_id = u._id
+				pl.reason = PointLog::NETRANKING_IMPORT
+				pl.save
+			end
+		end
+	end
+
 	def self.migrate
 		Log.destroy_all
 		AgentTask.destroy_all
@@ -114,9 +198,9 @@ class MigrateDb
 				a.reject_type = Answer::REJECT_BY_TIMEOUT
 			end
 			# the introducer_reward_assigned field
-			a.introducer_reward_assigned = a.status == Answer::FINISH
+			a.introducer_reward_assigned = (a.status == Answer::FINISH)
 			# the reward_delivered field
-			a.reward_delivered = a.status == Answer::FINISH
+			a.reward_delivered = (a.status == Answer::FINISH)
 			# the rewards field
 			a.rewards = []
 			# the need review field
@@ -135,7 +219,7 @@ class MigrateDb
 			# remove the password_confirmation
 			u.password_confirmation = nil if u.read_attribute("password_confirmation").present?
 			# the email activation field
-			u.email_activation = u.status > 1
+			u.email_activation = (u.status > 1)
 			# the email subscribe field
 			u.email_subscribe = true
 			# the user_role field
@@ -144,7 +228,7 @@ class MigrateDb
 			user_role += 4 if (u.role.to_i & 32) > 0 || (u.role.to_i & 16) > 0
 			u.user_role = user_role
 			# the status field
-			u.status = u.status == 0 ? User::VISITOR : User::REGISTERED
+			u.status = (u.status == 0 ? User::VISITOR : User::REGISTERED)
 			u.write_attribute(:migrate, true)
 			u.save
 
@@ -172,7 +256,7 @@ class MigrateDb
 			next if bg._type != "Gift"
 			g = Gift.new
 			# the type field
-			g.type = bg.type == 1 ? Gift::REAL : Gift::VIRTUAL
+			g.type = (bg.type == 1 ? Gift::REAL : Gift::VIRTUAL)
 			# the exchange count field
 			g.exchange_count = 0
 			# the view_count filed
@@ -205,9 +289,9 @@ class MigrateDb
 			next if bg._type != "Prize"
 			p = Prize.new
 			# the type field
-			p.type = bg.type == 1 ? Gift::REAL : Gift::VIRTUAL
+			p.type = (bg.type == 1 ? Gift::REAL : Gift::VIRTUAL)
 			# the status field
-			p.status = bg.is_deleted ? Prize::DELETED : Prize::NORMAL
+			p.status = (bg.is_deleted ? Prize::DELETED : Prize::NORMAL)
 			# the title field
 			p.title = bg.name
 			# the description field
@@ -236,7 +320,7 @@ class MigrateDb
 				gift_id = o.gift_id.to_s
 				gift = Gift.where(:basic_gift_id => gift_id)[0]
 				# the type field
-				o.type = gift.type == Gift::REAL ? Order::REAL : Order::VIRTUAL
+				o.type = (gift.type == Gift::REAL ? Order::REAL : Order::VIRTUAL)
 				# the gift association
 				o.gift_id = gift._id
 				# the point field
@@ -248,7 +332,7 @@ class MigrateDb
 				prize_id = o.gift_id.to_s
 				prize = Prize.where(:basic_gift_id => prize_id)[0]
 				# the type field
-				o.type = prize.type == Prize::REAL ? Order::REAL : Order::VIRTUAL
+				o.type = (prize.type == Prize::REAL ? Order::REAL : Order::VIRTUAL)
 				# the prize association
 				o.prize_id = prize._id
 			end
@@ -274,6 +358,7 @@ class MigrateDb
 	end
 
 	def self.migrate_survey_spreads
+		puts "Migrating survey spreads......"
 		SurveySpread.all.each do |ss|
 			s = ss.survey
 			ss.survey_creation_time = s.created_at.to_i if s.present?
@@ -281,9 +366,12 @@ class MigrateDb
 		end
 	end
 
+=begin
 	def self.migrate_survey_invitation_histories
+		puts "Migrating survey invitation histories......"
 		SurveyInvitationHistory.destroy_all
-		EmailHistory.all.each do |e|
+		EmailHistory.all.each_with_index do |e, index|
+			puts index if index%100 == 0
 			u = User.find_by_email(e.email) || e.user
 			s = e.survey
 			next if u.nil?
@@ -296,7 +384,6 @@ class MigrateDb
 		end
 	end
 
-=begin
 	def self.migrate_point_log
 		PointLog.destroy_all
 		puts "Migrating point logs......"

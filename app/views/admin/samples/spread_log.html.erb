@@ -57,7 +57,7 @@
     </form>
   </span>
   <span class="pull-right">
-    <%= paginator_mini @spread_log %>
+    <%= paginator_mini @answers %>
   </span>
 </div>
 
@@ -66,24 +66,18 @@
     <thead>
       <tr>
         <th>问卷标题</th>
-        <th>答案创建时间</th>
-        <th>结束答题时间</th>
-        <th>联系方式</th>
+        <th>时间</th>
+        <th>答题人邮箱/手机</th>
+        <th>推广奖励</th>
       </tr>
     </thead>
     <tbody>
-      <% @spread_log["data"].each_with_index do |log_item, i| %>
+      <% @answers["data"].each_with_index do |a, i| %>
       <tr>
-        <td><a href=""><%= log_item["title"] %> - <%= log_item["status"] %>- <%= log_item['reject_type'] %></a></td>
-        <td><%= log_item["created_at"] %></td>
-        <td>
-          <%= log_item['finished_at'] %>
-        </td>
-        <td>
-          <p><%= log_item['email']  %></p>
-          <p><%= log_item['mobile']  %></p>
-          
-        </td>
+        <td><%= a["survey_title"] %></td>
+        <td><%= int_time_to_date(a["created_at"].to_i) %></td>
+        <td><%= a["sample_email_mobile"] %></td>
+        <td><%= a["point_to_introducer"] %></td>
       </tr>
       <% end %>
     </tbody>
