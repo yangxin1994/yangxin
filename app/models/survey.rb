@@ -105,6 +105,7 @@ class Survey
     "reward_scheme_id" => ""
   }
   field :sample_attributes_for_promote, :type => Array, default: []
+  field :star, :type => Boolean, default: false
 
 
   # reward: 0: nothing, 1: priPze, 2: point

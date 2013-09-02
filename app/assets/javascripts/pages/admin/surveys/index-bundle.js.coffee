@@ -40,4 +40,20 @@ $ ->
           console.log ret
           alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")        
       error: ->
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")       
+          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+
+  $(".star").click ->
+    $this = $(this)
+    $.ajax
+      url: "/admin/surveys/#{$this.data("id")}/star"
+      method: 'PUT'
+      data:
+        star: $this.find('a').class
+      success: (ret)->
+        if ret.success
+          $this.html("""<i class="#{$this.data("toggle")}"></i>""")
+        else
+          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")        
+      error: ->
+          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+
