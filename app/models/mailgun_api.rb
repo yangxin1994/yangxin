@@ -7,6 +7,7 @@ class MailgunApi
 	@@user_email_from = "\"问卷吧\" <postmaster@oopsdata.cn>"
 
 	def self.batch_send_survey_email(survey_id, user_id_ary)
+		return if user_id_ary.blank?
 		@emails = user_id_ary.map { |e| User.find_by_id(e).try(:email) }
 		group_size = 900
 		@group_emails = []
@@ -17,16 +18,28 @@ class MailgunApi
 			@emails = @emails[group_size..-1]
 			temp_recipient_variables = {}
 			temp_emails.each do |e|
+				u = User.find_by_email(e)
+				if u.status == User::REGISTERED
+					u.auth_key = Encryption.encrypt_auth_key("#{self._id}&#{Time.now.to_i.to_s}")
+					u.auth_key_expire_time =  -1
+					u.save
+				end
 				unsubscribe_key = CGI::escape(Encryption.encrypt_activate_key({"email_mobile" => e}.to_json))
-				temp_recipient_variables[e] = {"email" => e, "unsubscribe_key" => unsubscribe_key}
+				temp_recipient_variables[e] = {"auth_key" => u.auth_key, "unsubscribe_key" => unsubscribe_key}
 			end
 			@group_recipient_variables << temp_recipient_variables
 		end
 		@group_emails << @emails
 		temp_recipient_variables = {}
 		@emails.each do |e|
+			u = User.find_by_email(e)
+			if u.status == User::REGISTERED
+				u.auth_key = Encryption.encrypt_auth_key("#{u._id}&#{Time.now.to_i.to_s}")
+				u.auth_key_expire_time =  -1
+				u.save
+			end
 			unsubscribe_key = CGI::escape(Encryption.encrypt_activate_key({"email_mobile" => e}.to_json))
-			temp_recipient_variables[e] = {"email" => e, "unsubscribe_key" => unsubscribe_key}
+			temp_recipient_variables[e] = {"auth_key" => u.auth_key, "unsubscribe_key" => unsubscribe_key}
 		end
 		@group_recipient_variables << temp_recipient_variables
 
@@ -45,7 +58,7 @@ class MailgunApi
 		if [RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::POINT].include? @reward_type || @reward_type.nil?
 			# list some hot gifts
 			@gifts = []
-			Gift.real_and_virtual.desc(:exchange_count).limit(3).each do |g|
+			Gift.on_shelf.real_and_virtual.desc(:exchange_count).limit(3).each do |g|
 				@gifts << { :title => g.title,
 					:url => Rails.application.config.quillme_host + "/gifts/" + g._id.to_s,
 					:img_url => Rails.application.config.quillme_host + g.photo.picture_url }
@@ -94,6 +107,7 @@ class MailgunApi
 		data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
 		@group_emails.each_with_index do |emails, i|
 			data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
+			# data[:to] = emails.join(', ')
 			data[:'recipient-variables'] = @group_recipient_variables[i].to_json
 			self.send_message(data)
 		end
