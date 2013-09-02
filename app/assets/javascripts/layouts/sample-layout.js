@@ -27,7 +27,7 @@ $(document).ready(function(){
 
   	// placeholder for IE 
   	//$.form.placeholder();
-
+  	$('input, textarea').placeholder();
 
 	$('.unfold-btn').toggle(function(){
 		$(this).children('i').removeClass('open').addClass('close').next('span').html('收起');
