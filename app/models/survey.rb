@@ -265,8 +265,9 @@ class Survey
     self['answer_count'] = self.answers.count
     self['time'] = self.estimate_answer_time
     if user.present?
-      self['answer_status'] = Answer.find_by_survey_id_sample_id_is_preview(self.id, user.id, false).try(:status)
-      self['answer_reject_type'] = Answer.find_by_survey_id_sample_id_is_preview(self.id, user.id, false).try(:reject_type)     
+      answer = Answer.find_by_survey_id_sample_id_is_preview(self.id, user.id, false)
+      self['answer_status'] = answer.try(:status)
+      self['answer_reject_type'] = answer.try(:reject_type)     
     else
       self['answer_status'] = 0
       self['answer_reject_type'] = 0
