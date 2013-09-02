@@ -75,7 +75,7 @@
       <% @samples["data"].each_with_index do |sample, index| %>
       <tr>
         <td><input type="checkbox" name="sample_ids" class="check-sample" value="<%= sample['_id'] %>"/> </td>
-        <td><a href="/admin/samples/<%= sample['_id'] %>/edit" title="title"><%= sample["email"] %></a></td>
+        <td><a href="/admin/samples/<%= sample['_id'] %>" title="title"><%= sample["email"] %></a></td>
         <td><%= sample["mobile"] %></td>
         <td data-sid="<%= sample['_id'] %>" data-is_blcok="<%= sample['is_block'] %>" data-roles="<%= sample['user_role'] %>">
           <div class="btn-group">

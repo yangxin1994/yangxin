@@ -16,6 +16,14 @@ class Admin::SurveysController < Admin::AdminController
     end
   end
 
+  def star
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      survey.star = !(params[:star].to_s == 'true')
+      survey.save
+      survey.star
+    end
+  end
+
   def more_info
     render_json Survey.where(:_id => params[:id]).first do |survey|
       {

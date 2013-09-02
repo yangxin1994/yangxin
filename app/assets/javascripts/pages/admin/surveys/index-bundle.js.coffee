@@ -44,14 +44,15 @@ $ ->
 
   $(".star").click ->
     $this = $(this)
+    icon = $this.find('i')
     $.ajax
       url: "/admin/surveys/#{$this.data("id")}/star"
       method: 'PUT'
       data:
-        star: $this.find('a').class
+        star: icon.hasClass('icon-star')
       success: (ret)->
         if ret.success
-          $this.html("""<i class="#{$this.data("toggle")}"></i>""")
+          icon.attr('class', "icon-star#{if ret.value then "" else "-empty" }")
         else
           alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")        
       error: ->
