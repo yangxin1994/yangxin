@@ -19,9 +19,9 @@ class Sample::SurveysController < Sample::SampleController
 		today_start = Time.local(date.year, date.month, date.day,0,0,0)
 		today_end   = Time.local(date.year, date.month, date.day+1,0,0,0)
 		@answer_count = Answer.where(:created_at.gte => today_start,:created_at.lt => today_end).count
-		date = Date.today
-		today_start = Time.local(date.year, date.month, date.day,0,0,0)
-		today_end   = Time.local(date.year, date.month, date.day+1,0,0,0)
+		# date = Date.today
+		# today_start = Time.local(date.year, date.month, date.day,0,0,0)
+		# today_end   = Time.local(date.year, date.month, date.day+1,0,0,0)
 		@spread_count = Answer.where(:created_at.gte => today_start,:created_at.lt => today_end,:introducer_id.ne => nil).count
 		@disciplinal = PunishLog.desc(:created_at).limit(3).map do |log|
 			log['avatar'] = log.user.avatar.present? ? log.user.avatar.picture_url : User::DEFAULT_IMG
@@ -34,6 +34,7 @@ class Sample::SurveysController < Sample::SampleController
 			log['username'] = log.user.try(:nickname)
 			log      
 		end
+		fresh_when(:etag => [@surveys,@answer_count,@spread_count,@disciplinal,@reward_count,@fresh_news])
 	end
 
 	#重新生成订阅 短信激活码  或者邮件

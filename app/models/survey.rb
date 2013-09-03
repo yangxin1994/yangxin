@@ -157,13 +157,19 @@ class Survey
   index({ status: 1, show_in_community: 1, title: 1 }, { background: true } )
   index({ show_in_community: 1, title: 1 }, { background: true } )
   index({ title: 1 }, { background: true } )
-  index({ status: 1, show_in_community: 1, title: 1 }, { background: true } )
-  index({ status: 1, title: 1 }, { background: true } )
   index({ status: 1, title: 1 }, { background: true } )
   index({ status: 1, reward: 1}, { background: true } )
-  index({ status: 1 }, { background: true } )
   index({ status: 1, is_star: 1 }, { background: true } )
   index({ status: 1, promotable: 1}, { background: true } )
+
+
+  
+  index({ quillme_promote_reward_type: 1 }, { background: true } )
+  index({ quillme_hot: 1 }, { background: true } )
+  index({ user_id: 1 }, { background: true } )
+  index({ title: 1 }, { background: true } )
+  index({ quillme_promotable: 1, quillme_hot: 1,status: 1,created_at: -1}, { background: true } )
+  index({ quillme_promotable: 1, quillme_hot: 1,status: 1,quillme_promote_reward_type: 1}, { background: true } )
 
   before_save :clear_survey_object
   before_update :clear_survey_object

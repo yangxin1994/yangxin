@@ -34,7 +34,11 @@ class Prize
 	scope :real, normal.where(:type => REAL)
 	scope :virtual, normal.where(:type => VIRTUAL)
 
+	index({ created_at: -1 }, { background: true } )
+	index({ status: 1 }, { background: true } )
+	index({ title: 1 }, { background: true } )
 	index({ type: 1, status: 1 }, { background: true } )
+	index({ _id: 1, created_at: -1 }, { background: true } )
 
 	def self.find_by_id(prize_id)
 		return self.normal.where(:_id => prize_id).first

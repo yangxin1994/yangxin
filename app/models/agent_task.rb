@@ -29,6 +29,10 @@ class AgentTask
 
 	scope :normal, where(:status.in => [OPEN, CLOSED, AGENT_CLOSED])
 
+	index({ status: 1 }, { background: true } )
+	index({ survey_id: 1 }, { background: true } )
+	index({ agent_id: 1, status:1 }, { background: true } )
+
 	def self.find_by_id(agent_task_id)
 		return self.normal.where(:_id => agent_task_id).first
 	end

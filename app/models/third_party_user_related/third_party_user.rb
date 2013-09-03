@@ -17,6 +17,8 @@ class ThirdPartyUser
 
 	index({ _type: 1, website_id: 1 }, { background: true } )
 
+	index({user_id: 1, website_id: 1 }, { background: true } )
+
 	public
 
 	def self.find_by_id(third_party_user_id)
