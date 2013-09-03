@@ -329,7 +329,7 @@ class Survey
   end
 
   def self.search(options = {})
-    surveys = Survey.desc(:created_at)
+    surveys = Survey.desc(:star).desc(:created_at)
     if options[:keyword]
       if options[:keyword] =~ /^.+@.+$/
         uid = User.where(:email => options[:keyword]).first.try '_id'
