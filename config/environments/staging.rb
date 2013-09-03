@@ -102,6 +102,18 @@ OopsData::Application.configure do
   }
 =end
 
+  config.authkeys = {
+    sina: '3198161770',
+    renren: '194585',
+    qq: '100418792',
+    google: '36926710043',
+    qihu360: 'c83cf3b2688f4f1c695bc9906a2dcf14',
+    kaixin001: '173805652095b523553bc42aa44f8171',
+    douban: '06b0041f88738b9e14100c5e995aa2da',
+    baidu: 'STFYxeMfwouPVtMjseFymHGD',
+    sohu: '9ab2466b42224c0c9b038e327db61b97'
+  }
+
   config.mailgun_api_key = "key-9zcv6-e7j8aratn9viu3unvbn2zc92j3"
 
   # task web service

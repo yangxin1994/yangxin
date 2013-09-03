@@ -25,6 +25,8 @@ class RewardScheme
 
 	scope :not_default, where(default: false)
 
+	index({ default: 1 }, { background: true } )
+
 	def self.find_by_id(reward_scheme_id)
 		return RewardScheme.where(:_id => reward_scheme_id).first
 	end

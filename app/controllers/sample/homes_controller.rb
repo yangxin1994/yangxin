@@ -22,12 +22,14 @@ class Sample::HomesController < Sample::SampleController
 			user
 		end
 
+
     @fresh_news = Log.get_new_logs(5, nil)
     @fresh_news = @fresh_news.each do |log|
       log['avatar'] = log.user.avatar.present? ? log.user.avatar.picture_url : User::DEFAULT_IMG
       log['username'] = log.user.try(:nickname)
       log
     end
+    fresh_when(:etag => [@hot_survey,@rsl,@public_notices,@hotest_gifts,@top_rank_users,@fresh_news])
 	end
 
 

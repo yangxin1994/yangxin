@@ -96,12 +96,19 @@ class Answer
   REJECT_BY_AGENT_REVIEW = 32
   REJECT_BY_IP_RESTRICT = 64
 
-  index({ survey_id: 1, status: 1, reject_type: 1 }, { background: true } )
+  index({ introducer_id: 1 }, { background: true } )
+
   index({ survey_id: 1, is_preview: 1 }, { background: true } )
   index({ username: 1, password: 1 }, { background: true } )
-  index({ user_id: 1 }, { background: true } )
-  index({ is_preview: 1, introducer_id: 1 }, { background: true } )
 
+  index({ is_preview: 1, introducer_id: 1 }, { background: true } )
+  index({ survey_id: 1, status: 1, reject_type: 1 }, { background: true } )
+  index({ status: 1, reject_type: 1 }, { background: true } )
+  index({ created_at: 1 }, { background: true } ) 
+  index({ user_id: 1, survey_id: 1, is_preview:1 }, { background: true } )
+  index({ import_id:1},{ background: true })
+  index({ ip_address:1},{ background: true })
+  
   def load_csv(survey=1)
     filename = "public/import/test.csv"
     CSV.foreach(filename, :headers => true) do |row|

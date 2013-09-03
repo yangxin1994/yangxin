@@ -123,7 +123,12 @@ class User
 	index({ color: 1, status: 1, role: 1 }, { background: true } )
 	index({ status: 1 }, { background: true } )
 	index({ introducer_id: 1, status: 1 }, { background: true } )
-
+	index({ auth_key: 1, status: 1 }, { background: true } )
+	index({ mobile: 1 }, { background: true } )
+	index({ user_role: 1 }, { background: true } )
+	index({ name:1},{background: true})
+	index({ created_at:1},{background: true})
+	index({ is_block:1},{background: true})
 
 	public
 

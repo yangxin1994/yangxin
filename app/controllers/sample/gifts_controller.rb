@@ -11,6 +11,7 @@ class Sample::GiftsController < Sample::SampleController
 		end
 		@gift_rank = Gift.on_shelf.real.desc(@sort_type).limit(5).map { |e| e.info }
 		@new_ex_history = Log.get_newest_exchange_logs
+		fresh_when(:etag => [@hotest_gifts,@gift_rank,@new_ex_history])
 	end
 
 	def get_special_type_data
@@ -27,6 +28,7 @@ class Sample::GiftsController < Sample::SampleController
 		@hotest_gifts = auto_paginate(@hotest_gifts) do |e|
 			e.map { |e| e.info }
 		end
+		fresh_when(:etag => [@hotest_gifts])
 	end
 
 
@@ -38,5 +40,6 @@ class Sample::GiftsController < Sample::SampleController
 		@gift.inc_view_count
 		@gift[:photo_src] = @gift.photo.nil? ? Gift::DEFAULT_IMG : @gift.photo.picture_url 
 		@receiver_info = current_user.nil? ? nil : current_user.affiliated.try(:receiver_info) || {}
+		fresh_when(:etag => [@gift_rank,@gift,@receiver_info])
 	end
 end

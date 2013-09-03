@@ -42,7 +42,14 @@ class Gift
 	scope :on_shelf, where(:status => ON_THE_SHELF)
 	scope :real, where(:type => REAL)
 	scope :real_and_virtual, where(:type.in => [VIRTUAL, REAL])
+
 	index({ type: 1, status: 1 }, { background: true } )
+	index({ point: 1}, { background: true } )
+	index({ view_count: 1}, { background: true } )
+	index({ status: 1}, { background: true } )	
+	index({ title: 1}, { background: true } )
+	index({ created_at: -1}, { background: true } )	
+	index({ status: 1, type:1, created_at:-1, view_count:-1}, { background: true } )
 
 	def self.find_by_id(gift_id)
 		return self.normal.where(:_id => gift_id).first
