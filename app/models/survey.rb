@@ -105,6 +105,7 @@ class Survey
     "reward_scheme_id" => ""
   }
   field :sample_attributes_for_promote, :type => Array, default: []
+  field :star, :type => Boolean, default: false
 
 
   # reward: 0: nothing, 1: priPze, 2: point
@@ -335,7 +336,7 @@ class Survey
   end
 
   def self.search(options = {})
-    surveys = Survey.desc(:created_at)
+    surveys = Survey.desc(:star).desc(:created_at)
     if options[:keyword]
       if options[:keyword] =~ /^.+@.+$/
         uid = User.where(:email => options[:keyword]).first.try '_id'

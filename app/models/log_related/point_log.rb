@@ -2,7 +2,7 @@
 class PointLog < Log
 	field :type, :type => Integer, :default => 8
 	field :amount, :type => Integer #花费积分数
-	field :reason, :type => Integer #1（回答问卷），2（推广问卷），4（礼品兑换）， 8（管理员操作）,16(处罚操作), 32(邀请样本)，64(撤销订单), 128(原有系统导入)
+	field :reason, :type => Integer #1（回答问卷），2（推广问卷），4（礼品兑换）， 8（管理员操作）,16(处罚操作), 32(邀请样本)，64(撤销订单), 128(原有系统导入), 256(清研通导入)
 	field :survey_title, :type => String
 	field :survey_id, :type => String
 	field :scheme_id, :type => String
@@ -21,6 +21,7 @@ class PointLog < Log
 	INVITE_USER = 32
 	REVOKE = 64
 	IMPORT = 128
+	NETRANKING_IMPORT = 256
 
 	def info_for_sample
 		point_log_obj = {}
