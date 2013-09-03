@@ -1377,7 +1377,7 @@ class Survey
       rule["finished_count"] = 0
       rule["submitted_count"] = 0
       return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
-      rule["conditinos"] ||= []
+      rule["conditions"] ||= []
       rule["conditions"].each do |condition|
         condition["condition_type"] = condition["condition_type"].to_i
         return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
