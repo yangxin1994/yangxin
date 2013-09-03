@@ -28,6 +28,7 @@ class Sample::HomesController < Sample::SampleController
           log['username'] = log.user.try(:nickname)
           log
         end
+        fresh_when(:etag => [@hot_survey,@rsl,@public_notices,@hotest_gifts,@top_rank_users,@fresh_news])
 	end
 
 

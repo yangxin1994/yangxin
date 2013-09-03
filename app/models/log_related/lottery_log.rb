@@ -11,6 +11,9 @@ class LotteryLog < Log
 	field :survey_title, :type => String
 	field :land, :type => String #归属地
 
+	index({ survey_id: 1, result: 1 }, { background: true } )
+	index({ answer_id: 1 }, { background: true } )
+	
 
 	def self.find_lottery_logs(answer_id,status,limit)
 		status = nil unless status.present?

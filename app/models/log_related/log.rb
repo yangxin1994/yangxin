@@ -17,7 +17,21 @@ class Log
 	scope :disciplinal_logs, lambda { where(:type => 64)}
 	scope :have_user,lambda {where(:user_id.ne => nil)}
 
+
+
 	belongs_to :user
+
+
+
+	index({ created_at:1},{background: true})
+
+	index({ type:1},{background: true})
+	index({ user_id:1},{background: true})
+	index({ point:1},{background: true})
+	index({ type:1, user_id:1, updated_at:-1},{background: true})
+	index({ _type:1, created_at:-1},{background: true})
+	index({ survey_id:1,_type:1, created_at:-1},{background: true})
+	index({ answer_id:1,_type:1, created_at:-1},{background: true})
 
 	def self.find_by_id(log_id)
 		log = Log.where(:_id => log_id).first
