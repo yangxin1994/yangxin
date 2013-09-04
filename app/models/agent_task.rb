@@ -25,7 +25,7 @@ class AgentTask
 
 	default_scope order_by(:created_at.desc)
 
-	attr_accessible :description, :count
+	# attr_accessible :description, :count
 
 	scope :normal, where(:status.in => [OPEN, CLOSED, AGENT_CLOSED])
 

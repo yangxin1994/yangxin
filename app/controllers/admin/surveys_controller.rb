@@ -194,14 +194,16 @@ class Admin::SurveysController < Admin::AdminController
 
   def _unbind_question
     @question = Question.find_by_id(params[:id])
-    @question.remove_attribute_bind
+    @question.remove_sample_attribute
     redirect_to :back
   end
 
   def _update_bind
     params[:relation] = JSON.parse params[:relation]
-    @question = @question.find params[:id]
-    @question.bind_question(params[:question_id], params[:relation])
+    @question = Question.find params[:id]
+    @question.sample_attribute_relation = params[:relation]
+    @question.sample_attribute_id = params[:attribute_id]
+    @question.save
     render json: {}
   end
   

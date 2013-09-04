@@ -130,6 +130,8 @@ class User
 	index({ created_at:1},{background: true})
 	index({ is_block:1},{background: true})
 
+	validates_numericality_of :point, :greater_than_or_equal_to => 0
+
 	public
 
 	def self.find_by_email_mobile(email_mobile)
@@ -663,9 +665,7 @@ class User
 	# admin inc
 	def operate_point(amount, remark)
 		self.point += amount.to_i
-		self.save
-		PointLog.create_admin_operate_point_log(amount, remark, self._id)
-		return true
+		PointLog.create_admin_operate_point_log(amount, remark, self._id) if self.save
 	end
 	#--
 	############### operations about charge #################

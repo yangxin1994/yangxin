@@ -1,4 +1,5 @@
 <% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/samples/point-bundle" %>
 <% end %>
 
 <% content_for :sidenav do %>
@@ -78,7 +79,7 @@
           <%= log_item['amount'] %>
         </td>
         <td>
-          <%= log_item['survey_titile'] || log_item['gift_name'] || log_item['remark'] %>
+          <%= log_item['remark'] || log_item['survey_titile'] || log_item['gift_name'] %>
         </td>
       </tr>
       <% end %>
@@ -93,9 +94,7 @@
     </div>
     <div class="modal-body">
       <div class="well">
-        <p id="p_point">
-          <%=  %>
-        </p>
+        总积分:<span id="p_point"><%= @sample.point %></span>
       </div>
     <form action=""
           name="point"
