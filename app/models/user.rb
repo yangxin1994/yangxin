@@ -332,7 +332,7 @@ class User
 	end
 
 
-	def self.make_forget_pass_activate(mobile,code)
+	def self.forget_pass_mobile_activate(mobile,code)
 		sample = self.find_by_mobile(mobile)
 		if sample.present?
 			return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i  > sample.sms_verification_expiration_time

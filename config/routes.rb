@@ -127,16 +127,16 @@ OopsData::Application.routes.draw do
       get  :sign_up, :as => :sign_up
       post :login,   :as => :login 
       get  :sign_out,:as => :sign_out
-      post :create_sample,:as => :create_sample
-      get  :check_email_mobile,:as => :check_email_mobile
-      get  :active_notice,:as => :active_notice
+      post :regist,:as => :regist
+      get  :check_user_exist,:as => :check_user_exist
+      get  :regist_succ,:as => :regist_succ
       get  :email_activate,:as => :email_activate
       post :mobile_activate,:as => :mobile_activate
       get  :re_mail,:as => :re_mail
       post  :get_basic_info_by_auth_key, :as => :get_basic_info_by_auth_key
       get :forget_password, :as => :forget_password
       get :send_forget_pass_code,:as => :send_forget_pass_code
-      get :make_forget_pass_activate, :as => :make_forget_pass_activate
+      get :forget_pass_mobile_activate, :as => :forget_pass_mobile_activate
       get :generate_new_password,:as => :generate_new_password
       get :get_account,:as => :get_account,:as => :get_account
     end

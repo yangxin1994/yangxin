@@ -175,7 +175,7 @@ $(function(){
   }
 
   function make_forget_pass_activate(mobile,code){
-    $.getJSON('/account/make_forget_pass_activate.json',{ phone:mobile,code:code},function(retval){
+    $.getJSON('/account/forget_pass_mobile_activate.json',{ phone:mobile,code:code},function(retval){
       if(retval.success){
         window.location.href =  window.location.href.split('?')[0] + '?k=' + Base64.encode(mobile) + '&c=' +  Base64.encode(code)
       }else{

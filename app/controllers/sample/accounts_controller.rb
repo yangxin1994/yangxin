@@ -5,8 +5,14 @@ class Sample::AccountsController < Sample::SampleController
 	before_filter :require_sign_in, :only => [:after_sign_in, :get_basic_info_by_auth_key]
 
   def sign_in
-
   end
+
+  def sign_up
+  end
+
+  def sign_out
+    _sign_out params[:ref]
+  end  
 
   # FOR AJAX 
   def login
@@ -29,19 +35,30 @@ class Sample::AccountsController < Sample::SampleController
 	  	redirect_to bind_sample_path({ref: params[:ref]})
   	end
   end
- 
-  def sign_up
 
+
+  #用户注册
+  def regist
+    if params[:email_mobile].present?
+      retval = User.create_new_user(
+        params[:email_mobile],
+        params[:password],
+        current_user,
+        params[:third_party_user_id],
+        {protocal_hostname: "#{request.protocol}#{request.host_with_port}",
+          path: "/account/email_activate"})
+      render_json_auto(retval) and return
+    end
   end
 
-  def sign_out
-  	_sign_out params[:ref]
+  def check_user_exist
+    u = User.find_by_email_mobile(params[:email_mobile])
+    render_json_auto({"exist" => (u &&  u.is_activated)}) and return
   end
+
 
   #注册成功后的跳转页面
-  def active_notice
-    # mail.cn.yahoo.com
-    #'gmail.com' 
+  def regist_succ
     mails = ['126.com','163.com','sina.com','yahoo','qq.com']
     @account = params[:k]
     @account = Base64.decode64(@account)
@@ -52,26 +69,8 @@ class Sample::AccountsController < Sample::SampleController
     end
   end
 
-  def check_email_mobile
-    u = User.find_by_email_mobile(params[:phone])
-    render_json_auto({"exist" => (u &&  u.is_activated)}) and return
-    # render :json => Sample::AccountClient.new(session_info).check_email_mobile(params[:phone])
-  end
 
-  #用户注册
-  def create_sample
-    if params[:phone].present?
-      retval = User.create_new_user(
-        params[:phone],
-        params[:password],
-        current_user,
-        params[:third_party_user_id],
-        {protocal_hostname: "#{request.protocol}#{request.host_with_port}",
-          path: "/account/email_activate"})
-      render_json_auto(retval) and return
-    end
-  end
-
+  # resend email after sign up success if can't receive the mail
   def re_mail
     @account = params[:k]
     @account = Base64.decode64(@account)
@@ -100,7 +99,7 @@ class Sample::AccountsController < Sample::SampleController
     render_json_s and return
   end
 
-  #用户注册  邮件激活
+  #用户注册  邮件激活callback
   def email_activate
     activate_info = {}
     begin
@@ -121,6 +120,7 @@ class Sample::AccountsController < Sample::SampleController
     end
   end
 
+  #用户注册  手机验证码激活
   def mobile_activate
     activate_info = {"mobile" => params[:mobile],
         "password" => params[:password],
@@ -133,7 +133,6 @@ class Sample::AccountsController < Sample::SampleController
   end
 
   def get_basic_info_by_auth_key
-    # answer number, spread number, third party accounts
     @answer_number = current_user.answers.not_preview.finished.length
     @spread_number = Answer.where(:introducer_id => current_user._id).not_preview.finished.length
     @bind_info = {}
@@ -176,7 +175,7 @@ class Sample::AccountsController < Sample::SampleController
     end
   end
 
-  #根据激活邮箱的key找回忘记密码的账户
+  #根据激活邮箱的key找回忘记密码的账户callback 
   def get_account
     begin
       activate_info_json = Encryption.decrypt_activate_key(params[:key])
@@ -189,6 +188,7 @@ class Sample::AccountsController < Sample::SampleController
     end
   end
 
+  # send email/mobile  code  when forget password
   def send_forget_pass_code
     session[:forget_account] = params[:email_mobile]
     retval = User.send_forget_pass_code(params[:email_mobile],
@@ -197,8 +197,9 @@ class Sample::AccountsController < Sample::SampleController
     render_json_auto retval and return
   end
 
-  def make_forget_pass_activate
-    render_json_auto User.make_forget_pass_activate(params[:phone], params[:code]) and return
+  #忘记密码,手机激活
+  def forget_pass_mobile_activate
+    render_json_auto User.forget_pass_mobile_activate(params[:phone], params[:code]) and return
   end
 
   def generate_new_password

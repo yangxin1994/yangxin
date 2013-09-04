@@ -169,7 +169,7 @@ $(function(){
 
 
 	function check_account_exist(account,notice_class){
-			$.getJSON('/account/check_email_mobile.json',{phone:account},function(retval){
+			$.getJSON('/account/check_user_exist.json',{email_mobile:account},function(retval){
 				if(retval.success){
 					if(retval.value['exist']){
 						$('input.account').addClass('error');
@@ -209,9 +209,9 @@ $(function(){
 	function create_email_sample(email,pass){
 		$('input.login_btn').val('正在注册')
 		$('input.login_btn').attr('disabled',true).addClass('disabled')
-		$.postJSON('/account/create_sample.json',{phone:email,password:pass},function(retval){
+		$.postJSON('/account/regist.json',{email_mobile:email,password:pass},function(retval){
 			if(retval.success){
-				window.location.href="/account/active_notice?k=" + Base64.encode(email)
+				window.location.href="/account/regist_succ?k=" + Base64.encode(email)
 			}else{
 				$('input.login_btn').attr('disabled',false).removeClass('disabled')
 				$('input.login_btn').val('立 即 注 册')
@@ -224,7 +224,7 @@ $(function(){
 		$('input.login_btn').attr('disabled',true).addClass('disabled')
 		$.postJSON('/account/mobile_activate.json',{mobile:account,password:pass,verification_code:code},function(retval){
 			if(retval.success){
-				window.location.href="/account/active_notice?k=" + Base64.encode(account)
+				window.location.href="/account/regist_succ?k=" + Base64.encode(account)
 			}else{
 				$('input.login_btn').val('立 即 注 册')
 				$('input.login_btn').attr('disabled',false).removeClass('disabled')
@@ -237,7 +237,7 @@ $(function(){
 	function send_active_code(mobile){
 		$(".send_code").text('正在发送......')
 		$('.send_code').attr('disabled', 'disabled').addClass('disabled');
-		$.postJSON('/account/create_sample.json',{ phone:mobile},function(retval){
+		$.postJSON('/account/regist.json',{ email_mobile:mobile},function(retval){
 			counter($('.send_code'));
 		})
 		return false;
