@@ -25,6 +25,8 @@ class Filler::FillerController < ApplicationController
 	end
 
 	def ensure_reward(reward_scheme_id, rewards)
+		logger.debug '=============='
+		logger.debug rewards.inspect
 		@reward_scheme_id = reward_scheme_id
 		@reward_scheme_type = 0
 		if !rewards.nil? && rewards.length > 0
@@ -55,6 +57,8 @@ class Filler::FillerController < ApplicationController
 								photo_url: prize.photo.picture_url
 							}
 						end || []
+						# win: nil, false, true
+						@lottery_started = !r['win'].nil?
 						break
 					end
 				when 16
