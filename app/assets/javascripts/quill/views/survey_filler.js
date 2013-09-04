@@ -390,18 +390,22 @@ $(function(){
 					}, this));
 				} else if(this.options.reward.reward_scheme_type == 3) {
 					// lottery
-					this.hbs({
-						title: this.model.get('title'),
-						prizes: this.options.reward.prizes,
-						signin: this.options.signin,
-						survey_id: this.model.get('_id'),
-						publish_result: this.model.get('publish_result'),
-						spreadable: this.options.spread_point > 0,
-						spread_point: this.options.spread_point,
-						show_subscribe: !this.options.binded
-					}, 'survey_filler_end_lottery').appendTo('#f_body');
-					$('#start_spread').click($.proxy(function() { this._spread(); }, this));
-					$('#ok_btn').click($.proxy(function() { location.href = '/lotteries/' + this.options.answer_id; }, this));
+					if(this.options.reward.lottery_started) {
+						location.href = '/lotteries/' + this.options.answer_id;
+					} else {
+						this.hbs({
+							title: this.model.get('title'),
+							prizes: this.options.reward.prizes,
+							signin: this.options.signin,
+							survey_id: this.model.get('_id'),
+							publish_result: this.model.get('publish_result'),
+							spreadable: this.options.spread_point > 0,
+							spread_point: this.options.spread_point,
+							show_subscribe: !this.options.binded
+						}, 'survey_filler_end_lottery').appendTo('#f_body');
+						$('#start_spread').click($.proxy(function() { this._spread(); }, this));
+						$('#ok_btn').click($.proxy(function() { location.href = '/lotteries/' + this.options.answer_id; }, this));
+					}
 				}
 			} else if (value.answer_status == 16) {
 				// 重答
