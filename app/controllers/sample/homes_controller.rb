@@ -9,7 +9,7 @@ class Sample::HomesController < Sample::SampleController
 		  paginated_surveys.map { |e| e.excute_sample_data(current_user) } 
 		end
 
-		@public_notices = auto_paginate PublicNotice.opend.desc(:updated_at)
+		@public_notices = PublicNotice.opend.desc(:updated_at).limit(5)
 
     @hotest_gifts = Gift.on_shelf.real.desc(:view_count).limit(8).map { |e| e.info }
 
