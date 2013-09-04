@@ -17,6 +17,7 @@
 				reward_point: <%= @reward_point %>,
 				<% elsif @reward_scheme_type == 3 %>
 				prizes: <%= raw @prizes.to_json %>,
+				lottery_started: <%= raw @lottery_started.to_json %>,
 				<% end %>
 			},
 			answer_id: '<%="#{params[:id]}" %>',
