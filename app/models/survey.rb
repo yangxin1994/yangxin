@@ -3,26 +3,8 @@
 require 'error_enum'
 require 'quality_control_type_enum'
 require 'quill_common'
-require 'securerandom'
 require 'csv'
-#The survey object has the following structure
-# {
-#  "owner_meail" : email of the owner user(string),
-#  "survey_id" : id of the survey(string),
-#  "title" : title of the survey(string),
-#  "subtitle" : subtitle of the survey(string),
-#  "welcome" : welcome of the survey(string),
-#  "closing" : closing of the survey(string),
-#  "header" : header of the survey(string),
-#  "footer" : footer of the survey(string),
-#  "description" : description of the survey(string),
-#  "created_at" : create time of the survey(integer),
-#  "constrains": an array of constrains
-#  "pages" : 2D array, each nested array is a page and each element is a Question id(2D array)
-# }
-#Structure of question object can be found at Question
 class Survey
-
   include Mongoid::Document
   include Mongoid::Timestamps
   field :title, :type => String, default: "调查问卷主标题"
@@ -77,10 +59,8 @@ class Survey
   field :quillme_promote_info, :type => Hash, :default => {
     "reward_scheme_id" => ""
   }
-
   # 0 免费, 1 表示话费，2表示支付宝转账，4表示积分，8表示抽奖，16表示发放集分宝
   field :quillme_promote_reward_type,:type => Integer, default: nil
-
   field :email_promote_info, :type => Hash, default: {
     "email_amount" => 0,
     "promote_to_undefined_sample" => false,
@@ -109,15 +89,6 @@ class Survey
   field :star, :type => Boolean, default: false
 
 
-  # reward: 0: nothing, 1: priPze, 2: point
-  # field_remove :reward, :type => Integer, :default => 0
-  # field_remove :show_in_community, :type => Boolean, default: false
-  # whether this survey can be promoted by emails or other ways
-  # field_remove :promotable, :type => Boolean, :default => false
-  # field_remove :promote_email_number, :type => Integer, :default => 0
-  # whether the answers of the survey need to be reviewed
-  # field_remove :answer_need_review, :type => Boolean, :default => false
-
   has_many :answers
   has_many :reward_schemes
   has_many :survey_invitation_histories
@@ -129,24 +100,10 @@ class Survey
   has_many :interviewer_tasks
   has_many :agent_tasks
   has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
-  has_and_belongs_to_many :entry_clerks, class_name: "User", inverse_of: :entry_clerk_allocated_surveys
-  has_and_belongs_to_many :tags do
-    def has_tag?(content)
-      @target.each do |tag|
-        return true if tag.content == content
-      end
-      return false
-    end
-  end
-  belongs_to :lottery
   belongs_to :user, class_name: "User", inverse_of: :surveys
 
 
   
-  scope :in_community, lambda { where(:show_in_community => true) }
-  scope :is_promotable, lambda { where(:promotable => true) }
-  
- 
   scope :status, lambda {|st| where(:status => st)}
   scope :reward_type,lambda {|rt| where(:quillme_promote_reward_type.in => rt)}
   scope :opend, lambda { where(:status => 2)}
@@ -156,13 +113,10 @@ class Survey
   scope :not_quillme_hot, lambda {where(:quillme_hot => false)}
 
 
-  index({ status: 1, show_in_community: 1, title: 1 }, { background: true } )
-  index({ show_in_community: 1, title: 1 }, { background: true } )
   index({ title: 1 }, { background: true } )
   index({ status: 1, title: 1 }, { background: true } )
   index({ status: 1, reward: 1}, { background: true } )
   index({ status: 1, is_star: 1 }, { background: true } )
-  index({ status: 1, promotable: 1}, { background: true } )
 
 
   
@@ -487,11 +441,6 @@ class Survey
     return self.is_star
   end
 
-  def set_community(show_in_community)
-    self.show_in_community = show_in_community
-    return self.save
-  end
-
   def update_style_setting(style_setting_obj)
     self.style_setting = style_setting_obj
     self.save
@@ -589,7 +538,6 @@ class Survey
     new_instance.point = 0
     new_instance.spread_point = 0
     new_instance.reward = 0
-    new_instance.show_in_community = false
     lottery = new_instance.lottery
     lottery.surveys.delete(new_instance) if !lottery.nil?
     new_instance.entry_clerks.each do |a| new_instance.entry_clerks.delete(a) end
