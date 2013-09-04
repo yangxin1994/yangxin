@@ -49,7 +49,7 @@ class Admin::SamplesController < Admin::AdminController
 
   def operate_point
     render_json User.where(:_id => params[:id]).first do |sample|
-      sample.operate_point(params[:amount], params[:remark])
+      success_true sample.operate_point(params[:amount], params[:remark])
     end  
   end
 
