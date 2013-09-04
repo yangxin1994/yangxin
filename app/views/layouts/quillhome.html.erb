@@ -67,7 +67,7 @@
 			<div class="login-panel r">
 
 					<a href="javascript:void(0);" class="account-setting white-txt mr10" >
-						<%=email%><span class="ml5">▼</span>
+						<%=current_user.try(:email)%><span class="ml5">▼</span>
 					</a>
 					<div class="account-setting-box dn">
 						<i class="trigon">▲</i>

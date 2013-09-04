@@ -1,15 +1,5 @@
 # finish migrating
 class Filler::FillerController < ApplicationController
-	# has_mobile_fu
- #  before_filter :set_mobile_format, :check_mobile_param
-
- #  # Continue rendering HTML for the iPad (no mobile views yet)
- #  def set_mobile_format
- #    is_device?("ipad") ? request.format = :html : super
- #  end
- #  def check_mobile_param
- #  	force_mobile_format if params[:m].to_b
- #  end
 
 	layout 'filler'
 
