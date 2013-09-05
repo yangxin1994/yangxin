@@ -58,7 +58,7 @@ $ ->
             <ul class="dropdown-menu dropselect agent-reward">
               #{type_html}
             </ul>
-            <input type="hidden" name="agent[agent_promote_setting][agents][#{index}][agent_id]"/>
+            <input type="hidden" name="agent[agent_promote_setting][agents][#{index}][reward_scheme_id]"/>
           </div>
         </div>
       </div>    
