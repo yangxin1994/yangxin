@@ -7,13 +7,7 @@ class Admin::SurveysController < Admin::AdminController
 	# *****************************
 
   def index
-    @surveys = auto_paginate Survey.search(params) do |surs|
-      surs.map do |sur|
-        sur.append_user_fields([:email, :mobile])
-        sur.serialize_for([:title, :email, :mobile, :created_at])
-        sur
-      end
-    end
+    @surveys = auto_paginate Survey.search(params)
   end
 
   def star
@@ -105,21 +99,13 @@ class Admin::SurveysController < Admin::AdminController
       end
       @questions[question_id] = question
     end    
-    # @survey = Survey.where(:_id => params[:id])
-    # result = @client.show(params)
-    # if result[:success] || result.try(:success)
-    #   @questions = result[:questions]
-    #   @survey = result[:survey]
-    # else
-    #   render :json => result
-    # end
   end
 
 
 
   def promote
     if survey = Survey.where(:_id => params[:id]).first
-      @promote = survey.get_all_promote_settings
+      @promote = survey.serialize_in_promote_setting
     else
 
     end

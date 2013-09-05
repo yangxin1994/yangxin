@@ -77,22 +77,22 @@ class Sample::UsersController < Sample::SampleController
 
 	#我推广的问卷
 	# GET
-	def spread_surveys
+  def spread_surveys
+    @my_spread_surveys = auto_paginate current_user.survey_spreads.desc(:survey_creation_time) do |paginated_survey_spreads|
+      paginated_survey_spreads.map do |e|
+        finish_number = e.survey.answers.not_preview.finished.where(:introducer_id => current_user._id).length
+        spread_number = e.survey.answers.not_preview.where(:introducer_id => current_user._id).length
+        e.survey.write_attribute(:spread_number, spread_number)
+        e.survey.write_attribute(:finish_number, finish_number)
+        e.survey
+      end
+    end
 
-		@my_spread_surveys = auto_paginate current_user.survey_spreads.desc(:survey_creation_time) do |paginated_survey_spreads|
-			paginated_survey_spreads.map do |e|
-				finish_number = e.survey.answers.not_preview.finished.where(:introducer_id => current_user._id).length
-				spread_number = e.survey.answers.not_preview.where(:introducer_id => current_user._id).length
-				e.survey.info_for_sample.merge({"spread_number" => spread_number,
-																				"finish_number" => finish_number})
-			end
-		end
-
-		respond_to do |format|
-			format.html 
-			format.json { render_json_auto @my_spread_surveys }
-		end
-	end
+    respond_to do |format|
+      format.html 
+      format.json { render_json_auto @my_spread_surveys }
+    end
+  end
 
 	# GET
 	def survey_detail
@@ -536,5 +536,4 @@ class Sample::UsersController < Sample::SampleController
 				"sample"
 			end
 	end
-
 end
