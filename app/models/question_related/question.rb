@@ -5,6 +5,9 @@ require 'quality_control_type_enum'
 class Question < BasicQuestion
 	include Mongoid::Document
 	field :is_required, :type => Boolean, default: true
+	field :sample_attribute_relation, :type => Hash, default: {}
+
+	belongs_to :sample_attribute
 
 	before_save :clear_question_object
 	before_update :clear_question_object
@@ -45,6 +48,14 @@ class Question < BasicQuestion
 		issue.remove_hidden_items(items)
 		self.issue = issue.serialize
 		return self
+	end
+
+	def remove_sample_attribute
+		self.sample_attribute_relation = {}
+		self.save
+		sample_attribute = self.sample_attribute
+		sample_attribute.questions.delete(self) if !sample_attribute.nil?
+		return true
 	end
 
 	def estimate_answer_time

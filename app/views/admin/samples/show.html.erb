@@ -1,0 +1,73 @@
+<% content_for :head do %>
+<% end %>
+
+<% content_for :sidenav do %>
+
+  <li class="active">
+    <a href="javascript(void(0));">
+    <i class="icon-chevron-right"></i>
+    基本属性
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/redeem_log">
+    <i class="icon-chevron-right"></i>
+    礼品兑换记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/point_log">
+      <i class="icon-chevron-right"></i>
+      积分变化记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/lottery_log">
+      <i class="icon-chevron-right"></i>
+      抽奖记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/lottery_log">
+      <i class="icon-chevron-right"></i>
+      回答历史记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/lottery_log">
+      <i class="icon-chevron-right"></i>
+      问卷推广记录
+    </a>
+  </li>
+<% end %>
+
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>样本属性</th>
+        <th></th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>邮箱:</td>
+        <td><%= @attrs['email'] %></td>
+      </tr>
+      <tr>
+        <td>手机:</td>
+        <td><%= @attrs['mobile'] %></td>
+      </tr>    
+      <% @sample_attributes.each do |attr| %>
+      <tr>
+        <td><%= attr['name'] %></td>
+        <td><%= attr_tag attr %></td>
+      </tr>
+      <% end %> 
+    </tbody>
+  </table>
+
+ 
+
+
+      

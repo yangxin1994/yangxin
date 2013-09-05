@@ -1,0 +1,29 @@
+<div class="sub-banner">
+	<h1>我的调研列表</h1>
+	<% if @status != 'deleted' %>
+	<div class='survey-list-menus'>
+		<span id='check_all_con'><input class="check-all" type="checkbox"></span><span id="control_panel"></span><span id="refresh_btn"></span>
+	</div>
+	<% end %>
+	<!--页码-->
+	<% if @surveys.present? %>
+	<span id="pagination">
+		<%
+			add_url = "&per_page=#{params[:per_page]}" if params[:per_page]
+			add_url = add_url.to_s + "&star=#{params[:star]}" if params[:star]
+			add_url = add_url.to_s + "&status=#{params[:status]}" if params[:status]
+			add_url = add_url.to_s + "&title=#{params[:title]}" if params[:title]
+			add_url = add_url.to_s + "&publish_status=#{params[:publish_status]}" if params[:publish_status]
+		%>
+		<!-- <span class="previous" title="上一页"></span>
+		<span class="current"><%= params[:page] || 1 %></span>
+		<span class="next" title="下一页"></span>
+		<span class="pagination-txt">页码</span> -->
+		<a href="/questionaires?page=1<%=add_url.to_s%>">« 首页</a>
+		<a href="/questionaires?page=<%= @surveys['previous_page'] %><%=add_url.to_s%>">« 上一页</a>
+		<a class="number current" href="/questionaires?page=<%= @surveys['current_page'] %><%=add_url.to_s%>"><%=@surveys['current_page']%>/<%= @surveys['total_page'] %></a>
+		<a href="/questionaires?page=<%=@surveys['next_page']%><%=add_url.to_s%>">下一页 »</a>
+		<a href="/questionaires?page=<%=@surveys['total_page']%><%=add_url.to_s%>">尾页 »</a>
+	</span>
+	<% end %>
+</div>

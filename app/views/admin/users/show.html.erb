@@ -1,0 +1,175 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/users-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/users-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+<%if @user.success %>
+<div class="users">
+	<div class="title">
+		<h5>用户管理: 基本信息</h5>
+		<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/users">返回用户列表</a><h5>
+	</div>
+	<!-- edit tab start -->
+	<div class="tab-content" id="edit-tab">
+		<div id="user-form">
+			<form action="#" method="post">
+				<p>
+					<label class="child-title f14 pl2">邮箱</label>
+					<input class='tw3' name="user[:email]" type ='text' value="<%= @user.value['email'] %>"/>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">用户名</label>
+					<input class='tw3' name="user[:username]" type ='text' value="<%= @user.value['username'] %>"/>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">姓名</label>
+					<input class='tw3' name="user[:full_name]" type ='text' value="<%= @user.value['full_name'] %>"/>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">证件号</label>
+					<input class='tw3' name="user[:identity_card]" type ='text' value="<%= @user.value['identity_card'] %>"/>
+					<span class="alertSpan red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">公司</label>
+					<input class='tw3' name="user[:company]" type ='text' value="<%= @user.value['company'] %>"/>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">手机号码</label>
+					<input class='tw3' name="user[:phone]" type ='text' value="<%= @user.value['phone'] %>"/>
+					<span class="alertSpan red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">地址</label>
+					<input class='tw3' name="user[:address]" type ='text' value="<%= @user.value['address'] %>"/>
+				</p>
+				<p>
+					<input class="greenBtn btn-edit" type="button" value="修 改" />
+					<input class="blueBtn btn-edit-ok" type="button" value="确 定" />
+				</p>
+
+			</form>
+		</div>
+
+<% if @user.value['status'] > -1 %>
+		<div class="title-parent">
+			<%
+					role_arr = []
+					roles = @user.value['role'].to_i
+					5.downto(0).each do |i|
+							if roles / 2**i == 1
+									role_arr << 2**i
+									roles %= 2**i
+							end
+					end
+			%>
+			<div class="title">
+				<h5>
+					用户管理: 分配角色
+				</h5>
+			</div>
+			<div class="roles">
+					<%if current_user.user_role & 32 > 0 %>
+							<div class="role role_32">
+									<input <%if role_arr.include?(32) %>checked<%end%> value="32" type="checkbox"/>
+									<span class="f14 pl2">SuperAdmin</span>
+							</div>
+							<div class="role role_16">
+									<input <%if role_arr.include?(16) %>checked<%end%> value="16" type="checkbox"/>
+									<span class="f14 pl2">Admin</span>
+							</div>
+					<%end%>
+
+					<div class="role role_8">
+							<input <%if role_arr.include?(8) %>checked<%end%> value="8" type="checkbox"/>
+							<span class="f14 pl2">问卷审核员</span>
+					</div>
+					<div class="role role_4">
+							<input <%if role_arr.include?(4) %>checked<%end%> value="4" type="checkbox"/>
+							<span class="f14 pl2">答案审核员</span>
+					</div>
+					<div class="role role_2">
+							<input <%if role_arr.include?(2) %>checked<%end%> value="2" type="checkbox"/>
+							<span class="f14 pl2">访问人员</span>
+					</div>
+					<div class="role role_1">
+							<input <%if role_arr.include?(1) %>checked<%end%> value="1" type="checkbox"/>
+							<span class="f14 pl2">录入人员</span>
+					</div>
+			</div>
+			<input class="blueBtn btn-role-ok" type="button" value="确 定" />
+	</div>
+
+	<!-- add point -->
+	<!-- 积分 -->
+	<div id="point-form"  class="title-parent">
+		<div class="title">
+			<h5>
+				用户管理: 积分操作
+			</h5>
+		</div>
+		<p>
+			用户当前积分为:<em class="pl10 point-num orange"><%= @user.value['point'] %></em>
+		</p>
+		<form action="#" method="post">
+			<input id='f_user_id' name="user_id" type ='hidden' value="<%= @user.value['_id'] %>"/>
+			<p>
+			<label class="child-title f14 pl2">增加的积分数</label>
+			<input id='f_point' class='tw3' name="point" type ='text' />
+			<br />
+			<label class="child-title f14 pl2">操作原因</label>
+			<input id='f_cause_desc' class='tw3' name="cause_desc" type ='text' />
+			</p>
+										<span><em class='red'>注意:  </em>答案审核员审核通过答题用户的答案时，答题用户会相应增加积分，通过此处可另外增加积分.</span>
+			<p>
+			<input class="blueBtn btn-point-ok" type="button" value="确 定" />
+			</p>
+		</form>
+	</div>
+<%end%>
+
+		<div class="title-parent stats">
+			<div class="title">
+				<h5>
+					用户管理: 其它操作
+				</h5>
+			</div>
+			<div style="clear:both"></div>
+
+			<% unless @user.value['status']==-1 %>
+					<a class="blueBtn btn-other-operate btn-reset-ok" href="#" value="">重置为随机密码</a>
+					<% unless @user.value['color']==0 %>
+							<a class="blueBtn btn-other-operate btn-to-color-ok" href="#" value="0">改为正常用户</a>
+					<%end%>
+					<% unless @user.value['color']==1 %>
+							<a class="blueBtn btn-other-operate btn-to-color-ok" href="#" value="1">移动到白名单</a>
+					<%end%>
+					<% unless @user.value['color']==-1 %>
+							<a class="blueBtn btn-other-operate btn-to-color-ok" href="#" value="-1">移动到黑名单</a>
+					<%end%>
+					<a class="blueBtn btn-other-operate btn-to-reward-ok" href="/admin/users/<%=params[:id]%>/lottery_record" value="">查看抽奖记录</a>
+					<a class="blueBtn btn-other-operate btn-to-gift-ok" href="/admin/users/<%=params[:id]%>/rewards" value="">礼品兑换记录</a>
+					<a class="blueBtn btn-other-operate btn-to-gift-ok" href="/admin/users/<%=params[:id]%>/point_logs" value="">积分变化记录</a>
+					<a class="blueBtn btn-other-operate btn-introduced_users-ok"  href="/admin/users/<%=params[:id]%>/introduced_users" value="">查看邀请的好友</a>
+					<%if @user.value['lock']==true%>
+							<a class="blueBtn btn-other-operate btn-unlock-ok" href="#" value="">解除锁定</a>
+					<%else%>
+							<a class="blueBtn btn-other-operate btn-lock-ok" href="#" value="">锁定</a>
+					<%end%>
+					<a class="blueBtn btn-other-operate btn-to-delete-ok" href="#" value="">删除此用户</a>
+		<%else%>
+			<a class="blueBtn btn-other-operate btn-to-recover-ok" href="#" value="">恢复删除用户</a>
+			<%end%>
+		</div>
+	</div>
+	<!-- edit tab end -->
+
+</div>
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @user.value %></p>
+</div>
+<%end%>

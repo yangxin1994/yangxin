@@ -1,0 +1,18 @@
+      <% article = product_news %>
+      <div id="<%= article['id'] %>" class="product-news-txt">
+        <!-- 日期 -->
+        <!--  -->
+        <% atime = article['time'].split('.') %>
+        <span class="product-news-date">
+          <span class="month"><%= atime[1] %></span>
+          <span class="day"><%= atime[2] %></span>
+          <span class="year"><%= atime[0] %></span>
+        </span>
+        <div class="article-txt l" style="width:530px;">
+          <img class="img-r" src="/assets/zine/4.png" alt="">
+          <h3 class="title"><a href="javascript:void(0);" class="editArea"><%= article['caption'] %></a></h3>
+          <p><%= article['abstract'] %>
+          </p>
+        </div>
+        <div style="clear:both"></div>
+      </div>

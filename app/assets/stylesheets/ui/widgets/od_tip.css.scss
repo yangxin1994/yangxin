@@ -1,0 +1,265 @@
+@import "common";
+@import "compass/css3/border-radius";
+@import "compass/utilities/general/clearfix";
+.od-tip, .od-uploadtip{
+	text-align:left;
+	/*弹出层外层透明背景*/
+	.layer_bg{
+	        width:240px;
+	        height:110px;
+	        position: relative;
+	        /* left:10px;
+	        top:10px; */
+	        background: image-url('widgets/layer_bg.png') repeat;
+	        @include border-radius(6px);
+	}
+	/*顶部尖角*/
+ 	.corner,.corner2{
+	        width:12px;
+	        height: 10px;
+	        position: absolute;
+	        top:-5px;
+	        left:50%;
+	        z-index: 99;
+	} 
+	/*灰底尖角*/
+	 .corner2{
+		background:image-url('widgets/kj_bg2.png') no-repeat -293px -46px;
+	}
+	/*弹出层内容*/
+	.layer_main{
+	        width:230px;
+	        background: #FFF;
+	        border:1px #989898 solid;
+	        position: absolute;
+	        top:4px;
+	        left:4px;
+	        @include border-radius(3px);
+	}
+	/************功能面板************/
+	.popup_panel{
+		width:220px;
+		height:20px;
+		line-height: 20px;
+		padding: 5px;
+	    border-radius: 3px;
+	    background: #e5e5e5;
+	    @include border-top-radius(3px);
+	}
+	/*****切换按钮*****/
+	.toggle-btn li button{
+		float:left;
+		width:42px;
+		@include one-line(20px);
+		text-align: center;
+		border:none;
+		cursor: pointer;
+	}
+	.font_bendi{
+		width:26px;
+		height: 12px;
+		@include inline-block;
+		vertical-align: middle;
+		background:image-url('widgets/kj_bg2.png') no-repeat -326px -82px;
+	}
+	.font_lianjie{
+		width:26px;
+		height: 12px;
+		@include inline-block;
+		vertical-align: middle;
+		background: image-url('widgets/kj_bg2.png') no-repeat -326px -147px;
+	}
+	/*左按钮默认*/
+	.toggle-btn-y-l button{
+		background:image-url('widgets/kj_bg2.png') no-repeat -146px -383px;
+		&:hover{
+			background-position: -239px -383px;
+		}
+		&:active{
+			background-position: -239px -413px;
+		}
+		&.active{
+			background-position: -146px -323px;
+		}
+	}
+	/*左按钮 鼠标经过后 与点击后 文字变化*/
+	.toggle-btn-y-l button:hover .font_bendi,
+	.toggle-btn-y-l button.active .font_bendi{
+		background: image-url('widgets/kj_bg2.png') no-repeat -326px -103px;
+	}
+	/*右按钮默认*/
+	.toggle-btn-y-r button{
+		background:image-url('widgets/kj_bg2.png') no-repeat -188px -323px;
+		&:hover{
+			background-position: -188px -353px;
+		}
+		&:active{
+			background-position: -188px -383px;
+		}
+		&.active{
+			background-position: -188px -413px;
+		}
+	}
+	/*右按钮 鼠标经过后 与点击后 文字变化*/
+	.toggle-btn-y-r button:hover .font_lianjie,
+	.toggle-btn-y-r button.active .font_lianjie{
+		background:image-url('widgets/kj_bg2.png') no-repeat -326px -168px;
+	}
+	/*关闭按钮2*/
+	.btn_close2{
+		width:8px;
+		height:8px;
+		display: inline-block;
+		overflow: hidden;
+		border:none;
+		cursor: pointer;
+		background:image-url('widgets/kj_bg2.png') no-repeat -247px -82px;
+		&:hover{
+			background-position: -265px -82px;
+		}
+		&:active{
+			background-position: -283px -82px;
+		}
+	}
+	.buttonStyle{
+		padding-top:20px;
+		text-align:center;
+		}
+
+	.img_preview{
+		width: 210px;
+		height: 130px;
+		margin-top:10px;
+	}
+	.img_upload{
+		width:210px;
+		height:130px;
+	}
+	/*链接面板*/
+	.link_main{
+		width:210px;
+		padding:20px 0px 15px 12px;
+	}
+	/*链接地址input*/
+	.link_address{
+		float: left;
+		@include one-line(16px);
+		border:1px #dbdbdb solid;
+		padding:4px;
+		margin-right:5px;
+		color: #999;
+	}
+		/*****更改上传样式******/
+	.progress_box{
+		width:204px;
+		line-height: 24px;
+		margin: 10px 0 0 10px;
+		float: left;
+		margin-bottom:26px;
+	}
+	.progress_box p{
+		float:left;
+		color:#333;
+	}
+	.progress_box i {
+		font-style: normal;
+		color: #CCC;
+		float: left;
+		margin-left: 5px;
+	}
+	a.cancel{
+		color:#666;
+		float: right;
+	}
+	a:hover.cancel{
+		color:#333;
+	}
+	.img_preview{
+		width: 210px;
+		height: 130px;
+		margin-top:10px;
+	}
+	.img_upload{
+		width:210px;
+		height:130px;
+	}
+	.music_show{
+		@include clearfix;
+		padding:2px;
+	}
+	.music_upload{
+		width:18px;
+		height:18px;
+		float:left;
+	}
+	.music_title{
+		margin-left:8px;
+		float:left;
+		width: 182px;
+		word-wrap: break-word;
+		word-break: normal;
+		margin-bottom: 10px;
+	}
+	.pl5{paddint-left:5px;}
+	.long_title{
+		word-wrap: break-word;
+		word-break: normal;
+		padding:5px;
+	}
+	/*确定按钮2*/
+	.btn_confirm2{
+		width:52px;
+		height: 26px;
+		border:none;
+		cursor: pointer;
+		background: image-url('widgets/kj_bg2.png') no-repeat -321px -224px;
+		&:hover{
+			background-position: -321px -259px;
+		}
+		&:active{
+			background-position: -321px -295px;	
+		}
+	}
+
+	.link_txt{
+		color: #666;
+		cursor: default;
+		padding-bottom: 15px;
+		width: 360px;
+		em{
+			color: #f4bf01;
+		}
+		a{
+			color: #f4bf01;
+			&:hover{
+				text-decoration: underline;
+			}
+		}
+	}
+	.uploadBox{
+		margin-left:10px;
+		margin-top:10px;
+	}
+	.chooseAgain{
+		float: left;
+		margin: 10px;		
+	}
+	.btnOK{
+		float: right;
+		margin: 10px;		
+	}
+	.mt0{margin-top: 0;}
+	.picShow{
+		position:relative;
+	}
+		
+	.video-pic-hover{
+		position:absolute;
+		top:1px;
+		right:11px;
+		width:10px;
+		height:10px;
+		background:image-url('widgets/small-x.png');
+		cursor:pointer;
+	}
+}

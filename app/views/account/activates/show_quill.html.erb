@@ -1,0 +1,12 @@
+<div class="activate">
+	<h1><%= @success ? '激活完成' : '激活失败' %></h1>
+	<% if @success %>
+	<span>激活成功，点击下面按钮进入系统。</span>
+	<br />
+	<a href="<%= signin_path %>" class='od-button' style='width: 100px;'>进入系统</a>
+	<% else %>
+	<span>激活失败，可能是激活链接已经过期，请点击下面按钮重新激活账户。</span>
+	<br />
+	<a href="<%= new_activate_path %>" class='od-button' style='width: 100px;'>重新激活</a>
+	<% end %>
+</div>

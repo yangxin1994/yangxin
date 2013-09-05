@@ -1,6 +1,6 @@
 class Issue
 
-	ISSUE_TYPE = %w[ChoiceIssue MatrixChoiceIssue TextBlankIssue NumberBlankIssue EmailBlankIssue UrlBlankIssue PhoneBlankIssue TimeBlankIssue AddressBlankIssue BlankIssue MatrixBlankIssue ConstSumIssue SortIssue RankIssue Paragraph FileIssue TableIssue ScaleIssue]
+	ISSUE_TYPE = %w[ChoiceIssue MatrixChoiceIssue TextBlankIssue NumberBlankIssue EmailBlankIssue UrlBlankIssue PhoneBlankIssue TimeBlankIssue AddressBlankIssue BlankIssue MatrixBlankIssue ConstSumIssue SortIssue RankIssue Paragraph FileIssue TableIssue ScaleIssue HeatMapQuestion HotSpotQuestion]
 
 	def serialize(attr_ary)
 		issue_obj = {}

@@ -1,0 +1,45 @@
+@import "common";
+@import "compass/css3/border-radius";
+
+table{
+	width:656px;
+	margin:0 auto;
+	background:#fff;
+	th{
+		background:#eaf1d0;
+		@include one-line(40px);
+	}
+	td{
+		@include one-line(50px);
+		line-height:1.5em;
+		border-bottom:1px #dbdbdb dashed;
+	}
+	tr{
+		&:hover{
+			background:#f2f2f2;
+		}
+	}
+	.w300 {width:300px;}
+	.w100 {width:100px;}
+}
+.sidebar-box{
+	@include border-radius(9px);
+	padding:10px 20px 10px 20px;
+	line-height:2em;
+	p{
+		text-indent:2em;
+		a{
+			color:#d93631;
+			&:hover{
+				text-decoration:underline;
+			}
+		}
+	}
+	ul{
+		padding-left:20px;
+		li{
+			list-style-type: disc;	
+		}
+	}
+	
+}

@@ -1,0 +1,61 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/sample/users-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/sample/users-bundle", "pages/sample/users_notifications-bundle", :media => "all" %>
+<% end %>
+
+<%= render "sample_nav", :@path => 'notifications', :@text => "系统通知" %>
+
+<div class="inner-page main-content">
+    <!-- main -->
+    <div class="part-left" id="notifications">
+        <div class="notifications tabs">
+            <div class="l">
+                <a href="/users/notifications" class="tab active" id="tab-edit-info">系统通知</a>
+                <span class="r">
+                    <a id="delete-all" href="javascript:void(0);" style="cursor: pointer;">删除全部</a>
+                </span>
+            </div>
+            <div style="clear:both;"></div>
+            <div class="nav2-dashed-line"></div>
+        </div>
+
+        <div style="clear:both;"></div>
+
+        <div class="table-box">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 600px;"></th>
+                        <th style="width: 80px;"></th>
+                        <th style="width: 60px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% @notices['data'].to_a.each do |notice| %>
+                    <tr id="<%= notice["_id"] %>">
+                            <td class="content" >
+                                <div class="normal-text">
+                                    <p><%= notice['title'] %></p>
+                                </div>
+                                <div class="detail-text">
+                                    <%= notice["content"] %>
+                                </div>
+                            </td>
+                            <td class="time" >
+                                <abbr class="timeago" title="<%= Time.at(notice["created_at"]) %>"></abbr>
+                            </td>
+                            <td >
+                                <a href="javascript: void(0);" class="del">删除</a>
+                            </td>
+                        </tr>
+                    <% end %>
+                </tbody>
+            </table>
+        </div>
+
+        <%= render "pagination", :@common_value => @notices, :@path => "/users/notifications" %>
+    </div>
+
+    <!-- user tabs -->
+    <%= render "right_partial" %>
+</div>

@@ -1,0 +1,10 @@
+      <div class="article-txt" id="<%= article['id'] %>">
+        <h2 class="title"><a href="<%= article['url'] || "javascript:void(0);" %> " ><%= article['caption'] %></a></h2>
+        <span class="date"><%= article['time'] %></span>
+        <p class="fix">
+          <% if article['image_url'] != '' %>
+          <img class="<%= article['right'].to_s == 'true' ? "img-r" : "img-l" %>" src="<%= article['image_url'] %>" alt="">
+          <% end -%>
+          <span class="editArea"><%= article['abstract'] %></span>
+        </p>
+      </div>

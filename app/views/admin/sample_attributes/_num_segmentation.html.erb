@@ -1,0 +1,16 @@
+<p>
+  <label style="width: auto">设置区间(用于分析时数据分段)</label>
+  <% if segs %>
+    <% segs.each do |seg| %>
+      <p> <input type="text" name="attribute[analyze_requirement][segmentation][]" value="<%= seg %>" /> <a class="del-btn" href="#">&times;</a> </p>
+    <% end %>
+  <% else %>
+    <% 4.times do  %>
+      <p> <input type="text" name="attribute[analyze_requirement][segmentation][]" /> <a class="del-btn" href="#">&times;</a> </p>
+    <% end %>
+  <% end %>
+  <p class="segment-new">
+    <input type="text" />
+    <button id="" type="button" class="blueBtn add-num-btn">添加</button>
+  </p>
+</p>

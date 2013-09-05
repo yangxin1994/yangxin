@@ -1,0 +1,78 @@
+<% content_for :head do %>
+<%= javascript_include_tag "pages/quill/docs-bundle" %>
+<%= stylesheet_link_tag "pages/quill/docs-bundle", :media => "all" %>
+<% end %>
+<ul class="menu">
+	<li><a href="<%= design_doc_path %>">设计问卷</a></li>
+	<li><a class="active" href="<%= share_doc_path %>">美化和发布问卷</a></li>
+	<li><a href="<%= result_doc_path %>">结果分析</a></li>
+</ul>
+<div class="menu-content">
+	<ul class="menu-link">
+		<li><a href="#style">美化问卷</a></li>
+		<li><a href="#quota">设置配额</a></li>
+		<li><a href="#deadline">截止时间</a></li>
+		<li><a href="#share">分享问卷</a></li>
+		<li><a href="#open_close">关闭和开放问卷</a></li>
+	</ul>
+</div>
+<div class="page">
+		<h3 id='style'>美化问卷</h3>
+		<div class="r">
+			<img class="db" src="../assets/doc/meihua.png" alt="问卷设置">	
+			<span class="grayTxt ml10 mt10">▲切换按钮</span>
+			<img class="db" src="../assets/doc/meihua2.jpg" alt="问卷设置">	
+			<span class="grayTxt ml10 mt10">▲美化问卷示意图</span>
+		</div>
+		<ul class="min-width">
+			<li>1．问卷编辑完成后，点击“美化问卷”按钮，进入美化问卷页面，如图</li>
+			<li>2．点击美化页面上方的左右箭头可以浏览所有问卷主题。</li>
+			<li>3．选中某个主题后，可在下方预览该主题，进行试答题，查看答题效果。</li>
+		</ul>
+		<i class="divide"></i>
+		<h3>发布问卷</h3>
+		<p class="blueTxt">※注：分管理员发布和非管理员发布，非管理员发布需设置配额信息后，点击 <b style="color:red">“提交审核”</b>按钮。等待管理员审核
+（在消息中心查看结果 : 管理员审核通过后，发布成功。审核不通过，发布失败。）</p>
+		<p class="blueTxt">※ 注：问卷发布后，非管理员不能再对问卷进行编辑。（非管理员如需修改问卷，请您在在“关闭发布”
+后进行编辑。）</p>
+		<p>点击“发布问卷”按钮，进入发布页面。</p>
+		<i class="divide"></i>
+		<div class="r ml20" style="margin-top:-105px">
+			<img class="db" src="../assets/doc/fabu.png" alt="问卷设置">	
+			<span class="grayTxt ml10 mt10">▲发布问卷示意图</span>
+		</div>
+		<h3 id='quota'>设置问卷回收配额</h3>
+		<p class="blueTxt min-width">※   注：回收配额可根据需求设置约束问题的回收数量（只限选择题）和总回收数量（即不选择任何约束问题）。</p>
+		<ul class="min-width">
+			<li>1)	点击“添加配额”按钮，添加新的配额。</li>
+			<li>2)	点击“选择配额约束问题”按钮，选择配额约束问题。</li>
+			<li>3)	勾选问题答案，点击完成编辑按钮，配额设置完成。<b class="g9">注：单选题配额设置选择多个选项，需答案符合勾选选项其中之一即可；多选题若选择“包含勾选项”方式，需答案包含全部勾选选项)</b></li>
+			<li>4)	将鼠标放在配额上，显示配额的编辑和删除配额按钮，可对该配额进行编辑和删除操作。</li>
+			<li>5)	可查看个配额的回收进度条。</li>
+		</ul>
+		<i class="divide"></i>
+		<h3 id='deadline'>设置问卷截止日期</h3>
+		<div class="r ml20">
+			<img class="db" src="../assets/doc/shijian.png" alt="问卷设置">	
+			<span class="grayTxt ml10 mt10">▲发布问卷示意图</span>
+		</div>
+		<p>点击文本框，设置截止日期。</p>
+		<i class="divide"></i>
+		<h3 id='share'>分享问卷（以新浪微博为例）</h3>
+		<p>点击新浪微博分享图标，进入新浪微博的分享界面。登录微博后，点击“分享”按钮，即发布成功。（也可像您平时发微博一样，复制问卷链接地址，粘贴到您的微博，进行发布）。等待管理员审核。</p>
+		<br/>
+		<img class="db" width="647" src="../assets/doc/sina1.png" alt="问卷设置">
+		<br/>
+		<img class="db" src="../assets/doc/sina2.png" alt="问卷设置">	
+		<i class="divide"></i>
+
+		<h3 id='open_close'>关闭问卷</h3>
+		<p>问卷发布后，点击“<img src="../assets/doc/guanbi.png" alt="问卷设置">	”按钮，问卷处于关闭状态。关闭之后被访者不能答题。</p>
+		<h3>开放问卷</h3>
+		<div class="r ml20">
+			<img class="db" src="../assets/doc/kaifang.png" alt="问卷设置">	
+		</div>
+		<p class="min-width">点击“开放问卷”按钮，问卷恢复开放状态，被访者可继续答题。</p>
+</div>
+
+<a href='javascript:void(0);' class='scrollup'></a>

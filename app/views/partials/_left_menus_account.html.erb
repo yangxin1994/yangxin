@@ -1,0 +1,7 @@
+<button class="left-sidebar-title">账户管理</button>
+<ul class="left-menus">
+	<li class='<% if (left_active == 0) %>active<%end%>'><a href="<%=profile_path %>"><span class="left-menu-icon"><em class="volunteer"></em></span><span class="left-menu-name">账户设置</span></a></li>
+	<li class='last <% if (left_active == 1) %>active<%end%>'><a href="<%=messages_path %>"><span class="left-menu-icon"><em class="bar"></em></span><span class="left-menu-name">消息中心</span></a></li>
+	<!-- <li class='last <% if (left_active == 2) %>active<%end%>'><a href="javascript:void(0);"><span class="left-menu-icon"><em class="volunteer"></em></span><span class="left-menu-name">帮助与反馈</span></a></li> -->
+</ul>
+<div class="left-sidebar-end"></div>

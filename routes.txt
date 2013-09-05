@@ -1,0 +1,586 @@
+                                              GET    /:unique_key(.:format)                                                 mongoid_shortener/shortened_urls#translate {:unique_key=>/~.+/}
+                                       signup POST   /signup(.:format)                                                      account/signups#create
+                                              GET    /signup(.:format)                                                      account/signups#show
+                                done_activate GET    /activate/done(.:format)                                               account/activates#done
+                                     activate POST   /activate(.:format)                                                    account/activates#create
+                                 new_activate GET    /activate/new(.:format)                                                account/activates#new
+                                              GET    /activate(.:format)                                                    account/activates#show
+                                find_password GET    /password/find(.:format)                                               account/passwords#find
+                    send_reset_email_password POST   /password/send_reset_email(.:format)                                   account/passwords#send_reset_email
+                               reset_password GET    /password/reset(.:format)                                              account/passwords#reset
+                                     password PUT    /password(.:format)                                                    account/passwords#update
+                                       signin POST   /signin(.:format)                                                      account/signins#create
+                                              GET    /signin(.:format)                                                      account/signins#show
+                                      connect GET    /connects/:id(.:format)                                                account/connects#show
+                                      signout GET    /signout(.:format)                                                     account/signouts#show
+                      update_password_profile PUT    /profile/update_password(.:format)                                     account/profiles#update_password
+                                      profile GET    /profile(.:format)                                                     account/profiles#show
+                                              PUT    /profile(.:format)                                                     account/profiles#update
+                                     messages GET    /messages(.:format)                                                    account/messages#index
+                                data_list_job GET    /jobs/:id/data_list(.:format)                                          jobs#data_list
+                                    stats_job GET    /jobs/:id/stats(.:format)                                              jobs#stats
+                          analysis_result_job GET    /jobs/:id/analysis_result(.:format)                                    jobs#analysis_result
+                                 file_uri_job GET    /jobs/:id/file_uri(.:format)                                           jobs#file_uri
+                                          job GET    /jobs/:id(.:format)                                                    jobs#show
+                                        index GET    /index(.:format)                                                       quill/indices#show
+                                   design_doc GET    /doc/design(.:format)                                                  quill/docs#design
+                                    share_doc GET    /doc/share(.:format)                                                   quill/docs#share
+                                   result_doc GET    /doc/result(.:format)                                                  quill/docs#result
+                                   export_doc GET    /doc/export(.:format)                                                  quill/docs#export
+                                     customer GET    /customer(.:format)                                                    quill/customers#show
+                                      aboutus GET    /aboutus(.:format)                                                     quill/aboutus#show
+                             new_questionaire GET    /questionaires/new(.:format)                                           quill/questionaires#new
+                                 questionaire GET    /questionaires/:questionaire_id(.:format)                              quill/questionaires#show
+                                 questionaire DELETE /questionaires/:questionaire_id(.:format)                              quill/questionaires#destroy
+                         recover_questionaire PUT    /questionaires/:id/recover(.:format)                                   quill/questionaires#recover
+                           stars_questionaire GET    /questionaires/:id/stars(.:format)                                     quill/questionaires#stars
+                          remove_questionaire GET    /questionaires/:id/remove(.:format)                                    quill/questionaires#remove
+                     update_star_questionaire PUT    /questionaires/:id/update_star(.:format)                               quill/questionaires#update_star
+                           clone_questionaire POST   /questionaires/:id/clone(.:format)                                     quill/questionaires#clone
+                         publish_questionaire PUT    /questionaires/:id/publish(.:format)                                   quill/questionaires#publish
+                        deadline_questionaire PUT    /questionaires/:id/deadline(.:format)                                  quill/questionaires#deadline
+                           close_questionaire PUT    /questionaires/:id/close(.:format)                                     quill/questionaires#close
+                      split_questionaire_page PUT    /questionaires/:questionaire_id/pages/:id/split(.:format)              quill/pages#split
+                    combine_questionaire_page PUT    /questionaires/:questionaire_id/pages/:id/combine(.:format)            quill/pages#combine
+                           questionaire_pages POST   /questionaires/:questionaire_id/pages(.:format)                        quill/pages#create
+                            questionaire_page GET    /questionaires/:questionaire_id/pages/:id(.:format)                    quill/pages#show
+                   move_questionaire_question PUT    /questionaires/:questionaire_id/questions/:id/move(.:format)           quill/questions#move
+                analyse_questionaire_question GET    /questionaires/:questionaire_id/questions/:id/analyse(.:format)        quill/questions#analyse
+                       questionaire_questions POST   /questionaires/:questionaire_id/questions(.:format)                    quill/questions#create
+                        questionaire_question GET    /questionaires/:questionaire_id/questions/:id(.:format)                quill/questions#show
+                                              PUT    /questionaires/:questionaire_id/questions/:id(.:format)                quill/questions#update
+                                              DELETE /questionaires/:questionaire_id/questions/:id(.:format)                quill/questions#destroy
+                       questionaire_authority GET    /questionaires/:questionaire_id/authority(.:format)                    quill/authorities#show
+                                              PUT    /questionaires/:questionaire_id/authority(.:format)                    quill/authorities#update
+                   more_questionaire_property GET    /questionaires/:questionaire_id/property/more(.:format)                quill/properties#more
+            update_more_questionaire_property PUT    /questionaires/:questionaire_id/property/update_more(.:format)         quill/properties#update_more
+                        questionaire_property GET    /questionaires/:questionaire_id/property(.:format)                     quill/properties#show
+                                              PUT    /questionaires/:questionaire_id/property(.:format)                     quill/properties#update
+                         questionaire_quality GET    /questionaires/:questionaire_id/quality(.:format)                      quill/qualities#show
+                                              PUT    /questionaires/:questionaire_id/quality(.:format)                      quill/qualities#update
+                   questionaire_customization GET    /questionaires/:questionaire_id/customization(.:format)                quill/customizations#show
+                                              PUT    /questionaires/:questionaire_id/customization(.:format)                quill/customizations#update
+                          questionaire_logics GET    /questionaires/:questionaire_id/logics(.:format)                       quill/logics#index
+                                              POST   /questionaires/:questionaire_id/logics(.:format)                       quill/logics#create
+                           questionaire_logic GET    /questionaires/:questionaire_id/logics/:id(.:format)                   quill/logics#show
+                                              PUT    /questionaires/:questionaire_id/logics/:id(.:format)                   quill/logics#update
+                                              DELETE /questionaires/:questionaire_id/logics/:id(.:format)                   quill/logics#destroy
+                           questionaire_share GET    /questionaires/:questionaire_id/share(.:format)                        quill/shares#show
+                  refresh_questionaire_quotas POST   /questionaires/:questionaire_id/quotas/refresh(.:format)               quill/quotas#refresh
+                          questionaire_quotas POST   /questionaires/:questionaire_id/quotas(.:format)                       quill/quotas#create
+                           questionaire_quota PUT    /questionaires/:questionaire_id/quotas/:id(.:format)                   quill/quotas#update
+                                              DELETE /questionaires/:questionaire_id/quotas/:id(.:format)                   quill/quotas#destroy
+                         questionaire_filters GET    /questionaires/:questionaire_id/filters(.:format)                      quill/filters#index
+                                              POST   /questionaires/:questionaire_id/filters(.:format)                      quill/filters#create
+                          questionaire_filter GET    /questionaires/:questionaire_id/filters/:id(.:format)                  quill/filters#show
+                                              PUT    /questionaires/:questionaire_id/filters/:id(.:format)                  quill/filters#update
+                                              DELETE /questionaires/:questionaire_id/filters/:id(.:format)                  quill/filters#destroy
+            report_questionaire_report_mockup GET    /questionaires/:questionaire_id/report_mockups/:id/report(.:format)    quill/report_mockups#report
+                  questionaire_report_mockups GET    /questionaires/:questionaire_id/report_mockups(.:format)               quill/report_mockups#index
+                                              POST   /questionaires/:questionaire_id/report_mockups(.:format)               quill/report_mockups#create
+                   questionaire_report_mockup GET    /questionaires/:questionaire_id/report_mockups/:id(.:format)           quill/report_mockups#show
+                                              PUT    /questionaires/:questionaire_id/report_mockups/:id(.:format)           quill/report_mockups#update
+                                              DELETE /questionaires/:questionaire_id/report_mockups/:id(.:format)           quill/report_mockups#destroy
+                     spss_questionaire_result GET    /questionaires/:questionaire_id/result/spss(.:format)                  quill/results#spss
+                    excel_questionaire_result GET    /questionaires/:questionaire_id/result/excel(.:format)                 quill/results#excel
+                   report_questionaire_result GET    /questionaires/:questionaire_id/result/report(.:format)                quill/results#report
+               csv_header_questionaire_result GET    /questionaires/:questionaire_id/result/csv_header(.:format)            quill/results#csv_header
+              import_data_questionaire_result POST   /questionaires/:questionaire_id/result/import_data(.:format)           quill/results#import_data
+                          questionaire_result GET    /questionaires/:questionaire_id/result(.:format)                       quill/results#show
+                         questionaire_preview GET    /questionaires/:questionaire_id/preview(.:format)                      quill/previews#show
+                                questionaires GET    /questionaires(.:format)                                               quill/questionaires#index
+                                              GET    /questionaires/new(.:format)                                           quill/questionaires#new
+                             design_functions GET    /functions/design(.:format)                                            quill/functions#design
+                                      sign_up GET    /sign_up(.:format)                                                     sample/accounts#sign_up
+                                      sign_in GET    /sign_in(.:format)                                                     sample/accounts#sign_in
+                                     sign_out GET    /sign_out(.:format)                                                    sample/accounts#sign_out
+                              sign_in_account GET    /account/sign_in(.:format)                                             sample/accounts#sign_in
+                        after_sign_in_account GET    /account/after_sign_in(.:format)                                       sample/accounts#after_sign_in
+                              sign_up_account GET    /account/sign_up(.:format)                                             sample/accounts#sign_up
+                                login_account POST   /account/login(.:format)                                               sample/accounts#login
+                             sign_out_account GET    /account/sign_out(.:format)                                            sample/accounts#sign_out
+                        create_sample_account POST   /account/create_sample(.:format)                                       sample/accounts#create_sample
+                   check_email_mobile_account GET    /account/check_email_mobile(.:format)                                  sample/accounts#check_email_mobile
+                        active_notice_account GET    /account/active_notice(.:format)                                       sample/accounts#active_notice
+                       email_activate_account GET    /account/email_activate(.:format)                                      sample/accounts#email_activate
+                      mobile_activate_account POST   /account/mobile_activate(.:format)                                     sample/accounts#mobile_activate
+                              re_mail_account GET    /account/re_mail(.:format)                                             sample/accounts#re_mail
+           get_basic_info_by_auth_key_account POST   /account/get_basic_info_by_auth_key(.:format)                          sample/accounts#get_basic_info_by_auth_key
+                      forget_password_account GET    /account/forget_password(.:format)                                     sample/accounts#forget_password
+                send_forget_pass_code_account GET    /account/send_forget_pass_code(.:format)                               sample/accounts#send_forget_pass_code
+            make_forget_pass_activate_account GET    /account/make_forget_pass_activate(.:format)                           sample/accounts#make_forget_pass_activate
+                generate_new_password_account GET    /account/generate_new_password(.:format)                               sample/accounts#generate_new_password
+                          get_account_account GET    /account/get_account(.:format)                                         sample/accounts#get_account
+                                         home GET    /home(.:format)                                                        sample/homes#show
+           get_special_status_surveys_surveys GET    /surveys/get_special_status_surveys(.:format)                          sample/surveys#get_special_status_surveys
+                get_reward_type_count_surveys POST   /surveys/get_reward_type_count(.:format)                               sample/surveys#get_reward_type_count
+                    make_rss_activate_surveys POST   /surveys/make_rss_activate(.:format)                                   sample/surveys#make_rss_activate
+                      active_rss_able_surveys GET    /surveys/active_rss_able(.:format)                                     sample/surveys#active_rss_able
+             make_rss_mobile_activate_surveys GET    /surveys/make_rss_mobile_activate(.:format)                            sample/surveys#make_rss_mobile_activate
+                          re_rss_mail_surveys GET    /surveys/re_rss_mail(.:format)                                         sample/surveys#re_rss_mail
+                     cancel_subscribe_surveys GET    /surveys/cancel_subscribe(.:format)                                    sample/surveys#cancel_subscribe
+                                result_survey GET    /surveys/:id/result(.:format)                                          sample/surveys#result
+                                      surveys GET    /surveys(.:format)                                                     sample/surveys#index
+                  create_lottery_order_orders POST   /orders/create_lottery_order(.:format)                                 sample/orders#create_lottery_order
+                                       orders GET    /orders(.:format)                                                      sample/orders#index
+                                              POST   /orders(.:format)                                                      sample/orders#create
+                                    new_order GET    /orders/new(.:format)                                                  sample/orders#new
+                                   edit_order GET    /orders/:id/edit(.:format)                                             sample/orders#edit
+                                        order GET    /orders/:id(.:format)                                                  sample/orders#show
+                                              PUT    /orders/:id(.:format)                                                  sample/orders#update
+                                              DELETE /orders/:id(.:format)                                                  sample/orders#destroy
+                                 draw_lottery GET    /lotteries/:id/draw(.:format)                                          sample/lotteries#draw
+                                    lotteries GET    /lotteries(.:format)                                                   sample/lotteries#index
+                                              POST   /lotteries(.:format)                                                   sample/lotteries#create
+                                  new_lottery GET    /lotteries/new(.:format)                                               sample/lotteries#new
+                                 edit_lottery GET    /lotteries/:id/edit(.:format)                                          sample/lotteries#edit
+                                      lottery GET    /lotteries/:id(.:format)                                               sample/lotteries#show
+                                              PUT    /lotteries/:id(.:format)                                               sample/lotteries#update
+                                              DELETE /lotteries/:id(.:format)                                               sample/lotteries#destroy
+                        get_mobile_area_users GET    /users/get_mobile_area(.:format)                                       sample/users#get_mobile_area
+                           join_surveys_users GET    /users/join_surveys(.:format)                                          sample/users#join_surveys
+                         spread_surveys_users GET    /users/spread_surveys(.:format)                                        sample/users#spread_surveys
+                                surveys_users GET    /users/surveys(.:format)                                               sample/users#join_surveys
+                                              GET    /users/spread_counter/:id(.:format)                                    sample/users#spread_counter
+                                              GET    /users/survey_detail/:id(.:format)                                     sample/users#survey_detail
+                                 points_users GET    /users/points(.:format)                                                sample/users#points
+                                 orders_users GET    /users/orders(.:format)                                                sample/users#orders
+                                              GET    /users/order_detail/:id(.:format)                                      sample/users#order_detail
+                                setting_users GET    /users/setting(.:format)                                               sample/users#basic_info
+              setting_update_basic_info_users PUT    /users/setting/update_basic_info(.:format)                             sample/users#update_basic_info
+                         setting_avatar_users GET    /users/setting/avatar(.:format)                                        sample/users#avatar
+                  setting_upload_avatar_users POST   /users/setting/upload_avatar(.:format)                                 sample/users#update_avatar
+                       setting_bindings_users GET    /users/setting/bindings(.:format)                                      sample/users#bindings
+                                              PUT    /users/setting/unbind/:website(.:format)                               sample/users#unbind
+                          setting_share_users PUT    /users/setting/share(.:format)                                         sample/users#bind_share
+                      setting_subscribe_users PUT    /users/setting/subscribe(.:format)                                     sample/users#bind_subscribe
+                  setting_change_mobile_users PUT    /users/setting/change_mobile(.:format)                                 sample/users#change_mobile
+       setting_check_mobile_verify_code_users PUT    /users/setting/check_mobile_verify_code(.:format)                      sample/users#check_mobile_verify_code
+                   setting_change_email_users PUT    /users/setting/change_email(.:format)                                  sample/users#change_email
+        setting_change_email_verify_key_users GET    /users/setting/change_email_verify_key(.:format)                       sample/users#change_email_verify_key
+                        setting_address_users GET    /users/setting/address(.:format)                                       sample/users#address
+                                              PUT    /users/setting/address(.:format)                                       sample/users#update_logistic_address
+                       setting_password_users GET    /users/setting/password(.:format)                                      sample/users#password
+                                              PUT    /users/setting/password(.:format)                                      sample/users#update_password
+                          notifications_users GET    /users/notifications(.:format)                                         sample/users#notifications
+                                              DELETE /users/notifications/:id(.:format)                                     sample/users#destroy_notification
+                                              DELETE /users/notifications(.:format)                                         sample/users#remove_notifications
+                                        users GET    /users(.:format)                                                       sample/users#index
+                                              POST   /users(.:format)                                                       sample/users#create
+                                     new_user GET    /users/new(.:format)                                                   sample/users#new
+                                    edit_user GET    /users/:id/edit(.:format)                                              sample/users#edit
+                                         user PUT    /users/:id(.:format)                                                   sample/users#update
+                                              DELETE /users/:id(.:format)                                                   sample/users#destroy
+                  get_special_type_data_gifts GET    /gifts/get_special_type_data(.:format)                                 sample/gifts#get_special_type_data
+                                        gifts GET    /gifts(.:format)                                                       sample/gifts#index
+                                         gift GET    /gifts/:id(.:format)                                                   sample/gifts#show
+                           find_by_ids_prizes POST   /prizes/find_by_ids(.:format)                                          sample/prizes#find_by_ids
+                                        prize GET    /prizes/:id(.:format)                                                  sample/prizes#show
+                                              GET    /users(.:format)                                                       sample/users#index
+                                              GET    /users/:id(.:format)                                                   sample/users#show
+                                  survey_help GET    /help/survey(.:format)                                                 sample/helps#survey
+                                 lottery_help GET    /help/lottery(.:format)                                                sample/helps#lottery
+                                    gift_help GET    /help/gift(.:format)                                                   sample/helps#gift
+                                  reward_help GET    /help/reward(.:format)                                                 sample/helps#reward
+                                 aboutus_help GET    /help/aboutus(.:format)                                                sample/helps#aboutus
+                               public_notices GET    /public_notices(.:format)                                              sample/public_notices#index
+                                public_notice GET    /public_notices/:id(.:format)                                          sample/public_notices#show
+                    provinces_utility_address GET    /utility/address/provinces(.:format)                                   utility/addresses#provinces
+                       cities_utility_address GET    /utility/address/cities(.:format)                                      utility/addresses#cities
+                        towns_utility_address GET    /utility/address/towns(.:format)                                       utility/addresses#towns
+          video_upload_path_utility_materials GET    /utility/materials/video_upload_path(.:format)                         utility/materials#video_upload_path
+               create_image_utility_materials POST   /utility/materials/create_image(.:format)                              utility/materials#create_image
+                     preview_utility_material GET    /utility/materials/:id/preview(.:format)                               utility/materials#preview
+                            utility_materials GET    /utility/materials(.:format)                                           utility/materials#index
+                                              POST   /utility/materials(.:format)                                           utility/materials#create
+                         new_utility_material GET    /utility/materials/new(.:format)                                       utility/materials#new
+                        edit_utility_material GET    /utility/materials/:id/edit(.:format)                                  utility/materials#edit
+                             utility_material GET    /utility/materials/:id(.:format)                                       utility/materials#show
+                                              PUT    /utility/materials/:id(.:format)                                       utility/materials#update
+                                              DELETE /utility/materials/:id(.:format)                                       utility/materials#destroy
+                            utility_short_url GET    /utility/short_urls/:id(.:format)                                      utility/short_urls#show
+                      confirm_utility_ofcards GET    /utility/ofcards/confirm(.:format)                                     utility/ofcards#confirm
+                                              POST   /utility/ofcards/confirm(.:format)                                     utility/ofcards#confirm
+                              utility_ofcards GET    /utility/ofcards(.:format)                                             utility/ofcards#index
+                                              POST   /utility/ofcards(.:format)                                             utility/ofcards#create
+                           new_utility_ofcard GET    /utility/ofcards/new(.:format)                                         utility/ofcards#new
+                          edit_utility_ofcard GET    /utility/ofcards/:id/edit(.:format)                                    utility/ofcards#edit
+                               utility_ofcard GET    /utility/ofcards/:id(.:format)                                         utility/ofcards#show
+                                              PUT    /utility/ofcards/:id(.:format)                                         utility/ofcards#update
+                                              DELETE /utility/ofcards/:id(.:format)                                         utility/ofcards#destroy
+                               answer_auditor GET    /answer_auditor(.:format)                                              admin/review_answers#index
+                                              GET    /answer_auditor/review_answers/:id/answers/:answer_id(.:format)        admin/review_answers#show_answer
+                                              PUT    /answer_auditor/review_answers/:id/answers/:answer_id/review(.:format) admin/review_answers#review
+          answer_auditor_answer_auditor_index GET    /answer_auditor/review_answers(.:format)                               admin/review_answers#index
+                                              POST   /answer_auditor/review_answers(.:format)                               admin/review_answers#create
+            new_answer_auditor_answer_auditor GET    /answer_auditor/review_answers/new(.:format)                           admin/review_answers#new
+           edit_answer_auditor_answer_auditor GET    /answer_auditor/review_answers/:id/edit(.:format)                      admin/review_answers#edit
+                answer_auditor_answer_auditor GET    /answer_auditor/review_answers/:id(.:format)                           admin/review_answers#show
+                                              PUT    /answer_auditor/review_answers/:id(.:format)                           admin/review_answers#update
+                                              DELETE /answer_auditor/review_answers/:id(.:format)                           admin/review_answers#destroy
+                               survey_auditor GET    /survey_auditor(.:format)                                              admin/reviews#index
+        publish_survey_auditor_survey_auditor PUT    /survey_auditor/reviews/:id/publish(.:format)                          admin/reviews#publish
+          close_survey_auditor_survey_auditor PUT    /survey_auditor/reviews/:id/close(.:format)                            admin/reviews#close
+          pause_survey_auditor_survey_auditor PUT    /survey_auditor/reviews/:id/pause(.:format)                            admin/reviews#pause
+         reject_survey_auditor_survey_auditor PUT    /survey_auditor/reviews/:id/reject(.:format)                           admin/reviews#reject
+          survey_auditor_survey_auditor_index GET    /survey_auditor/reviews(.:format)                                      admin/reviews#index
+                                              POST   /survey_auditor/reviews(.:format)                                      admin/reviews#create
+            new_survey_auditor_survey_auditor GET    /survey_auditor/reviews/new(.:format)                                  admin/reviews#new
+           edit_survey_auditor_survey_auditor GET    /survey_auditor/reviews/:id/edit(.:format)                             admin/reviews#edit
+                survey_auditor_survey_auditor GET    /survey_auditor/reviews/:id(.:format)                                  admin/reviews#show
+                                              PUT    /survey_auditor/reviews/:id(.:format)                                  admin/reviews#update
+                                              DELETE /survey_auditor/reviews/:id(.:format)                                  admin/reviews#destroy
+                                        admin GET    /admin(.:format)                                                       admin/surveys#index
+                                              GET    /admin/:id/get_email(.:format)                                         admin/admin#get_email
+                         publish_admin_review PUT    /admin/reviews/:id/publish(.:format)                                   admin/reviews#publish
+                           close_admin_review PUT    /admin/reviews/:id/close(.:format)                                     admin/reviews#close
+                           pause_admin_review PUT    /admin/reviews/:id/pause(.:format)                                     admin/reviews#pause
+                          reject_admin_review PUT    /admin/reviews/:id/reject(.:format)                                    admin/reviews#reject
+                                admin_reviews GET    /admin/reviews(.:format)                                               admin/reviews#index
+                                              POST   /admin/reviews(.:format)                                               admin/reviews#create
+                             new_admin_review GET    /admin/reviews/new(.:format)                                           admin/reviews#new
+                            edit_admin_review GET    /admin/reviews/:id/edit(.:format)                                      admin/reviews#edit
+                                 admin_review GET    /admin/reviews/:id(.:format)                                           admin/reviews#show
+                                              PUT    /admin/reviews/:id(.:format)                                           admin/reviews#update
+                                              DELETE /admin/reviews/:id(.:format)                                           admin/reviews#destroy
+                       allocate_admin_publish PUT    /admin/publishes/:id/allocate(.:format)                                admin/publishes#allocate
+                     add_reward_admin_publish PUT    /admin/publishes/:id/add_reward(.:format)                              admin/publishes#add_reward
+                  set_community_admin_publish PUT    /admin/publishes/:id/set_community(.:format)                           admin/publishes#set_community
+                     set_spread_admin_publish PUT    /admin/publishes/:id/set_spread(.:format)                              admin/publishes#set_spread
+               cancel_community_admin_publish PUT    /admin/publishes/:id/cancel_community(.:format)                        admin/publishes#cancel_community
+         set_answer_need_review_admin_publish PUT    /admin/publishes/:id/set_answer_need_review(.:format)                  admin/publishes#set_answer_need_review
+                 set_promotable_admin_publish PUT    /admin/publishes/:id/set_promotable(.:format)                          admin/publishes#set_promotable
+              admin_publish_interviewer_tasks GET    /admin/publishes/:publish_id/interviewer_tasks(.:format)               admin/interviewer_tasks#index
+                                              POST   /admin/publishes/:publish_id/interviewer_tasks(.:format)               admin/interviewer_tasks#create
+           new_admin_publish_interviewer_task GET    /admin/publishes/:publish_id/interviewer_tasks/new(.:format)           admin/interviewer_tasks#new
+          edit_admin_publish_interviewer_task GET    /admin/publishes/:publish_id/interviewer_tasks/:id/edit(.:format)      admin/interviewer_tasks#edit
+               admin_publish_interviewer_task GET    /admin/publishes/:publish_id/interviewer_tasks/:id(.:format)           admin/interviewer_tasks#show
+                                              PUT    /admin/publishes/:publish_id/interviewer_tasks/:id(.:format)           admin/interviewer_tasks#update
+                                              DELETE /admin/publishes/:publish_id/interviewer_tasks/:id(.:format)           admin/interviewer_tasks#destroy
+                              admin_publishes GET    /admin/publishes(.:format)                                             admin/publishes#index
+                                              POST   /admin/publishes(.:format)                                             admin/publishes#create
+                            new_admin_publish GET    /admin/publishes/new(.:format)                                         admin/publishes#new
+                           edit_admin_publish GET    /admin/publishes/:id/edit(.:format)                                    admin/publishes#edit
+                                admin_publish GET    /admin/publishes/:id(.:format)                                         admin/publishes#show
+                                              PUT    /admin/publishes/:id(.:format)                                         admin/publishes#update
+                                              DELETE /admin/publishes/:id(.:format)                                         admin/publishes#destroy
+                                  admin_costs GET    /admin/costs(.:format)                                                 admin/costs#index
+                                   admin_cost GET    /admin/costs/:id(.:format)                                             admin/costs#show
+                                              GET    /admin/review_answers/:id/answers/:answer_id(.:format)                 admin/review_answers#show_answer
+                                              PUT    /admin/review_answers/:id/answers/:answer_id/review(.:format)          admin/review_answers#review
+                         admin_review_answers GET    /admin/review_answers(.:format)                                        admin/review_answers#index
+                                              POST   /admin/review_answers(.:format)                                        admin/review_answers#create
+                      new_admin_review_answer GET    /admin/review_answers/new(.:format)                                    admin/review_answers#new
+                     edit_admin_review_answer GET    /admin/review_answers/:id/edit(.:format)                               admin/review_answers#edit
+                          admin_review_answer GET    /admin/review_answers/:id(.:format)                                    admin/review_answers#show
+                                              PUT    /admin/review_answers/:id(.:format)                                    admin/review_answers#update
+                                              DELETE /admin/review_answers/:id(.:format)                                    admin/review_answers#destroy
+          clear_cart_admin_template_questions GET    /admin/template_questions/clear_cart(.:format)                         admin/template_questions#clear_cart
+         add_to_cart_admin_template_questions POST   /admin/template_questions/add_to_cart(.:format)                        admin/template_questions#add_to_cart
+            del_cart_admin_template_questions POST   /admin/template_questions/del_cart(.:format)                           admin/template_questions#del_cart
+             get_text_admin_template_question GET    /admin/template_questions/:id/get_text(.:format)                       admin/template_questions#get_text
+                     admin_template_questions GET    /admin/template_questions(.:format)                                    admin/template_questions#index
+                                              POST   /admin/template_questions(.:format)                                    admin/template_questions#create
+                  new_admin_template_question GET    /admin/template_questions/new(.:format)                                admin/template_questions#new
+                 edit_admin_template_question GET    /admin/template_questions/:id/edit(.:format)                           admin/template_questions#edit
+                      admin_template_question GET    /admin/template_questions/:id(.:format)                                admin/template_questions#show
+                                              PUT    /admin/template_questions/:id(.:format)                                admin/template_questions#update
+                                              DELETE /admin/template_questions/:id(.:format)                                admin/template_questions#destroy
+            objective_admin_quality_questions GET    /admin/quality_questions/objective(.:format)                           admin/quality_questions#objective
+             matching_admin_quality_questions GET    /admin/quality_questions/matching(.:format)                            admin/quality_questions#matching
+         update_answer_admin_quality_question PUT    /admin/quality_questions/:id/update_answer(.:format)                   admin/quality_questions#update_answer
+                      admin_quality_questions GET    /admin/quality_questions(.:format)                                     admin/quality_questions#index
+                                              POST   /admin/quality_questions(.:format)                                     admin/quality_questions#create
+                   new_admin_quality_question GET    /admin/quality_questions/new(.:format)                                 admin/quality_questions#new
+                  edit_admin_quality_question GET    /admin/quality_questions/:id/edit(.:format)                            admin/quality_questions#edit
+                       admin_quality_question GET    /admin/quality_questions/:id(.:format)                                 admin/quality_questions#show
+                                              PUT    /admin/quality_questions/:id(.:format)                                 admin/quality_questions#update
+                                              DELETE /admin/quality_questions/:id(.:format)                                 admin/quality_questions#destroy
+add_template_question_admin_volunteer_surveys POST   /admin/volunteer_surveys/add_template_question(.:format)               admin/volunteer_surveys#add_template_question
+         del_question_admin_volunteer_surveys DELETE /admin/volunteer_surveys/del_question(.:format)                        admin/volunteer_surveys#del_question
+                      admin_volunteer_surveys GET    /admin/volunteer_surveys(.:format)                                     admin/volunteer_surveys#index
+                                              POST   /admin/volunteer_surveys(.:format)                                     admin/volunteer_surveys#create
+                   new_admin_volunteer_survey GET    /admin/volunteer_surveys/new(.:format)                                 admin/volunteer_surveys#new
+                  edit_admin_volunteer_survey GET    /admin/volunteer_surveys/:id/edit(.:format)                            admin/volunteer_surveys#edit
+                       admin_volunteer_survey GET    /admin/volunteer_surveys/:id(.:format)                                 admin/volunteer_surveys#show
+                                              PUT    /admin/volunteer_surveys/:id(.:format)                                 admin/volunteer_surveys#update
+                                              DELETE /admin/volunteer_surveys/:id(.:format)                                 admin/volunteer_surveys#destroy
+                           stockup_admin_gift PUT    /admin/gifts/:id/stockup(.:format)                                     admin/gifts#stockup
+                          outstock_admin_gift PUT    /admin/gifts/:id/outstock(.:format)                                    admin/gifts#outstock
+                                  admin_gifts GET    /admin/gifts(.:format)                                                 admin/gifts#index
+                                              POST   /admin/gifts(.:format)                                                 admin/gifts#create
+                               new_admin_gift GET    /admin/gifts/new(.:format)                                             admin/gifts#new
+                              edit_admin_gift GET    /admin/gifts/:id/edit(.:format)                                        admin/gifts#edit
+                                   admin_gift GET    /admin/gifts/:id(.:format)                                             admin/gifts#show
+                                              PUT    /admin/gifts/:id(.:format)                                             admin/gifts#update
+                                              DELETE /admin/gifts/:id(.:format)                                             admin/gifts#destroy
+                                 admin_prizes GET    /admin/prizes(.:format)                                                admin/prizes#index
+                                              POST   /admin/prizes(.:format)                                                admin/prizes#create
+                              new_admin_prize GET    /admin/prizes/new(.:format)                                            admin/prizes#new
+                             edit_admin_prize GET    /admin/prizes/:id/edit(.:format)                                       admin/prizes#edit
+                                  admin_prize GET    /admin/prizes/:id(.:format)                                            admin/prizes#show
+                                              PUT    /admin/prizes/:id(.:format)                                            admin/prizes#update
+                                              DELETE /admin/prizes/:id(.:format)                                            admin/prizes#destroy
+                         reward_schemes_admin GET    /admin/surveys/:id/reward_schemes(.:format)                            admin/surveys#reward_schemes
+                                promote_admin GET    /admin/surveys/:id/promote(.:format)                                   admin/surveys#promote
+                              more_info_admin GET    /admin/surveys/:id/more_info(.:format)                                 admin/surveys#more_info
+                          bind_question_admin GET    /admin/surveys/:id/bind_question(.:format)                             admin/surveys#bind_question
+                         update_promote_admin PUT    /admin/surveys/:id/update_promote(.:format)                            admin/surveys#update_promote
+                               set_info_admin PUT    /admin/surveys/:id/set_info(.:format)                                  admin/surveys#set_info
+                                              PUT    /admin/surveys/:id/bind_question(.:format)                             admin/surveys#bind_question
+                                   star_admin PUT    /admin/surveys/:id/star(.:format)                                      admin/surveys#star
+                                              POST   /admin/surveys/:id/update_promote(.:format)                            admin/surveys#update_promote
+                     destroy_attributes_admin DELETE /admin/surveys/:id/destroy_attributes(.:format)                        admin/surveys#destroy_attributes
+                                              DELETE /admin/surveys/:id/bind_question(.:format)                             admin/surveys#bind_question
+                                      admin_s GET    /admin/surveys(.:format)                                               admin/surveys#index
+                                              POST   /admin/surveys(.:format)                                               admin/surveys#create
+                                    new_admin GET    /admin/surveys/new(.:format)                                           admin/surveys#new
+                                   edit_admin GET    /admin/surveys/:id/edit(.:format)                                      admin/surveys#edit
+                                              GET    /admin/surveys/:id(.:format)                                           admin/surveys#show
+                                              PUT    /admin/surveys/:id(.:format)                                           admin/surveys#update
+                                              DELETE /admin/surveys/:id(.:format)                                           admin/surveys#destroy
+                         admin_reward_schemes GET    /admin/reward_schemes(.:format)                                        admin/reward_schemes#index
+                                              POST   /admin/reward_schemes(.:format)                                        admin/reward_schemes#create
+                      new_admin_reward_scheme GET    /admin/reward_schemes/new(.:format)                                    admin/reward_schemes#new
+                     edit_admin_reward_scheme GET    /admin/reward_schemes/:id/edit(.:format)                               admin/reward_schemes#edit
+                          admin_reward_scheme GET    /admin/reward_schemes/:id(.:format)                                    admin/reward_schemes#show
+                                              PUT    /admin/reward_schemes/:id(.:format)                                    admin/reward_schemes#update
+                                              DELETE /admin/reward_schemes/:id(.:format)                                    admin/reward_schemes#destroy
+                      redeem_log_admin_sample GET    /admin/samples/:id/redeem_log(.:format)                                admin/samples#redeem_log
+                       point_log_admin_sample GET    /admin/samples/:id/point_log(.:format)                                 admin/samples#point_log
+                     lottery_log_admin_sample GET    /admin/samples/:id/lottery_log(.:format)                               admin/samples#lottery_log
+                      answer_log_admin_sample GET    /admin/samples/:id/answer_log(.:format)                                admin/samples#answer_log
+                      spread_log_admin_sample GET    /admin/samples/:id/spread_log(.:format)                                admin/samples#spread_log
+                 edit_attributes_admin_sample GET    /admin/samples/:id/edit_attributes(.:format)                           admin/samples#edit_attributes
+              destroy_attributes_admin_sample DELETE /admin/samples/:id/destroy_attributes(.:format)                        admin/samples#destroy_attributes
+                 set_sample_role_admin_sample PUT    /admin/samples/:id/set_sample_role(.:format)                           admin/samples#set_sample_role
+                   operate_point_admin_sample PUT    /admin/samples/:id/operate_point(.:format)                             admin/samples#operate_point
+                           block_admin_sample PUT    /admin/samples/:id/block(.:format)                                     admin/samples#block
+                 add_attributes_admin_samples POST   /admin/samples/add_attributes(.:format)                                admin/samples#add_attributes
+                   send_message_admin_samples POST   /admin/samples/send_message(.:format)                                  admin/samples#send_message
+                     attributes_admin_samples GET    /admin/samples/attributes(.:format)                                    admin/samples#attributes
+                 new_attributes_admin_samples GET    /admin/samples/new_attributes(.:format)                                admin/samples#new_attributes
+                         status_admin_samples GET    /admin/samples/status(.:format)                                        admin/samples#status
+               get_sample_count_admin_samples GET    /admin/samples/get_sample_count(.:format)                              admin/samples#get_sample_count
+        get_active_sample_count_admin_samples GET    /admin/samples/get_active_sample_count(.:format)                       admin/samples#get_active_sample_count
+                                admin_samples GET    /admin/samples(.:format)                                               admin/samples#index
+                                              POST   /admin/samples(.:format)                                               admin/samples#create
+                             new_admin_sample GET    /admin/samples/new(.:format)                                           admin/samples#new
+                            edit_admin_sample GET    /admin/samples/:id/edit(.:format)                                      admin/samples#edit
+                                 admin_sample GET    /admin/samples/:id(.:format)                                           admin/samples#show
+                                              PUT    /admin/samples/:id(.:format)                                           admin/samples#update
+                                              DELETE /admin/samples/:id(.:format)                                           admin/samples#destroy
+                          review_admin_answer GET    /admin/answers/:id/review(.:format)                                    admin/answers#review
+                                admin_answers GET    /admin/answers(.:format)                                               admin/answers#index
+                                              POST   /admin/answers(.:format)                                               admin/answers#create
+                             new_admin_answer GET    /admin/answers/new(.:format)                                           admin/answers#new
+                            edit_admin_answer GET    /admin/answers/:id/edit(.:format)                                      admin/answers#edit
+                                 admin_answer GET    /admin/answers/:id(.:format)                                           admin/answers#show
+                                              PUT    /admin/answers/:id(.:format)                                           admin/answers#update
+                                              DELETE /admin/answers/:id(.:format)                                           admin/answers#destroy
+                  operate_point_admin_rewards POST   /admin/rewards/operate_point(.:format)                                 admin/rewards#operate_point
+                                admin_rewards GET    /admin/rewards(.:format)                                               admin/rewards#index
+                                              POST   /admin/rewards(.:format)                                               admin/rewards#create
+                             new_admin_reward GET    /admin/rewards/new(.:format)                                           admin/rewards#new
+                            edit_admin_reward GET    /admin/rewards/:id/edit(.:format)                                      admin/rewards#edit
+                                 admin_reward GET    /admin/rewards/:id(.:format)                                           admin/rewards#show
+                                              PUT    /admin/rewards/:id(.:format)                                           admin/rewards#update
+                                              DELETE /admin/rewards/:id(.:format)                                           admin/rewards#destroy
+                        to_excel_admin_orders GET    /admin/orders/to_excel(.:format)                                       admin/orders#to_excel
+                           handle_admin_order PUT    /admin/orders/:id/handle(.:format)                                     admin/orders#handle
+                      bulk_handle_admin_order PUT    /admin/orders/:id/bulk_handle(.:format)                                admin/orders#bulk_handle
+                           finish_admin_order PUT    /admin/orders/:id/finish(.:format)                                     admin/orders#finish
+                      bulk_finish_admin_order PUT    /admin/orders/:id/bulk_finish(.:format)                                admin/orders#bulk_finish
+              update_express_info_admin_order PUT    /admin/orders/:id/update_express_info(.:format)                        admin/orders#update_express_info
+                    update_remark_admin_order PUT    /admin/orders/:id/update_remark(.:format)                              admin/orders#update_remark
+                                 admin_orders GET    /admin/orders(.:format)                                                admin/orders#index
+                                  admin_order GET    /admin/orders/:id(.:format)                                            admin/orders#show
+                                              PUT    /admin/orders/:id(.:format)                                            admin/orders#update
+                      auto_draw_admin_lottery GET    /admin/lotteries/:id/auto_draw(.:format)                               admin/lotteries#auto_draw
+                 reward_records_admin_lottery GET    /admin/lotteries/:id/reward_records(.:format)                          admin/lotteries#reward_records
+                   assign_prize_admin_lottery GET    /admin/lotteries/:id/assign_prize(.:format)                            admin/lotteries#assign_prize
+                  lottery_codes_admin_lottery GET    /admin/lotteries/:id/lottery_codes(.:format)                           admin/lotteries#lottery_codes
+                           ctrl_admin_lottery GET    /admin/lotteries/:id/ctrl(.:format)                                    admin/lotteries#ctrl
+                                              PUT    /admin/lotteries/:id/assign_prize(.:format)                            admin/lotteries#assign_prize
+                  add_ctrl_rule_admin_lottery PUT    /admin/lotteries/:id/add_ctrl_rule(.:format)                           admin/lotteries#add_ctrl_rule
+                         status_admin_lottery PUT    /admin/lotteries/:id/status(.:format)                                  admin/lotteries#status
+                assign_prize_to_admin_lottery PUT    /admin/lotteries/:id/assign_prize_to(.:format)                         admin/lotteries#assign_prize_to
+                         revive_admin_lottery PUT    /admin/lotteries/:id/revive(.:format)                                  admin/lotteries#revive
+                      deleted_admin_lotteries GET    /admin/lotteries/deleted(.:format)                                     admin/lotteries#deleted
+                              admin_lotteries GET    /admin/lotteries(.:format)                                             admin/lotteries#index
+                                              POST   /admin/lotteries(.:format)                                             admin/lotteries#create
+                            new_admin_lottery GET    /admin/lotteries/new(.:format)                                         admin/lotteries#new
+                           edit_admin_lottery GET    /admin/lotteries/:id/edit(.:format)                                    admin/lotteries#edit
+                                admin_lottery GET    /admin/lotteries/:id(.:format)                                         admin/lotteries#show
+                                              PUT    /admin/lotteries/:id(.:format)                                         admin/lotteries#update
+                                              DELETE /admin/lotteries/:id(.:format)                                         admin/lotteries#destroy
+                              admin_materials GET    /admin/materials(.:format)                                             admin/materials#index
+                                              POST   /admin/materials(.:format)                                             admin/materials#create
+                           new_admin_material GET    /admin/materials/new(.:format)                                         admin/materials#new
+                          edit_admin_material GET    /admin/materials/:id/edit(.:format)                                    admin/materials#edit
+                               admin_material GET    /admin/materials/:id(.:format)                                         admin/materials#show
+                                              PUT    /admin/materials/:id(.:format)                                         admin/materials#update
+                                              DELETE /admin/materials/:id(.:format)                                         admin/materials#destroy
+                           blacks_admin_users GET    /admin/users/blacks(.:format)                                          admin/users#blacks
+                           whites_admin_users GET    /admin/users/whites(.:format)                                          admin/users#whites
+                          deleted_admin_users GET    /admin/users/deleted(.:format)                                         admin/users#deleted
+                           normal_admin_users GET    /admin/users/normal(.:format)                                          admin/users#normal
+                           search_admin_users GET    /admin/users/search(.:format)                                          admin/users#search
+                           recover_admin_user PUT    /admin/users/:id/recover(.:format)                                     admin/users#recover
+                         add_point_admin_user PUT    /admin/users/:id/add_point(.:format)                                   admin/users#add_point
+                          set_role_admin_user PUT    /admin/users/:id/set_role(.:format)                                    admin/users#set_role
+                         set_color_admin_user PUT    /admin/users/:id/set_color(.:format)                                   admin/users#set_color
+                    reset_password_admin_user PUT    /admin/users/:id/reset_password(.:format)                              admin/users#reset_password
+                          set_lock_admin_user PUT    /admin/users/:id/set_lock(.:format)                                    admin/users#set_lock
+                         get_email_admin_user GET    /admin/users/:id/get_email(.:format)                                   admin/users#get_email
+                            orders_admin_user GET    /admin/users/:id/orders(.:format)                                      admin/users#orders
+                           rewards_admin_user GET    /admin/users/:id/rewards(.:format)                                     admin/users#rewards
+                    lottery_record_admin_user GET    /admin/users/:id/lottery_record(.:format)                              admin/users#lottery_record
+                        point_logs_admin_user GET    /admin/users/:id/point_logs(.:format)                                  admin/users#point_logs
+                  introduced_users_admin_user GET    /admin/users/:id/introduced_users(.:format)                            admin/users#introduced_users
+                                  admin_users GET    /admin/users(.:format)                                                 admin/users#index
+                                              POST   /admin/users(.:format)                                                 admin/users#create
+                               new_admin_user GET    /admin/users/new(.:format)                                             admin/users#new
+                              edit_admin_user GET    /admin/users/:id/edit(.:format)                                        admin/users#edit
+                                   admin_user GET    /admin/users/:id(.:format)                                             admin/users#show
+                                              PUT    /admin/users/:id(.:format)                                             admin/users#update
+                                              DELETE /admin/users/:id(.:format)                                             admin/users#destroy
+                     deliver_admin_newsletter POST   /admin/newsletters/:id/deliver(.:format)                               admin/newsletters#deliver
+                        test_admin_newsletter POST   /admin/newsletters/:id/test(.:format)                                  admin/newsletters#test
+                      cancel_admin_newsletter DELETE /admin/newsletters/:id/cancel(.:format)                                admin/newsletters#cancel
+                     column_admin_newsletters POST   /admin/newsletters/column(.:format)                                    admin/newsletters#column
+                    article_admin_newsletters POST   /admin/newsletters/article(.:format)                                   admin/newsletters#article
+               product_news_admin_newsletters POST   /admin/newsletters/product_news(.:format)                              admin/newsletters#product_news
+                            admin_newsletters GET    /admin/newsletters(.:format)                                           admin/newsletters#index
+                                              POST   /admin/newsletters(.:format)                                           admin/newsletters#create
+                         new_admin_newsletter GET    /admin/newsletters/new(.:format)                                       admin/newsletters#new
+                        edit_admin_newsletter GET    /admin/newsletters/:id/edit(.:format)                                  admin/newsletters#edit
+                             admin_newsletter GET    /admin/newsletters/:id(.:format)                                       admin/newsletters#show
+                                              PUT    /admin/newsletters/:id(.:format)                                       admin/newsletters#update
+                                              DELETE /admin/newsletters/:id(.:format)                                       admin/newsletters#destroy
+                 unsubscribe_admin_subscriber PUT    /admin/subscribers/:id/unsubscribe(.:format)                           admin/subscribers#unsubscribe
+                   subscribe_admin_subscriber PUT    /admin/subscribers/:id/subscribe(.:format)                             admin/subscribers#subscribe
+                            admin_subscribers GET    /admin/subscribers(.:format)                                           admin/subscribers#index
+                                              POST   /admin/subscribers(.:format)                                           admin/subscribers#create
+                         new_admin_subscriber GET    /admin/subscribers/new(.:format)                                       admin/subscribers#new
+                        edit_admin_subscriber GET    /admin/subscribers/:id/edit(.:format)                                  admin/subscribers#edit
+                             admin_subscriber GET    /admin/subscribers/:id(.:format)                                       admin/subscribers#show
+                                              PUT    /admin/subscribers/:id(.:format)                                       admin/subscribers#update
+                                              DELETE /admin/subscribers/:id(.:format)                                       admin/subscribers#destroy
+                                   admin_faqs GET    /admin/faqs(.:format)                                                  admin/faqs#index
+                                              POST   /admin/faqs(.:format)                                                  admin/faqs#create
+                                new_admin_faq GET    /admin/faqs/new(.:format)                                              admin/faqs#new
+                               edit_admin_faq GET    /admin/faqs/:id/edit(.:format)                                         admin/faqs#edit
+                                    admin_faq GET    /admin/faqs/:id(.:format)                                              admin/faqs#show
+                                              PUT    /admin/faqs/:id(.:format)                                              admin/faqs#update
+                                              DELETE /admin/faqs/:id(.:format)                                              admin/faqs#destroy
+                          admin_announcements GET    /admin/announcements(.:format)                                         admin/announcements#index
+                                              POST   /admin/announcements(.:format)                                         admin/announcements#create
+                       new_admin_announcement GET    /admin/announcements/new(.:format)                                     admin/announcements#new
+                      edit_admin_announcement GET    /admin/announcements/:id/edit(.:format)                                admin/announcements#edit
+                           admin_announcement GET    /admin/announcements/:id(.:format)                                     admin/announcements#show
+                                              PUT    /admin/announcements/:id(.:format)                                     admin/announcements#update
+                                              DELETE /admin/announcements/:id(.:format)                                     admin/announcements#destroy
+                         admin_advertisements GET    /admin/advertisements(.:format)                                        admin/advertisements#index
+                                              POST   /admin/advertisements(.:format)                                        admin/advertisements#create
+                      new_admin_advertisement GET    /admin/advertisements/new(.:format)                                    admin/advertisements#new
+                     edit_admin_advertisement GET    /admin/advertisements/:id/edit(.:format)                               admin/advertisements#edit
+                          admin_advertisement GET    /admin/advertisements/:id(.:format)                                    admin/advertisements#show
+                                              PUT    /admin/advertisements/:id(.:format)                                    admin/advertisements#update
+                                              DELETE /admin/advertisements/:id(.:format)                                    admin/advertisements#destroy
+                         reply_admin_feedback POST   /admin/feedbacks/:id/reply(.:format)                                   admin/feedbacks#reply
+                              admin_feedbacks GET    /admin/feedbacks(.:format)                                             admin/feedbacks#index
+                                              POST   /admin/feedbacks(.:format)                                             admin/feedbacks#create
+                           new_admin_feedback GET    /admin/feedbacks/new(.:format)                                         admin/feedbacks#new
+                          edit_admin_feedback GET    /admin/feedbacks/:id/edit(.:format)                                    admin/feedbacks#edit
+                               admin_feedback GET    /admin/feedbacks/:id(.:format)                                         admin/feedbacks#show
+                                              PUT    /admin/feedbacks/:id(.:format)                                         admin/feedbacks#update
+                                              DELETE /admin/feedbacks/:id(.:format)                                         admin/feedbacks#destroy
+                               admin_messages GET    /admin/messages(.:format)                                              admin/messages#index
+                                              POST   /admin/messages(.:format)                                              admin/messages#create
+                            new_admin_message GET    /admin/messages/new(.:format)                                          admin/messages#new
+                           edit_admin_message GET    /admin/messages/:id/edit(.:format)                                     admin/messages#edit
+                                admin_message GET    /admin/messages/:id(.:format)                                          admin/messages#show
+                                              PUT    /admin/messages/:id(.:format)                                          admin/messages#update
+                                              DELETE /admin/messages/:id(.:format)                                          admin/messages#destroy
+                      admin_sample_attributes GET    /admin/sample_attributes(.:format)                                     admin/sample_attributes#index
+                                              POST   /admin/sample_attributes(.:format)                                     admin/sample_attributes#create
+                       admin_sample_attribute PUT    /admin/sample_attributes/:id(.:format)                                 admin/sample_attributes#update
+                                              DELETE /admin/sample_attributes/:id(.:format)                                 admin/sample_attributes#destroy
+                                              GET    /admin/sample_attributes/bind_question/:id(.:format)                   admin/sample_attributes#bind_question
+                                              PUT    /admin/sample_attributes/bind_question/:id(.:format)                   admin/sample_attributes#bind_question
+                  admin_sample_attribute_bind DELETE /admin/sample_attributes/bind_question/:id(.:format)                   admin/sample_attributes#bind_question
+                                 admin_agents GET    /admin/agents(.:format)                                                admin/agents#index
+                                              POST   /admin/agents(.:format)                                                admin/agents#create
+                              new_admin_agent GET    /admin/agents/new(.:format)                                            admin/agents#new
+                             edit_admin_agent GET    /admin/agents/:id/edit(.:format)                                       admin/agents#edit
+                                  admin_agent GET    /admin/agents/:id(.:format)                                            admin/agents#show
+                                              PUT    /admin/agents/:id(.:format)                                            admin/agents#update
+                                              DELETE /admin/agents/:id(.:format)                                            admin/agents#destroy
+                       close_admin_agent_task PUT    /admin/agent_tasks/:id/close(.:format)                                 admin/agent_tasks#close
+                        open_admin_agent_task PUT    /admin/agent_tasks/:id/open(.:format)                                  admin/agent_tasks#open
+                            admin_agent_tasks GET    /admin/agent_tasks(.:format)                                           admin/agent_tasks#index
+                                              POST   /admin/agent_tasks(.:format)                                           admin/agent_tasks#create
+                         new_admin_agent_task GET    /admin/agent_tasks/new(.:format)                                       admin/agent_tasks#new
+                        edit_admin_agent_task GET    /admin/agent_tasks/:id/edit(.:format)                                  admin/agent_tasks#edit
+                             admin_agent_task GET    /admin/agent_tasks/:id(.:format)                                       admin/agent_tasks#show
+                                              PUT    /admin/agent_tasks/:id(.:format)                                       admin/agent_tasks#update
+                                              DELETE /admin/agent_tasks/:id(.:format)                                       admin/agent_tasks#destroy
+          get_sample_count_admin_sample_stats GET    /admin/sample_stats/get_sample_count(.:format)                         admin/sample_stats#get_sample_count
+   get_active_sample_count_admin_sample_stats GET    /admin/sample_stats/get_active_sample_count(.:format)                  admin/sample_stats#get_active_sample_count
+                           admin_sample_stats GET    /admin/sample_stats(.:format)                                          admin/sample_stats#index
+                           agent_signin_index GET    /agent/signin(.:format)                                                agent/sessions/signin#index
+                                              POST   /agent/signin(.:format)                                                agent/sessions/signin#create
+                             new_agent_signin GET    /agent/signin/new(.:format)                                            agent/sessions/signin#new
+                            edit_agent_signin GET    /agent/signin/:id/edit(.:format)                                       agent/sessions/signin#edit
+                                 agent_signin GET    /agent/signin/:id(.:format)                                            agent/sessions/signin#show
+                                              PUT    /agent/signin/:id(.:format)                                            agent/sessions/signin#update
+                                              DELETE /agent/signin/:id(.:format)                                            agent/sessions/signin#destroy
+                          agent_signout_index GET    /agent/signout(.:format)                                               agent/sessions/signout#index
+                                              POST   /agent/signout(.:format)                                               agent/sessions/signout#create
+                            new_agent_signout GET    /agent/signout/new(.:format)                                           agent/sessions/signout#new
+                           edit_agent_signout GET    /agent/signout/:id/edit(.:format)                                      agent/sessions/signout#edit
+                                agent_signout GET    /agent/signout/:id(.:format)                                           agent/sessions/signout#show
+                                              PUT    /agent/signout/:id(.:format)                                           agent/sessions/signout#update
+                                              DELETE /agent/signout/:id(.:format)                                           agent/sessions/signout#destroy
+                   agent_reset_password_index GET    /agent/reset_password(.:format)                                        agent/sessions/reset_password#index
+                                              POST   /agent/reset_password(.:format)                                        agent/sessions/reset_password#create
+                     new_agent_reset_password GET    /agent/reset_password/new(.:format)                                    agent/sessions/reset_password#new
+                    edit_agent_reset_password GET    /agent/reset_password/:id/edit(.:format)                               agent/sessions/reset_password#edit
+                         agent_reset_password GET    /agent/reset_password/:id(.:format)                                    agent/sessions/reset_password#show
+                                              PUT    /agent/reset_password/:id(.:format)                                    agent/sessions/reset_password#update
+                                              DELETE /agent/reset_password/:id(.:format)                                    agent/sessions/reset_password#destroy
+                          review_agent_answer PUT    /agent/answers/:id/review(.:format)                                    agent/answers#review
+                                agent_answers GET    /agent/answers(.:format)                                               agent/answers#index
+                                              POST   /agent/answers(.:format)                                               agent/answers#create
+                             new_agent_answer GET    /agent/answers/new(.:format)                                           agent/answers#new
+                            edit_agent_answer GET    /agent/answers/:id/edit(.:format)                                      agent/answers#edit
+                                 agent_answer GET    /agent/answers/:id(.:format)                                           agent/answers#show
+                                              PUT    /agent/answers/:id(.:format)                                           agent/answers#update
+                                              DELETE /agent/answers/:id(.:format)                                           agent/answers#destroy
+                             close_agent_task PUT    /agent/tasks/:id/close(.:format)                                       agent/tasks#close
+                              open_agent_task PUT    /agent/tasks/:id/open(.:format)                                        agent/tasks#open
+                                  agent_tasks GET    /agent/tasks(.:format)                                                 agent/tasks#index
+                                              POST   /agent/tasks(.:format)                                                 agent/tasks#create
+                               new_agent_task GET    /agent/tasks/new(.:format)                                             agent/tasks#new
+                              edit_agent_task GET    /agent/tasks/:id/edit(.:format)                                        agent/tasks#edit
+                                   agent_task GET    /agent/tasks/:id(.:format)                                             agent/tasks#show
+                                              PUT    /agent/tasks/:id(.:format)                                             agent/tasks#update
+                                              DELETE /agent/tasks/:id(.:format)                                             agent/tasks#destroy
+                                       show_s GET    /s/:id(.:format)                                                       filler/surveys#show
+                                       survey GET    /surveys/:id(.:format)                                                 filler/surveys#show
+                                       show_p GET    /p/:id(.:format)                                                       filler/previews#show
+                                      preview GET    /previews/:id(.:format)                                                filler/previews#show
+                                       show_a GET    /a/:id(.:format)                                                       filler/answers#show
+                        load_questions_answer GET    /answers/:id/load_questions(.:format)                                  filler/answers#load_questions
+                                finish_answer POST   /answers/:id/finish(.:format)                                          filler/answers#finish
+                                 clear_answer POST   /answers/:id/clear(.:format)                                           filler/answers#clear
+                       destroy_preview_answer DELETE /answers/:id/destroy_preview(.:format)                                 filler/answers#destroy_preview
+                         select_reward_answer PUT    /answers/:id/select_reward(.:format)                                   filler/answers#select_reward
+                            start_bind_answer POST   /answers/:id/start_bind(.:format)                                      filler/answers#start_bind
+                                      answers POST   /answers(.:format)                                                     filler/answers#create
+                                       answer GET    /answers/:id(.:format)                                                 filler/answers#show
+                                              PUT    /answers/:id(.:format)                                                 filler/answers#update
+                                  bind_sample GET    /bind_sample(.:format)                                                 filler/bind_samples#show
+                                   admin_root        /                                                                      admin/publishes#index {:subdomain=>"admin"}
+                                         root        /                                                                      sample/homes#show

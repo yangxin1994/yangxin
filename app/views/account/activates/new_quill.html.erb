@@ -1,0 +1,18 @@
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/account/activate_new_quill-bundle" %>
+<% end %>
+<div class="find-pw">
+	<h1>激活账户</h1>
+	<span>请输入您的注册邮箱激活账户：</span>
+	<p>
+		<em class="icon icon-mail"></em>
+		<input type="text" id="activate_ipt" class="l" name="mail" param='e' placeholder="请输入您的注册邮箱" autofocus />
+		<span id='error' class="error-prompt" style='display:none;'>
+			<span class="error-prompt-t"></span><!-- 
+			 --><span class="error-prompt-txt"></span><!-- 
+			 --><a href="javascript:void(0);" class="close-error"></a><!-- 
+			 --><span class="error-prompt-r"></span>
+		</span>
+	</p>
+	<button id='activate_btn' class="od-button l" style='width: 90px;'>激活账户</button>
+</div>

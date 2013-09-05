@@ -1,0 +1,441 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/sample/users-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/sample/users-bundle", "pages/sample/users_bindings-bundle", :media => "all" %>
+<% end %>
+
+<%= render "sample_nav", :@path => 'setting', :@text => "用户设置" %>
+
+<div class="inner-page main-content">
+    <!-- main -->
+    <div class="part-left">
+        <div class="setting tabs">
+            <div class="l">
+                <a href="/users/setting" class="tab <%= 'active' if action_name == 'basic_info' %>" id="tab-edit-info">个人资料</a>
+                <a href="/users/setting/avatar" class="tab <%= 'active' if action_name == 'avatar' %>" id="tab--edit-avatar">修改头像</a>
+                <a href="/users/setting/bindings" class="tab <%= 'active' if action_name == 'bindings' %>" id="tab-edit-bindings">帐户绑定</a>
+                <a href="/users/setting/address" class="tab <%= 'active' if action_name == 'address' %>" id="tab-edit-address">收货地址</a>
+                <a href="/users/setting/password" class="tab <%= 'active' if action_name == 'password' %>" id="tab-edit-password">修改密码</a>
+            </div>
+            <div style="clear:both;"></div>
+            <div class="nav2-dashed-line"></div>
+        </div>
+
+        <div style="clear:both;"></div>
+
+        <table id="bindings">
+            <tr class="tr">
+                <!-- mobile -->
+                <% if @bindings["mobile"] %>
+                  <!-- binded -->
+                  <td class="icons">
+                    <i class="icon-binding icon-mobile active"></i>
+                    <span>激活手机</span>
+                  </td>
+                  <td class="content">
+                    <p>您已绑定手机：<span class="active-text"><%= @bindings["mobile"][0] %></span></p>
+                      
+                    <p>
+                      <input class="subscribe" name="mobile" type="checkbox" <%= 'checked' if @bindings["mobile"][1] %>/>
+                      <span>有新问卷时提醒我</span>
+                    </p>
+                  </td>
+                  <td class="bind change">
+                      <a class="fancybox" href="#phone-binding">更改</a>
+                  </td>
+                <% else %>
+                  <!-- unbind -->
+                  <td class="icons">
+                    <i class="icon-binding icon-mobile"></i>
+                    <span>激活手机</span>
+                  </td>
+                  <td class="content">
+                    <p>您尚未绑定手机</p>
+                  </td>
+                  <td class="bind">
+                      <a class="fancybox" href="#phone-binding">绑定</a>
+                  </td>
+                <% end %>
+            </tr>
+
+            <tr class="tr">
+              <!-- email -->
+              <% if @bindings["email"] %>
+                <td class="icons">
+                    <i class="icon-binding icon-email active"></i>
+                    <span>激活邮箱</span>
+                </td>
+                <td class="content">
+                    <p>您已绑定邮箱：<span class="active-text"><%= @bindings["email"][0] %></span></p>
+                    <p>
+                        <input type="checkbox" class="subscribe" name="email"  <%= 'checked' if @bindings["email"][1] %>/>
+                        <span>有新问卷时提醒我</span>
+                    </p>
+                </td>
+                <td class="bind change">
+                    <a class="fancybox" href="#email-binding">更改</a>
+                </td>
+              <% else %>
+                <td class="icons">
+                    <i class="icon-binding icon-email"></i>
+                    <span>激活邮箱</span>
+                </td>
+                <td class="content">
+                    <p>您尚未绑定邮箱</p>
+                </td>
+                <td class="bind">
+                    <a class="fancybox" href="#email-binding">绑定</a>
+                </td>
+              <% end %>
+            </tr>
+
+            <tr class="tr">
+              <!-- sina weibo -->
+              <% if @bindings["sina"] %>
+                <td class="icons">
+                    <i class="icon-binding icon-sina active"></i>
+                    <span>新浪微博</span>
+                </td>
+                <td class="content">
+                    <p>您已绑定新浪微博：<span class="active-text"><%= @bindings["sina"][0] %></span></p>
+                    <p>
+                        <input type="checkbox" class="share" name="sina"  <%= 'checked' if @bindings["sina"][1] %>/>
+                        <span>有新问卷时提醒我</span>
+                    </p>
+                </td>
+                <td class="bind change">
+                    <p>更改</p>
+                </td>
+              <% else %>
+                <td class="icons">
+                    <i class="icon-binding icon-sina"></i>
+                    <span>新浪微博</span>
+                </td>
+                <td class="content">
+                    <p>您尚未绑定新浪微博</p>
+                </td>
+                <td class="bind">
+                    <a href="#">绑定</a>
+                </td>
+              <% end %>
+            </tr>
+
+            <tr class="tr" style="display: none;">
+              <!-- tx weibo -->
+              <% if @bindings["tx_weibo"] %>
+                <td class="icons">
+                    <i class="icon-binding icon-tx_weibo active"></i>
+                    <span>腾讯微博</span>
+                </td>
+                <td class="content">
+                    <p>您已绑定腾讯微博：<span class="active-text"><%= @bindings["tx_weibo"][0] %></span></p>
+                    <p>
+                        <input type="checkbox"  class="share" name="tx_weibo"  <%= 'checked' if @bindings["tx_weibo"][1] %>/>
+                        <span>有新问卷时提醒我</span>
+                    </p>
+                </td>
+                <td class="bind change">
+                    <a href="#">更改</a>
+                </td>
+              <% else %>
+                <td class="icons">
+                    <i class="icon-binding icon-tx_weibo"></i>
+                    <span>腾讯微博</span>
+                </td>
+                <td class="content">
+                    <p>您尚未绑定腾讯微博</p>
+                </td>
+                <td class="bind">
+                    <a href="#">绑定</a>
+                </td>
+              <% end %>
+            </tr>
+
+            <tr class="tr" style="display: none;">
+              <!-- weixin -->
+              <% if @bindings["weixin"] %>
+                <td class="icons">
+                    <i class="icon-binding icon-weixin active"></i>
+                    <span>微信帐号</span>
+                </td>
+                <td class="content">
+                    <p>您已绑定微信帐号：<span class="active-text"><%= @bindings["weixin"][0] %></span></p>
+                    <p>
+                        <input type="checkbox" class="share" name="weixin"  <%= 'checked' if @bindings["weixin"][1] %>/>
+                        <span>有新问卷时提醒我</span>
+                    </p>
+                </td>
+                <td class="bind">
+                    <a href="#">更改</a>
+                </td>
+              <% else %>
+                <td class="icons">
+                    <i class="icon-binding icon-weixin"></i>
+                    <span>微信帐号</span>
+                </td>
+                <td class="content">
+                    <p>您尚未绑定微信帐号</p>
+                </td>
+                <td class="bind">
+                    <a href="#">绑定</a>
+                </td>
+              <% end %>
+            </tr>
+
+            <tr class="tr" style="display: none;">
+              <!-- alipay -->
+              <% if @bindings["alipay"] %>
+                <td class="icons">
+                    <i class="icon-binding icon-alipay active"></i>
+                    <span>支付宝</span>
+                </td>
+                <td class="content">
+                    <p>您已绑定支付宝：<span class="active-text"><%= @bindings["alipay"][0] %></span></p>
+                    <p>
+                        <input type="checkbox" class="share" name="alipay"  <%= 'checked' if @bindings["alipay"][1] %>/>
+                        <span>有新问卷时提醒我</span>
+                    </p>
+                </td>
+                <td class="bind">
+                    <a href="#">更改</a>
+                </td>
+              <% else %>
+                <td class="icons">
+                    <i class="icon-binding icon-alipay"></i>
+                    <span>支付宝</span>
+                </td>
+                <td class="content">
+                    <p>您尚未绑定支付宝</p>
+                </td>
+                <td class="bind">
+                    <a href="#">绑定</a>
+                </td>
+              <% end %>
+            </tr>
+
+            <tr class="tr" style="display: none;">
+              <!-- qzone -->
+              <% if @bindings["qzone"] %>
+                <td class="icons">
+                    <i class="icon-binding icon-qzone active"></i>
+                    <span>QQ空间</span>
+                </td>
+                <td class="content">
+                    <p>您已绑定QQ空间：<span class="active-text"><%= @bindings["qzone"][0] %></span></p>
+                    <p>
+                        <input type="checkbox" class="share" name="qzone" <%= 'checked' if @bindings["qzone"][1] %>/>
+                        <span>有新问卷时提醒我</span>
+                    </p>
+                </td>
+                <td class="bind">
+                    <a href="#">更改</a>
+                </td>
+              <% else %>
+                <td class="icons">
+                    <i class="icon-binding icon-qzone"></i>
+                    <span>QQ空间</span>
+                </td>
+                <td class="content">
+                    <p>您尚未绑定QQ空间</p>
+                </td>
+                <td class="bind">
+                    <a href="#">绑定</a>
+                </td>
+              <% end %>
+            </tr>
+
+            <tr class="tr">
+              <!-- renren -->
+              <% if @bindings["renren"] %>
+                <td class="icons">
+                    <i class="icon-binding icon-renren active"></i>
+                    <span>人人网</span>
+                </td>
+                <td class="content">
+                    <p>您已绑定人人网：<span class="active-text"><%= @bindings["renren"][0] %></span></p>
+                    <p>
+                        <input type="checkbox"  class="share" name="renren" <%= 'checked' if @bindings["renren"][1] %>/>
+                        <span>有新问卷时提醒我</span>
+                    </p>
+                </td>
+                <td class="bind">
+                    <a href="#">更改</a>
+                </td>
+              <% else %>
+                <td class="icons">
+                    <i class="icon-binding icon-renren"></i>
+                    <span>人人网</span>
+                </td>
+                <td class="content">
+                    <p>您尚未绑定人人网</p>
+                </td>
+                <td class="bind">
+                    <a href="#">绑定</a>
+                </td>
+              <% end %>
+            </tr>
+        </table>
+    </div>
+
+    <!-- user tabs -->
+    <%= render "right_partial" %>
+</div>
+
+<!-- phone-binding -->
+
+<div id="phone-binding" class="step1 popup">
+  <div class="detail-title">
+    <span>绑定手机</span>
+  </div>
+
+  <div class="steps">
+    <div class="step actived">
+      <div class="text">输入号码</div>
+      <i class="icon-step icon-step1 actived"></i>
+      <div class="line"></div>
+    </div>
+    <div class="step">
+      <div class="text">短信验证</div>
+      <i class="icon-step icon-step2"></i>
+      <div class="line"></div>
+    </div>
+    <div class="step">
+      <div class="text">完成</div>
+      <i class="icon-step icon-step3"></i>
+      <div class="line"></div>
+    </div>
+  </div>
+
+  <div class="cont" style="text-align: center;">
+  </div>
+
+
+  <div class="edit-phone">
+    <span>手机号码：</span>
+    <input type="text" id="mobile-number" placeholder="请填写11位手机号"/>
+    <a class="btn btn-send_mobile" href="javascript:void(0);"/>下一步</a>
+  </div>
+</div>
+
+<div id="step2" class="step2 popup">
+  <div class="detail-title">
+    <span>绑定手机</span>
+  </div>
+
+  <div class="steps">
+    <div class="step fixed">
+      <div class="text">输入号码</div>
+      <i class="icon-step icon-step1 fixed"></i>
+      <div class="line"></div>
+    </div>
+    <div class="step actived">
+      <div class="text">短信验证</div>
+      <i class="icon-step icon-step2 actived"></i>
+      <div class="line"></div>
+    </div>
+    <div class="step">
+      <div class="text">完成</div>
+      <i class="icon-step icon-step3"></i>
+      <div class="line"></div>
+    </div>
+  </div>
+
+  <div class="cont">
+      
+  </div>
+
+  <div class="edit-phone">
+    <span>短信验证码：</span>
+    <input type="text" id="verify-code"  placeholder="请填写6位验证码"/>
+    <a class="btn btn-verify_code" href="javascript:void(0);"/> 提交 </a>
+  </div>
+</div>
+
+<div id="step3" class="step3 popup">
+  <div class="detail-title">
+    <span class="l">绑定手机</span>
+  </div>
+
+  <div style="clear: both;"></div>
+
+  <div class="cont">
+    <p>
+      <span class="icon icon-green-ok"></span>
+      <span class="c-green">恭喜！您的手机号已成功激活！</span>
+    </p>
+    <p>您的手机已经激活成功，激活成功的手机可以订阅问卷!</p>
+  </div>
+
+  <div class="actions">
+    <a class="btn btn-over">我知道了</a>
+  </div>
+</div>
+
+<!-- email-binding -->
+
+<div id="email-binding" class="email-binding-1 popup">
+    <div class="detail-title">
+        <span class="">绑定邮箱</span>
+    </div>
+
+    <div class="steps">
+        <div class="step actived">
+          <div class="text">输入邮箱</div>
+          <i class="icon-step icon-step1 actived"></i>
+          <div class="line"></div>
+        </div>
+        <div class="step">
+          <div class="text">邮件验证</div>
+          <i class="icon-step icon-step2 "></i>
+          <div class="line"></div>
+        </div>
+        <div class="step">
+          <div class="text">完成</div>
+          <i class="icon-step icon-step3"></i>
+          <div class="line"></div>
+        </div>
+    </div>
+
+    <div class="cont" style="text-align: center;">
+    </div>
+
+    <div class="edit-email">
+        <span>您的邮箱：</span>
+        <input type="text" id="email-input"  placeholder="请正确填写您的邮箱"/>
+        <a class="btn btn-send_email" href="javascript:void(0);"/>下一步</a>
+  </div>
+</div>
+
+<div id="email-binding-2" class="email-binding-2 popup">
+    <div class="detail-title">
+        <span class="">绑定邮箱</span>
+    </div>
+
+    <div class="steps">
+        <div class="step fixed">
+          <div class="text">输入邮箱</div>
+          <i class="icon-step icon-step1 fixed"></i>
+          <div class="line"></div>
+        </div>
+        <div class="step actived">
+          <div class="text">邮件验证</div>
+          <i class="icon-step icon-step2 actived"></i>
+          <div class="line"></div>
+        </div>
+        <div class="step">
+          <div class="text">完成</div>
+          <i class="icon-step icon-step3"></i>
+          <div class="line"></div>
+        </div>
+    </div>
+
+    <div class="cont">
+    </div>
+
+    <div class="actions">
+        <a class="btn btn-link-email" type="button" href="javascript:void(0);" target="_blank">登录邮箱</a>
+        <div id="send-email-success-info" style="display: inline-block;">
+          <span class="icon icon-miniok"></span>
+          <span>验证邮件已发送，请查收</span>
+        </div>
+    </div>
+</div>

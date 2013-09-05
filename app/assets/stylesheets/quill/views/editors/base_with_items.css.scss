@@ -1,0 +1,21 @@
+/*
+ *=require ./base
+ */
+ 
+/* items and other item */
+.editor-left-body {
+	.q-body {
+		padding-top: 14px;
+		
+		.q-items, .q-other-item{
+			.od-item {
+				margin-bottom: 14px;
+			}
+		}
+		
+		.q-new-opt{
+			padding-top: 4px;
+			padding-left: 22px;
+		}
+	}
+}

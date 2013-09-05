@@ -156,9 +156,9 @@ class Feedback
 			return feedback if !feedback.instance_of?(Feedback)
 
 			if !feedback.question_user.nil? then
-				return ErrorEnum::FEEDBACK_NOT_CREATOR if user.nil? || (user != feedback.question_user && !user.is_admin)
+				return ErrorEnum::FEEDBACK_NOT_CREATOR if user.nil? || (user != feedback.question_user && !user.is_admin?)
 			else
-				return ErrorEnum::FEEDBACK_CANNOT_DELETE if user.nil? || !user.is_admin
+				return ErrorEnum::FEEDBACK_CANNOT_DELETE if user.nil? || !user.is_admin?
 			end
 
 			return feedback.destroy
@@ -267,7 +267,7 @@ class Feedback
 		def reply(feedback_id, answer_user, message_content)
 
 			# answer_user must be admin
-			return ErrorEnum::REQUIRE_ADMIN if answer_user.nil? || ( answer_user && !answer_user.is_admin)
+			return ErrorEnum::REQUIRE_ADMIN if answer_user.nil? || ( answer_user && !answer_user.is_admin?)
 
 			#find feedback
 			feedback = Feedback.find(feedback_id)

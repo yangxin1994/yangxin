@@ -51,4 +51,9 @@ OopsData::Application.configure do
     :enable_starttls_auto => true,
     :openssl_verify_mode  => 'none'
   }
+
+  # ofcard uri
+  config.ofcard_service_uri = "http://api2.ofpay.com/"
+  config.ofcard_key_str = "OFCARD"
+  config.ret_url = "http://221.221.17.98:4000/orders/confirm"
 end

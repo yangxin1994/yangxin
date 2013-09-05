@@ -1,102 +1,70 @@
-# encoding: utf-8
+class Admin::GiftsController < Admin::AdminController
 
-class Admin::GiftsController < Admin::ApplicationController
-
+  layout "layouts/admin-todc"
 
   def index
-    render_json true do
-      auto_paginate(Gift.where(:is_deleted => false))
-    end
-  end
-
-  def_each :virtual, :cash, :entity, :lottery, :stockout, :expired do |method_name|
-    @gifts = auto_paginate(Gift.send(method_name))
-    render_json { @gifts }
-  end
-
-  def create
-    unless create_photo(:gift)
-      render_json false do
-        {
-          :error_code => ErrorEnum::PHOTP_CANNOT_BE_BLANK,
-          :error_message => "请选择图片"
-        }
-      end
-      return
-    end
-    @gift = Gift.create(params[:gift])
-    # if params[:gift][:type] == 3
-    #   l = Lottery.where(:_id => params[:gift][:lottery]).first
-    #   if !l.nil?
-    #     params[:gift][:lottery] = l
-    #     @gift.lottery = l
-    #     @gift.lottery.save
-    #   else
-    #     render_json(false){ErrorEnum::LOTTERY_NOT_FOUND}
-    #   end
-    # end
-
-    # @gift.photo = material
-    # material.save
-    # TODO add admin_id
-    render_json @gift.save do
-      @gift.as_retval
-    end
-  end
-
-  def update
-    @gift = Gift.find_by_id params[:id]
-    unless params[:gift][:photo].nil?
-      if @gift.photo.nil?
-        material = Material.create(:material_type => 1,
-                                   :title => params[:gift][:name],
-                                   :value => params[:gift][:photo],
-                                   :picture_url => params[:gift][:photo])
-        @gift.photo = material
-      end
-      @gift.photo.value = params[:gift][:photo]
-      @gift.photo.picture_url = params[:gift][:photo]
-      params[:gift][:photo] = material
-      @gift.photo.save
-    end
-
-
-    if params[:gift][:type] == 3
-      l = Lottery.where(:_id => params[:gift][:lottery]).first
-      if !l.nil?
-        params[:gift].delete(:lottery)
-        @gift.lottery = l
-        @gift.lottery.save
-      else
-        render_json(false){ErrorEnum::LOTTERY_NOT_FOUND}
-      end
-    end
-    params[:gift].select!{ |k, v| !v.nil?}
-    render_json @gift.update_attributes(params[:gift]) do
-      @gift.as_retval
-    end
+    @gifts = auto_paginate Gift.search_gift(params[:title], params[:status].to_i, params[:type].to_i)
   end
 
   def show
-    # @gift = Gift.find_by_id(params[:id])
-    # @gift[:photo_src] = @gift.photo.picture_url unless @gift.photo.nil?
-    # @gift[:lottery_id] = @gift.lottery._id unless @gift.lottery.nil?
-    # render_json { @gift }
-    render_json false do
-      result = Gift.find_by_id(params[:id]) do |gift|
-        gift[:photo_src] = gift.photo.picture_url unless gift.photo.nil?
-        gift[:lottery_id] = gift.lottery_id
-        @is_success = true
-        gift
-      end
+    #render :json => @gift_client.show(params[:id])
+    @gift = Gift.find(params[:id])
+    @gift['photo_url'] = @gift.photo.try 'value'
+  end
+
+  def new
+    @gift = {}
+  end
+
+  def create
+    photo = ImageUploader.new
+    photo.store!(params[:gift][:photo])
+
+    params[:gift].delete(:photo)
+    params[:gift][:photo_url] = photo.url
+
+    @gift = Gift.create(params[:gift])
+    @gift.update_gift(params[:gift])
+    if @gift.created_at
+      redirect_to admin_gifts_path
+    else
+      render :new
     end
   end
 
+  def edit
+    @gift = Gift.find(params[:id])
+    @gift['photo_url'] = @gift.photo.try 'value'
+  end
+
+  def update
+    if params[:gift][:photo]
+      photo = ImageUploader.new
+      photo.store!(params[:gift][:photo])
+      params[:gift].delete(:photo)
+      params[:gift][:photo_url] = photo.url
+    end
+    @gift = Gift.find params[:id]
+    @gift.update_gift(params[:gift])
+    redirect_to edit_admin_gift_path(params[:id])
+  end
+
   def destroy
-    render_json false do |g|
-      Gift.find_by_id(params[:id]) do |gift|
-        @is_success = true if gift.update_attribute('is_deleted', true)
-      end
+    render_json @gift = Gift.where(:_id =>params[:id]).first do |gift|
+      success_true gift.delete_gift
     end
   end
+
+  def outstock
+    render_json @gift = Gift.where(:_id =>params[:id]).first do |gift|
+      success_true gift.update_attributes(:status => 2)
+    end
+  end
+
+  def stockup
+    render_json @gift = Gift.where(:_id =>params[:id]).first do |gift|
+      success_true gift.update_attributes(:status => 1)
+    end
+  end
+
 end

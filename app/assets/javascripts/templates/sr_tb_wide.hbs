@@ -1,0 +1,22 @@
+<table cellspacing='0' cellpadding='0'>
+	<tr>
+		<th class='tt tl'></th>
+		{{#iterateTo column_count}}
+		<th class='tt'></th>
+		{{/iterateTo}}
+	</tr>
+	{{#iterateTo row_count}}
+	<tr>
+		<th class='tl'></td>
+		{{#iterateTo ../column_count}}
+		<td></td>
+		{{/iterateTo}}
+	</tr>
+	{{/iterateTo}}
+	<tr>
+		<th class='tl tb'>合计</th>
+		{{#iterateTo column_count}}
+		<th class='tb'></th>
+		{{/iterateTo}}
+	</tr>
+</table>

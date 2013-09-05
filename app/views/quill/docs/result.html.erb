@@ -1,0 +1,143 @@
+<% content_for :head do %>
+<%= javascript_include_tag "pages/quill/docs-bundle" %>
+<%= stylesheet_link_tag "pages/quill/docs-bundle", :media => "all" %>
+<% end %>
+<ul class="menu">
+	<li><a href="<%= design_doc_path %>">设计问卷</a></li>
+	<li><a href="<%= share_doc_path %>">美化和发布问卷</a></li>
+	<li><a class="active" href="<%= result_doc_path %>">结果分析</a></li>
+</ul>
+<div class="menu-content">
+	<ul class="menu-link">
+		<li><a href="#import">导入数据</a></li>
+		<li><a href="#filters">筛选器设置</a></li>
+		<li><a href="#volunteers">样本分析</a></li>
+		<li><a href="#datalist">数据列表</a></li>
+		<li><a href="#report">调研报告</a></li>
+		<li><a href="#analysis">答案分析</a></li>
+	</ul>
+</div>
+<div class="page">
+		<h3>结果分析</h3>
+		<ul>
+			<li>1．调查者可利用结果分析功能对问卷的回收结果进行数据分析和报告生成。</li>
+			<li>2．回收问卷渠道：在线调研（优数调研网站）、线下调研。如果问卷有线下调研渠道，需先导入线下调研数据。</li>
+			<li>3．通过设置和应用筛选器，调查者可以筛选出部分答卷进行分析，默认为所有答卷。</li>
+			<li>4．如果在编辑问卷的时设置了控制条件或发布问卷时设置了配额条件，均可在筛选器里设置相应的筛选条件，筛选出符合条件的答卷进行结果分析。</li>
+			<li>5．结果分析包括样本分析、数据列表、调研报告、答案分析。
+		（具体操作见下）</li>
+		</ul>
+
+		<i class="divide"></i>
+
+			<h3>分析页面</h3>
+			<div class="r ml20">
+				<img class="db" src="../assets/doc/jieguo.png" alt="问卷设置">	
+				<span class="grayTxt ml10 mt10">▲结果分析按钮</span>
+			</div>
+			<p class="min-width">点击“查看结果”按钮，进入结果分析页面。</p>
+		<i class="divide"></i>	
+
+			<h3 id='import'>导入数据</h3>
+			<div class="r ml20">
+				<img class="db" src="../assets/doc/daoru.png" alt="问卷设置">	
+				<span class="grayTxt ml10 mt10">▲结果分析示意图</span>
+			</div>
+			<p class="blueTxt">※   导入线下调研的数据</p>
+			<ul class="min-width">
+				<li>1.点击“导入数据”按钮，在弹出的对话框里下载Excel模版文件，下载本问卷的录入模板。</li>
+				<li>2.按照规定格式向excel录入模板文件里录入答卷数据据。</li>
+				<li>3.点击“上传”按钮，将录入好的excel 文件上传至系统。</li>
+				<li>4.没有线下调研的问卷不需要导入数据。</li>
+			</ul>
+	
+			<i class="divide"></i>	
+
+			<h3 id='filters'>筛选器设置</h3>
+			<div class="r ml20">
+				<img class="db" src="../assets/doc/shaixuan.png" alt="问卷设置">	
+				<span class="grayTxt ml10 mt10">▲设置筛选器按钮</span>
+			</div>
+			<p class="blueTxt">※   设置筛选器，显示出符合筛选条件的答卷的分析结果</p>
+			<ul>
+				<li>1.点击“设置筛选器”按钮。</li>
+				<li>2.进入筛选器编辑页面,点击“添加筛选器”。
+					<img class="db" src="../assets/doc/shaixuan2.png" alt="问卷设置">	
+				</li>
+				<li>3.选择需要设置的题目并设置正确答案和筛选器名，筛选器设置完成。</li>
+				<li>4.筛选器设置完成后，点击“结果分析”按钮，回到结果分析界面。</li>
+				<li>5.选择筛选器，结果分析页面会显示出符合筛选条件的答卷的分析结果。</li>
+			</ul>
+			
+			<i class="divide"></i>
+			<h3 id='volunteers'>样本分析</h3>
+			<p class="blueTxt">※   样本分析包括回收数量统计、时间分析、地区分析。</p>
+			<ul>
+				<li>1.回收数量统计：以数字和图标的形式显示符合条件的答卷、被甄别掉的答卷、含甄别掉的问卷的分析结果。</li>
+				<li>2.时间分析：以图表的形式统计样本开始答题的时间。</li>
+				<li>3.地区分析：以地图的形式统计各个地区的样本数量。</li>
+			</ul>
+			
+			<i class="divide"></i>
+			<h3 id='datalist'>数据列表</h3>
+			<div class="r ml20">
+				<img class="db" src="../assets/doc/daochu.png" alt="问卷设置">	
+				<span class="grayTxt ml10 mt10">▲导出按钮</span>
+			</div>
+			<p class="blueTxt">※   数据别表显示样本编号、姓名、邮箱、所在地、开始填写时间、填写时长。
+			</p>
+			<p>点击导出按钮，可导出到excel 和spss 两种不同格式的文件。</p>
+
+			<i class="divide"></i>
+
+			<h3 id='report'>调研报告</h3>
+			<p class="blueTxt">※   可在线创建调研报告</p>
+			<ul>
+				<li>1.调研报告提供word、ppt、pdf共三种导出形式。</li>
+				<li>2.调研报告生成方式：一键导出报告、自定义调研报告。</li>
+				<li>3.一键导出报告：导出报告前选择所用筛选器、报告的风格，选择“默认报告”，再选择导出形式。
+			（默认报告对问卷所有题目进行单题分析。）</li>
+			<div>
+				<img class="db" src="../assets/doc/baogao.png" alt="问卷设置">	
+				<span class="grayTxt mt10">▲页面示意图</span>
+			</div>
+				<li>4.自定义调研报告
+					<ul class="g9">
+						<li>a)点击“添加调研报告”按钮，添加自定义报告。</li>
+						<div>
+							<img class="db" src="../assets/doc/add4.png" alt="问卷设置">	
+							<span class="grayTxt mt10">▲按钮</span>
+							<img class="db" src="../assets/doc/add3.png" alt="问卷设置">	
+							<span class="grayTxt mt10">▲页面示意图</span>
+						</div>
+						<li>b)自定义报告的标题、作者、页眉、页脚；</li>
+						<li>c)报告分为单题分析和交叉分析；</li>
+						<li>d)在单题分析和交叉分析的过程中，如果涉及的题目为选择题，可进行合并选项分析。合并选项分析指可以为选择题的各个选项分组，例如选择题有ABCD 四个选项，调查者可以将AC 和BD分别归为一个组，然后再将组当成选项进行分析。</li>
+						<li>e)单题分析
+			点击单题分析按钮，添加单题分析问题，选择分析类型图，设置选项合并选项。选择该自定义报告导出。</li>
+					</ul>
+				</li>
+			<li>5.交叉分析
+				<ul class="g9">
+					<li>a)可从问卷题目列表里选择两道题目进行交叉分析，两道题分别称为筛选题和目标题，筛选题用于筛选样本，使用筛选出来的样本对目标题进行分析。筛选题必须为选择题，目标题可以为任意题型。    </li>
+					<li>b)点击“交叉分析”按钮，选择筛选题和目标题，选择分析类型图，设置选项合并。</li>
+					<li>c)选择该自定义报告导出。</li>
+				</ul>
+				<div>
+					<img class="db" src="../assets/doc/jiaocha.png" alt="问卷设置">
+					<br/>
+					<span class="grayTxt mt10">▲交叉分析示意图</span>	
+					<br/>
+					<img class="db" src="../assets/doc/jiaocha2.png" alt="问卷设置">	
+					<br/>
+					<span class="grayTxt mt10">▲交叉分析示意图</span>
+				</div>
+			</li>
+
+			</ul>
+			<i class="divide"></i>
+			<h3 id='analysis'>答案分析</h3>
+			<p>以图表和表格的形式对问卷每道题进行答案进行分析</p>
+</div>
+
+<a href='javascript:void(0);' class='scrollup'></a>

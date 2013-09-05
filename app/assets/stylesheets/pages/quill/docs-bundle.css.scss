@@ -1,0 +1,97 @@
+@import "common";
+@import "compass/css3/inline-block";
+@import "compass/css3/border-radius";
+@import "compass/css3/opacity";
+@import "compass/utilities/general/clearfix";
+
+.scrollup{
+	@include size(40px, 40px);
+	text-indent:-9999px;
+	@include opacity(0.3);
+	position:fixed;
+	bottom:50px;
+	right:50px;
+	display:none;	
+	background: image-url("icon_top.png") no-repeat;
+
+	&:hover {
+		@include opacity(50);
+	}
+}
+
+$blueTxt:#3880c7;
+$grayTxt:#999;
+.blueTxt{color:$blueTxt;}
+.grayTxt{color:$grayTxt}
+.menu{
+	margin-top:1px;
+	@include one-line(50px);
+	@include clearfix;
+	border:1px #B4B4B4 solid;
+	border-top:none;
+	border-bottom:none;
+	background:#CFCFCF image-url("images/page_bg.png") repeat-x;
+	li{
+		float: left;
+		background:-webkit-gradient(linear, left top, left bottom, from(#A0A0A0), to(#CFCFCF),color-stop(0.2, #CFCFCF));
+		a{
+			font-size: 14px;
+			font-weight: bold;
+			color:#5A5A5A;
+			padding:0 25px;
+			display: block;
+			&:hover,&.active{
+				color: #fff;
+				background:#5BAAE0;
+				background:-webkit-gradient(linear, left top, left bottom, from(#4888B5), to(#5BAAE0),color-stop(0.25px, #5BAAE0));
+			}
+		}
+	}
+}
+.menu-content{
+	@include clearfix;
+	@include one-line(32px);
+	background:#5BAAE0;
+	border:1px #B4B4B4 solid;
+	border-top:none;
+	border-bottom:none;
+	li{
+		float: left;
+		padding:0 30px;
+		a{
+			color: #fff;
+			&:hover,&.active{ text-decoration: underline; }
+
+		}
+
+	}
+}
+.page{
+	background: #F3F3F4;
+	padding:20px 35px;
+	margin-bottom: 65px;
+	border:1px #B4B4B4 solid;
+	border-top:none;
+	@include clearfix;
+	@include border-bottom-radius(6px);
+	font-size: 14px;
+	line-height: 2em;
+	.min-width{width:340px;}
+	h3{
+		margin:35px 0;
+		font-size: 16px;
+		font-weight: bold;
+		color: $blueTxt;
+	}
+	.divide{
+		height:1px;
+		display:block;
+		border-top:1px #ccc dotted;
+		margin:30px 0;
+		clear: both;
+	}
+	p, li {
+		margin: 10px 0;
+	}
+}
+.img-box{padding-bottom:15px;}

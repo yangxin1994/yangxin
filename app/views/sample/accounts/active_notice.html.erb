@@ -1,0 +1,59 @@
+<% content_for :head do %>
+	<%= stylesheet_link_tag "pages/sample/active_notice-bundle", :media => "all" %>
+	<%= javascript_include_tag "pages/sample/active_notice-bundle" %>
+<% end %>
+
+<div class="login_con">	
+		<div class="sucess_img"><img src="/assets/od-quillme/regist_succ.png" /></div>
+		<h1>恭喜!
+			<span class="acc"><%= @account%></span>
+			已注册成功!
+		</h1>
+		<a class="reture_index" href="<%= home_path %>">返回首页</a>
+<!-- 		<div class="nickname">
+			您的昵称：<span><%= @account %></span>会展示在新鲜事与抽奖记录等地方
+		</div> -->
+		<div class="login_email">
+			<% if @account.match(/^(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$/i)%>
+				<p>
+					<span class="binding">超过了<b>80%</b>的用户选择了立即验证邮箱,账户安全更放心!
+					</span>
+					<div class="input_email">
+						<label for="y_mail">您的邮箱:</label>
+						<input type="text" id="y_mail" />
+						<button class="binding_now">立即验证</button>
+						<div class="re_notice">
+							<span></span><font>验证成功</font> 
+						</div>						
+					</div>	
+				</p>
+				<div class="log_maibtn">
+					<% if @mail_t.present? %>
+						<a href="<%= @mail_t%>">登录邮箱</a>
+					<% end %>
+					<div class="re_notice">
+						<span id="notice"></span><font>邮箱验证已重新发送，请查收</font> 
+					</div>
+				</div>
+			<% else %>
+				<p>系统已向您的邮箱
+					<% if @mail_t.present? %>
+						<a class="mail" href="<%= @mail_t %>"><%= @account %></a>
+					<% else %>
+						<%= @account %>
+					<% end %>
+					发送了一封验证邮件，请您登录邮箱。点击邮件链接完成邮箱验证。如果您超过2分钟未收到邮件，您可以
+					<a  class="re_mail" href="javascript:void(0);">重新发送</a>
+				</p>
+				<div class="log_maibtn">
+					<% if @mail_t.present? %>
+						<a href="<%= @mail_t%>">登录邮箱</a>
+					<% end %>
+					<div class="re_notice">
+						<span></span><font>邮箱验证已重新发送，请查收</font> 
+					</div>
+				</div>
+			<% end %>
+			
+		</div>
+</div>

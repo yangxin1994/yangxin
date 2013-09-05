@@ -1,0 +1,358 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/sample/users-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/sample/users-bundle", "pages/sample/users_orders-bundle", :media => "all" %>
+<% end %>
+
+<%= render "sample_nav", :@path => 'orders', :@text => "我的订单" %>
+
+<div class="inner-page main-content">
+    <!-- main -->
+    <div class="part-left orders">
+        <div class="tabs">
+            <div class="l">
+                <a href="/users/orders" class="tab <%= 'active' unless [Order::WIN_IN_LOTTERY, Order::REDEEM_GIFT].include?(params[:scope].to_i) %>" id="tab-lottery">答题奖励</a>
+                <a href="/users/orders?scope=2" class="tab <%= 'active' if params[:scope].to_i == Order::WIN_IN_LOTTERY %>" id="tab-lottery">抽奖所得</a>
+                <a href="/users/orders?scope=4" class="tab <%= 'active' if params[:scope].to_i == Order::REDEEM_GIFT %>" id="tab-point">积分兑换</a>
+            </div>
+            <div style="clear:both;"></div>
+            <div class="nav2-dashed-line"></div>
+        </div>
+
+        <div style="clear:both;"></div>
+
+        <div class="table-box">
+          <!-- answer 's orders -->
+          <% if ![Order::WIN_IN_LOTTERY, Order::REDEEM_GIFT].include?(params[:scope].to_i) %>
+
+              <table class="orders_by_answer">
+                  <thead>
+                      <tr>
+                          <th style="width: 100px;">提交时间</th>
+                          <th style="width: 500px;">答题奖励</th>
+                          <th style="width: 80px;">订单状态</th>
+                          <th class="last-child" style="width: 60px;">详情</th>
+                      </tr>
+                  </thead>
+                      <% @orders["data"].to_a.each do |order| %>
+                        <tr id="order-<%= order["_id"] %>">
+                            <td><%= int_time_to_date(order["created_at"].to_i) %></td>
+                            <% case order["type"].to_i %>
+                            <% when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE %>
+                              <!-- phone -->                            
+                              <td>
+                                  <i class="icon-order icon-phonepay"></i>
+                                  <span><%= order["amount"] %>元话费</span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>"  href="#order-phone-charge-detail">订单详情</a>
+                              </td>
+                            
+                            <% when Order::ALIPAY %>
+                              <!-- aplipay -->
+                              <td>
+                                  <i class="icon-order icon-alipay"></i>
+                                  <span><%= order["amount"] %>元支付宝</span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>"  href="#order-alipay-detail">订单详情</a>
+                              </td>
+                            
+                            <% when Order::JIFENBAO %>
+                              <!-- jifenbao -->
+                              <td>
+                                  <i class="icon-order icon-jfb"></i>
+                                  <span><%= order["amount"] %>集分宝</span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>"  href="#order-jifenbao-detail">订单详情</a>
+                              </td>
+                            <% when Order::QQ_COIN %>
+                              <!-- Ｑ币 -->
+                              <td>
+                                  <i class="icon-order icon-qb"></i>
+                                  <span><%= order["amount"] %>Ｑ币</span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>"  href="#order-qb-detail">订单详情</a>
+                              </td>
+                            <% when Order::REAL, Order::VIRTUAL %>
+                              <!-- 礼品 -->
+                              <td>
+                                  <img src="<%= small_gift_image(order['picture_url']) %>" style="width: 36px; height: 36px;"/>
+                                  <span><%= truncate(order["title"].to_s.strip, length: 22) %></span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>"  href="#order-gift-detail">订单详情</a>
+                              </td>
+                            <% else %>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                            <% end %>
+                        </tr>
+                      <% end %>
+                  </tbody>
+              </table>
+              
+          <% elsif Order::WIN_IN_LOTTERY == params[:scope].to_i %>
+              <!-- orders by lottery -->
+              <table class="orders_by_lottery">
+                  <thead >
+                      <tr>
+                          <th style="width: 100px;">兑换日期</th>
+                          <th style="width: 500px;">所得奖品</th>
+                          <th style="width: 80px;">订单状态</th>
+                          <th class="last-child" style="width: 60px;">详情</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <% @orders["data"].to_a.each do |order| %>
+                        <tr id="order-<%= order["_id"] %>">
+                            <td><%= int_time_to_date(order["created_at"].to_i) %></td>
+                            <% case order["type"].to_i %>
+                            <% when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE  %>
+                              <!-- phone -->                            
+                              <td>
+                                  <i class="icon-order icon-phonepay"></i>
+                                  <span><%= order["amount"] %>元话费</span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>"  href="#order-phone-charge-detail">订单详情</a>
+                              </td>
+                            
+                            <% when Order::ALIPAY %>
+                              <!-- aplipay -->
+                              <td>
+                                  <i class="icon-order icon-alipay"></i>
+                                  <span><%= order["amount"] %>元支付宝</span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>"  href="#order-alipay-detail">订单详情</a>
+                              </td>
+                            
+                            <% when Order::JIFENBAO %>
+                              <!-- jifenbao -->
+                              <td>
+                                  <i class="icon-order icon-jfb"></i>
+                                  <span><%= order["amount"] %>集分宝</span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>"  href="#order-jifenbao-detail">订单详情</a>
+                              </td>
+                            
+                            <% when Order::QQ_COIN %>
+                              <!-- Ｑ币 -->
+                              <td>
+                                  <i class="icon-order icon-qb"></i>
+                                  <span><%= order["amount"] %>Ｑ币</span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>"  href="#order-qb-detail">订单详情</a>
+                              </td>
+                            <% when Order::REAL, Order::VIRTUAL %>
+                              <!-- 奖品 -->
+                              <td>
+                                  <img src="<%= small_gift_image(order['picture_url']) %>" style="width: 36px; height: 36px;"/>
+                                  <span><%= truncate(order["title"].to_s.strip, length: 22) %></span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>"  href="#order-gift-detail">订单详情</a>
+                              </td>
+                            <% else %>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                            <% end %>
+                        </tr>
+                      <% end %>
+                  </tbody>
+              </table>
+          <% elsif Order::REDEEM_GIFT == params[:scope].to_i %>
+              <table class="orders_by_point">
+                <!-- orders  by point -->
+                   <thead>
+                      <tr>
+                          <th style="width: 100px;">兑换日期</th>
+                          <th style="width: 400px;">我兑换的礼品</th>
+                          <th style="width: 80px;">消费积分</th>
+                          <th style="width: 80px;">订单状态</th>
+                          <th class="last-child" style="width: 60px;">详情</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                     <% @orders["data"].to_a.each do |order| %>
+                        <tr id="order-<%= order["_id"] %>">
+                            <td><%= int_time_to_date(order["created_at"].to_i) %></td>
+                            <% case order["type"].to_i %>
+                            <% when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE  %>
+                              <!-- phone -->                            
+                              <td>
+                                  <i class="icon-order icon-phonepay"></i>
+                                  <span><%= order["amount"] %>元话费</span>
+                              </td>
+                              <td>
+                                <span class="point"><%= order["point"] %>积分</span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>" href="#order-phone-charge-detail">订单详情</a>
+                              </td>
+                            
+                            <% when Order::ALIPAY %>
+                              <!-- aplipay -->
+                              <td>
+                                  <i class="icon-order icon-alipay"></i>
+                                  <span><%= order["amount"] %>元支付宝</span>
+                              </td>
+                              <td>
+                                <span class="point"><%= order["point"] %>积分</span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>" href="#order-alipay-detail">订单详情</a>
+                              </td>
+                            
+                            <% when Order::JIFENBAO %>
+                              <!-- jifenbao -->
+                              <td>
+                                  <i class="icon-order icon-jfb"></i>
+                                  <span><%= order["amount"] %>集分宝</span>
+                              </td>
+                              <td>
+                                <span class="point"><%= order["point"] %>积分</span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>" href="#order-jifenbao-detail">订单详情</a>
+                              </td>
+                            
+                            <% when Order::QQ_COIN %>
+                              <!-- Ｑ币 -->
+                              <td>
+                                  <i class="icon-order icon-qb"></i>
+                                  <span><%= order["amount"] %>Ｑ币</span>
+                              </td>
+                              <td>
+                                <span class="point"><%= order["point"] %>积分</span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>" href="#order-qb-detail">订单详情</a>
+                              </td>
+                            <% when Order::REAL, Order::VIRTUAL %>
+                              <!-- 礼品 -->
+                              <td>
+                                  <img src="<%= small_gift_image(order['picture_url']) %>" style="width: 36px; height: 36px;"/>
+                                  <a target="_blank" href="/gifts/<%= order["gift_id"] %>"><%= truncate(order["title"].to_s.strip, length: 22) %></a>
+                              </td>
+                              <td>
+                                <span class="point"><%= order["point"] %>积分</span>
+                              </td>
+                              <td>
+                                 <span><%= order_status(order["status"].to_i) %></span>
+                              </td>
+                              <td class="last-child">
+                                  <a class="fancybox" name="<%= order["_id"] %>" href="#order-gift-detail">订单详情</a>
+                              </td>
+                            <% else %>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                            <% end %>
+                        </tr>
+                      <% end %>
+                  </tbody>
+              </table>
+          <% end %>
+        </div>
+
+        <%= render "pagination", :@common_value => @orders, :@path => "/users/orders" %>    
+    </div>
+
+    <!-- user tabs -->
+    <%= render "right_partial" %>
+</div>
+
+<!-- 礼品订单详情 -->
+
+<div id="order-gift-detail" style="min-height: 50px;">
+  <div class="detail-title">
+    <span>订单详情</span>
+  </div>
+  <div class="ajax-content"></div>
+</div>
+
+<!-- 话费订单详情 -->
+
+<div id="order-phone-charge-detail">
+  <div class="detail-title">
+    <span>订单详情</span>
+  </div>
+  <div class="ajax-content"></div>
+</div>
+
+<!-- 集分宝订单详情 -->
+
+<div id="order-jifenbao-detail">
+  <div class="detail-title">
+    <span>订单详情</span>
+  </div>
+  <div class="ajax-content"></div>
+</div>
+
+<!-- 支付宝订单详情 -->
+
+<div id="order-alipay-detail">
+  <div class="detail-title">
+    <span>订单详情</span>
+  </div>
+  <div class="ajax-content"></div>
+</div>
+
+<!-- Q币订单详情 -->
+
+<div id="order-qb-detail">
+  <div class="detail-title">
+    <span>订单详情</span>
+  </div>
+  <div class="ajax-content"></div>
+</div>

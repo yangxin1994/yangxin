@@ -1,0 +1,49 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= stylesheet_link_tag "pages/quillme/surveys-bundle", :media => "all" %>
+<% end %>
+
+<!-- content for main -->
+<% content_for :left do %>
+
+<div class="content-left-box blueBorder" id="free_surveys">
+	<h3 class="content-left-title whiteTxt f14 b blueBg ">查看问卷</h3>
+	<div class='survey-intro'>
+		<h1><%= @survey['title'] %> <span><%= Time.parse(@survey["created_at"]).strftime("（%Y.%m.%d）") %></span></h1>
+		<h2><%= @survey['subtitle'] %> </h2>
+		<div class='welcome'><%=raw @survey['welcome'] %> </div>
+		<div class='s-menus'>
+		<% case @status %>
+			<% when nil %>
+				<% if @survey['publish_status'] == 8 %>
+					<a class="css-btn blue" href="<%= survey_path(@survey['_id']) %>">开始答题</a>
+				<% else %>
+					<a class="css-btn disabled" href="javascript:void(0);">已关闭</a>
+				<% end %>
+			<% when 0 %>
+				<a class="css-btn blue" href="<%= survey_path(@survey['_id']) %>">继续答题</a>
+			<% when 1 %>
+				<a class="css-btn disabled" href="javascript:void(0);">不符合要求</a>
+			<% when 2 %>
+				<a class="css-btn disabled" href="javascript:void(0);">已经参与</a>
+			<% when 3 %>
+				<a class="css-btn blue" href="<%= survey_path(@survey['_id']) %>">继续答题</a>
+		<% end %>
+			<a class="css-btn blue" href="<%= surveys_path %>">返回问卷列表</a>
+		</div>
+	</div>
+</div>
+
+<% end %>
+
+<!-- content for right -->
+<% content_for :right do %>
+<div class="sidebar-box img-blueBg">
+	<h3 class="sidebar-title f14 b g3">问卷分类</h3>
+	<ul>
+		<li>积分奖励问卷：回答此类问卷可获取积分奖励。</li>
+		<li>抽奖问卷：回答此类问卷将获得某个抽奖活动的抽奖资格。</li>
+		<li>免费问卷：公益型问卷，您可以根据自己的喜好回答问卷，贡献您的观点。</li>
+	</ul>
+</div>
+<% end %>

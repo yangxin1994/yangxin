@@ -1,0 +1,217 @@
+<% content_for :head do %>
+	<%= stylesheet_link_tag "pages/sample/gifts-bundle", :media => "all" %>
+	<%= javascript_include_tag "pages/sample/gifts-bundle" %>
+	<script type="text/javascript">
+	    <% if user_signed_in %>
+	    	window.username    = "<%=  current_user.nickname %>"
+	    	window.total_point = "<%=  current_user.point  %>"
+	    <% end %>
+	</script>
+<% end %>
+
+
+<div class="inner-page fix ex">
+	<div class="slider">
+		<a href="<%= sign_up_account_path%>">
+			<div class="regist_bt"></div>
+		</a> 
+		<img src="/assets/od-quillme/gifts/gifts_banner.png" width="610" height="202"/>
+	</div>
+
+	<div class="bulletin dashed-box r">
+		<div class="dashed-box-inner">
+			<div class="dashed-box-inner-top">
+				<div class="box-title">快捷兑换</div>
+				<ul class="exc_nav">
+					<li class="current phone_exc">话费</li>
+					<li class="cash_exc">现金</li>
+					<!-- <li class="jifen_exc">集分宝</li> -->
+					<li class="qq_exc">Q币</li>
+				</ul> 
+			</div>
+			<div class="exc-panel">
+				<div id="phone_exc" class="exc_detail">
+					<div class="phone_container">
+						<label class="w80" for="exc-qq">手机号码</label>
+						<input type="text" name="custom_num" id="phone_num" class="account"  placeholder="请输入手机号">
+						<div class='acc_notice' style="display:none;"></div> 
+					</div>		
+					<div>
+						<label class="w80" for="exc-phone">充值面额</label>
+						<div class="select2">
+							<div class="select-content" tabindex="0">
+								<span class="select-txt">10元</span>
+								<i class="triangle"></i>
+							</div>	
+							<ul>
+								<li>10元</li>
+								<li>20元</li>
+								<li>30元</li>
+								<li>50元</li>
+								<li class="bblr">100元</li>
+								<li class="bbrr"></li>
+							</ul>
+						</div>							
+					</div>	
+					<div class="ex_btn">
+						<span>所需积分:</span><b>1000</b>
+						<% if user_signed_in %>
+							<button class="exc_right">立即兑换</button>
+						<% else %>
+							<button class="exc_login">立即兑换</button>
+						<% end %>
+					</div>		
+				</div><!-- end phone-->
+				<div id="cash_exc" class="exc_detail" style="display:none;">
+					<div>
+						<label class="w80" for="exc-alipay">支付宝账号</label>
+						<input type="text" name="custom_num" id="ali_num"  class="account" placeholder="请输入支付宝账号">
+						<div class='acc_notice' style="display:none;"></div>
+					</div>
+					<div>
+						<label class="w80" for="exc-phone">充值面额</label>
+						<div class="select2">
+							<div class="select-content" tabindex="0">
+								<span class="select-txt">10元</span>
+								<i class="triangle"></i>
+							</div>	
+							<ul>
+								<li>10元</li>
+								<li>20元</li>
+								<li>30元</li>
+								<li>50元</li>
+								<li class="bblr">100元</li>
+								<li class="bbrr"></li>
+							</ul>
+						</div>
+					</div>
+					<div class="ex_btn">
+						<span>所需积分:</span><b>1000</b>
+						<% if user_signed_in %>
+							<button class="exc_right">立即兑换</button>
+						<% else %>
+							<button class="exc_login">立即兑换</button>
+						<% end %>
+					</div>						
+				</div> <!-- end cash -->
+				<div id="jifen_exc" class="exc_detail" style="display:none;">
+					<div>
+						<label class="w80" for="exc-alipay">淘宝帐号</label>
+						<input type="text" name="custom_num" id="jifen_num"  class="account" placeholder="请输入淘宝账号">
+						<div class='acc_notice' style="display:none;"></div>
+					</div>
+					<div>
+						<label class="w80" for="exc-phone">兑换数量</label>
+						<input type="text" name="custom_num" id="jifen_v"  class="v" placeholder="请输入兑换数量">
+						<div class='number_notice'style="display:none;" ></div> 
+					</div>	
+					<div class="ex_btn">
+						<span>所需积分:</span><b>0</b>
+						<% if user_signed_in %>
+							<button class="exc_right">立即兑换</button>
+						<% else %>
+							<button class="exc_login">立即兑换</button>
+						<% end %>
+					</div>										
+				</div><!-- end jifenbao-->
+				<div id="qq_exc" class="exc_detail" style="display:none;">
+					<div>
+						<label class="w80" for="exc-qq">QQ账号</label>
+						<input type="text" name="custom_num" id="qq_num"  class="account" placeholder="请输入QQ账号">
+						<div class='acc_notice' style="display:none;"></div>
+					</div>
+					<div>
+						<label class="w80" for="exc-phone">兑换数量</label>
+						<input type="text" name="custom_num" id="qq_v"  class="v" placeholder="请输入兑换数量">
+						<div class='number_notice'style="display:none;" ></div> 
+					</div>
+					<div class="ex_btn">
+						<span>所需积分:</span><b>0</b>
+						<% if user_signed_in %>
+							<button class="exc_right">立即兑换</button>
+						<% else %>
+							<button class="exc_login">立即兑换</button>
+						<% end %>
+					</div>												
+				</div><!-- end QQ coin-->
+			</div><!-- end pannel-->
+
+		</div>
+	</div>
+</div>
+
+<div class="gift-list-main dashed-box inner-page">
+		<div class="dashed-box-inner">
+			<div class="dashed-box-inner-top">
+				<h3 class="box-title">热门兑换</h3>
+				<ul class="sh_type">
+					<li class="active" type="view_count">最热门</li>
+					<li type="point">积分数</li>
+				</ul>
+				<% if user_signed_in %>
+					<div class="can_change" sortype="view_count" point="<%= current_user.point %>">查看我能兑换的</div>
+				<% end %>
+			</div>
+			<ul class="gift-list">
+				<%=  render :partial => "gifts_list",  :locals => {:gifts => @hotest_gifts} %> 
+			</ul>
+			<%= sample_paginator_ajax(@hotest_gifts,@sort_type,nil,nil) %>
+		</div>
+</div>
+
+<div class="inner-page">
+	<% if @new_ex_history.present? %>	
+		<div class="research-list dashed-box l">
+			<div class="dashed-box-inner">
+				<div class="dashed-box-inner-top">
+					<h3 class="box-title">兑换记录 </h3>
+				</div>
+				<ul class="rank-list exchange">
+					<% @new_ex_history.each do |log|%>
+						<li>
+							<span class="ago"><%= ch_time(log['created_at']) %></span>
+							<span class="l_mame"><%= log['username'] %></span>
+							<span class="point">使用了<b><%= log['point']%></b>积分</span>
+							<span class="exchange">兑换了</span>
+							<% if log['gift_type'].to_s == Gift::REAL %>
+								<span class="l_mame"><a href="/gifts/<%= log['gift_id']%>"><%= log['gift_name']%></a></span>
+							<% else %>
+								<span class="l_mame"><%= log['gift_name']%></span>
+							<% end %>
+						</li>
+					<% end %>      
+				</ul>            
+			</div>
+		</div>
+
+
+		<% if @gift_rank.present? %>
+		<div class="rank dashed-box l">
+		<div class="dashed-box-inner">
+			<div class="dashed-box-inner-top">
+				<h3 class="box-title">兑换排行</h3>
+			</div>
+			<ul class="rank-list">
+				<% @gift_rank.each_with_index do |gift,index|%>
+					<li <%= hide_border?(@gift_rank,index)%> >
+						<span class="rank-list-left l">
+							<span class="number l"><%= index + 1 %></span>
+							<span class="username"><a href="/gifts/<%= gift['_id']%>">
+								<%= truncate("#{gift['title']}", :length => 15)%>
+							</a></span>            
+						</span>
+						<span class="rank-list-right r">
+							<b class="integral"><%= gift['point']%>积分</b>
+						</span>
+					</li>
+				<% end %>
+			</ul>      
+		</div>    
+		</div>
+		<% end %>
+
+	<% end %>
+
+</div>
+<%= render :partial => "popup" %>
+

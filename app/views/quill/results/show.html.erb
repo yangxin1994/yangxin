@@ -1,0 +1,177 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=1.4"></script>
+	<script type="text/javascript">
+	jQuery(function($) {
+		window.survey_questions = <%= raw @survey_questions.to_json %>;
+		window.survey_filters = <%= raw @filters.to_json %>;
+		window.filter_index = <%= @filter_index %>;
+		window.include = <%= @include %>;
+		window.job_id = '<%=escape_javascript @job_id %>';
+	});
+	</script>
+	<%= javascript_include_tag "pages/quill/result-bundle" %>
+	<%= stylesheet_link_tag "pages/quill/result-bundle", :media => "all" %>
+<% end %>
+
+<div class="wide-panel">
+	<div class="panel-head">
+		<h1>
+			结果分析
+			<div class='head-option'><button id='import_data' class="od-button" style='display:none;'>导入数据</button></div>
+		</h1>
+		<div class='filter'>
+			<div class='filter-slt'>
+				<span id="filter_slt" class='mr10'></span>
+				<span id="filter_edit" title='设置筛选器'></span>
+				<label><input id='include_ckb' type='checkbox' />包含被甄别掉的样本</label>
+			</div>
+			<div class='filter-info'>
+				<h4>筛选出答题情况符合下列条件的答卷：</h4>
+			</div>
+		</div>
+	</div>
+	<div id='progress'>
+		<h4>正在查询结果...</h4>
+		<div></div>
+	</div>
+	<div id='result'>
+		<h2>样本分析</h2>
+		<div class='result-charts'>
+			<div class='right'>
+				<ul>
+					<li id='time_menu'>时间分析</li>
+					<li id='region_menu' style='border-right:none;' class='active'>地区分析</li>
+					<!-- <li id='channel_menu'>渠道分析</li>
+					<li id='source_menu' style='border-right:none;'>网页来源分析</li> -->
+				</ul>
+				<div id='time_chart' class='chart-analysis'></div>
+				<div id='region_chart' class='chart-analysis' style='display:block;'></div>
+				<div id='channel_chart' class='chart-analysis'></div>
+				<div id='source_chart' class='chart-analysis'></div>
+			</div>
+			<div class='left'>
+				<h3>回收数量统计</h3>
+				<p>符合条件的答卷<em id='legal_count'></em>份</p>
+				<p>被甄别掉<em id='illegal_count'></em>份</p>
+				<p>正在回答的答卷<em id='ongoing_count'></em>份</p>
+				<div id='chart_summary'></div>
+			</div>
+		</div>
+		<h2>数据列表</h2>
+		<div class="data-list">
+			<div class='export-btns'>
+				<h3>调查结果数据列表</h3>
+				<button class="derive-excel"></button>
+				<div class="derive-button" >
+					<em class="spss"></em>
+					<em class="option"></em>
+				</div>
+			</div>
+			<div class='data-con'></div>
+		</div>
+		<h2>调研报告</h2>
+		<div class="report-list">
+			<div class='export-btns'>
+				<h3>调研报告列表</h3>
+				<div id='change_style' class="change-style-button">
+					<em class="option"><span id='report_style_preview' class='report-0'></span></em>
+					<em class="change-style-btn">默认圆版</em>
+				</div>
+				<div id='export_word' class="export word">
+					<em class="word export-btn"></em>
+				</div>
+				<div id='export_ppt' class="export ppt" style='display:none;'>
+					<em class="ppt export-btn"></em>
+				</div>
+				<div id='export_pdf' class="export pdf">
+					<em class="pdf export-btn"></em>
+				</div>
+			</div>
+			<!-- 弹出菜单 -->
+			<div class="export-btn-dropdown" style='display:none;'>
+				<ul style="border-right:1px #d0d2d3 solid;">
+					<li>
+						<a href="javascript:void(0);">
+							<i class="report-0"></i>
+							<span>默认圆版</span>
+						</a>
+					</li>
+					<li>
+						<a href="javascript:void(0);">
+							<i class="report-2"></i>
+							<span>天蓝圆版</span>
+						</a>
+					</li>
+					<li>
+						<a href="javascript:void(0);">
+							<i class="report-4"></i>
+							<span>黑白圆版</span>
+						</a>
+					</li>
+					<li>
+						<a href="javascript:void(0);">
+							<i class="report-6"></i>
+							<span>无格式</span>
+						</a>
+					</li>
+				</ul>
+				<ul>
+					<li>
+						<a href="javascript:void(0);">
+							<i class="report-1"></i>
+							<span>默认直版</span>
+						</a>
+					</li>
+					<li>
+						<a href="javascript:void(0);">
+							<i class="report-3"></i>
+							<span>天蓝直版</span>
+						</a>
+					</li>
+					<li>
+						<a href="javascript:void(0);">
+							<i class="report-5"></i>
+							<span>黑白直版</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+			<!-- 弹出菜单结束 -->
+			<ul class="reports">
+				<li class='active'>
+					<em class='radio'></em>
+					默认报告
+				</li>
+				<% if !@reports.nil? %>
+				<% alter = false %>
+					<% @reports.each do |r| %>
+					<% alter = !alter %>
+				<li id=<%= r["_id"] %> <%= alter ? "class='alter'" : '' %>>
+					<em class='radio'></em>
+					<%= r['title'] %><span><%= r["created_at"].strftime("（%Y.%m.%d）") %></span>
+					<a class="icon icon-del" title="删除" href='javascript:void(0);'></a>
+					<a class="icon icon-edit" title="编辑" href='<%= questionaire_report_mockup_path(@survey["_id"], r["_id"]) %>' target='blank'></a>
+				</li>
+					<% end %>
+				<% end %>
+			</ul>
+			<div class="add-report">
+				<a href="javascript:void(0);" class="add-btn">
+					<span class='add-btn-left'><i class="icon-add">+</i></span>
+					<span class="add-btn-right">添加调研报告</span>
+				</a>
+			</div>
+		</div>
+		<h2>答案分析
+			<ul class='survey-pages'>
+				<% for i in 0..(@survey_questions[:pages].length)-1 do %>
+				<li><a href='javascript:void(0);' ><%= i+1 %></a></li>
+				<% end %>
+			</ul>
+		</h2>
+		<dl class="answer-analysis">
+			<div style='padding: 40px;'></div>
+		</dl>
+	</div>
+</div>

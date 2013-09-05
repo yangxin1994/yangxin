@@ -29,6 +29,8 @@ class BasicQuestion
 	before_update :clear_question_object
 	before_destroy :clear_question_object
 
+	index({ _id: 1, _type: 1 }, { background: true } )
+
 	ATTR_NAME_ARY = %w[content note]
 
 	def csv_header(header_prefix)

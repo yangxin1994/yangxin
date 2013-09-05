@@ -1,0 +1,17 @@
+<% content_for :head do %>
+	<script type="text/javascript">
+		window.ejournal = <%= raw @ejournal.to_json %>;
+		window.mode = 'show';
+	</script>
+	<%= javascript_include_tag "pages/admin/ejournal-bundle" %>
+	<%= stylesheet_link_tag    "pages/admin/ejournal-bundle" %>
+<% end %>
+
+<button class="reedit-btn od-button" id="reedit">重新编辑</button>
+<button class="preview-btn od-button" id="preview" style="display:none;">预览</button>
+<button class="update-btn od-button" id="update" style="display:none;">更新</button>
+<button class="delete-btn od-button" id="delete">删除</button>
+<button class="return-btn od-button" id="return">返回列表</button>
+<button class="send-btn od-button" id="send">发送</button>
+<button class="test-btn od-button" id="test">测试</button>
+<button class="cancel-btn od-button" id="cancel" style="display:none;">正在发送，点击取消</button>

@@ -1,5 +1,39 @@
 module ErrorEnum
 
+
+	ORDER_CREATED = "error__13"
+	NOT_WIN = "error__14"
+
+
+	REWORD_NOT_SELECTED = "error__10"
+	LOTTERY_DRAWED = "error__11"
+	NOT_LOTTERY_REWARD = "error__12"
+	MAX_NUM_PER_IP_REACHED = "error__13"
+
+	SAMPLE_ATTRIBUTE_NOT_EXIST = "error__0"
+	WRONG_SAMPLE_ATTRIBUTE_TYPE = "error__1"
+	WRONG_DATE_TYPE = "error__2"
+	SAMPLE_ATTRIBUTE_NAME_EXIST = "error__3"
+	SAMPLE_NOT_EXIST = "error__4"
+	AGENT_TASK_NOT_EXIST = "error__5"
+	WRONG_ORDER_STATUS = "error__6"
+	REWARD_NOT_SELECTED = "error__7"
+	AGENT_NOT_EXIST = "error__8"
+	MOBILE_NOT_EXIST = "error__9"
+
+	
+	ANSWER_BOUND = "error__11"
+	REPEAT_ORDER = "error__12"
+	ANSWER_EXIST = "error__13"
+
+	HOT_SURVEY = "error_15"
+
+	REWARD_SCHEME_NOT_EXIST = 'error___0'  ##TODO ErrorEnum has not rule yet
+	ORDER_TYPE_ERROR = 'error___1'
+	ILLEGAL_EMAIL_OR_MOBILE = 'error___2'
+	EMAIL_OR_MOBILE_EXIST = 'error___3'
+	ACTIVATE_CODE_ERROR   = 'error___4'
+
 	LOGIN_TOO_FREQUENT = "error_0"
 	ILLEGAL_EMAIL = "error_1"
 	USER_ACTIVATED = "error_2"
@@ -7,6 +41,7 @@ module ErrorEnum
 	USER_NOT_ACTIVATED = "error_3"
 	USER_NOT_EXIST = "error_4"
 	USER_NOT_REGISTERED = "error_24"
+	USER_REGISTERED = "error_25"
 	ACTIVATE_EXPIRED = "error_5"
 	RESET_PASSWORD_EXPIRED = "error_6"
 	REQUIRE_LOGIN = "error_7"
@@ -76,11 +111,15 @@ module ErrorEnum
 	ANSWER_NOT_EXIST = "error_141"
 	VIOLATE_QUALITY_CONTROL_ONCE = "error_142"
 	VIOLATE_QUALITY_CONTROL_TWICE = "error_143"
+
 	SURVEY_NOT_PUBLISHED = "error_144"
+	SURVEY_CLOSED = "error__145"
+	SUEVEY_DELETED = "error__146"
 	SURVEY_PASSWORD_USED = "error_145"
 	WRONG_ANSWER_STATUS = "error_146"
 	SURVEY_NOT_ALLOW_PAGEUP = "error_147"
 	ANSWER_NOT_COMPLETE = "error_148"
+
 
 	WRONG_FILTER_CONDITION_TYPE = "error_150"
 	FILTER_NOT_EXIST = "error_151"
@@ -123,8 +162,7 @@ module ErrorEnum
 	FAQ_RANGE_ERROR = "error_100002"
 	FAQ_SAVE_FAILED = "error_100003"
 	FAQ_NOT_EXIST = "error_100004"
-	PUBLIC_NOTICE_TYPE_ERROR = "error_100011"
-	PUBLIC_NOTICE_RANGE_ERROR = "error_100012"
+	PUBLIC_NOTICE_STATUS_ERROR = "error_100011"
 	PUBLIC_NOTICE_SAVE_FAILED = "error_100013"
 	PUBLIC_NOTICE_NOT_EXIST = "error_100014"
 	FEEDBACK_TYPE_ERROR = "error_100021"
@@ -169,7 +207,7 @@ module ErrorEnum
 	GIFT_NOT_FOUND = "error_21001"
 
 	INVALID_GIFT_ID = "error_21002"
-	
+
 	GIFT_QUANTITY_NOT_A_NUNBER = "error_21031"
 	GIFT_SURPLUS_NOT_A_NUNBER = "error_21041"
 	GIFT_NOT_ENOUGH = "error_21033"

@@ -23,7 +23,7 @@ class InterviewerTask
 		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
 		interviewer = User.find_by_id(user_id)
 		return ErrorEnum::INTERVIEWER_NOT_EXIST if interviewer.nil?
-		return ErrorEnum::INTERVIEWER_NOT_EXIST if !interviewer.is_interviewer
+		return ErrorEnum::INTERVIEWER_NOT_EXIST if !interviewer.is_interviewer?
 		quota.merge!({"finished_count" => 0,
 					"submitted_count" => 0,
 					"rejected_count" => 0})

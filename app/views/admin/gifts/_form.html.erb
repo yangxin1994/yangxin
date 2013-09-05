@@ -1,0 +1,118 @@
+<form action="<%= admin_gifts_path + (@gift["created_at"].nil? ? '' : "/#{@gift["_id"]}") %>"
+      name="gift"
+      enctype="multipart/form-data"
+      method="post"
+      id="gift_form"
+      class="form-horizontal"
+>
+  <input value="<%= @gift["created_at"].present? ? 'put' : 'post' %>" type='hidden' name="_method">
+  <p class="text-center">
+    <img src="<%= @gift['photo_url'] %>" alt="" id="gift_photo_src" class="img-circle" style="width: 260px; height: 260px;">
+  </p>
+
+  <legend></legend>
+
+  <div class="control-group">
+    <label class="control-label" >礼品名称:</label>
+    <div class="controls">
+      <div class="input-append">
+      <input class="input-medium" type="text" name="gift[title]" placeholder="礼品名称" <%= "value=#{@gift["title"]}" if @gift["title"] %>>
+        <div class="btn-group">
+          <button class="btn dropdown-toggle" data-toggle="dropdown">
+            选择类型
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu dropselect" id="type_select">
+            <li><a href="#type-2">实物礼品</a></li>
+            <li><a href="#type-4">话费充值</a></li>
+            <li><a href="#type-8">支付宝转账</a></li>
+            <li><a href="#type-16">集分宝兑换</a></li>
+            <li><a href="#type-32">Q币充值</a></li>
+            <li><a href="#type-1">其他虚拟礼品</a></li>
+          </ul>
+          <input type="hidden" name="gift[type]" id="gift_type" value="<%= @gift["type"] || 1 %>">
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="control-group">
+    <label class="control-label">兑换条件:</label>
+    <div class="controls">
+      <div class="input-append">
+        <input class="input-medium" id="gift_point" name="gift[point]" type="text" placeholder="1000"  value="<%= @gift["point"] %>">
+        <span class="add-on">积分</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label">礼品数量:</label>
+    <div class="controls">
+      <div class="input-append">
+      <input class="input-medium" type="text" name="gift[quantity]" placeholder="礼品数量" value="<%= @gift["quantity"] %>">
+        <div class="btn-group">
+          <button class="btn dropdown-toggle" data-toggle="dropdown">
+            兑换方式
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu dropselect" id="redeem_select">
+            <li><a href="#redeem-1">单个兑换</a></li>
+            <li><a href="#redeem-2">在预定义区间内选择兑换数量</a></li>
+            <li><a href="#redeem-4">在预定义数组中选择兑换数量</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <input type="hidden" name="gift[redeem_number][mode]" id="gift_redeem" value="<%= @gift["redeem_number"].try('[]', 'mode') || 1 %>">
+
+
+  <div class="control-group" id="redeem_range" style="display:none">
+    <label class="control-label">数量区间:</label>
+    <div class="controls">
+      <input class="input-mini" type="text" name="gift[redeem_number][min]" placeholder="Min" value="<%= @gift["redeem_number"].try('[]','min') %>">
+      <input class="input-mini" type="text" name="gift[redeem_number][max]" placeholder="Max" value="<%= @gift["redeem_number"].try('[]','max') %>">
+    </div>
+  </div>
+
+  <div class="control-group" id="redeem_ary" style="display:none">
+    <label class="control-label">预定数量:</label>
+    <div class="controls">
+      <input class="input-large" type="text" name="gift[redeem_number][number_ary]"
+             placeholder="空格分隔,例: 1 2 5 10 20" value="<%= @gift["redeem_number"].try('[]', "number_ary") %>">
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >价值:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="gift[price]" id="prize_price" value="<%= @gift["price"] %>" placeholder="奖品的价值" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label">上传图片:</label>
+    <div class="controls">
+    <% if @gift['created_at'] %>
+      <input type="file" name="gift[photo]" id="gift_photo"/>
+    <% else %>
+      <input type="file" name="gift[photo]" id="gift_photo"/>
+    <% end %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >礼品描述:</label>
+    <div class="controls">
+      <textarea name="gift[description]"><%= @gift["description"] %></textarea>
+    </div>
+  </div>
+  <div class="pull-right">
+  <%= link_to "<<返回列表", admin_gifts_path %>
+  <button type="submit" class="btn btn-primary">确认无误</button>
+
+  </div>
+</form>

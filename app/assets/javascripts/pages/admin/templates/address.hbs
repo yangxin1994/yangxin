@@ -1,0 +1,27 @@
+
+<div class="address-panel panel">
+    <label class="child-title f14 pl2">地理位置精度</label>
+    <select id="" name="loc_precision">
+      <option value="0">省</option>
+      <option value="1">市</option>
+      <option value="2">县(区)</option>
+    </select>
+  <table cellpadding="0" cellspacing="0" width="100%" class="tableStatic resize">
+    <thead>
+      <tr>
+        <td class="question-title">选项</td>
+        <td>绑定属性</td>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each question.issue.items}}
+      <tr>
+        <td data-id="{{id}}">{{content.text}}</td>
+        <td>
+          <div class="address-content"></div>
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
