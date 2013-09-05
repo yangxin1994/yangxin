@@ -63,17 +63,6 @@ class User
 	field :level_expire_time, :type => Integer, default: -1
 
 
-	# field :birthday, :type => Integer, default: -1
-	# field :gender, :type => Boolean
-	# field :address, :type => String
-	# field :postcode, :type => String
-	# field :phone, :type => String
-	# field :full_name, :type => String
-	# field :identity_card, :type => String
-	# field :company, :type => String
-	# field :bankcard_number, :type => String
-	# field :bank, :type => String
-	# field :alipay_account, :type => String
 	field :point, :type => Integer, :default => 0
 
 	attr_protected :role, :level, :user_role
@@ -103,7 +92,6 @@ class User
 	has_many :logs
 	has_one  :affiliated, :class_name => "Affiliated", :inverse_of => :user
 
-	scope :unregistered, where(status: 1)
 	scope :sample, mod(:user_role => [2, 1])
 
 	VISITOR = 1
@@ -170,21 +158,7 @@ class User
 		end
 	end
 
-	def self.find_answer_auditors
-		answer_auditors = []
-		User.all.each do |user|
-			answer_auditors << user.serialize_for(["email", "mobile"]) if user.is_answer_auditor?
-		end
-		return answer_auditors
-	end
 
-	def self.logout(auth_key)
-		user = User.find_by_auth_key(auth_key)
-		if !user.nil?
-			user.auth_key = nil
-			user.save
-		end
-	end
 
 	def mini_avatar
 		md5 = Digest::MD5.hexdigest(self.id)
@@ -196,14 +170,6 @@ class User
 	end
 
 
-	def get_level_information
-		return {"level" => self.level, "level_expire_time" => self.level_expire_time}
-	end
-
-	def update_avatar(avatar)
-		self.create_avatar(avatar)
-	end
-
 	def set_receiver_info(receiver_info)
 		if self.affiliated.present?
 			self.affiliated.update_attributes(:receiver_info => receiver_info)
@@ -213,13 +179,7 @@ class User
 		return true
 	end
 
-	def is_deleted
-		return self.status == -1
-	end
 
-	def is_registered
-		return self.status == REGISTERED
-	end
 
 	def is_activated
 		return self.mobile_activation || self.email_activation
@@ -401,19 +361,6 @@ class User
 		return true
 	end
 
-	def self.find_or_create_new_visitor_by_email(email)
-		email.downcase!
-		user = User.find_by_email(email)
-		if user.nil?
-			user = User.create(email: email)
-			ImportEmail.destroy_by_email(email)
-		end
-		return user
-	end
-
-	def third_party_users
-		# self.third_party_users.map(&:website)	
-	end
 
 	def completed_info
 		affiliated = self.affiliated
@@ -431,19 +378,6 @@ class User
 		end
 	end
 
-	def self.find_or_create_new_visitor_by_email_mobile(email_mobile)
-		
-	end
-
-
-	def answerd?(survey_id)
-	  answer = self.answers.where(:survey_id => survey_id).first
-	  if answer.present?
-		return true
-	  else
-		return false
-	  end
-	end
 
 	#*description*: activate a user
 	#
@@ -486,12 +420,6 @@ class User
 		return self.login(client_ip, nil, false)
 	end
 
-	def self.get_account_by_activate_key(activate_info)
-		user = User.find_by_email(activate_info["email"])
-		return ErrorEnum::USER_NOT_EXIST if user.nil? 
-		return activate_info["email"]
-	end
-
 	#*description*: user login
 	#
 	#*params*:
@@ -523,18 +451,6 @@ class User
 		return user.login(client_ip, client_type, keep_signed_in)
 	end
 
-	def self.auto_login_with_email_mobile(email_mobile, client_ip, client_type)
-		user = nil
-		if email_mobile.match(/#{EmailRexg}/i)  ## match email
-			user = User.find_by_email(email_mobile.downcase)
-		elsif email_mobile.match(/#{MobileRexg}/i)  ## match mobile
-			user = User.find_by_mobile(email_mobile)
-		end
-		return ErrorEnum::USER_NOT_EXIST if user.nil?
-		return ErrorEnum::USER_NOT_REGISTERED if user.status == 1
-		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
-		return user.login(client_ip, client_type, keep_signed_in)
-	end
 
 	def login(client_ip, client_type, keep_signed_in=false)
 		self.last_login_ip = client_ip
@@ -550,29 +466,6 @@ class User
 		return {"auth_key" => self.auth_key}
 	end
 
-	def self.login_with_auth_key(auth_key)
-		user = User.find_by_auth_key(auth_key)
-		return ErrorEnum::AUTH_KEY_NOT_EXIST if user.nil?
-		return {"user_id" => user._id, "email" => user.email, "mobile" => user.mobile, "status" => user.status, "auth_key" => user.auth_key, "expire_at" => user.auth_key_expire_time, "role" => user.user_role}
-	end
-
-	#*description*: reset password for an user, used when the user forgets its password
-	#
-	#*params*:
-	#* email address of the user
-	#* new password of the user
-	#
-	#*retval*:
-	#* true: when successfully login
-	#* EMAIL_NOT_EXIST
-	#* WRONG_PASSWORD_CONFIRMATION
-	def self.reset_password(email, new_password, new_password_confirmation)
-		user = User.find_by_email(email)
-		return ErrorEnum::USER_NOT_EXIST if user.nil?      # email account does not exist
-		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if new_password != new_password_confirmation
-		user.password = Encryption.encrypt_password(new_password)
-		return user.save
-	end
 
 	#*description*: reset password for an user, used when the user resets its password
 	#
@@ -589,34 +482,7 @@ class User
 		return self.save
 	end
 
-	#*description*: set auth key for one user
-	#
-	#*params*:
-	#* email address of the user
-	#* the auth key to be set
-	#
-	#*retval*:
-	def set_auth_key(user_id, auth_key)
-		self.auth_key = auth_key
-		return self.save
-	end
 
-	#*description*: get auth key for one user
-	#
-	#*params*:
-	#* email address of the user
-	#
-	#*retval*:
-	#* the auth key of the user
-	def self.get_auth_key(email)
-		user = User.find_by_email(email)
-		if user != nil
-			return user.auth_key
-		else
-			return ""
-		end
-	end
-	#--
 	############### operations about message#################
 	#++
 	#ctreate
@@ -640,20 +506,9 @@ class User
 		m.save
 	end
 
-	def destroy_message(message_id)
-		m = Message.where(_id: message_id)[0]
-		return ErrorEnum::MESSAGE_NOT_FOUND unless m
-		m.destroy
-	end
 
 	def unread_messages_count
 		Message.unread(last_read_messeges_time).select{ |m| (message_ids.include? m.id) or (m.type == 0)}.count
-	end
-
-	def show_messages
-		self.update_attribute(:last_read_messeges_time, Time.now)
-		Message.all.desc(:updated_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}
-		#Message.unread(created_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}
 	end
 
 	#--
@@ -665,12 +520,6 @@ class User
 		PointLog.create_admin_operate_point_log(amount, remark, self._id) if self.save
 	end
 	#--
-	############### operations about charge #################
-	#++
-	#Obtain the charges of this user
-	def charges
-		Charge.charges_of(self.email)
-	end
 
 	#--
 	# **************************************************
@@ -680,59 +529,17 @@ class User
 	public
 
 	COLOR_NORMAL = 0
-	COLOR_WHITE = 1
-	COLOR_BLACK = -1
-
-	#--
-	# instance methods
-	#++
-
-	#--
-	# class methods
-	#++
 
 	scope :normal_list, where(:color => COLOR_NORMAL, :status.gt => -1)
-	scope :black_list, where(:color => COLOR_BLACK, :status.gt => -1)
-	scope :white_list, where(:color => COLOR_WHITE, :status.gt => -1)
-	scope :deleted_users, where(status: -1)
 
-	def update_user(attributes)
-		select_attrs = %w(status birthday gender address phone postcode company identity_card username full_name)
-		attributes.select!{|k,v| select_attrs.include?(k.to_s)}
-		retval = self.update_attributes(attributes)
-		return retval
-	end
 
-	def set_admin(admin)
-		if admin == true
-			self.role = self.role | 16
-		else
-			self.role = self.role & 47
-		end
-		return self.save
-	end
-
-	def set_role(role)
-		return ErrorEnum::WRONG_USER_ROLE if !(0..63).to_a.include?(role)
-		self.role = role
-		return self.save
-	end
 
 	def set_sample_role(role)
 		self.user_role = role.sum
 		return self.save
 	end
 
-	def set_color(color)
-		return ErrorEnum::WRONG_USER_COLOR if ![-1, 0, 1].include?(color)
-		self.color = color
-		return self.save
-	end
 
-	def set_lock(lock)
-		self.lock = lock == true
-		return self.save
-	end
 
 	def remove_user
 		self.status = -1
