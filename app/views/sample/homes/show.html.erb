@@ -176,7 +176,7 @@
 										ids = ids.join(',')
 									%>
 									<span class="stretch">
-										<a href="javascript:void(0);" class="unfold-btn" data="<%= ids  %>" 	survey_id="<%= survey['_id'] %>" scheme_id ="<%= survey['scheme_id']%>" prize_src ="<%= survey['reward_type_info']['prize_arr'].map{|pri| "#{request.protocol}#{request.host_with_port}" + pri['prize_src']}.join(',') %>" >
+										<a href="javascript:void(0);" class="unfold-btn" data="<%= ids  %>" 	survey_id="<%= survey['_id'] %>" scheme_id ="<%= survey['scheme_id']%>" prize_src ="<%#= survey['reward_type_info']['prize_arr'].map{|pri| "#{request.protocol}#{request.host_with_port}" + pri['prize_src']}.join(',') %>" >
 											<i class="icon16 open"></i>
 											<span>展开</span>
 										</a>

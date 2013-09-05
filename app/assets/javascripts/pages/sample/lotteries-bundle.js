@@ -282,7 +282,11 @@ $(function(){
 				{
 					beforeShow: function(){
 						//placeholder_for_ie()
+<<<<<<< HEAD
+						// $.form.placeholder();
+=======
 						//$.form.placeholder();
+>>>>>>> 291cdf64b081be555ad4012bf42489dabafdb12e
     	  		$(".fancybox-skin").css({"backgroundColor":"#fff"}); 
 	
     	  		if(redirect){

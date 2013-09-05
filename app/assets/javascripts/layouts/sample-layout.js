@@ -31,7 +31,7 @@ $(document).ready(function(){
 	$('input, textarea').placeholder();
   	// placeholder for IE 
   	//$.form.placeholder();
-
+  	$('input, textarea').placeholder();
 
 	$('.unfold-btn').toggle(function(){
 		$(this).children('i').removeClass('open').addClass('close').next('span').html('收起');
