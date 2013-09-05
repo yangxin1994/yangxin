@@ -14,7 +14,13 @@ class Agent::TasksController < Agent::AgentsController
 
   def close
     render_json current_agent.agent_tasks.where(:_id => params[:id]).first do |agent|
-      agent and agent.close
+      agent and agent.agent_close
+    end
+  end
+
+  def open
+    render_json current_agent.agent_tasks.where(:_id => params[:id]).first do |agent|
+      agent and agent.agent_open
     end
   end
 end
