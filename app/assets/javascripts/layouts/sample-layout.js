@@ -30,8 +30,6 @@ $(document).ready(function() {
 	});
 
 	$('input, textarea').placeholder();
-	// placeholder for IE 
-	//$.form.placeholder();
 
 
 	$('.unfold-btn').toggle(function() {

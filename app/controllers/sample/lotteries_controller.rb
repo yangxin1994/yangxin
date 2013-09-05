@@ -73,12 +73,9 @@ class Sample::LotteriesController < Sample::SampleController
 
 		#获取登录用户的order_id
 		@win_order = LotteryLog.get_order_by_answer_sample(params[:id])
-		# @win_order       = client.get_lottery_order(params[:id])
-
 		@win_order_id    = @win_order.present? ? @win_order.order_id  : nil
 		@win_prize_id    = @win_order.present? ? @win_order.prize_id  : @prize_id	 
 		@win_prize_title = @win_order.present? ? @win_order.prize_name  : @prize_title 
-
 		@lottery_result  = @success
 	end
 end

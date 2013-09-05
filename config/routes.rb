@@ -4,29 +4,6 @@ OopsData::Application.routes.draw do
   # get '/:unique_key' => 'utility/short_urls#show', :constraints => { :unique_key => /~.+/ }
   match '/:unique_key' => 'mongoid_shortener/shortened_urls#translate', :via => :get, :constraints => { :unique_key => /~.+/ }
 
-  # accounts
-  scope :module => 'account' do
-    resource :activate, :only => [:new, :create, :show] do
-      member do
-        get :done
-      end
-    end
-    resource :password, :only => [:update] do
-      member do
-        get :find
-        post :send_reset_email
-        get :reset
-      end
-    end
-    resources :connects, :only => [:show]
-    resource :profile, :only => [:show, :update] do
-      member do
-        put :update_password
-      end
-    end
-    resources :messages, :only => [:index]
-  end
-
   resources :jobs, :only => [:show] do
     member do
       get :data_list, :stats, :analysis_result, :file_uri

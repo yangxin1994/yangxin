@@ -3,7 +3,7 @@ class Sample::AccountsController < Sample::SampleController
   layout 'sample_account'
 
 	before_filter :require_sign_in, :only => [:after_sign_in, :get_basic_info_by_auth_key]
-
+  
   def sign_in
   end
 
