@@ -468,7 +468,7 @@ module ApplicationHelper
 		when PointLog::IMPORT
 			retval = "原有系统导入" 
 		when PointLog::NETRANKING_IMPORT
-			retval = "清研通系统导入" 
+			retval = "清研通导入" 
 		end
 		return retval
 	end
