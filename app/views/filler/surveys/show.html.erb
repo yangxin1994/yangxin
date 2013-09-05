@@ -18,9 +18,6 @@
 		$('#start_btn').text('继续答题（已完成' + Math.round(<%= @percentage * 100 %> ) + '%）');
 		<% else %>
 		var left_time = <%=@left_time %>;
-		if(window.survey_id == '51e35eb2eb0e5b0cba00007a') {
-			left_time = 10 * 60;
-		}
 		$('#start_btn').text('开始答题' + (left_time > 0 ? '（耗时' + $.util.printTimeFriendly(left_time) + '）' : ''));
 		<% end %>
 	});

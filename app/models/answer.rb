@@ -1237,6 +1237,20 @@ class Answer
     return answer_obj
   end
 
+  def info_for_admin
+    answer_obj = {}
+    answer_obj["answer_id"] = self._id.to_s
+    answer_obj["survey_id"] = self.survey_id.to_s
+    answer_obj["survey_title"] = self.survey.try(:title).to_s
+    answer_obj["order_id"] = self.order.try(:_id).to_s
+    answer_obj["answer_status"] = self.status
+    answer_obj["answer_reject_type"] = self.reject_type
+    answer_obj["created_at"] = self.created_at.to_i
+    answer_obj["rewards"] = self.rewards
+    answer_obj["point_to_introducer"] = self.point_to_introducer
+    return answer_obj
+  end
+
   def info_for_spread_details
     answer_obj = {}
     answer_obj["answer_status"] = self.status

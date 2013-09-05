@@ -46,6 +46,7 @@
   <table class="table table-striped">
     <thead>
       <tr>
+        <th></th>
         <th width="20%">标题</th>
         <th >创建者邮箱</th>
         <th >创建时间</th>
@@ -53,13 +54,16 @@
       </tr>
     </thead>
     <tfoot>
-      <tr>
-
-      </tr>
+      <tr></tr>
     </tfoot>
     <tbody>
       <% @surveys['data'].each do |survey| %>
       <tr>
+        <td>
+          <a href="javascript:void(0);" class="star" data-id="<%= survey["_id"] %>">
+            <i class="icon-star<%= '-empty' unless survey.star %>"></i>
+          </a>
+        </td>
         <td><a href="/questionaires/<%= survey["_id"] %>"><%= survey["title"] %></a></td>
         <td><%= survey["email"] %></td>
         <td><%= Time.at(survey["created_at"]).strftime('%F %R') %></td>
