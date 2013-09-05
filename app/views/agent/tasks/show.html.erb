@@ -30,11 +30,11 @@
   <p>当前状态: <%= agent_task_status_tag @task["status"] %></p>
 
   <p>需要回收的总体数量:&nbsp;&nbsp;&nbsp; <%= @task["count"] %></p>
-  <p>等待代理审核的数量:&nbsp;&nbsp;&nbsp; <%= @task["under_review_count"] %></p>
+  <p>等待代理审核的数量:&nbsp;&nbsp;&nbsp; <%= @task["agent_under_review_count"] %></p>
   <p>被代理拒绝掉的数量:&nbsp;&nbsp;&nbsp; <%= @task["agent_reject_count"] %></p>
-  <p>代理审核的答案数量:&nbsp;&nbsp;&nbsp; <%= @task["agent_reject_count"] %></p>
-  <p>管理员审核答案数量:&nbsp;&nbsp;&nbsp; <%= @task["finish_count"] %></p>
-  <p>被管理员拒绝的数量:&nbsp;&nbsp;&nbsp; <%= @task["reject_count"] %></p>
+  <p>等待管理员审核的答案数量:&nbsp;&nbsp;&nbsp; <%= @task["under_review_count"] %></p>
+  <p>管理员审核通过答案数量:&nbsp;&nbsp;&nbsp; <%= @task["finished_count"] %></p>
+  <p>管理员审核拒绝的数量:&nbsp;&nbsp;&nbsp; <%= @task["reject_count"] %></p>
   <p>描述:<br/><%= @task["description"] %></p>
 
   <% if @task["status"] == 1 %>

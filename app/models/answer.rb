@@ -188,7 +188,7 @@ class Answer
     # record the agent task information
     if !is_preview && agent_task_id.present?
       agent_task = AgentTask.find_by_id(agent_task_id)
-      agent_task.answers << answer if agent_task.present?
+      agent_task.answers << answer if agent_task.present? && agent_task.status == AgentTask::OPEN
     end
     # record the reward information
     reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
