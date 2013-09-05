@@ -20,11 +20,12 @@ class QualityControlQuestion < BasicQuestion
 
 	scope :objective_questions, lambda { where(:quality_control_type => 1) }
 	scope :matching_questions, lambda { where(:quality_control_type => 2, :is_first=> true) }
+	scope :find_by_type, ->(_type) { _type.present? ? where(:quality_control_type => _type).desc(:created_at) : self.desc(:created_at) }
 
 	index({ quality_control_type: 1, is_first: 1 }, { background: true } )
 
 	def self.create_quality_control_question(quality_control_type, question_type, question_number, operator)
-		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_super_admin
+		return ErrorEnum::UNAUTHORIZED if !operator.is_admin?
 		return ErrorEnum::WRONG_QUESTION_TYPE if !self.has_question_type(question_type)
 		if quality_control_type == QualityControlTypeEnum::OBJECTIVE
 			# create a objective quality control question
@@ -54,10 +55,10 @@ class QualityControlQuestion < BasicQuestion
 	end
 
 	def update_question(question_obj, operator)
-		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_super_admin
-		self.content = question_obj["content"]
-		self.note = question_obj["note"]
-		issue = Issue.create_issue(self.question_type, question_obj["issue"])
+		return ErrorEnum::UNAUTHORIZED if !operator.is_admin?
+		self.content = question_obj['content']
+		self.note = question_obj['note']
+		issue = Issue.create_issue(self.question_type, question_obj['issue'])
 		return ErrorEnum::WRONG_DATA_TYPE if issue == ErrorEnum::WRONG_DATA_TYPE
 		self.issue = issue.serialize
 		self.save
@@ -101,7 +102,7 @@ class QualityControlQuestion < BasicQuestion
 	end
 
 	def delete_quality_control_question(operator)
-		return ErrorEnum::UNAUTHORIZED if !operator.is_admin && !operator.is_super_admin
+		return ErrorEnum::UNAUTHORIZED if !operator.is_admin?
 		matching_question_ids = []
 		if self.quality_control_type == QualityControlTypeEnum::OBJECTIVE
 			QualityControlQuestionAnswer.destroy_by_question_id([self._id])

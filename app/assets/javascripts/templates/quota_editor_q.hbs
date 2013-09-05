@@ -1,0 +1,17 @@
+<li id='{{id}}'>
+	<button title="删除"></button>
+	<div class='question-title'>
+		{{title}}
+		{{#if single}}
+		<label>（答案为勾选项）</label>
+		{{else}}
+		<label><input type="radio" name="{{id}}_mate" class='precise'>匹配</label>
+		<label><input type="radio" name="{{id}}_mate" class='fuzzy'>包含勾选项</label>
+		{{/if}}
+	</div>
+	<ul>
+		{{#each options}}
+		<li><label><input id='{{../id}}_{{id}}' name='{{../id}}_opts' type='checkbox' class='opt'>{{text}}</label></li>
+		{{/each}}
+	</ul>
+</li>

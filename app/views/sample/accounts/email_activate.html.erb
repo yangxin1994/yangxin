@@ -1,0 +1,37 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/sample/email_activate-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/sample/email_activate-bundle" %>
+<% end %>
+
+<div class="login_con"> 
+  <%if @success %>
+    <div class="notice_head">
+      <img src="/assets/od-quillme/regist_succ.png"  />
+      <span class="success">激活成功</span>
+      <div styl="clear:both;"></div>
+    </div>
+    <div class="login_email">
+      <p>
+        <a href="<%= after_sign_in_account_path%>">返回首页</a>
+      </p>
+    </div>     
+  <% else %>
+    <div class="notice_head">
+      <img src="/assets/od-quillme/reg_fail.png"  />
+      <span>激活失败</span>
+      <div styl="clear:both;"></div>
+    </div>
+    <div class="login_email">
+      <p>
+        您的激活链接不正确或者已经过期，您可以
+      </p>
+      <p>
+        <a class="re_mail" href="javascript:void(0);" data="<%=@email%>">重新发送激活邮件</a>
+        <div class="re_notice" style="display:none;">
+          <span></span><font>邮箱验证已重新发送，请查收</font> 
+        </div>
+      </p>
+    </div>  
+  <%end %>
+
+</div>

@@ -1,0 +1,59 @@
+    <div class="pagination r">
+
+      <% pa = request.original_fullpath.gsub(/[&?]page?\=\d*/,'') -%>
+      <% pagid = 3 -%>
+      <% pa += (pa.include?('?') ? '&' : '?') + 'page=' -%>
+      <a href="1" class="paginator" title="首页">&laquo; 首页</a>
+      <% if paginator["current_page"] > 1 %>
+      <a href="<%= paginator["previous_page"].to_s %>" class="paginator" title="上一页">&laquo; 上一页</a>
+      <% end -%>
+
+      <% if paginator["current_page"] > pagid && 1 != paginator["current_page"] %>...<% end -%>
+
+      <% paginator['total_page'].times do |i| %>
+      
+        <% i += 1 %>
+        
+        <% if (paginator["current_page"] - i).abs < pagid || (i < pagid * 2 && paginator["current_page"] < pagid) %>
+
+        <a href="<%= i %>" class="number paginator <%= 'current' if i == paginator["current_page"] %>" title="第<%= i %>页"><%= i %></a>
+
+        <% end -%>
+
+      <% end -%>
+
+      <% if paginator["total_page"] > (pagid * 2) && (paginator["total_page"] - paginator["current_page"] >= pagid) -%>...<% end -%>
+      <% if paginator["current_page"] < paginator["total_page"]%>
+      <a href="<%= paginator["next_page"].to_s %>" class="paginator" title="下一页">下一页 &raquo;</a>
+      <% end -%>
+      <a href="<%= paginator['total_page'] %>" class="paginator" title="尾页">尾页 &raquo;</a>
+    </div> <!-- End .pagination -->
+    <div class="clear"></div>
+<script type="text/javascript">
+  jQuery(function($) {
+    $("<%= "##{params['render_div']} " if params['render_div'] %>.paginator").click(function(val){
+      var page = $(this).attr('href');
+      var rails_params = <%= raw raisl_params %>;
+      <% if params['render_div'] %>
+        var pagi = $("#" + "<%= params['render_div'] %>");
+      <% else %>
+        var pagi = $(this).closest('table').parent();
+      <% end %>
+      rails_params.partial = true;
+      $.get("<%= get_url %>",
+      $.extend(true,rails_params,{
+        page: page,
+        per_page: rails_params.per_page || 10 
+      }),
+      function(retval){
+        // console.log(retval);
+        // $(".paginator").unbind('click');
+        console.log("<%= get_url %>");
+        console.log(pagi);
+        pagi.html(retval)
+        //window.crt_pagi_fun(retval);
+      });
+      return false;
+    });
+  });
+</script>

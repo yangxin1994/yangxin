@@ -18,6 +18,8 @@ class BasicGift
 
 	field :is_deleted, :type => Boolean, :default => false
 
+    field :exchange_count, :type => Integer, :default => 0  #表示该礼品被兑换的次数(订单流程走完之后，该值加一)
+
 	default_scope order_by(:created_at.desc)
 
 	scope :cash, where( :type => 0).where(:is_deleted => false )

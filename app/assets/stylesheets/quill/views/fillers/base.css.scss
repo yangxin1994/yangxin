@@ -1,0 +1,508 @@
+//=require ui/widgets/od_address_selector
+//=require ui/widgets/od_time_selector
+//=require jquery.colorbox
+//=require ../media
+
+@import "common";
+@import "compass/css3/border-radius";
+@import "compass/css3/inline-block";
+@import "compass/css3/opacity";
+@import "compass/utilities/general/clearfix";
+@import "compass/utilities/general/min";
+@import "filler/default/cpnt/*.png";
+
+$blue-light: #f1f3f6;
+
+.q-filler {
+	line-height: 1.5em;
+	position: relative;
+	clear: both;
+	padding: 15px 50px 35px 50px;
+	border-top: 1px solid #fff;
+	border-bottom: 1px solid #DCE0E5;
+	font-size: 14px;
+	color: #000;
+
+	.q-idx {
+		background: #AEB5C0;
+		position: absolute;
+		top: 15px;
+		left: 0;
+		@include one-line(30px);
+		color: #fff;
+		font-weight: bold;
+		font-size: 20px;
+		text-align: center;
+		width: 32px;
+		overflow: hidden;
+		@include border-right-radius(4px);
+	}
+
+	.q-title {
+		padding-top: 3px;
+		line-height: 1.8em;
+		font-size: 15px;
+
+		.q-title-content {
+			// font-weight: bold;
+		}
+		.q-info {
+			color: #AEB5C0;
+			font-weight: normal;
+		}
+		.q-required {
+			color: #f00;
+			font-weight: bold;
+			font-size: 24px;
+			vertical-align: middle;
+		}
+		.q-error {
+			color: #f00;
+			padding-left: 0.5em;
+			display: none;
+			font-size: 13px;
+		}
+	}
+
+	.q-note {
+		font-size: 13px;
+		color: $blue;
+		line-height: 1.5em;
+		padding-bottom: 5px;
+	}
+
+	.q-content {
+		padding-top: 5px;
+		input[type='text'], textarea {
+			line-height: 24px;
+			@include border-radius(4px);
+			font-size: 14px;
+			padding-left: 5px;
+			padding-right: 5px;
+			width: 200px;
+
+			&.normal { width: 200px; }
+			&.middle { width: 350px; }
+			&.wide { width: 500px; }
+			&.short { width: 100px; }
+		}
+	}
+
+	&.error {
+		background: image-url("filler/default/icon/error.png") no-repeat 860px 15px;
+		background-color:  lighten(#FFC800, 40%);
+		.q-error {
+			display: inline;
+		}
+	}
+}
+
+/* paragraph */
+.q-paragraph {
+	.q-title {
+		.q-title-content {
+			font-weight: normal;
+			text-indent: 2em;
+		}
+	}
+}
+
+/* choice question */
+.q-choice {
+	.q-content {
+		table {
+			width: 100%;
+			td {
+				vertical-align: top;
+				padding-right: 20px;
+				padding-bottom: 5px;
+			}
+		}
+		select {
+			margin-right: 10px;
+			font-size: 14px;
+		}
+	}
+}
+
+// customize radio and checkbox
+label.cust-option {
+	> input + span + p {
+		@include inline-block;
+		input { width: 150px; }
+	}
+}
+label.cust-option:not(#foo) {
+	$lh: 24px;
+	$top: 2px;
+	$left: 5px;
+
+	.media-preview-con {
+		margin-left: $lh + 5px;
+	}
+
+	@include no-extra;
+	display: block;
+	position: relative;
+	cursor: pointer;
+	padding: $top $left;
+	font-size: 14px;
+	color: #333;
+	margin-right: 1em;
+
+	@include border-radius(10px);
+	&:hover { background: $blue-light; }
+
+	> input + span + p {
+		@include no-extra;
+		padding-left: $lh + 5px;
+		line-height: $lh;
+		@include min-height($lh);	// when text is null
+		input { width: 150px; }
+		display: block;
+	}
+	> input:focus + span + p, > input:checked + span + p, &:hover > input + span + p {
+		font-weight: bold;
+		color: #000;
+	}
+
+	> input[type=radio], > input[type=checkbox], > input + span {
+		@include no-extra;
+		@include size($lh, $lh);
+		position: absolute;
+		top: $top;
+		left: $left;
+	}
+	> input[type=radio], > input[type=checkbox] { @include opacity(0); }
+	> input + span { background-repeat: no-repeat; }
+
+	> input[type=radio] + span { @include cpnt-sprite(radio); }
+	> input[type=checkbox] + span { @include cpnt-sprite(checkbox); }
+
+	/* Checked styles */
+	> input[type=radio]:checked + span { @include cpnt-sprite(radio1); }
+	> input[type=checkbox]:checked + span { @include cpnt-sprite(checkbox1); }
+	> input[type=checkbox]:hover:checked + span,
+	> input[type=checkbox]:focus:checked + span,
+	> input[type=checkbox]:checked + span:hover,
+	> input[type=checkbox]:focus:checked + span { @include cpnt-sprite(checkbox1); }
+	> input[type=radio]:hover:checked + span,
+	> input[type=radio]:focus:checked + span,
+	> input[type=radio]:checked + span:hover,
+	> input[type=radio]:focus:checked + span { @include cpnt-sprite(radio1); }
+
+	/* Hover & Focus styles */
+	> input[type=checkbox]:hover + span,
+	> input[type=checkbox]:focus + span,
+	> input[type=checkbox] + span:hover { @include cpnt-sprite(checkbox_hover); }
+	> input[type=radio]:hover + span,
+	> input[type=radio]:focus + span,
+	> input[type=radio] + span:hover { @include cpnt-sprite(radio_hover); }
+
+	/* Active styles */
+	> input[type=checkbox]:active + span,
+	> input[type=checkbox] + span:hover:active { @include cpnt-sprite(checkbox_active); }
+	> input[type=radio]:active + span,
+	> input[type=radio] + span:hover:active { @include cpnt-sprite(radio_active); }
+	> input[type=checkbox]:active:checked + span,
+	> input[type=checkbox]:checked + span:hover:active { @include cpnt-sprite(checkbox1_active); }
+	> input[type=radio]:active:checked + span,
+	> input[type=radio]:checked + span:hover:active { @include cpnt-sprite(radio1_active); }
+
+	/* Disabled styles */
+	> input[type=checkbox]:disabled + span,
+	> input[type=checkbox]:hover:disabled + span,
+	> input[type=checkbox]:focus:disabled + span,
+	> input[type=checkbox]:disabled + span:hover,
+	> input[type=checkbox]:disabled + span:hover:active { @include cpnt-sprite(checkbox_disabled); }
+	> input[type=radio]:disabled + span,
+	> input[type=radio]:hover:disabled + span,
+	> input[type=radio]:focus:disabled + span,
+	> input[type=radio]:disabled + span:hover,
+	> input[type=radio]:disabled + span:hover:active { @include cpnt-sprite(radio_disabled); }
+	> input[type=checkbox]:disabled:checked + span,
+	> input[type=checkbox]:hover:disabled:checked + span,
+	> input[type=checkbox]:focus:disabled:checked + span,
+	> input[type=checkbox]:disabled:checked + span:hover,
+	> input[type=checkbox]:disabled:checked + span:hover:active { @include cpnt-sprite(checkbox1_disabled); }
+	> input[type=radio]:disabled:checked + span,
+	> input[type=radio]:hover:disabled:checked + span,
+	> input[type=radio]:focus:disabled:checked + span,
+	> input[type=radio]:disabled:checked + span:hover,
+	> input[type=radio]:disabled:checked + span:hover:active { @include cpnt-sprite(radio1_disabled); }
+}
+
+/* matrix choice  */
+.q-matrixchoice {
+	.q-content {
+		table {
+			border-collapse: collapse;
+			width: 100%;
+
+			tr.alter {background: #eee; }
+
+			th, td {
+				border: 1px solid #ddd;
+				text-align: center;
+			}
+			td { vertical-align: middle; padding: 0; }
+			th { vertical-align: bottom; padding: 0.7em 1em; }
+			th.head { border: none; font-weight: bold;}
+			th.row_0 { text-align: left; }
+			th.row_1 { text-align: center; }
+			th.row_2 { text-align: right; }
+
+			margin-bottom: 20px;
+			&.last { margin-bottom: 0; }
+		}
+	}
+}
+label.matrix-option {
+	@include inline-block;
+	@include size(100%, 100%);
+	@include no-extra;
+	cursor: pointer;
+	padding: 0;
+	color: #333;
+	text-align: center;
+}
+label.matrix-option:not(#foo) {
+	position: relative;
+
+	&:hover { background: $blue-light; }
+
+	> input { 
+		cursor: pointer;
+		position: absolute; 
+		left: 50%;
+		top: 50%;
+		margin-top: -5px;
+		margin-left: -5px;
+		@include opacity(0);
+	}
+
+	> input + span {
+		padding: 0;
+		@include square(24px);
+		background-repeat: no-repeat;
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		margin-top: -12px;
+		margin-left: -12px;
+	}
+
+	> input[type=radio] + span { @include cpnt-sprite(radio); }
+	> input[type=checkbox] + span { @include cpnt-sprite(checkbox); }
+
+	/* Checked styles */
+	> input[type=radio]:checked + span { @include cpnt-sprite(radio1); }
+	> input[type=checkbox]:checked + span { @include cpnt-sprite(checkbox1); }
+	> input[type=checkbox]:hover:checked + span,
+	> input[type=checkbox]:focus:checked + span,
+	> input[type=checkbox]:checked + span:hover,
+	> input[type=checkbox]:focus:checked + span { @include cpnt-sprite(checkbox1); }
+	> input[type=radio]:hover:checked + span,
+	> input[type=radio]:focus:checked + span,
+	> input[type=radio]:checked + span:hover,
+	> input[type=radio]:focus:checked + span { @include cpnt-sprite(radio1); }
+
+	/* Hover & Focus styles */
+	> input[type=checkbox]:hover + span,
+	> input[type=checkbox]:focus + span,
+	> input[type=checkbox] + span:hover { @include cpnt-sprite(checkbox_hover); }
+	> input[type=radio]:hover + span,
+	> input[type=radio]:focus + span,
+	> input[type=radio] + span:hover { @include cpnt-sprite(radio_hover); }
+
+	/* Active styles */
+	> input[type=checkbox]:active + span,
+	> input[type=checkbox] + span:hover:active { @include cpnt-sprite(checkbox_active); }
+	> input[type=radio]:active + span,
+	> input[type=radio] + span:hover:active { @include cpnt-sprite(radio_active); }
+	> input[type=checkbox]:active:checked + span,
+	> input[type=checkbox]:checked + span:hover:active { @include cpnt-sprite(checkbox1_active); }
+	> input[type=radio]:active:checked + span,
+	> input[type=radio]:checked + span:hover:active { @include cpnt-sprite(radio1_active); }
+
+	/* Disabled styles */
+	> input[type=checkbox]:disabled + span,
+	> input[type=checkbox]:hover:disabled + span,
+	> input[type=checkbox]:focus:disabled + span,
+	> input[type=checkbox]:disabled + span:hover,
+	> input[type=checkbox]:disabled + span:hover:active { @include cpnt-sprite(checkbox_disabled); }
+	> input[type=radio]:disabled + span,
+	> input[type=radio]:hover:disabled + span,
+	> input[type=radio]:focus:disabled + span,
+	> input[type=radio]:disabled + span:hover,
+	> input[type=radio]:disabled + span:hover:active { @include cpnt-sprite(radio_disabled); }
+	> input[type=checkbox]:disabled:checked + span,
+	> input[type=checkbox]:hover:disabled:checked + span,
+	> input[type=checkbox]:focus:disabled:checked + span,
+	> input[type=checkbox]:disabled:checked + span:hover,
+	> input[type=checkbox]:disabled:checked + span:hover:active { @include cpnt-sprite(checkbox1_disabled); }
+	> input[type=radio]:disabled:checked + span,
+	> input[type=radio]:hover:disabled:checked + span,
+	> input[type=radio]:focus:disabled:checked + span,
+	> input[type=radio]:disabled:checked + span:hover,
+	> input[type=radio]:disabled:checked + span:hover:active { @include cpnt-sprite(radio1_disabled); }
+
+}
+
+/* text blank question */
+.q-textblank {
+	.q-content {
+		textarea {
+			height: 150px;
+		}
+	}
+}
+
+/* number blank question */
+.q-numberblank {
+	.q-content {
+		input, span { vertical-align: middle; }
+	}
+}
+
+// address blank
+.q-addressblank {
+	.q-content {
+		.address-detail {
+			width: 304px;
+		}
+		.address-postcode {
+			width: 136px;
+		}
+	}
+}
+
+/* scale question */
+.q-scale {
+	.q-content {
+		table {
+			border-collapse: collapse;
+			width: 100%;
+
+			tr.alter {background: #eee; }
+
+			th, td {
+				border: 1px solid #ddd;
+				text-align: center;
+				padding: 0.6em 0.5em; 
+			}
+			th { vertical-align: bottom; }
+			th.head { border: none; font-weight: bold;}
+			th.row_0 { text-align: left; }
+			th.row_1 { text-align: center; }
+			th.row_2 { text-align: right; }
+			td { 
+				vertical-align: middle; 
+				color: #666;
+				cursor: pointer; 
+				&.selected {
+					font-weight: bold;
+					color: #000;
+					&.level1 { background: fade_out(#FBDD60, 0.6); }
+					&.level2 { background: fade_out(#FBDD60, 0.5); }
+					&.level3 { background: fade_out(#FBDD60, 0.4); }
+					&.level4 { background: fade_out(#FBDD60, 0.3); }
+					&.level5 { background: fade_out(#FBDD60, 0.2); }
+					&.level6 { background: fade_out(#FBDD60, 0.1); }
+					&.level7 { background: #FBDD60; }
+				}
+				&.hover {
+					background: $blue-light;
+					font-weight: bold;
+					color: #333;
+				}
+				&.unknown {
+					color: #f00;
+				}
+				&.set_unknown {
+					color: $blue;
+					font-size: 13px;
+				}
+			}
+
+			margin-bottom: 20px;
+			&.last { margin-bottom: 0; }
+		}
+	}
+}
+
+/* sort question */
+.q-sort {
+	.q-content {
+		ul { @include no-extra; }
+		li { 
+			@include clearfix;
+			@include no-extra;
+			@include border-radius(5px);
+			padding:5px;
+			list-style: none;
+			clear: both;
+			cursor: move;
+			vertical-align: middle;
+			line-height: 24px;
+
+			> em, > .sort-index, > .sort-item {
+				float: left;
+			}
+			> em, > .sort-index {
+				text-align: center;
+				@include size(16px, 16px);
+				margin-right: 1em;
+			}
+			> em {
+				@include cpnt-sprite(drag); 
+				margin-top: 5px;
+			}
+			> .sort-index {
+				font-size: 14px;
+				font-weight: bold;
+
+				&.max {
+					color: #ccc;
+				}
+			}
+			> .sort-item { }
+
+			&:hover {
+				background: $blue-light;
+				>em {
+					@include cpnt-sprite(drag_hover);
+				}
+			}
+		}
+	}
+}
+
+/* constsum question */
+.q-constsum {
+	.q-content {
+		table {
+			tr:hover { background: $blue-light; }
+			tr.sum {
+				border-top: 1px solid $blue-light;
+				th, td {font-weight: bold;}
+				color: $blue;
+				&:hover {background: none;}
+			}
+
+			th, td {
+				vertical-align: middle;
+				padding: 0.7em 1.5em;
+			}
+
+			th {  text-align: right; }
+			td { 
+				text-align: center; 
+				input {
+					text-align: center;
+				}
+			}
+		}
+	}
+}
+

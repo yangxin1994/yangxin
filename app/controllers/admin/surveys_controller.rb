@@ -1,106 +1,211 @@
-class Admin::SurveysController < Admin::ApplicationController
+# encoding: utf-8
 
-	def index
-		@surveys = Survey.all
-		# use publish_status = 0 means status=-1
-		if params[:publish_status].to_i > 0
-			@surveys = @surveys.where(:status.gt => -1, :publish_status => params[:publish_status].to_i).desc(:created_at)
-		elsif params[:publish_status] && params[:publish_status].to_i == 0
-			@surveys = @surveys.where(:status => -1).desc(:created_at)
-		end
-		@surveys = @surveys.where(:show_in_community => params["show_in_community"].to_s == 'true') if params[:show_in_community]
-		# search
-		@surveys = @surveys.where(title: /.*#{params[:title]}.*/) if params[:title]
+class Admin::SurveysController < Admin::AdminController
 
-		if params[:email].nil?
-			render_json_auto auto_paginate(@surveys) and return
-		else
-			@surveys = @surveys.to_a.select do |s|
-				s.user.email.include?(params[:email].to_s)
-			end
+  layout "layouts/admin-todc"
 
-			render_json_auto auto_paginate(@surveys) and return
-		end
-	end
+	# *****************************
 
-	def show
-		@survey = Survey.normal.find_by_id(params[:id])
-		# logger.info @survey.inspect
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return unless @survey
-		render_json_auto @survey
-	end
+  def index
+    @surveys = auto_paginate Survey.search(params) do |surs|
+      surs.map do |sur|
+        sur.append_user_fields([:email, :mobile])
+        sur.serialize_for([:title, :email, :mobile, :created_at])
+        sur
+      end
+    end
+  end
 
-	def add_template_question
-		@survey = Survey.find_by_id(params[:id]) if params[:id]
-		unless @survey
-			@survey = Survey.create
-			@current_user.surveys << @survey
-		end
-		if params[:question_id]
-			# insert
-			@survey.insert_template_question( params[:page_index].to_s.to_i,
-					"-1", params[:question_id])
-			# convert
-			@survey.convert_template_question_to_normal_question(params[:question_id])
-		end
-		render_json_auto true
-	end
+  def star
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      survey.star = !(params[:star].to_s == 'true')
+      survey.save
+      survey.star
+    end
+  end
 
-	def allocate
-		@survey = Survey.normal.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-		retval = @survey.allocate(params[:system_user_type], params[:user_id], params[:allocate].to_s == "true")
-		render_json_auto(retval) and return
-	end
+  def more_info
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      {
+        :hot => survey.quillme_hot,
+        :spread => survey.spread_point,
+        :visible => survey.publish_result,
+        :max_num_per_ip => survey.max_num_per_ip
+      }
+    end
+  end
 
-	def add_reward
-		@survey = Survey.normal.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return unless @survey
-		params[:lottery] = Lottery.find_by_id(params[:lottery_id]) if params[:reward].to_i==1
-		s = params.select{|k,v| %w(reward point lottery).include?(k.to_s)}
-		render_json_auto @survey.update_attributes(s) and return
-	end
+  def set_info
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      @is_succuess = 
+        survey.set_quillme_hot(params[:hot].to_s == "true") &&
+        survey.set_spread(params[:spread].to_i) &&
+        survey.update_attributes({'publish_result' => (params[:visible].to_s == "true"),
+                                  'max_num_per_ip' => params[:max_num_per_ip].to_i})
+      {
+        :hot => survey.quillme_hot,
+        :spread => survey.spread_point,
+        :visible => survey.publish_result,
+        :max_num_per_ip => survey.max_num_per_ip
+      }
+    end
+  end
 
-	def set_community
-		@survey = Survey.normal.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-		retval = @survey.set_community(params[:show_in_community].to_s == "true")
-		render_json_auto(retval) and return
-	end
+  def reward_schemes
+    survey = Survey.where(:_id => params[:id]).first
+    @reward_schemes = survey.reward_schemes.not_default
+    @prizes = Prize.all
+    if @editing_rs = RewardScheme.where(:id => params[:editing]).first
+      @editing_rs["rewards"].each do |reward|
+        case reward["type"].to_i
+        when 1
+          @editing_rs["tel_charge"] = reward["amount"]
+        when 2
+          @editing_rs["alipay"] = reward["amount"]
+        when 4
+          @editing_rs["point"] = reward["amount"]
+        when 8
+          @editing_rs["prizes"] = reward["prizes"]
+        when 16
+          @editing_rs["jifenbao"] = reward["amount"]
+        else
 
-	def set_spread
-		@survey = Survey.normal.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-		retval = @survey.set_spread(params[:spread_point].to_i, params[:spreadable].to_s == "true")
-		render_json_auto(retval) and return
-	end
+        end
+      end
+      if @editing_rs["rewards"].present?
+        @editing_rs['is_free'] = "no" 
+      else
+        @editing_rs['is_free'] = "yes" 
+      end
+    else
+      @editing_rs ={}
+    end    
+  end  
 
-	def set_promotable
-		@survey = Survey.normal.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-		@survey.promotable = params[:promotable].to_s == "true"
-		@survey.promote_email_number = params[:promote_email_number].to_i if !params[:promote_email_number].nil?
-		render_json_auto(@survey.save) and return
-	end
+  def show
+    _r = Survey.find(params[:id]).info_for_admin
+    @survey = _r["survey"]
+    @questions = {}
+    _r['questions'].each do |question_id, question|
+      @survey["logic_control"].each do |lc|
+        lc["conditions"].each do |condition|
+          if condition["question_id"] == question_id
+            question["is_logic_control"] = true
+            # question["logic_control_type"] = lc["rule_type"]
+            question["issue"]["items"] = question["issue"]["items"].try('map') do |item|
+              if condition["answer"].include? item["id"]
+                item["is_fuzzy"] = condition["fuzzy"]
+                item["is_logic_control"] = true
+                item["logic_control_type"] = lc["rule_type"]
+              end
+              item
+            end
+          end
+        end
+      end
+      @questions[question_id] = question
+    end    
+    # @survey = Survey.where(:_id => params[:id])
+    # result = @client.show(params)
+    # if result[:success] || result.try(:success)
+    #   @questions = result[:questions]
+    #   @survey = result[:survey]
+    # else
+    #   render :json => result
+    # end
+  end
 
-	def get_sent_email_number
-		@survey = Survey.normal.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-		sent_email_number = @survey.email_histories.length
-		render_json_auto(sent_email_number) and return
-	end
 
-	def set_answer_need_review
-		@survey = Survey.normal.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-		@survey.answer_need_review = params[:answer_need_review].to_s == "true"
-		render_json_auto(@survey.save) and return
-	end
 
-	def destroy
-		@survey = Survey.find_by_id(params[:id])
-		# else just change status to -1
-		render_json_auto @survey.try(:delete) and return
-	end
+  def promote
+    if survey = Survey.where(:_id => params[:id]).first
+      @promote = survey.get_all_promote_settings
+    else
 
+    end
+  end
+
+  def update_promote
+    survey = Survey.find params[:id]
+    if @promote = survey.update_promote(params)
+      survey.update_quillme_promote_reward_type
+      redirect_to "/admin/surveys/#{params[:id]}/promote",:flash => {:success => "推送渠道设置成功"}
+    else
+      flash.alert = "发生错误!请检查输入数据!"
+    end
+  end
+
+  def destroy_attributes
+   result = @client.destroy_attributes(params)
+   render :json => result
+  end
+
+# ###########################
+#
+# 问题属性绑定
+#
+# ###########################
+
+  def bind_question
+    if request.get?
+      _bind_question
+    elsif request.put?
+      _update_bind
+    elsif request.delete?
+      _unbind_question
+    end
+  end
+
+  private
+
+  def _bind_question
+
+    @question = Question.find_by_id(params[:id])
+    @attrs = SampleAttribute.all
+    case @question['question_type']
+    when 0 # choice
+      if @question['issue']['max_choice'] == 1
+        @attrs = @attrs.select {|attr| attr['type'] != 7} # except array
+      else
+        @attrs = @attrs.select {|attr| attr['type'] == 7} # only array
+      end
+    when 2 # text_blank
+      @attrs = @attrs.select {|attr| attr['type'] == 0}
+    when 3 # number_blank
+      @attrs = @attrs.select {|attr| [2, 4].include? attr['type']}
+    when 7 # time_blank
+      @attrs = @attrs.select {|attr| [3, 5].include? attr['type']}
+    when 8 # addr
+      @attrs = @attrs.select {|attr| attr['type'] == 6}
+    end
+    @addr_precision = 0
+    if @question['sample_attribute_id']
+      @attr = @attrs.select {|attr| attr['_id'] == @question['sample_attribute_id']}[0]
+      if @attr['type'] == 6
+        @question['sample_attribute_relation'].each do |key, value|
+          addr = QuillCommon::AddressUtility.find_province_city_town_by_code(value)
+          next if addr.blank?
+          @addr_precision = addr.split(/\s+\-\s+/).length - 1
+          break
+        end
+      end
+    end
+  end
+
+  def _unbind_question
+    @question = Question.find_by_id(params[:id])
+    @question.remove_sample_attribute
+    redirect_to :back
+  end
+
+  def _update_bind
+    params[:relation] = JSON.parse params[:relation]
+    @question = Question.find params[:id]
+    @question.sample_attribute_relation = params[:relation]
+    @question.sample_attribute_id = params[:attribute_id]
+    @question.save
+    render json: {}
+  end
+  
 end
+

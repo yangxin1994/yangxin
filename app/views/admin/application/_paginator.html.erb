@@ -1,0 +1,54 @@
+<div class="pagination">
+	<!--  -->
+<%
+	current_page= paginator["current_page"].to_i
+	total_page=paginator["total_page"].to_i
+	after_diff = total_page - current_page
+	before_diff= current_page - 1
+
+	# reset rails_params
+	rails_params = params.except(:id,:action,:controller, :page)
+	add_url=""
+	rails_params.each do |k,v|
+		add_url+="&#{k}=#{v}"
+	end
+%>
+  <ul>
+
+	<!-- first page -->
+    <% if before_diff >= 3	%>
+
+    	<li><a href="<%=get_url%>?page=1<%=add_url.to_s%>"> 1 </a></li>
+    	<span class="page_break">...</span>
+    <%else%>
+    	<%1.upto(current_page-2).each do |page|%>
+    		<li><a href="<%=get_url%>?page=<%= page.to_s + add_url.to_s%>"> <%=page%> </a></li>
+    	<%end%>
+    <% end %>
+
+    <!-- prev page -->
+    <% if current_page > 1 %>
+    <li><a href="<%=get_url%>?page=<%= (current_page-1).to_s + add_url.to_s%>"> <%=current_page-1%> </a></li>
+    <% end%>
+
+    <!-- current page -->
+    <li><a class="number current"> <%= current_page %> </a></li>
+
+    <!-- next page -->
+    <% if current_page < total_page%>
+    <li><a href="<%=get_url%>?page=<%= (current_page+1).to_s + add_url.to_s%>"><%=current_page+1%></a></li>
+    <% end%>
+	<!-- last page -->
+    <%
+    	if after_diff >= 3
+    %>
+    	<li><a>...</a></li>
+    	<li><a href="<%=get_url%>?page=<%=total_page%><%=add_url.to_s%>"><%=total_page%></a></li>
+    <%else%>
+    	<%(current_page+2).upto(total_page).each do |page|%>
+    		<li><a href="<%=get_url%>?page=<%= page.to_s + add_url.to_s%>"><%=page%></a></li>
+    	<%end%>
+    <% end %>
+  </ul>
+
+</div> <!-- End .pagination -->

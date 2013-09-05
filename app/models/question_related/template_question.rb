@@ -24,7 +24,7 @@ class TemplateQuestion < BasicQuestion
 	end
 
 	def self.create_question(question_type, creator)
-		return ErrorEnum::UNAUTHORIZED if !creator.is_admin
+		return ErrorEnum::UNAUTHORIZED if !creator.is_admin?
 		return ErrorEnum::WRONG_QUESTION_TYPE if !self.has_question_type(question_type)
 		question = TemplateQuestion.new
 		issue = Issue.create_issue(question_type)
@@ -46,7 +46,7 @@ class TemplateQuestion < BasicQuestion
 	#
 	#*retval*:
 	def update_question(question_obj, operator)
-		return ErrorEnum::UNAUTHORIZED if !operator.is_admin
+		return ErrorEnum::UNAUTHORIZED if !operator.is_admin?
 		self.content = question_obj["content"]
 		self.note = question_obj["note"]
 		self.attribute_name = question_obj["attribute_name"]

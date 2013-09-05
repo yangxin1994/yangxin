@@ -1,41 +1,18 @@
 # encoding: utf-8
 
-class Admin::SubscribersController < Admin::ApplicationController
-  before_filter :require_sign_in
+class Admin::SubscribersController < Admin::AdminController
+  layout "layouts/admin-todc"
 
   def index
-    render_json true do
-      data = {}
-      if params[:s]
-        email = params[:s].downcase
-        subscribers = Subscriber.any_of({ :email => /.*#{email}.*/ })
-                                .desc(:is_deleted, :created_at)
-        data[:search_count] = subscribers.count
-      else
-        subscribers = Subscriber.all
-      end
-      data[:subscribers] = auto_paginate(subscribers) { |data| data.present_json(:admin) }
-      data[:max_count] = Subscriber.count
-      data[:active_count] = Subscriber.subscribed.count
-      data[:deleted_count] = Subscriber.unsubscribed.count
-      data
+    @subscribers = auto_paginate Subscriber do |subscribers|
+      subscribers.present_json(:admin)
     end
   end
 
-  def_each :unsubscribed, :subscribed do |method_name|
-    render_json true do
-      data = {}
-      data[:subscribers] = auto_paginate(Subscriber.send(method_name)) do |subscribers|
-        subscribers.present_json(:admin)
-      end
-      data[:max_count] = Subscriber.count
-      data[:max_count] = Subscriber.count
-      data[:max_count] = Subscriber.count
+  def new
 
-      data
-    end
   end
-
+  
   def create
     render_json true do
       subscribers = params[:subscribers].gsub('，',',')

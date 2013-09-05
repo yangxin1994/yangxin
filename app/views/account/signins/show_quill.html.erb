@@ -1,0 +1,29 @@
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/account/signin_quill-bundle" %>
+<% end %>
+<div class="signins-left">
+	<p>
+		<em class="icon icon-mail l"></em>
+		<input type="text" id="email_ipt" name="userName" placeholder="邮箱/用户名" param='e' autofocus />
+	</p>
+	<p>
+		<em class="icon icon-i l"></em>
+		<input type="password" id="password_ipt" name="password" placeholder="输入密码"/>
+	</p>
+	<p>
+		<label><input type="checkbox" name="remember-password" id="remember_ckb" checked />记住我</label>
+		<a href="<%=find_password_path  %>" class="forget-password">忘记密码?</a>
+	</p>
+	<p>
+		<button id='login_btn' class="od-button">登 录</button>
+	</p>
+</div>
+<div class="signins-right">
+	<% if params[:tpui].blank? %>
+	<%= render "partials/social_connect_quill" %>
+	<% else %>
+	<ul class='other-login-link'>
+		<li>登录成功后，系统会将您刚才所授权的第三方账户和您在<%= corp_name %>的账户进行关联，下次您便可直接通过第三方账户进行登录。</li>
+	</ul>
+	<% end %>
+</div>

@@ -1,0 +1,71 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/surveys/index-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+  <li class="active">
+    <a href="javascript:void(0);">
+    <i class="icon-chevron-right"></i>
+    问卷列表
+    </a>
+  </li>
+<% end %>
+
+<div>
+  <span>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown">⃞&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        <li><a href="?" class="select-all-btn"><input type="checkbox" value="">&nbsp;全部</a></li>
+        <li class="divider"></li>
+      </ul>
+    </div>
+    <form class="form-search" style="display:inline">
+      <div class="input-append">
+        <input type="text" name="keyword" class="span6 search-query" required>
+        <button type="submit" class="btn">Search</button>
+      </div>
+    </form>
+  </span>
+  <span class="pull-right">
+    <%= paginator_mini @surveys %>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu pull-right">
+        <li><a href="?">全部</a></li>
+        <li class="divider"></li>
+      </ul>
+    </div>
+  </span>
+</div>
+
+<div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>问卷标题</th>
+        <th>创建人</th>
+        <th>未审核答案数</th>
+        <th>创建时间</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @surveys["data"].each_with_index do |survey, i| %>
+      <tr>
+        <td><a href="/questionaires/<%= survey["_id"] %>"><%= survey["title"] %></a></td>
+        <td><%= survey["email"] %></td>
+        <td><%= survey['not_review_answer_num'] %></td>
+        <td>
+          <%= survey['created_at'].strftime("%F") %>
+        </td>
+        <td>
+          <a class="btn" href="/admin/answers/<%= survey['_id']%>" target="_blank"><i class="icon-edit"></i>审核答案</a>
+        </td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+</div>

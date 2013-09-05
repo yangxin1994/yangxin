@@ -1,0 +1,94 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/admin/sample_stats-bundle", :meida => 'all' %>
+  <%= javascript_include_tag "pages/admin/sample_stats-bundle" %>
+<% end %>
+<div class="sample_properties">
+  <div class="title">
+    <h5>样本数据统计</h5>
+  </div>
+
+  <div class="stats">
+    <ul>
+      <li><a href="#" class="count grey" title=""><%= @sample_count['normal_sample_number'] %></a><span>个样本</span></li>
+
+      <li><a href="#" class="count grey" title=""><%= @sample_count['block_sample_number'] %></a><span>个被列入黑名单</span></li>
+      <li class=""><a href="#" class="count grey" title=""><%= @new_user_by_day %></a><span>个日新增样本</span></li>
+      <li class="last"><a href="#" class="count grey" title=""><%= @new_user_by_week %></a><span>个周新增样本</span></li>
+    </ul>
+    <div class="fix"></div>
+  </div>
+  <div class="widget first" id="sample_stats_panel">
+    <div class="head">
+      <h5 class="iGraph">样本数据</h5>
+    </div>
+    <div class="body">
+      <div class="action-bar">
+        <label>按照</label>
+        <select id="" name="period">
+          <option value="year">年</option>
+          <option value="week">周</option>
+          <option value="day">日</option>
+        </select>
+        &nbsp;
+        &nbsp;
+        向后
+        <select name="time_length">
+          <% (1..30).each do |n| %>
+            <option value="<%= n %>"><%= n %></option>
+          <% end %>
+        </select>
+        个周期
+        &nbsp;
+        &nbsp;
+        <select name="type">
+          <option value="unit">查看单位周期结果</option>
+          <option value="cumulation">查看累计周期结果</option>
+        </select>
+        &nbsp;
+        &nbsp;
+        <button class="button">ok</button>
+      </div>
+
+      <div id="sample_stats_charts"></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <ul>
+      <li><a href="#" class="count grey" title=""><%= @active_user_by_day %></a><span>日活跃用户</span></li>
+      <li><a href="#" class="count grey" title=""><%= @active_user_by_week %></a><span>周活跃用户</span></li>
+    </ul>
+    <div class="fix"></div>
+  </div>
+  <div class="widget first" id="active_sample_stats_panel">
+    <div class="head">
+      <h5 class="iGraph">活跃样本数据</h5>
+    </div>
+    <div class="body">
+      <div class="action-bar">
+        <label>按照</label>
+        <select id="" name="period">
+          <option value="year">年</option>
+          <option value="week">周</option>
+          <option value="day">日</option>
+        </select>
+        &nbsp;
+        &nbsp;
+        向后
+        <select name="time_length">
+          <% (1..30).each do |n| %>
+            <option value="<%= n %>"><%= n %></option>
+          <% end %>
+        </select>
+        个周期
+        &nbsp;
+        &nbsp;
+        <input type="hidden" name="type" value="unit" />
+        &nbsp;
+        &nbsp;
+        <button class="button">ok</button>
+      </div>
+      <div id="active_sample_stats_charts"></div>
+    </div>
+  </div>
+</div>

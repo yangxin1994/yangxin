@@ -1,0 +1,247 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+		window.stylesheet = <%= raw @stylesheet.to_json %>;
+	</script>
+	<%= javascript_include_tag "pages/quill/customization-bundle" %>
+	<%= stylesheet_link_tag "pages/quill/customization-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+<div class='custom-slide'>
+	<div class='slide-body'>
+		<span class='leftbutton'></span>
+		<span class='slide-container'>
+			<ul class='slide'>
+				<li class='slide-block'>
+					<span class='item-0'><img src="/assets/filler/thumb/default.png"  alt="默认" /></span>
+					<h2 id="default">默认</h2>
+				</li>
+				<li class='slide-block'>
+					<span class='item-1'><img src="/assets/filler/thumb/dark.png"  alt="经典蓝黑" /></span>
+					<h2 id="dark">经典蓝黑</h2>
+				</li>
+				<li class='slide-block'>
+					<span class='item-2'><img src="/assets/filler/thumb/blue.png"  alt="科技蓝" /></span>
+					<h2 id="blue">科技蓝</h2>
+				</li>
+				<li class='slide-block'>
+					<span class='item-3'><img src="/assets/filler/thumb/colorful.png"  alt="浓彩" /></span>
+					<h2 id="colorful">浓彩</h2>
+				</li>
+				<li class='slide-block'>
+					<span class='item-6'><img src="/assets/filler/thumb/light.png"  alt="清新" /></span>
+					<h2 id="light">清新</h2>
+				</li>
+			</ul>
+		</span>
+		<span class='rightbutton'></span>
+	</div>
+	<div class='custom-bottom'></div>
+</div>
+<div class='custom-preview'>
+<!-- preview -->
+<div id="sf" style='padding-top: 20px;'>
+	
+<!-- <div id="sf_banner">
+	<div class="inner">
+		<a id="logo" href="javascript:void(0);">
+			<img src="/assets/filler/default/logo.png">
+		</a>
+			<div id="progress_info">
+			<span>已完成问卷的<em id="progress_txt">30%</em></span>
+			<a id="restart_btn" href="javascript:void(0);">重新开始</a>
+	</div>
+
+		<div class="preview">（答题预览模式）</div>
+	</div>
+</div>
+<div class="progress-con">
+			<div id="progress"><em style="width: 30%;"></em></div>
+
+</div> -->
+
+
+
+
+
+<div id="f_body"><div>
+	
+	<div id="sf_main">
+		<div class='header'></div>
+		
+		<div class="s-title">示例问卷</div>
+		
+		<div id="questions_con"><div class="q-filler q-choice">
+	<span class="q-idx">01</span>
+	<div class="q-title">
+		<span class="q-title-content">请问您的性别是？</span>
+		<span class="q-info">（单选题）</span>
+		<span class="q-required" style="display: inline;">*</span>
+		<span class="q-error"></span>
+	</div>
+	<div class="q-note" style="display: none;">说明：</div>
+	<div class="q-content"><table><tbody><tr><td><label class="cust-option">
+	<input name="options_50ff6f67421aa940b1000005" id="option_50ff6f67421aa940b1000005_4083473364347755" type="radio" class="">
+	<span>&nbsp;</span>
+	<p>男性</p>
+</label></td></tr><tr><td><label class="cust-option">
+	<input name="options_50ff6f67421aa940b1000005" id="option_50ff6f67421aa940b1000005_3313971187223178" type="radio" class="">
+	<span>&nbsp;</span>
+	<p>女性</p>
+</label></td></tr></tbody></table></div>
+</div><div class="q-filler q-phoneblank">
+	<span class="q-idx">03</span>
+	<div class="q-title">
+		<span class="q-title-content">您的手机号码是？</span>
+		<span class="q-info">（请输入手机号）</span>
+		<span class="q-required" style="display: inline;">*</span>
+		<span class="q-error"></span>
+	</div>
+	<div class="q-note" style="display: none;">说明：</div>
+	<div class="q-content"><input type="text" placeholder="例如：186-8888-8888"></div>
+</div><div class="q-filler q-choice">
+	<span class="q-idx">02</span>
+	<div class="q-title">
+		<span class="q-title-content">最近 3 个月您使用过下面哪些社会化媒体？</span>
+		<span class="q-info">（多选题）</span>
+		<span class="q-required" style="display: inline;">*</span>
+		<span class="q-error"></span>
+	</div>
+	<div class="q-note">说明：请只选择最近 3 个月内使用过的。</div>
+	<div class="q-content"><table><tbody><tr><td><label class="cust-option">
+	<input name="options_50ff87e3421aa9420e000007" id="option_50ff87e3421aa9420e000007_5349926446047092" type="checkbox" class="">
+	<span>&nbsp;</span>
+	<p>人人网</p>
+</label></td><td><label class="cust-option">
+	<input name="options_50ff87e3421aa9420e000007" id="option_50ff87e3421aa9420e000007_1219015795224449" type="checkbox" class="">
+	<span>&nbsp;</span>
+	<p>新浪微博</p>
+</label></td><td><label class="cust-option">
+	<input name="options_50ff87e3421aa9420e000007" id="option_50ff87e3421aa9420e000007_7875050188015555" type="checkbox" class="">
+	<span>&nbsp;</span>
+	<p>腾讯微博</p>
+</label></td><td><label class="cust-option">
+	<input name="options_50ff87e3421aa9420e000007" id="option_50ff87e3421aa9420e000007_15615394093078016" type="checkbox" class="">
+	<span>&nbsp;</span>
+	<p>开心网</p>
+</label></td></tr><tr><td><label class="cust-option">
+	<input name="options_50ff87e3421aa9420e000007" id="option_50ff87e3421aa9420e000007_25169801400956160" type="checkbox" class="">
+	<span>&nbsp;</span>
+	<p>朋友网</p>
+</label></td><td><label class="cust-option">
+	<input name="options_50ff87e3421aa9420e000007" id="option_50ff87e3421aa9420e000007_24706374992132584" type="checkbox" class="">
+	<span>&nbsp;</span>
+	<p>豆瓣</p>
+</label></td><td><label class="cust-option">
+	<input name="options_50ff87e3421aa9420e000007" id="option_50ff87e3421aa9420e000007_25425533439014510" type="checkbox" class="">
+	<span>&nbsp;</span>
+	<p>蚂蜂窝</p>
+</label></td><td><label class="cust-option">
+	<input name="options_50ff87e3421aa9420e000007" id="option_50ff87e3421aa9420e000007_14813136028573330" type="checkbox" class="">
+	<span>&nbsp;</span>
+	<p>百度贴吧</p>
+</label></td></tr><tr><td><label class="cust-option">
+	<input name="options_50ff87e3421aa9420e000007" id="option_50ff87e3421aa9420e000007_20759282029215664" type="checkbox" class="">
+	<span>&nbsp;</span>
+	<p>QQ空间</p>
+</label></td><td><label class="cust-option">
+	<input name="options_50ff87e3421aa9420e000007" id="option_50ff87e3421aa9420e000007_28562400842532944" type="checkbox" class="">
+	<span>&nbsp;</span>
+	<p>陌陌</p>
+</label></td><td><label class="cust-option">
+	<input name="options_50ff87e3421aa9420e000007" id="option_50ff87e3421aa9420e000007_8884607607946233" type="checkbox" class="">
+	<span>&nbsp;</span>
+	<p>微信</p>
+</label></td><td></td></tr></tbody></table></div>
+</div><div class="q-filler q-matrixchoice bottom">
+	<span class="q-idx">04</span>
+	<div class="q-title">
+		<span class="q-title-content">对于以下有关社会化媒体的描述，您的符合程度如何？</span>
+		<span class="q-info">（矩阵选择题）</span>
+		<span class="q-required" style="display: inline;">*</span>
+		<span class="q-error"></span>
+	</div>
+	<div class="q-note" style="display: none;">说明：</div>
+	<div class="q-content"><table cellspacing="0" cellpadding="0" class="last"><tbody><tr><th class="head"></th><th class="head">完全不符合</th><th class="head">不太符合</th><th class="head">一般</th><th class="head">比较符合</th><th class="head">非常符合</th></tr><tr><th class="row_0">我每天都使用</th><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_4531534427831974" id="option_50ff91b1421aa9420e000013_4531534427831974_7893378011629413" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_4531534427831974" id="option_50ff91b1421aa9420e000013_4531534427831974_7237330568626392" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_4531534427831974" id="option_50ff91b1421aa9420e000013_4531534427831974_8867058323651007" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_4531534427831974" id="option_50ff91b1421aa9420e000013_4531534427831974_9278342239052892" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_4531534427831974" id="option_50ff91b1421aa9420e000013_4531534427831974_17149457131507252" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td></tr><tr class="alter"><th class="row_0">是我生活的重要组成部分</th><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_823522692617342" id="option_50ff91b1421aa9420e000013_823522692617342_7893378011629413" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_823522692617342" id="option_50ff91b1421aa9420e000013_823522692617342_7237330568626392" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_823522692617342" id="option_50ff91b1421aa9420e000013_823522692617342_8867058323651007" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_823522692617342" id="option_50ff91b1421aa9420e000013_823522692617342_9278342239052892" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_823522692617342" id="option_50ff91b1421aa9420e000013_823522692617342_17149457131507252" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td></tr><tr><th class="row_0">不使用我会觉得不舒服</th><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_5011206803218595" id="option_50ff91b1421aa9420e000013_5011206803218595_7893378011629413" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_5011206803218595" id="option_50ff91b1421aa9420e000013_5011206803218595_7237330568626392" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_5011206803218595" id="option_50ff91b1421aa9420e000013_5011206803218595_8867058323651007" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_5011206803218595" id="option_50ff91b1421aa9420e000013_5011206803218595_9278342239052892" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_5011206803218595" id="option_50ff91b1421aa9420e000013_5011206803218595_17149457131507252" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td></tr><tr class="alter"><th class="row_0">无聊的时候会使用</th><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_9415592117552120" id="option_50ff91b1421aa9420e000013_9415592117552120_7893378011629413" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_9415592117552120" id="option_50ff91b1421aa9420e000013_9415592117552120_7237330568626392" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_9415592117552120" id="option_50ff91b1421aa9420e000013_9415592117552120_8867058323651007" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_9415592117552120" id="option_50ff91b1421aa9420e000013_9415592117552120_9278342239052892" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+	<input name="options_50ff91b1421aa9420e000013_9415592117552120" id="option_50ff91b1421aa9420e000013_9415592117552120_17149457131507252" type="radio" class="">
+	<span>&nbsp;</span>
+</label></td></tr></tbody></table></div>
+</div></div>
+		
+		<div class='footer'></div>
+	</div>
+	<div id="page_buttons">
+		
+		<button id="next_btn">保存并加载下一页</button>
+	</div>
+</div></div>
+
+
+
+<div id="sf_footer">
+	<a href="/">技术支持 优数调研</a>
+	<div class="ad"></div>
+</div>
+
+</div>
+<!-- preview end -->
+</div>
+	

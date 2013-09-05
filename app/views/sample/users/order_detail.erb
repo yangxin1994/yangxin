@@ -1,0 +1,286 @@
+<% if @order["status"].to_i == Order::REJECT %>
+  <!-- 3 步 -->
+
+  <!-- 订单详情 -->
+  <div class="order-info">
+    <div class="title">
+      <div class="l">订单号：<%= @order["code"] %></div>
+      <div class="r">
+        <span>订单状态：</span>
+        <span class="c-green"><%= order_status(@order["status"].to_i) %></span>
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+
+    <ul class="order-list">
+      <li>
+        <span class="time"><%= int_time_to_datetime(@order["created_at"].to_i) %></span>
+        <span class="text">你提交了订单，等待审核...</span>
+      </li>
+      
+      <li>
+        <span class="time"><%= int_time_to_datetime(@order["reviewed_at"].to_i) %></span>
+        <span class="text">审核被拒绝</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- steps -->
+  <div class="steps">
+    <div class="step fixed">
+      <div class="text">提交订单</div>
+      <i class="icon-step icon-step1 fixed"></i>
+      <div class="line"></div>
+    </div>
+
+    <div class="step actived">
+      <div class="text">审核被拒绝</div>
+      <i class="icon-step icon-step2 actived"></i>
+      <div class="line"></div>
+    </div>
+
+    <div class="step">
+      <div class="text">完成</div>
+      <i class="icon-step icon-step3"></i>
+      <div class="line"></div>
+    </div>
+  </div>
+<% elsif @order["status"].to_i == Order::FROZEN || @order["reviewed_at"] %>
+  <!-- 4 步 -->
+  <div class="order-info">
+    <div class="title">
+      <div class="l">订单号：<%= @order["code"] %></div>
+      <div class="r">
+        <span>订单状态：</span>
+        <span class="c-green"><%= order_status(@order["status"].to_i) %></span>
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+
+    <ul class="order-list">
+      <li>
+        <span class="time"><%= int_time_to_datetime(@order["created_at"].to_i) %></span>
+        <span class="text">你提交了订单，等待系统审核</span>
+      </li>
+
+      <% if @order["reviewed_at"] %>
+        <li>
+          <span class="time"><%= int_time_to_datetime(@order["reviewed_at"].to_i) %></span>
+          <span class="text">审核通过，等待处理...</span>
+        </li>
+      <% end %>
+      
+      <% if [Order::HANDLE,Order::SUCCESS,Order::FAIL].include?(@order["status"].to_i) %>
+        <li>
+          <span class="time"><%= int_time_to_datetime(@order["handled_at"].to_i) %></span>
+          <span class="text"><%= order_list(@order["type"].to_i, 1) %></span>
+        </li>
+      <% end %>
+
+      <% if  @order["status"].to_i == Order::SUCCESS %>
+        <li>
+          <span class="time"><%= int_time_to_datetime(@order["finished_at"].to_i) %></span>
+          <span class="text"><%= order_list(@order["type"].to_i, 2) %></span>
+        </li>
+      <% end %>
+
+      <% if  @order["status"].to_i == Order::FAIL %>
+        <li>
+          <span class="time"><%= int_time_to_datetime(@order["finished_at"].to_i) %></span>
+          <span class="text"><%= @order["remark"] %></span>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <!-- steps -->
+  <div class="steps steps4">
+    <div class="step <%= 'actived' if @order["status"].to_i == Order::FROZEN %> <%= 'fixed' if @order["status"].to_i != Order::FROZEN %> ">
+      <div class="text">提交订单</div>
+      <i class="icon-step icon-step1 <%= 'actived' if @order["status"].to_i == Order::FROZEN %> <%= 'fixed' if @order["status"].to_i != Order::FROZEN %> "></i>
+        <div class="line"></div>
+    </div>
+
+    <div class="step <%= 'actived' if @order["status"].to_i == Order::WAIT %> <%= 'fixed' if @order["status"].to_i != Order::FROZEN  && @order["status"].to_i > Order::WAIT %>">
+      <div class="text">审核通过</div>
+      <i class="icon-step icon-step2 <%= 'actived' if @order["status"].to_i == Order::WAIT %> <%= 'fixed' if @order["status"].to_i != Order::FROZEN  && @order["status"].to_i > Order::WAIT %>"></i>
+        <div class="line"></div>
+    </div>
+
+    <div class="step <%= 'actived' if @order["status"].to_i == Order::HANDLE %> <%= 'fixed' if [Order::SUCCESS,Order::FAIL].include?(@order["status"].to_i) %>">
+      <div class="text"><%= order_process(@order["type"].to_i) %></div>
+      <i class="icon-step icon-step3 <%= 'actived' if @order["status"].to_i == Order::HANDLE %> <%= 'fixed' if [Order::SUCCESS,Order::FAIL].include?(@order["status"].to_i) %>"></i>
+        <div class="line"></div>
+    </div>
+
+    <% if @order["status"].to_i != Order::FAIL %>
+      <div class="step <%= 'actived' if @order["status"].to_i == Order::SUCCESS %>">
+        <div class="text">完成</div>
+        <i class="icon-step icon-step4 <%= 'actived' if @order["status"].to_i == Order::SUCCESS %>"></i>
+        <div class="line"></div>
+      </div>
+    <% end %>
+
+    <% if  @order["status"].to_i == Order::FAIL %>
+      <div class="step actived">
+        <div class="text">失败</div>
+        <i class="icon-step icon-step4 actived"></i>
+        <div class="line"></div>
+      </div>
+    <% end %>
+  </div>
+
+<% else %>
+  <!-- 3 步 -->
+  <div class="order-info">
+    <div class="title">
+      <div class="l">订单号：<%= @order["code"] %></div>
+      <div class="r">
+        <span>订单状态：</span>
+        <span class="c-green"><%= order_status(@order["status"].to_i) %></span>
+      </div>
+    </div>
+    <div style="clear:both;"></div>
+
+    <ul class="order-list">
+      <li>
+        <span class="time"><%= int_time_to_datetime(@order["created_at"].to_i) %></span>
+        <span class="text">你提交了订单</span>
+      </li>
+      
+      <% if [Order::HANDLE,Order::SUCCESS,Order::FAIL].include?(@order["status"].to_i) %>
+        <li>
+          <span class="time"><%= int_time_to_datetime(@order["handled_at"].to_i) %></span>
+          <span class="text"><%= order_list(@order["type"].to_i, 1) %></span>
+        </li>
+      <% end %>
+
+      <% if  @order["status"].to_i == Order::SUCCESS %>
+        <li>
+          <span class="time"><%= int_time_to_datetime(@order["finished_at"].to_i) %></span>
+          <span class="text"><%= order_list(@order["type"].to_i, 2) %></span>
+        </li>
+      <% end %>
+
+      <% if  @order["status"].to_i == Order::FAIL %>
+        <li>
+          <span class="time"><%= int_time_to_datetime(@order["finished_at"].to_i) %></span>
+          <span class="text"><%= @order["remark"] %></span>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <!-- steps -->
+  <div class="steps">
+    <div class="step <%= 'actived' if @order["status"].to_i == Order::WAIT %> <%= 'fixed' if @order["status"].to_i > Order::WAIT %>">
+      <div class="text">提交订单</div>
+      <i class="icon-step icon-step1 <%= 'actived' if @order["status"].to_i == Order::WAIT %> <%= 'fixed' if @order["status"].to_i > Order::WAIT %>"></i>
+      <div class="line">
+      </div>
+    </div>
+
+    <div class="step  <%= 'actived' if @order["status"].to_i == Order::HANDLE %> <%= 'fixed' if [Order::SUCCESS,Order::FAIL].include?(@order["status"].to_i) %> ">
+      <div class="text"><%= order_process(@order["type"].to_i) %></div>
+      <i class="icon-step icon-step2 <%= 'actived' if @order["status"].to_i == Order::HANDLE %> <%= 'fixed' if [Order::SUCCESS,Order::FAIL].include?(@order["status"].to_i) %> "></i>
+      <div class="line">
+      </div>
+    </div>
+
+    <% if @order["status"].to_i != Order::FAIL %>
+      <div class="step <%= 'actived' if @order["status"].to_i == Order::SUCCESS %>">
+        <div class="text">完成</div>
+        <i class="icon-step icon-step3 <%= 'actived' if @order["status"].to_i == Order::SUCCESS %>"></i>
+        <div class="line"></div>
+      </div>
+    <% end %>
+
+    <% if  @order["status"].to_i == Order::FAIL %>
+      <div class="step actived">
+        <div class="text">失败</div>
+        <i class="icon-step icon-step3 actived"></i>
+        <div class="line"></div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<!-- receiver info -->
+<% case @order["type"].to_i %>
+<% when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE %>
+  <!-- phone -->
+  <div class="receiver-info">
+    <div class="cont">
+      <% if @order["survey_id"] %>
+        <p>来自调研：<%= @order["survey_title"] %></p>
+      <% end %>
+      <span class="name">奖励方法：话费充值</span>
+      <span class="phone">
+        手机号码：
+        <span class="c-yellow mobile"><%= @order["mobile"] %></span>
+      </span>
+      <p>奖励数量：￥<%= @order["amount"].to_i %>元</p>
+    </div>
+  </div>
+
+  <%= javascript_include_tag "pages/sample/users_mobile_area-bundle", :media => "all" %>
+<% when Order::ALIPAY %>
+  <!-- alipay -->
+  <div class="receiver-info">
+    <div class="cont">
+      <% if @order["survey_id"] %>
+        <p>来自调研：<%= @order["survey_title"] %></p>
+      <% end %>
+      <span class="name">奖励方法：支付宝转账</span>
+      <span class="aplipay_email">支付宝帐号：<span class="c-yellow"><%= @order["alipay_account"] %></span></span>
+      <p>奖励数量：￥<%= @order["amount"].to_i %>元</p>
+    </div>
+  </div>
+<% when Order::JIFENBAO %>
+  <!-- JiFenBao -->
+  <div class="receiver-info">
+    <div class="cont">
+      <% if @order["survey_id"] %>
+        <p>来自调研：<%= @order["survey_title"] %></p>
+      <% end %>
+      <span class="name">奖励方法：集分宝</span>
+      <span class="aplipay_email">支付宝帐号：<span class="c-yellow"><%= @order["alipay_account"] %></span></span>
+      <p>奖励数量：￥<%= @order["amount"].to_i %>个</p>
+    </div>
+  </div>
+<% when Order::QQ_COIN %>
+  <!-- q bi -->
+  <div class="receiver-info">
+    <div class="cont">
+      <span class="name">礼品名称：Ｑ币</span>
+      <span>数量：<%= @order["amount"] %>个</span>
+      <span class="qq">QQ号：<span class="c-yellow"><%= @order["qq"] %></span></span>
+    </div>
+  </div>
+<% when Order::REAL, Order::VIRTUAL %>
+  <!-- gift -->
+  <div class="receiver-info">
+    <div class="title">
+      <div>收货信息</div>
+    </div>
+    <div class="cont">
+      <span class="name">收货人：<%= @order["receiver"] %></span>
+      <span class="phone">手机号码：<%= @order["mobile"] %></span>
+      <span class="postcode">邮政编码：<%= @order["postcode"] %></span>
+      <p style="line-height: 1.5em; word-break: break-all;">
+        <span class="address-detail">详细地址：<%= QuillCommon::AddressUtility.find_province_city_town_by_code(@order["address"].to_i) %><span style="margin-left: 30px;"><%= @order["street_info"] %></span></span>
+      </p>
+    </div>
+  </div>
+
+  <div class="delivery">
+    <div class="title">
+      <div>配送信息</div>
+    </div>
+    <div class="cont">
+      <span class="company">快递公司：<%= @order["express_info"]["company"] if @order["express_info"] %></span>
+      <span class="number">运单号码：<%= @order["express_info"]["tracking_number"] if @order["express_info"] %></span>
+      <span class="date">发货时间：<%= @order["express_info"]["sent_at"] if @order["express_info"]%></span>
+    </div>
+  </div>
+<% end %>

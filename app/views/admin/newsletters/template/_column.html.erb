@@ -1,0 +1,8 @@
+
+    <div class="article" id="<%= column['id'] %>">
+      <h3 ><%= column["title"] %></h3>
+      <% column['articles'].each do |order, article|%>
+        <%= render :partial => 'admin/newsletters/template/article', :object => article %>
+      <% end -%>
+      <div class="article_placeholder"></div>
+    </div>

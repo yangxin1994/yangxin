@@ -1,0 +1,5 @@
+    <span>第<%= "#{(paginator['current_page'] - 1) * paginator['per_page']}-#{paginator['current_page'] * paginator['per_page']}" %>项,共<%= paginator['total_page'] %>页</span>
+    <div class="btn-group" data-toggle="buttons-checkbox">
+      <a type="button" class="btn querilayer" href="?page=<%= paginator['previous_page'] %>&per_page=<%= paginator['per_page'] %>">&lt; </a>
+      <a type="button" class="btn querilayer" href="?page=<%= paginator['next_page'] %>&per_page=<%= paginator['per_page'] %>">&gt; </a>
+    </div>

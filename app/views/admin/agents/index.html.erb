@@ -1,0 +1,87 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/agents/index-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+  <li class="active">
+    <a href="/admin/agents">
+    <i class="icon-chevron-right"></i>
+    代理列表
+    </a>
+  </li>
+  <li>
+    <a href="/admin/agents/new">
+      <i class="icon-chevron-right"></i>
+      新建代理
+    </a>
+  </li>
+  <li>
+    <a href="/admin/agent_tasks">
+    <i class="icon-chevron-right"></i>
+    代理任务列表
+    </a>
+  </li>    
+<% end %>
+
+<div>
+  <span>
+    <form class="form-search" style="display:inline">
+      <div class="input-append">
+        <input type="text" name="keyword" class="span6 search-query">
+        <button type="submit" class="btn">Search</button>
+      </div>
+    </form>
+  </span>
+  <span class="pull-right">
+    <%= paginator_mini @agents %>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu pull-right">
+        <li><a href="?">全部</a></li>
+        <li class="divider"></li>
+      </ul>
+    </div>
+  </span>
+</div>
+
+<div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>代理名称</th>
+      <th>邮件</th>
+      <th>地区代码</th>
+      <th>代理状态</th>
+      <th>当前任务数量</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @agents["data"].each_with_index do |agent, i| %>
+    <tr>
+      <td><%= agent["name"] %></td>
+      <td><%= agent["email"] %></td>
+      <td><%= QuillCommon::AddressUtility.find_province_city_town_by_code(agent["region"]) %></td>
+      <td>
+        <%= agent_status_tag agent["status"] %>
+      </td>
+      <td>
+        <%= agent["open_agent_task_number"] %>
+      </td>
+      <td>
+        <div class="btn-group">
+          <a class="btn" href="<%= admin_agents_path %>/<%= agent["_id"] %>/edit" target="_blank"><i class="icon-edit"></i>编辑</a>
+          <button class="btn dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a href="javascript:void(0);" title="Delete" data-id="<%= agent["_id"] %>" class="delete"><i class="icon-remove"></i>删除</a></li>
+          </ul>
+        </div>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+</div>

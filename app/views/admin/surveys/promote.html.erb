@@ -1,0 +1,385 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/surveys/promote-bundle" %>
+  <script type="text/javascript">
+
+  </script>
+<% end %>
+<% content_for :sidenav do %>
+  <li>
+    <a href="/admin/surveys">
+    <i class="icon-chevron-right"></i>
+    调研列表
+    </a>
+  </li>
+  <li>
+    <a href="/admin/surveys/<%= params[:id]%>/questions">
+      <i class="icon-chevron-right"></i>
+      问卷查看
+    </a>
+  </li>
+  <li>
+    <a href="/admin/surveys/<%= params[:id]%>/reward_schemes">
+      <i class="icon-chevron-right"></i>
+      奖励方案
+    </a>
+  </li>
+  <li class="active">
+    <a href="/admin/surveys/<%= params[:id]%>/promote">
+      <i class="icon-chevron-right"></i>
+      推送渠道
+    </a>
+  </li>
+<% end %>
+
+<form action="/admin/surveys/<%="#{params["id"]}/update_promote" %>"
+      name="promote"
+      enctype="multipart/form-data"
+      method="post"
+      id="promote_form"
+      class="form-horizontal"
+>
+  <input value="put" type='hidden' name="_method">
+
+<ul class="nav nav-tabs" id="myTab">
+  <li class="active"><a href="#attr_setting">样本属性约束设置</a></li>
+  <li><a href="#promote_setting">推送渠道设置</a></li>
+</ul>
+ 
+<div class="tab-content">
+  <div class="tab-pane active" id="attr_setting" style="height:480px">
+    <% @promote['sample_attributes'].each_with_index do |sample_attribute, index| %>
+    <div class="attr-group">
+      <div class="control-group">
+        <label class="control-label" >样本属性类型:</label>
+        <div class="controls">
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              奖励方案
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropselect attr-select">
+              <li><a href="#attr-"  data-index="<%= index %>">属性选择</a></li>
+              <% @promote['sample_attributes_list'].each do |smp_attr| %>
+                <li><a href="#attr-<%= smp_attr['_id'] %>_<%= smp_attr['type'] %>" data-index="<%= index %>">[<%= attr_type_tag smp_attr['type'] %>] <%= smp_attr['name'] %></a></li>
+              <% end %>
+            </ul>
+            <input value="<%= sample_attribute['sample_attribute_id'] %>_<%= sample_attribute['type'] %>" type='hidden' class="attr-id" name="sample_attribute[attr_<%= index %>][id]">
+          </div>
+        </div>
+      </div>
+      <div class="control-group attr-setting" id="attr_setting_<%= index %>">
+        <label class="control-label" >属性相关设置:</label>
+        <div class="controls">
+            <textarea rows="6" name="sample_attribute[attr_<%= index %>][value]" placeholder="日期范围:每行包含两个元素的数组，两个元素均为YYYY/MM/DD,用逗号分隔，分别代表日期范围的最小值和最大值"><%= sample_attribute['value'] %></textarea>
+        </div>
+      </div>
+      <div class="control-group attr-setting" id="attr_setting_<%= index %>">
+        <div class="controls">
+            <a href="#" class="btn attr-delete" data-index="<%= index %>" >删除</a>
+        </div>
+      </div>       
+    <legend></legend>
+    </div>
+
+    <% end %>
+    <div class="control-group">
+      <label class="control-label" >样本属性类型:</label>
+      <div class="controls">
+        <div class="btn-group">
+          <button class="btn dropdown-toggle" data-toggle="dropdown">
+            奖励方案
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu dropselect attr-select">
+            <li><a href="#attr-"  data-index="new">属性选择</a></li>
+            <% @promote['sample_attributes_list'].each do |smp_attr| %>
+              <li><a href="#attr-<%= smp_attr['_id'] %>_<%= smp_attr['type'] %>" data-index="new">[<%= attr_type_tag smp_attr['type'] %>] <%= smp_attr['name'] %></a></li>
+            <% end %>
+          </ul>
+          <input value="" type='hidden' class="attr-id" name="sample_attribute[attr_new][id]">
+        </div>
+      </div>
+    </div>
+    <div class="control-group attr-setting" id="attr_setting_new">
+      <label class="control-label" >属性相关设置:</label>
+      <div class="controls">
+          <textarea rows="6" name="sample_attribute[attr_new][value]" placeholder="日期范围:每行包含两个元素的数组，两个元素均为YYYY/MM/DD,用逗号分隔，分别代表日期范围的最小值和最大值"></textarea>
+      </div>
+    </div>    
+  </div>
+
+  <!-- 分隔线:下面是推送渠道设置 -->
+
+  <div class="tab-pane" id="promote_setting">
+    <div class="control-group">
+      <label class="control-label" >调研社区发布:</label>
+      <div class="controls">
+        <div class="input-append">
+          <div class="btn-group" data-toggle="buttons-checkbox">
+            <button type="button" class="btn btn-info btn-ckb <%= "active" if @promote['quillme_promotable'] %> " data-toggle="quillme" >推送</button>
+            <input value="<%= @promote['quillme_promotable'] ? true : false %>" id="quillme_promotable" type="hidden" name="quillme[promotable]">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              奖励方案
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropselect" id="type_select">
+              <li><a href="#reward-">不设置奖励方案</a></li>
+              <% @promote['reward_schemes'].each do |reward_scheme| %>
+                <li><a href="#reward-<%= reward_scheme['_id'] %>"><%= reward_scheme['name'] %></a></li>
+              <% end %>
+            </ul>
+            <input value="<%= @promote['quillme_promote_info']['reward_scheme_id'] %>" type='hidden' id="quillme_reward_scheme" name="quillme[quillme_promote_setting][reward_scheme_id]">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" >邮件订阅:</label>
+      <div class="controls">
+        <div class="input-append">
+          <div class="btn-group" data-toggle="buttons-checkbox">
+            <button type="button" class="btn btn-info btn-ckb <%= "active" if @promote['email_promotable'] %> " data-toggle="email">推送</button>
+            <input value="<%= @promote['email_promotable'] ? true : false %>" id="email_promotable" type="hidden" name="email[promotable]">
+            <input class="input-medium" type="text" name="email[email_promote_setting][email_amount]" placeholder="每周期最大数量" value="<%= @promote['email_promote_info']['email_amount'] %>">
+
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              奖励方案
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropselect" id="type_select">
+              <li><a href="#reward-">不设置奖励方案</a></li>
+              <% @promote['reward_schemes'].each do |reward_scheme| %>
+                <li><a href="#reward-<%= reward_scheme['_id'] %>"><%= reward_scheme['name'] %></a></li>
+              <% end %>
+            </ul>
+            <input value="<%= @promote['email_promote_info']['reward_scheme_id'] %>" type='hidden' id="email_reward_scheme" name="email[email_promote_setting][reward_scheme_id]">
+          </div>
+        </div>
+        <label class="checkbox">
+          <input type="checkbox" id="email_to_undefined" value="true" name="email[email_promote_setting][promote_to_undefined_sample]" <%= 'checked' if @promote['email_promote_info']['promote_to_undefined_sample']%>> 推荐给未知样本
+        </label>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" >短信订阅:</label>
+      <div class="controls">
+        <div class="input-append">
+          <div class="btn-group" data-toggle="buttons-checkbox">
+            <button type="button" class="btn btn-info btn-ckb <%= "active" if @promote['sms_promotable'] %> " data-toggle="sms" >推送</button>
+            <input value="<%= @promote['sms_promote_promotable'] ? true : false %>" id="sms_promotable" type="hidden" name="sms[promotable]">
+            <input class="input-medium" type="text" name="sms[sms_promote_setting][sms_amount]" placeholder="每周期最大数量" value="<%= @promote['sms_promote_info']['sms_amount'] %>" name="sms[amount]">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              奖励方案
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropselect" id="type_select">
+              <li><a href="#reward-">不设置奖励方案</a></li>
+              <% @promote['reward_schemes'].each do |reward_scheme| %>
+                <li><a href="#reward-<%= reward_scheme['_id'] %>"><%= reward_scheme['name'] %></a></li>
+              <% end %>
+            </ul>
+            <input value="<%= @promote['sms_promote_info']['reward_scheme_id'] %>" type='hidden' id="sms_reward_scheme" name="sms[sms_promote_setting][reward_scheme_id]">
+          </div>
+        </div>
+        <label class="checkbox">
+          <input type="checkbox" id="sms_to_undefined" value="" name="sms[sms_promote_setting][promote_to_undefined_sample]" <%= 'checked' if @promote['sms_promote_info']['promote_to_undefined_sample']%>> 推荐给未知样本
+        </label>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" >浏览器插件:</label>
+      <div class="controls">
+        <div class="input-append">
+          <div class="btn-group" data-toggle="buttons-checkbox">
+            <button type="button" class="btn btn-info btn-ckb <%= "active" if @promote['broswer_extension_promotable'] %> " data-toggle="broswer_extension" >推送</button>
+            <input value="<%= @promote['broswer_extension_promotable'] ? true : false %>" id="broswer_extension_promotable" type="hidden" name="broswer_extension[promotable]">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              奖励方案
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropselect" id="type_select">
+              <li><a href="#reward-">不设置奖励方案</a></li>
+              <% @promote['reward_schemes'].each do |reward_scheme| %>
+                <li><a href="#reward-<%= reward_scheme['_id'] %>"><%= reward_scheme['name'] %></a></li>
+              <% end %>
+            </ul>
+            <input value="<%= @promote['broswer_extension_promote_info']['reward_scheme_id'] %>" type='hidden' id="broswer_extension_reward_scheme" name="broswer_extension[broswer_extension_promote_setting][reward_scheme_id]">
+          </div>
+        </div>
+          <label class="checkbox">
+            <input type="checkbox" id="broswer_extension_login_only" value="" name="broswer_extension[broswer_extension_promote_setting][login_sample_promote_only]" <%= 'checked' if @promote['broswer_extension_promote_info']['login_sample_promote_only']%>> 推荐给未知样本
+          </label>
+      </div>
+    </div>
+    <% (@promote['broswer_extension_promote_info']['filters'] || [{'key_words' => '', 'url' => ''}]).each_with_index do |filter, index| %>
+      <div class="control-group broswer_extension-info">
+        <label class="control-label" >浏览器插件详细设置:</label>
+        <div class="controls">
+          <input type="text" placeholder="在这里输入关键字"  value="<%= filter['key_words'] %>" id="weibo_text" name="broswer_extension[broswer_extension_promote_setting][filters][<%= index + 1 %>][key_words]" />
+        </div>
+      </div>
+      <div class="control-group broswer_extension-info">
+        <div class="controls">
+          <input type="text" placeholder="在这里输入网址" value="<%= filter['url'] %>" id="weibo_text" name="broswer_extension[broswer_extension_promote_setting][filters][<%= index + 1%>][url]" />
+        </div>
+      </div>  
+    <% end -%>
+      <div>
+        <div class="control-group broswer_extension-info">
+          <div class="controls">
+            <a href="#add_browser_extension_setting" id="add_browser_extension_setting" data-toggle="<%= @promote['broswer_extension_promote_info']['filters'].try('size') || 0 %>" class="btn btn-link">添加一组</a>
+          </div>
+        </div>
+      </div>
+
+    <div class="control-group">
+      <label class="control-label" >微博官方账号发布:</label>
+      <div class="controls">
+        <div class="input-append">
+          <div class="btn-group" data-toggle="buttons-checkbox">
+            <button type="button" class="btn btn-info btn-ckb <%= "active" if @promote['weibo_promotable'] %> " data-toggle="weibo" >推送</button>
+            <input value="<%= @promote['weibo_promotable'] ? true : false %>" id="weibo_promotable" type="hidden" name="weibo[promotable]">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              奖励方案
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropselect" id="type_select">
+              <li><a href="#reward-">不设置奖励方案</a></li>
+              <% @promote['reward_schemes'].each do |reward_scheme| %>
+                <li><a href="#reward-<%= reward_scheme['_id'] %>"><%= reward_scheme['name'] %></a></li>
+              <% end %>
+            </ul>
+            <input value="<%= @promote['weibo_promote_info']['reward_scheme_id'] %>" type='hidden' id="weibo_reward_scheme" name="weibo[weibo_promote_setting][reward_scheme_id]">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-group weibo-info">
+      <label class="control-label" >微博文字:</label>
+      <div class="controls">
+        <textarea id="weibo_text" name="weibo[weibo_promote_setting][text]"><%= @promote['weibo_promote_info']['text'] %></textarea>
+      </div>
+    </div>
+    <div class="control-group weibo-info">
+      <label class="control-label" >图片地址:</label>
+      <div class="controls">
+        <input value="<%= @promote['weibo_promote_info']['image'] %>" type='text' id="weibo_text" name="weibo[weibo_promote_setting][image]" placeholder="jpg, png 等格式"/>
+      </div>
+    </div>
+    <div class="control-group weibo-info">
+      <label class="control-label" >视频地址:</label>
+      <div class="controls">
+        <input value="<%= @promote['weibo_promote_info']['video'] %>" type='text' id="weibo_text" name="weibo[weibo_promote_setting][video]" palceholder=""/>
+      </div>
+    </div>
+    <div class="control-group weibo-info">
+      <label class="control-label" >音频地址:</label>
+      <div class="controls">
+        <input value="<%= @promote['weibo_promote_info']['audio'] %>" type='text' id="weibo_text" name="weibo[weibo_promote_setting][audio]" palceholder=""/>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" >通过代理发布:</label>
+      <div class="controls">
+        <div class="input-append">
+          <div class="btn-group" data-toggle="buttons-checkbox">
+            <button type="button" class="btn btn-info btn-ckb <%= "active" if @promote['agent_promotable'] %> " data-toggle="agent" >推送</button>
+            <input value="<%= @promote['agent_promotable'] ? true : false %>" id="agent_promotable" type="hidden" name="agent[promotable]">
+
+          </div>
+        </div>
+      </div>
+    </div>
+      <% @promote['agent_promote_info']['agent_tasks'].each_with_index do |agent_task, index| %>
+        <div class="control-group agent-info">
+          <label class="control-label">奖励方案设置:</label>
+          <div class="controls">
+            <div class="btn-group">
+              <button class="btn dropdown-toggle" data-toggle="dropdown">
+                奖励方案
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu dropselect agent-reward" id="type_select_0">
+                <li><a href="#reward-">不设置奖励方案</a></li>
+                <% @promote['reward_schemes'].each do |reward_scheme| %>
+                  <li><a href="#reward-<%= reward_scheme['_id'] %>"><%= reward_scheme['name'] %></a></li>
+                <% end %>
+              </ul>
+              <input value="<%= agent_task['reward_scheme_id'] %>" type='hidden' name="agent[agent_promote_setting][agents][<%= index %>][reward_scheme_id]" palceholder=""/>
+            </div>
+          </div>
+        </div>
+        <div class="control-group agent-info">
+          <label class="control-label">代理选择:</label>
+          <input value="<%= agent_task['_id'] %>" type='hidden' name="agent[agent_promote_setting][agents][<%= index %>][task_id]" />
+          <div class="controls">
+            <div class="btn-group">
+              <button class="btn dropdown-toggle" data-toggle="dropdown">
+                代理选择
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu dropselect" id="agent_select_<%= index %>">
+                <% @promote['agent_promote_info']['agents'].each do |agent| %>
+                <li><a href="#agent-<%= agent['_id'] %>"><%= agent['email'] %></a></li>
+                <% end -%>
+              </ul>
+              <input value="<%= agent_task['agent_id'] %>" type='hidden' class="abc" name="agent[agent_promote_setting][agents][<%= index %>][agent_id]" palceholder=""/>
+            </div>
+          </div>
+        </div>
+        <div class="control-group agent-info">
+          <label class="control-label">回收数量:</label>
+          <div class="controls">
+            <input value="<%= agent_task['count'] %>" type='text' name="agent[agent_promote_setting][agents][<%= index %>][count]" palceholder=""/>
+          </div>
+        </div>   
+        <div class="control-group agent-info">
+          <label class="control-label">描述:</label>
+          <div class="controls">
+            <textarea name="agent[agent_promote_setting][agents][<%= index %>][description]" rows ="5"><%= agent_task['description'] %></textarea>
+          </div>
+        </div>
+      <% end %>
+      <div>
+        <div class="control-group agent-info">
+          <div class="controls">
+            <a href="#add_agent_setting" id="add_agent_setting" data-toggle="<%= @promote['agent_promote_info']['agent_tasks'].try('size') || 0 %>" class="btn btn-link">添加一组</a>
+          </div>
+        </div>
+      </div>
+
+  <!--   <div class="control-group">
+      <label class="control-label" >设置为热点小调查:</label>
+      <div class="controls">
+        <div class="input-append">
+          <div class="btn-group" data-toggle="buttons-checkbox">
+            <button type="button" class="btn btn-info">推送</button>
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              奖励方案
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropselect" id="type_select">
+              <% @promote['reward_schemes'].each do |reward_scheme| %>
+                <li><a href="#reward-<%= reward_scheme['_id'] %>"><%= reward_scheme['_id'] %></a></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+  </div>
+</div>
+
+
+  <div class="pull-right">
+  <%= link_to "<<返回列表", "" %>
+  <button type="submit" class="btn btn-primary">确认无误</button>
+
+  </div>
+</form>

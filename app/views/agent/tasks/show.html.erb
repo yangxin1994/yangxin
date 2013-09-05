@@ -1,0 +1,46 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/agent/agent_tasks/show-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+  <li>
+    <a href="/agent/tasks">
+      <i class="icon-chevron-right"></i>
+      代理任务列表
+    </a>
+  </li>
+  <li class="active">
+    <a href="javascript:void(0)">
+      <i class="icon-chevron-right"></i>
+      代理任务详情
+    </a>
+  </li>
+  <li>
+    <a href="/agent/answers?agent_task_id=<%= params["id"] %>">
+      <i class="icon-chevron-right"></i>
+      答案审核
+    </a>
+  </li>   
+<% end %>
+
+<div class="well">
+  <h2><%= @task["survey_title"] %></h2>
+  <br>
+  <p>当前状态: <%= agent_task_status_tag @task["status"] %></p>
+
+  <p>需要回收的总体数量:&nbsp;&nbsp;&nbsp; <%= @task["count"] %></p>
+  <p>等待代理审核的数量:&nbsp;&nbsp;&nbsp; <%= @task["agent_under_review_count"] %></p>
+  <p>被代理拒绝掉的数量:&nbsp;&nbsp;&nbsp; <%= @task["agent_reject_count"] %></p>
+  <p>等待管理员审核的答案数量:&nbsp;&nbsp;&nbsp; <%= @task["under_review_count"] %></p>
+  <p>管理员审核通过答案数量:&nbsp;&nbsp;&nbsp; <%= @task["finished_count"] %></p>
+  <p>管理员审核拒绝的数量:&nbsp;&nbsp;&nbsp; <%= @task["reject_count"] %></p>
+  <p>描述:<br/><%= @task["description"] %></p>
+
+  <% if @task["status"] == 1 %>
+    <button class="btn btn-primary" type="button" id="btn_close" 
+      data-task="<%= @task["_id"] %>" 
+      data-loading-text="关闭中..."
+      data-complete-text="任务已关闭">关闭代理任务</button> 
+  <% end -%>
+</div>

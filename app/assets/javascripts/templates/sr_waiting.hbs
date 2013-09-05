@@ -1,0 +1,12 @@
+<div class='page'>
+	<div class='q-filler'>
+		<div class='waiting'>
+			{{#if error}}
+			加载出错，<a href='javascript:void(0);'>重试</a>
+			{{else}}
+			<img src="/assets/loading.gif" /><br />
+			<span>{{{msg}}}</span>
+			{{/if}}
+		</div>
+	</div>
+</div>

@@ -1,0 +1,84 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/users-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/users-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+<%if @lottery_codes.success %>
+<div class="lottery_codes"> 
+	<div class="title">
+		<h5>抽奖记录<h5>
+		<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/users/<%=params[:id]%>">返回个人用户管理</a><h5>
+	</div>
+	
+	<div class="table">
+		<div class="head">
+			<h5 class="iFrames">
+				列表
+			</h5>
+		</div>
+				
+		<table cellspacing="0" cellpadding="0" border="0" id="example" class="display">
+			<thead>
+				<tr>
+					<th class="" rowspan="1" colspan="1" style="width: 10px;">
+						<input class="check-all" type="checkbox" />
+					</th>
+					<th>来源</th>
+					<th>抽奖活动</th>
+					<th>抽奖时间</th>
+					<th>抽奖状态</th>
+				</tr>
+			</thead>
+			
+			<tbody>
+				<% @lottery_codes.value['data'].each do |code|%>
+					<tr id="<%= code['_id']%>">
+						<td><input type="checkbox" /></td>
+						<td>
+							<% case code['obtained_by'].to_i%>
+							<%when 0%>
+								积分兑换
+							<%when 1%>
+								答题获取
+							<%when 2%>
+								系统添加
+							<%end%>
+						</td>
+						<td>                           
+							<a href="/admin/lotteries/<%= code['_id']%>" title="点击查看详细">
+								<%= truncate(code["lottery_title"], :length => 24, :omission => "...") %></a>
+						</td>
+						<td><%= code["created_at"].to_s[0,16].gsub(/[T]/, ' ') %></td>
+						<td>
+							<% case code['status'].to_i%>
+							<%when 0%>
+								待抽奖
+							<%when 1%>
+								未中奖
+							<%when 2%>
+								中奖未下订单
+							<%when 4 %>
+								中奖已下订单
+							<%end%>
+						</td>
+					</tr>
+				<%- end %>
+			</tbody>
+						
+		</table>
+		<tfoot>
+			<tr>
+				<td colspan="6"><%= paginator_tag @lottery_codes.value %></td>
+			</tr>
+		</tfoot>
+
+	</div>
+</div>
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @lottery_codes.value %></p>
+</div>
+<%end%>	

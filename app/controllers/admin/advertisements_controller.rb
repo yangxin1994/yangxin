@@ -1,79 +1,133 @@
-class Admin::AdvertisementsController < Admin::ApplicationController
+# encoding: utf-8
 
-	def maping(advertisement)
-		user = User.find_by_id_including_deleted(advertisement['user_id'].to_s)
-		advertisement['user_email'] = user.email if user
-		advertisement
+# coding: utf-8
+
+class Admin::AdvertisementsController < Admin::AdminController
+
+	layout 'admin_new'
+	
+	before_filter :get_client
+
+	def get_client
+		@client = BaseClient.new(session_info, "/admin/advertisements")
 	end
 
-	# GET /admin/advertisements
-	# GET /admin/advertisements.json
+	# ****************************
+	
+	# GET
 	def index
-		@advertisements = Advertisement.all 
-		if params[:advertisement_type]
-			types = []
-			Advertisement::MAX_TYPE.downto(0).each { |element| 
-				if params[:advertisement_type].to_i / (2**element) == 1 then
-					types << 2**element
-				end
-			}
-			@advertisements = @advertisements.where(:advertisement_type.in => types)
+		hash_params={:page=> page, :per_page => per_page}
+		hash_params.merge!({:activate => params[:activate].to_s == "true"}) if params[:activate]
+		@advertisements = @client._get(hash_params)
+		_sign_out and return if @advertisements.require_login?
+
+		respond_to do |format|
+			format.html
+			format.json { render json: @advertisements}
 		end
-		@advertisements = @advertisements.where(:title => Regexp.new(params[:title].to_s)) if params[:title]
-		@advertisements =  @advertisements.where(:activate => params[:activate].to_s == 'true') if params[:activate]
-			
-		render_json_auto auto_paginate(@advertisements.desc(:created_at))
 	end
-	
-	# GET /admin/advertisements/1 
-	# GET /admin/advertisements/1.json
+
+	# GET
 	def show
-		@advertisement = Advertisement.find_by_id(params[:id])
-		@advertisement = maping(@advertisement) if @advertisement.is_a? Advertisement
-
+		@advertisement = @client._get({},"/#{params[:id]}")
 		respond_to do |format|
-			format.html # show.html.erb
-			format.json { render_json_auto @advertisement }
+			format.html
+			format.json { render json: @advertisement}
 		end
 	end
 
-	# GET /admin/advertisements/new
-	# GET /admin/advertisements/new.json
+	#
 	def new
-		@advertisement = Advertisement.new
-
-		respond_to do |format|
-			format.html # new.html.erb
-			format.json { render_json_auto @advertisement }
-		end
 	end
 
-	# GET /admin/advertisements/1/edit
-	def edit
-		@advertisement = Advertisement.find_by_id(params[:id])
-
-		respond _to do |format|
-			format.html # show.html.erb
-			format.json { render_json_auto @advertisement }
-		end
-	end
-	
-	# POST /admin/advertisements
-	# POST /admin/advertisements.json
+	# POST
 	def create
-		render_json_auto Advertisement.create_advertisement(params[:advertisement], @current_user)	
+		photo = ImageUploader.new
+		photo.store!(params[:image_location]) if params[:image_location]
+
+		if photo.url.to_s.strip != ""
+			@result = @client._post({
+				:advertisement => {
+						:title => params[:title],
+						:linked => params[:linked],
+						:image_location => photo.url.to_s,
+						:activate => !params[:activate].to_s.blank?
+					}
+			})
+		else
+			@result = Common::ResultInfo.new({success: false, value: 'Image no exist.'})
+		end
+
+		if @result.success
+			flash[:notice] ="创建成功!"
+			# redirect_to :action => :index
+		else
+			flash[:notice] = "创建失败!请重新创建,并保证完整性和标题唯一性!"
+			# render :action => :index
+		end
+		redirect_to :action => :index
 	end
 
-	# PUT /admin/advertisements/1
-	# PUT /admin/advertisements/1.json
+	# PUT
 	def update
-		render_json_auto Advertisement.update_advertisement(params[:id], params[:advertisement], @current_user)
+		photo = ImageUploader.new
+
+		retval = @client._get({}, "/#{params[:id]}")
+		photo.retrieve_from_store!(retval.value['image_location'].to_s.split('/').last) if retval.success
+		
+		if params[:image_location] 
+			# del before
+			# but not work!
+			begin
+				photo.remove!
+			rescue Exception => e
+				
+			end
+			# store new one
+			photo.store!(params[:image_location])
+		end
+
+		if photo.url.to_s.strip != ""
+			hash = {
+						:title => params[:title],
+						:linked => params[:linked],
+						# protect the path
+						:image_location => photo.url.to_s,
+						:activate => !params[:activate].to_s.blank?
+					}
+			@advertisement = @client._put({
+				:advertisement => hash
+			}, "/#{params[:id]}")
+		else
+			@advertisement = Common::ResultInfo.new({success: false, value: 'Image no exist.'})
+		end
+
+		if @advertisement.success
+			flash[:notice] ="更新成功!"
+		else
+			flash[:notice] = "更新失败!请重新更新,并保证完整性和标题唯一性!"
+		end
+
+		redirect_to request.url
 	end
 
-	# DELETE /admin/advertisements/1
-	# DELETE /admin/advertisements/1.json
+	# DELETE
 	def destroy
-		render_json_auto Advertisement.destroy_by_id(params[:id])
+		photo = ImageUploader.new
+		retval = @client._get({}, "/#{params[:id]}")
+
+		@result = @client._delete({}, "/#{params[:id]}")
+
+		if @result.success
+			photo.retrieve_from_store!(retval.value['image_location'].to_s.split('/').last)
+			begin
+				photo.remove!
+			rescue Exception => e
+				
+			end
+		end
+
+		render :json => @result
 	end
 
 end

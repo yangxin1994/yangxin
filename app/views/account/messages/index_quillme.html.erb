@@ -1,0 +1,47 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+		window.total_page = <%= raw (@messages ? @messages["total_page"] : 0) %>;
+	</script>
+	<%= javascript_include_tag "pages/account/messages-bundle" %>
+	<%= stylesheet_link_tag "pages/account/messages_quillme-bundle", :media => "all" %>
+<% end %>
+
+<% content_for :left do %>
+<div class="content-account-box redBorder">
+	<h3 class="content-left-title whiteTxt f14 b redBg">消息列表</h3>
+	<div class="w896 fix">
+		<ul class="messages">
+			<% if @messages != nil %>
+			<% @messages["data"].each do |message| %>
+				<li>
+					<span class="redTxt b l mr10"><%= @messages["data"].index(message) + 1 %>.</span>
+					<span class="l"><%= message["title"] %></span>
+					<span class="l ml10"><%= Time.iso8601(message["updated_at"]).localtime.strftime("(%Y.%m.%d %H:%M)") %></span>
+					<!-- <span class="unread r">未读</span> -->
+					<p style="display:none;"><%= message["content"] %></p>
+				</li>
+			<% end %>
+			<% end %>
+			<!--
+			<li class="graybg">
+				<span class="redTxt b l mr10">4.</span>
+				<span class="l"><a href="javascript:void(0);">您的“2012满意度调查”<b class="redTxt b">问卷审核结果</b>提醒。</a></span>
+				<span class="l ml10">(2012.9.8 10:50)</span>
+				<span class="read r g9">已读</span>
+				<p>
+					这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字这里是摘要文字
+				</p>
+			</li>
+			-->
+		</ul>
+		<div class="messages-bottom">
+			<span id="pagination">
+				<span class="previous" title="上一页"></span>
+				<span class="current"></span>
+				<span class="next" title="下一页"></span>
+			</span>
+		</div>					
+	</div>
+</div>
+<% end %>

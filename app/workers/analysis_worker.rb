@@ -21,20 +21,20 @@ class AnalysisWorker
 		if existing_analysis_result.nil?
 			# create analysis result
 			analysis_result = AnalysisResult.create(:result_key => result_key,
-													:task_id => task_id,
-													:tot_answer_number => tot_answer_number,
-													:screened_answer_number => screened_answer_number,
-													:ongoing_answer_number => ongoing_answer_number,
-													:wait_for_review_answer_number => wait_for_review_answer_number)
+				:task_id => task_id,
+				:tot_answer_number => tot_answer_number,
+				:screened_answer_number => screened_answer_number,
+				:ongoing_answer_number => ongoing_answer_number,
+				:wait_for_review_answer_number => wait_for_review_answer_number)
 		else
 			# create analysis result
 			analysis_result = AnalysisResult.create(:result_key => result_key,
-													:task_id => task_id,
-													:tot_answer_number => tot_answer_number,
-													:screened_answer_number => screened_answer_number,
-													:ref_result_id => existing_analysis_result._id,
-													:ongoing_answer_number => ongoing_answer_number,
-													:wait_for_review_answer_number => wait_for_review_answer_number)
+				:task_id => task_id,
+				:tot_answer_number => tot_answer_number,
+				:screened_answer_number => screened_answer_number,
+				:ref_result_id => existing_analysis_result._id,
+				:ongoing_answer_number => ongoing_answer_number,
+				:wait_for_review_answer_number => wait_for_review_answer_number)
 			return true
 		end
 		survey.analysis_results << analysis_result

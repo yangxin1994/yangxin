@@ -1,0 +1,365 @@
+//=require ./fillers/base
+//=require ui/widgets/od_popup
+
+@import "common";
+@import "compass/css3";
+@import "compass/utilities/general/min";
+@import "compass/utilities/general/clearfix";
+@import "filler/default/social/*.png";
+
+@mixin page-component {
+	width: 900px;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
+}
+$msg-bg: #fff0cc;
+
+#sf {
+	@include min-height(100%);
+	@include no-extra;
+	font-size: 14px;
+	text-align: center;
+	background: image-url("filler/default/icon/bg.png");
+	background-color: #333;
+	a {
+		color: #ffaa3c;
+		&:hover { text-decoration: underline; }
+	}
+}
+
+#sf_banner {
+	background: #212121;
+	width: 100%;
+	height: 60px;
+	font-size: 13px;
+
+	>.inner {
+		@include page-component;
+
+		#logo {
+			float: left;
+			img { 
+				border: none; 
+				margin-top: 15px;
+			}
+		}
+
+		.preview {
+			float: right;
+			@include one-line(60px);
+			font-weight: bold;
+			color: #999;
+			margin-right: 0.5em;
+		}
+
+		#progress_info {
+			float: right;
+			@include one-line(60px);
+			font-weight: bold;
+			color: #fff;
+			span {
+				em {margin: 0 5px;}
+			}
+		}
+	}
+}
+.progress-con {
+	margin-bottom: 30px;
+	#progress-line {
+		height: 2px;
+		width: 100%;
+		background: #4d4d4d;
+	}
+	#progress {
+		@include page-component;
+		@include clearfix;
+		margin-bottom: -4px;
+		height: 4px;
+		background: #666;
+		@include border-radius(2px);
+		> em {
+			display: block;
+			height: 4px;
+			background: $yellow;
+			@include border-radius(2px);
+		}
+	}
+}
+
+#sf_main {
+	@include page-component;
+	background: #fafafa;
+	@include border-radius(10px);
+	padding: 30px 0;
+	/*@include single-box-shadow(#222, 0px, 0px, 15px);*/
+	>.error-con {
+		// error message for link expire or survey closed
+		background: $msg-bg;
+		@include border-radius(5px);
+		padding: 20px;
+		text-align: center;
+		margin: 0 50px;
+		color: #f00;
+	}
+}
+
+/* survey welcome page */
+.welcome {
+	padding: 10px 50px;
+	>h1 {
+		font-size: 24px;
+		font-weight: bold;
+		margin-top: 20px;
+	}
+	>h2 {
+		font-size: 16px;
+		font-weight: bold;
+		color: #666;
+		margin-top: 15px;
+	}
+	.desc {
+		margin: 30px 0;
+		line-height: 1.8em;
+		text-indent: 2em;
+		strong {font-weight: bold;}
+		em {font-style: italic;}
+	}
+}
+
+/* remind message when redoing survey */
+#remind {
+	@include page-component;
+	color: #f00;
+	margin-top: -10px; margin-bottom: 20px;
+}
+
+/* message container*/
+.msg {
+	background: $msg-bg;
+	@include border-radius(5px);
+	padding: 15px 20px;
+	margin: 20px 0;
+	line-height: 20px;
+	> em {
+		@include inline-block;
+		@include size(40px, 40px);
+		vertical-align: middle;
+		margin-right: 15px;
+		background: image-url("filler/default/icon/time.png") no-repeat;
+	}
+	> span {
+		@include inline-block;
+		width: 900px - 50*2 - 20*2 - 32 - 30;
+		vertical-align: middle;
+		line-height: 1.8em;
+		a {
+			color: #ffaa3c;
+			font-weight: bold;
+			&:hover { text-decoration: underline; }
+		}
+		> em { 
+			color: #ffaa3c;
+			margin: 0 5px;
+		}
+	}
+	&.time { >em { background-image: image-url("filler/default/icon/time.png");}  }
+	&.warn { >em { background-image: image-url("filler/default/icon/warn.png");} }
+	&.award { >em { background-image: image-url("filler/default/icon/award.png");} }
+}
+
+.form {
+	text-align: center;
+
+	$w: 280px;
+
+	input[type="text"], input[type="password"]{
+		display: block;
+		margin: 15px auto 15px auto;
+		width: $w - 50;
+		padding:10px 10px 10px 40px;
+		font-size: 14px;
+		@include border-radius(4px);
+		background: no-repeat 12px 12px;
+		background-color: #f2f2f2;
+		&:focus { background-color: #fff; }
+		&.email {
+			background-image: image-url("filler/default/icon/email.png");
+			&:focus {
+				background-image: image-url("filler/default/icon/email_active.png");
+			}
+		}
+		&.username {
+			background-image: image-url("filler/default/icon/username.png");
+			&:focus {
+				background-image: image-url("filler/default/icon/username_active.png");
+			}
+		}
+	}
+	input[type="password"] {
+		background-image: image-url("filler/default/icon/password.png");
+		&:focus {
+			background-image: image-url("filler/default/icon/password_active.png");
+		}
+	}
+
+	button {
+		display: block;
+		margin: 20px auto 40px auto;
+		width: $w;
+		@include one-line(42px);
+		font-size: 16px;
+		font-weight: bold;
+		background: #fc0;
+		border: 1px solid #ffb300; 
+		@include border-radius(4px);
+		cursor: pointer;
+		&:hover {
+			background: #fac925;
+		}
+		&:active {
+			background: #E9BD25;
+		}
+		&[disabled], &[disabled]:hover, &[disabled]:active {
+			background: #ccc;
+			border-color: #bbb;
+			cursor: default;
+		}
+	}
+}
+
+#sf_footer {
+	@include page-component;
+	text-align: center;
+	color: #444;
+	padding: 20px 0;
+	font-size: 12px;
+	a {
+		color: #444;
+		&:hover { 
+			color: #666;
+			text-decoration: none; 
+		}
+	}
+	.ad {
+		// ad
+	}
+}
+
+/* spread container*/
+#spread {
+	border-top: 1px solid #cacaca;
+	padding: 0;
+
+	#spread_inner {
+		border-top: 1px solid #fff;
+		padding: 30px 50px 10px 50px;
+		font-size: 13px;
+		margin: 0;
+	}
+
+	h1 {
+		padding-top: 1em; 
+		color: #666;
+		em {
+			font-weight:bold; 
+			color: $blue;
+			margin: 0 5px;
+			font-size: 16px;
+		}
+	}
+
+	input[type='text'] {
+		color: $blue;
+		padding:2px 5px;
+		height:24px;
+		line-height: 16px;
+		width: 425px;
+		font-weight: bold;
+	}
+
+	button {
+		margin: 0 1em 0 0.5em;
+		height: 30px;
+	}
+
+	a.share-icon {
+		@include inline-block;
+		width:20px;
+		height:20px;
+		margin-left: 5px;
+
+		&.icon-SinaWeibo{@include social-sprite(sina);}
+		&.icon-TencentWeibo{@include social-sprite(tencent);}
+		&.icon-QQSpace{@include social-sprite(qqspace);}
+		&.icon-Renren{@include social-sprite(renren);}
+		&.icon-Douban{@include social-sprite(douban);}
+		&.icon-Kaixin001{@include social-sprite(kaixin001);}
+		&.icon-Diandian{@include social-sprite(diandian);}
+		&.icon-Fetion{@include social-sprite(fetion);}
+		&.icon-Gmail{@include social-sprite(gmail);}
+	}
+}
+
+/* page button */
+#page_buttons {
+	@include page-component;
+	text-align: center;
+	padding: 30px 0;
+
+	button {
+		background: #FAC324;
+		@include border-radius(4px);
+		font-size: 16px;
+		font-weight: bold;
+		padding: 0 30px;
+		margin: 0 5px;
+		@include one-line(46px);
+		cursor: pointer;
+		border: none;
+		/* @include single-box-shadow(#222, 0px, 0px, 5px); */
+		&:hover {
+			background: #fac925;
+		}
+		&:active {
+			background: #E9BD25;
+			@include box-shadow(#222 0 0 5px, #666 0 1px 4px 1px inset);
+		}
+		&[disabled], &[disabled]:hover, &[disabled]:active  {
+			background: #666;
+			color: #333;
+			cursor: default;
+		}
+
+		&.light {
+			background: lighten(#FAC324, 35%);
+			&:hover {
+				background: lighten(#fac925, 35%);
+			}
+			&:active {
+				background: lighten(#E9BD25, 35%);
+			}
+		}
+	}
+}
+
+/* survey body */
+.header, .footer {
+	@include one-line(20px);
+	text-align: right;
+	color: #999;
+	padding: 0 50px;
+	font-size: 13px;
+}
+.s-title {
+	font-size: 24px;
+	font-weight: bold;
+	text-align: center;
+	padding: 10px 50px 35px 50px;
+	border-bottom: 1px solid #cacaca;
+}
+
+.q-filler {
+	&.top { border-top: none; }
+	&.bottom { border-bottom: none; }
+}

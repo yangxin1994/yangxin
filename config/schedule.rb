@@ -20,7 +20,11 @@
 # Learn more: http://github.com/javan/whenever
 
 every 10.minutes do
-	runner "QuotaEmailWorker.perform_async"
+	runner "EmailInvitationWorker.perform_async"
+end
+
+every 1.days, :at => '4:30 pm' do
+	runner "SmsInvitationWorker.perform_async"
 end
 
 every 1.days do
@@ -29,4 +33,8 @@ end
 
 every 1.days do
 	command "cd ~/db_bak/; mongodump -d oops_data_production -o './' -u oopsdata -password=o2psllyscdata; tar -zcf oops_data_production_$(date +%d-%m-%y).tar.gz oops_data_production; rm -rf oops_data_production"
+end
+
+every 1.days do
+	runner "SampleAttribute.make_statistics"
 end

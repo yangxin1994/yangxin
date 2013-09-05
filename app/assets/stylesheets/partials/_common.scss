@@ -1,0 +1,71 @@
+@import "compass/css3/inline-block";
+@import "compass/css3/border-radius";
+@import "compass/css3/box-shadow";
+
+$url-widgets-bg: image-url("widgets/kj_bg.png");
+$url-widgets-repeatX-bg: image-url("widgets/widgets-repeatX-bg.png");
+$url-widgets-icon: image-url("widgets/kj_icon_bg.png");
+$url-widgets-btn: image-url("widgets/question_class.png");
+
+$yellow: #f5c000;
+$yellow-light: #fff6d4;
+$blue: #6d91a9;
+$blue-light: #e2e9ee;
+$red:#f14646;
+$red1:#f25d5d;
+$red2:#d93631;
+$blue:#5691f0;
+$blue1:#6fa0f0;
+$blue2:#4576c6;
+
+@mixin one-line($height) {
+	height: $height;
+	line-height: $height;
+	vertical-align: middle;
+}
+
+@mixin square($edge) {
+	@include inline-block;
+	width: $edge;
+	@include one-line($edge);
+}
+
+@mixin size($width, $height) {
+	width: $width;
+	height: $height;
+}
+
+@mixin bp($top, $left) {
+	background-position: $top $left;
+}
+
+@mixin abs-pos($top: 0px, $left: 0px) {
+	position: absolute;
+	top: $top;
+	left: $left;
+}
+
+@mixin ipt() {
+	border: 1px solid #ccc;
+	@include border-radius(3px);
+	padding: 2px;
+	line-height:1.5em;
+	
+	&:focus {
+		border-color: rgb(245, 192, 0);
+		@include box-shadow(inset 0 1px 3px rgba(0, 0, 0, 0.05), 0 0 8px rgba(245, 192, 0, .6));
+		outline: none;
+	}
+	
+	&.error {
+		border-color: rgb(255, 0, 0);
+		@include box-shadow(inset 0 1px 3px rgba(0, 0, 0, 0.05), 0 0 8px rgba(255, 0, 0, .6));
+		outline: none;
+		color: #f00;
+	}
+}
+
+@mixin no-extra{
+	padding: 0;
+	margin: 0;
+}

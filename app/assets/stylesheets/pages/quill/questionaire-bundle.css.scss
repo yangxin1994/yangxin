@@ -1,0 +1,24 @@
+//=require jquery.pageguide.cust
+//=require quill/views/survey_editor
+//=require ui/widgets/od_icon_buttons
+//=require ui/widgets/od_popup
+
+// load bootstrap tooltip css
+@import "twitter/bootstrap/variables";
+@import "twitter/bootstrap/mixins";
+@import "twitter/bootstrap/tooltip";
+
+.scrollup{
+	@include size(40px, 40px);
+	text-indent:-9999px;
+	@include opacity(30);
+	position:fixed;
+	bottom:50px;
+	right:50px;
+	display:none;	
+	background: image-url("icon_top.png") no-repeat;
+
+	&:hover {
+		@include opacity(50);
+	}
+}

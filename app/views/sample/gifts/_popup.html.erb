@@ -1,0 +1,170 @@
+<div id="recever" style="display:none;">
+  <div class="exc_notices">
+    <h1>补全收货人地址</h1>
+    <div class="sub_infor">
+      <div class="basic_document">
+        <input class="name" name="receiver" type="text" placeholder="姓名" />
+        <input class="phone_num" name="mobile" type="text" placeholder="电话" />
+        <input class="postcode" name="postcode" type="text" placeholder="邮政编码" />
+        <div style="clear:both;"></div>
+      </div>
+      <div class="address">
+        <span class="add">所在地：</span>
+        <span class="notice" style="display:none;color:#ec1717;">请输入正确的地址信息</span>
+        <div id="recerver_address"></div>
+      </div>
+      <textarea name="street_info" placeholder="街道地址（不需要填写省/市/区）"></textarea>
+      <div class="tj_sub">
+        <div class="synchro">
+          <input type="checkbox" name="info_sys"/><span>同步到个人资料</span>
+        </div>
+        <input class="sub_btn" type="button" value="提交" />
+        <div style="clear:both;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="order_ok" style="display:none;">
+  <div class="exc_notices">
+    <h2><img src="/assets/od-quillme/order_s.png" /><span>恭喜您，订单提交成功！</span></h2>
+    <div class="order_details">
+      <div class="answer_look">
+        <input class="answer close_f"  data="users/orders?scope=4" type="button" value="查看订单" />
+        <input class="look_over "  type="button" value="分享给好友" />
+      </div>
+      <div class="share_gift">
+        <div>
+          <a href="javascript:void(0);" s_to="SinaWeibo" target="_blank"><img src="/assets/image/sample/sina.png"  width="20" height="20" /></a>
+          <a href="javascript:void(0);" s_to="TencentWeibo" target="_blank"><img src="/assets/image/sample/tecent.png"  width="20" height="20" /></a>
+          <a href="javascript:void(0);" s_to="Douban" target="_blank"><img src="/assets/image/sample/dou.png" width="  20" height="20" /></a>
+          <a href="javascript:void(0);" s_to="Renren" target="_blank"><img src="/assets/image/sample/ren.png" width="20" height="20" /></a>          
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div id="contro" style="display:none;">
+  <div class="exc_notices">
+    <h2><img src="/assets/od-quillme/right.jpg" width="30" height="26" />恭喜您，订单提交成功！</h2>
+    <div class="order_details">
+      系统审核通过后我们会把礼品寄到您填写的地址，您可以进入个人中心<a href="/users/orders?scope=4">我的订单</a>中查看订单状态，或者
+      <div class="answer_look">
+        <input class="answer close_f"  type="button" value="答题赚积分" />
+        <input class="look_over close_f "  type="button" value="查看其他礼品" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="point_less" style="display:none;">
+  <div class="exc_notices">
+    <div class="p_notice">
+      <img src="/assets/od-quillme/p_less.png" />
+      <span>对不起,您的积分不足!</span>
+      <div style="clear:both;"></div>
+    </div>
+    <div class="order_details">
+      您当前积分总数
+      <span class="unenough"></span>
+      ,不够兑换此礼品,您可以:
+      <div class="answer_look">
+        <input class="answer close_f" type="button" data="/surveys" value="答题赚积分" />
+        <input class="look_over close_f" type="button" data="/gifts" value="查看其他礼品" />
+      </div>
+    </div>
+    <!-- <a href="" class="more_integral">获得更多积分的途径？</a> -->
+  </div>
+</div>
+
+
+<div id="feedm_confirm" style="display:none;">
+  <div class="exc_notices">
+    <h1>确认兑换</h1>
+    <div class="order_details">
+      <div class="order_inf"> 
+        <div>
+          <span>用户名:</span><span class="o_username "></span>
+        </div>            
+        <div>
+          <span>兑换类型:</span><span class="o_type order_common" name="gift_id"></span>
+        </div>
+        <div>
+          <span>目标帐号:</span><span class="o_target order_common" name="account"></span>
+        </div>        
+        <div>
+          <span>兑换量:</span><span class="o_amount order_common" name="amount"></span>
+        </div>
+        <div>  
+          <span>扣除积分:</span><span class="o_point order_common" name="point"></span>
+        </div>  
+        <div>
+          <span>剩余积分:</span><span class="o_remain_point "></span>
+        </div>                                       
+      </div>
+      <div class="answer_look inf">
+        <input class="answer close_f" type="button" value="取消" />
+        <input class="look_over order_confirm"  type="button" value="确认兑换" />
+      </div>
+    </div>
+    <!-- <a href="" class="more_integral">获得更多积分的途径？</a> -->
+  </div>
+</div>
+<div id="recever_confirm" style="display:none;">
+  <div class="exc_notices">
+    <h1>确认收货地址</h1>
+    <div class="sub_infor">
+      <div class="basic_document">
+        收货人：<span name="receiver" class="recerver_info"></span>
+        <span>手机：<span name="mobile" class="recerver_info"></span></span>
+        邮编：<span name="postcode" class="recerver_info"></span>
+        <span name="info_sys" class="recerver_info" style="display:none;"></span>
+      </div>
+      <div class="address">
+        所在地：<span name="address" class="recerver_info"></span>
+      </div>
+      <div class="street_add">
+        街道所在地：<span name="street_info" class="recerver_info"></span>
+      </div>
+      <div class="tj_sub">
+        <input class="sub_btn con_sub_btn" type="button" value="继续提交" />
+        <a href="javascript:void(0);" class="repair_address">我要修改</a>
+        <div style="clear:both;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="gift_login" style="display:none;">
+  <div class="exc_box">
+    <div class="exc_notices exc_left">
+      <h3>欢迎回来！</h3>
+      <div class='err_notice'></div>
+      <div class="wel_cont">
+        <div class="login_username">
+          <span><label for="username">用户名：</label></span>
+          <input type="text" name="username" value="" id="username"/>
+        </div>
+        <div class="login_password">
+          <span><label for="password">密码：</label></span>
+          <input type="password" name="password" value="" id="password" />
+        </div>
+        <div id="l_last">
+          <input type="checkbox" name="remember" id="rem"/>
+          <label for="rem">记住我</label>
+          <a href="/account/forget_password" target="_blank">忘记密码？</a>
+        </div>
+        <button class="login_btn">登录</button>
+      </div>
+    </div>
+    <div class="exc_middle"></div>
+    <div class="exc_right">
+      <button>立即注册</button>
+    </div>
+  </div>
+</div>

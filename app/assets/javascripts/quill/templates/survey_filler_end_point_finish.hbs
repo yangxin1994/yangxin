@@ -1,0 +1,31 @@
+<div id='sf_main'>
+	<div class='welcome no_reward'>
+		<div class='inner'>
+			<h1>{{title}}</h1>
+			<div class='msg green'>
+				<em></em>
+				<span>
+					<b>答题完成啦！{{#if publish_result}}<a href='/surveys/{{survey_id}}/result'>查看问卷报告</a>{{/if}}</b><br />
+					{{#if signin}}
+					您已经获得<em>{{reward_point}}</em>积分奖励，积分可<a href='/gifts'>兑换礼品</a>。
+					{{else}}
+					点击下面按钮登录系统（未注册者需先注册），您将获得<em>{{reward_point}}</em>积分奖励，积分可<a href='/gifts' target='_blank'>兑换礼品</a>。
+					{{/if}}
+					{{#if spreadable}}
+					<br /><a id='start_spread' href='javascript:void(0);'>邀请好友答题</a> 再获<em>{{spread_point}}</em>积分奖励。
+					{{/if}}
+					{{#if show_subscribe}}
+					<br />（<a id='subscribe_btn' href='/surveys#subscribe' target='_blank'>订阅</a>问卷提醒，不错过任何问卷）
+					{{/if}}
+				</span>
+			</div>
+			<div class='form'>
+				{{#if signin}}
+				<button id='my_rewards_btn'>查看我的积分详情</button>
+				{{else}}
+				<button id='signin_btn'>登录系统接收奖励</button>
+				{{/if}}
+			</div>
+		</div>
+	</div>
+</div>

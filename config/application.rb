@@ -49,11 +49,17 @@ module OopsData
     # Enable the asset pipeline
     config.assets.enabled = true
 
+    config.i18n.locale = 'zh'
+
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
 
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
     config.autoload_paths += Dir["#{config.root}/app/models/*/"].find_all { |f| File.stat(f).directory? } 
+
+    config.permanent_signed_in_months = 24
+    config.answer_id_time_out_in_hours = 240
+    config.bind_answer_id_cookie_key = 'odb'
 
   end
 end

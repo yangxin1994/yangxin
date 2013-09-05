@@ -1,0 +1,121 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+		window.quality_control_questions_type = <%=@quality_control_questions_type %>;
+		window.quality_control_questions_ids = <%= @quality_control_questions_ids.nil? ? '[]' : (raw @quality_control_questions_ids.to_json) %>;
+		window.quality_questions = <%= raw @quality_questions.to_json %>;
+		console.log(window.quality_control_questions_type);
+		console.log(window.quality_control_questions_ids);
+		console.log(window.quality_questions);
+	</script>
+	<%= javascript_include_tag "pages/quill/quality-bundle" %>
+	<%= stylesheet_link_tag "pages/quill/quality-bundle", :media => "all" %>
+<% end %>
+
+<!-- content for left menus -->
+<% content_for :left_menus do %>
+	<%= render :partial => "partials/left_menus_setting", :locals => { :left_active => 3 } %>
+<% end %>
+
+<div class="page">
+
+	<div class="seperator top gray"></div>
+	<div class="edited-question-main gray" id="mainA">	
+		<label><input type="checkbox" class="title-check l" id="inputA" ><h2 class="title f14 blue">开启质量控制</h2></label>
+		<div class="fix"></div>
+		<i class="css-white-gray" id="lineA"></i>
+	</div>
+	<div class="seperator bottom gray" id="bottomA"></div>
+
+	<div class="edited-question-main white" id="mainB">	
+	 <!--单选按钮-->
+    	 <ul class="radiobox p20" id="radioB">
+            <li class="now b f14 g3"><em class="radioBtn ture"></em>随机生成质量控制题嵌入问卷</li>
+            <li class="f14 g6"><em class="radioBtn"></em>从题库里选择质量控制题</li>
+      	</ul>
+		<i class="css-white-gray" id="lineB"></i>
+	</div>
+	<div class="seperator bottom white" id="bottomB"></div>
+
+	<div class="question_main l" id="mainC">
+		<div class="question_content l">
+			<h2 class="g9 p20" id="caption-h2">标准答案题质控</h2>
+			<dl class="quality-list" id="objectives">
+				<% @quality_questions["objective_questions"].each do |oq| %>
+					<div class="objective">
+						<dt>
+							<label>
+							<%= tag("input", :type => "checkbox", :name => "objective", :class => "list-check l", :id => oq["_id"]) %>
+							<span class="f14 g3 quality-q" title='<%= oq["content"]["text"] %>'><%= oq["content"]["text"] %></span>
+							</label>
+							<span class="questions g9 r">（选择题）</span>
+							<em class="icon icon-seach r"></em>
+						</dt>
+						<p style="display:none;">
+							<% oq["issue"]["items"].each do |item| %>
+								<span><%= item["content"]["text"] %>&nbsp;&nbsp;&nbsp;</span>
+							<% end %>
+							<% if oq["issue"]["other_item"]["has_other_item"] %>
+								<span><%= oq["issue"]["other_item"]["content"]["text"] %></span>
+							<% end %>
+						</p>
+					</div>
+				<% end %>
+			</dl>
+			<dl class="quality-list" id="matchings" style="display:none;">	
+				<% @quality_questions["matching_questions"].each do |mqg| %>
+					<% first = true %>
+					<div class="matching">
+						<% mqg.each do |mq| %>
+								<% if first %>
+								<% first = false %>
+								<dt>
+									<label>
+									<%= tag("input", :type => "checkbox", :name => "matching", :class => "list-check l", :id => mq["_id"]) %>
+									<span class="f14 g3 quality-q" title='<%= mq["content"]["text"] %>'><%= mq["content"]["text"] %></span>
+								</label>
+									<span class="questions g9 r">（选择题）</span>
+									<em class="icon icon-seach r"></em>
+								</dt>
+								<% else %>
+								<dd>
+									<span class="f14 g3 quality-q"  title='<%= mq["content"]["text"] %>'><%= mq["content"]["text"] %></span>
+									<span class="questions g9 r">（选择题）</span>
+								</dd>
+								<% end %>
+								<p style="display:none;">
+									<% mq["issue"]["items"].each do |item| %>
+										<span><%= item["content"]["text"] %>&nbsp;&nbsp;&nbsp;</span>
+									<% end %>
+									<% if mq["issue"]["other_item"]["has_other_item"] %>
+										<span><%= oq["issue"]["other_item"]["content"]["text"] %></span>
+									<% end %>
+								</p>								
+						<% end %>	
+					</div>
+				<% end %>
+			</dl>
+
+<!-- 			<span id="pagination">
+				<span class="previous" title="上一页"></span>
+				<span class="current">11</span>
+				<span class="next" title="下一页"></span>
+			</span> -->
+		</div>
+
+		<!--边栏 开始-->
+		<div class="question_sidebar l">
+		<h2 class="radioNav-title blue b">约束类型</h2>
+		        <!--单选按钮-->
+              <ul class="radiobox radioNav" id="radioC">
+                    <li class="now"><em class="radioBtn ture"></em>标准答案题</li>
+                    <li><em class="radioBtn"></em>答案一致题</li>
+
+              </ul>
+		</div>
+
+		<!--边栏 结束-->
+	</div>
+	<div class="question_bottom_bg" id="bottomC"></div>
+	<div class="bottom"><button class="od-button" id="confirm" >确定</button></div>
+</div>

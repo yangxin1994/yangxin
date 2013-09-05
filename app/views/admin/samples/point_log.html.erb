@@ -1,0 +1,127 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/samples/point-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>">
+    <i class="icon-chevron-right"></i>
+    基本属性
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/redeem_log">
+    <i class="icon-chevron-right"></i>
+    礼品兑换记录
+    </a>
+  </li>
+  <li class="active">
+    <a href="/admin/samples/<%= params["id"] %>/point_log">
+      <i class="icon-chevron-right"></i>
+      积分变化记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/lottery_log">
+      <i class="icon-chevron-right"></i>
+      抽奖记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/answer_log">
+      <i class="icon-chevron-right"></i>
+      回答历史记录
+    </a>
+  </li>
+  <li>
+    <a href="/admin/samples/<%= params["id"] %>/spread_log">
+      <i class="icon-chevron-right"></i>
+      问卷推广记录
+    </a>
+  </li>
+<% end %>
+
+
+<div>
+  <span>
+      <a href="javascript:$('#point_modal').modal('show');" class="btn"><i class="icon-plus"></i> 操作积分</a>
+
+  </span>
+  <span class="pull-right">
+    <%= paginator_mini @point_log %>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu">
+        <li><a href="?" class="all-btn">全部</a></li>
+        <li class="divider"></li>
+      </ul>
+    </div>
+  </span>
+</div>
+
+<div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>原因</th>
+        <th>操作时间</th>
+        <th>操作积分</th>
+        <th>备注</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @point_log["data"].each_with_index do |log_item, i| %>
+      <tr>
+        <td><%= point_reason log_item["reason"] %></td>
+        <td><%= Time.parse(log_item["created_at"].to_s).strftime("%F %T") %></td>
+        <td>
+          <%= log_item['amount'] %>
+        </td>
+        <td>
+          <%= log_item['remark'] || log_item['survey_titile'] || log_item['gift_name'] %>
+        </td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+  <div class="modal hide fade" id="point_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>操作积分</h3>
+    </div>
+    <div class="modal-body">
+      <div class="well">
+        总积分:<span id="p_point"><%= @sample.point %></span>
+      </div>
+    <form action=""
+          name="point"
+          enctype="multipart/form-data"
+          method="post"
+          id="point_form"
+          class="form-horizontal"
+    >
+      <div class="control-group">
+        <label class="control-label" >数量:</label>
+        <div class="controls">
+          <input type="text" class="text-middle" id="point_amount" name="amount">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" >备注:</label>
+        <div class="controls">
+          <textarea id="point_markup"  name="markup"></textarea>
+        </div>
+      </div>
+
+    </form>
+    </div>
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#point_modal').modal('hide');">取消</a>
+      <button type="button" class="btn btn-primary" data-pid="<%= params[:id] %>" data-loading-text="发送中..." id="btn_sub">确定发放</button>
+    </div>
+  </div>
+</div>
