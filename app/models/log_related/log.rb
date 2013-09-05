@@ -1,3 +1,4 @@
+#already tidied up
 require 'error_enum'
 class Log
 	include Mongoid::Document
