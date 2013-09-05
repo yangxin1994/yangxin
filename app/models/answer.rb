@@ -143,7 +143,8 @@ class Answer
     end
   end
 
-  def find_lottery_answers
+  
+  def find_lottery_info
     lottery_data = {}
     prizes_arr = []
     prize_ids = self.rewards.first['prizes'].map{|p| p['id']}
@@ -1265,7 +1266,6 @@ class Answer
     answer_obj["created_at"] = self.created_at.to_i
     answer_obj["sample_nickname"] = self.user.try(:nickname) || "游客"
     if self.user.present?
-      # answer_obj["sample_nickname"] = self.user.nickname
       answer_obj["sample_avatar"] = self.user.avatar.try(:picture_url)
       answer_obj["sample_id"] = self.user._id.to_s
     end
