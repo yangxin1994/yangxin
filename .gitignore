@@ -4,6 +4,7 @@ log/*.log
 log
 tmp/
 .sass-cache/
+.tags
 db/*.lock
 db/journal
 .DS_Store
