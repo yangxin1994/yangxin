@@ -51,16 +51,15 @@
     <tr>
       <th>问卷名称</th>
       <th>代理</th>
-      <th>审核/完成/拒绝</th>
+      <th>待审核/完成/拒绝</th>
       <th>操作</th>
     </tr>
   </thead>
   <tbody>
     <% @agent_tasks["data"].each do |task| %>
     <tr>
-      <td><a href="/admin/agent_tasks/<%= task["_id"] %>"><%= task["survey_title"] %></a></td>
+      <td><a href="javascript:void()"><%= task["survey_title"] %></a></td>
       <td><%= task["agent_name"] %>:<%= task["agent_email"] %></td>
-      <td><%= task["region"] %></td>
       <td>
         <%= task["under_review_count"] %>/
         <%= task["finished_count"] %>/
