@@ -81,11 +81,9 @@ class User
 	has_many :sended_messages, :class_name => "Message", :inverse_of => :sender
 	#################################
 	# QuillMe
-	has_many :reward_logs, :class_name => "RewardLog", :inverse_of => :user
 	has_many :orders, :class_name => "Order", :inverse_of => :sample
 	# QuillAdmin
 	has_many :operate_orders, :class_name => "Order", :foreign_key => "operator_id"
-	has_many :operate_reward_logs, :class_name => "RewardLog", :inverse_of => :operator,:foreign_key => "operator_id"
 	has_many :third_party_users
 	has_many :surveys, class_name: "Survey", inverse_of: :user
 	has_many :materials
@@ -97,7 +95,6 @@ class User
 	has_many :advertisements
 	has_many :survey_invitation_histories
 	has_many :answers, class_name: "Answer", inverse_of: :user
-	has_many :template_question_answers
 	has_many :survey_spreads
 	has_and_belongs_to_many :answer_auditor_allocated_surveys, class_name: "Survey", inverse_of: :answer_auditors
 	has_many :interviewer_tasks
