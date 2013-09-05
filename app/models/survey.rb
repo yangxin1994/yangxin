@@ -127,10 +127,6 @@ class Survey
   index({ quillme_promotable: 1, quillme_hot: 1,status: 1,created_at: -1}, { background: true } )
   index({ quillme_promotable: 1, quillme_hot: 1,status: 1,quillme_promote_reward_type: 1}, { background: true } )
 
-  before_save :clear_survey_object
-  before_update :clear_survey_object
-  before_destroy :clear_survey_object
-
   META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
   CLOSED = 1
   PUBLISHED = 2
@@ -145,28 +141,14 @@ class Survey
 
   public
 
-  def self.can_lottery?(survey_id,answer_id)
-    survey = Survey.find_by_id(survey_id)
-    return ErrorEnum::SURVEY_NOT_EXIST unless survey.present?
-    return ErrorEnum::SURVEY_CLOSED if survey.status ==  CLOSED
-    return ErrorEnum::SUEVEY_DELETED if survey.status == DELETED
-    answer = Answer.find_by_id(answer_id)
-
-    return ErrorEnum::ANSWER_NOT_EXIST unless answer.present?
-    
-
-  end
-
   def self.get_recommends(status=2,reward_type=nil,answer_status=nil,sample=nil,home_page=nil)
     status = 2 unless status.present?
     reward_type = nil unless reward_type.present?
     answer_status = nil unless answer_status.present?
     total_ids = Survey.quillme_promote.not_quillme_hot.map(&:id)
-
     if reward_type.present?
       reward_type = reward_type.split(',')
     end
-
     if reward_type.present?
       surveys = Survey.quillme_promote.not_quillme_hot.status(status).reward_type(reward_type).desc(:created_at)    
     else
@@ -174,7 +156,6 @@ class Survey
     end 
     surveys = get_filter_surveys(surveys,total_ids,answer_status,sample,home_page)
     return surveys
-
   end
 
   def self.get_filter_surveys(surveys,total_ids,answer_status,sample,home_page)
@@ -191,19 +172,12 @@ class Survey
       extend_surveys = Survey.quillme_promote.not_quillme_hot.closed.desc(:created_at).limit(9 - surveys.count.to_i)
       surveys = surveys.to_ary + extend_surveys.to_ary
     end
-
     return surveys
   end
-
-  # def answered(user)
-  #   answer  = self.answers.where(:user_id => user.id).first if user.present?
-  #   return [answer.try(:status),answer.try(:reject_type)]     
-  # end
 
   def reward_type_info
     rs = RewardScheme.where(:_id => self.quillme_promote_info['reward_scheme_id']).first
     info = rs.rewards[0] if rs
-    
     if info.present? && info['type'].to_i == RewardScheme::LOTTERY
       info['prize_arr'] = []
       ids = info['prizes'].map{|priz| priz['id']}
@@ -219,7 +193,6 @@ class Survey
         prize_info = {}  
       end       
     end
-
     return info
   end
 
@@ -234,7 +207,6 @@ class Survey
       self['answer_status'] = 0
       self['answer_reject_type'] = 0
     end
-
     self['reward_type_info'] = self.reward_type_info
     self['scheme_id'] = self.quillme_promote_info['reward_scheme_id']
     return self
@@ -263,24 +235,6 @@ class Survey
 
   def self.find_by_ids(survey_id_list)
     return Survey.all.in(_id: survey_id_list)
-  end
-
-  def self.find_by_fields(h_fields)
-    return Survey.all.desc(:created_at) if h_fields.blank?
-    return Survey.where(h_fields).desc(:created_at)
-  end
-
-  def append_user_fields(arr_fields)
-    if !self.blank?
-      arr_fields.each do |field|
-        self[field] = self.user.send(field)
-      end
-    end
-    return self
-  end
-
-  def get_all_promote_settings
-    return self.serialize_in_promote_setting
   end
 
   def update_quillme_promote_reward_type
@@ -369,38 +323,6 @@ class Survey
     sms_promote_info["promote_sms_count"] = _promote_sms_count
     save
     serialize_in_promote_setting
-    # result.value['survey_id'] = options[:id]
-    # _r = _get({}, "/#{options[:id]}/reward_schemes")
-    # if result.success
-    #   result.value['reward_schemes'] = _r.success ? _r.value['data'] : []
-
-    # end
-    # result
-  end
-
-  #----------------------------------------------
-  #
-  #     tags manupulation
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def has_one_tag_of(tags)
-    survey_tags = self.tags.map {|tag_inst| tag_inst.content}
-    return !(survey_tags & tags).empty?
-  end
-
-  def add_tag(tag)
-    return ErrorEnum::TAG_EXIST if self.tags.has_tag?(tag)
-    self.tags << Tag.get_or_create_new(tag)
-    return true
-  end
-
-  def remove_tag(tag)
-    return ErrorEnum::TAG_NOT_EXIST if !self.tags.has_tag?(tag)
-    tag_inst = Tag.find_by_content(tag)
-    self.tags.delete(tag_inst)
-    tag_inst.destroy if tag_inst.surveys.length == 0
-    return true
   end
 
   #----------------------------------------------
@@ -485,10 +407,6 @@ class Survey
     self.quality_control_questions_type = quality_control_questions_type
     self.quality_control_questions_ids = quality_control_questions_ids
     return self.save
-  end
-
-  def has_prize
-    reward > 0 ? true : false
   end
 
   def set_spread(spread_point)
@@ -607,28 +525,16 @@ class Survey
   #++++++++++++++++++++++++++++++++++++++++++++++
 
   def delete(operator)
-    # old version
-    # return self.update_attributes(:status => -1)
-
-    # new version
     return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
     return self.update_attributes(:status => DELETED)
   end
 
   def recover(operator)
-    # old version
-    # return self.update_attributes(:status => 0)
-
-    # new version
     return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
     return self.update_attributes(:status => CLOSED)
   end
 
   def clear(operator)
-    # return ErrorEnum::SURVEY_NOT_EXIST if self.status != -1
-    # self.tags.each do |tag|
-    #   tag.destroy if tag.surveys.length == 1
-    # end
     return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
     return self.destroy
   end
@@ -679,45 +585,6 @@ class Survey
     current_page["questions"].insert(question_index+1, question._id.to_s)
     self.save
     return question
-  end
-
-  def insert_template_question(page_index, question_id, template_question_id)
-    template_question = TemplateQuestion.find_by_id(template_question_id)
-    return ErrorEnum::TEMPLATE_QUESTION_NOT_EXIST if template_question.nil?
-
-    current_page = self.pages[page_index]
-    return ErrorEnum::OVERFLOW if current_page == nil
-    if question_id.to_s == "-1"
-      question_index = current_page["questions"].length - 1
-    elsif question_id.to_s == "0"
-      question_index = -1
-    else
-      question_index = current_page["questions"].index(question_id)
-      return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
-    end
-    # do not create new question, just insert the template question id into the pages
-    # question = Question.create_template_question(template_question)
-    current_page["questions"].insert(question_index+1, template_question_id)
-    self.save
-    return true
-  end
-
-  def convert_template_question_to_normal_question(question_id)
-    return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
-    question = TemplateQuestion.find_by_id(question_id)
-    return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
-    # quality control question in a survey cannot be updated
-    normal_question = question.convert_template_question_to_normal_question
-    # replace the template question with the normal question
-    self.pages.each do |page|
-      page["questions"].each_with_index do |q_id, index|
-        if q_id == question_id
-          page["questions"][index] = normal_question._id.to_s
-        end
-      end
-    end
-    self.save
-    return normal_question
   end
 
   def update_question(question_id, question_obj)
@@ -1113,48 +980,6 @@ class Survey
     return page_object
   end
 
-  def update_page(page_index, page_name)
-    current_page = self.pages[page_index]
-    return ErrorEnum::OVERFLOW if current_page.nil?
-    current_page["name"] = page_name
-    return self.save
-  end
-
-  def clone_page(page_index_1, page_index_2)
-    current_page = self.pages[page_index_1]
-    return ErrorEnum::OVERFLOW if current_page == nil
-    return ErrorEnum::OVERFLOW if page_index_2 < -1 or page_index_2 > self.pages.length - 1
-    new_page = {"name" => current_page["name"], "questions" => []}
-    new_page_obj = {"name" => current_page["name"], "questions" => []}
-    current_page["questions"].each do |question_id|
-      question = Question.find_by_id(question_id)
-      return ErrorEnum::QUESTION_NOT_EXIST if question == nil
-      new_question = question.clone
-      new_page["questions"] << new_question._id.to_s
-      new_page_obj["questions"] << new_question
-    end
-    self.pages.insert(page_index_2+1, new_page)
-    self.save
-    return new_page_obj
-  end
-
-  def delete_page(page_index)
-    current_page = self.pages[page_index]
-    return ErrorEnum::OVERFLOW if current_page.nil?
-    return delete_page!(page_index)
-  end
-
-  def delete_page!(page_index)
-    current_page = self.pages[page_index]
-    return ErrorEnum::OVERFLOW if current_page.nil?
-    current_page["questions"].each do |question_id|
-      question = Question.find_by_id(question_id)
-      question.destroy if !question.nil?
-    end
-    self.pages.delete_at(page_index)
-    return self.save
-  end
-
   def combine_pages(page_index_1, page_index_2)
     return ErrorEnum::OVERFLOW if page_index_1 < 0 or page_index_1 > self.pages.length - 1
     return ErrorEnum::OVERFLOW if page_index_2 < 0 or page_index_2 > self.pages.length - 1
@@ -1220,11 +1045,6 @@ class Survey
     return answer_time
   end
 
-  def estimate_price
-    # todo: estimate price
-    return 10
-  end
-
   #----------------------------------------------
   #
   #     manipulate on quotas
@@ -1261,7 +1081,6 @@ class Survey
     # only make statisics from the answers that are not preview answers
     finished_answers = self.answers.not_preview.finished
     unreviewed_answers = self.answers.not_preview.unreviewed
-
     # initialze the quota stats
     self.quota["finished_count"] = 0
     self.quota["submitted_count"] = 0
@@ -1298,15 +1117,6 @@ class Survey
     end
     self.save
     return quota
-  end
-
-  def set_exclusive(is_exclusive)
-    quota = Quota.new(self.quota)
-    return quota.set_exclusive(is_exclusive, self)
-  end
-
-  def get_exclusive
-    return self.quota["is_exclusive"]
   end
 
   def show_quota
@@ -1804,20 +1614,6 @@ class Survey
     return survey_obj
   end
 
-  def serialize_in_list_page
-    survey_obj = {}
-    survey_obj["_id"] = self._id.to_s
-    survey_obj["title"] = self.title.to_s
-    survey_obj["subtitle"] = self.subtitle.to_s
-    survey_obj["created_at"] = self.created_at
-    survey_obj["updated_at"] = self.updated_at
-    survey_obj["status"] = self.status
-    survey_obj["is_star"] = self.is_star
-    survey_obj['screened_answer_number']=self.answers.not_preview.screened.length
-    survey_obj['finished_answer_number']=self.answers.not_preview.finished.length
-    return survey_obj
-  end
-
   def info_for_sample
     survey_obj = {}
     survey_obj["_id"] = self._id.to_s
@@ -1837,18 +1633,6 @@ class Survey
     survey_obj["created_at"] = self.created_at.to_i
     survey_obj["broswer_extension_promote_info"] = self.broswer_extension_promote_info
     survey_obj["rewards"] = self.rewards
-    return survey_obj
-  end
-
-  def serialize_for(arr_fields)
-    survey_obj = {"id" => self.id.to_s}
-    arr_fields.each do |field|
-      if [:created_at, :updated_at].include?(field)
-        survey_obj[field] = self.send(field).to_i
-      else
-        survey_obj[field] = self.send(field)
-      end
-    end
     return survey_obj
   end
 
@@ -1993,11 +1777,6 @@ class Survey
     }
   end
 
-  def post_reward_to(user, options = {})
-    options[:user] = user
-    RewardLog.create(options).created_at ? true : false
-  end
-
   def allocate_answer_auditors(answer_auditor_ids, allocate)
     retval = {}
     answer_auditor_ids.each do |id|
@@ -2012,11 +1791,6 @@ class Survey
     end
     retval = (retval.blank? ? true : retval)
     return retval
-  end
-
-  def clear_survey_object
-    Cache.write(self._id, nil)
-    return true
   end
 
   def set_quillme_hot(quillme_hot)
@@ -2051,7 +1825,6 @@ class Survey
     survey_obj["access_control_setting"] = Marshal.load(Marshal.dump(self.access_control_setting))
     survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
     survey_obj["answer_time"] = self.estimate_answer_time
-    survey_obj["price"] = self.estimate_price
     user_obj = {}
     user_obj["id"] = self.user._id.to_s
     user_obj["email"] = self.user.email
@@ -2096,7 +1869,6 @@ class Survey
     self.quota["rules"].each do |r|
       amount += r["amount"] - r["finished_count"]
     end
-    # todo: calculate remainning quota number
     return amount
   end
 
