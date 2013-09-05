@@ -20,19 +20,35 @@
 	margin-top:20px;
 	background: image-url('od-quillme/banner/1.png') no-repeat;
 	.involved-btn{
-		width:110px;
-		@include one-line(40px);
+		width:136px;
+		@include one-line(44px);
 		@include inline-block;
 		text-align: center;
 		color: #fff;
-		background: $red1;
-		border:3px #fff solid;
+		background: #F14646;
 		@include border-radius(6px);
-		@include box-shadow(0 1px 1px #999);
-		font-size: 18px;
+		font-size: 16px;
 		font-weight: bold;
 		float: right;
 		margin:25px 35px 0 0;
+		&:hover{
+			background: $red1;
+		}
+		span{
+			@include one-line(16px);
+			width:10px;
+			display:inline-block;
+			margin-left:14px;
+			margin-top: -2px;
+			background:image-url('/assets/od-quillme/hot_r.png') no-repeat;
+		}
+	}
+	.involved-btn.old{
+		background:#65adf2;
+		margin: -40px 35px 0px 0px;
+		&:hover{
+			background:#6FA0F0;
+		}
 	}
 	strong{
 		@include one-line(32px);

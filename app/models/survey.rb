@@ -158,13 +158,19 @@ class Survey
   index({ status: 1, show_in_community: 1, title: 1 }, { background: true } )
   index({ show_in_community: 1, title: 1 }, { background: true } )
   index({ title: 1 }, { background: true } )
-  index({ status: 1, show_in_community: 1, title: 1 }, { background: true } )
-  index({ status: 1, title: 1 }, { background: true } )
   index({ status: 1, title: 1 }, { background: true } )
   index({ status: 1, reward: 1}, { background: true } )
-  index({ status: 1 }, { background: true } )
   index({ status: 1, is_star: 1 }, { background: true } )
   index({ status: 1, promotable: 1}, { background: true } )
+
+
+  
+  index({ quillme_promote_reward_type: 1 }, { background: true } )
+  index({ quillme_hot: 1 }, { background: true } )
+  index({ user_id: 1 }, { background: true } )
+  index({ title: 1 }, { background: true } )
+  index({ quillme_promotable: 1, quillme_hot: 1,status: 1,created_at: -1}, { background: true } )
+  index({ quillme_promotable: 1, quillme_hot: 1,status: 1,quillme_promote_reward_type: 1}, { background: true } )
 
   before_save :clear_survey_object
   before_update :clear_survey_object
@@ -266,8 +272,9 @@ class Survey
     self['answer_count'] = self.answers.count
     self['time'] = self.estimate_answer_time
     if user.present?
-      self['answer_status'] = Answer.find_by_survey_id_sample_id_is_preview(self.id, user.id, false).try(:status)
-      self['answer_reject_type'] = Answer.find_by_survey_id_sample_id_is_preview(self.id, user.id, false).try(:reject_type)     
+      answer = Answer.find_by_survey_id_sample_id_is_preview(self.id, user.id, false)
+      self['answer_status'] = answer.try(:status)
+      self['answer_reject_type'] = answer.try(:reject_type)     
     else
       self['answer_status'] = 0
       self['answer_reject_type'] = 0
@@ -1377,7 +1384,7 @@ class Survey
       rule["finished_count"] = 0
       rule["submitted_count"] = 0
       return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
-      rule["conditinos"] ||= []
+      rule["conditions"] ||= []
       rule["conditions"].each do |condition|
         condition["condition_type"] = condition["condition_type"].to_i
         return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
@@ -2147,7 +2154,7 @@ class Survey
   end
 
   def max_num_per_ip_reached?(ip_address)
-    return false if max_num_per_ip.blank? || max_num_per_ip == -1
+    return false if max_num_per_ip.blank? || max_num_per_ip <= 0
     return false if ip_address.blank?
     num_per_ip = self.answers.not_preview.where(ip_address: ip_address).length
     if num_per_ip >= self.max_num_per_ip

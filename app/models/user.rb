@@ -123,7 +123,14 @@ class User
 	index({ color: 1, status: 1, role: 1 }, { background: true } )
 	index({ status: 1 }, { background: true } )
 	index({ introducer_id: 1, status: 1 }, { background: true } )
+	index({ auth_key: 1, status: 1 }, { background: true } )
+	index({ mobile: 1 }, { background: true } )
+	index({ user_role: 1 }, { background: true } )
+	index({ name:1},{background: true})
+	index({ created_at:1},{background: true})
+	index({ is_block:1},{background: true})
 
+	validates_numericality_of :point, :greater_than_or_equal_to => 0
 
 	public
 
@@ -658,9 +665,7 @@ class User
 	# admin inc
 	def operate_point(amount, remark)
 		self.point += amount.to_i
-		self.save
-		PointLog.create_admin_operate_point_log(amount, remark, self._id)
-		return true
+		PointLog.create_admin_operate_point_log(amount, remark, self._id) if self.save
 	end
 	#--
 	############### operations about charge #################

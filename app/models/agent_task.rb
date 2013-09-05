@@ -25,9 +25,13 @@ class AgentTask
 
 	default_scope order_by(:created_at.desc)
 
-	attr_accessible :description, :count
+	# attr_accessible :description, :count
 
 	scope :normal, where(:status.in => [OPEN, CLOSED, AGENT_CLOSED])
+
+	index({ status: 1 }, { background: true } )
+	index({ survey_id: 1 }, { background: true } )
+	index({ agent_id: 1, status:1 }, { background: true } )
 
 	def self.find_by_id(agent_task_id)
 		return self.normal.where(:_id => agent_task_id).first

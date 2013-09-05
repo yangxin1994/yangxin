@@ -61,6 +61,12 @@ class Order
 	WIN_IN_LOTTERY = 2
 	REDEEM_GIFT = 4
 
+	index({ code: 1 }, { background: true } )
+	index({ status: 1 }, { background: true } )
+	index({ source: 1 }, { background: true } )
+	index({ amount: 1 }, { background: true } )
+	index({ type: 1, status: 1 ,ofcard_order_id: 1}, { background: true } )
+
 	#attr_accessible :mobile, :alipay_account, :qq, :user_name, :address, :postcode
 
 	def self.find_by_id(order_id)

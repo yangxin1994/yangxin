@@ -20,6 +20,10 @@ class Agent
 
   scope :normal, where(:status => NORMAL)
 
+  index({ status: 1 }, { background: true } )
+  index({ auth_key: 1 }, { background: true } )
+  index({ email: 1, password: 1 }, { background: true } )
+
   def self.find_by_id(agent_id)
     return self.normal.where(:_id => agent_id).first
   end

@@ -9,9 +9,9 @@ class Sample::HomesController < Sample::SampleController
 		  paginated_surveys.map { |e| e.excute_sample_data(current_user) } 
 		end
 
-		@public_notices = auto_paginate PublicNotice.opend.desc(:updated_at)
+		@public_notices = PublicNotice.opend.desc(:updated_at).limit(5)
 
-    	@hotest_gifts = Gift.on_shelf.real.desc(:view_count).limit(8).map { |e| e.info }
+    @hotest_gifts = Gift.on_shelf.real.desc(:view_count).limit(8).map { |e| e.info }
 
 		@top_rank_users = User.sample.where(:is_block => false).desc(:point).limit(5)
 		@top_rank_users = @top_rank_users.map do |user|
@@ -22,12 +22,14 @@ class Sample::HomesController < Sample::SampleController
 			user
 		end
 
-        @fresh_news = Log.get_new_logs(5, nil)
-        @fresh_news = @fresh_news.each do |log|
-          log['avatar'] = log.user.avatar.present? ? log.user.avatar.picture_url : User::DEFAULT_IMG
-          log['username'] = log.user.try(:nickname)
-          log
-        end
+
+    @fresh_news = Log.get_new_logs(5, nil)
+    @fresh_news = @fresh_news.each do |log|
+      log['avatar'] = log.user.avatar.present? ? log.user.avatar.picture_url : User::DEFAULT_IMG
+      log['username'] = log.user.try(:nickname)
+      log
+    end
+    fresh_when(:etag => [@hot_survey,@rsl,@public_notices,@hotest_gifts,@top_rank_users,@fresh_news])
 	end
 
 

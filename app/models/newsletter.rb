@@ -22,6 +22,9 @@ class Newsletter
 
   scope :find_by_status, ->(_status) { _status.present? ? where(:status => _status) : self.all }
 
+  index({ is_deleted: 1 }, { background: true } )
+  index({ status: 1 }, { background: true } )
+
   def present_admin
     present_attrs :_id, :title, :subject, :status, :columns, :is_tested, :is_deleted
     present_add   :created_at=> self.created_at.strftime("%Y-%m-%d")

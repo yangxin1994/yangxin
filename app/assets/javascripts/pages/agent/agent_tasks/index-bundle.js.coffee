@@ -1,6 +1,6 @@
 $ ->
   $('.survey-url').click ->
-    alert $(this).data('url')
+    prompt "答题地址", $(this).data('url')
 
   $.ajaxSetup
     headers: 

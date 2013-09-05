@@ -42,6 +42,7 @@ class Admin::AnswersController < Admin::AdminController
 
   def review
     @questions = Answer.find(params[:id]).present_auditor
+    @survey = @questions.survey
   end
 
   def update

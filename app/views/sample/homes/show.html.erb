@@ -15,7 +15,12 @@
 					<%= @hot_survey['title']%>
 				</a>
 			</strong>
-			<%= link_to "立即参与","/s/#{@hot_survey['quillme_promote_info']['reward_scheme_id']}",:class => 'involved-btn' %>
+			<a href="/s/<%= @hot_survey['quillme_promote_info']['reward_scheme_id']%>" class="involved-btn">我是新用户<span></span>
+			<a href="javascript:void(0);" class="involved-btn old" data="<%= @hot_survey['spread_point']%>" s_title= "<%= @hot_survey['title'] %>" scheme_id="<%= @hot_survey['quillme_promote_info']['reward_scheme_id']%>">我是老用户<span></span>
+			</a>
+			
+			</a>
+			
 	</div>
 <% end %>
 <div class="inner-page fix">
@@ -42,8 +47,8 @@
 			</div>
 			<% if @public_notices.present? %>
 			<ul>
-				<% @public_notices['data'].each_with_index do |pn,index| %>
-					<li <%= hide_border?(@public_notices['data'],index) %>>
+				<% @public_notices.each_with_index do |pn,index| %>
+					<li <%= hide_border?(@public_notices,index) %>>
 						<a href="<%= public_notice_path(pn['_id']) %>">
 							<span class="bulletin-title"><%= truncate("#{pn['title']}", :length => 25)%></span>
 						</a>

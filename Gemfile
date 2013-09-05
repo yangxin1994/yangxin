@@ -84,6 +84,7 @@ group :development do
   gem 'thin'
   gem 'pry-rails', "~> 0.2.2"
   gem "better_errors", "~> 0.8.0"
+  gem "rack-mini-profiler", "~> 0.1.30"
 end
 
 group :production do

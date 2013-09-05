@@ -18,6 +18,9 @@ class PublicNotice
   scope :opend, where(:status => 2)
   scope :closed, where(:status => 1)
 
+  index({ status: 1 }, { background: true } )
+  index({ title: 1 }, { background: true } )
+
   validates_presence_of :title#, :public_notice_type
     
   class << self
