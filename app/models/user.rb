@@ -1,4 +1,4 @@
-#is being tidied up
+#already tidied up
 require 'data_type'
 require 'encryption'
 require 'error_enum'
@@ -540,64 +540,8 @@ class User
 	end
 
 
-
-	def remove_user
-		self.status = -1
-		self.save
-	end
-
-	def recover
-		self.status = 4
-		self.save
-	end
-
-	# def add_point(point_int)
-	# 	self.point += point_int
-	# 	self.save
-	# end
-
-	def change_to_system_password
-		# generate rand number
-		sys_pwd = 1
-		while sys_pwd < 16**7 do
-			sys_pwd = rand(16**8-1)
-		end
-		sys_pwd = sys_pwd.to_s(16)
-		self.password = Encryption.encrypt_password(sys_pwd)
-		if !self.save then
-			return ErrorEnum::USER_SAVE_FAILED
-		end
-		self[:new_password] = sys_pwd
-		return self
-	end
-
-	def self.list_system_user(role, lock)
-		role = role.to_i & 15
-		selected_users = []
-		users = User.where(:role.gt => 0)
-		users.each do |u|
-			next if u.role & role == 0
-			if !lock.nil?
-				next if u.lock != lock
-			end
-			selected_users << u
-		end
-		return selected_users
-	end
-
 	def spread_count
 		Answer.where(:introducer_id => self.id).finished.count	
-	end
-
-	def get_introduced_users
-		introduced_users = User.where(:introducer_id => self._id.to_s, :status.gt => 1).desc(:created_at)
-		summary_info = introduced_users.map { |u| { _id: u._id.to_s, email: u.email, registered_at: u.registered_at } }
-		return summary_info
-	end
-
-	def get_survey_ids_answered
-		survey_ids = self.answers.map { |e| e.survey_id.to_s }
-		return survey_ids.uniq
 	end
 
 	def self.search_sample(email, mobile, is_block)
@@ -704,75 +648,12 @@ class User
 		return [completion, analyze_result]
 	end
 
-	def spread_logs
-		answers = Answer.where(:introducer_id => self._id.to_s)
-		ret_logs = answers.map do |e|
-			{
-				"_id" => e._id.to_s,
-				"title" => e.survey.title,
-				"created_at" => e.created_at,
-				"finished_at" => Time.at(e.finished_at),
-				"email" => e.user.try(:email),
-				"mobile" => e.user.try(:mobile),
-				"status" => e.status,
-				"reject_type" => e.reject_type
-			}
-		end
-		return ret_logs
-	end
 
 	def block(block)
 		self.is_block = block.to_s == "true"
 		return self.save
 	end
 
-	def basic_info
-		attributes = {}
-		SampleAttribute.normal.each do |e|
-			name = e.name
-			case e.type
-			when DataType::STRING
-				attributes[name] = self.read_attribute(e.name)
-			when DataType::ENUM
-				gender = self.read_attribute(e.name)
-				attributes[name] = gender.nil? ? nil : e.enum_array[gender]
-			when DataType::ARRAY
-				attributes[name] = []
-				(self.read_attribute(e.name) || []).each { |m| attributes[name] << e.enum_array[m] }
-			when DataType::NUMBER
-				attributes[name] = self.read_attribute(e.name)
-			when DataType::DATE
-				attributes[name] = {
-					"date_type" => e.date_type,
-					"value" => self.read_attribute(e.name)
-					}
-			when DataType::NUMBER_RANGE
-				attributes[name] = self.read_attribute(e.name)
-			when DataType::DATE_RANGE
-				attributes[name] = {
-					"date_type" => e.date_type,
-					"value" => self.read_attribute(e.name)
-					}
-			end
-		end
-		return {:email => self.email,
-			:mobile => self.mobile,
-			:point => self.point,
-			:attributes => attributes,
-			:is_block => self.is_block}
-	end
-
-	def serialize_for(arr_fields)
-		user_obj = {"id" => self.id.to_s}
-		arr_fields.each do |field|
-			if [:created_at, :updated_at].include?(field)
-				user_obj[field] = self.send(field).to_i
-			else
-				user_obj[field] = self.send(field)
-			end
-		end
-		return user_obj
-	end
 
 	def sample_attributes
 		sample = {
@@ -817,13 +698,6 @@ class User
 		return self.affiliated.save
 	end
 
-	def write_sample_attribute_by_id(sa_id, value)
-		sa = SampleAttribute.find_by_id(sa_id)
-		return false if sa.nli?
-		self.create_affiliated if self.affiliated.nil?
-		self.affiliated.write_attribute(sa.name.to_sym, value)
-		return self.affiliated.save
-	end
 
 	def get_basic_attributes
 		basic_attributes = {}
