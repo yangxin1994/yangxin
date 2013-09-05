@@ -1,7 +1,8 @@
 class Agent::TasksController < Agent::AgentsController
 
   def index
-    @tasks = auto_paginate(AgentTask.search_agent_task(params[:agent_id], nil)) do |tasks|
+		# @tasks = auto_paginate(AgentTask.search_agent_task(params[:agent_id], nil)) do |tasks|
+    @tasks = auto_paginate(current_agent.agent_tasks) do |tasks|
       tasks.map { |e| e.info }
     end
     @tasks['host'] = request.host_with_port
