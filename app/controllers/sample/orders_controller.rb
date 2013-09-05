@@ -4,10 +4,6 @@ class Sample::OrdersController < Sample::SampleController
 
 	before_filter :require_sign_in, :except => [:create_lottery_order]
 
-	def initialize
-		super('gift')
-	end
-
 	def create
 		amount  = params[:order].delete('amount')
 		point   = params[:order].delete('point')

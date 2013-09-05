@@ -2,10 +2,6 @@ class Sample::SurveysController < Sample::SampleController
 
 	layout :resolve_layout
 
-	def initialize
-		super('survey')
-	end
-
 	# PAGE
 	def index
 		@surveys = Survey.get_recommends(params[:status],
@@ -19,9 +15,7 @@ class Sample::SurveysController < Sample::SampleController
 		today_start = Time.local(date.year, date.month, date.day,0,0,0)
 		today_end   = Time.local(date.year, date.month, date.day+1,0,0,0)
 		@answer_count = Answer.where(:created_at.gte => today_start,:created_at.lt => today_end).count
-		# date = Date.today
-		# today_start = Time.local(date.year, date.month, date.day,0,0,0)
-		# today_end   = Time.local(date.year, date.month, date.day+1,0,0,0)
+
 		@spread_count = Answer.where(:created_at.gte => today_start,:created_at.lt => today_end,:introducer_id.ne => nil).count
 		@disciplinal = PunishLog.desc(:created_at).limit(3).map do |log|
 			log['avatar'] = log.user.avatar.present? ? log.user.avatar.picture_url : User::DEFAULT_IMG
@@ -38,15 +32,15 @@ class Sample::SurveysController < Sample::SampleController
 	end
 
 	#重新生成订阅 短信激活码  或者邮件
-	def make_rss_activate
+	def generate_rss_activate_code
 		retval = User.create_rss_user(params[:rss_channel],
 			{protocol_hostname: "#{request.protocol}#{request.host_with_port}",
-				path: "/surveys/active_rss_able"})
+				path: "/surveys/email_rss_activate"})
 		render :json => retval and return
 	end
 
 
-	def make_rss_mobile_activate
+	def mobile_rss_activate
 		user   = User.find_by_mobile(params[:rss_channel])
 		return ErrorEnum::USER_NOT_EXIST  if user.nil?
 		retval = user.make_mobile_rss_activate(params[:code])
@@ -54,7 +48,7 @@ class Sample::SurveysController < Sample::SampleController
 	end
 
 	#订阅邮件 callback链接
-	def active_rss_able
+	def email_rss_activate
 		begin
 			activate_info_json = Encryption.decrypt_activate_key(params[:key])
 			activate_info = JSON.parse(activate_info_json)
@@ -78,9 +72,6 @@ class Sample::SurveysController < Sample::SampleController
 		end
 	end
 
-	def show		
-	end	
-
 	# Show survey result
 	def result
 		@survey = Survey.find_by_id(params[:id])
@@ -100,7 +91,7 @@ class Sample::SurveysController < Sample::SampleController
 
 	def resolve_layout
   		case action_name
-  		when "active_rss_able"
+  		when "email_rss_activate"
   			"sample_account"
   		when "cancel_subscribe"
   			"sample_account"
