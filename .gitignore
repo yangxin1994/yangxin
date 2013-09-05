@@ -5,6 +5,7 @@ log
 tmp/
 .sass-cache/
 .tags
+.tags_sorted_by_file
 db/*.lock
 db/journal
 .DS_Store
