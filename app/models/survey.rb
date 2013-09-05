@@ -455,10 +455,6 @@ class Survey
     new_instance.is_star = false
     new_instance.point = 0
     new_instance.spread_point = 0
-    new_instance.reward = 0
-    lottery = new_instance.lottery
-    lottery.surveys.delete(new_instance) if !lottery.nil?
-    new_instance.entry_clerks.each do |a| new_instance.entry_clerks.delete(a) end
     new_instance.answer_auditors.each do |a| new_instance.answer_auditors.delete(a) end
 
     # the mapping of question ids
@@ -1591,41 +1587,6 @@ class Survey
     return answer.status
   end
 
-  def serialize
-    survey_obj = Hash.new
-    survey_obj["_id"] = self._id.to_s
-    survey_obj["user_id"] = self.user_id.to_s
-    survey_obj["created_at"] = self.created_at
-    survey_obj["pages"] = Marshal.load(Marshal.dump(self.pages))
-    META_ATTR_NAME_ARY.each do |attr_name|
-      method_obj = self.method("#{attr_name}".to_sym)
-      survey_obj[attr_name] = method_obj.call()
-    end
-    survey_obj["quota"] = Marshal.load(Marshal.dump(self.quota))
-    survey_obj["filters"] = Marshal.load(Marshal.dump(self.filters))
-    survey_obj["logic_control"] = Marshal.load(Marshal.dump(self.logic_control))
-    survey_obj["access_control_setting"] = Marshal.load(Marshal.dump(self.access_control_setting))
-    survey_obj["style_setting"] = Marshal.load(Marshal.dump(self.style_setting))
-    survey_obj["status"] = self.status
-    survey_obj["quality_control_questions_type"] = self.quality_control_questions_type
-    survey_obj["quality_control_questions_ids"] = self.quality_control_questions_ids
-    survey_obj["deadline"] = self.deadline
-    survey_obj["is_star"] = self.is_star
-    return survey_obj
-  end
-
-  def info_for_sample
-    survey_obj = {}
-    survey_obj["_id"] = self._id.to_s
-    survey_obj["title"] = self.title.to_s
-    survey_obj["subtitle"] = self.subtitle.to_s
-    survey_obj["created_at"] = self.created_at.to_i
-    survey_obj["status"] = self.status
-    survey_obj["spread_point"] = self.spread_point
-    survey_obj["quillme_promote_reward_type"] = self.quillme_promote_reward_type.to_i
-    return survey_obj
-  end
-
   def info_for_browser
     survey_obj = {}
     survey_obj["_id"] = self._id.to_s
@@ -1649,7 +1610,7 @@ class Survey
     survey_obj["weibo_promotable"] = self.weibo_promotable
     survey_obj["weibo_promote_info"] = Marshal.load(Marshal.dump(self.weibo_promote_info))
     survey_obj["reward_schemes"] = self.reward_schemes.not_default
-    survey_obj["agent_promote_info"] = info_for_agent
+    survey_obj["agent_promote_info"] = {"_id" => self._id.to_s, "title" => self.title}
     if survey_obj["agent_promote_info"].present?
       survey_obj["agent_promotable"] = true
     end
@@ -1703,13 +1664,6 @@ class Survey
       info = info.merge({qid => BasicQuestion.find_by_id(qid)})
     end
     return info
-  end
-
-  def info_for_agent
-    survey_obj = {}
-    survey_obj["_id"] = self._id.to_s
-    survey_obj["title"] = self.title
-    return survey_obj
   end
 
   def answer_import(csv_str)

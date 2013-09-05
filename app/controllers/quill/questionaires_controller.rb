@@ -44,7 +44,7 @@ class Quill::QuestionairesController < Quill::QuillController
 		@survey = Survey.find_by_id(params[:id])
 		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
 		new_survey = @survey.clone_survey(current_user, params[:title])
-		render_json_auto(new_survey.serialize) and return
+		render_json_auto(new_survey) and return
 	end
 
 	# PAGE: show and edit survey
