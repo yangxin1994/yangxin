@@ -149,12 +149,6 @@ class Filler::FillerController < ApplicationController
 		# 7. Estimate survey filler time
 		@left_time = @survey.estimate_answer_time
 
-		# 8. If is hot survey and user is signed in, check whether is new user or not
-		@answer_count_empty = false
-		if @survey.quillme_hot && user_signed_in
-			@answer_count_empty = current_user.answers.not_preview.length
-		end
-
 		# 10. get request referer and channel
 		@channel = params[:c].to_i
 		begin
