@@ -1,5 +1,6 @@
 require 'sidekiq/web'
 OopsData::Application.routes.draw do
+  # match '*path' => 'welcome#index'
 
   # get '/:unique_key' => 'utility/short_urls#show', :constraints => { :unique_key => /~.+/ }
   match '/:unique_key' => 'mongoid_shortener/shortened_urls#translate', :via => :get, :constraints => { :unique_key => /~.+/ }
