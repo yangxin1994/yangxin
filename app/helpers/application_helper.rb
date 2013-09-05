@@ -201,6 +201,10 @@ module ApplicationHelper
 				behavor = %Q{
 					兑换失败,返还了<b>#{news['amount'].abs}</b>积分
 				}.html_safe				
+			when 256
+				behavor = %Q{
+					从清研通导入<b>#{news['amount'].abs}</b>积分
+				}.html_safe				
 			end
 		when 16
 			behavor = %Q{
