@@ -60,10 +60,10 @@
               <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
-              <% if task["status"].to_i == 1 %>
+              <% if task["status"].to_i == AgentTask::OPEN %>
                 <li><a href="javascript:void(0)" style="display:none" class="st-open" ><i class="icon-ok-sign"></i>打开</a></li>
                 <li><a href="javascript:void(0)" class="st-close"><i class="icon-remove-sign"></i>关闭</a></li>
-              <% elsif task["status"].to_i == 2 %>
+              <% elsif task["status"].to_i == AgentTask::AGENT_CLOSED %>
                 <li><a href="javascript:void(0)" class="st-open"><i class="icon-ok-sign"></i>打开</a></li>
                 <li><a href="javascript:void(0)" class="st-close" style="display:none"><i class="icon-remove-sign"></i>关闭</a></li>
               <% else %>
