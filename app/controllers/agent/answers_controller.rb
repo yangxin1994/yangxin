@@ -1,3 +1,4 @@
+# already tidied up
 class Agent::AnswersController < Agent::AgentsController
 
   def index

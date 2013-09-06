@@ -1,4 +1,4 @@
-is being tidied up
+# already tidied up
 require 'tool'
 class Agent
   include Mongoid::Document
@@ -48,9 +48,12 @@ class Agent
     return agent
   end
 
-
   def update_agent(agent)
-    agent[:password] = Encryption.encrypt_password(agent[:password]) if agent[:password].present?
+    if agent[:password].present?
+      agent[:password] = Encryption.encrypt_password(agent[:password])
+    else
+      agent.delete :password
+    end
     return self.update_attributes(agent)
   end
 

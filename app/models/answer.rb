@@ -1,4 +1,5 @@
 # encoding: utf-8
+# is being tidied up
 require 'error_enum'
 require 'data_type'
 require 'securerandom'

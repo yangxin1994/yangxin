@@ -1,3 +1,4 @@
+# already tidied up
 class Subscriber
   include Mongoid::Document
   include Mongoid::Timestamps

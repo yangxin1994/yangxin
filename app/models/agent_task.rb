@@ -1,3 +1,4 @@
+# already tidied up
 require 'tool'
 class AgentTask
 	include Mongoid::Document

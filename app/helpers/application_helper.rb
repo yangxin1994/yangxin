@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 module ApplicationHelper
 
 	def var_to_js
@@ -22,9 +23,6 @@ module ApplicationHelper
 		render :partial => "admin/application/paginator_mini",  :locals => {
 			:paginator => paginator
 		}
-	end
-	def assets_icon(icon, style)
-		"/assets/images/icons/#{style}/#{icon}.png"
 	end
 
 	def notice_auto

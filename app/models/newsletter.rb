@@ -1,3 +1,4 @@
+# already tidied up
 class Newsletter
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -15,10 +16,6 @@ class Newsletter
   has_and_belongs_to_many :subscribers
 
   default_scope where(:is_deleted => false)
-  scope :editing, where(:status => 0)
-  scope :delivering, where(:status => -1)
-  scope :delivered, where(:status => 1)
-  scope :canceled, where(:status => -2)
 
   scope :find_by_status, ->(_status) { _status.present? ? where(:status => _status) : self.all }
 
@@ -27,13 +24,6 @@ class Newsletter
 
   def present_admin
     present_attrs :_id, :title, :subject, :status, :columns, :is_tested, :is_deleted
-    present_add   :created_at=> self.created_at.strftime("%Y-%m-%d")
-  end
-
-  def present_list
-    present_attrs :_id,:title, :subject, :status, :is_deleted
-    present_add   :delivered_count => self.subscribers.count
-    present_add   :all_sub_count => Subscriber.subscribed.count
     present_add   :created_at=> self.created_at.strftime("%Y-%m-%d")
   end
 
