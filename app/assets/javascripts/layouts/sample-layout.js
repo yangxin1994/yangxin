@@ -20,9 +20,6 @@ $(document).ready(function() {
 		});
 	})
 
-
-
-
 	jQuery(".slider").slide({
 		mainCell: ".bd ul",
 		effect: "leftLoop",
