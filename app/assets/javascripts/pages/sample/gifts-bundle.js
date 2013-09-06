@@ -17,7 +17,7 @@ $(function() {
 
 
 	//账户中心下拉菜单
-	$.form.powerfloat();
+	//$.form.powerfloat();
 
 	$(".exc_right button").click(function() {
 		window.location.href = window.location.protocol + "//" + window.location.host + "/sign_up";

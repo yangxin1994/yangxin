@@ -662,11 +662,7 @@ ul.exc_nav{
   		float:left;
   	}
   }
-	.order_details{
-/*	
-		width: 500px;
-		margin: 10px 80px;
-*/		
+	.order_details{	
 		line-height: 36px;
 		padding: 0px 50px;
 		.o_t{
@@ -755,6 +751,9 @@ ul.exc_nav{
 			}
 		}
 
+	}
+	.order_details.p_less{
+		text-align:center;
 	}
 	.more_integral{
   		color:#b3b3b3;
