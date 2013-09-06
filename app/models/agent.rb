@@ -1,4 +1,4 @@
-is being tidied up
+#already tidied up
 require 'tool'
 class Agent
   include Mongoid::Document
@@ -40,13 +40,6 @@ class Agent
     return agent
   end
 
-  def self.create_agent(agent)
-    return ErrorEnum::AGENT_EXIST if !self.find_by_email(agent["email"]).nil?
-    agent["password"] = Encryption.encrypt_password(agent["password"])
-    agent= Agent.new(agent)
-    agent.save
-    return agent
-  end
 
   def update_agent(agent)
     agent[:password] = Encryption.encrypt_password(agent[:password]) if agent[:password].present?
@@ -93,12 +86,6 @@ class Agent
       agent.auth_key = nil
       agent.save
     end
-  end
-
-  def self.login_with_auth_key(auth_key)
-    agent = Agent.find_by_auth_key(auth_key)
-    return ErrorEnum::AGENT_NOT_EXIST if agent.nil?
-    return agent
   end
 
   def login
