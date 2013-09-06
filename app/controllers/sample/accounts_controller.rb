@@ -45,7 +45,7 @@ class Sample::AccountsController < Sample::SampleController
         params[:password],
         current_user,
         params[:third_party_user_id],
-        {protocal_hostname: "#{request.protocol}#{request.host_with_port}",
+        {protocol_hostname: "#{request.protocol}#{request.host_with_port}",
           path: "/account/email_activate"})
       render_json_auto(retval) and return
     end
