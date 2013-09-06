@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 require 'string/utf8'
 class Admin::SamplesController < Admin::AdminController
 

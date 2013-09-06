@@ -1,4 +1,4 @@
-# encoding: utf-8
+# already tidied up
 class Report::Data
 
 	attr_accessor :report_type, :title, :header, :footer, :author_chn, :author_eng, :style

@@ -1,4 +1,4 @@
-#already tidied up
+# already tidied up
 require 'tool'
 class Prize
 	include Mongoid::Document

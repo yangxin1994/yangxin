@@ -1,4 +1,5 @@
-#already tidied up
+# already tidied up
+
 require 'tool'
 class Agent
   include Mongoid::Document
@@ -33,6 +34,14 @@ class Agent
     return self.normal.where(:email => agent_email).first
   end
 
+  def self.create_agent(agent)
+    return ErrorEnum::AGENT_EXIST if !self.find_by_email(agent["email"]).nil?
+    agent["password"] = Encryption.encrypt_password(agent["password"])
+    agent= Agent.new(agent)
+    agent.save
+    return agent
+  end
+
   def self.find_by_auth_key(auth_key)
     return nil if auth_key.blank?
     agent = self.normal.where(:auth_key => auth_key).first
@@ -40,9 +49,12 @@ class Agent
     return agent
   end
 
-
   def update_agent(agent)
-    agent[:password] = Encryption.encrypt_password(agent[:password]) if agent[:password].present?
+    if agent[:password].present?
+      agent[:password] = Encryption.encrypt_password(agent[:password])
+    else
+      agent.delete :password
+    end
     return self.update_attributes(agent)
   end
 

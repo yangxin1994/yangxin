@@ -1,6 +1,5 @@
 # encoding: utf-8
-
-# coding: utf-8
+# already tidied up
 
 class Admin::AnnouncementsController < Admin::AdminController
 

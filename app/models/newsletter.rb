@@ -16,10 +16,6 @@ class Newsletter
   has_and_belongs_to_many :subscribers
 
   default_scope where(:is_deleted => false)
-  scope :editing, where(:status => 0)
-  scope :delivering, where(:status => -1)
-  scope :delivered, where(:status => 1)
-  scope :canceled, where(:status => -2)
 
   scope :find_by_status, ->(_status) { _status.present? ? where(:status => _status) : self.all }
 
@@ -30,7 +26,6 @@ class Newsletter
     present_attrs :_id, :title, :subject, :status, :columns, :is_tested, :is_deleted
     present_add   :created_at=> self.created_at.strftime("%Y-%m-%d")
   end
-
 
   def cancel
     self.status = -2

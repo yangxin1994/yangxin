@@ -1,4 +1,4 @@
-# encoding: utf-8
+# already tidied up
 require 'error_enum'
 require 'array'
 require 'tool'
