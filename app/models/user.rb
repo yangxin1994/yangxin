@@ -140,10 +140,6 @@ class User
 		return self.where(:_id => user_id).first
 	end
 
-	def self.find_by_id_including_deleted(user_id)
-		return self.where(:_id => user_id).first
-	end
-
 	def self.find_by_auth_key(auth_key)
 		return nil if auth_key.blank?
 		user = User.where(:auth_key => auth_key, :status.gt => -1)[0]

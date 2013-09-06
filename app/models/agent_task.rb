@@ -1,3 +1,4 @@
+
 # already tidied up
 require 'tool'
 class AgentTask
@@ -36,25 +37,6 @@ class AgentTask
 
 	def self.find_by_id(agent_task_id)
 		return self.normal.where(:_id => agent_task_id).first
-	end
-
-	def find_answer_by_id(answer_id)
-		return self.answers.where(:_id => answer_id).first
-	end
-
-	def self.create_agent_task(agent_task, survey_id, agent_id)
-		survey = Survey.find_by_id(survey_id)
-		return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-		agent = Agent.find_by_id(agent_id)
-		return ErrorEnum::AGENT_NOT_EXIST if agent.nil?
-		reward_scheme_id = agent_task.delete("reward_schemes_id")
-		reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
-		agent_task = AgentTask.new(agent_task)
-		agent_task.save
-		reward_scheme.agent_tasks << agent_task
-		survey.agent_tasks << agent_task
-		agent.agent_tasks << agent_task
-		return agent_task
 	end
 
 	def update_agent_task(agent_task)

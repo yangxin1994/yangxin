@@ -1,4 +1,5 @@
 # already tidied up
+
 require 'tool'
 class Agent
   include Mongoid::Document
@@ -40,7 +41,7 @@ class Agent
     agent.save
     return agent
   end
-  
+
   def self.find_by_auth_key(auth_key)
     return nil if auth_key.blank?
     agent = self.normal.where(:auth_key => auth_key).first
@@ -97,12 +98,6 @@ class Agent
       agent.auth_key = nil
       agent.save
     end
-  end
-
-  def self.login_with_auth_key(auth_key)
-    agent = Agent.find_by_auth_key(auth_key)
-    return ErrorEnum::AGENT_NOT_EXIST if agent.nil?
-    return agent
   end
 
   def login
