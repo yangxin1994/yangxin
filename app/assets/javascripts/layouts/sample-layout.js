@@ -11,12 +11,15 @@ $(document).ready(function() {
 	var partial_ul = null;
 	var share_imgs = null;
 	$.form.powerfloat();
-	$('.share-btn').click(function() {
-		$.od.odShare({
-			point: $(this).attr('data'),
-			survey_title: $(this).attr('s_title'),
-			scheme_id: $(this).attr('scheme_id'),
-			images: $(this).parents('li').find('a.unfold-btn').attr('prize_src')
+
+	$.each([$('.share-btn'), $('a.old')], function() {
+		$(this).click(function() {
+			$.od.odShare({
+				point: $(this).attr('data'),
+				survey_title: $(this).attr('s_title'),
+				scheme_id: $(this).attr('scheme_id'),
+				images: $(this).parents('li').find('a.unfold-btn').attr('prize_src')
+			});
 		});
 	})
 
