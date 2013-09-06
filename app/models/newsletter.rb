@@ -1,3 +1,4 @@
+# already tidied up
 class Newsletter
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -30,31 +31,6 @@ class Newsletter
     present_add   :created_at=> self.created_at.strftime("%Y-%m-%d")
   end
 
-  def present_list
-    present_attrs :_id,:title, :subject, :status, :is_deleted
-    present_add   :delivered_count => self.subscribers.count
-    present_add   :all_sub_count => Subscriber.subscribed.count
-    present_add   :created_at=> self.created_at.strftime("%Y-%m-%d")
-  end
-
-  def deliver_news(content_html)
-    Sidekiq.redis{|r| r.set('news_flag', '1')}
-    NewsletterWorker.perform_async(self._id, content_html)
-    self.status = -1
-    save
-    # Subscriber.all.each do |subscriber|
-    #   NewsletterMailer.news_email(subscriber).deliver
-    # end
-  end
-
-  def deliver_test_news(user, content_html)
-    NewsletterMailer.news_email(self, content_html, user, true).deliver
-    self.is_tested = true
-    save
-    # Subscriber.all.each do |subscriber|
-    #   NewsletterMailer.news_email(subscriber).deliver
-    # end
-  end
 
   def cancel
     self.status = -2
