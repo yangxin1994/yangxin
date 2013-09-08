@@ -78,11 +78,13 @@ class MigrateDb
 				end
 				u.point = u.point + point
 				u.save
-				pl = PointLog.new
-				pl.amount = point
-				pl.user_id = u._id
-				pl.reason = PointLog::NETRANKING_IMPORT
-				pl.save
+				if point > 0
+					pl = PointLog.new
+					pl.amount = point
+					pl.user_id = u._id
+					pl.reason = PointLog::NETRANKING_IMPORT
+					pl.save
+				end
 			end
 		end
 	end
