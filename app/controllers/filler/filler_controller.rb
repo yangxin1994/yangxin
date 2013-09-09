@@ -140,15 +140,8 @@ class Filler::FillerController < ApplicationController
 		ensure_reward(reward_scheme_id, answer.nil? ? reward_scheme.rewards : answer.rewards)
 
 		# 6. Check whether survey is closed or not
-		@survey_closed = false
-		if !@is_preview && @survey.status != Survey::PUBLISHED
-			# if is filler and survey's status is not published
-			@survey_closed = true
-		end
-
-		# 7. Estimate survey filler time
-		@left_time = @survey.estimate_answer_time
-
+		@survey_closed = !@is_preview && @survey.status != Survey::PUBLISHED
+		
 		# 10. get request referer and channel
 		@channel = params[:c].to_i
 		begin
