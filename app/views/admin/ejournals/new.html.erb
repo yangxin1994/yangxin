@@ -1,0 +1,42 @@
+<% content_for :head do %>
+  <script type="text/javascript">
+    window.ejournal = {
+      status: 0,
+      title: "电子邮件主题",
+      column: {
+        "0": "优数动态", 
+        "1": "产品动态"
+      },
+      content: [
+        {
+          number: 0,
+          caption: "点击修改标题",
+          time: "2013.01.01",
+          url: "http://www.oopsdata.com/",
+          right: true,
+          abstract: "点击修改文字摘要",
+          image_url: "http://quill.oopsdata.com:3000/assets/zine/1.png",
+          column_id: '0'
+        },
+        {
+          number: 1,
+          caption: "点击修改标题",
+          time: "2013.01.01",
+          url: "http://www.oopsdata.com/",
+          right: true,
+          abstract: "点击修改文字摘要",
+          image_url: "http://quill.oopsdata.com:3000/assets/zine/4.png",
+          column_id: '1'        
+        }
+      ]
+    };
+    window.mode = 'new';
+  </script>
+  <%= javascript_include_tag "pages/admin/ejournal-bundle" %>
+  <%= stylesheet_link_tag    "pages/admin/ejournal-bundle" %> 
+<% end %>
+
+<button class="preview-btn od-button" id="preview">预览</button>
+<button class="reedit-btn od-button" id="reedit" style="display:none;">重新编辑</button>
+<button class="save-btn od-button" id="save">保存</button>
+<button class="return-btn od-button" id="return">返回列表</button>

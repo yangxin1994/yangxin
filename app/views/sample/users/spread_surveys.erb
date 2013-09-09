@@ -1,0 +1,108 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/sample/users-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/sample/users-bundle","pages/sample/users_spread_survey-bundle", :media => "all" %>
+<% end %>
+
+<%= render "sample_nav", :@path => 'join_surveys', :@text => "我的调研" %>
+
+<div class="inner-page main-content">
+    <!-- main -->
+    <div class="part-left">
+        <div class="tabs">
+            <div class="l">
+              <a href="/users/join_surveys" class="tab" id="tab-join-surveys">我参加的调研</a>
+              <a href="/users/spread_surveys" class="tab active" id="tab-spread-surveys">我推广的调研</a>
+            </div>
+            <div style="clear:both;"></div>
+            <div class="nav2-dashed-line"></div>
+        </div>
+
+        <div style="clear:both;"></div>
+
+        <div class="table-box">
+            <table class="spread_surveys">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;" class="time">时间</th>
+                        <th style="width: 300px;" class="name">调研名称</th>
+                        <th style="width: 80px;" class="type">奖励</th>
+                        <th style="width: 80px;" class="reward">完成／推广</th>
+                        <th style="width: 60px;" class="type">总计</th>
+                        <!-- work for survey detail -->
+                        <th style="display: none;" class="type">调研类型</th>
+                        <!--  -->
+                        <th class="last-child" style="width: 80px;" class="reward">查看详情</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% @my_spread_surveys['data'].to_a.each do |survey| %>
+                        <tr id="sid-<%= survey["_id"] %>">
+                            <td><%= int_time_to_date(survey["created_at"]) %></td>
+                            <td>
+                                <span><%= truncate(survey["title"].to_s.strip, length: 22) %></span>
+                            </td>
+                            <td>
+                                <span class="point"><%= survey["spread_point"] %>积分/份</span>
+                            </td>
+                            <td>
+                                 <span><%= survey["finish_number"].to_i %>/<%= survey["spread_number"] %> 份</span>
+                            </td>
+                            <td>
+                                <span class="point"><%= survey["spread_point"].to_i * survey["finish_number"].to_i %>积分</span>
+                            </td>
+                            <td style="display: none;"><%= survey_type?(survey["quillme_promote_reward_type"]) %></td>
+                            <td class="last-child">
+                                <a href="#spread-detail" name="<%= survey["_id"] %>" class="fancybox">推广详情</a>
+                            </td>
+                        </tr>
+                    <% end %>
+                </tbody>
+            </table>
+        </div>
+
+        <%= render "pagination", :@common_value => @my_spread_surveys, :@path => "/users/spread_surveys" %>
+    </div>
+
+    <!-- user tabs -->
+    <%= render "right_partial" %>
+</div>
+
+<div id="spread-detail">
+  <div class="detail-title">
+    <span>推广详情</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <!-- position element -->
+        <th style="width: 10px;"></th>
+
+        <th style="width: 80px;">时间</th>
+        <th style="width: 300px;">调研名称</th>
+        <th style="width: 70px;">调研类型</th>
+        <th style="width: 120px;">邀请人数</th>
+        <th style="width: 70px;">答题完毕</th>
+        <th style="width: 50px;">获得奖励</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <!-- position element -->
+        <td></td>
+
+        <td></td>
+        <td>重建社会信任，中国红十字会需要做些什么</td>
+        <td>有奖调研</td>
+        <td>0人（0人正在答题）</td>
+        <td>0人</td>
+        <td>0积分</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="spread-users">
+    <!-- Ajax Loading -->
+  </div>
+
+</div>

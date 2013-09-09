@@ -4,171 +4,25 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=7"/>
   <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7"/>
+  <%= csrf_meta_tags %>
   <title>电子杂志</title>
-  <style type="text/css">
-body{
-        margin:0;
-        padding:20px;
-        background: #e7e9ea;
-        font: 13px '微软雅黑', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';
-      }
-      h2,h3,h4,p,a,span,div,strong{margin:0;padding:0;}
-      .l{float: left}
-      .r{float: right}
-      .img-l{float: left;margin-right:20px;}
-      .img-r{float:right;margin-left:20px;}
-      .fix{*zoom:1;}
-      .fix:after{
-        display:block; 
-        content:"clear"; 
-        height:0; 
-        clear:both; 
-        overflow:hidden; 
-        visibility:hidden;
-      }
-      a{color: #4798ED;}
-      .zine{
-        width: 650px;
-        margin: 20px auto;
-      }
-      .zine-logo{
-        background: #212121;
-        padding: 10px 15px;
-        border-radius: 6px 6px 0 0;
-      }
-      .footer{
-        background: #212121;
-        height:55px;
-        line-height: 55px;
-        border-radius:0 0 6px 6px;
-      }
-      .footer span{
-        float: right;
-        margin-right:20px;
-        color: #999;
-      }
-      .footer a{
-        color: #4798ed;
-      }
-      .team{
-        text-align: right;
-        padding: 10px;
-        color: #999;
-      }
-      .team a{
-        font-size: 12px;
-        color: #4798ed;
-      }
-      .phone-number{
-        margin:5px 5px 0 0;
-        color: #FFF;  
-        font-size: 14px;
-        text-decoration: none;
-      }
-      .phone-number:hover .ico-phone{
-        background: url('/assets/zine/phone_hover.png') no-repeat;
-      }
-      .phone-number .ico-phone{
-        width:26px;
-        height:26px;
-        display: inline-block;
-        position: relative;
-        bottom:-5px;
-        background: url('/assets/zine/phone.png') no-repeat;
-      }
-      .content{
-        padding:30px 0;
-        border:1px #cccdd0 solid;
-        border-top:none;
-        background: #fff;
-        word-wrap: break-word;/*自动换行*/
-        word-break: break-all;/*强制英文单词断行*/
-      }
-      .content h4{
-        margin-bottom:20px;
-        padding-left:30px;
-        font-size: 18px;
-        font-weight: normal;
-      }
-      .content h3{
-        font-size: 16px;
-      }
-      .content .description{
-        font-size: 15px;
-        line-height: 1.7em;
-        text-indent: 2em;
-        padding:0 30px;
-        margin-bottom:30px;
-      }
-      .content .article,
-      .content .product-news{
-        border-top:1px #dbdbdb solid;
-        padding:30px;
-      }
-      
-      .content .article .article-txt{
-        margin-top:25px;
-      }
-      .content .article .title a{
-        font-size: 14px;
-      }
-      
-      .content .article .date{
-        color: #999;
-      }
-      .content .product-news-txt{
-        min-height:70px;
-        margin-top:15px;
-        display: block;
-      }
-      .content .product-news .product-news-date{
-        float: left;
-        margin-right: 15px;
-        color: #ccc;
-      }
-      .content .product-news .product-news-date span{
-        display: block;
-        line-height: 0.9em;
-        font-weight: bold;
-      }
-      .content .product-news .product-news-date .month,
-      .content .product-news .product-news-date .day{
-        font-size: 22px;
-        letter-spacing: 1px;
-      }
-      .content .product-news .product-news-date .year{
-        font-size: 12px;
-        line-height:1.2em;
-      }
-      .content .product-news .title{
-        margin:-5px 0 10px 0;
-      }
-      .content .product-news h3 a{
-        font-size: 14px;
-      }
-      .content .article p{
-        font-size: 14px;
-        margin-top:20px;
-        line-height: 1.6em;
-      }
-      .divide{
-        width:100%;
-        margin:35px 0 15px 0;
-        border-top:1px #dbdbdb solid;
-        display: inline-block;  
-      }
-  </style>
+  <%= stylesheet_link_tag "pages/admin/newsletter_edit-bundle", :media => "all" %>
+  <%= stylesheet_link_tag "pages/admin/newsletters-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/admin/newsletters/newsletter-class-bundle" %>
+  <%= yield :head %>
 </head>
 <body>
-  <div class="zine fix">
+<div class="zine fix">
   <div class="zine-logo">
-    <img src="http://res.oopsdata.com/assets/logo-cn.png" alt="优数调研">
+    <img src="/assets/logo-cn.png" alt="优数调研">
     <a href="http://oopsdata.com/contact" class="phone-number r">
       <span class="ico-phone"></span>
       <span class="number">联系我们</span>
     </a>
   </div>
   <%= yield %>
+
+
   <div class="footer fix">
     <a href="http://oopsdata.com/contact" class="phone-number l">
       <span class="number" style="margin-top:-5px;">联系我们</span>
@@ -178,8 +32,79 @@ body{
   </div>
   <div class='team'>
     如果您错误的接收到了电子杂志，或者不想接受我们的电子杂志，请
-    <a href="http://wordpress.oopsdata.com/unsubscribe?e=<%=@subscriber.email%>">取消订阅</a>
+    <a href="javascript:void(0);">取消订阅</a>
   </div>
 </div>
+<div id="edit-pad">
+  <button class="od-button" id="newsletter-return-btn">返回列表</button>
+  <button id="newsletter-edit-btn" class="od-button">杂志信息</button>
+  <%= yield :button %>
+  <button id="column-new-btn" class="od-button">新建栏目</button>
+
+  <div id="newsletter-edit-dlg" title="杂志信息">
+    <label for="newsletter-title-edit">标题</label>
+    <input type="text" id="newsletter-title-edit" name="newsletter_title">
+    <button id="newsletter-update-btn" class="btn submit" >提交</button>
+  </div>
+
+  <div id="column-create-dlg" title="新栏目">
+    <label for="column_title">标题</label>
+    <input type="text" id="column-title-new" name="column_title">
+    <button id="column-create-btn">提交</button>
+  </div>
+
+  <div id="column-edit-dlg" title="编辑栏目">
+    <form>
+    <p id="column-edit-pad">
+      <input type="hidden" id="column-id" name="column_id"/>
+      <label for="column-title-edit">栏目标题：</label>
+      <input id="column-title-edit" type="text" autofocus placeholder="请输入栏目标题">
+      <a href="javascript:void(0);" id="column-update-btn">保存</a>
+      <a href="javascript:void(0);" id="column-delete-btn">删除</a>
+    </p>
+    <p>
+      <label for="article-list">选择文章：</label>
+      <select id="article-list" >
+      </select>
+      <a href="javascript:void(0);" id="article-edit-btn">编辑</a>
+      <a href="javascript:void(0);" id="article-delete-btn">删除</a>
+      <a href="javascript:void(0);" id="article-new-btn">新增</a>
+    </p>
+    <div id="article-edit-div" style="display:none">
+    <input type="hidden" id="article-id" name="article_id"/>
+    <p>
+      <label for="article-caption">文章标题：</label>
+      <input id="article-caption" type="text" autofocus placeholder="请输入文章标题">
+    </p>
+    <p>
+      <label for="article-url">标题链接：</label>
+      <input id="article-url" type="text" autofocus placeholder="请输入标题链接">
+    </p>
+    <p>
+      <label for="article-time">发布时间：</label>
+      <input id="article-time" type="text" autofocus placeholder="请输入发布时间">
+    </p>
+    <p id="image-edit-pad">
+      <label for="article-image_url">文章配图：</label>
+      <input id="article-image_url" type="text" autofocus placeholder="请输入图片地址">
+      <span class="right">
+        <input type="checkbox" id="article-right">
+        <label style="display:inline-block;" for="article-right">图片居右</label>
+      </span>
+    </p>
+    <p>
+      <label for="article-abstract">文章摘要：</label>
+      <textarea name="article_abstract" id="article-abstract" cols="30" rows="10"></textarea>
+    </p>
+    <button class="btn submit" id="article-create-btn">提交保存</button>
+    <button class="btn submit" id="article-update-btn">提交保存</button>
+    </div>
+  </form>
+
+  </div>
+</div>
+
 </body>
+  <%= javascript_include_tag "pages/admin/newsletters/newsletter-bundle" %>
+
 </html>

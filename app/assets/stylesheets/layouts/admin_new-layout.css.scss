@@ -1,0 +1,337 @@
+
+p label {
+	width: 100px;
+	display: inline-block;
+	font-weight: bold;
+}
+
+p input[type="text"], p input[type="password"] {
+	width: 360px;
+	display: inline-block;
+}
+
+p .alertSpan {
+	width: 420px;
+	display: inline-block;
+}
+
+p input.button {
+	width: 80px;
+	height: 22px;
+}
+
+.wrap-text {
+	word-break: break-all; 
+	word-wrap: break-word;
+}
+
+.bg-gray {
+	background-color: #ebebe4;
+	padding: 8px 0;
+	margin: 4px 0;
+}
+
+.bg-orange {
+	padding: 4px;
+	background-color: orange;
+	display:inline-block;
+	margin-right:20px;
+}
+
+.bg-coral {
+	padding: 4px;
+	background-color: coral;
+	display:inline-block;
+	margin-right:20px;
+}
+
+.bg-red {
+	padding: 4px;
+	background-color: red;
+}
+
+.f-orange {
+	color: orange;
+	padding: 1px 2px;
+}
+
+.f-coral {
+	color: coral;
+	padding: 1px 2px;
+}
+
+.f-red {
+	color: red;
+	padding: 1px 2px;
+}
+
+hr {
+	margin: 10px 0px;
+}
+
+// *******Change css from brain frame******
+// 
+
+.blueBtn, .redBtn, .greenBtn {
+	padding: 4px;
+
+	&:disabled {
+		background: url("../images/ui/greyishBtn.png") repeat-x scroll 0 0 transparent;
+	    border: 1px solid #4F5A68;
+	    color: #FFFFFF;
+	}
+}
+
+.table {
+	margin-top: 20px;
+}
+
+textarea, input[type="text"], input[type="password"] {
+	font-size: 16px;
+}
+
+.title {
+	margin-bottom: 10px;
+	margin-top: 30px;
+}
+
+.title-parent {
+	margin-top: 30px;
+}
+
+.title:first-child {
+	margin-top: 0px;
+}
+
+.stats ul li {
+	margin-left: 10px;
+	width: auto;
+	display: inline-block;
+}
+
+// ****************
+
+.delete-selected-panel {
+	float: left;
+	padding: 10px 0 0 0;
+}
+a.button {
+	background-color: #f5c000;
+	margin: 4px;
+	display: inline-block;
+}
+
+.pager{
+
+	float: right;
+	padding-right: 10px;
+	padding-top: 6px;
+
+	a {
+		float: left;
+		height: 23px;
+		line-height: 23px;
+		overflow: hidden;
+		min-width: 15px;
+		_width: 15px;
+		padding: 0 5px;
+		margin-right: 5px;
+		text-align: center;
+		white-space: nowrap;
+		font-size: 13px;
+		vertical-align: middle;
+		font-family: Arial,SimSun;
+		border: solid 1px #CCC;
+		background-color: white;
+
+		display: inline-block;
+
+		&:hover{
+			border: solid 1px #F50;
+			text-decoration: none;
+		}
+	}
+
+	.page_break {
+		float: left;
+		height: 23px;
+		line-height: 23px;
+		overflow: hidden;
+		min-width: 15px;
+		_width: 15px;
+		padding: 0 5px;
+		margin-right: 5px;
+		text-align: center;
+		white-space: nowrap;
+		font-size: 13px;
+		vertical-align: middle;
+		font-family: Arial,SimSun;
+
+		display: inline-block;
+	}
+
+	.current {
+		border: 1px solid #F50;
+		font-weight: 700;
+		color: #F50;
+		background-color: #FFEEE5;
+	}
+}
+
+.dn {
+	display: none;
+}
+
+.new,.list{
+	float:right;
+	margin: 10px 12px 8px 20px;
+	font-size: 12px;
+	background: image-url('od-icon/add.png') no-repeat 12px;
+	padding-left: 30px;
+}
+.list{
+	padding-left: 35px;
+	background:url('/assets/images/icons/dark/list.png') no-repeat 12px;
+}
+.deleteAll{
+	margin:5px;
+}
+
+.error{
+	padding-left: 20px;
+	background: image-url('od-icon/cross_circle.png') no-repeat;
+}
+.information{
+	padding-left: 20px;
+	background: image-url('od-icon/information.png') no-repeat;
+}
+.search{
+	margin-top: 20px;
+}
+.center{
+	text-align: center;
+}
+.ml15{
+	margin-left: 15px;
+}
+.selectActive{
+	margin-top:8px;
+}
+
+/***************** 礼品分类按钮 *******************/
+.entity{
+	display:inline-block;
+	width:35px;
+	height:18px;
+	line-height:18px;
+	background:#669900;
+	font-style:normal;
+	color:white;
+	-moz-border-radius:3px 3px;
+	border-radius:3px 3px;
+	text-align:center;
+}
+ .lottery{
+	display:inline-block;
+	width:35px;
+	height:18px;
+	line-height:18px;
+	background:#FF6600;
+	font-style:normal;
+	color:white;
+	-moz-border-radius:3px 3px;
+	border-radius:3px 3px;
+	text-align:center;
+}
+.cash{
+	display:inline-block;
+	width:35px;
+	height:18px;
+	line-height:18px;
+	background:#CC0000;
+	font-style:normal;
+	color:white;
+	-moz-border-radius:3px 3px;
+	border-radius:3px 3px;
+	text-align:center;	
+}
+.virtual{
+	display:inline-block;
+	width:35px;
+	height:18px;
+	line-height:18px;
+	background:#3366FF;
+	font-style:normal;
+	color:white;
+	-moz-border-radius:3px 3px;
+	border-radius:3px 3px;
+	text-align:center;	
+}
+
+/*************** Pagination ***************/
+
+.pagination {
+	padding:20px 0 5px 0;
+	font-size:12px;
+	width:auto;
+	margin-top: 0px;
+	float: right;
+	text-align: right;
+
+	a {
+		// margin:0 5px 0 0;
+		// padding:3px 6px;
+		float: left;
+		height: 23px;
+		line-height: 23px;
+		overflow: hidden;
+		min-width: 15px;
+		_width: 15px;
+		padding: 0 5px;
+		margin-right: 5px;
+		text-align: center;
+		white-space: nowrap;
+		font-size: 13px;
+		vertical-align: middle;
+		font-family: Arial,SimSun;
+		border: solid 1px #CCC;
+		background-color: white;
+
+		display: inline-block;
+
+		&:hover{
+			border: solid 1px #F50;
+			text-decoration: none;
+		}
+	}
+
+	.page_break {
+		float: left;
+		height: 23px;
+		line-height: 23px;
+		overflow: hidden;
+		min-width: 15px;
+		_width: 15px;
+		padding: 0 5px;
+		margin-right: 5px;
+		text-align: center;
+		white-space: nowrap;
+		font-size: 13px;
+		vertical-align: middle;
+		font-family: Arial,SimSun;
+
+		display: inline-block;
+	}
+
+	a.number {
+		border:1px solid #ddd;
+	}
+	a.current {
+		background:#3581C1 url(/assets/images/ui/blueBtn.png) repeat-x 0 0 ;
+		border-color:#3581C1;
+		color:#fff ;
+	}
+	a.current:hover {
+		text-decoration:underline;
+	}
+}

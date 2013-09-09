@@ -1,0 +1,100 @@
+//=require ui/widgets/od_left_icon_button
+//=require ui/widgets/od_popup
+//=require ui/widgets/od_progressbar
+
+@import "common";
+@import "compass/css3/inline-block";
+@import "compass/utilities/general/clearfix";
+
+@import "od-icon/*.png";
+@import "od-button/*.png";
+.icon{
+	width:16px;
+	@include one-line(16px);
+	@include inline-block;
+	&:hover{cursor:pointer;}
+}
+.icon-edit {@include od-icon-sprite(edit);}
+.icon-new {@include od-icon-sprite(new);}
+.icon-del {@include od-icon-sprite(del);}
+.icon-share {@include od-icon-sprite(share);}
+.icon-gmail{@include od-icon-sprite(gmail);}
+.icon-douban{@include od-icon-sprite(dou);}
+.icon-renren{@include od-icon-sprite(ren);}
+.icon-diandian{@include od-icon-sprite(dian);}
+.icon-sina{@include od-icon-sprite(sina);}
+
+.office{
+	width:21px;
+	@include one-line(24px);
+	@include inline-block;
+	&:hover{cursor:pointer;}
+} 
+.word1{@include od-button-sprite(word1);}
+.word2{@include od-button-sprite(word2);}
+.word3{@include od-button-sprite(word3);}
+.reader1{@include od-button-sprite(reader1);}
+.reader2{@include od-button-sprite(reader2);}
+.reader3{@include od-button-sprite(reader3);}
+.excel1{@include od-button-sprite(excel1);}
+.excel2{@include od-button-sprite(excel2);}
+.excel3{@include od-button-sprite(excel3);}
+.edit-panel{
+	width:777px;
+	margin:1px 0 0 4px;
+}
+.link-address{
+	width:490px;
+	padding:4px;
+	margin:0 0 0 35px;
+}
+.btn{
+	margin:-2px 0 0 5px;
+}
+.report-title {
+	.manage-btn{
+		display: none;
+		em{
+			margin:13px 15px 0 0;
+		}
+	}
+	&:hover {
+		.manage-btn {display: block;}
+	}
+}
+.be6{
+	background:#e6e6e6;
+}
+.bf2{
+	background:#f2f2f2;
+}
+.share{
+	li{
+		margin:20px 0 20px 35px;
+	}
+}
+.filter-list{
+	color: #666;
+	width:730px;
+	margin:0 auto;
+	dt{
+		margin-top:15px;
+	}
+	dd{
+		margin: 0 30px;
+		font-size: 12px;
+		@include one-line(40px);
+		border-bottom:1px #ccc dashed;
+		ul{
+			display:none;
+		}
+		&:hover{
+			ul{
+				display:block;
+			}
+		}
+	}
+}
+#add_report{
+	margin:30px 0 25px 30px;
+}

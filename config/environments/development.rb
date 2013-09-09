@@ -29,7 +29,6 @@ OopsData::Application.configure do
   config.assets.debug = true
 
 	#config.cache_store = :mem_cache_store, 'localhost:11211'
-
 	config.action_mailer.perform_deliveries = true
 	config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
@@ -43,21 +42,48 @@ OopsData::Application.configure do
     :openssl_verify_mode  => 'none'
   }
 
+  config.survey_mailer_setting = {
+    :authentication => "plain",
+    :address        => "smtp.mailgun.com",
+    :port           => 25,
+    :domain         => "oopsdata.net",
+    :user_name      => "postmaster@oopsdata.net",
+    :password       => "0nlnhy08vbk1",
+    :enable_starttls_auto => true,
+    :openssl_verify_mode  => 'none'
+  }  
+
+  config.authkeys = {
+    sina: '3198161770',
+    renren: '194585',
+    qq: '100418792',
+    google: '36926710043',
+    qihu360: 'c83cf3b2688f4f1c695bc9906a2dcf14',
+    kaixin001: '173805652095b523553bc42aa44f8171',
+    douban: '06b0041f88738b9e14100c5e995aa2da',
+    baidu: 'STFYxeMfwouPVtMjseFymHGD',
+    sohu: '9ab2466b42224c0c9b038e327db61b97'
+  }
+
   # task web service
   config.service_port = '8000'
 
   # donet web service
-  # config.dotnet_web_service_uri = 'http://192.168.1.119:80'
   config.dotnet_web_service_uri = 'http://export.oopsdata.com'
+
+	# configuration for quill and quillme
+	config.quill_host = 'http://quill.oopsdata.net:3000'
+	config.quillme_host = 'http://localhost:8000'
 
 	# configuration for roadie
 	config.action_mailer.default_url_options = {:host => 'quill.oopsdata.net', :port => '3000'}
 
-	# configuration for quill and quillme
-	config.quill_host = 'http://quill.oopsdata.net:3000'
-	config.quillme_host = 'http://quillme.oopsdata.net:3000'
-
   config.mailgun_api_key = 'key-9zcv6-e7j8aratn9viu3unvbn2zc92j3'
-  config.survey_email_domain = 'oopsdata.net'
+  config.survey_email_domain = 'wenjuanba.net'
   config.user_email_domain = 'oopsdata.cn'
+
+  # ofcard uri
+  config.ofcard_service_uri = "http://api2.ofpay.com/"
+  config.ofcard_key_str = "OFCARD"
+  config.ret_url = "http://221.221.17.98:4000/orders/confirm"
 end

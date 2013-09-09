@@ -1,0 +1,47 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+		window.survey_questions = <%= raw @survey_questions.to_json %>;
+		window.current_filter = <%= raw @current_filter.to_json %>;
+		window.current_index = <%= @current_index %>;
+	</script>
+	<%= javascript_include_tag "pages/quill/filter-bundle" %>
+	<%= stylesheet_link_tag "pages/quill/filter-bundle", :media => "all" %>
+<% end %>
+
+<!-- content for left menus -->
+<% content_for :left_menus do %>
+	<%= render :partial => "partials/left_menus_result", :locals => { :left_active => 0 } %>
+<% end %>
+
+<!-- put html code below -->
+<p class="blue b f14">当样本回答题目选项同下面勾选一致，则作为符合条件的问卷。</p>
+
+<div id="filter-questions"></div>
+
+<div class="page" id="filter-nextbtn">	
+	<div class="seperator top tintgray"></div>	
+	<div class="q-render tintgray"></div>
+		<div class="q-render tintgray tc">
+			<span id="next_btn"><button class='od-button'>下一步</button></span>
+		</div>
+	<div class="seperator bottom tintgray"></div>	
+</div>
+
+<div class="page" id="filter-checked"></div>
+
+<div class="page" id="filter-bkcmbtn">	
+	<div class="seperator top tintgray"></div>	
+	<div class="q-render tintgray"></div>
+		<div class="q-render tintgray">
+			<div class="dib">
+				<span class="blue b dib w610 ml20">
+					筛选器命名：<input type="text" class="filter_name" name="filter_name" id="filter-name" />
+				</span>
+				<span id="back_btn"><button class='od-button'>上一步</button></span>
+				<span id="confirm_btn"><button class='od-button'>确定</button></span>
+			</div>
+			
+		</div>
+	<div class="seperator bottom tintgray"></div>	
+</div>

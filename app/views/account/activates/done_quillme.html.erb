@@ -1,0 +1,20 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= stylesheet_link_tag "pages/account/signup_quillme-bundle", :media => "all" %>
+<% end %>
+
+<% content_for :left do %>
+<div class="content-account-box redBorder">
+	<h3 class="content-left-title whiteTxt f14 b redBg"><%= @is_register ? '激活账户完成注册' : '激活账户' %></h3>
+	<div class="w896 fix">
+		<div class="reg-finish">
+			<p class="f14 g3">我们已经向<span style='margin: 0 10px; font-weight: bold;'><%= @signup_email %></span>发送了一封激活邮件，请在 24 小时内登录邮箱，点击激活链接<%= @is_register ? '完成注册' : '激活账户' %>。</p>
+			<a href="<%= @mail_url %>" target='blank' class="homepage-btn red-btn mt10">进入邮箱</a>
+			<dl class="activate-lose mt20">
+	    		<dt class="g6 mt5"><em class="icon-key dib"></em>没有收到激活邮件?</dt>
+	    		<dd class="g6 mt5 ml10">- 试试到邮箱中的垃圾邮件箱里找找，或者 <a param='e' href="<%= new_activate_path %>" class="re-send redTxt b">重发激活邮件</a>。</dd>
+	    	</dl>
+	    </div>
+	</div>   	
+</div>
+<% end %>

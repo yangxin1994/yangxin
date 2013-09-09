@@ -1,0 +1,245 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/surveys/reward-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+  <li>
+    <a href="/admin/surveys">
+    <i class="icon-chevron-right"></i>
+    调研列表
+    </a>
+  </li>
+  <li>
+    <a href="/admin/surveys/<%= params[:id]%>">
+      <i class="icon-chevron-right"></i>
+      问卷查看
+    </a>
+  </li>
+  <li class="active">
+    <a href="/admin/surveys/<%= params[:id]%>/reward_schemes">
+      <i class="icon-chevron-right"></i>
+      奖励方案
+    </a>
+  </li>
+  <li>
+    <a href="/admin/surveys/<%= params[:id]%>/promote">
+      <i class="icon-chevron-right"></i>
+      推送渠道
+    </a>
+  </li>
+<% end %>
+<div class="well">
+  <ul class="">
+  <% @reward_schemes.each_with_index do |reward_scheme, index| %>
+    <li><a href="?editing=<%= reward_scheme["_id"] %>">方案-<%= "#{index} #{reward_scheme['name']}" %> </a></li>
+  <% end %>
+    <li><a href="?">创建奖励方案 </a></li>
+  </ul>
+</div>
+
+
+<legend>奖励方案设置</legend>
+
+<form action="/admin/reward_schemes<%= "/#{params[:editing]}" if params[:editing] %>"
+      name="survey"
+      enctype="multipart/form-data"
+      method="post"
+      id="survey_form"
+      class="form-horizontal"
+>
+  <input value="<%= params[:editing] ? 'put' : 'post' %>" type='hidden' name="_method">
+  <input value="<%= params[:id] %>" type='hidden' name="reward_scheme[survey_id]">
+  <input value="<%= params[:editing] %>" type='hidden' name="reward_scheme[id]">
+  <input value="<%=
+    if @editing_rs["prizes"].present?
+      "prize"
+    elsif @editing_rs["point"].present? && @editing_rs["point"].to_s != '0'
+      "point"
+    elsif !@editing_rs["rewards"].present?
+      "free"
+    else
+      "cash"
+    end
+  -%>" type='hidden' id="reward_type" name="reward_scheme[type]">
+
+
+  <div class="control-group">
+    <label class="control-label" >奖励方案名称:</label>
+    <div class="controls">
+      <input type="text" name="reward_scheme[name]" class="input-large" placeholder="名称" value="<%= @editing_rs["name"] %>">
+    </div>
+  </div>   
+  <div class="control-group">
+    <label class="control-label" >是否需要审核:</label>
+    <div class="controls">
+      <input type="checkbox" name="reward_scheme[need_review]" <%= "checked" if @editing_rs["need_review"] %>/>
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" >奖励方案类型:</label>
+    <div class="controls">
+      <div class="btn-group">
+        <button class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+          奖励方案类型
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropselect">
+          <li><a href="#cash" id="cash_btn">现金类奖励</a></li>
+          <li><a href="#point" id="point_btn">积分奖励</a></li>
+          <li><a href="#prize" id="prize_btn">抽奖</a></li>
+          <li><a href="#free" id="free_btn">免费</a></li>
+          <!-- dropdown menu links -->
+        </ul>
+        <input type="hidden" name="reward_scheme[is_free]" id="ipt_free"/>        
+      </div>
+    </div>
+  </div>
+
+  <div id="cash_group">
+    <div class="control-group">
+      <label class="control-label" >话费充值:</label>
+      <div class="controls">
+        <div class="input-prepend" id="tel_charge_select">
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              快捷设置
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a href="#tel_charge-10">10</a></li>
+              <li><a href="#tel_charge-20">20</a></li>
+              <li><a href="#tel_charge-30">30</a></li>
+              <li><a href="#tel_charge-50">50</a></li>
+              <li><a href="#tel_charge-100">100</a></li>
+              <li><a href="#tel_charge-200">200</a></li>
+              <li><a href="#tel_charge-300">300</a></li>
+            </ul>
+            <input class="input-medium" type="text" name="reward_scheme[tel_charge]" id="tel_charge_amount" placeholder="额度" value="<%= @editing_rs["tel_charge"] %>">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" >支付宝转账:</label>
+      <div class="controls">
+        <div class="input-prepend" id="alipay_select">
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              快捷设置
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a href="#alipay-10">10</a></li>
+              <li><a href="#alipay-20">20</a></li>
+              <li><a href="#alipay-30">30</a></li>
+              <li><a href="#alipay-50">50</a></li>
+              <li><a href="#alipay-100">100</a></li>
+              <li><a href="#alipay-200">200</a></li>
+              <li><a href="#alipay-300">300</a></li>
+            </ul>
+            <input class="input-medium" type="text" name="reward_scheme[alipay]" id="alipay_amount" placeholder="额度"  value="<%= @editing_rs["alipay"] %>">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" >集分宝发放:</label>
+      <div class="controls">
+        <div class="input-prepend" id="jifenbao_select">
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              快捷设置
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a href="#jifenbao-10">10</a></li>
+              <li><a href="#jifenbao-20">20</a></li>
+              <li><a href="#jifenbao-30">30</a></li>
+              <li><a href="#jifenbao-50">50</a></li>
+              <li><a href="#jifenbao-100">100</a></li>
+              <li><a href="#jifenbao-200">200</a></li>
+              <li><a href="#jifenbao-300">300</a></li>
+            </ul>
+            <input class="input-medium" type="text" name="reward_scheme[jifenbao]" id="jifenbao_amount" placeholder="额度" value="<%= @editing_rs["jifenbao"] %>">
+          </div>
+        </div>
+      </div>
+    </div>  
+  </div>
+
+  <div id="point_group">
+    <div class="control-group">
+      <label class="control-label" >积分获取:</label>
+      <div class="controls">
+        <div class="input-prepend" id="point_select">
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              快捷设置
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a href="#point-10">10</a></li>
+              <li><a href="#point-20">20</a></li>
+              <li><a href="#point-30">30</a></li>
+              <li><a href="#point-50">50</a></li>
+              <li><a href="#point-100">100</a></li>
+              <li><a href="#point-200">200</a></li>
+              <li><a href="#point-300">300</a></li>
+            </ul>
+            <input class="input-medium" type="text" name="reward_scheme[point]" id="point_amount" placeholder="额度" value="<%= @editing_rs["point"] %>">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="prize_group">
+  <% (@editing_rs["prizes"] || [{}]).each_with_index do |prize, index| %>
+    <div class="control-group">
+      <label class="control-label" >奖品设置:</label>
+      <div class="controls">
+        <div class="input-prepend">
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              选择奖品
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropselect prize">
+              <% @prizes.each do |prize| %>
+                <li><a href="#prize-<%= prize['_id'] %>"><%= prize['title'] %></a></li>
+              <% end %>
+            </ul>
+            <input type="hidden" class="prize-id"  name="reward_scheme[prizes][<%= index %>][id]" value="<%= prize['id'] %>">
+          </div>
+          <input name="reward_scheme[prizes][<%= index %>][prob]" class="input-mini" type="text"  placeholder="中奖率" value="<%= prize['prob'] %>">
+          <input name="reward_scheme[prizes][<%= index %>][amount]" class="input-mini" type="text" placeholder="个数" value="<%= prize['amount'] %>">
+          <input name="reward_scheme[prizes][<%= index %>][deadline]" class="input-small reward-time" type="text" placeholder="YY/MM/DD" value="<%= Time.at(prize['deadline']).strftime("%y/%m/%d") if prize['deadline'].present? %>">
+        </div>
+      </div>
+    </div>
+  <% end %>
+    <div>
+      <div class="control-group broswer_extension-info">
+        <div class="controls">
+          <a href="#add_prize" id="add_prize" data-toggle="<%= @prizes.try('size') || 0 %>" class="btn btn-link">添加一组</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <div class="control-group">
+    <div class="controls">
+      <button class="btn btn-primary">保存</button>
+    </div>
+  </div>
+</form>
+
+<% content_for :foot do %>
+
+<% end %>
+
+

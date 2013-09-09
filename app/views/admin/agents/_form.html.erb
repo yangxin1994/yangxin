@@ -1,0 +1,38 @@
+<form action="<%= admin_agents_path + (@agent["created_at"].present? ? "/#{@agent["_id"]}" : "") %>"
+      name="agent"
+      enctype="multipart/form-data"
+      method="post"
+      id="agent_form"
+      class="form-horizontal"
+>
+    <input value="<%= @agent["created_at"].present? ? 'put' : 'post' %>" type='hidden' name="_method">
+    <div class="control-group">
+      <label class="control-label">邮箱:</label>
+      <div class="controls">
+        <input type="text" class="input-large" name="agent[email]" value="<%= @agent['email'] %>"/>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">密码:</label>
+      <div class="controls">
+        <input type="text" class="input-large" name="agent[password]"/>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label">姓名:</label>
+      <div class="controls">
+        <input type="text" class="input-large" name="agent[name]" value="<%= @agent['name'] %>"/>
+      </div>
+    </div>   
+    <div class="control-group">
+      <label class="control-label">地区代码:</label>
+      <div class="controls">
+        <input type="text" class="input-large" name="agent[region]" value="<%= @agent['region'] %>"/>
+      </div>
+    </div>   
+    <div class="control-group">
+      <div class="controls">
+        <input type="submit" class = "btn">
+      </div>
+    </div>   
+</form>

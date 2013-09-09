@@ -1,0 +1,363 @@
+@import "common";
+@import "filler/dark/social/*.png";
+@import "filler/dark/cpnt/*.png";
+@import "compass/css3";
+
+$light-blue: #9ca9b8;
+$fresh-blue: #7ba3da;
+$msg-bg: #3F454F;
+$line-dark: #1c1d1f;
+$line-light: #3F454F;
+
+#sf {
+	background: #1b1d1f;
+	a { color: $fresh-blue; }
+}
+
+#sf_banner {
+	background: #17181a;
+	>.inner {
+		.preview { color: $light-blue; }
+		#progress_info { color: $light-blue; }
+	}
+}
+.progress-con {
+	height: 4px;
+	background: #333;
+	#progress-line { display: none; }
+	#progress {
+		background: #555;
+		> em { background: $fresh-blue; }
+	}
+}
+
+#sf_main {
+	color: #fff;
+	background: #2d3137;
+	@include border-radius(0px);
+	@include single-box-shadow(#222, 0px, 0px, 15px);
+	>.error-con { background: $msg-bg; }
+}
+
+#sf_footer {
+	color: #333;
+	a { color: #333; }
+}
+
+.welcome {
+	>h1 { color: $light-blue; }
+	>h2 { color: #b3b3b3; }
+}
+.msg {
+	background: $msg-bg;
+	> em { background-image: image-url("filler/dark/icon/time.png"); }
+	> span {
+		a, > em { color: $fresh-blue; }
+	}
+	&.time { >em { background-image: image-url("filler/dark/icon/time.png");}  }
+	&.warn { >em { background-image: image-url("filler/dark/icon/warn.png");} }
+	&.award { >em { background-image: image-url("filler/dark/icon/award.png");} }
+}
+
+#remind { color: $yellow; }
+
+.form {
+	@mixin bg($color) {
+		background: $color;
+		border-color: $color; 
+	}
+	button {
+		@include bg(#80A2D9);
+		&:hover { @include bg(#86AFF2); }
+		&:active { @include bg(#5E81BB); }
+		&[disabled], &[disabled]:hover, &[disabled]:active { @include bg(#666); color: #333; }
+	}
+}
+
+#spread {
+	border-color: $line-dark;
+	#spread_inner { border-color: $line-light; }
+	h1 {
+		color: $light-blue;
+		em { color: $fresh-blue; }
+	}
+	button {
+		color: $light-blue;
+		background: $msg-bg;
+		border: none;
+		height: 32px;
+		text-shadow: 0 1px 1px rgba(0, 0, 0, 0);
+		&:hover {
+			background: lighten($msg-bg, 5%);
+		}
+	}
+	a.share-icon {
+		&.icon-SinaWeibo{@include social-sprite(sina);}
+		&.icon-TencentWeibo{@include social-sprite(tencent);}
+		&.icon-QQSpace{@include social-sprite(qqspace);}
+		&.icon-Renren{@include social-sprite(renren);}
+		&.icon-Douban{@include social-sprite(douban);}
+		&.icon-Kaixin001{@include social-sprite(kaixin001);}
+		&.icon-Diandian{@include social-sprite(diandian);}
+		&.icon-Fetion{@include social-sprite(fetion);}
+		&.icon-Gmail{@include social-sprite(gmail);}
+	}
+}
+
+#page_buttons {
+	button {
+		background: #80A2D9;
+		&:hover { background: #86AFF2; }
+		&:active { 
+			background: #5E81BB;
+			@include box-shadow(#222 0 0 5px, darken(#5E81BB, 25%) 0 1px 4px 1px inset);
+		}
+		&[disabled], &[disabled]:hover, &[disabled]:active  {
+			background: #666;
+			color: #333;
+			cursor: default;
+		}
+		&.light {
+			background: #535C66;
+			&:hover { 
+				background: lighten(#535C66, 20%); 
+			}
+			&:active { 
+				background: lighten(#535C66, 10%); 
+				@include box-shadow(#222 0 0 5px, darken(#535C66, 10%) 0 1px 4px 1px inset);
+			}
+			&[disabled], &[disabled]:hover, &[disabled]:active  {
+				background: #666;
+				color: #333;
+				cursor: default;
+			}
+		}
+	}
+}
+
+.header, .footer {
+	color: $light-blue;
+}
+.s-title {
+	color: $light-blue;
+	border-color: $line-dark;
+}
+
+/* questions fillers */
+
+.q-filler {
+	border-top: 1px solid $line-light;
+	border-bottom: 1px solid $line-dark;
+	color: #fff;
+
+	.q-idx {
+		background: #1b1d1f;
+		color: $light-blue;
+	}
+
+	.q-title {
+		.q-info {
+			color: $light-blue;
+		}
+		.q-required {
+			color: $yellow;
+		}
+	}
+
+	.q-note { color: $yellow; }
+
+	&.error { background-color: #455368; }
+}
+
+/* choice question */
+label.cust-option:not(#foo) {
+	color: #fff;
+	&:hover { background: #3E454E; }
+	> input:focus + span + p, > input:checked + span + p, &:hover > input + span + p { color: #fff; }
+
+	> input[type=radio] + span { @include cpnt-sprite(radio); }
+	> input[type=checkbox] + span { @include cpnt-sprite(checkbox); }
+
+	/* Checked styles */
+	> input[type=radio]:checked + span { @include cpnt-sprite(radio1); }
+	> input[type=checkbox]:checked + span { @include cpnt-sprite(checkbox1); }
+	> input[type=checkbox]:hover:checked + span,
+	> input[type=checkbox]:focus:checked + span,
+	> input[type=checkbox]:checked + span:hover,
+	> input[type=checkbox]:focus:checked + span { @include cpnt-sprite(checkbox1); }
+	> input[type=radio]:hover:checked + span,
+	> input[type=radio]:focus:checked + span,
+	> input[type=radio]:checked + span:hover,
+	> input[type=radio]:focus:checked + span { @include cpnt-sprite(radio1); }
+
+	/* Hover & Focus styles */
+	> input[type=checkbox]:hover + span,
+	> input[type=checkbox]:focus + span,
+	> input[type=checkbox] + span:hover { @include cpnt-sprite(checkbox_hover); }
+	> input[type=radio]:hover + span,
+	> input[type=radio]:focus + span,
+	> input[type=radio] + span:hover { @include cpnt-sprite(radio_hover); }
+
+	/* Active styles */
+	> input[type=checkbox]:active + span,
+	> input[type=checkbox] + span:hover:active { @include cpnt-sprite(checkbox_active); }
+	> input[type=radio]:active + span,
+	> input[type=radio] + span:hover:active { @include cpnt-sprite(radio_active); }
+	> input[type=checkbox]:active:checked + span,
+	> input[type=checkbox]:checked + span:hover:active { @include cpnt-sprite(checkbox1_active); }
+	> input[type=radio]:active:checked + span,
+	> input[type=radio]:checked + span:hover:active { @include cpnt-sprite(radio1_active); }
+
+	/* Disabled styles */
+	> input[type=checkbox]:disabled + span,
+	> input[type=checkbox]:hover:disabled + span,
+	> input[type=checkbox]:focus:disabled + span,
+	> input[type=checkbox]:disabled + span:hover,
+	> input[type=checkbox]:disabled + span:hover:active { @include cpnt-sprite(checkbox_disabled); }
+	> input[type=radio]:disabled + span,
+	> input[type=radio]:hover:disabled + span,
+	> input[type=radio]:focus:disabled + span,
+	> input[type=radio]:disabled + span:hover,
+	> input[type=radio]:disabled + span:hover:active { @include cpnt-sprite(radio_disabled); }
+	> input[type=checkbox]:disabled:checked + span,
+	> input[type=checkbox]:hover:disabled:checked + span,
+	> input[type=checkbox]:focus:disabled:checked + span,
+	> input[type=checkbox]:disabled:checked + span:hover,
+	> input[type=checkbox]:disabled:checked + span:hover:active { @include cpnt-sprite(checkbox1_disabled); }
+	> input[type=radio]:disabled:checked + span,
+	> input[type=radio]:hover:disabled:checked + span,
+	> input[type=radio]:focus:disabled:checked + span,
+	> input[type=radio]:disabled:checked + span:hover,
+	> input[type=radio]:disabled:checked + span:hover:active { @include cpnt-sprite(radio1_disabled); }
+}
+
+/* matrix choice  */
+.q-matrixchoice {
+	.q-content {
+		table {
+			tr.alter {background: fade_out($fresh-blue, 0.5);; }
+			th, td { border: 1px solid $light-blue; }
+		}
+	}
+}
+label.matrix-option:not(#foo) {
+	> input[type=radio] + span { @include cpnt-sprite(radio); }
+	> input[type=checkbox] + span { @include cpnt-sprite(checkbox); }
+
+	/* Checked styles */
+	> input[type=radio]:checked + span { @include cpnt-sprite(radio1); }
+	> input[type=checkbox]:checked + span { @include cpnt-sprite(checkbox1); }
+	> input[type=checkbox]:hover:checked + span,
+	> input[type=checkbox]:focus:checked + span,
+	> input[type=checkbox]:checked + span:hover,
+	> input[type=checkbox]:focus:checked + span { @include cpnt-sprite(checkbox1); }
+	> input[type=radio]:hover:checked + span,
+	> input[type=radio]:focus:checked + span,
+	> input[type=radio]:checked + span:hover,
+	> input[type=radio]:focus:checked + span { @include cpnt-sprite(radio1); }
+
+	/* Hover & Focus styles */
+	> input[type=checkbox]:hover + span,
+	> input[type=checkbox]:focus + span,
+	> input[type=checkbox] + span:hover { @include cpnt-sprite(checkbox_hover); }
+	> input[type=radio]:hover + span,
+	> input[type=radio]:focus + span,
+	> input[type=radio] + span:hover { @include cpnt-sprite(radio_hover); }
+
+	/* Active styles */
+	> input[type=checkbox]:active + span,
+	> input[type=checkbox] + span:hover:active { @include cpnt-sprite(checkbox_active); }
+	> input[type=radio]:active + span,
+	> input[type=radio] + span:hover:active { @include cpnt-sprite(radio_active); }
+	> input[type=checkbox]:active:checked + span,
+	> input[type=checkbox]:checked + span:hover:active { @include cpnt-sprite(checkbox1_active); }
+	> input[type=radio]:active:checked + span,
+	> input[type=radio]:checked + span:hover:active { @include cpnt-sprite(radio1_active); }
+
+	/* Disabled styles */
+	> input[type=checkbox]:disabled + span,
+	> input[type=checkbox]:hover:disabled + span,
+	> input[type=checkbox]:focus:disabled + span,
+	> input[type=checkbox]:disabled + span:hover,
+	> input[type=checkbox]:disabled + span:hover:active { @include cpnt-sprite(checkbox_disabled); }
+	> input[type=radio]:disabled + span,
+	> input[type=radio]:hover:disabled + span,
+	> input[type=radio]:focus:disabled + span,
+	> input[type=radio]:disabled + span:hover,
+	> input[type=radio]:disabled + span:hover:active { @include cpnt-sprite(radio_disabled); }
+	> input[type=checkbox]:disabled:checked + span,
+	> input[type=checkbox]:hover:disabled:checked + span,
+	> input[type=checkbox]:focus:disabled:checked + span,
+	> input[type=checkbox]:disabled:checked + span:hover,
+	> input[type=checkbox]:disabled:checked + span:hover:active { @include cpnt-sprite(checkbox1_disabled); }
+	> input[type=radio]:disabled:checked + span,
+	> input[type=radio]:hover:disabled:checked + span,
+	> input[type=radio]:focus:disabled:checked + span,
+	> input[type=radio]:disabled:checked + span:hover,
+	> input[type=radio]:disabled:checked + span:hover:active { @include cpnt-sprite(radio1_disabled); }
+}
+
+/* sort question */
+.q-sort {
+	.q-content {
+		li { 
+			> em {
+				@include cpnt-sprite(drag); 
+			}
+			> .sort-index {
+				&.max {
+					color: #808080;
+				}
+			}
+
+			&:hover {
+				background: #3E454E;
+				>.sort-index {
+					color: $fresh-blue;
+				}
+				>em {
+					@include cpnt-sprite(drag_hover);
+				}
+			}
+		}
+	}
+}
+
+/* constsum question */
+.q-constsum {
+	.q-content {
+		table {
+			tr:hover { background: #3E454E; }
+			tr.sum {
+				border-top: 1px solid $line-light;
+				color: $fresh-blue;
+			}
+		}
+	}
+}
+
+/* scale question */
+.q-scale {
+	.q-content {
+		table {
+			tr.alter {background: fade_out($fresh-blue, 0.7);; }
+			th, td { border: 1px solid $light-blue; }
+			td { 
+				color: $light-blue;
+				&.selected {
+					color: #fff;
+					&.level1 { background: fade_out($fresh-blue, 0.6); }
+					&.level2 { background: fade_out($fresh-blue, 0.5); }
+					&.level3 { background: fade_out($fresh-blue, 0.4); }
+					&.level4 { background: fade_out($fresh-blue, 0.3); }
+					&.level5 { background: fade_out($fresh-blue, 0.2); }
+					&.level6 { background: fade_out($fresh-blue, 0.1); }
+					&.level7 { background: $fresh-blue; }
+				}
+				&.unknown { color: $yellow; }
+				&.set_unknown { color: $fresh-blue;}
+			}
+		}
+	}
+}
+

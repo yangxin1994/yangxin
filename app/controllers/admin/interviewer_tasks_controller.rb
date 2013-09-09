@@ -1,39 +1,82 @@
-class Admin::InterviewerTasksController < Admin::ApplicationController
+class Admin::InterviewerTasksController < Admin::AdminController
+	layout 'admin_new'
 
+	before_filter :get_client
+
+	def get_client
+		@client = BaseClient.new(session_info, "/admin/interviewer_tasks")
+	end
+	# *******************************
 
 	def index
-		@survey = Survey.find_by_id(params[:survey_id])
-		render_json_e(ErrorEnum::SURVEY_NOT_EXIST) and return if @survey.nil?
-
-		interviewer_tasks = @survey.interviewer_tasks.to_a
-		render_json_auto(interviewer_tasks)	and return
+		@interviewer_tasks = @client._get({:survey_id => params[:publish_id]})
+		respond_to do |format|
+			format.html
+			format.json { render json: @interviewer_tasks}
+		end
 	end
 
 	def show
-		@interviewer_task = InterviewerTask.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::INTERVIEWER_TASK_NOT_EXIST) and return unless @interviewer_task
-		render_json_auto @interviewer_task
+		@interviewer_task = @client._get({}, "/#{params[:id]}")
+		respond_to do |format|
+			format.html
+			format.json { render json: @interviewer_task}
+		end
 	end
 
 	def create
-		interviewer_task_inst = InterviewerTask.create_interviewer_task(params[:survey_id],
-																		params[:user_id],
-																		params[:quota])
-		render_json_auto interviewer_task_inst
+		hash_params = {
+			:survey_id => params[:publish_id],
+			:user_id => params[:user_id],
+			:quota => params[:quota]
+		}
+		if hash_params[:quota] && hash_params[:quota].has_key?(:rules) &&
+			 hash_params[:quota][:rules] && hash_params[:quota][:rules].is_a?(Hash)
+
+			_rules = hash_params[:quota][:rules].values 
+			_rules.each do |_rule|
+				if _rule.has_key?(:conditions) && _rule[:conditions].is_a?(Hash)
+					_rule = _rule[:conditions].values
+				end
+			end
+
+			hash_params[:quota][:rules] = _rules
+		end
+		
+		@interviewer_task = @client._post(hash_params)
+		# respond_to do |format|
+		# 	format.html
+		# 	format.json { render json: @interviewer_task}
+		# end
+		render :json => @interviewer_task
 	end
 
 	def update
-		@interviewer_task = InterviewerTask.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::INTERVIEWER_TASK_NOT_EXIST) and return unless @interviewer_task
-		# logger.debug "#{JSON.parse(params[:quota].to_json)}"
-		retval = @interviewer_task.update_q(params[:quota])
-		render_json_auto retval
+		hash_params = {
+			:quota => params[:quota]
+		}
+		if hash_params[:quota] && hash_params[:quota].has_key?(:rules) &&
+			 hash_params[:quota][:rules] && hash_params[:quota][:rules].is_a?(Hash)
+
+			_rules = hash_params[:quota][:rules].values 
+			_rules.each do |_rule|
+				if _rule.has_key?(:conditions) && _rule[:conditions].is_a?(Hash)
+					_rule = _rule[:conditions].values
+				end
+			end
+
+			hash_params[:quota][:rules] = _rules
+		end
+		@interviewer_task = @client._put(hash_params, "/#{params[:id]}")
+		# respond_to do |format|
+		# 	format.html
+		# 	format.json { render json: @interviewer_task}
+		# end
+
+		render :json => @interviewer_task
 	end
 
 	def destroy
-		@interviewer_task = InterviewerTask.find_by_id(params[:id])
-		render_json_auto(ErrorEnum::INTERVIEWER_TASK_NOT_EXIST) and return unless @interviewer_task
-		render_json_auto @interviewer_task.destroy
+		render :json => @client._delete({}, "/#{params[:id]}")
 	end
-
 end

@@ -1,0 +1,46 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/account/signin_quillme-bundle" %>
+	<%= stylesheet_link_tag "pages/account/signin_quillme-bundle", :media => "all" %>
+<% end %>
+
+<% content_for :left do %>
+<div class="content-account-box redBorder">
+	<h3 class="content-left-title whiteTxt f14 b redBg">登录</h3>
+	<div class="w896 fix">
+		<div class="f14 login-left login-panel l">
+			<h2 class="b redTxt fix">
+			<span class="l">还没有账号？</span>
+			<span class="login-link g3 ml5"><a id='register_href' href="<%=signup_path %>" param='e tpui i'>立即注册</a></span>	
+			</h2>
+			<p>
+				<label for="email_ipt">邮箱：</label>
+				<input type="text" name="username" id="email_ipt" param='e' placeholder='请输入登录邮箱' /></p>
+			<p>
+				<label for="password_ipt">登录密码：</label>
+				<input type="password" name="passowrd" id="password_ipt" placeholder='请输入登录密码' /></p>
+			<p id='error'></p>
+			<p class="mt10">
+				<input type="checkbox" name="Rememb" id="remember_ckb" class="Rememb l">
+				<label class="redTxt b l" for='remember_ckb' style="text-align: left;margin-top:7px;margin-left:5px;">记住密码</label>
+				<button class="homepage-btn red-btn r" id="login_btn">登 录</button>
+				<a href="<%= find_password_path %>" class="homepage-btn gray-btn r mr10">忘记密码</a>	
+			</p>		
+		</div>
+		<div class="login-right l">
+			<% if params[:tpui].blank? %>
+			<h2 class="b redTxt fix f14">使用其他账号登录</h2>
+			<%= render "partials/social_connect_quillme" %>
+			<% else %>
+			<p style='font-size: 13px; line-height: 1.5em; margin-top: 10px;'>登录成功后，系统会将您刚才所授权的第三方账户和您在<%= corp_name %>的账户进行关联，账户关联后您可以：</p>
+			<ul style='font-size: 13px; line-height: 2em; list-style:square; margin-left: 20px; margin-top: 10px; color: #666;'>
+				<li>通过登录界面的“其他账户登录”按钮快速登录系统；</li>
+				<li>快速邀请好友加入<%= corp_name %>社区或填写问卷，获取奖励；</li>
+				<li>将您的动态实时更新到社交网络；</li>
+				<li>⋯⋯</li>
+			</ul>
+			<% end %>
+		</div>
+	</div>
+</div>
+<% end %>

@@ -1,0 +1,37 @@
+
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/messages-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/messages-bundle", :media => "all" %>
+<% end %>
+
+<div id="new-tab">
+	<div class="title">
+		<h5>消息管理: 创建<h5>
+		<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/messages">返回消息列表</a><h5>
+	</div>
+
+	<form action="#">					
+		<fieldset>
+			<p>
+				<label>消息标题</label>
+				<input class="wrap-text" type="text" name="message[:title]" value=""/>
+			</p>
+			<p>
+				<label>接收人</label>
+				<input title="多个邮箱间请用','间隔，发送所有用户请留空! 如果输入的邮箱一个都找不到,　将会设为空,　发送给所有用户!" class="text-input small-input" type="text" id="txt-receiver" name="message[:receiver]" value=""/> 
+				<span class="input-notification error dn png_bg">请输入正确的邮箱地址！</span> 
+			</p>
+			<p>
+				<label style="vertical-align:top">消息内容</label>
+				<textarea class="wrap-text" name="message[:content]" style="width:600px; min-height: 100px;"></textarea>
+			</p>
+			<p>
+				<input class="blueBtn btn-new-ok" type="button" value="确 定" />
+			</p>							
+		</fieldset>
+						
+	</form>	
+
+	<hr/>
+</div>

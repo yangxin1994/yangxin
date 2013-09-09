@@ -1,0 +1,52 @@
+@import "common";
+@import "compass/css3/border-radius";
+@import "compass/css3/box-shadow";
+@import "compass/utilities/general/clearfix";
+@import "od-button/*.png";
+@import "od-mobile/*.png";
+
+/*复制链接*/
+
+.share-icon{
+	width:32px;
+	height:32px;
+	float:left;
+	margin-right:3px;
+}
+.icon-QQSpace{@include od-mobile-sprite(qq);}
+.icon-TencentWeibo{@include od-mobile-sprite(tqq);}
+.icon-Renren{@include od-mobile-sprite(renren);}
+.icon-SinaWeibo{@include od-mobile-sprite(sina);}
+.icon-Diandian{@include od-mobile-sprite(diandian);}
+.icon-Douban{@include od-mobile-sprite(douban);}
+.icon-Kaixin001{@include od-mobile-sprite(kaixin);}
+.icon-Gmail{@include od-mobile-sprite(gmail);}
+.icon-Fetion{@include od-mobile-sprite(fetion);}
+.more{
+	float:left; 
+	color:#FFC719;
+	text-decoration: none;
+}
+.share-link{
+	width:60%;
+	margin-right:5%
+}
+.copy-link{
+	padding:2%;
+	width:26%;
+	text-align: center;
+	@include inline-block;
+	border:1px #B4B4B4 solid;
+	@include border-radius(6px);
+	color: #333;
+	font-size: 14px;
+	font-weight: bold;
+	background: -webkit-gradient(linear, left top, left bottom, from(#DFE0E2), to(#C6C7C9), color-stop(0.1, #DFE0E2));
+	&:active{background:#C6C7C9;}
+}
+input[type="text"]{
+	padding:2%;
+	background:#F7F7F8;
+	@include border-radius(6px);
+	&:focus{background: -webkit-gradient(linear, left top, left bottom, from(#C3C3C3), to(#F7F7F8), color-stop(0.1, #F7F7F8));}
+}

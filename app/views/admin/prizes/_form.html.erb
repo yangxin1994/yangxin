@@ -1,0 +1,94 @@
+<form action="<%= admin_prizes_path + (@prize["created_at"].nil? ? '' : "/#{@prize["_id"]}") %>"
+      name="prize"
+      enctype="multipart/form-data"
+      method="post"
+      id="prize_form"
+      class="form-horizontal"
+>
+  <input value="<%= @prize["created_at"].present? ? 'put' : 'post' %>" type='hidden' name="_method">
+  <p class="text-center">
+    <img src="<%= @prize.photo.picture_url %>" alt="" id="prize_photo_src" class="img-circle" style="width: 260px; height: 260px;">
+  </p>
+
+  <legend></legend>
+
+  <div class="control-group">
+    <label class="control-label" >奖品名称:</label>
+    <div class="controls">
+      <div class="input-append">
+      <input class="input-medium" type="text" name="prize[title]" placeholder="奖品名称" <%= "value=#{@prize["title"]}" if @prize["title"] %>>
+        <div class="btn-group">
+          <button class="btn dropdown-toggle" data-toggle="dropdown">
+            选择类型
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu dropselect" id="type_select">
+            <li><a href="#type-2">实物奖品</a></li>
+            <li><a href="#type-4">话费充值</a></li>
+            <li><a href="#type-8">支付宝转账</a></li>
+            <li><a href="#type-16">集分宝兑换</a></li>
+            <li><a href="#type-32">Q币充值</a></li>
+            <li><a href="#type-1">其他虚拟奖品</a></li>
+          </ul>
+        </div>
+      </div>
+  </div>
+  </div>
+
+  <input type="hidden" name="prize[type]" id="prize_type" value="<%= @prize["type"] || 1 %>">
+
+  <div class="control-group" id="amount_ctrl">
+    <label class="control-label">奖品额度:</label>
+    <div class="controls">
+      <div class="input-prepend" id="amount_select">
+        <div class="btn-group">
+          <button class="btn dropdown-toggle" data-toggle="dropdown">
+            快捷设置
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a href="#amount-10">10</a></li>
+            <li><a href="#amount-20">20</a></li>
+            <li><a href="#amount-30">30</a></li>
+            <li><a href="#amount-50">50</a></li>
+            <li><a href="#amount-100">100</a></li>
+            <li><a href="#amount-200">200</a></li>
+            <li><a href="#amount-300">300</a></li>
+          </ul>
+        </div>
+        <input class="input-medium" type="text" name="prize[amount]" id="prize_amount" placeholder="额度" value="<%= @prize["amount"] %>">
+      </div>
+
+    </div>
+  </div>
+  
+  <div class="control-group">
+    <label class="control-label" >价值:</label>
+    <div class="controls">
+      <input type="text" class="text-middle" name="prize[price]" id="prize_price" value="<%= @prize["price"] %>" placeholder="奖品的价值" />
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label">上传图片:</label>
+    <div class="controls">
+    <% if @prize['created_at'] %>
+      <input type="file" name="prize[photo]" id="prize_photo"/>
+    <% else %>
+      <input type="file" name="prize[photo]" id="prize_photo" class="validate[required]" />
+    <% end %>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >奖品描述:</label>
+    <div class="controls">
+      <textarea name="prize[description]"><%= @prize["description"] %></textarea>
+    </div>
+  </div>
+  <div class="pull-right">
+  <%= link_to "<<返回列表", admin_prizes_path %>
+  <button type="submit" class="btn btn-primary">确认无误</button>
+
+  </div>
+</form>

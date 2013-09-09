@@ -1,0 +1,57 @@
+//=require ui/widgets/od_popup
+@import "common";
+@import "od-icon/*.png";
+
+.quality-q {
+	@include inline-block;
+	width: 400px;
+	overflow: hidden;
+	height: 100%;
+}
+.icon{
+	width:16px;
+	@include one-line(16px);
+	@include inline-block;
+	&:hover{cursor:pointer;}
+}
+.icon-seach{
+	@include od-icon-sprite(seach);
+	margin:7px 20px 0 0;
+}
+.title-check{
+	margin:13px 10px 0 20px;
+}
+.list-check{
+	margin:9px 10px 0 0;
+}
+.radiobox{
+	line-height:3em;
+	li {
+		width: 250px;
+		cursor:pointer;
+	}
+}
+.quality-list{
+	width:625px;
+	margin-left:5px;
+	dt,dd{
+		padding:0 10px 0 30px;	
+		@include one-line(30px);
+		margin-top:2px;
+	}
+	dd{padding-left:53px;}
+	p{margin-left: 53px;}
+}
+.questions{
+	width:100px;
+}
+.interval{
+	background:#f2f2f2;
+}
+#pagination{
+	float: left;
+	margin-left:300px;
+}
+.bottom {
+	button{float:right;}
+}

@@ -1,0 +1,90 @@
+@import "common";
+@import "compass/css3/border-radius";
+@import "od-quillme/*.png";
+@import "od-icon/*.png";
+.icon{
+	width:16px;
+	@include one-line(16px);
+	@include inline-block;
+	&:hover{cursor:pointer;}
+}
+.icon-gmail{@include od-icon-sprite(gmail);}
+.icon-douban{@include od-icon-sprite(dou);}
+.icon-renren{@include od-icon-sprite(ren);}
+.icon-diandian{@include od-icon-sprite(dian);}
+.icon-sina{@include od-icon-sprite(sina);}
+.content-left-box{
+	padding-bottom:10px;
+}
+table{
+	width:656px;
+	margin:0 auto;
+	background:#fff;
+	th{
+		background:#f0e5f5;
+		@include one-line(40px);
+	}
+	td{
+		@include one-line(50px);
+		line-height:1.5em;
+		border-bottom:1px #dbdbdb dashed;
+	}
+	tr{
+		&:hover{
+			background:#f2f2f2;
+		}
+	}
+	.w300 {width:300px;}
+	.w150 {width:150px;}
+}
+.content{
+	background:#fff;
+	width:656px;
+	margin:0 auto;
+}
+.share-panel,.share-mail{
+	width:620px;
+	margin-left:10px;
+	padding:15px 0 20px 10px;
+	h2{padding:10px 0;}
+	ul{
+		li{
+			float: left;
+			width:20px;
+			height:20px;
+			padding:10px 20px 5px 0;
+		}
+	}
+	#link-address{
+		width:450px;
+		padding:4px;
+	}
+	input[type='text'],textarea {
+			@include border-radius(3px);
+			padding: 2px;
+			line-height:1.5em;
+			&:focus {
+				border-color: rgb(179, 125, 201);
+				@include box-shadow(inset 0 1px 3px rgba(0, 0, 0, 0.05), 0 0 8px rgba(219, 172, 228, .6));
+				outline: none;
+			}		
+		}
+	textarea{
+		width:455px;
+		height:180px;
+		float: left;
+		resize:none;
+	}
+	.od-button{
+		margin-top:-2px;
+		*margin-top:-9px;
+		*padding: 1px 5px 1px;
+	}
+	.send-btn{
+		margin-top:0;
+	}
+}
+.share-mail{
+	border-top:1px #dbdbdb dashed;
+	padding-bottom:50px;
+}

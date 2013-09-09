@@ -1,0 +1,25 @@
+<div class="num-range-panel panel">
+  <label>数值范围</label>
+  <table cellpadding="0" cellspacing="0" width="100%" class="tableStatic resize">
+    <thead>
+      <tr>
+        <td class="question-title">选项</td>
+        <td>绑定属性</td>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each question.issue.items}}
+      <tr>
+        <td data-id="{{id}}">{{content.text}}</td>
+        <td>
+          <div class="moreFields onlyNums">
+            <input type="text" class="range-input first" />
+            --
+            <input type="text" class="range-input second" />
+          </div>
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>

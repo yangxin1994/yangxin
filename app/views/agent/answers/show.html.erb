@@ -1,0 +1,27 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/agent/answers/review-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+  <li>
+    <a href="/agent/answers?agent_task_id=<%= params[:agent_task_id] %>">
+    <i class="icon-chevron-right"></i>
+    答案列表
+    </a>
+  </li>
+  <li class="active">
+    <a href="javascript:void(0);">
+    <i class="icon-chevron-right"></i>
+    答案审核
+    </a>
+  </li>
+<% end %>
+
+<%= render :partial => "admin/answers/detail" %>
+<% if @questions['status'].to_i == 8 %>
+  <span class="pull-right">
+    <button class="btn" type="button" id="btn_reject" data-answer_id="<%= params[:id] %>">拒绝</button>
+    <button class="btn btn-large btn-primary" type="button" id="btn_pass" data-answer_id="<%= params[:id] %>">通过</button> 
+  </span>
+<% end -%>

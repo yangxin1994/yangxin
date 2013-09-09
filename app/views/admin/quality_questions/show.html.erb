@@ -1,0 +1,124 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/quality_questions/form-bundle" %>
+<% end %>
+<% content_for :sidenav do %>
+  <li>
+    <a href="/admin/quality_questions">
+    <i class="icon-chevron-right"></i>
+    质控题列表
+    </a>
+  </li>
+  <li class="active">
+    <a href="/admin/quality_questions/new">
+      <i class="icon-chevron-right"></i>
+      新建质控题
+    </a>
+  </li>
+<% end %>
+<legend>质控题问题</legend>
+<form action="<%= admin_quality_question_path(params[:id]) %>"
+      name="quality_question"
+      enctype="multipart/form-data"
+      method="post"
+      id="quality_question_form"
+      class="form-horizontal"
+>
+  <input value="put" type='hidden' name="_method">
+  <input type='hidden' name="quality_control_type" value="<%=@question['quality_control_type']%>">
+
+  <div class="bs-docs-example">
+    <ul id="myTab" class="nav nav-tabs">
+      <% @question_objects.each_index do |index|%>
+        <li class=""><a href="#question-<%= index %>" data-toggle="tab" id="qtab-<%= index %>">问题 <%= index %></a></li>
+      <% end -%>
+    </ul>
+    <div id="question_content" class="tab-content">
+      <% @question_objects.each_with_index do |object, index|%>
+      <div class="tab-pane fade" id="question-<%= index %>">
+        <div class="well">
+          基本信息
+        </div>
+        <div class="control-group">
+          <label>问题名称</label>
+          <div class="controls">
+            <input class="span8" id="min_choice" type="text" placeholder="" value="<%= object.content['text'] %>" name="questions[<%= object._id %>][content]">
+          </div>
+        </div>
+        <div class="control-group">
+          <label>选项个数</label>
+          <div class="controls controls-row">
+            <input class="span2" name="questions[<%= object._id %>][min_choice]" value="<%= object.issue['min_choice'] %>" type="text" placeholder="至少选择">
+            <input class="span2" name="questions[<%= object._id %>][max_choice]" value="<%= object.issue['max_choice'] %>" type="text" placeholder="至多选择">
+          </div>
+        </div>
+
+        <div class="choices" data-qid="<%= object._id %>">
+          <div class="control-group">
+            <label>选项</label>
+            <div class="controls">
+
+              <% object["issue"]["items"].each do |item|%>
+              <div class="input-prepend input-append choice" data-id="choice-<%= item["id"]%>">
+                <span class="add-on drag-choice">拖拽</span>
+                <input class="span7 choice-text" id="appendedPrependedInput" type="text" value="<%= item["content"]["text"]%>" name="questions[<%= object._id %>][items][<%= item["id"]%>]">
+                <span class="add-on delete"><a href="#" class="btn-choice-delete"><i class="icon-remove"></i></a></span>
+              </div>
+              <p></p>
+              <%end%>
+            </div>
+            <a href="#" class="btn add-choice">增加选项</a>
+
+          </div> 
+        </div>
+      </div>
+      <%end%>
+
+    </div>
+  </div>
+
+  <legend>质控题答案</legend>
+
+
+    <div id="<%= @quality_control_question_answer["_id"] %>" class="quality_control_question_answer">
+      <div class="answer-choices" height="200px">
+      <% case @quality_control_question_answer["quality_control_type"].to_i %>
+      <% when 1 %>        
+        <div class="group group-1 ui-droppable"><div title="唯一组不能删除">拖拽</div>
+        <% @quality_control_question_answer.answer_content["items"].each do |item| %>
+          <% _item = @question.issue["items"].select{|a| a['id'] == item } %>
+          <% if _item.present? %>
+            <div class="input-prepend input-append choice ui-draggable" data-id="choice-<%= item %>">
+              <span class="add-on drag-choice ui-draggable">拖拽: <%= _item[0]["content"]["text"] %></span>
+            </div>
+          <% end %>
+        <% end if @quality_control_question_answer.answer_content.present? %>
+        </div>
+      </div>
+      <% when 2 %>
+        <% @quality_control_question_answer.answer_content['matching_items'].each_with_index do |rows, index| %>
+        <div class="group group-<%= index + 1%> ui-droppable"><div title="唯一组不能删除">拖拽</div>
+          <% rows.each do |item| %>
+            <% _item = @question_objects.map { |e| e.issue["items"].select{|a| a['id'] == item }.inject(&:+)}.compact %>
+            <% if _item.present? %>
+            <div class="input-prepend input-append choice ui-draggable" data-id="choice-<%= item %>">
+              <span class="add-on drag-choice ui-draggable">拖拽: <%= _item[0]["content"]["text"] %></span>
+            </div>
+            <% end %>
+
+          <% end %>
+        </div>
+        <% end if @quality_control_question_answer.answer_content.present? %>
+      </div>
+      <% end %>
+      <input type="hidden" name="answers" id="answers">
+
+    </div>
+
+      <a href="#" class="btn add-answers">增加答案组</a>
+
+  <div class="pull-right">
+  <%= link_to "<<返回列表", admin_quality_questions_path %>
+  <button type="submit" class="btn btn-primary" id="btn_sub">确认无误</button>
+
+  </div>
+</form>

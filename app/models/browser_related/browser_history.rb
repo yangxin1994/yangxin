@@ -9,6 +9,8 @@ class BrowserHistory
 
 	belongs_to :browser
 
+	index({ url: 1 }, { background: true } )
+
 	def self.find_by_url(url)
 		return self.where(:url => url).first
 	end

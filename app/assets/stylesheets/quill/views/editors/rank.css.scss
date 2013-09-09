@@ -1,0 +1,161 @@
+/*
+ *=require ./base_with_items
+ *=require ui/widgets/od_selector
+ *=require ui/widgets/od_item
+ *=require ui/widgets/od_left_icon_button
+ */
+
+@import "common";
+@import "compass/css3/inline-block";
+@import "od-button/*.png";
+@import "compass/css3/border-radius";
+
+@import "rank-icon/*.png";
+@include all-rank-icon-sprites;
+@import "rank-bar/*.png";
+@include all-rank-bar-sprites;
+
+.rank-style-con {
+
+	.style-slt {
+		@include inline-block;
+		font-size: 12px;
+
+		> h1 {
+			padding:0;
+			margin:0;
+			padding-bottom: 4px;
+			font-weight: normal;
+		}
+
+		> div {
+			vertical-align: middle;
+			position: relative;
+			border: 1px solid #ccc;
+
+			$size: 24px;
+			$size-wide: 100px;
+			$box-width: ($size) * 4;
+
+			> div {
+				background: #fff;
+				border-right: 1px solid #ccc;
+				width: 36px;
+				@include inline-block;
+				@include one-line($size);
+				text-align: center;
+				color: $blue;
+
+				>em {
+					@include square($size);
+				}
+
+				&.wide {
+					width: $size-wide;
+					>em {
+						width: 100%;
+					}
+				}
+
+			}
+
+			> span {
+				@include square(16px);
+				cursor: pointer;
+				@include od-button-sprite(unfold);
+			}
+
+			> p.style-slt-items {
+				display:none;
+				position: absolute;
+				top: $size;
+				left: 35px - $box-width;
+				margin: 0;
+				background: #fff;
+				border: 1px solid #ccc;
+				width: $box-width;
+				z-index: 1000;
+
+				> a {
+					@include square($size);
+					text-align: center;
+					color: #666;
+					border:none;
+					vertical-align: middle;
+					text-align:center;
+
+					&:hover, &.active {
+						background-color: $blue-light;
+						color: $blue;
+					}
+
+					img {
+						border:none;
+						vertical-align:middle;
+					}
+				}
+
+				&.wide{
+					width: $size-wide;
+					left: -1px;
+					>a {
+						display:block;
+						width: 100%;
+					}
+				}
+
+			}
+
+			&:hover {
+				> span {
+					@include od-button-sprite(unfold_hover);
+				}
+				>p {
+					display: block;
+				}
+			}
+		}
+
+		&.half {
+			width: 56px;
+		}
+	}
+}
+
+.rank-labels {
+
+	padding-top: 10px;
+	text-align:right;
+
+	span {
+		margin-right: 1em;
+	}
+
+	input[type='text'] {
+		$input-width: 70px;
+		$input-height: 25px;
+		
+		@include ipt;
+		@include inline-block;
+		@include size($input-width - 5 - 5 - 2, $input-height - 3 - 2);
+		padding: 3px 5px 0 5px;
+		border: 1px #dbdbdb solid;
+		
+		color: #666;
+		font-size: 12px;
+		text-align: center;
+		
+		background: image-url('editors/input_edit_bg.png') 0 -88px repeat-x;
+		
+		&:focus {
+			background: image-url('editors/input_edit_bg.png') 0 -53px repeat-x;
+		}
+		&.highlight {
+			background: image-url('editors/input_edit_bg.png') 0 -123px repeat-x;
+		}
+		&.other {
+			color: $blue;
+		}
+	}
+
+}

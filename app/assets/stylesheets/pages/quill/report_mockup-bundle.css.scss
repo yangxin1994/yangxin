@@ -1,0 +1,250 @@
+//=require ui/widgets/od_left_icon_button
+//=require ui/widgets/od_selector
+//=require ui/widgets/od_popup
+@import "common";
+@import "od-icon/*.png";
+@import "od-button/*.png";
+@import "compass/css3/inline-block";
+@import "compass/utilities/general/clearfix";
+
+.icon{
+	width:16px;
+	@include one-line(16px);
+	@include inline-block;
+	&:hover{cursor:pointer;
+	}
+}
+.icon-del {@include od-icon-sprite(del);}
+.analysis-del {margin:10px 20px 0 0;}
+.title{
+	 @include one-line(40px);
+	 @include inline-block;
+	 padding-left:35px;
+	 font-weight:bold;
+	 width:660px;
+}
+.bf2{
+	background:#f2f2f2;
+}
+
+.icon-cross{
+	width:24px;
+	height:24px;
+	@include inline-block;
+	@include od-button-sprite(cross);
+	margin-top:-3px;
+}
+.css-gray-white{
+	margin-left:18px;
+	width:750px;
+}
+.remark{
+	width:750px;
+	margin-left:3px;
+	padding:0 0 20px 30px;
+	border-bottom:1px #dbdbdb solid;
+	li{
+		width:280px;
+		margin-top:20px;
+		input{
+			margin-left:10px;
+			width:200px;
+		}
+	}
+}
+#single_analysis,#cross_analysis{
+	margin:20px 0 20px 30px;
+}
+.analysis-line{
+	width:780px;
+	height:16px;
+	@include inline-block;
+	background:image-url("editors/analysis_line.png");
+	position:absolute;
+	bottom:-8px;
+	left:-2px;
+	z-index: 5;
+}
+.style-panel {
+	height: 50px;
+}
+.edit-panel{
+	@include inline-block;
+	dl{
+		margin-left: 4px;
+		padding-bottom: 5px;
+		border-bottom: 1px dashed #dbdbdb;
+		dt{
+			position: relative;
+			width:777px;
+			cursor: default;
+			font-size: 14px;
+			color: #666;
+			padding-bottom: 7px;
+			.single_style, .cross_style {
+				position: absolute;
+				margin: 6px 0;
+				left: 500px;
+				font-size: 12px;
+			}
+			.analysis-del{
+				display:none;
+			}
+			&:hover{
+				.analysis-del{
+					display:block;
+				}
+			}
+			.single-number-format {
+				padding-left: 20px;
+				padding-bottom: 5px;
+			}
+			.cross-number-format {
+				padding-left: 20px;
+				padding-bottom: 5px;
+			}
+			.single-time-selector-add, .cross-time-selector-add, .single-items-com-add, .cross-items-com-add, .cross-items-com-add-target {
+				padding-top: 10px;
+				padding-left: 50px;
+				padding-bottom: 5px;
+			}
+			.single-items-com, .cross-items-com, .cross-items-com-target {
+				padding: 5px 20px;
+				// padding-left: 20px;
+				.item-com {margin-right: 10px;}
+			}
+			.single-time-format {
+				width: 777px;
+				height: 40px;
+				padding-left: 20px;
+				padding-bottom: 5px;
+				li {
+					float: left;
+					margin-left: 4px;
+				}		
+			}			
+			.cross-time-format {
+				width: 777px;
+				height: 40px;
+				padding-left: 20px;
+				padding-bottom: 5px;
+				li {
+					float: left;
+					margin-left: 4px;
+				}		
+			}
+			.ComboItem-Number, .ComboItem-Time {
+				h3 {
+					padding-left: 20px;
+					padding-bottom: 5px;
+					font-weight: bold;
+				}
+			}			
+		}
+		dd{
+			width:777px;
+			margin-left:4px;
+		}
+	}
+}
+.od-popup dd{
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.drag_btn {
+	width: 16px;
+	height: 16px;
+	border: none;
+	margin: 9px 0 0 20px;
+	@include od-icon-sprite(drag);
+}
+#confirm{
+	padding:3px 20px;
+	margin:15px 20px 10px 690px;
+}
+/*关闭按钮*/
+.od-close2-btn{
+	width: 8px;
+	height: 8px;
+	@include inline-block;
+	overflow: hidden;
+	border: none;
+	cursor: pointer;
+	@include od-button-sprite(close2);
+}
+.od-close2-btn:hover  {
+	@include od-button-sprite(close2_hover);
+}
+.od-close2-btn:active {
+	@include od-button-sprite(close2_active);
+}
+
+/*弹出层*/
+.popup-single-row{
+		width:600px;
+		@include inline-block;
+	/*单列*/
+	dl{
+		border-bottom:1px #dbdbdb dashed;
+		padding-bottom:10px;
+		height: 400px;
+		overflow-x: hidden;
+		overflow-y: auto;
+		dd{
+			@include one-line(34px);
+			padding-left:20px;
+			b{
+				width:500px;
+				white-space:nowrap;
+				overflow:hidden;
+				text-overflow:ellipsis;
+			}
+		}
+		dt{
+			@include one-line(40px);
+			padding-left:20px;
+			background:#eee;
+			input{
+				margin-right:10px;
+			}
+		}
+	}
+}
+.popup-two-row{
+		width:620px;
+		@include inline-block;
+		margin-left: -5px;
+	dl{
+		border-bottom:1px #dbdbdb dashed;
+		padding-bottom:10px;
+		height: 390px;
+		overflow-x: hidden;
+		overflow-y: auto;		
+		dd{
+			width:285px;
+			@include one-line(34px);
+			padding-left:20px;
+		}
+		dt{
+			width:285px;
+			@include one-line(40px);
+			padding-left:20px;
+			background:#eee;
+		}
+	}
+}
+/*取消按钮*/
+.cancel{
+	@include one-line(30px);
+	border:none;
+	cursor:pointer;
+	color:#999;
+	background:#fff;
+	&:hover{
+		color:#666;
+	}
+	&:active{
+		color:#333;
+	}
+}

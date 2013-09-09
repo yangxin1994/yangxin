@@ -1,0 +1,35 @@
+<% content_for :app_head do %>
+	<%= stylesheet_link_tag    "layouts/sample_account-layout" %>
+	<%= javascript_include_tag "layouts/sample_account-layout" %>
+	<script type="text/javascript">
+	jQuery(function($) {
+
+	});
+	</script>
+	
+	<%= yield :head %>
+
+<% end %>
+
+<% content_for :app_content do %>
+	<div class="header">
+		<div class="logo">
+			<a href="<%= home_path%>" title="问卷吧">
+				<img src="/assets/od-quillme/logo_login.png" width="180" height="70"/>
+			</a>
+		</div>
+        <div class="line_tel">
+          <a class="line_pic" target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=2523562014&site=qq&menu=yes">
+          	<i class="qq_c"></i>
+            <!-- <img src="/assets/od-quillme/qq_c.png" width="20" height="20" /> -->
+          </a>
+          <a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=2523562014&site=qq&menu=yes">在线客服</a>
+          
+          <span class="tel_pic"><img src="/assets/od-quillme/phone_c.png" width="20" height="20" /></span>
+          <span>400-6507-905</span>
+        </div>
+	</div>
+    <%= yield %>
+<% end %>
+
+<%= parent_layout 'app' %>

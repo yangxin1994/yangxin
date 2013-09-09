@@ -1,0 +1,29 @@
+@import "common";
+@import "compass/css3/inline-block";
+@import "od-button/*.png";
+
+.od-checkbox {
+	
+	@include inline-block;
+	cursor: pointer;
+	
+	em {
+		@include inline-block;
+		@include size(13px, 13px);
+		@include od-button-sprite(checkBtn);
+		margin:0 8px 0 0;
+
+		&.hover {
+			@include od-button-sprite(checkBtn_hover);
+		}
+
+		&.checked {
+			@include od-button-sprite(checkBtn_active);
+		}
+	}
+	
+	span {
+		@include one-line(13px);
+	}
+	
+}
