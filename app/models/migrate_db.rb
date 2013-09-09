@@ -78,11 +78,13 @@ class MigrateDb
 				end
 				u.point = u.point + point
 				u.save
-				pl = PointLog.new
-				pl.amount = point
-				pl.user_id = u._id
-				pl.reason = PointLog::NETRANKING_IMPORT
-				pl.save
+				if point > 0
+					pl = PointLog.new
+					pl.amount = point
+					pl.user_id = u._id
+					pl.reason = PointLog::NETRANKING_IMPORT
+					pl.save
+				end
 			end
 		end
 	end
@@ -141,7 +143,7 @@ class MigrateDb
 			s.email_promotable = false
 			s.email_promote_info = { "email_amount" => 0,
 				"promote_to_undefined_sample" => false,
-				"promote_email_count" => s.email_histories.length,
+				"promote_email_count" => 0,
 				"reward_scheme_id" => "" }
 
 			# the sms promote related

@@ -83,6 +83,8 @@
                                     <span><%= truncate(log["remark"], length: 22) %></span>
                                 <% elsif log["reason"].to_i == PointLog::IMPORT %>
                                     <span><%= change_point_reason_type(PointLog::IMPORT) %>记录</span>
+                                <% elsif log["reason"].to_i == PointLog::NETRANKING_IMPORT %>
+                                    <span><%= change_point_reason_type(PointLog::NETRANKING_IMPORT) %>记录</span>
                                 <% end %>
                                 
                             </td>
