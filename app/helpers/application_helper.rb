@@ -467,6 +467,8 @@ module ApplicationHelper
 			retval = "撤销订单"
 		when PointLog::IMPORT
 			retval = "原有系统导入" 
+		when PointLog::NETRANKING_IMPORT
+			retval = "清研通导入" 
 		end
 		return retval
 	end

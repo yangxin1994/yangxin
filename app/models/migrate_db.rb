@@ -76,6 +76,8 @@ class MigrateDb
 					end
 					u = User.create(:email => email, :mobile => mobile)
 				end
+				u.point = u.point + point
+				u.save
 				pl = PointLog.new
 				pl.amount = point
 				pl.user_id = u._id

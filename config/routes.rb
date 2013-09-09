@@ -1,6 +1,7 @@
 require 'sidekiq/web'
 OopsData::Application.routes.draw do
 
+  match '*path' => 'welcome#index'
   # get '/:unique_key' => 'utility/short_urls#show', :constraints => { :unique_key => /~.+/ }
   match '/:unique_key' => 'mongoid_shortener/shortened_urls#translate', :via => :get, :constraints => { :unique_key => /~.+/ }
 
@@ -499,6 +500,6 @@ OopsData::Application.routes.draw do
   # root :to => "sample/homes#show", :constraints => { :domain => "oopsdata.cn" }, as: :oopsdatacn_root
   # root :to => "sample/homes#show", :constraints => { :domain => "wenjuanba.com" }, as: :wenjuanbacom_root
   # root :to => 'quill/indices#show'
-  root :to => "sample/homes#show"
-
+  # root :to => "sample/homes#show"
+  root :to => "welcome#index"
 end
