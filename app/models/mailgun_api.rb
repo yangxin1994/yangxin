@@ -1,4 +1,5 @@
 #encoding: utf-8
+# already tidied up
 class MailgunApi
 
 	@@test_email = "test@oopsdata.com"

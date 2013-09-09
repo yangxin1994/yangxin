@@ -1,4 +1,3 @@
-
 # already tidied up
 require 'tool'
 class AgentTask

@@ -1,5 +1,4 @@
 # already tidied up
-
 require 'tool'
 class Agent
   include Mongoid::Document

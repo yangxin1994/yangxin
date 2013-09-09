@@ -1,3 +1,4 @@
+# already tidied up
 require 'error_enum'
 require 'quill_common'
 class InterviewerTask
@@ -41,28 +42,6 @@ class InterviewerTask
 		return interviewer_task
 	end
 
-	# *************
-	#  
-	#  update rule's "amount" which is a num of interviewer, 
-	#  then update status
-	# 
-	#  ******************
-	def update_q(quota)
-		# quota.merge!({"finished_count" => 0,
-		# 			"submitted_count" => 0,
-		# 			"rejected_count" => 0})
-		# quota["rules"] ||= []
-		# quota["rules"].each do |r|
-		# 	r["finished_count"] = 0
-		# 	r["submitted_count"] = 0
-		# end
-		retval = update_attributes({
-				quota: self.quota.merge(quota)
-			})
-
- 		return refresh_quota if retval
- 		return false
-	end
 
 	# Just update status 
 	# 
@@ -126,34 +105,6 @@ class InterviewerTask
 		# update status
 		self.update_status
 
-		return self
-	end
-
-	# submit answers
-	def submit_answers(answers)
-		answers.each do |a|
-			# convert the gps or 3g location to a region code
-			region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
-			if a["status"].to_i == 1
-				status = Answer::REJECT
-			else
-				status = self.survey.answer_need_review ? Answer::UNDER_REVIEW : Answer::FINISH
-			end
-			answer_to_insert = {:interviewer_task_id => self._id,
-				:survey_id => self.survey_id,
-				:channel => -2,
-				:created_at => Time.at(a["created_at"]),
-				:finished_at => a["finished_at"].to_i,
-				:answer_content => a["answer_content"],
-				:attachments => a["attachments"],
-				:latitude => a["location"][0].to_s,
-				:longitude => a["location"][1].to_s,
-				:status => status,
-				:reject_type => a["reject_type"].to_i,
-				:region => region}
-			Answer.create(answer_to_insert)
-		end
-		self.refresh_quota
 		return self
 	end
 end
