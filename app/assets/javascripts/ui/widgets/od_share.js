@@ -160,7 +160,7 @@
 						$(".fancybox-skin").css({"backgroundColor":"#fff"});
 						url_input.mouseover(function(e) { $(e.target).select(); });	
 						var share_url =  window.location.protocol + "//"  + window.location.host + '/s/' + opt.scheme_id		
-						if(typeof(window.current_user_id) != 'undefined'){
+						if(typeof(window.current_user_id) != 'undefined' && window.current_user_id != null){
 							var share_url =  share_url  + '?i=' + window.current_user_id;  
 							if(parseInt(opt.point) > 0){
 								$('.p_num').html(opt.point);

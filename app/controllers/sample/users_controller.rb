@@ -196,7 +196,7 @@ class Sample::UsersController < Sample::SampleController
 	# GET
 	def basic_info
 		@user_info = current_user.get_basic_attributes
-
+		
 		respond_to do |format|
 			format.html {
 				@user_info["income_person"][1] = 99999999 if @user_info["income_person"].is_a?(Array) and @user_info["income_person"][1] == 1.0/0.0
