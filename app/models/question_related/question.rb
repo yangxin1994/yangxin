@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 
 require 'error_enum'
 require 'quality_control_type_enum'

@@ -60,23 +60,23 @@
       <% @surveys['data'].each do |survey| %>
       <tr>
         <td>
-          <a href="javascript:void(0);" class="star" data-id="<%= survey["_id"] %>">
+          <a href="javascript:void(0);" class="star" data-id="<%= survey._id %>">
             <i class="icon-star<%= '-empty' unless survey.star %>"></i>
           </a>
         </td>
-        <td><a href="/questionaires/<%= survey["_id"] %>"><%= survey["title"] %></a></td>
-        <td><%= survey["email"] %></td>
-        <td><%= Time.at(survey["created_at"]).strftime('%F %R') %></td>
-        <td data-sid="<%= survey["_id"] %>">
+        <td><a href="/questionaires/<%= survey._id %>"><%= survey.title %></a></td>
+        <td><%= survey.user.try(:email) || survey.user.try(:mobile) %></td>
+        <td><%= Time.at(survey.created_at).strftime('%F %R') %></td>
+        <td data-sid="<%= survey._id %>">
         <div class="btn-group">
-          <a class="btn handle" href="/admin/surveys/<%= survey["_id"] %>" target="_blank"><i class="icon-list-alt"></i>查看问卷</a>
+          <a class="btn handle" href="/admin/surveys/<%= survey._id %>" target="_blank"><i class="icon-list-alt"></i>查看问卷</a>
           <button class="btn dropdown-toggle" data-toggle="dropdown">
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
             <li><a href="#info" class="info"><i class="icon-wrench"></i>问卷基本设置</a></li>
-            <li><a href="/admin/surveys/<%= survey["_id"] %>/reward_schemes" ><i class="icon-wrench"></i>奖励方案设置</a></li>
-            <li><a href="/admin/surveys/<%= survey["_id"] %>/promote" ><i class="icon-share"></i>推送渠道设置</a></li>
+            <li><a href="/admin/surveys/<%= survey._id %>/reward_schemes" ><i class="icon-wrench"></i>奖励方案设置</a></li>
+            <li><a href="/admin/surveys/<%= survey._id %>/promote" ><i class="icon-share"></i>推送渠道设置</a></li>
           </ul>
         </div>
         </td>

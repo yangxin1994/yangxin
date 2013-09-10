@@ -1,4 +1,5 @@
 # coding: utf-8
+# already tidied up
 require 'error_enum'
 require 'question_io'
 #Structure of different type question object can be found at 

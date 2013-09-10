@@ -1,3 +1,4 @@
+# already tidied up
 class Admin::NewslettersController < ApplicationController
 
   layout :resolve_layout

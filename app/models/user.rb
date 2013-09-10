@@ -1,3 +1,4 @@
+#already tidied up
 require 'data_type'
 require 'encryption'
 require 'error_enum'
@@ -62,17 +63,6 @@ class User
 	field :level_expire_time, :type => Integer, default: -1
 
 
-	# field :birthday, :type => Integer, default: -1
-	# field :gender, :type => Boolean
-	# field :address, :type => String
-	# field :postcode, :type => String
-	# field :phone, :type => String
-	# field :full_name, :type => String
-	# field :identity_card, :type => String
-	# field :company, :type => String
-	# field :bankcard_number, :type => String
-	# field :bank, :type => String
-	# field :alipay_account, :type => String
 	field :point, :type => Integer, :default => 0
 
 	attr_protected :role, :level, :user_role
@@ -81,11 +71,9 @@ class User
 	has_many :sended_messages, :class_name => "Message", :inverse_of => :sender
 	#################################
 	# QuillMe
-	has_many :reward_logs, :class_name => "RewardLog", :inverse_of => :user
 	has_many :orders, :class_name => "Order", :inverse_of => :sample
 	# QuillAdmin
 	has_many :operate_orders, :class_name => "Order", :foreign_key => "operator_id"
-	has_many :operate_reward_logs, :class_name => "RewardLog", :inverse_of => :operator,:foreign_key => "operator_id"
 	has_many :third_party_users
 	has_many :surveys, class_name: "Survey", inverse_of: :user
 	has_many :materials
@@ -97,16 +85,13 @@ class User
 	has_many :advertisements
 	has_many :survey_invitation_histories
 	has_many :answers, class_name: "Answer", inverse_of: :user
-	has_many :template_question_answers
 	has_many :survey_spreads
 	has_and_belongs_to_many :answer_auditor_allocated_surveys, class_name: "Survey", inverse_of: :answer_auditors
-	has_and_belongs_to_many :entry_clerk_allocated_surveys, class_name: "Survey", inverse_of: :entry_clerks
 	has_many :interviewer_tasks
 	has_many :reviewed_answers, class_name: "Answer", inverse_of: :auditor
 	has_many :logs
 	has_one  :affiliated, :class_name => "Affiliated", :inverse_of => :user
 
-	scope :unregistered, where(status: 1)
 	scope :sample, mod(:user_role => [2, 1])
 
 	VISITOR = 1
@@ -155,10 +140,6 @@ class User
 		return self.where(:_id => user_id).first
 	end
 
-	def self.find_by_id_including_deleted(user_id)
-		return self.where(:_id => user_id).first
-	end
-
 	def self.find_by_auth_key(auth_key)
 		return nil if auth_key.blank?
 		user = User.where(:auth_key => auth_key, :status.gt => -1)[0]
@@ -173,21 +154,7 @@ class User
 		end
 	end
 
-	def self.find_answer_auditors
-		answer_auditors = []
-		User.all.each do |user|
-			answer_auditors << user.serialize_for(["email", "mobile"]) if user.is_answer_auditor?
-		end
-		return answer_auditors
-	end
 
-	def self.logout(auth_key)
-		user = User.find_by_auth_key(auth_key)
-		if !user.nil?
-			user.auth_key = nil
-			user.save
-		end
-	end
 
 	def mini_avatar
 		md5 = Digest::MD5.hexdigest(self.id)
@@ -199,14 +166,6 @@ class User
 	end
 
 
-	def get_level_information
-		return {"level" => self.level, "level_expire_time" => self.level_expire_time}
-	end
-
-	def update_avatar(avatar)
-		self.create_avatar(avatar)
-	end
-
 	def set_receiver_info(receiver_info)
 		if self.affiliated.present?
 			self.affiliated.update_attributes(:receiver_info => receiver_info)
@@ -216,13 +175,7 @@ class User
 		return true
 	end
 
-	def is_deleted
-		return self.status == -1
-	end
 
-	def is_registered
-		return self.status == REGISTERED
-	end
 
 	def is_activated
 		return self.mobile_activation || self.email_activation
@@ -332,7 +285,7 @@ class User
 	end
 
 
-	def self.make_forget_pass_activate(mobile,code)
+	def self.forget_pass_mobile_activate(mobile,code)
 		sample = self.find_by_mobile(mobile)
 		if sample.present?
 			return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i  > sample.sms_verification_expiration_time
@@ -404,19 +357,6 @@ class User
 		return true
 	end
 
-	def self.find_or_create_new_visitor_by_email(email)
-		email.downcase!
-		user = User.find_by_email(email)
-		if user.nil?
-			user = User.create(email: email)
-			ImportEmail.destroy_by_email(email)
-		end
-		return user
-	end
-
-	def third_party_users
-		# self.third_party_users.map(&:website)	
-	end
 
 	def completed_info
 		affiliated = self.affiliated
@@ -434,19 +374,6 @@ class User
 		end
 	end
 
-	def self.find_or_create_new_visitor_by_email_mobile(email_mobile)
-		
-	end
-
-
-	def answerd?(survey_id)
-	  answer = self.answers.where(:survey_id => survey_id).first
-	  if answer.present?
-		return true
-	  else
-		return false
-	  end
-	end
 
 	#*description*: activate a user
 	#
@@ -479,7 +406,7 @@ class User
 			user.mobile_subscribe = true
 		end
 		user.save
-		RegistLog.create_regist_log(user.id)
+		RegistLog.create_regist_log(user.id) unless RegistLog.find_by_user_id(user.id).present?
 		return user.login(client_ip, client_type, false)
 	end
 
@@ -487,12 +414,6 @@ class User
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i > change_email_expiration_time
 		self.email = self.email_to_be_changed
 		return self.login(client_ip, nil, false)
-	end
-
-	def self.get_account_by_activate_key(activate_info)
-		user = User.find_by_email(activate_info["email"])
-		return ErrorEnum::USER_NOT_EXIST if user.nil? 
-		return activate_info["email"]
 	end
 
 	#*description*: user login
@@ -526,18 +447,6 @@ class User
 		return user.login(client_ip, client_type, keep_signed_in)
 	end
 
-	def self.auto_login_with_email_mobile(email_mobile, client_ip, client_type)
-		user = nil
-		if email_mobile.match(/#{EmailRexg}/i)  ## match email
-			user = User.find_by_email(email_mobile.downcase)
-		elsif email_mobile.match(/#{MobileRexg}/i)  ## match mobile
-			user = User.find_by_mobile(email_mobile)
-		end
-		return ErrorEnum::USER_NOT_EXIST if user.nil?
-		return ErrorEnum::USER_NOT_REGISTERED if user.status == 1
-		return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
-		return user.login(client_ip, client_type, keep_signed_in)
-	end
 
 	def login(client_ip, client_type, keep_signed_in=false)
 		self.last_login_ip = client_ip
@@ -553,29 +462,6 @@ class User
 		return {"auth_key" => self.auth_key}
 	end
 
-	def self.login_with_auth_key(auth_key)
-		user = User.find_by_auth_key(auth_key)
-		return ErrorEnum::AUTH_KEY_NOT_EXIST if user.nil?
-		return {"user_id" => user._id, "email" => user.email, "mobile" => user.mobile, "status" => user.status, "auth_key" => user.auth_key, "expire_at" => user.auth_key_expire_time, "role" => user.user_role}
-	end
-
-	#*description*: reset password for an user, used when the user forgets its password
-	#
-	#*params*:
-	#* email address of the user
-	#* new password of the user
-	#
-	#*retval*:
-	#* true: when successfully login
-	#* EMAIL_NOT_EXIST
-	#* WRONG_PASSWORD_CONFIRMATION
-	def self.reset_password(email, new_password, new_password_confirmation)
-		user = User.find_by_email(email)
-		return ErrorEnum::USER_NOT_EXIST if user.nil?      # email account does not exist
-		return ErrorEnum::WRONG_PASSWORD_CONFIRMATION if new_password != new_password_confirmation
-		user.password = Encryption.encrypt_password(new_password)
-		return user.save
-	end
 
 	#*description*: reset password for an user, used when the user resets its password
 	#
@@ -592,34 +478,7 @@ class User
 		return self.save
 	end
 
-	#*description*: set auth key for one user
-	#
-	#*params*:
-	#* email address of the user
-	#* the auth key to be set
-	#
-	#*retval*:
-	def set_auth_key(user_id, auth_key)
-		self.auth_key = auth_key
-		return self.save
-	end
 
-	#*description*: get auth key for one user
-	#
-	#*params*:
-	#* email address of the user
-	#
-	#*retval*:
-	#* the auth key of the user
-	def self.get_auth_key(email)
-		user = User.find_by_email(email)
-		if user != nil
-			return user.auth_key
-		else
-			return ""
-		end
-	end
-	#--
 	############### operations about message#################
 	#++
 	#ctreate
@@ -643,20 +502,9 @@ class User
 		m.save
 	end
 
-	def destroy_message(message_id)
-		m = Message.where(_id: message_id)[0]
-		return ErrorEnum::MESSAGE_NOT_FOUND unless m
-		m.destroy
-	end
 
 	def unread_messages_count
 		Message.unread(last_read_messeges_time).select{ |m| (message_ids.include? m.id) or (m.type == 0)}.count
-	end
-
-	def show_messages
-		self.update_attribute(:last_read_messeges_time, Time.now)
-		Message.all.desc(:updated_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}
-		#Message.unread(created_at).select{ |m| (message_ids.include? m.id) or (m.type == 0)}
 	end
 
 	#--
@@ -668,12 +516,6 @@ class User
 		PointLog.create_admin_operate_point_log(amount, remark, self._id) if self.save
 	end
 	#--
-	############### operations about charge #################
-	#++
-	#Obtain the charges of this user
-	def charges
-		Charge.charges_of(self.email)
-	end
 
 	#--
 	# **************************************************
@@ -683,117 +525,19 @@ class User
 	public
 
 	COLOR_NORMAL = 0
-	COLOR_WHITE = 1
-	COLOR_BLACK = -1
-
-	#--
-	# instance methods
-	#++
-
-	#--
-	# class methods
-	#++
 
 	scope :normal_list, where(:color => COLOR_NORMAL, :status.gt => -1)
-	scope :black_list, where(:color => COLOR_BLACK, :status.gt => -1)
-	scope :white_list, where(:color => COLOR_WHITE, :status.gt => -1)
-	scope :deleted_users, where(status: -1)
 
-	def update_user(attributes)
-		select_attrs = %w(status birthday gender address phone postcode company identity_card username full_name)
-		attributes.select!{|k,v| select_attrs.include?(k.to_s)}
-		retval = self.update_attributes(attributes)
-		return retval
-	end
 
-	def set_admin(admin)
-		if admin == true
-			self.role = self.role | 16
-		else
-			self.role = self.role & 47
-		end
-		return self.save
-	end
-
-	def set_role(role)
-		return ErrorEnum::WRONG_USER_ROLE if !(0..63).to_a.include?(role)
-		self.role = role
-		return self.save
-	end
 
 	def set_sample_role(role)
 		self.user_role = role.sum
 		return self.save
 	end
 
-	def set_color(color)
-		return ErrorEnum::WRONG_USER_COLOR if ![-1, 0, 1].include?(color)
-		self.color = color
-		return self.save
-	end
-
-	def set_lock(lock)
-		self.lock = lock == true
-		return self.save
-	end
-
-	def remove_user
-		self.status = -1
-		self.save
-	end
-
-	def recover
-		self.status = 4
-		self.save
-	end
-
-	# def add_point(point_int)
-	# 	self.point += point_int
-	# 	self.save
-	# end
-
-	def change_to_system_password
-		# generate rand number
-		sys_pwd = 1
-		while sys_pwd < 16**7 do
-			sys_pwd = rand(16**8-1)
-		end
-		sys_pwd = sys_pwd.to_s(16)
-		self.password = Encryption.encrypt_password(sys_pwd)
-		if !self.save then
-			return ErrorEnum::USER_SAVE_FAILED
-		end
-		self[:new_password] = sys_pwd
-		return self
-	end
-
-	def self.list_system_user(role, lock)
-		role = role.to_i & 15
-		selected_users = []
-		users = User.where(:role.gt => 0)
-		users.each do |u|
-			next if u.role & role == 0
-			if !lock.nil?
-				next if u.lock != lock
-			end
-			selected_users << u
-		end
-		return selected_users
-	end
 
 	def spread_count
 		Answer.where(:introducer_id => self.id).finished.count	
-	end
-
-	def get_introduced_users
-		introduced_users = User.where(:introducer_id => self._id.to_s, :status.gt => 1).desc(:created_at)
-		summary_info = introduced_users.map { |u| { _id: u._id.to_s, email: u.email, registered_at: u.registered_at } }
-		return summary_info
-	end
-
-	def get_survey_ids_answered
-		survey_ids = self.answers.map { |e| e.survey_id.to_s }
-		return survey_ids.uniq
 	end
 
 	def self.search_sample(email, mobile, is_block)
@@ -900,75 +644,12 @@ class User
 		return [completion, analyze_result]
 	end
 
-	def spread_logs
-		answers = Answer.where(:introducer_id => self._id.to_s)
-		ret_logs = answers.map do |e|
-			{
-				"_id" => e._id.to_s,
-				"title" => e.survey.title,
-				"created_at" => e.created_at,
-				"finished_at" => Time.at(e.finished_at),
-				"email" => e.user.try(:email),
-				"mobile" => e.user.try(:mobile),
-				"status" => e.status,
-				"reject_type" => e.reject_type
-			}
-		end
-		return ret_logs
-	end
 
 	def block(block)
 		self.is_block = block.to_s == "true"
 		return self.save
 	end
 
-	def basic_info
-		attributes = {}
-		SampleAttribute.normal.each do |e|
-			name = e.name
-			case e.type
-			when DataType::STRING
-				attributes[name] = self.read_attribute(e.name)
-			when DataType::ENUM
-				gender = self.read_attribute(e.name)
-				attributes[name] = gender.nil? ? nil : e.enum_array[gender]
-			when DataType::ARRAY
-				attributes[name] = []
-				(self.read_attribute(e.name) || []).each { |m| attributes[name] << e.enum_array[m] }
-			when DataType::NUMBER
-				attributes[name] = self.read_attribute(e.name)
-			when DataType::DATE
-				attributes[name] = {
-					"date_type" => e.date_type,
-					"value" => self.read_attribute(e.name)
-					}
-			when DataType::NUMBER_RANGE
-				attributes[name] = self.read_attribute(e.name)
-			when DataType::DATE_RANGE
-				attributes[name] = {
-					"date_type" => e.date_type,
-					"value" => self.read_attribute(e.name)
-					}
-			end
-		end
-		return {:email => self.email,
-			:mobile => self.mobile,
-			:point => self.point,
-			:attributes => attributes,
-			:is_block => self.is_block}
-	end
-
-	def serialize_for(arr_fields)
-		user_obj = {"id" => self.id.to_s}
-		arr_fields.each do |field|
-			if [:created_at, :updated_at].include?(field)
-				user_obj[field] = self.send(field).to_i
-			else
-				user_obj[field] = self.send(field)
-			end
-		end
-		return user_obj
-	end
 
 	def sample_attributes
 		sample = {
@@ -1013,13 +694,6 @@ class User
 		return self.affiliated.save
 	end
 
-	def write_sample_attribute_by_id(sa_id, value)
-		sa = SampleAttribute.find_by_id(sa_id)
-		return false if sa.nli?
-		self.create_affiliated if self.affiliated.nil?
-		self.affiliated.write_attribute(sa.name.to_sym, value)
-		return self.affiliated.save
-	end
 
 	def get_basic_attributes
 		basic_attributes = {}

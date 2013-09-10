@@ -18,7 +18,7 @@ class Quill::PagesController < ApplicationController
 	# split one page into two pages.
 	# If before_question_id is -1, split at the last of the page.
 	def split
-		render_json_auto @survey.split_page(params[:id].to_i, params[:question_id], 'new page', 'new page')
+		render_json_auto @survey.split_page(params[:id].to_i, params[:before_question_id], 'new page', 'new page')
 	end
 
 	# combine pages

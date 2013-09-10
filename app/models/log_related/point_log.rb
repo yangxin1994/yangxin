@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 class PointLog < Log
 	field :type, :type => Integer, :default => 8
 	field :amount, :type => Integer #花费积分数

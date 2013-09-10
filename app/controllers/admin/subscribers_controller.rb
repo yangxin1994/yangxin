@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 
 class Admin::SubscribersController < Admin::AdminController
   layout "layouts/admin-todc"

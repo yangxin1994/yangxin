@@ -1,3 +1,4 @@
+# already tidied up
 class Agent::Sessions::SignoutController < Agent::AgentsController
 
   # PAGE: show sign in

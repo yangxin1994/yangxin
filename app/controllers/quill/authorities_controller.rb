@@ -13,5 +13,4 @@ class Quill::AuthoritiesController < Quill::QuillController
 		retval = @survey.update_access_control_setting(params[:authority])
 		render_json_auto retval and return
 	end
-	
 end

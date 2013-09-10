@@ -1,4 +1,5 @@
 #encoding: utf-8
+# already tidied up
 #Corresponding to the User collection in database. Record the user information and activities related to the usage of OopsData system.
 class Task
 	include Mongoid::Document
@@ -18,8 +19,5 @@ class Task
 		return false if task.nil?
 		task.progress[progress_item.to_s] = progress_value
 		return task.save
-	end
-
-	def self.refresh_quota_task
 	end
 end

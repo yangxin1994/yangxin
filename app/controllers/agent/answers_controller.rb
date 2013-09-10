@@ -1,3 +1,4 @@
+# already tidied up
 class Agent::AnswersController < Agent::AgentsController
 
   def index
@@ -22,6 +23,7 @@ class Agent::AnswersController < Agent::AgentsController
       render :json => result
     end
   end
+  
   def update
     render_json Answer.find(params[:id]) do |answer|
       answer.agent_review(params[:review_result].to_s == "true")

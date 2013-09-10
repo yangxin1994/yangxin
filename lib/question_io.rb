@@ -45,7 +45,7 @@ class QuestionIo
   def spss_header(header_prefix)
     @spss_header << {"spss_name" => header_prefix,
                 "spss_type" => SPSS_STRING,
-                "spss_label" => content["text"].gsub(/<[^>]*>/, '').slice(0..200)}
+                "spss_label" => content["text"].gsub(/<[^>]*>/, '').slice(0..120)}
     @header_count[header_prefix] ||= @spss_header.count
     @spss_header
   end
@@ -57,7 +57,7 @@ class QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("blank?"))
     @retval << (v == {} ? nil : v)
   end
 
@@ -157,7 +157,7 @@ class ChoiceQuestionIo < QuestionIo
       issue["items"].each_index do |i|
         @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
                     "spss_type" => SPSS_NUMERIC,
-                    "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..200),
+                    "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120),
                     "spss_value_labels" => {1 => SPSS_OPTED,
                                             0 => SPSS_NOT_OPTED}}
       end
@@ -168,7 +168,7 @@ class ChoiceQuestionIo < QuestionIo
       end
       @spss_header << {"spss_name" => header_prefix,
                   "spss_type" => SPSS_NUMERIC,
-                  "spss_label" => content["text"].gsub(/<[^>]*>/, '').slice(0..200),
+                  "spss_label" => content["text"].gsub(/<[^>]*>/, '').slice(0..120),
                   "spss_value_labels" => choices }
     end
     if issue["other_item"]["has_other_item"]
@@ -206,8 +206,10 @@ class ChoiceQuestionIo < QuestionIo
     choiced = 0
     if issue["max_choice"].to_i > 1
       issue["items"].each_index do |i|
-        blank? row["#{header_prefix}_c#{i+1}"] if row["#{header_prefix}_input"].blank?
-        if row["#{header_prefix}_c#{i+1}"] == "1"
+        # blank? row["#{header_prefix}_c#{i+1}"] if row["#{header_prefix}_input"].blank?
+        row["#{header_prefix}_c#{i+1}"] = "0" if row["#{header_prefix}_c#{i+1}"].blank?
+	blank? row["#{header_prefix}_c#{i+1}"] if row["#{header_prefix}_input"].blank?
+	if row["#{header_prefix}_c#{i+1}"] == "1"
           @retval["selection"] << get_item_id(i + 1)
           choiced += 1
         end
@@ -283,7 +285,7 @@ class MatrixChoiceQuestionIo < QuestionIo
         issue["items"].each_index do |c|
           @spss_header << {"spss_name" => header_prefix  + "_r#{r + 1}" + "_c#{c + 1}",
                       "spss_type" => SPSS_NUMERIC,
-                      "spss_label" => issue["items"][c]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..200),
+                      "spss_label" => issue["items"][c]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120),
                       "spss_value_labels" => {1 => SPSS_OPTED,
                                               0 => SPSS_NOT_OPTED}}
         end
@@ -296,7 +298,7 @@ class MatrixChoiceQuestionIo < QuestionIo
       issue["rows"].each_with_index do |r, i|
         @spss_header << {"spss_name" => header_prefix + "_r#{i + 1}",
                     "spss_type" => SPSS_NUMERIC,
-                    "spss_label" => r["content"]["text"].gsub(/<[^>]*>/, '').slice(0..200),
+                    "spss_label" => r["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120),
                     "spss_value_labels" => choices }
       end
     end
@@ -306,7 +308,7 @@ class MatrixChoiceQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("blank?"))
     if issue["max_choice"].to_i > 1
       issue["rows"].each do |item|
         issue["items"].each_index do |c|
@@ -319,7 +321,7 @@ class MatrixChoiceQuestionIo < QuestionIo
       end
     else
       issue["rows"].each do |item|
-        @retval << (v[item["id"].to_s] && v[item["id"].to_s].empty? ? nil : get_item_index(v[item["id"].to_s][0]))
+        @retval << (v[item["id"].to_s] && v[item["id"].to_s].blank? ? nil : get_item_index(v[item["id"].to_s][0]))
       end
     end
     return @retval
@@ -327,7 +329,7 @@ class MatrixChoiceQuestionIo < QuestionIo
 
   def answer_content_2(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("blank?"))
     if issue["max_choice"].to_i > 1
       issue["rows"].each do |item|
         issue["items"].each_index do |c|
@@ -340,9 +342,9 @@ class MatrixChoiceQuestionIo < QuestionIo
       end
     else
       issue["rows"].each do |item|
-        p (v[item["id"].to_s] && v[item["id"].to_s].empty? ? nil : get_item_index(v[item["id"].to_s][0]))
+        p (v[item["id"].to_s] && v[item["id"].to_s].blank? ? nil : get_item_index(v[item["id"].to_s][0]))
         p get_item_index(v[item["id"].to_s][0])
-        @retval << (v[item["id"].to_s] && v[item["id"].to_s].empty? ? nil : get_item_index(v[item["id"].to_s][0]))
+        @retval << (v[item["id"].to_s] && v[item["id"].to_s].blank? ? nil : get_item_index(v[item["id"].to_s][0]))
       end
     end
     p @retval
@@ -404,13 +406,14 @@ end
 class TextBlankQuestionIo < QuestionIo
   def answer_import(row, header_prefix)
     blank? row["#{header_prefix}"]
-    if issue["max_length"] > 0 && row["#{header_prefix}"].length > issue["max_length"]
-      raise "您输入的文本有些太长了哦,重新检查一下吧!"
-    elsif issue["min_length"] > 0 && row["#{header_prefix}"].length < issue["min_length"]
-      raise "您输入的文本长度未免太短了些,重新检查一下吧!"
-    else
-      @retval = row["#{header_prefix}"]
-    end
+    # if issue["max_length"] > 0 && row["#{header_prefix}"].to_s.length > issue["max_length"]
+    #   raise "您输入的文本有些太长了哦,重新检查一下吧!(#{row["#{header_prefix}"].to_s.length}/#{issue["max_length"]})"
+    # elsif issue["min_length"] > 0 && row["#{header_prefix}"].to_s.length < issue["min_length"]
+    #   raise "您输入的文本长度未免太短了些,重新检查一下吧!(#{row["#{header_prefix}"].to_s.length}/#{issue["min_length"]})"
+    # else
+    #   @retval = row["#{header_prefix}"]
+    # end
+    @retval = row["#{header_prefix}"]
     return { "#{origin_id}" => @retval}
   end
 end
@@ -419,7 +422,7 @@ class NumberBlankQuestionIo < QuestionIo
   def spss_header(header_prefix)
     @spss_header << {"spss_name" => header_prefix,
                 "spss_type" => SPSS_NUMERIC,
-                "spss_label" => content["text"].gsub(/<[^>]*>/, '').slice(0..200)}
+                "spss_label" => content["text"].gsub(/<[^>]*>/, '').slice(0..120)}
     @header_count[header_prefix] ||= @spss_header.count
     @spss_header
   end
@@ -491,7 +494,7 @@ class TimeBlankQuestionIo < QuestionIo
   # @time_unit = ["Y", "M", "W", "D", "H", "M", "S"]
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("blank?"))
     return nil if v == {}
     # @time_unit.each_with_index do |e, i|
     #   @retval << "#{v[i]}#{e}" if v[i] != 0
@@ -611,7 +614,7 @@ class AddressBlankQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?")) || v == {}
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("blank?")) || v == {}
     add = QuillCommon::AddressUtility.find_province_city_town_by_code(v["address"]).strip.split('-')
     case issue["format"]
     when 1 , 2
@@ -666,7 +669,7 @@ class BlankQuestionIo < QuestionIo
     issue["items"].each_index do |i|
       @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_STRING,
-                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..200)}
+                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)}
     end
     @header_count[header_prefix] ||= @spss_header.count
     @spss_header
@@ -674,7 +677,7 @@ class BlankQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("blank?"))
     issue["items"].each_index do |i|
       q = Question.new(:content => issue["items"][i]["content"],
                        :issue => issue["items"][i]["properties"],
@@ -714,7 +717,7 @@ class MatrixBlankQuestionIo < QuestionIo
       issue["items"].each_index do |i|
         @spss_header << {"spss_name" => header_prefix  + "_r#{r + 1}" + "_c#{i + 1}",
                     "spss_type" => SPSS_STRING,
-                    "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..200)}
+                    "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)}
       end
     end
     @header_count[header_prefix] ||= @spss_header.count
@@ -723,7 +726,7 @@ class MatrixBlankQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("blank?"))
     issue["row_id"].each_index do |r|
       issue["items"].each_index do |i|
         q = Question.new(:content => issue["items"][i]["content"],
@@ -770,7 +773,7 @@ class ConstSumQuestionIo < QuestionIo
     issue["items"].each_index do |i|
       @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_NUMERIC,
-                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..200)}
+                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)}
     end
     if issue["other_item"]["has_other_item"]
       @spss_header << {"spss_name" => header_prefix + INPUT,
@@ -778,7 +781,7 @@ class ConstSumQuestionIo < QuestionIo
                   "spss_label" => SPSS_ETC}
       @spss_header << {"spss_name" => header_prefix + INPUT + VALUE,
                   "spss_type" => SPSS_NUMERIC,
-                  "spss_label" => issue["other_item"]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..200)}
+                  "spss_label" => issue["other_item"]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)}
     end
     @header_count[header_prefix] ||= @spss_header.count
     @spss_header
@@ -786,7 +789,7 @@ class ConstSumQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("blank?"))
     v.each do |k, c|
       unless k == "text_input" || k == issue["other_item"]["input_id"]
         @retval << c
@@ -868,7 +871,7 @@ class SortQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("blank?"))
     if issue["max"] == -1
       item_count = issue["items"].count
     else
@@ -930,7 +933,7 @@ class RankQuestionIo < QuestionIo
     issue["items"].each_index do |i|
       @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_NUMERIC,
-                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..200)}
+                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)}
       if issue["items"][i]["has_unknow"]
         @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}" + UNKNOW,
                     "spss_type" => SPSS_STRING,
@@ -944,14 +947,14 @@ class RankQuestionIo < QuestionIo
                   "spss_label" => SPSS_ETC}
       @spss_header << {"spss_name" => header_prefix + INPUT + VALUE,
                   "spss_type" => SPSS_NUMERIC,
-                  "spss_label" => issue["other_item"]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..200)}
+                  "spss_label" => issue["other_item"]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)}
     end
     @header_count[header_prefix] ||= @spss_header.count
     @spss_header
   end
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("blank?"))
     issue["items"].each do |e|
       @retval << v[e["input_id"]]
       (@retval << v[e["input_id"]] == -1 ? 1 : 0) if e["has_unknow"]
@@ -1011,14 +1014,14 @@ class TableQuestionIo < QuestionIo
     issue["items"].each_index do |i|
       @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_STRING,
-                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..200)}
+                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)}
     end
     @header_count[header_prefix] ||= @spss_header.count
     @retval
   end
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("blank?"))
     issue["items"].each_index do |i|
       q = Question.new(:content => issue["items"][i]["content"],
                        :issue => issue["items"][i]["properties"],
@@ -1062,7 +1065,7 @@ class ScaleQuestionIo < QuestionIo
     issue["items"].each_index do |i|
       @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_NUMERIC,
-                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..200),
+                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120),
                   "spss_value_labels" => value_labels}
       # if issue["show_unknown"]
       #   @retval << {"spss_name" => header_prefix + "_c#{i + 1}" + UNKNOW,
@@ -1077,7 +1080,7 @@ class ScaleQuestionIo < QuestionIo
 
   def answer_content(v, header_prefix)
     clear_retval
-    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("empty?"))
+    return Array.new(header_count(header_prefix)) if (v.nil? || v.try("blank?"))
     issue["items"].each do |e|
       @retval << (v[e["id"].to_s] ? v[e["id"].to_s] + 1 : nil)
       # @retval << (v[e["id"].to_s] == -1 ? 1 : 0 ) if e["show_unknow"]
@@ -1089,12 +1092,13 @@ class ScaleQuestionIo < QuestionIo
     @retval = {}
     issue["items"].each_with_index do |item, index|
       blank? row["#{header_prefix}_c#{index + 1}"]
-      if only_num?(row["#{header_prefix}_c#{index + 1}"], range: 1..issue["labels"].length)
+      if only_num?(row["#{header_prefix}_c#{index + 1}"], range: 1..(issue["labels"].try('length') || 1))
         @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : (row["#{header_prefix}_c#{index + 1}"].to_i) - 1)
       else
         raise "您输入的范围好像不太对吧?"
       end
     end
+    binding.pry
     return { "#{origin_id}" => @retval}
   end
 

@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 require 'quill_common'
 class LotteryLog < Log
 	field :type, :type => Integer,:default => 2

@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 class SpreadLog < Log
 	field :type, :type => Integer, :default => 32
 	field :survey_id, :type => String

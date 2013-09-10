@@ -390,9 +390,9 @@ $(function(){
 					}, this));
 				} else if(this.options.reward.reward_scheme_type == 3) {
 					// lottery
-					if(this.options.reward.lottery_started) {
-						location.href = '/lotteries/' + this.options.answer_id;
-					} else {
+					// if(this.options.reward.lottery_started) {
+						// location.href = '/lotteries/' + this.options.answer_id;
+					// } else {
 						this.hbs({
 							title: this.model.get('title'),
 							prizes: this.options.reward.prizes,
@@ -405,7 +405,7 @@ $(function(){
 						}, 'survey_filler_end_lottery').appendTo('#f_body');
 						$('#start_spread').click($.proxy(function() { this._spread(); }, this));
 						$('#ok_btn').click($.proxy(function() { location.href = '/lotteries/' + this.options.answer_id; }, this));
-					}
+					// }
 				}
 			} else if (value.answer_status == 16) {
 				// 重答

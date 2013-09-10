@@ -67,7 +67,7 @@
 			<div class="login-panel r">
 
 					<a href="javascript:void(0);" class="account-setting white-txt mr10" >
-						<%=email%><span class="ml5">▼</span>
+						<%=current_user.try(:email)%><span class="ml5">▼</span>
 					</a>
 					<div class="account-setting-box dn">
 						<i class="trigon">▲</i>
@@ -75,9 +75,9 @@
 							<% if current_user.is_admin? %>
 							<li><a href="<%=admin_path %>?publish_status=8">管理员操作</a></li>
 							<% end %>
-							<li><a href="<%=profile_path %>">账户设置</a></li>
-							<li><a href="<%=messages_path %>">消息中心</a></li>
-							<li><a href="<%=signout_path %>">退出</a></li>
+							<li><a href="<%=setting_users_path %>">账户设置</a></li>
+							<li><a href="<%=notifications_users_path %>">消息中心</a></li>
+							<li><a href="/sign_out">退出</a></li>
 						</ul>
 					</div>
 
@@ -85,8 +85,8 @@
 			</div>
 			<% else %>
 			<div class="login-panel r">
-				<a href="<%=signin_path %>" class="btn login mr10">登 录</a>
-				<a href="<%=signup_path %>" class="btn reg">注 册</a>
+				<a href="/sign_in" class="btn login mr10">登 录</a>
+				<a href="/sign_up" class="btn reg">注 册</a>
 			</div>
 			<% end %>
 		</div>
