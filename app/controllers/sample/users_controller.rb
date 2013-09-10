@@ -385,7 +385,7 @@ class Sample::UsersController < Sample::SampleController
 			return
 		end
 
-		user = User.find_by_email(activate_info["email"])
+		user = User.find_by_id(activate_info["user_id"])
 		if user.nil?
 			@success = false
 			return
