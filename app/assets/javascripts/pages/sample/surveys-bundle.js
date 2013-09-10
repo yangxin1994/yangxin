@@ -6,7 +6,6 @@ jQuery(function($) {
 	if(typeof(redict_to_subscribe) != 'undefined' && redict_to_subscribe != null){
 
     	function callback() {
-    		console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     	  setTimeout(function() {
     	    $( "#effect" ).removeAttr( "style" ).hide().fadeIn();
     	  }, 1000 );
