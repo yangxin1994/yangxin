@@ -1,4 +1,4 @@
-module LogicControl
+module SurveyLogicControl
 
   SCREEN = 0
   SHOW_QUESTION = 1

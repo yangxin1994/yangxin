@@ -677,7 +677,7 @@ class Answer
 
   def check_question_quota
     # 1. get the corresponding survey, quota, and quota stats
-    quota = self.survey.show_quota
+    quota = self.survey.quota
     # 2. if all quota rules are satisfied, the new answer should be rejected
     if quota["quota_satisfied"]
       self.set_reject
