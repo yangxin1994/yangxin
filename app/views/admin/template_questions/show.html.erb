@@ -1,0 +1,411 @@
+<% if @template_question.success %>
+<!-- content for head -->
+<% content_for :head do %>
+	<%= javascript_include_tag "pages/admin/template_questions-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/template_questions-bundle", :media => "all" %>
+	<script type="text/javascript">
+		jQuery(function($) {
+			window.template_question = <%= raw (@template_question.value).to_json %>;
+			 console.log(window.template_question);
+		});
+	</script>
+<% end %>
+
+<%
+	question_types=["选择题", "矩阵选择题", "文本填充题", "数值填充题", "邮箱题",
+		"网址链接题", "电话题", "时间题", "地址题", "组合填充题", 
+		"MATRIX_BLANK_QUESTION", "比重题", "排序题", "RANK_QUESTION", "文本段",
+		"FILE_QUESTION", "TABLE_QUESTION", "量表题"]
+%>
+
+<!-- put html code below -->
+<div class="template_questions">
+	<div class="title">
+		<h5>模板题编辑:基本信息<h5>
+		<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/template_questions">返回模板题列表</a><h5>
+		<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/template_questions/new">新建</a><h5>
+	</div>
+
+	<div id="edit-tab">
+		<form action="#">	
+
+			<div class="type-div" id="type_<%= @template_question.value['question_type'].to_i %>">
+				<p>
+					<label class="child-title f14 pl2">问题类型</label>
+					<span class="f-orange" type="text" name="template_question[:question_type]"><%= question_types[@template_question.value['question_type'].to_i] %></span>
+				</p>
+
+				<p>
+					<label class="child-title f14 pl2">问题名称</label>
+					<input class="text-input" type="text" name="template_question[:content]"  value="<%= @template_question.value['content']['text'] %>"></input>
+				</p>
+				 <p>
+					<label class="child-title f14 pl2">样本属性名称</label>
+					<input class="text-input" type="text" name="template_question[:attribute_name]" value="<%= @template_question.value['attribute_name'] %>"></input>
+				</p>
+
+			<!-- diff type, diff page init -->
+			<% case @template_question.value['question_type'].to_i %>
+			<% when 0 %>
+				
+				<p>
+					<label class="child-title f14 pl2">选项最小数</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:min_choice]"  value="<%= @template_question.value['issue']['min_choice'] %>"></input>
+					<span class="alertSpan dn red"></span> 
+				</p>
+				<p>
+					<label class="child-title f14 pl2">选项最大数</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:max_choice]" value="<%= @template_question.value['issue']['max_choice'] %>"></input> 
+					<span class="alertSpan dn red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2" title="关于选项个数设置的类型，0 单选选项；1 单选下拉框；2 多选不限制min和max；3 多选（必须选多少个）；4 多选（最多可选多少个）；5 多选（至少选择多少个）；6 多选（选择 min_choice 到 max_choice 个）">选项个数设置</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:option_type]" value="<%= @template_question.value['issue']['option_type'] %>"></input> 
+					<span class="alertSpan dn red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">选项是否列式显示</label>
+					<input class="text-input" type="checkbox" name="template_question[:is_list_style]" <%if @template_question.value['issue']['is_list_style'].to_s=="true" %>checked<%end%> />
+					<span class="alertSpan dn red"></span> 
+				</p>
+				<p>
+					<label class="child-title f14 pl2">选项是否随机排列</label>
+					<input class="text-input" type="checkbox" name="template_question[:is_rand]" <%if @template_question.value['issue']['is_rand'].to_s=="true" %>checked<%end%> />
+					<span class="alertSpan dn red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">选项</label>
+					<input class="blueBtn new-choice" type="button" value="添加新选项"/>
+				</p>
+
+				<div class="group group-1">
+					<div class="choices">
+						<% @template_question.value['issue']['items'].each do |item| %>
+							<div class="choice" id="choice-<%= item['id']%>">
+								<input type="text" class="choice-text text-input f14" value="<%= item["content"]["text"]%>"/>
+								<input type="button" class="redBtn btn-choice-delete" value="删除"/>
+							</div>
+						<%end%>
+					</div>
+				</div>
+
+			<% when 1%>
+				<p>
+					<label class="child-title f14 pl2">选项最小数</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:min_choice]"  value="<%= @template_question.value['issue']['min_choice'] %>"></input>
+					<span class="alertSpan dn red"></span> 
+				</p>
+				<p>
+					<label class="child-title f14 pl2">选项最大数</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:max_choice]" value="<%= @template_question.value['issue']['max_choice'] %>"></input> 
+					<span class="alertSpan dn red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2" title="关于选项个数设置的类型，0 单选选项；1 单选下拉框；2 多选不限制min和max；3 多选（必须选多少个）；4 多选（最多可选多少个）；5 多选（至少选择多少个）；6 多选（选择 min_choice 到 max_choice 个）">选项个数设置</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:option_type]" value="<%= @template_question.value['issue']['option_type'] %>"></input> 
+					<span class="alertSpan dn red"></span>
+				</p>
+				<!-- <p>
+					<label class="child-title f14 pl2">选项是否列式显示</label>
+					<input class="text-input" type="checkbox" name="template_question[:is_list_style]" <%if @template_question.value['issue']['is_list_style'].to_s=="true" %>checked<%end%> />
+				</p> -->
+				<p>
+					<label class="child-title f14 pl2">选项是否随机排列</label>
+					<input class="text-input" type="checkbox" name="template_question[:is_rand]" <%if @template_question.value['issue']['is_rand'].to_s=="true" %>checked<%end%> />
+				</p>
+				<p>
+					<label class="child-title f14 pl2" title="分组时　>０有效">每组数量</label>
+					<input class="text-input" type="text"  style="width:40px;" name="template_question[:row_num_per_group]" value="<%= @template_question.value['issue']['row_num_per_group'] %>" />
+					<span class="alertSpan dn red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">对齐方式</label>
+					<input class="text-input" type="radio" name="template_question[:show_style]" <%if @template_question.value['issue']['show_style'].to_i ==0%>checked<%end%> value="0"/><span style="margin-right: 20px;">左对齐</span>
+					<input class="text-input" type="radio" name="template_question[:show_style]" <%if @template_question.value['issue']['show_style'].to_i ==1%>checked<%end%> value="1"/><span style="margin-right: 20px;">居中对齐</span>
+					<input class="text-input" type="radio" name="template_question[:show_style]" <%if @template_question.value['issue']['show_style'].to_i ==2%>checked<%end%> value="2"/><span  style="margin-right: 20px;">右对齐</span>
+				</p>
+
+				<p>
+					<label class="child-title f14 pl2">是否随机排列行</label>
+					<input class="text-input" type="checkbox" name="template_question[:is_row_rand]" <%if @template_question.value['issue']['is_row_rand'].to_s=="true" %>checked<%end%> />
+				</p>
+
+				<p>
+					<label class="child-title f14 pl2">选项</label>
+					<input class="blueBtn new-choice" type="button" value="添加新选项"/>
+				</p>
+
+				<div class="group group-1">
+					<div class="choices">
+						<% @template_question.value['issue']['items'].each do |item| %>
+							<div class="choice" id="choice-<%= item['id']%>">
+								<input type="text" class="choice-text text-input f14" value="<%= item["content"]["text"]%>"/>
+								<input type="button" class="redBtn btn-choice-delete" value="删除"/>
+							</div>
+						<%end%>
+					</div>
+				</div>
+
+				<p class="new-row">
+					<label class="child-title f14 pl2">行</label>
+					<input class="blueBtn new-row" type="button" value="添加新行"/>
+				</p>
+				<div class="group group-2">
+					<div class="choices">
+						<% @template_question.value['issue']['rows'].to_a.each do |item| %>
+							<div class="choice" id="choice-<%= item['id']%>">
+								<input type="text" class="choice-text text-input f14" value="<%= item["content"]["text"]%>"/>
+								<input type="button" class="redBtn btn-choice-delete" value="删除"/>
+							</div>
+						<%end%>
+					</div>
+				</div>
+			<%when 2%>
+				<p>
+					<label class="child-title f14 pl2">最小长度</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:min_length]"  value="<%= @template_question.value['issue']['min_length'] %>"></input>
+					<span class="alertSpan dn red"></span> 
+				</p>
+				<p>
+					<label class="child-title f14 pl2">最大长度</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:max_length]" value="<%= @template_question.value['issue']['max_length'] %>"></input> 
+					<span class="alertSpan dn red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">是否多行输入</label>
+					<input class="text-input" type="checkbox" name="template_question[:has_multiple_line]" <%if @template_question.value['issue']['has_multiple_line'].to_s=="true" %>checked<%end%> />
+				</p>
+				<p>
+					<label class="child-title f14 pl2">输入框大小</label>
+					<input class="text-input" type="radio" name="template_question[:size]" <%if @template_question.value['issue']['size'].to_i ==0%>checked<%end%> value="0"/><span style="margin-right: 20px;">小</span>
+					<input class="text-input" type="radio" name="template_question[:size]" <%if @template_question.value['issue']['size'].to_i ==1%>checked<%end%> value="1"/><span style="margin-right: 20px;">中</span>
+					<input class="text-input" type="radio" name="template_question[:size]" <%if @template_question.value['issue']['size'].to_i ==2%>checked<%end%> value="2"/><span  style="margin-right: 20px;">大</span>
+				</p>
+
+			<%when 3%>
+				<p>
+					<label class="child-title f14 pl2">精度</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:precision]" title="整型，精度，即小数点后的位数" value="<%= @template_question.value['issue']['precision'] %>"></input> 
+					<span class="alertSpan dn red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">最小值</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:min_value]" title=" 浮点型，最小值，等于-Math.pow(2, 30)表示不设下限" value="<%= @template_question.value['issue']['min_value'] %>"></input>
+					<span class="alertSpan dn red"></span> 
+				</p>
+				<p>
+					<label class="child-title f14 pl2">最大值</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:max_value]" title="浮点型，最大值，等于Math.pow(2, 30)表示不设上限" value="<%= @template_question.value['issue']['max_value'] %>"></input> 
+					<span class="alertSpan dn red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">单位名称</label>
+					<input class="text-input" type="text" name="template_question[:unit]" value="<%= @template_question.value['issue']['unit']%>"/>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">单位位置</label>
+					<input class="text-input" type="radio" name="template_question[:unit_location]" <%if @template_question.value['issue']['unit_location'].to_i ==0%>checked<%end%> value="0"/><span style="margin-right: 20px;">无单位</span>
+					<input class="text-input" type="radio" name="template_question[:unit_location]" <%if @template_question.value['issue']['unit_location'].to_i ==1%>checked<%end%> value="1"/><span style="margin-right: 20px;">单位在后</span>
+					<input class="text-input" type="radio" name="template_question[:unit_location]" <%if @template_question.value['issue']['unit_location'].to_i ==2%>checked<%end%> value="2"/><span  style="margin-right: 20px;">单位在前</span>
+				</p>
+			<%when 4..5%>
+				<!-- no issue -->
+			<%when 6%>
+				<p>
+					<label class="child-title f14 pl2">电话类型</label>
+					<input class="text-input" type="radio" name="template_question[:phone_type]" <%if @template_question.value['issue']['phone_type'].to_i ==1%>checked<%end%> value="1"/><span style="margin-right: 20px;">座机</span>
+					<input class="text-input" type="radio" name="template_question[:phone_type]" <%if @template_question.value['issue']['phone_type'].to_i ==2%>checked<%end%> value="2"/><span style="margin-right: 20px;">手机</span>
+					<input class="text-input" type="radio" name="template_question[:phone_type]" <%if @template_question.value['issue']['phone_type'].to_i ==3%>checked<%end%> value="3"/><span  style="margin-right: 20px;">座机或者手机</span>
+				</p>
+			<%when 7%>
+				<p>
+					<label class="child-title f14 pl2">电话类型</label>
+					<input class="text-input" type="radio" name="template_question[:format]" <%if @template_question.value['issue']['format'].to_i ==0%>checked<%end%> value="0"/><span style="margin-right: 10px;">年</span>
+					<input class="text-input" type="radio" name="template_question[:format]" <%if @template_question.value['issue']['format'].to_i ==1%>checked<%end%> value="1"/><span style="margin-right: 10px;">年月</span>
+					<input class="text-input" type="radio" name="template_question[:format]" <%if @template_question.value['issue']['format'].to_i ==2%>checked<%end%> value="2"/><span style="margin-right: 10px;">年月日</span>
+					<input class="text-input" type="radio" name="template_question[:format]" <%if @template_question.value['issue']['format'].to_i ==3%>checked<%end%> value="3"/><span style="margin-right: 10px;">年月日时分</span>
+					<input class="text-input" type="radio" name="template_question[:format]" <%if @template_question.value['issue']['format'].to_i ==4%>checked<%end%> value="4"/><span style="margin-right: 10px;">月日</span>
+					<input class="text-input" type="radio" name="template_question[:format]" <%if @template_question.value['issue']['format'].to_i ==5%>checked<%end%> value="5"/><span style="margin-right: 10px;">时分</span>
+					<input class="text-input" type="radio" name="template_question[:format]" <%if @template_question.value['issue']['format'].to_i ==6%>checked<%end%> value="6"/><span style="margin-right: 10px;">时分秒</span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">最小值</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:min_time]" title="整型，the number of milliseconds since midnight Jan 1, 1970，按照 format 取有效值，比如如果 format 表示“年月”，那么最小的年月就是 min_time 转换成时间后的年月。若为 (new Date(1900, 0, 1, 0, 0, 0, 0)).getTime() ，则不设下限" value="<%= @template_question.value['issue']['min_time'] %>"></input>
+					<span class="alertSpan dn red"></span> 
+				</p>
+				<p>
+					<label class="child-title f14 pl2">最大值</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:max_time]" title="整型，若为 (new Date(2049, 11, 30, 23, 59, 59, 999)).getTime() ，则不设上限" value="<%= @template_question.value['issue']['max_time'] %>"></input> 
+					<span class="alertSpan dn red"></span>
+				</p>
+			<%when 8%>
+				<p>
+					<label class="child-title f14 pl2">是否要求输入邮编</label>
+					<input class="text-input" type="checkbox" name="template_question[:has_postcode]" <%if @template_question.value['issue']['has_postcode'].to_s=="true" %>checked<%end%> />
+				</p>
+				<p>
+					<label class="child-title f14 pl2">地址格式</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:format]" title="整型，地址格式，为一个1到15之间的整数，转换成二进制数后一共有4位，从最高位起，分别表示是否有省、市、县、详细地址" value="<%= @template_question.value['issue']['format'] %>"></input> 
+					<span class="alertSpan dn red"></span>
+				</p>
+			<%when 9..10%>
+				<div class="nNote nFailure hideit">
+					<p><strong>错误: </strong>此类题型未实现!</p>
+					<input class="redBtn btn-not-complete-delete" name="template_question[:btn_not_complete_delete]" type="button" value="删除此问题并返回列表" />
+				</div>
+			<%when 11%>
+
+				<p>
+					<label class="child-title f14 pl2">选项是否随机排列</label>
+					<input class="text-input" type="checkbox" name="template_question[:is_rand]" <%if @template_question.value['issue']['is_rand'].to_s=='true' %>checked<%end%> />
+					<span class="alertSpan dn red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2" title="整型，0或者1（暂时无用）">对齐方式</label>
+					<input class="text-input" type="radio" name="template_question[:show_style]" <%if @template_question.value['issue']['show_style'].to_i ==0%>checked<%end%> value="0"/><span style="margin-right: 20px;">0</span>
+					<input class="text-input" type="radio" name="template_question[:show_style]" <%if @template_question.value['issue']['show_style'].to_i ==1%>checked<%end%> value="1"/><span style="margin-right: 20px;">1</span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">比重总和</label>
+					<input class="text-input" type="text" title="整型，最少排序个数，若小于 0 则不设下限" style="width:40px;" name="template_question[:sum]"  value="<%= @template_question.value['issue']['sum'] %>"></input>
+					<span class="alertSpan dn red"></span> 
+				</p>
+				<p>
+					<label class="child-title f14 pl2">选项</label>
+					<input class="blueBtn new-choice" type="button" value="添加新选项"/>
+				</p>
+
+				<div class="group group-1">
+					<div class="choices">
+						<% @template_question.value['issue']['items'].each do |item| %>
+							<div class="choice" id="choice-<%= item['id']%>">
+								<input type="text" class="choice-text text-input f14" value="<%= item["content"]["text"]%>"/>
+								<input type="button" class="redBtn btn-choice-delete" value="删除"/>
+							</div>
+						<%end%>
+					</div>
+				</div>
+			<%when  12%>
+				<p>
+					<label class="child-title f14 pl2">选项是否随机排列</label>
+					<input class="text-input" type="checkbox" name="template_question[:is_rand]" <%if @template_question.value['issue']['is_rand'].to_s=="true" %>checked<%end%> />
+					<span class="alertSpan dn red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">最少排序个数</label>
+					<input class="text-input" type="text" title="整型，最少排序个数，若小于 0 则不设下限" style="width:40px;" name="template_question[:min]"  value="<%= @template_question.value['issue']['min'] %>"></input>
+					<span class="alertSpan dn red"></span> 
+				</p>
+				<p>
+					<label class="child-title f14 pl2">最多排序个数</label>
+					<input class="text-input" type="text" style="width:40px;" name="template_question[:max]" title="整型，最多排序个数，若小于 0 则不设上限" value="<%= @template_question.value['issue']['max'] %>"></input> 
+					<span class="alertSpan dn red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">选项</label>
+					<input class="blueBtn new-choice" type="button" value="添加新选项"/>
+				</p>
+
+				<div class="group group-1">
+					<div class="choices">
+						<% @template_question.value['issue']['items'].each do |item| %>
+							<div class="choice" id="choice-<%= item['id']%>">
+								<input type="text" class="choice-text text-input f14" value="<%= item["content"]["text"]%>"/>
+								<input type="button" class="redBtn btn-choice-delete" value="删除"/>
+							</div>
+						<%end%>
+					</div>
+				</div>
+			<%when 13%>
+				<div class="nNote nFailure hideit">
+					<p><strong>错误: </strong>此类题型未实现!</p>
+					<input class="redBtn btn-not-complete-delete" name="template_question[:btn_not_complete_delete]" type="button" value="删除此问题并返回列表" />
+				</div>
+			<%when 14%>
+				<!-- no issue -->
+			<%when 15..16%>
+				<div class="nNote nFailure hideit">
+					<p><strong>错误: </strong>此类题型未实现!</p>
+					<input class="redBtn btn-not-complete-delete" name="template_question[:btn_not_complete_delete]" type="button" value="删除此问题并返回列表" />
+				</div>
+			<%when 17%>
+				<p>
+					<label class="child-title f14 pl2">选项是否随机排列</label>
+					<input class="text-input" type="checkbox" name="template_question[:is_rand]" <%if @template_question.value['issue']['is_rand'].to_s=="true" %>checked<%end%> />
+					<span class="alertSpan dn red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2" title=" 整型，可以是0（左对齐），1（居中），2（右对齐）">对齐方式</label>
+					<input class="text-input" type="radio" name="template_question[:show_style]" <%if @template_question.value['issue']['show_style'].to_i ==0%>checked<%end%> value="0"/><span style="margin-right: 20px;">左对齐</span>
+					<input class="text-input" type="radio" name="template_question[:show_style]" <%if @template_question.value['issue']['show_style'].to_i ==1%>checked<%end%> value="1"/><span style="margin-right: 20px;">居中对齐</span>
+					<input class="text-input" type="radio" name="template_question[:show_style]" <%if @template_question.value['issue']['show_style'].to_i ==2%>checked<%end%> value="2"/><span style="margin-right: 20px;">右对齐</span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2" title="整型，若对行分组，每组数量，<=0 时表示不分组">每组数量</label>
+					<input class="text-input" type="text"  style="width:40px;" name="template_question[:item_num_per_group]" value="<%= @template_question.value['issue']['item_num_per_group'] %>" />
+					<span class="alertSpan dn red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">是否显示“不清楚”项</label>
+					<input class="text-input" type="checkbox" name="template_question[:show_unknown]" <%if @template_question.value['issue']['show_unknown'].to_s=="true" %>checked<%end%> />
+					<span class="alertSpan dn red"></span>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">选项</label>
+					<input class="blueBtn new-choice" type="button" value="添加新选项"/>
+				</p>
+
+				<div class="group group-1">
+					<div class="choices">
+						<% @template_question.value['issue']['items'].each do |item| %>
+							<div class="choice" id="choice-<%= item['id']%>">
+								<input type="text" class="choice-text text-input f14" value="<%= item["content"]["text"]%>"/>
+								<input type="button" class="redBtn btn-choice-delete" value="删除"/>
+							</div>
+						<%end%>
+					</div>
+				</div>
+
+				<p>
+					<label class="child-title f14 pl2">标签</label>
+					<input class="blueBtn new-label" type="button" value="添加新标签"/>
+				</p>
+
+				<div class="group group-2">
+					<div class="choices">
+						<% @template_question.value['issue']['labels'].to_a.each do |item| %>
+							<div class="choice">
+								<input type="text" class="choice-text text-input f14" value="<%= item %>"/>
+								<input type="button" class="redBtn btn-label-delete" value="删除"/>
+							</div>
+						<%end%>
+					</div>
+				</div>
+
+			<% else %>				
+				<div class="nNote nFailure hideit">
+					<p><strong>错误: </strong>此类题型未实现!</p>
+				</div>
+			<%end%>
+
+			<!-- all types has button -->
+				<p>
+					<!-- <input class="greenBtn btn-edit" type="button" value="修 改" /> -->
+					<input class="blueBtn btn-edit-ok" type="button" value="确 定" />
+				</p>
+			</div>
+			<!--  -->
+		</form>
+	</div>
+</div>
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @reviews.value %></p>
+</div>
+<%end%>	
+
+<div id="choice-item" class="dn">
+	<input type="text" class="choice-text text-input f14" value="新选项"/>
+	<input type="button" class="redBtn btn-choice-delete" value="删除"/>
+</div>

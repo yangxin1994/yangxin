@@ -1,0 +1,9 @@
+<%
+	if @page_title.blank?
+		if @link_epxire
+			@page_title = '错误 - 预览链接过期'
+		end
+	end
+%>
+
+<%= render :template => 'filler/surveys/show' %>

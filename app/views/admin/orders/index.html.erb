@@ -1,0 +1,204 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/orders/index-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+  <li>
+    <a href="?">
+    <i class="icon-chevron-right"></i>
+    全部
+    </a>
+  </li>
+  <li>
+    <a href="?type=1">
+    <i class="icon-chevron-right"></i>
+    虚拟礼品订单
+    </a>
+  </li>
+  <li>
+    <a href="?type=2">
+    <i class="icon-chevron-right"></i>
+    实物礼品订单
+    </a>
+  </li>
+  <li>
+    <a href="?type=4">
+    <i class="icon-chevron-right"></i>
+    话费充值订单
+    </a>
+  </li>
+  <li>
+    <a href="?type=8">
+    <i class="icon-chevron-right"></i>
+    支付宝订单
+    </a>
+  </li>
+  <li>
+    <a href="?type=16">
+    <i class="icon-chevron-right"></i>
+    集分宝订单
+    </a>
+  </li>
+   <li>
+    <a href="?type=32">
+    <i class="icon-chevron-right"></i>
+    Q币订单
+    </a>
+  </li>
+  <li>
+    <a href="?type=64">
+    <i class="icon-chevron-right"></i>
+    小额充值订单
+    </a>
+  </li>   
+<% end %>
+
+<div>
+  <span>
+    <form class="form-search" style="display:inline">
+    <div class="input-append">
+      <input class="span6 search-query" name="keyword" id="" type="text" placeholder="邮箱,电话或者订单号">
+      <button class="btn">搜索</button>
+    </div>
+    </form>
+  </span>
+  <span class="pull-right">
+    <%= paginator_mini @orders %>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu pull-right">
+        <li><a href="?type=<%= params["type"] %>">全部</a></li>
+        <li class="divider"></li>
+        <li><a href="?type=<%= params["type"] %>&source=1">回答问卷获得现金奖励</a></li>
+        <li><a href="?type=<%= params["type"] %>&source=2">回答问卷抽中奖品</a></li>
+        <li><a href="?type=<%= params["type"] %>&source=4">用积分兑换礼品</a></li>
+      </ul>
+    </div>    
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu pull-right">
+        <li><a href="?type=<%= params["type"] %>">全部</a></li>
+        <li class="divider"></li>
+        <li><a href="?type=<%= params["type"] %>&status=1">等待处理</a></li>
+        <li><a href="?type=<%= params["type"] %>&status=2">正在处理</a></li>
+        <li><a href="?type=<%= params["type"] %>&status=4">处理成功</a></li>
+        <li><a href="?type=<%= params["type"] %>&status=8">处理失败</a></li>
+        <li><a href="?type=<%= params["type"] %>&status=16">用户取消</a></li>
+      </ul>
+    </div>
+  </span>
+</div>
+
+<div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <td width="12%">名称</td>
+      <td width="8%">数量</td>
+      <td width="8%">用户</td>
+      <td><%= order_label(params["type"]) %></td>
+      <td width="15%">创建时间</td>
+      <td width="15%">操作</td>
+    </tr>
+  </thead>
+  <tbody>
+    <% @orders["data"].each_with_index do |order, i| %>
+    <tr>
+      <td><%= order['gift_name'] || order['prize_name'] %></td>
+      <td><%= order['amount'] %></td>
+      <td><%= order['user_email_mobile'] %></td>
+      <td  title="详细" data-content="订单号: <%= order['code'] %>" class="o-detail"><%= "#{order['address_str']} #{order['mobile']} #{order['qq']} #{order['email']} #{ "支付宝: " + order['alipay_account'] if order['alipay_account'].present?}" %></td>
+      <td><%= (_t = order['handled_at'] || order['finished_at'] || order['canceled_at']; _t ? Time.at(_t) : order['created_at']).strftime("%F<br />%T").html_safe%></td>
+      <td>
+        <div class="btn-group">
+          <% case order['status'].to_i %>
+          <% when 1 %>
+            <a class="btn btn-success handle" href="#handles-<%= order['_id'] %>" >开始处理</a>
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+          <% when 2 %>
+            <a href="#handles-<%= order['_id'] %>" class="btn finishs">处理成功</a>
+            <button class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a href="#handlef-<%= order['_id'] %>" class="finishf">处理失败</a></li>
+          <% else %>
+            <a href="#handles-<%= order['_id'] %>" class="btn disabled"><%= order_status_tag order['status'] %></a>
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+          <% end -%>
+            <% if order['status'].to_i == 2 && order['type'].to_i == 2 %>
+              <li><a href="#express_info-<%= order['_id'] %>" id="express_info-<%= order['_id'] %>" class="express" data-express="<%= order["express_info"].to_json %>" >配送信息</a></li>
+            <% end %>          
+            <li><a href="#remark-<%= order['_id'] %>" id="remark_<%= order['_id'] %>" class="remark" data-remark="<%= order['remark'] %>">备注及其它</a></li>
+          </ul>
+        </div>
+      </td>
+    </tr>
+    <% end -%>
+  </tbody>
+
+</table>
+
+</div>
+  <div class="modal hide fade" id="info_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>配送信息设置</h3>
+    </div>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <input type="hidden" name="oid" id="oid"> 
+        <div class="control-group">
+          <label class="control-label" for="block">快递公司</label>
+          <div class="controls">
+            <input type="text" class="input-medium" name="company" id="company"> 
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="block">快运单号</label>
+          <div class="controls">
+            <input type="text" class="input-medium" name="tracking_number" id="tracking_number"> 
+          </div>
+        </div>        
+        <div class="control-group">
+          <label class="control-label" for="roles">发货时间</label>
+          <div class="controls">
+            <input type="text" class="input-medium" name="sent_at" id="sent_at"> 
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#info_modal').modal('hide');">取消</a>
+      <button type="button" class="btn btn-primary" data-loading-text="保存中..." id="send_info">确定修改</button>
+    </div>
+  </div>
+
+  <div class="modal hide fade" id="remark_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>备注</h3>
+    </div>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <input type="hidden" name="orid" id="orid"> 
+        <div class="control-group">
+          <label class="control-label" for="block">更新备注</label>
+          <div class="controls">
+            <textarea id="ipt_remark"></textarea>
+          </div>
+        </div>        
+      </form>
+    </div>
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#remark_modal').modal('hide');">取消</a>
+      <button type="button" class="btn btn-primary" data-loading-text="保存中..." id="send_remark">确定修改</button>
+    </div>
+  </div>

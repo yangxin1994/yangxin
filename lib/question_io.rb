@@ -206,8 +206,10 @@ class ChoiceQuestionIo < QuestionIo
     choiced = 0
     if issue["max_choice"].to_i > 1
       issue["items"].each_index do |i|
-        blank? row["#{header_prefix}_c#{i+1}"] if row["#{header_prefix}_input"].blank?
-        if row["#{header_prefix}_c#{i+1}"] == "1"
+        # blank? row["#{header_prefix}_c#{i+1}"] if row["#{header_prefix}_input"].blank?
+        row["#{header_prefix}_c#{i+1}"] = "0" if row["#{header_prefix}_c#{i+1}"].blank?
+	blank? row["#{header_prefix}_c#{i+1}"] if row["#{header_prefix}_input"].blank?
+	if row["#{header_prefix}_c#{i+1}"] == "1"
           @retval["selection"] << get_item_id(i + 1)
           choiced += 1
         end
@@ -404,13 +406,14 @@ end
 class TextBlankQuestionIo < QuestionIo
   def answer_import(row, header_prefix)
     blank? row["#{header_prefix}"]
-    if issue["max_length"] > 0 && row["#{header_prefix}"].length > issue["max_length"]
-      raise "您输入的文本有些太长了哦,重新检查一下吧!"
-    elsif issue["min_length"] > 0 && row["#{header_prefix}"].length < issue["min_length"]
-      raise "您输入的文本长度未免太短了些,重新检查一下吧!"
-    else
-      @retval = row["#{header_prefix}"]
-    end
+    # if issue["max_length"] > 0 && row["#{header_prefix}"].to_s.length > issue["max_length"]
+    #   raise "您输入的文本有些太长了哦,重新检查一下吧!(#{row["#{header_prefix}"].to_s.length}/#{issue["max_length"]})"
+    # elsif issue["min_length"] > 0 && row["#{header_prefix}"].to_s.length < issue["min_length"]
+    #   raise "您输入的文本长度未免太短了些,重新检查一下吧!(#{row["#{header_prefix}"].to_s.length}/#{issue["min_length"]})"
+    # else
+    #   @retval = row["#{header_prefix}"]
+    # end
+    @retval = row["#{header_prefix}"]
     return { "#{origin_id}" => @retval}
   end
 end
@@ -459,11 +462,15 @@ class PhoneBlankQuestionIo < QuestionIo
     when 1
       if row["#{header_prefix}"] =~ /^((\d{11})|(\d{3}-\d{8})|(\d{4}-\d{7})|(\d{3}-\d{4}-\d{4}))$/
         @retval = row["#{header_prefix}"]
+      elsif row["#{header_prefix}"].blank?
+        @retval = row["#{header_prefix}"]
       else
         raise "您填写的这个...不太像是电话号码啊?"
       end
     when 2
       if row["#{header_prefix}"] =~ /^0?(13\d|15[012356789]|18[0236789]|14[57])-?\d{3}-?\d{1}-?\d{4}$/
+        @retval = row["#{header_prefix}"]
+      elsif row["#{header_prefix}"].blank?
         @retval = row["#{header_prefix}"]
       else
         raise "您填写的这个...不太像是手机号码啊?"
@@ -471,6 +478,8 @@ class PhoneBlankQuestionIo < QuestionIo
     when 3
       if row["#{header_prefix}"] =~ /^0?(13\d|15[012356789]|18[0236789]|14[57])-?\d{3}-?\d{1}-?\d{4}$/ ||
         row["#{header_prefix}"] =~ /^((\d{11})|(\d{3}-\d{8})|(\d{4}-\d{7})|(\d{3}-\d{4}-\d{4}))$/
+        @retval = row["#{header_prefix}"]
+      elsif row["#{header_prefix}"].blank?
         @retval = row["#{header_prefix}"]
       else
         raise "您填写的这个...不太像是手机或者电话号码啊?"
@@ -576,13 +585,13 @@ class AddressBlankQuestionIo < QuestionIo
   def spss_header(header_prefix)
     fom = []
     case issue["format"]
-    when 1 , 2
+    when 8
       fom = ['省']
       fom_pre = ['province']
-    when 3 , 4
+    when 12
       fom = ['省', '市']
       fom_pre = ['province', 'city']
-    when 7 , 8 , 14
+    when 14
       fom = ['省', '市', '县/区']
       fom_pre = ['province', 'city', 'county']
     when 15
@@ -1083,12 +1092,13 @@ class ScaleQuestionIo < QuestionIo
     @retval = {}
     issue["items"].each_with_index do |item, index|
       blank? row["#{header_prefix}_c#{index + 1}"]
-      if only_num?(row["#{header_prefix}_c#{index + 1}"], range: 1..issue["labels"].length)
+      if only_num?(row["#{header_prefix}_c#{index + 1}"], range: 1..(issue["labels"].try('length') || 1))
         @retval[get_item_id(index).to_s] = (row["#{header_prefix}_c#{index + 1}"].nil? ? nil : (row["#{header_prefix}_c#{index + 1}"].to_i) - 1)
       else
         raise "您输入的范围好像不太对吧?"
       end
     end
+    binding.pry
     return { "#{origin_id}" => @retval}
   end
 

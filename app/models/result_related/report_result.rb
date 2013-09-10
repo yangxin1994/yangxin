@@ -592,31 +592,20 @@ class ReportResult < Result
 
 	# description generation
 	def scale_description(analysis_result, issue, opt={})
-		results = []
-		analysis_result.each do |input_id, ele|
-			if ele[1] != -1
-				item_text = get_item_text_by_id(issue["items"], input_id)
-				next if item_text.nil?
-				results << { "text" => item_text, "score" => ele[1] } 
-			end
-		end
-		return "" if results.blank?
-		results.sort_by! { |e| -e["score"] }
-		item_text_ary = results.map { |e| e["text"] }
-		score_ary = results.map { |e| e["score"] }
+		return "" if analysis_result.blank?
 		text = opt[:cross] ? "" : "调查显示，"
-		text += "#{item_text_ary[0]}的平均得分最高，为#{score_ary[0].round(1)}"
-		# one item
-		return text + "。" if item_text_ary.length == 1
-		text = text + "，其次是#{item_text_ary[1]}，平均得分是#{score_ary[1].round(1)}"
-		# two items
-		return text + "。" if item_text_ary.length == 2
-		# three items
-		return text + "，#{item_text_ary[2]}的平均得分为#{score_ary[2].round(1)}。"
-		# more than three items
-		item_text_string = item_text_ary[2..-1].join('、')
-		score_string = score_ary[2..-1].join('、')
-		return text + "，#{item_text_string}的平均得分分别为#{score_string}。"
+		analysis_result.each do |input_id, result|
+			next if result["histogram"].sum == 0
+			item_text = get_item_text_by_id(issue["items"], input_id)
+			text += "对#{item_text}的选择中，"
+			result["histogram"].each_with_index do |r, index|
+				next if r == 0
+				text += "有#{r}人选择了不清楚，" if index == 0 
+				text += "有#{r}人选择了#{issue["labels"][index-1]}，" if index > 0 
+			end
+			text += "参与者对#{item_text}的平均打分为#{result['mean']}；" if result["histogram"][1..-1].sum > 0
+		end
+		return text
 	end
 
 	def sort_description(analysis_result, issue, opt={})
@@ -732,7 +721,7 @@ class ReportResult < Result
 		# six addresses
 		return text + "，另有#{ratio_ary[5].round(1)}%的人填写了#{address_text_ary[5]}。" if results.length == 6
 		# more than six addresses
-		other_ratio = 100 - ratio_array[1..4].sum
+		other_ratio = 100 - ratio_ary[1..4].sum
 		return text + "，另有#{other_ratio.round(1)}%的人填写了其他。"
 	end
 

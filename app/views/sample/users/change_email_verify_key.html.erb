@@ -1,0 +1,31 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/sample/active_rss_able-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/sample/active_rss_able-bundle" %>
+<% end %>
+
+<div class="login_con"> 
+  <%if @success %>
+    <div class="notice_head">
+      <img src="/assets/od-quillme/regist_succ.png"  />
+      <span class="success">更换账户邮箱成功 </span>
+      <div styl="clear:both;"></div>
+    </div>
+    <div class="login_email">
+      <p>
+        <a href="<%= home_path%>">返回首页</a>
+      </p>
+    </div>     
+  <% else %>
+    <div class="notice_head">
+      <img src="/assets/od-quillme/reg_fail.png"  />
+      <span>更换账户邮箱失败</span>
+      <div styl="clear:both;"></div>
+    </div>
+    <div class="login_email">
+      <p>
+        您的链接不正确或者已经过期，您可以前往<a href="/users/setting/bindings">账户中心</a>重新发送更换账户邮箱邮件
+      </p>
+    </div>  
+  <%end %>
+
+</div>

@@ -1,0 +1,30 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+		window.survey_questions = <%= raw @survey_questions.to_json %>;
+		window.survey_logics = <%= raw (@survey['logic_control'] || []).to_json %>;
+	</script>
+	<%= javascript_include_tag "pages/quill/logics-bundle" %>
+	<%= stylesheet_link_tag "pages/quill/logics-bundle", :media => "all" %>
+<% end %>
+
+<!-- content for left menus -->
+<% content_for :left_menus do %>
+	<%= render :partial => "partials/left_menus_setting", :locals => { :left_active => 1 } %>
+<% end %>
+
+<!-- put html code below -->
+<div class="page">	
+	<div class="seperator top tintgray"></div>	
+	<div class="q-render tintgray">
+
+		<div class="title-list dib">
+
+		</div>	
+
+	</div>
+	<div class="seperator bottom tintgray"></div>
+</div>
+
+<div id="add-restrain">
+</div>

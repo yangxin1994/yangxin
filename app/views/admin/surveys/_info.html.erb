@@ -1,0 +1,33 @@
+      <form action="<%= "/#{@survey["_id"]}" %>"
+            name="survey"
+            enctype="multipart/form-data"
+            method="post"
+            id="survey_form"
+            class="form-horizontal"
+      >
+        <input value="put" type='hidden' name="_method">
+
+        <input type="hidden" name="survey[type]" id="survey_type" value="<%= @survey["type"] || 1 %>">
+
+        <div class="control-group">
+          <label class="control-label">兑换条件:</label>
+          <div class="controls">
+            <div class="input-append">
+              <input class="input-medium" id="appendedInput" name="survey[point]" type="text" placeholder="1000"  value="<%= @survey["point"] %>">
+              <span class="add-on">积分</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" >礼品描述:</label>
+          <div class="controls">
+            <textarea name="survey[description]"><%= @survey["description"] %></textarea>
+          </div>
+        </div>
+        <div class="pull-right">
+        <%= link_to "<<返回列表", '/admin/surveys' %>
+        <button type="submit" class="btn btn-primary">确认无误</button>
+
+        </div>
+      </form>

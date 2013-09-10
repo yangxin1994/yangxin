@@ -1,0 +1,26 @@
+<!-- content for head -->
+<% content_for :head do %>
+<%= javascript_include_tag "pages/admin/common/od_admin_tab-bundle" %>
+<%= javascript_include_tag "pages/admin/subscriber-bundle" %>
+<% end %>
+
+<!-- put html code below -->
+<div class="title"><h5>订阅者管理:新增</h5></div>
+<form class="mainForm">
+  <fieldset>
+    <div class="rowElem"><label>订阅列表
+      多个邮箱请用全角半角分号、逗号或者过行分隔:</label>
+      <div class="formRight">
+        <textarea rows="8" cols="" class="auto" id="od-subscribe-ipt" name="textarea" style="height: auto; overflow: hidden;"></textarea>
+      </div>
+      <div class="fix"></div>
+    </div>
+    <input type="submit" value="添加订阅" class="greyishBtn submitForm od-subscribe-btn">
+    <div class="fix"></div>
+
+  </fieldset>
+</form>
+<p class="od-subscribe-rst"></p>
+
+
+</div>

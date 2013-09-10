@@ -1,0 +1,29 @@
+	<table id="<%= @lottery["_id"] %>" cellpadding="0" cellspacing="0" width="100%" class="table-prizes tableStatic lottery-ctrl">
+		<thead>
+			<tr>
+				<td width="25%">用户名</td>
+				<td width="25%">创建日期</td>
+				<td width="25%">抽奖日期</td>
+				<td width="25%">状态</td>
+			</tr>
+		</thead>
+		<tbody>
+			<% @lottery_codes["data"].each do |lottery_code| %>
+			<tr id='<%= lottery_code["_id"] %>'>
+				<td><%= lottery_code["user"]["email"] %></td>
+				<td><%= lottery_code["created_at"] %></td>
+				<td><%= lottery_code["drawed_at"] %></td>
+				<td><%= if lottery_code["prize"] then "抽中" + lottery_code["prize"]["name"]
+							  else lottery_code_status(lottery_code["status"]) end %></td>
+			</tr>
+			<% end -%>
+		</tbody>
+	  <tfoot>
+	    <tr>
+	      <td colspan="4"><%= paginator_tag_ajax @lottery_codes %></td>
+	    </tr>
+	    <tr>
+	      <td colspan="4">&nbsp;</td>
+	    </tr>
+	  </tfoot>
+	</table>

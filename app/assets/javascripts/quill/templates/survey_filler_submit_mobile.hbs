@@ -1,0 +1,25 @@
+<div class="page">
+	<div class="describe">
+		{{#if remind}}
+		<div id='remind'>注意，系统检测出您第一次答题时没有认真填写，您还有一次答题机会，请认真回答问卷，谢谢。</div>
+		{{/if}}
+
+
+		<span>
+			您已经回答完所有问题，是否提交答案并结束答题？
+			{{#if allow_pageup}}结束答题后将无法再次修改。{{/if}}
+		</span>
+	</div>
+</div>
+<div class="footer">
+	{{#if allow_pageup}}	
+	<a href="javascript:void(0)" class="prev" id="check_btn" title="返回检查答案"></a>
+	{{/if}}	
+	<i class="footer-divide"></i>
+	<a href="javascript:void(0)" class="next" id="submit_btn">提交结果</a>
+	{{#if show_restart}}
+	<a href="javascript:void(0)" class="resume" id="restart_btn">重新答题</a>
+	{{/if}}
+</div>
+
+

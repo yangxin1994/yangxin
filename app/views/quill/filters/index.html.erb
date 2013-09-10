@@ -1,0 +1,29 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+	jQuery(function($) {
+		window.survey_questions = <%= raw @survey_questions.to_json %>;
+		window.survey_filters = <%= raw (@survey['filters'] || []).to_json %>;
+	});
+	</script>
+	<%= javascript_include_tag "pages/quill/filters-bundle" %>
+	<%= stylesheet_link_tag "pages/quill/filters-bundle", :media => "all" %>
+<% end %>
+
+<!-- content for left menus -->
+<% content_for :left_menus do %>
+	<%= render :partial => "partials/left_menus_result", :locals => { :left_active => 0 } %>
+<% end %>
+
+<!-- put html code below -->
+<div class="page">	
+	<div class="seperator top tintgray"></div>	
+	<div class="q-render tintgray">
+		<div class="title-list dib" id="filters">
+		</div>	
+	</div>
+	<div class="seperator bottom tintgray"></div>
+</div>
+
+<div id="add-filter">
+</div>

@@ -1,0 +1,17 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/lottery_index-bundle" %>
+  <%= stylesheet_link_tag "pages/admin/lotteries-bundle", :media => "all" %>
+<% end %>
+
+<!-- put html code below -->
+
+<div>
+  <div class="title"><h5>已删除的抽奖</h5></div>
+  <div class="widget first">
+    <div class="head"><h5 class="iFrames">被删除的抽奖活动列表</h5></div>
+    <div>
+      <%= render 'deleted_lotteries' %>
+    </div>
+  </div>
+</div>

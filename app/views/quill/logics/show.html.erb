@@ -1,0 +1,54 @@
+<!-- content for head -->
+<% content_for :head do %>
+<script type="text/javascript">
+	window.survey_questions = <%= raw @survey_questions.to_json %>;
+	window.current_logic = <%= raw @current_logic.to_json %>;
+	window.current_index = <%= @current_index %>;
+</script>
+<%= javascript_include_tag "pages/quill/logic-bundle" %>
+<%= stylesheet_link_tag "pages/quill/logic-bundle", :media => "all" %>
+<% end %>
+
+<!-- content for left menus -->
+<% content_for :left_menus do %>
+	<%= render :partial => "partials/left_menus_setting", :locals => { :left_active => 1 } %>
+<% end %>
+
+<!-- put html code below -->
+
+
+<h2 class="intr" id="intr">请选择需要添加约束条件的选择题：</h2>
+<div id="logic-questions"></div>
+
+<div class="page" id="logic-nextbtn">	
+		<div class="seperator top white"></div>	
+		<div class="q-render white"></div>
+			<div class="q-render white tc">
+				<span id="next_btn"><button class='od-button'>下一步</button></span>
+			</div>
+		<div class="seperator bottom white"></div>	
+</div>
+
+<div class="page" id="logic-checked"></div>
+
+<div class="page" id="logic-bkcmbtn">	
+		<div class="seperator top white"></div>	
+		<div class="q-render white"></div>
+			<div class="q-render white tc">
+				<span id="back_btn"><button class='od-button'>上一步</button></span>
+				<span id="confirm_btn"><button class='od-button'>确定</button></span>
+			</div>
+		<div class="seperator bottom white"></div>	
+</div>
+
+<div class="page" id="logic-bkcmbtn2">	
+		<div class="seperator top white"></div>	
+		<div class="q-render white"></div>
+			<div class="q-render white tc">
+				<span id="back_btn2"><button class='od-button'>上一步</button></span>
+				<span id="confirm_btn2"><button class='od-button'>确定</button></span>
+			</div>
+		<div class="seperator bottom white"></div>	
+</div>
+
+<div style='font-size: 14px; margin: 20px 0; color: #666;'>（注意：对某问题设置约束条件后，样本答题时，此问题之后会自动进行分页。）</div>

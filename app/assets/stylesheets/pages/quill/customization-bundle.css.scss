@@ -1,0 +1,138 @@
+//=require ui/widgets/od_popup
+//=require quill/views/survey_filler
+
+@import "common";
+@import "compass/css3/border-radius";
+@import "compass/css3/inline-block";
+@import "od-button/*.png";
+
+$slide-height: 365px;
+$width: 905px;
+$max-slide-width: 1050px;		//210 * 5
+
+@mixin custom(){
+	@include border-radius(3px);
+	margin: 0 auto;
+	width: $width;
+	border: solid 1px;	
+}
+
+@mixin button($direc) {
+	@include inline-block;
+	position: relative;
+	top: 150px;
+	float: $direc;
+	@include size(25px, 37px);
+	cursor: pointer;
+}
+
+.custom-slide {
+	@include custom();
+	margin-top: 30px;
+	background-color: #F2F2F2;
+	height: 420px;
+	border-color: #CCCCCC;
+	.slide-body {
+		.leftbutton {
+			@include button(left);
+			@include od-button-sprite(left);
+		}
+		.rightbutton {
+			@include button(right);				
+			@include od-button-sprite(right);		
+		}
+		.slide-container {
+			@include inline-block;
+			height: $slide-height;
+			margin-left: 8px;
+			width: 840px;
+			border-bottom: #CCCCCC solid 1px;
+			overflow: hidden;
+			.slide{
+				width: $max-slide-width;
+				position: relative;
+				.slide-block {
+					display: inline;
+					position: relative;
+					height: 310px;
+					width: 206px;
+					float: left;
+					margin: 30px 0;
+					border: #F2F2F2 solid 2px;
+					cursor: pointer;
+					@include border-radius(3px);		
+					span {
+						@include inline-block;
+						width: 190px;
+						height: 260px;
+						margin: 10px 8px;
+					}
+					h2 {
+						text-align: center;
+						font: bold 14px '微软雅黑';
+						color: #6D91A9;
+					}
+					img {
+						border: 1px solid #ccc;
+						@include border-radius(4px);
+					}
+				}
+				.selected {
+					border: #FBB03B solid 2px;
+				}			
+			}
+		}
+	}
+}
+
+.custom-preview {
+	@include custom();
+	margin-top: 20px;
+	background-color: #E6E6E6;
+	border-color: #999999;
+}
+
+.custom-bottom {
+	margin: 0 auto;	
+	width: 841px;
+	height: 55px;
+	border-top: #FFFFFF solid 1px;
+	button {
+		position: absolute;
+		margin-left: 800px;
+		margin-top: 10px;
+	}
+}
+
+/* override filler */
+$filler_wide: 780px;
+
+#sf {
+	@include border-radius(3px);
+}
+#sf_banner {
+	>.inner {
+		width: $filler_wide;
+	}
+}
+.progress-con {
+	#progress {
+		width: $filler_wide;
+	}
+}
+
+#sf_main {
+	width: $filler_wide;
+}
+
+#remind {
+	width: $filler_wide;
+}
+
+#sf_footer {
+	width: $filler_wide;
+}
+
+#page_buttons {
+	width: $filler_wide;
+}

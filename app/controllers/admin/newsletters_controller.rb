@@ -1,84 +1,88 @@
-# encoding: utf-8
+class Admin::NewslettersController < ApplicationController
 
-class Admin::NewslettersController < Admin::ApplicationController
+  layout :resolve_layout
 
   def index
-    render_json true do
-      auto_paginate(Newsletter.all.present_json('list'))
-    end
+    @newsletters = auto_paginate Newsletter.find_by_status(params[:status])
   end
 
-  def_each :deleted, :editing, :delivering, :delivered, :canceled do |method_name|
-    render_json auto_paginate(Newsletter.send(method_name).present_json('list'))
-  end
-
-  def create
-    render_json true do
-      nl = Newsletter.create(params[:newsletter])
-      nl.present_admin
-    end
+  def new
   end
 
   def show
-    render_json false do
-      Newsletter.find_by_id(params[:id]) do |nl|
-        success_true
-        nl.present_admin
-      end
+    @newsletter = Newsletter.find(params[:id])
+  end
+
+  def edit
+    @newsletter = Newsletter.find(params[:id]).present_admin
+    @oops_column = @newsletter[:columns]['0']
+    @pdct_column = @newsletter[:columns]['1']
+    @columns = @newsletter[:columns].map do |order, column|
+      column unless ['0', '1'].include? order
+    end.compact
+
+  end
+
+  def test
+    render :json  => @newsletters_client.test(params[:id], params[:email] ,params[:content])
+  end
+
+
+  def create
+    # @newsletter  = @newsletters_client.create(
+    #   :subject => params[:subject],
+    #   :status  => params[:status],
+    #   :subject => params[:subject],
+    #   :content => params[:content],
+    #   )
+    render_json Newsletter.create(params[:newsletter])
+  end
+
+  def update
+    render_json Newsletter.where(:_id => params[:id]).first do |newsletter|
+      newsletter.update_attributes(params[:newsletter])
     end
   end
 
   def destroy
-    render_json false do
-      Newsletter.find_by_id(params[:id]) do |nl|
-        success_true
-        nl.is_deleted = true
-        nl.save
-      end
+    render_json Newsletter.where(:_id => params[:id]).first do |newsletter|
+      newsletter.update_attributes(:is_deleted => true)
     end
   end
 
-  def update
-    render_json false do
-      Newsletter.find_by_id(params[:id]) do |nl|
-        nl.assign_attributes(params[:newsletter])
-        success_true if nl.save
-      end
-    end
+  def column
+    render :partial => 'admin/newsletters/template/column', :locals => params
+  end
+
+  def article
+    render :partial => 'admin/newsletters/template/article', :locals => params
+  end
+
+  def product_news
+    render :partial => 'admin/newsletters/template/product_news', :object => params[:article]
   end
 
   def deliver
-    render_json false do
-      Newsletter.find_by_id(params[:id]) do |nl|
-        success_true
-        nl.deliver_news(params[:content])
-      end
-    end
-  end
-
-  def test
-    render_json false do
-      Newsletter.find_by_id(params[:id]) do |nl|
-        subscribers = params[:email].gsub(' ','')
-        subscribers = subscribers.gsub('，',',')
-        subscribers.split(',').each do |em|
-          if em.to_s.match(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/)
-            subscriber = Subscriber.find_or_create_by(:email => em.downcase)
-            subscriber.is_deleted = true
-            nl.deliver_test_news(subscriber ,params[:content])
-            success_true
-          end
-        end
-      end
-    end
+    render_json Newsletter.where(:_id => params[:id]).first do |newsletter|
+      newsletter.deliver
+    end    
   end
 
   def cancel
-    render_json false do
-      Newsletter.find_by_id(params[:id]) do |nl|
-        success_true
-        nl.cancel
-      end
+    render_json Newsletter.where(:_id => params[:id]).first do |newsletter|
+      newsletter.cancel
+    end        
+  end
+
+  private
+
+  def resolve_layout
+    case action_name
+    when "new", "show", "edit"
+      "layouts/newsletter"
+    else
+      "layouts/admin-todc"
     end
   end
+
 end

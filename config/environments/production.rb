@@ -43,7 +43,7 @@ OopsData::Application.configure do
   # config.action_controller.asset_host = "http://assets.example.com"
 
   # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
-  # config.assets.precompile += %w( search.js )
+  config.assets.precompile += %w( *-layout.js *-layout.css *-bundle.js *-bundle.css *-mobile.js *-mobile.css )
 
   # Disable delivery errors, bad email addresses will be ignored
   # config.action_mailer.raise_delivery_errors = false
@@ -102,6 +102,18 @@ OopsData::Application.configure do
   }
 =end
 
+  config.authkeys = {
+    sina: '3198161770',
+    renren: '194585',
+    qq: '100418792',
+    google: '36926710043',
+    qihu360: 'c83cf3b2688f4f1c695bc9906a2dcf14',
+    kaixin001: '173805652095b523553bc42aa44f8171',
+    douban: '06b0041f88738b9e14100c5e995aa2da',
+    baidu: 'STFYxeMfwouPVtMjseFymHGD',
+    sohu: '9ab2466b42224c0c9b038e327db61b97'
+  }
+
   config.mailgun_api_key = "key-9zcv6-e7j8aratn9viu3unvbn2zc92j3"
 
 	# task web service
@@ -109,16 +121,20 @@ OopsData::Application.configure do
 
   # donet web service
   config.dotnet_web_service_uri = 'http://export.oopsdata.com'
-  # config.dotnet_web_service_uri = 'http://192.168.1.116:80'
+
+	# configuration for quill and quillme
+	config.quill_host = 'http://s.oopsdata.com'
+	config.quillme_host = 'http://wenjuanba.com'
 
 	# configuration for roadie
 	config.action_mailer.default_url_options = {:host => 'res.oopsdata.com'}
 
-	# configuration for quill and quillme
-	config.quill_host = 'http://s.oopsdata.com'
-	config.quillme_host = 'http://oopsdata.cn'
-
   config.mailgun_api_key = 'key-9zcv6-e7j8aratn9viu3unvbn2zc92j3'
   config.survey_email_domain = 'oopsdata.net'
   config.user_email_domain = 'oopsdata.cn'
+
+  # ofcard uri
+  config.ofcard_service_uri = "http://api2.ofpay.com/"
+  config.ofcard_key_str = "OFCARD"
+  config.ret_url = "http://www.wenjuanba.com/orders/confirm"
 end

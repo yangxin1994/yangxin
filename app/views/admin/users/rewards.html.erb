@@ -1,0 +1,80 @@
+<!-- content for head -->
+<% content_for :head do %>
+<%= stylesheet_link_tag "pages/admin/orders-bundle", :media => "all" %>
+<%= javascript_include_tag "pages/admin/orders-bundle" %>
+<% end %>
+
+<!-- put html code below -->
+<%if @orders.success %>
+<div class="title">
+	<h5>订单管理</h5>
+	<h5 style="color: white; float: right; display: block;" ><a style="color: white; float: right; display: block;"  href="/admin/users/<%=params[:id]%>">返回个人用户管理</a><h5>
+</div>
+<div class="widget">
+	<div class="head">
+		<h5 class="iFrames">订单</h5>
+	</div>
+
+	<div class="tab_container">
+		<div class="tab_content nopadding" id="all">
+			<table cellpadding="0" cellspacing="0" width="723" class="tableStatic">
+				<thead>
+					<tr>
+						<td>礼品名称</td>
+						<td width="25%">日期</td>
+						<td width="45%">详细</td>
+						<td width="10%">操作</td>
+					</tr>
+				</thead>
+				<tbody>
+					<% @orders.value["data"].to_a.each_with_index do |order, i| %>
+						<tr id="<%= order["_id"] %>">
+							<td><%= order_type_icon order%> <%= order["gift_name"] %></td>
+							<td><%= time_tag(Time.parse(order["created_at"]))%></td>
+							<td><%= user_info order %></td>
+							<td>
+								<% case order["status"] -%>
+									<% when 0 %>
+										<a href="#" _id="<%= order["_id"] %>" class="od-accept">接受</a>
+										<a href="#" _id="<%= order["_id"] %>" class="od-refuse">拒绝</a>
+									<% when 1 %>
+										<a href="#" _id="<%= order["_id"] %>" class="od-deliver">配送</a>
+									<% when -1 %>
+										<%= order["status_desc"] %>
+									<% when 2 %>
+										<a href="#" _id="<%= order["_id"] %>" class="od-delivered">配送成功</a>
+										<a href="#" _id="<%= order["_id"] %>" class="od-deliverefailed">配送失败</a>
+									<% when -2 %>
+										被取消
+									<% when 3 %>
+										配送成功
+									<% when -3 %>
+										<%= order["status_desc"] || "配送失败"%>
+									<% else %>
+										<%= order["status"] %>
+								<% end -%>
+							</td>
+						</tr>
+					<% end unless @orders.nil? -%>
+				</tbody>
+				<tfoot>
+					<tr>
+						<td colspan="4"><%= paginator_tag @orders.value %></td>
+					</tr>
+					<tr>
+						<td colspan="4">&nbsp;</td>
+					</tr>
+				</tfoot>
+			</table>
+
+		</div> <!--#tab1 结束 -->
+	</div>
+	<div class="fix"></div>
+
+</div>
+<%else%>
+<div class="nNote nFailure hideit">
+	<p><strong>错误: </strong>哇! 数据加载错误!</p>
+	<p><strong>代号: </strong><%= @orders.value %></p>
+</div>
+<%end%>

@@ -1,0 +1,12 @@
+// customize highcharts
+.highcharts-container {
+	.highcharts-title {
+		> tspan {
+			font-size: 13px;
+		}
+	}
+	.highcharts-legend > rect {
+		display: none;
+		border: none;
+	}
+}

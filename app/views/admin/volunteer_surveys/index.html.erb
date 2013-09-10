@@ -1,0 +1,126 @@
+<% content_for :head do %>
+	<script type="text/javascript">
+	jQuery(function($) {
+		window.survey = <%= raw (@survey.value).to_json if @survey %>;
+		console.log(window.survey);
+	});
+	</script>
+	<%= javascript_include_tag "pages/admin/volunteer_surveys-bundle" %>
+	<%= stylesheet_link_tag "pages/admin/volunteer_surveys-bundle", :media => "all" %>
+<% end %>
+
+<%
+	question_types=["选择题", "矩阵选择题", "文本填充题", "数值填充题", "邮箱题",
+		"网址链接题", "电话题", "时间题", "地址题", "组合填充题", 
+		"MATRIX_BLANK_QUESTION", "比重题", "排序题", "RANK_QUESTION", "文本段",
+		"FILE_QUESTION", "TABLE_QUESTION", "量表题"]
+%>
+
+<!--  -->
+<% if @survey.success %>
+<div>
+	<div class="title">
+		<h5>背景样本管理<h5>
+	</div>
+
+	<% if !@survey.value.empty? %>
+		<p>
+			<span>存在样本问卷: </span>
+			<span class="survey_id dn" id="<%= @survey.value.keys[0] %>"></span>
+			<em><a href="/questionaires/<%= @survey.value.keys[0] %>"><%= @survey.value["title"]%></a></em>
+		</p>
+		<div class="nNote nWarning hideit">
+			<p>如果想添加自定义问题，点击问题标题进入编辑问卷页面；如果添加模板题，模板题在添加后会自动转为普通题。</p>
+		</div>
+
+		<hr />
+				
+		<div id="edit-tab">
+			<form action="#">
+				<p>
+					<b id="add_question">添加模板题</b> 
+				</p>
+				<p>
+					<label class="child-title f14 pl2">模板题类型</label>
+					<select class="question_type" name="question_type">
+						<% question_types.each_with_index do |type,index|%>
+							<option name="type_<%= index %>" value="<%=index%>"><%= type%></option>
+						<%end%>
+					</select>
+				</p>
+				<p>
+					<label class="child-title f14 pl2">选择模板题</label>
+					<select class="template_question" name="template_question">
+						<option value="12322323">模板题标题</option>
+					</select>
+				</p>
+				<!-- <p>
+					<label class="child-title f14 pl2">页码</label>
+					<input type="text" name="page_index" value="1"/>
+				</p> -->
+				<p>
+					<input class="blueBtn add_question_to_survey btn-ok" type="button" value="添加" title="点击`-`按钮删除"/>
+				</p>
+				
+			</form>
+		</div>
+				<!-- edit tab end -->
+		<hr />	
+		<div id="list-tab">
+			<div class="table">
+				<div class="head">
+					<h5 class="iFrames">
+						列表
+					</h5>
+				</div>
+
+				<table cellspacing="0" cellpadding="0" border="0" id="example" class="display">
+					<thead>
+						<tr>
+							<th class="" rowspan="1" colspan="1" style="width: 10px;">
+								<input class="check-all" type="checkbox" />
+							</th>
+							<th>问题标题</th>
+							<th>问题类型</th>
+							<th>创建时间</th>
+							<th rowspan="1" colspan="1" style="width: 60px;"></th>
+						</tr>
+					</thead>
+		 
+					<tbody>
+						<% @survey.value.values[0].to_a.each do |question|%>
+							<tr id="<%= question['_id'] %>" class="question_item">
+								<td><input type="checkbox" /></td>
+								<td class="f-orange">                           
+									<%= question['content']['text'] %>
+								</td>
+								<td><%= question_types[question["question_type"].to_i] %></td>
+								<td><%= question['created_at'][0,16].gsub(/[T]/, ' ') %></td>
+								<td>
+									<!-- Icons -->
+									<a href="#" class="delete" title="移出"><img src="../../assets/od-icon/cross.png" alt="移出" /></a> 
+								</td>
+							</tr>
+						<%end%>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<!-- list tab end -->
+
+	<%else %>
+
+		<p>
+			<span>尚未存在样本问卷, 请点击: </span>
+			<input class="blueBtn add_question_to_survey" type="button" value="新建" />
+		</p>
+	<%end%>
+
+</div>
+<% else %>
+	<div class="nNote nFailure hideit">
+		<p><strong>错误: </strong>哇! 数据加载错误!</p>
+		<p><strong>代号: </strong><%= @survey.value %></p>
+	</div>
+<% end %>
+

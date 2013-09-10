@@ -1,0 +1,216 @@
+@import "common";
+@import "compass/css3/box-shadow";
+@import "compass/css3/border-radius";
+@import "compass/utilities/general/clearfix";
+@import "compass/css3/opacity";
+
+.site_nav{
+	margin:26px auto 12px;
+    width:960px;
+	height:20px;
+	line-height:20px;
+	a{
+		color:#999;
+	}
+	span{
+		margin-right:3px;
+		margin-left:3px;
+	}
+	span.curr{
+		color:#ec1717;
+	}
+	span.biao{
+	    vertical-align: middle;
+		width:20px;
+		height:20px;
+		display:inline-block;
+		background: image-url('od-quillme/icons/pub_icon.png') no-repeat;
+		background-position:-20px -2px;
+	}
+}
+.inner-page{
+	width:960px;
+	.pub_list{
+		background: #fff;
+		padding: 10px;
+        @include border-radius(12px);
+        @include box-shadow(0 1px 1px #999);
+		width:610px;
+		float:left;
+		.pub_inner{
+			padding: 10px 15px 5px 10px;
+            @include border-radius(4px);
+			ul{
+				list-style:none;
+				li{
+					color: #999;
+					padding: 10px 0px;
+					overflow: hidden;
+					border-bottom: 1px #dbdbdb dashed;
+					a:hover{
+						color:#ec1717;
+					}
+					span.pn_l{
+						display:block;
+						float:left;
+						color:#666666;
+						&:hover{
+							color:#ec1717;
+						}
+					}
+					span.pn_r{
+						display:block;
+						float:right;
+						color:#999999;
+					}
+				}
+			}
+			.top{
+				height: 20px;
+				line-height: 20px;
+				padding-bottom: 5px;
+				margin-bottom: 5px;
+				border-bottom: 1px #f9b9b9 dashed;
+				font-size: 14px;
+				font-weight: bolder;
+				color: #F25D5D;
+				.h_icon{
+					display:inline-block;
+					width:20px;
+					height:20px;
+					float:left;
+					margin-right:10px;
+					background: image-url('od-quillme/icons/pub_icon.png') no-repeat;
+					background-position:-38px  -1px;
+				}
+			}
+			.pub_title{
+				font-size:20px;
+				color:#666666;
+				text-align:center;
+				padding-top:10px;
+			}	
+			.pub_detail{
+				padding:26px 0px 26px 18px;
+				color:#999999;
+				div.pub_at{
+					float:left;
+				}
+				div.share_to{
+					a{cursor:pointer;}
+					float:right;
+					span{
+						display:inline-block;
+						width:20px;
+						height:20px;
+					}
+					.share{
+						width:auto;
+						margin-right:8px;
+						height: 20px;
+						line-height: 20px;
+						float:left;
+					}
+					.sina{
+						background: image-url('/assets/od-quillme/icons/pn_sina.png') no-repeat;
+						&:hover{
+							background: image-url('/assets/od-quillme/icons/pn_sina_1.png') no-repeat;
+					    }	
+					}
+					.tecent{
+						background: image-url('/assets/od-quillme/icons/pn_t.png') no-repeat;	
+						&:hover{
+							background: image-url('/assets/od-quillme/icons/pn_t_1.png') no-repeat;
+					    }
+					}
+					.dou{
+						background: image-url('/assets/od-quillme/icons/pn_d.png') no-repeat;	
+						&:hover{
+							background: image-url('/assets/od-quillme/icons/pn_d_1.png') no-repeat;
+					    }
+					}
+				}
+			}
+			.content{
+				padding-top: 20px;
+				line-height: 1.7em;
+				font-size: 14px;
+				padding-left:18px;
+				padding-bottom:30px;
+				margin-bottom:20px;
+				color:#999;
+				border-bottom:1px dashed #999;
+				p{
+					text-indent: 2em;
+					line-height:2em;
+				}
+			}
+			.page_nav{
+				text-align:center;
+				margin-bottom:20px;
+				span{
+					margin-right:30px;
+				}
+			}		
+		}
+	}
+	.help{
+		width:295px;
+		float:right;
+		background: #fff;
+		padding: 10px;
+        @include border-radius(12px);
+        @include box-shadow(0 1px 1px #999);
+		.help_inner{
+			padding: 10px 15px 5px 10px;
+            @include border-radius(4px);
+			.top{
+				height: 20px;
+				line-height:20px;
+				padding-bottom: 5px;
+				margin-bottom: 5px;
+				border-bottom: 1px #f9b9b9 dashed;
+				font-size:14px;
+				font-weight:bolder;
+				color:#F25D5D;
+				.h_icon{
+					display:inline-block;
+					width:20px;
+					height:20px;
+					float:left;
+					margin-right:10px;
+					background: image-url('od-quillme/icons/pub_icon.png') no-repeat;
+					background-position:3px  -1px;
+				}
+				.h{
+					float:left;
+				}
+			}
+			dl{
+				height:28px;
+				a:hover {
+					color: #ec1717;
+					dt{
+						background: image-url('od-quillme/icons/arrow_hon.png') no-repeat;	
+					}
+				}
+				dt{
+					vertical-align: middle;
+					margin-top:4px;
+					width:20px;
+					height:20px;
+					float:left;
+					background: image-url('od-quillme/icons/arrow_hui.png') no-repeat;
+				}
+				dd{
+					line-height:20px;
+					float:left;
+					color:#999999;
+					&:hover{
+						color:#ec1717;
+					}
+				}
+			}
+		}
+	}
+}

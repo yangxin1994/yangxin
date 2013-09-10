@@ -14,8 +14,9 @@ class Material
 	belongs_to :prize, :inverse_of => 'photo'
 	belongs_to :lottery, :inverse_of => 'photo'
 	belongs_to :user
+	belongs_to :user,:inverse_of => 'avatar'
 
-	default_scope ->(o = 'ASC'){order_by(:created_at.try(o.to_sym)) }
+	# default_scope ->(o = 'ASC'){order_by(:created_at.try(o.to_sym)) }
 
 	before_save :set_picture_url
 
@@ -27,6 +28,12 @@ class Material
 
 	def self.find_by_id(material_id)
 		return Material.where(:_id => material_id).first
+	end
+
+	def self.create_image(image_url)
+		material = Material.new(:material_type => 1, :value => image_url, :picture_url => image_url)
+		material.save
+		return material
 	end
 
 	def self.check_and_create_new(current_user, material)
@@ -57,6 +64,6 @@ class Material
 			:value => material["value"],
 			:title => material["title"],
 			:picture_url => material["picture_url"])
-	  self.save
+	  return self.save
 	end
 end

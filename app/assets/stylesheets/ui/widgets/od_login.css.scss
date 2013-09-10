@@ -1,0 +1,113 @@
+@import "common";
+@import "od-quill/*.png";
+@import "share/*.png";
+@import "od-button/*.png";
+@import "compass/css3/border-radius";
+@import "compass/utilities/general/clearfix";
+@import "login/other-login-icon/*.png";
+
+#od_login{
+	font-size: 12px;
+	width:305px;
+	height:300px;
+	position:absolute;
+	left:50%;
+	top:50%;
+	margin-left:-150px;
+	margin-top:-150px;
+	z-index: 9999;
+	p{text-align:left;}
+	/*关闭按钮3*/
+	.btn_close3{
+		width:8px;
+		height:8px;
+		margin:15px 15px 0 0;
+		display: inline-block;
+		overflow: hidden;
+		border:none;
+		cursor: pointer;
+		@include od-button-sprite(close3);
+	}
+	.od_login_top{
+		background:#333;
+		height:240px;
+		@include border-top-radius(5px);
+		padding:10px 0 0 25px;
+	}
+	.od_login_bottom{
+		background:#333;
+		height:39px;
+		margin-top:1px;
+		@include border-bottom-radius(5px);
+		padding:20px 0 0 25px;
+	}
+
+	.other-login-icon{
+		width:20px;
+		height:20px;
+		@include inline-block;
+		margin:0 5px;
+	}
+	.icon-sina{@include share-sprite(sina);}
+	.icon-tencent{@include share-sprite(tencent);}
+	.icon-qq{@include share-sprite(qq);}
+	.icon-renren{@include share-sprite(renren);}
+	.icon-douban{@include share-sprite(douban);}
+	.icon-kaixin001{@include share-sprite(kaixin001);}
+	.icon{
+		width:16px;
+		height:16px;
+		@include inline-block;
+		position:absolute;
+		left:7px;
+		top:7px;
+	}
+	.icon-i{@include od-quill-sprite(i1);}
+	.icon-i2{@include od-quill-sprite(i2);}
+	.icon-mail{@include od-quill-sprite(mail1);}
+	.icon-mail2{@include od-quill-sprite(mail2);}
+	.logo{
+		width:200px;
+		height:70px;
+		@include od-quill-sprite(logo);
+	}
+
+	.white-txt{color:#fff;}
+	.yellow-txt{color:#f5c000;}
+	.warning{
+		color:red;
+		@include one-line(20px);
+	}
+	.register{
+		color:#fff;
+		font-size:14px;
+		font-weight:bold;
+		float: left;
+	}
+	.interval-line{
+		color:#999;
+		padding:0 10px 0 15px;
+		float: left;
+	}
+	.more{color:#999;}
+
+	input[type="text"],input[type="password"]{
+		width:220px;
+		padding:5px;
+		padding-left:27px;
+		font-size: 14px;
+	}
+	input[type="checkbox"]{
+		@include inline-block;
+		margin:-4px 5px 0 0;
+	}
+	.forget-password{
+		margin-left:30px;
+	}
+	.login{
+		margin-left:35px;
+		font-size: 14px;
+		width: 70px;
+		font-weight: bold;
+	}
+}

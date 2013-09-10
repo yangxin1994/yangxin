@@ -1,0 +1,80 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/agent/agent_tasks/index-bundle" %>
+<% end %>
+
+<% content_for :sidenav do %>
+  <li class="active">
+    <a href="javascript:void(0)">
+      <i class="icon-chevron-right"></i>
+      代理任务列表
+    </a>
+  </li>  
+<% end %>
+
+<div>
+  <span>
+    <form class="form-search" style="display:inline">
+      <div class="input-append">
+        <input type="text" name="keyword" class="span6 search-query">
+        <button type="submit" class="btn">Search</button>
+      </div>
+    </form>
+  </span>
+  <span class="pull-right">
+    <%= paginator_mini @tasks %>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu pull-right">
+        <li><a href="?">全部</a></li>
+        <li class="divider"></li>
+      </ul>
+    </div>
+  </span>
+</div>
+
+<div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>问卷名称</th>
+      <th>状态</th>
+      <th>已回收</th>
+      <th>待审核</th>
+      <th>总需求</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @tasks["data"].each do |task| %>
+    <tr>
+      <td><a href="/agent/tasks/<%= task["_id"] %>"><%= task["survey_title"] %></a></td>
+      <td><%= agent_task_status_tag task["status"] %></td>
+      <td><%= task["finish_count"] %></td>
+      <td><%= task["agent_under_review_count"] %></td>
+      <td><%= task["count"] %></td>
+      <td data-id="<%= task["_id"] %>">
+          <div class="btn-group">
+            <a class="btn" href="/agent/tasks/<%= task["_id"] %>" target="_blank"><i class="icon-list-alt"></i>查看详细</a>
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <% if task["status"].to_i == AgentTask::OPEN %>
+                <li><a href="javascript:void(0)" style="display:none" class="st-open" ><i class="icon-ok-sign"></i>打开</a></li>
+                <li><a href="javascript:void(0)" class="st-close"><i class="icon-remove-sign"></i>关闭</a></li>
+              <% elsif task["status"].to_i == AgentTask::AGENT_CLOSED %>
+                <li><a href="javascript:void(0)" class="st-open"><i class="icon-ok-sign"></i>打开</a></li>
+                <li><a href="javascript:void(0)" class="st-close" style="display:none"><i class="icon-remove-sign"></i>关闭</a></li>
+              <% else %>
+              <% end %>
+              <li><a href="javascript:void(0);" data-url="<%= "#{@tasks["host"]}/s/#{task["reward_scheme_id"]}?ati=#{task["_id"]}" %>" class="survey-url"><i class="icon-check"></i>答题地址</a></li>
+              <li><a href="/agent/answers?agent_task_id=<%= task["_id"] %>" ><i class="icon-check"></i>答案审核</a></li>
+            </ul>
+          </div>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+</div>

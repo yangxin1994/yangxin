@@ -1,0 +1,22 @@
+.s-desc {
+	border-bottom: 1px solid #cacaca;
+}
+.q-filler {
+	border-bottom: 1px solid #cacaca;
+	.q-idx {
+		background: #333;
+	}
+	.q-title {
+		.q-info {
+			color: #666;
+		}
+	}
+	&.error {
+		background-color: #F8EDB1;
+	}
+}
+
+$blue-light: #e2e9ee;
+label.cust-option:not(#foo) {
+	&:hover { background: $blue-light; }
+}

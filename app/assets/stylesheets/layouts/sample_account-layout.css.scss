@@ -1,0 +1,69 @@
+@import "common";
+@import "compass/css3/box-shadow";
+@import "compass/css3/border-radius";
+@import "compass/utilities/general/clearfix";
+@import "compass/css3/opacity";
+@import "od-quillme/icons/*.png";
+
+body{background: image-url('od-quillme/account_bg.jpg');}
+
+input[type='text']:focus,
+input[type='password']:focus,
+textarea:focus {
+  border-color: #8cc63f;
+  @include box-shadow(0 0 2px 1px rgba(140, 198, 63, 0.5));
+  @include border-radius(4px);
+
+}
+input[type='text'].error,
+input[type='password'].error,
+textarea.error {
+  border:1px solid #ec1717;
+  @include box-shadow(0 0 2px 1px rgba(236, 23, 23, 0.5));
+  @include border-radius(4px);
+}
+
+
+.header{
+  height:70px;	
+  width:960px;
+  margin:30px auto;
+  .logo{
+    width:180px;
+    height:70px;
+    float:left;
+  }
+
+  .line_tel{
+    margin-top:40px;
+    height:20px;
+    line-height:20px;
+    float:right;
+    color:#f14646;
+    a{
+       color:#f14646;
+       float:left;  
+    }
+    a.line_pic{
+       margin-right:6px;
+       display:inline; 
+       i.qq_c{
+        display:inline-block;
+        width:20px;
+        height:20px;
+        background: image-url('/assets/od-quillme/qq_c.png') no-repeat; 
+        &:hover{
+          background: image-url('/assets/od-quillme/qq_c_h.png') no-repeat; 
+        }
+       } 
+    }
+    span{
+      float:left;
+    }
+    span.tel_pic{
+      margin:0px 6px 0px 10px;
+      display:inline;  
+    }    
+  }
+
+}

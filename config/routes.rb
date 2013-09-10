@@ -1,509 +1,505 @@
 require 'sidekiq/web'
 OopsData::Application.routes.draw do
-	mount Sidekiq::Web, at: "/sidekiq"
 
-	resources :faqs, :public_notices, :feedbacks, :advertisements
-	resources :data_generators do
-		collection do
-			get 'generate'
-		end
-	end
+  # match '*path' => 'welcome#index'
+  # get '/:unique_key' => 'utility/short_urls#show', :constraints => { :unique_key => /~.+/ }
+  match '/:unique_key' => 'mongoid_shortener/shortened_urls#translate', :via => :get, :constraints => { :unique_key => /~.+/ }
 
-	namespace :super_admin do
-		resources :users do
-			member do
-				put 'set_admin'
-			end
-		end
-	end
+  # accounts
+  scope :module => 'account' do
+    resource :signup, :only => [:show, :create]
+    resource :activate, :only => [:new, :create, :show] do
+      member do
+        get :done
+      end
+    end
+    resource :password, :only => [:update] do
+      member do
+        get :find
+        post :send_reset_email
+        get :reset
+      end
+    end
+    resource :signin, :only => [:show, :create]
+    resources :connects, :only => [:show]
+    resource :signout, :only => [:show]
+    resource :profile, :only => [:show, :update] do
+      member do
+        put :update_password
+      end
+    end
+    resources :messages, :only => [:index]
+  end
 
-	resources :quality_control_questions do
-	end
+  resources :jobs, :only => [:show] do
+    member do
+      get :data_list, :stats, :analysis_result, :file_uri
+    end
+  end
 
-	resources :lottery_codes
+  # surveys, pages and questions
+  scope :module => "quill" do
+    # home
+    resource :index, :only => [:show]
+    resource :doc, :only => [] do
+      member do
+        get :design, :share, :result, :export
+      end
+    end
+    resource :customer, :only => [:show]
+    resource :aboutus, :only => [:show]
+    # survey
+    match "questionaires/new" => "questionaires#new", :as => :new_questionaire, :via => :get
+    match "questionaires/:questionaire_id" => "questionaires#show", :as => :questionaire, :via => :get  # ugly but make ensure_survey in quill_controller work
+    match "questionaires/:questionaire_id" => "questionaires#destroy", :as => :questionaire, :via => :delete
+    resources :questionaires, :only => [:index, :new] do
+      member do
+        put :recover
+        get :stars
+        get :remove
+        put :update_star
+        post :clone
+        put :publish
+        put :deadline
+        put :close
+      end
+      resources :pages, :only => [:create, :show] do
+        member do
+          put :split
+          put :combine
+        end
+      end
+      resources :questions, :only => [:create, :show, :update, :destroy] do
+        member do
+          put :move
+          get :analyse
+        end
+      end
 
-	resources :browser_extensions do
-	end
+      resource :authority, :only => [:show, :update]
+      resource :property, :only => [:show, :update] do
+        member do
+          get :more
+          put :update_more
+        end
+      end
+      resource :quality, :only => [:show, :update]
+      resource :customization, :only => [:show, :update]
+      resources :logics, :only => [:index, :show, :destroy, :update, :create]
 
-	resources :browsers do
-		member do
-			put :update_history
-			get :get_recommended_surveys
-			get :get_survey_info
-		end
-	end
+      resource :share, :only => [:show]
+      resources :quotas, :only => [:destroy, :update, :create] do
+        collection do
+          post :refresh
+        end
+      end
+
+      resources :filters, :only => [:index, :show, :destroy, :update, :create]
+      resources :report_mockups, :only => [:index, :show, :create, :update, :destroy] do
+        member do
+          get :report
+        end
+      end
+      resource :result, :only => [:show] do
+        member do
+          get :spss, :excel, :report, :csv_header
+          post :import_data
+        end
+      end
+
+      resource :preview, :only => [:show]
+    end #end of resources questionaire
+    resources :functions, :only => [] do
+      collection do
+        get :design
+      end
+    end
+  end
+
+  # sample
+  scope :module => "sample" do
+    match 'sign_up' => "accounts#sign_up",:via => :get
+    match 'sign_in' => "accounts#sign_in",:via => :get
+    match 'sign_out' => "accounts#sign_out",:via => :get
+
+    resource :account, :only => [] do
+      get  :sign_in, :as => :sign_in
+      get  :after_sign_in, :as => :after_sign_in
+      get  :sign_up, :as => :sign_up
+      post :login,   :as => :login 
+      get  :sign_out,:as => :sign_out
+      post :create_sample,:as => :create_sample
+      get  :check_email_mobile,:as => :check_email_mobile
+      get  :active_notice,:as => :active_notice
+      get  :email_activate,:as => :email_activate
+      post :mobile_activate,:as => :mobile_activate
+      get  :re_mail,:as => :re_mail
+      post  :get_basic_info_by_auth_key, :as => :get_basic_info_by_auth_key
+      get :forget_password, :as => :forget_password
+      get :send_forget_pass_code,:as => :send_forget_pass_code
+      get :make_forget_pass_activate, :as => :make_forget_pass_activate
+      get :generate_new_password,:as => :generate_new_password
+      get :get_account,:as => :get_account,:as => :get_account
+    end
+
+    resource :home, :only => [:show] 
+
+    resources :surveys, :only => [:index] do 
+      collection do
+        get  :get_special_status_surveys
+        post :get_reward_type_count
+        post :make_rss_activate
+        get  :active_rss_able
+        get  :make_rss_mobile_activate
+        get  :re_rss_mail
+        get  :cancel_subscribe
+      end
+      member do
+        get :result
+      end
+    end
+
+    resources :orders do 
+      collection do 
+        post :create_lottery_order, :as => :create_lottery_order
+      end
+    end
+
+    resources :lotteries do
+      member do 
+        get :draw
+      end 
+    end
+
+    resources :users,:except => [:show] do
+          collection do
+            # 
+            get 'get_mobile_area'
+            # surveys
+            get 'join_surveys', 'spread_surveys'
+            get 'surveys' => 'users#join_surveys'
+            match '/spread_counter/:id' => "users#spread_counter", :via => :get
+            match '/survey_detail/:id' => "users#survey_detail", :via => :get
+            # points
+            get 'points'
+            # orders
+            get 'orders'
+            match '/order_detail/:id' => "users#order_detail", :via => :get
+            # setting
+            get 'setting' => 'users#basic_info'
+            put 'setting/update_basic_info' => "users#update_basic_info"
+            get 'setting/avatar' => 'users#avatar'
+            post 'setting/upload_avatar' => 'users#update_avatar'
+            get 'setting/bindings' => 'users#bindings'
+            match 'setting/unbind/:website' => 'users#unbind', :via => :put
+            put 'setting/share' => 'users#bind_share'
+            put 'setting/subscribe' => 'users#bind_subscribe'
+            put 'setting/change_mobile' => 'users#change_mobile' 
+            put 'setting/check_mobile_verify_code' => 'users#check_mobile_verify_code'
+            put 'setting/change_email' => 'users#change_email'
+            get 'setting/change_email_verify_key' => 'users#change_email_verify_key'
+            get 'setting/address' => 'users#address'
+            put 'setting/address' => 'users#update_logistic_address'
+            get 'setting/password' => 'users#password'
+            put 'setting/password' => 'users#update_password'
+            # notifications
+            get 'notifications'
+            match 'notifications/:id' => 'users#destroy_notification', :via => :delete
+            delete 'notifications' => 'users#remove_notifications'
+          end 
+        end
+
+    resources :gifts, :only => [:index, :show] do
+      collection do 
+        get :get_special_type_data
+      end
+    end
+    resources :prizes, :only => [:show] do
+      collection do
+        post :find_by_ids 
+      end            
+    end
+    resources :users,:only => [:index,:show]
+    resource :help, :only =>[] do
+      member do
+        get :survey, :lottery, :gift, :reward, :aboutus
+      end
+    end
+    
+    resources :public_notices, :only => [:index,:show]      
+  end
+
+  # utility
+  namespace :utility do
+    resource :address, :only => [] do
+      member do
+        get :provinces
+        get :cities
+        get :towns
+      end
+    end
+    resources :materials do
+      collection do
+        get :video_upload_path
+        post :create_image
+      end
+      member do
+        get :preview
+      end
+    end
+    resources :short_urls, :only => [:show]
+    resources :ofcards do
+      collection do
+        get :confirm
+        post :confirm
+      end
+    end
+  end
+
+  namespace :answer_auditor, :module => 'admin' do
+    get ''=> 'review_answers#index'
+    resources 'review_answers', :as => 'answer_auditor' do
+      member do
+        get '/answers/:answer_id' => "review_answers#show_answer"
+        put '/answers/:answer_id/review' => "review_answers#review"
+      end
+    end
+  end
+
+  namespace :survey_auditor, :module => 'admin' do
+    get ''=> 'reviews#index'
+    resources 'reviews', :as=>'survey_auditor' do
+      member do
+        put 'publish', 'close', 'pause', 'reject'
+      end
+    end
+  end
+
+  # admin
+  namespace :admin do
+    get "" => "surveys#index"
+    get "/:id/get_email" => "admin#get_email"
+    resources :reviews do
+      member do
+        put 'publish', 'close', 'pause', 'reject'
+      end
+    end
+    resources :publishes do
+      member do
+        put 'allocate', 'add_reward', 'set_community', 'set_spread', 'cancel_community', 'set_answer_need_review', 'set_promotable'
+      end
+      resources :interviewer_tasks do
+      end
+    end
+    resources :costs, :only => [:index, :show]
+    resources :review_answers do
+      member do
+        get '/answers/:answer_id' => "review_answers#show_answer"
+        put '/answers/:answer_id/review' => "review_answers#review"
+      end
+    end
+
+    resources :template_questions do
+      collection do
+        get 'clear_cart'
+        post  'add_to_cart', 'del_cart'
+      end
+      member do
+        get 'get_text'
+      end
+    end
+
+    resources :quality_questions do
+      collection do
+        get 'objective', 'matching'
+      end
+      member do
+        put 'update_answer'
+      end
+    end
+    resources :volunteer_surveys do
+      collection do
+        post "add_template_question"
+        delete 'del_question'
+      end
+    end
+    resources :gifts do
+      member do
+        put 'stockup', 'outstock'
+      end
+    end
+    resources :prizes
+    resources :surveys, :as => :s do
+      member do
+        get :reward_schemes, :promote, :more_info, :bind_question
+        put :update_promote, :set_info, :bind_question, :star
+        post :update_promote
+        delete :destroy_attributes, :bind_question
+      end
+      collection do
+
+      end
+    end
 
 
-	# alias interface
-	match '/admin/surveys/new' => 'surveys#new'
-	#
-	match '/subscribe' , :to => 'subscribers#create', :as => '/subscribe'
-	match '/unsubscribe' , :to =>'subscribers#destroy', :as => '/subscribe'
-	namespace :admin do
-		resources :browsers do
-			collection do
-				get :role
-				get :tasks
-			end
-		end
 
-		resources :users do
-			collection do
-				get 'blacks', 'whites', 'deleteds','list_by_role'
-			end
+    resources :reward_schemes
 
-			member do
-				get 'get_email', 'get_introduced_users', 'lottery_codes', 'orders', 'point_logs'
-				put 'set_color', 'set_role', 'set_lock', 'system_pwd', 'recover','add_point'
-			end
-		end
-		resources :newsletters do
-			collection do
-				get :editing, :delivering, :delivered, :canceled
-			end
-			member do
-				post :deliver
-				post :test
-				delete :cancel
-			end
-		end
-		resources :subscribers do
-			collection do
-				get :subscribed, :unsubscribed, :search
-			end
-			member do
-				put :unsubscribe, :subscribe
-			end
-		end
-		resources :surveys do
-			collection do
-				put 'add_template_question'
-			end
-			member do
-				put 'allocate', 'add_reward', 'set_community', 'set_spread', 'set_promotable', 'set_answer_need_review'
-				get 'get_sent_email_number'
-			end
-		end
+    resources :samples do
+      member do
+        get :redeem_log, :point_log, :lottery_log, :answer_log, :spread_log, :edit_attributes
+        delete :destroy_attributes
+        put :set_sample_role, :operate_point, :block
+      end
+      collection do
+        post :add_attributes, :send_message
+        get :attributes, :new_attributes, :status, :get_sample_count, :get_active_sample_count
+      end
+    end
 
-		resources :interviewer_tasks do
-		end
+    resources :answers do
+      member do
+        get :review
+      end
+    end
 
-		resources :faqs do
-		end
-		resources :public_notices do
-			collection do
-				get 'count', 'list_by_type_count', 'list_by_type_and_value_count'
-			end
-		end
-		resources :advertisements do
-			collection do
-				get 'count', 'list_by_title_count', 'activated_count', 'unactivate_count'
-			end
-		end
+    resources :rewards do
+      collection do
+        post :operate_point
+      end
+    end
+    resources :orders, :only => [:index, :show, :update] do
+      collection do
+        get :to_excel
+      end
+      member do
+        put :handle, :bulk_handle, :finish, :bulk_finish, :update_express_info, :update_remark
+      end
+    end
+    resources :lotteries do
+      member do
+        get :auto_draw, :reward_records, :assign_prize, :lottery_codes , :ctrl
+        put :assign_prize, :add_ctrl_rule, :status , :assign_prize_to, :revive
+      end
+      collection do
+        get :deleted
+      end
+    end
+    resources :materials
+    resources :users do
+      collection do
+        get 'blacks', 'whites',
+          'deleted', 'normal', 'search'
+      end
+      member do
+        put 'recover', 'add_point', 'set_role', 'set_color', 'reset_password', 'set_lock'
+        get 'get_email', 'orders', 'rewards', 'lottery_record', 'point_logs','introduced_users'
+      end
+    end
+    resources :newsletters do
+      member do
+        post   :deliver
+        post   :test
+        delete :cancel
+      end
+      collection do
+        post   :column
+        post   :article
+        post   :product_news
+      end
+    end
+    resources :subscribers do
+      member do
+        put :unsubscribe, :subscribe
+      end
+    end
+    resources :faqs do
+    end
+    resources :announcements do
+    end
+    resources :advertisements do
+    end
+    resources :feedbacks do
+      member do
+        post 'reply'
+      end
+    end
+    resources :messages do
+    end
+    resources :sample_attributes, :only => [:index, :create, :update, :destroy]
+    get "sample_attributes/bind_question/:id" => "sample_attributes#bind_question"
+    put "sample_attributes/bind_question/:id" => "sample_attributes#bind_question"
+    delete "sample_attributes/bind_question/:id" => "sample_attributes#bind_question", as: :sample_attribute_bind
 
-		resources :feedbacks do
-			member do
-				post 'reply'
-			end
-		end
+    resources :agents
+    resources :agent_tasks do
+      member do
+        put :close, :open
+      end
+    end
+    
+    resources :sample_stats, :only => [:index] do
+      collection do
+      get :get_sample_count
+      get :get_active_sample_count
+      end
+    end
+  end
 
-		resources :quality_control_questions do
-			collection do
-				get 'objective_questions', 'objective_questions_count',
-					'matching_questions', 'matching_questions_count'
-			end
-			member do
-				put 'update_answer'
-			end
-		end
+  namespace :agent do
+    scope :module => :sessions do
+      resources :signin
+      resources :signout
+      resources :reset_password
+    end
+    resources :answers do
+      member do
+        put :review
+      end
+    end
+    resources :tasks do
+      member do
+        put :close, :open
+      end
+    end
+  end
 
-		resources :template_questions do
-			collection do
-				get 'count', 'list_by_type', 'list_by_type_count'
-			end
-			member do
-				get 'get_text'
-			end
-		end
+  # Survey filler
+  scope :module => "filler" do
+    match "s/:id" => "surveys#show", :as => :show_s, :via => :get
+    resources :surveys, :only => [:show] 
+    match "p/:id" => "previews#show", :as => :show_p, :via => :get
+    resources :previews, :only => [:show]
+    match "a/:id" => "answers#show", :as => :show_a, :via => :get
+    resources :answers, :only => [:show, :create, :update] do
+      member do
+        get :load_questions
+        post :finish
+        post :clear
+        delete :destroy_preview
+        put :select_reward
+        post :start_bind
+      end
+    end
+    resource :bind_sample, :only => [:show]
+  end
 
-		resources :points do
-			new do
-				post :operate
-			end
-		end
-		resources :gifts do
-			collection do
-				get :virtual, :cash, :entity, :lottery
-				get :expired, :index, :virtual, :cash, :entity, :stockout
-			end
-		end
-		resources :prizes do
-			collection do
-				get :virtual, :cash, :entity, :lottery, :for_lottery
-				get :expired, :index, :virtual, :cash, :entity, :stockout
-			end
-		end
-		resources :orders do
-			collection do
-				get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed, :canceled, :to_excel
-			end
-			member do
-				put :verify, :verify_as_failed, :deliver, :deliver_success, :deliver_as_failed
-			end
-		end
-
-		resources :lotteries do
-			collection do
-				get :for_publish, :activity, :finished, :deleted, :quillme
-			end
-			member do
-				get :auto_draw, :prize_records, :lottery_codes, :ctrl
-				put :assign_prize, :add_ctrl_rule, :revive
-			end
-		end
-
-		resources :reward_logs do
-			collection do
-				get :for_points, :for_lotteries
-			end
-		end
-
-		resources :lottery_codes
-
-		resources :messages
-
-		resources :rewards, :only => [:index] do
-			collection do
-				post :operate_point, :revoke_operation
-				get :for_points, :for_lotteries
-			end
-		end
-	# The priority is based upon order of creation:
-	# first created -> highest priority.
-
-	# Sample of regular route:
-	#	 match 'products/:id' => 'catalog#view'
-	# Keep in mind you can assign values other than :controller and :action
-
-	end
-
-	namespace :answer_auditor do
-		resources :surveys do
-		end
-		resources :answers do
-			member do
-				put 'review'
-			end
-		end
-	end
-
-	namespace :survey_auditor do
-		resources :surveys do
-			collection do
-				get 'count'
-			end
-			member do
-				get 'reject'
-				get 'publish'
-				get 'close'
-				get 'pause'
-			end
-		end
-	end
-
-	namespace :answer_auditor do
-		resources :answers do
-			collection do
-				get 'count'
-			end
-		end
-	end
-
-	namespace 'entry_clerk' do
-		resources :surveys do
-			member do
-				get 'csv_header'
-				put 'import_answer'
-			end
-		end
-	end
-
-	namespace 'interviewer' do
-		resources :surveys do
-		end
-		resources :interviewer_tasks do
-			resources :answers do
-				collection do
-					post 'submit'
-				end
-			end
-		end
-		resources :materials do
-		end
-	end
-
-	get "home/index"
-	match 'home' => 'home#index', :as => :home
-	post "home/get_tp_info"
-	post "home/get_more_info"
-
-
-	resources :registrations do
-		collection do
-			post :send_activate_email
-			post :activate
-		end
-	end
-
-	resources :sessions do
-		collection do
-			post :update_user_info, :init_basic_info, :send_password_email
-			post :new_password, :reset_password
-			post :login_with_auth_key
-			post :login_with_code
-		end
-	end
-	match 'logout' => 'sessions#destroy', :as => :logout
-	match 'login' => 'sessions#create', :as => :login
-
-	resources :users do
-		collection do
-			get :get_level_information
-			get :get_basic_info
-			get :get_introduced_users
-			get :point
-			get :lottery_codes
-		end
-		member do
-			get 'get_email'
-		end
-	end
-	match 'update_information' => 'users#update_information', :as => :update_information, :via => [:post]
-	match 'reset_password' => 'users#reset_password', :as => :reset_password, :via => [:post]
-
-	resources :groups
-
-	resources :surveys do
-		collection do
-			get 'list_surveys_in_community'
-			get 'list_answered_surveys'
-			get 'list_spreaded_surveys'
-			get 'search_title'
-		end
-		member do
-			put 'save_meta_data'
-			get 'clone'
-			get 'recover'
-			get 'clear'
-			put 'update_tags'
-			put 'add_tag'
-			put 'remove_tag'
-			put 'submit'
-			put 'close'
-			get 'reject'
-			get 'publish'
-			get 'pause'
-			put 'update_style_setting'
-			get 'show_style_setting'
-			put 'update_access_control_setting'
-			get 'show_access_control_setting'
-			put 'update_quality_control'
-			get 'show_quality_control'
-
-			get 'update_deadline'
-
-			get 'show_quality_control'
-			get 'estimate_answer_time'
-			put 'update_deadline'
-			post 'update_star'
-			get 'reward_info'
-		end
-		resources :pages do
-			member do
-				put 'move'
-				put 'clone'
-				put 'split'
-				put 'combine'
-			end
-		end
-		resources :questions do
-			collection do
-				post 'insert_template_question'
-				post 'insert_quality_control_question'
-			end
-			member do
-				put 'convert_template_question_to_normal_question'
-				put 'move'
-				put 'clone'
-				delete 'delete_quality_control_question'
-			end
-		end
-		resources :logic_controls do
-			collection do
-				get :list_with_question_objects
-			end
-		end
-		resources :quotas do
-			collection do
-				post :set_exclusive
-				get :get_exclusive
-				post :refresh
-			end
-		end
-		resources :filters do
-		end
-		resources :report_mockups do
-		end
-	end
-	resources :results do
-		collection do
-			get :check_progress
-			get :job_progress
-			get :analysis
-			get :to_spss
-			get :to_excel
-			get :report
-			put :finish
-			get :get_data_list
-			get :get_stats
-			get :get_analysis_result
-			get :get_file_uri
-		end
-	end
-
-	resources :materials do
-		member do
-			get 'clear'
-		end
-	end
-
-	resources :quality_control_questions do
-		member do
-			put 'update_answer'
-		end
-	end
-
-	resources :template_questions do
-	end
-
-	resources :answers do
-		collection do
-			get 'get_my_answer'
-		end
-		member do
-			get 'load_question'
-			post 'clear'
-			post 'submit_answer'
-			post 'finish'
-			get 'estimate_remain_answer_time'
-			delete 'destroy_preview'
-			get 'get_my_answer_by_id'
-		end
-	end
-
-	resources :messages do
-		collection do
-			get :unread_count
-		end
-	end
-
-	resources :lotteries do
-		collection do
-			get :own
-		end
-		member do
-			get :draw
-			post :exchange
-		end
-	end
-	resources :gifts do
-		collection do
-			get :virtual, :cash, :entity, :lottery
-		end
-		member do
-			put :exchange
-		end
-	end
-	resources :orders do
-		collection do
-			get :for_cash, :for_entity, :for_virtual, :for_lottery
-			get :need_verify, :verified, :verify_failed, :delivering, :delivering, :delivered, :deliver_failed
-		end
-		member do
-			put :cancel
-		end
-	end
-
-	resources :reward_logs do
-		collection do
-			get :for_points, :for_lotteries
-		end
-	end
-
-	resources :tools do
-		collection do
-			get :find_provinces
-			get :find_cities_by_province
-			get :find_towns_by_city
-			get :find_address_text_by_code
-			post :send_email
-		end
-	end
-
-	# The priority is based upon order of creation:
-	# first created -> highest priority.
-
-	# Sample of regular route:
-	#	 match 'products/:id' => 'catalog#view'
-	# Keep in mind you can assign values other than :controller and :action
-
-	# Sample of named route:
-	#	 match 'products/:id/purchase' => 'catalog#purchase', :as => :purchase
-	# This route can be invoked with purchase_url(:id => product.id)
-
-	# Sample resource route (maps HTTP verbs to controller actions automatically):
-	#	 resources :products
-
-	# Sample resource route with options:
-	#	 resources :products do
-	#		 member do
-	#			 get 'short'
-	#			 post 'toggle'
-	#		 end
-	#
-	#		 collection do
-	#			 get 'sold'
-	#		 end
-	#	 end
-
-	# Sample resource route with sub-resources:
-	#	 resources :products do
-	#		 resources :comments, :sales
-	#		 resource :seller
-	#	 end
-
-	# Sample resource route with more complex sub-resources
-	#	 resources :products do
-	#		 resources :comments
-	#		 resources :sales do
-	#			 get 'recent', :on => :collection
-	#		 end
-	#	 end
-
-	# Sample resource route within a namespace:
-	#	 namespace :admin do
-	#		 # Directs /admin/products/* to Admin::ProductsController
-	#		 # (app/controllers/admin/products_controller.rb)
-	#		 resources :products
-	#	 end
-
-	# You can have the root of your site routed with "root"
-	# just remember to delete public/index.html.
-	root :to => 'welcome#index'
-
-	# See how all your routes lay out with "rake routes"
-
-	# This is a legacy wild controller route that's not recommended for RESTful applications.
-	# Note: This route will make all actions in every controller accessible via GET requests.
-	# match ':controller(/:action(/:id(.:format)))'
+  # Root: different roots for diffent hosts
+  constraints :subdomain => "admin" do
+    root :to => 'admin/publishes#index', as: :admin_root
+  end
+  # constraints :subdomain => "quillme" do
+  #   root :to => 'sample/homes#show', as: :quillme_root
+  # end
+  # constraints :subdomain => "quillmeapi" do
+  #   root :to => 'sample/homes#show', as: :quillmeapi_root
+  # end
+  # constraints :subdomain => "quillmedev" do
+  #   root :to => 'sample/homes#show', as: :quillmedev_root
+  # end
+  # root :to => "sample/homes#show", :constraints => { :domain => "oopsdata.cn" }, as: :oopsdatacn_root
+  # root :to => "sample/homes#show", :constraints => { :domain => "wenjuanba.com" }, as: :wenjuanbacom_root
+  # root :to => 'quill/indices#show'
+  root :to => "sample/homes#show"
+  # root :to => "welcome#index"
 end

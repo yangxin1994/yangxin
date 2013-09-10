@@ -1,0 +1,22 @@
+<% content_for :app_head do %>
+	<%= javascript_include_tag "pages/account/signin_quill-mobile" %>
+	<%= stylesheet_link_tag "pages/account/signin_quill-mobile" %>
+<% end %>
+
+<div id='sf_main'>
+<h2 class="title">登录</h2>
+<div class="page">
+	<div class="login-panel">
+		<p><input type="text" id="email_ipt" name="userName" placeholder="邮箱/用户名" param='e' autofocus /></p>
+		<p><input type="password" id="password_ipt" name="password" placeholder="输入密码"/></p>
+		<p class="remember">
+			<input type="checkbox" name="remember-password" id="remember_ckb" checked />
+			<label for="remember_ckb">记住我</label>
+			<a href="/" class="home-page">进入系统首页</a>
+		</p>
+		<p><a href="javascript:void(0);" class="btn" id='login_btn'>登 录</a></p>
+		<p class="error" id="error_msg" style="display:none;"></p>
+	</div>
+	<div class="copyright">OopsData Consultant Co.,Ltd</div>
+</div>
+</div>

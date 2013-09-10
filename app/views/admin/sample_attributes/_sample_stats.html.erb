@@ -1,0 +1,29 @@
+<% if attribute['completion'] %>
+<h6>属性统计信息</h6>
+<p>
+  <label>属性完整度</label>
+  <label><%= attribute['completion'] %>%</label>
+</p>
+
+  <% if attribute['analyze_result'] != {}  %>
+
+    <% if ( attribute['type'] == 1 or attribute['type'] == 7 ) %>
+      <p>
+        <label>各个枚举下样本数</label>
+      </p>
+      <p class="pie_chart_container" data-distribution="<%= attribute['analyze_result']['distribution'] %>" data-type="enum" data-segmentation="<%= attribute['enum_array'] %>"></p>
+    <% elsif [2, 4].include? attribute['type'] #num %>
+      <p>
+        <label>各个区段下样本数</label>
+        <p class="pie_chart_container" data-type="num" data-distribution="<%= attribute['analyze_result']['distribution'] %>" data-segmentation="<%= attribute['analyze_requirement']['segmentation'] %>"></p>
+      </p>
+    <% elsif [3, 5].include? attribute['type'] %>
+      <p>
+        <label>各个区段下样本数</label>
+        <p class="pie_chart_container" data-type="date" data-distribution="<%= attribute['analyze_result']['distribution'] %>" data-segmentation="<%= attribute['analyze_requirement']['segmentation'] %>" data-date-type="<%= attribute['date_type'] %>"></p>
+      </p>
+
+    <% elsif attribute['type'] == 6 %>
+    <% end %>
+  <% end %>
+<% end %>

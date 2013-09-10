@@ -1,0 +1,25 @@
+.answer-choices{
+	width: 100%;
+	margin: 10px 0;
+	.group{
+		background-color: #f3a266;
+		margin-top:2px;
+
+		div:first-child {
+			display: inline-block;
+			color: white;
+			padding: 18px 6px;
+			margin-right: 10px;	
+			background-color: #2B2A2A;
+			cursor: pointer;
+		}
+	}
+
+	.drag-choice {
+		display: inline-block;
+		cursor: pointer;
+	}
+}
+.display-none{
+	display: none;
+}

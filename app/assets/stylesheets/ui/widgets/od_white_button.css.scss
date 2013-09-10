@@ -1,0 +1,70 @@
+/*
+*=require ./../../icons
+*/
+@import "common";
+@import "compass/css3/inline-block";
+
+// // load bootstrap tooltip css
+// @import "twitter/bootstrap/variables";
+// @import "twitter/bootstrap/mixins";
+// @import "twitter/bootstrap/tooltip";
+
+.od-white-button {
+	border: none;	
+	cursor: pointer;
+	@include inline-block;
+	background:none;
+	
+	.op-white-btn-l {
+		@include size(3px, 20px);
+		@include inline-block;
+		background: $url-widgets-bg no-repeat -44px 0;
+	}
+	.op-white-btn-c {
+		@include inline-block;
+		background: $url-widgets-repeatX-bg repeat-x 0 -145px;
+		@include one-line(20px);
+		padding:0 10px;
+		text-align:center;
+		
+		.icon {
+			@include square(16px);
+			margin-bottom:2px;
+			margin-top: 0;
+		}
+		
+		span {
+			margin-left: 2px;
+		}
+	}
+	.op-white-btn-r {
+		@include size(3px, 20px);
+		@include inline-block;
+		background: $url-widgets-bg no-repeat -47px 0;
+	}
+	
+	&:hover {
+		.op-white-btn-l {
+			@include bp(-44px, -20px);
+		}
+		.op-white-btn-c {
+			@include bp(0, -165px);
+		}
+		.op-white-btn-r {
+			@include bp(-47px, -20px);
+		}
+	}
+	
+	&:active {
+		.op-white-btn-l {
+			@include bp(-44px, -40px);
+		}
+		.op-white-btn-c {
+			@include bp(0, -185px);
+		}
+		.op-white-btn-r {
+			@include bp(-47px, -40px);
+		}
+	}
+
+}

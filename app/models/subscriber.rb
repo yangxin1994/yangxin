@@ -17,6 +17,9 @@ class Subscriber
   scope :subscribed, where(:is_deleted => false)
   scope :unsubscribed, where(:is_deleted => true)
 
+  index({ email: 1 }, { background: true } )
+  index({ is_deleted: 1 }, { background: true } )
+
   def present_admin
     present_attrs :_id, :email, :is_deleted
     present_add   :delivered_count => self.newsletters.count

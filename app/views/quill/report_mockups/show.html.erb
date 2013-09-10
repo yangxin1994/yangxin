@@ -1,0 +1,50 @@
+<!-- content for head -->
+<% content_for :head do %>
+	<script type="text/javascript">
+		window.survey_questions = <%= raw @survey_questions.to_json %>;
+		window.report_mockup = <%= raw @report_mockup.to_json %>;
+		console.log(window.survey_questions);
+		console.log(report_mockup);
+	</script>
+	<%= javascript_include_tag "pages/quill/report_mockup-bundle" %>
+	<%= stylesheet_link_tag "pages/quill/report_mockup-bundle", :media => "all" %>
+<% end %>
+
+<!-- content for left menus -->
+<% content_for :left_menus do %>
+	<%= render :partial => "partials/left_menus_result", :locals => { :left_active => 3 } %>
+<% end %>
+
+<!-- put html code below -->
+
+<div class="page">	
+		<div class="seperator top gray"></div>	
+		<div class="q-render gray">
+			<strong class="f14 g3 title">新建调研报告</strong>
+			<i class="css-gray-white fix"></i>
+			<ul class="remark fix">
+				<li class="blue f14 b l">标题<input type="text" name="title" id="title"></li>
+				<li class="blue f14 b l">作者<input type="text" name="author" id="author"></li>
+				<li class="blue f14 b l">页眉<input type="text" name="header" id="header"></li>
+				<li class="blue f14 b l">页脚<input type="text" name="footer" id="footer"></li>
+			</ul>
+		</div>
+		<div class="q-render white">
+			<div class="style-panel">
+				<span id="single_analysis" class="draggable l"></span>	
+				<span id="cross_analysis" class="draggable l"></span>
+			</div>
+			<div class="edit-panel">
+				<dl id="analysis-list"></dl>
+				<button class="od-button r" id="confirm">完 成</button>
+			</div>
+		</div>
+
+
+		<div class="q-render tintgray">	
+			<div class="date-panel">	
+			</div>	
+		</div>
+		<div class="seperator bottom tintgray"></div>	<!-- 下方圆角，白色 -->
+	</div>
+

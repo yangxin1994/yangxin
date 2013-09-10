@@ -1,0 +1,33 @@
+//=require 'ui/widgets/od_tip'
+//=require 'ui/widgets/od_autotip'
+
+#messages{
+	.receiver{
+		margin-left:10px;
+	}
+}
+
+/*********tip**********/
+.od-tip{
+	.tip-content{
+		padding:10px;
+		word-wrap:break-word;		
+		
+		.green-title{
+			font-weight: bold;
+			font-size: 14px;
+			color:#57A000;
+		}
+
+		.tip-title{
+			width:350px;
+			padding-bottom:5px;
+
+		}	
+	}
+
+	.tip-receiver{
+		padding:10px;	
+		word-wrap:break-word;	
+	}
+}

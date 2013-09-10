@@ -1,0 +1,27 @@
+<div class="date-range-panel panel">
+  <table cellpadding="0" cellspacing="0" width="100%" class="tableStatic resize">
+    <thead>
+      <tr>
+        <td class="question-title">选项</td>
+        <td>绑定属性</td>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each question.issue.items}}
+      <tr>
+        <td data-id="{{id}}">{{content.text}}</td>
+        <td>
+          <div class="moreFields onlyNums">
+            <div class="date-selector">
+              <label>从</label>
+              <div class="date-selector-content first"></div>
+              <label>到</label>
+              <div class="date-selector-content second"></div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
