@@ -7,6 +7,7 @@ require 'csv'
 class Survey
   include Mongoid::Document
   include Mongoid::Timestamps
+  include LogicControl
   field :title, :type => String, default: "调查问卷主标题"
   field :subtitle, :type => String, default: ""
   field :welcome, :type => String, default: ""
@@ -1194,100 +1195,6 @@ class Survey
       quota_object["rules"] = @rules
       quota_object["is_exclusive"] = @is_exclusive
       return quota_object
-    end
-  end
-
-  #----------------------------------------------
-  #
-  #     manipulate on logic control
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def show_logic_control
-    return Marshal.load(Marshal.dump(self.logic_control))
-  end
-
-  def show_logic_control_with_question_objects
-    logic_control = Marshal.load(Marshal.dump(self.logic_control))
-    logic_control.each do |rule|
-      conditions = rule["conditions"]
-      conditions.each do |c|
-        c["question"] = BasicQuestion.find_by_id(c["question_id"])
-      end
-      result = rule["result"]
-      if [1,2].include?(rule["rule_type"])
-        result.each_with_index do |q_id, index|
-          result[index] = BasicQuestion.find_by_id(q_id)
-        end
-      elsif [3,4].include?(rule["rule_type"])
-        result.each do |r|
-          r["question"] = BasicQuestion.find_by_id(r["question_id"])
-        end
-      elsif [5,6].include?(rule["rule_type"])
-        result.each do |r|
-          r["question_1"] = BasicQuestion.find_by_id(r["question_id_1"])
-          r["question_2"] = BasicQuestion.find_by_id(r["question_id_2"])
-        end
-      end
-    end
-    return logic_control
-  end
-
-  def show_logic_control_rule(logic_control_rule_index)
-    logic_control = LogicControl.new(self.logic_control)
-    return logic_control.show_rule(logic_control_rule_index)
-  end
-
-  def add_logic_control_rule(logic_control_rule)
-    logic_control = LogicControl.new(self.logic_control)
-    return logic_control.add_rule(logic_control_rule, self)
-  end
-
-  def update_logic_control_rule(logic_control_rule_index, logic_control_rule)
-    logic_control = LogicControl.new(self.logic_control)
-    return logic_control.update_rule(logic_control_rule_index, logic_control_rule, self)
-  end
-
-  def delete_logic_control_rule(logic_control_rule_index)
-    logic_control = LogicControl.new(self.logic_control)
-    return logic_control.delete_rule(logic_control_rule_index, self)
-  end
-
-  class LogicControl
-    RULE_TYPE = (0..6).to_a
-    def initialize(logic_control)
-      @rules = logic_control
-    end
-
-    def show_rule(rule_index)
-      return ErrorEnum::LOGIC_RULE_NOT_EXIST if @rules.length <= rule_index
-      return Marshal.load(Marshal.dump(@rules[rule_index]))
-    end
-
-    def add_rule(rule, survey)
-      rule["rule_type"] = rule["rule_type"].to_i
-      return ErrorEnum::WRONG_LOGIC_CONTROL_TYPE if !RULE_TYPE.include?(rule["rule_type"])
-      @rules << rule
-      survey.logic_control = @rules
-      survey.save
-      return survey.logic_control
-    end
-
-    def delete_rule(rule_index, survey)
-      return ErrorEnum::LOGIC_CONTROL_RULE_NOT_EXIST if @rules.length <= rule_index
-      @rules.delete_at(rule_index)
-      survey.logic_control = @rules
-      return survey.save
-    end
-
-    def update_rule(rule_index, rule, survey)
-      return ErrorEnum::LOGIC_CONTROL_RULE_NOT_EXIST if @rules.length <= rule_index
-      rule["rule_type"] = rule["rule_type"].to_i
-      return ErrorEnum::WRONG_LOGIC_CONTROL_TYPE if !RULE_TYPE.include?(rule["rule_type"])
-      @rules[rule_index] = rule
-      survey.logic_control = @rules
-      survey.save
-      return survey.logic_control
     end
   end
 
