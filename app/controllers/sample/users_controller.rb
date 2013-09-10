@@ -287,7 +287,7 @@ class Sample::UsersController < Sample::SampleController
 	#账户绑定
 	# GET /users/setting/bindings
 	def bindings
-
+		
 		@bindings = {}
 		if current_user.email_activation
 			@bindings["email"] = [current_user.email, current_user.email_subscribe]
