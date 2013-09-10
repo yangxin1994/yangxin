@@ -1,3 +1,4 @@
+# already tidied up
 class Admin::GiftsController < Admin::AdminController
 
   layout "layouts/admin-todc"
@@ -52,12 +53,6 @@ class Admin::GiftsController < Admin::AdminController
   def destroy
     render_json @gift = Gift.where(:_id =>params[:id]).first do |gift|
       success_true gift.delete_gift
-    end
-  end
-
-  def outstock
-    render_json @gift = Gift.where(:_id =>params[:id]).first do |gift|
-      success_true gift.update_attributes(:status => 2)
     end
   end
 

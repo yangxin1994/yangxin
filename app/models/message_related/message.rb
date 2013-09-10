@@ -1,12 +1,5 @@
+#already tidied up
 require "error_enum"
-# the message object has the following structure
-# {
-#    message_id:   id of the message  
-#    title:        title of the message
-#    content:      content of the message
-#    sender_id:    id of the sender
-#    type:         whether the message is sent to all users 
-#  } 
 class Message
 
 	include Mongoid::Document

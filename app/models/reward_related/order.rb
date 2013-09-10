@@ -1,5 +1,5 @@
 # encoding: utf-8
-
+#already tidied up
 class Order
 	include Mongoid::Document
 	include Mongoid::Timestamps
@@ -179,10 +179,6 @@ class Order
 		return order
 	end
 
-	def update_order(order)
-		return self.update_attributes(order)
-	end
-
 	def auto_handle
 		return false if self.status != WAIT
 		return false if ![MOBILE_CHARGE, QQ_COIN].include?(self.type)
@@ -201,12 +197,6 @@ class Order
 		return self.save
 	end
 
-	def cancel
-		return ErrorEnum::WRONG_ORDER_STATUS if self.status != WAIT
-		self.status = wait
-		self.canceled_at = Time.now.to_i
-		return self.save
-	end
 
 	def finish(success, remark = "")
 		return ErrorEnum::WRONG_ORDER_STATUS if self.status != HANDLE
@@ -256,78 +246,6 @@ class Order
 	def update_remark(remark)
 		self.remark = remark
 		return self.save
-	end
-
-	def callback_confirm(ret_code, err_msg)
-		self.remark = err_msg
-		case ret_code.to_i
-		when 1
-			self.status = SUCCESS
-			# send sample short message
-			if self.type == MOBILE_CHARGE
-				gift_name = "#{self.amount}元话费"
-				return SmsApi.charge_confirm_sms(self.mobile, "", :gift_name => gift_name)
-			end
-		when 9
-			self.status = FAIL
-		end
-		self.finished_at = Time.now.to_i
-		return self.save
-	end
-
-	def self.wait_small_charge_orders
-		orders = Order.where(:type => SMALL_MOBILE_CHARGE, :status => WAIT)
-		max_number = 0
-		amount = 0
-		1.up_to(9) do |e|
-			number = orders.where(:amount => e).length
-			if number > max_number
-				amount = e
-				max_number = number
-			end
-		end
-		orders = orders.where(:amount => e).limit(100)
-		orders_for_ofcard = []
-		orders.each do |o|
-			o.status = HANDLE
-			o.handled_at = Time.now.to_i
-			o.save
-			orders_for_ofcard << [o._id.to_s, o.mobile, e]
-		end
-		return orders_for_ofcard
-	end
-
-	def self.merge_order_id(orders)
-		orders.each do |o|
-			order = Order.find_by_id(o["orderid"])
-			next if order.nil?
-			order.ofcard_order_id = o["billid"]
-			if o["stat"] == "成功"
-				order.status = SUCCESS
-			elsif o["stat"] == "撤销"
-				order.status = FAIL
-			end
-			order.save
-		end
-		return true
-	end
-
-	def self.handled_orders
-		orders = Order.where(:type => SMALL_MOBILE_CHARGE, :status => HANDLE, :ofcard_order_id.ne => "").asc(:handled_at).limit(100)
-		return orders.map { |e| e.ofcard_order_id }
-	end
-
-	def self.update_order_stat(orders)
-		orders.each do |o|
-			order = Order.find_by_ofcard_order_id(o["billid"])
-			next if order.nil?
-			if o["stat"] == "成功"
-				order.status = SUCCESS
-			elsif o["stat"] == "撤销"
-				order.status = FAIL
-			end
-		end
-		return true
 	end
 
 	def info_for_admin

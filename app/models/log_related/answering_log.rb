@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 class AnsweringLog < Log
 
 	field :type, :type => Integer, :default => 1

@@ -1,3 +1,4 @@
+# already tidied up
 class Admin::QualityQuestionsController < Admin::AdminController
   layout 'admin-todc'
   # *****************************
@@ -8,10 +9,6 @@ class Admin::QualityQuestionsController < Admin::AdminController
 
   def objective
     @quality_questions = auto_paginate QualityControlQuestion.objective_questions.desc(:created_at)
-  end
-
-  def matching
-    @quality_questions = auto_paginate QualityControlQuestion.matching_questions.desc(:created_at)
   end
 
   def new

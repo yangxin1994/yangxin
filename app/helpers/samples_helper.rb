@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 
 module SamplesHelper
   def point_reason(_r)

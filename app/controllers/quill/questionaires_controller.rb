@@ -2,16 +2,9 @@
 require 'error_enum'
 class Quill::QuestionairesController < Quill::QuillController
 
-	# before_filter :get_ws_client, :except => [:show]
-
 	before_filter :require_sign_in, :only => [:index, :show]
-
 	before_filter :ensure_survey, :only => [:show]
 
-	def get_ws_client
-		@ws_client = Quill::SurveyClient.new(session_info)
-	end
-	
 	# PAGE: list survey
 	# GET
 	def index
@@ -51,7 +44,7 @@ class Quill::QuestionairesController < Quill::QuillController
 		@survey = Survey.find_by_id(params[:id])
 		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
 		new_survey = @survey.clone_survey(current_user, params[:title])
-		render_json_auto(new_survey.serialize) and return
+		render_json_auto(new_survey) and return
 	end
 
 	# PAGE: show and edit survey
@@ -99,8 +92,8 @@ class Quill::QuestionairesController < Quill::QuillController
 	def deadline
 		@survey = Survey.find_by_id(params[:id])
 		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
-		render_json_auto @survey.publish(current_user)
-		render_json_auto @survey.update_deadline(params[:deadline].to_i)
+		render_json_auto @survey.publish(current_user) and return
+		render_json_auto @survey.update_deadline(params[:deadline].to_i) and return
 	end
 
 	# AJAX: close a published survey

@@ -1,3 +1,4 @@
+#already tidied up
 class PublicNotice
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -43,21 +44,6 @@ class PublicNotice
       user.public_notices << public_notice if user && user.instance_of?(User)
       public_notice.save
       return public_notice     
-    end
-
-    def update_public_notice(public_notice_id, attributes, user)
-      public_notice = PublicNotice.find_by_id(public_notice_id)
-      return PUBLIC_NOTICE_NOT_EXIST if public_notice.blank?
-      return ErrorEnum::PUBLIC_NOTICE_STATUS_ERROR if ![1, 2].include?(attributes[:status])
-
-      public_notice.user = user if user && user.instance_of?(User)
-      return public_notice.update_attributes(attributes)
-    end
-
-    def destroy_by_id(public_notice_id)
-      public_notice = PublicNotice.find_by_id(public_notice_id)
-      return ErrorEnum::PUBLIC_NOTICE_NOT_EXIST if public_notice.blank?
-      return public_notice.update_attribute("status", 4)
     end
   end 
 end

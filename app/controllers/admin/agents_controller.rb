@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 
 class Admin::AgentsController < Admin::AdminController
 
@@ -18,7 +19,7 @@ class Admin::AgentsController < Admin::AdminController
   end
 
   def create
-    @agent = Agent.create(params[:agent])
+    @agent = Agent.create_agent(params[:agent])
     if @agent.created_at
       redirect_to admin_agents_path, :flash => {:success => "代理创建成功!"}
     else

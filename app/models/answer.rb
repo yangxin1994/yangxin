@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 require 'error_enum'
 require 'data_type'
 require 'securerandom'
@@ -12,14 +13,6 @@ class Answer
   field :answer_content, :type => Hash, default: {}
   field :random_quality_control_answer_content, :type => Hash, default: {}
   field :random_quality_control_locations, :type => Hash, default: {}
-  # Due to the logic control rules, volunteer's answer will hide/show some questions/choices.
-  # The hide/show of questions can be recorded in the "answer_content" field
-  # => For those questions that are hidden, their answers are set as "{}", and they will not be loaded
-  # The hide/show of choices is recorded in he logic_control_result
-  # => Specifically, logic_control_result is used to record those choices that are hidden.
-  # => logic_control_result is a hash, the key of which is question id, and the value of which has the following strucutre
-  # => => items : array of input ids that are hidden
-  # => => sub_questions : array of row ids that are hidden
   field :logic_control_result, :type => Hash, default: {}
   field :repeat_time, :type => Integer, default: 0
   # reject_type: 1 for rejected by quota, 2 for rejected by quliaty control (auto quality control), 4 for rejected by manual quality control, 8 for rejected by screen, 16 for timeout
@@ -108,21 +101,6 @@ class Answer
   index({ user_id: 1, survey_id: 1, is_preview:1 }, { background: true } )
   index({ import_id:1},{ background: true })
   index({ ip_address:1},{ background: true })
-  
-  def load_csv(survey=1)
-    filename = "public/import/test.csv"
-    CSV.foreach(filename, :headers => true) do |row|
-      row.to_hash
-    end
-  end
-
-  def self.def_status_attr
-    STATUS_NAME_ARY.each_with_index do |status_name, index|
-      define_method("is_#{status_name}".to_sym) { return 2**index == self.status }
-      define_method("set_#{status_name}".to_sym) { self.status = 2**index; self.save}
-    end
-  end
-  def_status_attr
 
   public
 
@@ -143,7 +121,8 @@ class Answer
     end
   end
 
-  def find_lottery_answers
+  
+  def find_lottery_info
     lottery_data = {}
     prizes_arr = []
     prize_ids = self.rewards.first['prizes'].map{|p| p['id']}
@@ -158,10 +137,6 @@ class Answer
     lottery_data['user_id'] = self.user_id.to_s
     lottery_data['status'] = self.status
     return lottery_data
-  end
-
-  def get_lottery_counts
-    LotteryLog.get_lottery_counts(self.survey.id) 
   end
 
   def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, agent_task_id, channel, referrer, remote_ip, username, password, http_user_agent)
@@ -865,16 +840,6 @@ class Answer
     return self.save
   end
 
-  def estimate_remain_answer_time
-    remain_answer_time = 0.0
-    self.survey.pages.each do |page|
-      page["questions"].each do |q_id|
-        q = BasicQuestion.find_by_id(q_id)
-        remain_answer_time = remain_answer_time + q.estimate_answer_time if self.answer_content[q_id].nil? && !q.nil?
-      end
-    end
-    return remain_answer_time
-  end
 
   def update_quota(old_status)
     quota = self.survey.quota
@@ -979,15 +944,6 @@ class Answer
     end
   end
 
-  def change_sample_account(sample)
-    sample.answers.delete(self) if !self.user.nil?
-    sample.answers << self
-    return true
-  end
-
-  def logout_sample_account
-    self.user.answers.delete(self) if !self.user.nil?
-  end
 
   def select_reward(reward_index, mobile, alipay_account, current_sample)
     return ErrorEnum::HOT_SURVEY if self.check_for_hot_survey(mobile, alipay_account, current_sample)
@@ -1265,7 +1221,6 @@ class Answer
     answer_obj["created_at"] = self.created_at.to_i
     answer_obj["sample_nickname"] = self.user.try(:nickname) || "游客"
     if self.user.present?
-      # answer_obj["sample_nickname"] = self.user.nickname
       answer_obj["sample_avatar"] = self.user.avatar.try(:picture_url)
       answer_obj["sample_id"] = self.user._id.to_s
     end
