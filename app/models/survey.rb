@@ -587,11 +587,6 @@ class Survey
     new_instance.is_star = false
     new_instance.point = 0
     new_instance.spread_point = 0
-    new_instance.reward = 0
-    new_instance.show_in_community = false
-    lottery = new_instance.lottery
-    lottery.surveys.delete(new_instance) if !lottery.nil?
-    new_instance.entry_clerks.each do |a| new_instance.entry_clerks.delete(a) end
     new_instance.answer_auditors.each do |a| new_instance.answer_auditors.delete(a) end
 
     # the mapping of question ids
@@ -646,6 +641,7 @@ class Survey
       end
     end
 
+    new_instance.create_default_reward_scheme
     new_instance.save
 
     return new_instance
