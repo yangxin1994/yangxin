@@ -196,7 +196,7 @@ class Sample::UsersController < Sample::SampleController
 	# GET
 	def basic_info
 		@user_info = current_user.get_basic_attributes
-
+		
 		respond_to do |format|
 			format.html {
 				@user_info["income_person"][1] = 99999999 if @user_info["income_person"].is_a?(Array) and @user_info["income_person"][1] == 1.0/0.0
@@ -287,7 +287,7 @@ class Sample::UsersController < Sample::SampleController
 	#账户绑定
 	# GET /users/setting/bindings
 	def bindings
-
+		
 		@bindings = {}
 		if current_user.email_activation
 			@bindings["email"] = [current_user.email, current_user.email_subscribe]
@@ -385,7 +385,7 @@ class Sample::UsersController < Sample::SampleController
 			return
 		end
 
-		user = User.find_by_email(activate_info["email"])
+		user = User.find_by_id(activate_info["user_id"])
 		if user.nil?
 			@success = false
 			return

@@ -2,6 +2,18 @@
 //=require jquery.cookie
 jQuery(function($) {
 
+	var redict_to_subscribe = window.location.href.split('#')[1];
+	if(typeof(redict_to_subscribe) != 'undefined' && redict_to_subscribe != null){
+
+    	function callback() {
+    		console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    	  setTimeout(function() {
+    	    $( "#effect" ).removeAttr( "style" ).hide().fadeIn();
+    	  }, 1000 );
+    	};
+
+		 $( "#subscribe" ).find('.content').effect( 'highlight', {}, 1000, callback );
+	}
 	//如果用户已经关闭了安装插件提示，那么24小时内不再提示安装
 	if ($.cookie('ignore_plugin')) {
 		$('div.hot-research-banner').remove();

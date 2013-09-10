@@ -102,6 +102,15 @@ class Answer
   index({ import_id:1},{ background: true })
   index({ ip_address:1},{ background: true })
 
+
+  def self.def_status_attr
+    STATUS_NAME_ARY.each_with_index do |status_name, index|
+      define_method("is_#{status_name}".to_sym) { return 2**index == self.status }
+      define_method("set_#{status_name}".to_sym) { self.status = 2**index; self.save}
+    end
+  end
+  def_status_attr
+
   public
 
   def self.find_by_id(answer_id)

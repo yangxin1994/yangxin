@@ -51,14 +51,17 @@
 				position: relative;
 				left: 120px;
 				top: -25px;
-        span{
-          display:inline-block;
-          width:20px;
-          height:20px;
-          background:url(/assets/od-quillme/success.png) no-repeat;
-          margin:2px 5px 0px 20px;
-          float:left;        
-        }				
+				span{
+				  display:inline-block;
+				  width:20px;
+				  height:20px;
+				  background:url(/assets/od-quillme/success.png) no-repeat;
+				  margin:2px 5px 0px 20px;
+				  float:left;        
+				}				
 			}
 		}
+		.login_email.c{
+				padding-left: 90px;
+		}		
 	}

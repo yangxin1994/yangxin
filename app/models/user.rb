@@ -413,6 +413,7 @@ class User
 	def change_email(client_ip)
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i > change_email_expiration_time
 		self.email = self.email_to_be_changed
+		self.email_activation = true
 		return self.login(client_ip, nil, false)
 	end
 

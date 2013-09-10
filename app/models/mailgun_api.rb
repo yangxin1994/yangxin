@@ -140,7 +140,7 @@ class MailgunApi
 
 	def self.change_email(user, protocol_hostname, callback)
 		@user = user
-		activate_info = {"email" => user.email, "email_to_be_changed" => user.email_to_be_changed, "time" => Time.now.to_i}
+		activate_info = {"user_id" => user.id, "email_to_be_changed" => user.email_to_be_changed, "time" => Time.now.to_i}
 		@activate_link = "#{protocol_hostname}#{callback}?key=" + CGI::escape(Encryption.encrypt_activate_key(activate_info.to_json))
 		result = MongoidShortener.generate(@activate_link)
 		@activate_link = "#{protocol_hostname}/#{result}" if result.present?
