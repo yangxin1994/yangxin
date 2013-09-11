@@ -1,4 +1,9 @@
 module SurveyLogicControl
+  extend ActiveSupport::Concern
+
+  included do
+    field :logic_control, :type => Array, default: []
+  end
 
   SCREEN = 0
   SHOW_QUESTION = 1
@@ -38,8 +43,7 @@ module SurveyLogicControl
   end
 
   def delete_logic_control_rule(index)
-    return ErrorEnum::LOGIC_CONTROL_RULE_NOT_EXIST if self.logic_control.length <= index
     self.logic_control.delete_at(index)
-    return self.save
+    self.save
   end
 end

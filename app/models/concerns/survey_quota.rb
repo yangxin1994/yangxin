@@ -1,4 +1,17 @@
 module SurveyQuota
+  extend ActiveSupport::Concern
+
+  included do
+    field :quota, :type => Hash, default: {"rules" => [{"conditions" => [],
+                                                        "amount" => 100,
+                                                        "finished_count" => 0,
+                                                        "submitted_count" => 0}],
+                                            "is_exclusive" => true,
+                                            "quota_satisfied" => false,
+                                            "finished_count" => 0,
+                                            "submitted_count" => 0 }
+  end
+
   QUESTION_QUOTA = 1
   REGION_QUOTA = 2
   CHANNEL_QUOTA = 3
@@ -44,8 +57,6 @@ module SurveyQuota
   end
 
   def delete_quota_rule(index)
-    return ErrorEnum::QUOTA_RULE_NOT_EXIST if self.quota["rules"].length <= index
-    # delete the rule
     self.quota["rules"].delete_at(index)
     self.save
     self.refresh_quota_stats
@@ -91,5 +102,13 @@ module SurveyQuota
     end
     self.save
     return quota
+  end
+
+  def remain_quota_number
+    amount = 0
+    self.quota["rules"].each do |r|
+      amount += r["amount"] - r["finished_count"]
+    end
+    return amount
   end
 end
