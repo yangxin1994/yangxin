@@ -1,6 +1,7 @@
 //=require ui/plugins/od_enter
 //=require ui/plugins/od_button_text
 //=require ui/widgets/od_popup
+//=require ui/widgets/od_share
 
 //=require twitter/bootstrap/tooltip
 //=require twitter/bootstrap/popover
@@ -8,7 +9,12 @@
 jQuery(function($) {
 	// start invite friends
 	$('#start_invite').click(function() {
-		//TODO: window.spread_url
+		$.od.odShare({
+			point: parseInt($('#spread_point').text()),
+			survey_title: $('#survey_title').text(),
+			scheme_id: window.rsi,
+			images: ""	//TODO: images for lottery
+		});
 	});
 
 	// rewards

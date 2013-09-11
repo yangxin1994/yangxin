@@ -479,13 +479,14 @@ class User
 			user.mobile_subscribe = true
 		end
 		user.save
-		RegistLog.create_regist_log(user.id)
+		RegistLog.create_regist_log(user.id)  unless RegistLog.find_by_user_id(user.id).present?
 		return user.login(client_ip, client_type, false)
 	end
 
 	def change_email(client_ip)
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i > change_email_expiration_time
 		self.email = self.email_to_be_changed
+		self.email_activation = true
 		return self.login(client_ip, nil, false)
 	end
 
