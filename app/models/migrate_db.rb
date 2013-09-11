@@ -1,36 +1,6 @@
 #encoding: utf-8
 class MigrateDb
 
-=begin
-	def self.temp
-		row_export = []
-		csv = CSV.parse(File.read('lib/pure_data.csv'), :headers => false)
-		CSV.open("lib/output.csv", "wb") do |csv_export|
-			csv.each_with_index do |row, index|
-				if index%30 == 0
-					# the first row of a user
-					csv_export << row_export if row_export.present?
-					row_export = []
-					content = row[0].split(' ')
-					row_export[0] = content[0][0..4]
-					row_export[1] = content[0][5..14]
-					row_export[2] = content[0][15..-1]
-					row_export[3] = content[1][0..10]
-					row_export[4] = content[1][11..-1].to_s + ":" + content[2]
-					row_export[5] = content[3] + ":" + content[4]
-					row_export[6] = content[5][0]
-				else
-					content = row[0]
-					content = content.gsub(/\s+/, "")
-					content = content.delete("!")
-					content = content.split(//)
-					row_export += content
-				end
-			end
-		end
-	end
-=end
-
 	def self.migrate_netranking_points
 		csv = CSV.parse(File.read("lib/data.csv"), :headers => false)
 		# the structure of the csv file
