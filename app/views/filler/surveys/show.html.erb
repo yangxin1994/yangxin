@@ -30,7 +30,7 @@
 
 			<% if @survey_closed %>
 
-			<h1><%= @survey['title'] %></h1>
+			<h1 id='survey_title'><%= @survey['title'] %></h1>
 			<div class='msg purple'>
 				<em></em>
 				<span>
@@ -85,13 +85,13 @@
 			<% elsif @reward_scheme_type > 0 && @survey.quillme_hot && user_signed_in && (current_user.answers.not_preview.length > 0) %>
 
 			<!-- signed in user is not allowed -->
-			<h1><%= @survey['title'] %></h1>
+			<h1 id='survey_title'><%= @survey['title'] %></h1>
 			<div class='msg purple'>
 				<em></em>
 				<span>
 					<b>本问卷只面向未参加过<%= corp_name %>调研的用户</b><br />
 					<% if @survey['spread_point'] > 0 %>
-					<%= corp_name %>会员每成功邀请一位好友答题可获<em><%= @survey['spread_point'] %></em>积分。<a id='start_invite' href='javascript:void(0);'>开始邀请</a>
+					<%= corp_name %>会员每成功邀请一位好友答题可获<em id='spread_point'><%= @survey['spread_point'] %></em>积分。<a id='start_invite' href='javascript:void(0);'>开始邀请</a>
 					<% else %>
 					您已经参加过<%= corp_name %>其他调研，不能参加本次调研。
 					<% end %>
@@ -100,7 +100,7 @@
 
 			<% else %>
 
-			<h1><%= @survey['title'] %></h1>
+			<h1 id='survey_title'><%= @survey['title'] %></h1>
 			<h2><%= @survey['subtitle'] %></h2>
 			<div class='desc'><%= raw @survey['welcome'] %></div>
 			<% if @survey['quillme_hot'] && @reward_scheme_type > 0 %>
