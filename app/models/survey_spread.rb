@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 require 'error_enum'
 class SurveySpread
 	include Mongoid::Document
@@ -33,9 +34,5 @@ class SurveySpread
 			survey.survey_spreads << ss
 		end
 		ss.save
-	end
-
-	def self.surveys_with_spread_hash(user)
-		ss_array = user.survey_spreads
 	end
 end

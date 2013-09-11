@@ -31,12 +31,5 @@ class Sample::HomesController < Sample::SampleController
     end
     fresh_when(:etag => [@hot_survey,@rsl,@public_notices,@hotest_gifts,@top_rank_users,@fresh_news])
 	end
-
-
-	def demo
-	end
-
-	def help
-	end
 	
 end

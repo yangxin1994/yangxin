@@ -1,3 +1,4 @@
+# already tidied up
 require 'tool'
 require 'error_enum'
 class Gift
@@ -55,31 +56,12 @@ class Gift
 		return self.normal.where(:_id => gift_id).first
 	end
 
-	def self.find_real_gift(desc_type)
-		gifts = self.on_shelf.real.desc("#{desc_type}")
-		gifts = gifts.map do |gift| 
-			gift['photo_src'] = gift.photo.nil? ? Gift::DEFAULT_IMG : gift.photo.picture_url
-			gift
-		end
-		return gifts
-	end
-
 	def info
 		photo_src = self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url
 		self.write_attribute(:photo_src, photo_src)
 		return self
 	end
 
-	def self.create_gift(gift)
-		photo_url = gift.delete("photo_url")
-		material = Material.create_image(photo_url)
-		gift = Gift.new(gift)
-		gift.price = gift.point / 100 if gift.price.blank?
-		gift.save
-		gift.photo = material
-		gift["photo_url"] = material.value
-		return gift
-	end
 
 	def self.generate_opt(order,gift)
 		opt = {}
@@ -126,13 +108,6 @@ class Gift
 		return self.save
 	end
 
-	def self.check_params(gift)
-		material_id = gift["material_id"]
-		material = Material.find_by_id(material_id)
-		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
-		return Errorenum::WRONG_GIFT_TYPE if ![1,2,4].include?(gift["type"].to_i)
-		return true
-	end
 
 
 	def self.generate_gift_id(order_type)

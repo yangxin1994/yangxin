@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 require 'error_enum'
 
 class RewardScheme
@@ -39,13 +40,6 @@ class RewardScheme
 		return new_reward_scheme
 	end
 
-	def self.update_reward_scheme(reward_scheme_id, reward_scheme)
-		retval = verify_reward_scheme_type(reward_scheme)
-		return retval if !(retval.to_s == "true")
-		reward = RewardScheme.not_default.find_by_id(reward_scheme_id)
-		reward.update_attributes(reward_scheme)
-		return true
-	end
 
 	def self.verify_reward_scheme_type(reward_scheme)
 		retval = true

@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 
 class Agent::Sessions::ResetPasswordController < Agent::AgentsController
   

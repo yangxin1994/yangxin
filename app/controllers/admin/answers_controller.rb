@@ -1,3 +1,4 @@
+# already tidied up
 class Admin::AnswersController < Admin::AdminController
 
   layout "layouts/admin-todc"

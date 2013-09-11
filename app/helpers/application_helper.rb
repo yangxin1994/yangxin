@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 module ApplicationHelper
 
 	def var_to_js
@@ -18,68 +19,10 @@ module ApplicationHelper
 		end.join(";\n").html_safe
 	end
 
-	def paginator_tag(items)
-		rails_params = params.except(:id,:action,:controller).to_json
-		render :partial => "admin/application/paginator",  :locals => {
-			:paginator => items,
-			:rails_params => rails_params,
-			:get_url => request.path}
-	end
-
 	def paginator_mini(paginator)
-
-
 		render :partial => "admin/application/paginator_mini",  :locals => {
 			:paginator => paginator
 		}
-	end
-
-	def paginator_tag_ajax(items)
-		raisl_params = params.except(:id,:action,:controller).to_json
-		render :partial => "admin/application/paginator_ajax",  :locals => {
-			:paginator => items,
-			:raisl_params => raisl_params,
-			:get_url => request.path}
-	end
-
-	def assets_icon(icon, style)
-		"/assets/images/icons/#{style}/#{icon}.png"
-	end
-
-	def ajax_loader_img
-		'<div class="center"><img src="/assets/images/loaders/loader7.gif" alt="" class="p12"></div>'.html_safe
-	end
-
-	def notice_warning(message)
-		%Q{
-		<div class="nNote nWarning hideit">
-			<p><strong>警告: </strong>#{message}</p>
-		</div>
-		}.html_safe
-	end
-
-	def notice_information(message)
-		%Q{
-		<div class="nNote nInformation hideit">
-			<p><strong>信息: </strong>#{message}</p>
-		</div>
-		}.html_safe
-	end
-
-	def notice_success(message)
-		%Q{
-		<div class="nNote nSuccess hideit">
-			<p><strong>成功: </strong>#{message}</p>
-		</div>
-		}.html_safe
-	end
-
-	def notice_failure(message)
-		%Q{
-		<div class="nNote nFailure hideit">
-			<p><strong>失败: </strong>#{message}</p>
-		</div>
-		}.html_safe
 	end
 
 	def notice_auto

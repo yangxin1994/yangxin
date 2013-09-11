@@ -1,3 +1,4 @@
+# already tidied up
 class Admin::PrizesController < Admin::AdminController
   before_filter :require_sign_in, :only => [:index, :create, :update, :destroy]
 

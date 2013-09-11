@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 require 'error_enum'
 require 'securerandom'
 class Tag
@@ -11,17 +12,4 @@ class Tag
 	index({ content: 1 }, { background: true } )
 
 	validates_uniqueness_of :content
-
-
-	def self.find_by_content(content)
-		return Tag.where(:content => content)[0]
-	end
-
-	def self.get_or_create_new(content)
-		tag = self.find_by_content(content)
-		return tag if !tag.nil?
-		tag = Tag.new(:content => content)
-		tag.save
-		return tag
-	end
 end

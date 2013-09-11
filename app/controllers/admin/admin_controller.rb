@@ -1,3 +1,4 @@
+# already tidied up
 class Admin::AdminController < ApplicationController
   
   layout "admin"

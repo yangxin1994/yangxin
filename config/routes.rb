@@ -5,32 +5,6 @@ OopsData::Application.routes.draw do
   # get '/:unique_key' => 'utility/short_urls#show', :constraints => { :unique_key => /~.+/ }
   match '/:unique_key' => 'mongoid_shortener/shortened_urls#translate', :via => :get, :constraints => { :unique_key => /~.+/ }
 
-  # accounts
-  scope :module => 'account' do
-    resource :signup, :only => [:show, :create]
-    resource :activate, :only => [:new, :create, :show] do
-      member do
-        get :done
-      end
-    end
-    resource :password, :only => [:update] do
-      member do
-        get :find
-        post :send_reset_email
-        get :reset
-      end
-    end
-    resource :signin, :only => [:show, :create]
-    resources :connects, :only => [:show]
-    resource :signout, :only => [:show]
-    resource :profile, :only => [:show, :update] do
-      member do
-        put :update_password
-      end
-    end
-    resources :messages, :only => [:index]
-  end
-
   resources :jobs, :only => [:show] do
     member do
       get :data_list, :stats, :analysis_result, :file_uri
@@ -128,16 +102,16 @@ OopsData::Application.routes.draw do
       get  :sign_up, :as => :sign_up
       post :login,   :as => :login 
       get  :sign_out,:as => :sign_out
-      post :create_sample,:as => :create_sample
-      get  :check_email_mobile,:as => :check_email_mobile
-      get  :active_notice,:as => :active_notice
+      post :regist,:as => :regist
+      get  :check_user_exist,:as => :check_user_exist
+      get  :regist_succ,:as => :regist_succ
       get  :email_activate,:as => :email_activate
       post :mobile_activate,:as => :mobile_activate
       get  :re_mail,:as => :re_mail
       post  :get_basic_info_by_auth_key, :as => :get_basic_info_by_auth_key
       get :forget_password, :as => :forget_password
       get :send_forget_pass_code,:as => :send_forget_pass_code
-      get :make_forget_pass_activate, :as => :make_forget_pass_activate
+      get :forget_pass_mobile_activate, :as => :forget_pass_mobile_activate
       get :generate_new_password,:as => :generate_new_password
       get :get_account,:as => :get_account,:as => :get_account
     end
@@ -148,9 +122,9 @@ OopsData::Application.routes.draw do
       collection do
         get  :get_special_status_surveys
         post :get_reward_type_count
-        post :make_rss_activate
-        get  :active_rss_able
-        get  :make_rss_mobile_activate
+        post :generate_rss_activate_code
+        get  :email_rss_activate
+        get  :mobile_rss_activate
         get  :re_rss_mail
         get  :cancel_subscribe
       end
@@ -173,7 +147,6 @@ OopsData::Application.routes.draw do
 
     resources :users,:except => [:show] do
           collection do
-            # 
             get 'get_mobile_area'
             # surveys
             get 'join_surveys', 'spread_surveys'
@@ -501,5 +474,6 @@ OopsData::Application.routes.draw do
   # root :to => "sample/homes#show", :constraints => { :domain => "wenjuanba.com" }, as: :wenjuanbacom_root
   # root :to => 'quill/indices#show'
   root :to => "sample/homes#show"
-  # root :to => "welcome#index"
+  # Just for test
+  resource :odwidgets, :only => [:show]
 end

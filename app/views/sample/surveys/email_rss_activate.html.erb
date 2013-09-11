@@ -7,7 +7,7 @@
   <%if @success %>
     <div class="notice_head">
       <img src="/assets/od-quillme/regist_succ.png"  />
-      <span class="success">更换账户邮箱成功 </span>
+      <span class="success">订阅成功 </span>
       <div styl="clear:both;"></div>
     </div>
     <div class="login_email">
@@ -18,12 +18,18 @@
   <% else %>
     <div class="notice_head">
       <img src="/assets/od-quillme/reg_fail.png"  />
-      <span>更换账户邮箱失败</span>
+      <span>订阅失败</span>
       <div styl="clear:both;"></div>
     </div>
-    <div class="login_email c">
+    <div class="login_email">
       <p>
-        您的链接不正确或者已经过期，您可以前往<a href="/users/setting/bindings">账户中心</a>重新发送更换账户邮箱邮件
+        您的激活链接不正确或者已经过期，您可以
+      </p>
+      <p>
+        <a class="re_mail" href="javascript:void(0);" data="<%=@email%>">重新发送激活邮件</a>
+        <div class="re_notice" style="display:none;">
+          <span></span><font>邮箱验证已重新发送，请查收</font> 
+        </div>
       </p>
     </div>  
   <%end %>
