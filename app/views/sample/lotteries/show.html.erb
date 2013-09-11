@@ -84,7 +84,7 @@
 		</div>		
 	</div>
 
-	
+	<% if @fail_lottery_logs.present? %>
 	<div class="rank dashed-box l">
 		<div class="dashed-box-inner">
 			<div class="dashed-box-inner-top">
@@ -164,10 +164,17 @@
 						</li>		
 					<% end %>		
 				</ul>
+			<% else %>
+				<ul class="rank-list succ_log" style="display:none;">
+						<li style="border-bottom:none";>
+							无中奖记录
+						</li>			
+				</ul>			
 			<% end %>
 		</div>
 	</div>
 	<div style="clear:both"></div> 
+	<% end %>
 </div>
 
 
