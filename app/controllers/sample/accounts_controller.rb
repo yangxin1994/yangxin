@@ -62,7 +62,9 @@ class Sample::AccountsController < Sample::SampleController
     mails = ['126.com','163.com','sina.com','yahoo','qq.com']
     @account = params[:k]
     @account = Base64.decode64(@account)
-  
+    Rails.logger.info("---------------------------------")
+    Rails.logger.info(@account)
+    Rails.logger.info("---------------------------------")
     m = mails.select{|mail| @account.include?(mail)}
     if m.present?
       @mail_t = "http://www.mail.#{m.first}"
@@ -113,7 +115,7 @@ class Sample::AccountsController < Sample::SampleController
       @success = false
     else
       @success = true
-      refresh_session(retval['auth_key'])
+      #refresh_session(retval['auth_key'])
       user = User.find_by_auth_key(retval['auth_key'])
       @email  = Base64.encode64(user.email).chomp()
     end
@@ -127,7 +129,7 @@ class Sample::AccountsController < Sample::SampleController
     retval = User.activate("mobile", activate_info, request.remote_ip, params[:_client_type])
 
     render_json_e retval and return if retval.class == String && retval.start_with?("error_")
-    refresh_session(retval['auth_key'])
+    #refresh_session(retval['auth_key'])
     render_json_auto retval
   end
 

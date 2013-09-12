@@ -16,23 +16,26 @@ $(function() {
 
 	$('button.binding_now').click(function() {
 		var email = $('#y_mail').val()
-		if (email.length < 1 || !$.regex.isEmail(email)) {
-			$('#y_mail').addClass('error')
-		} else {
-			$.putJSON('/users/setting/change_email', {
-				email: email.trim()
-			}, function(data) {
-				if (data.success) {
-					$('button.binding_now').next('.re_notice').find('span').css('background-image', 'url("/assets/od-quillme/success.png")')
-					$('button.binding_now').next('.re_notice').find('font').text('验证成功')
-					$('button.binding_now').next('.re_notice').show()
-				} else {
-					$('button.binding_now').next('.re_notice').find('span').css('background-image', 'url("/assets/od-quillme/faild.png")')
-					$('button.binding_now').next('.re_notice').find('font').text('此邮箱已经被使用')
-					$('button.binding_now').next('.re_notice').show()
-				}
-			})
-		}
+			if (email.length < 1 || !$.regex.isEmail(email)){
+				$('#y_mail').addClass('error')
+			}else{
+				$.putJSON('/users/setting/change_email',{email: email.trim(),mobile: Base64.decode(params).trim()}, function(data){
+						if (data.success) {
+							$('button.binding_now').next('.re_notice').find('span').css('background-image','url("/assets/od-quillme/success.png")')
+							$('button.binding_now').next('.re_notice').find('font').text('验证成功')
+							$('button.binding_now').next('.re_notice').show()
+						}else {
+							$('button.binding_now').next('.re_notice').find('span').css('background-image','url("/assets/od-quillme/faild.png")')
+							if(data.value['error_code'] == 'error_4'){
+								$('button.binding_now').next('.re_notice').find('font').text('该用户不存在')
+							}else{
+								$('button.binding_now').next('.re_notice').find('font').text('此邮箱已经被使用')	
+							}
+							
+							$('button.binding_now').next('.re_notice').show()
+						}
+					})  					
+			}
 	})
 
 
