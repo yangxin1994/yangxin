@@ -2,7 +2,7 @@
 class Sample::UsersController < Sample::SampleController
   layout :resolve_layout
 
-  before_filter :require_sign_in, :except => [:change_email_verify_key]
+  before_filter :require_sign_in, :except => [:change_email,:change_email_verify_key]
   before_filter :get_self_extend_info, :except => [:survey_detail, :spread_counter, 
                                       :update_logistic_address, :update_password, 
                                       :destroy_notification, :remove_notifications,
@@ -434,6 +434,8 @@ class Sample::UsersController < Sample::SampleController
   # PUT /users/setting/change_mobile?email=
   def change_email
     render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST and return if !User.find_by_email(params[:email]).nil?
+    current_user ||= User.find_by_mobile(params[:mobile])
+    render_json_e ErrorEnum::USER_NOT_EXIST and return unless current_user.present? 
     current_user.email_to_be_changed = params[:email]
     current_user.change_email_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
     current_user.save
