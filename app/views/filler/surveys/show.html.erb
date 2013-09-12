@@ -15,7 +15,7 @@
 
 		// set start button text
 		<% if @percentage > 0 %>
-		$('#start_btn').text('继续答题（已完成' + Math.round(<%= @percentage * 100 %> ) + '%）');
+		$('#start_btn').text('继续答题（已完成' + Math.round(<%= @percentage * 100 %>) + '%）');
 		<% else %>
 		var left_time = <%=@survey.estimate_answer_time %>;
 		$('#start_btn').text('开始答题' + (left_time > 0 ? '（耗时' + $.util.printTimeFriendly(left_time) + '）' : ''));
