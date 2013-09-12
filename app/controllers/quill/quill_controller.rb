@@ -10,7 +10,7 @@ class Quill::QuillController < ApplicationController
 
 	def ensure_survey
 		return @survey if @survey
-		@survey = Survey.find_by_id(params[:questionaire_id])
+		@survey = Survey.find(params[:questionaire_id])
 		return
 	end
 

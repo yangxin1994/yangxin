@@ -133,7 +133,7 @@ class Survey
   DELETED = 4
 
 
-  scope :stars, ->{where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
+  scope :stars, -> {where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
   scope :published, lambda { where(:status  => 2) }
   scope :normal, lambda { where(:status.gt => -1) }
   scope :closed, lambda { where(:status => 1) }
@@ -1572,7 +1572,7 @@ class Survey
     status_ary = Tool.convert_int_to_base_arr(status)
     # To solve different version status,
     # status = 4 and  status = -1 are deleted status
-    status_ary << -1 if status_ary.include?(4)
+    # status_ary << -1 if status_ary.include?(4)
     return Survey.where(:status.in => status_ary).desc(:created_at)
   end
 
