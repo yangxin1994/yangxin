@@ -60,6 +60,7 @@ class Answer
   scope :unreviewed, lambda { where(:status => UNDER_REVIEW) }
   scope :ongoing, lambda {where(:status => EDIT)}
   scope :wait_for_review, lambda {where(:status => UNDER_REVIEW)}
+  scope :my_spread, lambda{|user_id| where(:introducer_id => user_id)}
 
   belongs_to :agent_task
   belongs_to :user, class_name: "User", inverse_of: :answers

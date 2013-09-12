@@ -76,10 +76,11 @@ class Sample::AccountsController < Sample::SampleController
 
     user = nil
     if @account.match(User::EmailRexg)  ## match email
-      user = User.find_by_email(@account.downcase)
+      user = User.find_by(email:@account.downcase) # raise error if not found
     elsif @account.match(/^\d{11}$/)  ## match mobile
-      user = User.find_by_mobile(@account)
+      user = User.find_by(mobile:@account) #raise error if not found
     end
+
     render_json_e(ErrorEnum::USER_NOT_EXIST) and return if user.nil?
     render_json_e(ErrorEnum::USER_NOT_REGISTERED) and return if user.status == 0
     render_json_e(ErrorEnum::USER_ACTIVATED) and return if user.is_activated
@@ -133,7 +134,7 @@ class Sample::AccountsController < Sample::SampleController
 
   def get_basic_info_by_auth_key
     @answer_number = current_user.answers.not_preview.finished.length
-    @spread_number = Answer.where(:introducer_id => current_user._id).not_preview.finished.length
+    @spread_number = Answer.my_spread(current_user._id).not_preview.finished.length
     @bind_info = {}
     ["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
       @bind_info[website] = !ThirdPartyUser.where(:user_id => current_user._id.to_s, :website => website).blank?
