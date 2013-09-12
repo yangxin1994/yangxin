@@ -126,7 +126,7 @@ class Filler::FillerController < ApplicationController
 
 			if answer.is_edit
 				answer_index = answer.index_of(questions)
-				question_number = answer.survey.all_questions_id(false).length + answer.random_quality_control_answer_content.length,
+				question_number = answer.survey.all_questions_id(false).length + answer.random_quality_control_answer_content.length
 				@percentage = answer_index.to_f / question_number.to_f
 			else
 				redirect_to show_a_path(answer_id) and return
