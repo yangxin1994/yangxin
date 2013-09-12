@@ -48,7 +48,7 @@
 			<% if @public_notices.present? %>
 			<ul>
 				<% @public_notices.each_with_index do |pn,index| %>
-					<li <%= hide_border?(@public_notices,index) %>>
+					<li <%= hide_border?(@public_notices.to_ary,index) %>>
 						<a href="<%= public_notice_path(pn['_id']) %>">
 							<span class="bulletin-title"><%= truncate("#{pn['title']}", :length => 25)%></span>
 						</a>

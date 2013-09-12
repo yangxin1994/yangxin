@@ -34,7 +34,7 @@ class Log
 	end
 
 	def self.fresh_logs
-		return self.where(:type.in => [2,8,16], :reason.ne => PointLog::IMPORT)
+		return self.where(:type.in => [2,8,16], :reason.ne => PointLog::IMPORT,:reason.ne => PointLog::ADMIN_OPERATE)
 	end
 
 	def self.get_new_logs(limit=5,type=nil)
