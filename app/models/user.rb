@@ -1049,4 +1049,20 @@ class User
 		return nickname
 	end
 
+	def cal_point
+		point_logs = PointLog.where(:user_id => self._id)
+		point = 0
+		point_logs.each do |pl|
+			point += pl.amount
+		end
+		self.point = (point >= 0 ? point : 0)
+		self.save
+	end
+
+	def self.cal_point
+		User.where(status: 2).each_with_index do |u, index|
+			puts index if index%100 == 0
+			u.cal_point
+		end
+	end
 end
