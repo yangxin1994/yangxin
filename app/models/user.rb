@@ -1060,7 +1060,7 @@ class User
 	end
 
 	def self.cal_point
-		User.all.each_with_index do |u, index|
+		User.where(status: 2).each_with_index do |u, index|
 			puts index if index%100 == 0
 			u.cal_point
 		end
