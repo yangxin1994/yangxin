@@ -1,4 +1,4 @@
-module SurveyFilter
+module SurveyComponents::SurveyFilter
   extend ActiveSupport::Concern
 
   included do

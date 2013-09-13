@@ -4,14 +4,15 @@ require 'error_enum'
 require 'quality_control_type_enum'
 require 'quill_common'
 require 'csv'
+Dir[File.dirname(__FILE__) + '/lib/survey_components/*.rb'].each {|file| require file }
 class Survey
   include Mongoid::Document
   include Mongoid::Timestamps
-  include SurveyFilter
-  include SurveyPage
-  include SurveyLogicControl
-  include SurveyQuota
-  include SurveyReportMockup
+  include SurveyComponents::SurveyFilter
+  include SurveyComponents::SurveyPage
+  include SurveyComponents::SurveyLogicControl
+  include SurveyComponents::SurveyQuota
+  include SurveyComponents::SurveyReportMockup
   field :title, :type => String, default: "调查问卷主标题"
   field :subtitle, :type => String, default: ""
   field :welcome, :type => String, default: ""
@@ -21,9 +22,6 @@ class Survey
   field :description, :type => String, default: "调查问卷描述"
   # can be 1 (closed), 2 (published), 4 (deleted)
   field :status, :type => Integer, default: 2
-  # field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
-  # field :filters, :type => Array, default: []
-  # field :logic_control, :type => Array, default: []
   field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
     "has_progress_bar" => true,
     "has_question_number" => true,

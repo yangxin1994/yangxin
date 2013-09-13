@@ -1,4 +1,4 @@
-module SurveyQuota
+module SurveyComponents::SurveyQuota
   extend ActiveSupport::Concern
 
   included do

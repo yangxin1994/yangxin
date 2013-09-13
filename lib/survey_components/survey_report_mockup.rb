@@ -1,4 +1,4 @@
-module SurveyReportMockup
+module SurveyComponents::SurveyReportMockup
   extend ActiveSupport::Concern
 
   included do

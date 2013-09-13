@@ -1,4 +1,4 @@
-module SurveyPage
+module SurveyComponents::SurveyPage
   extend ActiveSupport::Concern
 
   included do

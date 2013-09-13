@@ -1,4 +1,4 @@
-module SurveyLogicControl
+module SurveyComponents::SurveyLogicControl
   extend ActiveSupport::Concern
 
   included do
