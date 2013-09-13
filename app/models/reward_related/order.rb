@@ -378,7 +378,6 @@ class Order
       item = order.gift || order.prize
       sample = order.sample
       unless sample && item
-        order.destroy
         next
       end
       case order.type
