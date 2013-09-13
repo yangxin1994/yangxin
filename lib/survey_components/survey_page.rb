@@ -5,10 +5,23 @@ module SurveyComponents::SurveyPage
     field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
   end
 
+  def insert_question(page_index, pre_question_id, question)
+    page = self.pages[page_index]
+    if pre_question_id.to_s == "-1"
+      question_index = page.length - 1
+    elsif pre_question_id.to_s == "0"
+      question_index = -1
+    else
+      question_index = page["questions"].index(pre_question_id)
+    end
+    page["questions"].insert(question_index + 1, question._id.to_s)
+    self.save
+  end
+
   def create_page(page_index, page_name)
     return ErrorEnum::OVERFLOW if page_index < -1 or page_index > self.pages.length - 1
     new_page = {"name" => page_name, "questions" => []}
-    self.pages.insert(page_index+1, new_page)
+    self.pages.insert(page_index + 1, new_page)
     self.save
     return new_page
   end

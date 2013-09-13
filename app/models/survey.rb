@@ -1,7 +1,6 @@
 # encoding: utf-8
 # already tidied up
 require 'error_enum'
-require 'quality_control_type_enum'
 require 'quill_common'
 require 'csv'
 Dir[File.dirname(__FILE__) + '/lib/survey_components/*.rb'].each {|file| require file }
@@ -410,12 +409,6 @@ class Survey
     return last_update_time
   end
 
-  #----------------------------------------------
-  #
-  #     clone survey
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
   def clone_survey(operator, title = nil)
     # clone the meta data of the survey
     new_instance = self.clone
@@ -489,77 +482,29 @@ class Survey
     return new_instance
   end
 
-  #----------------------------------------------
-  #
-  #     manipulate on questions
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def create_question(page_index, question_id, question_type)
-    current_page = self.pages[page_index]
-    if current_page == nil
-      # if the page cannot be found, append a new page in the last and insert the question into that page
-      self.pages << {"name" => "", "questions" => []}
+  def create_question(page_index, pre_question_id, question_type)
+    if self.pages[page_index].nil?
       page_index = self.pages.length - 1
-      question_id = "-1"
-      current_page = self.pages[page_index]
-    end
-    if question_id.to_s == "-1"
-      question_index = current_page["questions"].length - 1
-    elsif question_id.to_s == "0"
-      question_index = -1
-    else
-      question_index = current_page["questions"].index(question_id)
-      return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
+      create_page(page_index, "")
     end
     question = Question.create_question(question_type)
-    return ErrorEnum::WRONG_QUESTION_TYPE if question == ErrorEnum::WRONG_QUESTION_TYPE
-    current_page["questions"].insert(question_index+1, question._id.to_s)
-    self.save
-    return question
+    insert_question(page_index, pre_question_id, question)
+    question
   end
 
   def update_question(question_id, question_obj)
     question = Question.find_by_id(question_id)
-    return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id) || question.nil?
-    # quality control question in a survey cannot be updated
-    question_inst = question.clone
-    retval = question.update_question(question_obj)
-    # the logic control rules need to be adjusted
+    question.update_question(question_obj)
     adjust_logic_control_quota_filter('question_update', question_id)
-    return retval if retval != true
-    return question
+    question
   end
 
   def move_question(question_id_1, page_index, question_id_2)
-    from_page = nil
-    self.pages.each do |page|
-      if page["questions"].include?(question_id_1)
-        from_page = page
-        break
-      end
-    end
-    return ErrorEnum::QUESTION_NOT_EXIST if from_page == nil
-    to_page = self.pages[page_index]
-    # if the to_page does not exist, create a new page at the end of the survey
-    if to_page == nil
-      self.pages << {"name" => "", "questions" => []}
-      to_page = self.pages[-1]
-      question_id_2 = "-1"
-    end
-    if question_id_2.to_s == "-1"
-      question_index = -1
-    else
-      question_index = to_page["questions"].index(question_id_2)
-      return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
-    end
-    question_index_to_be_delete = from_page["questions"].index(question_id_1)
-    from_page["questions"][question_index_to_be_delete] = ""
-    to_page["questions"].insert(question_index+1, question_id_1)
-    from_page["questions"].delete("")
-    # the logic control rules need to be adjusted
+    remove_question(question_id_1, "")
+    insert_question(page_index, question_id_2, Question.find(question_id_1))
+    remove_question("")
     adjust_logic_control_quota_filter('question_move', question_id_1)
-    return self.save
+    self.save
   end
 
   def clone_question(question_id_1, page_index, question_id_2)
@@ -587,31 +532,22 @@ class Survey
     return new_question
   end
 
-  def get_question_inst(question_id)
-    return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
-    question = Question.find_by_id(question_id)
-    return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
-    return question
-  end
-
-  def delete_question(question_id)
-    question = BasicQuestion.find_by_id(question_id)
-    return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
-    find_question = false
+  def remove_question(question_id, replace = nil)
     self.pages.each do |page|
-      if page["questions"].include?(question_id)
-        page["questions"].delete(question_id)
-        find_question = true
+      index = page["questions"].index(question_id)
+      if index.present?
+        page["questions"].delete(question_id) if replace.nil?
+        page["questions"][index] = replace if replace.present?
         break
       end
     end
-    return ErrorEnum::QUESTION_NOT_EXIST if !find_question
     self.save
-    # logic control rules need to be adjusted
     adjust_logic_control_quota_filter('question_delete', question_id)
-    question.clear_question_object
-    question.destroy if question.type_of(Question)
-    return true
+  end
+
+  def delete_question(question_id)
+    self.remove_question(question_id)
+    Question.find(question_id).destroy
   end
 
   def all_questions(include_prg = true)

@@ -21,8 +21,7 @@ module SurveyComponents::SurveyLogicControl
   end
 
   def show_logic_control_rule(index)
-    return ErrorEnum::LOGIC_CONTROL_RULE_NOT_EXIST if self.logic_control.length <= index
-    return Marshal.load(Marshal.dump(self.logic_control[index]))
+    return self.logic_control[index.to_i]
   end
 
   def add_logic_control_rule(rule)

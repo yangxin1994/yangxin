@@ -252,6 +252,5 @@ class Filler::AnswersController < Filler::FillerController
 				:domain => :all
 		}
 		render_json_auto
-		# render :json => Common::ResultInfo.ok
 	end
 end

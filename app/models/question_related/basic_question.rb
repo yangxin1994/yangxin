@@ -26,10 +26,6 @@ class BasicQuestion
 	field :issue, :type => Hash
 	field :question_type, :type => Integer
 
-	before_save :clear_question_object
-	before_update :clear_question_object
-	before_destroy :clear_question_object
-
 	index({ _id: 1, _type: 1 }, { background: true } )
 
 	ATTR_NAME_ARY = %w[content note]
@@ -136,14 +132,6 @@ class BasicQuestion
 	def type_of(class_name)
 		return self.class == class_name
 	end
-
-	#*description*: clear the cached question object corresponding to current instance, usually called when the question is updated, either its meta data, or questions and constrains
-	#
-	#*params*:
-	def clear_question_object
-		Cache.write(self._id, nil)
-	end
-
 
 	def clone
 		return Marshal.load(Marshal.dump(self))

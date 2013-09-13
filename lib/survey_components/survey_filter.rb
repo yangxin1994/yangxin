@@ -12,8 +12,9 @@ module SurveyComponents::SurveyFilter
   CONDITION_TYPE = (0..4).to_a
 
   def show_filter(index)
-    return ErrorEnum::FILTER_NOT_EXIST if self.filters[index].nil?
-    return self.filters[index]
+    # index = index.to_i
+    # return ErrorEnum::FILTER_NOT_EXIST if self.filters[index].nil?
+    return self.filters[index.to_i]
   end
 
   def add_filter(filter)
