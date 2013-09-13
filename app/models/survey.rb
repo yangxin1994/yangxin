@@ -15,7 +15,7 @@ class Survey
   field :footer, :type => String, default: ""
   field :description, :type => String, default: "调查问卷描述"
   # can be 1 (closed), 2 (published), 4 (deleted)
-  field :status, :type => Integer, default: 1
+  field :status, :type => Integer, default: 2
   field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
   field :quota, :type => Hash, default: {"rules" => [{"conditions" => [], "amount" => 100, "finished_count" => 0, "submitted_count" => 0}], "is_exclusive" => true, "quota_satisfied" => false, "finished_count" => 0, "submitted_count" => 0 }
   field :filters, :type => Array, default: []
@@ -104,7 +104,10 @@ class Survey
 
 
   
-  scope :status, lambda {|st| where(:status => st)}
+  # scope :status, lambda {|st| where(:status => st)}
+  scope :status, lambda {|st| where(:status.in => Tool.convert_int_to_base_arr(st || (Survey::CLOSED + Survey::PUBLISHED)))}
+  scope :title, lambda {|title| where(title: Regexp.new(title.to_s)) }
+  scope :user, lambda { |e| e.is_admin? ? self.criteria : where(:user_id => e._id) }
   scope :reward_type,lambda {|rt| where(:quillme_promote_reward_type.in => rt)}
   scope :opend, lambda { where(:status => 2)}
   scope :closed, lambda { where(:status => 1)}
@@ -331,20 +334,6 @@ class Survey
   #
   #++++++++++++++++++++++++++++++++++++++++++++++
 
-  def save_meta_data(survey_obj)
-    # this is an existing survey
-    if !survey_obj.nil?
-      META_ATTR_NAME_ARY.each do |attr_name|
-        if !survey_obj[attr_name].nil?
-          method_obj = self.method("#{attr_name}=".to_sym)
-          method_obj.call(survey_obj[attr_name])
-        end
-      end
-      self.save
-    end
-    return self
-  end
-
   def update_deadline(time)
     time = time.to_i
     return ErrorEnum::SURVEY_DEADLINE_ERROR if time <= Time.now.to_i && time != -1
@@ -355,22 +344,6 @@ class Survey
       Survey.delay_until(self.deadline, :retry => false, :timeout => 10).deadline_arrived(self._id.to_s)
     end
     return true
-  end
-
-  def update_star(is_star)
-    self.is_star = is_star
-    self.save
-    return self.is_star
-  end
-
-  def update_style_setting(style_setting_obj)
-    self.style_setting = style_setting_obj
-    self.save
-    return true
-  end
-
-  def show_style_setting
-    return self.style_setting
   end
 
   def update_access_control_setting(access_control_setting_obj)
@@ -509,49 +482,9 @@ class Survey
       end
     end
 
-    new_instance.create_default_reward_scheme
     new_instance.save
-
+    new_instance.reward_scheme << RewardScheme.create(default: true)
     return new_instance
-  end
-
-  #----------------------------------------------
-  #
-  #     manipulate on status of the survey
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def delete(operator)
-    return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
-    return self.update_attributes(:status => DELETED)
-  end
-
-  def recover(operator)
-    return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
-    return self.update_attributes(:status => CLOSED)
-  end
-
-  def clear(operator)
-    return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
-    return self.destroy
-  end
-
-  #----------------------------------------------
-  #
-  #     manipulate on publish status of the survey
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def close(operator)
-    return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
-    self.update_attributes(:status => CLOSED)
-    return true
-  end
-
-  def publish(operator)
-    return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
-    self.update_attributes(:status => PUBLISHED)
-    return true
   end
 
   #----------------------------------------------
@@ -1814,9 +1747,8 @@ class Survey
     return self.save
   end
 
-  def create_default_reward_scheme
-    r = RewardScheme.create(:name => "默认奖励方案", :rewards => [], :need_review => false, :default => true)
-    self.reward_schemes << r
+  after_create do |doc|
+    doc.reward_schemes << RewardScheme.create(default: true)
   end
 
   def remain_quota_number
@@ -1835,5 +1767,10 @@ class Survey
       return true
     end
     return false
+  end
+
+  def self.star(is_star)
+    return self.criteria if is_star.blank?
+    self.where(:is_star => is_star.to_s == "true")
   end
 end

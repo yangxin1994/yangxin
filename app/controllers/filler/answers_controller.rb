@@ -4,17 +4,20 @@ class Filler::AnswersController < Filler::FillerController
 	
 	# AJAX
 	def create
+		logger.info "AAAAAAAAAAAAAAAAAA"
 		# hack: if the cookie has already has an answer_id and is not signed in, return the answer_id
 		# Used to avoid creating multiple answers when user click the back key in the keyboard when answeing survey
 		if !user_signed_in
 			answer_id = cookies[cookie_key(params[:survey_id], params[:is_preview])]
 			render_json_auto answer_id and return if answer_id.present?
 		end
+		logger.info "BBBBBBBBBBBBBBBBBBB"
 
 		survey = Survey.normal.find_by_id(params[:survey_id])
 		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if survey.nil?
 		render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if !params[:is_preview] && survey.status != Survey::PUBLISHED
-		render_json_e ErrorEnum::MAX_NUM_PER_IP_REACHED and return if survey.max_num_per_ip_reached?(request.remote_ip)
+		logger.info "CCCCCCCCCCCCCCCCCCCCC"
+		render_json_e ErrorEnum::MAX_NUM_PER_IP_REACHED and return if !params[:is_preview] && survey.max_num_per_ip_reached?(request.remote_ip)
 		answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], current_user.try(:_id), params[:is_preview] || false)
 		render_json_s(answer._id.to_s) and return if !answer.nil?
 		retval = survey.check_password(params[:username], params[:password], params[:is_preview] || false)

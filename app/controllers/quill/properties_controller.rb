@@ -9,8 +9,7 @@ class Quill::PropertiesController < Quill::QuillController
 
 	# AJAX: update properties
 	def update
-		retval = @survey.save_meta_data(params[:properties])
-		render_json_auto retval and return
+		render_json_auto @survey.update_attributes(params[:properties]) and return
 	end
 
 	# PAGE: more properties
@@ -29,7 +28,7 @@ class Quill::PropertiesController < Quill::QuillController
 		# style_setting['redirect_link'] = !!params[:redirect_link] if params.has_key?(:redirect_link)
 		style_setting['redirect_link'] = params[:redirect_link]
 		style_setting['allow_pageup'] = !!params[:allow_pageup] if params.has_key?(:allow_pageup)
-		retval = @survey.update_style_setting(style_setting)
+		retval = @survey.update_attrubtes(style_setting: style_setting)
 		render_json_auto retval and return
 	end
 end
