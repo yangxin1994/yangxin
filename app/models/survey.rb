@@ -7,6 +7,11 @@ require 'csv'
 class Survey
   include Mongoid::Document
   include Mongoid::Timestamps
+  include SurveyFilter
+  include SurveyPage
+  include SurveyLogicControl
+  include SurveyQuota
+  include SurveyReportMockup
   field :title, :type => String, default: "调查问卷主标题"
   field :subtitle, :type => String, default: ""
   field :welcome, :type => String, default: ""
@@ -16,10 +21,9 @@ class Survey
   field :description, :type => String, default: "调查问卷描述"
   # can be 1 (closed), 2 (published), 4 (deleted)
   field :status, :type => Integer, default: 2
-  field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
-  field :quota, :type => Hash, default: {"rules" => [{"conditions" => [], "amount" => 100, "finished_count" => 0, "submitted_count" => 0}], "is_exclusive" => true, "quota_satisfied" => false, "finished_count" => 0, "submitted_count" => 0 }
-  field :filters, :type => Array, default: []
-  field :logic_control, :type => Array, default: []
+  # field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
+  # field :filters, :type => Array, default: []
+  # field :logic_control, :type => Array, default: []
   field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
     "has_progress_bar" => true,
     "has_question_number" => true,
@@ -96,7 +100,7 @@ class Survey
   has_many :export_results
   has_many :analysis_results
   has_many :report_results
-  has_many :report_mockups
+  # has_many :report_mockups
   has_many :interviewer_tasks
   has_many :agent_tasks
   has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
@@ -856,83 +860,6 @@ class Survey
 
   #----------------------------------------------
   #
-  #     manipulate on pages
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def create_page(page_index, page_name)
-    return ErrorEnum::OVERFLOW if page_index < -1 or page_index > self.pages.length - 1
-    new_page = {"name" => page_name, "questions" => []}
-    self.pages.insert(page_index+1, new_page)
-    self.save
-    return new_page
-  end
-
-  def split_page(page_index, question_id, page_name_1, page_name_2)
-    current_page = self.pages[page_index]
-    return ErrorEnum::OVERFLOW if current_page.nil?
-    if question_id.to_s == "-1"
-      question_index = current_page["questions"].length
-    else
-      question_index = -1
-      current_page["questions"].each_with_index do |q_id, q_index|
-        if q_id == question_id
-          question_index = q_index
-          break
-        end
-      end
-      return ErrorEnum::QUESTION_NOT_EXIST if question_index == -1
-    end
-    if question_index == 0
-      new_page_1 = {"name" => page_name_1, "questions" => []}
-    else
-      new_page_1 = {"name" => page_name_1,
-            "questions" => current_page["questions"][0..question_index-1]}
-    end
-    new_page_2 = {"name" => page_name_2,
-            "questions" => current_page["questions"][question_index..current_page["questions"].length-1]}
-    self.pages.delete_at(page_index)
-    self.pages.insert(page_index, new_page_2)
-    self.pages.insert(page_index, new_page_1)
-    self.save
-    return [new_page_1, new_page_2]
-  end
-
-  def show_page(page_index)
-    current_page = self.pages[page_index]
-    return ErrorEnum::OVERFLOW if current_page.nil?
-    page_object = {name: current_page["name"], questions: []}
-    current_page["questions"].each do |question_id|
-      temp = Question.get_question_object(question_id)
-      temp["index"] = self.all_questions_id.index(question_id)
-      page_object[:questions] << temp
-    end
-    return page_object
-  end
-
-  def combine_pages(page_index_1, page_index_2)
-    return ErrorEnum::OVERFLOW if page_index_1 < 0 or page_index_1 > self.pages.length - 1
-    return ErrorEnum::OVERFLOW if page_index_2 < 0 or page_index_2 > self.pages.length - 1
-    self.pages[page_index_1+1..page_index_2].each do |page|
-      self.pages[page_index_1]["questions"] = self.pages[page_index_1]["questions"] + page["questions"]
-    end
-    (page_index_2 - page_index_1).times do
-      self.pages.delete_at(page_index_1+1)
-    end
-    return self.save
-  end
-
-  def move_page(page_index_1, page_index_2)
-    current_page = self.pages[page_index_1]
-    return ErrorEnum::OVERFLOW if current_page == nil
-    return ErrorEnum::OVERFLOW if page_index_2 < -1 or page_index_2 > self.pages.length - 1
-    self.pages.insert(page_index_2+1, current_page)
-    self.pages.delete_at(page_index_1)
-    return self.save
-  end
-
-  #----------------------------------------------
-  #
   #     for answering process
   #
   #++++++++++++++++++++++++++++++++++++++++++++++
@@ -973,338 +900,6 @@ class Survey
       end
     end
     return answer_time
-  end
-
-  #----------------------------------------------
-  #
-  #     manipulate on quotas
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def show_quota_rule(quota_rule_index)
-    quota = Quota.new(self.quota)
-    return quota.show_rule(quota_rule_index)
-  end
-
-  def add_quota_rule(quota_rule)
-    quota = Quota.new(self.quota)
-    retval = quota.add_rule(quota_rule, self)
-    self.refresh_quota_stats if retval
-    return self.quota["rules"][-1]
-  end
-
-  def update_quota_rule(quota_rule_index, quota_rule)
-    quota = Quota.new(self.quota)
-    retval = quota.update_rule(quota_rule_index, quota_rule, self)
-    self.refresh_quota_stats if retval
-    return self.quota["rules"][quota_rule_index]
-  end
-
-  def delete_quota_rule(quota_rule_index)
-    quota = Quota.new(self.quota)
-    retval = quota.delete_rule(quota_rule_index, self)
-    self.refresh_quota_stats if retval
-    return retval
-  end
-
-  def refresh_quota_stats
-    # only make statisics from the answers that are not preview answers
-    finished_answers = self.answers.not_preview.finished
-    unreviewed_answers = self.answers.not_preview.unreviewed
-    # initialze the quota stats
-    self.quota["finished_count"] = 0
-    self.quota["submitted_count"] = 0
-    self.quota["rules"].each do |rule|
-      rule["finished_count"] = 0
-      rule["submitted_count"] = 0
-    end
-
-    # make stats for the finished answers
-    finished_answers.each do |answer|
-      self.quota["finished_count"] += 1
-      self.quota["submitted_count"] += 1
-      self.quota["rules"].each do |rule|
-        if answer.satisfy_conditions(rule["conditions"], false)
-          rule["finished_count"] += 1
-          rule["submitted_count"] += 1
-        end
-      end
-    end
-
-    # make stats for the unreviewed answers
-    unreviewed_answers.each do |answer|
-      self.quota["submitted_count"] += 1
-      self.quota["rules"].each do |rule|
-        if answer.satisfy_conditions(rule["conditions"], false)
-          rule["submitted_count"] += 1
-        end
-      end
-    end
-
-    # calculate whether quota is satisfied
-    quota["rules"].each do |rule|
-      self.quota["quota_satisfied"] &&= rule["finished_count"] >= rule["amount"]
-    end
-    self.save
-    return quota
-  end
-
-  def show_quota
-    return Marshal.load(Marshal.dump(self.quota))
-  end
-
-  class Quota
-    CONDITION_TYPE = (0..4).to_a
-    def initialize(quota)
-      @is_exclusive = !!quota["is_exclusive"]
-      @rules = Marshal.load(Marshal.dump(quota["rules"]))
-    end
-
-    def show_rule(rule_index)
-      return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= rule_index
-      return Marshal.load(Marshal.dump(@rules[rule_index]))
-    end
-
-    def add_rule(rule, survey)
-      # check errors
-      rule["amount"] = rule["amount"].to_i
-      rule["finished_count"] = 0
-      rule["submitted_count"] = 0
-      return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
-      rule["conditions"] ||= []
-      rule["conditions"].each do |condition|
-        condition["condition_type"] = condition["condition_type"].to_i
-        return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
-      end
-      # add the rule
-      @rules << rule
-      survey.quota = self.serialize
-      survey.save
-      return @rules.length - 1
-    end
-
-    def delete_rule(rule_index, survey)
-      # check errors
-      return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= rule_index
-      # remove the template questions corresponding to the old quota rule
-      survey.quota["rules"][rule_index]["conditions"].each do |condition|
-        self.remove_quota_template_question(condition["name"]) if condition["condition_type"] == 0
-      end
-      # delete the rule
-      @rules.delete_at(rule_index)
-      survey.quota = self.serialize
-      return survey.save
-    end
-
-    def update_rule(rule_index, rule, survey)
-      # check errors
-      rule["amount"] = rule["amount"].to_i
-      return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= rule_index
-      return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
-      (rule["conditions"] || []).each do |condition|
-        condition["condition_type"] = condition["condition_type"].to_i
-        return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"].to_i)
-      end
-      # remove the template questions corresponding to the old quota rule
-      survey.quota["rules"][rule_index]["conditions"].each do |condition|
-        self.remove_quota_template_question(condition["name"]) if condition["condition_type"] == 0
-      end
-      # update the rule
-      @rules[rule_index] = rule
-      survey.quota = self.serialize
-      survey.save
-      return rule_index
-    end
-
-    def set_exclusive(is_exclusive, survey)
-      @is_exclusive = !!is_exclusive
-      survey.quota = self.serialize
-      return survey.save
-    end
-
-    def serialize
-      quota_object = {}
-      quota_object["rules"] = @rules
-      quota_object["is_exclusive"] = @is_exclusive
-      return quota_object
-    end
-  end
-
-  #----------------------------------------------
-  #
-  #     manipulate on logic control
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def show_logic_control
-    return Marshal.load(Marshal.dump(self.logic_control))
-  end
-
-  def show_logic_control_with_question_objects
-    logic_control = Marshal.load(Marshal.dump(self.logic_control))
-    logic_control.each do |rule|
-      conditions = rule["conditions"]
-      conditions.each do |c|
-        c["question"] = BasicQuestion.find_by_id(c["question_id"])
-      end
-      result = rule["result"]
-      if [1,2].include?(rule["rule_type"])
-        result.each_with_index do |q_id, index|
-          result[index] = BasicQuestion.find_by_id(q_id)
-        end
-      elsif [3,4].include?(rule["rule_type"])
-        result.each do |r|
-          r["question"] = BasicQuestion.find_by_id(r["question_id"])
-        end
-      elsif [5,6].include?(rule["rule_type"])
-        result.each do |r|
-          r["question_1"] = BasicQuestion.find_by_id(r["question_id_1"])
-          r["question_2"] = BasicQuestion.find_by_id(r["question_id_2"])
-        end
-      end
-    end
-    return logic_control
-  end
-
-  def show_logic_control_rule(logic_control_rule_index)
-    logic_control = LogicControl.new(self.logic_control)
-    return logic_control.show_rule(logic_control_rule_index)
-  end
-
-  def add_logic_control_rule(logic_control_rule)
-    logic_control = LogicControl.new(self.logic_control)
-    return logic_control.add_rule(logic_control_rule, self)
-  end
-
-  def update_logic_control_rule(logic_control_rule_index, logic_control_rule)
-    logic_control = LogicControl.new(self.logic_control)
-    return logic_control.update_rule(logic_control_rule_index, logic_control_rule, self)
-  end
-
-  def delete_logic_control_rule(logic_control_rule_index)
-    logic_control = LogicControl.new(self.logic_control)
-    return logic_control.delete_rule(logic_control_rule_index, self)
-  end
-
-  class LogicControl
-    RULE_TYPE = (0..6).to_a
-    def initialize(logic_control)
-      @rules = logic_control
-    end
-
-    def show_rule(rule_index)
-      return ErrorEnum::LOGIC_RULE_NOT_EXIST if @rules.length <= rule_index
-      return Marshal.load(Marshal.dump(@rules[rule_index]))
-    end
-
-    def add_rule(rule, survey)
-      rule["rule_type"] = rule["rule_type"].to_i
-      return ErrorEnum::WRONG_LOGIC_CONTROL_TYPE if !RULE_TYPE.include?(rule["rule_type"])
-      @rules << rule
-      survey.logic_control = @rules
-      survey.save
-      return survey.logic_control
-    end
-
-    def delete_rule(rule_index, survey)
-      return ErrorEnum::LOGIC_CONTROL_RULE_NOT_EXIST if @rules.length <= rule_index
-      @rules.delete_at(rule_index)
-      survey.logic_control = @rules
-      return survey.save
-    end
-
-    def update_rule(rule_index, rule, survey)
-      return ErrorEnum::LOGIC_CONTROL_RULE_NOT_EXIST if @rules.length <= rule_index
-      rule["rule_type"] = rule["rule_type"].to_i
-      return ErrorEnum::WRONG_LOGIC_CONTROL_TYPE if !RULE_TYPE.include?(rule["rule_type"])
-      @rules[rule_index] = rule
-      survey.logic_control = @rules
-      survey.save
-      return survey.logic_control
-    end
-  end
-
-  #----------------------------------------------
-  #
-  #     manipulate on filters
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def list_filters
-    return Marshal.load(Marshal.dump(self.filters))
-  end
-
-  def show_filter(filter_index)
-    filters = Filters.new(self.filters)
-    return filters.show_filter(filter_index)
-  end
-
-  def add_filter(filter)
-    filters = Filters.new(self.filters)
-    return filters.add_filter(filter, self)
-  end
-
-  def update_filter(filter_index, filter)
-    filters = Filters.new(self.filters)
-    return filters.update_filter(filter_index, filter, self)
-  end
-
-  def delete_filter(filter_index)
-    filters = Filters.new(self.filters)
-    return filters.delete_filter(filter_index, self)
-  end
-
-  class Filters
-    CONDITION_TYPE = (0..4).to_a
-    def initialize(filters)
-      @filters = Marshal.load(Marshal.dump(filters))
-    end
-
-    def show_filter(filter_index)
-      return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_index].nil?
-      return @filters[filter_index]
-    end
-
-    def add_filter(filter, survey)
-      # check errors
-      filter["conditions"].each do |condition|
-        condition["condition_type"] = condition["condition_type"].to_i
-        return ErrorEnum::WRONG_FILTER_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
-      end
-      # add the rule
-      @filters << filter
-      survey.filters = self.serialize
-      survey.save
-      return survey.filters
-    end
-
-    def delete_filter(filter_index, survey)
-      # check errors
-      return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_index].nil?
-      # delete the rule
-      @filters.delete_at(filter_index)
-      survey.filters = self.serialize
-      return survey.save
-    end
-
-    def update_filter(filter_index, filter, survey)
-      # check errors
-      return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_index].nil?
-      filter["conditions"].each do |condition|
-        condition["condition_type"] = condition["condition_type"].to_i
-        return ErrorEnum::WRONG_FILTER_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"].to_i)
-      end
-      # update the rule
-      @filters[filter_index] = filter
-      survey.filters = self.serialize
-      survey.save
-      return survey.filters
-    end
-
-    def serialize
-      filters_object = @filters
-      return filters_object
-    end
   end
 
   #----------------------------------------------
@@ -1462,43 +1057,6 @@ class Survey
     end
     Task.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
     return [filtered_answers, tot_answer_number, tot_answer_number - not_screened_answer_number, ongoing_answer_number, wait_for_review_answer_number]
-  end
-
-  #----------------------------------------------
-  #
-  #     report mockup related
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def create_report_mockup(report_mockup)
-    result = ReportMockup.check_and_create_new(self, report_mockup)
-    return result
-  end
-
-  def show_report_mockup(report_mockup_id)
-    report_mockup = self.report_mockups.find_by_id(report_mockup_id)
-    return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
-    return report_mockup
-  end
-
-  def list_report_mockups
-    return self.report_mockups
-  end
-
-  def delete_report_mockup(report_mockup_id)
-    report_mockup = self.report_mockups.find_by_id(report_mockup_id)
-    if !report_mockup.nil?
-      report_mockup.destroy
-      return true
-    else
-      return ErrorEnum::REPORT_MOCKUP_NOT_EXIST
-    end
-  end
-
-  def update_report_mockup(report_mockup_id, report_mockup_obj)
-    report_mockup = self.report_mockups.find_by_id(report_mockup_id)
-    return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
-    return report_mockup.update_report_mockup(report_mockup_obj)
   end
 
   def self.list(status)
