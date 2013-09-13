@@ -486,6 +486,7 @@ class User
 	def change_email(client_ip)
 		return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i > change_email_expiration_time
 		self.email = self.email_to_be_changed
+		self.email_activation = true
 		return self.login(client_ip, nil, false)
 	end
 
@@ -1048,4 +1049,21 @@ class User
 		return nickname
 	end
 
+	def cal_point
+		point_logs = PointLog.where(:user_id => self._id)
+		point = 0
+		point_logs.each do |pl|
+			point += pl.amount
+		end
+		self.point = (point >= 0 ? point : 0)
+		self.save
+	end
+
+	def self.cal_point
+		SurveySpread.all.each do |ss|
+			u = ss.user
+			next if u.blank?
+			u.cal_point
+		end
+	end
 end
