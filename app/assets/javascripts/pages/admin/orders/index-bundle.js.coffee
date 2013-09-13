@@ -134,7 +134,6 @@ $ ->
       error: ->
           alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
 
-  $ ->
-    alert_msg.show('info', "点击订单行区域可查看详细")
+
 
 

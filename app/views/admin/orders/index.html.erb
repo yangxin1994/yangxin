@@ -60,8 +60,28 @@
     <div class="input-append">
       <input class="span6 search-query" name="keyword" id="" type="text" placeholder="邮箱,电话或者订单号">
       <button class="btn">搜索</button>
-    </div>
+    </div>    
     </form>
+    <div class="btn-group">
+        <<a class="btn csv" href="/admin/orders/to_excel?<%= "page=1&" unless params[:page].present? %><%= request.query_string %>" class="csv" data-scope="current_page">导出当前页</a>
+      <button class="btn dropdown-toggle" data-toggle="dropdown">
+        <span class="caret"></span>
+      </button>      
+      <ul class="dropdown-menu">
+        <li><a href="/admin/orders/to_excel">导出全部</a></li>
+        <% if params[:type].present? %>
+        <li><a href="/admin/orders/to_excel?type=<%= params[:type] %>">导出当前分类</a></li>
+        <% end -%>
+        <% if params[:status].present? %>
+        <li><a href="/admin/orders/to_excel?status=<%= params[:status] %>">导出当前状态</a></li>
+        <li><a href="/admin/orders/to_excel?type=<%= params[:type] %>&status=<%= params[:status] %>">导出当前分类及状态</a></li>
+        <% end -%>
+        <% if params[:source].present? %>
+        <li><a href="/admin/orders/to_excel?source=<%= params[:source] %>">导出当前源</a></li>
+        <li><a href="/admin/orders/to_excel?type=<%= params[:type] %>&source=<%= params[:source] %>">导出当前源及分类</a></li>
+        <% end -%>
+      </ul>
+    </div>
   </span>
   <span class="pull-right">
     <%= paginator_mini @orders %>
