@@ -1,3 +1,4 @@
+#already tidied up
 class Affiliated
 	include Mongoid::Document
 	include Mongoid::Timestamps

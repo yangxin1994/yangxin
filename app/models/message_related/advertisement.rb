@@ -1,3 +1,4 @@
+#already tidied up
 class Advertisement
 	include Mongoid::Document
 	include Mongoid::Timestamps
@@ -48,64 +49,6 @@ class Advertisement
 			advertisement = Advertisement.where(_id: advertisement_id.to_s).first
 			return ErrorEnum::ADVERTISEMENT_NOT_EXIST if advertisement.nil?
 			return advertisement
-		end
-
-		#*description*:
-		# create advertisement for different type.
-		#
-		#*params*:
-		#* new_advertisement: a hash for advertisement attributes.
-		#* user: who create advertisement
-		#
-		#*retval*:
-		#* ErrorEnum or advertisement instance
-		def create_advertisement(new_advertisement, user)
-			advertisement = Advertisement.new(new_advertisement)
-
-			advertisement.user = user if user && user.instance_of?(User)
-
-			if advertisement.save then
-				return advertisement 
-			else
-				return ErrorEnum::ADVERTISEMENT_SAVE_FAILED
-			end
-		end
-
-		#*description*:
-		# update advertisement 
-		#
-		#*params*:
-		#* advertisement_id
-		#* attributes: update attributes
-		#* user: who update advertisement
-		#
-		#*retval*:
-		#* ErrorEnum or advertisement instance
-		def update_advertisement(advertisement_id, attributes, user)
-			advertisement = Advertisement.find_by_id(advertisement_id)
-			return advertisement if !advertisement.instance_of?(Advertisement)
-
-			advertisement.user = user if user && user.instance_of?(User)
-
-			if advertisement.update_attributes(attributes) then
-				return advertisement 
-			else
-				return ErrorEnum::ADVERTISEMENT_SAVE_FAILED
-			end
-		end
-
-		#*description*:
-		# destroy advertisement 
-		#
-		#*params*:
-		#* advertisement_id
-		#
-		#*retval*:
-		#* ErrorEnum or Boolean
-		def destroy_by_id(advertisement_id)
-			advertisement = Advertisement.find_by_id(advertisement_id)
-			return advertisement if !advertisement.instance_of?(Advertisement)
-			return advertisement.destroy
 		end
 
 	end

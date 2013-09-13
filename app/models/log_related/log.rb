@@ -1,3 +1,4 @@
+#already tidied up
 require 'error_enum'
 class Log
 	include Mongoid::Document
@@ -5,14 +6,11 @@ class Log
 	# log type, 1 for answering surveys, 2 for lottery, 4 for gift redeem, 8 for point change, 16 for register, 32 for spread, 64 for punish																																																																																																																																																																																																																																																																																
 
 	field :type, :type => Integer
-	# field :data, :type => Hash, default: {}
 	scope :lottery_logs, lambda { where(:type => 2) }
 	scope :redeem_logs, lambda { where(:type => 4) }
 	scope :point_logs, lambda { where(:type => 8) }
 	scope :answer_logs, lambda {where(:type => 1)}
 	scope :special_logs,lambda { |t| where(:type => t)}
-	#scope :fresh_logs, lambda { where(:type.ne => 8,:type.ne => 64)}
-	# scope :fresh_logs, lambda { where(:type.in => [2,8,16])}
 	scope :spread_logs, lambda { where(:type => 32)}
 	scope :disciplinal_logs, lambda { where(:type => 64)}
 	scope :have_user,lambda {where(:user_id.ne => nil)}
@@ -21,10 +19,7 @@ class Log
 
 	belongs_to :user
 
-
-
 	index({ created_at:1},{background: true})
-
 	index({ type:1},{background: true})
 	index({ user_id:1},{background: true})
 	index({ point:1},{background: true})
@@ -39,7 +34,7 @@ class Log
 	end
 
 	def self.fresh_logs
-		return self.where(:type.in => [2,8,16], :reason.ne => PointLog::IMPORT)
+		return self.where(:type.in => [2,8,16], :reason.ne => PointLog::IMPORT,:reason.ne => PointLog::ADMIN_OPERATE)
 	end
 
 	def self.get_new_logs(limit=5,type=nil)

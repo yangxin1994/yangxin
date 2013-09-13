@@ -1,3 +1,4 @@
+# already tidied up
 require 'error_enum'
 require 'quality_control_type_enum'
 #The question object has the following structure

@@ -1,4 +1,5 @@
 #encoding: utf-8
+# already tidied up
 
 module OrdersHelper
   def user_info(order)
@@ -11,18 +12,6 @@ module OrdersHelper
       result_str += ("#{op_name[index]}:#{order[value].to_s}  ") unless order[value].nil?
     end
     result_str
-  end
-  def order_type_tag(order)
-
-    orders_type = { "0" => ["cash", "现金"],
-                    "1" => ["entity", "实物"],
-                    "2" => ["virtual", "虚拟"],
-                    "3" => ["lottery", "抽奖"]}
-    "<i class=\"#{orders_type[order["type"].to_s][0]}\">#{'奖-' if order["is_prize"]}#{orders_type[order["type"].to_s][1]}</i>".html_safe
-  end
-
-  def order_ctrl_tag(order)
-    render :partial => "admin/orders/order_ctrl",  :locals => { :order => order } 
   end
 
   def order_status_tag(status)

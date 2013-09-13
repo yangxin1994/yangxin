@@ -1,3 +1,4 @@
+# already tidied up
 class Admin::AgentTasksController < Admin::AdminController
   layout "layouts/admin-todc"
 

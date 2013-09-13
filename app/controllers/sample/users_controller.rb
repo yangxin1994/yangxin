@@ -2,7 +2,7 @@
 class Sample::UsersController < Sample::SampleController
   layout :resolve_layout
 
-  before_filter :require_sign_in, :except => [:change_email_verify_key]
+  before_filter :require_sign_in, :except => [:change_email,:change_email_verify_key]
   before_filter :get_self_extend_info, :except => [:survey_detail, :spread_counter, 
                                       :update_logistic_address, :update_password, 
                                       :destroy_notification, :remove_notifications,
@@ -14,11 +14,6 @@ class Sample::UsersController < Sample::SampleController
   before_filter :order_nav,:only => [:orders, :from_lottery, :from_point, :order_show]
   before_filter :job_nav, :only => [:jobs]
   before_filter :notification_nav, :only => [:notifications]
-
-
-  def initialize
-    super('users')
-  end
 
   def get_mobile_area 
     @retval = QuillCommon::MobileUtility.region_and_carrier(params[:m])
@@ -40,13 +35,7 @@ class Sample::UsersController < Sample::SampleController
       paginate_answers.map { |e| e.info_for_answer_list_for_sample }
     end
 
-
-    # @my_answer_surveys = @uclient.get_my_surveys(page, per_page)
-
     data = @my_answer_surveys['data'].map do |item |
-      # Need attrs: rewards, answer_status, answer_id, amount
-      # maybe it has too many attrs, so i did not use helper method.
-
       # select reward
       item["select_reward"] = ""
       # 
@@ -73,7 +62,6 @@ class Sample::UsersController < Sample::SampleController
           break
         end
       end
-      # return
       item 
     end
 
@@ -90,18 +78,15 @@ class Sample::UsersController < Sample::SampleController
   #我推广的问卷
   # GET
   def spread_surveys
-
     @my_spread_surveys = auto_paginate current_user.survey_spreads.desc(:survey_creation_time) do |paginated_survey_spreads|
       paginated_survey_spreads.map do |e|
         finish_number = e.survey.answers.not_preview.finished.where(:introducer_id => current_user._id).length
         spread_number = e.survey.answers.not_preview.where(:introducer_id => current_user._id).length
-        # e.survey.info_for_sample.merge({"spread_number" => e.times})
-        e.survey.info_for_sample.merge({"spread_number" => spread_number,
-                                        "finish_number" => finish_number})
+        e.survey.write_attribute(:spread_number, spread_number)
+        e.survey.write_attribute(:finish_number, finish_number)
+        e.survey
       end
     end
-
-    # @my_spread_surveys = @uclient.my_spread_surveys(page, per_page)
 
     respond_to do |format|
       format.html 
@@ -119,7 +104,6 @@ class Sample::UsersController < Sample::SampleController
     @answers = auto_paginate @answers do |paginate_answers|
       paginate_answers.map { |e| e.info_for_spread_details }
     end
-    # @answers = @uclient.survey_spread_answers(params[:id], page, 9)
 
     respond_to do |format|
       format.html {
@@ -140,9 +124,6 @@ class Sample::UsersController < Sample::SampleController
     @spreaded_answer_number = {"total_answer_number" => @total_answer_number,
       "finished_answer_number" => @finished_answer_number,
       "editting_answer_number" => @editting_answer_number}
-    # render_json_auto @spreaded_answer_number and return
-
-    # @counter = @uclient.spread_answers_number(params[:id])
 
     respond_to do |format|
       format.json { render_json_auto @spreaded_answer_number }
@@ -166,8 +147,6 @@ class Sample::UsersController < Sample::SampleController
       paginated_logs.map { |e| e.info_for_sample }
     end
 
-    # @point_logs = @uclient.get_my_point_history(params[:scope], page, per_page)
-
     respond_to do |format|
       format.html 
       format.json { render_json_auto @point_logs and return }
@@ -186,9 +165,6 @@ class Sample::UsersController < Sample::SampleController
       paginated_orders.map { |e| e.info_for_sample }
     end
 
-    # scope = [1,2,4].include?(params[:scope].to_i) ? params[:scope].to_i : 1
-    # @orders = @uclient.get_my_orders(scope, page, per_page)
-
     respond_to do |format|
       format.html 
       format.json { render_json_auto @orders and return }
@@ -202,9 +178,6 @@ class Sample::UsersController < Sample::SampleController
     @order = Order.find_by_id(params[:id])
     render_404 and return if @order.nil?
     @order = @order.info_for_sample_detail
-
-
-    # @order = @uclient.order_show(params[:id])
 
     respond_to do |format|
       format.html {
@@ -223,8 +196,7 @@ class Sample::UsersController < Sample::SampleController
   # GET
   def basic_info
     @user_info = current_user.get_basic_attributes
-    # @user_info = @uclient.basic_attrs
-
+    
     respond_to do |format|
       format.html {
         @user_info["income_person"][1] = 99999999 if @user_info["income_person"].is_a?(Array) and @user_info["income_person"][1] == 1.0/0.0
@@ -241,7 +213,6 @@ class Sample::UsersController < Sample::SampleController
    #更改基本信息
    # PUT
   def update_basic_info
-    # logger.error ".........\n#{params[:attrs].inspect}"
     param_attrs = params[:attrs].select{|e| %w(nickname username gender birthday born_address 
                         live_address married children income_person income_family
                         education_level major industry position seniority).include?(e)}
@@ -277,9 +248,6 @@ class Sample::UsersController < Sample::SampleController
     end
 
     @retval = current_user.set_basic_attributes(param_attrs)
-    # render_json_auto(retval) and return
-
-    # @retval = @uclient.update_attrs(param_attrs)
 
     respond_to do |format|
       format.html {
@@ -319,7 +287,7 @@ class Sample::UsersController < Sample::SampleController
   #账户绑定
   # GET /users/setting/bindings
   def bindings
-
+    
     @bindings = {}
     if current_user.email_activation
       @bindings["email"] = [current_user.email, current_user.email_subscribe]
@@ -331,8 +299,6 @@ class Sample::UsersController < Sample::SampleController
       third_party_user = ThirdPartyUser.where(:user_id => current_user._id.to_s, :website => website).first
       @bindings[website] = [third_party_user.name, third_party_user.share] if !third_party_user.nil?
     end
-
-    # @bindings = @uclient.bindings
 
     respond_to do |format|
       format.html { }
@@ -346,16 +312,6 @@ class Sample::UsersController < Sample::SampleController
     third_party_user = ThirdPartyUser.where(:website => params[:website], :user_id => current_user._id.to_s).first
     third_party_user.destroy if !third_party_user.nil?
     render_json_s and return
-=begin
-    @retval = @uclient.unbind(params[:website])
-
-    respond_to do |format|
-      format.html {
-        render :text => "error!", action: 'bindings' and return unless @retval.success
-      }
-      format.json { render_json_auto @retval }
-    end
-=end
   end
 
   # 绑定分享
@@ -366,16 +322,6 @@ class Sample::UsersController < Sample::SampleController
     third_party_user.share = params[:share] == "true"
     third_party_user.save
     render_json_s and return
-=begin
-    @retval = @uclient.set_share(params[:website], params[:share])
-
-    respond_to do |format|
-      format.html {
-        render :text => "error!", action: 'bindings' and return unless @retval.success
-      }
-      format.json { render_json_auto @retval }
-    end
-=end
   end
 
   # 绑定订阅
@@ -388,14 +334,6 @@ class Sample::UsersController < Sample::SampleController
     end
     render_json_auto current_user.save and return
 
-=begin
-    @retval = @uclient.set_subscribe(params[:type], params[:sub])
-
-    respond_to do |format|
-      format.html { }
-      format.json { render_json_auto @retval }
-    end
-=end
   end
 
   # 根据手机号发送验证短信
@@ -403,17 +341,12 @@ class Sample::UsersController < Sample::SampleController
   def change_mobile
     render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST and return if User.find_by_mobile(params[:m]).present?
     current_user.mobile_to_be_changed = params[:m]
-    # current_user.sms_verification_code = Random.rand(100000..999999).to_s
     code = Tool.generate_active_mobile_code
     current_user.sms_verification_code = code
     current_user.sms_verification_expiration_time = Time.now.to_i + 2.hours.to_i
     tmp = current_user.save
     SmsWorker.perform_async("change_mobile", params[:m], "", :code => code)
     render_json_s and return
-
-    # @retval = @uclient.change_mobile(params[:m])
-
-    # render_json_auto @retval 
   end
 
   # 根据手机号和验证短信码激活手机
@@ -425,15 +358,14 @@ class Sample::UsersController < Sample::SampleController
     current_user.mobile = current_user.mobile_to_be_changed
     current_user.mobile_activation = true
     render_json_auto current_user.save and return
-
-    # @retval = @uclient.check_mobile_verify_code(params[:m], params[:code])
-    # render_json_auto @retval 
   end
 
   # 根据邮箱绑定
   # PUT /users/setting/change_mobile?email=
   def change_email
     render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST and return if !User.find_by_email(params[:email]).nil?
+    current_user ||= User.find_by_mobile(params[:mobile])
+    render_json_e ErrorEnum::USER_NOT_EXIST and return unless current_user.present? 
     current_user.email_to_be_changed = params[:email]
     current_user.change_email_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
     current_user.save
@@ -455,7 +387,7 @@ class Sample::UsersController < Sample::SampleController
       return
     end
 
-    user = User.find_by_email(activate_info["email"])
+    user = User.find_by_id(activate_info["user_id"])
     if user.nil?
       @success = false
       return
@@ -468,17 +400,6 @@ class Sample::UsersController < Sample::SampleController
     end
     refresh_session(retval['auth_key'])
     @success = true
-=begin
-    retval = User.activate("email", activate_info, request.remote_ip, params[:_client_type])  
-    if retval.class == String && retval.start_with?("error_")
-      @success = false
-    else
-      @success = true
-      refresh_session(retval['auth_key'])
-      user = User.find_by_auth_key(retval['auth_key'])
-      @email  = Base64.encode64(user.email).chomp()
-    end
-=end
   end
 
   #收获地址
@@ -495,9 +416,6 @@ class Sample::UsersController < Sample::SampleController
   # PUT
   def update_logistic_address
     @retval = current_user.set_receiver_info(params[:receiver_info])
-
-    # @retval = @uclient.update_logistic_address(params[:receiver_info])
-
     respond_to do |format|
       format.html { }
       format.json { render_json_auto @retval }
@@ -543,8 +461,6 @@ class Sample::UsersController < Sample::SampleController
     @message = Message.find_by_id(params[:id])
     render_json_e ErrorEnum::MESSAGE_NOT_EXIST and return if !current_user.messages.include?(@message)
 
-    # @retval = @uclient.del_notice(params[:id])
-
     respond_to do |format|
       format.html { }
       format.json { render_json_auto @message.destroy }
@@ -555,8 +471,6 @@ class Sample::UsersController < Sample::SampleController
   # Delete All notifications
   def remove_notifications
     @retval = current_user.messages.destroy_all
-    # @retval = @uclient.del_all_notices
-
     respond_to do |format|
       format.html { }
       format.json { render_json_auto @retval and return }
@@ -568,16 +482,8 @@ class Sample::UsersController < Sample::SampleController
   # *******************************************
 
   private 
-  
-  def get_client
-    @uclient = Sample::UserClient.new(session_info) 
-  end
 
   def get_self_extend_info
-    # current_user  = @uclient.get_basic_info.value
-
-
-    # answer number, spread number, third party accounts
     @answer_number = current_user.answers.not_preview.finished.length
     @spread_number = Answer.where(:introducer_id => current_user._id).not_preview.finished.length
     @bind_info = {}
@@ -631,6 +537,5 @@ class Sample::UsersController < Sample::SampleController
       else
         "sample"
       end
-    end
-
+  end
 end

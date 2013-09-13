@@ -101,7 +101,7 @@ jQuery(function($) {
 			$('#mobile-number').addClass('error');
 			if($('#phone-binding .cont').find('p').length < 1){
 				$('#phone-binding .cont').append('<p>请填写正确的手机号码</p>');	
-			}			
+			}
 			return false;
 		}
 		var _this = $(this);

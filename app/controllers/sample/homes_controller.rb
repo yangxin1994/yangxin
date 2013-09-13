@@ -3,7 +3,7 @@ class Sample::HomesController < Sample::SampleController
 	def show
 		@hot_survey     = Survey.quillme_promote.quillme_hot.opend.first
 
-		surveys = Survey.get_recommends(nil, nil, nil, current_user, nil)
+		surveys = Survey.get_recommends(nil, nil, nil, current_user, true)
 		params[:per_page] = 9
 		@rsl = auto_paginate(surveys) do |paginated_surveys|
 		  paginated_surveys.map { |e| e.excute_sample_data(current_user) } 
@@ -30,13 +30,6 @@ class Sample::HomesController < Sample::SampleController
       log
     end
     fresh_when(:etag => [@hot_survey,@rsl,@public_notices,@hotest_gifts,@top_rank_users,@fresh_news])
-	end
-
-
-	def demo
-	end
-
-	def help
 	end
 	
 end

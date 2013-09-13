@@ -1,4 +1,8 @@
 # encoding: utf-8
+# already tidied up
+
+require "csv"
+
 require 'string/utf8'
 class Admin::OrdersController < Admin::AdminController
 

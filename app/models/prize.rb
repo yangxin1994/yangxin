@@ -1,3 +1,4 @@
+# already tidied up
 require 'tool'
 class Prize
 	include Mongoid::Document
@@ -76,13 +77,5 @@ class Prize
 	def delete_prize
 		self.status = DELETED
 		return self.save
-	end
-
-	def self.check_params(prize)
-		material_id = prize["material_id"]
-		material = Material.find_by_id(material_id)
-		return ErrorEnum::MATERIAL_NOT_EXIST if material.nil?
-		return Errorenum::WRONG_PRIZE_TYPE if ![1,2,4].include?(prize["type"].to_i)
-		return true
 	end
 end

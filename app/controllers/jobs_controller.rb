@@ -3,12 +3,6 @@ class JobsController < ApplicationController
 
 	before_filter :require_sign_in
 
-=begin
-	def get_ws_client
-		@ws_client = JobClient.new(session_info, params[:id])
-	end
-=end
-
 	# AJAX
 	def show
 		render_json_auto Result.job_progress(params[:id]) and return

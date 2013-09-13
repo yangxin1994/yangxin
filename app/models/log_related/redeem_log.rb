@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 class RedeemLog < Log
 	field :type, :type => Integer, :default => 4
 	field :amount, :type => Integer

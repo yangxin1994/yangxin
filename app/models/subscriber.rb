@@ -1,3 +1,4 @@
+# already tidied up
 class Subscriber
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -20,14 +21,6 @@ class Subscriber
   index({ email: 1 }, { background: true } )
   index({ is_deleted: 1 }, { background: true } )
 
-  def present_admin
-    present_attrs :_id, :email, :is_deleted
-    present_add   :delivered_count => self.newsletters.count
-    if self.unsubscribed_at
-      present_add   :unsubscribed_at => self.unsubscribed_at.strftime("%Y-%m-%d")
-    end
-    present_add   :created_at => self.created_at.strftime("%Y-%m-%d")
-  end
 
   def subscribe
     self.is_deleted = false

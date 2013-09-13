@@ -1,15 +1,5 @@
 # finish migrating
 class Filler::FillerController < ApplicationController
-	# has_mobile_fu
- #  before_filter :set_mobile_format, :check_mobile_param
-
- #  # Continue rendering HTML for the iPad (no mobile views yet)
- #  def set_mobile_format
- #    is_device?("ipad") ? request.format = :html : super
- #  end
- #  def check_mobile_param
- #  	force_mobile_format if params[:m].to_b
- #  end
 
 	layout 'filler'
 
@@ -126,7 +116,7 @@ class Filler::FillerController < ApplicationController
 
 			if answer.is_edit
 				answer_index = answer.index_of(questions)
-				question_number = answer.survey.all_questions_id(false).length + answer.random_quality_control_answer_content.length,
+				question_number = answer.survey.all_questions_id(false).length + answer.random_quality_control_answer_content.length
 				@percentage = answer_index.to_f / question_number.to_f
 			else
 				redirect_to show_a_path(answer_id) and return
@@ -140,15 +130,8 @@ class Filler::FillerController < ApplicationController
 		ensure_reward(reward_scheme_id, answer.nil? ? reward_scheme.rewards : answer.rewards)
 
 		# 6. Check whether survey is closed or not
-		@survey_closed = false
-		if !@is_preview && @survey.status != Survey::PUBLISHED
-			# if is filler and survey's status is not published
-			@survey_closed = true
-		end
-
-		# 7. Estimate survey filler time
-		@left_time = @survey.estimate_answer_time
-
+		@survey_closed = !@is_preview && @survey.status != Survey::PUBLISHED
+		
 		# 10. get request referer and channel
 		@channel = params[:c].to_i
 		begin

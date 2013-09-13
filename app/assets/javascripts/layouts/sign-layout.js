@@ -2,7 +2,7 @@ jQuery(function($) {
 	var error_dom = $('#error_prompt');
 	window.showError = function(html, target, top, left) {
 		target = $(target);
-		if(target.is('input') || target.is('textarea')) {
+		if (target.is('input') || target.is('textarea')) {
 			target.select();
 		}
 		$('.error-prompt-txt', error_dom).html(html);

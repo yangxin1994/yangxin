@@ -3,10 +3,16 @@ class Sample::AccountsController < Sample::SampleController
   layout 'sample_account'
 
 	before_filter :require_sign_in, :only => [:after_sign_in, :get_basic_info_by_auth_key]
-
+  
   def sign_in
-
   end
+
+  def sign_up
+  end
+
+  def sign_out
+    _sign_out params[:ref]
+  end  
 
   # FOR AJAX 
   def login
@@ -29,40 +35,13 @@ class Sample::AccountsController < Sample::SampleController
 	  	redirect_to bind_sample_path({ref: params[:ref]})
   	end
   end
- 
-  def sign_up
 
-  end
-
-  def sign_out
-  	_sign_out params[:ref]
-  end
-
-  #注册成功后的跳转页面
-  def active_notice
-    # mail.cn.yahoo.com
-    #'gmail.com' 
-    mails = ['126.com','163.com','sina.com','yahoo','qq.com']
-    @account = params[:k]
-    @account = Base64.decode64(@account)
-  
-    m = mails.select{|mail| @account.include?(mail)}
-    if m.present?
-      @mail_t = "http://www.mail.#{m.first}"
-    end
-  end
-
-  def check_email_mobile
-    u = User.find_by_email_mobile(params[:phone])
-    render_json_auto({"exist" => (u &&  u.is_activated)}) and return
-    # render :json => Sample::AccountClient.new(session_info).check_email_mobile(params[:phone])
-  end
 
   #用户注册
-  def create_sample
-    if params[:phone].present?
+  def regist
+    if params[:email_mobile].present?
       retval = User.create_new_user(
-        params[:phone],
+        params[:email_mobile],
         params[:password],
         current_user,
         params[:third_party_user_id],
@@ -72,6 +51,27 @@ class Sample::AccountsController < Sample::SampleController
     end
   end
 
+  def check_user_exist
+    u = User.find_by_email_mobile(params[:email_mobile])
+    render_json_auto({"exist" => (u &&  u.is_activated)}) and return
+  end
+
+
+  #注册成功后的跳转页面
+  def regist_succ
+    mails = ['126.com','163.com','sina.com','yahoo','qq.com']
+    @account = params[:k]
+    @account = Base64.decode64(@account)
+    Rails.logger.info("---------------------------------")
+    Rails.logger.info(@account)
+    Rails.logger.info("---------------------------------")
+    m = mails.select{|mail| @account.include?(mail)}
+    if m.present?
+      @mail_t = "http://www.mail.#{m.first}"
+    end
+  end
+
+  # resend email after sign up success if can't receive the mail
   def re_mail
     @account = params[:k]
     @account = Base64.decode64(@account)
@@ -100,7 +100,7 @@ class Sample::AccountsController < Sample::SampleController
     render_json_s and return
   end
 
-  #用户注册  邮件激活
+  #用户注册  邮件激活callback
   def email_activate
     activate_info = {}
     begin
@@ -115,12 +115,13 @@ class Sample::AccountsController < Sample::SampleController
       @success = false
     else
       @success = true
-      refresh_session(retval['auth_key'])
+      #refresh_session(retval['auth_key'])
       user = User.find_by_auth_key(retval['auth_key'])
       @email  = Base64.encode64(user.email).chomp()
     end
   end
 
+  #用户注册  手机验证码激活
   def mobile_activate
     activate_info = {"mobile" => params[:mobile],
         "password" => params[:password],
@@ -128,12 +129,11 @@ class Sample::AccountsController < Sample::SampleController
     retval = User.activate("mobile", activate_info, request.remote_ip, params[:_client_type])
 
     render_json_e retval and return if retval.class == String && retval.start_with?("error_")
-    refresh_session(retval['auth_key'])
+    #refresh_session(retval['auth_key'])
     render_json_auto retval
   end
 
   def get_basic_info_by_auth_key
-    # answer number, spread number, third party accounts
     @answer_number = current_user.answers.not_preview.finished.length
     @spread_number = Answer.where(:introducer_id => current_user._id).not_preview.finished.length
     @bind_info = {}
@@ -176,7 +176,7 @@ class Sample::AccountsController < Sample::SampleController
     end
   end
 
-  #根据激活邮箱的key找回忘记密码的账户
+  #根据激活邮箱的key找回忘记密码的账户callback 
   def get_account
     begin
       activate_info_json = Encryption.decrypt_activate_key(params[:key])
@@ -189,6 +189,7 @@ class Sample::AccountsController < Sample::SampleController
     end
   end
 
+  # send email/mobile  code  when forget password
   def send_forget_pass_code
     session[:forget_account] = params[:email_mobile]
     retval = User.send_forget_pass_code(params[:email_mobile],
@@ -197,8 +198,9 @@ class Sample::AccountsController < Sample::SampleController
     render_json_auto retval and return
   end
 
-  def make_forget_pass_activate
-    render_json_auto User.make_forget_pass_activate(params[:phone], params[:code]) and return
+  #忘记密码,手机激活
+  def forget_pass_mobile_activate
+    render_json_auto User.forget_pass_mobile_activate(params[:phone], params[:code]) and return
   end
 
   def generate_new_password

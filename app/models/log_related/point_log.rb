@@ -1,4 +1,5 @@
 # encoding: utf-8
+# already tidied up
 class PointLog < Log
 	field :type, :type => Integer, :default => 8
 	field :amount, :type => Integer #花费积分数
@@ -55,6 +56,8 @@ class PointLog < Log
 
 	alias :data :info_for_sample
 
+	after_create :fill_scheme_id
+
 	def self.create_admin_operate_point_log(amount, remark, sample_id)
 		self.create(:amount => amount, :reason => ADMIN_OPERATE, :remark => remark, :user_id => sample_id)
 	end
@@ -90,4 +93,10 @@ class PointLog < Log
 			:gift_picture_url => gift_picture_url,
 			:user_id => sample_id)
 	end
+
+	def fill_scheme_id
+		scheme_id = Survey.find_by(:id => self.survey_id).quillme_promote_info['reward_scheme_id']  if self.survey_id.present?
+		self.update_attributes(:scheme_id => scheme_id) if scheme_id.present?
+	end
+
 end

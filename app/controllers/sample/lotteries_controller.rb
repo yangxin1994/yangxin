@@ -1,9 +1,5 @@
 class Sample::LotteriesController < Sample::SampleController
 
-	def initialize
-		super('lottery')
-	end
-
 	def draw
 		@answer = Answer.find_by_id(params[:id])
 		render_json_e ErrorEnum::ANSWER_NOT_EXIST if @answer.nil?
@@ -31,7 +27,7 @@ class Sample::LotteriesController < Sample::SampleController
 		render_404 if @answer.nil?
 
 		#获取该问卷下的抽奖奖品
-		@lottery = @answer.find_lottery_answers
+		@lottery = @answer.find_lottery_info
 		#参与抽奖记录
 		@fail_lottery_logs = LotteryLog.find_lottery_logs(params[:id],nil,8)
 		#中奖名单记录
@@ -77,12 +73,9 @@ class Sample::LotteriesController < Sample::SampleController
 
 		#获取登录用户的order_id
 		@win_order = LotteryLog.get_order_by_answer_sample(params[:id])
-		# @win_order       = client.get_lottery_order(params[:id])
-
 		@win_order_id    = @win_order.present? ? @win_order.order_id  : nil
 		@win_prize_id    = @win_order.present? ? @win_order.prize_id  : @prize_id	 
 		@win_prize_title = @win_order.present? ? @win_order.prize_name  : @prize_title 
-
 		@lottery_result  = @success
 	end
 end
