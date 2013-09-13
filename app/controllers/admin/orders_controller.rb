@@ -1,6 +1,4 @@
 # encoding: utf-8
-
-require "csv"
 require 'string/utf8'
 class Admin::OrdersController < Admin::AdminController
 
@@ -28,10 +26,6 @@ class Admin::OrdersController < Admin::AdminController
       params[:type].to_i).desc(:created_at)
     @orders = auto_paginate(order_list) do |orders|
       orders.map { |e| e.info_for_admin }
-    end
-    respond_to do |format|
-      format.json { render_json_auto @orders }
-      format.html { }
     end
   end
 
@@ -72,12 +66,27 @@ class Admin::OrdersController < Admin::AdminController
   end
 
   def to_excel
-    result = @orders_client.to_excel(params[:scope])
-    if result.success
-      send_data(result.value, :filename => "订单数据#{Time.now.strftime("%Y-%M-%d")}.csv", :type => 'text/csv')
-    else
-
-    end
+    params.each{|k, v| params.delete(k) unless v.present?}
+      if params[:keyword]
+        if params[:keyword] =~ /^.+@.+$/
+          params[:email] = params[:keyword]
+        elsif params[:keyword].length == 13
+          params[:code] = params[:keyword]
+        else
+          params[:mobile] = params[:keyword]
+        end
+        params.delete :keyword
+      end
+    @orders = Order.search_orders(params[:email], 
+      params[:mobile],
+      params[:code],
+      params[:status].to_i,
+      params[:source].to_i,
+      params[:type].to_i).desc(:created_at)
+    @orders = @orders.page(page).per(per_page) if params[:page].present?
+    send_data(@orders.to_excel,
+      :filename => "订单数据#{Time.now.strftime("%M-%d_%T")}.csv", 
+      :type => 'text/csv')
   end
 
 end

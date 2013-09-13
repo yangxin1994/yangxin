@@ -99,7 +99,9 @@ jQuery(function($) {
 
 		if(!/^1[3|4|5|8][0-9]\d{8}$/.test( $.trim($('#mobile-number').val())) ) {
 			$('#mobile-number').addClass('error');
-			$('#phone-binding .cont').append('<p>请填写正确的手机号码</p>')
+			if($('#phone-binding .cont').find('p').length < 1){
+				$('#phone-binding .cont').append('<p>请填写正确的手机号码</p>');	
+			}			
 			return false;
 		}
 		var _this = $(this);

@@ -201,6 +201,10 @@ module ApplicationHelper
 				behavor = %Q{
 					兑换失败,返还了<b>#{news['amount'].abs}</b>积分
 				}.html_safe				
+			when 256
+				behavor = %Q{
+					从清研通导入<b>#{news['amount'].abs}</b>积分
+				}.html_safe				
 			end
 		when 16
 			behavor = %Q{
@@ -467,6 +471,8 @@ module ApplicationHelper
 			retval = "撤销订单"
 		when PointLog::IMPORT
 			retval = "原有系统导入" 
+		when PointLog::NETRANKING_IMPORT
+			retval = "清研通导入" 
 		end
 		return retval
 	end

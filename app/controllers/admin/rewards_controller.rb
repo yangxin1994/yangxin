@@ -10,5 +10,5 @@ class Admin::RewardsController < Admin::AdminController
   def operate_point
   	render json: @rewards_client.operate_point(params[:point], params[:user_id])
   end
-
+  
  end

@@ -82,7 +82,7 @@
 				</ul>
 			</div>
 
-			<% elsif @survey['quillme_hot'] && @reward_scheme_type > 0 && !@answer_count_empty %>
+			<% elsif @reward_scheme_type > 0 && @survey.quillme_hot && user_signed_in && (current_user.answers.not_preview.length > 0) %>
 
 			<!-- signed in user is not allowed -->
 			<h1><%= @survey['title'] %></h1>
