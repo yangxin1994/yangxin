@@ -144,4 +144,8 @@ class BasicQuestion
 		sub_questions.delete_if { |e| to_be_removed["sub_questions"].include?(e["id"]) } if !sub_questions.nil?
 		return self
 	end
+
+	def has_other_item
+		self.issue["other_item"] && self.issue["other_item"]["has_other_item"] == true	
+	end
 end

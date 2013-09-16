@@ -47,7 +47,6 @@ class Survey
   field :is_star, :type => Boolean, :default => false
   field :publish_result, :type => Boolean, :default => false
   field :delta, :type => Boolean, :default => true
-  field :point, :type => Integer, :default => 0
   # reward for introducing others
   field :spread_point, :type => Integer, default: 0
   field :quillme_promotable, :type => Boolean, default: false
@@ -329,12 +328,6 @@ class Survey
     serialize_in_promote_setting
   end
 
-  #----------------------------------------------
-  #
-  #     set and get basic properties and attributes of the survey
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
   def update_deadline(time)
     time = time.to_i
     return ErrorEnum::SURVEY_DEADLINE_ERROR if time <= Time.now.to_i && time != -1
@@ -374,13 +367,9 @@ class Survey
   end
 
   def update_quality_control(quality_control_questions_type, quality_control_questions_ids)
-    return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTIONS_TYPE if ![0, 1, 2].include?(quality_control_questions_type)
-    quality_control_questions_ids.each do |qc_id|
-      return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if QualityControlQuestion.find_by_id(qc_id).nil?
-    end
     self.quality_control_questions_type = quality_control_questions_type
     self.quality_control_questions_ids = quality_control_questions_ids
-    return self.save
+    self.save
   end
 
   def set_spread(spread_point)
@@ -393,7 +382,6 @@ class Survey
     return if s.nil?
     return if s.deadline.nil?
     if Time.now.to_i - s.deadline < 20 && s.deadline - Time.now.to_i < 20
-      # close the survey and refresh the quota
       s.update_attributes(status: CLOSED) if survey.status == PUBLISHED
       s.refresh_quota_stats
     end
@@ -410,82 +398,22 @@ class Survey
   end
 
   def clone_survey(operator, title = nil)
-    # clone the meta data of the survey
     new_instance = self.clone
     new_instance.user = operator
-    new_instance.title = title || new_instance.title
-    new_instance.created_at = Time.now
-
-    # some information that cannot be cloned
-    new_instance.status = 0
-    new_instance.status = operator.is_admin? ? PUBLISHED : CLOSED
-
-    new_instance.is_star = false
-    new_instance.point = 0
-    new_instance.spread_point = 0
-    new_instance.answer_auditors.each do |a| new_instance.answer_auditors.delete(a) end
-
-    # the mapping of question ids
-    question_id_mapping = {}
-
-    # clone all questions
-    new_instance.pages.each do |page|
-      page["questions"].each_with_index do |question_id, question_index|
-        question = Question.find_by_id(question_id)
-        return ErrorEnum::QUESTION_NOT_EXIST if question == nil
-        cloned_question = question.clone
-        page["questions"][question_index] = cloned_question._id.to_s
-        question_id_mapping[question_id] = cloned_question._id.to_s
-      end
-    end
-
-    # clone quota rules
-    new_instance.quota["rules"].each do |quota_rule|
-      quota_rule["conditions"].each do |condition|
-        if condition["condition_type"] == 1
-          condition["name"] = question_id_mapping[condition["name"]]
-        end
-      end
-    end
-    new_instance.refresh_quota_stats
-
-    # clone quota rules
-    new_instance.filters.each do |filter|
-      filter["conditions"].each do |condition|
-        if condition["condition_type"] == 1
-          condition["name"] = question_id_mapping[condition["name"]]
-        end
-      end
-    end
-
-    # clone logic control rules
-    new_instance.logic_control.each do |logic_control_rule|
-      logic_control_rule["conditions"].each do |condition|
-        condition["question_id"] = question_id_mapping[condition["question_id"]]
-      end
-      if [1, 2].include?(logic_control_rule["rule_type"])
-        logic_control_rule["result"].each_with_index do |question_id, index|
-          logic_control_rule["result"][index] = question_id_mapping[question_id]
-        end
-      elsif [3, 4].include?(logic_control_rule["rule_type"])
-        logic_control_rule["result"].each do |result_ele|
-          result_ele["question_id"] = question_id_mapping[result_ele["question_id"]]
-        end
-      elsif [5, 6].include?(logic_control_rule["rule_type"])
-        logic_control_rule["result"]["question_id_1"] = question_id_mapping[logic_control_rule["result"]["question_id_1"]]
-        logic_control_rule["result"]["question_id_2"] = question_id_mapping[logic_control_rule["result"]["question_id_2"]]
-      end
-    end
-
-    new_instance.save
+    new_instance.update_attributes(title: title || new_instance.title, spread_point: 0)
+    new_instance.answer_auditors.each { |a| new_instance.answer_auditors.delete(a) }
+    question_id_mapping = new_instance.clone_page
+    new_instance.clone_quota(question_id_mapping)
+    new_instance.clone_filter(question_id_mapping)
+    new_instance.clone_logic_control(question_id_mapping)
     new_instance.reward_scheme << RewardScheme.create(default: true)
-    return new_instance
+    new_instance
   end
 
   def create_question(page_index, pre_question_id, question_type)
     if self.pages[page_index].nil?
       page_index = self.pages.length - 1
-      create_page(page_index, "")
+      create_page(page_index)
     end
     question = Question.create_question(question_type)
     insert_question(page_index, pre_question_id, question)
@@ -500,34 +428,18 @@ class Survey
   end
 
   def move_question(question_id_1, page_index, question_id_2)
-    remove_question(question_id_1, "")
+    remove_question(question_id_1, "to_be_deleted")
+    create_page(page_index - 1) if self.pages[page_index].nil?
     insert_question(page_index, question_id_2, Question.find(question_id_1))
-    remove_question("")
+    remove_question("to_be_deleted")
     adjust_logic_control_quota_filter('question_move', question_id_1)
     self.save
   end
 
   def clone_question(question_id_1, page_index, question_id_2)
-    from_page = nil
-    self.pages.each do |page|
-      if page["questions"].include?(question_id_1)
-        from_page = page
-        break
-      end
-    end
-    return ErrorEnum::QUESTION_NOT_EXIST if from_page == nil
-    to_page = self.pages[page_index]
-    return ErrorEnum::OVERFLOW if to_page == nil
-    if question_id_2.to_s == "-1"
-      question_index = -1
-    else
-      question_index = to_page.index(question_id_2)
-      return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
-    end
     orig_question = Question.find_by_id(question_id_1)
-    return ErrorEnum::QUESTION_NOT_EXIST if orig_question == nil
     new_question = orig_question.clone
-    to_page["questions"].insert(question_index+1, new_question._id.to_s)
+    insert_question(page_index, question_id_2, new_question)
     self.save
     return new_question
   end
@@ -542,11 +454,11 @@ class Survey
       end
     end
     self.save
-    adjust_logic_control_quota_filter('question_delete', question_id)
   end
 
   def delete_question(question_id)
     self.remove_question(question_id)
+    adjust_logic_control_quota_filter('question_delete', question_id)
     Question.find(question_id).destroy
   end
 
@@ -590,206 +502,14 @@ class Survey
     q
   end
 
-  def has_question(question_id)
-    self.pages.each do |page|
-      return true if page["questions"].include?(question_id)
-    end
-    return false
-  end
-
   def adjust_logic_control_quota_filter(type, question_id)
-    # first adjust the logic control
     question = BasicQuestion.find_by_id(question_id)
-    rules = self.logic_control
-    rules.each_with_index do |rule, rule_index|
-      case type
-      when 'question_update'
-        next if question.issue["items"].nil? && question.issue["rows"].nil?
-        item_ids = (question.issue["items"].try(:map) { |i| i["id"] }) || []
-        if question.issue["other_item"] && question.issue["other_item"]["has_other_item"] == true
-          item_ids << question.issue["other_item"]["id"]
-        end
-        row_ids = (question.issue["rows"].try(:map) { |i| i["id"] }) || []
-        # first handle conditions
-        if question.question_type == 0
-          # only choice questions can be conditions for logic control
-          if (0..4).to_a.include?(rule["rule_type"])
-            rule["conditions"].each do |c|
-              next if c["question_id"] != question_id
-              # the condition is about the question updated
-              # remove the items that do not exist
-              c["answer"].delete_if { |item_id| !item_ids.include?(item_id) }
-            end
-            # if all the items for a condition is removed, remove this condition
-            rule["conditions"].delete_if { |c| c["answer"].blank? }
-            # if all the conditions for a rule is removed, remove this rule
-            if rule["conditions"].blank?
-              rules.delete_at(rule_index)
-              next
-            end
-          end
-        end
-        # then handle result
-        if [3,4].to_a.include?(rule["rule_type"])
-          rule["result"].each do |r|
-            next if r["question_id"] != question_id
-            # the result is about the question updated
-            # remove the items that do not exist
-            r["items"].delete_if { |item_id| !item_ids.include?(item_id) }
-            # remove the rows that do not exist
-            r["sub_questions"].delete_if { |row_id| !row_ids.include?(row_id) }
-          end
-          # if all the items for a result is removed, remove this result
-          rule["result"].delete_if { |r| r["items"].blank? && r["sub_questions"].blank? }
-          # if all the results for a rule is removed, remove this rule
-          rules.delete_at(rule_index) if rule["result"].blank?
-        elsif [5,6].to_a.include?(rule["rule_type"])
-          if rule["result"]["question_id_1"] == question_id
-            rule["result"]["items"].delete_if { |i| !item_ids.include?(i[0]) }
-          elsif rule["result"]["question_id_2"] == question_id
-            rule["result"]["items"].delete_if { |i| !item_ids.include?(i[1]) }
-          end
-          # if all the results for a rule is removed, remove this rule
-          rules.delete_at(rule_index) if rule["result"]["items"].blank?
-        end
-      when 'question_move'
-        question_ids = self.all_questions_id
-        if [1,2].to_a.include?(rule["rule_type"])
-          # a show/hide questions rule
-          conditions_question_ids = rule["conditions"].map { |c| c["question_id"] }
-          result_question_ids = rule["result"]
-          if conditions_question_ids.include?(question_id)
-            # the conditions include the question to be moved
-            result_question_ids.each do |result_question_id|
-              if !question_ids.before(question_id, result_question_id)
-                rule["conditions"].delete_if { |c| c["question_id"] == question_id }
-              end
-            end
-          end
-          if result_question_ids.include?(question_id)
-            # the results include the question to be moved
-            conditions_question_ids.each do |condition_question_id|
-              if !question_ids.before(condition_question_id, question_id)
-                rule["result"].delete(question_id)
-              end
-            end
-          end
-          rules.delete_at(rule_index) if rule["conditions"].blank? || rule["result"].blank?
-        elsif [3,4].to_a.include?(rule["rule_type"])
-          # a show/hide items rule
-          conditions_question_ids = rule["conditions"].map { |c| c["question_id"] }
-          result_question_ids = rule["result"].map { |r| r["question_id"] }
-          if conditions_question_ids.include?(question_id)
-            # the conditions include the question to be moved
-            result_question_ids.each do |result_question_id|
-              if !question_ids.before(question_id, result_question_id)
-                rule["conditions"].delete_if { |c| c["question_id"] == question_id }
-              end
-            end
-          end
-          if result_question_ids.include?(question_id)
-            # the results include the question to be moved
-            conditions_question_ids.each do |condition_question_id|
-              if !question_ids.before(condition_question_id, question_id)
-                rule["result"].delete_if { |r| r["question_id"] == question_id }
-              end
-            end
-          end
-          rules.delete_at(rule_index) if rule["conditions"].blank? || rule["result"].blank?
-        elsif [5,6].to_a.include?(rule["rule_type"])
-          rules.delete_at(rule_index) if question_ids.before(rule["result"]["question_id_1"], rule["result"]["question_id_2"])
-        end
-      when 'question_delete'
-        if ![5,6].include?(rule["rule_type"])
-          # not a corresponding items rule
-          # adjust the conditions part
-          rule["conditions"].delete_if { |c| c["question_id"] == question_id }
-          # adjust the result part
-          if [1, 2].include?(rule["rule_type"])
-            rule["result"].delete(question_id)
-          elsif [3, 4].include?(rule["rule_type"])
-            rule["result"].delete_if { |r| r["question_id"] == question_id }
-          end
-          # check whether this logic control rule can be removed
-          if rule["conditions"].blank?
-            # no conditions, can be removed
-            rules.delete_at(rule_index)
-          elsif (1..4).to_a.include?(rule["rule_type"]) && rule["result"].blank?
-            # no results for the show/hide questions/items, can be removed
-            rules.delete_at(rule_index)
-          end
-        else
-          # a corresponding items rule
-          if rule["result"]["question_id_1"] == question_id || rule["result"]["question_id_2"] == question_id
-            rules.delete_at(rule_index)
-          end
-        end
-      end
-    end
-    self.save
-    # then adjust the quota
-    if question.question_type == 0
-      # only choice questions can be conditions of quotas
-      rules = self.quota["rules"]
-      need_refresh_quota = false
-      rules.each_with_index do |rule, rule_index|
-        next if rule["conditions"].blank?
-        case type
-        when 'question_update'
-          item_ids = question.issue["items"].map { |i| i["id"] }
-          if question.issue["other_item"] && question.issue["other_item"]["has_other_item"] == true
-            item_ids << question.issue["other_item"]["id"]
-          end
-          row_ids = question.issue["items"].map { |i| i["id"] }
-          need_refresh_quota = false
-          rule["conditions"].each do |c|
-            next if c["condition_type"] != 1 || c["name"] != question_id
-            # this condition is about the updated question
-            l1 = c["value"].length
-            c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
-            need_refresh_quota = true if l1 != c["value"].length
-          end
-          rule["conditions"].delete_if { |c| c["value"].blank? }
-          rules.delete_at(rule_index) if rule["conditions"].blank?
-        when 'question_delete'
-          l1 = rule["conditions"].length
-          rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
-          if l1 != rule["conditions"].length
-            rules.delete_at(rule_index) if rule["conditions"].blank?
-            need_refresh_quota = true
-          end
-        end
-      end
-      self.refresh_quota_stats if need_refresh_quota
-      self.save
-    end
-    # then adjust the filters
-    if question.question_type == 0
-      # only choice questions can be conditions of filters
-      rules = self.filters
-      rules.each_with_index do |rule, rule_index|
-        case type
-        when 'question_update'
-          question = Question.find_by_id(question_id)
-          item_ids = question.issue["items"].map { |i| i["id"] }
-          if question.issue["other_item"] && question.issue["other_item"]["has_other_item"] == true
-            item_ids << question.issue["other_item"]["id"]
-          end
-          row_ids = question.issue["items"].map { |i| i["id"] }
-          rule["conditions"].each do |c|
-            next if c["condition_type"] != 1 || c["name"] != question_id
-            # this condition is about the updated question
-            c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
-          end
-          rule["conditions"].delete_if { |c| c["value"].blank? }
-          rules.delete_at(rule_index) if rule["conditions"].blank?
-        when 'question_delete'
-          rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
-          rules.delete_at(rule_index) if rule["conditions"].blank?
-        end
-      end
-      self.save
-    end
+    logger.info "AAAAAAAAAAAAAAAAAA"
+    logger.info question.inspect
+    logger.info "AAAAAAAAAAAAAAAAAA"
+    adjust_logic_control(question, type)
+    self.adjust_quota(question, type)
+    self.adjust_filter(question, type)
   end
 
   #----------------------------------------------
@@ -942,14 +662,9 @@ class Survey
   end
 
   def report(analysis_task_id, report_mockup_id, report_style, report_type)
-    # return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
-    # if report_mockup_id is nil, export all single questions analysis with default charts
     if !report_mockup_id.blank?
       report_mockup = self.report_mockups.find_by_id(report_mockup_id)
-      return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
     end
-    return ErrorEnum::WRONG_REPORT_TYPE if !%w[word ppt pdf].include?(report_type)
-    return ErrorEnum::WRONG_REPORT_STYLE if !(0..6).to_a.include?(report_style.to_i)
     task_id = Task.create(:task_type => "report")._id.to_s
     ReportWorker.perform_async(self._id.to_s,
       analysis_task_id,
@@ -995,9 +710,6 @@ class Survey
 
   def self.list(status)
     status_ary = Tool.convert_int_to_base_arr(status)
-    # To solve different version status,
-    # status = 4 and  status = -1 are deleted status
-    # status_ary << -1 if status_ary.include?(4)
     return Survey.where(:status.in => status_ary).desc(:created_at)
   end
 

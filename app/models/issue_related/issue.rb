@@ -19,7 +19,7 @@ class Issue
   def update_issue(attr_name_ary, issue_obj)
     attr_name_ary.each do |attr_name|
       self.send("#{attr_name}=".to_sym, Marshal.load(Marshal.dump(issue_obj[attr_name])))
-    end 
+    end
   end
 
   def remove_hidden_items(items)

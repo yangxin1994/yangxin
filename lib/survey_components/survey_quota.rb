@@ -111,4 +111,49 @@ module SurveyComponents::SurveyQuota
     end
     return amount
   end
+
+  def clone_quota(question_id_mapping)
+    self.quota["rules"].each do |quota_rule|
+      quota_rule["conditions"].each do |condition|
+        if condition["condition_type"] == 1
+          condition["name"] = question_id_mapping[condition["name"]]
+        end
+      end
+    end
+    self.save
+    self.refresh_quota_stats
+  end
+
+  def adjust_quota(question, type)
+    return if question.question_type == 0
+    rules = self.quota["rules"]
+    need_refresh_quota = false
+    rules.each_with_index do |rule, rule_index|
+      next if rule["conditions"].blank?
+      case type
+      when 'question_update'
+        item_ids = question.issue["items"].map { |i| i["id"] }
+        item_ids << question.issue["other_item"]["id"] if question.has_other_item
+        row_ids = question.issue["items"].map { |i| i["id"] }
+        rule["conditions"].each do |c|
+          next if c["condition_type"] != 1 || c["name"] != question.id
+          # this condition is about the updated question
+          l1 = c["value"].length
+          c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
+          need_refresh_quota = true if l1 != c["value"].length
+        end
+        rule["conditions"].delete_if { |c| c["value"].blank? }
+        rules.delete_at(rule_index) if rule["conditions"].blank?
+      when 'question_delete'
+        l1 = rule["conditions"].length
+        rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question.id }
+        if l1 != rule["conditions"].length
+          rules.delete_at(rule_index) if rule["conditions"].blank?
+          need_refresh_quota = true
+        end
+      end
+    end
+    self.refresh_quota_stats if need_refresh_quota
+    self.save
+  end
 end

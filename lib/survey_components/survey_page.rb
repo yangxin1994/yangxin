@@ -8,7 +8,7 @@ module SurveyComponents::SurveyPage
   def insert_question(page_index, pre_question_id, question)
     page = self.pages[page_index]
     if pre_question_id.to_s == "-1"
-      question_index = page.length - 1
+      question_index = page["questions"].length - 1
     elsif pre_question_id.to_s == "0"
       question_index = -1
     else
@@ -18,7 +18,7 @@ module SurveyComponents::SurveyPage
     self.save
   end
 
-  def create_page(page_index, page_name)
+  def create_page(page_index, page_name = "")
     return ErrorEnum::OVERFLOW if page_index < -1 or page_index > self.pages.length - 1
     new_page = {"name" => page_name, "questions" => []}
     self.pages.insert(page_index + 1, new_page)
@@ -87,5 +87,18 @@ module SurveyComponents::SurveyPage
     self.pages.insert(page_index_2+1, current_page)
     self.pages.delete_at(page_index_1)
     return self.save
+  end
+
+  def clone_page
+    question_id_mapping = {}
+    self.pages.each do |page|
+      page["questions"].each_with_index do |question_id, question_index|
+        cloned_question = Question.find(question_id).clone
+        page["questions"][question_index] = cloned_question._id.to_s
+        question_id_mapping[question_id] = cloned_question._id.to_s
+      end
+    end
+    self.save
+    question_id_mapping
   end
 end
