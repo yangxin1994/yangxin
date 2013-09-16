@@ -14,8 +14,7 @@ class Quill::CustomizationsController < Quill::QuillController
 
 	# AJAX: update stylesheet
 	def update
-		style_setting = @survey.style_setting || {}
-		retval = @survey.update_style_setting(style_setting)
-		render_json_auto retval
+		@survey.style_setting['style_sheet_name'] = params[:stylesheet]
+		render_json_auto @survey.save and return
 	end
 end

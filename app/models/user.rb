@@ -8,10 +8,11 @@ class User
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt
-    EmailRexg  = '\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z'
-    MobileRexg = '^(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$' 
 
-    DEFAULT_IMG = '/assets/avatar/small_default.png'
+  EmailRexg  = '\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z'
+  MobileRexg = '^(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$' 
+
+  DEFAULT_IMG = '/assets/avatar/small_default.png'
 
   field :email, :type => String
   field :email_activation, :type => Boolean, default: false
@@ -32,8 +33,8 @@ class User
   field :login_count, :type => Integer, default: 0
   field :sms_verification_code, :type => String
   field :sms_verification_expiration_time, :type => Integer,default:  -> {(Time.now + 1.minutes).to_i }
-    field :rss_verification_code, :type => String
-    field :rss_verification_expiration_time, :type => Integer,default:  -> {(Time.now + 1.minutes).to_i } 
+  field :rss_verification_code, :type => String
+  field :rss_verification_expiration_time, :type => Integer,default:  -> {(Time.now + 1.minutes).to_i } 
   field :email_to_be_changed, :type => String
   field :change_email_expiration_time, :type => Integer
   field :mobile_to_be_changed, :type => String
@@ -164,11 +165,6 @@ class User
     end
     return "/assets/avatar/mini_default.png"  
   end
-
-  def avatar_src
-    self.avatar? ? user.avatar.picture_url : User::DEFAULT_IMG
-  end
-
 
   def set_receiver_info(receiver_info)
     if self.affiliated.present?
@@ -539,7 +535,6 @@ class User
     self.user_role = role.sum
     return self.save
   end
-
 
   # 我推广的问卷数
   def spread_count

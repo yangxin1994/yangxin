@@ -1,7 +1,6 @@
 # already tidied up
 require 'error_enum'
 require 'question_type_enum'
-require 'quality_control_type_enum'
 class QualityControlQuestionAnswer
 	include Mongoid::Document
 
@@ -25,13 +24,13 @@ class QualityControlQuestionAnswer
 		answer.quality_control_type = quality_control_type
 		answer.question_type = question_type
 		case "#{quality_control_type}_#{question_type}"
-		when "#{QualityControlTypeEnum::OBJECTIVE}_#{QuestionTypeEnum::CHOICE_QUESTION}"
+		when "#{QualityControlQuestion::OBJECTIVE}_#{QuestionTypeEnum::CHOICE_QUESTION}"
 			answer.answer_content = {"fuzzy" => false, "items" => []}
-		when "#{QualityControlTypeEnum::OBJECTIVE}_#{QuestionTypeEnum::TEXT_BLANK_QUESTION}"
+		when "#{QualityControlQuestion::OBJECTIVE}_#{QuestionTypeEnum::TEXT_BLANK_QUESTION}"
 			answer.answer_content = {"fuzzy" => true, "text" => ""}
-		when "#{QualityControlTypeEnum::OBJECTIVE}_#{QuestionTypeEnum::NUMBER_BLANK_QUESTION}"
+		when "#{QualityControlQuestion::OBJECTIVE}_#{QuestionTypeEnum::NUMBER_BLANK_QUESTION}"
 			answer.answer_content = {"number" => 0}
-		when "#{QualityControlTypeEnum::MATCHING}_#{QuestionTypeEnum::CHOICE_QUESTION}"
+		when "#{QualityControlQuestion::MATCHING}_#{QuestionTypeEnum::CHOICE_QUESTION}"
 			answer.answer_content = {"matching_items" => []}
 		end
 		answer.save
@@ -51,12 +50,12 @@ class QualityControlQuestionAnswer
 	end
 
 	def self.update_answer(question_id, quality_control_type, answer_object)
-		if quality_control_type == QualityControlTypeEnum::OBJECTIVE
+		if quality_control_type == QualityControlQuestion::OBJECTIVE
 			answer = QualityControlQuestionAnswer.find_by_question_id(question_id)
 			return ErrorEnum::QUALITY_CONTROL_QUESTION_ANSWER_NOT_EXIST if answer.nil?
 			answer.answer_content = answer_object
 			return answer.save
-		elsif quality_control_type == QualityControlTypeEnum::MATCHING
+		elsif quality_control_type == QualityControlQuestion::MATCHING
 			answer = QualityControlQuestionAnswer.find_by_question_id(question_id)
 			return ErrorEnum::QUALITY_CONTROL_QUESTION_ANSWER_NOT_EXIST if answer.nil?
 			answer.answer_content = answer_object

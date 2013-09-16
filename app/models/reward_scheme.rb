@@ -40,7 +40,6 @@ class RewardScheme
     return new_reward_scheme
   end
 
-
   def self.verify_reward_scheme_type(reward_scheme)
     retval = true
     reward_scheme["rewards"].each do |reward|
@@ -50,6 +49,7 @@ class RewardScheme
     return retval
   end
 
+  
   def self.first_reward_by_survey(id)
     reward = self.find_by(id: id)
     info = reward.rewards[0] if reward.present?
@@ -71,6 +71,4 @@ class RewardScheme
     return info
   end
 
-
-  
 end

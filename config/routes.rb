@@ -25,8 +25,8 @@ OopsData::Application.routes.draw do
     # survey
     match "questionaires/new" => "questionaires#new", :as => :new_questionaire, :via => :get
     match "questionaires/:questionaire_id" => "questionaires#show", :as => :questionaire, :via => :get  # ugly but make ensure_survey in quill_controller work
-    match "questionaires/:questionaire_id" => "questionaires#destroy", :as => :questionaire, :via => :delete
-    resources :questionaires, :only => [:index, :new] do
+    # match "questionaires/:questionaire_id" => "questionaires#destroy", :as => :questionaire, :via => :delete
+    resources :questionaires, :only => [:index, :new, :show, :destroy] do
       member do
         put :recover
         get :stars
