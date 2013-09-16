@@ -6,14 +6,14 @@ class Log
   # log type, 1 for answering surveys, 2 for lottery, 4 for gift redeem, 8 for point change, 16 for register, 32 for spread, 64 for punish                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 
   field :type, :type => Integer
-  scope :lottery_logs, lambda { where(:type => 2) }
-  scope :redeem_logs, lambda { where(:type => 4) }
-  scope :point_logs, lambda { where(:type => 8) }
-  scope :answer_logs, lambda {where(:type => 1)}
-  scope :special_logs,lambda { |t| where(:type => t)}
-  scope :spread_logs, lambda { where(:type => 32)}
-  scope :disciplinal_logs, lambda { where(:type => 64)}
-  scope :have_user,lambda {where(:user_id.ne => nil)}
+  scope :lottery_logs, -> { where(:type => 2) }
+  scope :redeem_logs, -> { where(:type => 4) }
+  scope :point_logs, -> { where(:type => 8) }
+  scope :answer_logs, -> {where(:type => 1)}
+  scope :special_logs,->(t) {  where(:type => t)}
+  scope :spread_logs, -> { where(:type => 32)}
+  scope :disciplinal_logs, -> { where(:type => 64)}
+  scope :have_user,-> {where(:user_id.ne => nil)}
 
 
 

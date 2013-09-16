@@ -6,8 +6,8 @@ class QualityControlQuestion < BasicQuestion
   field :is_required, :type => Boolean, default: true
   field :is_first, :type => Boolean, :default => false
 
-  scope :objective_questions, lambda { where(:quality_control_type => 1) }
-  scope :matching_questions, lambda { where(:quality_control_type => 2, :is_first=> true) }
+  scope :objective_questions, -> { where(:quality_control_type => 1) }
+  scope :matching_questions, -> { where(:quality_control_type => 2, :is_first=> true) }
   scope :find_by_type, ->(_type) { _type.present? ? where(:quality_control_type => _type).desc(:created_at) : self.desc(:created_at) }
 
   index({ quality_control_type: 1, is_first: 1 }, { background: true } )

@@ -51,17 +51,17 @@ class Answer
   field :agent_feedback_mobile
 
 
-  scope :not_preview, lambda { where(:is_preview => false) }
-  scope :preview, lambda { where(:is_preview => true) }
-  scope :finished, lambda { where(:status => FINISH) }
-  scope :screened, lambda { where(:status => REJECT, :reject_type => REJECT_BY_SCREEN) }
-  scope :finished_and_screened, lambda { any_of({:status => FINISH}, {:status => REJECT, :reject_type => REJECT_BY_SCREEN}) }
-  scope :rejected, lambda { where(:status => REJECT) }
-  scope :unreviewed, lambda { where(:status => UNDER_REVIEW) }
-  scope :ongoing, lambda {where(:status => EDIT)}
-  scope :wait_for_review, lambda {where(:status => UNDER_REVIEW)}
-  scope :my_spread, lambda{|user_id| where(:introducer_id => user_id)}
-  scope :special_status, lambda{|status| where(:status.in => status.split(','))}
+  scope :not_preview, -> { where(:is_preview => false) }
+  scope :preview, -> { where(:is_preview => true) }
+  scope :finished, -> { where(:status => FINISH) }
+  scope :screened, -> { where(:status => REJECT, :reject_type => REJECT_BY_SCREEN) }
+  scope :finished_and_screened, -> { any_of({:status => FINISH}, {:status => REJECT, :reject_type => REJECT_BY_SCREEN}) }
+  scope :rejected, -> { where(:status => REJECT) }
+  scope :unreviewed, -> { where(:status => UNDER_REVIEW) }
+  scope :ongoing, -> {where(:status => EDIT)}
+  scope :wait_for_review, -> {where(:status => UNDER_REVIEW)}
+  scope :my_spread, ->(user_id){ where(:introducer_id => user_id)}
+  scope :special_status, ->(status){ where(:status.in => status.split(',')) }
 
   belongs_to :agent_task
   belongs_to :user, class_name: "User", inverse_of: :answers

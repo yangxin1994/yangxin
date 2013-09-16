@@ -104,16 +104,16 @@ class Survey
 
 
 
-  scope :status, lambda {|st| where(:status.in => Tool.convert_int_to_base_arr(st || (Survey::CLOSED + Survey::PUBLISHED)))}
-  scope :title, lambda {|title| where(title: Regexp.new(title.to_s)) }
-  scope :user, lambda { |e| e.is_admin? ? self.criteria : where(:user_id => e._id) }
-  scope :reward_type,lambda {|rt| where(:quillme_promote_reward_type.in => rt.split(','))}
-  scope :opend, lambda { where(:status => 2)}
-  scope :closed, lambda { where(:status => 1)}
-  scope :quillme_promote, lambda { where(:quillme_promotable => true)}
-  scope :quillme_hot, lambda {where(:quillme_hot => true)}
-  scope :not_quillme_hot, lambda {where(:quillme_hot => false)}
-  scope :quillme_normal, lambda{ self.quillme_promote.not_quillme_hot} 
+  scope :status, ->(st) { where(:status.in => Tool.convert_int_to_base_arr(st || (Survey::CLOSED + Survey::PUBLISHED)))}
+  scope :title, ->(title) { where(title: Regexp.new(title.to_s)) }
+  scope :user, ->(e) {  e.is_admin? ? self.criteria : where(:user_id => e._id) }
+  scope :reward_type,->(rt) { where(:quillme_promote_reward_type.in => rt.split(','))}
+  scope :opend, -> { where(:status => 2)}
+  scope :closed, -> { where(:status => 1)}
+  scope :quillme_promote, -> { where(:quillme_promotable => true)}
+  scope :quillme_hot, -> {where(:quillme_hot => true)}
+  scope :not_quillme_hot, -> {where(:quillme_hot => false)}
+  scope :quillme_normal, -> { self.quillme_promote.not_quillme_hot} 
 
   index({ title: 1 }, { background: true } )
   index({ status: 1, title: 1 }, { background: true } )
@@ -136,10 +136,10 @@ class Survey
 
 
   scope :stars, -> {where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
-  scope :published, lambda { where(:status  => 2) }
-  scope :normal, lambda { where(:status.gt => -1) }
-  scope :closed, lambda { where(:status => 1) }
-  scope :deleted, lambda { where(:status => 4) }
+  scope :published, -> { where(:status  => 2) }
+  scope :normal, -> { where(:status.gt => -1) }
+  scope :closed, -> { where(:status => 1) }
+  scope :deleted, -> { where(:status => 4) }
 
   public
 
