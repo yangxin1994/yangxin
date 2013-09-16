@@ -154,7 +154,13 @@ class Order
 			option["postcode"]    = order[:postcode]
 			sample.set_receiver_info(option) if sample.present?
 		end	
-		LotteryLog.create_succ_lottery_Log(answer_id,order.id,survey_id,sample_id,ip_address,prize_id)
+		LotteryLog.create_succ_lottery_Log(answer_id:answer_id,
+											order_id:order.id,
+											survey_id:survey_id,
+											sample_id:sample_id,
+											ip_address:ip_address,
+											prize_id:prize_id
+											)
 		return order
 	end
 
@@ -261,26 +267,6 @@ class Order
 				self.street_info.to_s + " " + self.postcode.to_s + " " + self.receiver.to_s)
 		end
 		return self
-	end
-
-	def info_for_sample
-		order_obj = {}
-		order_obj["_id"] = self._id.to_s
-		order_obj["created_at"] = self.created_at.to_i
-		order_obj["status"] = self.status
-		order_obj["source"] = self.source
-		order_obj["amount"] = self.amount
-		order_obj["type"] = self.type
-		if self.source == REDEEM_GIFT
-			order_obj["point"] = self.point
-			order_obj["title"] = self.gift.try(:title)
-			order_obj["picture_url"] = self.gift.try(:photo).try(:picture_url)
-			order_obj["gift_id"] = self.gift.try(:_id)
-		elsif self.source == WIN_IN_LOTTERY
-			order_obj["title"] = self.prize.try(:title)
-			order_obj["picture_url"] = self.prize.try(:photo).try(:picture_url)
-		end
-		return order_obj
 	end
 
 	def info_for_sample_detail

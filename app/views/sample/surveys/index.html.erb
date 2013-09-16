@@ -1,209 +1,137 @@
 <% content_for :head do %>
-	<%= stylesheet_link_tag "pages/sample/surveys-bundle", :media => "all" %>
-	<%= javascript_include_tag "pages/sample/surveys-bundle" %>
-	<script type="text/javascript">
-		<% if user_signed_in %>
-		 	window.current_user_id = "<%=  current_user.id %>"
-		<% end %>	
-	</script>	
+  <%= stylesheet_link_tag "pages/sample/surveys-bundle", :media => "all" %>
+  <%= javascript_include_tag "pages/sample/surveys-bundle" %>
+  <script type="text/javascript">
+    <% if user_signed_in %>
+      window.current_user_id = "<%=  current_user.id %>"
+    <% end %> 
+  </script> 
 <% end %>
 
 <!-- <div class="hot-research-banner">
-	<i class="icon16 popup-close"></i>
-	<a class="chrome_p">
-		<span class="download"></span><span class="down">安装Chrome推送插件</span>
-	</a>
+  <i class="icon16 popup-close"></i>
+  <a class="chrome_p">
+    <span class="download"></span><span class="down">安装Chrome推送插件</span>
+  </a>
 </div> -->
 
 <div class="inner-page rl">
-	<div class="rl_h">
-		<ul>
-			<li class="<%= current_tab?("#{Survey::PUBLISHED}",params[:status].present? ? params[:status] : "#{Survey::PUBLISHED}" )%> opend" data="2">
-				<a href="<%= surveys_path(:status => Survey::PUBLISHED)%>">
-			 		开放中的问卷
-				</a> 
-			</li>
-			<li class="<%= current_tab?("#{Survey::CLOSED}",params[:status])%> closed" data="1">
-				<a href="<%= surveys_path(:status => Survey::CLOSED)%>">
-			 		已结束的问卷 
-			 	</a>
-			</li>
-			<div style="clear:both;"></div>        
-		</ul>
-		<div class="s_a_c">今日累计答题 <%= @answer_count %>，分享问卷 <%= @spread_count%></div>
-	</div>
-	<div class="research-list dashed-box l">
-		<div class="dashed-box-inner" id="s_list">
-			<div class="s_top">
-				<div class="s_type">
-					<ul class="reward_type">   
-						<li class="<%= current_tab?(nil,params[:reward_type])%>">
-							<a href="<%= surveys_path(:status => params[:status])%>">
-								全部 (<span class="all_t"><%= @reward_count.values.reduce(:+).to_i %></span>)
-							</a>
-						</li>
-						<li reward_type="<%= RewardScheme::POINT.to_s %>" class="<%= current_tab?("#{RewardScheme::POINT.to_s}",params[:reward_type])%>">
-							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::POINT.to_s}")%>">
-								积分奖励 (<span class="u_t"><%= @reward_count[4].to_i %></span>)
-							</a>
-						</li>
-						<li reward_type="<%= RewardScheme::LOTTERY.to_s %>"  class="<%= current_tab?("#{RewardScheme::LOTTERY.to_s}",params[:reward_type])%>">
-							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::LOTTERY.to_s}")%>">
-								抽奖机会 (<span class="c_t"><%= @reward_count[8].to_i %></span>)
-							</a>
-						</li>  
-						<li reward_type="<%= RewardScheme::CASH_REWARD %>" class="<%= current_tab?("#{RewardScheme::CASH_REWARD}",params[:reward_type])%>">
-							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::CASH_REWARD }")%>">
-								现金奖励 (<span class="x_t"><%= @reward_count[1].to_i + @reward_count["2"].to_i + @reward_count["16"].to_i %></span>)
-							</a>
-						</li>
-						<li reward_type="0" class="<%= current_tab?("#{RewardScheme::FREE}",params[:reward_type])%>">
-							<a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::FREE}")%>">
-								免费调研 (<span class="m_t"><%= @reward_count[0].to_i %></span>)
-							</a>
-						</li>
-						<div style="clear:both;"></div>
-					</ul>
-					<%if user_signed_in %>
-						<div class="select" name="answer_status">  
-							<div class="select-content w50" tabindex="0">
-								<%= show_default_select_option(params[:answer_status],params[:status])%>
-								<i class="triangle"></i>
-							</div>	
-							<ul class="w50">
-								<li data="<%=Answer::NOT_EXIST %>"><%= opend_nav?(params[:status]) ? '待参与' : '未参与' %></li>
-								<li data="<%= Answer::EDIT %>">答题中</li>
-								<li data="<%= "#{Answer::UNDER_REVIEW},#{Answer::UNDER_AGENT_REVIEW}"%>">待审核</li>
-								<li data="<%= Answer::REJECT%>">被拒绝</li>
-								<li class="bbr" data="<%= Answer::FINISH%>">已完成</li>
-							</ul>
-						</div>						
-					<% end %>
-				</div>
-			</div>
-			<ul class="list">
-				<% if @surveys['data'].length > 0 %>
-					<%=  render :partial => "survey_list",  :locals => {:surveys => @surveys} %>
-				<% else %>
-					<div class="no_data">该分类下没有任何问卷</div>
-				<% end %>
-			</ul>
-			<%= sample_paginator(@surveys) %>
-		</div>
-	</div>
+  <div class="rl_h">
+    <ul>
+      <li class="<%= current_tab?("#{Survey::PUBLISHED}",params[:status].present? ? params[:status] : "#{Survey::PUBLISHED}" )%> opend" data="2">
+        <a href="<%= surveys_path(:status => Survey::PUBLISHED)%>">
+          开放中的问卷
+        </a> 
+      </li>
+      <li class="<%= current_tab?("#{Survey::CLOSED}",params[:status])%> closed" data="1">
+        <a href="<%= surveys_path(:status => Survey::CLOSED)%>">
+          已结束的问卷 
+        </a>
+      </li>
+      <div style="clear:both;"></div>        
+    </ul>
+    <div class="s_a_c">今日累计答题 <%= @answer_count %>，分享问卷 <%= @spread_count%></div>
+  </div>
+  <div class="research-list dashed-box l">
+    <div class="dashed-box-inner" id="s_list">
+      <div class="s_top">
+        <div class="s_type">
+          <ul class="reward_type">   
+            <li class="<%= current_tab?(nil,params[:reward_type])%>">
+              <a href="<%= surveys_path(:status => params[:status])%>">
+                全部 (<span class="all_t"><%= @reward_count.values.reduce(:+).to_i %></span>)
+              </a>
+            </li>
+            <li reward_type="<%= RewardScheme::POINT.to_s %>" class="<%= current_tab?("#{RewardScheme::POINT.to_s}",params[:reward_type])%>">
+              <a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::POINT.to_s}")%>">
+                积分奖励 (<span class="u_t"><%= @reward_count[4].to_i %></span>)
+              </a>
+            </li>
+            <li reward_type="<%= RewardScheme::LOTTERY.to_s %>"  class="<%= current_tab?("#{RewardScheme::LOTTERY.to_s}",params[:reward_type])%>">
+              <a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::LOTTERY.to_s}")%>">
+                抽奖机会 (<span class="c_t"><%= @reward_count[8].to_i %></span>)
+              </a>
+            </li>  
+            <li reward_type="<%= RewardScheme::CASH_REWARD %>" class="<%= current_tab?("#{RewardScheme::CASH_REWARD}",params[:reward_type])%>">
+              <a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::CASH_REWARD }")%>">
+                现金奖励 (<span class="x_t"><%= @reward_count[1].to_i + @reward_count["2"].to_i + @reward_count["16"].to_i %></span>)
+              </a>
+            </li>
+            <li reward_type="0" class="<%= current_tab?("#{RewardScheme::FREE}",params[:reward_type])%>">
+              <a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::FREE}")%>">
+                免费调研 (<span class="m_t"><%= @reward_count[0].to_i %></span>)
+              </a>
+            </li>
+            <div style="clear:both;"></div>
+          </ul>
+          <%if user_signed_in %>
+            <div class="select" name="answer_status">  
+              <div class="select-content w50" tabindex="0">
+                <%= show_default_select_option(params[:answer_status],params[:status])%>
+                <i class="triangle"></i>
+              </div>  
+              <ul class="w50">
+                <li data="<%=Answer::NOT_EXIST %>"><%= opend_nav?(params[:status]) ? '待参与' : '未参与' %></li>
+                <li data="<%= Answer::EDIT %>">答题中</li>
+                <li data="<%= "#{Answer::UNDER_REVIEW},#{Answer::UNDER_AGENT_REVIEW}"%>">待审核</li>
+                <li data="<%= Answer::REJECT%>">被拒绝</li>
+                <li class="bbr" data="<%= Answer::FINISH%>">已完成</li>
+              </ul>
+            </div>            
+          <% end %>
+        </div>
+      </div>
+      <ul class="list">
+        <% if @surveys['data'].length > 0 %>
+          <%=  render :partial => "survey_list",  :locals => {:surveys => @surveys} %>
+        <% else %>
+          <div class="no_data">该分类下没有任何问卷</div>
+        <% end %>
+      </ul>
+      <%= sample_paginator(@surveys) %>
+    </div>
+  </div>
 
-	<div class="rss dashed-box l" id="subscribe">
-		<div class="header">
-			<span>订阅问卷</span>
-		</div>
-		<div class="content">
-			<div class="info">
-				<div>
-					<div class='channel_err'><i></i><span>帐号有误,请重新输入</span></div>
-					<input type="text" name="contact" placeholder="手机号/电子邮件" />
-					<a href="javascript:void(0);" class="btn rss-btn">订阅</a>
-				</div>
-			</div>
-		</div>
-	</div>
+  <div class="rss dashed-box l" id="subscribe">
+    <div class="header">
+      <span>订阅问卷</span>
+    </div>
+    <div class="content">
+      <div class="info">
+        <div>
+          <div class='channel_err'><i></i><span>帐号有误,请重新输入</span></div>
+          <input type="text" name="contact" placeholder="手机号/电子邮件" />
+          <a href="javascript:void(0);" class="btn rss-btn">订阅</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
-	<% if @disciplinal.present? %>
-	<div class="rank dashed-box l">
-		<div class="dashed-box-inner">
-			<div class="dashed-box-inner-top">
-				<h3 class="box-title">公示板</h3>
-			</div>
+  <% if @disciplinal.present? %>
+  <div class="rank dashed-box l">
+    <div class="dashed-box-inner">
+      <div class="dashed-box-inner-top">
+        <h3 class="box-title">公示板</h3>
+      </div>
 
-			<ul class="rank-list">
-				<% @disciplinal.each_with_index do |log,index|%>
-					<li <%= hide_border?(@disciplinal,index) %>>
-					<span class="rank-list-left l">
-						<a class="userhead l" href="javascript:void(0);<%#= user_path(log['user_id'])%>">
-							<img src="<%= small_avatar(log['user_id'])%>" alt="<%= log['username']%>">
-						</a>
-						<span class="username">
-							<a href="javascript:void(0);"><%= log['username']%></a>
-						</span>
-						<span class="integral">不认真答题，答案被拒绝</span>
-					</span>
-					</li>
-				<% end %>
-			</ul>
-		</div>
-	</div>
-	<% end %>
-
-<!-- 	<div class="help dashed-box l">
-		<div class="help_inner">
-			<div class="top"><span class="h_icon"></span><span class="h">帮助</span></div>
-			<dl>
-				<a href="">
-					<dt></dt>  
-					<dd><span>什么是优币?</span></dd>
-				</a>
-			</dl>
-			<dl>  
-				<a href="">
-					<dt></dt>
-					<dd><span>优币怎么获得? </span></dd>
-				</a>
-			</dl>
-			<dl>  
-				<a href="">
-					<dt></dt>
-					<dd><span>怎样才能参加抽奖? </span></dd>
-				</a>  
-			</dl>
-			<dl>  
-				<a href="">
-					<dt></dt>
-					<dd><span>抽中的奖品何时可以收到?</span></dd>
-				</a>
-			</dl>
-		</div>
-	</div>
- -->
-	<div style="clear:both;"></div>
+      <ul class="rank-list">
+        <% @disciplinal.each_with_index do |log,index|%>
+          <li <%= hide_border?(@disciplinal,index) %>>
+          <span class="rank-list-left l">
+            <a class="userhead l" href="javascript:void(0);<%#= user_path(log['user_id'])%>">
+              <img src="<%= small_avatar(log['user_id'])%>" alt="<%= log['username']%>">
+            </a>
+            <span class="username">
+              <a href="javascript:void(0);"><%= log['username']%></a>
+            </span>
+            <span class="integral">不认真答题，答案被拒绝</span>
+          </span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+  <% end %>
+  <div style="clear:both;"></div>
 </div>
-
-<% if @fresh_news.present? %>
-	<div class="inner-page">
-		<div class="research-list dashed-box l news">
-			<div class="dashed-box-inner">
-				<ul class="rank-list">
-				<% @fresh_news.each_with_index do |news,index|%>
-					<% t = DateTime.parse("#{news['created_at']}")%>
-					<li <%= hide_border?(@fresh_news,index) %> >
-						<span class="rank-list-left l">
-							<a class="userhead l" href="javascript:void(0);">
-								<img src="<%= show_image(news['avatar'],'avatar') %>" />
-							</a>
-						</span>
-						<span class="new_info">
-							<span class="username">
-								<span class="behavior"><%= ch_time(t) %></span>
-								<a href="<%= news['user_id']%>"><%=news['nickname']%></a>
-							</span>
-							<span class="new_detail">
-								<span class="behavior">参与了调研</span>
-								<span class="s_title">
-									<a href="<%= news['survey_id']%>"><%= news['survey_title']%></a>
-								</span>
-								<span class="behavior">获得了</span>
-								<% if news['reward_type'] == 8 %>
-              		<span class="point_reward">一次抽奖机会</span>
-								<% elsif news['reward_type'] > 1 %>
-									<span class="point_reward">
-										<b><%= news['amount']%></b><%= reward_type(news['reward_type'])%>
-									</span>
-								<% end %>
-							</span>  
-						</span>        
-					</li>
-				<% end %>             
-				</ul>
-			</div>
-		</div>
-	</div>
-<% end %>
 <%= render :partial => "popup_notice" %>

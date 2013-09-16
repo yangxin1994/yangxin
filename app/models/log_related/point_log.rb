@@ -24,20 +24,20 @@ class PointLog < Log
 	IMPORT = 128
 	NETRANKING_IMPORT = 256
 
-	def info_for_sample
-		point_log_obj = {}
-		point_log_obj["created_at"] = self.created_at.to_i
-		point_log_obj["amount"] = self.amount
-		point_log_obj["reason"] = self.reason
-		point_log_obj["survey_title"] = self.survey_title
-		point_log_obj["survey_id"] = self.survey_id
-		point_log_obj["gift_name"] = self.gift_name
-		point_log_obj["gift_type"] = self.gift_type
-		point_log_obj["gift_id"] = self.gift_id
-		point_log_obj["gift_picture_url"] = self.gift_picture_url
-		point_log_obj["remark"] = self.remark
-		return point_log_obj
-	end
+	# def info_for_sample
+	# 	point_log_obj = {}
+	# 	point_log_obj["created_at"] = self.created_at.to_i
+	# 	point_log_obj["amount"] = self.amount
+	# 	point_log_obj["reason"] = self.reason
+	# 	point_log_obj["survey_title"] = self.survey_title
+	# 	point_log_obj["survey_id"] = self.survey_id
+	# 	point_log_obj["gift_name"] = self.gift_name
+	# 	point_log_obj["gift_type"] = self.gift_type
+	# 	point_log_obj["gift_id"] = self.gift_id
+	# 	point_log_obj["gift_picture_url"] = self.gift_picture_url
+	# 	point_log_obj["remark"] = self.remark
+	# 	return point_log_obj
+	# end
 
 	def info_for_admin
 		point_log_obj = {}
@@ -54,7 +54,7 @@ class PointLog < Log
 		return point_log_obj
 	end
 
-	alias :data :info_for_sample
+	#alias :data :info_for_sample
 
 	def self.create_admin_operate_point_log(amount, remark, sample_id)
 		self.create(:amount => amount, :reason => ADMIN_OPERATE, :remark => remark, :user_id => sample_id)

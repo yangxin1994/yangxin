@@ -84,12 +84,12 @@
 		</div>		
 	</div>
 
-	<% if @fail_lottery_logs.present? %>
+	<% if @lottery_logs.present? %>
 	<div class="rank dashed-box l">
 		<div class="dashed-box-inner">
 			<div class="dashed-box-inner-top">
 				<div class="reward-info">
-					已有<%= @lottery_counts['total'] %>人参与，<span><%= @lottery_counts['succ'] %></span>人中奖
+					已有<%= @lottery_logs.size %>人参与，<span><%= @succ_lottery_logs.size %></span>人中奖
 				</div>
 				<div class="dashed-top-tit">
 					<ul>
@@ -103,10 +103,10 @@
 				</div>
 			</div>
 
-			<% if @fail_lottery_logs.present? %>
+			<% if @lottery_logs.present? %>
 				<ul class="rank-list fail_log">
-					<% @fail_lottery_logs.each_with_index do |log,index|%>
-					<li <%= hide_border?(@fail_lottery_logs,index) %>>
+					<% @lottery_logs.each_with_index do |log,index|%>
+					<li <%= hide_border?(@lottery_logs,index) %>>
 						<span class="rank-list-left l">
 							<a class="userhead l" href="javascript:void(0);">
 								<img src="<%= small_avatar(log['user_id']) %>" alt="<%= log['nickname']%>">
@@ -178,25 +178,24 @@
 </div>
 
 
-<% if @lottery.present? %>
+<% if @prizes.present? %>
 <div class="inner-page  other_like">
 	<div class="research-list dashed-box l">
 		<div class="dashed-box-inner">
 			<div class="dashed-box-inner-top survey_prizes">
-				<span>来自调研<a href="/s/<%= (@lottery['scheme_id'])%>"><%= @lottery['survey_title']%></a>下的奖品</span>
+				<span>来自调研<a href="/s/<%= @answer.survey.scheme_id%>"><%= @answer.survey.title %></a>下的奖品</span>
 			</div>
 			<div class="other_gifts">
 				<ul>
-					<% @lottery['prizes'].each_with_index do |prize,index|%>
-
+					<% @prizes.each_with_index do |prize,index|%>
 						<li class="<% if index.to_i == 0 %>first<% end %>">
-								<div>
-									<a href="javascript:void(0);"><img src="<%= prize['photo_src']%>" alt="<%= prize['title']%>" width="130" height="130"></a>
-								</div>
-								<div class="other_detail">
-									<span><%= prize['title']%></span>
-									<div>价值: <span class="p_price">￥<%= prize['price']%></span></div>
-								</div>
+							<div>
+								<a href="javascript:void(0);"><img src="<%= prize.photo_src%>" alt="<%= prize.title%>" width="130" height="130"></a>
+							</div>
+							<div class="other_detail">
+								<span><%= prize.title%></span>
+								<div>价值: <span class="p_price">￥<%= prize.price%></span></div>
+							</div>
 						</li>
 					<% end %>									
 				</ul>

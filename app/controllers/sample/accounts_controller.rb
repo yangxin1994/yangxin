@@ -115,7 +115,7 @@ class Sample::AccountsController < Sample::SampleController
     else
       @success = true
       refresh_session(retval['auth_key'])
-      user = User.find_by_auth_key(retval['auth_key'])
+      user = User.find_by(auth_key:retval['auth_key'])
       @email  = Base64.encode64(user.email).chomp()
     end
   end
@@ -180,7 +180,7 @@ class Sample::AccountsController < Sample::SampleController
     begin
       activate_info_json = Encryption.decrypt_activate_key(params[:key])
       activate_info = JSON.parse(activate_info_json)
-      user = User.find_by_email(activate_info['email'])
+      user = User.find_by(email: activate_info['email'])
       render_404 if user.nil?
       redirect_to forget_password_account_path(:key => Base64.encode64(user.email).chomp())
     rescue

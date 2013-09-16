@@ -1,117 +1,107 @@
 <% content_for :head do %>
-	<%= javascript_include_tag "pages/sample/gifts-bundle" %>
-	<%= stylesheet_link_tag "pages/sample/gift-bundle", :media => "all" %>
-	<script type="text/javascript">
-		<% if user_signed_in %>
-	    	window.username    = "<%=  current_user.nickname  if @receiver_info %>"
-	    	window.total_point = "<%=  current_user.point if @receiver_info  %>"
-	    	window.sample_receiver = "<%= @receiver_info['receiver']  if @receiver_info %>"
-    	  	window.sample_mobile   = "<%= @receiver_info['mobile']  if @receiver_info %>"
-    	  	window.sample_postcode = "<%= @receiver_info['postcode'] if @receiver_info  %>"
-    	  	window.sample_address  = "<%= @receiver_info['address'] if @receiver_info %>"
-    	  	window.sample_street_info = "<%= @receiver_info['street_info'] if @receiver_info %>"
-		<% end %>
-		window.point_value = "<%= @gift['point'] %>"
-		window.gift_id    = "<%= @gift['_id'] %>"
-		window.gift_name  = "<%= @gift['title'] %>"
-	</script>
+  <%= javascript_include_tag "pages/sample/gifts-bundle" %>
+  <%= stylesheet_link_tag "pages/sample/gift-bundle", :media => "all" %>
+  <script type="text/javascript">
+    <% if user_signed_in %>
+        window.username    = "<%=  current_user.nickname  if @receiver_info %>"
+        window.total_point = "<%=  current_user.point if @receiver_info  %>"
+        window.sample_receiver = "<%= @receiver_info['receiver']  if @receiver_info %>"
+          window.sample_mobile   = "<%= @receiver_info['mobile']  if @receiver_info %>"
+          window.sample_postcode = "<%= @receiver_info['postcode'] if @receiver_info  %>"
+          window.sample_address  = "<%= @receiver_info['address'] if @receiver_info %>"
+          window.sample_street_info = "<%= @receiver_info['street_info'] if @receiver_info %>"
+    <% end %>
+    window.point_value = "<%= @gift.point %>"
+    window.gift_id    = "<%= @gift.id %>"
+    window.gift_name  = "<%= @gift.title %>"
+  </script>
 <% end %>
 
 
 <div class="site_nav">
-	<span class="biao"></span><a href="<%= home_path %>"><span>首页</span></a>
-	<span>></span><a href="<%= gifts_path %>"><span>礼品列表</span></a>>
-	<span class="curr">礼品详情</span>
+  <span class="biao"></span><a href="<%= home_path %>"><span>首页</span></a>
+  <span>></span><a href="<%= gifts_path %>"><span>礼品列表</span></a>>
+  <span class="curr">礼品详情</span>
 </div>
 
 <div class="inner-page">
-	<div class="research-list dashed-box l">
-		<div class="dashed-box-inner">
-			<div class="gift_info">
-				<div class="gift_img">
-					<img src="<%= show_image(@gift['photo_src'],'gifts') %>" alt="<%= @gift['title'] %> "width="260" height="260" />
-				</div>
-				<div class="gift_sub_info">
-					<div class="gift_name"><%= @gift['title']%></div>
-					<div class="gift_detail">
-						<div><span>需要 :</span><span><b class="s-font"><%= @gift['point']%></b>积分</span></div>
-						<div><span>价值 :</span><span>￥<%=@gift['price']%>元</span></div>
-						<div>
-							<span>已兑 :</span><span class="gift_num"><%= @gift['exchange_count']%>件</span><span>(库存: <%= @gift['quantity']%>件)</span>
-						</div>
-						<% if @gift['deadline'].present? %>
+  <div class="research-list dashed-box l">
+    <div class="dashed-box-inner">
+      <div class="gift_info">
+        <div class="gift_img">
+          <img src="<%= show_image(@gift.photo_src,'gifts') %>" alt="<%= @gift.title %> "width="260" height="260" />
+        </div>
+        <div class="gift_sub_info">
+          <div class="gift_name"><%= @gift.title%></div>
+          <div class="gift_detail">
+            <div><span>需要 :</span><span><b class="s-font"><%= @gift.point %></b>积分</span></div>
+            <div><span>价值 :</span><span>￥<%=@gift.price %>元</span></div>
+            <div>
+              <span>已兑 :</span><span class="gift_num"><%= @gift.exchange_count %>件</span><span>(库存: <%= @gift.quantity %>件)</span>
+            </div>
+            <% if user_signed_in %>
+              <button class="reedm_right_now">立即兑换</button>
+            <% else %>
+              <button class="reedm_right_now not_login">立即兑换</button>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      <div class="gift_desc">
+        <h3>奖品介绍</h3>
+        <div class="gift_intro">
+          <%= @gift.description %>
+        </div>
+      </div>
+    </div>
+  </div>
 
-							<div><span>截止日期  :</span><span><%= Date.strptime("#{pn['created_at']}", "%Y年%m月%d日") %></span></div>
-						<% end %>
-<!-- 						<div class="special_desc">
-							特别说明:<%#= @gift['description']%>
-						</div> -->
-						<% if user_signed_in %>
-							<button class="reedm_right_now">立即兑换</button>
-						<% else %>
-							<button class="reedm_right_now not_login">立即兑换</button>
-						<% end %>
-					</div>
-				</div>
-			</div>
-			<div class="gift_desc">
-				<h3>奖品介绍</h3>
-				<div class="gift_intro">
-					<%= @gift['description']%>
-				</div>
-<!-- 				<div class="img_intro">
-					<img src="/assets/image/sample/04.jpg" width="568" height="270"/>
-				</div> -->
-			</div>
-		</div>
-	</div>
-
-	<% if @gift_rank.present? %>
-	<div class="guess dashed-box l">
-		<div class="dashed-box-inner">
-			<div class="dashed-box-inner-top">
-				<h3 class="box-title icon-like">猜你喜欢</h3>
-			</div>
-			<ul>
-				<% @gift_rank.each_with_index do |g,index| %>
-				<li>
-					<span class="gift-title"><a href="<%= gift_path(g['_id'])%>"><%= g['title']%></a></span>
-					<span class="integral"><%= g['point']%>积分</span>
-				</li>
-				<% end %>
-			</ul>      
-		</div>    
-	</div>  
-	<div style="clear:both;"></div>
-	<% end %>
+  <% if @gift_rank.present? %>
+  <div class="guess dashed-box l">
+    <div class="dashed-box-inner">
+      <div class="dashed-box-inner-top">
+        <h3 class="box-title icon-like">猜你喜欢</h3>
+      </div>
+      <ul>
+        <% @gift_rank.each_with_index do |g,index| %>
+        <li>
+          <span class="gift-title"><a href="<%= gift_path(g.id)%>"><%= g.title %></a></span>
+          <span class="integral"><%= g.point %>积分</span>
+        </li>
+        <% end %>
+      </ul>      
+    </div>    
+  </div>  
+  <div style="clear:both;"></div>
+  <% end %>
 </div>
 
 <% if @gift_rank.present? %>
 <div class="inner-page  other_like">
-	<div class="hot-gift dashed-box l">
-		<div class="dashed-box-inner">
-			<div class="dashed-box-inner-top">
-				<h3 class="box-title icon-gift">热门兑换</h3>
-			</div>
-			<ul>
-				<% @gift_rank.each_with_index do |g,index|%>
-					<% if index < 4%>
-						<li <%= index == 3 ? 'style=margin-right:0px' : '' %>>
-							<a href="<%= gift_path(g['_id'])%>">
-								<span class="gift-img">
-									<img src="<%= show_image(g['photo_src'],'gifts') %>" alt="<%= g['title']%>" 	width="	140" height="140">
-								</span>
-								<span class="gift-title"><%= truncate("#{g['title']}", :length => 25) %></span>
-								<span class="integral"><%= g['point']%>积分</span>
-							</a>
-						</li>
-					<% end %>
-				<% end %>
-			</ul>
+  <div class="hot-gift dashed-box l">
+    <div class="dashed-box-inner">
+      <div class="dashed-box-inner-top">
+        <h3 class="box-title icon-gift">热门兑换</h3>
+      </div>
+      <ul>
+        <% @gift_rank.each_with_index do |g,index|%>
+          <% if index < 4%>
+            <li <%= index == 3 ? 'style=margin-right:0px' : '' %>>
+              <a href="<%= gift_path(g.id)%>">
+                <span class="gift-img">
+                  <img src="<%= show_image(g.photo_src,'gifts') %>" alt="<%= g.title %>"  width=" 140" height="140">
+                </span>
+                <span class="gift-title"><%= truncate("#{g.title}", :length => 25) %></span>
+                <span class="integral"><%= g.point %>积分</span>
+              </a>
+            </li>
+          <% end %>
+        <% end %>
+      </ul>
 
-		</div>
-	</div>
-	<div style="clear:both;"></div>
+    </div>
+  </div>
+  <div style="clear:both;"></div>
 </div>
 <% end %>
 

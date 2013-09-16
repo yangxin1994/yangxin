@@ -78,4 +78,9 @@ class Prize
 		self.status = DELETED
 		return self.save
 	end
+
+	# add for lottery show page
+	def photo_src
+		self.photo.present? ? self.photo.picture_url : Prize::DEFAULT_IMG
+	end
 end

@@ -61,6 +61,7 @@ class Answer
   scope :ongoing, lambda {where(:status => EDIT)}
   scope :wait_for_review, lambda {where(:status => UNDER_REVIEW)}
   scope :my_spread, lambda{|user_id| where(:introducer_id => user_id)}
+  scope :special_status, lambda{|status| where(:status.in => status.split(','))}
 
   belongs_to :agent_task
   belongs_to :user, class_name: "User", inverse_of: :answers
@@ -131,23 +132,7 @@ class Answer
     end
   end
 
-  
-  def find_lottery_info
-    lottery_data = {}
-    prizes_arr = []
-    prize_ids = self.rewards.first['prizes'].map{|p| p['id']}
-    prizes = Prize.where(:id.in => prize_ids).map{|p| p['photo_src'] = p.photo.present? ? p.photo.picture_url : Prize::DEFAULT_IMG;p}
-    prizes.each do |pri|
-      prizes_arr << {'id' => pri.id,'title' => pri.title,'price' => pri.price,'photo_src' => pri.photo_src}
-    end
-    lottery_data['survey_id'] = self.survey.id
-    lottery_data['scheme_id'] = self.survey.quillme_promote_info['reward_scheme_id']
-    lottery_data['survey_title'] = self.survey.title
-    lottery_data['prizes'] = prizes_arr
-    lottery_data['user_id'] = self.user_id.to_s
-    lottery_data['status'] = self.status
-    return lottery_data
-  end
+
 
   def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, agent_task_id, channel, referrer, remote_ip, username, password, http_user_agent)
     survey = Survey.normal.find_by_id(survey_id)
@@ -226,9 +211,6 @@ class Answer
     return answer
   end
 
-  def has_rewards
-    return !self.rewards.blank?
-  end
 
   def is_screened
     return status == REJECT && reject_type == REJECT_BY_SCREEN
@@ -1155,7 +1137,11 @@ class Answer
     reward["win"] = false
     self.reward_delivered = true
     self.save
-    LotteryLog.create_fail_lottery_log(self.id,self.survey.id,self.survey.title,user_id,self.ip_address)
+    LotteryLog.create_fail_lottery_log(answer_id:self.id,
+                                        survey_id:self.survey.id,
+                                        survey_title:self.survey.title,
+                                        user_id:user_id,
+                                        ip:self.ip_address)
     return {"result" => false}
   end
 
@@ -1197,18 +1183,6 @@ class Answer
     return answer_obj
   end
 
-  def info_for_answer_list_for_sample
-    answer_obj = {}
-    answer_obj["answer_id"] = self._id.to_s
-    answer_obj["survey_id"] = self.survey_id.to_s
-    answer_obj["survey_title"] = self.survey.try(:title).to_s
-    answer_obj["order_id"] = self.order.try(:_id).to_s
-    answer_obj["answer_status"] = self.status
-    answer_obj["answer_reject_type"] = self.reject_type
-    answer_obj["created_at"] = self.created_at.to_i
-    answer_obj["rewards"] = self.rewards
-    return answer_obj
-  end
 
   def info_for_admin
     answer_obj = {}
@@ -1224,18 +1198,7 @@ class Answer
     return answer_obj
   end
 
-  def info_for_spread_details
-    answer_obj = {}
-    answer_obj["answer_status"] = self.status
-    answer_obj["answer_reject_type"] = self.reject_type
-    answer_obj["created_at"] = self.created_at.to_i
-    answer_obj["sample_nickname"] = self.user.try(:nickname) || "游客"
-    if self.user.present?
-      answer_obj["sample_avatar"] = self.user.avatar.try(:picture_url)
-      answer_obj["sample_id"] = self.user._id.to_s
-    end
-    return answer_obj
-  end
+
 
   def present_auditor
     answer = self
