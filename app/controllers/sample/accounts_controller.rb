@@ -16,12 +16,17 @@ class Sample::AccountsController < Sample::SampleController
 
   # FOR AJAX 
   def login
-    result = User.login_with_email_mobile(params[:email_mobile],
-                                          params[:password], 
-                                          request.remote_ip, 
-                                          params[:_client_type], 
-                                          params[:permanent_signed_in], 
-                                          params[:third_party_user_id])
+
+    result = User.login_with_email_mobile(email_mobile:params[:email_mobile],
+                                          password:params[:password], 
+                                          client_ip:request.remote_ip, 
+                                          client_type:params[:_client_type], 
+                                          keep_signed_in:params[:permanent_signed_in], 
+                                          third_party_user_id:params[:third_party_user_id]
+                                         )
+
+
+
     refresh_session(result['auth_key'])
     render_json_auto result and return
   end
@@ -41,14 +46,19 @@ class Sample::AccountsController < Sample::SampleController
   def regist
     if params[:email_mobile].present?
       retval = User.create_new_user(
-        params[:email_mobile],
-        params[:password],
-        current_user,
-        params[:third_party_user_id],
-        {protocol_hostname: "#{request.protocol}#{request.host_with_port}",
-          path: "/account/email_activate"})
+                    email_mobile:params[:email_mobile],
+                    password:params[:password],
+                    current_user:current_user,
+                    third_party_user_id:params[:third_party_user_id],
+                    callback:{
+                                protocol_hostname: "#{request.protocol}#{request.host_with_port}",
+                                path: "/account/email_activate"
+                             }
+          )
       render_json_auto(retval) and return
     end
+
+
   end
 
   def check_user_exist
@@ -92,9 +102,10 @@ class Sample::AccountsController < Sample::SampleController
       SmsWorker.perform_async("activate", user.mobile, "", :active_code => active_code)
     else
       EmailWorker.perform_async("welcome",
-        user.email,
-        "#{request.protocol}#{request.host_with_port}",
-        "/account/email_activate")
+                                user.email,
+                                "#{request.protocol}#{request.host_with_port}",
+                                "/account/email_activate"
+                                )
     end
     render_json_s and return
   end
@@ -123,8 +134,9 @@ class Sample::AccountsController < Sample::SampleController
   #用户注册  手机验证码激活
   def mobile_activate
     activate_info = {"mobile" => params[:mobile],
-        "password" => params[:password],
-        "verification_code" => params[:verification_code]}
+                     "password" => params[:password],
+                     "verification_code" => params[:verification_code]
+                    }
     retval = User.activate("mobile", activate_info, request.remote_ip, params[:_client_type])
 
     render_json_e retval and return if retval.class == String && retval.start_with?("error_")

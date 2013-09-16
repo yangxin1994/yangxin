@@ -313,48 +313,71 @@ class User
   #
   #*retval*:
   #* the new user instance: when successfully created
-  def self.create_new_user(email_mobile, password, current_user, third_party_user_id, callback)
+  #def self.create_new_user(email_mobile, password, current_user, third_party_user_id, callback)
+  def self.create_new_user(opt)  
+
     account = {}
-    if email_mobile.match(/#{EmailRexg}/i)  ## match email
-      account[:email] = email_mobile.downcase
-    elsif email_mobile.match(/#{MobileRexg}/i)  ## match mobile
+
+    if opt[:email_mobile].match(/#{EmailRexg}/i)  ## match email
+
+      account[:email] = opt[:email_mobile].downcase
+
+    elsif opt[:email_mobile].match(/#{MobileRexg}/i)  ## match mobile
+
       active_code = Tool.generate_active_mobile_code
-      account[:mobile] = email_mobile
+
+      account[:mobile] = opt[:email_mobile]
+
     end
+
     return ErrorEnum::ILLEGAL_EMAIL_OR_MOBILE if account.blank?
+
     existing_user = account[:email] ? self.find_by_email(account[:email]) : self.find_by_mobile(account[:mobile])
-    #return ErrorEnum::USER_REGISTERED if existing_user && existing_user.status == REGISTERED
+
     return ErrorEnum::USER_REGISTERED if existing_user && existing_user.is_activated
-    password = Encryption.encrypt_password(password) if account[:email]
+
+    password = Encryption.encrypt_password(opt[:password]) if account[:email]
+
     account[:status] =  REGISTERED
+
     account[:sms_verification_code] = active_code if account[:mobile]
+
     account[:sms_verification_expiration_time]  = (Time.now + 2.hours).to_i
-    updated_attr = account.merge(
-      password: password,
-      registered_at: Time.now.to_i)
 
-    #existing_user = User.create if check_exist.nil?
+    updated_attr = account.merge(password: password,registered_at: Time.now.to_i)
+
     existing_user = User.create if existing_user.nil?
+
     existing_user.update_attributes(updated_attr)
+
     if active_code.present?
+
       SmsWorker.perform_async("welcome", existing_user.mobile, "", :active_code => active_code)
+
     else
+
       if account[:email]
-        EmailWorker.perform_async("welcome",
-          existing_user.email,
-          callback[:protocol_hostname],
-          callback[:path])
+
+        EmailWorker.perform_async("welcome", 
+                                  existing_user.email,
+                                  opt[:callback][:protocol_hostname],
+                                  opt[:callback][:path]
+                                 )
+
       end
+
     end
 
-    # send welcome email
-    ## TODO  send_mobile_message() if account[:mobile]
-    if !third_party_user_id.nil?
-      # bind the third party user if the id is provided
-      third_party_user = ThirdPartyUser.find_by_id(third_party_user_id)
+    if !opt[:third_party_user_id].nil?
+
+      third_party_user = ThirdPartyUser.find_by_id(opt[:third_party_user_id])
+
       third_party_user.bind(existing_user) if !third_party_user.nil?
+
     end
+
     return true
+    
   end
 
 
@@ -417,36 +440,33 @@ class User
     return self.login(client_ip, nil, false)
   end
 
-  #*description*: user login
-  #
-  #*params*:
-  #* email address of the user
-  #* password of the user
-  #* ip address of the user
-  #
-  #*retval*:
-  #* true: when successfully login
-  #* EMAIL_NOT_EXIST
-  #* EMAIL_NOT_ACTIVATED
-  #* WRONG_PASSWORD
-  def self.login_with_email_mobile(email_mobile, password, client_ip, client_type, keep_signed_in, third_party_user_id)
+  ####################################
+  #email_mobile : 登录用的email或mobile
+  #password:密码
+  #client_ip:登录ip
+  #keep_signed_in:是否记住我
+  #third_party_user_id:第三方登录账户的id
+  ####################################
+  def self.login_with_email_mobile(opt)
     user = nil
-    if email_mobile.match(/#{EmailRexg}/i)  ## match email
-      user = User.find_by_email(email_mobile.downcase)
-    elsif email_mobile.match(/#{MobileRexg}/i)  ## match mobile
-      user = User.find_by_mobile(email_mobile)
+    if opt[:email_mobile].match(/#{EmailRexg}/i)  ## match email
+      user = User.find_by(email: opt[:email_mobile].downcase)
+    elsif opt[:email_mobile].match(/#{MobileRexg}/i)  ## match mobile
+      user = User.find_by(mobile: opt[:email_mobile])
     end
     return ErrorEnum::USER_NOT_EXIST if user.nil?
     return ErrorEnum::USER_NOT_REGISTERED if user.status == 1
     return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
-    return ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(password)
-    if !third_party_user_id.nil?
-      # bind the third party user if the id is provided
-      third_party_user = ThirdPartyUser.find_by_id(third_party_user_id)
+    return ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(opt[:password])
+    if !opt[:third_party_user_id].nil?
+      third_party_user = ThirdPartyUser.find_by(id: opt[:third_party_user_id])
       third_party_user.bind(user) if !third_party_user.nil?
     end
-    return user.login(client_ip, client_type, keep_signed_in)
+    return user.login(opt[:client_ip], opt[:client_type], opt[:keep_signed_in])
   end
+
+
+
 
 
   def login(client_ip, client_type, keep_signed_in=false)
