@@ -1049,4 +1049,21 @@ class User
 		return nickname
 	end
 
+	def cal_point
+		point_logs = PointLog.where(:user_id => self._id)
+		point = 0
+		point_logs.each do |pl|
+			point += pl.amount
+		end
+		self.point = (point >= 0 ? point : 0)
+		self.save
+	end
+
+	def self.cal_point
+		SurveySpread.all.each do |ss|
+			u = ss.user
+			next if u.blank?
+			u.cal_point
+		end
+	end
 end
