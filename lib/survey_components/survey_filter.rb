@@ -63,12 +63,12 @@ module SurveyComponents::SurveyFilter
         item_ids << question.issue["other_item"]["id"] if question.has_other_item
         row_ids = question.issue["items"].map { |i| i["id"] }
         rule["conditions"].each do |c|
-          next if c["condition_type"] != 1 || c["name"] != question.id
+          next if c["condition_type"] != 1 || c["name"] != question.id.to_s
           c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
         end
         rule["conditions"].delete_if { |c| c["value"].blank? }
       when 'question_delete'
-        rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question.id }
+        rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question.id.to_s }
       end
     end
     self.filters.delete_if { |e| e["conditions"].blank? }

@@ -206,15 +206,15 @@ class Survey
   end
 
 
-    def self.get_reward_type_count(status=2)
-      status = 2 if status.blank?
-      reward_types = Survey.quillme_normal.status(status).map{|s| s.quillme_promote_reward_type}
-      reward_data = {}
-      reward_types.uniq.each do |rt|
-        reward_data[rt] = Survey.quillme_normal.status(status).where(:quillme_promote_reward_type => rt).count
-      end
-      return reward_data
+  def self.get_reward_type_count(status=2)
+    status = 2 if status.blank?
+    reward_types = Survey.quillme_normal.status(status).map{|s| s.quillme_promote_reward_type}
+    reward_data = {}
+    reward_types.uniq.each do |rt|
+      reward_data[rt] = Survey.quillme_normal.status(status).where(:quillme_promote_reward_type => rt).count
     end
+    return reward_data
+  end
 
   #----------------------------------------------
   #
@@ -494,41 +494,26 @@ class Survey
 
   def adjust_logic_control_quota_filter(type, question_id)
     question = BasicQuestion.find_by_id(question_id)
-    logger.info "AAAAAAAAAAAAAAAAAA"
-    logger.info question.inspect
-    logger.info "AAAAAAAAAAAAAAAAAA"
     adjust_logic_control(question, type)
     self.adjust_quota(question, type)
     self.adjust_filter(question, type)
   end
 
-  #----------------------------------------------
-  #
-  #     for answering process
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
   def check_password(username, password, is_preview)
-    case self.access_control_setting["password_control"]["password_type"]
-    when -1
-      return true
-    when 0
-      return self.access_control_setting["password_control"]["single_password"] == password
-    when 1
-      list = self.access_control_setting["password_control"]["password_list"]
+    password_control = self.access_control_setting["password_control"]
+    return true if password_control["password_type"] == -1
+    return password_control["single_password"] == password if password_control["password_type"] == 0
+    if password_control["password_type"] == 1
+      list = password_control["password_list"]
       password_element = list.select { |ele| ele["content"] == password }[0]
-    when 2
-      list = self.access_control_setting["password_control"]["username_password_list"]
+    else
+      list = password_control["username_password_list"]
       password_element = list.select { |ele| ele["content"] == [username, password] }[0]
     end
-    return false if password_element.nil?
+    return false if password_element.nil? || password_element["used"] != false
     return true if is_preview
-    if password_element["used"] == false
-      password_element["used"] = true
-      self.save
-      return true
-    else
-      return false
-    end
+    password_element["used"] = true
+    return self.save
   end
 
   def get_user_ids_answered
@@ -545,12 +530,6 @@ class Survey
     end
     return answer_time
   end
-
-  #----------------------------------------------
-  #
-  #     result related
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
 
   def to_csv(path = "public/import/test.csv")
     c = CSV.open(path, "w") do |csv|
@@ -666,36 +645,19 @@ class Survey
   end
 
   def get_answers(filter_index, include_screened_answer, task_id = nil)
-    # answers = include_screened_answer ? self.answers.not_preview.finished_and_screened : self.answers.not_preview.finished
-    answers = self.answers.not_preview.finished_and_screened
-    ongoing_answer_number = self.answers.not_preview.ongoing.length
-    wait_for_review_answer_number = self.answers.not_preview.wait_for_review.length
-    if filter_index == -1
-      Task.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
-      #set_status({"find_answers_progress" => 1})
-      tot_answer_number = answers.length
-      answers = include_screened_answer ? answers : answers.finished
-      return [answers, tot_answer_number, self.answers.not_preview.screened.length, ongoing_answer_number, wait_for_review_answer_number]
-    end
-    filter_conditions = self.filters[filter_index]["conditions"]
+    filter_conditions = filter_index == -1 ? [] : self.show_filter(filter_index)["conditions"]
     filtered_answers = []
-    tot_answer_number = 0
-    not_screened_answer_number = 0
-    answers_length = answers.length
-    last_time  =Time.now.to_i
-    answers.each_with_index do |a, index|
+    tot_num = screened_num = 0
+    self.answers.not_preview.finished_and_screened.each_with_index do |a, index|
       next if !a.satisfy_conditions(filter_conditions, false)
-      tot_answer_number += 1
-      not_screened_answer_number += 1 if !a.is_screened
+      tot_num += 1
+      screened_num += 1 if a.is_screened
       next if !include_screened_answer && a.is_screened
       filtered_answers << a
-      if Time.now.to_i != last_time
-        Task.set_progress(task_id, "find_answers_progress", (index + 1).to_f / answers_length) if !task_id.nil?
-        last_time = Time.now.to_i
-      end
     end
-    Task.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
-    return [filtered_answers, tot_answer_number, tot_answer_number - not_screened_answer_number, ongoing_answer_number, wait_for_review_answer_number]
+    Task.set_progress(task_id, "find_answers_progress", 1.0)
+    return [filtered_answers, tot_num, screened_num,
+      self.answers.not_preview.ongoing.length, self.answers.not_preview.wait_for_review.length]
   end
 
   def self.list(status)

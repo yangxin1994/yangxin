@@ -11,7 +11,7 @@ class Quill::LogicsController < Quill::QuillController
   # PAGE: show survey logic
   def show
     @survey_questions = get_survey_questions
-    @current_logic = @survey.show_logic_control(params[:id])
+    @current_logic = @survey.show_logic_control_rule(params[:id])
     @current_index = @current_logic.nil? ? -1 : params[:id].to_i
   end
 
