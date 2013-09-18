@@ -13,10 +13,6 @@ class Admin::AnswersController < Admin::AdminController
         s
       end
     end
-    respond_to do |format|
-      format.json { render_json_auto @surveys }
-      format.html { }
-    end
   end
 
   def show
@@ -33,11 +29,6 @@ class Admin::AnswersController < Admin::AdminController
         end
         a
       end
-    end
-
-    respond_to do |format|
-      format.json { render_json_auto @answers }
-      format.html { }
     end
   end
 
