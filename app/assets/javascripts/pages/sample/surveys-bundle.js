@@ -17,7 +17,18 @@ jQuery(function($) {
         });
     })
 
-    //相应回车提交表单事件
+    //相应回车提交表单事件 -- 订阅相关
+    $('input[name="contact"]').next('a').click(function() {
+        var channel = $('input[name="contact"]').val();
+        if ($.regex.isEmail(channel) || $.regex.isMobile(channel)) {
+            $.od.odSubscribe({
+                email_mobile: channel,
+                btn: $(this)
+            })
+        } else {
+            $('input[name="contact"]').prev('.channel_err').show();
+        }
+    })
 
     function commit_rss() {
         $('.rss-btn').click();
@@ -25,6 +36,11 @@ jQuery(function($) {
     $('input[name="contact"]').odEnter({
         enter: commit_rss
     });
+
+    $('input[name="contact"]').focus(function() {
+        $(this).prev('.channel_err').hide();
+    })
+
 
     //下拉框点击事件
     $("body").click(function(e) {
@@ -36,7 +52,6 @@ jQuery(function($) {
             $('.select-content').removeClass('active')
         }
     })
-
 
     var select = $('div.select')
     if (select.length > 0) {
@@ -55,7 +70,6 @@ jQuery(function($) {
         })
     }
 
-
     //下拉框选项点击事件
     $('.select-content').next('ul').children('li').click(function() {
         $('span.select-txt').attr('data', $(this).attr('data')).text($(this).text())
@@ -65,20 +79,7 @@ jQuery(function($) {
         window.location.href = "/surveys?status=" + status + "&reward_type=" + reward_type + "&answer_status=" + answer_status
     })
 
-    //订阅按钮
-    $('input[name="contact"]').next('a').click(function() {
-        var channel = $('input[name="contact"]').val();
-        if ($.regex.isEmail(channel) || $.regex.isMobile(channel)) {
-            $.od.odSubscribe({
-                email_mobile: channel,
-                btn: $(this)
-            })
-        } else {
-            $('input[name="contact"]').prev('.channel_err').show();
-        }
-    })
 
-    $('input[name="contact"]').focus(function() {
-        $(this).prev('.channel_err').hide();
-    })
+
+
 });
