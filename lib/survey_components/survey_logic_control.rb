@@ -68,9 +68,6 @@ module SurveyComponents::SurveyLogicControl
   end
 
   def adjust_logic_control(question, type)
-    logger.info "BBBBBBBBBBBBBBBBBBBBB"
-    logger.info question.inspect
-    logger.info "BBBBBBBBBBBBBBBBBBBBB"
     rules = self.logic_control
     rules.each_with_index do |rule, rule_index|
       case type
@@ -127,19 +124,19 @@ module SurveyComponents::SurveyLogicControl
           # a show/hide questions rule
           conditions_question_ids = rule["conditions"].map { |c| c["question_id"] }
           result_question_ids = rule["result"]
-          if conditions_question_ids.include?(question.id)
+          if conditions_question_ids.include?(question.id.to_s)
             # the conditions include the question to be moved
             result_question_ids.each do |result_question_id|
               if !question_ids.before(question.id, result_question_id)
-                rule["conditions"].delete_if { |c| c["question_id"] == question.id }
+                rule["conditions"].delete_if { |c| c["question_id"] == question.id.to_s }
               end
             end
           end
-          if result_question_ids.include?(question.id)
+          if result_question_ids.include?(question.id.to_s)
             # the results include the question to be moved
             conditions_question_ids.each do |condition_question_id|
-              if !question_ids.before(condition_question_id, question.id)
-                rule["result"].delete(question.id)
+              if !question_ids.before(condition_question_id, question.id.to_s)
+                rule["result"].delete(question.id.to_s)
               end
             end
           end

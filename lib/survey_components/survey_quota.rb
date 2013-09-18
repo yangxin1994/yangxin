@@ -136,7 +136,7 @@ module SurveyComponents::SurveyQuota
         item_ids << question.issue["other_item"]["id"] if question.has_other_item
         row_ids = question.issue["items"].map { |i| i["id"] }
         rule["conditions"].each do |c|
-          next if c["condition_type"] != 1 || c["name"] != question.id
+          next if c["condition_type"] != 1 || c["name"] != question.id.to_s
           # this condition is about the updated question
           l1 = c["value"].length
           c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
@@ -146,7 +146,7 @@ module SurveyComponents::SurveyQuota
         rules.delete_at(rule_index) if rule["conditions"].blank?
       when 'question_delete'
         l1 = rule["conditions"].length
-        rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question.id }
+        rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question.id.to_s }
         if l1 != rule["conditions"].length
           rules.delete_at(rule_index) if rule["conditions"].blank?
           need_refresh_quota = true
