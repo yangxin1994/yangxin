@@ -784,10 +784,10 @@ class Survey
 
   def parse_answer(row)
     line_answer = {}
-    all_questions_io.each_with_index do |e, i|
+    all_questions_io.each_with_index do |qio, i|
       header_prefix = "q#{i + 1}"
       begin
-        line_answer.merge! e.answer_import(row.to_hash, header_prefix)
+        line_answer.merge! qio.answer_import(row.to_hash, header_prefix)
       rescue Exception => emsg
         binding.pry
       end
@@ -796,7 +796,7 @@ class Survey
   end
 
   def all_questions_io
-    @questions_io ||= all_questions.map do |question|
+    @questions_io ||= all_questions(false).map do |question|
       Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question.question_type}"] + "Io").new(question)
     end
   end
@@ -806,7 +806,7 @@ class Survey
      :import_id => row["import_id"],
      :channel => -1,
      :survey_id => self._id,
-     :status => 3,
+     :status => 32,
      :random_quality_control_answer_content => {},
      :random_quality_control_locations => {},
      :logic_control_result => {},

@@ -35,7 +35,7 @@
     </div>
     <form class="form-search" style="display:inline">
       <div class="input-append">
-        <input type="text" name="title" class="span6 search-query" required>
+        <input type="text" name="keyword" class="span6 search-query" placeholder="输入邮箱查询">
         <button type="submit" class="btn">Search</button>
       </div>
     </form>
@@ -49,8 +49,8 @@
       <ul class="dropdown-menu pull-right">
         <li><a href="?">全部</a></li>
         <li class="divider"></li>
-        <li><a href="?is_deleted=false">已订阅</a></li>
-        <li><a href="?is_deleted=true">已退订</a></li>
+        <li><a href="?subscribed=true">已订阅</a></li>
+        <li><a href="?subscribed=false">已退订</a></li>
       </ul>
     </div>
   </span>
@@ -71,15 +71,15 @@
       <% @subscribers["data"].each do |subscriber| %>
       <tr>
         <td><%= subscriber[:email] %></td>
-        <td><%= subscriber[:is_deleted] ? "已退订" : "订阅中" %></td>
+        <td><%= subscriber[:subscribed] ? "订阅中" : "已退订" %></td>
         <td><%= subscriber[:delivered_count] %></td>
         <td><%= subscriber[:created_at] %></td>
         <td>
           <div class="btn-group">
-            <% if subscriber[:is_deleted] %>
-              <a class="btn od-subscribe" href="javascript:void(0);" data-id="<%= subscriber[:_id] %>" target="_blank"><i class="icon-play"></i>继续推送</a>
-            <% else %>
+            <% if subscriber[:subscribed] %>
               <a class="btn od-unsubscribe" href="javascript:void(0);" data-id="<%= subscriber[:_id] %>" target="_blank"><i class="icon-stop"></i>停止推送</a>
+            <% else %>
+              <a class="btn od-subscribe" href="javascript:void(0);" data-id="<%= subscriber[:_id] %>" target="_blank"><i class="icon-play"></i>继续推送</a>
             <% end -%>
             <button class="btn dropdown-toggle" data-toggle="dropdown">
               <span class="caret"></span>
