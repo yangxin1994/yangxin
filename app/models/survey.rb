@@ -764,68 +764,65 @@ class Survey
   end
 
   def answer_import(csv_str)
-    q = []
-    batch = []
-    import_error = []
-    imported_answer = nil
     updated_count = 0
-    header_prefix = 0
-    all_questions.each do |a|
-      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
-    end
+    answer_bean = []
     CSV.parse(csv_str, :headers => true) do |row|
       return false if row.headers != self.csv_header(:with => "import_id")
-      if self.answers.where(:import_id => row["import_id"]).length > 0
-        imported_answer = self.answers.where(:import_id => row["import_id"].to_s).first
-      end
-      row = row.to_hash
-      line_answer = {}
-      quota_qustions_count = 0 # quota_qustions.size
-      begin
-        q.each_with_index do |e, i|
-          #q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
-          header_prefix = "q#{i + 1}"
-          line_answer.merge! e.answer_import(row, header_prefix)
-        end
-      rescue Exception => test
-        import_error << {row:row, message:"第#{header_prefix}题:#{test.to_s}"}
+      if imported_answer = self.answers.where(:import_id => row["import_id"].to_s).first
+        imported_answer.update_attributes(:answer_content => parse_answer(row))
+        updated_count += 1
       else
-        if imported_answer
-          imported_answer.assign_attributes(:answer_content => line_answer)
-          imported_answer.save
-          updated_count += 1
-          imported_answer = nil
-        else
-          batch << {:answer_content => line_answer,
-                    :import_id => row["import_id"],
-                    :channel => -1,
-                    :survey_id => self._id,
-                    :status => 3,
-                    :random_quality_control_answer_content => {},
-                    :random_quality_control_locations => {},
-                    :logic_control_result => {},
-                    :username => "",
-                    :password => "",
-                    :region => -1,
-                    :ip_address => "",
-                    :audit_message => "",
-                    :is_scanned => false,
-                    :is_preview => false,
-                    :finished_at => Time.now.to_i,
-                    :created_at => Time.now,
-                    :updated_at => Time.now}
-        end
+        answer_bean << generate_answer(row)
       end
     end
-    # return false if batch.empty?
-    Answer.collection.insert(batch) unless batch.empty?
+    Answer.collection.insert(answer_bean) if answer_bean.present?
     self.refresh_quota_stats
     self.save
     {
-      :insert_count => batch.length,
+      :insert_count => answer_bean.length,
       :updated_count => updated_count,
-      :error => import_error
+      :error => ''
     }
+  end
+
+  def parse_answer(row)
+    line_answer = {}
+    all_questions_io.each_with_index do |e, i|
+      header_prefix = "q#{i + 1}"
+      begin
+        line_answer.merge! e.answer_import(row.to_hash, header_prefix)
+      rescue Exception => emsg
+        binding.pry
+      end
+    end
+    line_answer
+  end
+
+  def all_questions_io
+    @questions_io ||= all_questions.map do |question|
+      Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question.question_type}"] + "Io").new(question)
+    end
+  end
+
+  def generate_answer(row)
+    {:answer_content => parse_answer(row),
+     :import_id => row["import_id"],
+     :channel => -1,
+     :survey_id => self._id,
+     :status => 3,
+     :random_quality_control_answer_content => {},
+     :random_quality_control_locations => {},
+     :logic_control_result => {},
+     :username => "",
+     :password => "",
+     :region => -1,
+     :ip_address => "",
+     :audit_message => "",
+     :is_scanned => false,
+     :is_preview => false,
+     :finished_at => Time.now.to_i,
+     :created_at => Time.now,
+     :updated_at => Time.now}
   end
 
   def allocate_answer_auditors(answer_auditor_ids, allocate)
