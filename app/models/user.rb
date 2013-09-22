@@ -450,9 +450,9 @@ class User
   def self.login_with_email_mobile(opt)
     user = nil
     if opt[:email_mobile].match(/#{EmailRexg}/i)  ## match email
-      user = User.find_by(email: opt[:email_mobile].downcase)
+      user = User.find_by_email(opt[:email_mobile].downcase)
     elsif opt[:email_mobile].match(/#{MobileRexg}/i)  ## match mobile
-      user = User.find_by(mobile: opt[:email_mobile])
+      user = User.find_by_mobile(opt[:email_mobile])
     end
     return ErrorEnum::USER_NOT_EXIST if user.nil?
     return ErrorEnum::USER_NOT_REGISTERED if user.status == 1
