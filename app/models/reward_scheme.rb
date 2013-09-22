@@ -49,6 +49,13 @@ class RewardScheme
     return retval
   end
 
+  def new_answer(answer)
+    answer.rewards = self.rewards
+    answer.rewards[0]["checked"] = true if self.rewards.length == 1
+    answer.need_review = self.need_review
+    self.answers << answer
+    answer.save
+  end
   
   def self.first_reward_by_survey(id)
     reward = self.find_by(id: id)

@@ -120,8 +120,6 @@ class Survey
   index({ status: 1, reward: 1}, { background: true } )
   index({ status: 1, is_star: 1 }, { background: true } )
 
-
-  
   index({ quillme_promote_reward_type: 1 }, { background: true } )
   index({ quillme_hot: 1 }, { background: true } )
   index({ user_id: 1 }, { background: true } )
@@ -133,7 +131,6 @@ class Survey
   CLOSED = 1
   PUBLISHED = 2
   DELETED = 4
-
 
   scope :stars, -> {where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
   scope :published, -> { where(:status  => 2) }
