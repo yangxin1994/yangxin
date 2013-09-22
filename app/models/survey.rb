@@ -252,7 +252,18 @@ class Survey
   end
 
   def update_promote(options)
-    options[:sample_attribute].each_value do |smp_attr|
+    update_sample_attributes(options)
+    options.each do |promote_type, promote_info|
+      next unless promote_info.is_a? Hash
+      options[promote_type][:promotable] = promote_info[:promotable] == "true"
+    end
+    update_promote_info(options)
+    update_agent_promote(options)
+    serialize_in_promote_setting
+  end
+
+  def update_sample_attributes(options)
+    options[:sample_attributes].each_value do |smp_attr|
       if smp_attr[:id].present?
         _id = smp_attr[:id].split('_')[0]
         _type = smp_attr[:id].split('_')[1]
@@ -265,7 +276,7 @@ class Survey
         when 2, 4
           _value = smp_attr[:value].split(' ').map { |e| e.split(',') }
         when 3, 5
-          _value = smp_attr[:value].split(' ').map { |e| Time.parse(e.split(',')).to_i }
+          _value = smp_attr[:value].split(' ').map { |e| e.split(',').map { |_t| Time.parse(_t).to_i } }
         when 6
           _value = smp_attr[:value].split(' ')
         when 7
@@ -277,27 +288,14 @@ class Survey
           })
       end
     end
-    options.each do |promote_type, promote_info|
-      next unless promote_info.is_a? Hash
-      promote_info[:promotable] = (promote_info[:promotable] == "true")
-      options[promote_type] = promote_info
-    end
+  end
+
+  def update_promote_info(options)
     filters = []
     options["broswer_extension"]["broswer_extension_promote_setting"]["filters"].each_value do |filter|
       filters << filter
     end
     options["broswer_extension"]["broswer_extension_promote_setting"]["filters"] = filters
-    agents = []
-    
-    options["agent"]["agent_promote_setting"]["agents"].each_value do |agent|
-      agent['survey_id'] = options[:id]
-      if _agent_task = AgentTask.where(:_id => agent['task_id']).first
-        agents << _agent_task.update_attributes(agent)
-      else
-        agents << AgentTask.create(agent)
-      end
-    end
-
     _promote_email_count = email_promote_info["promote_email_count"]
     _promote_sms_count = sms_promote_info["promote_sms_count"]
 
@@ -311,9 +309,20 @@ class Survey
     end
 
     email_promote_info["promote_email_count"] = _promote_email_count
-    sms_promote_info["promote_sms_count"] = _promote_sms_count
+    sms_promote_info["promote_sms_count"] = _promote_sms_count    
     save
-    serialize_in_promote_setting
+  end
+
+  def update_agent_promote(options)
+    agents = []
+    options["agent"]["agent_promote_setting"]["agents"].each_value do |agent|
+      agent['survey_id'] = options[:id]
+      if _agent_task = AgentTask.where(:_id => agent['task_id']).first
+        agents << _agent_task.update_attributes(agent)
+      else
+        agents << AgentTask.create(agent)
+      end
+    end    
   end
 
   def update_deadline(time)
