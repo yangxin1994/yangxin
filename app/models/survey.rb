@@ -239,18 +239,16 @@ class Survey
 
   def self.search(options = {})
     surveys = Survey.desc(:star).desc(:created_at)
-    if options[:keyword]
-      if options[:keyword] =~ /^.+@.+$/
-        uid = User.where(:email => options[:keyword]).first.try '_id'
-        surveys = surveys.where(:user_id => uid)
-      else
-        surveys = surveys.where(:title => /.*#{options[:keyword]}.*/)
-      end
+    surveys = surveys.in(:status => Tool.convert_int_to_base_arr(options[:status])) if options[:status]
+    case options[:keyword].to_s
+    when /^.+@.+$/
+      uid = User.where(:email => options[:keyword]).first.try '_id'
+      surveys = surveys.where(:user_id => uid)
+    when ''
+      surveys
+    else
+      surveys = surveys.where(:title => /.*#{options[:keyword]}.*/)
     end
-    if options[:status]
-      surveys = surveys.in :status => Tool.convert_int_to_base_arr(options[:status])
-    end
-    surveys
   end
 
   def update_promote(options)
