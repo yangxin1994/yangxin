@@ -42,7 +42,7 @@ class Sample::GiftsController < Sample::SampleController
 
   def show
     @gift_rank = Gift.on_shelf.real.desc(@sort_type).limit(5)
-    @gift = Gift.find_by(id: params[:id])
+    @gift = Gift.normal.find_by(id: params[:id])
     render_404 if @gift.nil?
     @gift.inc_view_count
     @receiver_info = current_user.nil? ? nil : current_user.affiliated.try(:receiver_info) || {}

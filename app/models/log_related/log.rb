@@ -3,6 +3,7 @@ require 'error_enum'
 class Log
   include Mongoid::Document
   include Mongoid::Timestamps
+  include FindTool
   # log type, 1 for answering surveys, 2 for lottery, 4 for gift redeem, 8 for point change, 16 for register, 32 for spread, 64 for punish                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 
   field :type, :type => Integer
@@ -28,10 +29,10 @@ class Log
   index({ survey_id:1,_type:1, created_at:-1},{background: true})
   index({ answer_id:1,_type:1, created_at:-1},{background: true})
 
-  def self.find_by_id(log_id)
-    log = Log.where(:_id => log_id).first
-    return log
-  end
+  # def self.find_by_id(log_id)
+  #   log = Log.where(:_id => log_id).first
+  #   return log
+  # end
 
   def self.fresh_logs
     return self.where(:type.in => [2,8,16], :reason.ne => PointLog::IMPORT)

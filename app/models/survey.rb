@@ -12,6 +12,7 @@ class Survey
   include SurveyComponents::SurveyLogicControl
   include SurveyComponents::SurveyQuota
   include SurveyComponents::SurveyReportMockup
+  include FindTool
   field :title, :type => String, default: "调查问卷主标题"
   field :subtitle, :type => String, default: ""
   field :welcome, :type => String, default: ""
@@ -222,9 +223,9 @@ class Survey
   #
   #++++++++++++++++++++++++++++++++++++++++++++++
 
-  def self.find_by_id(survey_id)
-    return Survey.where(:_id => survey_id).first
-  end
+  # def self.find_by_id(survey_id)
+  #   return Survey.where(:_id => survey_id).first
+  # end
 
   def self.find_by_ids(survey_id_list)
     return Survey.all.in(_id: survey_id_list)

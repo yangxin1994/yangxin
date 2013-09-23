@@ -28,7 +28,7 @@ class LotteryLog < Log
       logs = self.where(:survey_id => survey_id).desc(:created).limit(limit)
     end
     logs.each_with_index do |log,index|
-      pri = Prize.find_by_id(log.prize_id)
+      pri = Prize.normal.find_by_id(log.prize_id)
       log_data['nickname'] = log.user.try(:nickname) || '游客'
       log_data['user_id']  = log.user.try(:id)
       log_data['created_at'] = log.created_at
@@ -64,7 +64,7 @@ class LotteryLog < Log
   end
 
   def self.create_succ_lottery_Log(opt)
-    prize_name  = Prize.find_by_id(opt[:prize_id]).try(:title)
+    prize_name  = Prize.normal.find_by_id(opt[:prize_id]).try(:title)
     survey_title = Survey.find_by_id(opt[:survey_id]).try(:title)
     address_code = QuillCommon::AddressUtility.find_address_code_by_ip(opt[:ip_address])
     land = QuillCommon::AddressUtility.find_province_city_town_by_code(address_code)    
