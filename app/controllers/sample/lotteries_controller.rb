@@ -2,7 +2,7 @@
 class Sample::LotteriesController < Sample::SampleController
 
   def draw
-    @answer = Answer.find_by(id: params[:id])
+    @answer = Answer.find_by_id(params[:id])
     render_json_e ErrorEnum::ANSWER_NOT_EXIST if @answer.nil?
     result = @answer.draw_lottery(current_user.try(:id))
 
@@ -19,7 +19,7 @@ class Sample::LotteriesController < Sample::SampleController
   end
 
   def show
-    @answer = Answer.find_by(id: params[:id])
+    @answer = Answer.find_by_id(params[:id])
     render_404 if @answer.nil?
     #参与抽奖记录
     @lottery_logs = LotteryLog.find_lottery_logs(params[:id],nil,8)

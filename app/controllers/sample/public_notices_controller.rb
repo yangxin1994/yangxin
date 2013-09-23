@@ -8,7 +8,7 @@ class Sample::PublicNoticesController < Sample::SampleController
   end
 
   def show
-    @public_notice = PublicNotice.find_by(id:params[:id])
+    @public_notice = PublicNotice.find_by_id(params[:id])
     render_404 if @public_notice.nil?
     pids = PublicNotice.opend.desc(:updated_at)
     tmp_hash = {}

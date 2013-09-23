@@ -50,7 +50,7 @@ class AgentTask
   end
 
   def self.search_agent_task(agent_id, survey_id)
-      agent = Agent.find_by_id(agent_id)
+      agent = Agent.normal.find_by_id(agent_id)
       survey = Survey.find_by_id(survey_id)
 
       agent_tasks = AgentTask.normal
