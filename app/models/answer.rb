@@ -5,6 +5,7 @@ require 'data_type'
 require 'securerandom'
 require 'tool'
 require 'quill_common'
+Dir[File.dirname(__FILE__) + '/lib/survey_components/*.rb'].each {|file| require file }
 class Answer
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -133,9 +134,12 @@ class Answer
     end
   end
 
+  after_create do |doc|
+    doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.remote_ip)
+  end
 
 
-  def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, agent_task_id, channel, referrer, remote_ip, username, password, http_user_agent)
+ def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, agent_task_id, channel, referrer, remote_ip, username, password, http_user_agent)
     survey = Survey.normal.find_by_id(survey_id)
     # create the answer
     answer = Answer.new(is_preview: is_preview,
@@ -211,7 +215,6 @@ class Answer
 
     return answer
   end
-
 
   def is_screened
     return status == REJECT && reject_type == REJECT_BY_SCREEN
@@ -394,28 +397,18 @@ class Answer
   end
 
   def load_question_by_ids(question_ids, next_page = true)
-    if question_ids.blank? && !self.survey.is_pageup_allowed
-      # try to automatically finish the survey if:
-      # 1. no questions to load
-      # 2. page up is now allowed
-      finish(true)
-    end
+    finish(true) if question_ids.blank? && !self.survey.is_pageup_allowed
     questions = []
     question_ids.each do |q_id|
       question = BasicQuestion.find_by_id(q_id)
       questions << question.remove_hidden_items(logic_control_result[q_id]) if !question.nil?
     end
     # consider the scenario that "one question per page"
+    return questions if !self.survey.style_setting["is_one_question_per_page"]
     if self.survey.style_setting["is_one_question_per_page"]
-      if questions.blank?
-        return []
-      elsif next_page
-        # should return the first question
-        return [questions[0]]
-      else
-        # should return the last question
-        return [questions[-1]]
-      end
+      return [] if questions.blank?
+      return [questions[0]] if next_page
+      return [questions[-1]]
     else
       return questions
     end

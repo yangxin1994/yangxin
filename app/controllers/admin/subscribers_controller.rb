@@ -5,9 +5,7 @@ class Admin::SubscribersController < Admin::AdminController
   layout "layouts/admin-todc"
 
   def index
-    @subscribers = auto_paginate Subscriber do |subscribers|
-      subscribers.present_json(:admin)
-    end
+    @subscribers = auto_paginate Subscriber.search(params)
   end
 
   def new

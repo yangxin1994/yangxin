@@ -18,6 +18,10 @@ module SurveyComponents::SurveyQuota
   IP_QUOTA = 4
   CONDITION_TYPE = (1..4).to_a
 
+  def show_quota
+    return self.quota
+  end
+
   def show_quota_rule(index)
     return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= index
     return self.quota["rules"][index]
