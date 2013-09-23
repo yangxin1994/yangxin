@@ -713,6 +713,17 @@ class Survey
     unless survey_obj["agent_promote_info"]["agent_tasks"].present?
       survey_obj["agent_promote_info"]["agent_tasks"] = [{}]
     end
+
+    if SampleAttribute.count > 0
+      survey_obj["sample_attributes_list"] = SampleAttribute.all
+    else
+      survey_obj["sample_attributes_list"] = [{}]
+    end    
+    survey_obj["sample_attributes"] = sample_attributes
+    return survey_obj
+  end
+
+  def sample_attributes
     smp_attrs = sample_attributes_for_promote
 
     smp_attrs.each_with_index do |smp_attr, index|
@@ -732,13 +743,6 @@ class Survey
       end
       smp_attrs[index]['value'] = _value
     end
-    if SampleAttribute.count > 0
-      survey_obj["sample_attributes_list"] = SampleAttribute.all
-    else
-      survey_obj["sample_attributes_list"] = [{}]
-    end    
-    survey_obj["sample_attributes"] = smp_attrs
-    return survey_obj
   end
 
   def info_for_interviewer
