@@ -50,7 +50,7 @@ class Filler::AnswersController < Filler::FillerController
     render_404 if @answer.nil?
 
     # load data
-    redirect_to sign_in_path({ref: request.url}) and return if @answer.user.present? && @answer.user != current_user
+    redirect_to sign_in_account_path({ref: request.url}) and return if @answer.user.present? && @answer.user != current_user
     @answer.update_status # check whether it is time out
     if @answer.is_edit
       questions = @answer.load_question(nil, true)

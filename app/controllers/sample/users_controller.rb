@@ -455,6 +455,9 @@ class Sample::UsersController < Sample::SampleController
   # Delete notice from id
   def destroy_notification
     @message = Message.find_by_id(params[:id])
+    Rails.logger.info("---------------------------")
+    Rails.logger.info(@message)
+    Rails.logger.info("---------------------------")
     render_json_e ErrorEnum::MESSAGE_NOT_EXIST and return if !current_user.messages.include?(@message)
 
     respond_to do |format|

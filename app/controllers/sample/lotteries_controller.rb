@@ -28,7 +28,7 @@ class Sample::LotteriesController < Sample::SampleController
     #判断该答案是否是会员创建
     if @answer.user_id.present?
       #如果是会员创建，当前访问用户没有登录，需要先登录,如果不是会员创建，不需要登录
-      redirect_to sign_in_path(:ref => "#{request.protocol}#{request.host_with_port}#{request.fullpath}") and return   unless user_signed_in
+      redirect_to sign_in_account_path(:ref => "#{request.protocol}#{request.host_with_port}#{request.fullpath}") and return   unless user_signed_in
       #如果当前登录用户不是问卷的创建者，那么要无权参加抽奖
       redirect_to "/s/#{@answer.survey.scheme_id}" and return  if @answer.user_id.to_s != current_user.try(:_id).to_s
     end

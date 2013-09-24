@@ -14,13 +14,12 @@ jQuery(function($) {
         // console.log('loading oid: '+oid);
 
         // Is login?
-        $.getJSON('/users/order_detail/'+oid+'.json', function(data){})
-
+        $.getJSON('/users/' + oid + '/order_detail.json', function(data){})
         var _this = $(this);
 
         $.ajax({
             type: "GET",
-            url: '/users/order_detail/'+oid,
+            url: '/users/' + oid + '/order_detail' ,
             beforeSend: function(xhr){
                 xhr.setRequestHeader("OJAX",true);
             }

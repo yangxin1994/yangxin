@@ -33,7 +33,6 @@ class Sample::AccountsController < Sample::SampleController
     if cookies[Rails.application.config.bind_answer_id_cookie_key].blank?
       redirect_to (params[:ref].blank? ? root_path : params[:ref])
     else
-      # go to bind answer id to the current user
       redirect_to bind_sample_path({ref: params[:ref]})
     end
   end
@@ -53,8 +52,6 @@ class Sample::AccountsController < Sample::SampleController
                                     })
       render_json_auto(retval) and return
     end
-
-
   end
 
   def check_user_exist
@@ -75,7 +72,6 @@ class Sample::AccountsController < Sample::SampleController
     end
   end
 
-  # resend email after sign up success if can't receive the mail
   def re_mail
     @account = params[:k]
     @account = Base64.decode64(@account)

@@ -39,7 +39,7 @@ jQuery(function($) {
     var _this = $(this);
     _this.addClass('disabled').text('删除中...');
 
-    $.deleteJSON('/users/notifications/'+$(this).closest('tr').attr('id'), function(data){
+      $.deleteJSON('/users/' + $(this).closest('tr').attr('id') + '/destroy_notification', function(data){
         // console.log(data);
         if (data.success && data.value){
           // console.log('success....');
