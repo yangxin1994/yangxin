@@ -41,15 +41,13 @@ class Sample::AccountsController < Sample::SampleController
   #用户注册
   def regist
     if params[:email_mobile].present?
-      retval = User.create_new_user(
-                                    email_mobile:params[:email_mobile],
+      retval = User.create_new_user(email_mobile:params[:email_mobile],
                                     password:params[:password],
                                     current_user:current_user,
                                     third_party_user_id:params[:third_party_user_id],
                                     callback:{
                                       protocol_hostname: "#{request.protocol}#{request.host_with_port}",
-                                      path: "/account/email_activate"
-                                    })
+                                      path: "/account/email_activate"})
       render_json_auto(retval) and return
     end
   end
@@ -65,7 +63,6 @@ class Sample::AccountsController < Sample::SampleController
     mails = ['126.com','163.com','sina.com','yahoo','qq.com']
     @account = params[:k]
     @account = Base64.decode64(@account)
-
     m = mails.select{|mail| @account.include?(mail)}
     if m.present?
       @mail_t = "http://www.mail.#{m.first}"
@@ -126,12 +123,13 @@ class Sample::AccountsController < Sample::SampleController
   #用户注册  手机验证码激活
   def mobile_activate
     activate_info = {"mobile" => params[:mobile],
-      "password" => params[:password],
-      "verification_code" => params[:verification_code]
-    }
+                     "password" => params[:password],
+                     "verification_code" => params[:verification_code]}
+
     retval = User.activate("mobile", activate_info, request.remote_ip, params[:_client_type])
 
     render_json_e retval and return if retval.class == String && retval.start_with?("error_")
+
     refresh_session(retval['auth_key'])
     render_json_auto retval
   end
@@ -139,10 +137,12 @@ class Sample::AccountsController < Sample::SampleController
   def get_basic_info_by_auth_key
     @answer_number = current_user.answers.not_preview.finished.length
     @spread_number = Answer.my_spread(current_user._id).not_preview.finished.length
+
     @bind_info = {}
     ["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
       @bind_info[website] = !ThirdPartyUser.where(:user_id => current_user._id.to_s, :website => website).blank?
     end
+
     @bind_info["email"] = current_user.email_activation
     @bind_info["mobile"] = current_user.mobile_activation
 
@@ -158,16 +158,19 @@ class Sample::AccountsController < Sample::SampleController
       "avatar" => current_user.mini_avatar,
       "nickname" => current_user.nickname
     }
+
     render_json_auto @basic_info and return
   end
 
   def forget_password
     mobilerexg = User::MobileRexg
     emailrexg  = User::EmailRexg
+
     @acc = Base64.decode64(params[:k]) if params[:k]
     @acc = Base64.decode64(params[:key])  if params[:key]
     @code = Base64.decode64(params[:c]) if params[:c]
     @completed = Base64.decode64(params[:acc]) if params[:acc]
+
     if((@acc.present? && @code.present?) || params[:key].present? )
       @step = 'third'
     elsif params[:k].present? && (@acc.match(/#{mobilerexg}/i) || @acc.match(/#{emailrexg}/i) )
@@ -177,6 +180,7 @@ class Sample::AccountsController < Sample::SampleController
     else
       @step = 'first'
     end
+
   end
 
   #根据激活邮箱的key找回忘记密码的账户callback
@@ -196,8 +200,8 @@ class Sample::AccountsController < Sample::SampleController
   def send_forget_pass_code
     session[:forget_account] = params[:email_mobile]
     retval = User.send_forget_pass_code(params[:email_mobile],
-    {protocol_hostname: "#{request.protocol}#{request.host_with_port}",
-    path: "/account/get_account"})
+                                        {protocol_hostname: "#{request.protocol}#{request.host_with_port}",
+                                         path: "/account/get_account"})
     render_json_auto retval and return
   end
 

@@ -1,4 +1,3 @@
-# finish migrating
 require 'error_enum'
 class Sample::OrdersController < Sample::SampleController
 

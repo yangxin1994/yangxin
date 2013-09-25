@@ -188,7 +188,7 @@ class ApplicationController < ActionController::Base
     retval = {}
     retval["current_page"] = page
     retval["per_page"] = per_page
-    retval["previous_page"] = (page - 1 > 0 ? page-1 : 1)
+    retval["previous_page"] = (page - 1 > 0 ? page - 1 : 1)
     # retval["previous_page"] = [page - 1, 1].max
 
     # 当没有block或者传入的是一个mongoid集合对象时就自动分页
@@ -198,9 +198,9 @@ class ApplicationController < ActionController::Base
       if value.methods.include? :page
         count ||= value.count
         value = value.page(retval["current_page"]).per(retval["per_page"])
-      elsif value.is_a?(Array) and value.count > per_page
+      elsif value.is_a?(Array) && value.count > per_page
         count ||= value.count
-        value = value.slice((page-1)*per_page, per_page)
+        value = value.slice((page - 1) * per_page, per_page)
       end
       
         if block_given?

@@ -32,7 +32,6 @@ class Sample::UsersController < Sample::SampleController
 
     @my_answer_surveys = auto_paginate @answers
 
-
     data = @my_answer_surveys['data'].map do |item |
       # select reward
       item["select_reward"] = ""
@@ -76,15 +75,8 @@ class Sample::UsersController < Sample::SampleController
   #我推广的问卷
   # GET
   def spread_surveys
-    @my_spread_surveys = auto_paginate current_user.survey_spreads.desc(:survey_creation_time) do |paginated_survey_spreads|
-      paginated_survey_spreads.map do |e|
-        finish_number = e.survey.answers.not_preview.finished.where(:introducer_id => current_user._id).length
-        spread_number = e.survey.answers.not_preview.where(:introducer_id => current_user._id).length
-        e.survey.write_attribute(:spread_number, spread_number)
-        e.survey.write_attribute(:finish_number, finish_number)
-        e.survey
-      end
-    end
+
+    @my_spread_surveys = auto_paginate current_user.survey_spreads.desc(:survey_creation_time)
 
     respond_to do |format|
       format.html 
@@ -158,9 +150,6 @@ class Sample::UsersController < Sample::SampleController
   def orders
     scope = [1,2,4].include?(params[:scope].to_i) ? params[:scope].to_i : 1
     @orders = current_user.orders.where(:source => scope).desc(:created_at)
-    # @orders = auto_paginate(@orders) do |paginated_orders|
-    #   paginated_orders.map { |e| e.info_for_sample }
-    # end
 
     @orders = auto_paginate @orders   
 
@@ -198,12 +187,12 @@ class Sample::UsersController < Sample::SampleController
     
     respond_to do |format|
       format.html {
-        @user_info["income_person"][1] = 99999999 if @user_info["income_person"].is_a?(Array) and @user_info["income_person"][1] == 1.0/0.0
-        @user_info["income_family"][1] = 99999999 if @user_info["income_family"].is_a?(Array) and @user_info["income_family"][1] == 1.0/0.0
-        @user_info["seniority"][1] = 99999999 if @user_info["seniority"].is_a?(Array) and @user_info["seniority"][1] == 1.0/0.0
-        @user_info["income_person"][0] = -99999999 if @user_info["income_person"].is_a?(Array) and @user_info["income_person"][0] == -1.0/0.0
-        @user_info["income_family"][0] = -99999999 if @user_info["income_family"].is_a?(Array) and @user_info["income_family"][0] == -1.0/0.0
-        @user_info["seniority"][0] = -99999999 if @user_info["seniority"].is_a?(Array) and @user_info["seniority"][0] == -1.0/0.0
+        @user_info["income_person"][1] = 99999999 if @user_info["income_person"].is_a?(Array) && @user_info["income_person"][1] == 1.0/0.0
+        @user_info["income_family"][1] = 99999999 if @user_info["income_family"].is_a?(Array) && @user_info["income_family"][1] == 1.0/0.0
+        @user_info["seniority"][1] = 99999999 if @user_info["seniority"].is_a?(Array) && @user_info["seniority"][1] == 1.0/0.0
+        @user_info["income_person"][0] = -99999999 if @user_info["income_person"].is_a?(Array) && @user_info["income_person"][0] == -1.0/0.0
+        @user_info["income_family"][0] = -99999999 if @user_info["income_family"].is_a?(Array) && @user_info["income_family"][0] == -1.0/0.0
+        @user_info["seniority"][0] = -99999999 if @user_info["seniority"].is_a?(Array) && @user_info["seniority"][0] == -1.0/0.0
       }
       format.json { render_json_auto @user_info }
     end
@@ -294,7 +283,8 @@ class Sample::UsersController < Sample::SampleController
     if current_user.mobile_activation
       @bindings["mobile"] = [current_user.mobile, current_user.mobile_subscribe]
     end
-    ["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
+
+    %w(sina renren qq google kaixin001 douban baidu sohu qihu360).each do |website|
       third_party_user = ThirdPartyUser.where(:user_id => current_user._id.to_s, :website => website).first
       @bindings[website] = [third_party_user.name, third_party_user.share] if !third_party_user.nil?
     end
@@ -455,9 +445,7 @@ class Sample::UsersController < Sample::SampleController
   # Delete notice from id
   def destroy_notification
     @message = Message.find_by_id(params[:id])
-    Rails.logger.info("---------------------------")
-    Rails.logger.info(@message)
-    Rails.logger.info("---------------------------")
+
     render_json_e ErrorEnum::MESSAGE_NOT_EXIST and return if !current_user.messages.include?(@message)
 
     respond_to do |format|

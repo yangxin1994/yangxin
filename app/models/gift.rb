@@ -53,15 +53,11 @@ class Gift
   index({ created_at: -1}, { background: true } ) 
   index({ status: 1, type:1, created_at:-1, view_count:-1}, { background: true } )
 
-  # def self.find_by_id(gift_id)
-  #   return self.normal.where(:_id => gift_id).first
+  # def info
+  #   photo_src = self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url
+  #   self.write_attribute(:photo_src, photo_src)
+  #   return self
   # end
-
-  def info
-    photo_src = self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url
-    self.write_attribute(:photo_src, photo_src)
-    return self
-  end
 
   def photo_src
     self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url

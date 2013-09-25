@@ -1,5 +1,3 @@
-# finish migrating
-# already refaoring
 class Sample::PublicNoticesController < Sample::SampleController
 
   def index

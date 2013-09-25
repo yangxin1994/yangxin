@@ -206,15 +206,6 @@ class Survey
     return reward_data
   end
 
-  #----------------------------------------------
-  #
-  #     find_by_*
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  # def self.find_by_id(survey_id)
-  #   return Survey.where(:_id => survey_id).first
-  # end
 
   def self.find_by_ids(survey_id_list)
     return Survey.all.in(_id: survey_id_list)
