@@ -10,8 +10,4 @@ class BrowserExtension
     has_many :browsers
 
     index({ browser_extension_type: 1 }, { background: true } )
-
-    # def self.find_by_type(browser_extension_type)
-    #   return self.where(:browser_extension_type => browser_extension_type).first
-    # end
 end

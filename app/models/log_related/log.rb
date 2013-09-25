@@ -1,4 +1,3 @@
-#already tidied up
 require 'error_enum'
 class Log
   include Mongoid::Document
@@ -29,10 +28,6 @@ class Log
   index({ survey_id:1,_type:1, created_at:-1},{background: true})
   index({ answer_id:1,_type:1, created_at:-1},{background: true})
 
-  # def self.find_by_id(log_id)
-  #   log = Log.where(:_id => log_id).first
-  #   return log
-  # end
 
   def self.fresh_logs
     return self.where(:type.in => [2,8,16], :reason.ne => PointLog::IMPORT)

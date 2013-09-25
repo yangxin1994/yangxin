@@ -1,5 +1,4 @@
 # encoding: utf-8
-# already tidied up
 require 'quill_common'
 class LotteryLog < Log
   field :type, :type => Integer,:default => 2
@@ -41,15 +40,6 @@ class LotteryLog < Log
       log_data = {}
     end
     return data
-  end
-
-  def info_for_admin
-    lottery_log_obj = {}
-    lottery_log_obj["created_at"] = self.created_at.to_i
-    lottery_log_obj["result"] = self.result.to_s
-    lottery_log_obj["order_id"] = self.order_id
-    lottery_log_obj["prize_name"] = self.prize_name
-    return lottery_log_obj
   end
 
   def self.create_fail_lottery_log(opt)

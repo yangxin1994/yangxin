@@ -17,12 +17,12 @@ class Sample::AccountsController < Sample::SampleController
   # FOR AJAX
   def login
 
-    result = User.login_with_email_mobile(email_mobile:params[:email_mobile],
-                                          password:params[:password],
-                                          client_ip:request.remote_ip,
-                                          client_type:params[:_client_type],
-                                          keep_signed_in:params[:permanent_signed_in],
-                                          third_party_user_id:params[:third_party_user_id])
+    result = User.login_with_email_mobile(email_mobile: params[:email_mobile],
+                                          password: params[:password],
+                                          client_ip: request.remote_ip,
+                                          client_type: params[:_client_type],
+                                          keep_signed_in: params[:permanent_signed_in],
+                                          third_party_user_id: params[:third_party_user_id])
 
     refresh_session(result['auth_key'])
     render_json_auto result and return
@@ -41,10 +41,10 @@ class Sample::AccountsController < Sample::SampleController
   #用户注册
   def regist
     if params[:email_mobile].present?
-      retval = User.create_new_user(email_mobile:params[:email_mobile],
-                                    password:params[:password],
-                                    current_user:current_user,
-                                    third_party_user_id:params[:third_party_user_id],
+      retval = User.create_new_user(email_mobile: params[:email_mobile],
+                                    password: params[:password],
+                                    current_user: current_user,
+                                    third_party_user_id: params[:third_party_user_id],
                                     callback:{
                                       protocol_hostname: "#{request.protocol}#{request.host_with_port}",
                                       path: "/account/email_activate"})
@@ -54,16 +54,16 @@ class Sample::AccountsController < Sample::SampleController
 
   def check_user_exist
     u = User.find_by_email_or_mobile(params[:email_mobile])
-    render_json_auto({"exist" => (u &&  u.is_activated)}) and return
+    render_json_auto({ exist: (u && u.is_activated)}) and return
   end
 
 
   #注册成功后的跳转页面
   def regist_succ
-    mails = ['126.com','163.com','sina.com','yahoo','qq.com']
+    mails = %w(126.com 163.com sina.com yahoo qq.com)
     @account = params[:k]
     @account = Base64.decode64(@account)
-    m = mails.select{|mail| @account.include?(mail)}
+    m = mails.select{ |mail| @account.include?(mail) }
     if m.present?
       @mail_t = "http://www.mail.#{m.first}"
     end
@@ -92,7 +92,7 @@ class Sample::AccountsController < Sample::SampleController
     else
       EmailWorker.perform_async("welcome",
       user.email,
-      "#{request.protocol}#{request.host_with_port}",
+      "#{ request.protocol }#{ request.host_with_port }",
       "/account/email_activate"
       )
     end
@@ -122,9 +122,10 @@ class Sample::AccountsController < Sample::SampleController
 
   #用户注册  手机验证码激活
   def mobile_activate
-    activate_info = {"mobile" => params[:mobile],
-                     "password" => params[:password],
-                     "verification_code" => params[:verification_code]}
+    activate_info = { mobile: params[:mobile],
+                      password: params[:password],
+                      verification_code: params[:verification_code] 
+                    }
 
     retval = User.activate("mobile", activate_info, request.remote_ip, params[:_client_type])
 
@@ -139,7 +140,7 @@ class Sample::AccountsController < Sample::SampleController
     @spread_number = Answer.my_spread(current_user._id).not_preview.finished.length
 
     @bind_info = {}
-    ["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
+    %w(sina renren qq google kaixin001 douban baidu sohu qihu360).each do |website|
       @bind_info[website] = !ThirdPartyUser.where(:user_id => current_user._id.to_s, :website => website).blank?
     end
 
@@ -149,14 +150,14 @@ class Sample::AccountsController < Sample::SampleController
     @completed_info = current_user.completed_info
 
     @basic_info = {
-      "answer_number" => @answer_number,
-      "spread_number" => @spread_number,
-      "bind_info" => @bind_info,
-      "completed_info" => @completed_info,
-      "point" => current_user.point,
-      "sample_id" => current_user._id.to_s,
-      "avatar" => current_user.mini_avatar,
-      "nickname" => current_user.nickname
+      answer_number: @answer_number,
+      spread_number: @spread_number,
+      bind_info: @bind_info,
+      completed_info: @completed_info,
+      point: current_user.point,
+      sample_id: current_user._id.to_s,
+      avatar: current_user.mini_avatar,
+      nickname: current_user.nickname
     }
 
     render_json_auto @basic_info and return
@@ -200,8 +201,8 @@ class Sample::AccountsController < Sample::SampleController
   def send_forget_pass_code
     session[:forget_account] = params[:email_mobile]
     retval = User.send_forget_pass_code(params[:email_mobile],
-                                        {protocol_hostname: "#{request.protocol}#{request.host_with_port}",
-                                         path: "/account/get_account"})
+                                        { protocol_hostname: "#{request.protocol}#{request.host_with_port}",
+                                          path: "/account/get_account"})
     render_json_auto retval and return
   end
 

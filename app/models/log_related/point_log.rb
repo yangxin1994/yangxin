@@ -1,5 +1,4 @@
 # encoding: utf-8
-# already tidied up
 class PointLog < Log
     field :type, :type => Integer, :default => 8
     field :amount, :type => Integer #花费积分数
@@ -23,36 +22,6 @@ class PointLog < Log
     REVOKE = 64
     IMPORT = 128
     NETRANKING_IMPORT = 256
-
-    # def info_for_sample
-    #   point_log_obj = {}
-    #   point_log_obj["created_at"] = self.created_at.to_i
-    #   point_log_obj["amount"] = self.amount
-    #   point_log_obj["reason"] = self.reason
-    #   point_log_obj["survey_title"] = self.survey_title
-    #   point_log_obj["survey_id"] = self.survey_id
-    #   point_log_obj["gift_name"] = self.gift_name
-    #   point_log_obj["gift_type"] = self.gift_type
-    #   point_log_obj["gift_id"] = self.gift_id
-    #   point_log_obj["gift_picture_url"] = self.gift_picture_url
-    #   point_log_obj["remark"] = self.remark
-    #   return point_log_obj
-    # end
-
-    def info_for_admin
-        point_log_obj = {}
-        point_log_obj["created_at"] = Time.at(self.created_at.to_i)
-        point_log_obj["amount"] = self.amount
-        point_log_obj["reason"] = self.reason
-        point_log_obj["survey_title"] = self.survey_title
-        point_log_obj["survey_id"] = self.survey_id
-        point_log_obj["gift_name"] = self.gift_name
-        point_log_obj["gift_type"] = self.gift_type
-        point_log_obj["gift_id"] = self.gift_id
-        point_log_obj["gift_picture_url"] = self.gift_picture_url
-        point_log_obj["remark"] = self.remark
-        return point_log_obj
-    end
 
     #alias :data :info_for_sample
 
