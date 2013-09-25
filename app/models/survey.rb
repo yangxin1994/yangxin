@@ -1,5 +1,4 @@
 # encoding: utf-8
-# already tidied up
 require 'error_enum'
 require 'quill_common'
 require 'csv'
@@ -655,16 +654,6 @@ class Survey
     return nil if answer.nil?
     return answer.status
   end
-
-  # def info_for_browser
-  #   survey_obj = {}
-  #   survey_obj["_id"] = self._id.to_s
-  #   survey_obj["title"] = self.title.to_s
-  #   survey_obj["created_at"] = self.created_at.to_i
-  #   survey_obj["broswer_extension_promote_info"] = self.broswer_extension_promote_info
-  #   survey_obj["rewards"] = self.rewards
-  #   return survey_obj
-  # end
 
   def serialize_in_promote_setting
     survey_obj = Hash.new

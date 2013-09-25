@@ -1,5 +1,4 @@
 # encoding: utf-8
-# already tidied up
 require 'error_enum'
 require 'data_type'
 require 'securerandom'
@@ -116,10 +115,6 @@ class Answer
   def_status_attr
 
   public
-
-  # def self.find_by_id(answer_id)
-  #   return Answer.where(:_id => answer_id).first
-  # end
 
   def self.find_by_survey_id_sample_id_is_preview(survey_id, sample_id, is_preview)
     return nil if sample_id.blank?

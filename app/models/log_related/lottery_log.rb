@@ -46,11 +46,10 @@ class LotteryLog < Log
     address_code = QuillCommon::AddressUtility.find_address_code_by_ip(opt[:ip_address])
     land = QuillCommon::AddressUtility.find_province_city_town_by_code(address_code)
     self.create(:answer_id => opt[:answer_id],
-          :survey_id =>opt[:survey_id],
-          :survey_title => opt[:survey_title],
-          :user_id => opt[:user_id],
-          :land => land
-          )
+                :survey_id =>opt[:survey_id],
+                :survey_title => opt[:survey_title],
+                :user_id => opt[:user_id],
+                :land => land)
   end
 
   def self.create_succ_lottery_Log(opt)
@@ -59,14 +58,14 @@ class LotteryLog < Log
     address_code = QuillCommon::AddressUtility.find_address_code_by_ip(opt[:ip_address])
     land = QuillCommon::AddressUtility.find_province_city_town_by_code(address_code)    
     self.create(:answer_id => opt[:answer_id],
-          :order_id => opt[:order_id],
-          :prize_id => opt[:prize_id],
-          :prize_name => prize_name,
-          :survey_id => opt[:survey_id],
-          :survey_title => survey_title,
-          :user_id => opt[:user_id],
-          :land => land,
-          :result => true)
+                :order_id => opt[:order_id],
+                :prize_id => opt[:prize_id],
+                :prize_name => prize_name,
+                :survey_id => opt[:survey_id],
+                :survey_title => survey_title,
+                :user_id => opt[:user_id],
+                :land => land,
+                :result => true)
   end
 
   def self.get_order_by_answer_sample(answer_id)
