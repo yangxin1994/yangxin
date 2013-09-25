@@ -15,8 +15,6 @@ class Log
   scope :disciplinal_logs, -> { where(:type => 64)}
   scope :have_user,-> {where(:user_id.ne => nil)}
 
-
-
   belongs_to :user
 
   index({ created_at:1},{background: true})
