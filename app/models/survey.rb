@@ -603,7 +603,6 @@ class Survey
     formated_error = []
     qindex = 0
     q = self.all_questions_type(false)
-    p "========= 准备完毕 ========="
     answer_length = answers.length
     last_time = Time.now.to_i
     answers.each_with_index do |answer, index|
