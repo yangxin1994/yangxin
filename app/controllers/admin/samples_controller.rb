@@ -70,40 +70,34 @@ class Admin::SamplesController < Admin::AdminController
   # ##########################
   def redeem_log
     @sample = User.find(params[:id])
-    @redeem_log = auto_paginate(@sample.logs.redeem_logs) do |logs|
-      logs.map { |e| e.info_for_admin }
-    end
+    @redeem_log = auto_paginate(@sample.logs.redeem_logs)
   end
 
   def point_log
     @sample = User.find(params[:id])
-    @point_log = auto_paginate(@sample.logs.point_logs) do |logs|
-      logs.map { |e| e.info_for_admin }
-    end
+    @point_log = auto_paginate(@sample.logs.point_logs)
   end
 
   def lottery_log
     @sample = User.find(params[:id])
-    @lottery_log = auto_paginate(@sample.logs.lottery_logs) do |logs|
-      logs.map { |e| e.info_for_admin }
-    end
+    @lottery_log = auto_paginate(@sample.logs.lottery_logs)
   end
 
   def answer_log
     @answers = @current_user.answers.not_preview.desc(:created_at)
-    @answers = auto_paginate(@answers) do |paginated_answers|
-      paginated_answers.map { |e| e.info_for_admin }
-    end
+
+    @answers = auto_paginate(@answers)
+
     data = @answers['data'].map do |item|
       # Need attrs: rewards, answer_status, answer_id, amount
       # maybe it has too many attrs, so i did not use helper method.
       # select reward
       item["select_reward"] = ""
       # 
-      item["free_reward"] = item["rewards"].to_a.empty?
-      item["rewards"].to_a.each do |rew|
+      item["free_reward"] = item.rewards.to_a.empty?
+      item.rewards.to_a.each do |rew|
         # if rejected, reward in empty
-        item["select_reward"] = "" and break if item["answer_status"].to_i == 2 
+        item["select_reward"] = "" and break if item.status.to_i == 2 
 
         if rew["checked"]
           case rew["type"].to_i
@@ -131,11 +125,10 @@ class Admin::SamplesController < Admin::AdminController
   def spread_log
     @sample = User.find(params[:id])
     @answers = Answer.not_preview.finished.where(:introducer_id => @sample._id.to_s)
-    @answers = auto_paginate(@answers) do |paginated_answers|
-      paginated_answers.map { |e| e.info_for_admin }
-    end
+    @answers = auto_paginate(@answers)
+    
     data = @answers['data'].map do |item|
-      a = Answer.find_by_id(item["answer_id"])
+      a = Answer.find_by_id(item._id)
       if a.user.present?
         item["sample_email_mobile"] = a.user.email || a.user.mobile
       else
@@ -145,6 +138,7 @@ class Admin::SamplesController < Admin::AdminController
     end
     @answers['data'] = data
   end
+
   # ##########################
   #
   # 样本属性相关

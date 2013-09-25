@@ -1,5 +1,4 @@
 # encoding: utf-8
-# already tidied up
 require 'quill_common'
 class LotteryLog < Log
   field :type, :type => Integer,:default => 2
@@ -28,7 +27,7 @@ class LotteryLog < Log
       logs = self.where(:survey_id => survey_id).desc(:created).limit(limit)
     end
     logs.each_with_index do |log,index|
-      pri = Prize.find_by_id(log.prize_id)
+      pri = Prize.normal.find_by_id(log.prize_id)
       log_data['nickname'] = log.user.try(:nickname) || '游客'
       log_data['user_id']  = log.user.try(:id)
       log_data['created_at'] = log.created_at
@@ -43,15 +42,6 @@ class LotteryLog < Log
     return data
   end
 
-  def info_for_admin
-    lottery_log_obj = {}
-    lottery_log_obj["created_at"] = self.created_at.to_i
-    lottery_log_obj["result"] = self.result.to_s
-    lottery_log_obj["order_id"] = self.order_id
-    lottery_log_obj["prize_name"] = self.prize_name
-    return lottery_log_obj
-  end
-
   def self.create_fail_lottery_log(opt)
     address_code = QuillCommon::AddressUtility.find_address_code_by_ip(opt[:ip_address])
     land = QuillCommon::AddressUtility.find_province_city_town_by_code(address_code)
@@ -64,7 +54,7 @@ class LotteryLog < Log
   end
 
   def self.create_succ_lottery_Log(opt)
-    prize_name  = Prize.find_by_id(opt[:prize_id]).try(:title)
+    prize_name  = Prize.normal.find_by_id(opt[:prize_id]).try(:title)
     survey_title = Survey.find_by_id(opt[:survey_id]).try(:title)
     address_code = QuillCommon::AddressUtility.find_address_code_by_ip(opt[:ip_address])
     land = QuillCommon::AddressUtility.find_province_city_town_by_code(address_code)    

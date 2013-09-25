@@ -4,6 +4,7 @@ require 'error_enum'
 class Gift
   include Mongoid::Document
   include Mongoid::Timestamps
+  include FindTool
 
   OFF_THE_SHELF = 2
   ON_THE_SHELF = 1
@@ -52,15 +53,11 @@ class Gift
   index({ created_at: -1}, { background: true } ) 
   index({ status: 1, type:1, created_at:-1, view_count:-1}, { background: true } )
 
-  def self.find_by_id(gift_id)
-    return self.normal.where(:_id => gift_id).first
-  end
-
-  def info
-    photo_src = self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url
-    self.write_attribute(:photo_src, photo_src)
-    return self
-  end
+  # def info
+  #   photo_src = self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url
+  #   self.write_attribute(:photo_src, photo_src)
+  #   return self
+  # end
 
   def photo_src
     self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url
@@ -69,7 +66,7 @@ class Gift
 
   def self.generate_opt(order,gift)
     opt = {}
-    real_gift = self.find_by_id(gift)
+    real_gift = self.normal.find_by_id(gift)
 
     if real_gift.present?
       opt["receiver"]    = order[:receiver] 
@@ -115,7 +112,7 @@ class Gift
 
 
   def self.generate_gift_id(order_type)
-    gift = self.find_by_id(order_type)
+    gift = self.normal.find_by_id(order_type)
     if gift.present?
       return gift._id
     else

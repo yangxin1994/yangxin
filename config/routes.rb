@@ -92,28 +92,26 @@ OopsData::Application.routes.draw do
 
   # sample
   scope :module => "sample" do
-    match 'sign_up' => "accounts#sign_up",:via => :get
-    match 'sign_in' => "accounts#sign_in",:via => :get
-    match 'sign_out' => "accounts#sign_out",:via => :get
-
     resource :account, :only => [] do
-      get  :sign_in, :as => :sign_in
-      get  :after_sign_in, :as => :after_sign_in
-      get  :sign_up, :as => :sign_up
-      post :login,   :as => :login 
-      get  :sign_out,:as => :sign_out
-      post :regist,:as => :regist
-      get  :check_user_exist,:as => :check_user_exist
-      get  :regist_succ,:as => :regist_succ
-      get  :email_activate,:as => :email_activate
-      post :mobile_activate,:as => :mobile_activate
-      get  :re_mail,:as => :re_mail
-      post  :get_basic_info_by_auth_key, :as => :get_basic_info_by_auth_key
-      get :forget_password, :as => :forget_password
-      get :send_forget_pass_code,:as => :send_forget_pass_code
-      get :forget_pass_mobile_activate, :as => :forget_pass_mobile_activate
-      get :generate_new_password,:as => :generate_new_password
-      get :get_account,:as => :get_account,:as => :get_account
+      collection do
+        get  :sign_in, :as => :sign_in
+        get  :after_sign_in, :as => :after_sign_in
+        get  :sign_up, :as => :sign_up
+        post :login,   :as => :login 
+        get  :sign_out,:as => :sign_out
+        post :regist,:as => :regist
+        get  :check_user_exist,:as => :check_user_exist
+        get  :regist_succ,:as => :regist_succ
+        get  :email_activate,:as => :email_activate
+        post :mobile_activate,:as => :mobile_activate
+        get  :re_mail,:as => :re_mail
+        post  :get_basic_info_by_auth_key, :as => :get_basic_info_by_auth_key
+        get :forget_password, :as => :forget_password
+        get :send_forget_pass_code,:as => :send_forget_pass_code
+        get :forget_pass_mobile_activate, :as => :forget_pass_mobile_activate
+        get :generate_new_password,:as => :generate_new_password
+        get :get_account,:as => :get_account,:as => :get_account
+      end
     end
 
     resource :home, :only => [:show] 
@@ -146,41 +144,42 @@ OopsData::Application.routes.draw do
     end
 
     resources :users,:except => [:show] do
-          collection do
-            get 'get_mobile_area'
-            # surveys
-            get 'join_surveys', 'spread_surveys'
-            get 'surveys' => 'users#join_surveys'
-            match '/spread_counter/:id' => "users#spread_counter", :via => :get
-            match '/survey_detail/:id' => "users#survey_detail", :via => :get
-            # points
-            get 'points'
-            # orders
-            get 'orders'
-            match '/order_detail/:id' => "users#order_detail", :via => :get
-            # setting
-            get 'setting' => 'users#basic_info'
-            put 'setting/update_basic_info' => "users#update_basic_info"
-            get 'setting/avatar' => 'users#avatar'
-            post 'setting/upload_avatar' => 'users#update_avatar'
-            get 'setting/bindings' => 'users#bindings'
-            match 'setting/unbind/:website' => 'users#unbind', :via => :put
-            put 'setting/share' => 'users#bind_share'
-            put 'setting/subscribe' => 'users#bind_subscribe'
-            put 'setting/change_mobile' => 'users#change_mobile' 
-            put 'setting/check_mobile_verify_code' => 'users#check_mobile_verify_code'
-            put 'setting/change_email' => 'users#change_email'
-            get 'setting/change_email_verify_key' => 'users#change_email_verify_key'
-            get 'setting/address' => 'users#address'
-            put 'setting/address' => 'users#update_logistic_address'
-            get 'setting/password' => 'users#password'
-            put 'setting/password' => 'users#update_password'
-            # notifications
-            get 'notifications'
-            match 'notifications/:id' => 'users#destroy_notification', :via => :delete
-            delete 'notifications' => 'users#remove_notifications'
-          end 
-        end
+      member do
+        delete 'destroy_notification'
+        get 'spread_counter'
+        get 'survey_detail'
+      end
+      collection do
+        get 'get_mobile_area'
+        # surveys
+        get 'join_surveys', 'spread_surveys'
+        get 'surveys' => 'users#join_surveys'
+        # points
+        get 'points'
+        # orders
+        get 'orders'
+        # setting
+        get 'setting' => 'users#basic_info'
+        put 'setting/update_basic_info' => "users#update_basic_info"
+        get 'setting/avatar' => 'users#avatar'
+        post 'setting/upload_avatar' => 'users#update_avatar'
+        get 'setting/bindings' => 'users#bindings'
+        put 'setting/unbind/:website' => 'users#unbind'
+        put 'setting/share' => 'users#bind_share'
+        put 'setting/subscribe' => 'users#bind_subscribe'
+        put 'setting/change_mobile' => 'users#change_mobile' 
+        put 'setting/check_mobile_verify_code' => 'users#check_mobile_verify_code'
+        put 'setting/change_email' => 'users#change_email'
+        get 'setting/change_email_verify_key' => 'users#change_email_verify_key'
+        get 'setting/address' => 'users#address'
+        put 'setting/address' => 'users#update_logistic_address'
+        get 'setting/password' => 'users#password'
+        put 'setting/password' => 'users#update_password'
+        # notifications
+        get 'notifications'
+        delete 'notifications' => 'users#remove_notifications'
+      end 
+    end
 
     resources :gifts, :only => [:index, :show] do
       collection do 

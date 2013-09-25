@@ -74,13 +74,13 @@
     <tbody>
       <% @redeem_log["data"].each_with_index do |log_item, i| %>
       <tr>
-        <td><a href=""><%= log_item["gift_name"] %></a></td>
-        <td><%= log_item["created_at"] %></td>
+        <td><a href=""><%= log_item.gift_name %></a></td>
+        <td><%= log_item.created_at %></td>
         <td>
-          <%= log_item['amount'] %>
+          <%= log_item.amount %>
         </td>
         <td>
-          <%= log_item['result'] ? link_to("查看订单", admin_order_path(log_item["order_id"]) ) : '' %>
+          <%= link_to("查看订单", admin_order_path(log_item.order_id) ) %>
         </td>
       </tr>
       <% end %>

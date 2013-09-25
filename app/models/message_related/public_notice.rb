@@ -2,6 +2,7 @@
 class PublicNotice
   include Mongoid::Document
   include Mongoid::Timestamps
+  include FindTool
 
   field :title, :type => String
   field :content, :type => String
@@ -26,10 +27,10 @@ class PublicNotice
     
   class << self
 
-    def find_by_id(public_notice_id)
-      public_notice = PublicNotice.where(_id: public_notice_id.to_s).first
-      return public_notice
-    end
+    # def find_by_id(public_notice_id)
+    #   public_notice = PublicNotice.where(_id: public_notice_id.to_s).first
+    #   return public_notice
+    # end
 
     def find_valid_notice
       PublicNotice.in(status: [1, 2]).desc(:updated_at)

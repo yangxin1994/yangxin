@@ -187,7 +187,7 @@ module Tool
 	# check wheather value satisfies standard value
 	def self.check_sample_attribute(sample_attribute_id, value, standard_value)
 		return nil if value.blank?
-		sample_attribute = SampleAttribute.find_by_id(sample_attribute_id)
+		sample_attribute = SampleAttribute.normal.find_by_id(sample_attribute_id)
 		return nil if sample_attribute.nil?
 		case sample_attribute.type
 		when DataType::STRING

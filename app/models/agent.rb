@@ -3,7 +3,7 @@ require 'tool'
 class Agent
   include Mongoid::Document
   include Mongoid::Timestamps
-
+  include FindTool
   NORMAL = 1
   DELETED = 2
 
@@ -25,16 +25,16 @@ class Agent
   index({ auth_key: 1 }, { background: true } )
   index({ email: 1, password: 1 }, { background: true } )
 
-  def self.find_by_id(agent_id)
-    return self.normal.where(:_id => agent_id).first
-  end
+  # def self.find_by_id(agent_id)
+  #   return self.normal.where(:_id => agent_id).first
+  # end
 
-  def self.find_by_email(agent_email)
-    return self.normal.where(:email => agent_email).first
-  end
+  # def self.find_by_email(agent_email)
+  #   return self.normal.where(:email => agent_email).first
+  # end
 
   def self.create_agent(agent)
-    return ErrorEnum::AGENT_EXIST if !self.find_by_email(agent["email"]).nil?
+    return ErrorEnum::AGENT_EXIST if !self.normal.find_by_email(agent["email"]).nil?
     agent["password"] = Encryption.encrypt_password(agent["password"])
     agent= Agent.new(agent)
     agent.save
@@ -85,7 +85,7 @@ class Agent
   end
 
   def self.login(email, password)
-    Agent.find_by(:email => email, :password => Encryption.encrypt_password(password)) do |agent|
+    Agent.where(:email => email, :password => Encryption.encrypt_password(password)) do |agent|
       agent.auth_key = Encryption.encrypt_auth_key("#{agent.email}&#{Time.now.to_i.to_s}")
       agent.save
     end.auth_key

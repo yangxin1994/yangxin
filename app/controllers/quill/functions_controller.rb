@@ -1,8 +1,8 @@
 class Quill::FunctionsController < ApplicationController
 
-	layout 'quillhome'
+    layout 'quillhome'
 
-	def design
-	end
-	
+    def design
+    end
+    
 end

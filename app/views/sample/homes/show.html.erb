@@ -5,22 +5,20 @@
       window.current_user_id = "<%= current_user.id %>"
     <% end %>   
   </script>
-
-
 <% end %>
-<% if @hot_survey.present? %>
+<% if @data[:hot_survey].present? %>
   <div class="hot-research-banner inner-page">
-      <strong>
-        <a href="javascript:void(0);">
-          <%= @hot_survey['title']%>
-        </a>
-      </strong>
-      <a href="/s/<%= @hot_survey['quillme_promote_info']['reward_scheme_id']%>" class="involved-btn">我是新用户<span></span>
-      <a href="javascript:void(0);" class="involved-btn old" data="<%= @hot_survey['spread_point']%>" s_title= "<%= @hot_survey['title'] %>" scheme_id="<%= @hot_survey['quillme_promote_info']['reward_scheme_id']%>">我是老用户<span></span>
+    <strong>
+      <a href="javascript:void(0);">
+        <%= @data[:hot_survey]['title']%>
       </a>
-      
+    </strong>
+    <a href="/s/<%= @data[:hot_survey]['quillme_promote_info']['reward_scheme_id']%>" class="involved-btn">我是新用户
+      <span></span>
+      <a href="javascript:void(0);" class="involved-btn old" data="<%= @data[:hot_survey]['spread_point']%>" s_title= "<%= @data[:hot_survey]['title'] %>" scheme_id="<%= @data[:hot_survey]['quillme_promote_info']['reward_scheme_id']%>">我是老用户
+        <span></span>
       </a>
-      
+    </a>
   </div>
 <% end %>
 <div class="inner-page fix">
@@ -45,10 +43,10 @@
         <h3 class="box-title">站内公告</h3>
         <a href="<%= public_notices_path %>" class="more">更多</a>
       </div>
-      <% if @public_notices.present? %>
+      <% if @data[:public_notices].present? %>
       <ul>
-        <% @public_notices.each_with_index do |pn,index| %>
-          <li <%= hide_border?(@public_notices,index) %>>
+        <% @data[:public_notices].each_with_index do |pn,index| %>
+          <li <%= hide_border?(@data[:public_notices].to_ary,index) %>>
             <a href="<%= public_notice_path(pn['_id']) %>">
               <span class="bulletin-title"><%= truncate("#{pn['title']}", :length => 25)%></span>
             </a>
@@ -68,21 +66,21 @@
       <h3 class="box-title">推荐礼品</h3>
       <a href="<%= gifts_path %>" class="more">更多</a>
     </div>
-    <% if @hotest_gifts.present? %>
+    <% if @data[:hotest_gifts].present? %>
     <ul class="gift-list">
-      <% @hotest_gifts.each do |gift|%>
+      <% @data[:hotest_gifts].each do |gift|%>
         <li>
           <a href="<%= gift_path(gift['_id']) %>">
             <span class="gift-img">
-              <img src="<%= show_image(gift['photo_src'],'gifts') %> " alt="<%= gift['title'] %>" />
+              <img src="<%= show_image(gift.photo_src,'gifts') %> " alt="<%= gift.title %>" />
             </span>
-            <span class="gift-name"><%= gift['title'] %></span>
+            <span class="gift-name"><%= gift.title %></span>
             <span class="gift-mask"></span>
             <span class="gift-remark">
-              <span class="integral l"><b><%= gift['point']%></b>积分</span>
+              <span class="integral l"><b><%= gift.point%></b>积分</span>
               <span class="gift-remark-right">
-                <span class="nop">人气：<b><%= gift['view_count']%></b></span>
-                <span class="price">价值：<b><%= show_gift_price(gift['price'])%></b> 元</span>
+                <span class="nop">人气：<b><%= gift.view_count%></b></span>
+                <span class="price">价值：<b><%= show_gift_price(gift.price)%></b> 元</span>
               </span>     
             </span>
           </a>
@@ -105,7 +103,7 @@
         <a href="<%= surveys_path(:status => 2) %>" class="more">更多</a>
       </div>
       <ul>
-        <%= render :partial => 'sample/surveys/survey_list',:locals => {:surveys => @rsl} %>
+        <%= render :partial => 'sample/surveys/survey_list',:locals => {:surveys => @data[:rsl]} %>
       </ul>
     </div>
   </div>
@@ -115,10 +113,10 @@
       <div class="dashed-box-inner-top">
         <h3 class="box-title">排行榜</h3>
       </div>
-      <% if @top_rank_users.present? %>
+      <% if @data[:top_rank_users].present? %>
         <ul class="rank-list">
-          <% @top_rank_users.each_with_index do |user,index| %>
-            <li <%= hide_border?(@top_rank_users,index) %>>
+          <% @data[:top_rank_users].each_with_index do |user,index| %>
+            <li <%= hide_border?(@data[:top_rank_users].to_ary,index) %>>
               <span class="rank-list-left l">
                 <span class="number l"><%= index + 1 %></span>
                 <span class="userhead l" href="javascript:void(0);">
@@ -142,15 +140,15 @@
     </div>
   </div> 
 
-  <% if @fresh_news.present? %>
+  <% if @data[:fresh_news].present? %>
   <div class="forums dashed-box l">
     <div class="dashed-box-inner">
       <div class="dashed-box-inner-top">
         <h3 class="box-title">新鲜事</h3>
       </div>
         <ul class="forums-list">
-          <% @fresh_news.each_with_index do |news,index|%>
-            <li <%= hide_border?(@fresh_news,index) %>>
+          <% @data[:fresh_news].each_with_index do |news,index|%>
+            <li <%= hide_border?(@data[:fresh_news],index) %>>
               <span class="time"><%= ch_time(news['created_at']) %></span>
               <%= user_behavor(news) %>
             </li>
@@ -159,5 +157,4 @@
     </div>
   </div> 
   <% end %>
-
 </div> 

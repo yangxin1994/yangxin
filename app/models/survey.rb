@@ -12,6 +12,13 @@ class Survey
   include SurveyComponents::SurveyLogicControl
   include SurveyComponents::SurveyQuota
   include SurveyComponents::SurveyReportMockup
+  include FindTool
+
+  META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
+  CLOSED = 1
+  PUBLISHED = 2
+  DELETED = 4
+
   field :title, :type => String, default: "调查问卷主标题"
   field :subtitle, :type => String, default: ""
   field :welcome, :type => String, default: ""
@@ -88,7 +95,6 @@ class Survey
   field :sample_attributes_for_promote, :type => Array, default: []
   field :star, :type => Boolean, default: false
 
-
   has_many :answers
   has_many :reward_schemes
   has_many :survey_invitation_histories
@@ -96,13 +102,10 @@ class Survey
   has_many :export_results
   has_many :analysis_results
   has_many :report_results
-  # has_many :report_mockups
   has_many :interviewer_tasks
   has_many :agent_tasks
   has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
   belongs_to :user, class_name: "User", inverse_of: :surveys
-
-
 
   scope :status, ->(st) { where(:status.in => Tool.convert_int_to_base_arr(st || (Survey::CLOSED + Survey::PUBLISHED)))}
   scope :title, ->(title) { where(title: Regexp.new(title.to_s)) }
@@ -114,29 +117,22 @@ class Survey
   scope :quillme_hot, -> {where(:quillme_hot => true)}
   scope :not_quillme_hot, -> {where(:quillme_hot => false)}
   scope :quillme_normal, -> { self.quillme_promote.not_quillme_hot} 
+  scope :stars, -> {where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
+  scope :published, -> { where(:status  => 2) }
+  scope :normal, -> { where(:status.gt => -1) }
+  scope :closed, -> { where(:status => 1) }
+  scope :deleted, -> { where(:status => 4) }
 
   index({ title: 1 }, { background: true } )
   index({ status: 1, title: 1 }, { background: true } )
   index({ status: 1, reward: 1}, { background: true } )
   index({ status: 1, is_star: 1 }, { background: true } )
-
   index({ quillme_promote_reward_type: 1 }, { background: true } )
   index({ quillme_hot: 1 }, { background: true } )
   index({ user_id: 1 }, { background: true } )
   index({ title: 1 }, { background: true } )
   index({ quillme_promotable: 1, quillme_hot: 1,status: 1,created_at: -1}, { background: true } )
   index({ quillme_promotable: 1, quillme_hot: 1,status: 1,quillme_promote_reward_type: 1}, { background: true } )
-
-  META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
-  CLOSED = 1
-  PUBLISHED = 2
-  DELETED = 4
-
-  scope :stars, -> {where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
-  scope :published, -> { where(:status  => 2) }
-  scope :normal, -> { where(:status.gt => -1) }
-  scope :closed, -> { where(:status => 1) }
-  scope :deleted, -> { where(:status => 4) }
 
   public
 
@@ -162,7 +158,6 @@ class Survey
                                   })
   end  
 
-
   def self.get_filter_surveys(opt)
     if opt[:sample].present?
       if opt[:answer_status].present? && opt[:answer_status].to_i != 0
@@ -184,7 +179,6 @@ class Survey
   
   delegate :count, :to => :answers,:prefix => true
 
-  #  快捷方法，获得某个survey  的奖励方案的id
   def scheme_id
     self.quillme_promote_info['reward_scheme_id']
   end
@@ -202,8 +196,7 @@ class Survey
     return self
   end
 
-
-  def self.get_reward_type_count(status=2)
+  def self.get_reward_type_count(status = 2)
     status = 2 if status.blank?
     reward_types = Survey.quillme_normal.status(status).map{|s| s.quillme_promote_reward_type}
     reward_data = {}
@@ -213,15 +206,6 @@ class Survey
     return reward_data
   end
 
-  #----------------------------------------------
-  #
-  #     find_by_*
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def self.find_by_id(survey_id)
-    return Survey.where(:_id => survey_id).first
-  end
 
   def self.find_by_ids(survey_id_list)
     return Survey.all.in(_id: survey_id_list)
@@ -457,33 +441,24 @@ class Survey
   end
 
   def all_questions(include_prg = true)
-    q = []
-    pages.each do |page|
-      q += page["questions"]
-    end
+    q = (pages.map { |p| p["questions"] }).flatten
     ques = []
     q.collect do |i|
       que = Question.find(i)
       ques << que if (que.question_type != QuestionTypeEnum:: PARAGRAPH || include_prg)
     end
-    return ques
+    ques
   end
 
   def all_questions_id(include_prg = true)
-    q = []
-    pages.each do |page|
-      q += page["questions"]
-    end
+    q = (pages.map { |p| p["questions"] }).flatten
+    return q if include_prg
     ques = []
-    if include_prg
-      return q
-    else
-      q.collect do |i|
-        que = Question.find(i)
-        ques << i if (que.question_type != QuestionTypeEnum:: PARAGRAPH || include_prg)
-      end
-      return ques
+    q.collect do |i|
+      que = Question.find(i)
+      ques << i if (que.question_type != QuestionTypeEnum:: PARAGRAPH || include_prg)
     end
+    ques
   end
 
   def all_questions_type(include_prg = true)
@@ -680,15 +655,15 @@ class Survey
     return answer.status
   end
 
-  def info_for_browser
-    survey_obj = {}
-    survey_obj["_id"] = self._id.to_s
-    survey_obj["title"] = self.title.to_s
-    survey_obj["created_at"] = self.created_at.to_i
-    survey_obj["broswer_extension_promote_info"] = self.broswer_extension_promote_info
-    survey_obj["rewards"] = self.rewards
-    return survey_obj
-  end
+  # def info_for_browser
+  #   survey_obj = {}
+  #   survey_obj["_id"] = self._id.to_s
+  #   survey_obj["title"] = self.title.to_s
+  #   survey_obj["created_at"] = self.created_at.to_i
+  #   survey_obj["broswer_extension_promote_info"] = self.broswer_extension_promote_info
+  #   survey_obj["rewards"] = self.rewards
+  #   return survey_obj
+  # end
 
   def serialize_in_promote_setting
     survey_obj = Hash.new
