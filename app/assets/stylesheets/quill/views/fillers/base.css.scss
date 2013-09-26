@@ -432,46 +432,177 @@ label.matrix-option:not(#foo) {
 }
 
 /* sort question */
+// .q-sort {
+// 	.q-content {
+// 		ul { @include no-extra; }
+// 		li { 
+// 			@include clearfix;
+// 			@include no-extra;
+// 			@include border-radius(5px);
+// 			padding:5px;
+// 			list-style: none;
+// 			clear: both;
+// 			cursor: move;
+// 			vertical-align: middle;
+// 			line-height: 24px;
+
+// 			> em, > .sort-index, > .sort-item {
+// 				float: left;
+// 			}
+// 			> em, > .sort-index {
+// 				text-align: center;
+// 				@include size(16px, 16px);
+// 				margin-right: 1em;
+// 			}
+// 			> em {
+// 				@include cpnt-sprite(drag); 
+// 				margin-top: 5px;
+// 			}
+// 			> .sort-index {
+// 				font-size: 14px;
+// 				font-weight: bold;
+
+// 				&.max {
+// 					color: #ccc;
+// 				}
+// 			}
+// 			> .sort-item { }
+
+// 			&:hover {
+// 				background: $blue-light;
+// 				>em {
+// 					@include cpnt-sprite(drag_hover);
+// 				}
+// 			}
+// 		}
+// 	}
+// }
+/* sort question new version*/
 .q-sort {
 	.q-content {
-		ul { @include no-extra; }
-		li { 
+		$total-width: 775px;
+		$left-width: 280px;
+		$index-width: 25px;
+		.sort-frame {
 			@include clearfix;
-			@include no-extra;
-			@include border-radius(5px);
-			padding:5px;
-			list-style: none;
-			clear: both;
-			cursor: move;
-			vertical-align: middle;
-			line-height: 24px;
-
-			> em, > .sort-index, > .sort-item {
-				float: left;
-			}
-			> em, > .sort-index {
-				text-align: center;
-				@include size(16px, 16px);
-				margin-right: 1em;
-			}
-			> em {
-				@include cpnt-sprite(drag); 
-				margin-top: 5px;
-			}
-			> .sort-index {
-				font-size: 14px;
-				font-weight: bold;
-
-				&.max {
-					color: #ccc;
+			> ul {
+				@include no-extra;
+				> li {
+					@include clearfix;
+					@include no-extra;
+					list-style: none;
+					clear: both;
+					vertical-align: middle;
+					margin: 5px 0;
 				}
 			}
-			> .sort-item { }
-
+			.sort-left {
+				float: left;
+				width: $left-width;
+			}
+			.sort-right {
+				float: right;
+				width: $total-width - $left-width;
+			}
+		}
+		$lh: 34px;
+		.sort-left {
+			>li {
+				>.sort-index {
+					float: left;
+					line-height: $lh;
+					font-size: 16px;
+					width: 25px;
+					font-weight: bold;
+				}
+				> .sort-item-con {
+					float: left;
+					background: #e2e5ea;
+					background: #d8dde5; 
+					@include min-height($lh);
+					width: $left-width - $index-width;
+					@include border-radius(4px);
+				}
+				&.sort-type-option {
+					> .sort-item-con { background: #f1f3f6; }
+				}
+				&.sort-type-hover {
+					> .sort-item-con { background: #d8dde5; background: rgb(255, 200, 0)}
+				}
+			}
+		}
+		.sort-item {
+			cursor: move;
+			background: #fff;
+			@include border-radius(4px);
+			border: 1px solid #ccc;
+			padding: 0 6px;
+			position: relative;
+			em.sort-item-drag, em.sort-item-remove {
+				position: absolute;
+				top: 0;
+				margin-top: ($lh - 2 - 20) / 2;
+				@include size(20px, 20px);
+			}
+			em.sort-item-drag {
+				left: 6px;
+				@include cpnt-sprite(drag);
+			}
+			em.sort-item-remove {
+				display: none;
+				right: 6px;
+				@include cpnt-sprite(remove);
+				background-color: #fff;
+				cursor: default;
+			}
+			.sort-item-detail {
+				margin-left: 30px;
+				line-height: 24px;
+				padding: 5px 0;
+			}
 			&:hover {
-				background: $blue-light;
-				>em {
-					@include cpnt-sprite(drag_hover);
+				em.sort-item-drag { @include cpnt-sprite(drag_hover); }
+				em.sort-item-remove {display: block;}
+			}
+		}
+		.sort-right {
+			>li {
+				@include border-radius(4px);
+				background:#f1f3f6;
+				@include min-height($lh);
+			}
+			.sort-item {
+				border: none;
+				em.sort-item-drag {
+					margin-top: ($lh - 20) / 2;
+				}
+				&.dragged {
+					z-index: 2000;
+					border: 1px solid #ccc;
+				}
+			}
+		}
+
+	}
+}
+.q-render {
+	/* editor */
+	.q-sort {
+		.q-content {
+			.sort-frame {
+				$total-width-editor: 695px;
+				$left-width-eidtor: 200px;
+				$index-width: 25px;
+				.sort-left {
+					width: $left-width-eidtor;
+					>li {
+						> .sort-item-con {
+							width: $left-width-eidtor - $index-width;
+						}
+					}
+				}
+				.sort-right {
+					width: $total-width-editor - $left-width-eidtor;
 				}
 			}
 		}
