@@ -30,9 +30,9 @@ class QqUser < ThirdPartyUser
     #
     #* response_data: it includes access_token, expires_in
     def self.get_access_token(code, redirect_uri)
-        access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["qq_app_id"],
-            "client_secret" => OOPSDATA[RailsEnv.get_rails_env]["qq_app_key"],
-            "redirect_uri" => redirect_uri || OOPSDATA[RailsEnv.get_rails_env]["qq_redirect_uri"],
+        access_token_params = {"client_id" => OOPSDATA[Rails.env]["qq_app_id"],
+            "client_secret" => OOPSDATA[Rails.env]["qq_app_key"],
+            "redirect_uri" => redirect_uri || OOPSDATA[Rails.env]["qq_redirect_uri"],
             "grant_type" => "authorization_code",
             "state" => Time.now.to_i,
             "code" => code}
@@ -99,7 +99,7 @@ class QqUser < ThirdPartyUser
 
         @params={}
         @params[:access_token] = self.access_token
-        @params[:oauth_consumer_key] = OOPSDATA[RailsEnv.get_rails_env]["qq_app_id"]
+        @params[:oauth_consumer_key] = OOPSDATA[Rails.env]["qq_app_id"]
         @params[:openid] = self.user_id
         method = opts[:method] || opts["method"]
         

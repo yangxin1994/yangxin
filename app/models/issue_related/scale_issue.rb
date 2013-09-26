@@ -50,7 +50,7 @@ class ScaleIssue < Issue
         self.items.each do |item|
             text_length = text_length + item["content"]["text"].length
         end
-        return text_length / OOPSDATA[RailsEnv.get_rails_env]["words_per_second"].to_i + ANSWER_TIME
+        return text_length / OOPSDATA[Rails.env]["words_per_second"].to_i + ANSWER_TIME
     end
 
     #*description*: serialize the current instance into a question object

@@ -91,7 +91,7 @@ class MatrixChoiceIssue < Issue
         self.rows.each do |row|
             text_length = text_length + row["content"]["text"].length
         end
-        return text_length / OOPSDATA[RailsEnv.get_rails_env]["words_per_second"].to_i + ANSWER_TIME * self.rows.length
+        return text_length / OOPSDATA[Rails.env]["words_per_second"].to_i + ANSWER_TIME * self.rows.length
     end
 
     #*description*: serialize the current instance into a question object
