@@ -14,8 +14,7 @@ class Subscriber
   has_and_belongs_to_many :newsletters
 
   # Validations
-  default_scope desc(:created_at)
-
+  default_scope desc(:created_at).desc(:subscribed)
 
   scope :subscribed, where(:subscribed => false)
   scope :unsubscribed, where(:subscribed => true)

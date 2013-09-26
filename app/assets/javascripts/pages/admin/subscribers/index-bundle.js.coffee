@@ -17,8 +17,8 @@ $ ->
   $('.od-subscribe').click (e)->
     $this = $(this)
     $.ajax
-      type: 'DELETE'
-      url: "/admin/subscribers/#{$(this).data('id')}"
+      type: 'PUT'
+      url: "/admin/subscribers/#{$(this).data('id')}/subscribe"
       success: (ret)->
         if ret.success
           $this.addClass 'disabled'
@@ -34,8 +34,8 @@ $ ->
     $this = $(this)
     if confirm "确定要停止对该用户的推送吗?"
       $.ajax
-        type: 'DELETE'
-        url: "/admin/subscribers/#{$(this).data('id')}"
+        type: 'PUT'
+        url: "/admin/subscribers/#{$(this).data('id')}/unsubscribe"
         success: (ret)->
           if ret.success
             $this.addClass 'disabled'
@@ -64,3 +64,4 @@ $ ->
           alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
       error: ->
           alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          
