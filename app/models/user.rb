@@ -9,6 +9,8 @@ class User
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt
 
+  include FindTool  # for mongoid find methods 
+
   EmailRexg  = '\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z'
   MobileRexg = '^(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$' 
 
@@ -120,26 +122,6 @@ class User
 
   public
 
-  def self.find_by_email_mobile(email_mobile)
-    return nil if email_mobile.nil?
-    user = self.where(:email => email_mobile).first
-    user = self.where(:mobile => email_mobile).first if user.nil?
-    return user
-  end
-
-  def self.find_by_email(email)
-    return nil if email.blank?
-    return self.where(:email => email.try(:downcase)).first
-  end
-
-  def self.find_by_mobile(mobile)
-    return nil if mobile.blank?
-    return self.where(:mobile => mobile).first
-  end
-
-  def self.find_by_id(user_id)
-    return self.where(:_id => user_id).first
-  end
 
   def self.find_by_auth_key(auth_key)
     return nil if auth_key.blank?
@@ -149,10 +131,13 @@ class User
     if user.auth_key_expire_time > Time.now.to_i || user.auth_key_expire_time == -1
       return user
     else
-      user.auth_key = nil
-      user.save
+      refresh_auth_key
       return nil
     end
+  end
+
+  def refresh_auth_key
+    self.update_attributes(:auth_key =>nil)
   end
 
 
@@ -195,7 +180,7 @@ class User
 
   #生成订阅用户并发激活码或者邮件
   def self.create_rss_user(email_mobile, callback)
-    user = find_by_email_mobile(email_mobile)
+    user = find_by_email_or_mobile(email_mobile)
 
     account = {}
     if email_mobile.match(/#{EmailRexg}/i)
@@ -259,7 +244,7 @@ class User
   def self.cancel_subscribe(active_info)
     email_mobile  = active_info['email_mobile']
     mobile = active_info['mobile']
-    user = User.find_by_email_mobile(email_mobile)
+    user = User.find_by_email_or_mobile(email_mobile)
     return ErrorEnum::USER_NOT_EXIST unless user.present?
     user.update_attributes(:email_subscribe => false) if email_mobile.match(/#{EmailRexg}/i)
     user.update_attributes(:mobile_subscribe => false) if email_mobile.match(/#{MobileRexg}/i)
@@ -267,7 +252,7 @@ class User
   end
 
   def self.send_forget_pass_code(email_mobile, callback)
-    sample = self.find_by_email_mobile(email_mobile) 
+    sample = self.find_by_email_or_mobile(email_mobile) 
     if sample.present?
       if(email_mobile.match(/#{MobileRexg}/i))
         active_code = Tool.generate_active_mobile_code  
@@ -297,7 +282,7 @@ class User
   end
 
   def self.generate_new_password(email_mobile,password)
-    sample = self.find_by_email_mobile(email_mobile)    
+    sample = self.find_by_email_or_mobile(email_mobile)    
     if sample.present?
       password = Encryption.encrypt_password(password)
       return sample.update_attributes(:password => password)
@@ -306,14 +291,14 @@ class User
     end
   end
 
-  #*description*: create a new user
-  #
-  #*params*:
-  #* a user hash
-  #
-  #*retval*:
-  #* the new user instance: when successfully created
-  #def self.create_new_user(email_mobile, password, current_user, third_party_user_id, callback)
+  ####################################
+  #opt is a hash that contains some key as follow
+  #email_mobile : 要注册的手机或者邮箱
+  #password:密码
+  #keep_signed_in:是否记住我
+  #third_party_user_id:第三方账户的id
+  #callback:发送激活邮件的回调函数
+  ####################################
   def self.create_new_user(opt)  
 
     account = {}
@@ -441,6 +426,7 @@ class User
   end
 
   ####################################
+  #opt is a hash that contains some key as follow
   #email_mobile : 登录用的email或mobile
   #password:密码
   #client_ip:登录ip
@@ -454,13 +440,14 @@ class User
     elsif opt[:email_mobile].match(/#{MobileRexg}/i)  ## match mobile
       user = User.find_by_mobile(opt[:email_mobile])
     end
-    return ErrorEnum::USER_NOT_EXIST if user.nil?
-    return ErrorEnum::USER_NOT_REGISTERED if user.status == 1
-    return ErrorEnum::USER_NOT_ACTIVATED if !user.is_activated
+
+    return ErrorEnum::USER_NOT_EXIST unless user.present?
+    return ErrorEnum::USER_NOT_REGISTERED if user.status == VISITOR
+    return ErrorEnum::USER_NOT_ACTIVATED unless user.is_activated
     return ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(opt[:password])
-    if !opt[:third_party_user_id].nil?
-      third_party_user = ThirdPartyUser.find_by(id: opt[:third_party_user_id])
-      third_party_user.bind(user) if !third_party_user.nil?
+    if opt[:third_party_user_id].present?
+      third_party_user = ThirdPartyUser.find_by_id(opt[:third_party_user_id])
+      third_party_user.bind(user) if third_party_user.present?
     end
     return user.login(opt[:client_ip], opt[:client_type], opt[:keep_signed_in])
   end
@@ -681,7 +668,7 @@ class User
   end
 
   def need_update_attribute(attr_name, updated_value)
-    sa = SampleAttribute.find_by_name(attr_name)
+    sa = SampleAttribute.normal.find_by_name(attr_name)
     return false if sa.nil?
     return true if ![DataType::NUMBER_RANGE, DataType::DATE_RANGE].include?(sa.type)
     sa_value = self.read_sample_attribute(attr_name)
@@ -691,21 +678,21 @@ class User
   end
 
   def read_sample_attribute(name)
-    sa = SampleAttribute.find_by_name(name)
+    sa = SampleAttribute.normal.find_by_name(name)
     return nil if sa.nil?
     return nil if self.affiliated.nil?
     return self.affiliated.read_attribute(sa.name.to_sym)
   end
 
   def read_sample_attribute_by_id(sa_id)
-    sa = SampleAttribute.find_by_id(sa_id)
+    sa = SampleAttribute.normal.find_by_id(sa_id)
     return nil if sa.nil?
     return nil if self.affiliated.nil?
     return self.affiliated.read_attribute(sa.name.to_sym)
   end
 
   def write_sample_attribute(name, value)
-    sa = SampleAttribute.find_by_name(name)
+    sa = SampleAttribute.normal.find_by_name(name)
     return false if sa.nil?
     self.create_affiliated if self.affiliated.nil?
     self.affiliated.write_attribute(sa.name.to_sym, value)

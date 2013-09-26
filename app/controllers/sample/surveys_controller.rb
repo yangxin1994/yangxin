@@ -5,34 +5,42 @@ class Sample::SurveysController < Sample::SampleController
   # PAGE
   def index
     
-    @surveys = Survey.get_recommends(sample:current_user,
-                                     status:params[:status],
-                                     reward_type:params[:reward_type],
-                                     answer_status:params[:answer_status]
-                                    )
+    surveys = Survey.get_recommends(
+      sample:current_user,
+      status:params[:status],
+      reward_type:params[:reward_type],
+      answer_status:params[:answer_status])
 
-    @surveys = @surveys.map { |e| e.excute_sample_data(current_user) }
-    @surveys = auto_paginate @surveys
+    surveys = surveys.map { |e| e.excute_sample_data(current_user) }
+    surveys = auto_paginate surveys
+
     date = Date.today
     today_start = Time.local(date.year, date.month, date.day,0,0,0)
-    today_end   = Time.local(date.year, date.month, date.day+1,0,0,0)
-    @answer_count = Answer.where(:created_at.gte => today_start,:created_at.lt => today_end).count
+    today_end   = Time.local(date.year, date.month, date.day + 1,0,0,0)
 
-    @spread_count = Answer.where(:created_at.gte => today_start,:created_at.lt => today_end,:introducer_id.ne => nil).count
-    @disciplinal = PunishLog.desc(:created_at).limit(3).map do |log|
-      log['avatar'] = log.user.avatar.present? ? log.user.avatar.picture_url : User::DEFAULT_IMG
-      log['username'] = log.user.try(:nickname)
-      log
-    end
-    @reward_count = Survey.get_reward_type_count(params[:status])
-    fresh_when(:etag => [@surveys,@answer_count,@spread_count,@disciplinal,@reward_count,@fresh_news])
+    answer = Answer.where(:created_at.gte => today_start,:created_at.lt => today_end)
+
+    @data = {
+      surveys:surveys,
+      answer_count:answer.count,
+      spread_count:answer.where(:introducer_id.ne => nil).count,
+      disciplinal:PunishLog.desc(:created_at).limit(3),
+      reward_count:Survey.get_reward_type_count(params[:status])
+    }
+
+    fresh_when(:etag => @data)
+    
   end
 
   #重新生成订阅 短信激活码  或者邮件
   def generate_rss_activate_code
-    retval = User.create_rss_user(params[:rss_channel],
-      {protocol_hostname: "#{request.protocol}#{request.host_with_port}",
-        path: "/surveys/email_rss_activate"})
+    retval = User.create_rss_user(
+      params[:rss_channel],
+      {
+        protocol_hostname: "#{request.protocol}#{request.host_with_port}",
+        path: "/surveys/email_rss_activate"
+      })
+    
     render :json => retval and return
   end
 

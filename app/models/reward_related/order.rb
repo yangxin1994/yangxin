@@ -1,11 +1,11 @@
 # encoding: utf-8
-#already tidied up
 class Order
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt
   extend Mongoid::FindHelper
   include Mongoid::CriteriaExt
+  include FindTool
 
   field :code, :type => String, default: ->{ Time.now.strftime("%Y%m%d") + sprintf("%05d",rand(10000)) }
   # can be 1 (small mobile charge), 2 (large mobile charge), 4 (alipay), 8(alijf)
@@ -69,20 +69,15 @@ class Order
 
   #attr_accessible :mobile, :alipay_account, :qq, :user_name, :address, :postcode
 
-  def self.find_by_id(order_id)
-    return Order.where(:_id => order_id).first
-  end
-
-
   def self.create_redeem_order(sample_id, gift_id, amount, point, opt = {})
-    gift  = Gift.find_by_id(gift_id)
+    gift  = Gift.normal.find_by_id(gift_id)
     return ErrorEnum::ORDER_ERROR if amount.to_i < 1
 
     point = gift.point.to_i  * amount.to_i
     sample = User.sample.find_by_id(sample_id)
     return ErrorEnum::POINT_NOT_ENOUGH if sample.point.to_i < point.to_i 
     return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
-    gift = Gift.find_by_id(gift_id)
+    gift = Gift.normal.find_by_id(gift_id)
     return ErrorEnum::GIFT_NOT_EXIST if gift.nil?
     order = Order.create(:source => REDEEM_GIFT, :amount => amount, :point => point, :type => gift.type)
     order.sample = sample
@@ -117,7 +112,7 @@ class Order
     sample = User.sample.find_by_id(sample_id)
     survey = Survey.find_by_id(survey_id)
     return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-    prize = Prize.find_by_id(prize_id)
+    prize = Prize.normal.find_by_id(prize_id)
     return ErrorEnum::PRIZE_NOT_EXIST if prize.nil?
     order = Order.new(:source => WIN_IN_LOTTERY, :type => prize.type, :amount => prize.amount)
     order.sample = sample if sample.present?
@@ -147,7 +142,7 @@ class Order
     ##synchro  reverver info 
     if opt['info_sys'].to_s == 'true'
       option = {}
-      option["receiver"]    = order[:receiver]  
+      option["receiver"]    = order[:receiver]
       option["mobile"]      = order[:mobile]
       option["address"]     = order[:address]
       option["street_info"] = order[:street_info]
@@ -318,3 +313,4 @@ class Order
     self.auto_handle if handle
   end
 end
+

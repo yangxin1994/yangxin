@@ -1,8 +1,7 @@
 # finish migrating
 require 'array'
 class Filler::AnswersController < Filler::FillerController
-  
-  # AJAX
+
   def create
     # hack: if the cookie has already has an answer_id and is not signed in, return the answer_id
     # Used to avoid creating multiple answers when user click the back key in the keyboard when answeing survey
@@ -43,14 +42,15 @@ class Filler::AnswersController < Filler::FillerController
     render_json_auto answer.id.to_s
   end
 
-  # PAGE
+
+    # PAGE
   def show
     # get answer
     @answer = Answer.find_by_id(params[:id])
     render_404 if @answer.nil?
 
     # load data
-    redirect_to sign_in_path({ref: request.url}) and return if @answer.user.present? && @answer.user != current_user
+    redirect_to sign_in_account_path({ref: request.url}) and return if @answer.user.present? && @answer.user != current_user
     @answer.update_status # check whether it is time out
     if @answer.is_edit
       questions = @answer.load_question(nil, true)
@@ -97,17 +97,19 @@ class Filler::AnswersController < Filler::FillerController
     @binded = user_signed_in ? (current_user.email_activation || current_user.mobile_activation) : false
   end
 
-  # AJAX
+
   def destroy_preview
     @answer = Answer.preview.find(params[:id])
     @answer.survey.answers.delete(@answer)
     render_json_auto @answer.destroy and return 
   end
 
+
   def clear
     @answer = Answer.find(params[:id])
     render_json_auto @answer.clear and return
   end
+
 
   # AJAX
   def update
@@ -169,10 +171,12 @@ class Filler::AnswersController < Filler::FillerController
     end
   end
 
+
   # AJAX
   def finish
     render_json_auto Answer.find(params[:id]).finish and return
   end
+
 
   # AJAX
   def select_reward

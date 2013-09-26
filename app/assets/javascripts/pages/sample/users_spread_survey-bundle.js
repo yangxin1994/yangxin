@@ -20,7 +20,7 @@ jQuery(function($) {
         $('#spread-detail span.point').removeClass('point');
 
         // spread users nubmer
-        $.getJSON('/users/spread_counter/'+sid+'.json', function(data){
+        $.getJSON('/users/' + sid + '/spread_counter.json', function(data){    
             if (data.success){
                 $('#spread-detail tbody tr td:eq(4)').html(data.value.total_answer_number+'人（'+data.value.editting_answer_number+'人正在答题）');
                 $('#spread-detail tbody tr td:eq(5)').html(data.value.finished_answer_number+'人');
@@ -32,7 +32,7 @@ jQuery(function($) {
         // ajax request spreaded-users list
         $.ajax({
             type: "GET",
-            url: '/users/survey_detail/'+sid,
+            url: '/users/' + sid + '/survey_detail',
             beforeSend: function(xhr){
                 xhr.setRequestHeader("OJAX",true);
             }
@@ -58,7 +58,7 @@ jQuery(function($) {
                                                     '<img class="loading" src="/assets/od-icon/loading.gif"/></div>')
 
         // spread users nubmer which is useful to check signined or not.
-        $.getJSON('/users/spread_counter/'+sid+'.json', function(data){
+        $.getJSON('/users/' + sid +'/spread_counter.json', function(data){
             if (data.success){
                 $('#spread-detail tbody tr td:eq(4)').html(data.value.total_answer_number+'人（'+data.value.editting_answer_number+'人正在答题）');
                 $('#spread-detail tbody tr td:eq(5)').html(data.value.finished_answer_number+'人');
@@ -80,7 +80,7 @@ jQuery(function($) {
         // ajax data
         $.ajax({
             type: "GET",
-            url: '/users/survey_detail/'+sid+'?page='+pager,
+            url: '/users/' + sid + '/survey_detail?page='+pager,
             beforeSend: function(xhr){
                 xhr.setRequestHeader("OJAX",true);
             }

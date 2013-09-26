@@ -1,5 +1,4 @@
 # encoding: utf-8
-# already tidied up
 require 'error_enum'
 require 'quill_common'
 require 'csv'
@@ -12,6 +11,7 @@ class Survey
   include SurveyComponents::SurveyQuota
   include SurveyComponents::SurveyReportMockup
   include SurveyComponents::SurveyFilter
+  include FindTool
 
   META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
   CLOSED = 1
@@ -34,14 +34,14 @@ class Survey
     "has_advertisement" => true,
     "has_oopsdata_link" => true,
     "redirect_link" => "",
-    "allow_pageup" => false}
+  "allow_pageup" => false}
   field :access_control_setting, :type => Hash, default: {"times_for_one_computer" => -1,
     "has_captcha" => false,
     "ip_restrictions" => [],
     "password_control" => {"password_type" => -1,
       "single_password" => "",
       "password_list" => [],
-      "username_password_list" => []}}
+    "username_password_list" => []}}
   # the type of inserting quality control question
   #  0 for not inserting
   #  1 for inserting manually
@@ -76,7 +76,7 @@ class Survey
   field :sms_promote_info, :type => Hash, default: {
     "sms_amount" => 0,
     "promote_to_undefined_sample" => false,
-    "promote_sms_count" => 0,   
+    "promote_sms_count" => 0,
     "reward_scheme_id" => ""
   }
   field :broswer_extension_promote_info, :type => Hash, default: {
@@ -94,6 +94,7 @@ class Survey
   field :sample_attributes_for_promote, :type => Array, default: []
   field :star, :type => Boolean, default: false
 
+
   has_many :answers
   has_many :reward_schemes
   has_many :survey_invitation_histories
@@ -106,6 +107,7 @@ class Survey
   has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
   belongs_to :user, class_name: "User", inverse_of: :surveys
 
+
   scope :status, ->(st) { where(:status.in => Tool.convert_int_to_base_arr(st || (Survey::CLOSED + Survey::PUBLISHED)))}
   scope :title, ->(title) { where(title: Regexp.new(title.to_s)) }
   scope :user, ->(e) {  e.is_admin? ? self.criteria : where(:user_id => e._id) }
@@ -115,12 +117,13 @@ class Survey
   scope :quillme_promote, -> { where(:quillme_promotable => true)}
   scope :quillme_hot, -> {where(:quillme_hot => true)}
   scope :not_quillme_hot, -> {where(:quillme_hot => false)}
-  scope :quillme_normal, -> { self.quillme_promote.not_quillme_hot} 
+  scope :quillme_normal, -> { self.quillme_promote.not_quillme_hot}
   scope :stars, -> {where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
   scope :published, -> { where(:status  => 2) }
   scope :normal, -> { where(:status.gt => -1) }
   scope :closed, -> { where(:status => 1) }
   scope :deleted, -> { where(:status => 4) }
+
 
   index({ title: 1 }, { background: true } )
   index({ status: 1, title: 1 }, { background: true } )
@@ -134,7 +137,6 @@ class Survey
   index({ quillme_promotable: 1, quillme_hot: 1,status: 1,quillme_promote_reward_type: 1}, { background: true } )
 
   public
-
   # Class Methods
   #######################
   # 问卷吧首页及调研列表页用
@@ -151,11 +153,11 @@ class Survey
     reward_type = opt[:reward_type].split(',') if opt[:reward_type].present?
     surveys = Survey.quillme_normal.status(opt[:status] || 2).reward_type(opt[:reward_type]).desc(:created_at) if opt[:reward_type].present?
     surveys = Survey.quillme_normal.status(opt[:status] || 2).desc(:created_at) unless opt[:reward_type].present?
-    surveys = get_filter_surveys({surveys:surveys,total_ids:total_ids,
-                                  answer_status:opt[:answer_status],
-                                  sample:opt[:sample],home_page:opt[:home_page]
-                                  })
-  end  
+    surveys = get_filter_surveys(
+      surveys:surveys,total_ids:total_ids,
+      answer_status:opt[:answer_status],
+      sample:opt[:sample],home_page:opt[:home_page])
+  end
 
   def self.get_filter_surveys(opt)
     if opt[:sample].present?
@@ -164,7 +166,7 @@ class Survey
       elsif opt[:answer_status].present? && opt[:answer_status].to_i == 0  # 待参与
         survey_ids = opt[:sample].answers.not_preview.map(&:survey_id)
         survey_ids = opt[:total_ids] - survey_ids
-      end 
+      end
       opt[:surveys] = opt[:surveys].where(:_id.in => survey_ids) if survey_ids
     end
     if opt[:home_page].present? && opt[:surveys].size.to_i < 9
@@ -174,10 +176,8 @@ class Survey
     return surveys ||= opt[:surveys]
   end
 
-  # Instance Methods 
-  
+  # Instance Methods
   delegate :count, :to => :answers,:prefix => true
-
   def scheme_id
     self.quillme_promote_info['reward_scheme_id']
   end
@@ -203,16 +203,6 @@ class Survey
       reward_data[rt] = Survey.quillme_normal.status(status).where(:quillme_promote_reward_type => rt).count
     end
     return reward_data
-  end
-
-  #----------------------------------------------
-  #
-  #     find_by_*
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def self.find_by_id(survey_id)
-    return Survey.where(:_id => survey_id).first
   end
 
   def self.find_by_ids(survey_id_list)
@@ -272,9 +262,9 @@ class Survey
           _value = smp_attr[:value].split(' ')
         end
         add_sample_attribute_for_promote({
-            :sample_attribute_id => _id,
-            :value => _value
-          })
+          :sample_attribute_id => _id,
+          :value => _value
+        })
       end
     end
   end
@@ -287,8 +277,7 @@ class Survey
     options["broswer_extension"]["broswer_extension_promote_setting"]["filters"] = filters
     _promote_email_count = email_promote_info["promote_email_count"]
     _promote_sms_count = sms_promote_info["promote_sms_count"]
-
-    [:quillme, :email, :sms, :broswer_extension, :weibo].each do |promote_type|
+   [:quillme, :email, :sms, :broswer_extension, :weibo].each do |promote_type|
       _params = options[promote_type]
       self.update_attributes(
       "#{promote_type}_promotable".to_sym => _params[:promotable],
@@ -296,9 +285,8 @@ class Survey
       )
       update_quillme_promote_reward_type if options[promote_type] == :quillme
     end
-
-    email_promote_info["promote_email_count"] = _promote_email_count
-    sms_promote_info["promote_sms_count"] = _promote_sms_count    
+   email_promote_info["promote_email_count"] = _promote_email_count
+    sms_promote_info["promote_sms_count"] = _promote_sms_count
     save
   end
 
@@ -311,7 +299,7 @@ class Survey
       else
         agents << AgentTask.create(agent)
       end
-    end    
+    end
   end
 
   def update_deadline(time)
@@ -329,7 +317,7 @@ class Survey
   def update_access_control_setting(access_control_setting_obj)
     access_control_setting_obj["times_for_one_computer"] = access_control_setting_obj["times_for_one_computer"].to_i
     access_control_setting_obj["password_control"]["password_type"] =
-      access_control_setting_obj["password_control"]["password_type"].to_i
+    access_control_setting_obj["password_control"]["password_type"].to_i
     self.access_control_setting = access_control_setting_obj
     self.save
     return true
@@ -340,22 +328,22 @@ class Survey
   end
 
   def is_pageup_allowed
-    return self.style_setting["allow_pageup"]
+     return self.style_setting["allow_pageup"]
   end
 
   def is_random_quality_control_questions
-    return self.quality_control_questions_type == 2
+     return self.quality_control_questions_type == 2
   end
 
   def show_quality_control
     return {"quality_control_questions_type" => self.quality_control_questions_type,
-        "quality_control_questions_ids" => self.quality_control_questions_ids}
+    "quality_control_questions_ids" => self.quality_control_questions_ids}
   end
 
   def update_quality_control(quality_control_questions_type, quality_control_questions_ids)
-    self.quality_control_questions_type = quality_control_questions_type
-    self.quality_control_questions_ids = quality_control_questions_ids
-    self.save
+     self.quality_control_questions_type = quality_control_questions_type
+     self.quality_control_questions_ids = quality_control_questions_ids
+     self.save
   end
 
   def set_spread(spread_point)
@@ -522,7 +510,7 @@ class Survey
     c = CSV.open(path, "w") do |csv|
       csv << csv_header
       answer_content.each do |a|
-      csv << a
+        csv << a
       end
     end
   end
@@ -586,7 +574,6 @@ class Survey
     formated_error = []
     qindex = 0
     q = self.all_questions_type(false)
-    p "========= 准备完毕 ========="
     answer_length = answers.length
     last_time = Time.now.to_i
     answers.each_with_index do |answer, index|
@@ -623,11 +610,11 @@ class Survey
     end
     task_id = Task.create(:task_type => "report")._id.to_s
     ReportWorker.perform_async(self._id.to_s,
-      analysis_task_id,
-      report_mockup_id,
-      report_type,
-      report_style,
-      task_id)
+    analysis_task_id,
+    report_mockup_id,
+    report_type,
+    report_style,
+    task_id)
     return task_id
   end
 
@@ -644,7 +631,7 @@ class Survey
     end
     Task.set_progress(task_id, "find_answers_progress", 1.0)
     return [filtered_answers, tot_num, screened_num,
-      self.answers.not_preview.ongoing.length, self.answers.not_preview.wait_for_review.length]
+    self.answers.not_preview.ongoing.length, self.answers.not_preview.wait_for_review.length]
   end
 
   def self.list(status)
@@ -662,16 +649,6 @@ class Survey
     answer = Answer.where(:survey_id => self._id.to_s, :user_id => user._id.to_s, :is_preview => false)[0]
     return nil if answer.nil?
     return answer.status
-  end
-
-  def info_for_browser
-    survey_obj = {}
-    survey_obj["_id"] = self._id.to_s
-    survey_obj["title"] = self.title.to_s
-    survey_obj["created_at"] = self.created_at.to_i
-    survey_obj["broswer_extension_promote_info"] = self.broswer_extension_promote_info
-    survey_obj["rewards"] = self.rewards
-    return survey_obj
   end
 
   def serialize_in_promote_setting
@@ -696,20 +673,18 @@ class Survey
     unless survey_obj["agent_promote_info"]["agent_tasks"].present?
       survey_obj["agent_promote_info"]["agent_tasks"] = [{}]
     end
-
-    if SampleAttribute.count > 0
+   if SampleAttribute.count > 0
       survey_obj["sample_attributes_list"] = SampleAttribute.all
     else
       survey_obj["sample_attributes_list"] = [{}]
-    end    
+    end
     survey_obj["sample_attributes"] = sample_attributes
     return survey_obj
   end
 
   def sample_attributes
     smp_attrs = sample_attributes_for_promote
-
-    smp_attrs.each_with_index do |smp_attr, index|
+   smp_attrs.each_with_index do |smp_attr, index|
       case smp_attr['type'].to_i
       when 0
         _value = smp_attr['value']
@@ -790,36 +765,36 @@ class Survey
 
   def generate_answer(row)
     {:answer_content => parse_answer(row),
-     :import_id => row["import_id"],
-     :channel => -1,
-     :survey_id => self._id,
-     :status => 32,
-     :random_quality_control_answer_content => {},
-     :random_quality_control_locations => {},
-     :logic_control_result => {},
-     :username => "",
-     :password => "",
-     :region => -1,
-     :ip_address => "",
-     :audit_message => "",
-     :is_scanned => false,
-     :is_preview => false,
-     :finished_at => Time.now.to_i,
-     :created_at => Time.now,
-     :updated_at => Time.now}
+      :import_id => row["import_id"],
+      :channel => -1,
+      :survey_id => self._id,
+      :status => 32,
+      :random_quality_control_answer_content => {},
+      :random_quality_control_locations => {},
+      :logic_control_result => {},
+      :username => "",
+      :password => "",
+      :region => -1,
+      :ip_address => "",
+      :audit_message => "",
+      :is_scanned => false,
+      :is_preview => false,
+      :finished_at => Time.now.to_i,
+      :created_at => Time.now,
+    :updated_at => Time.now}
   end
 
   def allocate_answer_auditors(answer_auditor_ids, allocate)
     retval = {}
     answer_auditor_ids.each do |id|
-    answer_auditor = User.find_by_id(id)
-    retval[id] = USER_NOT_EXIST and next if user.blank? or user.is_answer_auditor?
-    if allocate
-      self.answer_auditors << answer_auditor
-    else
-      self.answer_auditors.delete(answer_auditor)
-    end
-    self.save
+      answer_auditor = User.find_by_id(id)
+      retval[id] = USER_NOT_EXIST and next if user.blank? or user.is_answer_auditor?
+      if allocate
+        self.answer_auditors << answer_auditor
+      else
+        self.answer_auditors.delete(answer_auditor)
+      end
+      self.save
     end
     retval = (retval.blank? ? true : retval)
     return retval
@@ -867,7 +842,7 @@ class Survey
     end
     info = {"survey" => survey_obj,
       "user" => user_obj,
-      "questions" => questions}
+    "questions" => questions}
     return info
   end
 
@@ -917,4 +892,5 @@ class Survey
     return self.criteria if is_star.blank?
     self.where(:is_star => is_star.to_s == "true")
   end
+  
 end

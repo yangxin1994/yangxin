@@ -1,4 +1,3 @@
-# finish migrating
 class Filler::FillerController < ApplicationController
 
   layout 'filler'

@@ -29,7 +29,7 @@
       </li>
       <div style="clear:both;"></div>        
     </ul>
-    <div class="s_a_c">今日累计答题 <%= @answer_count %>，分享问卷 <%= @spread_count%></div>
+    <div class="s_a_c">今日累计答题 <%= @data[:answer_count] %>，分享问卷 <%= @data[:spread_count]%></div>
   </div>
   <div class="research-list dashed-box l">
     <div class="dashed-box-inner" id="s_list">
@@ -38,27 +38,27 @@
           <ul class="reward_type">   
             <li class="<%= current_tab?(nil,params[:reward_type])%>">
               <a href="<%= surveys_path(:status => params[:status])%>">
-                全部 (<span class="all_t"><%= @reward_count.values.reduce(:+).to_i %></span>)
+                全部 (<span class="all_t"><%= @data[:reward_count].values.reduce(:+).to_i %></span>)
               </a>
             </li>
             <li reward_type="<%= RewardScheme::POINT.to_s %>" class="<%= current_tab?("#{RewardScheme::POINT.to_s}",params[:reward_type])%>">
               <a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::POINT.to_s}")%>">
-                积分奖励 (<span class="u_t"><%= @reward_count[4].to_i %></span>)
+                积分奖励 (<span class="u_t"><%= @data[:reward_count][4].to_i %></span>)
               </a>
             </li>
             <li reward_type="<%= RewardScheme::LOTTERY.to_s %>"  class="<%= current_tab?("#{RewardScheme::LOTTERY.to_s}",params[:reward_type])%>">
               <a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::LOTTERY.to_s}")%>">
-                抽奖机会 (<span class="c_t"><%= @reward_count[8].to_i %></span>)
+                抽奖机会 (<span class="c_t"><%= @data[:reward_count][8].to_i %></span>)
               </a>
             </li>  
             <li reward_type="<%= RewardScheme::CASH_REWARD %>" class="<%= current_tab?("#{RewardScheme::CASH_REWARD}",params[:reward_type])%>">
               <a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::CASH_REWARD }")%>">
-                现金奖励 (<span class="x_t"><%= @reward_count[1].to_i + @reward_count["2"].to_i + @reward_count["16"].to_i %></span>)
+                现金奖励 (<span class="x_t"><%= @data[:reward_count][1].to_i + @data[:reward_count]["2"].to_i + @data[:reward_count]["16"].to_i %></span>)
               </a>
             </li>
             <li reward_type="0" class="<%= current_tab?("#{RewardScheme::FREE}",params[:reward_type])%>">
               <a href="<%= surveys_path(:status => params[:status],:reward_type => "#{RewardScheme::FREE}")%>">
-                免费调研 (<span class="m_t"><%= @reward_count[0].to_i %></span>)
+                免费调研 (<span class="m_t"><%= @data[:reward_count][0].to_i %></span>)
               </a>
             </li>
             <div style="clear:both;"></div>
@@ -81,13 +81,13 @@
         </div>
       </div>
       <ul class="list">
-        <% if @surveys['data'].length > 0 %>
-          <%=  render :partial => "survey_list",  :locals => {:surveys => @surveys} %>
+        <% if @data[:surveys]['data'].length > 0 %>
+          <%=  render :partial => "survey_list",  :locals => {:surveys => @data[:surveys]} %>
         <% else %>
           <div class="no_data">该分类下没有任何问卷</div>
         <% end %>
       </ul>
-      <%= sample_paginator(@surveys) %>
+      <%= sample_paginator(@data[:surveys]) %>
     </div>
   </div>
 
@@ -106,7 +106,7 @@
     </div>
   </div>
 
-  <% if @disciplinal.present? %>
+  <% if @data[:disciplinal].present? %>
   <div class="rank dashed-box l">
     <div class="dashed-box-inner">
       <div class="dashed-box-inner-top">
@@ -114,14 +114,14 @@
       </div>
 
       <ul class="rank-list">
-        <% @disciplinal.each_with_index do |log,index|%>
-          <li <%= hide_border?(@disciplinal,index) %>>
+        <% @data[:disciplinal].each_with_index do |log,index|%>
+          <li <%= hide_border?(@data[:disciplinal],index) %>>
           <span class="rank-list-left l">
             <a class="userhead l" href="javascript:void(0);<%#= user_path(log['user_id'])%>">
-              <img src="<%= small_avatar(log['user_id'])%>" alt="<%= log['username']%>">
+              <img src="<%= small_avatar(log['user_id'])%>" alt="<%= log.user.try(:nickname)%>">
             </a>
             <span class="username">
-              <a href="javascript:void(0);"><%= log['username']%></a>
+              <a href="javascript:void(0);"><%= log.user.try(:nickname) %></a>
             </span>
             <span class="integral">不认真答题，答案被拒绝</span>
           </span>

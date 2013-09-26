@@ -1,5 +1,4 @@
 # encoding: utf-8
-# already tidied up
 
 module AnswersHelper
 

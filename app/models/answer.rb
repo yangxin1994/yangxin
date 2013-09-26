@@ -1,5 +1,4 @@
 # encoding: utf-8
-# already tidied up
 require 'error_enum'
 require 'data_type'
 require 'securerandom'
@@ -9,6 +8,7 @@ Dir[File.dirname(__FILE__) + '/lib/survey_components/*.rb'].each {|file| require
 class Answer
   include Mongoid::Document
   include Mongoid::Timestamps
+  include FindTool
   # status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo, 32 for under agents' review
   field :status, :type => Integer, default: 1
   field :answer_content, :type => Hash, default: {}
@@ -113,10 +113,6 @@ class Answer
   def_status_attr
 
   public
-
-  def self.find_by_id(answer_id)
-    return Answer.where(:_id => answer_id).first
-  end
 
   def self.find_by_survey_id_sample_id_is_preview(survey_id, sample_id, is_preview)
     return nil if sample_id.blank?
@@ -721,7 +717,7 @@ class Answer
     return false if survey.quillme_hot != true
     return true if user.answers.not_preview.length > 0 && user.present?
     return true if user.blank? && current_sample && current_sample.answers.not_preview.length > 0
-    sample = User.sample.find_by_email_mobile(account)
+    sample = User.sample.find_by_email_or_mobile(account)
     return true if sample && sample.answers.not_preview.length > 0
     false
   end
@@ -844,7 +840,7 @@ class Answer
           reward_scheme.save
           return {"result" => true,
             "prize_id" => p["id"],
-            "prize_title" => Prize.find_by_id(p["id"]).try(:title)}
+            "prize_title" => Prize.normal.find_by_id(p["id"]).try(:title)}
         end
       end
     end
@@ -892,20 +888,6 @@ class Answer
     answer_obj["rewards"] = self.rewards
     answer_obj["sample_id"] = self.user.nil? ? nil : self.user._id.to_s
     answer_obj["reward_scheme_id"] = self.reward_scheme_id.to_s
-    return answer_obj
-  end
-
-  def info_for_admin
-    answer_obj = {}
-    answer_obj["answer_id"] = self._id.to_s
-    answer_obj["survey_id"] = self.survey_id.to_s
-    answer_obj["survey_title"] = self.survey.try(:title).to_s
-    answer_obj["order_id"] = self.order.try(:_id).to_s
-    answer_obj["answer_status"] = self.status
-    answer_obj["answer_reject_type"] = self.reject_type
-    answer_obj["created_at"] = self.created_at.to_i
-    answer_obj["rewards"] = self.rewards
-    answer_obj["point_to_introducer"] = self.point_to_introducer
     return answer_obj
   end
 

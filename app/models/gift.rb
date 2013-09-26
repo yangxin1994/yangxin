@@ -1,9 +1,9 @@
-# already tidied up
 require 'tool'
 require 'error_enum'
 class Gift
   include Mongoid::Document
   include Mongoid::Timestamps
+  include FindTool
 
   OFF_THE_SHELF = 2
   ON_THE_SHELF = 1
@@ -52,24 +52,11 @@ class Gift
   index({ created_at: -1}, { background: true } ) 
   index({ status: 1, type:1, created_at:-1, view_count:-1}, { background: true } )
 
-  def self.find_by_id(gift_id)
-    return self.normal.where(:_id => gift_id).first
-  end
 
-  def info
-    photo_src = self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url
-    self.write_attribute(:photo_src, photo_src)
-    return self
-  end
-
-  def photo_src
-    self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url
-  end
-
-
+  # Class Methods
   def self.generate_opt(order,gift)
     opt = {}
-    real_gift = self.find_by_id(gift)
+    real_gift = self.normal.find_by_id(gift)
 
     if real_gift.present?
       opt["receiver"]    = order[:receiver] 
@@ -85,16 +72,8 @@ class Gift
     end
 
     return opt
-  end
+  end  
 
-  def update_gift(gift)
-    photo_url = gift.delete("photo_url")
-    if !photo_url.blank? && photo_url != self.photo.try(:picture_url)
-      material = Material.create_image(photo_url)
-      self.photo = material
-    end
-    return self.update_attributes(gift)
-  end
 
   def self.search_gift(title, status, type)
     gifts = Gift.normal
@@ -107,15 +86,8 @@ class Gift
     return gifts
   end
 
-  def delete_gift
-    self.status = DELETED
-    return self.save
-  end
-
-
-
   def self.generate_gift_id(order_type)
-    gift = self.find_by_id(order_type)
+    gift = self.normal.find_by_id(order_type)
     if gift.present?
       return gift._id
     else
@@ -134,6 +106,24 @@ class Gift
     end
   end
 
+  # Instance Methods
+  def photo_src
+    self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url
+  end
+
+  def update_gift(gift)
+    photo_url = gift.delete("photo_url")
+    if !photo_url.blank? && photo_url != self.photo.try(:picture_url)
+      material = Material.create_image(photo_url)
+      self.photo = material
+    end
+    return self.update_attributes(gift)
+  end
+
+  def delete_gift
+    self.status = DELETED
+    return self.save
+  end
 
   #订单(兑换)流程走完之后该值加一，表示该礼品兑换的次数
   def inc_exchange_count

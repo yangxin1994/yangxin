@@ -1,13 +1,13 @@
 class Quill::AboutusController < ApplicationController
 
-	layout 'quillhome'
+    layout 'quillhome'
 
-	before_filter :activate_menu
+    before_filter :activate_menu
 
-	def activate_menu
-		@activate_menu = 3
-	end
+    def activate_menu
+        @activate_menu = 3
+    end
 
-	def show
-	end
+    def show
+    end
 end
