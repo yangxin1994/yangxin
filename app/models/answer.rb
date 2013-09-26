@@ -700,26 +700,28 @@ class Answer
     end
   end
 
-  def select_reward(reward_index, mobile, alipay_account, current_sample)
-    return ErrorEnum::HOT_SURVEY if self.check_for_hot_survey(mobile, alipay_account, current_sample)
-    reward = self.rewards[reward_index]
-    return ErrorEnum::REWARD_NOT_EXIST if reward.nil?
+  def select_reward(type, account, current_sample)
+    return ErrorEnum::HOT_SURVEY if self.check_for_hot_survey(account, current_sample)
     self.rewards.each { |r| r["checked"] = false }
-    reward["checked"] = true
-    if reward["type"].to_i == RewardScheme::MOBILE
-      reward["mobile"] = mobile
-    elsif [RewardScheme::ALIPAY, RewardScheme::JIFENBAO].include?(reward["type"].to_i)
-      reward["alipay_account"] = alipay_account
+    case type
+    when "chongzhi"
+      index = self.rewards.index { |e| e["type"].to_i == RewardScheme::MOBILE }
+      self.rewards[index]["mobile"] = mobile
+      self.rewards[index]["checked"] = true
+    when "zhifubao", "jifenbao"
+      index = self.rewards.index { |e| [RewardScheme::ALIPAY, RewardScheme::JIFENBAO].include?(e["type"].to_i) }
+      self.rewards[index]["alipay_account"] = alipay_account
+      self.rewards[index]["checked"] = true
     end
     self.save
     self.deliver_reward
   end
 
-  def check_for_hot_survey(mobile, alipay_account, current_sample)
+  def check_for_hot_survey(account, current_sample)
     return false if survey.quillme_hot != true
     return true if user.answers.not_preview.length > 0 && user.present?
     return true if user.blank? && current_sample && current_sample.answers.not_preview.length > 0
-    sample = User.sample.find_by_email_mobile(mobile) || User.sample.find_by_email_mobile(alipay_account)
+    sample = User.sample.find_by_email_mobile(account)
     return true if sample && sample.answers.not_preview.length > 0
     false
   end
@@ -1254,5 +1256,11 @@ class Answer
       end 
     end
     answer
+  end
+
+  def answer_percentage
+    questions = answer.load_question(nil, true)
+    question_number = self.survey.all_questions_id(false).length + self.random_quality_control_answer_content.length
+    self.index_of(questions) / question_number.to_f
   end
 end

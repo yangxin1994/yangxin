@@ -12,48 +12,34 @@ class Filler::FillerController < ApplicationController
   end
 
   def ensure_reward(reward_scheme_id, rewards)
-    logger.debug '=============='
-    logger.debug rewards.inspect
     @reward_scheme_id = reward_scheme_id
     @reward_scheme_type = 0
     return if rewards.blank?
-    rewards.each do |r|
-      case r['type']
-      when 1, 2
-        if r['amount'] > 0
-          @reward_scheme_type = 1
-          @reward_money = r['amount']
-          break
-        end
-      when 4
-        if r['amount'] > 0
-          @reward_scheme_type = 2
-          @reward_point = r['amount']
-          # get hottest gift
-          @hot_gift = Gift.on_shelf.real.desc(:exchange_count).first.info
-          break
-        end
-      when 8
-        if r['prizes'].length > 0
-          @reward_scheme_type = 3 
-          @prizes = r['prizes'].map do |p|
-            prize = Prize.find_by_id(p['id'])
-            {
-              title: prize.title,
-              amount: p['amount'],
-              photo_url: prize.photo.picture_url
-            }
-          end || []
-          # win: nil, false, true
-          @lottery_started = !r['win'].nil?
-          break
-        end
-      when 16
-        if r['amount'] > 0
-          @reward_scheme_type = 1
-          @reward_money = r['amount'].to_f / 100
-          break
-        end
+    r = rewards[0]
+    case r['type']
+    when RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO
+      if r['amount'] > 0
+        @reward_scheme_type = 1
+        @reward_money = r["type"] == RewardScheme::JIFENBAO ? r['amount'].to_f / 100 : r['amount']
+      end
+    when RewardScheme::POINT
+      if r['amount'] > 0
+        @reward_scheme_type = 2
+        @reward_point = r['amount']
+        @hot_gift = Gift.on_shelf.real.desc(:exchange_count).first.info
+      end
+    when RewardScheme::LOTTERY
+      if r['prizes'].length > 0
+        @reward_scheme_type = 3 
+        @prizes = r['prizes'].map do |p|
+          prize = Prize.find(p['id'])
+          {
+            title: prize.title,
+            amount: p['amount'],
+            photo_url: prize.photo.picture_url
+          }
+        end || []
+        @lottery_started = !r['win'].nil?
       end
     end
   end
@@ -90,32 +76,20 @@ class Filler::FillerController < ApplicationController
     #    If the user is signed in, ask his answer from Quill.
     #    If the user is not signed in, check the cookie
     #    If answer exists, get percentage
-    answer_id = nil
     if user_signed_in
       answer = Answer.find_by_survey_id_sample_id_is_preview(survey_id, current_user._id.to_s, is_preview)
-      answer_id = answer._id.to_s if answer.present?
     else
-      answer_id = cookies[cookie_key(survey_id, is_preview)]
+      answer = Answer.find(cookies[cookie_key(survey_id, is_preview)])
     end
     @percentage = 0
-    answer = answer_id.present? ? Answer.find_by_id(answer_id) : nil
     if answer.present?
-      # if answer exist, load next page questions
       if answer.user.present? && answer.user != current_user
-        answer_id = nil
         cookies.delete(cookie_key(survey_id, is_preview), :domain => :all)
-      end
-      answer.update_status
-      questions = answer.load_question(nil, true) if answer.is_edit
-
-      if answer.is_edit
-        answer_index = answer.index_of(questions)
-        question_number = answer.survey.all_questions_id(false).length + answer.random_quality_control_answer_content.length,
-        @percentage = answer_index.to_f / question_number.to_f
       else
-        redirect_to show_a_path(answer_id) and return
+        answer.update_status
+        redirect_to show_a_path(answer.id.to_s) and return if !answer.is_edit
+        @percentage = answer.answer_percentage
       end
-
     end
 
     # 5. get real reward
@@ -129,12 +103,7 @@ class Filler::FillerController < ApplicationController
     # 10. get request referer and channel
     @channel = params[:c].to_i
     begin
-      if !request.referer.blank?
-        ref_uri = URI.parse(request.referer)
-        # if !ref_uri.host.downcase.end_with?(request.domain.downcase)
-          @referer_host = ref_uri.host.downcase
-        # end
-      end
+      @referer_host = URI.parse(request.referer).host.downcase if request.referer.present?
     rescue => ex
       logger.debug ex
     end
