@@ -2,7 +2,7 @@ class Newsletter
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt
-  extend Mongoid::FindHelper
+  include Mongoid::FindTool
   include Mongoid::CriteriaExt
 
   field :subject, type: String
