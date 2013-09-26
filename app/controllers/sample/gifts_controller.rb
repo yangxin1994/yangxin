@@ -15,6 +15,7 @@ class Sample::GiftsController < Sample::SampleController
     @data = {sort_type:sort_type,hotest_gifts:hotest_gifts,gift_rank:gift_rank,new_ex_history:new_ex_history}
     
     fresh_when(:etag => @data)
+    
   end
 
   def get_special_type_data

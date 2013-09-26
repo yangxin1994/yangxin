@@ -19,12 +19,13 @@ class Sample::HomesController < Sample::SampleController
 
     fresh_news = Log.get_new_logs(5, nil)
 
-    @data = {hot_survey:hot_survey,
-             rsl:rsl,public_notices:public_notices,
-             hotest_gifts:hotest_gifts,
-             top_rank_users:top_rank_users,
-             fresh_news:fresh_news
-           }
+    @data = {
+      hot_survey:hot_survey,
+      rsl:rsl,public_notices:public_notices,
+      hotest_gifts:hotest_gifts,
+      top_rank_users:top_rank_users,
+      fresh_news:fresh_news
+    }
 
     fresh_when(:etag => @data)
   end

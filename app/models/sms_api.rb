@@ -36,17 +36,17 @@ class SmsApi # 短信接口
   #注册企业信息  web容器第一次启动的时候，需要注册本企业的相关信息
   def self.regist_company_info
     result = get('/sdkproxy/registdetailinfo.action',
-        :query => {:cdkey    => CDKEY,
-                  :password => PASSWORD,
-                  :ename    => '优数调研',
-                  :linkman  => '杨泽曦',
-                  :phonenum => '13488881477',
-                  :mobile   => '13488881477',
-                  :email    => 'yangzexi@oopsdata.com',
-                  :fax      => '010-62800785',
-                  :address  => '北京市海淀区五道口',
-                  :postcode => '100083'
-                  })
+            :query => { :cdkey  => CDKEY,
+                        :password => PASSWORD,
+                        :ename    => '优数调研',
+                        :linkman  => '杨泽曦',
+                        :phonenum => '13488881477',
+                        :mobile   => '13488881477',
+                        :email    => 'yangzexi@oopsdata.com',
+                        :fax      => '010-62800785',
+                        :address  => '北京市海淀区五道口',
+                        :postcode => '100083' })
+
     puts result.parsed_response
   end
 
@@ -62,19 +62,19 @@ class SmsApi # 短信接口
     puts "AAAAAAAAAAAAAA"
     return if Rails.env != "production"
     result = get('/sdkproxy/sendsms.action',
-        :query => {:cdkey    => SmsApi::CDKEY,
-                   :password => SmsApi::PASSWORD,
-                   :phone    => phone,
-                   :message  => message
-                  })
+            :query => { :cdkey => SmsApi::CDKEY,
+                         :password => SmsApi::PASSWORD,
+                         :phone    => phone,
+                         :message  => message })
+
   end
 
   #查询短信剩余条数
   def self.get_remainder
     result = get('/sdkproxy/querybalance.action',
-      :query => {:cdkey    => SmsApi::CDKEY,
-      :password => SmsApi::PASSWORD  
-      })
+        :query => {:cdkey    => SmsApi::CDKEY,
+        :password => SmsApi::PASSWORD  
+        })
     puts result.parsed_response
     remainder = result.parsed_response['response']['message'].to_f * 10 
     return remainder
@@ -84,12 +84,11 @@ class SmsApi # 短信接口
   #sendtime format : yyyymmddhhnnss
   def self.send_time_sms(phone,message, sendtime)
     get('/sdkproxy/sendtimesms.action',
-        :query => {:cdkey    => SmsApi::CDKEY,
-                   :password => SmsApi::PASSWORD,
-                   :phone    => phone,
-                   :message  => message + AUTOGRAPH,
-                   :sendtime => sendtime
-                   })
+            :query => { :cdkey => SmsApi::CDKEY,
+                        :password => SmsApi::PASSWORD,
+                        :phone    => phone,
+                        :message  => message + AUTOGRAPH,
+                        :sendtime => sendtime})
   end
 
 
@@ -119,15 +118,15 @@ class SmsApi # 短信接口
     if reward_scheme && reward_scheme.rewards[0].present?
       case reward_scheme.rewards[0]["type"]
       when RewardScheme::MOBILE
-        @reward = "#{reward_scheme.rewards[0]["amount"]}元现金奖励"
+          @reward = "#{reward_scheme.rewards[0]["amount"]}元现金奖励"
       when RewardScheme::ALIPAY
-        @reward = "#{reward_scheme.rewards[0]["amount"]}元现金奖励"
+          @reward = "#{reward_scheme.rewards[0]["amount"]}元现金奖励"
       when RewardScheme::JIFENBAO
-        @reward = "#{reward_scheme.rewards[0]["amount"]}元现金奖励"
+          @reward = "#{reward_scheme.rewards[0]["amount"]}元现金奖励"
       when RewardScheme::POINT
-        @reward = "#{reward_scheme.rewards[0]["amount"]}积分奖励"
+          @reward = "#{reward_scheme.rewards[0]["amount"]}积分奖励"
       when RewardScheme::LOTTERY
-        @reward = "一次抽奖机会"
+          @reward = "一次抽奖机会"
       end
     end
 

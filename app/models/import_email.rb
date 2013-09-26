@@ -1,4 +1,3 @@
-# already tidied up
 require 'csv'
 class ImportEmail
   include Mongoid::Document

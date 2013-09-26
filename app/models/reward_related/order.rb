@@ -1,5 +1,4 @@
 # encoding: utf-8
-#already tidied up
 class Order
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -156,12 +155,11 @@ class Order
       sample.set_receiver_info(option) if sample.present?
     end 
     LotteryLog.create_succ_lottery_Log(answer_id:answer_id,
-                      order_id:order.id,
-                      survey_id:survey_id,
-                      sample_id:sample_id,
-                      ip_address:ip_address,
-                      prize_id:prize_id
-                      )
+                                       order_id:order.id,
+                                       survey_id:survey_id,
+                                       sample_id:sample_id,
+                                       ip_address:ip_address,
+                                       prize_id:prize_id)
     return order
   end
 
@@ -278,3 +276,4 @@ class Order
     return order_obj
   end
 end
+

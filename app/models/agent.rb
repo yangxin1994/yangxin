@@ -1,4 +1,3 @@
-# already tidied up
 require 'tool'
 class Agent
   include Mongoid::Document
@@ -25,13 +24,6 @@ class Agent
   index({ auth_key: 1 }, { background: true } )
   index({ email: 1, password: 1 }, { background: true } )
 
-  # def self.find_by_id(agent_id)
-  #   return self.normal.where(:_id => agent_id).first
-  # end
-
-  # def self.find_by_email(agent_email)
-  #   return self.normal.where(:email => agent_email).first
-  # end
 
   def self.create_agent(agent)
     return ErrorEnum::AGENT_EXIST if !self.normal.find_by_email(agent["email"]).nil?

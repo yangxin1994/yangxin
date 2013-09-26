@@ -1,4 +1,3 @@
-# already tidied up
 require 'tool'
 class Prize
   include Mongoid::Document
@@ -42,9 +41,6 @@ class Prize
   index({ type: 1, status: 1 }, { background: true } )
   index({ _id: 1, created_at: -1 }, { background: true } )
 
-  # def self.find_by_id(prize_id)
-  #   return self.normal.where(:_id => prize_id).first
-  # end
 
   def self.create_prize(prize)
     photo_url = prize.delete("photo_url")
@@ -59,8 +55,8 @@ class Prize
   def update_prize(prize)
     photo_url = prize.delete("photo_url")
     if !photo_url.blank? && photo_url != self.photo.try(:picture_url)
-      material = Material.create_image(photo_url)
-      self.photo = material
+        material = Material.create_image(photo_url)
+        self.photo = material
     end
     return self.update_attributes(prize)
   end
@@ -70,7 +66,7 @@ class Prize
     prizes = prizes.where(:title => /#{title}/) if !title.blank?
     prizes = prizes.where(:type.in => Tool.convert_int_to_base_arr(type)) if !type.blank? && type != 0
     prizes.each do |p|
-      p["photo_url"] = p.photo.try(:picture_url)
+        p["photo_url"] = p.photo.try(:picture_url)
     end
     return prizes
   end

@@ -1,4 +1,3 @@
-# already tidied up
 class Newsletter
   include Mongoid::Document
   include Mongoid::Timestamps

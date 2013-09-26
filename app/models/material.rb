@@ -1,4 +1,3 @@
-#already tidied up
 require 'error_enum'
 require 'securerandom'
 

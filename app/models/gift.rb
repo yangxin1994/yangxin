@@ -1,4 +1,3 @@
-# already tidied up
 require 'tool'
 require 'error_enum'
 class Gift
@@ -52,12 +51,6 @@ class Gift
   index({ title: 1}, { background: true } )
   index({ created_at: -1}, { background: true } ) 
   index({ status: 1, type:1, created_at:-1, view_count:-1}, { background: true } )
-
-  # def info
-  #   photo_src = self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url
-  #   self.write_attribute(:photo_src, photo_src)
-  #   return self
-  # end
 
   def photo_src
     self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url
