@@ -3,9 +3,8 @@ class Subscriber
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt
-  #extend Mongoid::FindHelper
+  extend Mongoid::FindHelper
   include Mongoid::CriteriaExt
-  include FindTool
 
   field :email, type: String
   field :subscribed, type: Boolean, default: false
