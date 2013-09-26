@@ -3,7 +3,6 @@ class Order
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt
-  extend Mongoid::FindHelper
   include Mongoid::CriteriaExt
   include FindTool
 

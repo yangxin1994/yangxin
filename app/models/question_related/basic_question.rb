@@ -17,7 +17,6 @@ require 'question_io'
 # SortQuestion, 
 # ConstSumQuestion
 class BasicQuestion
-  extend Mongoid::FindHelper
   include Mongoid::Document
   include Mongoid::Timestamps
   include FindTool
