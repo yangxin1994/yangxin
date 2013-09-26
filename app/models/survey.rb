@@ -7,11 +7,11 @@ Dir[File.dirname(__FILE__) + '/lib/survey_components/*.rb'].each {|file| require
 class Survey
   include Mongoid::Document
   include Mongoid::Timestamps
-  include SurveyComponents::SurveyFilter
   include SurveyComponents::SurveyPage
   include SurveyComponents::SurveyLogicControl
   include SurveyComponents::SurveyQuota
   include SurveyComponents::SurveyReportMockup
+  include SurveyComponents::SurveyFilter
 
   META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
   CLOSED = 1
@@ -636,7 +636,7 @@ class Survey
     filtered_answers = []
     tot_num = screened_num = 0
     self.answers.not_preview.finished_and_screened.each_with_index do |a, index|
-      next if !a.satisfy_conditions(filter_conditions, false)
+      next if !a.satisfy_conditions(filter_conditions)
       tot_num += 1
       screened_num += 1 if a.is_screened
       next if !include_screened_answer && a.is_screened

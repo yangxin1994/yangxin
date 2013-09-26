@@ -516,14 +516,6 @@ class User
     m
   end
 
-  def update_message(message_id, update_attrs)
-    m = Message.where(_id: message_id)[0]
-    return ErrorEnum::MESSAGE_NOT_FOUND unless m
-    m.update_attributes(update_attrs)
-    m.save
-  end
-
-
   def unread_messages_count
     Message.unread(last_read_messeges_time).select{ |m| (message_ids.include? m.id) or (m.type == 0)}.count
   end
