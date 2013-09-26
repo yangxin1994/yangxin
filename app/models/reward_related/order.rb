@@ -68,11 +68,6 @@ class Order
 
   #attr_accessible :mobile, :alipay_account, :qq, :user_name, :address, :postcode
 
-  # def self.find_by_id(order_id)
-  #   return Order.where(:_id => order_id).first
-  # end
-
-
   def self.create_redeem_order(sample_id, gift_id, amount, point, opt = {})
     gift  = Gift.normal.find_by_id(gift_id)
     return ErrorEnum::ORDER_ERROR if amount.to_i < 1
@@ -146,7 +141,7 @@ class Order
     ##synchro  reverver info 
     if opt['info_sys'].to_s == 'true'
       option = {}
-      option["receiver"]    = order[:receiver]    
+      option["receiver"]    = order[:receiver]
       option["mobile"]      = order[:mobile]
       option["address"]     = order[:address]
       option["street_info"] = order[:street_info]
@@ -154,12 +149,46 @@ class Order
       sample.set_receiver_info(option) if sample.present?
     end 
     LotteryLog.create_succ_lottery_Log(answer_id:answer_id,
-                                       order_id:order.id,
-                                       survey_id:survey_id,
-                                       sample_id:sample_id,
-                                       ip_address:ip_address,
-                                       prize_id:prize_id)
+                      order_id:order.id,
+                      survey_id:survey_id,
+                      sample_id:sample_id,
+                      ip_address:ip_address,
+                      prize_id:prize_id
+                      )
     return order
+  end
+
+  def self.create_answer_alipay_order(answer, reward)
+    order_info = { "alipay_account" => reward["alipay_account"] }
+    order_info.merge!("status" => FROZEN) if answer.status == UNDER_REVIEW
+    Order.create_answer_order(
+      answer.user.try(:_id),
+      answer.survey._id.to_s,
+      ALIPAY,
+      reward["amount"],
+      order_info)
+  end
+
+  def self.create_answer_jifenbao_order(answer, reward)
+    order_info = { "alipay_account" => reward["alipay_account"] }
+    order_info.merge!("status" => FROZEN) if answer.status == UNDER_REVIEW
+    Order.create_answer_order(
+      answer.user.try(:_id),
+      answer.survey._id.to_s,
+      JIFENBAO,
+      reward["amount"],
+      order_info)
+  end
+
+  def self.create_answer_mobile_order(answer, reward)
+    order_info = { "mobile" => reward["mobile"] }
+    order_info.merge!("status" => FROZEN) if answer.status == UNDER_REVIEW
+    Order.create_answer_order(
+      answer.user.try(:_id),
+      answer.survey._id.to_s,
+      SMALL_MOBILE_CHARGE,
+      reward["amount"],
+      order_info)
   end
 
   def self.create_answer_order(sample_id, survey_id, type, amount, opt = {})
@@ -218,9 +247,11 @@ class Order
 
   def self.search_orders(email, mobile, code, status, source, type)
     if !email.blank?
-      orders = User.sample.find_by_email(email).try(:orders).desc(:created_at) || []
+      return [] if User.sample.find_by_email(email).nil?
+      orders = User.sample.find_by_email(email).orders.desc(:created_at) || []
     elsif !mobile.blank?
-      orders = User.sample.find_by_mobile(mobile).try(:orders).desc(:created_at) || []
+      return [] if User.sample.find_by_mobile(mobile).nil?
+      orders = User.sample.find_by_mobile(mobile).orders.desc(:created_at) || []
     elsif !code.blank?
       orders = Order.where(:code => /#{code}/).desc(:created_at)
     else
@@ -273,6 +304,12 @@ class Order
     order_obj["survey_title"] = self.survey.title if !self.survey.nil?
     order_obj["survey_id"] = self.survey._id.to_s if !self.survey.nil?
     return order_obj
+  end
+
+  def update_status(handle = true)
+    self.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
+    self.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i} ) if self.status == REJECT
+    self.auto_handle if handle
   end
 end
 

@@ -20,7 +20,7 @@ class MailgunApi
       temp_emails.each do |e|
         u = User.find_by_email(e)
         if u.status == User::REGISTERED
-          u.auth_key = Encryption.encrypt_auth_key("#{self._id}&#{Time.now.to_i.to_s}")
+          u.auth_key = Encryption.encrypt_auth_key("#{u._id}&#{Time.now.to_i.to_s}")
           u.auth_key_expire_time =  -1
           u.save
         end

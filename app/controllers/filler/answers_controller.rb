@@ -86,70 +86,48 @@ class Filler::AnswersController < Filler::FillerController
     end
     @data = {:success => true, :value => retval}
 
-    # ensure preview
     ensure_preview(@answer.is_preview)
 
-    # ensure survey
     ensure_survey(@answer.survey_id)
 
-    # ensure reward, use the reward info in answer
     ensure_reward(@answer.reward_scheme_id.to_s, @answer.rewards)
 
-    # ensure spread url
     ensure_spread(@survey, @answer.reward_scheme_id)
 
-    # load user bind info
     @binded = user_signed_in ? (current_user.email_activation || current_user.mobile_activation) : false
   end
 
 
   def destroy_preview
-    @answer = Answer.find_by_id(params[:id])
-    render_json_e ErrorEnum::ANSWER_NOT_EXIST and return if @answer.nil?
-    if @answer.is_preview
-      # this is a preview answer, and the owner of the answer wants to clear the answer
-      @answer.survey.answers.delete(@answer)
-      retval = @answer.destroy
-      render_json_auto(retval) and return 
-    else
-      render_json_e(ErrorEnum::ANSWER_NOT_EXIST) and return
-    end
+    @answer = Answer.preview.find(params[:id])
+    @answer.survey.answers.delete(@answer)
+    render_json_auto @answer.destroy and return 
   end
 
 
   def clear
-    @answer = Answer.find_by_id(params[:id])
-    render_json_e ErrorEnum::ANSWER_NOT_EXIST and return if @answer.nil?
+    @answer = Answer.find(params[:id])
     render_json_auto @answer.clear and return
   end
 
 
   # AJAX
   def update
-    @answer = Answer.find_by_id(params[:id])
-    render_json_e ErrorEnum::ANSWER_NOT_EXIST and return if @answer.nil?
-
+    @answer = Answer.find(params[:id])
     # 0. check the answer's status
     render_json_e(ErrorEnum::WRONG_ANSWER_STATUS) and return if !@answer.is_edit
-
     # 1. update the answer content
-    retval = @answer.update_answer(params[:answer_content])
-
+    @answer.update_answer(params[:answer_content])
     # 2. check quality control
     passed = @answer.check_quality_control(params[:answer_content])
-
     # 3. check screen questions
-    passed &&= @answer.check_screen(params[:answer_content]) if passed
-
+    passed &&= @answer.check_screen(params[:answer_content])
     # 4. check quota questions (skip for previewing)
-    passed &&= @answer.check_question_quota if !@answer.is_preview && passed
-
+    passed &&= @answer.check_question_quota if !@answer.is_preview
     # 5. update the logic control result
     @answer.update_logic_control_result(params[:answer_content]) if passed
-
     # 6. automatically finish the answers that do not allow pageup
     @answer.finish(true) if passed
-
     render_json_s and return
   end
 
@@ -196,60 +174,22 @@ class Filler::AnswersController < Filler::FillerController
 
   # AJAX
   def finish
-    @answer = Answer.find_by_id(params[:id])
-    render_json_e ErrorEnum::ANSWER_NOT_EXIST and return if @answer.nil?
-    render_json_auto @answer.finish and return
-    # render :json => @ws_client.finish 
+    render_json_auto Answer.find(params[:id]).finish and return
   end
 
 
   # AJAX
   def select_reward
-    reward_index = -1
-    mobile = nil
-    alipay_account = nil
-    answer = Answer.find_by_id(params[:id])
-    render_json_e ErrorEnum::ANSWER_NOT_EXIST and return if answer.nil?
-    answer.rewards.each_with_index do |r, i|
-      case r['type']
-      when 1
-        if r['amount'] > 0 && params[:type] == 'chongzhi'
-          reward_index = i
-          mobile = params[:account]
-          break
-        end
-      when 2
-        if r['amount'] > 0 && params[:type] == 'zhifubao'
-          reward_index = i
-          alipay_account = params[:account]
-          break
-        end
-      when 16
-        if r['amount'] > 0 && params[:type] == 'jifenbao'
-          reward_index = i
-          alipay_account = params[:account]
-          break
-        end
-      when 8
-        if r['prizes'].length > 0
-          reward_index = i
-          break
-        end
-      end
-    end
-    retval = answer.select_reward(reward_index, mobile, alipay_account, current_user)
-    render_json_auto retval and return
+    render_json_auto Answer.find(params[:id]).select_reward(params[:type], params[:account], current_user)
   end
 
   # AJAX
   def start_bind
     bind_ids = (cookies[Rails.application.config.bind_answer_id_cookie_key] || '').split('_')
-    bind_ids << params[:id]
-    bind_ids.uniq!
     cookies[Rails.application.config.bind_answer_id_cookie_key] = { 
-      :value => bind_ids.join('_'), 
+      :value => bind_ids.push(params[:id]).uniq!.join('_'), 
       :expires => Rails.application.config.answer_id_time_out_in_hours.hours.from_now ,
-        :domain => :all
+      :domain => :all
     }
     render_json_auto
   end
