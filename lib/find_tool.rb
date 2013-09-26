@@ -10,6 +10,7 @@ module FindTool
 		if retval.present? && block_given?
 		  retval = yield(retval)
 		end
+		retval
 	end
 
 	def find_by_name(name)

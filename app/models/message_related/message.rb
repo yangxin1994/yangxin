@@ -5,7 +5,7 @@ class Message
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt
-  include Mongoid::FindTool
+  include FindTool
   field :title, :type => String
   field :content, :type => String
   # 0 the message is sent to all users
