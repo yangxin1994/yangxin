@@ -1,18 +1,18 @@
 # encoding: utf-8
+# already tidied up
 
 class Admin::SubscribersController < Admin::AdminController
   layout "layouts/admin-todc"
 
   def index
-    @subscribers = auto_paginate Subscriber do |subscribers|
-      subscribers.present_json(:admin)
-    end
+    @subscribers = auto_paginate Subscriber.search(params)
   end
 
   def new
 
   end
   
+
   def create
     render_json true do
       subscribers = params[:subscribers].gsub('，',',')
