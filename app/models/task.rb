@@ -1,4 +1,3 @@
-#encoding: utf-8
 #Corresponding to the User collection in database. Record the user information and activities related to the usage of OopsData system.
 class Task
   include Mongoid::Document

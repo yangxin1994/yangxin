@@ -48,9 +48,8 @@ class SampleAttribute
     DateType::YEAR_MONTH,
     DateType::YEAR_MONTH_DAY]
 
-
   def self.search(name)
-      return name.blank? ? self.normal.all : self.normal.where(:name => /.*#{name.to_s}.*/)
+    return name.blank? ? self.normal.all : self.normal.where(:name => /.*#{name.to_s}.*/)
   end
 
   def self.create_sample_attribute(sample_attribute)
@@ -83,15 +82,15 @@ class SampleAttribute
 
   def self.check_params(sample_attribute)
     if !TYPE_ARRAY.include?(sample_attribute["type"])
-        return ErrorEnum::WRONG_SAMPLE_ATTRIBUTE_TYPE
+      return ErrorEnum::WRONG_SAMPLE_ATTRIBUTE_TYPE
     end
     if sample_attribute["type"] == DataType::ARRAY && !ELEMENT_TYPE_ARRAY.include?(sample_attribute["element_type"])
-        return ErrorEnum::WRONG_SAMPLE_ATTRIBUTE_TYPE
+      return ErrorEnum::WRONG_SAMPLE_ATTRIBUTE_TYPE
     end
     if sample_attribute["type"] == DataType::DATE || sample_attribute["type"] == DataType::DATE_RANGE
-        if !DATE_TYPE_ARRAY.include?(sample_attribute["date_type"])
-            return ErrorEnum::WRONG_DATE_TYPE
-        end
+      if !DATE_TYPE_ARRAY.include?(sample_attribute["date_type"])
+        return ErrorEnum::WRONG_DATE_TYPE
+      end
     end
     return true
   end

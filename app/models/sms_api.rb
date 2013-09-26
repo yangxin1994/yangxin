@@ -46,6 +46,7 @@ class SmsApi # 短信接口
                         :fax      => '010-62800785',
                         :address  => '北京市海淀区五道口',
                         :postcode => '100083' })
+
     puts result.parsed_response
   end
 
@@ -65,6 +66,7 @@ class SmsApi # 短信接口
                          :password => SmsApi::PASSWORD,
                          :phone    => phone,
                          :message  => message })
+
   end
 
   #查询短信剩余条数

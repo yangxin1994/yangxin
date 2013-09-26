@@ -104,7 +104,6 @@ class Order
       order.street_info = opt["street_info"]
       order.postcode = opt["postcode"]
     end
-
     order.save
     sample.point -= point 
     sample.save
@@ -263,8 +262,8 @@ class Order
     self.write_attribute(:user_email_mobile, self.sample.try(:email) || self.sample.try(:mobile))
     if self.type == 2
       self.write_attribute(:address_str, 
-          QuillCommon::AddressUtility.find_province_city_town_by_code(self.address) + " " +
-          self.street_info.to_s + " " + self.postcode.to_s + " " + self.receiver.to_s)
+        QuillCommon::AddressUtility.find_province_city_town_by_code(self.address) + " " +
+        self.street_info.to_s + " " + self.postcode.to_s + " " + self.receiver.to_s)
     end
     return self
   end
@@ -277,3 +276,4 @@ class Order
     return order_obj
   end
 end
+

@@ -30,7 +30,6 @@ class InterviewerTask
         r
     end
     interviewer_task = InterviewerTask.create(quota: quota, user: interviewer, survey: survey)
-
     # survey.interviewer_tasks << interviewer_task and survey.save
     # interviewer.interviewer_tasks << interviewer_task and interviewer.save
     return interviewer_task
@@ -53,6 +52,7 @@ class InterviewerTask
         self.status = 1
     else
         self.status = 0
+>>>>>>> df4200f65e5cbe61f0009179be75bd645975d385
     end
     self.save
   end
@@ -64,8 +64,8 @@ class InterviewerTask
     self.quota["submitted_count"] = 0
     self.quota["rejected_count"] = 0
     self.quota["rules"].each do |r|
-        r["finished_count"] = 0
-        r["submitted_count"] = 0
+      r["finished_count"] = 0
+      r["submitted_count"] = 0
     end
     finished_answers = self.answers.not_preview.finished
     unreviewed_answers = self.answers.not_preview.unreviewed
@@ -73,24 +73,24 @@ class InterviewerTask
 
     # make stats for the finished answers
     finished_answers.each do |answer|
-        self.quota["finished_count"] += 1
-        self.quota["submitted_count"] += 1
-        self.quota["rules"].each do |rule|
-            if answer.satisfy_conditions(rule["conditions"] || [], false)
-                rule["finished_count"] += 1
-                rule["submitted_count"] += 1
-            end
+      self.quota["finished_count"] += 1
+      self.quota["submitted_count"] += 1
+      self.quota["rules"].each do |rule|
+        if answer.satisfy_conditions(rule["conditions"] || [], false)
+          rule["finished_count"] += 1
+          rule["submitted_count"] += 1
         end
+      end
     end
 
     # make stats for the unreviewed answers
     unreviewed_answers.each do |answer|
-        self.quota["submitted_count"] += 1
-        self.quota["rules"].each do |rule|
-            if answer.satisfy_conditions(rule["conditions"] || [], false)
-                rule["submitted_count"] += 1
-            end
+      self.quota["submitted_count"] += 1
+      self.quota["rules"].each do |rule|
+        if answer.satisfy_conditions(rule["conditions"] || [], false)
+          rule["submitted_count"] += 1
         end
+      end
     end
 
     # make stats for the rejected answers

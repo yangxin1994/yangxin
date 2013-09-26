@@ -20,45 +20,49 @@ class Material
   before_save :set_picture_url
 
   def set_picture_url
-      if material_type == 1
-          picture_url ||= '/assets/images/img.png'
-      end
+    if material_type == 1
+      picture_url ||= '/assets/images/img.png'
+    end
   end
 
+  # def self.find_by_id(material_id)
+  #   return Material.where(:_id => material_id).first
+  # end
+
   def self.create_image(image_url)
-      material = Material.new(:material_type => 1, :value => image_url, :picture_url => image_url)
-      material.save
-      return material
+    material = Material.new(:material_type => 1, :value => image_url, :picture_url => image_url)
+    material.save
+    return material
   end
 
   def self.check_and_create_new(current_user, material)
-      return ErrorEnum::WRONG_MATERIAL_TYPE unless [1, 2, 4, 8, 16, 32].include?(material["material_type"].to_i)
-      material_inst = Material.new(:material_type => material["material_type"].to_i,
-          :value => material["value"],
-          :title => material["title"],
-          :picture_url => material["picture_url"])
-      material_inst.save
-      if !current_user.nil?
-          current_user.materials << material_inst
-          current_user.save
-      end
-      return material_inst
+    return ErrorEnum::WRONG_MATERIAL_TYPE unless [1, 2, 4, 8, 16, 32].include?(material["material_type"].to_i)
+    material_inst = Material.new(:material_type => material["material_type"].to_i,
+      :value => material["value"],
+      :title => material["title"],
+      :picture_url => material["picture_url"])
+    material_inst.save
+    if !current_user.nil?
+      current_user.materials << material_inst
+      current_user.save
+    end
+    return material_inst
   end
 
   def self.find_by_type(material_type)
-      return [] if !(1..63).to_a.include?(material_type)
-      materials = []
-      Material.all.each do |material|
-          materials << material if material.material_type & material_type > 0
-      end
-      return materials
+    return [] if !(1..63).to_a.include?(material_type)
+    materials = []
+    Material.all.each do |material|
+      materials << material if material.material_type & material_type > 0
+    end
+    return materials
   end
 
   def update_material(material)
     self.update_attributes(:material_type => material["material_type"],
-          :value => material["value"],
-          :title => material["title"],
-          :picture_url => material["picture_url"])
+      :value => material["value"],
+      :title => material["title"],
+      :picture_url => material["picture_url"])
     return self.save
   end
 end
