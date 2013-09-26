@@ -16,7 +16,6 @@ class Sample::AccountsController < Sample::SampleController
 
   # FOR AJAX
   def login
-
     result = User.login_with_email_mobile(
       email_mobile: params[:email_mobile],
       password: params[:password],

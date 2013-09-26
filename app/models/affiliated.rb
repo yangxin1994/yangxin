@@ -1,4 +1,3 @@
-#already tidied up
 class Affiliated
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -12,4 +11,5 @@ class Affiliated
       }
 
   belongs_to :user, :inverse_of => 'user'
+
 end

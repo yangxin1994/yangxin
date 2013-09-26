@@ -123,9 +123,9 @@ class Survey
   scope :normal, -> { where(:status.gt => -1) }
   scope :closed, -> { where(:status => 1) }
   scope :deleted, -> { where(:status => 4) }
+
+
   index({ title: 1 }, { background: true } )
-
-
   index({ status: 1, title: 1 }, { background: true } )
   index({ status: 1, reward: 1}, { background: true } )
   index({ status: 1, is_star: 1 }, { background: true } )

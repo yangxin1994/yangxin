@@ -11,7 +11,6 @@ class InterviewerTask
 
   belongs_to :survey
   belongs_to :user
-  
   has_many :answers
 
   def self.create_interviewer_task(survey_id, user_id, quota)

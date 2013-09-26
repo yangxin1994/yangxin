@@ -52,15 +52,6 @@ class Prize
     return prize
   end
 
-  def update_prize(prize)
-    photo_url = prize.delete("photo_url")
-    if !photo_url.blank? && photo_url != self.photo.try(:picture_url)
-        material = Material.create_image(photo_url)
-        self.photo = material
-    end
-    return self.update_attributes(prize)
-  end
-
   def self.search_prize(title, type)
     prizes = Prize.normal
     prizes = prizes.where(:title => /#{title}/) if !title.blank?
@@ -69,6 +60,16 @@ class Prize
         p["photo_url"] = p.photo.try(:picture_url)
     end
     return prizes
+  end
+
+
+  def update_prize(prize)
+    photo_url = prize.delete("photo_url")
+    if !photo_url.blank? && photo_url != self.photo.try(:picture_url)
+        material = Material.create_image(photo_url)
+        self.photo = material
+    end
+    return self.update_attributes(prize)
   end
 
   def delete_prize
