@@ -67,17 +67,18 @@ class Sample::LotteriesController < Sample::SampleController
     #获取登录用户的order
     win_order = LotteryLog.get_order_by_answer_sample(params[:id])
 
-    @data = {receiver_info:receiver_info,
-             win_prize_id:win_order.present? ? win_order.prize_id  : prize_id,
-             win_prize_title:win_order.present? ? win_order.prize_name  : prize_title,
-             error_code:error_code,
-             lottery_result:success,
-             win_order_id:win_order.present? ? win_order.order_id  : nil,
-             lottery_logs:lottery_logs,
-             succ_lottery_logs:succ_lottery_logs,
-             prizes:prizes,
-             answer:answer}
-
+    @data = {
+      receiver_info:receiver_info,
+      win_prize_id:win_order.present? ? win_order.prize_id  : prize_id,
+      win_prize_title:win_order.present? ? win_order.prize_name  : prize_title,
+      error_code:error_code,
+      lottery_result:success,
+      win_order_id:win_order.present? ? win_order.order_id  : nil,
+      lottery_logs:lottery_logs,
+      succ_lottery_logs:succ_lottery_logs,
+      prizes:prizes,
+      answer:answer
+    }
   end
 end
 

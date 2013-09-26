@@ -5,10 +5,11 @@ class Sample::SurveysController < Sample::SampleController
   # PAGE
   def index
     
-    surveys = Survey.get_recommends(sample:current_user,
-                                     status:params[:status],
-                                     reward_type:params[:reward_type],
-                                     answer_status:params[:answer_status])
+    surveys = Survey.get_recommends(
+      sample:current_user,
+      status:params[:status],
+      reward_type:params[:reward_type],
+      answer_status:params[:answer_status])
 
     surveys = surveys.map { |e| e.excute_sample_data(current_user) }
     surveys = auto_paginate surveys
@@ -33,9 +34,13 @@ class Sample::SurveysController < Sample::SampleController
 
   #重新生成订阅 短信激活码  或者邮件
   def generate_rss_activate_code
-    retval = User.create_rss_user(params[:rss_channel],
-      {protocol_hostname: "#{request.protocol}#{request.host_with_port}",
-        path: "/surveys/email_rss_activate"})
+    retval = User.create_rss_user(
+      params[:rss_channel],
+      {
+        protocol_hostname: "#{request.protocol}#{request.host_with_port}",
+        path: "/surveys/email_rss_activate"
+      })
+    
     render :json => retval and return
   end
 
