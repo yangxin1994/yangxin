@@ -3,6 +3,7 @@ class Agent
   include Mongoid::Document
   include Mongoid::Timestamps
   include FindTool
+
   NORMAL = 1
   DELETED = 2
 
@@ -24,7 +25,7 @@ class Agent
   index({ auth_key: 1 }, { background: true } )
   index({ email: 1, password: 1 }, { background: true } )
 
-
+  # Class Methods
   def self.create_agent(agent)
     return ErrorEnum::AGENT_EXIST if !self.normal.find_by_email(agent["email"]).nil?
     agent["password"] = Encryption.encrypt_password(agent["password"])
@@ -40,15 +41,6 @@ class Agent
     return agent
   end
 
-  def update_agent(agent)
-    if agent[:password].present?
-      agent[:password] = Encryption.encrypt_password(agent[:password])
-    else
-      agent.delete :password
-    end
-    return self.update_attributes(agent)
-  end
-
   def self.search_agent(email, region)
     agents = self.normal
     agents = agents.where(:email => /#{email.to_s}/) if !email.blank?
@@ -58,6 +50,31 @@ class Agent
       end
     end
     return agents
+  end
+
+  def self.login(email, password)
+    Agent.where(:email => email, :password => Encryption.encrypt_password(password)) do |agent|
+      agent.auth_key = Encryption.encrypt_auth_key("#{agent.email}&#{Time.now.to_i.to_s}")
+      agent.save
+    end.auth_key
+  end
+
+  def self.logout(auth_key)
+    agent = self.find_by_auth_key(auth_key)
+    if !agent.nil?
+      agent.auth_key = nil
+      agent.save
+    end
+  end
+
+  # Instance Methods
+  def update_agent(agent)
+    if agent[:password].present?
+      agent[:password] = Encryption.encrypt_password(agent[:password])
+    else
+      agent.delete :password
+    end
+    return self.update_attributes(agent)
   end
 
   def info
@@ -74,21 +91,6 @@ class Agent
     return ErrorEnum::WRONG_PASSWORD if self.password != Encryption.encrypt_password(old_password)
     self.password = Encryption.encrypt_password(new_password)
     return self.save
-  end
-
-  def self.login(email, password)
-    Agent.where(:email => email, :password => Encryption.encrypt_password(password)) do |agent|
-      agent.auth_key = Encryption.encrypt_auth_key("#{agent.email}&#{Time.now.to_i.to_s}")
-      agent.save
-    end.auth_key
-  end
-
-  def self.logout(auth_key)
-    agent = self.find_by_auth_key(auth_key)
-    if !agent.nil?
-      agent.auth_key = nil
-      agent.save
-    end
   end
 
   def login

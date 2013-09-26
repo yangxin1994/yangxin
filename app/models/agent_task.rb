@@ -25,23 +25,14 @@ class AgentTask
   has_many :answers
 
   default_scope order_by(:created_at.desc)
-
-  # attr_accessible :description, :count
-
   scope :normal, where(:status.in => [OPEN, CLOSED, AGENT_CLOSED])
 
   index({ status: 1 }, { background: true } )
   index({ survey_id: 1 }, { background: true } )
   index({ agent_id: 1, status:1 }, { background: true } )
 
-  def update_agent_task(agent_task)
-    reward_scheme_id  agent_task.delete("reward_schemes_id")
-    reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
-    self.update_attributes(agent_task)
-    reward_scheme.agent_tasks << self
-    return true
-  end
 
+  # Class Methods
   def self.search_agent_task(agent_id, survey_id)
     agent = Agent.normal.find_by_id(agent_id)
     survey = Survey.find_by_id(survey_id)
@@ -51,6 +42,15 @@ class AgentTask
     agent_tasks = agent_tasks.where(:agent_id => agent_id) if !agent.nil?
 
     return agent_tasks
+  end  
+
+  # Instance Methods
+  def update_agent_task(agent_task)
+    reward_scheme_id  agent_task.delete("reward_schemes_id")
+    reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
+    self.update_attributes(agent_task)
+    reward_scheme.agent_tasks << self
+    return true
   end
 
   def info
