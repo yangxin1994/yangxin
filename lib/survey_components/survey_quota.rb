@@ -83,7 +83,7 @@ module SurveyComponents::SurveyQuota
       self.quota["finished_count"] += 1
       self.quota["submitted_count"] += 1
       self.quota["rules"].each do |rule|
-        if answer.satisfy_conditions(rule["conditions"], false)
+        if answer.satisfy_conditions(rule["conditions"])
           rule["finished_count"] += 1
           rule["submitted_count"] += 1
         end
@@ -94,7 +94,7 @@ module SurveyComponents::SurveyQuota
     unreviewed_answers.each do |answer|
       self.quota["submitted_count"] += 1
       self.quota["rules"].each do |rule|
-        if answer.satisfy_conditions(rule["conditions"], false)
+        if answer.satisfy_conditions(rule["conditions"])
           rule["submitted_count"] += 1
         end
       end
@@ -159,5 +159,40 @@ module SurveyComponents::SurveyQuota
     end
     self.refresh_quota_stats if need_refresh_quota
     self.save
+  end
+
+  def update_quota(answer, old_status)
+    if old_status == Answer::EDIT && answer.is_under_review
+      # user submits the answer
+      quota["submitted_count"] += 1
+    elsif old_status == Answer::EDIT && answer.is_finish
+      # user submits the answer, and the answer automatically passes review
+      quota["submitted_count"] += 1
+      quota["finished_count"] += 1
+    elsif old_status == Answer::UNDER_REVIEW && answer.is_finish
+      # answer passes review
+      quota["finished_count"] += 1
+    elsif old_status == Answer::UNDER_REVIEW && answer.is_reject
+      # answer fails review
+      quota["submitted_count"] = [quota["submitted_count"].to_i - 1, 0].max
+    end
+    quota["rules"].each do |rule|
+      next if !answer.satisfy_conditions(rule["conditions"] || [])
+      if old_status == Answer::EDIT && answer.is_under_review
+        # user submits the answer
+        rule["submitted_count"] += 1
+      elsif old_status == Answer::EDIT && answer.is_finish
+        # user submits the answer, and the answer automatically passes review
+        rule["submitted_count"] += 1
+        rule["finished_count"] += 1
+      elsif old_status == Answer::UNDER_REVIEW && answer.is_finish
+        # answer passes review
+        rule["finished_count"] += 1
+      elsif old_status == Answer::UNDER_REVIEW && answer.is_reject
+        # answer fails review
+        rule["submitted_count"] = [rule["submitted_count"] - 1, 0].max
+      end
+    end
+    save
   end
 end
