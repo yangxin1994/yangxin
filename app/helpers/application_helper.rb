@@ -52,6 +52,7 @@ module ApplicationHelper
     def corp_name
         return '问卷吧'
     end
+    
     def corp_name_short
         return '问卷吧'
     end
@@ -63,29 +64,29 @@ module ApplicationHelper
 
 
     def ch_time(from_time)  
-        time = time_ago_in_words(from_time,include_seconds = true)  
-        time = time.sub(/about /,"")  
-        time = time.sub(/over /,"")   
-        if time.to_i == 0  
-            case time.to_s  
-            when 'half a minute'   then '半分钟前'  
-            when 'less than a minute' then '不到1分钟前'  
-            when 'less than 5 seconds'   then '5秒前'  
-            when 'less than 10 seconds' then '10秒前'  
-            when 'less than 20 seconds' then '20秒前'  
-            end  
-        else  
-            mun = time.to_i   
-            case time[-3,3]  
-            when 'nds'   then mun.to_s+'秒前'  
-            when 'ute'   then mun.to_s+'分前'  
-            when 'tes' then mun.to_s+'分钟前'  
-            when 'urs','our' then mun.to_s+'小时前'  
-            when 'day','ays' then mun.to_s+'天前'  
-            when 'nth','ths' then mun.to_s+'个月前'  
-            when 'ear','ars' then mun.to_s+'年前'  
-            end  
-        end   
+      time = time_ago_in_words(from_time,include_seconds = true)  
+      time = time.sub(/about /,"")  
+      time = time.sub(/over /,"")   
+      if time.to_i == 0  
+          case time.to_s  
+          when 'half a minute'   then '半分钟前'  
+          when 'less than a minute' then '不到1分钟前'  
+          when 'less than 5 seconds'   then '5秒前'  
+          when 'less than 10 seconds' then '10秒前'  
+          when 'less than 20 seconds' then '20秒前'  
+          end  
+      else  
+          mun = time.to_i   
+          case time[-3,3]  
+          when 'nds'   then mun.to_s+'秒前'  
+          when 'ute'   then mun.to_s+'分前'  
+          when 'tes' then mun.to_s+'分钟前'  
+          when 'urs','our' then mun.to_s+'小时前'  
+          when 'day','ays' then mun.to_s+'天前'  
+          when 'nth','ths' then mun.to_s+'个月前'  
+          when 'ear','ars' then mun.to_s+'年前'  
+          end  
+      end 
     end
 
     def user_behavor(news)
@@ -93,12 +94,12 @@ module ApplicationHelper
         username = %Q{<span class="u">#{news['username']}</span>}.html_safe
         behavor  = ''
         result   = ''
-        case news['type'].to_i
+        case news.type.to_i
         when 2
-            if(news['result'])
+            if(news.result)
                 #抽得了<a href="#{survey_path(news['prize_id'])}">#{news['prize_name']}</a>
                 behavor = %Q{
-                    抽得了<a href="javascript:void(0);">#{news['prize_name']}</a>
+                    抽得了<a href="javascript:void(0);">#{news.prize_name}</a>
                 }.html_safe        
             else
                 behavor = %Q{
@@ -106,47 +107,47 @@ module ApplicationHelper
                 }.html_safe
             end
         when 8
-            case news['reason'].to_i
+            case news.reason.to_i
             when 1
-                if news['scheme_id'].to_i > 0 
+                if news.scheme_id.to_i > 0 
                     behavor = %Q{
-                        回答了<a href="/s/#{(news['scheme_id'])}">#{news['survey_title']}</a>获得了<b>#{news['amount']}</b>积分 
+                        回答了<a href="/s/#{(news.scheme_id)}">#{news.survey_title}</a>获得了<b>#{news.amount}</b>积分 
                     }.html_safe 
                 else
                     behavor = %Q{
-                        回答了<a href="javascript:void(0);">#{news['survey_title']}</a>获得了<b>#{news['amount']}</b>积分   
+                        回答了<a href="javascript:void(0);">#{news.survey_title}</a>获得了<b>#{news.amount}</b>积分   
                     }.html_safe 
                 end
             
             when 2
-                ref = news['scheme_id'].to_i > 0 ? "/s/#{news['scheme_id']}" : "javascript:void(0);"
-                if news['amount'].to_i > 0
+                ref = news.scheme_id.to_i > 0 ? "/s/#{news.scheme_id}" : "javascript:void(0);"
+                if news.amount.to_i > 0
                     behavor = %Q{
-                        推广了<a href="#{ref}">#{news['survey_title']}</a>获得了<b>#{news['amount']}</b>积分    
+                        推广了<a href="#{ref}">#{news.survey_title}</a>获得了<b>#{news.amount}</b>积分    
                     }.html_safe
                 else
                     behavor = %Q{
-                        推广了<a href="#{ref}">#{news['survey_title']}</a> 
+                        推广了<a href="#{ref}">#{news.survey_title}</a> 
                     }.html_safe
                 end
     
             when 4
-                if news['gift_type'].to_i == Gift::REAL.to_i
+                if news.gift_type.to_i == Gift::REAL.to_i
                     behavor = %Q{
-                        使用<b>#{news['amount'].abs}</b>积分兑换了<a href="/gifts/#{news['gift_id']}">#{news['gift_name']}</a>
+                        使用<b>#{news.amount.abs}</b>积分兑换了<a href="/gifts/#{news.gift_id}">#{news.gift_name}</a>
                     }.html_safe 
                 else
                     behavor = %Q{
-                        使用<b>#{news['amount'].abs}</b>积分兑换了<span class="u">#{news['gift_name']}</span>
+                        使用<b>#{news.amount.abs}</b>积分兑换了<span class="u">#{news.gift_name}</span>
                     }.html_safe
                 end
             when 8
                 behavor = %Q{
-                    兑换失败,返还了<b>#{news['amount'].abs}</b>积分
+                    兑换失败,返还了<b>#{news.amount.abs}</b>积分
                 }.html_safe             
             when 256
                 behavor = %Q{
-                    从清研通导入<b>#{news['amount'].abs}</b>积分
+                    从清研通导入<b>#{news.amount.abs}</b>积分
                 }.html_safe             
             end
         when 16

@@ -149,7 +149,7 @@
         <ul class="forums-list">
           <% @data[:fresh_news].each_with_index do |news,index|%>
             <li <%= hide_border?(@data[:fresh_news],index) %>>
-              <span class="time"><%= ch_time(news['created_at']) %></span>
+              <span class="time"><%= ch_time(news.created_at) %></span>
               <%= user_behavor(news) %>
             </li>
           <% end %>
