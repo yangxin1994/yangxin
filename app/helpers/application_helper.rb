@@ -67,7 +67,7 @@ module ApplicationHelper
       time = time_ago_in_words(from_time,include_seconds = true)  
       time = time.sub(/about /,"")  
       time = time.sub(/over /,"")   
-      if time.to_i == 0  
+      if time.to_i == 0                 
           case time.to_s  
           when 'half a minute'   then '半分钟前'  
           when 'less than a minute' then '不到1分钟前'  

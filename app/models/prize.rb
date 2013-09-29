@@ -30,7 +30,6 @@ class Prize
   has_many :orders
 
   default_scope order_by(:created_at.desc)
-
   scope :normal, where(:status => NORMAL)
   scope :real, normal.where(:type => REAL)
   scope :virtual, normal.where(:type => VIRTUAL)

@@ -1,14 +1,11 @@
 require 'csv'
 class ImportEmail
+
   include Mongoid::Document
   include FindTool
   
   field :email, :type => String
   field :username, :type => String
-
-  # def self.find_by_email(email)
-  #   return self.where(:email.downcase => email.downcase).first
-  # end
 
   def self.destroy_by_email(email)
     return self.find_by_email(email.downcase).try(:destroy)
@@ -43,4 +40,5 @@ class ImportEmail
       end
     end
   end
+  
 end

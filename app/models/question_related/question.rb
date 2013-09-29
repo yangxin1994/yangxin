@@ -1,7 +1,9 @@
 # encoding: utf-8
 require 'error_enum'
 class Question < BasicQuestion
+
   include Mongoid::Document
+  
   field :is_required, :type => Boolean, default: true
   field :sample_attribute_relation, :type => Hash, default: {}
 

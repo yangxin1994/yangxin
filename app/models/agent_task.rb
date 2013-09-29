@@ -1,5 +1,6 @@
 require 'tool'
 class AgentTask
+  
   include Mongoid::Document
   include Mongoid::Timestamps
   include FindTool

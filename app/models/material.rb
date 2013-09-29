@@ -1,10 +1,11 @@
 require 'error_enum'
 require 'securerandom'
-
 class Material
+
   include Mongoid::Document
   include Mongoid::Timestamps
   include FindTool
+
   # 1 for image, 2 for video, 4 for audio, 8 for local image, 16 for local video, 32 for local audio
   field :material_type, :type => Integer
   field :title, :type => String
@@ -18,16 +19,6 @@ class Material
   belongs_to :user,:inverse_of => 'avatar'
 
   before_save :set_picture_url
-
-  def set_picture_url
-    if material_type == 1
-      picture_url ||= '/assets/images/img.png'
-    end
-  end
-
-  # def self.find_by_id(material_id)
-  #   return Material.where(:_id => material_id).first
-  # end
 
   def self.create_image(image_url)
     material = Material.new(:material_type => 1, :value => image_url, :picture_url => image_url)
@@ -58,6 +49,12 @@ class Material
     return materials
   end
 
+  def set_picture_url
+    if material_type == 1
+      picture_url ||= '/assets/images/img.png'
+    end
+  end
+
   def update_material(material)
     self.update_attributes(:material_type => material["material_type"],
       :value => material["value"],
@@ -65,4 +62,5 @@ class Material
       :picture_url => material["picture_url"])
     return self.save
   end
+  
 end

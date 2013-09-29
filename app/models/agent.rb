@@ -1,5 +1,6 @@
 require 'tool'
 class Agent
+
   include Mongoid::Document
   include Mongoid::Timestamps
   include FindTool
@@ -18,7 +19,6 @@ class Agent
   has_many :agent_tasks
 
   default_scope order_by(:created_at.desc)
-
   scope :normal, where(:status => NORMAL)
 
   index({ status: 1 }, { background: true } )

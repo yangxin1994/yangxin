@@ -15,7 +15,6 @@ class Newsletter
   has_and_belongs_to_many :subscribers
 
   default_scope where(:is_deleted => false)
-
   scope :find_by_status, ->(_status) { _status.present? ? where(:status => _status) : self.all }
 
   index({ is_deleted: 1 }, { background: true } )

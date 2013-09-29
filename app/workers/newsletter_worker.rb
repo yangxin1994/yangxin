@@ -1,5 +1,4 @@
 # encoding: utf-8
-
 class NewsletterWorker
   include Sidekiq::Worker
   sidekiq_options :retry => false, :queue => "oopsdata_#{Rails.env}".to_sym

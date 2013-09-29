@@ -1,5 +1,5 @@
-#already tidied up
 class PublicNotice
+
   include Mongoid::Document
   include Mongoid::Timestamps
   include FindTool
@@ -12,25 +12,15 @@ class PublicNotice
 
   belongs_to :user
 
-  # index({ title: 1, public_notice_type: 1 }, { background: true } )
-  # index({ public_notice_type: 1, content: 1 }, { background: true } )
-  
-  # attr_accessible :title, :content, :attachment, :status#, :public_notice_type
+  validates_presence_of :title#, :public_notice_type
 
   scope :opend, where(:status => 2)
   scope :closed, where(:status => 1)
 
   index({ status: 1 }, { background: true } )
   index({ title: 1 }, { background: true } )
-
-  validates_presence_of :title#, :public_notice_type
     
   class << self
-
-    # def find_by_id(public_notice_id)
-    #   public_notice = PublicNotice.where(_id: public_notice_id.to_s).first
-    #   return public_notice
-    # end
 
     def find_valid_notice
       PublicNotice.in(status: [1, 2]).desc(:updated_at)
@@ -46,5 +36,7 @@ class PublicNotice
       public_notice.save
       return public_notice     
     end
-  end 
+
+  end
+   
 end

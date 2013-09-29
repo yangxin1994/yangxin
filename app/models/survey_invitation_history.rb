@@ -5,6 +5,7 @@ class SurveyInvitationHistory
   # 0 for ongoing, 1 for finished
   belongs_to :user
   belongs_to :survey, index: true
+  
   index({ survey_id: 1 }, { background: true } )
 
   def self.get_user_ids_sent(survey_id)
