@@ -1,5 +1,5 @@
-# already tidied up
 class ExportResult < Result
+  
   include Mongoid::Document
   include Mongoid::Timestamps
   include ConnectDotNet

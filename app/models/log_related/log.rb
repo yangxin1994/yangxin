@@ -1,11 +1,15 @@
 require 'error_enum'
 class Log
+
   include Mongoid::Document
   include Mongoid::Timestamps
   include FindTool
   # log type, 1 for answering surveys, 2 for lottery, 4 for gift redeem, 8 for point change, 16 for register, 32 for spread, 64 for punish                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 
   field :type, :type => Integer
+
+  belongs_to :user
+
   scope :lottery_logs, -> { where(:type => 2) }
   scope :redeem_logs, -> { where(:type => 4) }
   scope :point_logs, -> { where(:type => 8) }
@@ -14,8 +18,6 @@ class Log
   scope :spread_logs, -> { where(:type => 32)}
   scope :disciplinal_logs, -> { where(:type => 64)}
   scope :have_user,-> {where(:user_id.ne => nil)}
-
-  belongs_to :user
 
   index({ created_at:1},{background: true})
   index({ type:1},{background: true})

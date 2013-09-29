@@ -1,10 +1,10 @@
-# already tidied up
 require 'error_enum'
 require 'array'
 require 'tool'
 require 'digest/md5'
 require 'quill_common'
 class AnalysisResult < Result
+
   include Mongoid::Document
   include Mongoid::Timestamps
 
@@ -29,6 +29,37 @@ class AnalysisResult < Result
     return result_key
   end
 
+  def self.get_data_list(task_id)
+    # analysis_result = self.where(:task_id => task_id)[0]
+    analysis_result = self.find_by_task_id(task_id)
+    return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
+    return {:result_key => analysis_result.result_key,
+        :answer_info => analysis_result.answer_info}
+  end
+
+  def self.get_stats(task_id)
+    # analysis_result = self.where(:task_id => task_id)[0]
+    analysis_result = self.find_by_task_id(task_id)
+    return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
+    return {:tot_answer_number => analysis_result.tot_answer_number,
+        :screened_answer_number => analysis_result.screened_answer_number,
+        :ongoing_answer_number => analysis_result.ongoing_answer_number,
+        :wait_for_review_answer_number => analysis_result.wait_for_review_answer_number,
+        :duration_mean => analysis_result.duration_mean,
+        :time_result => analysis_result.time_result,
+        :region_result => analysis_result.region_result,
+        :channel_result => analysis_result.channel_result}
+  end
+
+ 
+  def self.get_analysis_result(task_id, page_index)
+    # analysis_result = self.where(:task_id => task_id)[0]
+    analysis_result = self.find_by_task_id(task_id)
+    return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
+    page = analysis_result.survey.pages[page_index]
+    return ErrorEnum::OVERFLOW if page.nil?
+    return analysis_result.answers_result.select { |e, v| page["questions"].include?(e) }
+  end    
 
   def analysis(answers, task_id = nil)
     region_result = QuillCommon::AddressUtility.province_hash.merge(QuillCommon::AddressUtility.city_hash).merge(QuillCommon::AddressUtility.county_hash)
@@ -209,34 +240,9 @@ class AnalysisResult < Result
     end
   end
 
-  def self.get_data_list(task_id)
-    # analysis_result = self.where(:task_id => task_id)[0]
-    analysis_result = self.find_by_task_id(task_id)
-    return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
-    return {:result_key => analysis_result.result_key,
-        :answer_info => analysis_result.answer_info}
-  end
 
-  def self.get_stats(task_id)
-    # analysis_result = self.where(:task_id => task_id)[0]
-    analysis_result = self.find_by_task_id(task_id)
-    return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
-    return {:tot_answer_number => analysis_result.tot_answer_number,
-        :screened_answer_number => analysis_result.screened_answer_number,
-        :ongoing_answer_number => analysis_result.ongoing_answer_number,
-        :wait_for_review_answer_number => analysis_result.wait_for_review_answer_number,
-        :duration_mean => analysis_result.duration_mean,
-        :time_result => analysis_result.time_result,
-        :region_result => analysis_result.region_result,
-        :channel_result => analysis_result.channel_result}
-  end
 
-  def self.get_analysis_result(task_id, page_index)
-    # analysis_result = self.where(:task_id => task_id)[0]
-    analysis_result = self.find_by_task_id(task_id)
-    return ErrorEnum::RESULT_NOT_EXIST if analysis_result.nil?
-    page = analysis_result.survey.pages[page_index]
-    return ErrorEnum::OVERFLOW if page.nil?
-    return analysis_result.answers_result.select { |e, v| page["questions"].include?(e) }
-  end
+
+
+
 end

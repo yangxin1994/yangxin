@@ -1,11 +1,41 @@
-# already tidied up
 require 'data_type'
 require 'date_type'
 require 'error_enum'
 class SampleAttribute
+
   include Mongoid::Document
   include Mongoid::Timestamps
   include FindTool
+
+  BASIC_ATTR = %w(nickname username gender birthday born_address live_address married children income_person income_family education_level major industry position seniority)
+
+  TYPE_ARRAY = [
+    DataType::STRING,
+    DataType::ENUM,
+    DataType::NUMBER,
+    DataType::DATE,
+    DataType::NUMBER_RANGE,
+    DataType::DATE_RANGE,
+    DataType::ADDRESS,
+    DataType::ARRAY
+  ]
+
+  ELEMENT_TYPE_ARRAY = [
+    DataType::STRING,
+    DataType::ENUM,
+    DataType::NUMBER,
+    DataType::DATE,
+    DataType::NUMBER_RANGE,
+    DataType::DATE_RANGE,
+    DataType::ADDRESS
+  ]
+
+  DATE_TYPE_ARRAY = [
+    DateType::YEAR,
+    DateType::YEAR_MONTH,
+    DateType::YEAR_MONTH_DAY
+  ]
+
 
   field :name, :type => String
   # data type of the sample attribute
@@ -27,27 +57,6 @@ class SampleAttribute
   index({ name: 1 }, { background: true } )
   index({ status: 1, name: 1 }, { background: true } )
 
-  BASIC_ATTR = ['nickname','username','gender','birthday','born_address','live_address','married','children','income_person','income_family','education_level','major','industry','position','seniority']
-
-  TYPE_ARRAY = [DataType::STRING,
-    DataType::ENUM,
-    DataType::NUMBER,
-    DataType::DATE,
-    DataType::NUMBER_RANGE,
-    DataType::DATE_RANGE,
-    DataType::ADDRESS,
-    DataType::ARRAY]
-  ELEMENT_TYPE_ARRAY = [DataType::STRING,
-    DataType::ENUM,
-    DataType::NUMBER,
-    DataType::DATE,
-    DataType::NUMBER_RANGE,
-    DataType::DATE_RANGE,
-    DataType::ADDRESS]
-  DATE_TYPE_ARRAY = [DateType::YEAR,
-    DateType::YEAR_MONTH,
-    DateType::YEAR_MONTH_DAY]
-
   def self.search(name)
     return name.blank? ? self.normal.all : self.normal.where(:name => /.*#{name.to_s}.*/)
   end
@@ -61,24 +70,6 @@ class SampleAttribute
     return new_sample_attribute.save
   end
 
-  def update_sample_attribute(sample_attribute)
-    retval = SampleAttribute.check_params(sample_attribute)
-    return retval if retval != true
-    return self.update_attributes(sample_attribute)
-  end
-
-  def bind_question(question_id, relation)
-    question = BasicQuestion.find_by_id(question_id)
-    return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
-    question.sample_attribute = self
-    question.sample_attribute_relation = relation
-    return question.save
-  end
-
-  def delete
-    self.status = 2
-    return self.save
-  end
 
   def self.check_params(sample_attribute)
     if !TYPE_ARRAY.include?(sample_attribute["type"])
@@ -101,5 +92,24 @@ class SampleAttribute
         *User.make_sample_attribute_statistics(sample_attribute)
       sample_attribute.save
     end
+  end
+
+  def update_sample_attribute(sample_attribute)
+    retval = SampleAttribute.check_params(sample_attribute)
+    return retval if retval != true
+    return self.update_attributes(sample_attribute)
+  end
+
+  def bind_question(question_id, relation)
+    question = BasicQuestion.find_by_id(question_id)
+    return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
+    question.sample_attribute = self
+    question.sample_attribute_relation = relation
+    return question.save
+  end
+
+  def delete
+    self.status = 2
+    return self.save
   end
 end

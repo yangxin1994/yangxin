@@ -1,5 +1,6 @@
 #encoding: utf-8
 class BrowserHistory
+  
   include Mongoid::Document
   include FindTool
   

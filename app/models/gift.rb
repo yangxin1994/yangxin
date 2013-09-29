@@ -74,7 +74,6 @@ class Gift
     return opt
   end  
 
-
   def self.search_gift(title, status, type)
     gifts = Gift.normal
     gifts = gifts.where(:title => /#{title}/) if !title.blank?

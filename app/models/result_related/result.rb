@@ -1,10 +1,10 @@
-# already tidied up
 require 'error_enum'
 require 'array'
 require 'tool'
 require 'connect_dot_net'
 require 'quill_common'
 class Result
+  
   include Mongoid::Document
   include Mongoid::Timestamps
 

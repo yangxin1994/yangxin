@@ -1,5 +1,4 @@
 # encoding: utf-8
-
 module Mongoid
   module FindHelper
     def random(n=1)

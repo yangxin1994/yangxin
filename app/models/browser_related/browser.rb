@@ -1,7 +1,9 @@
 #encoding: utf-8
 class Browser
+
   include Mongoid::Document
   include FindTool
+  
   field :last_request_time, :type => Integer
 
   belongs_to :browser_extension

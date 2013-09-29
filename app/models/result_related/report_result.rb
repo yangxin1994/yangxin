@@ -1,5 +1,4 @@
 # encoding: utf-8
-# already tidied up
 require 'error_enum'
 require 'quill_common'
 require 'array'
@@ -7,6 +6,7 @@ require 'tool'
 require 'digest/md5'
 require 'connect_dot_net'
 class ReportResult < Result
+
   include Mongoid::Document
   include Mongoid::Timestamps
 
@@ -18,6 +18,146 @@ class ReportResult < Result
     answer_ids = answers.map { |e| e._id.to_s }
     result_key = Digest::MD5.hexdigest(("#{last_update_time}-report-#{report_mockup.to_json}-#{report_style}-#{report_type}-#{answer_ids.to_s}"))
     return result_key
+  end
+
+  def self.convert_time_interval_to_text(format, v1, v2)
+    case format.to_i
+    when 0
+      # year
+      if v1.nil?
+        y = Time.at(v2).year
+        return "#{y}年以前"
+      elsif v2.nil?
+        y = Time.at(v1).year + 1
+        return "#{y}年以后"
+      else
+        y1 = Time.at(v1).year + 1
+        y2 = Time.at(v2).year
+        return y1 == y2 ? "#{y1}年" : "#{y1}年到#{y2}年"
+      end
+    when 1
+      # year, month
+      if v1.nil?
+        y = Time.at(v2).year
+        m = Time.at(v2).month
+        return "#{y}年#{m}月以前"
+      elsif v2.nil?
+        y = Time.at(v1).year
+        m = Time.at(v1).month + 1
+        return "#{y}年#{m}月以后"
+      else
+        y1 = Time.at(v1).year
+        m1 = Time.at(v1).month + 1
+        y2 = Time.at(v2).year
+        m2 = Time.at(v2).month
+        return y1 == y2 && m1 == m2 ? "#{y1}年#{m1}月" : "#{y1}年#{m1}月到#{y2}年#{m2}月"
+      end
+    when 2
+      # year, month, day
+      if v1.nil?
+        y = Time.at(v2).year
+        m = Time.at(v2).month
+        d = Time.at(v2).day
+        return "#{y}年#{m}月#{d}日以前"
+      elsif v2.nil?
+        y = Time.at(v1).year
+        m = Time.at(v1).month
+        d = Time.at(v1).day + 1
+        return "#{y}年#{m}月#{d}日以后"
+      else
+        y1 = Time.at(v1).year
+        m1 = Time.at(v1).month
+        d1 = Time.at(v1).day + 1
+        y2 = Time.at(v2).year
+        m2 = Time.at(v2).month
+        d2 = Time.at(v2).day
+        return y1 == y2 && m1 == m2 && d1 == d2 ? "#{y1}年#{m1}月#{d1}日" : "#{y1}年#{m1}月#{d1}日到#{y2}年#{m2}月#{d2}日"
+      end
+    when 3
+      # year, month, day, hour, minute
+      if v1.nil?
+        y = Time.at(v2).year
+        m = Time.at(v2).month
+        d = Time.at(v2).day
+        h = Time.at(v2).hour
+        min = Time.at(v2).min
+        return "#{y}年#{m}月#{d}日#{h}时#{min}分以前"
+      elsif v2.nil?
+        y = Time.at(v1).year
+        m = Time.at(v1).month
+        d = Time.at(v1).day
+        h = Time.at(v1).hour
+        min = Time.at(v1).min + 1
+        return "#{y}年#{m}月#{d}日#{h}时#{min}分以后"
+      else
+        y1 = Time.at(v1).year
+        m1 = Time.at(v1).month
+        d1 = Time.at(v1).day
+        h1 = Time.at(v1).hour
+        min1 = Time.at(v1).min + 1
+        y2 = Time.at(v2).year
+        m2 = Time.at(v2).month
+        d2 = Time.at(v2).day
+        h2 = Time.at(v2).hour
+        min2 = Time.at(v2).min
+        return y1 == y2 && m1 == m2 && d1 == d2 ? "#{y1}年#{m1}月#{d1}日#{h1}时#{min1}分" : "#{y1}年#{m1}月#{d1}日#{h1}时#{min1}分到#{y2}年#{m2}月#{d2}日#{h2}时#{min2}分"
+      end
+    when 4
+      # month, day
+      if v1.nil?
+        m = Time.at(v2).month
+        d = Time.at(v2).day
+        return "#{m}月#{d}日以前"
+      elsif v2.nil?
+        m = Time.at(v1).month
+        d = Time.at(v1).day + 1
+        return "#{m}月#{d}日以后"
+      else
+        m1 = Time.at(v1).month
+        d1 = Time.at(v1).day + 1
+        m2 = Time.at(v2).month
+        d2 = Time.at(v2).day
+        return m1 == m2 && d1 == d2 ? "#{m1}月#{d1}日" : "#{m1}月#{d1}日到#{m2}月#{d2}日"
+      end
+    when 5
+      # hour, minute
+      if v1.nil?
+        h = Time.at(v2).hour
+        min = Time.at(v2).min
+        return "#{h}时#{min}分以前"
+      elsif v2.nil?
+        h = Time.at(v1).hour
+        min = Time.at(v1).min + 1
+        return "#{h}时#{min}分以后"
+      else
+        h1 = Time.at(v1).hour
+        min1 = Time.at(v1).min + 1
+        h2 = Time.at(v2).hour
+        min2 = Time.at(v2).min
+        return h1 == h2 && min1 == min2 ? "#{h1}时#{min1}分" : "#{h1}时#{min1}分到#{h2}时#{min2}分"
+      end
+    when 6
+      # hour, minute, second
+      if v1.nil?
+        h = Time.at(v2).hour
+        min = Time.at(v2).min
+        sec = Time.at(v2).second
+        return "#{h}时#{min}分#{sec}秒以前"
+      elsif v2.nil?
+        h = Time.at(v1).hour
+        min = Time.at(v1).min
+        sec = Time.at(v1).second + 1
+        return "#{h}时#{min}分#{sec}秒以后"
+      else
+        h1 = Time.at(v1).hour
+        min1 = Time.at(v1).min
+        sec1 = Time.at(v1).second + 1
+        h2 = Time.at(v2).hour
+        min2 = Time.at(v2).min
+        sec2 = Time.at(v2).second
+        return h1 == h2 && min1 == min2 && sec1 == sec2 ? "#{h1}时#{min1}分#{sec1}秒" : "#{h1}时#{min1}分#{sec1}秒到#{h2}时#{min2}分#{sec2}秒"
+      end
+    end
   end
 
   def generate_report(report_mockup, report_type, report_style, answers_transform)
@@ -928,146 +1068,6 @@ class ReportResult < Result
     item_text_ary = selected_items.map { |item| item["content"]["text"] }
     item_text = item_text_ary.join('或')
     return item_text
-  end
-
-  def self.convert_time_interval_to_text(format, v1, v2)
-    case format.to_i
-    when 0
-      # year
-      if v1.nil?
-        y = Time.at(v2).year
-        return "#{y}年以前"
-      elsif v2.nil?
-        y = Time.at(v1).year + 1
-        return "#{y}年以后"
-      else
-        y1 = Time.at(v1).year + 1
-        y2 = Time.at(v2).year
-        return y1 == y2 ? "#{y1}年" : "#{y1}年到#{y2}年"
-      end
-    when 1
-      # year, month
-      if v1.nil?
-        y = Time.at(v2).year
-        m = Time.at(v2).month
-        return "#{y}年#{m}月以前"
-      elsif v2.nil?
-        y = Time.at(v1).year
-        m = Time.at(v1).month + 1
-        return "#{y}年#{m}月以后"
-      else
-        y1 = Time.at(v1).year
-        m1 = Time.at(v1).month + 1
-        y2 = Time.at(v2).year
-        m2 = Time.at(v2).month
-        return y1 == y2 && m1 == m2 ? "#{y1}年#{m1}月" : "#{y1}年#{m1}月到#{y2}年#{m2}月"
-      end
-    when 2
-      # year, month, day
-      if v1.nil?
-        y = Time.at(v2).year
-        m = Time.at(v2).month
-        d = Time.at(v2).day
-        return "#{y}年#{m}月#{d}日以前"
-      elsif v2.nil?
-        y = Time.at(v1).year
-        m = Time.at(v1).month
-        d = Time.at(v1).day + 1
-        return "#{y}年#{m}月#{d}日以后"
-      else
-        y1 = Time.at(v1).year
-        m1 = Time.at(v1).month
-        d1 = Time.at(v1).day + 1
-        y2 = Time.at(v2).year
-        m2 = Time.at(v2).month
-        d2 = Time.at(v2).day
-        return y1 == y2 && m1 == m2 && d1 == d2 ? "#{y1}年#{m1}月#{d1}日" : "#{y1}年#{m1}月#{d1}日到#{y2}年#{m2}月#{d2}日"
-      end
-    when 3
-      # year, month, day, hour, minute
-      if v1.nil?
-        y = Time.at(v2).year
-        m = Time.at(v2).month
-        d = Time.at(v2).day
-        h = Time.at(v2).hour
-        min = Time.at(v2).min
-        return "#{y}年#{m}月#{d}日#{h}时#{min}分以前"
-      elsif v2.nil?
-        y = Time.at(v1).year
-        m = Time.at(v1).month
-        d = Time.at(v1).day
-        h = Time.at(v1).hour
-        min = Time.at(v1).min + 1
-        return "#{y}年#{m}月#{d}日#{h}时#{min}分以后"
-      else
-        y1 = Time.at(v1).year
-        m1 = Time.at(v1).month
-        d1 = Time.at(v1).day
-        h1 = Time.at(v1).hour
-        min1 = Time.at(v1).min + 1
-        y2 = Time.at(v2).year
-        m2 = Time.at(v2).month
-        d2 = Time.at(v2).day
-        h2 = Time.at(v2).hour
-        min2 = Time.at(v2).min
-        return y1 == y2 && m1 == m2 && d1 == d2 ? "#{y1}年#{m1}月#{d1}日#{h1}时#{min1}分" : "#{y1}年#{m1}月#{d1}日#{h1}时#{min1}分到#{y2}年#{m2}月#{d2}日#{h2}时#{min2}分"
-      end
-    when 4
-      # month, day
-      if v1.nil?
-        m = Time.at(v2).month
-        d = Time.at(v2).day
-        return "#{m}月#{d}日以前"
-      elsif v2.nil?
-        m = Time.at(v1).month
-        d = Time.at(v1).day + 1
-        return "#{m}月#{d}日以后"
-      else
-        m1 = Time.at(v1).month
-        d1 = Time.at(v1).day + 1
-        m2 = Time.at(v2).month
-        d2 = Time.at(v2).day
-        return m1 == m2 && d1 == d2 ? "#{m1}月#{d1}日" : "#{m1}月#{d1}日到#{m2}月#{d2}日"
-      end
-    when 5
-      # hour, minute
-      if v1.nil?
-        h = Time.at(v2).hour
-        min = Time.at(v2).min
-        return "#{h}时#{min}分以前"
-      elsif v2.nil?
-        h = Time.at(v1).hour
-        min = Time.at(v1).min + 1
-        return "#{h}时#{min}分以后"
-      else
-        h1 = Time.at(v1).hour
-        min1 = Time.at(v1).min + 1
-        h2 = Time.at(v2).hour
-        min2 = Time.at(v2).min
-        return h1 == h2 && min1 == min2 ? "#{h1}时#{min1}分" : "#{h1}时#{min1}分到#{h2}时#{min2}分"
-      end
-    when 6
-      # hour, minute, second
-      if v1.nil?
-        h = Time.at(v2).hour
-        min = Time.at(v2).min
-        sec = Time.at(v2).second
-        return "#{h}时#{min}分#{sec}秒以前"
-      elsif v2.nil?
-        h = Time.at(v1).hour
-        min = Time.at(v1).min
-        sec = Time.at(v1).second + 1
-        return "#{h}时#{min}分#{sec}秒以后"
-      else
-        h1 = Time.at(v1).hour
-        min1 = Time.at(v1).min
-        sec1 = Time.at(v1).second + 1
-        h2 = Time.at(v2).hour
-        min2 = Time.at(v2).min
-        sec2 = Time.at(v2).second
-        return h1 == h2 && min1 == min2 && sec1 == sec2 ? "#{h1}时#{min1}分#{sec1}秒" : "#{h1}时#{min1}分#{sec1}秒到#{h2}时#{min2}分#{sec2}秒"
-      end
-    end
   end
 
   def convert_time_mean_to_text(format, v)

@@ -1,4 +1,5 @@
 class EmailHistory
+  
   include Mongoid::Document
   include Mongoid::Timestamps
 
