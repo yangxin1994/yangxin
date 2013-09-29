@@ -50,6 +50,48 @@ class ThirdPartyUser
     return response_data
   end
 
+
+  # def self.get_access_token(website, code, redirect_uri)
+  #   case website
+  #   when "sina"
+  #       auth_url = "https://api.weibo.com/oauth2/access_token"
+  #   when "renren"
+  #       auth_url = "https://graph.renren.com/oauth/token"
+  #   when "qq"
+  #       auth_url = "https://graph.qq.com/oauth2.0/token"
+  #   when "google"
+  #       auth_url = "https://accounts.google.com/o/oauth2/token"
+  #   when "kaixin001"
+  #       auth_url = "https://api.kaixin001.com/oauth2/access_token"
+  #   when "douban"
+  #       auth_url = "https://www.douban.com/service/auth2/token"
+  #   when "baidu"
+  #       auth_url = "https://openapi.baidu.com/oauth/2.0/token"
+  #   when "sohu"
+  #       auth_url = "https://api.sohu.com/oauth2/token"
+  #   when "qihu360"
+  #       auth_url = "https://openapi.360.cn/oauth2/access_token"
+  #   end
+
+  #   access_token_params = {
+  #     "client_id" => OOPSDATA[Rails.env]["#{website}_api_key"],
+  #     "client_secret" => OOPSDATA[Rails.env]["#{website}_api_secret"],
+  #     "redirect_uri" => redirect_uri,
+  #     "grant_type" => "authorization_code",
+  #     "code" => code
+  #   }
+
+  #   if auth_url.present?
+  #     retval = Tool.send_post_request(auth_url, access_token_params, true)  
+  #     response_data = JSON.parse(retval.body)
+  #   else
+  #     response_data = {}
+  #   end
+  #   return response_data
+    
+  # end
+
+
   def self.find_or_create_user(website, response_data)
     case website
     when "sina"
