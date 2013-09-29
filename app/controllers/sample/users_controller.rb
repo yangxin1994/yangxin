@@ -20,50 +20,34 @@ class Sample::UsersController < Sample::SampleController
     render_json_auto @retval and return
   end
 
-  # *********************************
-  # ============Different Partial of User Center Page==============================
-
-  # ************ surveys *********************
-
-  # 我参加的调研
   # GET
   def join_surveys
     @answers = current_user.answers.not_preview.desc(:created_at)
-
-    @my_answer_surveys = auto_paginate @answers
-
-    data = @my_answer_surveys['data'].map do |item |
-      # select reward
-      item["select_reward"] = ""
-      # 
-      item["free_reward"] = item["rewards"].to_a.empty?
-      item["rewards"].to_a.each do |rew|
-        # if rejected, reward in empty
-        item["select_reward"] = "" and break if item["answer_status"].to_i == 2 
-
-        if rew["checked"]
+    @my_answer_surveys = auto_paginate @answers do |paginated_answers|
+      paginated_answers.map do |a|
+        a["select_reward"] = ""
+        a["free_reward"] = a["rewards"].to_a.empty?
+        a["rewards"].to_a.each do |rew|
+          # a["select_reward"] = "" and break if a["answer_status"].to_i == 2 
+          next if rew["checked"] != true
           case rew["type"].to_i
-          when 1
-            item["select_reward"] = "#{rew["amount"].to_i}元话费"
-          when 2
-            item["select_reward"] = "#{rew["amount"].to_i}元支付宝"
-          when 4 
-            item["select_reward"] = "#{rew["amount"].to_i}积分"
-          when 8
-            lottery_link = "/lotteries/#{item["answer_id"]}"
-            item["select_reward"] = %Q{<a class='lottery' target='_blank' href='#{lottery_link}'>抽奖机会</a>}
-          when 16
-            item["select_reward"] = "#{rew["amount"].to_i}集分宝"
+          when RewardScheme::MOBILE
+            a["select_reward"] = "#{rew["amount"].to_i}元话费"
+          when RewardScheme::ALIPAY
+            a["select_reward"] = "#{rew["amount"].to_i}元支付宝"
+          when RewardScheme::POINT 
+            a["select_reward"] = "#{rew["amount"].to_i}积分"
+          when RewardScheme::LOTTERY
+            lottery_link = "/lotteries/#{a["answer_id"]}"
+            a["select_reward"] = %Q{<a class='lottery' target='_blank' href='#{lottery_link}'>抽奖机会</a>}
+          when RewardScheme::JIFENBAO
+            a["select_reward"] = "#{rew["amount"].to_i}集分宝"
           end
-
           break
         end
+        a 
       end
-      item 
     end
-
-    @my_answer_surveys['data'] = data
-
     respond_to do |format|
       format.html { render 'join_surveys' } # adapt to alias index action
       format.json { render_json_auto @my_answer_surveys }
@@ -86,14 +70,10 @@ class Sample::UsersController < Sample::SampleController
 
   # GET
   def survey_detail
-
-    @survey = Survey.find_by_id(params[:id])
-    render_404 and return if @survey.nil?
+    @survey = Survey.find(params[:id])
     @answers = @survey.answers.not_preview.where(:introducer_id => current_user._id.to_s).desc(:status)
     params[:per_page] = 9
-
     @answers = auto_paginate @answers  
-
     respond_to do |format|
       format.html {
         render :layout => false if request.headers["OJAX"]

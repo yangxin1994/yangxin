@@ -131,7 +131,7 @@ class User
     if user.auth_key_expire_time > Time.now.to_i || user.auth_key_expire_time == -1
       return user
     else
-      refresh_auth_key
+      user.refresh_auth_key
       return nil
     end
   end
