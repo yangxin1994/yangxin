@@ -18,8 +18,8 @@ class QihuUser < ThirdPartyUser
     #*retval*:
     #* response_data: it includes access_token, expires_in and user info
     def self.get_access_token(code, redirect_uri)
-        access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["qihu_app_key"],
-            "client_secret" => OOPSDATA[RailsEnv.get_rails_env]["qihu_app_secret"],
+        access_token_params = {"client_id" => OOPSDATA[Rails.env]["qihu_app_key"],
+            "client_secret" => OOPSDATA[Rails.env]["qihu_app_secret"],
             "redirect_uri" => redirect_uri,
             "grant_type" => "authorization_code",
             "code" => code}

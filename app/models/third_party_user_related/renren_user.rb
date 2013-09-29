@@ -18,9 +18,9 @@ class RenrenUser < ThirdPartyUser
     #*retval*:
     #* response_data: it includes access_token, expires_in and user info
     def self.get_access_token(code, redirect_uri)
-        access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["renren_api_key"],
-            "client_secret" => OOPSDATA[RailsEnv.get_rails_env]["renren_secret_key"],
-            "redirect_uri" => redirect_uri || OOPSDATA[RailsEnv.get_rails_env]["renren_redirect_uri"],
+        access_token_params = {"client_id" => OOPSDATA[Rails.env]["renren_api_key"],
+            "client_secret" => OOPSDATA[Rails.env]["renren_secret_key"],
+            "redirect_uri" => redirect_uri || OOPSDATA[Rails.env]["renren_redirect_uri"],
             "grant_type" => "authorization_code",
             "code" => code}
         retval = Tool.send_post_request("https://graph.renren.com/oauth/token", access_token_params, true)
@@ -154,9 +154,9 @@ class RenrenUser < ThirdPartyUser
     #*retval*:
     #* response_data: it includes access_token, expires_in ,refresh_token and others
     def reget_access_token    
-        access_token_params = {"client_id" => OOPSDATA[RailsEnv.get_rails_env]["renren_api_key"],
-            "client_secret" => OOPSDATA[RailsEnv.get_rails_env]["renren_secret_key"],
-            "redirect_uri" => OOPSDATA[RailsEnv.get_rails_env]["renren_redirect_uri"],
+        access_token_params = {"client_id" => OOPSDATA[Rails.env]["renren_api_key"],
+            "client_secret" => OOPSDATA[Rails.env]["renren_secret_key"],
+            "redirect_uri" => OOPSDATA[Rails.env]["renren_redirect_uri"],
             "grant_type" => "refresh_token",
             "refresh_token" => self.refresh_token}
         retval = Tool.send_post_request("https://graph.renren.com/oauth/token", access_token_params, true)
@@ -180,7 +180,7 @@ class RenrenUser < ThirdPartyUser
     #* opts: hash for params.
     def update_params(opts)
         params = @params.merge(opts){|key, first, second| second}
-        params[:sig] = Digest::MD5.hexdigest(params.map{|k,v| "#{k}=#{v}"}.sort.join + OOPSDATA[RailsEnv.get_rails_env]["renren_secret_key"])
+        params[:sig] = Digest::MD5.hexdigest(params.map{|k,v| "#{k}=#{v}"}.sort.join + OOPSDATA[Rails.env]["renren_secret_key"])
         params
     end
 

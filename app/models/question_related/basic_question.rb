@@ -2,20 +2,6 @@
 # already tidied up
 require 'error_enum'
 require 'question_io'
-#Structure of different type question object can be found at 
-# ChoiceQuestion, 
-# MatrixChoiceQuestion, 
-# TextBlankQuestion, 
-# NumberBlankQuestion, 
-# EmailBlankQuestion, 
-# PhoneBlankQuestion, 
-# TimeBlankQuestion, 
-# AddressBlankQuestion, 
-# BlankQuestion, 
-# MatrixBlankQuestion, 
-# RankQuestion, 
-# SortQuestion, 
-# ConstSumQuestion
 class BasicQuestion
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -25,7 +11,6 @@ class BasicQuestion
   field :note, :type => String, default: OOPSDATA["question_default_settings"]["note"]
   field :issue, :type => Hash
   field :question_type, :type => Integer
-
   index({ _id: 1, _type: 1 }, { background: true } )
 
   ATTR_NAME_ARY = %w[content note]
@@ -52,35 +37,10 @@ class BasicQuestion
     end
   end
 
-  #*description*: find the question instance by its id, return nil if the question does not exist
-  #
-  #*params*:
-
-  #* id of the question required
-  #
-  #*retval*:
-  #* the question instance
-  # def self.find_by_id(question_id)
-  #   return self.where(:_id => question_id)[0]
-  # end
-
-  #*description*: judge whether this question is a quality control question
-  #
-  #*params*:
-  #
-  #*retval*:
-  #* boolean value
   def is_quality_control_question
     return ["objective", "matching"].include?(self.input_prefix)
   end
 
-  #*description*: serialize the current instance into a question object
-  #
-  #*params*:
-  #* the array of names
-  #
-  #*retval*:
-  #* the question object
   def serialize(attr_name_ary)
     question_obj = {}
     question_obj["question_id"] = self._id.to_s
@@ -91,13 +51,6 @@ class BasicQuestion
     return question_obj
   end
 
-  #*description*: update the current question instance without generating id for inputs, and without saving (such stuff should be done by methods in subclasses)
-  #
-  #*params*:
-  #* the array of names
-  #* the question object
-  #
-  #*retval*:
   def update_question(attr_name_ary, question_obj)
     attr_name_ary.each do |attr_name|
       next if attr_name == "question_type"
@@ -106,14 +59,6 @@ class BasicQuestion
     end
   end
 
-  #*description*: get a question object. Will first try to get it from cache. If failed, will get it from database and write cache
-  #
-  #*params*:
-  #* id of the question required
-  #
-  #*retval*:
-  #* the question object: if successfully obtained
-  #* ErrorEnum ::QUESTION_NOT_EXIST : if cannot find the question
   def self.get_question_object(question_id)
     question_object = Cache.read(question_id)
     if question_object == nil

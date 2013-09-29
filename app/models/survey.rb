@@ -277,7 +277,7 @@ class Survey
     options["broswer_extension"]["broswer_extension_promote_setting"]["filters"] = filters
     _promote_email_count = email_promote_info["promote_email_count"]
     _promote_sms_count = sms_promote_info["promote_sms_count"]
-   [:quillme, :email, :sms, :broswer_extension, :weibo].each do |promote_type|
+    [:quillme, :email, :sms, :broswer_extension, :weibo].each do |promote_type|
       _params = options[promote_type]
       self.update_attributes(
       "#{promote_type}_promotable".to_sym => _params[:promotable],
@@ -285,7 +285,7 @@ class Survey
       )
       update_quillme_promote_reward_type if options[promote_type] == :quillme
     end
-   email_promote_info["promote_email_count"] = _promote_email_count
+    email_promote_info["promote_email_count"] = _promote_email_count
     sms_promote_info["promote_sms_count"] = _promote_sms_count
     save
   end

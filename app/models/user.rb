@@ -230,7 +230,7 @@ class User
     time  = active_info['time']   
     user  = User.where(:email => email).first
     return ErrorEnum::USER_NOT_EXIST if !user.present?
-    return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - time.to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i        
+    return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - time.to_i > OOPSDATA[Rails.env]["activate_expiration_time"].to_i        
     user.update_attributes(:email_subscribe => true )
     return true
   end
@@ -399,7 +399,7 @@ class User
     if activate_type == "email"
       # email activate
       return ErrorEnum::USER_NOT_REGISTERED if user.status == VISITOR
-      return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i    # expired
+      return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - activate_info["time"].to_i > OOPSDATA[Rails.env]["activate_expiration_time"].to_i    # expired
       user.email_activation = true
       user.activate_time = Time.now.to_i
       user.email_subscribe = true
@@ -460,7 +460,7 @@ class User
     self.last_login_ip = client_ip
     self.last_login_client_type = client_type
     self.login_count = 0 if self.last_login_time.blank? || Time.at(self.last_login_time).day != Time.now.day
-    return ErrorEnum::LOGIN_TOO_FREQUENT if self.login_count > OOPSDATA[RailsEnv.get_rails_env]["login_count_threshold"]
+    return ErrorEnum::LOGIN_TOO_FREQUENT if self.login_count > OOPSDATA[Rails.env]["login_count_threshold"]
     return ErrorEnum::USER_LOCKED if self.lock
     self.login_count = self.login_count + 1
     self.last_login_time = Time.now.to_i
