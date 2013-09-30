@@ -1251,4 +1251,28 @@ class Answer
     question_number = self.survey.all_questions_id(false).length + self.random_quality_control_answer_content.length
     self.index_of(questions) / question_number.to_f
   end
+
+  def append_reward_info
+    self["select_reward"] = ""
+    self["free_reward"] = self["rewards"].to_a.empty?
+    self["rewards"].to_a.each do |rew|
+      # a["select_reward"] = "" and break if a["answer_status"].to_i == 2 
+      next if rew["checked"] != true
+      case rew["type"].to_i
+      when RewardScheme::MOBILE
+        self["select_reward"] = "#{rew["amount"].to_i}元话费"
+      when RewardScheme::ALIPAY
+        self["select_reward"] = "#{rew["amount"].to_i}元支付宝"
+      when RewardScheme::POINT 
+        self["select_reward"] = "#{rew["amount"].to_i}积分"
+      when RewardScheme::LOTTERY
+        lottery_link = "/lotteries/#{a["answer_id"]}"
+        self["select_reward"] = %Q{<a class='lottery' target='_blank' href='#{lottery_link}'>抽奖机会</a>}
+      when RewardScheme::JIFENBAO
+        self["select_reward"] = "#{rew["amount"].to_i}集分宝"
+      end
+      break
+    end
+    self
+  end
 end

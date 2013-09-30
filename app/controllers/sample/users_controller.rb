@@ -24,29 +24,7 @@ class Sample::UsersController < Sample::SampleController
   def join_surveys
     @answers = current_user.answers.not_preview.desc(:created_at)
     @my_answer_surveys = auto_paginate @answers do |paginated_answers|
-      paginated_answers.map do |a|
-        a["select_reward"] = ""
-        a["free_reward"] = a["rewards"].to_a.empty?
-        a["rewards"].to_a.each do |rew|
-          # a["select_reward"] = "" and break if a["answer_status"].to_i == 2 
-          next if rew["checked"] != true
-          case rew["type"].to_i
-          when RewardScheme::MOBILE
-            a["select_reward"] = "#{rew["amount"].to_i}元话费"
-          when RewardScheme::ALIPAY
-            a["select_reward"] = "#{rew["amount"].to_i}元支付宝"
-          when RewardScheme::POINT 
-            a["select_reward"] = "#{rew["amount"].to_i}积分"
-          when RewardScheme::LOTTERY
-            lottery_link = "/lotteries/#{a["answer_id"]}"
-            a["select_reward"] = %Q{<a class='lottery' target='_blank' href='#{lottery_link}'>抽奖机会</a>}
-          when RewardScheme::JIFENBAO
-            a["select_reward"] = "#{rew["amount"].to_i}集分宝"
-          end
-          break
-        end
-        a 
-      end
+      paginated_answers.map { |a| a.append_reward_info }
     end
     respond_to do |format|
       format.html { render 'join_surveys' } # adapt to alias index action
@@ -59,9 +37,7 @@ class Sample::UsersController < Sample::SampleController
   #我推广的问卷
   # GET
   def spread_surveys
-
     @my_spread_surveys = auto_paginate current_user.survey_spreads.desc(:survey_creation_time)
-
     respond_to do |format|
       format.html 
       format.json { render_json_auto @my_spread_surveys }
@@ -84,19 +60,13 @@ class Sample::UsersController < Sample::SampleController
 
   # GET
   def spread_counter
-    @survey = Survey.find_by_id(params[:id])
-    render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
+    @survey = Survey.find(params[:id])
     @answers = @survey.answers.not_preview.where(:introducer_id => current_user._id.to_s)
-    @total_answer_number = @answers.length
-    @finished_answer_number = @answers.finished.length
-    @editting_answer_number = @answers.where(:status => Answer::EDIT).length
-    @spreaded_answer_number = {"total_answer_number" => @total_answer_number,
-      "finished_answer_number" => @finished_answer_number,
-      "editting_answer_number" => @editting_answer_number}
-
-    respond_to do |format|
-      format.json { render_json_auto @spreaded_answer_number }
-    end
+    @spreaded_answer_number = {
+      "total_answer_number" => @answers.length,
+      "finished_answer_number" => @answers.finished.length,
+      "editting_answer_number" => @answers.where(:status => Answer::EDIT).length}
+    render_json_auto @spreaded_answer_number
   end
 
   # *************** points ****************
@@ -106,16 +76,12 @@ class Sample::UsersController < Sample::SampleController
   # params[:scope] = :all | :in | :out
   def points
     if params[:scope] == 'in'
-      @logs = PointLog.where(:user_id => current_user.id, :amount.gt => 0)
+      @point_logs = PointLog.where(:user_id => current_user.id, :amount.gt => 0).desc(:created_at)
     elsif params[:scope] == 'out' 
-      @logs = PointLog.where(:user_id => current_user.id, :amount.lt => 0)
+      @point_logs = PointLog.where(:user_id => current_user.id, :amount.lt => 0).desc(:created_at)
     else
-      @logs = PointLog.where(:user_id => current_user.id)
+      @point_logs = PointLog.where(:user_id => current_user.id).desc(:created_at)
     end
-
-    @point_logs = auto_paginate @logs.desc(:created_at) 
-
-
     respond_to do |format|
       format.html 
       format.json { render_json_auto @point_logs and return }
@@ -128,11 +94,9 @@ class Sample::UsersController < Sample::SampleController
   # ** scope: answer/lottery/point
   # 
   def orders
-    scope = [1,2,4].include?(params[:scope].to_i) ? params[:scope].to_i : 1
-    @orders = current_user.orders.where(:source => scope).desc(:created_at)
-
+    # scope = [1,2,4].include?(params[:scope].to_i) ? params[:scope].to_i : 1
+    @orders = current_user.orders.where(:source => params[:scope].to_i).desc(:created_at)
     @orders = auto_paginate @orders   
-
     respond_to do |format|
       format.html 
       format.json { render_json_auto @orders and return }
@@ -142,11 +106,7 @@ class Sample::UsersController < Sample::SampleController
 
   #订单详情查询
   def order_detail
-
-    @order = Order.find_by_id(params[:id])
-    render_404 and return if @order.nil?
-    @order = @order.info_for_sample_detail
-
+    @order = Order.find(params[:id]).info_for_sample_detail
     respond_to do |format|
       format.html {
         render :layout => false if request.headers["OJAX"]
