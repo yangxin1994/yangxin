@@ -297,14 +297,6 @@ class Order
     return self
   end
 
-  def info_for_sample_detail
-    order_obj = JSON.parse(self.to_json)
-    order_obj["created_at"] = self.created_at.to_i
-    order_obj["survey_title"] = self.survey.title if !self.survey.nil?
-    order_obj["survey_id"] = self.survey._id.to_s if !self.survey.nil?
-    return order_obj
-  end
-
   def update_status(handle = true)
     self.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
     self.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i} ) if self.status == REJECT
