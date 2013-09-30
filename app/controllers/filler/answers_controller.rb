@@ -109,6 +109,9 @@ class Filler::AnswersController < Filler::FillerController
 		render_json_e ErrorEnum::ANSWER_NOT_EXIST and return if @answer.nil?
 		if @answer.is_preview
 			# this is a preview answer, and the owner of the answer wants to clear the answer
+			# delete answer id in cookies
+			cookies.delete(cookie_key(@answer.survey._id.to_s, true), :domain => :all)
+			# delete answer in db
 			@answer.survey.answers.delete(@answer)
 			retval = @answer.destroy
 			render_json_auto(retval) and return 
