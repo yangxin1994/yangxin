@@ -4,6 +4,13 @@ OopsData::Application.routes.draw do
   # match '*path' => 'welcome#index'
   # get '/:unique_key' => 'utility/short_urls#show', :constraints => { :unique_key => /~.+/ }
   match '/:unique_key' => 'mongoid_shortener/shortened_urls#translate', :via => :get, :constraints => { :unique_key => /~.+/ }
+  # scope :module => :mongoid_shortener do
+  #   resource :shortened_urls do
+  #     collection do
+  #       get :translate
+  #     end
+  #   end
+  # end
 
   resources :jobs, :only => [:show] do
     member do
@@ -15,38 +22,38 @@ OopsData::Application.routes.draw do
   scope :module => "quill" do
     # home
     resource :index, :only => [:show]
+
     resource :doc, :only => [] do
       member do
         get :design, :share, :result, :export
       end
     end
+
     resource :customer, :only => [:show]
+
     resource :aboutus, :only => [:show]
+
     # survey
     match "questionaires/new" => "questionaires#new", :as => :new_questionaire, :via => :get
     match "questionaires/:questionaire_id" => "questionaires#show", :as => :questionaire, :via => :get  # ugly but make ensure_survey in quill_controller work
     # match "questionaires/:questionaire_id" => "questionaires#destroy", :as => :questionaire, :via => :delete
-    resources :questionaires, :only => [:index, :new, :show, :destroy] do
+    resources :questionaires , :except => [:show] do
       member do
-        put :recover
         get :stars
-        get :remove
-        put :update_star
         post :clone
-        put :publish
-        put :deadline
-        put :close
+        put :recover, :remove, :update_star, :publish, :deadline, :close
       end
+
       resources :pages, :only => [:create, :show] do
         member do
-          put :split
-          put :combine
+          put :split, :combine
         end
       end
+
       resources :questions, :only => [:create, :show, :update, :destroy] do
         member do
-          put :move
           get :analyse
+          put :move
         end
       end
 
@@ -57,11 +64,15 @@ OopsData::Application.routes.draw do
           put :update_more
         end
       end
+
       resource :quality, :only => [:show, :update]
+
       resource :customization, :only => [:show, :update]
+
       resources :logics, :only => [:index, :show, :destroy, :update, :create]
 
       resource :share, :only => [:show]
+
       resources :quotas, :only => [:destroy, :update, :create] do
         collection do
           post :refresh
@@ -69,11 +80,13 @@ OopsData::Application.routes.draw do
       end
 
       resources :filters, :only => [:index, :show, :destroy, :update, :create]
+
       resources :report_mockups, :only => [:index, :show, :create, :update, :destroy] do
         member do
           get :report
         end
       end
+
       resource :result, :only => [:show] do
         member do
           get :spss, :excel, :report, :csv_header
@@ -82,7 +95,9 @@ OopsData::Application.routes.draw do
       end
 
       resource :preview, :only => [:show]
+
     end #end of resources questionaire
+
     resources :functions, :only => [] do
       collection do
         get :design
@@ -97,20 +112,20 @@ OopsData::Application.routes.draw do
         get  :sign_in, :as => :sign_in
         get  :after_sign_in, :as => :after_sign_in
         get  :sign_up, :as => :sign_up
-        post :login,   :as => :login 
         get  :sign_out,:as => :sign_out
-        post :regist,:as => :regist
         get  :check_user_exist,:as => :check_user_exist
         get  :regist_succ,:as => :regist_succ
         get  :email_activate,:as => :email_activate
-        post :mobile_activate,:as => :mobile_activate
         get  :re_mail,:as => :re_mail
-        post  :get_basic_info_by_auth_key, :as => :get_basic_info_by_auth_key
         get :forget_password, :as => :forget_password
         get :send_forget_pass_code,:as => :send_forget_pass_code
         get :forget_pass_mobile_activate, :as => :forget_pass_mobile_activate
         get :generate_new_password,:as => :generate_new_password
-        get :get_account,:as => :get_account,:as => :get_account
+        get :get_account,:as => :get_account,:as => :get_account        
+        post :login,   :as => :login 
+        post :regist,:as => :regist
+        post :mobile_activate,:as => :mobile_activate
+        post  :get_basic_info_by_auth_key, :as => :get_basic_info_by_auth_key
       end
     end
 
@@ -119,13 +134,14 @@ OopsData::Application.routes.draw do
     resources :surveys, :only => [:index] do 
       collection do
         get  :get_special_status_surveys
-        post :get_reward_type_count
-        post :generate_rss_activate_code
         get  :email_rss_activate
         get  :mobile_rss_activate
         get  :re_rss_mail
         get  :cancel_subscribe
+        post :get_reward_type_count
+        post :generate_rss_activate_code
       end
+
       member do
         get :result
       end
@@ -160,23 +176,23 @@ OopsData::Application.routes.draw do
         get 'orders'
         # setting
         get 'setting' => 'users#basic_info'
-        put 'setting/update_basic_info' => "users#update_basic_info"
         get 'setting/avatar' => 'users#avatar'
-        post 'setting/upload_avatar' => 'users#update_avatar'
         get 'setting/bindings' => 'users#bindings'
+        get 'setting/password' => 'users#password'
+        get 'setting/address' => 'users#address'
+        get 'setting/change_email_verify_key' => 'users#change_email_verify_key'
+        get 'notifications'
+        post 'setting/upload_avatar' => 'users#update_avatar'
+        put 'setting/update_basic_info' => "users#update_basic_info"
         put 'setting/unbind/:website' => 'users#unbind'
         put 'setting/share' => 'users#bind_share'
         put 'setting/subscribe' => 'users#bind_subscribe'
         put 'setting/change_mobile' => 'users#change_mobile' 
         put 'setting/check_mobile_verify_code' => 'users#check_mobile_verify_code'
         put 'setting/change_email' => 'users#change_email'
-        get 'setting/change_email_verify_key' => 'users#change_email_verify_key'
-        get 'setting/address' => 'users#address'
         put 'setting/address' => 'users#update_logistic_address'
-        get 'setting/password' => 'users#password'
         put 'setting/password' => 'users#update_password'
         # notifications
-        get 'notifications'
         delete 'notifications' => 'users#remove_notifications'
       end 
     end
@@ -186,12 +202,15 @@ OopsData::Application.routes.draw do
         get :get_special_type_data
       end
     end
+
     resources :prizes, :only => [:show] do
       collection do
         post :find_by_ids 
       end            
     end
+
     resources :users,:only => [:index,:show]
+
     resource :help, :only =>[] do
       member do
         get :survey, :lottery, :gift, :reward, :aboutus
@@ -210,16 +229,20 @@ OopsData::Application.routes.draw do
         get :towns
       end
     end
+
     resources :materials do
       collection do
         get :video_upload_path
         post :create_image
       end
+
       member do
         get :preview
       end
     end
+
     resources :short_urls, :only => [:show]
+
     resources :ofcards do
       collection do
         get :confirm
@@ -249,13 +272,19 @@ OopsData::Application.routes.draw do
 
   # admin
   namespace :admin do
+
     get "" => "surveys#index"
     get "/:id/get_email" => "admin#get_email"
+    get "sample_attributes/bind_question/:id" => "sample_attributes#bind_question"
+    put "sample_attributes/bind_question/:id" => "sample_attributes#bind_question"
+    delete "sample_attributes/bind_question/:id" => "sample_attributes#bind_question", as: :sample_attribute_bind
+
     resources :reviews do
       member do
         put 'publish', 'close', 'pause', 'reject'
       end
     end
+
     resources :publishes do
       member do
         put 'allocate', 'add_reward', 'set_community', 'set_spread', 'cancel_community', 'set_answer_need_review', 'set_promotable'
@@ -263,7 +292,9 @@ OopsData::Application.routes.draw do
       resources :interviewer_tasks do
       end
     end
+
     resources :costs, :only => [:index, :show]
+
     resources :review_answers do
       member do
         get '/answers/:answer_id' => "review_answers#show_answer"
@@ -274,7 +305,7 @@ OopsData::Application.routes.draw do
     resources :template_questions do
       collection do
         get 'clear_cart'
-        post  'add_to_cart', 'del_cart'
+        post 'add_to_cart', 'del_cart'
       end
       member do
         get 'get_text'
@@ -285,35 +316,39 @@ OopsData::Application.routes.draw do
       collection do
         get 'objective', 'matching'
       end
+
       member do
         put 'update_answer'
       end
     end
+
     resources :volunteer_surveys do
       collection do
         post "add_template_question"
         delete 'del_question'
       end
     end
+
     resources :gifts do
       member do
         put 'stockup', 'outstock'
       end
     end
+
     resources :prizes
+
     resources :surveys, :as => :s do
       member do
         get :reward_schemes, :promote, :more_info, :bind_question
-        put :update_promote, :set_info, :bind_question, :star
         post :update_promote
+        put :update_promote, :set_info, :bind_question, :star
         delete :destroy_attributes, :bind_question
       end
+
       collection do
 
       end
     end
-
-
 
     resources :reward_schemes
 
@@ -323,6 +358,7 @@ OopsData::Application.routes.draw do
         delete :destroy_attributes
         put :set_sample_role, :operate_point, :block
       end
+
       collection do
         post :add_attributes, :send_message
         get :attributes, :new_attributes, :status, :get_sample_count, :get_active_sample_count
@@ -340,10 +376,12 @@ OopsData::Application.routes.draw do
         post :operate_point
       end
     end
+
     resources :orders, :only => [:index, :show, :update] do
       collection do
         get :to_excel
       end
+
       member do
         put :handle, :bulk_handle, :finish, :bulk_finish, :update_express_info, :update_remark
       end
@@ -353,55 +391,64 @@ OopsData::Application.routes.draw do
         get :auto_draw, :reward_records, :assign_prize, :lottery_codes , :ctrl
         put :assign_prize, :add_ctrl_rule, :status , :assign_prize_to, :revive
       end
+
       collection do
         get :deleted
       end
     end
+
     resources :materials
+
     resources :users do
       collection do
-        get 'blacks', 'whites',
-          'deleted', 'normal', 'search'
+        get 'blacks', 'whites', 'deleted', 'normal', 'search'
       end
+
       member do
         put 'recover', 'add_point', 'set_role', 'set_color', 'reset_password', 'set_lock'
         get 'get_email', 'orders', 'rewards', 'lottery_record', 'point_logs','introduced_users'
       end
     end
+
     resources :newsletters do
       member do
         post   :deliver
         post   :test
         delete :cancel
       end
+
       collection do
         post   :column
         post   :article
         post   :product_news
       end
     end
+
     resources :subscribers do
       member do
         put :unsubscribe, :subscribe
       end
     end
+
     resources :faqs do
     end
+
     resources :announcements do
     end
+
     resources :advertisements do
     end
+
     resources :feedbacks do
       member do
         post 'reply'
       end
     end
+
     resources :messages do
     end
+
     resources :sample_attributes, :only => [:index, :create, :update, :destroy]
-    get "sample_attributes/bind_question/:id" => "sample_attributes#bind_question"
-    put "sample_attributes/bind_question/:id" => "sample_attributes#bind_question"
-    delete "sample_attributes/bind_question/:id" => "sample_attributes#bind_question", as: :sample_attribute_bind
 
     resources :agents
     resources :agent_tasks do
@@ -440,9 +487,12 @@ OopsData::Application.routes.draw do
   scope :module => "filler" do
     match "s/:id" => "surveys#show", :as => :show_s, :via => :get
     resources :surveys, :only => [:show] 
+
     match "p/:id" => "previews#show", :as => :show_p, :via => :get
     resources :previews, :only => [:show]
+
     match "a/:id" => "answers#show", :as => :show_a, :via => :get
+    
     resources :answers, :only => [:show, :create, :update] do
       member do
         get :load_questions

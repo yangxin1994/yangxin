@@ -1,22 +1,4 @@
                                               GET    /:unique_key(.:format)                                                 mongoid_shortener/shortened_urls#translate {:unique_key=>/~.+/}
-                                       signup POST   /signup(.:format)                                                      account/signups#create
-                                              GET    /signup(.:format)                                                      account/signups#show
-                                done_activate GET    /activate/done(.:format)                                               account/activates#done
-                                     activate POST   /activate(.:format)                                                    account/activates#create
-                                 new_activate GET    /activate/new(.:format)                                                account/activates#new
-                                              GET    /activate(.:format)                                                    account/activates#show
-                                find_password GET    /password/find(.:format)                                               account/passwords#find
-                    send_reset_email_password POST   /password/send_reset_email(.:format)                                   account/passwords#send_reset_email
-                               reset_password GET    /password/reset(.:format)                                              account/passwords#reset
-                                     password PUT    /password(.:format)                                                    account/passwords#update
-                                       signin POST   /signin(.:format)                                                      account/signins#create
-                                              GET    /signin(.:format)                                                      account/signins#show
-                                      connect GET    /connects/:id(.:format)                                                account/connects#show
-                                      signout GET    /signout(.:format)                                                     account/signouts#show
-                      update_password_profile PUT    /profile/update_password(.:format)                                     account/profiles#update_password
-                                      profile GET    /profile(.:format)                                                     account/profiles#show
-                                              PUT    /profile(.:format)                                                     account/profiles#update
-                                     messages GET    /messages(.:format)                                                    account/messages#index
                                 data_list_job GET    /jobs/:id/data_list(.:format)                                          jobs#data_list
                                     stats_job GET    /jobs/:id/stats(.:format)                                              jobs#stats
                           analysis_result_job GET    /jobs/:id/analysis_result(.:format)                                    jobs#analysis_result
@@ -29,9 +11,6 @@
                                    export_doc GET    /doc/export(.:format)                                                  quill/docs#export
                                      customer GET    /customer(.:format)                                                    quill/customers#show
                                       aboutus GET    /aboutus(.:format)                                                     quill/aboutus#show
-                             new_questionaire GET    /questionaires/new(.:format)                                           quill/questionaires#new
-                                 questionaire GET    /questionaires/:questionaire_id(.:format)                              quill/questionaires#show
-                                 questionaire DELETE /questionaires/:questionaire_id(.:format)                              quill/questionaires#destroy
                          recover_questionaire PUT    /questionaires/:id/recover(.:format)                                   quill/questionaires#recover
                            stars_questionaire GET    /questionaires/:id/stars(.:format)                                     quill/questionaires#stars
                           remove_questionaire GET    /questionaires/:id/remove(.:format)                                    quill/questionaires#remove
@@ -89,34 +68,36 @@
                           questionaire_result GET    /questionaires/:questionaire_id/result(.:format)                       quill/results#show
                          questionaire_preview GET    /questionaires/:questionaire_id/preview(.:format)                      quill/previews#show
                                 questionaires GET    /questionaires(.:format)                                               quill/questionaires#index
-                                              GET    /questionaires/new(.:format)                                           quill/questionaires#new
+                                              POST   /questionaires(.:format)                                               quill/questionaires#create
+                             new_questionaire GET    /questionaires/new(.:format)                                           quill/questionaires#new
+                            edit_questionaire GET    /questionaires/:id/edit(.:format)                                      quill/questionaires#edit
+                                 questionaire GET    /questionaires/:id(.:format)                                           quill/questionaires#show
+                                              PUT    /questionaires/:id(.:format)                                           quill/questionaires#update
+                                              DELETE /questionaires/:id(.:format)                                           quill/questionaires#destroy
                              design_functions GET    /functions/design(.:format)                                            quill/functions#design
-                                      sign_up GET    /sign_up(.:format)                                                     sample/accounts#sign_up
-                                      sign_in GET    /sign_in(.:format)                                                     sample/accounts#sign_in
-                                     sign_out GET    /sign_out(.:format)                                                    sample/accounts#sign_out
                               sign_in_account GET    /account/sign_in(.:format)                                             sample/accounts#sign_in
                         after_sign_in_account GET    /account/after_sign_in(.:format)                                       sample/accounts#after_sign_in
                               sign_up_account GET    /account/sign_up(.:format)                                             sample/accounts#sign_up
                                 login_account POST   /account/login(.:format)                                               sample/accounts#login
                              sign_out_account GET    /account/sign_out(.:format)                                            sample/accounts#sign_out
-                        create_sample_account POST   /account/create_sample(.:format)                                       sample/accounts#create_sample
-                   check_email_mobile_account GET    /account/check_email_mobile(.:format)                                  sample/accounts#check_email_mobile
-                        active_notice_account GET    /account/active_notice(.:format)                                       sample/accounts#active_notice
+                               regist_account POST   /account/regist(.:format)                                              sample/accounts#regist
+                     check_user_exist_account GET    /account/check_user_exist(.:format)                                    sample/accounts#check_user_exist
+                          regist_succ_account GET    /account/regist_succ(.:format)                                         sample/accounts#regist_succ
                        email_activate_account GET    /account/email_activate(.:format)                                      sample/accounts#email_activate
                       mobile_activate_account POST   /account/mobile_activate(.:format)                                     sample/accounts#mobile_activate
                               re_mail_account GET    /account/re_mail(.:format)                                             sample/accounts#re_mail
            get_basic_info_by_auth_key_account POST   /account/get_basic_info_by_auth_key(.:format)                          sample/accounts#get_basic_info_by_auth_key
                       forget_password_account GET    /account/forget_password(.:format)                                     sample/accounts#forget_password
                 send_forget_pass_code_account GET    /account/send_forget_pass_code(.:format)                               sample/accounts#send_forget_pass_code
-            make_forget_pass_activate_account GET    /account/make_forget_pass_activate(.:format)                           sample/accounts#make_forget_pass_activate
+          forget_pass_mobile_activate_account GET    /account/forget_pass_mobile_activate(.:format)                         sample/accounts#forget_pass_mobile_activate
                 generate_new_password_account GET    /account/generate_new_password(.:format)                               sample/accounts#generate_new_password
                           get_account_account GET    /account/get_account(.:format)                                         sample/accounts#get_account
                                          home GET    /home(.:format)                                                        sample/homes#show
            get_special_status_surveys_surveys GET    /surveys/get_special_status_surveys(.:format)                          sample/surveys#get_special_status_surveys
                 get_reward_type_count_surveys POST   /surveys/get_reward_type_count(.:format)                               sample/surveys#get_reward_type_count
-                    make_rss_activate_surveys POST   /surveys/make_rss_activate(.:format)                                   sample/surveys#make_rss_activate
-                      active_rss_able_surveys GET    /surveys/active_rss_able(.:format)                                     sample/surveys#active_rss_able
-             make_rss_mobile_activate_surveys GET    /surveys/make_rss_mobile_activate(.:format)                            sample/surveys#make_rss_mobile_activate
+           generate_rss_activate_code_surveys POST   /surveys/generate_rss_activate_code(.:format)                          sample/surveys#generate_rss_activate_code
+                   email_rss_activate_surveys GET    /surveys/email_rss_activate(.:format)                                  sample/surveys#email_rss_activate
+                  mobile_rss_activate_surveys GET    /surveys/mobile_rss_activate(.:format)                                 sample/surveys#mobile_rss_activate
                           re_rss_mail_surveys GET    /surveys/re_rss_mail(.:format)                                         sample/surveys#re_rss_mail
                      cancel_subscribe_surveys GET    /surveys/cancel_subscribe(.:format)                                    sample/surveys#cancel_subscribe
                                 result_survey GET    /surveys/:id/result(.:format)                                          sample/surveys#result
@@ -137,15 +118,15 @@
                                       lottery GET    /lotteries/:id(.:format)                                               sample/lotteries#show
                                               PUT    /lotteries/:id(.:format)                                               sample/lotteries#update
                                               DELETE /lotteries/:id(.:format)                                               sample/lotteries#destroy
+                    destroy_notification_user DELETE /users/:id/destroy_notification(.:format)                              sample/users#destroy_notification
+                          spread_counter_user GET    /users/:id/spread_counter(.:format)                                    sample/users#spread_counter
+                           survey_detail_user GET    /users/:id/survey_detail(.:format)                                     sample/users#survey_detail
                         get_mobile_area_users GET    /users/get_mobile_area(.:format)                                       sample/users#get_mobile_area
                            join_surveys_users GET    /users/join_surveys(.:format)                                          sample/users#join_surveys
                          spread_surveys_users GET    /users/spread_surveys(.:format)                                        sample/users#spread_surveys
                                 surveys_users GET    /users/surveys(.:format)                                               sample/users#join_surveys
-                                              GET    /users/spread_counter/:id(.:format)                                    sample/users#spread_counter
-                                              GET    /users/survey_detail/:id(.:format)                                     sample/users#survey_detail
                                  points_users GET    /users/points(.:format)                                                sample/users#points
                                  orders_users GET    /users/orders(.:format)                                                sample/users#orders
-                                              GET    /users/order_detail/:id(.:format)                                      sample/users#order_detail
                                 setting_users GET    /users/setting(.:format)                                               sample/users#basic_info
               setting_update_basic_info_users PUT    /users/setting/update_basic_info(.:format)                             sample/users#update_basic_info
                          setting_avatar_users GET    /users/setting/avatar(.:format)                                        sample/users#avatar
@@ -163,7 +144,6 @@
                        setting_password_users GET    /users/setting/password(.:format)                                      sample/users#password
                                               PUT    /users/setting/password(.:format)                                      sample/users#update_password
                           notifications_users GET    /users/notifications(.:format)                                         sample/users#notifications
-                                              DELETE /users/notifications/:id(.:format)                                     sample/users#destroy_notification
                                               DELETE /users/notifications(.:format)                                         sample/users#remove_notifications
                                         users GET    /users(.:format)                                                       sample/users#index
                                               POST   /users(.:format)                                                       sample/users#create
@@ -584,3 +564,4 @@ add_template_question_admin_volunteer_surveys POST   /admin/volunteer_surveys/ad
                                   bind_sample GET    /bind_sample(.:format)                                                 filler/bind_samples#show
                                    admin_root        /                                                                      admin/publishes#index {:subdomain=>"admin"}
                                          root        /                                                                      sample/homes#show
+                                    odwidgets GET    /odwidgets(.:format)                                                   odwidgets#show
