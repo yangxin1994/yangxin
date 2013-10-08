@@ -18,93 +18,6 @@ OopsData::Application.routes.draw do
     end
   end
 
-  # surveys, pages and questions
-  scope :module => "quill" do
-    # home
-    resource :index, :only => [:show]
-
-    resource :doc, :only => [] do
-      member do
-        get :design, :share, :result, :export
-      end
-    end
-
-    resource :customer, :only => [:show]
-
-    resource :aboutus, :only => [:show]
-
-    # survey
-    match "questionaires/new" => "questionaires#new", :as => :new_questionaire, :via => :get
-    match "questionaires/:questionaire_id" => "questionaires#show", :as => :questionaire, :via => :get  # ugly but make ensure_survey in quill_controller work
-    # match "questionaires/:questionaire_id" => "questionaires#destroy", :as => :questionaire, :via => :delete
-    resources :questionaires , :except => [:show] do
-      member do
-        get :stars
-        post :clone
-        put :recover, :remove, :update_star, :publish, :deadline, :close
-      end
-
-      resources :pages, :only => [:create, :show] do
-        member do
-          put :split, :combine
-        end
-      end
-
-      resources :questions, :only => [:create, :show, :update, :destroy] do
-        member do
-          get :analyse
-          put :move
-        end
-      end
-
-      resource :authority, :only => [:show, :update]
-      resource :property, :only => [:show, :update] do
-        member do
-          get :more
-          put :update_more
-        end
-      end
-
-      resource :quality, :only => [:show, :update]
-
-      resource :customization, :only => [:show, :update]
-
-      resources :logics, :only => [:index, :show, :destroy, :update, :create]
-
-      resource :share, :only => [:show]
-
-      resources :quotas, :only => [:destroy, :update, :create] do
-        collection do
-          post :refresh
-        end
-      end
-
-      resources :filters, :only => [:index, :show, :destroy, :update, :create]
-
-      resources :report_mockups, :only => [:index, :show, :create, :update, :destroy] do
-        member do
-          get :report
-        end
-      end
-
-      resource :result, :only => [:show] do
-        member do
-          get :spss, :excel, :report, :csv_header
-          post :import_data
-        end
-      end
-
-      resource :preview, :only => [:show]
-
-    end #end of resources questionaire
-
-    resources :functions, :only => [] do
-      collection do
-        get :design
-      end
-    end
-  end
-
   # sample
   scope :module => "sample" do
     resource :account, :only => [] do
@@ -220,52 +133,89 @@ OopsData::Application.routes.draw do
     resources :public_notices, :only => [:index,:show]      
   end
 
-  # utility
-  namespace :utility do
-    resource :address, :only => [] do
+  # surveys, pages and questions
+  scope :module => "quill" do
+    # home
+    resource :index, :only => [:show]
+
+    resource :doc, :only => [] do
       member do
-        get :provinces
-        get :cities
-        get :towns
+        get :design, :share, :result, :export
       end
     end
 
-    resources :materials do
+    resource :customer, :only => [:show]
+
+    resource :aboutus, :only => [:show]
+
+    # survey
+    match "questionaires/new" => "questionaires#new", :as => :new_questionaire, :via => :get
+    match "questionaires/:questionaire_id" => "questionaires#show", :as => :questionaire, :via => :get  # ugly but make ensure_survey in quill_controller work
+    # match "questionaires/:questionaire_id" => "questionaires#destroy", :as => :questionaire, :via => :delete
+    resources :questionaires , :except => [:show] do
+      member do
+        get :stars
+        post :clone
+        put :recover, :remove, :update_star, :publish, :deadline, :close
+      end
+
+      resources :pages, :only => [:create, :show] do
+        member do
+          put :split, :combine
+        end
+      end
+
+      resources :questions, :only => [:create, :show, :update, :destroy] do
+        member do
+          get :analyse
+          put :move
+        end
+      end
+
+      resource :authority, :only => [:show, :update]
+      resource :property, :only => [:show, :update] do
+        member do
+          get :more
+          put :update_more
+        end
+      end
+
+      resource :quality, :only => [:show, :update]
+
+      resource :customization, :only => [:show, :update]
+
+      resources :logics, :only => [:index, :show, :destroy, :update, :create]
+
+      resource :share, :only => [:show]
+
+      resources :quotas, :only => [:destroy, :update, :create] do
+        collection do
+          post :refresh
+        end
+      end
+
+      resources :filters, :only => [:index, :show, :destroy, :update, :create]
+
+      resources :report_mockups, :only => [:index, :show, :create, :update, :destroy] do
+        member do
+          get :report
+        end
+      end
+
+      resource :result, :only => [:show] do
+        member do
+          get :spss, :excel, :report, :csv_header
+          post :import_data
+        end
+      end
+
+      resource :preview, :only => [:show]
+
+    end #end of resources questionaire
+
+    resources :functions, :only => [] do
       collection do
-        get :video_upload_path
-        post :create_image
-      end
-
-      member do
-        get :preview
-      end
-    end
-
-    resources :short_urls, :only => [:show]
-
-    resources :ofcards do
-      collection do
-        get :confirm
-        post :confirm
-      end
-    end
-  end
-
-  namespace :answer_auditor, :module => 'admin' do
-    get ''=> 'review_answers#index'
-    resources 'review_answers', :as => 'answer_auditor' do
-      member do
-        get '/answers/:answer_id' => "review_answers#show_answer"
-        put '/answers/:answer_id/review' => "review_answers#review"
-      end
-    end
-  end
-
-  namespace :survey_auditor, :module => 'admin' do
-    get ''=> 'reviews#index'
-    resources 'reviews', :as=>'survey_auditor' do
-      member do
-        put 'publish', 'close', 'pause', 'reject'
+        get :design
       end
     end
   end
@@ -386,6 +336,7 @@ OopsData::Application.routes.draw do
         put :handle, :bulk_handle, :finish, :bulk_finish, :update_express_info, :update_remark
       end
     end
+    
     resources :lotteries do
       member do
         get :auto_draw, :reward_records, :assign_prize, :lottery_codes , :ctrl
@@ -465,6 +416,56 @@ OopsData::Application.routes.draw do
     end
   end
 
+  # utility
+  namespace :utility do
+    resource :address, :only => [] do
+      member do
+        get :provinces
+        get :cities
+        get :towns
+      end
+    end
+
+    resources :materials do
+      collection do
+        get :video_upload_path
+        post :create_image
+      end
+
+      member do
+        get :preview
+      end
+    end
+
+    resources :short_urls, :only => [:show]
+
+    resources :ofcards do
+      collection do
+        get :confirm
+        post :confirm
+      end
+    end
+  end
+
+  namespace :answer_auditor, :module => 'admin' do
+    get ''=> 'review_answers#index'
+    resources 'review_answers', :as => 'answer_auditor' do
+      member do
+        get '/answers/:answer_id' => "review_answers#show_answer"
+        put '/answers/:answer_id/review' => "review_answers#review"
+      end
+    end
+  end
+
+  namespace :survey_auditor, :module => 'admin' do
+    get ''=> 'reviews#index'
+    resources 'reviews', :as=>'survey_auditor' do
+      member do
+        put 'publish', 'close', 'pause', 'reject'
+      end
+    end
+  end
+
   namespace :agent do
     scope :module => :sessions do
       resources :signin
@@ -492,7 +493,7 @@ OopsData::Application.routes.draw do
     resources :previews, :only => [:show]
 
     match "a/:id" => "answers#show", :as => :show_a, :via => :get
-    
+
     resources :answers, :only => [:show, :create, :update] do
       member do
         get :load_questions
