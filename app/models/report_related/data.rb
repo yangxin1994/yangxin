@@ -1,4 +1,4 @@
-class Report::Data
+class Data
 
   attr_accessor :report_type, :title, :header, :footer, :author_chn, :author_eng, :style
   attr_reader :component_list

@@ -1,6 +1,6 @@
 # encoding: utf-8
 require 'quill_common'
-class Report::DataAdapter
+class DataAdapter
 
     CHART_MATHCING = {
       QuestionTypeEnum::CHOICE_QUESTION => [
