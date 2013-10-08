@@ -1,7 +1,11 @@
-# already tidied up
 require 'error_enum'
 class QualityControlQuestion < BasicQuestion
+
   include Mongoid::Document
+
+  OBJECTIVE = 1
+  MATCHING = 2
+
   field :quality_control_type, :type => Integer
   field :is_required, :type => Boolean, default: true
   field :is_first, :type => Boolean, :default => false
@@ -11,9 +15,6 @@ class QualityControlQuestion < BasicQuestion
   scope :find_by_type, ->(_type) { _type.present? ? where(:quality_control_type => _type).desc(:created_at) : self.desc(:created_at) }
 
   index({ quality_control_type: 1, is_first: 1 }, { background: true } )
-
-  OBJECTIVE = 1
-  MATCHING = 2
 
   def self.create_quality_control_question(quality_control_type, question_type, question_number, operator)
     return ErrorEnum::UNAUTHORIZED if !operator.is_admin?
@@ -45,17 +46,6 @@ class QualityControlQuestion < BasicQuestion
     end
   end
 
-  def update_question(question_obj, operator)
-    return ErrorEnum::UNAUTHORIZED if !operator.is_admin?
-    self.content = question_obj['content']
-    self.note = question_obj['note']
-    issue = Issue.create_issue(self.question_type, question_obj['issue'])
-    return ErrorEnum::WRONG_DATA_TYPE if issue == ErrorEnum::WRONG_DATA_TYPE
-    self.issue = issue.serialize
-    self.save
-    return self
-  end
-
   def self.list_quality_control_question(quality_control_type)
     objective_questions = []
     matching_questions = []
@@ -74,6 +64,56 @@ class QualityControlQuestion < BasicQuestion
       end
     end
     return {"objective_questions" => objective_questions, "matching_questions" => matching_questions}
+  end
+
+
+  def self.check_quality_control_answer(quality_control_question_id, answer)
+    standard_answer = QualityControlQuestionAnswer.find_by_question_id(quality_control_question_id)
+    if standard_answer.quality_control_type == 1
+      # this is objective quality control question
+      question_answer = answer.random_quality_control_answer_content[quality_control_question_id]
+      return false if question_answer.nil?
+      volunteer_answer = question_answer["selection"]
+      case standard_answer.question_type
+      when QuestionTypeEnum::CHOICE_QUESTION
+        return Tool.check_choice_question_answer(quality_control_question_id,
+          question_answer["selection"], 
+          standard_answer.answer_content["items"],
+          standard_answer.answer_content["fuzzy"])
+      else
+        return true
+      end
+    else
+      # this is matching quality control question
+      # find all the volunteer answers of this group of quality control questions
+      matching_question_id_ary = MatchingQuestion.get_matching_question_ids(quality_control_question_id)
+      volunteer_answer = []
+
+      # get the selection of the user
+      answer.random_quality_control_answer_content.each do |k, v|
+        next if !matching_question_id_ary.include?(k)
+        next if v.nil?
+        # return false if v.nil?
+        volunteer_answer = volunteer_answer + v["selection"]
+      end
+
+      standard_matching_items = standard_answer.answer_content["matching_items"]
+      standard_matching_items.each do |standard_matching_item|
+        return true if (volunteer_answer - standard_matching_item).empty?
+      end
+      return false
+    end
+  end  
+
+  def update_question(question_obj, operator)
+    return ErrorEnum::UNAUTHORIZED if !operator.is_admin?
+    self.content = question_obj['content']
+    self.note = question_obj['note']
+    issue = Issue.create_issue(self.question_type, question_obj['issue'])
+    return ErrorEnum::WRONG_DATA_TYPE if issue == ErrorEnum::WRONG_DATA_TYPE
+    self.issue = issue.serialize
+    self.save
+    return self
   end
 
   def show_quality_control_question
@@ -122,42 +162,4 @@ class QualityControlQuestion < BasicQuestion
     return true
   end
 
-  def self.check_quality_control_answer(quality_control_question_id, answer)
-    standard_answer = QualityControlQuestionAnswer.find_by_question_id(quality_control_question_id)
-    if standard_answer.quality_control_type == 1
-      # this is objective quality control question
-      question_answer = answer.random_quality_control_answer_content[quality_control_question_id]
-      return false if question_answer.nil?
-      volunteer_answer = question_answer["selection"]
-      case standard_answer.question_type
-      when QuestionTypeEnum::CHOICE_QUESTION
-        return Tool.check_choice_question_answer(quality_control_question_id,
-          question_answer["selection"], 
-          standard_answer.answer_content["items"],
-          standard_answer.answer_content["fuzzy"])
-      else
-        return true
-      end
-    else
-      # this is matching quality control question
-      # find all the volunteer answers of this group of quality control questions
-      matching_question_id_ary = MatchingQuestion.get_matching_question_ids(quality_control_question_id)
-      volunteer_answer = []
-
-      # get the selection of the user
-      answer.random_quality_control_answer_content.each do |k, v|
-        next if !matching_question_id_ary.include?(k)
-        next if v.nil?
-        # return false if v.nil?
-        volunteer_answer = volunteer_answer + v["selection"]
-      end
-
-
-      standard_matching_items = standard_answer.answer_content["matching_items"]
-      standard_matching_items.each do |standard_matching_item|
-        return true if (volunteer_answer - standard_matching_item).empty?
-      end
-      return false
-    end
-  end
 end

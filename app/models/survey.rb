@@ -4,6 +4,7 @@ require 'quill_common'
 require 'csv'
 Dir[File.dirname(__FILE__) + '/lib/survey_components/*.rb'].each {|file| require file }
 class Survey
+  
   include Mongoid::Document
   include Mongoid::Timestamps
   include SurveyComponents::SurveyPage

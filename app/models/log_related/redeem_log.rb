@@ -1,5 +1,6 @@
 # encoding: utf-8
 class RedeemLog < Log
+
   field :type, :type => Integer, :default => 4
   field :amount, :type => Integer
   field :order_id, :type => String
@@ -10,7 +11,6 @@ class RedeemLog < Log
   field :gift_name, :type => String
 
   def self.create_gift_exchange_logs(amount, point, gift_type, order_id, gift_id, user_id)
-
     gift = Gift.normal.find_by_id(gift_id)
     case gift.type
     when Gift::MOBILE_CHARGE
@@ -25,14 +25,16 @@ class RedeemLog < Log
       gift_name = gift.try(:title)
     end
 
-    self.create(:amount => amount,
-                :point => point,
-                :gift_type => gift_type,
-                :order_id => order_id,
-                :order_code => Order.find(order_id).code,
-                :gift_id => gift_id,
-                :gift_name => gift_name,
-                :user_id => user_id)
+    self.create(
+      :amount => amount,
+      :point => point,
+      :gift_type => gift_type,
+      :order_id => order_id,
+      :order_code => Order.find(order_id).code,
+      :gift_id => gift_id,
+      :gift_name => gift_name,
+      :user_id => user_id
+    )
   end
 
 end

@@ -77,6 +77,7 @@ OopsData::Application.routes.draw do
         delete 'destroy_notification'
         get 'spread_counter'
         get 'survey_detail'
+        get 'order_detail'
       end
       collection do
         get 'get_mobile_area'

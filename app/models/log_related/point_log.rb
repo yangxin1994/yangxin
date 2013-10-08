@@ -1,16 +1,5 @@
 # encoding: utf-8
 class PointLog < Log
-  field :type, :type => Integer, :default => 8
-  field :amount, :type => Integer #花费积分数
-  field :reason, :type => Integer #1（回答问卷），2（推广问卷），4（礼品兑换）， 8（管理员操作）,16(处罚操作), 32(邀请样本)，64(撤销订单), 128(原有系统导入), 256(清研通导入)
-  field :survey_title, :type => String
-  field :survey_id, :type => String
-  field :scheme_id, :type => String
-  field :gift_name, :type => String
-  field :gift_type, :type => Integer
-  field :gift_id, :type => String
-  field :gift_picture_url, :type => String
-  field :remark, :type => String
 
   # reason
   ANSWER = 1
@@ -23,7 +12,17 @@ class PointLog < Log
   IMPORT = 128
   NETRANKING_IMPORT = 256
 
-  #alias :data :info_for_sample
+  field :type, :type => Integer, :default => 8
+  field :amount, :type => Integer #花费积分数
+  field :reason, :type => Integer #1（回答问卷），2（推广问卷），4（礼品兑换）， 8（管理员操作）,16(处罚操作), 32(邀请样本)，64(撤销订单), 128(原有系统导入), 256(清研通导入)
+  field :survey_title, :type => String
+  field :survey_id, :type => String
+  field :scheme_id, :type => String
+  field :gift_name, :type => String
+  field :gift_type, :type => Integer
+  field :gift_id, :type => String
+  field :gift_picture_url, :type => String
+  field :remark, :type => String
 
   def self.create_admin_operate_point_log(amount, remark, sample_id)
     self.create(:amount => amount, :reason => ADMIN_OPERATE, :remark => remark, :user_id => sample_id)
@@ -52,12 +51,14 @@ class PointLog < Log
     when Gift::QQ_COIN
       gift_name = "#{amount/100}元Q币"
     end
-    self.create(:amount => -amount,
+    self.create(
+      :amount => -amount,
       :gift_id => gift_id,
       :gift_name => gift_name,
       :gift_type => gift.type,
       :reason => PointLog::REDEEM,
       :gift_picture_url => gift_picture_url,
-      :user_id => sample_id)
+      :user_id => sample_id
+    )
   end
 end

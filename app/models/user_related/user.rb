@@ -1,20 +1,27 @@
-#already tidied up
 require 'data_type'
 require 'encryption'
 require 'error_enum'
 require 'tool'
-#Corresponding to the User collection in database. Record the user information and activities related to the usage of OopsData system.
 class User
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt
-
-  include FindTool  # for mongoid find methods 
+  include FindTool
 
   EmailRexg  = '\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z'
   MobileRexg = '^(13[0-9]|15[012356789]|18[0236789]|14[57])[0-9]{8}$' 
 
   DEFAULT_IMG = '/assets/avatar/small_default.png'
+
+
+  VISITOR = 1
+  REGISTERED = 2
+
+  SAMPLE = 1
+  CLIENT = 2
+  ADMIN = 4
+  ANSWER_AUDITOR = 8
+  INTERVIEWER = 16  
 
   field :email, :type => String
   field :email_activation, :type => Boolean, default: false
@@ -64,16 +71,11 @@ class User
   field :auth_key_expire_time, :type => Integer
   field :level, :type => Integer, default: 0
   field :level_expire_time, :type => Integer, default: -1
-
-
   field :point, :type => Integer, :default => 0
 
-  attr_protected :role, :level, :user_role
 
   has_and_belongs_to_many :messages, class_name: "Message", inverse_of: :receiver
   has_many :sended_messages, :class_name => "Message", :inverse_of => :sender
-  #################################
-  # QuillMe
   has_many :orders, :class_name => "Order", :inverse_of => :sample
   # QuillAdmin
   has_many :operate_orders, :class_name => "Order", :foreign_key => "operator_id"
@@ -97,15 +99,6 @@ class User
 
   scope :sample, mod(:user_role => [2, 1])
 
-  VISITOR = 1
-  REGISTERED = 2
-
-  SAMPLE = 1
-  CLIENT = 2
-  ADMIN = 4
-  ANSWER_AUDITOR = 8
-  INTERVIEWER = 16
-
   index({ email: 1 }, { background: true } )
   index({ full_name: 1 }, { background: true } )
   index({ color: 1, status: 1, role: 1 }, { background: true } )
@@ -122,7 +115,6 @@ class User
 
   public
 
-
   def self.find_by_auth_key(auth_key)
     return nil if auth_key.blank?
     user = User.where(:auth_key => auth_key, :status.gt => -1)[0]
@@ -131,51 +123,13 @@ class User
     if user.auth_key_expire_time > Time.now.to_i || user.auth_key_expire_time == -1
       return user
     else
-      refresh_auth_key
+      user.refresh_auth_key
       return nil
     end
   end
 
   def refresh_auth_key
     self.update_attributes(:auth_key =>nil)
-  end
-
-
-
-  def mini_avatar
-    md5 = Digest::MD5.hexdigest(self.id)
-    return "/uploads/avatar/mini_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/mini_#{md5}.png")
-    %w( mini small thumb).each do |ver|
-      return "/uploads/avatar/#{ver}_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/#{ver}_#{md5}.png")  
-    end
-    return "/assets/avatar/mini_default.png"  
-  end
-
-  def set_receiver_info(receiver_info)
-    if self.affiliated.present?
-      self.affiliated.update_attributes(:receiver_info => receiver_info)
-    else
-      self.create_affiliated(:receiver_info => receiver_info)
-    end   
-    return true
-  end
-
-
-
-  def is_activated
-    return self.mobile_activation || self.email_activation
-  end
-
-  def is_admin?
-    return (self.user_role.to_i & ADMIN) > 0
-  end
-
-  def is_answer_auditor?
-    return (self.user_role.to_i & ANSWER_AUDITOR) > 0
-  end
-
-  def is_interviewer?
-    return (self.user_role.to_i & INTERVIEWER) > 0
   end
 
   #生成订阅用户并发激活码或者邮件
@@ -233,12 +187,6 @@ class User
     return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i - time.to_i > OOPSDATA[Rails.env]["activate_expiration_time"].to_i        
     user.update_attributes(:email_subscribe => true )
     return true
-  end
-
-  def make_mobile_rss_activate(code)
-    return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i  > self.rss_verification_expiration_time
-    return ErrorEnum::ACTIVATE_CODE_ERROR if self.rss_verification_code != code
-    return self.update_attributes(:mobile_subscribe => true)
   end
 
   def self.cancel_subscribe(active_info)
@@ -300,88 +248,44 @@ class User
   #callback:发送激活邮件的回调函数
   ####################################
   def self.create_new_user(opt)  
-
     account = {}
-
     if opt[:email_mobile].match(/#{EmailRexg}/i)  ## match email
-
       account[:email] = opt[:email_mobile].downcase
-
     elsif opt[:email_mobile].match(/#{MobileRexg}/i)  ## match mobile
-
       active_code = Tool.generate_active_mobile_code
-
       account[:mobile] = opt[:email_mobile]
-
     end
 
     return ErrorEnum::ILLEGAL_EMAIL_OR_MOBILE if account.blank?
-
     existing_user = account[:email] ? self.find_by_email(account[:email]) : self.find_by_mobile(account[:mobile])
-
     return ErrorEnum::USER_REGISTERED if existing_user && existing_user.is_activated
-
     password = Encryption.encrypt_password(opt[:password]) if account[:email]
-
     account[:status] =  REGISTERED
-
     account[:sms_verification_code] = active_code if account[:mobile]
-
     account[:sms_verification_expiration_time]  = (Time.now + 2.hours).to_i
-
     updated_attr = account.merge(password: password,registered_at: Time.now.to_i)
-
     existing_user = User.create if existing_user.nil?
-
     existing_user.update_attributes(updated_attr)
 
     if active_code.present?
-
       SmsWorker.perform_async("welcome", existing_user.mobile, "", :active_code => active_code)
-
     else
-
       if account[:email]
-
-        EmailWorker.perform_async("welcome", 
-                                  existing_user.email,
-                                  opt[:callback][:protocol_hostname],
-                                  opt[:callback][:path]
-                                 )
-
+        EmailWorker.perform_async(
+          "welcome", 
+          existing_user.email,
+          opt[:callback][:protocol_hostname],
+          opt[:callback][:path]
+        )
       end
-
     end
 
     if !opt[:third_party_user_id].nil?
-
       third_party_user = ThirdPartyUser.find_by_id(opt[:third_party_user_id])
-
       third_party_user.bind(existing_user) if !third_party_user.nil?
-
     end
-
     return true
-    
   end
-
-
-  def completed_info
-    affiliated = self.affiliated
-    if affiliated
-      complete = 0
-      affiliated.attributes.each_key do |attr_name|
-        if SampleAttribute::BASIC_ATTR.include?(attr_name)
-          complete += 1
-        end 
-      end
-      basic_attr = SampleAttribute::BASIC_ATTR.length
-      return complete * 100 / basic_attr
-    else
-      return 0 
-    end
-  end
-
 
   #*description*: activate a user
   #
@@ -418,13 +322,6 @@ class User
     return user.login(client_ip, client_type, false)
   end
 
-  def change_email(client_ip)
-    return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i > change_email_expiration_time
-    self.email = self.email_to_be_changed
-    self.email_activation = true
-    return self.login(client_ip, nil, false)
-  end
-
   ####################################
   #opt is a hash that contains some key as follow
   #email_mobile : 登录用的email或mobile
@@ -452,98 +349,6 @@ class User
     return user.login(opt[:client_ip], opt[:client_type], opt[:keep_signed_in])
   end
 
-
-
-
-
-  def login(client_ip, client_type, keep_signed_in=false)
-    self.last_login_ip = client_ip
-    self.last_login_client_type = client_type
-    self.login_count = 0 if self.last_login_time.blank? || Time.at(self.last_login_time).day != Time.now.day
-    return ErrorEnum::LOGIN_TOO_FREQUENT if self.login_count > OOPSDATA[Rails.env]["login_count_threshold"]
-    return ErrorEnum::USER_LOCKED if self.lock
-    self.login_count = self.login_count + 1
-    self.last_login_time = Time.now.to_i
-    self.auth_key = Encryption.encrypt_auth_key("#{self._id}&#{Time.now.to_i.to_s}")
-    self.auth_key_expire_time =  keep_signed_in ? -1 : Time.now.to_i + OOPSDATA["login_keep_time"].to_i
-    return false if !self.save
-    return {"auth_key" => self.auth_key}
-  end
-
-
-  #*description*: reset password for an user, used when the user resets its password
-  #
-  #*params*:
-  #* old password of the user
-  #* new password of the user
-  #
-  #*retval*:
-  #* true: when successfully login
-  #* WRONG_PASSWORD
-  def reset_password(old_password, new_password)
-    return ErrorEnum::WRONG_PASSWORD if self.password != Encryption.encrypt_password(old_password)  # wrong password
-    self.password = Encryption.encrypt_password(new_password)
-    return self.save
-  end
-
-
-  ############### operations about message#################
-  #++
-  #ctreate
-  def create_message(title, content, receiver = [])
-    m = sended_messages.create(:title => title, :content => content, :type => 0) if receiver.size == 0
-    m = sended_messages.create(:title => title, :content => content, :type => 1) if receiver.size >= 1
-    return m unless m.is_a? Message
-    receiver.each do |r|
-      u = User.find_by_email(r.to_s) || User.find_by_id(r)
-      next unless u
-      u.messages << m# => unless m.created_at.nil?
-      u.save
-    end
-    m
-  end
-
-  def unread_messages_count
-    Message.unread(last_read_messeges_time).select{ |m| (message_ids.include? m.id) or (m.type == 0)}.count
-  end
-
-  #--
-  ############### operations about point #################
-  #++
-  # admin inc
-  def operate_point(amount, remark)
-    self.point += amount.to_i
-    PointLog.create_admin_operate_point_log(amount, remark, self._id) if self.save
-  end
-  #--
-
-  #--
-  # **************************************************
-  # Quill AdminController
-  #++
-
-  public
-
-  COLOR_NORMAL = 0
-
-  scope :normal_list, where(:color => COLOR_NORMAL, :status.gt => -1)
-
-
-
-  def set_sample_role(role)
-    self.user_role = role.sum
-    return self.save
-  end
-
-  # 我推广的问卷数
-  def spread_count
-    Answer.my_spread(self.id).finished.size
-  end
-
-  # 我回答的问卷数
-  def answer_count
-    self.answers.not_preview.size
-  end
 
   def self.search_sample(email, mobile, is_block)
     samples = User
@@ -647,6 +452,146 @@ class User
       analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
     end
     return [completion, analyze_result]
+  end
+
+  def mini_avatar
+    md5 = Digest::MD5.hexdigest(self.id)
+    return "/uploads/avatar/mini_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/mini_#{md5}.png")
+    %w( mini small thumb).each do |ver|
+      return "/uploads/avatar/#{ver}_#{md5}.png" if File.exist?("#{Rails.root}/public/uploads/avatar/#{ver}_#{md5}.png")  
+    end
+    return "/assets/avatar/mini_default.png"  
+  end
+
+  def set_receiver_info(receiver_info)
+    if self.affiliated.present?
+      self.affiliated.update_attributes(:receiver_info => receiver_info)
+    else
+      self.create_affiliated(:receiver_info => receiver_info)
+    end   
+    return true
+  end
+
+  def is_activated
+    return self.mobile_activation || self.email_activation
+  end
+
+  def is_admin?
+    return (self.user_role.to_i & ADMIN) > 0
+  end
+
+  def is_answer_auditor?
+    return (self.user_role.to_i & ANSWER_AUDITOR) > 0
+  end
+
+  def is_interviewer?
+    return (self.user_role.to_i & INTERVIEWER) > 0
+  end
+
+  def make_mobile_rss_activate(code)
+    return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i  > self.rss_verification_expiration_time
+    return ErrorEnum::ACTIVATE_CODE_ERROR if self.rss_verification_code != code
+    return self.update_attributes(:mobile_subscribe => true)
+  end
+
+  def completed_info
+    affiliated = self.affiliated
+    if affiliated
+      complete = 0
+      affiliated.attributes.each_key do |attr_name|
+        if SampleAttribute::BASIC_ATTR.include?(attr_name)
+          complete += 1
+        end 
+      end
+      basic_attr = SampleAttribute::BASIC_ATTR.length
+      return complete * 100 / basic_attr
+    else
+      return 0 
+    end
+  end
+
+  def change_email(client_ip)
+    return ErrorEnum::ACTIVATE_EXPIRED if Time.now.to_i > change_email_expiration_time
+    self.email = self.email_to_be_changed
+    self.email_activation = true
+    return self.login(client_ip, nil, false)
+  end
+
+  def login(client_ip, client_type, keep_signed_in=false)
+    self.last_login_ip = client_ip
+    self.last_login_client_type = client_type
+    self.login_count = 0 if self.last_login_time.blank? || Time.at(self.last_login_time).day != Time.now.day
+    return ErrorEnum::LOGIN_TOO_FREQUENT if self.login_count > OOPSDATA[Rails.env]["login_count_threshold"]
+    return ErrorEnum::USER_LOCKED if self.lock
+    self.login_count = self.login_count + 1
+    self.last_login_time = Time.now.to_i
+    self.auth_key = Encryption.encrypt_auth_key("#{self._id}&#{Time.now.to_i.to_s}")
+    self.auth_key_expire_time =  keep_signed_in ? -1 : Time.now.to_i + OOPSDATA["login_keep_time"].to_i
+    return false if !self.save
+    return {"auth_key" => self.auth_key}
+  end
+
+
+  #*description*: reset password for an user, used when the user resets its password
+  #
+  #*params*:
+  #* old password of the user
+  #* new password of the user
+  #
+  #*retval*:
+  #* true: when successfully login
+  #* WRONG_PASSWORD
+  def reset_password(old_password, new_password)
+    return ErrorEnum::WRONG_PASSWORD if self.password != Encryption.encrypt_password(old_password)  # wrong password
+    self.password = Encryption.encrypt_password(new_password)
+    return self.save
+  end
+
+
+  ############### operations about message#################
+  #++
+  #ctreate
+  def create_message(title, content, receiver = [])
+    m = sended_messages.create(:title => title, :content => content, :type => 0) if receiver.size == 0
+    m = sended_messages.create(:title => title, :content => content, :type => 1) if receiver.size >= 1
+    return m unless m.is_a? Message
+    receiver.each do |r|
+      u = User.find_by_email(r.to_s) || User.find_by_id(r)
+      next unless u
+      u.messages << m# => unless m.created_at.nil?
+      u.save
+    end
+    m
+  end
+
+  def unread_messages_count
+    Message.unread(last_read_messeges_time).select{ |m| (message_ids.include? m.id) or (m.type == 0)}.count
+  end
+
+  #--
+  ############### operations about point #################
+  #++
+  # admin inc
+  def operate_point(amount, remark)
+    self.point += amount.to_i
+    PointLog.create_admin_operate_point_log(amount, remark, self._id) if self.save
+  end
+
+
+
+  def set_sample_role(role)
+    self.user_role = role.sum
+    return self.save
+  end
+
+  # 我推广的问卷数
+  def spread_count
+    Answer.my_spread(self.id).finished.size
+  end
+
+  # 我回答的问卷数
+  def answer_count
+    self.answers.not_preview.size
   end
 
 

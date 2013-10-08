@@ -6,9 +6,31 @@ require 'tool'
 require 'quill_common'
 Dir[File.dirname(__FILE__) + '/lib/survey_components/*.rb'].each {|file| require file }
 class Answer
+
   include Mongoid::Document
   include Mongoid::Timestamps
   include FindTool
+
+
+  # status
+  NOT_EXIST = 0
+  STATUS_NAME_ARY = ["edit", "reject", "under_review", "under_agent_review", "redo", "finish"]
+  EDIT = 1
+  REJECT = 2
+  UNDER_REVIEW = 4
+  UNDER_AGENT_REVIEW = 8
+  REDO = 16
+  FINISH = 32
+
+  # reject type
+  REJECT_BY_QUOTA = 1
+  REJECT_BY_QUALITY_CONTROL = 2
+  REJECT_BY_REVIEW = 4
+  REJECT_BY_SCREEN = 8
+  REJECT_BY_TIMEOUT = 16
+  REJECT_BY_AGENT_REVIEW = 32
+  REJECT_BY_IP_RESTRICT = 64
+
   # status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo, 32 for under agents' review
   field :status, :type => Integer, default: 1
   field :answer_content, :type => Hash, default: {}
@@ -50,6 +72,16 @@ class Answer
   field :agent_feedback_mobile
 
 
+  belongs_to :agent_task
+  belongs_to :user, class_name: "User", inverse_of: :answers
+  belongs_to :survey
+  belongs_to :interviewer_task
+  belongs_to :lottery
+  belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
+  belongs_to :reward_scheme
+  has_one :order
+
+
   scope :not_preview, -> { where(:is_preview => false) }
   scope :preview, -> { where(:is_preview => true) }
   scope :finished, -> { where(:status => FINISH) }
@@ -62,39 +94,10 @@ class Answer
   scope :my_spread, ->(user_id){ where(:introducer_id => user_id)}
   scope :special_status, ->(status){ where(:status.in => status.split(',')) }
 
-  belongs_to :agent_task
-  belongs_to :user, class_name: "User", inverse_of: :answers
-  belongs_to :survey
-  belongs_to :interviewer_task
-  belongs_to :lottery
-  belongs_to :auditor, class_name: "User", inverse_of: :reviewed_answers
-  belongs_to :reward_scheme
-  has_one :order
-
-  # status
-  NOT_EXIST = 0
-  STATUS_NAME_ARY = ["edit", "reject", "under_review", "under_agent_review", "redo", "finish"]
-  EDIT = 1
-  REJECT = 2
-  UNDER_REVIEW = 4
-  UNDER_AGENT_REVIEW = 8
-  REDO = 16
-  FINISH = 32
-
-  # reject type
-  REJECT_BY_QUOTA = 1
-  REJECT_BY_QUALITY_CONTROL = 2
-  REJECT_BY_REVIEW = 4
-  REJECT_BY_SCREEN = 8
-  REJECT_BY_TIMEOUT = 16
-  REJECT_BY_AGENT_REVIEW = 32
-  REJECT_BY_IP_RESTRICT = 64
 
   index({ introducer_id: 1 }, { background: true } )
-
   index({ survey_id: 1, is_preview: 1 }, { background: true } )
   index({ username: 1, password: 1 }, { background: true } )
-
   index({ is_preview: 1, introducer_id: 1 }, { background: true } )
   index({ survey_id: 1, status: 1, reject_type: 1 }, { background: true } )
   index({ status: 1, reject_type: 1 }, { background: true } )
@@ -104,15 +107,22 @@ class Answer
   index({ ip_address:1},{ background: true })
 
 
+  after_create do |doc|
+    doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.remote_ip)
+  end
+
+
+  public
+
   def self.def_status_attr
     STATUS_NAME_ARY.each_with_index do |status_name, index|
       define_method("is_#{status_name}".to_sym) { return 2**index == self.status }
       define_method("set_#{status_name}".to_sym) { self.status = 2**index; self.save}
     end
   end
+  
   def_status_attr
 
-  public
 
   def self.find_by_survey_id_sample_id_is_preview(survey_id, sample_id, is_preview)
     return nil if sample_id.blank?
@@ -130,10 +140,6 @@ class Answer
   def set_reject_with_type(reject_type, finished_at = Time.now.to_i)
     set_reject
     update_attributes(reject_type: reject_type, finished_at: finished_at)
-  end
-
-  after_create do |doc|
-    doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.remote_ip)
   end
 
   def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, answer_obj)
@@ -1244,5 +1250,29 @@ class Answer
     questions = answer.load_question(nil, true)
     question_number = self.survey.all_questions_id(false).length + self.random_quality_control_answer_content.length
     self.index_of(questions) / question_number.to_f
+  end
+
+  def append_reward_info
+    self["select_reward"] = ""
+    self["free_reward"] = self["rewards"].to_a.empty?
+    self["rewards"].to_a.each do |rew|
+      # a["select_reward"] = "" and break if a["answer_status"].to_i == 2 
+      next if rew["checked"] != true
+      case rew["type"].to_i
+      when RewardScheme::MOBILE
+        self["select_reward"] = "#{rew["amount"].to_i}元话费"
+      when RewardScheme::ALIPAY
+        self["select_reward"] = "#{rew["amount"].to_i}元支付宝"
+      when RewardScheme::POINT 
+        self["select_reward"] = "#{rew["amount"].to_i}积分"
+      when RewardScheme::LOTTERY
+        lottery_link = "/lotteries/#{a["answer_id"]}"
+        self["select_reward"] = %Q{<a class='lottery' target='_blank' href='#{lottery_link}'>抽奖机会</a>}
+      when RewardScheme::JIFENBAO
+        self["select_reward"] = "#{rew["amount"].to_i}集分宝"
+      end
+      break
+    end
+    self
   end
 end

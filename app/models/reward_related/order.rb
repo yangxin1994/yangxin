@@ -1,10 +1,35 @@
 # encoding: utf-8
 class Order
+
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt
   include Mongoid::CriteriaExt
   include FindTool
+
+  # status
+  WAIT = 1
+  HANDLE = 2
+  SUCCESS = 4
+  FAIL = 8
+  CANCEL = 16
+  FROZEN = 32
+  REJECT = 64
+
+  # type
+  VIRTUAL = 1
+  REAL = 2
+  MOBILE_CHARGE = 4
+  ALIPAY = 8
+  JIFENBAO = 16
+  QQ_COIN = 32
+  SMALL_MOBILE_CHARGE = 64
+
+  # source
+  ANSWER_SURVEY = 1
+  WIN_IN_LOTTERY = 2
+  REDEEM_GIFT = 4
+
 
   field :code, :type => String, default: ->{ Time.now.strftime("%Y%m%d") + sprintf("%05d",rand(10000)) }
   # can be 1 (small mobile charge), 2 (large mobile charge), 4 (alipay), 8(alijf)
@@ -37,36 +62,11 @@ class Order
   belongs_to :answer
   belongs_to :sample, :class_name => "User", :inverse_of => :orders
 
-  # status
-  WAIT = 1
-  HANDLE = 2
-  SUCCESS = 4
-  FAIL = 8
-  CANCEL = 16
-  FROZEN = 32
-  REJECT = 64
-
-  # type
-  VIRTUAL = 1
-  REAL = 2
-  MOBILE_CHARGE = 4
-  ALIPAY = 8
-  JIFENBAO = 16
-  QQ_COIN = 32
-  SMALL_MOBILE_CHARGE = 64
-
-  # source
-  ANSWER_SURVEY = 1
-  WIN_IN_LOTTERY = 2
-  REDEEM_GIFT = 4
-
   index({ code: 1 }, { background: true } )
   index({ status: 1 }, { background: true } )
   index({ source: 1 }, { background: true } )
   index({ amount: 1 }, { background: true } )
   index({ type: 1, status: 1 ,ofcard_order_id: 1}, { background: true } )
-
-  #attr_accessible :mobile, :alipay_account, :qq, :user_name, :address, :postcode
 
   def self.create_redeem_order(sample_id, gift_id, amount, point, opt = {})
     gift  = Gift.normal.find_by_id(gift_id)
@@ -212,39 +212,6 @@ class Order
     return order
   end
 
-  def auto_handle
-    return false if self.status != WAIT
-    return false if ![MOBILE_CHARGE, QQ_COIN].include?(self.type)
-    case self.type
-    when MOBILE_CHARGE
-      # ChargeClient.mobile_charge(self.mobile, self.amount, self._id.to_s)
-    when QQ_COIN
-      # ChargeClient.qq_charge(self.qq, self.amount, self._id.to_s)
-    end
-  end
-
-  def manu_handle
-    return ErrorEnum::WRONG_ORDER_STATUS if self.status != WAIT
-    self.status = HANDLE
-    self.handled_at = Time.now.to_i
-    return self.save
-  end
-
-
-  def finish(success, remark = "")
-    return ErrorEnum::WRONG_ORDER_STATUS if self.status != HANDLE
-    self.status = success ? SUCCESS : FAIL
-    self.remark = remark
-    self.finished_at = Time.now.to_i
-    if self.status == FAIL && self.source == REDEEM_GIFT
-      sample = self.sample
-      sample.point = sample.point + point
-      sample.save
-      PointLog.create_admin_operate_point_log(point, "兑换失败，积分返还", sample._id.to_s)
-    end
-    return self.save
-  end
-
   def self.search_orders(email, mobile, code, status, source, type)
     if !email.blank?
       return [] if User.sample.find_by_email(email).nil?
@@ -273,6 +240,38 @@ class Order
     return orders
   end
 
+  def auto_handle
+    return false if self.status != WAIT
+    return false if ![MOBILE_CHARGE, QQ_COIN].include?(self.type)
+    case self.type
+    when MOBILE_CHARGE
+      # ChargeClient.new.mobile_charge(self.mobile, self.amount, self._id.to_s)
+    when QQ_COIN
+      # ChargeClient.new.qq_charge(self.qq, self.amount, self._id.to_s)
+    end
+  end
+
+  def manu_handle
+    return ErrorEnum::WRONG_ORDER_STATUS if self.status != WAIT
+    self.status = HANDLE
+    self.handled_at = Time.now.to_i
+    return self.save
+  end
+
+  def finish(success, remark = "")
+    return ErrorEnum::WRONG_ORDER_STATUS if self.status != HANDLE
+    self.status = success ? SUCCESS : FAIL
+    self.remark = remark
+    self.finished_at = Time.now.to_i
+    if self.status == FAIL && self.source == REDEEM_GIFT
+      sample = self.sample
+      sample.point = sample.point + point
+      sample.save
+      PointLog.create_admin_operate_point_log(point, "兑换失败，积分返还", sample._id.to_s)
+    end
+    return self.save
+  end
+
   def update_express_info(express_info)
     self.express_info = express_info
     return self.save
@@ -296,14 +295,6 @@ class Order
         self.street_info.to_s + " " + self.postcode.to_s + " " + self.receiver.to_s)
     end
     return self
-  end
-
-  def info_for_sample_detail
-    order_obj = JSON.parse(self.to_json)
-    order_obj["created_at"] = self.created_at.to_i
-    order_obj["survey_title"] = self.survey.title if !self.survey.nil?
-    order_obj["survey_id"] = self.survey._id.to_s if !self.survey.nil?
-    return order_obj
   end
 
   def update_status(handle = true)

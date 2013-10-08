@@ -1,5 +1,4 @@
 # coding: utf-8
-# already tidied up
 require 'error_enum'
 require 'question_io'
 class BasicQuestion
@@ -7,13 +6,14 @@ class BasicQuestion
   include Mongoid::Timestamps
   include FindTool
   
+  ATTR_NAME_ARY = %w[content note]
+
   field :content, :type => Hash, default: {"text" => OOPSDATA["question_default_settings"]["content"], "image" => "", "audio" => "", "video" => ""}
   field :note, :type => String, default: OOPSDATA["question_default_settings"]["note"]
   field :issue, :type => Hash
   field :question_type, :type => Integer
-  index({ _id: 1, _type: 1 }, { background: true } )
 
-  ATTR_NAME_ARY = %w[content note]
+  index({ _id: 1, _type: 1 }, { background: true } )
 
   def csv_header(header_prefix)
     q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question_type}"] + "Io").new(self)

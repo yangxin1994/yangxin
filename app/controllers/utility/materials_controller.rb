@@ -3,14 +3,6 @@ class Utility::MaterialsController < ApplicationController
 
     before_filter :require_sign_in, :only => [:index, :video_upload_path, :create, :create_image, :update, :destroy]
 
-    # before_filter :get_ws_client
-
-=begin  
-    def get_ws_client
-        @ws_client = Utility::MaterialClient.new(session_info)
-    end
-=end
-
     # Ajax: get materials list
     def index
         materials = current_user.materials.find_by_type(params[:material_type].to_i)
@@ -40,8 +32,6 @@ class Utility::MaterialsController < ApplicationController
 
         material = Material.check_and_create_new(current_user, params[:material])
         render_json_auto material
-
-        # render :json => @ws_client.create(params[:material])
     end
 
     # AJAX. upload image
@@ -69,8 +59,6 @@ class Utility::MaterialsController < ApplicationController
     # Json: show the data of the material
     def show
         @material = Material.find_by_id(params[:id])
-
-        # @material = @ws_client.show(params[:id])
         respond_to do |format|
             format.html { 
                 if @material.material_type == 1
@@ -89,16 +77,12 @@ class Utility::MaterialsController < ApplicationController
         render_json_e ErrorEnum::MATERIAL_NOT_EXIST and return if material.nil?
         retval = material.update_material(params[:material])
         render_json_e material and return
-
-        # render :json => @ws_client.update(params[:id], params[:material])
     end
 
     # PAGE
     def preview
         url = nil
         material = Material.find_by_id(params[:id])
-        # material = @ws_client.show(params[:id])
-        # material.success ? material = material.value : material = nil
         if material.present?
             case material.material_type
             when 1 # image

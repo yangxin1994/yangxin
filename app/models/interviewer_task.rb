@@ -1,6 +1,7 @@
 require 'error_enum'
 require 'quill_common'
 class InterviewerTask
+  
   include Mongoid::Document 
   include Mongoid::Timestamps
   include FindTool

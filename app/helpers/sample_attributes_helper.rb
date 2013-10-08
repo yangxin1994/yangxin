@@ -1,6 +1,4 @@
 # encoding: utf-8
-# already tidied up
-
 module SampleAttributesHelper
   def time_format(ts, precision=0)
     time = Time.at(ts / 1000)
