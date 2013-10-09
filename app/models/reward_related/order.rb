@@ -67,7 +67,7 @@ class Order
   index({ amount: 1 }, { background: true } )
   index({ type: 1, status: 1 ,ofcard_order_id: 1}, { background: true } )
 
-  #attr_accessible :mobile, :alipay_account, :qq, :user_name, :address, :postcode
+  #attr_accessible :mobile, :alipay_account, :qq, :sample_name, :address, :postcode
 
   def self.find_by_id(order_id)
     return Order.where(:_id => order_id).first
@@ -389,7 +389,7 @@ class Order
       when 2
         "#{sample.email},#{item.title}-#{order.amount},地址:#{order.address_str} 邮编:#{order.postcode} 收件人:#{order.receiver} 电话:#{order.mobile}"
       when 4
-        "#{sample.email},#{item.title}-#{order.amount},电话:#{order.mobile}"
+        "#{sample.email},#{item.title}-#{order.amount},电话:#{order.mobile || order.sample.mobile}"
       when 8
         "#{sample.email},#{item.title}-#{order.amount},支付宝账号:#{order.alipay_account}"
       when 16
@@ -397,7 +397,7 @@ class Order
       when 32
         "#{sample.email},#{item.title}-#{order.amount},QQ:#{order.qq}"
       when 64
-        "#{sample.email},#{item.title}-#{order.amount},电话:#{order.mobile}"
+        "#{sample.email},#{item.title}-#{order.amount},电话:#{order.mobile || order.sample.mobile}"
       end
     end.join("\n")
   end
