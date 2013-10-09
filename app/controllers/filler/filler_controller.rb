@@ -114,24 +114,26 @@ class Filler::FillerController < ApplicationController
 			answer_id = cookies[cookie_key(survey_id, is_preview)]
 		end
 		@percentage = 0
-		answer = answer_id.present? ? Answer.find_by_id(answer_id) : nil
-		if answer.present?
-			# if answer exist, load next page questions
-			if answer.user.present? && answer.user != current_user
+		if answer_id.present?
+			answer = Answer.find_by_id(answer_id)
+			if answer.blank? || (answer.user.present? && answer.user != current_user)
+				# If answer does not exist or does not belong to the current user, remove answer id and cookie
 				answer_id = nil
 				cookies.delete(cookie_key(survey_id, is_preview), :domain => :all)
-			end
-			answer.update_status
-			questions = answer.load_question(nil, true) if answer.is_edit
-
-			if answer.is_edit
-				answer_index = answer.index_of(questions)
-				question_number = answer.survey.all_questions_id(false).length + answer.random_quality_control_answer_content.length
-				@percentage = answer_index.to_f / question_number.to_f
 			else
-				redirect_to show_a_path(answer_id) and return
+				# If answer exist and belongs to the current user, load next page questions
+				answer.update_status
+				questions = answer.load_question(nil, true) if answer.is_edit
+				if answer.is_edit
+					answer_index = answer.index_of(questions)
+					question_number = answer.survey.all_questions_id(false).length + answer.random_quality_control_answer_content.length
+					if question_number > 0
+						@percentage = answer_index.to_f / question_number.to_f
+					end
+				else
+					redirect_to show_a_path(answer_id) and return
+				end
 			end
-
 		end
 
 		# 5. get real reward
