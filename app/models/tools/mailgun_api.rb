@@ -160,7 +160,10 @@ class MailgunApi
         emails << subscriber.email
       else
         emails << subscriber.email
-        # data[:'recipient-variables'] = "subscriber:{id:#{subscriber._id}}"
+        data[:'recipient-variables'] = {
+          subscriber.email =>{
+            :id => subscriber._id
+          }}.to_json
         if Rails.env == "production"
           data[:to] = emails.join(',')
           self.send_message(data)
