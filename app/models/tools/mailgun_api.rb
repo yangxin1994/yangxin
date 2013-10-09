@@ -137,6 +137,42 @@ class MailgunApi
     self.send_message(data)
   end
 
+  def self.newsletter(newsletter, content_html, protocol_hostname, callback, test_emails = nil)
+    count = 0
+    emails = []
+    data = {}
+
+    data[:domain] = Rails.application.config.user_email_domain
+    data[:from] = @@user_email_from
+    @content_html = content_html
+    html_template_file_name = "#{Rails.root}/app/views/newsletter_mailer/news_email.html.erb"
+    text_template_file_name = "#{Rails.root}/app/views/newsletter_mailer/news_email.text.erb"
+    html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
+    text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+    premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
+
+    data[:html] = premailer.to_inline_css
+    data[:text] = text_template.result(binding)
+    data[:subject] = newsletter.title || newsletter.subject
+    Subscriber.all.each do |subscriber|
+      if count < 990
+        count += 1
+        emails << subscriber.email
+      else
+        emails << subscriber.email
+        # data[:'recipient-variables'] = "subscriber:{id:#{subscriber._id}}"
+        if Rails.env == "production"
+          data[:to] = emails.join(',')
+          self.send_message(data)
+        else
+          data[:to] =  test_emails || @@test_email
+          self.send_message(data)
+          break
+        end
+      end
+    end
+  end
+
   def self.change_email(user, protocol_hostname, callback)
     @user = user
     activate_info = {"user_id" => user.id, "email_to_be_changed" => user.email_to_be_changed, "time" => Time.now.to_i}

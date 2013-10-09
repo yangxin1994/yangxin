@@ -1,4 +1,3 @@
-# encoding: utf-8
 class Sample::AccountsController < Sample::SampleController
   layout 'sample_account'
 
@@ -94,7 +93,7 @@ class Sample::AccountsController < Sample::SampleController
       EmailWorker.perform_async(
         "welcome",
         user.email,
-        "#{ request.protocol }#{ request.host_with_port }",
+        "#{request.protocol}#{request.host_with_port}",
         "/account/email_activate")
     end
     render_json_s and return
