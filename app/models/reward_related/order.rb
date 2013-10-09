@@ -338,9 +338,7 @@ class Order
     end
     self.write_attribute(:user_email_mobile, self.sample.try(:email) || self.sample.try(:mobile))
     if self.type == 2
-      self.write_attribute(:address_str, 
-        QuillCommon::AddressUtility.find_province_city_town_by_code(self.address) + " " +
-        self.street_info.to_s + " " + self.postcode.to_s + " " + self.receiver.to_s)
+      self.write_attribute(:address_str,address_str)
     end
     return self
   end
@@ -373,6 +371,11 @@ class Order
     return order_obj
   end
 
+  def address_str
+    QuillCommon::AddressUtility.find_province_city_town_by_code(self.address) + " " +
+      self.street_info.to_s + " " + self.postcode.to_s + " " + self.receiver.to_s    
+  end
+
   def self.to_excel
     self.criteria.map do |order|
       item = order.gift || order.prize
@@ -384,7 +387,7 @@ class Order
       when 1
         "#{sample.email},#{item.title}-#{order.amount},支付宝账号:#{order.alipay_account}"
       when 2
-        "#{sample.email},#{item.title}-#{order.amount},地址:#{order.street_info} 邮编:#{order.postcode} 收件人:#{order.receiver} 电话:#{order.mobile}"
+        "#{sample.email},#{item.title}-#{order.amount},地址:#{order.address_str} 邮编:#{order.postcode} 收件人:#{order.receiver} 电话:#{order.mobile}"
       when 4
         "#{sample.email},#{item.title}-#{order.amount},电话:#{order.mobile}"
       when 8
