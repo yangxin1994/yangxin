@@ -1,6 +1,6 @@
 # encoding: utf-8
 class PointLog < Log
-
+  
   # reason
   ANSWER = 1
   SPREAD = 2
@@ -23,6 +23,9 @@ class PointLog < Log
   field :gift_id, :type => String
   field :gift_picture_url, :type => String
   field :remark, :type => String
+
+  after_create :fill_scheme_id
+
 
   def self.create_admin_operate_point_log(amount, remark, sample_id)
     self.create(:amount => amount, :reason => ADMIN_OPERATE, :remark => remark, :user_id => sample_id)
@@ -60,5 +63,11 @@ class PointLog < Log
       :gift_picture_url => gift_picture_url,
       :user_id => sample_id
     )
+  end
+
+
+  def fill_scheme_id
+    scheme_id = Survey.find_by(:id => self.survey_id).quillme_promote_info['reward_scheme_id']  if self.survey_id.present?
+    self.update_attributes(:scheme_id => scheme_id) if scheme_id.present?
   end
 end

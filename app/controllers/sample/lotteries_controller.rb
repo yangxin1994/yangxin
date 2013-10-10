@@ -81,4 +81,3 @@ class Sample::LotteriesController < Sample::SampleController
     }
   end
 end
-

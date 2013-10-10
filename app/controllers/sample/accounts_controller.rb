@@ -114,7 +114,7 @@ class Sample::AccountsController < Sample::SampleController
       @success = false
     else
       @success = true
-      refresh_session(retval['auth_key'])
+      #refresh_session(retval['auth_key'])
       user = User.find_by_auth_key(retval['auth_key'])
       @email  = Base64.encode64(user.email).chomp()
     end
@@ -130,8 +130,7 @@ class Sample::AccountsController < Sample::SampleController
     retval = User.activate("mobile", activate_info, request.remote_ip, params[:_client_type])
 
     render_json_e retval and return if retval.class == String && retval.start_with?("error_")
-
-    refresh_session(retval['auth_key'])
+    #refresh_session(retval['auth_key'])
     render_json_auto retval
   end
 

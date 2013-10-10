@@ -24,5 +24,4 @@ class Message
   scope :readed, ->(t){where(:updated_at.lt => t)}
 
   index({ updated_at: 1 }, { background: true } )
-
 end

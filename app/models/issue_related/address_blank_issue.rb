@@ -40,6 +40,6 @@ class AddressBlankIssue < Issue
   #*retval*:
   #* the question object
   def serialize
-      super(ATTR_NAME_ARY)
+    super(ATTR_NAME_ARY)
   end
 end

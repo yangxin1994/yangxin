@@ -32,7 +32,6 @@ class AgentTask
   index({ survey_id: 1 }, { background: true } )
   index({ agent_id: 1, status:1 }, { background: true } )
 
-
   # Class Methods
   def self.search_agent_task(agent_id, survey_id)
     agent = Agent.normal.find_by_id(agent_id)
@@ -45,6 +44,8 @@ class AgentTask
     return agent_tasks
   end  
 
+
+
   # Instance Methods
   def update_agent_task(agent_task)
     reward_scheme_id  agent_task.delete("reward_schemes_id")
@@ -53,6 +54,8 @@ class AgentTask
     reward_scheme.agent_tasks << self
     return true
   end
+
+
 
   def info
     self["survey_title"] = self.survey.title
@@ -70,6 +73,8 @@ class AgentTask
       return ErrorEnum::WRONG_AGENT_TASK_STATUS
     end
   end
+
+
 
   def close
     if self.status == OPEN || self.status == AGENT_CLOSED
@@ -89,7 +94,6 @@ class AgentTask
     return self.update_attributes({status: OPEN}) if self.status == AGENT_CLOSED
     return ErrorEnum::WRONG_AGENT_TASK_STATUS
   end
-
 
   def delete_agent_task
     self.status = DELETED
@@ -122,5 +126,4 @@ class AgentTask
     return if answer.is_preview
     self.answers << answer if self.status == OPEN
   end
-
 end

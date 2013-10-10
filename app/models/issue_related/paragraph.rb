@@ -2,7 +2,7 @@ require 'error_enum'
 require 'securerandom'
 #Besides the fields that all types questions have, paragraph also have:
 class Paragraph < Issue
-
+  
   ATTR_NAME_ARY = []
 
   def initialize

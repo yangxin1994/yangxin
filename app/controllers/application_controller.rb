@@ -100,16 +100,16 @@ class ApplicationController < ActionController::Base
     @is_success = _is
   end
 
-  # def fresh_when(opts = {})
-  #   opts[:etag] ||= []
-  #   # 保证 etag 参数是 Array 类型
-  #   opts[:etag] = [opts[:etag]] if !opts[:etag].is_a?(Array)
-  #   # 加入页面上直接调用的信息用于组合 etag
-  #   opts[:etag] << current_user
-  #   # 所有 etag 保持一天
-  #   opts[:etag] << Date.current
-  #   super(opts)
-  # end
+  def fresh_when(opts = {})
+    opts[:etag] ||= []
+    # 保证 etag 参数是 Array 类型
+    opts[:etag] = [opts[:etag]] if !opts[:etag].is_a?(Array)
+    # 加入页面上直接调用的信息用于组合 etag
+    opts[:etag] << current_user
+    # 所有 etag 保持一天
+    opts[:etag] << Date.current
+    super(opts)
+  end
 
 
   # =============================

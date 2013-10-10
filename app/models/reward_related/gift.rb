@@ -52,7 +52,6 @@ class Gift
   index({ created_at: -1}, { background: true } ) 
   index({ status: 1, type:1, created_at:-1, view_count:-1}, { background: true } )
 
-
   # Class Methods
   def self.generate_opt(order,gift)
     opt = {}
@@ -132,4 +131,5 @@ class Gift
   def inc_view_count
     inc(:view_count,1)
   end
+
 end

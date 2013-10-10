@@ -4,7 +4,7 @@ require 'tool'
 require 'securerandom'
 
 class HeatMapIssue < Issue
-    
+
   attr_accessor :max_click_num,:min_click_mum,:image,:items
 
   ATTR_NAME_ARY = %w[max_click_num min_click_mum image items]

@@ -31,5 +31,4 @@ class Advertisement
     end
 
   end
-  
 end

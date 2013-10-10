@@ -43,5 +43,4 @@ class SurveySpread
   def spread_number
     survey.answers.not_preview.where(:introducer_id => user_id).length
   end
-
 end

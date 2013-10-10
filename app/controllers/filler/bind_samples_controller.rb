@@ -1,7 +1,5 @@
-# finish migrating
 class Filler::BindSamplesController < Filler::FillerController
   before_filter :require_sign_in
-
   def show
     bind_ids = (cookies[Rails.application.config.bind_answer_id_cookie_key] || '').split('_')
     redirect_aid = nil

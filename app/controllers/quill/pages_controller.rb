@@ -1,4 +1,3 @@
-# finish migrating
 require 'error_enum'
 class Quill::PagesController < ApplicationController
   
@@ -6,7 +5,7 @@ class Quill::PagesController < ApplicationController
   before_filter :ensure_survey
 
   def ensure_survey
-    @survey = Survey.find(params[:questionaire_id])
+    @survey = Survey.find_by_id(params[:questionaire_id])
   end
 
   def create

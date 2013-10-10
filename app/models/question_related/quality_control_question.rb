@@ -66,7 +66,6 @@ class QualityControlQuestion < BasicQuestion
     return {"objective_questions" => objective_questions, "matching_questions" => matching_questions}
   end
 
-
   def self.check_quality_control_answer(quality_control_question_id, answer)
     standard_answer = QualityControlQuestionAnswer.find_by_question_id(quality_control_question_id)
     if standard_answer.quality_control_type == 1
@@ -96,7 +95,6 @@ class QualityControlQuestion < BasicQuestion
         # return false if v.nil?
         volunteer_answer = volunteer_answer + v["selection"]
       end
-
       standard_matching_items = standard_answer.answer_content["matching_items"]
       standard_matching_items.each do |standard_matching_item|
         return true if (volunteer_answer - standard_matching_item).empty?
@@ -161,5 +159,4 @@ class QualityControlQuestion < BasicQuestion
     end
     return true
   end
-
 end

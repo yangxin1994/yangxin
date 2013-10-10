@@ -6,13 +6,6 @@ class QihuUser < ThirdPartyUser
 
   alias gender sex
 
-  #*description*: get access_token for other works
-  #
-  #*params*:
-  #* code: code from third party respond.
-  #
-  #*retval*:
-  #* response_data: it includes access_token, expires_in and user info
   def self.get_access_token(code, redirect_uri)
     access_token_params = {
       "client_id" => OOPSDATA[Rails.env]["qihu_app_key"],
@@ -26,15 +19,6 @@ class QihuUser < ThirdPartyUser
     return response_data
   end
 
-  #*description*: receive params, then
-  #
-  # 1. new or update qihu_user
-  #
-  #*params*: 
-  #* response_data: access_token, user_id and other
-  #
-  #*retval*:
-  #* qihu_user: new or updated.
   def self.save_tp_user(response_data)
       
     access_token = response_data["access_token"]
@@ -69,6 +53,5 @@ class QihuUser < ThirdPartyUser
   def locale
       nil
   end
-  
 
 end

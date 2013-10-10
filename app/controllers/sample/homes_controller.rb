@@ -21,8 +21,4 @@ class Sample::HomesController < Sample::SampleController
       top_rank_users:top_rank_users,
       fresh_news:fresh_news
     }
-
-    fresh_when(:etag => @data)
-  end
-  
 end

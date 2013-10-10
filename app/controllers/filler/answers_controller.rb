@@ -1,7 +1,5 @@
-# finish migrating
 require 'array'
 class Filler::AnswersController < Filler::FillerController
-
   def create
     # hack: if the cookie has already has an answer_id and is not signed in, return the answer_id
     # Used to avoid creating multiple answers when user click the back key in the keyboard when answeing survey
@@ -42,8 +40,6 @@ class Filler::AnswersController < Filler::FillerController
     render_json_auto answer.id.to_s
   end
 
-
-    # PAGE
   def show
     # get answer
     @answer = Answer.find_by_id(params[:id])
@@ -170,7 +166,6 @@ class Filler::AnswersController < Filler::FillerController
       render_json_auto(retval) and return
     end
   end
-
 
   # AJAX
   def finish

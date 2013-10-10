@@ -12,6 +12,7 @@ class Admin::SubscribersController < Admin::AdminController
 
   end
   
+
   def create
     render_json true do
       subscribers = params[:subscribers].gsub('，',',')
@@ -25,7 +26,7 @@ class Admin::SubscribersController < Admin::AdminController
           if Subscriber.where(:email => email.downcase).exists?
             e_count += 1
           else
-            batch << {:email => email.downcase}
+            batch << {:email => email.downcase, :created_at => Time.now}
             s_count += 1
           end
         else

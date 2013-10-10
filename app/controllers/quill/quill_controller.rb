@@ -1,4 +1,3 @@
-# finish migrating
 class Quill::QuillController < ApplicationController
   
   before_filter :require_sign_in
@@ -10,7 +9,7 @@ class Quill::QuillController < ApplicationController
 
   def ensure_survey
     return @survey if @survey
-    @survey = Survey.find(params[:questionaire_id])
+    @survey = Survey.find_by_id(params[:questionaire_id])
     return
   end
 
@@ -24,5 +23,4 @@ class Quill::QuillController < ApplicationController
     end
     return survey_questions
   end
-  
 end

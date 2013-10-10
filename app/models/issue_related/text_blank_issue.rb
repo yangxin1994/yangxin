@@ -37,12 +37,6 @@ class TextBlankIssue < Issue
     return (min_length / CHAR_PER_SECOND).ceil
   end
 
-  #*description*: serialize the current instance into a question object
-  #
-  #*params*:
-  #
-  #*retval*:
-  #* the question object
   def serialize
     super(ATTR_NAME_ARY)
   end

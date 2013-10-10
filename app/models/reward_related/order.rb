@@ -68,10 +68,10 @@ class Order
   index({ amount: 1 }, { background: true } )
   index({ type: 1, status: 1 ,ofcard_order_id: 1}, { background: true } )
 
+
   def self.create_redeem_order(sample_id, gift_id, amount, point, opt = {})
     gift  = Gift.normal.find_by_id(gift_id)
     return ErrorEnum::ORDER_ERROR if amount.to_i < 1
-
     point = gift.point.to_i  * amount.to_i
     sample = User.sample.find_by_id(sample_id)
     return ErrorEnum::POINT_NOT_ENOUGH if sample.point.to_i < point.to_i 
@@ -141,13 +141,14 @@ class Order
     ##synchro  reverver info 
     if opt['info_sys'].to_s == 'true'
       option = {}
-      option["receiver"]    = order[:receiver]
+      option["receiver"]    = order[:receiver] 
       option["mobile"]      = order[:mobile]
       option["address"]     = order[:address]
       option["street_info"] = order[:street_info]
       option["postcode"]    = order[:postcode]
       sample.set_receiver_info(option) if sample.present?
     end 
+
     LotteryLog.create_succ_lottery_Log(answer_id:answer_id,
                       order_id:order.id,
                       survey_id:survey_id,
@@ -190,6 +191,7 @@ class Order
       reward["amount"],
       order_info)
   end
+
 
   def self.create_answer_order(sample_id, survey_id, type, amount, opt = {})
     sample = User.sample.find_by_id(sample_id)
@@ -272,6 +274,34 @@ class Order
     return self.save
   end
 
+
+  def self.search_orders(email, mobile, code, status, source, type)
+    if !email.blank?
+      orders = User.sample.find_by_email(email).try(:orders).desc(:created_at) || []
+    elsif !mobile.blank?
+      orders = User.sample.find_by_mobile(mobile).try(:orders).desc(:created_at) || []
+    elsif !code.blank?
+      orders = Order.where(:code => /#{code}/).desc(:created_at)
+    else
+      orders = Order.all.desc(:created_at)
+    end
+
+    if !status.blank? && status != 0
+      status_ary = Tool.convert_int_to_base_arr(status)
+      orders = orders.where(:status.in => status_ary)
+    end
+    if !source.blank? && source != 0
+      source_ary = Tool.convert_int_to_base_arr(source)
+      orders = orders.where(:source.in => source_ary)
+    end
+    if !type.blank? && type != 0
+      type_ary = Tool.convert_int_to_base_arr(type)
+      orders = orders.where(:type.in => type_ary)
+    end
+    return orders
+  end
+
+
   def update_express_info(express_info)
     self.express_info = express_info
     return self.save
@@ -301,6 +331,35 @@ class Order
     self.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
     self.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i} ) if self.status == REJECT
     self.auto_handle if handle
+  end
+
+  def info_for_sample
+    order_obj = {}
+    order_obj["_id"] = self._id.to_s
+    order_obj["created_at"] = self.created_at.to_i
+    order_obj["status"] = self.status
+    order_obj["source"] = self.source
+    order_obj["amount"] = self.amount
+    order_obj["type"] = self.type
+    if self.source == REDEEM_GIFT
+      order_obj["point"] = self.point
+      order_obj["title"] = self.gift.try(:title)
+      order_obj["picture_url"] = self.gift.try(:photo).try(:picture_url)
+      order_obj["gift_id"] = self.gift.try(:_id)
+    elsif self.source == WIN_IN_LOTTERY
+      order_obj["title"] = self.prize.try(:title)
+      order_obj["picture_url"] = self.prize.try(:photo).try(:picture_url)
+    end
+    return order_obj
+  end
+
+
+  def info_for_sample_detail
+    order_obj = JSON.parse(self.to_json)
+    order_obj["created_at"] = self.created_at.to_i
+    order_obj["survey_title"] = self.survey.title if !self.survey.nil?
+    order_obj["survey_id"] = self.survey._id.to_s if !self.survey.nil?
+    return order_obj
   end
 end
 

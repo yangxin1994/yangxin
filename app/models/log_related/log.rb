@@ -28,9 +28,8 @@ class Log
   index({ survey_id:1,_type:1, created_at:-1},{background: true})
   index({ answer_id:1,_type:1, created_at:-1},{background: true})
 
-
   def self.fresh_logs
-    return self.where(:type.in => [2,8,16], :reason.ne => PointLog::IMPORT)
+    return self.where(:type.in => [2,8,16], :reason.ne => PointLog::IMPORT,:reason.ne => PointLog::ADMIN_OPERATE)
   end
 
   def self.get_new_logs(limit=5,type=nil)

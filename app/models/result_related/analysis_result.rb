@@ -76,7 +76,6 @@ class AnalysisResult < Result
       self.status = 1
       return self.save
     end
-
     # get the answer info
     answer_info = []
     answers_length = answers.length
@@ -97,7 +96,7 @@ class AnalysisResult < Result
     end
     Task.set_progress(task_id, "answer_info_progress", 1.0) if !task_id.nil?
     self.answer_info = answer_info
-    
+
     # get the analysis result
     answers.each_with_index do |answer, index|
       # analyze region
@@ -239,10 +238,4 @@ class AnalysisResult < Result
     #   return analyze_hot_spot(question.issue, answer_ary)
     end
   end
-
-
-
-
-
-
 end

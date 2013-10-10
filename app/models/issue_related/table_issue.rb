@@ -30,6 +30,7 @@ class TableIssue < Issue
   ADDRESS_PROP_ARY = %w[has_postcode format]
   TIME_PROP_ARY = %w[format min_time max_time]
 
+
   def initialize
     @items = []
     @is_rand = false
@@ -68,12 +69,6 @@ class TableIssue < Issue
     @items[3]["properties"] = {}
   end
 
-  #*description*: serialize the current instance into a question object
-  #
-  #*params*:
-  #
-  #*retval*:
-  #* the question object
   def serialize
     super(ATTR_NAME_ARY)
   end

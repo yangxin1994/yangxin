@@ -36,5 +36,4 @@ class RedeemLog < Log
       :user_id => user_id
     )
   end
-
 end

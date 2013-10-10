@@ -54,6 +54,10 @@ $(function(){
 			this.trigger('change:issue:min_max');
 		},
 
+		hasOther: function() {
+			return this.issue.other_item && this.issue.other_item.has_other_item;
+		},
+
 		_getInfo: function() {
 			if(this.issue.min <= 0) {
 				if(this.issue.max <= 0) return '拖放选项进行排列';
@@ -67,13 +71,14 @@ $(function(){
 
 		_checkAnswer: function(answer) {
 			if(answer.sort_result == undefined) return '请对选项进行排序';
+			for(var i=0; i<answer.sort_result.length; i++)
+				if(answer.sort_result[i] == undefined) return '请逐名次排序';
 			if(this.issue.min == this.issue.max && this.issue.min > 0 && this.issue.min != answer.sort_result.length) 
 				return '请排出前 ' + this.issue.min + ' 个选项';
 			if(this.issue.min >= 0 && answer.sort_result.length < this.issue.min) return '至少对 ' + this.issue.min + ' 个选项进行排序';
 			if(this.issue.max >= 0 && answer.sort_result.length > this.issue.max) return '最多对 ' + this.issue.max + ' 个选项进行排序';
-			if(this.issue.other_item && this.issue.other_item.has_other_item && this.issue.min > 0) {
-				for (var i = 0; i < this.issue.min; i++) {
-					if(i >= answer.sort_result.length) break;
+			if(this.hasOther()) {
+				for (var i = 0; i < answer.sort_result.length; i++) {
 					if(answer.sort_result[i] == this.issue.other_item.id && !answer.text_input) return '请填写其他项内容';
 				};
 			}

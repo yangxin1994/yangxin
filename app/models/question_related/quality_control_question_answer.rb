@@ -1,7 +1,7 @@
 require 'error_enum'
 require 'question_type_enum'
 class QualityControlQuestionAnswer
-
+  
   include Mongoid::Document
 
   OBJECTIVE_QUESTION  = 0

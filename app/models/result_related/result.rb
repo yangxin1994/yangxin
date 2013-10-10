@@ -21,6 +21,7 @@ class Result
   index({ result_key: 1, ref_result_id: 1 }, { background: true } )
   index({ result_key: 1, ref_result_id: 1, status: 1 }, { background: true } )
 
+
   def self.find_by_result_id(result_id)
     return Result.where(:_id => result_id)[0]
   end
@@ -121,7 +122,6 @@ class Result
     # the job has not been finished, the progress cannot be greater than 0.99
     return [s, 0.99].min
   end
-
 
   def analyze_choice(issue, answer_ary, opt={})
     items_com = opt[:items_com] || []
@@ -439,9 +439,6 @@ class Result
     return result
   end
 
-
-  
-
 ###############################################################
 # issue 某个question的issue
 # answer_ary 根据需要分析的question的id，去answers表中找到对应的答案的内容
@@ -468,11 +465,10 @@ private
     point_y = point[1]
 
     if x_start < point_x && point_x < x_end &&  y_end < point_y && point_y < y_start   
-    return true
+      return true
     else
-    return false
+      return false
     end
-    
   end
 
 end

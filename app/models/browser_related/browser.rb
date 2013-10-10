@@ -33,7 +33,7 @@ class Browser
   end
 
   def recommend_surveys(exclude_survey_ids)
-      surveys = Survey.normal.where(status: Survey::PUBLISHED, browser_extension_promotable: true).desc(:created_at)
-      return surveys.map { |s| s.info_for_browser }
+    surveys = Survey.normal.where(status: Survey::PUBLISHED, browser_extension_promotable: true).desc(:created_at)
+    return surveys.map { |s| s.info_for_browser }
   end
 end

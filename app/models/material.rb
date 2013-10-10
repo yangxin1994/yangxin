@@ -62,5 +62,4 @@ class Material
       :picture_url => material["picture_url"])
     return self.save
   end
-  
 end

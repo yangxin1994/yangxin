@@ -1,4 +1,5 @@
 class Faq
+
   include Mongoid::Document 
   include Mongoid::Timestamps
 
@@ -28,5 +29,4 @@ class Faq
     end
 
   end
-
 end

@@ -37,7 +37,6 @@ class InterviewerTask
     return interviewer_task
   end
 
-
   # Just update status 
   # 
   def update_status
@@ -58,6 +57,7 @@ class InterviewerTask
     self.save
   end
 
+
   # update quota based answers 
   # 
   def refresh_quota
@@ -71,7 +71,6 @@ class InterviewerTask
     finished_answers = self.answers.not_preview.finished
     unreviewed_answers = self.answers.not_preview.unreviewed
     rejected_answers = self.answers.not_preview.rejected
-
     # make stats for the finished answers
     finished_answers.each do |answer|
         self.quota["finished_count"] += 1
@@ -83,7 +82,6 @@ class InterviewerTask
             end
         end
     end
-
     # make stats for the unreviewed answers
     unreviewed_answers.each do |answer|
         self.quota["submitted_count"] += 1

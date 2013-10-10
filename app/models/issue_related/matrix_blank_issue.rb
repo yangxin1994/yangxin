@@ -10,6 +10,7 @@ require 'securerandom'
 #    "is_row_rand" : whether randomly show rows(bool),
 #    "row_num_per_group" : number of rows in each group(integer)
 #   }
+
 #The element in the "inputs" array has the following structure
 # {
 #  "id": id of the input(string)

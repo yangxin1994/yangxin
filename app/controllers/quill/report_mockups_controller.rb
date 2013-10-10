@@ -1,4 +1,3 @@
-# finish migrating
 class Quill::ReportMockupsController < Quill::QuillController
 
     before_filter :ensure_survey

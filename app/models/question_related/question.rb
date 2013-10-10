@@ -45,6 +45,7 @@ class Question < BasicQuestion
     return self
   end
 
+
   def remove_sample_attribute
     self.sample_attribute_relation = {}
     self.save
@@ -58,6 +59,7 @@ class Question < BasicQuestion
     return (text_length / OOPSDATA[Rails.env]["words_per_second"].to_i).ceil +
       Issue.create_issue(self.question_type, self.issue).estimate_answer_time
   end
+
 
   def serialize
     question_obj = {}

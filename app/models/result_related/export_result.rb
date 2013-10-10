@@ -7,6 +7,7 @@ class ExportResult < Result
   field :answer_contents, :type => Array, :default => []
   field :file_uri, :type => String
 
+
   def self.generate_excel_result_key(last_update_time, answers)
     answer_ids = answers.map { |e| e._id.to_s }
     result_key = Digest::MD5.hexdigest("to_excel_result-#{last_update_time}-#{answer_ids.to_s}")
@@ -20,10 +21,13 @@ class ExportResult < Result
   end
 
   def generate_excel(survey, answers, result_key)
-    excel_data_json = {"excel_header" => survey.excel_header,
-                        "answer_contents" => survey.formated_answers(answers, result_key, task_id.to_s),
-                        "header_name" => survey.csv_header,
-                        "result_key" => result_key}.to_json
+    excel_data_json = {
+      "excel_header" => survey.excel_header,
+      "answer_contents" => survey.formated_answers(answers, result_key, task_id.to_s),
+      "header_name" => survey.csv_header,
+      "result_key" => result_key
+      }.to_json
+
     retval = ConnectDotNet.send_data('/ToExcel.aspx') do
       {'excel_data' => excel_data_json, 'job_id' => task_id.to_s}
     end

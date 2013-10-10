@@ -1,4 +1,3 @@
-# finish migrating
 class Quill::PreviewsController < Quill::QuillController
     before_filter :ensure_survey
 

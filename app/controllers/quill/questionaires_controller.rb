@@ -1,10 +1,10 @@
-# finish migrating
 require 'error_enum'
 class Quill::QuestionairesController < Quill::QuillController
 
   before_filter :require_sign_in, :only => [:index, :show]
   # before_filter :ensure_survey, :only => [:show]
   before_filter :check_survey_existence, :only => [:show, :clone, :destroy, :recover, :remove, :publish, :deadline, :close]
+
 
   def check_survey_existence
     @survey = Survey.user(current_user).find(params[:id] || params[:questionaire_id])

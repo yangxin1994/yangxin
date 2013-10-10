@@ -9,7 +9,6 @@ require 'securerandom'
 #    "unit" : unit
 #   }
 class NumberBlankIssue < Issue
-
   attr_reader :precision, :min_value, :max_value, :unit, :unit_location
   attr_writer :precision, :min_value, :max_value, :unit, :unit_location
 

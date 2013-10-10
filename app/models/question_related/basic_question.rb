@@ -41,6 +41,8 @@ class BasicQuestion
     return ["objective", "matching"].include?(self.input_prefix)
   end
 
+
+
   def serialize(attr_name_ary)
     question_obj = {}
     question_obj["question_id"] = self._id.to_s
@@ -70,6 +72,8 @@ class BasicQuestion
     return question_object
   end
 
+
+
   def remove_hidden_items(items)
     return self
   end
@@ -78,9 +82,11 @@ class BasicQuestion
     return self.class == class_name
   end
 
+
   def clone
     return Marshal.load(Marshal.dump(self))
   end
+
 
   def update_items(to_be_removed)
     items = issue["items"]

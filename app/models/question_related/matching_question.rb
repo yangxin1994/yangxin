@@ -16,6 +16,8 @@ class MatchingQuestion
     end
   end
 
+
+
   def self.get_matching_question_ids(question_id)
     matching = MatchingQuestion.find_by_question_id(question_id)
     return ErrorEnum::MATCHING_NOT_EXIST if matching.nil?

@@ -14,11 +14,13 @@ class ReportResult < Result
 
   belongs_to :survey
 
+
   def self.generate_result_key(last_update_time, answers, report_mockup, report_type, report_style)
     answer_ids = answers.map { |e| e._id.to_s }
     result_key = Digest::MD5.hexdigest(("#{last_update_time}-report-#{report_mockup.to_json}-#{report_style}-#{report_type}-#{answer_ids.to_s}"))
     return result_key
   end
+
 
   def self.convert_time_interval_to_text(format, v1, v2)
     case format.to_i

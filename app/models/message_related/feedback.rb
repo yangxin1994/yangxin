@@ -1,5 +1,6 @@
 # coding: utf-8
 class Feedback
+
   include Mongoid::Document
   include Mongoid::Timestamps
   
@@ -22,7 +23,7 @@ class Feedback
   
   scope :answered, where(is_answer: true)
   scope :unanswer, where(is_answer: false)
-  
+
   index({ feedback_type: 1, title: 1, is_answer: 1 }, { background: true } )
   index({ title: 1, is_answer: 1 }, { background: true } )
   index({ is_answer: 1 }, { background: true } )
@@ -31,6 +32,7 @@ class Feedback
   index({ question_user_id: 1, title: 1, is_answer: 1 }, { background: true } )
   index({ question_user_id: 1, is_answer: 1 }, { background: true } )
   index({ question_user_id: 1, feedback_type: 1, is_answer: 1 }, { background: true } )
+
 
   class << self
 
@@ -41,5 +43,4 @@ class Feedback
     end
 
   end 
-  
 end

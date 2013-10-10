@@ -2,7 +2,7 @@
 class Sample::UsersController < Sample::SampleController
   layout :resolve_layout
 
-  before_filter :require_sign_in, :except => [:change_email_verify_key]
+  before_filter :require_sign_in, :except => [:change_email,:change_email_verify_key]
   before_filter :get_self_extend_info, :except => [:survey_detail, :spread_counter, 
                                       :update_logistic_address, :update_password, 
                                       :destroy_notification, :remove_notifications,
@@ -19,7 +19,7 @@ class Sample::UsersController < Sample::SampleController
     @retval = "#{@retval['city']}, 中国 #{@retval['carrier']}"
     render_json_auto @retval and return
   end
-
+  
   def join_surveys
     @answers = current_user.answers.not_preview.desc(:created_at)
     @my_answer_surveys = auto_paginate @answers do |paginated_answers|
@@ -42,7 +42,7 @@ class Sample::UsersController < Sample::SampleController
   end
 
   def survey_detail
-    @survey = Survey.find(params[:id])
+    @survey = Survey.find_by_id(params[:id])
     @answers = @survey.answers.not_preview.where(:introducer_id => current_user._id.to_s).desc(:status)
     params[:per_page] = 9
     @answers = auto_paginate @answers  
@@ -55,7 +55,7 @@ class Sample::UsersController < Sample::SampleController
   end
 
   def spread_counter
-    @survey = Survey.find(params[:id])
+    @survey = Survey.find_by_id(params[:id])
     @answers = @survey.answers.not_preview.where(:introducer_id => current_user._id.to_s)
     @spreaded_answer_number = {
       "total_answer_number" => @answers.length,
@@ -89,7 +89,7 @@ class Sample::UsersController < Sample::SampleController
   end
 
   def order_detail
-    @order = Order.find(params[:id])
+    @order = Order.find_by_id(params[:id])
     respond_to do |format|
       format.html {
         render :layout => false if request.headers["OJAX"]
@@ -123,6 +123,7 @@ class Sample::UsersController < Sample::SampleController
     param_attrs["income_person"] = param_attrs["income_person"].split('_').collect!{|e| e.to_i } if param_attrs["income_person"]
     # change 99999999 to -1
     param_attrs["income_person"][1] = 1.0/0.0 if param_attrs["income_person"].is_a?(Array) and param_attrs["income_person"][1] == 99999999
+
     param_attrs["income_family"] = param_attrs["income_family"].split('_').collect!{|e| e.to_i} if param_attrs["income_family"]
     # change 99999999 to -1
     param_attrs["income_family"][1] = 1.0/0.0 if param_attrs["income_family"].is_a?(Array) and param_attrs["income_family"][1] == 99999999
@@ -134,6 +135,7 @@ class Sample::UsersController < Sample::SampleController
       param_attrs[item] = param_attrs[item].to_i if param_attrs[item]
     end
     @retval = current_user.set_basic_attributes(param_attrs)
+
     respond_to do |format|
       format.html {
         redirect_to :action => :basic_info
@@ -190,7 +192,7 @@ class Sample::UsersController < Sample::SampleController
     current_user.sms_verification_code = Tool.generate_active_mobile_code
     current_user.sms_verification_expiration_time = Time.now.to_i + 2.hours.to_i
     current_user.save
-    SmsWorker.perform_async("change_mobile", params[:m], "", :code => Tool.generate_active_mobile_code)
+    SmsWorker.perform_async("change_mobile", params[:m], "", :code => current_user.sms_verification_code)
     render_json_s and return
   end
 
@@ -288,8 +290,7 @@ class Sample::UsersController < Sample::SampleController
     end
   end
 
-  private 
-
+  private
   def get_self_extend_info
     @bind_info = {}
     ["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
@@ -315,7 +316,6 @@ class Sample::UsersController < Sample::SampleController
   def survey_nav
     @current_nav = 'surveys'  
   end
-
 
   def order_nav
     @current_nav = 'orders' 
