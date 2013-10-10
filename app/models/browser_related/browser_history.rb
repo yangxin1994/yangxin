@@ -1,6 +1,9 @@
 #encoding: utf-8
 class BrowserHistory
+  
   include Mongoid::Document
+  include FindTool
+
   field :url, :type => String
   field :title, :type => String
   field :last_visit_time, :type => Integer
@@ -10,8 +13,4 @@ class BrowserHistory
   belongs_to :browser
 
   index({ url: 1 }, { background: true } )
-
-  def self.find_by_url(url)
-    return self.where(:url => url).first
-  end
 end

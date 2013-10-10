@@ -1,136 +1,131 @@
-<% if surveys['data'].present? %>
+<% if surveys.present? %>
+  <% surveys = surveys['data'] %>
+  <% surveys.each_with_index do |survey,index| %>
+    <li class="research-content" <%= hide_border?(surveys,index) %>>
+      <% if [1,2,16].include?(survey['quillme_promote_reward_type']) %>
+        <span class="reward rmb <%= survey['status'].to_s ==  Survey::CLOSED.to_s  ? 'finished' :  'unfinished' %>">
+          <b>
+            ￥<%= survey['reward_type_info']['amount'] if survey['reward_type_info']%>
+          </b>
+        </span>
+      <% elsif [4].include?(survey['quillme_promote_reward_type']) %>
+        <span class="reward integral <%= survey['status'].to_s ==  Survey::CLOSED.to_s ? 'finished' :  'unfinished' %>">
+          <b>
+            <% if survey['reward_type_info']%>
+              <%= survey['reward_type_info']['amount']%>
+            <% else %>
+                0
+            <% end %>
+          </b>
+          <em>积分</em>
+        </span>
+      <% elsif [8].include?(survey['quillme_promote_reward_type']) %>
+        <span class="reward lottery <%= survey['status'].to_s ==  Survey::CLOSED.to_s ?  'finished' :  'unfinished' %>">
+          <b>抽奖机会</b> 
+        </span>   
+      <% elsif [0].include?(survey['quillme_promote_reward_type']) %>
+        <span class="reward lottery <%= survey['status'].to_s ==  Survey::CLOSED.to_s ?  'finished' :  'unfinished' %>">
+          <b>免费调研</b> 
+        </span>         
+      <% end %>
 
-	<% surveys = surveys['data'] %>
-	<% surveys.each_with_index do |survey,index|%>
-		<li class="research-content" <%= hide_border?(surveys,index) %>>
-			<% if [1,2,16].include?(survey['quillme_promote_reward_type']) %>
-				<span class="reward rmb <%= survey['status'].to_i == Survey::CLOSED ? 'finished' : 'unfinished' %>">
-					<b>￥<%= survey['reward_type_info']['amount'] if survey['reward_type_info']%>
-					</b>
-				</span>
-			<% elsif [4].include?(survey['quillme_promote_reward_type']) %>
-				<span class="reward integral <%= survey['status'].to_i == Survey::CLOSED ? 'finished' : 'unfinished' %>">
-					<b>
-						<% if survey['reward_type_info']%>
-							<%= survey['reward_type_info']['amount']   %>
-						<% else %>
-							0
-						<% end %>
-					</b>
-					<em>积分</em>
-				</span>
-			<% elsif [8].include?(survey['quillme_promote_reward_type']) %>
-				<span class="reward lottery <%= survey['status'].to_i == Survey::CLOSED ? 'finished' : 'unfinished' %>">
-					<b>抽奖机会</b> 
-				</span>   
-			<% elsif [0].include?(survey['quillme_promote_reward_type']) %>
-				<span class="reward lottery <%= survey['status'].to_i == Survey::CLOSED ? 'finished' : 'unfinished' %>">
-					<b>免费调研</b> 
-				</span>         
-			<% end %>
+      <span class="research-title">
+        <a href="/s/<%= survey.scheme_id %>">
+          <%= truncate(survey['title'],:length => 30)%>
+        </a>
+      </span>
+      <% if user_signed_in %>
+          <% if survey['status'].to_s ==  Survey::PUBLISHED.to_s %>
+            <span class="status  <%= survey['answer_status'].to_i == 0 ? 'unfinished' : ''%>">
+              <%= raw( answered?(survey['answer_status'],survey['reject_type']) )%>
+            </span>
+          <% else %>
+            <span class="status  <%= survey['answer_status'].to_i == 0 ? 'finished' : ''%>">
+              <%= raw( answered?(survey['answer_status']) == '待参与' ? '未参与' : answered?(survey['answer_status']) )  %>
+            </span>
+          <% end %>
+      <% end %>
 
-			<span class="research-title">
-				<a href="/s/<%= survey['scheme_id']%>">
-					<%= truncate(survey['title'],:length => 30)%>
-				</a>
-			</span>
-			<% if user_signed_in%>
-				<span class="status  <%= survey['status'].to_s == "#{Survey::CLOSED.to_s}" ? 'finished' : (survey['answer_status'].to_i == 0 ? 'unfinished' : '') %>">
-					<% if params[:status].to_s == '1' %>
-						<%= raw( answered?(survey['answer_status']) == '待参与' ? '未参与' : answered?(survey['answer_status']) )  %>
-					<% else %>
-						<%= raw( answered?(survey['answer_status']) )%>
-					<% end %>
-					
-				</span>
-			<% end %>
+      <% if survey['status'].to_s ==  Survey::PUBLISHED.to_s %>
+        <span class="share">
+          <% if survey['spread_point'].to_i > 0 %>
+            <a class="btn share-btn"  data="<%= survey['spread_point']%>" survey_id="<%= survey['_id']%>" scheme_id = "<%= survey.scheme_id%>" s_title="<%= survey['title'] %>" >分享奖励<b><%= survey['spread_point']%></b> 积分</a>
+          <% else %>
+            <a class="btn share-btn"  data="<%= survey['spread_point']%>" survey_id="<%= survey['_id']%>" scheme_id = "<%= survey.scheme_id %>" s_title="<%= survey['title'] %>" >分享</a>
+          <% end %>   
+        </span>
+      <% end %>
 
-			<% if survey['status'].to_i == 2 %>
-				<span class="share">
-					<% if survey['spread_point'].to_i > 0 %>
-						<a class="btn share-btn"  data="<%= survey['spread_point']%>" survey_id="<%= survey['_id']%>" scheme_id = "<%= survey['scheme_id']%>" s_title="<%= survey['title'] %>">
-							分享奖励<b><%= survey['spread_point']%> 积分</b>
-					<% else %>
-						<a class="btn share-btn"  data="<%= survey['spread_point']%>" survey_id="<%= survey['_id']%>" scheme_id = "<%= survey['scheme_id']%>" s_title="<%= survey['title'] %>">
-						 	分享
-					<% end %>
-						</a>
-				</span>
 
-			<% end %>
 
-			<span class="research-meta">
-				<% if survey['deadline'].present? %>
-					<span class="countdown">
-						<!-- <i class="icon16 hourglass"></i> -->
-						<%=can_answer?(survey['deadline'])%>
-					</span>
-					<span class="divide">/</span>
-				<% end %>
-				<span class="estimate">
-					<!-- <i class="icon16 clock"></i> -->
-					<%= rounding(survey[ 'time']) %>分钟
-				</span>
-				<span class="divide">/</span>
-				<span class="people">
-					<!-- <i class="icon16 research-people"></i> -->
-					<em><%=  survey['answer_count']%></em>人已参与
-				</span>
-					<!-- 收起奖品 -->
-					
-				<% if survey['quillme_promote_reward_type'].to_i == 8 %>
-					<%  ids = survey['reward_type_info']['prizes'].map{|priz| priz['id']  }
-						ids = ids.join(',')
-					%>
-					<span class="stretch">
-						<a href="javascript:void(0);" class="unfold-btn" data="<%= ids  %>"   survey_id="<%= survey['_id'] %>" scheme_id ="<%= survey['scheme_id']%>" prize_src ="<%#= survey['reward_type_info']['prize_arr'].map{|pri| "#{request.protocol}#{request.host_with_port}" + pri['prize_src']}.join(',') %>">
-							<i class="icon16 open"></i><span>展开</span>
-						</a>
-					</span>
-				<% end %>
-			</span>
-			<% if survey['quillme_promote_reward_type'].to_i == 8 %>
-					<ul class="reward_list" style="display:none;">
-						<% survey['reward_type_info']['prize_arr'].each_with_index do |prize_info,index| %>
-							<li id="<%= survey['_id'].to_s + prize_info['prize_id'].to_s %>">
-								<a href="#<%= prize_info['prize_id'].to_s + survey['_id'].to_s %>" class="pop" rel="survey_<%= survey['_id'].to_s + ids %>" data="<%= prize_info['prize_id'].to_s %>" index="<%= index %>" >
-									<img src="<%= prize_info['prize_src'] %>" alt="<%= prize_info['title']%>">
-									<span class="gift-mask"></span>
-									<div class="gift-name">
-										<div><%= prize_info['title'] %></div>
-									</div>
-								</a>
-							</li>
-							<div id="<%= prize_info['prize_id'].to_s + survey['_id'].to_s %>" style="display:none;" class="pri1">
-								<div class="prize_info">
-									<div class="detail">
-										<div class="title">参与本次调研就有机会获得如下奖品</div>
-										<div class="prize_img">
-											<img src="<%= prize_info['prize_src']%>" />
-										</div>
-										<div class="prize_intro">
-											<p class="prize_title"><%= prize_info['title']%></p>
-											<p class="prize_price">市场价:<span class="prize_info">￥<%= prize_info['price']%></span></p>
-											<p>
-												<span class="p_intro">奖品介绍 :</span><br />
-												<span class="intro_info"><%= prize_info['description']%></span>
-											</p>
-											<a class="prize_btn" href="/s/<%= survey['scheme_id'] %>" target="_blank">立即参与</a>
-										</div>
-										<div style="clear:both;"></div>
-										<div class="slide_nav">
-										<% survey['reward_type_info']['prize_arr'].each do |pri| %>
-											<li class="slide"></li>
-										<% end %>
-										</div>
-									</div>
-								</div>
-							</div>
-						<% end %>
-					</ul>				
-			<% end%>
-		</li>	
-	<% end %>
+      <span class="research-meta">
+        <% if survey['deadline'].present? %>
+          <span class="countdown">
+            <%=can_answer?(survey['deadline'])%>
+          </span>
+          <span class="divide">/</span>
+        <% end %>
+        <span class="estimate"><%= rounding(survey.estimate_answer_time) %>分钟</span>
+        <span class="divide">/</span>
+        <span class="people">
+          <em><%= survey.answers_count%></em>人已参与
+        </span>
+        <!-- 收起奖品 -->
+        <% if survey['quillme_promote_reward_type'].to_i == 8 %>
+          <%  ids = survey['reward_type_info']['prizes'].map{|priz| priz['id']  }
+            ids = ids.join(',')
+          %>
+          <span class="stretch">
+            <a href="javascript:void(0);" class="unfold-btn" data="<%= ids  %>"   survey_id="<%= survey['_id'] %>" scheme_id ="<%= survey.scheme_id %>" prize_src ="<%#= survey['reward_type_info']['prize_arr'].map{|pri| "#{request.protocol}#{request.host_with_port}" + pri['prize_src']}.join(',') %>" >
+              <i class="icon16 open"></i>
+              <span>展开</span>
+            </a>
+          </span>
+        <% end %>
+      </span>
+
+
+
+      <% if survey['quillme_promote_reward_type'].to_i == 8 %>
+        <ul class="reward_list" style="display:none;">
+          <% survey['reward_type_info']['prize_arr'].each_with_index do |prize_info,index| %>
+            <li id="<%= survey['_id'].to_s + prize_info['prize_id'].to_s %>">
+              <a href="#<%= prize_info['prize_id'].to_s + survey['_id'].to_s %>" class="pop" rel="survey_<%= survey['_id'].to_s + ids %>" data="<%= prize_info['prize_id'].to_s %>" index="<%= index %>" >
+                <img src="<%= prize_info['prize_src'] %>" alt="<%= prize_info['title']%>">
+                <span class="gift-mask"></span>
+                <div class="gift-name">
+                  <div><%= prize_info['title'] %></div>
+                </div>
+              </a>
+            </li>
+            <div id="<%= prize_info['prize_id'].to_s + survey['_id'].to_s %>" style="display:none;" class="pri1">
+              <div class="prize_info">
+                <div class="detail">
+                  <div class="title">参与本次调研就有机会获得如下奖品</div>
+                  <div class="prize_img">
+                    <img src="<%= prize_info['prize_src']%>" />
+                  </div>
+                  <div class="prize_intro">
+                    <p class="prize_title"><%= prize_info['title']%></p>
+                    <p class="prize_price">市场价:<span class="prize_info">￥<%= prize_info['price']%></span></p>
+                    <p>
+                      <span class="p_intro">奖品介绍 :</span><br />
+                      <span class="intro_info"><%= prize_info['description']%></span>
+                    </p>
+                    <a class="prize_btn" href="/s/<%= survey.scheme_id %>" target="_blank">立即参与</a>
+                  </div>
+                  <div style="clear:both;"></div>
+                  <div class="slide_nav">
+                  <% survey['reward_type_info']['prize_arr'].each do |pri| %>
+                    <li class="slide"></li>
+                  <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </ul>
+      <% end%>
+    </li>
+  <% end %>
 <% end %>
-
-			

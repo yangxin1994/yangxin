@@ -4,5 +4,4 @@ class Quill::FunctionsController < ApplicationController
 
   def design
   end
-  
 end

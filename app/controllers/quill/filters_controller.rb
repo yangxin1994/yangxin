@@ -15,35 +15,22 @@ class Quill::FiltersController < Quill::QuillController
   # PAGE: show survey filter
   def show
     @survey_questions = get_survey_questions
-
-    filters = @survey.filters || []
-    @current_index = -1
-    @current_filter = nil
-    index = params[:id].to_s
-    if index.to_i.to_s == index
-      index = index.to_i
-      if index >= 0 && index < filters.length
-        @current_index = index
-        @current_filter = filters[index]
-      end
-    end
+    @current_filter = @survey.show_filter(params[:id])
+    @current_index = @current_filter.nil? ? -1 : params[:id].to_i
   end
 
   # AJAX: destory a filter by its index
   def destroy
-    retval = @survey.delete_filter(params[:id].to_i)
-    render_json_auto retval and return
+    render_json_auto @survey.delete_filter(params[:id].to_i) and return
   end
 
   # AJAX: update filter by its index
   def update
-    retval = @survey.update_filter(params[:id].to_i, params[:filter])
-    render_json_auto retval and return
+    render_json_auto @survey.update_filter(params[:id].to_i, params[:filter]) and return
   end
 
   # AJAX: create a new filter
   def create
-    retval = @survey.add_filter(params[:filter])
-    render_json_auto retval and return
+    render_json_auto @survey.add_filter(params[:filter]) and return
   end
 end

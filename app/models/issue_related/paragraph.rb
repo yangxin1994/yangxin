@@ -2,27 +2,27 @@ require 'error_enum'
 require 'securerandom'
 #Besides the fields that all types questions have, paragraph also have:
 class Paragraph < Issue
+  
+  ATTR_NAME_ARY = []
 
-    ATTR_NAME_ARY = []
+  def initialize
+  end
 
-    def initialize
-    end
+  def update_issue(issue_obj)
+    super(ATTR_NAME_ARY, issue_obj)
+  end
 
-    def update_issue(issue_obj)
-        super(ATTR_NAME_ARY, issue_obj)
-    end
+  def estimate_answer_time
+    return 0
+  end
 
-    def estimate_answer_time
-        return 0
-    end
-
-    #*description*: serialize the current instance into a question object
-    #
-    #*params*:
-    #
-    #*retval*:
-    #* the question object
-    def serialize
-        super(ATTR_NAME_ARY)
-    end
+  #*description*: serialize the current instance into a question object
+  #
+  #*params*:
+  #
+  #*retval*:
+  #* the question object
+  def serialize
+    super(ATTR_NAME_ARY)
+  end
 end

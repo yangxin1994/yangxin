@@ -1,105 +1,75 @@
-# finish migrating
 require 'error_enum'
 class Quill::QuestionairesController < Quill::QuillController
 
-    before_filter :require_sign_in, :only => [:index, :show]
-    before_filter :ensure_survey, :only => [:show]
+  before_filter :require_sign_in, :only => [:index, :show]
+  # before_filter :ensure_survey, :only => [:show]
+  before_filter :check_survey_existence, :only => [:show, :clone, :destroy, :recover, :remove, :publish, :deadline, :close]
 
-    # PAGE: list survey
-    # GET
-    def index
-        # add stars survey in Index action
-        @stars = params[:stars].to_s == "true"
-        @status = params[:status] || 3
-        if !params[:title].nil?
-            @surveys = Survey.search_title(params[:title], current_user)
-        elsif params[:stars].nil?
-            @surveys = current_user.surveys.list(@status)
-        else
-            @surveys = current_user.surveys.stars
-        end 
-        @surveys = auto_paginate @surveys
-        respond_to do |format|
-            format.html { }
-            format.json { render json: @surveys}
-        end
-    end
 
-    # PAGE
-    def new
-        @survey = Survey.new
-        @survey.user = current_user
-        if current_user.is_admin?
-            @survey.status = Survey::PUBLISHED
-        else
-            @survey.style_setting["has_advertisement"] = false
-        end
-        @survey.save
-        @survey.create_default_reward_scheme
-        redirect_to questionaire_path(@survey._id) and return
-    end
+  def check_survey_existence
+    @survey = Survey.user(current_user).find(params[:id] || params[:questionaire_id])
+  end
 
-    # AJAX: clone survey
-    def clone
-        @survey = Survey.find_by_id(params[:id])
-        render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
-        new_survey = @survey.clone_survey(current_user, params[:title])
-        render_json_auto(new_survey) and return
+  # PAGE: list survey
+  # GET
+  def index
+    @surveys = current_user.surveys.title(params[:title]).status(params[:status]).star(params[:stars])
+    @surveys = auto_paginate @surveys
+    respond_to do |format|
+      format.html { }
+      format.json { render json: @surveys}
     end
+  end
 
-    # PAGE: show and edit survey
-    def show
-        @locked = (!current_user.is_admin? && @survey.publish_status == 8) 
-    end
+  # PAGE
+  def new
+    @survey = Survey.create
+    current_user.surveys << @survey
+    redirect_to questionaire_path(@survey._id) and return
+  end
 
-    # AJAX: delete survey
-    def destroy
-        @survey = Survey.find_by_id(params[:questionaire_id])
-        render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
-        retval = @survey.delete(current_user)
-        render_json_auto(retval) and return
-    end
+  # AJAX: clone survey
+  def clone
+    render_json_auto(@survey.clone_survey(current_user, params[:title])) and return
+  end
 
-    # PUT
-    def recover
-        @survey = Survey.find_by_id(params[:id])
-        render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
-        render_json_auto @survey.recover(current_user)
-    end
+  # PAGE: show and edit survey
+  def show
+    # @locked = (!current_user.is_admin? && @survey.publish_status == 8) 
+  end
 
-    #GET
-    def remove
-        @survey = Survey.find_by_id(params[:id])
-        render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
-        render_json_auto @survey.clear(current_user)
-    end
+  # AJAX: delete survey
+  def destroy
+    render_json_auto(@survey.update_attributes(status: Survey::DELETED)) and return
+  end
 
-    # get
-    def update_star
-        @survey = Survey.find_by_id(params[:id])
-        render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
-        render_json_auto @survey.update_star(params[:is_star].to_s == "true")
-    end
+  # PUT
+  def recover
+    render_json_auto(@survey.update_attributes(status: Survey::CLOSED)) and return
+  end
 
-    # AJAX: publish survey
-    def publish
-        @survey = Survey.find_by_id(params[:id])
-        render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
-        render_json_auto @survey.publish(current_user)
-    end
-    
-    # AJAX: set deadline
-    def deadline
-        @survey = Survey.find_by_id(params[:id])
-        render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
-        render_json_auto @survey.publish(current_user) and return
-        render_json_auto @survey.update_deadline(params[:deadline].to_i) and return
-    end
+  #GET
+  def remove
+    render_json_auto(@survey.destroy) and return
+  end
 
-    # AJAX: close a published survey
-    def close
-        @survey = Survey.find_by_id(params[:id])
-        render_json_e ErrorEnum::SURVEY_NOT_EXIST and return if @survey.nil?
-        render_json_auto @survey.close(current_user)
-    end
+  # get
+  def update_star
+    render_json_auto @survey.update_attributes(is_star: params[:is_star].to_s == "true") and return
+  end
+
+  # AJAX: publish survey
+  def publish
+    render_json_auto(@survey.update_attributes(status: Survey::PUBLISHED)) and return
+  end
+  
+  # AJAX: set deadline
+  def deadline
+    render_json_auto @survey.update_deadline(params[:deadline].to_i) and return
+  end
+
+  # AJAX: close a published survey
+  def close
+    render_json_auto(@survey.update_attributes(status: Survey::CLOSED)) and return
+  end
 end

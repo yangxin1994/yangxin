@@ -25,9 +25,10 @@ class Admin::NewslettersController < ApplicationController
   end
 
   def test
-    render :json  => @newsletters_client.test(params[:id], params[:email] ,params[:content])
+    render_json Newsletter.where(:_id => params[:id]).first do |newsletter|
+      newsletter.deliver_test_news(params[:content], "#{request.protocol }#{ request.host_with_port }", "", params[:email])
+    end   
   end
-
 
   def create
     # @newsletter  = @newsletters_client.create(
@@ -65,7 +66,7 @@ class Admin::NewslettersController < ApplicationController
 
   def deliver
     render_json Newsletter.where(:_id => params[:id]).first do |newsletter|
-      newsletter.deliver
+      newsletter.deliver_news(content_html, "#{ request.protocol }#{ request.host_with_port }", "")
     end    
   end
 

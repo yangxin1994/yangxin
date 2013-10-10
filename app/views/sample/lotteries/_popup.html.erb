@@ -87,8 +87,8 @@
       如果您没有登录,您可以选择
        <div class="answer_look">
         <% if !user_signed_in %>
-          <input class="answer close_f"  data="/sign_in" type="button" value="登录" />
-          <input class="look_over close_f" data="/sign_out"  type="button" value="注册" />
+          <input class="answer close_f"  data="/account/sign_in" type="button" value="登录" />
+          <input class="look_over close_f" data="/account/sign_out"  type="button" value="注册" />
           <div style="clear:both;"></div>
         <% else %>
           <input class="look_over close_f" data="/users/orders"  type="button" value="查看订单"  style="margin-left:100px;"/>

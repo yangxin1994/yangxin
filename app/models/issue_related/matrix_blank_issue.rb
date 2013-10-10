@@ -4,12 +4,13 @@ require 'tool'
 require 'securerandom'
 #Besides the fields that all types questions have, matrix blank questions also have:
 # {
-#  "inputs" : array of input items(array),
-#  "is_rand" : whether randomly show blanks(bool),
-#  "row_name" : array of row names(array),
-#  "is_row_rand" : whether randomly show rows(bool),
-#  "row_num_per_group" : number of rows in each group(integer)
-# }
+#    "inputs" : array of input items(array),
+#    "is_rand" : whether randomly show blanks(bool),
+#    "row_name" : array of row names(array),
+#    "is_row_rand" : whether randomly show rows(bool),
+#    "row_num_per_group" : number of rows in each group(integer)
+#   }
+
 #The element in the "inputs" array has the following structure
 # {
 #  "id": id of the input(string)
@@ -75,18 +76,27 @@ class MatrixBlankIssue < Issue
     1.upto(4) do |id|
       row = {}
       row["id"] = Tool.rand_id
-      row["content"] = {"text" => "子题目#{Tool.convert_digit(id)}",
-                            "image" => [], "audio" => [], "video" => []}
+      row["content"] = {
+        "text" => "子题目#{Tool.convert_digit(id)}",
+        "image" => [], 
+        "audio" => [], 
+        "video" => []
+      }
       @rows << row
     end
     
     1.upto(4) do |input_index|
       input = {}
-    input["id"] = Tool.rand_id
-      input["content"] = {"text" => "选项#{Tool.convert_digit(input_index)}",
-                            "image" => [], "audio" => [], "video" => []}
+      input["id"] = Tool.rand_id
+      input["content"] = {
+        "text" => "选项#{Tool.convert_digit(input_index)}",
+        "image" => [], 
+        "audio" => [], 
+        "video" => []
+      }
       @items << input
     end
+
     # the first input's content
     @items[0]["data_type"] = "Text"
     @items[0]["properties"] = {}
@@ -138,31 +148,33 @@ class MatrixBlankIssue < Issue
     issue_obj["items"].each do |input_obj|
       input_obj.delete_if { |k, v| !INPUT_ATTR_ARY.include?(k) }
       return ErrorEnum::WRONG_DATA_TYPE if !DATA_TYPE_ARY.include?(input_obj["data_type"])
+
       if input_obj["properties"].class == Hash
-        input_obj["properties"].delete_if { |k, v| !BlankIssue.const_get("#{input_obj["data_type"].upcase}_PROP_ARY".to_sym).include?(k) }
+          input_obj["properties"].delete_if { |k, v| !BlankIssue.const_get("#{input_obj["data_type"].upcase}_PROP_ARY".to_sym).include?(k) }
       else
-        input_obj["properties"] == Hash.new
+          input_obj["properties"] == Hash.new
       end
+
       case input_obj["data_type"]
       when "Text"
-        input_obj["properties"]["min_length"] = input_obj["properties"]["min_length"].to_i if !input_obj["properties"]["min_length"].nil?
-        input_obj["properties"]["max_length"] = input_obj["properties"]["max_length"].to_i if !input_obj["properties"]["max_length"].nil?
-        input_obj["properties"]["size"] = input_obj["properties"]["size"].to_i if !input_obj["properties"]["size"].nil?
-        input_obj["properties"]["has_multiple_line"] = input_obj["properties"]["has_multiple_line"].to_s == "true" if !input_obj["properties"]["has_multiple_line"].nil?
+          input_obj["properties"]["min_length"] = input_obj["properties"]["min_length"].to_i if !input_obj["properties"]["min_length"].nil?
+          input_obj["properties"]["max_length"] = input_obj["properties"]["max_length"].to_i if !input_obj["properties"]["max_length"].nil?
+          input_obj["properties"]["size"] = input_obj["properties"]["size"].to_i if !input_obj["properties"]["size"].nil?
+          input_obj["properties"]["has_multiple_line"] = input_obj["properties"]["has_multiple_line"].to_s == "true" if !input_obj["properties"]["has_multiple_line"].nil?
       when "Number"
-        input_obj["properties"]["min_value"] = input_obj["properties"]["min_value"].to_i if !input_obj["properties"]["min_value"].nil?
-        input_obj["properties"]["max_value"] = input_obj["properties"]["max_value"].to_i if !input_obj["properties"]["max_value"].nil?
-        input_obj["properties"]["precision"] = input_obj["properties"]["precision"].to_i if !input_obj["properties"]["precision"].nil?
-        input_obj["properties"]["unit_location"] = input_obj["properties"]["unit_location"].to_i if !input_obj["properties"]["unit_location"].nil?
+          input_obj["properties"]["min_value"] = input_obj["properties"]["min_value"].to_i if !input_obj["properties"]["min_value"].nil?
+          input_obj["properties"]["max_value"] = input_obj["properties"]["max_value"].to_i if !input_obj["properties"]["max_value"].nil?
+          input_obj["properties"]["precision"] = input_obj["properties"]["precision"].to_i if !input_obj["properties"]["precision"].nil?
+          input_obj["properties"]["unit_location"] = input_obj["properties"]["unit_location"].to_i if !input_obj["properties"]["unit_location"].nil?
       when "Phone"
-        input_obj["properties"]["phone_type"] = input_obj["properties"]["phone_type"].to_i if !input_obj["properties"]["phone_type"].nil?
+          input_obj["properties"]["phone_type"] = input_obj["properties"]["phone_type"].to_i if !input_obj["properties"]["phone_type"].nil?
       when "Address"
-        input_obj["properties"]["format"] = input_obj["properties"]["format"].to_i if !input_obj["properties"]["format"].nil?
-        input_obj["properties"]["has_postcode"] = input_obj["properties"]["has_postcode"].to_s == "true" if !input_obj["properties"]["has_postcode"].nil?
+          input_obj["properties"]["format"] = input_obj["properties"]["format"].to_i if !input_obj["properties"]["format"].nil?
+          input_obj["properties"]["has_postcode"] = input_obj["properties"]["has_postcode"].to_s == "true" if !input_obj["properties"]["has_postcode"].nil?
       when "Time"
-        input_obj["properties"]["format"] = input_obj["properties"]["format"].to_i if !input_obj["properties"]["format"].nil?
-        input_obj["properties"]["min_time"].map! { |e| e.to_i } if !input_obj["properties"]["min_time"].nil?
-        input_obj["properties"]["max_time"].map! { |e| e.to_i } if !input_obj["properties"]["max_time"].nil?
+          input_obj["properties"]["format"] = input_obj["properties"]["format"].to_i if !input_obj["properties"]["format"].nil?
+          input_obj["properties"]["min_time"].map! { |e| e.to_i } if !input_obj["properties"]["min_time"].nil?
+          input_obj["properties"]["max_time"].map! { |e| e.to_i } if !input_obj["properties"]["max_time"].nil?
       end
     end
     issue_obj["rows"].each do |row_obj|

@@ -6,35 +6,29 @@ require 'securerandom'
 #   }
 class TimeBlankIssue < Issue
 
-    attr_reader :format, :min, :max
-    attr_writer :format, :min, :max
+  attr_reader :format, :min, :max
+  attr_writer :format, :min, :max
 
-    ATTR_NAME_ARY = %w[format min max]
+  ATTR_NAME_ARY = %w[format min max]
 
-    def initialize
-        @format = 2
-        @min = nil
-        @max = nil
-    end
+  def initialize
+    @format = 2
+    @min = nil
+    @max = nil
+  end
 
-    def update_issue(issue_obj)
-        issue_obj["format"] = issue_obj["format"].to_i
-        issue_obj["min"] = issue_obj["min"].to_i
-        issue_obj["max"] = issue_obj["max"].to_i
-        super(ATTR_NAME_ARY, issue_obj)
-    end
+  def update_issue(issue_obj)
+    issue_obj["format"] = issue_obj["format"].to_i
+    issue_obj["min"] = issue_obj["min"].to_i
+    issue_obj["max"] = issue_obj["max"].to_i
+    super(ATTR_NAME_ARY, issue_obj)
+  end
 
-    def estimate_answer_time
-        return 2
-    end
+  def estimate_answer_time
+    return 2
+  end
 
-    #*description*: serialize the current instance into a question object
-    #
-    #*params*:
-    #
-    #*retval*:
-    #* the question object
-    def serialize
-        super(ATTR_NAME_ARY)
-    end
+  def serialize
+    super(ATTR_NAME_ARY)
+  end
 end

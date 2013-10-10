@@ -10,16 +10,16 @@ class Issue
     return issue_obj
   end
 
-  def self.create_issue(issue_type, issue_obj=nil)
+  def self.create_issue(issue_type, issue_obj = nil)
     issue = Object::const_get(ISSUE_TYPE[issue_type]).new
-    issue.update_issue(issue_obj) if !issue_obj.nil?
-    return issue
+    issue.update_issue(issue_obj) if issue_obj.present?
+    issue
   end
 
   def update_issue(attr_name_ary, issue_obj)
     attr_name_ary.each do |attr_name|
       self.send("#{attr_name}=".to_sym, Marshal.load(Marshal.dump(issue_obj[attr_name])))
-    end 
+    end
   end
 
   def remove_hidden_items(items)

@@ -1,4 +1,3 @@
-# finish migrating
 class Quill::ReportMockupsController < Quill::QuillController
 
     before_filter :ensure_survey
@@ -35,7 +34,6 @@ class Quill::ReportMockupsController < Quill::QuillController
             respond_to do |format|
                 format.html { redirect_to questionaire_report_mockups_path and return }
                 format.json { render_json_e ErrorEnum::REPORT_MOCKUP_NOT_EXIST }
-                # format.json { return_json result }
             end
         end
     end

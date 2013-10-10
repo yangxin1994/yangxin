@@ -28,10 +28,6 @@ every 1.days, :at => '4:30 pm' do
 end
 
 every 1.days do
-	runner "ImportEmail.remove_bounce_emails"
-end
-
-every 1.days do
 	command "cd ~/db_bak/; mongodump -d oops_data_production -o './' -u oopsdata -password=o2psllyscdata; tar -zcf oops_data_production_$(date +%d-%m-%y).tar.gz oops_data_production; rm -rf oops_data_production"
 end
 

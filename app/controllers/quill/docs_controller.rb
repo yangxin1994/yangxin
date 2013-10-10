@@ -5,7 +5,7 @@ class Quill::DocsController < ApplicationController
   before_filter :activate_menu
 
   def activate_menu
-    @activate_menu = 1
+      @activate_menu = 1
   end
 
   def design
@@ -14,5 +14,4 @@ class Quill::DocsController < ApplicationController
   end
   def share
   end
-  
 end

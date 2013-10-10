@@ -1,9 +1,8 @@
-# already tidied up
 class Newsletter
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt
-  extend Mongoid::FindHelper
+  include FindTool
   include Mongoid::CriteriaExt
 
   field :subject, type: String
@@ -16,7 +15,6 @@ class Newsletter
   has_and_belongs_to_many :subscribers
 
   default_scope where(:is_deleted => false)
-
   scope :find_by_status, ->(_status) { _status.present? ? where(:status => _status) : self.all }
 
   index({ is_deleted: 1 }, { background: true } )
@@ -26,6 +24,25 @@ class Newsletter
     present_attrs :_id, :title, :subject, :status, :columns, :is_tested, :is_deleted
     present_add   :created_at=> self.created_at.strftime("%Y-%m-%d")
   end
+
+  def deliver_news(content_html, protocol_hostname, callback)
+    Sidekiq.redis{|r| r.set('news_flag', '1')}
+    NewsletterWorker.perform_async(self._id, content_html, protocol_hostname, callback)
+    self.status = -1
+    save
+    # Subscriber.all.each do |subscriber|
+    #   NewsletterMailer.news_email(subscriber).deliver
+    # end
+  end
+
+  def deliver_test_news(content_html, protocol_hostname, callback, test_emails)
+    MailgunApi.newsletter(self, content_html, protocol_hostname, callback, test_emails)
+    self.is_tested = true
+    save
+    # Subscriber.all.each do |subscriber|
+    #   NewsletterMailer.news_email(subscriber).deliver
+    # end
+  end  
 
   def cancel
     self.status = -2

@@ -32,17 +32,17 @@
                 </thead>
                 <tbody>
                     <% @notices['data'].to_a.each do |notice| %>
-                    <tr id="<%= notice["_id"] %>">
+                    <tr id="<%= notice.id %>">
                             <td class="content" >
                                 <div class="normal-text">
-                                    <p><%= notice['title'] %></p>
+                                    <p><%= notice.title %></p>
                                 </div>
                                 <div class="detail-text">
-                                    <%= notice["content"] %>
+                                    <%= notice.content %>
                                 </div>
                             </td>
                             <td class="time" >
-                                <abbr class="timeago" title="<%= Time.at(notice["created_at"]) %>"></abbr>
+                                <abbr class="timeago" title="<%= Time.at(notice.created_at.to_i) %>"></abbr>
                             </td>
                             <td >
                                 <a href="javascript: void(0);" class="del">删除</a>

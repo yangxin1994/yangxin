@@ -74,11 +74,11 @@
     <tbody>
       <% @answers["data"].each_with_index do |a, i| %>
       <tr>
-        <td><%= a["survey_title"] %></td>
-        <td><%= int_time_to_date(a["created_at"].to_i) %></td>
-        <td><%= sanitize(answered?(a["answer_status"], a["answer_reject_type"], a["free_reward"])) %>
+        <td><%= a.survey.try(:title).to_s %></td>
+        <td><%= int_time_to_date(a.created_at.to_i) %></td>
+        <td><%= sanitize(answered?(a.status, a.reject_type, a[:free_reward])) %>
         </td>
-        <td><%= sanitize a["select_reward"] %></td>
+        <td><%= sanitize a[:select_reward] %></td>
       </tr>
       <% end %>
     </tbody>

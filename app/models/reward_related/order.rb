@@ -1,11 +1,34 @@
 # encoding: utf-8
-#already tidied up
 class Order
+
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt
-  extend Mongoid::FindHelper
   include Mongoid::CriteriaExt
+  include FindTool
+
+  # status
+  WAIT = 1
+  HANDLE = 2
+  SUCCESS = 4
+  FAIL = 8
+  CANCEL = 16
+  FROZEN = 32
+  REJECT = 64
+
+  # type
+  VIRTUAL = 1
+  REAL = 2
+  MOBILE_CHARGE = 4
+  ALIPAY = 8
+  JIFENBAO = 16
+  QQ_COIN = 32
+  SMALL_MOBILE_CHARGE = 64
+
+  # source
+  ANSWER_SURVEY = 1
+  WIN_IN_LOTTERY = 2
+  REDEEM_GIFT = 4
 
 
   field :code, :type => String, default: ->{ Time.now.strftime("%Y%m%d") + sprintf("%05d",rand(10000)) }
@@ -39,29 +62,6 @@ class Order
   belongs_to :answer
   belongs_to :sample, :class_name => "User", :inverse_of => :orders
 
-  # status
-  WAIT = 1
-  HANDLE = 2
-  SUCCESS = 4
-  FAIL = 8
-  CANCEL = 16
-  FROZEN = 32
-  REJECT = 64
-
-  # type
-  VIRTUAL = 1
-  REAL = 2
-  MOBILE_CHARGE = 4
-  ALIPAY = 8
-  JIFENBAO = 16
-  QQ_COIN = 32
-  SMALL_MOBILE_CHARGE = 64
-
-  # source
-  ANSWER_SURVEY = 1
-  WIN_IN_LOTTERY = 2
-  REDEEM_GIFT = 4
-
   index({ code: 1 }, { background: true } )
   index({ status: 1 }, { background: true } )
   index({ source: 1 }, { background: true } )
@@ -69,19 +69,14 @@ class Order
   index({ type: 1, status: 1 ,ofcard_order_id: 1}, { background: true } )
 
 
-  def self.find_by_id(order_id)
-    return Order.where(:_id => order_id).first
-  end
-
-
   def self.create_redeem_order(sample_id, gift_id, amount, point, opt = {})
-    gift  = Gift.find_by_id(gift_id)
+    gift  = Gift.normal.find_by_id(gift_id)
     return ErrorEnum::ORDER_ERROR if amount.to_i < 1
     point = gift.point.to_i  * amount.to_i
     sample = User.sample.find_by_id(sample_id)
     return ErrorEnum::POINT_NOT_ENOUGH if sample.point.to_i < point.to_i 
     return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
-    gift = Gift.find_by_id(gift_id)
+    gift = Gift.normal.find_by_id(gift_id)
     return ErrorEnum::GIFT_NOT_EXIST if gift.nil?
     order = Order.create(:source => REDEEM_GIFT, :amount => amount, :point => point, :type => gift.type)
     order.sample = sample
@@ -112,12 +107,11 @@ class Order
     return order
   end
 
-
   def self.create_lottery_order(answer_id, sample_id, survey_id, prize_id, ip_address, opt = {})
     sample = User.sample.find_by_id(sample_id)
     survey = Survey.find_by_id(survey_id)
     return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-    prize = Prize.find_by_id(prize_id)
+    prize = Prize.normal.find_by_id(prize_id)
     return ErrorEnum::PRIZE_NOT_EXIST if prize.nil?
     order = Order.new(:source => WIN_IN_LOTTERY, :type => prize.type, :amount => prize.amount)
     order.sample = sample if sample.present?
@@ -147,15 +141,55 @@ class Order
     ##synchro  reverver info 
     if opt['info_sys'].to_s == 'true'
       option = {}
-      option["receiver"]    = order[:receiver]  
+      option["receiver"]    = order[:receiver] 
       option["mobile"]      = order[:mobile]
       option["address"]     = order[:address]
       option["street_info"] = order[:street_info]
       option["postcode"]    = order[:postcode]
       sample.set_receiver_info(option) if sample.present?
     end 
-    LotteryLog.create_succ_lottery_Log(answer_id,order.id,survey_id,sample_id,ip_address,prize_id)
+
+    LotteryLog.create_succ_lottery_Log(answer_id:answer_id,
+                      order_id:order.id,
+                      survey_id:survey_id,
+                      sample_id:sample_id,
+                      ip_address:ip_address,
+                      prize_id:prize_id
+                      )
     return order
+  end
+
+  def self.create_answer_alipay_order(answer, reward)
+    order_info = { "alipay_account" => reward["alipay_account"] }
+    order_info.merge!("status" => FROZEN) if answer.status == UNDER_REVIEW
+    Order.create_answer_order(
+      answer.user.try(:_id),
+      answer.survey._id.to_s,
+      ALIPAY,
+      reward["amount"],
+      order_info)
+  end
+
+  def self.create_answer_jifenbao_order(answer, reward)
+    order_info = { "alipay_account" => reward["alipay_account"] }
+    order_info.merge!("status" => FROZEN) if answer.status == UNDER_REVIEW
+    Order.create_answer_order(
+      answer.user.try(:_id),
+      answer.survey._id.to_s,
+      JIFENBAO,
+      reward["amount"],
+      order_info)
+  end
+
+  def self.create_answer_mobile_order(answer, reward)
+    order_info = { "mobile" => reward["mobile"] }
+    order_info.merge!("status" => FROZEN) if answer.status == UNDER_REVIEW
+    Order.create_answer_order(
+      answer.user.try(:_id),
+      answer.survey._id.to_s,
+      SMALL_MOBILE_CHARGE,
+      reward["amount"],
+      order_info)
   end
 
 
@@ -180,16 +214,42 @@ class Order
     return order
   end
 
+  def self.search_orders(email, mobile, code, status, source, type)
+    if !email.blank?
+      return [] if User.sample.find_by_email(email).nil?
+      orders = User.sample.find_by_email(email).orders.desc(:created_at) || []
+    elsif !mobile.blank?
+      return [] if User.sample.find_by_mobile(mobile).nil?
+      orders = User.sample.find_by_mobile(mobile).orders.desc(:created_at) || []
+    elsif !code.blank?
+      orders = Order.where(:code => /#{code}/).desc(:created_at)
+    else
+      orders = Order.all.desc(:created_at)
+    end
 
+    if !status.blank? && status != 0
+      status_ary = Tool.convert_int_to_base_arr(status)
+      orders = orders.where(:status.in => status_ary)
+    end
+    if !source.blank? && source != 0
+      source_ary = Tool.convert_int_to_base_arr(source)
+      orders = orders.where(:source.in => source_ary)
+    end
+    if !type.blank? && type != 0
+      type_ary = Tool.convert_int_to_base_arr(type)
+      orders = orders.where(:type.in => type_ary)
+    end
+    return orders
+  end
 
   def auto_handle
     return false if self.status != WAIT
     return false if ![MOBILE_CHARGE, QQ_COIN].include?(self.type)
     case self.type
     when MOBILE_CHARGE
-      # ChargeClient.mobile_charge(self.mobile, self.amount, self._id.to_s)
+      # ChargeClient.new.mobile_charge(self.mobile, self.amount, self._id.to_s)
     when QQ_COIN
-      # ChargeClient.qq_charge(self.qq, self.amount, self._id.to_s)
+      # ChargeClient.new.qq_charge(self.qq, self.amount, self._id.to_s)
     end
   end
 
@@ -199,7 +259,6 @@ class Order
     self.handled_at = Time.now.to_i
     return self.save
   end
-
 
   def finish(success, remark = "")
     return ErrorEnum::WRONG_ORDER_STATUS if self.status != HANDLE
@@ -214,6 +273,7 @@ class Order
     end
     return self.save
   end
+
 
   def self.search_orders(email, mobile, code, status, source, type)
     if !email.blank?
@@ -247,8 +307,6 @@ class Order
     return self.save
   end
 
-
-
   def update_remark(remark)
     self.remark = remark
     return self.save
@@ -267,6 +325,12 @@ class Order
         self.street_info.to_s + " " + self.postcode.to_s + " " + self.receiver.to_s)
     end
     return self
+  end
+
+  def update_status(handle = true)
+    self.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
+    self.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i} ) if self.status == REJECT
+    self.auto_handle if handle
   end
 
   def info_for_sample
@@ -298,3 +362,4 @@ class Order
     return order_obj
   end
 end
+
