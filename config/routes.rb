@@ -20,6 +20,7 @@ OopsData::Application.routes.draw do
 
   # sample
   scope :module => "sample" do
+    resources :connects, :only => [:show]
     resource :account, :only => [] do
       collection do
         get  :sign_in, :as => :sign_in

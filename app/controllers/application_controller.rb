@@ -121,7 +121,8 @@ class ApplicationController < ActionController::Base
   end
   def social_auth_link(website)
     redirect_uri = social_redirect_uri(website)
-    client_id = Rails.application.config.authkeys[website.to_sym]
+    client_id = OOPSDATA[Rails.env]["#{website}_app_key"]
+    #client_id = Rails.application.config.authkeys[website.to_sym]
     case website
     when 'sina'
       return "https://api.weibo.com/oauth2/authorize?client_id=#{client_id}&response_type=code&redirect_uri=#{redirect_uri}&display=page"

@@ -26,26 +26,53 @@ class ThirdPartyUser
   def self.get_access_token(website, code, redirect_uri)
     case website
     when "sina"
-      response_data = SinaUser.get_access_token(code, redirect_uri)
+      request_uri = "https://api.weibo.com/oauth2/access_token"
     when "renren"
-      response_data = RenrenUser.get_access_token(code, redirect_uri)
+      request_uri = "https://graph.renren.com/oauth/token"
     when "qq"
-      response_data = QqUser.get_access_token(code, redirect_uri)
-    when "google"
-      response_data = GoogleUser.get_access_token(code, redirect_uri)
-    when "kaixin001"
-      response_data = KaixinUser.get_access_token(code, redirect_uri)
-    when "douban"
-      response_data = DoubanUser.get_access_token(code, redirect_uri)
-    when "baidu"
-      response_data = BaiduUser.get_access_token(code, redirect_uri)
-    when "sohu"
-      response_data = SohuUser.get_access_token(code, redirect_uri)
+      request_uri = "https://graph.qq.com/oauth2.0/token"
     when "qihu360"
-      response_data = QihuUser.get_access_token(code, redirect_uri)
-    else
-      response_data = {}
+      request_uri = "https://api.weibo.com/oauth2/access_token"
+    when "alipay"
+      request_uri = "https://api.weibo.com/oauth2/access_token"
+    when "tecent"
+      request_uri = "https://api.weibo.com/oauth2/access_token"
+    # when "google"
+    #   request_uri = "https://api.weibo.com/oauth2/access_token"
+    # when "kaixin001"
+    #   request_uri = "https://api.weibo.com/oauth2/access_token"
+    # when "douban"
+    #   request_uri = "https://api.weibo.com/oauth2/access_token"
+    # when "baidu"
+    #   request_uri = "https://api.weibo.com/oauth2/access_token"
+    # when "sohu"
+    #   request_uri = "https://api.weibo.com/oauth2/access_token"
     end
+
+    access_token_params = {
+      "client_id" => OOPSDATA[Rails.env]["#{website}_app_key"],
+      "client_secret" => OOPSDATA[Rails.env]["#{website}_app_secret"],
+      "redirect_uri" => redirect_uri || OOPSDATA[Rails.env]["#{website}_redirect_uri"],
+      "grant_type" => "authorization_code",
+      "code" => code
+    }
+---------------------
+    access_token_params = {
+      "client_id" => OOPSDATA[Rails.env]["qq_app_id"],
+      "client_secret" => OOPSDATA[Rails.env]["qq_app_key"],
+      "redirect_uri" => redirect_uri || OOPSDATA[Rails.env]["qq_redirect_uri"],
+      "grant_type" => "authorization_code",
+      "state" => Time.now.to_i,
+      "code" => code
+    }
+    retval = Tool.send_post_request("https://graph.qq.com/oauth2.0/token", access_token_params, true)
+    access_token, expires_in = *(retval.body.split('&').map { |ele| ele.split('=')[1] })
+    
+    response_data = {"access_token" => access_token, "expires_in" => expires_in}        
+    return response_data
+------------------------
+    retval = Tool.send_post_request(request_uri, access_token_params, true)
+    response_data = JSON.parse(retval.body)
     return response_data
   end
 
