@@ -75,6 +75,7 @@
           </button>
           <ul class="dropdown-menu">
             <li><a href="#info" class="info"><i class="icon-wrench"></i>问卷基本设置</a></li>
+            <li><a href="#cost" class="cost"><i class="icon-wrench"></i>问卷成本</a></li>
             <li><a href="/admin/surveys/<%= survey._id %>/reward_schemes" ><i class="icon-wrench"></i>奖励方案设置</a></li>
             <li><a href="/admin/surveys/<%= survey._id %>/promote" ><i class="icon-share"></i>推送渠道设置</a></li>
           </ul>
@@ -130,3 +131,16 @@
       <button type="button" class="btn btn-primary" data-loading-text="保存中..." id="send_info">确定修改</button>
     </div>
   </div>
+
+  <div class="modal hide fade" id="cost_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>样本权限设置</h3>
+    </div>
+    <div class="modal-body">
+      <p>成本</p>
+    </div>
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#cost_modal').modal('hide');">关闭</a>
+    </div>
+  </div>  

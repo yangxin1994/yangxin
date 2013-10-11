@@ -78,4 +78,12 @@ class Prize
 		self.status = DELETED
 		return self.save
 	end
+
+	def picture_url
+		if photo
+			photo.picture_url
+		else
+			""
+		end
+	end
 end

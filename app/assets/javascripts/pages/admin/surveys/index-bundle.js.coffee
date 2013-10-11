@@ -22,6 +22,11 @@ $ ->
       error: ->
           alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
 
+  $(".cost").click ->
+    $this = $(this).closest('td')
+    $("#sid").val($this.data("sid"))
+    $('#cost_modal').modal('show')
+
   $("#send_info").click ->
     $('#info_modal').modal('hide');
     alert_msg.show('info', "正在处理,请稍后...")
