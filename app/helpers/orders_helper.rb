@@ -37,11 +37,11 @@ module OrdersHelper
   def order_label(type)
     case type.to_i
     when 1
-      "收货信息"
+      "收货信息(点击看详细)"
     when 2
-      "收货地址"
+      "收货信息(点击看详细)"
     when 4
-      "电话号码"
+      "电话号码(点击看详细)"
     when 8
       "支付宝账号"
     when 16
@@ -51,7 +51,7 @@ module OrdersHelper
     when 64
       "电话号码"
     else
-      "收货信息"
+      "收货信息(点击看详细)"
     end
   end
 

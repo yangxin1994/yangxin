@@ -90,12 +90,8 @@ class Admin::SamplesController < Admin::AdminController
   end
 
   def answer_log
-<<<<<<< HEAD
-    @answers = Answer.not_preview.desc(:created_at)
-=======
     @sample = User.find(params[:id])
     @answers = @sample.answers.not_preview.desc(:created_at)
->>>>>>> f756deb958c20ec84009ed5af31d7f87820d2c7a
     @answers = auto_paginate(@answers) do |paginated_answers|
       paginated_answers.map { |e| e.info_for_admin }
     end

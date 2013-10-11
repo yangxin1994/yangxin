@@ -734,8 +734,9 @@ class User
 	end
 
 	def self.cal_point
-		User.where(status: 2).each_with_index do |u, index|
-			puts index if index%100 == 0
+		SurveySpread.all.each do |ss|
+			u = ss.user
+			next if u.blank?
 			u.cal_point
 		end
 	end
