@@ -20,7 +20,8 @@ class SmsApi # 短信接口
   # PASSWORD = '007266'
   # real account
   CDKEY = "3SDK-EMY-0130-PIWST"
-  PASSWORD = '349473'
+  #PASSWORD = '349473'
+  PASSWORD = 'od@2013'
   CODE = 4699
   AUTOGRAPH = '［问卷吧］'
   ##### 注意: 不能使用短信接口发送个人信息(如"老地方见","你在哪"之类)                   #####
@@ -50,8 +51,19 @@ class SmsApi # 短信接口
     puts result.parsed_response
   end
 
+  def self.get_sent_status
+    result = get('/sdkproxy/getreport.action',
+            :query => { :cdkey => SmsApi::CDKEY,
+                         :password => SmsApi::PASSWORD
+                      })     
+  end
+
+  def self.reset_password
+    result = get('/sdkproxy/changepassword.action', :query => {:cdkey => CDKEY,:password => '349473',:newPassword => PASSWORD})
+  end
+
   #同步发送即时短信
-  def self.send_sms(phone, message)
+  def self.send_sms(type,phone, message)
     Rails.logger.info "AAAAAAAAAAAAAA"
     Rails.logger.info phone
     Rails.logger.info message
@@ -61,12 +73,17 @@ class SmsApi # 短信接口
     puts message
     puts "AAAAAAAAAAAAAA"
     return if Rails.env != "production"
+    seqid = Random.rand(10000..9999999999999999).to_i
+
     result = get('/sdkproxy/sendsms.action',
             :query => { :cdkey => SmsApi::CDKEY,
                          :password => SmsApi::PASSWORD,
                          :phone    => phone,
-                         :message  => message })
-
+                         :message  => message,
+                         :seqid => seqid
+                      }) 
+    #status = get_sent_status
+    SmsHistory.create(mobile:phone,type:type,seqid:seqid)
   end
 
   #查询短信剩余条数
@@ -133,15 +150,15 @@ class SmsApi # 短信接口
     text_template_file_name = "#{Rails.root}/app/views/sms_text/invitation_sms.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
     text = text_template.result(binding)
-    self.send_sms(mobile, text)
+    self.send_sms('invitation',mobile, text)
   end
 
-  def self.find_password_sms(mobile, callback, opt)
+  def self.find_password_sms(type,mobile, callback, opt)
     @code = opt["code"].to_s
     text_template_file_name = "#{Rails.root}/app/views/sms_text/find_password_sms.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
     text = text_template.result(binding)
-    self.send_sms(mobile, text)
+    self.send_sms(type,mobile, text)
   end
 
   def self.change_mobile_sms(mobile, callback, opt)
@@ -152,28 +169,28 @@ class SmsApi # 短信接口
     self.send_sms(mobile, text)
   end
   
-  def self.rss_subscribe_sms(mobile, callback, opt)
+  def self.rss_subscribe_sms(type,mobile, callback, opt)
     @code = opt["code"].to_s
     text_template_file_name = "#{Rails.root}/app/views/sms_text/rss_subscribe_sms.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
     text = text_template.result(binding)
-    self.send_sms(mobile, text)
+    self.send_sms(type,mobile, text)
   end
 
-  def self.activate_sms(mobile, callback, opt)
+  def self.activate_sms(type,mobile, callback, opt)
     @code = opt["code"].to_s
     text_template_file_name = "#{Rails.root}/app/views/sms_text/activate_sms.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
     text = text_template.result(binding)
-    self.send_sms(mobile, text)
+    self.send_sms(type,mobile, text)
   end
 
-  def self.welcome_sms(mobile, callback, opt)
+  def self.welcome_sms(type,mobile, callback, opt)
     @code = opt["active_code"].to_s
     text_template_file_name = "#{Rails.root}/app/views/sms_text/welcome_sms.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
     text = text_template.result(binding)
-    self.send_sms(mobile, text)
+    self.send_sms(type,mobile, text)
   end
 
   def self.charge_confirm_sms(mobile, callback, opt)
