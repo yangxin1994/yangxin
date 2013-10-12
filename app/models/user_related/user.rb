@@ -670,5 +670,4 @@ class User
     end
     return nickname
   end
-
 end
