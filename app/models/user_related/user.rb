@@ -217,7 +217,6 @@ class User
     end
   end
 
-
   def self.forget_pass_mobile_activate(mobile,code)
     sample = self.find_by_mobile(mobile)
     if sample.present?
