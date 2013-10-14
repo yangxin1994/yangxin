@@ -217,7 +217,6 @@ class User
     end
   end
 
-
   def self.forget_pass_mobile_activate(mobile,code)
     sample = self.find_by_mobile(mobile)
     if sample.present?
@@ -671,5 +670,4 @@ class User
     end
     return nickname
   end
-
 end

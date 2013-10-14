@@ -76,7 +76,7 @@ class InterviewerTask
         self.quota["finished_count"] += 1
         self.quota["submitted_count"] += 1
         self.quota["rules"].each do |rule|
-            if answer.satisfy_conditions(rule["conditions"] || [], false)
+            if answer.satisfy_conditions(rule["conditions"] || [])
                 rule["finished_count"] += 1
                 rule["submitted_count"] += 1
             end
@@ -86,7 +86,7 @@ class InterviewerTask
     unreviewed_answers.each do |answer|
         self.quota["submitted_count"] += 1
         self.quota["rules"].each do |rule|
-            if answer.satisfy_conditions(rule["conditions"] || [], false)
+            if answer.satisfy_conditions(rule["conditions"] || [])
                 rule["submitted_count"] += 1
             end
         end
@@ -98,6 +98,33 @@ class InterviewerTask
     # update status
     self.update_status
 
+    return self
+  end
+
+  def submit_answers(answers)
+    answers.each do |a|
+      # convert the gps or 3g location to a region code
+      region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
+      if a["status"].to_i == 1
+        status = Answer::REJECT
+      else
+        status = self.survey.answer_need_review ? Answer::UNDER_REVIEW : Answer::FINISH
+      end
+      answer_to_insert = {:interviewer_task_id => self._id,
+        :survey_id => self.survey_id,
+        :channel => -2,
+        :created_at => Time.at(a["created_at"]),
+        :finished_at => a["finished_at"].to_i,
+        :answer_content => a["answer_content"],
+        :attachments => a["attachments"],
+        :latitude => a["location"][0].to_s,
+        :longitude => a["location"][1].to_s,
+        :status => status,
+        :reject_type => a["reject_type"].to_i,
+        :region => region}
+      Answer.create(answer_to_insert)
+    end
+    self.refresh_quota
     return self
   end
 end

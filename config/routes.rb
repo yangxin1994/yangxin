@@ -527,4 +527,20 @@ OopsData::Application.routes.draw do
   root :to => "sample/homes#show"
   # Just for test
   resource :odwidgets, :only => [:show]
+
+
+  ########
+  match 'quillu/login', to: 'quillu#login', :via => [:get, :post]
+  match 'quillu/interviewer/interviewer_tasks', to: 'quillu#list_tasks', :via => [:get, :post]
+  match 'quillu/interviewer/interviewer_tasks/:id', to: 'quillu#show_task', :via => [:get, :post]
+  match 'quillu/surveys/:survey_id', to: 'quillu#show_survey', :via => [:get, :post]
+  match 'quillu/surveys/:survey_id/pages/:page_id.json', to: 'quillu#show_page', :via => [:get, :post]
+  match 'quillu/tools/find_provinces', to: 'quillu#find_provinces', :via => [:get, :post]
+  match 'quillu/tools/find_cities_by_province', to: 'quillu#find_cities_by_province', :via => [:get, :post]
+  match 'quillu/tools/find_towns_by_city', to: 'quillu#find_towns_by_city', :via => [:get, :post]
+  match 'quillu/tools/find_address_text_by_code', to: 'quillu#find_address_text_by_code', :via => [:get, :post]
+  match 'quillu/interviewer/interviewer_tasks/:interviewer_task_id/answers/submit', to: 'quillu#submit_answers', :via => [:get, :post]
+  match 'quillu/interviewer/materials', to: 'quillu#submit_material', :via => [:get, :post]
+  match 'quillu/materials/:material_id/preview', to: 'quillu#preview_material', :via => [:get, :post]
+  match 'quillu/materials/:material_id', to: 'quillu#show_material', :via => [:get, :post]
 end
