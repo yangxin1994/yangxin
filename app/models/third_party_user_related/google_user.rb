@@ -5,8 +5,6 @@ class GoogleUser < ThirdPartyUser
   field :locale, :type => String
   field :google_email, :type => String  
 
-  alias get_user_info call_method
-
   public
 
   def self.get_access_token(code, redirect_uri)
@@ -67,6 +65,8 @@ class GoogleUser < ThirdPartyUser
     end
     return JSON.parse(retval.body)
   end
+
+  alias get_user_info call_method
 
   def update_user_info
     @select_attrs = %{name gender locale google_email}

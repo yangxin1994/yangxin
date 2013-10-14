@@ -1,6 +1,7 @@
 require 'encryption'
 require 'error_enum'
 require 'tool'
+require 'uri'
 class ThirdPartyUser
 
   include Mongoid::Document
@@ -23,79 +24,79 @@ class ThirdPartyUser
 
   public
 
-  def self.get_access_token(website, code, redirect_uri)
-    case website
+  def self.get_access_token(opt)
+    access_token_params = {
+      "client_id" => OOPSDATA[Rails.env]["#{opt[:account]}_app_key"],
+      "client_secret" => OOPSDATA[Rails.env]["#{opt[:account]}_app_secret"],
+      "redirect_uri" => opt[:redirect_uri],
+      "grant_type" => "authorization_code",
+      "code" => opt[:param_obj][:code]
+    }
+    case opt[:account]
     when "sina"
       request_uri = "https://api.weibo.com/oauth2/access_token"
     when "renren"
       request_uri = "https://graph.renren.com/oauth/token"
     when "qq"
       request_uri = "https://graph.qq.com/oauth2.0/token"
-    when "qihu360"
-      request_uri = "https://api.weibo.com/oauth2/access_token"
+      state = {"state" => Time.now.to_i}
+      access_token_params.merge!(state)
     when "alipay"
-      request_uri = "https://api.weibo.com/oauth2/access_token"
+      # access_token_params = {
+      #   "method" => 'alipay.system.oauth.token',
+      #   "format" => 'json',
+      #   "timestamp" => Time.now.strftime('%Y-%m-%d %H:%M:%S'),
+      #   "app_id" => OOPSDATA[Rails.env]["#{opt[:account]}_app_key"],
+      #   "version" => 1.0,
+      #   "sign_type" => "RSA",
+      #   "sign" => SecureRandom.uuid
+      # }
+      access_token_params = {
+        "method" => 'alipay.system.oauth.token',
+        "format" => 'json',
+        "timestamp" => Time.now.strftime('%Y-%m-%d %H:%M:%S'),
+        "app_id" => '2013101100001739',
+        "version" => 1.0,
+        "sign_type" => "RSA",
+        "sign" => SecureRandom.uuid,
+        "platform" => 'top',
+        "terminal_type" => 'web',
+        "grant_type" => 'authorization_code',
+        "code" => opt[:param_obj][:code]
+      }
+      request_uri = "https://openapi.alipay.com/gateway.do"
     when "tecent"
-      request_uri = "https://api.weibo.com/oauth2/access_token"
-    # when "google"
-    #   request_uri = "https://api.weibo.com/oauth2/access_token"
-    # when "kaixin001"
-    #   request_uri = "https://api.weibo.com/oauth2/access_token"
-    # when "douban"
-    #   request_uri = "https://api.weibo.com/oauth2/access_token"
-    # when "baidu"
-    #   request_uri = "https://api.weibo.com/oauth2/access_token"
-    # when "sohu"
-    #   request_uri = "https://api.weibo.com/oauth2/access_token"
+      request_uri = "https://open.t.qq.com/cgi-bin/oauth2/access_token"
+      state = {"state" => Time.now.to_i}
+      access_token_params.merge!(state)      
+    when "qihu360" #TODO need ICP information
+      request_uri = "https://openapi.360.cn/oauth2/access_token"
     end
 
-    access_token_params = {
-      "client_id" => OOPSDATA[Rails.env]["#{website}_app_key"],
-      "client_secret" => OOPSDATA[Rails.env]["#{website}_app_secret"],
-      "redirect_uri" => redirect_uri || OOPSDATA[Rails.env]["#{website}_redirect_uri"],
-      "grant_type" => "authorization_code",
-      "code" => code
-    }
----------------------
-    access_token_params = {
-      "client_id" => OOPSDATA[Rails.env]["qq_app_id"],
-      "client_secret" => OOPSDATA[Rails.env]["qq_app_key"],
-      "redirect_uri" => redirect_uri || OOPSDATA[Rails.env]["qq_redirect_uri"],
-      "grant_type" => "authorization_code",
-      "state" => Time.now.to_i,
-      "code" => code
-    }
-    retval = Tool.send_post_request("https://graph.qq.com/oauth2.0/token", access_token_params, true)
-    access_token, expires_in = *(retval.body.split('&').map { |ele| ele.split('=')[1] })
-    
-    response_data = {"access_token" => access_token, "expires_in" => expires_in}        
-    return response_data
-------------------------
     retval = Tool.send_post_request(request_uri, access_token_params, true)
-    response_data = JSON.parse(retval.body)
+    case opt[:account]
+    when 'qq','tecent'
+      access_token, expires_in, refresh_token = *(retval.body.split('&').map { |ele| ele.split('=')[1] })      
+      response_data = {"access_token" => access_token, "expires_in" => expires_in,:refresh_token => refresh_token}
+      response_data.merge!(opt[:param_obj])   
+    else
+      response_data = JSON.parse(retval.body)
+    end 
     return response_data
   end
 
-  def self.find_or_create_user(website, response_data)
+  def self.find_or_create_user(website, response_data,current_user)
     case website
     when "sina"
-      tp_user = SinaUser.save_tp_user(response_data)
+      tp_user = SinaUser.save_tp_user(response_data,current_user)
     when "renren"
-      tp_user = RenrenUser.save_tp_user(response_data)
+      tp_user = RenrenUser.save_tp_user(response_data,current_user)
     when "qq"
-      tp_user = QqUser.save_tp_user(response_data)
-    when "google"
-      tp_user = GoogleUser.save_tp_user(response_data)
-    when "kaixin001"
-      tp_user = KaixinUser.save_tp_user(response_data)
-    when "douban"
-      tp_user = DoubanUser.save_tp_user(response_data)
-    when "baidu"
-      tp_user = BaiduUser.save_tp_user(response_data)
-    when "sohu"
-      tp_user = SohuUser.save_tp_user(response_data)
-    when "qihu360"
-      tp_user = QihuUser.save_tp_user(response_data)
+      tp_user = QqUser.save_tp_user(response_data,current_user)
+    when "tecent"
+      tp_user = TecentUser.save_tp_user(response_data,current_user)
+    when 'alipay'
+      tp_user = AlipayUser.save_tp_user(response_data,current_user)
     else
       return ErrorEnum::WRONG_THIRD_PARTY_WEBSITE
     end
@@ -118,23 +119,26 @@ class ThirdPartyUser
     return self
   end
 
-  
-  def update_user_info
-    response_data = get_user_info
-    #select attribute
-    response_data.select!{|k,v| @select_attrs.split.include?(k.to_s) }
-    #update
-    return self.update_by_hash(response_data)
+
+  def generate_params_string(opts = {})
+    str = ''
+    opts.each{|k,v| str += "&#{k}=#{v}"}
+    str = str.sub!('&','?')
+    return str     
   end
 
   
-  def generate_params_string(opts = {})
-    params_string = ""
-    params.merge(opts.select {|k,v| k.to_s!="method"}).each{|k, v| @params_string +="&#{k}=#{v}"}
-    params_string.sub!("&","?")
-    return params_string
+  def call_method(opt)
+    if opt[:http_method].downcase == "get" 
+      str =  generate_params_string(opt[:opts])
+      retval = Tool.send_get_request(URI.encode("#{opt[:url]}#{opt[:action]}#{opt[:format]}#{str}"), true)      
+    else
+      retval = Tool.send_post_request("#{opt[:url]}#{opt[:action]}#{opt[:format]}", opt[:opts], true)
+    end
+    return JSON.parse(retval.body)
   end
-  
+
+
   #update instance's access_token and save
   def update_access_token(access_token)
     self.access_token = access_token
