@@ -47,7 +47,7 @@ class Quill::ResultsController < Quill::QuillController
   # PAGE, csv header
   def csv_header
     result = @survey.csv_header(:with => "import_id", :text => true)
-    send_data(result.to_csv, :filename => "导入数据-#{id}.csv", :type => 'text/csv')
+    send_data(result, :filename => "导入数据-#{@survey._id}.csv", :type => 'text/csv')
   end
 
   # AJAX import csv data file
@@ -65,7 +65,7 @@ class Quill::ResultsController < Quill::QuillController
     end
     csv = File.read("public/uploads/csv/#{filename}").utf8!
 
-    result = @survey.answer_import(csv.join)
+    result = @survey.answer_import(csv)
     render_json_auto result and return
   end
 end

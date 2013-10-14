@@ -2,6 +2,8 @@
 # already tidied up
 
 require "csv"
+require 'string/utf8'
+
 class Admin::OrdersController < Admin::AdminController
 
   layout "layouts/admin-todc"
@@ -87,7 +89,7 @@ class Admin::OrdersController < Admin::AdminController
       params[:type].to_i).desc(:created_at)
     @orders = @orders.page(page).per(per_page) if params[:page].present?
     send_data(@orders.to_excel.encode("GBK"),
-      :filename => "订单数据#{Time.now.strftime("%M-%d_%T")}.csv", 
+      :filename => "订单数据-#{Time.now.strftime("%M-%d_%T")}.csv", 
       :type => 'text/csv')
   end
 

@@ -1,6 +1,4 @@
 # encoding: utf-8
-# already tidied up
-
 module SurveysHelper
 
   def logic_control_tag(question ,logic_controls)

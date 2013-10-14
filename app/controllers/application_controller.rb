@@ -46,7 +46,7 @@ class ApplicationController < ActionController::Base
   def require_sign_in
     if !user_signed_in
       respond_to do |format|
-        format.html { redirect_to sign_in_path({ref: request.url}) and return }
+        format.html { redirect_to sign_in_account_path({ref: request.url}) and return }
         # format.json { render :json => Common::ResultInfo.error_require_login and return }
         format.json { render_json_e ErrorEnum::REQUIRE_LOGIN and return }
       end
@@ -100,16 +100,16 @@ class ApplicationController < ActionController::Base
     @is_success = _is
   end
 
-  # def fresh_when(opts = {})
-  #   opts[:etag] ||= []
-  #   # 保证 etag 参数是 Array 类型
-  #   opts[:etag] = [opts[:etag]] if !opts[:etag].is_a?(Array)
-  #   # 加入页面上直接调用的信息用于组合 etag
-  #   opts[:etag] << current_user
-  #   # 所有 etag 保持一天
-  #   opts[:etag] << Date.current
-  #   super(opts)
-  # end
+  def fresh_when(opts = {})
+    opts[:etag] ||= []
+    # 保证 etag 参数是 Array 类型
+    opts[:etag] = [opts[:etag]] if !opts[:etag].is_a?(Array)
+    # 加入页面上直接调用的信息用于组合 etag
+    opts[:etag] << current_user
+    # 所有 etag 保持一天
+    opts[:etag] << Date.current
+    super(opts)
+  end
 
 
   # =============================
@@ -188,7 +188,7 @@ class ApplicationController < ActionController::Base
     retval = {}
     retval["current_page"] = page
     retval["per_page"] = per_page
-    retval["previous_page"] = (page - 1 > 0 ? page-1 : 1)
+    retval["previous_page"] = (page - 1 > 0 ? page - 1 : 1)
     # retval["previous_page"] = [page - 1, 1].max
 
     # 当没有block或者传入的是一个mongoid集合对象时就自动分页
@@ -198,9 +198,9 @@ class ApplicationController < ActionController::Base
       if value.methods.include? :page
         count ||= value.count
         value = value.page(retval["current_page"]).per(retval["per_page"])
-      elsif value.is_a?(Array) and value.count > per_page
+      elsif value.is_a?(Array) && value.count > per_page
         count ||= value.count
-        value = value.slice((page-1)*per_page, per_page)
+        value = value.slice((page - 1) * per_page, per_page)
       end
       
         if block_given?

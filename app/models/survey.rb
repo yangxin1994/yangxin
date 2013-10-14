@@ -1,12 +1,24 @@
 # encoding: utf-8
-# already tidied up
 require 'error_enum'
-require 'quality_control_type_enum'
 require 'quill_common'
 require 'csv'
+Dir[File.dirname(__FILE__) + '/lib/survey_components/*.rb'].each {|file| require file }
 class Survey
+  
   include Mongoid::Document
   include Mongoid::Timestamps
+  include SurveyComponents::SurveyPage
+  include SurveyComponents::SurveyLogicControl
+  include SurveyComponents::SurveyQuota
+  include SurveyComponents::SurveyReportMockup
+  include SurveyComponents::SurveyFilter
+  include FindTool
+
+  META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
+  CLOSED = 1
+  PUBLISHED = 2
+  DELETED = 4
+
   field :title, :type => String, default: "调查问卷主标题"
   field :subtitle, :type => String, default: ""
   field :welcome, :type => String, default: ""
@@ -15,11 +27,7 @@ class Survey
   field :footer, :type => String, default: ""
   field :description, :type => String, default: "调查问卷描述"
   # can be 1 (closed), 2 (published), 4 (deleted)
-  field :status, :type => Integer, default: 1
-  field :pages, :type => Array, default: [{"name" => "", "questions" => []}]
-  field :quota, :type => Hash, default: {"rules" => [{"conditions" => [], "amount" => 100, "finished_count" => 0, "submitted_count" => 0}], "is_exclusive" => true, "quota_satisfied" => false, "finished_count" => 0, "submitted_count" => 0 }
-  field :filters, :type => Array, default: []
-  field :logic_control, :type => Array, default: []
+  field :status, :type => Integer, default: 2
   field :style_setting, :type => Hash, default: {"style_sheet_name" => "",
     "has_progress_bar" => true,
     "has_question_number" => true,
@@ -27,14 +35,14 @@ class Survey
     "has_advertisement" => true,
     "has_oopsdata_link" => true,
     "redirect_link" => "",
-    "allow_pageup" => false}
+  "allow_pageup" => false}
   field :access_control_setting, :type => Hash, default: {"times_for_one_computer" => -1,
     "has_captcha" => false,
     "ip_restrictions" => [],
     "password_control" => {"password_type" => -1,
       "single_password" => "",
       "password_list" => [],
-      "username_password_list" => []}}
+    "username_password_list" => []}}
   # the type of inserting quality control question
   #  0 for not inserting
   #  1 for inserting manually
@@ -46,7 +54,6 @@ class Survey
   field :is_star, :type => Boolean, :default => false
   field :publish_result, :type => Boolean, :default => false
   field :delta, :type => Boolean, :default => true
-  field :point, :type => Integer, :default => 0
   # reward for introducing others
   field :spread_point, :type => Integer, default: 0
   field :quillme_promotable, :type => Boolean, default: false
@@ -70,7 +77,7 @@ class Survey
   field :sms_promote_info, :type => Hash, default: {
     "sms_amount" => 0,
     "promote_to_undefined_sample" => false,
-    "promote_sms_count" => 0,   
+    "promote_sms_count" => 0,
     "reward_scheme_id" => ""
   }
   field :broswer_extension_promote_info, :type => Hash, default: {
@@ -96,30 +103,33 @@ class Survey
   has_many :export_results
   has_many :analysis_results
   has_many :report_results
-  has_many :report_mockups
   has_many :interviewer_tasks
   has_many :agent_tasks
   has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
   belongs_to :user, class_name: "User", inverse_of: :surveys
 
 
-  
-  scope :status, lambda {|st| where(:status => st)}
-  scope :reward_type,lambda {|rt| where(:quillme_promote_reward_type.in => rt)}
-  scope :opend, lambda { where(:status => 2)}
-  scope :closed, lambda { where(:status => 1)}
-  scope :quillme_promote, lambda { where(:quillme_promotable => true)}
-  scope :quillme_hot, lambda {where(:quillme_hot => true)}
-  scope :not_quillme_hot, lambda {where(:quillme_hot => false)}
+  scope :status, ->(st) { where(:status.in => Tool.convert_int_to_base_arr(st || (Survey::CLOSED + Survey::PUBLISHED)))}
+  scope :title, ->(title) { where(title: Regexp.new(title.to_s)) }
+  scope :user, ->(e) {  e.is_admin? ? self.criteria : where(:user_id => e._id) }
+  scope :reward_type,->(rt) { where(:quillme_promote_reward_type.in => rt.split(','))}
+  scope :opend, -> { where(:status => 2)}
+  scope :closed, -> { where(:status => 1)}
+  scope :quillme_promote, -> { where(:quillme_promotable => true)}
+  scope :quillme_hot, -> {where(:quillme_hot => true)}
+  scope :not_quillme_hot, -> {where(:quillme_hot => false)}
+  scope :quillme_normal, -> { self.quillme_promote.not_quillme_hot}
+  scope :stars, -> {where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
+  scope :published, -> { where(:status  => 2) }
+  scope :normal, -> { where(:status.gt => -1) }
+  scope :closed, -> { where(:status => 1) }
+  scope :deleted, -> { where(:status => 4) }
 
 
   index({ title: 1 }, { background: true } )
   index({ status: 1, title: 1 }, { background: true } )
   index({ status: 1, reward: 1}, { background: true } )
   index({ status: 1, is_star: 1 }, { background: true } )
-
-
-  
   index({ quillme_promote_reward_type: 1 }, { background: true } )
   index({ quillme_hot: 1 }, { background: true } )
   index({ user_id: 1 }, { background: true } )
@@ -127,110 +137,73 @@ class Survey
   index({ quillme_promotable: 1, quillme_hot: 1,status: 1,created_at: -1}, { background: true } )
   index({ quillme_promotable: 1, quillme_hot: 1,status: 1,quillme_promote_reward_type: 1}, { background: true } )
 
-  META_ATTR_NAME_ARY = %w[title subtitle welcome closing header footer description]
-  CLOSED = 1
-  PUBLISHED = 2
-  DELETED = 4
-
-
-  scope :stars, ->{where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
-  scope :published, lambda { where(:status  => 2) }
-  scope :normal, lambda { where(:status.gt => -1) }
-  scope :closed, lambda { where(:status => 1) }
-  scope :deleted, lambda { where(:status => 4) }
-
   public
-
-  def self.get_recommends(status=2,reward_type=nil,answer_status=nil,sample=nil,home_page=nil)
-    status = 2 unless status.present?
-    reward_type = nil unless reward_type.present?
-    answer_status = nil unless answer_status.present?
-    total_ids = Survey.quillme_promote.not_quillme_hot.map(&:id)
-    if reward_type.present?
-      reward_type = reward_type.split(',')
-    end
-    if reward_type.present?
-      surveys = Survey.quillme_promote.not_quillme_hot.status(status).reward_type(reward_type).desc(:created_at)    
-    else
-      surveys = Survey.quillme_promote.not_quillme_hot.status(status).desc(:created_at)   
-    end 
-    surveys = get_filter_surveys(surveys,total_ids,answer_status,sample,home_page)
-    return surveys
+  # Class Methods
+  #######################
+  # 问卷吧首页及调研列表页用
+  # 参数: opt ={sample:current_user,home_page:true,status:nil,reward_type:nil,answer_status:nil}
+  # 参数说明:
+  # sample:传递当前登录样本的instance，样本未登录时，可以不传递
+  # home_page:表示当前的调用是否为首页调用，如果不是，可以不传递
+  # status:表示要查询的surveys的状态，如果传递为nil或者不穿地，则默认会被赋值为2，表示开放中的问卷，如果为1表示关闭的问卷
+  # reward_type:表示要查询的某种奖励类型的问卷，传值为nil表示所有奖励类型，如果为字符串类型表示对应类型的问卷,参考值：'1' 或者'1,2,16'等
+  # answers_status:nil或者不传值时表示所有状态的问卷，传值参考:'1' 或者'1,2,4,8'等等
+  #######################
+  def self.get_recommends(opt)
+    total_ids = Survey.quillme_normal.map(&:id)
+    reward_type = opt[:reward_type].split(',') if opt[:reward_type].present?
+    surveys = Survey.quillme_normal.status(opt[:status] || 2).reward_type(opt[:reward_type]).desc(:created_at) if opt[:reward_type].present?
+    surveys = Survey.quillme_normal.status(opt[:status] || 2).desc(:created_at) unless opt[:reward_type].present?
+    surveys = get_filter_surveys(
+      surveys:surveys,total_ids:total_ids,
+      answer_status:opt[:answer_status],
+      sample:opt[:sample],home_page:opt[:home_page])
   end
 
-  def self.get_filter_surveys(surveys,total_ids,answer_status,sample,home_page)
-    if sample.present?
-      if answer_status.present? && answer_status.to_i != 0
-        survey_ids = sample.answers.not_preview.where(:status.in => answer_status.split(',')).map(&:survey_id)
-      elsif answer_status.present? && answer_status.to_i == 0  # 待参与
-        survey_ids = sample.answers.not_preview.map(&:survey_id)
-        survey_ids = total_ids - survey_ids
-      end 
-      surveys = surveys.where(:_id.in => survey_ids) if survey_ids
+  def self.get_filter_surveys(opt)
+    if opt[:sample].present?
+      if opt[:answer_status].present? && opt[:answer_status].to_i != 0
+        survey_ids = opt[:sample].answers.not_preview.special_status(opt[:answer_status]).map(&:survey_id)
+      elsif opt[:answer_status].present? && opt[:answer_status].to_i == 0  # 待参与
+        survey_ids = opt[:sample].answers.not_preview.map(&:survey_id)
+        survey_ids = opt[:total_ids] - survey_ids
+      end
+      opt[:surveys] = opt[:surveys].where(:_id.in => survey_ids) if survey_ids
     end
-    if home_page.present? && surveys.count.to_i < 9
-      extend_surveys = Survey.quillme_promote.not_quillme_hot.closed.desc(:created_at).limit(9 - surveys.count.to_i)
-      surveys = surveys.to_ary + extend_surveys.to_ary
+    if opt[:home_page].present? && opt[:surveys].size.to_i < 9
+      extend_surveys = Survey.quillme_normal.closed.desc(:created_at).limit(9 - opt[:surveys].size.to_i)
+      surveys = opt[:surveys] + extend_surveys
     end
-    return surveys
+    return surveys ||= opt[:surveys]
   end
 
-  def reward_type_info
-    rs = RewardScheme.where(:_id => self.quillme_promote_info['reward_scheme_id']).first
-    info = rs.rewards[0] if rs
-    if info.present? && info['type'].to_i == RewardScheme::LOTTERY
-      info['prize_arr'] = []
-      ids = info['prizes'].map{|priz| priz['id']}
-      prizes = Prize.where(:_id.in => ids)
-      prize_info = {}
-      prizes = prizes.each do |prize|
-        prize_info['prize_id']  = prize.id
-        prize_info['title'] = prize.title
-        prize_info['price'] = prize.price
-        prize_info['description'] = prize.description
-        prize_info['prize_src'] = prize.photo.present? ? prize.photo.picture_url : Prize::DEFAULT_IMG 
-        info['prize_arr'] << prize_info
-        prize_info = {}  
-      end       
-    end
-    return info
+  # Instance Methods
+  delegate :count, :to => :answers,:prefix => true
+  def scheme_id
+    self.quillme_promote_info['reward_scheme_id']
   end
 
-  def excute_sample_data(user)
-    self['answer_count'] = self.answers.count
-    self['time'] = self.estimate_answer_time
-    if user.present?
-      answer = Answer.find_by_survey_id_sample_id_is_preview(self.id, user.id, false)
-      self['answer_status'] = answer.try(:status)
-      self['answer_reject_type'] = answer.try(:reject_type)     
-    else
-      self['answer_status'] = 0
-      self['answer_reject_type'] = 0
-    end
-    self['reward_type_info'] = self.reward_type_info
-    self['scheme_id'] = self.quillme_promote_info['reward_scheme_id']
+  # 查找某个sample 某个survey的answer
+  def answer_by_sample(user=nil)
+    self.answers.where(:is_preview => false,:user_id => user.id).first if user.present?
+  end
+
+  def excute_sample_data(user=nil)
+    answer = answer_by_sample(user)
+    self['answer_status'] = answer.try(:status) || 0
+    self['answer_reject_type'] = answer.try(:reject_type) || 0
+    self['reward_type_info'] = RewardScheme.first_reward_by_survey(self.scheme_id)
     return self
   end
 
-
-    def self.get_reward_type_count(status=2)
-      status = 2 if status.blank?
-      reward_types = Survey.quillme_promote.not_quillme_hot.status(status).map{|s| s.quillme_promote_reward_type}
-      reward_data = {}
-      reward_types.uniq.each do |rt|
-        reward_data[rt] = Survey.quillme_promote.not_quillme_hot.status(status).where(:quillme_promote_reward_type => rt).count
-      end
-      return reward_data
+  def self.get_reward_type_count(status = 2)
+    status = 2 if status.blank?
+    reward_types = Survey.quillme_normal.status(status).map{|s| s.quillme_promote_reward_type}
+    reward_data = {}
+    reward_types.uniq.each do |rt|
+      reward_data[rt] = Survey.quillme_normal.status(status).where(:quillme_promote_reward_type => rt).count
     end
-
-  #----------------------------------------------
-  #
-  #     find_by_*
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def self.find_by_id(survey_id)
-    return Survey.where(:_id => survey_id).first
+    return reward_data
   end
 
   def self.find_by_ids(survey_id_list)
@@ -246,22 +219,31 @@ class Survey
 
   def self.search(options = {})
     surveys = Survey.desc(:star).desc(:created_at)
-    if options[:keyword]
-      if options[:keyword] =~ /^.+@.+$/
-        uid = User.where(:email => options[:keyword]).first.try '_id'
-        surveys = surveys.where(:user_id => uid)
-      else
-        surveys = surveys.where(:title => /.*#{options[:keyword]}.*/)
-      end
+    surveys = surveys.in(:status => Tool.convert_int_to_base_arr(options[:status])) if options[:status]
+    case options[:keyword].to_s
+    when /^.+@.+$/
+      uid = User.where(:email => options[:keyword]).first.try '_id'
+      surveys = surveys.where(:user_id => uid)
+    when ''
+      surveys
+    else
+      surveys = surveys.where(:title => /.*#{options[:keyword]}.*/)
     end
-    if options[:status]
-      surveys = surveys.in :status => Tool.convert_int_to_base_arr(options[:status])
-    end
-    surveys
   end
 
   def update_promote(options)
-    options[:sample_attribute].each_value do |smp_attr|
+    update_sample_attributes(options)
+    options.each do |promote_type, promote_info|
+      next unless promote_info.is_a? Hash
+      options[promote_type][:promotable] = promote_info[:promotable] == "true"
+    end
+    update_promote_info(options)
+    update_agent_promote(options)
+    serialize_in_promote_setting
+  end
+
+  def update_sample_attributes(options)
+    options[:sample_attributes].each_value do |smp_attr|
       if smp_attr[:id].present?
         _id = smp_attr[:id].split('_')[0]
         _type = smp_attr[:id].split('_')[1]
@@ -274,42 +256,28 @@ class Survey
         when 2, 4
           _value = smp_attr[:value].split(' ').map { |e| e.split(',') }
         when 3, 5
-          _value = smp_attr[:value].split(' ').map { |e| Time.parse(e.split(',')).to_i }
+          _value = smp_attr[:value].split(' ').map { |e| e.split(',').map { |_t| Time.parse(_t).to_i } }
         when 6
           _value = smp_attr[:value].split(' ')
         when 7
           _value = smp_attr[:value].split(' ')
         end
         add_sample_attribute_for_promote({
-            :sample_attribute_id => _id,
-            :value => _value
-          })
+          :sample_attribute_id => _id,
+          :value => _value
+        })
       end
     end
-    options.each do |promote_type, promote_info|
-      next unless promote_info.is_a? Hash
-      promote_info[:promotable] = (promote_info[:promotable] == "true")
-      options[promote_type] = promote_info
-    end
+  end
+
+  def update_promote_info(options)
     filters = []
     options["broswer_extension"]["broswer_extension_promote_setting"]["filters"].each_value do |filter|
       filters << filter
     end
     options["broswer_extension"]["broswer_extension_promote_setting"]["filters"] = filters
-    agents = []
-    
-    options["agent"]["agent_promote_setting"]["agents"].each_value do |agent|
-      agent['survey_id'] = options[:id]
-      if _agent_task = AgentTask.where(:_id => agent['task_id']).first
-        agents << _agent_task.update_attributes(agent)
-      else
-        agents << AgentTask.create(agent)
-      end
-    end
-
     _promote_email_count = email_promote_info["promote_email_count"]
     _promote_sms_count = sms_promote_info["promote_sms_count"]
-
     [:quillme, :email, :sms, :broswer_extension, :weibo].each do |promote_type|
       _params = options[promote_type]
       self.update_attributes(
@@ -318,31 +286,21 @@ class Survey
       )
       update_quillme_promote_reward_type if options[promote_type] == :quillme
     end
-
     email_promote_info["promote_email_count"] = _promote_email_count
     sms_promote_info["promote_sms_count"] = _promote_sms_count
     save
-    serialize_in_promote_setting
   end
 
-  #----------------------------------------------
-  #
-  #     set and get basic properties and attributes of the survey
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def save_meta_data(survey_obj)
-    # this is an existing survey
-    if !survey_obj.nil?
-      META_ATTR_NAME_ARY.each do |attr_name|
-        if !survey_obj[attr_name].nil?
-          method_obj = self.method("#{attr_name}=".to_sym)
-          method_obj.call(survey_obj[attr_name])
-        end
+  def update_agent_promote(options)
+    agents = []
+    options["agent"]["agent_promote_setting"]["agents"].each_value do |agent|
+      agent['survey_id'] = options[:id]
+      if _agent_task = AgentTask.where(:_id => agent['task_id']).first
+        agents << _agent_task.update_attributes(agent)
+      else
+        agents << AgentTask.create(agent)
       end
-      self.save
     end
-    return self
   end
 
   def update_deadline(time)
@@ -357,26 +315,10 @@ class Survey
     return true
   end
 
-  def update_star(is_star)
-    self.is_star = is_star
-    self.save
-    return self.is_star
-  end
-
-  def update_style_setting(style_setting_obj)
-    self.style_setting = style_setting_obj
-    self.save
-    return true
-  end
-
-  def show_style_setting
-    return self.style_setting
-  end
-
   def update_access_control_setting(access_control_setting_obj)
     access_control_setting_obj["times_for_one_computer"] = access_control_setting_obj["times_for_one_computer"].to_i
     access_control_setting_obj["password_control"]["password_type"] =
-      access_control_setting_obj["password_control"]["password_type"].to_i
+    access_control_setting_obj["password_control"]["password_type"].to_i
     self.access_control_setting = access_control_setting_obj
     self.save
     return true
@@ -387,26 +329,22 @@ class Survey
   end
 
   def is_pageup_allowed
-    return self.style_setting["allow_pageup"]
+     return self.style_setting["allow_pageup"]
   end
 
   def is_random_quality_control_questions
-    return self.quality_control_questions_type == 2
+     return self.quality_control_questions_type == 2
   end
 
   def show_quality_control
     return {"quality_control_questions_type" => self.quality_control_questions_type,
-        "quality_control_questions_ids" => self.quality_control_questions_ids}
+    "quality_control_questions_ids" => self.quality_control_questions_ids}
   end
 
   def update_quality_control(quality_control_questions_type, quality_control_questions_ids)
-    return ErrorEnum::WRONG_QUALITY_CONTROL_QUESTIONS_TYPE if ![0, 1, 2].include?(quality_control_questions_type)
-    quality_control_questions_ids.each do |qc_id|
-      return ErrorEnum::QUALITY_CONTROL_QUESTION_NOT_EXIST if QualityControlQuestion.find_by_id(qc_id).nil?
-    end
-    self.quality_control_questions_type = quality_control_questions_type
-    self.quality_control_questions_ids = quality_control_questions_ids
-    return self.save
+     self.quality_control_questions_type = quality_control_questions_type
+     self.quality_control_questions_ids = quality_control_questions_ids
+     self.save
   end
 
   def set_spread(spread_point)
@@ -419,7 +357,6 @@ class Survey
     return if s.nil?
     return if s.deadline.nil?
     if Time.now.to_i - s.deadline < 20 && s.deadline - Time.now.to_i < 20
-      # close the survey and refresh the quota
       s.update_attributes(status: CLOSED) if survey.status == PUBLISHED
       s.refresh_quota_stats
     end
@@ -435,278 +372,90 @@ class Survey
     return last_update_time
   end
 
-  #----------------------------------------------
-  #
-  #     clone survey
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
   def clone_survey(operator, title = nil)
-    # clone the meta data of the survey
     new_instance = self.clone
     new_instance.user = operator
-    new_instance.title = title || new_instance.title
-    new_instance.created_at = Time.now
-
-    # some information that cannot be cloned
-    new_instance.status = 0
-    new_instance.status = operator.is_admin? ? PUBLISHED : CLOSED
-
-    new_instance.is_star = false
-    new_instance.point = 0
-    new_instance.spread_point = 0
-    new_instance.answer_auditors.each do |a| new_instance.answer_auditors.delete(a) end
-
-    # the mapping of question ids
-    question_id_mapping = {}
-
-    # clone all questions
-    new_instance.pages.each do |page|
-      page["questions"].each_with_index do |question_id, question_index|
-        question = Question.find_by_id(question_id)
-        return ErrorEnum::QUESTION_NOT_EXIST if question == nil
-        cloned_question = question.clone
-        page["questions"][question_index] = cloned_question._id.to_s
-        question_id_mapping[question_id] = cloned_question._id.to_s
-      end
-    end
-
-    # clone quota rules
-    new_instance.quota["rules"].each do |quota_rule|
-      quota_rule["conditions"].each do |condition|
-        if condition["condition_type"] == 1
-          condition["name"] = question_id_mapping[condition["name"]]
-        end
-      end
-    end
-    new_instance.refresh_quota_stats
-
-    # clone quota rules
-    new_instance.filters.each do |filter|
-      filter["conditions"].each do |condition|
-        if condition["condition_type"] == 1
-          condition["name"] = question_id_mapping[condition["name"]]
-        end
-      end
-    end
-
-    # clone logic control rules
-    new_instance.logic_control.each do |logic_control_rule|
-      logic_control_rule["conditions"].each do |condition|
-        condition["question_id"] = question_id_mapping[condition["question_id"]]
-      end
-      if [1, 2].include?(logic_control_rule["rule_type"])
-        logic_control_rule["result"].each_with_index do |question_id, index|
-          logic_control_rule["result"][index] = question_id_mapping[question_id]
-        end
-      elsif [3, 4].include?(logic_control_rule["rule_type"])
-        logic_control_rule["result"].each do |result_ele|
-          result_ele["question_id"] = question_id_mapping[result_ele["question_id"]]
-        end
-      elsif [5, 6].include?(logic_control_rule["rule_type"])
-        logic_control_rule["result"]["question_id_1"] = question_id_mapping[logic_control_rule["result"]["question_id_1"]]
-        logic_control_rule["result"]["question_id_2"] = question_id_mapping[logic_control_rule["result"]["question_id_2"]]
-      end
-    end
-
-    new_instance.create_default_reward_scheme
-    new_instance.save
-
-    return new_instance
+    new_instance.update_attributes(title: title || new_instance.title, spread_point: 0)
+    new_instance.answer_auditors.each { |a| new_instance.answer_auditors.delete(a) }
+    question_id_mapping = new_instance.clone_page
+    new_instance.clone_quota(question_id_mapping)
+    new_instance.clone_filter(question_id_mapping)
+    new_instance.clone_logic_control(question_id_mapping)
+    new_instance.reward_scheme << RewardScheme.create(default: true)
+    new_instance
   end
 
-  #----------------------------------------------
-  #
-  #     manipulate on status of the survey
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def delete(operator)
-    return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
-    return self.update_attributes(:status => DELETED)
-  end
-
-  def recover(operator)
-    return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
-    return self.update_attributes(:status => CLOSED)
-  end
-
-  def clear(operator)
-    return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
-    return self.destroy
-  end
-
-  #----------------------------------------------
-  #
-  #     manipulate on publish status of the survey
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def close(operator)
-    return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
-    self.update_attributes(:status => CLOSED)
-    return true
-  end
-
-  def publish(operator)
-    return ErrorEnum::UNAUTHORIZED if self.user._id != operator._id && !operator.is_admin?
-    self.update_attributes(:status => PUBLISHED)
-    return true
-  end
-
-  #----------------------------------------------
-  #
-  #     manipulate on questions
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def create_question(page_index, question_id, question_type)
-    current_page = self.pages[page_index]
-    if current_page == nil
-      # if the page cannot be found, append a new page in the last and insert the question into that page
-      self.pages << {"name" => "", "questions" => []}
+  def create_question(page_index, pre_question_id, question_type)
+    if self.pages[page_index].nil?
       page_index = self.pages.length - 1
-      question_id = "-1"
-      current_page = self.pages[page_index]
-    end
-    if question_id.to_s == "-1"
-      question_index = current_page["questions"].length - 1
-    elsif question_id.to_s == "0"
-      question_index = -1
-    else
-      question_index = current_page["questions"].index(question_id)
-      return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
+      create_page(page_index)
     end
     question = Question.create_question(question_type)
-    return ErrorEnum::WRONG_QUESTION_TYPE if question == ErrorEnum::WRONG_QUESTION_TYPE
-    current_page["questions"].insert(question_index+1, question._id.to_s)
-    self.save
-    return question
+    insert_question(page_index, pre_question_id, question)
+    question
   end
 
   def update_question(question_id, question_obj)
     question = Question.find_by_id(question_id)
-    return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id) || question.nil?
-    # quality control question in a survey cannot be updated
-    question_inst = question.clone
-    retval = question.update_question(question_obj)
-    # the logic control rules need to be adjusted
+    question.update_question(question_obj)
     adjust_logic_control_quota_filter('question_update', question_id)
-    return retval if retval != true
-    return question
+    question
   end
 
   def move_question(question_id_1, page_index, question_id_2)
-    from_page = nil
-    self.pages.each do |page|
-      if page["questions"].include?(question_id_1)
-        from_page = page
-        break
-      end
-    end
-    return ErrorEnum::QUESTION_NOT_EXIST if from_page == nil
-    to_page = self.pages[page_index]
-    # if the to_page does not exist, create a new page at the end of the survey
-    if to_page == nil
-      self.pages << {"name" => "", "questions" => []}
-      to_page = self.pages[-1]
-      question_id_2 = "-1"
-    end
-    if question_id_2.to_s == "-1"
-      question_index = -1
-    else
-      question_index = to_page["questions"].index(question_id_2)
-      return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
-    end
-    question_index_to_be_delete = from_page["questions"].index(question_id_1)
-    from_page["questions"][question_index_to_be_delete] = ""
-    to_page["questions"].insert(question_index+1, question_id_1)
-    from_page["questions"].delete("")
-    # the logic control rules need to be adjusted
+    remove_question(question_id_1, "to_be_deleted")
+    create_page(page_index - 1) if self.pages[page_index].nil?
+    insert_question(page_index, question_id_2, Question.find(question_id_1))
+    remove_question("to_be_deleted")
     adjust_logic_control_quota_filter('question_move', question_id_1)
-    return self.save
+    self.save
   end
 
   def clone_question(question_id_1, page_index, question_id_2)
-    from_page = nil
-    self.pages.each do |page|
-      if page["questions"].include?(question_id_1)
-        from_page = page
-        break
-      end
-    end
-    return ErrorEnum::QUESTION_NOT_EXIST if from_page == nil
-    to_page = self.pages[page_index]
-    return ErrorEnum::OVERFLOW if to_page == nil
-    if question_id_2.to_s == "-1"
-      question_index = -1
-    else
-      question_index = to_page.index(question_id_2)
-      return ErrorEnum::QUESTION_NOT_EXIST if question_index == nil
-    end
     orig_question = Question.find_by_id(question_id_1)
-    return ErrorEnum::QUESTION_NOT_EXIST if orig_question == nil
     new_question = orig_question.clone
-    to_page["questions"].insert(question_index+1, new_question._id.to_s)
+    insert_question(page_index, question_id_2, new_question)
     self.save
     return new_question
   end
 
-  def get_question_inst(question_id)
-    return ErrorEnum::QUESTION_NOT_EXIST if !self.has_question(question_id)
-    question = Question.find_by_id(question_id)
-    return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
-    return question
-  end
-
-  def delete_question(question_id)
-    question = BasicQuestion.find_by_id(question_id)
-    return ErrorEnum::QUESTION_NOT_EXIST if question.nil?
-    find_question = false
+  def remove_question(question_id, replace = nil)
     self.pages.each do |page|
-      if page["questions"].include?(question_id)
-        page["questions"].delete(question_id)
-        find_question = true
+      index = page["questions"].index(question_id)
+      if index.present?
+        page["questions"].delete(question_id) if replace.nil?
+        page["questions"][index] = replace if replace.present?
         break
       end
     end
-    return ErrorEnum::QUESTION_NOT_EXIST if !find_question
     self.save
-    # logic control rules need to be adjusted
+  end
+
+  def delete_question(question_id)
+    self.remove_question(question_id)
     adjust_logic_control_quota_filter('question_delete', question_id)
-    question.clear_question_object
-    question.destroy if question.type_of(Question)
-    return true
+    Question.find(question_id).destroy
   end
 
   def all_questions(include_prg = true)
-    q = []
-    pages.each do |page|
-      q += page["questions"]
-    end
+    q = (pages.map { |p| p["questions"] }).flatten
     ques = []
     q.collect do |i|
       que = Question.find(i)
       ques << que if (que.question_type != QuestionTypeEnum:: PARAGRAPH || include_prg)
     end
-    return ques
+    ques
   end
 
   def all_questions_id(include_prg = true)
-    q = []
-    pages.each do |page|
-      q += page["questions"]
-    end
+    q = (pages.map { |p| p["questions"] }).flatten
+    return q if include_prg
     ques = []
-    if include_prg
-      return q
-    else
-      q.collect do |i|
-        que = Question.find(i)
-        ques << i if (que.question_type != QuestionTypeEnum:: PARAGRAPH || include_prg)
-      end
-      return ques
+    q.collect do |i|
+      que = Question.find(i)
+      ques << i if (que.question_type != QuestionTypeEnum:: PARAGRAPH || include_prg)
     end
+    ques
   end
 
   def all_questions_type(include_prg = true)
@@ -719,312 +468,28 @@ class Survey
     q
   end
 
-  def has_question(question_id)
-    self.pages.each do |page|
-      return true if page["questions"].include?(question_id)
-    end
-    return false
-  end
-
   def adjust_logic_control_quota_filter(type, question_id)
-    # first adjust the logic control
     question = BasicQuestion.find_by_id(question_id)
-    rules = self.logic_control
-    rules.each_with_index do |rule, rule_index|
-      case type
-      when 'question_update'
-        next if question.issue["items"].nil? && question.issue["rows"].nil?
-        item_ids = (question.issue["items"].try(:map) { |i| i["id"] }) || []
-        if question.issue["other_item"] && question.issue["other_item"]["has_other_item"] == true
-          item_ids << question.issue["other_item"]["id"]
-        end
-        row_ids = (question.issue["rows"].try(:map) { |i| i["id"] }) || []
-        # first handle conditions
-        if question.question_type == 0
-          # only choice questions can be conditions for logic control
-          if (0..4).to_a.include?(rule["rule_type"])
-            rule["conditions"].each do |c|
-              next if c["question_id"] != question_id
-              # the condition is about the question updated
-              # remove the items that do not exist
-              c["answer"].delete_if { |item_id| !item_ids.include?(item_id) }
-            end
-            # if all the items for a condition is removed, remove this condition
-            rule["conditions"].delete_if { |c| c["answer"].blank? }
-            # if all the conditions for a rule is removed, remove this rule
-            if rule["conditions"].blank?
-              rules.delete_at(rule_index)
-              next
-            end
-          end
-        end
-        # then handle result
-        if [3,4].to_a.include?(rule["rule_type"])
-          rule["result"].each do |r|
-            next if r["question_id"] != question_id
-            # the result is about the question updated
-            # remove the items that do not exist
-            r["items"].delete_if { |item_id| !item_ids.include?(item_id) }
-            # remove the rows that do not exist
-            r["sub_questions"].delete_if { |row_id| !row_ids.include?(row_id) }
-          end
-          # if all the items for a result is removed, remove this result
-          rule["result"].delete_if { |r| r["items"].blank? && r["sub_questions"].blank? }
-          # if all the results for a rule is removed, remove this rule
-          rules.delete_at(rule_index) if rule["result"].blank?
-        elsif [5,6].to_a.include?(rule["rule_type"])
-          if rule["result"]["question_id_1"] == question_id
-            rule["result"]["items"].delete_if { |i| !item_ids.include?(i[0]) }
-          elsif rule["result"]["question_id_2"] == question_id
-            rule["result"]["items"].delete_if { |i| !item_ids.include?(i[1]) }
-          end
-          # if all the results for a rule is removed, remove this rule
-          rules.delete_at(rule_index) if rule["result"]["items"].blank?
-        end
-      when 'question_move'
-        question_ids = self.all_questions_id
-        if [1,2].to_a.include?(rule["rule_type"])
-          # a show/hide questions rule
-          conditions_question_ids = rule["conditions"].map { |c| c["question_id"] }
-          result_question_ids = rule["result"]
-          if conditions_question_ids.include?(question_id)
-            # the conditions include the question to be moved
-            result_question_ids.each do |result_question_id|
-              if !question_ids.before(question_id, result_question_id)
-                rule["conditions"].delete_if { |c| c["question_id"] == question_id }
-              end
-            end
-          end
-          if result_question_ids.include?(question_id)
-            # the results include the question to be moved
-            conditions_question_ids.each do |condition_question_id|
-              if !question_ids.before(condition_question_id, question_id)
-                rule["result"].delete(question_id)
-              end
-            end
-          end
-          rules.delete_at(rule_index) if rule["conditions"].blank? || rule["result"].blank?
-        elsif [3,4].to_a.include?(rule["rule_type"])
-          # a show/hide items rule
-          conditions_question_ids = rule["conditions"].map { |c| c["question_id"] }
-          result_question_ids = rule["result"].map { |r| r["question_id"] }
-          if conditions_question_ids.include?(question_id)
-            # the conditions include the question to be moved
-            result_question_ids.each do |result_question_id|
-              if !question_ids.before(question_id, result_question_id)
-                rule["conditions"].delete_if { |c| c["question_id"] == question_id }
-              end
-            end
-          end
-          if result_question_ids.include?(question_id)
-            # the results include the question to be moved
-            conditions_question_ids.each do |condition_question_id|
-              if !question_ids.before(condition_question_id, question_id)
-                rule["result"].delete_if { |r| r["question_id"] == question_id }
-              end
-            end
-          end
-          rules.delete_at(rule_index) if rule["conditions"].blank? || rule["result"].blank?
-        elsif [5,6].to_a.include?(rule["rule_type"])
-          rules.delete_at(rule_index) if question_ids.before(rule["result"]["question_id_1"], rule["result"]["question_id_2"])
-        end
-      when 'question_delete'
-        if ![5,6].include?(rule["rule_type"])
-          # not a corresponding items rule
-          # adjust the conditions part
-          rule["conditions"].delete_if { |c| c["question_id"] == question_id }
-          # adjust the result part
-          if [1, 2].include?(rule["rule_type"])
-            rule["result"].delete(question_id)
-          elsif [3, 4].include?(rule["rule_type"])
-            rule["result"].delete_if { |r| r["question_id"] == question_id }
-          end
-          # check whether this logic control rule can be removed
-          if rule["conditions"].blank?
-            # no conditions, can be removed
-            rules.delete_at(rule_index)
-          elsif (1..4).to_a.include?(rule["rule_type"]) && rule["result"].blank?
-            # no results for the show/hide questions/items, can be removed
-            rules.delete_at(rule_index)
-          end
-        else
-          # a corresponding items rule
-          if rule["result"]["question_id_1"] == question_id || rule["result"]["question_id_2"] == question_id
-            rules.delete_at(rule_index)
-          end
-        end
-      end
-    end
-    self.save
-    # then adjust the quota
-    if question.question_type == 0
-      # only choice questions can be conditions of quotas
-      rules = self.quota["rules"]
-      need_refresh_quota = false
-      rules.each_with_index do |rule, rule_index|
-        next if rule["conditions"].blank?
-        case type
-        when 'question_update'
-          item_ids = question.issue["items"].map { |i| i["id"] }
-          if question.issue["other_item"] && question.issue["other_item"]["has_other_item"] == true
-            item_ids << question.issue["other_item"]["id"]
-          end
-          row_ids = question.issue["items"].map { |i| i["id"] }
-          need_refresh_quota = false
-          rule["conditions"].each do |c|
-            next if c["condition_type"] != 1 || c["name"] != question_id
-            # this condition is about the updated question
-            l1 = c["value"].length
-            c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
-            need_refresh_quota = true if l1 != c["value"].length
-          end
-          rule["conditions"].delete_if { |c| c["value"].blank? }
-          rules.delete_at(rule_index) if rule["conditions"].blank?
-        when 'question_delete'
-          l1 = rule["conditions"].length
-          rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
-          if l1 != rule["conditions"].length
-            rules.delete_at(rule_index) if rule["conditions"].blank?
-            need_refresh_quota = true
-          end
-        end
-      end
-      self.refresh_quota_stats if need_refresh_quota
-      self.save
-    end
-    # then adjust the filters
-    if question.question_type == 0
-      # only choice questions can be conditions of filters
-      rules = self.filters
-      rules.each_with_index do |rule, rule_index|
-        case type
-        when 'question_update'
-          question = Question.find_by_id(question_id)
-          item_ids = question.issue["items"].map { |i| i["id"] }
-          if question.issue["other_item"] && question.issue["other_item"]["has_other_item"] == true
-            item_ids << question.issue["other_item"]["id"]
-          end
-          row_ids = question.issue["items"].map { |i| i["id"] }
-          rule["conditions"].each do |c|
-            next if c["condition_type"] != 1 || c["name"] != question_id
-            # this condition is about the updated question
-            c["value"].delete_if { |item_id| !item_ids.include?(item_id) }
-          end
-          rule["conditions"].delete_if { |c| c["value"].blank? }
-          rules.delete_at(rule_index) if rule["conditions"].blank?
-        when 'question_delete'
-          rule["conditions"].delete_if { |c| c["condition_type"] == 1 && c["name"] == question_id }
-          rules.delete_at(rule_index) if rule["conditions"].blank?
-        end
-      end
-      self.save
-    end
+    adjust_logic_control(question, type)
+    self.adjust_quota(question, type)
+    self.adjust_filter(question, type)
   end
 
-  #----------------------------------------------
-  #
-  #     manipulate on pages
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def create_page(page_index, page_name)
-    return ErrorEnum::OVERFLOW if page_index < -1 or page_index > self.pages.length - 1
-    new_page = {"name" => page_name, "questions" => []}
-    self.pages.insert(page_index+1, new_page)
-    self.save
-    return new_page
-  end
-
-  def split_page(page_index, question_id, page_name_1, page_name_2)
-    current_page = self.pages[page_index]
-    return ErrorEnum::OVERFLOW if current_page.nil?
-    if question_id.to_s == "-1"
-      question_index = current_page["questions"].length
-    else
-      question_index = -1
-      current_page["questions"].each_with_index do |q_id, q_index|
-        if q_id == question_id
-          question_index = q_index
-          break
-        end
-      end
-      return ErrorEnum::QUESTION_NOT_EXIST if question_index == -1
-    end
-    if question_index == 0
-      new_page_1 = {"name" => page_name_1, "questions" => []}
-    else
-      new_page_1 = {"name" => page_name_1,
-            "questions" => current_page["questions"][0..question_index-1]}
-    end
-    new_page_2 = {"name" => page_name_2,
-            "questions" => current_page["questions"][question_index..current_page["questions"].length-1]}
-    self.pages.delete_at(page_index)
-    self.pages.insert(page_index, new_page_2)
-    self.pages.insert(page_index, new_page_1)
-    self.save
-    return [new_page_1, new_page_2]
-  end
-
-  def show_page(page_index)
-    current_page = self.pages[page_index]
-    return ErrorEnum::OVERFLOW if current_page.nil?
-    page_object = {name: current_page["name"], questions: []}
-    current_page["questions"].each do |question_id|
-      temp = Question.get_question_object(question_id)
-      temp["index"] = self.all_questions_id.index(question_id)
-      page_object[:questions] << temp
-    end
-    return page_object
-  end
-
-  def combine_pages(page_index_1, page_index_2)
-    return ErrorEnum::OVERFLOW if page_index_1 < 0 or page_index_1 > self.pages.length - 1
-    return ErrorEnum::OVERFLOW if page_index_2 < 0 or page_index_2 > self.pages.length - 1
-    self.pages[page_index_1+1..page_index_2].each do |page|
-      self.pages[page_index_1]["questions"] = self.pages[page_index_1]["questions"] + page["questions"]
-    end
-    (page_index_2 - page_index_1).times do
-      self.pages.delete_at(page_index_1+1)
-    end
-    return self.save
-  end
-
-  def move_page(page_index_1, page_index_2)
-    current_page = self.pages[page_index_1]
-    return ErrorEnum::OVERFLOW if current_page == nil
-    return ErrorEnum::OVERFLOW if page_index_2 < -1 or page_index_2 > self.pages.length - 1
-    self.pages.insert(page_index_2+1, current_page)
-    self.pages.delete_at(page_index_1)
-    return self.save
-  end
-
-  #----------------------------------------------
-  #
-  #     for answering process
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
   def check_password(username, password, is_preview)
-    case self.access_control_setting["password_control"]["password_type"]
-    when -1
-      return true
-    when 0
-      return self.access_control_setting["password_control"]["single_password"] == password
-    when 1
-      list = self.access_control_setting["password_control"]["password_list"]
+    password_control = self.access_control_setting["password_control"]
+    return true if password_control["password_type"] == -1
+    return password_control["single_password"] == password if password_control["password_type"] == 0
+    if password_control["password_type"] == 1
+      list = password_control["password_list"]
       password_element = list.select { |ele| ele["content"] == password }[0]
-    when 2
-      list = self.access_control_setting["password_control"]["username_password_list"]
+    else
+      list = password_control["username_password_list"]
       password_element = list.select { |ele| ele["content"] == [username, password] }[0]
     end
-    return false if password_element.nil?
+    return false if password_element.nil? || password_element["used"] != false
     return true if is_preview
-    if password_element["used"] == false
-      password_element["used"] = true
-      self.save
-      return true
-    else
-      return false
-    end
+    password_element["used"] = true
+    return self.save
   end
 
   def get_user_ids_answered
@@ -1042,349 +507,11 @@ class Survey
     return answer_time
   end
 
-  #----------------------------------------------
-  #
-  #     manipulate on quotas
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def show_quota_rule(quota_rule_index)
-    quota = Quota.new(self.quota)
-    return quota.show_rule(quota_rule_index)
-  end
-
-  def add_quota_rule(quota_rule)
-    quota = Quota.new(self.quota)
-    retval = quota.add_rule(quota_rule, self)
-    self.refresh_quota_stats if retval
-    return self.quota["rules"][-1]
-  end
-
-  def update_quota_rule(quota_rule_index, quota_rule)
-    quota = Quota.new(self.quota)
-    retval = quota.update_rule(quota_rule_index, quota_rule, self)
-    self.refresh_quota_stats if retval
-    return self.quota["rules"][quota_rule_index]
-  end
-
-  def delete_quota_rule(quota_rule_index)
-    quota = Quota.new(self.quota)
-    retval = quota.delete_rule(quota_rule_index, self)
-    self.refresh_quota_stats if retval
-    return retval
-  end
-
-  def refresh_quota_stats
-    # only make statisics from the answers that are not preview answers
-    finished_answers = self.answers.not_preview.finished
-    unreviewed_answers = self.answers.not_preview.unreviewed
-    # initialze the quota stats
-    self.quota["finished_count"] = 0
-    self.quota["submitted_count"] = 0
-    self.quota["rules"].each do |rule|
-      rule["finished_count"] = 0
-      rule["submitted_count"] = 0
-    end
-
-    # make stats for the finished answers
-    finished_answers.each do |answer|
-      self.quota["finished_count"] += 1
-      self.quota["submitted_count"] += 1
-      self.quota["rules"].each do |rule|
-        if answer.satisfy_conditions(rule["conditions"], false)
-          rule["finished_count"] += 1
-          rule["submitted_count"] += 1
-        end
-      end
-    end
-
-    # make stats for the unreviewed answers
-    unreviewed_answers.each do |answer|
-      self.quota["submitted_count"] += 1
-      self.quota["rules"].each do |rule|
-        if answer.satisfy_conditions(rule["conditions"], false)
-          rule["submitted_count"] += 1
-        end
-      end
-    end
-
-    # calculate whether quota is satisfied
-    quota["rules"].each do |rule|
-      self.quota["quota_satisfied"] &&= rule["finished_count"] >= rule["amount"]
-    end
-    self.save
-    return quota
-  end
-
-  def show_quota
-    return Marshal.load(Marshal.dump(self.quota))
-  end
-
-  class Quota
-    CONDITION_TYPE = (0..4).to_a
-    def initialize(quota)
-      @is_exclusive = !!quota["is_exclusive"]
-      @rules = Marshal.load(Marshal.dump(quota["rules"]))
-    end
-
-    def show_rule(rule_index)
-      return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= rule_index
-      return Marshal.load(Marshal.dump(@rules[rule_index]))
-    end
-
-    def add_rule(rule, survey)
-      # check errors
-      rule["amount"] = rule["amount"].to_i
-      rule["finished_count"] = 0
-      rule["submitted_count"] = 0
-      return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
-      rule["conditions"] ||= []
-      rule["conditions"].each do |condition|
-        condition["condition_type"] = condition["condition_type"].to_i
-        return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
-      end
-      # add the rule
-      @rules << rule
-      survey.quota = self.serialize
-      survey.save
-      return @rules.length - 1
-    end
-
-    def delete_rule(rule_index, survey)
-      # check errors
-      return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= rule_index
-      # remove the template questions corresponding to the old quota rule
-      survey.quota["rules"][rule_index]["conditions"].each do |condition|
-        self.remove_quota_template_question(condition["name"]) if condition["condition_type"] == 0
-      end
-      # delete the rule
-      @rules.delete_at(rule_index)
-      survey.quota = self.serialize
-      return survey.save
-    end
-
-    def update_rule(rule_index, rule, survey)
-      # check errors
-      rule["amount"] = rule["amount"].to_i
-      return ErrorEnum::QUOTA_RULE_NOT_EXIST if @rules.length <= rule_index
-      return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
-      (rule["conditions"] || []).each do |condition|
-        condition["condition_type"] = condition["condition_type"].to_i
-        return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"].to_i)
-      end
-      # remove the template questions corresponding to the old quota rule
-      survey.quota["rules"][rule_index]["conditions"].each do |condition|
-        self.remove_quota_template_question(condition["name"]) if condition["condition_type"] == 0
-      end
-      # update the rule
-      @rules[rule_index] = rule
-      survey.quota = self.serialize
-      survey.save
-      return rule_index
-    end
-
-    def set_exclusive(is_exclusive, survey)
-      @is_exclusive = !!is_exclusive
-      survey.quota = self.serialize
-      return survey.save
-    end
-
-    def serialize
-      quota_object = {}
-      quota_object["rules"] = @rules
-      quota_object["is_exclusive"] = @is_exclusive
-      return quota_object
-    end
-  end
-
-  #----------------------------------------------
-  #
-  #     manipulate on logic control
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def show_logic_control
-    return Marshal.load(Marshal.dump(self.logic_control))
-  end
-
-  def show_logic_control_with_question_objects
-    logic_control = Marshal.load(Marshal.dump(self.logic_control))
-    logic_control.each do |rule|
-      conditions = rule["conditions"]
-      conditions.each do |c|
-        c["question"] = BasicQuestion.find_by_id(c["question_id"])
-      end
-      result = rule["result"]
-      if [1,2].include?(rule["rule_type"])
-        result.each_with_index do |q_id, index|
-          result[index] = BasicQuestion.find_by_id(q_id)
-        end
-      elsif [3,4].include?(rule["rule_type"])
-        result.each do |r|
-          r["question"] = BasicQuestion.find_by_id(r["question_id"])
-        end
-      elsif [5,6].include?(rule["rule_type"])
-        result.each do |r|
-          r["question_1"] = BasicQuestion.find_by_id(r["question_id_1"])
-          r["question_2"] = BasicQuestion.find_by_id(r["question_id_2"])
-        end
-      end
-    end
-    return logic_control
-  end
-
-  def show_logic_control_rule(logic_control_rule_index)
-    logic_control = LogicControl.new(self.logic_control)
-    return logic_control.show_rule(logic_control_rule_index)
-  end
-
-  def add_logic_control_rule(logic_control_rule)
-    logic_control = LogicControl.new(self.logic_control)
-    return logic_control.add_rule(logic_control_rule, self)
-  end
-
-  def update_logic_control_rule(logic_control_rule_index, logic_control_rule)
-    logic_control = LogicControl.new(self.logic_control)
-    return logic_control.update_rule(logic_control_rule_index, logic_control_rule, self)
-  end
-
-  def delete_logic_control_rule(logic_control_rule_index)
-    logic_control = LogicControl.new(self.logic_control)
-    return logic_control.delete_rule(logic_control_rule_index, self)
-  end
-
-  class LogicControl
-    RULE_TYPE = (0..6).to_a
-    def initialize(logic_control)
-      @rules = logic_control
-    end
-
-    def show_rule(rule_index)
-      return ErrorEnum::LOGIC_RULE_NOT_EXIST if @rules.length <= rule_index
-      return Marshal.load(Marshal.dump(@rules[rule_index]))
-    end
-
-    def add_rule(rule, survey)
-      rule["rule_type"] = rule["rule_type"].to_i
-      return ErrorEnum::WRONG_LOGIC_CONTROL_TYPE if !RULE_TYPE.include?(rule["rule_type"])
-      @rules << rule
-      survey.logic_control = @rules
-      survey.save
-      return survey.logic_control
-    end
-
-    def delete_rule(rule_index, survey)
-      return ErrorEnum::LOGIC_CONTROL_RULE_NOT_EXIST if @rules.length <= rule_index
-      @rules.delete_at(rule_index)
-      survey.logic_control = @rules
-      return survey.save
-    end
-
-    def update_rule(rule_index, rule, survey)
-      return ErrorEnum::LOGIC_CONTROL_RULE_NOT_EXIST if @rules.length <= rule_index
-      rule["rule_type"] = rule["rule_type"].to_i
-      return ErrorEnum::WRONG_LOGIC_CONTROL_TYPE if !RULE_TYPE.include?(rule["rule_type"])
-      @rules[rule_index] = rule
-      survey.logic_control = @rules
-      survey.save
-      return survey.logic_control
-    end
-  end
-
-  #----------------------------------------------
-  #
-  #     manipulate on filters
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def list_filters
-    return Marshal.load(Marshal.dump(self.filters))
-  end
-
-  def show_filter(filter_index)
-    filters = Filters.new(self.filters)
-    return filters.show_filter(filter_index)
-  end
-
-  def add_filter(filter)
-    filters = Filters.new(self.filters)
-    return filters.add_filter(filter, self)
-  end
-
-  def update_filter(filter_index, filter)
-    filters = Filters.new(self.filters)
-    return filters.update_filter(filter_index, filter, self)
-  end
-
-  def delete_filter(filter_index)
-    filters = Filters.new(self.filters)
-    return filters.delete_filter(filter_index, self)
-  end
-
-  class Filters
-    CONDITION_TYPE = (0..4).to_a
-    def initialize(filters)
-      @filters = Marshal.load(Marshal.dump(filters))
-    end
-
-    def show_filter(filter_index)
-      return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_index].nil?
-      return @filters[filter_index]
-    end
-
-    def add_filter(filter, survey)
-      # check errors
-      filter["conditions"].each do |condition|
-        condition["condition_type"] = condition["condition_type"].to_i
-        return ErrorEnum::WRONG_FILTER_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"])
-      end
-      # add the rule
-      @filters << filter
-      survey.filters = self.serialize
-      survey.save
-      return survey.filters
-    end
-
-    def delete_filter(filter_index, survey)
-      # check errors
-      return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_index].nil?
-      # delete the rule
-      @filters.delete_at(filter_index)
-      survey.filters = self.serialize
-      return survey.save
-    end
-
-    def update_filter(filter_index, filter, survey)
-      # check errors
-      return ErrorEnum::FILTER_NOT_EXIST if @filters[filter_index].nil?
-      filter["conditions"].each do |condition|
-        condition["condition_type"] = condition["condition_type"].to_i
-        return ErrorEnum::WRONG_FILTER_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"].to_i)
-      end
-      # update the rule
-      @filters[filter_index] = filter
-      survey.filters = self.serialize
-      survey.save
-      return survey.filters
-    end
-
-    def serialize
-      filters_object = @filters
-      return filters_object
-    end
-  end
-
-  #----------------------------------------------
-  #
-  #     result related
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
   def to_csv(path = "public/import/test.csv")
     c = CSV.open(path, "w") do |csv|
       csv << csv_header
       answer_content.each do |a|
-      csv << a
+        csv << a
       end
     end
   end
@@ -1448,7 +575,6 @@ class Survey
     formated_error = []
     qindex = 0
     q = self.all_questions_type(false)
-    p "========= 准备完毕 ========="
     answer_length = answers.length
     last_time = Time.now.to_i
     answers.each_with_index do |answer, index|
@@ -1480,99 +606,37 @@ class Survey
   end
 
   def report(analysis_task_id, report_mockup_id, report_style, report_type)
-    # return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
-    # if report_mockup_id is nil, export all single questions analysis with default charts
     if !report_mockup_id.blank?
       report_mockup = self.report_mockups.find_by_id(report_mockup_id)
-      return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
     end
-    return ErrorEnum::WRONG_REPORT_TYPE if !%w[word ppt pdf].include?(report_type)
-    return ErrorEnum::WRONG_REPORT_STYLE if !(0..6).to_a.include?(report_style.to_i)
     task_id = Task.create(:task_type => "report")._id.to_s
     ReportWorker.perform_async(self._id.to_s,
-      analysis_task_id,
-      report_mockup_id,
-      report_type,
-      report_style,
-      task_id)
+    analysis_task_id,
+    report_mockup_id,
+    report_type,
+    report_style,
+    task_id)
     return task_id
   end
 
   def get_answers(filter_index, include_screened_answer, task_id = nil)
-    # answers = include_screened_answer ? self.answers.not_preview.finished_and_screened : self.answers.not_preview.finished
-    answers = self.answers.not_preview.finished_and_screened
-    ongoing_answer_number = self.answers.not_preview.ongoing.length
-    wait_for_review_answer_number = self.answers.not_preview.wait_for_review.length
-    if filter_index == -1
-      Task.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
-      #set_status({"find_answers_progress" => 1})
-      tot_answer_number = answers.length
-      answers = include_screened_answer ? answers : answers.finished
-      return [answers, tot_answer_number, self.answers.not_preview.screened.length, ongoing_answer_number, wait_for_review_answer_number]
-    end
-    filter_conditions = self.filters[filter_index]["conditions"]
+    filter_conditions = filter_index == -1 ? [] : self.show_filter(filter_index)["conditions"]
     filtered_answers = []
-    tot_answer_number = 0
-    not_screened_answer_number = 0
-    answers_length = answers.length
-    last_time  =Time.now.to_i
-    answers.each_with_index do |a, index|
-      next if !a.satisfy_conditions(filter_conditions, false)
-      tot_answer_number += 1
-      not_screened_answer_number += 1 if !a.is_screened
+    tot_num = screened_num = 0
+    self.answers.not_preview.finished_and_screened.each_with_index do |a, index|
+      next if !a.satisfy_conditions(filter_conditions)
+      tot_num += 1
+      screened_num += 1 if a.is_screened
       next if !include_screened_answer && a.is_screened
       filtered_answers << a
-      if Time.now.to_i != last_time
-        Task.set_progress(task_id, "find_answers_progress", (index + 1).to_f / answers_length) if !task_id.nil?
-        last_time = Time.now.to_i
-      end
     end
-    Task.set_progress(task_id, "find_answers_progress", 1.0) if !task_id.nil?
-    return [filtered_answers, tot_answer_number, tot_answer_number - not_screened_answer_number, ongoing_answer_number, wait_for_review_answer_number]
-  end
-
-  #----------------------------------------------
-  #
-  #     report mockup related
-  #
-  #++++++++++++++++++++++++++++++++++++++++++++++
-
-  def create_report_mockup(report_mockup)
-    result = ReportMockup.check_and_create_new(self, report_mockup)
-    return result
-  end
-
-  def show_report_mockup(report_mockup_id)
-    report_mockup = self.report_mockups.find_by_id(report_mockup_id)
-    return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
-    return report_mockup
-  end
-
-  def list_report_mockups
-    return self.report_mockups
-  end
-
-  def delete_report_mockup(report_mockup_id)
-    report_mockup = self.report_mockups.find_by_id(report_mockup_id)
-    if !report_mockup.nil?
-      report_mockup.destroy
-      return true
-    else
-      return ErrorEnum::REPORT_MOCKUP_NOT_EXIST
-    end
-  end
-
-  def update_report_mockup(report_mockup_id, report_mockup_obj)
-    report_mockup = self.report_mockups.find_by_id(report_mockup_id)
-    return ErrorEnum::REPORT_MOCKUP_NOT_EXIST if report_mockup.nil?
-    return report_mockup.update_report_mockup(report_mockup_obj)
+    Task.set_progress(task_id, "find_answers_progress", 1.0)
+    return [filtered_answers, tot_num, screened_num,
+    self.answers.not_preview.ongoing.length, self.answers.not_preview.wait_for_review.length]
   end
 
   def self.list(status)
     status_ary = Tool.convert_int_to_base_arr(status)
-    # To solve different version status,
-    # status = 4 and  status = -1 are deleted status
-    status_ary << -1 if status_ary.include?(4)
     return Survey.where(:status.in => status_ary).desc(:created_at)
   end
 
@@ -1586,16 +650,6 @@ class Survey
     answer = Answer.where(:survey_id => self._id.to_s, :user_id => user._id.to_s, :is_preview => false)[0]
     return nil if answer.nil?
     return answer.status
-  end
-
-  def info_for_browser
-    survey_obj = {}
-    survey_obj["_id"] = self._id.to_s
-    survey_obj["title"] = self.title.to_s
-    survey_obj["created_at"] = self.created_at.to_i
-    survey_obj["broswer_extension_promote_info"] = self.broswer_extension_promote_info
-    survey_obj["rewards"] = self.rewards
-    return survey_obj
   end
 
   def serialize_in_promote_setting
@@ -1620,8 +674,17 @@ class Survey
     unless survey_obj["agent_promote_info"]["agent_tasks"].present?
       survey_obj["agent_promote_info"]["agent_tasks"] = [{}]
     end
-    smp_attrs = sample_attributes_for_promote
+   if SampleAttribute.count > 0
+      survey_obj["sample_attributes_list"] = SampleAttribute.all
+    else
+      survey_obj["sample_attributes_list"] = [{}]
+    end
+    survey_obj["sample_attributes"] = sample_attributes
+    return survey_obj
+  end
 
+  def sample_attributes
+    smp_attrs = sample_attributes_for_promote
     smp_attrs.each_with_index do |smp_attr, index|
       case smp_attr['type'].to_i
       when 0
@@ -1639,13 +702,6 @@ class Survey
       end
       smp_attrs[index]['value'] = _value
     end
-    if SampleAttribute.count > 0
-      survey_obj["sample_attributes_list"] = SampleAttribute.all
-    else
-      survey_obj["sample_attributes_list"] = [{}]
-    end    
-    survey_obj["sample_attributes"] = smp_attrs
-    return survey_obj
   end
 
   def info_for_interviewer
@@ -1668,81 +724,78 @@ class Survey
   end
 
   def answer_import(csv_str)
-    q = []
-    batch = []
-    import_error = []
-    imported_answer = nil
     updated_count = 0
-    header_prefix = 0
-    all_questions.each do |a|
-      q << Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{a.question_type}"] + "Io").new(a)
-    end
+    answer_bean = []
     CSV.parse(csv_str, :headers => true) do |row|
       return false if row.headers != self.csv_header(:with => "import_id")
-      if self.answers.where(:import_id => row["import_id"]).length > 0
-        imported_answer = self.answers.where(:import_id => row["import_id"].to_s).first
-      end
-      row = row.to_hash
-      line_answer = {}
-      quota_qustions_count = 0 # quota_qustions.size
-      begin
-        q.each_with_index do |e, i|
-          #q = Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{e.question_type}"] + "Io").new(e)
-          header_prefix = "q#{i + 1}"
-          line_answer.merge! e.answer_import(row, header_prefix)
-        end
-      rescue Exception => test
-        import_error << {row:row, message:"第#{header_prefix}题:#{test.to_s}"}
+      if imported_answer = self.answers.where(:import_id => row["import_id"].to_s).first
+        imported_answer.update_attributes(:answer_content => parse_answer(row))
+        updated_count += 1
       else
-        if imported_answer
-          imported_answer.assign_attributes(:answer_content => line_answer)
-          imported_answer.save
-          updated_count += 1
-          imported_answer = nil
-        else
-          batch << {:answer_content => line_answer,
-                    :import_id => row["import_id"],
-                    :channel => -1,
-                    :survey_id => self._id,
-                    :status => 3,
-                    :random_quality_control_answer_content => {},
-                    :random_quality_control_locations => {},
-                    :logic_control_result => {},
-                    :username => "",
-                    :password => "",
-                    :region => -1,
-                    :ip_address => "",
-                    :audit_message => "",
-                    :is_scanned => false,
-                    :is_preview => false,
-                    :finished_at => Time.now.to_i,
-                    :created_at => Time.now,
-                    :updated_at => Time.now}
-        end
+        answer_bean << generate_answer(row)
       end
     end
-    # return false if batch.empty?
-    Answer.collection.insert(batch) unless batch.empty?
+    Answer.collection.insert(answer_bean) if answer_bean.present?
     self.refresh_quota_stats
     self.save
     {
-      :insert_count => batch.length,
+      :insert_count => answer_bean.length,
       :updated_count => updated_count,
-      :error => import_error
+      :error => ''
     }
+  end
+
+  def parse_answer(row)
+    line_answer = {}
+    all_questions_io.each_with_index do |qio, i|
+      header_prefix = "q#{i + 1}"
+      begin
+        line_answer.merge! qio.answer_import(row.to_hash, header_prefix)
+      rescue Exception => emsg
+        binding.pry
+      end
+    end
+    line_answer
+  end
+
+  def all_questions_io
+    @questions_io ||= all_questions(false).map do |question|
+      Kernel.const_get(QuestionTypeEnum::QUESTION_TYPE_HASH["#{question.question_type}"] + "Io").new(question)
+    end
+  end
+
+  def generate_answer(row)
+    {:answer_content => parse_answer(row),
+      :import_id => row["import_id"],
+      :channel => -1,
+      :survey_id => self._id,
+      :status => 32,
+      :random_quality_control_answer_content => {},
+      :random_quality_control_locations => {},
+      :logic_control_result => {},
+      :username => "",
+      :password => "",
+      :region => -1,
+      :ip_address => "",
+      :audit_message => "",
+      :is_scanned => false,
+      :is_preview => false,
+      :finished_at => Time.now.to_i,
+      :created_at => Time.now,
+    :updated_at => Time.now}
   end
 
   def allocate_answer_auditors(answer_auditor_ids, allocate)
     retval = {}
     answer_auditor_ids.each do |id|
-    answer_auditor = User.find_by_id(id)
-    retval[id] = USER_NOT_EXIST and next if user.blank? or user.is_answer_auditor?
-    if allocate
-      self.answer_auditors << answer_auditor
-    else
-      self.answer_auditors.delete(answer_auditor)
-    end
-    self.save
+      answer_auditor = User.find_by_id(id)
+      retval[id] = USER_NOT_EXIST and next if user.blank? or user.is_answer_auditor?
+      if allocate
+        self.answer_auditors << answer_auditor
+      else
+        self.answer_auditors.delete(answer_auditor)
+      end
+      self.save
     end
     retval = (retval.blank? ? true : retval)
     return retval
@@ -1790,7 +843,7 @@ class Survey
     end
     info = {"survey" => survey_obj,
       "user" => user_obj,
-      "questions" => questions}
+    "questions" => questions}
     return info
   end
 
@@ -1814,9 +867,8 @@ class Survey
     return self.save
   end
 
-  def create_default_reward_scheme
-    r = RewardScheme.create(:name => "默认奖励方案", :rewards => [], :need_review => false, :default => true)
-    self.reward_schemes << r
+  after_create do |doc|
+    doc.reward_schemes << RewardScheme.create(default: true)
   end
 
   def remain_quota_number
@@ -1836,4 +888,10 @@ class Survey
     end
     return false
   end
+
+  def self.star(is_star)
+    return self.criteria if is_star.blank?
+    self.where(:is_star => is_star.to_s == "true")
+  end
+  
 end

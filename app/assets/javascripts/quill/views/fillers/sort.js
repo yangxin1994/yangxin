@@ -1,7 +1,10 @@
-//=require ../../templates/fillers/sort_option
+//=require ../../templates/fillers/sort
+//=require ../../templates/fillers/sort_left
+//=require ../../templates/fillers/sort_right
+//=require ../../templates/fillers/sort_item
 
 /* ================================
- * View: Sort question render
+ * View: Sort question filler
  * ================================ */
 
 $(function(){
@@ -9,85 +12,143 @@ $(function(){
 	quill.quillClass('quill.views.fillers.Sort', quill.views.fillers.Base, {
 		
 		_render: function() {
-			var ul = $('<ul />').appendTo(this.$('.q-content'));
+			this.hbs(null, '/fillers/sort', true).appendTo(this.$('.q-content'));
 
+			// setup left options
+			var min = this.model_issue.min, max = this.model_issue.max, idx = 0;
+			if(min <= 0) min = 0;
+			if(max <= 0) max = this.model_issue.items.length + (this.model.hasOther() ? 1 : 0);
+			var _setup_left = $.proxy(function(idx, type) {
+				var dom = this.hbs({index: idx + 1, type: type}, '/fillers/sort_left', true).appendTo(this.$('.sort-left'));
+				dom.droppable({
+					scope: this.model.id,
+					hoverClass: 'sort-type-hover',
+					tolerance: 'pointer',
+					drop: $.proxy(function(event, ui) {
+						var idx = ui.draggable.data('item-index');
+						this._move_item_to_left(idx, dom);
+						dom.droppable('disable');
+					}, this)
+				});
+			}, this);
+			for (; idx < min; idx++) { _setup_left(idx, 'require'); };
+			for (; idx < max; idx++) { _setup_left(idx, 'option'); };
+
+			// setup right options
 			// shuffle items if necessary
 			var indexes = _.range(this.model_issue.items.length);
 			if(this.model_issue.is_rand)
-				var indexes = _.shuffle(indexes);
-			var other_item = this.model_issue.other_item;
-			if(other_item && !other_item.has_other_item) other_item = null;
+				indexes = _.shuffle(indexes);
+			if(this.model.hasOther())
+				indexes.push(indexes.length);
+			for (var i = 0; i < indexes.length; i++) {
+				var idx = indexes[i];
+				var li = this.hbs(this._get_item(indexes[i]), '/fillers/sort_right', true).appendTo(this.$('.sort-right'));
+				var dom = this._setup_item(idx).appendTo(li);
+				dom.draggable({
+					scope: this.model.id,
+					helper: "clone",
+					start: $.proxy(function(event, ui) {
+						ui.helper.addClass('dragged');
+						dom.hide();
+					}, this),
+					stop: function(event, ui) { dom.show(); }
+				});
+			};
+		},
 
-			// setup options
-			var total_count = this.model.itemCount();
-			var _setup_item = $.proxy(function(i) {
-				var item = (i < this.model_issue.items.length) ? this.model_issue.items[i] : other_item;
-				var li = this.hbs(item, '/fillers/sort_option', true).appendTo(ul);
-				this.renderMediaPreviews(li, item.content);
-				if(i == this.model_issue.items.length) {
-					$('<input type="text" />').attr({
-						placeholder: item.content.text
-					}).placeholder().appendTo($('.sort-item', li));
-				} else {
-					$('.sort-item', li).html($.richtext.textToHtml(item.content));
-				}
-			}, this);
-			for (var i = 0; i < indexes.length; i++)
-				_setup_item(indexes[i]);
-			if(other_item) _setup_item(indexes.length);
-			this.refreshSortIndex();
-
-			// make ul sortable
-			ul.sortable({
-				stop: $.proxy(function(event, ui) {
-					this.refreshSortIndex();
+		_get_item: function(index) {
+			return (index < this.model_issue.items.length) ? this.model_issue.items[index] : this.model_issue.other_item;
+		},
+		_setup_item: function(index) {
+			var item = this._get_item(index);
+			var dom = this.hbs(item, '/fillers/sort_item', true);
+			if(index == this.model_issue.items.length) {
+				var ipt = $('<input type="text" />').attr({ placeholder: item.content.text }).placeholder().blur(function() {
+					item.input_value = $.trim($(this).val());
+				}).appendTo($('.sort-item-detail', dom));
+				if(item.input_value != '') ipt.val(item.input_value);
+			} else {
+				$('.sort-item-detail', dom).html($.richtext.textToHtml(item.content));
+			}
+			this.renderMediaPreviews($('.sort-item-detail', dom), item.content);
+			dom.data('item-index', index);
+			return dom;
+		},
+		_remove_left_item: function(left_li) {
+			if(left_li.length == 0) return;
+			var dom = $('.sort-item', left_li);
+			if(dom.length == 0) return;
+			var index = dom.data('item-index');
+			this.$('.sort-right li:eq(' + index + ')').show();
+			dom.remove();
+			left_li.droppable('enable');
+		},
+		_move_item_to_left: function(index, left_li) {
+			if(left_li.length == 0) return;
+			this.$('.sort-left li').each($.proxy(function(i, v) {
+				var dom = $('.sort-item', $(v));
+				if(dom.length > 0 && dom.data('item-index') == index)
+					this._remove_left_item($(v));
+			}, this));
+			var right_li = this.$('.sort-right li:eq(' + index + ')').hide();
+			var dom = this._setup_item(index).appendTo($('.sort-item-con', left_li));
+			$('<em />').addClass('sort-item-remove').appendTo(dom).click($.proxy(function() {
+				this._remove_left_item(left_li);
+			}, this));
+			dom.draggable({
+				scope: this.model.id,
+				helper: "clone",
+				start: $.proxy(function(event, ui) {
+					ui.helper.css('zIndex', 2000);
+					$('.sort-item-remove', ui.helper).remove();
 				}, this)
 			});
 		},
 
-		refreshSortIndex: function() {
-			if(this.model_issue.min <= 0 && this.model_issue.max <= 0) {
-				this.$('.sort-index').hide();
-			} else {
-				this.$('.sort-index').empty().removeClass('max');
-				var min = this.model_issue.min, max = this.model_issue.max;
-				if(min <= 0) min = 1;
-				if(max <= 0) max = this.model.itemCount();
-				for (var i = 0; i < max; i++) {
-					this.$('.sort-index:eq(' + i + ')').text(i + 1);
-				};
-				this.$('.sort-index:gt(' + (min-1) + ')').addClass('max');
-			}
-		},
-
 		setAnswer: function(answer) {
 			if(!answer) return;
-			this.$('input:text').val(answer.text_input);
+
+			if(this.model.hasOther()) {
+				this.$('input:text').val(answer.text_input);
+				this.model_issue.other_item.input_value = answer.text_input;
+			}
+			
 			if(answer.sort_result) {
 				for (var i = 0; i < answer.sort_result.length; i++) {
-					var id = answer.sort_result[i];
-					var dom = this.$('#' + id).detach();
-					if(i == 0)
-						dom.prependTo(this.$('.q-content ul'));
-					else
-						dom.insertAfter($('li:eq(' + (i-1) + ')', this.$('.q-content ul')));
+					var idx = this.model.findItemIndex(answer.sort_result[i]);
+					if(idx == -1) {
+						if(answer.sort_result[i] == this.model_issue.other_item.id)
+							idx = this.model_issue.items.length;
+						else
+							continue;
+					}
+					this._move_item_to_left(idx, this.$('.sort-left li:eq(' + i + ')'));
 				};
 			}
-			this.refreshSortIndex();
 		},
 		_getAnswer: function() {
 			var answer = { sort_result: [] };
-			var max = this.model_issue.max;
-			if(max <= 0) max = this.$('.q-content li').length;
-			$.each(this.$('.q-content li:lt(' + max + ')'), function(i, v) {
-				answer.sort_result[i] = $(v).attr('id');
+
+			var max = this.$('.sort-left li.sort-type-require').length;
+			var min = this.$('.sort-left li').length - max;
+			this.$('.sort-left li').each(function(i, v){
+				var dom = $('.sort-item', $(v));
+				if(dom.length == 0) {
+					answer.sort_result.push(undefined);
+				} else {
+					answer.sort_result.push(dom.attr('id'));
+				}
 			});
-			if(this.model_issue.other_item && this.model_issue.other_item.has_other_item) {
+			while(answer.sort_result.length > 0 && answer.sort_result[answer.sort_result.length - 1] == undefined)
+				answer.sort_result.pop();
+
+			if(this.model.hasOther())
 				answer.text_input = $.trim(this.$('input:text').val());
-			}
+
 			return answer;
 		}
 		
 	});
 	
-});
+}); 

@@ -58,9 +58,9 @@
             </a>
         </div>
         <div class="dashed-line"></div>
-        <div class="tab points <%= 'active' if @current_nav == "points" %>">
+        <div class="tab points <%= 'active' if action_name == "points" %>">
             <a href="/users/points">
-                <i class="icon-ucenter icon-points <%= 'active' if @current_nav == "points" %>"></i>
+                <i class="icon-ucenter icon-points <%= 'active' if action_name == "points" %>"></i>
                 <span>积分记录</span>
             </a>
         </div>
@@ -79,9 +79,9 @@
             </a>
         </div>
         <div class="dashed-line"></div>
-        <div class="tab notifications <%= 'active' if @current_nav == "notifications" %>">
+        <div class="tab notifications <%= 'active' if action_name == "notifications" %>">
             <a href="/users/notifications">
-                <i class="icon-ucenter icon-notifications <%= 'active' if @current_nav == "notifications" %>"></i>
+                <i class="icon-ucenter icon-notifications <%= 'active' if action_name == "notifications" %>"></i>
                 <span>系统通知</span>
             </a>
         </div>
