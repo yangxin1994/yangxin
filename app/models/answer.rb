@@ -70,6 +70,7 @@ class Answer
   field :agent_feedback_name
   field :agent_feedback_email
   field :agent_feedback_mobile
+  field :sample_attributes_updated, :type => Boolean, default: false
 
 
   belongs_to :agent_task
@@ -636,6 +637,7 @@ class Answer
     self.update_quota(old_status) if !self.is_preview
     self.finished_at = Time.now.to_i
     self.deliver_reward
+    self.update_sample_attributes if !self.is_preview && self.is_finish
     self.save
   end
 
@@ -662,6 +664,7 @@ class Answer
     old_status = self.status
     if review_result
       self.set_finish
+      self.update_sample_attributes
       message_title = "问卷[#{self.survey.title}]通过审核!"
       message_content = "您参与的[#{self.survey.title}]已通过审核,感谢参与."
     else
@@ -799,6 +802,7 @@ class Answer
     answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id.to_s, sample._id.to_s, false)
     return ErrorEnum::ANSWER_EXIST if answer.present?
     sample.answers << self
+    answer.update_sample_attributes if answer.is_finish
     PunishLog.create_punish_log(sample.id) if self.status == REJECT
     if self.auditor.present?
       self.auditor.create_message("审核问卷答案消息", self.audit_message, [sample._id.to_s])
@@ -1249,7 +1253,7 @@ class Answer
   end
 
   def answer_percentage
-    questions = answer.load_question(nil, true)
+    questions = self.load_question(nil, true)
     question_number = self.survey.all_questions_id(false).length + self.random_quality_control_answer_content.length
     self.index_of(questions) / question_number.to_f
   end
@@ -1276,5 +1280,56 @@ class Answer
       break
     end
     self
+  end
+
+  def update_sample_attributes
+    # return if no user or attributes already updated
+    return false if self.user.blank? || self.sample_attributes_updated
+    self.answer_content.each do |q_id, answer|
+      q = BasicQuestion.find(q_id)
+      next if q.sample_attribute.blank?
+      attr_value = nil
+      case q.sample_attribute.type
+      when DataType::STRING
+        attr_value = answer if q.question_type == QuestionTypeEnum::TEXT_BLANK_QUESTION
+      when DataType::ENUM
+        if q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+        end
+      when DataType::NUMBER
+        attr_value = answer if q.question_type == QuestionTypeEnum::NUMBER_BLANK_QUESTION
+      when DataType::NUMBER_RANGE
+        if q.question_type == QuestionTypeEnum::NUMBER_BLANK_QUESTION
+          attr_value = [answer, answer] if answer.present?
+        elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+        end
+      when DataType::DATE
+        attr_value = answer / 1000 if q.question_type == QuestionTypeEnum::TIME_BLANK_QUESTION
+      when DataType::DATE_RANGE
+        if q.question_type == QuestionTypeEnum::TIME_BLANK_QUESTION
+          attr_value = [answer / 1000, answer / 1000] if answer.present
+        elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+        end
+      when DataType::ADDRESS
+        if q.question_type == QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+          attr_value = answer["address"]
+        elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+        end
+      when DataType::ARRAY
+        if q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          new_attr_value = []
+          answer["selection"].each do |input_id|
+            enum_value = q.sample_attribute_relation[input_id]
+            new_attr_value << enum_value if enum_value.present?
+          end
+          attr_value = (self.user.read_sample_attribute(q.sample_attribute.name).to_a + new_attr_value).uniq
+        end
+      end
+      self.user.write_sample_attribute(q.sample_attribute.name, attr_value) if attr_value.present?
+    end
+    self.update_attributes(sample_attributes_updated: true)
   end
 end
