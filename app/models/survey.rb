@@ -118,8 +118,6 @@ class Survey
   index({ status: 1, reward: 1}, { background: true } )
   index({ status: 1, is_star: 1 }, { background: true } )
 
-
-  
   index({ quillme_promote_reward_type: 1 }, { background: true } )
   index({ quillme_hot: 1 }, { background: true } )
   index({ user_id: 1 }, { background: true } )
@@ -1825,6 +1823,11 @@ class Survey
       amount += r["amount"] - r["finished_count"]
     end
     return amount
+  end
+
+  def cost_info
+    rs = reward_schemes.dup
+
   end
 
   def max_num_per_ip_reached?(ip_address)

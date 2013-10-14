@@ -163,13 +163,16 @@
       <form class="form-horizontal">
         <input type="hidden" id="sid"> 
         <div class="control-group">
-          <label class="control-label" for="block">黑名单</label>
+          <label class="control-label" for="block">状态</label>
           <div class="controls">
             <label class="checkbox">
-              <input class="ck" type="checkbox" name="is_block" id="ck_block"> 
+              <input class="ck" type="checkbox" name="is_block" id="ck_block"> 黑名单
             </label>
+            <label class="checkbox">
+              <input class="ck" type="checkbox" name="is_active" id="ck_active"> 激活
+            </label>            
           </div>
-        </div>
+        </div>       
         <div class="control-group">
           <label class="control-label" for="roles">角色分配</label>
           <div class="controls">
@@ -190,6 +193,18 @@
             </label>
           </div>
         </div>
+        <div class="control-group">
+          <label class="control-label" for="email">邮箱</label>
+          <div class="controls">
+            <input type="text" name="email" placeholder="Type something…">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="mobile">电话</label>
+          <div class="controls">
+            <input type="text" name="mobile" placeholder="Type something…">
+          </div>
+        </div>         
       </form>
     </div>
     <div class="modal-footer">

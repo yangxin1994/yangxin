@@ -29,7 +29,7 @@ class Subscriber
     when /^.+@.+$/
       subscribers = subscribers.where(:email => options[:keyword])
     else
-      subscribers 
+      subscribers
     end
   end
 
