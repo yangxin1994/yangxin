@@ -1626,7 +1626,7 @@ class Survey
     c = CSV.open(path, "w") do |csv|
       csv << csv_header
       answer_content.each do |a|
-      csv << a
+        csv << a
       end
     end
   end
