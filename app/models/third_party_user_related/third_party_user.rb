@@ -42,28 +42,20 @@ class ThirdPartyUser
       state = {"state" => Time.now.to_i}
       access_token_params.merge!(state)
     when "alipay"
-      # access_token_params = {
-      #   "method" => 'alipay.system.oauth.token',
-      #   "format" => 'json',
-      #   "timestamp" => Time.now.strftime('%Y-%m-%d %H:%M:%S'),
-      #   "app_id" => OOPSDATA[Rails.env]["#{opt[:account]}_app_key"],
-      #   "version" => 1.0,
-      #   "sign_type" => "RSA",
-      #   "sign" => SecureRandom.uuid
-      # }
       access_token_params = {
         "method" => 'alipay.system.oauth.token',
         "format" => 'json',
         "timestamp" => Time.now.strftime('%Y-%m-%d %H:%M:%S'),
-        "app_id" => '2013101100001739',
-        "version" => 1.0,
+        "app_id" => OOPSDATA[Rails.env]["#{opt[:account]}_app_key"],
+        "version" => '1.0',
         "sign_type" => "RSA",
-        "sign" => SecureRandom.uuid,
+        "sign" => '',
         "platform" => 'top',
         "terminal_type" => 'web',
         "grant_type" => 'authorization_code',
         "code" => opt[:param_obj][:code]
       }
+
       request_uri = "https://openapi.alipay.com/gateway.do"
     when "tecent"
       request_uri = "https://open.t.qq.com/cgi-bin/oauth2/access_token"
