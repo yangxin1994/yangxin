@@ -164,7 +164,7 @@ class ReportResult < Result
 
   def generate_report(report_mockup, report_type, report_style, answers_transform)
     # initialize a report data instance
-    report_data = Data.new(report_type,
+    report_data = ReportData.new(report_type,
                   report_mockup.title,
                   report_mockup.subtitle,
                   report_mockup.header,
