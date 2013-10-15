@@ -9,6 +9,7 @@ class EmailInvitationWorker
 		# 3. find out samples for surveys
 		surveys_for_sample = {}
 		published_survey.each do |survey|
+			next if survey.remain_quota_number == 0
 			# find samples for each survey
 			s_id = survey._id.to_s
 			email_number = survey.email_promote_info["email_amount"].to_i
