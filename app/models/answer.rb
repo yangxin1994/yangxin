@@ -510,11 +510,15 @@ class Answer
     true
   end
 
-  def check_question_quota
+  def check_question_quota(answer_content)
+    quota["rules"].each do |rule|
+    end
+
+
     # 1. get the corresponding survey, quota, and quota stats
     quota = self.survey.show_quota
     # 2. if all quota rules are satisfied, the new answer should be rejected
-    set_reject_with_type(REJECT_BY_QUOTA) and return false if quota["quota_satisfied"]
+    # set_reject_with_type(REJECT_BY_QUOTA) and return false if quota["quota_satisfied"]
     # 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
     return true if !quota["is_exclusive"]
     # 4. check the rules one by one

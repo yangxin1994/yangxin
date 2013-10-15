@@ -333,16 +333,8 @@ class Order
   end
 
   def update_status(handle = true)
-    Rails.logger.info "AAAAAAAAAAAAAAAAAAA"
-    Rails.logger.info self.answer.is_finish
-    Rails.logger.info "AAAAAAAAAAAAAAAAAAA"
-    Rails.logger.info self.answer.status
-    Rails.logger.info "AAAAAAAAAAAAAAAAAAA"
     self.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.answer.is_finish
     self.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i} ) if self.answer.is_reject
-    Rails.logger.info "BBBBBBBBBBBBBBBBBBB"
-    Rails.logger.info self.inspect
-    Rails.logger.info "BBBBBBBBBBBBBBBBBBB"
     self.auto_handle if handle
   end
 
