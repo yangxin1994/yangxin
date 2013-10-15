@@ -2,6 +2,7 @@ require 'encryption'
 require 'error_enum'
 require 'tool'
 require 'uri'
+require "base64"
 class ThirdPartyUser
 
   include Mongoid::Document
@@ -48,14 +49,36 @@ class ThirdPartyUser
         "timestamp" => Time.now.strftime('%Y-%m-%d %H:%M:%S'),
         "app_id" => OOPSDATA[Rails.env]["#{opt[:account]}_app_key"],
         "version" => '1.0',
-        "sign_type" => "RSA",
-        "sign" => '',
         "platform" => 'top',
         "terminal_type" => 'web',
         "grant_type" => 'authorization_code',
         "code" => opt[:param_obj][:code]
       }
 
+      # access_token_params = {
+      #   "method" => 'alipay.system.oauth.token',
+      #   "format" => 'json',
+      #   "timestamp" => Time.now.strftime('%Y-%m-%d %H:%M:%S'),
+      #   "app_id" => 2013101100001739,
+      #   "version" => '1.0',
+      #   "platform" => 'top',
+      #   "terminal_type" => 'web',
+      #   "grant_type" => 'authorization_code',
+      #   "code" => 'fc96978b3ee644e791f5df4386df51ca'
+      # }
+
+
+      str = ''
+      data = access_token_params.sort.map{|k,v| str += "&#{k}=#{v}"}
+      str.sub!('&','')
+      if File.exists?("#{Rails.root.to_s}/rsa_private_key.pem")
+        priv_key = OpenSSL::PKey::RSA.new File.read "#{Rails.root.to_s}/rsa_private_key.pem"
+      else
+        priv_key = OpenSSL::PKey::RSA.new(2048)
+      end
+      sign = Base64.encode64(priv_key.private_encrypt(OpenSSL::Digest::DSS1.digest("od@2013")))
+      access_token_params["sign"] = sign
+      access_token_params["sign_type"] = "RSA"
       request_uri = "https://openapi.alipay.com/gateway.do"
     when "tecent"
       request_uri = "https://open.t.qq.com/cgi-bin/oauth2/access_token"
@@ -114,7 +137,7 @@ class ThirdPartyUser
 
   def generate_params_string(opts = {})
     str = ''
-    opts.each{|k,v| str += "&#{k}=#{v}"}
+    opts.sort.map{|k,v| str += "&#{k}=#{v}"}
     str = str.sub!('&','?')
     return str     
   end
