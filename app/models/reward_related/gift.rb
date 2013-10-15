@@ -132,4 +132,7 @@ class Gift
     inc(:view_count,1)
   end
 
+  def photo_src
+    self.photo.nil? ? Gift::DEFAULT_IMG : self.photo.picture_url
+  end
 end

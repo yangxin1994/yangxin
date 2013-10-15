@@ -66,11 +66,11 @@ class Sample::UsersController < Sample::SampleController
 
   def points
     if params[:scope] == 'in'
-      @point_logs = PointLog.where(:user_id => current_user.id, :amount.gt => 0).desc(:created_at)
+      @point_logs = auto_paginate PointLog.where(:user_id => current_user.id, :amount.gt => 0).desc(:created_at)
     elsif params[:scope] == 'out' 
-      @point_logs = PointLog.where(:user_id => current_user.id, :amount.lt => 0).desc(:created_at)
+      @point_logs = auto_paginate PointLog.where(:user_id => current_user.id, :amount.lt => 0).desc(:created_at)
     else
-      @point_logs = PointLog.where(:user_id => current_user.id).desc(:created_at)
+      @point_logs = auto_paginate PointLog.where(:user_id => current_user.id).desc(:created_at)
     end
     respond_to do |format|
       format.html 

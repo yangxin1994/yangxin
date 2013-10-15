@@ -802,7 +802,7 @@ class Answer
     answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id.to_s, sample._id.to_s, false)
     return ErrorEnum::ANSWER_EXIST if answer.present?
     sample.answers << self
-    answer.update_sample_attributes if answer.is_finish
+    answer.update_sample_attributes if self.is_finish
     PunishLog.create_punish_log(sample.id) if self.status == REJECT
     if self.auditor.present?
       self.auditor.create_message("审核问卷答案消息", self.audit_message, [sample._id.to_s])

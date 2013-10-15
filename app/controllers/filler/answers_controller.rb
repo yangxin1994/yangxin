@@ -182,7 +182,7 @@ class Filler::AnswersController < Filler::FillerController
   def start_bind
     bind_ids = (cookies[Rails.application.config.bind_answer_id_cookie_key] || '').split('_')
     cookies[Rails.application.config.bind_answer_id_cookie_key] = { 
-      :value => bind_ids.push(params[:id]).uniq!.join('_'), 
+      :value => bind_ids.push(params[:id]).uniq.join('_'), 
       :expires => Rails.application.config.answer_id_time_out_in_hours.hours.from_now ,
       :domain => :all
     }
