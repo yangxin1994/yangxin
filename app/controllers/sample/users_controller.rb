@@ -80,7 +80,7 @@ class Sample::UsersController < Sample::SampleController
 
   def orders
     # scope = [1,2,4].include?(params[:scope].to_i) ? params[:scope].to_i : 1
-    @orders = current_user.orders.where(:source => params[:scope].to_i).desc(:created_at)
+    @orders = current_user.orders.where(:source => (params[:scope] || Order::WAIT).to_i).desc(:created_at)
     @orders = auto_paginate @orders   
     respond_to do |format|
       format.html 
