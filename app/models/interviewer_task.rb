@@ -108,7 +108,8 @@ class InterviewerTask
       if a["status"].to_i == 1
         status = Answer::REJECT
       else
-        status = self.survey.answer_need_review ? Answer::UNDER_REVIEW : Answer::FINISH
+        # status = self.survey.answer_need_review ? Answer::UNDER_REVIEW : Answer::FINISH
+        status = Answer::UNDER_REVIEW
       end
       answer_to_insert = {:interviewer_task_id => self._id,
         :survey_id => self.survey_id,
