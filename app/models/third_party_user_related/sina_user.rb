@@ -1,101 +1,44 @@
 class SinaUser < ThirdPartyUser
-    
-  field :name, :type => String
-  field :location, :type => String
-  field :description, :type => String
-  field :gender, :type => String #male will return: "m"
-  field :profile_image_url, :type => String
-  
 
-  alias locale location
-  alias get_user_info call_method  
-
-
-  def self.get_access_token(code, redirect_uri)
-    access_token_params = {
-      "client_id" => OOPSDATA[Rails.env]["sina_app_key"],
-      "client_secret" => OOPSDATA[Rails.env]["sina_app_secret"],
-      "redirect_uri" => redirect_uri || OOPSDATA[Rails.env]["sina_redirect_uri"],
-      "grant_type" => "authorization_code",
-      "code" => code
-    }
-    retval = Tool.send_post_request("https://api.weibo.com/oauth2/access_token", access_token_params, true)
-    response_data = JSON.parse(retval.body)
-    Logger.new("log/development.log").info(response_data.to_s)
-    
-    return response_data
-  end
-
-  def self.save_tp_user(response_data)
-    access_token = response_data["access_token"]
-    website_id = response_data["uid"]
-    
-    # reject the same function field
-    response_data.select!{|k,v| !k.to_s.include?("id") }
-  
-    #new or update sina_user
-    sina_user = SinaUser.where(:website_id => website_id)[0]
-    if sina_user.nil? then
-      sina_user = SinaUser.new(:website => "sina", :website_id => website_id, :access_token => access_token)
-      sina_user.save
-      # this is not update instance, it would lead that other info should be seen in next login.
+  def self.save_tp_user(response_data,current_user)
+    sina_user = SinaUser.where(:website_id => response_data["uid"]).first
+    u = current_user.present? ? current_user : User.new(:status => User::REGISTERED)
+    unless sina_user.present?  # create binding
+      sina_user = SinaUser.create(:website => "sina", :website_id => response_data["uid"], :user_id => u.id,:access_token => response_data["access_token"])
+      u.save unless current_user.present?
     else
-      #sina_user.update_by_hash(response_data)
+      unless sina_user.user.present?
+        sina_user.update_attributes(:user_id => u.id)  # create binding
+        u.save unless current_user.present?
+      else
+        sina_user.update_attributes(:user_id => u.id)  if  current_user.present?  #update binding
+      end
     end
-    
+
+    sina_user.update_user_info
+
     return sina_user
   end
 
-  def call_method(http_method="get", opts = {:method => "users/show", :uid => self.user_id})
-    @params={}
-    @params["access_token"] = self.access_token
-    method = opts[:method] || opts["method"]
-    if http_method.downcase == "get"
-      params_string = generate_params_string(opts)
-      retval = Tool.send_get_request("https://api.weibo.com/2/#{method}.json#{params_string}", true) 
-    else
-      opts.merge!(@params).select!{|k,v| k.to_s != "method"}
-      retval = Tool.send_post_request("https://api.weibo.com/2/#{method}.json", opts, true)
-    end
-    return JSON.parse(retval.body)
-  end
 
   def update_user_info
-    @select_attrs = %{name location gender description profile_image_url}
-    super
-  end
-  
 
+    response_data = call_method(
+      http_method: 'get',
+      format:'.json',
+      url: 'https://api.weibo.com/2/',
+      action: 'users/show',
+      opts: {
+        uid: self.website_id,
+        access_token:self.access_token 
+      }
+    )
 
-  def say_text(status)
-    retval = call_method("post", {:method => "statuses/update", :status =>status}) 
-    successful?(retval)
-  end
-
-  
-  def repost_text(text_id, status=nil)
-    retval = call_method("post", {:method => "statuses/repost", :id => text_id}) if status.nil?
-    retval = call_method("post", {:method => "statuses/repost", :id => text_id, :status => status}) if !status.nil?
-    successful?(retval)
-  end
-
-
-  def create_friendship(friend_id)
-    retval = call_method("post", {:method => "friendships/create", :id => friend_id})
-    successful?(retval)
-  end
-
-
-  def follow_topic(topic_name)
-    retval = call_method("post", {:method => "trends/follow", :trend_name => topic_name})
-    successful?(retval)
-  end
-
-  
-
-  def logout
-    retval = call_method("get", {:method => "account/end_session"}) 
-    successful?(retval)
+    gender = response_data["gender"] == 'm' ? 0 : 1
+    attr = {"nickname" => response_data["screen_name"],"username" => response_data["screen_name"],"gender" => gender }
+    attr.each do |k,v|
+      self.user.write_sample_attribute(k,v)
+    end
   end
 
 end

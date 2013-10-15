@@ -119,28 +119,34 @@ class ApplicationController < ActionController::Base
     intro = params[:i].blank? ? '' : "?i=#{params[:i]}"
     return "#{request.protocol}#{request.host_with_port}#{connect_path(website)}#{intro}"
   end
+
   def social_auth_link(website)
     redirect_uri = social_redirect_uri(website)
-    client_id = Rails.application.config.authkeys[website.to_sym]
+    client_id = OOPSDATA[Rails.env]["#{website}_app_key"]
+    #client_id = Rails.application.config.authkeys[website.to_sym]
     case website
     when 'sina'
       return "https://api.weibo.com/oauth2/authorize?client_id=#{client_id}&response_type=code&redirect_uri=#{redirect_uri}&display=page"
     when 'renren'
-      return "https://graph.renren.com/oauth/authorize?client_id=#{client_id}&response_type=code&redirect_uri=#{redirect_uri}&response_type=code&scope=publish_share+operate_like"
+      return "https://graph.renren.com/oauth/authorize?client_id=#{client_id}&response_type=code&redirect_uri=#{redirect_uri}&response_type=code"
     when 'qq'
       return "https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=#{client_id}&redirect_uri=#{redirect_uri}"
-    when 'google'
-      return "https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=#{client_id}.apps.googleusercontent.com&redirect_uri=#{redirect_uri}&scope=https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
+    when 'alipay'
+      return "https://openauth.alipay.com/oauth2/authorize.htm?client_id=#{client_id}&redirect_uri=#{redirect_uri}"  
     when 'qihu360'
-      return "https://openapi.360.cn/oauth2/authorize?client_id=#{client_id}&response_type=code&redirect_uri=#{redirect_uri}"
-    when 'kaixin001'
-      return "http://api.kaixin001.com/oauth2/authorize?response_type=code&client_id=#{client_id}&redirect_uri=#{redirect_uri}"
-    when 'douban'
-      return "https://www.douban.com/service/auth2/auth?response_type=code&client_id=#{client_id}&redirect_uri=#{redirect_uri}"
-    when 'baidu'
-      return "https://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id=#{client_id}&redirect_uri=#{redirect_uri}"
-    when 'sohu'
-      return "https://api.sohu.com/oauth2/authorize?response_type=code&client_id=#{client_id}&redirect_uri=#{redirect_uri}"
+      return "https://openapi.360.cn/oauth2/authorize?client_id=#{client_id}&response_type=code&redirect_uri=#{redirect_uri}"      
+    when 'tecent'
+      return "https://open.t.qq.com/cgi-bin/oauth2/authorize?client_id=#{client_id}&response_type=code&redirect_uri=#{redirect_uri}"          
+    # when 'google'
+    #   return "https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=#{client_id}.apps.googleusercontent.com&redirect_uri=#{redirect_uri}&scope=https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
+    # when 'kaixin001'
+    #   return "http://api.kaixin001.com/oauth2/authorize?response_type=code&client_id=#{client_id}&redirect_uri=#{redirect_uri}"
+    # when 'douban'
+    #   return "https://www.douban.com/service/auth2/auth?response_type=code&client_id=#{client_id}&redirect_uri=#{redirect_uri}"
+    # when 'baidu'
+    #   return "https://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id=#{client_id}&redirect_uri=#{redirect_uri}"
+    # when 'sohu'
+    #   return "https://api.sohu.com/oauth2/authorize?response_type=code&client_id=#{client_id}&redirect_uri=#{redirect_uri}"
     end
   end
 

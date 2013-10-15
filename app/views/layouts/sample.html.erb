@@ -1,4 +1,5 @@
 <% content_for :app_head do %>
+	<meta property="qc:admins" content="17463526262516216375" />
 	<%= stylesheet_link_tag    "layouts/sample-layout" %>
 	<%= javascript_include_tag "layouts/sample-layout" %>
 	<script type="text/javascript">
@@ -21,7 +22,6 @@
 					<a href="http://t.qq.com/wenjuanba" target="_blank"><i class="icon16 f-qq"></i></a>
 				</div>
 				<div class="login_methods r">
-					
 						<% if user_signed_in %>
 						<ul>
 							<li>
@@ -71,6 +71,16 @@
 								<a href="/account/sign_up">注册</a>
 								<a href="/account/sign_in">登录</a>
 							</li>
+							<li class="out-login">
+								<a href="<%= social_auth_link('sina')%>"><i class="icon login-sina"></i>微博登录</a>
+								<a href="<%= social_auth_link('alipay')%>"><i class="icon login-alipay"></i>支付宝登录</a>
+								<a href="<%= social_auth_link('qq')%>"><i class="icon login-qq"></i>QQ登录</a>
+								<a href="<%= sign_in_account_path%>">更多登录</a>
+								<!-- <a href="javacsript:void(0);"><i class="icon login-alipay"></i>支付宝登录</a>
+								<a href="javacsript:void(0);"><i class="icon login-sina"></i>微博登录</a>
+								<a href="javacsript:void(0);"><i class="icon login-qq"></i>QQ登录</a>
+								<a href="javacsript:void(0);"><i class="icon login-alipay"></i>支付宝登录</a> -->
+						</li>
 						</ul>	
 						<% end %>
 						<!-- <li>

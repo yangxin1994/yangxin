@@ -1,110 +1,68 @@
 class RenrenUser < ThirdPartyUser
 
-  field :name, :type => String
-  field :sex, :type => String # male will return: 1
-  field :headurl, :type => String
-
-  alias gender sex
-
-  def locale
-      nil
-  end
-
-  def self.get_access_token(code, redirect_uri)
-    access_token_params = {
-      "client_id" => OOPSDATA[Rails.env]["renren_api_key"],
-      "client_secret" => OOPSDATA[Rails.env]["renren_secret_key"],
-      "redirect_uri" => redirect_uri || OOPSDATA[Rails.env]["renren_redirect_uri"],
-      "grant_type" => "authorization_code",
-      "code" => code
-    }
-    retval = Tool.send_post_request("https://graph.renren.com/oauth/token", access_token_params, true)
-    response_data = JSON.parse(retval.body)
-    return response_data
-  end
-
-  def self.save_tp_user(response_data)
-
-    website_id = response_data["user"]["id"]
-    access_token = response_data["access_token"]
-    refresh_token = response_data["refresh_token"]
-    expires_in = response_data["expires_in"]
-   
-    #new or update renren_user
-    renren_user = RenrenUser.where(:website_id => website_id)[0]
-    if renren_user.nil?
-      renren_user = RenrenUser.new(:website => "renren", :website_id => website_id, :access_token => access_token, 
-      :refresh_token => refresh_token, :expires_in => expires_in)
-      renren_user.save
+  def self.save_tp_user(response_data,current_user)
+    renren_user = RenrenUser.where(:website_id => response_data["user"]["id"]).first
+    u = current_user.present? ? current_user : User.new(:status => User::REGISTERED)
+    unless renren_user.present?
+      renren_user = RenrenUser.create(:website => "renren", 
+        :website_id => response_data["user"]["id"], 
+        :access_token => response_data["access_token"], 
+        :refresh_token => response_data["refresh_token"], 
+        :expires_in => response_data["expires_in"],
+        :user_id => u.id
+      )
+      u.save unless current_user.present?
     else 
-      #only update access_token, refresh_token, expires_in, remove other info which is un-useful.
-      response_data = {}
-      response_data["access_token"] = access_token 
-      response_data["refresh_token"] = refresh_token
-      response_data["expires_in"] = expires_in
-      # update info 
-      #renren_user.update_by_hash(response_data)
+      unless renren_user.user.present?
+        renren_user.update_attributes(:user_id => u.id)
+        u.save unless current_user.present?
+      else
+        renren_user.update_attributes(:user_id => u.id) if current_user.present?
+      end
     end
+
+    renren_user.update_user_info
+
     return renren_user
   end
 
-  def call_method(http_method="post", opts = {:method => "users.getInfo"})
-    @params = {}
-    @params[:call_id] = Time.now.to_i
-    @params[:format] = 'json'
-    @params[:v] = '1.0'
-    @params[:access_token] = self.access_token
-    
-    if http_method.downcase == "post" then
-      retval = JSON.parse(Tool.send_post_request('http://api.renren.com/restserver.do', update_params(opts)).body)
-    else
-      return {}
-    end
-  end
-
-  def get_user_info
-    call_method()[0]
-  end
-
-  def add_share(url, type=6)
-    retval = call_method("post", {:method => "share.share", :type => type, :url => url}) 
-    successful?(retval)   
-  end
-
-  def add_like(url)
-    retval = call_method("post", {:method => "like.like", :url => url}) 
-    successful?(retval)  
-  end
 
   def update_user_info
-    @select_attrs = %{name sex headurl}
-    super
-  end
+    response_data = call_method(
+      http_method: 'get',
+      url: 'https://api.renren.com/v2/',
+      action: 'user/get',
+      opts: {
+        access_token: self.access_token,
+        userId: self.website_id
+      }
+    )
 
-  def reget_access_token    
-    access_token_params = {"client_id" => OOPSDATA[Rails.env]["renren_api_key"],
-      "client_secret" => OOPSDATA[Rails.env]["renren_secret_key"],
-      "redirect_uri" => OOPSDATA[Rails.env]["renren_redirect_uri"],
-      "grant_type" => "refresh_token",
-      "refresh_token" => self.refresh_token}
-    retval = Tool.send_post_request("https://graph.renren.com/oauth/token", access_token_params, true)
-    response_data = JSON.parse(retval.body)
-    
-    access_token = response_data["access_token"]
-    refresh_token = response_data["refresh_token"]
+    response_data = response_data["response"]
+    date_arr = response_data["basicInformation"]["birthday"].split('-').map!{|e| e.to_i}
+    education_level = -1
+    case response_data["education"][0]["educationBackground"]
+    when 'COLLEGE'
+      education_level = 2
+    when 'MASTER'
+      education_level = 3
+    when 'DOCTOR'
+      education_level = 4
+    when 'TECHNICAL'
+      education_level = 1
+    when 'HIGHSCHOOL'
+      education_level = 0
+    end
 
-    self.update_access_token(access_token)
-    self.update_refresh_token(refresh_token)
-    
-    return response_data
-  end  
-
-  private
-
-  def update_params(opts)
-    params = @params.merge(opts){|key, first, second| second}
-    params[:sig] = Digest::MD5.hexdigest(params.map{|k,v| "#{k}=#{v}"}.sort.join + OOPSDATA[Rails.env]["renren_secret_key"])
-    params
+    attr = {}
+    attr["nickname"]        = response_data["name"]
+    attr["username"]        = response_data["name"]
+    attr["gender"]          = response_data["basicInformation"]["sex"] == "MALE" ? 0 : 1
+    attr["birthday"]        = [Date.new(date_arr[0],date_arr[1],date_arr[2]).to_time.to_i,Date.new(date_arr[0],date_arr[1],date_arr[2]).to_time.to_i]
+    attr['education_level'] = education_level
+    attr.each do |k,v|
+      self.user.write_sample_attribute(k,v)
+    end
   end
 
 end
