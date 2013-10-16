@@ -1826,8 +1826,12 @@ class Survey
   end
 
   def cost_info
-    rs = reward_schemes.dup
-
+    rs = reward_schemes.not_default.map{|r|r}
+    rs << RewardScheme.find_by_id(email_promote_info["reward_scheme_id"])
+    rs << RewardScheme.find_by_id(sms_promote_info["reward_scheme_id"])
+    rs << RewardScheme.find_by_id(broswer_extension_promote_info["reward_scheme_id"])
+    rs << RewardScheme.find_by_id(weibo_promote_info["reward_scheme_id"])
+    rs
   end
 
   def max_num_per_ip_reached?(ip_address)

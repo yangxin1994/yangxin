@@ -42,6 +42,7 @@ class Admin::SamplesController < Admin::AdminController
       sample_attribute['value'] = @attrs[sample_attribute['name']]
     end
   end
+
   # ##########################
   #
   # index当页操作相关
@@ -58,7 +59,11 @@ class Admin::SamplesController < Admin::AdminController
     render_json User.where(:_id => params[:id]).first do |sample|
       {
         :role => sample.set_sample_role(params[:roles].map(&:to_i)),
-        :block => sample.block(params[:block])
+        :block => sample.block(params[:block]),
+        :active => sample.update_attributes(:email => params[:email],
+        :email_activation => params[:email_activation] == "true",
+        :mobile => params[:mobile],
+        :mobile_activation => params[:mobile_activation] == "true")
       }
     end
   end

@@ -30,6 +30,12 @@ class Admin::SurveysController < Admin::AdminController
     end
   end
 
+  def cost_info
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      survey.cost_info
+    end
+  end
+
   def set_info
     render_json Survey.where(:_id => params[:id]).first do |survey|
       @is_succuess = 

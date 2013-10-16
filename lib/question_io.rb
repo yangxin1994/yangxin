@@ -585,13 +585,13 @@ class AddressBlankQuestionIo < QuestionIo
   def spss_header(header_prefix)
     fom = []
     case issue["format"]
-    when 8
+    when 1 , 2
       fom = ['省']
       fom_pre = ['province']
-    when 12
+    when 3 , 4
       fom = ['省', '市']
       fom_pre = ['province', 'city']
-    when 14
+    when 7 , 8 , 14
       fom = ['省', '市', '县/区']
       fom_pre = ['province', 'city', 'county']
     when 15
@@ -851,7 +851,7 @@ class SortQuestionIo < QuestionIo
     end
     value_labels = {}
     issue["items"].each_with_index do |item, index|
-      value_labels[index + 1] = item["content"]["text"]
+      value_labels[index + 1] = item["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)
     end
     item_count.times do |i|
       @spss_header << {"spss_name" => header_prefix + "_s#{i + 1}",
