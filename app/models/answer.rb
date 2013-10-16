@@ -511,23 +511,18 @@ class Answer
   end
 
   def check_question_quota(answer_content)
-    quota["rules"].each do |rule|
-    end
-
-
-    # 1. get the corresponding survey, quota, and quota stats
     quota = self.survey.show_quota
-    # 2. if all quota rules are satisfied, the new answer should be rejected
-    # set_reject_with_type(REJECT_BY_QUOTA) and return false if quota["quota_satisfied"]
-    # 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
     return true if !quota["is_exclusive"]
-    # 4. check the rules one by one
+    has_related_rule = false
     quota["rules"].each do |rule|
-      # find out a rule that:
-      # a. the quota of the rule has not been satisfied
-      # b. this answer satisfies the rule
-      return true if rule["submitted_count"] < rule["amount"] && self.satisfy_conditions(rule["conditions"])
+      question_ids = []
+      (rule["conditions"] || []).each do |c|
+        question_ids << c["name"] if c["condition_type"].to_i == 1
+      end
+      has_related_rule = true if (answer_content.keys & question_ids).present?
+      return true if self.satisfy_conditions(rule["conditions"]) && rule["submitted_count"] < rule["amount"]
     end
+    return true unless has_related_rule
     set_reject_with_type(REJECT_BY_QUOTA)
     false
   end
