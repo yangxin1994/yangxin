@@ -20,8 +20,7 @@ class SmsApi # 短信接口
   # PASSWORD = '007266'
   # real account
   CDKEY = "3SDK-EMY-0130-PIWST"
-  #PASSWORD = '349473'
-  PASSWORD = 'od@2013'
+  PASSWORD = '921256'
   CODE = 4699
   AUTOGRAPH = '［问卷吧］'
   ##### 注意: 不能使用短信接口发送个人信息(如"老地方见","你在哪"之类)                   #####
@@ -59,7 +58,7 @@ class SmsApi # 短信接口
   end
 
   def self.reset_password
-    result = get('/sdkproxy/changepassword.action', :query => {:cdkey => CDKEY,:password => '349473',:newPassword => PASSWORD})
+    result = get('/sdkproxy/changepassword.action', :query => {:cdkey => CDKEY,:password => 'od@2013',:newPassword => PASSWORD})
   end
 
   #同步发送即时短信

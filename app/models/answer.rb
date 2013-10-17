@@ -70,6 +70,7 @@ class Answer
   field :agent_feedback_name
   field :agent_feedback_email
   field :agent_feedback_mobile
+  field :sample_attributes_updated, :type => Boolean, default: false
 
 
   belongs_to :agent_task
@@ -108,7 +109,7 @@ class Answer
 
 
   after_create do |doc|
-    doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.remote_ip)
+    doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.ip_address) 
   end
 
 
@@ -509,20 +510,19 @@ class Answer
     true
   end
 
-  def check_question_quota
-    # 1. get the corresponding survey, quota, and quota stats
+  def check_question_quota(answer_content)
     quota = self.survey.show_quota
-    # 2. if all quota rules are satisfied, the new answer should be rejected
-    set_reject_with_type(REJECT_BY_QUOTA) and return false if quota["quota_satisfied"]
-    # 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
     return true if !quota["is_exclusive"]
-    # 4. check the rules one by one
+    has_related_rule = false
     quota["rules"].each do |rule|
-      # find out a rule that:
-      # a. the quota of the rule has not been satisfied
-      # b. this answer satisfies the rule
-      return true if rule["submitted_count"] < rule["amount"] && self.satisfy_conditions(rule["conditions"])
+      question_ids = []
+      (rule["conditions"] || []).each do |c|
+        question_ids << c["name"] if c["condition_type"].to_i == 1
+      end
+      has_related_rule = true if (answer_content.keys & question_ids).present?
+      return true if self.satisfy_conditions(rule["conditions"]) && rule["submitted_count"] < rule["amount"]
     end
+    return true unless has_related_rule
     set_reject_with_type(REJECT_BY_QUOTA)
     false
   end
@@ -636,6 +636,7 @@ class Answer
     self.update_quota(old_status) if !self.is_preview
     self.finished_at = Time.now.to_i
     self.deliver_reward
+    self.update_sample_attributes if !self.is_preview && self.is_finish
     self.save
   end
 
@@ -662,6 +663,7 @@ class Answer
     old_status = self.status
     if review_result
       self.set_finish
+      self.update_sample_attributes
       message_title = "问卷[#{self.survey.title}]通过审核!"
       message_content = "您参与的[#{self.survey.title}]已通过审核,感谢参与."
     else
@@ -710,11 +712,11 @@ class Answer
     case type
     when "chongzhi"
       index = self.rewards.index { |e| e["type"].to_i == RewardScheme::MOBILE }
-      self.rewards[index]["mobile"] = mobile
+      self.rewards[index]["mobile"] = account
       self.rewards[index]["checked"] = true
     when "zhifubao", "jifenbao"
       index = self.rewards.index { |e| [RewardScheme::ALIPAY, RewardScheme::JIFENBAO].include?(e["type"].to_i) }
-      self.rewards[index]["alipay_account"] = alipay_account
+      self.rewards[index]["alipay_account"] = account
       self.rewards[index]["checked"] = true
     end
     self.save
@@ -733,13 +735,13 @@ class Answer
   def handle_cash_order(reward)
     if order.nil?
       order =
-        case type
-        when "mobile"
+        case reward["type"].to_i
+        when RewardScheme::MOBILE
           Order.create_answer_mobile_order(self, reward)
-        when "alipay"
+        when RewardScheme::ALIPAY
           Order.create_answer_alipay_order(self, reward)
-        when "jifenbao"
-          Order.create_answer_alipay_order(self, reward)
+        when RewardScheme::JIFENBAO
+          Order.create_answer_jifenbao_order(self, reward)
         end
       return true if status == UNDER_REVIEW
       update_attributes({ "reward_delivered" => true })
@@ -760,16 +762,17 @@ class Answer
     case reward["type"].to_i
     when RewardScheme::MOBILE
       return ErrorEnum::REPEAT_ORDER if self.check_repeat_order(reward["mobile"])
-      handle_cash_order
+      handle_cash_order(reward)
     when RewardScheme::ALIPAY
       return ErrorEnum::REPEAT_ORDER if self.check_repeat_order(reward["alipay_account"])
-      handle_cash_order
+      handle_cash_order(reward)
     when RewardScheme::JIFENBAO
       return ErrorEnum::REPEAT_ORDER if self.check_repeat_order(reward["alipay_account"])
-      handle_cash_order
+      handle_cash_order(reward)
     when RewardScheme::POINT
       return true if self.status == UNDER_REVIEW
       self.update_attributes({"reward_delivered" => true}) and return true if self.status == REJECT
+      user = self.user
       if user.present?
         user.update_attributes(point: user.point + reward["amount"])
         PointLog.create_answer_point_log(reward["amount"], self.survey_id.to_s, self.survey.title, user._id)
@@ -799,6 +802,7 @@ class Answer
     answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id.to_s, sample._id.to_s, false)
     return ErrorEnum::ANSWER_EXIST if answer.present?
     sample.answers << self
+    self.update_sample_attributes if self.is_finish
     PunishLog.create_punish_log(sample.id) if self.status == REJECT
     if self.auditor.present?
       self.auditor.create_message("审核问卷答案消息", self.audit_message, [sample._id.to_s])
@@ -1249,7 +1253,7 @@ class Answer
   end
 
   def answer_percentage
-    questions = answer.load_question(nil, true)
+    questions = self.load_question(nil, true)
     question_number = self.survey.all_questions_id(false).length + self.random_quality_control_answer_content.length
     self.index_of(questions) / question_number.to_f
   end
@@ -1276,5 +1280,56 @@ class Answer
       break
     end
     self
+  end
+
+  def update_sample_attributes
+    # return if no user or attributes already updated
+    return false if self.user.blank? || self.sample_attributes_updated
+    self.answer_content.each do |q_id, answer|
+      q = BasicQuestion.find(q_id)
+      next if q.sample_attribute.blank?
+      attr_value = nil
+      case q.sample_attribute.type
+      when DataType::STRING
+        attr_value = answer if q.question_type == QuestionTypeEnum::TEXT_BLANK_QUESTION
+      when DataType::ENUM
+        if q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+        end
+      when DataType::NUMBER
+        attr_value = answer if q.question_type == QuestionTypeEnum::NUMBER_BLANK_QUESTION
+      when DataType::NUMBER_RANGE
+        if q.question_type == QuestionTypeEnum::NUMBER_BLANK_QUESTION
+          attr_value = [answer, answer] if answer.present?
+        elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+        end
+      when DataType::DATE
+        attr_value = answer / 1000 if q.question_type == QuestionTypeEnum::TIME_BLANK_QUESTION
+      when DataType::DATE_RANGE
+        if q.question_type == QuestionTypeEnum::TIME_BLANK_QUESTION
+          attr_value = [answer / 1000, answer / 1000] if answer.present
+        elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+        end
+      when DataType::ADDRESS
+        if q.question_type == QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+          attr_value = answer["address"]
+        elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+        end
+      when DataType::ARRAY
+        if q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          new_attr_value = []
+          answer["selection"].each do |input_id|
+            enum_value = q.sample_attribute_relation[input_id]
+            new_attr_value << enum_value if enum_value.present?
+          end
+          attr_value = (self.user.read_sample_attribute(q.sample_attribute.name).to_a + new_attr_value).uniq
+        end
+      end
+      self.user.write_sample_attribute(q.sample_attribute.name, attr_value) if attr_value.present?
+    end
+    self.update_attributes(sample_attributes_updated: true)
   end
 end

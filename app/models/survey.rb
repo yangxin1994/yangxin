@@ -685,7 +685,7 @@ class Survey
 
   def sample_attributes
     smp_attrs = sample_attributes_for_promote
-   smp_attrs.each_with_index do |smp_attr, index|
+    smp_attrs.each_with_index do |smp_attr, index|
       case smp_attr['type'].to_i
       when 0
         _value = smp_attr['value']
