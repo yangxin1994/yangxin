@@ -287,7 +287,7 @@ $(function(){
 		},
 
 		/* Move a question after after_question_id
-		 * if after_question_id is -1, move question_id to the begining of page_index
+		 * if after_question_id is 0, move question_id to the begining of page_index
 		 * if page_index is illegal, add a new page to the end of the survey and move question_id to the new page
 		 * =========================== */
 		moveQuestion: function(question_id, after_question_id, page_index, callback) {
@@ -306,7 +306,7 @@ $(function(){
 						// page index is illegal, add a new page
 						ps.push({name: 'new page', questions:[question_id]});
 					} else {
-						if(after_question_id == -1) {
+						if(after_question_id == 0) {
 							ps[page_index].questions.splice(0, 0, question_id);
 						} else {
 							var after_pos = this.findQuestionPosition(after_question_id);

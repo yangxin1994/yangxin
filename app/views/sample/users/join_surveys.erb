@@ -32,16 +32,16 @@
                 <tbody>
                     <% @my_answer_surveys['data'].to_a.each do |survey| %>
                         <tr>
-                            <td><%= int_time_to_date(survey["created_at"]) %></td>
+                            <td><%= int_time_to_date(survey.created_at.to_i) %></td>
                             <td>
-                                <a target="_blank" href="/a/<%= survey["answer_id"] %>">
-                                    <%= truncate(survey["survey_title"].strip, length: 30) %>
-                                    <% if survey["answer_status"].to_i == 1 %>
+                                <a target="_blank" href="/a/<%= survey.id.to_s %>">
+                                    <%= truncate(survey.survey.try(:title).to_s.strip, length: 30) %>
+                                    <% if survey.status.to_i == 1 %>
                                         <span class="c-blue">(继续答题..)</span>
                                     <% end %>
                                 </a>
                             </td>
-                            <td><%= sanitize(answered?(survey["answer_status"], survey["answer_reject_type"], survey["free_reward"])) %></td>
+                            <td><%= sanitize(answered?(survey.status, survey.reject_type, survey["free_reward"])) %></td>
                             <td class="last-child">
                                 <%= sanitize survey["select_reward"], attributes: %w(id class href target) %>
                             </td>

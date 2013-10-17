@@ -63,7 +63,7 @@
                 <li><a href="#attr-<%= smp_attr['_id'] %>_<%= smp_attr['type'] %>" data-index="<%= index %>">[<%= attr_type_tag smp_attr['type'] %>] <%= smp_attr['name'] %></a></li>
               <% end %>
             </ul>
-            <input value="<%= sample_attribute['sample_attribute_id'] %>_<%= sample_attribute['type'] %>" type='hidden' class="attr-id" name="sample_attribute[attr_<%= index %>][id]">
+            <input value="<%= sample_attribute['sample_attribute_id'] %>_<%= sample_attribute['type'] %>" type='hidden' class="attr-id" name="sample_attributes[attr_<%= index %>][id]">
           </div>
         </div>
       </div>
@@ -97,14 +97,14 @@
               <li><a href="#attr-<%= smp_attr['_id'] %>_<%= smp_attr['type'] %>" data-index="new">[<%= attr_type_tag smp_attr['type'] %>] <%= smp_attr['name'] %></a></li>
             <% end %>
           </ul>
-          <input value="" type='hidden' class="attr-id" name="sample_attribute[attr_new][id]">
+          <input value="" type='hidden' class="attr-id" name="sample_attributes[attr_new][id]">
         </div>
       </div>
     </div>
     <div class="control-group attr-setting" id="attr_setting_new">
       <label class="control-label" >属性相关设置:</label>
       <div class="controls">
-          <textarea rows="6" name="sample_attribute[attr_new][value]" placeholder="日期范围:每行包含两个元素的数组，两个元素均为YYYY/MM/DD,用逗号分隔，分别代表日期范围的最小值和最大值"></textarea>
+          <textarea rows="6" name="sample_attributes[attr_new][value]" placeholder="日期范围:每行包含两个元素的数组，两个元素均为YYYY/MM/DD,用逗号分隔，分别代表日期范围的最小值和最大值"></textarea>
       </div>
     </div>    
   </div>

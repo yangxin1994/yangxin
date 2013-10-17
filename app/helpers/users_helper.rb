@@ -1,6 +1,4 @@
 # encoding: utf-8
-# already tidied up
-
 module UsersHelper
 
   def point_log_status(status)

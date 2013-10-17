@@ -142,7 +142,7 @@
 			<% if !@hot_gift.nil? %>
 			<h2>热门兑换礼品：</h2>
 			<a class='gifts-preview' href='<%= gift_path(@hot_gift['_id']) %>' target='_blank'>
-				<img src='<%= @hot_gift['photo_src'] %>' />
+				<img src='<%= @hot_gift.photo_src %>' />
 				<h3><%= @hot_gift['title'] %></h3>
 			</a>
 			<div class='gifts-info'>

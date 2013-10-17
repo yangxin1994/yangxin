@@ -77,7 +77,7 @@
 							<% end %>
 							<li><a href="<%=setting_users_path %>">账户设置</a></li>
 							<li><a href="<%=notifications_users_path %>">消息中心</a></li>
-							<li><a href="/sign_out">退出</a></li>
+							<li><a href="/account/sign_out">退出</a></li>
 						</ul>
 					</div>
 
@@ -85,8 +85,8 @@
 			</div>
 			<% else %>
 			<div class="login-panel r">
-				<a href="/sign_in" class="btn login mr10">登 录</a>
-				<a href="/sign_up" class="btn reg">注 册</a>
+				<a href="/account/sign_in" class="btn login mr10">登 录</a>
+				<a href="/account/sign_up" class="btn reg">注 册</a>
 			</div>
 			<% end %>
 		</div>

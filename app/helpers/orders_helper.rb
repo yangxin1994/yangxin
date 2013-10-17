@@ -1,6 +1,4 @@
 #encoding: utf-8
-# already tidied up
-
 module OrdersHelper
   def user_info(order)
     op = ["full_name", "identity_card", "bank", "bankcard_number",
@@ -54,6 +52,4 @@ module OrdersHelper
       "收货信息(点击看详细)"
     end
   end
-
-
 end

@@ -1,13 +1,36 @@
 # encoding: utf-8
-# already tidied up
 require 'error_enum'
 require 'data_type'
 require 'securerandom'
 require 'tool'
 require 'quill_common'
+Dir[File.dirname(__FILE__) + '/lib/survey_components/*.rb'].each {|file| require file }
 class Answer
+
   include Mongoid::Document
   include Mongoid::Timestamps
+  include FindTool
+
+
+  # status
+  NOT_EXIST = 0
+  STATUS_NAME_ARY = ["edit", "reject", "under_review", "under_agent_review", "redo", "finish"]
+  EDIT = 1
+  REJECT = 2
+  UNDER_REVIEW = 4
+  UNDER_AGENT_REVIEW = 8
+  REDO = 16
+  FINISH = 32
+
+  # reject type
+  REJECT_BY_QUOTA = 1
+  REJECT_BY_QUALITY_CONTROL = 2
+  REJECT_BY_REVIEW = 4
+  REJECT_BY_SCREEN = 8
+  REJECT_BY_TIMEOUT = 16
+  REJECT_BY_AGENT_REVIEW = 32
+  REJECT_BY_IP_RESTRICT = 64
+
   # status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo, 32 for under agents' review
   field :status, :type => Integer, default: 1
   field :answer_content, :type => Hash, default: {}
@@ -39,27 +62,16 @@ class Answer
   field :introducer_reward_assigned, :type => Boolean, default: false
   field :reward_delivered, :type => Boolean, default: false
   field :need_review, :type => Boolean
-
   # used for interviewer to upload attachments
   field :attachment, :type => Hash, :default => {}
   field :longitude, :type => String, :default => ""
   field :latitude, :type => String, :default => ""
   field :referrer, :type => String, :default => ""
-
   field :agent_feedback_name
   field :agent_feedback_email
   field :agent_feedback_mobile
+  field :sample_attributes_updated, :type => Boolean, default: false
 
-
-  scope :not_preview, lambda { where(:is_preview => false) }
-  scope :preview, lambda { where(:is_preview => true) }
-  scope :finished, lambda { where(:status => FINISH) }
-  scope :screened, lambda { where(:status => REJECT, :reject_type => REJECT_BY_SCREEN) }
-  scope :finished_and_screened, lambda { any_of({:status => FINISH}, {:status => REJECT, :reject_type => REJECT_BY_SCREEN}) }
-  scope :rejected, lambda { where(:status => REJECT) }
-  scope :unreviewed, lambda { where(:status => UNDER_REVIEW) }
-  scope :ongoing, lambda {where(:status => EDIT)}
-  scope :wait_for_review, lambda {where(:status => UNDER_REVIEW)}
 
   belongs_to :agent_task
   belongs_to :user, class_name: "User", inverse_of: :answers
@@ -70,30 +82,23 @@ class Answer
   belongs_to :reward_scheme
   has_one :order
 
-  # status
-  NOT_EXIST = 0
-  STATUS_NAME_ARY = ["edit", "reject", "under_review", "under_agent_review", "redo", "finish"]
-  EDIT = 1
-  REJECT = 2
-  UNDER_REVIEW = 4
-  UNDER_AGENT_REVIEW = 8
-  REDO = 16
-  FINISH = 32
 
-  # reject type
-  REJECT_BY_QUOTA = 1
-  REJECT_BY_QUALITY_CONTROL = 2
-  REJECT_BY_REVIEW = 4
-  REJECT_BY_SCREEN = 8
-  REJECT_BY_TIMEOUT = 16
-  REJECT_BY_AGENT_REVIEW = 32
-  REJECT_BY_IP_RESTRICT = 64
+  scope :not_preview, -> { where(:is_preview => false) }
+  scope :preview, -> { where(:is_preview => true) }
+  scope :finished, -> { where(:status => FINISH) }
+  scope :screened, -> { where(:status => REJECT, :reject_type => REJECT_BY_SCREEN) }
+  scope :finished_and_screened, -> { any_of({:status => FINISH}, {:status => REJECT, :reject_type => REJECT_BY_SCREEN}) }
+  scope :rejected, -> { where(:status => REJECT) }
+  scope :unreviewed, -> { where(:status => UNDER_REVIEW) }
+  scope :ongoing, -> {where(:status => EDIT)}
+  scope :wait_for_review, -> {where(:status => UNDER_REVIEW)}
+  scope :my_spread, ->(user_id){ where(:introducer_id => user_id)}
+  scope :special_status, ->(status){ where(:status.in => status.split(',')) }
+
 
   index({ introducer_id: 1 }, { background: true } )
-
   index({ survey_id: 1, is_preview: 1 }, { background: true } )
   index({ username: 1, password: 1 }, { background: true } )
-
   index({ is_preview: 1, introducer_id: 1 }, { background: true } )
   index({ survey_id: 1, status: 1, reject_type: 1 }, { background: true } )
   index({ status: 1, reject_type: 1 }, { background: true } )
@@ -103,19 +108,22 @@ class Answer
   index({ ip_address:1},{ background: true })
 
 
+  after_create do |doc|
+    doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.ip_address) 
+  end
+
+
+  public
+
   def self.def_status_attr
     STATUS_NAME_ARY.each_with_index do |status_name, index|
       define_method("is_#{status_name}".to_sym) { return 2**index == self.status }
       define_method("set_#{status_name}".to_sym) { self.status = 2**index; self.save}
     end
   end
+  
   def_status_attr
 
-  public
-
-  def self.find_by_id(answer_id)
-    return Answer.where(:_id => answer_id).first
-  end
 
   def self.find_by_survey_id_sample_id_is_preview(survey_id, sample_id, is_preview)
     return nil if sample_id.blank?
@@ -130,123 +138,80 @@ class Answer
     end
   end
 
-  
-  def find_lottery_info
-    lottery_data = {}
-    prizes_arr = []
-    prize_ids = self.rewards.first['prizes'].map{|p| p['id']}
-    prizes = Prize.where(:id.in => prize_ids).map{|p| p['photo_src'] = p.photo.present? ? p.photo.picture_url : Prize::DEFAULT_IMG;p}
-    prizes.each do |pri|
-      prizes_arr << {'id' => pri.id,'title' => pri.title,'price' => pri.price,'photo_src' => pri.photo_src}
-    end
-    lottery_data['survey_id'] = self.survey.id
-    lottery_data['scheme_id'] = self.survey.quillme_promote_info['reward_scheme_id']
-    lottery_data['survey_title'] = self.survey.title
-    lottery_data['prizes'] = prizes_arr
-    lottery_data['user_id'] = self.user_id.to_s
-    lottery_data['status'] = self.status
-    return lottery_data
+  def set_reject_with_type(reject_type, finished_at = Time.now.to_i)
+    set_reject
+    update_attributes(reject_type: reject_type, finished_at: finished_at)
   end
 
-  def self.create_answer(survey_id, reward_scheme_id, is_preview, introducer_id, agent_task_id, channel, referrer, remote_ip, username, password, http_user_agent)
-    survey = Survey.normal.find_by_id(survey_id)
-    # create the answer
-    answer = Answer.new(is_preview: is_preview,
-      channel: channel,
-      ip_address: remote_ip,
-      region: QuillCommon::AddressUtility.find_address_code_by_ip(remote_ip),
-      username: username,
-      password: password,
-      referrer: referrer,
-      http_user_agent: http_user_agent)
-    answer.save
-    # record introducer information
+  def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, answer_obj)
+    answer = Answer.create(answer_obj)
+    Survey.normal.find(survey_id).answers << answer
+    # AgentTask.find_by_id(agent_task_id).try(:new_answer, answer)
+    AgentTask.find(agent_task_id).new_answer(answer) if agent_task_id.present?
+    RewardScheme.find(reward_scheme_id).new_answer(answer)
+    answer.set_introducer_info(introducer_id)
+      .init_answer_content
+      .init_logic_control
+      .genereate_random_quality_control_questions
+  end
+
+  def set_introducer_info(introducer_id)
     if !is_preview && introducer_id.present?
       introducer = User.sample.find_by_id(introducer_id)
       if introducer.present?
-        answer.introducer_id = introducer_id
-        answer.point_to_introducer = survey.spread_point
+        introducer_id = introducer_id
+        point_to_introducer = survey.spread_point
         SurveySpread.create_new(introducer, survey) 
       end
     end
-    # record the agent task information
-    if !is_preview && agent_task_id.present?
-      agent_task = AgentTask.find_by_id(agent_task_id)
-      agent_task.answers << answer if agent_task.present? && agent_task.status == AgentTask::OPEN
-    end
-    # record the reward information
-    reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
-    if !reward_scheme.nil?
-      answer.rewards = reward_scheme.rewards
-      answer.rewards[0]["checked"] = true if answer.rewards.length == 1
-      answer.need_review = reward_scheme.need_review
-      reward_scheme.answers << answer
-    else
-      answer.rewards = []
-      answer.need_review = false
-    end
+    self.save
+    self
+  end
 
-    # initialize the answer content
-    answer_content = {}
+  def init_answer_content
+    self.answer_content = {}
     survey.pages.each do |page|
-      answer_content = answer_content.merge(Hash[page["questions"].map { |ele| [ele, nil] }])
+      self.answer_content = answer_content.merge(Hash[page["questions"].map { |ele| [ele, nil] }])
     end
-    logic_control = survey.show_logic_control
-    logic_control.each do |rule|
-      if rule["rule_type"] == 1
+    survey.show_logic_control.each do |rule|
+      if rule["rule_type"] == Survey::SHOW_QUESTION
         rule["result"].each do |q_id|
-          answer_content[q_id] = {}
+          self.answer_content[q_id] = {}
         end
       end
     end
-    answer.answer_content = answer_content
+    self.save
+    self
+  end
 
-    # initialize the logic control result
-    answer.logic_control_result = {}
-    logic_control.each do |rule|
-      if rule["rule_type"] == 3
+  def init_logic_control
+    self.logic_control_result = {}
+    survey.show_logic_control.each do |rule|
+      if rule["rule_type"] == Survey::SHOW_ITEM
         rule["result"].each do |ele|
-          answer.add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
+          add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
         end
-      elsif rule["rule_type"] == 5
-        items_to_be_added = []
-        rule["result"]["items"].each do |input_ids|
-          items_to_be_added << input_ids[1]
-        end
-        answer.add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
+      elsif rule["rule_type"] == Survey::SHOW_CORRESPONDING_ITEM
+        items_to_be_added = rule["result"]["items"].map { |input_ids| input_ids[1] }
+        add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
       end
     end
-    answer.save
-    survey.answers << answer
-    # randomly generate quality control questions
-    answer = answer.genereate_random_quality_control_questions
-    answer.save
-
-    return answer
-  end
-
-  def has_rewards
-    return !self.rewards.blank?
-  end
-
-  def is_screened
-    return status == REJECT && reject_type == REJECT_BY_SCREEN
+    self.save
+    self
   end
 
   def genereate_random_quality_control_questions
     quality_control_questions_ids = []
     self.random_quality_control_answer_content = {}
     self.random_quality_control_locations = {}
-    if self.answer_content.blank?
-      # when there are no normal questions, it is not needed to generate random quality control questions
+    if answer_content.blank?
       self.save
       return self
     end
-    if self.survey.is_random_quality_control_questions
+    if survey.is_random_quality_control_questions
       # need to select random questions
       # 1. determine the number of random quality control questions
-      question_number = self.answer_content.length
-      qc_question_number = [[question_number / 10, 1].max, 4].min
+      qc_question_number = [[answer_content.length / 10, 1].max, 4].min
       objective_question_number = (qc_question_number / 2.0).ceil
       matching_question_number = qc_question_number - objective_question_number
       # 2. randomly choose questions and generate locations of questions
@@ -280,38 +245,30 @@ class Answer
     end
     # 4. initialize the random quality control questions answers
     self.random_quality_control_answer_content = Hash[quality_control_questions_ids.map { |ele| [ele, nil] }]
-
     self.save
-    return self
+    self
   end
 
-  #*description*: load questions for volunteers
-  #
-  #*params*:
-  #* question_id: the id of the question that indicates the location (only works for the surveys that allow pageup)
-  #* prev_page: whether show the previous page or the next page (only works for the surveys that allow pageup)
-  #
-  #*retval*:
-  #* array of questions objects
+  def is_screened
+    return status == REJECT && reject_type == REJECT_BY_SCREEN
+  end
+
   def load_question(question_id, next_page)
-    pages = self.survey.pages.map { |p| p["questions"] }
-    pages_with_qc_questions = []
-    pages.each do |page_question_ids|
+    pages_with_qc_questions = (survey.pages.map { |p| p["questions"] }).map do |page_question_ids|
       cur_page_questions = []
       page_question_ids.each do |q_id|
         cur_page_questions << q_id
         qc_ids = self.random_quality_control_locations[q_id] || []
         cur_page_questions += qc_ids
       end
-      pages_with_qc_questions << cur_page_questions
+      cur_page_questions
     end
     # consider the following scenario:
     # a normal question is removed, there are quality control questions after this normal question
     # such quality control questions are added to the last page
-    current_all_questions = pages_with_qc_questions.flatten
     remain_qc_ids = []
     self.random_quality_control_answer_content.each do |k, v|
-      remain_qc_ids << k if !current_all_questions.include?(k)
+      remain_qc_ids << k if !pages_with_qc_questions.flatten.include?(k)
     end
     pages_with_qc_questions << remain_qc_ids if !remain_qc_ids.blank?
 
@@ -410,43 +367,19 @@ class Answer
   end
 
   def load_question_by_ids(question_ids, next_page = true)
-    if question_ids.blank? && !self.survey.is_pageup_allowed
-      # try to automatically finish the survey if:
-      # 1. no questions to load
-      # 2. page up is now allowed
-      finish(true)
-    end
+    finish(true) if question_ids.blank? && !self.survey.is_pageup_allowed
     questions = []
     question_ids.each do |q_id|
       question = BasicQuestion.find_by_id(q_id)
       questions << question.remove_hidden_items(logic_control_result[q_id]) if !question.nil?
     end
     # consider the scenario that "one question per page"
-    if self.survey.style_setting["is_one_question_per_page"]
-      if questions.blank?
-        return []
-      elsif next_page
-        # should return the first question
-        return [questions[0]]
-      else
-        # should return the last question
-        return [questions[-1]]
-      end
-    else
-      return questions
-    end
+    return questions if !self.survey.style_setting["is_one_question_per_page"]
+    return [] if questions.blank?
+    return [questions[0]] if next_page
+    return [questions[-1]]
   end
 
-  #*description*: add a logic control result, used for show/hide items logic control rules
-  #
-  #*params*:
-  #* question_id
-  #* items: array of inputs id that are added
-  #* sub_questions: array of rows id that are added
-  #
-  #*retval*:
-  #* true:
-  #* false:
   def add_logic_control_result(question_id, items, sub_questions)
     return if self.survey.is_pageup_allowed
     if self.logic_control_result[question_id].nil?
@@ -457,69 +390,43 @@ class Answer
       self.logic_control_result[question_id]["sub_questions"] =
         (self.logic_control_result[question_id]["sub_questions"].to_a + sub_questions.to_a).uniq
     end
-    return self.save
+    self.save
   end
 
-  #*description*: remove a logic control result
-  #
-  #*params*:
-  #* question_id
-  #* items: array of inputs id that are removed
-  #* sub_questions: array of rows id that are removed
-  #
-  #*retval*:
-  #* true:
-  #* false:
   def remove_logic_control_result(question_id, items, sub_questions)
     return if self.survey.is_pageup_allowed
     return if self.logic_control_result[question_id].nil?
     cur_items = self.logic_control_result[question_id]["items"].to_a
     cur_sub_questions = self.logic_control_result[question_id]["sub_questions"].to_a
-    items.each do |ele|
+    (items || []).each do |ele|
       cur_items.delete(ele)
     end
-    sub_questions.each do |ele|
+    (sub_questions || []).each do |ele|
       cur_sub_questions.delete(ele)
     end
     self.logic_control_result[question_id]["items"] = cur_items
     self.logic_control_result[question_id]["sub_questions"] = cur_sub_questions
-    return self.save
+    self.save
   end
 
-  #*description*: called by "refresh_quota_stats" in survey.rb, check whether the answer satisfies the given conditions
-  #
-  #*params*:
-  #* conditions: array, the conditions to be checked
-  #
-  #*retval*:
-  #* true: when the conditions can be satisfied
-  #* false: otherwise
-  def satisfy_conditions(conditions, refresh_quota = true)
-    # only answers that are finished contribute to quotas
-    return false if !self.is_finish && refresh_quota
-    # check the conditions one by one
+  def satisfy_conditions(conditions)
     (conditions || []).each do |condition|
       satisfy = false
       case condition["condition_type"].to_s
       when "1"
         question_id = condition["name"]
         question = BasicQuestion.find_by_id(question_id)
-        if question.nil?
+        if question.nil? || answer_content[question_id].nil?
           satisfy = true
-        else
-          require_answer = condition["value"]
-          if answer_content[question_id].nil?
-            satisfy = true
-          elsif question.question_type == QuestionTypeEnum::CHOICE_QUESTION
-            satisfy = Tool.check_choice_question_answer(question_id,
-                                self.answer_content[question_id]["selection"],
-                                require_answer,
-                                condition["fuzzy"])
-          elsif question.question_type == QuestionTypeEnum::ADDRESS_BLANK_QUESTION
-            satisfy = Tool.check_address_blank_question_answer(question_id,
-                                self.answer_content[question_id]["selection"],
-                                require_answer)
-          end
+        elsif question.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          satisfy = Tool.check_choice_question_answer(question_id,
+                              self.answer_content[question_id]["selection"],
+                              condition["value"],
+                              condition["fuzzy"])
+        elsif question.question_type == QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+          satisfy = Tool.check_address_blank_question_answer(question_id,
+                              self.answer_content[question_id]["selection"],
+                              condition["value"])
         end
       when "2"
         satisfy = QuillCommon::AddressUtility.satisfy_region_code?(self.region, condition["value"])
@@ -528,71 +435,24 @@ class Answer
       when "4"
         satisfy = Tool.check_ip_mask(condition["value"], self.ip_address)
       end
-      return satisfy if !satisfy
+      return false if !satisfy
     end
-    return true
+    true
   end
 
-  #*description*: clear the answer contents, only work for answers with "redo" status, or preview answers, or answers whose survey allows pageup
-  #
-  #*params*:
-  #
-  #*retval*:
-  #* true: when the answer content is cleared
-  #* ErrorEnum::WRONG_ANSWER_STATUS
   def clear
     return ErrorEnum::WRONG_ANSWER_STATUS if self.is_finish || self.is_reject
-    # clear the answer content
-    self.answer_content.each_key do |k|
-      self.answer_content[k] = nil
-    end
-    # clear the random quality control questions answer content
-    self.random_quality_control_answer_content.each_key do |k|
-      self.random_quality_control_answer_content[k] = nil
-    end
-    logic_control = self.survey.show_logic_control
-    logic_control.each do |rule|
-      if rule["rule_type"] == 1
-        rule["result"].each do |q_id|
-          answer_content[q_id] = {}
-        end
-      end
-    end
-    # initialize the logic control result
-    self.logic_control_result = {}
-    logic_control.each do |rule|
-      if rule["rule_type"] == 3
-        rule["result"].each do |ele|
-          self.add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
-        end
-      elsif rule["rule_type"] == 5
-        items_to_be_added = []
-        rule["result"]["items"].each do |input_ids|
-          items_to_be_added << input_ids[1]
-        end
-        self.add_logic_control_result(rule["result"]["question_id_2"], items_to_be_added, [])
-      end
-    end
-
-    # initialize the random quality control questions
-    self.genereate_random_quality_control_questions
-
-    self.save
-    self.set_edit
-    return true
+    self.init_answer_content
+      .init_logic_control
+      .genereate_random_quality_control_questions
+      .set_edit
+    true
   end
 
-  #*description*: check whether the answer expires and update the answer's status
-  #
-  #*params*:
-  #
-  #*retval*:
-  #* the status of the answer after updating
   def update_status
     # an answer expires only when the survey is not published and the answer is in editting status
     if Time.now.to_i - self.created_at.to_i > 2.days.to_i && self.survey.status != Survey::PUBLISHED && self.status == EDIT
-      self.set_reject
-      self.update_attributes(reject_type: REJECT_BY_TIMEOUT, finished_at: Time.now.to_i)
+      set_reject_with_type(REJECT_BY_TIMEOUT)
     end
     return self.status
   end
@@ -600,16 +460,14 @@ class Answer
   def delete
     # only answers that are finished can be deleted
     return ErrorEnum::WRONG_ANSWER_STATUS if self.is_redo || self.is_edit
-    self.destroy
-    return true
+    return self.destroy
   end
 
-  #*description*: update the answer content
-  def update_answer(updated_answer_content)
+  def update_answer(new_answer)
     # it might happen that:
     # survey has a new question, but the answer content does not has the question id as a key
     # thus when updating the answer content, the key should not be checked
-    updated_answer_content.each do |k, v|
+    new_answer.each do |k, v|
       self.answer_content[k] = v if self.answer_content.has_key?(k)
       self.random_quality_control_answer_content[k] = v if self.random_quality_control_answer_content.has_key?(k)
     end
@@ -617,96 +475,63 @@ class Answer
     return true
   end
 
-  # the following three methods check the quality control, screen, and quota questions, respectively
-  def check_quality_control(answer_content)
-    # find out quality control questions
+  def check_quality_control(new_answer)
     random_quality_control_question_id_ary = []
-    answer_content.each do |k, v|
+    new_answer.each do |k, v|
       question = BasicQuestion.find_by_id(k)
       random_quality_control_question_id_ary << k if !question.nil? && question.class == QualityControlQuestion
     end
-    # if there is no quality control questions, return
-    return true if random_quality_control_question_id_ary.blank?
-    ########## all quality control quesoitns are randomly inserted ##########
     random_quality_control_question_id_ary.each do |qc_id|
-      retval = QualityControlQuestion.check_quality_control_answer(qc_id, self)
-      if !retval
-        # the quality control is violated
-        self.repeat_time = self.repeat_time + 1 if self.repeat_time < 2
-        self.save
-        if self.repeat_time == 1
-          self.set_redo
-        else
-          self.set_reject
-          self.update_attributes(reject_type: REJECT_BY_QUALITY_CONTROL, finished_at: Time.now.to_i)
-        end
+      if !QualityControlQuestion.check_quality_control_answer(qc_id, self)
+        update_attributes(repeat_time: repeat_time + 1)
+        repeat_time == 1 ? set_redo : set_reject_with_type(REJECT_BY_QUALITY_CONTROL)
         return false
       end
     end
-    return true
+    true
   end
 
-  def check_screen(answer_content)
-    logic_control = self.survey.show_logic_control
-    volunteer_answer_question_id_ary = answer_content.keys
-    logic_control.each do |logic_control_rule|
-      # only check the screen logic control rules
-      next if logic_control_rule["rule_type"] != 0
-      screen_condition_question_id_ary = logic_control_rule["conditions"].map {|ele| ele["question_id"]}
-      # check whether, in the answers submitted, there are screen questions for this logic control rule
-      target_question_id_ary = volunteer_answer_question_id_ary & screen_condition_question_id_ary
-      next if target_question_id_ary.empty?
-
+  def check_screen(new_answer)
+    survey.show_logic_control.each do |logic_control_rule|
+      next if logic_control_rule["rule_type"] != Survey::SCREEN
+      condition_qid_ary = logic_control_rule["conditions"].map {|ele| ele["question_id"]}
+      next if (new_answer.keys & condition_qid_ary).empty?
       # for each condition, check whether it is violated
       logic_control_rule["conditions"].each do |condition|
         # if the volunteer has not answered this question, stop the checking of this rule
         break if answer_content[condition["question_id"]].nil?
-        pass_condition = Tool.check_choice_question_answer(answer_content[condition["question_id"]],
+        pass_condition = Tool.check_choice_question_answer(condition["question_id"],
                                 answer_content[condition["question_id"]]["selection"],
                                 condition["answer"],
                                 condition["fuzzy"])
-        if pass_condition
-          self.set_reject
-          self.update_attributes(reject_type: REJECT_BY_SCREEN, finished_at: Time.now.to_i)
-          return false
-        end
+        set_reject_with_type(REJECT_BY_SCREEN) and return false if pass_condition
       end
     end
-    return true
+    true
   end
 
-  def check_question_quota
-    # 1. get the corresponding survey, quota, and quota stats
+  def check_question_quota(answer_content)
     quota = self.survey.show_quota
-    # 2. if all quota rules are satisfied, the new answer should be rejected
-    if quota["quota_satisfied"]
-      self.set_reject
-      self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
-      return false
-    end
-    # 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
     return true if !quota["is_exclusive"]
-    # 4. check the rules one by one
+    has_related_rule = false
     quota["rules"].each do |rule|
-      # find out a rule that:
-      # a. the quota of the rule has not been satisfied
-      # b. this answer satisfies the rule
-      return true if rule["submitted_count"] < rule["amount"] && self.satisfy_conditions(rule["conditions"], false)
+      question_ids = []
+      (rule["conditions"] || []).each do |c|
+        question_ids << c["name"] if c["condition_type"].to_i == 1
+      end
+      has_related_rule = true if (answer_content.keys & question_ids).present?
+      return true if self.satisfy_conditions(rule["conditions"]) && rule["submitted_count"] < rule["amount"]
     end
-    self.set_reject
-    self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
-    return false
+    return true unless has_related_rule
+    set_reject_with_type(REJECT_BY_QUOTA)
+    false
   end
 
   def check_channel_ip_address_quota
     # 1. get the corresponding survey, quota, and quota stats
     quota = self.survey.quota
     # 2. if all quota rules are satisfied, the new answer should be rejected
-    if quota["quota_satisfied"]
-      self.set_reject
-      self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
-      return false
-    end
+    set_reject_with_type(REJECT_BY_QUOTA) and return false if quota["quota_satisfied"]
     # 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
     return true if !quota["is_exclusive"]
     # 4 the rules should be checked one by one to see whether this answer can be satisfied
@@ -723,26 +548,18 @@ class Answer
       return true
     end
     # 5 cannot find a quota rule to accept this new answer
-    self.set_reject
-    self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
-    return false
+    set_reject_with_type(REJECT_BY_QUOTA)
+    false
   end
 
-  def update_logic_control_result(answer_content)
-    return if self.survey.is_pageup_allowed
-    # array of ids of the questinos that the volunteer answers this time
-    volunteer_answer_question_id_ary = answer_content.keys
-    logic_control = self.survey.show_logic_control
-    logic_control.each do |logic_control_rule|
-      # array of ids of the quetions that are the conditions of this logic control rule
-      logic_control_rule_question_id_ary = logic_control_rule["conditions"].map {|condition| condition["question_id"]}
-      target_question_id_ary = volunteer_answer_question_id_ary & logic_control_rule_question_id_ary
+  def update_logic_control_result(new_answer)
+    return if survey.is_pageup_allowed
+    survey.show_logic_control.each do |logic_control_rule|
       # if the answers submitted have nothing to do with the conditions of this rule, move to the next rule
-      next if target_question_id_ary.empty?
-      # if the conditions of the rule are not satisfied, move to the next rule
+      condition_qid_ary = logic_control_rule["conditions"].map {|condition| condition["question_id"]}
+      next if (new_answer.keys & condition_qid_ary).empty?
       satisfy_rule = true
       logic_control_rule["conditions"].each do |condition|
-        # if the volunteer has not answered this question, stop the checking of this rule
         satisfy_rule = false if answer_content[condition["question_id"]].nil?
         pass_condition = Tool.check_choice_question_answer(condition["question_id"],
                                 answer_content[condition["question_id"]]["selection"],
@@ -752,49 +569,29 @@ class Answer
       end
       next if !satisfy_rule
       # the conditions of this logic control rule is satisfied
-      case logic_control_rule["rule_type"].to_s
-      when "1"
-        # "show question" logic control
+      case logic_control_rule["rule_type"].to_i
+      when Survey::SHOW_QUESTION
         # if the rule is satisfied, show the question (set the answer of the question as "nil")
-        logic_control_rule["result"].each do |q_id|
-          self.answer_content[q_id] = nil
-        end
+        logic_control_rule["result"].each { |q_id| self.answer_content[q_id] = nil }
         self.save
-      when "2"
-        # "hide question" logic control
+      when Survey::HIDE_QUESTION
         # if the rule is satisfied, hide the question (set the answer of the question as {})
-        logic_control_rule["result"].each do |q_id|
-          self.answer_content[q_id] = self.answer_content[q_id] || {}
-        end
+        logic_control_rule["result"].each { |q_id| self.answer_content[q_id] ||= {} }
         self.save
-      when "3"
-        # "show item" logic control
+      when Survey::SHOW_ITEM
         # if the rule is satisfied, show the items (remove from the logic_control_result)
-        logic_control_rule["result"].each do |ele|
-          self.remove_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
-        end
-      when "4"
-        # "hide item" logic control
+        logic_control_rule["result"].each { |ele| remove_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"]) }
+      when Survey::HIDE_ITEM
         # if the rule is satisfied, hide the items (add to the logic_control_result)
-        logic_control_rule["result"].each do |ele|
-          self.add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"])
-        end
-      when "5"
-        # "show matching item" logic control
+        logic_control_rule["result"].each { |ele| add_logic_control_result(ele["question_id"], ele["items"], ele["sub_questions"]) }
+      when Survey::SHOW_CORRESPONDING_ITEM
         # if the rule is satisfied, show the items (remove from the logic_control_result)
-        items_to_be_removed = []
-        log_control_rule["result"]["items"].each do |input_ids|
-          items_to_be_removed << input_ids[1]
-        end
-        self.remove_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_removed, [])
-      when "6"
-        # "hide matching item" logic control
+        items_to_be_removed = log_control_rule["result"]["items"].map { |input_ids| input_ids[1] } || []
+        remove_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_removed, [])
+      when Survey::HIDE_CORRESPONDING_ITEM
         # if the rule is satisfied, hide the items (add to the logic_control_result)
-        items_to_be_added = []
-        log_control_rule["result"]["items"].each do |input_ids|
-          items_to_be_added << input_ids[1]
-        end
-        self.add_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_added, [])
+        items_to_be_added = log_control_rule["result"]["items"].map { |input_ids| input_ids[1] } || []
+        add_logic_control_result(logic_control_rule["result"]["question_id_2"], items_to_be_added, [])
       end
     end
   end
@@ -820,14 +617,7 @@ class Answer
   end
 
   def finish(auto = false)
-    # synchronize the normal questions in the survey and the qeustions in the answer content
-    survey_question_ids = self.survey.all_questions_id
-    self.answer_content.delete_if { |q_id, a| !survey_question_ids.include?(q_id) }
-    survey_question_ids.each do |q_id|
-      self.answer_content[q_id] ||= nil
-    end
-    self.random_quality_control_answer_content.delete_if { |q_id, a| QualityControlQuestion.find_by_id(q_id).nil? }
-    self.save
+    sync_questions
     # surveys that allow page up cannot be finished automatically
     return false if self.survey.is_pageup_allowed && auto
     # check whether can finish this answer
@@ -846,102 +636,63 @@ class Answer
     self.update_quota(old_status) if !self.is_preview
     self.finished_at = Time.now.to_i
     self.deliver_reward
-    return self.save
+    self.update_sample_attributes if !self.is_preview && self.is_finish
+    self.save
   end
 
+  def sync_questions
+    survey_question_ids = survey.all_questions_id
+    self.answer_content.delete_if { |q_id, a| !survey_question_ids.include?(q_id) }
+    survey_question_ids.each do |q_id|
+      self.answer_content[q_id] ||= nil
+    end
+    self.random_quality_control_answer_content.delete_if { |q_id, a| QualityControlQuestion.find_by_id(q_id).nil? }
+    self.save
+    self
+  end
 
   def update_quota(old_status)
-    quota = self.survey.quota
-    if old_status == EDIT && self.is_under_review
-      # user submits the answer
-      quota["submitted_count"] += 1
-    elsif old_status == EDIT && self.is_finish
-      # user submits the answer, and the answer automatically passes review
-      quota["submitted_count"] += 1
-      quota["finished_count"] += 1
-    elsif old_status == UNDER_REVIEW && self.is_finish
-      # answer passes review
-      quota["finished_count"] += 1
-    elsif old_status == UNDER_REVIEW && self.is_reject
-      # answer fails review
-      quota["submitted_count"] = [quota["submitted_count"].to_i - 1, 0].max
-    end
-    quota["rules"].each do |rule|
-      next if !self.satisfy_conditions(rule["conditions"] || [], false)
-      if old_status == EDIT && self.is_under_review
-        # user submits the answer
-        rule["submitted_count"] += 1
-      elsif old_status == EDIT && self.is_finish
-        # user submits the answer, and the answer automatically passes review
-        rule["submitted_count"] += 1
-        rule["finished_count"] += 1
-      elsif old_status == UNDER_REVIEW && self.is_finish
-        # answer passes review
-        rule["finished_count"] += 1
-      elsif old_status == UNDER_REVIEW && self.is_reject
-        # answer fails review
-        rule["submitted_count"] = [rule["submitted_count"] - 1, 0].max
-      end
-    end
-    self.interviewer_task.try(:refresh_quota)
-    self.agent_task.try(:refresh_quota)
-    self.survey.save
+    survey.update_quota(self, old_status)
+    interviewer_task.try(:refresh_quota)
+    agent_task.try(:refresh_quota)
+    self
   end
 
-  # the answer auditor reviews this answer, the review result can be 1 (pass review) or 2 (not pass)
   def review(review_result, answer_auditor, message)
-    return ErrorEnum::WRONG_ANSWER_STATUS if self.status != UNDER_REVIEW
-
+    return false if self.status != UNDER_REVIEW
     old_status = self.status
-    user = self.user
-
-    # execute the review operation
     if review_result
       self.set_finish
+      self.update_sample_attributes
       message_title = "问卷[#{self.survey.title}]通过审核!"
       message_content = "您参与的[#{self.survey.title}]已通过审核,感谢参与."
     else
-      self.set_reject
-      self.reject_type = REJECT_BY_REVIEW
+      set_reject_with_type(REJECT_BY_REVIEW)
       message_title = "对不起,您参与的问卷未通过审核!"
       message_content = "您参与的问卷[#{self.survey.title}]没有通过管理员审核"
       message_content += ", 拒绝原因: #{message}" if message.present?
       PunishLog.create_punish_log(user.id) if user.present?
     end
     answer_auditor.create_message(message_title, message_content, [user._id.to_s]) if user.present?
-    self.audit_message = message_content
-    self.auditor = answer_auditor
-    self.audit_at = Time.now.to_i
-    self.save
-
-    # update quota of the survey and the interviewer task if there is any
-    self.interviewer_task.try(:refresh_quota)
-    self.update_quota(old_status)
-    self.deliver_reward
-    return true
+    update_attributes(audit_message: message_content, auditor: answer_auditor, audit_at: Time.now.to_i)
+    interviewer_task.try(:refresh_quota)
+    update_quota(old_status).deliver_reward
+    true
   end
 
   def agent_review(review_result)
-    return ErrorEnum::WRONG_ANSWER_STATUS if self.status != UNDER_AGENT_REVIEW
-
-    old_status = self.status
-    user = self.user
-    if review_result
-      self.set_under_review
-    else
-      self.set_reject
-      self.reject_type = REJECT_BY_AGENT_REVIEW
-    end
-    self.save
-    self.agent_task.try(:refresh_quota)
-    return true
+    return false if self.status != UNDER_AGENT_REVIEW
+    review_result ? set_under_review : set_reject_with_type(REJECT_BY_AGENT_REVIEW)
+    save
+    agent_task.try(:refresh_quota)
+    true
   end
 
   def assign_introducer_reward
-    return unless self.status == FINISH
+    return unless status == FINISH
     # give the introducer points
     introducer = User.find_by_id(self.introducer_id)
-    if !introducer.nil? && self.introducer_reward_assigned == false
+    if introducer.present? && self.introducer_reward_assigned == false
       # update the survey spread
       SurveySpread.inc(introducer, self.survey)
       if point_to_introducer > 0
@@ -955,134 +706,86 @@ class Answer
     end
   end
 
-
-  def select_reward(reward_index, mobile, alipay_account, current_sample)
-    return ErrorEnum::HOT_SURVEY if self.check_for_hot_survey(mobile, alipay_account, current_sample)
-    # select reward
-    reward = self.rewards[reward_index]
-    return ErrorEnum::REWARD_NOT_EXIST if reward.nil?
+  def select_reward(type, account, current_sample)
+    return ErrorEnum::HOT_SURVEY if self.check_for_hot_survey(account, current_sample)
     self.rewards.each { |r| r["checked"] = false }
-    reward["checked"] = true
-    # record the mobile or alipay account
-    if reward["type"].to_i == RewardScheme::MOBILE
-      # need to record mobile number
-      reward["mobile"] = mobile
-    elsif [RewardScheme::ALIPAY, RewardScheme::JIFENBAO].include?(reward["type"].to_i)
-      # need to record alipay account
-      reward["alipay_account"] = alipay_account
+    case type
+    when "chongzhi"
+      index = self.rewards.index { |e| e["type"].to_i == RewardScheme::MOBILE }
+      self.rewards[index]["mobile"] = account
+      self.rewards[index]["checked"] = true
+    when "zhifubao", "jifenbao"
+      index = self.rewards.index { |e| [RewardScheme::ALIPAY, RewardScheme::JIFENBAO].include?(e["type"].to_i) }
+      self.rewards[index]["alipay_account"] = account
+      self.rewards[index]["checked"] = true
     end
     self.save
-    return self.deliver_reward
+    self.deliver_reward
   end
 
-  def check_for_hot_survey(mobile, alipay_account, current_sample)
-    return false if self.survey.quillme_hot != true
-    if self.user.present?
-      return true if self.user.answers.not_preview.length > 0
-    else
-      return true if current_sample && current_sample.answers.not_preview.length > 0
-    end
-    sample = User.sample.find_by_email_mobile(mobile) || User.sample.find_by_email_mobile(alipay_account)
+  def check_for_hot_survey(account, current_sample)
+    return false if survey.quillme_hot != true
+    return true if user.answers.not_preview.length > 0 && user.present?
+    return true if user.blank? && current_sample && current_sample.answers.not_preview.length > 0
+    sample = User.sample.find_by_email_or_mobile(account)
     return true if sample && sample.answers.not_preview.length > 0
-    return false
+    false
+  end
+
+  def handle_cash_order(reward)
+    if order.nil?
+      order =
+        case reward["type"].to_i
+        when RewardScheme::MOBILE
+          Order.create_answer_mobile_order(self, reward)
+        when RewardScheme::ALIPAY
+          Order.create_answer_alipay_order(self, reward)
+        when RewardScheme::JIFENBAO
+          Order.create_answer_jifenbao_order(self, reward)
+        end
+      return true if status == UNDER_REVIEW
+      update_attributes({ "reward_delivered" => true })
+    elsif self.order.status == Order::FROZEN
+      self.order.update_status
+      self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
+    end
   end
 
   def deliver_reward
     assign_introducer_reward
-    # reward has been delivered
     return true if self.reward_delivered
-    # find out the selected reward
     reward = nil
     self.rewards.each do |r|
       reward = r and break if r["checked"] == true
     end
     return ErrorEnum::REWARD_NOT_SELECTED if reward.nil?
-    
     case reward["type"].to_i
     when RewardScheme::MOBILE
       return ErrorEnum::REPEAT_ORDER if self.check_repeat_order(reward["mobile"])
-      if self.order.nil?
-        order_info = { "mobile" => reward["mobile"] }
-        order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
-        self.order = Order.create_answer_order(self.user.try(:_id),
-          self.survey._id.to_s,
-          Order::SMALL_MOBILE_CHARGE,
-          reward["amount"],
-          order_info)
-        return true if self.status == UNDER_REVIEW
-        # assign_introducer_reward
-        self.update_attributes({"reward_delivered" => true})
-      elsif self.order.status == Order::FROZEN
-        self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
-        self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
-        self.order.auto_handle
-        # assign_introducer_reward if self.status == FINISH
-        self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
-      end
+      handle_cash_order(reward)
     when RewardScheme::ALIPAY
       return ErrorEnum::REPEAT_ORDER if self.check_repeat_order(reward["alipay_account"])
-      if self.order.nil?
-        order_info = { "alipay_account" => reward["alipay_account"] }
-        order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
-        self.order = Order.create_answer_order(self.user.try(:_id),
-          self.survey._id.to_s,
-          Order::ALIPAY,
-          reward["amount"],
-          order_info)
-        return true if self.status == UNDER_REVIEW
-        # assign_introducer_reward
-        self.update_attributes({"reward_delivered" => true})
-      elsif self.order.status == Order::FROZEN
-        self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
-        self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
-        self.order.auto_handle
-        # assign_introducer_reward if self.status == FINISH
-        self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
-      end
+      handle_cash_order(reward)
     when RewardScheme::JIFENBAO
       return ErrorEnum::REPEAT_ORDER if self.check_repeat_order(reward["alipay_account"])
-      if self.order.nil?
-        order_info = { "alipay_account" => reward["alipay_account"] }
-        order_info.merge!("status" => Order::FROZEN) if self.status == UNDER_REVIEW
-        self.order = Order.create_answer_order(self.user.try(:_id),
-          self.survey._id.to_s,
-          Order::JIFENBAO,
-          reward["amount"],
-          order_info)
-        return true if self.status == UNDER_REVIEW
-        # assign_introducer_reward
-        self.update_attributes({"reward_delivered" => true})
-      else
-        self.order.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
-        self.order.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i}) if self.status == REJECT
-        self.order.auto_handle
-        # assign_introducer_reward if self.status == FINISH
-        self.update_attributes({"reward_delivered" => true}) if [FINISH, REJECT].include?(self.status)
-      end
+      handle_cash_order(reward)
     when RewardScheme::POINT
       return true if self.status == UNDER_REVIEW
-      if self.status == REJECT
-        self.update_attributes({"reward_delivered" => true})
-        return true
-      end
-      sample = self.user
-      if sample.present?
-        sample.point += reward["amount"]
-        sample.save
-        PointLog.create_answer_point_log(reward["amount"], self.survey_id.to_s, self.survey.title, sample._id)
+      self.update_attributes({"reward_delivered" => true}) and return true if self.status == REJECT
+      user = self.user
+      if user.present?
+        user.update_attributes(point: user.point + reward["amount"])
+        PointLog.create_answer_point_log(reward["amount"], self.survey_id.to_s, self.survey.title, user._id)
         self.update_attributes({"reward_delivered" => true})
       end
-      # assign_introducer_reward if self.status == FINISH
     when RewardScheme::LOTTERY
       return true if self.status == UNDER_REVIEW
-      # assign_introducer_reward if self.status == FINISH
       if self.order && self.order.status == Order::FROZEN
-        self.order.update_attributes( {"status" => Order::WAIT, "reviewed_at" => Time.now.to_i} ) if self.status == FINISH
-        self.order.update_attributes( {"status" => Order::REJECT, "reviewed_at" => Time.now.to_i} ) if self.status == REJECT
+        self.order.update_status(false)
         self.update_attributes({"reward_delivered" => true})
       end
     end
-    return true
+    true
   end
 
   def check_repeat_order(account)
@@ -1099,11 +802,11 @@ class Answer
     answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id.to_s, sample._id.to_s, false)
     return ErrorEnum::ANSWER_EXIST if answer.present?
     sample.answers << self
+    self.update_sample_attributes if self.is_finish
     PunishLog.create_punish_log(sample.id) if self.status == REJECT
     if self.auditor.present?
       self.auditor.create_message("审核问卷答案消息", self.audit_message, [sample._id.to_s])
     end
-
     # handle rewards
     reward = nil
     self.rewards.each do |r|
@@ -1149,18 +852,20 @@ class Answer
           reward_scheme.save
           return {"result" => true,
             "prize_id" => p["id"],
-            "prize_title" => Prize.find_by_id(p["id"]).try(:title)}
+            "prize_title" => Prize.normal.find_by_id(p["id"]).try(:title)}
         end
       end
     end
     reward["win"] = false
     self.reward_delivered = true
     self.save
-    LotteryLog.create_fail_lottery_log(self.id,self.survey.id,self.survey.title,user_id,self.ip_address)
+    LotteryLog.create_fail_lottery_log(answer_id:self.id,
+                                        survey_id:self.survey.id,
+                                        survey_title:self.survey.title,
+                                        user_id:user_id,
+                                        ip:self.ip_address)
     return {"result" => false}
   end
-
-
 
   def create_lottery_order(order_info)
     #return ErrorEnum::SAMPLE_NOT_EXIST if self.user.nil?
@@ -1195,46 +900,6 @@ class Answer
     answer_obj["rewards"] = self.rewards
     answer_obj["sample_id"] = self.user.nil? ? nil : self.user._id.to_s
     answer_obj["reward_scheme_id"] = self.reward_scheme_id.to_s
-    return answer_obj
-  end
-
-  def info_for_answer_list_for_sample
-    answer_obj = {}
-    answer_obj["answer_id"] = self._id.to_s
-    answer_obj["survey_id"] = self.survey_id.to_s
-    answer_obj["survey_title"] = self.survey.try(:title).to_s
-    answer_obj["order_id"] = self.order.try(:_id).to_s
-    answer_obj["answer_status"] = self.status
-    answer_obj["answer_reject_type"] = self.reject_type
-    answer_obj["created_at"] = self.created_at.to_i
-    answer_obj["rewards"] = self.rewards
-    return answer_obj
-  end
-
-  def info_for_admin
-    answer_obj = {}
-    answer_obj["answer_id"] = self._id.to_s
-    answer_obj["survey_id"] = self.survey_id.to_s
-    answer_obj["survey_title"] = self.survey.try(:title).to_s
-    answer_obj["order_id"] = self.order.try(:_id).to_s
-    answer_obj["answer_status"] = self.status
-    answer_obj["answer_reject_type"] = self.reject_type
-    answer_obj["created_at"] = self.created_at.to_i
-    answer_obj["rewards"] = self.rewards
-    answer_obj["point_to_introducer"] = self.point_to_introducer
-    return answer_obj
-  end
-
-  def info_for_spread_details
-    answer_obj = {}
-    answer_obj["answer_status"] = self.status
-    answer_obj["answer_reject_type"] = self.reject_type
-    answer_obj["created_at"] = self.created_at.to_i
-    answer_obj["sample_nickname"] = self.user.try(:nickname) || "游客"
-    if self.user.present?
-      answer_obj["sample_avatar"] = self.user.avatar.try(:picture_url)
-      answer_obj["sample_id"] = self.user._id.to_s
-    end
     return answer_obj
   end
 
@@ -1585,5 +1250,86 @@ class Answer
       end 
     end
     answer
+  end
+
+  def answer_percentage
+    questions = self.load_question(nil, true)
+    question_number = self.survey.all_questions_id(false).length + self.random_quality_control_answer_content.length
+    self.index_of(questions) / question_number.to_f
+  end
+
+  def append_reward_info
+    self["select_reward"] = ""
+    self["free_reward"] = self["rewards"].to_a.empty?
+    self["rewards"].to_a.each do |rew|
+      # a["select_reward"] = "" and break if a["answer_status"].to_i == 2 
+      next if rew["checked"] != true
+      case rew["type"].to_i
+      when RewardScheme::MOBILE
+        self["select_reward"] = "#{rew["amount"].to_i}元话费"
+      when RewardScheme::ALIPAY
+        self["select_reward"] = "#{rew["amount"].to_i}元支付宝"
+      when RewardScheme::POINT 
+        self["select_reward"] = "#{rew["amount"].to_i}积分"
+      when RewardScheme::LOTTERY
+        lottery_link = "/lotteries/#{a["answer_id"]}"
+        self["select_reward"] = %Q{<a class='lottery' target='_blank' href='#{lottery_link}'>抽奖机会</a>}
+      when RewardScheme::JIFENBAO
+        self["select_reward"] = "#{rew["amount"].to_i}集分宝"
+      end
+      break
+    end
+    self
+  end
+
+  def update_sample_attributes
+    # return if no user or attributes already updated
+    return false if self.user.blank? || self.sample_attributes_updated
+    self.answer_content.each do |q_id, answer|
+      q = BasicQuestion.find(q_id)
+      next if q.sample_attribute.blank?
+      attr_value = nil
+      case q.sample_attribute.type
+      when DataType::STRING
+        attr_value = answer if q.question_type == QuestionTypeEnum::TEXT_BLANK_QUESTION
+      when DataType::ENUM
+        if q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+        end
+      when DataType::NUMBER
+        attr_value = answer if q.question_type == QuestionTypeEnum::NUMBER_BLANK_QUESTION
+      when DataType::NUMBER_RANGE
+        if q.question_type == QuestionTypeEnum::NUMBER_BLANK_QUESTION
+          attr_value = [answer, answer] if answer.present?
+        elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+        end
+      when DataType::DATE
+        attr_value = answer / 1000 if q.question_type == QuestionTypeEnum::TIME_BLANK_QUESTION
+      when DataType::DATE_RANGE
+        if q.question_type == QuestionTypeEnum::TIME_BLANK_QUESTION
+          attr_value = [answer / 1000, answer / 1000] if answer.present
+        elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+        end
+      when DataType::ADDRESS
+        if q.question_type == QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+          attr_value = answer["address"]
+        elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+        end
+      when DataType::ARRAY
+        if q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          new_attr_value = []
+          answer["selection"].each do |input_id|
+            enum_value = q.sample_attribute_relation[input_id]
+            new_attr_value << enum_value if enum_value.present?
+          end
+          attr_value = (self.user.read_sample_attribute(q.sample_attribute.name).to_a + new_attr_value).uniq
+        end
+      end
+      self.user.write_sample_attribute(q.sample_attribute.name, attr_value) if attr_value.present?
+    end
+    self.update_attributes(sample_attributes_updated: true)
   end
 end

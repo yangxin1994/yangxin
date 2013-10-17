@@ -15,12 +15,8 @@ $(function() {
 		$.social['shareTo' + $(this).attr('s_to')](s_uri, '我刚刚在问卷吧使用' + share_gift_point + '积分兑换了' + share_gift_title + ',参与答题奖励多多,话费,现金,集分宝,积分换礼,快来参与吧 ! ^_^ [' + s_uri + '] ');
 	})
 
-
-	//账户中心下拉菜单
-	//$.form.powerfloat();
-
 	$(".exc_right button").click(function() {
-		window.location.href = window.location.protocol + "//" + window.location.host + "/sign_up";
+		window.location.href = window.location.protocol + "//" + window.location.host + "/account/sign_up";
 	})
 
 	function refresh_login_status(user) {

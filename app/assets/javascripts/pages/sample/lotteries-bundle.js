@@ -482,9 +482,9 @@ $(function() {
 
 	function popup_order_ok_page() {
 		if (typeof(window.username) != 'undefined') {
-			popup("#order_ok", 'sign_in', 'users/orders?scope=2')
+			popup("#order_ok", 'account/sign_in', 'users/orders?scope=2')
 		} else {
-			popup("#order_ok", 'sign_in', 'sign_up')
+			popup("#order_ok", 'account/sign_in', 'account/sign_up')
 		}
 
 	}

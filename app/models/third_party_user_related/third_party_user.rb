@@ -1,166 +1,184 @@
 require 'encryption'
 require 'error_enum'
 require 'tool'
-#Record the user from other websites
+require 'uri'
+require "base64"
 class ThirdPartyUser
-	include Mongoid::Document
-	# website can be "renren", "sina", "qq", "google", "qihu"
-	field :website, :type => String
-	field :website_id, :type => String
-	field :access_token, :type => String
-	field :refresh_token, :type => String
-	field :expires_in, :type => String
-	field :scope, :type => String
-	field :share, :type => Boolean, default: false
 
-	belongs_to :user
+  include Mongoid::Document
+  include FindTool
 
-	index({ _type: 1, website_id: 1 }, { background: true } )
+  # website can be "renren", "sina", "qq", "google", "qihu"
+  field :website, :type => String
+  field :website_id, :type => String
+  field :access_token, :type => String
+  field :refresh_token, :type => String
+  field :expires_in, :type => String
+  field :scope, :type => String
+  field :share, :type => Boolean, default: false
 
-	index({user_id: 1, website_id: 1 }, { background: true } )
+  belongs_to :user
 
-	public
+  index({ _type: 1, website_id: 1 }, { background: true } )
 
-	def self.find_by_id(third_party_user_id)
-		third_party_user = ThirdPartyUser.where(_id: third_party_user_id)[0]
-		return third_party_user
-	end
-	
-	def self.get_access_token(website, code, redirect_uri)
-		case website
-		when "sina"
-			response_data = SinaUser.get_access_token(code, redirect_uri)
-		when "renren"
-			response_data = RenrenUser.get_access_token(code, redirect_uri)
-		when "qq"
-			response_data = QqUser.get_access_token(code, redirect_uri)
-		when "google"
-			response_data = GoogleUser.get_access_token(code, redirect_uri)
-		when "kaixin001"
-			response_data = KaixinUser.get_access_token(code, redirect_uri)
-		when "douban"
-			response_data = DoubanUser.get_access_token(code, redirect_uri)
-		when "baidu"
-			response_data = BaiduUser.get_access_token(code, redirect_uri)
-		when "sohu"
-			response_data = SohuUser.get_access_token(code, redirect_uri)
-		when "qihu360"
-			response_data = QihuUser.get_access_token(code, redirect_uri)
-		else
-			response_data = {}
-		end
-		return response_data
-	end
+  index({user_id: 1, website_id: 1 }, { background: true } )
 
-	def self.find_or_create_user(website, response_data)
-		case website
-		when "sina"
-			tp_user = SinaUser.save_tp_user(response_data)
-		when "renren"
-			tp_user = RenrenUser.save_tp_user(response_data)
-		when "qq"
-			tp_user = QqUser.save_tp_user(response_data)
-		when "google"
-			tp_user = GoogleUser.save_tp_user(response_data)
-		when "kaixin001"
-			tp_user = KaixinUser.save_tp_user(response_data)
-		when "douban"
-			tp_user = DoubanUser.save_tp_user(response_data)
-		when "baidu"
-			tp_user = BaiduUser.save_tp_user(response_data)
-		when "sohu"
-			tp_user = SohuUser.save_tp_user(response_data)
-		when "qihu360"
-			tp_user = QihuUser.save_tp_user(response_data)
-		else
-			return ErrorEnum::WRONG_THIRD_PARTY_WEBSITE
-		end
-		return tp_user
-	end
+  public
 
-	def is_bound(user = nil)
-		return false if user.nil?
-		return self.oopsdata_user_id == user.id
-	end
+  def self.get_access_token(opt)
+    access_token_params = {
+      "client_id" => OOPSDATA[Rails.env]["#{opt[:account]}_app_key"],
+      "client_secret" => OOPSDATA[Rails.env]["#{opt[:account]}_app_secret"],
+      "redirect_uri" => opt[:redirect_uri],
+      "grant_type" => "authorization_code",
+      "code" => opt[:param_obj][:code]
+    }
+    case opt[:account]
+    when "sina"
+      request_uri = "https://api.weibo.com/oauth2/access_token"
+    when "renren"
+      request_uri = "https://graph.renren.com/oauth/token"
+    when "qq"
+      request_uri = "https://graph.qq.com/oauth2.0/token"
+      state = {"state" => Time.now.to_i}
+      access_token_params.merge!(state)
+    when "alipay"
+      access_token_params = {
+        "method" => 'alipay.system.oauth.token',
+        "format" => 'json',
+        "timestamp" => Time.now.strftime('%Y-%m-%d %H:%M:%S'),
+        "app_id" => OOPSDATA[Rails.env]["#{opt[:account]}_app_key"],
+        "version" => '1.0',
+        "platform" => 'top',
+        "terminal_type" => 'web',
+        "grant_type" => 'authorization_code',
+        "code" => opt[:param_obj][:code]
+      }
 
-	def bind(user)
-		user.third_party_users << self
-	end
-	
-	#*description*: update specifi ThirdPartyUser sub class instance 
-	#by hash which has update attributes.
-	#
-	#*params*:
-	#* hash
-	#
-	#*retval*:
-	#* self: like GoogleUser's instance, SinaUser's instance ...
-	def update_by_hash(hash)
-	  attrs = self.attributes
-	  attrs.merge!(hash)
-	  self.class.collection.find_and_modify(:query => {_id: self.id}, :update => attrs, :new => true)
-	  return self
-	end
-	
-	#*description*: update user base info, it involves get_user_info.
-	#
-	#*params*: none
-	#
-	#*retval*:
-	#* instance: a updated tp_user instance
-	def update_user_info
-		response_data = get_user_info
-		#select attribute
-		response_data.select!{|k,v| @select_attrs.split.include?(k.to_s) }
-		#update
-		return self.update_by_hash(response_data)
-	end
-	
-	# description: generate parameters string used by http get request
-	#
-	#*params*:
-	#
-	#*opts: hash.
-	def generate_params_string(opts = {})
-		params_string = ""
-		params.merge(opts.select {|k,v| k.to_s!="method"}).each{|k, v| @params_string +="&#{k}=#{v}"}
-		params_string.sub!("&","?")
-		return params_string
-	end
-	
-	#update instance's access_token and save
-	def update_access_token(access_token)
-		self.access_token = access_token
-		return self.save
-	end
-	
-	#update instance's refresh_token and save
-	def update_refresh_token(refresh_token)
-		self.refresh_token = refresh_token
-		return self.save
-	end
-	
-	# update instance's scope and save
-	def update_scope(scope)
-		self.scope = scope
-		return self.save
-	end
-	
-	#*description*: judge of a text's action.
-	#
-	#*params*: 
-	#* hash: a hash which some website response.
-	#
-	#*retval*:
-	#* bool: true or false
-	def successful?(hash)
-		if hash.select{|k,v| k.to_s.include?("error")}.empty? then
-			Logger.new("log/development.log").info("true: ")
-			return true
-		else
-			Logger.new("log/development.log").info("false: ")
-			return false
-		end   
-	end
-		
+      # access_token_params = {
+      #   "method" => 'alipay.system.oauth.token',
+      #   "format" => 'json',
+      #   "timestamp" => Time.now.strftime('%Y-%m-%d %H:%M:%S'),
+      #   "app_id" => 2013101100001739,
+      #   "version" => '1.0',
+      #   "platform" => 'top',
+      #   "terminal_type" => 'web',
+      #   "grant_type" => 'authorization_code',
+      #   "code" => 'fc96978b3ee644e791f5df4386df51ca'
+      # }
+
+
+      str = ''
+      data = access_token_params.sort.map{|k,v| str += "&#{k}=#{v}"}
+      str.sub!('&','')
+      if File.exists?("#{Rails.root.to_s}/rsa_private_key.pem")
+        priv_key = OpenSSL::PKey::RSA.new File.read "#{Rails.root.to_s}/rsa_private_key.pem"
+      else
+        priv_key = OpenSSL::PKey::RSA.new(2048)
+      end
+      sign = Base64.encode64(priv_key.private_encrypt(OpenSSL::Digest::DSS1.digest("od@2013")))
+      access_token_params["sign"] = sign
+      access_token_params["sign_type"] = "RSA"
+      request_uri = "https://openapi.alipay.com/gateway.do"
+    when "tecent"
+      request_uri = "https://open.t.qq.com/cgi-bin/oauth2/access_token"
+      state = {"state" => Time.now.to_i}
+      access_token_params.merge!(state)      
+    when "qihu360" #TODO need ICP information
+      request_uri = "https://openapi.360.cn/oauth2/access_token"
+    end
+
+    retval = Tool.send_post_request(request_uri, access_token_params, true)
+    case opt[:account]
+    when 'qq','tecent'
+      access_token, expires_in, refresh_token = *(retval.body.split('&').map { |ele| ele.split('=')[1] })      
+      response_data = {"access_token" => access_token, "expires_in" => expires_in,:refresh_token => refresh_token}
+      response_data.merge!(opt[:param_obj])   
+    else
+      response_data = JSON.parse(retval.body)
+    end 
+    return response_data
+  end
+
+  def self.find_or_create_user(website, response_data,current_user)
+    case website
+    when "sina"
+      tp_user = SinaUser.save_tp_user(response_data,current_user)
+    when "renren"
+      tp_user = RenrenUser.save_tp_user(response_data,current_user)
+    when "qq"
+      tp_user = QqUser.save_tp_user(response_data,current_user)
+    when "tecent"
+      tp_user = TecentUser.save_tp_user(response_data,current_user)
+    when 'alipay'
+      tp_user = AlipayUser.save_tp_user(response_data,current_user)
+    else
+      return ErrorEnum::WRONG_THIRD_PARTY_WEBSITE
+    end
+    return tp_user
+  end
+
+  def is_bound(user = nil)
+    return false if user.nil?
+    return self.oopsdata_user_id == user.id
+  end
+
+  def bind(user)
+    user.third_party_users << self
+  end
+  
+  def update_by_hash(hash)
+    attrs = self.attributes
+    attrs.merge!(hash)
+    self.class.collection.find_and_modify(:query => {_id: self.id}, :update => attrs, :new => true)
+    return self
+  end
+
+
+  def generate_params_string(opts = {})
+    str = ''
+    opts.sort.map{|k,v| str += "&#{k}=#{v}"}
+    str = str.sub!('&','?')
+    return str     
+  end
+
+  
+  def call_method(opt)
+    if opt[:http_method].downcase == "get" 
+      str =  generate_params_string(opt[:opts])
+      retval = Tool.send_get_request(URI.encode("#{opt[:url]}#{opt[:action]}#{opt[:format]}#{str}"), true)      
+    else
+      retval = Tool.send_post_request("#{opt[:url]}#{opt[:action]}#{opt[:format]}", opt[:opts], true)
+    end
+    return JSON.parse(retval.body)
+  end
+
+
+  #update instance's access_token and save
+  def update_access_token(access_token)
+    self.access_token = access_token
+    return self.save
+  end
+  
+  #update instance's refresh_token and save
+  def update_refresh_token(refresh_token)
+    self.refresh_token = refresh_token
+    return self.save
+  end
+  
+  # update instance's scope and save
+  def update_scope(scope)
+    self.scope = scope
+    return self.save
+  end
+  
+  def successful?(hash)
+    if hash.select{|k,v| k.to_s.include?("error")}.empty? then
+      Logger.new("log/development.log").info("true: ")
+      return true
+    else
+      Logger.new("log/development.log").info("false: ")
+      return false
+    end   
+  end
 end
