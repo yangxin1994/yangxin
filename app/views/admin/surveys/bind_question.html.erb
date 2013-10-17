@@ -63,17 +63,13 @@
         </select>
       </div>
     </div>
+    <div class="panel-wrapper"><!-- extra view for bind attr -->
+    </div> 
     <div class="control-group">
-        <div class="panel-wrapper"><!-- extra view for bind attr -->
-        </div>
-    </div>
-
-    <div class="control-group">
-      <label class="control-label">问题标题:</label>
       <div class="controls">
-        <input class="btn" id="submit_bind" type="button" value="确 定">
-        <%= link_to "删除属性绑定", bind_question_admin_path(@question['_id']), method: :delete, confirm: "确定要删除吗", class: "submitForm btn"   %>
+        <input class="btn btn-primary btn-new-ok" id="submit_bind" type="submit" value="确 定">
+        <%= link_to "删除属性绑定", admin_sample_attribute_bind_path(@question['_id']), method: :delete, confirm: "确定要删除吗", class: "submitForm btn btn-danger"   %>
       </div>
-    </div>    
+    </div> 
   <% end %>
 </div>

@@ -8,6 +8,9 @@ class Admin::SurveysController < Admin::AdminController
 	# *****************************
 
   def index
+    @side_nav = [
+      {url:"asdf", title:"asdf"}
+    ]
     @surveys = auto_paginate Survey.search(params)
   end
 
@@ -107,8 +110,6 @@ class Admin::SurveysController < Admin::AdminController
       @questions[question_id] = question
     end    
   end
-
-
 
   def promote
     if survey = Survey.where(:_id => params[:id]).first

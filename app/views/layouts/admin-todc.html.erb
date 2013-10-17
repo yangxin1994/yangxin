@@ -84,8 +84,17 @@
     <div class="row-fluid">
       <div class="span3 flowy-admin-sidebar">
         <ul class="nav nav-list flowy-admin-sidenav affix">
-          <%= yield :sidenav %>
+          <% @side_nav.each do |item|%>
+            <li class="<%= "active" if item[:action] == params[:action] %>">
+              <a href="<%= item[:url] %>">
+              <i class="icon-chevron-right"></i><%= item[:title] %></a>
+            </li>
+          <% end -%>
         </ul>
+        <div class="well">
+          <%= @side_tips %>
+        </div>
+        <%= yield :sidenav %>
       </div>
       <div class="span9">
         <div id="alert_placeholder">
