@@ -3,8 +3,27 @@
   <%= javascript_include_tag "pages/admin/surveys/index-bundle" %>
 <% end %>
 
-<% content_for :sidenav do %>
-
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li class="active">
+      <a href="javascript:void(0);">
+      <i class="icon-chevron-right"></i>
+      调研列表
+      </a>
+    </li>
+    <li>
+      <a href="/admin/quality_questions">
+      <i class="icon-chevron-right"></i>
+      质控题管理
+      </a>
+    </li>
+  </ul>
+  <div class="well well-small well-tips">
+    <p>Tips:</p>
+    <ul>
+      <li>加星标的问卷将会被置顶.</li>
+    </ul>
+  </div>
 <% end %>
 
 <div>
