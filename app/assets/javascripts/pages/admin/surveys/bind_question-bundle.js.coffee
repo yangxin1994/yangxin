@@ -160,7 +160,7 @@ $ ->
           $this = $(this)
           item_id = $this.find('[data-id]').data('id')
           val = $this.find('select').val()
-          relation[item_id] = val
+          relation[item_id] = val if val.length > 0
         console.log relation
         relation
       ,
@@ -170,7 +170,7 @@ $ ->
           item_id = $this.find('[data-id]').data('id')
           first = $this.find('.range-input.first').val()
           second = $this.find('.range-input.second').val()
-          relation[item_id] = [first, second]
+          relation[item_id] = [first, second] if first.length > 0 && second.length > 0
         relation
       'date_range': (panel_class) ->
         $(".#{panel_class} table tbody tr").each () ->
@@ -178,14 +178,14 @@ $ ->
           item_id = $this.find('[data-id]').data('id')
           first = $this.find('.first .od-time-selector').odTimeSelector('val')
           second = $this.find('.second .od-time-selector').odTimeSelector('val')
-          relation[item_id] = [first, second]
+          relation[item_id] = [first, second] if first.length > 0 && second.length > 0
         relation
       'address': (panel_class) ->
         $(".#{panel_class} table tbody tr").each () ->
           $this = $(this)
           item_id = $this.find('[data-id]').data('id')
           val = $this.find('.address-slt').odAddressSelector('val')['address']
-          relation[item_id] = val
+          relation[item_id] = val if val.length > 0
         relation
     }
 
