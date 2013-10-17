@@ -1,3 +1,3 @@
 class Sample::SampleController < ApplicationController
-	layout 'sample'
+    layout 'sample'
 end

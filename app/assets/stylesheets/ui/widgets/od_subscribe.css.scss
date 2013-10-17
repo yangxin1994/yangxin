@@ -1,0 +1,186 @@
+@import "common";
+@import "od-quillme/icons/*.png";
+.rss_notice{
+  width:466px;
+  padding: 0px 0px 20px;
+  .title{
+    margin-bottom:20px;
+    color:#999;
+    font-size:16px;
+    font-weight:bolder; 
+  }
+  .rss_content{
+    margin:auto 50px;
+    font-size:14px;
+    color:#333;
+    line-height:2.5em;
+    .mail,.mobi{
+      color:#fbaf3a;
+    }   
+    .sub_content{
+      position:relative;
+      font-size:12px;
+      color:#b3b3b3;
+      a{
+        cursor:pointer;
+        color:#3e98ee;
+      }   
+    }
+    .finish{
+      text-align: center;
+      margin-bottom: 20px;
+      font-size:16px;
+      color:#8CC63F;
+      img{
+        vertical-align:middle;
+      }
+      span{
+        height:30px;
+        line-height:30px;
+      }
+    }
+
+  }
+   .activate{
+    text-align: center;
+    /*margin-top:30px;*/
+    &.send_code{
+      position:relative;
+      padding-left:40px;
+      margin-bottom:20px;
+      margin-bottom:30px\9;
+      span{
+        float:left;
+        margin-right:4px;
+      }
+      input{
+        // height:30px;
+        // line-height:30px;
+        // height:24px\9;   
+        // line-height:24px\9;
+        margin-right:4px;
+        float:left; 
+        padding:9px 0px 9px 8px;  
+        &.email_mobile{
+          width:270px;
+        }
+      }
+      button{
+        font-size: 16px;
+        line-height: 36px;
+        height: 36px;
+        line-height: 30px\9;
+        height: 30px\9;       
+        text-align: center;
+        letter-spacing: 2px;
+        float: left;
+      }
+      .code_exp{
+        border: 1px solid #f47474;
+        text-align: center;
+        font-size: 14px;
+        left: 86px;
+        top: 40px;
+        display:none;
+        color:#ec1717;
+        height:30px;
+        background:#fff7eb;
+        line-height:30px;
+        position:absolute;
+        width: 250px;
+        @include border-radius(4px);
+        i{
+          margin-right: 4px;
+          top: 4px;
+          position: relative;
+          display:inline-block;
+          width:20px;
+          height:20px;
+          background: image-url('/assets/od-quillme/faild.png') no-repeat;
+        }
+        span{
+          height:20px;
+          line-height:20px;
+          float:none;
+          margin:0px;
+          a{
+            color: #65ADF1;
+          }
+        }
+      }
+      .channel_err{
+        margin:0px;
+        border: 1px solid #f47474;
+        text-align: center;
+        font-size: 14px;  
+        position:absolute;
+        width:190px;
+        height:30px;
+        background:#fff7eb;
+        line-height:30px;
+        top:40px;
+        left:40px;
+        display:none;
+        color:#ec1717;
+        @include border-radius(4px);
+        a{
+          color:#3d97ed;
+        }
+        i{
+          margin-right: 4px;
+          top: 4px;
+          left:-10px;
+          position: relative;
+          display:inline-block;
+          width:20px;
+          height:20px;
+          background: image-url('/assets/od-quillme/faild.png') no-repeat;
+        }
+        span{
+          float:none;
+          height:30px;
+          line-height:30px;
+          a{
+            color: #65ADF1;
+          }
+        }
+      }
+
+
+
+    }
+    span{
+      height:36px;
+      line-height:36px;
+      height:30px\9;
+      line-height:30px\9;     
+      font-size:14px;
+      color:#b3b3b3;
+    }
+    input{  
+      width:216px;
+      @include border-radius(4px);
+      padding:2px 0px 2px 8px;
+      font-size:12px;
+      color:#b3b3b3;
+    }
+    button{
+      width:90px;
+      height:30px;
+      border:0px;
+      background: #f14646;
+      color: #fff;
+      text-align: center;
+      line-height: 30px;
+      font-size:16px;
+      cursor: pointer;
+      @include border-radius(4px);    
+      &:hover{
+        background:$red1;
+      } 
+    }
+    .error{
+      color:red;
+    }
+   }    
+}

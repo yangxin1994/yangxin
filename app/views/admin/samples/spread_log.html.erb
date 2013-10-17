@@ -74,10 +74,10 @@
     <tbody>
       <% @answers["data"].each_with_index do |a, i| %>
       <tr>
-        <td><%= a["survey_title"] %></td>
-        <td><%= int_time_to_date(a["created_at"].to_i) %></td>
+        <td><%= a.survey.try(:title).to_s %></td>
+        <td><%= int_time_to_date(a.created_at.to_i) %></td>
         <td><%= a["sample_email_mobile"] %></td>
-        <td><%= a["point_to_introducer"] %></td>
+        <td><%= a.point_to_introducer %></td>
       </tr>
       <% end %>
     </tbody>

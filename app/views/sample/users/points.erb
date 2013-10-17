@@ -57,52 +57,52 @@
                 <tbody>
                     <% @point_logs["data"].to_a.each do |log| %>
                         <tr>
-                            <td><%= int_time_to_date(log["created_at"].to_i) %></td>
+                            <td><%= int_time_to_date(Time.at(log.created_at.to_i)) %></td>
                             <td>
-                                <% if !log["survey_id"].blank? %>
-                                    <span><%= truncate(log["survey_title"], length: 22) %></span>
-                                <% elsif !log["gift_type"].blank? %>
-                                    <% case log["gift_type"].to_i %>
+                                <% if !log.survey_id.blank? %>
+                                    <span><%= truncate(log.survey_title, length: 22) %></span>
+                                <% elsif !log.gift_type.blank? %>
+                                    <% case log.gift_type.to_i %>
                                     <% when Order::MOBILE_CHARGE, Order::SMALL_MOBILE_CHARGE %>
                                         <i class="icon-order icon-phonepay"></i>
-                                        <span><%= truncate(log["gift_name"], length: 22) %></span>
+                                        <span><%= truncate(log.gift_name, length: 22) %></span>
                                     <% when Order::ALIPAY %>
                                         <i class="icon-order icon-alipay"></i>
-                                        <span><%= truncate(log["gift_name"], length: 22) %></span>
+                                        <span><%= truncate(log.gift_name, length: 22) %></span>
                                     <% when Order::JIFENBAO %>
                                         <i class="icon-order icon-jfb"></i>
-                                        <span><%= truncate(log["gift_name"], length: 22) %></span>
+                                        <span><%= truncate(log.gift_name, length: 22) %></span>
                                     <% when Order::QQ_COIN %>
                                         <i class="icon-order icon-qb"></i>
-                                        <span><%= truncate(log["gift_name"], length: 22) %></span>
+                                        <span><%= truncate(log.gift_name, length: 22) %></span>
                                     <% else %>
-                                        <img src="<%= small_gift_image(log['gift_picture_url']) %>" style="width: 36px; height: 36px;"/>
-                                        <a target="_blank" href="/gifts/<%= log["gift_id"] %>"><%= truncate(log["gift_name"], length: 22) %></a>
+                                        <img src="<%= small_gift_image(log.gift_picture_url) %>" style="width: 36px; height: 36px;"/>
+                                        <a target="_blank" href="/gifts/<%= log.gift_id %>"><%= truncate(log.gift_name, length: 22) %></a>
                                     <% end %>
                                 <% elsif [PointLog::ADMIN_OPERATE, PointLog::PUNISH, PointLog::INVITE_USER, PointLog::REVOKE].include?(log["reason"].to_i) %>
-                                    <span><%= truncate(log["remark"], length: 22) %></span>
-                                <% elsif log["reason"].to_i == PointLog::IMPORT %>
+                                    <span><%= truncate(log.remark, length: 22) %></span>
+                                <% elsif log.reason.to_i == PointLog::IMPORT %>
                                     <span><%= change_point_reason_type(PointLog::IMPORT) %>记录</span>
-                                <% elsif log["reason"].to_i == PointLog::NETRANKING_IMPORT %>
+                                <% elsif log.reason.to_i == PointLog::NETRANKING_IMPORT %>
                                     <span><%= change_point_reason_type(PointLog::NETRANKING_IMPORT) %>记录</span>
                                 <% end %>
                                 
                             </td>
-                            <% if log["amount"].to_i < 0%>
+                            <% if log.amount.to_i < 0%>
                                 <td>
                                 </td>
                                 <td>
-                                    <span class="point"><%= -(log["amount"].to_i) %>积分</span>
+                                    <span class="point"><%= -(log.amount.to_i) %>积分</span>
                                 </td>
                             <% else %>
                                 <td>
-                                    <span class="point"><%= log["amount"].to_i %>积分</span>
+                                    <span class="point"><%= log.amount.to_i %>积分</span>
                                 </td>
                                 <td>
                                 </td>
                             <% end %>
                             <td  class="last-child">
-                                <span><%= change_point_reason_type(log["reason"]) %></span>
+                                <span><%= change_point_reason_type(log.reason) %></span>
                             </td>
                         </tr>
                     <% end %>

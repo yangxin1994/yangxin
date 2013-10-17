@@ -136,7 +136,7 @@ $(function(){
 				cancel: ".page-index, .drop-question",
 				stop: $.proxy(function(event, ui) {
 					var qid = ui.item.data('view').model.id;
-					var after_question_id = -1;
+					var after_question_id = 0;
 					var prev_dom = ui.item.prev();
 					if(prev_dom.hasClass('q-designer')) {
 						after_question_id = prev_dom.data('view').model.id;
@@ -491,7 +491,7 @@ $(function(){
 						this._newPageIndex(this.$('.page-index').length).appendTo(this.$('.s-pages'));
 						this.refreshPageIndexes();
 					}
-					if(after_question_id == -1) {
+					if(after_question_id == 0) {
 						if(page_index == 0) {
 							q_designer_dom.prependTo(this.$('.s-pages'));
 						} else {

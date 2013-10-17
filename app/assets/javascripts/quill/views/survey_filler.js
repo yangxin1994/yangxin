@@ -365,7 +365,7 @@ $(function(){
 						$('#my_order_btn').click(function() { location.href = '/users/orders'; });
 						var signin_btn = $('#signin_btn').click($.proxy(function() { 
 							$.util.disable(signin_btn.text('正在跳转...'));
-							$.postJSON(this._uri('/start_bind'), function(retval) { location.href = '/sign_in?ref=' + encodeURIComponent('/users/orders'); });
+							$.postJSON(this._uri('/start_bind'), function(retval) { location.href = '/account/sign_in?ref=' + encodeURIComponent('/users/orders'); });
 						}, this));
 						$('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));
 					}
@@ -386,7 +386,7 @@ $(function(){
 					$('#my_rewards_btn').click(function() { location.href = '/users/points'; });
 					var signin_btn = $('#signin_btn').click($.proxy(function() { 
 						$.util.disable(signin_btn.text('正在跳转...'));
-						$.postJSON(this._uri('/start_bind'), function(retval) { location.href = '/sign_in?ref=' + encodeURIComponent('/users/points'); });
+						$.postJSON(this._uri('/start_bind'), function(retval) { location.href = '/account/sign_in?ref=' + encodeURIComponent('/users/points'); });
 					}, this));
 				} else if(this.options.reward.reward_scheme_type == 3) {
 					// lottery

@@ -35,24 +35,24 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% @my_spread_surveys['data'].to_a.each do |survey| %>
-                        <tr id="sid-<%= survey["_id"] %>">
-                            <td><%= int_time_to_date(survey["created_at"]) %></td>
+                    <% @my_spread_surveys['data'].to_a.each do |spread_survey| %>
+                        <tr id="sid-<%= spread_survey.survey._id %>">
+                            <td><%= int_time_to_date(spread_survey.survey.created_at) %></td>
                             <td>
-                                <span><%= truncate(survey["title"].to_s.strip, length: 22) %></span>
+                                <span><%= truncate(spread_survey.survey.title.to_s.strip, length: 22) %></span>
                             </td>
                             <td>
-                                <span class="point"><%= survey["spread_point"] %>积分/份</span>
+                                <span class="point"><%= spread_survey.survey.spread_point %>积分/份</span>
                             </td>
                             <td>
-                                 <span><%= survey["finish_number"].to_i %>/<%= survey["spread_number"] %> 份</span>
+                                 <span><%= spread_survey.finish_number.to_i %>/<%= spread_survey.spread_number %> 份</span>
                             </td>
                             <td>
-                                <span class="point"><%= survey["spread_point"].to_i * survey["finish_number"].to_i %>积分</span>
+                                <span class="point"><%= spread_survey.survey.spread_point.to_i * spread_survey.finish_number.to_i %>积分</span>
                             </td>
-                            <td style="display: none;"><%= survey_type?(survey["quillme_promote_reward_type"]) %></td>
+                            <td style="display: none;"><%= survey_type?(spread_survey.survey.quillme_promote_reward_type) %></td>
                             <td class="last-child">
-                                <a href="#spread-detail" name="<%= survey["_id"] %>" class="fancybox">推广详情</a>
+                                <a href="#spread-detail" name="<%= spread_survey.survey._id %>" class="fancybox">推广详情</a>
                             </td>
                         </tr>
                     <% end %>

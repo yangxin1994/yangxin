@@ -29,5 +29,4 @@ class NewsletterMailer < ActionMailer::Base
     mail(to:      email,
          subject: subject)
   end
-
 end
