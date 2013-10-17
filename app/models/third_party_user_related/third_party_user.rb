@@ -2,7 +2,6 @@ require 'encryption'
 require 'error_enum'
 require 'tool'
 require 'uri'
-require "base64"
 class ThirdPartyUser
 
   include Mongoid::Document
@@ -16,6 +15,7 @@ class ThirdPartyUser
   field :expires_in, :type => String
   field :scope, :type => String
   field :share, :type => Boolean, default: false
+  field :nick, :type => String
 
   belongs_to :user
 
@@ -40,46 +40,8 @@ class ThirdPartyUser
       request_uri = "https://graph.renren.com/oauth/token"
     when "qq"
       request_uri = "https://graph.qq.com/oauth2.0/token"
-      state = {"state" => Time.now.to_i}
-      access_token_params.merge!(state)
     when "alipay"
-      access_token_params = {
-        "method" => 'alipay.system.oauth.token',
-        "format" => 'json',
-        "timestamp" => Time.now.strftime('%Y-%m-%d %H:%M:%S'),
-        "app_id" => OOPSDATA[Rails.env]["#{opt[:account]}_app_key"],
-        "version" => '1.0',
-        "platform" => 'top',
-        "terminal_type" => 'web',
-        "grant_type" => 'authorization_code',
-        "code" => opt[:param_obj][:code]
-      }
-
-      # access_token_params = {
-      #   "method" => 'alipay.system.oauth.token',
-      #   "format" => 'json',
-      #   "timestamp" => Time.now.strftime('%Y-%m-%d %H:%M:%S'),
-      #   "app_id" => 2013101100001739,
-      #   "version" => '1.0',
-      #   "platform" => 'top',
-      #   "terminal_type" => 'web',
-      #   "grant_type" => 'authorization_code',
-      #   "code" => 'fc96978b3ee644e791f5df4386df51ca'
-      # }
-
-
-      str = ''
-      data = access_token_params.sort.map{|k,v| str += "&#{k}=#{v}"}
-      str.sub!('&','')
-      if File.exists?("#{Rails.root.to_s}/rsa_private_key.pem")
-        priv_key = OpenSSL::PKey::RSA.new File.read "#{Rails.root.to_s}/rsa_private_key.pem"
-      else
-        priv_key = OpenSSL::PKey::RSA.new(2048)
-      end
-      sign = Base64.encode64(priv_key.private_encrypt(OpenSSL::Digest::DSS1.digest("od@2013")))
-      access_token_params["sign"] = sign
-      access_token_params["sign_type"] = "RSA"
-      request_uri = "https://openapi.alipay.com/gateway.do"
+      # nothing to do 
     when "tecent"
       request_uri = "https://open.t.qq.com/cgi-bin/oauth2/access_token"
       state = {"state" => Time.now.to_i}
@@ -88,12 +50,14 @@ class ThirdPartyUser
       request_uri = "https://openapi.360.cn/oauth2/access_token"
     end
 
-    retval = Tool.send_post_request(request_uri, access_token_params, true)
+    retval = Tool.send_post_request(request_uri, access_token_params, true) if request_uri.present?
     case opt[:account]
     when 'qq','tecent'
       access_token, expires_in, refresh_token = *(retval.body.split('&').map { |ele| ele.split('=')[1] })      
       response_data = {"access_token" => access_token, "expires_in" => expires_in,:refresh_token => refresh_token}
-      response_data.merge!(opt[:param_obj])   
+      response_data.merge!(opt[:param_obj]) 
+    when 'alipay'
+      response_data = opt
     else
       response_data = JSON.parse(retval.body)
     end 
@@ -118,20 +82,8 @@ class ThirdPartyUser
     return tp_user
   end
 
-  def is_bound(user = nil)
-    return false if user.nil?
-    return self.oopsdata_user_id == user.id
-  end
-
   def bind(user)
     user.third_party_users << self
-  end
-  
-  def update_by_hash(hash)
-    attrs = self.attributes
-    attrs.merge!(hash)
-    self.class.collection.find_and_modify(:query => {_id: self.id}, :update => attrs, :new => true)
-    return self
   end
 
 
@@ -152,33 +104,5 @@ class ThirdPartyUser
     end
     return JSON.parse(retval.body)
   end
-
-
-  #update instance's access_token and save
-  def update_access_token(access_token)
-    self.access_token = access_token
-    return self.save
-  end
   
-  #update instance's refresh_token and save
-  def update_refresh_token(refresh_token)
-    self.refresh_token = refresh_token
-    return self.save
-  end
-  
-  # update instance's scope and save
-  def update_scope(scope)
-    self.scope = scope
-    return self.save
-  end
-  
-  def successful?(hash)
-    if hash.select{|k,v| k.to_s.include?("error")}.empty? then
-      Logger.new("log/development.log").info("true: ")
-      return true
-    else
-      Logger.new("log/development.log").info("false: ")
-      return false
-    end   
-  end
 end

@@ -88,7 +88,7 @@
               <% end %>
             </tr>
 
-            <tr class="tr" style="display: none;">
+            <tr class="tr">
               <!-- sina weibo -->
               <% if @bindings["sina"] %>
                 <td class="icons">
@@ -103,7 +103,7 @@
                     </p>
                 </td>
                 <td class="bind change">
-                    <p>更改</p>
+                    <a  href="<%= social_auth_link('sina')%>">更改</a>
                 </td>
               <% else %>
                 <td class="icons">
@@ -114,27 +114,27 @@
                     <p>您尚未绑定新浪微博</p>
                 </td>
                 <td class="bind">
-                    <a href="#">绑定</a>
+                    <a href="<%= social_auth_link('sina')%>">绑定</a>
                 </td>
               <% end %>
             </tr>
 
-            <tr class="tr" style="display: none;">
+            <tr class="tr">
               <!-- tx weibo -->
-              <% if @bindings["tx_weibo"] %>
+              <% if @bindings["tecent"] %>
                 <td class="icons">
                     <i class="icon-binding icon-tx_weibo active"></i>
                     <span>腾讯微博</span>
                 </td>
                 <td class="content">
-                    <p>您已绑定腾讯微博：<span class="active-text"><%= @bindings["tx_weibo"][0] %></span></p>
+                    <p>您已绑定腾讯微博：<span class="active-text"><%= @bindings["tecent"][0] %></span></p>
                     <p>
-                        <input type="checkbox"  class="share" name="tx_weibo"  <%= 'checked' if @bindings["tx_weibo"][1] %>/>
+                        <input type="checkbox"  class="share" name="tx_weibo"  <%= 'checked' if @bindings["tecent"][1] %>/>
                         <span>有新问卷时提醒我</span>
                     </p>
                 </td>
                 <td class="bind change">
-                    <a href="#">更改</a>
+                    <a href="<%= social_auth_link('tecent')%>">绑定</a>
                 </td>
               <% else %>
                 <td class="icons">
@@ -145,43 +145,43 @@
                     <p>您尚未绑定腾讯微博</p>
                 </td>
                 <td class="bind">
-                    <a href="#">绑定</a>
+                    <a href="<%= social_auth_link('tecent')%>">绑定</a>
                 </td>
               <% end %>
             </tr>
 
-            <tr class="tr" style="display: none;">
+            <tr class="tr" style="display:none;">
               <!-- weixin -->
-              <% if @bindings["weixin"] %>
+              <% if @bindings["qihu360"] %>
                 <td class="icons">
                     <i class="icon-binding icon-weixin active"></i>
-                    <span>微信帐号</span>
+                    <span>360帐号</span>
                 </td>
                 <td class="content">
-                    <p>您已绑定微信帐号：<span class="active-text"><%= @bindings["weixin"][0] %></span></p>
+                    <p>您已绑定360帐号：<span class="active-text"><%= @bindings["qihu360"][0] %></span></p>
                     <p>
-                        <input type="checkbox" class="share" name="weixin"  <%= 'checked' if @bindings["weixin"][1] %>/>
+                        <input type="checkbox" class="share" name="weixin"  <%= 'checked' if @bindings["qihu360"][1] %>/>
                         <span>有新问卷时提醒我</span>
                     </p>
                 </td>
-                <td class="bind">
-                    <a href="#">更改</a>
+                <td class="bind change">
+                    <a href="<%= social_auth_link('qihu360')%>">更改</a>
                 </td>
               <% else %>
                 <td class="icons">
                     <i class="icon-binding icon-weixin"></i>
-                    <span>微信帐号</span>
+                    <span>360帐号</span>
                 </td>
                 <td class="content">
-                    <p>您尚未绑定微信帐号</p>
+                    <p>您尚未绑定360帐号</p>
                 </td>
                 <td class="bind">
-                    <a href="#">绑定</a>
+                    <a href="<%= social_auth_link('qihu360')%>">绑定</a>
                 </td>
               <% end %>
             </tr>
 
-            <tr class="tr" style="display: none;">
+            <tr class="tr">
               <!-- alipay -->
               <% if @bindings["alipay"] %>
                 <td class="icons">
@@ -195,8 +195,8 @@
                         <span>有新问卷时提醒我</span>
                     </p>
                 </td>
-                <td class="bind">
-                    <a href="#">更改</a>
+                <td class="bind change">
+                    <a  href="<%= social_auth_link('alipay')%>">更改</a>
                 </td>
               <% else %>
                 <td class="icons">
@@ -207,27 +207,27 @@
                     <p>您尚未绑定支付宝</p>
                 </td>
                 <td class="bind">
-                    <a href="#">绑定</a>
+                    <a href="<%= social_auth_link('alipay')%>">绑定</a>
                 </td>
               <% end %>
             </tr>
 
-            <tr class="tr" style="display: none;">
+            <tr class="tr">
               <!-- qzone -->
-              <% if @bindings["qzone"] %>
+              <% if @bindings["qq"] %>
                 <td class="icons">
                     <i class="icon-binding icon-qzone active"></i>
-                    <span>QQ空间</span>
+                    <span>QQ</span>
                 </td>
                 <td class="content">
-                    <p>您已绑定QQ空间：<span class="active-text"><%= @bindings["qzone"][0] %></span></p>
+                    <p>您已绑定QQ：<span class="active-text"><%= @bindings["qq"][0] %></span></p>
                     <p>
-                        <input type="checkbox" class="share" name="qzone" <%= 'checked' if @bindings["qzone"][1] %>/>
+                        <input type="checkbox" class="share" name="qzone" <%= 'checked' if @bindings["qq"][1] %>/>
                         <span>有新问卷时提醒我</span>
                     </p>
                 </td>
-                <td class="bind">
-                    <a href="#">更改</a>
+                <td class="bind change">
+                    <a  href="<%= social_auth_link('qq')%>">更改</a>
                 </td>
               <% else %>
                 <td class="icons">
@@ -238,12 +238,12 @@
                     <p>您尚未绑定QQ空间</p>
                 </td>
                 <td class="bind">
-                    <a href="#">绑定</a>
+                    <a href="<%= social_auth_link('qq')%>">绑定</a>
                 </td>
               <% end %>
             </tr>
 
-            <tr class="tr" style="display: none;">
+            <tr class="tr">
               <!-- renren -->
               <% if @bindings["renren"] %>
                 <td class="icons">
@@ -257,8 +257,8 @@
                         <span>有新问卷时提醒我</span>
                     </p>
                 </td>
-                <td class="bind">
-                    <a href="#">更改</a>
+                <td class="bind change">
+                    <a href="<%= social_auth_link('renren')%>">更改</a>
                 </td>
               <% else %>
                 <td class="icons">
@@ -269,7 +269,7 @@
                     <p>您尚未绑定人人网</p>
                 </td>
                 <td class="bind">
-                    <a href="#">绑定</a>
+                    <a href="<%= social_auth_link('renren')%>">绑定</a>
                 </td>
               <% end %>
             </tr>

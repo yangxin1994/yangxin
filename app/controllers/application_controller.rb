@@ -126,17 +126,17 @@ class ApplicationController < ActionController::Base
     #client_id = Rails.application.config.authkeys[website.to_sym]
     case website
     when 'sina'
-      return "https://api.weibo.com/oauth2/authorize?client_id=#{client_id}&response_type=code&redirect_uri=#{redirect_uri}&display=page"
+      return "https://api.weibo.com/oauth2/authorize?client_id=#{client_id}&response_type=code&redirect_uri=#{redirect_uri}&display=page&forcelogin=true"
     when 'renren'
       return "https://graph.renren.com/oauth/authorize?client_id=#{client_id}&response_type=code&redirect_uri=#{redirect_uri}&response_type=code"
     when 'qq'
       return "https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=#{client_id}&redirect_uri=#{redirect_uri}"
     when 'alipay'
-      return "https://openauth.alipay.com/oauth2/authorize.htm?client_id=#{client_id}&redirect_uri=#{redirect_uri}"  
+      return "https://mapi.alipay.com/gateway.do?#{AlipayUser.generate_para}"  
     when 'qihu360'
       return "https://openapi.360.cn/oauth2/authorize?client_id=#{client_id}&response_type=code&redirect_uri=#{redirect_uri}"      
     when 'tecent'
-      return "https://open.t.qq.com/cgi-bin/oauth2/authorize?client_id=#{client_id}&response_type=code&redirect_uri=#{redirect_uri}"          
+      return "https://open.t.qq.com/cgi-bin/oauth2/authorize?client_id=#{client_id}&response_type=code&redirect_uri=#{redirect_uri}&forcelogin=true"          
     # when 'google'
     #   return "https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=#{client_id}.apps.googleusercontent.com&redirect_uri=#{redirect_uri}&scope=https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
     # when 'kaixin001'
