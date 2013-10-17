@@ -72,14 +72,11 @@
 								<a href="/account/sign_in">登录</a>
 							</li>
 							<li class="out-login">
-								<a href="<%= social_auth_link('sina')%>"><i class="icon login-sina"></i>微博登录</a>
-								<a href="<%= social_auth_link('alipay')%>"><i class="icon login-alipay"></i>支付宝登录</a>
-								<a href="<%= social_auth_link('qq')%>"><i class="icon login-qq"></i>QQ登录</a>
-								<a href="<%= sign_in_account_path%>">更多登录</a>
-								<!-- <a href="javacsript:void(0);"><i class="icon login-alipay"></i>支付宝登录</a>
-								<a href="javacsript:void(0);"><i class="icon login-sina"></i>微博登录</a>
-								<a href="javacsript:void(0);"><i class="icon login-qq"></i>QQ登录</a>
-								<a href="javacsript:void(0);"><i class="icon login-alipay"></i>支付宝登录</a> -->
+								<a href="<%= social_auth_link('sina')%>" title="新浪微博" ><i class="icon login-sina"></i></a>
+								<a href="<%= social_auth_link('alipay')%>" title="支付宝" ><i class="icon login-alipay"></i></a>
+								<a href="<%= social_auth_link('qq')%>" title="QQ帐号"><i class="icon login-qq"></i></a>
+								<a href="<%= social_auth_link('tecent')%>" title="腾讯微博"><i class="icon login-tecent"></i></a>
+								<a href="<%= social_auth_link('renren')%>" title="人人网"><i class="icon login-renren"></i></a>
 						</li>
 						</ul>	
 						<% end %>

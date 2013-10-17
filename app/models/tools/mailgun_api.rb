@@ -134,6 +134,9 @@ class MailgunApi
     data[:subject] = "欢迎注册问卷吧"
     data[:subject] += " --- to #{user.email}" if Rails.env != "production" 
     data[:to] = Rails.env == "production" ? user.email : @@test_email
+    Rails.logger.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+    Rails.logger.info(data[:to])
+    Rails.logger.info("$$$$$$$$$$$$$$$$$$$$$$$$$$$")
     self.send_message(data)
   end
 

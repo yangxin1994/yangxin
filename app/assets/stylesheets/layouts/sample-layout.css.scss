@@ -215,6 +215,8 @@ $colorB: #b3b3b3;
 .icon.login-sina{background: image-url('od-quillme/icons/out_login.png') no-repeat 0 0;}
 .icon.login-qq{background: image-url('od-quillme/icons/out_login.png') no-repeat 0 -20px;}
 .icon.login-alipay{background: image-url('od-quillme/icons/out_login.png') no-repeat 0 -40px;}
+.icon.login-tecent{background: image-url('od-quillme/icons/pn_t.png')}
+.icon.login-renren{background: image-url('od-quillme/icons/renren.png')}
 
 /*标题图标
 .icon-bulletin{background: image-url('od-quillme/icons/bulletin.png') no-repeat left;}
@@ -276,12 +278,15 @@ body{background: image-url('od-quillme/bg.png');}
 				margin-right:14px;
 				float: left;
 				&.out-login{
+					a{
+						margin-right:0px;
+					}
 					margin-top:-2px;
 					padding:0 5px 0 15px;
 				}
 				a{
 					float: left;
-					margin-right:16px;
+					margin-right:10px;
 					.icon{margin:-2px 5px 0 0;}
 					color:#666;
 					&:hover{

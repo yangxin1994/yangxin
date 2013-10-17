@@ -3,7 +3,7 @@ require 'error_enum'
 require 'tool'
 require 'securerandom'
 
-class words_per_seconda                                                                           leIssue < issue_obj
+class ScaleIssue < Issue
   attr_reader :items, :is_rand, :item_num_per_group, :labels, :show_unknown, :show_style
   attr_writer :items, :is_rand, :item_num_per_group, :labels, :show_unknown, :show_style
 
