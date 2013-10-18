@@ -1304,8 +1304,8 @@ class Answer
         elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
           attr_value = q.sample_attribute_relation[answer["selection"][0].to_s]
           if attr_value.present?
-            attr_value[0] = attr_value[0].to_f
-            attr_value[1] = attr_value[1].to_f
+            attr_value[0] = attr_value[0].blank? ? -1.0/0.0 : attr_value[0].to_f
+            attr_value[1] = attr_value[1].blank? ? 1.0/0.0 : attr_value[1].to_f
           end
         end
       when DataType::DATE
@@ -1316,8 +1316,8 @@ class Answer
         elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
           attr_value = q.sample_attribute_relation[answer["selection"][0].to_s]
           if attr_value.present?
-            attr_value[0] = attr_value[0] / 1000
-            attr_value[1] = attr_value[1] / 1000
+            attr_value[0] = attr_value[0].blank? ? -1.0/0.0 : attr_value[0] / 1000
+            attr_value[1] = attr_value[1].blank? ? 1.0/0.0 : attr_value[1] / 1000
           end
         end
       when DataType::ADDRESS
