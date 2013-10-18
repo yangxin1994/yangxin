@@ -753,7 +753,7 @@ class Survey
       begin
         line_answer.merge! qio.answer_import(row.to_hash, header_prefix)
       rescue Exception => emsg
-        binding.pry
+#        binding.pry
       end
     end
     line_answer
