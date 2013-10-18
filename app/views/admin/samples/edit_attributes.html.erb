@@ -2,20 +2,22 @@
   <%= javascript_include_tag "pages/admin/samples/attributes-bundle" %>
 <% end %>
 
-<% content_for :sidenav do %>
+<% content_for :sidebar do %>
 
-  <li>
-    <a href="/admin/samples/attributes">
-    <i class="icon-chevron-right"></i>
-    样本属性列表
-    </a>
-  </li>
-  <li class="active">
-    <a href="javascript:vodi(0);">
-    <i class="icon-chevron-right"></i>
-    编辑样本属性
-    </a>
-  </li>  
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li>
+      <a href="/admin/samples/attributes">
+      <i class="icon-chevron-right"></i>
+      样本属性列表
+      </a>
+    </li>
+    <li class="active">
+      <a href="javascript:vodi(0);">
+      <i class="icon-chevron-right"></i>
+      编辑样本属性
+      </a>
+    </li>  
+  </ul>
 <% end %>
 
 <%= render "attr_form" %>

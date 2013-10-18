@@ -1,26 +1,28 @@
 <% content_for :head do %>
   <%= javascript_include_tag "pages/admin/samples/status-bundle" %>
 <% end %>
-<% content_for :sidenav do %>
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
 
-  <li>
-    <a href="/admin">
-    <i class="icon-chevron-right"></i>
-    样本列表
-    </a>
-  </li>
-  <li>
-    <a href="/admin/samples/attributes">
-    <i class="icon-chevron-right"></i>
-    样本属性
-    </a>
-  </li>
-  <li class="active">
-    <a href="/admin/sample/stats">
+    <li>
+      <a href="/admin">
       <i class="icon-chevron-right"></i>
-      样本数据统计
-    </a>
-  </li>
+      样本列表
+      </a>
+    </li>
+    <li>
+      <a href="/admin/samples/attributes">
+      <i class="icon-chevron-right"></i>
+      样本属性
+      </a>
+    </li>
+    <li class="active">
+      <a href="/admin/sample/stats">
+        <i class="icon-chevron-right"></i>
+        样本数据统计
+      </a>
+    </li>
+  </ul>
 <% end %>
 <div class="bs-docs-example">
   <ul id="myTab" class="nav nav-tabs">

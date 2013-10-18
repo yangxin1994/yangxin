@@ -1,44 +1,46 @@
 <% content_for :head do %>
 <% end %>
 
-<% content_for :sidenav do %>
+<% content_for :sidebar do %>
 
-  <li class="active">
-    <a href="javascript(void(0));">
-    <i class="icon-chevron-right"></i>
-    基本属性
-    </a>
-  </li>
-  <li>
-    <a href="/admin/samples/<%= params["id"] %>/redeem_log">
-    <i class="icon-chevron-right"></i>
-    礼品兑换记录
-    </a>
-  </li>
-  <li>
-    <a href="/admin/samples/<%= params["id"] %>/point_log">
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li class="active">
+      <a href="javascript(void(0));">
       <i class="icon-chevron-right"></i>
-      积分变化记录
-    </a>
-  </li>
-  <li>
-    <a href="/admin/samples/<%= params["id"] %>/lottery_log">
+      基本属性
+      </a>
+    </li>
+    <li>
+      <a href="/admin/samples/<%= params["id"] %>/redeem_log">
       <i class="icon-chevron-right"></i>
-      抽奖记录
-    </a>
-  </li>
-  <li>
-    <a href="/admin/samples/<%= params["id"] %>/lottery_log">
-      <i class="icon-chevron-right"></i>
-      回答历史记录
-    </a>
-  </li>
-  <li>
-    <a href="/admin/samples/<%= params["id"] %>/lottery_log">
-      <i class="icon-chevron-right"></i>
-      问卷推广记录
-    </a>
-  </li>
+      礼品兑换记录
+      </a>
+    </li>
+    <li>
+      <a href="/admin/samples/<%= params["id"] %>/point_log">
+        <i class="icon-chevron-right"></i>
+        积分变化记录
+      </a>
+    </li>
+    <li>
+      <a href="/admin/samples/<%= params["id"] %>/lottery_log">
+        <i class="icon-chevron-right"></i>
+        抽奖记录
+      </a>
+    </li>
+    <li>
+      <a href="/admin/samples/<%= params["id"] %>/lottery_log">
+        <i class="icon-chevron-right"></i>
+        回答历史记录
+      </a>
+    </li>
+    <li>
+      <a href="/admin/samples/<%= params["id"] %>/lottery_log">
+        <i class="icon-chevron-right"></i>
+        问卷推广记录
+      </a>
+    </li>
+  </ul>
 <% end %>
 
   <table class="table table-hover">

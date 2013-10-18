@@ -3,55 +3,57 @@
   <%= javascript_include_tag "pages/admin/orders/index-bundle" %>
 <% end %>
 
-<% content_for :sidenav do %>
-  <li>
-    <a href="?">
-    <i class="icon-chevron-right"></i>
-    全部
-    </a>
-  </li>
-  <li>
-    <a href="?type=1">
-    <i class="icon-chevron-right"></i>
-    虚拟礼品订单
-    </a>
-  </li>
-  <li>
-    <a href="?type=2">
-    <i class="icon-chevron-right"></i>
-    实物礼品订单
-    </a>
-  </li>
-  <li>
-    <a href="?type=4">
-    <i class="icon-chevron-right"></i>
-    话费充值订单
-    </a>
-  </li>
-  <li>
-    <a href="?type=8">
-    <i class="icon-chevron-right"></i>
-    支付宝订单
-    </a>
-  </li>
-  <li>
-    <a href="?type=16">
-    <i class="icon-chevron-right"></i>
-    集分宝订单
-    </a>
-  </li>
-   <li>
-    <a href="?type=32">
-    <i class="icon-chevron-right"></i>
-    Q币订单
-    </a>
-  </li>
-  <li>
-    <a href="?type=64">
-    <i class="icon-chevron-right"></i>
-    小额充值订单
-    </a>
-  </li>   
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li>
+      <a href="?">
+      <i class="icon-chevron-right"></i>
+      全部
+      </a>
+    </li>
+    <li>
+      <a href="?type=1">
+      <i class="icon-chevron-right"></i>
+      虚拟礼品订单
+      </a>
+    </li>
+    <li>
+      <a href="?type=2">
+      <i class="icon-chevron-right"></i>
+      实物礼品订单
+      </a>
+    </li>
+    <li>
+      <a href="?type=4">
+      <i class="icon-chevron-right"></i>
+      话费充值订单
+      </a>
+    </li>
+    <li>
+      <a href="?type=8">
+      <i class="icon-chevron-right"></i>
+      支付宝订单
+      </a>
+    </li>
+    <li>
+      <a href="?type=16">
+      <i class="icon-chevron-right"></i>
+      集分宝订单
+      </a>
+    </li>
+     <li>
+      <a href="?type=32">
+      <i class="icon-chevron-right"></i>
+      Q币订单
+      </a>
+    </li>
+    <li>
+      <a href="?type=64">
+      <i class="icon-chevron-right"></i>
+      小额充值订单
+      </a>
+    </li>   
+  </ul>
 <% end %>
 
 <div>

@@ -3,26 +3,28 @@
   <%= javascript_include_tag "pages/admin/samples/index-bundle" %>
 <% end %>
 
-<% content_for :sidenav do %>
+<% content_for :sidebar do %>
 
-  <li class="active">
-    <a href="/admin/samples">
-    <i class="icon-chevron-right"></i>
-    样本列表
-    </a>
-  </li>
-  <li>
-    <a href="/admin/samples/attributes">
-    <i class="icon-chevron-right"></i>
-    样本属性
-    </a>
-  </li>
-  <li>
-    <a href="/admin/samples/status">
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li class="active">
+      <a href="/admin/samples">
       <i class="icon-chevron-right"></i>
-      样本数据统计
-    </a>
-  </li>
+      样本列表
+      </a>
+    </li>
+    <li>
+      <a href="/admin/samples/attributes">
+      <i class="icon-chevron-right"></i>
+      样本属性
+      </a>
+    </li>
+    <li>
+      <a href="/admin/samples/status">
+        <i class="icon-chevron-right"></i>
+        样本数据统计
+      </a>
+    </li>
+  </ul>
 <% end %>
 
 
