@@ -147,7 +147,9 @@ $(function() {
           item_id = $this.find('[data-id]').data('id');
           first = $this.find('.range-input.first').val();
           second = $this.find('.range-input.second').val();
-          return relation[item_id] = [first !== "" ? first : void 0, second !== "" ? second : void 0];
+          if (first !== "" || second !== "") {
+            return relation[item_id] = [first, second];
+          }
         });
         return relation;
       },
@@ -166,7 +168,9 @@ $(function() {
           } else {
             second = $this.find('.second .od-time-selector').odTimeSelector('val');
           }
-          return relation[item_id] = [first, second];
+          if ((first != null) || (second != null)) {
+            return relation[item_id] = [first, second];
+          }
         });
         return relation;
       },

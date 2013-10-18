@@ -162,7 +162,7 @@ $ ->
           item_id = $this.find('[data-id]').data('id')
           first = $this.find('.range-input.first').val()
           second = $this.find('.range-input.second').val()
-          relation[item_id] = [first if first != "", second if second != ""]
+          relation[item_id] = [first, second] if first != "" || second != ""
         relation
       'date_range': (panel_class) ->
         $(".#{panel_class} table tbody tr").each () ->
@@ -177,7 +177,7 @@ $ ->
             second = null
           else
             second = $this.find('.second .od-time-selector').odTimeSelector('val')
-          relation[item_id] = [first, second]
+          relation[item_id] = [first, second] if first? || second?
         relation
       'address': (panel_class) ->
         $(".#{panel_class} table tbody tr").each () ->

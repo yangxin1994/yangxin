@@ -144,7 +144,6 @@ class Admin::SurveysController < Admin::AdminController
     if request.get?
       _bind_question
     elsif request.put?
-      binding.pry
       _update_bind
     elsif request.delete?
       _unbind_question
