@@ -11,14 +11,29 @@
         <%= choice %> 
       </li>
       <% end -%>
-      <% if question["selected_choices"].present? %>
+      <% if question["rows"].present? %>
         <p>-----------</p>
-      <%- end %>
-      <% question["selected_choices"].try('each') do |choice| %>
-      <li>
-        <%= choice %> 
-      </li>
-      <% end -%>
+        <% question["rows"].each_with_index do |row, i| %>
+          <li>
+            <%= "#{row} : #{question["rows_selected_choices"][i][0]}" %>
+          </li>
+        <% end %>
+      <% else %>
+        <% if question["selected_choices"].present? %>
+          <p>-----------</p>
+        <%- end %>
+        <% question["selected_choices"].try('each') do |choice| %>
+        <li>
+          <%= choice %>
+        </li>
+        <% end -%>
+        <p>
+          <%= question["content"] %>
+          <%= question["address"] %>
+          <%= question["detail"] %>
+          <%= question["postcode"] %>
+        </p>
+      <% end %>
     </ul>
   </div>
 <% end -%>

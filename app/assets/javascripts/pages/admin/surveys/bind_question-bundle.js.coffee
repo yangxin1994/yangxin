@@ -38,27 +38,25 @@ $ ->
   # on change reload the partial for bind attrs
   $('[name=type]').change () ->
     value = $(this).val()
-    console.log value
+    # console.log value
     current_attr = attr = $.grep(attrs, (a) ->
       return a._id == value
     )[0]
 
     console.log attr.enum_array
     type = current_attr.type
-    console.log question.issue.max_choice
-    console.log "type: #{render_mapper[type]}"
+    # console.log question.issue.max_choice
+    # console.log "type: #{render_mapper[type]}"
 
     # question_type == 0 means only choice questions have tmpls
     if render_mapper[type] && question['question_type'] == 0
       tmpl = "#{tmpl_prefix}#{render_mapper[type]}"
-      console.log tmpl
       $('.panel-wrapper').html(HandlebarsTemplates[tmpl]({
         question: question,
         attr: attr
       }))
 
       if type == 5 # date-range
-        console.log attr
         setTimeout(() ->
           $('.date-range-panel .date-selector-content').each () ->
             $.od.odTimeSelector({format: attr.date_type}).appendTo(this)
@@ -79,7 +77,6 @@ $ ->
 
   # if this question already has binded attr
   if question.sample_attribute_id
-    console.log "has attr #{question.sample_attribute_id}"
     current_attr = attr = $.grep(attrs, (a) ->
       return a._id == question.sample_attribute_id
     )[0]
@@ -93,7 +90,6 @@ $ ->
     # render the panel with val
     if mapped_type && question['question_type'] == 0
       tmpl = "#{tmpl_prefix}#{render_mapper[type]}"
-      console.log tmpl
       $('.panel-wrapper').html(HandlebarsTemplates[tmpl]({
         question: question,
         attr: attr
@@ -108,7 +104,6 @@ $ ->
           $(".#{panel_class} table tbody tr").each () ->
             $this = $(this)
             item_id = $this.find('[data-id]').data('id')
-            console.log(relation[item_id])
             $this.find('.first .od-time-selector').odTimeSelector('val', relation[item_id][0])
             $this.find('.second .od-time-selector').odTimeSelector('val', relation[item_id][1])
         ,
@@ -119,11 +114,9 @@ $ ->
         ,
         0)
         setTimeout(() ->
-          console.log ".#{panel_class} table tbody tr"
           $(".#{panel_class} table tbody tr").each () ->
             $this = $(this)
             item_id = $this.find('[data-id]').data('id')
-            console.log(relation[item_id])
             $this.find('.address-slt').odAddressSelector('val', {address: relation[item_id]})
         ,
         50)
@@ -161,7 +154,6 @@ $ ->
           item_id = $this.find('[data-id]').data('id')
           val = $this.find('select').val()
           relation[item_id] = val if val.length > 0
-        console.log relation
         relation
       ,
       'num_range': (panel_class) ->
@@ -170,15 +162,22 @@ $ ->
           item_id = $this.find('[data-id]').data('id')
           first = $this.find('.range-input.first').val()
           second = $this.find('.range-input.second').val()
-          relation[item_id] = [first, second] if first.length > 0 && second.length > 0
+          relation[item_id] = [first if first != "", second if second != ""]
         relation
       'date_range': (panel_class) ->
         $(".#{panel_class} table tbody tr").each () ->
           $this = $(this)
           item_id = $this.find('[data-id]').data('id')
-          first = $this.find('.first .od-time-selector').odTimeSelector('val')
-          second = $this.find('.second .od-time-selector').odTimeSelector('val')
-          relation[item_id] = [first, second] if first.length > 0 && second.length > 0
+          if $this.find('.ts-year select:first').val().toString() == "-1" 
+            first = null
+          else
+            first = $this.find('.first .od-time-selector').odTimeSelector('val')
+
+          if $this.find('.ts-year select:last').val().toString() == "-1" 
+            second = null
+          else
+            second = $this.find('.second .od-time-selector').odTimeSelector('val')
+          relation[item_id] = [first, second]
         relation
       'address': (panel_class) ->
         $(".#{panel_class} table tbody tr").each () ->
@@ -203,7 +202,7 @@ $ ->
     # if there is extra relation view
     if render_mapper[type] && question['question_type'] == 0
       relation = generate_relation(render_mapper[type])
-
+    console.log relation
     $.put(location.href, {attribute_id: current_attr['_id'], relation: JSON.stringify(relation)}, () ->
       location.reload()
     )
