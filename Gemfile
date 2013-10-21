@@ -44,6 +44,9 @@ gem 'roadie', '~> 2.3.4'# html email
 gem 'premailer-rails', '~> 1.4.0'
 gem 'nokogiri', '~> 1.5.6'
 
+# for captcha
+gem 'easy_captcha'
+
 
 group :assets do
   gem 'sass-rails', '~> 3.2.6'
