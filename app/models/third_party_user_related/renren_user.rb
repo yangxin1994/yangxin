@@ -27,8 +27,8 @@ class RenrenUser < ThirdPartyUser
       url: 'https://api.renren.com/v2/',
       action: 'user/get',
       opts: {
-        access_token: self.access_token,
-        userId: self.website_id
+        access_token: data["access_token"],
+        userId: data["user"]["id"]
       }
     )
     

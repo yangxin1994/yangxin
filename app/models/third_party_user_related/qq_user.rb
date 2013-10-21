@@ -37,8 +37,8 @@ class QqUser < ThirdPartyUser
       url: 'https://graph.qq.com/user/',
       action: 'get_user_info',
       opts: {
-        access_token: self.access_token,
-        openid: self.website_id,
+        access_token: data["access_token"],
+        openid: response_data2["openid"],
         oauth_consumer_key:  OOPSDATA[Rails.env]["qq_app_key"],
         format: 'json'
       }

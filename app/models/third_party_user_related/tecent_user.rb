@@ -21,6 +21,7 @@ class TecentUser < ThirdPartyUser
   end
 
   def update_user_info(data)
+
     response_data = call_method(
       http_method: 'get',
       url: 'https://open.t.qq.com/api/',
@@ -28,8 +29,8 @@ class TecentUser < ThirdPartyUser
       opts: {
         clientip: '127.0.0.1',
         oauth_version: '2.a',
-        access_token: self.access_token,
-        openid: self.website_id,
+        access_token: data["access_token"],
+        openid: data["openid"],
         oauth_consumer_key: OOPSDATA[Rails.env]["tecent_app_key"],
         format: 'json'
       }

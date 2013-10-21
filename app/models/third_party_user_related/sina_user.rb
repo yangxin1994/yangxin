@@ -3,6 +3,7 @@ class SinaUser < ThirdPartyUser
   def self.save_tp_user(response_data,current_user)
     sina_user = SinaUser.where(:website_id => response_data["uid"]).first
     sina_user = SinaUser.where(:user_id => current_user.id).first if current_user.present?
+
     u = current_user.present? ? current_user : User.new(:status => User::REGISTERED)
     unless sina_user.present?  # create binding
       sina_user = SinaUser.create(
@@ -21,15 +22,14 @@ class SinaUser < ThirdPartyUser
 
 
   def update_user_info(data)
-
     response_data = call_method(
       http_method: 'get',
       format:'.json',
       url: 'https://api.weibo.com/2/',
       action: 'users/show',
       opts: {
-        uid: self.website_id,
-        access_token:self.access_token 
+        uid: data["uid"],
+        access_token:data["access_token"] 
       }
     )
 
