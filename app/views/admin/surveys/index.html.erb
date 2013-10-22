@@ -83,9 +83,10 @@
           </button>
           <ul class="dropdown-menu">
             <li><a href="#info" class="info"><i class="icon-wrench"></i>问卷基本设置</a></li>
-            <li><a href="#cost" class="cost"><i class="icon-wrench"></i>问卷成本</a></li>
-            <li><a href="/admin/surveys/<%= survey._id %>/reward_schemes" ><i class="icon-wrench"></i>奖励方案设置</a></li>
+            <li><a href="/admin/surveys/<%= survey._id %>/reward_schemes" ><i class="icon-gift"></i>奖励方案设置</a></li>
             <li><a href="/admin/surveys/<%= survey._id %>/promote" ><i class="icon-share"></i>推送渠道设置</a></li>
+            <li><a href="#cost" class="cost"><i class="icon-tint"></i>问卷成本</a></li>
+            <li><a href="#promote" class="promote"><i class="icon-share-alt"></i>问卷推送进度</a></li>
           </ul>
         </div>
         </td>
@@ -151,4 +152,21 @@
     <div class="modal-footer">
       <a class="btn" href="javascript:$('#cost_modal').modal('hide');">关闭</a>
     </div>
-  </div>  
+  </div>
+
+  <div class="modal hide fade" id="promote_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>问卷推送进度</h3>
+    </div>
+    <div class="modal-body" id="promote_body">
+      <div id="email_status">
+        <p class="pull-center">
+          Email 发送状态: 已发出 <span id="email_sended"></span>
+        </p>        
+      </div>
+    </div>    
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#promote_modal').modal('hide');">关闭</a>
+    </div>
+  </div> 

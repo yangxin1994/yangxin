@@ -33,6 +33,15 @@ class Admin::SurveysController < Admin::AdminController
     end
   end
 
+  def promote_info
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      {
+        :email => survey.email_promote_info,
+        :sms => survey.sms_promote_info
+      }
+    end
+  end
+
   def cost_info
     render_json Survey.where(:_id => params[:id]).first do |survey|
       survey.cost_info

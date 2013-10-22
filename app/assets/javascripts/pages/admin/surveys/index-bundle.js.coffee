@@ -22,6 +22,23 @@ $ ->
       error: ->
           alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
 
+  $(".promote").click ->
+    $this = $(this).closest('td')
+    $("#sid").val($this.data("sid"))
+    $('#promote_modal').modal('show')
+    $.ajax
+      url: "/admin/surveys/#{$this.data("sid")}/promote_info"
+      method: "GET"
+      success: (ret)->
+        console.log ret
+        if ret.success
+          $("#email_sended").html(ret.value.email.promote_email_count)
+        else
+          console.log ret
+          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+      error: ->
+          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")  
+
   $(".cost").click ->
     $this = $(this).closest('td')
     $("#sid").val($this.data("sid"))
