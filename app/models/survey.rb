@@ -752,7 +752,11 @@ class Survey
       begin
         line_answer.merge! qio.answer_import(row.to_hash, header_prefix)
       rescue Exception => emsg
+<<<<<<< HEAD
         binding.pry
+=======
+        
+>>>>>>> bugfix-spss_adderess
       end
     end
     line_answer
@@ -783,6 +787,11 @@ class Survey
       :finished_at => Time.now.to_i,
       :created_at => Time.now,
     :updated_at => Time.now}
+  end
+
+  def post_reward_to(user, options = {})
+    options[:user] = user
+    RewardLog.create(options).created_at ? true : false
   end
 
   def allocate_answer_auditors(answer_auditor_ids, allocate)
