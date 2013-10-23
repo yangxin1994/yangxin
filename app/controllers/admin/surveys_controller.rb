@@ -120,9 +120,25 @@ class Admin::SurveysController < Admin::AdminController
     end    
   end
 
+  # 推送渠道设置相关
+
+  def sample_attributes
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      surveys_smp_attrs = survey.sample_attributes_for_promote.map { |e| e["sample_attribute_id"] }
+      SampleAttribute.normal.order_by(:type => :asc).map do |smp_attr|
+        smp_attr unless surveys_smp_attrs.include? smp_attr._id
+      end
+    end    
+  end
+
+  def update_sample_attribute
+    
+  end
+
   def promote
     if survey = Survey.where(:_id => params[:id]).first
       @promote = survey.serialize_in_promote_setting
+      gon.push({:id => params[:id]})
     else
 
     end

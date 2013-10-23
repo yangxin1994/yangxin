@@ -291,10 +291,9 @@ OopsData::Application.routes.draw do
 
     resources :surveys, :as => :s do
       member do
-        get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info
-        put :update_promote, :set_info, :bind_question, :star
+        get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info, :sample_attributes
         post :update_promote
-        put :update_promote, :set_info, :bind_question, :star
+        put :update_promote, :set_info, :bind_question, :star, :update_sample_attribute
         delete :destroy_attributes, :bind_question
       end
 
@@ -314,7 +313,7 @@ OopsData::Application.routes.draw do
 
       collection do
         post :add_attributes, :send_message
-        get :attributes, :new_attributes, :status, :get_sample_count, :get_active_sample_count
+        get :attributes, :new_attributes, :status, :get_sample_count, :get_active_sample_count, :all_attributes
       end
     end
 

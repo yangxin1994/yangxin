@@ -153,6 +153,12 @@ class Admin::SamplesController < Admin::AdminController
     @attributes = auto_paginate SampleAttribute.search(params[:name])
   end
 
+  def all_attributes
+    render_json true do |survey|
+      SampleAttribute.normal.order_by(:type)
+    end    
+  end
+
   def add_attributes
     params[:attribute][:type] = params[:attribute][:type].to_i
     attrs = make_attrs params[:attribute]
