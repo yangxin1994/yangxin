@@ -88,8 +88,7 @@ class SampleAttribute
 
   def self.make_statistics
     self.each do |sample_attribute|
-      sample_attribute.completion, sample_attribute.analyze_result = 
-        *User.make_sample_attribute_statistics(sample_attribute)
+      sample_attribute.analyze_result = User.make_sample_attribute_statistics(sample_attribute)
       sample_attribute.save
     end
   end
