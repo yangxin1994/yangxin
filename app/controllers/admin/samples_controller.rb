@@ -182,26 +182,26 @@ class Admin::SamplesController < Admin::AdminController
     end
     attr["analyze_requirement"]['segmentation'] ||= []
     case attr['type'].to_i
-    when 0
-      attr['value_0'] = attr["analyze_requirement"]['segmentation']
-    when 1
-      attr['value_1'] = attr["analyze_requirement"]['segmentation']
-    when 2
-      attr['value_2'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.join(',') }}.join("\n")
-    when 3
+    when DataType::STRING
+    when DataType::ENUM
+    when DataType::NUMBER
+      # attr['value_2'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.join(',') }}.join("\n")
+      attr['value_2'] = attr["analyze_requirement"]['segmentation'].join(' ')
+    when DataType::DATE
       attr['date_type_3'] = attr["date_type"]
-      attr['value_3'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.strftime("%Y/%m/%d") }}.join("\n")
-    when 4
-      attr['value_4'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.join(',') }}.join("\n")
-    when 5
+      # attr['value_3'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.strftime("%Y/%m/%d") }}.join("\n")
+      attr['value_3'] = attr["analyze_requirement"]['segmentation'].map{|e| Time.at(e).strftime("%Y/%m/%d") }.join(" ")
+    when DataType::NUMBER_RANGE
+      # attr['value_4'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.join(',') }}.join("\n")
+      attr['value_4'] = attr["analyze_requirement"]['segmentation'].join(' ')
+    when DataType::DATE_RANGE
       attr['date_type_5'] = attr["date_type"]
-      attr['value_5'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.strftime("%Y/%m/%d") }}.join("\n")
-    when 6
-      attr['value_6'] = attr["analyze_requirement"]['segmentation']
-    when 7
+      # attr['value_5'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.strftime("%Y/%m/%d") }}.join("\n")
+      attr['value_5'] = attr["analyze_requirement"]['segmentation'].map{|e| Time.at(e).strftime("%Y/%m/%d") }.join(" ")
+    when DataType::ADDRESS
+    when DataType::ARRAY
       attr['element_type'] = attr["element_type"]
       attr['enum_array_6'] = attr["enum_array"]
-      attr['value_7'] = attr["analyze_requirement"]['segmentation']
     end
     @attribute = attr
   end
@@ -215,27 +215,23 @@ class Admin::SamplesController < Admin::AdminController
   def make_attrs(attr)
     attr[:analyze_requirement] = {}
     case attr[:type]
-    when 0
-      attr[:analyze_requirement][:segmentation] = attr[:value_0].split(' ')
-    when 1
+    when DataType::STRING
+    when DataType::ENUM
       attr[:enum_array] = attr[:enum_array].split(' ')
-      attr[:analyze_requirement][:segmentation] = attr[:value_1].split(' ')
-    when 2
-      attr[:analyze_requirement][:segmentation] = attr[:value_2].split(' ').map { |e| e.split(',') }
-    when 3
+    when DataType::NUMBER
+      attr[:analyze_requirement][:segmentation] = attr[:value_2].split(' ').map { |e| e.to_f }
+    when DataType::DATE
       attr[:date_type] = attr[:date_type_3].to_i
-      attr[:analyze_requirement][:segmentation] = attr[:value_3].split(' ').map { |e| Time.parse(e.split(',')).to_i }
-    when 4
-      attr[:analyze_requirement][:segmentation] = attr[:value_4].split(' ').map { |e| e.split(',') }
-    when 5
+      attr[:analyze_requirement][:segmentation] = attr[:value_3].split(' ').map { |e| Time.parse(e).to_i }
+    when DataType::NUMBER_RANGE
+      attr[:analyze_requirement][:segmentation] = attr[:value_4].split(' ').map { |e| e.to_f }
+    when DataType::DATE_RANGE
       attr[:date_type] = attr[:date_type_5].to_i
-      attr[:analyze_requirement][:segmentation] = attr[:value_5].split(' ').map { |e| Time.parse(e.split(',')).to_i }
-    when 6
-      attr[:analyze_requirement][:segmentation] = attr[:value_6].split(' ')
-    when 7
+      attr[:analyze_requirement][:segmentation] = attr[:value_5].split(' ').map { |e| Time.parse(e).to_i }
+    when DataType::ADDRESS
+    when DataType::ARRAY
       attr[:element_type] = attr[:element_type].to_i
       attr[:enum_array] = attr[:enum_array_6].split(' ')
-      attr[:analyze_requirement][:segmentation] = attr[:value_7].split(' ')
     end
     attr
   end
