@@ -264,7 +264,7 @@ class Survey
           _value = smp_attr[:value].split(' ')
         end
         add_sample_attribute_for_promote({
-          :sample_attribute_id => _id,
+          :sample_attribute_id => _id.split('_')[0],
           :value => _value
         })
       end
@@ -676,7 +676,7 @@ class Survey
       survey_obj["agent_promote_info"]["agent_tasks"] = [{}]
     end
    if SampleAttribute.count > 0
-      survey_obj["sample_attributes_list"] = SampleAttribute.all
+      survey_obj["sample_attributes_list"] = SampleAttribute.normal
     else
       survey_obj["sample_attributes_list"] = [{}]
     end
@@ -687,19 +687,22 @@ class Survey
   def sample_attributes
     smp_attrs = sample_attributes_for_promote
     smp_attrs.each_with_index do |smp_attr, index|
+      smp_attr[:value] ||= smp_attr["value"]
       case smp_attr['type'].to_i
       when 0
-        _value = smp_attr['value']
+        _value = smp_attr[:value]
       when 1
-        _value = smp_attr['value'].join("\n")
+        _value = smp_attr[:value].join("\n")
       when 2, 4
-        _value = smp_attr['value'].map{|es| es.map { |e| e.join(',') }}.join("\n")
+        _value = smp_attr[:value].map{|es| es.map { |e| e.join(',') }}.join("\n")
       when 3, 5
-        _value = smp_attr['value'].map{|es| es.map { |e| e.strftime("%Y/%m/%d") }}.join("\n")
+        _value = smp_attr[:value].map{|es| es.map { |e| e.strftime("%Y/%m/%d") }}.join("\n")
       when 6
-        _value = smp_attr['value'].join("\n")
+        _value = smp_attr[:value].join("\n")
       when 7
-        _value = smp_attr['value'].join("\n")
+        _value = smp_attr[:value].join("\n")
+      else
+        _value = smp_attr[:value]
       end
       smp_attrs[index]['value'] = _value
     end
@@ -849,10 +852,14 @@ class Survey
   end
 
   def add_sample_attribute_for_promote(sample_attribute)
-    s = SampleAttribute.normal.find_by_id(sample_attribute["sample_attribute_id"])
+    s = SampleAttribute.normal.find_by_id(sample_attribute[:sample_attribute_id])
     return ErrorEnum::SAMPLE_ATTRIBUTE_NOT_EXIST if s.nil?
     sample_attribute[:type] = s.type
-    self.sample_attributes_for_promote << sample_attribute
+    if self.sample_attributes_for_promote.map{|sa| sa["sample_attribute_id"]}.include? sample_attribute[:sample_attribute_id]
+      # self.sample_attributes_for_promote.each{|sa| if sa["sample_attribute_id"] == sample_attribute[:sample_attribute_id]}
+    else
+      self.sample_attributes_for_promote << sample_attribute
+    end
     return self.save
   end
 

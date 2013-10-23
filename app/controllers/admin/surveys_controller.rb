@@ -139,8 +139,10 @@ class Admin::SurveysController < Admin::AdminController
   end
 
   def destroy_attributes
-   result = @client.destroy_attributes(params)
-   render :json => result
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      survey.sample_attributes_for_promote.delete_at(params[:sample_attribute_index].to_i)
+      survey.save
+    end    
   end
 
 # ###########################
