@@ -162,9 +162,6 @@ class Admin::SurveysController < Admin::AdminController
   end
 
   def create_interviewer
-    Rails.logger.info("-------------------------")
-    Rails.logger.info(params.inspect)
-    Rails.logger.info("-------------------------")
     InterviewerTask.create_interviewer_task(params[:id], params[:user_id], params[:amount].to_i)
     redirect_to :action => 'interviewer_task'
   end
