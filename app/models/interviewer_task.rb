@@ -129,7 +129,7 @@ class InterviewerTask
     self.write_attribute(:finished_count, self.quota["finished_count"])
     self.write_attribute(:submitted_count, self.quota["submitted_count"])
     self.write_attribute(:rejected_count, self.quota["rejected_count"])
-    self.write_attribute(:interviewer, self.user.email || self.user.mobile)
+    self.write_attribute(:interviewer, self.user.nickname)
     return self
   end
 end

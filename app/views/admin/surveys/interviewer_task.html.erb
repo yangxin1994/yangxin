@@ -1,8 +1,17 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/surveys/interviewer_task-bundle" %>
+   <%= javascript_tag do  %>
+    window.survey_id = <%= raw params[:id].to_json %>;
+  <% end %> 
+<% end %>
 <%= render 'left_nav' %>
 <div class="well">
   <a href="/admin/surveys/<%= params[:id]%>"><%= @survey.title %></a>
 </div>
-
+<div>
+  <a href="/admin/surveys/<%= params[:id]%>/new_interviewer" class="btn btn-primary pull-right">新增任务
+  </a>
+</div>
 <div>
   <table class="table table-striped">
     <thead>
@@ -11,6 +20,7 @@
         <th >状态</th>
         <th >访问员姓名</th>
         <th >目标完成量</th>
+        <th >完成量</th>
         <th >提交量</th>
         <th >拒绝量</th>
       </tr>
@@ -19,15 +29,22 @@
       <tr></tr>
     </tfoot>
     <tbody>
-      <% @tasks.each do |task| %>
-      <tr>
+      <% @tasks['data'].each do |task| %>
+      <tr data="<%= task.id%>">
         <td><%= task.created_at.strftime('%F') %></td>
         <td><%= interviewer_format(task.status.to_i) %></td>
-        <td><%= task.user.nickname %></td>
-        <td><%= %></td>
+        <td><%= task.interviewer %></td>
+        <td id="amount"><%= task.amount %></td>
+        <td><%= task.finished_count %></td>
+        <td><%= task.submitted_count %></td>
+        <td><%= task.rejected_count %></td>
       </tr>
       <% end %>
     </tbody>
   </table>
-
+</div>
+<div>
+  <span class="pull-right">
+    <%= paginator_mini @tasks %>
+  </span>  
 </div>

@@ -1,0 +1,46 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/surveys/interviewer_task-bundle" %>
+   <%= javascript_tag do  %>
+    window.survey_id = <%= raw params[:id].to_json %>;
+  <% end %> 
+<% end %>
+<%= render 'left_nav' %>
+<div class="well">
+  <a href="/admin/surveys/<%= params[:id]%>"><%= @survey.title %></a>
+</div>
+<legend>新增访问任务</legend>
+
+<div class="alert alert-danger alert-dismissable" style="display:none;">
+  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+  <strong>信息有误</strong>
+</div>
+
+<form action="/admin/surveys/<%=params[:id]%>/create_interviewer" class="form-horizontal" method="post">
+  <div class="control-group">
+    <label class="control-label" >访问员姓名:</label>
+    <div class="controls">
+      <div class="btn-group">
+        <button class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+          请选择
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropselect">
+          <% @interviewers.each do |viewer| %>
+            <li><a href="javascript:void(0);" id="<%= viewer.id %>" class="interviewer"><%=viewer.nickname%></a></li>
+          <% end %>
+        </ul>       
+      </div>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >要求回收数量:</label>
+    <div class="controls">
+      <input type="text" name="amount" class="input-large" placeholder="回收数量" />
+      <input type="hidden" name="user_id" />
+    </div>
+  </div>   
+  <div class="controls">
+    <button class="btn btn-primary" id="confirm_add">确认添加</button>
+  </div>
+</form>

@@ -23,7 +23,7 @@
       推送渠道
     </a>
   </li>
-  <li class="<%= action_name == 'interviewer_task' ? 'active' : '' %>">
+  <li class="<%= (action_name == 'interviewer_task' || action_name = 'new_interviewer' ) ? 'active' : '' %>">
     <a href="/admin/surveys/<%= params[:id]%>/interviewer_task">
       <i class="icon-chevron-right"></i>
       访问员设置
