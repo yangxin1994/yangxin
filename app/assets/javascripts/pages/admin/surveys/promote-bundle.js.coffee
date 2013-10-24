@@ -1,18 +1,51 @@
+#=require utility/modelinker
+
 $ ->
   # 预置事件
+  window.modelinker = new Modelinker
+
   $('#myTab a').click (e)->
     e.preventDefault()
     $(this).tab('show')
 
   # helpers
 
+  add_time_ipt = ($this) ->
+    $parent = $this.closest('.bs-docs-example')
+    data = gon.attr_data["#{$parent.data('oid')}"]
+    data["#{new_oid()}"] = ""
+    $this.closest('.controls-row').append(
+      """
+        <div class="controls controls-row">
+          <input class="span2" type="text" placeholder="年">
+          #{"<input class=\"span1\" type=\"text\" placeholder=\"月\">" if date_type > 0}
+          #{"<input class=\"span1\" type=\"text\" placeholder=\"日\">>" if date_type > 1}
+          <span class="span1">~</span>
+          <input class="span2" type="text" placeholder="年">
+          #{"<input class=\"span1\" type=\"text\" placeholder=\"月\">" if date_type > 0}
+          #{"<input class=\"span1\" type=\"text\" placeholder=\"日\">>" if date_type > 1}
+          <span class="help-inline">
+            <a href="javascript:void(0);"><i class="icon-plus-sign"></i></a>
+            <a href="javascript:void(0);"><i class="icon-minus-sign"></i></a>
+          </span>
+        </div> 
+      """
+    )
+
+  add_num_ipt = () ->
+    ""
+    
   render_attr = (smp_attr) ->
     console.log smp_attr
     switch smp_attr.type
       when 0
-        input = """
-          <textarea rows="6" placeholder="字符串类型:请填写需要过滤的内容."></textarea>
-        """
+        input = modelinker.generate
+          type: "textarea"
+          linker: "attr.#{smp_attr._id}.#{Date.now()}"
+          html_attr:
+            rows: "6"
+            placeholder:"字符串类型:请填写需要过滤的内容."
+
       when 1
         input = """
         """
@@ -60,7 +93,13 @@ $ ->
         """
 
     """
-      <div class="bs-docs-example" data-id="#{smp_attr._id}" style="display:none">
+      <div class="bs-docs-example" 
+           data-id="#{smp_attr._id}" 
+           data-date_type="#{smp_attr.date_type}"
+           data-date_type="#{smp_attr.date_type}"
+           data-element_type="#{smp_attr.element_type}
+           data-enum_array="#{smp_attr.enum_array}"
+           style="display:none" >
         <div class="row">
           <span class="span1">
           </span>  
@@ -71,8 +110,13 @@ $ ->
             #{input}
           </span>  
           <span class="span2">
-            <button class="btn btn-small btn-blocks btn-primary btn-attr-save" type="button">保存*</button>
-            <button class="btn btn-small btn-blocks btn-danger btn-attr-del" type="button">删除</button>
+            <p>
+              <button class="btn btn-small btn-blocks btn-primary btn-attr-save" type="button">保存*</button>
+            </p>
+            <p>
+              <button class="btn btn-small btn-blocks btn-danger btn-attr-del" type="button">删除</button>
+            </p>
+            
           </span>  
         </div>
       </div>
@@ -156,20 +200,22 @@ $ ->
       # do nothing
     else
       $.ajax
-        method: "put"
+        method: "PUT"
         url: "update_sample_attribute"
         data:
-          id: $this_div.data("id")
+          sample_attribute:
+            sample_attribute_id: $this_div.data("id")
+            value: modelinker.get("attr.#{$this_div.data("id")}")
         success: (ret)->
           if ret.success
-            console.log $this.closest(".attr-group").html()
             $this.closest(".attr-group").remove()
-            alert_msg.show('success', "已经删除!")
+            $this.html("已保存").addClass("disabled")
+            alert_msg.show('success', "保存成功!")
           else
-            alert_msg.show('error', "删除失败 (╯‵□′)╯︵┻━┻")
+            alert_msg.show('error', "保存失败 (╯‵□′)╯︵┻━┻")
 
         error: ->
-          alert_msg.show('error', "删除失败 (╯‵□′)╯︵┻━┻")
+          alert_msg.show('error', "保存失败 (╯‵□′)╯︵┻━┻")
 
     
 
