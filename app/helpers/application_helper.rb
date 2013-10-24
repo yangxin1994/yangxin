@@ -508,6 +508,18 @@ module ApplicationHelper
   def small_gift_image(img_path)
     return "/assets/od-quillme/uc/gift_36X36.png" if img_path.to_s.empty? || !File.exist?("#{Rails.root}/public#{img_path}")
     return img_path
+  end
+
+  def interviewer_format(status)
+    #0(doing), 1(under review), 2(finished)
+    case status.to_i
+    when 0
+      return '正在进行'
+    when 1
+      return '正在审核'
+    when 2
+      return '已经完成'
+    end
   end 
 
 end

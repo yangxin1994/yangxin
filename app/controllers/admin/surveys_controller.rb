@@ -1,6 +1,4 @@
 # encoding: utf-8
-# already tidied up
-
 class Admin::SurveysController < Admin::AdminController
 
   layout "layouts/admin-todc"
