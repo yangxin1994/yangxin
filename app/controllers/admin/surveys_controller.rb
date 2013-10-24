@@ -133,6 +133,7 @@ class Admin::SurveysController < Admin::AdminController
 
   def update_sample_attribute
     render_json Survey.where(:_id => params[:id]).first do |survey|
+      binding.pry
       survey.add_sample_attribute_for_promote(params[:sample_attribute])
     end
   end

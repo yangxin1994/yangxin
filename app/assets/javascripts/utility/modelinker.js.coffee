@@ -66,6 +66,8 @@ class Modelinker
     linker = @data if typeof(linker) != "object"
     _ret = {}
     for k, v of linker
+      if k.split()[0] == "ary"
+        last_k = k
       if typeof(v) == "string"
         _ret["#{k}"] = @queue["#{v}"]
       else

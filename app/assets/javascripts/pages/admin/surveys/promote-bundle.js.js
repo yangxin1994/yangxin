@@ -17,7 +17,7 @@ $(function() {
     return "";
   };
   render_attr = function(smp_attr) {
-    var input;
+    var i, input, item, _i, _len, _ref;
     console.log(smp_attr);
     switch (smp_attr.type) {
       case 0:
@@ -32,6 +32,19 @@ $(function() {
         break;
       case 1:
         input = "";
+        _ref = smp_attr.enum_array;
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          item = _ref[i];
+          input += "<label class=\"checkbox inline\">\n" + (modelinker.generate({
+            type: "input",
+            linker: "attr." + smp_attr._id + "." + i,
+            html_attr: {
+              type: "checkbox",
+              value: i
+            },
+            html: item
+          })) + "\n</label>";
+        }
         break;
       case 2:
       case 4:

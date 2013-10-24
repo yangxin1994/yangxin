@@ -90,7 +90,7 @@ Modelinker = (function() {
   };
 
   Modelinker.prototype.get_obj = function(linker) {
-    var k, v, _ret;
+    var k, last_k, v, _ret;
     if (linker == null) {
       linker = this.data;
     }
@@ -100,6 +100,9 @@ Modelinker = (function() {
     _ret = {};
     for (k in linker) {
       v = linker[k];
+      if (k.split()[0] === "ary") {
+        last_k = k;
+      }
       if (typeof v === "string") {
         _ret["" + k] = this.queue["" + v];
       } else {

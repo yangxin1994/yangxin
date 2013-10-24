@@ -47,8 +47,20 @@ $ ->
             placeholder:"字符串类型:请填写需要过滤的内容."
 
       when 1
-        input = """
-        """
+        input = ""
+        for item, i in smp_attr.enum_array
+          input += """<label class="checkbox inline">
+            #{
+              modelinker.generate
+                type: "input"
+                linker: "attr.#{smp_attr._id}.#{i}"
+                html_attr:
+                  type: "checkbox"
+                  value: i
+                html: item
+            }
+            </label>
+            """
       when 2, 4
         input = """
         <div class="controls controls-row">
