@@ -758,8 +758,8 @@ class ReportResult < Result
     first_index_dist = {}
     second_index_dist = {}
     analysis_result.each do |input_id, sort_number_ary|
-      first_index_dist[input_id] = (sort_number_ary[0] * 100.0 / answer_number).round
-      second_index_dist[input_id] = (sort_number_ary[1] * 100.0 / answer_number).round if sort_number_ary.length > 1
+      first_index_dist[input_id] = (sort_number_ary[0] * 100.0 / answer_number).round(1)
+      second_index_dist[input_id] = (sort_number_ary[1] * 100.0 / answer_number).round(1) if sort_number_ary.length > 1
     end
     # handle the result for the first index
     first_index_results = []
@@ -845,7 +845,7 @@ class ReportResult < Result
     return "" if total_number == 0
     results.sort_by! { |e| -e["number"] }
     address_text_ary = results.map { |e| e["text"] }
-    ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
+    ratio_ary = results.map { |e| (e["number"] * 100.0 / total_number).round(1) }
 
     text = opt[:cross] ? "" : "调查显示，"
     text += "#{ratio_ary[0].round(1)}%的人填写#{address_text_ary[0]}，所占比例最高"
@@ -890,7 +890,7 @@ class ReportResult < Result
     return text if total_number == 0
     results.sort_by! { |e| -e["number"] }
     interval_text_ary = results.map { |e| e["text"] }
-    ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
+    ratio_ary = results.map { |e| (e["number"] * 100.0 / total_number).round(1) }
     text = text + "填写#{interval_text_ary[0]}的被访者比例最高，为#{ratio_ary[0].round(1)}%"
     # one interval
     return text + "；被访者填写的平均值为#{mean}。" if results.length == 1
@@ -933,7 +933,7 @@ class ReportResult < Result
     return text if total_number == 0
     results.sort_by! { |e| -e["number"] }
     interval_text_ary = results.map { |e| e["text"] }
-    ratio_ary = results.map { |e| (e["number"] * 100 / total_number).round }
+    ratio_ary = results.map { |e| (e["number"] * 100.0 / total_number).round(1) }
     text = text + "填写#{interval_text_ary[0]}的被访者比例最高，为#{ratio_ary[0].round(1)}%"
     # one interval
     return text + "；被访者填写的平均值为#{mean.round(1)}。" if results.length == 1
@@ -978,7 +978,7 @@ class ReportResult < Result
       next if cur_row_total_number == 0
       cur_row_results.sort_by! { |e| -e["select_number"] }
       item_text_ary = cur_row_results.map { |e| e["text"] }
-      ratio_ary = cur_row_results.map { |e| (e["select_number"] * 100 / cur_row_total_number).round }
+      ratio_ary = cur_row_results.map { |e| (e["select_number"] * 100.0 / cur_row_total_number).round(1) }
       # generate text for this row
       cur_row_text_ary = []
       item_text_ary.each_with_index do |item_text, index|
@@ -1004,7 +1004,7 @@ class ReportResult < Result
     temp_results = results.clone
     temp_results.sort_by! { |e| -e["select_number"] }
     item_text_ary = temp_results.map { |e| e["text"] }
-    ratio_ary = temp_results.map { |e| (e["select_number"] * 100 / total_number).round }
+    ratio_ary = temp_results.map { |e| (e["select_number"] * 100.0 / total_number).round(1) }
     text = opt[:cross] ? "" : "调查显示，"
     text = text + "#{ratio_ary[0].round(1)}%的人选择了#{item_text_ary[0]}"
     # only one item
@@ -1044,7 +1044,7 @@ class ReportResult < Result
     temp_results = results.clone
     temp_results.sort_by! { |e| -e["select_number"] }
     item_text_ary = temp_results.map { |e| e["text"] }
-    ratio_ary = temp_results.map { |e| (e["select_number"] * 100 / answer_number).round }
+    ratio_ary = temp_results.map { |e| (e["select_number"] * 100.0 / answer_number).round(1) }
     text = opt[:cross] ? "" : "调查显示，"
     text = text + "#{ratio_ary[0].round(1)}%的人选择了#{item_text_ary[0]}，所占比例最高"
     # only one item
