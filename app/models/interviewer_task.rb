@@ -14,31 +14,26 @@ class InterviewerTask
   belongs_to :user
   has_many :answers
 
-  def self.create_interviewer_task(survey_id, user_id, quota)
-    survey = Survey.find_by_id(survey_id)
-    return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
-    interviewer = User.find_by_id(user_id)
-    return ErrorEnum::INTERVIEWER_NOT_EXIST if interviewer.nil?
+  def self.create_interviewer_task(survey_id, user_id, amount)
+    survey = Survey.find(survey_id)
+    interviewer = User.find(user_id)
     return ErrorEnum::INTERVIEWER_NOT_EXIST if !interviewer.is_interviewer?
-    quota.merge!({"finished_count" => 0,
-                "submitted_count" => 0,
-                "rejected_count" => 0})
-    quota["rules"] ||= []
-    quota["rules"]=quota["rules"].map do |r|
-        r["amount"] = r["amount"] || 0
-        r["finished_count"] = 0
-        r["submitted_count"] = 0
-        r
-    end
-    interviewer_task = InterviewerTask.create(quota: quota, user: interviewer, survey: survey)
+    quota = {"rules" => [{
+        "amount" => amount,
+        "finished_count" => 0,
+        "submitted_count" => 0}],
+      "finished_count" => 0,
+      "submitted_count" => 0,
+      "rejected_count" => 0}
+    InterviewerTask.create(quota: quota, user: interviewer, survey: survey)
+  end
 
-    # survey.interviewer_tasks << interviewer_task and survey.save
-    # interviewer.interviewer_tasks << interviewer_task and interviewer.save
-    return interviewer_task
+  def update_amount(amount)
+    self.quota["rules"][0]["amount"] = amount
+    self.update_status
   end
 
   # Just update status 
-  # 
   def update_status
     # calculate whether quota is satisfied
     finished = true
@@ -126,6 +121,15 @@ class InterviewerTask
       Answer.create(answer_to_insert)
     end
     self.refresh_quota
+    return self
+  end
+
+  def info_for_admin
+    self.write_attribute(:amount, self.quota["rules"][0]["amount"])
+    self.write_attribute(:finished_count, self.quota["finished_count"])
+    self.write_attribute(:submitted_count, self.quota["submitted_count"])
+    self.write_attribute(:rejected_count, self.quota["rejected_count"])
+    self.write_attribute(:interviewer, self.user.nickname)
     return self
   end
 end

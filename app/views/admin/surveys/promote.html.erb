@@ -4,32 +4,7 @@
 
   </script>
 <% end %>
-<% content_for :sidenav do %>
-  <li>
-    <a href="/admin/surveys">
-    <i class="icon-chevron-right"></i>
-    调研列表
-    </a>
-  </li>
-  <li>
-    <a href="/admin/surveys/<%= params[:id]%>/questions">
-      <i class="icon-chevron-right"></i>
-      问卷查看
-    </a>
-  </li>
-  <li>
-    <a href="/admin/surveys/<%= params[:id]%>/reward_schemes">
-      <i class="icon-chevron-right"></i>
-      奖励方案
-    </a>
-  </li>
-  <li class="active">
-    <a href="/admin/surveys/<%= params[:id]%>/promote">
-      <i class="icon-chevron-right"></i>
-      推送渠道
-    </a>
-  </li>
-<% end %>
+<%= render 'left_nav' %>
 
 <form action="/admin/surveys/<%="#{params["id"]}/update_promote" %>"
       name="promote"

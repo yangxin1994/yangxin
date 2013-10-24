@@ -1,6 +1,4 @@
 # encoding: utf-8
-# already tidied up
-
 class Admin::SurveysController < Admin::AdminController
 
   layout "layouts/admin-todc"
@@ -141,6 +139,34 @@ class Admin::SurveysController < Admin::AdminController
     elsif request.delete?
       _unbind_question
     end
+  end
+
+
+  def interviewer_task
+    @survey = Survey.find_by_id(params[:id])
+    tasks = @survey.interviewer_tasks
+    @tasks = auto_paginate(tasks) do |paginated_tasks|
+      paginated_tasks.map { |t| t.info_for_admin } 
+    end
+  end
+
+  def update_amount
+    survey = Survey.find_by_id(params[:id])
+    task = survey.interviewer_tasks.where(:id => params[:task_id]).first
+    render :json => task.update_amount(params[:amount])
+  end
+
+  def new_interviewer
+    @survey = Survey.find_by_id(params[:id])
+    @interviewers = User.for_js("this.user_role & 0x10")
+  end
+
+  def create_interviewer
+    Rails.logger.info("-------------------------")
+    Rails.logger.info(params.inspect)
+    Rails.logger.info("-------------------------")
+    InterviewerTask.create_interviewer_task(params[:id], params[:user_id], params[:amount].to_i)
+    redirect_to :action => 'interviewer_task'
   end
 
   private
