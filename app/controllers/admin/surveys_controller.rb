@@ -143,6 +143,13 @@ class Admin::SurveysController < Admin::AdminController
     end
   end
 
+
+  def interviewer_task
+    Rails.logger.info("-----------------------------")
+    Rails.logger.info("I am in interviewer_task action")
+    Rails.logger.info("-----------------------------")
+  end
+
   private
 
   def _bind_question
