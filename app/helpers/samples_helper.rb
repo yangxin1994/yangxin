@@ -88,7 +88,7 @@ module SamplesHelper
     when 2
       attr['strf'] = "%F"
     end    
-    Time.at(attr['value']).strftime(attr['strf'])
+    attr['value'].present? ? Time.at(attr['value']).strftime(attr['strf']) : nil
   end
   def attr_num_range(attr)
     if attr['value'][0] == attr['value'][1]
