@@ -42,40 +42,13 @@ $ ->
   $(".cost").click ->
     $this = $(this).closest('td')
     $("#sid").val($this.data("sid"))
-    reward_item = (item)->
-      str = ''
-      if item.rewards.length > 0
-        for reward in item.rewards
-          reward_type = ""
-          if reward.type == 1
-            reward_type = "虚拟"
-          else if reward.type == 2
-            reward_type = "实物"
-          else if reward.type == 4
-            reward_type = "话费"
-          else if reward.type == 8
-            reward_type = "支付宝"
-          else if reward.type == 16
-            reward_type = "集分宝"
-          else if reward.type == 32
-            reward_type = "Q币"
-                    
-          str += "<p>&nbsp;&nbsp;&nbsp;&nbsp;奖励类型 - #{reward_type}: #{reward.amount}</p>"
-      str
     $.ajax
       url: "/admin/surveys/#{$this.data("sid")}/cost_info"
       method: "GET"
       success: (ret)->
         if ret.success
-          $("#cost_body").html("<div id=\"cost_item\"></div>")
-          for item in ret.value
-            if item
-              $("#cost_item").append("""
-                <p>奖励方案 - #{item.name}:
-                  <br>
-                  #{reward_item(item)}
-                </p>
-                """)
+          for k, v of ret.value
+            $('#' + k).text(v)
           $('#cost_modal').modal('show')
         else
           console.log ret

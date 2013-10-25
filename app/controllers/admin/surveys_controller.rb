@@ -43,9 +43,8 @@ class Admin::SurveysController < Admin::AdminController
   end
 
   def cost_info
-    render_json Survey.where(:_id => params[:id]).first do |survey|
-      survey.cost_info
-    end
+    survey = Survey.find(params[:id])
+    render_json_s survey.cost_info and return
   end
 
   def set_info
