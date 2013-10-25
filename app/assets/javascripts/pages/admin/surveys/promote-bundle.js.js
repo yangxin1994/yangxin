@@ -44,6 +44,7 @@ $(function() {
         break;
       case 2:
       case 4:
+        smp_attr.pmt_value || (smp_attr.pmt_value = []);
         input = "<div class=\"controls controls-row\">\n" + (modelinker.generate({
           type: "input",
           linker: "attr." + smp_attr._id + ".ary_0",
@@ -66,7 +67,7 @@ $(function() {
         break;
       case 3:
       case 5:
-        console.log(smp_attr.pmt_value);
+        smp_attr.pmt_value || (smp_attr.pmt_value = []);
         min_date = Date.create(smp_attr.pmt_value[0] * 1000);
         max_date = Date.create(smp_attr.pmt_value[1] * 1000);
         input = "<div class=\"controls controls-row\">\n  " + (modelinker.generate({

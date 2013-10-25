@@ -40,6 +40,7 @@ $ ->
             </label>
             """
       when 2, 4
+        smp_attr.pmt_value ||= []
         input = """<div class="controls controls-row">
           #{
             modelinker.generate
@@ -68,7 +69,7 @@ $ ->
           </div>
           """
       when 3, 5
-        console.log smp_attr.pmt_value
+        smp_attr.pmt_value ||= []
         min_date = Date.create(smp_attr.pmt_value[0] * 1000)
         max_date = Date.create(smp_attr.pmt_value[1] * 1000)
         input = """
