@@ -40,6 +40,7 @@ $ ->
             </label>
             """
       when 2, 4
+        smp_attr.pmt_value ||= []
         input = """<div class="controls controls-row">
           #{
             modelinker.generate
@@ -68,7 +69,7 @@ $ ->
           </div>
           """
       when 3, 5
-        console.log smp_attr.pmt_value
+        smp_attr.pmt_value ||= []
         min_date = Date.create(smp_attr.pmt_value[0] * 1000)
         max_date = Date.create(smp_attr.pmt_value[1] * 1000)
         input = """
@@ -93,7 +94,7 @@ $ ->
                 value: min_date.getMonth() + 1
                 html_attr:
                   type: "text"
-                  placeholder: "年"
+                  placeholder: "月"
                 html: item
           }
           #{
@@ -105,7 +106,7 @@ $ ->
                 value: min_date.getDay()
                 html_attr:
                   type: "text"
-                  placeholder: "年"
+                  placeholder: "日"
                 html: item
           }
           <span class="span1">~</span>
@@ -130,7 +131,7 @@ $ ->
                 value: max_date.getMonth() + 1
                 html_attr:
                   type: "text"
-                  placeholder: "年"
+                  placeholder: "月"
                 html: item
           }
           #{
@@ -142,7 +143,7 @@ $ ->
                 value: max_date.getDay()
                 html_attr:
                   type: "text"
-                  placeholder: "年"
+                  placeholder: "日"
                 html: item
           }
           <span class="help-inline">

@@ -44,6 +44,7 @@ $(function() {
         break;
       case 2:
       case 4:
+        smp_attr.pmt_value || (smp_attr.pmt_value = []);
         input = "<div class=\"controls controls-row\">\n" + (modelinker.generate({
           type: "input",
           linker: "attr." + smp_attr._id + ".ary_0",
@@ -66,7 +67,7 @@ $(function() {
         break;
       case 3:
       case 5:
-        console.log(smp_attr.pmt_value);
+        smp_attr.pmt_value || (smp_attr.pmt_value = []);
         min_date = Date.create(smp_attr.pmt_value[0] * 1000);
         max_date = Date.create(smp_attr.pmt_value[1] * 1000);
         input = "<div class=\"controls controls-row\">\n  " + (modelinker.generate({
@@ -86,7 +87,7 @@ $(function() {
           value: min_date.getMonth() + 1,
           html_attr: {
             type: "text",
-            placeholder: "年"
+            placeholder: "月"
           },
           html: item
         }) : void 0) + "\n  " + (smp_attr.date_type > 1 ? modelinker.generate({
@@ -96,7 +97,7 @@ $(function() {
           value: min_date.getDay(),
           html_attr: {
             type: "text",
-            placeholder: "年"
+            placeholder: "日"
           },
           html: item
         }) : void 0) + "\n  <span class=\"span1\">~</span>\n\n  " + (modelinker.generate({
@@ -116,7 +117,7 @@ $(function() {
           value: max_date.getMonth() + 1,
           html_attr: {
             type: "text",
-            placeholder: "年"
+            placeholder: "月"
           },
           html: item
         }) : void 0) + "\n  " + (smp_attr.date_type > 1 ? modelinker.generate({
@@ -126,7 +127,7 @@ $(function() {
           value: max_date.getDay(),
           html_attr: {
             type: "text",
-            placeholder: "年"
+            placeholder: "日"
           },
           html: item
         }) : void 0) + "\n  <span class=\"help-inline\">\n    <a href=\"javascript:void(0);\"><i class=\"icon-plus-sign\"></i></a>\n    <a href=\"javascript:void(0);\"><i class=\"icon-minus-sign\"></i></a>\n  </span>\n</div>        ";
