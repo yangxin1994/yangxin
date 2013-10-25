@@ -34,7 +34,7 @@
         <td><%= task.created_at.strftime('%F') %></td>
         <td><%= interviewer_format(task.status.to_i) %></td>
         <td><%= task.interviewer %></td>
-        <td id="amount"><%= task.amount %></td>
+        <td id="amount" title="点击修改"><%= task.amount %></td>
         <td><%= task.finished_count %></td>
         <td><%= task.submitted_count %></td>
         <td><%= task.rejected_count %></td>
