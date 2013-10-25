@@ -233,7 +233,6 @@ class Survey
   end
 
   def update_promote(options)
-    update_sample_attributes(options)
     options.each do |promote_type, promote_info|
       next unless promote_info.is_a? Hash
       options[promote_type][:promotable] = promote_info[:promotable] == "true"
@@ -241,34 +240,6 @@ class Survey
     update_promote_info(options)
     update_agent_promote(options)
     serialize_in_promote_setting
-  end
-
-  def update_sample_attributes(options)
-    options[:sample_attributes].each_value do |smp_attr|
-      if smp_attr[:id].present?
-        _id = smp_attr[:id].split('_')[0]
-        _type = smp_attr[:id].split('_')[1]
-        _value = ""
-        case _type.to_i
-        when 0
-          _value = smp_attr[:value]
-        when 1
-          _value = smp_attr[:value].split(' ')
-        when 2, 4
-          _value = smp_attr[:value].split(' ').map { |e| e.split(',') }
-        when 3, 5
-          _value = smp_attr[:value].split(' ').map { |e| e.split(',').map { |_t| Time.parse(_t).to_i } }
-        when 6
-          _value = smp_attr[:value].split(' ')
-        when 7
-          _value = smp_attr[:value].split(' ')
-        end
-        add_sample_attribute_for_promote({
-          :sample_attribute_id => _id.split('_')[0],
-          :value => _value
-        })
-      end
-    end
   end
 
   def update_promote_info(options)

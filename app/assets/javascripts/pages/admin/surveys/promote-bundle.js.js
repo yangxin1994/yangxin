@@ -286,7 +286,7 @@ $(function() {
       }
     });
   });
-  return $(document).on('click', ".btn-attr-save", function() {
+  $(document).on('click', ".btn-attr-save", function() {
     var $this, $this_div, _max, _min, _value;
     $this = $(this);
     $this_div = $this.closest('.bs-docs-example');
@@ -336,5 +336,73 @@ $(function() {
         }
       });
     }
+  });
+  $('.btn-ckb').click(function() {
+    var $this, _ref, _ref1;
+    $this = $(this);
+    if ($this.hasClass('active')) {
+      $("#" + ($this.data('toggle')) + "_promotable").val(false);
+      return (_ref = $("." + ($this.data('toggle')) + "-info")) != null ? _ref.hide() : void 0;
+    } else {
+      $("#" + ($this.data('toggle')) + "_promotable").val(true);
+      return (_ref1 = $("." + ($this.data('toggle')) + "-info")) != null ? _ref1.show() : void 0;
+    }
+  });
+  $(document).on('click', '.attr-li', function() {
+    var $this, _placeholder;
+    $this = $(this);
+    _placeholder = "";
+    switch ($this.attr("href").split('_')[1].toNumber()) {
+      case 0:
+        _placeholder = "字符串:请直接输入要筛选的字符串内容";
+        break;
+      case 1:
+        _placeholder = "";
+        break;
+      case 2:
+      case 4:
+        _placeholder = "数值类型:每行包含两个元素的数组，两个元素均为数字,用逗号分隔，分别代表日期范围的最小值和最大值";
+        break;
+      case 3:
+      case 5:
+        _placeholder = "日期类型:每行包含两个元素的数组，两个元素均为YYYY/MM/DD,用逗号分隔，分别代表日期范围的最小值和最大值";
+        break;
+      case 6:
+        _placeholder = "枚举类型:每行代表一项枚举";
+        break;
+      case 7:
+        _placeholder = "数组类型:每行代表数组内的一项";
+    }
+    return $("#attr-ipt-" + ($this.data('index'))).attr("placeholder", _placeholder);
+  });
+  $(document).on('click', '.dropselect a', function() {
+    var $this;
+    $this = $(this);
+    return $this.parent().parent().next('input').val($this.attr('href').split('-')[1]);
+  });
+  $('.btn-ckb').each(function() {
+    var $this, _ref;
+    $this = $(this);
+    if (!$this.hasClass('active')) {
+      return (_ref = $("." + ($this.data('toggle')) + "-info")) != null ? _ref.hide() : void 0;
+    }
+  });
+  $('#add_browser_extension_setting').click(function() {
+    var $this, add_html, index;
+    $this = $(this);
+    index = $this.data('toggle') + 1;
+    add_html = "<div class=\"control-group broswer_extension-info\">\n  <label class=\"control-label\" >浏览器插件详细设置:</label>\n  <div class=\"controls\">\n    <input type=\"text\" placeholder=\"在这里输入关键字\" id=\"weibo_text\" name=\"broswer_extension[broswer_extension_promote_setting][filters][" + index + "][key_words]\" />\n  </div>\n</div>\n<div class=\"control-group broswer_extension-info\">\n  <div class=\"controls\">\n    <input type=\"text\" placeholder=\"在这里输入网址\" id=\"weibo_text\" name=\"broswer_extension[broswer_extension_promote_setting][filters][" + index + "][url]\" />\n  </div>\n</div>";
+    $this.data('toggle', index);
+    return $this.parent().parent().parent().prepend(add_html);
+  });
+  return $('#add_agent_setting').click(function() {
+    var $this, add_html, agent_list, index, type_html;
+    $this = $(this);
+    type_html = $("#type_select_0").html();
+    index = $this.data('toggle') + 1;
+    agent_list = $("#agent_select_0").html();
+    add_html = "<div class=\"control-group agent-info\">\n  <label class=\"control-label\">奖励方案设置:</label>\n  <div class=\"controls\">\n    <div class=\"btn-group\">\n      <button class=\"btn dropdown-toggle\" data-toggle=\"dropdown\">\n        奖励方案\n        <span class=\"caret\"></span>\n      </button>\n      <ul class=\"dropdown-menu dropselect agent-reward\">\n        " + type_html + "\n      </ul>\n      <input type=\"hidden\" name=\"agent[agent_promote_setting][agents][" + index + "][reward_scheme_id]\"/>\n    </div>\n  </div>\n</div>    \n<div class=\"control-group agent-info\">\n  <label class=\"control-label\">代理选择:</label>\n  <div class=\"controls\">\n    <div class=\"btn-group\">\n      <button class=\"btn dropdown-toggle\" data-toggle=\"dropdown\">\n        代理选择\n        <span class=\"caret\"></span>\n      </button>\n      <ul class=\"dropdown-menu dropselect\" id=\"agent_select_" + index + "\">\n        " + agent_list + "\n      </ul>\n      <input type='hidden' name=\"agent[agent_promote_setting][agents][" + index + "][agent_id]\" palceholder=\"\"/>\n    </div>\n  </div>\n</div>\n<div class=\"control-group agent-info\">\n  <label class=\"control-label\">回收数量:</label>\n  <div class=\"controls\">\n    <input type='text' name=\"agent[agent_promote_setting][agents][" + index + "][count]\" palceholder=\"\"/>\n  </div>\n</div>   \n<div class=\"control-group agent-info\">\n  <label class=\"control-label\">描述:</label>\n  <div class=\"controls\">\n    <textarea name=\"agent[agent_promote_setting][agents][" + index + "][description]\" rows =\"5\">\n    </textarea>        \n  </div>\n</div>";
+    $this.data('toggle', index);
+    return $this.parent().parent().parent().prepend(add_html);
   });
 });

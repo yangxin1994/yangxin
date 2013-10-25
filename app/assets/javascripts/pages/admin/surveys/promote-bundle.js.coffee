@@ -337,6 +337,114 @@ $ ->
         error: ->
           alert_msg.show('error', "保存失败 (╯‵□′)╯︵┻━┻")
 
+  $('.btn-ckb').click ->
+    $this = $(this)
+    if $this.hasClass('active')
+      $("##{$this.data('toggle')}_promotable").val(false)
+      $(".#{$this.data('toggle')}-info")?.hide()
+    else
+      $("##{$this.data('toggle')}_promotable").val(true)
+      $(".#{$this.data('toggle')}-info")?.show()
+
+  $(document).on 'click','.attr-li', ->
+    $this = $(this)
+    _placeholder = ""
+    switch $this.attr("href").split('_')[1].toNumber()
+      when 0
+        _placeholder = "字符串:请直接输入要筛选的字符串内容"
+      when 1
+        _placeholder = ""
+      when 2, 4
+        _placeholder = "数值类型:每行包含两个元素的数组，两个元素均为数字,用逗号分隔，分别代表日期范围的最小值和最大值"
+      when 3, 5
+        _placeholder = "日期类型:每行包含两个元素的数组，两个元素均为YYYY/MM/DD,用逗号分隔，分别代表日期范围的最小值和最大值"
+      when 6
+        _placeholder = "枚举类型:每行代表一项枚举"
+      when 7
+        _placeholder = "数组类型:每行代表数组内的一项"
+    $("#attr-ipt-#{$this.data('index')}").attr("placeholder", _placeholder)
+
+  $(document).on 'click','.dropselect a', ->
+    $this = $(this)
+    $this.parent().parent().next('input').val($this.attr('href').split('-')[1])
+
+  $('.btn-ckb').each ->
+    $this = $(this)
+    $(".#{$this.data('toggle')}-info")?.hide() unless $this.hasClass('active')
+
+  $('#add_browser_extension_setting').click ->
+    $this = $(this)
+    index = $this.data('toggle') + 1
+    add_html = """
+    <div class="control-group broswer_extension-info">
+      <label class="control-label" >浏览器插件详细设置:</label>
+      <div class="controls">
+        <input type="text" placeholder="在这里输入关键字" id="weibo_text" name="broswer_extension[broswer_extension_promote_setting][filters][#{index}][key_words]" />
+      </div>
+    </div>
+    <div class="control-group broswer_extension-info">
+      <div class="controls">
+        <input type="text" placeholder="在这里输入网址" id="weibo_text" name="broswer_extension[broswer_extension_promote_setting][filters][#{index}][url]" />
+      </div>
+    </div>
+    """
+    $this.data('toggle', index)
+    $this.parent().parent().parent().prepend(add_html)
+
+
+  $('#add_agent_setting').click ->
+    $this = $(this)
+    type_html = $("#type_select_0").html()
+    index = $this.data('toggle') + 1
+    agent_list = $("#agent_select_0").html() 
+    add_html = """
+      <div class="control-group agent-info">
+        <label class="control-label">奖励方案设置:</label>
+        <div class="controls">
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              奖励方案
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropselect agent-reward">
+              #{type_html}
+            </ul>
+            <input type="hidden" name="agent[agent_promote_setting][agents][#{index}][reward_scheme_id]"/>
+          </div>
+        </div>
+      </div>    
+      <div class="control-group agent-info">
+        <label class="control-label">代理选择:</label>
+        <div class="controls">
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              代理选择
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropselect" id="agent_select_#{index}">
+              #{agent_list}
+            </ul>
+            <input type='hidden' name="agent[agent_promote_setting][agents][#{index}][agent_id]" palceholder=""/>
+          </div>
+        </div>
+      </div>
+      <div class="control-group agent-info">
+        <label class="control-label">回收数量:</label>
+        <div class="controls">
+          <input type='text' name="agent[agent_promote_setting][agents][#{index}][count]" palceholder=""/>
+        </div>
+      </div>   
+      <div class="control-group agent-info">
+        <label class="control-label">描述:</label>
+        <div class="controls">
+          <textarea name="agent[agent_promote_setting][agents][#{index}][description]" rows ="5">
+          </textarea>        
+        </div>
+      </div>
+    """
+    $this.data('toggle', index)
+    $this.parent().parent().parent().prepend(add_html)
+
 
 
     
