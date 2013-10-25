@@ -865,12 +865,26 @@ class Survey
   end
 
   def cost_info
-    rs = reward_schemes.not_default.map{|r|r}
-    rs << RewardScheme.find_by_id(email_promote_info["reward_scheme_id"])
-    rs << RewardScheme.find_by_id(sms_promote_info["reward_scheme_id"])
-    rs << RewardScheme.find_by_id(broswer_extension_promote_info["reward_scheme_id"])
-    rs << RewardScheme.find_by_id(weibo_promote_info["reward_scheme_id"])
-    rs
+    cost_info = {mobile_cost: 0, alipay_cost: 0, point_cost: 0, lottery_cost: 0.0, jifenbao_cost: 0}
+    self.answers.not_preview.finished.each do |a|
+      next if a.reward_delivered != true
+      reward = (a.rewards.select { |e| e["checked"] == true }).first
+      next if reward.blank?
+      case reward["type"]
+      when RewardScheme::MOBILE
+        cost_info[:mobile_cost] += reward["amount"]
+      when RewardScheme::ALIPAY
+        cost_info[:alipay_cost] += reward["amount"]
+      when RewardScheme::POINT
+        cost_info[:point_cost] += reward["amount"]
+      when RewardScheme::LOTTERY
+        next if reward["win"] != true
+        cost_info[:lottery_cost] += Prize.find(reward["win_prize_id"]).price
+      when RewardScheme::JIFENBAO
+        cost_info[:jifenbao_cost] += reward["amount"]
+      end
+    end
+    cost_info
   end
 
   def max_num_per_ip_reached?(ip_address)
