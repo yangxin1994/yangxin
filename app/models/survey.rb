@@ -233,7 +233,6 @@ class Survey
   end
 
   def update_promote(options)
-    update_sample_attributes(options)
     options.each do |promote_type, promote_info|
       next unless promote_info.is_a? Hash
       options[promote_type][:promotable] = promote_info[:promotable] == "true"
@@ -241,34 +240,6 @@ class Survey
     update_promote_info(options)
     update_agent_promote(options)
     serialize_in_promote_setting
-  end
-
-  def update_sample_attributes(options)
-    options[:sample_attributes].each_value do |smp_attr|
-      if smp_attr[:id].present?
-        _id = smp_attr[:id].split('_')[0]
-        _type = smp_attr[:id].split('_')[1]
-        _value = ""
-        case _type.to_i
-        when 0
-          _value = smp_attr[:value]
-        when 1
-          _value = smp_attr[:value].split(' ')
-        when 2, 4
-          _value = smp_attr[:value].split(' ').map { |e| e.split(',') }
-        when 3, 5
-          _value = smp_attr[:value].split(' ').map { |e| e.split(',').map { |_t| Time.parse(_t).to_i } }
-        when 6
-          _value = smp_attr[:value].split(' ')
-        when 7
-          _value = smp_attr[:value].split(' ')
-        end
-        add_sample_attribute_for_promote({
-          :sample_attribute_id => _id.split('_')[0],
-          :value => _value
-        })
-      end
-    end
   end
 
   def update_promote_info(options)
@@ -691,15 +662,13 @@ class Survey
       case smp_attr['type'].to_i
       when 0
         _value = smp_attr[:value]
-      when 1
-        _value = smp_attr[:value].join("\n")
-      when 2, 4
-        _value = smp_attr[:value].map{|es| es.map { |e| e.join(',') }}.join("\n")
-      when 3, 5
-        _value = smp_attr[:value].map{|es| es.map { |e| Time.at(e).strftime("%Y/%m/%d") }.join(',')}.join("\n")
+      # when 1, 7
+      #   _value = smp_attr[:value].join("\n")
+      # when 2, 4
+      #   _value = smp_attr[:value].map{|es| es.map { |e| e.join(',') }}.join("\n")
+      # when 3, 5
+      #   _value = smp_attr[:value].map{|es| es.map { |e| Time.at(e).strftime("%Y/%m/%d") }.join(',')}.join("\n")
       when 6
-        _value = smp_attr[:value].join("\n")
-      when 7
         _value = smp_attr[:value].join("\n")
       else
         _value = smp_attr[:value]
@@ -856,7 +825,11 @@ class Survey
     return ErrorEnum::SAMPLE_ATTRIBUTE_NOT_EXIST if s.nil?
     sample_attribute[:type] = s.type
     if self.sample_attributes_for_promote.map{|sa| sa["sample_attribute_id"]}.include? sample_attribute[:sample_attribute_id]
-      # self.sample_attributes_for_promote.each{|sa| if sa["sample_attribute_id"] == sample_attribute[:sample_attribute_id]}
+      self.sample_attributes_for_promote.each do |smp_attr|
+        if smp_attr["sample_attribute_id"] == sample_attribute[:sample_attribute_id]
+          smp_attr["value"] = sample_attribute[:value]
+        end
+      end
     else
       self.sample_attributes_for_promote << sample_attribute
     end
@@ -870,9 +843,13 @@ class Survey
     return self.save
   end
 
-  def remove_sample_attribute_for_promote(index)
-    self.sample_attributes_for_promote.delete(index)
-    return self.save
+  def remove_sample_attribute_for_promote(sample_attribute_id)
+    self.sample_attributes_for_promote.each_with_index do |smp_attr, i|
+      if smp_attr["sample_attribute_id"] == sample_attribute_id
+        self.sample_attributes_for_promote.delete_at(i)
+      end
+    end
+    self.save
   end
 
   after_create do |doc|

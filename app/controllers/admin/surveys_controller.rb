@@ -130,10 +130,16 @@ class Admin::SurveysController < Admin::AdminController
     end    
   end
 
-  def update_sample_attribute
+  def update_sample_attribute_for_promote
     render_json Survey.where(:_id => params[:id]).first do |survey|
       binding.pry
       survey.add_sample_attribute_for_promote(params[:sample_attribute])
+    end
+  end
+
+  def remove_sample_attribute_for_promote
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      survey.remove_sample_attribute_for_promote(params[:sample_attribute_id])
     end
   end
 
@@ -141,6 +147,7 @@ class Admin::SurveysController < Admin::AdminController
     if survey = Survey.where(:_id => params[:id]).first
       @promote = survey.serialize_in_promote_setting
       gon.push({:id => params[:id]})
+      gon.push({:pmt_attrs => survey.sample_attributes_for_promote})
     else
 
     end

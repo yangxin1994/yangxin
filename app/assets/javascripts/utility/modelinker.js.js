@@ -11,12 +11,19 @@ Modelinker = (function() {
       klass = "modelinker";
     }
     this.queue = {};
+    this.callback_queue = {};
     this.data = data;
     this.klass = "modelinker";
     $(document).on("change", "." + this.klass, function(event) {
       var $this;
       $this = $(event.target);
-      if ($this.is("input") || $this.is("textarea")) {
+      if ($this.is("input")) {
+        if ($this.is("input:checkbox")) {
+          return _this.queue["" + ($this.data("mid"))] = $this.prop("checked") ? $this.val() : "";
+        } else {
+          return _this.queue["" + ($this.data("mid"))] = $this.val();
+        }
+      } else if ($this.is("textarea")) {
         return _this.queue["" + ($this.data("mid"))] = $this.val();
       } else {
         return _this.queue["" + ($this.data("mid"))] = $this.html();
@@ -63,50 +70,85 @@ Modelinker = (function() {
   };
 
   Modelinker.prototype.generate = function(options) {
-    var end_tag, html_attr, k, v, _mid, _ref;
+    var end_tag, k, v, value_tag, _html_attr, _mid, _ref;
     if (options == null) {
       options = {};
     }
-    options["class"] || (options["class"] = "");
+    options.klass || (options.klass = "");
     _mid = this.new_mid();
     options.id || (options.id = _mid);
     options.value || (options.value = void 0);
     options.prefix || (options.prefix = void 0);
-    html_attr = "";
+    options.callback || (options.callback = function(ret) {
+      return ret;
+    });
+    options.html || (options.html = "");
+    _html_attr = "";
     _ref = options.html_attr;
     for (k in _ref) {
       v = _ref[k];
-      html_attr += " " + k + "=\"" + v + "\"";
+      _html_attr += " " + k + (v ? "=\"" + v + "\"" : '') + " ";
     }
-    options.html || (options.html = "");
     end_tag = options.single ? "" : "</" + options.type + ">";
+    value_tag = "";
     if (options.type) {
-      this.queue["" + _mid] = options.value;
+      if (options.type === "input") {
+        switch (options.html_attr.type) {
+          case "text":
+            value_tag = options.value ? " value=" + options.value + " " : "";
+            if (options.value) {
+              this.queue["" + _mid] = options.value;
+            }
+            break;
+          case "checkbox":
+            if (options.html_attr.checked !== void 0) {
+              this.queue["" + _mid] = options.value;
+            }
+            value_tag = " value=" + options.value + " ";
+            break;
+          default:
+            if (options.value) {
+              this.queue["" + _mid] = options.value;
+            }
+        }
+      } else {
+        this.queue["" + _mid] = options.html;
+      }
+      this.callback_queue["" + _mid] = options.callback;
       this.set_obj(options.linker, _mid);
-      return "<" + options.type + " \n  id=\"" + options.id + "\" \n  class=\"" + this.klass + " " + options["class"] + "\"\n  data-mid=\"" + _mid + "\"\n  data-linker=\"" + options.linker + "\"" + html_attr + ">" + options.html + end_tag;
+      return "<" + options.type + " \n  id=\"" + options.id + "\" \n  class=\"" + this.klass + " " + options.klass + "\"\n  data-mid=\"" + _mid + "\"\n  " + value_tag + "\n  data-linker=\"" + options.linker + "\"" + _html_attr + ">" + options.html + end_tag;
     } else {
       return "";
     }
   };
 
   Modelinker.prototype.get_obj = function(linker) {
-    var k, last_k, v, _ret;
+    var k, v, _ret;
     if (linker == null) {
       linker = this.data;
     }
     if (typeof linker !== "object") {
       linker = this.data;
     }
-    _ret = {};
+    _ret = void 0;
     for (k in linker) {
       v = linker[k];
-      if (k.split()[0] === "ary") {
-        last_k = k;
-      }
-      if (typeof v === "string") {
-        _ret["" + k] = this.queue["" + v];
+      if (k.split('_')[0] === "ary") {
+        _ret || (_ret = []);
+        if (typeof v === "string") {
+          _ret.push(this.queue["" + v]);
+          this.callback_queue["" + v](_ret);
+        } else {
+          _ret.push(this.get_obj(v));
+        }
       } else {
-        _ret["" + k] = this.get_obj(v);
+        _ret || (_ret = {});
+        if (typeof v === "string") {
+          _ret["" + k] = this.queue["" + v];
+          this.callback_queue["" + v](_ret);
+        } else {
+          _ret["" + k] = this.get_obj(v);
+        }
       }
     }
     return _ret;

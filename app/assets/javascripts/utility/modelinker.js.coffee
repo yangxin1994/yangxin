@@ -1,13 +1,19 @@
 class Modelinker
   constructor: (data = {}, klass= "modelinker")->
     @queue = {}
+    @callback_queue = {}
     @data = data
     @klass = "modelinker"
 
     # Linker Event Bind
     $(document).on "change", ".#{@klass}", (event)=>
       $this = $(event.target)
-      if $this.is("input") || $this.is("textarea")
+      if $this.is("input")
+        if $this.is("input:checkbox")
+          @queue["#{$this.data("mid")}"] = if $this.prop("checked") then $this.val() else ""
+        else
+          @queue["#{$this.data("mid")}"] = $this.val()
+      else if $this.is("textarea")
         @queue["#{$this.data("mid")}"] = $this.val()
       else
         @queue["#{$this.data("mid")}"] = $this.html()
@@ -29,7 +35,7 @@ class Modelinker
     linker = linker.split('.')
     last_linker = @data
     for l, i in linker
-      last_linker["#{l}"] ||= {}
+      last_linker["#{l}"] ||= {}      
       if i == linker.length - 1
         last_linker["#{l}"] = mid
       else
@@ -37,41 +43,64 @@ class Modelinker
     @data
       
   generate: (options = {}) ->
-
-    options.class ||= ""
+    options.klass ||= ""
     _mid = @new_mid()
     options.id ||= _mid
     options.value ||= undefined
     options.prefix ||= undefined
-    html_attr = ""
-    for k, v of options.html_attr
-      html_attr += " #{k}=\"#{v}\""
+    options.callback ||= (ret)-> ret
     options.html ||= ""
+    _html_attr = ""
+    for k, v of options.html_attr
+      _html_attr += " #{k}#{if v then "=\"#{v}\"" else ''} "
     
     end_tag = if options.single then "" else "</#{options.type}>"
+    value_tag = ""
     if options.type
-      @queue["#{_mid}"] = options.value
+      if options.type == "input"
+        switch options.html_attr.type
+          when "text"
+            value_tag = if options.value then " value=#{options.value} " else ""
+            @queue["#{_mid}"] = options.value if options.value
+          when "checkbox"
+            @queue["#{_mid}"] = options.value if options.html_attr.checked != undefined
+            value_tag = " value=#{options.value} "
+          else
+            @queue["#{_mid}"] = options.value if options.value
+      else
+        @queue["#{_mid}"] = options.html
+  
+      @callback_queue["#{_mid}"] = options.callback
       @set_obj(options.linker, _mid)
       """
       <#{options.type} 
         id="#{options.id}" 
-        class="#{@klass} #{options.class}"
+        class="#{@klass} #{options.klass}"
         data-mid="#{_mid}"
-        data-linker="#{options.linker}"#{html_attr}>#{options.html}#{end_tag}
+        #{value_tag}
+        data-linker="#{options.linker}"#{_html_attr}>#{options.html}#{end_tag}
       """
     else
       ""
 
   get_obj: (linker = @data) ->
     linker = @data if typeof(linker) != "object"
-    _ret = {}
+    _ret = undefined
     for k, v of linker
-      if k.split()[0] == "ary"
-        last_k = k
-      if typeof(v) == "string"
-        _ret["#{k}"] = @queue["#{v}"]
+      if k.split('_')[0] == "ary"
+        _ret ||= []
+        if typeof(v) == "string"
+          _ret.push @queue["#{v}"]
+          @callback_queue["#{v}"](_ret)
+        else
+          _ret.push @get_obj(v)
       else
-        _ret["#{k}"] = @get_obj(v)
+        _ret ||= {}
+        if typeof(v) == "string"
+          _ret["#{k}"] = @queue["#{v}"]
+          @callback_queue["#{v}"](_ret)
+        else
+          _ret["#{k}"] = @get_obj(v)
     _ret
   
   get: (linker = "") ->
@@ -79,7 +108,6 @@ class Modelinker
     last_linker = @data
     for key in _linker
       last_linker = last_linker["#{key}"]
-
     if typeof(last_linker) == "string"
       @queue["#{last_linker}"]
     else

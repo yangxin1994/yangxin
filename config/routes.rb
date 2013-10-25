@@ -293,8 +293,8 @@ OopsData::Application.routes.draw do
       member do
         get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info, :sample_attributes
         post :update_promote
-        put :update_promote, :set_info, :bind_question, :star, :update_sample_attribute
-        delete :destroy_attributes, :bind_question
+        put :update_promote, :set_info, :bind_question, :star, :update_sample_attribute_for_promote
+        delete :destroy_attributes, :bind_question, :remove_sample_attribute_for_promote
       end
 
       collection do
