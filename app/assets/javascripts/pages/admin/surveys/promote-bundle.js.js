@@ -87,7 +87,7 @@ $(function() {
           value: min_date.getMonth() + 1,
           html_attr: {
             type: "text",
-            placeholder: "年"
+            placeholder: "月"
           },
           html: item
         }) : void 0) + "\n  " + (smp_attr.date_type > 1 ? modelinker.generate({
@@ -97,7 +97,7 @@ $(function() {
           value: min_date.getDay(),
           html_attr: {
             type: "text",
-            placeholder: "年"
+            placeholder: "日"
           },
           html: item
         }) : void 0) + "\n  <span class=\"span1\">~</span>\n\n  " + (modelinker.generate({
@@ -117,7 +117,7 @@ $(function() {
           value: max_date.getMonth() + 1,
           html_attr: {
             type: "text",
-            placeholder: "年"
+            placeholder: "月"
           },
           html: item
         }) : void 0) + "\n  " + (smp_attr.date_type > 1 ? modelinker.generate({
@@ -127,7 +127,7 @@ $(function() {
           value: max_date.getDay(),
           html_attr: {
             type: "text",
-            placeholder: "年"
+            placeholder: "日"
           },
           html: item
         }) : void 0) + "\n  <span class=\"help-inline\">\n    <a href=\"javascript:void(0);\"><i class=\"icon-plus-sign\"></i></a>\n    <a href=\"javascript:void(0);\"><i class=\"icon-minus-sign\"></i></a>\n  </span>\n</div>        ";
