@@ -25,7 +25,7 @@ class EmailInvitationWorker
             sample_ids_selected << e if survey.sample_attributes_for_promote.blank?
             survey.sample_attributes_for_promote.each do |sample_attribute|
                 v = current_sample.read_sample_attribute_by_id(sample_attribute["sample_attribute_id"])
-                match = Tool.check_sample_attribute(sample_attribute._id.to_s, v, sample_attribute["value"])
+                match = Tool.check_sample_attribute(sample_attribute["sample_attribute_id"], v, sample_attribute["value"])
                 next if match == false
                 if match == true
                     sample_ids_selected << e

@@ -193,18 +193,26 @@ module Tool
 		when DataType::STRING
 			return true if value == standard_value
 		when DataType::ENUM
+			standard_value.map! { |e| e.to_i }
+			value = value.to_i
 			return true if standard_value.include?(value)
 		when DataType::NUMBER
-			return true if value == standard_value
+			return true if value.to_f >= standard_value[0].to_f && value.to_f <= standard_value[1].to_f
 		when DataType::DATE
-			return true if value == standard_value
+			return true if value.to_f >= standard_value[0].to_f && value.to_f <= standard_value[1].to_f
 		when DataType::NUMBER_RANGE
+			standard_value.map! { |e| e.to_f }
+			value.map! { |e| e.to_f }
 			return true if self.range_compare(standard_value, value) == 1
 		when DataType::DATE_RANGE
+			standard_value.map! { |e| e.to_f }
+			value.map! { |e| e.to_f }
 			return true if self.range_compare(standard_value, value) == 1
 		when DataType::ADDRESS
 			return true if standard_value.include?(value)
 		when DataType::ARRAY
+			standard_value.map! { |e| e.to_i }
+			value.map! { |e| e.to_i }
 			return true if (standard_value & value).present?
 		end
 		return false
