@@ -865,8 +865,9 @@ class Survey
   end
 
   def cost_info
-    cost_info = {mobile_cost: 0, alipay_cost: 0, point_cost: 0, lottery_cost: 0.0, jifenbao_cost: 0}
+    cost_info = {mobile_cost: 0, alipay_cost: 0, point_cost: 0, lottery_cost: 0.0, jifenbao_cost: 0, introduce_number: 0}
     self.answers.not_preview.finished.each do |a|
+      cost_info[:introduce_number] += 1 if a.introducer_id.present? && a.introducer_reward_assigned == true
       next if a.reward_delivered != true
       reward = (a.rewards.select { |e| e["checked"] == true }).first
       next if reward.blank?
