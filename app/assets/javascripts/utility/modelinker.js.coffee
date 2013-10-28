@@ -19,6 +19,8 @@ class Modelinker
           @queue["#{$this.data("mid")}"] = $this.val()
       else if $this.is("textarea")
         @queue["#{$this.data("mid")}"] = $this.val()
+      else if $this.is("select")
+        @queue["#{$this.data("mid")}"] = $this.val()      
       else
         @queue["#{$this.data("mid")}"] = $this.html()
       
@@ -54,7 +56,9 @@ class Modelinker
     options.prefix ||= undefined
     options.callback ||= (ret)-> ret
     options.html ||= ""
+    options.select_options ||= {}
     _html_attr = ""
+    _select_options_tag = ""
     for k, v of options.html_attr
       _html_attr += " #{k}#{if v then "=\"#{v}\"" else ''} "
     
@@ -71,6 +75,14 @@ class Modelinker
             value_tag = " value=#{options.value} "
           else
             @queue["#{_mid}"] = options.value if options.value
+      else if options.type == "select"
+        for k, v of options.select_options
+          if options.value.toString() == v.toString()    
+            _select_options_tag += """<option value="#{v}" selected="selected">#{k}</option>"""
+          else
+            _select_options_tag += """<option value="#{v}">#{k}</option>"""
+            
+          
       else
         @queue["#{_mid}"] = options.html
   
@@ -82,7 +94,7 @@ class Modelinker
         class="#{@klass} #{options.klass}"
         data-mid="#{_mid}"
         #{value_tag}
-        data-linker="#{options.linker}"#{_html_attr}>#{options.html}#{end_tag}
+        data-linker="#{options.linker}"#{_html_attr}>#{options.html}#{_select_options_tag}#{end_tag}
       """
     else
       ""

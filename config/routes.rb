@@ -317,6 +317,8 @@ OopsData::Application.routes.draw do
       end
     end
 
+    resources :statistics, :only => [:show]
+
     resources :answers do
       member do
         get :review

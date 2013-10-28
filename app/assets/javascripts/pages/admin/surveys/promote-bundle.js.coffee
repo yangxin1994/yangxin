@@ -167,12 +167,42 @@ $ ->
         """
       when 6
         input = modelinker.generate
-          type: "textarea"
+          type: "select"
           linker: "attr.#{smp_attr._id}"
-          html: smp_attr.pmt_value
-          html_attr:
-            rows: "6"
-            placeholder:"地址类型:请填写需要过滤的内容."          
+          value: smp_attr.pmt_value
+          klass: ".province-group"
+          select_options:
+            安徽省: 340000
+            北京市: 110000
+            福建省: 350000
+            甘肃省: 620000
+            广东省: 440000
+            广西壮: 450000
+            贵州省: 520000
+            海南省: 460000
+            河北省: 130000
+            河南省: 410000
+            黑龙江: 230000
+            湖北省: 420000
+            湖南省: 430000
+            吉林省: 220000
+            江苏省: 320000
+            江西省: 360000
+            辽宁省: 210000
+            内蒙古: 150000
+            宁夏回: 640000
+            青海省: 630000
+            山东省: 370000
+            山西省: 140000
+            陕西省: 610000
+            上海市: 310000
+            四川省: 510000
+            天津市: 120000
+            西藏自: 540000
+            新疆维: 650000
+            云南省: 530000
+            浙江省: 330000
+            重庆市: 500000
       else
         input = """
           <div class="bs-docs-example">

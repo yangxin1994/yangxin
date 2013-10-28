@@ -30,6 +30,8 @@ Modelinker = (function() {
         }
       } else if ($this.is("textarea")) {
         return _this.queue["" + ($this.data("mid"))] = $this.val();
+      } else if ($this.is("select")) {
+        return _this.queue["" + ($this.data("mid"))] = $this.val();
       } else {
         return _this.queue["" + ($this.data("mid"))] = $this.html();
       }
@@ -75,7 +77,7 @@ Modelinker = (function() {
   };
 
   Modelinker.prototype.generate = function(options) {
-    var end_tag, k, v, value_tag, _html_attr, _mid, _ref;
+    var end_tag, k, v, value_tag, _html_attr, _mid, _ref, _ref1, _select_options_tag;
     if (options == null) {
       options = {};
     }
@@ -88,7 +90,9 @@ Modelinker = (function() {
       return ret;
     });
     options.html || (options.html = "");
+    options.select_options || (options.select_options = {});
     _html_attr = "";
+    _select_options_tag = "";
     _ref = options.html_attr;
     for (k in _ref) {
       v = _ref[k];
@@ -116,12 +120,22 @@ Modelinker = (function() {
               this.queue["" + _mid] = options.value;
             }
         }
+      } else if (options.type === "select") {
+        _ref1 = options.select_options;
+        for (k in _ref1) {
+          v = _ref1[k];
+          if (options.value.toString() === v.toString()) {
+            _select_options_tag += "<option value=\"" + v + "\" selected=\"selected\">" + k + "</option>";
+          } else {
+            _select_options_tag += "<option value=\"" + v + "\">" + k + "</option>";
+          }
+        }
       } else {
         this.queue["" + _mid] = options.html;
       }
       this.callback_queue["" + _mid] = options.callback;
       this.set_obj(options.linker, _mid);
-      return "<" + options.type + " \n  id=\"" + options.id + "\" \n  class=\"" + this.klass + " " + options.klass + "\"\n  data-mid=\"" + _mid + "\"\n  " + value_tag + "\n  data-linker=\"" + options.linker + "\"" + _html_attr + ">" + options.html + end_tag;
+      return "<" + options.type + " \n  id=\"" + options.id + "\" \n  class=\"" + this.klass + " " + options.klass + "\"\n  data-mid=\"" + _mid + "\"\n  " + value_tag + "\n  data-linker=\"" + options.linker + "\"" + _html_attr + ">" + options.html + _select_options_tag + end_tag;
     } else {
       return "";
     }
