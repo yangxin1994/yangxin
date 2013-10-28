@@ -101,6 +101,8 @@ $ ->
                   type: "text"
                   placeholder: "月"
                 html: item
+            else
+              ""
           }
           #{
             if smp_attr.date_type > 1
@@ -113,6 +115,8 @@ $ ->
                   type: "text"
                   placeholder: "日"
                 html: item
+            else
+              ""
           }
           <span class="span1">~</span>
 
@@ -138,6 +142,8 @@ $ ->
                   type: "text"
                   placeholder: "月"
                 html: item
+            else
+              ""
           }
           #{
             if smp_attr.date_type > 1
@@ -150,6 +156,8 @@ $ ->
                   type: "text"
                   placeholder: "日"
                 html: item
+            else
+              ""
           }
           <span class="help-inline">
             <a href="javascript:void(0);"><i class="icon-plus-sign"></i></a>
@@ -317,7 +325,7 @@ $ ->
         _value
       when 3, 5
         _min = _value.min.join('-')
-        _max = _value.min.join('-')
+        _max = _value.max.join('-')
         _value = [Date.parse(_min)/1000, Date.parse(_max)/1000]
       else
         _value

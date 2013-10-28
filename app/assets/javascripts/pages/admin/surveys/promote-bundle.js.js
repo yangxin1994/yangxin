@@ -94,7 +94,7 @@ $(function() {
             placeholder: "月"
           },
           html: item
-        }) : void 0) + "\n  " + (smp_attr.date_type > 1 ? modelinker.generate({
+        }) : "") + "\n  " + (smp_attr.date_type > 1 ? modelinker.generate({
           type: "input",
           linker: "attr." + smp_attr._id + ".min.ary_d",
           klass: "span1",
@@ -104,7 +104,7 @@ $(function() {
             placeholder: "日"
           },
           html: item
-        }) : void 0) + "\n  <span class=\"span1\">~</span>\n\n  " + (modelinker.generate({
+        }) : "") + "\n  <span class=\"span1\">~</span>\n\n  " + (modelinker.generate({
           type: "input",
           linker: "attr." + smp_attr._id + ".max.ary_y",
           klass: "span2",
@@ -124,7 +124,7 @@ $(function() {
             placeholder: "月"
           },
           html: item
-        }) : void 0) + "\n  " + (smp_attr.date_type > 1 ? modelinker.generate({
+        }) : "") + "\n  " + (smp_attr.date_type > 1 ? modelinker.generate({
           type: "input",
           linker: "attr." + smp_attr._id + ".max.ary_d",
           klass: "span1",
@@ -134,7 +134,7 @@ $(function() {
             placeholder: "日"
           },
           html: item
-        }) : void 0) + "\n  <span class=\"help-inline\">\n    <a href=\"javascript:void(0);\"><i class=\"icon-plus-sign\"></i></a>\n    <a href=\"javascript:void(0);\"><i class=\"icon-minus-sign\"></i></a>\n  </span>\n</div>        ";
+        }) : "") + "\n  <span class=\"help-inline\">\n    <a href=\"javascript:void(0);\"><i class=\"icon-plus-sign\"></i></a>\n    <a href=\"javascript:void(0);\"><i class=\"icon-minus-sign\"></i></a>\n  </span>\n</div>        ";
         break;
       case 6:
         input = "<textarea rows=\"6\" placeholder=\"地址类型:请填写需要过滤的内容.\"></textarea>";
@@ -310,7 +310,7 @@ $(function() {
       case 3:
       case 5:
         _min = _value.min.join('-');
-        _max = _value.min.join('-');
+        _max = _value.max.join('-');
         _value = [Date.parse(_min) / 1000, Date.parse(_max) / 1000];
         break;
       default:
