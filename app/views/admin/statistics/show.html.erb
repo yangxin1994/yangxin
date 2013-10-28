@@ -1,0 +1,30 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/statistics/show-bundle" %>
+    <style type="text/css">
+
+    .province {
+      fill: #ccc;
+      stroke: #fff;
+    }
+
+    .place-label {
+      fill: #777;
+      fill-opacity: .8;
+      font-size: 4px;
+      font-weight: 300;
+      text-anchor: middle;
+    }
+
+    .province.p_01 { fill: #ddc;}
+    .province.p_02 { fill: #dc0;}
+    .province.p_03 { fill: #aac;}
+
+    </style>  
+<% end %>
+
+<div id="canvas">
+  <h2>
+    <span>样本地区分布图</span><br>
+        
+  </h2>
+</div>
