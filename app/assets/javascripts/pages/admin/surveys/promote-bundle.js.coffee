@@ -166,9 +166,13 @@ $ ->
         </div>        
         """
       when 6
-        input = """
-          <textarea rows="6" placeholder="地址类型:请填写需要过滤的内容."></textarea>
-        """                 
+        input = modelinker.generate
+          type: "textarea"
+          linker: "attr.#{smp_attr._id}"
+          html: smp_attr.pmt_value
+          html_attr:
+            rows: "6"
+            placeholder:"地址类型:请填写需要过滤的内容."          
       else
         input = """
           <div class="bs-docs-example">

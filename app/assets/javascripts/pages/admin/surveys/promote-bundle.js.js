@@ -137,7 +137,15 @@ $(function() {
         }) : "") + "\n  <span class=\"help-inline\">\n    <a href=\"javascript:void(0);\"><i class=\"icon-plus-sign\"></i></a>\n    <a href=\"javascript:void(0);\"><i class=\"icon-minus-sign\"></i></a>\n  </span>\n</div>        ";
         break;
       case 6:
-        input = "<textarea rows=\"6\" placeholder=\"地址类型:请填写需要过滤的内容.\"></textarea>";
+        input = modelinker.generate({
+          type: "textarea",
+          linker: "attr." + smp_attr._id,
+          html: smp_attr.pmt_value,
+          html_attr: {
+            rows: "6",
+            placeholder: "地址类型:请填写需要过滤的内容."
+          }
+        });
         break;
       default:
         input = "<div class=\"bs-docs-example\">\n  <textarea rows=\"6\" placeholder=\"我觉得还是重试吧!\"></textarea>\n</div>";

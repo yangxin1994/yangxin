@@ -668,8 +668,8 @@ class Survey
       #   _value = smp_attr[:value].map{|es| es.map { |e| e.join(',') }}.join("\n")
       # when 3, 5
       #   _value = smp_attr[:value].map{|es| es.map { |e| Time.at(e).strftime("%Y/%m/%d") }.join(',')}.join("\n")
-      when 6
-        _value = smp_attr[:value].join("\n")
+      # when 6
+      #   _value = smp_attr[:value].join("\n")
       else
         _value = smp_attr[:value]
       end
