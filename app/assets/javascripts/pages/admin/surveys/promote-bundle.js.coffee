@@ -3,6 +3,11 @@
 $ ->
   # 预置事件
   window.modelinker = new Modelinker
+    changed: ($this)->
+      $this.closest(".bs-docs-example")
+        .find(".btn-attr-save")
+        .removeClass("disabled")
+        .html("*保存")
 
   $('#myTab a').click (e)->
     e.preventDefault()
@@ -306,7 +311,8 @@ $ ->
     _value = modelinker.get("attr.#{$this_div.data("id")}")
     switch $this_div.data("type")
       when 1, 7
-        _value.remove("")
+        _value = _value.filter (i)->
+          i != null && i != undefined && i != ""
       when 2, 4
         _value
       when 3, 5
