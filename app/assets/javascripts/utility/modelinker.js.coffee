@@ -1,13 +1,17 @@
 class Modelinker
-  constructor: (data = {}, klass= "modelinker")->
+  constructor: (options ={})->
+    options.klass ||= "modelinker"
+    options.data ||= {}
+    options.changed ||= (e)->{e}
     @queue = {}
     @callback_queue = {}
-    @data = data
-    @klass = "modelinker"
+    @data = options.data
+    @klass = options.klass
 
     # Linker Event Bind
     $(document).on "change", ".#{@klass}", (event)=>
       $this = $(event.target)
+      options.changed($this)
       if $this.is("input")
         if $this.is("input:checkbox")
           @queue["#{$this.data("mid")}"] = if $this.prop("checked") then $this.val() else ""

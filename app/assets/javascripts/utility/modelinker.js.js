@@ -2,21 +2,26 @@
 var Modelinker;
 
 Modelinker = (function() {
-  function Modelinker(data, klass) {
+  function Modelinker(options) {
     var _this = this;
-    if (data == null) {
-      data = {};
+    if (options == null) {
+      options = {};
     }
-    if (klass == null) {
-      klass = "modelinker";
-    }
+    options.klass || (options.klass = "modelinker");
+    options.data || (options.data = {});
+    options.changed || (options.changed = function(e) {
+      return {
+        e: e
+      };
+    });
     this.queue = {};
     this.callback_queue = {};
-    this.data = data;
-    this.klass = "modelinker";
+    this.data = options.data;
+    this.klass = options.klass;
     $(document).on("change", "." + this.klass, function(event) {
       var $this;
       $this = $(event.target);
+      options.changed($this);
       if ($this.is("input")) {
         if ($this.is("input:checkbox")) {
           return _this.queue["" + ($this.data("mid"))] = $this.prop("checked") ? $this.val() : "";
