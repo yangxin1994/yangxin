@@ -14,7 +14,47 @@ $ ->
     $(this).tab('show')
 
   # helpers
-    
+
+  address_input = (smp_attr) ->
+
+    modelinker.generate
+      type: "select"
+      linker: "attr.#{smp_attr._id}"
+      value: smp_attr.pmt_value
+      klass: ".province-group"
+      select_options:
+        安徽省: 49152
+        北京市: 4096
+        福建省: 53248
+        甘肃省: 114688
+        广东省: 77824
+        广西壮族自治区: 81920
+        贵州省: 98304
+        海南省: 86016
+        河北省: 12288
+        河南省: 65536
+        黑龙江省: 32768
+        湖北省: 69632
+        湖南省: 73728
+        吉林省: 28672
+        江苏省: 40960
+        江西省: 57344
+        辽宁省: 24576
+        内蒙古自治区: 20480
+        宁夏回族自治区: 122880
+        青海省: 118784
+        山东省: 61440
+        山西省: 16384
+        陕西省: 110592
+        上海市: 36864
+        四川省: 94208
+        天津市: 8192
+        西藏自治区: 106496
+        新疆维吾尔自治区: 126976
+        云南省: 102400
+        浙江省: 45056
+        重庆市: 90112
+
   render_attr = (smp_attr) ->
     switch smp_attr.type
       when 0
@@ -168,8 +208,8 @@ $ ->
       when 6
         input = modelinker.generate
           type: "select"
-          linker: "attr.#{smp_attr._id}"
-          value: smp_attr.pmt_value
+          linker: "attr.#{smp_attr._id}.ary_0"
+          value: smp_attr.pmt_value[0]
           klass: ".province-group"
           select_options:
             安徽省: 49152
