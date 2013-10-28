@@ -77,7 +77,12 @@ class Modelinker
             @queue["#{_mid}"] = options.value if options.value
       else if options.type == "select"
         for k, v of options.select_options
-          if options.value.toString() == v.toString()    
+          if options.html_attr.multiple
+            flag = options.value.indexOf(v.toString()) != -1
+          else
+            flag = options.value.toString() == v.toString()
+          
+          if flag
             _select_options_tag += """<option value="#{v}" selected="selected">#{k}</option>"""
           else
             _select_options_tag += """<option value="#{v}">#{k}</option>"""

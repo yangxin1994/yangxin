@@ -77,7 +77,7 @@ Modelinker = (function() {
   };
 
   Modelinker.prototype.generate = function(options) {
-    var end_tag, k, v, value_tag, _html_attr, _mid, _ref, _ref1, _select_options_tag;
+    var end_tag, flag, k, v, value_tag, _html_attr, _mid, _ref, _ref1, _select_options_tag;
     if (options == null) {
       options = {};
     }
@@ -124,7 +124,12 @@ Modelinker = (function() {
         _ref1 = options.select_options;
         for (k in _ref1) {
           v = _ref1[k];
-          if (options.value.toString() === v.toString()) {
+          if (options.html_attr.multiple) {
+            flag = options.value.indexOf(v.toString()) !== -1;
+          } else {
+            flag = options.value.toString() === v.toString();
+          }
+          if (flag) {
             _select_options_tag += "<option value=\"" + v + "\" selected=\"selected\">" + k + "</option>";
           } else {
             _select_options_tag += "<option value=\"" + v + "\">" + k + "</option>";

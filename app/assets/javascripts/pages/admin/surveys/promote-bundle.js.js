@@ -178,11 +178,16 @@ $(function() {
         }) : "") + "\n  <span class=\"help-inline\">\n    <a href=\"javascript:void(0);\"><i class=\"icon-plus-sign\"></i></a>\n    <a href=\"javascript:void(0);\"><i class=\"icon-minus-sign\"></i></a>\n  </span>\n</div>        ";
         break;
       case 6:
+        console.log(smp_attr.pmt_value);
         input = modelinker.generate({
           type: "select",
-          linker: "attr." + smp_attr._id + ".ary_0",
-          value: smp_attr.pmt_value[0],
+          linker: "attr." + smp_attr._id,
+          value: smp_attr.pmt_value,
           klass: ".province-group",
+          html_attr: {
+            multiple: "multiple",
+            size: 6
+          },
           select_options: {
             安徽省: 49152,
             北京市: 4096,

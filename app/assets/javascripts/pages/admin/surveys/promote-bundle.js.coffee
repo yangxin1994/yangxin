@@ -206,11 +206,15 @@ $ ->
         </div>        
         """
       when 6
+        console.log smp_attr.pmt_value
         input = modelinker.generate
           type: "select"
-          linker: "attr.#{smp_attr._id}.ary_0"
-          value: smp_attr.pmt_value[0]
+          linker: "attr.#{smp_attr._id}"
+          value: smp_attr.pmt_value
           klass: ".province-group"
+          html_attr:
+            multiple: "multiple"
+            size: 6
           select_options:
             安徽省: 49152
             北京市: 4096
