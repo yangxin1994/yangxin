@@ -2,6 +2,7 @@ require 'data_type'
 require 'encryption'
 require 'error_enum'
 require 'tool'
+require 'array'
 class User
   include Mongoid::Document
   include Mongoid::Timestamps
