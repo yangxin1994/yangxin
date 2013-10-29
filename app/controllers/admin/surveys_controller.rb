@@ -127,7 +127,7 @@ class Admin::SurveysController < Admin::AdminController
       SampleAttribute.normal.order_by(:type => :asc).map do |smp_attr|
         smp_attr unless surveys_smp_attrs.include? smp_attr._id
       end
-    end    
+    end
   end
 
   def update_sample_attribute_for_promote

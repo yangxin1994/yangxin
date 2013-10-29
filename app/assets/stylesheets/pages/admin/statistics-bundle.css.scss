@@ -1,0 +1,20 @@
+.province {
+  fill: #ccc;
+  stroke: #fff;
+}
+
+.place-label {
+  fill: #777;
+  fill-opacity: .8;
+  font-size: 4px;
+  font-weight: 300;
+  text-anchor: middle;
+}
+
+#canvas {
+  font: 10px sans-serif;
+}
+
+.arc path {
+  stroke: #fff;
+}
