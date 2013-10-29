@@ -65,31 +65,30 @@ class Modelinker
     end_tag = if options.single then "" else "</#{options.type}>"
     value_tag = ""
     if options.type
-      if options.type == "input"
-        switch options.html_attr.type
-          when "text"
-            value_tag = if options.value then " value=#{options.value} " else ""
-            @queue["#{_mid}"] = options.value if options.value
-          when "checkbox"
-            @queue["#{_mid}"] = options.value if options.html_attr.checked != undefined
-            value_tag = " value=#{options.value} "
-          else
-            @queue["#{_mid}"] = options.value if options.value
-      else if options.type == "select"
-        for k, v of options.select_options
-          if options.html_attr.multiple
-            flag = options.value.indexOf(v.toString()) != -1
-          else
-            flag = options.value.toString() == v.toString()
-          
-          if flag
-            _select_options_tag += """<option value="#{v}" selected="selected">#{k}</option>"""
-          else
-            _select_options_tag += """<option value="#{v}">#{k}</option>"""
+      switch options.type
+        when "input"
+          switch options.html_attr.type
+            when "text"
+              value_tag = if options.value then " value=#{options.value} " else ""
+              @queue["#{_mid}"] = options.value if options.value
+            when "checkbox"
+              @queue["#{_mid}"] = options.value if options.html_attr.checked != undefined
+              value_tag = " value=#{options.value} "
+            else
+              @queue["#{_mid}"] = options.value if options.value
+        when "select"
+          for k, v of options.select_options
+            if options.html_attr.multiple
+              flag = options.value.indexOf(v.toString()) != -1 if options.value
+            else
+              flag = options.value.toString() == v.toString() if options.value
             
-          
-      else
-        @queue["#{_mid}"] = options.html
+            if flag
+              _select_options_tag += """<option value="#{v}" selected="selected">#{k}</option>"""
+            else
+              _select_options_tag += """<option value="#{v}">#{k}</option>"""
+        else
+          @queue["#{_mid}"] = options.html
   
       @callback_queue["#{_mid}"] = options.callback
       @set_obj(options.linker, _mid)

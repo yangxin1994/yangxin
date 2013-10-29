@@ -101,42 +101,49 @@ Modelinker = (function() {
     end_tag = options.single ? "" : "</" + options.type + ">";
     value_tag = "";
     if (options.type) {
-      if (options.type === "input") {
-        switch (options.html_attr.type) {
-          case "text":
-            value_tag = options.value ? " value=" + options.value + " " : "";
-            if (options.value) {
-              this.queue["" + _mid] = options.value;
-            }
-            break;
-          case "checkbox":
-            if (options.html_attr.checked !== void 0) {
-              this.queue["" + _mid] = options.value;
-            }
-            value_tag = " value=" + options.value + " ";
-            break;
-          default:
-            if (options.value) {
-              this.queue["" + _mid] = options.value;
-            }
-        }
-      } else if (options.type === "select") {
-        _ref1 = options.select_options;
-        for (k in _ref1) {
-          v = _ref1[k];
-          if (options.html_attr.multiple) {
-            flag = options.value.indexOf(v.toString()) !== -1;
-          } else {
-            flag = options.value.toString() === v.toString();
+      switch (options.type) {
+        case "input":
+          switch (options.html_attr.type) {
+            case "text":
+              value_tag = options.value ? " value=" + options.value + " " : "";
+              if (options.value) {
+                this.queue["" + _mid] = options.value;
+              }
+              break;
+            case "checkbox":
+              if (options.html_attr.checked !== void 0) {
+                this.queue["" + _mid] = options.value;
+              }
+              value_tag = " value=" + options.value + " ";
+              break;
+            default:
+              if (options.value) {
+                this.queue["" + _mid] = options.value;
+              }
           }
-          if (flag) {
-            _select_options_tag += "<option value=\"" + v + "\" selected=\"selected\">" + k + "</option>";
-          } else {
-            _select_options_tag += "<option value=\"" + v + "\">" + k + "</option>";
+          break;
+        case "select":
+          _ref1 = options.select_options;
+          for (k in _ref1) {
+            v = _ref1[k];
+            if (options.html_attr.multiple) {
+              if (options.value) {
+                flag = options.value.indexOf(v.toString()) !== -1;
+              }
+            } else {
+              if (options.value) {
+                flag = options.value.toString() === v.toString();
+              }
+            }
+            if (flag) {
+              _select_options_tag += "<option value=\"" + v + "\" selected=\"selected\">" + k + "</option>";
+            } else {
+              _select_options_tag += "<option value=\"" + v + "\">" + k + "</option>";
+            }
           }
-        }
-      } else {
-        this.queue["" + _mid] = options.html;
+          break;
+        default:
+          this.queue["" + _mid] = options.html;
       }
       this.callback_queue["" + _mid] = options.callback;
       this.set_obj(options.linker, _mid);
