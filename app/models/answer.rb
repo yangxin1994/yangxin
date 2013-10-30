@@ -883,6 +883,9 @@ class Answer
       quota["submitted_count"] += 1
     elsif old_status == EDIT && self.is_finish
       # user submits the answer, and the answer automatically passes review
+      Rails.logger.info "BBBBBBBBBBBBBBBBBB"
+      Rails.logger.info quota.inspect
+      Rails.logger.info "BBBBBBBBBBBBBBBBBB"
       quota["submitted_count"] += 1
       quota["finished_count"] += 1
     elsif old_status == UNDER_REVIEW && self.is_finish
