@@ -5,10 +5,23 @@
 
 <div id="canvas" class="span9">
   <h2>
-    <span>样本地区分布图</span><br>
+    <span><%= @smp_attr.name %>统计</span><br>
         
   </h2>
+
+  <div class="btn-group">
+    <a href="?samples=registered_users" class="btn">注册样本</a>
+    <a href="?samples=all_users" class="btn">所有样本</a>
+    <a href="?samples=users_with_answers" class="btn">答题样本</a>
+  </div>
+
+  <div id="tooltip" class="hidden">
+    <p><strong>样本数量</strong></p>
+    <p><span id="area_value"></span></p>
+  </div>
+
 </div>
 <div class="span3">
   这里是侧边栏侧边栏侧边栏~
+
 </div>

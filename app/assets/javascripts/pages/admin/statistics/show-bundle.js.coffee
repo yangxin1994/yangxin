@@ -1,8 +1,7 @@
 $ ->
 
-  get_color = (d) ->
-    users = gon.analyze_result.registered_users
-    count = if users["#{d.id}"] then users["#{d.id}"].count.toNumber() else -1
+  get_color = (d, samples) ->
+    count = if samples["#{d.id}"] then samples["#{d.id}"].count.toNumber() else -1
     if count <= 0
       color = "#ccc"
     else if count < 10
@@ -32,25 +31,44 @@ $ ->
     "fill: #{color}"
 
   highlight = (selection, color = '#fff') ->
-    $this = $(selection)
     d3.select(selection)
-      .attr("data-style", $this.attr("style"))
-      .attr("style", "fill: #{color}")
+      .attr("data-fill", -> d3.select(this).style("fill") )
+      .transition()
+      .duration(250)
+      .style("fill", color)
 
   recolor = (selection) ->
-    $this = $(selection)
     d3.select(selection)
-      .attr("style", $this.data("style"))
+      .transition()
+      .duration(250)    
+      .style("fill", -> d3.select(this).attr("data-fill"))
+
+  show_tips = (selection, d, samples)->
+    count = if samples["#{d.id}"] then samples["#{d.id}"].count.toNumber() else 0
+    xPositon = d3.mouse(selection)[0] +  400
+    yPositon = d3.mouse(selection)[1] + 100
+
+    d3.select("#tooltip")
+      .style("left", "#{xPositon}px")
+      .style("top", "#{yPositon}px")
+      .select("#area_value")
+      .text("#{d.properties.name}: #{count}")
+
+    d3.select("#tooltip").classed("hidden", false)
+
+  hidden_tips = ->
+    d3.select("#tooltip").classed("hidden", true)
 
   # Create Map
 
-  map_chart = ->
+  map_chart = (samples)->
     # svg = d3.select('#canvas').append('svg')
     # svg.append('path')
     #   .attr('d', '123.8302214986772 43.42412446912962')
     #   .style('fill', 'none')
     #   .style('stroke', 'purple')
     #   .style('stroke-width', 2)
+    samples = gon.analyze_result["#{samples}"]
 
     width = 800
     height = 548
@@ -86,10 +104,13 @@ $ ->
         .attr("d", path)
         .attr("class", (d)-> "province p_#{d.id}" )
         .attr("data-name", (d)-> d.properties.name )
-        .attr("style", (d)-> get_color(d))
-        .on('mouseover', -> highlight(this, "#f2f2f2"))
-        .on("mouseout", -> recolor(this))
-
+        .attr("style", (d)-> get_color(d, samples))
+        .on('mouseover', (d)-> highlight(this, "#f2f2f2"); show_tips(this, d, samples))
+        .on("mouseout", -> recolor(this); hidden_tips())
+      
+      provinces.selectAll("d")
+        .append("title")
+        .text((d)-> d.properties.name )
 
       places.selectAll("path")
         .data(collection.features)
@@ -100,14 +121,23 @@ $ ->
         .attr("transform", (d)-> "translate(#{path.centroid(d)})")
         .text((d)-> d.properties.name)
 
-  pie_chart = ->
+  pie_chart = (samples)->
+    samples = gon.analyze_result["#{samples}"]
 
     width = 700
     height = 500
     radius = Math.min(width, height) / 2
+    data = []
+
+
+    for item, index in gon.enum_array
+      data.push 
+        _key: item
+        _value: samples[index]
 
     color = d3.scale.ordinal()
-      .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"])
+      .range(["#f0623c", "#fba959", "#fddf84", "#f5fca4", "#e4f791", "a7dd9e", "61c09f", "2f7fb8"])
+      # .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"])
 
     arc = d3.svg.arc()
       .outerRadius(radius - 10)
@@ -116,7 +146,7 @@ $ ->
     pie = d3.layout.pie()
       .sort(null)
       .value (d) -> 
-        d.population
+        d._value
 
     svg = d3.select("#canvas").insert("svg", "h2")
       .attr("width", width)
@@ -124,12 +154,6 @@ $ ->
       .append("g")
       .attr("transform", "translate(#{width / 2},#{height / 2})")
 
-    d3.csv "/assets/pages/admin/statistics/data.csv", (error, data) ->
-      for d in data
-        d.population = +d.population
-        
-      console.log data
-    data = []
     g = svg.selectAll(".arc")
       .data(pie(data))
       .enter()
@@ -139,7 +163,14 @@ $ ->
     g.append("path")
       .attr("d", arc)
       .style "fill", (d) -> 
-        color(d.data.age)
+        color(d.data._value)
+
+    g.selectAll("path")
+      .on("mouseover", (d)-> highlight(this, "#f2f2f2"))
+      .on("mouseout", -> recolor(this))
+
+    # g.data(pie(data))
+    #   .transition()
 
     g.append("text")
       .attr "transform", (d) -> 
@@ -147,9 +178,16 @@ $ ->
       .attr("dy", ".35em")
       .style("text-anchor", "middle")
       .text (d) -> 
-        d.data.age
+        "#{d.data._key}(#{d.data._value})"
 
-  pie_chart()
+
+
+  switch gon.chart_type
+    when 1, 2, 3, 4, 5, 7
+      pie_chart(querilayer.queries.samples || "registered_users")
+    when 6
+      map_chart(querilayer.queries.samples || "registered_users")
+  
 
 
 
