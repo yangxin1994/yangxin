@@ -49,7 +49,8 @@ module SurveyComponents::SurveyQuota
     rule["amount"] = rule["amount"].to_i
     return ErrorEnum::QUOTA_RULE_NOT_EXIST if self.quota["rules"].length <= index
     return ErrorEnum::WRONG_QUOTA_RULE_AMOUNT if rule["amount"].to_i <= 0
-    (rule["conditions"] || []).each do |condition|
+    rule["conditions"] ||= []
+    rule["conditions"].each do |condition|
       condition["condition_type"] = condition["condition_type"].to_i
       return ErrorEnum::WRONG_QUOTA_RULE_CONDITION_TYPE if !CONDITION_TYPE.include?(condition["condition_type"].to_i)
     end
