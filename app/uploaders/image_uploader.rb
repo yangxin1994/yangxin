@@ -19,8 +19,11 @@ class ImageUploader < CarrierWave::Uploader::Base
     "uploads/images/"
   end
   def filename
-    Time.now.strftime("%y-%m-%d")+'_'+(file.original_filename)
+    Time.now.strftime("%Y-%m-%d-%H-%M-%S") + "_" + (0...8).map { (65 + rand(26)).chr }.join
   end
+  # def filename
+  #   Time.now.strftime("%y-%m-%d")+'_'+(file.original_filename)
+  # end
   # Provide a default URL as a default if there hasn't been a file uploaded:
   # def default_url
   #   # For Rails 3.1+ asset pipeline compatibility:
