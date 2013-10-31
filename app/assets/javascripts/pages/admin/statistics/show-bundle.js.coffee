@@ -180,6 +180,41 @@ $ ->
       .text (d) -> 
         "#{d.data._key}(#{d.data._value})"
 
+  bar_chart = (samples)->
+
+    width = 100
+    height = 800
+
+    _results = gon.analyze_result["#{samples}"]
+    sample = {}
+
+    samples = for k, v of _results
+      # sample["#{k}"] = 
+      v.count
+
+    console.log samples
+
+    svg = d3.select("#canvas_side")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+
+    svg.selectAll("rect")
+      .data(samples)
+      .enter()
+      .append("rect")
+      .attr("y", (d, i)->i * 21 )
+      .attr("x", 0)
+      .style("fill", "#fba959")
+      .style("stroke", "#ffffff")
+      .attr("width", 0)
+      .transition()
+      .duration(1500)
+      .attr("width", (d, i) -> d / 40 + 1)
+      .attr("height", 20)
+
+
+
 
 
   switch gon.chart_type
@@ -187,6 +222,7 @@ $ ->
       pie_chart(querilayer.queries.samples || "registered_users")
     when 6
       map_chart(querilayer.queries.samples || "registered_users")
+      bar_chart(querilayer.queries.samples || "registered_users")
   
 
 
