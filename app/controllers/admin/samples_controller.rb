@@ -189,15 +189,25 @@ class Admin::SamplesController < Admin::AdminController
       attr['value_2'] = attr["analyze_requirement"]['segmentation'].join(' ')
     when DataType::DATE
       attr['date_type_3'] = attr["date_type"]
+      strf = case attr[:date_type]
+      when 1 then "%Y/%m"
+      when 0 then "%Y"
+      else "%Y/%m/%d"
+      end      
       # attr['value_3'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.strftime("%Y/%m/%d") }}.join("\n")
-      attr['value_3'] = attr["analyze_requirement"]['segmentation'].map{|e| Time.at(e).strftime("%Y/%m/%d") }.join(" ")
+      attr['value_3'] = attr["analyze_requirement"]['segmentation'].map{|e| Time.at(e).strftime(strf) }.join(" ")
     when DataType::NUMBER_RANGE
       # attr['value_4'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.join(',') }}.join("\n")
       attr['value_4'] = attr["analyze_requirement"]['segmentation'].join(' ')
     when DataType::DATE_RANGE
       attr['date_type_5'] = attr["date_type"]
+      strf = case attr[:date_type]
+      when 1 then "%Y/%m"
+      when 0 then "%Y"
+      else "%Y/%m/%d"
+      end      
       # attr['value_5'] = attr["analyze_requirement"]['segmentation'].map{|es| es.map { |e| e.strftime("%Y/%m/%d") }}.join("\n")
-      attr['value_5'] = attr["analyze_requirement"]['segmentation'].map{|e| Time.at(e).strftime("%Y/%m/%d") }.join(" ")
+      attr['value_5'] = attr["analyze_requirement"]['segmentation'].map{|e| Time.at(e).strftime(strf) }.join(" ")
     when DataType::ADDRESS
     when DataType::ARRAY
       attr['element_type'] = attr["element_type"]
@@ -222,12 +232,22 @@ class Admin::SamplesController < Admin::AdminController
       attr[:analyze_requirement][:segmentation] = attr[:value_2].split(' ').map { |e| e.to_f }
     when DataType::DATE
       attr[:date_type] = attr[:date_type_3].to_i
-      attr[:analyze_requirement][:segmentation] = attr[:value_3].split(' ').map { |e| Time.parse(e).to_i }
+      strf = case attr[:date_type]
+      when 1 then "-1"
+      when 0 then "-1-1"
+      else ""
+      end
+      set_attr[:analyze_requirement][:segmentation] = attr[:value_3].split(' ').map { |e| Time.parse("#{e}#{strf}").to_i }
     when DataType::NUMBER_RANGE
-      attr[:analyze_requirement][:segmentation] = attr[:value_4].split(' ').map { |e| e.to_f }
+      set_attr[:analyze_requirement][:segmentation] = attr[:value_4].split(' ').map { |e| e.to_f }
     when DataType::DATE_RANGE
       attr[:date_type] = attr[:date_type_5].to_i
-      attr[:analyze_requirement][:segmentation] = attr[:value_5].split(' ').map { |e| Time.parse(e).to_i }
+      strf = case attr[:date_type]
+      when 1 then "-1"
+      when 0 then "-1-1"
+      else ""
+      end
+      attr[:analyze_requirement][:segmentation] = attr[:value_5].split(' ').map { |e| Time.parse("#{e}#{strf}").to_i }
     when DataType::ADDRESS
     when DataType::ARRAY
       attr[:element_type] = attr[:element_type].to_i

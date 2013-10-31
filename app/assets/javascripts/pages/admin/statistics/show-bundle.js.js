@@ -38,19 +38,19 @@ $(function() {
       color = '#fff';
     }
     return d3.select(selection).attr("data-fill", function() {
-      return d3.select(this).style("fill");
-    }).transition().duration(250).style("fill", color);
+      return d3.select(selection).style("fill");
+    }).style("fill", color);
   };
   recolor = function(selection) {
-    return d3.select(selection).transition().duration(250).style("fill", function() {
-      return d3.select(this).attr("data-fill");
+    return d3.select(selection).style("fill", function() {
+      return d3.select(selection).attr("data-fill");
     });
   };
   show_tips = function(selection, d, samples) {
     var count, xPositon, yPositon;
     count = samples["" + d.id] ? samples["" + d.id].count.toNumber() : 0;
-    xPositon = d3.mouse(selection)[0] + 400;
-    yPositon = d3.mouse(selection)[1] + 100;
+    xPositon = d3.mouse(selection)[0];
+    yPositon = d3.mouse(selection)[1] + 30;
     d3.select("#tooltip").style("left", "" + xPositon + "px").style("top", "" + yPositon + "px").select("#area_value").text("" + d.properties.name + ": " + count);
     return d3.select("#tooltip").classed("hidden", false);
   };
@@ -62,7 +62,7 @@ $(function() {
     samples = gon.analyze_result["" + samples];
     width = 800;
     height = 548;
-    projection = d3.geo.conicConformal().rotate([240, 0]).center([-10, 38]).parallels([29.5, 45.5]).scale(800).translate([width / 2, height / 2]).precision(.1);
+    projection = d3.geo.miller().scale(800);
     path = d3.geo.path().projection(projection);
     svg = d3.select("#canvas").insert("svg", "h2").attr("width", width).attr("height", height);
     provinces = svg.append("g").attr("id", "provinces");
@@ -92,20 +92,94 @@ $(function() {
     });
   };
   pie_chart = function(samples) {
-    var arc, color, data, g, height, index, item, pie, radius, svg, width, _i, _len, _ref;
+    var arc, color, data, g, height, index, item, month_flag, pie, radius, str_max, str_min, svg, time_max, time_min, width, year_flag, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
     samples = gon.analyze_result["" + samples];
     width = 700;
     height = 500;
     radius = Math.min(width, height) / 2;
     data = [];
-    _ref = gon.enum_array;
-    for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
-      item = _ref[index];
-      data.push({
-        _key: item,
-        _value: samples[index]
-      });
+    switch (gon.chart_type) {
+      case 2:
+      case 4:
+        _ref = gon.analyze_requirement.segmentation;
+        for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+          item = _ref[index];
+          if (index === 0) {
+            data.push({
+              _key: "小于 " + item,
+              _value: samples[index]
+            });
+            item = "" + item + " ~ " + gon.analyze_requirement.segmentation[index + 1];
+          } else if (index === gon.analyze_requirement.segmentation.length - 1) {
+            item = "大于 " + item;
+          } else {
+            item = "" + item + " ~ " + gon.analyze_requirement.segmentation[index + 1];
+          }
+          data.push({
+            _key: item,
+            _value: samples[index]
+          });
+        }
+        break;
+      case 3:
+      case 5:
+        _ref1 = gon.analyze_requirement.segmentation;
+        for (index = _j = 0, _len1 = _ref1.length; _j < _len1; index = ++_j) {
+          item = _ref1[index];
+          item = item * 1000;
+          time_min = Date.create(item);
+          time_max = Date.create(gon.analyze_requirement.segmentation[index + 1] * 1000);
+          switch (gon.date_type) {
+            case 0:
+              str_min = time_min.format("{yyyy}年");
+              str_max = time_max.format("{yyyy}年");
+              break;
+            case 1:
+              str_min = time_min.format("{yyyy}年{Month}月");
+              str_max = time_max.format("{yyyy}年{Month}月");
+              break;
+            case 2:
+              year_flag = false;
+              month_flag = false;
+              str_min = time_min.format('short', 'ja');
+              str_max = time_max.format('short', 'ja');
+              if (time_min.getYear() === time_max.getYear()) {
+                str_max = time_max.format("{Month}月{d}日");
+                year_flag = true;
+              }
+              if (year_flag && time_min.getMonth() === time_max.getMonth()) {
+                str_max = time_max.format("{d}日");
+              }
+          }
+          if (index === 0) {
+            data.push({
+              _key: "早于 " + str_min,
+              _value: samples[index]
+            });
+            item = "" + str_min + " ~ " + str_max;
+          } else if (index === gon.analyze_requirement.segmentation.length - 1) {
+            item = "晚于 " + str_min;
+          } else {
+            item = "" + str_min + " ~ " + str_max;
+          }
+          data.push({
+            _key: item,
+            _value: samples[index]
+          });
+        }
+        break;
+      case 1:
+      case 7:
+        _ref2 = gon.enum_array;
+        for (index = _k = 0, _len2 = _ref2.length; _k < _len2; index = ++_k) {
+          item = _ref2[index];
+          data.push({
+            _key: item,
+            _value: samples[index]
+          });
+        }
     }
+    console.log(data);
     color = d3.scale.ordinal().range(["#f0623c", "#fba959", "#fddf84", "#f5fca4", "#e4f791", "a7dd9e", "61c09f", "2f7fb8"]);
     arc = d3.svg.arc().outerRadius(radius - 10).innerRadius(0);
     pie = d3.layout.pie().sort(null).value(function(d) {
@@ -120,6 +194,9 @@ $(function() {
       return highlight(this, "#f2f2f2");
     }).on("mouseout", function() {
       return recolor(this);
+    });
+    g.append("title").text(function(d) {
+      return "" + d.data._key + "(" + d.data._value + ")";
     });
     return g.append("text").attr("transform", function(d) {
       return "translate(" + (arc.centroid(d)) + ")";
