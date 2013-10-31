@@ -16,7 +16,7 @@ class Sample::SurveysController < Sample::SampleController
 
     date = Date.today
     today_start = Time.local(date.year, date.month, date.day,0,0,0)
-    today_end   = Time.local(date.year, date.month, date.day + 1,0,0,0)
+    today_end = Time.at(today_start.to_i + 1.days.to_i)
 
     answer = Answer.where(:created_at.gte => today_start,:created_at.lt => today_end)
 
