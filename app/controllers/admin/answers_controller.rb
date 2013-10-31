@@ -34,7 +34,6 @@ class Admin::AnswersController < Admin::AdminController
 
   def review
     @questions = Answer.find(params[:id]).present_auditor
-#    binding.pry
     @survey = @questions.survey
   end
 
