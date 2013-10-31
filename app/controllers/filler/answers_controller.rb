@@ -144,7 +144,7 @@ class Filler::AnswersController < Filler::FillerController
 		passed &&= @answer.check_screen(params[:answer_content] || {}) if passed
 
 		# 4. check quota questions (skip for previewing)
-		passed &&= @answer.check_question_quota if !@answer.is_preview && passed
+		passed &&= @answer.check_question_quota(params[:answer_content] || {}) if !@answer.is_preview && passed
 
 		# 5. update the logic control result
 		@answer.update_logic_control_result(params[:answer_content] || {}) if passed
