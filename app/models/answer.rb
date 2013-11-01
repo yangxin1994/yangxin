@@ -520,7 +520,7 @@ class Answer
         question_ids << c["name"] if c["condition_type"].to_i == 1
       end
       has_related_rule = true if (answer_content.keys & question_ids).present?
-      return true if self.satisfy_conditions(rule["conditions"]) && rule["submitted_count"] < rule["amount"]
+      return true if self.satisfy_conditions(rule["conditions"], false) && rule["submitted_count"] < rule["amount"]
     end
     return true unless has_related_rule
     set_reject_with_type(REJECT_BY_QUOTA)
