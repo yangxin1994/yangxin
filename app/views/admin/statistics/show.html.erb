@@ -23,4 +23,14 @@
 </div>
 <div class="span3">
   <div id="canvas_side"></div>
+  <table class="table table-condensed table-hover">
+    <% samples = @smp_attr.analyze_result[params["samples"] || "registered_users"] %>
+    <% samples.each do |al, count|%>
+    <tr>
+      <td><%= QuillCommon::AddressUtility.find_text_by_code(al) %></td>
+      <td><%= count["count"] %></td>
+    </tr>
+    <% end -%>
+
+  </table>
 </div>
