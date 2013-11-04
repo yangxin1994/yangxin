@@ -162,8 +162,9 @@ class Order
 
   def self.create_answer_alipay_order(answer, reward)
     order_info = { "alipay_account" => reward["alipay_account"] }
-    order_info.merge!("status" => FROZEN) if answer.status == UNDER_REVIEW
+    order_info.merge!("status" => FROZEN) if answer.status == Answer::UNDER_REVIEW
     Order.create_answer_order(
+      answer.id.to_s,
       answer.user.try(:_id),
       answer.survey._id.to_s,
       ALIPAY,
@@ -173,8 +174,9 @@ class Order
 
   def self.create_answer_jifenbao_order(answer, reward)
     order_info = { "alipay_account" => reward["alipay_account"] }
-    order_info.merge!("status" => FROZEN) if answer.status == UNDER_REVIEW
+    order_info.merge!("status" => FROZEN) if answer.status == Answer::UNDER_REVIEW
     Order.create_answer_order(
+      answer.id.to_s,
       answer.user.try(:_id),
       answer.survey._id.to_s,
       JIFENBAO,
@@ -184,8 +186,9 @@ class Order
 
   def self.create_answer_mobile_order(answer, reward)
     order_info = { "mobile" => reward["mobile"] }
-    order_info.merge!("status" => FROZEN) if answer.status == UNDER_REVIEW
+    order_info.merge!("status" => FROZEN) if answer.status == Answer::UNDER_REVIEW
     Order.create_answer_order(
+      answer.id.to_s,
       answer.user.try(:_id),
       answer.survey._id.to_s,
       SMALL_MOBILE_CHARGE,
@@ -194,13 +197,15 @@ class Order
   end
 
 
-  def self.create_answer_order(sample_id, survey_id, type, amount, opt = {})
+  def self.create_answer_order(answer_id, sample_id, survey_id, type, amount, opt = {})
     sample = User.sample.find_by_id(sample_id)
     survey = Survey.find_by_id(survey_id)
+    answer = Answer.find(answer_id)
     return ErrorEnum::SURVEY_NOT_EXIST if survey.nil?
     order = Order.create(:source => ANSWER_SURVEY, :amount => amount, :type => type)
     order.sample = sample if sample.present?
     order.survey = survey
+    order.answer = answer
     case type
     when SMALL_MOBILE_CHARGE
       order.mobile = opt["mobile"]
@@ -327,8 +332,8 @@ class Order
   end
 
   def update_status(handle = true)
-    self.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.status == FINISH
-    self.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i} ) if self.status == REJECT
+    self.update_attributes({"status" => Order::WAIT, "reviewed_at" => Time.now.to_i}) if self.answer.is_finish
+    self.update_attributes({"status" => Order::REJECT, "reviewed_at" => Time.now.to_i} ) if self.answer.is_reject
     self.auto_handle if handle
   end
 

@@ -25,7 +25,7 @@ class Filler::FillerController < ApplicationController
       if r['amount'] > 0
         @reward_scheme_type = 2
         @reward_point = r['amount']
-        @hot_gift = Gift.on_shelf.real.desc(:exchange_count).first.info
+        @hot_gift = Gift.on_shelf.real.desc(:exchange_count).first
       end
     when RewardScheme::LOTTERY
       if r['prizes'].length > 0
@@ -78,7 +78,7 @@ class Filler::FillerController < ApplicationController
     if user_signed_in
       answer = Answer.find_by_survey_id_sample_id_is_preview(survey_id, current_user._id.to_s, is_preview)
     else
-      answer = Answer.find(cookies[cookie_key(survey_id, is_preview)])
+      answer = Answer.find_by_id(cookies[cookie_key(survey_id, is_preview)])
     end
     @percentage = 0
     if answer.present?

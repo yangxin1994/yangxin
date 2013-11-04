@@ -510,20 +510,19 @@ class Answer
     true
   end
 
-  def check_question_quota
-    # 1. get the corresponding survey, quota, and quota stats
+  def check_question_quota(answer_content)
     quota = self.survey.show_quota
-    # 2. if all quota rules are satisfied, the new answer should be rejected
-    set_reject_with_type(REJECT_BY_QUOTA) and return false if quota["quota_satisfied"]
-    # 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
     return true if !quota["is_exclusive"]
-    # 4. check the rules one by one
+    has_related_rule = false
     quota["rules"].each do |rule|
-      # find out a rule that:
-      # a. the quota of the rule has not been satisfied
-      # b. this answer satisfies the rule
-      return true if rule["submitted_count"] < rule["amount"] && self.satisfy_conditions(rule["conditions"])
+      question_ids = []
+      (rule["conditions"] || []).each do |c|
+        question_ids << c["name"] if c["condition_type"].to_i == 1
+      end
+      has_related_rule = true if (answer_content.keys & question_ids).present?
+      return true if self.satisfy_conditions(rule["conditions"], false) && rule["submitted_count"] < rule["amount"]
     end
+    return true unless has_related_rule
     set_reject_with_type(REJECT_BY_QUOTA)
     false
   end
@@ -713,11 +712,11 @@ class Answer
     case type
     when "chongzhi"
       index = self.rewards.index { |e| e["type"].to_i == RewardScheme::MOBILE }
-      self.rewards[index]["mobile"] = mobile
+      self.rewards[index]["mobile"] = account
       self.rewards[index]["checked"] = true
     when "zhifubao", "jifenbao"
       index = self.rewards.index { |e| [RewardScheme::ALIPAY, RewardScheme::JIFENBAO].include?(e["type"].to_i) }
-      self.rewards[index]["alipay_account"] = alipay_account
+      self.rewards[index]["alipay_account"] = account
       self.rewards[index]["checked"] = true
     end
     self.save
@@ -736,13 +735,13 @@ class Answer
   def handle_cash_order(reward)
     if order.nil?
       order =
-        case type
-        when "mobile"
+        case reward["type"].to_i
+        when RewardScheme::MOBILE
           Order.create_answer_mobile_order(self, reward)
-        when "alipay"
+        when RewardScheme::ALIPAY
           Order.create_answer_alipay_order(self, reward)
-        when "jifenbao"
-          Order.create_answer_alipay_order(self, reward)
+        when RewardScheme::JIFENBAO
+          Order.create_answer_jifenbao_order(self, reward)
         end
       return true if status == UNDER_REVIEW
       update_attributes({ "reward_delivered" => true })
@@ -763,16 +762,17 @@ class Answer
     case reward["type"].to_i
     when RewardScheme::MOBILE
       return ErrorEnum::REPEAT_ORDER if self.check_repeat_order(reward["mobile"])
-      handle_cash_order
+      handle_cash_order(reward)
     when RewardScheme::ALIPAY
       return ErrorEnum::REPEAT_ORDER if self.check_repeat_order(reward["alipay_account"])
-      handle_cash_order
+      handle_cash_order(reward)
     when RewardScheme::JIFENBAO
       return ErrorEnum::REPEAT_ORDER if self.check_repeat_order(reward["alipay_account"])
-      handle_cash_order
+      handle_cash_order(reward)
     when RewardScheme::POINT
       return true if self.status == UNDER_REVIEW
       self.update_attributes({"reward_delivered" => true}) and return true if self.status == REJECT
+      user = self.user
       if user.present?
         user.update_attributes(point: user.point + reward["amount"])
         PointLog.create_answer_point_log(reward["amount"], self.survey_id.to_s, self.survey.title, user._id)
@@ -802,7 +802,7 @@ class Answer
     answer = Answer.find_by_survey_id_sample_id_is_preview(self.survey._id.to_s, sample._id.to_s, false)
     return ErrorEnum::ANSWER_EXIST if answer.present?
     sample.answers << self
-    answer.update_sample_attributes if answer.is_finish
+    self.update_sample_attributes if self.is_finish
     PunishLog.create_punish_log(sample.id) if self.status == REJECT
     if self.auditor.present?
       self.auditor.create_message("审核问卷答案消息", self.audit_message, [sample._id.to_s])

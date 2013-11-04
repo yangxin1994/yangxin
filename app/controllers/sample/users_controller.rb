@@ -66,11 +66,11 @@ class Sample::UsersController < Sample::SampleController
 
   def points
     if params[:scope] == 'in'
-      @point_logs = PointLog.where(:user_id => current_user.id, :amount.gt => 0).desc(:created_at)
+      @point_logs = auto_paginate PointLog.where(:user_id => current_user.id, :amount.gt => 0).desc(:created_at)
     elsif params[:scope] == 'out' 
-      @point_logs = PointLog.where(:user_id => current_user.id, :amount.lt => 0).desc(:created_at)
+      @point_logs = auto_paginate PointLog.where(:user_id => current_user.id, :amount.lt => 0).desc(:created_at)
     else
-      @point_logs = PointLog.where(:user_id => current_user.id).desc(:created_at)
+      @point_logs = auto_paginate PointLog.where(:user_id => current_user.id).desc(:created_at)
     end
     respond_to do |format|
       format.html 
@@ -80,7 +80,7 @@ class Sample::UsersController < Sample::SampleController
 
   def orders
     # scope = [1,2,4].include?(params[:scope].to_i) ? params[:scope].to_i : 1
-    @orders = current_user.orders.where(:source => params[:scope].to_i).desc(:created_at)
+    @orders = current_user.orders.where(:source => (params[:scope] || Order::WAIT).to_i).desc(:created_at)
     @orders = auto_paginate @orders   
     respond_to do |format|
       format.html 
@@ -160,9 +160,9 @@ class Sample::UsersController < Sample::SampleController
     @bindings = {}
     @bindings["email"] = [current_user.email, current_user.email_subscribe] if current_user.email_activation
     @bindings["mobile"] = [current_user.mobile, current_user.mobile_subscribe] if current_user.mobile_activation
-    %w(sina renren qq google kaixin001 douban baidu sohu qihu360).each do |website|
+    %w(sina renren qq tecent alipay qihu360).each do |website|
       tp_user = ThirdPartyUser.where(:user_id => current_user._id.to_s, :website => website).first
-      @bindings[website] = [tp_user.name, tp_user.share] if tp_user.present?
+      @bindings[website] = [tp_user.nick, tp_user.share] if tp_user.present?
     end
   end
 
@@ -293,7 +293,7 @@ class Sample::UsersController < Sample::SampleController
   private
   def get_self_extend_info
     @bind_info = {}
-    ["sina", "renren", "qq", "google", "kaixin001", "douban", "baidu", "sohu", "qihu360"].each do |website|
+    ["sina", "renren", "qq", "tecent", "renren", "alipay"].each do |website|
       @bind_info[website] = !ThirdPartyUser.where(:user_id => current_user._id.to_s, :website => website).blank?
     end
     @bind_info["email"] = current_user.email_activation

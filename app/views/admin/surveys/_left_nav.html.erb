@@ -1,0 +1,32 @@
+<% content_for :sidenav do %>
+  <li class="<%= action_name == 'index' ? 'active' : '' %>">
+    <a href="/admin/surveys">
+    <i class="icon-chevron-right"></i>
+    调研列表
+    </a>
+  </li>
+  <li class="<%= action_name == 'questions' ? 'active' : '' %>">
+    <a href="/admin/surveys/<%= params[:id]%>/questions">
+      <i class="icon-chevron-right"></i>
+      问卷查看
+    </a>
+  </li>
+  <li class="<%= action_name == 'reward_schemes' ? 'active' : '' %>">
+    <a href="/admin/surveys/<%= params[:id]%>/reward_schemes">
+      <i class="icon-chevron-right"></i>
+      奖励方案
+    </a>
+  </li>
+  <li class="<%= action_name == 'promote' ? 'active' : '' %>">
+    <a href="/admin/surveys/<%= params[:id]%>/promote">
+      <i class="icon-chevron-right"></i>
+      推送渠道
+    </a>
+  </li>
+  <li class="<%= (action_name == 'interviewer_task' ||  action_name == 'new_interviewer') ? 'active' : '' %>">
+    <a href="/admin/surveys/<%= params[:id]%>/interviewer_task">
+      <i class="icon-chevron-right"></i>
+      访问员设置
+    </a>
+  </li>    
+<% end %>

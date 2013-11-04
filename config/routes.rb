@@ -20,6 +20,7 @@ OopsData::Application.routes.draw do
 
   # sample
   scope :module => "sample" do
+    resources :connects, :only => [:show]
     resource :account, :only => [] do
       collection do
         get  :sign_in, :as => :sign_in
@@ -290,9 +291,10 @@ OopsData::Application.routes.draw do
 
     resources :surveys, :as => :s do
       member do
-        get :reward_schemes, :promote, :more_info, :bind_question
-        post :update_promote
+        get :reward_schemes, :promote, :more_info, :bind_question, :interviewer_task, :new_interviewer, :questions
+        post :update_promote, :create_interviewer
         put :update_promote, :set_info, :bind_question, :star
+        put :update_amount
         delete :destroy_attributes, :bind_question
       end
 
