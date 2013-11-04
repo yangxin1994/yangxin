@@ -28,23 +28,14 @@
   </div>
   <div class="control-group">
     <label class="control-label" >属性设置:</label>
-      <div class="attr-0 attr-ipt">
-        <div class="controls">
-         <textarea rows="6" name="attribute[value_0]" placeholder="字符串"></textarea>
-        </div>
-      </div>
       <div class="attr-1 attr-ipt">
         <div class="controls">
           <textarea rows="6" name="attribute[enum_array]" placeholder="枚举，每一行元素代表一个枚举值"><%= @attribute["enum_array"] %></textarea>
         </div>
-        <br/>
-        <div class="controls">
-          <textarea rows="6" name="attribute[value_1]" placeholder="整型数组，每一个元素代表一个枚举值"></textarea>
-        </div>
       </div>
       <div class="attr-2 attr-ipt">
         <div class="controls">
-          <input type="text"  name="attribute[value_2]" placeholder="浮点数"/>
+          <textarea rows="6" name="attribute[value_2]" placeholder="划分数值段，供查看样本分布使用，数值之间空格隔开"><%= @attribute["value_2"] %></textarea>
         </div>
       </div>
       <div class="attr-3 attr-ipt">
@@ -64,12 +55,12 @@
         </div>
         <br/>        
         <div class="controls">
-          <input type="text"  name="attribute[value_3]" placeholder="日期格式:YYYY/MM/DD"/>
+          <textarea rows="6" name="attribute[value_3]" placeholder="划分日期段，供查看样本分布使用。日期格式‘年/月/日’，日期之间空格分隔"><%= @attribute["value_3"] %></textarea>
         </div>
       </div>
       <div class="attr-4 attr-ipt">
         <div class="controls">
-          <textarea rows="6" name="attribute[value_4]" placeholder="数值范围:每行包含两个元素的数组，两个元素均为浮点型用逗号隔开，分别代表数值范围的最小值和最大值"></textarea>
+          <textarea rows="6" name="attribute[value_4]" placeholder="划分数值段，供查看样本分布使用，数值之间空格隔开"><%= @attribute["value_4"] %></textarea>
         </div>
       </div>
       <div class="attr-5 attr-ipt">
@@ -89,13 +80,10 @@
         </div>
         <br/>        
         <div class="controls">
-          <textarea rows="6" name="attribute[value_5]" placeholder="日期范围:每行包含两个元素的数组，两个元素均为YYYY/MM/DD,用逗号分隔，分别代表日期范围的最小值和最大值"></textarea>
+          <textarea rows="6" name="attribute[value_5]" placeholder="划分日期段，供查看样本分布使用。日期格式‘年/月/日’，日期之间空格分隔"><%= @attribute["value_5"] %></textarea>
         </div>
       </div>
       <div class="attr-6 attr-ipt">
-        <div class="controls">
-          <input type="text" name="attribute[value_6]" placeholder="相应的地址码"/>
-        </div>
       </div>
       <div class="attr-7 attr-ipt">
         <div class="controls">
@@ -119,9 +107,6 @@
           <textarea rows="6" name="attribute[enum_array_6]" id="ipt_enum_array" placeholder="枚举，每一行元素代表一个枚举值"><%= @attribute["enum_array_6"] %></textarea>
         </div>
         <br/>        
-        <div class="controls">
-          <textarea rows="6" name="attribute[value_7]" placeholder="每一行元素代表一个枚举值"/></textarea>
-        </div>
       </div>
   </div>
   <div class="control-group">

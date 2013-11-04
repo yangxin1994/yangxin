@@ -3,19 +3,27 @@
   <%= javascript_include_tag "pages/admin/surveys/index-bundle" %>
 <% end %>
 
-<% content_for :sidenav do %>
-  <li class="active">
-    <a href="#{}">
-    <i class="icon-chevron-right"></i>
-    调研列表
-    </a>
-  </li>
-  <li>
-    <a href="/admin/quality_questions">
-    <i class="icon-chevron-right"></i>
-    质控题管理
-    </a>
-  </li>  
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li class="active">
+      <a href="javascript:void(0);">
+      <i class="icon-chevron-right"></i>
+      调研列表
+      </a>
+    </li>
+    <li>
+      <a href="/admin/quality_questions">
+      <i class="icon-chevron-right"></i>
+      质控题管理
+      </a>
+    </li>
+  </ul>
+  <div class="well well-small well-tips">
+    <p>Tips:</p>
+    <ul>
+      <li>加星标的问卷将会被置顶.</li>
+    </ul>
+  </div>
 <% end %>
 
 <div>
@@ -75,8 +83,10 @@
           </button>
           <ul class="dropdown-menu">
             <li><a href="#info" class="info"><i class="icon-wrench"></i>问卷基本设置</a></li>
-            <li><a href="/admin/surveys/<%= survey._id %>/reward_schemes" ><i class="icon-wrench"></i>奖励方案设置</a></li>
+            <li><a href="/admin/surveys/<%= survey._id %>/reward_schemes" ><i class="icon-gift"></i>奖励方案设置</a></li>
             <li><a href="/admin/surveys/<%= survey._id %>/promote" ><i class="icon-share"></i>推送渠道设置</a></li>
+            <li><a href="#cost" class="cost"><i class="icon-tint"></i>问卷成本</a></li>
+            <li><a href="#promote" class="promote"><i class="icon-share-alt"></i>问卷推送进度</a></li>
           </ul>
         </div>
         </td>
@@ -116,7 +126,7 @@
               <input type="checkbox" id="ck_visible" name="visible"> 
             </label>
           </div>
-        </div>
+      </div>
         <div class="control-group">
           <label class="control-label" for="block">单ip最大答题次数</label>
           <div class="controls">
@@ -130,3 +140,51 @@
       <button type="button" class="btn btn-primary" data-loading-text="保存中..." id="send_info">确定修改</button>
     </div>
   </div>
+
+  <div class="modal hide fade" id="cost_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>问卷成本</h3>
+    </div>
+    <div class="modal-body" id="cost_body">
+      <div id="cost_item"></div>
+        <p>
+          已支付积分： <span id="point_cost"></span>（1元价值100积分）
+        </p>
+        <p>
+          已支付话费： <span id="mobile_cost"></span>元
+        </p>
+        <p>
+          已转帐支付宝：<span id="alipay_cost"></span>元
+        </p>
+        <p>
+          已支付集分宝：<span id="jifenbao_cost"></span>个
+        </p>
+        <p>
+          已抽中奖品总成本：<span id="lottery_cost"></span>元
+        </p>
+        <p>
+          样本推广数量：<span id="introduce_number"></span>份
+        </p>
+    </div>
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#cost_modal').modal('hide');">关闭</a>
+    </div>
+  </div>
+
+  <div class="modal hide fade" id="promote_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>问卷推送进度</h3>
+    </div>
+    <div class="modal-body" id="promote_body">
+      <div id="email_status">
+        <p class="pull-center">
+          Email 发送状态: 已发出 <span id="email_sended"></span>
+        </p>        
+      </div>
+    </div>    
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#promote_modal').modal('hide');">关闭</a>
+    </div>
+  </div> 

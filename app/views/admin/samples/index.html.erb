@@ -3,26 +3,28 @@
   <%= javascript_include_tag "pages/admin/samples/index-bundle" %>
 <% end %>
 
-<% content_for :sidenav do %>
+<% content_for :sidebar do %>
 
-  <li class="active">
-    <a href="/admin/samples">
-    <i class="icon-chevron-right"></i>
-    样本列表
-    </a>
-  </li>
-  <li>
-    <a href="/admin/samples/attributes">
-    <i class="icon-chevron-right"></i>
-    样本属性
-    </a>
-  </li>
-  <li>
-    <a href="/admin/samples/status">
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li class="active">
+      <a href="/admin/samples">
       <i class="icon-chevron-right"></i>
-      样本数据统计
-    </a>
-  </li>
+      样本列表
+      </a>
+    </li>
+    <li>
+      <a href="/admin/samples/attributes">
+      <i class="icon-chevron-right"></i>
+      样本属性
+      </a>
+    </li>
+    <li>
+      <a href="/admin/samples/status">
+        <i class="icon-chevron-right"></i>
+        样本数据统计
+      </a>
+    </li>
+  </ul>
 <% end %>
 
 
@@ -79,7 +81,13 @@
         <td><a href="/admin/samples/<%= sample['_id'] %>" title="title"><%= sample["email"] %></a></td>
         <td><%= sample["mobile"] %></td>
         <td><%= sample["point"] %></td>
-        <td data-sid="<%= sample['_id'] %>" data-is_blcok="<%= sample['is_block'] %>" data-roles="<%= sample['user_role'] %>">
+        <td data-sid="<%= sample['_id'] %>" 
+            data-email="<%= sample['email'] %>" 
+            data-a_email="<%= sample['email_activation'] %>" 
+            data-mobile="<%= sample['mobile'] %>" 
+            data-a_mobile="<%= sample['mobile_activation'] %>" 
+            data-is_blcok="<%= sample['is_block'] %>" 
+            data-roles="<%= sample['user_role'] %>"> 
           <div class="btn-group">
             <a href="/admin/samples/<%= sample["_id"] %>" class="btn"><i class="icon-list-alt"></i>样本信息查看</a>
             <button class="btn dropdown-toggle" data-toggle="dropdown">
@@ -163,13 +171,13 @@
       <form class="form-horizontal">
         <input type="hidden" id="sid"> 
         <div class="control-group">
-          <label class="control-label" for="block">黑名单</label>
+          <label class="control-label" for="block">状态</label>
           <div class="controls">
             <label class="checkbox">
-              <input class="ck" type="checkbox" name="is_block" id="ck_block"> 
-            </label>
+              <input class="ck" type="checkbox" name="is_block" id="ck_block"> 黑名单
+            </label>          
           </div>
-        </div>
+        </div>       
         <div class="control-group">
           <label class="control-label" for="roles">角色分配</label>
           <div class="controls">
@@ -190,6 +198,20 @@
             </label>
           </div>
         </div>
+        <div class="control-group">
+          <label class="control-label" for="email">邮箱</label>
+          <div class="controls">
+            <input type="text" id="i_email" name="email" placeholder="Type something…">
+            <input class="ck" type="checkbox" name="is_active" id="a_email"> 激活
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="mobile">电话</label>
+          <div class="controls">
+            <input type="text" id="i_mobile" name="mobile" placeholder="Type something…">
+            <input class="ck" type="checkbox" name="is_active" id="a_mobile"> 激活
+          </div>
+        </div>         
       </form>
     </div>
     <div class="modal-footer">

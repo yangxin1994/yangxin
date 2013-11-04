@@ -7,6 +7,7 @@
   <%= stylesheet_link_tag "layouts/admin-todc-layout", :media => :all %>
 
   <%= javascript_include_tag "layouts/admin-todc-layout" %>
+  <%= include_gon %>
   <script type="text/javascript">
   $(function(){
     <% if flash.notice %>
@@ -83,9 +84,7 @@
 
     <div class="row-fluid">
       <div class="span3 flowy-admin-sidebar">
-        <ul class="nav nav-list flowy-admin-sidenav affix">
-          <%= yield :sidenav %>
-        </ul>
+        <%= yield :sidebar %>
       </div>
       <div class="span9">
         <div id="alert_placeholder">

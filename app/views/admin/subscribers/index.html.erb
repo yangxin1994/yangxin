@@ -3,25 +3,27 @@
   <%= javascript_include_tag "pages/admin/subscribers/index-bundle" %>
 <% end %>
 
-<% content_for :sidenav do %>
-  <li>
-    <a href="/admin/newsletters">
-    <i class="icon-chevron-right"></i>
-    电子杂志列表
-    </a>
-  </li>
-  <li>
-    <a href="/admin/newsletters/new">
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li>
+      <a href="/admin/newsletters">
       <i class="icon-chevron-right"></i>
-      新建电子杂志
-    </a>
-  </li>
-  <li class="active">
-    <a href="javascript:void(0);">
-      <i class="icon-chevron-right"></i>
-      订阅管理
-    </a>
-  </li>  
+      电子杂志列表
+      </a>
+    </li>
+    <li>
+      <a href="/admin/newsletters/new">
+        <i class="icon-chevron-right"></i>
+        新建电子杂志
+      </a>
+    </li>
+    <li class="active">
+      <a href="javascript:void(0);">
+        <i class="icon-chevron-right"></i>
+        订阅管理
+      </a>
+    </li>  
+  </ul>
 <% end %>
 
 <div>

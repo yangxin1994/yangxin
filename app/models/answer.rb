@@ -1294,7 +1294,7 @@ class Answer
         attr_value = answer if q.question_type == QuestionTypeEnum::TEXT_BLANK_QUESTION
       when DataType::ENUM
         if q.question_type == QuestionTypeEnum::CHOICE_QUESTION
-          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+          attr_value = q.sample_attribute_relation[answer["selection"][0].to_s]
         end
       when DataType::NUMBER
         attr_value = answer if q.question_type == QuestionTypeEnum::NUMBER_BLANK_QUESTION
@@ -1302,27 +1302,35 @@ class Answer
         if q.question_type == QuestionTypeEnum::NUMBER_BLANK_QUESTION
           attr_value = [answer, answer] if answer.present?
         elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
-          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+          attr_value = q.sample_attribute_relation[answer["selection"][0].to_s]
+          if attr_value.present?
+            attr_value[0] = attr_value[0].blank? ? -1.0/0.0 : attr_value[0].to_f
+            attr_value[1] = attr_value[1].blank? ? 1.0/0.0 : attr_value[1].to_f
+          end
         end
       when DataType::DATE
         attr_value = answer / 1000 if q.question_type == QuestionTypeEnum::TIME_BLANK_QUESTION
       when DataType::DATE_RANGE
         if q.question_type == QuestionTypeEnum::TIME_BLANK_QUESTION
-          attr_value = [answer / 1000, answer / 1000] if answer.present
+          attr_value = [answer / 1000, answer / 1000] if answer.present?
         elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
-          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+          attr_value = q.sample_attribute_relation[answer["selection"][0].to_s]
+          if attr_value.present?
+            attr_value[0] = attr_value[0].blank? ? -1.0/0.0 : attr_value[0] / 1000
+            attr_value[1] = attr_value[1].blank? ? 1.0/0.0 : attr_value[1] / 1000
+          end
         end
       when DataType::ADDRESS
         if q.question_type == QuestionTypeEnum::ADDRESS_BLANK_QUESTION
           attr_value = answer["address"]
         elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
-          attr_value = q.sample_attribute_relation[answer["selection"][0]]
+          attr_value = q.sample_attribute_relation[answer["selection"][0].to_s]
         end
       when DataType::ARRAY
         if q.question_type == QuestionTypeEnum::CHOICE_QUESTION
           new_attr_value = []
           answer["selection"].each do |input_id|
-            enum_value = q.sample_attribute_relation[input_id]
+            enum_value = q.sample_attribute_relation[input_id.to_s]
             new_attr_value << enum_value if enum_value.present?
           end
           attr_value = (self.user.read_sample_attribute(q.sample_attribute.name).to_a + new_attr_value).uniq

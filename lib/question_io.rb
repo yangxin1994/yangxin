@@ -853,7 +853,7 @@ class SortQuestionIo < QuestionIo
     end
     value_labels = {}
     issue["items"].each_with_index do |item, index|
-      value_labels[index + 1] = item["content"]["text"]
+      value_labels[index + 1] = item["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)
     end
     item_count.times do |i|
       @spss_header << {"spss_name" => header_prefix + "_s#{i + 1}",

@@ -1,6 +1,5 @@
 # encoding: utf-8
 class Order
-  
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt

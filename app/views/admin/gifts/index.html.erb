@@ -3,19 +3,21 @@
   <%= javascript_include_tag "pages/admin/gifts/index-bundle" %>
 <% end %>
 
-<% content_for :sidenav do %>
-  <li class="active">
-    <a href="/admin/gifts">
-    <i class="icon-chevron-right"></i>
-    礼品列表
-    </a>
-  </li>
-  <li>
-    <a href="/admin/gifts/new">
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li class="active">
+      <a href="/admin/gifts">
       <i class="icon-chevron-right"></i>
-      新建礼品
-    </a>
-  </li>
+      礼品列表
+      </a>
+    </li>
+    <li>
+      <a href="/admin/gifts/new">
+        <i class="icon-chevron-right"></i>
+        新建礼品
+      </a>
+    </li>
+  </ul>
 <% end %>
 
 <div>

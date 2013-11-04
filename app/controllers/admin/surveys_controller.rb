@@ -6,6 +6,9 @@ class Admin::SurveysController < Admin::AdminController
 	# *****************************
 
   def index
+    @side_nav = [
+      {url:"asdf", title:"asdf"}
+    ]
     @surveys = auto_paginate Survey.search(params)
   end
 
@@ -26,6 +29,20 @@ class Admin::SurveysController < Admin::AdminController
         :max_num_per_ip => survey.max_num_per_ip
       }
     end
+  end
+
+  def promote_info
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      {
+        :email => survey.email_promote_info,
+        :sms => survey.sms_promote_info
+      }
+    end
+  end
+
+  def cost_info
+    survey = Survey.find(params[:id])
+    render_json_s survey.cost_info and return
   end
 
   def set_info
@@ -100,11 +117,34 @@ class Admin::SurveysController < Admin::AdminController
     end    
   end
 
+  # 推送渠道设置相关
 
+  def sample_attributes
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      surveys_smp_attrs = survey.sample_attributes_for_promote.map { |e| e["sample_attribute_id"] }
+      SampleAttribute.normal.order_by(:type => :asc).map do |smp_attr|
+        smp_attr unless surveys_smp_attrs.include? smp_attr._id
+      end
+    end
+  end
+
+  def update_sample_attribute_for_promote
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      survey.add_sample_attribute_for_promote(params[:sample_attribute])
+    end
+  end
+
+  def remove_sample_attribute_for_promote
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      survey.remove_sample_attribute_for_promote(params[:sample_attribute_id])
+    end
+  end
 
   def promote
     if survey = Survey.where(:_id => params[:id]).first
       @promote = survey.serialize_in_promote_setting
+      gon.push({:id => params[:id]})
+      gon.push({:pmt_attrs => survey.sample_attributes_for_promote})
     else
 
     end
@@ -121,8 +161,10 @@ class Admin::SurveysController < Admin::AdminController
   end
 
   def destroy_attributes
-   result = @client.destroy_attributes(params)
-   render :json => result
+    render_json Survey.where(:_id => params[:id]).first do |survey|
+      survey.sample_attributes_for_promote.delete_at(params[:sample_attribute_index].to_i)
+      survey.save
+    end    
   end
 
 # ###########################

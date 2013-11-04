@@ -13,25 +13,36 @@
   <div class="title">
     <h5>绑定样本属性</h5>
   </div>
-  <%= form_tag("", method: 'put', name: 'attribute_bind_form') do %>
-    <p>
-    <label class="child-title f14 pl2">问题标题</label>
-    <%= @question['content']['text'] %>
-    </p>
-    <p>
-    <label class="child-title f14 pl2">选择绑定属性</label>
-    <select name="type" class="validate[required]">
-      <option value=""></option>
-      <% @attrs.each do |attr| %>
-        <option data-id="<%= attr['type'] %>" value="<%= attr['_id'] %>"><%= attr['name'] %></option>
-      <% end %>
-    </select>
-    </p>
-    <div class="panel-wrapper"><!-- extra view for bind attr -->
+  <%= form_tag("", method: 'put', name: 'attribute_bind_form', class: "form-horizontal") do %>
+    <div class="control-group">
+      <label class="control-label" for="input_title">问题标题</label>
+      <div class="controls">
+        <%= @question['content']['text'] %>
+      </div>
     </div>
-    <p>
-    <input class="blueBtn btn-new-ok" id="submit_bind" type="submit" value="确 定">
-    <%= link_to "删除属性绑定", admin_sample_attribute_bind_path(@question['_id']), method: :delete, confirm: "确定要删除吗", class: "submitForm greyishBtn button"   %>
-    </p>
+    <div class="control-group">
+      <label class="control-label" for="input_attr">选择绑定属性</label>
+      <div class="controls">
+        <select name="type" class="validate[required]">
+          <option value=""></option>
+          <% @attrs.each do |attr| %>
+            <option data-id="<%= attr['type'] %>" value="<%= attr['_id'] %>"><%= attr['name'] %></option>
+          <% end %>
+        </select>
+      </div>
+    </div>
+    <div class="control-group">
+      <label class="control-label" for="input_attr">详细设置</label>
+      <div class="controls">
+        <div class="panel-wrapper"><!-- extra view for bind attr -->
+        </div>
+      </div>
+    </div>    
+    <div class="control-group">
+      <div class="controls">
+        <input class="button btn-new-ok" id="submit_bind" type="submit" value="确 定">
+        <%= link_to "删除属性绑定", admin_sample_attribute_bind_path(@question['_id']), method: :delete, confirm: "确定要删除吗", class: "submitForm button"   %>
+      </div>
+    </div> 
   <% end %>
 </div>

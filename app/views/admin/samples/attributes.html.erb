@@ -2,26 +2,28 @@
   <%= javascript_include_tag "pages/admin/samples/attributes-bundle" %>
 <% end %>
 
-<% content_for :sidenav do %>
+<% content_for :sidebar do %>
 
-  <li>
-    <a href="/admin">
-    <i class="icon-chevron-right"></i>
-    样本列表
-    </a>
-  </li>
-  <li class="active">
-    <a href="/admin/samples/attributes">
-    <i class="icon-chevron-right"></i>
-    样本属性
-    </a>
-  </li>
-  <li>
-    <a href="/admin/samples/status">
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li>
+      <a href="/admin">
       <i class="icon-chevron-right"></i>
-      样本数据统计
-    </a>
-  </li>
+      样本列表
+      </a>
+    </li>
+    <li class="active">
+      <a href="/admin/samples/attributes">
+      <i class="icon-chevron-right"></i>
+      样本属性
+      </a>
+    </li>
+    <li>
+      <a href="/admin/samples/status">
+        <i class="icon-chevron-right"></i>
+        样本数据统计
+      </a>
+    </li>
+  </ul>
 <% end %>
 
 <div>
@@ -70,12 +72,13 @@
       <td><%= attr_type_tag attribute['type'] %></td>
       <td>
         <div class="btn-group">
-          <a class="btn handle" href="<%= attribute['_id'] %>/edit_attributes" >编辑</a>
+          <a class="btn handle" href="<%= attribute['_id'] %>/edit_attributes" ><i class="icon-pencil"></i>编辑</a>
           <button class="btn dropdown-toggle" data-toggle="dropdown">
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li><a href="#delete-<%= attribute['_id'] %>" class="delete-btn">删除</a></li>
+            <li><a href="/admin/statistics/<%= attribute['_id'] %>"><i class="icon-th-list"></i>统计</a></li>
+            <li><a href="#delete-<%= attribute['_id'] %>" class="delete-btn"><i class="icon-remove"></i>删除</a></li>
           </ul>
         </div>
       </td>

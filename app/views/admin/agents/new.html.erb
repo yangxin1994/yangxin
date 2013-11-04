@@ -2,25 +2,27 @@
   <%= javascript_include_tag "pages/admin/agents/form-bundle" %>
 <% end %>
 
-<% content_for :sidenav do %>
-  <li>
-    <a href="/admin/agents">
-    <i class="icon-chevron-right"></i>
-    代理列表
-    </a>
-  </li>
-  <li class="active">
-    <a href="/admin/agent_tasks/new">
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li>
+      <a href="/admin/agents">
       <i class="icon-chevron-right"></i>
-      新建代理
-    </a>
-  </li>
-  <li>
-    <a href="/admin/agent_tasks">
-    <i class="icon-chevron-right"></i>
-    代理任务列表
-    </a>
-  </li>
+      代理列表
+      </a>
+    </li>
+    <li class="active">
+      <a href="/admin/agent_tasks/new">
+        <i class="icon-chevron-right"></i>
+        新建代理
+      </a>
+    </li>
+    <li>
+      <a href="/admin/agent_tasks">
+      <i class="icon-chevron-right"></i>
+      代理任务列表
+      </a>
+    </li>
+  </ul>
   
 <% end %>
 

@@ -2,6 +2,7 @@ require 'data_type'
 require 'encryption'
 require 'error_enum'
 require 'tool'
+require 'array'
 class User
   include Mongoid::Document
   include Mongoid::Timestamps
@@ -400,56 +401,121 @@ class User
   def self.make_sample_attribute_statistics(sample_attribute)
     name = sample_attribute.name.to_sym
     analyze_requirement = sample_attribute.analyze_requirement
-    completion = 100 - User.where(name => nil).length * 100 / User.all.length
+    # completion = 100 - User.where(name => nil).length * 100 / User.all.length
     analyze_result = {}
-    attributes = User.only(name).where(name.ne => nil)
     case sample_attribute.type
     when DataType::ENUM
-      distribution = Array.new(sample_attribute.enum_array.length) { 0 }
-      attributes.each do |e|
-        attribute = e.name
-        distribution[attribute] = distribution[attribute] + 1
+      registered_users = Array.new(sample_attribute.enum_array.length) { 0 }
+      all_users = Array.new(sample_attribute.enum_array.length) { 0 }
+      users_with_answers = Array.new(sample_attribute.enum_array.length) { 0 }
+      User.all.each do |u|
+        attribute = u.read_sample_attribute(name)
+        next if attribute.blank? || attribute >= sample_attribute.enum_array.length
+        all_users[attribute] += 1
+        registered_users[attribute] += 1 if u.status == REGISTERED
+        users_with_answers[attribute] += 1 if u.answers.present?
       end
-      analyze_result["distribution"] = distribution
+      analyze_result["all_users"] = all_users
+      analyze_result["registered_users"] = registered_users
+      analyze_result["users_with_answers"] = users_with_answers
     when DataType::ARRAY
-      distribution = Array.new(sample_attribute.enum_array.length) { 0 }
-      attribute.each do |e|
-        attribute = e.name
-        attribute.each do |a|
-        distribution[a] = distribution[a] + 1
+      registered_users = Array.new(sample_attribute.enum_array.length) { 0 }
+      all_users = Array.new(sample_attribute.enum_array.length) { 0 }
+      users_with_answers = Array.new(sample_attribute.enum_array.length) { 0 }
+      User.all.each do |u|
+        attribute = u.read_sample_attribute(name)
+        next if attribute.blank?
+        attribute.each do |e|
+          next if e >= sample_attribute.enum_array.length
+          all_users[e] += 1
+          registered_users[e] += 1 if u.status == REGISTERED
+          users_with_answers[e] += 1 if u.answers.present?
         end
       end
-      analyze_result["distribution"] = distribution
+      analyze_result["all_users"] = all_users
+      analyze_result["registered_users"] = registered_users
+      analyze_result["users_with_answers"] = users_with_answers
     when DataType::ADDRESS
-      distribution = QuillCommon::AddressUtility.province_hash
-      attribute.each do |e|
-        address = e.name
-        distribution.each do |k, v|
-          if QuillCommon::AddressUtility.satisfy_region_code?(e.name, k)
-            v["count"] += 1
+      registered_users = QuillCommon::AddressUtility.province_hash
+      all_users = QuillCommon::AddressUtility.province_hash
+      users_with_answers = QuillCommon::AddressUtility.province_hash
+      provinces = QuillCommon::AddressUtility.province_hash.keys
+      User.all.each do |u|
+        attribute = u.read_sample_attribute(name)
+        provinces.each do |p|
+          if QuillCommon::AddressUtility.satisfy_region_code?(attribute, p)
+            all_users[p]["count"] += 1
+            registered_users[p]["count"] += 1 if u.status == REGISTERED
+            users_with_answers[p]["count"] += 1 if u.answers.present?
             break
           end
         end
       end
-      analyze_result["distribution"] = distribution
+      analyze_result["all_users"] = all_users
+      analyze_result["registered_users"] = registered_users
+      analyze_result["users_with_answers"] = users_with_answers
     when DataType::NUMBER
       segmentation = analyze_requirement["segmentation"] || []
-      attribute_value = attribute.map { |e| e.name }
-      analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
+      all_users_data = []
+      registered_users_data = []
+      users_with_answers_data = []
+      User.all.each do |u|
+        attribute = u.read_sample_attribute(name)
+        next if attribute.blank?
+        all_users_data << attribute
+        registered_users_data << attribute if u.status == REGISTERED
+        users_with_answers_data << attribute if u.answers.present?
+      end
+      analyze_result["all_users"] = Tool.calculate_segmentation_distribution(segmentation, all_users_data)
+      analyze_result["registered_users"] = Tool.calculate_segmentation_distribution(segmentation, registered_users_data)
+      analyze_result["users_with_answers"] = Tool.calculate_segmentation_distribution(segmentation, users_with_answers_data)
     when DataType::NUMBER_RANGE
       segmentation = analyze_requirement["segmentation"] || []
-      attribute_value = attribute.map { |e| e.name.mean }
-      analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
+      all_users_data = []
+      registered_users_data = []
+      users_with_answers_data = []
+      User.all.each do |u|
+        attribute = u.read_sample_attribute(name)
+        next if attribute.blank?
+        all_users_data << attribute.mean
+        registered_users_data << attribute.mean if u.status == REGISTERED
+        users_with_answers_data << attribute.mean if u.answers.present?
+      end
+      analyze_result["all_users"] = Tool.calculate_segmentation_distribution(segmentation, all_users_data)
+      analyze_result["registered_users"] = Tool.calculate_segmentation_distribution(segmentation, registered_users_data)
+      analyze_result["users_with_answers"] = Tool.calculate_segmentation_distribution(segmentation, users_with_answers_data)
     when DataType::DATE
       segmentation = analyze_requirement["segmentation"] || []
-      attribute_value = attribute.map { |e| e.name }
-      analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
+      all_users_data = []
+      registered_users_data = []
+      users_with_answers_data = []
+      User.all.each do |u|
+        attribute = u.read_sample_attribute(name)
+        next if attribute.blank?
+        all_users_data << attribute
+        registered_users_data << attribute if u.status == REGISTERED
+        users_with_answers_data << attribute if u.answers.present?
+      end
+      analyze_result["all_users"] = Tool.calculate_segmentation_distribution(segmentation, all_users_data)
+      analyze_result["registered_users"] = Tool.calculate_segmentation_distribution(segmentation, registered_users_data)
+      analyze_result["users_with_answers"] = Tool.calculate_segmentation_distribution(segmentation, users_with_answers_data)
     when DataType::DATE_RANGE
       segmentation = analyze_requirement["segmentation"] || []
-      attribute_value = attribute.map { |e| e.name.mean }
-      analyze_result["distribution"] = Tool.calculate_segmentation_distribution(segmentation, attribute_value)
+      all_users_data = []
+      registered_users_data = []
+      users_with_answers_data = []
+      User.all.each do |u|
+        attribute = u.read_sample_attribute(name)
+        next if attribute.blank?
+        all_users_data << attribute.mean
+        registered_users_data << attribute.mean if u.status == REGISTERED
+        users_with_answers_data << attribute.mean if u.answers.present?
+      end
+      analyze_result["all_users"] = Tool.calculate_segmentation_distribution(segmentation, all_users_data)
+      analyze_result["registered_users"] = Tool.calculate_segmentation_distribution(segmentation, registered_users_data)
+      analyze_result["users_with_answers"] = Tool.calculate_segmentation_distribution(segmentation, users_with_answers_data)
     end
-    return [completion, analyze_result]
+    return analyze_result
   end
 
   def mini_avatar

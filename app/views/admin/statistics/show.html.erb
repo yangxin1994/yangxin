@@ -1,0 +1,36 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/statistics/show-bundle" %>
+  <%= stylesheet_link_tag "pages/admin/statistics-bundle", :meida => 'all' %>  
+<% end %>
+
+<div id="canvas" class="span9">
+  <h2>
+    <span><%= @smp_attr.name %>统计</span><br>
+        
+  </h2>
+
+  <div class="btn-group">
+    <a href="?samples=registered_users" class="btn">注册样本</a>
+    <a href="?samples=all_users" class="btn">所有样本</a>
+    <a href="?samples=users_with_answers" class="btn">答题样本</a>
+  </div>
+
+  <div id="tooltip" class="hidden">
+    <p><strong>样本数量</strong></p>
+    <p><span id="area_value"></span></p>
+  </div>
+
+</div>
+<div class="span3">
+  <div id="canvas_side"></div>
+  <table class="table table-condensed table-hover">
+    <% samples = @smp_attr.analyze_result[params["samples"] || "registered_users"] %>
+    <% (samples|| {}).each do |al, count|%>
+    <tr>
+      <td><%= QuillCommon::AddressUtility.find_text_by_code(al) %></td>
+      <td><%= count["count"] %></td>
+    </tr>
+    <% end -%>
+
+  </table>
+</div>

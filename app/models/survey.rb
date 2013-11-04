@@ -130,6 +130,7 @@ class Survey
   index({ status: 1, title: 1 }, { background: true } )
   index({ status: 1, reward: 1}, { background: true } )
   index({ status: 1, is_star: 1 }, { background: true } )
+
   index({ quillme_promote_reward_type: 1 }, { background: true } )
   index({ quillme_hot: 1 }, { background: true } )
   index({ user_id: 1 }, { background: true } )
@@ -232,7 +233,6 @@ class Survey
   end
 
   def update_promote(options)
-    update_sample_attributes(options)
     options.each do |promote_type, promote_info|
       next unless promote_info.is_a? Hash
       options[promote_type][:promotable] = promote_info[:promotable] == "true"
@@ -240,34 +240,6 @@ class Survey
     update_promote_info(options)
     update_agent_promote(options)
     serialize_in_promote_setting
-  end
-
-  def update_sample_attributes(options)
-    options[:sample_attributes].each_value do |smp_attr|
-      if smp_attr[:id].present?
-        _id = smp_attr[:id].split('_')[0]
-        _type = smp_attr[:id].split('_')[1]
-        _value = ""
-        case _type.to_i
-        when 0
-          _value = smp_attr[:value]
-        when 1
-          _value = smp_attr[:value].split(' ')
-        when 2, 4
-          _value = smp_attr[:value].split(' ').map { |e| e.split(',') }
-        when 3, 5
-          _value = smp_attr[:value].split(' ').map { |e| e.split(',').map { |_t| Time.parse(_t).to_i } }
-        when 6
-          _value = smp_attr[:value].split(' ')
-        when 7
-          _value = smp_attr[:value].split(' ')
-        end
-        add_sample_attribute_for_promote({
-          :sample_attribute_id => _id,
-          :value => _value
-        })
-      end
-    end
   end
 
   def update_promote_info(options)
@@ -675,7 +647,7 @@ class Survey
       survey_obj["agent_promote_info"]["agent_tasks"] = [{}]
     end
    if SampleAttribute.count > 0
-      survey_obj["sample_attributes_list"] = SampleAttribute.all
+      survey_obj["sample_attributes_list"] = SampleAttribute.normal
     else
       survey_obj["sample_attributes_list"] = [{}]
     end
@@ -686,19 +658,20 @@ class Survey
   def sample_attributes
     smp_attrs = sample_attributes_for_promote
     smp_attrs.each_with_index do |smp_attr, index|
+      smp_attr[:value] ||= smp_attr["value"]
       case smp_attr['type'].to_i
       when 0
-        _value = smp_attr['value']
-      when 1
-        _value = smp_attr['value'].join("\n")
-      when 2, 4
-        _value = smp_attr['value'].map{|es| es.map { |e| e.join(',') }}.join("\n")
-      when 3, 5
-        _value = smp_attr['value'].map{|es| es.map { |e| e.strftime("%Y/%m/%d") }}.join("\n")
-      when 6
-        _value = smp_attr['value'].join("\n")
-      when 7
-        _value = smp_attr['value'].join("\n")
+        _value = smp_attr[:value]
+      # when 1, 7
+      #   _value = smp_attr[:value].join("\n")
+      # when 2, 4
+      #   _value = smp_attr[:value].map{|es| es.map { |e| e.join(',') }}.join("\n")
+      # when 3, 5
+      #   _value = smp_attr[:value].map{|es| es.map { |e| Time.at(e).strftime("%Y/%m/%d") }.join(',')}.join("\n")
+      # when 6
+      #   _value = smp_attr[:value].join("\n")
+      else
+        _value = smp_attr[:value]
       end
       smp_attrs[index]['value'] = _value
     end
@@ -752,11 +725,6 @@ class Survey
       begin
         line_answer.merge! qio.answer_import(row.to_hash, header_prefix)
       rescue Exception => emsg
-<<<<<<< HEAD
-        binding.pry
-=======
-        
->>>>>>> bugfix-spss_adderess
       end
     end
     line_answer
@@ -857,10 +825,18 @@ class Survey
   end
 
   def add_sample_attribute_for_promote(sample_attribute)
-    s = SampleAttribute.normal.find_by_id(sample_attribute["sample_attribute_id"])
+    s = SampleAttribute.normal.find_by_id(sample_attribute[:sample_attribute_id])
     return ErrorEnum::SAMPLE_ATTRIBUTE_NOT_EXIST if s.nil?
     sample_attribute[:type] = s.type
-    self.sample_attributes_for_promote << sample_attribute
+    if self.sample_attributes_for_promote.map{|sa| sa["sample_attribute_id"]}.include? sample_attribute[:sample_attribute_id]
+      self.sample_attributes_for_promote.each do |smp_attr|
+        if smp_attr["sample_attribute_id"] == sample_attribute[:sample_attribute_id]
+          smp_attr["value"] = sample_attribute[:value]
+        end
+      end
+    else
+      self.sample_attributes_for_promote << sample_attribute
+    end
     return self.save
   end
 
@@ -871,9 +847,13 @@ class Survey
     return self.save
   end
 
-  def remove_sample_attribute_for_promote(index)
-    self.sample_attributes_for_promote.delete(index)
-    return self.save
+  def remove_sample_attribute_for_promote(sample_attribute_id)
+    self.sample_attributes_for_promote.each_with_index do |smp_attr, i|
+      if smp_attr["sample_attribute_id"] == sample_attribute_id
+        self.sample_attributes_for_promote.delete_at(i)
+      end
+    end
+    self.save
   end
 
   after_create do |doc|
@@ -886,6 +866,30 @@ class Survey
       amount += r["amount"] - r["finished_count"]
     end
     return amount
+  end
+
+  def cost_info
+    cost_info = {mobile_cost: 0, alipay_cost: 0, point_cost: 0, lottery_cost: 0.0, jifenbao_cost: 0, introduce_number: 0}
+    self.answers.not_preview.finished.each do |a|
+      cost_info[:introduce_number] += 1 if a.introducer_id.present? && a.introducer_reward_assigned == true
+      next if a.reward_delivered != true
+      reward = (a.rewards.select { |e| e["checked"] == true }).first
+      next if reward.blank?
+      case reward["type"]
+      when RewardScheme::MOBILE
+        cost_info[:mobile_cost] += reward["amount"]
+      when RewardScheme::ALIPAY
+        cost_info[:alipay_cost] += reward["amount"]
+      when RewardScheme::POINT
+        cost_info[:point_cost] += reward["amount"]
+      when RewardScheme::LOTTERY
+        next if reward["win"] != true
+        cost_info[:lottery_cost] += Prize.find(reward["win_prize_id"]).price
+      when RewardScheme::JIFENBAO
+        cost_info[:jifenbao_cost] += reward["amount"]
+      end
+    end
+    cost_info
   end
 
   def max_num_per_ip_reached?(ip_address)

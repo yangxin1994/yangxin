@@ -22,6 +22,40 @@ $ ->
       error: ->
           alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
 
+  $(".promote").click ->
+    $this = $(this).closest('td')
+    $("#sid").val($this.data("sid"))
+    $('#promote_modal').modal('show')
+    $.ajax
+      url: "/admin/surveys/#{$this.data("sid")}/promote_info"
+      method: "GET"
+      success: (ret)->
+        console.log ret
+        if ret.success
+          $("#email_sended").html(ret.value.email.promote_email_count)
+        else
+          console.log ret
+          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+      error: ->
+          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")  
+
+  $(".cost").click ->
+    $this = $(this).closest('td')
+    $("#sid").val($this.data("sid"))
+    $.ajax
+      url: "/admin/surveys/#{$this.data("sid")}/cost_info"
+      method: "GET"
+      success: (ret)->
+        if ret.success
+          for k, v of ret.value
+            $('#' + k).text(v)
+          $('#cost_modal').modal('show')
+        else
+          console.log ret
+          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+      error: ->
+          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")    
+
   $("#send_info").click ->
     $('#info_modal').modal('hide');
     alert_msg.show('info', "正在处理,请稍后...")
