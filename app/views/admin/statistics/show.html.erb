@@ -26,10 +26,12 @@
   <table class="table table-condensed table-hover">
     <% samples = @smp_attr.analyze_result[params["samples"] || "registered_users"] %>
     <% (samples|| {}).each do |al, count|%>
-    <tr>
-      <td><%= QuillCommon::AddressUtility.find_text_by_code(al) %></td>
-      <td><%= count["count"] %></td>
-    </tr>
+    <%if @smp_attr.type == 6 %>
+      <tr>
+        <td><%= QuillCommon::AddressUtility.find_text_by_code(al) %></td>
+        <td><%= count["count"] %></td>
+      </tr>
+      <% end -%>
     <% end -%>
 
   </table>
