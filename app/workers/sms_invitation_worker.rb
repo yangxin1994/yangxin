@@ -9,6 +9,7 @@ class SmsInvitationWorker
 		# 3. find out samples for surveys
 		surveys_for_sample = {}
 		published_survey.each do |survey|
+			next if survey.remain_quota_number <= 0
 			# find samples for each survey
 			s_id = survey._id.to_s
 			sms_number = survey.sms_promote_info["sms_amount"].to_i
