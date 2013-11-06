@@ -409,7 +409,9 @@ class Answer
     self.save
   end
 
-  def satisfy_conditions(conditions)
+  def satisfy_conditions(conditions, refresh_quota = true)
+    # only answers that are finished contribute to quotas
+    return false if !self.is_finish && refresh_quota
     (conditions || []).each do |condition|
       satisfy = false
       case condition["condition_type"].to_s
