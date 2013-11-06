@@ -27,6 +27,10 @@
     <% samples = @smp_attr.analyze_result[params["samples"] || "registered_users"] %>
     <% (samples|| {}).each do |al, count|%>
     <%if @smp_attr.type == 6 %>
+      <th>
+        <td>地区</td>
+        <td>样本数量</td>
+      </th>
       <tr>
         <td><%= QuillCommon::AddressUtility.find_text_by_code(al) %></td>
         <td><%= count["count"] %></td>
