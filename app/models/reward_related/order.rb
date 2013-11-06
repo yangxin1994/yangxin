@@ -224,9 +224,11 @@ class Order
 
   def self.search_orders(email, mobile, code, status, source, type)
     if !email.blank?
-      orders = User.sample.find_by_email(email).try(:orders).desc(:created_at) || []
+      orders = User.sample.find_by_email(email).try(:orders)
+      orders = orders.nil? ? [] : orders.desc(:created_at)
     elsif !mobile.blank?
-      orders = User.sample.find_by_mobile(mobile).try(:orders).desc(:created_at) || []
+      orders = User.sample.find_by_mobile(mobile).try(:orders)
+      orders = orders.nil? ? [] : orders.desc(:created_at)
     elsif !code.blank?
       orders = Order.where(:code => /#{code}/).desc(:created_at)
     else

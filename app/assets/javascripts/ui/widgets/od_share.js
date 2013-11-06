@@ -19,7 +19,7 @@
     },
   
   	_popup_page:function(){
-  		if(parseInt(this.options.point) > 0 &&  typeof(window.current_user_id) == 'undefined' ){
+  		if(parseInt(this.options.point) > 0 && !window.current_user_id ){
   			page = '#share_survey'
   		}else{
   			page = '#s_survey'
