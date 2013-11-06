@@ -222,10 +222,12 @@ class Order
   def self.search_orders(email, mobile, code, status, source, type)
     if !email.blank?
       return [] if User.sample.find_by_email(email).nil?
-      orders = User.sample.find_by_email(email).orders.desc(:created_at) || []
+      orders = User.sample.find_by_email(email).try(:orders)
+      orders = orders.nil? ? [] : orders.desc(:created_at)
     elsif !mobile.blank?
       return [] if User.sample.find_by_mobile(mobile).nil?
-      orders = User.sample.find_by_mobile(mobile).orders.desc(:created_at) || []
+      orders = User.sample.find_by_mobile(mobile).try(:orders)
+      orders = orders.nil? ? [] : orders.desc(:created_at)
     elsif !code.blank?
       orders = Order.where(:code => /#{code}/).desc(:created_at)
     else
