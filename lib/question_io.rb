@@ -573,9 +573,10 @@ end
 class AddressBlankQuestionIo < QuestionIo
   def csv_header(header_prefix)
     @csv_header << "#{header_prefix}"+"_address"
-    if issue["format"] == 15
+    format = Tool::convert_int_to_base_arr(issue["format"])
+    if format.include? 1
       @csv_header << "#{header_prefix}"+"_detail"
-    end
+    end    
     if issue["has_postcode"]
       @csv_header << "#{header_prefix}"+"_postcode"
     end
@@ -584,29 +585,33 @@ class AddressBlankQuestionIo < QuestionIo
 
   def spss_header(header_prefix)
     fom = []
-    case issue["format"]
-    when 8
-      fom = ['省']
-      fom_pre = ['province']
-    when 12
-      fom = ['省', '市']
-      fom_pre = ['province', 'city']
-    when 14
-      fom = ['省', '市', '县/区']
-      fom_pre = ['province', 'city', 'county']
-    when 15
-      fom = ['省', '市', '县/区', '详细']
-      fom_pre = ['province', 'city', 'county', 'detail']
+    fom_pre = []
+    format = Tool::convert_int_to_base_arr(issue["format"])
+    if format.include? 8
+      fom << '省'
+      fom_pre << 'province'
+    end
+    if format.include? 4
+      fom << '市'
+      fom_pre << 'city'
+    end
+    if format.include? 2
+      fom << '县/区'
+      fom_pre << 'county'
+    end
+    if format.include? 1
+      fom << '详细'
+      fom_pre << 'detail'
     end
     fom.each_with_index do |f, index|
       @spss_header << {"spss_name" => "#{header_prefix}_#{fom_pre[index]}",
-                  "spss_type" => SPSS_STRING,
-                  "spss_label" => f}
+                       "spss_type" => SPSS_STRING,
+                       "spss_label" => f}
     end
     if issue["has_postcode"]
       @spss_header << {"spss_name" => "#{header_prefix}_postcode",
-                  "spss_type" => SPSS_STRING,
-                  "spss_label" => "邮编"}
+                       "spss_type" => SPSS_STRING,
+                       "spss_label" => "邮编"}
     end
     @header_count[header_prefix] ||= @spss_header.count
     @spss_header
@@ -616,20 +621,17 @@ class AddressBlankQuestionIo < QuestionIo
     clear_retval
     return Array.new(header_count(header_prefix)) if (v.nil? || v.try("blank?")) || v == {}
     add = QuillCommon::AddressUtility.find_province_city_town_by_code(v["address"]).strip.split('-')
-    case issue["format"]
-    when 1 , 2
+    format = Tool::convert_int_to_base_arr(issue["format"])
+    if format.include? 8
       @retval << add[0]
-    when 3 , 4
-      @retval << add[0]
+    end
+    if format.include? 4
       @retval << add[1]
-    when 7 , 8 , 14
-      @retval << add[0]
-      @retval << add[1]
+    end
+    if format.include? 2
       @retval << add[2]
-    when 15
-      @retval << add[0]
-      @retval << add[1]
-      @retval << add[2]
+    end
+    if format.include? 1
       @retval << v["detail"]
     end
     if issue["has_postcode"]

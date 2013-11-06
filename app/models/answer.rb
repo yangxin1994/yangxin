@@ -143,6 +143,11 @@ class Answer
     end
   end
 
+  def set_reject_with_type(reject_type, finished_at = Time.now.to_i)
+    set_reject
+    update_attributes(reject_type: reject_type, finished_at: finished_at)
+  end
+
   def find_lottery_answers
     lottery_data = {}
     prizes_arr = []
@@ -691,27 +696,21 @@ class Answer
     return true
   end
 
-  def check_question_quota
-    # 1. get the corresponding survey, quota, and quota stats
+  def check_question_quota(answer_content)
     quota = self.survey.show_quota
-    # 2. if all quota rules are satisfied, the new answer should be rejected
-    if quota["quota_satisfied"]
-      self.set_reject
-      self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
-      return false
-    end
-    # 3 else, if the "is_exclusive" is set as false, the new answer should be accepted
     return true if !quota["is_exclusive"]
-    # 4. check the rules one by one
+    has_related_rule = false
     quota["rules"].each do |rule|
-      # find out a rule that:
-      # a. the quota of the rule has not been satisfied
-      # b. this answer satisfies the rule
-      return true if rule["submitted_count"] < rule["amount"] && self.satisfy_conditions(rule["conditions"], false)
+      question_ids = []
+      (rule["conditions"] || []).each do |c|
+        question_ids << c["name"] if c["condition_type"].to_i == 1
+      end
+      has_related_rule = true if (answer_content.keys & question_ids).present?
+      return true if self.satisfy_conditions(rule["conditions"], false) && rule["submitted_count"] < rule["amount"]
     end
-    self.set_reject
-    self.update_attributes(reject_type: REJECT_BY_QUOTA, finished_at: Time.now.to_i)
-    return false
+    return true unless has_related_rule
+    set_reject_with_type(REJECT_BY_QUOTA)
+    false
   end
 
   def check_channel_ip_address_quota
@@ -883,6 +882,9 @@ class Answer
       quota["submitted_count"] += 1
     elsif old_status == EDIT && self.is_finish
       # user submits the answer, and the answer automatically passes review
+      Rails.logger.info "BBBBBBBBBBBBBBBBBB"
+      Rails.logger.info quota.inspect
+      Rails.logger.info "BBBBBBBBBBBBBBBBBB"
       quota["submitted_count"] += 1
       quota["finished_count"] += 1
     elsif old_status == UNDER_REVIEW && self.is_finish

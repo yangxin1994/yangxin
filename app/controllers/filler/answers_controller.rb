@@ -135,19 +135,19 @@ class Filler::AnswersController < Filler::FillerController
 		render_json_e(ErrorEnum::WRONG_ANSWER_STATUS) and return if !@answer.is_edit
 
 		# 1. update the answer content
-		retval = @answer.update_answer(params[:answer_content])
+		retval = @answer.update_answer(params[:answer_content] || {})
 
 		# 2. check quality control
-		passed = @answer.check_quality_control(params[:answer_content])
+		passed = @answer.check_quality_control(params[:answer_content] || {})
 
 		# 3. check screen questions
-		passed &&= @answer.check_screen(params[:answer_content]) if passed
+		passed &&= @answer.check_screen(params[:answer_content] || {}) if passed
 
 		# 4. check quota questions (skip for previewing)
-		passed &&= @answer.check_question_quota if !@answer.is_preview && passed
+		passed &&= @answer.check_question_quota(params[:answer_content] || {}) if !@answer.is_preview && passed
 
 		# 5. update the logic control result
-		@answer.update_logic_control_result(params[:answer_content]) if passed
+		@answer.update_logic_control_result(params[:answer_content] || {}) if passed
 
 		# 6. automatically finish the answers that do not allow pageup
 		@answer.finish(true) if passed
