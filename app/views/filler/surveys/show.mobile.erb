@@ -4,73 +4,73 @@
 		if @survey_closed
 			@page_title = '错误 - 问卷已经关闭'
 		else
-			@page_title = "#{@is_preview ? '答题预览 - ' : ''}#{@survey['title']}"
+			@page_title = "#{@is_preview ? '答题预览 - ' : ''}#{@survey.title}"
 		end
 	end
 %>
 
 <% content_for :head do %>
 	<% if !@survey.nil? %>
-	<%= javascript_include_tag "pages/filler/survey-mobile" %>
-	<%= stylesheet_link_tag    "pages/filler/survey-mobile" %>
+		<%= javascript_include_tag "pages/filler/survey-mobile" %>
+		<%= stylesheet_link_tag    "pages/filler/survey-mobile" %>
 
-	<script type="text/javascript">
-	jQuery(function($) {
-		// referer
-		window.referer = "<%= raw escape_javascript(@referer_host) %>";
-		
-		// set welcome message
-		var left_time = <%=@left_time %>;
-		if(left_time > 0) {
-			$('#welcome_msg').append("回答本问卷大概需要占用您<span class='time'>" + $.util.printTimeFriendly(left_time) + "</span>的时间。");
-		};
-		var reward = <%=@reward.nil? ? "null" : (raw @reward.to_json) %>;
-		if(reward && reward.reward_type > 0) {
-			switch(reward.reward_type) {
-				case 1: 
-					$('#welcome_msg').prepend('答题将获得一次<span class="yellow-txt"><a target="_blank" href="/lotteries/'
-						+ reward.lottery_id + '">“' + reward.lottery_title + '”</a></span>的抽奖机会，'); 
-					break;
-				case 2:
-					$('#welcome_msg').prepend('答题完成后您将获得<span class="yellow-txt">' + reward.point + '</span>积分的奖励。'); 
-					break;
-			}
-		};
-	});	
-	</script>
+		<script type="text/javascript">
+			jQuery(function($) {
+				window.rsi = '<%=params[:id]  %>';
+				// referer
+				window.referer = "<%= raw escape_javascript(@referer_host) %>";
+				window.channel = <%= @channel %>;
+				// set welcome message
+				var left_time = <%= @survey.estimate_answer_time %>;
+				if(left_time > 0) {
+					$('#welcome_msg').append("回答本问卷大概需要占用您<span class='time'>" + $.util.		printTimeFriendly(left_time) + "</span>的时间。");
+				};
+
+				var reward_type = <%= @reward_scheme_type %>;
+				if(reward_type > 0) {
+					switch(reward_type) {
+						case 1: 
+							$('#welcome_msg').prepend('答题完成后您将获得<span class="yellow-txt">' + <%=  @reward_money %> + '</span>现金奖励。'); 
+							break;
+						case 2:
+							$('#welcome_msg').prepend('答题完成后您将获得<span class="yellow-txt">' + <%= @reward_point %> + '</span>积分奖励。'); 
+							break;
+						case 3:
+							$('#welcome_msg').prepend('答题将获得一次抽奖机会')
+					}
+				};
+			});	
+		</script>
 	<% end %>
 <% end %>
 
 
 <div id='sf_main'>
-<% if @link_epxire %>
-	<div class='error-con'>您所访问的答题预览链接已经过期，请与管理员联系获取新链接。</div>
-<% elsif @survey_closed %>
+<% if @survey_closed %>
 	<div class='error-con'>对不起，您所访问的问卷达到回收要求已经关闭，感谢您的关注，欢迎参加其他调研。</div>
 <% elsif !@survey.nil? %>
-<h2 class="title"><%= @survey['title'] %></h2>
-<div class="page">
-	<div class="describe"><%= raw @survey['welcome'] %></div>
-	<div class="gift-time">
-		<p id="welcome_msg"></p>
-		<p class="tip">请在开始后24小时内完成答题。</p>
-	</div>
-	<div class="login-panel">
-		<% if !user_signed_in && @reward['reward_type'] > 0 %>
-		<p><input id='email_ipt' type="text" class='email' placeholder="邮箱" param='e' autofocus /></p>
-		<% end %>
-		<% password_type = @survey['access_control_setting']['password_control']['password_type'] %>
-		<% if password_type == 2 %>
-			<p><input id='username_ipt' type="text" class='username' placeholder="答题用户名" autofocus /></p>
-		<% end %>
-		<% if password_type >= 0 %>
-			<p><input id='password_ipt' type="password" placeholder="答题密码" autofocus /></p>
-		<% end %>
-		<p><a href="javascript:void(0);" id='start_btn' class='btn'>开始答题</a></p>
-		<p class="error" id="error_msg" style="display:none;">调查问卷尚未发布，请等待问卷发布之后再进行填写。</p>
-	</div>
-	<div class="copyright">OopsData Consultant Co.,Ltd</div>
-</div>
+	<h2 class="title"><%= @survey.title %></h2>
+	<div class="page">
+		<div class="describe"><%= raw @survey.welcome %></div>
+		<div class="gift-time">
+			<p id="welcome_msg"></p>
+			<p class="tip">请在开始后24小时内完成答题。</p>
+		</div>
+		<div class="login-panel">
+			<% password_type = @survey['access_control_setting']['password_control']['password_type'] %>
+			<% if password_type == 2 %>
+				<p>
+					<input id='username_ipt' type="text" class='username' placeholder="答题用户名" autofocus />
+				</p>
+			<% end %>
+			<% if password_type >= 0 %>
+				<p><input id='password_ipt' type="password" placeholder="答题密码" autofocus /></p>
+			<% end %>
 
+			<p><a href="javascript:void(0);" id='start_btn' class='btn'>开始答题</a></p>
+			<p class="error" id="error_msg" style="display:none;">调查问卷尚未发布，请等待问卷发布之后再进行填写。<	/p>
+		</div>
+		<div class="copyright">OopsData Consultant Co.,Ltd</div>
+	</div>
 <% end %>
 </div>
