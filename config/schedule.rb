@@ -38,3 +38,7 @@ end
 every 1.days do
 	runner "SampleAttribute.make_statistics"
 end
+
+every 1.days do
+	runner "User.clear_point"
+end

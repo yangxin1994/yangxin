@@ -1066,4 +1066,14 @@ class User
 			u.cal_point
 		end
 	end
+
+	def self.clear_point
+		User.all.each do |u|
+			if u.point > 0 && u.answers.length == 0 && u.status == User::VISITOR
+				u.point = 0
+				u.logs.point_logs.destroy_all
+				u.save
+			end
+		end
+	end
 end
