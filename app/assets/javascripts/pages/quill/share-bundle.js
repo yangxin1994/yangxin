@@ -300,6 +300,7 @@ jQuery(function($) {
 					options: options
 				})).appendTo(qs_con);
 				// set rule value
+				cond.value = cond.value || [];
 				_.each(cond.value, function(input_id) {
 					$('#' + dom_id + '_' + input_id, dom).attr('checked', 'checked');
 				});

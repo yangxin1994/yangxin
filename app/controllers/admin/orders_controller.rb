@@ -23,7 +23,7 @@ class Admin::OrdersController < Admin::AdminController
       params[:code],
       params[:status].to_i,
       params[:source].to_i,
-      params[:type].to_i).desc(:created_at)
+      params[:type].to_i)
     @orders = auto_paginate(order_list) do |orders|
       orders.map { |e| e.info_for_admin }
     end

@@ -434,16 +434,16 @@ class Sample::UsersController < Sample::SampleController
   # PUT /users/setting/change_mobile?email=
   def change_email
     render_json_e ErrorEnum::EMAIL_OR_MOBILE_EXIST and return if !User.find_by_email(params[:email]).nil?
-    current_user ||= User.find_by_mobile(params[:mobile])
-    render_json_e ErrorEnum::USER_NOT_EXIST and return unless current_user.present? 
-    current_user.email_to_be_changed = params[:email]
-    current_user.change_email_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
-    current_user.save
+    user = current_user || User.find_by_mobile(params[:mobile])
+    render_json_e ErrorEnum::USER_NOT_EXIST and return unless user.present?
+    user.email_to_be_changed = params[:email]
+    user.change_email_expiration_time = Time.now.to_i + OOPSDATA[RailsEnv.get_rails_env]["activate_expiration_time"].to_i
+    user.save
     EmailWorker.perform_async("change_email",
       params[:email],
       "#{request.protocol}#{request.host_with_port}",
       "/users/setting/change_email_verify_key",
-      :user_id => current_user._id.to_s)
+      :user_id => user._id.to_s)
     render_json_s and return
   end
 
