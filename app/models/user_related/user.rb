@@ -740,7 +740,7 @@ class User
     time = Time.now
     User.where(:updated_at.lt => time).each_with_index do |u, i|
       puts i if i%1000 == 0
-      if u.point > 0 && u.answers.length == 0 && u.status == User::VISITOR
+      if u.answers.length == 0 && u.status == User::VISITOR
         u.logs.destroy_all
         u.destroy
       end
