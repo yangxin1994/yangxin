@@ -66,7 +66,7 @@
           </a>
         </td>        
 	      <td>                           
-	      	<a href="/users/notifications" title="点击查看/回复"><%= announcement["title"] %></a></td>
+	      	<a href="/public_notices/<%= announcement["_id"] %>" title="点击查看/回复"><%= announcement["title"] %></a></td>
 	      <td><%= announcement["user_email"] %></td>
 	      <td><%= announcement["created_at"].strftime("%F %T") %></td>
 	      <td>
