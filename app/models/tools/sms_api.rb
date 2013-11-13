@@ -83,6 +83,7 @@ class SmsApi # 短信接口
                       }) 
     #status = get_sent_status
     SmsHistory.create(mobile:phone,type:type,seqid:seqid)
+    return result
   end
 
   #查询短信剩余条数
