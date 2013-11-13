@@ -91,9 +91,7 @@ class Admin::SamplesController < Admin::AdminController
   def answer_log
     @sample = User.find(params[:id])
     @answers = @sample.answers.not_preview.desc(:created_at)
-    @answers = auto_paginate(@answers) do |paginated_answers|
-      paginated_answers.map { |e| e.info_for_admin }
-    end
+    @answers = auto_paginate(@answers)
 
     data = @answers['data'].map do |item|
       # Need attrs: rewards, answer_status, answer_id, amount
