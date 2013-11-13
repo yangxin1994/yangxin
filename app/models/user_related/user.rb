@@ -586,7 +586,7 @@ class User
     self.last_login_client_type = client_type
     self.login_count = 0 if self.last_login_time.blank? || Time.at(self.last_login_time).day != Time.now.day
     return ErrorEnum::LOGIN_TOO_FREQUENT if self.login_count > OOPSDATA[Rails.env]["login_count_threshold"]
-    return ErrorEnum::USER_LOCKED if self.lock
+    return ErrorEnum::USER_LOCKED if self.is_block
     self.login_count = self.login_count + 1
     self.last_login_time = Time.now.to_i
     self.auth_key = Encryption.encrypt_auth_key("#{self._id}&#{Time.now.to_i.to_s}")
