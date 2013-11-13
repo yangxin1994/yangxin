@@ -81,13 +81,14 @@
       <tr>
         <td><input type="checkbox" name="sample_ids" class="check-sample" value="<%= sample['_id'] %>"/> </td>
         <td><%= "[黑]" if sample["is_block"] %><a href="/admin/samples/<%= sample['_id'] %>" title="title"><%= sample["email"] %></a></td>
-        <td><%= sample["mobile"] %></td>
+        <td><%= "[黑]" if sample["is_block"] %><a href="/admin/samples/<%= sample['_id'] %>" title="title"><%= sample["mobile"] %></a></td>
         <td><%= sample["point"] %></td>
         <td data-sid="<%= sample['_id'] %>" 
             data-email="<%= sample['email'] %>" 
             data-a_email="<%= sample['email_activation'] %>" 
             data-mobile="<%= sample['mobile'] %>" 
             data-a_mobile="<%= sample['mobile_activation'] %>" 
+            data-a_mobile_p="<%= !!sample['password'] %>" 
             data-is_blcok="<%= sample['is_block'] %>" 
             data-roles="<%= sample['user_role'] %>"> 
           <div class="btn-group">
@@ -203,17 +204,23 @@
         <div class="control-group">
           <label class="control-label" for="email">邮箱</label>
           <div class="controls">
-            <input type="text" id="i_email" name="email" placeholder="Type something…">
+            <input type="text" id="i_email" name="email" placeholder="填写用户邮箱">
             <input class="ck" type="checkbox" name="is_active" id="a_email"> 激活
           </div>
         </div>
         <div class="control-group">
           <label class="control-label" for="mobile">电话</label>
           <div class="controls">
-            <input type="text" id="i_mobile" name="mobile" placeholder="Type something…">
+            <input type="text" id="i_mobile" name="mobile" placeholder="填写用户手机">
             <input class="ck" type="checkbox" name="is_active" id="a_mobile"> 激活
           </div>
-        </div>         
+        </div>
+        <div id="a_mobile_p" class="control-group">
+          <label class="control-label" for="mobile">预设密码</label>
+          <div class="controls">
+            <input type="text" id="i_psw" name="mpsw" placeholder="Type something…">
+          </div>
+        </div>          
       </form>
     </div>
     <div class="modal-footer">

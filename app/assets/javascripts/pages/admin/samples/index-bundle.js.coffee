@@ -28,6 +28,7 @@ $ ->
           alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
 
   $(".roles").click ->
+    $("#a_mobile_p").hide()
     $(".ck").prop("checked", false)
     $this = $(this).closest('td')
     window.current_$ = $this
@@ -37,6 +38,7 @@ $ ->
 
     $("#a_email").prop("checked", true) if $this.data("a_email") == true
     $("#a_mobile").prop("checked", true) if $this.data("a_mobile") == true
+    $("#a_mobile_p").show() if !$this.data("a_mobile_p")
     $("#ck_block").prop("checked", true) if $this.data("is_blcok") == true
 
     $("#ck_sample").prop("checked", true) if $this.data("roles") & 1
@@ -53,6 +55,8 @@ $ ->
     _block = $("#ck_block").prop("checked")
     _a_email = $("#a_email").prop("checked")
     _a_mobile = $("#a_mobile").prop("checked")
+    _a_mobile_p = _a_mobile && $("#i_psw").val()
+
     roles = []
     roles.push(1)  if $("#ck_sample").prop("checked")
     roles.push(2)  if $("#ck_guest").prop("checked")
@@ -70,6 +74,7 @@ $ ->
         email_activation: _a_email
         mobile: $("#i_mobile").val()
         mobile_activation: _a_mobile
+        password: $("#i_psw").val()
       success: (ret)->
         if ret.success
           console.log ret
@@ -77,6 +82,7 @@ $ ->
           window.current_$.data("a_email", _a_email)
           window.current_$.data("a_mobile", _a_mobile)
           window.current_$.data("roles", roles.sum())
+          window.current_$.data("a_mobile_p", _a_mobile_p)
           alert_msg.show('success', "操作完成!")
         else
           console.log ret
