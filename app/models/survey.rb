@@ -495,7 +495,7 @@ class Survey
   end
 
   def spss_header
-    headers =[]
+    headers =["IP"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.spss_header("q#{i+1}")
     end
@@ -503,7 +503,7 @@ class Survey
   end
 
   def excel_header
-    headers =[]
+    headers =["IP"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -550,7 +550,7 @@ class Survey
     answer_length = answers.length
     last_time = Time.now.to_i
     answers.each_with_index do |answer, index|
-      line_answer = []
+      line_answer = [answer.ip_address]
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index
