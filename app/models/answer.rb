@@ -1274,7 +1274,7 @@ class Answer
       when RewardScheme::POINT 
         self["select_reward"] = "#{rew["amount"].to_i}积分"
       when RewardScheme::LOTTERY
-        lottery_link = "/lotteries/#{a["answer_id"]}"
+        lottery_link = "/lotteries/#{self.id.to_s}"
         self["select_reward"] = %Q{<a class='lottery' target='_blank' href='#{lottery_link}'>抽奖机会</a>}
       when RewardScheme::JIFENBAO
         self["select_reward"] = "#{rew["amount"].to_i}集分宝"
