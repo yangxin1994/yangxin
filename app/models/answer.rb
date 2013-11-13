@@ -121,6 +121,21 @@ class Answer
       define_method("set_#{status_name}".to_sym) { self.status = 2**index; self.save}
     end
   end
+
+  def self.search(options)
+    answers = self.not_preview
+    answers = answers.find_by_status(options[:status]) if options[:status]
+    if options[:keyword].present?
+      if options[:keyword] =~ /^.+@.+$/
+        options[:email] = options[:keyword]
+      else
+        options[:mobile] = options[:keyword]
+      end
+      user = User.search_sample(options[:email], options[:mobile], true).first
+      answers = answers.where(:user_id => user.try(:_id))
+    end
+    answers  
+  end  
   
   def_status_attr
 

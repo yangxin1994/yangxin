@@ -226,6 +226,9 @@ class Survey
     when /^.+@.+$/
       uid = User.where(:email => options[:keyword]).first.try '_id'
       surveys = surveys.where(:user_id => uid)
+    when /^13[0-9]{9}|15[0|1|2|3|5|6|7|8|9]\d{8}|18[0|5|6|7|8|9]\d{8}/
+      uid = User.where(:mobile => options[:keyword]).first.try '_id'
+      surveys = surveys.where(:user_id => uid)
     when ''
       surveys
     else

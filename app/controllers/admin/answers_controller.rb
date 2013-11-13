@@ -22,10 +22,11 @@ class Admin::AnswersController < Admin::AdminController
       survey = current_user.answer_auditor_allocated_surveys.find(params[:id])
     end
 
-    @answers = auto_paginate survey.answers.not_preview.find_by_status(params[:status]) do |paginated_answers|
+    @answers = auto_paginate survey.answers.search(params) do |paginated_answers|
       paginated_answers.map do |a|
         if a.user.present?
-          a.write_attribute(:user_email_mobile, a.user.try(:email) || a.user.try(:mobile))
+          a.write_attribute(:user_email_mobile, [a.user.email, a.user.mobile, "游客"].select { |e| e.present? }.first)
+          a.write_attribute(:user_id, a.user.id)
         end
         a
       end
