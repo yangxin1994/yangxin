@@ -80,7 +80,6 @@ class Admin::QualityQuestionsController < Admin::AdminController
           :matching_items => params[:answers].split(';').map{ |a| a.split(',')}.select{|a| a.present?}
         }
       end
-      binding.pry
       QualityControlQuestionAnswer.update_answer(qid, params[:quality_control_type].to_i, answer_content)     
     end
     redirect_to admin_quality_question_path(params[:id])
