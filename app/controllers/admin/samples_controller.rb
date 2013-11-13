@@ -91,9 +91,7 @@ class Admin::SamplesController < Admin::AdminController
   def answer_log
     @sample = User.find(params[:id])
     @answers = @sample.answers.not_preview.desc(:created_at)
-    @answers = auto_paginate(@answers) do |paginated_answers|
-      paginated_answers.map { |e| e.info_for_admin }
-    end
+    @answers = auto_paginate(@answers)
 
     data = @answers['data'].map do |item|
       # Need attrs: rewards, answer_status, answer_id, amount
@@ -239,9 +237,9 @@ class Admin::SamplesController < Admin::AdminController
       when 0 then "-1-1"
       else ""
       end
-      set_attr[:analyze_requirement][:segmentation] = attr[:value_3].split(' ').map { |e| Time.parse("#{e}#{strf}").to_i }
+      attr[:analyze_requirement][:segmentation] = attr[:value_3].split(' ').map { |e| Time.parse("#{e}#{strf}").to_i }
     when DataType::NUMBER_RANGE
-      set_attr[:analyze_requirement][:segmentation] = attr[:value_4].split(' ').map { |e| e.to_f }
+      attr[:analyze_requirement][:segmentation] = attr[:value_4].split(' ').map { |e| e.to_f }
     when DataType::DATE_RANGE
       attr[:date_type] = attr[:date_type_5].to_i
       strf = case attr[:date_type]
