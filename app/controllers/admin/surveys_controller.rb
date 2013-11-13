@@ -6,9 +6,6 @@ class Admin::SurveysController < Admin::AdminController
 	# *****************************
 
   def index
-    @side_nav = [
-      {url:"asdf", title:"asdf"}
-    ]
     @surveys = auto_paginate Survey.search(params)
   end
 
