@@ -97,7 +97,7 @@ $ ->
         .text((d)-> d.properties.name)
 
   pie_chart = (samples)->
-    samples = gon.analyze_result["#{samples}"]
+    samples = gon.analyze_result["#{samples}"] || []
 
     width = 700
     height = 500
@@ -109,7 +109,7 @@ $ ->
           if index == 0
             data.push 
               _key: "小于 #{item}"
-              _value: samples[index] || 0          
+              _value: samples[index] || 0
             item = "#{item} ~ #{gon.analyze_requirement.segmentation[index + 1]}"
           else if index == gon.analyze_requirement.segmentation.length - 1
             item = "大于 #{item}"
