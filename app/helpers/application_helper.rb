@@ -73,6 +73,7 @@ module ApplicationHelper
       when 'less than 5 seconds'   then '5秒前'  
       when 'less than 10 seconds' then '10秒前'  
       when 'less than 20 seconds' then '20秒前'  
+      else time
       end  
     else  
       mun = time.to_i   
@@ -84,6 +85,7 @@ module ApplicationHelper
       when 'day','ays' then mun.to_s+'天前'  
       when 'nth','ths' then mun.to_s+'个月前'  
       when 'ear','ars' then mun.to_s+'年前'  
+      else time
       end  
     end 
   end
