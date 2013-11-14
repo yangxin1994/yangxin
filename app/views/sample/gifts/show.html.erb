@@ -37,7 +37,7 @@
             <div><span>需要 :</span><span><b class="s-font"><%= @data[:gift].point %></b>积分</span></div>
             <div><span>价值 :</span><span>￥<%=@data[:gift].price %>元</span></div>
             <div>
-              <span>已兑 :</span><span class="gift_num"><%= @data[:gift].exchange_count %>件</span><span>(库存: <%= @data[:gift].quantity %>件)</span>
+              <span>已兑 :</span><span class="gift_num"><%= @data[:gift].exchange_count %>件</span>
             </div>
             <% if user_signed_in %>
               <% if @data[:gift].status == Gift::ON_THE_SHELF %>
