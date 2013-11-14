@@ -95,12 +95,19 @@ $ ->
       activeClass: ""
       drop: (event, ui) ->
         $item = ui.draggable
-        if $(group).children("#" + $item.attr("id")).length is 0
+        if $(group).children("#" + $item.data("id")).length is 0
           $ic = $item.clone()
+          console.log $item
           $ic.children('.drag-choice').html("拖拽: #{$item.children("input[type=text]").val()}")
           $ic.children('span.delete').remove()
           $ic.children('input').remove()
           $ic.appendTo group
+          $ic.draggable
+            cancel: "input" # clicking an icon won't initiate dragging
+            revert: "invalid" # when not dropped, the item will revert back to its initial position
+            containment: "document"
+            helper: "clone"
+            cursor: "move"
     false
 
 
@@ -108,6 +115,7 @@ $ ->
     _p = $(this).parent().parent()
     _p.next("p").remove()
     _p.remove()
+    false
 
   $("#btn_sub").click ->
     _answer_groups = []

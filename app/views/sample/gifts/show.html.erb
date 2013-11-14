@@ -37,12 +37,20 @@
             <div><span>需要 :</span><span><b class="s-font"><%= @data[:gift].point %></b>积分</span></div>
             <div><span>价值 :</span><span>￥<%=@data[:gift].price %>元</span></div>
             <div>
-              <span>已兑 :</span><span class="gift_num"><%= @data[:gift].exchange_count %>件</span><span>(库存: <%= @data[:gift].quantity %>件)</span>
+              <span>已兑 :</span><span class="gift_num"><%= @data[:gift].exchange_count %>件</span>
             </div>
             <% if user_signed_in %>
-              <button class="reedm_right_now">立即兑换</button>
+              <% if @data[:gift].status == Gift::ON_THE_SHELF %>
+                <button class="reedm_right_now">立即兑换</button>
+              <% else %>
+                <button>已经下架</button>
+              <% end %>
             <% else %>
-              <button class="reedm_right_now not_login">立即兑换</button>
+              <% if @data[:gift].status == Gift::ON_THE_SHELF %>
+                <button class="reedm_right_now not_login">立即兑换</button>
+              <% else %>
+                <button>已经下架</button>
+              <% end %>
             <% end %>
           </div>
         </div>

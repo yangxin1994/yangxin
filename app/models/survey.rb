@@ -219,17 +219,23 @@ class Survey
   end
 
   def self.search(options = {})
-    surveys = Survey.desc(:star).desc(:created_at)
-    surveys = surveys.in(:status => Tool.convert_int_to_base_arr(options[:status])) if options[:status]
+    surveys = Survey.all
+    surveys = survey.in(:status => Tool.convert_int_to_base_arr(options[:status])) if options[:status]
+    surveys = surveys.where(:quillme_promotable => true) if options[:quillme_only].to_s == "true"
     case options[:keyword].to_s
     when /^.+@.+$/
       uid = User.where(:email => options[:keyword]).first.try '_id'
+      surveys = surveys.where(:user_id => uid)
+    when /^13[0-9]{9}|15[0|1|2|3|5|6|7|8|9]\d{8}|18[0|5|6|7|8|9]\d{8}/
+      uid = User.where(:mobile => options[:keyword]).first.try '_id'
       surveys = surveys.where(:user_id => uid)
     when ''
       surveys
     else
       surveys = surveys.where(:title => /.*#{options[:keyword]}.*/)
     end
+    surveys = surveys.desc(:star).desc(:created_at)
+
   end
 
   def update_promote(options)
@@ -495,7 +501,7 @@ class Survey
   end
 
   def spss_header
-    headers =[]
+    headers =["IP"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.spss_header("q#{i+1}")
     end
@@ -503,7 +509,7 @@ class Survey
   end
 
   def excel_header
-    headers =[]
+    headers =["IP"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -550,7 +556,7 @@ class Survey
     answer_length = answers.length
     last_time = Time.now.to_i
     answers.each_with_index do |answer, index|
-      line_answer = []
+      line_answer = [answer.ip_address]
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index

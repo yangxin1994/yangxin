@@ -12,6 +12,19 @@ $ ->
   $('#myTab a').click (e)->
     e.preventDefault()
     $(this).tab('show')
+    
+  do ->
+    $(".attr-id").each ->
+      $this = $(this)
+      $this.prev("ul").find("a[href='#attr-#{$this.val()}']").click()
+    
+    $(".dropselect").each ->
+      $this = $(this)
+      _val = $this.next('input').val()
+      $this.find('a').each ->
+        $_this = $(this)
+        if $_this.attr("href").split('-')[1] == _val
+          $_this.click()
 
   # helpers
 

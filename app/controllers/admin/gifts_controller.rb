@@ -62,4 +62,10 @@ class Admin::GiftsController < Admin::AdminController
     end
   end
 
+  def outstock
+    render_json @gift = Gift.where(:_id =>params[:id]).first do |gift|
+      success_true gift.update_attributes(:status => 2)
+    end
+  end
+
 end

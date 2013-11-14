@@ -586,7 +586,7 @@ class User
     self.last_login_client_type = client_type
     self.login_count = 0 if self.last_login_time.blank? || Time.at(self.last_login_time).day != Time.now.day
     return ErrorEnum::LOGIN_TOO_FREQUENT if self.login_count > OOPSDATA[Rails.env]["login_count_threshold"]
-    return ErrorEnum::USER_LOCKED if self.lock
+    return ErrorEnum::USER_LOCKED if self.is_block
     self.login_count = self.login_count + 1
     self.last_login_time = Time.now.to_i
     self.auth_key = Encryption.encrypt_auth_key("#{self._id}&#{Time.now.to_i.to_s}")
@@ -646,6 +646,10 @@ class User
   def set_sample_role(role)
     self.user_role = role.sum
     return self.save
+  end
+
+  def set_password_when_nil(password)
+    self.update_attributes(:password => Encryption.encrypt_password(password)) if self.password.blank? && password.present?
   end
 
   # 我推广的问卷数
@@ -734,5 +738,16 @@ class User
       nickname ||= self.mobile
     end
     return nickname
+  end
+
+  def self.clear_users
+    time = Time.now
+    User.where(:updated_at.lt => time).each_with_index do |u, i|
+      puts i if i%1000 == 0
+      if u.answers.length == 0 && u.status == User::VISITOR && u.email_subscribe == false && u.mobile_subscribe == false
+        u.logs.destroy_all
+        u.destroy
+      end
+    end
   end
 end

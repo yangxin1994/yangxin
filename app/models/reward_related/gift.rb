@@ -125,7 +125,7 @@ class Gift
 
   #订单(兑换)流程走完之后该值加一，表示该礼品兑换的次数
   def inc_exchange_count
-      inc(:exchange_count, 1)
+    inc(:exchange_count, 1)
   end
 
   def inc_view_count

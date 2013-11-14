@@ -389,6 +389,9 @@ OopsData::Application.routes.draw do
     end
 
     resources :announcements do
+      member do
+        put :star
+      end
     end
 
     resources :advertisements do

@@ -45,9 +45,11 @@
         <span class="caret"></span>
       </a>
       <ul class="dropdown-menu">
-<!--         <li><a href="">加入黑名单</a> </li>
-        <li><a href="">移除黑名单</a> </li>
-        <!-- dropdown menu links --> -->
+        <% if params[:is_block].to_s == "true" %>
+          <li><a href="?is_block=false">不显示黑名单用户</a> </li>
+        <% else %>
+          <li><a href="?is_block=true">显示黑名单用户</a> </li>
+        <% end %>
       </ul>
     </div>
     <form class="form-search" style="display:inline">
@@ -71,6 +73,7 @@
         <th>邮箱</th>
         <th>电话</th>
         <th>积分</th>
+        <th>注册时间</th>
         <th width="15%">操作</th>
       </tr>
     </thead>
@@ -78,14 +81,16 @@
       <% @samples["data"].each_with_index do |sample, index| %>
       <tr>
         <td><input type="checkbox" name="sample_ids" class="check-sample" value="<%= sample['_id'] %>"/> </td>
-        <td><a href="/admin/samples/<%= sample['_id'] %>" title="title"><%= sample["email"] %></a></td>
-        <td><%= sample["mobile"] %></td>
+        <td><%= "[黑]" if sample["is_block"] %><a href="/admin/samples/<%= sample['_id'] %>" title="title"><%= sample["email"] %></a></td>
+        <td><%= "[黑]" if sample["is_block"] %><a href="/admin/samples/<%= sample['_id'] %>" title="title"><%= sample["mobile"] %></a></td>
         <td><%= sample["point"] %></td>
+        <td><%= Time.at(sample["registered_at"]).strftime("%F %T") %></td>
         <td data-sid="<%= sample['_id'] %>" 
             data-email="<%= sample['email'] %>" 
             data-a_email="<%= sample['email_activation'] %>" 
             data-mobile="<%= sample['mobile'] %>" 
             data-a_mobile="<%= sample['mobile_activation'] %>" 
+            data-a_mobile_p="<%= !!sample['password'] %>" 
             data-is_blcok="<%= sample['is_block'] %>" 
             data-roles="<%= sample['user_role'] %>"> 
           <div class="btn-group">
@@ -201,17 +206,23 @@
         <div class="control-group">
           <label class="control-label" for="email">邮箱</label>
           <div class="controls">
-            <input type="text" id="i_email" name="email" placeholder="Type something…">
+            <input type="text" id="i_email" name="email" placeholder="填写用户邮箱">
             <input class="ck" type="checkbox" name="is_active" id="a_email"> 激活
           </div>
         </div>
         <div class="control-group">
           <label class="control-label" for="mobile">电话</label>
           <div class="controls">
-            <input type="text" id="i_mobile" name="mobile" placeholder="Type something…">
+            <input type="text" id="i_mobile" name="mobile" placeholder="填写用户手机">
             <input class="ck" type="checkbox" name="is_active" id="a_mobile"> 激活
           </div>
-        </div>         
+        </div>
+        <div id="a_mobile_p" class="control-group">
+          <label class="control-label" for="mobile">预设密码</label>
+          <div class="controls">
+            <input type="text" id="i_psw" name="mpsw" placeholder="Type something…">
+          </div>
+        </div>          
       </form>
     </div>
     <div class="modal-footer">

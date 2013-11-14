@@ -13,7 +13,7 @@ class Quill::QuestionairesController < Quill::QuillController
   # PAGE: list survey
   # GET
   def index
-    @surveys = current_user.surveys.title(params[:title]).status(params[:status]).star(params[:stars])
+    @surveys = current_user.surveys.title(params[:title]).status(params[:status]).star(params[:stars]).desc(:created_at)
     @surveys = auto_paginate @surveys
     respond_to do |format|
       format.html { }

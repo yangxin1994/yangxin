@@ -74,6 +74,7 @@ class Order
     return ErrorEnum::ORDER_ERROR if amount.to_i < 1
     point = gift.point.to_i  * amount.to_i
     sample = User.sample.find_by_id(sample_id)
+    binding.pry
     return ErrorEnum::POINT_NOT_ENOUGH if sample.point.to_i < point.to_i 
     return ErrorEnum::SAMPLE_NOT_EXIST if sample.nil?
     gift = Gift.normal.find_by_id(gift_id)
@@ -284,9 +285,9 @@ class Order
 
   def self.search_orders(email, mobile, code, status, source, type)
     if !email.blank?
-      orders = User.sample.find_by_email(email).try(:orders).desc(:created_at) || []
+      orders = User.find_by_email(email).try(:orders).desc(:created_at) || []
     elsif !mobile.blank?
-      orders = User.sample.find_by_mobile(mobile).try(:orders).desc(:created_at) || []
+      orders = User.find_by_mobile(mobile).try(:orders).desc(:created_at) || []
     elsif !code.blank?
       orders = Order.where(:code => /#{code}/).desc(:created_at)
     else
