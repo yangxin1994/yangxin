@@ -9,6 +9,7 @@ class PublicNotice
   field :attachment, :type => String
   ## status can be 1(close)，2(publish) 4(deleted, just can be change by destroy method)
   field :status, :type => Integer, :default => 2
+  field :top, :type => Boolean, :default => false
 
   belongs_to :user
 
