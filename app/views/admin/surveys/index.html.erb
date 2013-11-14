@@ -22,6 +22,7 @@
     <p>Tips:</p>
     <ul>
       <li>加星标的问卷将会被置顶.</li>
+      <li>右侧的筛选器中可以设置只显示发布在调研社区中的问卷.</li>
     </ul>
   </div>
 <% end %>
@@ -36,11 +37,14 @@
     </form>
   </span>
   <span class="pull-right">
+    <a class="btn"  href="/questionaires" target="_blank"><i class="icon-plus"></i>&nbsp;创建新问卷</a>
     <%= paginator_mini @surveys %>
     <div class="btn-group">
       <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
       <ul class="dropdown-menu pull-right">
         <li><a href="?">全部</a></li>
+        <li class="divider"></li>
+        <li><a href="?quillme_only=true" class="querilayer">仅显示调研社区中的问卷</a></li>
         <li class="divider"></li>
         <li><a href="?status=1">关闭中</a></li>
         <li><a href="?status=2">已发布</a></li>

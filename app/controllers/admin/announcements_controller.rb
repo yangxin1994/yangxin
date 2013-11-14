@@ -7,7 +7,7 @@ class Admin::AnnouncementsController < Admin::AdminController
   
   # GET
   def index
-    @announcements = auto_paginate(PublicNotice.find_valid_notice.find_by_title(params[:title])) 
+    @announcements = auto_paginate(PublicNotice.find_by_title(params[:title]).find_valid_notice) 
   end
 
   # GET
@@ -23,6 +23,14 @@ class Admin::AnnouncementsController < Admin::AdminController
     @announcement ={}
   end
 
+  def star
+    render_json PublicNotice.where(:_id => params[:id]).first do |announcement|
+      announcement.top = !(params[:star].to_s == 'true')
+      announcement.save
+      announcement.top
+    end
+  end  
+
   # POST
   def create
     @announcement = PublicNotice.create_public_notice({
@@ -31,7 +39,7 @@ class Admin::AnnouncementsController < Admin::AdminController
           :content =>  params[:announcement][:content]
         }, current_user)
     if @announcement.created_at
-      redirect_to :action => :index, :flash => {:success => "公告已成功发送."}
+      redirect_to :action => :index
     else
       flash.alert = "公告创建失败,请检查参数!"
       render :new
@@ -47,7 +55,7 @@ class Admin::AnnouncementsController < Admin::AdminController
         :title =>  params[:announcement][:title],
         :content =>  params[:announcement][:content])
     if @announcement.save
-      redirect_to :action => :index, :flash => {:success => "公告已成功发送."}
+      redirect_to :action => :index
     else
       flash.alert = "公告创建失败,请检查参数!"
       render :new
