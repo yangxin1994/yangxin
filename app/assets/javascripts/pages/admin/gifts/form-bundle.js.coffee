@@ -27,10 +27,10 @@ $ ->
           required: true
           digits: true
           min: 0
-      'gift[quantity]':
-          required: true
-          digits: true
-          min: 0
+      # 'gift[quantity]':
+      #     required: true
+      #     digits: true
+      #     min: 0
 
     messages:
       'gift[title]': 
@@ -39,7 +39,7 @@ $ ->
           required: "还没有填写所需积分呢"
           digits: "积分请用表示数字"
           min: "最少需要0个积分"
-      'gift[quantity]':
-          required: "礼品数量也是必须的"
-          digits: "礼品数量是一个整数哦"
-          min: "最少也得有0个礼品啊"
+      # 'gift[quantity]':
+      #     required: "礼品数量也是必须的"
+      #     digits: "礼品数量是一个整数哦"
+      #     min: "最少也得有0个礼品啊"

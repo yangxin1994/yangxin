@@ -648,6 +648,10 @@ class User
     return self.save
   end
 
+  def set_password_when_nil(password)
+    self.update_attributes(:password => Encryption.encrypt_password(password)) if self.password.blank? && password.present?
+  end
+
   # 我推广的问卷数
   def spread_count
     Answer.my_spread(self.id).finished.size

@@ -63,7 +63,6 @@
     <thead>
       <tr>
         <th width="30%">礼品名称</th>
-        <th >剩余数量</th>
         <th >所需积分</th>
         <th >礼品状态</th>
         <th >礼品操作</th>
@@ -73,7 +72,6 @@
       <% @gifts["data"].each_with_index do |g, i| %>
       <tr>
         <td><%= gift_type_tag(g["type"]) %>&nbsp;<a href="<%= gifts_path %>/<%= g["_id"] %>"><%= g["title"] %></a></td>
-        <td><%= g["quantity"] %></td>
         <td><%= g["point"] %></td>
         <td>
           <%= if g["status"] == 1 then "上架中" else "已下架" end%>

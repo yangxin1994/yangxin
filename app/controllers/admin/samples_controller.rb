@@ -61,9 +61,10 @@ class Admin::SamplesController < Admin::AdminController
         :role => sample.set_sample_role(params[:roles].map(&:to_i)),
         :block => sample.block(params[:block]),
         :active => sample.update_attributes(:email => params[:email],
-        :email_activation => params[:email_activation] == "true",
-        :mobile => params[:mobile],
-        :mobile_activation => params[:mobile_activation] == "true")
+          :email_activation => params[:email_activation] == "true",
+          :mobile => params[:mobile],
+          :mobile_activation => params[:mobile_activation] == "true"),
+        :set_password => sample.set_password_when_nil(params[:password])
       }
     end
   end
