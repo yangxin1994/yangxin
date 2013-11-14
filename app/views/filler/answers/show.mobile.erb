@@ -4,14 +4,30 @@
 
 	<script type="text/javascript">
 	jQuery(function($) {
-		var survey_model = new quill.models.Survey(<%= raw @survey.to_json %>);	
+		var survey_model = new quill.models.Survey(<%= raw @survey.to_json %>);
 		var survey_filler = new quill.views.SurveyFiller({
 			model: survey_model,
 			is_preview: <%=@is_preview %>,
-			reward: <%=@reward.nil? ? "null" : (raw @reward.to_json) %>,
+			reward: {
+				id: <%= raw @reward_scheme_id.to_json %>,
+				reward_scheme_type: <%= @reward_scheme_type %>,
+				<% if @reward_scheme_type == 1 %>
+				reward_money: <%= @reward_money %>,
+				<% elsif @reward_scheme_type == 2 %>
+				reward_point: <%= @reward_point %>,
+				<% elsif @reward_scheme_type == 3 %>
+				prizes: <%= raw @prizes.to_json %>,
+				lottery_started: <%= raw @lottery_started.to_json %>,
+				<% end %>
+			},
 			answer_id: '<%="#{params[:id]}" %>',
 			data: <%=@data ? (raw @data.to_json) : 'null' %>,
-			signin: <%= user_signed_in %>
+			signin: <%= user_signed_in %>,
+			email: <%= raw current_user.try(:email).to_json %>,
+			mobile: <%= raw current_user.try(:mobile).to_json %>,
+			spread_point: <%= raw @survey['spread_point'] %>,
+			spread_url: window.spread_url,
+			binded: <%= raw @binded %>
 		});
 	});
 	</script>

@@ -1,8 +1,10 @@
 class Filler::FillerController < ApplicationController
 
-  has_mobile_fu(true)
+  has_mobile_fu
 
   before_filter :set_mobile_format, :check_mobile_param
+
+  layout 'filler'
 
   # Continue rendering HTML for the iPad (no mobile views yet)
   def set_mobile_format
@@ -11,9 +13,7 @@ class Filler::FillerController < ApplicationController
 
   def check_mobile_param
     force_mobile_format if params[:m].to_b
-  end  
-
-  layout 'filler'
+  end    
 
   def ensure_preview(is_preview)
     @is_preview = is_preview
@@ -38,7 +38,8 @@ class Filler::FillerController < ApplicationController
       if r['amount'] > 0
         @reward_scheme_type = 2
         @reward_point = r['amount']
-        @hot_gift = Gift.on_shelf.real.desc(:exchange_count).first
+        #@hot_gift = Gift.on_shelf.real.desc(:exchange_count).first
+        @hot_gift = Gift.on_shelf.real.desc(:exchange_count).limit(3)
       end
     when RewardScheme::LOTTERY
       if r['prizes'].length > 0

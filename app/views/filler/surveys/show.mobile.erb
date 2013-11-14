@@ -20,25 +20,29 @@
 				// referer
 				window.referer = "<%= raw escape_javascript(@referer_host) %>";
 				window.channel = <%= @channel %>;
+
 				// set welcome message
 				var left_time = <%= @survey.estimate_answer_time %>;
 				if(left_time > 0) {
-					$('#welcome_msg').append("回答本问卷大概需要占用您<span class='time'>" + $.util.		printTimeFriendly(left_time) + "</span>的时间。");
+					$('#left_time').append($.util.printTimeFriendly(left_time));
 				};
 
 				var reward_type = <%= @reward_scheme_type %>;
 				if(reward_type > 0) {
-					switch(reward_type) {
+					switch(parseInt(reward_type)) {
 						case 1: 
-							$('#welcome_msg').prepend('答题完成后您将获得<span class="yellow-txt">' + <%=  @reward_money %> + '</span>现金奖励。'); 
+							$('#reward_info').append('￥' + "<%=  @reward_money %>");
+							$('.rtype').append('支持以下领取方式:');
 							break;
 						case 2:
-							$('#welcome_msg').prepend('答题完成后您将获得<span class="yellow-txt">' + <%= @reward_point %> + '</span>积分奖励。'); 
+							$('#reward_info').append("<%= @reward_point %>" + '积分'); 
+							$('.rtype').append('热门兑换:');
 							break;
 						case 3:
-							$('#welcome_msg').prepend('答题将获得一次抽奖机会')
+							$('#reward_info').append('抽奖机会');
+							$('.rtype').append('参与调研有机会获得:');
 					}
-				};
+				}
 			});	
 		</script>
 	<% end %>
@@ -52,10 +56,6 @@
 	<h2 class="title"><%= @survey.title %></h2>
 	<div class="page">
 		<div class="describe"><%= raw @survey.welcome %></div>
-		<div class="gift-time">
-			<p id="welcome_msg"></p>
-			<p class="tip">请在开始后24小时内完成答题。</p>
-		</div>
 		<div class="login-panel">
 			<% password_type = @survey['access_control_setting']['password_control']['password_type'] %>
 			<% if password_type == 2 %>
@@ -68,9 +68,51 @@
 			<% end %>
 
 			<p><a href="javascript:void(0);" id='start_btn' class='btn'>开始答题</a></p>
+			<p class="tip">
+				<span class='fl'>耗时<span id="left_time"></span></span>
+				<span class="fr">奖励<span id="reward_info"></span></span>
+			</p>
+
+			<div class="reward_show">
+				<div class="rtype"></div>
+				<div class="type_info">
+
+          <% if @reward_scheme_type == 1 %>
+            <div class="r_cash">
+              <img src="/assets/filler/zhifubao.png" />
+              <p>支付宝转账<%= @reward_money %>元</p>
+            </div>
+            <div class="r_cash">
+              <img src="/assets/filler/chongzhi.png" />
+              <p>话费充值<%= @reward_money %>元</p>    
+            </div>                   
+          <% elsif @reward_scheme_type == 2 %>
+            <% @hot_gift.each do |gift| %>
+              <div class="r_poit">
+                <img src="/assets/od-quillme/gifts/erji.jpg" />
+                <p><%= gift.title %><span><%= gift.point %>积分</span></p>
+              </div>            
+            <% end %>             
+          <% elsif @reward_scheme_type == 3 %>
+						<div id="slideBox" class="slideBox">
+							<div class="bd">
+								<ul>
+									<li><img src="/assets/od-quillme/gifts/erji.jpg" /></li>
+									<li><img src="/assets/od-quillme/gifts/erji.jpg" /></li>
+									<li><img src="/assets/od-quillme/gifts/erji.jpg" /></li>
+								</ul>
+							</div>
+							<a class="prev" href="javascript:void(0)"></a>
+							<a class="next" href="javascript:void(0)"></a>
+						</div>            
+          <% end %>
+				</div>
+			</div>
+
+
 			<p class="error" id="error_msg" style="display:none;">调查问卷尚未发布，请等待问卷发布之后再进行填写。<	/p>
 		</div>
-		<div class="copyright">OopsData Consultant Co.,Ltd</div>
+		<!-- <div class="copyright">OopsData Consultant Co.,Ltd</div> -->
 	</div>
 <% end %>
 </div>

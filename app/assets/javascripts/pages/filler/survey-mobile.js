@@ -1,6 +1,9 @@
+//=require jquery.SuperSlide
 jQuery(function($) {
+	// slide the prizes of lottery
+	jQuery(".slideBox").slide({mainCell:".bd ul",autoPlay:true});
 	// add spreadable dom
-	$('#sf_main .copyright').before(window.spread_dom);
+	// $('#sf_main .copyright').before(window.spread_dom);
 
 	var start_btn = $('#start_btn'), username_ipt = $('#username_ipt'), password_ipt = $('#password_ipt');
 

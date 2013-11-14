@@ -334,6 +334,7 @@ $(function(){
 								if(retval.success) {
 									location.reload(true);
 								} else {
+									console.log("retval")
 									var error_msg = ((retval.value != null) ? infos[award_type][retval.value.error_code] : null);
 									if(error_msg != null) {
 										ok_btn.odButtonText('restore');
