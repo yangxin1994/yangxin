@@ -1,3 +1,4 @@
+# encoding: utf-8
 # already tidied up
 class Admin::AnswersController < Admin::AdminController
 
