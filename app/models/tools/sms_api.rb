@@ -20,7 +20,8 @@ class SmsApi # 短信接口
   # PASSWORD = '007266'
   # real account
   CDKEY = "3SDK-EMY-0130-PIWST"
-  PASSWORD = '921256'
+  # PASSWORD = '921256'
+  PASSWORD = 'od@2013'
   CODE = 4699
   AUTOGRAPH = '［问卷吧］'
   ##### 注意: 不能使用短信接口发送个人信息(如"老地方见","你在哪"之类)                   #####
