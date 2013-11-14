@@ -33,10 +33,10 @@ class Log
   end
 
   def self.get_new_logs(limit=5,type=nil)
-    @logs = Log.special_logs(type).have_user.desc(:created_at).limit(limit) if type.present?
-    @logs = Log.fresh_logs.have_user.desc(:created_at).limit(limit) unless @logs.present?
-    if @logs
-      @logs = @logs.map do |log|
+    logs = Log.special_logs(type).have_user.desc(:created_at).limit(limit) if type.present?
+    logs = Log.fresh_logs.have_user.desc(:created_at).limit(limit) unless type.present?
+    if logs
+      logs = logs.map do |log|
         log['username'] = log.user.try(:nickname)
         log['avatar'] = log.user.avatar ? log.user.avatar.picture_url : User::DEFAULT_IMG
         log
@@ -46,6 +46,6 @@ class Log
 
   def self.get_newest_exchange_logs
     logs = self.redeem_logs.have_user.desc(:updated_at).limit(5);
-    @logs = logs.map{|log| log['username'] = log.user.nickname;log}
+    logs = logs.map{|log| log['username'] = log.user.nickname;log}
   end
 end
