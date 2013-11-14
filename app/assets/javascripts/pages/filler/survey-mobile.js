@@ -53,4 +53,6 @@ jQuery(function($) {
 	};
 
 	start_btn.click(_start);
+
+
 });

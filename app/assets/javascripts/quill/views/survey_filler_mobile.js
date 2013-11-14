@@ -92,6 +92,17 @@ $(function(){
 			})			
 		},
 
+		_bind_reward:function(sign_in,r_type){
+			$.postJSON(this._uri('/start_bind'), function(retval) {
+				var redirect = r_type == 'cash' ? 'orders' : 'points'
+				if(!sign_in){
+					location.href = '/account/sign_in?ref=/users/' + redirect; 
+				}else{
+					location.href = '/users/' + redirect; 
+				}
+			});
+		},
+
 		/* Load questions
 		 * =========================== */
 		load_questions: function(start_from_question, load_next_page) {
@@ -120,6 +131,7 @@ $(function(){
 				// answer_status: 1（正在回答）
 				var questions = value.questions, answers = value.answers, total_count = value.question_number, 
 					index = value.answer_index, time = value.estimate_answer_time, redo_count = value.repeat_time;				
+			
 				if(questions.length == 0) {
 					//该页显示问题数量为0，此时表示题已经加载完最后一道，应该做提交操作
 					this._updateProgress(1);//标识答题进度为100%
@@ -153,7 +165,8 @@ $(function(){
 					this.hbs({
 						remind: redo_count > 0,
 						allow_pageup: this.model.get('style_setting').allow_pageup,
-						show_restart: this.options.is_preview
+						show_restart: this.options.is_preview,
+						welcome: this.model.get('welcome')
 					}, 'survey_filler_qs_mobile').appendTo($('#f_body'));
 	
 					// Setup questions fillers
@@ -180,7 +193,7 @@ $(function(){
 					// Disable next button for some time (don't disable it for allow_pageup==true survey, or previewing)
 					var has_not_empty_answer = (_.find(answers || [], function(a) { return a != null; }) != null);
 					if(!has_not_empty_answer && !this.options.is_preview && prev_btn.length > 0) {
-						$.util.disable(next_btn);show_restart
+						$.util.disable(next_btn);
 						var old_text = next_btn.text();
 						function _update_btn() {
 							if(time == 0) {
@@ -245,7 +258,6 @@ $(function(){
 				} else if(this.options.reward.reward_scheme_type == 1) {
 					if(value.order_id == null){
 						this.hbs({}, 'survey_filler_end_money_mobile').appendTo($('#f_body'));
-	
 						$('.s_type select').children('option[value="zhifubao"]').text('为您支付宝付款￥' + this.options.reward.reward_money + '元')
 						$('.s_type select').children('option[value="chongzhi"]').text('为您手机充值￥' + this.options.reward.reward_money + '元')
 
@@ -303,18 +315,28 @@ $(function(){
 							var award_type = account_ipt.attr('name');
 							var acc = $.trim(account_ipt.val());
 							if(award_type == 'chongzhi'){
+								confirm_acc =  $.trim($('input[name="confirm_chongzhi"]').val());
+								console.log(confirm_acc)
 								if(!$.regex.isMobile(acc)){
 									account_ipt.addClass('error');
 									this._error('请输入正确手机号');
 									return false;
+								}else if(acc !== confirm_acc){
+									this._error('手机号不一致');
+									return false;
 								}
 							}else{
+								confirm_acc = $.trim($('input[name="confirm_zhifubao"]').val());
 								if(!$.regex.isMobile(acc) && !$.regex.isEmail(acc)){
 									account_ipt.addClass('error');
 									this._error('请输入手机号或邮箱');
 									return false;	
+								}else if(acc !== confirm_acc){
+									this._error('账户输入不一致');
+									return false;										
 								}
 							}
+
 
 							var infos = {
 								chongzhi: {error__12: '此手机号已经参加过本次调研，不能重复充值。', error__15: '此手机号已参加过' + window.config.corp_name + '其他调研，无法申请本热点调查奖励。',
@@ -358,9 +380,12 @@ $(function(){
 							show_subscribe: !this.options.binded
 						}, 'survey_filler_end_money_finish_mobile').appendTo('#f_body');
 
-							this._share();
+						this._share();
 						
-						$('#close').click($.proxy(function() { location.href = '/'; }, this));
+						var get_order_btn = $('#get_order').click($.proxy(function() { 
+							$.util.disable(get_order_btn.text('正在跳转...'));
+							this._bind_reward(this.options.signin,'cash')
+						}, this));
 					}
 				} else if(this.options.reward.reward_scheme_type == 2) {
 					this.hbs({
@@ -370,16 +395,27 @@ $(function(){
 						spread_point: this.options.spread_point
 					},'survey_filler_end_point_finish_mobile').appendTo('#f_body');
 
-					$('.rew_next').click($.proxy(function(){
-						if(this.options.signin){
-							location.href = '/users/points?scope=in'
-						}else{
-							location.href = '/account/sign_in?ref=/users/points'
-						}						
-					},this))			
+					var sign_in = this.options.signin;
+					var get_order_btn = $('.rew_next').click($.proxy(function() { 
+						$.util.disable(get_order_btn.text('正在跳转...'));
+						$.postJSON(this._uri('/start_bind'), function(retval) {
+							if(!sign_in){
+								location.href = '/account/sign_in?ref=/users/points'; 
+							}else{
+								location.href = '/users/points'; 
+							}
+						});
+					}, this));
+
+
+
+					this._share();			
 				} else if(this.options.reward.reward_scheme_type == 3) {
-					this.hbs({}, 'survey_filler_end_lottery_mobile').appendTo('#f_body');
+					this.hbs({
+						spread_point:this.options.spread_point
+					}, 'survey_filler_end_lottery_mobile').appendTo('#f_body');
 					$('#rew_next').click($.proxy(function() { location.href = '/lotteries/' + this.options.answer_id; }, this));
+					this._share();
 				}
 			}else if (value.answer_status == 16){
 				// 重答

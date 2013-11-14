@@ -42,6 +42,8 @@
 							$('#reward_info').append('抽奖机会');
 							$('.rtype').append('参与调研有机会获得:');
 					}
+				}else{
+					$('#reward_info').parent().html('免费调研');
 				}
 			});	
 		</script>
@@ -55,7 +57,9 @@
 <% elsif !@survey.nil? %>
 	<h2 class="title"><%= @survey.title %></h2>
 	<div class="page">
-		<div class="describe"><%= raw @survey.welcome %></div>
+		<% if @survey.welcome.present? %>
+			<div class="describe"><%= raw @survey.welcome %></div>
+		<% end %>
 		<div class="login-panel">
 			<% password_type = @survey['access_control_setting']['password_control']['password_type'] %>
 			<% if password_type == 2 %>
@@ -89,7 +93,7 @@
           <% elsif @reward_scheme_type == 2 %>
             <% @hot_gift.each do |gift| %>
               <div class="r_poit">
-                <img src="/assets/od-quillme/gifts/erji.jpg" />
+                <img src="<%= gift.photo_src %>" />
                 <p><%= gift.title %><span><%= gift.point %>积分</span></p>
               </div>            
             <% end %>             
@@ -97,9 +101,9 @@
 						<div id="slideBox" class="slideBox">
 							<div class="bd">
 								<ul>
-									<li><img src="/assets/od-quillme/gifts/erji.jpg" /></li>
-									<li><img src="/assets/od-quillme/gifts/erji.jpg" /></li>
-									<li><img src="/assets/od-quillme/gifts/erji.jpg" /></li>
+									<% @prizes.each do |prize|%>
+										<li><img src="<%= prize[:photo_url]%>" /></li>
+									<% end %>
 								</ul>
 							</div>
 							<a class="prev" href="javascript:void(0)"></a>

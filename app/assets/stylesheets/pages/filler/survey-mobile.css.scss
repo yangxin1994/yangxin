@@ -88,15 +88,23 @@ body{
 		}
 		span.fl{
 			float:left;
+			#left_time{
+				margin-left: .5em;
+			}			
 		}
 		span.fr{
 			float:right;
+			#reward_info{
+				margin-left:.5em;
+				color:#ff6600;
+			}
 		}		
 	}
 	.rtype{
 		margin:20px 0px;
 	}
 	.type_info{
+		overflow: hidden;
 		width:inherit;
 		height:auto;
 		> div {
@@ -138,15 +146,16 @@ body{
 				left:3%; top:50%; 
 				margin-top:-25px; 
 				display:block; 
-				width:32px; 
-				height:40px; 
-				background:url(/assets/od-quillme/slider-arrow.png) -110px 5px no-repeat; 
+				width:36px; 
+				height:36px; 
+				background:url(/assets/od-quillme/prev_s.png) no-repeat; 
 				filter:alpha(opacity=50);opacity:0.5;   
 			}
 			.next{
 				 left:auto; 
-				 right:3%; 
-				 background-position:8px 5px;
+				 right:3%;
+				 background:url(/assets/od-quillme/next_s.png) 
+				 // background-position:8px 5px;
 			}
 			.prevStop{ 
 				display:none;  

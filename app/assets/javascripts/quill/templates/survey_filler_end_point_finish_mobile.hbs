@@ -1,11 +1,16 @@
 <div class="page">
 	<div class="free_describe">
 		<div class="answer_finish">
-			<b>答题完成啦！</b>
-			<div>恭喜您获得了{{spread_point}}积分，我们会在审核后将积分发放到您的账户</div>
+			<b><i></i>答题完成啦！</b>
+			<div>恭喜您获得了{{reward_point}}积分，我们会在审核后将积分发放到您的账户</div>
 		</div>
 	</div>
 	<div class="free_form">
-		<button class="rew_next" id="rew_next" >查看积分记录</button>
+    {{#if signin}}
+		  <button class="rew_next" id="rew_next" >查看积分记录</button>
+    {{else}}
+      <button class="rew_next" id="rew_next" >登录领取</button>
+    {{/if}}
+    <button id="socal_share">分享得{{spread_point}}积分</button>
 	</div>		
 </div>

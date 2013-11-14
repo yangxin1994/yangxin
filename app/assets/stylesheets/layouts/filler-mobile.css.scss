@@ -14,6 +14,7 @@
 	width:32px;
 	height:32px;
 	// float:left;
+	display: block;
 	margin-right:3px;
 }
 .icon-QQSpace{@include od-mobile-sprite(qq);}
