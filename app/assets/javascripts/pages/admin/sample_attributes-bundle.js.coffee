@@ -1,5 +1,7 @@
 #= require jquery_ujs
 #= require utility/string
+#= require jquery.serializeobject
+#= require jquery-interdependencies
 #= require jquery.placeholder
 #= require ui/widgets/od_time_selector
 #= require highcharts
