@@ -30,6 +30,7 @@ class Answer
   REJECT_BY_TIMEOUT = 16
   REJECT_BY_AGENT_REVIEW = 32
   REJECT_BY_IP_RESTRICT = 64
+  REJECT_BY_ADMIN = 128
 
   # status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo, 32 for under agents' review
   field :status, :type => Integer, default: 1
@@ -673,6 +674,20 @@ class Answer
     interviewer_task.try(:refresh_quota)
     agent_task.try(:refresh_quota)
     self
+  end
+
+  def admin_reject(admin)
+    # only finished answers can be rejected by admin
+    return false if self.status != FINISH
+    # set reject and reject type
+    set_reject_with_type(REJECT_BY_ADMIN)
+    if self.user.present?
+      # send sample a message
+      message_title = "对不起,您参与的问卷未通过审核!"
+      message_content = "您参与的问卷[#{self.survey.title}]没有通过管理员审核"
+      admin.create_message(message_title, message_content, [self.user._id.to_s])
+      update_attributes(audit_message: message_content, auditor: admin, audit_at: Time.now.to_i)
+    end
   end
 
   def review(review_result, answer_auditor, message)
