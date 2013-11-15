@@ -220,7 +220,7 @@ class Survey
 
   def self.search(options = {})
     surveys = Survey.all
-    surveys = survey.in(:status => Tool.convert_int_to_base_arr(options[:status])) if options[:status]
+    surveys = surveys.in(:status => Tool.convert_int_to_base_arr(options[:status])) if options[:status]
     surveys = surveys.where(:quillme_promotable => true) if options[:quillme_only].to_s == "true"
     case options[:keyword].to_s
     when /^.+@.+$/

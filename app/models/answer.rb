@@ -687,6 +687,14 @@ class Answer
       message_content = "您参与的问卷[#{self.survey.title}]没有通过管理员审核"
       admin.create_message(message_title, message_content, [self.user._id.to_s])
       update_attributes(audit_message: message_content, auditor: admin, audit_at: Time.now.to_i)
+      # decrease the sample's point
+      self.rewards.each do |r|
+        if r["checked"] == true && r["type"] == RewardScheme::POINT
+          sample = self.user
+          sample.point = sample.point - r["amount"]
+          sample.save
+        end
+      end
     end
   end
 
