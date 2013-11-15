@@ -73,12 +73,7 @@ class Admin::OrdersController < Admin::AdminController
         end
         params.delete :keyword
       end
-    @orders = Order.search_orders(params[:email], 
-      params[:mobile],
-      params[:code],
-      params[:status].to_i,
-      params[:source].to_i,
-      params[:type].to_i).desc(:created_at)
+    @orders = Order.search_orders(params).desc(:created_at)
     @orders = @orders.page(page).per(per_page) if params[:page].present?
     send_data(@orders.to_excel.encode("GBK"),
       :filename => "订单数据-#{Time.now.strftime("%M-%d_%T")}.csv", 

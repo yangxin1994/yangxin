@@ -11,6 +11,10 @@ $ ->
     selector: '.o-detail'
     container: 'tr'
 
+  # $('table').popover
+  #   selector: '.o-time'
+  #   container: 'tr'    
+
   $(".handle").click ->
     $this = $(this)
     order_id = $this.attr('href').split('-')[1]
