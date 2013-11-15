@@ -325,9 +325,11 @@ class Order
     elsif self.source == WIN_IN_LOTTERY
       self.write_attribute(:prize_name, self.prize.try(:title))
     end
+    self.write_attribute(:gift_id, (self.gift || self.prize).try(:_id))
     self.write_attribute(:user_email_mobile, self.sample.try(:email) || self.sample.try(:mobile))
+    self.write_attribute(:user_id, self.sample.try(:id))
     if self.type == 2
-      self.write_attribute(:address_str,address_str)
+      self.write_attribute(:address_str, address_str)
     end
     return self
   end
