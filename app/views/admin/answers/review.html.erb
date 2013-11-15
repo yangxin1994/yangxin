@@ -21,7 +21,7 @@
 
 <legend><%= @survey.title %></legend>
   <div class="well well-small">
-    答题时间: <%= ((@questions.finished_at - @questions.created_at.to_i) / 60.0 ).ceil %> 分钟
+    答题时间: <%= ((@questions.finished_at - @questions.created_at.to_i) / 60.0 ).ceil if @questions.finished_at.present? %> 分钟
   </div>
 <%= render :partial => "admin/answers/detail" %>
 <% if @questions['status'].to_i == 4 %>

@@ -501,7 +501,20 @@ class Survey
   end
 
   def spss_header
-    headers =["answer_id", "email", "mobile", "IP"]
+    headers =[
+      {"spss_name" => "answer_id",
+       "spss_type" => "String",
+       "spss_label" => "答案ID"},
+      {"spss_name" => "email",
+       "spss_type" => "String",
+       "spss_label" => "邮箱"},
+      {"spss_name" => "mobile",
+       "spss_type" => "String",
+       "spss_label" => "手机号码"},
+      {"spss_name" => "IP",
+       "spss_type" => "String",
+       "spss_label" => "IP"}                 
+    ]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.spss_header("q#{i+1}")
     end
