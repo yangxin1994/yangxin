@@ -73,7 +73,7 @@
     <div class="control-group">
       <div class="controls">
         <input class="btn btn-primary btn-new-ok" id="submit_bind" type="submit" value="确 定">
-        <%= link_to "删除属性绑定", admin_sample_attribute_bind_path(@question['_id']), method: :delete, confirm: "确定要删除吗", class: "submitForm btn btn-danger"   %>
+        <%= link_to "删除属性绑定", "javascript:;", "data-id" => @question['_id'], :id => "delete_bind", :class => "btn btn-danger"   %>
       </div>
     </div> 
   <% end %>

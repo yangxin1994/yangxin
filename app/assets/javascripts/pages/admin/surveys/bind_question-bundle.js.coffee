@@ -1,5 +1,4 @@
 #= require handlebars.runtime
-#= require jquery_ujs
 # =require jquery-ui-min
 #= require utility/string
 #= require utility/util
@@ -208,3 +207,19 @@ $ ->
       location.reload()
     )
     false
+
+  $("#delete_bind").click ->
+    $this = $(this)
+    if confirm "确定要删除吗?"
+      $.ajax
+        type: 'DELETE'
+        url: "/admin/surveys/#{$this.data('id')}/bind_question"
+        success: (ret)->
+          if ret.success
+            alert_msg.show('success', "已经删除!")
+            document.location = "/admin/surveys/#{$this.data('id')}/bind_question"
+          else
+            alert_msg.show('error', "删除失败 (╯‵□′)╯︵┻━┻")
+        error: ->
+          alert_msg.show('error', "删除失败 (╯‵□′)╯︵┻━┻")
+          

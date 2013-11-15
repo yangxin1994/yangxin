@@ -40,7 +40,7 @@
     <div class="control-group">
       <div class="controls">
         <input class="button btn-new-ok" id="submit_bind" type="submit" value="确 定">
-        <%= link_to "删除属性绑定", admin_sample_attribute_bind_path(@question['_id']), method: :delete, confirm: "确定要删除吗", class: "submitForm button"   %>
+        <%= link_to "删除属性绑定", admin_survey_bind_question_path(@question['_id'])), method: :delete, confirm: "确定要删除吗", class: "submitForm button"   %>
       </div>
     </div> 
   <% end %>

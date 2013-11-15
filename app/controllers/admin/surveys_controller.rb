@@ -180,7 +180,6 @@ class Admin::SurveysController < Admin::AdminController
     end
   end
 
-
   def interviewer_task
     @survey = Survey.find_by_id(params[:id])
     tasks = @survey.interviewer_tasks
@@ -242,9 +241,9 @@ class Admin::SurveysController < Admin::AdminController
   end
 
   def _unbind_question
-    @question = Question.find_by_id(params[:id])
-    @question.remove_sample_attribute
-    redirect_to :back
+    render_json Question.find_by_id(params[:id]) do |question|
+      question.remove_sample_attribute
+    end
   end
 
   def _update_bind
