@@ -88,27 +88,28 @@
   <span class="pull-right">
     <%= paginator_mini @orders %>
     <div class="btn-group">
-      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
+      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>筛选<span class="caret"></span></button>
       <ul class="dropdown-menu pull-right">
-        <li><a href="?type=<%= params["type"] %>">全部</a></li>
+        <li><a href="/admin/orders">全部</a></li>
         <li class="divider"></li>
-        <li><a href="?type=<%= params["type"] %>&source=1">回答问卷获得现金奖励</a></li>
-        <li><a href="?type=<%= params["type"] %>&source=2">回答问卷抽中奖品</a></li>
-        <li><a href="?type=<%= params["type"] %>&source=4">用积分兑换礼品</a></li>
+        <li><a class="querilayer" href="?source=1">回答问卷获得现金奖励</a></li>
+        <li><a class="querilayer" href="?source=2">回答问卷抽中奖品</a></li>
+        <li><a class="querilayer" href="?source=4">用积分兑换礼品</a></li>
+        <li class="divider"></li>
+        <li><a class="querilayer" href="?status=1">等待处理</a></li>
+        <li><a class="querilayer" href="?status=2">正在处理</a></li>
+        <li><a class="querilayer" href="?status=4">处理成功</a></li>
+        <li><a class="querilayer" href="?status=8">处理失败</a></li>
+        <li><a class="querilayer" href="?status=16">用户取消</a></li>
+        <li class="divider"></li>
+        <li><a class="querilayer" href="?date=1">今天</a></li>
+        <li><a class="querilayer" href="?date=7">7天内</a></li>
+        <li><a class="querilayer" href="?date=30">一月内</a></li>
+        <li><a class="querilayer" href="?date=90">三月内</a></li>
+        <li><a class="querilayer" href="?date=365">一年内</a></li>             
+        <li><a href="javascript:;" id="date_btn">自定义</a></li>             
       </ul>
     </div>    
-    <div class="btn-group">
-      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
-      <ul class="dropdown-menu pull-right">
-        <li><a href="?type=<%= params["type"] %>">全部</a></li>
-        <li class="divider"></li>
-        <li><a href="?type=<%= params["type"] %>&status=1">等待处理</a></li>
-        <li><a href="?type=<%= params["type"] %>&status=2">正在处理</a></li>
-        <li><a href="?type=<%= params["type"] %>&status=4">处理成功</a></li>
-        <li><a href="?type=<%= params["type"] %>&status=8">处理失败</a></li>
-        <li><a href="?type=<%= params["type"] %>&status=16">用户取消</a></li>
-      </ul>
-    </div>
   </span>
 </div>
 
@@ -224,5 +225,33 @@
     <div class="modal-footer">
       <a class="btn" href="javascript:$('#remark_modal').modal('hide');">取消</a>
       <button type="button" class="btn btn-primary" data-loading-text="保存中..." id="send_remark">确定修改</button>
+    </div>
+  </div>
+
+
+  <div class="modal hide fade" id="date_model">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>日期</h3>
+    </div>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="block">起始</label>
+          <div class="controls">
+            <input type="text" name="date_min" id="date_min" placeholder="日期格式：yyyy/mm/dd"> 
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="block">结束</label>
+          <div class="controls">
+            <input type="text" name="date_max" id="date_max" placeholder="日期格式：yyyy/mm/dd"> 
+          </div>
+        </div>              
+      </form>
+    </div>
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#date_model').modal('hide');">取消</a>
+      <button type="button" class="btn btn-primary" id="send_date">筛选</button>
     </div>
   </div>

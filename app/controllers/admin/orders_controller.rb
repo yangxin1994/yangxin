@@ -19,12 +19,7 @@ class Admin::OrdersController < Admin::AdminController
       end
       params.delete :keyword
     end
-    order_list = Order.search_orders(params[:email], 
-      params[:mobile],
-      params[:code],
-      params[:status].to_i,
-      params[:source].to_i,
-      params[:type].to_i)
+    order_list = Order.search_orders(params)
     @orders = auto_paginate(order_list) do |orders|
       orders.map { |e| e.info_for_admin }
     end

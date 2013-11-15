@@ -219,36 +219,6 @@ class Order
     return order
   end
 
-  def self.search_orders(email, mobile, code, status, source, type)
-    if !email.blank?
-      return [] if User.sample.find_by_email(email).nil?
-      orders = User.sample.find_by_email(email).try(:orders)
-      orders = orders.nil? ? [] : orders.desc(:created_at)
-    elsif !mobile.blank?
-      return [] if User.sample.find_by_mobile(mobile).nil?
-      orders = User.sample.find_by_mobile(mobile).try(:orders)
-      orders = orders.nil? ? [] : orders.desc(:created_at)
-    elsif !code.blank?
-      orders = Order.where(:code => /#{code}/).desc(:created_at)
-    else
-      orders = Order.all.desc(:created_at)
-    end
-
-    if !status.blank? && status != 0
-      status_ary = Tool.convert_int_to_base_arr(status)
-      orders = orders.where(:status.in => status_ary)
-    end
-    if !source.blank? && source != 0
-      source_ary = Tool.convert_int_to_base_arr(source)
-      orders = orders.where(:source.in => source_ary)
-    end
-    if !type.blank? && type != 0
-      type_ary = Tool.convert_int_to_base_arr(type)
-      orders = orders.where(:type.in => type_ary)
-    end
-    return orders
-  end
-
   def auto_handle
     return false if self.status != WAIT
     return false if ![MOBILE_CHARGE, QQ_COIN].include?(self.type)
@@ -281,31 +251,42 @@ class Order
     return self.save
   end
 
-
-  def self.search_orders(email, mobile, code, status, source, type)
-    if !email.blank?
-      orders = User.find_by_email(email).try(:orders).desc(:created_at) || []
-    elsif !mobile.blank?
-      orders = User.find_by_mobile(mobile).try(:orders).desc(:created_at) || []
-    elsif !code.blank?
-      orders = Order.where(:code => /#{code}/).desc(:created_at)
+  def self.search_orders(options = {})
+    options[:status] = options[:status].to_i
+    options[:source] = options[:source].to_i
+    options[:type] = options[:type].to_i
+    if options[:email].present?
+      orders = User.find_by_email(options[:email]).try(:orders).desc(:created_at) || []
+    elsif options[:mobile].present?
+      orders = User.find_by_mobile(options[:mobile]).try(:orders).desc(:created_at) || []
+    elsif options[:code].present?
+      orders = Order.where(:code => /#{options[:code]}/).desc(:created_at)
     else
       orders = Order.all.desc(:created_at)
     end
-
-    if !status.blank? && status != 0
-      status_ary = Tool.convert_int_to_base_arr(status)
+    if options[:status].present? && options[:status] != 0
+      status_ary = Tool.convert_int_to_base_arr(options[:status])
       orders = orders.where(:status.in => status_ary)
     end
-    if !source.blank? && source != 0
-      source_ary = Tool.convert_int_to_base_arr(source)
+    if options[:source].present? && options[:source] != 0
+      source_ary = Tool.convert_int_to_base_arr(options[:source])
       orders = orders.where(:source.in => source_ary)
     end
-    if !type.blank? && type != 0
-      type_ary = Tool.convert_int_to_base_arr(type)
+    if options[:type].present? && options[:type] != 0
+      type_ary = Tool.convert_int_to_base_arr(options[:type])
       orders = orders.where(:type.in => type_ary)
+    end 
+    if options[:date_max].present?
+      orders = orders.where(:created_at.lt => Time.parse(options[:date_max]))
+    elsif options[:date_min].present?
+      orders = orders.where(:created_at.gt => Time.parse(options[:date_min]))
+    else
+      if options[:date].present?
+        _qdate = Time.now - options[:date].to_i.days
+        orders = orders.where(:created_at.gt => _qdate)
+      end
     end
-    return orders
+    return orders      
   end
 
 
