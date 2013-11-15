@@ -126,7 +126,6 @@ $(function(){
 			$('#f_body').empty();
 			var value = data.value;		
 			value.answer_status == 1 ? $('#progress').show() : $('#progress').hide();// show or hide the progress bar
-
 			if(value.answer_status == 1){
 				// answer_status: 1（正在回答）
 				var questions = value.questions, answers = value.answers, total_count = value.question_number, 
@@ -429,14 +428,17 @@ $(function(){
 			}else if(value.answer_status == 2){
 				// 被拒绝
 				// reject 1（配额已满），2（未通过自动质控），4（未通过人工质控），8（甄别题）或者16（超时）
+
 				this.hbs({
-					full: (value[1] == 0),
-					quality: (value[1] == 1),
+					quality: (value.answer_reject_type == 2),
 					review_failed: (value[1] == 2),
-					filter: (value[1] == 3),
-					timeout: (value[1] == 4),
-					reject_reason: (value[2]),
-					show_restart: this.options.is_preview
+					filter: (value.answer_reject_type == 1 || value.answer_reject_type == 8),
+					timeout: (value.answer_reject_type == 16),
+					review_failed: (value.answer_reject_type == 4),
+					reject_reason: value.answer_audit_message,
+					show_restart: this.options.is_preview,
+					spreadable: this.options.spread_point > 0,
+					spread_point: this.options.spread_point					
 				}, 'survey_filler_reject_mobile').appendTo('#f_body');
 				$('#start_spread').click($.proxy(function() { this._spread(); }, this));
 				$('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));				
