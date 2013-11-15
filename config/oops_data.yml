@@ -20,11 +20,11 @@ production:
   tecent_redirect_uri: "http://wenjuanba.com/connects/tecent"
   alipay_app_key: "2088901873811631"
   alipay_app_secret: "4ooqffbbyw433itxemcsg2js508o0gqr"
-  alipay_redirect_uri: "http://127.0.0.1:8000/connects/alipay"  
+  alipay_redirect_uri: "http://www.wenjuanba.com/connects/alipay"  
   qihu_app_id: "10425"
   qihu_app_key: "c83cf3b2688f4f1c695bc9906a2dcf14"
   qihu_app_secret: "5822aa2a51c9d34b61a8b51217eacac4"
-  qihu_redirect_uri: "http://test.oopsdata.com/qihu_connect"
+  qihu_redirect_uri: "http://www.wenjuanba.com/connects/qihu360"
 demo:
   words_per_second: 5
   login_count_threshold: 1000
