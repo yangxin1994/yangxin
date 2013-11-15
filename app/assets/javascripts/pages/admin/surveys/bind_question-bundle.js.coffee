@@ -155,7 +155,7 @@ $ ->
           val = $this.find('select').val()
           relation[item_id] = val if val.length > 0
         relation
-      ,
+      ,   
       'num_range': (panel_class) ->
         $(".#{panel_class} table tbody tr").each () ->
           $this = $(this)
