@@ -134,7 +134,7 @@
       <td><a href="/admin/samples/<%= order['user_id'] %>"><%= order['user_email_mobile'] %></a></td>
       <td  title="订单号: <%= order['code'] %>" data-content="<%= "#{order['address_str']}" %>" class="o-detail"><%= "#{order['mobile']} #{order['qq']} #{order['email']} #{ "支付宝: " + order['alipay_account'] if order['alipay_account'].present? }" %></td>
       <td><%= order['created_at'].strftime("%F<br />%T").html_safe %></td>
-      <td><%= Time.at(order['canceled_at'] || order['finished_at'] || order['handled_at']).strftime("%F<br />%T").html_safe %></td>
+      <td><%= Time.at(order['canceled_at'] || order['finished_at'] || order['handled_at'] || order['created_at'].to_i).strftime("%F<br />%T").html_safe %></td>
       <td>
         <div class="btn-group">
           <% case order['status'].to_i %>
