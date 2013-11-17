@@ -5,6 +5,7 @@
       <% if user_signed_in %>
         window.username    = "<%=  current_user.nickname %>"
         window.total_point = "<%=  current_user.point  %>"
+        window.completed_info = "<%= current_user.completed_info %>"
       <% end %>
   </script>
 <% end %>
