@@ -1,5 +1,5 @@
+//= require ui/plugins/od_param
 jQuery(function($) {
-
 	// *************** functions ******************
 
 	var provinces = null, cities = null, towns = null;
@@ -167,6 +167,10 @@ jQuery(function($) {
 
 	// **************init page *************************
    
+	if($.util.param('full') === 'false' && $.util.param('ref').length > 0){
+		$.popupFancybox({cont: "完善个人信息资料后才可兑换哦！"});
+	}
+
 	// init select date values
 	if ($('.select-date').length > 0) {
 		var now = new Date();
@@ -550,22 +554,6 @@ jQuery(function($) {
 		var position = $('#position .select-txt').attr('name');
 		var seniority = $('#seniority .select-txt').attr('name');
 
-		// console.log('nickname: '+nickname+', '+
-		// 			'username: '+username+', '+
-		// 			'gender: '+gender+', '+
-		// 			'birthday: '+birthday+', '+
-		// 			'born_address: '+born_address+', '+
-		// 			'live_address: '+live_address+', '+
-		// 			'married: '+married+', '+
-		// 			'children: '+children+', '+
-		// 			'income_person: '+income_person+', '+
-		// 			'income_family: '+income_family+', '+
-		// 			'education_level: '+education_level+', '+
-		// 			'major: '+major+', '+
-		// 			'industry: '+industry+', '+
-		// 			'position: '+position+', '+
-		// 			'seniority: '+seniority+', ')
-
 		var _this = $(this);
 		_this.addClass('disabled').val("提交中...");
 
@@ -593,7 +581,12 @@ jQuery(function($) {
 				// console.log(data);
 				_this.removeClass('disabled').val("确认提交");
 				if (data.success && data.value){
-					$.popupFancybox({success: true, cont: "个人资料更新成功！"});
+        	if($.util.param('full') === 'false' && $.util.param('ref').length > 0){
+        	    var ref = $.util.param('ref');
+        	    window.location.href = decodeURIComponent(ref);
+        	}else{
+        		$.popupFancybox({success: true, cont: "个人资料更新成功！"});
+        	}
 				}else {
 					$.popupFancybox({cont: "操作失败，请保证数据完整！"});
 				}
