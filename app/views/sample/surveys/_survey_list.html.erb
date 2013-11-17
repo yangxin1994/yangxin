@@ -37,7 +37,7 @@
       <% if user_signed_in %>
           <% if survey['status'].to_s ==  Survey::PUBLISHED.to_s %>
             <span class="status  <%= survey['answer_status'].to_i == 0 ? 'unfinished' : ''%>">
-              <%= raw( answered?(survey['answer_status'],survey['reject_type']) )%>
+            <%= raw( answered?(survey['answer_status'],survey['reject_type'],false,survey) )%>
             </span>
           <% else %>
             <span class="status  <%= survey['answer_status'].to_i == 0 ? 'finished' : ''%>">
