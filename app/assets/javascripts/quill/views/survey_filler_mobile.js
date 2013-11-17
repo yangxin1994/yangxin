@@ -73,6 +73,11 @@ $(function(){
 
 			$('#socal_share').click($.proxy(function() {
 				if(this.options.signin){
+					var s_icon_height = $('.s_icon').css('height');
+					var share_top_height = $('.share_top').css('height');
+					var top = parseInt(s_icon_height,10) / 2 - parseInt(share_top_height,10) / 2 ; 
+					$('.share_top').css('top',top)
+
 					$('.spread').animate({"top" : "0px"}, 'fast');
 					var href = window.location.href
 					_.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace', 
