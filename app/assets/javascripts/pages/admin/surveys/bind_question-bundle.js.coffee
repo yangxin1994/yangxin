@@ -7,6 +7,7 @@
 #= require jquery.placeholder
 #= require ui/widgets/od_address_selector
 #= require ui/widgets/od_time_selector
+#= require jquery-interdependencies
 #= require_tree ../templates
 
 $ ->
