@@ -1327,7 +1327,7 @@ class Answer
     return false if self.user.blank? || self.sample_attributes_updated
     self.answer_content.each do |q_id, answer|
       q = BasicQuestion.find(q_id)
-      next if q.sample_attribute.blank?
+      next if answer.blank? || q.sample_attribute.blank?
       attr_value = nil
       case q.sample_attribute.type
       when DataType::STRING
