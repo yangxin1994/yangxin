@@ -45,4 +45,8 @@ class Admin::AnswersController < Admin::AdminController
     end 
   end
 
+  def reject
+    answer = Answer.find(params[:id])
+    answer.admin_reject(current_user)
+  end
 end
