@@ -220,6 +220,7 @@ class ApplicationController < ActionController::Base
     # end
     retval["total_page"] = ( (count || value.count )/ per_page.to_f ).ceil
     retval["total_page"] = retval["total_page"] == 0 ? 1 : retval["total_page"]
+    retval["total_number"] = count || value.count
     retval["next_page"] = (page+1 <= retval["total_page"] ? page+1: retval["total_page"])
     # retval["next_page"] = [page + 1, retval["total_page"]].min
     retval
