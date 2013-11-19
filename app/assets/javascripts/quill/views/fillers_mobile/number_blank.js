@@ -27,7 +27,15 @@ $(function(){
 			this.$('#' + this.model.id).val(answer);
 		},
 		_getAnswer: function() {
-			return parseFloat($.trim(this.$('#' + this.model.id).val()));
+			var num = $.trim(this.$('#' + this.model.id).val());
+			var splits = num.split('.');		
+			var precision_nums = ['0','00','000','0000'];		
+			if( $.inArray(splits[1],precision_nums) > -1 ){
+				var pre_num = parseFloat(num);
+				return 	pre_num + '.' + splits[1];
+			}else{
+				return parseFloat(num);
+			}
 		}
 		
 	});

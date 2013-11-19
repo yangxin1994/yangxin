@@ -6,11 +6,15 @@
 @import "od-mobile/*.png";
 
 /*复制链接*/
-
+.spread{
+	position:absolute;
+	top:-2000px;
+}
 .share-icon{
 	width:32px;
 	height:32px;
-	float:left;
+	// float:left;
+	display: block;
 	margin-right:3px;
 }
 .icon-QQSpace{@include od-mobile-sprite(qq);}
