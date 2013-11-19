@@ -9,7 +9,7 @@ class Sample::HomesController < Sample::SampleController
       paginated_surveys.map { |e| e.excute_sample_data(current_user) } 
     end
 
-    public_notices = PublicNotice.opend.desc(:updated_at).limit(5)
+    public_notices = PublicNotice.desc(:top).opend.desc(:created_at).limit(5)
     hotest_gifts = Gift.on_shelf.real.desc(:view_count).limit(8)
     top_rank_users = User.sample.where(:is_block => false).desc(:point).limit(5)
     fresh_news = Log.get_new_logs(5, nil)

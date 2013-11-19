@@ -107,6 +107,7 @@ OopsData::Application.routes.draw do
         put 'setting/change_email' => 'users#change_email'
         put 'setting/address' => 'users#update_logistic_address'
         put 'setting/password' => 'users#update_password'
+        put 'order_cancel' => 'users#order_cancel'
         # notifications
         delete 'notifications' => 'users#remove_notifications'
       end 

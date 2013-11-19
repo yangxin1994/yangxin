@@ -231,10 +231,11 @@ module ApplicationHelper
     Time.at(int_time.to_i).strftime("%Y-%m-%d %H:%M:%S")
   end
 
-  def answered?(status, reject_type=0, free_reward=false)
+  def answered?(status, reject_type=0, free_reward=false,survey=nil)
     case status.to_i
     when Answer::EDIT
-      return "答题中"
+      return "<a href='/s/#{survey.scheme_id}'>答题中</a>" if survey.present?
+      return "答题中" unless survey.present?
     when Answer::REJECT
       case reject_type.to_i
       when 0
@@ -264,7 +265,8 @@ module ApplicationHelper
       return "需重答"
     else
       #return status
-      return "待参与"
+      return '待参与' unless survey.present?
+      return "<a href='/s/#{survey.scheme_id}'>待参与</a>" if survey.present?
     end
   end
 

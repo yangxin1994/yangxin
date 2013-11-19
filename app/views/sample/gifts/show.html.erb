@@ -5,6 +5,7 @@
   <% if user_signed_in %>
     window.username    = "<%=  current_user.nickname  if @data[:receiver_info] %>"
     window.total_point = "<%=  current_user.point if @data[:receiver_info]  %>"
+    window.completed_info = "<%= current_user.completed_info %>"
     window.sample_receiver = "<%= @data[:receiver_info]['receiver']  if @data[:receiver_info] %>"
     window.sample_mobile   = "<%= @data[:receiver_info]['mobile']  if @data[:receiver_info] %>"
     window.sample_postcode = "<%= @data[:receiver_info]['postcode'] if @data[:receiver_info]  %>"
