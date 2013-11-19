@@ -322,6 +322,7 @@ OopsData::Application.routes.draw do
     resources :answers do
       member do
         get :review
+        put :reject
       end
     end
 
