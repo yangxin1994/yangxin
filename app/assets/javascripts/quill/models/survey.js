@@ -200,10 +200,8 @@ $(function(){
 			if(!qids || qids.length == 0) {
 				callback.success([]);
 			} else {
-				console.log(this._uri('/pages/' + page_index))
 				$.getJSON(this._uri('/pages/' + page_index), $.proxy(function(retval) {
 					if(retval.success) {
-						console.log(retval);
 						var qs = retval.value.questions;
 						var models = [];
 						for (var i = 0; i < qs.length; i++) {

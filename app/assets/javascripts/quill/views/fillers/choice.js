@@ -135,7 +135,6 @@ $(function(){
 					if (v != null) answer.selection.push(v);	// in case some browser does not support jQuery.data
 				});
 			}
-			console.log(answer);
 			if(this.model_issue.other_item && _.contains(answer.selection, this.model_issue.other_item.id)) {
 				answer.text_input = $.trim(this.$('input:text').val());
 			};
