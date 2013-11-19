@@ -349,9 +349,8 @@ class User
   end
 
 
-  def self.search_sample(email, mobile, is_block, uid = nil)
+  def self.search_sample(email, mobile, is_block)
     samples = User
-    return User.where(:_id => uid) if uid
     # samples = User.sample
     samples = samples.where(:is_block => false) if !is_block
     samples = samples.where(:email => /#{email.to_s}/) if !email.blank?

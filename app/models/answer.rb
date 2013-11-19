@@ -132,9 +132,9 @@ class Answer
       elsif /^\d{11}$/
         options[:mobile] = options[:keyword]
       else
-        options[:uid] = options[:keyword]
+        return answers.where(:_id => options[:keyword])
       end
-      user = User.search_sample(options[:email], options[:mobile], true, options[:uid]).first
+      user = User.search_sample(options[:email], options[:mobile], true).first
       answers = answers.where(:user_id => user.try(:_id))
     end
     answers  
