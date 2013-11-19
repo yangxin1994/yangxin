@@ -129,10 +129,12 @@ class Answer
     if options[:keyword].present?
       if options[:keyword] =~ /^.+@.+$/
         options[:email] = options[:keyword]
-      else
+      elsif /^\d{11}$/
         options[:mobile] = options[:keyword]
+      else
+        options[:uid] = options[:keyword]
       end
-      user = User.search_sample(options[:email], options[:mobile], true).first
+      user = User.search_sample(options[:email], options[:mobile], true, options[:uid]).first
       answers = answers.where(:user_id => user.try(:_id))
     end
     answers  
