@@ -4,6 +4,7 @@
 //=require ui/widgets/od_popup
 //=require ui/plugins/od_button_text
 //=require jquery.scrollTo
+//=require jquery.cookie
 
 //=require ../templates/survey_filler_qs_mobile
 //=require ../templates/survey_filler_submit_mobile
@@ -89,15 +90,6 @@ $(function(){
 			$('.spread').click(function(){
 				$('.spread').animate({"top" : "-2000px"}, 'fast');
 			})			
-		},
-
-		_get_reward:function(sign_in,redirect){
-			var redirect = redirect == 'cash' ? '/users/orders' : '/users/points?scope=in' 
-			if(!sign_in){
-				window.location.href =  window.location.protocol + "//" + window.location.host + '/account/sign_in?ref=' + redirect; 
-			}else{
-				window.location.href =  window.location.protocol + "//" + window.location.host + redirect; 
-			}
 		},
 
 		_set_reward:function(){
@@ -342,10 +334,11 @@ $(function(){
 								type: award_type,
 								account: acc
 							}, $.proxy(function(retval) {
-								if(retval.success) {
-									this._set_reward();
+								if(retval.success) {								
 									location.reload(true);
 								} else {
+									next_btn.odButtonText('restore');
+									$.util.enable(next_btn, account_ipt);
 									var error_msg = ((retval.value != null) ? infos[award_type][retval.value.error_code] : null);
 									if(error_msg != null) {
 										this._error(error_msg);
@@ -370,11 +363,20 @@ $(function(){
 						}, 'survey_filler_end_money_finish_mobile').appendTo('#f_body');
 
 						this._share();
+
+						if(!this.options.signin){
+							this._set_reward();
+						}	
+
+						$('#get_order').click($.proxy(function(){
+							$.util.disable($('#get_order').text('正在跳转...'));
+							if(!this.options.signin){
+								location.href = '/account/sign_in?ref=/users/orders'; 
+							}else{
+								location.href = '/users/orders'; 
+							}						
+						},this))	
 						
-						var get_order_btn = $('#get_order').click($.proxy(function() { 
-							$.util.disable(get_order_btn.text('正在跳转...'));
-							this._get_reward(this.options.signin,'cash')
-						}, this));
 					}
 				} else if(this.options.reward.reward_scheme_type == 2) {
 					this.hbs({

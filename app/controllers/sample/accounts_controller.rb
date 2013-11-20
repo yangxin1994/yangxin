@@ -29,9 +29,15 @@ class Sample::AccountsController < Sample::SampleController
 
   # PAGE
   def after_sign_in
+    Rails.logger.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+    Rails.logger.info(cookies[Rails.application.config.bind_answer_id_cookie_key])
+    Rails.logger.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^")
     if cookies[Rails.application.config.bind_answer_id_cookie_key].blank?
+      Rails.logger.info("-------no--cookie")
+      
       redirect_to (params[:ref].blank? ? root_path : params[:ref])
     else
+      Rails.logger.info("-------cookie exist----")
       redirect_to bind_sample_path({ref: params[:ref]})
     end
   end

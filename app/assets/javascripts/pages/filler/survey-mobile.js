@@ -1,4 +1,5 @@
 //=require jquery.SuperSlide
+
 jQuery(function($) {
 	// slide the prizes of lottery
 	jQuery(".slideBox").slide({mainCell:".bd ul",autoPlay:true});

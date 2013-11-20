@@ -194,6 +194,6 @@ class Filler::AnswersController < Filler::FillerController
       :expires => Rails.application.config.answer_id_time_out_in_hours.hours.from_now ,
       :domain => :all
     }
-    render_json_auto
+    render_json_auto(cookies[Rails.application.config.bind_answer_id_cookie_key])
   end
 end
