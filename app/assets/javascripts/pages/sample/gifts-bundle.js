@@ -175,7 +175,14 @@ $(function() {
 				popup_login_page()
 			} else if (bt_class == 'exc_right') {
 				if (parseInt(window.total_point) >= parseInt(window.point_value)) {
-					popup_order_confirm_page()
+					//强制已登录用户进行样本属性信息完善
+					if(parseInt(window.completed_info,10) < 100){
+						var ref = window.location.href;
+						window.location.href = window.location.protocol + "//" + window.location.host + "/users/setting?full=false&ref=" + encodeURIComponent(ref);
+						return false;
+					}else{
+						popup_order_confirm_page()
+					}
 				} else {
 					popup_point_less_page()
 				}
@@ -574,11 +581,14 @@ $(function() {
 				window.total_point = retval.value['point']
 				can_freedm = parseInt(window.total_point) - parseInt(window.point_value)
 				if (can_freedm >= 0) {
-					current_p = current_page();
-					if (current_p == 'gifts') {
-						popup_order_confirm_page()
-					} else {
-						popup_address_page()
+					var redirect = complete_info(retval.value['completed_info']);
+						if(redirect){
+						current_p = current_page();	
+						if (current_p == 'gifts') {
+							popup_order_confirm_page()
+						} else {
+							popup_address_page()
+						}						
 					}
 				} else {
 					popup_point_less_page()
@@ -687,7 +697,11 @@ $(function() {
 			popup_login_page()
 		} else {
 			if (parseInt(window.total_point) >= parseInt(window.point_value)) {
-				popup_address_page()
+				var redirect = complete_info(window.completed_info);
+				if(redirect){
+					popup_address_page()	
+				}
+				
 			} else {
 				popup_point_less_page()
 			}
@@ -720,6 +734,18 @@ $(function() {
 
 		}
 	})
+
+
+	function complete_info(completed_info){
+		if(parseInt(completed_info) < 100){
+			var ref = window.location.href;
+			//如果样本属性填写未完整，则强制要求用户完成样本属性
+			window.location.href = window.location.protocol + "//" + window.location.host + "/users/setting?full=false&ref=" + encodeURIComponent(ref);
+			return false;
+		}else{
+			return true;
+		}		
+	}
 
 
 	function check_enter() {

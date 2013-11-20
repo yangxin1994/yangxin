@@ -1,7 +1,7 @@
 class Sample::PublicNoticesController < Sample::SampleController
   def index
     params[:per_page] = 15
-    @public_notices = auto_paginate PublicNotice.opend.desc(:updated_at)
+    @public_notices = auto_paginate PublicNotice.desc(:top).opend.desc(:created_at)
   end
 
   def show

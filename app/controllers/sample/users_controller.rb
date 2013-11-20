@@ -98,6 +98,16 @@ class Sample::UsersController < Sample::SampleController
     end
   end
 
+  def order_cancel
+    @order = Order.find_by_id(params[:order_id])
+    @order.update_attributes(:status => Order::CANCEL,:canceled_at => Time.now)
+    prev_point = @order.sample.point 
+    @order.sample.update_attributes(:point => prev_point + @order.point)
+    respond_to do |format|
+      format.json{render_json_auto @order }
+    end
+  end
+
   def basic_info
     @user_info = current_user.get_basic_attributes
     %w{income_person income_family seniority}.each do |attr|

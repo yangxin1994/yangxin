@@ -691,8 +691,10 @@ class Answer
       self.rewards.each do |r|
         if r["checked"] == true && r["type"] == RewardScheme::POINT
           sample = self.user
-          sample.point = sample.point - r["amount"]
+          amount = [sample.point, r["amount"].to_i].min
+          sample.point = sample.point - amount
           sample.save
+          PointLog.create_admin_operate_point_log(amount, "", sample.id)
         end
       end
     end

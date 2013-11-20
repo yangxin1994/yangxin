@@ -399,12 +399,6 @@ $blue-color: #5691f0;
 		background: no-repeat 12px 12px;
 		background-color: #f2f2f2;
 		&:focus { background-color: #fff; }
-		&.email {
-			background-image: image-url("filler/default/icon/email.png");
-			&:focus {
-				background-image: image-url("filler/default/icon/email_active.png");
-			}
-		}
 		&.username {
 			background-image: image-url("filler/default/icon/username.png");
 			&:focus {

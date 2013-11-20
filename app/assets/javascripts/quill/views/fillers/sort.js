@@ -11,6 +11,7 @@ $(function(){
 	
 	quill.quillClass('quill.views.fillers.Sort', quill.views.fillers.Base, {
 		
+		shuffle_indexes: null,
 		_render: function() {
 			this.hbs(null, '/fillers/sort', true).appendTo(this.$('.q-content'));
 
@@ -41,20 +42,20 @@ $(function(){
 				indexes = _.shuffle(indexes);
 			if(this.model.hasOther())
 				indexes.push(indexes.length);
-			for (var i = 0; i < indexes.length; i++) {
-				var idx = indexes[i];
-				var li = this.hbs(this._get_item(indexes[i]), '/fillers/sort_right', true).appendTo(this.$('.sort-right'));
+			_.each(indexes, $.proxy(function(idx) {
+				var li = this.hbs(this._get_item(idx), '/fillers/sort_right', true).appendTo(this.$('.sort-right'));
 				var dom = this._setup_item(idx).appendTo(li);
 				dom.draggable({
 					scope: this.model.id,
 					helper: "clone",
-					start: $.proxy(function(event, ui) {
+					start: function(event, ui) {
 						ui.helper.addClass('dragged');
 						dom.hide();
-					}, this),
+					},
 					stop: function(event, ui) { dom.show(); }
 				});
-			};
+			}, this));
+			this.shuffle_indexes = indexes;
 		},
 
 		_get_item: function(index) {
@@ -75,26 +76,32 @@ $(function(){
 			dom.data('item-index', index);
 			return dom;
 		},
-		_remove_left_item: function(left_li) {
-			if(left_li.length == 0) return;
-			var dom = $('.sort-item', left_li);
-			if(dom.length == 0) return;
-			var index = dom.data('item-index');
-			this.$('.sort-right li:eq(' + index + ')').show();
-			dom.remove();
-			left_li.droppable('enable');
-		},
 		_move_item_to_left: function(index, left_li) {
 			if(left_li.length == 0) return;
+
+			var _remove_left_item = $.proxy(function(_left_li) {
+				if(_left_li.length == 0) return;
+				var dom = $('.sort-item', _left_li);
+				if(dom.length == 0) return;
+				this.$('.sort-right li:eq(' + _.findIndex(this.shuffle_indexes, function(v) {return v == dom.data('item-index');}) + ')').show();
+				dom.remove();
+				_left_li.droppable('enable');
+			}, this);
+
+			// remove old left li
 			this.$('.sort-left li').each($.proxy(function(i, v) {
 				var dom = $('.sort-item', $(v));
 				if(dom.length > 0 && dom.data('item-index') == index)
-					this._remove_left_item($(v));
+					_remove_left_item($(v));
 			}, this));
-			var right_li = this.$('.sort-right li:eq(' + index + ')').hide();
+
+			// hide right li
+			this.$('.sort-right li:eq(' + _.findIndex(this.shuffle_indexes, function(v) {return v == index;}) + ')').hide();
+
+			// setup new left li
 			var dom = this._setup_item(index).appendTo($('.sort-item-con', left_li));
 			$('<em />').addClass('sort-item-remove').appendTo(dom).click($.proxy(function() {
-				this._remove_left_item(left_li);
+				_remove_left_item(left_li);
 			}, this));
 			dom.draggable({
 				scope: this.model.id,
@@ -146,6 +153,7 @@ $(function(){
 			if(this.model.hasOther())
 				answer.text_input = $.trim(this.$('input:text').val());
 
+			console.log(answer);
 			return answer;
 		}
 		
