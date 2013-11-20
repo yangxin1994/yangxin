@@ -359,7 +359,7 @@ class Survey
     new_instance.clone_quota(question_id_mapping)
     new_instance.clone_filter(question_id_mapping)
     new_instance.clone_logic_control(question_id_mapping)
-    new_instance.reward_scheme << RewardScheme.create(default: true)
+    new_instance.reward_schemes << RewardScheme.create(default: true)
     new_instance
   end
 
