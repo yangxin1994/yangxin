@@ -253,6 +253,8 @@ module ApplicationHelper
         return "超时拒绝"
       when Answer::REJECT_BY_IP_RESTRICT
         return "IP拒绝"
+      when Answer::REJECT_BY_ADMIN
+        return "管理员拒绝"
       else
         return reject_type.to_s
       end
