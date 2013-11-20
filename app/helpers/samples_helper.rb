@@ -72,7 +72,7 @@ module SamplesHelper
   end
 
   def attr_enum(attr)
-    attr['enum_array'][attr['value']] if attr['value'].present?
+    attr['enum_array'][attr['value'].to_i] if attr['value'].present?
   end
 
   def attr_number(attr)
