@@ -981,6 +981,12 @@ class Answer
               selected_choices << item["content"]["text"] if selection_id.to_s == item["id"].to_s
             end
           end
+          if question.issue["other_item"]["has_other_item"]
+            if val["selection"].include?(question.issue["other_item"]["id"])
+              selected_choices << "#{question.issue["other_item"]["content"]["text"]}:#{val["text_input"]}"
+            end
+            choices << question.issue["other_item"]["content"]["text"]
+          end
           show_answer.merge!({"choices"=>choices})
           show_answer.merge!({"selected_choices"=> selected_choices})
         end
