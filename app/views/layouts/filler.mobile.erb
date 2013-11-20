@@ -3,10 +3,13 @@
 	<%= stylesheet_link_tag    "layouts/filler-mobile" %>
 
 	<% if !@survey.nil?%>
-	<script type="text/javascript">
-		window.survey_id = '<%= @survey["_id"] %>';
-		window.is_preview = <%= @is_preview.blank? ? 'false' : @is_preview %>;
-	</script>
+		<script type="text/javascript">
+			window.survey_id = '<%= @survey["_id"] %>';
+			window.is_preview = <%= @is_preview.blank? ? 'false' : @is_preview %>;
+			window.spread_url = <%= raw @spread_url.to_json %>;
+			window.current_user_id = <%=  raw (current_user.nil? ? nil.to_json : current_user._id.to_s.to_json) %>;
+
+		</script>
 	<% end %>
 
 	<%= yield :head %>
@@ -16,28 +19,35 @@
 <% content_for :app_content do %>
 
 <%= yield %>
-
-
-<% if @spreadable %>
-<div id='spread'>
-	<div id='spread_inner'>
-		<i class="q-divide"></i>
-		<input type="text" name="share-link" class="share-link" value="<%= @spread_url %>" />
-		<button class="copy-link">复制链接</button>
-		<p class="describe-txt">每成功邀请一位好友答题可获<em><%= @reward['spread_point'] %></em>积分奖励。</p>
-
-			<a href='javascript:void(0);' class='share-icon icon-SinaWeibo' title='分享至 新浪微博'></a>
-			<a href='javascript:void(0);' class='share-icon icon-TencentWeibo' title='分享至 腾讯微博'></a>
-			<a href='javascript:void(0);' class='share-icon icon-Renren' title='分享至 人人网'></a>
-			<a href='javascript:void(0);' class='share-icon icon-Douban' title='分享至 豆瓣'></a>
-			<a href='javascript:void(0);' class='share-icon icon-QQSpace' title='分享至 QQ 空间'></a>
-			<a href='javascript:void(0);' class='share-icon icon-Kaixin001' title='分享至 开心网'></a>
-			<a href='javascript:void(0);' class='share-icon icon-Diandian' title='分享至 点点网'></a>
-			<a href='javascript:void(0);' class='share-icon icon-Gmail' title='分享至 Gmail'></a>
-			<a href='javascript:void(0);' class='share-icon icon-Fetion' title='分享至 飞信'></a>
+	<div class="spread">
+		<div class="s_icon">
+			<div class="share_top">
+				<h1>将问卷分享到:	</h1>
+				<ul>
+					<li class='l'>
+						<a href='javascript:void(0);' class='share-icon icon-SinaWeibo' title='分享至 新浪微博'>
+						</a>
+					</li>
+					<li class='c'>
+						<a href='javascript:void(0);' class='share-icon icon-TencentWeibo' title='分享至 腾讯微博'>
+						</a>
+					</li>
+					<li class='r'>
+						<a href='javascript:void(0);' class='share-icon icon-QQSpace' title='分享至 QQ 空间'></a>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<% if @survey && @survey.spread_point.to_i > 0 %>
+			<div class="describe-txt">
+				<div class="describe_inner">
+					每成功邀请一位好友答题可获<em><%= @survey.spread_point %></em>积分,邀请越多积分越多!
+				</div>
+			</div>
+		<% end %>		
 	</div>
-</div>
-<% end %>
+
 
 
 <% end %>
