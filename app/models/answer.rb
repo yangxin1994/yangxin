@@ -30,6 +30,7 @@ class Answer
   REJECT_BY_TIMEOUT = 16
   REJECT_BY_AGENT_REVIEW = 32
   REJECT_BY_IP_RESTRICT = 64
+  REJECT_BY_ADMIN = 128
 
   # status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo, 32 for under agents' review
   field :status, :type => Integer, default: 1
@@ -675,6 +676,30 @@ class Answer
     self
   end
 
+  def admin_reject(admin)
+    # only finished answers can be rejected by admin
+    return false if self.status != FINISH
+    # set reject and reject type
+    set_reject_with_type(REJECT_BY_ADMIN)
+    if self.user.present?
+      # send sample a message
+      message_title = "对不起,您参与的问卷未通过审核!"
+      message_content = "您参与的问卷[#{self.survey.title}]没有通过管理员审核"
+      admin.create_message(message_title, message_content, [self.user._id.to_s])
+      update_attributes(audit_message: message_content, auditor: admin, audit_at: Time.now.to_i)
+      # decrease the sample's point
+      self.rewards.each do |r|
+        if r["checked"] == true && r["type"] == RewardScheme::POINT
+          sample = self.user
+          amount = [sample.point, r["amount"].to_i].min
+          sample.point = sample.point - amount
+          sample.save
+          PointLog.create_admin_operate_point_log(amount, "", sample.id)
+        end
+      end
+    end
+  end
+
   def review(review_result, answer_auditor, message)
     return false if self.status != UNDER_REVIEW
     old_status = self.status
@@ -1304,7 +1329,7 @@ class Answer
     return false if self.user.blank? || self.sample_attributes_updated
     self.answer_content.each do |q_id, answer|
       q = BasicQuestion.find(q_id)
-      next if q.sample_attribute.blank?
+      next if answer.blank? || q.sample_attribute.blank?
       attr_value = nil
       case q.sample_attribute.type
       when DataType::STRING

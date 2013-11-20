@@ -9,7 +9,7 @@ class Admin::AnswersController < Admin::AdminController
   def index
     @surveys = auto_paginate(Survey.search(params)) do |paginated_surveys|
       paginated_surveys.map do |s|
-        s.write_attribute(:email, s.user.email || s.user.mobile)
+        s.write_attribute(:email, s.user.try(:email) || s.user.try(:mobile))
         s.write_attribute(:not_review_answer_num, s.answers.not_preview.unreviewed.length)
         s
       end
@@ -45,4 +45,9 @@ class Admin::AnswersController < Admin::AdminController
     end 
   end
 
+  def reject
+    render_json Answer.find(params[:id]) do |answer|
+      answer.admin_reject(current_user)
+    end
+  end
 end

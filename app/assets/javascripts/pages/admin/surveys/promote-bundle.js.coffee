@@ -1,4 +1,4 @@
-#=require utility/modelinker
+#=require utility_admin/modelinker
 
 $ ->
   # 预置事件

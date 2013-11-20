@@ -180,7 +180,6 @@ class Admin::SurveysController < Admin::AdminController
     end
   end
 
-
   def interviewer_task
     @survey = Survey.find_by_id(params[:id])
     tasks = @survey.interviewer_tasks
@@ -230,7 +229,7 @@ class Admin::SurveysController < Admin::AdminController
     @addr_precision = 0
     if @question['sample_attribute_id']
       @attr = @attrs.select {|attr| attr['_id'] == @question['sample_attribute_id']}[0]
-      if @attr['type'] == 6
+      if @attr && @attr['type'] == 6
         @question['sample_attribute_relation'].each do |key, value|
           addr = QuillCommon::AddressUtility.find_province_city_town_by_code(value)
           next if addr.blank?
@@ -242,9 +241,9 @@ class Admin::SurveysController < Admin::AdminController
   end
 
   def _unbind_question
-    @question = Question.find_by_id(params[:id])
-    @question.remove_sample_attribute
-    redirect_to :back
+    render_json Question.find_by_id(params[:id]) do |question|
+      question.remove_sample_attribute
+    end
   end
 
   def _update_bind

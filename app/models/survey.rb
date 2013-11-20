@@ -220,7 +220,7 @@ class Survey
 
   def self.search(options = {})
     surveys = Survey.all
-    surveys = survey.in(:status => Tool.convert_int_to_base_arr(options[:status])) if options[:status]
+    surveys = surveys.in(:status => Tool.convert_int_to_base_arr(options[:status])) if options[:status]
     surveys = surveys.where(:quillme_promotable => true) if options[:quillme_only].to_s == "true"
     case options[:keyword].to_s
     when /^.+@.+$/
@@ -501,7 +501,20 @@ class Survey
   end
 
   def spss_header
-    headers =["answer_id", "email", "mobile", "IP"]
+    headers =[
+      {"spss_name" => "answer_id",
+       "spss_type" => "String",
+       "spss_label" => "答案ID"},
+      {"spss_name" => "email",
+       "spss_type" => "String",
+       "spss_label" => "邮箱"},
+      {"spss_name" => "mobile",
+       "spss_type" => "String",
+       "spss_label" => "手机号码"},
+      {"spss_name" => "IP",
+       "spss_type" => "String",
+       "spss_label" => "IP"}                 
+    ]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.spss_header("q#{i+1}")
     end
@@ -556,7 +569,7 @@ class Survey
     answer_length = answers.length
     last_time = Time.now.to_i
     answers.each_with_index do |answer, index|
-      line_answer = [answer._id ,answer.user.email, answer.user.mobile, answer.ip_address]
+      line_answer = [answer._id, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address]
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index

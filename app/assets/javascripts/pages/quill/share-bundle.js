@@ -21,7 +21,7 @@ jQuery(function($) {
 	function info(msg) { $.od.odAutotip({content: msg }); };
 
 	/* ===========================
-	 * survey publish penels
+	 * survey publish panels
 	 * =========================== */
 	var panels = ['close_publish', 'publish'];
 	function showPanel(publish_status) {

@@ -1,3 +1,4 @@
+#= require jquery-interdependencies
 #= require jquery_ujs
 #= require utility/string
 #= require jquery.placeholder

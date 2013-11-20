@@ -11,6 +11,10 @@ $ ->
     selector: '.o-detail'
     container: 'tr'
 
+  # $('table').popover
+  #   selector: '.o-time'
+  #   container: 'tr'    
+
   $(".handle").click ->
     $this = $(this)
     order_id = $this.attr('href').split('-')[1]
@@ -79,6 +83,13 @@ $ ->
     $("#ipt_remark").val $this.data('remark')
     $('#remark_modal').modal('show')
 
+  $(document).on "click", "#date_btn", ->
+    $('#date_model').modal('show')
+
+  $(document).on "click", "#send_date", ->
+    document.location = querilayer.to_s
+      date_min: $("#date_min").val()
+      date_max: $("#date_max").val()
 
   $("#send_remark").click ->
     $('#remark_modal').modal('hide');
