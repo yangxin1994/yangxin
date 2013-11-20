@@ -694,7 +694,7 @@ class Answer
           amount = [sample.point, r["amount"].to_i].min
           sample.point = sample.point - amount
           sample.save
-          PointLog.create_admin_operate_point_log(-amount, "", sample.id)
+          PointLog.create_admin_operate_point_log(-amount, "您参与的问卷[#{self.survey.title}]没有通过管理员审核", sample.id)
         end
       end
     end
