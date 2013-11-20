@@ -29,15 +29,14 @@
 
 	
 		<div class="share">
-			{{#if spreadable}}
-				<button id="socal_share">分享得{{spread_point}}积分</button>
-			{{/if}}
-
-			{{#if signin}}
-				<button id="get_order">查看详情</button>
+			{{#if signin}}		
+				<button id="get_order" ref="/users/orders">查看详情</button>
 			{{else}}
-				<button id="get_order">登录领取</button>
+				<button id="get_order" >登录领取</button>
 			{{/if}}
-		</div>	
+			{{#if spreadable}}
+			  <button id="socal_share">分享得{{spread_point}}积分</button>
+			{{/if}}				
+		</div>			
 	
 </div>

@@ -22,6 +22,7 @@ $(function(){
       if(this.model_issue.option_type == 1) {
         // render selector
         var slt = $('<select />').appendTo(con);
+        $('<option value="-1" />').text('- 请选择 -').appendTo(slt);
         $.each(indexes, $.proxy(function(i, index) {
           var item = this.model_issue.items[index];
           $('<option value=' + item.id + ' />').text(item.content.text).appendTo(slt);
@@ -113,7 +114,10 @@ $(function(){
       var answer = {selection: [], text_input: ''};
       if(this.model_issue.option_type == 1) {
         this.$('select option:selected').each(function () {
-          answer.selection.push(parseInt($(this).val()));
+          var v = parseInt($(this).val(), 10);
+          if(v > 0){
+            answer.selection.push(parseInt($(this).val()));
+          }
         });
       } else {
         this.$('input:checked').each(function(i, v) {
@@ -125,7 +129,6 @@ $(function(){
       };
       return answer;
     }
-
   });
   
 });

@@ -3,7 +3,6 @@
 //=require ./fillers_mobile
 //=require ui/widgets/od_popup
 //=require ui/plugins/od_button_text
-//=require ui/widgets/od_share
 //=require jquery.scrollTo
 
 //=require ../templates/survey_filler_qs_mobile
@@ -15,11 +14,6 @@
 //=require ../templates/survey_filler_end_lottery_mobile
 //=require ../templates/survey_filler_redo_mobile
 //=require ../templates/survey_filler_reject_mobile
-
-//=require ../templates/survey_filler_review_mobile
-//=require ../templates/survey_filler_finish_mobile
-
-
 
 $(function(){
 	/* Survey filer
@@ -87,7 +81,7 @@ $(function(){
 						});
 					});								
 				}else{
-					ref = location.href
+					ref = window.location.href
 					location.href = '/account/sign_in?ref=' + ref;
 				} 
 			}, this));
@@ -97,20 +91,23 @@ $(function(){
 			})			
 		},
 
-		_bind_reward:function(sign_in,r_type){
-			$.postJSON(this._uri('/start_bind'), function(retval) {
-				var redirect = r_type == 'cash' ? 'orders' : 'points'
-				if(!sign_in){
-					location.href = '/account/sign_in?ref=/users/' + redirect; 
-				}else{
-					location.href = '/users/' + redirect; 
-				}
-			});
+		_get_reward:function(sign_in,redirect){
+			var redirect = redirect == 'cash' ? '/users/orders' : '/users/points?scope=in' 
+			if(!sign_in){
+				window.location.href =  window.location.protocol + "//" + window.location.host + '/account/sign_in?ref=' + redirect; 
+			}else{
+				window.location.href =  window.location.protocol + "//" + window.location.host + redirect; 
+			}
+		},
+
+		_set_reward:function(){
+			$.postJSON(this._uri('/start_bind'), function(retval){}) 
 		},
 
 		/* Load questions
 		 * =========================== */
 		load_questions: function(start_from_question, load_next_page) {
+
 			$.getJSON(this._uri('/load_questions'), {
 				start_from_question: start_from_question,
 				load_next_page: load_next_page
@@ -135,7 +132,7 @@ $(function(){
 				// answer_status: 1（正在回答）
 				var questions = value.questions, answers = value.answers, total_count = value.question_number, 
 					index = value.answer_index, time = value.estimate_answer_time, redo_count = value.repeat_time;				
-			
+
 				if(questions.length == 0) {
 					//该页显示问题数量为0，此时表示题已经加载完最后一道，应该做提交操作
 					this._updateProgress(1);//标识答题进度为100%
@@ -215,12 +212,12 @@ $(function(){
 						$.util.disable(next_btn, prev_btn);
 						// submit question answers
 						// 1. get answers
-						var answer_content = {}, error_filler = null;
+						var answer_info = {}, error_filler = null;
 						$('.q-filler').each(function(i, v) {
 							var filler = $(this).data('view');
 							var result = filler.getAnswer();
 							if(!error_filler && result.error) error_filler = filler;
-							answer_content[filler.model.id] = result.answer;
+							answer_info[filler.model.id] = result.answer;
 						});
 						if(error_filler) {
 							// 2. if there is any illegal answer, alert
@@ -230,7 +227,7 @@ $(function(){
 							// 3. submit answers
 							next_btn.text('正在提交答案...');
 							$.util.disable(prev_btn, next_btn);
-							$.putJSON(this._uri(), { answer_content: answer_content }, $.proxy(function(retval) {
+							$.postJSON(this._uri('/update_for_mobile'), { answer_content: answer_info }, $.proxy(function(retval) {
 								if(retval && retval.success) {
 									next_btn.text('正在加载问题...');
 									this.load_questions((questions.length > 0) ? 
@@ -267,19 +264,6 @@ $(function(){
 
 						var next_btn = $('#rew_next'),check_btn = $('#check_btn');				
 	
-						check_btn.click($.proxy(function() {
-							$.util.disable(check_btn,next_btn);
-							this.load_questions(-1, true);
-						}, this));
-	
-						// submit answer when click on submit button
-						next_btn.click($.proxy(function() {
-							$.util.disable(check_btn, submit_btn,next_btn);
-							next_btn.text('正在提交...');
-							$.postJSON(this._uri('/finish'), $.proxy(function(retval) {
-								this.load_questions(-1, true);
-							}, this));
-						}, this));
 	
 						function show_zhifubao_ipt(){
 							$('#zhifubao').show();
@@ -353,11 +337,13 @@ $(function(){
 
 							next_btn.odButtonText({text: '正在提交订单...'});
 							$.util.disable(next_btn, account_ipt);
-							$.putJSON(this._uri('/select_reward'), {
+
+							$.postJSON(this._uri('/select_reward_for_mobile'), {
 								type: award_type,
 								account: acc
 							}, $.proxy(function(retval) {
 								if(retval.success) {
+									this._set_reward();
 									location.reload(true);
 								} else {
 									var error_msg = ((retval.value != null) ? infos[award_type][retval.value.error_code] : null);
@@ -367,7 +353,6 @@ $(function(){
 										this._error('订单提交失败，请刷新页面重试');										}
 								}
 							}, this));
-	
 						}, this));
 					}else{
 						this.hbs({
@@ -388,7 +373,7 @@ $(function(){
 						
 						var get_order_btn = $('#get_order').click($.proxy(function() { 
 							$.util.disable(get_order_btn.text('正在跳转...'));
-							this._bind_reward(this.options.signin,'cash')
+							this._get_reward(this.options.signin,'cash')
 						}, this));
 					}
 				} else if(this.options.reward.reward_scheme_type == 2) {
@@ -399,21 +384,20 @@ $(function(){
 						spread_point: this.options.spread_point
 					},'survey_filler_end_point_finish_mobile').appendTo('#f_body');
 
-					var sign_in = this.options.signin;
-					var get_order_btn = $('.rew_next').click($.proxy(function() { 
-						$.util.disable(get_order_btn.text('正在跳转...'));
-						$.postJSON(this._uri('/start_bind'), function(retval) {
-							if(!sign_in){
-								location.href = '/account/sign_in?ref=/users/points'; 
-							}else{
-								location.href = '/users/points'; 
-							}
-						});
-					}, this));
 
+					if(!this.options.signin){
+						this._set_reward();
+					}
 
-
-					this._share();			
+					this._share();	
+					$('.rew_next').click($.proxy(function(){
+						$.util.disable($('.rew_next').text('正在跳转...'));
+						if(!this.options.signin){
+							location.href = '/account/sign_in?ref=/users/points'; 
+						}else{
+							location.href = '/users/points'; 
+						}						
+					},this))		
 				} else if(this.options.reward.reward_scheme_type == 3) {
 					this.hbs({
 						spread_point:this.options.spread_point

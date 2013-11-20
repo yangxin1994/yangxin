@@ -37,9 +37,10 @@
 
 <h2 class="title"><%= @survey['title'] %></h2>
 <% if @survey['style_setting']['has_progress_bar'] %>
-<div class="progress" id="progress"><em style="width:100px;"></em>
-	<span class="progress-number" id="progress_txt"></span>
-</div>
+	<div class="progress" id="progress">
+		<em></em>
+		<span class="progress-number" id="progress_txt"></span>
+	</div>
 <% end %>
 
 <div id="f_body"></div>

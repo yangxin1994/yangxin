@@ -107,6 +107,10 @@ class Filler::AnswersController < Filler::FillerController
   end
 
 
+  def update_for_mobile
+    update()
+  end
+
   # AJAX
   def update
     @answer = Answer.find(params[:id])
@@ -176,6 +180,10 @@ class Filler::AnswersController < Filler::FillerController
   # AJAX
   def select_reward
     render_json_auto Answer.find(params[:id]).select_reward(params[:type], params[:account], current_user)
+  end
+
+  def select_reward_for_mobile
+    select_reward()
   end
 
   # AJAX
