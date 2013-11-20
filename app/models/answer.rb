@@ -695,6 +695,8 @@ class Answer
           sample.point = sample.point - amount
           sample.save
           PointLog.create_admin_operate_point_log(-amount, "您参与的问卷[#{self.survey.title}]没有通过管理员审核", sample.id)
+          self.rewards.each { |e| e["checked"] = false }
+          self.save
         end
       end
     end
