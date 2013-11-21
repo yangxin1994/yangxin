@@ -95,6 +95,8 @@ class Survey
   field :sample_attributes_for_promote, :type => Array, default: []
   field :star, :type => Boolean, default: false
 
+  field :pre_survey_promotable, :type => Boolean, default: false
+  field :pre_survey_promote_info, :type => Array, default: []
 
   has_many :answers
   has_many :reward_schemes
