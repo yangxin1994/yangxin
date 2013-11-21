@@ -589,6 +589,28 @@ class Survey
     answer_c
   end
 
+  def admin_to_csv(answers)
+    formated_error = []
+    qindex = 0
+    q = self.all_questions_type(false)
+    csv_string = CSV.generate(:headers => true) do |csv|
+      csv << excel_header
+      answers.each_with_index do |answer, index|
+        line_answer = [answer._id, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip]
+        begin
+          all_questions_id(false).each_with_index do |question, index|
+            qindex = index
+            line_answer += q[index].answer_content(answer.answer_content[question], "q#{index + 1}")
+          end
+        rescue Exception => test
+          formated_error << [test, index + 1, qindex + 1, q[index + 1].class]
+        else
+          csv << line_answer
+        end
+      end
+    end
+  end
+
   def analysis(filter_index, include_screened_answer)
     return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
     task_id = Task.create(:task_type => "analysis")._id.to_s

@@ -47,6 +47,7 @@ class Answer
   #channel: 1（调研社区）2（邮件订阅），4（短信订阅），8（浏览器插件推送），16（微博发布），32（Folwy发布），64（线上代理发布)
   field :channel, :type => Integer
   field :ip_address, :type => String, default: ""
+  field :remote_ip, :type => String, default: ""
   field :http_user_agent, :type => String, default: ""
   field :is_scanned, :type => Boolean, default: false
   field :is_preview, :type => Boolean, default: false
@@ -132,9 +133,9 @@ class Answer
       elsif /^\d{11}$/
         options[:mobile] = options[:keyword]
       else
-        options[:uid] = options[:keyword]
+        return answers.where(:_id => options[:keyword])
       end
-      user = User.search_sample(options[:email], options[:mobile], true, options[:uid]).first
+      user = User.search_sample(options[:email], options[:mobile], true).first
       answers = answers.where(:user_id => user.try(:_id))
     end
     answers  
