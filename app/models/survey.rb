@@ -589,14 +589,14 @@ class Survey
     answer_c
   end
 
-  def to_csv(answers)
+  def admin_to_csv(answers)
     formated_error = []
     qindex = 0
     q = self.all_questions_type(false)
     csv_string = CSV.generate(:headers => true) do |csv|
       csv << excel_header
       answers.each_with_index do |answer, index|
-        line_answer = [answer._id, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address]
+        line_answer = [answer._id, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip]
         begin
           all_questions_id(false).each_with_index do |question, index|
             qindex = index
