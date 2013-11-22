@@ -13,7 +13,10 @@
         <% @public_notices['data'].each_with_index do |pn,index| %>
           <li <%= hide_border?(@public_notices['data'],index)%>>
             <a href="<%= public_notice_path(pn['_id'])%>">
-              <span class="pn_l"><%= pn['title']%></span>
+              <span class="pn_l <%= 'rec' if pn.top %>">
+                <%= "【置顶】" if pn.top %>
+                <%= pn['title']%>
+              </span>
             </a>
             <span class="pn_r"><%= Date.strptime("#{pn['created_at']}", "%Y-%m-%d") %></span>
             

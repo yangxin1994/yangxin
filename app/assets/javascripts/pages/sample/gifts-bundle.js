@@ -30,7 +30,7 @@ $(function() {
       '</div>'+
       '<div class="actions">'+
           '<a class="b_info" href="/users/setting">去完善基本信息</a>' +
-          '<a class="a_info" href="/users/address">去完善收获地址</a>' + 
+          '<a class="a_info" href="/users/setting/address">去完善收货地址</a>' + 
       '</div>'+
       '</div>'
   
