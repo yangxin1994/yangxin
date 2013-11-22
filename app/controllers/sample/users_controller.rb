@@ -103,6 +103,7 @@ class Sample::UsersController < Sample::SampleController
     @order.update_attributes(:status => Order::CANCEL,:canceled_at => Time.now)
     prev_point = @order.sample.point 
     @order.sample.update_attributes(:point => prev_point + @order.point)
+    PointLog.create_cancel_order_log(@order.point,@order.sample.id)
     respond_to do |format|
       format.json{render_json_auto @order }
     end
