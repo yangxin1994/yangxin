@@ -47,7 +47,10 @@
         <% @data[:public_notices].each_with_index do |pn,index| %>
           <li <%= hide_border?(@data[:public_notices].to_ary,index) %>>
             <a href="<%= public_notice_path(pn['_id']) %>">
-              <span class="bulletin-title"><%= truncate("#{pn['title']}", :length => 25)%></span>
+              <span class="bulletin-title <%= 'top' if pn.top %>">
+                <%= "【置顶】" if pn.top %>
+                <%= truncate("#{pn['title']}", :length => 25)%>
+              </span>
             </a>
             <span class="time">
               <%= Date.strptime("#{pn['created_at']}", "%Y-%m-%d") %></span>

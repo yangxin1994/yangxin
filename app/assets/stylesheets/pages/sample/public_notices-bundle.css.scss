@@ -33,13 +33,13 @@
 	.pub_list{
 		background: #fff;
 		padding: 10px;
-        @include border-radius(12px);
-        @include box-shadow(0 1px 1px #999);
+    @include border-radius(12px);
+    @include box-shadow(0 1px 1px #999);
 		width:610px;
 		float:left;
 		.pub_inner{
 			padding: 10px 15px 5px 10px;
-            @include border-radius(4px);
+      @include border-radius(4px);
 			ul{
 				list-style:none;
 				li{
@@ -54,6 +54,9 @@
 						display:block;
 						float:left;
 						color:#666666;
+						&.rec{
+							color:$red1;
+						}
 						&:hover{
 							color:#ec1717;
 						}
