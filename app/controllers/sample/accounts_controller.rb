@@ -147,12 +147,14 @@ class Sample::AccountsController < Sample::SampleController
     @bind_info["mobile"] = current_user.mobile_activation
 
     @completed_info = current_user.completed_info
+    @receiver_completed = current_user.receiver_completed_info
 
     @basic_info = {
       answer_number: @answer_number,
       spread_number: @spread_number,
       bind_info: @bind_info,
       completed_info: @completed_info,
+      receiver_completed:@receiver_completed,
       point: current_user.point,
       sample_id: current_user._id.to_s,
       avatar: current_user.mini_avatar,
