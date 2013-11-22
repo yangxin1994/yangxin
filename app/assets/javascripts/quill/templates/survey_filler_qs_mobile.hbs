@@ -1,9 +1,15 @@
 <div class="page">
-	<div class="describe">
-		{{#if remind}}
+	{{#if remind}}
+		<div class="describe">
 			<span>注意，系统检测出您第一次答题时没有认真填写，您还有一次答题机会，请认真回答问卷，谢谢。</span>
+		</div>
+	{{else}}
+		{{#if welcome}}
+			<div class="describe">
+				{{welcome}}
+			</div>
 		{{/if}}
-	</div>
+	{{/if}}
 	<div id='questions_con'></div>
 </div>
 

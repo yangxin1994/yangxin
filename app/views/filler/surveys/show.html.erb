@@ -141,13 +141,13 @@
 			<h1>答题奖励<em><%= @reward_point %></em>积分</h1>
 			<% if !@hot_gift.nil? %>
 			<h2>热门兑换礼品：</h2>
-			<a class='gifts-preview' href='<%= gift_path(@hot_gift['_id']) %>' target='_blank'>
-				<img src='<%= @hot_gift.photo_src %>' />
-				<h3><%= @hot_gift['title'] %></h3>
+			<a class='gifts-preview' href='<%= gift_path(@hot_gift.first['_id']) %>' target='_blank'>
+				<img src='<%= @hot_gift.first.photo_src %>' />
+				<h3><%= @hot_gift.first['title'] %></h3>
 			</a>
 			<div class='gifts-info'>
-				<span class='l'><%= @hot_gift['point'] %>积分</span>
-				<span class='r'><%= @hot_gift['exchange_count'] %>人兑换</span>
+				<span class='l'><%= @hot_gift.first['point'] %>积分</span>
+				<span class='r'><%= @hot_gift.first['exchange_count'] %>人兑换</span>
 			</div>
 			<% end %>
 			<% elsif @reward_scheme_type == 3 %>

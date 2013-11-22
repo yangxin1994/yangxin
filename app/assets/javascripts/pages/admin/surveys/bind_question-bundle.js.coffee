@@ -1,5 +1,4 @@
 #= require handlebars.runtime
-#= require jquery_ujs
 # =require jquery-ui-min
 #= require utility/string
 #= require utility/util
@@ -7,6 +6,7 @@
 #= require jquery.placeholder
 #= require ui/widgets/od_address_selector
 #= require ui/widgets/od_time_selector
+#= require jquery-interdependencies
 #= require_tree ../templates
 
 $ ->
@@ -155,7 +155,7 @@ $ ->
           val = $this.find('select').val()
           relation[item_id] = val if val.length > 0
         relation
-      ,
+      ,   
       'num_range': (panel_class) ->
         $(".#{panel_class} table tbody tr").each () ->
           $this = $(this)
@@ -207,3 +207,19 @@ $ ->
       location.reload()
     )
     false
+
+  $("#delete_bind").click ->
+    $this = $(this)
+    if confirm "确定要删除吗?"
+      $.ajax
+        type: 'DELETE'
+        url: "/admin/surveys/#{$this.data('id')}/bind_question"
+        success: (ret)->
+          if ret.success
+            alert_msg.show('success', "已经删除!")
+            document.location = "/admin/surveys/#{$this.data('id')}/bind_question"
+          else
+            alert_msg.show('error', "删除失败 (╯‵□′)╯︵┻━┻")
+        error: ->
+          alert_msg.show('error', "删除失败 (╯‵□′)╯︵┻━┻")
+          

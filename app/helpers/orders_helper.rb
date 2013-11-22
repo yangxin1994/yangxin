@@ -52,4 +52,21 @@ module OrdersHelper
       "收货信息(点击看详细)"
     end
   end
+
+  def order_time_label(status)
+    case status.to_i
+    when 0
+      "最近操作时间"
+    when 4, 8
+      "处理时间"
+    when 16
+      "取消时间"
+    when 32
+      "冻结时间"
+    when 64
+      "拒绝时间"
+    else
+      "创建时间"
+    end
+  end
 end

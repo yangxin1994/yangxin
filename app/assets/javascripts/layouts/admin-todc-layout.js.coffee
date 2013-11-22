@@ -7,8 +7,8 @@
 //= require twitter/bootstrap/tooltip
 //= require twitter/bootstrap/dropdown
 //= require twitter/bootstrap/popover
-//= require utility/querilayer
-//= require utility/checklist
+//= require utility_admin/querilayer
+//= require utility_admin/checklist
 //= require jquery.validate.min
 //= require jquery.validate.bootstrap.popover
 

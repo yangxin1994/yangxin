@@ -49,7 +49,7 @@ module SamplesHelper
     when 0
       attr_string attr
     when 1
-      attr_emun attr
+      attr_enum attr
     when 2
       attr_number attr
     when 3
@@ -71,8 +71,8 @@ module SamplesHelper
     attr['value']
   end
 
-  def attr_emun(attr)
-    attr['enum_array'][attr['value']] if attr['value'].present?
+  def attr_enum(attr)
+    attr['enum_array'][attr['value'].to_i] if attr['value'].present?
   end
 
   def attr_number(attr)
@@ -124,8 +124,7 @@ module SamplesHelper
     if attr['element_type'].to_i == 7
       "error"
     else
-      attr['type'] = attr['element_type']
-      attr_tag(attr)
+      attr['enum_array'].join(',')
     end
   end
 end

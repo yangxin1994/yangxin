@@ -158,6 +158,7 @@
                         <ul class="w100">
                             <li name="0">已  婚</li>
                             <li name="1" class="bbr">未  婚</li>
+                            <li name="2" class="bbr">离  异</li>
                         </ul>
                     </div>
 
@@ -169,8 +170,10 @@
                             <i class="triangle"></i>
                         </div>  
                         <ul class="w100">
-                            <li name="0">是</li>
-                            <li name="1">否</li>
+                            <li name="0">没有</li>
+                            <li name="1">1个</li>
+                            <li name="2">2个</li>
+                            <li name="3">3个及以上</li>
                         </ul>
                     </div>
                 </div>
@@ -244,18 +247,7 @@
                             <span name="-1" class="select-txt">请选择..</span>
                             <i class="triangle"></i>
                         </div>  
-                        <ul class="w180" style="width: 180px;">
-                        </ul>
-                    </div>
-
-                    <div class="title" style="width: 110px;">担任职位：</div>
-                    <input id="position_value" style="display: none;" type="text" value="<%= @user_info["position"].nil? ? -1 :  @user_info["position"] %>"/>
-                    <div class="select td1" id="position">
-                        <div class="select-content"> <!-- 点击后请用js 加上 .active -->
-                            <span name="-1" class="select-txt">请选择..</span>
-                            <i class="triangle"></i>
-                        </div>  
-                        <ul class="w160" style="width: 160px;">
+                        <ul class="w180" style="width: 300px;">
                         </ul>
                     </div>
 
@@ -267,6 +259,20 @@
                             <i class="triangle"></i>
                         </div>  
                         <ul class="w120" style="width: 120px;">
+                        </ul>
+                    </div>
+
+                    <br />
+                    <div style="width:100%;height:8px;"></div>
+
+                    <div class="title" style="">担任职位：</div>
+                    <input id="position_value" style="display: none;" type="text" value="<%= @user_info["position"].nil? ? -1 :  @user_info["position"] %>"/>
+                    <div class="select td1" id="position">
+                        <div class="select-content"> <!-- 点击后请用js 加上 .active -->
+                            <span name="-1" class="select-txt">请选择..</span>
+                            <i class="triangle"></i>
+                        </div>  
+                        <ul class="w160" style="width: 220px;">
                         </ul>
                     </div>
 

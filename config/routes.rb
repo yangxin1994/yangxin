@@ -322,7 +322,8 @@ OopsData::Application.routes.draw do
 
     resources :answers do
       member do
-        get :review
+        get :review, :to_csv
+        put :reject
       end
     end
 
@@ -509,7 +510,9 @@ OopsData::Application.routes.draw do
         post :clear
         delete :destroy_preview
         put :select_reward
+        post :select_reward_for_mobile
         post :start_bind
+        post :update_for_mobile
       end
     end
     resource :bind_sample, :only => [:show]

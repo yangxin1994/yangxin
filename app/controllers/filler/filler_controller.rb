@@ -1,6 +1,19 @@
 class Filler::FillerController < ApplicationController
 
+  has_mobile_fu
+
+  before_filter :set_mobile_format, :check_mobile_param
+
   layout 'filler'
+
+  # Continue rendering HTML for the iPad (no mobile views yet)
+  def set_mobile_format
+    is_device?("ipad") ? request.format = :html : super
+  end
+
+  def check_mobile_param
+    force_mobile_format if params[:m].to_b
+  end    
 
   def ensure_preview(is_preview)
     @is_preview = is_preview
@@ -25,7 +38,8 @@ class Filler::FillerController < ApplicationController
       if r['amount'] > 0
         @reward_scheme_type = 2
         @reward_point = r['amount']
-        @hot_gift = Gift.on_shelf.real.desc(:exchange_count).first
+        #@hot_gift = Gift.on_shelf.real.desc(:exchange_count).first
+        @hot_gift = Gift.on_shelf.real.desc(:exchange_count).limit(3)
       end
     when RewardScheme::LOTTERY
       if r['prizes'].length > 0
@@ -43,13 +57,11 @@ class Filler::FillerController < ApplicationController
     end
   end
 
-  def ensure_spread(survey, reward_scheme_id)
-    # get spread url
-    @spread_url = nil
-    return if !user_signed_in || survey['spread_point'] == 0
-    @spread_url = "#{Rails.application.config.quillme_host}#{show_s_path(reward_scheme_id)}?i=#{current_user._id}"
+  def ensure_spread(survey, reward_scheme_id)   
+    @spread_url = "#{Rails.application.config.quillme_host}#{show_s_path(reward_scheme_id)}" unless user_signed_in
+    @spread_url = "#{Rails.application.config.quillme_host}#{show_s_path(reward_scheme_id)}?i=#{current_user._id}" if user_signed_in 
     @spread_url = "#{Rails.application.config.quillme_host}/#{MongoidShortener.generate(@spread_url)}"
-  end
+  end  
 
   def cookie_key(survey_id, is_preview)
     return "#{survey_id}_#{is_preview ? 1 : 0}"
@@ -61,7 +73,6 @@ class Filler::FillerController < ApplicationController
   def load_survey(reward_scheme_id, is_preview = false)
     # ensure preview
     ensure_preview(is_preview)
-
     # 1. ensure reward_scheme exist
     # 2. get survey_id from rewarc_scheme
     # 3. ensure survey exist and not deleted
