@@ -38,7 +38,15 @@ class Admin::AnswersController < Admin::AdminController
     survey = Survey.find(params[:id])
     answers = survey.answers.search(params)
     csv_string = survey.admin_to_csv(answers)
-    send_data(csv_string.encode("GBK"),
+    csv_string_gbk = ""
+    csv_string.each_char do |csv_str|
+      begin
+        csv_string_gbk << csv_str.encode("GBK")
+      rescue
+        csv_string_gbk << ' '
+      end
+    end
+    send_data(csv_string_gbk,
       :filename => "答案数据-#{Time.now.strftime("%M-%d_%T")}.csv", 
       :type => 'text/csv')    
   end
