@@ -231,6 +231,20 @@ module ApplicationHelper
     Time.at(int_time.to_i).strftime("%Y-%m-%d %H:%M:%S")
   end
 
+  def order_next_node(order)
+    case order.status.to_i
+    when Order::WAIT
+    '(预计在' + (DateTime.parse(order.created_at.strftime('%Y-%m-%d')) + 1.months).strftime('%Y年%-m月') + '5日前完成审核)' 
+    when Order::HANDLE
+      if order.type.to_i == Order::REAL 
+        '(预计在' + (DateTime.parse(Time.at(order.handled_at).strftime("%Y-%m-%d")) + 1.months).strftime('%Y年%-m月') + '5日前送达)'
+      else
+        '(预计在' + (DateTime.parse(Time.at(order.handled_at).strftime("%Y-%m-%d")) + 1.months).strftime('%Y年%-m月') + '5日前支付)'
+      end
+         
+    end
+  end
+
   def answered?(status, reject_type=0, free_reward=false,survey=nil)
     case status.to_i
     when Answer::EDIT

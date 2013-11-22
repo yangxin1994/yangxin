@@ -1,5 +1,53 @@
 //=require ui/widgets/od_address_selector
 $(function() {
+
+
+  jQuery.extend({
+    popupFancybox: function(options){
+      var _defaults = {
+        cont: 'info not completed',
+        basic_completed:0,
+        address_completed:0
+      }
+      var _options = $.extend(_defaults, options);
+
+      $('#popup-fail').remove();
+      html = '<div id="popup-fail" class="popup" >'+
+          '<div class="detail-title">提示信息'+
+      '</div>'+
+      '<div style="clear: both;"></div>'+
+      '<div class="cont" style="text-align: center;">'+
+          '<p>'+
+              '<span class="icon icon-red-error"></span>'+
+              '<span class="c-red">'+_options.cont+'</span>'+
+          '</p>'+
+          '<p class="un_complete basic_info">' +
+          '<span class="basic_info_detail">基本信息完成度(' + _options.basic_completed + '%)</span>' +  
+          '<i></i></p>' + 
+          '<p class="un_complete address">' +
+          '<span class="address_detail">地址信息完成度(' + _options.address_completed + '%)</span>' +
+          '<i></i></p>' +
+      '</div>'+
+      '<div class="actions">'+
+          '<a class="b_info" href="/users/setting">去完善基本信息</a>' +
+          '<a class="a_info" href="/users/address">去完善收获地址</a>' + 
+      '</div>'+
+      '</div>'
+  
+      $('body').append(html);
+      $.fancybox($('#popup-fail'), 
+        {
+        	scrolling:false,
+          beforeShow: function(){
+            $(".fancybox-skin").css({"backgroundColor":"#fff"});
+            $('.un_complete.basic_info').find('i').css({width:_options.basic_completed + '%'});
+            $('.un_complete.address').find('i').css({width:_options.address_completed + '%'});
+          }
+        }
+      );   
+    } 
+  });
+
 	var unit = null;
 
 	var partial_ul = null;
@@ -176,14 +224,13 @@ $(function() {
 			} else if (bt_class == 'exc_right') {
 				if (parseInt(window.total_point) >= parseInt(window.point_value)) {
 					//强制已登录用户进行样本属性信息完善
-					if(parseInt(window.completed_info,10) < 100){
-						var ref = window.location.href;
-						window.location.href = window.location.protocol + "//" + window.location.host + "/users/setting?full=false&ref=" + encodeURIComponent(ref);
+					var con = info_completed(window.completed_info,window.receiver_completed);
+					if(!con){
 						return false;
 					}else{
-						popup_order_confirm_page()
+						popup_order_confirm_page();
 					}
-				} else {
+				}else {
 					popup_point_less_page()
 				}
 
@@ -576,14 +623,16 @@ $(function() {
 			auth_key: authkey
 		}, function(retval) {
 			if (retval.success) {
-				refresh_login_status(retval.value)
-				window.username = retval.value['nickname']
-				window.total_point = retval.value['point']
+				refresh_login_status(retval.value);
+				window.username = retval.value['nickname'];
+				window.total_point = retval.value['point'];
+				window.completed_info = retval.value['completed_info'];
+				window.receiver_completed = retval.value['receiver_completed']
 				can_freedm = parseInt(window.total_point) - parseInt(window.point_value)
 				if (can_freedm >= 0) {
-					var redirect = complete_info(retval.value['completed_info']);
+					var redirect = info_completed(window.completed_info,window.receiver_completed)
 						if(redirect){
-						current_p = current_page();	
+							current_p = current_page();	
 						if (current_p == 'gifts') {
 							popup_order_confirm_page()
 						} else {
@@ -697,11 +746,10 @@ $(function() {
 			popup_login_page()
 		} else {
 			if (parseInt(window.total_point) >= parseInt(window.point_value)) {
-				var redirect = complete_info(window.completed_info);
+				var redirect = info_completed(window.completed_info,window.receiver_completed)
 				if(redirect){
 					popup_address_page()	
 				}
-				
 			} else {
 				popup_point_less_page()
 			}
@@ -736,16 +784,36 @@ $(function() {
 	})
 
 
-	function complete_info(completed_info){
-		if(parseInt(completed_info) < 100){
-			var ref = window.location.href;
-			//如果样本属性填写未完整，则强制要求用户完成样本属性
-			window.location.href = window.location.protocol + "//" + window.location.host + "/users/setting?full=false&ref=" + encodeURIComponent(ref);
+	function info_completed(completed_info,receiver_completed){
+		var info_completed     = parseInt(completed_info,10) < 100;
+		var rec_completed = parseInt(receiver_completed,10) < 100;
+
+		if(info_completed || rec_completed ){
+			$.popupFancybox({
+				cont: "亲,完善以下信息后才可以兑换哦!",
+				basic_completed:completed_info,
+        address_completed:receiver_completed
+			})
 			return false;
 		}else{
 			return true;
-		}		
-	}
+		}						
+	}	
+
+
+	// function complete_info(current_user){
+	// 	// if(parseInt(completed_info) < 100){
+	// 	// 	var ref = window.location.href;
+	// 	// 	//如果样本属性填写未完整，则强制要求用户完成样本属性
+	// 	// 	window.location.href = window.location.protocol + "//" + window.location.host + "/users/setting?full=false&ref=" + encodeURIComponent(ref);
+	// 	// 	return false;
+	// 	// }else if(current_user){
+
+	// 	// 	return false;
+	// 	// }else{
+	// 	// 	return true;
+	// 	// }		
+	// }
 
 
 	function check_enter() {

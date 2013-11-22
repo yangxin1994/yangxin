@@ -166,10 +166,6 @@ jQuery(function($) {
 	}
 
 	// **************init page *************************
-   
-	if($.util.param('full') === 'false' && $.util.param('ref').length > 0){
-		$.popupFancybox({cont: "完善个人信息资料后才可兑换哦！"});
-	}
 
 	// init select date values
 	if ($('.select-date').length > 0) {
@@ -590,7 +586,7 @@ jQuery(function($) {
         	    var ref = $.util.param('ref');
         	    window.location.href = decodeURIComponent(ref);
         	}else{
-        		$.popupFancybox({success: true, cont: "个人资料更新成功！"});
+        		$.popupFancybox({success: false, cont: "个人资料更新成功！"});
         	}
 				}else {
 					$.popupFancybox({cont: "操作失败，请保证数据完整！"});

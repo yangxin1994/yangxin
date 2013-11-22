@@ -157,13 +157,19 @@
           <span class="time">
             <%= int_time_to_datetime(@order["created_at"].to_i) %>
           </span>
-          <span class="text">你提交了订单</span>
+          <span class="text">
+            你提交了订单
+            <%= order_next_node(@order) if  @order["status"].to_i == Order::WAIT%>
+          </span>
         </li>
       <% end %>
       <% if [Order::HANDLE,Order::SUCCESS,Order::FAIL].include?(@order["status"].to_i) %>
         <li>
           <span class="time"><%= int_time_to_datetime(@order["handled_at"].to_i) %></span>
-          <span class="text"><%= order_list(@order["type"].to_i, 1) %></span>
+          <span class="text">
+            <%= order_list(@order["type"].to_i, 1) %>
+            <%= order_next_node(@order) if  @order["status"].to_i == Order::HANDLE %>
+          </span>
         </li>
       <% end %>
 
