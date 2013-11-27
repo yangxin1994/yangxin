@@ -27,6 +27,7 @@ jQuery(function($) {
             $('.loading-div').remove();
             $(_this.attr('href')+' .ajax-content').html(data);
             $('.cancel').bind('click',function(){
+                $(this).remove();
                 $.putJSON('/users/order_cancel',{
                     order_id: oid
                     }, function(data){
@@ -44,9 +45,5 @@ jQuery(function($) {
                         '<span class="c-red">请求失败！</span></div>');
         })
     });
-
-    $('.cancel').bind('click',function(){
-        console.log('ddd')
-    })
 
 });
