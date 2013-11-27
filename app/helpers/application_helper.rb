@@ -36,9 +36,9 @@ module ApplicationHelper
   def icp_info
     host = request.host.downcase
     if host.include? 'quillme'
-      return '京 ICP 备 13010483 号'
+      return '京 ICP 备 13048388 号'
     else
-      return '京 ICP 备 13010483 号'
+      return '京 ICP 备 13048388 号'
     end
   end
 
