@@ -65,6 +65,35 @@ class PointLog < Log
     )
   end
 
+  def self.create_cancel_order_log(amount,sample_id,gift_id)
+    gift_id = Gift.generate_gift_id(gift_id)
+    gift = Gift.normal.find_by_id(gift_id)
+    gift_name = gift.try(:title)
+    gift_picture_url = gift.photo.present? ? gift.photo.picture_url : Gift::DEFAULT_IMG
+
+    case gift.type
+    when Gift::MOBILE_CHARGE
+      gift_name = "#{amount/100}元话费"
+    when Gift::ALIPAY
+      gift_name = "#{amount/100}元支付宝"
+    when Gift::JIFENBAO
+      gift_name = "#{amount}集分宝"
+    when Gift::QQ_COIN
+      gift_name = "#{amount/100}元Q币"
+    end
+
+    self.create(
+      :amount => amount,
+      :gift_id => gift_id,
+      :gift_name => gift_name,
+      :gift_type => gift.type,
+      :reason => PointLog::REVOKE,
+      :gift_picture_url => gift_picture_url,
+      :user_id => sample_id,
+      :remark => '订单取消'
+    )
+  end
+
 
   def fill_scheme_id
     scheme_id = Survey.find_by(:id => self.survey_id).quillme_promote_info['reward_scheme_id']  if self.survey_id.present?

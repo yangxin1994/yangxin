@@ -17,7 +17,9 @@ module SamplesHelper
     when 64
       "撤销订单"
     when 128
-      "原有系统导入"       
+      "原有系统导入" 
+    when 512
+      "订单取消"    
     else
       "其它"
     end

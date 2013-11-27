@@ -586,7 +586,7 @@ jQuery(function($) {
         	    var ref = $.util.param('ref');
         	    window.location.href = decodeURIComponent(ref);
         	}else{
-        		$.popupFancybox({success: false, cont: "个人资料更新成功！"});
+        		$.popupFancybox({success: true, cont: "个人资料更新成功！"});
         	}
 				}else {
 					$.popupFancybox({cont: "操作失败，请保证数据完整！"});
