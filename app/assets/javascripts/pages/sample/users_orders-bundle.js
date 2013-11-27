@@ -31,9 +31,6 @@ jQuery(function($) {
                 $.putJSON('/users/order_cancel',{
                     order_id: oid
                     }, function(data){
-                        console.log("------------------------")
-                        console.log(data)
-                        console.log("------------------------")
                         $.popupFancybox({success: true, cont: "操作成功！"});
                     }
                 );                
