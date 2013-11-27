@@ -100,6 +100,8 @@ class Filler::FillerController < ApplicationController
         redirect_to show_a_path(answer.id.to_s) and return if !answer.is_edit
         @percentage = answer.answer_percentage
       end
+    else
+    	cookies.delete(cookie_key(survey_id, is_preview), :domain => :all)
     end
 
     # 5. get real reward
