@@ -18,8 +18,66 @@ OopsData::Application.routes.draw do
     end
   end
 
-  namespace :express do
-    resources :questionaires, :only => [:show, :index]
+  namespace :express, :path => :e do
+    resources :questionaires do
+      member do
+        get :stars
+        post :clone
+        put :recover, :remove, :update_star, :publish, :deadline, :close
+      end
+
+      resources :pages, :only => [:create, :show] do
+        member do
+          put :split, :combine
+        end
+      end
+
+      resources :questions, :only => [:create, :show, :update, :destroy] do
+        member do
+          get :analyse
+          put :move
+        end
+      end
+
+      resource :authority, :only => [:show, :update]
+      resource :property, :only => [:show, :update] do
+        member do
+          get :more
+          put :update_more
+        end
+      end
+
+      resource :quality, :only => [:show, :update]
+
+      resource :customization, :only => [:show, :update]
+
+      resources :logics, :only => [:index, :show, :destroy, :update, :create]
+
+      resource :share, :only => [:show]
+
+      resources :quotas, :only => [:destroy, :update, :create] do
+        collection do
+          post :refresh
+        end
+      end
+
+      resources :filters, :only => [:index, :show, :destroy, :update, :create]
+
+      resources :report_mockups, :only => [:index, :show, :create, :update, :destroy] do
+        member do
+          get :report
+        end
+      end
+
+      resource :result, :only => [:show] do
+        member do
+          get :spss, :excel, :report, :csv_header
+          post :import_data
+        end
+      end
+
+      resource :preview, :only => [:show]      
+    end
   end
 
 
@@ -156,70 +214,70 @@ OopsData::Application.routes.draw do
 
     resource :aboutus, :only => [:show]
 
-    # survey
-    match "questionaires/new" => "questionaires#new", :as => :new_questionaire, :via => :get
-    match "questionaires/:questionaire_id" => "questionaires#show", :as => :questionaire, :via => :get  # ugly but make ensure_survey in quill_controller work
-    # match "questionaires/:questionaire_id" => "questionaires#destroy", :as => :questionaire, :via => :delete
-    resources :questionaires , :except => [:show] do
-      member do
-        get :stars
-        post :clone
-        put :recover, :remove, :update_star, :publish, :deadline, :close
-      end
+    # # survey
+    # match "questionaires/new" => "questionaires#new", :as => :new_questionaire, :via => :get
+    # match "questionaires/:questionaire_id" => "questionaires#show", :as => :questionaire, :via => :get  # ugly but make ensure_survey in quill_controller work
+    # # match "questionaires/:questionaire_id" => "questionaires#destroy", :as => :questionaire, :via => :delete
+    # resources :questionaires , :except => [:show] do
+    #   member do
+    #     get :stars
+    #     post :clone
+    #     put :recover, :remove, :update_star, :publish, :deadline, :close
+    #   end
 
-      resources :pages, :only => [:create, :show] do
-        member do
-          put :split, :combine
-        end
-      end
+    #   resources :pages, :only => [:create, :show] do
+    #     member do
+    #       put :split, :combine
+    #     end
+    #   end
 
-      resources :questions, :only => [:create, :show, :update, :destroy] do
-        member do
-          get :analyse
-          put :move
-        end
-      end
+    #   resources :questions, :only => [:create, :show, :update, :destroy] do
+    #     member do
+    #       get :analyse
+    #       put :move
+    #     end
+    #   end
 
-      resource :authority, :only => [:show, :update]
-      resource :property, :only => [:show, :update] do
-        member do
-          get :more
-          put :update_more
-        end
-      end
+    #   resource :authority, :only => [:show, :update]
+    #   resource :property, :only => [:show, :update] do
+    #     member do
+    #       get :more
+    #       put :update_more
+    #     end
+    #   end
 
-      resource :quality, :only => [:show, :update]
+    #   resource :quality, :only => [:show, :update]
 
-      resource :customization, :only => [:show, :update]
+    #   resource :customization, :only => [:show, :update]
 
-      resources :logics, :only => [:index, :show, :destroy, :update, :create]
+    #   resources :logics, :only => [:index, :show, :destroy, :update, :create]
 
-      resource :share, :only => [:show]
+    #   resource :share, :only => [:show]
 
-      resources :quotas, :only => [:destroy, :update, :create] do
-        collection do
-          post :refresh
-        end
-      end
+    #   resources :quotas, :only => [:destroy, :update, :create] do
+    #     collection do
+    #       post :refresh
+    #     end
+    #   end
 
-      resources :filters, :only => [:index, :show, :destroy, :update, :create]
+    #   resources :filters, :only => [:index, :show, :destroy, :update, :create]
 
-      resources :report_mockups, :only => [:index, :show, :create, :update, :destroy] do
-        member do
-          get :report
-        end
-      end
+    #   resources :report_mockups, :only => [:index, :show, :create, :update, :destroy] do
+    #     member do
+    #       get :report
+    #     end
+    #   end
 
-      resource :result, :only => [:show] do
-        member do
-          get :spss, :excel, :report, :csv_header
-          post :import_data
-        end
-      end
+    #   resource :result, :only => [:show] do
+    #     member do
+    #       get :spss, :excel, :report, :csv_header
+    #       post :import_data
+    #     end
+    #   end
 
-      resource :preview, :only => [:show]
+    #   resource :preview, :only => [:show]
 
-    end #end of resources questionaire
+    # end #end of resources questionaire
 
     resources :functions, :only => [] do
       collection do

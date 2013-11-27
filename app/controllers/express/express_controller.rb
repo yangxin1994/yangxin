@@ -1,5 +1,7 @@
 class Express::ExpressController < ApplicationController
 
+  layout 'express-quill'
+
   before_filter :require_sign_in
 
   def initialize(step = 1)

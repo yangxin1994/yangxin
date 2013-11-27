@@ -1,0 +1,92 @@
+<script type="text/javascript">
+jQuery(function($) {
+	// star button
+	$('#survey_star').click(function() {
+		var self = $(this);
+		self.toggleClass('star-active');
+		$.putJSON('/questionaires/' + window.survey_id + '/update_star', {
+			is_star: self.hasClass('star-active')
+		}, function(retval) {
+			if(retval.success) {
+				retval.value ? self.addClass('star-active') : self.removeClass('star-active');
+			} else {
+				self.toggleClass('star-active');
+			}
+		});
+	});
+
+	// icon buttons
+	var icon_buttons = $.od.odIconButtons({
+		buttons: [{ name: 'new', info: '复制问卷' }, { name: 'del', info: '删除问卷' }],
+		toggle: false
+	}).appendTo('.survey-toggle-btns');
+	// copy survey
+	var copy_btn = $('button:eq(0)', icon_buttons);
+	var copy_confirm_tip = $.od.odConfirmTip({
+		target: copy_btn,
+		text: '复制当前问卷',
+		confirm: function(callback) {
+			$.postJSON('/questionaires/' + window.survey_id + '/clone.json', {
+				title: '<%=escape_javascript @survey["title"] %>' + ' 复件'
+			}, function(retval) {
+				if(retval.success) {
+					$.od.odPopup({
+						type: null,
+						content: '复制问卷完成，正在跳转至新问卷 ...'
+					});
+					location.href = '/questionaires/' + retval.value['_id'];
+				} else {
+					$.od.odAutotip({content:'复制问卷失败',style:'error'});
+					callback(retval.success);
+				}
+				copy_confirm_tip.odConfirmTip('hide');
+			});
+		}
+	});
+	copy_btn.click(function(e) {
+		copy_btn.tooltip('hide');
+		copy_confirm_tip.odConfirmTip('show', e);
+	});
+	// delete survey
+	var delete_btn = $('button:eq(1)', icon_buttons);
+	var confirm_tip = $.od.odConfirmTip({
+		target: delete_btn,
+		text: '确定删除问卷',
+		confirm: function(callback) {
+			$.deleteJSON('/questionaires/' + window.survey_id + '.json', function(retval) {
+				if(retval.success) {
+					location.href = '/questionaires';
+				} else {
+					$.od.odAutotip({content:'删除问卷失败，请刷新页面重试。',style:'error'});
+					callback(retval.success);
+				}
+				confirm_tip.odConfirmTip('hide');
+			});
+		}
+	});
+	delete_btn.click(function(e) {
+		delete_btn.tooltip('hide');
+		confirm_tip.odConfirmTip('show', e);
+	});
+	
+	// tooltips for menus
+	$('.sub-banner-menus > li').tooltip({
+		placement: 'bottom',
+		delay: {show: 500, hide: 0}	
+	});
+});
+</script>
+<div class="sub-banner">
+	<h1 id='banner_survey_title'><%=@survey['title'] %></h1>
+	<em id='survey_star' class="icon_star <%=@survey['is_star'] ? 'star-active' : '' %> "></em>
+	<!--多切换按钮-->
+	<div class='survey-toggle-btns'></div>
+	<!--右上交互功能区-->
+	<ul class="sub-banner-menus">
+		<li <%= (@current_step == 1) ? "class='now'" : "" %> title="编辑问卷"><a href="<%= express_questionaire_path(@survey['_id'])%>" title=""><em class="edit"></em></a></li>
+		<li <%= (@current_step == 2) ? "class='now'" : "" %> title="美化问卷"><a href="<%= express_questionaire_customization_path(@survey['_id'])%>" title=""><em class="mobang"></em></a></li>
+		<li <%= (@current_step == 3) ? "class='now'" : "" %> title="发布问卷"><a href="<%= express_questionaire_share_path(@survey['_id'])%>" title=""><em class="share"></em></a></li>
+		<li <%= (@current_step == 4) ? "class='now'" : "" %> title="查看结果"><a href="<%= express_questionaire_result_path(@survey['_id'])%>" title=""><em class="stat"></em></a></li>
+		<li title='预览问卷' class='preview-survey'><a href="<%= express_questionaire_preview_path(@survey['_id'])%>" title="" target="_blank"><em class="preview"></em></a></li>
+	</ul>
+</div>

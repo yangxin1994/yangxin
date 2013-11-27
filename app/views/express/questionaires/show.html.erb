@@ -1,0 +1,108 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <script type="text/javascript">
+    window.uid = "<%= current_user._id %>";
+  </script>
+  <%= javascript_include_tag "pages/express/questionaire-bundle" %>
+  <%= stylesheet_link_tag "pages/express/questionaire-bundle", :media => "all" %>
+  
+  <script type="text/javascript">
+  jQuery(function($) {
+    var survey = <%= raw @survey.to_json %>;
+    var survey_model = new quill.models.Survey(survey); 
+    var survey_editor = new quill.views.SurveyEditor({
+      //locked: <%= @locked %>,
+      locked: false,
+      model: survey_model
+    });
+    survey_editor.appendTo('#my_editor');
+
+    // update title of banner when survey title changed
+    survey_model.on('change:title', function() {
+      $('#banner_survey_title').text(survey_model.get('title'));
+    });
+
+    // set left menus events
+    $.each(quill.helpers.QuestionType.getNames(), function(i, type) {
+      var btn = $('.' + type);
+      btn.draggable({
+        helper: "clone",
+        start: function(event, ui) {
+          ui.helper.data('questionType', type);
+        },
+        drag: function(event, ui) {
+          var designer_el = $(this).data("current-droppable");
+          if(!designer_el) return;
+          var $draggable = ui.draggable || ui.helper;
+          var is_upper =  (ui.offset.top + $draggable.outerHeight() / 2 
+            <= designer_el.offset().top + designer_el.outerHeight() / 2);
+          survey_editor.updateHighlight(designer_el, is_upper);
+        },
+        stop: function(event, ui) {
+          survey_editor.cleanupHighlight();
+        }
+      });
+      btn.click(function() {
+        survey_editor.addQuestionAuto(type);
+      });
+    });
+
+  });
+  </script>
+<% end %>
+
+<% content_for :left_menus do %>
+  <div class='left-head'>
+  <ul class="top-option">
+    <li class="edit"><a class="current" href="<%= express_questionaire_path %>"><strong>编辑问卷</strong></a></li>
+  </ul>
+  <div class="current-option-name">编辑问卷</div>
+  </div>
+  <ul class="left-menus">
+    <li class='big'><a class='Paragraph' href="javascript:void(0);"><span class="left-menu-icon"><em class="paragraph"></em></span><span class="left-menu-name">文字描述</span></a></li>
+    <li class='big'><a class='Choice' href="javascript:void(0);"><span class="left-menu-icon"><em class="choice"></em></span><span class="left-menu-name">选择题</span></a></li>
+    <li class='big'><a class='MatrixChoice' href="javascript:void(0);"><span class="left-menu-icon"><em class="matrixchoice"></em></span><span class="left-menu-name">矩阵选择题</span></a></li>
+    <li class='big'><a class='Scale' href="javascript:void(0);"><span class="left-menu-icon"><em class="scale"></em></span><span class="left-menu-name">量表题</span></a></li>
+    <li class='big'><a class='TextBlank' href="javascript:void(0);"><span class="left-menu-icon"><em class="textblank"></em></span><span class="left-menu-name">填充题</span></a></li>
+    <li class='big'><a class='Sort' href="javascript:void(0);"><span class="left-menu-icon"><em class="sort"></em></span><span class="left-menu-name">排序题</span></a></li>
+    <!-- <li class='big'><a class='Template' href="javascript:void(0);"><span class="left-menu-icon"><em class="template"></em></span><span class="left-menu-name">模版题</span></a></li> -->
+    <li class='small' style='display:none;'><a class='Paragraph' href="javascript:void(0);"><span class="left-menu-name">文字描述</span></a></li>
+    <li class='small' style='display:none;'><a class='Choice' href="javascript:void(0);"><span class="left-menu-name">选择题</span></a></li>
+    <li class='small' style='display:none;'><a class='Scale' href="javascript:void(0);"><span class="left-menu-name">量表题</span></a></li>
+    <li class='small' style='display:none;'><a class='MatrixChoice' href="javascript:void(0);"><span class="left-menu-name">矩阵选择题</span></a></li>
+    <!-- <li class='small' style='display:none;'><a class='Rank' href="javascript:void(0);"><span class="left-menu-name">评分题</span></a></li> -->
+    <li class='small' style='display:none;'><a class='TextBlank' href="javascript:void(0);"><span class="left-menu-name">填充题</span></a></li>
+    <li class='small' style='display:none;'><a class='NumberBlank' href="javascript:void(0);"><span class="left-menu-name">数值填充题</span></a></li>
+    <li class='small' style='display:none;'><a class='PhoneBlank' href="javascript:void(0);"><span class="left-menu-name">电话题</span></a></li>
+    <li class='small' style='display:none;'><a class='TimeBlank' href="javascript:void(0);"><span class="left-menu-name">时间题</span></a></li>
+    <li class='small' style='display:none;'><a class='AddressBlank' href="javascript:void(0);"><span class="left-menu-name">地址题</span></a></li>
+    <li class='small' style='display:none;'><a class='EmailBlank' href="javascript:void(0);"><span class="left-menu-name">邮箱题</span></a></li>
+    <li class='small' style='display:none;'><a class='UrlBlank' href="javascript:void(0);"><span class="left-menu-name">网址链接题</span></a></li>
+    <li class='small' style='display:none;'><a class='Sort' href="javascript:void(0);"><span class="left-menu-name">排序题</span></a></li>
+    <li class='small' style='display:none;'><a class='ConstSum' href="javascript:void(0);"><span class="left-menu-name">比重题</span></a></li>
+    <!-- <li class='small' style='display:none;'><a class='Blank' href="javascript:void(0);"><span class="left-menu-name">组合填充题</span></a></li> -->
+    <!-- <li class='small' style='display:none;'><a class='Template' href="javascript:void(0);"><span class="left-menu-name">模板题</span></a></li> -->
+  </ul>
+  <button class="left-sidebar-pulldownBtn"></button>
+  <script type="text/javascript">
+  jQuery(function($) {
+    var big = true;
+    $('.left-sidebar-pulldownBtn').click(function() {
+      if(big) {
+        $('.big').slideUp('fast');
+        $('.small').slideDown('fast');
+      } else {
+        $('.big').slideDown('fast');
+        $('.small').slideUp('fast');
+      }
+      big = !big;
+    });
+
+    $('#edit_setting').tooltip({ placement: 'right', delay: {show: 500, hide: 0}  });
+  });
+  </script>
+<% end %>
+
+<div id='my_editor'></div>
+
+<a href='javascript:void(0);' class='scrollup'></a>
