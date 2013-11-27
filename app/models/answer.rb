@@ -106,8 +106,8 @@ class Answer
   index({ status: 1, reject_type: 1 }, { background: true } )
   index({ created_at: 1 }, { background: true } ) 
   index({ user_id: 1, survey_id: 1, is_preview:1 }, { background: true } )
-  index({ import_id:1},{ background: true })
-  index({ ip_address:1},{ background: true })
+  index({ import_id: 1},{ background: true })
+  index({ ip_address: 1},{ background: true })
 
 
   after_create do |doc|

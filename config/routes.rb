@@ -18,6 +18,11 @@ OopsData::Application.routes.draw do
     end
   end
 
+  namespace :express do
+    resources :questionaires, :only => [:show, :index]
+  end
+
+
   # sample
   scope :module => "sample" do
     resources :connects, :only => [:show]
