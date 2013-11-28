@@ -337,6 +337,7 @@ OopsData::Application.routes.draw do
     resources :orders, :only => [:index, :show, :update] do
       collection do
         get :to_excel
+        put :batch
       end
 
       member do
