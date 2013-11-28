@@ -1,0 +1,36 @@
+/*
+ *=require ./base_with_items
+ *=require ui/widgets/od_selector
+ *=require ui/widgets/od_item
+ *=require ui/widgets/od_left_icon_button
+ */
+
+@import "common";
+@import "compass/utilities/general/clearfix";
+
+.exclusive-con {
+
+	@include clearfix;
+
+	a {
+		font-size: 12px;
+		float: left;
+		@include size(18px, 18px);
+		@include one-line(18px);
+		text-align: center;
+		border: 1px dotted #ccc;
+		margin-right: 3px;
+		margin-bottom: 3px;
+		background: #fff;
+
+		&:hover, &.active {
+			background: #F5E995;
+			border-color: $yellow;
+		}
+
+		&.active {
+			font-weight: bold;
+		}
+	}
+
+}
