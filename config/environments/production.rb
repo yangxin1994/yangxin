@@ -64,9 +64,9 @@ OopsData::Application.configure do
     :authentication => "plain",
     :address        => "smtp.mailgun.com",
     :port           => 25,
-    :domain         => "oopsdata.cn",
-    :user_name      => "postmaster@oopsdata.cn",
-    :password       => "73ve2nt6yxl9",
+    :domain         => "wenjuanba.cn",
+    :user_name      => "postmaster@wenjuanba.cn",
+    :password       => "6e5550mkmyn9",
     :enable_starttls_auto => true,
     :openssl_verify_mode  => 'none'
 	}
@@ -85,9 +85,9 @@ OopsData::Application.configure do
     :authentication => "plain",
     :address        => "smtp.mailgun.com",
     :port           => 25,
-    :domain         => "oopsdata.net",
-    :user_name      => "postmaster@oopsdata.net",
-    :password       => "0nlnhy08vbk1",
+    :domain         => "wenjuanba.net",
+    :user_name      => "postmaster@wenjuanba.net",
+    :password       => "8l437zkvhi33",
     :enable_starttls_auto => true,
     :openssl_verify_mode  => 'none'
   }
