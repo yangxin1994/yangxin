@@ -26,6 +26,15 @@ jQuery(function($) {
         }).done(function(data){
             $('.loading-div').remove();
             $(_this.attr('href')+' .ajax-content').html(data);
+            $('.cancel').bind('click',function(){
+                $(this).remove();
+                $.putJSON('/users/order_cancel',{
+                    order_id: oid
+                    }, function(data){
+                        $.popupFancybox({success: true, cont: "操作成功！"});
+                    }
+                );                
+            })            
             $.fancybox.update();
         }).fail(function() { 
             $('.loading-div').remove();

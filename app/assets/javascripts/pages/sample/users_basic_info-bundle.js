@@ -1,5 +1,5 @@
+//= require ui/plugins/od_param
 jQuery(function($) {
-
 	// *************** functions ******************
 
 	var provinces = null, cities = null, towns = null;
@@ -166,7 +166,7 @@ jQuery(function($) {
 	}
 
 	// **************init page *************************
-   
+
 	// init select date values
 	if ($('.select-date').length > 0) {
 		var now = new Date();
@@ -392,17 +392,22 @@ jQuery(function($) {
 	}
 
 	// init other selector items
-	var income_person = {"0_2000":"2000以下","2001_4000": "2001-4000", 
-							"4001_6000": "4001-6000", "6001_8000": "6001-8000", 
-							"8001_10000": "8001-10000", "10000_50000": "1万-5万",
-							"50000_99999999": "5万以上"}
-	var income_family = {"0_2000": "2000以下", "2001_5000": "2001-5000", 
-							"5001_10000": "5001-10000", "10000_50000": "1万-5万",
-							"50000_99999999": "5万以上"}
-	var education_level = ["高中以下","大专/高职","大学本科","硕士","博士及以上"]
+	var income_person = {"0_0":"无收入","0_2000":"2000以下","2000_3000":"2000-3000","3001_4000": "3001-4000", 
+							"4001_5000": "4001-5000", "5001_8000": "5001-8000", 
+							"8001_10000": "8001-10000", "10001_20000": "1万-2万",
+							"20001_99999999": "2万以上"}
+
+	var income_family = {"0_2000": "2000以下", "2001_3000": "2001-3000", 
+							"3001_5000": "3001-5000", "5001_8000": "5001-8000",
+							"8001_10000": "8001-10000","10001_20000":"1万-2万","20001_99999999":"2万以上"}
+
+	//var education_level = ["高中以下","大专/高职","大学本科","硕士","博士及以上"]
+	var education_level = ["小学及以下","初中","高中/中专/技校","大专/高职","大学本科","硕士及以上"]
 	var major = ["哲学","经济学","法学","教育学","文学","历史学","理学","工学","农学","医学","军事学","管理学"]
-	var industry = ["农林牧渔业", "矿业", "制造业", "电力水力供应", "建筑业", "交通运输", "计算机信息服务", "批发零售业", "住宿餐饮业", "金融业", "房地产业", "科学与技术研究", "公共设施管理", "居民社区服务", "教育", "卫生及社会保障", "文化、体育及娱乐业", "公共管理和社会组织", "国际组织"]
-	var position = ['政府工作人员', '企业管理人员', '服务人员/售货员', '自由职业者', '农民', '军人', '失业及下岗人员', '离退休人员', '专业技术人员', '公司职员', '个体经营者', '工人', '教师', '学生', '家庭主妇', '其他']
+	//var industry = ["农林牧渔业", "矿业", "制造业", "电力水力供应", "建筑业", "交通运输", "计算机信息服务", "批发零售业", "住宿餐饮业", "金融业", "房地产业", "科学与技术研究", "公共设施管理", "居民社区服务", "教育", "卫生及社会保障", "文化、体育及娱乐业", "公共管理和社会组织", "国际组织"]
+  var industry = ["政府机关/社会团体", "教育科研", "农林牧渔", "矿产能源", "制造业", "建筑/地产", "交通运输/仓储","邮电通讯", "IT行业", "商业/贸易", "旅游/餐饮/酒店", "银行/金融/证券/保险/投资", "媒体/广告/咨询/展览/律师/会计师/商务服务","体育/娱乐", "军人/警察/武警", "健康医疗服务", "其他"]	
+	//var position = ['政府工作人员', '企业管理人员', '服务人员/售货员', '自由职业者', '农民', '军人', '失业及下岗人员', '离退休人员', '专业技术人员', '公司职员', '个体经营者', '工人', '教师', '学生', '家庭主妇', '其他']
+  var position = ['学生', '党政机关事业单位领导干部', '党政机关事业单位一般职员', '企业/公司管理者', '企业/公司一般职员', '商业服务业职工', '制造生产型企业工人', '个体户/自由职业者', '农村外出务工人员', '农林牧渔劳动者', '退休', '无业/下岗/失业']	
 	var seniority = {"0_1":'一年以下', "1_3":'一年到三年', "3_10":'三年到十年', "10_99999999":'十年以上'}
 
 	$.each(income_person, function(name,value){
@@ -550,22 +555,6 @@ jQuery(function($) {
 		var position = $('#position .select-txt').attr('name');
 		var seniority = $('#seniority .select-txt').attr('name');
 
-		// console.log('nickname: '+nickname+', '+
-		// 			'username: '+username+', '+
-		// 			'gender: '+gender+', '+
-		// 			'birthday: '+birthday+', '+
-		// 			'born_address: '+born_address+', '+
-		// 			'live_address: '+live_address+', '+
-		// 			'married: '+married+', '+
-		// 			'children: '+children+', '+
-		// 			'income_person: '+income_person+', '+
-		// 			'income_family: '+income_family+', '+
-		// 			'education_level: '+education_level+', '+
-		// 			'major: '+major+', '+
-		// 			'industry: '+industry+', '+
-		// 			'position: '+position+', '+
-		// 			'seniority: '+seniority+', ')
-
 		var _this = $(this);
 		_this.addClass('disabled').val("提交中...");
 
@@ -593,7 +582,12 @@ jQuery(function($) {
 				// console.log(data);
 				_this.removeClass('disabled').val("确认提交");
 				if (data.success && data.value){
-					$.popupFancybox({success: true, cont: "个人资料更新成功！"});
+        	if($.util.param('full') === 'false' && $.util.param('ref').length > 0){
+        	    var ref = $.util.param('ref');
+        	    window.location.href = decodeURIComponent(ref);
+        	}else{
+        		$.popupFancybox({success: true, cont: "个人资料更新成功！"});
+        	}
 				}else {
 					$.popupFancybox({cont: "操作失败，请保证数据完整！"});
 				}

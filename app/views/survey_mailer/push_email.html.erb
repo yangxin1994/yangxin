@@ -32,8 +32,7 @@
 		　</tr>
 		　<tr height="50" style="background:#F25F5D;">
 		　　<td width="500">
-				<span style="font-size:16px;margin-left:15px;color:#fff;">本期调研：</span>
-				<a href="javascript:void(0);" style="font-size:16px;color:#fff;text-decoration:none;"><%= @survey.title %></a>
+				<a href="javascript:void(0);" style="font-size:16px;color:#fff;text-decoration:none;margin-left:15px;">本期调研：<%= @survey.title %></a>
 			</td>
 			<td><a style="font-size:14px;display:block;text-align:center;background:#fff;color:#f25f5d;height:30px;line-height:30px;text-decoration:none;width:90px;" href="<%= Rails.application.config.quillme_host %>/s/<%= @reward_scheme_id %>?auth_key=%recipient.auth_key%">立即参与</a></td>
 		　</tr>

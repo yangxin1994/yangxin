@@ -536,6 +536,22 @@ class User
     return true
   end
 
+  #收获地址完善度
+  def receiver_completed_info
+    info = self.affiliated.try(:receiver_info)
+    return 0 unless info.present?
+    attr_length = self.affiliated.receiver_info.length
+    complete = 0
+    self.affiliated.receiver_info.each_pair do |k,v|
+      if k == 'address'
+        complete += 1 if v. != -1  
+      else
+        complete += 1 if v.present?
+      end
+    end
+    return complete * 100 / attr_length
+  end
+
   def is_activated
     return self.mobile_activation || self.email_activation
   end

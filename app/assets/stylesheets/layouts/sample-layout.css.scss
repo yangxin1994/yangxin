@@ -627,7 +627,12 @@ body{background: image-url('od-quillme/bg.png');}
 				float: right;
 				font-size: 12px;
 				color:#999;
-				&.unfinished{color:#8cc63f}
+				&.unfinished{
+					color:#8cc63f;
+					a{
+						color:#8cc63f;
+					}
+				}
 			}
 
 			.share{

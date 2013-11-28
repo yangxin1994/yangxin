@@ -9,7 +9,7 @@ class Admin::AnswersController < Admin::AdminController
   def index
     @surveys = auto_paginate(Survey.search(params)) do |paginated_surveys|
       paginated_surveys.map do |s|
-        s.write_attribute(:email, s.user.email || s.user.mobile)
+        s.write_attribute(:email, s.user.try(:email) || s.user.try(:mobile))
         s.write_attribute(:not_review_answer_num, s.answers.not_preview.unreviewed.length)
         s
       end
@@ -34,6 +34,23 @@ class Admin::AnswersController < Admin::AdminController
     end
   end
 
+  def to_csv
+    survey = Survey.find(params[:id])
+    answers = survey.answers.search(params)
+    csv_string = survey.admin_to_csv(answers)
+    csv_string_gbk = ""
+    csv_string.each_char do |csv_str|
+      begin
+        csv_string_gbk << csv_str.encode("GBK")
+      rescue
+        csv_string_gbk << ' '
+      end
+    end
+    send_data(csv_string_gbk,
+      :filename => "答案数据-#{Time.now.strftime("%M-%d_%T")}.csv", 
+      :type => 'text/csv')    
+  end
+
   def review
     @questions = Answer.find(params[:id]).present_auditor
     @survey = @questions.survey
@@ -45,4 +62,9 @@ class Admin::AnswersController < Admin::AdminController
     end 
   end
 
+  def reject
+    render_json Answer.find(params[:id]) do |answer|
+      answer.admin_reject(current_user)
+    end
+  end
 end

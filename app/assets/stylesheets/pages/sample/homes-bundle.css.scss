@@ -136,10 +136,13 @@
 			height:30px;
 			overflow: hidden;
 			white-space: nowrap;
-		    -o-text-overflow: ellipsis;
-		    text-overflow: ellipsis;
+		  -o-text-overflow: ellipsis;
+		  text-overflow: ellipsis;
 			float:left;
 			margin-right:15px;
+			&.top{
+				color:$red1;
+			}
 			&:hover{color: $red1;}
 		}
 		.time{

@@ -1,5 +1,52 @@
 //=require ui/widgets/od_address_selector
 $(function() {
+
+  jQuery.extend({
+    popupFancybox: function(options){
+      var _defaults = {
+        cont: 'info not completed',
+        basic_completed:0,
+        address_completed:0
+      }
+      var _options = $.extend(_defaults, options);
+
+      $('#popup-fail').remove();
+      html = '<div id="popup-fail" class="popup" >'+
+          '<div class="detail-title">提示信息'+
+      '</div>'+
+      '<div style="clear: both;"></div>'+
+      '<div class="cont" style="text-align: center;">'+
+          '<p>'+
+              '<span class="icon icon-red-error"></span>'+
+              '<span class="c-red">'+_options.cont+'</span>'+
+          '</p>'+
+          '<p class="un_complete basic_info">' +
+          '<span class="basic_info_detail">基本信息完成度(' + _options.basic_completed + '%)</span>' +  
+          '<i></i></p>' + 
+          '<p class="un_complete address">' +
+          '<span class="address_detail">地址信息完成度(' + _options.address_completed + '%)</span>' +
+          '<i></i></p>' +
+      '</div>'+
+      '<div class="actions">'+
+          '<a class="b_info" href="/users/setting">去完善基本信息</a>' +
+          '<a class="a_info" href="/users/setting/address">去完善收货地址</a>' + 
+      '</div>'+
+      '</div>'
+  
+      $('body').append(html);
+      $.fancybox($('#popup-fail'), 
+        {
+        	scrolling:false,
+          beforeShow: function(){
+            $(".fancybox-skin").css({"backgroundColor":"#fff"});
+            $('.un_complete.basic_info').find('i').css({width:_options.basic_completed + '%'});
+            $('.un_complete.address').find('i').css({width:_options.address_completed + '%'});
+          }
+        }
+      );   
+    } 
+  });
+
 	var unit = null;
 
 	var partial_ul = null;
@@ -175,8 +222,14 @@ $(function() {
 				popup_login_page()
 			} else if (bt_class == 'exc_right') {
 				if (parseInt(window.total_point) >= parseInt(window.point_value)) {
-					popup_order_confirm_page()
-				} else {
+					//强制已登录用户进行样本属性信息完善
+					var con = info_completed(window.completed_info,window.receiver_completed);
+					if(!con){
+						return false;
+					}else{
+						popup_order_confirm_page();
+					}
+				}else {
 					popup_point_less_page()
 				}
 
@@ -569,16 +622,21 @@ $(function() {
 			auth_key: authkey
 		}, function(retval) {
 			if (retval.success) {
-				refresh_login_status(retval.value)
-				window.username = retval.value['nickname']
-				window.total_point = retval.value['point']
+				refresh_login_status(retval.value);
+				window.username = retval.value['nickname'];
+				window.total_point = retval.value['point'];
+				window.completed_info = retval.value['completed_info'];
+				window.receiver_completed = retval.value['receiver_completed']
 				can_freedm = parseInt(window.total_point) - parseInt(window.point_value)
 				if (can_freedm >= 0) {
-					current_p = current_page();
-					if (current_p == 'gifts') {
-						popup_order_confirm_page()
-					} else {
-						popup_address_page()
+					var redirect = info_completed(window.completed_info,window.receiver_completed)
+						if(redirect){
+							current_p = current_page();	
+						if (current_p == 'gifts') {
+							popup_order_confirm_page()
+						} else {
+							popup_address_page()
+						}						
 					}
 				} else {
 					popup_point_less_page()
@@ -589,29 +647,20 @@ $(function() {
 	}
 
 	//获取收获地址
-
 	function get_recerver_info() {
-		if (typeof(window.sample_receiver) != 'undefined') {
-			$('input[name="receiver"]').val(window.sample_receiver)
-			$('input[name="mobile"]').val(window.sample_mobile)
-			$('input[name="postcode"]').val(window.sample_postcode)
-			$('textarea[name="street_info"]').val(window.sample_street_info)
-			generate_address(window.sample_address)
-		} else {
-			$.getJSON('/users/setting/address.json', {}, function(retval) {
-				window.sample_receiver = retval.value.receiver;
-				window.sample_mobile = retval.value.mobile;
-				window.sample_postcode = retval.value.postcode;
-				window.sample_address = retval.value.address;
-				window.sample_street_info = retval.value.street_info;
-				$('input[name="receiver"]').val(window.sample_receiver);
-				$('input[name="mobile"]').val(window.sample_mobile);
-				$('input[name="postcode"]').val(window.sample_postcode);
-				$('textarea[name="street_info"]').val(window.sample_street_info);
-				generate_address(window.sample_address);
-			})
-		}
-	}
+		$.getJSON('/users/setting/address.json', {}, function(retval) {
+			window.sample_receiver = retval.value.receiver;
+			window.sample_mobile = retval.value.mobile;
+			window.sample_postcode = retval.value.postcode;
+			window.sample_address = retval.value.address;
+			window.sample_street_info = retval.value.street_info;
+			$('input[name="receiver"]').val(window.sample_receiver);
+			$('input[name="mobile"]').val(window.sample_mobile);
+			$('input[name="postcode"]').val(window.sample_postcode);
+			$('textarea[name="street_info"]').val(window.sample_street_info);
+			generate_address(window.sample_address);
+		})
+	}	
 
 
 
@@ -687,9 +736,12 @@ $(function() {
 			popup_login_page()
 		} else {
 			if (parseInt(window.total_point) >= parseInt(window.point_value)) {
-				popup_address_page()
+				var redirect = info_completed(window.completed_info,window.receiver_completed);
+				if(redirect){
+					popup_address_page();	
+				}
 			} else {
-				popup_point_less_page()
+				popup_point_less_page();
 			}
 
 		}
@@ -722,15 +774,30 @@ $(function() {
 	})
 
 
-	function check_enter() {
-		var receiver = $('input[name="receiver"]').val()
-		var mobile = $('input[name="mobile"]').val()
-		var postcode = $('input[name="postcode"]').val()
-		var province = $('select.address-province').val()
-		var city = $('select.address-city').val()
-		var town = $('select.address-town').val()
-		var street_info = $('textarea[name="street_info"]').val()
+	function info_completed(completed_info,receiver_completed){
+		var inf_completed     = parseInt(completed_info,10) < 100;
+		var rec_completed = parseInt(receiver_completed,10) < 100;
 
+		if(inf_completed || rec_completed ){
+			$.popupFancybox({
+				cont: "亲,完善以下信息后才可以兑换哦!",
+				basic_completed:completed_info,
+        address_completed:receiver_completed
+			})
+			return false;
+		}else{
+			return true;
+		}						
+	}
+
+	function check_enter() {
+		var receiver = $.trim($('input[name="receiver"]').val());
+		var mobile = $.trim($('input[name="mobile"]').val());
+		var postcode = $.trim($('input[name="postcode"]').val());
+		var province = $.trim($('select.address-province').val());
+		var city = $('select.address-city').val();
+		var town = $('select.address-town').val();
+		var street_info = $.trim($('textarea[name="street_info"]').val())
 		var go = false
 		if (!$.regex.isReceiver(receiver) || $.regex.isDefaultReceiver(receiver)) {
 			$('input[name="receiver"]').addClass('error')

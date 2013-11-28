@@ -36,9 +36,9 @@ module ApplicationHelper
   def icp_info
     host = request.host.downcase
     if host.include? 'quillme'
-      return '京 ICP 备 13010483 号'
+      return '京 ICP 备 13048388 号'
     else
-      return '京 ICP 备 13010483 号'
+      return '京 ICP 备 13048388 号'
     end
   end
 
@@ -231,10 +231,25 @@ module ApplicationHelper
     Time.at(int_time.to_i).strftime("%Y-%m-%d %H:%M:%S")
   end
 
-  def answered?(status, reject_type=0, free_reward=false)
+  def order_next_node(order)
+    case order.status.to_i
+    when Order::WAIT
+    '(预计在' + (DateTime.parse(order.created_at.strftime('%Y-%m-%d')) + 1.months).strftime('%Y年%-m月') + '5日前完成审核)' 
+    when Order::HANDLE
+      if order.type.to_i == Order::REAL 
+        '(预计在' + (DateTime.parse(Time.at(order.handled_at).strftime("%Y-%m-%d")) + 1.months).strftime('%Y年%-m月') + '5日前送达)'
+      else
+        '(预计在' + (DateTime.parse(Time.at(order.handled_at).strftime("%Y-%m-%d")) + 1.months).strftime('%Y年%-m月') + '5日前支付)'
+      end
+         
+    end
+  end
+
+  def answered?(status, reject_type=0, free_reward=false,survey=nil)
     case status.to_i
     when Answer::EDIT
-      return "答题中"
+      return "<a href='/s/#{survey.scheme_id}'>答题中</a>" if survey.present?
+      return "答题中" unless survey.present?
     when Answer::REJECT
       case reject_type.to_i
       when 0
@@ -252,6 +267,8 @@ module ApplicationHelper
         return "超时拒绝"
       when Answer::REJECT_BY_IP_RESTRICT
         return "IP拒绝"
+      when Answer::REJECT_BY_ADMIN
+        return "管理员拒绝"
       else
         return reject_type.to_s
       end
@@ -264,7 +281,8 @@ module ApplicationHelper
       return "需重答"
     else
       #return status
-      return "待参与"
+      return '待参与' unless survey.present?
+      return "<a href='/s/#{survey.scheme_id}'>待参与</a>" if survey.present?
     end
   end
 

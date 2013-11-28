@@ -220,7 +220,7 @@ class Survey
 
   def self.search(options = {})
     surveys = Survey.all
-    surveys = survey.in(:status => Tool.convert_int_to_base_arr(options[:status])) if options[:status]
+    surveys = surveys.in(:status => Tool.convert_int_to_base_arr(options[:status])) if options[:status]
     surveys = surveys.where(:quillme_promotable => true) if options[:quillme_only].to_s == "true"
     case options[:keyword].to_s
     when /^.+@.+$/
@@ -359,7 +359,7 @@ class Survey
     new_instance.clone_quota(question_id_mapping)
     new_instance.clone_filter(question_id_mapping)
     new_instance.clone_logic_control(question_id_mapping)
-    new_instance.reward_scheme << RewardScheme.create(default: true)
+    new_instance.reward_schemes << RewardScheme.create(default: true)
     new_instance
   end
 
@@ -501,7 +501,20 @@ class Survey
   end
 
   def spss_header
-    headers =["IP"]
+    headers =[
+      {"spss_name" => "answer_id",
+       "spss_type" => "String",
+       "spss_label" => "答案ID"},
+      {"spss_name" => "email",
+       "spss_type" => "String",
+       "spss_label" => "邮箱"},
+      {"spss_name" => "mobile",
+       "spss_type" => "String",
+       "spss_label" => "手机号码"},
+      {"spss_name" => "IP",
+       "spss_type" => "String",
+       "spss_label" => "IP"}                 
+    ]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.spss_header("q#{i+1}")
     end
@@ -509,7 +522,7 @@ class Survey
   end
 
   def excel_header
-    headers =["IP"]
+    headers =["answer_id", "email", "mobile", "IP"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -556,7 +569,7 @@ class Survey
     answer_length = answers.length
     last_time = Time.now.to_i
     answers.each_with_index do |answer, index|
-      line_answer = [answer.ip_address]
+      line_answer = [answer._id, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address]
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index
@@ -574,6 +587,28 @@ class Survey
     end
     Task.set_progress(task_id, "data_conversion_progress", 1.0)
     answer_c
+  end
+
+  def admin_to_csv(answers)
+    formated_error = []
+    qindex = 0
+    q = self.all_questions_type(false)
+    csv_string = CSV.generate(:headers => true) do |csv|
+      csv << excel_header
+      answers.each_with_index do |answer, index|
+        line_answer = [answer._id, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip]
+        begin
+          all_questions_id(false).each_with_index do |question, index|
+            qindex = index
+            line_answer += q[index].answer_content(answer.answer_content[question], "q#{index + 1}")
+          end
+        rescue Exception => test
+          formated_error << [test, index + 1, qindex + 1, q[index + 1].class]
+        else
+          csv << line_answer
+        end
+      end
+    end
   end
 
   def analysis(filter_index, include_screened_answer)

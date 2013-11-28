@@ -40,10 +40,24 @@
   <span>
     <form class="form-search" style="display:inline">
     <div class="input-append">
-      <input class="span6 search-query" name="keyword" id="" type="text" placeholder="创建人邮箱">
+      <input class="span6 search-query" name="keyword" id="" type="text" placeholder="创建人邮箱,手机或者ID">
       <button class="btn">搜索</button>
     </div>
     </form>
+  </span>
+  <span class="btn-group">
+    <div class="btn-group">
+      <a class="btn handle" href="<%= params[:id] %>/to_csv?status=4">导出待审核数据</a>
+      <button class="btn dropdown-toggle" data-toggle="dropdown">
+        <span class="caret"></span>
+      </button>    
+      <ul class="dropdown-menu">
+        <li><a href="<%= params[:id] %>/to_csv">导出全部</a></li>
+        <li class="divider"></li>
+        <li><a href="<%= params[:id] %>/to_csv" class="querilayer">导当前条件下所有数据</a></li>
+        <li><a href="<%= params[:id] %>/to_csv?status=32">导出审核完毕的数据</a></li>
+      </ul>
+    </div>
   </span>
   <span class="pull-right">
     <%= paginator_mini @answers %>

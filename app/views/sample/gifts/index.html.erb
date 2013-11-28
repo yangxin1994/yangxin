@@ -2,10 +2,14 @@
   <%= stylesheet_link_tag "pages/sample/gifts-bundle", :media => "all" %>
   <%= javascript_include_tag "pages/sample/gifts-bundle" %>
   <script type="text/javascript">
+    $(function(){
       <% if user_signed_in %>
         window.username    = "<%=  current_user.nickname %>"
         window.total_point = "<%=  current_user.point  %>"
-      <% end %>
+        window.completed_info = "<%=  current_user.completed_info  %>"
+        window.receiver_completed = "<%=  current_user.receiver_completed_info  %>"
+      <% end %>      
+    })
   </script>
 <% end %>
 
