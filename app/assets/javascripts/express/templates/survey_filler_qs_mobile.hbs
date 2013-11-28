@@ -1,0 +1,25 @@
+<div class="page">
+	{{#if remind}}
+		<div class="describe">
+			<span>注意，系统检测出您第一次答题时没有认真填写，您还有一次答题机会，请认真回答问卷，谢谢。</span>
+		</div>
+	{{else}}
+		{{#if welcome}}
+			<div class="describe">
+				{{welcome}}
+			</div>
+		{{/if}}
+	{{/if}}
+	<div id='questions_con'></div>
+</div>
+
+<div class="footer">
+	{{#if allow_pageup}}
+	<a href="javascript:void(0)" class="prev" id="prev_btn" title="上一页"></a>
+	{{/if}}
+	<i class="footer-divide"></i>
+	<a href="javascript:void(0)" class="next" id="next_btn">下一页</a>
+	{{#if show_restart}}
+	<a href="javascript:void(0)" class="resume" id="restart_btn">重新答题</a>
+	{{/if}}
+</div>

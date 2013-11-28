@@ -1,0 +1,12 @@
+<table class='scale-labels'>
+	<tr>
+		{{#each labels}}
+		<td><input type='text' value='{{this}}' /></td>
+		{{/each}}
+	</tr>
+	<tr>
+		{{#iterateTo count}}
+		<td>（{{#add this 1}}{{this}} 分{{/add}}）</td>
+		{{/iterateTo}}
+	</tr>
+</table>
