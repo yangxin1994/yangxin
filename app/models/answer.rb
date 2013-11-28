@@ -489,7 +489,7 @@ class Answer
     # survey has a new question, but the answer content does not has the question id as a key
     # thus when updating the answer content, the key should not be checked
     new_answer.each do |k, v|
-      v["selection"] ||= [] if v.has_key?("selection")
+      v["selection"] ||= [] if v.class == Hash && v.has_key?("selection")
       self.answer_content[k] = v if self.answer_content.has_key?(k)
       self.random_quality_control_answer_content[k] = v if self.random_quality_control_answer_content.has_key?(k)
     end
