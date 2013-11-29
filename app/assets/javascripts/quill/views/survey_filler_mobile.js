@@ -209,11 +209,6 @@ $(function(){
             _update_btn();
           };
 
-
-          if(has_not_empty_answer){
-            time = 0;//if the answer has been answerd set time to 0 
-          }
-
           next_btn.click($.proxy(function() {
             $.util.disable(next_btn, prev_btn);
             // submit question answers
@@ -231,7 +226,6 @@ $(function(){
               $.util.enable(prev_btn, next_btn);
             } else {
               // 3. submit answers
-              if(time == 0){
                 next_btn.text('正在提交答案...');
                 $.util.disable(prev_btn, next_btn);
                 $.postJSON(this._uri('/update_for_mobile'), { answer_content: answer_info }, $.proxy(function(retval) {
@@ -242,7 +236,6 @@ $(function(){
                     location.reload(true);
                   }
                 }, this));
-              }
             }
           }, this));
           prev_btn.click($.proxy(function() { 
