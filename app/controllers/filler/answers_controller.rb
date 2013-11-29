@@ -96,6 +96,8 @@ class Filler::AnswersController < Filler::FillerController
 
   def destroy_preview
     @answer = Answer.preview.find(params[:id])
+    # delete cookie
+  	cookies.delete(cookie_key(@answer.survey_id.to_s, @answer.is_preview), :domain => :all)
     @answer.survey.answers.delete(@answer)
     render_json_auto @answer.destroy and return 
   end

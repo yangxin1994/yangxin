@@ -4,7 +4,7 @@ class NewsletterMailer < ActionMailer::Base
   layout 'newsletter'
 
   # default to:      -> { Subscriber.all.map { |e| e.email } },
-  default from:    "\"优数咨询\" <newsletter@oopsdata.net>",
+  default from:    "\"优数咨询\" <newsletter@wenjuanba.net>",
           charset: "UTF-8"
 
   @@test_email = "test@oopsdata.com"
