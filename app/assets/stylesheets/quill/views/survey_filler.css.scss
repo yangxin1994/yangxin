@@ -27,6 +27,10 @@ $popoverArrowOuterWidth:  $popoverArrowWidth;
 
 /* preview */
 #pv_bar {
+	position: fixed;
+	width: 100%;
+	top: 0;
+	z-index: 999;
 	@include one-line(37px);
 	border-bottom: 3px solid #656c76;
 	background: #737982;
@@ -81,8 +85,8 @@ $blue-color: #5691f0;
 
 #sf_banner {
 	width: 100%;
-	margin-bottom: 20px;
-
+	margin-bottom: 90px;
+	padding-top:20px;
 	#sf_banner_sticky {
 		z-index: 1000;
 	}
@@ -91,7 +95,9 @@ $blue-color: #5691f0;
 		background: #FFC800;
 		border-bottom: 1px solid #EFB40F;
 		@include one-line(50px);
-
+		width:100%;
+		position: fixed;
+		top:40px;
 		>.inner {
 			@include page-component;
 
@@ -131,6 +137,8 @@ $blue-color: #5691f0;
 
 	.sf_banner_bottom {
 		width: 100%;
+		position: fixed;
+		top:90px;
 		@include one-line(3px);
 		@include opacity(0.25);
 		background: #aeb5c0;
