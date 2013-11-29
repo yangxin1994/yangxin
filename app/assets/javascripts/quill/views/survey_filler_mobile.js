@@ -28,7 +28,23 @@ $(function(){
    * =========================== */
   quill.quillClass('quill.views.SurveyFiller', quill.views.Base, {
 
+    _redirect_link: '/',
+
     _initialize: function() {
+      var link = this.model.get('style_setting').redirect_link;
+
+      if($.regex.isUrl(link)) {
+        link = link.toLowerCase();
+        if(link.indexOf('http') != 0)
+          link = 'http://' + link;
+        this._redirect_link = link;
+      }
+
+      if(this.options.spread_point == undefined){
+        this.options.spread_point = 0;
+      }
+        
+
       if(this.options.reward == null)
         this.options.reward = {reward_type : 0};
     },
@@ -193,6 +209,7 @@ $(function(){
           var next_btn = $('#next_btn'), prev_btn = $('#prev_btn');
           // Disable next button for some time (don't disable it for allow_pageup==true survey, or previewing)
           var has_not_empty_answer = (_.find(answers || [], function(a) { return a != null; }) != null);
+
           if(!has_not_empty_answer && !this.options.is_preview && prev_btn.length > 0) {
             $.util.disable(next_btn);
             var old_text = next_btn.text();
@@ -207,7 +224,10 @@ $(function(){
               }
             }
             _update_btn();
+          }else{
+            time = 0;
           };
+
 
           next_btn.click($.proxy(function() {
             $.util.disable(next_btn, prev_btn);
@@ -223,9 +243,12 @@ $(function(){
             if(error_filler) {
               // 2. if there is any illegal answer, alert
               $(window).scrollTo(error_filler.$el, 500, { offset: {top: -60} });
-              $.util.enable(prev_btn, next_btn);
+              if(time == 0){
+                $.util.enable(prev_btn, next_btn);
+              }
             } else {
               // 3. submit answers
+              if(time == 0){
                 next_btn.text('正在提交答案...');
                 $.util.disable(prev_btn, next_btn);
                 $.postJSON(this._uri('/update_for_mobile'), { answer_content: answer_info }, $.proxy(function(retval) {
@@ -235,7 +258,9 @@ $(function(){
                   } else {
                     location.reload(true);
                   }
-                }, this));
+                }, this));                
+              }
+
             }
           }, this));
           prev_btn.click($.proxy(function() { 
@@ -255,7 +280,7 @@ $(function(){
           }, 'survey_filler_end_free_mobile').appendTo('#f_body');
 
           this._share();
-          $('#close_btn').click($.proxy(function() { location.href = '/'; }, this));
+          $('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));
         } else if(this.options.reward.reward_scheme_type == 1) {
           if(value.order_id == null){
             this.hbs({}, 'survey_filler_end_money_mobile').appendTo($('#f_body'));
@@ -444,8 +469,6 @@ $(function(){
         $('#start_spread').click($.proxy(function() { this._spread(); }, this));
         $('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));        
       } 
-
-
       $('#restart_btn').click($.proxy(function() {
         if($('#restart_btn').attr("disabled") == 'disabled')
           return;
