@@ -234,8 +234,8 @@ class Answer
       objective_question_number = (qc_question_number / 2.0).ceil
       matching_question_number = qc_question_number - objective_question_number
       # 2. randomly choose questions and generate locations of questions
-      objective_questions_ids = QualityControlQuestion.objective_questions.random(objective_question_number).map { |e| e._id.to_s }
-      temp_matching_questions_ids = QualityControlQuestion.matching_questions.random(matching_question_number).map { |e| e._id.to_s }
+      objective_questions_ids = QualityControlQuestion.objective_questions.shuffle[0..objective_question_number-1].map { |e| e._id.to_s }
+      temp_matching_questions_ids = QualityControlQuestion.matching_questions.shuffle[0..matching_question_number-1].map { |e| e._id.to_s }
       matching_questions_ids = []
       temp_matching_questions_ids.each do |m_q_id|
         matching_questions_ids += MatchingQuestion.get_matching_question_ids(m_q_id)

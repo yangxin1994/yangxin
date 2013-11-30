@@ -1,7 +1,6 @@
 //=require ui/widgets/od_address_selector
 $(function() {
 
-
   jQuery.extend({
     popupFancybox: function(options){
       var _defaults = {
@@ -648,29 +647,20 @@ $(function() {
 	}
 
 	//获取收获地址
-
 	function get_recerver_info() {
-		if (typeof(window.sample_receiver) != 'undefined') {
-			$('input[name="receiver"]').val(window.sample_receiver)
-			$('input[name="mobile"]').val(window.sample_mobile)
-			$('input[name="postcode"]').val(window.sample_postcode)
-			$('textarea[name="street_info"]').val(window.sample_street_info)
-			generate_address(window.sample_address)
-		} else {
-			$.getJSON('/users/setting/address.json', {}, function(retval) {
-				window.sample_receiver = retval.value.receiver;
-				window.sample_mobile = retval.value.mobile;
-				window.sample_postcode = retval.value.postcode;
-				window.sample_address = retval.value.address;
-				window.sample_street_info = retval.value.street_info;
-				$('input[name="receiver"]').val(window.sample_receiver);
-				$('input[name="mobile"]').val(window.sample_mobile);
-				$('input[name="postcode"]').val(window.sample_postcode);
-				$('textarea[name="street_info"]').val(window.sample_street_info);
-				generate_address(window.sample_address);
-			})
-		}
-	}
+		$.getJSON('/users/setting/address.json', {}, function(retval) {
+			window.sample_receiver = retval.value.receiver;
+			window.sample_mobile = retval.value.mobile;
+			window.sample_postcode = retval.value.postcode;
+			window.sample_address = retval.value.address;
+			window.sample_street_info = retval.value.street_info;
+			$('input[name="receiver"]').val(window.sample_receiver);
+			$('input[name="mobile"]').val(window.sample_mobile);
+			$('input[name="postcode"]').val(window.sample_postcode);
+			$('textarea[name="street_info"]').val(window.sample_street_info);
+			generate_address(window.sample_address);
+		})
+	}	
 
 
 
@@ -746,12 +736,12 @@ $(function() {
 			popup_login_page()
 		} else {
 			if (parseInt(window.total_point) >= parseInt(window.point_value)) {
-				var redirect = info_completed(window.completed_info,window.receiver_completed)
+				var redirect = info_completed(window.completed_info,window.receiver_completed);
 				if(redirect){
-					popup_address_page()	
+					popup_address_page();	
 				}
 			} else {
-				popup_point_less_page()
+				popup_point_less_page();
 			}
 
 		}
@@ -785,10 +775,10 @@ $(function() {
 
 
 	function info_completed(completed_info,receiver_completed){
-		var info_completed     = parseInt(completed_info,10) < 100;
+		var inf_completed     = parseInt(completed_info,10) < 100;
 		var rec_completed = parseInt(receiver_completed,10) < 100;
 
-		if(info_completed || rec_completed ){
+		if(inf_completed || rec_completed ){
 			$.popupFancybox({
 				cont: "亲,完善以下信息后才可以兑换哦!",
 				basic_completed:completed_info,
@@ -798,33 +788,16 @@ $(function() {
 		}else{
 			return true;
 		}						
-	}	
-
-
-	// function complete_info(current_user){
-	// 	// if(parseInt(completed_info) < 100){
-	// 	// 	var ref = window.location.href;
-	// 	// 	//如果样本属性填写未完整，则强制要求用户完成样本属性
-	// 	// 	window.location.href = window.location.protocol + "//" + window.location.host + "/users/setting?full=false&ref=" + encodeURIComponent(ref);
-	// 	// 	return false;
-	// 	// }else if(current_user){
-
-	// 	// 	return false;
-	// 	// }else{
-	// 	// 	return true;
-	// 	// }		
-	// }
-
+	}
 
 	function check_enter() {
-		var receiver = $('input[name="receiver"]').val()
-		var mobile = $('input[name="mobile"]').val()
-		var postcode = $('input[name="postcode"]').val()
-		var province = $('select.address-province').val()
-		var city = $('select.address-city').val()
-		var town = $('select.address-town').val()
-		var street_info = $('textarea[name="street_info"]').val()
-
+		var receiver = $.trim($('input[name="receiver"]').val());
+		var mobile = $.trim($('input[name="mobile"]').val());
+		var postcode = $.trim($('input[name="postcode"]').val());
+		var province = $.trim($('select.address-province').val());
+		var city = $('select.address-city').val();
+		var town = $('select.address-town').val();
+		var street_info = $.trim($('textarea[name="street_info"]').val())
 		var go = false
 		if (!$.regex.isReceiver(receiver) || $.regex.isDefaultReceiver(receiver)) {
 			$('input[name="receiver"]').addClass('error')
