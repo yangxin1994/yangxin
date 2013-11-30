@@ -19,19 +19,19 @@ class Admin::AgentTasksController < Admin::AdminController
   def close
     render_json agent_task = AgentTask.where(:id => params[:id]).first do
       agent_task.close
-    end    
+    end
   end
 
   def open
     render_json agent_task = AgentTask.where(:id => params[:id]).first do
       agent_task.open
-    end    
+    end
   end
 
   def destroy
     render_json agent_task = AgentTask.where(:id => params[:id]).first do
       agent_task.delete_agent_task
-    end    
+    end
   end
 
 end
