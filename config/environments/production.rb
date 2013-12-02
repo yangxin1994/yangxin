@@ -130,8 +130,8 @@ OopsData::Application.configure do
 	config.action_mailer.default_url_options = {:host => 'res.oopsdata.com'}
 
   config.mailgun_api_key = 'key-9zcv6-e7j8aratn9viu3unvbn2zc92j3'
-  config.survey_email_domain = 'oopsdata.net'
-  config.user_email_domain = 'oopsdata.cn'
+  config.survey_email_domain = 'wenjuanba.net'
+  config.user_email_domain = 'wenjuanba.cn'
 
   # ofcard uri
   config.ofcard_service_uri = "http://api2.ofpay.com/"
