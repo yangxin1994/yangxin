@@ -54,6 +54,7 @@ OopsData::Application.routes.draw do
         get  :cancel_subscribe
         post :get_reward_type_count
         post :generate_rss_activate_code
+        get :offline_user_rss
       end
 
       member do

@@ -12,6 +12,7 @@ class MailgunApi
     @group_recipient_variables = []
 
     @emails = OfflineUser.where(:invited => false, :email.ne => "").map { |e| e.email }
+    return if @emails.blank?
 
     while @emails.length >= group_size
       temp_emails = @emails[0..group_size-1]
@@ -20,9 +21,42 @@ class MailgunApi
       temp_recipient_variables = {}
       temp_emails.each do |e|
         u = OfflineUser.where(email: e).first
-        temp_recipient_variables[e] = {"name" => u.name, "survey_title" => u.survey_title}
+        url = "#{Rails.application.config.quillme_host}/surveys/offline_user_rss?email_mobile=#{e}"
+        temp_recipient_variables[e] = {"name" => u.name,
+          "survey_title" => "《#{u.survey_title}》",
+          "url" => url,
+          "short_url" => "#{Rails.application.config.quillme_host}/#{MongoidShortener.generate(url)}"}
       end
       @group_recipient_variables << temp_recipient_variables
+    end
+
+    @group_emails << @emails
+    temp_recipient_variables = {}
+    @emails.each do |e|
+      u = OfflineUser.where(email: e).first
+      url = "#{Rails.application.config.quillme_host}/surveys/offline_user_rss?email_mobile=#{e}"
+      temp_recipient_variables[e] = {"name" => u.name,
+        "survey_title" => "《#{u.survey_title}》",
+        "url" => url,
+        "short_url" => "#{Rails.application.config.quillme_host}/#{MongoidShortener.generate(url)}"}
+    end
+    @group_recipient_variables << temp_recipient_variables
+    
+    # list some hot gifts
+    @gifts = []
+    Gift.on_shelf.real_and_virtual.desc(:exchange_count).limit(3).each do |g|
+      @gifts << { :title => g.title,
+        :url => Rails.application.config.quillme_host + "/gifts/" + g._id.to_s,
+        :img_url => Rails.application.config.quillme_host + g.photo.picture_url }
+    end
+    # get redeem logs
+    @redeem_logs = []
+    RedeemLog.all.desc(:created_at).limit(3).each do |redeem_log|
+      time = Tool.time_string(Time.now.to_i - redeem_log.created_at.to_i)
+      @redeem_logs << { :time => time,
+        :nickname => redeem_log.user.nickname,
+        :point => redeem_log.point,
+        :gift_name => redeem_log.gift_name }
     end
 
     data = {}
@@ -45,6 +79,10 @@ class MailgunApi
       data[:'recipient-variables'] = @group_recipient_variables[i].to_json
       self.send_message(data)
     end
+    OfflineUser.where(:invited => false, :email.ne => "").each do |u|
+      u.update_attributes({invited: true})
+    end
+
   end
 
   def self.batch_send_survey_email(survey_id, user_id_ary)

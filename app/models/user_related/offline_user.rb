@@ -11,7 +11,11 @@ class OfflineUser
   field :participate_at, type: Integer
 
   def self.import
-    content = File.read('lib/offline_users')
-    
+    content = File.read("lib/data")
+    user_ary = content.split("\n")
+    user_ary.each do |u|
+      data = u.split("\t")
+      OfflineUser.create(name: data[0], email: data[1], survey_title: data[2])
+    end
   end
 end

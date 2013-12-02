@@ -40,10 +40,12 @@
                           <span>%recipient.name%，您好</span>
                         </p>
                         <p>
-                          <span>感谢您参与我们的%recipient.title%调研项目，诚邀您进一步关注我们的【问卷吧】网络调研平台，通过手机或电脑答题获得现金、话费、礼品、抽奖等奖励。您可以点击此处订阅【问卷吧】答题邀请，或在浏览器里输入以下链接：</span>
+                          <span>感谢您参与我们的%recipient.survey_title%调研项目，诚邀您进一步关注我们的【问卷吧】网络调研平台，通过手机或电脑答题获得现金、话费、礼品、抽奖等奖励。您可以点击</span>
+                          <a href="%recipient.url%">此处</a>
+                          <span>订阅【问卷吧】答题邀请，或在浏览器里输入以下链接：</span>
                         </p>
                         <p>
-                          <a href="http://wenjuanba.com...">http://wenjuanba.com/...</a>
+                          <a href="%recipient.short_url%">%recipient.short_url%</a>
                         </p>
                         <br />
                         <p>
@@ -60,108 +62,24 @@
                         </p>
                       </td>
                     </tr> 
-                    <% if [RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO].include?(@reward_type) %>
-                      <tr>
-                        <td width="200" align="left">
-                          <table width="182" height="60" style="border:1px #dbdbdb solid;">
-                            <tr>
-                              <td align="center" rowspan="2" width="50" ><img src="<%= Rails.application.config.quillme_host + "/assets/email/phone.png" %>"/></td>
-                              <td style="vertical-align: bottom;"><span style="font-size:14px;">手机话费</span></td>
-                            </tr>
-                            <tr>
-                              <td style="vertical-align: top;">
-                                <span style="width:130px;display:block;font-size:12px;color:#888;">为您的手机充值<strong style="color:#ff6600;margin-left:2px;margin-right:2px;font-size:12px;">1</strong>元</span>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                        <td width="200" align="center">
-                          <table width="182" height="60" style="border:1px #dbdbdb solid;">
-                            <tr>
-                              <td align="center" rowspan="2" width="50" ><img src="<%= Rails.application.config.quillme_host + "/assets/email/alipay.png" %>"/></td>
-                              <td align="left" style="vertical-align: bottom;"><span style="font-size:14px;">支付宝转账</span></td>
-                            </tr>
-                            <tr>
-                              <td style="vertical-align: top;" align="left" >
-                                <span style="width:130px;display:block;font-size:12px;color:#888;">为您的支付宝付款<strong style="color:#ff6600;margin-left:2px;margin-right:2px;font-size:12px;">1</strong>元</span>
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                    <% end %>
                     <tr>
-                      <% if [RewardScheme::POINT, RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO].include?(@reward_type) %>
-                        <td colspan="3" height="50" style="font-size:14px;">热门礼品</td>
-                      <% end %>
+                      <td colspan="3" height="50" style="font-size:14px;">热门礼品</td>
                     </tr>
                     <tr>
                       <% (@gifts || []).each do |g| %>
                         <td width="200" align="left"><a href="<%=g[:url]%>" style="width:180px;height:180px;display:block;border:1px #dbdbdb solid;text-align:center;"><img style="border:none;" width="180" height="180" src="<%= g[:img_url] %>" /></a></td>
-                      <% end %>
-                      <% (@prizes || []).each do |p| %>
-                        <td width="200" align="left"><a href="javascript:void(0);" style="width:180px;height:180px;display:block;border:1px #dbdbdb solid;text-align:center;"><img style="border:none;" width="180" height="180" src="<%= p[:img_url] %>" /></a></td>
                       <% end %>
                     </tr>
                     <tr>
                       <% (@gifts || []).each do |g| %>
                         <td width="200" height="30" align="left"><a href="<%=g[:url]%>" style="width:180px;display:block;text-align:center;font-size:12px;"><%=g[:title]%></a></td>
                       <% end %>
-                      <% (@prizes || []).each do |p| %>
-                        <td width="200" height="30" align="left"><a href="javascript:void(0);" style="width:180px;display:block;text-align:center;font-size:12px;"><%=p[:title]%></a></td>
-                      <% end %>
                     </tr>
                     <tr style="border-bottom:1px #dbdbdb solid;">
                       <td colspan="3" height="20"></td>
                     </tr>
-                    <% if @redeem_logs.present? %>
-                      <tr>
-                        <td colspan="3" height="40" style="font-size:13px;">
-                          最近兑换：
-                        </td>
-                      </tr>
-                      <% @redeem_logs.each do |log| %>
-                        <tr height="24">
-                          <td colspan="3" style="font-size:12px;">
-                            <span style="color:#999;margin-right:5px;"><%=log[:time]%></span><span style="color:#666;margin-right:5px;"><%=log[:nickname]%></span><span style="color:#999;margin-right:5px;">使用<b style="margin-left:2px;margin-right:2px;color:#ff6600;"><%=log[:point]%></b>积分</span><span style="color:#999;margin-right:5px;">兑换了</span><a href="javascript:void(0);"><%=log[:gift_name]%></a>
-                          </td>
-                        </tr>
-                      <% end %>
-                    <% end %>
-                    <% if @lottery_logs.present? %>
-                      <tr>
-                        <td colspan="3" height="50" style="font-size:13px;">
-                          最近参与
-                        </td>
-                      </tr>
-                      <% @lottery_logs.each do |lottery_log_group| %>
-                        <tr>
-                          <% lottery_log_group.each do |lottery_log| %>
-                            <td width="200" align="left">
-                              <table width="182" height="50" style="border:1px #dbdbdb solid;">
-                                <tr>
-                                  <td align="center" rowspan="2" width="50" ><img width="34" height="34" src="<%= lottery_log[:avatar_url] %>"/></td>
-                                  <td style="vertical-align: bottom;"><span style="font-size:12px;"><%=lottery_log[:nickname]%></span></td>
-                                </tr>
-                                <tr>
-                                  <td style="vertical-align: top;">
-                                    <span style="font-size:12px;color:#999;"><%=lottery_log[:region]%></span>
-                                  </td>
-                                </tr>
-                              </table>
-                            </td>
-                          <% end %>
-                        </tr>
-                        <tr>
-                          <td colspan="3" height="10"></td>
-                        </tr>
-                      <% end %>
-                    <% end %>
                     <tr style="border-bottom:1px #dbdbdb solid;">
                       <td colspan="3" height="20"></td>
-                    </tr>
-                    <tr>
-                      <td colspan="3" align="right" height="40"><span style="font-size:12px;">若不是您订阅的邮件，点击<a href="<%= Rails.application.config.quillme_host %>/surveys/cancel_subscribe?key=%recipient.unsubscribe_key%">退订</a></span></td>
                     </tr>
                   </table>
                 </td>
