@@ -29,6 +29,8 @@ class Result
   def self.find_by_task_id(task_id)
     result = Result.where(:task_id => task_id).first
     return nil if result.nil?
+    correct_result = Result.where(:result_key => result.result_key, :ref_result_id => nil, :status.gt => -1).first
+    return correct_result if correct_result.present?
     return Result.where(:result_key => result.result_key, :ref_result_id => nil).first
   end
 
