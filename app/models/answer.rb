@@ -178,7 +178,7 @@ class Answer
     if !is_preview && introducer_id.present?
       introducer = User.sample.find_by_id(introducer_id)
       if introducer.present?
-        introducer_id = introducer_id
+        self.introducer_id = introducer_id
         point_to_introducer = survey.spread_point
         SurveySpread.create_new(introducer, survey) 
       end
