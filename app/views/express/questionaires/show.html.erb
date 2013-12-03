@@ -53,37 +53,35 @@
 
 <% content_for :left_menus do %>
   <div class='left-head'>
-  <ul class="top-option">
-    <li class="edit"><a class="current" href="<%= express_questionaire_path %>"><strong>编辑问卷</strong></a></li>
-  </ul>
-  <div class="current-option-name">编辑问卷</div>
+    <a href="javascript:;" class="current-option-name">基本题型</a>
   </div>
   <ul class="left-menus">
+       <li class='big'><a class='Choice' href="javascript:void(0);"><span class="left-menu-icon"><em class="choice"></em></span><span class="left-menu-name">选择题</span></a></li>
     <li class='big'><a class='Paragraph' href="javascript:void(0);"><span class="left-menu-icon"><em class="paragraph"></em></span><span class="left-menu-name">文字描述</span></a></li>
-    <li class='big'><a class='Choice' href="javascript:void(0);"><span class="left-menu-icon"><em class="choice"></em></span><span class="left-menu-name">选择题</span></a></li>
+ <li class='big'><a class='Scale' href="javascript:void(0);"><span class="left-menu-icon"><em class="scale"></em></span><span class="left-menu-name">评分题</span></a></li>
     <li class='big'><a class='MatrixChoice' href="javascript:void(0);"><span class="left-menu-icon"><em class="matrixchoice"></em></span><span class="left-menu-name">矩阵选择题</span></a></li>
-    <li class='big'><a class='Scale' href="javascript:void(0);"><span class="left-menu-icon"><em class="scale"></em></span><span class="left-menu-name">量表题</span></a></li>
+    
     <li class='big'><a class='TextBlank' href="javascript:void(0);"><span class="left-menu-icon"><em class="textblank"></em></span><span class="left-menu-name">填充题</span></a></li>
-    <li class='big'><a class='Sort' href="javascript:void(0);"><span class="left-menu-icon"><em class="sort"></em></span><span class="left-menu-name">排序题</span></a></li>
-    <!-- <li class='big'><a class='Template' href="javascript:void(0);"><span class="left-menu-icon"><em class="template"></em></span><span class="left-menu-name">模版题</span></a></li> -->
-    <li class='small' style='display:none;'><a class='Paragraph' href="javascript:void(0);"><span class="left-menu-name">文字描述</span></a></li>
-    <li class='small' style='display:none;'><a class='Choice' href="javascript:void(0);"><span class="left-menu-name">选择题</span></a></li>
-    <li class='small' style='display:none;'><a class='Scale' href="javascript:void(0);"><span class="left-menu-name">量表题</span></a></li>
-    <li class='small' style='display:none;'><a class='MatrixChoice' href="javascript:void(0);"><span class="left-menu-name">矩阵选择题</span></a></li>
-    <!-- <li class='small' style='display:none;'><a class='Rank' href="javascript:void(0);"><span class="left-menu-name">评分题</span></a></li> -->
-    <li class='small' style='display:none;'><a class='TextBlank' href="javascript:void(0);"><span class="left-menu-name">填充题</span></a></li>
-    <li class='small' style='display:none;'><a class='NumberBlank' href="javascript:void(0);"><span class="left-menu-name">数值填充题</span></a></li>
-    <li class='small' style='display:none;'><a class='PhoneBlank' href="javascript:void(0);"><span class="left-menu-name">电话题</span></a></li>
-    <li class='small' style='display:none;'><a class='TimeBlank' href="javascript:void(0);"><span class="left-menu-name">时间题</span></a></li>
-    <li class='small' style='display:none;'><a class='AddressBlank' href="javascript:void(0);"><span class="left-menu-name">地址题</span></a></li>
-    <li class='small' style='display:none;'><a class='EmailBlank' href="javascript:void(0);"><span class="left-menu-name">邮箱题</span></a></li>
-    <li class='small' style='display:none;'><a class='UrlBlank' href="javascript:void(0);"><span class="left-menu-name">网址链接题</span></a></li>
-    <li class='small' style='display:none;'><a class='Sort' href="javascript:void(0);"><span class="left-menu-name">排序题</span></a></li>
-    <li class='small' style='display:none;'><a class='ConstSum' href="javascript:void(0);"><span class="left-menu-name">比重题</span></a></li>
-    <!-- <li class='small' style='display:none;'><a class='Blank' href="javascript:void(0);"><span class="left-menu-name">组合填充题</span></a></li> -->
-    <!-- <li class='small' style='display:none;'><a class='Template' href="javascript:void(0);"><span class="left-menu-name">模板题</span></a></li> -->
+    <li class='big' style="border-bottom:0;"><a class='Sort' href="javascript:void(0);"><span class="left-menu-icon"><em class="sort"></em></span><span class="left-menu-name">排序题</span></a></li>
+ 
+    <li class='small' style='display:none;'><a class='Choice' href="javascript:void(0);"><span class="left-menu-name">性别</span></a></li>
+    <li class='small' style='display:none;'><a class='Paragraph' href="javascript:void(0);"><span class="left-menu-name">城市</span></a></li>
+    <li class='small' style='display:none;'><a class='Scale' href="javascript:void(0);"><span class="left-menu-name">年龄</span></a></li>
+    <li class='small' style='display:none;'><a class='MatrixChoice' href="javascript:void(0);"><span class="left-menu-name">手机</span></a></li>
+    <li class='small' style='display:none;'><a class='EmailBlank' href="javascript:void(0);"><span class="left-menu-name">Email</span></a></li>
+    <li class='small' style='display:none;'><a class='NumberBlank' href="javascript:void(0);"><span class="left-menu-name">工作年限</span></a></li>
+    <li class='small' style='display:none;'><a class='PhoneBlank' href="javascript:void(0);"><span class="left-menu-name">个人收入</span></a></li>
+    <li class='small' style='display:none;'><a class='TimeBlank' href="javascript:void(0);"><span class="left-menu-name">教育程度</span></a></li>
+    <li class='small' style='display:none;'><a class='AddressBlank' href="javascript:void(0);"><span class="left-menu-name">婚姻状况</span></a></li>
+    <li class='small' style="border-bottom:none;display:none;"><a class='UrlBlank' href="javascript:void(0);"><span class="left-menu-name">工作单位</span></a></li>
+
   </ul>
-  <button class="left-sidebar-pulldownBtn"></button>
+  <div class="left-bottom">
+    <div class="left-sidebar-pulldownBtn">
+      <a href="javascript:;" class="common-use">常用题目</a>
+    </div>
+  </div>
+
   <script type="text/javascript">
   jQuery(function($) {
     var big = true;
@@ -102,7 +100,256 @@
   });
   </script>
 <% end %>
+<div id='my_editor' style="position:relative;">
 
-<div id='my_editor'></div>
+    <!-- 逻辑控制&预览 浮动层 -->
+  <div id="float-panel">
+    <a href="javascript:;" class="logic-control"></a>
+    <a href="javascript:;" class="preview-survey"></a>
+  </div>
 
+  <div class="survey-editor">
+    <!-- 问卷标题 -->
+    <div class="ex-title">
+      <!-- 主标题 -->
+        <input type="text" name="survey-title" class="survey-title">
+       <!-- 副标题  -->
+        <input type="text" name="survey-subhead" class="survey-subhead">
+        <!-- 调查背景 -->
+        <textarea name="survey-background" class="survey-background" cols="30" rows="10"></textarea>
+        <a href="javascript:;" class="submit-edit">
+          <strong>确定</strong><span>并开始编辑问题</span>
+        </a>
+    </div>
+
+
+    <div class="survey-editor-finished">
+      <button class="editor-btn">编辑</button>
+      <h1 class="survey-title-finished">问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题</h1>
+      <h2 class="survey-subhead-finished">问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题</h2>
+      <div class="survey-background-finished">
+        <p>
+          调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景
+        </p>
+        <p>
+          调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景
+        </p>
+      </div>
+    </div>
+
+
+
+    <!-- 选择题 预览 start -->
+<div id="" class="q-designer ui-droppable"><div class="q-render">
+  <div class="q-render-mid"><div class="q-filler q-choice">
+  <span class="q-idx">06</span>
+  <div class="q-title">
+    <span class="q-title-content">请在此输入问题标题</span>
+    <span class="q-info">（单选题）</span>
+    <span class="q-required" style="display: inline;">*</span>
+    <span class="q-error"></span>
+  </div>
+  <div class="q-note" style="display: none;">说明：</div>
+  <div class="q-content"><table><tbody><tr><td><label class="cust-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+  <p>选项一</p>
+</label></td></tr><tr><td><label class="cust-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+  <p>选项二</p>
+</label></td></tr><tr><td><label class="cust-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+  <p>选项三</p>
+</label></td></tr><tr><td><label class="cust-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+  <p>其他（请填写）：<input type="text"></p>
+</label></td></tr></tbody></table></div>
+</div></div>
+  
+
+   
+  </div>
+</div>
+
+    <!-- 选择题 预览 end -->
+    <!-- 文字描述 预览 start -->
+    <div id="" class="q-designer ui-droppable"><div class="q-render">
+  <div class="q-render-mid"><div class="q-filler q-paragraph">
+  
+  <div class="q-title">
+    <span class="q-title-content">请在此输入文本描述</span>
+    
+    
+    
+  </div>
+  <div class="q-note" style="display: none;">说明：</div>
+  <div class="q-content"></div>
+</div></div>
+  
+</div>
+    <!-- 文字描述 预览 end -->
+    <!-- 评分题 预览 start -->
+    <div id="" class="q-designer ui-droppable"><div class="q-render">
+  <div class="q-render-mid"><div class="q-filler q-scale">
+  <span class="q-idx">11</span>
+  <div class="q-title">
+    <span class="q-title-content">请在此输入问题标题</span>
+    <span class="q-info">（量表题）</span>
+    <span class="q-required" style="display: inline;">*</span>
+    <span class="q-error"></span>
+  </div>
+  <div class="q-note" style="display: none;">说明：</div>
+  <div class="q-content"><table cellpadding="0" cellspacing="0" class="last"><tbody><tr><th class="head"></th><th class="head">很不满意</th><th class="head">不太满意</th><th class="head">一般</th><th class="head">比较满意</th><th class="head">很满意</th></tr><tr id="6997618719498548"><th class="row_0">选项一</th><td class="">1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr><tr id="7936257593713032" class="alter"><th class="row_0">选项二</th><td class="">1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr><tr id="9214735722028126"><th class="row_0">选项三</th><td class="">1</td><td class="">2</td><td class="">3</td><td>4</td><td>5</td></tr><tr id="4895409669036745" class="alter"><th class="row_0">选项四</th><td class="">1</td><td class="">2</td><td class="">3</td><td class="">4</td><td>5</td></tr></tbody></table></div>
+</div></div>
+  <div class="q-render-btns-con">
+    <div class="q-render-btns"><ul class="od-icon-buttons">
+  <li class="icon-btn icon-btn-l"><button title="" data-original-title="编辑"><em class="icon od-icon-edit"></em></button></li><li class="icon-btn"><button title="" data-original-title="删除"><em class="icon od-icon-del"></em></button></li><li class="icon-btn icon-btn-r"><button title="" data-original-title="从此处开始新页"><em class="icon od-icon-pagination"></em></button></li>
+</ul></div>
+    </div>
+    <!-- 评分题 预览 end -->
+    <!-- 矩阵选择题 预览 start -->
+    <div id="" class="q-designer ui-droppable"><div class="q-render">
+  <div class="q-render-mid"><div class="q-filler q-matrixchoice">
+  <span class="q-idx">14</span>
+  <div class="q-title">
+    <span class="q-title-content">请在此输入问题标题</span>
+    <span class="q-info">（矩阵选择题）</span>
+    <span class="q-required" style="display: inline;">*</span>
+    <span class="q-error"></span>
+  </div>
+  <div class="q-note" style="display: none;">说明：</div>
+  <div class="q-content"><table cellspacing="0" cellpadding="0" class="last"><tbody><tr><th class="head"></th><th class="head">选项一</th><th class="head">选项二</th><th class="head">选项三</th><th class="head">选项四</th></tr><tr><th class="row_0">子题目一</th><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td></tr><tr class="alter"><th class="row_0">子题目二</th><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td></tr><tr><th class="row_0">子题目三</th><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td></tr><tr class="alter"><th class="row_0">子题目四</th><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td><td><label class="matrix-option">
+  <input name="" id="" type="radio" class="">
+  <span>&nbsp;</span>
+</label></td></tr></tbody></table></div>
+</div></div>
+  
+</div></div>
+    <!-- 矩阵选择题 预览 end -->
+    <!-- 填充题 预览 start -->
+  <div id="" class="q-designer ui-droppable">
+    <div class="q-render">
+      <div class="q-render-mid">
+        <div class="q-filler q-textblank">
+          <span class="q-idx">12</span>
+          <div class="q-title">
+            <span class="q-title-content">请在此输入问题标题</span>
+            <span class="q-info">（输入 1 到 10 个字）</span>
+            <span class="q-required" style="display: inline;">*</span>
+            <span class="q-error"></span>
+          </div>
+          <div class="q-note" style="display: none;">说明：</div>
+          <div class="q-content"><input type="text" id="" class="normal"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+    <!-- 填充题 预览 end -->
+    <!-- 排序题 预览 start -->
+   <div id="" class="q-designer ui-droppable"><div class="q-render">
+  <div class="q-render-mid"><div class="q-filler q-sort">
+  <span class="q-idx">13</span>
+  <div class="q-title">
+    <span class="q-title-content">请在此输入问题标题</span>
+    <span class="q-info">（请至少排出前 2 个选项，拖放选项进行排序）</span>
+    <span class="q-required" style="display: inline;">*</span>
+    <span class="q-error"></span>
+  </div>
+  <div class="q-note" style="display: none;">说明：</div>
+  <div class="q-content"><div class="sort-frame">
+  <ul class="sort-left">
+
+  <li class="sort-type-require ui-droppable" aria-disabled="false">
+  <span class="sort-index">1</span>
+  <div class="sort-item-con"></div>
+</li><li class="sort-type-require ui-droppable" aria-disabled="false">
+  <span class="sort-index">2</span>
+  <div class="sort-item-con"></div>
+</li><li class="sort-type-option ui-droppable" aria-disabled="false">
+  <span class="sort-index">3</span>
+  <div class="sort-item-con"></div>
+</li><li class="sort-type-option ui-droppable" aria-disabled="false">
+  <span class="sort-index">4</span>
+  <div class="sort-item-con"></div>
+</li></ul>
+  <ul class="sort-right">
+
+  <li style="display: list-item;">
+    <div class="sort-item ui-draggable" id="" style="display: block;">
+    <em class="sort-item-drag"></em>
+    <div class="sort-item-detail">选项一</div>
+    </div>
+  </li>
+
+  <li style="display: list-item;"><div class="sort-item ui-draggable" id="" style="display: block;">
+  <em class="sort-item-drag"></em>
+  <div class="sort-item-detail">选项二</div>
+</div></li>
+<li style="display: list-item;"><div class="sort-item ui-draggable" id="" style="display: block;">
+  <em class="sort-item-drag"></em>
+  <div class="sort-item-detail">选项三</div>
+</div></li>
+<li style="display: list-item;"><div class="sort-item ui-draggable" id="" style="display: block;">
+  <em class="sort-item-drag"></em>
+  <div class="sort-item-detail">选项四</div>
+</div>
+</li>
+</ul>
+
+
+
+  
+</div></div> 
+    <!-- 排序题 预览 end -->
+  </div>
+</div>
+</div>
 <a href='javascript:void(0);' class='scrollup'></a>

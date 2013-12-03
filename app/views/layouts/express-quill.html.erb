@@ -1,5 +1,5 @@
 <% content_for :app_head do %>
-  <%= stylesheet_link_tag    "layouts/quill-layout" %>
+  <%= stylesheet_link_tag    "layouts/express-layout" %>
   <%= javascript_include_tag "layouts/quill-layout" %>
   <script type="text/javascript">
   jQuery(function($) {
@@ -31,7 +31,7 @@
 
     // make left menus float
     $("#left_float_menus").smartFloat();
-
+    // $("#float-panel").smartFloat();
     // mouse over and out
     $('.left-menu-icon em').each(function(i, v) {
       $(this).data('icon', $(this).attr('class'));
@@ -68,51 +68,37 @@
   <a href="http://www.firefox.com.cn/download/" class='firefox' target='_blank' title='点击下载火狐浏览器'></a>
   <a href="http://info.msn.com.cn/ie9/" class='ie' target='_blank' title='点击下载IE9浏览器'></a>
 </div>
-<!-- 黑色banner -->
-<div id='banner'>
+
+<!-- 白色banner -->
+<div id='header'>
   <div class="od-container">
-    <a class='logo' href='<%=root_path %>' ></a>
-    <ul class='menus'>
-      <li><a class='list-survey' href="<%= express_questionaires_path %>">调研列表</a></li>
-      <li><a class='new-survey' href="<%= new_express_questionaire_path %>">新建</a></li>
-    </ul>
-    <form id="search_form" onsubmit='return false;'>
-      <a class='account-setting' href="javascript:void(0);">
-        <% @unread_messages_count = (user_signed_in ? current_user.unread_messages_count : 0) 
-          if @unread_messages_count > 0 %>
-        <em class="BallonToolTip" ><%=@unread_messages_count %></em>
-        <% end %>
-      </a>
-      <div class="account-setting-box dn">
-        <i class="trigon">▲</i>
-        <ul>
-          <% if current_user.is_admin? %>
-          <li><a href="<%=admin_path %>?publish_status=8">管理员操作</a></li>
-          <% end %>
-          <li><a href="<%=setting_users_path %>">账户设置</a></li>
-          <li><a href="<%=notifications_users_path %>">消息中心</a></li>
-          <li><a href="<%= design_doc_path %>">使用帮助</a></li>
-          <li><a href="/account/sign_out">退出</a></li>
-        </ul>
-      </div>
-      <button id="search_btn" class="r" ></button>
-      <input id='search_ipt' placeholder='搜索' class="search r" type="text" x-webkit-speech />
-    </form>
+    <a class='logo' href='<%=root_path %>' >QuillExpress</a>
+    <div class="menu">
+      <ul>
+        <li>
+            <a href="<%= design_doc_path %>"><i class="icon16 doc"></i>帮助</a>
+        </li>
+        <li>
+            <a href="javascript:;"><i class="icon16 msg"></i>消息</a>
+        </li>
+        <li>
+            <a href="javascript:;"><i class="icon16 my-survey"></i>我的问卷</a>
+        </li>
+        <li>
+            <a href="javascript:;"><i class="icon16 username"></i>fengyuan@gmail.com</a>
+        </li>
+      </ul>
+    </div>
+
   </div>
+      
 </div>
-<!-- 灰色菜单 -->
-<div id='top_menus'>
-  <div class='od-container'>
-    <!-- menus -->
-    <% if @survey %>
-    <%= render "partials/express/survey_menus" %>
-    <% elsif @is_account_mgr %>
-    <%= render "partials/express/account_menus" %>
-    <% else @is_account_mgr %>
-    <%= render "partials/express/survey_list_menus" %>
-    <% end %>
-  </div>
-</div>
+<!-- 向导 -->
+  <ul id="nav" class="od-container">
+    <li class="active"><a href="javascript:;">设计问卷</a></li>
+    <li><a href="javascript:;">分享问卷</a></li>
+    <li style="width:285px;"><a href="javascript:;">回收问卷</a></li>
+  </ul>
 <!-- 下部分 -->
 <div class="od-container od-body">
   <% if @hide_left_sidebar %>

@@ -1,0 +1,320 @@
+@import "common";
+@import "filler/colorful/social/*.png";
+@import "filler/colorful/cpnt/*.png";
+@import "compass/css3";
+
+$light-blue: #c8d8e5;
+$fresh-blue: #5c97ff;
+$dark-blue:#14405b;
+$msg-bg: #ABE5FF;
+$pink:#FF3E3E;
+#sf {
+	background:image-url('filler/colorful/bg.png');
+	a{color: $pink;}
+}
+#sf_banner {
+	background: #17181a;
+	@include opacity(0.75);
+	>.inner {
+		.preview { color: $light-blue; }
+		#progress_info { 
+			color: $light-blue; 
+			#progress_txt{ color: $fresh-blue; }
+		}
+
+	}
+}
+.progress-con {
+	height: 4px;
+	background: #262626;
+	#progress-line { display: none; }
+	#progress {
+		background: #262626;
+		@include border-radius(0px);
+		> em { 
+				background: $pink;
+				@include border-radius(0px);
+			 }
+	}
+}
+.header{
+	color: #006CB5;
+	padding:15px 20px 20px 20px;
+	background:image-url('filler/colorful/header.png') no-repeat;
+}
+.footer{
+	color: #006CB5;
+	margin-top:4px;
+	padding:15px 20px 20px 20px;
+	background:image-url('filler/colorful/footer.png') no-repeat;
+}
+#sf_main {
+	padding:0;
+	background:image-url('filler/colorful/bg.png');
+	@include border-radius(0px);
+	>.error-con { background: $msg-bg; }
+}
+
+#sf_footer {
+	color: #999;
+	a { 
+		color: #999;
+		&:hover{color: #FFF} 
+	}
+}
+.welcome {
+	>h1 { color: #FFAB00; }
+	>h2 { color: #b3b3b3; }
+	background:	image-url('filler/colorful/filler.png') repeat-y;
+}
+#spread{
+	margin-top:4px;
+	border:none;
+	#spread_inner{
+		padding-bottom:20px;
+		background: image-url('filler/colorful/filler.png') repeat-y;
+	}
+}
+
+.msg {
+	background: $msg-bg;
+	> em { background-image: image-url("filler/colorful/icon/time.png"); }
+	> span {
+		a, > em { color: #29ABE2; }
+	}
+	&.time { >em { background-image: image-url("filler/colorful/icon/time.png");}  }
+	&.warn { >em { background-image: image-url("filler/colorful/icon/warn.png");} }
+	&.award { >em { background-image: image-url("filler/colorful/icon/award.png");} }
+}
+.form {
+	button {
+		border:none;
+		color: #fff;
+		background: #FF3E3E;
+		&:hover { background: #FF6767; }
+		&:active { 
+			background: #FF3E3E;
+			@include box-shadow(darken(#b2414f, 25%) 0 1px 4px 1px inset);
+		}
+		&[disabled], &[disabled]:hover, &[disabled]:active  {
+			background: #666;
+			color: #333;
+			cursor: default;
+		}
+	}	
+}
+
+#page_buttons {
+	button {
+		color: #fff;
+		background: #FF3E3E;
+		&:hover { background: #FF6767; }
+		&:active { 
+			background: #FF3E3E;
+			@include box-shadow(darken(#b2414f, 25%) 0 1px 4px 1px inset);
+		}
+		&[disabled], &[disabled]:hover, &[disabled]:active  {
+			background: #666;
+			color: #333;
+			cursor: default;
+		}
+		&.light {
+			background: #535C66;
+			&:hover { 
+				background: lighten(#535C66, 20%); 
+			}
+			&:active { 
+				background: lighten(#535C66, 10%); 
+				@include box-shadow(darken(#535C66, 10%) 0 1px 4px 1px inset);
+			}
+			&[disabled], &[disabled]:hover, &[disabled]:active  {
+				background: #666;
+				color: #333;
+				cursor: default;
+			}
+		}
+	}
+}
+
+/* questions fillers */
+
+.q-filler {
+	padding: 10px 50px 35px 50px;
+	border: none;
+	margin-top:4px;
+	background:image-url('filler/colorful/filler.png') repeat-y;
+	.q-idx {
+		@include size(34px,35px);
+		@include inline-block;
+		line-height: 34px;
+		@include cpnt-sprite(idx);
+		color:#fff;
+		margin:-17px 0 0 12px;
+	}
+
+}
+
+.s-title {
+	color: #fff;
+	padding: 5px 50px 45px 50px;
+	margin-top:-10px;
+	border:none;
+	background:image-url('filler/colorful/title_bg.png') repeat-y;
+}
+/* choice question */
+label.cust-option:not(#foo) {
+	&:hover { background: #ABE5FF; }
+	> input:focus + span + p, > input:checked + span + p, &:hover > input + span + p { color: #333; }
+
+	> input[type=radio] + span { @include cpnt-sprite(radio); }
+	> input[type=checkbox] + span { @include cpnt-sprite(checkbox); }
+
+	/* Checked styles */
+	> input[type=radio]:checked + span { @include cpnt-sprite(radio1); }
+	> input[type=checkbox]:checked + span { @include cpnt-sprite(checkbox1); }
+	> input[type=checkbox]:hover:checked + span,
+	> input[type=checkbox]:focus:checked + span,
+	> input[type=checkbox]:checked + span:hover,
+	> input[type=checkbox]:focus:checked + span { @include cpnt-sprite(checkbox1); }
+	> input[type=radio]:hover:checked + span,
+	> input[type=radio]:focus:checked + span,
+	> input[type=radio]:checked + span:hover,
+	> input[type=radio]:focus:checked + span { @include cpnt-sprite(radio1); }
+
+	/* Hover & Focus styles */
+	> input[type=checkbox]:hover + span,
+	> input[type=checkbox]:focus + span,
+	> input[type=checkbox] + span:hover { @include cpnt-sprite(checkbox_hover); }
+	> input[type=radio]:hover + span,
+	> input[type=radio]:focus + span,
+	> input[type=radio] + span:hover { @include cpnt-sprite(radio_hover); }
+
+	/* Active styles */
+	> input[type=checkbox]:active + span,
+	> input[type=checkbox] + span:hover:active { @include cpnt-sprite(checkbox_active); }
+	> input[type=radio]:active + span,
+	> input[type=radio] + span:hover:active { @include cpnt-sprite(radio_active); }
+	> input[type=checkbox]:active:checked + span,
+	> input[type=checkbox]:checked + span:hover:active { @include cpnt-sprite(checkbox1_active); }
+	> input[type=radio]:active:checked + span,
+	> input[type=radio]:checked + span:hover:active { @include cpnt-sprite(radio1_active); }
+
+	/* Disabled styles */
+	> input[type=checkbox]:disabled + span,
+	> input[type=checkbox]:hover:disabled + span,
+	> input[type=checkbox]:focus:disabled + span,
+	> input[type=checkbox]:disabled + span:hover,
+	> input[type=checkbox]:disabled + span:hover:active { @include cpnt-sprite(checkbox_disabled); }
+	> input[type=radio]:disabled + span,
+	> input[type=radio]:hover:disabled + span,
+	> input[type=radio]:focus:disabled + span,
+	> input[type=radio]:disabled + span:hover,
+	> input[type=radio]:disabled + span:hover:active { @include cpnt-sprite(radio_disabled); }
+	> input[type=checkbox]:disabled:checked + span,
+	> input[type=checkbox]:hover:disabled:checked + span,
+	> input[type=checkbox]:focus:disabled:checked + span,
+	> input[type=checkbox]:disabled:checked + span:hover,
+	> input[type=checkbox]:disabled:checked + span:hover:active { @include cpnt-sprite(checkbox1_disabled); }
+	> input[type=radio]:disabled:checked + span,
+	> input[type=radio]:hover:disabled:checked + span,
+	> input[type=radio]:focus:disabled:checked + span,
+	> input[type=radio]:disabled:checked + span:hover,
+	> input[type=radio]:disabled:checked + span:hover:active { @include cpnt-sprite(radio1_disabled); }
+}
+
+/* matrix choice  */
+.q-matrixchoice {
+	.q-content {
+		table {
+			tr.alter {background: fade_out($fresh-blue, 0.5);; }
+			th, td { border: 1px solid $light-blue; }
+		}
+	}
+}
+label.matrix-option:not(#foo) {
+	> input[type=radio] + span { @include cpnt-sprite(radio); }
+	> input[type=checkbox] + span { @include cpnt-sprite(checkbox); }
+
+	/* Checked styles */
+	> input[type=radio]:checked + span { @include cpnt-sprite(radio1); }
+	> input[type=checkbox]:checked + span { @include cpnt-sprite(checkbox1); }
+	> input[type=checkbox]:hover:checked + span,
+	> input[type=checkbox]:focus:checked + span,
+	> input[type=checkbox]:checked + span:hover,
+	> input[type=checkbox]:focus:checked + span { @include cpnt-sprite(checkbox1); }
+	> input[type=radio]:hover:checked + span,
+	> input[type=radio]:focus:checked + span,
+	> input[type=radio]:checked + span:hover,
+	> input[type=radio]:focus:checked + span { @include cpnt-sprite(radio1); }
+
+	/* Hover & Focus styles */
+	> input[type=checkbox]:hover + span,
+	> input[type=checkbox]:focus + span,
+	> input[type=checkbox] + span:hover { @include cpnt-sprite(checkbox_hover); }
+	> input[type=radio]:hover + span,
+	> input[type=radio]:focus + span,
+	> input[type=radio] + span:hover { @include cpnt-sprite(radio_hover); }
+
+	/* Active styles */
+	> input[type=checkbox]:active + span,
+	> input[type=checkbox] + span:hover:active { @include cpnt-sprite(checkbox_active); }
+	> input[type=radio]:active + span,
+	> input[type=radio] + span:hover:active { @include cpnt-sprite(radio_active); }
+	> input[type=checkbox]:active:checked + span,
+	> input[type=checkbox]:checked + span:hover:active { @include cpnt-sprite(checkbox1_active); }
+	> input[type=radio]:active:checked + span,
+	> input[type=radio]:checked + span:hover:active { @include cpnt-sprite(radio1_active); }
+
+	/* Disabled styles */
+	> input[type=checkbox]:disabled + span,
+	> input[type=checkbox]:hover:disabled + span,
+	> input[type=checkbox]:focus:disabled + span,
+	> input[type=checkbox]:disabled + span:hover,
+	> input[type=checkbox]:disabled + span:hover:active { @include cpnt-sprite(checkbox_disabled); }
+	> input[type=radio]:disabled + span,
+	> input[type=radio]:hover:disabled + span,
+	> input[type=radio]:focus:disabled + span,
+	> input[type=radio]:disabled + span:hover,
+	> input[type=radio]:disabled + span:hover:active { @include cpnt-sprite(radio_disabled); }
+	> input[type=checkbox]:disabled:checked + span,
+	> input[type=checkbox]:hover:disabled:checked + span,
+	> input[type=checkbox]:focus:disabled:checked + span,
+	> input[type=checkbox]:disabled:checked + span:hover,
+	> input[type=checkbox]:disabled:checked + span:hover:active { @include cpnt-sprite(checkbox1_disabled); }
+	> input[type=radio]:disabled:checked + span,
+	> input[type=radio]:hover:disabled:checked + span,
+	> input[type=radio]:focus:disabled:checked + span,
+	> input[type=radio]:disabled:checked + span:hover,
+	> input[type=radio]:disabled:checked + span:hover:active { @include cpnt-sprite(radio1_disabled); }
+}
+/* sort question */
+.q-sort {
+	.q-content {
+		li { 
+			> em {
+				@include cpnt-sprite(drag); 
+			}
+			> .sort-index {
+				&.max {
+					color: #808080;
+				}
+			}
+
+			&:hover {
+				background: #d2e5b6;
+				>.sort-index {
+					color: $fresh-blue;
+				}
+				>em {
+					@include cpnt-sprite(drag_hover);
+				}
+			}
+		}
+	}
+}
+input[type="text"]{
+	&:focus {
+	border-color: #95C738;
+	outline: none;
+	}
+}

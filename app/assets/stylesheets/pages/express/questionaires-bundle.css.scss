@@ -1,0 +1,59 @@
+//=require ui/widgets/od_icon_buttons
+//=require ui/widgets/od_white_button
+//=require ui/widgets/od_popup
+
+@import "compass/utilities/general/clearfix";
+@import "compass/utilities/general/min";
+@import "common";
+@import "od-icon/*.png";
+
+.icon{
+	width:16px;
+	@include one-line(16px);
+	@include inline-block;
+	&:hover{cursor:pointer;}
+}
+.icon-add {@include od-icon-sprite(add);margin: -3px 3px 0 -3px;}
+.icon-edit {@include od-icon-sprite(edit);}
+.icon-new {@include od-icon-sprite(new);}
+.icon-del {@include od-icon-sprite(del);}
+.icon-share {@include od-icon-sprite(share);}
+.icon-star {@include od-icon-sprite(star);}
+.icon-customization {@include od-icon-sprite(customization);}
+.icon-filters {@include od-icon-sprite(filters);}
+.icon-recover{@include od-icon-sprite(return);}
+.icon-remove{@include od-icon-sprite(clear);}
+/*问卷列表*/
+.question-box{
+	cursor:default;
+	&:hover .icon{
+		display:inline-block;
+	}
+}
+.question-list{
+	height:30px;
+	line-height:30px;
+	padding-left:20px;
+	.icon-star{margin:-5px 5px 0 0;}
+	.s-title {
+		max-width: 500px;
+		height: 30px;
+		line-height:26px;
+		overflow: hidden;
+		@include inline-block;
+	}
+}
+.question-list-edit{
+	padding-left:55px;
+	height:30px;
+	line-height:30px;
+	.icon{
+		display:none;
+		margin-left:10px;
+	}
+}
+/*列表多选按钮*/
+.list-check{
+	float: left;
+	margin:9px 10px 0 0;
+}

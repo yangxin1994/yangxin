@@ -76,6 +76,8 @@ jQuery(function($) {
 	});
 });
 </script>
+
+
 <div class="sub-banner">
 	<h1 id='banner_survey_title'><%=@survey['title'] %></h1>
 	<em id='survey_star' class="icon_star <%=@survey['is_star'] ? 'star-active' : '' %> "></em>
@@ -90,3 +92,5 @@ jQuery(function($) {
 		<li title='预览问卷' class='preview-survey'><a href="<%=questionaire_preview_path(@survey['_id'])%>" title="" target="_blank"><em class="preview"></em></a></li>
 	</ul>
 </div>
+
+

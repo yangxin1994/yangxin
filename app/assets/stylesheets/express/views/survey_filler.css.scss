@@ -1,0 +1,680 @@
+//=require ./fillers/base
+//=require ui/widgets/od_popup
+//=require jquery.fancybox
+
+@import "common";
+@import "popup";
+@import "compass/css3";
+@import "compass/utilities/general/min";
+@import "compass/utilities/general/clearfix";
+
+@import "twitter/bootstrap/variables";
+$popoverArrowWidth:       6px;
+$popoverArrowOuterWidth:  $popoverArrowWidth;
+@import "twitter/bootstrap/popovers";
+
+@import "filler/*.png";
+
+@import "filler/default/social/*.png";
+
+/* override popovers styles */
+.popover {
+	@include single-box-shadow(rgba(0, 0, 0, 0.4), 0px, 0px, 8px);
+	border: none;
+	@include border-radius(3px);
+	font-size: 12px;
+}
+
+/* preview */
+#pv_bar {
+	position: fixed;
+	width: 100%;
+	top: 0;
+	z-index: 999;
+	@include one-line(37px);
+	border-bottom: 3px solid #656c76;
+	background: #737982;
+	text-align: center;
+	> span {
+		color: #eee;
+		font-size: 13px;
+		font-weight: normal;
+		vertical-align: middle;
+		margin: 0 10px;
+	}
+	>img {
+		vertical-align: middle;
+	}
+	>button {
+		display: none;
+		@include border-radius(2px);
+		background: #5f6671;
+		border: none;
+		color: #eee;
+		padding: 5px 15px;
+		cursor: pointer;
+		&:hover { background: #89909B; }
+		&:active { background: #555c66; }
+	}
+}
+
+/* filler */
+$cmpt-w: 905px;
+@mixin page-component {
+	width: $cmpt-w;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
+}
+$blue-color: #5691f0;
+
+#sf {
+	@include min-height(100%);
+	@include no-extra;
+	font-size: 14px;
+	text-align: center;
+	background-color: #f5f5f5;
+	a {
+		color: #5691f0;
+		text-decoration: underline;
+		&:hover {
+			color: #4A7BCA;
+		}
+	}
+}
+
+#sf_banner {
+	width: 100%;
+	margin-bottom: 90px;
+	padding-top:20px;
+	#sf_banner_sticky {
+		z-index: 1000;
+	}
+
+	.sf_banner_top {
+		background: #FFC800;
+		border-bottom: 1px solid #EFB40F;
+		@include one-line(50px);
+		width:100%;
+		position: fixed;
+		top:40px;
+		>.inner {
+			@include page-component;
+
+			#logo {
+				float: left;
+				img { 
+					border: none; 
+				}
+			}
+
+			#progress_con {
+				display: none;
+				float: right;
+				font-weight: bold;
+				color: #fff;
+				span {
+					em {margin: 0 5px;}
+				}
+			}
+			#progress_info {
+				@include inline-block;
+				margin-right: 5px;
+			}
+			#progress_bar {
+				@include inline-block;
+				border: 2px solid #fff;
+				width: 100px;
+				@include one-line(18px);
+				em {
+					float: left;
+					background: #fff;
+					height: 18px;
+				}
+			}
+		}
+	}
+
+	.sf_banner_bottom {
+		width: 100%;
+		position: fixed;
+		top:90px;
+		@include one-line(3px);
+		@include opacity(0.25);
+		background: #aeb5c0;
+	}
+}
+
+#sf_main {
+	@include page-component;
+	border: none;
+	width: $cmpt-w;
+	background: #fff;
+	@include border-radius(4px);
+	@include single-box-shadow(rgba(22, 22, 48, 0.2), 0px, 0px, 8px);
+}
+.sf_main_padding {
+	padding: 38px 0;
+}
+
+/* survey welcome page */
+.welcome {
+	background: #E2e5ea;
+	border: 2px solid #fff;
+	@include border-radius(4px);
+	@include clearfix;
+	>.inner {
+		@include min-height(300px);
+		float: left;
+		padding: 38px 50px;
+		width: $cmpt-w - 200px - 50px * 2 - 2px * 2;
+		background: #fff;
+		>h1 {
+			font-size: 24px;
+			font-weight: bold;
+			margin-top: 20px;
+		}
+		>h2 {
+			font-size: 16px;
+			font-weight: bold;
+			color: #666;
+			margin-top: 15px;
+		}
+		.desc {
+			margin: 30px 0;
+			line-height: 1.8em;
+			text-indent: 2em;
+			strong {font-weight: bold;}
+			em {font-style: italic;}
+		}
+		.quillme_hot_note {
+			color: #f00;
+			text-align: center;
+			font-size: 12px;
+		}
+	}
+
+	>.reward {
+		float: right;
+		padding: 24px 20px;
+		width: 200px - 20px * 2;
+
+		>h1 {
+			background: #f6f6f6;
+			@include one-line(40px);
+			font-weight: normal;
+			text-align: center;
+			@include border-radius(3px);
+			font-size: 14px;
+			>em {
+				margin: 0 5px;
+				color: $blue-color;
+				font-weight: bold;
+				font-size: 1.5em;
+			}
+		}
+
+		>h2 {
+			margin-top: 15px;
+			margin-bottom: 10px;
+			font-size: 13px;
+			color: #333;
+		}
+
+		>.gifts-preview {
+			display: block;
+			position: relative;
+			img {
+				width: 160px;
+			}
+			h3 {
+				display: none;
+				font-size: 12px;
+				position: absolute;
+				bottom: 0px;
+				@include one-line(30px);
+				padding: 0 5px;
+				width: 150px;
+				overflow: hidden;
+				color: #fff;
+				background: #333;
+				@include opacity(0.7);
+				text-align: center;
+			}
+			&.hover, &:hover {
+				h3 { display: block; }
+			}
+		}
+
+		>.gifts-list {
+			img {
+				cursor: pointer;
+				@include square(30px);
+				border: 1px solid #fff;
+				margin: 10px 4px 0 0;
+				&.active {
+					border: 1px solid #FFC800;
+				}
+			}
+		}
+
+		>.gifts-info {
+			font-size: 12px;
+			color: #999;
+			padding: 5px 0;
+			.l {
+				float: left;
+			}
+			.r {
+				float: right;
+			}
+		}
+
+		/* awards */
+		.awards {
+			em {
+				@include square(46px);
+				// margin: 0 31px 0 0;
+			}
+			.zhifubao {
+				@include filler-sprite(zhifubao);
+			}
+			.jifenbao {
+				@include filler-sprite(jifenbao);
+			}
+			.chongzhi {
+				@include filler-sprite(chongzhi);
+			}
+		}
+	}
+	/* when no reward scheme exists, hide right banner */
+	&.no_reward {
+		>.inner {
+			width:  $cmpt-w - 50px * 2 - 2px * 2;
+			@include min-height(200px);
+		}
+		>.reward {
+			display: none;
+		}
+	}
+}
+
+/* remind message when redoing survey */
+#remind {
+	@include page-component;
+	color: #f00;
+	margin-top: 20px;
+	margin-bottom: -10px;
+	text-align: center;
+}
+
+/* message container*/
+.msg {
+	@include border-radius(4px);
+	padding: 15px 20px;
+	margin: 30px 0;
+	line-height: 20px;
+	> em {
+		@include square(60px);
+		vertical-align: middle;
+		margin-right: 15px;
+	}
+	> span {
+		@include inline-block;
+		vertical-align: middle;
+		line-height: 1.8em;
+		a {
+			color: #ffaa3c;
+			font-weight: bold;
+			&:hover { text-decoration: underline; }
+		}
+		> em { 
+			color: #ffaa3c;
+			margin: 0 5px;
+			font-weight: bold;
+			font-size: 1.5em;
+		}
+		> b {
+			font-weight: bold;
+			font-size: 16px;
+			color: #000;
+		}
+	}
+	&.purple, &.waiting {
+		background: #F3F0FC;
+		color: #9F8BE4;
+	}
+	&.purple {
+		> em { background-image: image-url("filler/purple-face.png"); }
+	}
+	&.waiting {
+		> em { background-image: image-url("filler/waiting-face.png"); }
+	}
+	&.red, &.time {
+		background: #FDECEF;
+		color: #ED2152;
+	}
+	&.red {
+		> em { background-image: image-url("filler/red-face.png"); }
+	}
+	&.time {
+		> em { background-image: image-url("filler/time-face.png"); }
+	}
+	&.green {
+		background: #EEF7E2;
+		color: #82BD3F;
+		> em { background-image: image-url("filler/green-face.png"); }
+	}
+}
+
+/* for closed survey */
+.follow-con {
+	margin: 50px 0 40px 0;
+	h3 { color: #999; }
+	> ul {
+		@include clearfix;
+		a {
+			float: left;
+			margin: 20px 40px 0 0;
+			em {
+				@include square(38px);
+				vertical-align: middle;
+				margin-right: 15px;
+				&.browser { background-image: image-url("filler/follow/browser.png"); }
+				&.email { background-image: image-url("filler/follow/email.png"); }
+				&.sms { background-image: image-url("filler/follow/sms.png"); }
+				&.wenjuanba { background-image: image-url("filler/follow/wenjuanba.png"); }
+				&.weibo { background-image: image-url("filler/follow/weibo.png"); }
+				&.weixin { background-image: image-url("filler/follow/weixin.png"); }
+				&.tencent { background-image: image-url("filler/follow/tencent.png"); }
+			}
+		}
+	}
+}
+
+.form {
+	text-align: center;
+
+	$w: 280px;
+
+	input[type="text"], input[type="password"]{
+		display: block;
+		margin: 15px auto 15px auto;
+		width: $w - 50;
+		padding:10px 10px 10px 40px;
+		font-size: 14px;
+		@include border-radius(4px);
+		background: no-repeat 12px 12px;
+		background-color: #f2f2f2;
+		&:focus { background-color: #fff; }
+		&.username {
+			background-image: image-url("filler/default/icon/username.png");
+			&:focus {
+				background-image: image-url("filler/default/icon/username_active.png");
+			}
+		}
+	}
+	input[type="password"] {
+		background-image: image-url("filler/default/icon/password.png");
+		&:focus {
+			background-image: image-url("filler/default/icon/password_active.png");
+		}
+	}
+
+	button, > a {
+		color: #fff;
+		display: block;
+		margin: 20px auto 40px auto;
+		@include one-line(54px);
+		font-size: 16px;
+		font-weight: bold;
+		background: #5691f0;
+		@include border-radius(3px);
+		cursor: pointer;
+		border: none;
+		width: $w;
+		&:hover {
+			background: #6FA1F0;
+		}
+		&:active {
+			background: #4A7BCA;
+		}
+		&[disabled], &[disabled]:hover, &[disabled]:active {
+			background: #DEE0E4;
+			cursor: default;
+		}
+	}
+	.view-result-text {
+		margin-top: -30px;
+		color: #666;
+	}
+}
+
+.award_money {
+	ul {
+		margin-top: -10px;
+		margin-bottom: 20px;
+		@include clearfix;
+		li {
+			float: left;
+			width: 250px;
+			margin: 0 7px;
+			border: 1px solid #eee;
+			@include border-radius(3px);
+			text-align: center;
+			padding: 20px 0;
+			cursor: pointer;
+			color: #666;
+			img {
+				border: none;
+				margin-left: auto;
+				margin-right: auto;
+				display: block;
+			}
+			span {
+				margin-top: 10px;
+				display: block;
+				em {
+					font-size: 1.5em;
+					font-weight: bold;
+					color: #ffaa3c;
+					margin: 0 0.5em;
+				}
+			}
+			&:hover, &:active, &.hover, &.active {
+				border: 1px solid #FFC742;
+				background: lighten(#FFC742, 35%);
+			}
+			&.active, &:active {
+				cursor: default;
+				background: lighten(#FFC742, 30%);
+			}
+		}
+	}
+	.award_money_info {
+		display: none;
+		margin: 7px;
+		padding: 20px;
+		@include border-radius(3px);
+		background: #F3F0FC;
+		input[type="text"] {
+			margin: 15px 0;
+			width: 250px;
+			padding: 5px 10px;
+			font-size: 16px;
+			@include border-radius(4px);
+		}
+		.ami_error {
+			color: #f00;
+			margin-left: 1em;
+		}
+		h2 > em {
+			font-size: 30px;
+			color: #0c3;
+			margin: 10px 0 0 0;
+		}
+	}
+}
+
+.award_lottery {
+	ul {
+		margin-top: -10px;
+		margin-bottom: 20px;
+		@include clearfix;
+		li {
+			float: left;
+			width: 142px;
+			margin: 0 7px;
+			border: 1px solid #eee;
+			@include border-radius(3px);
+			text-align: center;
+			padding: 20px;
+			color: #666;
+			img {
+				width: 142px;
+				border: none;
+				margin-left: auto;
+				margin-right: auto;
+				display: block;
+			}
+			span {
+				font-size: 12px;
+				margin-top: 10px;
+				display: block;
+			}
+		}
+	}
+}
+
+#sf_footer {
+	padding: 20px 0;
+	@include page-component;
+	text-align: center;
+	color: #ccc;
+	font-size: 12px;
+	a {
+		color: #ccc;
+		text-decoration: none;
+		&:hover { 
+			color: #999;
+		}
+	}
+	.ad {
+		// ad
+	}
+}
+
+/* spread container*/
+// #spread {
+// 	border-top: 1px solid #cacaca;
+// 	padding: 0;
+
+// 	#spread_inner {
+// 		border-top: 1px solid #fff;
+// 		padding: 30px 50px 10px 50px;
+// 		font-size: 13px;
+// 		margin: 0;
+// 	}
+
+// 	h1 {
+// 		padding-top: 1em; 
+// 		color: #666;
+// 		em {
+// 			font-weight:bold; 
+// 			color: $blue;
+// 			margin: 0 5px;
+// 			font-size: 16px;
+// 		}
+// 	}
+
+// 	input[type='text'] {
+// 		color: $blue;
+// 		padding:2px 5px;
+// 		height:24px;
+// 		line-height: 16px;
+// 		width: 425px;
+// 		font-weight: bold;
+// 	}
+
+// 	button {
+// 		margin: 0 1em 0 0.5em;
+// 		height: 30px;
+// 	}
+
+// 	a.share-icon {
+// 		@include inline-block;
+// 		width:20px;
+// 		height:20px;
+// 		margin-left: 5px;
+
+// 		&.icon-SinaWeibo{@include social-sprite(sina);}
+// 		&.icon-TencentWeibo{@include social-sprite(tencent);}
+// 		&.icon-QQSpace{@include social-sprite(qqspace);}
+// 		&.icon-Renren{@include social-sprite(renren);}
+// 		&.icon-Douban{@include social-sprite(douban);}
+// 		&.icon-Kaixin001{@include social-sprite(kaixin001);}
+// 		&.icon-Diandian{@include social-sprite(diandian);}
+// 		&.icon-Fetion{@include social-sprite(fetion);}
+// 		&.icon-Gmail{@include social-sprite(gmail);}
+// 	}
+// }
+
+/* page button */
+#page_buttons {
+	@include page-component;
+	text-align: center;
+	padding: 30px 0;
+
+	button {
+		margin: 0 5px;
+		padding: 0 30px;
+		@include one-line(46px);
+		font-size: 16px;
+		font-weight: bold;
+		cursor: pointer;
+		background: #5691f0;
+		@include border-radius(3px);
+		border: none;
+		color: #fff;
+		&:hover {
+			background: #6FA1F0;
+		}
+		&:active {
+			background: #4A7BCA;
+		}
+		&[disabled], &[disabled]:hover, &[disabled]:active {
+			background: #DEE0E4;
+			cursor: default;
+		}
+
+		&.light {
+			background: lighten(#5691f0, 10%);
+			&:hover {
+				background: lighten(#6FA1F0, 10%);
+			}
+			&:active {
+				background: lighten(#4A7BCA, 10%);
+			}
+		}
+	}
+}
+
+/* survey body */
+.header, .footer {
+	@include one-line(20px);
+	text-align: right;
+	color: #AEB5C0;
+	padding: 0 50px;
+	font-size: 13px;
+}
+.s-title {
+	font-size: 24px;
+	font-weight: bold;
+	padding: 10px 50px 35px 50px;
+	border-bottom: 1px solid #DCE0E5;
+}
+
+.q-filler {
+	&.top { border-top: none; }
+	&.bottom { border-bottom: none; }
+}

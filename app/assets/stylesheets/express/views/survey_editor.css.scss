@@ -203,6 +203,7 @@
 			width:650px;
 			line-height: 1.6em;
 			font-size: 22px;
+			text-align: left;
 			margin:-5px 0 20px 0;
 			font-weight: bold;
 		}
@@ -210,11 +211,13 @@
 			width:720px;
 			line-height: 1.6em;
 			font-size: 18px;
+			text-align: left;
 			margin-bottom:20px;
 		}
 		.survey-background-finished{
 			height:110px;
 			overflow: auto;
+			text-align: left;
 			line-height: 2em;
 			text-indent: 2em;
 			p{font-size: 14px;}
