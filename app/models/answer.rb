@@ -489,6 +489,7 @@ class Answer
     # survey has a new question, but the answer content does not has the question id as a key
     # thus when updating the answer content, the key should not be checked
     new_answer.each do |k, v|
+      v["selection"] ||= [] if v.has_key?("selection")
       self.answer_content[k] = v if self.answer_content.has_key?(k)
       self.random_quality_control_answer_content[k] = v if self.random_quality_control_answer_content.has_key?(k)
     end
@@ -977,6 +978,7 @@ class Answer
         show_answer.merge!({'question_type_label'=> '选择题'})
         answer["question_content"] << show_answer and next if val.blank?
 
+        val["selection"] ||= []
         if question.issue["items"] 
           choices = []
           selected_choices = []
