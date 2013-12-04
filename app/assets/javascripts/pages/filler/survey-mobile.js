@@ -8,6 +8,11 @@ jQuery(function($) {
 
 	var start_btn = $('#start_btn'), username_ipt = $('#username_ipt'), password_ipt = $('#password_ipt');
 
+	$('#username_ipt,#password_ipt').focus(function(){
+		$("#error_msg").hide();
+		start_btn.text('开始答题');
+	})
+
 	var _start = function(after_login) {
 		// set start button text
 		var new_text = '正在加载问题...';
@@ -36,7 +41,8 @@ jQuery(function($) {
 				referer: window.referer,				
 			},
 			success:function(retval){
-				if(retval.success) {	
+				if(retval.success) {
+					$("#error_msg").hide();
 					window.location.href = window.location.protocol + "//" + window.location.host + '/a/' + retval.value + '?m=true';
 					return false;
 				} else {
