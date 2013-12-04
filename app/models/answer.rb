@@ -1357,11 +1357,13 @@ class Answer
         if q.question_type == QuestionTypeEnum::NUMBER_BLANK_QUESTION
           attr_value = [answer, answer] if answer.present?
         elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          cur_attr_value = self.user.read_sample_attribute(q.sample_attribute.name)
           attr_value = q.sample_attribute_relation[answer["selection"][0].to_s]
           if attr_value.present?
             attr_value[0] = attr_value[0].blank? ? -1.0/0.0 : attr_value[0].to_f
             attr_value[1] = attr_value[1].blank? ? 1.0/0.0 : attr_value[1].to_f
           end
+          attr_value = nil if Tool.range_compare(attr_value, cur_attr_value) == 1
         end
       when DataType::DATE
         attr_value = answer / 1000 if q.question_type == QuestionTypeEnum::TIME_BLANK_QUESTION
@@ -1369,11 +1371,13 @@ class Answer
         if q.question_type == QuestionTypeEnum::TIME_BLANK_QUESTION
           attr_value = [answer / 1000, answer / 1000] if answer.present?
         elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          cur_attr_value = self.user.read_sample_attribute(q.sample_attribute.name)
           attr_value = q.sample_attribute_relation[answer["selection"][0].to_s]
           if attr_value.present?
             attr_value[0] = attr_value[0].blank? ? -1.0/0.0 : attr_value[0] / 1000
             attr_value[1] = attr_value[1].blank? ? 1.0/0.0 : attr_value[1] / 1000
           end
+          attr_value = nil if Tool.range_compare(attr_value, cur_attr_value) == 1
         end
       when DataType::ADDRESS
         if q.question_type == QuestionTypeEnum::ADDRESS_BLANK_QUESTION
