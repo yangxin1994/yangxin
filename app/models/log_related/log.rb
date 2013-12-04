@@ -14,7 +14,7 @@ class Log
   scope :redeem_logs, -> { where(:type => 4) }
   scope :point_logs, -> { where(:type => 8) }
   scope :answer_logs, -> {where(:type => 1)}
-  scope :special_logs,->(t) {  where(:type => t)}
+  scope :special_logs,->(t) {  where(:type => t,:reason.ne => PointLog::IMPORT,:reason.ne => PointLog::ADMIN_OPERATE)}
   scope :spread_logs, -> { where(:type => 32)}
   scope :disciplinal_logs, -> { where(:type => 64)}
   scope :have_user,-> {where(:user_id.ne => nil)}
@@ -29,11 +29,10 @@ class Log
   index({ answer_id:1,_type:1, created_at:-1},{background: true})
 
   def self.fresh_logs
-    return self.where(:type.in => [2,8,16], :reason.ne => PointLog::IMPORT,:reason.ne => PointLog::ADMIN_OPERATE)
+    return self.where(:type.in => [2,8,16], :reason.ne => PointLog::IMPORT,:reason.ne => PointLog::ADMIN_OPERATE,:reason.ne => PointLog::REVOKE)
   end
 
   def self.get_new_logs(limit=5,type=nil)
-    logs = Log.special_logs(type).have_user.desc(:created_at).limit(limit) if type.present?
     logs = Log.fresh_logs.have_user.desc(:created_at).limit(limit) unless type.present?
     if logs
       logs = logs.map do |log|
