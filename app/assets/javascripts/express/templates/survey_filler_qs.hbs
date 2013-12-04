@@ -1,0 +1,19 @@
+<div>
+	<div id='sf_main' class='sf_main_padding'>
+		<div class='header'>{{#if header}}{{header}}{{/if}}</div>
+		{{#if title}}
+		<div class='s-title'>{{title}}</div>
+		{{/if}}
+		<div id='questions_con'></div>
+		<div class='footer'>{{#if footer}}{{footer}}{{/if}}</div>
+	</div>
+	{{#if remind}}
+	<div id='remind'>注意：系统检测出您第一次答题时没有认真填写，您只剩一次答题机会，请认真答题。</div>
+	{{/if}}
+	<div id='page_buttons'>
+		{{#if allow_pageup}}
+		<button id='prev_btn' class='light'>上一页</button>
+		{{/if}}
+		<button id='next_btn'>保存并加载下一页</button>
+	</div>
+</div>

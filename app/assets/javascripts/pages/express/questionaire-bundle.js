@@ -1,6 +1,6 @@
 //=require jquery.pageguide
 //=require jquery.cookie
-//=require quill/views/survey_editor
+//=require express/views/survey_editor
 //=require twitter/bootstrap/tooltip
 
 jQuery(function($) {
@@ -26,10 +26,6 @@ jQuery(function($) {
 			steps: [ {
 				target: '.sub-banner-menus > li:eq(0)',
 				content: '【编辑问卷】在这里您可以创建修改和删除问题、设置问题间逻辑约束、设置问卷属性、对问卷进行权限控制和质量控制等。',
-				direction: 'bottom'
-			}, {
-				target: '.sub-banner-menus > li:eq(1)',
-				content: '【美化问卷】为问卷选择您喜欢的风格，如蓝黑、科技、浓彩或者清新风格。',
 				direction: 'bottom'
 			}, {
 				target: '.sub-banner-menus > li:eq(2)',
