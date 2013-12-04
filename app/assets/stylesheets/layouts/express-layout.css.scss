@@ -6,8 +6,10 @@
 @import "common";
 @import "od-icon/*.png";
 @import "od-button/*.png";
+@import "editors/*.png";
 @import "browser/*.png";
-@import "left-menu/*.png";
+// @import "left-menu/*.png";
+@import "ex-left-menu/*.png";
 @import "compass/css3/box-shadow";
 @import "compass/css3/border-radius";
 @import "compass/utilities/general/clearfix";
@@ -80,13 +82,30 @@ body {
 		font-weight: bold;
 		color:#33333D;
 		a{
-			width:310px;
+			.edit{@include editors-sprite(ex_edit);}
+			.share{@include editors-sprite(ex_share);}
+			.recycle{@include editors-sprite(ex_recycle);}
 			@include one-line(40px);
 			display: block;
-		}
+			background: image-url('editors/step.png') no-repeat right;
+			&:hover{
+				color:$exblue;
+				.edit{@include editors-sprite(ex_edit_hover);}
+				.share{@include editors-sprite(ex_share_hover);}
+				.recycle{@include editors-sprite(ex_recycle_hover);}
+				// background: image-url('editors/step_hover.png') no-repeat right;
+				// .edit{background: image-url('editors/ex_edit_hover.png') no-repeat;}
+				// .share{background: image-url('editors/ex_share_hover.png') no-repeat;}
+				// .recycle{background: image-url('editors/ex_recycle_hover.png') no-repeat;}
+				}
+			}
 		&.active{
 			a{
+				.edit{@include editors-sprite(ex_edit_hover);}
+				.share{@include editors-sprite(ex_share_hover);}
+				.recycle{@include editors-sprite(ex_recycle_hover);}
 				color:#5691F0;
+				background: image-url('editors/step_hover.png') no-repeat right;
 			}
 		}
 	}
@@ -230,26 +249,15 @@ body {
 		.left-menu-icon{
 			margin:0 auto;
 			em {
-				@include size(32px, 32px);
+				@include size(26px, 26px);
 				@include inline-block;
-
-				&.paragraph { @include left-menu-sprite(paragraph); }
-				&.choice { @include left-menu-sprite(choice); }
-				&.textblank { @include left-menu-sprite(textblank); }
-				&.matrixchoice { @include left-menu-sprite(matrixchoice); }
-				&.rank { @include left-menu-sprite(rank); }
-				&.scale { @include left-menu-sprite(scale); }
-				&.sort { @include left-menu-sprite(sort); }
-				&.template { @include left-menu-sprite(template); }
-				&.filter { @include left-menu-sprite(filter); }
-				&.share { @include left-menu-sprite(share); }
-				&.bar { @include left-menu-sprite(bar); }
-				&.volunteer { @include left-menu-sprite(volunteer); }
-				&.report { @include left-menu-sprite(report); }
-				&.setting { @include left-menu-sprite(setting); }
-				&.moresetting { @include left-menu-sprite(moresetting); }
-				&.accesscontrol { @include left-menu-sprite(accesscontrol); }
-				&.logic { @include left-menu-sprite(logic); }
+				margin-bottom:8px;
+				&.choice { @include ex-left-menu-sprite(choice); }
+				&.text { @include ex-left-menu-sprite(text); }
+				&.star { @include ex-left-menu-sprite(star); }
+				&.matrix_choice{ @include ex-left-menu-sprite(matrix_choice); }
+				&.filling{ @include ex-left-menu-sprite(filling); }
+				&.jmix{@include ex-left-menu-sprite(jmix); }
 			}
 		}
 		.left-menu-name{
@@ -260,15 +268,15 @@ body {
 		&.last {background: none;}
 		&.active {
 			em {
-				&.filter { @include left-menu-sprite(filter_active); }
-				&.share { @include left-menu-sprite(share_active); }
-				&.bar { @include left-menu-sprite(bar_active); }
-				&.volunteer { @include left-menu-sprite(volunteer_active); }
-				&.report { @include left-menu-sprite(report_active); }
-				&.setting { @include left-menu-sprite(setting_active); }
-				&.moresetting { @include left-menu-sprite(moresetting_active); }
-				&.accesscontrol { @include left-menu-sprite(accesscontrol_active); }
-				&.logic { @include left-menu-sprite(logic_active); }
+				// &.filter { @include left-menu-sprite(filter_active); }
+				// &.share { @include left-menu-sprite(share_active); }
+				// &.bar { @include left-menu-sprite(bar_active); }
+				// &.volunteer { @include left-menu-sprite(volunteer_active); }
+				// &.report { @include left-menu-sprite(report_active); }
+				// &.setting { @include left-menu-sprite(setting_active); }
+				// &.moresetting { @include left-menu-sprite(moresetting_active); }
+				// &.accesscontrol { @include left-menu-sprite(accesscontrol_active); }
+				// &.logic { @include left-menu-sprite(logic_active); }
 			}
 
 			.left-menu-name {
@@ -300,10 +308,18 @@ body {
 	}
 	.logic-control{
 		@include border-top-radius(3px);
+		background:#FFF image-url('editors/logic.png') no-repeat center center;
+		&:hover{
+			background:#FFF image-url('editors/logic_hover.png') no-repeat center center;
+		}
 	}
 	.preview-survey{
 		border-top:1px $borderColor solid;
 		@include border-bottom-radius(3px);
+		background:#FFF image-url('editors/preview.png') no-repeat center center;
+		&:hover{
+			background:#FFF image-url('editors/preview_hover.png') no-repeat center center;
+		}
 	}
 }
 

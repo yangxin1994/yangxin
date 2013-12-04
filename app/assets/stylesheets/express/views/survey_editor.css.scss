@@ -141,12 +141,11 @@
 
 	// Quill_Express
 	.ex-title{
-		width:720px;
+		width:723px;
 		padding:30px;
 		border:1px $borderColor solid;
 		background: #fff;
 		@include border-radius(3px);
-		@include box-shadow(rgba(#333, 0.2) 0 0 3px);
 		input,textarea{
 			width:704px;
 			display: block;
@@ -189,7 +188,7 @@
 		}
 	}
 	.survey-editor-finished{
-		width:720px;
+		width:723px;
 		padding:30px;
 		border:1px $borderColor solid;
 		background: #fff;

@@ -24,6 +24,16 @@ $exblue:#5691F0;
 .icon16{
 	background: #ddd;
 }
+.icon20{
+	width:20px;
+	height:20px;
+	@include inline-block;
+}
+.icon32{
+	width:32px;
+	height:32px;
+	@include inline-block;
+}
 @mixin one-line($height) {
 	height: $height;
 	line-height: $height;
