@@ -54,6 +54,12 @@
       </a>
     </li>   
   </ul>
+  <div class="well well-small well-tips">
+    <p>Tips:</p>
+    <ul>
+      <li>"一键处理"可以将当前条件下列出的所有订单推到下一个状态（“等待处理”的订单进入“正在处理”状态，“正在处理”的订单进入“处理成功”状态）.</li>
+    </ul>
+  </div>
 <% end %>
 
 <div>
@@ -65,7 +71,8 @@
     </div>    
     </form>
     <div class="btn-group">
-        <<a class="btn csv" href="/admin/orders/to_excel?<%= "page=1&" unless params[:page].present? %><%= request.query_string %>" class="csv" data-scope="current_page">导出当前页</a>
+      <a class="btn batch" href="javascript:void(0);">一键处理</a>
+        <a class="btn csv" href="/admin/orders/to_excel?<%= "page=1&" unless params[:page].present? %><%= request.query_string %>" class="csv" data-scope="current_page">导出</a>
       <button class="btn dropdown-toggle" data-toggle="dropdown">
         <span class="caret"></span>
       </button>      

@@ -31,7 +31,6 @@ gem 'mobile-fu', "~> 1.1.1"
 gem 'gon', "~> 4.1.1"
 
 gem 'yab62', require: 'yab62'
-gem 'china_city'
 # uploader
 
 gem 'mini_magick', '~> 3.5.0'
