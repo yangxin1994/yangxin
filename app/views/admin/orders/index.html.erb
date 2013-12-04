@@ -54,6 +54,12 @@
       </a>
     </li>   
   </ul>
+  <div class="well well-small well-tips">
+    <p>Tips:</p>
+    <ul>
+      <li>"一键处理"可以将当前条件下列出的所有订单推到下一个状态（“等待处理”的订单进入“正在处理”状态，“正在处理”的订单进入“处理成功”状态）.</li>
+    </ul>
+  </div>
 <% end %>
 
 <div>
@@ -65,7 +71,8 @@
     </div>    
     </form>
     <div class="btn-group">
-        <<a class="btn csv" href="/admin/orders/to_excel?<%= "page=1&" unless params[:page].present? %><%= request.query_string %>" class="csv" data-scope="current_page">导出当前页</a>
+      <a class="btn batch" href="javascript:void(0);">一键处理</a>
+        <a class="btn csv" href="/admin/orders/to_excel?<%= "page=1&" unless params[:page].present? %><%= request.query_string %>" class="csv" data-scope="current_page">导出</a>
       <button class="btn dropdown-toggle" data-toggle="dropdown">
         <span class="caret"></span>
       </button>      
@@ -133,7 +140,7 @@
       <td><%= order['amount'] %></td>
       <td><a href="/admin/samples/<%= order['user_id'] %>"><%= order['user_email_mobile'] %></a></td>
       <td title="订单号: <%= order['code'] %>" data-content="<%= order['address_str'] %>" class="o-detail"><%= "#{order['mobile']} #{order['qq']} #{order['email']} #{ "支付宝: " + order['alipay_account'] if order['alipay_account'].present? }" %></td>
-      <td><%= order['created_at'].strftime("%F<br />%T").html_safe %></td>
+      <td><%= order.created_at.strftime("%F<br />%T").html_safe %></td>
       <td class="o-time" title="订单处理详细" data-content="<%= order['time_str'] %>"><%= Time.at(order['canceled_at'] || order['finished_at'] || order['handled_at'] || order['created_at'].to_i).strftime("%F<br />%T").html_safe %></td>
       <td>
         <div class="btn-group">

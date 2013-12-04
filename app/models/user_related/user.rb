@@ -189,6 +189,32 @@ class User
     return true
   end
 
+  def self.create_activated_rss_user(email_mobile)
+    logger.info "AAAAAAAAAAAAAAA"
+    logger.info email_mobile.inspect
+    user = find_by_email_or_mobile(email_mobile)
+
+    account = {}
+    if email_mobile.match(/#{EmailRexg}/i)
+      account[:email] = email_mobile.downcase
+      account[:email_subscribe] = true
+    elsif email_mobile.match(/#{MobileRexg}/i)
+      account[:mobile] = email_mobile
+      account[:mobile_subscribe] = true
+    end
+    logger.info "BBBBBBBBBBBBBBBB"
+    logger.info account.inspect
+
+    if user.present?
+      user.update_attributes(account)
+    else
+      account[:registered_at] = Time.now.to_i
+      account[:status] = VISITOR
+      user = User.create(account)        
+    end   
+    return {:success => true}
+  end
+
   def self.cancel_subscribe(active_info)
     email_mobile  = active_info['email_mobile']
     mobile = active_info['mobile']
