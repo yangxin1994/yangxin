@@ -269,7 +269,7 @@ $(function(){
             prev_btn.text('正在加载上一页问题...');
             this.load_questions((questions.length > 0) ? questions[0]['_id'] : -1, false);
           }, this));
-          if(index == 0) prev_btn.hide();                                                                        
+          if(index == 0 || index == null) prev_btn.hide();                                                                        
         }
       }else if(value.answer_status == 4 || value.answer_status == 8 || value.answer_status == 32){    
         // answer_status: 4（待审核），8（等待代理审核），32（完成）
@@ -329,7 +329,6 @@ $(function(){
               var acc = $.trim(account_ipt.val());
               if(award_type == 'chongzhi'){
                 confirm_acc =  $.trim($('input[name="confirm_chongzhi"]').val());
-                console.log(confirm_acc)
                 if(!$.regex.isMobile(acc)){
                   account_ipt.addClass('error');
                   this._error('请输入正确手机号');
