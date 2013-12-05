@@ -1312,8 +1312,8 @@ class Answer
 
   def answer_percentage
     questions = self.load_question(nil, true)
-    question_number = self.survey.all_questions_id(false).length + self.random_quality_control_answer_content.length
-    self.index_of(questions) / question_number.to_f
+    question_number = self.survey.all_questions_id(true).length + self.random_quality_control_answer_content.length
+    self.index_of(questions, true) / question_number.to_f
   end
 
   def append_reward_info
