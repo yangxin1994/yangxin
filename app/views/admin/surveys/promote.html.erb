@@ -155,8 +155,8 @@
         <div class="controls">
           <div class="input-append">
             <div class="btn-group" data-toggle="buttons-checkbox">
-              <button type="button" class="btn btn-info btn-ckb <%= "active" if @promote['broswer_extension_promotable'] %> " data-toggle="broswer_extension" >推送</button>
-              <input value="<%= @promote['broswer_extension_promotable'] ? true : false %>" id="broswer_extension_promotable" type="hidden" name="broswer_extension[promotable]">
+              <button type="button" class="btn btn-info btn-ckb <%= "active" if @promote['browser_extension_promotable'] %> " data-toggle="browser_extension" >推送</button>
+              <input value="<%= @promote['browser_extension_promotable'] ? true : false %>" id="browser_extension_promotable" type="hidden" name="browser_extension[promotable]">
               <button class="btn dropdown-toggle" data-toggle="dropdown">
                 奖励方案
                 <span class="caret"></span>
@@ -167,31 +167,31 @@
                   <li><a href="#reward-<%= reward_scheme['_id'] %>"><%= reward_scheme['name'] %></a></li>
                 <% end %>
               </ul>
-              <input value="<%= @promote['broswer_extension_promote_info']['reward_scheme_id'] %>" type='hidden' id="broswer_extension_reward_scheme" name="broswer_extension[broswer_extension_promote_setting][reward_scheme_id]">
+              <input value="<%= @promote['browser_extension_promote_info']['reward_scheme_id'] %>" type='hidden' id="browser_extension_reward_scheme" name="browser_extension[browser_extension_promote_setting][reward_scheme_id]">
             </div>
           </div>
             <label class="checkbox">
-              <input type="checkbox" id="broswer_extension_login_only" value="" name="broswer_extension[broswer_extension_promote_setting][login_sample_promote_only]" <%= 'checked' if @promote['broswer_extension_promote_info']['login_sample_promote_only']%>> 推荐给未知样本
+              <input type="checkbox" id="browser_extension_login_only" value="" name="browser_extension[browser_extension_promote_setting][login_sample_promote_only]" <%= 'checked' if @promote['browser_extension_promote_info']['login_sample_promote_only']%>> 推荐给未知样本
             </label>
         </div>
       </div>
-      <% (@promote['broswer_extension_promote_info']['filters'] || [{'key_words' => '', 'url' => ''}]).each_with_index do |filter, index| %>
-        <div class="control-group broswer_extension-info">
+      <% (@promote['browser_extension_promote_info']['filters'] || [{'key_words' => '', 'url' => ''}]).each_with_index do |filter, index| %>
+        <div class="control-group browser_extension-info">
           <label class="control-label" >浏览器插件详细设置:</label>
           <div class="controls">
-            <input type="text" placeholder="在这里输入关键字"  value="<%= filter['key_words'] %>" id="weibo_text" name="broswer_extension[broswer_extension_promote_setting][filters][<%= index + 1 %>][key_words]" />
+            <input type="text" placeholder="在这里输入关键字"  value="<%= filter['key_words'] %>" id="weibo_text" name="browser_extension[browser_extension_promote_setting][filters][<%= index + 1 %>][key_words]" />
           </div>
         </div>
-        <div class="control-group broswer_extension-info">
+        <div class="control-group browser_extension-info">
           <div class="controls">
-            <input type="text" placeholder="在这里输入网址" value="<%= filter['url'] %>" id="weibo_text" name="broswer_extension[broswer_extension_promote_setting][filters][<%= index + 1%>][url]" />
+            <input type="text" placeholder="在这里输入网址" value="<%= filter['url'] %>" id="weibo_text" name="browser_extension[browser_extension_promote_setting][filters][<%= index + 1%>][url]" />
           </div>
         </div>  
       <% end -%>
         <div>
-          <div class="control-group broswer_extension-info">
+          <div class="control-group browser_extension-info">
             <div class="controls">
-              <a href="#add_browser_extension_setting" id="add_browser_extension_setting" data-toggle="<%= @promote['broswer_extension_promote_info']['filters'].try('size') || 0 %>" class="btn btn-link">添加一组</a>
+              <a href="#add_browser_extension_setting" id="add_browser_extension_setting" data-toggle="<%= @promote['browser_extension_promote_info']['filters'].try('size') || 0 %>" class="btn btn-link">添加一组</a>
             </div>
           </div>
         </div>

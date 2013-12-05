@@ -18,6 +18,7 @@ class Filler::AnswersController < Filler::FillerController
       channel: params[:channel],
       referrer: params[:referrer],
       remote_ip: request.remote_ip,
+      ip_address: request.remote_ip,
       username: params[:username],
       password: params[:password],
       http_user_agent: request.env['HTTP_USER_AGENT'] }
@@ -66,6 +67,7 @@ class Filler::AnswersController < Filler::FillerController
           "answers" => answers,
           "question_number" => @answer.survey.all_questions_id(false).length + @answer.random_quality_control_answer_content.length,
           "answer_index" => @answer.index_of(questions),
+          "answer_index_all" => @answer.index_of(questions, true),
           "estimate_answer_time" => questions.estimate_answer_time,
           "repeat_time" => @answer.repeat_time,
           "order_id" => @answer.order.try(:_id),
@@ -157,6 +159,7 @@ class Filler::AnswersController < Filler::FillerController
           "answers" => answers,
           "question_number" => @answer.survey.all_questions_id(false).length + @answer.random_quality_control_answer_content.length,
           "answer_index" => @answer.index_of(questions),
+          "answer_index_all" => @answer.index_of(questions, true),
           "estimate_answer_time" => questions.estimate_answer_time,
           "repeat_time" => @answer.repeat_time,
           "order_id" => @answer.order.try(:_id),
