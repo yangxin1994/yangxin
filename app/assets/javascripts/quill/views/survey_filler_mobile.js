@@ -147,7 +147,7 @@ $(function(){
       if(value.answer_status == 1){
         // answer_status: 1（正在回答）
         var questions = value.questions, answers = value.answers, total_count = value.question_number, 
-          index = value.answer_index, time = value.estimate_answer_time, redo_count = value.repeat_time;        
+          index = value.answer_index, time = value.estimate_answer_time, redo_count = value.repeat_time;
 
         if(questions.length == 0) {
           //该页显示问题数量为0，此时表示题已经加载完最后一道，应该做提交操作
@@ -205,12 +205,14 @@ $(function(){
           if(!this.model.get('style_setting').has_question_number){
             $('#questions_con .q-idx').hide(); 
           }
+
           // Setup next and previous buttons
           var next_btn = $('#next_btn'), prev_btn = $('#prev_btn');
+
           // Disable next button for some time (don't disable it for allow_pageup==true survey, or previewing)
           var has_not_empty_answer = (_.find(answers || [], function(a) { return a != null; }) != null);
 
-          if(!has_not_empty_answer && !this.options.is_preview && prev_btn.length > 0) {
+          if(!has_not_empty_answer) {
             $.util.disable(next_btn);
             var old_text = next_btn.text();
             function _update_btn() {
@@ -243,8 +245,10 @@ $(function(){
             if(error_filler) {
               // 2. if there is any illegal answer, alert
               $(window).scrollTo(error_filler.$el, 500, { offset: {top: -60} });
-              if(time == 0){
-                $.util.enable(prev_btn, next_btn);
+              if(time ==0){
+                $.util.enable(prev_btn, next_btn);  
+              }else{
+                $.util.enable(prev_btn);
               }
             } else {
               // 3. submit answers
@@ -258,7 +262,9 @@ $(function(){
                   } else {
                     location.reload(true);
                   }
-                }, this));                
+                }, this));
+              }else{
+               $.util.enable(prev_btn); 
               }
 
             }
@@ -269,7 +275,8 @@ $(function(){
             prev_btn.text('正在加载上一页问题...');
             this.load_questions((questions.length > 0) ? questions[0]['_id'] : -1, false);
           }, this));
-          if(index == 0 || index == null) prev_btn.hide();                                                                        
+          
+          if(index == 0) prev_btn.hide();                                                                        
         }
       }else if(value.answer_status == 4 || value.answer_status == 8 || value.answer_status == 32){    
         // answer_status: 4（待审核），8（等待代理审核），32（完成）
