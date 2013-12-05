@@ -8,7 +8,6 @@
 @import "od-button/*.png";
 @import "editors/*.png";
 @import "browser/*.png";
-// @import "left-menu/*.png";
 @import "ex-left-menu/*.png";
 @import "compass/css3/box-shadow";
 @import "compass/css3/border-radius";
@@ -55,13 +54,6 @@ body {
 				font-size: 14px;
 				margin-left: 20px;
 				color: #666;
-				// &.list-survey{ @include od-button-sprite(menu_list); }
-				// &.new-survey{ @include od-button-sprite(menu_new); }
-				// &:hover, &.active { 
-				// 	color: #fff; 
-				// 	&.list-survey{ @include od-button-sprite(menu_list_active); }
-				// 	&.new-survey{ @include od-button-sprite(menu_new_active); }
-				// }
 			}
 		}
 	}
@@ -93,10 +85,6 @@ body {
 				.edit{@include editors-sprite(ex_edit_hover);}
 				.share{@include editors-sprite(ex_share_hover);}
 				.recycle{@include editors-sprite(ex_recycle_hover);}
-				// background: image-url('editors/step_hover.png') no-repeat right;
-				// .edit{background: image-url('editors/ex_edit_hover.png') no-repeat;}
-				// .share{background: image-url('editors/ex_share_hover.png') no-repeat;}
-				// .recycle{background: image-url('editors/ex_recycle_hover.png') no-repeat;}
 				}
 			}
 		&.active{
@@ -223,6 +211,34 @@ body {
 	cursor:pointer;
 	background: $url-widgets-bg	no-repeat -8px -255px;
 }
+.current-option-name{
+		.tip-active{
+			width:14px;
+			height:14px;
+			margin-left:5px;
+			@include inline-block;
+			@include ex-left-menu-sprite(tip_active); 
+		}
+		&:hover{
+			.tip-active{
+				@include ex-left-menu-sprite(tip_active_hover); 
+			}
+		}
+	}
+.common-use{
+		.tip{
+			width:14px;
+			height:14px;
+			margin-left:5px;
+			@include inline-block;
+			@include ex-left-menu-sprite(tip); 
+		}
+		&:hover{
+			.tip{
+				@include ex-left-menu-sprite(tip_hover); 
+			}
+		}
+}	
 .left-menus{
 	width:110px;
 	background:#FFF;
@@ -285,7 +301,7 @@ body {
 			}
 		}
 	}
-
+	
 }
 .right-sidebar{
 	float: right;
