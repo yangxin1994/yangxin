@@ -164,7 +164,7 @@ class ChoiceQuestionIo < QuestionIo
     else
       choices = {}
       issue["items"].each_index do |i|
-        choices[i+1] = issue["items"][i]["content"]["text"]
+        choices[i+1] = issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '')
       end
       @spss_header << {"spss_name" => header_prefix,
                   "spss_type" => SPSS_NUMERIC,
@@ -293,7 +293,7 @@ class MatrixChoiceQuestionIo < QuestionIo
     else
       choices = {}
       issue["items"].each_index do |i|
-        choices[i+1] = issue["items"][i]["content"]["text"]
+        choices[i+1] = issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '')
       end
       issue["rows"].each_with_index do |r, i|
         @spss_header << {"spss_name" => header_prefix + "_r#{i + 1}",
