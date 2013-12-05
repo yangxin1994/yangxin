@@ -12,20 +12,18 @@
 
 	input[type='text'] {
 		$input-width: 475px;
-		$input-height: 25px;
+		$input-height: 32px;
 		
 		@include ipt;
 		@include inline-block;
 		@include size($input-width - 68 - 5 - 2, $input-height - 3 - 2);
 		padding: 3px 68px 0 5px;
 		border: 1px #dbdbdb solid;
-		
 		color: #666;
-		font-size: 12px;
+		font-size: 14px;
+		background: #FFF;
 		
-		background: image-url('editors/input_edit_bg.png') 0 -88px repeat-x;
-		
-		&:focus { background: image-url('editors/input_edit_bg.png') 0 -53px repeat-x; }
+		&:focus { border-color:$exblue; }
 		&.highlight { background: image-url('editors/input_edit_bg.png') 0 -123px repeat-x; }
 		&.other { color: $blue; }
 	}
