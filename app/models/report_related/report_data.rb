@@ -47,7 +47,7 @@ class ReportData
     when HEADING_2
       component.merge!("text" => opt["text"])
     when DESCRIPTION
-      component.merge!("text" => opt["text"])
+      component.merge!("text" => opt["text"].remove_style)
     when CHART_DATA
       component.merge!("chart_data" => opt["chart_data"])
     end
