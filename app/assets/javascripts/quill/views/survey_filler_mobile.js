@@ -131,7 +131,8 @@ $(function(){
       if(value.answer_status == 1){
         // answer_status: 1（正在回答）
         var questions = value.questions, answers = value.answers, total_count = value.question_number, 
-          index = value.answer_index, time = value.estimate_answer_time, redo_count = value.repeat_time;
+          index = value.answer_index, time = value.estimate_answer_time, redo_count = value.repeat_time,
+          answer_index_all = value.answer_index_all;
 
         if(questions.length == 0) {
           //该页显示问题数量为0，此时表示题已经加载完最后一道，应该做提交操作
@@ -260,7 +261,7 @@ $(function(){
             this.load_questions((questions.length > 0) ? questions[0]['_id'] : -1, false);
           }, this));
           
-          if(index == 0) prev_btn.hide();                                                                        
+          if(answer_index_all == 0) prev_btn.hide();                                                                        
         }
       }else if(value.answer_status == 4 || value.answer_status == 8 || value.answer_status == 32){    
         // answer_status: 4（待审核），8（等待代理审核），32（完成）
