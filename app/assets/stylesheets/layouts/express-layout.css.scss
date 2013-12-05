@@ -74,7 +74,7 @@ body {
 		font-weight: bold;
 		color:#33333D;
 		a{
-			.edit{@include editors-sprite(ex_edit);}
+			.edit{@include editors-sprite(edit);}
 			.share{@include editors-sprite(ex_share);}
 			.recycle{@include editors-sprite(ex_recycle);}
 			@include one-line(40px);
@@ -82,14 +82,14 @@ body {
 			background: image-url('editors/step.png') no-repeat right;
 			&:hover{
 				color:$exblue;
-				.edit{@include editors-sprite(ex_edit_hover);}
+				.edit{@include editors-sprite(edit_hover);}
 				.share{@include editors-sprite(ex_share_hover);}
 				.recycle{@include editors-sprite(ex_recycle_hover);}
 				}
 			}
 		&.active{
 			a{
-				.edit{@include editors-sprite(ex_edit_hover);}
+				.edit{@include editors-sprite(edit_hover);}
 				.share{@include editors-sprite(ex_share_hover);}
 				.recycle{@include editors-sprite(ex_recycle_hover);}
 				color:#5691F0;
@@ -317,26 +317,21 @@ body {
 	position: absolute;
 	right:-52px;
 	top:0;
+	background: #fff;
 	a{
 		@include size(40px,40px);
 		display: block;
-		background: #fff;
-	}
-	.logic-control{
-		@include border-top-radius(3px);
-		background:#FFF image-url('editors/logic.png') no-repeat center center;
-		&:hover{
-			background:#FFF image-url('editors/logic_hover.png') no-repeat center center;
+		&.logic-control{
+			@include border-top-radius(3px);
+			@include editors-sprite(logic);
+		}
+		&.preview-survey{
+			border-top:1px $borderColor solid;
+			@include border-bottom-radius(3px);
+			@include editors-sprite(preview);
 		}
 	}
-	.preview-survey{
-		border-top:1px $borderColor solid;
-		@include border-bottom-radius(3px);
-		background:#FFF image-url('editors/preview.png') no-repeat center center;
-		&:hover{
-			background:#FFF image-url('editors/preview_hover.png') no-repeat center center;
-		}
-	}
+	
 }
 
 /*********问题编辑模版公共样式*********/
