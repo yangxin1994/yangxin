@@ -1,0 +1,27 @@
+/*
+ *=require ./../../icons
+ */
+@import "common";
+@import "compass/css3/inline-block";
+@import "editors/*.png";
+// load bootstrap tooltip css
+@import "twitter/bootstrap/variables";
+@import "twitter/bootstrap/mixins";
+@import "twitter/bootstrap/tooltip";
+
+.edit-panel {
+	@include inline-block;
+	line-height: 20px;
+	li {
+		@include size(32px,33px);
+		a{
+			@include size(32px,33px);
+			display: block;
+			&.edit{@include editors-sprite(edit);}
+			&.del{@include editors-sprite(del);}
+			&.copy{@include editors-sprite(copy);}
+			&.page-break{@include editors-sprite(page-break);}
+		}
+	}
+}
+

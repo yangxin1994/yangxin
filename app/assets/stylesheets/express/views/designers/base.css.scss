@@ -19,13 +19,9 @@
 	.q-render-btns-con {
 		font-size: 12px;
 		position: absolute;
-		top: 15px;
-		right: 15px;
-		padding: 10px;
+		top:0;
+		right:0;
 		display:none;
-		background: #fafafa;
-		@include border-radius(5px);
-		.q-render-btns {}
 		.q-render-btns-confirm {
 			display: none;
 			.cancel-btn {

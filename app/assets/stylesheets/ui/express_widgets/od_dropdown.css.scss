@@ -1,0 +1,42 @@
+﻿@import "common";
+@import "compass/css3/border-radius";
+
+.od-dropdown{
+	position: absolute;
+	border:1px #dbdbdb solid;
+	color:#666;
+	background-color: #FFF;
+	@include border-radius(4px);
+	z-index: 2000;
+	
+	li {
+		display: block;
+		@include one-line(24px);
+		padding-left: 0.5em;
+		padding-right: 0.5em;
+		text-align: left;
+		cursor: pointer;
+		color:#666;
+		overflow: hidden;
+		
+		&:first-child, &.first-child {
+			@include border-top-radius(3px);
+		};
+		
+		&:last-child, &.last-child {
+			@include border-bottom-radius(3px);
+		}
+		
+		&:nth-child(even), &.odd {/* :nth-child not supported in <= IE8 */
+			background:#f0f0f0;
+		}
+		
+		&:hover {
+			background: image-url("widgets/od-selector-yellow-1px.png") repeat-x;
+			color: #FFF;
+		}
+	}
+}
+.od-dropdown-target {
+	position: relative;
+}
