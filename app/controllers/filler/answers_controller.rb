@@ -66,6 +66,7 @@ class Filler::AnswersController < Filler::FillerController
           "answers" => answers,
           "question_number" => @answer.survey.all_questions_id(false).length + @answer.random_quality_control_answer_content.length,
           "answer_index" => @answer.index_of(questions),
+          "answer_index_all" => @answer.index_of(questions, true),
           "estimate_answer_time" => questions.estimate_answer_time,
           "repeat_time" => @answer.repeat_time,
           "order_id" => @answer.order.try(:_id),
