@@ -117,6 +117,7 @@ OopsData::Application.routes.draw do
         get  :cancel_subscribe
         post :get_reward_type_count
         post :generate_rss_activate_code
+        get :offline_user_rss
       end
 
       member do
@@ -399,6 +400,7 @@ OopsData::Application.routes.draw do
     resources :orders, :only => [:index, :show, :update] do
       collection do
         get :to_excel
+        put :batch
       end
 
       member do

@@ -178,8 +178,8 @@ class Answer
     if !is_preview && introducer_id.present?
       introducer = User.sample.find_by_id(introducer_id)
       if introducer.present?
-        introducer_id = introducer_id
-        point_to_introducer = survey.spread_point
+        self.introducer_id = introducer_id
+        self.point_to_introducer = survey.spread_point
         SurveySpread.create_new(introducer, survey) 
       end
     end
@@ -489,6 +489,7 @@ class Answer
     # survey has a new question, but the answer content does not has the question id as a key
     # thus when updating the answer content, the key should not be checked
     new_answer.each do |k, v|
+      v["selection"] ||= [] if v.class == Hash && v.has_key?("selection")
       self.answer_content[k] = v if self.answer_content.has_key?(k)
       self.random_quality_control_answer_content[k] = v if self.random_quality_control_answer_content.has_key?(k)
     end
@@ -618,17 +619,20 @@ class Answer
   end
 
   # return the index of the first given question in all the survey questions
-  def index_of(questions)
+  def index_of(questions, all = false)
     return nil if questions.blank?
     question_id = nil
-    questions.each do |q|
-      if q.question_type != QuestionTypeEnum::PARAGRAPH
-        question_id = q._id.to_s
-        break
+    if all == false
+      questions.each do |q|
+        if q.question_type != QuestionTypeEnum::PARAGRAPH
+          question_id = q._id.to_s
+          break
+        end
       end
+    else
+      question_id = questions[0].id.to_s
     end
-    return nil if question_id.nil?
-    question_ids = self.survey.all_questions_id(false)
+    question_ids = self.survey.all_questions_id(all)
     question_ids_with_qc_questions = []
     question_ids.each do |qid|
       question_ids_with_qc_questions << qid
@@ -977,6 +981,7 @@ class Answer
         show_answer.merge!({'question_type_label'=> '选择题'})
         answer["question_content"] << show_answer and next if val.blank?
 
+        val["selection"] ||= []
         if question.issue["items"] 
           choices = []
           selected_choices = []
@@ -1307,8 +1312,8 @@ class Answer
 
   def answer_percentage
     questions = self.load_question(nil, true)
-    question_number = self.survey.all_questions_id(false).length + self.random_quality_control_answer_content.length
-    self.index_of(questions) / question_number.to_f
+    question_number = self.survey.all_questions_id(true).length + self.random_quality_control_answer_content.length
+    self.index_of(questions, true) / question_number.to_f
   end
 
   def append_reward_info
@@ -1355,11 +1360,13 @@ class Answer
         if q.question_type == QuestionTypeEnum::NUMBER_BLANK_QUESTION
           attr_value = [answer, answer] if answer.present?
         elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          cur_attr_value = self.user.read_sample_attribute(q.sample_attribute.name)
           attr_value = q.sample_attribute_relation[answer["selection"][0].to_s]
           if attr_value.present?
             attr_value[0] = attr_value[0].blank? ? -1.0/0.0 : attr_value[0].to_f
             attr_value[1] = attr_value[1].blank? ? 1.0/0.0 : attr_value[1].to_f
           end
+          attr_value = nil if Tool.range_compare(attr_value, cur_attr_value) == 1
         end
       when DataType::DATE
         attr_value = answer / 1000 if q.question_type == QuestionTypeEnum::TIME_BLANK_QUESTION
@@ -1367,11 +1374,13 @@ class Answer
         if q.question_type == QuestionTypeEnum::TIME_BLANK_QUESTION
           attr_value = [answer / 1000, answer / 1000] if answer.present?
         elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          cur_attr_value = self.user.read_sample_attribute(q.sample_attribute.name)
           attr_value = q.sample_attribute_relation[answer["selection"][0].to_s]
           if attr_value.present?
             attr_value[0] = attr_value[0].blank? ? -1.0/0.0 : attr_value[0] / 1000
             attr_value[1] = attr_value[1].blank? ? 1.0/0.0 : attr_value[1] / 1000
           end
+          attr_value = nil if Tool.range_compare(attr_value, cur_attr_value) == 1
         end
       when DataType::ADDRESS
         if q.question_type == QuestionTypeEnum::ADDRESS_BLANK_QUESTION

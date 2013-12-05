@@ -25,6 +25,32 @@ class Admin::OrdersController < Admin::AdminController
     end
   end
 
+  def batch
+    params.each{|k, v| params.delete(k) unless v.present?}
+      if params[:keyword]
+        if params[:keyword] =~ /^.+@.+$/
+          params[:email] = params[:keyword]
+        elsif params[:keyword].length == 13
+          params[:code] = params[:keyword]
+        else
+          params[:mobile] = params[:keyword]
+        end
+        params.delete :keyword
+      end
+    @orders = Order.search_orders(params)
+    render_json @orders do |orders|
+      orders.each do |order|
+        case order.status
+        when 1
+          order.manu_handle
+        when 2
+          order.finish(true)
+        end
+      end
+      success_true true
+    end
+  end
+
   def handle
     render_json Order.where(:_id => params[:id]).first do |order|
       order.manu_handle
