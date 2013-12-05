@@ -76,6 +76,23 @@ $ ->
         error: (ret)->
             alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
 
+  $(".batch").click ->
+    $this = $(this)
+    if confirm "确定要批量处理吗?"
+      $.ajax
+        url: "/admin/orders/batch"
+        type: 'PUT'
+        data : querilayer.queries
+        success: (ret)->
+          if ret.success
+            alert_msg.show('success', "操作完成!")
+            location.reload()
+          else
+            console.log ret
+            alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+        error: (ret)->
+            alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+
   $(document).on "click", ".remark", ->
     $this = $(this)
     order_id = $this.attr('href').split('-')[1]
