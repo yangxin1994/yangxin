@@ -1,6 +1,6 @@
 //=require jquery.pageguide
 //=require jquery.cookie
-//=require quill/views/survey_editor
+//=require express/views/survey_editor
 //=require twitter/bootstrap/tooltip
 
 jQuery(function($) {

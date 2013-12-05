@@ -1,0 +1,16 @@
+<div class="page">
+	<div class="describe">
+		<div class="answer_finish">
+			<b><i></i>答题完成啦！</b>
+			<div>恭喜您获得了一次抽奖机会</div>
+		</div>
+	</div>
+	<div class="free_form">
+		<button class="rew_next" id="rew_next" >马上抽奖</button>
+		{{#if spreadable}}
+    	<button id="socal_share">分享得{{spread_point}}积分</button>
+    {{else}}
+    	<button id="socal_share">分享问卷</button>
+    {{/if}}
+	</div>		
+</div>
