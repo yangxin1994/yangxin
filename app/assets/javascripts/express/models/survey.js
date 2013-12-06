@@ -79,6 +79,22 @@ $(function(){
 				}
 			}, this));
 		},
+		updateBasic: function(title, subtitle, description, callback) {
+			callback = $.ensureCallback(callback);
+			if(!title) title = this.get('title');
+			$.putJSON(this._uri('/property'), {
+				properties: { title: title, subtitle: subtitle, description: description }
+			}, $.proxy(function(retval) {
+				if(retval.success) {
+					this.set('title', title);
+					this.set('subtitle', subtitle);
+					this.set('description', description);
+					callback.success();
+				} else {
+					callback.error(retval.value);
+				}
+			}, this));
+		},
 
 		/* ==================================================
 		 * Page related actions

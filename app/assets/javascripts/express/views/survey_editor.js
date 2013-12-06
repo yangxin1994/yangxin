@@ -14,13 +14,13 @@ $(function(){
 	 * =========================== */
 	quill.quillClass('quill.views.SurveyEditor', quill.views.Base, {
 
-		_initialize: function() { },
+		_initialize: function() { 
+			this.model.on('change:title', this.refreshTitle, this);
+			this.model.on('change:subtitle', this.refreshSubtitle, this);
+			this.model.on('change:description', this.refreshDescription, this);
+		},
 
 		_is_ready: false,
-
-		_renderBasic: function() {
-
-		},
 
 		_render: function() {
 			this.replaceElement(this.hbs(this.model.toJSON()));
@@ -28,39 +28,29 @@ $(function(){
 			/* edit survey title
 			 * =============================== */
 			var save_title = $.proxy(function() {
-				this.$('.s-title .s-title-con input').attr('disabled', 'disabled');
-				this.$('.s-title .s-title-con button').attr('disabled', 'disabled');
-				this.model.updateTitle(this.$('.s-title-con input').val(), {
+				$.util.disable(this.$('.ex-title input'), this.$('.ex-title button'));
+				this.$('.ex-title button strong').text('正在保存...');
+				this.model.updateBasic(this.$('.ex-title .survey-title').val(), 
+					this.$('.ex-title .survey-subtitle').val(), this.$('.ex-title .survey-description').val(), {
 					success: $.proxy(function() {
-						this.$('.s-title .s-title-preview').text(this.model.get('title'));
+						this.$('.ex-title').hide();
+						this.$('.ex-title-finished').show();
 					}, this), 
 					after: $.proxy(function() {
-						this.$('.s-title .s-title-con input').attr('disabled', null);
-						this.$('.s-title .s-title-con button').attr('disabled', null);
-						this.$('.s-title').removeClass('active');
+						$.util.enable(this.$('.ex-title input'), this.$('.ex-title button'));
+						this.$('.ex-title button strong').text('确定');
 					}, this)
 				});
 			}, this);
+			this.$('.ex-title button').mousedown(save_title);
 			var start_edit_title = $.proxy(function() {
-				if(this._current_designer)
-					this._current_designer.openRender();
- 				this.$('.s-title').addClass('active');
- 				this.$('.s-title-con input').focus();
- 				$(document).one('click', save_title);
+				// if(this._current_designer)
+				// 	this._current_designer.openRender();
+				this.$('.ex-title').show();
+				this.$('.ex-title-finished').hide();
+ 				this.$('.ex-title input:eq(0)').focus();
  			}, this);
-			var btn = $.od.odIconButtons({
-				buttons:	[{
-		 			name: 'edit',
-		 			info: '编辑问卷标题',
-		 			click: start_edit_title
-		 		}]
-			}).appendTo(this.$('.s-title .t-btns'));
-			this.$('.s-title').click(function(e) {e.stopPropagation()}).dblclick(start_edit_title);
-			this.$('.s-title .s-title-con input').odEnter({ enter: save_title });
-			this.$('.s-title .s-title-con button.ok').mousedown(save_title);
-			this.$('.s-title .s-title-con button.cancel').click($.proxy(function() {
-				this.$('.s-title').removeClass('active');
-			}, this));
+ 			this.$('.ex-title-finished button').click(start_edit_title);
 
 			/* event for buttons in no-question contain
 			 * =============================== */
@@ -122,6 +112,21 @@ $(function(){
 				}, this)
 			});
 
+		},
+
+		refreshTitle: function() {
+			this.$('.ex-title .survey-title').val(this.model.get('title'));
+			this.$('.ex-title-finished h1').text(this.model.get('title'));
+		},
+		refreshSubtitle: function() {
+			this.$('.ex-title .survey-subtitle').val(this.model.get('subtitle'));
+			this.$('.ex-title-finished h2').text(this.model.get('subtitle'));
+		},
+		refreshDescription: function() {
+			var desc_html = $.richtext.textToHtml({text: this.model.get('description')});
+			console.log(desc_html);
+			this.$('.ex-title .survey-description').val(this.model.get('description'));
+			this.$('.ex-title-finished .survey-description-finished').html(desc_html);
 		},
 
 		/* ==================================================

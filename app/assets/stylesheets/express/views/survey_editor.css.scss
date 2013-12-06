@@ -18,68 +18,91 @@
 	$editor-width: 785px;
 	$top-bottom-height: 14px;
 
-	.s-msg {
-		display: none;
-		// font-size: 12px;
-		border: 1px dotted $yellow;
-		background: $yellow-light;
-		@include border-radius(5px);
-		line-height: 2em;
-		padding: 10px;
-		margin-bottom: 20px;
-		text-align: center;
-		a { color: $blue; margin: 0 5px; }
-		a:hover { text-decoration: underline; }
-	}
-
-	.s-title {
-		clear: both;
-		position: relative;
-		margin-bottom: 20px;
-
-		.t-top, .t-bottom { @include size($editor-width, $top-bottom-height); }
-		.t-mid { 
-			padding: 20px 30px;
-			.s-title-preview {
+	.ex-title {
+    padding:30px;
+    border:1px $borderColor solid;
+		width:$editor-width - 30 *2 - 2;
+		background: #fff;
+		@include border-radius(3px);
+		input,textarea {
+			width:704px;
+			display: block;
+			margin-bottom:15px;
+		}
+		.survey-title{
+			@include one-line(22px);
+			padding:14px 7px;
+			font-size: 22px;
+		}
+		.survey-subtitle{
+			@include one-line(22px);
+			padding:7px;
+			font-size: 18px;
+		}
+		.survey-description{
+			padding:7px;
+			resize: none;
+			margin-bottom:20px;
+			font-size: 14px;
+			line-height: 1.7em;
+		}
+		button {
+      border: none;
+      cursor: pointer;
+			width:330px;
+			margin:0 auto;
+			@include one-line(50px);
+			text-align: center;
+			display: block;
+			background: $exblue;
+			color:#fff;
+			@include border-radius(3px);
+			strong{
 				font-size: 18px;
 				font-weight: bold;
+				margin-right:8px;
 			}
-			.s-title-con {
-				display: none;
-				input {
-					line-height: 16px;
-					width: 500px;
-					padding: 5px;
-					font-size: 15px;
-					vertical-align: middle;
-					margin-right: 10px;
-				}
-				button {
-					vertical-align: middle;
-					margin-right: 5px;
-				}
-			}
+      &:disabled {
+        /*TODO*/
+        background: #f00;
+        cursor: default;
+      }
 		}
-		.t-btns {
-			position: absolute;
-			top: 15px;
-			right: 15px;
-			padding: 10px;
-			display:none;
-			// background: transparent;
-			@include border-radius(5px);
+	}
+	.ex-title-finished{
+    display: none;
+		width:723px;
+		padding:30px;
+		border:1px $borderColor solid;
+		background: #fff;
+		@include border-radius(3px);
+		button{
+			width:60px;
+			height:30px;
+			float: right;
 		}
-
-		.t-top { background: image-url("editors/gray-top.png") no-repeat 0 0; }
-		.t-bottom { background: image-url("editors/gray-bottom.png") no-repeat 0 0; }
-		.t-mid { background: image-url("editors/gray-mid.png") repeat-y 0 0; }
-		&:hover, &.active {
-			.t-btns { display: block; }
+		h1{
+			width:650px;
+			line-height: 1.6em;
+			font-size: 22px;
+			text-align: left;
+			margin:-5px 0 20px 0;
+			font-weight: bold;
 		}
-		&.active {
-			.t-btns {display: none;}
-			.s-title-preview {display: none; }
-			.s-title-con {display: block; }
+		h2{
+			width:720px;
+			line-height: 1.6em;
+			font-size: 18px;
+			text-align: left;
+			margin-bottom:20px;
+		}
+		.survey-description-finished{
+			// height:110px;
+			// overflow: auto;
+			text-align: left;
+			line-height: 2em;
+			text-indent: 2em;
+			p{font-size: 14px;}
 		}
 	}
 
@@ -143,94 +166,7 @@
 		background: #ffffee;
 		text-align: center;
 	}
-
-
-	// Quill_Express
-	.ex-title{
-		width:723px;
-		padding:30px;
-		border:1px $borderColor solid;
-		background: #fff;
-		@include border-radius(3px);
-		input,textarea{
-			width:704px;
-			display: block;
-			margin-bottom:15px;
-		}
-		.survey-title{
-			@include one-line(22px);
-			padding:14px 7px;
-			font-size: 22px;
-		}
-		.survey-subhead{
-			@include one-line(22px);
-			padding:7px;
-			font-size: 18px;
-		}
-		.survey-background{
-			padding:7px;
-			resize: none;
-			margin-bottom:20px;
-			font-size: 14px;
-			line-height: 1.7em;
-		}
-		.submit-edit{
-			width:330px;
-			margin:0 auto;
-			@include one-line(50px);
-			text-align: center;
-			display: block;
-			background: $exblue;
-			color:#fff;
-			@include border-radius(3px);
-			strong{
-				font-size: 18px;
-				font-weight: bold;
-				margin-right:8px;
-			}
-			span{
-				color:#fff;
-			}
-		}
-	}
-	.survey-editor-finished{
-		width:723px;
-		padding:30px;
-		border:1px $borderColor solid;
-		background: #fff;
-		@include border-radius(3px);
-		.editor-btn{
-			width:60px;
-			height:30px;
-			float: right;
-		}
-		.survey-title-finished{
-			width:650px;
-			line-height: 1.6em;
-			font-size: 22px;
-			text-align: left;
-			margin:-5px 0 20px 0;
-			font-weight: bold;
-		}
-		.survey-subhead-finished{
-			width:720px;
-			line-height: 1.6em;
-			font-size: 18px;
-			text-align: left;
-			margin-bottom:20px;
-		}
-		.survey-background-finished{
-			height:110px;
-			overflow: auto;
-			text-align: left;
-			line-height: 2em;
-			text-indent: 2em;
-			p{font-size: 14px;}
-		}
-	}
 }
-
-
 
 .left-sidebar{
 	float: left;

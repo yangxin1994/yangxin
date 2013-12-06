@@ -44,8 +44,6 @@
   </script>
 <% end %>
 
-<div id='my_editor'></div>
-
 <div class="left-sidebar" id="left_float_menus">
   <div class='left-head'>
     <a href="javascript:void(0);" class="current-option-name">基本题型<i class="tip-active"></i></a>
@@ -94,31 +92,17 @@
   });
   </script>
 </div>
-<div class='right-sidebar'>
-  <div id='my_editor' style="position:relative;">
-
+<div class='right-sidebar' style="position:relative;">
       <!-- 逻辑控制&预览 浮动层 -->
     <div id="float-panel">
       <a class="logic-control" href="javascript:;"></a>
       <a  class="preview-survey" href="javascript:;"></a>
     </div>
+  <div id='my_editor'></div>
 
+  <div>
     <div class="survey-editor">
-      <!-- 问卷标题 -->
-      <div class="ex-title">
-        <!-- 主标题 -->
-          <input type="text" name="survey-title" class="survey-title">
-         <!-- 副标题  -->
-          <input type="text" name="survey-subhead" class="survey-subhead">
-          <!-- 调查背景 -->
-          <textarea name="survey-background" class="survey-background" cols="30" rows="10"></textarea>
-          <a href="javascript:;" class="submit-edit">
-            <strong>确定</strong><span>并开始编辑问题</span>
-          </a>
-      </div>
-
-
-      <div class="survey-editor-finished">
+      <div class="ex-title-finished">
         <button class="editor-btn">编辑</button>
         <h1 class="survey-title-finished">问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题</h1>
         <h2 class="survey-subhead-finished">问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题</h2>
@@ -131,9 +115,6 @@
           </p>
         </div>
       </div>
-
-
-
       <!-- 选择题 预览 start -->
   <div id="" class="q-designer ui-droppable"><div class="q-render">
     <div class="q-render-mid"><div class="q-filler q-choice">
