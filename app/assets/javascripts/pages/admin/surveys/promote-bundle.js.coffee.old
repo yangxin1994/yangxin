@@ -43,15 +43,15 @@ $ ->
     $this = $(this)
     index = $this.data('toggle') + 1
     add_html = """
-    <div class="control-group broswer_extension-info">
+    <div class="control-group browser_extension-info">
       <label class="control-label" >浏览器插件详细设置:</label>
       <div class="controls">
-        <input type="text" placeholder="在这里输入关键字" id="weibo_text" name="broswer_extension[broswer_extension_promote_setting][filters][#{index}][key_words]" />
+        <input type="text" placeholder="在这里输入关键字" id="weibo_text" name="browser_extension[browser_extension_promote_setting][filters][#{index}][key_words]" />
       </div>
     </div>
-    <div class="control-group broswer_extension-info">
+    <div class="control-group browser_extension-info">
       <div class="controls">
-        <input type="text" placeholder="在这里输入网址" id="weibo_text" name="broswer_extension[broswer_extension_promote_setting][filters][#{index}][url]" />
+        <input type="text" placeholder="在这里输入网址" id="weibo_text" name="browser_extension[browser_extension_promote_setting][filters][#{index}][url]" />
       </div>
     </div>
     """
