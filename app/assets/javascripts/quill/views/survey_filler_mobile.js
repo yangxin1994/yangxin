@@ -28,7 +28,23 @@ $(function(){
    * =========================== */
   quill.quillClass('quill.views.SurveyFiller', quill.views.Base, {
 
+    _redirect_link: '/',
+
     _initialize: function() {
+      var link = this.model.get('style_setting').redirect_link;
+
+      if($.regex.isUrl(link)) {
+        link = link.toLowerCase();
+        if(link.indexOf('http') != 0)
+          link = 'http://' + link;
+        this._redirect_link = link;
+      }
+
+      if(this.options.spread_point == undefined){
+        this.options.spread_point = 0;
+      }
+        
+
       if(this.options.reward == null)
         this.options.reward = {reward_type : 0};
     },
@@ -196,6 +212,7 @@ $(function(){
 
           // Disable next button for some time (don't disable it for allow_pageup==true survey, or previewing)
           var has_not_empty_answer = (_.find(answers || [], function(a) { return a != null; }) != null);
+
           if(!has_not_empty_answer) {
             $.util.disable(next_btn);
             var old_text = next_btn.text();
@@ -210,12 +227,10 @@ $(function(){
               }
             }
             _update_btn();
+          }else{
+            time = 0;
           };
 
-
-          if(has_not_empty_answer){
-            time = 0;//if the answer has been answerd set time to 0 
-          }
 
           next_btn.click($.proxy(function() {
             $.util.disable(next_btn, prev_btn);
@@ -252,6 +267,7 @@ $(function(){
               }else{
                $.util.enable(prev_btn); 
               }
+
             }
           }, this));
           prev_btn.click($.proxy(function() { 
@@ -272,7 +288,7 @@ $(function(){
           }, 'survey_filler_end_free_mobile').appendTo('#f_body');
 
           this._share();
-          $('#close_btn').click($.proxy(function() { location.href = '/'; }, this));
+          $('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));
         } else if(this.options.reward.reward_scheme_type == 1) {
           if(value.order_id == null){
             this.hbs({}, 'survey_filler_end_money_mobile').appendTo($('#f_body'));
@@ -321,7 +337,6 @@ $(function(){
               var acc = $.trim(account_ipt.val());
               if(award_type == 'chongzhi'){
                 confirm_acc =  $.trim($('input[name="confirm_chongzhi"]').val());
-                console.log(confirm_acc)
                 if(!$.regex.isMobile(acc)){
                   account_ipt.addClass('error');
                   this._error('请输入正确手机号');
@@ -461,8 +476,6 @@ $(function(){
         $('#start_spread').click($.proxy(function() { this._spread(); }, this));
         $('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));        
       } 
-
-
       $('#restart_btn').click($.proxy(function() {
         if($('#restart_btn').attr("disabled") == 'disabled')
           return;
