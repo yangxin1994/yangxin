@@ -51,6 +51,7 @@ $(function(){
  				this.$('.ex-title input:eq(0)').focus();
  			}, this);
  			this.$('.ex-title-finished button').click(start_edit_title);
+			this.refreshDescription();
 
 			/* event for buttons in no-question contain
 			 * =============================== */
@@ -123,10 +124,10 @@ $(function(){
 			this.$('.ex-title-finished h2').text(this.model.get('subtitle'));
 		},
 		refreshDescription: function() {
-			var desc_html = $.richtext.textToHtml({text: this.model.get('description')});
-			console.log(desc_html);
 			this.$('.ex-title .survey-description').val(this.model.get('description'));
-			this.$('.ex-title-finished .survey-description-finished').html(desc_html);
+			this.$('.ex-title-finished .survey-description-finished').html('<p>' + _.map(this.model.get('description').split(/\r\n|\r|\n/igm), function(v) {
+				return $.richtext.textToHtml({text: v});
+			}).join('</p><p>') + '</p>');
 		},
 
 		/* ==================================================

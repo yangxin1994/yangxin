@@ -61,6 +61,6 @@
 	};
 
 	// console.log($.richtext.print({text:'<c>asd<b>fa</b>sda<link>http://abc.com abc.com</link>sd <link>aasdf.com</link>fasdf</c>'}));
-	console.log($.richtext.textToHtml({text: '<b>ab   c</b><p>asd   ff</p><r> asdff</r><i>asd<r>asdff</r>ff</i>'}));
+	// console.log($.richtext.textToHtml({text: '<b>ab   c</b><p>asd   ff</p><r> asdff</r><i>asd<r>asdff</r>ff</i>'}));
 
 })(jQuery);
