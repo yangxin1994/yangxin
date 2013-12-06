@@ -12,6 +12,7 @@
 .edit-panel {
 	@include inline-block;
 	line-height: 20px;
+	display: block;
 	li {
 		@include size(32px,33px);
 		a{
