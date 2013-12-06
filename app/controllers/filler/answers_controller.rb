@@ -18,6 +18,7 @@ class Filler::AnswersController < Filler::FillerController
       channel: params[:channel],
       referrer: params[:referrer],
       remote_ip: request.remote_ip,
+      ip_address: request.remote_ip,
       username: params[:username],
       password: params[:password],
       http_user_agent: request.env['HTTP_USER_AGENT'] }
