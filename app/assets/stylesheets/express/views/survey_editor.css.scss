@@ -19,6 +19,7 @@
 	$top-bottom-height: 14px;
 
 	.ex-title {
+    display: none;
     padding:30px;
     border:1px $borderColor solid;
 		width:$editor-width - 30 *2 - 2;
@@ -70,7 +71,6 @@
 		}
 	}
 	.ex-title-finished{
-    display: none;
 		width:723px;
 		padding:30px;
 		border:1px $borderColor solid;
@@ -168,179 +168,186 @@
 	}
 }
 
+/* left and right sidebar */
 .left-sidebar{
 	float: left;
-	width:110px;
-	height:507px;
-	overflow: hidden;
-	border:1px $borderColor solid;
-	@include border-radius(3px);
-	margin-top:12px;
-	.tip{
-			width:14px;
-			height:14px;
-			margin-left:5px;
-			@include inline-block;
-		}
-		.tip-close{
-			@include ex-left-menu-sprite(tipclose);
-			&.disable{
-				@include ex-left-menu-sprite(tipclose_disable); 
-			}
-		}
-		.tip-open{
-			@include ex-left-menu-sprite(tipopen); 
-			&.disable{
-				@include ex-left-menu-sprite(tipopen_disable); 
-			}
-		}
-		.tip-open2{
-			@include ex-left-menu-sprite(tipopen2); 
-		}
-	.common-use:hover{
-		.tip-close{
-			@include ex-left-menu-sprite(tipclose_hover);
+	width: 110px;
+  border:1px $borderColor solid;
+  @include border-radius(3px);
+  padding: 2px 0;
+  margin-top:12px;
+  background:#fff;
+  .left-menus {
+    > a {
+      display: block;
+      @include one-line(40px);
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      border-bottom:1px $borderColor solid;
 
-		}
-	}	
-}
-.menu-unfold-btn{
-	width:13px;
-	height:12px;
-	@include inline-block;
-	background: $url-widgets-bg	no-repeat -347px -21px;
-	margin-left:10px;
-	cursor: pointer;
-}
-.left-sidebar-title{
-	width:100px;
-	height:31px;
-	border:none;
-	color:#FFF;
-	font-weight:bold;
-	background: $url-widgets-bg	no-repeat -8px -205px;
-	margin-bottom:4px;
-	font-size: 13px;
-	vertical-align: middle;
-	position: relative;
+      >i {
+        @include square(14px);
+        margin-left:5px;
+        @include ex-left-menu-sprite(tip);
+      }
 
-	> div {
-		padding-right: 15px;
-	}
-	> a {
-		position: absolute;
-		display: block;
-		top: 8px;
-		left: 75px;
-		@include size(16px, 16px);
+      &:hover {
+        // color: $exblue;
+        >i { @include ex-left-menu-sprite(tip_hover); }
+      }
+
+      &.active {
+        cursor: default;
+        color: $exblue;
+        >i { @include ex-left-menu-sprite(tipactive); }
+      }
+
+      &.bottom-head { 
+        border: none; 
+        border-top: 1px solid  $borderColor;
+      }
+    }
+
+    > ul {
+      display: block;
+      width:110px;
+      background:#FFF;
+      border-bottom:none;
+      margin-top:1px;
+      li{
+        width:80px;
+        margin:0 auto;
+        text-align:center;
+        font-size: 14px;
+        z-index: 1000;
+        border-bottom:1px $borderColor solid;
+        a{  
+          display:block;
+          width:80px;
+          padding:10px 0;
+          z-index: 1000;
+        }
+
+        &.small {
+          a {padding: 13px 0;}
+        }
+
+        .left-menu-icon{
+          margin:0 auto;
+          em {
+            @include size(26px, 26px);
+            @include inline-block;
+            margin-bottom:8px;
+            &.choice { @include ex-left-menu-sprite(choice); }
+            &.text { @include ex-left-menu-sprite(text); }
+            &.star { @include ex-left-menu-sprite(star); }
+            &.matrix_choice{ @include ex-left-menu-sprite(matrix_choice); }
+            &.filling{ @include ex-left-menu-sprite(filling); }
+            &.jmix{@include ex-left-menu-sprite(jmix); }
+          }
+        }
+        .left-menu-name{
+          display:block;
+          color:#666;
+        }
+      }
+    }
+  }
+
+  &.disable {
+    .left-menus {
+      >a {
+        cursor: default;
+        color: #AEB5C0;
+        >i { @include ex-left-menu-sprite(tip_disable); }
+        &.active {
+          >i { @include ex-left-menu-sprite(tipactive_disable); }
+        }
+      }
+      >ul {
+        li {
+          > a { cursor: default; }
+          .left-menu-icon {
+            em { 
+              &.choice { @include ex-left-menu-sprite(choice_disable); }
+              &.text { @include ex-left-menu-sprite(text_disable); }
+              &.star { @include ex-left-menu-sprite(star_disable); }
+              &.matrix_choice{ @include ex-left-menu-sprite(matrix_choice_disable); }
+              &.filling{ @include ex-left-menu-sprite(filling_disable); }
+              &.jmix{@include ex-left-menu-sprite(jmix_disable); }
+            }
+          }
+          .left-menu-name { color: #AEB5C0; }
+        }
+      }
+    }
+  }
+}
+// .menu-unfold-btn{
+// 	width:13px;
+// 	height:12px;
+// 	@include inline-block;
+// 	background: $url-widgets-bg	no-repeat -347px -21px;
+// 	margin-left:10px;
+// 	cursor: pointer;
+// }
+// .left-sidebar-title{
+// 	width:100px;
+// 	height:31px;
+// 	border:none;
+// 	color:#FFF;
+// 	font-weight:bold;
+// 	background: $url-widgets-bg	no-repeat -8px -205px;
+// 	margin-bottom:4px;
+// 	font-size: 13px;
+// 	vertical-align: middle;
+// 	position: relative;
+
+// 	> div {
+// 		padding-right: 15px;
+// 	}
+// 	> a {
+// 		position: absolute;
+// 		display: block;
+// 		top: 8px;
+// 		left: 75px;
+// 		@include size(16px, 16px);
 		
-		&.setting { @include od-icon-sprite(white_setting); }
-		&.edit { @include od-icon-sprite(white_edit); }
-	}
-}
-.left-bottom{
-	position: absolute;
-	top:467px;
-	// top:40px;
-	.left-sidebar-pulldownBtn{
-		@include one-line(40px);
-		text-align: center;
-		clear:both;
-		.common-use{
-			font-size: 14px;
-			height:39px;
-			font-weight: bold;
-			color:$exblue;
-			display: block;
-			background: #fff;
-			border-top:1px $borderColor solid;
-			border-bottom:1px $borderColor solid;
-			@include border-bottom-radius(3px);
-		}
-	}
-}
-.left-sidebar-end{
-	display:block;
-	clear:both;
-	width:100px;
-	@include one-line(12px);
-	border:none;
-	cursor:pointer;
-	background: $url-widgets-bg	no-repeat -8px -255px;
-}
-.left-menus{
-	width:110px;
-	background:#FFF;
-	float: left;
-	border-bottom:none;
-	margin-top:1px;
-	@include clearfix;
-	li{
-		width:80px;
-		margin:0 auto;
-		text-align:center;
-		font-size: 14px;
-		z-index: 1000;
-		border-bottom:1px $borderColor solid;
-		a{	
-			width:80px;
-			display:block;
-			padding:10px 0;
-			z-index: 1000;
-			&.disable{
-				cursor: default;
-			}
-		}
-		&.small {
-			a {padding: 13px 0;}
-		}
-
-		.left-menu-icon{
-			margin:0 auto;
-			em {
-				@include size(26px, 26px);
-				@include inline-block;
-				margin-bottom:8px;
-				&.choice { 
-					@include ex-left-menu-sprite(choice); 
-					&.disable{
-						@include ex-left-menu-sprite(choice_disable);
-					}
-				}
-				&.text { @include ex-left-menu-sprite(text); }
-				&.star { @include ex-left-menu-sprite(star); }
-				&.matrix_choice{ @include ex-left-menu-sprite(matrix_choice); }
-				&.filling{ @include ex-left-menu-sprite(filling); }
-				&.jmix{@include ex-left-menu-sprite(jmix); }
-			}
-		}
-		.left-menu-name{
-			display:block;
-			color:#666;
-		}
-
-		&.last {background: none;}
-		&.active {
-			em {
-				// &.filter { @include left-menu-sprite(filter_active); }
-				// &.share { @include left-menu-sprite(share_active); }
-				// &.bar { @include left-menu-sprite(bar_active); }
-				// &.volunteer { @include left-menu-sprite(volunteer_active); }
-				// &.report { @include left-menu-sprite(report_active); }
-				// &.setting { @include left-menu-sprite(setting_active); }
-				// &.moresetting { @include left-menu-sprite(moresetting_active); }
-				// &.accesscontrol { @include left-menu-sprite(accesscontrol_active); }
-				// &.logic { @include left-menu-sprite(logic_active); }
-			}
-
-			.left-menu-name {
-				color: $blue;
-				font-weight: bold;
-			}
-		}
-	}
-	
-}
+// 		&.setting { @include od-icon-sprite(white_setting); }
+// 		&.edit { @include od-icon-sprite(white_edit); }
+// 	}
+// }
+// .left-bottom{
+// 	position: absolute;
+// 	top:467px;
+// 	// top:40px;
+// 	.left-sidebar-pulldownBtn{
+// 		@include one-line(40px);
+// 		text-align: center;
+// 		clear:both;
+// 		.common-use{
+// 			font-size: 14px;
+// 			height:39px;
+// 			font-weight: bold;
+// 			color:$exblue;
+// 			display: block;
+// 			background: #fff;
+// 			border-top:1px $borderColor solid;
+// 			border-bottom:1px $borderColor solid;
+// 			@include border-bottom-radius(3px);
+// 		}
+// 	}
+// }
+// .left-sidebar-end{
+// 	display:block;
+// 	clear:both;
+// 	width:100px;
+// 	@include one-line(12px);
+// 	border:none;
+// 	cursor:pointer;
+// 	background: $url-widgets-bg	no-repeat -8px -255px;
+// }
 .right-sidebar{
 	float: right;
 	width:785px;

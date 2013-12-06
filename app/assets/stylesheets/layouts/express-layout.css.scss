@@ -536,14 +536,3 @@ ul.radioNav-s li{
 }
 
 
-.current-option-name{
-	@include one-line(40px);
-	display: block;
-	text-align: center;
-	font-size: 14px;
-	font-weight: bold;
-	color:$exblue;
-	background: #FFF;
-	border-bottom:1px $borderColor solid;
-	@include border-top-radius(3px);
-}
