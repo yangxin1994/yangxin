@@ -371,11 +371,36 @@
 						@include ex-left-menu-sprite(choice_disable);
 					}
 				}
-				&.text { @include ex-left-menu-sprite(text); }
-				&.star { @include ex-left-menu-sprite(star); }
-				&.matrix_choice{ @include ex-left-menu-sprite(matrix_choice); }
-				&.filling{ @include ex-left-menu-sprite(filling); }
-				&.jmix{@include ex-left-menu-sprite(jmix); }
+				&.text { 
+					@include ex-left-menu-sprite(text); 
+					&.disable{
+						@include ex-left-menu-sprite(text_disable);
+					}
+				}
+				&.star { 
+					@include ex-left-menu-sprite(star);
+					&.disable{
+						@include ex-left-menu-sprite(star_disable);
+					}
+				 }
+				&.matrix_choice{ 
+					@include ex-left-menu-sprite(matrix_choice);
+					 &.disable{
+						@include ex-left-menu-sprite(matrix_choice_disable);
+					}
+				}
+				&.filling{ 
+					@include ex-left-menu-sprite(filling); 
+					&.disable{
+						@include ex-left-menu-sprite(filling_disable);
+					}
+				}
+				&.jmix{
+					@include ex-left-menu-sprite(jmix); 
+					&.disable{
+						@include ex-left-menu-sprite(jmix_disable);
+					}
+				}
 			}
 		}
 		.left-menu-name{
