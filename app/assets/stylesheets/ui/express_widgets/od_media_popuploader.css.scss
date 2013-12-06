@@ -1,0 +1,270 @@
+//=require ui/widgets/od_icon_buttons
+//=require ui/widgets/od_dropdown
+//=require ui/widgets/od_popup
+
+@import "common";
+@import "od-icon/*.png";
+@import "od-button/*.png";
+@import "left-menu/*.png";
+@import "compass/css3/box-shadow";
+@import "compass/css3/border-radius";
+@import "compass/utilities/general/clearfix";
+@import "widgets/*.png";
+
+.od-uploadtip{
+	.layer_bg{
+		width:450px;
+		min-height:420px;
+	}
+	.layer_main{
+		width:440px;
+		min-height:410px;
+	}
+	.popup_panel{
+		width:430px;
+		height:30px;
+		padding-top:10px;
+	}
+	.toggle-btn{
+		margin-left:15px;
+	}
+	.popup_content{
+		padding:0;
+	}
+	.popup_show{
+		min-height:310px;
+		margin-left:20px;
+	}
+
+	.upload_type{
+		height:46px;
+		line-height:46px;
+		color:#999;
+		font-size:14px;
+	}
+	.buttonStyle{
+		padding-top:0px;
+		@include inline-block;
+	}
+	.temp-button{
+		display:none;
+		background:image-url('widgets/upload-add2.png');
+		width:90px;
+		height:90px;
+		position: absolute;
+		top: 90px;
+		left: 20px;
+	}
+	.add-font,.video-note,.page-no,.chosen-video span{
+		font-size:11px;
+		color:#999;
+	}
+	.add-font{padding-top:5px;}
+	.second-line{margin-top:20px;min-height:116px;}
+
+	.video-show,.link-show{
+		@include inline-block;
+		position:relative;
+		width:90px;
+
+		.del-video-btn{
+			position:absolute;
+			top:1px;
+			right:1px;
+			//background:image-url('widgets/small-x.png');
+			width:10px;
+			height:10px;
+		}
+
+		img{width:90px;height:68px;}
+
+		.video-pic{
+			border-top:11px black solid;
+			border-bottom:11px black solid;
+			height:68px;
+			width:90px;
+		}
+		.music-pic{
+			border-top:none;
+			border-bottom:none;
+			height:90px;
+			width:90px;
+			@include widgets-sprite(music);
+			img{width:90px;height:90px;}
+		}
+		.video-pic-hover{
+			background:image-url('widgets/small-x.png');
+			width:10px;
+			height:10px;
+			cursor:pointer;
+		}
+		.video-note{padding-top:9px;}
+	}
+	.link-show{
+		margin-bottom:20px;
+	}
+	.tick-checkBtn.true {
+		background-position: 0 -771px;
+	}
+	.tick-checkBtn {
+		width: 13px;
+		height: 13px;
+		cursor: pointer;
+		@include inline-block;
+		zoom: 1;
+		vertical-align: middle;
+		margin: -3px 8px 0 0;
+		background: image-url('od-button-s2626132926.png') no-repeat;
+		background-position: 0 -1042px;
+	}
+
+	.tick-checkBtn:hover, .tick-checkBtn.checkBtn2_hover, .tick-checkBtn.checkBtn2-hover {
+		background-position: 0 -771px;
+	}
+	//分页
+	.pagination{
+		text-align: center;
+		margin-top: 15px;
+
+	.previous,.next{
+		width:14px;
+		height:14px;
+		@include inline-block;
+		cursor:pointer;
+	}
+	/*上一页*/
+	.previous{
+		@include od-button-sprite(previous);
+	}
+	.dis_previous,.dis_next{
+		width:14px;
+		height:14px;
+		@include inline-block;
+		cursor:default;
+		
+	}
+	.dis_previous{
+		background:image-url('od-button/previous.png') no-repeat;
+	}
+	.dis_next{
+		background:image-url('od-button/next.png') no-repeat;
+	}
+	/*下一页*/
+	.next{
+		@include od-button-sprite(next);
+	}
+	.current,.pagination-txt,.total{
+		//padding:0 5px;
+		color:#666;
+		@include one-line(14px);
+		text-align:center;
+		@include inline-block;
+	}
+
+	}
+
+	.dashed-line{
+		border-top: 1px #E6E6E6 dashed;
+		width:420px;
+		margin-left:5px;
+		margin-top:12px;
+	}
+	.chosen-show{
+		margin-top:20px;
+		margin-bottom:20px;
+		line-height:20px;
+		margin-left:20px;
+	}
+	.finish-btn{
+		position: absolute;
+		bottom: 15px;
+		right: 20px;
+	}
+	.f-title{width:340px;}
+	.title-div{
+		word-wrap: break-word;
+		word-break: normal;}
+
+	.internetMedia{
+		margin-left:20px;
+
+		.link_address{
+			width:350px;
+			height:24px;
+			float:left;
+			padding:0;
+			margin-bottom:20px;
+		}
+
+		.btn_linkOk{
+			float:right;
+			margin-right:10px;
+		}
+		
+	}
+
+//上传样式
+	.progress_box{
+	width:400px;
+	line-height: 24px;
+	margin: 20px 0 20px 20px;
+	float: left;
+	}
+	.progress_box p{
+		float:left;
+		color:#333;
+	}
+	.progress_box i{
+		font-style: normal;
+		color:#ccc;
+		float: left;
+		margin-left:5px;	
+	}
+	.progressBarInProgress,.progressBarComplete,.progressBarError {
+		font-size: 0;
+		width: 0%;
+		height: 2px;
+		background-color: blue;
+		margin-top: 2px;
+	}
+	.progressBarComplete {
+		width: 100%;
+		background-color: green;
+		visibility: hidden;
+	}
+	.progressBarError {
+		width: 100%;
+		background-color: red;
+		visibility: hidden;
+	}
+	.progress_bar
+	{
+		width: 320px;
+		height: 8px;
+		border:1px #c8c8c8 solid;
+		float: left;
+		margin-top:7px;
+	}
+	.progress_live{
+		width:0%;
+		height:8px;
+		background: #f4bf00;	
+		float: left;
+	}
+	a.cancel{
+		color:#666;
+		float: right;
+		padding-right:10px;
+	}
+	a:hover.cancel{
+		color:#333;
+	}
+	.ml10{margin-left:10px;margin-right:0;}
+	.cl{@include clearfix;}
+	.temp-title{
+		display:inline-block;
+		margin-left:15px;
+		font-size:14px;
+		color:#999;
+	}
+}
