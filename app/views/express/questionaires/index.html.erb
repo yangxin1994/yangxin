@@ -15,7 +15,7 @@
 <% end %>
 
 <!-- content for left menus -->
-<% content_for :left_menus do %>
+<div class="left-sidebar" id="left_float_menus">
   <button class="left-sidebar-title">调研列表</button>
   <ul class="left-menus">
     <li class='small'><a href="/questionaires"><span class="left-menu-name">全部</span></a></li>
@@ -25,8 +25,8 @@
     <li class='small last'><a href="/questionaires?status=4"><span class="left-menu-name" >已删除</span></a></li>
   </ul>
   <div class="left-sidebar-end"></div>
-<% end %>
-
+</div>
+<div class='right-sidebar'>
     <!--问题列表-->
     <div class='page'>  
     <div class='seperator top gray'></div>  <!-- 上方圆角，灰色 -->
@@ -123,3 +123,5 @@
     <div class='seperator bottom white'></div>
     
   </div>
+
+</div>

@@ -12,6 +12,7 @@
 @import "ex-left-menu/*.png";
 @import "compass/utilities/general/clearfix";
 .survey-editor {
+	position: relative;
 	float: right;
 	font-size: 14px;
 	$editor-width: 785px;

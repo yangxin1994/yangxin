@@ -17,53 +17,50 @@
     });
     survey_editor.appendTo('#my_editor');
 
-    // update title of banner when survey title changed
-    survey_model.on('change:title', function() {
-      $('#banner_survey_title').text(survey_model.get('title'));
-    });
-
     // set left menus events
-    $.each(quill.helpers.QuestionType.getNames(), function(i, type) {
-      var btn = $('.' + type);
-      btn.draggable({
-        helper: "clone",
-        start: function(event, ui) {
-          ui.helper.data('questionType', type);
-        },
-        drag: function(event, ui) {
-          var designer_el = $(this).data("current-droppable");
-          if(!designer_el) return;
-          var $draggable = ui.draggable || ui.helper;
-          var is_upper =  (ui.offset.top + $draggable.outerHeight() / 2 
-            <= designer_el.offset().top + designer_el.outerHeight() / 2);
-          survey_editor.updateHighlight(designer_el, is_upper);
-        },
-        stop: function(event, ui) {
-          survey_editor.cleanupHighlight();
-        }
-      });
-      btn.click(function() {
-        survey_editor.addQuestionAuto(type);
-      });
-    });
+    // $.each(quill.helpers.QuestionType.getNames(), function(i, type) {
+    //   var btn = $('.' + type);
+    //   btn.draggable({
+    //     helper: "clone",
+    //     start: function(event, ui) {
+    //       ui.helper.data('questionType', type);
+    //     },
+    //     drag: function(event, ui) {
+    //       var designer_el = $(this).data("current-droppable");
+    //       if(!designer_el) return;
+    //       var $draggable = ui.draggable || ui.helper;
+    //       var is_upper =  (ui.offset.top + $draggable.outerHeight() / 2 
+    //         <= designer_el.offset().top + designer_el.outerHeight() / 2);
+    //       survey_editor.updateHighlight(designer_el, is_upper);
+    //     },
+    //     stop: function(event, ui) {
+    //       survey_editor.cleanupHighlight();
+    //     }
+    //   });
+    //   btn.click(function() {
+    //     survey_editor.addQuestionAuto(type);
+    //   });
+    // });
 
   });
   </script>
 <% end %>
 
-<% content_for :left_menus do %>
+<div id='my_editor'></div>
+
+<div class="left-sidebar" id="left_float_menus">
   <div class='left-head'>
-    <a href="javascript:;" class="current-option-name">基本题型<i class="tip-active"></i></a>
+    <a href="javascript:void(0);" class="current-option-name">基本题型<i class="tip-active"></i></a>
   </div>
   <ul class="left-menus">
-       <li class='big'><a class='Choice' href="javascript:void(0);"><span class="left-menu-icon"><em class="choice"></em></span><span class="left-menu-name">选择题</span></a></li>
+    <li class='big'><a class='Choice' href="javascript:void(0);"><span class="left-menu-icon"><em class="choice"></em></span><span class="left-menu-name">选择题</span></a></li>
     <li class='big'><a class='Paragraph' href="javascript:void(0);"><span class="left-menu-icon"><em class="text"></em></span><span class="left-menu-name">文字描述</span></a></li>
- <li class='big'><a class='Scale' href="javascript:void(0);"><span class="left-menu-icon"><em class="star"></em></span><span class="left-menu-name">评分题</span></a></li>
+    <li class='big'><a class='Scale' href="javascript:void(0);"><span class="left-menu-icon"><em class="star"></em></span><span class="left-menu-name">评分题</span></a></li>
     <li class='big'><a class='MatrixChoice' href="javascript:void(0);"><span class="left-menu-icon"><em class="matrix_choice"></em></span><span class="left-menu-name">矩阵选择题</span></a></li>
-    
     <li class='big'><a class='TextBlank' href="javascript:void(0);"><span class="left-menu-icon"><em class="filling"></em></span><span class="left-menu-name">填充题</span></a></li>
     <li class='big' style="border-bottom:0;"><a class='Sort' href="javascript:void(0);"><span class="left-menu-icon"><em class="jmix"></em></span><span class="left-menu-name">排序题</span></a></li>
- 
+  </ul>
+  <ul class="left-menus" style='display:none;'>
     <li class='small' style='display:none;'><a class='Choice' href="javascript:void(0);"><span class="left-menu-name">性别</span></a></li>
     <li class='small' style='display:none;'><a class='Paragraph' href="javascript:void(0);"><span class="left-menu-name">城市</span></a></li>
     <li class='small' style='display:none;'><a class='Scale' href="javascript:void(0);"><span class="left-menu-name">年龄</span></a></li>
@@ -74,11 +71,10 @@
     <li class='small' style='display:none;'><a class='TimeBlank' href="javascript:void(0);"><span class="left-menu-name">教育程度</span></a></li>
     <li class='small' style='display:none;'><a class='AddressBlank' href="javascript:void(0);"><span class="left-menu-name">婚姻状况</span></a></li>
     <li class='small' style="border-bottom:none;display:none;"><a class='UrlBlank' href="javascript:void(0);"><span class="left-menu-name">工作单位</span></a></li>
-
   </ul>
   <div class="left-bottom">
     <div class="left-sidebar-pulldownBtn">
-      <a href="javascript:;" class="common-use">常用题目<i class="tip"></i></a>
+      <a href="javascript:void(0);" class="common-use">常用题目<i class="tip"></i></a>
     </div>
   </div>
 
@@ -99,728 +95,729 @@
     $('#edit_setting').tooltip({ placement: 'right', delay: {show: 500, hide: 0}  });
   });
   </script>
-<% end %>
-<div id='my_editor' style="position:relative;">
+</div>
+<div class='right-sidebar'>
+  <div id='my_editor' style="position:relative;">
 
-    <!-- 逻辑控制&预览 浮动层 -->
-  <div id="float-panel">
-    <a class="logic-control" href="javascript:;"></a>
-    <a  class="preview-survey" href="javascript:;"></a>
-  </div>
-
-  <div class="survey-editor">
-    <!-- 问卷标题 -->
-    <div class="ex-title">
-      <!-- 主标题 -->
-        <input type="text" name="survey-title" class="survey-title">
-       <!-- 副标题  -->
-        <input type="text" name="survey-subhead" class="survey-subhead">
-        <!-- 调查背景 -->
-        <textarea name="survey-background" class="survey-background" cols="30" rows="10"></textarea>
-        <a href="javascript:;" class="submit-edit">
-          <strong>确定</strong><span>并开始编辑问题</span>
-        </a>
+      <!-- 逻辑控制&预览 浮动层 -->
+    <div id="float-panel">
+      <a class="logic-control" href="javascript:;"></a>
+      <a  class="preview-survey" href="javascript:;"></a>
     </div>
 
-
-    <div class="survey-editor-finished">
-      <button class="editor-btn">编辑</button>
-      <h1 class="survey-title-finished">问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题</h1>
-      <h2 class="survey-subhead-finished">问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题</h2>
-      <div class="survey-background-finished">
-        <p>
-          调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景
-        </p>
-        <p>
-          调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景
-        </p>
+    <div class="survey-editor">
+      <!-- 问卷标题 -->
+      <div class="ex-title">
+        <!-- 主标题 -->
+          <input type="text" name="survey-title" class="survey-title">
+         <!-- 副标题  -->
+          <input type="text" name="survey-subhead" class="survey-subhead">
+          <!-- 调查背景 -->
+          <textarea name="survey-background" class="survey-background" cols="30" rows="10"></textarea>
+          <a href="javascript:;" class="submit-edit">
+            <strong>确定</strong><span>并开始编辑问题</span>
+          </a>
       </div>
+
+
+      <div class="survey-editor-finished">
+        <button class="editor-btn">编辑</button>
+        <h1 class="survey-title-finished">问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题</h1>
+        <h2 class="survey-subhead-finished">问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题</h2>
+        <div class="survey-background-finished">
+          <p>
+            调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景
+          </p>
+          <p>
+            调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景
+          </p>
+        </div>
+      </div>
+
+
+
+      <!-- 选择题 预览 start -->
+  <div id="" class="q-designer ui-droppable"><div class="q-render">
+    <div class="q-render-mid"><div class="q-filler q-choice">
+    <span class="q-idx">06</span>
+    <div class="q-title">
+      <span class="q-title-content">请在此输入问题标题</span>
+      <span class="q-info">（单选题）</span>
+      <span class="q-required" style="display: inline;">*</span>
+      <span class="q-error"></span>
+    </div>
+    <div class="q-note" style="display: none;">说明：</div>
+    <div class="q-content"><table><tbody><tr><td><label class="cust-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+    <p>选项一</p>
+  </label></td></tr><tr><td><label class="cust-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+    <p>选项二</p>
+  </label></td></tr><tr><td><label class="cust-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+    <p>选项三</p>
+  </label></td></tr><tr><td><label class="cust-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+    <p>其他（请填写）：<input type="text"></p>
+  </label></td></tr></tbody></table></div>
+  </div></div>
+    
+
+     
+    </div>
+  </div>
+
+      <!-- 选择题 预览 end -->
+      <!-- 文字描述 预览 start -->
+      <div id="" class="q-designer ui-droppable"><div class="q-render">
+    <div class="q-render-mid"><div class="q-filler q-paragraph">
+    
+    <div class="q-title">
+      <span class="q-title-content">请在此输入文本描述</span>
+      
+      
+      
+    </div>
+    <div class="q-note" style="display: none;">说明：</div>
+    <div class="q-content"></div>
+  </div></div>
+    
+  </div>
+      <!-- 文字描述 预览 end -->
+      <!-- 评分题 预览 start -->
+      <div id="" class="q-designer ui-droppable"><div class="q-render">
+    <div class="q-render-mid"><div class="q-filler q-scale">
+    <span class="q-idx">11</span>
+    <div class="q-title">
+      <span class="q-title-content">请在此输入问题标题</span>
+      <span class="q-info">（量表题）</span>
+      <span class="q-required" style="display: inline;">*</span>
+      <span class="q-error"></span>
+    </div>
+    <div class="q-note" style="display: none;">说明：</div>
+    <div class="q-content"><table cellpadding="0" cellspacing="0" class="last"><tbody><tr><th class="head"></th><th class="head">很不满意</th><th class="head">不太满意</th><th class="head">一般</th><th class="head">比较满意</th><th class="head">很满意</th></tr><tr id="6997618719498548"><th class="row_0">选项一</th><td class="">1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr><tr id="7936257593713032" class="alter"><th class="row_0">选项二</th><td class="">1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr><tr id="9214735722028126"><th class="row_0">选项三</th><td class="">1</td><td class="">2</td><td class="">3</td><td>4</td><td>5</td></tr><tr id="4895409669036745" class="alter"><th class="row_0">选项四</th><td class="">1</td><td class="">2</td><td class="">3</td><td class="">4</td><td>5</td></tr></tbody></table></div>
+  </div></div>
+
+    <div class="q-render-btns-con">
+      <div class="q-render-btns">
+        <ul class="edit-panel">
+          <li>
+              <a class="del" href="javascript:;"></a>
+          </li>
+          <li>
+              <a class="edit" href="javascript:;"></a>
+          </li>
+          <li>
+              <a class="copy" href="javascript:;"></a>
+          </li>
+          <li>
+              <a class="page-break" href="javascript:;"></a>
+          </li>
+        </ul>
     </div>
 
 
-
-    <!-- 选择题 预览 start -->
-<div id="" class="q-designer ui-droppable"><div class="q-render">
-  <div class="q-render-mid"><div class="q-filler q-choice">
-  <span class="q-idx">06</span>
-  <div class="q-title">
-    <span class="q-title-content">请在此输入问题标题</span>
-    <span class="q-info">（单选题）</span>
-    <span class="q-required" style="display: inline;">*</span>
-    <span class="q-error"></span>
-  </div>
-  <div class="q-note" style="display: none;">说明：</div>
-  <div class="q-content"><table><tbody><tr><td><label class="cust-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-  <p>选项一</p>
-</label></td></tr><tr><td><label class="cust-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-  <p>选项二</p>
-</label></td></tr><tr><td><label class="cust-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-  <p>选项三</p>
-</label></td></tr><tr><td><label class="cust-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-  <p>其他（请填写）：<input type="text"></p>
-</label></td></tr></tbody></table></div>
-</div></div>
-  
-
-   
-  </div>
-</div>
-
-    <!-- 选择题 预览 end -->
-    <!-- 文字描述 预览 start -->
-    <div id="" class="q-designer ui-droppable"><div class="q-render">
-  <div class="q-render-mid"><div class="q-filler q-paragraph">
-  
-  <div class="q-title">
-    <span class="q-title-content">请在此输入文本描述</span>
-    
-    
-    
-  </div>
-  <div class="q-note" style="display: none;">说明：</div>
-  <div class="q-content"></div>
-</div></div>
-  
-</div>
-    <!-- 文字描述 预览 end -->
-    <!-- 评分题 预览 start -->
-    <div id="" class="q-designer ui-droppable"><div class="q-render">
-  <div class="q-render-mid"><div class="q-filler q-scale">
-  <span class="q-idx">11</span>
-  <div class="q-title">
-    <span class="q-title-content">请在此输入问题标题</span>
-    <span class="q-info">（量表题）</span>
-    <span class="q-required" style="display: inline;">*</span>
-    <span class="q-error"></span>
-  </div>
-  <div class="q-note" style="display: none;">说明：</div>
-  <div class="q-content"><table cellpadding="0" cellspacing="0" class="last"><tbody><tr><th class="head"></th><th class="head">很不满意</th><th class="head">不太满意</th><th class="head">一般</th><th class="head">比较满意</th><th class="head">很满意</th></tr><tr id="6997618719498548"><th class="row_0">选项一</th><td class="">1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr><tr id="7936257593713032" class="alter"><th class="row_0">选项二</th><td class="">1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr><tr id="9214735722028126"><th class="row_0">选项三</th><td class="">1</td><td class="">2</td><td class="">3</td><td>4</td><td>5</td></tr><tr id="4895409669036745" class="alter"><th class="row_0">选项四</th><td class="">1</td><td class="">2</td><td class="">3</td><td class="">4</td><td>5</td></tr></tbody></table></div>
-</div></div>
-
-  <div class="q-render-btns-con">
-    <div class="q-render-btns">
-      <ul class="edit-panel">
-        <li>
-            <a class="del" href="javascript:;"></a>
-        </li>
-        <li>
-            <a class="edit" href="javascript:;"></a>
-        </li>
-        <li>
-            <a class="copy" href="javascript:;"></a>
-        </li>
-        <li>
-            <a class="page-break" href="javascript:;"></a>
-        </li>
-      </ul>
-  </div>
-
-
+      </div>
+      <!-- 评分题 预览 end -->
+      <!-- 矩阵选择题 预览 start -->
+      <div id="" class="q-designer ui-droppable"><div class="q-render">
+    <div class="q-render-mid"><div class="q-filler q-matrixchoice">
+    <span class="q-idx">14</span>
+    <div class="q-title">
+      <span class="q-title-content">请在此输入问题标题</span>
+      <span class="q-info">（矩阵选择题）</span>
+      <span class="q-required" style="display: inline;">*</span>
+      <span class="q-error"></span>
     </div>
-    <!-- 评分题 预览 end -->
-    <!-- 矩阵选择题 预览 start -->
-    <div id="" class="q-designer ui-droppable"><div class="q-render">
-  <div class="q-render-mid"><div class="q-filler q-matrixchoice">
-  <span class="q-idx">14</span>
-  <div class="q-title">
-    <span class="q-title-content">请在此输入问题标题</span>
-    <span class="q-info">（矩阵选择题）</span>
-    <span class="q-required" style="display: inline;">*</span>
-    <span class="q-error"></span>
-  </div>
-  <div class="q-note" style="display: none;">说明：</div>
-  <div class="q-content"><table cellspacing="0" cellpadding="0" class="last"><tbody><tr><th class="head"></th><th class="head">选项一</th><th class="head">选项二</th><th class="head">选项三</th><th class="head">选项四</th></tr><tr><th class="row_0">子题目一</th><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td></tr><tr class="alter"><th class="row_0">子题目二</th><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td></tr><tr><th class="row_0">子题目三</th><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td></tr><tr class="alter"><th class="row_0">子题目四</th><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td><td><label class="matrix-option">
-  <input name="" id="" type="radio" class="">
-  <span>&nbsp;</span>
-</label></td></tr></tbody></table></div>
-</div></div>
-  
-</div></div>
-    <!-- 矩阵选择题 预览 end -->
-    <!-- 填充题 预览 start -->
-  <div id="" class="q-designer ui-droppable">
-    <div class="q-render">
-      <div class="q-render-mid">
-        <div class="q-filler q-textblank">
-          <span class="q-idx">12</span>
-          <div class="q-title">
-            <span class="q-title-content">请在此输入问题标题</span>
-            <span class="q-info">（输入 1 到 10 个字）</span>
-            <span class="q-required" style="display: inline;">*</span>
-            <span class="q-error"></span>
+    <div class="q-note" style="display: none;">说明：</div>
+    <div class="q-content"><table cellspacing="0" cellpadding="0" class="last"><tbody><tr><th class="head"></th><th class="head">选项一</th><th class="head">选项二</th><th class="head">选项三</th><th class="head">选项四</th></tr><tr><th class="row_0">子题目一</th><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td></tr><tr class="alter"><th class="row_0">子题目二</th><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td></tr><tr><th class="row_0">子题目三</th><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td></tr><tr class="alter"><th class="row_0">子题目四</th><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td><td><label class="matrix-option">
+    <input name="" id="" type="radio" class="">
+    <span>&nbsp;</span>
+  </label></td></tr></tbody></table></div>
+  </div></div>
+    
+  </div></div>
+      <!-- 矩阵选择题 预览 end -->
+      <!-- 填充题 预览 start -->
+    <div id="" class="q-designer ui-droppable">
+      <div class="q-render">
+        <div class="q-render-mid">
+          <div class="q-filler q-textblank">
+            <span class="q-idx">12</span>
+            <div class="q-title">
+              <span class="q-title-content">请在此输入问题标题</span>
+              <span class="q-info">（输入 1 到 10 个字）</span>
+              <span class="q-required" style="display: inline;">*</span>
+              <span class="q-error"></span>
+            </div>
+            <div class="q-note" style="display: none;">说明：</div>
+            <div class="q-content"><input type="text" id="" class="normal"></div>
           </div>
-          <div class="q-note" style="display: none;">说明：</div>
-          <div class="q-content"><input type="text" id="" class="normal"></div>
         </div>
       </div>
     </div>
-  </div>
-    <!-- 填充题 预览 end -->
-    <!-- 排序题 预览 start -->
-   <div id="" class="q-designer ui-droppable"><div class="q-render">
-  <div class="q-render-mid"><div class="q-filler q-sort">
-  <span class="q-idx">13</span>
-  <div class="q-title">
-    <span class="q-title-content">请在此输入问题标题</span>
-    <span class="q-info">（请至少排出前 2 个选项，拖放选项进行排序）</span>
-    <span class="q-required" style="display: inline;">*</span>
-    <span class="q-error"></span>
-  </div>
-  <div class="q-note" style="display: none;">说明：</div>
-  <div class="q-content"><div class="sort-frame">
-  <ul class="sort-left">
+      <!-- 填充题 预览 end -->
+      <!-- 排序题 预览 start -->
+     <div id="" class="q-designer ui-droppable"><div class="q-render">
+    <div class="q-render-mid"><div class="q-filler q-sort">
+    <span class="q-idx">13</span>
+    <div class="q-title">
+      <span class="q-title-content">请在此输入问题标题</span>
+      <span class="q-info">（请至少排出前 2 个选项，拖放选项进行排序）</span>
+      <span class="q-required" style="display: inline;">*</span>
+      <span class="q-error"></span>
+    </div>
+    <div class="q-note" style="display: none;">说明：</div>
+    <div class="q-content"><div class="sort-frame">
+    <ul class="sort-left">
 
-  <li class="sort-type-require ui-droppable" aria-disabled="false">
-  <span class="sort-index">1</span>
-  <div class="sort-item-con"></div>
-</li><li class="sort-type-require ui-droppable" aria-disabled="false">
-  <span class="sort-index">2</span>
-  <div class="sort-item-con"></div>
-</li><li class="sort-type-option ui-droppable" aria-disabled="false">
-  <span class="sort-index">3</span>
-  <div class="sort-item-con"></div>
-</li><li class="sort-type-option ui-droppable" aria-disabled="false">
-  <span class="sort-index">4</span>
-  <div class="sort-item-con"></div>
-</li></ul>
-  <ul class="sort-right">
+    <li class="sort-type-require ui-droppable" aria-disabled="false">
+    <span class="sort-index">1</span>
+    <div class="sort-item-con"></div>
+  </li><li class="sort-type-require ui-droppable" aria-disabled="false">
+    <span class="sort-index">2</span>
+    <div class="sort-item-con"></div>
+  </li><li class="sort-type-option ui-droppable" aria-disabled="false">
+    <span class="sort-index">3</span>
+    <div class="sort-item-con"></div>
+  </li><li class="sort-type-option ui-droppable" aria-disabled="false">
+    <span class="sort-index">4</span>
+    <div class="sort-item-con"></div>
+  </li></ul>
+    <ul class="sort-right">
 
-  <li style="display: list-item;">
-    <div class="sort-item ui-draggable" id="" style="display: block;">
+    <li style="display: list-item;">
+      <div class="sort-item ui-draggable" id="" style="display: block;">
+      <em class="sort-item-drag"></em>
+      <div class="sort-item-detail">选项一</div>
+      </div>
+    </li>
+
+    <li style="display: list-item;"><div class="sort-item ui-draggable" id="" style="display: block;">
     <em class="sort-item-drag"></em>
-    <div class="sort-item-detail">选项一</div>
-    </div>
-  </li>
-
+    <div class="sort-item-detail">选项二</div>
+  </div></li>
   <li style="display: list-item;"><div class="sort-item ui-draggable" id="" style="display: block;">
-  <em class="sort-item-drag"></em>
-  <div class="sort-item-detail">选项二</div>
-</div></li>
-<li style="display: list-item;"><div class="sort-item ui-draggable" id="" style="display: block;">
-  <em class="sort-item-drag"></em>
-  <div class="sort-item-detail">选项三</div>
-</div></li>
-<li style="display: list-item;"><div class="sort-item ui-draggable" id="" style="display: block;">
-  <em class="sort-item-drag"></em>
-  <div class="sort-item-detail">选项四</div>
-</div>
-</li>
-</ul>
-
-  
-</div></div> 
-    <!-- 排序题 预览 end -->
-
+    <em class="sort-item-drag"></em>
+    <div class="sort-item-detail">选项三</div>
+  </div></li>
+  <li style="display: list-item;"><div class="sort-item ui-draggable" id="" style="display: block;">
+    <em class="sort-item-drag"></em>
+    <div class="sort-item-detail">选项四</div>
   </div>
-</div>
-   <!-- 选择题 编辑 start -->
-<div id="" class="q-designer ui-droppable"><div class="editor">
-  <div class="editor-top-bg"></div>
-  <div class="editor-main">
+  </li>
+  </ul>
+
     
-    <!-- 左侧编辑区域 -->
-    <div class="editor-left">
-      
-      <!-- 左侧顶部：题目类型、切换按钮 -->
-      <div class="editor-left-head">
-        <h1 class="q-type"><strong>05</strong>选择题</h1>
-        <em class="star" style="display: inline;">*</em>
-        <div class="editor-method"><ul class="od-icon-buttons">
-  <li class="icon-btn icon-btn-l"><button title="" data-original-title="可视化编辑模式" class="active"><em class="icon od-icon-eye eye-active"></em></button></li><li class="icon-btn icon-btn-r"><button title="" data-original-title="输入代码编辑模式"><em class="icon od-icon-pc"></em></button></li>
-</ul></div>
-      </div>
-      <!-- /左侧顶部：题目类型、切换按钮 -->
+  </div></div> 
+      <!-- 排序题 预览 end -->
 
-      <!--左侧下方：问题内容 -->
-      <div class="editor-left-body editor-left-body-visual" style="display: block;">
-        <div class="q-title"><div class="od-rich-input" id="">
-  
-  <textarea style="width: 563px;"></textarea>
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div>
-        <div class="q-note" style="display: none;"><textarea>请输入您的答案提示</textarea></div>
-        <div class="q-body"><div class="q-items ui-sortable"><div class="od-item" id="">
-  <em class="drag-btn "></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" style="width: 411px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --><button class="close-btn close-btn-hide" title="删除"></button>
-</div><div class="od-item" id="">
-  <em class="drag-btn "></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" style="width: 411px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --><button class="close-btn close-btn-hide" title="删除"></button>
-</div><div class="od-item" id="">
-  <em class="drag-btn "></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" style="width: 411px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --><button class="close-btn close-btn-hide" title="删除"></button>
-</div><div class="od-item" id="">
-  <em class="drag-btn "></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" style="width: 411px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --><button class="close-btn close-btn-hide" title="删除"></button>
-</div></div><div class="q-other-item" style="display: block;"><div class="od-item" id="">
-  <em class="drag-btn drag-btn-hide"></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" class="other" style="width: 408px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --> 
-</div></div><div class="q-new-opt"><div class="od-left-icon-btn" style="width:90px">
-<span class="left-icon-btn-bg-l"><em class="icon od-icon-add"></em></span>添加新选项
-</div></div></div>
-      </div>
-      <div class="editor-left-body editor-left-body-code" style="display: none;">
-        <textarea></textarea>
-      </div>
-      <!-- /左侧下方：问题内容 -->
-      
     </div>
-    <!-- /左侧编辑区域 -->
-    
-    <!-- 右侧编辑区域 -->
-    <div class="editor-right">
-      <div class="item"><div class="od-checkbox" id="">
-  <em class="checked"></em><span>必答题</span>
-</div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
-  <em class=""></em><span>答题指导</span>
-</div></div><div class="dotted"></div><h2>可选个数</h2><div class="item"><div class="od-selector od-dropdown-target" style="width: 120px; margin-top: 0px;" id="">
-  <div class="selector-box">
-    <b>
-      <span style="width: 94px;">单选 - 选项</span>
-      <em class="pull-down"></em>
-    </b>
   </div>
-<ul class="od-dropdown" style="width: 94px; display: none;">
-  
-  <li class="first-child">单选 - 选项</li>
-  
-  <li class="odd">单选 - 下拉框</li>
-  
-  <li>多选 - 不限制</li>
-  
-  <li class="odd">多选 - 固定</li>
-  
-  <li>多选 - 带上限</li>
-  
-  <li class="odd">多选 - 带下限</li>
-  
-  <li class="last-child">多选 - 自定义</li>
-
-</ul></div></div><div class="item"><div class="opt-type opt-type-3" style="display: none;">限制选择 <input class="tiny-ipt" type="text"><input class="tiny-ipt" type="text" style="display:none;"> 项 </div></div><div class="item"><div class="opt-type opt-type-4" style="display: none;">最多选择 <input class="tiny-ipt" type="text" style="display:none;"><input class="tiny-ipt" type="text"> 项 </div></div><div class="item"><div class="opt-type opt-type-5" style="display: none;">至少选择 <input class="tiny-ipt" type="text"><input class="tiny-ipt" type="text" style="display:none;"> 项 </div></div><div class="item"><div class="opt-type opt-type-6" style="display: none;">选择 <input class="tiny-ipt" type="text"> 到 <input class="tiny-ipt" type="text"> 项 </div></div><div class="dotted" style="display: none;"></div><h2 style="display: none;">选项分栏</h2><div class="item" style="display: none;"><div class="od-selector od-dropdown-target" style="width: 120px; margin: 0px;" id="">
-  <div class="selector-box">
-    <b>
-      <span style="width: 94px;">1 栏</span>
-      <em class="pull-down"></em>
-    </b>
-  </div>
-<ul class="od-dropdown" style="width: 94px; display: none;">
-  
-  <li class="first-child">1 栏</li>
-  
-  <li class="odd">2 栏</li>
-  
-  <li>3 栏</li>
-  
-  <li class="odd">4 栏</li>
-  
-  <li class="last-child">5 栏</li>
-
-</ul></div></div><div class="dotted"></div><div class="item"><div class="od-checkbox" id="">
-  <em class="checked"></em><span>带"其他"项</span>
-</div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
-  <em class=""></em><span>设置排他项</span>
-</div></div><div class="item" style="display: none;"><div class="exclusive-con" style="display: none;"><a href="javascript:void(0);" title="选项1">1</a><a href="javascript:void(0);" title="选项2">2</a><a href="javascript:void(0);" title="选项3">3</a><a href="javascript:void(0);" title="选项4">4</a><a href="javascript:void(0);" title="选项5">5</a></div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
-  <em class=""></em><span>选项乱序</span>
-</div></div><div class="dotted after_items" style="margin-bottom:0;"></div>
-      <button class="unfold-btn" title="展开"><em></em></button>
-      <button class="packUp-btn" title="收起" style="display:none;"><em></em></button>
-    </div>  
-    <!-- /右侧编辑区域 -->
+     <!-- 选择题 编辑 start -->
+  <div id="" class="q-designer ui-droppable"><div class="editor">
+    <div class="editor-top-bg"></div>
+    <div class="editor-main">
       
-  </div>
-
-  <div class="editor-bottom-bg"></div>
-  
-  <div class="btn-confirm-box">
-    <button class="btn-cancel">取消</button>
-    <button class="btn-confirm">确定</button>
-  </div>
-</div></div>
-
-    <!-- 选择题 编辑 end -->
-
-    <!-- 文字描述 编辑 start -->
-    <div id="" class="q-designer ui-droppable"><div class="editor">
-  <div class="editor-paragraph-top"></div>
-  <div class="editor-paragraph-main">
-    <div class="paragraph-content">
-      <h1>文本段</h1>
-      <div class="p-content"><div class="od-rich-input" id="">
-  
-  <textarea style="width: 563px; height: 98px; background-image: none; background-position: initial initial; background-repeat: initial initial;"></textarea>
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div>
-      <div class="p-btn">
-        <div>
-          <button class="od-button ok-btn">确 定</button>
+      <!-- 左侧编辑区域 -->
+      <div class="editor-left">
+        
+        <!-- 左侧顶部：题目类型、切换按钮 -->
+        <div class="editor-left-head">
+          <h1 class="q-type"><strong>05</strong>选择题</h1>
+          <em class="star" style="display: inline;">*</em>
+          <div class="editor-method"><ul class="od-icon-buttons">
+    <li class="icon-btn icon-btn-l"><button title="" data-original-title="可视化编辑模式" class="active"><em class="icon od-icon-eye eye-active"></em></button></li><li class="icon-btn icon-btn-r"><button title="" data-original-title="输入代码编辑模式"><em class="icon od-icon-pc"></em></button></li>
+  </ul></div>
         </div>
-        <div>
-          <button class="cancel-btn">取 消</button>
+        <!-- /左侧顶部：题目类型、切换按钮 -->
+
+        <!--左侧下方：问题内容 -->
+        <div class="editor-left-body editor-left-body-visual" style="display: block;">
+          <div class="q-title"><div class="od-rich-input" id="">
+    
+    <textarea style="width: 563px;"></textarea>
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div>
+          <div class="q-note" style="display: none;"><textarea>请输入您的答案提示</textarea></div>
+          <div class="q-body"><div class="q-items ui-sortable"><div class="od-item" id="">
+    <em class="drag-btn "></em><!-- 
+    --><div><div class="od-rich-input">
+    
+    <input type="text" style="width: 411px;">
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div><!-- 
+    --><button class="close-btn close-btn-hide" title="删除"></button>
+  </div><div class="od-item" id="">
+    <em class="drag-btn "></em><!-- 
+    --><div><div class="od-rich-input">
+    
+    <input type="text" style="width: 411px;">
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div><!-- 
+    --><button class="close-btn close-btn-hide" title="删除"></button>
+  </div><div class="od-item" id="">
+    <em class="drag-btn "></em><!-- 
+    --><div><div class="od-rich-input">
+    
+    <input type="text" style="width: 411px;">
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div><!-- 
+    --><button class="close-btn close-btn-hide" title="删除"></button>
+  </div><div class="od-item" id="">
+    <em class="drag-btn "></em><!-- 
+    --><div><div class="od-rich-input">
+    
+    <input type="text" style="width: 411px;">
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div><!-- 
+    --><button class="close-btn close-btn-hide" title="删除"></button>
+  </div></div><div class="q-other-item" style="display: block;"><div class="od-item" id="">
+    <em class="drag-btn drag-btn-hide"></em><!-- 
+    --><div><div class="od-rich-input">
+    
+    <input type="text" class="other" style="width: 408px;">
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div><!-- 
+    --> 
+  </div></div><div class="q-new-opt"><div class="od-left-icon-btn" style="width:90px">
+  <span class="left-icon-btn-bg-l"><em class="icon od-icon-add"></em></span>添加新选项
+  </div></div></div>
+        </div>
+        <div class="editor-left-body editor-left-body-code" style="display: none;">
+          <textarea></textarea>
+        </div>
+        <!-- /左侧下方：问题内容 -->
+        
+      </div>
+      <!-- /左侧编辑区域 -->
+      
+      <!-- 右侧编辑区域 -->
+      <div class="editor-right">
+        <div class="item"><div class="od-checkbox" id="">
+    <em class="checked"></em><span>必答题</span>
+  </div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
+    <em class=""></em><span>答题指导</span>
+  </div></div><div class="dotted"></div><h2>可选个数</h2><div class="item"><div class="od-selector od-dropdown-target" style="width: 120px; margin-top: 0px;" id="">
+    <div class="selector-box">
+      <b>
+        <span style="width: 94px;">单选 - 选项</span>
+        <em class="pull-down"></em>
+      </b>
+    </div>
+  <ul class="od-dropdown" style="width: 94px; display: none;">
+    
+    <li class="first-child">单选 - 选项</li>
+    
+    <li class="odd">单选 - 下拉框</li>
+    
+    <li>多选 - 不限制</li>
+    
+    <li class="odd">多选 - 固定</li>
+    
+    <li>多选 - 带上限</li>
+    
+    <li class="odd">多选 - 带下限</li>
+    
+    <li class="last-child">多选 - 自定义</li>
+
+  </ul></div></div><div class="item"><div class="opt-type opt-type-3" style="display: none;">限制选择 <input class="tiny-ipt" type="text"><input class="tiny-ipt" type="text" style="display:none;"> 项 </div></div><div class="item"><div class="opt-type opt-type-4" style="display: none;">最多选择 <input class="tiny-ipt" type="text" style="display:none;"><input class="tiny-ipt" type="text"> 项 </div></div><div class="item"><div class="opt-type opt-type-5" style="display: none;">至少选择 <input class="tiny-ipt" type="text"><input class="tiny-ipt" type="text" style="display:none;"> 项 </div></div><div class="item"><div class="opt-type opt-type-6" style="display: none;">选择 <input class="tiny-ipt" type="text"> 到 <input class="tiny-ipt" type="text"> 项 </div></div><div class="dotted" style="display: none;"></div><h2 style="display: none;">选项分栏</h2><div class="item" style="display: none;"><div class="od-selector od-dropdown-target" style="width: 120px; margin: 0px;" id="">
+    <div class="selector-box">
+      <b>
+        <span style="width: 94px;">1 栏</span>
+        <em class="pull-down"></em>
+      </b>
+    </div>
+  <ul class="od-dropdown" style="width: 94px; display: none;">
+    
+    <li class="first-child">1 栏</li>
+    
+    <li class="odd">2 栏</li>
+    
+    <li>3 栏</li>
+    
+    <li class="odd">4 栏</li>
+    
+    <li class="last-child">5 栏</li>
+
+  </ul></div></div><div class="dotted"></div><div class="item"><div class="od-checkbox" id="">
+    <em class="checked"></em><span>带"其他"项</span>
+  </div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
+    <em class=""></em><span>设置排他项</span>
+  </div></div><div class="item" style="display: none;"><div class="exclusive-con" style="display: none;"><a href="javascript:void(0);" title="选项1">1</a><a href="javascript:void(0);" title="选项2">2</a><a href="javascript:void(0);" title="选项3">3</a><a href="javascript:void(0);" title="选项4">4</a><a href="javascript:void(0);" title="选项5">5</a></div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
+    <em class=""></em><span>选项乱序</span>
+  </div></div><div class="dotted after_items" style="margin-bottom:0;"></div>
+        <button class="unfold-btn" title="展开"><em></em></button>
+        <button class="packUp-btn" title="收起" style="display:none;"><em></em></button>
+      </div>  
+      <!-- /右侧编辑区域 -->
+        
+    </div>
+
+    <div class="editor-bottom-bg"></div>
+    
+    <div class="btn-confirm-box">
+      <button class="btn-cancel">取消</button>
+      <button class="btn-confirm">确定</button>
+    </div>
+  </div></div>
+
+      <!-- 选择题 编辑 end -->
+
+      <!-- 文字描述 编辑 start -->
+      <div id="" class="q-designer ui-droppable"><div class="editor">
+    <div class="editor-paragraph-top"></div>
+    <div class="editor-paragraph-main">
+      <div class="paragraph-content">
+        <h1>文本段</h1>
+        <div class="p-content"><div class="od-rich-input" id="">
+    
+    <textarea style="width: 563px; height: 98px; background-image: none; background-position: initial initial; background-repeat: initial initial;"></textarea>
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div>
+        <div class="p-btn">
+          <div>
+            <button class="od-button ok-btn">确 定</button>
+          </div>
+          <div>
+            <button class="cancel-btn">取 消</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="editor-paragraph-bottom"></div>
-</div></div>
-    <!-- 文字描述 编辑 end -->
+    <div class="editor-paragraph-bottom"></div>
+  </div></div>
+      <!-- 文字描述 编辑 end -->
 
 
-    <!-- 评分题 编辑 start -->
-    <div id="" class="q-designer ui-droppable"><div class="editor">
-  <div class="editor-top-bg"></div>
-  <div class="editor-main">
-    
-    <!-- 左侧编辑区域 -->
-    <div class="editor-left">
+      <!-- 评分题 编辑 start -->
+      <div id="" class="q-designer ui-droppable"><div class="editor">
+    <div class="editor-top-bg"></div>
+    <div class="editor-main">
       
-      <!-- 左侧顶部：题目类型、切换按钮 -->
-      <div class="editor-left-head">
-        <h1 class="q-type"><strong>13</strong>量表题</h1>
-        <em class="star" style="display: inline;">*</em>
-        <div class="editor-method"><ul class="od-icon-buttons">
-  <li class="icon-btn icon-btn-l"><button title="" data-original-title="可视化编辑模式" class="active"><em class="icon od-icon-eye eye-active"></em></button></li><li class="icon-btn icon-btn-r"><button title="" data-original-title="输入代码编辑模式"><em class="icon od-icon-pc"></em></button></li>
-</ul></div>
-      </div>
-      <!-- /左侧顶部：题目类型、切换按钮 -->
+      <!-- 左侧编辑区域 -->
+      <div class="editor-left">
+        
+        <!-- 左侧顶部：题目类型、切换按钮 -->
+        <div class="editor-left-head">
+          <h1 class="q-type"><strong>13</strong>量表题</h1>
+          <em class="star" style="display: inline;">*</em>
+          <div class="editor-method"><ul class="od-icon-buttons">
+    <li class="icon-btn icon-btn-l"><button title="" data-original-title="可视化编辑模式" class="active"><em class="icon od-icon-eye eye-active"></em></button></li><li class="icon-btn icon-btn-r"><button title="" data-original-title="输入代码编辑模式"><em class="icon od-icon-pc"></em></button></li>
+  </ul></div>
+        </div>
+        <!-- /左侧顶部：题目类型、切换按钮 -->
 
-      <!--左侧下方：问题内容 -->
-      <div class="editor-left-body editor-left-body-visual" style="display: block;">
-        <div class="q-title"><div class="od-rich-input" id="">
-  
-  <textarea style="width: 563px;"></textarea>
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div>
-        <div class="q-note" style="display: none;"><textarea>请输入您的答案提示</textarea></div>
-        <div class="q-body"><div class="q-items ui-sortable"><div class="od-item" id="">
-  <em class="drag-btn "></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" style="width: 411px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --><button class="close-btn close-btn-hide" title="删除"></button>
-</div><div class="od-item" id="">
-  <em class="drag-btn "></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" style="width: 411px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --><button class="close-btn close-btn-hide" title="删除"></button>
-</div><div class="od-item" id="">
-  <em class="drag-btn "></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" style="width: 411px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --><button class="close-btn close-btn-hide" title="删除"></button>
-</div><div class="od-item" id="">
-  <em class="drag-btn "></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" style="width: 411px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --><button class="close-btn close-btn-hide" title="删除"></button>
-</div></div><div class="q-other-item" style="display: none;"><div class="od-item" id="">
-  <em class="drag-btn drag-btn-hide"></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" class="other" style="width: 408px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --> 
-</div></div><div class="q-new-opt"><div class="od-left-icon-btn" style="width:90px">
-<span class="left-icon-btn-bg-l"><em class="icon od-icon-add"></em></span>添加新选项
-</div></div><table class="scale-labels">
-  <tbody><tr>
+        <!--左侧下方：问题内容 -->
+        <div class="editor-left-body editor-left-body-visual" style="display: block;">
+          <div class="q-title"><div class="od-rich-input" id="">
     
-    <td><input type="text" value="很不满意"></td>
+    <textarea style="width: 563px;"></textarea>
     
-    <td><input type="text" value="不太满意"></td>
-    
-    <td><input type="text" value="一般"></td>
-    
-    <td><input type="text" value="比较满意"></td>
-    
-    <td><input type="text" value="很满意"></td>
-    
-  </tr>
-  <tr>
-    
-    <td>（1 分）</td>
-    
-    <td>（2 分）</td>
-    
-    <td>（3 分）</td>
-    
-    <td>（4 分）</td>
-    
-    <td>（5 分）</td>
-    
-  </tr>
-</tbody></table></div>
-      </div>
-      <div class="editor-left-body editor-left-body-code" style="display: none;">
-        <textarea></textarea>
-      </div>
-      <!-- /左侧下方：问题内容 -->
-      
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
     </div>
-    <!-- /左侧编辑区域 -->
+  </div></div>
+          <div class="q-note" style="display: none;"><textarea>请输入您的答案提示</textarea></div>
+          <div class="q-body"><div class="q-items ui-sortable"><div class="od-item" id="">
+    <em class="drag-btn "></em><!-- 
+    --><div><div class="od-rich-input">
     
-    <!-- 右侧编辑区域 -->
-    <div class="editor-right">
-      <div class="item"><div class="od-checkbox" id="">
-  <em class="checked"></em><span>必答题</span>
-</div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
-  <em class=""></em><span>答题指导</span>
-</div></div><div class="dotted"></div><h2>选项对齐</h2><div class="item"><div class="od-selector od-dropdown-target" style="width:120px" id="">
-  <div class="selector-box">
-    <b>
-      <span style="width: 94px;">左对齐</span>
-      <em class="pull-down"></em>
-    </b>
-  </div>
-<ul class="od-dropdown" style="width: 94px; display: none;">
-  
-  <li class="first-child">左对齐</li>
-  
-  <li class="odd">中对齐</li>
-  
-  <li class="last-child">右对齐</li>
-  
-  <!--
-  <li class="top">选项1</li>
-  <li class="interval">选项2</li>
-  <li>选项3</li>
-  <li class="interval">选项4</li>
-  <li class="bottom">选项5</li>
-  -->
-</ul></div></div><div class="dotted"></div><h2>标签数量</h2><div class="item"><div class="od-selector od-dropdown-target" style="width:120px" id="">
-  <div class="selector-box">
-    <b>
-      <span style="width: 94px;">5 个</span>
-      <em class="pull-down"></em>
-    </b>
-  </div>
-<ul class="od-dropdown" style="width: 94px; display: none;">
-  
-  <li class="first-child">2 个</li>
-  
-  <li class="odd">3 个</li>
-  
-  <li>4 个</li>
-  
-  <li class="odd">5 个</li>
-  
-  <li>6 个</li>
-  
-  <li class="last-child odd">7 个</li>
-
-</ul></div></div><div class="item"><div class="od-checkbox" id="">
-  <em class=""></em><span>显示“不清楚”项</span>
-</div></div><div class="dotted" style="display: none;"></div><h2 style="display: none;">选项分组</h2><div class="item" style="display: none;"><div class="od-selector od-dropdown-target" style="width:120px" id="">
-  <div class="selector-box">
-    <b>
-      <span style="width: 94px;">不分组</span>
-      <em class="pull-down"></em>
-    </b>
-  </div>
-<ul class="od-dropdown" style="width: 94px; display: none;">
-  
-  <li class="first-child">不分组</li>
-  
-  <li class="odd">5 项一组</li>
-  
-  <li>10 项一组</li>
-  
-  <li class="odd">15 项一组</li>
-  
-  <li>20 项一组</li>
-  
-  <li class="last-child odd">25 项一组</li>
-
-</ul></div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
-  <em class=""></em><span>选项乱序</span>
-</div></div><div class="dotted after_items" style="margin-bottom:0;"></div>
-      <button class="unfold-btn" title="展开"><em></em></button>
-      <button class="packUp-btn" title="收起" style="display:none;"><em></em></button>
-    </div>  
-    <!-- /右侧编辑区域 -->
-      
-  </div>
-
-  <div class="editor-bottom-bg"></div>
-  
-  <div class="btn-confirm-box">
-    <button class="btn-cancel">取消</button>
-    <button class="btn-confirm">确定</button>
-  </div>
-</div></div>
-<!-- 评分题 编辑 end -->
-
-
-<!-- 矩阵选择题 编辑 start -->
-<div id="" class="q-designer ui-droppable"><div class="editor">
-  <div class="editor-top-bg"></div>
-  <div class="editor-main">
+    <input type="text" style="width: 411px;">
     
-    <!-- 左侧编辑区域 -->
-    <div class="editor-left">
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div><!-- 
+    --><button class="close-btn close-btn-hide" title="删除"></button>
+  </div><div class="od-item" id="">
+    <em class="drag-btn "></em><!-- 
+    --><div><div class="od-rich-input">
+    
+    <input type="text" style="width: 411px;">
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div><!-- 
+    --><button class="close-btn close-btn-hide" title="删除"></button>
+  </div><div class="od-item" id="">
+    <em class="drag-btn "></em><!-- 
+    --><div><div class="od-rich-input">
+    
+    <input type="text" style="width: 411px;">
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div><!-- 
+    --><button class="close-btn close-btn-hide" title="删除"></button>
+  </div><div class="od-item" id="">
+    <em class="drag-btn "></em><!-- 
+    --><div><div class="od-rich-input">
+    
+    <input type="text" style="width: 411px;">
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div><!-- 
+    --><button class="close-btn close-btn-hide" title="删除"></button>
+  </div></div><div class="q-other-item" style="display: none;"><div class="od-item" id="">
+    <em class="drag-btn drag-btn-hide"></em><!-- 
+    --><div><div class="od-rich-input">
+    
+    <input type="text" class="other" style="width: 408px;">
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div><!-- 
+    --> 
+  </div></div><div class="q-new-opt"><div class="od-left-icon-btn" style="width:90px">
+  <span class="left-icon-btn-bg-l"><em class="icon od-icon-add"></em></span>添加新选项
+  </div></div><table class="scale-labels">
+    <tbody><tr>
       
-      <!-- 左侧顶部：题目类型、切换按钮 -->
-      <div class="editor-left-head">
-        <h1 class="q-type"><strong>14</strong>矩阵选择题</h1>
-        <em class="star" style="display: inline;">*</em>
-        <div class="editor-method"><ul class="od-icon-buttons">
-  <li class="icon-btn icon-btn-l"><button title="" data-original-title="可视化编辑模式" class="active"><em class="icon od-icon-eye eye-active"></em></button></li><li class="icon-btn icon-btn-r"><button title="" data-original-title="输入代码编辑模式"><em class="icon od-icon-pc"></em></button></li>
-</ul></div>
+      <td><input type="text" value="很不满意"></td>
+      
+      <td><input type="text" value="不太满意"></td>
+      
+      <td><input type="text" value="一般"></td>
+      
+      <td><input type="text" value="比较满意"></td>
+      
+      <td><input type="text" value="很满意"></td>
+      
+    </tr>
+    <tr>
+      
+      <td>（1 分）</td>
+      
+      <td>（2 分）</td>
+      
+      <td>（3 分）</td>
+      
+      <td>（4 分）</td>
+      
+      <td>（5 分）</td>
+      
+    </tr>
+  </tbody></table></div>
+        </div>
+        <div class="editor-left-body editor-left-body-code" style="display: none;">
+          <textarea></textarea>
+        </div>
+        <!-- /左侧下方：问题内容 -->
+        
       </div>
-      <!-- /左侧顶部：题目类型、切换按钮 -->
+      <!-- /左侧编辑区域 -->
+      
+      <!-- 右侧编辑区域 -->
+      <div class="editor-right">
+        <div class="item"><div class="od-checkbox" id="">
+    <em class="checked"></em><span>必答题</span>
+  </div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
+    <em class=""></em><span>答题指导</span>
+  </div></div><div class="dotted"></div><h2>选项对齐</h2><div class="item"><div class="od-selector od-dropdown-target" style="width:120px" id="">
+    <div class="selector-box">
+      <b>
+        <span style="width: 94px;">左对齐</span>
+        <em class="pull-down"></em>
+      </b>
+    </div>
+  <ul class="od-dropdown" style="width: 94px; display: none;">
+    
+    <li class="first-child">左对齐</li>
+    
+    <li class="odd">中对齐</li>
+    
+    <li class="last-child">右对齐</li>
+    
+    <!--
+    <li class="top">选项1</li>
+    <li class="interval">选项2</li>
+    <li>选项3</li>
+    <li class="interval">选项4</li>
+    <li class="bottom">选项5</li>
+    -->
+  </ul></div></div><div class="dotted"></div><h2>标签数量</h2><div class="item"><div class="od-selector od-dropdown-target" style="width:120px" id="">
+    <div class="selector-box">
+      <b>
+        <span style="width: 94px;">5 个</span>
+        <em class="pull-down"></em>
+      </b>
+    </div>
+  <ul class="od-dropdown" style="width: 94px; display: none;">
+    
+    <li class="first-child">2 个</li>
+    
+    <li class="odd">3 个</li>
+    
+    <li>4 个</li>
+    
+    <li class="odd">5 个</li>
+    
+    <li>6 个</li>
+    
+    <li class="last-child odd">7 个</li>
+
+  </ul></div></div><div class="item"><div class="od-checkbox" id="">
+    <em class=""></em><span>显示“不清楚”项</span>
+  </div></div><div class="dotted" style="display: none;"></div><h2 style="display: none;">选项分组</h2><div class="item" style="display: none;"><div class="od-selector od-dropdown-target" style="width:120px" id="">
+    <div class="selector-box">
+      <b>
+        <span style="width: 94px;">不分组</span>
+        <em class="pull-down"></em>
+      </b>
+    </div>
+  <ul class="od-dropdown" style="width: 94px; display: none;">
+    
+    <li class="first-child">不分组</li>
+    
+    <li class="odd">5 项一组</li>
+    
+    <li>10 项一组</li>
+    
+    <li class="odd">15 项一组</li>
+    
+    <li>20 项一组</li>
+    
+    <li class="last-child odd">25 项一组</li>
+
+  </ul></div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
+    <em class=""></em><span>选项乱序</span>
+  </div></div><div class="dotted after_items" style="margin-bottom:0;"></div>
+        <button class="unfold-btn" title="展开"><em></em></button>
+        <button class="packUp-btn" title="收起" style="display:none;"><em></em></button>
+      </div>  
+      <!-- /右侧编辑区域 -->
+        
+    </div>
+
+    <div class="editor-bottom-bg"></div>
+    
+    <div class="btn-confirm-box">
+      <button class="btn-cancel">取消</button>
+      <button class="btn-confirm">确定</button>
+    </div>
+  </div></div>
+  <!-- 评分题 编辑 end -->
+
+
+  <!-- 矩阵选择题 编辑 start -->
+  <div id="" class="q-designer ui-droppable"><div class="editor">
+    <div class="editor-top-bg"></div>
+    <div class="editor-main">
+      
+      <!-- 左侧编辑区域 -->
+      <div class="editor-left">
+        
+        <!-- 左侧顶部：题目类型、切换按钮 -->
+        <div class="editor-left-head">
+          <h1 class="q-type"><strong>14</strong>矩阵选择题</h1>
+          <em class="star" style="display: inline;">*</em>
+          <div class="editor-method"><ul class="od-icon-buttons">
+    <li class="icon-btn icon-btn-l"><button title="" data-original-title="可视化编辑模式" class="active"><em class="icon od-icon-eye eye-active"></em></button></li><li class="icon-btn icon-btn-r"><button title="" data-original-title="输入代码编辑模式"><em class="icon od-icon-pc"></em></button></li>
+  </ul></div>
+        </div>
+        <!-- /左侧顶部：题目类型、切换按钮 -->
 
       <!--左侧下方：问题内容 -->
       <div class="editor-left-body editor-left-body-visual" style="display: block;">
@@ -958,377 +955,377 @@
       </div>
       <div class="editor-left-body editor-left-body-code" style="display: none;">
         <textarea></textarea>
+
+ 
       </div>
-      <!-- /左侧下方：问题内容 -->
+      <!-- /左侧编辑区域 -->
       
+   
+        
     </div>
-    <!-- /左侧编辑区域 -->
+
+   <!-- 右侧编辑区域 -->
+      <div class="editor-right">
+        <div class="item"><div class="od-checkbox" id="">
+    <em class="checked"></em><span>必答题</span>
+  </div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
+    <em class=""></em><span>答题指导</span>
+  </div></div><div class="dotted"></div><h1>子问题设置</h1><div class="item"><div class="od-selector od-dropdown-target" style="width:120px" id="">
+    <div class="selector-box">
+      <b>
+        <span style="width: 94px;">左对齐</span>
+        <em class="pull-down"></em>
+      </b>
+    </div>
+  <ul class="od-dropdown" style="width: 94px; display: none;">
     
-    <!-- 右侧编辑区域 -->
-    <div class="editor-right">
-      <div class="item"><div class="od-checkbox" id="">
-  <em class="checked"></em><span>必答题</span>
-</div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
-  <em class=""></em><span>答题指导</span>
-</div></div><div class="dotted"></div><h1>子问题设置</h1><div class="item"><div class="od-selector od-dropdown-target" style="width:120px" id="">
-  <div class="selector-box">
-    <b>
-      <span style="width: 94px;">左对齐</span>
-      <em class="pull-down"></em>
-    </b>
-  </div>
-<ul class="od-dropdown" style="width: 94px; display: none;">
-  
-  <li class="first-child">左对齐</li>
-  
-  <li class="odd">中对齐</li>
-  
-  <li class="last-child">右对齐</li>
-  
-  <!--
-  <li class="top">选项1</li>
-  <li class="interval">选项2</li>
-  <li>选项3</li>
-  <li class="interval">选项4</li>
-  <li class="bottom">选项5</li>
-  -->
-</ul></div></div><div class="item" style="display: none;"><div class="od-selector od-dropdown-target" style="width:120px" id="">
-  <div class="selector-box">
-    <b>
-      <span style="width: 94px;">不分组</span>
-      <em class="pull-down"></em>
-    </b>
-  </div>
-<ul class="od-dropdown" style="width: 94px; display: none;">
-  
-  <li class="first-child">不分组</li>
-  
-  <li class="odd">5 题一组</li>
-  
-  <li>10 题一组</li>
-  
-  <li class="odd">15 题一组</li>
-  
-  <li>20 题一组</li>
-  
-  <li class="last-child odd">25 题一组</li>
-  
+    <li class="first-child">左对齐</li>
+    
+    <li class="odd">中对齐</li>
+    
+    <li class="last-child">右对齐</li>
+    
+    <!--
+    <li class="top">选项1</li>
+    <li class="interval">选项2</li>
+    <li>选项3</li>
+    <li class="interval">选项4</li>
+    <li class="bottom">选项5</li>
+    -->
+  </ul></div></div><div class="item" style="display: none;"><div class="od-selector od-dropdown-target" style="width:120px" id="">
+    <div class="selector-box">
+      <b>
+        <span style="width: 94px;">不分组</span>
+        <em class="pull-down"></em>
+      </b>
+    </div>
+  <ul class="od-dropdown" style="width: 94px; display: none;">
+    
+    <li class="first-child">不分组</li>
+    
+    <li class="odd">5 题一组</li>
+    
+    <li>10 题一组</li>
+    
+    <li class="odd">15 题一组</li>
+    
+    <li>20 题一组</li>
+    
+    <li class="last-child odd">25 题一组</li>
+    
 
-</ul></div></div><div class="item"><div class="od-checkbox" id="">
-  <em class=""></em><span>子问题乱序</span>
-</div></div><div class="dotted"></div><h1>选项设置</h1><div class="item"><div class="od-selector od-dropdown-target" style="width: 120px; margin-top: 0px;" id="">
-  <div class="selector-box">
-    <b>
-      <span style="width: 94px;">单选</span>
-      <em class="pull-down"></em>
-    </b>
-  </div>
-<ul class="od-dropdown" style="width: 94px; display: none;">
-  
-  <li class="first-child">单选</li>
-  
-  <li class="odd">多选 - 不限制</li>
-  
-  <li>多选 - 固定</li>
-  
-  <li class="odd">多选 - 带上限</li>
-  
-  <li>多选 - 带下限</li>
-  
-  <li class="last-child odd">多选 - 自定义</li>
-  
+  </ul></div></div><div class="item"><div class="od-checkbox" id="">
+    <em class=""></em><span>子问题乱序</span>
+  </div></div><div class="dotted"></div><h1>选项设置</h1><div class="item"><div class="od-selector od-dropdown-target" style="width: 120px; margin-top: 0px;" id="">
+    <div class="selector-box">
+      <b>
+        <span style="width: 94px;">单选</span>
+        <em class="pull-down"></em>
+      </b>
+    </div>
+  <ul class="od-dropdown" style="width: 94px; display: none;">
+    
+    <li class="first-child">单选</li>
+    
+    <li class="odd">多选 - 不限制</li>
+    
+    <li>多选 - 固定</li>
+    
+    <li class="odd">多选 - 带上限</li>
+    
+    <li>多选 - 带下限</li>
+    
+    <li class="last-child odd">多选 - 自定义</li>
+    
 
-</ul></div></div><div class="item"><div class="opt-type opt-type-2" style="display: none;">限制选择 <input class="tiny-ipt" type="text"><input class="tiny-ipt" type="text" style="display:none;"> 项 </div></div><div class="item"><div class="opt-type opt-type-3" style="display: none;">最多选择 <input class="tiny-ipt" type="text" style="display:none;"><input class="tiny-ipt" type="text"> 项 </div></div><div class="item"><div class="opt-type opt-type-4" style="display: none;">至少选择 <input class="tiny-ipt" type="text"><input class="tiny-ipt" type="text" style="display:none;"> 项 </div></div><div class="item"><div class="opt-type opt-type-5" style="display: none;">选择 <input class="tiny-ipt" type="text"> 到 <input class="tiny-ipt" type="text"> 项 </div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
-  <em class=""></em><span>设置排他项</span>
-</div></div><div class="item" style="display: none;"><div class="exclusive-con" style="display: none;"><a href="javascript:void(0);" title="选项1">1</a><a href="javascript:void(0);" title="选项2">2</a><a href="javascript:void(0);" title="选项3">3</a><a href="javascript:void(0);" title="选项4">4</a></div></div><div class="item"><div class="od-checkbox" id="">
-  <em class=""></em><span>选项乱序</span>
-</div></div><div class="dotted after_items" style="margin-bottom:0;"></div>
-      <button class="unfold-btn" title="展开"><em></em></button>
-      <button class="packUp-btn" title="收起" style="display:none;"><em></em></button>
-    </div>  
-    <!-- /右侧编辑区域 -->
+  </ul></div></div><div class="item"><div class="opt-type opt-type-2" style="display: none;">限制选择 <input class="tiny-ipt" type="text"><input class="tiny-ipt" type="text" style="display:none;"> 项 </div></div><div class="item"><div class="opt-type opt-type-3" style="display: none;">最多选择 <input class="tiny-ipt" type="text" style="display:none;"><input class="tiny-ipt" type="text"> 项 </div></div><div class="item"><div class="opt-type opt-type-4" style="display: none;">至少选择 <input class="tiny-ipt" type="text"><input class="tiny-ipt" type="text" style="display:none;"> 项 </div></div><div class="item"><div class="opt-type opt-type-5" style="display: none;">选择 <input class="tiny-ipt" type="text"> 到 <input class="tiny-ipt" type="text"> 项 </div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
+    <em class=""></em><span>设置排他项</span>
+  </div></div><div class="item" style="display: none;"><div class="exclusive-con" style="display: none;"><a href="javascript:void(0);" title="选项1">1</a><a href="javascript:void(0);" title="选项2">2</a><a href="javascript:void(0);" title="选项3">3</a><a href="javascript:void(0);" title="选项4">4</a></div></div><div class="item"><div class="od-checkbox" id="">
+    <em class=""></em><span>选项乱序</span>
+  </div></div><div class="dotted after_items" style="margin-bottom:0;"></div>
+        <button class="unfold-btn" title="展开"><em></em></button>
+        <button class="packUp-btn" title="收起" style="display:none;"><em></em></button>
+      </div>  
+      <!-- /右侧编辑区域 -->
+    
+    <div class="btn-confirm-box">
+      <button class="btn-cancel">取消</button>
+      <button class="btn-confirm">确定</button>
+    </div>
+  </div></div>
+  <!-- 矩阵选择题 编辑 end -->
+
+
+
+
+    <!-- 填充题 编辑 start -->
+    <div id="" class="q-designer ui-droppable"><div class="editor">
+    <div class="editor-top-bg"></div>
+    <div class="editor-main">
       
-  </div>
+      <!-- 左侧编辑区域 -->
+      <div class="editor-left">
+        
+        <!-- 左侧顶部：题目类型、切换按钮 -->
+        <div class="editor-left-head">
+          <h1 class="q-type"><strong>15</strong>文本填充题</h1>
+          <em class="star" style="display: inline;">*</em>
+          <div class="editor-method" style="display: none;"><ul class="od-icon-buttons">
+    <li class="icon-btn icon-btn-l"><button title="" data-original-title="可视化编辑模式" class="active"><em class="icon od-icon-eye eye-active"></em></button></li><li class="icon-btn icon-btn-r"><button title="" data-original-title="输入代码编辑模式"><em class="icon od-icon-pc"></em></button></li>
+  </ul></div>
+        </div>
+        <!-- /左侧顶部：题目类型、切换按钮 -->
 
-  <div class="editor-bottom-bg"></div>
-  
-  <div class="btn-confirm-box">
-    <button class="btn-cancel">取消</button>
-    <button class="btn-confirm">确定</button>
-  </div>
-</div></div>
-<!-- 矩阵选择题 编辑 end -->
+        <!--左侧下方：问题内容 -->
+        <div class="editor-left-body editor-left-body-visual" style="display: block;">
+          <div class="q-title"><div class="od-rich-input" id="">
+    
+    <textarea style="width: 563px;"></textarea>
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div>
+          <div class="q-note" style="display: none;"><textarea>请输入您的答案提示</textarea></div>
+          <div class="q-body"><div class="text-blank-preview" style="height: 27px; width: 230px;">输入框尺寸预览</div></div>
+        </div>
+        <div class="editor-left-body editor-left-body-code" style="display: none;">
+          <textarea></textarea>
+        </div>
+        <!-- /左侧下方：问题内容 -->
+        
+      </div>
+      <!-- /左侧编辑区域 -->
+      
+      <!-- 右侧编辑区域 -->
+      <div class="editor-right">
+        <div class="item"><div class="od-checkbox" id="">
+    <em class="checked"></em><span>必答题</span>
+  </div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
+    <em class=""></em><span>答题指导</span>
+  </div></div><div class="dotted"></div><h2>字数限制</h2><div class="item"><div class="od-selector od-dropdown-target" style="width:120px" id="">
+    <div class="selector-box">
+      <b>
+        <span style="width: 94px;">自定义</span>
+        <em class="pull-down"></em>
+      </b>
+    </div>
+  <ul class="od-dropdown" style="width: 94px; display: none;">
+    
+    <li class="first-child">不限制</li>
+    
+    <li class="odd">设下限</li>
+    
+    <li>设上限</li>
+    
+    <li class="last-child odd">自定义</li>
 
+  </ul></div></div><div class="item"><div class="min-max">
+    <div style="display: none;">至少填写 <input class="tiny-ipt" type="text"> 字</div>
+    <div style="display: none;">最多填写 <input class="tiny-ipt" type="text"> 字</div>
+    <div style="display: block;">填写 <input class="tiny-ipt" type="text"> 到 <input class="tiny-ipt" type="text"> 字</div>
+  </div></div><div class="dotted"></div><h2>输入框尺寸</h2><div class="item"><div class="od-selector od-dropdown-target" style="width:120px" id="">
+    <div class="selector-box">
+      <b>
+        <span style="width: 94px;">单行</span>
+        <em class="pull-down"></em>
+      </b>
+    </div>
+  <ul class="od-dropdown" style="width: 94px; display: none;">
+    
+    <li class="first-child">单行</li>
+    
+    <li class="last-child odd">多行</li>
+    
 
+  </ul></div></div><div class="item"><div class="od-selector od-dropdown-target" style="width:120px" id="">
+    <div class="selector-box">
+      <b>
+        <span style="width: 94px;">小</span>
+        <em class="pull-down"></em>
+      </b>
+    </div>
+  <ul class="od-dropdown" style="width: 94px; display: none;">
+    
+    <li class="first-child">小</li>
+    
+    <li class="odd">中</li>
+    
+    <li class="last-child">大</li>
 
+  </ul></div></div><div class="dotted after_items" style="margin-bottom:0;"></div>
+        <button class="unfold-btn" title="展开"><em></em></button>
+        <button class="packUp-btn" title="收起" style="display:none;"><em></em></button>
+      </div>  
+      <!-- /右侧编辑区域 -->
+        
+    </div>
 
-  <!-- 填充题 编辑 start -->
+    <div class="editor-bottom-bg"></div>
+    
+    <div class="btn-confirm-box">
+      <button class="btn-cancel">取消</button>
+      <button class="btn-confirm">确定</button>
+    </div>
+  </div></div>
+  <!-- 填充题 编辑 end -->
+
+  <!-- 排序题 编辑 start -->
   <div id="" class="q-designer ui-droppable"><div class="editor">
-  <div class="editor-top-bg"></div>
-  <div class="editor-main">
-    
-    <!-- 左侧编辑区域 -->
-    <div class="editor-left">
+    <div class="editor-top-bg"></div>
+    <div class="editor-main">
       
-      <!-- 左侧顶部：题目类型、切换按钮 -->
-      <div class="editor-left-head">
-        <h1 class="q-type"><strong>15</strong>文本填充题</h1>
-        <em class="star" style="display: inline;">*</em>
-        <div class="editor-method" style="display: none;"><ul class="od-icon-buttons">
-  <li class="icon-btn icon-btn-l"><button title="" data-original-title="可视化编辑模式" class="active"><em class="icon od-icon-eye eye-active"></em></button></li><li class="icon-btn icon-btn-r"><button title="" data-original-title="输入代码编辑模式"><em class="icon od-icon-pc"></em></button></li>
-</ul></div>
-      </div>
-      <!-- /左侧顶部：题目类型、切换按钮 -->
+      <!-- 左侧编辑区域 -->
+      <div class="editor-left">
+        
+        <!-- 左侧顶部：题目类型、切换按钮 -->
+        <div class="editor-left-head">
+          <h1 class="q-type"><strong>16</strong>排序题</h1>
+          <em class="star" style="display: inline;">*</em>
+          <div class="editor-method"><ul class="od-icon-buttons">
+    <li class="icon-btn icon-btn-l"><button title="" data-original-title="可视化编辑模式" class="active"><em class="icon od-icon-eye eye-active"></em></button></li><li class="icon-btn icon-btn-r"><button title="" data-original-title="输入代码编辑模式"><em class="icon od-icon-pc"></em></button></li>
+  </ul></div>
+        </div>
+        <!-- /左侧顶部：题目类型、切换按钮 -->
 
-      <!--左侧下方：问题内容 -->
-      <div class="editor-left-body editor-left-body-visual" style="display: block;">
-        <div class="q-title"><div class="od-rich-input" id="">
-  
-  <textarea style="width: 563px;"></textarea>
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div>
-        <div class="q-note" style="display: none;"><textarea>请输入您的答案提示</textarea></div>
-        <div class="q-body"><div class="text-blank-preview" style="height: 27px; width: 230px;">输入框尺寸预览</div></div>
-      </div>
-      <div class="editor-left-body editor-left-body-code" style="display: none;">
-        <textarea></textarea>
-      </div>
-      <!-- /左侧下方：问题内容 -->
-      
+        <!--左侧下方：问题内容 -->
+        <div class="editor-left-body editor-left-body-visual" style="display: block;">
+          <div class="q-title"><div class="od-rich-input" id="">
+    
+    <textarea style="width: 563px;"></textarea>
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
     </div>
-    <!-- /左侧编辑区域 -->
+  </div></div>
+          <div class="q-note" style="display: none;"><textarea>请输入您的答案提示</textarea></div>
+          <div class="q-body"><div class="q-items ui-sortable"><div class="od-item" id="">
+    <em class="drag-btn "></em><!-- 
+    --><div><div class="od-rich-input">
     
-    <!-- 右侧编辑区域 -->
-    <div class="editor-right">
-      <div class="item"><div class="od-checkbox" id="">
-  <em class="checked"></em><span>必答题</span>
-</div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
-  <em class=""></em><span>答题指导</span>
-</div></div><div class="dotted"></div><h2>字数限制</h2><div class="item"><div class="od-selector od-dropdown-target" style="width:120px" id="">
-  <div class="selector-box">
-    <b>
-      <span style="width: 94px;">自定义</span>
-      <em class="pull-down"></em>
-    </b>
-  </div>
-<ul class="od-dropdown" style="width: 94px; display: none;">
-  
-  <li class="first-child">不限制</li>
-  
-  <li class="odd">设下限</li>
-  
-  <li>设上限</li>
-  
-  <li class="last-child odd">自定义</li>
-
-</ul></div></div><div class="item"><div class="min-max">
-  <div style="display: none;">至少填写 <input class="tiny-ipt" type="text"> 字</div>
-  <div style="display: none;">最多填写 <input class="tiny-ipt" type="text"> 字</div>
-  <div style="display: block;">填写 <input class="tiny-ipt" type="text"> 到 <input class="tiny-ipt" type="text"> 字</div>
-</div></div><div class="dotted"></div><h2>输入框尺寸</h2><div class="item"><div class="od-selector od-dropdown-target" style="width:120px" id="">
-  <div class="selector-box">
-    <b>
-      <span style="width: 94px;">单行</span>
-      <em class="pull-down"></em>
-    </b>
-  </div>
-<ul class="od-dropdown" style="width: 94px; display: none;">
-  
-  <li class="first-child">单行</li>
-  
-  <li class="last-child odd">多行</li>
-  
-
-</ul></div></div><div class="item"><div class="od-selector od-dropdown-target" style="width:120px" id="">
-  <div class="selector-box">
-    <b>
-      <span style="width: 94px;">小</span>
-      <em class="pull-down"></em>
-    </b>
-  </div>
-<ul class="od-dropdown" style="width: 94px; display: none;">
-  
-  <li class="first-child">小</li>
-  
-  <li class="odd">中</li>
-  
-  <li class="last-child">大</li>
-
-</ul></div></div><div class="dotted after_items" style="margin-bottom:0;"></div>
-      <button class="unfold-btn" title="展开"><em></em></button>
-      <button class="packUp-btn" title="收起" style="display:none;"><em></em></button>
-    </div>  
-    <!-- /右侧编辑区域 -->
-      
-  </div>
-
-  <div class="editor-bottom-bg"></div>
-  
-  <div class="btn-confirm-box">
-    <button class="btn-cancel">取消</button>
-    <button class="btn-confirm">确定</button>
-  </div>
-</div></div>
-<!-- 填充题 编辑 end -->
-
-<!-- 排序题 编辑 start -->
-<div id="" class="q-designer ui-droppable"><div class="editor">
-  <div class="editor-top-bg"></div>
-  <div class="editor-main">
+    <input type="text" style="width: 411px;">
     
-    <!-- 左侧编辑区域 -->
-    <div class="editor-left">
-      
-      <!-- 左侧顶部：题目类型、切换按钮 -->
-      <div class="editor-left-head">
-        <h1 class="q-type"><strong>16</strong>排序题</h1>
-        <em class="star" style="display: inline;">*</em>
-        <div class="editor-method"><ul class="od-icon-buttons">
-  <li class="icon-btn icon-btn-l"><button title="" data-original-title="可视化编辑模式" class="active"><em class="icon od-icon-eye eye-active"></em></button></li><li class="icon-btn icon-btn-r"><button title="" data-original-title="输入代码编辑模式"><em class="icon od-icon-pc"></em></button></li>
-</ul></div>
-      </div>
-      <!-- /左侧顶部：题目类型、切换按钮 -->
-
-      <!--左侧下方：问题内容 -->
-      <div class="editor-left-body editor-left-body-visual" style="display: block;">
-        <div class="q-title"><div class="od-rich-input" id="">
-  
-  <textarea style="width: 563px;"></textarea>
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div>
-        <div class="q-note" style="display: none;"><textarea>请输入您的答案提示</textarea></div>
-        <div class="q-body"><div class="q-items ui-sortable"><div class="od-item" id="">
-  <em class="drag-btn "></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" style="width: 411px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --><button class="close-btn close-btn-hide" title="删除"></button>
-</div><div class="od-item" id="">
-  <em class="drag-btn "></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" style="width: 411px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --><button class="close-btn close-btn-hide" title="删除"></button>
-</div><div class="od-item" id="">
-  <em class="drag-btn "></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" style="width: 411px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --><button class="close-btn close-btn-hide" title="删除"></button>
-</div><div class="od-item" id="">
-  <em class="drag-btn "></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" style="width: 411px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --><button class="close-btn close-btn-hide" title="删除"></button>
-</div></div><div class="q-other-item" style="display: none;"><div class="od-item" id="">
-  <em class="drag-btn drag-btn-hide"></em><!-- 
-  --><div><div class="od-rich-input">
-  
-  <input type="text" class="other" style="width: 408px;">
-  
-  <div class="od-rich-input-btns" style="display: none;">
-    <button class="image-btn media-button-empty"></button>
-    <button class="video-btn media-button-empty"></button>
-    <button class="audio-btn media-button-empty"></button>
-  </div>
-</div></div><!-- 
-  --> 
-</div></div><div class="q-new-opt"><div class="od-left-icon-btn" style="width:90px">
-<span class="left-icon-btn-bg-l"><em class="icon od-icon-add"></em></span>添加新选项
-</div></div></div>
-      </div>
-      <div class="editor-left-body editor-left-body-code" style="display: none;">
-        <textarea></textarea>
-      </div>
-      <!-- /左侧下方：问题内容 -->
-      
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
     </div>
-    <!-- /左侧编辑区域 -->
+  </div></div><!-- 
+    --><button class="close-btn close-btn-hide" title="删除"></button>
+  </div><div class="od-item" id="">
+    <em class="drag-btn "></em><!-- 
+    --><div><div class="od-rich-input">
     
-    <!-- 右侧编辑区域 -->
-    <div class="editor-right">
-      <div class="item"><div class="od-checkbox" id="">
-  <em class="checked"></em><span>必答题</span>
-</div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
-  <em class=""></em><span>答题指导</span>
-</div></div><div class="dotted"></div><h2>排序数量</h2><div class="item"><div class="od-selector od-dropdown-target" style="width: 120px; margin-top: 0px;" id="">
-  <div class="selector-box">
-    <b>
-      <span style="width: 94px;">设下限</span>
-      <em class="pull-down"></em>
-    </b>
-  </div>
-<ul class="od-dropdown" style="width: 94px; display: none;">
-  
-  <li class="first-child">定值</li>
-  
-  <li class="odd">设上限</li>
-  
-  <li class="last-child">设下限</li>
-  
-
-</ul></div></div><div class="item"><div class="item-count">
-  <div style="display: none;">排出 <input class="tiny-ipt" type="text"> 项</div>
-  <div style="display: none;">最多排 <input class="tiny-ipt" type="text"> 项</div>
-  <div style="display: block;">至少排 <input class="tiny-ipt" type="text"> 项</div>
-</div></div><div class="dotted" style="display: none;"></div><div class="item"><div class="od-checkbox" id="">
-  <em class=""></em><span>带"其他"项</span>
-</div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
-  <em class=""></em><span>选项乱序</span>
-</div></div><div class="dotted after_items" style="margin-bottom:0;"></div>
-      <button class="unfold-btn" title="展开"><em></em></button>
-      <button class="packUp-btn" title="收起" style="display:none;"><em></em></button>
-    </div>  
-    <!-- /右侧编辑区域 -->
+    <input type="text" style="width: 411px;">
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div><!-- 
+    --><button class="close-btn close-btn-hide" title="删除"></button>
+  </div><div class="od-item" id="">
+    <em class="drag-btn "></em><!-- 
+    --><div><div class="od-rich-input">
+    
+    <input type="text" style="width: 411px;">
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div><!-- 
+    --><button class="close-btn close-btn-hide" title="删除"></button>
+  </div><div class="od-item" id="">
+    <em class="drag-btn "></em><!-- 
+    --><div><div class="od-rich-input">
+    
+    <input type="text" style="width: 411px;">
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div><!-- 
+    --><button class="close-btn close-btn-hide" title="删除"></button>
+  </div></div><div class="q-other-item" style="display: none;"><div class="od-item" id="">
+    <em class="drag-btn drag-btn-hide"></em><!-- 
+    --><div><div class="od-rich-input">
+    
+    <input type="text" class="other" style="width: 408px;">
+    
+    <div class="od-rich-input-btns" style="display: none;">
+      <button class="image-btn media-button-empty"></button>
+      <button class="video-btn media-button-empty"></button>
+      <button class="audio-btn media-button-empty"></button>
+    </div>
+  </div></div><!-- 
+    --> 
+  </div></div><div class="q-new-opt"><div class="od-left-icon-btn" style="width:90px">
+  <span class="left-icon-btn-bg-l"><em class="icon od-icon-add"></em></span>添加新选项
+  </div></div></div>
+        </div>
+        <div class="editor-left-body editor-left-body-code" style="display: none;">
+          <textarea></textarea>
+        </div>
+        <!-- /左侧下方：问题内容 -->
+        
+      </div>
+      <!-- /左侧编辑区域 -->
       
-  </div>
+      <!-- 右侧编辑区域 -->
+      <div class="editor-right">
+        <div class="item"><div class="od-checkbox" id="">
+    <em class="checked"></em><span>必答题</span>
+  </div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
+    <em class=""></em><span>答题指导</span>
+  </div></div><div class="dotted"></div><h2>排序数量</h2><div class="item"><div class="od-selector od-dropdown-target" style="width: 120px; margin-top: 0px;" id="">
+    <div class="selector-box">
+      <b>
+        <span style="width: 94px;">设下限</span>
+        <em class="pull-down"></em>
+      </b>
+    </div>
+  <ul class="od-dropdown" style="width: 94px; display: none;">
+    
+    <li class="first-child">定值</li>
+    
+    <li class="odd">设上限</li>
+    
+    <li class="last-child">设下限</li>
+    
 
-  <div class="editor-bottom-bg"></div>
-  
-  <div class="btn-confirm-box">
-    <button class="btn-cancel">取消</button>
-    <button class="btn-confirm">确定</button>
+  </ul></div></div><div class="item"><div class="item-count">
+    <div style="display: none;">排出 <input class="tiny-ipt" type="text"> 项</div>
+    <div style="display: none;">最多排 <input class="tiny-ipt" type="text"> 项</div>
+    <div style="display: block;">至少排 <input class="tiny-ipt" type="text"> 项</div>
+  </div></div><div class="dotted" style="display: none;"></div><div class="item"><div class="od-checkbox" id="">
+    <em class=""></em><span>带"其他"项</span>
+  </div></div><div class="item" style="display: none;"><div class="od-checkbox" id="">
+    <em class=""></em><span>选项乱序</span>
+  </div></div><div class="dotted after_items" style="margin-bottom:0;"></div>
+        <button class="unfold-btn" title="展开"><em></em></button>
+        <button class="packUp-btn" title="收起" style="display:none;"><em></em></button>
+      </div>  
+      <!-- /右侧编辑区域 -->
+        
+    </div>
+
+    <div class="editor-bottom-bg"></div>
+    
+    <div class="btn-confirm-box">
+      <button class="btn-cancel">取消</button>
+      <button class="btn-confirm">确定</button>
+    </div>
+  </div></div>
+  <!-- 排序题 编辑 end -->
   </div>
-</div></div>
-<!-- 排序题 编辑 end -->
+  <a href='javascript:void(0);' class='scrollup'></a>
 </div>
-<a href='javascript:void(0);' class='scrollup'></a>
