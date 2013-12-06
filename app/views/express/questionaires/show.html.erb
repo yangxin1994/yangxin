@@ -11,8 +11,6 @@
     var survey = <%= raw @survey.to_json %>;
     var survey_model = new quill.models.Survey(survey); 
     var survey_editor = new quill.views.SurveyEditor({
-      //locked: <%= @locked %>,
-      locked: false,
       model: survey_model
     });
     survey_editor.appendTo('#my_editor');

@@ -1,8 +1,8 @@
 //=require ../base
 //=require ../fillers
 //=require ../editors
-//=require quill/templates/designers/base
-//=require quill/templates/designers/q_render
+//=require express/templates/designers/base
+//=require express/templates/designers/q_render
 //=require ui/widgets/od_tip
 //=require ui/widgets/od_waiting
 //=require ui/widgets/od_white_button

@@ -56,7 +56,7 @@ $(function(){
 		/* construct uri
 		 * =========================== */
 		_uri: function(name) {
-			return '/questionaires/' + this.id + (name || '') + '.json'
+			return '/e/questionaires/' + this.id + (name || '') + '.json'
 		},
 
 		/* ==================================================

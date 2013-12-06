@@ -11,8 +11,6 @@
 $(function(){
 	
 	/* Survey editor
-	 * options: 
-	 *		locked: bool
 	 * =========================== */
 	quill.quillClass('quill.views.SurveyEditor', quill.views.Base, {
 
@@ -20,33 +18,12 @@ $(function(){
 
 		_is_ready: false,
 
+		_renderBasic: function() {
+
+		},
+
 		_render: function() {
 			this.replaceElement(this.hbs(this.model.toJSON()));
-
-			/* If survey is published, should not add, remove, update question.
-			 * =============================== */
-			if(this.options.locked) {
-				this.$('.s-msg').show();
-				function close() {
-					var waiting_pop = $.od.odPopup({ type: null, content: '正在关闭发布，请稍候 ...', closeButton: false });
-					$.putJSON('/questionaires/' + window.survey_id + '/close.json', {}, function(retval) {
-						if(waiting_pop) waiting_pop.odPopup('destroy');
-						if(retval.success) {
-							$.od.odPopup({ type: null, content: '已经关闭发布，正在重新加载问卷 ...' });
-							location.reload(true);
-						} else {
-							$.od.odPopup({ content: '关闭发布失败，请重试。' });
-						}
-					});
-				}
-				this.$('.close-publish').click(function() {
-					$.od.odPopup({type: 'confirm', content: '确定关闭发布？', callback: function(ok) {
-						if(ok) close();
-					}});
-				});
-			} else {
-				this.$('.s-msg').remove();
-			}
 
 			/* edit survey title
 			 * =============================== */
@@ -266,7 +243,6 @@ $(function(){
 
 				// setup question designer
 				var designer = new quill.views.designers[quill.helpers.QuestionType.getName(q_model.get('question_type'))]({
-					locked: this.options.locked,
 					index: pos.index,
 					model: q_model,
 					remove: $.proxy(function(failed_callback) {
@@ -378,11 +354,6 @@ $(function(){
 		 * question_index: question index in page
 		 * =========================== */
 		addQuestion: function(page_index, question_index, question_type) {
-			if(this.options.locked) {
-				$.od.odPopup({content: '问卷已经发布，不能增加问题。'});
-				return;
-			}
-
 			if(!this._is_ready) return;
 			this._is_ready = false;
 			// hide no-question con
@@ -464,10 +435,6 @@ $(function(){
 		/* Remove question
 		 * =========================== */
 		removeQuestion: function(question_id, failed_callback) {
-			if(this.options.locked) {
-				$.od.odPopup({content: '问卷已经发布，不能删除问题。'});
-				return;
-			}
 			this.model.removeQuestion(question_id, {
 				success: $.proxy(function() {
 					this.findQDesigner(question_id).remove();
