@@ -11,15 +11,17 @@
 .q-render {
 	clear: both;
 	position: relative;
+	margin-top: -1px;
 
-	.q-render-top, .q-render-bottom { @include size(785px, 14px); }
-
-	.q-render-mid { padding: 1px 30px; }
-
+	.q-render-mid { 
+		padding: 1px 30px; 
+		background: #fff; 
+		border:1px $borderColor solid;
+	}
 	.q-render-btns-con {
 		font-size: 12px;
 		position: absolute;
-		top:0;
+		top:1px;
 		right:0;
 		display:none;
 		.q-render-btns-confirm {
@@ -30,15 +32,24 @@
 		}
 	}
 
-	.q-render-top { background: image-url("editors/tint-gray-top.png") no-repeat 0 0; }
-	.q-render-bottom { background: image-url("editors/tint-gray-bottom.png") no-repeat 0 0; }
-	.q-render-mid { 
-		background: #fff; 
-		border:1px $borderColor solid;
-		@include border-radius(3px);
-	}
 	&:hover {
 		.q-render-btns-con { display: block; }
+	}
+  &.dragging {
+    .q-render-btns-con {display:none;}
+  }
+
+	&.top {
+		.q-render-mid {
+			margin-top: 9px;
+			@include border-top-radius(3px);
+		}
+	}
+	&.bottom {
+		.q-render-mid {
+			margin-bottom: 9px;
+			@include border-bottom-radius(3px);
+		}
 	}
 
 	.q-filler {
@@ -49,8 +60,6 @@
 			left: -32px;
 			font-size: 16px;
 			background: #999;
-			// background: transparent;
-			// color: #000;
 		}
 	}
 }

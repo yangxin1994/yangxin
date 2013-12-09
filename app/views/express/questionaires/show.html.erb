@@ -1,50 +1,13 @@
 <!-- content for head -->
 <% content_for :head do %>
   <script type="text/javascript">
-    window.uid = "<%= current_user._id %>";
+    // window.uid = "<%= current_user._id %>";
   </script>
   <%= javascript_include_tag "pages/express/questionaire-bundle" %>
   <%= stylesheet_link_tag "pages/express/questionaire-bundle", :media => "all" %>
-  
-  <script type="text/javascript">
-  jQuery(function($) {
-    var survey = <%= raw @survey.to_json %>;
-    var survey_model = new quill.models.Survey(survey); 
-    var survey_editor = new quill.views.SurveyEditor({
-      model: survey_model
-    });
-    survey_editor.appendTo('#my_editor');
-
-    // set left menus events
-    // $.each(quill.helpers.QuestionType.getNames(), function(i, type) {
-    //   var btn = $('.' + type);
-    //   btn.draggable({
-    //     helper: "clone",
-    //     start: function(event, ui) {
-    //       ui.helper.data('questionType', type);
-    //     },
-    //     drag: function(event, ui) {
-    //       var designer_el = $(this).data("current-droppable");
-    //       if(!designer_el) return;
-    //       var $draggable = ui.draggable || ui.helper;
-    //       var is_upper =  (ui.offset.top + $draggable.outerHeight() / 2 
-    //         <= designer_el.offset().top + designer_el.outerHeight() / 2);
-    //       survey_editor.updateHighlight(designer_el, is_upper);
-    //     },
-    //     stop: function(event, ui) {
-    //       survey_editor.cleanupHighlight();
-    //     }
-    //   });
-    //   btn.click(function() {
-    //     survey_editor.addQuestionAuto(type);
-    //   });
-    // });
-
-  });
-  </script>
 <% end %>
 
-<div class="left-sidebar">
+<div class="left-sidebar disable">
   <div id='normal_q' class='left-menus'>
     <a href="javascript:void(0);" class="active">基本题型<i></i></a>
     <ul>
@@ -74,39 +37,64 @@
 
   <script type="text/javascript">
   jQuery(function($) {
+    var left_disabled = true;
     $('#normal_q a:eq(0)').click(function() {
+      if(left_disabled) return;
       $('#normal_q a:eq(0)').addClass('active');
       $('#normal_q ul:eq(0)').slideDown('fast');
       $('#special_q a:eq(0)').removeClass('active').addClass('bottom-head');
       $('#special_q ul:eq(0)').slideUp('fast');
     });
     $('#special_q a:eq(0)').click(function() {
+      if(left_disabled) return;
       $('#normal_q a:eq(0)').removeClass('active');
       $('#normal_q ul:eq(0)').slideUp('fast');
       $('#special_q a:eq(0)').addClass('active').removeClass('bottom-head');
       $('#special_q ul:eq(0)').slideDown('fast');
     });
-    // $('.left-head').click(function() {
-    //   $('#normal_q').slideUp('fast');
-    //   $('#special_q').slideDown('fast');
-    // });
-    // $('.left-sidebar-pulldownBtn').click(function() {
-    //   $('#normal_q').slideDown('fast');
-    //   $('#special_q').slideUp('fast');
-    // });
-    // var big = true;
-    // $('.left-sidebar-pulldownBtn').click(function() {
-    //   if(big) {
-    //     $('.big').slideUp('fast');
-    //     $('.small').slideDown('fast');
-    //   } else {
-    //     $('.big').slideDown('fast');
-    //     $('.small').slideUp('fast');
-    //   }
-    //   big = !big;
-    // });
 
-    $('#edit_setting').tooltip({ placement: 'right', delay: {show: 500, hide: 0}  });
+    // survey editor
+    var survey = <%= raw @survey.to_json %>;
+    var survey_model = new quill.models.Survey(survey); 
+    window.survey_editor = new quill.views.SurveyEditor({
+      model: survey_model,
+      onUnready: function() {
+        left_disabled = true;
+        $('.left-sidebar').addClass('disable');
+      },
+      onReady: function() {
+        left_disabled = false;
+        $('.left-sidebar').removeClass('disable');
+      }
+    });
+    survey_editor.appendTo('#my_editor');
+
+    // set left menus events
+    $.each(quill.helpers.QuestionType.getNames(), function(i, type) {
+      var btn = $('.' + type);
+      btn.draggable({
+        helper: "clone",
+        start: function(event, ui) {
+          if(left_disabled) return false;
+          ui.helper.data('questionType', type);
+        },
+        drag: function(event, ui) {
+          var designer_el = $(this).data("current-droppable");
+          if(!designer_el) return;
+          var $draggable = ui.draggable || ui.helper;
+          var is_upper =  (ui.offset.top + $draggable.outerHeight() / 2 
+            <= designer_el.offset().top + designer_el.outerHeight() / 2);
+          survey_editor.updateHighlight(designer_el, is_upper);
+        },
+        stop: function(event, ui) {
+          survey_editor.cleanupHighlight();
+        }
+      });
+      btn.click(function() {
+        if(left_disabled) return;
+        survey_editor.addQuestionAuto(type);
+      });
+    });
   });
   </script>
 </div>
@@ -174,7 +162,8 @@
   </div>
       <!-- 文字描述 预览 end -->
       <!-- 评分题 预览 start -->
-      <div id="" class="q-designer ui-droppable"><div class="q-render">
+      <div id="" class="q-designer ui-droppable">
+  <div class="q-render">
     <div class="q-render-mid"><div class="q-filler q-scale">
     <span class="q-idx">11</span>
     <div class="q-title">

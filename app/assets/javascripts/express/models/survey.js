@@ -41,13 +41,6 @@ $(function(){
 			  this.set({"pages": this.defaults().pages});
 			}
 		},
-		
-		/* Check whether the survey is published
-		 * =========================== */
-		// isPublished: function() {
-		// 	// 1 closed 2 reviewing 4 paused 8 published
-		// 	return this.get('publish_status') == 8;
-		// },
 
 		/* ==================================================
 		 * common methods
@@ -94,6 +87,12 @@ $(function(){
 					callback.error(retval.value);
 				}
 			}, this));
+		},
+
+		/* Check whether the survey is new (has only one page and has no questions)
+		 * =========================== */
+		isNew: function() {
+			return this.pageCount() == 1 && ((this.get('pages')[0].questions || []).length == 0);
 		},
 
 		/* ==================================================
