@@ -1,4 +1,3 @@
-//=require jquery.viewport
 //=require jquery.scrollTo
 //=require ./base
 //=require ./designers
@@ -266,10 +265,10 @@ $(function(){
             this.splitPage(qid);
           }, this),
           onOpenRender: $.proxy(function() {
-            if(this._current_designer == designer) {
+            if(this._current_designer == designer)
               this._current_designer = null;
-            }
             this.$('.s-pages').sortable('enable');
+            this.adjustDesignerRound(designer);
           }, this),
           onOpenEditor: $.proxy(function() {
             if(this._current_designer && this._current_designer != designer) {
@@ -278,11 +277,18 @@ $(function(){
             this._current_designer = designer;
             this.$('.s-pages').sortable('disable');
             // scroll to the designer
-            if($('#q_designer_' + qid + ':in-viewport').length == 0) {
-            // if($('#q_designer_' + qid + ':in-viewport').length == 0 ||
-            //  $('#q_designer_' + qid + ':above-the-top').length > 0) {
-              $(window).scrollTo(designer.$el, 500, { offset: {top: -20} });
+            var $w = $(window), $d = designer.$el, padding = 10, time = 500;
+            if($w.scrollTop() > $d.offset().top) {
+              $w.scrollTo($d, time, { offset: {top: 0-padding} });
+            } else if($w.scrollTop() + $w.height() < $d.offset().top + $d.height()) {
+              if(($d.height() + padding)< $w.height()) {
+                $w.scrollTo($d, time, { offset: {top: $d.height() + padding - $w.height()} });
+              } else {
+                $w.scrollTo($d, time, { offset: {top: 0-padding} });
+              }
             }
+            // focus on title input
+            $('.q-title textarea', designer.$el).focus();
           }, this)
         });
 
@@ -416,8 +422,10 @@ $(function(){
 
       }, this);
 
-      if($('.adding-question:in-viewport').length == 0) {
-        $(window).scrollTo(adding_q_dom, 500, { 
+      var $w = $(window);
+      if(adding_q_dom.offset().top > $w.scrollTop() + $w.height() || 
+        adding_q_dom.offset().top + adding_q_dom.height() < $w.scrollTop()) {
+        $w.scrollTo(adding_q_dom, 500, { 
           offset: {top: -20},
           onAfter: _start_to_add 
         });
