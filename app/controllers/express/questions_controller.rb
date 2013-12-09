@@ -26,4 +26,9 @@ class Express::QuestionsController < Express::ExpressController
       retval = @survey.move_question(params[:id], params[:page_index].to_i, params[:after_question_id])
       render_json_auto retval and return
   end
+
+  def copy
+    retval = @survey.clone_question(params[:id])
+    render_json_auto retval and return
+  end
 end

@@ -389,10 +389,17 @@ class Survey
     self.save
   end
 
-  def clone_question(question_id_1, page_index, question_id_2)
-    orig_question = Question.find_by_id(question_id_1)
+  def clone_question(question_id)
+    index = nil
+    self.pages.each_with_index do |page, page_index|
+      if page["questions"].include?(question_id)
+        index = page_index
+        break
+      end
+    end
+    orig_question = Question.find_by_id(question_id)
     new_question = orig_question.clone
-    insert_question(page_index, question_id_2, new_question)
+    insert_question(index, question_id, new_question)
     self.save
     return new_question
   end
