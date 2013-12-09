@@ -21,7 +21,6 @@ $(function(){
 	 *    saved: function() {}
 	 *    onOpenEditor: function() {}
 	 *    onOpenRender: function() {}
-	 *		locked: bool
 	 * =========================== */
 	quill.quillClass('quill.views.designers.Base', quill.views.Base, {
 
@@ -56,7 +55,6 @@ $(function(){
 		/* Toggle to render status
 		 * =========================== */
 		_rd: null,
-		// _rd_btns: null,
 		_fl: null,
 		_ed: null,
 		openRender: function() {
@@ -72,57 +70,28 @@ $(function(){
 				model: this.model
 			}).appendTo($('.q-render-mid', this._rd));
 			var btns_con = $('.q-render-btns', this._rd);
-			// var confirm_con = $('.q-render-btns-confirm', this._rd);
 			var _start_edit = $.proxy(function() {
 				this.openEditor();
 			}, this);
 			this._rd.dblclick(_start_edit);
 			$('.q-render-btns-con', this._rd).dblclick(function(e) { e.stopPropagation(); });
-			// var buttons = [];
-			// this._rd_btns = $.od.odIconButtons({
-			// 	buttons:	this.options.locked ? [{
-		 // 			name: 'pagination',
-		 // 			info: '从此处开始新页',
-		 // 			click: $.proxy(function(){
-			// 			if(this.options.pagination) 
-			// 				this.options.pagination();
-			// 		}, this)
-			// 	}] : [{
-		 // 			name: 'edit',
-		 // 			info: '编辑',
-		 // 			click: _start_edit
-		 // 		}, {
-		 // 			name: 'del',
-		 // 			info: '删除',
-		 // 			click: function() {
-			// 			btns_con.hide();
-			// 			confirm_con.show();
-			// 		}
-		 // 		}, {
-		 // 			name: 'pagination',
-		 // 			info: '从此处开始新页',
-		 // 			click: $.proxy(function(){
-			// 			if(this.options.pagination) 
-			// 				this.options.pagination();
-			// 		}, this)
-		 // 		}]
-			// }).appendTo(btns_con);
-			// $.od.odWhiteButton({ text: '确定删除' }).appendTo(confirm_con).click($.proxy(function() {
-			// 	var waiting = $.od.odWaiting({
-			// 		message: '正在删除',
-			// 		contentId: this._rd
-			// 	}).odWaiting('open');
-			// 	this.options.remove(function() {
-			// 		// failed
-			// 		btns_con.show();
-			// 		confirm_con.hide();
-			// 		if(waiting) waiting.odWaiting('destroy');
-			// 	});
+			$('.del', this._rd).click($.proxy(function() {
+				var waiting = $.od.odWaiting({
+					message: '正在删除',
+					contentId: this._rd
+				}).odWaiting('open');
+				this.options.remove(function() {
+					// failed
+					if(waiting) waiting.odWaiting('destroy');
+				});
+			}, this));
+			$('.edit', this._rd).click(_start_edit);
+			// $('.copy', this._rd).click($.proxy(function(){
+			// 	if(this.options.pagination) this.options.pagination();
 			// }, this));
-			// $('<a href="javascript:void(0);" style="margin: 0 10px;" />').text('取消').appendTo(confirm_con).click(function() {
-			// 	btns_con.show();
-			// 	confirm_con.hide();
-			// });
+			$('.page-break', this._rd).click($.proxy(function(){
+				if(this.options.pagination) this.options.pagination();
+			}, this));
 
 			// 3. call callback
 			if(this.options.onOpenRender)
@@ -133,13 +102,11 @@ $(function(){
 		 * =========================== */
 		_ed: null,
 		openEditor: function() {
-			if(this.options.locked) return;
 			// 1. remove render
 			if(this._fl) {
 				this._fl.remove();
 				this._fl = null;
 				this._rd.remove();
-				// this._rd_btns.odIconButtons('destroy');	// Remember to destroy odIconButton. Or its tooltip will keep visiable
 			}
 
 			// 2. new editor

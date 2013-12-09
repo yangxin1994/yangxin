@@ -150,7 +150,8 @@ $(function(){
     /* Split one page into two pages
      * =========================== */
     splitPage: function(before_question_id) {
-      this._newPageIndex(0).insertBefore(this.findQDesigner(before_question_id).$el);
+      var page_dom = this._newPageIndex(0).insertBefore(this.findQDesigner(before_question_id).$el);
+      this.adjustDesignerRound(page_dom.prev().data('view'), page_dom.next().data('view'));
       this.refreshPageIndexes();
       this.model.splitPage(before_question_id, {
         success: function() {},
@@ -161,7 +162,10 @@ $(function(){
     /* Combine two pages into one
      * =========================== */
     combinePages: function(page_index) {
+      var page_dom = this.findPageIndexDom(page_index);
+      var prev_designer = page_dom.prev().data('view'), next_designer = page_dom.next().data('view');
       this.findPageIndexDom(page_index).remove();
+      this.adjustDesignerRound(prev_designer, next_designer);
       this.refreshPageIndexes();
       this.model.combinePages(page_index, {
         success: function() {},
@@ -268,7 +272,8 @@ $(function(){
             if(this._current_designer == designer)
               this._current_designer = null;
             this.$('.s-pages').sortable('enable');
-            this.adjustDesignerRound(designer);
+            if(designer) 
+              this.adjustDesignerRound(designer, designer.$el.prev().data('view'), designer.$el.next().data('view'));
           }, this),
           onOpenEditor: $.proxy(function() {
             if(this._current_designer && this._current_designer != designer) {
@@ -276,6 +281,11 @@ $(function(){
             }
             this._current_designer = designer;
             this.$('.s-pages').sortable('disable');
+            if(designer) {
+              var prev_designer = designer.$el.prev().data('view'), next_designer = designer.$el.next().data('view');
+              if(prev_designer) prev_designer.setBottom(true);
+              if(next_designer) next_designer.setTop(true);
+            }
             // scroll to the designer
             var $w = $(window), $d = designer.$el, padding = 10, time = 500;
             if($w.scrollTop() > $d.offset().top) {
@@ -453,7 +463,10 @@ $(function(){
     removeQuestion: function(question_id, failed_callback) {
       this.model.removeQuestion(question_id, {
         success: $.proxy(function() {
-          this.findQDesigner(question_id).remove();
+          var designer = this.findQDesigner(question_id);
+          var pre_designer = designer.$el.prev().data('view'), next_designer = designer.$el.next().data('view');
+          designer.remove();
+          this.adjustDesignerRound(pre_designer, next_designer);
           this.refreshQuestionIndexes();
         }, this),
 
@@ -465,29 +478,30 @@ $(function(){
      * TODO: waiting for finish 
      * =========================== */
     moveQuestion: function(question_id, after_question_id, page_index) {
+      // move question
       this.model.moveQuestion(question_id, after_question_id, page_index, {
-        success: $.proxy(function() {
-          var q_designer = this.findQDesigner(question_id), q_designer_dom = q_designer.$el.detach()
-          // 1. if page_index is illegal, add new page
-          if(page_index < 0 || page_index >= this.$('.page-index').length) {
-            this._newPageIndex(this.$('.page-index').length).appendTo(this.$('.s-pages'));
-            this.refreshPageIndexes();
-          }
-          if(after_question_id == 0) {
-            if(page_index == 0) {
-              q_designer_dom.prependTo(this.$('.s-pages'));
-            } else {
-              q_designer_dom.insertAfter(this.findPageIndexDom(page_index - 1));
-            }
-          } else {
-            q_designer_dom.insertAfter(this.findQDesigner(after_question_id).$el);
-          }
-          this.refreshQuestionIndexes();
-          // set designer round
-          this.adjustDesignerRound(q_designer, q_designer_dom.prev().data('view'), q_designer_dom.next().data('view'));
-        }, this),
+        success: function() {},
         error: function() {}
       });
+      // adjust ui
+      var q_designer = this.findQDesigner(question_id), q_designer_dom = q_designer.$el.detach()
+      // 1. if page_index is illegal, add new page
+      if(page_index < 0 || page_index >= this.$('.page-index').length) {
+        this._newPageIndex(this.$('.page-index').length).appendTo(this.$('.s-pages'));
+        this.refreshPageIndexes();
+      }
+      if(after_question_id == 0) {
+        if(page_index == 0) {
+          q_designer_dom.prependTo(this.$('.s-pages'));
+        } else {
+          q_designer_dom.insertAfter(this.findPageIndexDom(page_index - 1));
+        }
+      } else {
+        q_designer_dom.insertAfter(this.findQDesigner(after_question_id).$el);
+      }
+      this.refreshQuestionIndexes();
+      // set designer round
+      this.adjustDesignerRound(q_designer, q_designer_dom.prev().data('view'), q_designer_dom.next().data('view'));
     },
 
     /* Refresh question indexes and refresh question backgrounds
