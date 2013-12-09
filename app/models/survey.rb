@@ -459,7 +459,6 @@ class Survey
       if index.present?
         page["questions"].delete(question_id) if replace.nil?
         page["questions"][index] = replace if replace.present?
-        break
       end
     end
     self.save
