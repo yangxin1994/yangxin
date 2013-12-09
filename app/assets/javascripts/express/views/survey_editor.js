@@ -2,6 +2,7 @@
 //=require ./base
 //=require ./designers
 //=require ../templates/adding_question
+//=require ../templates/dropping_question
 //=require ../templates/page_index
 //=require ../templates/survey_editor
 //=require ../models/survey
@@ -264,6 +265,9 @@ $(function(){
             // after the question is saved, we should update the question model cache
             this.model.setQuestionModel(new_model);
           }, this),
+          copy: $.proxy(function(failed_callback) {
+            this.copyQuestion(qid, failed_callback);
+          }, this),
           pagination: $.proxy(function() {
             // add pagination before the designer
             this.splitPage(qid);
@@ -287,16 +291,7 @@ $(function(){
               if(next_designer) next_designer.setTop(true);
             }
             // scroll to the designer
-            var $w = $(window), $d = designer.$el, padding = 10, time = 500;
-            if($w.scrollTop() > $d.offset().top) {
-              $w.scrollTo($d, time, { offset: {top: 0-padding} });
-            } else if($w.scrollTop() + $w.height() < $d.offset().top + $d.height()) {
-              if(($d.height() + padding)< $w.height()) {
-                $w.scrollTo($d, time, { offset: {top: $d.height() + padding - $w.height()} });
-              } else {
-                $w.scrollTo($d, time, { offset: {top: 0-padding} });
-              }
-            }
+            this._scrollTo(designer.$el);
             // focus on title input
             $('.q-title textarea', designer.$el).focus();
           }, this)
@@ -322,8 +317,24 @@ $(function(){
           }
         }
 
+        // refresh question indexes
+        this.refreshQuestionIndexes();
+
         callback.success();
       }, this));
+    },
+    _scrollTo: function(target) {
+      if(!target) return;
+      var $w = $(window), $d = target, padding = 10, time = 500;
+      if($w.scrollTop() > $d.offset().top) {
+        $w.scrollTo($d, time, { offset: {top: 0-padding} });
+      } else if($w.scrollTop() + $w.height() < $d.offset().top + $d.height()) {
+        if(($d.height() + padding)< $w.height()) {
+          $w.scrollTo($d, time, { offset: {top: $d.height() + padding - $w.height()} });
+        } else {
+          $w.scrollTo($d, time, { offset: {top: 0-padding} });
+        }
+      }
     },
 
     /* Clean up and update highlight dom for adding question
@@ -332,13 +343,16 @@ $(function(){
       // make a designer or a page-index dom droppable in order to add question
       dom.droppable({
         over: $.proxy(function(event, ui) {
+          // console.log('over');
           if(!ui.helper.data('questionType')) return;
           ui.draggable.data("current-droppable", dom);
         }, this),
         out: $.proxy(function(event, ui) {
+          // console.log('out');
           if(!ui.helper.data('questionType')) return;
           if(ui.draggable.data('current-droppable') == dom)
             ui.draggable.removeData("current-droppable");
+          // console.log('clear');
           this.cleanupHighlight();
         }, this),
         drop: $.proxy(function(event, ui) {
@@ -368,9 +382,9 @@ $(function(){
     updateHighlight: function(q_designer_el, is_upper) {
       this.cleanupHighlight();
       if(is_upper) {
-        $('<div class="drop-question" />').insertBefore(q_designer_el);
+        this.hbs({}, 'dropping_question').insertBefore(q_designer_el);
       } else {
-        $('<div class="drop-question" />').insertAfter(q_designer_el);
+        this.hbs({}, 'dropping_question').insertAfter(q_designer_el);
       }
     },
 
@@ -387,7 +401,7 @@ $(function(){
       var after_question_id = 0;
 
       // add waiting dom
-      var adding_q_dom = this.hbs({paragraph: question_type=='Paragraph'}, 'adding_question');
+      var adding_q_dom = this.hbs({}, 'adding_question');
       if(question_index == 0) {
         if(page_index == 0) {
           adding_q_dom.prependTo(this.$('.s-pages'));
@@ -398,51 +412,36 @@ $(function(){
         after_question_id = this.model.get('pages')[page_index].questions[question_index - 1];
         adding_q_dom.insertAfter(this.findQDesigner(after_question_id).$el);
       }
+      this.adjustDesignerRound(adding_q_dom.prev().data('view'), adding_q_dom.next().data('view'));
+      this._scrollTo(adding_q_dom);
 
       // start to add question
-      var _start_to_add = $.proxy(function() {
+      this.model.addQuestion(page_index, after_question_id, question_type, {
+        
+        before: $.proxy(function() {
+          // show or hide no-question con
+          no_question_hidden ? this.$('.s-no-question').hide() : this.$('.s-no-question').show();
+          adding_q_dom.remove();
+        }, this),
 
-        this.model.addQuestion(page_index, after_question_id, question_type, {
-          
-          before: $.proxy(function() {
-            // show or hide no-question con
-            no_question_hidden ? this.$('.s-no-question').hide() : this.$('.s-no-question').show();
-            adding_q_dom.remove();
-          }, this),
+        success: $.proxy(function(new_qid) {
+          // 1. if page_index is illegal, add new page
+          if(page_index < 0 || page_index >= this.$('.page-index').length) {
+            this._newPageIndex(this.$('.page-index').length).appendTo(this.$('.s-pages'));
+            this.refreshPageIndexes();
+          }
+          // render question
+          this.renderQuestion(new_qid, $.proxy(function() {
+            // active question designer
+            this.findQDesigner(new_qid).openEditor();
+          }, this));
+        }, this),
 
-          success: $.proxy(function(new_qid) {
-            // 1. if page_index is illegal, add new page
-            if(page_index < 0 || page_index >= this.$('.page-index').length) {
-              this._newPageIndex(this.$('.page-index').length).appendTo(this.$('.s-pages'));
-              this.refreshPageIndexes();
-            }
-            // render question
-            this.renderQuestion(new_qid, $.proxy(function() {
-              this.refreshQuestionIndexes();
-              // active question designer
-              this.findQDesigner(new_qid).openEditor();
-            }, this));
-          }, this),
+        after: $.proxy(function() {
+          this._setReady();
+        }, this)
 
-          after: $.proxy(function() {
-            this._setReady();
-          }, this)
-
-        });
-
-      }, this);
-
-      var $w = $(window);
-      if(adding_q_dom.offset().top > $w.scrollTop() + $w.height() || 
-        adding_q_dom.offset().top + adding_q_dom.height() < $w.scrollTop()) {
-        $w.scrollTo(adding_q_dom, 500, { 
-          offset: {top: -20},
-          onAfter: _start_to_add 
-        });
-      } else {
-        _start_to_add();
-      }
-
+      });
     },
     addQuestionAuto: function(question_type) {
       // add a question to the survey automatically
@@ -456,6 +455,25 @@ $(function(){
         //TODO: if ps.length = 0?
         this.addQuestion(ps.length - 1, ps[ps.length - 1].questions.length, question_type);
       }
+    },
+
+    /* Copy a question
+     * =========================== */
+    copyQuestion: function(question_id, after_callback) {
+      this.model.copyQuestion(question_id, {
+        success: $.proxy(function(new_qid) {
+          // render question
+          this.renderQuestion(new_qid, $.proxy(function() {
+            // active question designer
+            $('.q-render-mid' ,  this.findQDesigner(new_qid).$el)
+              .css({ backgroundColor: '#E0F2CD' })
+              .animate({backgroundColor: '#fff'}, 1000);
+            this.adjustDesignerRound(this.findQDesigner(question_id), this.findQDesigner(new_qid));
+          }, this));
+        }, this),
+
+        after: after_callback
+      });
     },
 
     /* Remove question

@@ -24,6 +24,7 @@
     border:1px $borderColor solid;
 		width:$editor-width - 30 *2 - 2;
 		background: #fff;
+    margin-bottom: 12px;
 		@include border-radius(3px);
 		input,textarea {
 			width:704px;
@@ -71,6 +72,7 @@
 		}
 	}
   .ex-title-finished-con {
+    margin-bottom: 12px;
     .ex-title-finished{
       width:723px;
       padding:30px;
@@ -159,13 +161,10 @@
 	.drop-question {
 		height: 1px;
 		background: $yellow;
+    margin: 8px 0;
 	}
-
 	.adding-question {
 		padding: 2em;
-		@include border-radius(5px);
-		border: 1px solid #f5c000;
-		background: #ffffee;
 		text-align: center;
 	}
 }

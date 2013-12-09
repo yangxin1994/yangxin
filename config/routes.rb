@@ -35,7 +35,7 @@ OopsData::Application.routes.draw do
       resources :questions, :only => [:create, :show, :update, :destroy] do
         member do
           get :analyse
-          put :move
+          put :move, :copy
         end
       end
 

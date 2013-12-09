@@ -18,6 +18,7 @@ $(function(){
 	 *    index: int
 	 *    remove: function() {}
 	 *    pagination: function() {}
+	 *		copy: function() {}
 	 *    saved: function() {}
 	 *    onOpenEditor: function() {}
 	 *    onOpenRender: function() {}
@@ -79,16 +80,25 @@ $(function(){
 				var waiting = $.od.odWaiting({
 					message: '正在删除',
 					contentId: this._rd
-				}).odWaiting('open');
+				});
+				waiting.odWaiting('open');
 				this.options.remove(function() {
 					// failed
 					if(waiting) waiting.odWaiting('destroy');
 				});
 			}, this));
 			$('.edit', this._rd).click(_start_edit);
-			// $('.copy', this._rd).click($.proxy(function(){
-			// 	if(this.options.pagination) this.options.pagination();
-			// }, this));
+			$('.copy', this._rd).click($.proxy(function(){
+				var waiting = $.od.odWaiting({
+					message: '正在复制',
+					contentId: this._rd
+				});
+				waiting.odWaiting('open');
+				this.options.copy(function() {
+					// after
+					if(waiting) waiting.odWaiting('destroy');
+				});
+			}, this));
 			$('.page-break', this._rd).click($.proxy(function(){
 				if(this.options.pagination) this.options.pagination();
 			}, this));

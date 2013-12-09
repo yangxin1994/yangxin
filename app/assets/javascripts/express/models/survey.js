@@ -279,6 +279,27 @@ $(function(){
 			}, this));
 		},
 
+		/* Copy a question
+		 * =========================== */
+		copyQuestion: function(question_id, callback) {
+			var pos = this.findQuestionPosition(question_id);
+			if(!pos) return;
+			$.putJSON(this._uri('/questions/' + question_id + '/copy'), {}, $.proxy(function(retval) {
+				callback = $.ensureCallback(callback);
+				if(retval.success) {
+					// 1. update question models
+					var new_q_model = this.setQuestionModel(retval.value);
+					// 2. find page index and add new qid to it
+					var pos = this.findQuestionPosition(question_id);
+					this.get('pages')[pos.pageIndex].questions.splice(pos.questionIndex + 1, 0, retval.value._id);
+					// 3. call callback
+					callback.success(retval.value._id);
+				} else {
+					callback.error(retval.value);
+				}
+			}, this));
+		},
+
 		/* Delete a question from the survey
 		 * =========================== */
 		removeQuestion: function(question_id, callback) {
