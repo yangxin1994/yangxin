@@ -1,0 +1,69 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/netranking_users-bundle" %>
+<% end %>
+
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li>
+      <a href="/admin/newsletters">
+      <i class="icon-chevron-right"></i>
+      电子杂志列表
+      </a>
+    </li>
+    <li>
+      <a href="/admin/newsletters/new">
+        <i class="icon-chevron-right"></i>
+        新建电子杂志
+      </a>
+    </li>
+    <li>
+      <a href="/admin/subscribers">
+        <i class="icon-chevron-right"></i>
+        订阅管理
+      </a>
+    </li>
+    <li>
+      <a href="/admin/newsletters/upload_attachment">
+      <i class="icon-chevron-right"></i>
+      清研杂志
+      </a>
+    </li>
+    <li class="active">
+      <a href="/admin/newsletters/netranking_users">
+      <i class="icon-chevron-right"></i>
+      清研杂志用户列表
+      </a>
+    </li>
+  </ul>
+<% end %>
+
+<div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th width="30%">邮箱</th>
+        <th >操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @netranking_users.each do |e| %>
+      <tr>
+        <td><%= e.email %></td>
+        <td>
+          <div class="btn-group">
+            <a class="od-delete btn btn-min btn-danger" href="javascript:void(0)" data-id="<%= e._id %>" title="Delete">删除</a>
+          </div>
+        </td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div>
+  <%= form_tag('/admin/netranking_users', method: :post) do %>
+    <%= text_field_tag 'email' %>
+    <%= submit_tag '添加' %>
+  <% end %>
+</div>

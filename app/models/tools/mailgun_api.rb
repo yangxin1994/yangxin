@@ -327,7 +327,7 @@ class MailgunApi
     self.send_message(data)
   end
 
-  def self.send_emagzine(subject, content, attachment, emails)
+  def self.send_emagzine(subject, send_from, domain, content, attachment, emails)
     group_size = 900
     @group_emails = []
     @emails = emails
@@ -340,11 +340,11 @@ class MailgunApi
     @group_emails << @emails
     
     data = {}
-    data[:domain] = Rails.application.config.survey_email_domain
-    data[:from] = @@survey_email_from
+    data[:domain] = domain
+    data[:from] = send_from
     data[:html] = content
     data[:text] = ""
-    data[:attachment] = File.new(attachment)
+    data[:attachment] = File.new(attachment) if attachment.present?
     data[:subject] = subject
     data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
     @group_emails.each_with_index do |emails, i|

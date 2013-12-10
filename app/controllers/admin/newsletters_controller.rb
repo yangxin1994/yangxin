@@ -76,6 +76,36 @@ class Admin::NewslettersController < ApplicationController
     end        
   end
 
+  def netranking_newsletter
+    @file_path = params[:path]
+  end
+
+  def upload_attachment
+  end
+
+  def attachment_uploaded
+    name =  params[:file].original_filename
+    directory = "public/uploads/magzine"
+    # create the file path
+    path = File.join(directory, name)
+    # write the file
+    File.open(path, "wb") { |f| f.write(params[:file].read) }
+    redirect_to action: :netranking_newsletter, path: path
+  end
+
+  def send_netranking_newsletter
+    Rails.logger.info "AAAAAAAAAAAAAAAAA"
+    Rails.logger.info params.inspect
+    Rails.logger.info "AAAAAAAAAAAAAAAAA"
+    if params[:email_list].to_s == "true"
+      emails = params[:email_content].split('\n')
+    else
+      emails = NetrankingUser.all.map { |e| e.email }
+    end
+    MailgunApi.send_emagzine(params[:subject], params[:send_from], params[:domain], params[:content], params[:file_path], emails)
+    render_json_auto and return
+  end
+
   private
 
   def resolve_layout
@@ -86,5 +116,4 @@ class Admin::NewslettersController < ApplicationController
       "layouts/admin-todc"
     end
   end
-
 end
