@@ -1,3 +1,4 @@
+#encoding: utf-8
 require 'error_enum'
 require 'open-uri'
 class Express::QuestionairesController < Express::ExpressController
@@ -76,9 +77,12 @@ class Express::QuestionairesController < Express::ExpressController
 
   # ajax download qcode image
   def down_qrcode
-    @filename ="#{Rails.root}/public/qrcode/#{params[:id]}.png"
-    if File.exist?( @filename)
-      send_file(@filename, :filename => "#{params[:id]}.png")
-    end
+    @survey = Survey.find(params[:id])
+    result = @survey.csv_header(:with => "import_id", :text => true)
+    send_data(result, :filename => "导入数据-#{@survey._id}.csv", :type => 'text/csv')    
+    # @filename ="#{Rails.root}/public/qrcode/#{params[:id]}.png"
+    # if File.exist?( @filename)
+    #   send_file(@filename, :filename => "#{params[:id]}.png")
+    # end
   end
 end
