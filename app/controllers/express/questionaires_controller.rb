@@ -78,11 +78,7 @@ class Express::QuestionairesController < Express::ExpressController
   # ajax download qcode image
   def down_qrcode
     @survey = Survey.find(params[:id])
-    result = @survey.csv_header(:with => "import_id", :text => true)
-    send_data(result, :filename => "导入数据-#{@survey._id}.csv", :type => 'text/csv')    
-    # @filename ="#{Rails.root}/public/qrcode/#{params[:id]}.png"
-    # if File.exist?( @filename)
-    #   send_file(@filename, :filename => "#{params[:id]}.png")
-    # end
+    result = open("#{Rails.root}/public/qrcode/#{params[:id]}.png", "rb") { |f| f.read }
+    send_data(result,:filename => "#{params[:id]}.png",:type => "image/png" )
   end
 end

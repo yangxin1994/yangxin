@@ -63,7 +63,8 @@
         .s_bottom
           img src="#{@output_file}"
           .overlay
-            img src="/assets/share/download.png"
+            = link_to image_tag('/assets/share/download.png'),"/e/questionaires/#{@survey.id}/down_qrcode"
+            /img src="/assets/share/download.png"
     .mail_channel.mail_net
       .main
         img src="/assets/share/comingsoon.png"

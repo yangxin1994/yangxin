@@ -12,7 +12,7 @@ class Express::SharesController < Express::ExpressController
     @share_link = "#{Rails.application.config.quillme_host}/#{MongoidShortener.generate(@share_link)}"
     @output_file = Rails.root + "/public/qrcode/#{@survey.id}.png"
     unless File.exist?(@output_file)
-      QRCode.image("test", "#{Rails.root}" + '/public/qrcode', { :format => :png , :filename => "#{@survey.id}" })
+      QRCode.image("#{@share_link}", "#{Rails.root}" + '/public/qrcode', { :format => :png , :filename => "#{@survey.id}" })
     end
     @output_file = Rails.root + "/qrcode/#{@survey.id}.png"    
   end
