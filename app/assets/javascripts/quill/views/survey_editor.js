@@ -293,12 +293,6 @@ $(function(){
 						}
 						this._current_designer = designer;
 						this.$('.s-pages').sortable('disable');
-						// scroll to the designer
-						if($('#q_designer_' + qid + ':in-viewport').length == 0) {
-						// if($('#q_designer_' + qid + ':in-viewport').length == 0 ||
-						// 	$('#q_designer_' + qid + ':above-the-top').length > 0) {
-							$(window).scrollTo(designer.$el, 500, { offset: {top: -20} });
-						}
 					}, this)
 				});
 

@@ -41,13 +41,6 @@ $(function(){
 			  this.set({"pages": this.defaults().pages});
 			}
 		},
-		
-		/* Check whether the survey is published
-		 * =========================== */
-		// isPublished: function() {
-		// 	// 1 closed 2 reviewing 4 paused 8 published
-		// 	return this.get('publish_status') == 8;
-		// },
 
 		/* ==================================================
 		 * common methods
@@ -56,7 +49,7 @@ $(function(){
 		/* construct uri
 		 * =========================== */
 		_uri: function(name) {
-			return '/questionaires/' + this.id + (name || '') + '.json'
+			return '/e/questionaires/' + this.id + (name || '') + '.json'
 		},
 
 		/* ==================================================
@@ -78,6 +71,28 @@ $(function(){
 					callback.error(retval.value);
 				}
 			}, this));
+		},
+		updateBasic: function(title, subtitle, description, callback) {
+			callback = $.ensureCallback(callback);
+			if(!title) title = this.get('title');
+			$.putJSON(this._uri('/property'), {
+				properties: { title: title, subtitle: subtitle, description: description }
+			}, $.proxy(function(retval) {
+				if(retval.success) {
+					this.set('title', title);
+					this.set('subtitle', subtitle);
+					this.set('description', description);
+					callback.success();
+				} else {
+					callback.error(retval.value);
+				}
+			}, this));
+		},
+
+		/* Check whether the survey is new (has only one page and has no questions)
+		 * =========================== */
+		isNew: function() {
+			return this.pageCount() == 1 && ((this.get('pages')[0].questions || []).length == 0);
 		},
 
 		/* ==================================================
@@ -258,6 +273,27 @@ $(function(){
 					}
 					// 3. call callback
 					callback.success(qid);
+				} else {
+					callback.error(retval.value);
+				}
+			}, this));
+		},
+
+		/* Copy a question
+		 * =========================== */
+		copyQuestion: function(question_id, callback) {
+			var pos = this.findQuestionPosition(question_id);
+			if(!pos) return;
+			$.putJSON(this._uri('/questions/' + question_id + '/copy'), {}, $.proxy(function(retval) {
+				callback = $.ensureCallback(callback);
+				if(retval.success) {
+					// 1. update question models
+					var new_q_model = this.setQuestionModel(retval.value);
+					// 2. find page index and add new qid to it
+					var pos = this.findQuestionPosition(question_id);
+					this.get('pages')[pos.pageIndex].questions.splice(pos.questionIndex + 1, 0, retval.value._id);
+					// 3. call callback
+					callback.success(retval.value._id);
 				} else {
 					callback.error(retval.value);
 				}

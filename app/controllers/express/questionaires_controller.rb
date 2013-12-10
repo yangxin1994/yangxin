@@ -25,7 +25,7 @@ class Express::QuestionairesController < Express::ExpressController
   def new
     @survey = Survey.create
     current_user.surveys << @survey
-    redirect_to questionaire_path(@survey._id) and return
+    redirect_to express_questionaire_path(@survey._id) and return
   end
 
   # AJAX: clone survey

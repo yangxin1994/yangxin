@@ -1,4 +1,4 @@
-class Express::PropertiesController < Express::QuillController
+class Express::PropertiesController < Express::ExpressController
   
   before_filter :ensure_survey
 

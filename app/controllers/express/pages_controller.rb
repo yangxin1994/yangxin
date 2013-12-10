@@ -1,3 +1,6 @@
+require 'error_enum'
+class Express::PagesController < Express::ExpressController
+  
   before_filter :require_sign_in, :except => [:show]
   before_filter :ensure_survey
 

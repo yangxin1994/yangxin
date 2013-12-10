@@ -1,57 +1,25 @@
 <!-- content for head -->
 <% content_for :head do %>
   <script type="text/javascript">
-    window.uid = "<%= current_user._id %>";
+    // window.uid = "<%= current_user._id %>";
   </script>
   <%= javascript_include_tag "pages/express/questionaire-bundle" %>
   <%= stylesheet_link_tag "pages/express/questionaire-bundle", :media => "all" %>
-  
-  <script type="text/javascript">
-  jQuery(function($) {
-    var survey = <%= raw @survey.to_json %>;
-    var survey_model = new quill.models.Survey(survey); 
-    var survey_editor = new quill.views.SurveyEditor({
-      //locked: <%= @locked %>,
-      locked: false,
-      model: survey_model
-    });
-    survey_editor.appendTo('#my_editor');
-
-    // set left menus events
-    // $.each(quill.helpers.QuestionType.getNames(), function(i, type) {
-    //   var btn = $('.' + type);
-    //   btn.draggable({
-    //     helper: "clone",
-    //     start: function(event, ui) {
-    //       ui.helper.data('questionType', type);
-    //     },
-    //     drag: function(event, ui) {
-    //       var designer_el = $(this).data("current-droppable");
-    //       if(!designer_el) return;
-    //       var $draggable = ui.draggable || ui.helper;
-    //       var is_upper =  (ui.offset.top + $draggable.outerHeight() / 2 
-    //         <= designer_el.offset().top + designer_el.outerHeight() / 2);
-    //       survey_editor.updateHighlight(designer_el, is_upper);
-    //     },
-    //     stop: function(event, ui) {
-    //       survey_editor.cleanupHighlight();
-    //     }
-    //   });
-    //   btn.click(function() {
-    //     survey_editor.addQuestionAuto(type);
-    //   });
-    // });
-
-  });
-  </script>
 <% end %>
 
-<div id='my_editor'></div>
-
-<div class="left-sidebar" id="left_float_menus">
-  <div class='left-head'>
-    <a href="javascript:void(0);" class="current-option-name">基本题型<i class="tip tip-open"></i></a>
+<div class="left-sidebar disable">
+  <div id='normal_q' class='left-menus'>
+    <a href="javascript:void(0);" class="active">基本题型<i></i></a>
+    <ul>
+      <li class='big'><a class='Choice' href="javascript:void(0);"><span class="left-menu-icon"><em class="choice"></em></span><span class="left-menu-name">选择题</span></a></li>
+      <li class='big'><a class='Paragraph' href="javascript:void(0);"><span class="left-menu-icon"><em class="text"></em></span><span class="left-menu-name">文字描述</span></a></li>
+      <li class='big'><a class='Scale' href="javascript:void(0);"><span class="left-menu-icon"><em class="star"></em></span><span class="left-menu-name">评分题</span></a></li>
+      <li class='big'><a class='MatrixChoice' href="javascript:void(0);"><span class="left-menu-icon"><em class="matrix_choice"></em></span><span class="left-menu-name">矩阵选择题</span></a></li>
+      <li class='big'><a class='TextBlank' href="javascript:void(0);"><span class="left-menu-icon"><em class="filling"></em></span><span class="left-menu-name">填充题</span></a></li>
+      <li class='big' style="border-bottom:0;"><a class='Sort' href="javascript:void(0);"><span class="left-menu-icon"><em class="jmix"></em></span><span class="left-menu-name">排序题</span></a></li>
+    </ul>
   </div>
+<<<<<<< HEAD
   <ul class="left-menus">
     <li class='big'><a class='Choice disable' href="javascript:void(0);"><span class="left-menu-icon"><em class="choice disable"></em></span><span class="left-menu-name">选择题</span></a></li>
     <li class='big'><a class='Paragraph disable' href="javascript:void(0);"><span class="left-menu-icon"><em class="text disable"></em></span><span class="left-menu-name">文字描述</span></a></li>
@@ -79,67 +47,98 @@
     <li class='small'><a class='AddressBlank' href="javascript:void(0);"><span class="left-menu-name">婚姻状况</span></a></li>
     <li class='small' style="border-bottom:none"><a class='UrlBlank' href="javascript:void(0);"><span class="left-menu-name">工作单位</span></a></li>
   </ul>
+=======
+  <div id='special_q' class='left-menus'>
+    <a class='bottom-head' href="javascript:void(0);">常用题型<i></i></a>
+    <ul style='display:none;'>
+      <li class='small'><a class='Choice' href="javascript:void(0);"><span class="left-menu-name">性别</span></a></li>
+      <li class='small'><a class='Paragraph' href="javascript:void(0);"><span class="left-menu-name">城市</span></a></li>
+      <li class='small'><a class='Scale' href="javascript:void(0);"><span class="left-menu-name">年龄</span></a></li>
+      <li class='small'><a class='MatrixChoice' href="javascript:void(0);"><span class="left-menu-name">手机</span></a></li>
+      <li class='small'><a class='EmailBlank' href="javascript:void(0);"><span class="left-menu-name">Email</span></a></li>
+      <li class='small'><a class='NumberBlank' href="javascript:void(0);"><span class="left-menu-name">工作年限</span></a></li>
+      <li class='small'><a class='PhoneBlank' href="javascript:void(0);"><span class="left-menu-name">个人收入</span></a></li>
+      <li class='small'><a class='TimeBlank' href="javascript:void(0);"><span class="left-menu-name">教育程度</span></a></li>
+      <li class='small'><a class='AddressBlank' href="javascript:void(0);"><span class="left-menu-name">婚姻状况</span></a></li>
+      <li class='small' style="border-bottom:none"><a class='UrlBlank' href="javascript:void(0);"><span class="left-menu-name">工作单位</span></a></li>
+    </ul>
+>>>>>>> 3f75ebaf1cb75a6f76d793519a1e7a4e94322a47
   </div>
- <!-- 常用题型 end --> 
 
   <script type="text/javascript">
   jQuery(function($) {
-    var big = true;
-    $('.left-sidebar-pulldownBtn').click(function() {
-      if(big) {
-        $('.big').slideUp('fast');
-        $('.small').slideDown('fast');
-      } else {
-        $('.big').slideDown('fast');
-        $('.small').slideUp('fast');
-      }
-      big = !big;
+    var left_disabled = true;
+    $('#normal_q a:eq(0)').click(function() {
+      if(left_disabled) return;
+      $('#normal_q a:eq(0)').addClass('active');
+      $('#normal_q ul:eq(0)').slideDown('fast');
+      $('#special_q a:eq(0)').removeClass('active').addClass('bottom-head');
+      $('#special_q ul:eq(0)').slideUp('fast');
+    });
+    $('#special_q a:eq(0)').click(function() {
+      if(left_disabled) return;
+      $('#normal_q a:eq(0)').removeClass('active');
+      $('#normal_q ul:eq(0)').slideUp('fast');
+      $('#special_q a:eq(0)').addClass('active').removeClass('bottom-head');
+      $('#special_q ul:eq(0)').slideDown('fast');
     });
 
-    $('#edit_setting').tooltip({ placement: 'right', delay: {show: 500, hide: 0}  });
+    // survey editor
+    var survey = <%= raw @survey.to_json %>;
+    var survey_model = new quill.models.Survey(survey); 
+    window.survey_editor = new quill.views.SurveyEditor({
+      model: survey_model,
+      onUnready: function() {
+        left_disabled = true;
+        $('.left-sidebar').addClass('disable');
+      },
+      onReady: function() {
+        left_disabled = false;
+        $('.left-sidebar').removeClass('disable');
+      }
+    });
+    survey_editor.appendTo('#my_editor');
+
+    // set left menus events
+    $.each(quill.helpers.QuestionType.getNames(), function(i, type) {
+      var btn = $('.' + type);
+      btn.draggable({
+        helper: "clone",
+        start: function(event, ui) {
+          if(left_disabled) return false;
+          ui.helper.data('questionType', type);
+        },
+        drag: function(event, ui) {
+          var designer_el = $(this).data("current-droppable");
+          if(!designer_el) return;
+          var $draggable = ui.draggable || ui.helper;
+          var is_upper =  (ui.offset.top + $draggable.outerHeight() / 2 
+            <= designer_el.offset().top + designer_el.outerHeight() / 2);
+          survey_editor.updateHighlight(designer_el, is_upper);
+        },
+        stop: function(event, ui) {
+          survey_editor.cleanupHighlight();
+        }
+      });
+      btn.click(function() {
+        if(left_disabled) return;
+        survey_editor.addQuestionAuto(type);
+      });
+    });
   });
   </script>
 </div>
-<div class='right-sidebar'>
-  <div id='my_editor' style="position:relative;">
 
+<div class='right-sidebar' style="position:relative;">
       <!-- 逻辑控制&预览 浮动层 -->
     <div id="float-panel">
       <a class="logic-control" href="javascript:;"></a>
       <a  class="preview-survey" href="javascript:;"></a>
     </div>
+  <div id='my_editor'></div>
 
+  <div>
     <div class="survey-editor">
-      <!-- 问卷标题 -->
-      <div class="ex-title">
-        <!-- 主标题 -->
-          <input type="text" name="survey-title" class="survey-title">
-         <!-- 副标题  -->
-          <input type="text" name="survey-subhead" class="survey-subhead">
-          <!-- 调查背景 -->
-          <textarea name="survey-background" class="survey-background" cols="30" rows="10"></textarea>
-          <a href="javascript:;" class="submit-edit">
-            <strong>确定</strong><span>并开始编辑问题</span>
-          </a>
-      </div>
-
-
-      <div class="survey-editor-finished">
-        <button class="editor-btn">编辑</button>
-        <h1 class="survey-title-finished">问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题问卷主标题</h1>
-        <h2 class="survey-subhead-finished">问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题问卷副标题</h2>
-        <div class="survey-background-finished">
-          <p>
-            调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景
-          </p>
-          <p>
-            调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景调查背景
-          </p>
-        </div>
-      </div>
-
-
-
       <!-- 选择题 预览 start -->
   <div id="" class="q-designer ui-droppable"><div class="q-render">
     <div class="q-render-mid"><div class="q-filler q-choice">
@@ -193,7 +192,8 @@
   </div>
       <!-- 文字描述 预览 end -->
       <!-- 评分题 预览 start -->
-      <div id="" class="q-designer ui-droppable"><div class="q-render">
+      <div id="" class="q-designer ui-droppable">
+  <div class="q-render">
     <div class="q-render-mid"><div class="q-filler q-scale">
     <span class="q-idx">11</span>
     <div class="q-title">
