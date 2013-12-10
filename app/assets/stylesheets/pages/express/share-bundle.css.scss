@@ -1,0 +1,395 @@
+@import "common";
+@import "share/*.png";
+@import "compass/css3/box-shadow";
+@import "compass/css3/border-radius";
+@import "compass/css3/opacity";
+@import "compass/utilities/general/clearfix";
+
+.od-body{
+  margin-top: 12px;
+  background: #FFF;  
+  @include border-radius(3px);
+  border: 1px #DFE3E8 solid;
+  .sub_container{
+    .sub_nav{
+      @include clearfix;
+      li{
+        float: left;
+        width:213px;
+        @include one-line(50px);
+        text-align: center;
+        font-size: 16px;
+        font-weight: normal;
+        color:#33333D;
+        border-right: 1px solid #DFE3E8;
+        border-bottom:1px solid #DFE3E8;      
+        a{
+          display:block;
+          height:50px;
+          line-height:50px;
+          .social{@include share-sprite(social);}
+          .mail{@include share-sprite(mail);}
+          .site{@include share-sprite(site);}
+          .set{@include share-sprite(set);}
+          &:hover{
+            .social{@include share-sprite(social_hover);}
+            .mail{@include share-sprite(mail_hover);}
+            .site{@include share-sprite(site_hover);}
+            .set{@include share-sprite(set_hover); }
+          }
+        }
+  
+        &.active{
+          border-bottom: none;
+          a{
+            font-weight:bold;
+            .social{@include share-sprite(social_hover);}
+            .mail{@include share-sprite(mail_hover);}
+            .site{@include share-sprite(site_hover);}    
+          }
+        }
+        &.last{
+          width:49px;
+          border-right:0px;
+          background: #F4F5F9;
+        }
+      }
+    }  
+  }
+
+  .share_info{
+    margin:30px 40px 70px;    
+    .social_channel{
+      @include clearfix;
+      .title{
+        font-weight:bold;
+        font-size:16px;
+        margin-bottom:38px;
+      }
+      .left{
+        float:left;
+        width:560px;
+        .share_link{
+          margin-bottom:38px;
+          .share_notice{
+            font-size:16px;
+            margin-bottom:12px;
+          }
+          input{
+            width:404px;
+            font-size:16px;
+            padding:10px;
+            font-weight:bold;
+            color:#5691F0;
+            border:1px solid #DFE3E8;
+            border-right:none;
+            @include border-radius(3px);
+            @include border-top-right-radius(0px);
+            @include border-bottom-right-radius(0px);
+          }
+          button{
+            width:120px;
+            padding:11px;
+            font-size:16px;
+            border:none;
+            line-height: 1.5em;
+            background: #ffc000;
+            text-align: center;
+            @include border-top-right-radius(3px);
+            @include border-bottom-right-radius(3px);          
+          }
+          .add_psw{
+            margin-top:12px;
+            @include one-line(16px);
+            .lock{
+              width:16px;
+              height:16px;
+              @include inline-block;
+              @include share-sprite(lock);
+              margin-right:8px;
+            }
+            a{
+              color:#5691F0;
+              text-decoration: underline;            
+            }
+          }
+        }
+        .share_social{
+          .socials{
+            margin-top: 20px;
+            a{
+              text-align: center;
+              display:inline-block;
+              margin-right:25px;
+              width:50px;
+              i{
+                display:inline-block;
+                width:50px;
+                height:49px;
+                margin-bottom:6px;
+              }
+              &.sina{
+                i{@include share-sprite(sina);}
+                &.hover{
+                  i{@include share-sprite(sina_hover);}
+                }
+              }
+              &.renren{
+                i{@include share-sprite(renren);}
+                &.hover{
+                  i{@include share-sprite(renren_hover);}
+                }                
+              }
+              &.weixin{
+                i{@include share-sprite(weixin);}
+                &.hover{
+                  i{@include share-sprite(weixin_hover);}
+                }                
+              }
+              &.douban{
+                i{@include share-sprite(douban);}
+                &.hover{
+                  i{@include share-sprite(douban_hover);}
+                }                
+              }
+              &.qzone{
+                i{@include share-sprite(qzone);}
+                &.hover{
+                  i{@include share-sprite(qzone_hover);}
+                }                
+              }                            
+            }
+          }
+        }
+      }
+      .right{
+        float:right;
+        width:222px;
+        font-size:16px;
+        .s_top{
+          margin-bottom:18px;
+        }
+      }
+    }
+    .mail_channel{
+      display:none;
+      .main{
+        text-align: center;
+        margin-top:100px;
+      } 
+    }
+    .site_channel{
+      display:none;
+      .title{
+        font-weight:bold;
+        font-size:16px;
+        margin-bottom:10px;
+        .sub_title{
+          margin-top: 20px;
+          font-size: 14px;
+          font-weight:normal;
+          @include clearfix;
+          .lt{
+            float:left;
+          }
+          .rt{
+            color:#DFE3E8;
+            float:right;
+          }
+        }
+      }      
+      .survey_link {
+        border:1px solid #DFE3E8;
+        position: relative;
+        .left_part {
+          width: 260px;
+          height:348px;
+          padding: 0px 34px;
+          .float_color{
+            @include clearfix;
+            label{
+              font-size:14px;
+              font-weight: bold;
+              font-family: "微软雅黑";
+              width: 38px;
+              height: 100px;
+              float: left;
+              display: block;
+              margin-top:28px;
+              margin-right:36px;
+              margin-bottom:34px;
+              cursor: pointer;
+              background-position: 0 -5px;
+              position: relative;
+              &.color_A {
+                @include share-sprite(s_A);
+              }
+              &.color_B {
+                @include share-sprite(s_B);
+              }
+              &.color_C {
+                @include share-sprite(s_C);
+              }
+              &.color_D {
+                margin-right:0px;
+                @include share-sprite(s_D);
+              }
+              &.color_E {
+                @include share-sprite(s_E);
+              }
+              &.color_F {
+                @include share-sprite(s_F);
+              }
+              &.color_G {
+                @include share-sprite(s_G);
+              }
+              &.color_H{
+                margin-right:0px;
+                @include share-sprite(s_H);
+              }
+              input{
+                @include opacity(0);
+              }
+              span{
+                position:absolute;
+                top:108px;
+                left:10px;
+                display:inline-block;
+                width:24px;
+                height:24px;
+                @include share-sprite(radio);
+              }
+              &:hover{
+                span{
+                  @include share-sprite(radio_hover);
+                }
+              }
+              &.active{
+                span{
+                  @include share-sprite(radio_active);
+                }
+              }
+            }
+          }
+        }
+        .right_part {
+          padding: 2px;
+          border-left:1px solid #DFE3E8;
+          position: absolute;
+          right: 0;
+          top: 0;
+          width: 490px;
+          height:348px;
+          textarea{
+            width:486px;
+            height:280px;
+            border:none;
+          }
+          .help{
+            background:#e2e5ea;
+            height:48px;
+            font-size:14px;
+            line-height: 1.5em;
+            padding-top: 8px;
+            padding-left:14px;
+          }
+        }        
+        .float_link{
+          position: fixed;
+          right: 0;
+          top: 250px;
+        }
+      }
+      .share_bottom{
+        font-size:14px;
+        @include clearfix;
+        margin-top:18px;
+        height:72px;
+        width:inherit;
+        .s_l{
+          float:left;
+          p{
+            margin-bottom:14px;
+            display:block;
+          }
+          .scale_l{
+            display:inline-block;
+            width:14px;
+            height:2px;
+            @include share-sprite(l);
+            position:relative;
+            top:-2px;
+          }
+          .scale_c{
+            display:inline-block;
+            height:6px;
+            width:290px;
+            background: #e2e5ea;
+            @include border-radius(3px);
+            margin:0px 10px;
+          }
+          .scale_r{
+            display:inline-block;
+            width:14px;
+            height:14px;
+            @include share-sprite(r);
+            position: relative;
+            top:4px;
+          }
+          .val{
+            margin-top:10px;
+            text-align:center;
+            color:#5691f0;
+          }
+        }
+        .s_r{
+          float:right;
+          button{
+            width:122px;
+            height:46px;
+            border:0px;
+            background:#ffc800;
+            font-size: 14px;
+            @include border-radius(3px);
+          }
+        }
+      }
+    }
+    .sample_serve{
+      display:none;
+      .main{
+        text-align: center;
+        margin-top:100px;
+      }      
+    }
+  }
+}
+
+
+
+
+
+.ui-slider {position: relative;}
+
+.ui-state-default {
+  @include share-sprite(circle);
+  width:29px;
+  height:28px;
+  outline: none;
+  position: absolute;
+  z-index: 2;
+  cursor: default;
+  top: -.8em;
+  margin-left: -.6em;
+  &:hover{
+    @include share-sprite(circle_hover);
+  }
+}
+
+.ui-widget-header {
+  background:#FFC800;
+  @include border-radius(3px);
+  top: 0;
+  height: 100%;  
+}
+

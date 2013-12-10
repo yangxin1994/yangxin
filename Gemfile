@@ -1,7 +1,7 @@
 #source 'http://rubygems.org'
 source 'http://ruby.taobao.org'
 
-ruby "1.9.3"
+#ruby "1.9.3"
 
 gem 'rails', '~> 3.2.6'
 
@@ -12,7 +12,7 @@ gem 'sidekiq', '~> 2.8.0'
 gem "kiqstand", '~> 1.0.0'
 gem 'whenever', '~> 0.8.2', :require => false
 gem 'sinatra', require: false
-gem 'slim', '~> 1.3.6'
+gem "slim", "~> 2.0.2"
 
 gem 'ezcrypto', '~> 0.7.2'
 gem 'rack-protection', '~> 1.3.2'
@@ -61,6 +61,7 @@ group :assets do
   # TODO: follow https://github.com/Compass/compass-rails/pull/59 for the latest updates
   # gem 'compass-rails', github: "milgner/compass-rails", ref: "1749c06f15dc4b058427e7969810457213647fb8" 
   gem 'jquery-rails', "~> 2.2.1"
+
   # gem for bootstrap.
   gem "bootstrap-sass-rails", "~> 2.3.0.0"
   # gem 'anjlab-bootstrap-rails', :require => 'bootstrap-rails',
