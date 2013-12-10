@@ -369,6 +369,9 @@ OopsData::Application.routes.draw do
       end
     end
 
+    resources :netranking_users do
+    end
+
     resources :newsletters do
       member do
         post   :deliver
@@ -380,6 +383,10 @@ OopsData::Application.routes.draw do
         post   :column
         post   :article
         post   :product_news
+        get    :netranking_newsletter
+        get    :upload_attachment
+        post   :attachment_uploaded
+        post   :send_netranking_newsletter
       end
     end
 
