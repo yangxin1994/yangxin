@@ -250,7 +250,8 @@ $(function(){
 						show_subscribe: !this.options.binded
 					}, 'survey_filler_end_free').appendTo('#f_body');
 					$('#start_spread').click($.proxy(function() { this._spread(); }, this));
-					$('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));
+					$('#close_btn').click(function(){window.close();});
+					//$('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));
 				} else if(this.options.reward.reward_scheme_type == 1) {
 					// cash
 					if(value.order_id == null) {
@@ -371,7 +372,9 @@ $(function(){
 							$.util.disable(signin_btn.text('正在跳转...'));
 							$.postJSON(this._uri('/start_bind'), function(retval) { location.href = '/account/sign_in?ref=' + encodeURIComponent('/users/orders'); });
 						}, this));
-						$('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));
+						
+						$('#close_btn').click(function(){window.close();});
+						//$('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));
 					}
 				} else if(this.options.reward.reward_scheme_type == 2) {
 					// point
@@ -439,7 +442,9 @@ $(function(){
 					show_subscribe: !this.options.binded
 				}, 'survey_filler_reject').appendTo('#f_body');
 				$('#start_spread').click($.proxy(function() { this._spread(); }, this));
-				$('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));
+				
+				$('#close_btn').click(function(){window.close();});
+				//$('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));
 			}
 
 			// scroll to window top
