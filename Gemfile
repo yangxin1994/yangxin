@@ -14,6 +14,8 @@ gem 'whenever', '~> 0.8.2', :require => false
 gem 'sinatra', require: false
 gem "slim", "~> 2.0.2"
 
+gem 'qrcoder'
+
 gem 'ezcrypto', '~> 0.7.2'
 gem 'rack-protection', '~> 1.3.2'
 gem 'log4r', '~> 1.1.10'

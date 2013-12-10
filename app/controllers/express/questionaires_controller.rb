@@ -1,4 +1,5 @@
 require 'error_enum'
+require 'open-uri'
 class Express::QuestionairesController < Express::ExpressController
 
   before_filter :require_sign_in, :only => [:index, :show]
@@ -71,5 +72,13 @@ class Express::QuestionairesController < Express::ExpressController
   # AJAX: close a published survey
   def close
     render_json_auto(@survey.update_attributes(status: Survey::CLOSED)) and return
+  end
+
+  # ajax download qcode image
+  def down_qrcode
+    @filename ="#{Rails.root}/public/qrcode/#{params[:id]}.png"
+    if File.exist?( @filename)
+      send_file(@filename, :filename => "#{params[:id]}.png")
+    end
   end
 end

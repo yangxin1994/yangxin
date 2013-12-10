@@ -24,6 +24,7 @@ OopsData::Application.routes.draw do
         get :stars
         post :clone
         put :recover, :remove, :update_star, :publish, :deadline, :close
+        get :down_qrcode
       end
 
       resources :pages, :only => [:create, :show] do

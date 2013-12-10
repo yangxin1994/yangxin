@@ -1,9 +1,12 @@
 //=require ui/plugins/od_float_link
-//= require jquery.zclip.js
-//= require jQuery.blockUI
+//=require ui/plugins/od_social_share
+//=require ui/plugins/od_clipboard
 
 $ ->
-  $('.left_part').SurveyLink(href:'http://sina.com')
+
+  $('.socials').share(title:$('.social_channel .title').text(),url:$('input[name="link"]').val())
+
+  $('.left_part').SurveyLink(href:$('input[name="link"]').val())
 
   $('.sub_nav li').bind('click',(e) ->
     tab_class = $(@).attr('class')
@@ -12,34 +15,28 @@ $ ->
       $(@).addClass('active').siblings().removeClass('active')     
   )
 
+  $('.copy_button').clipboard(text:$('input[name="link"]').val())
+
   $('li.site_net').click(->
-    succ = "<div class='succ_msg'><img src='/assets/share/success.png'></div>"
-    $('.code_button').zclip({
-      path:'/assets/ZeroClipboard.swf',
-      copy:$('.pre_code').text(),
-      afterCopy:->
-        $.blockUI({ 
-          message: succ, 
-          fadeIn: 700, 
-          fadeOut: 700, 
-          timeout: 2000, 
-          showOverlay: false, 
-          centerY: false, 
-          css: { 
-            width: '350px', 
-            height:'70px',
-            'line-height':'100px',
-            border: 'none', 
-            padding: '5px', 
-            backgroundColor: '#000', 
-            '-webkit-border-radius': '10px', 
-            '-moz-border-radius': '10px', 
-            opacity: .6, 
-            color: '#fff' 
-          } 
-        })
-    })
+    $('.code_button').clipboard(text:$('.pre_code').text())
   )
+
+  $('.s_bottom img').hover(
+    ->
+      $('.overlay').show()
+    ->
+      $('.overlay').hide()
+
+  )
+
+
+  $('.overlay').click(->
+    url = window.location.href.replace('share','')
+    $.getJSON(url + "down_qrcode.json", (data)->)
+  )
+
+
+
 
   
   

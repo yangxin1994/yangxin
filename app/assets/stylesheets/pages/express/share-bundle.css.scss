@@ -25,17 +25,36 @@
         border-bottom:1px solid #DFE3E8;      
         a{
           display:block;
-          height:50px;
-          line-height:50px;
-          .social{@include share-sprite(social);}
-          .mail{@include share-sprite(mail);}
-          .site{@include share-sprite(site);}
+          @include one-line(50px);
+          .social{
+            height:20px;
+            @include share-sprite(social);
+          }
+          .mail{
+            height:24px;
+            @include share-sprite(mail);
+          }
+          .site{
+            height:16px;
+            @include share-sprite(site);
+          }
           .set{@include share-sprite(set);}
           &:hover{
-            .social{@include share-sprite(social_hover);}
-            .mail{@include share-sprite(mail_hover);}
-            .site{@include share-sprite(site_hover);}
-            .set{@include share-sprite(set_hover); }
+            .social{
+              height:20px;
+              @include share-sprite(social_hover);
+            }
+            .mail{
+              height:24px;
+              @include share-sprite(mail_hover);
+            }
+            .site{
+              height:16px;
+              @include share-sprite(site_hover);
+            }
+            .set{
+              @include share-sprite(set_hover); 
+            }
           }
         }
   
@@ -43,9 +62,18 @@
           border-bottom: none;
           a{
             font-weight:bold;
-            .social{@include share-sprite(social_hover);}
-            .mail{@include share-sprite(mail_hover);}
-            .site{@include share-sprite(site_hover);}    
+            .social{
+              height:20px;
+              @include share-sprite(social_hover);
+            }
+            .mail{
+              height:24px;
+              @include share-sprite(mail_hover);
+            }
+            .site{
+              height:16px;
+              @include share-sprite(site_hover);
+            }    
           }
         }
         &.last{
@@ -87,7 +115,7 @@
             @include border-top-right-radius(0px);
             @include border-bottom-right-radius(0px);
           }
-          button{
+          .copy_button{
             width:120px;
             padding:11px;
             font-size:16px;
@@ -95,6 +123,7 @@
             line-height: 1.5em;
             background: #ffc000;
             text-align: center;
+            cursor:pointer;
             @include border-top-right-radius(3px);
             @include border-bottom-right-radius(3px);          
           }
@@ -121,11 +150,11 @@
               text-align: center;
               display:inline-block;
               margin-right:25px;
-              width:50px;
+              width:48px;
               i{
                 display:inline-block;
-                width:50px;
-                height:49px;
+                width:48px;
+                @include one-line(48px);
                 margin-bottom:6px;
               }
               &.sina{
@@ -168,6 +197,20 @@
         font-size:16px;
         .s_top{
           margin-bottom:18px;
+        }
+        .s_bottom{
+          position:relative;
+          img{
+            width:216px;
+            height:216px;
+            cursor:pointer;
+          }
+          .overlay{
+            position: absolute;
+            top:0;
+            left:0;
+            display:none;
+          }
         }
       }
     }
