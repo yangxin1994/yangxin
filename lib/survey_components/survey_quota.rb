@@ -163,7 +163,17 @@ module SurveyComponents::SurveyQuota
   end
 
   def decrease_quota(answer)
-    return if !answer.is_under_review && !answer.is_finish
+    if quota["quota_satisfied"]
+      self.refresh_quota_stats
+      return
+    end
+    if answer.is_finish
+      quota["finished_count"] = [quota["finished_count"] - 1, 0].max
+      quota["submitted_count"] = [quota["submitted_count"] - 1, 0].max
+    end
+    if answer.is_under_review
+      quota["submitted_count"] = [quota["submitted_count"] - 1, 0].max
+    end
     quota["rules"].each do |rule|
       next if !answer.satisfy_conditions(rule["conditions"] || [])
       if answer.is_under_review

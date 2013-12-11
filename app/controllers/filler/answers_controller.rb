@@ -106,9 +106,10 @@ class Filler::AnswersController < Filler::FillerController
 
   def replay
     @answer = Answer.find(params[:id])
-    @answer.survey.decrease_quota(@answer)
     cookies.delete(cookie_key(@answer.survey_id.to_s, @answer.is_preview), :domain => :all)
-    @answer.survey.answers.delete(@answer)
+    survey = @answer.survey
+    survey.answers.delete(@answer)
+    survey.decrease_quota(@answer)
     render_json_auto @answer.destroy and return 
   end
 
