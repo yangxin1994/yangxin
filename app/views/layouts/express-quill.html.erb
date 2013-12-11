@@ -95,13 +95,21 @@
 </div>
 <!-- 向导 -->
   <ul id="nav" class="od-container">
-    <li class="active"><a href="javascript:;"><i class="icon32 edit"></i>设计问卷</a></li>
-    <li><a href="javascript:;"><i class="icon32 share"></i>分享问卷</a></li>
-    <li style="width:285px;"><a style="background:none;" href="javascript:void(0);"><i class="icon32 recycle"></i>回收问卷</a></li>
+    <li class="<%= current_tab(controller_name,'questionaires')%>">
+      <a href="javascript:;"><i class="icon32 edit"></i>设计问卷</a>
+    </li>
+    <li class="<%= current_tab(controller_name,'shares')%>">
+      <a href="javascript:;"><i class="icon32 share"></i>分享问卷</a>
+    </li>
+    <li style="width:285px;">
+      <a style="background:none;" href="javascript:void(0);">
+        <i class="icon32 recycle"></i>回收问卷
+      </a>
+    </li>
   </ul>
 <!-- 下部分 -->
 <div class="od-container od-body">
-	<%= yield %>
+        <%= yield %>
   <div class='cl-line'></div>
 </div>
 <% end %>

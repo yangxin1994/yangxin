@@ -39,6 +39,7 @@
           .add_psw
             i.lock
             a href='javascript:void(0)' 添加访问密码
+            input type='text' class="password" name='password' value="#{@survey.access_password}"
         .share_social
           p.desc 分享到社交网络
           .socials
@@ -64,7 +65,6 @@
           img src="#{@output_file}"
           .overlay
             = link_to image_tag('/assets/share/download.png'),"/e/questionaires/#{@survey.id}/down_qrcode"
-            /img src="/assets/share/download.png"
     .mail_channel.mail_net
       .main
         img src="/assets/share/comingsoon.png"

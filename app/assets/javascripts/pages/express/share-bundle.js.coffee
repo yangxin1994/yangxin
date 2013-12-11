@@ -29,10 +29,20 @@ $ ->
 
   )
 
-
   $('.overlay').click(->
     url = window.location.href.replace('share','')
     $.getJSON(url + "down_qrcode.json", (data)->)
+  )
+
+  $('.add_psw a').click(->
+    $(@).hide().siblings('input').show().select()
+  )
+
+  $('.password').focusout(->
+    psw = $.trim($(@).val().toLowerCase())  
+    $.putJSON("/e/questionaires/#{window.survey_id}/update_access_pass",{single_password:psw},(data)->
+      $('.password').hide().prev('a').text('修改密码成功').show()
+    )
   )
 
 

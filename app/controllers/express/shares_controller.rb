@@ -17,10 +17,6 @@ class Express::SharesController < Express::ExpressController
     @output_file = Rails.root + "/qrcode/#{@survey.id}.png"    
   end
 
-  def down_qrcode
-    
-  end
-
   def current_step
     @current_step = 2
   end

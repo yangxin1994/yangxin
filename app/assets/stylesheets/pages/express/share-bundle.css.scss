@@ -141,6 +141,18 @@
               color:#5691F0;
               text-decoration: underline;            
             }
+            .password{
+              display:none;
+              @include border-radius(3px);
+              // @include one-line(26px);
+              border:1px solid #DFE3E8;
+              width:120px;
+              font-size:14px;
+              height:14px;
+              padding:8px;
+              color:#AEB5C0;
+
+            }
           }
         }
         .share_social{

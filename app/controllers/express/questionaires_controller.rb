@@ -5,7 +5,7 @@ class Express::QuestionairesController < Express::ExpressController
 
   before_filter :require_sign_in, :only => [:index, :show]
   # before_filter :ensure_survey, :only => [:show]
-  before_filter :check_survey_existence, :only => [:show, :clone, :destroy, :recover, :remove, :publish, :deadline, :close]
+  before_filter :check_survey_existence, :only => [:show, :clone, :destroy, :recover, :remove, :publish, :deadline, :close,:update_access_pass]
 
 
   def check_survey_existence
@@ -80,5 +80,11 @@ class Express::QuestionairesController < Express::ExpressController
     @survey = Survey.find(params[:id])
     result = open("#{Rails.root}/public/qrcode/#{params[:id]}.png", "rb") { |f| f.read }
     send_data(result,:filename => "#{params[:id]}.png",:type => "image/png" )
+  end
+
+  # ajax update survey acess password
+  def update_access_pass
+    @survey.update_access_password(params[:single_password])
+    render_json_auto(:success => true)
   end
 end

@@ -540,6 +540,12 @@ module ApplicationHelper
     when 2
       return '已经完成'
     end
+  end
+
+
+  # new add for express navbar
+  def current_tab(controller,param)
+    return 'active' if controller == param
   end 
 
 end

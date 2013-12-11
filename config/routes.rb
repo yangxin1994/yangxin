@@ -23,7 +23,7 @@ OopsData::Application.routes.draw do
       member do
         get :stars
         post :clone
-        put :recover, :remove, :update_star, :publish, :deadline, :close
+        put :recover, :remove, :update_star, :publish, :deadline, :close,:update_access_pass
         get :down_qrcode
       end
 
