@@ -14,7 +14,7 @@
 	</script>
 
 	<% if @survey['_id'].to_s == '52a59fc6eb0e5bb2c5000007' %>
-	<!-- hack to hide logo -->
+	<!-- hack gonganbu to hide logo -->
 		<style type="text/css">
 			#logo { display: none; }
 		</style>
@@ -38,6 +38,10 @@
 	<% if @is_preview %>
 	<div id='pv_bar'>
 		<img src="/assets/filler/preview.png"><span>您正在模拟答题，答案不会被记录。</span><button>重新开始</button>
+	</div>
+	<% elsif @survey['style_setting']['allow_replay'] %>
+	<div id='pv_bar'>
+		<span>请认真答题</span><button>重新开始</button>
 	</div>
 	<% end %>
 	<div class='sf_banner_top'>
