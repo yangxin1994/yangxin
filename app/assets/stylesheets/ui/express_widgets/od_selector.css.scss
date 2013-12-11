@@ -12,7 +12,7 @@ $od-selector-height: 32px;
 .od-selector {
 	position: relative;
 	@include inline-block;
-	
+	font-size: 12px;
 	.selector-box {
 		@include one-line($od-selector-height);
 		cursor: pointer;

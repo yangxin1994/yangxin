@@ -232,11 +232,11 @@ $editor-paragraph-top-bottom-height: 14px;
 		@include border-bottom-radius(4px);
 		cursor: pointer;
 		background: none;
-		@include size(100%, 16px);
+		@include size(100%, 30px);
 		
 		em {
-			@include size(16px, 16px);
-			@include od-button-sprite(unfold);
+			@include size(12px, 6px);
+			@include editors-sprite(unfold);
 			@include inline-block;
 		}
 		
@@ -246,7 +246,7 @@ $editor-paragraph-top-bottom-height: 14px;
 	}
 	.packUp-btn {
 		em {
-			@include od-button-sprite(packUp);
+			@include editors-sprite(packUp);
 		}
 	}
 	
@@ -263,35 +263,25 @@ $editor-paragraph-top-bottom-height: 14px;
 	position: absolute;
 	bottom: 3px;
 	right: 3px;
-	.btn-confirm{
-		@include size(75px,40px);
-		border: none;
-		cursor: pointer;
-		font-weight: bold;
-		background: #FFC800;
-		color: #333;
-		float: left;
-		font-size: 14px;
-		@include border-bottom-right-radius(4px);
-		border-left:1px #FFA800 solid;
-	}
-	.btn-cancel {
+	button{
 		@include size(75px, 40px);
 		border: none;
 		cursor: pointer;
-		font-weight: bold;
+		font-size: 14px;
 		background: #FFC800;
 		color: #FFF;
 		float: left;
-		font-size: 14px;
-		
 		&:hover{
-			color:#333;
-		}
-		&:active{
-			color:#000;
+			background: #FFD337
 		}
 	}
+	.btn-confirm{
+		@include border-bottom-right-radius(4px);
+		border-left:1px #FFA800 solid;
+		color:#333;
+		font-weight: bold;
+	}
+
 }
 
 /* input preview */

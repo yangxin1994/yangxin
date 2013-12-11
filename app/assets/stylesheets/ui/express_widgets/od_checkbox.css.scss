@@ -11,7 +11,7 @@
 		@include inline-block;
 		@include size(20px, 18px);
 		@include editors-sprite(checkBtn);
-		margin:0 8px 0 0;
+		margin:0 4px 0 0;
 
 		&:hover {
 			@include editors-sprite(checkBtn_hover);
