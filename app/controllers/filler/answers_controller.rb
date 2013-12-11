@@ -112,7 +112,6 @@ class Filler::AnswersController < Filler::FillerController
     render_json_auto @answer.destroy and return 
   end
 
-
   def clear
     @answer = Answer.find(params[:id])
     render_json_auto @answer.clear and return
