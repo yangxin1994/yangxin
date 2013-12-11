@@ -94,9 +94,6 @@ class Admin::NewslettersController < ApplicationController
   end
 
   def send_netranking_newsletter
-    Rails.logger.info "AAAAAAAAAAAAAAAAA"
-    Rails.logger.info params.inspect
-    Rails.logger.info "AAAAAAAAAAAAAAAAA"
     if params[:email_list].to_s == "true"
       emails = params[:email_content].split('\n')
     else

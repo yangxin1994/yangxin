@@ -370,6 +370,9 @@ OopsData::Application.routes.draw do
     end
 
     resources :netranking_users do
+      collection do
+        post :import
+      end
     end
 
     resources :newsletters do
