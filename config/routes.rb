@@ -521,6 +521,7 @@ OopsData::Application.routes.draw do
         post :finish
         post :clear
         delete :destroy_preview
+        delete :replay
         put :select_reward
         post :select_reward_for_mobile
         post :start_bind

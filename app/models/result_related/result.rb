@@ -140,7 +140,7 @@ class Result
     result = {}
     input_ids.each { |input_id| result[input_id] = 0 }
     answer_ary.each do |answer|
-      answer["selection"].each do |input_id|
+      (answer["selection"] || []).each do |input_id|
         result.each_key do |k|
           if k.split(',').include?(input_id.to_s)
             result[k] = result[k] + 1

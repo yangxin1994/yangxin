@@ -35,7 +35,8 @@ class Survey
     "has_advertisement" => true,
     "has_oopsdata_link" => true,
     "redirect_link" => "",
-  "allow_pageup" => false}
+    "allow_pageup" => false,
+    "allow_replay" => false}
   field :access_control_setting, :type => Hash, default: {"times_for_one_computer" => -1,
     "has_captcha" => false,
     "ip_restrictions" => [],
@@ -61,7 +62,7 @@ class Survey
   field :recommend_position, :type => Integer, :default => nil  #推荐位
   field :email_promotable, :type => Boolean, default: false
   field :sms_promotable, :type => Boolean, default: false
-  field :broswer_extension_promotable, :type => Boolean, default: false
+  field :browser_extension_promotable, :type => Boolean, default: false
   field :weibo_promotable, :type => Boolean, default: false
   field :quillme_promote_info, :type => Hash, :default => {
     "reward_scheme_id" => ""
@@ -80,7 +81,7 @@ class Survey
     "promote_sms_count" => 0,
     "reward_scheme_id" => ""
   }
-  field :broswer_extension_promote_info, :type => Hash, default: {
+  field :browser_extension_promote_info, :type => Hash, default: {
     "login_sample_promote_only" => false,
     "filters" => [{"key_words" => [""], "url" => ""}],
     "reward_scheme_id" => ""
@@ -156,9 +157,11 @@ class Survey
     surveys = Survey.quillme_normal.status(opt[:status] || 2).reward_type(opt[:reward_type]).desc(:created_at) if opt[:reward_type].present?
     surveys = Survey.quillme_normal.status(opt[:status] || 2).desc(:created_at) unless opt[:reward_type].present?
     surveys = get_filter_surveys(
-      surveys:surveys,total_ids:total_ids,
+      surveys:surveys,
+      total_ids:total_ids,
       answer_status:opt[:answer_status],
-      sample:opt[:sample],home_page:opt[:home_page])
+      sample:opt[:sample],
+      home_page:opt[:home_page])
   end
 
   def self.get_filter_surveys(opt)
@@ -250,13 +253,13 @@ class Survey
 
   def update_promote_info(options)
     filters = []
-    options["broswer_extension"]["broswer_extension_promote_setting"]["filters"].each_value do |filter|
+    options["browser_extension"]["browser_extension_promote_setting"]["filters"].each_value do |filter|
       filters << filter
     end
-    options["broswer_extension"]["broswer_extension_promote_setting"]["filters"] = filters
+    options["browser_extension"]["browser_extension_promote_setting"]["filters"] = filters
     _promote_email_count = email_promote_info["promote_email_count"]
     _promote_sms_count = sms_promote_info["promote_sms_count"]
-    [:quillme, :email, :sms, :broswer_extension, :weibo].each do |promote_type|
+    [:quillme, :email, :sms, :browser_extension, :weibo].each do |promote_type|
       _params = options[promote_type]
       self.update_attributes(
       "#{promote_type}_promotable".to_sym => _params[:promotable],
@@ -266,6 +269,21 @@ class Survey
     end
     email_promote_info["promote_email_count"] = _promote_email_count
     sms_promote_info["promote_sms_count"] = _promote_sms_count
+    if self.quillme_promotable && self.quillme_promote_info["reward_scheme_id"].blank?
+      self.quillme_promote_info["reward_scheme_id"] = self.reward_schemes.where(default: true).first.id.to_s
+    end
+    if self.email_promotable && self.email_promote_info["reward_scheme_id"].blank?
+      self.email_promote_info["reward_scheme_id"] = self.reward_schemes.where(default: true).first.id.to_s
+    end
+    if self.sms_promotable && self.sms_promote_info["reward_scheme_id"].blank?
+      self.sms_promote_info["reward_scheme_id"] = self.reward_schemes.where(default: true).first.id.to_s
+    end
+    if self.browser_extension_promotable && self.browser_extension_promote_info["reward_scheme_id"].blank?
+      self.browser_extension_promote_info["reward_scheme_id"] = self.reward_schemes.where(default: true).first.id.to_s
+    end
+    if self.weibo_promotable && self.weibo_promote_info["reward_scheme_id"].blank?
+      self.weibo_promote_info["reward_scheme_id"] = self.reward_schemes.where(default: true).first.id.to_s
+    end
     save
   end
 
@@ -352,15 +370,54 @@ class Survey
 
   def clone_survey(operator, title = nil)
     new_instance = self.clone
+    new_instance.created_at = Time.now
     new_instance.user = operator
-    new_instance.update_attributes(title: title || new_instance.title, spread_point: 0)
+    new_instance.update_attributes(title: title || new_instance.title)
     new_instance.answer_auditors.each { |a| new_instance.answer_auditors.delete(a) }
     question_id_mapping = new_instance.clone_page
     new_instance.clone_quota(question_id_mapping)
     new_instance.clone_filter(question_id_mapping)
     new_instance.clone_logic_control(question_id_mapping)
-    new_instance.reward_schemes << RewardScheme.create(default: true)
+    new_instance.clear_promote_info
     new_instance
+  end
+
+  def clear_promote_info
+    self.spread_point = 0
+    self.quillme_promotable = false
+    self.quillme_hot = false
+    self.recommend_position = nil
+    self.email_promotable = false
+    self.browser_extension_promotable = false
+    self.weibo_promotable = false
+    self.quillme_promote_info = {"reward_scheme_id" => ""}
+    self.quillme_promote_reward_type = nil
+    self.email_promote_info = {
+      "email_amount" => 0,
+      "promote_to_undefined_sample" => false,
+      "promote_email_count" => 0,
+      "reward_scheme_id" => ""
+    }
+    self.sms_promote_info = {
+      "sms_amount" => 0,
+      "promote_to_undefined_sample" => false,
+      "promote_sms_count" => 0,
+      "reward_scheme_id" => ""
+    }
+    self.browser_extension_promote_info = {
+      "login_sample_promote_only" => false,
+      "filters" => [{"key_words" => [""], "url" => ""}],
+      "reward_scheme_id" => ""
+    }
+    self.weibo_promote_info = {
+      "text" => "",
+      "image" => "",
+      "video" => "",
+      "audio" => "",
+      "reward_scheme_id" => ""
+    }
+    self.sample_attributes_for_promote = []
+    self.save
   end
 
   def create_question(page_index, pre_question_id, question_type)
@@ -403,7 +460,6 @@ class Survey
       if index.present?
         page["questions"].delete(question_id) if replace.nil?
         page["questions"][index] = replace if replace.present?
-        break
       end
     end
     self.save
@@ -673,8 +729,8 @@ class Survey
     survey_obj["email_promote_info"] = Marshal.load(Marshal.dump(self.email_promote_info))
     survey_obj["sms_promotable"] = self.sms_promotable
     survey_obj["sms_promote_info"] = Marshal.load(Marshal.dump(self.sms_promote_info))
-    survey_obj["broswer_extension_promotable"] = self.broswer_extension_promotable
-    survey_obj["broswer_extension_promote_info"] = Marshal.load(Marshal.dump(self.broswer_extension_promote_info))
+    survey_obj["browser_extension_promotable"] = self.browser_extension_promotable
+    survey_obj["browser_extension_promote_info"] = Marshal.load(Marshal.dump(self.browser_extension_promote_info))
     survey_obj["weibo_promotable"] = self.weibo_promotable
     survey_obj["weibo_promote_info"] = Marshal.load(Marshal.dump(self.weibo_promote_info))
     survey_obj["reward_schemes"] = self.reward_schemes.not_default

@@ -18,6 +18,7 @@ class Filler::AnswersController < Filler::FillerController
       channel: params[:channel],
       referrer: params[:referrer],
       remote_ip: request.remote_ip,
+      ip_address: request.remote_ip,
       username: params[:username],
       password: params[:password],
       http_user_agent: request.env['HTTP_USER_AGENT'] }
@@ -66,6 +67,7 @@ class Filler::AnswersController < Filler::FillerController
           "answers" => answers,
           "question_number" => @answer.survey.all_questions_id(false).length + @answer.random_quality_control_answer_content.length,
           "answer_index" => @answer.index_of(questions),
+          "answer_index_all" => @answer.index_of(questions, true),
           "estimate_answer_time" => questions.estimate_answer_time,
           "repeat_time" => @answer.repeat_time,
           "order_id" => @answer.order.try(:_id),
@@ -102,6 +104,14 @@ class Filler::AnswersController < Filler::FillerController
     render_json_auto @answer.destroy and return 
   end
 
+  def replay
+    @answer = Answer.find(params[:id])
+    cookies.delete(cookie_key(@answer.survey_id.to_s, @answer.is_preview), :domain => :all)
+    survey = @answer.survey
+    survey.answers.delete(@answer)
+    survey.decrease_quota(@answer)
+    render_json_auto @answer.destroy and return 
+  end
 
   def clear
     @answer = Answer.find(params[:id])
@@ -157,6 +167,7 @@ class Filler::AnswersController < Filler::FillerController
           "answers" => answers,
           "question_number" => @answer.survey.all_questions_id(false).length + @answer.random_quality_control_answer_content.length,
           "answer_index" => @answer.index_of(questions),
+          "answer_index_all" => @answer.index_of(questions, true),
           "estimate_answer_time" => questions.estimate_answer_time,
           "repeat_time" => @answer.repeat_time,
           "order_id" => @answer.order.try(:_id),
