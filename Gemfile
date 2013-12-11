@@ -27,7 +27,7 @@ gem 'rest-client', '~> 1.6.7'
 gem 'mime-types', "~> 1.21"
 gem 'string_utf8', "~> 0.0.1"
 gem 'quill_common', :path => "../quill_common"
-gem 'mobile-fu', "~> 1.1.1"
+gem 'mobile-fu', "~> 1.2.2"
 gem 'gon', "~> 4.1.1"
 
 gem 'yab62', require: 'yab62'
