@@ -9,7 +9,6 @@
 	
 	@include inline-block;
 	position: relative;
-
 	input[type='text'] {
 		$input-width: 475px;
 		$input-height: 32px;
@@ -24,25 +23,21 @@
 		background: #FFF;
 		
 		&:focus { border-color:$exblue; }
-		&.highlight { background: image-url('editors/input_edit_bg.png') 0 -123px repeat-x; }
+		// &.highlight { background: image-url('editors/input_edit_bg.png') 0 -123px repeat-x; }
 		&.other { color: $blue; }
 	}
 	
 	textarea {
 		$input-width: 569px;
 		$input-height: 42px;
-		
 		@include ipt;
 		@include inline-block;
 		@include size($input-width - 5 * 2 - 2, $input-height - 5 * 2 - 2);
 		line-height: 1.3em;
 		padding: 5px;
 		border:1px #dbdbdb solid;
-		
 		color: #333;
 		font-size: 14px;
-		
-		background: image-url('editors/input_edit_bg.png') repeat-x;
 		resize:none;	/*禁止鼠标拖动调大小*/
 	}
 	
@@ -75,15 +70,15 @@
 		&.active { @include od-icon-sprite(audio_hover); }
 	}
 
-	&.active {
-		// .od-rich-input-btns{ display: block; }
-		textarea, input[type='text'] {
-			border-color: rgb(245, 192, 0);
-			@include box-shadow(inset 0 1px 3px rgba(0, 0, 0, 0.05), 0 0 8px rgba(245, 192, 0, .6));
-			outline: none;
-		}
-		input[type='text'] {
-			background: image-url('editors/input_edit_bg.png') 0 -53px repeat-x;
-		}
-	}
+	// &.active {
+	// 	// .od-rich-input-btns{ display: block; }
+	// 	textarea, input[type='text'] {
+	// 		border-color: rgb(245, 192, 0);
+	// 		@include box-shadow(inset 0 1px 3px rgba(0, 0, 0, 0.05), 0 0 8px rgba(245, 192, 0, .6));
+	// 		outline: none;
+	// 	}
+	// 	input[type='text'] {
+	// 		background: image-url('editors/input_edit_bg.png') 0 -53px repeat-x;
+	// 	}
+	// }
 }

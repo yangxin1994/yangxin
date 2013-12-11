@@ -1,15 +1,13 @@
 @import "common";
 @import "compass/css3/inline-block";
-@import "od-icon/*.png";
-@import "od-button/*.png";
 @import "editors/*.png";
 
 .od-item {
 	.drag-btn {
 		@include inline-block;
-		@include size(16px, 16px);
+		@include size(20px, 20px);
 		border: none;
-		@include od-icon-sprite(drag);	
+		@include editors-sprite(drag);	
 		margin-right: 5px;
 		cursor: move;
 	}	

@@ -6,35 +6,32 @@
 
 .od-left-icon-btn{
 	font-size: 12px;
+	@include one-line(32px);
 	@include inline-block;
-	@include one-line(21px);
 	color: #666;
-	background: image-url("editors/add_right.png") no-repeat right top;
 	cursor:pointer;
 	padding-right:10px;
 	&:hover{
-	background: image-url("editors/add_right_hover.png") no-repeat right top;
 		.left-icon-btn-bg-l{
-			background: image-url("editors/add_left_hover.png") no-repeat left top;
-		}	
-	}
-	&:active{
-	background: image-url("editors/add_right_active.png") no-repeat right top;
-		.left-icon-btn-bg-l{
-			background: image-url("editors/add_left_active.png") no-repeat left top;
+			background: #FFD22E;
 		}	
 	}
 	.left-icon-btn-bg-l{
-		float: left;
-		width:22px;
-		height:21px;
-		padding-right:10px;
-		margin-left:-2px;
-		background: image-url("editors/add_left.png") no-repeat left top;
-		.icon {
-			@include square(16px);
-			margin-left: 3px;
-			margin-bottom: 3px;
-		}			
+		@include inline-block;
+		width:32px;
+		height:32px;
+		line-height: 29px;
+		background: #FFC800;
+		color:#FFF;	
+		font-size: 20px;
+		// font-weight: bold;
+		text-align: center;
+	}
+	.left-icon-btn-bg-r{
+		@include one-line(30px);
+		padding:0 10px;
+		border:1px $borderColor solid;
+		border-left:0;
+		@include inline-block;
 	}
 }

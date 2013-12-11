@@ -10,6 +10,8 @@
 @import "compass/css3/box-shadow";
 @import "compass/css3/border-radius";
 @import "od-button/*.png";
+@import "editors/*.png";
+
 
 $url-od-edit-question: image-url("editors/editors-question-bg.png");
 
@@ -133,8 +135,24 @@ $editor-paragraph-top-bottom-height: 14px;
 	
 	.editor-method {
 		float: right;
-		margin-top: 10px;
+		margin-top: 8px;
 		margin-right: 30px;
+		a{
+	      @include size(43px,24px);
+			float: left;
+			&.eye{
+				@include editors-sprite(eye);
+				&.active{
+					@include editors-sprite(eye_active);
+				}
+			}
+		    &.pc{
+		    	@include editors-sprite(pc);
+		    	&.active{
+					@include editors-sprite(eye_active);
+				}
+		    }
+	    }
 	}
 }
 @mixin code-textarea($width:575px, $height:45px) {
