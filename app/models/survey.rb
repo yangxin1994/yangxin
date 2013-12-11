@@ -35,7 +35,8 @@ class Survey
     "has_advertisement" => true,
     "has_oopsdata_link" => true,
     "redirect_link" => "",
-  "allow_pageup" => false}
+    "allow_pageup" => false,
+    "allow_replay" => false}
   field :access_control_setting, :type => Hash, default: {"times_for_one_computer" => -1,
     "has_captcha" => false,
     "ip_restrictions" => [],

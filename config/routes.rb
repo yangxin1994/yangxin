@@ -525,6 +525,7 @@ OopsData::Application.routes.draw do
         post :select_reward_for_mobile
         post :start_bind
         post :update_for_mobile
+        post :replay
       end
     end
     resource :bind_sample, :only => [:show]
