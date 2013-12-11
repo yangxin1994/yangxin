@@ -1,16 +1,14 @@
 class Filler::FillerController < ApplicationController
 
+  before_filter :force_tablet_html, :check_mobile_param
   has_mobile_fu
-
-  before_filter :set_mobile_format, :check_mobile_param
 
   layout 'filler'
 
-  # Continue rendering HTML for the iPad (no mobile views yet)
-  def set_mobile_format
-    is_device?("ipad") ? request.format = :html : super
+  # Continue rendering HTML for tablet
+  def force_tablet_html
+    session[:tablet_view] = false
   end
-
   def check_mobile_param
     force_mobile_format if params[:m].to_b
   end    
