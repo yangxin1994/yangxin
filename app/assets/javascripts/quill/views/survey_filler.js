@@ -19,7 +19,7 @@
 
 $(function(){
 	
-	var gonganbu = '52a58728255f9e8e4c000001';
+	var gonganbu = '52a59fc6eb0e5bb2c5000007', renmin = ''
 
 	/* Survey filer
 	 * options:
@@ -69,7 +69,9 @@ $(function(){
 					link = 'http://' + link;
 				location.href = link;
 			} else {
-				window.close();
+				var opened = window.open('about:blank','_self');
+				opened.opener = null;
+				opened.close();
 			}
 		},
 
@@ -115,7 +117,6 @@ $(function(){
 			if(value.answer_status == 1) {
 				// answer_status: 1（正在回答）
 				// setup questions
-				console.log(value);
 				var questions = value.questions, answers = value.answers, total_count = value.question_number, 
 					index = value.answer_index, time = value.estimate_answer_time, redo_count = value.repeat_time,
 					answer_index_all = value.answer_index_all;
@@ -240,7 +241,6 @@ $(function(){
 						prev_btn.text('正在加载上一页问题...');
 						this.load_questions((questions.length > 0) ? questions[0]['_id'] : -1, false);
 					}, this));
-					console.log(answer_index_all);
 					if(answer_index_all == 0) prev_btn.hide();
 				}
 			} else if(value.answer_status == 4 || value.answer_status == 8 || value.answer_status == 32) {
@@ -343,7 +343,6 @@ $(function(){
 								if(retval.success) {
 									location.reload(true);
 								} else {
-									console.log("retval")
 									var error_msg = ((retval.value != null) ? infos[award_type][retval.value.error_code] : null);
 									if(error_msg != null) {
 										ok_btn.odButtonText('restore');
