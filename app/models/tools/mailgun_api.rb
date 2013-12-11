@@ -327,6 +327,32 @@ class MailgunApi
     self.send_message(data)
   end
 
+  def self.send_emagzine(subject, send_from, domain, content, attachment, emails)
+    group_size = 900
+    @group_emails = []
+    @emails = emails
+
+    while @emails.length >= group_size
+      temp_emails = @emails[0..group_size-1]
+      @group_emails << temp_emails
+      @emails = @emails[group_size..-1]
+    end
+    @group_emails << @emails
+    
+    data = {}
+    data[:domain] = domain
+    data[:from] = send_from
+    data[:html] = content
+    data[:text] = ""
+    data[:attachment] = File.new(attachment) if attachment.present?
+    data[:subject] = subject
+    data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
+    @group_emails.each_with_index do |emails, i|
+      data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
+      self.send_message(data)
+    end
+  end
+
   def self.send_message(data)
     # domain = data.delete(:domain)
     domain = data[:domain]

@@ -714,7 +714,7 @@ jQuery(function($) {
 				var $ns = $('<span />');
 				$ns.text("请输入区段划分(以逗号隔开)：");
 				var $ninp = $('<input type="text" name="number-format" />');
-				$ninp.val(report_mockup.components[i].value.format["-1"].join(","));
+				$ninp.val((report_mockup.components[i].value.format["-1"] || []).join(","));
 				$ns.appendTo($nf);$ninp.appendTo($nf);
 				$nf.appendTo($dt);
 
@@ -987,7 +987,7 @@ jQuery(function($) {
 				var $ns = $('<span />');
 				$ns.text("请输入区段划分(以逗号隔开)：");
 				var $ninp = $('<input type="text" name="number-format" />');
-				$ninp.val(report_mockup.components[i].value.target.format["-1"].join(","));
+				$ninp.val((report_mockup.components[i].value.target.format["-1"] || []).join(","));
 				$ns.appendTo($nf);$ninp.appendTo($nf);
 				$nf.appendTo($dt);
 

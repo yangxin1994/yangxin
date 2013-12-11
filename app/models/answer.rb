@@ -441,12 +441,12 @@ class Answer
           satisfy = true
         elsif question.question_type == QuestionTypeEnum::CHOICE_QUESTION
           satisfy = Tool.check_choice_question_answer(question_id,
-                              self.answer_content[question_id]["selection"],
+                              self.answer_content[question_id]["selection"] || [],
                               condition["value"],
                               condition["fuzzy"])
         elsif question.question_type == QuestionTypeEnum::ADDRESS_BLANK_QUESTION
           satisfy = Tool.check_address_blank_question_answer(question_id,
-                              self.answer_content[question_id]["selection"],
+                              self.answer_content[question_id]["selection"] || [],
                               condition["value"])
         end
       when "2"

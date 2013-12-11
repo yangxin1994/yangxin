@@ -18,6 +18,7 @@ class Filler::AnswersController < Filler::FillerController
       channel: params[:channel],
       referrer: params[:referrer],
       remote_ip: request.remote_ip,
+      ip_address: request.remote_ip,
       username: params[:username],
       password: params[:password],
       http_user_agent: request.env['HTTP_USER_AGENT'] }
@@ -103,6 +104,14 @@ class Filler::AnswersController < Filler::FillerController
     render_json_auto @answer.destroy and return 
   end
 
+  def replay
+    @answer = Answer.find(params[:id])
+    cookies.delete(cookie_key(@answer.survey_id.to_s, @answer.is_preview), :domain => :all)
+    survey = @answer.survey
+    survey.answers.delete(@answer)
+    survey.decrease_quota(@answer)
+    render_json_auto @answer.destroy and return 
+  end
 
   def clear
     @answer = Answer.find(params[:id])
