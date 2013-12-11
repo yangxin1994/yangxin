@@ -4,7 +4,12 @@ class Admin::NetrankingUsersController < ApplicationController
   layout "layouts/admin-todc"
 
   def index
-    @netranking_users = NetrankingUser.all
+    Rails.logger.info "AAAAAAAAAAA"
+    Rails.logger.info params.inspect
+    Rails.logger.info "AAAAAAAAAAA"
+
+    @netranking_users = auto_paginate(NetrankingUser.all) if params[:search].blank?
+    @netranking_users = auto_paginate(NetrankingUser.where(email: /#{params[:search]}/)) if params[:search].present?
   end
 
   def create
@@ -21,5 +26,14 @@ class Admin::NetrankingUsersController < ApplicationController
     render_json NetrankingUser.where(:_id => params[:id]).first do |user|
       user.destroy
     end
+  end
+
+  def import
+    content = params[:file].read
+    content.split("\n").each do |email|
+      NetrankingUser.create(email: email) if NetrankingUser.where(email: email).first.nil?
+    end
+    flash[:notice] = "成功批量导入邮件"
+    redirect_to action: :index
   end
 end
