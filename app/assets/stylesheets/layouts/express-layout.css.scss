@@ -1,7 +1,7 @@
-//=require ui/widgets/od_icon_buttons
-//=require ui/widgets/od_tip
-//=require ui/widgets/od_confirm_tip
-//=require ui/widgets/od_autotip
+//=require ui/express_widgets/od_icon_buttons
+//=require ui/express_widgets/od_tip
+//=require ui/express_widgets/od_confirm_tip
+//=require ui/express_widgets/od_autotip
 
 @import "common";
 @import "od-icon/*.png";
@@ -146,121 +146,6 @@ body {
 	padding-bottom: 50px;
 }
 
-.left-sidebar{
-	float: left;
-	width:110px;
-	border:1px $borderColor solid;
-	@include border-radius(3px);
-	margin-top:12px;
-}
-.menu-unfold-btn{
-	width:13px;
-	height:12px;
-	@include inline-block;
-	background: $url-widgets-bg	no-repeat -347px -21px;
-	margin-left:10px;
-	cursor: pointer;
-}
-.left-sidebar-title{
-	width:100px;
-	height:31px;
-	border:none;
-	color:#FFF;
-	font-weight:bold;
-	background: $url-widgets-bg	no-repeat -8px -205px;
-	margin-bottom:4px;
-	font-size: 13px;
-	vertical-align: middle;
-	position: relative;
-
-	> div {
-		padding-right: 15px;
-	}
-	> a {
-		position: absolute;
-		display: block;
-		top: 8px;
-		left: 75px;
-		@include size(16px, 16px);
-		
-		&.setting { @include od-icon-sprite(white_setting); }
-		&.edit { @include od-icon-sprite(white_edit); }
-	}
-}
-.left-sidebar-pulldownBtn{
-	@include one-line(40px);
-	text-align: center;
-	clear:both;
-	.common-use{
-		font-size: 14px;
-		height:39px;
-		font-weight: bold;
-		color:$exblue;
-		display: block;
-		background: #fff;
-		border-top:1px $borderColor solid;
-		@include border-bottom-radius(3px);
-	}
-}
-.left-sidebar-end{
-	display:block;
-	clear:both;
-	width:100px;
-	@include one-line(12px);
-	border:none;
-	cursor:pointer;
-	background: $url-widgets-bg	no-repeat -8px -255px;
-}
-.current-option-name{
-		.tip-active{
-			width:14px;
-			height:14px;
-			margin-left:5px;
-			@include inline-block;
-			@include ex-left-menu-sprite(tip_active); 
-		}
-		&:hover{
-			.tip-active{
-				@include ex-left-menu-sprite(tip_active_hover); 
-			}
-		}
-	}
-.common-use{
-		.tip{
-			width:14px;
-			height:14px;
-			margin-left:5px;
-			@include inline-block;
-			@include ex-left-menu-sprite(tip); 
-		}
-		&:hover{
-			.tip{
-				@include ex-left-menu-sprite(tip_hover); 
-			}
-		}
-}	
-.left-menus{
-	width:110px;
-	background:#FFF;
-	float: left;
-	border-bottom:none;
-	@include clearfix;
-	li{
-		width:80px;
-		margin:0 auto;
-		text-align:center;
-		font-size: 14px;
-		z-index: 1000;
-		border-bottom:1px $borderColor solid;
-		a{	
-			width:80px;
-			display:block;
-			padding:10px 0;
-			z-index: 1000;
-		}
-		&.small {
-			a {padding: 12px 0;}
-		}
 
 		.left-menu-icon{
 			margin:0 auto;
@@ -721,14 +606,3 @@ ul.radioNav-s li{
 }
 
 
-.current-option-name{
-	@include one-line(40px);
-	display: block;
-	text-align: center;
-	font-size: 14px;
-	font-weight: bold;
-	color:$exblue;
-	background: #FFF;
-	border-bottom:1px $borderColor solid;
-	@include border-top-radius(3px);
-}

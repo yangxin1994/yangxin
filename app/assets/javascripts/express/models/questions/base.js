@@ -60,7 +60,7 @@ $(function(){
 		/* url of question
 		 * =========================== */
 		url: function() {
-			return '/questionaires/' + this._surveyModel.id + '/questions/' + this.id + '.json';
+			return '/e/questionaires/' + this._surveyModel.id + '/questions/' + this.id + '.json';
 		},
 
 		/* Save question

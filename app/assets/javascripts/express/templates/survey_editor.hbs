@@ -1,26 +1,25 @@
 <div class='survey-editor'>
-	<div class='s-msg'>注意：本问卷已经发布，无法增删或修改题目内容。<br />您可以先<a class='close-publish' href='javascript:void(0)'>关闭发布</a>再进行编辑，编辑完成之后，您需要再次提交问卷至管理员审核发布。</div>
-	<div class='s-title'>
-		<div class='t-top'></div>
-		<div class='t-mid'>
-			<div class='s-title-preview'>{{title}}</div>
-			<div class='s-title-con'>
-				<input type='text' value='{{title}}' />
-				<button class='od-button ok'>确 定</button>
-				<button class='od-button od-button-white cancel'>取 消</button>
-			</div>
-		</div>
-		<div class='t-bottom'></div>
-		<div class='t-btns'></div>
-	</div>
-	<div class='s-no-question'>
-		<h1>您尚未添加任何题目，请点击左侧或下方按钮添加问题。</h1>
-		<p>
-			<!-- <button t='Paragraph' class='od-button'>添加文本段</button> -->
-			<button t='Choice' class='od-button'>添加一道选择题</button>
-			<!-- <button t='TextBlank' class='od-button'>添加填充题</button> -->
-		</p>
-	</div>
+  <!-- 问卷标题 -->
+  <div class="ex-title">
+    <!-- 主标题 -->
+      <input type="text" name="survey-title" class="survey-title" value='{{title}}'>
+     <!-- 副标题  -->
+      <input type="text" name="survey-subtitle" class="survey-subtitle" value='{{subtitle}}'>
+      <!-- 调查背景 -->
+      <textarea name="survey-description" class="survey-description" cols="30" rows="10">{{description}}</textarea>
+      <button class="submit-edit"><strong>确定</strong><span>并开始编辑问题</span></button>
+  </div>
+  <div class='ex-title-finished-con'>
+    <div class="ex-title-finished">
+      <button>编辑</button>
+      <h1>{{title}}</h1>
+      <h2>{{subtitle}}</h2>
+      <div class="survey-description-finished"></div>
+    </div>
+    <div class='s-no-question'>
+      <h1>请从左侧点击或拖拽题型添加题目</h1>
+    </div>
+  </div>
 	<div class='s-pages'>
 	</div>
 </div>
