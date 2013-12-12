@@ -17,7 +17,7 @@
 		var survey_model = new quill.models.Survey(<%= raw @survey.to_json %>);
 		var survey_filler = new quill.views.SurveyFiller({
 			model: survey_model,
-			is_preview: <%=@is_preview %>,
+			is_preview: <%= @is_preview %>,
 			reward: {
 				id: <%= raw @reward_scheme_id.to_json %>,
 				reward_scheme_type: <%= @reward_scheme_type %>,
