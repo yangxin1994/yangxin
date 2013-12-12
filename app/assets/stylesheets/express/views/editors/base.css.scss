@@ -56,31 +56,41 @@ $editor-paragraph-top-bottom-height: 14px;
 
 
 	.paragraph-content {
-		padding: 20px 50px 40px 50px;
+		padding: 20px 50px 25px 50px;
 		
 		h1{
 			font-size: 15px;
 			line-height: 2em;
 		}
-
-		.p-content, .p-btn {
-			@include inline-block;
-			vertical-align: top;
-		}
-
 		.p-btn {
-			margin-left: 10px;
-
-			.cancel-btn {
+			@include clearfix;
+			button{
+				@include size(80px, 34px);
+				float: right;
 				border: none;
 				background: none;
-				@include size(53px, 26px);
-				text-align: center;
-				cursor: pointer;
-				margin-top: 10px;
-
-				&:hover {
-					color: $blue;
+				margin-top: 25px;
+				margin-left: 10px;
+				font-size: 14px;
+				@include border-radius(4px);
+				&.ok-btn{
+					color:#333;
+					background: #ffc800;
+					&:hover{
+						background: #FFD337;
+						cursor: pointer;
+					}
+					&.disable{
+						background: #CCC;
+						cursor: default;
+					}
+				}
+				&.cancel-btn{
+					color:#666;
+					&:hover{
+						color:#333;
+						cursor: pointer;
+					}
 				}
 			}
 		}
@@ -272,7 +282,7 @@ $editor-paragraph-top-bottom-height: 14px;
 		color: #FFF;
 		float: left;
 		&:hover{
-			background: #FFD337
+			background: #FFD337;
 		}
 	}
 	.btn-confirm{
@@ -280,6 +290,10 @@ $editor-paragraph-top-bottom-height: 14px;
 		border-left:1px #FFA800 solid;
 		color:#333;
 		font-weight: bold;
+		&.disable{
+			background: #ccc;
+			cursor: default;
+		}
 	}
 
 }
