@@ -1,8 +1,12 @@
 /*
- *=require ui/express_widgets/od_icon_buttons
  *=require ui/express_widgets/od_checkbox
-//=require ui/express_widgets/od_rich_input
+ *=require ui/express_widgets/od_rich_input
  */ 
+
+// load bootstrap tooltip css
+@import "twitter/bootstrap/variables";
+@import "twitter/bootstrap/mixins";
+@import "twitter/bootstrap/tooltip";
 
 @import "common";
 @import "compass/utilities/general/clearfix";
@@ -10,6 +14,7 @@
 @import "compass/css3/box-shadow";
 @import "compass/css3/border-radius";
 @import "od-button/*.png";
+@import "editors/*.png";
 
 $url-od-edit-question: image-url("editors/editors-question-bg.png");
 
@@ -20,65 +25,74 @@ $editor-main-height-min: 365px;
 $editor-paragraph-top-bottom-height: 14px;
 
 .editor {
-	width:$editor-width;
-	position: relative;
-	margin: 8px 0;
-	font-size: 12px;
+  width:$editor-width;
+  position: relative;
+  margin: 8px 0;
+  font-size: 12px;
 }
 .editor-top-bg {
-	@include size($editor-width, $editor-top-bottom-height);
-	background: $url-od-edit-question no-repeat 0 0;
+  @include size($editor-width, $editor-top-bottom-height);
+  background: $url-od-edit-question no-repeat 0 0;
 }
 .editor-bottom-bg {
-	@include size($editor-width, $editor-top-bottom-height);
-	background: $url-od-edit-question no-repeat 0 -17px;
+  @include size($editor-width, $editor-top-bottom-height);
+  background: $url-od-edit-question no-repeat 0 -17px;
 }
 .editor-main{
-	width:$editor-width;
-	background: image-url('editors/edit_question_repeatbg.png') repeat-y;
-	@include clearfix;
+  width:$editor-width;
+  background: image-url("editors/edit_question_bg.png") repeat-y;
+  @include clearfix;
 }
 
 // paragraph
 .editor-paragraph-top, .editor-paragraph-bottom {
-	clear: both;
-	@include size($editor-width, $editor-paragraph-top-bottom-height);
-	background: image-url("editors/tint-gray-top.png") no-repeat 0 0;
+  clear: both;
+  @include size($editor-width, $editor-paragraph-top-bottom-height);
+  background: image-url("editors/tint-gray-top.png") no-repeat 0 0;
 }
 .editor-paragraph-bottom {
-	background: image-url("editors/tint-gray-bottom.png") no-repeat 0 0;
+  background: image-url("editors/tint-gray-bottom.png") no-repeat 0 0;
 }
 .editor-paragraph-main{
-	width:$editor-width;
-	background: image-url('editors/tint-gray-mid.png') repeat-y;
-
+  width:$editor-width;
+  background: image-url('editors/tint-gray-mid.png') repeat-y;
 
 	.paragraph-content {
-		padding: 20px 50px 40px 50px;
+		padding: 20px 50px 25px 50px;
 		
 		h1{
 			font-size: 15px;
 			line-height: 2em;
 		}
-
-		.p-content, .p-btn {
-			@include inline-block;
-			vertical-align: top;
-		}
-
 		.p-btn {
-			margin-left: 10px;
-
-			.cancel-btn {
+			@include clearfix;
+			button{
+				@include size(80px, 34px);
+				float: right;
 				border: none;
 				background: none;
-				@include size(53px, 26px);
-				text-align: center;
-				cursor: pointer;
-				margin-top: 10px;
-
-				&:hover {
-					color: $blue;
+				margin-top: 25px;
+				margin-left: 10px;
+				font-size: 14px;
+				@include border-radius(4px);
+				&.ok-btn{
+					color:#333;
+					background: #ffc800;
+					&:hover{
+						background: #FFD337;
+						cursor: pointer;
+					}
+					&.disable{
+						background: #CCC;
+						cursor: default;
+					}
+				}
+				&.cancel-btn{
+					color:#666;
+					&:hover{
+						color:#333;
+						cursor: pointer;
+					}
 				}
 			}
 		}
@@ -87,156 +101,172 @@ $editor-paragraph-top-bottom-height: 14px;
 
 // editor left
 .editor-left{
-	width: $editor-width-left;
-	@include min-height($editor-main-height-min);
-	float: left;
+  width: $editor-width-left;
+  @include min-height($editor-main-height-min);
+  float: left;
 }
 .editor-left-head{
-	margin-top: 10px;
-	@include size($editor-width-left, 32px);
-	@include clearfix;
+  margin-top: 10px;
+  @include size($editor-width-left, 32px);
+  @include clearfix;
 
-	.q-type {
-		float: left;
-		font-size: 14px;
-		font-weight: bold;
-		color: #666;
-		@include one-line(32px);
-		background: image-url('editors/2.png') right bottom;
-		padding-right:15px;
-		margin-left: -3px;
-		// margin-left: 3px;
-		cursor: default;
-		
-		strong {
-			float: left;
-			width:33px;
-			text-align: center;
-			color: #FFF;
-			background: image-url('editors/1.png') no-repeat left top;
-			// margin-left: -1px;
-			margin-right:10px;
-			font-size: 18px;
-			font-family: Arial;
-		}
-	}
-	
-	.star {
-		@include one-line(32px);
-		float: left;
-		text-align: center;
-		margin-left: 10px;
-		color: #f00;
-		font-weight: bold;
-		font-size: 16px;
-	}
-	
-	.editor-method {
-		float: right;
-		margin-top: 10px;
-		margin-right: 30px;
-	}
+  .q-type {
+    float: left;
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+    @include one-line(32px);
+    padding-right:15px;
+    margin-left: -3px;
+    // margin-left: 3px;
+    cursor: default;
+    
+    strong {
+      float: left;
+      width:33px;
+      text-align: center;
+      color: #FFF;
+      background: #AEB5BF;
+      @include border-right-radius(3px);
+      // margin-left: -1px;
+      margin-right:10px;
+      font-size: 18px;
+      font-family: Arial;
+    }
+  }
+  
+  .star {
+    @include one-line(32px);
+    float: left;
+    text-align: center;
+    margin-left: 10px;
+    color: #f00;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  
+  .editor-method {
+    float: right;
+    margin-top: 8px;
+    margin-right: 30px;
+    a{
+      @include size(43px,24px);
+      float: left;
+      &.eye{
+        @include editors-sprite(eye);
+        &.active{
+          @include editors-sprite(eye_active);
+        }
+      }
+      &.pc{
+        @include editors-sprite(pc);
+        &.active{
+          @include editors-sprite(pc_active);
+        }
+      }
+    }
+  }
 }
 @mixin code-textarea($width:575px, $height:45px) {
-	$input-width: $width;
-	$input-height: $height;
+  $input-width: $width;
+  $input-height: $height;
 
-	@include ipt;
-	@include size($input-width - 5 * 2 - 2, $input-height - 5 * 2 - 2);
-	line-height: 1.3em;
-	padding: 5px;
-	border:1px #dbdbdb dashed;
+  @include ipt;
+  @include size($input-width - 5 * 2 - 2, $input-height - 5 * 2 - 2);
+  line-height: 1.3em;
+  padding: 5px;
+  border:1px #dbdbdb dashed;
 
-	color: #666;
-	font-size: 12px;
+  color: #666;
+  font-size: 12px;
 
-	background: #F2F2F2;
-	resize:none;	/*禁止鼠标拖动调大小*/
+  background: #F2F2F2;
+  resize:none;  /*禁止鼠标拖动调大小*/
 }
 .editor-left-body {
-	$padding-left-right: 30px;
-	
-	padding: 24px 30px;
-	
-	.q-title {
-		margin-bottom: 8px;
-	}
-	.q-body {}
-	
-	.q-note {
-		textarea {
-			@include code-textarea;
-		}
-	}
-	
+  $padding-left-right: 30px;
+  
+  padding: 24px 30px;
+  
+  .q-title {
+    margin-bottom: 8px;
+  }
+  .q-body {}
+  
+  .q-note {
+    textarea {
+      @include code-textarea;
+    }
+  }
+  
 }
 .editor-left-body-code textarea{
-	@include code-textarea(570px, 250px);
-	font-size: 14px;
-	border-style: solid;
+  @include code-textarea(570px, 250px);
+  font-size: 14px;
+  border-style: solid;
 }
 
 // eidtor right
 .editor-right {
-	$padding-left-right: 15px;
-	
-	padding: 9px $padding-left-right 60px $padding-left-right;
-	width: $editor-width - $editor-width-left - $padding-left-right * 2;
-	float: right;
-	font-size: 13px;
-	color: #333;
+  $padding-left-right: 15px;
+  
+  padding: 9px $padding-left-right 60px $padding-left-right;
+  width: $editor-width - $editor-width-left - $padding-left-right * 2;
+  float: right;
+  font-size: 13px;
+  color: #333;
 
-	>h1 {
-		margin: 6px 0 10px 0;
-		padding: 0;
-		font-size: 12px;
-		font-weight: bold;
-		color: $blue;
-	}
-	
-	>h2, > .item {
-		margin: 10px 0 10px 0;
-	}
-	> h2 {
-		margin: 6px 0 6px 0;
-	}
-	
-	> .dotted{
-		margin: 12px 0 12px 0;
-		@include size(100%, 2px);
-		background: image-url('widgets/dotted.png') repeat-x;
-	}
-	
-	/*展开隐藏箭头*/
-	.unfold-btn, .packUp-btn {
-		display: block;
-		border: none;
-		@include border-bottom-radius(4px);
-		cursor: pointer;
-		background: none;
-		@include size(100%, 16px);
-		
-		em {
-			@include size(16px, 16px);
-			@include od-button-sprite(unfold);
-			@include inline-block;
-		}
-		
-		&:hover {
-			background-color: #eee;
-		}
-	}
-	.packUp-btn {
-		em {
-			@include od-button-sprite(packUp);
-		}
-	}
-	
-	.tiny-ipt {
-		padding: 0;
-		text-align: center;
-		width: 2em;
-	}
+  >h1 {
+    margin: 6px 0 10px 0;
+    padding: 0;
+    font-size: 12px;
+    font-weight: bold;
+    color: $blue;
+  }
+  
+  >h2, > .item {
+    margin: 10px 0 10px 0;
+  }
+  > h2 {
+    margin: 6px 0 6px 0;
+  }
+  
+  > .dotted{
+    margin: 12px 0 12px 0;
+    @include size(100%, 2px);
+    background: image-url('widgets/dotted.png') repeat-x;
+  }
+  
+  /*展开隐藏箭头*/
+  .unfold-btn, .packUp-btn {
+    display: block;
+    border: none;
+    @include border-bottom-radius(4px);
+    cursor: pointer;
+    background: none;
+    @include size(100%, 30px);
+    
+    em {
+      @include size(12px, 6px);
+      @include editors-sprite(unfold);
+      @include inline-block;
+    }
+    
+    &:hover {
+      background-color: #eee;
+    }
+  }
+  .packUp-btn {
+    em {
+      @include editors-sprite(packUp);
+    }
+  }
+  
+  .tiny-ipt {
+    padding: 0;
+    text-align: center;
+    width: 2em;
+  }
 }
 
 // confirm and cancel box
@@ -247,73 +277,73 @@ $editor-paragraph-top-bottom-height: 14px;
 	position: absolute;
 	bottom: 2px;
 	right: 3px;
-	
-	.btn-cancel {
-		@include size(36px, 25px);
+	button{
+		@include size(75px, 40px);
 		border: none;
 		background: none;
 		cursor: pointer;
-		font-weight: bold;
+		font-size: 14px;
+		background: #FFC800;
 		color: #FFF;
 		float: left;
-		margin-right: 25px;
-		font-size: 14px;
-		
 		&:hover{
-			color:#333;
-		}
-		&:active{
-			color:#000;
+			background: #FFD337;
 		}
 	}
-	
-	.od-button {
-		font-size: 14px;
+	.btn-confirm{
+		@include border-bottom-right-radius(4px);
+		border-left:1px #FFA800 solid;
+		color:#333;
+		font-weight: bold;
+    &:disabled{
+      color: #999;
+      cursor: default;
+    }
 	}
 }
 
 /* input preview */
 ul.ipt-preview {
-	@include clearfix;
-	width: 525px;
+  @include clearfix;
+  width: 525px;
 
-	li {
-		float: left;
-		width: 160px;
-		height: 55px;
-		margin-right: 15px;
-		cursor: default;
+  li {
+    float: left;
+    width: 160px;
+    height: 55px;
+    margin-right: 15px;
+    cursor: default;
 
-		&.w {
-			width: 335px;
-		}
+    &.w {
+      width: 335px;
+    }
 
-		&.s {
-			width: 100px;
-		}
-	}
+    &.s {
+      width: 100px;
+    }
+  }
 
-	.preview-title {
-		display: block;
-		padding-left: 10px;
-		color: #333;
-		@include one-line(22px);
-		border: 1px dashed #ccc;
-		// height: 26px;
-		.jt {
-			width: 16px;
-			height: 16px;
-			margin: 3px 5px 0 0;
-			float: right;
-			background: image-url("./od-button/unfold.png") no-repeat;
-		}
-	}
+  .preview-title {
+    display: block;
+    padding-left: 10px;
+    color: #333;
+    @include one-line(22px);
+    border: 1px dashed #ccc;
+    // height: 26px;
+    .jt {
+      width: 16px;
+      height: 16px;
+      margin: 3px 5px 0 0;
+      float: right;
+      background: image-url("./od-button/unfold.png") no-repeat;
+    }
+  }
 
-	.preview-title-txt {
-		display: block;
-		padding-left:5px;	
-		@include one-line(28px);
-		color: #999;
-	}
+  .preview-title-txt {
+    display: block;
+    padding-left:5px; 
+    @include one-line(28px);
+    color: #999;
+  }
 }
 

@@ -3,9 +3,9 @@
 //=require ../editors
 //=require express/templates/designers/base
 //=require express/templates/designers/q_render
-//=require ui/widgets/od_tip
-//=require ui/widgets/od_waiting
-//=require ui/widgets/od_white_button
+//=require ui/express_widgets/od_tip
+//=require ui/express_widgets/od_waiting
+//=require ui/express_widgets/od_white_button
 
 /* ================================
  * Base class for question designer

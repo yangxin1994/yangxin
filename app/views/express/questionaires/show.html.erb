@@ -1,8 +1,5 @@
 <!-- content for head -->
 <% content_for :head do %>
-  <script type="text/javascript">
-    // window.uid = "<%= current_user._id %>";
-  </script>
   <%= javascript_include_tag "pages/express/questionaire-bundle" %>
   <%= stylesheet_link_tag "pages/express/questionaire-bundle", :media => "all" %>
 <% end %>
@@ -19,9 +16,6 @@
       <li class='big' style="border-bottom:0;"><a class='Sort' href="javascript:void(0);"><span class="left-menu-icon"><em class="jmix"></em></span><span class="left-menu-name">排序题</span></a></li>
     </ul>
   </div>
-
-<!-- 常用题型 start -->
-  <div class="left-bottom">
   <div id='special_q' class='left-menus'>
     <a class='bottom-head' href="javascript:void(0);">常用题型<i></i></a>
     <ul style='display:none;'>
@@ -36,26 +30,24 @@
       <li class='small'><a class='AddressBlank' href="javascript:void(0);"><span class="left-menu-name">婚姻状况</span></a></li>
       <li class='small' style="border-bottom:none"><a class='UrlBlank' href="javascript:void(0);"><span class="left-menu-name">工作单位</span></a></li>
     </ul>
-
   </div>
-</div>
   <script type="text/javascript">
   jQuery(function($) {
     var left_disabled = true;
-    $('#normal_q a:eq(0)').click(function() {
+    function toggleMenu() {
       if(left_disabled) return;
-      $('#normal_q a:eq(0)').addClass('active');
-      $('#normal_q ul:eq(0)').slideDown('fast');
-      $('#special_q a:eq(0)').removeClass('active').addClass('bottom-head');
-      $('#special_q ul:eq(0)').slideUp('fast');
-    });
-    $('#special_q a:eq(0)').click(function() {
-      if(left_disabled) return;
-      $('#normal_q a:eq(0)').removeClass('active');
-      $('#normal_q ul:eq(0)').slideUp('fast');
-      $('#special_q a:eq(0)').addClass('active').removeClass('bottom-head');
-      $('#special_q ul:eq(0)').slideDown('fast');
-    });
+      $('#normal_q a:eq(0)').toggleClass('active');
+      $('#special_q a:eq(0)').toggleClass('active').toggleClass('bottom-head');
+      if($('#normal_q a:eq(0)').hasClass('active')) {
+      	$('#normal_q ul:eq(0)').slideDown('fast');
+      	$('#special_q ul:eq(0)').slideUp('fast');
+      } else {
+      	$('#normal_q ul:eq(0)').slideUp('fast');
+      	$('#special_q ul:eq(0)').slideDown('fast');
+      }
+    }
+    $('#normal_q a:eq(0)').click(toggleMenu);
+    $('#special_q a:eq(0)').click(toggleMenu);
 
     // survey editor
     var survey = <%= raw @survey.to_json %>;
@@ -262,8 +254,9 @@
     <span>&nbsp;</span>
   </label></td></tr></tbody></table></div>
   </div></div>
-    
-  </div></div>
+  </div>
+
+</div>
       <!-- 矩阵选择题 预览 end -->
       <!-- 填充题 预览 start -->
     <div id="" class="q-designer ui-droppable">
@@ -353,9 +346,10 @@
         <div class="editor-left-head">
           <h1 class="q-type"><strong>05</strong>选择题</h1>
           <em class="star" style="display: inline;">*</em>
-          <div class="editor-method"><ul class="od-icon-buttons">
-    <li class="icon-btn icon-btn-l"><button title="" data-original-title="可视化编辑模式" class="active"><em class="icon od-icon-eye eye-active"></em></button></li><li class="icon-btn icon-btn-r"><button title="" data-original-title="输入代码编辑模式"><em class="icon od-icon-pc"></em></button></li>
-  </ul></div>
+          <div class="editor-method">
+            <a href="javascript:void(0);" class="eye active"></a>
+            <a href="javascript:void(0);" class="pc"></a>
+          </div>
         </div>
         <!-- /左侧顶部：题目类型、切换按钮 -->
 
@@ -437,8 +431,8 @@
     </div>
   </div></div><!-- 
     --> 
-  </div></div><div class="q-new-opt"><div class="od-left-icon-btn" style="width:90px">
-  <span class="left-icon-btn-bg-l"><em class="icon od-icon-add"></em></span>添加新选项
+  </div></div><div class="q-new-opt"><div class="od-left-icon-btn">
+  <span class="left-icon-btn-bg-l">+</span><span class="left-icon-btn-bg-r">添加新选项</span>
   </div></div></div>
         </div>
         <div class="editor-left-body editor-left-body-code" style="display: none;">
@@ -515,7 +509,7 @@
     
     <div class="btn-confirm-box">
       <button class="btn-cancel">取消</button>
-      <button class="btn-confirm">确定</button>
+      <button class="btn-confirm disable">确定</button>
     </div>
   </div></div>
 
@@ -529,7 +523,7 @@
         <h1>文本段</h1>
         <div class="p-content"><div class="od-rich-input" id="">
     
-    <textarea style="width: 563px; height: 98px; background-image: none; background-position: initial initial; background-repeat: initial initial;"></textarea>
+    <textarea style="width: 673px; height: 98px; background-image: none; background-position: initial initial; background-repeat: initial initial;"></textarea>
     
     <div class="od-rich-input-btns" style="display: none;">
       <button class="image-btn media-button-empty"></button>
@@ -539,7 +533,7 @@
   </div></div>
         <div class="p-btn">
           <div>
-            <button class="od-button ok-btn">确 定</button>
+            <button class="ok-btn">确 定</button>
           </div>
           <div>
             <button class="cancel-btn">取 消</button>
@@ -648,8 +642,8 @@
     </div>
   </div></div><!-- 
     --> 
-  </div></div><div class="q-new-opt"><div class="od-left-icon-btn" style="width:90px">
-  <span class="left-icon-btn-bg-l"><em class="icon od-icon-add"></em></span>添加新选项
+  </div></div><div class="q-new-opt"><div class="od-left-icon-btn">
+  <span class="left-icon-btn-bg-l">+</span><span class="left-icon-btn-bg-r">添加新选项</span>
   </div></div><table class="scale-labels">
     <tbody><tr>
       
@@ -866,9 +860,11 @@
 </div></div><!-- 
   --><button class="close-btn close-btn-hide" title="删除"></button>
 </div></div>
-    <div class="q-new-opt q-new-opt-row"><div class="od-left-icon-btn" style="width:90px">
-<span class="left-icon-btn-bg-l"><em class="icon od-icon-add"></em></span>添加子题目
-</div></div>
+    <div class="q-new-opt q-new-opt-row">
+      <div class="od-left-icon-btn">
+        <span class="left-icon-btn-bg-l">+</span><span class="left-icon-btn-bg-r">添加子题目</span>
+      </div>
+    </div>
   </div><!--
   --><div class="q-matrix-half">
     <div class="q-items-title">选项</div>
@@ -925,8 +921,8 @@
 </div></div><!-- 
   --><button class="close-btn close-btn-hide" title="删除"></button>
 </div></div>
-    <div class="q-new-opt q-new-opt-item"><div class="od-left-icon-btn" style="width:90px">
-<span class="left-icon-btn-bg-l"><em class="icon od-icon-add"></em></span>添加新选项
+    <div class="q-new-opt q-new-opt-item"><div class="od-left-icon-btn">
+<span class="left-icon-btn-bg-l">+</span><span class="left-icon-btn-bg-r">添加新选项</span>
 </div></div>
   </div>
 </div></div>
@@ -1246,9 +1242,11 @@
     </div>
   </div></div><!-- 
     --> 
-  </div></div><div class="q-new-opt"><div class="od-left-icon-btn" style="width:90px">
-  <span class="left-icon-btn-bg-l"><em class="icon od-icon-add"></em></span>添加新选项
-  </div></div></div>
+  </div></div><div class="q-new-opt"><div class="od-left-icon-btn">
+  <span class="left-icon-btn-bg-l">+</span>
+  <span class="left-icon-btn-bg-r">添加新选项</span>
+  </div>
+</div></div>
         </div>
         <div class="editor-left-body editor-left-body-code" style="display: none;">
           <textarea></textarea>

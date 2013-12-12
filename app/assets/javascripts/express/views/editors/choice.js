@@ -1,7 +1,7 @@
 //=require ./base_with_items
-//=require ui/widgets/od_selector
-//=require ui/widgets/od_item
-//=require ui/widgets/od_left_icon_button
+//=require ui/express_widgets/od_selector
+//=require ui/express_widgets/od_item
+//=require ui/express_widgets/od_left_icon_button
 //=require jquery.numeric
 
 /* ================================

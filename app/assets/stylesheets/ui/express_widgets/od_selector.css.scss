@@ -4,25 +4,23 @@
  
 @import "common";
 @import "compass/css3/inline-block";
-
+@import "editors/*.png";
 $url-od-selector: image-url("widgets/od-selector.png");
 $url-od-selector-yellow: image-url("widgets/od-selector-yellow-1px.png");
-$od-selector-height: 23px;
+$od-selector-height: 32px;
 
 .od-selector {
 	position: relative;
 	@include inline-block;
-	
+	font-size: 12px;
 	.selector-box {
 		@include one-line($od-selector-height);
 		cursor: pointer;
-		background: $url-od-selector no-repeat 0 0;
-		
 		> b {
 			position: relative;
 			margin-right:24px;
 			@include one-line($od-selector-height - 2);
-			margin-left:3px;
+			// margin-left:3px;
 			display: block;
 			font-weight: normal;
 			padding-left: 0.5em;
@@ -30,8 +28,8 @@ $od-selector-height: 23px;
 			text-align: left;
 			color:#666;
 			background: #FFF;
-			border-top:1px #cbcccc solid;
-			border-bottom:1px #cbcccc solid;
+			border:1px #cbcccc solid;
+			border-right:0;
 
 			span { 
 				overflow: hidden; 
@@ -40,9 +38,9 @@ $od-selector-height: 23px;
 			}
 			
 			.pull-down {
-				width: 24px;
+				width: 32px;
 				height: $od-selector-height;
-				background: $url-od-selector no-repeat 0 -99px;
+				@include editors-sprite(select);
 				position: absolute;
 				right:-24px;
 				top:-1px;
@@ -51,18 +49,8 @@ $od-selector-height: 23px;
 		}
 		
 		&:hover {
-			background-position: 0 -33px;
-			
-			> b {
-				background: #eeeeef;
-			}
-		}
-		
-		&:active {
-			background-position: 0 -66px;
-			
-			> b {
-				background: #dbdcdc;
+			.pull-down{
+				@include editors-sprite(select_hover);
 			}
 		}
 	}

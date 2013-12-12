@@ -1,6 +1,6 @@
 @import "common";
 @import "compass/css3/inline-block";
-@import "od-button/*.png";
+@import "editors/*.png";
 
 .od-checkbox {
 	
@@ -9,16 +9,16 @@
 	
 	em {
 		@include inline-block;
-		@include size(13px, 13px);
-		@include od-button-sprite(checkBtn);
-		margin:0 8px 0 0;
+		@include size(20px, 18px);
+		@include editors-sprite(checkBtn);
+		margin:0 4px 0 0;
 
-		&.hover {
-			@include od-button-sprite(checkBtn_hover);
+		&:hover {
+			@include editors-sprite(checkBtn_hover);
 		}
 
 		&.checked {
-			@include od-button-sprite(checkBtn_active);
+			@include editors-sprite(checkBtn-active);
 		}
 	}
 	

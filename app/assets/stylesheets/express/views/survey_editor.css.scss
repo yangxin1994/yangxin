@@ -1,5 +1,5 @@
 /*
- *=require ui/widgets/od_white_button
+ *=require ui/express_widgets/od_white_button
  *=require ./designers
  */
 @import "common";
@@ -198,7 +198,7 @@
       }
 
       &.active {
-        cursor: default;
+        // cursor: default;
         color: $exblue;
         >i { @include ex-left-menu-sprite(tipactive); }
       }
@@ -292,26 +292,25 @@
 
 /*浮动层*/ 
 #float-panel{
-        @include size(40px,82px);
-        @include border-radius(3px);
-        border:1px $borderColor solid;
-        position: absolute;
-        right:-52px;
-        top:0;
-        background: #fff;
-        a{
-                @include size(40px,40px);
-                display: block;
-                background: #fff;
-                &.logic-control{
-                        @include border-top-radius(3px);
-                        @include editors-sprite(logic);
-                }
-                &.preview-survey{
-                        border-top:1px $borderColor solid;
-                        @include border-bottom-radius(3px);
-                        @include editors-sprite(preview);
-                }
-        }
-        
+	@include size(40px,82px);
+	@include border-radius(3px);
+	border:1px $borderColor solid;
+	position: absolute;
+	right:-52px;
+	top:0;
+	background: #fff;
+	a{
+		@include size(40px,40px);
+		display: block;
+		background: #fff;
+		&.logic-control{
+			@include border-top-radius(3px);
+			@include editors-sprite(logic);
+		}
+		&.preview-survey{
+			border-top:1px $borderColor solid;
+			@include border-bottom-radius(3px);
+			@include editors-sprite(preview);
+		}
+	}
 }

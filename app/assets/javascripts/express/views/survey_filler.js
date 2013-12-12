@@ -1,8 +1,8 @@
 //=require ./base
 //=require ../models/survey
 //=require ./fillers
-//=require ui/widgets/od_popup
-//=require ui/widgets/od_share
+//=require ui/express_widgets/od_popup
+//=require ui/express_widgets/od_share
 //=require ui/plugins/od_button_text
 //=require ui/plugins/od_enter
 //=require jquery.scrollTo

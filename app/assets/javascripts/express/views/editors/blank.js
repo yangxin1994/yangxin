@@ -3,9 +3,9 @@
 //=require ../../templates/editors/number_blank_min_max
 //=require ../../templates/editors/number_blank_unit
 //=require ../../templates/editors/time_blank_body_min_max
-//=require ui/widgets/od_item
-//=require ui/widgets/od_left_icon_button
-//=require ui/widgets/od_time_selector
+//=require ui/express_widgets/od_item
+//=require ui/express_widgets/od_left_icon_button
+//=require ui/express_widgets/od_time_selector
 
 /* ================================
  * View: Blank question editor
