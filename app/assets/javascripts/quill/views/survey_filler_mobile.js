@@ -28,17 +28,7 @@ $(function(){
    * =========================== */
   quill.quillClass('quill.views.SurveyFiller', quill.views.Base, {
 
-    _redirect_link: '/',
-
     _initialize: function() {
-      var link = this.model.get('style_setting').redirect_link;
-
-      if($.regex.isUrl(link)) {
-        link = link.toLowerCase();
-        if(link.indexOf('http') != 0)
-          link = 'http://' + link;
-        this._redirect_link = link;
-      }
 
       if(this.options.spread_point == undefined){
         this.options.spread_point = 0;
@@ -68,6 +58,23 @@ $(function(){
       });
     },
 
+    _close: function() {
+      // close window or redirect
+      var link = this.model.get('style_setting').redirect_link;
+      if($.regex.isUrl(link)) {
+        link = link.toLowerCase();
+        if(link.indexOf('http') != 0)
+          link = 'http://' + link;
+        location.href = link;
+      } else {
+        location.href = '/';
+        // var opened = window.open('about:blank','_self');
+        // opened.opener = null;
+        // opened.close();
+      }
+    },
+
+
     _render: function() {
       // Setup page
       this._setup(this.options.data);
@@ -87,6 +94,15 @@ $(function(){
           $.social['shareTo' + v](href, '亲，帮忙填写一份问卷哦~');
         });
       }); 
+    },
+
+    _replay:function(){
+      $.deleteJSON(this._uri(this.options.is_preview ? '/destroy_preview' : '/replay'), $.proxy(function(retval) {
+        if(retval.success)
+          location.href = (this.options.is_preview ? '/p/' : '/s/') + this.options.reward.id
+        else 
+          this._error('操作失败，请刷新页面重试。');
+      }, this));
     },
 
     _share:function(){
@@ -149,7 +165,6 @@ $(function(){
         var questions = value.questions, answers = value.answers, total_count = value.question_number, 
           index = value.answer_index, time = value.estimate_answer_time, redo_count = value.repeat_time,
           answer_index_all = value.answer_index_all;
-
         if(questions.length == 0) {
           //该页显示问题数量为0，此时表示题已经加载完最后一道，应该做提交操作
           this._updateProgress(1);//标识答题进度为100%
@@ -157,11 +172,12 @@ $(function(){
           this.hbs({
             remind: redo_count > 0,
             allow_pageup: this.model.get('style_setting').allow_pageup,
-            show_restart: this.options.is_preview
+            show_restart: this.options.is_preview,
+            allow_replay: this.model.get('style_setting').allow_replay
           }, 'survey_filler_submit_mobile').appendTo($('#f_body'));
 
           // set prev and next button event
-          var check_btn = $('#check_btn'), submit_btn = $('#submit_btn');           
+          var check_btn = $('#check_btn'), submit_btn = $('#submit_btn'),replay_btn = $('#replay');           
 
           // check answer from page one when click on check button
           check_btn.click($.proxy(function() {
@@ -177,6 +193,11 @@ $(function(){
               this.load_questions(-1, true);
             }, this));
           }, this));
+
+          replay_btn.click($.proxy(function() {
+            this._replay();
+          }, this));
+
         }else{
           this._updateProgress(index / total_count);
           // setup survey filler container
@@ -184,6 +205,7 @@ $(function(){
             remind: redo_count > 0,
             allow_pageup: this.model.get('style_setting').allow_pageup,
             show_restart: this.options.is_preview,
+            allow_replay: this.model.get('style_setting').allow_replay,
             welcome: this.model.get('welcome')
           }, 'survey_filler_qs_mobile').appendTo($('#f_body'));
         
@@ -208,7 +230,7 @@ $(function(){
           }
 
           // Setup next and previous buttons
-          var next_btn = $('#next_btn'), prev_btn = $('#prev_btn');
+          var next_btn = $('#next_btn'), prev_btn = $('#prev_btn'), replay_btn = $('#replay');
 
           // Disable next button for some time (don't disable it for allow_pageup==true survey, or previewing)
           var has_not_empty_answer = (_.find(answers || [], function(a) { return a != null; }) != null);
@@ -277,6 +299,12 @@ $(function(){
             this.load_questions((questions.length > 0) ? questions[0]['_id'] : -1, false);
           }, this));
           
+
+          replay_btn.click($.proxy(function() {
+            this._replay();
+          }, this));
+
+
           if(answer_index_all == 0) prev_btn.hide();                                                                        
         }
       }else if(value.answer_status == 4 || value.answer_status == 8 || value.answer_status == 32){    
@@ -288,7 +316,7 @@ $(function(){
           }, 'survey_filler_end_free_mobile').appendTo('#f_body');
 
           this._share();
-          $('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));
+          $('#close_btn').click($.proxy(function() { this._close() }, this));
         } else if(this.options.reward.reward_scheme_type == 1) {
           if(value.order_id == null){
             this.hbs({}, 'survey_filler_end_money_mobile').appendTo($('#f_body'));
@@ -474,7 +502,7 @@ $(function(){
           spread_point: this.options.spread_point         
         }, 'survey_filler_reject_mobile').appendTo('#f_body');
         $('#start_spread').click($.proxy(function() { this._spread(); }, this));
-        $('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));        
+        $('#close_btn').click($.proxy(function() { this._close() }, this));        
       } 
       $('#restart_btn').click($.proxy(function() {
         if($('#restart_btn').attr("disabled") == 'disabled')
