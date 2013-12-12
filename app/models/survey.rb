@@ -124,7 +124,6 @@ class Survey
   scope :stars, -> {where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
   scope :published, -> { where(:status  => 2) }
   scope :normal, -> { where(:status.gt => -1) }
-  scope :closed, -> { where(:status => 1) }
   scope :deleted, -> { where(:status => 4) }
 
 
