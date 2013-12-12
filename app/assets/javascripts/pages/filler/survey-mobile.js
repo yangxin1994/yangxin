@@ -33,18 +33,18 @@ jQuery(function($) {
 				survey_id: window.survey_id,
 				is_preview: window.is_preview,
 				reward_scheme_id: window.rsi,
-				channel: window.channel,
-				username: username_ipt.val(),
-				password: password_ipt.val(),
 				introducer_id: $.util.param('i'),
 				agent_task_id: $.util.param('ati'),
-				referer: window.referer,				
+				channel: window.channel,
+				referer: window.referer,
+				username: username_ipt.val(),
+				password: password_ipt.val()			
 			},
+			dataType:'json',
 			success:function(retval){
 				if(retval.success) {
 					$("#error_msg").hide();
-					window.location.href = window.location.protocol + "//" + window.location.host + '/a/' + retval.value + '?m=true';
-					return false;
+					location.href = '/a/' + retval.value;
 				} else {
 					$.util.enable(start_btn, username_ipt, password_ipt);
 					start_btn.text('提交出错，请重试。');
