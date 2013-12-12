@@ -85,7 +85,7 @@ $(function(){
 						return '请输入整数';
 				} else if(issue.precision > 0) {
 					var splits = ((answer + '').split('.'));
-					if(splits.length == 1 || splits[1].length != issue.precision) 
+					if(splits.length == 2 && splits[1].length > issue.precision)  
 						return '请精确到小数点后' + issue.precision + '位数字';
 				}
 				return null;
