@@ -17,6 +17,10 @@
 	<a href="javascript:void(0)" class="next" id="submit_btn">提交结果</a>
 	{{#if show_restart}}
 	<a href="javascript:void(0)" class="resume" id="restart_btn">重新答题</a>
+	{{else}}
+		{{#if allow_replay}}
+			<a href="javascript:void(0)" class="resume" id="replay">重新答题</a>
+		{{/if}}
 	{{/if}}
 </div>
 

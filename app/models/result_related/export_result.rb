@@ -1,3 +1,4 @@
+# encoding: utf-8
 class ExportResult < Result
   
   include Mongoid::Document
@@ -57,15 +58,18 @@ class ExportResult < Result
       {'spss_data' => spss_data_json, 'job_id' => task_id.to_s}
     end
     # File.open("tmp/a.txt", "wb") { |file| file.puts(spss_header)}
+    File.open("public/dotnet.err", "wb") { |file| file.puts("出错")}
     if retval.to_s.start_with?('error')
       self.status = -1
       self.error_code = retval
     elsif retval.code != "200"
       self.status = -1
+      File.open("public/dotnet.err", "wb") { |file| file.puts(retval.to_s)}
       self.error_code = ErrorEnum::DOTNET_HTTP_ERROR
     elsif retval.body.start_with?('error:')
       return ErrorEnum::DOTNET_INTERNAL_ERROR
       self.status = -1
+      File.open("public/dotnet.err", "wb") { |file| file.puts(retval.to_s)}
       self.error_code = ErrorEnum::DOTNET_INTERNAL_ERROR
     else
       self.status = 1
