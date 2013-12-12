@@ -95,11 +95,12 @@ class Admin::NewslettersController < ApplicationController
 
   def send_netranking_newsletter
     if params[:email_list].to_s == "true"
-      emails = params[:email_content].split('\n')
+      emails = params[:email_content].split("\n")
     else
       emails = NetrankingUser.all.map { |e| e.email }
     end
-    MailgunApi.send_emagzine(params[:subject], params[:send_from], params[:domain], params[:content], params[:file_path], emails)
+    send_from = params[:send_from].blank? ? "postmaster@#{params[:domain]}" : params[:send_from]
+    MailgunApi.send_emagzine(params[:subject], send_from, params[:domain], params[:content], params[:file_path], emails)
     render_json_auto and return
   end
 
