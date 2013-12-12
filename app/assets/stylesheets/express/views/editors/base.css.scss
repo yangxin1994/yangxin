@@ -15,7 +15,7 @@ $url-od-edit-question: image-url("editors/editors-question-bg.png");
 
 $editor-width: 785px;
 $editor-width-left: 635px;
-$editor-top-bottom-height: 6px;
+$editor-top-bottom-height: 5px;
 $editor-main-height-min: 365px;
 $editor-paragraph-top-bottom-height: 14px;
 
@@ -35,7 +35,7 @@ $editor-paragraph-top-bottom-height: 14px;
 }
 .editor-main{
 	width:$editor-width;
-	background: image-url("editors/edit_question_bg.png") repeat-y;
+	background: image-url('editors/edit_question_repeatbg.png') repeat-y;
 	@include clearfix;
 }
 
@@ -102,6 +102,7 @@ $editor-paragraph-top-bottom-height: 14px;
 		font-weight: bold;
 		color: #666;
 		@include one-line(32px);
+		background: image-url('editors/2.png') right bottom;
 		padding-right:15px;
 		margin-left: -3px;
 		// margin-left: 3px;
@@ -112,8 +113,7 @@ $editor-paragraph-top-bottom-height: 14px;
 			width:33px;
 			text-align: center;
 			color: #FFF;
-			background: #AEB5BF;
-			@include border-right-radius(3px);
+			background: image-url('editors/1.png') no-repeat left top;
 			// margin-left: -1px;
 			margin-right:10px;
 			font-size: 18px;
@@ -241,30 +241,22 @@ $editor-paragraph-top-bottom-height: 14px;
 
 // confirm and cancel box
 .btn-confirm-box {
-	@include size(150px, 40px);
+	@include size(133px, 40px);
+	background: $url-widgets-bg no-repeat -134px -151px;
+	padding: 15px 0 0 15px;
 	position: absolute;
-	bottom: 3px;
+	bottom: 2px;
 	right: 3px;
-	.btn-confirm{
-		@include size(75px,40px);
-		border: none;
-		cursor: pointer;
-		font-weight: bold;
-		background: #FFC800;
-		color: #333;
-		float: left;
-		font-size: 14px;
-		@include border-bottom-right-radius(4px);
-		border-left:1px #FFA800 solid;
-	}
+	
 	.btn-cancel {
-		@include size(75px, 40px);
+		@include size(36px, 25px);
 		border: none;
+		background: none;
 		cursor: pointer;
 		font-weight: bold;
-		background: #FFC800;
 		color: #FFF;
 		float: left;
+		margin-right: 25px;
 		font-size: 14px;
 		
 		&:hover{
@@ -273,6 +265,10 @@ $editor-paragraph-top-bottom-height: 14px;
 		&:active{
 			color:#000;
 		}
+	}
+	
+	.od-button {
+		font-size: 14px;
 	}
 }
 

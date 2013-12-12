@@ -1,0 +1,128 @@
+= content_for :head do
+  =javascript_include_tag "pages/express/share-bundle"
+  =stylesheet_link_tag "pages/express/share-bundle"
+  javascript:
+    $(function(){
+      window.survey_id = "#{@survey.id}"
+    })
+.sub_container
+  ul.sub_nav
+    li.socal_net.active
+      a href='javascript:void(0)'
+        i.icon24.social
+        | 社交网络 
+    li.mail_net
+      a href='javascript:void(0)'
+        i.icon24.mail
+        | 群发邮件
+    li.site_net
+      a href='javascript:void(0)'
+        i.icon24.site
+        | 网站收藏
+    li.sample_net
+      a href='javascript:void(0)'
+        i.icon24.site
+        | 样本服务        
+    li.last
+      a href='javascript:void(0)'
+        i.icon20.set
+  .share_info
+    .social_channel.socal_net
+      .title
+        = "#{@survey.title}"
+      .left
+        .share_link
+          .share_notice
+            | 赋值链接直接发送到email或者聊天工具给受访者
+          input type='text' name='link' value="#{@share_link}"
+          button.copy_button 复制链接
+          .add_psw
+            i.lock
+            a href='javascript:void(0)' 添加访问密码
+            input type='text' class="password" name='password' value="#{@survey.access_password}"
+        .share_social
+          p.desc 分享到社交网络
+          .socials
+            a.sina href='javascript:void(0)'
+              i
+              | 新浪微博 
+            / a.weixin href='javascript:void(0)'
+            /   i
+            /   | 微信
+            a.qzone href='javascript:void(0)' 
+              i
+              | QQ空间
+            a.douban href='javascript:void(0)' 
+              i
+              | 豆瓣
+            a.renren href='javascript:void(0)' 
+              i
+              | 人人网
+      .right
+        .s_top
+          | 扫描二维码手机答题
+        .s_bottom
+          img src="#{@output_file}"
+          .overlay
+            = link_to image_tag('/assets/share/download.png'),"/e/questionaires/#{@survey.id}/down_qrcode"
+    .mail_channel.mail_net
+      .main
+        img src="/assets/share/comingsoon.png"
+    .site_channel.site_net
+      .title
+        = "#{@survey.title}"
+        .sub_title
+          .lt 方式一: 按钮分享
+          .rt 预览效果在页面右侧 >>    
+      .survey_link
+        .left_part
+          .float_color
+            label.color_A.active for='s_A'
+              input type='radio' name='style' id='s_A' value=1
+              span
+            label.color_B for='s_B'
+              input type='radio' name='style' id='s_B' value=2
+              span               
+            label.color_C for='s_C'
+              input type='radio' name='style' id='s_C' value=3
+              span
+            label.color_D for='s_D'
+              input type='radio' name='style' id='s_D' value=4
+              span
+            label.color_E for='s_E'
+              input type='radio' name='style' id='s_E' value=5
+              span
+            label.color_F for='s_F'
+              input type='radio' name='style' id='s_F' value=6
+              span
+            label.color_G for='s_G'
+              input type='radio' name='style' id='s_G' value=7
+              span
+            label.color_H for='s_H'
+              input type='radio' name='style' id='s_H' value=8
+              span
+        .right_part
+          textarea.pre_code
+          div.help
+            = '请复制上面的代码到<body> 与 </body> 之间的任意位置。'
+            | <br />如果您的网站使用模板,请复制代码到您的模板,按钮将自动出现
+        .float_link
+          a href='javascript:void(0);' target='_blank'
+            img src=''
+      .share_bottom
+        .s_l
+          p
+            | 拖动调整浮动框高度
+          .scale
+            span.scale_l
+            span.scale_c
+            span.scale_r
+            .val
+              | 高度250px
+
+        .s_r
+          button.code_button 复制代码
+    .sample_serve.sample_net
+      .main
+        img src="/assets/share/comingsoon.png"    
+
