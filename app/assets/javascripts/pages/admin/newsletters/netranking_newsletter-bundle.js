@@ -20,6 +20,8 @@ jQuery(function($) {
     $('.ke-container').css("width", "576px");
     content_editor.sync();
 
+    $('.btn').text('正在发送');
+
     $.postJSON('/admin/newsletters/send_netranking_newsletter.json', {
       file_path: $('#file-path').html(),
       subject: $('#subject').val(),
@@ -31,7 +33,8 @@ jQuery(function($) {
     }, function(retval) {
       $('.property-bottom button').removeAttr("disabled");
       if(retval.success) {
-        alert_msg.show('success', "成功!")
+        alert_msg.show('success', "已成功发送邮件!")
+        $('.btn').text('发送');
       } else {
         alert_msg.show('error', "失败 (╯‵□′)╯︵┻━┻")
       }
