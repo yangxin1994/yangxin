@@ -369,6 +369,12 @@ OopsData::Application.routes.draw do
       end
     end
 
+    resources :netranking_users do
+      collection do
+        post :import
+      end
+    end
+
     resources :newsletters do
       member do
         post   :deliver
@@ -380,6 +386,10 @@ OopsData::Application.routes.draw do
         post   :column
         post   :article
         post   :product_news
+        get    :netranking_newsletter
+        get    :upload_attachment
+        post   :attachment_uploaded
+        post   :send_netranking_newsletter
       end
     end
 
@@ -511,6 +521,7 @@ OopsData::Application.routes.draw do
         post :finish
         post :clear
         delete :destroy_preview
+        delete :replay
         put :select_reward
         post :select_reward_for_mobile
         post :start_bind

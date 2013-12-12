@@ -4,6 +4,7 @@ class Filler::AnswersController < Filler::FillerController
     # hack: if the cookie has already has an answer_id and is not signed in, return the answer_id
     # Used to avoid creating multiple answers when user click the back key in the keyboard when answeing survey
     if !user_signed_in
+      params[:is_preview] = false if params[:is_preview] == 'false'
       answer_id = cookies[cookie_key(params[:survey_id], params[:is_preview])]
       render_json_auto answer_id and return if answer_id.present?
     end
@@ -104,6 +105,15 @@ class Filler::AnswersController < Filler::FillerController
     render_json_auto @answer.destroy and return 
   end
 
+  def replay
+    @answer = Answer.find(params[:id])
+    cookies.delete(cookie_key(@answer.survey_id.to_s, @answer.is_preview), :domain => :all)
+    survey = @answer.survey
+    survey.recover_password(@answer)
+    survey.answers.delete(@answer)
+    survey.decrease_quota(@answer)
+    render_json_auto @answer.destroy and return 
+  end
 
   def clear
     @answer = Answer.find(params[:id])

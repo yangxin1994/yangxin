@@ -35,7 +35,9 @@ class Survey
     "has_advertisement" => true,
     "has_oopsdata_link" => true,
     "redirect_link" => "",
-  "allow_pageup" => false}
+    "allow_pageup" => false,
+    "allow_replay" => false,
+    "show_estimated_time" => true}
   field :access_control_setting, :type => Hash, default: {"times_for_one_computer" => -1,
     "has_captcha" => false,
     "ip_restrictions" => [],
@@ -122,7 +124,6 @@ class Survey
   scope :stars, -> {where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
   scope :published, -> { where(:status  => 2) }
   scope :normal, -> { where(:status.gt => -1) }
-  scope :closed, -> { where(:status => 1) }
   scope :deleted, -> { where(:status => 4) }
 
 
@@ -459,7 +460,6 @@ class Survey
       if index.present?
         page["questions"].delete(question_id) if replace.nil?
         page["questions"][index] = replace if replace.present?
-        break
       end
     end
     self.save
@@ -523,6 +523,21 @@ class Survey
     return false if password_element.nil? || password_element["used"] != false
     return true if is_preview
     password_element["used"] = true
+    return self.save
+  end
+
+  def recover_password(answer)
+    password_control = self.access_control_setting["password_control"]
+    return true if password_control["password_type"] == -1 || password_control["password_type"] == 0
+    if password_control["password_type"] == 1
+      list = password_control["password_list"]
+      password_element = list.select { |ele| ele["content"] == answer.password }[0]
+    else
+      list = password_control["username_password_list"]
+      password_element = list.select { |ele| ele["content"] == [answer.username, answer.password] }[0]
+    end
+    return true if password_element.nil?
+    password_element["used"] = false
     return self.save
   end
 

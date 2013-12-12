@@ -1,3 +1,4 @@
+# encoding: utf-8
 class ExportResult < Result
   
   include Mongoid::Document

@@ -14,7 +14,7 @@ jQuery(function($) {
 
 		$('#spread-detail tbody tr').attr('name', sid);
 		$('#spread-detail tbody tr td:eq(1)').html($('tbody tr#sid-'+sid+' td:eq(0)').html());
-		$('#spread-detail tbody tr td:eq(2)').html($('tbody tr#sid-'+sid+' td:eq(1) a').html());
+		$('#spread-detail tbody tr td:eq(2)').html($('tbody tr#sid-'+sid+' td:eq(1)').html());
 		$('#spread-detail tbody tr td:eq(3)').html($('tbody tr#sid-'+sid+' td:eq(5)').html());
 		$('#spread-detail tbody tr td:eq(6)').html($('tbody tr#sid-'+sid+' td:eq(4)').html());
 		$('#spread-detail span.point').removeClass('point');

@@ -3,7 +3,7 @@
 var wel_editor;
 KindEditor.ready(function(K) {
 	wel_editor = K.create('#p-welcome', {items: ['fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold',
-        'italic', 'underline', 'link', 'unlink', 'strikethrough', 'removeformat'], themeType: 'simple', resizeType: 1});
+        'italic', 'underline', 'link', 'unlink', 'strikethrough', 'removeformat', 'image'], themeType: 'simple', resizeType: 1});
 });
 
 jQuery(function($) {
