@@ -338,7 +338,7 @@ class MailgunApi
       @emails = @emails[group_size..-1]
     end
     @group_emails << @emails
-    
+
     data = {}
     data[:domain] = domain
     data[:from] = send_from
