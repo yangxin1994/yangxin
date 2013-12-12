@@ -36,7 +36,8 @@ class Survey
     "has_oopsdata_link" => true,
     "redirect_link" => "",
     "allow_pageup" => false,
-    "allow_replay" => false}
+    "allow_replay" => false,
+    "show_estimated_time" => true}
   field :access_control_setting, :type => Hash, default: {"times_for_one_computer" => -1,
     "has_captcha" => false,
     "ip_restrictions" => [],
@@ -523,6 +524,21 @@ class Survey
     return false if password_element.nil? || password_element["used"] != false
     return true if is_preview
     password_element["used"] = true
+    return self.save
+  end
+
+  def recover_password(answer)
+    password_control = self.access_control_setting["password_control"]
+    return true if password_control["password_type"] == -1 || password_control["password_type"] == 0
+    if password_control["password_type"] == 1
+      list = password_control["password_list"]
+      password_element = list.select { |ele| ele["content"] == answer.password }[0]
+    else
+      list = password_control["username_password_list"]
+      password_element = list.select { |ele| ele["content"] == [answer.username, answer.password] }[0]
+    end
+    return true if password_element.nil?
+    password_element["used"] = false
     return self.save
   end
 
