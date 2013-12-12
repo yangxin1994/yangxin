@@ -1,7 +1,7 @@
 //=require ./base
 //=require ../models/survey
 //=require ./fillers_mobile
-//=require ui/widgets/od_popup
+//=require ui/express_widgets/od_popup
 //=require ui/plugins/od_button_text
 //=require jquery.scrollTo
 //=require jquery.cookie

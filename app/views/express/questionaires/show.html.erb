@@ -1,8 +1,5 @@
 <!-- content for head -->
 <% content_for :head do %>
-  <script type="text/javascript">
-    // window.uid = "<%= current_user._id %>";
-  </script>
   <%= javascript_include_tag "pages/express/questionaire-bundle" %>
   <%= stylesheet_link_tag "pages/express/questionaire-bundle", :media => "all" %>
 <% end %>
@@ -19,9 +16,6 @@
       <li class='big' style="border-bottom:0;"><a class='Sort' href="javascript:void(0);"><span class="left-menu-icon"><em class="jmix"></em></span><span class="left-menu-name">排序题</span></a></li>
     </ul>
   </div>
-
-<!-- 常用题型 start -->
-  <div class="left-bottom">
   <div id='special_q' class='left-menus'>
     <a class='bottom-head' href="javascript:void(0);">常用题型<i></i></a>
     <ul style='display:none;'>
@@ -36,26 +30,24 @@
       <li class='small'><a class='AddressBlank' href="javascript:void(0);"><span class="left-menu-name">婚姻状况</span></a></li>
       <li class='small' style="border-bottom:none"><a class='UrlBlank' href="javascript:void(0);"><span class="left-menu-name">工作单位</span></a></li>
     </ul>
-
   </div>
-</div>
   <script type="text/javascript">
   jQuery(function($) {
     var left_disabled = true;
-    $('#normal_q a:eq(0)').click(function() {
+    function toggleMenu() {
       if(left_disabled) return;
-      $('#normal_q a:eq(0)').addClass('active');
-      $('#normal_q ul:eq(0)').slideDown('fast');
-      $('#special_q a:eq(0)').removeClass('active').addClass('bottom-head');
-      $('#special_q ul:eq(0)').slideUp('fast');
-    });
-    $('#special_q a:eq(0)').click(function() {
-      if(left_disabled) return;
-      $('#normal_q a:eq(0)').removeClass('active');
-      $('#normal_q ul:eq(0)').slideUp('fast');
-      $('#special_q a:eq(0)').addClass('active').removeClass('bottom-head');
-      $('#special_q ul:eq(0)').slideDown('fast');
-    });
+      $('#normal_q a:eq(0)').toggleClass('active');
+      $('#special_q a:eq(0)').toggleClass('active').toggleClass('bottom-head');
+      if($('#normal_q a:eq(0)').hasClass('active')) {
+      	$('#normal_q ul:eq(0)').slideDown('fast');
+      	$('#special_q ul:eq(0)').slideUp('fast');
+      } else {
+      	$('#normal_q ul:eq(0)').slideUp('fast');
+      	$('#special_q ul:eq(0)').slideDown('fast');
+      }
+    }
+    $('#normal_q a:eq(0)').click(toggleMenu);
+    $('#special_q a:eq(0)').click(toggleMenu);
 
     // survey editor
     var survey = <%= raw @survey.to_json %>;

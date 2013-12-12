@@ -1,6 +1,6 @@
 //=require ../../templates/editors/matrix_choice_body
-//=require ui/widgets/od_item
-//=require ui/widgets/od_left_icon_button
+//=require ui/express_widgets/od_item
+//=require ui/express_widgets/od_left_icon_button
 
 /* ================================
  * View: Matrix Choice question editor
@@ -56,8 +56,7 @@ $(function(){
 
 				// add new
 				$.od.odLeftIconButton({
-					text: (key == 'item') ? '添加新选项' : '添加子题目',
-					width: 90
+					text: (key == 'item') ? '添加新选项' : '添加子题目'
 				}).appendTo(this.$('.q-new-opt-' + key)).click($.proxy(function() {
 					handler.addItem();
 				}, this));
@@ -192,7 +191,7 @@ $(function(){
 			
 			var opt = $.od.odItem({
 				id: this._domId(id),
-				width: 280,
+				width: 270,
 				value: item.content
 			}).data('id', id).appendTo(this.$('.q-items-' + handler.key));
 			

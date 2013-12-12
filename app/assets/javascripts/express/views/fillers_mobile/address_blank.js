@@ -1,4 +1,4 @@
-//=require ui/widgets/od_address_selector
+//=require ui/express_widgets/od_address_selector
 
 /* ================================
  * View: Address blank question render

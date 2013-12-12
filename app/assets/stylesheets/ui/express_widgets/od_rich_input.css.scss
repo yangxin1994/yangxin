@@ -1,29 +1,25 @@
-//=require ../plugins/od_media_upload_button
-
 @import "common";
 @import "compass/css3/inline-block";
 @import "od-icon/*.png";
-
 
 .od-rich-input {
 	
 	@include inline-block;
 	position: relative;
 	input[type='text'] {
-		$input-width: 475px;
+		$input-width: 538px;
 		$input-height: 32px;
 		
 		@include ipt;
 		@include inline-block;
 		@include size($input-width - 68 - 5 - 2, $input-height - 3 - 2);
-		padding: 3px 68px 0 5px;
+		padding: 3px 5px 0 5px;
 		border: 1px #dbdbdb solid;
 		color: #666;
 		font-size: 14px;
 		background: #FFF;
 		
 		&:focus { border-color:$exblue; }
-		// &.highlight { background: image-url('editors/input_edit_bg.png') 0 -123px repeat-x; }
 		&.other { color: $blue; }
 	}
 	
@@ -40,45 +36,4 @@
 		font-size: 14px;
 		resize:none;	/*禁止鼠标拖动调大小*/
 	}
-	
-	/*input内上传按钮*/
-	.od-rich-input-btns {
-		position: absolute;
-		bottom: 4px;
-		right: 8px;
-		// display: none;
-	}
-	.image-btn, .video-btn, .audio-btn {
-		@include inline-block;
-		@include size(16px, 16px);
-		border: none;
-		cursor: pointer;
-	}
-	
-	.image-btn {
-		@include od-icon-sprite(img);
-		&.active, &.media-button-not-empty { @include od-icon-sprite(img_hover); }//50a45a68421aa9526400000d
-	}
-
-	.video-btn {
-		@include od-icon-sprite(video);
-		&.active { @include od-icon-sprite(video_hover); }
-	}
-
-	.audio-btn {
-		@include od-icon-sprite(audio);
-		&.active { @include od-icon-sprite(audio_hover); }
-	}
-
-	// &.active {
-	// 	// .od-rich-input-btns{ display: block; }
-	// 	textarea, input[type='text'] {
-	// 		border-color: rgb(245, 192, 0);
-	// 		@include box-shadow(inset 0 1px 3px rgba(0, 0, 0, 0.05), 0 0 8px rgba(245, 192, 0, .6));
-	// 		outline: none;
-	// 	}
-	// 	input[type='text'] {
-	// 		background: image-url('editors/input_edit_bg.png') 0 -53px repeat-x;
-	// 	}
-	// }
 }

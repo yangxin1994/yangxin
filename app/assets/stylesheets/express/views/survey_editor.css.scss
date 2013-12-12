@@ -1,5 +1,5 @@
 /*
- *=require ui/widgets/od_white_button
+ *=require ui/express_widgets/od_white_button
  *=require ./designers
  */
 @import "common";
@@ -198,7 +198,7 @@
       }
 
       &.active {
-        cursor: default;
+        // cursor: default;
         color: $exblue;
         >i { @include ex-left-menu-sprite(tipactive); }
       }
