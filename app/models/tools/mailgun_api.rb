@@ -330,14 +330,25 @@ class MailgunApi
   def self.send_emagzine(subject, send_from, domain, content, attachment, emails)
     group_size = 900
     @group_emails = []
+    @group_recipient_variables = []
     @emails = emails
 
     while @emails.length >= group_size
       temp_emails = @emails[0..group_size-1]
       @group_emails << temp_emails
       @emails = @emails[group_size..-1]
+      temp_recipient_variables = {}
+      temp_emails.each do |e|
+        temp_recipient_variables[e] = {"email" => e}
+      end
+      @group_recipient_variables << temp_recipient_variables
     end
     @group_emails << @emails
+    temp_recipient_variables = {}
+    @emails.each do |e|
+      temp_recipient_variables[e] = {"email" => e}
+    end
+    @group_recipient_variables << temp_recipient_variables
 
     data = {}
     data[:domain] = domain
@@ -349,6 +360,7 @@ class MailgunApi
     data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
     @group_emails.each_with_index do |emails, i|
       data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
+      data[:'recipient-variables'] = @group_recipient_variables[i].to_json
       self.send_message(data)
     end
   end
