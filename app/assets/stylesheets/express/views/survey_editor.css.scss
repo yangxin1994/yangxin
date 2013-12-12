@@ -12,65 +12,65 @@
 @import "ex-left-menu/*.png";
 @import "compass/utilities/general/clearfix";
 .survey-editor {
-	position: relative;
-	float: right;
-	font-size: 14px;
-	$editor-width: 785px;
-	$top-bottom-height: 14px;
+        position: relative;
+        float: right;
+        font-size: 14px;
+        $editor-width: 785px;
+        $top-bottom-height: 14px;
 
-	.ex-title {
+        .ex-title {
     display: none;
     padding:30px;
     border:1px $borderColor solid;
-		width:$editor-width - 30 *2 - 2;
-		background: #fff;
+                width:$editor-width - 30 *2 - 2;
+                background: #fff;
     margin-bottom: 12px;
-		@include border-radius(3px);
-		input,textarea {
-			width:704px;
-			display: block;
-			margin-bottom:15px;
-		}
-		.survey-title{
-			@include one-line(22px);
-			padding:14px 7px;
-			font-size: 22px;
-		}
-		.survey-subtitle{
-			@include one-line(22px);
-			padding:7px;
-			font-size: 18px;
-		}
-		.survey-description{
-			padding:7px;
-			resize: none;
-			margin-bottom:20px;
-			font-size: 14px;
-			line-height: 1.7em;
-		}
-		button {
+                @include border-radius(3px);
+                input,textarea {
+                        width:704px;
+                        display: block;
+                        margin-bottom:15px;
+                }
+                .survey-title{
+                        @include one-line(22px);
+                        padding:14px 7px;
+                        font-size: 22px;
+                }
+                .survey-subtitle{
+                        @include one-line(22px);
+                        padding:7px;
+                        font-size: 18px;
+                }
+                .survey-description{
+                        padding:7px;
+                        resize: none;
+                        margin-bottom:20px;
+                        font-size: 14px;
+                        line-height: 1.7em;
+                }
+                button {
       border: none;
       cursor: pointer;
-			width:330px;
-			margin:0 auto;
-			@include one-line(50px);
-			text-align: center;
-			display: block;
-			background: $exblue;
-			color:#fff;
-			@include border-radius(3px);
-			strong{
-				font-size: 18px;
-				font-weight: bold;
-				margin-right:8px;
-			}
+                        width:330px;
+                        margin:0 auto;
+                        @include one-line(50px);
+                        text-align: center;
+                        display: block;
+                        background: $exblue;
+                        color:#fff;
+                        @include border-radius(3px);
+                        strong{
+                                font-size: 18px;
+                                font-weight: bold;
+                                margin-right:8px;
+                        }
       &:disabled {
         /*TODO*/
         background: #f00;
         cursor: default;
       }
-		}
-	}
+                }
+        }
   .ex-title-finished-con {
     margin-bottom: 12px;
     .ex-title-finished{
@@ -117,62 +117,62 @@
     }
   }
 
-	$page-width: 785px;
+        $page-width: 785px;
 
-	.page-index {
-		$page-index-padding: 20px;
+        .page-index {
+                $page-index-padding: 20px;
 
-		width: $page-width;
-		text-align:center;
-		padding: $page-index-padding 0;
-		position: relative;
+                width: $page-width;
+                text-align:center;
+                padding: $page-index-padding 0;
+                position: relative;
 
-		>div{
-			@include one-line(0px);
-			border-bottom:1px #999 dotted;
-			margin: 0 250px;
-		}
+                >div{
+                        @include one-line(0px);
+                        border-bottom:1px #999 dotted;
+                        margin: 0 250px;
+                }
 
-		>span {
-			$b-width: 100px;
+                >span {
+                        $b-width: 100px;
 
-			width: $b-width;
-			@include inline-block;
-			@include one-line($page-index-padding * 2 + 1);
-			color:#333;
-			background:#F4F5F9;
-			font-size:12px;
-			text-align:center;
-			position: absolute;
-			top: 0px;
-			left: ($page-width - $b-width) / 2;
-		}
+                        width: $b-width;
+                        @include inline-block;
+                        @include one-line($page-index-padding * 2 + 1);
+                        color:#333;
+                        background:#F4F5F9;
+                        font-size:12px;
+                        text-align:center;
+                        position: absolute;
+                        top: 0px;
+                        left: ($page-width - $b-width) / 2;
+                }
 
-		cursor: default;
-		&:hover{
-			// cursor: 
-			// cursor:image-url('editors/page-pointer-acitve.cur'), pointer;
-		}
-		&.last:hover {
-			cursor: default;
-		}
-	}
+                cursor: default;
+                &:hover{
+                        // cursor: 
+                        // cursor:image-url('editors/page-pointer-acitve.cur'), pointer;
+                }
+                &.last:hover {
+                        cursor: default;
+                }
+        }
 
-	.drop-question {
-		height: 1px;
-		background: $yellow;
+        .drop-question {
+                height: 1px;
+                background: $yellow;
     margin: 8px 0;
-	}
-	.adding-question {
-		padding: 2em;
-		text-align: center;
-	}
+        }
+        .adding-question {
+                padding: 2em;
+                text-align: center;
+        }
 }
 
 /* left and right sidebar */
 .left-sidebar{
-	float: left;
-	width: 110px;
+        float: left;
+        width: 110px;
   border:1px $borderColor solid;
   @include border-radius(3px);
   padding: 2px 0;
@@ -285,9 +285,9 @@
   }
 }
 .right-sidebar{
-	float: right;
-	width:785px;
-	margin-top:12px;
+        float: right;
+        width:785px;
+        margin-top:12px;
 }
 
 /*浮动层*/ 

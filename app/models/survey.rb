@@ -19,6 +19,12 @@ class Survey
   PUBLISHED = 2
   DELETED = 4
 
+  #password type
+  NO_PASSWORD = -1 #没有密码控制
+  SINGLE_PASSWORD = 0 #单个密码
+  PASSWORD_LIST =  1 #密码列表
+  USER_PASSWORD = 2 #用户名，密码列表
+
   field :title, :type => String, default: "调查问卷主标题"
   field :subtitle, :type => String, default: ""
   field :welcome, :type => String, default: ""
@@ -954,5 +960,20 @@ class Survey
     return self.criteria if is_star.blank?
     self.where(:is_star => is_star.to_s == "true")
   end
+
+
+  # add for express start-----
+  # 获取某个survey的访问密码
+  def access_password
+    self.access_control_setting['password_control']['single_password']
+  end
+
+  def update_access_password(single_password)
+    self.access_control_setting['password_control']['password_type']   = SINGLE_PASSWORD
+    self.access_control_setting['password_control']['single_password'] = single_password
+    self.save
+  end
+
+  # add for express end-------
   
 end

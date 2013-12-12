@@ -20,7 +20,7 @@ $url-od-edit-question: image-url("editors/editors-question-bg.png");
 
 $editor-width: 785px;
 $editor-width-left: 635px;
-$editor-top-bottom-height: 6px;
+$editor-top-bottom-height: 5px;
 $editor-main-height-min: 365px;
 $editor-paragraph-top-bottom-height: 14px;
 
@@ -271,13 +271,16 @@ $editor-paragraph-top-bottom-height: 14px;
 
 // confirm and cancel box
 .btn-confirm-box {
-	@include size(150px, 40px);
+	@include size(133px, 40px);
+	background: $url-widgets-bg no-repeat -134px -151px;
+	padding: 15px 0 0 15px;
 	position: absolute;
-	bottom: 3px;
+	bottom: 2px;
 	right: 3px;
 	button{
 		@include size(75px, 40px);
 		border: none;
+		background: none;
 		cursor: pointer;
 		font-size: 14px;
 		background: #FFC800;

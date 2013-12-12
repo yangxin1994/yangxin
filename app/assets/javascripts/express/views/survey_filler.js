@@ -109,8 +109,10 @@ $(function(){
 			if(value.answer_status == 1) {
 				// answer_status: 1（正在回答）
 				// setup questions
+				console.log(value);
 				var questions = value.questions, answers = value.answers, total_count = value.question_number, 
-					index = value.answer_index, time = value.estimate_answer_time, redo_count = value.repeat_time;
+					index = value.answer_index, time = value.estimate_answer_time, redo_count = value.repeat_time,
+					answer_index_all = value.answer_index_all;
 
 				// setup question or submit page
 				if(questions.length == 0) {
@@ -232,7 +234,8 @@ $(function(){
 						prev_btn.text('正在加载上一页问题...');
 						this.load_questions((questions.length > 0) ? questions[0]['_id'] : -1, false);
 					}, this));
-					if(index == 0) prev_btn.hide();
+					console.log(answer_index_all);
+					if(answer_index_all == 0) prev_btn.hide();
 				}
 			} else if(value.answer_status == 4 || value.answer_status == 8 || value.answer_status == 32) {
 				// answer_status: 4（待审核），8（等待代理审核），32（完成）

@@ -75,6 +75,7 @@ $blue-light: #f1f3f6;
 		padding-top: 5px;
 		input[type='text'], textarea {
 			line-height: 24px;
+			@include border-radius(4px);
 			font-size: 14px;
 			padding-left: 5px;
 			padding-right: 5px;
@@ -238,9 +239,10 @@ label.cust-option:not(#foo) {
 			border-collapse: collapse;
 			width: 100%;
 
-			tr.alter {background: #F1F3F6; }
+			tr.alter {background: #eee; }
 
 			th, td {
+				border: 1px solid #ddd;
 				text-align: center;
 			}
 			td { vertical-align: middle; padding: 0; }
@@ -263,10 +265,12 @@ label.matrix-option {
 	padding: 0;
 	color: #333;
 	text-align: center;
-	border-left:1px #FFF solid;
 }
 label.matrix-option:not(#foo) {
 	position: relative;
+
+	&:hover { background: $blue-light; }
+
 	> input { 
 		cursor: pointer;
 		position: absolute; 
@@ -380,7 +384,7 @@ label.matrix-option:not(#foo) {
 			border-collapse: collapse;
 			width: 100%;
 
-			tr.alter {background: #F1F3F6; }
+			tr.alter {background: #eee; }
 
 			th, td {
 				border: 1px solid #ddd;
@@ -427,7 +431,53 @@ label.matrix-option:not(#foo) {
 	}
 }
 
+/* sort question */
+// .q-sort {
+// 	.q-content {
+// 		ul { @include no-extra; }
+// 		li { 
+// 			@include clearfix;
+// 			@include no-extra;
+// 			@include border-radius(5px);
+// 			padding:5px;
+// 			list-style: none;
+// 			clear: both;
+// 			cursor: move;
+// 			vertical-align: middle;
+// 			line-height: 24px;
 
+// 			> em, > .sort-index, > .sort-item {
+// 				float: left;
+// 			}
+// 			> em, > .sort-index {
+// 				text-align: center;
+// 				@include size(16px, 16px);
+// 				margin-right: 1em;
+// 			}
+// 			> em {
+// 				@include cpnt-sprite(drag); 
+// 				margin-top: 5px;
+// 			}
+// 			> .sort-index {
+// 				font-size: 14px;
+// 				font-weight: bold;
+
+// 				&.max {
+// 					color: #ccc;
+// 				}
+// 			}
+// 			> .sort-item { }
+
+// 			&:hover {
+// 				background: $blue-light;
+// 				>em {
+// 					@include cpnt-sprite(drag_hover);
+// 				}
+// 			}
+// 		}
+// 	}
+// }
+/* sort question new version*/
 .q-sort {
 	.q-content {
 		$total-width: 775px;
