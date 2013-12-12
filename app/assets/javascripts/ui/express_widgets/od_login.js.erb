@@ -1,0 +1,193 @@
+//=require ./_base
+//=require ./_templates/od_login
+//=require ../plugins/od_enter
+
+/* ================================
+ * The widget calls od_login.js 
+ * ================================ */
+
+(function($){
+	var client_ids = {
+		sina: '<%=Rails.application.config.authkeys[:sina]  %>',
+		tencent: '<%=Rails.application.config.authkeys[:qq]  %>',
+		qq: '<%=Rails.application.config.authkeys[:qq]  %>',
+		renren: '<%=Rails.application.config.authkeys[:renren]  %>',
+		kaixin001: '<%=Rails.application.config.authkeys[:kaixin001]  %>'
+	};
+	var links = {
+		sina: "https://api.weibo.com/oauth2/authorize?client_id={CLIENT_ID}&response_type=code&redirect_uri={URL}/connects/sina",
+		tencent: "https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={URL}/connects/qq",
+		qq: "https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={URL}/connects/qq",
+		renren: "https://graph.renren.com/oauth/authorize?client_id={CLIENT_ID}&response_type=code&redirect_uri={URL}/connects/renren&response_type=code",
+		kaixin001: "http://api.kaixin001.com/oauth2/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={URL}/connects/kaixin001"
+	};
+	function getLink(website) {
+		return links[website].replace('{CLIENT_ID}', client_ids[website])
+			.replace('{URL}', location.protocol + '//' + location.host);
+	};
+	
+	$.odWidget('odLogin',{
+		options:{
+			email:"",
+			message:"",
+			verticalOffset:0,//弹出框偏移程度
+			horizontalOffset:0,
+			overlayBackground:'#cdcdcd',//背景颜色
+			overpayOpacity:0.3,//背景透明度
+			zIndex:9999,
+			remeberPw:false,
+			callback:function(){}
+		},
+		_createEl:function(){
+			this.element = this.hbs(this.options);
+			this._show();
+
+			//点击登录按钮
+			this._find("#password").odEnter({enter:$.proxy(function(e){
+					this._find(".login").trigger("click");
+				},this)
+			});
+			
+			this._find(".login").click($.proxy(function(e){
+				var btn=$(e.target);
+				$.util.disable(btn);
+				btn.html("登录中");
+				this._find('.od_login_top .warning').html('');
+				$.post('/signin.json',{
+						email: $("#userName").val(),
+						password: $("#password").val(),
+						permanent_signed_in: this.options.remeberPw
+					}, $.proxy(function(retval) {
+						$.util.enable(btn);
+						btn.html("登 陆");
+						console.log(retval);
+						if(retval.success) {
+							this._hide();
+							if(this.options.callback)
+								this.options.callback(true);							
+						} else {
+							this._find('.od_login_top .warning').css("visibility","visible");
+							this._find('.od_login_top .warning').addClass("error");
+							this._find('.od_login_top .warning').html(this.errorMessage(retval.value.error_code));
+						}
+					}, this)
+				);
+			},this));
+
+			//点击“记住密码”
+			this._find("#remember-pw").click($.proxy(function(e){
+				if(this.target.attr("checked"))
+					this.options.remeberPw=true;
+				else
+					this.options.remeberPw=false;
+			},this));
+			//右键点击关闭无效
+			var _close=this._find('.btn_close3');
+			_close.on("contextmenu",function(){return false;}); 
+
+			// other login
+			_.each(['sina', 'tencent', 'qq', 'renren', 'kaixin001'], $.proxy(function(v, i) {
+				this._find('.icon-' + v).attr('href', getLink(v));
+			}, this));
+
+			_close.click($.proxy(function(e){
+				e.stopPropagation();
+				this._hide();
+			},this));
+		},
+		_hide: function() {
+			this.destroy();
+			this._overlay('hide');
+		},
+		_show: function() {            
+			this._overlay('show');           
+			$("BODY").append(this.element);
+
+			// IE6 Fix
+			var pos = ($.browser.msie && parseInt($.browser.version) <= 6 ) ? 'absolute' : 'fixed'; 
+			
+			this.element.css({
+				position: pos,
+				zIndex: this.options.zIndex,
+				padding: 0,
+				margin: 0
+			});                            
+			this._reposition();
+		
+			if(this.options.email!=""){
+				this._find("#userName").val(this.options.email);
+			}  
+			
+			this._find('input[placeholder]').placeholder();
+			this._find("#userName").focus(function(e){
+				$(this).prev().addClass("icon-mail2")
+			});
+			this._find("#password").focus(function(e){
+				$(this).prev().addClass("icon-i2")
+			})
+			this._find("#userName").blur(function(e){
+				$(this).prev().removeClass("icon-mail2")
+			});
+			this._find("#password").blur(function(e){
+				$(this).prev().removeClass("icon-i2")
+			})
+
+			this._find('#remember-pw').attr("checked",true);
+
+			//设置焦点
+			if(this.options.btnObject){
+				this.options.btnObject.focus();
+			}
+		},
+		_reposition: function() {
+			var top = (($(window).height() / 2) - (this.element.height() / 2)) + this.options.verticalOffset;
+			var left = (($(window).width() / 2) - (this.element.width() / 2)) + this.options.horizontalOffset;
+			if( top < 0 ) top = 0;
+			if( left < 0 ) left = 0;
+			
+			// IE6 fix
+			if( $.browser.msie && parseInt($.browser.version) <= 6 ) top = top + $(window).scrollTop();
+			
+			this.element.css({
+				top: top + 'px',
+				left: left + 'px'
+			});
+			$("#popup_overlay").height($(document).height());
+		},
+		_overlay: function(status) {
+			switch( status ) {
+				case 'show':
+					this._overlay('hide');
+					var div=$('<div />').addClass("popup_overlay").appendTo($("BODY"));
+					div.addClass("od_login");
+					div.css({
+						position: 'absolute',
+						zIndex: this.options.zIndex-1,
+						top: '0px',
+						left: '0px',
+						width: '100%',
+						height: $(document).height(),
+						background:this.options.overlayBackground,
+						opacity: this.options.overpayOpacity
+					});
+				break;
+				case 'hide':
+					$(".popup_overlay.od_login").remove();
+				break;
+			}
+		},
+		errorMessage:function(code){
+			var msg ;
+			var email=$("#userName").val();
+			switch(code){
+				case 'error_11': msg = '密码错误，请重新输入密码。' ; break;
+				case 'error_3': msg = '您的账户尚未激活，请先 <a href="/activate/new?e=' + email + '" style="color:#ffc000">激活账户</a> 。' ; break;
+				case 'error_4':
+				case 'error_24': msg = '此邮箱尚未注册，请先 <a href="/account/sign_up?e=' + email + '" style="color:#ffc000">注册</a> 。' ; break;
+				case 'error_10': msg = '登录失败，请重试' ; break;
+				default: msg='登录失败，请重试' ; break;
+			}
+			return msg;
+		}
+	});
+ })(jQuery)

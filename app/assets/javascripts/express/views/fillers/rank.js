@@ -1,5 +1,5 @@
 //=require ../../templates/fillers/rank_option
-//=require ui/widgets/od_checkbox
+//=require ui/express_widgets/od_checkbox
 
 /* ================================
  * View: Rank question render

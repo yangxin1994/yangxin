@@ -1,5 +1,5 @@
-//=require ui/widgets/od_item
-//=require ui/widgets/od_left_icon_button
+//=require ui/express_widgets/od_item
+//=require ui/express_widgets/od_left_icon_button
 
 /* ================================
  * View: Base class for editor with items
@@ -51,8 +51,7 @@ $(function(){
 			
 			// add new item
 			$.od.odLeftIconButton({
-				text: '添加新选项',
-				width: 90
+				text: '添加新选项'
 			}).appendTo($('<div class="q-new-opt" />').appendTo(this.$('.q-body'))).click($.proxy(function() {
 				this.model.addItem();
 			}, this));

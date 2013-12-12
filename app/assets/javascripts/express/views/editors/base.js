@@ -1,10 +1,10 @@
 //=require ../base
 //=require ../../models/questions
 //=require ../../templates/editors/base
-//=require ui/widgets/od_icon_buttons
-//=require ui/widgets/od_checkbox
-//=require ui/widgets/od_rich_input
+//=require ui/express_widgets/od_checkbox
+//=require ui/express_widgets/od_rich_input
 //=require ui/plugins/od_button_text
+//=require twitter/bootstrap/tooltip
 //=require jquery.hotkeys
 
 /* ================================
@@ -55,28 +55,20 @@ $(function(){
 				this.model.deserialize($code.val().split(/\r?\n/));
 			}, this);
 			$code.blur(from_code);
-			var $toggle_buttons = $.od.odIconButtons({
-				buttons: [{
-					name: 'eye',
-					info: '可视化编辑模式',
-					click: $.proxy(function() {
-						from_code();
-						this.$('.editor-left-body-visual').show();
-						this.$('.editor-left-body-code').hide();
-					}, this)
-				}, {
-					name: 'pc',
-					info: '输入代码编辑模式',
-					click: $.proxy(function() {
-						to_code();
-						this.$('.editor-left-body-visual').hide();
-						this.$('.editor-left-body-code').show();
-						$code.focus().trigger('select');
-					}, this)
-				}],
-				toggle: true
-			}).appendTo(this.$('.editor-method'));
-			$toggle_buttons.odIconButtons('trigger', 0);
+			this.$('.editor-method >a').tooltip({placement: 'bottom'});
+			this.$('.editor-method .eye').click($.proxy(function() {
+					from_code();
+					this.$('.editor-left-body-visual').show();
+					this.$('.editor-left-body-code').hide();
+					this.$('.editor-method >a').toggleClass('active');
+			}, this)).click();
+			this.$('.editor-method .pc').click($.proxy(function() {
+					to_code();
+					this.$('.editor-left-body-visual').hide();
+					this.$('.editor-left-body-code').show();
+					this.$('.editor-method >a').toggleClass('active');
+					$code.focus().trigger('select');
+			}, this));
 
 			/* Cancel and confirm buttons
 			 * ========================== */

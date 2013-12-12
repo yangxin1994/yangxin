@@ -1,6 +1,6 @@
 //=require ../../templates/editors/time_blank_body
 //=require ../../templates/editors/time_blank_body_min_max
-//=require ui/widgets/od_time_selector
+//=require ui/express_widgets/od_time_selector
 
 /* ================================
  * View: Time blank question editor
