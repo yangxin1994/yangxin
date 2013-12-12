@@ -69,28 +69,6 @@ $(function(){
 					this.$('.editor-method >a').toggleClass('active');
 					$code.focus().trigger('select');
 			}, this));
-			// var $toggle_buttons = $.od.odIconButtons({
-			// 	buttons: [{
-			// 		name: 'eye',
-			// 		info: '可视化编辑模式',
-			// 		click: $.proxy(function() {
-			// 			from_code();
-			// 			this.$('.editor-left-body-visual').show();
-			// 			this.$('.editor-left-body-code').hide();
-			// 		}, this)
-			// 	}, {
-			// 		name: 'pc',
-			// 		info: '输入代码编辑模式',
-			// 		click: $.proxy(function() {
-			// 			to_code();
-			// 			this.$('.editor-left-body-visual').hide();
-			// 			this.$('.editor-left-body-code').show();
-			// 			$code.focus().trigger('select');
-			// 		}, this)
-			// 	}],
-			// 	toggle: true
-			// }).appendTo(this.$('.editor-method'));
-			// $toggle_buttons.odIconButtons('trigger', 0);
 
 			/* Cancel and confirm buttons
 			 * ========================== */

@@ -57,37 +57,46 @@ $editor-paragraph-top-bottom-height: 14px;
   width:$editor-width;
   background: image-url('editors/tint-gray-mid.png') repeat-y;
 
-
-  .paragraph-content {
-    padding: 20px 50px 40px 50px;
-    
-    h1{
-      font-size: 15px;
-      line-height: 2em;
-    }
-
-    .p-content, .p-btn {
-      @include inline-block;
-      vertical-align: top;
-    }
-
-    .p-btn {
-      margin-left: 10px;
-
-      .cancel-btn {
-        border: none;
-        background: none;
-        @include size(53px, 26px);
-        text-align: center;
-        cursor: pointer;
-        margin-top: 10px;
-
-        &:hover {
-          color: $blue;
-        }
-      }
-    }
-  }
+	.paragraph-content {
+		padding: 20px 50px 25px 50px;
+		
+		h1{
+			font-size: 15px;
+			line-height: 2em;
+		}
+		.p-btn {
+			@include clearfix;
+			button{
+				@include size(80px, 34px);
+				float: right;
+				border: none;
+				background: none;
+				margin-top: 25px;
+				margin-left: 10px;
+				font-size: 14px;
+				@include border-radius(4px);
+				&.ok-btn{
+					color:#333;
+					background: #ffc800;
+					&:hover{
+						background: #FFD337;
+						cursor: pointer;
+					}
+					&.disable{
+						background: #CCC;
+						cursor: default;
+					}
+				}
+				&.cancel-btn{
+					color:#666;
+					&:hover{
+						color:#333;
+						cursor: pointer;
+					}
+				}
+			}
+		}
+	}
 }
 
 // editor left
@@ -262,29 +271,32 @@ $editor-paragraph-top-bottom-height: 14px;
 
 // confirm and cancel box
 .btn-confirm-box {
-  @include size(150px, 40px);
-  position: absolute;
-  bottom: 3px;
-  right: 3px;
-  button{
-    @include size(75px, 40px);
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    background: #FFC800;
-    color: #FFF;
-    float: left;
-    &:hover{
-      background: #FFD337
+	@include size(150px, 40px);
+	position: absolute;
+	bottom: 3px;
+	right: 3px;
+	button{
+		@include size(75px, 40px);
+		border: none;
+		cursor: pointer;
+		font-size: 14px;
+		background: #FFC800;
+		color: #FFF;
+		float: left;
+		&:hover{
+			background: #FFD337;
+		}
+	}
+	.btn-confirm{
+		@include border-bottom-right-radius(4px);
+		border-left:1px #FFA800 solid;
+		color:#333;
+		font-weight: bold;
+    &:disabled{
+      color: #999;
+      cursor: default;
     }
-  }
-  .btn-confirm{
-    @include border-bottom-right-radius(4px);
-    border-left:1px #FFA800 solid;
-    color:#333;
-    font-weight: bold;
-  }
-
+	}
 }
 
 /* input preview */
