@@ -56,9 +56,11 @@ class Filler::FillerController < ApplicationController
   end
 
   def ensure_spread(survey, reward_scheme_id)   
-    @spread_url = "#{Rails.application.config.quillme_host}#{show_s_path(reward_scheme_id)}" unless user_signed_in
-    @spread_url = "#{Rails.application.config.quillme_host}#{show_s_path(reward_scheme_id)}?i=#{current_user._id}" if user_signed_in 
-    @spread_url = "#{Rails.application.config.quillme_host}/#{MongoidShortener.generate(@spread_url)}"
+    if reward_scheme_id.present?
+      @spread_url = "#{Rails.application.config.quillme_host}#{show_s_path(reward_scheme_id)}" unless user_signed_in
+      @spread_url = "#{Rails.application.config.quillme_host}#{show_s_path(reward_scheme_id)}?i=#{current_user._id}" if user_signed_in 
+      @spread_url = "#{Rails.application.config.quillme_host}/#{MongoidShortener.generate(@spread_url)}"
+    end
   end  
 
   def cookie_key(survey_id, is_preview)

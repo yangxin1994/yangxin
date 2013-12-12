@@ -108,6 +108,7 @@ class Filler::AnswersController < Filler::FillerController
     @answer = Answer.find(params[:id])
     cookies.delete(cookie_key(@answer.survey_id.to_s, @answer.is_preview), :domain => :all)
     survey = @answer.survey
+    survey.recover_password(@answer)
     survey.answers.delete(@answer)
     survey.decrease_quota(@answer)
     render_json_auto @answer.destroy and return 
