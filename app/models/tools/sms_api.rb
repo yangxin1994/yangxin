@@ -20,9 +20,28 @@ class SmsApi # 短信接口
   CGID = 52
 
 
-  def self.send_sms(phone, message)
-    query_p = {action: "sendOnce", ac: AC, authkey: AUTHKEY, cgid: CGID, c: message, m: phone}
+  def self.send_sms(mobile, message)
+    query_p = {action: "sendOnce", ac: AC, authkey: AUTHKEY, cgid: CGID, c: message, m: mobile}
     result = get('/OpenPlatform/OpenApi',
+        :query => query_p)
+    binding.pry
+    puts result.inspect
+  end
+
+  def self.send_param_sms(mobiles, message, params)
+    query_p = {action: "sendParam", ac: AC, authkey: AUTHKEY, cgid: CGID, c: message, m: mobiles.join(',')}
+    params.each_with_index do |param, index|
+      query_p["p#{index+1}".to_sym] = param.join("{|}")
+    end
+    result = get('/OpenPlatform/OpenApi',
+        :query => query_p)
+    binding.pry
+    puts result.inspect
+  end
+
+  def self.get_status
+    query_p = {action: "getSendState", ac: AC, authkey: AUTHKEY}
+    result = get('/OpenPlatform/DataApi',
         :query => query_p)
     binding.pry
     puts result.inspect
