@@ -746,7 +746,7 @@ class ReportResult < Result
         text += "有#{r}人选择了不清楚，" if index == 0 
         text += "有#{r}人选择了#{issue["labels"][index-1]}，" if index > 0 
       end
-      text += "参与者对#{item_text}的平均打分为#{result['mean']}；" if result["histogram"][1..-1].sum > 0
+      text += "参与者对#{item_text}的平均打分为#{result['mean'].round(2)}；" if result["histogram"][1..-1].sum > 0
     end
     return text
   end
