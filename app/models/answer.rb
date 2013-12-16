@@ -112,6 +112,7 @@ class Answer
 
   after_create do |doc|
     doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.ip_address) 
+    doc.save
   end
 
 
