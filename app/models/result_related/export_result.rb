@@ -58,7 +58,6 @@ class ExportResult < Result
       {'spss_data' => spss_data_json, 'job_id' => task_id.to_s}
     end
     # File.open("tmp/a.txt", "wb") { |file| file.puts(spss_header)}
-    File.open("public/dotnet.err", "wb") { |file| file.puts("出错")}
     if retval.to_s.start_with?('error')
       self.status = -1
       self.error_code = retval

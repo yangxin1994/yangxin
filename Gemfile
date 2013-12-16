@@ -1,6 +1,8 @@
 #source 'http://rubygems.org'
 source 'http://ruby.taobao.org'
 
+ruby "1.9.3"
+
 gem 'rails', '~> 3.2.6'
 
 gem "binding_of_caller", "~> 0.7.2", :group => :development
