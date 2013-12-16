@@ -589,13 +589,13 @@ class DataAdapter
         if [ChartStyleEnum::BAR, ChartStyleEnum::LINE, ChartStyleEnum::TABLE].include?(chart_style)
           # multipe categories, one series
           data << ["Categories"] + items_text
-          score = items_id.map { |id| analysis_result[id][1] }
+          score = items_id.map { |id| analysis_result[id]["mean"].round(2) }
           data << ["分数"] + score
         elsif chart_style == ChartStyleEnum::STACK
           # one category, multiple series
           data << ["Categories", "分数"]
           items_id.each_with_index do |id, index|
-            data << [items_text[index], analysis_result[id][1]]
+            data << [items_text[index], analysis_result[id]["mean"].round(2)]
           end
         end
         chart_data << [chart_style, data] if !data.blank?
