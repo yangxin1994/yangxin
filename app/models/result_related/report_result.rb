@@ -200,7 +200,8 @@ class ReportResult < Result
             chart_components = DataAdapter.convert_single_data(question.question_type,
                                       analysis_result,
                                       question.issue,
-                                      component["chart_style"])
+                                      component["chart_style"],
+                                      answer_number: cur_question_answer.length)
             report_data.push_chart_components(chart_components)
           else
             pie_text = multiple_choice_description(analysis_result,
@@ -216,7 +217,8 @@ class ReportResult < Result
             chart_components = DataAdapter.convert_single_data(question.question_type,
                                       analysis_result,
                                       question.issue,
-                                      component["chart_style"])
+                                      component["chart_style"],
+                                      answer_number: cur_question_answer.length)
             if [ChartStyleEnum::ALL, ChartStyleEnum::PIE, ChartStyleEnum::DOUGHNUT, ChartStyleEnum::STACK].include?(component["chart_style"])
               report_data.push_component(ReportData::DESCRIPTION, "text" => pie_text)
             end

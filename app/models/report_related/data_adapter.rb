@@ -8,7 +8,8 @@ class DataAdapter
         ChartStyleEnum::DOUGHNUT,
         ChartStyleEnum::LINE,
         ChartStyleEnum::BAR,
-        ChartStyleEnum::STACK
+        ChartStyleEnum::STACK,
+        ChartStyleEnum::MULTI_STACK
       ],
       QuestionTypeEnum::MATRIX_CHOICE_QUESTION => [
         ChartStyleEnum::PIE,
@@ -78,7 +79,7 @@ class DataAdapter
 
       case question_type
       when QuestionTypeEnum::CHOICE_QUESTION
-          return self.convert_single_choice_data(analysis_result, issue, chart_styles)
+          return self.convert_single_choice_data(analysis_result, issue, chart_styles, opt[:answer_number])
       when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
           return self.convert_single_matrix_choice_data(analysis_result, issue, chart_styles)
       when QuestionTypeEnum::NUMBER_BLANK_QUESTION
@@ -149,7 +150,7 @@ class DataAdapter
       return item_text.remove_style
     end
 
-    def self.convert_single_choice_data(analysis_result, issue, chart_styles)
+    def self.convert_single_choice_data(analysis_result, issue, chart_styles, answer_number)
       chart_data = []
       items_id, items_text = *self.get_item_id_and_text_array(issue, analysis_result.keys)
       chart_styles.each do |chart_style|
@@ -158,6 +159,12 @@ class DataAdapter
           # multipe categories, one series
           data << ["Categories"] + items_text
           number = items_id.map { |id| analysis_result[id] || 0 }
+          data << ["选择人数"] + number
+        elsif chart_style == ChartStyleEnum::MULTI_STACK
+          # multipe categories, one series
+          data << ["Categories"] + items_text
+          number = items_id.map { |id| analysis_result[id] || 0 }
+          number.map! { |e| e * 1.0 / answer_number } if answer_number.present?
           data << ["选择人数"] + number
         elsif chart_style == ChartStyleEnum::STACK
           # one category, multiple series
