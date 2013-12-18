@@ -150,7 +150,7 @@ class DataAdapter
       return item_text.remove_style
     end
 
-    def self.convert_single_choice_data(analysis_result, issue, chart_styles, answer_number)
+    def self.convert_single_choice_data(analysis_result, issue, chart_styles, answer_number = nil)
       chart_data = []
       items_id, items_text = *self.get_item_id_and_text_array(issue, analysis_result.keys)
       chart_styles.each do |chart_style|
