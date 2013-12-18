@@ -64,6 +64,7 @@ class SmsApi # 短信接口
 
   #同步发送即时短信
   def self.send_sms(type,phone, message)
+    message.gsub!("\n", "")
     Rails.logger.info "AAAAAAAAAAAAAA"
     Rails.logger.info phone
     Rails.logger.info message
