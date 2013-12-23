@@ -321,7 +321,7 @@ class MatrixChoiceQuestionIo < QuestionIo
       end
     else
       issue["rows"].each do |item|
-        @retval << (v[item["id"].to_s] && v[item["id"].to_s].blank? ? nil : get_item_index(v[item["id"].to_s][0]))
+        @retval << (v[item["id"].to_s].blank? ? nil : get_item_index(v[item["id"].to_s][0]))
       end
     end
     return @retval
