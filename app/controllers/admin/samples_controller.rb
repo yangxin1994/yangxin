@@ -287,4 +287,8 @@ class Admin::SamplesController < Admin::AdminController
     render_json current_user.create_message(params[:title], params[:content], params[:sample_ids])
   end
 
+  def total_point
+    @total_point = User.all.map { |e| e.point } .sum
+  end
+
 end
