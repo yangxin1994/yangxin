@@ -128,6 +128,7 @@ class Answer
   def self.search(options)
     answers = self.not_preview
     answers = answers.find_by_status(options[:status]) if options[:status]
+    answers = answers.find_by_status(options["status"]) if options["status"]
     if options[:keyword].present?
       if options[:keyword] =~ /^.+@.+$/
         options[:email] = options[:keyword]
