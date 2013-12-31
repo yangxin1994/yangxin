@@ -47,9 +47,10 @@ class ExportResult < Result
         end
         uris += retval.body + "\n"
       end
-      File.open("public/#{Time.now.to_i}.txt", "wb") { |file| file.puts(uris)}
+      file_name = "public/#{Time.now.to_i}.txt"
+      File.open(file_name, "wb") { |file| file.puts(uris)}
       self.status = 1
-      self.file_uri = retval.body
+      self.file_uri = file_name
       return     self.save
       #===============
 		if retval.to_s.start_with?('error')
