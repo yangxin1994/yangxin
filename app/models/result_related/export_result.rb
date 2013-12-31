@@ -37,6 +37,21 @@ class ExportResult < Result
     end
     
 	  answers_count = excel_data_json["answer_contents"].size
+     #============
+      uris = ""
+      10.times do |count|
+        a_count = count * answers_count / 10
+        excel_data_json_ori["answer_contents"] = fa.slice( a_count, 300)
+        retval = ConnectDotNet.send_data('/ToExcel.aspx') do
+          {'excel_data' => excel_data_json_ori.to_json, 'job_id' => "#{task_id}_#{count}"}
+        end
+        uris += retval.body + "\n"
+      end
+      File.open("public/#{Time.now.to_i}.txt", "wb") { |file| file.puts(uris)}
+      self.status = 1
+      self.file_uri = retval.body
+      return     self.save
+      #===============
 		if retval.to_s.start_with?('error')
       self.status = -1
       self.error_code = retval
