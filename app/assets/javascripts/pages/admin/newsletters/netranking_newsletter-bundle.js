@@ -4,7 +4,7 @@ jQuery(function($) {
   var content_editor;
   KindEditor.ready(function(K) {
     content_editor = K.create('#p-content', {items: ['fontname', 'fontsize', 'forecolor', 'hilitecolor', 'bold',
-          'italic', 'underline', 'link', 'unlink', 'strikethrough', 'removeformat'], themeType: 'simple', resizeType: 1});
+          'italic', 'underline', 'link', 'unlink', 'strikethrough', 'removeformat', 'image'], themeType: 'simple', resizeType: 1});
     $('.ke-container').css("width", "576px");
   });
 
