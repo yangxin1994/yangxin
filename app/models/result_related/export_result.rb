@@ -41,7 +41,7 @@ class ExportResult < Result
       uris = ""
       10.times do |count|
         a_count = count * answers_count / 10
-        excel_data_json_ori["answer_contents"] = fa.slice( a_count, 300)
+        excel_data_json_ori["answer_contents"] = fa.slice( a_count, 100)
         retval = ConnectDotNet.send_data('/ToExcel.aspx') do
           {'excel_data' => excel_data_json_ori.to_json, 'job_id' => "#{task_id}_#{count}"}
         end
