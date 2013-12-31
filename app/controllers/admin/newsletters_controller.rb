@@ -1,3 +1,4 @@
+#encoding: utf-8
 # already tidied up
 class Admin::NewslettersController < ApplicationController
 
@@ -99,7 +100,15 @@ class Admin::NewslettersController < ApplicationController
     else
       emails = NetrankingUser.all.map { |e| e.email }
     end
-    send_from = params[:send_from].blank? ? "postmaster@#{params[:domain]}" : params[:send_from]
+    if params[:send_from].blank?
+      if params[:domain] == "wenjuanba.net"
+        send_from = "\"问卷吧\" <postmaster@wenjuanba.net>"
+      elsif params[:domain] == "netranking.cn"
+        send_from = "\"清研咨询\" <postmaster@netranking.cn>"
+      end
+    else
+      send_from = params[:send_from]
+    end
     MailgunApi.send_emagzine(params[:subject], send_from, params[:domain], params[:content], params[:file_path], emails)
     render_json_auto and return
   end
