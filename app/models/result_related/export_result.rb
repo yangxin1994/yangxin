@@ -44,9 +44,9 @@ class ExportResult < Result
         "answer_contents" => survey.formated_answers(_a, result_key, task_id.to_s),
         "header_name" => survey.csv_header,
         "result_key" => result_key
-        }      
+        }
         retval = ConnectDotNet.send_data('/ToExcel.aspx') do
-          {'excel_data' => excel_data_json.to_json, 'job_id' => "#{task_id}_#{0}"}
+          {'excel_data' => excel_data_json.to_json, 'job_id' => "#{task_id}_#{1}"}
         end
         uris << retval.body        
       # end
