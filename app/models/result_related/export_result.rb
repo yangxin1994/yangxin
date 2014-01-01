@@ -22,54 +22,54 @@ class ExportResult < Result
   end
 
   def generate_excel(survey, answers, result_key)
-    fa = survey.formated_answers(answers, result_key, task_id.to_s)
-	  excel_data_json_ori = {
+    if answers.count > 1500
+      uris = []
+      10.times do |_count|
+        a_count = _count * (answers.count / 10)
+        _a = answers.slice(a_count, answers.count / 10)
+        excel_data_json = {
+        "excel_header" => survey.excel_header,
+        "answer_contents" => survey.formated_answers(_a, result_key, task_id.to_s),
+        "header_name" => survey.csv_header,
+        "result_key" => result_key
+        }      
+        retval = ConnectDotNet.send_data('/ToExcel.aspx') do
+          {'excel_data' => excel_data_json.to_json, 'job_id' => "#{task_id}_#{_count}"}
+        end
+        uris << retval.body
+      end
+      retval = ConnectDotNet.send_data('/ToExcel.aspx') do
+        {"excel_data" => {
+           "excel_header" => survey.excel_header,
+           "answer_contents" => uris,
+           "header_name" => survey.csv_header,
+           "result_key" => result_key
+          }.to_json, 'job_id' => "#{task_id}_#{_count}"}
+      end
+      file_name = "public/import/#{task_id}.txt"
+      File.open(file_name, "wb") { |file| file.puts(uris.join("\n"))}
+      self.status = 1
+      self.file_uri = file_name
+      return save
+    else
+      excel_data_json = {
       "excel_header" => survey.excel_header,
-      "answer_contents" => fa,
+      "answer_contents" => survey.formated_answers(answers, result_key, task_id.to_s),
       "header_name" => survey.csv_header,
       "result_key" => result_key
-      }
-
-    excel_data_json = excel_data_json_ori.to_json
-    File.open(file_name, "wb") { |file| file.puts(excel_data_json_ori)}
+      }.to_json
+    end      
     
     retval = ConnectDotNet.send_data('/ToExcel.aspx') do
       {'excel_data' => excel_data_json, 'job_id' => task_id.to_s}
     end
-    
-	  answers_count = excel_data_json["answer_contents"].size
-     #============
-      uris = ""
-      33.times do |count|
-        a_count = count * answers_count / 33
-        excel_data_json_ori["answer_contents"] = fa.slice( a_count, 100)
-        retval = ConnectDotNet.send_data('/ToExcel.aspx') do
-          {'excel_data' => excel_data_json_ori.to_json, 'job_id' => "#{task_id}_#{count}"}
-        end
-        uris += retval.body + "\n"
-      end
-      file_name = "public/#{Time.now.to_i}.txt"
-      File.open(file_name, "wb") { |file| file.puts(uris)}
-      self.status = 1
-      self.file_uri = file_name
-      return     self.save
-      #===============
+
 		if retval.to_s.start_with?('error')
       self.status = -1
       self.error_code = retval
     elsif retval.code != "200"
-			uris = ""
-      10.times do |count|
-				a_count = count * answers_count / 10
-        excel_data_json_ori["answer_contents"] = fa.slice( a_count, 300)
-			  retval = ConnectDotNet.send_data('/ToExcel.aspx') do
-			    {'excel_data' => excel_data_json_ori.to_json, 'job_id' => "#{task_id}_#{count}"}
-	      end
-				uris += retval.body + "\n"
-			end
-			File.open("public/#{Time.now.to_i}.txt", "wb") { |file| file.puts(uris)}
-      self.status = 1
-			self.file_uri = retval.body
+      self.status = -1
+      self.error_code = ErrorEnum::DOTNET_INTERNAL_ERROR
     elsif retval.body.start_with?('error:')
       return ErrorEnum::DOTNET_INTERNAL_ERROR
       self.status = -1
