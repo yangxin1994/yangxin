@@ -24,10 +24,10 @@ class ExportResult < Result
   def generate_excel(survey, answers, result_key)
     if answers.count > 1500
       uris = []
-      1.times do |_count|
+      # 1.times do |_count|
         # a_count = _count * (answers.count / 20)
         # _a = answers.slice(a_count, answers.count / 20)
-        _a = answers.slice(0, 165)
+        _a = answers.slice(0, 100)
         excel_data_json = {
         "excel_header" => survey.excel_header,
         "answer_contents" => survey.formated_answers(_a, result_key, task_id.to_s),
@@ -35,18 +35,21 @@ class ExportResult < Result
         "result_key" => result_key
         }      
         retval = ConnectDotNet.send_data('/ToExcel.aspx') do
-          {'excel_data' => excel_data_json.to_json, 'job_id' => "#{task_id}_#{_count}"}
+          {'excel_data' => excel_data_json.to_json, 'job_id' => "#{task_id}_#{0}"}
         end
         uris << retval.body
-      end
-      retval = ConnectDotNet.send_data('/ToExcel.aspx') do
-        {"excel_data" => {
-           "excel_header" => survey.excel_header,
-           "answer_contents" => uris,
-           "header_name" => survey.csv_header,
-           "result_key" => result_key
-          }.to_json, 'job_id' => "#{task_id}_#{_count}"}
-      end
+        _a = answers.slice(100, 65)
+        excel_data_json = {
+        "excel_header" => survey.excel_header,
+        "answer_contents" => survey.formated_answers(_a, result_key, task_id.to_s),
+        "header_name" => survey.csv_header,
+        "result_key" => result_key
+        }      
+        retval = ConnectDotNet.send_data('/ToExcel.aspx') do
+          {'excel_data' => excel_data_json.to_json, 'job_id' => "#{task_id}_#{0}"}
+        end
+        uris << retval.body        
+      # end
       file_name = "public/import/#{task_id}.txt"
       File.open(file_name, "wb") { |file| file.puts(uris.join("\n"))}
       self.status = 1
