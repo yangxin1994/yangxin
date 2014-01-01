@@ -27,7 +27,7 @@ class ExportResult < Result
       # 1.times do |_count|
         # a_count = _count * (answers.count / 20)
         # _a = answers.slice(a_count, answers.count / 20)
-        _a = answers.slice(0, 100)
+        _a = answers.slice(100, 30)
         excel_data_json = {
         "excel_header" => survey.excel_header,
         "answer_contents" => survey.formated_answers(_a, result_key, task_id.to_s),
@@ -38,7 +38,7 @@ class ExportResult < Result
           {'excel_data' => excel_data_json.to_json, 'job_id' => "#{task_id}_#{0}"}
         end
         uris << retval.body
-        _a = answers.slice(100, 65)
+        _a = answers.slice(130, 35)
         excel_data_json = {
         "excel_header" => survey.excel_header,
         "answer_contents" => survey.formated_answers(_a, result_key, task_id.to_s),
