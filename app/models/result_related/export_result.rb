@@ -98,7 +98,7 @@ class ExportResult < Result
         "result_key" => result_key
         }      
         retval = ConnectDotNet.send_data('/ToSpss.aspx') do
-          {'spss_data' => excel_data_json.to_json, 'job_id' => "#{task_id}_#{0}"}
+          {'spss_data' => excel_data_json.to_json, 'job_id' => "#{task_id}_#{_count}"}
         end
         uris << retval.body
       end
