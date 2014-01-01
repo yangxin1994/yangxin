@@ -24,9 +24,10 @@ class ExportResult < Result
   def generate_excel(survey, answers, result_key)
     if answers.count > 1500
       uris = []
-      20.times do |_count|
-        a_count = _count * (answers.count / 20)
-        _a = answers.slice(a_count, answers.count / 20)
+      1.times do |_count|
+        # a_count = _count * (answers.count / 20)
+        # _a = answers.slice(a_count, answers.count / 20)
+        _a = answers.slice(0, 165)
         excel_data_json = {
         "excel_header" => survey.excel_header,
         "answer_contents" => survey.formated_answers(_a, result_key, task_id.to_s),
