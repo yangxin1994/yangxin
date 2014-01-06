@@ -1,7 +1,7 @@
 # finish migrating
 class JobsController < ApplicationController
 
-    before_filter :require_sign_in
+    # before_filter :require_sign_in
 
     # AJAX
     def show
