@@ -174,7 +174,7 @@ class Result
       answer.each do |row_id, row_answer|
         row_id = row_id.to_s
         next if !row_ids.include?(row_id)
-        row_answer.each do |input_id|
+        (row_answer || []).each do |input_id|
           result.each_key do |k|
             k_row_id = k.split('-')[0]
             k_input_ids = k.split('-')[1].split(',')
