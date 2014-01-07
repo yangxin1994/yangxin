@@ -18,6 +18,8 @@ OopsData::Application.routes.draw do
     end
   end
 
+  resources :sample_servers,:only => [:create]
+
   # sample
   scope :module => "sample" do
     resources :connects, :only => [:show]
@@ -437,6 +439,9 @@ OopsData::Application.routes.draw do
       get :get_active_sample_count
       end
     end
+
+    resources :sample_servers
+
   end
 
   # utility
