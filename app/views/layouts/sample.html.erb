@@ -1,5 +1,6 @@
 <% content_for :app_head do %>
-	<meta property="qc:admins" content="17463526262516216375" />
+  <meta property="qc:admins" content="174635260767562516216367" />
+	<meta property="wb:webmaster" content="a2dcd8999fdf9b37" />
 	<%= stylesheet_link_tag    "layouts/sample-layout" %>
 	<%= javascript_include_tag "layouts/sample-layout" %>
 	<script type="text/javascript">
@@ -71,14 +72,14 @@
 								<a href="/account/sign_up">注册</a>
 								<a href="/account/sign_in">登录</a>
 							</li>
-							<!-- <li class="out-login">
-								<a href="<%#= social_auth_link('sina')%>" title="新浪微博" ><i class="icon login-sina"></i></a>
-								<a href="<%#= social_auth_link('alipay')%>" title="支付宝" ><i class="icon login-alipay"></i></a>
+							<li class="out-login">
+								<a href="<%= social_auth_link('sina')%>" title="新浪微博" ><i class="icon login-sina"></i></a>
+								<!-- <a href="<%#= social_auth_link('alipay')%>" title="支付宝" ><i class="icon login-alipay"></i></a>
 								<a href="<%#= social_auth_link('qq')%>" title="QQ帐号"><i class="icon login-qq"></i></a>
 								<a href="<%#= social_auth_link('tecent')%>" title="腾讯微博"><i class="icon login-tecent"></i></a>
-								<a href="<%#= social_auth_link('renren')%>" title="人人网"><i class="icon login-renren"></i></a> -->
-<!-- 								<a href="<%#= social_auth_link('qihu360')%>" title="奇虎360"><i class="icon login-qihu360"></i></a> -->
-						<!-- </li> -->
+								<a href="<%#= social_auth_link('renren')%>" title="人人网"><i class="icon login-renren"></i></a>
+								<a href="<%#= social_auth_link('qihu360')%>" title="奇虎360"><i class="icon login-qihu360"></i></a> -->
+						</li>
 						</ul>	
 						<% end %>
 						<!-- <li>
