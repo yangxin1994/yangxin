@@ -392,6 +392,8 @@ OopsData::Application.routes.draw do
         get    :upload_attachment
         post   :attachment_uploaded
         post   :send_netranking_newsletter
+        get    :sms
+        post   :send_sms
       end
     end
 

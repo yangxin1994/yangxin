@@ -81,6 +81,15 @@ class Admin::NewslettersController < ApplicationController
     @file_path = params[:path]
   end
 
+  def sms
+  end
+
+  def send_sms
+    mobile_list = params[:mobile_list].split("\n")
+    SmsApi.send_massive_sms(mobile_list, params[:sms_content])
+    render_json_auto and return
+  end
+
   def upload_attachment
   end
 

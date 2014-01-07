@@ -16,11 +16,11 @@ jQuery(function($) {
     }
   })
 
-  $('.btn').click(function() {
+  $('.email_btn').click(function() {
     $('.ke-container').css("width", "576px");
     content_editor.sync();
 
-    $('.btn').text('正在发送');
+    $('.email_btn').text('正在发送');
 
     $.postJSON('/admin/newsletters/send_netranking_newsletter.json', {
       file_path: $('#file-path').html(),
@@ -34,7 +34,25 @@ jQuery(function($) {
       $('.property-bottom button').removeAttr("disabled");
       if(retval.success) {
         alert_msg.show('success', "已成功发送邮件!")
-        $('.btn').text('发送');
+        $('.email_btn').text('发送');
+      } else {
+        alert_msg.show('error', "失败 (╯‵□′)╯︵┻━┻")
+      }
+    })
+  });
+
+  $('.sms_btn').click(function() {
+
+    $('.sms_btn').text('正在发送');
+
+    $.postJSON('/admin/newsletters/send_sms.json', {
+      mobile_list: $('#mobile_list').val(),
+      sms_content: $('#sms_content').val()
+    }, function(retval) {
+      $('.property-bottom button').removeAttr("disabled");
+      if(retval.success) {
+        alert_msg.show('success', "已成功发送短信!")
+        $('.sms_btn').text('发送');
       } else {
         alert_msg.show('error', "失败 (╯‵□′)╯︵┻━┻")
       }
