@@ -73,7 +73,7 @@ class SmsApi # 短信接口
     puts phone
     puts message
     puts "AAAAAAAAAAAAAA"
-    # return if Rails.env != "production"
+    return if Rails.env != "production"
     seqid = Random.rand(10000..9999999999999999).to_i
 
     result = get('/sdkproxy/sendsms.action',
