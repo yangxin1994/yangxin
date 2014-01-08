@@ -8,7 +8,7 @@ require 'data_type'
 module Tool
 
   def self.generate_active_mobile_code
-    return 111111 if Rails.env != "production"
+    # return 111111 if Rails.env != "production"
     return Random.rand(100000..999999).to_i 
   end
 

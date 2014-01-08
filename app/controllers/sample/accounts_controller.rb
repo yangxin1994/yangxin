@@ -36,7 +36,6 @@ class Sample::AccountsController < Sample::SampleController
     end
   end
 
-
   #用户注册
   def regist
     if params[:email_mobile].present?
@@ -56,7 +55,6 @@ class Sample::AccountsController < Sample::SampleController
     u = User.find_by_email_or_mobile(params[:email_mobile])
     render_json_auto({ exist: (u && u.is_activated)}) and return
   end
-
 
   #注册成功后的跳转页面
   def regist_succ
@@ -84,10 +82,14 @@ class Sample::AccountsController < Sample::SampleController
     render_json_e(ErrorEnum::USER_NOT_REGISTERED) and return if user.status == 0
     render_json_e(ErrorEnum::USER_ACTIVATED) and return if user.is_activated
     if @account.match(/^\d{11}$/)
-      active_code = Tool.generate_active_mobile_code
-      user.sms_verification_code = active_code
-      user.sms_verification_expiration_time  = (Time.now + 2.hours).to_i
-      user.save
+      if user.sms_verification_code.present? && user.sms_verification_expiration_time > Time.now.to_i
+        active_code = user.sms_verification_code
+      else
+        active_code = Tool.generate_active_mobile_code
+        user.sms_verification_code = active_code
+        user.sms_verification_expiration_time  = (Time.now + 2.hours).to_i
+        user.save
+      end
       SmsWorker.perform_async("activate", user.mobile, "", :active_code => active_code)
     else
       EmailWorker.perform_async(
