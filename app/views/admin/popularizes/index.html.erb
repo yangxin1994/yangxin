@@ -1,0 +1,41 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/surveys/index-bundle" %>
+<% end %>
+
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li class="active">
+      <a href="/admin/popularizes">
+        <i class="icon-chevron-right"></i>
+        Banner管理
+      </a>
+    </li>
+  </ul>
+<% end %>
+
+<div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th >截图</th>
+        <th >创建者邮箱</th>
+        <th >修改时间</th>
+        <th >操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @surveys['data'].each do |banner| %>
+      <tr>
+        <td><a href="/questionaires/<%= banner._id %>"><%= banner.title %></a></td>
+        <td><%= banner.user.try(:email) || banner.user.try(:mobile) %></td>
+        <td><%= Time.at(banner.updated_at).strftime('%F %R') %></td>
+        <td>
+          <a href="javascript:void(0);">下架</a>
+        </td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+</div>

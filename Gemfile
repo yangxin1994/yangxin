@@ -39,6 +39,10 @@ gem 'mini_magick', '~> 3.5.0'
 gem 'carrierwave', '~> 0.8.0'
 gem 'rack-raw-upload', '1.1.0'
 
+gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
+gem 'mongoid-grid_fs', github: 'ahoward/mongoid-grid_fs'
+
+
 # about mail
 
 gem 'roadie', '~> 2.3.4'# html email
