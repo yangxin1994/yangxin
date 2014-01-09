@@ -293,7 +293,11 @@ OopsData::Application.routes.draw do
 
     resources :prizes
 
-    resources :popularizes
+    resources :popularizes do
+      collection do 
+        put :sort
+      end 
+    end
 
     resources :surveys, :as => :s do
       member do
