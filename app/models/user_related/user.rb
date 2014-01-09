@@ -62,6 +62,7 @@ class User
 
   # 1 for sample, 2 for client, 4 for admin, 8 for answer auditor, 16 for interviewer
   field :user_role, :type => Integer, default: 1
+  field :interviewer, :type => Boolean, default: false
   field :is_block, :type => Boolean, default: false
 
   # 0 normal users
@@ -693,6 +694,7 @@ class User
 
   def set_sample_role(role)
     self.user_role = role.sum
+    self.interviewer = self.user_role & 0x10 > 0
     return self.save
   end
 
