@@ -1,8 +1,8 @@
 <% content_for :head do %>
   <%= javascript_include_tag "pages/admin/answers/review-bundle" %>
 	<script>
-		window.latitude = <%= @questions.latitude.to_i %>
-		window.longitude = <%= @questions.longitude.to_i %>
+		window.latitude = <%= @questions.latitude.to_f %>
+		window.longitude = <%= @questions.longitude.to_f %>
 	</script>
 <% end %>
 
