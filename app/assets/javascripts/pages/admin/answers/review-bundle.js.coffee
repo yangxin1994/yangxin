@@ -1,4 +1,11 @@
+#= require soso_map
 $ ->
+  if window.latitude == 0 && window.longitude == 0
+    map = new soso.maps.Map(document.getElementById('map'))
+  else
+    center = new soso.maps.LatLng(window.latitude, window.longitude)
+    map = new soso.maps.Map(document.getElementById('map'),{center: center, zoom: 18})
+    marker = new soso.maps.Marker({position: center, map: map})
   review = (is_pass, message_content, _this)->
     $this = $(_this)
     $.ajax
