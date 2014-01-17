@@ -80,7 +80,7 @@ class Admin::PopularizesController < Admin::AdminController
         point_recod = PointLog.where(:user_id => user.id,:reason => PointLog::ADMIN_OPERATE,:remark => /积分快来/).first
         if user.present? && !point_recod.present?
           point = 20
-          if user.update_attributes(:point => point)
+          if user.update_attributes(:point => ( user.point + point) )
             PointLog.create_sina_reward_point_log(point,user.id)  
           else
             error_user_ids.push user.id
