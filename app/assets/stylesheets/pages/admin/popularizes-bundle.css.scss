@@ -71,3 +71,29 @@
     }
   }
 }
+
+.weibo_right{
+  .no-data{
+    font-size:14px;
+    text-align: center;
+    color:red;
+    margin: 20px;    
+  }
+  .total_count,.add-reward{
+    text-align: right;
+  }
+  .add-reward{
+    button{
+      height:42px;
+      border:1px solid #196aeb;
+      background: #4186f6;
+      @include border-radius(3px);
+      color:#fff; 
+      &.disabled{
+        background:#E6E6E6;
+        border:1px solid #E6E6E6;
+      }      
+    }
+   
+  }
+}

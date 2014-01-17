@@ -10,7 +10,7 @@ class PointLog < Log
   INVITE_USER = 32
   REVOKE = 64
   IMPORT = 128
-  NETRANKING_IMPORT = 256
+  NETRANKING_IMPORT = 256 
 
   field :type, :type => Integer, :default => 8
   field :amount, :type => Integer #花费积分数
@@ -37,6 +37,10 @@ class PointLog < Log
 
   def self.create_spread_point_log(amount, survey_id, survey_title, sample_id)
     self.create(:amount => amount, :reason => SPREAD, :survey_id => survey_id, :survey_title => survey_title, :user_id => sample_id)
+  end
+
+  def self.create_sina_reward_point_log(amount,sample_id)
+    self.create(:amount => amount, :reason => ADMIN_OPERATE, :remark => '《积分快来》奖励积分', :user_id => sample_id)
   end
 
   #创建礼品兑换产生的积分变化记录
