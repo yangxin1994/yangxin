@@ -18,6 +18,8 @@ OopsData::Application.routes.draw do
     end
   end
 
+  resources :sample_servers,:only => [:create]
+
   # sample
   scope :module => "sample" do
     resources :connects, :only => [:show]
@@ -291,6 +293,14 @@ OopsData::Application.routes.draw do
 
     resources :prizes
 
+    resources :popularizes do
+      collection do 
+        put :sort
+        get :weibo
+        post :add_reward
+      end 
+    end
+
     resources :surveys, :as => :s do
       member do
         get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info, :sample_attributes, :interviewer_task, :new_interviewer, :questions
@@ -315,7 +325,7 @@ OopsData::Application.routes.draw do
 
       collection do
         post :add_attributes, :send_message
-        get :attributes, :new_attributes, :status, :get_sample_count, :get_active_sample_count, :all_attributes
+        get :total_point, :attributes, :new_attributes, :status, :get_sample_count, :get_active_sample_count, :all_attributes
       end
     end
 
@@ -390,6 +400,8 @@ OopsData::Application.routes.draw do
         get    :upload_attachment
         post   :attachment_uploaded
         post   :send_netranking_newsletter
+        get    :sms
+        post   :send_sms
       end
     end
 
@@ -435,6 +447,9 @@ OopsData::Application.routes.draw do
       get :get_active_sample_count
       end
     end
+
+    resources :sample_servers
+
   end
 
   # utility

@@ -1,6 +1,8 @@
 #source 'http://rubygems.org'
 source 'http://ruby.taobao.org'
 
+ruby "1.9.3"
+
 gem 'rails', '~> 3.2.6'
 
 gem "binding_of_caller", "~> 0.7.2", :group => :development
@@ -36,6 +38,8 @@ gem 'yab62', require: 'yab62'
 gem 'mini_magick', '~> 3.5.0'
 gem 'carrierwave', '~> 0.8.0'
 gem 'rack-raw-upload', '1.1.0'
+
+gem 'carrierwave-mongoid', :require => 'carrierwave/mongoid'
 
 # about mail
 

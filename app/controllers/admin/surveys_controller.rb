@@ -196,7 +196,8 @@ class Admin::SurveysController < Admin::AdminController
 
   def new_interviewer
     @survey = Survey.find_by_id(params[:id])
-    @interviewers = User.for_js("this.user_role & 0x10")
+    # @interviewers = User.for_js("this.user_role & 0x10")
+    @interviewers = User.where(interviewer: true)
   end
 
   def create_interviewer

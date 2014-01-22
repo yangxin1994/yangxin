@@ -1,0 +1,67 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/popularizes/index-bundle" %>
+  <%= stylesheet_link_tag  "pages/admin/popularizes-bundle" %>
+<% end %>
+
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li class="active">
+      <a href="/admin/popularizes">
+        <i class="icon-chevron-right"></i>
+        Banner管理
+      </a>
+    </li>
+    <li>
+      <a href="/admin/popularizes/weibo">
+        <i class="icon-chevron-right"></i>
+        微博
+      </a>
+    </li>    
+  </ul>
+<% end %>
+
+<div>
+  <% if @banners['data'].length > 0 %>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th >截图</th>
+          <th >修改时间</th>
+          <th >上传者</th>
+          <th >操作</th>
+        </tr>
+      </thead>
+      <tbody class='pop'>
+        <% @banners['data'].each do |banner| %>
+        <tr id="<%= banner.id%>">
+          <td class='img-con'><%= image_tag(banner.image.url) %></td>
+          <td><%= Time.at(banner.updated_at).strftime('%F %R') %></td>
+          <td><%= banner.user.email %></td>
+          <td>
+            <a href="javascript:void(0);" class='delete' data="<%= banner.id%>">
+              删除
+            </a>
+          </td>
+        </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+  <div class="add-new">
+    <% unless  @banners['data'].length > 0 %>
+      <div class="no-data">
+        没有查到相关数据，您可以点击如下按钮创建
+      </div>
+    <% end %>
+    <form action='/admin/popularizes' method='post' enctype="multipart/form-data">
+      <div class='cont'>
+        <div class='ipt-holder'>
+          点击添加图片地址
+        </div>
+        <input type='file' name='banner[image]' class='upload' />
+        <button>上传</button>
+      </div>
+    </form>
+  </div>  
+</div>

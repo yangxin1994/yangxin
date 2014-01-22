@@ -112,6 +112,7 @@ class Answer
 
   after_create do |doc|
     doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.ip_address) 
+    doc.save
   end
 
 
@@ -127,6 +128,7 @@ class Answer
   def self.search(options)
     answers = self.not_preview
     answers = answers.find_by_status(options[:status]) if options[:status]
+    answers = answers.find_by_status(options["status"]) if options["status"]
     if options[:keyword].present?
       if options[:keyword] =~ /^.+@.+$/
         options[:email] = options[:keyword]
@@ -159,7 +161,8 @@ class Answer
 
   def set_reject_with_type(reject_type, finished_at = Time.now.to_i)
     set_reject
-    update_attributes(reject_type: reject_type, finished_at: finished_at)
+    update_attributes(reject_type: reject_type)
+    update_attributes(finished_at: finished_at) if self.finished_at.blank?
   end
 
   def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, answer_obj)

@@ -59,21 +59,20 @@ class MailgunApi
         :gift_name => redeem_log.gift_name }
     end
 
-    data = {}
-    data[:domain] = Rails.application.config.survey_email_domain
-    data[:from] = @@survey_email_from
 
     html_template_file_name = "#{Rails.root}/app/views/offline_invite_mailer/push_email.html.erb"
     text_template_file_name = "#{Rails.root}/app/views/offline_invite_mailer/push_email.text.erb"
     html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
     premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
-    data[:html] = premailer.to_inline_css
-    data[:text] = text_template.result(binding)
-
-    data[:subject] = "邀请您加入问卷吧"
-    data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
     @group_emails.each_with_index do |emails, i|
+      data = {}
+      data[:domain] = Rails.application.config.survey_email_domain
+      data[:from] = @@survey_email_from
+      data[:html] = premailer.to_inline_css
+      data[:text] = text_template.result(binding)
+      data[:subject] = "邀请您加入问卷吧"
+      data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
       data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
       # data[:to] = emails.join(', ')
       data[:'recipient-variables'] = @group_recipient_variables[i].to_json
@@ -170,21 +169,21 @@ class MailgunApi
       @lottery_logs = @lottery_logs.each_slice(3).to_a
     end
 
-    data = {}
-    data[:domain] = Rails.application.config.survey_email_domain
-    data[:from] = @@survey_email_from
 
     html_template_file_name = "#{Rails.root}/app/views/survey_mailer/push_email.html.erb"
     text_template_file_name = "#{Rails.root}/app/views/survey_mailer/push_email.text.erb"
     html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
     premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
-    data[:html] = premailer.to_inline_css
-    data[:text] = text_template.result(binding)
 
-    data[:subject] = "邀请您参加问卷调查"
-    data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
     @group_emails.each_with_index do |emails, i|
+      data = {}
+      data[:domain] = Rails.application.config.survey_email_domain
+      data[:from] = @@survey_email_from
+      data[:html] = premailer.to_inline_css
+      data[:text] = text_template.result(binding)
+      data[:subject] = "邀请您参加问卷调查"
+      data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
       data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
       # data[:to] = emails.join(', ')
       data[:'recipient-variables'] = @group_recipient_variables[i].to_json
@@ -350,15 +349,15 @@ class MailgunApi
     end
     @group_recipient_variables << temp_recipient_variables
 
-    data = {}
-    data[:domain] = domain
-    data[:from] = send_from
-    data[:html] = content
-    data[:text] = ""
-    data[:attachment] = File.new(attachment) if attachment.present?
-    data[:subject] = subject
-    data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
     @group_emails.each_with_index do |emails, i|
+      data = {}
+      data[:domain] = domain
+      data[:from] = send_from
+      data[:html] = content
+      data[:text] = ""
+      data[:attachment] = File.new(attachment) if attachment.present?
+      data[:subject] = subject
+      data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
       data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
       data[:'recipient-variables'] = @group_recipient_variables[i].to_json
       self.send_message(data)
@@ -368,9 +367,9 @@ class MailgunApi
   def self.send_message(data)
     # domain = data.delete(:domain)
     domain = data[:domain]
-    retval = RestClient.post("https://api:#{Rails.application.config.mailgun_api_key}"\
-      "@api.mailgun.net/v2/#{domain}/messages", data)
     begin
+      retval = RestClient.post("https://api:#{Rails.application.config.mailgun_api_key}"\
+        "@api.mailgun.net/v2/#{domain}/messages", data)
       retval = JSON.parse(retval)
       return retval["id"]
     rescue
