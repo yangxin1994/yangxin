@@ -91,10 +91,11 @@ class Filler::FillerController < ApplicationController
     else
       answer = Answer.find_by_id(cookies[cookie_key(survey_id, is_preview)])
     end
-    @percentage = 0
+    @percentage = -1
     if answer.present?
       if answer.user.present? && answer.user != current_user
         cookies.delete(cookie_key(survey_id, is_preview), :domain => :all)
+        answer = nil
       else
         answer.update_status
         redirect_to show_a_path(answer.id.to_s) and return if !answer.is_edit
