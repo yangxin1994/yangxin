@@ -1,0 +1,69 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/popularizes/index-bundle" %>
+  <%= stylesheet_link_tag  "pages/admin/popularizes-bundle" %>
+<% end %>
+
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li >
+      <a href="/admin/popularizes">
+        <i class="icon-chevron-right"></i>
+        Banner管理
+      </a>
+    </li>
+    <li class="active">
+      <a href="/admin/popularizes/weibo">
+        <i class="icon-chevron-right"></i>
+        微博
+      </a>
+    </li>    
+  </ul>
+<% end %>
+
+<div class='weibo_right'>
+  <form class="form-search" style="display:inline">
+    <div class="input-append">
+      <input type="text" name="weibo_id" placeholder="输入要搜索的微博ID" class="span8 search-query"  value="<%= params[:weibo_id]%>">
+      <button type="submit" class="btn">Search</button>
+    </div>
+  </form>
+  <div>
+    <% if @sina_user.present? %>
+      <% if @users.length > 0 %>
+        <div class='total_count'>共<%= @users.length %>条记录</div>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th >ID</th>
+              <th >昵称</th>
+              <th >注册时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @users.each do |user| %>
+            <tr id="<%= user.id%>">
+              <td ><%= user.id %></td>
+              <td><%= user.nickname %></td>
+              <td><%= Time.at(user.created_at).strftime('%F %R') %></td>
+            </tr>
+            <% end %>
+          </tbody>
+        </table>
+        <div class='add-reward'>
+          <button>确定并奖励积分</button>
+        </div>                
+      <% else %>
+        <div class='no-data'>
+          <% if @notice.present? %>
+            <%= @notice %>
+          <% else %>
+            没有查到该微博的转发用户!
+          <% end %>
+        </div>
+      <% end %>
+    <% else %>
+      <div class='no-data'>您的账户还未绑定微博,请先绑定微博!</div>
+    <% end %>  
+  </div>
+</div>

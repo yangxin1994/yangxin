@@ -296,6 +296,8 @@ OopsData::Application.routes.draw do
     resources :popularizes do
       collection do 
         put :sort
+        get :weibo
+        post :add_reward
       end 
     end
 
