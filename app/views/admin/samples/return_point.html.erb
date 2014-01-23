@@ -22,13 +22,13 @@
         样本数据统计
       </a>
     </li>
-    <li class="active">
+    <li>
       <a href="/admin/samples/total_point">
         <i class="icon-chevron-right"></i>
         积分总数
       </a>
     </li>
-    <li>
+    <li class="active">
       <a href="/admin/samples/return_point">
         <i class="icon-chevron-right"></i>
         批量退回积分
@@ -38,10 +38,15 @@
 <% end %>
 
 <div class="bs-docs-example">
-  <p>
-    <span>积分总数：</span>
-    <span><%= @total_point %></span>
-  </p>
+  <%= form_tag("/admin/samples/point_returned", method: "post", multipart: true) do %>
+    <p>
+      <%= label_tag :content, "积分退回信息" %>
+      <%= text_area_tag "content" %>
+    </p>
+    <p>
+      <%= submit_tag "上传" %>
+    </p>
+  <% end %>
 </div>
 
 

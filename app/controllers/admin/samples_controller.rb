@@ -291,4 +291,26 @@ class Admin::SamplesController < Admin::AdminController
     @total_point = User.all.map { |e| e.point } .sum
   end
 
+  def return_point
+
+  end
+
+  def point_returned
+    return_users = params[:content].split("\r\n")
+    return_users.each do |e|
+      e = e.split("\t")
+      user = User.find_by_email_or_mobile(e[0])
+      next if user.blank?
+      amount = e[1].to_i
+      remark = e[2]
+      message_content = e[3]
+      next if amount == 0
+      PointLog.create_admin_operate_point_log(amount, remark, user.id.to_s)
+      user.point += amount
+      user.save
+      current_user.create_message("积分退回通知", message_content, [user.id.to_s])
+    end
+    flash[:notice] = "成功退回积分"
+    redirect_to action: :return_point
+  end
 end

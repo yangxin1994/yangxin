@@ -322,8 +322,8 @@ OopsData::Application.routes.draw do
       end
 
       collection do
-        post :add_attributes, :send_message
-        get :total_point, :attributes, :new_attributes, :status, :get_sample_count, :get_active_sample_count, :all_attributes
+        post :point_returned, :add_attributes, :send_message
+        get :return_point, :total_point, :attributes, :new_attributes, :status, :get_sample_count, :get_active_sample_count, :all_attributes
       end
     end
 
