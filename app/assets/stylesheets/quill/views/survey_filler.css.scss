@@ -435,6 +435,7 @@ $blue-color: #5691f0;
 	> ul {
 		@include clearfix;
 		a {
+      width: 130px;
 			float: left;
 			margin: 20px 40px 0 0;
 			em {

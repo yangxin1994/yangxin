@@ -40,6 +40,7 @@ class Log
         if log.user.present?
           log['avatar'] = log.user.avatar ? log.user.avatar.picture_url : User::DEFAULT_IMG
         else
+          Rails.logger.info "========= #{log['user_id']} ============" 
           log['avatar'] = User::DEFAULT_IMG
         end
         log
