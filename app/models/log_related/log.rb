@@ -37,7 +37,11 @@ class Log
     if logs
       logs = logs.map do |log|
         log['username'] = log.user.try(:nickname)
-        log['avatar'] = log.user.avatar ? log.user.avatar.picture_url : User::DEFAULT_IMG
+        if log.user.present?
+          log['avatar'] = log.user.avatar ? log.user.avatar.picture_url : User::DEFAULT_IMG
+        else
+          log['avatar'] = User::DEFAULT_IMG
+        end
         log
       end      
     end
