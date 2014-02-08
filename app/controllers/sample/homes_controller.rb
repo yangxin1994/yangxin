@@ -23,5 +23,10 @@ class Sample::HomesController < Sample::SampleController
       fresh_news:fresh_news,
       banners:banners
     }
+
   end
+
+  def i
+    # redirect_to questionaires_path if user_signed_in
+  end  
 end

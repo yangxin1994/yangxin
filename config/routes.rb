@@ -45,7 +45,11 @@ OopsData::Application.routes.draw do
       end
     end
 
-    resource :home, :only => [:show] 
+    resource :home, :only => [:show] do
+      collection do
+        get :i
+      end
+    end
 
     resources :surveys, :only => [:index] do 
       collection do
