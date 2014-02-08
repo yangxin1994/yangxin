@@ -30,9 +30,7 @@
   <p> 开始答题时间:<%= @questions.created_at.strftime('%Y-%m-%d %H:%M:%S')  %></p>
   <p> 答题时长: <%= ((@questions.finished_at - @questions.created_at.to_i) / 60.0 ).ceil if @questions.finished_at.present? %> 分钟</p>
   <p class="red"> <%= @questions.audit_message %> </p>
-  <%- if @questions.interviewer_task.present? %>
-    <div id="map" style="height:500px;"></div>
-  <%- end %>
+  <div id="map" style="height:500px;"></div>
 <%= render :partial => "admin/answers/detail" %>
 <% if @questions['status'].to_i == 4 %>
   <span class="pull-right">

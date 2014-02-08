@@ -1405,4 +1405,15 @@ class Answer
     end
     self.update_attributes(sample_attributes_updated: true)
   end
+
+  def self.temp_location
+    s = Survey.find('5269d885eb0e5ba4bd000001')
+    region_result = QuillCommon::AddressUtility.province_hash.merge(QuillCommon::AddressUtility.city_hash).merge(QuillCommon::AddressUtility.county_hash)
+    s.answers.each do |a|
+      location = region_result[a.region.to_s]
+      a.latitude = location["lat"].to_f
+      a.longitude = location["lng"].to_f
+      a.save
+    end
+  end
 end
