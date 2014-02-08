@@ -1,0 +1,180 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "pages/sample/homes-bundle", :media => "all" %>
+  <script type="text/javascript">
+    <% if user_signed_in %>
+      window.current_user_id = "<%= current_user.id %>"
+    <% end %>   
+  </script>
+<% end %>
+<% if @data[:hot_survey].present? %>
+  <div class="hot-research-banner inner-page">
+    <strong>
+      <a href="javascript:void(0);">
+        <%= @data[:hot_survey]['title']%>
+      </a>
+    </strong>
+    <a href="/s/<%= @data[:hot_survey]['quillme_promote_info']['reward_scheme_id']%>" class="involved-btn">我是新用户
+      <span></span>
+      <a href="javascript:void(0);" class="involved-btn old" data="<%= @data[:hot_survey]['spread_point']%>" s_title= "<%= @data[:hot_survey]['title'] %>" scheme_id="<%= @data[:hot_survey]['quillme_promote_info']['reward_scheme_id']%>">我是老用户
+        <span></span>
+      </a>
+    </a>
+  </div>
+<% end %>
+<div class="inner-page fix">
+  <!-- 焦点图切换 -->
+  <div id="slideBox" class="slider">
+    <% if @data[:banners].length > 0 %>
+      <div class="hd">
+        <ul>
+          <% @data[:banners].each_with_index do |banner,idx|%>
+            <li><%= idx + 1 %></li>
+          <% end %>
+        </ul>  
+      </div>
+      <div class="bd">
+        <ul>
+          <% @data[:banners].each do |banner|%>
+            <li><%= image_tag(banner.image.url) %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% else %>
+      <div class="hd">
+        <ul><li>1</li><li>2</li><li>3</li></ul>
+      </div>
+      <div class="bd">
+        <ul>
+          <li><img src="/assets/od-quillme/banner/banner_1.jpg" /></li>
+          <li><img src="/assets/od-quillme/banner/banner_2.png" /></li>
+          <li><img src="/assets/od-quillme/banner/banner_3.png" /></li>
+        </ul>
+      </div>    
+    <% end %>
+
+  </div>
+  <!-- 公告 -->
+  <div class="bulletin dashed-box r">
+    <div class="dashed-box-inner">
+      <div class="dashed-box-inner-top">
+        <h3 class="box-title">站内公告</h3>
+        <a href="<%= public_notices_path %>" class="more">更多</a>
+      </div>
+      <% if @data[:public_notices].present? %>
+      <ul>
+        <% @data[:public_notices].each_with_index do |pn,index| %>
+          <li <%= hide_border?(@data[:public_notices].to_ary,index) %>>
+            <a href="<%= public_notice_path(pn['_id']) %>">
+              <span class="bulletin-title <%= 'top' if pn.top %>">
+                <%= "【置顶】" if pn.top %>
+                <%= truncate("#{pn['title']}", :length => 25)%>
+              </span>
+            </a>
+            <span class="time">
+              <%= Date.strptime("#{pn['created_at']}", "%Y-%m-%d") %></span>
+          </li>
+        <% end %>
+      </ul>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="gift-list-main dashed-box inner-page">
+  <div class="dashed-box-inner">
+    <div class="dashed-box-inner-top">
+      <h3 class="box-title">推荐礼品</h3>
+      <a href="<%= gifts_path %>" class="more">更多</a>
+    </div>
+    <% if @data[:hotest_gifts].present? %>
+    <ul class="gift-list">
+      <% @data[:hotest_gifts].each do |gift|%>
+        <li>
+          <a href="<%= gift_path(gift['_id']) %>">
+            <span class="gift-img">
+              <img src="<%= show_image(gift.photo_src,'gifts') %> " alt="<%= gift.title %>" />
+            </span>
+            <span class="gift-name"><%= gift.title %></span>
+            <span class="gift-mask"></span>
+            <span class="gift-remark">
+              <span class="integral l"><b><%= gift.point%></b>积分</span>
+              <span class="gift-remark-right">
+                <span class="nop">人气：<b><%= gift.view_count%></b></span>
+                <span class="price">价值：<b><%= show_gift_price(gift.price)%></b> 元</span>
+              </span>     
+            </span>
+          </a>
+        </li>
+      <% end %>       
+    </ul>
+    <% end %>
+  </div>
+</div>
+
+
+<!-- 热门兑换 -->
+
+<!-- 调研推荐&排行榜&新鲜事 -->
+<div class="inner-page">
+  <div class="research-list dashed-box l">
+    <div class="dashed-box-inner">
+      <div class="dashed-box-inner-top">
+        <h3 class="box-title">调研推荐</h3>
+        <a href="<%= surveys_path(:status => 2) %>" class="more">更多</a>
+      </div>
+      <ul>
+        <%= render :partial => 'sample/surveys/survey_list',:locals => {:surveys => @data[:rsl]} %>
+      </ul>
+    </div>
+  </div>
+
+  <div class="rank dashed-box l">
+    <div class="dashed-box-inner">
+      <div class="dashed-box-inner-top">
+        <h3 class="box-title">排行榜</h3>
+      </div>
+      <% if @data[:top_rank_users].present? %>
+        <ul class="rank-list">
+          <% @data[:top_rank_users].each_with_index do |user,index| %>
+            <li <%= hide_border?(@data[:top_rank_users].to_ary,index) %>>
+              <span class="rank-list-left l">
+                <span class="number l"><%= index + 1 %></span>
+                <span class="userhead l" href="javascript:void(0);">
+                  <img src="<%= small_avatar(user['_id'])%>" alt="<%= user.nickname%>" />
+                </span>
+                <span class="username">
+                    <%= truncate(user.nickname, :length => 15) %>
+                </span>
+                <span class="integral">积分：
+                  <b><%= user.point %></b>
+                </span>
+              </span>
+              <span class="rank-list-right r">
+                <span class="answer">答题：<b><%= user.answer_count %></b></span>
+                <span class="spread">推广：<b><%= user.spread_count %></b></span>
+              </span> 
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+  </div> 
+
+  <% if @data[:fresh_news].present? %>
+  <div class="forums dashed-box l">
+    <div class="dashed-box-inner">
+      <div class="dashed-box-inner-top">
+        <h3 class="box-title">新鲜事</h3>
+      </div>
+        <ul class="forums-list">
+          <% @data[:fresh_news].each_with_index do |news,index|%>
+            <li <%= hide_border?(@data[:fresh_news],index) %>>
+              <span class="time"><%= ch_time(news.created_at) %></span>
+              <%= user_behavor(news) %>
+            </li>
+          <% end %>
+        </ul>
+    </div>
+  </div> 
+  <% end %>
+</div> 

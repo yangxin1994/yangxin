@@ -27,6 +27,7 @@ class Sample::HomesController < Sample::SampleController
   end
 
   def i
+    render :action =>'i',:layout=>"/layouts/home"
     # redirect_to questionaires_path if user_signed_in
   end  
 end
