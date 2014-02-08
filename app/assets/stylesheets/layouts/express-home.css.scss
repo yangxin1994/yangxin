@@ -1,0 +1,491 @@
+//=require layouts/app-layout
+//=require jquery.fancybox
+@import "common";
+@import "compass/css3";
+@import "compass/utilities/general/clearfix";
+@import "home/*.png";
+@import "share/*.png";
+
+.container{
+  width:905px;
+  margin:0 auto;
+}
+.header{
+  border-top:5px #FFC800 solid;
+  @include one-line(59px);
+  position: relative;
+  z-index: 99;
+  background: #FFF;
+  // @include box-shadow(rgba(#000, 0.7) 0 0 2px);
+  .logo{
+    @include size(172px,36px);
+    @include home-sprite(logo);
+    float: left;
+    margin-top:10px;
+  }
+  .help{
+    float: right;
+    font-size: 14px;
+    &:hover{
+      .icon-help{
+        @include home-sprite(help_hover);
+      }
+    }
+    .icon-help{
+      @include size(16px,16px);
+      @include inline-block;
+      @include home-sprite(help);
+      margin:-2px 5px 0 0;
+    }
+  }
+}
+.shadow{
+    height:3px;
+    background: #33333D;
+    @include opacity(0.2);
+  } 
+.bg{
+  position: fixed;
+  top:0;
+  left:-50%;
+  width:200%;
+  height:450px;
+  z-index: 1;
+  img {
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    margin:auto;
+    min-width:50%;
+    min-height:50%
+  }
+}
+.login-reg{
+  position: relative;
+  min-height:380px;
+  z-index: 99;
+  color:#FFF;
+  @include clearfix;
+  .login-reg-l{
+    @include size(400px,380px);
+    float: left;
+    h1{
+      margin-top:100px;
+      font-size: 30px;
+      font-weight: bold;
+    }
+    p{
+      font-size: 18px;
+      line-height: 1.5em;
+      &.txt{
+        text-indent: 2em;
+        margin-top:15px;
+      }
+      &.number{
+        margin-top:30px;
+      }
+    }
+  }
+  .login-reg-r{
+    /*自定义滚动条样式 for webkit*/
+    ::-webkit-scrollbar-track-piece{
+      background-color:#f5f5f5;
+      border-left:1px solid $borderColor;
+    }
+    ::-webkit-scrollbar{
+      width:10px;
+      height:13px;
+    }
+    ::-webkit-scrollbar-thumb{
+      background-color:#c2c2c2;
+      background-clip:padding-box;
+      border:1px solid #979797;
+      min-height:28px;
+    }
+    ::-webkit-scrollbar-thumb:hover{
+      border:1px solid #636363;
+      background-color:#929292;
+    }
+    /*自定义滚动条样式 for IE*/
+    scrollbar-face-color:#ccc;
+    scrollbar-shadow-color: #eee; 
+    scrollbar-highlight-color: #FFF; 
+    scrollbar-3dlight-color: #eee; 
+    scrollbar-darkshadow-color: #FFF; 
+    scrollbar-track-color: #f9f9f9; 
+    scrollbar-arrow-color: #fff;
+    @include size(450px,390px);
+    cursor: default;
+    float: right;
+    form{
+      float: right;
+      position: relative;
+      margin:85px 10px 0 0;
+      .tip-panel{
+        width:278px;
+        height:200px;
+        overflow: auto;
+        background: #FFF;
+        border:1px $borderColor solid;
+        position: absolute;
+        top:50px;
+        left:50px;
+        li{
+          color:#333;
+          a{
+            display: block;
+            @include one-line(30px);
+            padding:0 15px;
+            &:hover{
+              background: #f8f8f8;
+            }
+          }
+        }
+      }
+      p{
+        a{
+          color:$exblue;
+          &:hover{
+            text-decoration: underline;
+          }
+        }
+        &.pop{
+          width:310px;
+          padding:0 10px;
+          color:#FF4A51;
+          position: absolute;
+          top:-42px;
+          left:0;
+          @include home-sprite(pop);
+        }
+        &.h30{
+          @include one-line(30px);
+        }
+        &.h40{
+          @include one-line(40px);
+        }
+        &.divide{
+          background: image-url("home/divide.png") no-repeat top;
+        }
+      }
+      .remember{
+        &:hover{
+          cursor: pointer;
+          .checkbox{
+            @include home-sprite(checkbox_hover);
+            &.active{
+              @include home-sprite(checkbox-active_hover);
+            }
+          }
+
+        }
+        .checkbox{
+          @include size(12px,12px);
+          @include inline-block;
+          @include home-sprite(checkbox);
+          margin-top:-2px;
+          &.active{
+            @include home-sprite(checkbox-active);
+          }
+        }
+      }
+      input[type='text'],
+      input[type='password']{
+        font-size: 14px;
+        padding:14px;
+        padding-left:65px;
+        width:251px;
+        border:0;
+        margin-bottom:12px;
+        &#reg-username{
+          @include home-sprite(mail);
+          &.focus{
+            @include home-sprite(mail_focus);
+          }
+          &.error{
+            @include home-sprite(mail_error);
+          }
+        }
+        &#reg-password,
+        &#login-password{
+          @include home-sprite(pw);
+          &.focus{
+            @include home-sprite(pw_focus);
+          }
+          &.error{
+            @include home-sprite(pw_error);
+          }
+        }
+        &#login-username{
+          @include home-sprite(account);
+          &.focus{
+            @include home-sprite(account_focus);
+          }
+          &.error{
+            @include home-sprite(account_error);
+          }
+        }
+      }
+      .submit-reg{
+        @include size(330px,50px);
+        @include home-sprite(reg_btn);
+        border:0;
+        &:hover{
+          cursor: pointer;
+        }
+        &.disabled{
+          @include home-sprite(reg_btn_disabled);
+        }
+      }
+      .submit-login{
+        @include size(330px,50px);
+        @include home-sprite(login_btn);
+        border:0;
+        &:hover{
+          cursor: pointer;
+        }
+        &.disabled{
+          @include home-sprite(login_btn_disabled);
+        }
+      }
+    }
+  }
+}
+.page{
+  position: relative;
+  cursor: default;
+  z-index: 99;
+}
+.reason{
+  padding:55px 0 25px 0;
+  background: #F4F5F9;
+  border-bottom:1px $borderColor solid;
+  ul{
+    margin-left:40px;
+    @include clearfix;
+    li{
+      float: left;
+      width:102px;
+      height:142px;
+      margin:0 80px 45px 0;
+      span{
+        display: block;
+        text-align: center;
+        font-size: 16px;
+        color:#33333D;
+      }
+    }
+  }
+}
+.logos{
+  background: #FFF;
+  h2{
+    width:230px;
+    height:44px;
+    line-height: 44px;
+    margin:0 auto;
+    position: relative;
+    top:-22px;
+    text-align: center;
+    font-size: 20px;
+    color:#333;
+    background: #FFF;
+    border:1px $borderColor solid;
+    @include border-radius(4px);
+  }
+  ul{
+    height:130px;
+    li{
+      @include size(150px,100px);
+      float: left;
+    }
+  }
+}
+.footer{
+  height:135px;
+  padding:50px 0 45px 0;
+  color:#BEC4CE;
+  background: #33333d;
+  a{color:#BEC4CE;}
+  @include clearfix;
+  
+  .footer-left{
+    .logo2{
+      @include size(125px,26px);
+      @include home-sprite(logo2);
+      margin-bottom:30px;
+    }
+    ul{
+      @include clearfix;
+      li{
+        float: left;
+        a{
+          font-size: 14px;
+          margin-right:20px;
+        }
+      }
+    }
+    p{
+      margin-top:30px;
+      a{
+        margin:0 10px;
+      }
+    }
+  }
+  .footer-right{
+    .qr-code{
+      float:left;
+      @include size(140px,140px);
+    }
+    .contact{
+      float: left;
+      margin-left: 28px;
+      ul{
+        li{
+          width:260px;
+          height:40px;
+          margin-bottom:10px;
+          i{
+            @include size(40px,40px);
+            float: left;
+            margin-right:10px;
+            &.phone{@include home-sprite(phone);}
+            &.email{@include home-sprite(email);}
+            &.weibo{@include home-sprite(weibo);}
+          }
+          span{
+            display: block;
+            &.contact-title{
+              font-size: 18px;
+              font-weight: bold;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+.fancybox-opened .fancybox-skin{
+  -webkit-box-shadow: 0 0px 5px rgba(51, 51, 61, 0.5);
+  -moz-box-shadow: 0 0px 5px rgba(51, 51, 61, 0.5);
+  box-shadow: 0 0px 5px rgba(51, 51, 61, 0.5);
+  @include border-radius(0px);
+  padding:0px;
+  background: #fff;
+}
+
+.fancybox-inner{
+  overflow: visible;
+}
+
+.fancybox-close{
+  width:32px;
+  height:32px;
+  top:-16px;
+  right:-16px;
+  @include share-sprite(x);
+  &:hover{
+    @include share-sprite(x_hover);
+  }
+}
+
+
+
+// 忘记密码
+.forget-password{
+  display:none;
+  width:430px;
+  padding:30px;
+  background: #FFF;
+  cursor: default;
+  h2{
+    margin-bottom:20px;
+    color:$exblue;
+    font-size: 18px;
+  }
+  p{
+    @include clearfix;
+    &.tip{
+      font-size: 14px;
+      padding:12px 0;
+      height:16px;
+      a{
+        color:$exblue;
+        text-decoration: underline;
+        &:hover{
+          color:red;
+        }
+      }
+    }
+  }
+  input{
+    width:300px;
+    font-size: 14px;
+    padding:10px;
+    float: left;
+  }
+  button{
+    height:43px;
+    width:100px;
+    letter-spacing: 2px;
+    font-size: 16px;
+    background: #ffc800;
+    border:0;
+    outline: none;
+    &.sending{
+      background: #ccc;
+      &:hover{
+        background: #ccc;
+        cursor: default;
+      }
+    }
+    &.finished{
+      background: #9bca3e;
+      color:#fff;
+      &:hover{
+        background: #9bca3e;
+        color:#fff;
+        cursor: default;
+      }
+    }
+    @include border-right-radius(4px);
+    &:hover{
+      cursor: pointer;
+      background: #FFD44D;
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
