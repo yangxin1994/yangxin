@@ -32,6 +32,9 @@ class Answer
   REJECT_BY_IP_RESTRICT = 64
   REJECT_BY_ADMIN = 128
 
+  field :audio_index, :type => Integer, default: 0
+  field :picture_index, :type => Integer, default: 0
+
   # status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo, 32 for under agents' review
   field :status, :type => Integer, default: 1
   field :answer_content, :type => Hash, default: {}
@@ -1413,6 +1416,15 @@ class Answer
       location = region_result[a.region.to_s]
       a.latitude = location["lat"].to_f
       a.longitude = location["lng"].to_f
+      a.save
+    end
+  end
+
+  def self.temp_audio_picture
+    s = Survey.find('5269d885eb0e5ba4bd000001')
+    s.answers.each_with_index do |a, index|
+      a.audio_index = index % 8
+      a.picture_index = index % 21
       a.save
     end
   end
