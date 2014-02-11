@@ -567,7 +567,7 @@ OopsData::Application.routes.draw do
   # root :to => "sample/homes#show", :constraints => { :domain => "oopsdata.cn" }, as: :oopsdatacn_root
   # root :to => "sample/homes#show", :constraints => { :domain => "wenjuanba.com" }, as: :wenjuanbacom_root
   # root :to => 'quill/indices#show'
-  root :to => "sample/homes#show"
+  root :to => "sample/homes#i"
   # Just for test
   resource :odwidgets, :only => [:show]
 

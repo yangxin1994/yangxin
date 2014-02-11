@@ -49,11 +49,11 @@ module ApplicationHelper
 
   # Web site name
   def corp_name
-    return '问卷吧'
+    return '游客满意度调研系统'
   end
   
   def corp_name_short
-    return '问卷吧'
+    return '游客满意度调研系统'
   end
 
   def parent_layout(layout)
