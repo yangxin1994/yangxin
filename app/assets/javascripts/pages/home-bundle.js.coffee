@@ -1,5 +1,6 @@
 #=require jquery.fancybox.pack
 #=require ui/plugins/od_enter
+#=require utility_admin/querilayer
 
 $ ->
 

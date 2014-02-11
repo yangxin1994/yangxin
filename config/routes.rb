@@ -4,6 +4,7 @@ OopsData::Application.routes.draw do
   # match '*path' => 'welcome#index'
   # get '/:unique_key' => 'utility/short_urls#show', :constraints => { :unique_key => /~.+/ }
   match '/:unique_key' => 'mongoid_shortener/shortened_urls#translate', :via => :get, :constraints => { :unique_key => /~.+/ }
+  match 'index' => "sample/homes#i"
   # scope :module => :mongoid_shortener do
   #   resource :shortened_urls do
   #     collection do
@@ -45,7 +46,11 @@ OopsData::Application.routes.draw do
       end
     end
 
-    resource :home, :only => [:show] 
+    resource :home, :only => [:show] do
+      collection do
+        get :i
+      end
+    end
 
     resources :surveys, :only => [:index] do 
       collection do

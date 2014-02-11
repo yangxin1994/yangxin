@@ -26,7 +26,7 @@ class Querilayer
 window.querilayer = new Querilayer
 
 $ ->
-  _tmp_queries = Object.clone(querilayer.queries)
+  _tmp_queries = (-> querilayer.queries).call()
   $('.querilayer').each (index, _this)->
     $this = $(_this)
     href = $this.attr("href").split("?")
@@ -39,4 +39,5 @@ $ ->
           _query = _query_str.split("=")
           querilayer.queries[_query[0]] = _query[1]
     $this.attr("href", _path + querilayer.to_s())
-    querilayer.queries = Object.clone(_tmp_queries)
+    querilayer.queries = (-> _tmp_queries).call()
+  
