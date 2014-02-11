@@ -1414,11 +1414,22 @@ class Answer
     region_result = QuillCommon::AddressUtility.province_hash.merge(QuillCommon::AddressUtility.city_hash).merge(QuillCommon::AddressUtility.county_hash)
     s.answers.each do |a|
       location = region_result[a.region.to_s]
+			next if location.nil?
       a.latitude = location["lat"].to_f
       a.longitude = location["lng"].to_f
       a.save
     end
   end
+
+	def self.location_offset
+    s = Survey.find('5269d885eb0e5ba4bd000001')
+    s.answers.each do |a|
+			next if a.latitude.blank?
+      a.latitude = a.latitude.to_f + (rand * 0.24 - 0.12)
+      a.longitude = a.longitude.to_f + (rand * 0.24 - 0.12)
+      a.save
+    end
+	end
 
   def self.temp_audio_picture
     s = Survey.find('5269d885eb0e5ba4bd000001')
