@@ -28,9 +28,18 @@
     <p> 访问员:<%= @questions.interviewer_task.user.email  %></p>
   <%- end %>
   <p> 开始答题时间:<%= @questions.created_at.strftime('%Y-%m-%d %H:%M:%S')  %></p>
-  <p> 答题时长: <%= ((@questions.finished_at - @questions.created_at.to_i) / 60.0 ).ceil if @questions.finished_at.present? %> 分钟</p>
+  <p>
+		答题时长: <%= ((@questions.finished_at - @questions.created_at.to_i) / 60.0 ).ceil if @questions.finished_at.present? %> 分钟
+		<span> <a href="/manyime/audio/<%= @questions.audio_index %>.3gp">录音下载</a></span>
+	</p>
   <p class="red"> <%= @questions.audit_message %> </p>
   <div id="map" style="height:500px;"></div>
+	<br />
+	<p>
+		现场照片：
+		<br />
+    <img src="/manyime/picture/<%= @questions.picture_index %>.jpg"  alt="上海鲜花港 - 郁金香" />
+	</p>
 <%= render :partial => "admin/answers/detail" %>
 <% if @questions['status'].to_i == 4 %>
   <span class="pull-right">
