@@ -18,7 +18,7 @@
   background: #FFF;
   // @include box-shadow(rgba(#000, 0.7) 0 0 2px);
   .logo{
-    @include size(172px,36px);
+    @include size(282px,36px);
     @include home-sprite(logo);
     float: left;
     margin-top:10px;
@@ -313,7 +313,7 @@
   
   .footer-left{
     .logo2{
-      @include size(125px,26px);
+      @include size(282px,26px);
       @include home-sprite(logo2);
       margin-bottom:30px;
     }
