@@ -46,7 +46,7 @@ class ApplicationController < ActionController::Base
   def require_sign_in
     if !user_signed_in
       respond_to do |format|
-        format.html { redirect_to sign_in_account_path({ref: request.url}) and return }
+        format.html { redirect_to home_path({ref: request.url}) and return }
         # format.json { render :json => Common::ResultInfo.error_require_login and return }
         format.json { render_json_e ErrorEnum::REQUIRE_LOGIN and return }
       end
