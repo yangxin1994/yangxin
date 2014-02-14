@@ -44,7 +44,7 @@ module ApplicationHelper
 
   # Copy right html
   def copyright_html
-    return '版权所有 &copy; 2012-2014 清研咨询'
+    return '版权所有 &copy; 2012-2014 清研科技'
   end
 
   # Web site name
