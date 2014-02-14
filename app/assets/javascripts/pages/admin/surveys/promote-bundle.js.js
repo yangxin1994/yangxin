@@ -482,7 +482,7 @@ $(function() {
     var $this, add_html, index;
     $this = $(this);
     index = $this.data('toggle') + 1;
-    add_html = "<div class=\"control-group broswer_extension-info\">\n  <label class=\"control-label\" >浏览器插件详细设置:</label>\n  <div class=\"controls\">\n    <input type=\"text\" placeholder=\"在这里输入关键字\" id=\"weibo_text\" name=\"broswer_extension[broswer_extension_promote_setting][filters][" + index + "][key_words]\" />\n  </div>\n</div>\n<div class=\"control-group broswer_extension-info\">\n  <div class=\"controls\">\n    <input type=\"text\" placeholder=\"在这里输入网址\" id=\"weibo_text\" name=\"broswer_extension[broswer_extension_promote_setting][filters][" + index + "][url]\" />\n  </div>\n</div>";
+    add_html = "<div class=\"control-group browser_extension-info\">\n  <label class=\"control-label\" >浏览器插件详细设置:</label>\n  <div class=\"controls\">\n    <input type=\"text\" placeholder=\"在这里输入关键字\" id=\"weibo_text\" name=\"browser_extension[browser_extension_promote_setting][filters][" + index + "][key_words]\" />\n  </div>\n</div>\n<div class=\"control-group browser_extension-info\">\n  <div class=\"controls\">\n    <input type=\"text\" placeholder=\"在这里输入网址\" id=\"weibo_text\" name=\"browser_extension[browser_extension_promote_setting][filters][" + index + "][url]\" />\n  </div>\n</div>";
     $this.data('toggle', index);
     return $this.parent().parent().parent().prepend(add_html);
   });

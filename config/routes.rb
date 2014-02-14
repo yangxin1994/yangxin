@@ -18,68 +18,7 @@ OopsData::Application.routes.draw do
     end
   end
 
-  namespace :express, :path => :e do
-    resources :questionaires do
-      member do
-        get :stars
-        post :clone
-        put :recover, :remove, :update_star, :publish, :deadline, :close
-      end
-
-      resources :pages, :only => [:create, :show] do
-        member do
-          put :split, :combine
-        end
-      end
-
-      resources :questions, :only => [:create, :show, :update, :destroy] do
-        member do
-          get :analyse
-          put :move
-        end
-      end
-
-      resource :authority, :only => [:show, :update]
-      resource :property, :only => [:show, :update] do
-        member do
-          get :more
-          put :update_more
-        end
-      end
-
-      resource :quality, :only => [:show, :update]
-
-      resource :customization, :only => [:show, :update]
-
-      resources :logics, :only => [:index, :show, :destroy, :update, :create]
-
-      resource :share, :only => [:show]
-
-      resources :quotas, :only => [:destroy, :update, :create] do
-        collection do
-          post :refresh
-        end
-      end
-
-      resources :filters, :only => [:index, :show, :destroy, :update, :create]
-
-      resources :report_mockups, :only => [:index, :show, :create, :update, :destroy] do
-        member do
-          get :report
-        end
-      end
-
-      resource :result, :only => [:show] do
-        member do
-          get :spss, :excel, :report, :csv_header
-          post :import_data
-        end
-      end
-
-      resource :preview, :only => [:show]      
-    end
-  end
-
+  resources :sample_servers,:only => [:create]
 
   # sample
   scope :module => "sample" do
@@ -117,6 +56,7 @@ OopsData::Application.routes.draw do
         get  :cancel_subscribe
         post :get_reward_type_count
         post :generate_rss_activate_code
+        get :offline_user_rss
       end
 
       member do
@@ -353,6 +293,14 @@ OopsData::Application.routes.draw do
 
     resources :prizes
 
+    resources :popularizes do
+      collection do 
+        put :sort
+        get :weibo
+        post :add_reward
+      end 
+    end
+
     resources :surveys, :as => :s do
       member do
         get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info, :sample_attributes, :interviewer_task, :new_interviewer, :questions
@@ -376,8 +324,8 @@ OopsData::Application.routes.draw do
       end
 
       collection do
-        post :add_attributes, :send_message
-        get :attributes, :new_attributes, :status, :get_sample_count, :get_active_sample_count, :all_attributes
+        post :point_returned, :add_attributes, :send_message
+        get :return_point, :total_point, :attributes, :new_attributes, :status, :get_sample_count, :get_active_sample_count, :all_attributes
       end
     end
 
@@ -399,6 +347,7 @@ OopsData::Application.routes.draw do
     resources :orders, :only => [:index, :show, :update] do
       collection do
         get :to_excel
+        put :batch
       end
 
       member do
@@ -430,6 +379,12 @@ OopsData::Application.routes.draw do
       end
     end
 
+    resources :netranking_users do
+      collection do
+        post :import
+      end
+    end
+
     resources :newsletters do
       member do
         post   :deliver
@@ -441,6 +396,12 @@ OopsData::Application.routes.draw do
         post   :column
         post   :article
         post   :product_news
+        get    :netranking_newsletter
+        get    :upload_attachment
+        post   :attachment_uploaded
+        post   :send_netranking_newsletter
+        get    :sms
+        post   :send_sms
       end
     end
 
@@ -486,6 +447,9 @@ OopsData::Application.routes.draw do
       get :get_active_sample_count
       end
     end
+
+    resources :sample_servers
+
   end
 
   # utility
@@ -572,6 +536,7 @@ OopsData::Application.routes.draw do
         post :finish
         post :clear
         delete :destroy_preview
+        delete :replay
         put :select_reward
         post :select_reward_for_mobile
         post :start_bind

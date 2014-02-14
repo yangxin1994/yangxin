@@ -5,6 +5,7 @@ require 'uri'
 class ThirdPartyUser
 
   include Mongoid::Document
+  include Mongoid::Timestamps
   include FindTool
 
   # website can be "renren", "sina", "qq", "google", "qihu"

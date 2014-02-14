@@ -1,3 +1,13 @@
+<%
+	if @page_title.blank?
+		if @survey_closed
+			@page_title = '错误 - 问卷已经关闭'
+		else
+			@page_title = "#{@is_preview ? '答题预览 - ' : ''}#{@survey.title}"
+		end
+	end
+%>
+
 <% content_for :head do %>
 	<%= javascript_include_tag "pages/filler/answer-mobile" %>
 	<%= stylesheet_link_tag    "pages/filler/answer-mobile" %>
@@ -7,7 +17,7 @@
 		var survey_model = new quill.models.Survey(<%= raw @survey.to_json %>);
 		var survey_filler = new quill.views.SurveyFiller({
 			model: survey_model,
-			is_preview: <%=@is_preview %>,
+			is_preview: <%= @is_preview %>,
 			reward: {
 				id: <%= raw @reward_scheme_id.to_json %>,
 				reward_scheme_type: <%= @reward_scheme_type %>,

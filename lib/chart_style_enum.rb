@@ -6,4 +6,5 @@ module ChartStyleEnum
 	BAR = 3
 	STACK = 4
 	TABLE = 5
+	MULTI_STACK = 6
 end

@@ -1,0 +1,55 @@
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/samples/status-bundle" %>
+<% end %>
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+
+    <li>
+      <a href="/admin/samples">
+      <i class="icon-chevron-right"></i>
+      样本列表
+      </a>
+    </li>
+    <li>
+      <a href="/admin/samples/attributes">
+      <i class="icon-chevron-right"></i>
+      样本属性
+      </a>
+    </li>
+    <li>
+      <a href="/admin/sample/status">
+        <i class="icon-chevron-right"></i>
+        样本数据统计
+      </a>
+    </li>
+    <li>
+      <a href="/admin/samples/total_point">
+        <i class="icon-chevron-right"></i>
+        积分总数
+      </a>
+    </li>
+    <li class="active">
+      <a href="/admin/samples/return_point">
+        <i class="icon-chevron-right"></i>
+        批量退回积分
+      </a>
+    </li>
+  </ul>
+<% end %>
+
+<div class="bs-docs-example">
+  <%= form_tag("/admin/samples/point_returned", method: "post", multipart: true) do %>
+    <p>
+      <%= label_tag :content, "积分退回信息" %>
+      <%= text_area_tag "content" %>
+    </p>
+    <p>
+      <%= submit_tag "上传" %>
+    </p>
+  <% end %>
+</div>
+
+
+
+
+

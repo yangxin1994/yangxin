@@ -13,6 +13,13 @@
 		window.current_user_id = <%=  raw (current_user.nil? ? nil.to_json : current_user._id.to_s.to_json) %>;
 	</script>
 
+	<% if @survey['_id'].to_s == '52a59fc6eb0e5bb2c5000007' %>
+	<!-- hack gonganbu to hide logo -->
+		<style type="text/css">
+			#logo { display: none; }
+		</style>
+	<% end %>
+
 	<%= yield :head %>
 
 	<% if @survey['style_setting']['style_sheet_name'].blank? %>
@@ -24,32 +31,36 @@
 
 <% content_for :app_content do %>
 
-<% if @is_preview %>
-<div id='pv_bar'>
-	<img src="/assets/filler/preview.png"><span>您正在模拟答题，答案不会被记录。</span><button>重新开始</button>
-</div>
-<% end %>
 
 <div id='sf'>
 	
 <div id='sf_banner'>
-	<div id='sf_banner_sticky'>
-		<div class='sf_banner_top'>
-			<div class='inner'>
-				<a id='logo' href="http://oopsdata.com">
-					<img src="/assets/filler/default/logo.png" />
-				</a>
-				<% if @survey['style_setting']['has_progress_bar'] %>
-				<div id='progress_con'>
-					<div id='progress_info'></div>
-					<div id='progress_bar'><em></em></div>
-				</div>
-				<% end %>
-			</div>
-		</div>
-		<div class='sf_banner_bottom'></div>
+	<% if @is_preview %>
+	<div id='pv_bar'>
+		<img src="/assets/filler/preview.png"><span>您正在模拟答题，答案不会被记录。</span><button>重新开始</button>
 	</div>
+	<% elsif @survey['style_setting']['allow_replay'] %>
+	<div id='pv_bar'>
+		<span>请认真答题</span><button>重新开始</button>
+	</div>
+	<% end %>
+	<div class='sf_banner_top'>
+		<div class='inner'>
+			<a id='logo' href="http://oopsdata.com">
+				<img src="/assets/filler/default/logo.png" />
+			</a>
+			<% if @survey['style_setting']['has_progress_bar'] %>
+			<div id='progress_con'>
+				<div id='progress_info'></div>
+				<div id='progress_bar'><em></em></div>
+			</div>
+			<% end %>
+		</div>
+	</div>
+	<div class='sf_banner_bottom'></div>
 </div>
+
+<div class='sf_banner_span <% if @is_preview %>is_preview<%end%>'>&nbsp;</div>
 
 <%= yield %>
 

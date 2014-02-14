@@ -18,6 +18,9 @@
 //=require ../templates/survey_filler_end_lottery
 
 $(function(){
+	
+	var gonganbu = '52a59fc6eb0e5bb2c5000007', renmin = ''
+
 	/* Survey filer
 	 * options:
 	 *    answer_id: string, if null, the user has not started answer the survey
@@ -33,17 +36,7 @@ $(function(){
 	 * =========================== */
 	quill.quillClass('quill.views.SurveyFiller', quill.views.Base, {
 
-		_redirect_link: '/',
-
 		_initialize: function() {
-			// get survey redirect link
-			var link = this.model.get('style_setting').redirect_link;
-			if($.regex.isUrl(link)) {
-				link = link.toLowerCase();
-				if(link.indexOf('http') != 0)
-					link = 'http://' + link;
-				this._redirect_link = link;
-			}
 			// spread point
 			if(this.options.spread_point == undefined)
 				this.options.spread_point = 0;
@@ -67,12 +60,27 @@ $(function(){
 			});
 		},
 
+		_close: function() {
+			// close window or redirect
+			var link = this.model.get('style_setting').redirect_link;
+			if($.regex.isUrl(link)) {
+				link = link.toLowerCase();
+				if(link.indexOf('http') != 0)
+					link = 'http://' + link;
+				location.href = link;
+			} else {
+				var opened = window.open('about:blank','_self');
+				opened.opener = null;
+				opened.close();
+			}
+		},
+
 		_render: function() {
 			// restart preview button
 			$('#pv_bar button').show().click($.proxy(function() {
-				$.deleteJSON(this._uri('/destroy_preview'), $.proxy(function(retval) {
+				$.deleteJSON(this._uri(this.options.is_preview ? '/destroy_preview' : '/replay'), $.proxy(function(retval) {
 					if(retval.success)
-						location.href = '/p/' + this.options.reward.id
+						location.href = (this.options.is_preview ? '/p/' : '/s/') + this.options.reward.id
 					else 
 						this._error('操作失败，请刷新页面重试。');
 				}, this));
@@ -110,7 +118,8 @@ $(function(){
 				// answer_status: 1（正在回答）
 				// setup questions
 				var questions = value.questions, answers = value.answers, total_count = value.question_number, 
-					index = value.answer_index, time = value.estimate_answer_time, redo_count = value.repeat_time;
+					index = value.answer_index, time = value.estimate_answer_time, redo_count = value.repeat_time,
+					answer_index_all = value.answer_index_all;
 
 				// setup question or submit page
 				if(questions.length == 0) {
@@ -232,7 +241,7 @@ $(function(){
 						prev_btn.text('正在加载上一页问题...');
 						this.load_questions((questions.length > 0) ? questions[0]['_id'] : -1, false);
 					}, this));
-					if(index == 0) prev_btn.hide();
+					if(answer_index_all == 0) prev_btn.hide();
 				}
 			} else if(value.answer_status == 4 || value.answer_status == 8 || value.answer_status == 32) {
 				// answer_status: 4（待审核），8（等待代理审核），32（完成）
@@ -244,10 +253,10 @@ $(function(){
 						publish_result: this.model.get('publish_result'),
 						spreadable: this.options.spread_point > 0,
 						spread_point: this.options.spread_point,
-						show_subscribe: !this.options.binded
+						show_subscribe: !this.options.binded && this.model.get('_id') != gonganbu
 					}, 'survey_filler_end_free').appendTo('#f_body');
 					$('#start_spread').click($.proxy(function() { this._spread(); }, this));
-					$('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));
+					$('#close_btn').click($.proxy(function() { this._close(); }, this));
 				} else if(this.options.reward.reward_scheme_type == 1) {
 					// cash
 					if(value.order_id == null) {
@@ -334,7 +343,6 @@ $(function(){
 								if(retval.success) {
 									location.reload(true);
 								} else {
-									console.log("retval")
 									var error_msg = ((retval.value != null) ? infos[award_type][retval.value.error_code] : null);
 									if(error_msg != null) {
 										ok_btn.odButtonText('restore');
@@ -360,7 +368,7 @@ $(function(){
 							publish_result: this.model.get('publish_result'),
 							spreadable: this.options.spread_point > 0,
 							spread_point: this.options.spread_point,
-							show_subscribe: !this.options.binded
+							show_subscribe: !this.options.binded && this.model.get('_id') != gonganbu
 						}, 'survey_filler_end_money_finish').appendTo('#f_body');
 						$('#start_spread').click($.proxy(function() { this._spread(); }, this));
 						$('#my_order_btn').click(function() { location.href = '/users/orders'; });
@@ -368,7 +376,7 @@ $(function(){
 							$.util.disable(signin_btn.text('正在跳转...'));
 							$.postJSON(this._uri('/start_bind'), function(retval) { location.href = '/account/sign_in?ref=' + encodeURIComponent('/users/orders'); });
 						}, this));
-						$('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));
+						$('#close_btn').click($.proxy(function() { this._close(); }, this));
 					}
 				} else if(this.options.reward.reward_scheme_type == 2) {
 					// point
@@ -380,7 +388,7 @@ $(function(){
 						publish_result: this.model.get('publish_result'),
 						spreadable: this.options.spread_point > 0,
 						spread_point: this.options.spread_point,
-						show_subscribe: !this.options.binded
+						show_subscribe: !this.options.binded && this.model.get('_id') != gonganbu
 					}, (value.answer_status == 32) ? 'survey_filler_end_point_finish' : 'survey_filler_end_point_review').appendTo('#f_body');
 					$('#start_spread').click($.proxy(function() { this._spread(); }, this));
 					$('#my_surveys_btn').click(function() { location.href = '/users/surveys'; });
@@ -391,22 +399,18 @@ $(function(){
 					}, this));
 				} else if(this.options.reward.reward_scheme_type == 3) {
 					// lottery
-					// if(this.options.reward.lottery_started) {
-						// location.href = '/lotteries/' + this.options.answer_id;
-					// } else {
-						this.hbs({
-							title: this.model.get('title'),
-							prizes: this.options.reward.prizes,
-							signin: this.options.signin,
-							survey_id: this.model.get('_id'),
-							publish_result: this.model.get('publish_result'),
-							spreadable: this.options.spread_point > 0,
-							spread_point: this.options.spread_point,
-							show_subscribe: !this.options.binded
-						}, 'survey_filler_end_lottery').appendTo('#f_body');
-						$('#start_spread').click($.proxy(function() { this._spread(); }, this));
-						$('#ok_btn').click($.proxy(function() { location.href = '/lotteries/' + this.options.answer_id; }, this));
-					// }
+					this.hbs({
+						title: this.model.get('title'),
+						prizes: this.options.reward.prizes,
+						signin: this.options.signin,
+						survey_id: this.model.get('_id'),
+						publish_result: this.model.get('publish_result'),
+						spreadable: this.options.spread_point > 0,
+						spread_point: this.options.spread_point,
+						show_subscribe: !this.options.binded && this.model.get('_id') != gonganbu
+					}, 'survey_filler_end_lottery').appendTo('#f_body');
+					$('#start_spread').click($.proxy(function() { this._spread(); }, this));
+					$('#ok_btn').click($.proxy(function() { location.href = '/lotteries/' + this.options.answer_id; }, this));
 				}
 			} else if (value.answer_status == 16) {
 				// 重答
@@ -433,17 +437,14 @@ $(function(){
 					publish_result: this.model.get('publish_result'),
 					spreadable: this.options.spread_point > 0,
 					spread_point: this.options.spread_point,
-					show_subscribe: !this.options.binded
+					show_subscribe: !this.options.binded && this.model.get('_id') != gonganbu
 				}, 'survey_filler_reject').appendTo('#f_body');
 				$('#start_spread').click($.proxy(function() { this._spread(); }, this));
-				$('#close_btn').click($.proxy(function() { location.href = this._redirect_link; }, this));
+				$('#close_btn').click($.proxy(function() { this._close(); }, this));
 			}
 
 			// scroll to window top
 			$("html, body").animate({ scrollTop: 0 }, 500);
-			if(!$.browser.msie) {
-				$('#sf_banner_sticky').css('top', 0);	// hack stickyscroll plugin - stick to middle of the window
-			}
 		},
 
 		/* Update progress bar

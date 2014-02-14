@@ -44,6 +44,9 @@ class Sample::SurveysController < Sample::SampleController
     render :json => retval and return
   end
 
+  def offline_user_rss
+    retval = User.create_activated_rss_user(params[:email_mobile])
+  end
 
   def mobile_rss_activate
     user   = User.find_by_mobile(params[:rss_channel])

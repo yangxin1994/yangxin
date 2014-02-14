@@ -63,7 +63,8 @@ class SmsApi # 短信接口
   end
 
   #同步发送即时短信
-  def self.send_sms(type,phone, message)
+  def self.send_sms(type, phone, message)
+    message.gsub!("\n", "")
     Rails.logger.info "AAAAAAAAAAAAAA"
     Rails.logger.info phone
     Rails.logger.info message
@@ -154,7 +155,7 @@ class SmsApi # 短信接口
     self.send_sms('invitation',mobile, text)
   end
 
-  def self.find_password_sms(type,mobile, callback, opt)
+  def self.find_password_sms(type, mobile, callback, opt)
     @code = opt["code"].to_s
     text_template_file_name = "#{Rails.root}/app/views/sms_text/find_password_sms.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
@@ -170,7 +171,7 @@ class SmsApi # 短信接口
     self.send_sms(mobile, text)
   end
   
-  def self.rss_subscribe_sms(type,mobile, callback, opt)
+  def self.rss_subscribe_sms(type, mobile, callback, opt)
     @code = opt["code"].to_s
     text_template_file_name = "#{Rails.root}/app/views/sms_text/rss_subscribe_sms.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
@@ -178,7 +179,7 @@ class SmsApi # 短信接口
     self.send_sms(type,mobile, text)
   end
 
-  def self.activate_sms(type,mobile, callback, opt)
+  def self.activate_sms(type, mobile, callback, opt)
     @code = opt["code"].to_s
     text_template_file_name = "#{Rails.root}/app/views/sms_text/activate_sms.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
@@ -186,7 +187,7 @@ class SmsApi # 短信接口
     self.send_sms(type,mobile, text)
   end
 
-  def self.welcome_sms(type,mobile, callback, opt)
+  def self.welcome_sms(type, mobile, callback, opt)
     @code = opt["active_code"].to_s
     text_template_file_name = "#{Rails.root}/app/views/sms_text/welcome_sms.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
@@ -200,5 +201,20 @@ class SmsApi # 短信接口
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
     text = text_template.result(binding)
     self.send_sms(mobile, text)
+  end
+
+  def self.send_massive_sms(mobile_list, sms_text)
+    group_size = 100
+    groups = []
+    while mobile_list.size >= group_size
+      temp_group = mobile_list[0..group_size-1]
+      groups << temp_group
+      mobile_list = mobile_list[group_size..-1]
+    end
+    groups << mobile_list
+
+    groups.each do |group|
+      self.send_sms("massive", group.join(','), sms_text)
+    end
   end
 end

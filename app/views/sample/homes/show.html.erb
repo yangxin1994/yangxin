@@ -24,16 +24,34 @@
 <div class="inner-page fix">
   <!-- 焦点图切换 -->
   <div id="slideBox" class="slider">
-    <div class="hd">
-      <ul><li>1</li><li>2</li><li>3</li></ul>
-    </div>
-    <div class="bd">
-      <ul>
-        <li><img src="/assets/od-quillme/banner/banner_1.png" /></li>
-        <li><img src="/assets/od-quillme/banner/banner_2.png" /></li>
-        <li><img src="/assets/od-quillme/banner/banner_3.png" /></li>
-      </ul>
-    </div>
+    <% if @data[:banners].length > 0 %>
+      <div class="hd">
+        <ul>
+          <% @data[:banners].each_with_index do |banner,idx|%>
+            <li><%= idx + 1 %></li>
+          <% end %>
+        </ul>  
+      </div>
+      <div class="bd">
+        <ul>
+          <% @data[:banners].each do |banner|%>
+            <li><%= image_tag(banner.image.url) %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% else %>
+      <div class="hd">
+        <ul><li>1</li><li>2</li><li>3</li></ul>
+      </div>
+      <div class="bd">
+        <ul>
+          <li><img src="/assets/od-quillme/banner/banner_1.jpg" /></li>
+          <li><img src="/assets/od-quillme/banner/banner_2.png" /></li>
+          <li><img src="/assets/od-quillme/banner/banner_3.png" /></li>
+        </ul>
+      </div>    
+    <% end %>
+
   </div>
   <!-- 公告 -->
   <div class="bulletin dashed-box r">
