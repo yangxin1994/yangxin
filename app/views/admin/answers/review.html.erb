@@ -35,11 +35,6 @@
   <p class="red"> <%= @questions.audit_message %> </p>
   <div id="map" style="height:500px;"></div>
 	<br />
-	<p>
-		现场照片：
-		<br />
-    <img src="/manyime/picture/<%= @questions.picture_index %>.jpg"  alt="上海鲜花港 - 郁金香" />
-	</p>
 <%= render :partial => "admin/answers/detail" %>
 <% if @questions['status'].to_i == 4 %>
   <span class="pull-right">
