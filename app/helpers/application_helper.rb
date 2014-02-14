@@ -44,16 +44,16 @@ module ApplicationHelper
 
   # Copy right html
   def copyright_html
-    return '版权所有 &copy; 2012-2014 清研咨询'
+    return '版权所有 &copy; 2012-2014 清研科技'
   end
 
   # Web site name
   def corp_name
-    return '游客满意度调研系统'
+    return '居民满意度调研系统'
   end
   
   def corp_name_short
-    return '游客满意度调研系统'
+    return '居民满意度调研系统'
   end
 
   def parent_layout(layout)
