@@ -13,6 +13,7 @@ gem "kiqstand", '~> 1.0.0'
 gem 'whenever', '~> 0.8.2', :require => false
 gem 'sinatra', require: false
 gem 'slim', '~> 1.3.6'
+gem 'haml', '~> 4.0.3'
 
 gem 'ezcrypto', '~> 0.7.2'
 gem 'rack-protection', '~> 1.3.2'
