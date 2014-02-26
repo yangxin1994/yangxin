@@ -11,5 +11,6 @@ class Client::SurveysController < Client::ApplicationController
     @interviewer_tasks = @survey.interviewer_tasks
     @answers = @interviewer_tasks.map { |e| e.answers } .flatten
     @answers = @answers.select { |e| e.status == Answer::FINISHED }
+    @location = @answers.map { |e| "#{e.latitude},#{e.longitude}" } .join('-')
   end
 end
