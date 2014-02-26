@@ -4,7 +4,7 @@
       = form_for "client", :url=> "/client/signin", :html => { :class => "form-horizontal"} do |f|
         %legend 登录
         .form-group
-          = f.label :email, "邮箱:"
+          = f.label :email, "账户:"
           = f.text_field :email, :class => "form-control"
         .form-group
           = f.label :password, "密码:"
