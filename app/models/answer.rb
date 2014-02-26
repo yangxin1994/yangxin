@@ -495,6 +495,10 @@ class Answer
       v["selection"] ||= [] if v.class == Hash && v.has_key?("selection")
       self.answer_content[k] = v if self.answer_content.has_key?(k)
       self.random_quality_control_answer_content[k] = v if self.random_quality_control_answer_content.has_key?(k)
+      if self.answer_content[k].nil?
+        q = Question.find(k)
+        self.answer_content[k] = {} if q.is_required == false
+      end
     end
     self.save
     return true
