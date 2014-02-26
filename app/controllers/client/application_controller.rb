@@ -6,7 +6,7 @@ class Client::ApplicationController < ApplicationController
   helper_method :client_signed_in, :current_client
 
   def require_client
-    if session[:auth_key] != current_client.try('auth_key')
+    if session[:auth_key].blank? || session[:auth_key] != current_client.try('auth_key')
       redirect_to "/client/signin", :notice => "您需要登录才能继续操作!" and return
     end
   end
