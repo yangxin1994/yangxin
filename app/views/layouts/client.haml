@@ -1,6 +1,6 @@
 - content_for :app_head do
-  = stylesheet_link_tag "bootstrap_and_overrides", :media => "all"
-  = javascript_include_tag "bootstrap.min"
+  = stylesheet_link_tag "pages/client/client-bundle", :media => "all"
+  = javascript_include_tag "pages/client/client-bundle"
   = yield :head
 - content_for :app_content do
   .navbar-wrapper
