@@ -1,0 +1,12 @@
+.container
+  .row
+    .col-sm-4.col-sm-offset-4.col-xs-10.col-xs-offset-1
+      = form_for "client", :url=> "/client/signin", :html => { :class => "form-horizontal"} do |f|
+        %legend 登录
+        .form-group
+          = f.label :email, "邮箱:"
+          = f.text_field :email, :class => "form-control"
+        .form-group
+          = f.label :password, "密码:"
+          = f.password_field :password, :class => "form-control"
+        = f.submit "确定",:class => "btn"

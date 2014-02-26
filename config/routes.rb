@@ -502,6 +502,16 @@ OopsData::Application.routes.draw do
     end
   end
 
+  namespace :client do
+    resources :surveys do
+    end
+    scope :module => :sessions do
+      resources :signin
+      resources :signout
+      resources :reset_password
+    end
+  end
+
   namespace :agent do
     scope :module => :sessions do
       resources :signin
