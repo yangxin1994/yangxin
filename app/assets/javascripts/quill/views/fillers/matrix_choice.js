@@ -81,8 +81,7 @@ $(function(){
 			};
 		},
 
-		setAnswer: function(answer) {
-			if(!answer) return;
+		_setAnswer: function(answer) {
 			for (var i = 0; i < this.model_issue.rows.length; i++) {
 				var row = this.model_issue.rows[i];
 				var group_id = this.model.id + '_' + row.id;

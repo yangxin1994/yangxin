@@ -23,8 +23,7 @@ $(function(){
 			}
 		},
 
-		setAnswer: function(answer) {
-			if(!answer) return;
+		_setAnswer: function(answer) {
 			this.$('#' + this.model.id).val(answer);
 		},
 		_getAnswer: function() {
