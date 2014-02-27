@@ -56,6 +56,14 @@ class Admin::AnswersController < Admin::AdminController
     @survey = @questions.survey
   end
 
+  def set_location
+    render_json Answer.find(params[:id]) do |answer|
+      answer.latitude = params[:lat]
+      answer.longitude = params[:lng]
+      answer.save
+    end
+  end
+
   def update
     render_json Answer.find(params[:id]) do |answer|
       answer.review(params[:review_result].to_s == "true", current_user, params[:message_content])

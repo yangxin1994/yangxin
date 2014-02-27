@@ -109,6 +109,7 @@ class Survey
   has_many :agent_tasks
   has_and_belongs_to_many :answer_auditors, class_name: "User", inverse_of: :answer_auditor_allocated_surveys
   belongs_to :user, class_name: "User", inverse_of: :surveys
+  belongs_to :client
 
 
   scope :status, ->(st) { where(:status.in => Tool.convert_int_to_base_arr(st || (Survey::CLOSED + Survey::PUBLISHED)))}

@@ -334,7 +334,7 @@ OopsData::Application.routes.draw do
     resources :answers do
       member do
         get :review, :to_csv
-        put :reject
+        put :reject, :set_location
       end
     end
 
@@ -499,6 +499,16 @@ OopsData::Application.routes.draw do
       member do
         put 'publish', 'close', 'pause', 'reject'
       end
+    end
+  end
+
+  namespace :client do
+    resources :surveys do
+    end
+    scope :module => :sessions do
+      resources :signin
+      resources :signout
+      resources :reset_password
     end
   end
 
