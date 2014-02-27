@@ -13,7 +13,7 @@ $(function(){
 			this.$('.q-idx').remove();
 		},
 
-		setAnswer: function(answer) { },
+		_setAnswer: function(answer) { },
 		_getAnswer: function() { return {}; }
 		
 	});

@@ -94,8 +94,12 @@ $(function(){
 		/* Set and get the answer of the question
 		 * =========================== */
 		setAnswer: function(answer) {
-			throw 'Override setAnswer method!';
+      if(_.isNull(answer) || _.isUndefined(answer) || (_.isObject(answer) && _.isEmpty(answer))) return;
+      this._setAnswer(answer);
 		},
+    _setAnswer: function(answer) {
+      throw 'Override _setAnswer method!';
+    },
 		getAnswer: function() {
 			var answer = this._getAnswer();
 			var error = this.model.checkAnswer(answer);
