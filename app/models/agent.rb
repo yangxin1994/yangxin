@@ -41,6 +41,10 @@ class Agent
     return agent
   end
 
+  def self.find_by_email(email)
+    self.where(email: email).first
+  end
+
   def self.search_agent(email, region)
     agents = self.normal
     agents = agents.where(:email => /#{email.to_s}/) if !email.blank?
