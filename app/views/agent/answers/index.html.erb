@@ -27,11 +27,11 @@
     <div class="btn-group">
       <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
       <ul class="dropdown-menu pull-right">
-        <li><a href="?">全部</a></li>
+        <li><a href="?agent_task_id=<%= params[:agent_task_id] %>">全部</a></li>
         <li class="divider"></li>
         <li><a href="?status=8" class="querilayer">待审核</a></li>
         <li><a href="?status=2" class="querilayer">被拒绝</a></li>
-        <li><a href="?status=32" class="querilayer">审核完毕</a></li>
+        <li><a href="?status=4" class="querilayer">审核完毕</a></li>
       </ul>
     </div>
   </span>
@@ -56,7 +56,7 @@
       <% @answers['data'].each do |answer| %>
       <tr>
         <td><%= answer["sample_name"] %></td>
-        <td><%= answer_type_tag answer["status"] %></td>
+        <td><%= answer_type_tag answer["status"], true%></td>
         <td><%= answer["created_at"].strftime('%F %R') %></td>
         <td>
           <a class="btn handle" href="answers/<%= answer["_id"] %>?agent_task_id=<%= params[:agent_task_id] %>" ><i class="icon-list-alt"></i>查看详细</a>

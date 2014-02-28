@@ -2,7 +2,7 @@
 
 module AnswersHelper
 
-  def answer_type_tag(status)
+  def answer_type_tag(status, is_agent = false)
     tag = ""
     case status.to_i
     when Answer::EDIT
@@ -10,7 +10,11 @@ module AnswersHelper
     when Answer::REJECT
       tag = '已拒绝'
     when Answer::UNDER_REVIEW
-      tag = '待审核'
+      if is_agent
+        tag = '审核通过'
+      else
+        tag = '待审核'
+      end
     when Answer::UNDER_AGENT_REVIEW
       tag = '待代理审核'
     when Answer::REDO
