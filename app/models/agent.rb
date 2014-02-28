@@ -41,6 +41,10 @@ class Agent
     return agent
   end
 
+  def self.find_by_email(email)
+    self.where(email: email).first
+  end
+
   def self.search_agent(email, region)
     agents = self.normal
     agents = agents.where(:email => /#{email.to_s}/) if !email.blank?
@@ -53,7 +57,7 @@ class Agent
   end
 
   def self.login(email, password)
-    Agent.where(:email => email, :password => Encryption.encrypt_password(password)) do |agent|
+    Agent.find_by(:email => email, :password => Encryption.encrypt_password(password)) do |agent|
       agent.auth_key = Encryption.encrypt_auth_key("#{agent.email}&#{Time.now.to_i.to_s}")
       agent.save
     end.auth_key

@@ -22,10 +22,7 @@ $(->
     )
   )
 
-  $("tbody").sortable({ axis: "y" })
-
-
-  $("tbody").sortable({
+  $("tbody.pop").sortable({
     axis: "y",
     stop:->
       id_arr = $.map($('tbody tr'),(colum)->
@@ -33,9 +30,26 @@ $(->
       )
       $.putJSON('/admin/popularizes/sort.json',{ids:id_arr},->
       )
-      
-    
   })
+
+  $('.add-reward button').click(->
+    $(@).addClass('disabled').text('正在操作...').attr('disabled',true)
+    ids = []
+    $.each($('tbody tr'),(idx,tr)->
+      ids.push($(tr).attr('id'))
+    )
+    id_arr = $.unique(ids)
+    $.postJSON('/admin/popularizes/add_reward',{user_ids: id_arr},(retval)->
+      if retval.success
+        unless retval.value.length > 0 
+          window.location.href = "/admin/popularizes/weibo?success=true"
+        else
+          return $.error("id为列表中的用户奖励没有成功:" + retval.value) 
+          
+    )
+
+
+  )
 
 
 

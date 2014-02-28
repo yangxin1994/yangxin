@@ -296,6 +296,8 @@ OopsData::Application.routes.draw do
     resources :popularizes do
       collection do 
         put :sort
+        get :weibo
+        post :add_reward
       end 
     end
 
@@ -322,8 +324,8 @@ OopsData::Application.routes.draw do
       end
 
       collection do
-        post :add_attributes, :send_message
-        get :total_point, :attributes, :new_attributes, :status, :get_sample_count, :get_active_sample_count, :all_attributes
+        post :point_returned, :add_attributes, :send_message
+        get :return_point, :total_point, :attributes, :new_attributes, :status, :get_sample_count, :get_active_sample_count, :all_attributes
       end
     end
 
@@ -332,7 +334,7 @@ OopsData::Application.routes.draw do
     resources :answers do
       member do
         get :review, :to_csv
-        put :reject
+        put :reject, :set_location
       end
     end
 
@@ -497,6 +499,16 @@ OopsData::Application.routes.draw do
       member do
         put 'publish', 'close', 'pause', 'reject'
       end
+    end
+  end
+
+  namespace :client do
+    resources :surveys do
+    end
+    scope :module => :sessions do
+      resources :signin
+      resources :signout
+      resources :reset_password
     end
   end
 

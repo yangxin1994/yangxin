@@ -91,10 +91,11 @@ class Filler::FillerController < ApplicationController
     else
       answer = Answer.find_by_id(cookies[cookie_key(survey_id, is_preview)])
     end
-    @percentage = 0
+    @percentage = -1
     if answer.present?
       if answer.user.present? && answer.user != current_user
         cookies.delete(cookie_key(survey_id, is_preview), :domain => :all)
+        answer = nil
       else
         answer.update_status
         redirect_to show_a_path(answer.id.to_s) and return if !answer.is_edit
@@ -111,6 +112,13 @@ class Filler::FillerController < ApplicationController
 
     # 6. Check whether survey is closed or not
     @survey_closed = !@is_preview && @survey.status != Survey::PUBLISHED
+    if params[:ati].present?
+      # checkout whether agent task is already closed
+      agent_task = AgentTask.find(params[:ati])
+      if agent_task.blank? || agent_task.status != AgentTask::OPEN
+        @survey_closed = true
+      end
+    end
     
     # 10. get request referer and channel
     @channel = params[:c].to_i

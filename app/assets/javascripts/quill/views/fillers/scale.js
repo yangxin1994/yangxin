@@ -75,8 +75,7 @@ $(function(){
 			});
 		},
 
-		setAnswer: function(answer) {
-			if(!answer) return;
+		_setAnswer: function(answer) {
 			$.each(this.model_issue.items, $.proxy(function(i, item){
 				var v = answer[item.id], tr = this.$('#' + item.id);
 				if(v == undefined) return;
