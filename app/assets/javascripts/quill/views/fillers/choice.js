@@ -104,8 +104,7 @@ $(function(){
 			}
 		},
 
-		setAnswer: function(answer) {
-			if(!answer) return;
+		_setAnswer: function(answer) {
 			if(answer.selection && answer.selection.length > 0) {
 				if(this.model_issue.option_type == 1) {
 					this.$('select').val(answer.selection[0]);
