@@ -14,4 +14,5 @@
         %td
           = link_to s.title, { controller: "client/surveys", action: "show", id: s.id.to_s }
         %td= s.created_at.strftime("%Y年%m月%d日")
-        %td= s.quota["finished_count"]
+        / %td= s.quota["finished_count"]
+        %td= s.answers.not_preview.length
