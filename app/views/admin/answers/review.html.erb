@@ -26,6 +26,9 @@
 
 <legend><%= @survey.title %></legend>
   <div class="well well-small">
+    <%- if @questions.agent_task.present? %>
+      <p> 代理:<%= @questions.agent_task.agent.email  %></p>
+    <%- end %>
     <%- if @questions.interviewer_task.present? %>
       <p> 访问员:<%= @questions.interviewer_task.user.email  %></p>
     <%- end %>
