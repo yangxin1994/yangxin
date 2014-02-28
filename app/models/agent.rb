@@ -8,10 +8,10 @@ class Agent
   NORMAL = 1
   DELETED = 2
 
-  field :email, :type => String
+  field :email,    :type => String
   field :password, :type => String
-  field :name, :type => String
-  field :region, :type => Integer
+  field :name,     :type => String
+  field :region,   :type => Integer
   # 1 for normal, 2 for deleted
   field :status, :type => Integer, default: NORMAL
   field :auth_key, :type => String
@@ -62,7 +62,7 @@ class Agent
   def self.logout(auth_key)
     agent = self.find_by_auth_key(auth_key)
     if !agent.nil?
-      agent.auth_key = nil
+      agent.auth_key = nil  
       agent.save
     end
   end
