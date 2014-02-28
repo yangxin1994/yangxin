@@ -29,6 +29,7 @@
           - @interviewer_tasks.each do |i|
             %tr
               %td= i.user.email
-              %td= i.quota["finished_count"]
+              / %td= i.quota["finished_count"]
+              %td= i.quota["submitted_count"]
     #map.tab-pane
 

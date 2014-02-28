@@ -1,6 +1,6 @@
 <!-- content for head -->
 <% content_for :head do %>
-  <%= javascript_include_tag "pages/admin/answers/index-bundle" %>
+  <%= javascript_include_tag "pages/admin/answers/review-bundle" %>
 <% end %>
 
 <% content_for :sidenav do %>
@@ -29,9 +29,9 @@
       <ul class="dropdown-menu pull-right">
         <li><a href="?">全部</a></li>
         <li class="divider"></li>
-        <li><a href="?status=4">待审核</a></li>
-        <li><a href="?status=2">被拒绝</a></li>
-        <li><a href="?status=32">审核完毕</a></li>
+        <li><a href="?status=8" class="querilayer">待审核</a></li>
+        <li><a href="?status=2" class="querilayer">被拒绝</a></li>
+        <li><a href="?status=32" class="querilayer">审核完毕</a></li>
       </ul>
     </div>
   </span>

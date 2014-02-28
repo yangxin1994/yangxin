@@ -8,10 +8,10 @@ class Agent
   NORMAL = 1
   DELETED = 2
 
-  field :email, :type => String
+  field :email,    :type => String
   field :password, :type => String
-  field :name, :type => String
-  field :region, :type => Integer
+  field :name,     :type => String
+  field :region,   :type => Integer
   # 1 for normal, 2 for deleted
   field :status, :type => Integer, default: NORMAL
   field :auth_key, :type => String
@@ -41,6 +41,10 @@ class Agent
     return agent
   end
 
+  def self.find_by_email(email)
+    self.where(email: email).first
+  end
+
   def self.search_agent(email, region)
     agents = self.normal
     agents = agents.where(:email => /#{email.to_s}/) if !email.blank?
@@ -53,7 +57,7 @@ class Agent
   end
 
   def self.login(email, password)
-    Agent.where(:email => email, :password => Encryption.encrypt_password(password)) do |agent|
+    Agent.find_by(:email => email, :password => Encryption.encrypt_password(password)) do |agent|
       agent.auth_key = Encryption.encrypt_auth_key("#{agent.email}&#{Time.now.to_i.to_s}")
       agent.save
     end.auth_key
@@ -62,7 +66,7 @@ class Agent
   def self.logout(auth_key)
     agent = self.find_by_auth_key(auth_key)
     if !agent.nil?
-      agent.auth_key = nil
+      agent.auth_key = nil  
       agent.save
     end
   end

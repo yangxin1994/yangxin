@@ -504,6 +504,7 @@ class Survey
   end
 
   def adjust_logic_control_quota_filter(type, question_id)
+    return
     question = BasicQuestion.find_by_id(question_id)
     adjust_logic_control(question, type)
     self.adjust_quota(question, type)
