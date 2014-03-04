@@ -68,7 +68,7 @@
                 <li><a href="javascript:void(0)" class="st-close" style="display:none"><i class="icon-remove-sign"></i>关闭</a></li>
               <% else %>
               <% end %>
-              <li><a href="javascript:void(0);" data-url="<%= "#{@tasks["host"]}/s/#{task["reward_scheme_id"]}?ati=#{task["_id"]}" %>" class="survey-url"><i class="icon-check"></i>答题地址</a></li>
+              <li><a href="javascript:void(0);" data-url="http://<%= "#{@tasks["host"]}/s/#{task["reward_scheme_id"]}?ati=#{task["_id"]}" %>" class="survey-url"><i class="icon-check"></i>答题地址</a></li>
               <li><a href="/agent/answers?agent_task_id=<%= task["_id"] %>" ><i class="icon-check"></i>答案审核</a></li>
             </ul>
           </div>
