@@ -5,7 +5,8 @@ class QuilluController < ApplicationController
     user = User.find_by_email(params[:user]["email_username"].to_s)
     render_json_e ErrorEnum::USER_NOT_EXIST and return if user.nil?
     render_json_e ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(params[:user]["password"].to_s)
-    user.update_attributes(auth_key: Encryption.encrypt_auth_key("#{user._id}&#{Time.now.to_i.to_s}"))
+    user.update_attributes({auth_key: Encryption.encrypt_auth_key("#{user._id}&#{Time.now.to_i.to_s}"),
+      auth_key_expire_time: params[:keep_signed_in] ? -1 : Time.now.to_i + OOPSDATA["login_keep_time"].to_i})
     retval = {
       status: 4,
       user_id: user._id.to_s,
