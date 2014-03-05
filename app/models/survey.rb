@@ -18,6 +18,7 @@ class Survey
   CLOSED = 1
   PUBLISHED = 2
   DELETED = 4
+  PER_PAGE = 10
 
   field :title, :type => String, default: "调查问卷主标题"
   field :subtitle, :type => String, default: ""
@@ -175,8 +176,8 @@ class Survey
       end
       opt[:surveys] = opt[:surveys].where(:_id.in => survey_ids) if survey_ids
     end
-    if opt[:home_page].present? && opt[:surveys].size.to_i < 9
-      extend_surveys = Survey.quillme_normal.closed.desc(:created_at).limit(9 - opt[:surveys].size.to_i)
+    if opt[:home_page].present? && opt[:surveys].size.to_i < Survey::PER_PAGE
+      extend_surveys = Survey.quillme_normal.closed.desc(:created_at).limit(Survey::PER_PAGE - opt[:surveys].size.to_i)
       surveys = opt[:surveys] + extend_surveys
     end
     return surveys ||= opt[:surveys]

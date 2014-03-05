@@ -45,7 +45,12 @@ OopsData::Application.routes.draw do
       end
     end
 
-    resource :home, :only => [:show] 
+    #resource :home, :only => [:show]
+    resource :home do
+      collection do
+        get :gifts 
+      end 
+    end
 
     resources :surveys, :only => [:index] do 
       collection do
@@ -138,6 +143,8 @@ OopsData::Application.routes.draw do
     
     resources :public_notices, :only => [:index,:show]      
   end
+
+  resources :realogs
 
   # surveys, pages and questions
   scope :module => "quill" do

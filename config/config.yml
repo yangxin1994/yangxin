@@ -1,0 +1,12 @@
+defaults: &defaults
+  faye_server: "http://127.0.0.1:9393/faye"
+  faye_token: "oopsdata@2014"
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults
