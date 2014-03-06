@@ -4,7 +4,7 @@ class Agent::AnswersController < Agent::AgentsController
   def index
     agent_task = current_agent.agent_tasks.where(:id => params[:agent_task_id]).first
 
-    @answers = auto_paginate agent_task.answers do |answers|
+    @answers = auto_paginate agent_task.answers.search(params) do |answers|
       answers.map { |e| e.info_for_auditor }
     end
 
