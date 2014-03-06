@@ -44,9 +44,11 @@
       <ul class="dropdown-menu pull-right">
         <li><a href="?agent_task_id=<%= params[:agent_task_id] %>">全部</a></li>
         <li class="divider"></li>
+        <li><a href="?status=1" class="querilayer">正在答题</a></li>
+        <li><a href="?status=2" class="querilayer">已拒绝</a></li>
+        <li><a href="?status=4" class="querilayer">等待管理员审核</a></li>
         <li><a href="?status=8" class="querilayer">待审核</a></li>
-        <li><a href="?status=2" class="querilayer">被拒绝</a></li>
-        <li><a href="?status=4" class="querilayer">审核完毕</a></li>
+        <li><a href="?status=32" class="querilayer">通过审核</a></li>
       </ul>
     </div>
   </span>
