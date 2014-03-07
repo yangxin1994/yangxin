@@ -1,12 +1,11 @@
-defaults: &defaults
+development:
   faye_server: "http://127.0.0.1:9393/faye"
   faye_token: "oopsdata@2014"
 
-development:
-  <<: *defaults
-
-test:
-  <<: *defaults
+staging:
+  faye_server: "http://127.0.0.1:9393/faye"
+  faye_token: "oopsdata@2014"
 
 production:
-  <<: *defaults
+  faye_server: "http://127.0.0.1:9494/faye"
+  faye_token: "oopsdata@2014"
