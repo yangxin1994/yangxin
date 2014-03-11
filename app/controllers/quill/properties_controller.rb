@@ -26,6 +26,8 @@ class Quill::PropertiesController < Quill::QuillController
     style_setting['has_oopsdata_link'] = !!params[:has_oopsdata_link] if params.has_key?(:has_oopsdata_link)
     style_setting['redirect_link'] = params[:redirect_link]
     style_setting['allow_pageup'] = !!params[:allow_pageup] if params.has_key?(:allow_pageup)
+    style_setting['allow_replay'] = !!params[:allow_replay] if params.has_key?(:allow_replay)
+    style_setting['show_estimated_time'] = !!params[:show_estimated_time] if params.has_key?(:show_estimated_time)
     retval = @survey.update_attributes(style_setting: style_setting)
     render_json_auto retval and return
   end

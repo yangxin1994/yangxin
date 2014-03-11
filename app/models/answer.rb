@@ -112,6 +112,7 @@ class Answer
 
   after_create do |doc|
     doc.region = QuillCommon::AddressUtility.find_address_code_by_ip(doc.ip_address) 
+    doc.save
   end
 
 
@@ -127,6 +128,7 @@ class Answer
   def self.search(options)
     answers = self.not_preview
     answers = answers.find_by_status(options[:status]) if options[:status]
+    answers = answers.find_by_status(options["status"]) if options["status"]
     if options[:keyword].present?
       if options[:keyword] =~ /^.+@.+$/
         options[:email] = options[:keyword]
@@ -159,7 +161,8 @@ class Answer
 
   def set_reject_with_type(reject_type, finished_at = Time.now.to_i)
     set_reject
-    update_attributes(reject_type: reject_type, finished_at: finished_at)
+    update_attributes(reject_type: reject_type)
+    update_attributes(finished_at: finished_at) if self.finished_at.blank?
   end
 
   def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, answer_obj)
@@ -178,8 +181,8 @@ class Answer
     if !is_preview && introducer_id.present?
       introducer = User.sample.find_by_id(introducer_id)
       if introducer.present?
-        introducer_id = introducer_id
-        point_to_introducer = survey.spread_point
+        self.introducer_id = introducer_id
+        self.point_to_introducer = survey.spread_point
         SurveySpread.create_new(introducer, survey) 
       end
     end
@@ -441,12 +444,12 @@ class Answer
           satisfy = true
         elsif question.question_type == QuestionTypeEnum::CHOICE_QUESTION
           satisfy = Tool.check_choice_question_answer(question_id,
-                              self.answer_content[question_id]["selection"],
+                              self.answer_content[question_id]["selection"] || [],
                               condition["value"],
                               condition["fuzzy"])
         elsif question.question_type == QuestionTypeEnum::ADDRESS_BLANK_QUESTION
           satisfy = Tool.check_address_blank_question_answer(question_id,
-                              self.answer_content[question_id]["selection"],
+                              self.answer_content[question_id]["selection"] || [],
                               condition["value"])
         end
       when "2"
@@ -489,8 +492,13 @@ class Answer
     # survey has a new question, but the answer content does not has the question id as a key
     # thus when updating the answer content, the key should not be checked
     new_answer.each do |k, v|
+      v["selection"] ||= [] if v.class == Hash && v.has_key?("selection")
       self.answer_content[k] = v if self.answer_content.has_key?(k)
       self.random_quality_control_answer_content[k] = v if self.random_quality_control_answer_content.has_key?(k)
+      if self.answer_content[k].nil?
+        q = Question.find(k)
+        self.answer_content[k] = {} if q.is_required == false
+      end
     end
     self.save
     return true
@@ -618,17 +626,20 @@ class Answer
   end
 
   # return the index of the first given question in all the survey questions
-  def index_of(questions)
+  def index_of(questions, all = false)
     return nil if questions.blank?
     question_id = nil
-    questions.each do |q|
-      if q.question_type != QuestionTypeEnum::PARAGRAPH
-        question_id = q._id.to_s
-        break
+    if all == false
+      questions.each do |q|
+        if q.question_type != QuestionTypeEnum::PARAGRAPH
+          question_id = q._id.to_s
+          break
+        end
       end
+    else
+      question_id = questions[0].id.to_s
     end
-    return nil if question_id.nil?
-    question_ids = self.survey.all_questions_id(false)
+    question_ids = self.survey.all_questions_id(all)
     question_ids_with_qc_questions = []
     question_ids.each do |qid|
       question_ids_with_qc_questions << qid
@@ -647,10 +658,10 @@ class Answer
     return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
     old_status = self.status
     # if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
-    if self.is_preview || !self.need_review
-      self.set_finish
-    elsif !self.agent_task.nil?
+    if self.agent_task.present?
       self.set_under_agent_review
+    elsif self.is_preview || !self.need_review
+      self.set_finish
     else
       self.set_under_review
     end
@@ -977,6 +988,7 @@ class Answer
         show_answer.merge!({'question_type_label'=> '选择题'})
         answer["question_content"] << show_answer and next if val.blank?
 
+        val["selection"] ||= []
         if question.issue["items"] 
           choices = []
           selected_choices = []
@@ -1307,8 +1319,8 @@ class Answer
 
   def answer_percentage
     questions = self.load_question(nil, true)
-    question_number = self.survey.all_questions_id(false).length + self.random_quality_control_answer_content.length
-    self.index_of(questions) / question_number.to_f
+    question_number = self.survey.all_questions_id(true).length + self.random_quality_control_answer_content.length
+    self.index_of(questions, true) / question_number.to_f
   end
 
   def append_reward_info
@@ -1355,11 +1367,13 @@ class Answer
         if q.question_type == QuestionTypeEnum::NUMBER_BLANK_QUESTION
           attr_value = [answer, answer] if answer.present?
         elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          cur_attr_value = self.user.read_sample_attribute(q.sample_attribute.name)
           attr_value = q.sample_attribute_relation[answer["selection"][0].to_s]
           if attr_value.present?
             attr_value[0] = attr_value[0].blank? ? -1.0/0.0 : attr_value[0].to_f
             attr_value[1] = attr_value[1].blank? ? 1.0/0.0 : attr_value[1].to_f
           end
+          attr_value = nil if Tool.range_compare(attr_value, cur_attr_value) == 1
         end
       when DataType::DATE
         attr_value = answer / 1000 if q.question_type == QuestionTypeEnum::TIME_BLANK_QUESTION
@@ -1367,11 +1381,13 @@ class Answer
         if q.question_type == QuestionTypeEnum::TIME_BLANK_QUESTION
           attr_value = [answer / 1000, answer / 1000] if answer.present?
         elsif q.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          cur_attr_value = self.user.read_sample_attribute(q.sample_attribute.name)
           attr_value = q.sample_attribute_relation[answer["selection"][0].to_s]
           if attr_value.present?
             attr_value[0] = attr_value[0].blank? ? -1.0/0.0 : attr_value[0] / 1000
             attr_value[1] = attr_value[1].blank? ? 1.0/0.0 : attr_value[1] / 1000
           end
+          attr_value = nil if Tool.range_compare(attr_value, cur_attr_value) == 1
         end
       when DataType::ADDRESS
         if q.question_type == QuestionTypeEnum::ADDRESS_BLANK_QUESTION

@@ -162,6 +162,32 @@ module SurveyComponents::SurveyQuota
     self.save
   end
 
+  def decrease_quota(answer)
+    if quota["quota_satisfied"]
+      self.refresh_quota_stats
+      return
+    end
+    if answer.is_finish
+      quota["finished_count"] = [quota["finished_count"] - 1, 0].max
+      quota["submitted_count"] = [quota["submitted_count"] - 1, 0].max
+    end
+    if answer.is_under_review
+      quota["submitted_count"] = [quota["submitted_count"] - 1, 0].max
+    end
+    quota["rules"].each do |rule|
+      next if !answer.satisfy_conditions(rule["conditions"] || [])
+      if answer.is_under_review
+        # user submits the answer
+        rule["submitted_count"] = [rule["submitted_count"] - 1, 0].max
+      elsif answer.is_finish
+        # user submits the answer, and the answer automatically passes review
+        rule["submitted_count"] = [rule["submitted_count"] - 1, 0].max
+        rule["finished_count"] = [rule["finished_count"] - 1, 0].max
+      end
+    end
+    save
+  end
+
   def update_quota(answer, old_status)
     if old_status == Answer::EDIT && answer.is_under_review
       # user submits the answer

@@ -28,9 +28,16 @@ body{
 .describe{
 	background: #F7F7F8;
 	text-indent: 2em;
-	// border-bottom:1px #ccc dotted;
 	margin:15px 0;
 	padding-bottom:15px;
+	line-height: 1.8em;
+	strong{
+		font-weight: bold;
+	}
+	em{
+		font-style: italic;
+	}
+
 }
 .gift-time{
 	.tip{

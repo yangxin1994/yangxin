@@ -62,6 +62,7 @@ class User
 
   # 1 for sample, 2 for client, 4 for admin, 8 for answer auditor, 16 for interviewer
   field :user_role, :type => Integer, default: 1
+  field :interviewer, :type => Boolean, default: false
   field :is_block, :type => Boolean, default: false
 
   # 0 normal users
@@ -96,6 +97,7 @@ class User
   has_many :reviewed_answers, class_name: "Answer", inverse_of: :auditor
   has_many :logs
   has_one  :affiliated, :class_name => "Affiliated", :inverse_of => :user
+  has_many :banners, class_name: "Banner", inverse_of: :user
 
   scope :sample, mod(:user_role => [2, 1])
 
@@ -189,6 +191,32 @@ class User
     return true
   end
 
+  def self.create_activated_rss_user(email_mobile)
+    logger.info "AAAAAAAAAAAAAAA"
+    logger.info email_mobile.inspect
+    user = find_by_email_or_mobile(email_mobile)
+
+    account = {}
+    if email_mobile.match(/#{EmailRexg}/i)
+      account[:email] = email_mobile.downcase
+      account[:email_subscribe] = true
+    elsif email_mobile.match(/#{MobileRexg}/i)
+      account[:mobile] = email_mobile
+      account[:mobile_subscribe] = true
+    end
+    logger.info "BBBBBBBBBBBBBBBB"
+    logger.info account.inspect
+
+    if user.present?
+      user.update_attributes(account)
+    else
+      account[:registered_at] = Time.now.to_i
+      account[:status] = VISITOR
+      user = User.create(account)        
+    end   
+    return {:success => true}
+  end
+
   def self.cancel_subscribe(active_info)
     email_mobile  = active_info['email_mobile']
     mobile = active_info['mobile']
@@ -251,22 +279,28 @@ class User
     if opt[:email_mobile].match(/#{EmailRexg}/i)  ## match email
       account[:email] = opt[:email_mobile].downcase
     elsif opt[:email_mobile].match(/#{MobileRexg}/i)  ## match mobile
-      active_code = Tool.generate_active_mobile_code
       account[:mobile] = opt[:email_mobile]
     end
 
     return ErrorEnum::ILLEGAL_EMAIL_OR_MOBILE if account.blank?
     existing_user = account[:email] ? self.find_by_email(account[:email]) : self.find_by_mobile(account[:mobile])
     return ErrorEnum::USER_REGISTERED if existing_user && existing_user.is_activated
+    existing_user = User.create if existing_user.nil?
     password = Encryption.encrypt_password(opt[:password]) if account[:email]
     account[:status] =  REGISTERED
-    account[:sms_verification_code] = active_code if account[:mobile]
-    account[:sms_verification_expiration_time]  = (Time.now + 2.hours).to_i
-    updated_attr = account.merge(password: password,registered_at: Time.now.to_i)
-    existing_user = User.create if existing_user.nil?
+    if account[:mobile].present?
+      if existing_user.sms_verification_code.present? && existing_user.sms_verification_expiration_time > Time.now.to_i
+        active_code = existing_user.sms_verification_code
+      else
+        active_code = Tool.generate_active_mobile_code
+        account[:sms_verification_code] = active_code
+        account[:sms_verification_expiration_time]  = (Time.now + 2.hours).to_i
+      end
+    end
+    updated_attr = account.merge(password: password, registered_at: Time.now.to_i)
     existing_user.update_attributes(updated_attr)
 
-    if active_code.present?
+    if account[:mobile].present?
       SmsWorker.perform_async("welcome", existing_user.mobile, "", :active_code => active_code)
     else
       if account[:email]
@@ -661,6 +695,7 @@ class User
 
   def set_sample_role(role)
     self.user_role = role.sum
+    self.interviewer = self.user_role & 0x10 > 0
     return self.save
   end
 

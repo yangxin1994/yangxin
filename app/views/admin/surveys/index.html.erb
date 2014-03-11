@@ -87,6 +87,8 @@
           </button>
           <ul class="dropdown-menu">
             <li><a href="#info" class="info"><i class="icon-wrench"></i>问卷基本设置</a></li>
+             
+            <li><a href="/admin/answers/<%= survey._id %>" ><i class="icon-eye-open"></i>审核答案</a></li>
             <li><a href="/admin/surveys/<%= survey._id %>/reward_schemes" ><i class="icon-gift"></i>奖励方案设置</a></li>
             <li><a href="/admin/surveys/<%= survey._id %>/promote" ><i class="icon-share"></i>推送渠道设置</a></li>
             <li><a href="#cost" class="cost"><i class="icon-tint"></i>问卷成本</a></li>

@@ -184,6 +184,9 @@ textarea{
 		cursor: pointer;
 		border: none;
 		width: 40%;
+		&.single{
+			width:100%;
+		}
 	}
 }
 
@@ -462,8 +465,7 @@ select{
 	width:100%;
 	display: block;
 	text-align: center;
-	background: #FCCA19;
-	border:1px #FBB140 solid;
+	background: #5691f0;
 	padding:7px 0;
 	margin:15px 0;
 	font-weight: bold;

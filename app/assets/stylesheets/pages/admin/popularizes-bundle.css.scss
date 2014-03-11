@@ -1,0 +1,99 @@
+@import "common";
+@import "compass/css3/box-shadow";
+@import "compass/css3/border-radius";
+@import "compass/utilities/general/clearfix";
+@import "compass/css3/opacity";
+.table{
+  th{
+    text-align: center;
+  }
+  tr{
+    cursor:move;
+    td{
+      text-align: center;
+      vertical-align: middle;    
+    }
+    td.img-con{
+      text-align: left;
+      width:200px;
+      img{
+        width:200px;
+        height:100px;
+      }    
+    }     
+  } 
+}
+
+.add-new{
+  .no-data{
+    font-size:14px;
+    text-align: center;
+    color:red;
+    margin-bottom: 20px;
+  }
+
+  form{
+    .cont{
+      @include clearfix;
+      position: relative;
+      .ipt-holder{
+        position: absolute;
+        border:1px solid #33333D;
+        border-right:0px;
+        @include border-top-left-radius(3px);
+        @include border-bottom-left-radius(3px);
+        width:180px;
+        @include one-line(40px);
+        background: #EDEDF2;
+        color:#868c95;
+        text-align: center;
+        cursor:pointer;
+        overflow:hidden;
+        white-space: nowrap;
+        padding:0px 10px;
+      }
+      input{
+        width:200px;
+        height:42px;
+        @include opacity(0);
+        cursor:pointer;
+      }
+      button{
+        width:80px;
+        margin-left:-3px;
+        height:42px;
+        border:1px solid #196aeb;
+        background: #4186f6;
+        @include border-top-right-radius(3px);
+        @include border-bottom-right-radius(3px);
+        color:#fff;
+      }
+    }
+  }
+}
+
+.weibo_right{
+  .no-data{
+    font-size:14px;
+    text-align: center;
+    color:red;
+    margin: 20px;    
+  }
+  .total_count,.add-reward{
+    text-align: right;
+  }
+  .add-reward{
+    button{
+      height:42px;
+      border:1px solid #196aeb;
+      background: #4186f6;
+      @include border-radius(3px);
+      color:#fff; 
+      &.disabled{
+        background:#E6E6E6;
+        border:1px solid #E6E6E6;
+      }      
+    }
+   
+  }
+}

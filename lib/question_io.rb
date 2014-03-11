@@ -164,7 +164,7 @@ class ChoiceQuestionIo < QuestionIo
     else
       choices = {}
       issue["items"].each_index do |i|
-        choices[i+1] = issue["items"][i]["content"]["text"]
+        choices[i+1] = issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '')
       end
       @spss_header << {"spss_name" => header_prefix,
                   "spss_type" => SPSS_NUMERIC,
@@ -195,7 +195,7 @@ class ChoiceQuestionIo < QuestionIo
       @retval <<  get_item_index(v["selection"].try('[]',0))
     end
     if issue["other_item"]["has_other_item"]
-      @retval << v["text_input"]
+      @retval << v["text_input"].try('gsub', /<[^>]*>/, '')
     end
     return @retval
   end
@@ -293,7 +293,7 @@ class MatrixChoiceQuestionIo < QuestionIo
     else
       choices = {}
       issue["items"].each_index do |i|
-        choices[i+1] = issue["items"][i]["content"]["text"]
+        choices[i+1] = issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '')
       end
       issue["rows"].each_with_index do |r, i|
         @spss_header << {"spss_name" => header_prefix + "_r#{i + 1}",
@@ -321,7 +321,7 @@ class MatrixChoiceQuestionIo < QuestionIo
       end
     else
       issue["rows"].each do |item|
-        @retval << (v[item["id"].to_s] && v[item["id"].to_s].blank? ? nil : get_item_index(v[item["id"].to_s][0]))
+        @retval << (v[item["id"].to_s].blank? ? nil : get_item_index(v[item["id"].to_s][0]))
       end
     end
     return @retval
@@ -632,7 +632,7 @@ class AddressBlankQuestionIo < QuestionIo
       @retval << add[2]
     end
     if format.include? 1
-      @retval << v["detail"]
+      @retval << v["detail"].try('gsub', /<[^>]*>/, '')
     end
     if issue["has_postcode"]
       @retval << v["postcode"]
@@ -798,7 +798,7 @@ class ConstSumQuestionIo < QuestionIo
       end
     end
     if issue["other_item"]["has_other_item"]
-      @retval << v["text_input"]
+      @retval << v["text_input"].try('gsub', /<[^>]*>/, '')
       @retval << v[issue["other_item"]["input_id"]]
     end
     return @retval
@@ -883,7 +883,7 @@ class SortQuestionIo < QuestionIo
       @retval << (v["sort_result"] ? get_item_index(v["sort_result"][i]) : nil)
     end
     if issue["other_item"]["has_other_item"]
-      @retval << v["text_input"]
+      @retval << v["text_input"].try('gsub', /<[^>]*>/, '')
     end
     @retval
   end
@@ -962,7 +962,7 @@ class RankQuestionIo < QuestionIo
       (@retval << v[e["input_id"]] == -1 ? 1 : 0) if e["has_unknow"]
     end
     if issue["other_item"]["has_other_item"]
-      @retval << v["text_input"]
+      @retval << v["text_input"].try('gsub', /<[^>]*>/, '')
       @retval << v[issue["other_item"]["input_id"]]
     end
     return @retval
@@ -1100,7 +1100,6 @@ class ScaleQuestionIo < QuestionIo
         raise "您输入的范围好像不太对吧?"
       end
     end
-    binding.pry
     return { "#{origin_id}" => @retval}
   end
 

@@ -6,6 +6,84 @@ class MailgunApi
   @@survey_email_from = "\"问卷吧\" <postmaster@wenjuanba.net>"
   @@user_email_from = "\"问卷吧\" <postmaster@wenjuanba.cn>"
 
+  def self.batch_send_offline_invite_email
+    group_size = 900
+    @group_emails = []
+    @group_recipient_variables = []
+
+    @emails = OfflineUser.where(:invited => false, :email.ne => "").map { |e| e.email }
+    return if @emails.blank?
+
+    while @emails.length >= group_size
+      temp_emails = @emails[0..group_size-1]
+      @group_emails << temp_emails
+      @emails = @emails[group_size..-1]
+      temp_recipient_variables = {}
+      temp_emails.each do |e|
+        u = OfflineUser.where(email: e).first
+        url = "#{Rails.application.config.quillme_host}/surveys/offline_user_rss?email_mobile=#{e}"
+        temp_recipient_variables[e] = {"name" => u.name,
+          "survey_title" => "《#{u.survey_title}》",
+          "url" => url,
+          "short_url" => "#{Rails.application.config.quillme_host}/#{MongoidShortener.generate(url)}"}
+      end
+      @group_recipient_variables << temp_recipient_variables
+    end
+
+    @group_emails << @emails
+    temp_recipient_variables = {}
+    @emails.each do |e|
+      u = OfflineUser.where(email: e).first
+      url = "#{Rails.application.config.quillme_host}/surveys/offline_user_rss?email_mobile=#{e}"
+      temp_recipient_variables[e] = {"name" => u.name,
+        "survey_title" => "《#{u.survey_title}》",
+        "url" => url,
+        "short_url" => "#{Rails.application.config.quillme_host}/#{MongoidShortener.generate(url)}"}
+    end
+    @group_recipient_variables << temp_recipient_variables
+    
+    # list some hot gifts
+    @gifts = []
+    Gift.on_shelf.real_and_virtual.desc(:exchange_count).limit(3).each do |g|
+      @gifts << { :title => g.title,
+        :url => Rails.application.config.quillme_host + "/gifts/" + g._id.to_s,
+        :img_url => Rails.application.config.quillme_host + g.photo.picture_url }
+    end
+    # get redeem logs
+    @redeem_logs = []
+    RedeemLog.all.desc(:created_at).limit(3).each do |redeem_log|
+      time = Tool.time_string(Time.now.to_i - redeem_log.created_at.to_i)
+      @redeem_logs << { :time => time,
+        :nickname => redeem_log.user.nickname,
+        :point => redeem_log.point,
+        :gift_name => redeem_log.gift_name }
+    end
+
+
+    html_template_file_name = "#{Rails.root}/app/views/offline_invite_mailer/push_email.html.erb"
+    text_template_file_name = "#{Rails.root}/app/views/offline_invite_mailer/push_email.text.erb"
+    html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
+    text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+    premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
+    @group_emails.each_with_index do |emails, i|
+      data = {}
+      data[:domain] = Rails.application.config.survey_email_domain
+      data[:from] = @@survey_email_from
+      data[:html] = premailer.to_inline_css
+      data[:text] = text_template.result(binding)
+      data[:subject] = "邀请您加入问卷吧"
+      data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
+      data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
+      # data[:to] = emails.join(', ')
+      data[:'recipient-variables'] = @group_recipient_variables[i].to_json
+      self.send_message(data)
+    end
+    OfflineUser.where(:invited => false, :email.ne => "").each do |u|
+      u.update_attributes({invited: true})
+    end
+
+  end
+
   def self.batch_send_survey_email(survey_id, user_id_ary)
     return if user_id_ary.blank?
     @emails = user_id_ary.map { |e| User.find_by_id(e).try(:email) }
@@ -91,21 +169,21 @@ class MailgunApi
       @lottery_logs = @lottery_logs.each_slice(3).to_a
     end
 
-    data = {}
-    data[:domain] = Rails.application.config.survey_email_domain
-    data[:from] = @@survey_email_from
 
     html_template_file_name = "#{Rails.root}/app/views/survey_mailer/push_email.html.erb"
     text_template_file_name = "#{Rails.root}/app/views/survey_mailer/push_email.text.erb"
     html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
     premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
-    data[:html] = premailer.to_inline_css
-    data[:text] = text_template.result(binding)
 
-    data[:subject] = "邀请您参加问卷调查"
-    data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
     @group_emails.each_with_index do |emails, i|
+      data = {}
+      data[:domain] = Rails.application.config.survey_email_domain
+      data[:from] = @@survey_email_from
+      data[:html] = premailer.to_inline_css
+      data[:text] = text_template.result(binding)
+      data[:subject] = "邀请您参加问卷调查"
+      data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
       data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
       # data[:to] = emails.join(', ')
       data[:'recipient-variables'] = @group_recipient_variables[i].to_json
@@ -248,12 +326,50 @@ class MailgunApi
     self.send_message(data)
   end
 
+  def self.send_emagzine(subject, send_from, domain, content, attachment, emails)
+    group_size = 900
+    @group_emails = []
+    @group_recipient_variables = []
+    @emails = emails
+
+    while @emails.length >= group_size
+      temp_emails = @emails[0..group_size-1]
+      @group_emails << temp_emails
+      @emails = @emails[group_size..-1]
+      temp_recipient_variables = {}
+      temp_emails.each do |e|
+        temp_recipient_variables[e] = {"email" => e}
+      end
+      @group_recipient_variables << temp_recipient_variables
+    end
+    @group_emails << @emails
+    temp_recipient_variables = {}
+    @emails.each do |e|
+      temp_recipient_variables[e] = {"email" => e}
+    end
+    @group_recipient_variables << temp_recipient_variables
+
+    @group_emails.each_with_index do |emails, i|
+      data = {}
+      data[:domain] = domain
+      data[:from] = send_from
+      data[:html] = content
+      data[:text] = ""
+      data[:attachment] = File.new(attachment) if attachment.present?
+      data[:subject] = subject
+      data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
+      data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
+      data[:'recipient-variables'] = @group_recipient_variables[i].to_json
+      self.send_message(data)
+    end
+  end
+
   def self.send_message(data)
     # domain = data.delete(:domain)
     domain = data[:domain]
-    retval = RestClient.post("https://api:#{Rails.application.config.mailgun_api_key}"\
-      "@api.mailgun.net/v2/#{domain}/messages", data)
     begin
+      retval = RestClient.post("https://api:#{Rails.application.config.mailgun_api_key}"\
+        "@api.mailgun.net/v2/#{domain}/messages", data)
       retval = JSON.parse(retval)
       return retval["id"]
     rescue

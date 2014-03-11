@@ -18,6 +18,8 @@ OopsData::Application.routes.draw do
     end
   end
 
+  resources :sample_servers,:only => [:create]
+
   # sample
   scope :module => "sample" do
     resources :connects, :only => [:show]
@@ -54,6 +56,7 @@ OopsData::Application.routes.draw do
         get  :cancel_subscribe
         post :get_reward_type_count
         post :generate_rss_activate_code
+        get :offline_user_rss
       end
 
       member do
@@ -290,6 +293,14 @@ OopsData::Application.routes.draw do
 
     resources :prizes
 
+    resources :popularizes do
+      collection do 
+        put :sort
+        get :weibo
+        post :add_reward
+      end 
+    end
+
     resources :surveys, :as => :s do
       member do
         get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info, :sample_attributes, :interviewer_task, :new_interviewer, :questions
@@ -313,8 +324,8 @@ OopsData::Application.routes.draw do
       end
 
       collection do
-        post :add_attributes, :send_message
-        get :attributes, :new_attributes, :status, :get_sample_count, :get_active_sample_count, :all_attributes
+        post :point_returned, :add_attributes, :send_message
+        get :return_point, :total_point, :attributes, :new_attributes, :status, :get_sample_count, :get_active_sample_count, :all_attributes
       end
     end
 
@@ -323,7 +334,7 @@ OopsData::Application.routes.draw do
     resources :answers do
       member do
         get :review, :to_csv
-        put :reject, :batch_reject
+        put :reject, :batch_reject, :set_location
       end
     end
 
@@ -336,6 +347,7 @@ OopsData::Application.routes.draw do
     resources :orders, :only => [:index, :show, :update] do
       collection do
         get :to_excel
+        put :batch
       end
 
       member do
@@ -367,6 +379,12 @@ OopsData::Application.routes.draw do
       end
     end
 
+    resources :netranking_users do
+      collection do
+        post :import
+      end
+    end
+
     resources :newsletters do
       member do
         post   :deliver
@@ -378,6 +396,12 @@ OopsData::Application.routes.draw do
         post   :column
         post   :article
         post   :product_news
+        get    :netranking_newsletter
+        get    :upload_attachment
+        post   :attachment_uploaded
+        post   :send_netranking_newsletter
+        get    :sms
+        post   :send_sms
       end
     end
 
@@ -423,6 +447,9 @@ OopsData::Application.routes.draw do
       get :get_active_sample_count
       end
     end
+
+    resources :sample_servers
+
   end
 
   # utility
@@ -475,6 +502,16 @@ OopsData::Application.routes.draw do
     end
   end
 
+  namespace :client do
+    resources :surveys do
+    end
+    scope :module => :sessions do
+      resources :signin
+      resources :signout
+      resources :reset_password
+    end
+  end
+
   namespace :agent do
     scope :module => :sessions do
       resources :signin
@@ -509,6 +546,7 @@ OopsData::Application.routes.draw do
         post :finish
         post :clear
         delete :destroy_preview
+        delete :replay
         put :select_reward
         post :select_reward_for_mobile
         post :start_bind

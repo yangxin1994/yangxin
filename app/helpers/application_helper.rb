@@ -119,7 +119,6 @@ module ApplicationHelper
             回答了<a href="javascript:void(0);">#{news.survey_title}</a>获得了<b>#{news.amount}</b>积分   
           }.html_safe 
         end
-      
       when 2
         ref = news.scheme_id.to_i > 0 ? "/s/#{news.scheme_id}" : "javascript:void(0);"
         if news.amount.to_i > 0
@@ -131,7 +130,6 @@ module ApplicationHelper
             推广了<a href="#{ref}">#{news.survey_title}</a> 
           }.html_safe
         end
-  
       when 4
         if news.gift_type.to_i == Gift::REAL.to_i
           behavor = %Q{
@@ -141,11 +139,15 @@ module ApplicationHelper
           behavor = %Q{
             使用<b>#{news.amount.abs}</b>积分兑换了<span class="u">#{news.gift_name}</span>
           }.html_safe
-        end
-      when 8
+        end           
+      when 16
         behavor = %Q{
-          兑换失败,返还了<b>#{news.amount.abs}</b>积分
-        }.html_safe             
+          违规操作,处罚了<b>#{news.amount.abs}</b>积分
+        }.html_safe          
+      when 32
+        behavor = %Q{
+          邀请样本答题,获得了<b>#{news.amount.abs}</b>积分
+        }.html_safe  
       when 256
         behavor = %Q{
           从清研通导入<b>#{news.amount.abs}</b>积分

@@ -1,3 +1,4 @@
+#encoding: utf-8
 # already tidied up
 class Admin::NewslettersController < ApplicationController
 
@@ -76,6 +77,51 @@ class Admin::NewslettersController < ApplicationController
     end        
   end
 
+  def netranking_newsletter
+    @file_path = params[:path]
+  end
+
+  def sms
+  end
+
+  def send_sms
+    mobile_list = params[:mobile_list].split("\n")
+    SmsApi.send_massive_sms(mobile_list, params[:sms_content])
+    render_json_auto and return
+  end
+
+  def upload_attachment
+  end
+
+  def attachment_uploaded
+    name =  params[:file].original_filename
+    directory = "public/uploads/magzine"
+    # create the file path
+    path = File.join(directory, name)
+    # write the file
+    File.open(path, "wb") { |f| f.write(params[:file].read) }
+    redirect_to action: :netranking_newsletter, path: path
+  end
+
+  def send_netranking_newsletter
+    if params[:email_list].to_s == "true"
+      emails = params[:email_content].split("\n")
+    else
+      emails = NetrankingUser.all.map { |e| e.email }
+    end
+    if params[:send_from].blank?
+      if params[:domain] == "wenjuanba.net"
+        send_from = "\"问卷吧\" <postmaster@wenjuanba.net>"
+      elsif params[:domain] == "netranking.cn"
+        send_from = "\"清研咨询\" <postmaster@netranking.cn>"
+      end
+    else
+      send_from = params[:send_from]
+    end
+    MailgunApi.send_emagzine(params[:subject], send_from, params[:domain], params[:content], params[:file_path], emails)
+    render_json_auto and return
+  end
+
   private
 
   def resolve_layout
@@ -86,5 +132,4 @@ class Admin::NewslettersController < ApplicationController
       "layouts/admin-todc"
     end
   end
-
 end
