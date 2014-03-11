@@ -598,7 +598,7 @@ class Survey
   end
 
   def excel_header
-    headers =["answer_id", "email", "mobile", "IP"]
+    headers =["answer_id", "is_agent", "email", "mobile", "IP"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
