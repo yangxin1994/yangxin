@@ -687,6 +687,29 @@ class Survey
     end
   end
 
+  def batch_reject(options, answer_auditor)
+    unless(File.exist?("public/uploads"))
+      Dir.mkdir("public/uploads")
+    end
+    unless(File.exist?("public/uploads/csv"))
+      Dir.mkdir("public/uploads/csv")
+    end
+    csv_origin = options["answer_list"]
+    filename = Time.now.strftime("%y-%m-%s-%d")+'_'+(csv_origin.original_filename)
+    File.open("public/uploads/csv/#{filename}", "wb") do |f|
+      f.write(csv_origin.read)
+    end
+    csv = File.read("public/uploads/csv/#{filename}").utf8!
+    CSV.generate do |re_csv|
+      CSV.parse(csv, :headers => false) do |row|
+        self.answers.find_by(:id => row[0]) do |_answer|
+          r = _answer.try("review",false, answer_auditor, row[1]) ? "已拒绝" : "处理失败"
+          re_csv << [row[0], r]
+        end
+      end      
+    end
+  end  
+
   def analysis(filter_index, include_screened_answer)
     return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
     task_id = Task.create(:task_type => "analysis")._id.to_s
