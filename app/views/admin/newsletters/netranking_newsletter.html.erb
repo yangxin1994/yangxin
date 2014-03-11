@@ -1,0 +1,77 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "/kindeditor/kindeditor-min", "/kindeditor/lang/zh_CN" %>
+  <%= javascript_include_tag "pages/admin/newsletters/netranking_newsletter-bundle" %>
+<% end %>
+
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li>
+      <a href="/admin/newsletters">
+      <i class="icon-chevron-right"></i>
+      电子杂志列表
+      </a>
+    </li>
+    <li>
+      <a href="/admin/newsletters/new">
+        <i class="icon-chevron-right"></i>
+        新建电子杂志
+      </a>
+    </li>
+    <li>
+      <a href="/admin/subscribers">
+        <i class="icon-chevron-right"></i>
+        订阅管理
+      </a>
+    </li>
+    <li>
+      <a href="/admin/newsletters/sms">
+      <i class="icon-chevron-right"></i>
+      群发短信
+      </a>
+    </li>
+    <li class="active">
+      <a href="/admin/newsletters/upload_attachment">
+      <i class="icon-chevron-right"></i>
+      清研杂志
+      </a>
+    </li>
+    <li>
+      <a href="/admin/netranking_users">
+      <i class="icon-chevron-right"></i>
+      清研杂志用户列表
+      </a>
+    </li>
+  </ul>
+<% end %>
+
+<p>
+  <span>请输入邮件标题</span>
+  <input type='text' id='subject'></input>
+</p>
+  <span>接收回复的邮箱</span>
+  <input type='text' id='send_from'></input>
+<p>
+<p>
+  <span>选择发送域名</span>
+  <%= select_tag "domain", "<option>netranking.cn</option><option>wenjuanba.net</option>".html_safe %>
+</p>
+
+</p>
+
+<span class='p-content'><textarea id="p-content" name="p-content"></textarea></span>
+
+<% if @file_path.present? %>
+  <span>附件：</span>
+<% end %>
+<span id='file-path'><%= @file_path %></span>
+<br />
+<p>
+  <label "email_list">邮箱列表</lable>
+  <%= check_box_tag 'email_list' %>
+</p>
+<p id='email_content' style='display:none;'>
+  <%= text_area_tag 'emails' %>
+</p>
+<br />
+<a class="email_btn btn" href="javascript:void();" target="_blank">发送</a>

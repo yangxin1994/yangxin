@@ -8,5 +8,14 @@ class String
     # return false if self == false || self.blank? || self =~ (/(false|f|no|n|0)$/i)
     # raise ArgumentError.new("invalid value for Boolean: \"#{self}\"")
   end
-  
+
+  def remove_style
+    return self.gsub(/<r>(.*?)<\/r>/, '\1')
+      .gsub(/<u>(.*?)<\/u>/, '\1')
+      .gsub(/<big>(.*?)<\/big>/, '\1')
+      .gsub(/<bigger>(.*?)<\/bigger>/, '\1')
+      .gsub(/<biggest>(.*?)<\/biggest>/, '\1')
+      .gsub(/<link>([^\s]*?)<\/link>/, '\1')
+      .gsub(/<link>([^\s]*?)\s(.*?)<\/link>/, '\2');
+  end
 end

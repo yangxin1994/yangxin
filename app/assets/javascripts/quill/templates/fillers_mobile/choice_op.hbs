@@ -1,5 +1,7 @@
 <p>
-	<input name='{{model_id}}' id='{{model_id}}_{{item_id}}' type="{{type}}" class="{{#if is_exclusive}}is_exclusive{{/if}}" />
-	<label for='{{model_id}}_{{item_id}}'>{{{html}}}</label>
+	<label for='{{model_id}}_{{item_id}}'>
+    <input name='{{model_id}}' id='{{model_id}}_{{item_id}}' type="{{type}}" class="{{#if is_exclusive}}is_exclusive{{/if}}" />
+    {{{html}}}
+  </label>
 	{{#if input}}<input type='text' />{{/if}}
 </p>

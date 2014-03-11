@@ -104,8 +104,7 @@ $(function(){
 			}).placeholder().appendTo(con);
 		},
 
-		setAnswer: function(answer) {
-			if(!answer) return;
+		_setAnswer: function(answer) {
 			var bound = answer.length;
 			if(bound > this.model_issue.items.length)
 				bound = this.model_issue.items.length;

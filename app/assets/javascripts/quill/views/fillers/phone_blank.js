@@ -18,7 +18,7 @@ $(function(){
 			}).placeholder().appendTo(this.$('.q-content'));
 		},
 
-		setAnswer: function(answer) {
+		_setAnswer: function(answer) {
 			this.$('input:text').val(answer);
 		},
 		_getAnswer: function() {

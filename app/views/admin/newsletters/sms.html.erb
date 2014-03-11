@@ -1,0 +1,57 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "/kindeditor/kindeditor-min", "/kindeditor/lang/zh_CN" %>
+  <%= javascript_include_tag "pages/admin/newsletters/netranking_newsletter-bundle" %>
+<% end %>
+
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li>
+      <a href="/admin/newsletters">
+      <i class="icon-chevron-right"></i>
+      电子杂志列表
+      </a>
+    </li>
+    <li>
+      <a href="/admin/newsletters/new">
+        <i class="icon-chevron-right"></i>
+        新建电子杂志
+      </a>
+    </li>
+    <li>
+      <a href="/admin/subscribers">
+        <i class="icon-chevron-right"></i>
+        订阅管理
+      </a>
+    </li>
+    <li class="active">
+      <a href="/admin/newsletters/sms">
+      <i class="icon-chevron-right"></i>
+      群发短信
+      </a>
+    </li>
+    <li>
+      <a href="/admin/newsletters/upload_attachment">
+      <i class="icon-chevron-right"></i>
+      清研杂志
+      </a>
+    </li>
+    <li>
+      <a href="/admin/netranking_users">
+      <i class="icon-chevron-right"></i>
+      清研杂志用户列表
+      </a>
+    </li>
+  </ul>
+<% end %>
+
+<p>
+  <span>请输入短信内容</span>
+  <%= text_area_tag 'sms_content' %>
+</p>
+<p>
+  <label "mobile_list">手机列表</lable>
+  <%= text_area_tag 'mobile_list' %>
+</p>
+<br />
+<a class="sms_btn btn" href="javascript:void();" target="_blank">发送</a>

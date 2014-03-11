@@ -2,15 +2,13 @@
 	<%= javascript_include_tag "layouts/filler-mobile" %>
 	<%= stylesheet_link_tag    "layouts/filler-mobile" %>
 
-	<% if !@survey.nil?%>
-		<script type="text/javascript">
-			window.survey_id = '<%= @survey["_id"] %>';
-			window.is_preview = <%= @is_preview.blank? ? 'false' : @is_preview %>;
-			window.spread_url = <%= raw @spread_url.to_json %>;
-			window.current_user_id = <%=  raw (current_user.nil? ? nil.to_json : current_user._id.to_s.to_json) %>;
 
-		</script>
-	<% end %>
+	<script type="text/javascript">
+		window.survey_id = '<%= @survey["_id"] %>';
+		window.is_preview = <%= @is_preview.blank? ? false : @is_preview %>;
+		window.spread_url = <%= raw @spread_url.to_json %>;
+		window.current_user_id = <%=  raw (current_user.nil? ? nil.to_json : current_user._id.to_s.to_json) %>;
+	</script>
 
 	<%= yield :head %>
 

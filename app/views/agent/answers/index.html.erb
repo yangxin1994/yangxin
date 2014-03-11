@@ -1,6 +1,6 @@
 <!-- content for head -->
 <% content_for :head do %>
-  <%= javascript_include_tag "pages/admin/answers/index-bundle" %>
+  <%= javascript_include_tag "pages/admin/answers/review-bundle" %>
 <% end %>
 
 <% content_for :sidenav do %>
@@ -18,20 +18,37 @@
     <form class="form-search" style="display:inline">
     <div class="input-append">
       <input class="span6 search-query" name="keyword" id="" type="text" placeholder="创建人邮箱">
+      <input  name="agent_task_id" value="<%= params[:agent_task_id] %>" type="hidden" >
       <button class="btn">搜索</button>
     </div>
     </form>
   </span>
+  <span class="btn-group">
+    <div class="btn-group">
+      <a class="btn handle" href="/agent/answers/<%= params[:agent_task_id] %>/to_csv?status=8">导出待审核数据</a>
+      <button class="btn dropdown-toggle" data-toggle="dropdown">
+        <span class="caret"></span>
+      </button>    
+      <ul class="dropdown-menu">
+        <li><a href="/agent/answers/<%= params[:agent_task_id] %>/to_csv">导出全部</a></li>
+        <li class="divider"></li>
+        <li><a href="/agent/answers/<%= params[:agent_task_id] %>/to_csv" class="querilayer">导当前条件下所有数据</a></li>
+        <li><a href="/agent/answers/<%= params[:agent_task_id] %>/to_csv?status=32">导出审核完毕的数据</a></li>
+      </ul>
+    </div>
+  </span>  
   <span class="pull-right">
     <%= paginator_mini @answers %>
     <div class="btn-group">
       <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
       <ul class="dropdown-menu pull-right">
-        <li><a href="?">全部</a></li>
+        <li><a href="?agent_task_id=<%= params[:agent_task_id] %>">全部</a></li>
         <li class="divider"></li>
-        <li><a href="?status=4">待审核</a></li>
-        <li><a href="?status=2">被拒绝</a></li>
-        <li><a href="?status=32">审核完毕</a></li>
+        <li><a href="?status=1" class="querilayer">正在答题</a></li>
+        <li><a href="?status=2" class="querilayer">已拒绝</a></li>
+        <li><a href="?status=4" class="querilayer">等待管理员审核</a></li>
+        <li><a href="?status=8" class="querilayer">待审核</a></li>
+        <li><a href="?status=32" class="querilayer">通过审核</a></li>
       </ul>
     </div>
   </span>
@@ -56,7 +73,7 @@
       <% @answers['data'].each do |answer| %>
       <tr>
         <td><%= answer["sample_name"] %></td>
-        <td><%= answer_type_tag answer["status"] %></td>
+        <td><%= answer_type_tag answer["status"], true%></td>
         <td><%= answer["created_at"].strftime('%F %R') %></td>
         <td>
           <a class="btn handle" href="answers/<%= answer["_id"] %>?agent_task_id=<%= params[:agent_task_id] %>" ><i class="icon-list-alt"></i>查看详细</a>

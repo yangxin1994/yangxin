@@ -1,3 +1,5 @@
+#= require "d3.v3"
+
 $ ->
 
   highlight = (selection, color = '#fff') ->

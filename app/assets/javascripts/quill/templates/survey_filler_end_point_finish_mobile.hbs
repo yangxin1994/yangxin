@@ -11,6 +11,10 @@
     {{else}}
       <button class="rew_next" id="rew_next" >登录领取</button>
     {{/if}}
-    <button id="socal_share">分享得{{spread_point}}积分</button>
+    {{#if spreadable}}
+      <button id="socal_share">分享得{{spread_point}}积分</button>
+    {{else}}
+      <button id="socal_share">分享问卷</button>
+    {{/if}}
 	</div>		
 </div>

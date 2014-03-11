@@ -19,8 +19,7 @@ $(function(){
 			$('<div class="cl-line" />').appendTo(this.$('.q-content'));
 		},
 
-		setAnswer: function(answer) {
-			if(!answer) return;
+		_setAnswer: function(answer) {
 			this._time_selector.odTimeSelector('val', answer);
 		},
 		_getAnswer: function() {
