@@ -672,7 +672,7 @@ class Survey
     csv_string = CSV.generate(:headers => true) do |csv|
       csv << excel_header
       answers.each_with_index do |answer, index|
-        line_answer = [answer._id, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip]
+        line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip]
         begin
           all_questions_id(false).each_with_index do |question, index|
             qindex = index
