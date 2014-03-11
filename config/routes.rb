@@ -528,6 +528,7 @@ OopsData::Application.routes.draw do
     resources :answers do
       member do
         put :review
+        get :to_csv
       end
     end
     resources :tasks do

@@ -112,6 +112,13 @@ class Filler::FillerController < ApplicationController
 
     # 6. Check whether survey is closed or not
     @survey_closed = !@is_preview && @survey.status != Survey::PUBLISHED
+    if params[:ati].present?
+      # checkout whether agent task is already closed
+      agent_task = AgentTask.find(params[:ati])
+      if agent_task.blank? || agent_task.status != AgentTask::OPEN
+        @survey_closed = true
+      end
+    end
     
     # 10. get request referer and channel
     @channel = params[:c].to_i

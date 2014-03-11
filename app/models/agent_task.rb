@@ -58,9 +58,9 @@ class AgentTask
 
 
   def info
-    self["survey_title"] = self.survey.title
-    self["agent_email"] = self.agent.email
-    self["agent_name"] = self.agent.name
+    self["survey_title"] = self.survey.try(:title).to_s
+    self["agent_email"] = self.agent.try(:email).to_s
+    self["agent_name"] = self.agent.try(:name).to_s
     self["reward_scheme_id"] = self.reward_scheme.try(:_id).to_s
     return self
   end

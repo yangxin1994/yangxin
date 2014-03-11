@@ -54,7 +54,7 @@
     <tr>
       <th>问卷名称</th>
       <th>代理</th>
-      <th>待审核/完成/拒绝</th>
+      <th>待代理审核/待审核/完成/拒绝</th>
       <th>操作</th>
     </tr>
   </thead>
@@ -64,6 +64,7 @@
       <td><a href="javascript:void()"><%= task["survey_title"] %></a></td>
       <td><%= task["agent_name"] %>:<%= task["agent_email"] %></td>
       <td>
+        <%= task["agent_under_review_count"] %>/
         <%= task["under_review_count"] %>/
         <%= task["finished_count"] %>/
         <%= task["reject_count"] %>

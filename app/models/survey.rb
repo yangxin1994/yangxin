@@ -579,6 +579,9 @@ class Survey
       {"spss_name" => "answer_id",
        "spss_type" => "String",
        "spss_label" => "答案ID"},
+      {"spss_name" => "is_agent",
+       "spss_type" => "String",
+       "spss_label" => "通过代理回收"},
       {"spss_name" => "email",
        "spss_type" => "String",
        "spss_label" => "邮箱"},
@@ -596,7 +599,7 @@ class Survey
   end
 
   def excel_header
-    headers =["answer_id", "email", "mobile", "IP"]
+    headers =["answer_id", "is_agent", "email", "mobile", "IP"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -643,7 +646,7 @@ class Survey
     answer_length = answers.length
     last_time = Time.now.to_i
     answers.each_with_index do |answer, index|
-      line_answer = [answer._id, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address]
+      line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address]
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index
