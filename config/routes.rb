@@ -323,7 +323,7 @@ OopsData::Application.routes.draw do
     resources :answers do
       member do
         get :review, :to_csv
-        put :reject
+        put :reject, :batch_reject
       end
     end
 

@@ -30,9 +30,9 @@ $ ->
           alert_msg.show('success', "操作完成!")
         else
           console.log ret
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
       error: (ret)->
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
 
   $(".finishs").click ->
     $this = $(this)
@@ -49,9 +49,9 @@ $ ->
           alert_msg.show('success', "操作完成!")
         else
           console.log ret
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
       error: (ret)->
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
 
 
   $(".finishf").click ->
@@ -72,9 +72,9 @@ $ ->
             alert_msg.show('success', "操作完成!")
           else
             console.log ret
-            alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+            alert_msg.show('error', "处理失败,请稍后重试")
         error: (ret)->
-            alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+            alert_msg.show('error', "处理失败,请稍后重试")
 
   $(document).on "click", ".remark", ->
     $this = $(this)
@@ -106,9 +106,9 @@ $ ->
           alert_msg.show('success', "操作完成!")
         else
           console.log ret
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
       error: (ret)->
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
 
   $(".express").click ->
     $this = $(this)
@@ -141,9 +141,9 @@ $ ->
           alert_msg.show('success', "操作完成!")
         else
           console.log ret
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")        
+          alert_msg.show('error', "处理失败,请稍后重试")        
       error: ->
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
 
 
 
