@@ -23,6 +23,20 @@
     </div>
     </form>
   </span>
+  <span class="btn-group">
+    <div class="btn-group">
+      <a class="btn handle" href="/agent/answers/<%= params[:agent_task_id] %>/to_csv?status=8">导出待审核数据</a>
+      <button class="btn dropdown-toggle" data-toggle="dropdown">
+        <span class="caret"></span>
+      </button>    
+      <ul class="dropdown-menu">
+        <li><a href="/agent/answers/<%= params[:agent_task_id] %>/to_csv">导出全部</a></li>
+        <li class="divider"></li>
+        <li><a href="/agent/answers/<%= params[:agent_task_id] %>/to_csv" class="querilayer">导当前条件下所有数据</a></li>
+        <li><a href="/agent/answers/<%= params[:agent_task_id] %>/to_csv?status=32">导出审核完毕的数据</a></li>
+      </ul>
+    </div>
+  </span>  
   <span class="pull-right">
     <%= paginator_mini @answers %>
     <div class="btn-group">
@@ -30,9 +44,11 @@
       <ul class="dropdown-menu pull-right">
         <li><a href="?agent_task_id=<%= params[:agent_task_id] %>">全部</a></li>
         <li class="divider"></li>
+        <li><a href="?status=1" class="querilayer">正在答题</a></li>
+        <li><a href="?status=2" class="querilayer">已拒绝</a></li>
+        <li><a href="?status=4" class="querilayer">等待管理员审核</a></li>
         <li><a href="?status=8" class="querilayer">待审核</a></li>
-        <li><a href="?status=2" class="querilayer">被拒绝</a></li>
-        <li><a href="?status=4" class="querilayer">审核完毕</a></li>
+        <li><a href="?status=32" class="querilayer">通过审核</a></li>
       </ul>
     </div>
   </span>

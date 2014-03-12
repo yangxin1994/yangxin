@@ -32,7 +32,7 @@ class Answer
   REJECT_BY_IP_RESTRICT = 64
   REJECT_BY_ADMIN = 128
 
-  # status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo, 32 for under agents' review
+  # status: 1 for editting, 2 for reject, 4 for under review, 8 for for under agents' review, 16 for redo, 32 finish
   field :status, :type => Integer, default: 1
   field :answer_content, :type => Hash, default: {}
   field :random_quality_control_answer_content, :type => Hash, default: {}

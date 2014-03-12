@@ -13,6 +13,7 @@ class String
     return self.gsub(/<r>(.*?)<\/r>/, '\1')
       .gsub(/<u>(.*?)<\/u>/, '\1')
       .gsub(/<big>(.*?)<\/big>/, '\1')
+      .gsub(/<b>(.*?)<\/b>/, '\1')
       .gsub(/<bigger>(.*?)<\/bigger>/, '\1')
       .gsub(/<biggest>(.*?)<\/biggest>/, '\1')
       .gsub(/<link>([^\s]*?)<\/link>/, '\1')
