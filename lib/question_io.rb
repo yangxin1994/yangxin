@@ -392,7 +392,7 @@ class MatrixChoiceQuestionIo < QuestionIo
     return nil if index.blank?
     raise "您填写的内容不像是个数字啊(#{index}）!" unless only_num?(index)
     index = index.to_i - 1
-    raise "您确定有这个选项吗#({index})?" unless (0..(self.issue["items"].count)).include? index
+    raise "您确定有这个选项吗(#{index})?" unless (0..(self.issue["items"].count)).include? index
     self.issue["items"][index]["id"]
   end
   
