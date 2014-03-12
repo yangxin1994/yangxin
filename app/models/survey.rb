@@ -598,7 +598,7 @@ class Survey
   end
 
   def excel_header
-    headers =["answer_id", "is_agent", "email", "mobile", "IP"]
+    headers =["answer_id", "is_agent", "email", "mobile", "IP", "答题时长"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -645,7 +645,7 @@ class Survey
     answer_length = answers.length
     last_time = Time.now.to_i
     answers.each_with_index do |answer, index|
-      line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address]
+      line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, "#{answer_time} 分"]
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index
@@ -672,7 +672,9 @@ class Survey
     csv_string = CSV.generate(:headers => true) do |csv|
       csv << excel_header
       answers.each_with_index do |answer, index|
-        line_answer = [answer._id, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip]
+        answer_time = Time.at(answer.finished_at) - answer.created_at
+        answer_time = (answer_time.ceil / 60).ceil
+        line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, "#{answer_time} 分"]
         begin
           all_questions_id(false).each_with_index do |question, index|
             qindex = index
