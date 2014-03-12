@@ -101,7 +101,7 @@ class QuestionIo
   end
 
   def get_item_id(index)
-    return nil if index.nil?
+    return nil if index.blank?
     index = index.to_i - 1
     if self.issue["other_item"]["has_other_item"] && self.issue["items"].count == index
       return self.issue["other_item"]["id"]
@@ -250,7 +250,7 @@ class ChoiceQuestionIo < QuestionIo
   end
 
   def get_item_id(index)
-    return nil if index.nil?
+    return nil if index.blank?
     raise "您确定有这个选项吗?" unless only_num?(index)
     index = index.to_i - 1
     if self.issue["other_item"]["has_other_item"] && self.issue["items"].count == index
@@ -384,17 +384,18 @@ class MatrixChoiceQuestionIo < QuestionIo
   end
 
   # def get_item_id(index)
-  #   return nil if index.nil?
+  #   return nil if index.blank?
   #   index = index.to_i - 1
   #   self.issue["items"][index]["id"]
   # end
   def get_item_id(index)
-    return nil if index.nil?
+    return nil if index.blank?
     raise "您填写的内容不像是个数字啊!" unless only_num?(index)
     index = index.to_i - 1
     raise "您确定有这个选项吗?" unless (0..(self.issue["items"].count)).include? index
     self.issue["items"][index]["id"]
   end
+  
   def get_item_index(id)
     self.issue["items"].each_with_index do |item, index|
       return index + 1 if item["id"].to_s == id.to_s
