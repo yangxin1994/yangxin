@@ -843,6 +843,7 @@ class Survey
   def answer_import(csv_str)
     updated_count = 0
     answer_bean = []
+    @exception_msg = []
     CSV.parse(csv_str, :headers => true) do |row|
       return false if row.headers != self.csv_header(:with => "import_id")
       if imported_answer = self.answers.where(:import_id => row["import_id"].to_s).first
@@ -858,7 +859,7 @@ class Survey
     {
       :insert_count => answer_bean.length,
       :updated_count => updated_count,
-      :error => ''
+      :error => @exception_msg
     }
   end
 
@@ -869,6 +870,8 @@ class Survey
       begin
         line_answer.merge! qio.answer_import(row.to_hash, header_prefix)
       rescue Exception => emsg
+
+        @exception_msg << [row["import_id"].to_s, header_prefix, emsg.to_s.encode("GBK")]
       end
     end
     line_answer
