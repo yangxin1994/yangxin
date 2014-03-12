@@ -597,7 +597,7 @@ class Survey
       csv << excel_header
       answers.each_with_index do |answer, index|
         answer_time = Time.at(answer.finished_at) - answer.created_at
-        answer_time = （answer_time.ceil / 60).ceil
+        answer_time = (answer_time.ceil / 60).ceil
         line_answer = [answer._id, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, "#{answer_time} 分"]
         begin
           all_questions_id(false).each_with_index do |question, index|
