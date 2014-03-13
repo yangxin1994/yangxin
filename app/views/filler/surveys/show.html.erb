@@ -17,13 +17,10 @@
 		<% if @percentage > 0 %>
 		$('#start_btn').text('继续答题（已完成' + Math.round(<%= @percentage * 100 %>) + '%）');
 		<% else %>
-		<% if @survey['_id'].to_s != '52a156f0eb0e5b697800000b' && @survey['_id'].to_s != '52a59fc6eb0e5bb2c5000007' %>
+		<% if !["53191980eb0e5b99ea000020", "52a156f0eb0e5b697800000b", "52a59fc6eb0e5bb2c5000007"].include?(@survey['_id'].to_s) %>
 		// hack renmin
 		var left_time = <%=@survey.estimate_answer_time %>;
 		$('#start_btn').text('开始答题' + (left_time > 0 ? '（耗时' + $.util.printTimeFriendly(left_time) + '）' : ''));
-    <% if @survey['_id'].to_s == "531e76c4eb0e5bc0e3000021" %>
-		  $('#start_btn').text('开始答题');
-    <% end %>
 		<% end %>
 		<% end %>
 	});
