@@ -21,6 +21,9 @@
 		// hack renmin
 		var left_time = <%=@survey.estimate_answer_time %>;
 		$('#start_btn').text('开始答题' + (left_time > 0 ? '（耗时' + $.util.printTimeFriendly(left_time) + '）' : ''));
+    <% if @survey['_id'].to_s == "531e76c4eb0e5bc0e3000021" %>
+		  $('#start_btn').text('开始答题');
+    <% end %>
 		<% end %>
 		<% end %>
 	});
