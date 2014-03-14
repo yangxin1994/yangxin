@@ -590,7 +590,7 @@ class Survey
       {"spss_name" => "IP",
        "spss_type" => "String",
        "spss_label" => "IP"},
-      {"spss_name" => "IP",
+      {"spss_name" => "time",
        "spss_type" => "String",
        "spss_label" => "答题时长"}
     ]
