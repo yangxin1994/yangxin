@@ -592,7 +592,7 @@ class Survey
        "spss_label" => "IP"},
       {"spss_name" => "IP",
        "spss_type" => "String",
-       "spss_label" => "答题时长"}         
+       "spss_label" => "答题时长"}
     ]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.spss_header("q#{i+1}")
