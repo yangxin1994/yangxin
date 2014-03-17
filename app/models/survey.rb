@@ -589,7 +589,10 @@ class Survey
        "spss_label" => "手机号码"},
       {"spss_name" => "IP",
        "spss_type" => "String",
-       "spss_label" => "IP"}                 
+       "spss_label" => "IP"},
+      {"spss_name" => "time",
+       "spss_type" => "String",
+       "spss_label" => "答题时长"}
     ]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.spss_header("q#{i+1}")
@@ -691,6 +694,29 @@ class Survey
     end
   end
 
+  def batch_pass(options, answer_auditor)
+    unless(File.exist?("public/uploads"))
+      Dir.mkdir("public/uploads")
+    end
+    unless(File.exist?("public/uploads/csv"))
+      Dir.mkdir("public/uploads/csv")
+    end
+    csv_origin = options["pass_answer_list"]
+    filename = Time.now.strftime("%y-%m-%s-%d")+'_'+(csv_origin.original_filename)
+    File.open("public/uploads/csv/#{filename}", "wb") do |f|
+      f.write(csv_origin.read)
+    end
+    csv = File.read("public/uploads/csv/#{filename}").force_encoding 'utf-8'
+    CSV.generate do |re_csv|
+      CSV.parse(csv, :headers => false) do |row|
+        self.answers.find_by(:id => row[0]) do |_answer|
+          r = _answer.try("review", true, answer_auditor, "") ? "已通过" : "处理失败"
+          re_csv << [row[0], r]
+        end
+      end      
+    end
+  end
+
   def batch_reject(options, answer_auditor)
     unless(File.exist?("public/uploads"))
       Dir.mkdir("public/uploads")
@@ -703,7 +729,7 @@ class Survey
     File.open("public/uploads/csv/#{filename}", "wb") do |f|
       f.write(csv_origin.read)
     end
-    csv = File.read("public/uploads/csv/#{filename}").utf8!
+    csv = File.read("public/uploads/csv/#{filename}").force_encoding 'utf-8'
     CSV.generate do |re_csv|
       CSV.parse(csv, :headers => false) do |row|
         self.answers.find_by(:id => row[0]) do |_answer|
@@ -790,6 +816,7 @@ class Survey
     unless survey_obj["agent_promote_info"]["agent_tasks"].present?
       survey_obj["agent_promote_info"]["agent_tasks"] = [{}]
     end
+    
    if SampleAttribute.count > 0
       survey_obj["sample_attributes_list"] = SampleAttribute.normal
     else
