@@ -56,6 +56,14 @@ class Admin::AnswersController < Admin::AdminController
     @survey = @questions.survey
   end
 
+  def batch_pass
+    survey = Survey.find(params[:id])
+    survey.answers.not_preview.unreviewed.each do |e|
+      e.review(true, current_user, "")
+    end
+    redirect_to action: :show, id: params[:id]
+  end
+
   def set_location
     render_json Answer.find(params[:id]) do |answer|
       answer.latitude = params[:lat]
