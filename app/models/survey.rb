@@ -2,6 +2,7 @@
 require 'error_enum'
 require 'quill_common'
 require 'csv'
+require "string/utf8"
 Dir[File.dirname(__FILE__) + '/lib/survey_components/*.rb'].each {|file| require file }
 class Survey
   
@@ -706,7 +707,7 @@ class Survey
     File.open("public/uploads/csv/#{filename}", "wb") do |f|
       f.write(csv_origin.read)
     end
-    csv = File.read("public/uploads/csv/#{filename}").force_encoding 'utf-8'
+    csv = File.read("public/uploads/csv/#{filename}").utf8!
     CSV.generate do |re_csv|
       CSV.parse(csv, :headers => false) do |row|
         self.answers.find_by(:id => row[0]) do |_answer|
@@ -729,7 +730,7 @@ class Survey
     File.open("public/uploads/csv/#{filename}", "wb") do |f|
       f.write(csv_origin.read)
     end
-    csv = File.read("public/uploads/csv/#{filename}").force_encoding 'utf-8'
+    csv = File.read("public/uploads/csv/#{filename}").utf8!
     CSV.generate do |re_csv|
       CSV.parse(csv, :headers => false) do |row|
         self.answers.find_by(:id => row[0]) do |_answer|
