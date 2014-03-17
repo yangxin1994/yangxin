@@ -589,7 +589,10 @@ class Survey
        "spss_label" => "手机号码"},
       {"spss_name" => "IP",
        "spss_type" => "String",
-       "spss_label" => "IP"}                 
+       "spss_label" => "IP"},
+      {"spss_name" => "time",
+       "spss_type" => "String",
+       "spss_label" => "答题时长"}
     ]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.spss_header("q#{i+1}")
@@ -790,6 +793,7 @@ class Survey
     unless survey_obj["agent_promote_info"]["agent_tasks"].present?
       survey_obj["agent_promote_info"]["agent_tasks"] = [{}]
     end
+    
    if SampleAttribute.count > 0
       survey_obj["sample_attributes_list"] = SampleAttribute.normal
     else
