@@ -99,15 +99,29 @@ $ ->
     $("#answer_list_vld").html("")
     $("#survey_title").html(stitle)
     $("#breject_form").attr("action", "/admin/answers/#{sid}/batch_reject")
-    $('#batch_modal').modal('show')
+    $('#batch_reject_modal').modal('show')
 
   $("#breject_btn").click ->
     if $("#answer_list").val()
-      $('#batch_modal').modal('hide')
+      $('#batch_reject_modal').modal('hide')
       alert_msg.show('success', "请等待处理，处理结果会会自动下载。")
     else
       $("#answer_list_vld").html("* 请选择csv文件！")
       return false
     
+  $(".batch-pass").click ->
+    $this = $(this)
+    sid = $this.data("sid")
+    stitle = $this.data("stitle").truncate(10)
+    $("#pass_answer_list_vld").html("")
+    $("#survey_title").html(stitle)
+    $("#bpass_form").attr("action", "/admin/answers/#{sid}/batch_pass")
+    $('#batch_pass_modal').modal('show')
 
-
+  $("#bpass_btn").click ->
+    if $("#pass_answer_list").val()
+      $('#batch_pass_modal').modal('hide')
+      alert_msg.show('success', "请等待处理，处理结果会会自动下载。")
+    else
+      $("#pass_answer_list_vld").html("* 请选择csv文件！")
+      return false

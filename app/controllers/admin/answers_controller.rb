@@ -85,4 +85,14 @@ class Admin::AnswersController < Admin::AdminController
       :filename => "批量拒绝处理结果-#{Time.now.strftime("%M-%d_%T")}.csv",
       :type => "text/csv")
   end
+
+  def batch_pass
+    survey = Survey.find(params[:id])
+
+    result = survey.batch_pass(params, current_user)
+
+    send_data(result, 
+      :filename => "批量通过处理结果-#{Time.now.strftime("%M-%d_%T")}.csv",
+      :type => "text/csv")
+  end
 end

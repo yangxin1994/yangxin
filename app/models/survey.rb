@@ -650,7 +650,7 @@ class Survey
     last_time = Time.now.to_i
     answers.each_with_index do |answer, index|
       answer_time = Time.at(answer.finished_at) - answer.created_at
-      answer_time = (answer_time / 60).ceil
+      answer_time = (answer_time.ceil / 60.0).ceil      
       line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, "#{answer_time} 分"]
       begin
         all_questions_id(false).each_with_index do |question, index|
@@ -679,7 +679,7 @@ class Survey
       csv << excel_header
       answers.each_with_index do |answer, index|
         answer_time = Time.at(answer.finished_at) - answer.created_at
-        answer_time = (answer_time.ceil / 60).ceil
+        answer_time = (answer_time.ceil / 60.0).ceil
         line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, "#{answer_time} 分"]
         begin
           all_questions_id(false).each_with_index do |question, index|
@@ -692,6 +692,29 @@ class Survey
           csv << line_answer
         end
       end
+    end
+  end
+
+  def batch_pass(options, answer_auditor)
+    unless(File.exist?("public/uploads"))
+      Dir.mkdir("public/uploads")
+    end
+    unless(File.exist?("public/uploads/csv"))
+      Dir.mkdir("public/uploads/csv")
+    end
+    csv_origin = options["pass_answer_list"]
+    filename = Time.now.strftime("%y-%m-%s-%d")+'_'+(csv_origin.original_filename)
+    File.open("public/uploads/csv/#{filename}", "wb") do |f|
+      f.write(csv_origin.read)
+    end
+    csv = File.read("public/uploads/csv/#{filename}").utf8!
+    CSV.generate do |re_csv|
+      CSV.parse(csv, :headers => false) do |row|
+        self.answers.find_by(:id => row[0]) do |_answer|
+          r = _answer.try("review", true, answer_auditor, "") ? "已通过" : "处理失败"
+          re_csv << [row[0], r]
+        end
+      end      
     end
   end
 
