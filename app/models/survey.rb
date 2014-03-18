@@ -2,6 +2,7 @@
 require 'error_enum'
 require 'quill_common'
 require 'csv'
+require "string/utf8"
 Dir[File.dirname(__FILE__) + '/lib/survey_components/*.rb'].each {|file| require file }
 class Survey
   
@@ -649,7 +650,7 @@ class Survey
     last_time = Time.now.to_i
     answers.each_with_index do |answer, index|
       answer_time = Time.at(answer.finished_at) - answer.created_at
-      answer_time = (answer_time.ceil / 60).ceil      
+      answer_time = (answer_time / 60).ceil
       line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, "#{answer_time} 分"]
       begin
         all_questions_id(false).each_with_index do |question, index|
