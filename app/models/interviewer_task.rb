@@ -120,7 +120,10 @@ class InterviewerTask
         :status => status,
         :reject_type => a["reject_type"].to_i,
         :region => region}
-      Answer.create(answer_to_insert)
+      retval = Answer.create(answer_to_insert)
+      Rails.logger.info "&&&&&&&&&&&&&&&&&&&&"
+      Rails.logger.info retval.inspect
+      Rails.logger.info "&&&&&&&&&&&&&&&&&&&&"
     end
     self.refresh_quota
     return self
