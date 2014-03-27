@@ -52,6 +52,11 @@ class QuilluController < ApplicationController
   def submit_answers
     interviewer_task = InterviewerTask.find_by_id(params[:interviewer_task_id])
     render_json_auto(ErrorEnum::INTERVIEWER_TASK_NOT_EXIST) and return if interviewer_task.nil?
+    Rails.logger.info "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+    Rails.logger.info interviewer_task.id.to_s
+    Rails.logger.info interviewer_task.user.try(:email)
+    Rails.logger.info params[:answers].length
+    Rails.logger.info "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
     retval = interviewer_task.submit_answers(params[:answers])
     render_json_auto(retval) and return
   end
