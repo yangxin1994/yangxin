@@ -75,4 +75,24 @@ class Admin::AnswersController < Admin::AdminController
       answer.admin_reject(current_user)
     end
   end
+
+  def batch_reject
+    survey = Survey.find(params[:id])
+
+    result = survey.batch_reject(params, current_user)
+
+    send_data(result, 
+      :filename => "批量拒绝处理结果-#{Time.now.strftime("%M-%d_%T")}.csv",
+      :type => "text/csv")
+  end
+
+  def batch_pass
+    survey = Survey.find(params[:id])
+
+    result = survey.batch_pass(params, current_user)
+
+    send_data(result, 
+      :filename => "批量通过处理结果-#{Time.now.strftime("%M-%d_%T")}.csv",
+      :type => "text/csv")
+  end
 end

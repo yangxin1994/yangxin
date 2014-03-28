@@ -23,11 +23,11 @@ $(function() {
           return $('#info_modal').modal('show');
         } else {
           console.log(ret);
-          return alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ");
+          return alert_msg.show('error', "处理失败,请稍后重试");
         }
       },
       error: function() {
-        return alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ");
+        return alert_msg.show('error', "处理失败,请稍后重试");
       }
     });
   });
@@ -45,11 +45,11 @@ $(function() {
           return $("#email_sended").html(ret.value.email.promote_email_count);
         } else {
           console.log(ret);
-          return alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ");
+          return alert_msg.show('error', "处理失败,请稍后重试");
         }
       },
       error: function() {
-        return alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ");
+        return alert_msg.show('error', "处理失败,请稍后重试");
       }
     });
   });
@@ -100,11 +100,11 @@ $(function() {
           return $('#cost_modal').modal('show');
         } else {
           console.log(ret);
-          return alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ");
+          return alert_msg.show('error', "处理失败,请稍后重试");
         }
       },
       error: function() {
-        return alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ");
+        return alert_msg.show('error', "处理失败,请稍后重试");
       }
     });
   });
@@ -125,11 +125,11 @@ $(function() {
           return alert_msg.show('success', "操作完成!");
         } else {
           console.log(ret);
-          return alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ");
+          return alert_msg.show('error', "处理失败,请稍后重试");
         }
       },
       error: function() {
-        return alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ");
+        return alert_msg.show('error', "处理失败,请稍后重试");
       }
     });
   });
@@ -147,11 +147,11 @@ $(function() {
         if (ret.success) {
           return icon.attr('class', "icon-star" + (ret.value ? "" : "-empty"));
         } else {
-          return alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ");
+          return alert_msg.show('error', "处理失败,请稍后重试");
         }
       },
       error: function() {
-        return alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ");
+        return alert_msg.show('error', "处理失败,请稍后重试");
       }
     });
   });

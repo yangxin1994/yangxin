@@ -2,6 +2,7 @@
 require 'error_enum'
 require 'quill_common'
 require 'csv'
+require "string/utf8"
 Dir[File.dirname(__FILE__) + '/lib/survey_components/*.rb'].each {|file| require file }
 class Survey
   
@@ -590,7 +591,10 @@ class Survey
        "spss_label" => "手机号码"},
       {"spss_name" => "IP",
        "spss_type" => "String",
-       "spss_label" => "IP"}                 
+       "spss_label" => "IP"},
+      {"spss_name" => "time",
+       "spss_type" => "String",
+       "spss_label" => "答题时长"}
     ]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.spss_header("q#{i+1}")
@@ -599,7 +603,7 @@ class Survey
   end
 
   def excel_header
-    headers =["answer_id", "is_agent", "email", "mobile", "IP"]
+    headers =["answer_id", "is_agent", "email", "mobile", "IP", "答题时长"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -646,7 +650,9 @@ class Survey
     answer_length = answers.length
     last_time = Time.now.to_i
     answers.each_with_index do |answer, index|
-      line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address]
+      answer_time = Time.at(answer.finished_at) - answer.created_at
+      answer_time = (answer_time.ceil / 60.0).ceil      
+      line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, "#{answer_time} 分"]
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index
@@ -673,7 +679,9 @@ class Survey
     csv_string = CSV.generate(:headers => true) do |csv|
       csv << excel_header
       answers.each_with_index do |answer, index|
-        line_answer = [answer._id, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip]
+        answer_time = Time.at(answer.finished_at) - answer.created_at
+        answer_time = (answer_time.ceil / 60.0).ceil
+        line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, "#{answer_time} 分"]
         begin
           all_questions_id(false).each_with_index do |question, index|
             qindex = index
@@ -687,6 +695,52 @@ class Survey
       end
     end
   end
+
+  def batch_pass(options, answer_auditor)
+    unless(File.exist?("public/uploads"))
+      Dir.mkdir("public/uploads")
+    end
+    unless(File.exist?("public/uploads/csv"))
+      Dir.mkdir("public/uploads/csv")
+    end
+    csv_origin = options["pass_answer_list"]
+    filename = Time.now.strftime("%y-%m-%s-%d")+'_'+(csv_origin.original_filename)
+    File.open("public/uploads/csv/#{filename}", "wb") do |f|
+      f.write(csv_origin.read)
+    end
+    csv = File.read("public/uploads/csv/#{filename}").utf8!
+    CSV.generate do |re_csv|
+      CSV.parse(csv, :headers => false) do |row|
+        self.answers.find_by(:id => row[0]) do |_answer|
+          r = _answer.try("review", true, answer_auditor, "") ? "已通过" : "处理失败"
+          re_csv << [row[0], r]
+        end
+      end      
+    end
+  end
+
+  def batch_reject(options, answer_auditor)
+    unless(File.exist?("public/uploads"))
+      Dir.mkdir("public/uploads")
+    end
+    unless(File.exist?("public/uploads/csv"))
+      Dir.mkdir("public/uploads/csv")
+    end
+    csv_origin = options["answer_list"]
+    filename = Time.now.strftime("%y-%m-%s-%d")+'_'+(csv_origin.original_filename)
+    File.open("public/uploads/csv/#{filename}", "wb") do |f|
+      f.write(csv_origin.read)
+    end
+    csv = File.read("public/uploads/csv/#{filename}").utf8!
+    CSV.generate do |re_csv|
+      CSV.parse(csv, :headers => false) do |row|
+        self.answers.find_by(:id => row[0]) do |_answer|
+          r = _answer.try("review",false, answer_auditor, row[1]) ? "已拒绝" : "处理失败"
+          re_csv << [row[0], r]
+        end
+      end      
+    end
+  end  
 
   def analysis(filter_index, include_screened_answer)
     return ErrorEnum::FILTER_NOT_EXIST if filter_index >= self.filters.length
@@ -764,6 +818,7 @@ class Survey
     unless survey_obj["agent_promote_info"]["agent_tasks"].present?
       survey_obj["agent_promote_info"]["agent_tasks"] = [{}]
     end
+    
    if SampleAttribute.count > 0
       survey_obj["sample_attributes_list"] = SampleAttribute.normal
     else
@@ -817,6 +872,7 @@ class Survey
   def answer_import(csv_str)
     updated_count = 0
     answer_bean = []
+    @exception_msg = []
     CSV.parse(csv_str, :headers => true) do |row|
       return false if row.headers != self.csv_header(:with => "import_id")
       if imported_answer = self.answers.where(:import_id => row["import_id"].to_s).first
@@ -832,7 +888,7 @@ class Survey
     {
       :insert_count => answer_bean.length,
       :updated_count => updated_count,
-      :error => ''
+      :error => @exception_msg
     }
   end
 
@@ -843,6 +899,8 @@ class Survey
       begin
         line_answer.merge! qio.answer_import(row.to_hash, header_prefix)
       rescue Exception => emsg
+
+        @exception_msg << [row["import_id"].to_s, header_prefix, emsg.to_s.encode("GBK")]
       end
     end
     line_answer

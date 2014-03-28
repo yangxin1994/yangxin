@@ -256,9 +256,11 @@ class Order
     options[:source] = options[:source].to_i
     options[:type] = options[:type].to_i
     if options[:email].present?
-      orders = User.find_by_email(options[:email]).try(:orders).desc(:created_at) || []
+      orders = User.find_by_email(options[:email]).try(:orders)
+      orders = orders.nil? ? [] : orders.desc(:created_at)
     elsif options[:mobile].present?
-      orders = User.find_by_mobile(options[:mobile]).try(:orders).desc(:created_at) || []
+      orders = User.find_by_mobile(options[:mobile]).try(:orders)
+      orders = orders.nil? ? [] : orders.desc(:created_at)
     elsif options[:code].present?
       orders = Order.where(:code => /#{options[:code]}/).desc(:created_at)
     else

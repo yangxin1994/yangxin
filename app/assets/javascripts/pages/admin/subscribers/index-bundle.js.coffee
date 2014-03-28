@@ -61,7 +61,7 @@ $ ->
           alert_msg.show('success', "操作完成!成功添加#{ret.value.s_count}个!重复#{ret.value.e_count}个!失败#{ret.value.f_count}个!")
         else
           console.log ret
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
       error: ->
-          alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试")
           

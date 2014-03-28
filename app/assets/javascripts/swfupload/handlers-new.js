@@ -134,11 +134,7 @@ function uploadSuccess(file, serverData) {
 				var cont="您成功导入"+sdata.value.insert_count+"条，更新"+sdata.value.updated_count+"条数据<br>";
 							
 				if(sdata.value.error.length!=0){
-					var error_id="";
-					$.each(sdata.value.error, function(i,str){
-						error_id=error_id+"import_id="+str.row.import_id+":"+str.message+"<br>";
-					});
-					cont+="以下数据导入失败：<br>"+error_id;
+					cont += ("以下数据导入失败：<a href=\"/" + sdata.value.error + "\" target=\"_blank\">点击查看</a>");
  				}
 				$.od.odPopup({content:cont,size:{width:300},contentPosition:'left',
 					confirm:function(){
