@@ -1,7 +1,7 @@
 # already tidied up
 class Admin::AdminController < ApplicationController
   
-  layout "admin"
+  layout "admin-todc"
 
   before_filter :require_sign_in
   # because only user_id of user is from return data in many times.

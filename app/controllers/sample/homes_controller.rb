@@ -17,7 +17,8 @@ class Sample::HomesController < Sample::SampleController
 
     @data = {
       hot_survey:hot_survey,
-      rsl:rsl,public_notices:public_notices,
+      rsl:rsl,
+      public_notices:public_notices,
       hotest_gifts:hotest_gifts,
       top_rank_users:top_rank_users,
       fresh_news:fresh_news,

@@ -30,9 +30,15 @@
       <% end %>
 
       <span class="research-title">
-        <a href="/s/<%= survey.scheme_id %>">
-          <%= truncate(survey['title'],:length => 30)%>
-        </a>
+        <% if survey[:encoded_url] %>
+          <a href="<%= survey[:encoded_url] %>">
+            <%= truncate(survey['title'],:length => 30)%>
+          </a>
+        <% else %>
+          <a href="/s/<%= survey.scheme_id %>">
+            <%= truncate(survey['title'],:length => 30)%>
+          </a>
+        <% end %>
       </span>
       <% if user_signed_in %>
           <% if survey['status'].to_s ==  Survey::PUBLISHED.to_s %>
