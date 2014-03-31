@@ -226,6 +226,14 @@ OopsData::Application.routes.draw do
     end
   end
 
+  # api
+
+  namespace :api do
+    
+    resources :survey_tasks
+
+  end
+
   # admin
   namespace :admin do
 
@@ -313,6 +321,8 @@ OopsData::Application.routes.draw do
 
       end
     end
+
+    resources :survey_tasks
 
     resources :reward_schemes
 
