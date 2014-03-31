@@ -16,7 +16,6 @@ class SurveyTask < Survey
     "#{origin_route}#{encode_id}?s=true"
   end
 
-
   def excute_sample_data(user=nil)
     answer = answer_by_sample(user)
     self['answer_status'] = answer.try(:status) || 0

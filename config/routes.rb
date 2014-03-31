@@ -231,6 +231,14 @@ OopsData::Application.routes.draw do
   namespace :api do
     
     resources :survey_tasks
+    resources :answer_tasks do
+
+    end
+    resources :users do
+      collection do
+        get :current
+      end
+    end
 
   end
 
