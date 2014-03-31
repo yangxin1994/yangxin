@@ -1,5 +1,5 @@
 ---
-address: 0.0.0.0
+address: 118.194.61.82
 pid: tmp/pids/thin.pid
 timeout: 120
 port: 9393
