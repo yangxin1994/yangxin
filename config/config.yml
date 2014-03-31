@@ -7,5 +7,5 @@ staging:
   faye_token: "oopsdata@2014"
 
 production:
-  faye_server: "http://127.0.0.1:9393/faye"
+  faye_server: "http://118.194.61.82:9393/faye"
   faye_token: "oopsdata@2014"
