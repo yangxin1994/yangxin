@@ -1,0 +1,10 @@
+<% if@hotest_gifts['data'].length > 0 %>
+  $('ul.gift-list').html("<%= escape_javascript(render :partial => 'gifts_list', :locals => { :gifts => @hotest_gifts['data'] }) %>").find('li').css('opacity',0)
+
+  //$('ul.gift-list').replaceWith("<ul class='gift-list'><%= escape_javascript(render :partial => 'gifts_list', :locals => { :gifts => @hotest_gifts['data'] }) %></ul>")
+  $('ul.gift-list li').animate({opacity:1},500);
+  var p = "<%= @hotest_gifts['next_page']%>";
+  $('.gift_slide a.next').attr('page', p); 
+<% else %>
+  $('ul.gift-list').find('img.loading').remove(); 
+<% end %>

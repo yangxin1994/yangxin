@@ -1,0 +1,52 @@
+#!/bin/sh -e
+COMMAND="$1"
+
+# verify parameters
+case $COMMAND in
+start|stop|restart)
+  ;;
+*)
+  echo "The command $COMMAND is not supported."
+  echo "Supported commands include: start, stop, and restart"
+  exit
+  ;;
+esac
+
+
+# check whether the pid file exists
+pid_file="faye_server/tmp/pids/thin.9393.pid"
+if [ -f "$pid_file" ]; then
+  pid_file_exist=1
+else
+  pid_file_exist=0
+fi
+
+# execute the command
+case $COMMAND in
+start)
+  if [ $pid_file_exist = 1 ]; then
+    echo "A thin pid file already exists at faye_server/tmp/pids."
+    echo "You need to first stop the thin process, or remove the pid file if you can confirm no thin process is running."
+    exit
+  fi
+  cd faye_server && bundle exec thin start -C thin.yml
+  ;;
+stop)
+  if [ $pid_file_exist = 0 ]; then
+    echo "Cannot find thin pid at faye_server/tmp/pids."
+    echo "No thin process to stop"
+    exit
+  fi
+  cd faye_server && bundle exec thin stop -C thin.yml
+  ;;
+restart)
+  if [ $pid_file_exist = 0 ]; then
+    echo "Cannot find thin pid at faye_server/tmp/pids."
+    echo "No thin process to stop"
+  else
+    cd faye_server && bundle exec thin stop -C thin.yml
+    bundle exec thin start -C thin.yml
+  fi
+  ;;
+esac
+
