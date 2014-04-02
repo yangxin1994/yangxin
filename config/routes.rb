@@ -45,7 +45,12 @@ OopsData::Application.routes.draw do
       end
     end
 
-    resource :home, :only => [:show] 
+    #resource :home, :only => [:show]
+    resource :home do
+      collection do
+        get :gifts 
+      end 
+    end
 
     resources :surveys, :only => [:index] do 
       collection do
@@ -138,6 +143,8 @@ OopsData::Application.routes.draw do
     
     resources :public_notices, :only => [:index,:show]      
   end
+
+  resources :realogs
 
   # surveys, pages and questions
   scope :module => "quill" do
@@ -334,7 +341,7 @@ OopsData::Application.routes.draw do
     resources :answers do
       member do
         get :review, :to_csv
-        put :reject
+        put :reject, :batch_reject, :batch_pass, :set_location
       end
     end
 
@@ -502,6 +509,16 @@ OopsData::Application.routes.draw do
     end
   end
 
+  namespace :client do
+    resources :surveys do
+    end
+    scope :module => :sessions do
+      resources :signin
+      resources :signout
+      resources :reset_password
+    end
+  end
+
   namespace :agent do
     scope :module => :sessions do
       resources :signin
@@ -511,6 +528,7 @@ OopsData::Application.routes.draw do
     resources :answers do
       member do
         put :review
+        get :to_csv
       end
     end
     resources :tasks do

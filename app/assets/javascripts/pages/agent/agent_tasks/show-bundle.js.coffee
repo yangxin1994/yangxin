@@ -17,7 +17,7 @@ $ ->
         else
           $this.button('reset')
           console.log ret
-          alert_msg.show('error', "处理失败,请稍后重试:#{ret.value.error_message} (╯‵□′)╯︵┻━┻ ")
+          alert_msg.show('error', "处理失败,请稍后重试:#{ret.value.error_message}")
       error: ->
         $this.button('reset')
-        alert_msg.show('error', "处理失败,请稍后重试 (╯‵□′)╯︵┻━┻ ")
+        alert_msg.show('error', "处理失败,请稍后重试")

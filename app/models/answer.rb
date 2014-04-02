@@ -32,7 +32,7 @@ class Answer
   REJECT_BY_IP_RESTRICT = 64
   REJECT_BY_ADMIN = 128
 
-  # status: 1 for editting, 2 for reject, 4 for under review, 8 for finish, 16 for redo, 32 for under agents' review
+  # status: 1 for editting, 2 for reject, 4 for under review, 8 for for under agents' review, 16 for redo, 32 finish
   field :status, :type => Integer, default: 1
   field :answer_content, :type => Hash, default: {}
   field :random_quality_control_answer_content, :type => Hash, default: {}
@@ -495,6 +495,10 @@ class Answer
       v["selection"] ||= [] if v.class == Hash && v.has_key?("selection")
       self.answer_content[k] = v if self.answer_content.has_key?(k)
       self.random_quality_control_answer_content[k] = v if self.random_quality_control_answer_content.has_key?(k)
+      if self.answer_content[k].nil?
+        q = Question.find(k)
+        self.answer_content[k] = {} if q.is_required == false
+      end
     end
     self.save
     return true
@@ -654,10 +658,10 @@ class Answer
     return ErrorEnum::ANSWER_NOT_COMPLETE if self.random_quality_control_answer_content.has_value?(nil)
     old_status = self.status
     # if the survey has no prize and cannot be spreadable (or spread reward point is 0), set the answer as finished
-    if self.is_preview || !self.need_review
-      self.set_finish
-    elsif !self.agent_task.nil?
+    if self.agent_task.present?
       self.set_under_agent_review
+    elsif self.is_preview || !self.need_review
+      self.set_finish
     else
       self.set_under_review
     end

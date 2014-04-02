@@ -13,6 +13,11 @@ gem "kiqstand", '~> 1.0.0'
 gem 'whenever', '~> 0.8.2', :require => false
 gem 'sinatra', require: false
 gem 'slim', '~> 1.3.6'
+gem 'haml', '~> 4.0.3'
+
+gem 'thin'
+gem "faye-rails", "1.0.0"
+gem "settingslogic", "~> 2.0.9"
 
 gem 'ezcrypto', '~> 0.7.2'
 gem 'rack-protection', '~> 1.3.2'
@@ -84,7 +89,6 @@ group :test do
 end
 
 group :development do
-  gem 'thin'
   gem 'pry-rails', "~> 0.2.2"
   gem "better_errors", "~> 0.8.0"
   #gem "rack-mini-profiler", "~> 0.1.30"

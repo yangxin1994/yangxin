@@ -54,8 +54,7 @@ $(function(){
 			});
 		},
 
-		setAnswer: function(answer) {
-			if(!answer) return;
+		_setAnswer: function(answer) {
 			this.$('.cs_other').val(answer.text_input);
 
 			for (var i = 0; i < this.model_issue.items.length; i++) {

@@ -45,7 +45,7 @@ class QuestionIo
   def spss_header(header_prefix)
     @spss_header << {"spss_name" => header_prefix,
                 "spss_type" => SPSS_STRING,
-                "spss_label" => content["text"].gsub(/<[^>]*>/, '').slice(0..120)}
+                "spss_label" => content["text"].slice(0..120)}
     @header_count[header_prefix] ||= @spss_header.count
     @spss_header
   end
@@ -101,7 +101,7 @@ class QuestionIo
   end
 
   def get_item_id(index)
-    return nil if index.nil?
+    return nil if index.blank?
     index = index.to_i - 1
     if self.issue["other_item"]["has_other_item"] && self.issue["items"].count == index
       return self.issue["other_item"]["id"]
@@ -157,18 +157,18 @@ class ChoiceQuestionIo < QuestionIo
       issue["items"].each_index do |i|
         @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
                     "spss_type" => SPSS_NUMERIC,
-                    "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120),
+                    "spss_label" => issue["items"][i]["content"]["text"].slice(0..120),
                     "spss_value_labels" => {1 => SPSS_OPTED,
                                             0 => SPSS_NOT_OPTED}}
       end
     else
       choices = {}
       issue["items"].each_index do |i|
-        choices[i+1] = issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '')
+        choices[i+1] = issue["items"][i]["content"]["text"]
       end
       @spss_header << {"spss_name" => header_prefix,
                   "spss_type" => SPSS_NUMERIC,
-                  "spss_label" => content["text"].gsub(/<[^>]*>/, '').slice(0..120),
+                  "spss_label" => content["text"].slice(0..120),
                   "spss_value_labels" => choices }
     end
     if issue["other_item"]["has_other_item"]
@@ -250,7 +250,7 @@ class ChoiceQuestionIo < QuestionIo
   end
 
   def get_item_id(index)
-    return nil if index.nil?
+    return nil if index.blank?
     raise "您确定有这个选项吗?" unless only_num?(index)
     index = index.to_i - 1
     if self.issue["other_item"]["has_other_item"] && self.issue["items"].count == index
@@ -285,7 +285,7 @@ class MatrixChoiceQuestionIo < QuestionIo
         issue["items"].each_index do |c|
           @spss_header << {"spss_name" => header_prefix  + "_r#{r + 1}" + "_c#{c + 1}",
                       "spss_type" => SPSS_NUMERIC,
-                      "spss_label" => issue["items"][c]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120),
+                      "spss_label" => issue["items"][c]["content"]["text"].slice(0..120),
                       "spss_value_labels" => {1 => SPSS_OPTED,
                                               0 => SPSS_NOT_OPTED}}
         end
@@ -293,12 +293,12 @@ class MatrixChoiceQuestionIo < QuestionIo
     else
       choices = {}
       issue["items"].each_index do |i|
-        choices[i+1] = issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '')
+        choices[i+1] = issue["items"][i]["content"]["text"]
       end
       issue["rows"].each_with_index do |r, i|
         @spss_header << {"spss_name" => header_prefix + "_r#{i + 1}",
                     "spss_type" => SPSS_NUMERIC,
-                    "spss_label" => r["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120),
+                    "spss_label" => r["content"]["text"].slice(0..120),
                     "spss_value_labels" => choices }
       end
     end
@@ -384,17 +384,18 @@ class MatrixChoiceQuestionIo < QuestionIo
   end
 
   # def get_item_id(index)
-  #   return nil if index.nil?
+  #   return nil if index.blank?
   #   index = index.to_i - 1
   #   self.issue["items"][index]["id"]
   # end
   def get_item_id(index)
-    return nil if index.nil?
-    raise "您填写的内容不像是个数字啊!" unless only_num?(index)
+    return nil if index.blank?
+    raise "您填写的内容不像是个数字啊(#{index}）!" unless only_num?(index)
     index = index.to_i - 1
-    raise "您确定有这个选项吗?" unless (0..(self.issue["items"].count)).include? index
+    raise "您确定有这个选项吗(#{index})?" unless (0..(self.issue["items"].count)).include? index
     self.issue["items"][index]["id"]
   end
+  
   def get_item_index(id)
     self.issue["items"].each_with_index do |item, index|
       return index + 1 if item["id"].to_s == id.to_s
@@ -422,7 +423,7 @@ class NumberBlankQuestionIo < QuestionIo
   def spss_header(header_prefix)
     @spss_header << {"spss_name" => header_prefix,
                 "spss_type" => SPSS_NUMERIC,
-                "spss_label" => content["text"].gsub(/<[^>]*>/, '').slice(0..120)}
+                "spss_label" => content["text"].slice(0..120)}
     @header_count[header_prefix] ||= @spss_header.count
     @spss_header
   end
@@ -671,7 +672,7 @@ class BlankQuestionIo < QuestionIo
     issue["items"].each_index do |i|
       @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_STRING,
-                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)}
+                  "spss_label" => issue["items"][i]["content"]["text"].slice(0..120)}
     end
     @header_count[header_prefix] ||= @spss_header.count
     @spss_header
@@ -719,7 +720,7 @@ class MatrixBlankQuestionIo < QuestionIo
       issue["items"].each_index do |i|
         @spss_header << {"spss_name" => header_prefix  + "_r#{r + 1}" + "_c#{i + 1}",
                     "spss_type" => SPSS_STRING,
-                    "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)}
+                    "spss_label" => issue["items"][i]["content"]["text"].slice(0..120)}
       end
     end
     @header_count[header_prefix] ||= @spss_header.count
@@ -775,7 +776,7 @@ class ConstSumQuestionIo < QuestionIo
     issue["items"].each_index do |i|
       @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_NUMERIC,
-                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)}
+                  "spss_label" => issue["items"][i]["content"]["text"].slice(0..120)}
     end
     if issue["other_item"]["has_other_item"]
       @spss_header << {"spss_name" => header_prefix + INPUT,
@@ -783,7 +784,7 @@ class ConstSumQuestionIo < QuestionIo
                   "spss_label" => SPSS_ETC}
       @spss_header << {"spss_name" => header_prefix + INPUT + VALUE,
                   "spss_type" => SPSS_NUMERIC,
-                  "spss_label" => issue["other_item"]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)}
+                  "spss_label" => issue["other_item"]["content"]["text"].slice(0..120)}
     end
     @header_count[header_prefix] ||= @spss_header.count
     @spss_header
@@ -853,7 +854,7 @@ class SortQuestionIo < QuestionIo
     end
     value_labels = {}
     issue["items"].each_with_index do |item, index|
-      value_labels[index + 1] = item["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)
+      value_labels[index + 1] = item["content"]["text"].slice(0..120)
     end
     item_count.times do |i|
       @spss_header << {"spss_name" => header_prefix + "_s#{i + 1}",
@@ -935,7 +936,7 @@ class RankQuestionIo < QuestionIo
     issue["items"].each_index do |i|
       @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_NUMERIC,
-                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)}
+                  "spss_label" => issue["items"][i]["content"]["text"].slice(0..120)}
       if issue["items"][i]["has_unknow"]
         @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}" + UNKNOW,
                     "spss_type" => SPSS_STRING,
@@ -949,7 +950,7 @@ class RankQuestionIo < QuestionIo
                   "spss_label" => SPSS_ETC}
       @spss_header << {"spss_name" => header_prefix + INPUT + VALUE,
                   "spss_type" => SPSS_NUMERIC,
-                  "spss_label" => issue["other_item"]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)}
+                  "spss_label" => issue["other_item"]["content"]["text"].slice(0..120)}
     end
     @header_count[header_prefix] ||= @spss_header.count
     @spss_header
@@ -1016,7 +1017,7 @@ class TableQuestionIo < QuestionIo
     issue["items"].each_index do |i|
       @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_STRING,
-                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120)}
+                  "spss_label" => issue["items"][i]["content"]["text"].slice(0..120)}
     end
     @header_count[header_prefix] ||= @spss_header.count
     @retval
@@ -1067,7 +1068,7 @@ class ScaleQuestionIo < QuestionIo
     issue["items"].each_index do |i|
       @spss_header << {"spss_name" => header_prefix + "_c#{i + 1}",
                   "spss_type" => SPSS_NUMERIC,
-                  "spss_label" => issue["items"][i]["content"]["text"].gsub(/<[^>]*>/, '').slice(0..120),
+                  "spss_label" => issue["items"][i]["content"]["text"].slice(0..120),
                   "spss_value_labels" => value_labels}
       # if issue["show_unknown"]
       #   @retval << {"spss_name" => header_prefix + "_c#{i + 1}" + UNKNOW,

@@ -248,6 +248,11 @@ body{background: image-url('od-quillme/bg.png');}
 	margin:0 auto;
 }
 
+.survey_list{
+	margin-top:20px;
+	height:865px;
+}
+
 
 .header{
 	.inner-page{
@@ -541,7 +546,7 @@ body{background: image-url('od-quillme/bg.png');}
 			margin-bottom:5px;
 			border-bottom:1px #f9b9b9 dashed;
 			.box-title{
-				width:60px;
+				// width:60px;
 				height:18px;
 				font-size:14px;
 				font-weight: bold;

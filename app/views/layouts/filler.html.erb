@@ -46,9 +46,15 @@
 	<% end %>
 	<div class='sf_banner_top'>
 		<div class='inner'>
-			<a id='logo' href="http://oopsdata.com">
-				<img src="/assets/filler/default/logo.png" />
-			</a>
+      <% if @survey['_id'].to_s == '530ecc12eb0e5be18500001a' %>
+      <a id='logo' href="http://netranking.cn">
+        <img src="/assets/filler/default/logo-nr.png" />
+      </a>
+      <% else %>
+      <a id='logo' href="http://oopsdata.com">
+        <img src="/assets/filler/default/logo.png" />
+      </a>
+      <% end %>
 			<% if @survey['style_setting']['has_progress_bar'] %>
 			<div id='progress_con'>
 				<div id='progress_info'></div>

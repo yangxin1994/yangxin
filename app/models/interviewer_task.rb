@@ -99,7 +99,11 @@ class InterviewerTask
   def submit_answers(answers)
     answers.each do |a|
       # convert the gps or 3g location to a region code
-      region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
+      begin
+        region = QuillCommon::AddressUtility.find_region_code_by_latlng(*a["location"])
+      rescue
+        region = -1
+      end
       if a["status"].to_i == 1
         status = Answer::REJECT
       else
@@ -113,12 +117,17 @@ class InterviewerTask
         :finished_at => a["finished_at"].to_i,
         :answer_content => a["answer_content"],
         :attachments => a["attachments"],
-        :latitude => a["location"][0].to_s,
-        :longitude => a["location"][1].to_s,
+        # :latitude => a["location"][0].to_s,
+        # :longitude => a["location"][1].to_s,
+        :latitude => "39.910477",
+        :longitude => "116.42748",
         :status => status,
         :reject_type => a["reject_type"].to_i,
         :region => region}
-      Answer.create(answer_to_insert)
+      retval = Answer.create(answer_to_insert)
+      Rails.logger.info "&&&&&&&&&&&&&&&&&&&&"
+      Rails.logger.info retval.inspect
+      Rails.logger.info "&&&&&&&&&&&&&&&&&&&&"
     end
     self.refresh_quota
     return self
