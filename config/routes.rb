@@ -516,7 +516,9 @@ OopsData::Application.routes.draw do
       member do
         get :records
         get :set_location
+        get :batch_set_location
         put :update_location
+        put :batch_update_location
       end
     end
     scope :module => :sessions do
