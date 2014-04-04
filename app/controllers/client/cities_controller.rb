@@ -35,9 +35,24 @@ class Client::CitiesController < Client::ApplicationController
     @location = @city.records[@record_index.to_i].join(',')
   end
 
+  def batch_set_location
+    @city = City.find(params[:id])
+    @record_index = params[:index]
+  end
+
   def update_location
     render_json City.find(params[:id]) do |city|
       city.records[params[:record_index].to_i] = [params[:lat], params[:lng]]
+      city.save
+    end
+  end
+
+  def batch_update_location
+    render_json City.find(params[:id]) do |city|
+      record_index_ary = params[:record_index].split(',').map { |e| e.to_i }
+      record_index_ary.each do |i|
+        city.records[i] = [(params[:lat].to_f + rand / 1000).to_s, (params[:lng].to_f + rand / 1000).to_s]
+      end
       city.save
     end
   end
