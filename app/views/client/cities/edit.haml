@@ -1,0 +1,14 @@
+- content_for :head do
+  = javascript_include_tag "pages/client/cities-bundle"
+  = stylesheet_link_tag "pages/client/cities-bundle", :media => "all"
+
+.container
+  - if current_client.admin
+    = form_tag("/client/cities/#{@city.id}", method: "put") do
+      .form-group
+        = label_tag :name, "名称"
+        = text_field_tag "city[name]", @city.name, autofocus: true, class: "form-control"
+      .form-group
+        = label_tag :imei, "已回收数量"
+        = text_field_tag "city[amount]", @city.amount, class: "form-control"
+      = submit_tag "提交", :class => 'btn-primary btn'

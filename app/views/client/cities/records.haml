@@ -1,0 +1,21 @@
+- content_for :head do
+  = javascript_include_tag "pages/client/cities-bundle"
+  = stylesheet_link_tag "pages/client/cities-bundle", :media => "all"
+
+.container
+  %h3
+    %span= @city.name
+    %span= "已回收" + @city.amount.to_s + "份"
+    = link_to "返回列表", { controller: "client/cities", action: "show", id: @city.id }
+  %div
+    %table.table.table-striped
+      %tr
+        %th 编号
+        %th 经纬度
+        %th 操作
+      - @city.records.each_with_index do |record, index|
+        %tr
+          %td= index
+          %td= record.join(', ')
+          %td
+            = link_to "设置位置", { controller: "client/cities", action: "set_location", id: @city.id.to_s, index: index }

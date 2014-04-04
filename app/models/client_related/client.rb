@@ -13,8 +13,9 @@ class Client
   field :name, :type => String
   field :status, :type => Integer, default: NORMAL
   field :auth_key, :type => String
+  field :admin, type: Boolean, default: false
 
-  has_many :surveys
+  has_many :cities
 
   scope :normal, where(:status => NORMAL)
 
