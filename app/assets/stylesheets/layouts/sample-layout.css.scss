@@ -564,7 +564,7 @@ body{background: image-url('od-quillme/bg.png');}
 }
 
 /*调研列表*/
-.research-list{
+.research-list,.survey-list{
 	width:610px;
 	float: left;
 	ul{
@@ -575,6 +575,7 @@ body{background: image-url('od-quillme/bg.png');}
 			border-bottom:1px #dbdbdb dashed;
 			@include clearfix;
 			.reward.unfinished{background: #fbbf62;}
+			.reward.red{background: $red1;}
 			.reward.finished{background: #ddd;}
 			.reward{
 				float: left;
@@ -1233,3 +1234,147 @@ textarea.error {
 	}
 }
 
+/*商业调研 2014-4-3 */
+
+
+.paid-survey{
+	width:630px;
+	height:220px;
+	margin-top:20px;
+	float: left;
+	background: #FFF;
+	@include box-shadow(0 1px 1px #999);
+	@include border-radius(6px);
+	.content-title{
+		width:590px;
+		margin:0 auto;
+		border-bottom:1px $red1 dashed;
+		@include clearfix;
+		h2{
+			color: $red1;
+			font-size: 14px;
+			font-weight: bold;
+			width:200px;
+			float: left;
+			@include one-line(50px);
+		}
+		.page{
+			float: right;
+			margin:13px 0 0 0;
+			a{
+				@include size(24px,24px);
+				display: block;
+				float: left;
+				border:1px #dbdbdb solid;
+				&:hover{
+					border-color:$red1;
+					i{
+						border-color: $red1;
+					}
+				}
+				&.prev{
+					@include border-left-radius(4px);
+					position: relative;
+					right:-1px;
+					&:hover{
+						z-index: 999;
+					}
+				}
+				&.next{
+					@include border-right-radius(4px);
+					position: relative;
+					&:hover{
+						z-index: 999;
+					}
+				}
+				i{
+					width:1px;
+					height:1px;
+					display: inline-block;
+					border:5px #dbdbdb solid;
+					position: absolute;
+					&.page-top{
+						border-top-color:#fff;
+						border-left-color:#fff;
+						border-right-color:#fff;
+						top:4px;
+						left:7px;
+					}
+					&.page-bottom{
+						border-bottom-color:#fff;
+						border-left-color:#fff;
+						border-right-color:#fff;
+						top:10px;
+						left:6px;
+					}
+				}
+			}
+		}
+	}
+	.survey-list{
+		width:630px;
+		height:160px;
+		overflow: hidden;
+		position: relative;
+		ul{
+			padding:0 20px;
+			position: absolute;
+		}	
+	}
+}
+	.create-survey{
+		cursor: default;
+		width:295px;
+		margin-top:20px;
+		float:right;
+		background:#FFF image-url('od-quillme/count_bg.png') no-repeat right top;
+		.count{
+			padding:13px 0;
+			span{
+				padding:0 20px;
+				font-size: 14px;
+				color:$red1;
+				strong{
+					margin-right:10px;
+				}
+				b{
+					color:#666;
+					margin-left:10px;
+				}
+			}
+			i{
+				width:20px;
+				@include one-line(27px);
+				@include inline-block;
+				text-align: center;
+				color:#fff;
+				font-size: 24px;
+				font-weight: bold;
+				background: #b4b5be;
+				border:1px #a7abbb solid;
+				@include border-radius(3px);
+				text-shadow: #999 0 1px 0;
+			}
+		}
+		.btn-line{
+			border-top:1px #dbdbdb dashed;
+			width:265px;
+			margin:0 auto;
+			padding:22px 0 16px 0;
+			margin-top:11px;
+			.create-survey-btn{
+				width:200px;
+				margin:0 auto;
+				@include one-line(40px);
+				text-align: center;
+				color:#FFF;
+				background: $blue;
+				display: block;
+				font-size: 16px;
+				@include border-radius(4px);
+				&:hover{
+					background: $blue2;
+				}
+			}
+		}
+	}
