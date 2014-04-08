@@ -6,6 +6,98 @@
 @import "compass/css3/opacity";
 
 
+.paid-survey{
+	width:630px;
+	height:220px;
+	margin-top:20px;
+	float: left;
+	background: #FFF;
+	@include box-shadow(0 1px 1px #999);
+	@include border-radius(6px);
+	.content-title{
+		width:590px;
+		margin:0 auto;
+		border-bottom:1px $red1 dashed;
+		@include clearfix;
+		h2{
+			color: $red1;
+			font-size: 14px;
+			font-weight: bold;
+			width:200px;
+			float: left;
+			@include one-line(50px);
+		}
+		.page{
+			float: right;
+			margin:13px 0 0 0;
+			a{
+				@include size(24px,24px);
+				display: block;
+				float: left;
+				border:1px #dbdbdb solid;
+				&:hover{
+					border-color:$red1;
+					i{
+						border-color: $red1;
+					}
+				}
+				&.prev{
+					@include border-left-radius(4px);
+					position: relative;
+					right:-1px;
+					&:hover{
+						z-index: 999;
+					}
+				}
+				&.next{
+					@include border-right-radius(4px);
+					position: relative;
+					&:hover{
+						z-index: 999;
+					}
+				}
+				i{
+					width:1px;
+					height:1px;
+					display: inline-block;
+					border:5px #dbdbdb solid;
+					position: absolute;
+					&.page-top{
+						border-top-color:#fff;
+						border-left-color:#fff;
+						border-right-color:#fff;
+						top:4px;
+						left:7px;
+					}
+					&.page-bottom{
+						border-bottom-color:#fff;
+						border-left-color:#fff;
+						border-right-color:#fff;
+						top:10px;
+						left:6px;
+					}
+				}
+			}
+		}
+	}
+	.survey-list{
+		width:630px;
+		height:160px;
+		overflow: hidden;
+		position: relative;
+		ul{
+			padding:0 20px;
+			position: relative;
+			li{
+				position:relative;
+				border-bottom: none;
+				&.have-border{
+					border-bottom: 1px #dbdbdb dashed;
+				}
+			}
+		}	
+	}
+}
 
 .research-list{
 	min-height:370px;
@@ -115,11 +207,9 @@
   }  		
 }
 
-
-
-
 .bulletin{
 	width:295px;
+	height:202px;
 	margin-top:20px;
 	ul{
 		@include clearfix;
@@ -166,40 +256,74 @@
 		color:#999;
 	}
 }
+%gift-width{
+	width:(868px/5);
+	height:174px;
+}
+
 .gift-list-main{
 	width:940px;
 	margin-top:20px;
 	margin-bottom:20px;
+	.gift_slide{
+		position: relative;
+		overflow: hidden;
+	}
 	.gift-list{
 		width:950px;
+		height:254px;
 		@include clearfix;
 		li{
-			width:220px;
-			height:290px;
+			// width:220px;
+			@extend %gift-width;
+			// height:290px;
 			float: left;
 			margin:12px 12px 0 0;
 			a{
-				width:220px;
-				height:280px;
+				// width:220px;
+				@extend %gift-width;
+				// height:280px;
 				display: block;
 				border:1px #f2f2f2 solid;
+				border-top:none;
 				&:hover{
 					.gift-mask{
 						background:red;
 					}
 				}	
 				.gift-img{
-					width:220px;
+					// width:220px;
+					position:relative;
+					@extend %gift-width;
 					margin:0 auto;
 					display: block;
 					img{
-						width:220px;
-						height:220px;
+						// width:220px;
+						@extend %gift-width;
+						// height:220px;
 						display: block;	
+						// &.loading{
+						// 	position:absolute;
+						// 	top:0
+						// }
+					}
+					.loading{
+						position:absolute;
+						top:0;
+						@extend %gift-width;
+						height:185px;
+						img{
+							position:absolute;
+							width:50px;
+							height:50px;
+							left:35%;
+							top:35%;							
+						}
 					}
 				}
 				.gift-name{
-					width:220px;
+					// width:220px;
+					@extend %gift-width;
 					@include one-line(30px);
 					overflow: hidden;
 					text-align: center;
@@ -211,7 +335,8 @@
 					top:-30px;			
 				}
 				.gift-mask{
-					width:220px;
+					// width:220px;
+					@extend %gift-width;
 					height:30px;
 					display: block;
 					margin-top:-60px;
@@ -219,12 +344,14 @@
 					@include opacity(0.5);
 				}
 				.gift-remark{
-					width:209px;
+					// width:209px;
+					@extend %gift-width;
 					margin:0 auto;
 					display: block;
 					@include clearfix;
 					.integral{
-						width:95px;
+						// width:95px;
+						width:80px;
 						margin-top:5px;
 						@include one-line(50px);
 						text-align: center;
@@ -237,10 +364,13 @@
 					}
 					.gift-remark-right{
 						float: right;
-						margin-top:10px;
+						// margin-top:10px;
+						margin-top:5px;
 						width:85px;
-						padding-left:20px;
-						border-left:1px #dbdbdb dashed;
+						color: #999;
+						@include one-line(50px);
+						// padding-left:20px;
+						// border-left:1px #dbdbdb dashed;
 						span{
 							color:#999;
 							text-align: left;
@@ -261,28 +391,35 @@
 /*排行榜*/
 .forums{
 	width:295px;
+	height:400px;
 	margin:15px 0 0 15px;
 	.forums-list{
 		li{
+			display:table;
 			padding:7px 0;
-			line-height: 1.5em;
+			height:55px;
+			width:100%;
 			border-bottom:1px #dbdbdb dashed;
 			color:#999;
-			a{
-				margin:0 2px;
-				&:hover{
-					color:$red1;
+			div{
+				display:table-cell;
+				vertical-align: middle;
+				a{
+					margin:0 2px;
+					&:hover{
+						color:$red1;
+					}
 				}
-			}
-			b{
-				color:#ff6600;
-				margin:0 3px;
-			}
-			span{
-				margin:0 3px;
-				&.u{
-					color:#666;
+				b{
+					color:#ff6600;
+					margin:0 3px;
 				}
+				span{
+					margin:0 3px;
+					&.u{
+						color:#666;
+					}
+				}				
 			}
 		}
 	}
@@ -293,7 +430,7 @@
 	margin-left:15px;
 	.rank-list{
 		li{
-			padding:10px 0;
+			padding:14px 0;
 			@include clearfix;
 			border-bottom:1px #dbdbdb dashed;
 			span{

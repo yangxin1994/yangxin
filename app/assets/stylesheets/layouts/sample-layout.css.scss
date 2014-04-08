@@ -248,6 +248,11 @@ body{background: image-url('od-quillme/bg.png');}
 	margin:0 auto;
 }
 
+.survey_list{
+	margin-top:20px;
+	height:865px;
+}
+
 
 .header{
 	.inner-page{
@@ -541,7 +546,7 @@ body{background: image-url('od-quillme/bg.png');}
 			margin-bottom:5px;
 			border-bottom:1px #f9b9b9 dashed;
 			.box-title{
-				width:60px;
+				// width:60px;
 				height:18px;
 				font-size:14px;
 				font-weight: bold;
@@ -559,7 +564,7 @@ body{background: image-url('od-quillme/bg.png');}
 }
 
 /*调研列表*/
-.research-list{
+.research-list,.survey-list{
 	width:610px;
 	float: left;
 	ul{
@@ -570,6 +575,7 @@ body{background: image-url('od-quillme/bg.png');}
 			border-bottom:1px #dbdbdb dashed;
 			@include clearfix;
 			.reward.unfinished{background: #fbbf62;}
+			.reward.red{background: $red1;}
 			.reward.finished{background: #ddd;}
 			.reward{
 				float: left;
@@ -1228,3 +1234,60 @@ textarea.error {
 	}
 }
 
+/*商业调研 2014-4-3 */
+	.create-survey{
+		cursor: default;
+		width:295px;
+		margin-top:20px;
+		float:right;
+		background:#FFF image-url('od-quillme/count_bg.png') no-repeat right top;
+		.count{
+			padding:13px 0;
+			span{
+				padding:0 20px;
+				font-size: 14px;
+				color:$red1;
+				strong{
+					margin-right:10px;
+				}
+				b{
+					color:#666;
+					margin-left:10px;
+				}
+			}
+			i{
+				width:20px;
+				@include one-line(27px);
+				@include inline-block;
+				text-align: center;
+				color:#fff;
+				font-size: 24px;
+				font-weight: bold;
+				background: #b4b5be;
+				border:1px #a7abbb solid;
+				@include border-radius(3px);
+				text-shadow: #999 0 1px 0;
+			}
+		}
+		.btn-line{
+			border-top:1px #dbdbdb dashed;
+			width:265px;
+			margin:0 auto;
+			padding:22px 0 16px 0;
+			margin-top:11px;
+			.create-survey-btn{
+				width:200px;
+				margin:0 auto;
+				@include one-line(40px);
+				text-align: center;
+				color:#FFF;
+				background: $blue;
+				display: block;
+				font-size: 16px;
+				@include border-radius(4px);
+				&:hover{
+					background: $blue2;
+				}
+			}
+		}
+	}

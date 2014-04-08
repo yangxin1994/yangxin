@@ -1,9 +1,11 @@
+# encoding: utf-8
 require 'error_enum'
 class Log
 
   include Mongoid::Document
   include Mongoid::Timestamps
   include FindTool
+  include ViewHelper
   # log type, 1 for answering surveys, 2 for lottery, 4 for gift redeem, 8 for point change, 16 for register, 32 for spread, 64 for punish                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
 
   field :type, :type => Integer
@@ -28,8 +30,11 @@ class Log
   index({ survey_id:1,_type:1, created_at:-1},{background: true})
   index({ answer_id:1,_type:1, created_at:-1},{background: true})
 
+  after_create :update_reallog
+
   def self.fresh_logs
-    return self.where(:type.in => [2,8,16], :reason.ne => PointLog::IMPORT,:reason.ne => PointLog::ADMIN_OPERATE,:reason.ne => PointLog::REVOKE)
+    Log.where(:type.in => [2,8,16]).not_in(:reason => [8,64,28])
+    return self.where(:type.in => [2,8,16]).not_in(:reason => [PointLog::IMPORT,PointLog::ADMIN_OPERATE,PointLog::REVOKE])
   end
 
   def self.get_new_logs(limit=5,type=nil)
@@ -40,7 +45,6 @@ class Log
         if log.user.present?
           log['avatar'] = log.user.avatar ? log.user.avatar.picture_url : User::DEFAULT_IMG
         else
-          # Rails.logger.info "========= #{log['user_id']} ============" 
           log['avatar'] = User::DEFAULT_IMG
         end
         log
@@ -52,4 +56,22 @@ class Log
     logs = self.redeem_logs.have_user.desc(:updated_at).limit(5);
     logs = logs.map{|log| log['username'] = log.user.nickname;log}
   end
+
+  def update_reallog
+    times = Log.get_new_logs(5,nil)[1..4].map(&:created_at).map{|create_time| ViewHelper::View.ch_time(create_time)}
+    self['username'] = self.user.try(:nickname)
+    if [2,8,6].include?(self.type.to_i) && ![PointLog::IMPORT,PointLog::ADMIN_OPERATE,PointLog::REVOKE].include?(self.reason.to_i)
+      hash = {}
+      new_log =  '<li><div><span class="time">刚刚</span>'
+      new_log += ViewHelper::View.user_behavor(self)
+      new_log += '</div></li>'
+      hash[:log] = new_log
+      hash[:other_times] = times
+      FayeClient.send("/realogs/new", hash)
+    end
+  end
+
+
+
+
 end

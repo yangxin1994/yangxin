@@ -19,6 +19,7 @@ class Survey
   CLOSED = 1
   PUBLISHED = 2
   DELETED = 4
+  PER_PAGE = 10
 
   field :title, :type => String, default: "调查问卷主标题"
   field :subtitle, :type => String, default: ""
@@ -123,6 +124,7 @@ class Survey
   scope :quillme_hot, -> {where(:quillme_hot => true)}
   scope :not_quillme_hot, -> {where(:quillme_hot => false)}
   scope :quillme_normal, -> { self.quillme_promote.not_quillme_hot}
+  scope :not_express, -> {where(:_type.ne => 'SurveyTask' )}
   scope :stars, -> {where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
   scope :published, -> { where(:status  => 2) }
   scope :normal, -> { where(:status.gt => -1) }
@@ -156,8 +158,8 @@ class Survey
   def self.get_recommends(opt)
     total_ids = Survey.quillme_normal.map(&:id)
     reward_type = opt[:reward_type].split(',') if opt[:reward_type].present?
-    surveys = Survey.quillme_normal.status(opt[:status] || 2).reward_type(opt[:reward_type]).desc(:created_at) if opt[:reward_type].present?
-    surveys = Survey.quillme_normal.status(opt[:status] || 2).desc(:created_at) unless opt[:reward_type].present?
+    surveys = Survey.quillme_normal.not_express.status(opt[:status] || 2).reward_type(opt[:reward_type]).desc(:created_at) if opt[:reward_type].present?
+    surveys = Survey.quillme_normal.not_express.status(opt[:status] || 2).desc(:created_at) unless opt[:reward_type].present?
     surveys = get_filter_surveys(
       surveys:surveys,
       total_ids:total_ids,
@@ -176,8 +178,8 @@ class Survey
       end
       opt[:surveys] = opt[:surveys].where(:_id.in => survey_ids) if survey_ids
     end
-    if opt[:home_page].present? && opt[:surveys].size.to_i < 9
-      extend_surveys = Survey.quillme_normal.closed.desc(:created_at).limit(9 - opt[:surveys].size.to_i)
+    if opt[:home_page].present? && opt[:surveys].size.to_i < Survey::PER_PAGE
+      extend_surveys = Survey.quillme_normal.closed.desc(:created_at).limit(Survey::PER_PAGE - opt[:surveys].size.to_i)
       surveys = opt[:surveys] + extend_surveys
     end
     return surveys ||= opt[:surveys]

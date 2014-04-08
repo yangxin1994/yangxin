@@ -57,7 +57,7 @@
   <div class="bulletin dashed-box r">
     <div class="dashed-box-inner">
       <div class="dashed-box-inner-top">
-        <h3 class="box-title">站内公告</h3>
+        <h3 class="box-title">问卷吧快报</h3>
         <a href="<%= public_notices_path %>" class="more">更多</a>
       </div>
       <% if @data[:public_notices].present? %>
@@ -80,42 +80,52 @@
   </div>
 </div>
 
-<div class="gift-list-main dashed-box inner-page">
-  <div class="dashed-box-inner">
-    <div class="dashed-box-inner-top">
-      <h3 class="box-title">推荐礼品</h3>
-      <a href="<%= gifts_path %>" class="more">更多</a>
+<div class="inner-page">
+  <% if @data[:express_surveys].present? %>
+  <div class="paid-survey">
+    <div class="content-title">
+      <h2>商业调研</h2>
+      <div class="page" click='0'>
+        <a href="javascript:void(0);" class="prev"><i class="page-top"></i></a>
+        <a href="javascript:void(0);" class="next"><i class="page-bottom"></i></a>
+      </div>
     </div>
-    <% if @data[:hotest_gifts].present? %>
-    <ul class="gift-list">
-      <% @data[:hotest_gifts].each do |gift|%>
-        <li>
-          <a href="<%= gift_path(gift['_id']) %>">
-            <span class="gift-img">
-              <img src="<%= show_image(gift.photo_src,'gifts') %> " alt="<%= gift.title %>" />
-            </span>
-            <span class="gift-name"><%= gift.title %></span>
-            <span class="gift-mask"></span>
-            <span class="gift-remark">
-              <span class="integral l"><b><%= gift.point%></b>积分</span>
-              <span class="gift-remark-right">
-                <span class="nop">人气：<b><%= gift.view_count%></b></span>
-                <span class="price">价值：<b><%= show_gift_price(gift.price)%></b> 元</span>
-              </span>     
-            </span>
-          </a>
-        </li>
-      <% end %>       
-    </ul>
-    <% end %>
+    <div class="survey-list express">
+      <ul>
+        <%= render :partial => 'sample/surveys/express_surveys',:locals => {:surveys => @data[:express_surveys]} %>
+      </ul>
+    </div>
   </div>
+  <div class="create-survey dashed-box">
+    <div class="count">
+      <span>
+        <strong>当前累计问卷</strong>
+        <% @data[:survey_counts].each do |data|%>
+          <i><%= data %></i>
+        <% end %>
+        <b>份</b>
+      </span>
+    </div>
+    <div class="count">
+      <span>
+        <strong>当前累计答题</strong>
+        <% @data[:answer_counts].each do |data|%>
+          <i><%= data %></i>
+        <% end %>
+        <b>份</b>
+      </span>
+    </div>
+    <div class="btn-line">
+      <a class="create-survey-btn" href="http://diaoyan.me/questionaires/new">免费创建一份问卷</a>
+    </div>
+  </div>
+  <% end %>
 </div>
 
-
-<!-- 热门兑换 -->
-
+<div style="clear:both;"></div>
 <!-- 调研推荐&排行榜&新鲜事 -->
-<div class="inner-page">
+<div class="inner-page survey_list quill">
+
   <div class="research-list dashed-box l">
     <div class="dashed-box-inner">
       <div class="dashed-box-inner-top">
@@ -169,8 +179,10 @@
         <ul class="forums-list">
           <% @data[:fresh_news].each_with_index do |news,index|%>
             <li <%= hide_border?(@data[:fresh_news],index) %>>
-              <span class="time"><%= ch_time(news.created_at) %></span>
-              <%= user_behavor(news) %>
+              <div>
+                <span class="time"><%= ch_time(news.created_at) %></span>
+                <%= user_behavor(news) %>
+              </div>
             </li>
           <% end %>
         </ul>
@@ -178,3 +190,22 @@
   </div> 
   <% end %>
 </div> 
+
+<!-- 热门兑换 -->
+<div class="gift-list-main dashed-box inner-page">
+  <div class="dashed-box-inner gift_slide">
+    <div class="dashed-box-inner-top">
+      <h3 class="box-title">热门兑换</h3>
+      <a href="javascript:void(0);" class="more next" page='2'>换一组</a>
+    </div>
+    <% if @data[:hotest_gifts].present? %>
+    <div class='more_list'>
+      <ul class="gift-list">
+         <%=  render :partial => "gifts_list",  :locals => {:gifts => @data[:hotest_gifts]  } %>      
+      </ul>
+    </div>
+    <% end %>
+  </div>
+</div>
+
+
