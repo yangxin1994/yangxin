@@ -10,6 +10,11 @@ class SurveyTask < Survey
   field :identifier, :type => String
   field :origin_url, :type => String
   field :origin_route, :type => String
+  field :remote_estimate_answer_time, :type => Float, :default => 1.0
+
+  def estimate_answer_time
+    remote_estimate_answer_time
+  end
 
   def get_encoded_url(user = nil)
     encode_id = Base64.encode64("#{identifier}|#{scheme_id}|#{user.try(:id)}|")

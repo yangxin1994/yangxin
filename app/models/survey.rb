@@ -650,9 +650,13 @@ class Survey
     answer_length = answers.length
     last_time = Time.now.to_i
     answers.each_with_index do |answer, index|
+      p "time"
       answer_time = Time.at(answer.finished_at) - answer.created_at
+      p "time 2"
       answer_time = (answer_time.ceil / 60.0).ceil      
+      p "time 3"
       line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, "#{answer_time} 分"]
+      p "time 4"
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index

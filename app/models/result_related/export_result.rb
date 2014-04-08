@@ -65,7 +65,7 @@ class ExportResult < Result
     
     
     retval = ConnectDotNet.send_data('/ToExcel.aspx') do
-      {'excel_data' => excel_data_json, 'job_id' => task_id.to_s}
+      {'excel_data' => excel_data_json.gsub(/<[^>]*>/), 'job_id' => task_id.to_s}
     end
     File.open("public/uploads/excel.html", "wb") { |file| file.puts(retval.body.to_s)}
 
