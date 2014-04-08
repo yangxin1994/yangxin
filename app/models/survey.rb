@@ -649,14 +649,15 @@ class Survey
     q = self.all_questions_type(false)
     answer_length = answers.length
     last_time = Time.now.to_i
+    p "======================="
     answers.each_with_index do |answer, index|
-      p "time"
-      answer_time = Time.at(answer.finished_at) - answer.created_at
-      p "time 2"
-      answer_time = (answer_time.ceil / 60.0).ceil      
-      p "time 3"
+      if answer.finished_at
+        answer_time = Time.at(answer.finished_at) - answer.created_at 
+        answer_time = (answer_time.ceil / 60.0).ceil
+      else
+        answer_time = 0
+      end
       line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, "#{answer_time} 分"]
-      p "time 4"
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index
@@ -683,8 +684,12 @@ class Survey
     csv_string = CSV.generate(:headers => true) do |csv|
       csv << excel_header
       answers.each_with_index do |answer, index|
-        answer_time = Time.at(answer.finished_at) - answer.created_at
-        answer_time = (answer_time.ceil / 60.0).ceil
+        if answer.finished_at
+          answer_time = Time.at(answer.finished_at) - answer.created_at 
+          answer_time = (answer_time.ceil / 60.0).ceil
+        else
+          answer_time = 0
+        end
         line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, "#{answer_time} 分"]
         begin
           all_questions_id(false).each_with_index do |question, index|
