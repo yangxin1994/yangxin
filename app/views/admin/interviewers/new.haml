@@ -1,0 +1,16 @@
+- content_for :head do
+  = javascript_include_tag "pages/admin/interviewers-bundle"
+  = stylesheet_link_tag "pages/admin/interviewers-bundle", :media => "all"
+
+- content_for :sidebar do
+  %ul.nav.nav-list.flowy-admin-sidenav
+    %li.active
+      %a{href: "/admin/interviewers"}
+        %i.icon-chevron-right
+        访问员列表
+    %li
+      %a{href: "/admin/interviewers/new"}
+        %i.icon-chevron-right
+        新建访问员
+
+= render "form"

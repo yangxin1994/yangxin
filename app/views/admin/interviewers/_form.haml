@@ -1,0 +1,21 @@
+%form#agent_form.form-horizontal{action: admin_interviewers_path, enctype: "multipart/form-data", method: "post", name: "agent"}
+  %input{name: "_method", type: "hidden", value: @agent["created_at"].present? ? 'put' : 'post'}/
+  .control-group
+    %label.control-label 邮箱:
+    .controls
+      %input.input-large{name: "agent[email]", type: "text", value: @agent['email']}/
+  .control-group
+    %label.control-label 密码:
+    .controls
+      %input.input-large{name: "agent[password]", type: "text"}/
+  .control-group
+    %label.control-label 姓名:
+    .controls
+      %input.input-large{name: "agent[name]", type: "text", value: @agent['name']}/
+  .control-group
+    %label.control-label 地区代码:
+    .controls
+      %input.input-large{name: "agent[region]", type: "text", value: @agent['region']}/
+  .control-group
+    .controls
+      %input.btn{type: "submit"}/
