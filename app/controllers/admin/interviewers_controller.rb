@@ -13,33 +13,45 @@ class Admin::InterviewersController < Admin::AdminController
   end
 
   def create
-    @agent = Agent.create_agent(params[:agent])
-    if @agent.created_at
-      redirect_to admin_agents_path, :flash => {:success => "代理创建成功!"}
-    else
-      flash.alert = "代理创建失败, 请检查参数, 错误信息: #{result}"
-      render :new
+    @interviewer = User.find_by_email(params[:interviewer]["email"])
+    if @interviewer.present?
+      @interviewer = {}
+      flash.alert = "邮箱已经存在，访问员创建失败"
+      render :new and return
     end
+    @interviewer = User.create(email: params[:interviewer]["email"],
+      user_role: 17,
+      interviewer: true,
+      status: 2,
+      email_activation: true,
+      last_login_time: Time.now.to_i)
+    @interviewer.password = Encryption.encrypt_password(params[:interviewer]["password"])
+    @interviewer.save
+    @interviewer.write_sample_attribute("nickname", params[:interviewer]["name"])
+    redirect_to admin_interviewers_path, :flash => {:success => "访问员创建成功!"} and return
   end
 
   def edit
-    @agent = Agent.find(params[:id]).info
+    @interviewer = User.find(params[:id])
+    @interviewer["name"] = @interviewer.read_sample_attribute("nickname")
   end
 
   def update
-    @agent = Agent.find(params[:id])
-    if @agent.update_agent(params[:agent])
-      redirect_to admin_agents_path, :flash => {:success => "代理创建成功!"}
-    else
-      flash.alert = "代理更新失败, 请检查参数, 错误信息: #{result}"
-      render :json => result
+    @interviewer = User.find(params[:id])
+    if @interviewer.nil?
+      redirect_to admin_interviewers_path, :flash => {:alert => "访问员更新失败!"} and return
     end
-  end
-
-  def destroy
-    render_json @agent = Agent.where(:_id =>params[:id]).first do |agent|
-      success_true agent.delete_agent
-    end    
-    
+    u = User.find_by_email(params[:interviewer]["email"])
+    if u.present? && u != @interviewer
+      redirect_to edit_admin_interviewer_path(@interviewer), :flash => {:alert => "邮箱已存在，访问员更新失败!"} and return
+    end
+    @interviewer.email = params[:interviewer]["email"]
+    @interviewer.save
+    @interviewer.write_sample_attribute("nickname", params[:interviewer]["name"])
+    if params["interviewer"]["password"].present?
+      @interviewer.password = Encryption.encrypt_password(params[:interviewer]["password"])
+      @interviewer.save
+    end
+    redirect_to admin_interviewers_path, :flash => {:success => "访问员更新成功!"}
   end
 end

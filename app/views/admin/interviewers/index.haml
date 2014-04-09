@@ -20,5 +20,6 @@
       %th 帐户名
     - @interviewers.each do |interviewer|
       %tr
-        %td= interviewer.email
+        %td
+          =link_to interviewer.email, edit_admin_interviewer_path(interviewer)
         %td= interviewer.nickname
