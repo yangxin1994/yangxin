@@ -650,8 +650,13 @@ class Survey
     answer_length = answers.length
     last_time = Time.now.to_i
     answers.each_with_index do |answer, index|
-      answer_time = Time.at(answer.finished_at) - answer.created_at
-      answer_time = (answer_time.ceil / 60.0).ceil      
+      if answer.finished_at.present?
+        answer_time = Time.at(answer.finished_at) - answer.created_at
+        answer_time = (answer_time.ceil / 60.0).ceil
+      else
+        answer_time = 0      
+      end
+   
       line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, "#{answer_time} 分"]
       begin
         all_questions_id(false).each_with_index do |question, index|
@@ -679,8 +684,12 @@ class Survey
     csv_string = CSV.generate(:headers => true) do |csv|
       csv << excel_header
       answers.each_with_index do |answer, index|
-        answer_time = Time.at(answer.finished_at) - answer.created_at
-        answer_time = (answer_time.ceil / 60.0).ceil
+        if answer.finished_at.present?
+          answer_time = Time.at(answer.finished_at) - answer.created_at
+          answer_time = (answer_time.ceil / 60.0).ceil
+        else
+          answer_time = 0      
+        end
         line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, "#{answer_time} 分"]
         begin
           all_questions_id(false).each_with_index do |question, index|
