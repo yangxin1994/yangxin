@@ -4,7 +4,15 @@ class Admin::InterviewersController < Admin::AdminController
   layout "layouts/admin-todc"
 
   def index
-    @interviewers = User.where(interviewer: true)
+    if params[:keyword].present?
+      @interviewers = auto_paginate User.where(email: /#{params[:keyword]}/, interviewer: true) do |interviewers|
+        interviewers
+      end
+    else
+      @interviewers = auto_paginate User.where(interviewer: true) do |interviewers|
+        interviewers
+      end
+    end
   end
 
 
