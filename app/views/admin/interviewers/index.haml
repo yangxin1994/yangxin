@@ -13,13 +13,33 @@
         %i.icon-chevron-right
         新建访问员
 
-.container
+%div
+  %span
+    %form.form-search{style: "display:inline"}
+      .input-append
+        %input.span6.search-query{name: "keyword", type: "text"}/
+        %button.btn{type: "submit"} Search
+  %span.pull-right
+    = paginator_mini @interviewers
+    .btn-group
+      %button.btn.dropdown-toggle{"data-toggle" => "dropdown"}
+        %i.icon-filter>
+         
+        %span.caret
+      %ul.dropdown-menu.pull-right
+        %li
+          %a{href: "?"} 全部
+        %li.divider
+
+%div
   %table.table.table-striped
-    %tr
-      %th 邮箱
-      %th 帐户名
-    - @interviewers.each do |interviewer|
+    %thead
       %tr
-        %td
-          =link_to interviewer.email, edit_admin_interviewer_path(interviewer)
-        %td= interviewer.nickname
+        %th 邮箱
+        %th 帐户名
+    %tbody
+      - @interviewers["data"].each do |interviewer|
+        %tr
+          %td
+            =link_to interviewer.email, edit_admin_interviewer_path(interviewer)
+          %td= interviewer.nickname
