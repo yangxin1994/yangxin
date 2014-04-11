@@ -10,6 +10,7 @@ db/*.lock
 db/journal
 .DS_Store
 config/mongoid.yml
+config/config.yml
 Gemfile.lock
 public/uploads/*
 public/uploads/avatar/*

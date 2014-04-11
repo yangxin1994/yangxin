@@ -124,6 +124,7 @@ class Survey
   scope :quillme_hot, -> {where(:quillme_hot => true)}
   scope :not_quillme_hot, -> {where(:quillme_hot => false)}
   scope :quillme_normal, -> { self.quillme_promote.not_quillme_hot}
+  scope :not_express, -> {where(:_type.ne => 'SurveyTask' )}
   scope :stars, -> {where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
   scope :published, -> { where(:status  => 2) }
   scope :normal, -> { where(:status.gt => -1) }
@@ -157,8 +158,8 @@ class Survey
   def self.get_recommends(opt)
     total_ids = Survey.quillme_normal.map(&:id)
     reward_type = opt[:reward_type].split(',') if opt[:reward_type].present?
-    surveys = Survey.quillme_normal.status(opt[:status] || 2).reward_type(opt[:reward_type]).desc(:created_at) if opt[:reward_type].present?
-    surveys = Survey.quillme_normal.status(opt[:status] || 2).desc(:created_at) unless opt[:reward_type].present?
+    surveys = Survey.quillme_normal.not_express.status(opt[:status] || 2).reward_type(opt[:reward_type]).desc(:created_at) if opt[:reward_type].present?
+    surveys = Survey.quillme_normal.not_express.status(opt[:status] || 2).desc(:created_at) unless opt[:reward_type].present?
     surveys = get_filter_surveys(
       surveys:surveys,
       total_ids:total_ids,
