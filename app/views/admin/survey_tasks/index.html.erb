@@ -84,7 +84,7 @@
              
             <!-- <li><a href="/admin/answers/<%= survey_task._id %>" ><i class="icon-eye-open"></i>审核答案</a></li> -->
           
-            <li><a class="btn handle" href="/admin/survey_tasks/<%= survey_task._id %>" target="_blank"><i class="icon-list-alt"></i>预览答题</a></li>
+            <li><a class="handle" href="<%= survey_task.preview_url %>" target="_blank"><i class="icon-list-alt"></i>预览答题</a></li>
             <li><a href="/admin/surveys/<%= survey_task._id %>/reward_schemes" ><i class="icon-gift"></i>奖励方案设置</a></li>
             <li><a href="/admin/surveys/<%= survey_task._id %>/promote" ><i class="icon-share"></i>推送渠道设置</a></li>
             <li><a href="#cost" class="cost"><i class="icon-tint"></i>问卷成本</a></li>
