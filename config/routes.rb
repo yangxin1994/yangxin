@@ -475,6 +475,9 @@ OopsData::Application.routes.draw do
 
     resources :sample_servers
 
+    resources :interviewers do
+    end
+
   end
 
   # utility
@@ -529,6 +532,15 @@ OopsData::Application.routes.draw do
 
   namespace :client do
     resources :surveys do
+    end
+    resources :cities do
+      member do
+        get :records
+        get :set_location
+        get :batch_set_location
+        put :update_location
+        put :batch_update_location
+      end
     end
     scope :module => :sessions do
       resources :signin

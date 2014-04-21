@@ -27,7 +27,7 @@ class Client::Sessions::SigninController < Client::ApplicationController
       render :index
     else
       session[:auth_key] = auth_key
-      redirect_to client_surveys_url, :flash => { :success => "登录成功!" }
+      redirect_to client_cities_url, :flash => { :success => "登录成功!" }
     end
   end
 end
