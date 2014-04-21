@@ -457,6 +457,9 @@ OopsData::Application.routes.draw do
 
     resources :sample_servers
 
+    resources :interviewers do
+    end
+
   end
 
   # utility

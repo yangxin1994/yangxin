@@ -39,7 +39,7 @@ class User
   field :lock, :type => Boolean, default: false
   field :last_login_time, :type => Integer
   field :last_login_ip, :type => String
-  field :last_login_client_type, :type => String
+  field :last_login_client_type, :type => String, default: 'web'
   field :login_count, :type => Integer, default: 0
   field :sms_verification_code, :type => String
   field :sms_verification_expiration_time, :type => Integer,default:  -> {(Time.now + 1.minutes).to_i }
