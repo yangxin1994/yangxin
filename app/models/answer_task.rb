@@ -8,9 +8,10 @@ class AnswerTask < Answer
   # field :origin_route, :type => String
 
   def self.status_sync(options)
-    survey = SurveyTask.where("identifier" => options[:survey_id]).first
+    survey = SurveyTask.where(:identifier => options[:survey_id]).first
     return false unless options[:survey_id] && survey
-    answer = AnswerTask.where(:survey_id => survey.id, :identifier => options[:identifier]).first
+    answer = AnswerTask.where(:identifier => options[:identifier]).first
+    return false if answer.survey.id != options[:survey_id]
     if answer
       answer.update_attributes(options[:answer])
     else
