@@ -20,12 +20,22 @@ class Sample::SurveysController < Sample::SampleController
 
     answer = Answer.where(:created_at.gte => today_start,:created_at.lt => today_end)
 
+    survey_counts = Survey.count.to_s.split('')
+    answer_counts = Answer.where(:status => Answer::FINISH).count.to_s.split('')
+    express_surveys = SurveyTask.quillme_promote.asc(:created_at)
+    express_surveys =  auto_paginate(express_surveys) do |paginated_surveys|
+      paginated_surveys.map { |e| e.excute_sample_data(current_user) } 
+    end
+    
     @data = {
       surveys:surveys,
       answer_count:answer.count,
       spread_count:answer.where(:introducer_id.ne => nil).count,
       disciplinal:PunishLog.desc(:created_at).limit(3),
-      reward_count:Survey.get_reward_type_count(params[:status])
+      reward_count:Survey.get_reward_type_count(params[:status]),
+      survey_counts:survey_counts,
+      answer_counts:answer_counts,
+      express_surveys:express_surveys      
     }
 
     fresh_when(:etag => @data)

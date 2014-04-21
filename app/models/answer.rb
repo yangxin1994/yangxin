@@ -11,7 +11,6 @@ class Answer
   include Mongoid::Timestamps
   include FindTool
 
-
   # status
   NOT_EXIST = 0
   STATUS_NAME_ARY = ["edit", "reject", "under_review", "under_agent_review", "redo", "finish"]

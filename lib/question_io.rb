@@ -496,7 +496,7 @@ class TimeBlankQuestionIo < QuestionIo
   def answer_content(v, header_prefix)
     clear_retval
     return Array.new(header_count(header_prefix)) if (v.nil? || v.try("blank?"))
-    return nil if v == {}
+    return nil if v.blank?
     # @time_unit.each_with_index do |e, i|
     #   @retval << "#{v[i]}#{e}" if v[i] != 0
     # end

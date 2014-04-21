@@ -69,6 +69,8 @@ class User
   # 1 in the white list
   # 2 in the black list
   field :auth_key, :type => String
+  field :auth_key_remote, :type => String
+  field :auth_key_remote_expire, :type => Boolean
   field :auth_key_expire_time, :type => Integer
   field :level, :type => Integer, default: 0
   field :level_expire_time, :type => Integer, default: -1
@@ -127,6 +129,18 @@ class User
     else
       user.refresh_auth_key
       return nil
+    end
+  end
+
+  def self.auth_remote(akr)
+    if user = self.where(:auth_key_remote => akr).first
+      user.auth_key_remote_expire = true
+      user.save
+      {
+        email: user.email
+      }
+    else
+      nil
     end
   end
 
