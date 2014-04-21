@@ -141,4 +141,10 @@ class InterviewerTask
     self.write_attribute(:interviewer, self.user.nickname)
     return self
   end
+
+	def info_for_interviewer
+		self.quota["amount"] = self.quota["rules"][0]["amount"]
+    self.write_attribute(:create_time, self.created_at.to_i)
+		return self
+	end
 end
