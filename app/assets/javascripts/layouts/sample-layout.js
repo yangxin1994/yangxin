@@ -87,8 +87,6 @@ $(document).ready(function() {
     });
 
 
-<<<<<<< HEAD
-=======
     $('.express a.unfold-btn').click(function() {
         $('.express .reward_list li:first .pop').click()
     })

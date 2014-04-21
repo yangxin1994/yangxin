@@ -76,6 +76,28 @@ $ ->
       error: ->
           alert_msg.show('error', "处理失败,请稍后重试")
 
+  $(".task_info").click ->
+    $this = $(this).closest('td')
+    $("#sid").val($this.data("sid"))
+    $.ajax
+      url: "/admin/surveys/#{$("#sid").val()}/set_info"
+      method: 'PUT'
+      data:
+        hot: $("#ck_hot").prop("checked")
+        spread: $("#point").val()
+        visible: $("#ck_visible").prop("checked")
+        max_num_per_ip: $("#max_num_per_ip").val()
+      success: (ret)->
+        if ret.success
+          for k, v of ret.value
+            $('#' + k).text(v)
+          $('#cost_modal').modal('show')
+        else
+          console.log ret
+          alert_msg.show('error', "处理失败,请稍后重试")
+      error: ->
+          alert_msg.show('error', "处理失败,请稍后重试")
+
   $(".star").click ->
     $this = $(this)
     icon = $this.find('i')

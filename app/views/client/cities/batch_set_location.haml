@@ -1,0 +1,17 @@
+- content_for :head do
+  = javascript_include_tag "pages/client/cities-bundle"
+  = stylesheet_link_tag "pages/client/cities-bundle", :media => "all"
+  :javascript
+    window.city_id = "#{@city.id.to_s}"
+    window.record_index = "#{@record_index}"
+    window.locations = ""
+    window.one_record = true
+    window.batch_set = true
+
+.container
+  %h3
+    %span= @city.name
+    = link_to "返回", { controller: "client/cities", action: "records", id: @city.id }
+  %p= "一共#{@city.records.length.to_s}条记录，正在设置第#{@record_index}条记录位置"
+  %p 右键单击设置新位置
+  #map.tab-pane

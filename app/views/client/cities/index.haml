@@ -1,0 +1,31 @@
+- content_for :head do
+  = javascript_include_tag "pages/client/cities-bundle"
+  = stylesheet_link_tag "pages/client/cities-bundle", :media => "all"
+
+.container
+  %table.table.table-striped
+    %tr
+      %th 城市
+      %th 已回收数量
+      - if current_client.admin
+        %th 操作
+    - @cities.each do |city|
+      %tr
+        %td
+          = link_to city.name, { controller: "client/cities", action: "show", id: city.id.to_s }
+        %td= city.amount
+        - if current_client.admin
+          %td 
+            = link_to "编辑", { controller: "client/cities", action: "edit", id: city.id.to_s }
+            |
+            = link_to "删除", { controller: "client/cities", action: "destroy", id: city.id.to_s}, method: "delete"
+
+  - if current_client.admin
+    = form_tag('/client/cities', method: "post") do
+      .form-group
+        = label_tag :name, "名称"
+        = text_field_tag "city[name]", "", autofocus: true, class: "form-control"
+      .form-group
+        = label_tag :imei, "已回收数量"
+        = text_field_tag "city[amount]", "", class: "form-control"
+      = submit_tag "创建", :class => 'btn-primary btn'
