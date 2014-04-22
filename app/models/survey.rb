@@ -226,7 +226,7 @@ class Survey
   end
 
   def self.search(options = {})
-    surveys = Survey.all
+    surveys = self.normal
     surveys = surveys.in(:status => Tool.convert_int_to_base_arr(options[:status])) if options[:status]
     surveys = surveys.where(:quillme_promotable => true) if options[:quillme_only].to_s == "true"
     case options[:keyword].to_s
@@ -242,7 +242,6 @@ class Survey
       surveys = surveys.where(:title => /.*#{options[:keyword]}.*/)
     end
     surveys = surveys.desc(:star).desc(:created_at)
-
   end
 
   def update_promote(options)

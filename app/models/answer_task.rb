@@ -18,7 +18,10 @@ class AnswerTask < Answer
       user = User.where(:id => options[:user_id]).first
       answer = AnswerTask.new(options[:answer])
       survey.answers << answer
-      user.answers << answer if user
+      if user
+        user.answers << answer 
+        user.save
+      end
       answer.save
     end
   end
