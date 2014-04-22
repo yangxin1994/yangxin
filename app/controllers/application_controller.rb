@@ -98,7 +98,8 @@ class ApplicationController < ActionController::Base
   end
 
   def success_true(_is = true)
-    @is_success = _is
+    @is_success = !!_is
+    _is
   end
 
   def fresh_when(opts = {})

@@ -54,7 +54,7 @@
       <tr>
         <th></th>
         <th width="20%">标题</th>
-        <th >创建者邮箱</th>
+        <th >回收情况</th>
         <th >创建时间</th>
         <th >操作</th>
       </tr>
@@ -71,7 +71,7 @@
           </a>
         </td>
         <td><a href="/questionaires/<%= survey_task._id %>"><%= survey_task.title %></a></td>
-        <td></td>
+        <td><%= "#{survey_task.quota["rules"][0]["finished_count"]}/#{survey_task.quota["rules"][0]["amount"]}" %></td>
         <td><%= Time.at(survey_task.created_at).strftime('%F %R') %></td>
         <td data-sid="<%= survey_task._id %>">
         <div class="btn-group">
@@ -199,12 +199,15 @@
     <div class="modal-body" id="promote_body">
       <div id="email_status">
         <p class="pull-center">
-          <button type="button" class="btn btn-primary" data-loading-text="保存中..." id="reject_task">拒绝发布</button>
+          需要收集答案：<span id="task_quota"></span>
+        </p>
+        <p class="pull-center">
+          <!-- <button type="button" class="btn btn-primary" data-loading-text="保存中..." id="reject_task">拒绝发布</button> -->
         </p>        
       </div>
     </div>    
     <div class="modal-footer">
-      <a class="btn" href="javascript:$('#promote_modal').modal('hide');">关闭</a>
+      <a class="btn" href="javascript:$('#task_modal').modal('hide');">关闭</a>
     </div>
   </div> 
 

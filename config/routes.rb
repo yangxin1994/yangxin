@@ -243,7 +243,7 @@ OopsData::Application.routes.draw do
     end
     resources :users do
       collection do
-        get :current
+        post :qauth
       end
     end
 
@@ -337,7 +337,11 @@ OopsData::Application.routes.draw do
       end
     end
 
-    resources :survey_tasks
+    resources :survey_tasks do
+      member do
+        get :task_info
+      end
+    end
 
     resources :reward_schemes
 
