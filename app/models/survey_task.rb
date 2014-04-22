@@ -33,5 +33,11 @@ class SurveyTask < Survey
     self["encoded_url"] = get_encoded_url(user)
     return self
   end
+
+  def task_info
+    {
+      quota: quota
+    }
+  end
   
 end

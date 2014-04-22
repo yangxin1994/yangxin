@@ -1,7 +1,7 @@
 class Api::UsersController < ApplicationController
-  def auth
-    render_json params[:auth_key_remote].present? do
-      User.auth_remote(params[:auth_key_remote].present?)
+  def qauth
+    render_json params[:akr].present? do
+      success_true User.auth_remote(params[:akr], params[:notoken])
     end
   end
 end

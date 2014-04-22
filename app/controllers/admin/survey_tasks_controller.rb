@@ -6,6 +6,11 @@ class Admin::SurveyTasksController < Admin::AdminController
   def show
   end
 
+  def task_info
+    survey = SurveyTask.find(params[:id])
+    render_json_s survey.task_info and return
+  end
+
   def create
   end
 

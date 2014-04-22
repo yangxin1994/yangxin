@@ -1,5 +1,6 @@
 require 'data_type'
 require 'encryption'
+require 'quill_common/encryption'
 require 'error_enum'
 require 'tool'
 require 'array'
@@ -69,9 +70,9 @@ class User
   # 1 in the white list
   # 2 in the black list
   field :auth_key, :type => String
-  field :auth_key_remote, :type => String
-  field :auth_key_remote_expire, :type => Boolean
   field :auth_key_expire_time, :type => Integer
+  field :auth_key_remote, :type => String
+  field :auth_key_remote_expire, :type => Boolean, :default => true
   field :level, :type => Integer, default: 0
   field :level_expire_time, :type => Integer, default: -1
   field :point, :type => Integer, :default => 0
@@ -132,16 +133,29 @@ class User
     end
   end
 
-  def self.auth_remote(akr)
+  def self.auth_remote(akr, notoken = false)
     if user = self.where(:auth_key_remote => akr).first
-      user.auth_key_remote_expire = true
-      user.save
-      {
-        email: user.email
-      }
+      unless user.auth_key_remote_expire
+        user.auth_key_remote_expire = true
+        user.save
+        if notoken
+          {token: true}
+        else
+          {token: QuillCommon::Encryption.encrypt_qauth_key("#{user.password}&#{Time.now.to_i.to_s}")}
+        end
+      end
     else
       nil
     end
+  end
+
+  def get_auth_remote_key
+    if auth_key_remote_expire
+      self.auth_key_remote = QuillCommon::Encryption.encrypt_qauth_key("#{self.email}&#{Time.now.to_i.to_s}")
+      self.auth_key_remote_expire = false
+      self.save
+    end
+    self.auth_key_remote 
   end
 
   def refresh_auth_key
