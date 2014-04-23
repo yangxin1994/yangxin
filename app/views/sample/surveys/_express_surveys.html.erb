@@ -29,7 +29,8 @@
         </span>         
       <% end %>
       <span class="research-title">
-        <a href="<%= survey[:encoded_url] %>">
+        <!-- <a href="<%= survey[:encoded_url] %>"> -->
+        <a href="/s/<%= survey.scheme_id %>">
           <%= truncate(survey['title'],:length => 30)%>
         </a>
       </span>
