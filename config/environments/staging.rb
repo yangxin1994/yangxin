@@ -137,4 +137,5 @@ OopsData::Application.configure do
   config.ofcard_service_uri = "http://api2.ofpay.com/"
   config.ofcard_key_str = "OFCARD"
   config.ret_url = "http://staging.wenjuanba.com/orders/confirm"
+  config.diaoyan = 'http://staging.diaoyan.me'
 end

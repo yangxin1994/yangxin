@@ -108,6 +108,29 @@
     </div>
   </div>
   <div class='f_r'>
+  <div class="create-survey dashed-box">
+    <div class="count">
+      <span>
+        <strong>当前累计问卷</strong>
+        <% @data[:survey_counts].each do |data|%>
+          <i><%= data %></i>
+        <% end %>
+        <b>份</b>
+      </span>
+    </div>
+    <div class="count">
+      <span>
+        <strong>当前累计答题</strong>
+        <% @data[:answer_counts].each do |data|%>
+          <i><%= data %></i>
+        <% end %>
+        <b>份</b>
+      </span>
+    </div>
+    <div class="btn-line">
+      <a class="create-survey-btn" href="<%= Rails.application.config.diaoyan %>/questionaires/new">免费创建一份问卷</a>
+    </div>
+  </div>
     <div class="rss dashed-box l" id="subscribe">
       <div class="header">
         <span>订阅问卷</span>
