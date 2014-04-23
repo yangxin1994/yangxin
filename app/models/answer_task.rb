@@ -34,5 +34,40 @@ class AnswerTask < Answer
       end
     end    
   end
+
+  def satisfy_conditions(conditions, refresh_quota = true)
+    # only answers that are finished contribute to quotas
+    return false if !self.is_finish && refresh_quota
+    (conditions || []).each do |condition|
+      satisfy = false
+      case condition["condition_type"].to_s
+      when "1"
+        question_id = condition["name"]
+        question = BasicQuestion.find_by_id(question_id)
+        if question.nil? || answer_content[question_id].nil?
+          satisfy = true
+        elsif question.question_type == QuestionTypeEnum::CHOICE_QUESTION
+          satisfy = Tool.check_choice_question_answer(question_id,
+                              self.answer_content[question_id]["selection"] || [],
+                              condition["value"],
+                              condition["fuzzy"])
+        elsif question.question_type == QuestionTypeEnum::ADDRESS_BLANK_QUESTION
+          satisfy = Tool.check_address_blank_question_answer(question_id,
+                              self.answer_content[question_id]["selection"] || [],
+                              condition["value"])
+        end
+      when "2"
+        satisfy = QuillCommon::AddressUtility.satisfy_region_code?(self.region, condition["value"])
+      when "3"
+        satisfy = condition["value"] == self.channel.to_s
+      when "4"
+        satisfy = Tool.check_ip_mask(condition["value"], self.ip_address)
+      when "5"
+        satisfy = true
+      end
+      return false if !satisfy
+    end
+    true
+  end  
   
 end
