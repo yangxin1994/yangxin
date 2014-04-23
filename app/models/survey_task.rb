@@ -47,7 +47,7 @@ class SurveyTask < Survey
   def retrieve_amount
     flag = false
     self.quota['rules'].each do |q| 
-      q['conditions'] || [].each_with_index do |condition|
+      (q['conditions'] || []).each_with_index do |condition|
         flag ||= condition["condition_type"] == 5
         return q['amount'] if flag
       end
@@ -58,7 +58,7 @@ class SurveyTask < Survey
   def finish_retrieve_amount
     flag = false
     self.quota['rules'].each do |q| 
-      q['conditions'] || [].each_with_index do |condition|
+      (q['conditions'] || []).each_with_index do |condition|
         flag ||= condition["condition_type"] == 5
         return q['finished_count'] if flag
       end
