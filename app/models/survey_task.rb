@@ -10,6 +10,7 @@ class SurveyTask < Survey
   field :identifier, :type => String
   field :origin_host, :type => String
   field :origin_path, :type => String
+
   field :remote_estimate_answer_time, :type => Float, :default => 1.0
 
   def estimate_answer_time
