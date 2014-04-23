@@ -15,7 +15,6 @@ class AnswerTask < Answer
     if answer
       # return false if answer.survey.id != options[:survey_id]
       answer.update_attributes(options[:answer])
-      binding.pry
       case options[:answer][:status]
       when 32
         answer.finish
