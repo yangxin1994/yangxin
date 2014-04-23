@@ -14,6 +14,10 @@ class AnswerTask < Answer
     if answer
       return false if answer.survey.id != options[:survey_id]
       answer.update_attributes(options[:answer])
+      case options[:answer][:status]
+      when 32
+        answer.finish
+      end
     else
       user = User.where(:id => options[:user_id]).first
       answer = AnswerTask.new(options[:answer])
