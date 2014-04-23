@@ -1,6 +1,6 @@
 class Admin::SurveyTasksController < Admin::AdminController
   def index
-    @survey_tasks = auto_paginate SurveyTask.all
+    @survey_tasks = auto_paginate SurveyTask.search(params)
   end
 
   def show
