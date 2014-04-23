@@ -11,9 +11,11 @@ class AnswerTask < Answer
     survey = SurveyTask.where(:identifier => options[:survey_id]).first
     return false unless options[:survey_id] && survey
     answer = AnswerTask.where(:identifier => options[:identifier]).first
+      binding.pry
     if answer
-      return false if answer.survey.id != options[:survey_id]
+      # return false if answer.survey.id != options[:survey_id]
       answer.update_attributes(options[:answer])
+      binding.pry
       case options[:answer][:status]
       when 32
         answer.finish
