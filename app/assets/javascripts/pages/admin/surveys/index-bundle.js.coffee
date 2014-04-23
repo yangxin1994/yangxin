@@ -75,6 +75,31 @@ $ ->
           alert_msg.show('error', "处理失败,请稍后重试")        
       error: ->
           alert_msg.show('error', "处理失败,请稍后重试")
+    false
+
+  $(".task_info").click ->
+    $this = $(this).closest('td')
+    $("#sid").val($this.data("sid"))
+    $.ajax
+      url: "/admin/survey_tasks/#{$("#sid").val()}/task_info"
+      method: 'GET'
+      data:
+        max_num_per_ip: $("#max_num_per_ip").val()
+      success: (ret)->
+        window.rettt = ret
+        if ret.success
+          quota_rules = ret.value.quota.rules[0]
+          $("#task_quota").html("#{quota_rules.finished_count}/#{quota_rules.amount}")
+          $('#task_modal').modal('show')
+        else
+          console.log ret
+          alert_msg.show('error', "处理失败,请稍后重试")
+      error: ->
+          alert_msg.show('error', "处理失败,请稍后重试")
+    false
+
+  $("#reject_task").click ->
+    
 
   $(".star").click ->
     $this = $(this)

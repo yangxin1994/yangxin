@@ -81,9 +81,51 @@
 </div>
 
 
+<div class="inner-page">
+  <% if @data[:express_surveys].present? %>
+  <div class="paid-survey">
+    <div class="content-title">
+      <h2>商业调研</h2>
+      <div class="page" click='0'>
+        <a href="javascript:void(0);" class="prev"><i class="page-top"></i></a>
+        <a href="javascript:void(0);" class="next"><i class="page-bottom"></i></a>
+      </div>
+    </div>
+    <div class="survey-list express">
+      <ul>
+        <%= render :partial => 'sample/surveys/express_surveys',:locals => {:surveys => @data[:express_surveys]} %>
+      </ul>
+    </div>
+  </div>
+  <div class="create-survey dashed-box">
+    <div class="count">
+      <span>
+        <strong>当前累计问卷</strong>
+        <% @data[:survey_counts].each do |data|%>
+          <i><%= data %></i>
+        <% end %>
+        <b>份</b>
+      </span>
+    </div>
+    <div class="count">
+      <span>
+        <strong>当前累计答题</strong>
+        <% @data[:answer_counts].each do |data|%>
+          <i><%= data %></i>
+        <% end %>
+        <b>份</b>
+      </span>
+    </div>
+    <div class="btn-line">
+      <a class="create-survey-btn" href="http://diaoyan.me/questionaires/new<%= "?akr=#{current_user.get_auth_remote_key}" if current_user %>">免费创建一份问卷</a>
+    </div>
+  </div>
+  <% end %>
+</div>
+
 <div style="clear:both;"></div>
 <!-- 调研推荐&排行榜&新鲜事 -->
-<div class="inner-page survey_list">
+<div class="inner-page survey_list quill">
 
   <div class="research-list dashed-box l">
     <div class="dashed-box-inner">

@@ -45,7 +45,7 @@ OopsData::Application.routes.draw do
       end
     end
 
-    #resource :home, :only => [:show]
+    #resource :home, :only => [:show] 
     resource :home do
       collection do
         get :gifts 
@@ -233,6 +233,22 @@ OopsData::Application.routes.draw do
     end
   end
 
+  # api
+
+  namespace :api do
+    
+    resources :survey_tasks
+    resources :answer_tasks do
+
+    end
+    resources :users do
+      collection do
+        post :qauth
+      end
+    end
+
+  end
+
   # admin
   namespace :admin do
 
@@ -318,6 +334,12 @@ OopsData::Application.routes.draw do
 
       collection do
 
+      end
+    end
+
+    resources :survey_tasks do
+      member do
+        get :task_info
       end
     end
 

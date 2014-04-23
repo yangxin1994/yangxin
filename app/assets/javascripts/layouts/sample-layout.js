@@ -32,7 +32,7 @@ $(document).ready(function() {
 
     $('input, textarea').placeholder();
 
-    $('.unfold-btn').toggle(function() {
+    $('.quill .unfold-btn').toggle(function() {
         $(this).children('i').removeClass('open').addClass('close').next('span').html('收起');
         $(this).parents('.research-meta').siblings('.reward_list').show();
     }, function() {
@@ -85,6 +85,38 @@ $(document).ready(function() {
         arrows: true,
         loop: false
     });
+
+
+    $('.express a.unfold-btn').click(function() {
+        $('.express .reward_list li:first .pop').click()
+    })
+
+    $('.paid-survey a').click(function() {
+        page = $(this).parent('.page')
+        count = parseInt(page.attr('click'));
+        survey_list = $('.express ul li.research-content');
+        survey_length = survey_list.length;
+        if (survey_length > 2) {
+            if ($(this).hasClass('prev') && count > 0) {
+                // top_v = (count - 1) * 80;
+                top_v = parseInt(survey_list.css('top')) + 80;
+                survey_list.animate({
+                    top: top_v + 'px'
+                }, 500)
+                survey_list.filter('.express_' + count).removeClass('have-border');
+                count -= 1;
+                page.attr('click', count);
+            } else if ($(this).hasClass('next') && count < survey_length - 2) {
+                survey_list.filter('.express_' + (count + 1)).addClass('have-border');
+                top_v = -(count + 1) * 80;
+                survey_list.animate({
+                    top: top_v + 'px'
+                }, 500)
+                count += 1;
+                page.attr('click', count);
+            }
+        }
+    })
 
 
     $('.gift_slide a.next').on('click', function() {

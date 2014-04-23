@@ -6,6 +6,98 @@
 @import "compass/css3/opacity";
 
 
+.paid-survey{
+	width:630px;
+	height:220px;
+	margin-top:20px;
+	float: left;
+	background: #FFF;
+	@include box-shadow(0 1px 1px #999);
+	@include border-radius(6px);
+	.content-title{
+		width:590px;
+		margin:0 auto;
+		border-bottom:1px $red1 dashed;
+		@include clearfix;
+		h2{
+			color: $red1;
+			font-size: 14px;
+			font-weight: bold;
+			width:200px;
+			float: left;
+			@include one-line(50px);
+		}
+		.page{
+			float: right;
+			margin:13px 0 0 0;
+			a{
+				@include size(24px,24px);
+				display: block;
+				float: left;
+				border:1px #dbdbdb solid;
+				&:hover{
+					border-color:$red1;
+					i{
+						border-color: $red1;
+					}
+				}
+				&.prev{
+					@include border-left-radius(4px);
+					position: relative;
+					right:-1px;
+					&:hover{
+						z-index: 999;
+					}
+				}
+				&.next{
+					@include border-right-radius(4px);
+					position: relative;
+					&:hover{
+						z-index: 999;
+					}
+				}
+				i{
+					width:1px;
+					height:1px;
+					display: inline-block;
+					border:5px #dbdbdb solid;
+					position: absolute;
+					&.page-top{
+						border-top-color:#fff;
+						border-left-color:#fff;
+						border-right-color:#fff;
+						top:4px;
+						left:7px;
+					}
+					&.page-bottom{
+						border-bottom-color:#fff;
+						border-left-color:#fff;
+						border-right-color:#fff;
+						top:10px;
+						left:6px;
+					}
+				}
+			}
+		}
+	}
+	.survey-list{
+		width:630px;
+		height:160px;
+		overflow: hidden;
+		position: relative;
+		ul{
+			padding:0 20px;
+			position: relative;
+			li{
+				position:relative;
+				border-bottom: none;
+				&.have-border{
+					border-bottom: 1px #dbdbdb dashed;
+				}
+			}
+		}	
+	}
+}
 
 .research-list{
 	min-height:370px;

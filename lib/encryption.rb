@@ -34,4 +34,5 @@ module Encryption
 		key = EzCrypto::Key.with_password("third_party_user_id", "oops!data")
 		return key.decrypt(Base64.urlsafe_decode64(string.to_s))
 	end
+
 end
