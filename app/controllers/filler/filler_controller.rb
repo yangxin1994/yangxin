@@ -81,7 +81,10 @@ class Filler::FillerController < ApplicationController
     render_404 if reward_scheme.nil?
     survey_id = reward_scheme.survey_id
     ensure_survey(survey_id)
-
+    if @survey.is_a? SurveyTask
+      redirect_to @survey.get_encoded_url(current_user)
+      return
+    end
     # 4. Check whether an answer for this survey is already exist.
     #    If the user is signed in, ask his answer from Quill.
     #    If the user is not signed in, check the cookie
