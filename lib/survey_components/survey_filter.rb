@@ -9,7 +9,8 @@ module SurveyComponents::SurveyFilter
   REGION_QUOTA = 2
   CHANNEL_QUOTA = 3
   IP_QUOTA = 4
-  CONDITION_TYPE = (0..4).to_a
+  REMOTE_QUOTA = 5
+  CONDITION_TYPE = (0..5).to_a
 
   def show_filter(index)
     # index = index.to_i

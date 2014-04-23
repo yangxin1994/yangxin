@@ -16,7 +16,8 @@ module SurveyComponents::SurveyQuota
   REGION_QUOTA = 2
   CHANNEL_QUOTA = 3
   IP_QUOTA = 4
-  CONDITION_TYPE = (1..4).to_a
+  REMOTE_QUOTA = 5
+  CONDITION_TYPE = (1..5).to_a
 
   def show_quota
     return self.quota
