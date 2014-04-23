@@ -72,7 +72,6 @@ class Filler::FillerController < ApplicationController
   # =============================
   def load_survey(reward_scheme_id, is_preview = false)
     # ensure preview
-    binding.pry
     ensure_preview(is_preview)
     # 1. ensure reward_scheme exist
     # 2. get survey_id from rewarc_scheme
