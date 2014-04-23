@@ -46,7 +46,10 @@ class Filler::AnswersController < Filler::FillerController
     # get answer
     @answer = Answer.find_by_id(params[:id])
     render_404 if @answer.nil?
-
+    if @answer.is_a? AnswerTask
+      redirect_to "/"
+      return
+    end
     # load data
     redirect_to sign_in_account_path({ref: request.url}) and return if @answer.user.present? && @answer.user != current_user
     @answer.update_status # check whether it is time out

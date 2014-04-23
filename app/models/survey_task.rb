@@ -17,6 +17,9 @@ class SurveyTask < Survey
   end
 
   def get_encoded_url(user = nil)
+    if user && rid = user.answers.where(:survey_id => self.id).first.try(:identifier)
+      return "http://#{origin_host}/a/#{rid}"
+    end
     encode_id = Base64.encode64("#{identifier}|#{scheme_id}|#{user.try(:id)}|")
     "http://#{origin_host}#{origin_path}/#{encode_id}?s=true"
   end

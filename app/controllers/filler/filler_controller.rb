@@ -72,6 +72,7 @@ class Filler::FillerController < ApplicationController
   # =============================
   def load_survey(reward_scheme_id, is_preview = false)
     # ensure preview
+    binding.pry
     ensure_preview(is_preview)
     # 1. ensure reward_scheme exist
     # 2. get survey_id from rewarc_scheme
@@ -90,6 +91,10 @@ class Filler::FillerController < ApplicationController
       answer = Answer.find_by_survey_id_sample_id_is_preview(survey_id, current_user._id.to_s, is_preview)
     else
       answer = Answer.find_by_id(cookies[cookie_key(survey_id, is_preview)])
+    end
+    if answer.is_a? AnswerTask
+      redirect_to "/"
+      return
     end
     @percentage = -1
     if answer.present?
