@@ -22,7 +22,7 @@ class Sample::SurveysController < Sample::SampleController
 
     survey_counts = Survey.count.to_s.split('')
     answer_counts = Answer.where(:status => Answer::FINISH).count.to_s.split('')
-    express_surveys = SurveyTask.quillme_promote.asc(:created_at)
+    express_surveys = SurveyTask.quillme_promote.opend.desc(:created_at)
     express_surveys =  auto_paginate(express_surveys) do |paginated_surveys|
       paginated_surveys.map { |e| e.excute_sample_data(current_user) } 
     end
