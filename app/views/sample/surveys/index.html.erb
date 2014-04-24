@@ -111,7 +111,7 @@
   <div class="create-survey dashed-box">
     <div class="count">
       <span>
-        <strong>当前累计问卷</strong>
+        <strong>累计问卷</strong>
         <% @data[:survey_counts].each do |data|%>
           <i><%= data %></i>
         <% end %>
@@ -120,11 +120,11 @@
     </div>
     <div class="count">
       <span>
-        <strong>当前累计答题</strong>
+        <strong>累计答题</strong>
         <% @data[:answer_counts].each do |data|%>
           <i><%= data %></i>
         <% end %>
-        <b>份</b>
+        <b>次</b>
       </span>
     </div>
     <div class="btn-line">
