@@ -7,7 +7,9 @@
 @import "od-quillme/icons/*.png";
 
 
-
+body {
+	font-family: "ff-tisa-web-pro-1","ff-tisa-web-pro-2","Lucida Grande","Hiragino Sans GB","Hiragino Sans GB W3","\5FAE\8F6F\96C5\9ED1";
+}
 
 /* layout */
 
@@ -590,7 +592,7 @@ body{background: image-url('od-quillme/bg.png');}
 					b{
 						font-size: 20px;
 						@include one-line(46px);
-						font-weight: bold;
+
 					}
 				}
 				&.integral{
@@ -598,19 +600,21 @@ body{background: image-url('od-quillme/bg.png');}
 						display: block;
 						font-size: 18px;
 						margin-top:3px;
-						font-weight: bold;
 						letter-spacing: 1px;
+						line-height: 1.2em;
 					}
 					em{
 						text-align: center;
 						font-size: 12px;
+						
 					}
 				}
 				&.lottery{
 					b{
 						font-size: 14px;
 						display: block;
-						padding:0 3px;
+						padding:3px;
+						line-height: 1.4em;
 					}
 				}
 			}

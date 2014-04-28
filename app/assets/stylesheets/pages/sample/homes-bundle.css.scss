@@ -87,7 +87,7 @@
 		position: relative;
 		ul{
 			padding:0 20px;
-			position: relative;
+			position: absolute;
 			li{
 				position:relative;
 				border-bottom: none;
@@ -219,6 +219,8 @@
 			@include one-line(30px);
 			a{
 				color: #333;
+				float: left;
+				width: 180px;
 			}
 		}
 		.bulletin-title{
@@ -226,8 +228,8 @@
 			height:30px;
 			overflow: hidden;
 			white-space: nowrap;
-		  -o-text-overflow: ellipsis;
-		  text-overflow: ellipsis;
+		  	-o-text-overflow: ellipsis;
+		  	text-overflow: ellipsis;
 			float:left;
 			margin-right:15px;
 			&.top{
@@ -236,7 +238,7 @@
 			&:hover{color: $red1;}
 		}
 		.time{
-			width:70px;
+			width:80px;
 			color: #999;
 			float: right;
 			text-align: right;
