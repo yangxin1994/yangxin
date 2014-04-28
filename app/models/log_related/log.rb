@@ -67,7 +67,17 @@ class Log
       new_log += '</div></li>'
       hash[:log] = new_log
       hash[:other_times] = times
-      FayeClient.send("/realogs/new", hash)
+      begin
+        FayeClient.send("/realogs/new", hash)
+      rescue
+        if File.exist?('./faye_server/tmp/pids/thin.9393.pid')
+          system("rm -rf ./faye_server/tmp/pids/* && ./faye start")
+          FayeClient.send("/realogs/new", hash)
+        else
+          system("./faye start")
+          FayeClient.send("/realogs/new", hash)
+        end
+      end
     end
   end
 
