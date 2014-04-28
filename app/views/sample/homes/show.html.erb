@@ -7,70 +7,76 @@
 jQuery(function(){
         var paidSlider = $('.paid-survey');
         var content = $('.paid-survey ul')[0];
+        var oLi = content.children;
         var page = $('.page')[0];
         var prev = page.children[0];
         var next = page.children[1];
         var n = content.offsetTop;
-        var m;
-        content.innerHTML += content.innerHTML;
-
-        function sliderTop(){
-          target = setInterval(function(){
-            n-=1;
-            if(n <= -content.offsetHeight/2){
-              n = 0;
-            };
-            if(!(n%-content.children[0].offsetHeight)){
-                clearInterval(target);
-                return;
-            };
-            $(content).animate({top:n+'px'},10);
-          },10);
-          return target;
-        };        
-        sliderTop();
-
-        function sliderDown(){
-          target = setInterval(function(){
-            n+=1;
-            if(n >= 0){
-              n = -content.offsetHeight/2;
-            };
-            if(!(n%-content.children[0].offsetHeight)){
-                clearInterval(target);
-                return;
-            };
-            $(content).animate({top:n+'px'},10);
-          },10);
-          return target;
-        };        
-
-        //停止上移动
-        function stopMove(){
-          return setInterval(function(){
-            sliderTop();
-          },5000); 
-        };
-        timer = stopMove();
-
-        //移入
-        paidSlider.mouseenter(function(){
-          clearInterval(timer);
-        });
-        //移出
-        paidSlider.mouseleave(function(){
-          timer = stopMove();
-        });
-        //上翻页
-        prev.onclick = function(){
-          clearInterval(target);
+        var target;
+        var timer;
+        if(oLi.length<=2){
+          page.style.display = 'none';
+          return;
+        }else{
+          page.style.display = 'block';
+          content.innerHTML += content.innerHTML;
+          function sliderTop(){
+            target = setInterval(function(){
+              n-=1;
+              if(n <= -content.offsetHeight/2){
+                n = 0;
+              };
+              if(!(n%-content.children[0].offsetHeight)){
+                  clearInterval(target);
+                  return;
+              };
+              $(content).animate({top:n+'px'},10);
+            },10);
+            return target;
+          };        
           sliderTop();
-        }
-        //下翻页
-        next.onclick = function(){
-          clearInterval(target);
-          sliderDown();
-        }
+
+          function sliderDown(){
+            target = setInterval(function(){
+              n+=1;
+              if(n >= 0){
+                n = -content.offsetHeight/2;
+              };
+              if(!(n%-content.children[0].offsetHeight)){
+                  clearInterval(target);
+                  return;
+              };
+              $(content).animate({top:n+'px'},10);
+            },10);
+            return target;
+          };        
+
+          //停止上移动
+          function stopMove(){
+            return setInterval(function(){
+              sliderTop();
+            },5000); 
+          };
+          timer = stopMove();
+          //移入
+          paidSlider.mouseenter(function(){
+            clearInterval(timer);
+          });
+          //移出
+          paidSlider.mouseleave(function(){
+            timer = stopMove();
+          });
+          //上翻页
+          prev.onclick = function(){
+            clearInterval(target);
+            sliderTop();
+          }
+          //下翻页
+          next.onclick = function(){
+            clearInterval(target);
+            sliderDown();
+          };
+         };
       });
   </script>
 <% end %>
