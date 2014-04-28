@@ -137,7 +137,7 @@
 	}
 	.involved-btn.old{
 		background:#65adf2;
-		margin: -40px 35px 0px 0px;
+		margin: -50px 35px 0px 0px;
 		&:hover{
 			background:#6FA0F0;
 		}
@@ -192,7 +192,8 @@
       }
       li.on{ 
         background:$red1; 
-        color:#fff; 
+        color:#fff;
+        border-color:$red1; 
       }
     }
   }

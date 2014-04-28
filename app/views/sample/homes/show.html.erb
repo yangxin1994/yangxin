@@ -4,14 +4,16 @@
     <% if user_signed_in %>
       window.current_user_id = "<%= current_user.id %>"
     <% end %>   
-      jQuery(function(){
+jQuery(function(){
         var paidSlider = $('.paid-survey');
         var content = $('.paid-survey ul')[0];
         var page = $('.page')[0];
         var prev = page.children[0];
         var next = page.children[1];
         var n = content.offsetTop;
+        var m;
         content.innerHTML += content.innerHTML;
+
         function sliderTop(){
           target = setInterval(function(){
             n-=1;
@@ -27,13 +29,30 @@
           return target;
         };        
         sliderTop();
+
+        function sliderDown(){
+          target = setInterval(function(){
+            n+=1;
+            if(n >= 0){
+              n = -content.offsetHeight/2;
+            };
+            if(!(n%-content.children[0].offsetHeight)){
+                clearInterval(target);
+                return;
+            };
+            $(content).animate({top:n+'px'},10);
+          },10);
+          return target;
+        };        
+
+        //停止上移动
         function stopMove(){
-        return setInterval(function(){
-            clearInterval(target);
+          return setInterval(function(){
             sliderTop();
-          },3000);
+          },5000); 
         };
         timer = stopMove();
+
         //移入
         paidSlider.mouseenter(function(){
           clearInterval(timer);
@@ -43,8 +62,15 @@
           timer = stopMove();
         });
         //上翻页
-
+        prev.onclick = function(){
+          clearInterval(target);
+          sliderTop();
+        }
         //下翻页
+        next.onclick = function(){
+          clearInterval(target);
+          sliderDown();
+        }
       });
   </script>
 <% end %>
