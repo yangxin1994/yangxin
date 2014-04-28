@@ -1,5 +1,5 @@
 ---
-address: http://www.wenjuanba.com
+address: www.wenjuanba.com
 pid: tmp/pids/thin.pid
 timeout: 120
 port: 9393
