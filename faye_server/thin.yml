@@ -1,5 +1,5 @@
 ---
-address: 118.194.61.82
+address: http://www.wenjuanba.com
 pid: tmp/pids/thin.pid
 timeout: 120
 port: 9393
