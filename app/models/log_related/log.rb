@@ -72,10 +72,8 @@ class Log
       rescue
         if File.exist?('./faye_server/tmp/pids/thin.9393.pid')
           system("rm -rf ./faye_server/tmp/pids/* && ./faye start")
-          FayeClient.send("/realogs/new", hash)
         else
           system("./faye start")
-          FayeClient.send("/realogs/new", hash)
         end
       end
     end
