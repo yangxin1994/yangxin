@@ -49,7 +49,7 @@ class Utility::MaterialsController < ApplicationController
     def create_media
         media = MediaUploader.new
         media.store!(params[:Filedata])
-        render :json => media.url
+        render :json => media.thumb.url
     end
 
 
@@ -100,15 +100,15 @@ class Utility::MaterialsController < ApplicationController
                 url = '/assets/materials/music.png'
             when 4 # video
                 url = material.picture_url
-                if url.blank?
-                    url = TudouClient.video_pic_url(material.value)
-                    # update the preview page
-                    if url.present?
-                        material.picture_url = url
-                        material.save
-                        # @ws_client.update(material['_id'], material)
-                    end
-                end
+                # if url.blank?
+                #     url = TudouClient.video_pic_url(material.value)
+                #     # update the preview page
+                #     if url.present?
+                #         material.picture_url = url
+                #         material.save
+                #         # @ws_client.update(material['_id'], material)
+                #     end
+                # end
                 url = '/assets/materials/no-video.png' if url.blank?
             else
             end

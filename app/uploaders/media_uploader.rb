@@ -1,5 +1,9 @@
 class MediaUploader < CarrierWave::Uploader::Base
   CarrierWave::SanitizedFile.sanitize_regexp = /[^[:word:]\.\-\+]/
+
+  include CarrierWave::Video
+  include CarrierWave::Video::Thumbnailer
+
   # Include RMagick or MiniMagick support:
   # include CarrierWave::RMagick
   # include CarrierWave::MiniMagick
@@ -31,6 +35,21 @@ class MediaUploader < CarrierWave::Uploader::Base
   #
   #   "/images/fallback/" + [version_name, "default.png"].compact.join('_')
   # end
+
+
+
+  version :thumb do
+    process thumbnail: [{format: 'png', quality: 10, size: 90, strip: true, logger: Rails.logger}]
+    def full_filename for_file
+      png_name for_file, version_name
+    end
+  end
+
+  def png_name for_file, version_name
+    %Q{#{version_name}_#{for_file.chomp(File.extname(for_file))}.png}
+  end
+
+
 
   # Process files as they are uploaded:
   # process :scale => [200, 300]
