@@ -45,6 +45,14 @@ class Utility::MaterialsController < ApplicationController
         end
     end
 
+    # AJAX upload vedio and audio
+    def create_media
+        media = MediaUploader.new
+        media.store!(params[:Filedata])
+        render :json => media.url
+    end
+
+
     # AJAX
     def destroy
         material = current_user.materials.find_by_id(params[:id])
