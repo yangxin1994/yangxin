@@ -651,6 +651,7 @@ class Survey
     last_time = Time.now.to_i
     p "======================="
     answers.each_with_index do |answer, index|
+
       if answer.finished_at.present?
         answer_time = Time.at(answer.finished_at) - answer.created_at
         answer_time = (answer_time.ceil / 60.0).ceil

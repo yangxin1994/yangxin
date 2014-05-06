@@ -80,11 +80,12 @@
   </div>
 </div>
 
+
 <div class="inner-page">
   <% if @data[:express_surveys].present? %>
   <div class="paid-survey">
     <div class="content-title">
-      <h2>商业调研</h2>
+      <h2>热点调研</h2>
       <div class="page" click='0'>
         <a href="javascript:void(0);" class="prev"><i class="page-top"></i></a>
         <a href="javascript:void(0);" class="next"><i class="page-bottom"></i></a>
@@ -99,7 +100,7 @@
   <div class="create-survey dashed-box">
     <div class="count">
       <span>
-        <strong>当前累计问卷</strong>
+        <strong>累计问卷</strong>
         <% @data[:survey_counts].each do |data|%>
           <i><%= data %></i>
         <% end %>
@@ -108,15 +109,19 @@
     </div>
     <div class="count">
       <span>
-        <strong>当前累计答题</strong>
+        <strong>累计答题</strong>
         <% @data[:answer_counts].each do |data|%>
           <i><%= data %></i>
         <% end %>
-        <b>份</b>
+        <b>次</b>
       </span>
     </div>
     <div class="btn-line">
-      <a class="create-survey-btn" href="http://diaoyan.me/questionaires/new<%= "?akr=#{current_user.get_auth_remote_key}" if current_user %>">免费创建一份问卷</a>
+      <% if current_user.present? %>
+        <a class="create-survey-btn" href="<%= Rails.application.config.diaoyan + '/questionaires/new?akr=' + current_user.get_auth_remote_key %>">免费创建一份问卷</a>
+      <% else %>
+        <a class="create-survey-btn" href="<%= Rails.application.config.diaoyan %>/questionaires/new">免费创建一份问卷</a>
+      <% end %>
     </div>
   </div>
   <% end %>
@@ -129,7 +134,7 @@
   <div class="research-list dashed-box l">
     <div class="dashed-box-inner">
       <div class="dashed-box-inner-top">
-        <h3 class="box-title">调研推荐</h3>
+        <h3 class="box-title">商业调研</h3>
         <a href="<%= surveys_path(:status => 2) %>" class="more">更多</a>
       </div>
       <ul>

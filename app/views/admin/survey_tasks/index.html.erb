@@ -71,7 +71,7 @@
           </a>
         </td>
         <td><a href="/questionaires/<%= survey_task._id %>"><%= survey_task.title %></a></td>
-        <td><%= "#{survey_task.quota["rules"][0]["finished_count"]}/#{survey_task.quota["rules"][0]["amount"]}" %></td>
+        <td><%= "#{survey_task.finish_retrieve_amount}/#{survey_task.retrieve_amount}" %></td>
         <td><%= Time.at(survey_task.created_at).strftime('%F %R') %></td>
         <td data-sid="<%= survey_task._id %>">
         <div class="btn-group">

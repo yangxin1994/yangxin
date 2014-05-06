@@ -165,7 +165,7 @@ class Answer
   end
 
   def self.create_answer(survey_id, reward_scheme_id, introducer_id, agent_task_id, answer_obj)
-    answer = Answer.create(answer_obj)
+    answer = self.create(answer_obj)
     Survey.normal.find(survey_id).answers << answer
     # AgentTask.find_by_id(agent_task_id).try(:new_answer, answer)
     AgentTask.find(agent_task_id).new_answer(answer) if agent_task_id.present?

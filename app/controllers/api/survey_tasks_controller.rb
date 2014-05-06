@@ -1,5 +1,10 @@
 class Api::SurveyTasksController < ApplicationController
   def show
+    render_json SurveyTask.where(:identifier => params[:id]).first do |survey_task|
+      {
+        quillme_promotable: survey_task.quillme_promotable
+      }
+    end
   end
 
   def create
