@@ -33,10 +33,6 @@ class Material
       material["value"] = material["value"].gsub('thumb_','').split('.').first
     end 
 
-    Rails.logger.info('---------------------------------------')
-    Rails.logger.info(material["value"])
-    Rails.logger.info(material["picture_url"])
-    Rails.logger.info('---------------------------------------')
 
     material_inst = Material.new(:material_type => material["material_type"].to_i,
       :value => material["value"],
