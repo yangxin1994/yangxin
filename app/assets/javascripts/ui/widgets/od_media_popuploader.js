@@ -661,10 +661,12 @@
             var typeid = 1;
             if (this.options.type == "M") {
                 this.options.title = "音频";
-                typeid = 2
+                //typeid = 2
+                typeid = 4
             } else if (this.options.type == "V") {
                 this.options.title = "视频";
-                typeid = 4
+                //typeid = 4
+                typeid = 2
             }
             this._find(".internetMedia .upload_type").html("链接" + this.options.title);
             this._find(".localMedia .add-font").html("点击添加新" + this.options.title);

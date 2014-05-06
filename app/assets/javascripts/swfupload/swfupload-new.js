@@ -856,11 +856,16 @@ SWFUpload.prototype.cleanUp = function(movieElement) {
 SWFUpload.prototype.fileDialogStart = function() {
     this.queueEvent("file_dialog_start_handler");
     //updat by GY
-
+    console.log("=========this.customSettings.fileType:" + this.customSettings.fileType)
     if (this.customSettings.fileType == "1") { //图片
         this.setUploadURL("/utility/materials/create_image");
     } else if (this.customSettings.fileType) {
-        this.setUploadURL("/utility/materials/create_media");
+        if (this.customSettings.fileType == "2") { //video
+            this.setUploadURL("/utility/materials/create_video");
+        } else {
+            this.setUploadURL("/utility/materials/create_audio");
+        }
+
     }
 
     // if (this.customSettings.fileType == "1") { //图片
@@ -940,10 +945,6 @@ SWFUpload.prototype.uploadError = function(file, errorCode, message) {
 };
 
 SWFUpload.prototype.uploadSuccess = function(file, serverData, responseReceived) {
-    console.log('------in SWFUpload.prototype.uploadSuccess--- start --------')
-    console.log(file)
-    console.log(serverData)
-    console.log('------in SWFUpload.prototype.uploadSuccess--- end   --------')
     file = this.unescapeFilePostParams(file);
     this.queueEvent("upload_success_handler", [file, serverData, responseReceived]);
 };

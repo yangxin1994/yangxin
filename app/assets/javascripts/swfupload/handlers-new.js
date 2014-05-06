@@ -119,16 +119,7 @@ function uploadSuccess(file, serverData) {
         //存入数据库
         beginUpload(false, this);
         if (this.customSettings.fileType) { //上传图片、视频、音频
-            // if (this.customSettings.fileType == 1) {
-            //     postInfo(serverData, file.name, this.customSettings.fileType, serverData);
-            // } else {
-            //     var code = this.customSettings.videoCode;
-            //     var name = progress.getName();
-            //     postInfo(code, name, this.customSettings.fileType, null);
-            // }
-
             postInfo(serverData, file.name, this.customSettings.fileType, serverData);
-
         } else {
             var sdata = JSON.parse(serverData);
             console.log(sdata);
@@ -162,12 +153,15 @@ function uploadSuccess(file, serverData) {
 }
 
 function postInfo(finfo, ftitle, ftype, fpic) {
-    console.log('--------in pistInfo function start -----------')
-    console.log(finfo)
-    console.log(ftitle)
-    console.log(ftype)
-    console.log(fpic)
-    console.log('--------in pistInfo function end   -----------')
+
+    // 1 for image, 2 for video, 4 for audio
+    if (parseInt(ftype) == 2) {
+        finfo = JSON.parse(finfo);
+        fpic = JSON.parse(fpic);
+        finfo = finfo['val'] ? finfo['val'] : finfo;
+        fpic = fpic['pic'] ? fpic['pic'] : fpic;
+    }
+
     var param = {
         material: {
             value: finfo, //视频、音频11位码

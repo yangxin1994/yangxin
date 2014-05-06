@@ -1,6 +1,8 @@
-class MediaUploader < CarrierWave::Uploader::Base
+class VideoUploader < CarrierWave::Uploader::Base
   CarrierWave::SanitizedFile.sanitize_regexp = /[^[:word:]\.\-\+]/
 
+
+  # need  install ffmpegthumbnailer  through  package manager
   include CarrierWave::Video
   include CarrierWave::Video::Thumbnailer
 
@@ -20,7 +22,7 @@ class MediaUploader < CarrierWave::Uploader::Base
   # Override the directory where uploaded files will be stored.
   # This is a sensible default for uploaders that are meant to be mounted:
   def store_dir
-    "uploads/media/"
+    "uploads/video/"
   end
   def filename
     Time.now.strftime("%Y-%m-%d-%H-%M-%S") + "_" + (0...8).map { (65 + rand(26)).chr }.join
@@ -36,17 +38,21 @@ class MediaUploader < CarrierWave::Uploader::Base
   #   "/images/fallback/" + [version_name, "default.png"].compact.join('_')
   # end
 
-
-
+ 
   version :thumb do
     process thumbnail: [{format: 'png', quality: 10, size: 90, strip: true, logger: Rails.logger}]
     def full_filename for_file
-      png_name for_file, version_name
+      png_name for_file
     end
   end
 
-  def png_name for_file, version_name
-    %Q{#{version_name}_#{for_file.chomp(File.extname(for_file))}.png}
+  def png_name for_file
+    # Rails.logger.info '-------in uploader  start -----------------------'
+    # Rails.logger.info "--filename:----" + self.filename
+    # Rails.logger.info "--url:---" + self.url
+    # Rails.logger.info "--for_file:--" + for_file
+    # Rails.logger.info '-------in uploader  start -----------------------'
+    %Q{#{for_file}.png}
   end
 
 

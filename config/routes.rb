@@ -498,7 +498,8 @@ OopsData::Application.routes.draw do
       collection do
         get :video_upload_path
         post :create_image
-        post :create_media
+        post :create_video
+        post :create_audio
       end
 
       member do
