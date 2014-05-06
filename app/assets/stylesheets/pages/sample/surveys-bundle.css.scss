@@ -10,6 +10,54 @@
 $colorA: #666666;
 $colorB: #b3b3b3;
 
+.f_l{
+  float:left;
+}
+
+// .f_r{
+//   // position: relative;
+// }
+
+.paid-survey{
+  width:630px;
+  margin-top:20px;
+  float: left;
+  background: #FFF;
+  @include box-shadow(0 1px 1px #999);
+  @include border-radius(6px);
+  .content-title{
+    @include border-top-left-radius(6px);
+    @include border-top-right-radius(6px);
+    background: #f25d5d;
+    @include clearfix;
+    h2{
+      color: #fff;
+      font-size: 14px;
+      font-weight: bold;
+      padding-left:20px;
+      width:200px;
+      float: left;
+      @include one-line(50px);
+    }
+  }
+  .survey-list{
+    ul{
+      padding:0 20px;
+      li{
+        border-bottom: none;
+        border-bottom: 1px #dbdbdb dashed;
+        &:last-child{
+          border-bottom:none;
+        }
+      }
+    } 
+  }
+}
+
+.s_list{
+  width:630px;
+}
+
 .rl{
   position:relative;
   margin-top:12px;
@@ -17,7 +65,7 @@ $colorB: #b3b3b3;
     position:absolute;
     width:630px;
     height:48px;
-    background:#f25d5d;
+    background:#d9d9d9;
     @include border-top-radius(6px);
     top:0;
     li{
@@ -105,9 +153,9 @@ $colorB: #b3b3b3;
 
 
 .dashed-box{
-  #s_list{
-    min-height:534px;
-  }
+  // #s_list{
+  //   min-height:534px;
+  // }
   .s_top{
     margin:50px 0 10px 0;
     height: 26px;
@@ -286,6 +334,8 @@ $colorB: #b3b3b3;
 }
 
 .rank{
+  right: 0px;
+
   width:295px;
   margin-left:15px;
   .rank-list{
@@ -326,6 +376,11 @@ $colorB: #b3b3b3;
 }
 
 .rss{
+
+  // position: absolute;
+  right: 0;
+  // top: -70px;
+  margin-top:20px;
   width:315px;
   margin-left:15px;
   margin-bottom:12px;
@@ -337,7 +392,7 @@ $colorB: #b3b3b3;
   .header{
     @include border-top-radius(6px);
     height:48px;
-    background: #f25d5d url(/assets/od-quillme/rss.png) no-repeat;
+    background: #d9d9d9 url(/assets/od-quillme/rss.png) no-repeat;
     span{
       display:inline-block;
       margin:16px 0px 0px 30px;

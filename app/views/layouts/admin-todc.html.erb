@@ -27,7 +27,7 @@
 <body>
   <div class="navbar navbar-googlebar navbar-inverse navbar-fixed-top">
     <div class="navbar-inner">
-      <div class="container">
+      <div class="container-fluid">
         <a class="brand" href="/admin">Quill Admin</a>
           <ul class="nav">
             <li>
@@ -62,7 +62,10 @@
             </li>
             <li>
               <a href="/admin/popularizes">推广</a>
-            </li>            
+            </li>       
+            <li>
+              <a href="/admin/survey_tasks">任务</a>
+            </li>                   
           </ul>
         <ul class="nav pull-right">
           <li id="fat-menu" class="dropdown">
@@ -86,13 +89,13 @@
     </div>
   </div>
 
-  <div class="container">
+  <div class="container-fluid">
 
     <div class="row-fluid">
-      <div class="span3 flowy-admin-sidebar">
+      <div class="span2 flowy-admin-sidebar">
         <%= yield :sidebar %>
       </div>
-      <div class="span9">
+      <div class="span10">
         <div id="alert_placeholder">
 
         </div>

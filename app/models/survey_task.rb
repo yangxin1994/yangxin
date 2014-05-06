@@ -5,18 +5,31 @@ class SurveyTask < Survey
 
   # field :title, :type => String, default: "调查问卷主标题"
   # field :description, :type => String, default: "调查问卷描述"
-  # # can be 1 (closed), 2 (published), 4 (deleted)
+  # can be 1 (closed), 2 (published), 4 (deleted)
   # field :status, :type => Integer, default: 2
   field :identifier, :type => String
-  field :origin_url, :type => String
-  field :origin_route, :type => String
+  field :origin_host, :type => String
+  field :origin_path, :type => String
 
-  def get_encoded_url(user = nil)
-    encode_id = Base64.encode64("#{identifier}|#{scheme_id}|#{user.try(:id)}|")
-    "#{origin_route}#{encode_id}?s=true"
+  field :remote_estimate_answer_time, :type => Float, :default => 1.0
+
+  def estimate_answer_time
+    remote_estimate_answer_time
   end
 
-  def excute_sample_data(user=nil)
+  def get_encoded_url(user = nil)
+    if user && rid = user.answers.where(:survey_id => self.id).first.try(:identifier)
+      return "http://#{origin_host}/a/#{rid}"
+    end
+    encode_id = Base64.encode64("#{identifier}|#{scheme_id}|#{user.try(:id)}|")
+    "http://#{origin_host}#{origin_path}/#{encode_id}?s=true"
+  end
+
+  def preview_url
+    url = "http://#{origin_host}/p/#{identifier}".gsub('/surveys', '')
+  end
+
+  def excute_sample_data(user = nil)
     answer = answer_by_sample(user)
     self['answer_status'] = answer.try(:status) || 0
     self['answer_reject_type'] = answer.try(:reject_type) || 0
@@ -24,5 +37,33 @@ class SurveyTask < Survey
     self["encoded_url"] = get_encoded_url(user)
     return self
   end
+
+  def task_info
+    {
+      quota: quota
+    }
+  end
+
+  def retrieve_amount
+    flag = false
+    self.quota['rules'].each do |q| 
+      (q['conditions'] || []).each_with_index do |condition|
+        flag ||= condition["condition_type"] == 5
+        return q['amount'] if flag
+      end
+    end
+    self.quota["rules"][0]["amount"]
+  end
+
+  def finish_retrieve_amount
+    flag = false
+    self.quota['rules'].each do |q| 
+      (q['conditions'] || []).each_with_index do |condition|
+        flag ||= condition["condition_type"] == 5
+        return q['finished_count'] if flag
+      end
+    end
+    self.quota["rules"][0]["finished_count"]
+  end  
   
 end

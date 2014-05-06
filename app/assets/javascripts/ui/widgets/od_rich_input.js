@@ -3,7 +3,6 @@
 //=require ../plugins/od_media_upload_button
  
 (function($) {
-
 	/* Check whether the value of a rich input has medias
 	 * ================================ */
 	function _has_media(value) {

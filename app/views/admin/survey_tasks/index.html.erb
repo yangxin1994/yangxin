@@ -1,0 +1,213 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/surveys/index-bundle" %>
+<% end %>
+
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li class="active">
+      <a href="javascript:void(0);">
+      <i class="icon-chevron-right"></i>
+      推广任务列表
+      </a>
+    </li>
+  </ul>
+  <div class="well well-small well-tips">
+    <p>Tips:</p>
+    <ul>
+      <li>加星标的问卷将会被置顶.</li>
+      <li>右侧的筛选器中可以设置只显示发布在调研社区中的问卷.</li>
+    </ul>
+  </div>
+<% end %>
+
+<div>
+  <span>
+    <form class="form-search" style="display:inline">
+    <div class="input-append">
+      <input class="span6 search-query" name="keyword" id="" type="text" placeholder="标题或创建人邮箱">
+      <button class="btn">搜索</button>
+    </div>
+    </form>
+  </span>
+  <span class="pull-right">
+    <!-- <a class="btn"  href="/questionaires" target="_blank"><i class="icon-plus"></i>&nbsp;创建新问卷</a> -->
+    <%= paginator_mini @survey_tasks %>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>&nbsp;<span class="caret"></span></button>
+      <ul class="dropdown-menu pull-right">
+        <li><a href="?">全部</a></li>
+        <li class="divider"></li>
+        <li><a href="?quillme_only=true" class="querilayer">仅显示调研社区中的问卷</a></li>
+        <li class="divider"></li>
+        <li><a href="?status=1">关闭中</a></li>
+        <li><a href="?status=2">已发布</a></li>
+        <li><a href="?status=4">已删除</a></li>
+      </ul>
+    </div>
+  </span>
+</div>
+
+<div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th></th>
+        <th width="20%">标题</th>
+        <th >回收情况</th>
+        <th >创建时间</th>
+        <th >操作</th>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr></tr>
+    </tfoot>
+    <tbody>
+      <% @survey_tasks['data'].each do |survey_task| %>
+      <tr>
+        <td>
+          <a href="javascript:void(0);" class="star" data-id="<%= survey_task._id %>">
+            <i class="icon-star<%= '-empty' unless survey_task.star %>"></i>
+          </a>
+        </td>
+        <td><a href="/questionaires/<%= survey_task._id %>"><%= survey_task.title %></a></td>
+        <td><%= "#{survey_task.finish_retrieve_amount}/#{survey_task.retrieve_amount}" %></td>
+        <td><%= Time.at(survey_task.created_at).strftime('%F %R') %></td>
+        <td data-sid="<%= survey_task._id %>">
+        <div class="btn-group">
+          <a class="btn task_info" href="/admin/survey_tasks/<%= survey_task._id %>"><i class="icon-list-alt"></i>问卷详情</a>
+          <button class="btn dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <!-- <li><a href="#info" class="info"><i class="icon-wrench"></i>问卷基本设置</a></li> -->
+             
+            <!-- <li><a href="/admin/answers/<%= survey_task._id %>" ><i class="icon-eye-open"></i>审核答案</a></li> -->
+          
+            <li><a href="<%= survey_task.preview_url %>" target="_blank"><i class="icon-list-alt"></i>预览答题</a></li>
+            <li><a href="/admin/surveys/<%= survey_task._id %>/reward_schemes" ><i class="icon-gift"></i>奖励方案设置</a></li>
+            <li><a href="/admin/surveys/<%= survey_task._id %>/promote" ><i class="icon-share"></i>推送渠道设置</a></li>
+            <li><a href="#cost" class="cost"><i class="icon-tint"></i>问卷成本</a></li>
+            <li><a href="#promote" class="promote"><i class="icon-share-alt"></i>问卷推送进度</a></li>
+          </ul>
+        </div>
+        </td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+</div>
+
+  <div class="modal hide fade" id="info_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>样本权限设置</h3>
+    </div>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <input type="hidden" name="sid" id="sid"> 
+        <div class="control-group">
+          <label class="control-label" for="block">热点小调查</label>
+          <div class="controls">
+            <label class="checkbox">
+              <input type="checkbox" name="is_hot" id="ck_hot"> 
+            </label>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="block">推广积分</label>
+          <div class="controls">
+            <input type="text" class="input-medium" name="point" id="point"> 
+          </div>
+        </div>        
+        <div class="control-group">
+          <label class="control-label" for="roles">是否公开调研结果</label>
+          <div class="controls">
+            <label class="checkbox">
+              <input type="checkbox" id="ck_visible" name="visible"> 
+            </label>
+          </div>
+      </div>
+        <div class="control-group">
+          <label class="control-label" for="block">单ip最大答题次数</label>
+          <div class="controls">
+            <input type="text" class="input-medium" name="max_num_per_ip" id="max_num_per_ip"> 
+          </div>
+        </div>   
+      </form>
+    </div>
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#info_modal').modal('hide');">取消</a>
+      <button type="button" class="btn btn-primary" data-loading-text="保存中..." id="send_info">确定修改</button>
+    </div>
+  </div>
+
+  <div class="modal hide fade" id="cost_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>问卷成本</h3>
+    </div>
+    <div class="modal-body" id="cost_body">
+      <div id="cost_item"></div>
+        <p>
+          已支付积分： <span id="point_cost"></span>（1元价值100积分）
+        </p>
+        <p>
+          已支付话费： <span id="mobile_cost"></span>元
+        </p>
+        <p>
+          已转帐支付宝：<span id="alipay_cost"></span>元
+        </p>
+        <p>
+          已支付集分宝：<span id="jifenbao_cost"></span>个
+        </p>
+        <p>
+          已抽中奖品总成本：<span id="lottery_cost"></span>元
+        </p>
+        <p>
+          样本推广数量：<span id="introduce_number"></span>份
+        </p>
+    </div>
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#cost_modal').modal('hide');">关闭</a>
+    </div>
+  </div>
+
+  <div class="modal hide fade" id="promote_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>问卷推送进度</h3>
+    </div>
+    <div class="modal-body" id="promote_body">
+      <div id="email_status">
+        <p class="pull-center">
+          Email 发送状态: 已发出 <span id="email_sended"></span>
+        </p>        
+      </div>
+    </div>    
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#promote_modal').modal('hide');">关闭</a>
+    </div>
+  </div> 
+
+  <div class="modal hide fade" id="task_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>样本服务</h3>
+    </div>
+    <div class="modal-body" id="promote_body">
+      <div id="email_status">
+        <p class="pull-center">
+          需要收集答案：<span id="task_quota"></span>
+        </p>
+        <p class="pull-center">
+          <!-- <button type="button" class="btn btn-primary" data-loading-text="保存中..." id="reject_task">拒绝发布</button> -->
+        </p>        
+      </div>
+    </div>    
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#task_modal').modal('hide');">关闭</a>
+    </div>
+  </div> 
+

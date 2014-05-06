@@ -45,6 +45,22 @@ class Utility::MaterialsController < ApplicationController
         end
     end
 
+    # AJAX upload vedio
+    def create_video
+        video = VideoUploader.new
+        video.store!(params[:Filedata])
+        render :json => {val:video.url,pic:video.thumb.url}
+    end
+
+    # AJAX upload  audio
+    def create_audio
+        audio = AudioUploader.new
+        audio.store!(params[:Filedata])
+        render :json => audio.url
+    end
+
+
+
     # AJAX
     def destroy
         material = current_user.materials.find_by_id(params[:id])
@@ -88,21 +104,11 @@ class Utility::MaterialsController < ApplicationController
             when 1 # image
                 url = material.picture_url
                 url = '/assets/materials/no-image.png' if url.blank?
-            when 2 # audio
-                url = '/assets/materials/music.png'
-            when 4 # video
+            when 2 # video
                 url = material.picture_url
-                if url.blank?
-                    url = TudouClient.video_pic_url(material.value)
-                    # update the preview page
-                    if url.present?
-                        material.picture_url = url
-                        material.save
-                        # @ws_client.update(material['_id'], material)
-                    end
-                end
                 url = '/assets/materials/no-video.png' if url.blank?
-            else
+            when 4 # audio
+                url = '/assets/materials/music.png'
             end
         end
         redirect_to(url.blank? ? '/assets/materials/no-image.png' : URI.encode(url.strip))

@@ -124,6 +124,7 @@ class Survey
   scope :quillme_hot, -> {where(:quillme_hot => true)}
   scope :not_quillme_hot, -> {where(:quillme_hot => false)}
   scope :quillme_normal, -> { self.quillme_promote.not_quillme_hot}
+  scope :not_express, -> {where(:_type.ne => 'SurveyTask' )}
   scope :stars, -> {where(:status.in => [CLOSED,PUBLISHED], :is_star => true)}
   scope :published, -> { where(:status  => 2) }
   scope :normal, -> { where(:status.gt => -1) }
@@ -157,8 +158,8 @@ class Survey
   def self.get_recommends(opt)
     total_ids = Survey.quillme_normal.map(&:id)
     reward_type = opt[:reward_type].split(',') if opt[:reward_type].present?
-    surveys = Survey.quillme_normal.status(opt[:status] || 2).reward_type(opt[:reward_type]).desc(:created_at) if opt[:reward_type].present?
-    surveys = Survey.quillme_normal.status(opt[:status] || 2).desc(:created_at) unless opt[:reward_type].present?
+    surveys = Survey.quillme_normal.not_express.status(opt[:status] || 2).reward_type(opt[:reward_type]).desc(:created_at) if opt[:reward_type].present?
+    surveys = Survey.quillme_normal.not_express.status(opt[:status] || 2).desc(:created_at) unless opt[:reward_type].present?
     surveys = get_filter_surveys(
       surveys:surveys,
       total_ids:total_ids,
@@ -225,7 +226,7 @@ class Survey
   end
 
   def self.search(options = {})
-    surveys = Survey.all
+    surveys = self.normal
     surveys = surveys.in(:status => Tool.convert_int_to_base_arr(options[:status])) if options[:status]
     surveys = surveys.where(:quillme_promotable => true) if options[:quillme_only].to_s == "true"
     case options[:keyword].to_s
@@ -241,7 +242,6 @@ class Survey
       surveys = surveys.where(:title => /.*#{options[:keyword]}.*/)
     end
     surveys = surveys.desc(:star).desc(:created_at)
-
   end
 
   def update_promote(options)
@@ -649,14 +649,15 @@ class Survey
     q = self.all_questions_type(false)
     answer_length = answers.length
     last_time = Time.now.to_i
+    p "======================="
     answers.each_with_index do |answer, index|
+
       if answer.finished_at.present?
         answer_time = Time.at(answer.finished_at) - answer.created_at
         answer_time = (answer_time.ceil / 60.0).ceil
       else
         answer_time = 0      
       end
-   
       line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, "#{answer_time} 分"]
       begin
         all_questions_id(false).each_with_index do |question, index|
