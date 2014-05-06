@@ -40,18 +40,18 @@ class VideoUploader < CarrierWave::Uploader::Base
 
  
   version :thumb do
-    process thumbnail: [{format: 'png', quality: 10, size: 90, strip: true, logger: Rails.logger}]
-    def full_filename for_file
-      png_name for_file
+    begin
+      process thumbnail: [{format: 'png', quality: 10, size: 90, strip: true, logger: Rails.logger}]
+      def full_filename for_file
+        png_name for_file
+      end
+    rescue
+      nil
     end
+
   end
 
   def png_name for_file
-    # Rails.logger.info '-------in uploader  start -----------------------'
-    # Rails.logger.info "--filename:----" + self.filename
-    # Rails.logger.info "--url:---" + self.url
-    # Rails.logger.info "--for_file:--" + for_file
-    # Rails.logger.info '-------in uploader  start -----------------------'
     %Q{#{for_file}.png}
   end
 
