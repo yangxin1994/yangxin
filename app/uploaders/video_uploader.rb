@@ -40,15 +40,19 @@ class VideoUploader < CarrierWave::Uploader::Base
 
  
   version :thumb do
-    begin
-      process thumbnail: [{format: 'png', quality: 10, size: 90, strip: true, logger: Rails.logger}]
-      def full_filename for_file
-        png_name for_file
+      thub = %x(which ffmpegthumbnailer)
+      if thub.present?
+        begin
+          process thumbnail: [{format: 'png', quality: 10, size: 90, strip: true, logger: Rails.logger}]
+          def full_filename for_file
+            png_name for_file
+          end 
+        rescue
+          nil
+        end
+      else
+        nil
       end
-    rescue
-      nil
-    end
-
   end
 
   def png_name for_file
