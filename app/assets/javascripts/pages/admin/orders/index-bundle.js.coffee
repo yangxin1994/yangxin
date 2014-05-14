@@ -162,6 +162,25 @@ $ ->
       error: ->
           alert_msg.show('error', "处理失败,请稍后重试")
 
+  $(".refresh_esai").click ->
+    order_id = $(this).data("id")
+    $this = $(this)
+    $.ajax
+      url: "/admin/orders/#{order_id}/check_result"
+      type: 'GET'
+      success: (ret)->
+        if ret.success
+          if ret.data == 3
+            $this.closest("td").find("span").text("正在处理")
+          else if ret.data == 4
+            $this.closest("td").find("span").text("已成功")
+          else if ret.data == 5
+            $this.closest("td").find("span").text("已失败")
+        else
+          console.log ret
+          alert_msg.show('error', "处理失败,请稍后重试")
+      error: (ret)->
+          alert_msg.show('error', "处理失败,请稍后重试")
 
 
 

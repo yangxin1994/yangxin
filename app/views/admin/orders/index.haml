@@ -1,0 +1,217 @@
+/ content for head
+- content_for :head do
+  = javascript_include_tag "pages/admin/orders/index-bundle"
+- content_for :sidebar do
+  %ul.nav.nav-list.flowy-admin-sidenav
+    %li
+      %a{href: "?"}
+        %i.icon-chevron-right
+        全部
+    %li
+      %a{href: "?type=1"}
+        %i.icon-chevron-right
+        虚拟礼品订单
+    %li
+      %a{href: "?type=2"}
+        %i.icon-chevron-right
+        实物礼品订单
+    %li
+      %a{href: "?type=4"}
+        %i.icon-chevron-right
+        话费充值订单
+    %li
+      %a{href: "?type=8"}
+        %i.icon-chevron-right
+        支付宝订单
+    %li
+      %a{href: "?type=16"}
+        %i.icon-chevron-right
+        集分宝订单
+    %li
+      %a{href: "?type=32"}
+        %i.icon-chevron-right
+        Q币订单
+    %li
+      %a{href: "?type=64"}
+        %i.icon-chevron-right
+        小额充值订单
+  .well.well-small.well-tips
+    %p Tips:
+    %ul
+      %li "一键处理"可以将当前条件下列出的所有订单推到下一个状态（“等待处理”的订单进入“正在处理”状态，“正在处理”的订单进入“处理成功”状态）.
+%div
+  %span
+    %form.form-search{style: "display:inline"}
+      .input-append
+        %input.span6.search-query{id: "", name: "keyword", placeholder: "邮箱,电话或者订单号", type: "text"}/
+        %button.btn 搜索
+    .btn-group
+      %a.btn.batch{href: "javascript:void(0);"} 一键处理
+      %a.btn.csv{"data-scope" => "current_page", href: "/admin/orders/to_excel?#{"page=1&" unless params[:page].present?}#{request.query_string}"} 导出
+      %button.btn.dropdown-toggle{"data-toggle" => "dropdown"}
+        %span.caret
+      %ul.dropdown-menu
+        %li
+          %a{href: "/admin/orders/to_excel"} 导出全部
+        - if params[:type].present?
+          %li
+            %a{href: "/admin/orders/to_excel?type=#{params[:type]}"} 导出当前分类
+        - if params[:status].present?
+          %li
+            %a{href: "/admin/orders/to_excel?status=#{params[:status]}"} 导出当前状态
+          %li
+            %a{href: "/admin/orders/to_excel?type=#{params[:type]}&status=#{params[:status]}"} 导出当前分类及状态
+        - if params[:source].present?
+          %li
+            %a{href: "/admin/orders/to_excel?source=#{params[:source]}"} 导出当前源
+          %li
+            %a{href: "/admin/orders/to_excel?type=#{params[:type]}&source=#{params[:source]}"} 导出当前源及分类
+  %span.pull-right
+    = paginator_mini @orders
+    .btn-group
+      %button.btn.dropdown-toggle{"data-toggle" => "dropdown"}
+        %i.icon-filter>
+        筛选
+        %span.caret
+      %ul.dropdown-menu.pull-right
+        %li
+          %a{href: "/admin/orders"} 全部
+        %li.divider
+        %li
+          %a.querilayer{href: "?source=1"} 回答问卷获得现金奖励
+        %li
+          %a.querilayer{href: "?source=2"} 回答问卷抽中奖品
+        %li
+          %a.querilayer{href: "?source=4"} 用积分兑换礼品
+        %li.divider
+        %li
+          %a.querilayer{href: "?status=1"} 等待处理
+        %li
+          %a.querilayer{href: "?status=2"} 正在处理
+        %li
+          %a.querilayer{href: "?status=4"} 处理成功
+        %li
+          %a.querilayer{href: "?status=8"} 处理失败
+        %li
+          %a.querilayer{href: "?status=16"} 用户取消
+        %li.divider
+        %li
+          %a.querilayer{href: "?date=1"} 今天
+        %li
+          %a.querilayer{href: "?date=7"} 7天内
+        %li
+          %a.querilayer{href: "?date=30"} 一月内
+        %li
+          %a.querilayer{href: "?date=90"} 三月内
+        %li
+          %a.querilayer{href: "?date=365"} 一年内
+        %li
+          %a#date_btn{href: "javascript:;"} 自定义
+      %button.btn
+        失败易赛订单再充值
+%div
+  %table.table.table-striped
+    %thead
+      %tr
+        %td{width: "12%"} 名称
+        %td{width: "8%"} 数量
+        %td{width: "8%"} 用户
+        %td= order_label(params["type"])
+        %td{width: params[:type].to_i == Order::MOBILE_CHARGE ? "10%" : "15%"} 创建时间
+        %td{width: params[:type].to_i == Order::MOBILE_CHARGE ? "10%" : "15%"}= order_time_label(params["status"])
+        %td{width: "15%"} 操作
+        - if params[:type].to_i == Order::MOBILE_CHARGE
+          %td{width: "10%"} 易赛状态
+    %tbody
+      - @orders["data"].each_with_index do |order, i|
+        %tr
+          %td= order['gift_name'] || order['prize_name']
+          %td= order['amount']
+          %td
+            %a{href: "/admin/samples/#{order['user_id']}"}= order['user_email_mobile']
+          %td.o-detail{"data-content" => order['address_str'], title: "订单号: #{order['code']}"}= "#{order['mobile']} #{order['qq']} #{order['email']} #{ "支付宝: " + order['alipay_account'] if order['alipay_account'].present? }"
+          %td= order.created_at.strftime("%F<br />%T").html_safe
+          %td.o-time{"data-content" => order['time_str'], title: "订单处理详细"}= Time.at(order['canceled_at'] || order['finished_at'] || order['handled_at'] || order['created_at'].to_i).strftime("%F<br />%T").html_safe
+          %td
+            .btn-group
+              - case order['status'].to_i
+              - when 1
+                %a.btn.btn-success.handle{href: "#handles-#{order['_id']}"} 开始处理
+                %button.btn.dropdown-toggle{"data-toggle" => "dropdown"}
+                  %span.caret
+                %ul.dropdown-menu
+              - when 2
+                %a.btn.finishs{href: "#handles-#{order['_id']}"} 处理成功
+                %button.btn.btn-success.dropdown-toggle{"data-toggle" => "dropdown"}
+                  %span.caret
+                %ul.dropdown-menu
+                  %li
+                    %a.finishf{href: "#handlef-#{order['_id']}"} 处理失败
+              - else
+                %a.btn.disabled{href: "#handles-#{order['_id']}"}= order_status_tag order['status']
+                %button.btn.dropdown-toggle{"data-toggle" => "dropdown"}
+                  %span.caret
+                %ul.dropdown-menu
+              - if order['status'].to_i == 2 && order['type'].to_i == 2
+                %li
+                  %a.express{"data-express" => order["express_info"].to_json, href: "#express_info-#{order['_id']}", id: "express_info-#{order['_id']}"} 配送信息
+              %li
+                %a.remark{"data-remark" => order['remark'], href: "#remark-#{order['_id']}", id: "remark_#{order['_id']}"} 备注及其它
+          - if params[:type].to_i == Order::MOBILE_CHARGE
+            %td
+              %span= esai_order_status_tag(order.esai_status)
+              - if order.esai_status == Order::ESAI_HANDLE
+                %a.refresh_esai{href: "javascript:void();", data: {id: order.id.to_s}}= "刷新"
+#info_modal.modal.hide.fade
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} ×
+    %h3 配送信息设置
+  .modal-body
+    %form.form-horizontal
+      %input#oid{name: "oid", type: "hidden"}/
+      .control-group
+        %label.control-label{for: "block"} 快递公司
+        .controls
+          %input#company.input-medium{name: "company", type: "text"}/
+      .control-group
+        %label.control-label{for: "block"} 快运单号
+        .controls
+          %input#tracking_number.input-medium{name: "tracking_number", type: "text"}/
+      .control-group
+        %label.control-label{for: "roles"} 发货时间
+        .controls
+          %input#sent_at.input-medium{name: "sent_at", type: "text"}/
+  .modal-footer
+    %a.btn{href: "javascript:$('#info_modal').modal('hide');"} 取消
+    %button#send_info.btn.btn-primary{"data-loading-text" => "保存中...", type: "button"} 确定修改
+#remark_modal.modal.hide.fade
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} ×
+    %h3 备注
+  .modal-body
+    %form.form-horizontal
+      %input#orid{name: "orid", type: "hidden"}/
+      .control-group
+        %label.control-label{for: "block"} 更新备注
+        .controls
+          %textarea#ipt_remark
+  .modal-footer
+    %a.btn{href: "javascript:$('#remark_modal').modal('hide');"} 取消
+    %button#send_remark.btn.btn-primary{"data-loading-text" => "保存中...", type: "button"} 确定修改
+#date_model.modal.hide.fade
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} ×
+    %h3 日期
+  .modal-body
+    %form.form-horizontal
+      .control-group
+        %label.control-label{for: "block"} 起始
+        .controls
+          %input#date_min{name: "date_min", placeholder: "日期格式：yyyy/mm/dd", type: "text"}/
+      .control-group
+        %label.control-label{for: "block"} 结束
+        .controls
+          %input#date_max{name: "date_max", placeholder: "日期格式：yyyy/mm/dd", type: "text"}/
+  .modal-footer
+    %a.btn{href: "javascript:$('#date_model').modal('hide');"} 取消
+    %button#send_date.btn.btn-primary{type: "button"} 筛选

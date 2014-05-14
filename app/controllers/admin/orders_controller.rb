@@ -106,4 +106,13 @@ class Admin::OrdersController < Admin::AdminController
       :type => 'text/csv')
   end
 
+  def recharge_fail_mobile
+    Order.recharge_fail_mobile
+  end
+
+  def check_result
+    order = Order.find(params[:id])
+    retval = order.check_result
+    render_json_auto retval
+  end
 end
