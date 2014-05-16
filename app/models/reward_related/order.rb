@@ -268,7 +268,7 @@ class Order
   end
 
   def send_mobile_charge_success_message
-    SmsWorker.perform_async("charge_notification", self.mobile, "", {gift_name: "#{self.amount}元话费"})
+    SmsWorker.perform_async("charge_notification", self.mobile, "", gift_name: "#{self.amount}元话费")
   end
 
   def manu_handle

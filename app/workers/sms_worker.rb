@@ -3,6 +3,9 @@ class SmsWorker
   sidekiq_options :retry => 10, :queue => "oopsdata_#{Rails.env}".to_sym
 
   def perform(sms_type, mobile, callback, opt={})
+    puts "BBBBBBBBBBBBBBBB"
+    puts opt.inspect
+    puts "BBBBBBBBBBBBBBBB"
     case sms_type
     when 'welcome'
       retval = SmsApi.welcome_sms(sms_type, mobile, callback, opt)
