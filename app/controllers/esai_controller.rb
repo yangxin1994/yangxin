@@ -9,7 +9,6 @@ class EsaiController < ApplicationController
     # params[:PayResult]
 
     EsaiApi.callback(params[:InOrderNumber], params[:PayResult])
-
-    render xml: "<?xml version=\"1.0\" encoding=\"GB2312\"?>\n<root>\n<result> success</result>\n</root>"
+    render xml: "<?xml version=\"1.0\" encoding=\"GB2312\"?><root><result>success</result></root>"
   end
 end

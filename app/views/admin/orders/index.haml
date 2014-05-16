@@ -107,8 +107,8 @@
           %a.querilayer{href: "?date=365"} 一年内
         %li
           %a#date_btn{href: "javascript:;"} 自定义
-      %button.btn
-        失败易赛订单再充值
+      - if params[:type].to_i == Order::MOBILE_CHARGE
+        %a.btn{href: "/admin/orders/recharge_fail_mobile"} 失败易赛订单再充值
 %div
   %table.table.table-striped
     %thead

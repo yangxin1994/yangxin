@@ -147,7 +147,7 @@ class EsaiApi
     if result.to_i == 4
       order.update_attributes(status: Order::SUCCESS, esai_status: Order::ESAI_SUCCESS)
     else
-      order.update_attributes(esai_status: Order::FAIL)
+      order.update_attributes(esai_status: Order::ESAI_FAIL)
     end
   end
 end

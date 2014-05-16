@@ -377,7 +377,7 @@ OopsData::Application.routes.draw do
       collection do
         get :to_excel
         put :batch
-        put :recharge_fail_mobile
+        get :recharge_fail_mobile
       end
 
       member do

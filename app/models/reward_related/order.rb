@@ -229,8 +229,9 @@ class Order
   def auto_handle
     return false if self.status != WAIT
     return false if self.type != MOBILE_CHARGE
-    retval = EsaiApi.new..charge_phone(self.mobile, self.amount, self.code)
+    retval = EsaiApi.new.charge_phone(self.mobile, self.amount, "None")
     self.status = HANDLE
+		self.handled_at = Time.now
     if retval.nil?
       self.esai_status = ESAI_FAIL
     else
@@ -249,7 +250,7 @@ class Order
 
   def check_result
     return nil if self.esai_order_id.blank?
-    retval = EsaiApi.new.check_result(self.esai_order_id, self.code)
+    retval = EsaiApi.new.check_result(self.esai_order_id, "None")
     case retval
     when 0, 1, 2
       self.update_attributes({status: HANDLE, esai_status: ESAI_HANDLE})
