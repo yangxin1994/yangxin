@@ -14,6 +14,8 @@ class SmsWorker
       retval = SmsApi.activate_sms('change_mobile',mobile, callback, opt)
     when 'find_password'
       retval = SmsApi.find_password_sms('find_password',mobile, callback, opt)
+    when 'charge_notification'
+      retval = SmsApi.charge_notification('charge_notification', mobile, callback, opt)
     end
     return true
   end

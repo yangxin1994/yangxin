@@ -146,6 +146,7 @@ class EsaiApi
     return if order.nil?
     if result.to_i == 4
       order.update_attributes(status: Order::SUCCESS, esai_status: Order::ESAI_SUCCESS)
+      order.send_mobile_charge_success_message
     else
       order.update_attributes(esai_status: Order::ESAI_FAIL)
     end

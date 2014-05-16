@@ -231,9 +231,10 @@ class Order
     return false if self.type != MOBILE_CHARGE
     # retval = EsaiApi.new.charge_phone(self.mobile, self.amount, "None")
     self.status = HANDLE
+    self.status = ESAI_HANDLE
     self.handled_at = Time.now
     self.save
-    ChargeWorker.perform_async(self.id, self.mobile, self.amount)
+    ChargeWorker.perform_async(self.id.to_s, self.mobile, self.amount)
 =begin
     if retval.nil?
       self.esai_status = ESAI_FAIL
@@ -259,10 +260,15 @@ class Order
       self.update_attributes({status: HANDLE, esai_status: ESAI_HANDLE})
     when 4
       self.update_attributes({status: SUCCESS, esai_status: ESAI_SUCCESS})
+      self.send_mobile_charge_success_message
     when 5
       self.update_attributes({status: HANDLE, esai_status: ESAI_FAIL})
     end
     return self.esai_status
+  end
+
+  def send_mobile_charge_success_message
+    
   end
 
   def manu_handle
