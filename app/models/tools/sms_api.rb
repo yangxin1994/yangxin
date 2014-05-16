@@ -195,12 +195,12 @@ class SmsApi # 短信接口
     self.send_sms(type,mobile, text)
   end
 
-  def self.charge_confirm_sms(mobile, callback, opt)
+  def self.charge_confirm_sms(type, mobile, callback, opt)
     @gift_name = opt[:gift_name].to_s
     text_template_file_name = "#{Rails.root}/app/views/sms_text/charge_confirm_sms.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
     text = text_template.result(binding)
-    self.send_sms(mobile, text)
+    self.send_sms(type, mobile, text)
   end
 
   def self.send_massive_sms(mobile_list, sms_text)
