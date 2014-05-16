@@ -229,16 +229,19 @@ class Order
   def auto_handle
     return false if self.status != WAIT
     return false if self.type != MOBILE_CHARGE
-    retval = EsaiApi.new.charge_phone(self.mobile, self.amount, "None")
+    # retval = EsaiApi.new.charge_phone(self.mobile, self.amount, "None")
     self.status = HANDLE
-		self.handled_at = Time.now
+    self.handled_at = Time.now
+    self.save
+    ChargeWorker.perform_async(self.id, self.mobile, self.amount)
+=begin
     if retval.nil?
       self.esai_status = ESAI_FAIL
     else
       self.esai_status = ESAI_HANDLE
       self.esai_order_id = retval
     end
-    self.save
+=end
   end
 
   def self.recharge_fail_mobile
