@@ -231,7 +231,7 @@ class Order
     return false if self.type != MOBILE_CHARGE
     # retval = EsaiApi.new.charge_phone(self.mobile, self.amount, "None")
     self.status = HANDLE
-    self.status = ESAI_HANDLE
+    self.esai_status = ESAI_HANDLE
     self.handled_at = Time.now
     self.save
     ChargeWorker.perform_async(self.id.to_s, self.mobile, self.amount)
