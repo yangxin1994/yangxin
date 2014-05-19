@@ -90,11 +90,8 @@ class QuilluController < ApplicationController
       @material = Material.find_by_id(params[:material_id])
       respond_to do |format|
           format.html { 
-              if @material.material_type == 1
-                  url = @material.picture_url
-                  redirect_to(url.blank? ? '/assets/materials/no-image.png' : URI.encode(url.strip)) and return
-              end
-              return 
+              url = @material.picture_url
+              redirect_to(url.blank? ? '/assets/materials/no-image.png' : URI.encode(url.strip)) and return
           }
           format.json { render_json_auto @material and return }
       end
