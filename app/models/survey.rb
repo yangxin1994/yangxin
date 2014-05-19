@@ -603,7 +603,7 @@ class Survey
   end
 
   def excel_header
-    headers =["answer_id", "is_agent", "email", "mobile", "IP", "答题时长"]
+    headers =["answer_id", "is_agent", "email", "mobile", "IP", "地点", "答题时长"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -691,7 +691,7 @@ class Survey
         else
           answer_time = 0      
         end
-        line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, "#{answer_time} 分"]
+        line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
         begin
           all_questions_id(false).each_with_index do |question, index|
             qindex = index
