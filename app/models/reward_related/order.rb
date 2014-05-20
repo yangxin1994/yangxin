@@ -296,6 +296,7 @@ class Order
     options[:status] = options[:status].to_i
     options[:source] = options[:source].to_i
     options[:type] = options[:type].to_i
+    options.delete(:type) if options[:type] == 0
     if options[:email].present?
       orders = User.find_by_email(options[:email]).try(:orders)
       orders = orders.nil? ? [] : orders.desc(:created_at)
