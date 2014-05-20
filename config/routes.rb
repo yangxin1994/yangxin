@@ -377,10 +377,12 @@ OopsData::Application.routes.draw do
       collection do
         get :to_excel
         put :batch
+        get :recharge_fail_mobile
       end
 
       member do
         put :handle, :bulk_handle, :finish, :bulk_finish, :update_express_info, :update_remark
+        get :check_result
       end
     end
     
@@ -635,4 +637,6 @@ OopsData::Application.routes.draw do
   match 'quillu/interviewer/materials', to: 'quillu#submit_material', :via => [:get, :post]
   match 'quillu/materials/:material_id/preview', to: 'quillu#preview_material', :via => [:get, :post]
   match 'quillu/materials/:material_id', to: 'quillu#show_material', :via => [:get, :post]
+
+  match 'esai/callback', to: 'esai#callback', :via => [:get, :post]
 end
