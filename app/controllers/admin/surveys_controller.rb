@@ -116,6 +116,12 @@ class Admin::SurveysController < Admin::AdminController
 
   # 推送渠道设置相关
 
+  def presurvey
+    @presurvey_schemes = []
+    @editing_rs = {}
+    @surveys = Survey.normal
+  end
+
   def sample_attributes
     render_json Survey.where(:_id => params[:id]).first do |survey|
       surveys_smp_attrs = survey.sample_attributes_for_promote.map { |e| e["sample_attribute_id"] }

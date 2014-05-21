@@ -326,7 +326,7 @@ OopsData::Application.routes.draw do
 
     resources :surveys, :as => :s do
       member do
-        get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info, :sample_attributes, :interviewer_task, :new_interviewer, :questions
+        get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info, :sample_attributes, :interviewer_task, :new_interviewer, :questions, :presurvey
         post :update_promote, :create_interviewer
         put :update_promote, :set_info, :bind_question, :star, :update_sample_attribute_for_promote, :update_amount
         delete :destroy_attributes, :bind_question, :remove_sample_attribute_for_promote
