@@ -335,6 +335,9 @@ OopsData::Application.routes.draw do
       collection do
 
       end
+
+      resources :pre_surveys do
+      end
     end
 
     resources :survey_tasks do
