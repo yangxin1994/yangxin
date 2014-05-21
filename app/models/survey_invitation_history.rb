@@ -2,6 +2,7 @@ class SurveyInvitationHistory
   
   include Mongoid::Document
   include Mongoid::Timestamps
+  field :email, :type => String
   field :type, :type => String
   # 0 for ongoing, 1 for finished
   belongs_to :user

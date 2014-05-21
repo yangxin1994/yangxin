@@ -6,6 +6,12 @@ class PreSurvey
   include Mongoid::Timestamps
   include FindTool
 
+  CLOSED = 1
+  OPEN = 2
+
+  EMAIL = 1
+  MOBILE = 2
+
   field :name, :type => String
   # 1 for closed, 2 for open
   field :status, :type => Integer, default: 1
