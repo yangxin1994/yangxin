@@ -11,7 +11,7 @@ class MailgunApi
     group_size = 900
     @group_emails = @emails.each_slice(group_size).to_a
     @survey = Survey.find_by_id(survey_id)
-    @reward_scheme = RewardScheme.find_by_id(@reward_scheme_id)
+    @reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
 
     @reward_type = @reward_scheme.rewards.length > 0 ? @reward_scheme.rewards[0]["type"] : nil
     if [RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::POINT].include? @reward_type
