@@ -7,7 +7,8 @@ class SmsApi # 短信接口
   attr_reader :phone_number, :message
 
   include HTTParty
-  base_uri 'http://sdkhttp.eucp.b2m.cn'
+# base_uri 'http://sdkhttp.eucp.b2m.cn'
+  base_uri 'http://219.239.91.112'
   format  :xml
 
   def initialize(phone_number, message)
@@ -73,7 +74,7 @@ class SmsApi # 短信接口
     puts phone
     puts message
     puts "AAAAAAAAAAAAAA"
-    return if Rails.env != "production"
+    return if Rails.env == "production"
     seqid = Random.rand(10000..9999999999999999).to_i
 
     result = get('/sdkproxy/sendsms.action',
@@ -195,12 +196,15 @@ class SmsApi # 短信接口
     self.send_sms(type,mobile, text)
   end
 
-  def self.charge_confirm_sms(mobile, callback, opt)
-    @gift_name = opt[:gift_name].to_s
+  def self.charge_confirm_sms(type, mobile, callback, opt)
+    puts "CCCCCCCCCCCCCCCC"
+    puts opt.inspect
+    puts "CCCCCCCCCCCCCCCC"
+    @gift_name = opt["gift_name"].to_s
     text_template_file_name = "#{Rails.root}/app/views/sms_text/charge_confirm_sms.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
     text = text_template.result(binding)
-    self.send_sms(mobile, text)
+    self.send_sms(type, mobile, text)
   end
 
   def self.send_massive_sms(mobile_list, sms_text)

@@ -4,7 +4,7 @@ class QuilluController < ApplicationController
   def login
     user = User.find_by_email(params[:user]["email_username"].to_s)
     render_json_e ErrorEnum::USER_NOT_EXIST and return if user.nil?
-    render_json_e ErrorEnum::WRONG_PASSWORD if user.password != Encryption.encrypt_password(params[:user]["password"].to_s)
+    render_json_e ErrorEnum::WRONG_PASSWORD and return if user.password != Encryption.encrypt_password(params[:user]["password"].to_s)
     user.update_attributes({auth_key: Encryption.encrypt_auth_key("#{user._id}&#{Time.now.to_i.to_s}"),
       auth_key_expire_time: params[:keep_signed_in] ? -1 : Time.now.to_i + OOPSDATA["login_keep_time"].to_i})
     retval = {
@@ -15,7 +15,7 @@ class QuilluController < ApplicationController
   end
 
   def list_tasks
-    retval = current_user.interviewer_tasks
+    retval = current_user.interviewer_tasks.map { |e| e.info_for_interviewer }
     render_json_auto retval and return
   end
 
@@ -90,11 +90,8 @@ class QuilluController < ApplicationController
       @material = Material.find_by_id(params[:material_id])
       respond_to do |format|
           format.html { 
-              if @material.material_type == 1
-                  url = @material.picture_url
-                  redirect_to(url.blank? ? '/assets/materials/no-image.png' : URI.encode(url.strip)) and return
-              end
-              return 
+              url = @material.picture_url
+              redirect_to(url.blank? ? '/assets/materials/no-image.png' : URI.encode(url.strip)) and return
           }
           format.json { render_json_auto @material and return }
       end

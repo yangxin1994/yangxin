@@ -12,6 +12,19 @@ module OrdersHelper
     result_str
   end
 
+  def esai_order_status_tag(status)
+    case status.to_i
+    when 3
+      "正在处理"
+    when 4
+      "已成功"
+    when 5
+      "已失败"
+    else
+      "无"
+    end
+  end
+
   def order_status_tag(status)
     
     case status.to_i

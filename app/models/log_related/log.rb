@@ -67,7 +67,22 @@ class Log
       new_log += '</div></li>'
       hash[:log] = new_log
       hash[:other_times] = times
-      FayeClient.send("/realogs/new", hash)
+      begin
+        FayeClient.send("/realogs/new", hash)
+      rescue
+        pid = %x(lsof -i:9393 | awk 'END{print $2}').gsub(/\n/,'').to_i
+
+        if pid > 0
+          puts "******************#{pid}***************"
+          %x(kill -9 `lsof -i:9393 | awk 'END{print $2}'`)
+        end
+
+        if File.exist?('./faye_server/tmp/pids/thin.9393.pid')
+          system("rm -rf ./faye_server/tmp/pids/* && ./faye start")
+        else
+          system("./faye start")
+        end
+      end
     end
   end
 

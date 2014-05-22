@@ -28,6 +28,12 @@ class Material
 
   def self.check_and_create_new(current_user, material)
     return ErrorEnum::WRONG_MATERIAL_TYPE unless [1, 2, 4, 8, 16, 32].include?(material["material_type"].to_i)
+    # video and audio
+    if material["material_type"].to_i != 1
+      material["value"] = material["value"].gsub('thumb_','').split('.').first
+    end 
+
+
     material_inst = Material.new(:material_type => material["material_type"].to_i,
       :value => material["value"],
       :title => material["title"],
