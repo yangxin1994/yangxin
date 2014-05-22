@@ -452,16 +452,4 @@ module ApplicationHelper
       return '已经完成'
     end
   end
-
-  def reward_name(reward_type)
-    case reward_type.to_i
-    when RewardScheme::MOBILE
-      return "手机话费"
-    when RewardScheme::JIFENBAO
-      return "集分宝"
-    when RewardScheme::ALIPAY
-      return "支付宝"
-    end
-  end
-
 end

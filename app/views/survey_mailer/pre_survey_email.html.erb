@@ -50,7 +50,7 @@
 					<% end %>
 					本调研还需回收<%= @survey.remain_quota_number %> 份答案。
 					<% if [RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO].include?(@reward_type) %>
-						参与本次调研即可获得 <span style="color:#ff6600;font-size:14px;">￥<%= @amount %></span> 元<%= reward_name(@reward_type) %>奖励，快来参与吧！
+						参与本次调研即可获得 <span style="color:#ff6600;font-size:14px;">￥<%= @amount %></span> 元<%= @reward_name %>奖励，快来参与吧！
 					<% end %>
 					<% if @reward_type == RewardScheme::POINT %>
 						参与本次调研即可获得 <span style="color:#ff6600;font-size:14px;"><%= @amount %></span> 积分！
