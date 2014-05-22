@@ -46,11 +46,10 @@ class PreSurveyWorker
       mobile_to_send = mobile_to_send - SurveyInvitationHistory.get_mobiles_sent(pre_survey.survey_id.to_s)
       MailgunApi.batch_send_survey_email(pre_survey.survey_id.to_s, email_to_send, "email")
 
-      SmsApi.invitation_sms(s_id, sample_id, "")
+      # SmsApi.invitation_sms(s_id, sample_id, "")
 
       email_to_send = []
       mobile_to_send = []
     end
-
   end
 end

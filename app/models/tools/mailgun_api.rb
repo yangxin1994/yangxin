@@ -11,18 +11,19 @@ class MailgunApi
     group_size = 900
     @group_emails = @emails.each_slice(group_size).to_a
     @survey = Survey.find_by_id(survey_id)
+    @reward_scheme_id = reward_scheme_id
     @reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
 
     @reward_type = @reward_scheme.rewards.length > 0 ? @reward_scheme.rewards[0]["type"] : nil
-		@reward_name = ""
-		case @reward_type
-		when RewardScheme::MOBILE
-			@reward_name = "手机话费"
-		when RewardScheme::JIFENBAO
-			@reward_name = "集分宝"
-		when RewardScheme::ALIPAY
-			@reward_name = "支付宝"
-		end
+    @reward_name = ""
+    case @reward_type
+    when RewardScheme::MOBILE
+      @reward_name = "手机话费"
+    when RewardScheme::JIFENBAO
+      @reward_name = "集分宝"
+    when RewardScheme::ALIPAY
+      @reward_name = "支付宝"
+    end
     if [RewardScheme::MOBILE, RewardScheme::ALIPAY, RewardScheme::JIFENBAO, RewardScheme::POINT].include? @reward_type
       amount = @reward_scheme.rewards[0]["amount"]
       @amount = @reward == RewardScheme::JIFENBAO ? amount / 100 : amount
