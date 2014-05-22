@@ -18,6 +18,7 @@ class PreSurvey
   field :publish, :type => Hash, default: { }
   field :conditions, :type => Array, default: [ ]
   field :last_scan_time, :type => Integer, default: 0
+  field :reward_scheme_id, :type => String
 
   belongs_to :survey
 
