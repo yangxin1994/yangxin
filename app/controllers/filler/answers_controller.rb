@@ -10,9 +10,9 @@ class Filler::AnswersController < Filler::FillerController
     end
 
     survey = Survey.normal.find_by_id(params[:survey_id])
-    render_json_e ErrorEnum::MAX_NUM_PER_IP_REACHED and return if !params[:is_preview] && survey.max_num_per_ip_reached?(request.remote_ip)
     answer = Answer.find_by_survey_id_sample_id_is_preview(params[:survey_id], current_user.try(:_id), params[:is_preview] || false)
     render_json_s(answer._id.to_s) and return if !answer.nil?
+    render_json_e ErrorEnum::MAX_NUM_PER_IP_REACHED and return if !params[:is_preview] && survey.max_num_per_ip_reached?(request.remote_ip)
     retval = survey.check_password(params[:username], params[:password], params[:is_preview] || false)
     render_json_e ErrorEnum::WRONG_SURVEY_PASSWORD and return if retval != true
     answer = { is_preview: params[:is_preview] || false,

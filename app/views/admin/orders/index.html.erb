@@ -66,6 +66,7 @@
   <span>
     <form class="form-search" style="display:inline">
     <div class="input-append">
+      <input class="span6" name="type" id="" type="hidden" value="<%= params[:type] =%>">
       <input class="span6 search-query" name="keyword" id="" type="text" placeholder="邮箱,电话或者订单号">
       <button class="btn">搜索</button>
     </div>    
@@ -116,7 +117,8 @@
         <li><a class="querilayer" href="?date=365">一年内</a></li>             
         <li><a href="javascript:;" id="date_btn">自定义</a></li>             
       </ul>
-    </div>    
+      <a class="btn" href="/admin/orders/recharge_fail_mobile">失败易赛订单再充值</a>
+    </div>
   </span>
 </div>
 
@@ -128,9 +130,10 @@
       <td width="8%">数量</td>
       <td width="8%">用户</td>
       <td><%= order_label(params["type"]) %></td>
-      <td width="15%">创建时间</td>
-      <td width="15%"><%= order_time_label(params["status"]) %></td>
+      <td width="10%">创建时间</td>
+      <td width="10%"><%= order_time_label(params["status"]) %></td>
       <td width="15%">操作</td>
+      <td width="10%">易赛状态</td>
     </tr>
   </thead>
   <tbody>
@@ -139,7 +142,11 @@
       <td><%= order['gift_name'] || order['prize_name'] %></td>
       <td><%= order['amount'] %></td>
       <td><a href="/admin/samples/<%= order['user_id'] %>"><%= order['user_email_mobile'] %></a></td>
-      <td title="订单号: <%= order['code'] %>" data-content="<%= order['address_str'] %>" class="o-detail"><%= "#{order['mobile']} #{order['qq']} #{order['email']} #{ "支付宝: " + order['alipay_account'] if order['alipay_account'].present? }" %></td>
+      <% if order.esai_order_id.present? %>
+        <td title="订单号: <%= order['code'] %>; 易赛订单号: <%= order.esai_order_id %>" data-content="<%= order['address_str'] %>" class="o-detail"><%= "#{order['mobile']} #{order['qq']} #{order['email']} #{ "支付宝: " + order['alipay_account'] if order['alipay_account'].present? }" %></td>
+      <% else %>
+        <td title="订单号: <%= order['code'] %>" data-content="<%= order['address_str'] %>" class="o-detail"><%= "#{order['mobile']} #{order['qq']} #{order['email']} #{ "支付宝: " + order['alipay_account'] if order['alipay_account'].present? }" %></td>
+      <% end %>
       <td><%= order.created_at.strftime("%F<br />%T").html_safe %></td>
       <td class="o-time" title="订单处理详细" data-content="<%= order['time_str'] %>"><%= Time.at(order['canceled_at'] || order['finished_at'] || order['handled_at'] || order['created_at'].to_i).strftime("%F<br />%T").html_safe %></td>
       <td>
@@ -171,6 +178,12 @@
             <li><a href="#remark-<%= order['_id'] %>" id="remark_<%= order['_id'] %>" class="remark" data-remark="<%= order['remark'] %>">备注及其它</a></li>
           </ul>
         </div>
+      </td>
+      <td>
+        <span><%= esai_order_status_tag(order.esai_status) %></span>
+        <% if order.esai_status == Order::ESAI_HANDLE %>
+          <a class="refresh_esai" href="javascript:void()", data-id="<%= order.id.to_s %>">刷新</a>
+        <% end %>
       </td>
     </tr>
     <% end -%>

@@ -46,7 +46,7 @@
 	<% end %>
 	<div class='sf_banner_top'>
 		<div class='inner'>
-      <% if @survey['_id'].to_s == '530ecc12eb0e5be18500001a' %>
+      <% if ["530ecc12eb0e5be18500001a", "5372c7f6eb0e5b41fc000003"].include?(@survey['_id'].to_s) %>
       <a id='logo' href="http://netranking.cn">
         <img src="/assets/filler/default/logo-nr.png" />
       </a>

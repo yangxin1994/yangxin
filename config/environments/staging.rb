@@ -138,4 +138,8 @@ OopsData::Application.configure do
   config.ofcard_key_str = "OFCARD"
   config.ret_url = "http://staging.wenjuanba.com/orders/confirm"
   config.diaoyan = 'http://staging.diaoyan.me'
+
+  # esai uri
+  config.esai_service_uri = "http://www.esaipai.com/IF/EIFPHONE/"
+
 end

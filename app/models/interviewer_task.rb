@@ -117,10 +117,8 @@ class InterviewerTask
         :finished_at => a["finished_at"].to_i,
         :answer_content => a["answer_content"],
         :attachments => a["attachments"],
-        # :latitude => a["location"][0].to_s,
-        # :longitude => a["location"][1].to_s,
-        :latitude => "39.910477",
-        :longitude => "116.42748",
+        :latitude => a["location"][0].to_s,
+        :longitude => a["location"][1].to_s,
         :status => status,
         :reject_type => a["reject_type"].to_i,
         :region => region}
@@ -141,4 +139,10 @@ class InterviewerTask
     self.write_attribute(:interviewer, self.user.nickname)
     return self
   end
+
+	def info_for_interviewer
+		self.quota["amount"] = self.quota["rules"][0]["amount"]
+    self.write_attribute(:create_time, self.created_at.to_i)
+		return self
+	end
 end

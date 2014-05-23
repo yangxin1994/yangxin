@@ -451,6 +451,5 @@ module ApplicationHelper
     when 2
       return '已经完成'
     end
-  end 
-
+  end
 end

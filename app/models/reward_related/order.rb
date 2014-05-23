@@ -15,6 +15,11 @@ class Order
   FROZEN = 32
   REJECT = 64
 
+  # esai status
+  ESAI_HANDLE = 3
+  ESAI_SUCCESS = 4
+  ESAI_FAIL = 5
+
   # type
   VIRTUAL = 1
   REAL = 2
@@ -52,7 +57,9 @@ class Order
   field :finished_at, :type => Integer
   field :canceled_at, :type => Integer
   field :rejected_at, :type => Integer
-  field :ofcard_order_id, :type => String, :default => ""
+  field :esai_order_id, :type => String, :default => ""
+  # 3 for handling, 4 for success, 5 for fail
+  field :esai_status, :type => Integer
   field :point, :type => Integer, :default => 0
 
   belongs_to :prize
@@ -65,7 +72,7 @@ class Order
   index({ status: 1 }, { background: true } )
   index({ source: 1 }, { background: true } )
   index({ amount: 1 }, { background: true } )
-  index({ type: 1, status: 1 ,ofcard_order_id: 1}, { background: true } )
+  index({ type: 1, status: 1, esai_order_id: 1}, { background: true } )
 
   #attr_accessible :mobile, :alipay_account, :qq, :sample_name, :address, :postcode
 
@@ -221,13 +228,39 @@ class Order
 
   def auto_handle
     return false if self.status != WAIT
-    return false if ![MOBILE_CHARGE, QQ_COIN].include?(self.type)
-    case self.type
-    when MOBILE_CHARGE
-      # ChargeClient.new.mobile_charge(self.mobile, self.amount, self._id.to_s)
-    when QQ_COIN
-      # ChargeClient.new.qq_charge(self.qq, self.amount, self._id.to_s)
+    return false if self.type != MOBILE_CHARGE
+    # retval = EsaiApi.new.charge_phone(self.mobile, self.amount, "None")
+    self.status = HANDLE
+    self.esai_status = ESAI_HANDLE
+    self.handled_at = Time.now
+    self.save
+    ChargeWorker.perform_async(self.id.to_s, self.mobile, self.amount)
+  end
+
+  def self.recharge_fail_mobile
+    Order.where(esai_status: ESAI_FAIL, status: HANDLE, type: MOBILE_CHARGE).each do |order|
+      order.update_attributes(status: WAIT)
+      order.auto_handle
     end
+  end
+
+  def check_result
+    return nil if self.esai_order_id.blank?
+    retval = EsaiApi.new.check_result(self.esai_order_id, "None")
+    case retval
+    when 0, 1, 2
+      self.update_attributes({status: HANDLE, esai_status: ESAI_HANDLE})
+    when 4
+      self.update_attributes({status: SUCCESS, esai_status: ESAI_SUCCESS})
+      self.send_mobile_charge_success_message
+    when 5
+      self.update_attributes({status: HANDLE, esai_status: ESAI_FAIL})
+    end
+    return self.esai_status
+  end
+
+  def send_mobile_charge_success_message
+    SmsWorker.perform_async("charge_notification", self.mobile, "", gift_name: "#{self.amount}元话费")
   end
 
   def manu_handle
@@ -255,6 +288,7 @@ class Order
     options[:status] = options[:status].to_i
     options[:source] = options[:source].to_i
     options[:type] = options[:type].to_i
+    options.delete(:type) if options[:type] == 0
     if options[:email].present?
       orders = User.find_by_email(options[:email]).try(:orders)
       orders = orders.nil? ? [] : orders.desc(:created_at)

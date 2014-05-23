@@ -11,29 +11,41 @@
         <%= choice %> 
       </li>
       <% end -%>
+      <p>-----------</p>
       <% if question["rows"].present? %>
-        <p>-----------</p>
         <% question["rows"].each_with_index do |row, i| %>
           <li>
             <%= "#{row} : #{question["rows_selected_choices"][i][0]}" %>
           </li>
         <% end %>
-      <% else %>
-        <% if question["selected_choices"].present? %>
-          <p>-----------</p>
-        <%- end %>
+      <% elsif question["selected_choices"].present? %>
         <% question["selected_choices"].try('each') do |choice| %>
         <li>
           <%= choice %>
         </li>
         <% end -%>
-        <p>
-          <%= question["content"] %>
-          <%= question["address"] %>
-          <%= question["detail"] %>
-          <%= question["postcode"] %>
-        </p>
+      <% elsif question["selected_labels"].present? %>
+				<% question["selected_labels"].try('each_with_index') do |label, index| %>
+					<li>
+						<%= question["choices"][index] + ": " + label %>
+					</li>
+				<% end %>
+			<% elsif question["question_type"] == QuestionTypeEnum::SORT_QUESTION %>
+				<%= question["items"].map { |e| e["title"] } .join(', ')  %>
+			<% elsif question["question_type"] == QuestionTypeEnum::CONST_SUM_QUESTION %>
+				<% question["items"].try('each') do |item| %>
+					<li>
+						<%= item["title"] + ": " + item["content"].to_s %>
+					</li>
+				<% end %>
       <% end %>
+			<p>
+				<%= question["content"] %>
+				<%= question["address"] %>
+				<%= question["detail"] %>
+				<%= question["postcode"] %>
+			</p>
+
     </ul>
   </div>
 <% end -%>
