@@ -125,14 +125,19 @@ class Admin::SurveysController < Admin::AdminController
   def prequestions
     questions = []
     surveys = Survey.where(:_id.in => params[:survey_ids].split('|'))
-    stype = (params["stype"]||"0").split('|').map { |e| e.to_i }
-    questions = surveys.map do |survey|
+    # stype = (params["stype"]||"0").split('|').map { |e| e.to_i }
+    stype = [4, 6]
+    email_questions = surveys.map do |survey|
+      survey.all_questions.select{|question| stype.include? question["question_type"]}
+    end.flatten
+    stype = [0]
+    choice_questions = surveys.map do |survey|
       survey.all_questions.select{|question| stype.include? question["question_type"]}
     end.flatten
     render_json true do 
-
       {
-        questions: questions
+        email_questions: email_questions,
+        choice_questions: choice_questions
       }
     end
   end
