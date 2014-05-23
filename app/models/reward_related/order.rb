@@ -235,14 +235,6 @@ class Order
     self.handled_at = Time.now
     self.save
     ChargeWorker.perform_async(self.id.to_s, self.mobile, self.amount)
-=begin
-    if retval.nil?
-      self.esai_status = ESAI_FAIL
-    else
-      self.esai_status = ESAI_HANDLE
-      self.esai_order_id = retval
-    end
-=end
   end
 
   def self.recharge_fail_mobile
