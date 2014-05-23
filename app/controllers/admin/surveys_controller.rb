@@ -122,6 +122,21 @@ class Admin::SurveysController < Admin::AdminController
     @surveys = Survey.normal
   end
 
+  def prequestions
+    questions = []
+    surveys = Survey.where(:_id.in => params[:survey_ids].split('|'))
+    stype = (params["stype"]||"0").split('|').map { |e| e.to_i }
+    questions = surveys.map do |survey|
+      survey.all_questions.select{|question| stype.include? question["question_type"]}
+    end.flatten
+    render_json true do 
+
+      {
+        questions: questions
+      }
+    end
+  end
+
   def sample_attributes
     render_json Survey.where(:_id => params[:id]).first do |survey|
       surveys_smp_attrs = survey.sample_attributes_for_promote.map { |e| e["sample_attribute_id"] }

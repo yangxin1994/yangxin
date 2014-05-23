@@ -93,12 +93,7 @@ class Modelinker
       @callback_queue["#{_mid}"] = options.callback
       @set_obj(options.linker, _mid)
       """
-      <#{options.type} 
-        id="#{options.id}" 
-        class="#{@klass} #{options.klass}"
-        data-mid="#{_mid}"
-        #{value_tag}
-        data-linker="#{options.linker}"#{_html_attr}>#{options.html}#{_select_options_tag}#{end_tag}
+      <#{options.type} id="#{options.id}" class="#{@klass} #{options.klass}" data-mid="#{_mid}"#{value_tag}data-linker="#{options.linker}"#{_html_attr}>#{options.html}#{_select_options_tag}#{end_tag}
       """
     else
       ""

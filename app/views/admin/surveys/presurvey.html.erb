@@ -89,25 +89,19 @@
   <div class="control-group">
     <label class="control-label" >请选择要添加的问卷:</label>
     <div class="controls">
-      <div>
-        <select id="e1">
-          <% @surveys.each do |survey| %>
-            <option value="<%= survey._id %>"><%= survey.title %></option>
-          <% end %>
-        </select>
-        <input type="hidden" name="presurvey_scheme[is_free]" id="ipt_free"/>        
-      </div>
+      <select id="survey_selector">
+        <% @surveys.each do |survey| %>
+          <option value="<%= survey._id %>"><%= survey.title %></option>
+        <% end %>
+      </select>
     </div>
   </div>
   <div class="control-group">
     <label class="control-label" >已选择的问卷:</label>
     <div class="controls">
       <div>
-        <ul>
-          <li>问卷 <a href="#">移除</a></li>
-          <li>问卷 <a href="#">移除</a></li>
-          <li>问卷 <a href="#">移除</a></li>
-          <li>问卷 <a href="#">移除</a></li>
+        <ul id="survey_list">
+
         </ul>
         <input type="hidden" name="presurvey_scheme[is_free]" id="ipt_free"/>        
       </div>
@@ -115,9 +109,19 @@
   </div>
   <div class="control-group">
     <label class="control-label" >请设定问题:</label>
-    <div class="controls">
+    <div class="controls" id="quesiton_pannel">
       <div>
-        <span>
+        <div class="well">
+          <div>
+            <div class="question_placeholder"></div>
+            <select id="question_selector_0" class="question_selector">
+              <% @surveys.each do |survey| %>
+                <option value="<%= survey._id %>"><%= survey.title %></option>
+              <% end %>
+            </select>
+          </div>
+        </div>
+        <div class="well">
           <p>1. 这里是一个问题 </p>
           <label class="checkbox">
             <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 1 
@@ -130,9 +134,35 @@
           </label>
           <label class="checkbox">
             <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox"><i>模糊匹配</i>
-          </label>             
-        </span>
-        <span>
+          </label>
+          <p>2. 这里是一个问题 </p>
+          <label class="checkbox">
+            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 1 
+          </label>
+          <label class="checkbox">
+            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 2
+          </label>
+          <label class="checkbox">
+            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 3
+          </label>
+          <label class="checkbox">
+            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox"><i>模糊匹配</i>
+          </label> 
+          <p>3. 这里是一个问题 </p>
+          <label class="checkbox">
+            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 1 
+          </label>
+          <label class="checkbox">
+            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 2
+          </label>
+          <label class="checkbox">
+            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 3
+          </label>
+          <label class="checkbox">
+            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox"><i>模糊匹配</i>
+          </label>                               
+        </div>
+        <div class="well">
           <p>2. 这里是一个问题 </p>
           <label class="checkbox">
             <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 1 
@@ -146,8 +176,21 @@
           <label class="checkbox">
             <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox"><i>模糊匹配</i>
           </label>             
-        </span>
-        <span>
+        </div>
+        <div class="well">
+          <p>1. 这里是一个问题 </p>
+          <label class="checkbox">
+            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 1 
+          </label>
+          <label class="checkbox">
+            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 2
+          </label>
+          <label class="checkbox">
+            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 3
+          </label>
+          <label class="checkbox">
+            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox"><i>模糊匹配</i>
+          </label> 
           <p>2. 这里是一个问题 </p>
           <label class="checkbox">
             <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 1 
@@ -160,38 +203,8 @@
           </label>
           <label class="checkbox">
             <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox"><i>模糊匹配</i>
-          </label>             
-        </span>
-        <span>
-          <p>2. 这里是一个问题 </p>
-          <label class="checkbox">
-            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 1 
-          </label>
-          <label class="checkbox">
-            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 2
-          </label>
-          <label class="checkbox">
-            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 3
-          </label>
-          <label class="checkbox">
-            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox"><i>模糊匹配</i>
-          </label>             
-        </span>
-        <span>
-          <p>2. 这里是一个问题 </p>
-          <label class="checkbox">
-            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 1 
-          </label>
-          <label class="checkbox">
-            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 2
-          </label>
-          <label class="checkbox">
-            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox">答案 3
-          </label>
-          <label class="checkbox">
-            <input id="1914171187672764" class="modelinker " data-mid="1914171187672764" value="0" data-linker="attr.522884c0eb0e5b0845000004.ary_0" type="checkbox"><i>模糊匹配</i>
-          </label>             
-        </span>                
+          </label>                       
+        </div>        
         <input type="hidden" name="presurvey_scheme[is_free]" id="ipt_free"/>        
       </div>
     </div>
