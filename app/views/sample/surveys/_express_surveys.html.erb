@@ -74,6 +74,12 @@
       </span>
       <% if survey['quillme_promote_reward_type'].to_i == 8 %>
         <ul class="reward_list" style="display:none;">
+
+
+
+
+
+
           <% survey['reward_type_info']['prize_arr'].each_with_index do |prize_info,index| %>
             <li id="<%= survey['_id'].to_s + prize_info['prize_id'].to_s %>">
               <a href="#<%= prize_info['prize_id'].to_s + survey['_id'].to_s %>" class="pop" rel="survey_<%= survey['_id'].to_s + ids %>" data="<%= prize_info['prize_id'].to_s %>" index="<%= index %>" >
@@ -84,6 +90,10 @@
                 </div>
               </a>
             </li>
+
+
+
+
             <div id="<%= prize_info['prize_id'].to_s + survey['_id'].to_s %>" style="display:none;" class="pri1">
               <div class="prize_info">
                 <div class="detail">
@@ -117,3 +127,5 @@
     </li>
   <% end %>
 <% end %>
+
+
