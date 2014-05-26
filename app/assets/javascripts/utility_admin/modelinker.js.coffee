@@ -41,7 +41,7 @@ class Modelinker
     linker = linker.split('.')
     last_linker = @data
     for l, i in linker
-      last_linker["#{l}"] ||= {}      
+      last_linker["#{l}"] ||= {} 
       if i == linker.length - 1
         last_linker["#{l}"] = mid
       else
@@ -119,6 +119,16 @@ class Modelinker
     _ret
   
   get: (linker = "") ->
+    _linker = linker.split('.')
+    last_linker = @data
+    for key in _linker
+      last_linker = last_linker["#{key}"]
+    if typeof(last_linker) == "string"
+      @queue["#{last_linker}"]
+    else
+      @get_obj(last_linker)
+
+  delete: (linker = "")->
     _linker = linker.split('.')
     last_linker = @data
     for key in _linker
