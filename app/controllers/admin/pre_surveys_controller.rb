@@ -5,18 +5,17 @@ class Admin::PreSurveysController < Admin::AdminController
 
   def index
     survey = Survey.find(params[:_id])
-    binding.pry
     @presurvey_schemes = survey.pre_surveys
-    @editing_rs = {}
+    @editing_ps = PreSurvey.where(:_id => params[:editing]).first || {}
+    gon.push({
+      :editing => @editing_ps
+      })
     @surveys = Survey.normal
   end
 
   def create
     survey = Survey.find(params[:_id])
-    params[:pre_survey][:conditions] = params[:pre_survey][:conditions].map do |k, v| 
-      v["fuzzy"] = v["fuzzy"] == "true"
-      v
-    end
+    format_params
     @pre_survey = PreSurvey.create(params[:pre_survey])
     @pre_survey.survey = survey
     render_json @pre_survey.save
@@ -30,7 +29,17 @@ class Admin::PreSurveysController < Admin::AdminController
 
   def update
     pre_survey = PreSurvey.find(params[:id])
-    pre_survey.update(params[:pre_survey])
+    format_params
+    render_json pre_survey.update_attributes(params[:pre_survey])
+  end
+
+  def format_params
+    params[:pre_survey][:conditions] = params[:pre_survey][:conditions].map do |k, v| 
+      v.map do |k, v|
+        v["fuzzy"] = v["fuzzy"] == "fuzzy"
+        v
+      end
+    end
   end
 
   def questions

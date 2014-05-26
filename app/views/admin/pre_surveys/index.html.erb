@@ -54,7 +54,7 @@
   </ul>
 </div>
 
-<legend>奖励方案设置</legend>
+<legend>预调研方案设置</legend>
 
 <form action="/admin/presurvey_schemes<%= "/#{params[:editing]}" if params[:editing] %>"
       name="survey"
@@ -63,26 +63,11 @@
       id="survey_form"
       class="form-horizontal"
 >
-  <input value="<%= params[:editing] ? 'put' : 'post' %>" type='hidden' name="_method">
-  <input value="<%= params[:id] %>" type='hidden' name="presurvey_scheme[survey_id]">
-  <input value="<%= params[:editing] %>" type='hidden' name="presurvey_scheme[id]">
-  <input value="<%=
-    if @editing_rs["prizes"].present?
-      "prize"
-    elsif @editing_rs["point"].present? && @editing_rs["point"].to_s != '0'
-      "point"
-    elsif !@editing_rs["rewards"].present?
-      "free"
-    else
-      "cash"
-    end
-  -%>" type='hidden' id="reward_type" name="presurvey_scheme[type]">
-
 
   <div class="control-group">
     <label class="control-label" >预调研方案名称:</label>
     <div class="controls">
-      <input type="text" name="presurvey_scheme[name]" class="input-large" placeholder="名称" value="<%= @editing_rs["name"] %>">
+      <input type="text" name="presurvey_scheme[name]" class="input-large" placeholder="名称" value="<%= @editing_ps["name"] %>">
     </div>
   </div>   
 
