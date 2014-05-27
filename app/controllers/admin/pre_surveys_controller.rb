@@ -5,8 +5,9 @@ class Admin::PreSurveysController < Admin::AdminController
 
   def index
     survey = Survey.find(params[:_id])
-    @presurvey_schemes = survey.pre_surveys
+    @presurvey_schemes = survey.pre_surveys || []
     @editing_ps = PreSurvey.where(:_id => params[:editing]).first || {}
+    @reward_schemes = survey.reward_schemes.not_default
     gon.push({
       :editing => @editing_ps
       })
@@ -22,9 +23,9 @@ class Admin::PreSurveysController < Admin::AdminController
   end
 
   def destroy
-    pre_survey = PreSurvey.find(params[:id])
-    pre_survey.destroy
-    redirect_to action: :index
+    render_json pre_survey = PreSurvey.find(params[:id]) do
+      pre_survey.destroy
+    end
   end
 
   def update

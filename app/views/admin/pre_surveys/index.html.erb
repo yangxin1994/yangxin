@@ -13,31 +13,31 @@
       </a>
     </li>
     <li>
-      <a href="/admin/surveys/<%= params[:id]%>">
+      <a href="/admin/surveys/<%= params[:_id]%>">
         <i class="icon-chevron-right"></i>
         基本信息
       </a>
     </li>
     <li>
-      <a href="/admin/surveys/<%= params[:id]%>">
+      <a href="/admin/surveys/<%= params[:_id]%>">
         <i class="icon-chevron-right"></i>
         问卷查看
       </a>
     </li>
     <li>
-      <a href="/admin/surveys/<%= params[:id]%>/presurvey_schemes">
+      <a href="/admin/surveys/<%= params[:_id]%>/reward_schemes">
         <i class="icon-chevron-right"></i>
         奖励方案
       </a>
     </li>    
     <li class="active">
-      <a href="/admin/surveys/<%= params[:id]%>/presurvey">
+      <a href="/admin/surveys/<%= params[:_id]%>/presurvey">
         <i class="icon-chevron-right"></i>
         预调研
       </a>
     </li>
     <li>
-      <a href="/admin/surveys/<%= params[:id]%>/interviewer_task">
+      <a href="/admin/surveys/<%= params[:_id]%>/interviewer_task">
         <i class="icon-chevron-right"></i>
         访问员设置
       </a>
@@ -67,9 +67,31 @@
   <div class="control-group">
     <label class="control-label" >预调研方案名称:</label>
     <div class="controls">
-      <input type="text" name="presurvey_scheme[name]" class="input-large" placeholder="名称" value="<%= @editing_ps["name"] %>">
+      <input type="text" name="pre_survey[name]" class="input-large" id="pres_name" placeholder="名称" value="<%= @editing_ps["name"] %>">
     </div>
   </div>   
+
+  <div class="control-group">
+    <label class="control-label" >是否处于发布状态:</label>
+    <div class="controls">
+      <label class="checkbox">
+        <input id="pres_status" class="modelinker " type="checkbox" <%= @editing_ps["status"].to_i == 2 ? "checked" : "" %>>(勾选则发布)
+      </label>      
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >奖励方案设置:</label>
+    <div class="controls">
+      <div>
+      <select id="rs_selector">
+        <% @reward_schemes.each do |reward_scheme| %>
+          <option value="<%= reward_scheme._id %>"><%= reward_scheme.name %></option>
+        <% end %>
+      </select>        
+      </div>
+    </div>
+  </div>  
 
   <div class="control-group">
     <label class="control-label" >请选择要添加的问卷:</label>
@@ -81,6 +103,7 @@
       </select>
     </div>
   </div>
+
   <div class="control-group">
     <label class="control-label" >已选择的问卷:</label>
     <div class="controls">
@@ -92,6 +115,7 @@
       </div>
     </div>
   </div>
+
   <div class="control-group">
     <label class="control-label" >请设定问题:</label>
     <div class="controls">
@@ -105,6 +129,7 @@
   <div class="control-group">
     <div class="controls">
       <a class="btn btn-primary btn-save" href="javascript:void(0);">保存</a>
+      <a class="btn-delete" href="javascript:void(0);">删除</a>
     </div>
   </div>
 </form>

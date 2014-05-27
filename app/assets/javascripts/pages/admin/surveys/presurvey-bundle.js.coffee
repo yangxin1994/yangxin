@@ -13,8 +13,10 @@ survey_helper = (survey)->
       type: "input"
       value: question._id
       linker: "surveys.#{question._id}"
+      klass: ""
       html_attr:
         type: "checkbox"
+        "data-type": if survey.question_type == 4 then 1 else 2
     question_html += """
       <label class="checkbox inline">
         #{inner_html}#{question.content.text}
@@ -23,7 +25,7 @@ survey_helper = (survey)->
 
   wrapper = """
   <span class="survey_#{survey._id}">
-    <li>#{survey.title}<a href="javascript:void(0);" class="survey_remove" data-survey_id="#{survey._id}">移除</a></li>
+    <li>#{survey.title}<a href="javascript:void(0);" class="survey_remove" data-survey_id="#{survey._id}"><i class="icon-remove"></i></a></li>
       <label class="checkbox">
         #{question_html}
       </label>
@@ -66,7 +68,7 @@ question_selector_helper = ()->
 question_helper = (question, survey_id, condition_id)->
   questions_html = """
   <div class="question_items survey_#{survey_id}"><p>
-    #{question.content.text}<a href="javascript:void(0);" class="question_remove" data-survey_id="#{question._id}">移除</a>
+    #{question.content.text}<a href="javascript:void(0);" class="question_remove" data-survey_id="#{question._id}"><i class="icon-remove"></i></a>
   </p>
   """
   for item in question.issue.items
@@ -117,7 +119,9 @@ refresh_question_selectors = () ->
   for question_panel in $(".condition")
     $(question_panel).append(question_selector_helper())
     # $("#question_selector_#{$('.question_selector').length - 1}").select2()
-  $(".question_selector").select2()
+  $(".question_selector").select2(
+    width:"element"
+    )
 
 remove_survey = (survey_id) ->
   $(".survey_#{survey_id}").remove()
@@ -131,7 +135,9 @@ save = () ->
 
 $(()->
   # initialize
-  $("#survey_selector").select2()
+  $("#survey_selector").select2(
+    width:"element"
+    )
 
   # events
 
@@ -205,13 +211,13 @@ $(()->
       async: false
       data:
         pre_survey:
-          name: ""
-          status: 1
+          name: $("#pres_name").val()
+          status: if $("#pres_status").prop("checked") then 2 else 1
           publish: 
             type: 1
             survey_id: ""
             question_id: ""
-          reward_scheme_id: ""
+          reward_scheme_id: $("#rs_selector").val()
           conditions: conditions
       success: (ret)->
         if ret.success
@@ -225,15 +231,37 @@ $(()->
 
   $(document).on "click", ".survey_remove", ->
     survey_id = $(this).data("survey_id")
-    # confirm "确定删除吗?", ->
-    remove_survey(survey_id) 
+    if confirm("问卷移除之后，条件设置中有关该问卷的问题都会被删除掉，确定移除问卷吗?")
+      remove_survey(survey_id)
+
+  $(document).on "click", ".question_remove", ->
+    question_id = $(this).data("question_id")
+    if confirm("确定移除该问题吗?")
+      remove_survey(survey_id) 
+
+  $(".btn-delete").click ->
+    if confirm("确定删除该方案吗?")
+      console.log gon.editing._id
+      $.ajax
+        method: "DELETE"
+        url: "pre_surveys/#{gon.editing._id}"
+        async: false
+        success: (ret)->
+          if ret.success
+            alert_msg.show('save', "删除成功！")
+            document.location = location.pathname
+          else
+            alert_msg.show('error', "系统繁忙请稍后再试 (╯‵□′)╯︵┻━┻")
+
+        error: ->
+          alert_msg.show('error', "系统繁忙请稍后再试 (╯‵□′)╯︵┻━┻")
 
   # restate
   do ->
     console.log "恢复状态"
     surveys_id = []
     i = 0
-    return unless gon.editing
+    return true unless gon.editing
     for condition in gon.editing.conditions
       $(".btn-add_condition").click()
       for question in condition
@@ -254,6 +282,8 @@ $(()->
             $(item).click() if item.value == "fuzzy" && question.fuzzy
 
       i += 1
+    $("#rs_selector").val(gon.editing.reward_scheme_id)
+
 
 
 )
