@@ -101,6 +101,7 @@ class User
   has_many :logs
   has_one  :affiliated, :class_name => "Affiliated", :inverse_of => :user
   has_many :banners, class_name: "Banner", inverse_of: :user
+  has_many :movie_activities
 
   scope :sample, mod(:user_role => [2, 1])
 
