@@ -31,11 +31,12 @@ class Admin::PreSurveysController < Admin::AdminController
   def update
     pre_survey = PreSurvey.find(params[:id])
     format_params
+    binding.pry
     render_json pre_survey.update_attributes(params[:pre_survey])
   end
 
   def format_params
-    params[:pre_survey][:conditions] = params[:pre_survey][:conditions].map do |k, v| 
+    params[:pre_survey][:conditions] = (params[:pre_survey][:conditions] || []).map do |k, v| 
       v.map do |k, v|
         v["fuzzy"] = v["fuzzy"] == "fuzzy"
         v

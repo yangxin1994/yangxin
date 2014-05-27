@@ -13,7 +13,7 @@ survey_helper = (survey)->
       type: "input"
       value: question._id
       linker: "surveys.#{question._id}"
-      klass: ""
+      klass: "publish_ipt"
       html_attr:
         type: "checkbox"
         "data-type": if survey.question_type == 4 then 1 else 2
@@ -67,7 +67,7 @@ question_selector_helper = ()->
 
 question_helper = (question, survey_id, condition_id)->
   questions_html = """
-  <div class="question_items survey_#{survey_id}"><p>
+  <div data-linker="conditions.#{condition_id}.#{question._id}" class="question_items survey_#{survey_id}"><p>
     #{question.content.text}<a href="javascript:void(0);" class="question_remove" data-survey_id="#{question._id}"><i class="icon-remove"></i></a>
   </p>
   """
@@ -124,12 +124,17 @@ refresh_question_selectors = () ->
     )
 
 remove_survey = (survey_id) ->
-  $(".survey_#{survey_id}").remove()
   delete presurveys[survey_id]
+  for _linker in $(".survey_#{survey_id}")
+    remove_question $(_linker)
+  $(".survey_#{survey_id}").remove()
   refresh_question_selectors()
 
-remove_question = () ->
-  ""
+remove_question = ($question) ->
+  modelinker.remove $question.data("linker")
+  console.log $question.data("linker")
+  $question.remove()
+  
 
 save = () ->
 
@@ -203,8 +208,19 @@ $(()->
       conditions[i] = cdt.clone()
       i += 1
 
-    console.log conditions
     editing_id = gon.editing._id
+    $select_publish = undefined
+    for publish_ipt in $(".publish_ipt")
+      if $(publish_ipt).prop("checked")
+        $select_publish = $(publish_ipt)
+
+    if $select_publish
+      select_publish = 
+        type: $select_publish.data("type")
+        survey_id: $select_publish.data("linker").split(".")[1]
+        question_id: $select_publish.val()
+    else
+      select_publish = {}
     $.ajax
       method: if editing_id then "PUT" else "POST"
       url: if editing_id then "pre_surveys/#{editing_id}" else "pre_surveys"
@@ -213,10 +229,8 @@ $(()->
         pre_survey:
           name: $("#pres_name").val()
           status: if $("#pres_status").prop("checked") then 2 else 1
-          publish: 
-            type: 1
-            survey_id: ""
-            question_id: ""
+          publish:
+            select_publish
           reward_scheme_id: $("#rs_selector").val()
           conditions: conditions
       success: (ret)->
@@ -235,9 +249,9 @@ $(()->
       remove_survey(survey_id)
 
   $(document).on "click", ".question_remove", ->
-    question_id = $(this).data("question_id")
     if confirm("确定移除该问题吗?")
-      remove_survey(survey_id) 
+      $question = $(this).closest("div.question_items")
+      remove_question($question)
 
   $(".btn-delete").click ->
     if confirm("确定删除该方案吗?")
@@ -255,6 +269,11 @@ $(()->
 
         error: ->
           alert_msg.show('error', "系统繁忙请稍后再试 (╯‵□′)╯︵┻━┻")
+
+  $(document).on "click", ".publish_ipt", ->
+    for publish_ipt in $(".publish_ipt")
+      if publish_ipt != this
+        $(publish_ipt).prop("checked", false)
 
   # restate
   do ->
@@ -282,9 +301,11 @@ $(()->
             $(item).click() if item.value == "fuzzy" && question.fuzzy
 
       i += 1
+    for publish_ipt in $(".publish_ipt")
+      $publish_ipt = $(publish_ipt)
+      if gon.editing.publish.question_id == $publish_ipt.val()
+        $(publish_ipt).prop("checked", true)
     $("#rs_selector").val(gon.editing.reward_scheme_id)
-
-
 
 )
 

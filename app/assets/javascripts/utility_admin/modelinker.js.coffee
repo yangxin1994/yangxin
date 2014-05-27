@@ -128,14 +128,13 @@ class Modelinker
     else
       @get_obj(last_linker)
 
-  delete: (linker = "")->
-    _linker = linker.split('.')
-    last_linker = @data
-    for key in _linker
-      last_linker = last_linker["#{key}"]
-    if typeof(last_linker) == "string"
-      @queue["#{last_linker}"]
-    else
-      @get_obj(last_linker)
+  remove: (linker)->
+    return false unless linker
+    _linker = ""
+    for i in linker.split('.')
+      _linker += "['#{i}']"
+    
+    del_string = "delete this.data#{_linker}"
+    eval(del_string)
 
 window.Modelinker = Modelinker
