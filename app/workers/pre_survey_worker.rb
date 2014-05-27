@@ -2,12 +2,12 @@ class PreSurveyWorker
   include Sidekiq::Worker
   sidekiq_options :retry => false, :queue => "oopsdata_#{Rails.env}".to_sym
   def perform
-    PreSurvey.where(status: OPEN).each do |pre_survey|
+    PreSurvey.where(status: PreSurvey::OPEN).each do |pre_survey|
       email_to_send = []
       mobile_to_send = []
       publish_survey = Survey.find(pre_survey.publish["survey_id"])
-      publish_answers = publish_survey.answers.where(:finished_at.gt pre_survey.last_scan_time)
-      selected_answers = publish_answers.select do |a|
+      publish_answers = publish_survey.answers.where(:finished_at.gt => pre_survey.last_scan_time)
+      publish_answers.each do |a|
         satisfy = false
         pre_survey.conditions.each do |condition|
           cur_satisfy = true
@@ -28,7 +28,7 @@ class PreSurveyWorker
                 end
               end
             end
-            cur_satisfy = Tool.check_choice_question_answer(c["question_id"], answer, c["answer"], c["fuzzy"])
+            cur_satisfy = Tool.check_choice_question_answer(c["question_id"], answer["selection"], c["answer"], c["fuzzy"])
             break if !cur_satisfy
           end
           satisfy = cur_satisfy
@@ -37,8 +37,8 @@ class PreSurveyWorker
         if satisfy
           # record the email or mobile
           email_mobile = a.answer_content[pre_survey.publish["question_id"]]
-          email_to_send << email_mobile if pre_survey.publish["type"] == PreSurvey::EMAIL
-          mobile_to_send << email_mobile if pre_survey.publish["type"] == PreSurvey::MOBILE
+          email_to_send << email_mobile if pre_survey.publish["type"].to_i == PreSurvey::EMAIL
+          mobile_to_send << email_mobile if pre_survey.publish["type"].to_i == PreSurvey::MOBILE
         end
       end
       # send emails and messages
@@ -49,9 +49,6 @@ class PreSurveyWorker
       mobile_to_send.each do |mobile|
         SmsApi.pre_survey_sms(pre_survey.survey_id.to_s, mobile, pre_survey.reward_scheme_id)
       end
-
-      email_to_send = []
-      mobile_to_send = []
     end
   end
 end
