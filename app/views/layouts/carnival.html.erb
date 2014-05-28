@@ -1,0 +1,19 @@
+<% content_for :app_head do %>
+  <%= stylesheet_link_tag    "layouts/carnival-layout" %>
+  <%= javascript_include_tag "layouts/carnival-layout" %>
+  <script type="text/javascript">
+  FAYE_SERVER_URL = "<%= Setting.faye_server %>";
+  jQuery(function($) {
+
+  });
+  </script>
+
+  <%= yield :head %>
+
+<% end %>
+
+<% content_for :app_content do %>
+  <%= yield %>
+<% end %>
+
+<%= parent_layout 'app' %>
