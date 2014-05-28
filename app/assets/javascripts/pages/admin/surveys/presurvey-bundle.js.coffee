@@ -61,6 +61,7 @@ question_selector_helper = ()->
       """
   wrapper = """
     <select id="question_selector_#{$(".question_selector").length}" class="question_selector">
+      <option></option>
       #{questions_html}
     </select>
   """
@@ -121,6 +122,8 @@ refresh_question_selectors = () ->
     # $("#question_selector_#{$('.question_selector').length - 1}").select2()
   $(".question_selector").select2(
     width:"element"
+    placeholder: "请选择要添加的问题"
+
     )
 
 remove_survey = (survey_id) ->
@@ -142,6 +145,7 @@ $(()->
   # initialize
   $("#survey_selector").select2(
     width:"element"
+    placeholder: "请选择要作为预调研的问卷"
     )
 
   # events

@@ -97,6 +97,7 @@
     <label class="control-label" >请选择要添加的问卷:</label>
     <div class="controls">
       <select id="survey_selector">
+        <option></option>
         <% @surveys.each do |survey| %>
           <option value="<%= survey._id %>"><%= survey.title %></option>
         <% end %>
