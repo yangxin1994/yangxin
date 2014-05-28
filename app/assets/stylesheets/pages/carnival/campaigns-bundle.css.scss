@@ -1,9 +1,24 @@
 @import "common";
 @import "compass/utilities/general/clearfix";
-
+@import "activities/2014-6/ferris/*.png";
 
 #ferris-wheel{
-	width:200px;
-	height:200px;
-	background: red;
+	width:346px;
+	height:352px;
+	margin:200px auto;
+	background: #f8f8f8;
+	position: relative;
+	a{
+		width:346px;
+		height:352px;
+		display: block;
+		position: absolute;
+		top:0;
+		left:0;
+		&.one{@include ferris-sprite(one);}
+		&.two{@include ferris-sprite(two);}
+		&.three{@include ferris-sprite(three);}
+		&.four{@include ferris-sprite(four);}
+		&.five{@include ferris-sprite(five);}
+	}
 }
