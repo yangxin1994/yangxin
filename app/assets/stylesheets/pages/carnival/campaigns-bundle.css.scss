@@ -1,9 +1,110 @@
 @import "common";
 @import "compass/utilities/general/clearfix";
+@import "activities/2014-6/ferris/*.png";
 
 
 #ferris-wheel{
-	width:200px;
-	height:200px;
-	background: red;
+	width:350px;
+	height:350px;
+	position: relative;
+	top:100px;
+	left:300px;
+ .ferris-wheel-box{
+		width:350px;
+		height:350px;
+		top:100px;
+		
+		.ferris{
+			width:350px;
+			height:350px;
+			position: absolute;
+			top:0;
+			left:0;
+			z-index: 99;
+			@include ferris-sprite(ferris1);
+			-webkit-transition-property: -webkit-transform;
+			-webkit-transition-duration: 1s;
+			-moz-transition-property: -moz-transform;
+			-moz-transition-duration: 1s;
+			-webkit-animation: rotate 4s linear infinite;
+			-moz-animation: rotate 4s linear infinite;
+			-o-animation: rotate 4s linear infinite;
+			animation: rotate 4s linear infinite;
+		}
+		.holder{
+			width:350px;
+			height:350px;
+			position: absolute;
+			top:0;
+			left:0;
+			z-index: 99;
+			@include ferris-sprite(holder);
+		}
+		a{
+			width:175px;
+			height:175px;
+			line-height: 175px;
+			float: left;
+			text-align: center;
+			color:#FFF;
+			font-size: 17px;
+			&.one{
+				@include ferris-sprite(one);
+				&:active{
+					@include ferris-sprite(one_hover);
+				}
+				&.active{
+					@include ferris-sprite(one_active);
+					cursor: default;
+				}
+			}
+			&.two{
+				@include ferris-sprite(two);
+				&:active{
+					@include ferris-sprite(two_hover);
+				}
+				&.active{
+					@include ferris-sprite(two_active);
+					cursor: default;
+				}
+			}
+			&.three{
+				@include ferris-sprite(three);
+				&:active{
+					@include ferris-sprite(three_hover);
+				}
+				&.active{
+					@include ferris-sprite(three_active);
+					cursor: default;
+				}
+			}
+			&.four{
+				@include ferris-sprite(four);
+				&:active{
+					@include ferris-sprite(four_hover);
+				}
+				&.active{
+					@include ferris-sprite(four_active);
+					cursor: default;
+				}
+			}
+		}
+	}
 }
+
+//旋转效果
+
+@-webkit-keyframes rotate{from{-webkit-transform: rotate(0deg)}
+to{-webkit-transform: rotate(360deg)}
+}
+@-moz-keyframes rotate{from{-moz-transform: rotate(0deg)}
+to{-moz-transform: rotate(359deg)}
+}
+@-o-keyframes rotate{from{-o-transform: rotate(0deg)}
+to{-o-transform: rotate(359deg)}
+}
+@keyframes rotate{from{transform: rotate(0deg)}
+to{transform: rotate(359deg)}
+}
+
+
