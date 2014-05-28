@@ -608,6 +608,7 @@ OopsData::Application.routes.draw do
   namespace :carnival do
     resources :users do
     end
+    resources :campaigns, :only => [:index]
   end
 
   # Root: different roots for diffent hosts
