@@ -1,0 +1,70 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <!--<%= javascript_include_tag "pages/admin/carnival/index-bundle" %>-->
+<% end %>
+
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li>
+      <a href="/admin/carnivals/pre_surveys">
+        <i class="icon-chevron-right"></i>
+        预调研配额
+      </a>
+    </li>
+    <li class="active">
+      <a href="/admin/carnivals/surveys">
+        <i class="icon-chevron-right"></i>
+        调研回收
+      </a>
+    </li>
+    <li>
+      <a href="/admin/carnivals/orders">
+        <i class="icon-chevron-right"></i>
+        订单
+      </a>
+    </li>    
+  </ul>
+<% end %>
+
+<div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>问卷名称</th>
+        <th>总数</th>
+        <th>性别（男/女）</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @agent_tasks["data"].each do |task| %>
+      <tr>
+        <td><a href="javascript:void()"><%= task["survey_title"] %></a></td>
+        <td><%= task["agent_name"] %>:<%= task["agent_email"] %></td>
+        <td>
+          <%= task["agent_under_review_count"] %>/
+          <%= task["under_review_count"] %>/
+          <%= task["finished_count"] %>/
+          <%= task["reject_count"] %>
+        </td>
+        <td>
+          <div class="btn-group">
+            <a class="btn disabled" href="javascript:void(0);" target="_blank"><i class="icon-edit"></i>查看</a>
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="od-delete" href="javascript:void(0);" data-id="<%= task["_id"] %>" title="Delete"><i class="icon-remove"></i>删除</a></li>
+              <% if task["status"] == 1 %>
+              <li><a href="javascript:void(0);" data-id="<%= task["_id"] %>" class="od-close">关闭</a></li>
+              <% elsif task["status"] == 2 %>
+              <li><a href="javascript:void(0);" data-id="<%= task["_id"] %>" class="od-open">打开</a></li>
+              <% end %>
+            </ul>
+          </div>
+        </td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

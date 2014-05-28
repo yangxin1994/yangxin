@@ -261,6 +261,12 @@ OopsData::Application.routes.draw do
     put "sample_attributes/bind_question/:id" => "sample_attributes#bind_question"
     delete "sample_attributes/bind_question/:id" => "sample_attributes#bind_question", as: :sample_attribute_bind
 
+    resources :carnivals do
+      collection do
+        get :pre_surveys, :surveys, :orders
+      end
+    end
+
     resources :reviews do
       member do
         put 'publish', 'close', 'pause', 'reject'
