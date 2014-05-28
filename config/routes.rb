@@ -141,10 +141,13 @@ OopsData::Application.routes.draw do
       end
     end
     
-    resources :public_notices, :only => [:index,:show]      
+    resources :public_notices, :only => [:index,:show]
+
+    resources :campaigns, :only => [:index]      
   end
 
   resources :realogs
+
 
   # surveys, pages and questions
   scope :module => "quill" do
