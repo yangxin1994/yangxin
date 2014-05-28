@@ -605,6 +605,11 @@ OopsData::Application.routes.draw do
     resource :bind_sample, :only => [:show]
   end
 
+  namespace :carnival do
+    resources :users do
+    end
+  end
+
   # Root: different roots for diffent hosts
   constraints :subdomain => "admin" do
     root :to => 'admin/publishes#index', as: :admin_root
