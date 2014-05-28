@@ -1,5 +1,5 @@
 # encoding: utf-8
-class Order
+class CarnivalOrder
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongoid::ValidationsExt

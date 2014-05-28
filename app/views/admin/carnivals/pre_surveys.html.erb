@@ -1,0 +1,28 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <!--<%= javascript_include_tag "pages/admin/carnival/index-bundle" %>-->
+<% end %>
+
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li class="active">
+      <a href="/admin/carnivals/pre_surveys">
+        <i class="icon-chevron-right"></i>
+        预调研配额
+      </a>
+    </li>
+    <li>
+      <a href="/admin/carnivals/surveys">
+        <i class="icon-chevron-right"></i>
+        调研回收
+      </a>
+    </li>
+    <li>
+      <a href="/admin/carnivals/orders">
+        <i class="icon-chevron-right"></i>
+        订单
+      </a>
+    </li>    
+  </ul>
+<% end %>
+
