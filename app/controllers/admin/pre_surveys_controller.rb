@@ -31,7 +31,6 @@ class Admin::PreSurveysController < Admin::AdminController
   def update
     pre_survey = PreSurvey.find(params[:id])
     format_params
-    binding.pry
     render_json pre_survey.update_attributes(params[:pre_survey])
   end
 
