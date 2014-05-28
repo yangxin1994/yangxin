@@ -27,6 +27,7 @@ class CarnivalUser
   def self.create_new(introducer_id)
     u = CarnivalUser.create(introducer_id: introducer_id)
     u.survey_order = Carnival::SURVEY.shuffle
+    return u
   end
 
   def pre_survey_result(result)
