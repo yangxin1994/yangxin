@@ -1,9 +1,154 @@
 @import "common";
 @import "compass/utilities/general/clearfix";
+@import "activities/2014-6/ferris/*.png";
 
-
-#ferris-wheel{
-	width:200px;
-	height:200px;
-	background: red;
+//摩天轮
+ #ferris-wheel{
+	width:350px;
+	height:350px;
+	position: relative;
+	top:100px;
+	left:300px;
+ .ferris-wheel-box{
+		width:350px;
+		height:350px;
+		top:100px;
+		
+		.ferris{
+			width:350px;
+			height:350px;
+			position: absolute;
+			top:0;
+			left:0;
+			z-index: 99;
+			@include ferris-sprite(ferris1);
+			-webkit-transition-property: -webkit-transform;
+			-webkit-transition-duration: 1s;
+			-moz-transition-property: -moz-transform;
+			-moz-transition-duration: 1s;
+			-webkit-animation: rotate 30s linear infinite;
+			-moz-animation: rotate 30s linear infinite;
+			-o-animation: rotate 30s linear infinite;
+			animation: rotate 30s linear infinite;
+			&.flash{
+				@include ferris-sprite(ferris2);
+			}
+		}
+		.holder{
+			width:350px;
+			height:350px;
+			position: absolute;
+			top:0;
+			left:0;
+			z-index: 99;
+			@include ferris-sprite(holder);
+		}
+		a{
+			width:175px;
+			height:175px;
+			line-height: 175px;
+			float: left;
+			text-align: center;
+			color:#FFF;
+			font-size: 17px;
+			&.one{
+				@include ferris-sprite(one);
+				&:active{
+					@include ferris-sprite(one_hover);
+				}
+				&.active{
+					@include ferris-sprite(one_active);
+					cursor: default;
+				}
+			}
+			&.two{
+				@include ferris-sprite(two);
+				&:active{
+					@include ferris-sprite(two_hover);
+				}
+				&.active{
+					@include ferris-sprite(two_active);
+					cursor: default;
+				}
+			}
+			&.three{
+				@include ferris-sprite(three);
+				&:active{
+					@include ferris-sprite(three_hover);
+				}
+				&.active{
+					@include ferris-sprite(three_active);
+					cursor: default;
+				}
+			}
+			&.four{
+				@include ferris-sprite(four);
+				&:active{
+					@include ferris-sprite(four_hover);
+				}
+				&.active{
+					@include ferris-sprite(four_active);
+					cursor: default;
+				}
+			}
+			&.five{
+				width:40px;
+				height:40px;
+				display: block;
+				position: absolute;
+				@include ferris-sprite(five);
+				z-index: 100;
+				top:156px;
+				left:156px;
+			}
+		}
+	}
 }
+
+//旋转效果
+
+@-webkit-keyframes rotate{from{-webkit-transform: rotate(0deg)}
+to{-webkit-transform: rotate(360deg)}
+}
+@-moz-keyframes rotate{from{-moz-transform: rotate(0deg)}
+to{-moz-transform: rotate(359deg)}
+}
+@-o-keyframes rotate{from{-o-transform: rotate(0deg)}
+to{-o-transform: rotate(359deg)}
+}
+@keyframes rotate{from{transform: rotate(0deg)}
+to{transform: rotate(359deg)}
+}
+.page{
+	width:1100px;
+	margin:0 auto;
+}
+.header{
+	width:100%;
+	height:30px;
+	line-height: 30px;
+	cursor: default;
+	color:#fff;
+	background: #333;
+	position: fixed;
+	top:0;
+	z-index: 999;
+	a{
+		color:#fff;
+	}
+}
+.footer{
+	width:100%;
+	height:40px;
+	line-height: 40px;
+	cursor: default;
+	color:#fff;
+	background: #333;
+	position: fixed;
+	bottom:0;
+	a{
+		color:#fff;
+	}
+}
+
+

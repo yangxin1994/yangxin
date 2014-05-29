@@ -2,21 +2,136 @@
   <%= stylesheet_link_tag "pages/carnival/campaigns-bundle", :media => "all" %>
   <%= javascript_include_tag "pages/carnival/campaigns-bundle" %>
   <script type="text/javascript">
-    $(function(){      
+    $(function(){
+
+      // window.step = $.cookie('current_step') || 0; 
+
+      // window.pre_answer = <%= raw (@pre_answer).to_json %>;
+
+      // window.ticket  = $.cookie('ticket') || false ;
+
+      // if(window.step){
+      //     if(window.step == 1){
+
+      //     }else if(window.step == 2){
+
+      //     }else{
+            
+      //     }
+      // }else{
+      //   // step 0
+      //   if(window.ticket){
+      //     $.cookie('current_step',1);
+      //     window.step = $.cookie('current_step');
+      //     // redirect to section 1
+      //   }else{
+      //     if(window.pre_answer.finished){
+      //       alert(' 你不符合此次活动的参加对象，谢谢参与 ');
+      //     }
+      //   }
+
+      // }
+      
+      // window.t1_start = 
+      // window.t1_end =
+
+      // window.t2_start = 
+      // window.t2_end   =
+
+      // window.t3_start = 
+      // window.t3_end   = 
+
+
+      // if(window.pre_answer){
+      //   //当前用户已创建答案
+      //   if(window.ticket){
+      //     //拿到进入下一步的入场券 进入下一任务
+
+      //   }else{
+      //     if(window.pre_answer.finished){
+      //       //预调研不符合要求，过滤掉了
+      //       alert('');
+      //     }else{
+      //       //跳转到预调研答题页
+      //     }
+      //   }
+      // }else{
+      //   //跳转到预调研答题页
+      // }
+
+      // if(window.prev_start){
+      //   //已经开始答题
+      //   if(window.ticket){
+      //     //有票
+      //     if(t1_start){
+      //       //第一个大任务已经开始答题
+      //       if(t1_end){
+      //         //第一个大任务已经结束  尚未结束
+
+      //       }else{
+      //         //第一个大任务尚未结束
+      //       }
+      //     }else{
+      //       //第一个大任务尚未答题  第二个大任务 第三个 大任务
+      //     }
+      //   }else{
+      //     //没票
+      //     if(window.prev_end){
+      //       //预调研未通过
+      //     }else{
+      //       //预调研未完成,继续答题
+      //     }
+      //   }
+      // }else{
+      //   //尚未答题
+      // }
     })
   </script>
 <% end %>
 
+
+
+
 <div class='fullPage'>
+  <div class="header">
+    <div class="page">
+      XXX 获得了 门票一张
+    </div>
+  </div>
   <div class='section'>section_1</div>
   <div class='section'>section_2</div>
-  <div class='section active'>
-    <!-- 摩天轮 Start -->
-    <div id="ferris-wheel">
-     12
-    </div>
+  <div class='section'>
+    <div class="page">
+   <!-- 摩天轮 Start -->
+		<div id="ferris-wheel">
+			<span class="ferris-wheel-box">
+			<a href="javascript:void(0);" class="one active"></a>
+			<a href="javascript:void(0);" class="two"></a>
+			<a href="javascript:void(0);" class="three"></a>
+			<a href="javascript:void(0);" class="four"></a>
+			<a href="javascript:void(0);" class="five"></a>
+<!-- 						
+			<span class="ferris flash"></span>
+			<span class="holder"></span>
+ -->
+			</span>
+     </div> 
     <!-- 摩天轮 End -->    
-
+    </div>
   </div>
-  <div class='section'>section_4</div>
-</div>
+  <div class='section active'>
+		
+  </div>
+  <div class="footer">
+    <div class="page">
+       版权所有 &copy; 2012-2014 <a href="http://wenjuanba.com">问卷吧</a>
+       <ul class="share">
+         <li><a class="sina" href="javascript:void(0);"></a></li>
+         <li><a class="tencent" href="javascript:void(0);"></a></li>
+         <li><a class="weixin" href="javascript:void(0);"></a></li>
+         <li><a class="qzone" href="javascript:void(0);"></a></li>
+         <li><a class="renren" href="javascript:void(0);"></a></li>
+       </ul>
+    </div>
+   
+  </div>
