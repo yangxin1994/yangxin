@@ -30,6 +30,7 @@ class Filler::AnswersController < Filler::FillerController
       answer )
     if Carnival::ALL_SURVEY.include?(params[:survey_id])
       current_carnival_user << answer if current_carnival_user.present?
+      current_carnival_user.fill_answer(answer)
     else
       current_user.answers << answer if current_user.present?
     end

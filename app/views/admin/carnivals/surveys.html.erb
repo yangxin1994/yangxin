@@ -33,36 +33,22 @@
         <th>问卷名称</th>
         <th>总数</th>
         <th>性别（男/女）</th>
-        <th>操作</th>
+        <th>年龄（0/19/25/31/36/41/50）</th>
+        <th>收入（0/2000/3000/6000/8000/10000）</th>
+        <th>学历（初中/高中/大专/本科/硕士）</th>
+        <th>地区</th>
       </tr>
     </thead>
     <tbody>
-      <% @agent_tasks["data"].each do |task| %>
+      <% @quotas.each do |quota| %>
       <tr>
-        <td><a href="javascript:void()"><%= task["survey_title"] %></a></td>
-        <td><%= task["agent_name"] %>:<%= task["agent_email"] %></td>
-        <td>
-          <%= task["agent_under_review_count"] %>/
-          <%= task["under_review_count"] %>/
-          <%= task["finished_count"] %>/
-          <%= task["reject_count"] %>
-        </td>
-        <td>
-          <div class="btn-group">
-            <a class="btn disabled" href="javascript:void(0);" target="_blank"><i class="icon-edit"></i>查看</a>
-            <button class="btn dropdown-toggle" data-toggle="dropdown">
-              <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu">
-              <li><a class="od-delete" href="javascript:void(0);" data-id="<%= task["_id"] %>" title="Delete"><i class="icon-remove"></i>删除</a></li>
-              <% if task["status"] == 1 %>
-              <li><a href="javascript:void(0);" data-id="<%= task["_id"] %>" class="od-close">关闭</a></li>
-              <% elsif task["status"] == 2 %>
-              <li><a href="javascript:void(0);" data-id="<%= task["_id"] %>" class="od-open">打开</a></li>
-              <% end %>
-            </ul>
-          </div>
-        </td>
+        <td><%= Survey.find(quota.survey_id).title %></td>
+        <td><%= quota.quota[:amount] %></td>
+        <td><%= quota.quota[:gender].join('/') %></td>
+        <td><%= quota.quota[:age].join('/') %></td>
+        <td><%= quota.quota[:income].join('/') %></td>
+        <td><%= quota.quota[:education].join('/') %></td>
+        <td><a href="/admin/carnivals/region_quota?survey_id=<%=quota.survey_id%>">查看</a></td>
       </tr>
       <% end %>
     </tbody>
