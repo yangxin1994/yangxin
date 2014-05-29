@@ -3,88 +3,80 @@
   <%= javascript_include_tag "pages/carnival/campaigns-bundle" %>
   <script type="text/javascript">
     $(function(){
+      window.data = <%= raw (@obj).to_json %>;
+      console.log('----------------------------------')
+      console.log(widnow.data);
+      console.log('----------------------------------')
 
-      // window.step = $.cookie('current_step') || 0; 
+      // window.current_carnival_user = <%= raw (@obj).to_json %>;
 
-      // window.pre_answer = <%= raw (@pre_answer).to_json %>;
-
-      // window.ticket  = $.cookie('ticket') || false ;
-
-      // if(window.step){
-      //     if(window.step == 1){
-
-      //     }else if(window.step == 2){
-
-      //     }else{
-            
-      //     }
-      // }else{
-      //   // step 0
-      //   if(window.ticket){
-      //     $.cookie('current_step',1);
-      //     window.step = $.cookie('current_step');
-      //     // redirect to section 1
-      //   }else{
-      //     if(window.pre_answer.finished){
-      //       alert(' 你不符合此次活动的参加对象，谢谢参与 ');
-      //     }
-      //   }
-
-      // }
+      // var pre_status = parseInt(window.current_carnival_user.pre_survey_status,10);
       
-      // window.t1_start = 
-      // window.t1_end =
+      // window.current_step = <%= raw (@step).to_json %>;
 
-      // window.t2_start = 
-      // window.t2_end   =
+      // // for test
+      // pre_status = 32;
+      // window.current_step = 3;
 
-      // window.t3_start = 
-      // window.t3_end   = 
-
-
-      // if(window.pre_answer){
-      //   //当前用户已创建答案
-      //   if(window.ticket){
-      //     //拿到进入下一步的入场券 进入下一任务
-
-      //   }else{
-      //     if(window.pre_answer.finished){
-      //       //预调研不符合要求，过滤掉了
-      //       alert('');
+      // if (pre_status) {     
+      //   if(pre_status == 2){// for reject
+      //     $.od.odPopup({content: '您不在此次调研范围内!'});
+      //   }else if(pre_status == 32){ // for finish
+      //     // get ticket
+      //     if(window.current_step){
+      //       setSection(window.current_step);
       //     }else{
-      //       //跳转到预调研答题页
+      //       $.od.odPopup({content: '恭喜您获得活动门票!'});  
       //     }
-      //   }
-      // }else{
-      //   //跳转到预调研答题页
+      //   } 
       // }
 
-      // if(window.prev_start){
-      //   //已经开始答题
-      //   if(window.ticket){
-      //     //有票
-      //     if(t1_start){
-      //       //第一个大任务已经开始答题
-      //       if(t1_end){
-      //         //第一个大任务已经结束  尚未结束
-
-      //       }else{
-      //         //第一个大任务尚未结束
-      //       }
-      //     }else{
-      //       //第一个大任务尚未答题  第二个大任务 第三个 大任务
-      //     }
-      //   }else{
-      //     //没票
-      //     if(window.prev_end){
-      //       //预调研未通过
-      //     }else{
-      //       //预调研未完成,继续答题
-      //     }
-      //   }
-      // }else{
-      //   //尚未答题
+      // //set full page
+      // function setFullPage() {
+      //     $('.fullPage').fullpage({
+      //         verticalCentered: true,
+      //         slidesColor: ['#a2ca81', '#a2ca81', '#a2ca81', '#a2ca81'],
+      //         loopTop: false,
+      //         loopBottom: false,
+      //         autoScrolling: true
+      //     })
       // }
+    
+      // //up step
+      // function foraward(){
+      //   var bottom = parseInt($('.happy').css('bottom'),10);
+      //   var new_bottom = bottom + 60 + 'px'; 
+      //   $('.happy').animate({'bottom':new_bottom},3000,function(){
+      //     setTimeout(function(){
+      //       fallback();
+      //     },1000)
+      //   })
+      // }
+
+      // //down step
+      // function fallback(){
+      //   $('.happy').animate({'bottom':'35px'},3000,function(){
+      //     $.fn.fullpage.moveSectionUp()// go to next section
+      //   })
+      // }
+
+      // //set section
+      // function setSection(step){
+      //   var step = parseInt(step,10);
+      //   if(step == 1){
+      //     $('.section.wheel').addClass('active').siblings().removeClass('active');
+      //   }else if(step == 2){
+      //     $('.section.stair').addClass('active').siblings().removeClass('active');
+      //   }else if(step == 3){
+      //     $('.section.balloon').addClass('active').siblings().removeClass('active');
+      //   }else{
+      //     $('.section.reward').addClass('active').siblings().removeClass('active');
+      //   }
+      // }
+
+      // setFullPage();
+      
+
     })
   </script>
 <% end %>
@@ -93,9 +85,19 @@
 
 
 <div class='fullPage'>
-  <div class='section'>section_1</div>
-  <div class='section'>section_2</div>
-  <div class='section active'>
+  <div class='section balloon'>section_3</div>
+  <div class='section stair' >
+    <div id='machine-wrap'>
+      <div class='happy'></div>
+      <div class='st5'></div>
+      <div class='st4'></div>
+      <div class='st3'></div>
+      <div class='st2'></div>
+      <div class='st1'></div>
+      <div class='sbottom'></div>
+    </div>
+  </div>
+  <div class='section wheel'>
    <!-- 摩天轮 Start -->
 		<div id="ferris-wheel">
 			<span class="ferris-wheel-box">
@@ -113,5 +115,5 @@
     </div>
     <!-- 摩天轮 End -->    
   </div>
-  <div class='section'>section_4</div>
+  <div class='section gate active'>section_1</div>
 
