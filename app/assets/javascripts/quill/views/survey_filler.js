@@ -190,7 +190,6 @@ $(function(){
 					// Disable next button for some time (don't disable it for allow_pageup==true survey, or previewing)
 					var has_not_empty_answer = (_.find(answers || [], function(a) { return a != null; }) != null);
 					if(!this.options.is_preview && (prev_btn.length == 0 || !has_not_empty_answer)) {
-            console.log('===========')
 						$.util.disable(next_btn);
 						var old_text = next_btn.text();
 						function _update_btn() {
