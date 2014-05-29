@@ -44,11 +44,31 @@
 		<span>请认真答题</span><button>重新开始</button>
 	</div>
 	<% end %>
-	<div class='sf_banner_top'>
+  <!-- hack for trip survey -->
+  <% trip_id = '537e9abdeb0e5b357b000096' %>
+  <% if @survey['_id'].to_s == trip_id %> 
+  <style type="text/css">
+    #sf_banner .sf_banner_top > .inner #progress_con {
+      color: #FFC800;
+    }
+    #sf_banner .sf_banner_top > .inner #progress_bar {
+      border-color: #FFC800;
+    }
+    #sf_banner .sf_banner_top > .inner #progress_bar em {
+      background-color: #FFC800;
+    }
+  </style>
+  <% end %>
+  <!-- hack for trip survey -->
+	<div class='sf_banner_top' <% if @survey['_id'].to_s == trip_id %> style='background:#fff;' <% end %>>
 		<div class='inner'>
       <% if ["530ecc12eb0e5be18500001a", "5372c7f6eb0e5b41fc000003"].include?(@survey['_id'].to_s) %>
       <a id='logo' href="http://netranking.cn">
         <img src="/assets/filler/default/logo-nr.png" />
+      </a>
+      <% elsif @survey['_id'].to_s == trip_id %>
+      <a id='logo' href="http://www.shanxichina.gov.cn/zh/index.shtml">
+        <img src="/sxlyj.png" />
       </a>
       <% else %>
       <a id='logo' href="http://oopsdata.com">

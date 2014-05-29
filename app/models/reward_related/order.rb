@@ -67,6 +67,7 @@ class Order
   belongs_to :gift
   belongs_to :answer
   belongs_to :sample, :class_name => "User", :inverse_of => :orders
+  belongs_to :movie_activity
 
   index({ code: 1 }, { background: true } )
   index({ status: 1 }, { background: true } )

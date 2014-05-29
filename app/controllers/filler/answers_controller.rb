@@ -28,7 +28,12 @@ class Filler::AnswersController < Filler::FillerController
       params[:introducer_id],
       params[:agent_task_id],
       answer )
-    current_user.answers << answer if current_user.present?
+    if Carnival::ALL_SURVEY.include?(params[:survey_id])
+      current_carnival_user << answer if current_carnival_user.present?
+      current_carnival_user.fill_answer(answer)
+    else
+      current_user.answers << answer if current_user.present?
+    end
     answer.check_channel_ip_address_quota
     if !user_signed_in
       # If a new answer for the survey is created, and the user is not signed in

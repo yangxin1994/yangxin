@@ -141,10 +141,13 @@ OopsData::Application.routes.draw do
       end
     end
     
-    resources :public_notices, :only => [:index,:show]      
+    resources :public_notices, :only => [:index,:show]
+
+    resources :campaigns, :only => [:index]      
   end
 
   resources :realogs
+
 
   # surveys, pages and questions
   scope :module => "quill" do
@@ -257,6 +260,12 @@ OopsData::Application.routes.draw do
     get "sample_attributes/bind_question/:id" => "sample_attributes#bind_question"
     put "sample_attributes/bind_question/:id" => "sample_attributes#bind_question"
     delete "sample_attributes/bind_question/:id" => "sample_attributes#bind_question", as: :sample_attribute_bind
+
+    resources :carnivals do
+      collection do
+        get :pre_surveys, :surveys, :orders, :region_quota
+      end
+    end
 
     resources :reviews do
       member do
@@ -605,6 +614,12 @@ OopsData::Application.routes.draw do
       end
     end
     resource :bind_sample, :only => [:show]
+  end
+
+  namespace :carnival do
+    resources :users do
+    end
+    resources :campaigns, :only => [:index]
   end
 
   # Root: different roots for diffent hosts

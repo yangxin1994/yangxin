@@ -87,7 +87,7 @@
 		position: relative;
 		ul{
 			padding:0 20px;
-			position: relative;
+			position: absolute;
 			li{
 				position:relative;
 				border-bottom: none;
@@ -137,7 +137,7 @@
 	}
 	.involved-btn.old{
 		background:#65adf2;
-		margin: -40px 35px 0px 0px;
+		margin: -50px 35px 0px 0px;
 		&:hover{
 			background:#6FA0F0;
 		}
@@ -192,7 +192,8 @@
       }
       li.on{ 
         background:$red1; 
-        color:#fff; 
+        color:#fff;
+        border-color:$red1; 
       }
     }
   }
@@ -219,6 +220,8 @@
 			@include one-line(30px);
 			a{
 				color: #333;
+				float: left;
+				width: 180px;
 			}
 		}
 		.bulletin-title{
@@ -226,8 +229,8 @@
 			height:30px;
 			overflow: hidden;
 			white-space: nowrap;
-		  -o-text-overflow: ellipsis;
-		  text-overflow: ellipsis;
+		  	-o-text-overflow: ellipsis;
+		  	text-overflow: ellipsis;
 			float:left;
 			margin-right:15px;
 			&.top{
@@ -236,7 +239,7 @@
 			&:hover{color: $red1;}
 		}
 		.time{
-			width:70px;
+			width:80px;
 			color: #999;
 			float: right;
 			text-align: right;
@@ -364,11 +367,9 @@
 					}
 					.gift-remark-right{
 						float: right;
-						// margin-top:10px;
 						margin-top:5px;
-						width:85px;
 						color: #999;
-						@include one-line(50px);
+						@include one-line(55px);
 						// padding-left:20px;
 						// border-left:1px #dbdbdb dashed;
 						span{
