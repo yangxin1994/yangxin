@@ -19,6 +19,19 @@
 /*    .section.a {filter:progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);-webkit-filter: grayscale(100%);}*/
   </style>
 
+  <script type="text/javascript">
+  $(function () {
+    // social share
+    // TODO: i, share link to QQ
+    var share_href = 'http://wenjuanba.com/carnival/campaigns?i='; //TODO: i
+    _.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace'], $.proxy(function(v) {
+      $('#' + v).click(function() {
+        $.social['shareTo' + v](share_href + '&c=' + v, '我发现了一个好玩的活动：问卷吧嘉年华，参加100%获得手机充值卡，并可抽取红米note、小米盒子、小米电源等大奖哦！', 'http://wenjuanba.com/assets/activities/2014-6/carnival.png');
+      });
+    }, this));
+  });
+  </script>
+
   <%= yield :head %>
 
 </head>
@@ -55,7 +68,7 @@
          			<form action="">
          				<p><input type="text" placeholder="输入手机号保存进度"><a class="save-btn" href="javascript:void(0);">提交</a></p>
          				<div style="clear:both;padding:5px 0;"></div>
-         				<p><a class="favorite" href="javascript:void(0)" onClick="return BookmarkApp.addBookmark(this)">将本站放到收藏夹</a></p>
+         				<p><a class="favorite" href="javascript:void(0)" onClick="return BookmarkApp.addBookmark(this)">将本活动放入收藏夹</a></p>
          				
          			</form>
          		</span>
@@ -70,13 +83,13 @@
               成功邀请1次可抽奖1次
             </p>
             <ul class="share">
-              <li><a class="sina" href="javascript:void(0);"></a></li>
-               <li><a class="tencent" href="javascript:void(0);"></a></li>
+              <li><a id='SinaWeibo' class="sina" href="javascript:void(0);"></a></li>
+               <li><a id='TencentWeibo' class="tencent" href="javascript:void(0);"></a></li>
                <!-- <li><a class="weixin" href="javascript:void(0);"><i></i>微信朋友圈</a></li> -->
                <li><a class="qq" href="javascript:void(0);"></a></li>
-               <li><a class="qzone" href="javascript:void(0);"></a></li>
-               <li><a class="renren" href="javascript:void(0);"></a></li>
-               <li><a class="douban" href="javascript:void(0);"></a></li>
+               <li><a id='QQSpace' class="qzone" href="javascript:void(0);"></a></li>
+               <li><a id='Renren' class="renren" href="javascript:void(0);"></a></li>
+               <li><a id='Douban' class="douban" href="javascript:void(0);"></a></li>
             </ul>
             <div style="clear:both;"></div>
             <div class="share-lottery">

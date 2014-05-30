@@ -8,7 +8,7 @@ class Carnival::UsersController < Carnival::CarnivalController
   end
 
   def login
-    carnival_user = CarnivalUser.where(email: params[:email]).first
+    carnival_user = CarnivalUser.where(mobile: params[:mobile]).first
     if carnival_user.present?
       cookies[:carnival_user_id] = carnival_user.id.to_s
       render_json_auto true and return
@@ -20,6 +20,7 @@ class Carnival::UsersController < Carnival::CarnivalController
   # parameters:
   # => type: 0代表第二个大任务的抽奖，1代表第三个大任务的抽奖，2代表分享成功的抽奖，3代表第一个大任务的10元充值卡，4代表第三个大任务的10充值卡
   # => amount: type为0时有意义，可以为20或者50，为充值卡面值
+  # => mobile: 
   def draw_lottery
     if current_carnival_user.blank?
       render_json_auto CarnivalUser::USER_NOT_EXIST and return
@@ -30,9 +31,9 @@ class Carnival::UsersController < Carnival::CarnivalController
     if current_carnival_user.background_survey_status != CarnivalUser::FINISH
       render_json_auto CarnivalUser::BACKGROUND_SURVEY_NOT_FINISHED and return
     end
-    case param[:type].to_i
+    case params[:type].to_i
     when 0
-      retval = current_carnival_user.draw_second_stage_lottery(param[:amount].to_i, params[:mobile])
+      retval = current_carnival_user.draw_second_stage_lottery(params[:amount].to_i, params[:mobile])
     when 1
       retval = current_carnival_user.draw_third_stage_lottery(params[:mobile])
     when 2
