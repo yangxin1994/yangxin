@@ -771,6 +771,22 @@ to{transform: rotate(359deg)}
 		position: relative;	
 		margin:0 auto;
 		top:208px;
+		.start{
+			width:250px;
+			height:50px;
+			line-height: 50px;
+			display: block;
+			color: #fff;
+			text-align: center;
+			position: absolute;
+			top:190px;
+			left:80px;
+			z-index: 999;
+			background: #72CBED;
+			&:hover{
+				background: #46C2E8;
+			}
+		}
 		.left{
 			width:207px;
 			height:376px;
@@ -789,7 +805,50 @@ to{transform: rotate(359deg)}
 		}
 	}
 }
-
+.tooltip{
+	text-align: center;
+	line-height: 1.3em;
+	font-size: 16px;
+	color:#72CBED;
+	font-weight: bold;
+	cursor: default;
+	position: absolute;
+	b{
+		color:red;
+	}
+	&.ty{
+		right:80px;
+		top:50px;
+		width:83px;
+		height:52px;
+		padding:30px 20px;
+		background:url('/assets/activities/2014-6/ferris/ty.png') no-repeat;
+	}
+	&.mtl{
+		right:235px;
+		top:-205px;
+		width:224px;
+		height:90px;
+		padding:70px 30px;
+		background:url('/assets/activities/2014-6/ferris/rqq.png') no-repeat;
+	}
+	&.rqq{
+		right:235px;
+		top:-185px;
+		width:224px;
+		height:90px;
+		padding:70px 30px;
+		background:url('/assets/activities/2014-6/ferris/rqq.png') no-repeat;
+	}
+	&.tlj{
+		right:-290px;
+		top:-185px;
+		width:224px;
+		height:100px;
+		padding:60px 30px;
+		background:url('/assets/activities/2014-6/ferris/tlj.png') no-repeat;
+	}
+}
 .footer{
 	width:100%;
 	height:40px;
