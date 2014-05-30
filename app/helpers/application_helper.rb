@@ -451,6 +451,7 @@ module ApplicationHelper
     when 2
       return '已经完成'
     end
+
   end 
 
   def show_region_name(code)

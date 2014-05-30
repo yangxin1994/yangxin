@@ -46,7 +46,9 @@ class EmailInvitationWorker
         surveys_for_sample[u_id] ||= []
         surveys_for_sample[u_id] << survey._id.to_s
         sample = User.sample.find_by_id(u_id)
-        sample_email_history_batch << { :user_id => sample._id, :survey_id => survey._id, :type => "email" } if sample.present?
+        if sample.present?
+          sample_email_history_batch << { user_id: sample._id, survey_id: survey._id, type: "email", email: sample.email, mobile: sample.mobile }
+        end
       end
       # update email history for samples
       SurveyInvitationHistory.collection.insert(sample_email_history_batch)
