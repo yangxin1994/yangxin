@@ -1,19 +1,7 @@
 $ ->
-  if querilayer.queries.type
-    $('ul.flowy-admin-sidenav a').each ->
-      $this = $(this)
-      _type = $this.attr('href').split('=')[1]
-      $this.closest('li').addClass('active') if _type == querilayer.queries.type
-  else
-     $('ul.flowy-admin-sidenav a:first').closest('li').addClass('active')
-
   $('table').popover
     selector: '.o-detail'
     container: 'tr'
-
-  # $('table').popover
-  #   selector: '.o-time'
-  #   container: 'tr'    
 
   $(".handle").click ->
     $this = $(this)

@@ -162,4 +162,10 @@ class CarnivalOrder
     self.auto_handle if handle
   end
 
+  def self.recharge_fail_mobile
+    CarnivalOrder.where(esai_status: ESAI_FAIL, status: HANDLE).each do |order|
+      order.update_attributes(status: WAIT)
+      order.handle
+    end
+  end
 end

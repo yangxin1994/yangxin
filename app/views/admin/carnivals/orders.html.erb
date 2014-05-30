@@ -38,7 +38,7 @@
     </form>
   </span>
   <span class="pull-right">
-    <a class="btn" href="/admin/orders/recharge_fail_mobile">失败易赛订单再充值</a>
+    <a class="btn" href="/admin/carnival/recharge_fail_mobile">失败易赛订单再充值</a>
     <%= paginator_mini @orders %>
     <div class="btn-group">
       <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>筛选<span class="caret"></span></button>
@@ -78,7 +78,7 @@
       <td><%= order.carnival_prize.name %></td>
       <td><%= order['amount'] %></td>
       <td><a href="/admin/carnival_users/<%= order.carnival_user._id %>"><%= order.carnival_user.mobile %></a></td>
-      <td title="订单号: <%= order['code'] %>" data-content="<%= order.express_str %>" class="o-detail">订单号: <%= order['code'] %></td>
+      <td title="订单号: <%= order['code'] %>; 易赛订单号: <%= order.esai_order_id %>" data-content="<%= order.express_str %>" class="o-detail">订单号: <%= order['code'] %></td>_
       <td><%= order.created_at.strftime("%F<br />%T").html_safe %></td>
       <td class="o-time" title="订单处理详细" data-content="<%= order['time_str'] %>"><%= Time.at(order['canceled_at'] || order['finished_at'] || order['handled_at'] || order['created_at'].to_i).strftime("%F<br />%T").html_safe %></td>
       <td>
