@@ -4,8 +4,8 @@ class Admin::CarnivalsController < Admin::AdminController
   layout "layouts/admin-todc"
 
   def pre_surveys
-    @quota_setting = Carnival.where(survey_id: Carnival::PRE_SURVEY, type: Carnival::SETTING)
-    @quota_stats = Carnival.where(survey_id: Carnival::PRE_SURVEY, type: Carnival::STATS)
+    @quota_setting = Carnival.where(survey_id: Carnival::PRE_SURVEY, type: Carnival::SETTING).first
+    @quota_stats = Carnival.where(survey_id: Carnival::PRE_SURVEY, type: Carnival::STATS).first
   end
 
   # update quota of pre surveys
@@ -22,6 +22,6 @@ class Admin::CarnivalsController < Admin::AdminController
   end
 
   def orders
-    
+    @orders = CarnivalOrder.all
   end
 end
