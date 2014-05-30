@@ -124,6 +124,9 @@ to{transform: rotate(359deg)}
 	position: relative;
 	z-index: 9;
 	margin:0 auto;
+	.page-inner{
+		padding:40px 0;
+	}
 }
 .header{
 	width:100%;
@@ -138,6 +141,11 @@ to{transform: rotate(359deg)}
 	font-size: 14px;
 	a{
 		color:#fff;
+	}
+	.header-box{
+		height:40px;
+		line-height: 40px;
+		background: #333;
 	}
 	.bulletin{
 		width:500px;
@@ -259,7 +267,10 @@ to{transform: rotate(359deg)}
 	.contact{
 		float: right;
 	}
-	
+	.footer-box{
+		height:40px;
+		background: #333;
+	}
 }
 .bg1{
 	background:#A2CA81 url('/assets/activities/2014-6/ferris/bg1.png') no-repeat center center;
