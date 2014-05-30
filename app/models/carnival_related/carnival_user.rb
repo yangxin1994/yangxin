@@ -244,17 +244,17 @@ class CarnivalUser
 
   def draw_second_stage_lottery(amount, mobile)
     if (self.survey_status[5..9] & [NOT_EXIST, REJECT]).present?
-      return -2
+      return -3
     end
     if self.lottery_status[0] == EXIST
-      return -3
+      return -4
     end
     if amount == 20
       p = 0.5
     else
       p = 0.2
     end
-    return -4 if rand < p
+    return -5 if rand < p
     self.lottery_status[0] = EXIST
     self.save
     # create order
@@ -272,10 +272,10 @@ class CarnivalUser
 
   def create_first_stage_order(mobile)
     if (self.survey_status[0..4] & [NOT_EXIST, REJECT]).present?
-      return -2
+      return -3
     end
     if self.orders.where(type: CarnivalOrder::STAGE_1).present?
-      return -3
+      return -4
     end
     # create order
     order = CarnivalOrder.create(type: CarnivalOrder::STAGE_1, mobile: mobile, amount: 10)
@@ -292,10 +292,10 @@ class CarnivalUser
 
   def create_third_stage_mobile_order(mobile)
     if (self.survey_status[10..13] & [NOT_EXIST, REJECT]).present?
-      return -2
+      return -3
     end
     if self.orders.where(type: CarnivalOrder::STAGE_3).present?
-      return -3
+      return -4
     end
     # create order
     order = CarnivalOrder.create(type: CarnivalOrder::STAGE_3, mobile: mobile, amount: 10)
@@ -312,10 +312,10 @@ class CarnivalUser
 
   def draw_third_stage_lottery(mobile)
     if (self.survey_status[10..13] & [NOT_EXIST, REJECT]).present?
-      return -2
+      return -3
     end
     if self.lottery_status[1] == EXIST
-      return -3
+      return -4
     end
     self.lottery_status[1] == EXIST
     self.save
@@ -323,7 +323,7 @@ class CarnivalUser
     ### draw
     prize = CarnivalPrize.draw
 
-    return -4 if prize.blank?
+    return -5 if prize.blank?
     order = CarnivalOrder.create(type: CarnivalOrder::STAGE_3_LOTTERY, mobile: mobile)
     order.prize = prize
     order.carnival_user = self
@@ -338,7 +338,7 @@ class CarnivalUser
 
   def draw_share_lottery(mobile)
     if self.share_num <= self.share_lottery_num
-      return -3
+      return -4
     end
     self.share_lottery_num += 1
     self.save
@@ -346,7 +346,7 @@ class CarnivalUser
     ### draw
     prize = CarnivalPrize.draw
 
-    return -4 if prize.blank?
+    return -5 if prize.blank?
     order = CarnivalOrder.create(type: CarnivalOrder::SHARE, mobile: mobile)
     order.prize = prize
     order.carnival_user = self

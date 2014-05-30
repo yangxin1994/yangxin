@@ -3,161 +3,409 @@
   <%= javascript_include_tag "pages/carnival/campaigns-bundle" %>
   <script type="text/javascript">
     $(function(){
+      window.data = <%= raw (@obj).to_json %>;
+      console.log('====================================')
+      console.log(window.data)
+      console.log('====================================')
+      var pre_status = parseInt(window.data.pre_status,10);
+      window.current_step = parseInt(window.data.step,10);
 
-      // window.step = $.cookie('current_step') || 0; 
+      // for test
+      // pre_status = 32;
+      // window.current_step = 3;
+      // window.data.t2_status = [1,2,2,2,1];
+      // window.data.t3_status = [1,1,1,1,0];
 
-      // window.pre_answer = <%= raw (@pre_answer).to_json %>;
 
-      // window.ticket  = $.cookie('ticket') || false ;
+      if(window.data.t3_surveys.length == 4){
+        window.data.t3_status.pop();
+      }
 
-      // if(window.step){
-      //     if(window.step == 1){
+      if (pre_status) {     
+        if(pre_status == 2){// for reject
+          $.od.odPopup({content: '您不在此次调研范围内!'});
+        }else if(pre_status == 32){ // for finish
+          // get ticket
+          if(window.current_step){
+            //每个小任务(及每个大任务)完成后的跳转页面
+            setSection(window.current_step);
+          }else{
+            //预调研通过,通知领取门票,并进入下一个任务
+            $.od.odPopup({
+              title:'恭喜',
+              content: '恭喜您获得活动门票!',
+              closeButton:false,
+              confirm:function(){
+                openDoor();
+              }
+            });
+          }
+        } 
+      }
 
-      //     }else if(window.step == 2){
+      //set full page
+      function setFullPage() {
+          $('.fullPage').fullpage({
+              verticalCentered: true,
+              slidesColor: ['#fff', '#fff', '#fff', '#fff'],
+              loopTop: false,
+              loopBottom: false,
+              autoScrolling: true
+          })
+      }
+    
+      //up step
+      function foraward(prev_bottom,target_bottom,top){
+        $('.happy').animate({'bottom':target_bottom + 'px'},3000,function(){
+          if(top < 0){//到达顶端
+            setTimeout(function(){
+              fallback();
+            },1000)            
+          }
 
-      //     }else{
-            
-      //     }
-      // }else{
-      //   // step 0
-      //   if(window.ticket){
-      //     $.cookie('current_step',1);
-      //     window.step = $.cookie('current_step');
-      //     // redirect to section 1
-      //   }else{
-      //     if(window.pre_answer.finished){
-      //       alert(' 你不符合此次活动的参加对象，谢谢参与 ');
-      //     }
-      //   }
+        })
+      }
 
-      // }
+      //down step
+      function fallback(){
+        $('.happy').animate({'bottom':'35px'},3000,function(){
+          $.od.odPopup({
+            title:'恭喜',
+            content: '恭喜您获得一次抽奖活动!',
+            closeButton:false,
+            confirm:function(){
+              // ajax request for task 2
+              TaskOpen('balloon');
+              $.fn.fullpage.moveSectionUp()// go to next section
+            }
+          });          
+          
+        })
+      }
+
+      //set section
+      function setSection(step){
+        var step = parseInt(step,10);
+        if(step == 1){
+          $('.section.wheel').addClass('active').siblings().removeClass('active');
+          setTaskDetail(step,$('.section.wheel'));
+        }else if(step == 2){
+          $('.section.stair').addClass('active').siblings().removeClass('active');
+          setTaskDetail(step,$('.section.stair'));
+        }else if(step == 3){
+          $('.section.balloon').addClass('active').siblings().removeClass('active');
+          setTaskDetail(step,$('.section.balloon'));
+        }else{
+          $('.section.reward').addClass('active').siblings().removeClass('active');
+          setTaskDetail(step,$('.section.reward'));
+        }
+      }
+
+      // open door
+      function openDoor(){
+        TaskOpen('wheel');// start the wheel section
+        $.fn.fullpage.moveSectionUp()// go to next section
+      }
+
+      // open task完成上一个任务后设置下一个任务
+      function TaskOpen(flag){
+        switch(flag){
+        case 'wheel':
+          setTaskOne();
+          break;
+        case 'stair':
+          setTaskTwo();
+          break;
+        case 'balloon':
+          setTaskThree();
+          break;u
+        case 'reward':
+          setTaskFour();
+          break;
+        }
+      }
+
+      //设置第一个大任务
+      function setTaskOne(){
+        fireUpBackground($('.section.wheel'));
+        $('.section.wheel a').each(function(k,v){
+          var uri = '/s/' + window.data.t1_surveys[k];
+          $(v).attr('href',uri).attr('id',window.data.t1_surveys[k]);
+        })
+      }
+
+      //设置第二个大任务
+      function setTaskTwo(){
+        fireUpBackground($('.section.stair'));
+        var survey_arr = window.data.t2_surveys.reverse(); 
+        $('.section.stair a').each(function(k,v){
+          var uri = '/s/' + survey_arr[k];
+          $(v).attr('href',uri).parent().attr('id',survey_arr[k]);
+        })
+      }
+
+      //设置第三个大任务
+      function setTaskThree(){
+        fireUpBackground($('.section.balloon'));
+        $('.section.balloon a').each(function(k,v){
+          if(window.data.t3_surveys[k]){
+            var uri = '/s/' + window.data.t3_surveys[k];
+            $(v).attr('href',uri).parent().attr('id',window.data.t3_surveys[k]);
+          }else{
+            //第三个大任务,如果小任务不足五个，移除多于的绳子和答题链接
+            $(v).parent().remove();
+            $($('.line-wrap .line')[k -1]).hide();
+          }
+        })
+      }
+
+      //设置抽奖
+      function setTaskFour(){
+
+      }
+
+      //答题跳转回来用
+      function setTaskDetail(step,content){
+        fireUpBackground(content);
+        switch(step){
+        case 1:
+          flagSurvey(step,window.data.t1_surveys,window.data.t1_status);
+          break;
+        case 2:
+          flagSurvey(step,window.data.t2_surveys,window.data.t2_status);
+          break;
+        case 3:
+          flagSurvey(step,window.data.t3_surveys,window.data.t3_status);
+          break;
+        default:
+          break;
+        }
+      }
+
+      //点亮不同场景的背景颜色
+      function fireUpBackground(secContent){
+        // do something
+      }
+
+      //标识某个问卷是否已经回答完毕
+      function flagSurvey(step,survey_arr,status_arr){
+        //for test
+        switch(step){
+        case 1:
+          setTaskOne();
+          break;
+        case 2:
+          setTaskTwo();
+          break;
+        case 3:
+          setTaskThree();
+          break;                    
+        }
+
+        setFlag(step,survey_arr,status_arr);
+
+        if(step == 1){
+          //摩天轮,如果该大任务的每个小任务都完成,则加载动画效果
+          if($.inArray(0,status_arr) < 0 ){
+            turnWheel();
+            //弹出话费充值提示
+            setTimeout(function(){
+              $.od.odPopup({
+                title:'恭喜',
+                content: '恭喜您,获得我们奖励的10元话费充值奖励,请输入您的手机号!',
+                closeButton:false,
+                confirm:function(){
+                  //ajax 生成第一大任务完成后的订单
+                  // do some ajax request
+                  //设置第二大任务
+                  TaskOpen('stair');
+                  //跳转到下一个任务
+                  $.fn.fullpage.moveSectionUp()
+                  
+                }
+              });              
+            },1000)
+          }else{
+            // 弹出气泡提示操作方法
+          }
+        }
+
+        if(step == 3){
+          //筐子点燃火焰
+          makeFire();
+
+          if($('.line-wrap.line:visible').length == 0){
+            //所有绳子都已经剪断,气球飞扬
+            flyBalloon();
+          }
+
+        }
+
+      }
+
+      //转动摩天轮
+      function turnWheel(){
+        var wheel = $('.section.wheel');
+        wheel.find('a').hide();
+        wheel.find('span').show();
+        flash = wheel.find('.ferris');
+        flashWheel();
+      }
+
+      //给气球点火
+      function makeFire(){
+        var basket = $('.basket');
+        if(basket.hasClass('left')){
+          basket.removeClass('left').addClass('right');
+        }else{
+          basket.removeClass('right').addClass('left');  
+        }
+        setTimeout(makeFire,300); 
+      }
+
+      // set Active
+      function setFlag(step,survey_arr,status_arr){
+        if(step == 2){
+          //跳楼机答题有顺序,必须从底往上答题
+          survey_arr = survey_arr.reverse();
+          //跳楼机,先上升，停止上升后标识底部的survey 为 答完状态
+          var move_to = status_arr.indexOf(0)
+
+          var prev_bottom =  parseInt($('.happy').css('bottom'),10);
+
+          if(move_to > 0){
+            target_bottom = move_to * 60 + prev_bottom;
+          }else if(move_to < 0){
+            target_bottom = '322';
+            prev_bottom = '280';
+          }
+
+          $('.happy').css('bottom',prev_bottom + 'px');
+          tmp_status = status_arr.filter(function(ele){return ele > 0 })
+          if(tmp_status.length > 1){
+            $('.sbottom').addClass('act');
+          }else{
+            $('.sbottom').removeClass('act');
+          }
+
+          foraward(prev_bottom,target_bottom,move_to);
+
+          $.each(survey_arr,function(k,v){
+            if(parseInt(status_arr[k]) > 0){
+              $('#' + v).addClass('act');
+            }else{
+              if(k != 0){
+                if( parseInt(status_arr[k -1]) == 0 ){
+                  $('#' + v).children().attr('href','javascript:void(0);');
+                }
+              }
+            }           
+          })
+        }else{
+          $.each(survey_arr,function(k,v){
+            if(parseInt(status_arr[k]) > 0){
+              $('#' + v).addClass('act');
+              if(step == 3){
+                //热气球,如果某个小任务完成,删除绳子
+                $($('.line-wrap .line')[k]).hide();
+              }
+            }
+          })          
+        }        
+      }
+
+      //摩天轮发光闪烁
+      function flashWheel(wheel){
+        var wheel = $('.section.wheel');
+        flash = wheel.find('.ferris');
+        if(flash.hasClass('flash')){
+          flash.removeClass('flash');
+        }else{
+          flash.addClass('flash');  
+        }
+        setTimeout(flashWheel,300);        
+      }
+
+      function flyBalloon(){
+        
+      }
+
+      setFullPage();
       
-      // window.t1_start = 
-      // window.t1_end =
 
-      // window.t2_start = 
-      // window.t2_end   =
-
-      // window.t3_start = 
-      // window.t3_end   = 
-
-
-      // if(window.pre_answer){
-      //   //当前用户已创建答案
-      //   if(window.ticket){
-      //     //拿到进入下一步的入场券 进入下一任务
-
-      //   }else{
-      //     if(window.pre_answer.finished){
-      //       //预调研不符合要求，过滤掉了
-      //       alert('');
-      //     }else{
-      //       //跳转到预调研答题页
-      //     }
-      //   }
-      // }else{
-      //   //跳转到预调研答题页
-      // }
-
-      // if(window.prev_start){
-      //   //已经开始答题
-      //   if(window.ticket){
-      //     //有票
-      //     if(t1_start){
-      //       //第一个大任务已经开始答题
-      //       if(t1_end){
-      //         //第一个大任务已经结束  尚未结束
-
-      //       }else{
-      //         //第一个大任务尚未结束
-      //       }
-      //     }else{
-      //       //第一个大任务尚未答题  第二个大任务 第三个 大任务
-      //     }
-      //   }else{
-      //     //没票
-      //     if(window.prev_end){
-      //       //预调研未通过
-      //     }else{
-      //       //预调研未完成,继续答题
-      //     }
-      //   }
-      // }else{
-      //   //尚未答题
-      // }
     })
+
   </script>
 <% end %>
 
 
-
-
 <div class='fullPage'>
-  <div class="header">
-    <div class="page">
-      <div class="bulletin">
-        <ul>
-          <li><span>5分钟之前</span>  <span>XXX</span> <span>获得了</span> <span>门票一张1</span></li>
-          <li><span>5分钟之前</span>  <span>XXX</span> <span>获得了</span> <span>门票一张2</span></li>
-          <li><span>5分钟之前</span>  <span>XXX</span> <span>获得了</span> <span>门票一张3</span></li>
-        </ul>
+  <div class='section balloon'>
+    <div class='page bg4'>
+      <div class="page-inner">
+        <div class='ball-cont'>
+          <div class='ball-body'>
+            <div class='umbrella'></div>
+            <div class='basket'>
+              <!-- <div class='stack stack5'>
+                <a href='javascript:void(0);'></a>
+              </div> -->
+            </div>
+          </div>
+          <div class='ball-line'>
+            <div class='line-wrap'>
+              <div class='line line-1'></div>
+              <div class='line line-2'></div>
+              <div class='line line-3'></div>
+              <div class='line line-4'></div>
+              <div class='bg-grass'></div>
+              <div class='stack stack1'><a href='javascript:void(0);'></a></div>
+              <div class='stack stack2'><a href='javascript:void(0);'></a></div>
+              <div class='stack stack3'><a href='javascript:void(0);'></a></div>
+              <div class='stack stack4'><a href='javascript:void(0);'></a></div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="share">
-        <a class="link" href="javascript:void(0);">分享拿大奖<b></b></a>
-        <ul class="share">
-         <li><a class="sina" href="javascript:void(0);"><i></i>新浪微博</a></li>
-         <li><a class="tencent" href="javascript:void(0);"><i></i>腾讯微博</a></li>
-         <li><a class="weixin" href="javascript:void(0);"><i></i>微信朋友圈</a></li>
-         <li><a class="qzone" href="javascript:void(0);"><i></i>QQ空间</a></li>
-         <li><a class="renren" href="javascript:void(0);"><i></i>人人网</a></li>
-       </ul>
-      </div>
-       <div class="questions">
-        <a class="link" href="javascript:void(0);">常见问题<b></b></a>
-        <ul>
-          <li><span class="title">如何参与活动?</span><span class="text">点击开始游戏，进入游乐场大门，按照提示参与活动</span></li>
-          <li><span class="title">3个任务是必须要都完成吗？</span><span class="text">任务是依次进行的，参与完成每个任务都会获得相应奖励，3次全部完成会获得3个奖励和一次额外奖励，如果只参与两次，只能获得两次奖励，不能获得最后的抽奖机会。</span></li>
-          <li><span class="title">都有哪些奖品？</span><span class="text">这个暂时保密哦</span></li>
-          <li><span class="title">如何领奖？</span><span class="text">获奖将会以电话或短信的方式通知您</span></li>
-        </ul>
-      </div>
-      
     </div>
   </div>
-  <div class='section'>section_1</div>
-  <div class='section'>section_2</div>
-  <div class='section'>
-    <div class="page">
-   <!-- 摩天轮 Start -->
-		<div id="ferris-wheel">
-			<span class="ferris-wheel-box">
-			<a href="javascript:void(0);" class="one active"></a>
-			<a href="javascript:void(0);" class="two"></a>
-			<a href="javascript:void(0);" class="three"></a>
-			<a href="javascript:void(0);" class="four"></a>
-			<a href="javascript:void(0);" class="five"></a>
-<!-- 						
-			<span class="ferris flash"></span>
-			<span class="holder"></span>
- -->
-			</span>
-     </div> 
-    <!-- 摩天轮 End -->    
+  <div class='section stair'>
+    <div class='page bg3'>
+      <div class="page-inner">
+        <div id='machine-wrap'>
+          <div class='happy'></div>
+          <div class='st5'><a href='javascript:void(0);'></a></div>
+          <div class='st4'><a href='javascript:void(0);'></a></div>
+          <div class='st3'><a href='javascript:void(0);'></a></div>
+          <div class='st2'><a href='javascript:void(0);'></a></div>
+          <div class='st1'><a href='javascript:void(0);'></a></div>
+          <div class='sbottom'></div>
+        </div>
+      </div>
     </div>
   </div>
-  <div class='section active'>
-		
-  </div>
-  <div class="footer">
-    <div class="page">
-       <span class="copy">版权所有 &copy; 2012-2014 <a href="http://wenjuanba.com">问卷吧</a></span>
-      
-       <!-- 在线交流 -->
-       <span class="contact">
-          <a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=2523562014&site=qq&menu=yes">QQ交流</a>
-          <a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=2523562014&site=qq&menu=yes">百度网桥</a>
-          <span>电话:400-650-7905 转838</span>
-       </span>
+  <div class='section wheel'>
+    <div class="page bg2">
+      <div class="page-inner">
+        <div id="ferris-wheel">
+          <span class="ferris-wheel-box">
+          <a href="javascript:void(0);" class="one"></a>
+          <a href="javascript:void(0);" class="two"></a>
+          <a href="javascript:void(0);" class="three"></a>
+          <a href="javascript:void(0);" class="four"></a>
+          <a href="javascript:void(0);" class="five"></a>
+          <span class="ferris"></span>
+          <span class="holder"></span>
+          </span>
+        </div>        
+      </div>
     </div>
-   
   </div>
+  <div class='section gate active'>
+    <div class="page bg1">
+      <div class="page-inner">
+        <!-- add custom html -->
+      </div>
+    </div>
+  </div>
+</div>

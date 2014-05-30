@@ -29,8 +29,8 @@
 <div>
   <span><%= Survey.find(@quota.survey_id).title %><span>
   <br />
-  <% @quota.quota[:region].each |key, value| %>
-    <span><%= key + ": " + value %></span>
+  <% @quota.quota["region"].each do |key, value| %>
+    <span><%= show_region_name(key) + ": " + value.to_s %></span>
     <br />
   <% end %>
 </div>

@@ -24,17 +24,21 @@ class Carnival::UsersController < Carnival::CarnivalController
     if current_carnival_user.blank?
       render_json_auto -1 and return
     end
+    if current_carnival_user.background_survey_status != CarnivalUser::FINISH
+      render_json_auto -2 and return
+    end
     case param[:type].to_i
     when 0
-      current_carnival_user.draw_second_stage_lottery(param[:amount].to_i)
+      retval = current_carnival_user.draw_second_stage_lottery(param[:amount].to_i)
     when 1
-      current_carnival_user.draw_third_stage_lottery
+      retval = current_carnival_user.draw_third_stage_lottery
     when 2
-      current_carnival_user.draw_share_lottery
+      retval = current_carnival_user.draw_share_lottery
     when 3
-      current_carnival_user.create_first_stage_order
+      retval = current_carnival_user.create_first_stage_order
     when 4
-      current_carnival_user.create_third_stage_mobile_order
+      retval = current_carnival_user.create_third_stage_mobile_order
     end
+    render_json_auto retval and return
   end
 end

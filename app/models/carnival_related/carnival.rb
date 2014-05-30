@@ -17,7 +17,7 @@ class Carnival
       "41024" => 0,       # nanjing
       "69696" => 0,       # wuhan
       "24640" => 0,       # shenyang
-      "28930" => 0,       # xi'an
+      "110656" => 0,       # xi'an
       "94272" => 0,       # chengdu
       "90112" => 0,       # chongqing
       "45120" => 0,       # hangzhou
@@ -29,7 +29,7 @@ class Carnival
       "28736" => 0,       # changchun
       "53376" => 0,       # xiamen
       "65600" => 0,       # zhengzhou
-      "65600" => 0,       # suzhou
+      "41280" => 0,       # suzhou
       "41088" => 0,       # wuxi
       "73792" => 0,       # changsha
       "53312" => 0,       # fuzhou
@@ -52,9 +52,37 @@ class Carnival
 
   PRE_SURVEY = "53859185eb0e5b7282000002"
   BACKGROUND_SURVEY = "53858ff3eb0e5b3366000023"
-  SURVEY = ["53868990eb0e5ba257000025", "53843373eb0e5bac1d00002f", "538415caeb0e5b815400000b", "53843581eb0e5bff58000001", "538436c9eb0e5bf8cf00003d", "5384011beb0e5b091d00001a", "5384282deb0e5bbcb900002b", "53842c9aeb0e5bbcb90000a1", "53842d30eb0e5bb228000008", "5385982aeb0e5b7282000022", "53843187eb0e5b2ac8000037", "53859a0deb0e5b2452000021"]
+  SURVEY = [
+    "53868990eb0e5ba257000025", 
+    "53843373eb0e5bac1d00002f", 
+    "538415caeb0e5b815400000b", 
+    "53843581eb0e5bff58000001", 
+    "538436c9eb0e5bf8cf00003d", 
+    "5384011beb0e5b091d00001a", 
+    "5384282deb0e5bbcb900002b", 
+    "53842c9aeb0e5bbcb90000a1", 
+    "53842d30eb0e5bb228000008", 
+    "5385982aeb0e5b7282000022", 
+    "53843187eb0e5b2ac8000037", 
+    "53859a0deb0e5b2452000021",
+    "53859a0deb0e5b245200002333",
+    "53859a0deb0e5b245200002444"
+  ]
 
   ALL_SURVEY = SURVEY + [PRE_SURVEY, BACKGROUND_SURVEY]
+
+  def self.generate_data
+    return if Carnival.all.length > 0
+    SURVEY.each do |e|
+      Carnival.create(survey_id: e, type: STATS)
+    end
+    Carnival.create(survey_id: PRE_SURVEY, type: STATS)
+    Carnival.create(survey_id: PRE_SURVEY, type: SETTING)
+  end
+
+  def self.clear_data
+    Carnival.destroy_all
+  end
 
   def self.pre_survey_finished(answer_id)
     answer = Answer.find(answer_id)
@@ -187,7 +215,7 @@ class Carnival
 
   def self.background_survey_finished(answer_id)
     carnival_user = answer.carnival_user
-    carnival_user.update(background_survey_status: CarnivalUser::FINISH)
+    carnival_user.update_attributes(background_survey_status: CarnivalUser::FINISH)
   end
 
   def self.survey_finished(answer_id)
