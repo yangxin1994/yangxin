@@ -3,7 +3,7 @@ class Carnival::UsersController < Carnival::CarnivalController
 
   def update
     carnival_user = CarnivalUser.find(params[:id])
-    carnival_user.email = params[:email]
+    carnival_user.mobile = params[:mobile]
     carnival_user.save
   end
 
@@ -29,15 +29,15 @@ class Carnival::UsersController < Carnival::CarnivalController
     end
     case param[:type].to_i
     when 0
-      retval = current_carnival_user.draw_second_stage_lottery(param[:amount].to_i)
+      retval = current_carnival_user.draw_second_stage_lottery(param[:amount].to_i, params[:mobile])
     when 1
-      retval = current_carnival_user.draw_third_stage_lottery
+      retval = current_carnival_user.draw_third_stage_lottery(params[:mobile])
     when 2
-      retval = current_carnival_user.draw_share_lottery
+      retval = current_carnival_user.draw_share_lottery(params[:mobile])
     when 3
-      retval = current_carnival_user.create_first_stage_order
+      retval = current_carnival_user.create_first_stage_order(params[:mobile])
     when 4
-      retval = current_carnival_user.create_third_stage_mobile_order
+      retval = current_carnival_user.create_third_stage_mobile_order(params[:mobile])
     end
     render_json_auto retval and return
   end

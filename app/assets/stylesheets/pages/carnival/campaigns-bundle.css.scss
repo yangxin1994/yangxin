@@ -1,8 +1,79 @@
 //=require ui/widgets/od_popup
-
-@import "common";
+@import "compass/css3/border-radius";
 @import "compass/utilities/general/clearfix";
 @import "activities/2014-6/ferris/*.png";
+//弹出窗
+.popup{
+	padding:30px;
+	min-width: 400px;
+	min-height:100px;
+	background: #f8f8f8;
+	float: left;
+	margin:20px;
+	// position: absolute;
+	// left:200px;
+	// top:200px;
+	text-align: center;
+	cursor: default;
+	@include border-radius(4px);
+	h2{
+		color:#E75C72;
+		font-size: 20px;
+		font-weight: bold;
+		text-align: center;
+	}
+	p{
+		color:#B3BDC6;
+		font-size: 14px;
+		text-align: center;
+		line-height: 1.5em;
+		margin-top:10px;
+		b{
+			color:#52ACEF;
+		}
+	}
+	.btn{
+		min-width: 100px;
+		padding:0 15px;
+		height:40px;
+		font-size: 16px;
+		line-height: 40px;
+		text-align: center;
+		color:#fff;
+		display: inline-block;
+		margin:15px 10px;
+		@include border-radius(4px);
+		&.submit{
+			background: #72CBED;
+			&:hover{
+				background: #46C2E8;
+			}
+		}
+		&.cancel{
+			background: #A2CA81;
+			&:hover{
+				background: #8CBA60;
+			}
+		}
+	}
+	input[type='text'], input[type='password']{
+		border: 1px solid #ccc;
+		@include border-radius(3px);
+		padding: 2px;
+		line-height:1.5em;
+		
+		&:focus {
+			border-color: rgb(245, 192, 0);
+			outline: none;
+		}
+		
+		&.error {
+			border-color: rgb(255, 0, 0);
+			outline: none;
+			color: #f00;
+		}
+	}
+}
 
 //摩天轮
  #ferris-wheel{
@@ -630,29 +701,7 @@ to{transform: rotate(359deg)}
 	height:600px;
 	margin-top:100px;	
 	background:#A2CA81 url('/assets/activities/2014-6/ferris/door_bg.png') no-repeat center center;
-	.door{
-		width:404px;
-		height:376px;
-		position: relative;	
-		margin:0 auto;
-		top:208px;
-		.left{
-			width:207px;
-			height:376px;
-			position: absolute;
-			top:0;
-			left:5px;
-			@include ferris-sprite(door_l);
-		}
-		.right{
-			width:197px;
-			height:376px;
-			position: absolute;
-			top:0;
-			right:22px;
-			@include ferris-sprite(door_r);
-		}
-	}
+
 }
 
 .footer{

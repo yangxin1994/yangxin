@@ -142,13 +142,24 @@ class EsaiApi
   end
 
   def self.callback(in_order_number, result)
-    order = Order.where(esai_order_id: in_order_number).first
-    return if order.nil?
-    if result.to_i == 4
-      order.update_attributes(status: Order::SUCCESS, esai_status: Order::ESAI_SUCCESS)
-      order.send_mobile_charge_success_message
+    o1 = Order.where(esai_order_id: in_order_number).first
+    o2 = CarnivalOrder.where(esai_order_id: in_order_number).first
+    if o1.present?
+      if result.to_i == 4
+        o1.update_attributes(status: Order::SUCCESS, esai_status: Order::ESAI_SUCCESS)
+        o1.send_mobile_charge_success_message
+      else
+        o1.update_attributes(esai_status: Order::ESAI_FAIL)
+      end
+    elsif o2.present?
+      if result.to_i == 4
+        o2.update_attributes(status: CarnivalOrder::SUCCESS, esai_status: CarnivalOrder::ESAI_SUCCESS)
+        o2.send_mobile_charge_success_message
+      else
+        o2.update_attributes(esai_status: CarnivalOrder::ESAI_FAIL)
+      end
     else
-      order.update_attributes(esai_status: Order::ESAI_FAIL)
+      return
     end
   end
 end
