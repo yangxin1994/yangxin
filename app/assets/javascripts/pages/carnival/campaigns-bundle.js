@@ -1,4 +1,26 @@
 jQuery(function($) {
+	(function(){
+		//滚动公告
+    var oDiv = $('.bulletin')[0];
+    var oUl = oDiv.children[0];
+    oUl.innerHTML += oUl.innerHTML;
+    var timer = null;
+    run();
+
+    function run() {
+        clearInterval(timer);
+        timer = setInterval(function() {
+            if (oUl.offsetTop <= -oUl.offsetHeight / 2) {
+                oUl.style.top = 0;
+            };
+            oUl.style.top = oUl.offsetTop - 1 + 'px';
+            if (oUl.offsetTop % 40) {} else {
+                clearInterval(timer);
+                setTimeout(run, 5000);
+            };
+        }, 30);
+    };
+	})();
 		//活动介绍
 		var ad = $('#ad')[0];
 		var drag = ad.children[0];
@@ -60,26 +82,6 @@ jQuery(function($) {
     pullDown('.questions');
     pullDown('.share');
     pullDown('.save');
-    //滚动公告
-    var oDiv = $('.bulletin')[0];
-    var oUl = oDiv.children[0];
-    oUl.innerHTML += oUl.innerHTML;
-    var timer = null;
-    run();
-
-    function run() {
-        clearInterval(timer);
-        timer = setInterval(function() {
-            if (oUl.offsetTop <= -oUl.offsetHeight / 2) {
-                oUl.style.top = 0;
-            };
-            oUl.style.top = oUl.offsetTop - 1 + 'px';
-            if (oUl.offsetTop % 40) {} else {
-                clearInterval(timer);
-                setTimeout(run, 5000);
-            };
-        }, 30);
-    };
 
     var timeOut = function() { //超时函数
         $("#lotteryBtn").rotate({
