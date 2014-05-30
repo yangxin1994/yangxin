@@ -11,7 +11,6 @@ class CarnivalOrder
   HANDLE = 2
   SUCCESS = 4
   FAIL = 8
-  CANCEL = 16
   REJECT = 64
   UNDER_REVIEW = 128
 
@@ -57,7 +56,7 @@ class CarnivalOrder
     options[:type] = options[:type].to_i
     options.delete(:type) if options[:type] == 0
     if options[:mobile].present?
-      orders = CarnivalUser.find_by_mobile(options[:mobile]).try(:carnival_orders)
+      orders = CarnivalOrder.where(mobile: /#{options[:mobile]}/)
       if orders
         orders = orders.desc(:created_at)
       else
@@ -69,24 +68,22 @@ class CarnivalOrder
       orders = CarnivalOrder.all.desc(:created_at)
     end
     if options[:status].present? && options[:status] != 0
-      status_ary = Tool.convert_int_to_base_arr(options[:status])
-      orders = orders.where(:status.in => status_ary)
+      orders = orders.where(status: options[:status])
     end
-    if options[:type].present? && options[:type] != 0
-      type_ary = Tool.convert_int_to_base_arr(options[:type])
-      orders = orders.where(:type.in => type_ary)
+    if options[:type].present? && options[:type] == 1
+      orders = orders.where(:type.in => [STAGE_1, STAGE_2, STAGE_3])
+    elsif options[:type].present? && options[:type] == 2
+      orders = orders.where(:type.in => [SHARE, STAGE_3_LOTTERY])
     end 
-    if options[:date_max].present?
-      orders = orders.where(:created_at.lt => Time.parse(options[:date_max]))
-    elsif options[:date_min].present?
-      orders = orders.where(:created_at.gt => Time.parse(options[:date_min]))
-    else
-      if options[:date].present?
-        _qdate = Time.now - options[:date].to_i.days
-        orders = orders.where(:created_at.gt => _qdate)
-      end
-    end
     return orders      
+  end
+
+  def prize_name
+    if carnival_prize.present?
+      return self.carnival_prize.name
+    else
+      return "话费充值"
+    end
   end
 
   def handle
@@ -135,27 +132,6 @@ class CarnivalOrder
     return self.save
   end
 
-  def express_str
-    str = ""
-    if type == 1
-      str = "易赛订单号: #{esai_order_id}"
-    else
-      str = "快递公司: #{express_info["company"]}
-      单号:#{express_info["tracking_number"]}
-      发货时间: #{express_info["sent_at"]}"
-    end
-  end
-
-  def update_express_info(express_info)
-    self.express_info = express_info
-    return self.save
-  end
-
-  def update_remark(remark)
-    self.remark = remark
-    return self.save
-  end
-
   def update_status(handle = true)
     self.update_attributes({"status" => CarnivalOrder::WAIT, "reviewed_at" => Time.now.to_i}) if self.answer.is_finish
     self.update_attributes({"status" => CarnivalOrder::REJECT, "reviewed_at" => Time.now.to_i} ) if self.answer.is_reject
@@ -167,5 +143,24 @@ class CarnivalOrder
       order.update_attributes(status: WAIT)
       order.handle
     end
+  end
+
+  def check_result
+    return nil if self.esai_order_id.blank?
+    retval = EsaiApi.new.check_result(self.esai_order_id, "None")
+    case retval
+    when 0, 1, 2
+      self.update_attributes({status: HANDLE, esai_status: ESAI_HANDLE})
+    when 4
+      self.update_attributes({status: SUCCESS, esai_status: ESAI_SUCCESS})
+      self.send_mobile_charge_success_message
+    when 5
+      self.update_attributes({status: HANDLE, esai_status: ESAI_FAIL})
+    end
+    return self.esai_status
+  end
+
+  def send_mobile_charge_success_message
+    SmsWorker.perform_async("charge_notification", self.mobile, "", gift_name: "#{self.amount}元话费")
   end
 end
