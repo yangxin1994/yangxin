@@ -43,6 +43,11 @@ class Admin::CarnivalsController < Admin::AdminController
     @orders = auto_paginate(order_list)   
   end
 
+  def recharge_fail_mobile
+    CarnivalOrder.recharge_fail_mobile
+    redirect_to action: :orders and return
+  end
+
   def handle
     render_json CarnivalOrder.where(:_id => params[:id]).first do |order|
       order.manu_handle
