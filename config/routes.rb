@@ -623,9 +623,9 @@ OopsData::Application.routes.draw do
 
   namespace :carnival do
     resources :users do
-      collection do 
-        post :draw_lottery
-      end       
+      collection do
+        post :login, :draw_lottery
+      end
     end
     resources :campaigns, :only => [:index]
   end
