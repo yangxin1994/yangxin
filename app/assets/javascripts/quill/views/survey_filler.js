@@ -246,6 +246,12 @@ $(function(){
 			} else if(value.answer_status == 4 || value.answer_status == 8 || value.answer_status == 32) {
 				// answer_status: 4（待审核），8（等待代理审核），32（完成）
 				if(this.options.reward.reward_scheme_type == 0) {
+          // hack for survey carnival
+          if(!this.options.is_preview && this.model.get('style_setting').redirect_link == 'carnival') {
+            location.href = "/carnival/campaigns";
+            return;
+          }
+          // end hack
 					// free, show message
 					this.hbs({
 						title: this.model.get('title'),
