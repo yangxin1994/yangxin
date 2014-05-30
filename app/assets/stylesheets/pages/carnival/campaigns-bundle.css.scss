@@ -111,119 +111,122 @@
 
 
 #machine-wrap{
-	width:106px;
-	height:376px;
-	position: relative;
-	@include ferris-sprite(all);
-	a{
-		display:block;
-		width:100%;
-		height:100%;
+	position: absolute;
+	left:360px;
+	bottom:25%;
+	.wrap-skin{
+		width:106px;
+		height:376px;		
+		position: relative;
+		@include ferris-sprite(all);
+		a{
+			display:block;
+			width:100%;
+			height:100%;
+		}
+		.happy{
+			width:106px;
+			height:32px;
+			position: absolute;
+			left:2px;
+			z-index:1;
+			bottom:35px;
+			//bottom:322px;
+			@include ferris-sprite(happy);	
+			// move 60px from 1 to 4
+			// move 42px from 4 to 5	
+		}
+		.st5{
+			width:106px;
+			height:72px;
+			position: absolute;
+			left:2px;
+			bottom:304px;
+			cursor:pointer;
+			@include ferris-sprite(st5);
+			&:hover{
+				@include ferris-sprite(st5_hover);
+			}
+			&.act{
+				@include ferris-sprite(st5_active);	
+			}
+		}		
+		.st4{
+			width:106px;
+			height:60px;
+			position: absolute;
+			left:2px;
+			bottom:244px;
+			cursor:pointer;
+			@include ferris-sprite(st4);
+			&:hover{
+				@include ferris-sprite(st4_hover);
+			}
+			&.act{
+				@include ferris-sprite(st4_active);	
+			}
+		}	
+		.st3{
+			width:106px;
+			height:60px;
+			position: absolute;
+			left:2px;
+			bottom:184px;	
+			cursor:pointer;	
+			@include ferris-sprite(st3);
+			&:hover{
+				@include ferris-sprite(st3_hover);
+			}
+			&.act{
+				@include ferris-sprite(st3_active);	
+			}
+		}	
+		.st2{
+			width:106px;
+			height:60px;
+			position: absolute;
+			left:2px;
+			bottom:124px;
+			cursor:pointer;
+			@include ferris-sprite(st2);
+			&:hover{
+				@include ferris-sprite(st2_hover);
+			}
+			&.act{
+				@include ferris-sprite(st2_active);	
+			}
+		}	
+		.st1{
+			width:106px;
+			height:60px;
+			position: absolute;
+			left:2px;
+			bottom:64px;
+			cursor:pointer;		
+			@include ferris-sprite(st1);
+			&:hover{
+				@include ferris-sprite(st1_hover);
+			}
+			&.act{
+				@include ferris-sprite(st1_active);	
+			}
+		}
+		.sbottom{
+			position: absolute;
+			left:0px;
+			bottom:0px;
+			width:106px;
+			height:64px;
+			@include ferris-sprite(foot);
+			&.act{
+				@include ferris-sprite(foot_active);
+			}
+		}
+		&.act{
+			@include ferris-sprite(all_act);
+		}
 	}
-	.happy{
-		width:106px;
-		height:32px;
-		position: absolute;
-		left:2px;
-		z-index:1;
-		bottom:35px;
-		//bottom:322px;
-		@include ferris-sprite(happy);	
-		// move 60px from 1 to 4
-		// move 42px from 4 to 5	
-	}
-	.st5{
-		width:106px;
-		height:72px;
-		position: absolute;
-		left:2px;
-		bottom:304px;
-		cursor:pointer;
-		@include ferris-sprite(st5);
-		&:hover{
-			@include ferris-sprite(st5_hover);
-		}
-		&.act{
-			@include ferris-sprite(st5_active);	
-		}
-	}		
-	.st4{
-		width:106px;
-		height:60px;
-		position: absolute;
-		left:2px;
-		bottom:244px;
-		cursor:pointer;
-		@include ferris-sprite(st4);
-		&:hover{
-			@include ferris-sprite(st4_hover);
-		}
-		&.act{
-			@include ferris-sprite(st4_active);	
-		}
-	}	
-	.st3{
-		width:106px;
-		height:60px;
-		position: absolute;
-		left:2px;
-		bottom:184px;	
-		cursor:pointer;	
-		@include ferris-sprite(st3);
-		&:hover{
-			@include ferris-sprite(st3_hover);
-		}
-		&.act{
-			@include ferris-sprite(st3_active);	
-		}
-	}	
-	.st2{
-		width:106px;
-		height:60px;
-		position: absolute;
-		left:2px;
-		bottom:124px;
-		cursor:pointer;
-		@include ferris-sprite(st2);
-		&:hover{
-			@include ferris-sprite(st2_hover);
-		}
-		&.act{
-			@include ferris-sprite(st2_active);	
-		}
-	}	
-	.st1{
-		width:106px;
-		height:60px;
-		position: absolute;
-		left:2px;
-		bottom:64px;
-		cursor:pointer;		
-		@include ferris-sprite(st1);
-		&:hover{
-			@include ferris-sprite(st1_hover);
-		}
-		&.act{
-			@include ferris-sprite(st1_active);	
-		}
-	}
-	.sbottom{
-		position: absolute;
-		left:0px;
-		bottom:0px;
-		width:106px;
-		height:64px;
-		@include ferris-sprite(foot);
-		&:hover{
-			@include ferris-sprite(foot_hover);
-		}
-		&.act{
-			@include ferris-sprite(foot_active);
-		}
-	}
-	&.act{
-		@include ferris-sprite(all_act);
-	}
+
 }
 
 .balloon{
@@ -424,9 +427,7 @@ to{transform: rotate(359deg)}
 	z-index: 9;
 	margin:0 auto;
 	.page-inner{
-		position: relative;
 		padding:40px 0;
-		// position: relative;
 	}
 }
 .header{

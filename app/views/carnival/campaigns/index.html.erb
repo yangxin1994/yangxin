@@ -9,8 +9,8 @@
 
       // for test
       pre_status = 32;
-      window.current_step = 3;
-      window.data.t2_status = [1,2,2,2,1];
+      window.current_step = 2;
+      window.data.t2_status = [0,0,0,0,0];
       window.data.t3_status = [1,1,1,1,0];
 
 
@@ -269,7 +269,7 @@
           var move_to = status_arr.indexOf(0)
 
           var prev_bottom =  parseInt($('.happy').css('bottom'),10);
-
+          var target_bottom = 35;
           if(move_to > 0){
             target_bottom = move_to * 60 + prev_bottom;
           }else if(move_to < 0){
@@ -394,13 +394,15 @@
     <div class='page bg3'>
       <div class="page-inner">
         <div id='machine-wrap'>
-          <div class='happy'></div>
-          <div class='st5'><a href='javascript:void(0);'></a></div>
-          <div class='st4'><a href='javascript:void(0);'></a></div>
-          <div class='st3'><a href='javascript:void(0);'></a></div>
-          <div class='st2'><a href='javascript:void(0);'></a></div>
-          <div class='st1'><a href='javascript:void(0);'></a></div>
-          <div class='sbottom'></div>
+          <div class='wrap-skin'>
+            <div class='happy'></div>
+            <div class='st5'><a href='javascript:void(0);'></a></div>
+            <div class='st4'><a href='javascript:void(0);'></a></div>
+            <div class='st3'><a href='javascript:void(0);'></a></div>
+            <div class='st2'><a href='javascript:void(0);'></a></div>
+            <div class='st1'><a href='javascript:void(0);'></a></div>
+            <div class='sbottom'></div>            
+          </div>
         </div>
       </div>
     </div>
