@@ -16,6 +16,8 @@ class SmsWorker
       retval = SmsApi.find_password_sms(sms_type, mobile, callback, opt)
     when 'charge_notification'
       retval = SmsApi.charge_confirm_sms(sms_type, mobile, callback, opt)
+    when 'carnival_re_invitation'
+      retval = SmsApi.carnival_re_invitation(sms_type, mobile, callback, opt)
     end
     return true
   end

@@ -4,17 +4,14 @@
   <script type="text/javascript">
     $(function(){
       window.data = <%= raw (@obj).to_json %>;
-      console.log('====================================')
-      console.log(window.data)
-      console.log('====================================')
       var pre_status = parseInt(window.data.pre_status,10);
       window.current_step = parseInt(window.data.step,10);
 
       // for test
-      // pre_status = 32;
-      // window.current_step = 3;
-      // window.data.t2_status = [1,2,2,2,1];
-      // window.data.t3_status = [1,1,1,1,0];
+      pre_status = 32;
+      window.current_step = 0;
+      window.data.t2_status = [0,0,0,0,0];
+      window.data.t3_status = [1,1,1,1,0];
 
 
       if(window.data.t3_surveys.length == 4){
@@ -104,7 +101,12 @@
       // open door
       function openDoor(){
         TaskOpen('wheel');// start the wheel section
-        $.fn.fullpage.moveSectionUp()// go to next section
+        $('.door .left').animate({'left':'-175px'},3000,function(){})
+
+        $('.door .right').animate({'right':'-148px'},3000,function(){
+          $.fn.fullpage.moveSectionUp()// go to next section
+        })
+        
       }
 
       // open task完成上一个任务后设置下一个任务
@@ -272,7 +274,7 @@
           var move_to = status_arr.indexOf(0)
 
           var prev_bottom =  parseInt($('.happy').css('bottom'),10);
-
+          var target_bottom = 35;
           if(move_to > 0){
             target_bottom = move_to * 60 + prev_bottom;
           }else if(move_to < 0){
@@ -284,8 +286,10 @@
           tmp_status = status_arr.filter(function(ele){return ele > 0 })
           if(tmp_status.length > 1){
             $('.sbottom').addClass('act');
+            $('.happy').addClass('act');
           }else{
             $('.sbottom').removeClass('act');
+            $('.happy').removeClass('act');
           }
 
           foraward(prev_bottom,target_bottom,move_to);
@@ -326,7 +330,26 @@
       }
 
       function flyBalloon(){
-        
+        var bg  = parseInt($('.bg4').css('background-position-y'));
+        var nbg = bg - 1 + '%'
+        $('.bg4').css({'background-position-y': nbg});
+        var grass_top = parseInt( $('.ball-line').css('top') );
+        var ngrass_top = grass_top + 10 + 'px';
+        $('.ball-line').css({'top':ngrass_top});
+
+        if(nbg == '0%'){
+          $('.ball-body').animate({'top':'-350px'},3000,function(){
+            console.log('---ball hidden ------------')
+            console.log('===========================')
+          })
+
+          $('.ly-plate').fadeIn(3000,function(){
+            console.log('----already show')
+          })
+
+          return false;
+        }
+        setTimeout(flyBalloon,100)
       }
 
       setFullPage();
@@ -365,6 +388,12 @@
             </div>
           </div>
         </div>
+        <div class="ly-plate">
+          <div class="rotate-bg"></div>
+            <div class="lottery-star">
+              <img src="/assets/activities/2014-6/ferris/rotate-static.png" id="lotteryBtn">
+            </div>
+        </div>
       </div>
     </div>
   </div>
@@ -372,13 +401,15 @@
     <div class='page bg3'>
       <div class="page-inner">
         <div id='machine-wrap'>
-          <div class='happy'></div>
-          <div class='st5'><a href='javascript:void(0);'></a></div>
-          <div class='st4'><a href='javascript:void(0);'></a></div>
-          <div class='st3'><a href='javascript:void(0);'></a></div>
-          <div class='st2'><a href='javascript:void(0);'></a></div>
-          <div class='st1'><a href='javascript:void(0);'></a></div>
-          <div class='sbottom'></div>
+          <div class='wrap-skin'>
+            <div class='happy'></div>
+            <div class='st5'><a href='javascript:void(0);'></a></div>
+            <div class='st4'><a href='javascript:void(0);'></a></div>
+            <div class='st3'><a href='javascript:void(0);'></a></div>
+            <div class='st2'><a href='javascript:void(0);'></a></div>
+            <div class='st1'><a href='javascript:void(0);'></a></div>
+            <div class='sbottom'></div>            
+          </div>
         </div>
       </div>
     </div>

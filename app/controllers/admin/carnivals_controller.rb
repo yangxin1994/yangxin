@@ -43,25 +43,29 @@ class Admin::CarnivalsController < Admin::AdminController
     @orders = auto_paginate(order_list)   
   end
 
+  def recharge_fail_mobile
+    CarnivalOrder.recharge_fail_mobile
+    redirect_to action: :orders and return
+  end
+
+  def check_order_result
+    order = CarnivalOrder.find(params[:carnival_order_id])
+    retval = order.check_result
+    logger.info "AAAAAAAAAAAAAAAA"
+    logger.info retval
+    logger.info "AAAAAAAAAAAAAAAA"
+    render_json_auto retval
+  end
+
   def handle
     render_json CarnivalOrder.where(:_id => params[:id]).first do |order|
       order.manu_handle
     end
   end
+  
   def finish
     render_json CarnivalOrder.where(:_id => params[:id]).first do |order|
       order.finish(params[:success] == 'true', params[:remark])
     end
   end
-  def update_express_info
-    render_json CarnivalOrder.where(:_id => params[:id]).first do |order|
-      order.update_express_info(params[:express_info])
-    end
-  end
-  def update_remark
-    render_json CarnivalOrder.where(:_id => params[:id]).first do |order|
-      order.update_remark(params[:remark]) 
-    end
-  end
-    
 end
