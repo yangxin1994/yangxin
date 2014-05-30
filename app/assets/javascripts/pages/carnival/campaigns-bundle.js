@@ -110,7 +110,7 @@ BookmarkApp = function () {
     } else if (window.home || isWebkit || isIEmac || isMac) {
       str = (isMac ? 'Command/Cmd' : 'CTRL') + ' + D'; // Netscape, Safari, iCab, IE5/Mac
     }
-    return ((str) ? 'Press ' + str + ' to bookmark this page.' : str);
+    return ((str) ? '请按' + str + ' 保存到收藏夹.' : str);
   }
 
   function isIE8() {
