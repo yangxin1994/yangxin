@@ -453,4 +453,23 @@ module ApplicationHelper
     end
   end 
 
+  def show_region_name(code)
+    case code.to_i
+    when 1
+      return "三线华东"
+    when 2
+      return "三线华南"
+    when 3
+      return "三线华中"
+    when 4
+      return "三线华北"
+    when 5
+      return "三线西北"
+    when 6
+      return "三线西南"
+    when 7
+      return "三线东北"
+    end
+    return QuillCommon::AddressUtility.find_province_city_town_by_code(code)
+  end
 end

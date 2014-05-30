@@ -264,6 +264,7 @@ OopsData::Application.routes.draw do
     resources :carnivals do
       collection do
         get :pre_surveys, :surveys, :orders, :region_quota
+        post :update_quota
       end
     end
 

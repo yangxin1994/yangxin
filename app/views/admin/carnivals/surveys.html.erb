@@ -43,11 +43,11 @@
       <% @quotas.each do |quota| %>
       <tr>
         <td><%= Survey.find(quota.survey_id).title %></td>
-        <td><%= quota.quota[:amount] %></td>
-        <td><%= quota.quota[:gender].join('/') %></td>
-        <td><%= quota.quota[:age].join('/') %></td>
-        <td><%= quota.quota[:income].join('/') %></td>
-        <td><%= quota.quota[:education].join('/') %></td>
+        <td><%= quota.quota["amount"] %></td>
+        <td><%= quota.quota["gender"].join('/') %></td>
+        <td><%= quota.quota["age"].join('/') %></td>
+        <td><%= quota.quota["income"].join('/') %></td>
+        <td><%= quota.quota["education"].join('/') %></td>
         <td><a href="/admin/carnivals/region_quota?survey_id=<%=quota.survey_id%>">查看</a></td>
       </tr>
       <% end %>
