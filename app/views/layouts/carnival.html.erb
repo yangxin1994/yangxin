@@ -1,22 +1,26 @@
-<% content_for :app_head do %>
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= @page_title or "#{corp_name_short} | 专注网络调研 让调研更科学" %></title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="description" content="<%= corp_name %>网络调研/网络调查平台是专业从事网络数据产品和市场调研的第三方服务商，为您提供优质、科学、严谨的数字化调研和研究咨询服务。" />
+  <meta name="Keywords" content="<%= corp_name_short %>,<%= corp_name %>,网络调查,网络调研,数字化调研,优数调研,市场调研,研究咨询,连续性调研,问卷调查" />
+
   <%= stylesheet_link_tag    "layouts/carnival-layout" %>
+  <%= javascript_include_tag "layouts/app-layout" %>
   <%= javascript_include_tag "layouts/carnival-layout" %>
-	<style>
-/*		.section.a {filter:progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);-webkit-filter: grayscale(100%);}*/
-	</style>
-  <script type="text/javascript">
-  FAYE_SERVER_URL = "<%= Setting.faye_server %>";
-
-  jQuery(function($) {
-
-  });
-  </script>
-
+  <%= csrf_meta_tags %>
+  <link rel="shortcut icon" href="/assets/od-quillme/favicon.ico">
+  
+  
+  <style>
+/*    .section.a {filter:progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);-webkit-filter: grayscale(100%);}*/
+  </style>
   <%= yield :head %>
 
-<% end %>
+</head>
+<body>
 
-<% content_for :app_content do %>
   <div class="header">
     <div class="page">
       <div class="header-box">
@@ -39,7 +43,7 @@
         </div>
 
 
-				<div class="share">
+        <div class="share">
           <a class="link" href="javascript:void(0);">分享拿大奖<b></b></a>
           <div class="share-box">
           	<p>
@@ -84,6 +88,15 @@
   </div>
   <div style='display:none;'><script type="text/javascript"> var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://"); document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fb54732309180d2feab954364fdebf7f2' type='text/javascript'%3E%3C/script%3E")) </script>
   </div>
-<% end %>
 
-<%= parent_layout 'app' %>
+<% if Rails.env.production? %>
+<div style='display:none;'>
+  <!-- Baidu statistic -->
+  <script type="text/javascript">
+  var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+  document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fbd6514854e0a82f4cf35b8a23b78ee51' type='text/javascript'%3E%3C/script%3E"));
+  </script>
+</div>
+<% end %>
+</body>
+</html>

@@ -7,9 +7,12 @@
       var pre_status = parseInt(window.data.pre_status,10);
       window.current_step = parseInt(window.data.step,10);
 
+      if( $.cookie('ticket') && window.current_step == 0){
+        window.current_step = 1; //如果拿到票后刷新页面，直接进入第一个任务
+      }
       // for test
       pre_status = 32;
-      window.current_step = 0;
+      //window.current_step = 3;
       window.data.t2_status = [0,0,0,0,0];
       window.data.t3_status = [1,1,1,1,0];
 
@@ -20,7 +23,7 @@
 
       if (pre_status) {     
         if(pre_status == 2){// for reject
-          $.od.odPopup({content: '您不在此次调研范围内!'});
+          $.od.odPopup({withoutTitle:true,content: '您不在此次调研范围内!'});
         }else if(pre_status == 32){ // for finish
           // get ticket
           if(window.current_step){
@@ -29,7 +32,7 @@
           }else{
             //预调研通过,通知领取门票,并进入下一个任务
             $.od.odPopup({
-              title:'恭喜',
+              withoutTitle:true,
               content: '恭喜您获得活动门票!',
               closeButton:false,
               confirm:function(){
@@ -67,7 +70,7 @@
       function fallback(){
         $('.happy').animate({'bottom':'35px'},3000,function(){
           $.od.odPopup({
-            title:'恭喜',
+            withoutTitle:true,
             content: '恭喜您获得一次抽奖活动!',
             closeButton:false,
             confirm:function(){
@@ -105,6 +108,8 @@
 
         $('.door .right').animate({'right':'-148px'},3000,function(){
           $.fn.fullpage.moveSectionUp()// go to next section
+          var d = new Date();
+          $.cookie('ticket',d.getTime());
         })
         
       }
@@ -213,7 +218,7 @@
             //弹出话费充值提示
             setTimeout(function(){
               $.od.odPopup({
-                title:'恭喜',
+                withoutTitle:true,
                 content: '恭喜您,获得我们奖励的10元话费充值奖励,请输入您的手机号!',
                 closeButton:false,
                 confirm:function(){
@@ -256,12 +261,19 @@
 
       //给气球点火
       function makeFire(){
+        var umbrella = $('.umbrella');
+        umbrella.addClass('act');
         var basket = $('.basket');
-        if(basket.hasClass('left')){
-          basket.removeClass('left').addClass('right');
-        }else{
-          basket.removeClass('right').addClass('left');  
+
+        if(window.data.t3_status.indexOf(0) < 0){
+          if(basket.hasClass('left')){
+            basket.removeClass('left').addClass('right');
+          }else{
+            basket.removeClass('right').addClass('left');  
+          }          
         }
+        
+
         setTimeout(makeFire,300); 
       }
 
@@ -337,24 +349,16 @@
         var ngrass_top = grass_top + 10 + 'px';
         $('.ball-line').css({'top':ngrass_top});
 
-        if(nbg == '0%'){
-          $('.ball-body').animate({'top':'-350px'},3000,function(){
-            console.log('---ball hidden ------------')
-            console.log('===========================')
+        if(nbg == '30%'){
+          $('.ball-body').animate({'top':'-350px'},4000,function(){
+            $('.ly-plate').fadeIn(4000,function(){})
           })
-
-          $('.ly-plate').fadeIn(3000,function(){
-            console.log('----already show')
-          })
-
           return false;
         }
         setTimeout(flyBalloon,100)
       }
 
       setFullPage();
-      
-
     })
 
   </script>
