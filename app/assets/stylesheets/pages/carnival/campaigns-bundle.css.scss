@@ -131,10 +131,10 @@
 			left:2px;
 			z-index:1;
 			bottom:35px;
-			//bottom:322px;
 			@include ferris-sprite(happy);	
-			// move 60px from 1 to 4
-			// move 42px from 4 to 5	
+			&.act{
+				@include ferris-sprite(happya);	
+			}
 		}
 		.st5{
 			width:106px;
