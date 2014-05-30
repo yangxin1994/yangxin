@@ -18,9 +18,9 @@ jQuery(function($) {
 				}else{
 					var timer = setInterval(function(){
 						a+=10;
-						if(a>=40){
+						if(a>=0){
 							clearInterval(timer);
-							a=40;
+							a=0;
 							b=true;
 						}
 						ad.style.top = a + 'px';
@@ -28,17 +28,19 @@ jQuery(function($) {
 				};
 			};
 			
-
+		// var oSun = $('.sun')[0];
     //顶部下拉菜单
     function pullDown(obj) {
         var oBox = $(obj)[0];
         oBox.onmouseover = function() {
             this.children[1].style.display = 'block';
             this.children[0].className = 'link active';
+            // oSun.style.display = 'none';
         };
         oBox.onmouseout = function() {
             this.children[1].style.display = 'none';
             this.children[0].className = 'link';
+            // oSun.style.display = 'block';
         };
     };
     pullDown('.questions');

@@ -1,43 +1,29 @@
-//=require jquery.fancybox
-@import "common";
+//=require ui/widgets/od_popup
 @import "compass/css3/border-radius";
 @import "compass/utilities/general/clearfix";
 @import "activities/2014-6/ferris/*.png";
 @import "compass/reset";
 //弹出窗
-.carnival-popup{
-	a{
-		text-decoration: none;
-	}
+a{
+	text-decoration: none;
+}
+.popup{
 	padding:30px;
 	min-width: 400px;
 	min-height:100px;
-	position:relative;
 	background: #f8f8f8;
 	float: left;
 	margin:20px;
+	// position: absolute;
+	// left:200px;
+	// top:200px;
 	text-align: center;
 	cursor: default;
 	@include border-radius(4px);
-	.notic{
-		display:none;
-		position:absolute;
-		top:6px;
-		width:400px;
-		font-size: 14px;
-		background:#fe7b91;
-		color:#fff;
-		@include one-line(26px);
-		a{
-			
-			color:#fff;
-		}
-
 	img{
 		display: block;
 		margin:0 auto;
 		margin-top:15px;
-
 	}
 	h2{
 		color:#E75C72;
@@ -543,7 +529,7 @@ to{transform: rotate(359deg)}
 	}
 	#ad{
 		position: absolute;
-		top:20px;
+		top:40px;
 		left:50%;
 		margin-left:-550px;
 		width:1100px;
@@ -572,7 +558,6 @@ to{transform: rotate(359deg)}
 		position: absolute;
 		right:20px;
 		top:50px;
-		z-index: 99;
 		@include ferris-sprite(sun);
 		&:active{
 			@include ferris-sprite(sun_hover);
@@ -882,7 +867,8 @@ to{transform: rotate(359deg)}
 		color:red;
 	}
 	&.ty{
-		right:180px;
+		position: absolute;
+		right:160px;
 		top:50px;
 		width:83px;
 		height:52px;
