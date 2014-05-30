@@ -265,6 +265,10 @@ OopsData::Application.routes.draw do
       collection do
         get :pre_surveys, :surveys, :orders, :region_quota
       end
+
+      member do
+        put :handle, :finish, :update_express_info, :update_remark
+      end
     end
 
     resources :reviews do
