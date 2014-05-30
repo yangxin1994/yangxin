@@ -33,7 +33,8 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       t3_surveys:surveys[2],
       t1_status:step_arr[0],
       t2_status:step_arr[1],
-      t3_status:step_arr[2]
+      t3_status:step_arr[2],
+      pre_reject_count: CarnivalUser.where(pre_survey_status: 2).length
     }
 
     return @obj
