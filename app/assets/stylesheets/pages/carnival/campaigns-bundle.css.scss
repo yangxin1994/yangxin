@@ -514,21 +514,6 @@ to{transform: rotate(359deg)}
 	}
 }
 .header{
-	.sun{
-		width:120px;
-		height:117px;
-		position: absolute;
-		right:50px;
-		top:50px;
-		z-index: 999;
-		@include ferris-sprite(sun);
-		&:active{
-			@include ferris-sprite(sun_hover);
-		}
-		&.active{
-			@include ferris-sprite(sun_active);
-		}
-	}
 	width:100%;
 	height:40px;
 	line-height: 40px;
@@ -537,15 +522,57 @@ to{transform: rotate(359deg)}
 	background: #333;
 	position: fixed;
 	top:0;
-	z-index: 999;
 	font-size: 14px;
+	z-index: 999;
 	a{
 		color:#fff;
+	}
+	#ad{
+		position: absolute;
+		top:20px;
+		left:50%;
+		margin-left:-550px;
+		width:1100px;
+		height:665px;
+		z-index: 10;
+		background: url('/assets/activities/2014-6/ferris/ad.png') no-repeat;
+		border-top:none;
+		.drag{
+			position: absolute;
+			bottom:-75px;
+			left:50%;
+			margin-left:-20px;
+			width:40px;
+			height:94px;
+			background: url('/assets/activities/2014-6/ferris/drag.png') no-repeat;
+			display: block;
+			z-index: 6;
+			&:hover{
+				bottom:-85px;
+			}
+		}
+	}
+	.sun{
+		width:120px;
+		height:117px;
+		position: absolute;
+		right:20px;
+		top:50px;
+		z-index: 99;
+		@include ferris-sprite(sun);
+		&:active{
+			@include ferris-sprite(sun_hover);
+		}
+		&.active{
+			@include ferris-sprite(sun_active);
+		}
 	}
 	.header-box{
 		height:40px;
 		line-height: 40px;
 		background: #333;
+		position: relative;
+		z-index: 99;
 	}
 	.bulletin{
 		width:500px;

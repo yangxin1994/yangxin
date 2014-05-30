@@ -1,4 +1,34 @@
 jQuery(function($) {
+		//活动介绍
+		var ad = $('#ad')[0];
+		var drag = ad.children[0];
+		var b=true;
+		var a=ad.offsetTop;
+		drag.onclick = function(){
+			if(b){
+				var timer = setInterval(function(){
+						a-=10;
+						if(a<=-ad.offsetHeight){
+							clearInterval(timer);
+							a=-ad.offsetHeight;
+							b=false;
+						}
+						ad.style.top = a + 'px';
+					},20)
+				}else{
+					var timer = setInterval(function(){
+						a+=10;
+						if(a>=40){
+							clearInterval(timer);
+							a=40;
+							b=true;
+						}
+						ad.style.top = a + 'px';
+					},20)
+				};
+			};
+			
+
     //顶部下拉菜单
     function pullDown(obj) {
         var oBox = $(obj)[0];
