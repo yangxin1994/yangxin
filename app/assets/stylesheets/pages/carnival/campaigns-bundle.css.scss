@@ -9,8 +9,6 @@
 	width:350px;
 	height:350px;
 	position: relative;
-	top:100px;
-	left:300px;
  .ferris-wheel-box{
 		width:350px;
 		height:350px;
@@ -378,21 +376,133 @@ to{transform: rotate(359deg)}
 }
 .page{
 	width:1100px;
+	height:100%;
+	background: #A2CA81;
+	position: relative;
+	z-index: 9;
 	margin:0 auto;
+	.page-inner{
+		padding:40px 0;
+	}
 }
 .header{
 	width:100%;
-	height:30px;
-	line-height: 30px;
+	height:40px;
+	line-height: 40px;
 	cursor: default;
 	color:#fff;
 	background: #333;
 	position: fixed;
 	top:0;
 	z-index: 999;
+	font-size: 14px;
 	a{
 		color:#fff;
 	}
+	.header-box{
+		height:40px;
+		line-height: 40px;
+		background: #333;
+	}
+	.bulletin{
+		width:500px;
+		height:40px;
+		float: left;
+		position: relative;
+		overflow: hidden;
+		ul{
+			width:500px;
+			position: absolute;
+		}
+	}
+	.link{
+		padding:0 15px;
+		display: block;
+		b{
+				width:1px;
+				height:1px;
+				border:5px #fff solid;
+				border-left-color:#333;
+				border-right-color:#333;
+				border-bottom-color:#333;
+				display: inline-block;
+				position: relative;
+				top:4px;
+				left:5px;
+			}
+		&.active{
+			background: #fff;
+			color:#333;
+			cursor: default;
+			b{
+				border:5px #dbdbdb solid;
+				border-left-color:#fff;
+				border-right-color:#fff;
+				border-bottom-color:#fff;
+			}
+		}
+	}
+	.share{
+		float: right;
+		position: relative;
+		ul{
+			width:150px;
+			position: absolute;
+			background: #fff;
+			top:40px;
+			right:0;
+			display: none;
+			li{
+				margin:10px;
+				a{
+					color:#333;
+					background: #f6f6f6;
+					display: block;
+					padding:0 10px;
+					i{
+						width:24px;
+						height:24px;
+						background: #fff;
+						float: left;
+						margin:8px 8px 0 0 ;
+					}
+				}
+			}
+		}
+	}
+	.questions{
+		float: right;
+		position: relative;
+		ul{
+			width:260px;
+			position: absolute;
+			background: #fff;
+			top:40px;
+			left:0;
+			display: none;
+			li{
+				margin: 10px;
+				span{
+					color:#333;
+					display: block;
+					line-height: 1.6em;
+					&.title{
+						background: #f8f8f8;
+						padding:3px 10px;
+						color:#333;
+					}
+					&.text{
+						padding:10px;
+						padding-bottom:0;
+						color:#999;
+					}
+				}
+			}
+		}
+	}
+}
+.door{
+	width:1100px;
 }
 .footer{
 	width:100%;
@@ -402,10 +512,34 @@ to{transform: rotate(359deg)}
 	color:#fff;
 	background: #333;
 	position: fixed;
+	z-index: 999;
 	bottom:0;
+	font-size: 14px;
 	a{
 		color:#fff;
 	}
+	.copy{
+		float: left;
+	}
+	.contact{
+		float: right;
+	}
+	.footer-box{
+		height:40px;
+		background: #333;
+	}
+}
+.bg1{
+	background:#A2CA81 url('/assets/activities/2014-6/ferris/bg1.png') no-repeat center center;
+}
+.bg2{
+	background:#A2CA81 url('/assets/activities/2014-6/ferris/bg2.png') no-repeat center center;
+}
+.bg3{
+	background:#A2CA81 url('/assets/activities/2014-6/ferris/bg3.png') no-repeat center center;
+}
+.bg4{
+	background:#A2CA81 url('/assets/activities/2014-6/ferris/bg4.png') no-repeat 0 -1631px;
 }
 
 

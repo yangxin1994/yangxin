@@ -17,7 +17,7 @@ class Carnival
       "41024" => 0,       # nanjing
       "69696" => 0,       # wuhan
       "24640" => 0,       # shenyang
-      "28930" => 0,       # xi'an
+      "110656" => 0,       # xi'an
       "94272" => 0,       # chengdu
       "90112" => 0,       # chongqing
       "45120" => 0,       # hangzhou
@@ -29,7 +29,7 @@ class Carnival
       "28736" => 0,       # changchun
       "53376" => 0,       # xiamen
       "65600" => 0,       # zhengzhou
-      "65600" => 0,       # suzhou
+      "41280" => 0,       # suzhou
       "41088" => 0,       # wuxi
       "73792" => 0,       # changsha
       "53312" => 0,       # fuzhou
@@ -70,6 +70,19 @@ class Carnival
   ]
 
   ALL_SURVEY = SURVEY + [PRE_SURVEY, BACKGROUND_SURVEY]
+
+  def self.generate_data
+    return if Carnival.all.length > 0
+    SURVEY.each do |e|
+      Carnival.create(survey_id: e, type: STATS)
+    end
+    Carnival.create(survey_id: PRE_SURVEY, type: STATS)
+    Carnival.create(survey_id: PRE_SURVEY, type: SETTING)
+  end
+
+  def self.clear_data
+    Carnival.destroy_all
+  end
 
   def self.pre_survey_finished(answer_id)
     answer = Answer.find(answer_id)
@@ -202,7 +215,7 @@ class Carnival
 
   def self.background_survey_finished(answer_id)
     carnival_user = answer.carnival_user
-    carnival_user.update(background_survey_status: CarnivalUser::FINISH)
+    carnival_user.update_attributes(background_survey_status: CarnivalUser::FINISH)
   end
 
   def self.survey_finished(answer_id)
