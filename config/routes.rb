@@ -266,6 +266,10 @@ OopsData::Application.routes.draw do
         get :pre_surveys, :surveys, :orders, :region_quota
         post :update_quota
       end
+
+      member do
+        put :handle, :finish, :update_express_info, :update_remark
+      end
     end
 
     resources :reviews do
@@ -336,7 +340,7 @@ OopsData::Application.routes.draw do
 
     resources :surveys, :as => :s do
       member do
-        get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info, :sample_attributes, :interviewer_task, :new_interviewer, :questions
+        get :reward_schemes, :promote, :more_info, :bind_question, :cost_info, :promote_info, :sample_attributes, :interviewer_task, :new_interviewer, :questions, :presurvey, :prequestions
         post :update_promote, :create_interviewer
         put :update_promote, :set_info, :bind_question, :star, :update_sample_attribute_for_promote, :update_amount
         delete :destroy_attributes, :bind_question, :remove_sample_attribute_for_promote
@@ -345,8 +349,13 @@ OopsData::Application.routes.draw do
       collection do
 
       end
+      resources :pre_surveys do
+        collection do
+          get :questions
+        end
+      end      
     end
-
+    
     resources :survey_tasks do
       member do
         get :task_info

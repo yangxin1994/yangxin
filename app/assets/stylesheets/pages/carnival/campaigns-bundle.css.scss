@@ -9,6 +9,8 @@
 	width:350px;
 	height:350px;
 	position: relative;
+	left:550px;
+	top:300px;
  .ferris-wheel-box{
 		width:350px;
 		height:350px;
@@ -401,12 +403,7 @@
 
 	}
 }
-
-
-
-
 //旋转效果
-
 @-webkit-keyframes rotate{from{-webkit-transform: rotate(0deg)}
 to{-webkit-transform: rotate(360deg)}
 }
@@ -427,6 +424,7 @@ to{transform: rotate(359deg)}
 	z-index: 9;
 	margin:0 auto;
 	.page-inner{
+		position: relative;
 		padding:40px 0;
 		// position: relative;
 	}
@@ -459,11 +457,14 @@ to{transform: rotate(359deg)}
 		ul{
 			width:500px;
 			position: absolute;
+
 		}
 	}
 	.link{
 		padding:0 15px;
+		height:38px;
 		display: block;
+		border:1px #333 solid;
 		b{
 				width:1px;
 				height:1px;
@@ -480,6 +481,7 @@ to{transform: rotate(359deg)}
 			background: #fff;
 			color:#333;
 			cursor: default;
+			border-color:#fff;
 			b{
 				border:5px #dbdbdb solid;
 				border-left-color:#fff;
@@ -491,26 +493,96 @@ to{transform: rotate(359deg)}
 	.share{
 		float: right;
 		position: relative;
-		ul{
-			width:150px;
+		.share-box{
+			width:175px;
+			height:230px;
+			border:1px #dbdbdb solid;
+			border-top:none;
 			position: absolute;
 			background: #fff;
 			top:40px;
-			right:0;
+			left:-1px;
 			display: none;
-			li{
-				margin:10px;
+			p{
+					width:170px;
+					height:20px;
+					line-height: 20px;
+					margin-top:10px;
+					text-align: center;
+					color:#ff6600;
+				}
+			ul{
+				padding-bottom:10px;
+				li{
+					width:45px;
+					height:45px;
+					margin:10px 0 0 10px;
+					float: left;
+					a{
+						width:45px;
+						height:45px;
+						background: #f6f6f6;
+						display: block;
+						&.sina{
+							@include ferris-sprite(sina);
+						}
+						&.qq{
+							@include ferris-sprite(qq);
+						}
+						&.tencent{
+							@include ferris-sprite(tencent);
+						}
+						&.douban{
+							@include ferris-sprite(douban);
+						}
+						&.renren{
+							@include ferris-sprite(renren);
+						}
+						&.qzone{
+							@include ferris-sprite(qzone);
+						}
+						i{
+							width:24px;
+							height:24px;
+							background: #fff;
+							float: left;
+							margin:8px 8px 0 0 ;
+						}
+					}
+				}
+			}
+			.share-lottery{
+				height:60px;
 				a{
-					color:#333;
-					background: #f6f6f6;
+					width:156px;
+					height:30px;
+					line-height: 30px;
 					display: block;
-					padding:0 10px;
-					i{
-						width:24px;
-						height:24px;
-						background: #fff;
-						float: left;
-						margin:8px 8px 0 0 ;
+					text-align: center;
+					font-size: 16px;
+					background: #ffb800;
+					border:1px #ffa800 solid;
+					color:#333;
+					margin:5px 0 5px 10px;
+					&:hover{
+						background: #ffc800;
+					}
+					&.disabled{
+						background: #ccc;
+						border-color:#bbb;
+						color:#999;
+						cursor: default;
+					}
+				}
+				p{
+					width:170px;
+					height:20px;
+					line-height: 20px;
+					margin-top:10px;
+					text-align: center;
+					color:#666;
+					b{
+						color:#ff6600;
 					}
 				}
 			}
@@ -524,8 +596,10 @@ to{transform: rotate(359deg)}
 			position: absolute;
 			background: #fff;
 			top:40px;
-			left:0;
+			right:-1px;
 			display: none;
+			border:1px #dbdbdb solid;
+			border-top:none;
 			li{
 				margin: 10px;
 				span{
@@ -547,9 +621,36 @@ to{transform: rotate(359deg)}
 		}
 	}
 }
-.door{
+.door-box{
 	width:1100px;
+	height:600px;
+	margin-top:100px;	
+	background:#A2CA81 url('/assets/activities/2014-6/ferris/door_bg.png') no-repeat center center;
+	.door{
+		width:404px;
+		height:376px;
+		position: relative;	
+		margin:0 auto;
+		top:208px;
+		.left{
+			width:207px;
+			height:376px;
+			position: absolute;
+			top:0;
+			left:5px;
+			@include ferris-sprite(door_l);
+		}
+		.right{
+			width:197px;
+			height:376px;
+			position: absolute;
+			top:0;
+			right:22px;
+			@include ferris-sprite(door_r);
+		}
+	}
 }
+
 .footer{
 	width:100%;
 	height:40px;

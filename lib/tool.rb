@@ -73,6 +73,8 @@ module Tool
   end
 
   def self.check_choice_question_answer(question_id, answer, standard_answer, fuzzy)
+    answer.map! { |e| e.to_s }
+    standard_answer.map! { |e| e.to_s }
     question = BasicQuestion.find_by_id(question_id)
     issue = question.issue if !question.nil?
     if issue && issue["max_choice"] == 1
