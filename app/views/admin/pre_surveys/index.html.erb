@@ -1,0 +1,140 @@
+
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/surveys/presurvey-bundle" %>
+  <%= stylesheet_link_tag "pages/admin/presurvey-bundle", :meida => 'all' %>
+<% end %>
+
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li>
+      <a href="/admin/surveys">
+      <i class="icon-chevron-right"></i>
+      调研列表
+      </a>
+    </li>
+    <li>
+      <a href="/admin/surveys/<%= params[:_id]%>">
+        <i class="icon-chevron-right"></i>
+        基本信息
+      </a>
+    </li>
+    <li>
+      <a href="/admin/surveys/<%= params[:_id]%>">
+        <i class="icon-chevron-right"></i>
+        问卷查看
+      </a>
+    </li>
+    <li>
+      <a href="/admin/surveys/<%= params[:_id]%>/reward_schemes">
+        <i class="icon-chevron-right"></i>
+        奖励方案
+      </a>
+    </li>    
+    <li class="active">
+      <a href="/admin/surveys/<%= params[:_id]%>/pre_surveys">
+        <i class="icon-chevron-right"></i>
+        预调研
+      </a>
+    </li>
+    <li>
+      <a href="/admin/surveys/<%= params[:_id]%>/interviewer_task">
+        <i class="icon-chevron-right"></i>
+        访问员设置
+      </a>
+    </li>      
+  </ul>
+<% end %>
+
+<div class="well">
+  <ul class="">
+  <% @presurvey_schemes.each_with_index do |presurvey_scheme, index| %>
+    <li><a href="?editing=<%= presurvey_scheme["_id"] %>">方案-<%= "#{index} #{presurvey_scheme['name']}" %> </a></li>
+  <% end %>
+    <li><a href="?">创建预调研方案</a></li>
+  </ul>
+</div>
+
+<legend>预调研方案设置</legend>
+
+<form action="/admin/presurvey_schemes<%= "/#{params[:editing]}" if params[:editing] %>"
+      name="survey"
+      enctype="multipart/form-data"
+      method="post"
+      id="survey_form"
+      class="form-horizontal"
+>
+
+  <div class="control-group">
+    <label class="control-label" >预调研方案名称:</label>
+    <div class="controls">
+      <input type="text" name="pre_survey[name]" class="input-large" id="pres_name" placeholder="名称" value="<%= @editing_ps["name"] %>">
+    </div>
+  </div>   
+
+  <div class="control-group">
+    <label class="control-label" >是否处于发布状态:</label>
+    <div class="controls">
+      <label class="checkbox">
+        <input id="pres_status" class="modelinker " type="checkbox" <%= @editing_ps["status"].to_i == 2 ? "checked" : "" %>>(勾选则发布)
+      </label>      
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >奖励方案设置:</label>
+    <div class="controls">
+      <div>
+      <select id="rs_selector">
+        <% @reward_schemes.each do |reward_scheme| %>
+          <option value="<%= reward_scheme._id %>"><%= reward_scheme.name %></option>
+        <% end %>
+      </select>        
+      </div>
+    </div>
+  </div>  
+
+  <div class="control-group">
+    <label class="control-label" >请选择要添加的问卷:</label>
+    <div class="controls">
+      <select id="survey_selector">
+        <option></option>
+        <% @surveys.each do |survey| %>
+          <option value="<%= survey._id %>"><%= survey.title %></option>
+        <% end %>
+      </select>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >已选择的问卷:</label>
+    <div class="controls">
+      <div>
+        <ul id="survey_list">
+
+        </ul>
+        <input type="hidden" name="presurvey_scheme[is_free]" id="ipt_free"/>        
+      </div>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" >请设定问题:</label>
+    <div class="controls">
+      <div id="condition">
+      </div>
+      <div style="max-width: 400px; margin: 0 auto 10px;">
+        <button type="button" class="btn btn-large btn-block btn-primary btn-add_condition">添加一组问题</button> 
+      </div>
+    </div>
+  </div>  
+  <div class="control-group">
+    <div class="controls">
+      <a class="btn btn-primary btn-save" href="javascript:void(0);">保存</a>
+      <a class="btn-delete" href="javascript:void(0);">删除</a>
+    </div>
+  </div>
+</form>
+
+<% content_for :foot do %>
+
+<% end %>
