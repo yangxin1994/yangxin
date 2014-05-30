@@ -34,7 +34,11 @@ jQuery(function($) {
             };
         }, 30);
     };
-		
+		//小太阳跟随滚动
+		var sun = $('#sun')[0];
+		window.onscroll = function(){
+			
+		}
 
     var timeOut = function() { //超时函数
         $("#lotteryBtn").rotate({
