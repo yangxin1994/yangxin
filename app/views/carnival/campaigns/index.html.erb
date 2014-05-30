@@ -23,7 +23,7 @@
 
       if (pre_status) {     
         if(pre_status == 2){// for reject
-          $.od.odPopup({content: '您不在此次调研范围内!'});
+          $.od.odPopup({withoutTitle:true,content: '您不在此次调研范围内!'});
         }else if(pre_status == 32){ // for finish
           // get ticket
           if(window.current_step){
@@ -32,7 +32,7 @@
           }else{
             //预调研通过,通知领取门票,并进入下一个任务
             $.od.odPopup({
-              title:'恭喜',
+              withoutTitle:true,
               content: '恭喜您获得活动门票!',
               closeButton:false,
               confirm:function(){
@@ -70,7 +70,7 @@
       function fallback(){
         $('.happy').animate({'bottom':'35px'},3000,function(){
           $.od.odPopup({
-            title:'恭喜',
+            withoutTitle:true,
             content: '恭喜您获得一次抽奖活动!',
             closeButton:false,
             confirm:function(){
@@ -218,7 +218,7 @@
             //弹出话费充值提示
             setTimeout(function(){
               $.od.odPopup({
-                title:'恭喜',
+                withoutTitle:true,
                 content: '恭喜您,获得我们奖励的10元话费充值奖励,请输入您的手机号!',
                 closeButton:false,
                 confirm:function(){
@@ -359,8 +359,6 @@
       }
 
       setFullPage();
-      
-
     })
 
   </script>
