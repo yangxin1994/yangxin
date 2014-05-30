@@ -245,6 +245,9 @@
 					height:231px;
 					margin-left:35px;
 					@include ferris-sprite(umbrella);
+					&.act{
+						@include ferris-sprite(umbrella);
+					}
 				}
 				.basket{
 					position: relative;

@@ -7,9 +7,12 @@
       var pre_status = parseInt(window.data.pre_status,10);
       window.current_step = parseInt(window.data.step,10);
 
+      if( $.cookie('ticket') && window.current_step == 0){
+        window.current_step = 1; //如果拿到票后刷新页面，直接进入第一个任务
+      }
       // for test
       pre_status = 32;
-      window.current_step = 0;
+      //window.current_step = 3;
       window.data.t2_status = [0,0,0,0,0];
       window.data.t3_status = [1,1,1,1,0];
 
@@ -105,6 +108,8 @@
 
         $('.door .right').animate({'right':'-148px'},3000,function(){
           $.fn.fullpage.moveSectionUp()// go to next section
+          var d = new Date();
+          $.cookie('ticket',d.getTime());
         })
         
       }
@@ -256,12 +261,19 @@
 
       //给气球点火
       function makeFire(){
+        var umbrella = $('.umbrella');
+        umbrella.addClass('act');
         var basket = $('.basket');
-        if(basket.hasClass('left')){
-          basket.removeClass('left').addClass('right');
-        }else{
-          basket.removeClass('right').addClass('left');  
+
+        if(window.data.t3_status.indexOf(0) < 0){
+          if(basket.hasClass('left')){
+            basket.removeClass('left').addClass('right');
+          }else{
+            basket.removeClass('right').addClass('left');  
+          }          
         }
+        
+
         setTimeout(makeFire,300); 
       }
 
@@ -337,16 +349,10 @@
         var ngrass_top = grass_top + 10 + 'px';
         $('.ball-line').css({'top':ngrass_top});
 
-        if(nbg == '0%'){
-          $('.ball-body').animate({'top':'-350px'},3000,function(){
-            console.log('---ball hidden ------------')
-            console.log('===========================')
+        if(nbg == '30%'){
+          $('.ball-body').animate({'top':'-350px'},4000,function(){
+            $('.ly-plate').fadeIn(4000,function(){})
           })
-
-          $('.ly-plate').fadeIn(3000,function(){
-            console.log('----already show')
-          })
-
           return false;
         }
         setTimeout(flyBalloon,100)
