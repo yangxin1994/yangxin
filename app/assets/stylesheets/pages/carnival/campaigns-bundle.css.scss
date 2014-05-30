@@ -444,11 +444,20 @@ to{transform: rotate(359deg)}
 		position: relative;
 		.share-box{
 			width:175px;
+			height:230px;
 			position: absolute;
 			background: #fff;
 			top:40px;
 			right:0;
 			display: none;
+			p{
+					width:170px;
+					height:20px;
+					line-height: 20px;
+					margin-top:10px;
+					text-align: center;
+					color:#ff6600;
+				}
 			ul{
 				padding-bottom:10px;
 				li{
@@ -473,7 +482,38 @@ to{transform: rotate(359deg)}
 			}
 			.share-lottery{
 				height:60px;
-				border-top:1px #dbdbdb solid;
+				a{
+					width:156px;
+					height:30px;
+					line-height: 30px;
+					display: block;
+					text-align: center;
+					font-size: 16px;
+					background: #ffb800;
+					border:1px #ffa800 solid;
+					color:#333;
+					margin:5px 0 5px 10px;
+					&:hover{
+						background: #ffc800;
+					}
+					&.disabled{
+						background: #ccc;
+						border-color:#bbb;
+						color:#999;
+						cursor: default;
+					}
+				}
+				p{
+					width:170px;
+					height:20px;
+					line-height: 20px;
+					margin-top:10px;
+					text-align: center;
+					color:#666;
+					b{
+						color:#ff6600;
+					}
+				}
 			}
 		}
 	}
