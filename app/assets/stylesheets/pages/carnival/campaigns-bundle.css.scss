@@ -529,7 +529,7 @@ to{transform: rotate(359deg)}
 	}
 	#ad{
 		position: absolute;
-		top:40px;
+		top:0;
 		left:50%;
 		margin-left:-550px;
 		width:1100px;
@@ -537,6 +537,52 @@ to{transform: rotate(359deg)}
 		z-index: 10;
 		background: url('/assets/activities/2014-6/ferris/ad.png') no-repeat;
 		border-top:none;
+		.gifts{
+			position: absolute;
+			top:200px;
+			left:230px;
+			a{
+				width:371px;
+				height:28px;
+				display: block;
+			}
+			.gift-a{
+				@include ferris-sprite(gift_a);
+			}
+			.gift-b{
+				@include ferris-sprite(gift_b);
+			}
+			.gift-c{
+				@include ferris-sprite(gift_c);
+			}
+		}
+		.statistic{
+			width:300px;
+			margin:0 auto;
+			margin-top:600px;
+			text-align: center;
+			.yjsc{
+				width:94px;
+				height:25px;
+				display: inline-block;
+				background: url('/assets/activities/2014-6/ferris/yjsc.png') no-repeat;
+			}
+			b{
+				padding:0 10px;
+				color:#C3A5E8;
+				font-size: 30px;
+				font-weight: bold;
+				font-family: "Georgia";
+				height:25px;
+				display: inline-block;
+			}
+			.gjp{
+				width:74px;
+				height:25px;
+				display: inline-block;
+				background: url('/assets/activities/2014-6/ferris/gjp.png') no-repeat;
+			}
+		}
 		.drag{
 			position: absolute;
 			bottom:-75px;

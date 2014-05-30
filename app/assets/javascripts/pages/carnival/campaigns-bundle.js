@@ -4,9 +4,26 @@ jQuery(function($) {
 		var drag = ad.children[0];
 		var b=true;
 		var a=ad.offsetTop;
+		var timer=null;
 		drag.onclick = function(){
+			clearInterval(timer);
+			adSport();
+		};	
+		ad.onclick = function(){
+			clearInterval(timer);
+			adSport();
+		}
+		var giftBtn = $('.gifts a');
+		for(var i=0;i<giftBtn.length;i++){
+			
+			giftBtn[i].onclick = function(ev){
+				var oEvent = ev || event;
+				oEvent.cancelBubble=true;
+			}
+		}
+		function adSport(){
 			if(b){
-				var timer = setInterval(function(){
+				timer = setInterval(function(){
 						a-=10;
 						if(a<=-ad.offsetHeight){
 							clearInterval(timer);
@@ -16,7 +33,7 @@ jQuery(function($) {
 						ad.style.top = a + 'px';
 					},20)
 				}else{
-					var timer = setInterval(function(){
+				timer = setInterval(function(){
 						a+=10;
 						if(a>=0){
 							clearInterval(timer);
@@ -26,21 +43,18 @@ jQuery(function($) {
 						ad.style.top = a + 'px';
 					},20)
 				};
-			};
-			
-		// var oSun = $('.sun')[0];
+			};	
+
     //顶部下拉菜单
     function pullDown(obj) {
         var oBox = $(obj)[0];
         oBox.onmouseover = function() {
             this.children[1].style.display = 'block';
             this.children[0].className = 'link active';
-            // oSun.style.display = 'none';
         };
         oBox.onmouseout = function() {
             this.children[1].style.display = 'none';
             this.children[0].className = 'link';
-            // oSun.style.display = 'block';
         };
     };
     pullDown('.questions');
