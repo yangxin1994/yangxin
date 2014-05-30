@@ -410,11 +410,14 @@ to{transform: rotate(359deg)}
 		ul{
 			width:500px;
 			position: absolute;
+
 		}
 	}
 	.link{
 		padding:0 15px;
+		height:38px;
 		display: block;
+		border:1px #333 solid;
 		b{
 				width:1px;
 				height:1px;
@@ -431,6 +434,7 @@ to{transform: rotate(359deg)}
 			background: #fff;
 			color:#333;
 			cursor: default;
+			border-color:#fff;
 			b{
 				border:5px #dbdbdb solid;
 				border-left-color:#fff;
@@ -445,10 +449,12 @@ to{transform: rotate(359deg)}
 		.share-box{
 			width:175px;
 			height:230px;
+			border:1px #dbdbdb solid;
+			border-top:none;
 			position: absolute;
 			background: #fff;
 			top:40px;
-			right:0;
+			left:-1px;
 			display: none;
 			p{
 					width:170px;
@@ -470,6 +476,24 @@ to{transform: rotate(359deg)}
 						height:45px;
 						background: #f6f6f6;
 						display: block;
+						&.sina{
+							@include ferris-sprite(sina);
+						}
+						&.qq{
+							@include ferris-sprite(qq);
+						}
+						&.tencent{
+							@include ferris-sprite(tencent);
+						}
+						&.douban{
+							@include ferris-sprite(douban);
+						}
+						&.renren{
+							@include ferris-sprite(renren);
+						}
+						&.qzone{
+							@include ferris-sprite(qzone);
+						}
 						i{
 							width:24px;
 							height:24px;
@@ -525,8 +549,10 @@ to{transform: rotate(359deg)}
 			position: absolute;
 			background: #fff;
 			top:40px;
-			left:0;
+			right:-1px;
 			display: none;
+			border:1px #dbdbdb solid;
+			border-top:none;
 			li{
 				margin: 10px;
 				span{
