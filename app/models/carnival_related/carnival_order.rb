@@ -21,32 +21,15 @@ class CarnivalOrder
   ESAI_FAIL = 5
 
   # type
-  VIRTUAL = 1
   REAL = 2
   MOBILE_CHARGE = 4
-  ALIPAY = 8
-  JIFENBAO = 16
-  QQ_COIN = 32
-  SMALL_MOBILE_CHARGE = 64
 
-  # source
-  ANSWER_SURVEY = 1
-  WIN_IN_LOTTERY = 2
-  REDEEM_GIFT = 4
-
-
-  field :code, :type => String, default: ->{ Time.now.strftime("%Y%m%d") + sprintf("%05d",rand(10000)) }
-  # can be 1 (small mobile charge), 2 (large mobile charge), 4 (alipay), 8(alijf)
-  # 16 (Q coins), 32 (prize), 64 (virtual prize)
+  field :stage, type: Integer
+  field :code, type: String, default: ->{ Time.now.strftime("%Y%m%d") + sprintf("%05d",rand(10000)) }
   field :type, :type => Integer
-  # can be 1 (wait for deal), 2 (dealing), 4 (deal success), 8 (deal fail), 16 (cancel), 32 (frozen), 64 (reject)
   field :status, :type => Integer, :default => 1
-  field :source, :type => Integer
-  field :remark, :type => String, :default => "正常"
   field :amount, :type => Integer, :default => 0
-  field :alipay_account, :type => String
   field :mobile, :type => String
-  field :qq, :type => String
   field :receiver, :type => String
   field :address, :type => String
   field :street_info, :type => String
@@ -55,27 +38,18 @@ class CarnivalOrder
   field :reviewed_at, :type => Integer
   field :handled_at, :type => Integer
   field :finished_at, :type => Integer
-  field :canceled_at, :type => Integer
   field :rejected_at, :type => Integer
   field :esai_order_id, :type => String, :default => ""
   # 3 for handling, 4 for success, 5 for fail
   field :esai_status, :type => Integer
-  field :point, :type => Integer, :default => 0
 
-  belongs_to :prize
-  belongs_to :survey
-  belongs_to :gift
-  belongs_to :answer
-  belongs_to :sample, :class_name => "User", :inverse_of => :orders
-  belongs_to :movie_activity
+  belongs_to :carnival_user
 
   index({ code: 1 }, { background: true } )
   index({ status: 1 }, { background: true } )
   index({ source: 1 }, { background: true } )
   index({ amount: 1 }, { background: true } )
   index({ type: 1, status: 1, esai_order_id: 1}, { background: true } )
-
-  #attr_accessible :mobile, :alipay_account, :qq, :sample_name, :address, :postcode
 
   def self.create_redeem_order(sample_id, gift_id, amount, point, opt = {})
     gift  = Gift.normal.find_by_id(gift_id)

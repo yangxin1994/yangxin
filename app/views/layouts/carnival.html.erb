@@ -13,7 +13,24 @@
 <% end %>
 
 <% content_for :app_content do %>
+  <div class="header">
+    <div class="page">
+      XXX 获得了 门票一张
+    </div>
+  </div>
   <%= yield %>
+  <div class="footer">
+    <div class="page">
+       版权所有 &copy; 2012-2014 <a href="http://wenjuanba.com">问卷吧</a>
+       <ul class="share">
+         <li><a class="sina" href="javascript:void(0);"></a></li>
+         <li><a class="tencent" href="javascript:void(0);"></a></li>
+         <li><a class="weixin" href="javascript:void(0);"></a></li>
+         <li><a class="qzone" href="javascript:void(0);"></a></li>
+         <li><a class="renren" href="javascript:void(0);"></a></li>
+       </ul>
+    </div> 
+  </div>
 <% end %>
 
 <%= parent_layout 'app' %>
