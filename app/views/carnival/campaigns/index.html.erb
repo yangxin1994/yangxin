@@ -24,10 +24,10 @@
       
 
       // for test
-      pre_status = 32;
-      //window.data.t2_status = [1,1,1,1,1];
-      //window.data.t3_status = [1,1,1,1,0];
-
+      // pre_status = 32;
+      // window.current_step = 0;
+      // window.data.t2_status = [0,0,0,0,0];
+      // window.data.t3_status = [1,1,1,1,0];
 
       if(window.data.t3_surveys.length == 4){
         window.data.t3_status.pop();
@@ -479,11 +479,10 @@
         setTimeout(flyBalloon,100)
       }
 
+
       setFullPage();
+    });
 
-
-
-    })
 
   </script>
 <% end %>
@@ -509,6 +508,9 @@
               <div class='line line-3'></div>
               <div class='line line-4'></div>
               <div class='bg-grass'></div>
+              <div class="tooltip rqq">
+                点击问号解开热气球绳子,<br>4根全部解开立即获得<b>神秘奖品</b><br>和<b>小米大奖抽奖机会！</b>
+              </div>
               <div class='stack stack1'><a href='javascript:void(0);'></a></div>
               <div class='stack stack2'><a href='javascript:void(0);'></a></div>
               <div class='stack stack3'><a href='javascript:void(0);'></a></div>
@@ -530,6 +532,9 @@
       <div class="page-inner">
         <div id='machine-wrap'>
           <div class='wrap-skin'>
+            <div class="tooltip tlj">
+              点击跳楼机问号进行闯关,<br>本关分5个小任务,闯关成功<br>可参加<b>神秘抽奖哦！</b>
+            </div>
             <div class='happy'></div>
             <div class='st5'><a href='javascript:void(0);'></a></div>
             <div class='st4'><a href='javascript:void(0);'></a></div>
@@ -546,6 +551,9 @@
     <div class="page bg2">
       <div class="page-inner">
         <div id="ferris-wheel">
+          <div class="tooltip mtl">
+            点击摩天轮问号进行闯关,<br> 本关分5个小任务,闯关成功即送<b>10元手机充值卡！</b>
+          </div>
           <span class="ferris-wheel-box">
           <a href="javascript:void(0);" class="one"></a>
           <a href="javascript:void(0);" class="two"></a>
@@ -563,9 +571,14 @@
     <div class="page bg1">
       <div class="page-inner">
         <div class="door-box">
-
+          <div class="tooltip ty">跪求点亮Orz</div>
+          <div class="door">
+            <a href="javascript:void(0);" class="start">立即开始</a>
+            <a href="javascript:void(0);" class="last">继续游戏</a>
+          <span class="left"></span>
+          <span class="right"></span>
         </div>
-        
+        </div>
       </div>
     </div>
   </div>

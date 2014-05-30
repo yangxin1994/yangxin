@@ -5,10 +5,12 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="description" content="<%= corp_name %>网络调研/网络调查平台是专业从事网络数据产品和市场调研的第三方服务商，为您提供优质、科学、严谨的数字化调研和研究咨询服务。" />
   <meta name="Keywords" content="<%= corp_name_short %>,<%= corp_name %>,网络调查,网络调研,数字化调研,优数调研,市场调研,研究咨询,连续性调研,问卷调查" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
 
   <%= stylesheet_link_tag    "layouts/carnival-layout" %>
   <%= javascript_include_tag "layouts/app-layout" %>
   <%= javascript_include_tag "layouts/carnival-layout" %>
+
   <%= csrf_meta_tags %>
   <link rel="shortcut icon" href="/assets/od-quillme/favicon.ico">
   
@@ -16,12 +18,27 @@
   <style>
 /*    .section.a {filter:progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);-webkit-filter: grayscale(100%);}*/
   </style>
+
+  <script type="text/javascript">
+  $(function () {
+    // social share
+    // TODO: i, share link to QQ
+    var share_href = 'http://wenjuanba.com/carnival/campaigns?i='; //TODO: i
+    _.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace'], $.proxy(function(v) {
+      $('#' + v).click(function() {
+        $.social['shareTo' + v](share_href + '&c=' + v, '我发现了一个好玩的活动：问卷吧嘉年华，参加100%获得手机充值卡，并可抽取红米note、小米盒子、小米电源等大奖哦！', 'http://wenjuanba.com/assets/activities/2014-6/carnival.png');
+      });
+    }, this));
+  });
+  </script>
+
   <%= yield :head %>
 
 </head>
 <body>
 
   <div class="header">
+  	
     <div class="page">
       <div class="header-box">
         <div class="bulletin">
@@ -31,7 +48,7 @@
             <li><span>5分钟之前</span>  <span>XXX</span> <span>获得了</span> <span>门票一张<3> </3></span></li>
           </ul>
         </div>
-
+				<a href="javascript:void(0);" class="sun" id="sun"></a>
          <div class="questions">
           <a class="link" href="javascript:void(0);">FAQ<b></b></a>
           <ul>
@@ -41,7 +58,21 @@
             <li><span class="title">如何领奖？</span><span class="text">问卷吧统一在活动结束后公布大奖获奖名单，并电话联系中奖者寄出奖品。</span></li>
           </ul>
         </div>
+        <div class="save">
+        	
+          <a class="link" href="javascript:void(0);">收藏<b></b></a>
+         	
+         		<span class="save-box">
+         			<form action="">
+         				<p><input type="text" placeholder="输入手机号保存进度"><a class="save-btn" href="javascript:void(0);">提交</a></p>
+         				<div style="clear:both;padding:5px 0;"></div>
+         				<p><a class="favorite" href="javascript:void(0)" onClick="return BookmarkApp.addBookmark(this)">将本活动放入收藏夹</a></p>
+         				
+         			</form>
+         		</span>
 
+        </div>
+				
 
         <div class="share">
           <a class="link" href="javascript:void(0);">分享拿大奖<b></b></a>
@@ -50,22 +81,22 @@
               成功邀请1次可抽奖1次
             </p>
             <ul class="share">
-              <li><a class="sina" href="javascript:void(0);"></a></li>
-               <li><a class="tencent" href="javascript:void(0);"></a></li>
+              <li><a id='SinaWeibo' class="sina" href="javascript:void(0);"></a></li>
+               <li><a id='TencentWeibo' class="tencent" href="javascript:void(0);"></a></li>
                <!-- <li><a class="weixin" href="javascript:void(0);"><i></i>微信朋友圈</a></li> -->
                <li><a class="qq" href="javascript:void(0);"></a></li>
-               <li><a class="qzone" href="javascript:void(0);"></a></li>
-               <li><a class="renren" href="javascript:void(0);"></a></li>
-               <li><a class="douban" href="javascript:void(0);"></a></li>
+               <li><a id='QQSpace' class="qzone" href="javascript:void(0);"></a></li>
+               <li><a id='Renren' class="renren" href="javascript:void(0);"></a></li>
+               <li><a id='Douban' class="douban" href="javascript:void(0);"></a></li>
             </ul>
             <div style="clear:both;"></div>
             <div class="share-lottery">
-              
               <a class="disabled" href="javascript:void(0);">抽奖（通关后开启）</a>
               <p>
                 已获得 <b>100</b> 次抽大奖机会
               </p>
             </div>
+
           </div>
         </div>
 
