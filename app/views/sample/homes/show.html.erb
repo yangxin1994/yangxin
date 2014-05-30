@@ -4,7 +4,15 @@
     <% if user_signed_in %>
       window.current_user_id = "<%= current_user.id %>"
     <% end %>   
-    // jQuery(function(){
+    jQuery(function(){
+      // carnival
+      setTimeout(function() {
+        $('#carnival').slideDown(1500);
+        setTimeout(function() {
+          $('#carnival').slideUp(1500);
+        }, 10000);
+      }, 500);
+      
     //     var paidSlider = $('.paid-survey');
     //     var content = $('.paid-survey ul')[0];
     //     var oLi = content.children;
@@ -76,7 +84,7 @@
     //         sliderDown();
     //       };
     //      };
-    //   });
+      });
   </script>
 <% end %>
 <% if @data[:hot_survey].present? %>
