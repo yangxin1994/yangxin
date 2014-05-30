@@ -9,7 +9,7 @@
 
       // for test
       pre_status = 32;
-      window.current_step = 2;
+      window.current_step = 0;
       window.data.t2_status = [0,0,0,0,0];
       window.data.t3_status = [1,1,1,1,0];
 
@@ -101,7 +101,12 @@
       // open door
       function openDoor(){
         TaskOpen('wheel');// start the wheel section
-        $.fn.fullpage.moveSectionUp()// go to next section
+        $('.door .left').animate({'left':'-175px'},3000,function(){})
+
+        $('.door .right').animate({'right':'-148px'},3000,function(){
+          $.fn.fullpage.moveSectionUp()// go to next section
+        })
+        
       }
 
       // open task完成上一个任务后设置下一个任务
