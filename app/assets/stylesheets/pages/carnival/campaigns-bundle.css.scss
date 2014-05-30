@@ -9,6 +9,8 @@
 	width:350px;
 	height:350px;
 	position: relative;
+	left:550px;
+	top:300px;
  .ferris-wheel-box{
 		width:350px;
 		height:350px;
@@ -355,12 +357,7 @@
 		}
 	}
 }
-
-
-
-
 //旋转效果
-
 @-webkit-keyframes rotate{from{-webkit-transform: rotate(0deg)}
 to{-webkit-transform: rotate(360deg)}
 }
@@ -381,6 +378,7 @@ to{transform: rotate(359deg)}
 	z-index: 9;
 	margin:0 auto;
 	.page-inner{
+		position: relative;
 		padding:40px 0;
 	}
 }
@@ -444,28 +442,38 @@ to{transform: rotate(359deg)}
 	.share{
 		float: right;
 		position: relative;
-		ul{
-			width:150px;
+		.share-box{
+			width:175px;
 			position: absolute;
 			background: #fff;
 			top:40px;
 			right:0;
 			display: none;
-			li{
-				margin:10px;
-				a{
-					color:#333;
-					background: #f6f6f6;
-					display: block;
-					padding:0 10px;
-					i{
-						width:24px;
-						height:24px;
-						background: #fff;
-						float: left;
-						margin:8px 8px 0 0 ;
+			ul{
+				padding-bottom:10px;
+				li{
+					width:45px;
+					height:45px;
+					margin:10px 0 0 10px;
+					float: left;
+					a{
+						width:45px;
+						height:45px;
+						background: #f6f6f6;
+						display: block;
+						i{
+							width:24px;
+							height:24px;
+							background: #fff;
+							float: left;
+							margin:8px 8px 0 0 ;
+						}
 					}
 				}
+			}
+			.share-lottery{
+				height:60px;
+				border-top:1px #dbdbdb solid;
 			}
 		}
 	}
@@ -500,23 +508,36 @@ to{transform: rotate(359deg)}
 		}
 	}
 }
-.door{
-	width:404px;
-	height:376px;
-	margin:0 auto;
-	.left{
-		width:197px;
+.door-box{
+	width:1100px;
+	height:600px;
+	margin-top:100px;	
+	background:#A2CA81 url('/assets/activities/2014-6/ferris/door_bg.png') no-repeat center center;
+	.door{
+		width:404px;
 		height:376px;
-		float: left;
-		@include ferris-sprite(door_l);
-	}
-	.right{
-		width:207px;
-		height:376px;
-		float: left;
-		@include ferris-sprite(door_r);
+		position: relative;	
+		margin:0 auto;
+		top:208px;
+		.left{
+			width:207px;
+			height:376px;
+			position: absolute;
+			top:0;
+			left:5px;
+			@include ferris-sprite(door_l);
+		}
+		.right{
+			width:197px;
+			height:376px;
+			position: absolute;
+			top:0;
+			right:22px;
+			@include ferris-sprite(door_r);
+		}
 	}
 }
+
 .footer{
 	width:100%;
 	height:40px;
