@@ -111,250 +111,299 @@
 
 
 #machine-wrap{
-	width:106px;
-	height:376px;
-	position: relative;
-	@include ferris-sprite(all);
-	a{
-		display:block;
-		width:100%;
-		height:100%;
+	position: absolute;
+	left:360px;
+	bottom:25%;
+	.wrap-skin{
+		width:106px;
+		height:376px;		
+		position: relative;
+		@include ferris-sprite(all);
+		a{
+			display:block;
+			width:100%;
+			height:100%;
+		}
+		.happy{
+			width:106px;
+			height:32px;
+			position: absolute;
+			left:2px;
+			z-index:1;
+			bottom:35px;
+			@include ferris-sprite(happy);	
+			&.act{
+				@include ferris-sprite(happya);	
+			}
+		}
+		.st5{
+			width:106px;
+			height:72px;
+			position: absolute;
+			left:2px;
+			bottom:304px;
+			cursor:pointer;
+			@include ferris-sprite(st5);
+			&:hover{
+				@include ferris-sprite(st5_hover);
+			}
+			&.act{
+				@include ferris-sprite(st5_active);	
+			}
+		}		
+		.st4{
+			width:106px;
+			height:60px;
+			position: absolute;
+			left:2px;
+			bottom:244px;
+			cursor:pointer;
+			@include ferris-sprite(st4);
+			&:hover{
+				@include ferris-sprite(st4_hover);
+			}
+			&.act{
+				@include ferris-sprite(st4_active);	
+			}
+		}	
+		.st3{
+			width:106px;
+			height:60px;
+			position: absolute;
+			left:2px;
+			bottom:184px;	
+			cursor:pointer;	
+			@include ferris-sprite(st3);
+			&:hover{
+				@include ferris-sprite(st3_hover);
+			}
+			&.act{
+				@include ferris-sprite(st3_active);	
+			}
+		}	
+		.st2{
+			width:106px;
+			height:60px;
+			position: absolute;
+			left:2px;
+			bottom:124px;
+			cursor:pointer;
+			@include ferris-sprite(st2);
+			&:hover{
+				@include ferris-sprite(st2_hover);
+			}
+			&.act{
+				@include ferris-sprite(st2_active);	
+			}
+		}	
+		.st1{
+			width:106px;
+			height:60px;
+			position: absolute;
+			left:2px;
+			bottom:64px;
+			cursor:pointer;		
+			@include ferris-sprite(st1);
+			&:hover{
+				@include ferris-sprite(st1_hover);
+			}
+			&.act{
+				@include ferris-sprite(st1_active);	
+			}
+		}
+		.sbottom{
+			position: absolute;
+			left:0px;
+			bottom:0px;
+			width:106px;
+			height:64px;
+			@include ferris-sprite(foot);
+			&.act{
+				@include ferris-sprite(foot_active);
+			}
+		}
+		&.act{
+			@include ferris-sprite(all_act);
+		}
 	}
-	.happy{
-		width:106px;
-		height:32px;
-		position: absolute;
-		left:2px;
-		z-index:1;
-		bottom:35px;
-		//bottom:322px;
-		@include ferris-sprite(happy);	
-		// move 60px from 1 to 4
-		// move 42px from 4 to 5	
-	}
-	.st5{
-		width:106px;
-		height:72px;
-		position: absolute;
-		left:2px;
-		bottom:304px;
-		cursor:pointer;
-		@include ferris-sprite(st5);
-		&:hover{
-			@include ferris-sprite(st5_hover);
-		}
-		&.act{
-			@include ferris-sprite(st5_active);	
-		}
-	}		
-	.st4{
-		width:106px;
-		height:60px;
-		position: absolute;
-		left:2px;
-		bottom:244px;
-		cursor:pointer;
-		@include ferris-sprite(st4);
-		&:hover{
-			@include ferris-sprite(st4_hover);
-		}
-		&.act{
-			@include ferris-sprite(st4_active);	
-		}
-	}	
-	.st3{
-		width:106px;
-		height:60px;
-		position: absolute;
-		left:2px;
-		bottom:184px;	
-		cursor:pointer;	
-		@include ferris-sprite(st3);
-		&:hover{
-			@include ferris-sprite(st3_hover);
-		}
-		&.act{
-			@include ferris-sprite(st3_active);	
-		}
-	}	
-	.st2{
-		width:106px;
-		height:60px;
-		position: absolute;
-		left:2px;
-		bottom:124px;
-		cursor:pointer;
-		@include ferris-sprite(st2);
-		&:hover{
-			@include ferris-sprite(st2_hover);
-		}
-		&.act{
-			@include ferris-sprite(st2_active);	
-		}
-	}	
-	.st1{
-		width:106px;
-		height:60px;
-		position: absolute;
-		left:2px;
-		bottom:64px;
-		cursor:pointer;		
-		@include ferris-sprite(st1);
-		&:hover{
-			@include ferris-sprite(st1_hover);
-		}
-		&.act{
-			@include ferris-sprite(st1_active);	
-		}
-	}
-	.sbottom{
-		position: absolute;
-		left:0px;
-		bottom:0px;
-		width:106px;
-		height:64px;
-		@include ferris-sprite(foot);
-		&:hover{
-			@include ferris-sprite(foot_hover);
-		}
-		&.act{
-			@include ferris-sprite(foot_active);
-		}
-	}
-	&.act{
-		@include ferris-sprite(all_act);
-	}
+
 }
 
 .balloon{
 	.page{
-		.ball-body{
-			position: relative;
+		.ball-cont{
 			width:270px;
-			.umbrella{
+			position:absolute;
+			right:300px;
+			bottom:170px;
+			.ball-body{
 				position: relative;
-				height:231px;
-				margin-left:35px;
-				@include ferris-sprite(umbrella);
-			}
-			.basket{
-				position: relative;
-				margin-left:116px;
-				width:38px;
-				height:50px;
-				@include ferris-sprite(basket);
-				&.left{
-					@include ferris-sprite(basket_l);
-				}
-				&.right{
-					@include ferris-sprite(basket_r);
-				}
-				.stack5{
-					position:absolute;
-					width:49px;
-					height:52px;
-					top:-18px;
-					right:-52px;
-					cursor:pointer;		
-					@include ferris-sprite(q5);
-					a{
-						display:inline-block;
-						cursor: pointer;
-						width:100%;
-						height:100%;
-					}
-					&:hover{
-						@include ferris-sprite(q5_hover);
-					}
-					&.act{
-						display:none;
-					}		
-				}
-			}
-		}
-		.ball-line{
-			.line-wrap{
+				top:0px;
 				width:270px;
-				height:150px;
-				position:relative;
-				.line,.bg-grass{
-					width:100%;
-					height:100%;	
-					position:absolute;		
+				.umbrella{
+					position: relative;
+					height:231px;
+					margin-left:35px;
+					@include ferris-sprite(umbrella);
 				}
-				.line-1{
-					@include ferris-sprite(line1);
+				.basket{
+					position: relative;
+					margin-left:116px;
+					width:38px;
+					height:50px;
+					@include ferris-sprite(basket);
+					&.left{
+						@include ferris-sprite(basket_l);
+					}
+					&.right{
+						@include ferris-sprite(basket_r);
+					}
+					.stack5{
+						position:absolute;
+						width:49px;
+						height:52px;
+						top:-18px;
+						right:-52px;
+						cursor:pointer;		
+						@include ferris-sprite(q5);
+						a{
+							display:inline-block;
+							cursor: pointer;
+							width:100%;
+							height:100%;
+						}
+						&:hover{
+							@include ferris-sprite(q5_hover);
+						}
+						&.act{
+							display:none;
+						}		
+					}
 				}
-				.line-2{
-					@include ferris-sprite(line2);
-				}
-				.line-3{
-					@include ferris-sprite(line3);
-				}
-				.line-4{
-					@include ferris-sprite(line4);
-				}
-				.bg-grass{
-					@include ferris-sprite(line_bg);
-				}
-				.stack{
-					position:absolute;
-					width:49px;
-					height:52px;
-					cursor:pointer;
-					a{
-						display:inline-block;
-						cursor: pointer;
+			}
+			.ball-line{
+				position: relative;
+				top:0px;
+				.line-wrap{
+					width:270px;
+					height:150px;
+					position:relative;
+					.line,.bg-grass{
 						width:100%;
-						height:100%;
-					}				
-					&.stack1{
-						@include ferris-sprite(q1);
-						left:-36px;
-						bottom:20px;
-						&:hover{
-							@include ferris-sprite(q1_hover);
-						}
-						&.act{
-							@include ferris-sprite(q1_active);
-						}
+						height:100%;	
+						position:absolute;		
 					}
-					&.stack2{
-						@include ferris-sprite(q2);
-						bottom:0px;
-						left:38px;
-						&:hover{
-							@include ferris-sprite(q2_hover);
-						}
-						&.act{
-							@include ferris-sprite(q2_active);
-						}
+					.line-1{
+						@include ferris-sprite(line1);
 					}
-					&.stack3{
-						@include ferris-sprite(q3);
-						bottom:-2px;
-						right:32px;
-						&:hover{
-							@include ferris-sprite(q3_hover);
-						}
-						&.act{
-							@include ferris-sprite(q3_active);
-						}
+					.line-2{
+						@include ferris-sprite(line2);
 					}
-					&.stack4{
-						@include ferris-sprite(q4);
-						bottom:20px;
-						right:-40px;
-						&:hover{
-							@include ferris-sprite(q4_hover);
+					.line-3{
+						@include ferris-sprite(line3);
+					}
+					.line-4{
+						@include ferris-sprite(line4);
+					}
+					.bg-grass{
+						//background:url('/assets/activities/2014-6/ferris/line_bg.png') no-repeat center center;
+						@include ferris-sprite(line_bg);
+					}
+					.stack{
+						position:absolute;
+						width:49px;
+						height:52px;
+						cursor:pointer;
+						a{
+							display:inline-block;
+							cursor: pointer;
+							width:100%;
+							height:100%;
+						}				
+						&.stack1{
+							@include ferris-sprite(q1);
+							left:-36px;
+							bottom:20px;
+							&:hover{
+								@include ferris-sprite(q1_hover);
+							}
+							&.act{
+								@include ferris-sprite(q1_active);
+							}
 						}
-						&.act{
-							@include ferris-sprite(q4_active);
+						&.stack2{
+							@include ferris-sprite(q2);
+							bottom:0px;
+							left:38px;
+							&:hover{
+								@include ferris-sprite(q2_hover);
+							}
+							&.act{
+								@include ferris-sprite(q2_active);
+							}
 						}
-					}									
-				}
-			}	
+						&.stack3{
+							@include ferris-sprite(q3);
+							bottom:-2px;
+							right:32px;
+							&:hover{
+								@include ferris-sprite(q3_hover);
+							}
+							&.act{
+								@include ferris-sprite(q3_active);
+							}
+						}
+						&.stack4{
+							@include ferris-sprite(q4);
+							bottom:20px;
+							right:-40px;
+							&:hover{
+								@include ferris-sprite(q4_hover);
+							}
+							&.act{
+								@include ferris-sprite(q4_active);
+							}
+						}									
+					}
+				}	
+			}			
 		}
+		.ly-plate{
+		    position:relative;
+		    width:509px;
+		    height:509px;
+		    margin: 50px auto;
+		    display:none;
+		}
+		.rotate-bg{
+		    width: 509px;
+		    height: 509px;
+		    background: url('/assets/activities/2014-6/ferris/ly-plate.png');
+		    position: absolute;
+		    top: 0;
+		    left: 0;
+		    margin-top: 0%;
+		}
+		.ly-plate div.lottery-star{
+		    width:214px;
+		    height:214px;
+		    position:absolute;
+		    top:150px;
+		    left:147px;
+		    /*text-indent:-999em;
+		    overflow:hidden;
+		    background:url(rotate-static.png);
+		    -webkit-transform:rotate(0deg);*/
+		    outline:none
+		}
+		.ly-plate div.lottery-star #lotteryBtn{
+		    cursor: pointer;
+		    position: absolute;
+		    top:0;
+		    left:0;
+		    *left:-107px
+		}
+
 	}
 }
 //旋转效果
@@ -378,7 +427,6 @@ to{transform: rotate(359deg)}
 	z-index: 9;
 	margin:0 auto;
 	.page-inner{
-		position: relative;
 		padding:40px 0;
 	}
 }
