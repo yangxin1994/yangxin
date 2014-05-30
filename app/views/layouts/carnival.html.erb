@@ -1,8 +1,12 @@
 <% content_for :app_head do %>
   <%= stylesheet_link_tag    "layouts/carnival-layout" %>
   <%= javascript_include_tag "layouts/carnival-layout" %>
+	<style>
+/*		.section.a {filter:progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);-webkit-filter: grayscale(100%);}*/
+	</style>
   <script type="text/javascript">
   FAYE_SERVER_URL = "<%= Setting.faye_server %>";
+
   jQuery(function($) {
 
   });
