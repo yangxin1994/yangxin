@@ -4,17 +4,14 @@
   <script type="text/javascript">
     $(function(){
       window.data = <%= raw (@obj).to_json %>;
-      console.log('====================================')
-      console.log(window.data)
-      console.log('====================================')
       var pre_status = parseInt(window.data.pre_status,10);
       window.current_step = parseInt(window.data.step,10);
 
       // for test
-      // pre_status = 32;
-      // window.current_step = 3;
-      // window.data.t2_status = [1,2,2,2,1];
-      // window.data.t3_status = [1,1,1,1,0];
+      pre_status = 32;
+      window.current_step = 3;
+      window.data.t2_status = [1,2,2,2,1];
+      window.data.t3_status = [1,1,1,1,0];
 
 
       if(window.data.t3_surveys.length == 4){
@@ -327,7 +324,26 @@
       }
 
       function flyBalloon(){
-        
+        var bg  = parseInt($('.bg4').css('background-position-y'));
+        var nbg = bg - 1 + '%'
+        $('.bg4').css({'background-position-y': nbg});
+        var grass_top = parseInt( $('.ball-line').css('top') );
+        var ngrass_top = grass_top + 10 + 'px';
+        $('.ball-line').css({'top':ngrass_top});
+
+        if(nbg == '0%'){
+          $('.ball-body').animate({'top':'-350px'},3000,function(){
+            console.log('---ball hidden ------------')
+            console.log('===========================')
+          })
+
+          $('.ly-plate').fadeIn(3000,function(){
+            console.log('----already show')
+          })
+
+          return false;
+        }
+        setTimeout(flyBalloon,100)
       }
 
       setFullPage();
@@ -365,6 +381,12 @@
               <div class='stack stack4'><a href='javascript:void(0);'></a></div>
             </div>
           </div>
+        </div>
+        <div class="ly-plate">
+          <div class="rotate-bg"></div>
+            <div class="lottery-star">
+              <img src="/assets/activities/2014-6/ferris/rotate-static.png" id="lotteryBtn">
+            </div>
         </div>
       </div>
     </div>
