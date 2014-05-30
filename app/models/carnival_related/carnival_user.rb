@@ -279,7 +279,8 @@ class CarnivalUser
     if (self.survey_status[0..4] & [NOT_EXIST, REJECT]).present?
       return SURVEY_NOT_FINISHED
     end
-    if self.orders.where(type: CarnivalOrder::STAGE_1).present?
+    #if self.orders.where(type: CarnivalOrder::STAGE_1).present?
+    if self.carnival_orders.where(type: CarnivalOrder::STAGE_1).present?
       return REWARD_ASSIGNED
     end
     # create order

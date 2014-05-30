@@ -31,9 +31,9 @@ class Carnival::UsersController < Carnival::CarnivalController
     if current_carnival_user.background_survey_status != CarnivalUser::FINISH
       render_json_auto CarnivalUser::BACKGROUND_SURVEY_NOT_FINISHED and return
     end
-    case param[:type].to_i
+    case params[:type].to_i
     when 0
-      retval = current_carnival_user.draw_second_stage_lottery(param[:amount].to_i, params[:mobile])
+      retval = current_carnival_user.draw_second_stage_lottery(params[:amount].to_i, params[:mobile])
     when 1
       retval = current_carnival_user.draw_third_stage_lottery(params[:mobile])
     when 2
