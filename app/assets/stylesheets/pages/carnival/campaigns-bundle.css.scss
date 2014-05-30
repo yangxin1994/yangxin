@@ -16,6 +16,11 @@
 	text-align: center;
 	cursor: default;
 	@include border-radius(4px);
+	img{
+		display: block;
+		margin:0 auto;
+		margin-top:15px;
+	}
 	h2{
 		color:#E75C72;
 		font-size: 20px;
@@ -560,6 +565,33 @@ to{transform: rotate(359deg)}
 				border-right-color:#fff;
 				border-bottom-color:#fff;
 			}
+		}
+	}
+	.save{
+		float: right;
+		position: relative;
+		.save-box{
+			width:160px;
+			display: none;
+			position: absolute;
+			background: #fff;
+			top:40px;
+			right:-1px;
+			display: none;
+			border:1px #dbdbdb solid;
+			border-top:none;
+			// .save-btn{
+			// 	width:130px;
+			// 	margin:0 auto;
+			// 	margin-top:15px;
+			// 	color:#fff;
+			// 	display: block;
+			// 	text-align: center;
+			// 	background: #A2CA81;
+			// 	&:hover{
+			// 		background: #8CBA60;
+			// 	}
+			// }
 		}
 	}
 	.share{

@@ -6,10 +6,6 @@
 	</style>
   <script type="text/javascript">
   FAYE_SERVER_URL = "<%= Setting.faye_server %>";
-
-  jQuery(function($) {
-
-  });
   </script>
 
   <%= yield :head %>
@@ -37,7 +33,20 @@
             <li><span class="title">如何领奖？</span><span class="text">完成3关即可开始抽大奖，问卷吧统一在活动结束后公布获奖名单，并电话联系中奖者寄出奖品。</span></li>
           </ul>
         </div>
+        <div class="save">
+        	
+          <a class="link" href="javascript:void(0);">保存进度<b></b></a>
+         	
+         		<span class="save-box">
+         			<form action="">
+         				<input type="text" value="输入手机号用以保存进度">
+         				<a href="javascript:void(0);">提交</a>
+         				<a href="javascript:void(0)" onClick="return BookmarkApp.addBookmark(this)">bookmark me</a>
+         			</form>
+         		</span>
 
+        </div>
+				
 
 				<div class="share">
           <a class="link" href="javascript:void(0);">分享拿大奖<b></b></a>
@@ -48,7 +57,6 @@
           	<ul class="share">
         			<li><a class="sina" href="javascript:void(0);"></a></li>
 		           <li><a class="tencent" href="javascript:void(0);"></a></li>
-		           <!-- <li><a class="weixin" href="javascript:void(0);"><i></i>微信朋友圈</a></li> -->
 		           <li><a class="qq" href="javascript:void(0);"></a></li>
 		           <li><a class="qzone" href="javascript:void(0);"></a></li>
 		           <li><a class="renren" href="javascript:void(0);"></a></li>
