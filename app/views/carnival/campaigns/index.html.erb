@@ -7,14 +7,26 @@
       var pre_status = parseInt(window.data.pre_status,10);
       window.current_step = parseInt(window.data.step,10);
 
+      //如果拿到票后刷新页面，直接进入第一个任务
       if( $.cookie('ticket') && window.current_step == 0){
-        window.current_step = 1; //如果拿到票后刷新页面，直接进入第一个任务
+        window.current_step = 1; 
       }
+
+      //已经领取第一关的手机充值,再次进入页面的时候直接进入下一个场景
+      if($.cookie('reward_1')){
+        window.current_step = 2;
+      }
+
+      //第二关任务完成 再次来到页面,直接进入第三个任务场景
+      if($.cookie('reward_2')){
+        window.current_step = 3; 
+      }
+      
+
       // for test
       pre_status = 32;
-      //window.current_step = 3;
-      window.data.t2_status = [0,0,0,0,0];
-      window.data.t3_status = [1,1,1,1,0];
+      //window.data.t2_status = [1,1,1,1,1];
+      //window.data.t3_status = [1,1,1,1,0];
 
 
       if(window.data.t3_surveys.length == 4){
@@ -23,7 +35,7 @@
 
       if (pre_status) {     
         if(pre_status == 2){// for reject
-          $.od.odPopup({withoutTitle:true,content: '您不在此次调研范围内!'});
+          //$.od.odPopup({withoutTitle:true,content: '您不在此次调研范围内!'});
         }else if(pre_status == 32){ // for finish
           // get ticket
           if(window.current_step){
@@ -31,14 +43,18 @@
             setSection(window.current_step);
           }else{
             //预调研通过,通知领取门票,并进入下一个任务
-            $.od.odPopup({
-              withoutTitle:true,
-              content: '恭喜您获得活动门票!',
-              closeButton:false,
-              confirm:function(){
-                openDoor();
+            $.carnivalbox({
+              width:460,
+              title:'已获得门票',
+              content:'',
+              btnCont:'立即前往',
+              aftershow:function(){
+                $('.carnival-popup a.btn').live('click',function(){
+                  $.fancybox.close();
+                  openDoor();
+                })
               }
-            });
+            })
           }
         } 
       }
@@ -47,7 +63,7 @@
       function setFullPage() {
           $('.fullPage').fullpage({
               verticalCentered: true,
-              slidesColor: ['#fff', '#fff', '#fff', '#fff'],
+              slidesColor: ['#eff2c9', '#eff2c9', '#eff2c9', '#eff2c9'],
               loopTop: false,
               loopBottom: false,
               autoScrolling: true
@@ -69,17 +85,36 @@
       //down step
       function fallback(){
         $('.happy').animate({'bottom':'35px'},3000,function(){
-          $.od.odPopup({
-            withoutTitle:true,
-            content: '恭喜您获得一次抽奖活动!',
-            closeButton:false,
-            confirm:function(){
-              // ajax request for task 2
-              TaskOpen('balloon');
-              $.fn.fullpage.moveSectionUp()// go to next section
-            }
-          });          
+          $.carnivalbox({
+            width:460,
+            title:'跳楼机关卡已完成',
+            content:'系统会在问卷审核通过后将话费充值到您的手机',
+
+            btnCont:'继续任务',
+            beforeshow:function(){
+              var text = '<form action=""><input type="radio" name="charg" checked="checked" value="a" />10元<input type="radio" name="charg" value="b" />50元<input type="radio" name="charg" value="c" />100元</form>'
+              $('.carnival-popup p').after(text);
           
+            },
+            aftershow:function(){
+              var sub_btn   = $('.carnival-popup a.btn');
+
+              sub_btn.live('click',function(){
+                if(!sub_btn.hasClass('disabled')){
+                    var money =  $('.carnival-popup input:checked').val();
+                    if(money == 'a'){
+                      money = 10;
+                    }else if (money == 'b'){
+                      money = 50;
+                    }else{
+                      money = 100;
+                    }
+                    sub_btn.addClass('disabled');
+                    sendAjax(0,null,money);
+                }
+              });
+            }
+          })         
         })
       }
 
@@ -111,6 +146,7 @@
           var d = new Date();
           $.cookie('ticket',d.getTime());
         })
+        $.fn.fullpage.moveSectionUp();
         
       }
 
@@ -217,20 +253,39 @@
             turnWheel();
             //弹出话费充值提示
             setTimeout(function(){
-              $.od.odPopup({
-                withoutTitle:true,
-                content: '恭喜您,获得我们奖励的10元话费充值奖励,请输入您的手机号!',
-                closeButton:false,
-                confirm:function(){
-                  //ajax 生成第一大任务完成后的订单
-                  // do some ajax request
-                  //设置第二大任务
-                  TaskOpen('stair');
-                  //跳转到下一个任务
-                  $.fn.fullpage.moveSectionUp()
-                  
+
+              $.carnivalbox({
+                width:460,
+                title:'摩天轮关卡已完成',
+                content:'系统会在问卷审核通过后将<b>10元话费</b>充值到您的手机',
+                btnCont:'继续任务',
+                beforeshow:function(){
+                  $('.carnival-popup p').after('<form action=""><input type="text" name="phone"/></form>')
+          
+                },
+                aftershow:function(){
+                  var phone_ipt = $('.carnival-popup form input');
+                  var sub_btn   = $('.carnival-popup a.btn');
+                  phone_ipt.live('focus',function(){
+                    $(this).removeClass('error');
+                    sub_btn.removeClass('disabled');
+                  });
+                  sub_btn.live('click',function(){
+                    if(!sub_btn.hasClass('disabled')){
+                      var phone = phone_ipt.val();
+                      if($.regex.isMobile(phone)){
+                        sub_btn.addClass('disabled');
+                        phone_ipt.removeClass('error');
+                        sub_btn.addClass('disabled');
+                        sendAjax(3,phone);                   
+                      }else{
+                        phone_ipt.addClass('error');
+                        sub_btn.removeClass('disabled');
+                      }
+                    }
+                  });
                 }
-              });              
+              })              
             },1000)
           }else{
             // 弹出气泡提示操作方法
@@ -248,6 +303,52 @@
 
         }
 
+      }
+
+      //t_type 任务类型
+      //mobile 手机号
+      //数量
+      function sendAjax(t_type,phone,num){
+        var url = '/carnival/users/draw_lottery';
+        $.post(url,
+          {mobile: phone, 
+           type: t_type, 
+           amount: num
+          },function(data){
+            if(data.success){
+              if(t_type == 3){
+                var d = new Date();
+                $.cookie('reward_1',d.getTime());
+                TaskOpen('stair'); 
+              }else if(t_type == 0){
+                var d = new Date();
+                $.cookie('reward_2',d.getTime());
+                TaskOpen('balloon');                
+              }
+              
+              $.fancybox.close();
+              $.fn.fullpage.moveSectionUp()
+            }else{
+              var notic = $('.carnival-popup .notic');
+              if(data.value.error_code == -2){
+                notic.html( '<a href="/s/' + window.data.background_survey + '">请先点亮小太阳</a>' );
+              }
+              if(data.value.error_code == -3){
+                if(t_type == 3){
+                  notic.html('请回答完摩天轮关卡的所有答题')
+                }else if(t_type == 0){
+                  notic.html('请回答完跳楼机关卡的所有答题')
+                }
+                
+                $('.carnival-popup .submit').text('马上完成')
+                $('.carnival-popup .submit').unbind('click');
+                $('.carnival-popup .submit').bind('click',function(){
+                  $.fancybox.close();
+                })
+              }
+              notic.show();
+            }
+          })
       }
 
       //转动摩天轮
@@ -283,20 +384,40 @@
           //跳楼机答题有顺序,必须从底往上答题
           survey_arr = survey_arr.reverse();
           //跳楼机,先上升，停止上升后标识底部的survey 为 答完状态
-          var move_to = status_arr.indexOf(0)
-
-          var prev_bottom =  parseInt($('.happy').css('bottom'),10);
-          var target_bottom = 35;
-          if(move_to > 0){
-            target_bottom = move_to * 60 + prev_bottom;
-          }else if(move_to < 0){
-            target_bottom = '322';
-            prev_bottom = '280';
+          var move_to = status_arr.indexOf(0);
+          var prev_bottom;
+          var target_bottom;
+          switch(move_to){
+            case 0:
+              prev_bottom = 35;
+              target_bottom = 35;
+              break;
+            case 1:
+              prev_bottom = 35;
+              target_bottom = 95;
+              break;
+            case 2:
+              prev_bottom = 95;
+              target_bottom = 155;
+              break;
+            case 3:
+              prev_bottom = 155;
+              target_bottom = 215;
+              break;
+            case 4:
+              prev_bottom = 215;
+              target_bottom = 275;
+              break;
+            default:
+              prev_bottom = 280;
+              target_bottom = 322;
           }
+        
+          $('.happy').css('bottom',prev_bottom);
 
-          $('.happy').css('bottom',prev_bottom + 'px');
+          
           tmp_status = status_arr.filter(function(ele){return ele > 0 })
-          if(tmp_status.length > 1){
+          if(tmp_status.length > 0){
             $('.sbottom').addClass('act');
             $('.happy').addClass('act');
           }else{
@@ -359,6 +480,9 @@
       }
 
       setFullPage();
+
+
+
     })
 
   </script>
@@ -438,61 +562,6 @@
   <div class='section gate active'>
     <div class="page bg1">
       <div class="page-inner">
-        <!-- 预调研被拒绝 start -->
-        <div class="popup">
-          <h2>呃..您不符合本次活动要求</h2>
-          <p>有<b>1832</b>个小盆友和您一样挂在了这条路上..</p>
-          <a href="javascript:void(0);" class="btn submit">我知道了</a>
-        </div>
-        <!-- 预调研被拒绝 end -->
-
-
-        <!-- 预调研通过 start -->
-        <div class="popup">
-          <h2>已获得门票</h2>
-          <p>输入手机号,立即开始探险之旅吧!</p>
-          <form action="">
-            <input type="text" />
-          </form>
-          <a href="javascript:void(0);" class="btn submit">立即前往</a>
-        </div>
-        <!-- 预调研通过 end -->
-
-        <!-- 完成部分任务 start -->
-        <div class="popup">
-          <h2>完成任务</h2>
-          <p>恭喜,已完成摩天轮关卡的1/5 , 全部完成可获得10元话费</p>
-          <a href="javascript:void(0);" class="btn submit">继续任务</a>
-          <a href="javascript:void(0);" class="btn cancel">以后再说</a>
-        </div>
-        <!-- 完成部分任务 end -->
-
-
-        <!-- 中断游戏 start -->
-        <div class="popup">
-          <p>游戏进度已保存,点击"<b>再次游玩</b>"将从本次进度继续</p>
-          <a href="javascript:void(0);" class="btn submit">我知道了</a>
-        </div>
-        <!-- 中断游戏 end -->
-
-        <!-- 完成某一场景 start -->
-        <div class="popup">
-          <h2>摩天轮关卡已完成</h2>
-          <p>系统会在问卷审核通过后将<b>10元话费</b>充值到您的手机</p>
-          <p><b style="font-size:20px;color:#33333d">18201151988</b></p>
-          <a href="javascript:void(0);" class="btn submit">继续任务</a>
-          <a href="javascript:void(0);" class="btn cancel">以后再说</a>
-        </div>
-        <!-- 完成某一场景 end -->
-  
-        <!-- 完成某一场景 start -->
-        <div class="popup">
-          <h2>您已完成全部关卡</h2>
-          <p>系统奖励您<b>10元话费</b>,并且赠送您一次<b>抽奖机会</b></p>
-          <a href="javascript:void(0);" class="btn submit">前去抽奖</a>
-        </div>
-        <!-- 完成某一场景 end -->
-  
         <div class="door-box">
 
         </div>

@@ -5,6 +5,10 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       cookies[:carnival_user_id] = @current_carnival_user.id.to_s
     end
 
+  Rails.logger.info('--------------------------')
+  Rails.logger.info(@current_carnival_user.inspect)
+  Rails.logger.info('--------------------------')
+
     pre_survey = Carnival::PRE_SURVEY
 
     background_survey = Carnival::BACKGROUND_SURVEY
@@ -28,6 +32,7 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       step:step,
       pre_survey:pre_survey,
       background_survey:background_survey,
+      background_survey_status:@current_carnival_user.background_survey_status,
       t1_surveys:surveys[0],
       t2_surveys:surveys[1],
       t3_surveys:surveys[2],
@@ -37,7 +42,7 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       pre_reject_count: CarnivalUser.where(pre_survey_status: 2).length
     }
 
-    return @obj
-       
+    return @obj 
   end
+
 end

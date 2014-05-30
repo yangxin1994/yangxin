@@ -1,12 +1,14 @@
-//=require ui/widgets/od_popup
+//=require jquery.fancybox
+@import "common";
 @import "compass/css3/border-radius";
 @import "compass/utilities/general/clearfix";
 @import "activities/2014-6/ferris/*.png";
 //弹出窗
-.popup{
+.carnival-popup{
 	padding:30px;
 	min-width: 400px;
 	min-height:100px;
+	position:relative;
 	background: #f8f8f8;
 	float: left;
 	margin:20px;
@@ -16,6 +18,20 @@
 	text-align: center;
 	cursor: default;
 	@include border-radius(4px);
+	.notic{
+		display:none;
+		position:absolute;
+		top:6px;
+		width:400px;
+		font-size: 14px;
+		background:#fe7b91;
+		color:#fff;
+		@include one-line(26px);
+		a{
+			
+			color:#fff;
+		}
+	}
 	h2{
 		color:#E75C72;
 		font-size: 20px;
