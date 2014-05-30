@@ -272,7 +272,7 @@ class CarnivalUser
     end
     order.save
     order.handle
-    return order.id
+    return "#{amount}元充值卡"
   end
 
   def create_first_stage_order(mobile)
@@ -292,7 +292,7 @@ class CarnivalUser
     end
     order.save
     order.handle
-    return order.id
+    return "10元充值卡"
   end
 
   def create_third_stage_mobile_order(mobile)
@@ -312,7 +312,7 @@ class CarnivalUser
     end
     order.save
     order.handle
-    return order.id
+    return "10元充值卡"
   end
 
   def draw_third_stage_lottery(mobile)
@@ -338,7 +338,7 @@ class CarnivalUser
       order.status = CarnivalOrder::WAIT
     end
     order.save
-    return order.id
+    return order.carnival_prize.name
   end
 
   def draw_share_lottery(mobile)
@@ -357,6 +357,6 @@ class CarnivalUser
     order.carnival_user = self
     order.status = CarnivalOrder::WAIT
     order.save
-    return order.id
+    return order.carnival_prize.name
   end
 end
