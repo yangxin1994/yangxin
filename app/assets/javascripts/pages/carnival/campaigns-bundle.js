@@ -21,7 +21,9 @@ jQuery(function($) {
         }, 30);
     };
 	})();
-		//活动介绍
+
+	(function(){
+	//活动介绍
 		var ad = $('#ad')[0];
 		var drag = ad.children[0];
 		var b=true;
@@ -66,22 +68,26 @@ jQuery(function($) {
 					},20)
 				};
 			};	
-
-    //顶部下拉菜单
-    function pullDown(obj) {
-        var oBox = $(obj)[0];
-        oBox.onmouseover = function() {
-            this.children[1].style.display = 'block';
-            this.children[0].className = 'link active';
-        };
-        oBox.onmouseout = function() {
-            this.children[1].style.display = 'none';
-            this.children[0].className = 'link';
-        };
-    };
-    pullDown('.questions');
-    pullDown('.share');
-    pullDown('.save');
+	})();
+	
+		(function(){
+			//顶部下拉菜单
+	    function pullDown(obj) {
+	        var oBox = $(obj)[0];
+	        oBox.onmouseover = function() {
+	            this.children[1].style.display = 'block';
+	            this.children[0].className = 'link active';
+	        };
+	        oBox.onmouseout = function() {
+	            this.children[1].style.display = 'none';
+	            this.children[0].className = 'link';
+	        };
+	    };
+	    pullDown('.questions');
+	    pullDown('.share');
+	    pullDown('.save');
+		})();
+    
 
     var timeOut = function() { //超时函数
         $("#lotteryBtn").rotate({
