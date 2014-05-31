@@ -42,7 +42,7 @@ class CarnivalUser
   has_many :answers
   has_many :carnival_orders
 
-  def self.create_new(introducer_id)
+  def self.create_new(introducer_id, source_id)
     u = CarnivalUser.create(introducer_id: introducer_id)
     u.survey_order = Carnival::SURVEY.shuffle
     u.save
