@@ -40,6 +40,7 @@
       //background status
       if(window.data.background_survey_status == 32) {
         $('.sun').addClass('active');
+        $('#light_sun').remove();
       }
 
       var pre_status = parseInt(window.data.pre_status,10);
@@ -158,11 +159,10 @@
             title:'跳楼机关卡已完成',
             content:'系统会在问卷审核通过后将话费充值到您的手机',
 
-            btnCont:'继续任务',
+            btnCont:'抽奖',
             beforeshow:function(){
-              var text = '<form action=""><input type="radio" name="charg" checked="checked" value="a" />10元<input type="radio" name="charg" value="b" />50元<input type="radio" name="charg" value="c" />100元</form>'
+              var text = '<form action=""><input type="radio" name="charg" checked="checked" value="a" />10元（中奖率99%）<input type="radio" name="charg" value="b" />50元（中奖率20%）<input type="radio" name="charg" value="c" />100元（中奖率10%）</form>'
               $('.carnival-popup p').after(text);
-          
             },
             aftershow:function(){
               var sub_btn   = $('.carnival-popup a.btn');
