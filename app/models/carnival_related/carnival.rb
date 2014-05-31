@@ -223,12 +223,12 @@ class Carnival
   def self.survey_finished(answer_id)
     answer = Answer.find(answer_id)
     carnival_user = answer.carnival_user
-    carnival_user.survey_finished(answer.survey_id)
+    carnival_user.survey_finished(answer.id)
   end
 
   def self.survey_reviewed(answer_id)
     answer = Answer.find(answer_id)
     carnival_user = answer.carnival_user
-    carnival_user.survey_reviewed(answer.survey_id, answer.status)
+    carnival_user.survey_reviewed(answer.id, answer.status)
   end
 end
