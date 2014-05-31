@@ -23,6 +23,7 @@ class CarnivalUser
   SURVEY_NOT_FINISHED = -3
   REWARD_ASSIGNED = -4
   UNLUCKY = -5
+  MOBILE_EXIST = -6
 
 
   field :mobile, type: String, default: ""
@@ -42,6 +43,7 @@ class CarnivalUser
 
   has_many :answers
   has_many :carnival_orders
+  has_many :carnival_logs
 
   def self.create_new(introducer_id, source)
     u = CarnivalUser.create(introducer_id: introducer_id, source: source)
@@ -53,6 +55,8 @@ class CarnivalUser
   def pre_survey_result(result)
     if result
       self.update_attributes(pre_survey_status: FINISH)
+      carnival_log = CarnivalLog.create(type: CarnivalLog::GET_TICKET)
+      self.carnival_logs << carnival_log
     else
       self.update_attributes(pre_survey_status: REJECT)
     end
@@ -175,6 +179,9 @@ class CarnivalUser
       introducer.save
       self.introducer_reward_assigned = true
       self.save
+      # create log
+      carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE)
+      self.carnival_logs << carnival_log
     end
   end
 
@@ -249,7 +256,7 @@ class CarnivalUser
     answer.save
   end
 
-  def draw_second_stage_lottery(amount, mobile)
+  def draw_second_stage_lottery(amount)
     if (self.survey_status[5..9] & [NOT_EXIST, REJECT]).present?
       return SURVEY_NOT_FINISHED
     end
@@ -267,7 +274,7 @@ class CarnivalUser
     self.lottery_status[0] = REWARD_EXIST
     self.save
     # create order
-    order = CarnivalOrder.create(type: CarnivalOrder::STAGE_2, mobile: self.mobile || mobile, amount: amount)
+    order = CarnivalOrder.create(type: CarnivalOrder::STAGE_2, mobile: self.mobile, amount: amount)
     order.carnival_user = self
     if self.survey_status[5..9].include?(UNDER_REVIEW)
       order.status = CarnivalOrder::UNDER_REVIEW
@@ -276,10 +283,18 @@ class CarnivalUser
     end
     order.save
     order.handle
+    # create log
+    carnival_log = CarnivalLog.create(type: CarnivalLog::STAGE_2, prize_name: "#{amount}元充值卡")
+    self.carnival_logs << carnival_log
     return "#{amount}元充值卡"
   end
 
   def create_first_stage_order(mobile)
+    if CarnivalUser.where(mobile: mobile).present?
+      return MOBILE_EXIST
+    else
+      self.update_attributes(mobile: mobile)
+    end
     if (self.survey_status[0..4] & [NOT_EXIST, REJECT]).present?
       return SURVEY_NOT_FINISHED
     end
@@ -288,7 +303,7 @@ class CarnivalUser
       return REWARD_ASSIGNED
     end
     # create order
-    order = CarnivalOrder.create(type: CarnivalOrder::STAGE_1, mobile: self.mobile || mobile, amount: 10)
+    order = CarnivalOrder.create(type: CarnivalOrder::STAGE_1, mobile: self.mobile, amount: 10)
     order.carnival_user = self
     if self.survey_status[0..4].include?(UNDER_REVIEW)
       order.status = CarnivalOrder::UNDER_REVIEW
@@ -297,20 +312,22 @@ class CarnivalUser
     end
     order.save
     order.handle
+    # create log
+    carnival_log = CarnivalLog.create(type: CarnivalLog::STAGE_1, prize_name: "10元充值卡")
+    self.carnival_logs << carnival_log
     return "10元充值卡"
   end
 
-  def create_third_stage_mobile_order(mobile)
+  def create_third_stage_mobile_order
     if (self.survey_status[10..13] & [NOT_EXIST, REJECT]).present?
       return SURVEY_NOT_FINISHED
     end
     #if self.orders.where(type: CarnivalOrder::STAGE_3).present?
     if self.carnival_orders.where(type: CarnivalOrder::STAGE_3).present?
-      
       return REWARD_ASSIGNED
     end
     # create order
-    order = CarnivalOrder.create(type: CarnivalOrder::STAGE_3, mobile: self.mobile || mobile, amount: 10)
+    order = CarnivalOrder.create(type: CarnivalOrder::STAGE_3, mobile: self.mobile, amount: 10)
     order.carnival_user = self
     if self.survey_status[10..13].include?(UNDER_REVIEW)
       order.status = CarnivalOrder::UNDER_REVIEW
@@ -319,10 +336,13 @@ class CarnivalUser
     end
     order.save
     order.handle
+    # create log
+    carnival_log = CarnivalLog.create(type: CarnivalLog::STAGE_3, prize_name: "10元充值卡")
+    self.carnival_logs << carnival_log
     return "10元充值卡"
   end
 
-  def draw_third_stage_lottery(mobile)
+  def draw_third_stage_lottery
     if (self.survey_status[10..13] & [NOT_EXIST, REJECT]).present?
       return SURVEY_NOT_FINISHED
     end
@@ -336,7 +356,7 @@ class CarnivalUser
     prize = CarnivalPrize.draw
 
     return UNLUCKY if prize.blank?
-    order = CarnivalOrder.create(type: CarnivalOrder::STAGE_3_LOTTERY, mobile: self.mobile || mobile)
+    order = CarnivalOrder.create(type: CarnivalOrder::STAGE_3_LOTTERY, mobile: self.mobile)
     order.prize = prize
     order.carnival_user = self
     if self.survey_status[10..13].include?(UNDER_REVIEW)
@@ -345,10 +365,13 @@ class CarnivalUser
       order.status = CarnivalOrder::WAIT
     end
     order.save
+    # create log
+    carnival_log = CarnivalLog.create(type: CarnivalLog::STAGE_3_LOTTERY, prize_name: order.carnival_prize.name)
+    self.carnival_logs << carnival_log
     return order.carnival_prize.name
   end
 
-  def draw_share_lottery(mobile)
+  def draw_share_lottery
     if self.share_num <= self.share_lottery_num
       return REWARD_ASSIGNED
     end
@@ -359,11 +382,14 @@ class CarnivalUser
     prize = CarnivalPrize.draw
 
     return UNLUCKY if prize.blank?
-    order = CarnivalOrder.create(type: CarnivalOrder::SHARE, mobile: self.mobile || mobile)
+    order = CarnivalOrder.create(type: CarnivalOrder::SHARE, mobile: self.mobile)
     order.prize = prize
     order.carnival_user = self
     order.status = CarnivalOrder::WAIT
     order.save
+    # create log
+    carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE_LOTTERY, prize_name: order.carnival_prize.name)
+    self.carnival_logs << carnival_log
     return order.carnival_prize.name
   end
 end

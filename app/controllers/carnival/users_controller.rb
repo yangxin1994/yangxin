@@ -10,7 +10,7 @@ class Carnival::UsersController < Carnival::CarnivalController
   def login
     carnival_user = CarnivalUser.where(mobile: params[:mobile]).first
     if carnival_user.present?
-      cookies[:carnival_user_id] = carnival_user.id.to_s
+      set_carnival_user_cookie(carnival_user.id.to_s)
       render_json_auto true and return
     else
       render_json_auto false and return
@@ -33,15 +33,15 @@ class Carnival::UsersController < Carnival::CarnivalController
     end
     case params[:type].to_i
     when 0
-      retval = current_carnival_user.draw_second_stage_lottery(params[:amount].to_i, params[:mobile])
+      retval = current_carnival_user.draw_second_stage_lottery(params[:amount].to_i)
     when 1
-      retval = current_carnival_user.draw_third_stage_lottery(params[:mobile])
+      retval = current_carnival_user.draw_third_stage_lottery
     when 2
-      retval = current_carnival_user.draw_share_lottery(params[:mobile])
+      retval = current_carnival_user.draw_share_lottery
     when 3
       retval = current_carnival_user.create_first_stage_order(params[:mobile])
     when 4
-      retval = current_carnival_user.create_third_stage_mobile_order(params[:mobile])
+      retval = current_carnival_user.create_third_stage_mobile_order
     end
     render_json_auto retval and return
   end
