@@ -132,6 +132,8 @@
       //up step
       //function foraward(prev_bottom,target_bottom,top){
       function foraward(){
+        $('.happy').addClass('act');
+        $('.sbottom').addClass('act');
         $('.happy').animate({'bottom':'322px'},3000,function(){
             setTimeout(function(){
               fallback();
@@ -306,6 +308,31 @@
 
       // 获取剩余抽奖机会
       function get_remain(){
+        if(window.data.share_lottery_num == 0 && window.data.share_num == 0){
+          //第一次抽奖且没有分享过,只有一次抽奖机会
+          var rem = '您还有1次抽奖机会';
+        }else if(window.data.share_num > 0){
+          // 有多次抽奖机会
+          if(window.data.share_num == window.data.share_lottery_num){
+            //所有机会已经用尽
+            var rem = '您还有0次抽奖机会';
+            $("#lotteryBtn").addClass('disabled');
+          }
+
+          if(window.data.share_num > window.data.share_lottery_num){
+            // 有多次抽奖机会,但是还没有用尽
+            var rem = '您还有' + (window.data.share_num - window.data.share_lottery_num) + '次抽奖机会';
+          }
+
+          if(window.data.share_num < window.data.share_lottery_num){
+            //如果用户之前已经抽中奖品,再次进入这个页面后,所有抽奖机会消失,并将 window.data.share_lottery_num 设置为无限大
+            var rem = '您还有0次抽奖机会';
+            $("#lotteryBtn").addClass('disabled');
+          }
+
+        }
+
+
         if(window.data.share_lottery_num >= window.data.share_num){
           $("#lotteryBtn").addClass('disabled');
         }
@@ -502,6 +529,7 @@
                 TaskOpen('stair');
                 notic.html( '领取成功!系统审核通过后会充值到您的手机!' );
                 notic.show();
+                $('.carnival-popup a.btn').text('继续答题');
                 $('.carnival-popup a.btn').unbind('click');
                 $('.carnival-popup a.btn').live('click',function(){
                   nextSec();
@@ -543,7 +571,7 @@
                     break;
                 case -2:
                     notic.html( '<a href="/s/' + window.data.background_survey + '">需要先点亮小太阳，点击此处点亮。</a>' );
-                    rebind_click();
+                    rebind_click('');
                     break;
                 case -3:
                     if(t_type == 3){
