@@ -10,7 +10,9 @@ class Carnival::CampaignsController < Carnival::CarnivalController
 
     background_survey = Carnival::BACKGROUND_SURVEY
 
-    surveys = Carnival::SURVEY.each_slice(5).to_a
+    #surveys = Carnival::SURVEY.each_slice(5).to_a
+
+    surveys = Carnival::SURVEY.each_slice(5).to_a    
 
     step_arr = @current_carnival_user.survey_status.each_slice(5).to_a
 
@@ -23,6 +25,11 @@ class Carnival::CampaignsController < Carnival::CarnivalController
     elsif (step_arr[0].include?(CarnivalUser::UNDER_REVIEW) || step_arr[0].include?(CarnivalUser::UNDER_REVIEW) || step_arr[0].include?(CarnivalUser::FINISH) )
       step = 1
     end
+
+    if @current_carnival_user.carnival_orders.present?
+      @priz_name = @current_carnival_user.carnival_orders.last.carnival_prize.try(:name)  
+    end
+    
 
     @obj = {
       pre_status:@current_carnival_user.pre_survey_status,
@@ -45,7 +52,7 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       share_num:@current_carnival_user.share_num,
       share_lottery_num:@current_carnival_user.share_lottery_num,
       own:@current_carnival_user.carnival_orders.present?,
-      prize_name:@current_carnival_user.carnival_orders.last.carnival_prize.try(:name)
+      prize_name:@priz_name
     }
 
     return @obj 
