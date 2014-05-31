@@ -19,7 +19,7 @@ class Carnival::UsersController < Carnival::CarnivalController
 
   # parameters:
   # => type: 0代表第二个大任务的抽奖，1代表第三个大任务的抽奖，2代表分享成功的抽奖，3代表第一个大任务的10元充值卡，4代表第三个大任务的10充值卡
-  # => amount: type为0时有意义，可以为20或者50，为充值卡面值
+  # => amount: type为0时有意义，可以为10, 50或者100，为充值卡面值
   # => mobile: 
   def draw_lottery
     if current_carnival_user.blank?

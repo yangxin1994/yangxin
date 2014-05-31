@@ -27,6 +27,7 @@ class CarnivalUser
 
   field :mobile, type: String, default: ""
   field :introducer_id, type: String
+  field :source, type: String
   field :introducer_reward_assigned, type: Boolean, default: false
 
   # 0 for not exist, 2 for reject, 32 for finish
@@ -42,8 +43,8 @@ class CarnivalUser
   has_many :answers
   has_many :carnival_orders
 
-  def self.create_new(introducer_id)
-    u = CarnivalUser.create(introducer_id: introducer_id)
+  def self.create_new(introducer_id, source)
+    u = CarnivalUser.create(introducer_id: introducer_id, source: source)
     u.survey_order = Carnival::SURVEY.shuffle
     u.save
     u
@@ -255,10 +256,12 @@ class CarnivalUser
     if self.lottery_status[0] == REWARD_EXIST
       return REWARD_ASSIGNED
     end
-    if amount == 20
-      p = 0.5
-    else
+    if amount == 10
+      p = 0.99
+    elsif amount == 50
       p = 0.2
+    else
+      p = 0.1
     end
     return UNLUCKY if rand < p
     self.lottery_status[0] = REWARD_EXIST

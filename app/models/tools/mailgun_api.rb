@@ -6,6 +6,27 @@ class MailgunApi
   @@survey_email_from = "\"问卷吧\" <postmaster@wenjuanba.net>"
   @@user_email_from = "\"问卷吧\" <postmaster@wenjuanba.cn>"
 
+  def self.batch_send_carnival_email
+    # @emails = (User.all.select { |e| e.email.present? } ).map { |e| e.email }
+    @emails = ["jesse.yang1985@gmail.com", "yangzexi@126.com"]
+    group_size = 900
+    @group_emails = @emails.each_slice(group_size).to_a
+    html_template_file_name = "#{Rails.root}/app/views/survey_mailer/carnival_email.html.erb"
+    html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
+    premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
+
+    @group_emails.each_with_index do |emails, i|
+      data = {}
+      data[:domain] = Rails.application.config.survey_email_domain
+      data[:from] = @@survey_email_from
+      data[:html] = premailer.to_inline_css
+      data[:subject] = "问卷吧嘉年华重磅来袭"
+      data[:subject] += " --- to #{@group_emails.flatten.length} emails" if Rails.env != "production" 
+      data[:to] = Rails.env == "production" ? emails.join(', ') : @@test_email
+      self.send_message(data)
+    end
+  end
+
   def self.batch_send_pre_survey_email(survey_id, emails, reward_scheme_id)
     @emails = emails
     group_size = 900
