@@ -118,8 +118,12 @@ jQuery(function($) {
                         var title = '';
                         var content = '';
 
+                        $.cookie('reward_4', d.getTime(), {
+                            expires: 10 * 365
+                        });
+
                         function setDisabled() {
-                            if (window.data.share_lottery_num == window.data.share_num) {
+                            if (window.data.share_lottery_num >= window.data.share_num) {
                                 lotteryBtn.addClass('disabled');
                             } else {
                                 lotteryBtn.removeClass('disabled');
@@ -128,10 +132,6 @@ jQuery(function($) {
 
                         if (data.success) {
                             window.data.share_lottery_num += 1;
-                            $.cookie('reward_4', d.getTime(), {
-                                expires: 10 * 365
-                            });
-
                             setDisabled();
 
                             var priz_obj = {
@@ -190,7 +190,7 @@ jQuery(function($) {
                                     })
                                     break;
                                 case -4:
-                                    title = '对不起,该奖品已被您领取';
+                                    title = '对不起,该奖品已被您抽中';
                                     break;
                                 case -5:
                                     window.data.share_lottery_num += 1;
