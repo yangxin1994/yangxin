@@ -274,9 +274,9 @@ class CarnivalUser
     else
       p = 0.1
     end
-    return UNLUCKY if rand < p
     self.lottery_status[0] = REWARD_EXIST
     self.save
+    return UNLUCKY if rand > p
     # create order
     order = CarnivalOrder.create(type: CarnivalOrder::STAGE_2, mobile: self.mobile, amount: amount)
     order.carnival_user = self
@@ -354,7 +354,7 @@ class CarnivalUser
     if self.lottery_status[1] == REWARD_EXIST
       return REWARD_ASSIGNED
     end
-    self.lottery_status[1] == REWARD_EXIST
+    self.lottery_status[1] = REWARD_EXIST
     self.save
 
     ### draw
