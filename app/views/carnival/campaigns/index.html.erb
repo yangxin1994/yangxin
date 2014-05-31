@@ -7,9 +7,8 @@
       var pre_status = parseInt(window.data.pre_status,10);
       window.current_step = parseInt(window.data.step,10);
 
-      //是否显示广告
-      if($.cookie('adv')){
-        $('#ad').css({'top':'-665px'});
+      if(window.data.pre_status > 0){
+        $('#ad').hide();
       }
 
       //如果拿到票后刷新页面，直接进入第一个任务
@@ -350,7 +349,6 @@
                 beforeshow:function(){},
                 aftershow:function(){
                   var sub_btn   = $('.carnival-popup a.btn');
-    
                   sub_btn.live('click',function(){
                     if(!sub_btn.hasClass('disabled')){
                         sub_btn.addClass('disabled');
@@ -360,12 +358,6 @@
                 }
               })
             };
-            //筐子点燃火焰
-            makeFire();
-            if($('.line-wrap .line:visible').length == 0){
-              //所有绳子都已经剪断,气球飞扬
-              flyBalloon();
-            }
           }
         }
 
@@ -387,11 +379,16 @@
                 $.cookie('reward_1',d.getTime());
                 TaskOpen('stair'); 
               }else if(t_type == 0){
-                
                 $.cookie('reward_2',d.getTime());
                 TaskOpen('balloon');                
               }else if(t_type == 4){
                 $.cookie('reward_3',d.getTime());
+                //筐子点燃火焰
+                makeFire();
+                if($('.line-wrap .line:visible').length == 0){
+                  //所有绳子都已经剪断,气球飞扬
+                  flyBalloon();
+                }
               }
               
               $.fancybox.close();
@@ -435,9 +432,7 @@
         var umbrella = $('.umbrella');
         var basket = $('.basket');
         if(window.data.t3_status.indexOf(0) < 0){
-          if(!umbrella.hasClass('act')){
             umbrella.addClass('act');  
-          }
           
           if(basket.hasClass('left')){
             basket.removeClass('left').addClass('right');
@@ -524,9 +519,8 @@
       }
 
       function percentNotice(step,survey_arr,status_arr){
-        var tmp_status = arr.filter(function(ele){ return ele > 0})
-
-        if( $.inArray(0,status_arr) > 0 && tmp_status > 0 ){
+        var tmp_status = status_arr.filter(function(ele){ return ele > 0})
+        if( $.inArray(0,status_arr) > 0 && tmp_status.length > 0 ){
           if(step == 1){
             var con = '摩天轮';
             var reward = '10元话费';
@@ -537,7 +531,6 @@
             var con = '热气球'
             var reward = '10元话费及一次抽大奖机会';
           }
-
           var answered = status_arr.filter(function(ele){ return ele > 0 });
           var perc     = answered.length + '/' +  status_arr.length ;
           var t = '完成任务';
@@ -660,6 +653,7 @@
       <div class="page-inner">
         <div id="ferris-wheel">
           <div class="tooltip mtl">
+            <!-- <div style='font-size: 50px; color: #f00;'>?</div> -->
             点击摩天轮问号进行闯关,<br> 本关分5个小任务,闯关成功即送<b>10元手机充值卡！</b>
           </div>
           <span class="ferris-wheel-box">
@@ -681,7 +675,7 @@
         <div class="door-box">
           <div class="door">
             <a href="javascript:void(0);" class="start">立即开始</a>
-            <p class="last">如果您参加过本活动,可以<a href="javascript:void(0);">继续游戏</a></p>
+            <p class="last">如果您已参加过本活动，可 <a href="javascript:void(0);">继续游戏</a></p>
           <span class="left"></span>
           <span class="right"></span>
         </div>
