@@ -255,10 +255,10 @@
         fireUpBackground($('.section.stair'));
         $('#task_two_ask').hide();
         $('#task_two_text').show();
-        var survey_arr = window.data.t2_surveys.reverse(); 
+        // var survey_arr = window.data.t2_surveys.reverse(); 
         $('.section.stair a').each(function(k,v){
-          var uri = '/s/' + survey_arr[k];
-          $(v).attr('href',uri).parent().attr('id',survey_arr[k]);
+          var uri = '/s/' + window.data.t2_surveys[k];
+          $(v).attr('href',uri).parent().attr('id',window.data.t2_surveys[k]);
         })
       }
 
