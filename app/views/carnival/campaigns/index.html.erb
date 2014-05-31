@@ -303,6 +303,19 @@
         // do something
       }
 
+      // 获取剩余抽奖机会
+      function get_remain(){
+        if(window.data.share_lottery_num >= window.data.share_num){
+          $("#lotteryBtn").addClass('disabled');
+        }
+        if(window.data.share_num > 0){
+          var rem = window.data.share_num - window.data.share_lottery_num;
+        }else{
+          var rem = '您还有1次抽奖机会'
+        }
+        $('.ly-plate .draw_remain').text(rem)  
+      }
+
       //标识某个问卷是否已经回答完毕
       function flagSurvey(step,survey_arr,status_arr){
 
@@ -372,56 +385,77 @@
         if(step == 3){
           if($.cookie('reward_3')){
             //第三个大任务充值话费已经领取
+
+            $('.bg4').css({'background-position-y': '0%'});
+            $('.ball-body').css({'top':'-1000px'});
+            $('.bg-grass').hide();
+            $('.line-wrap').hide();
+
+
             var remain = window.data.share_num -  window.data.share_lottery_num;
-            if($.cookie('reward_4') && remain <= 0){
+            console.log('====================================')
+            console.log(remain)
+            console.log($.cookie('reward_4'))
+            console.log('====================================')
+            if($.cookie('reward_4')){
               //已经参加了转盘抽奖
-              $.carnivalbox({
-                width:460,
-                title:'你已完成抽奖活动,感谢您的参与',
-                content:'',
-                btnCont:'离开',
-                beforeshow:function(){},
-                aftershow:function(){
-                  var sub_btn   = $('.carnival-popup a.btn');
-                  sub_btn.live('click',function(){
-                    $.fancybox.close();
-                  });
-                }
-              })              
-            }else{
-              $('.bg4').css({'background-position-y': '0%'});
-              $('.ball-body').css({'top':'-1000px'});
-              $('.bg-grass').hide();
-              $('.line-wrap').hide();
-              if(window.data.own){
-                var title ='恭喜您,中奖了';
-                var cont = '您已经抽中奖品' +  window.data.prize_name + '我们会在审核后联系您!';
-                var btn_cont = '我知道了';
-                $('#lotteryBtn').addClass('disabled');
+              if(remain <= 0){
+                //首次完成全部任务后并已经抽奖，再次来到页面
+                $("#lotteryBtn").addClass('disabled');
+                $.carnivalbox({
+                  width:460,
+                  title:'你已完成抽奖活动,感谢您的参与',
+                  content:'',
+                  btnCont:'离开',
+                  beforeshow:function(){},
+                  aftershow:function(){
+                    var sub_btn   = $('.carnival-popup a.btn');
+                    sub_btn.live('click',function(){
+                      $.fancybox.close();
+                    });
+                  }
+                }) 
               }else{
-                var title ='欢迎您再次抽奖';
-                var cont = '您共有' + window.data.share_num + '次抽奖机会,还剩余'
-              + remain + '次抽奖机会';
-                var btn_cont = '继续抽奖';
-              }
-              
-              
-              $.carnivalbox({
-                width:460,
-                title:title,
-                content:cont,
-                btnCont:btn_cont,
-                beforeshow:function(){},
-                aftershow:function(){
-                  var sub_btn   = $('.carnival-popup a.btn');
-                  sub_btn.live('click',function(){
-                    $.fancybox.close();
-                    $('.ly-plate').fadeIn(3000);
-                  });
+                //已经完成了转盘抽奖,但是可以重复抽奖
+                if(window.data.own){
+                  //已经抽中奖品,不允许再次抽奖
+                  $("#lotteryBtn").addClass('disabled');
+                  var title ='恭喜您,中奖了';
+                  var cont = '您已经抽中奖品' +  window.data.prize_name + '我们会在审核后联系您!'  ;
+                  var btn_cont = '我知道了';
+                  $('#lotteryBtn').addClass('disabled');
+                }else{
+                  //分享抽奖情况
+                  var title ='欢迎您再次抽奖';
+                  var cont = '您共有' + window.data.share_num + '次抽奖机会,还剩余'
+                + remain + '次抽奖机会';
+                  var btn_cont = '继续抽奖';
                 }
-              })  
-            }
+
+                $.carnivalbox({
+                  width:460,
+                  title:title,
+                  content:cont,
+                  btnCont:btn_cont,
+                  beforeshow:function(){},
+                  aftershow:function(){
+                    var sub_btn   = $('.carnival-popup a.btn');
+                    sub_btn.live('click',function(){
+                      $.fancybox.close();
+                      get_remain();
+                      $('.ly-plate').fadeIn(3000);
+                    });
+                  }
+                })
+              }
+            }else{
+              //第三关的话费领取完成但是还未抽奖
+              get_remain();
+              console.log('ddd')
+              $('.ly-plate').fadeIn(3000);
+            } 
           }else{
+            //第三个大任务充值话费尚未领取
             if(window.data.t3_status.indexOf(0) < 0){
               $.carnivalbox({
                 width:460,
@@ -486,15 +520,18 @@
               }else if(t_type == 4){
                 $.cookie('reward_3',d.getTime(),{ expires: 10 * 365 });
                 notic.html('获得了10元手机充值奖励,系统会在审核后充值到您的手机!');
-                notic.show(); 
+                notic.show();
+                $('.carnival-popup a.btn').text('现在去抽奖'); 
                 $('.carnival-popup a.btn').live('click',function(){
+                  $.fancybox.close();
                   makeFire();
                   flyBalloon();
                 })
               }
             }else{
-              function rebind_click(){
-                $('.carnival-popup .submit').text('马上完成')
+              function rebind_click(txt){
+                txt = txt || '马上完成';
+                $('.carnival-popup .submit').text(txt)
                 $('.carnival-popup .submit').unbind('click');
                 $('.carnival-popup .submit').bind('click',function(){
                   $.fancybox.close();
@@ -524,16 +561,16 @@
                     rebind_click();
                     break;
                 case -4:
-                    notic.html( '对不起,该奖品已被您领取' );
-                    rebind_click();               
+                    notic.html( '对不起,该奖品已被您抽中' );
+                    rebind_click('我知道了');               
                     break;
                 case -5:
                     notic.html( '对不起,您本次没有抽中!' );
-                    rebind_click();                    
+                    rebind_click('我知道了');                    
                     break;
                 case -6:
                     notic.html('对不起,该手机号不存在!' );
-                    rebind_click();                  
+                    rebind_click('我知道了');                  
                     break;
                 default:
                   break;
@@ -640,6 +677,7 @@
 
         if(nbg == '30%'){
           $('.ball-body').animate({'top':'-1000px'},4000,function(){
+            get_remain();
             $('.ly-plate').fadeIn(4000,function(){})
           })
           return false;
@@ -688,10 +726,7 @@
         </div>
         <div class="ly-plate">
           <div class="rotate-bg">
-            <div class='draw_remain'>您还有
-      <%= @obj[:share_num].to_i == 0 ? 1 : @obj[:share_num].to_i%>/
-      <%= @obj[:share_lottery_num].to_i == 0 ? 1 : @obj[:share_lottery_num].to_i%>
-              次抽奖机会</div>
+            <div class='draw_remain'></div>
           </div>
             <div class="lottery-star">
               <img src="/assets/activities/2014-6/ferris/rotate-static.png" id="lotteryBtn">
