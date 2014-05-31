@@ -41,7 +41,9 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       priz_3:CarnivalPrize.where(name: "小米移动电源").first.name,
       pre_reject_count: CarnivalUser.where(pre_survey_status: 2).length,
       share_num:@current_carnival_user.share_num,
-      share_lottery_num:@current_carnival_user.share_lottery_num
+      share_lottery_num:@current_carnival_user.share_lottery_num,
+      own:@current_carnival_user.carnival_orders.present?,
+      prize_name:@current_carnival_user.carnival_orders.last.carnival_prize.try(:name)
     }
 
     return @obj 

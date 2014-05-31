@@ -109,7 +109,6 @@
 
       $('a.start').live('click',function(){
         var d = new Date();
-        $.cookie('adv',d.getTime(),{ expires: 10 * 365 });
         window.location.href = '/s/' + window.data.pre_survey;
       })
 
@@ -120,6 +119,7 @@
               verticalCentered: true,
               slidesColor: ['#eff2c9', '#eff2c9', '#eff2c9', '#eff2c9'],
               loopTop: false,
+              navigationPosition:right,
               loopBottom: false,
               autoScrolling: true
           })
@@ -371,14 +371,24 @@
               $('.ball-body').css({'top':'-1000px'});
               $('.bg-grass').hide();
               $('.line-wrap').hide();
-              var cont = '您共有' + window.data.share_num + '次抽奖机会,还剩余'
-              + remain + '次抽奖机会'
+              if(window.data.own){
+                var title ='恭喜您,中奖了';
+                var cont = '您已经抽中奖品' +  window.data.prize_name + '我们会在审核后联系您!';
+                var btn_cont = '我知道了';
+                $('#lotteryBtn').addClass('disabled');
+              }else{
+                var title ='欢迎您再次抽奖';
+                var cont = '您共有' + window.data.share_num + '次抽奖机会,还剩余'
+              + remain + '次抽奖机会';
+                var btn_cont = '继续抽奖';
+              }
+              
               
               $.carnivalbox({
                 width:460,
-                title:'欢迎您再次抽奖',
+                title:title,
                 content:cont,
-                btnCont:'继续抽奖',
+                btnCont:btn_cont,
                 beforeshow:function(){},
                 aftershow:function(){
                   var sub_btn   = $('.carnival-popup a.btn');
