@@ -35,6 +35,7 @@ class CarnivalUser
   field :pre_survey_status, type: Integer, default: 0
   field :background_survey_status, type: Integer, default: 0
   field :survey_order, type: Array
+  field :reward_scheme_order, type: Array
   field :survey_status, type: Array, default: Array.new(14) { 0 }
   field :lottery_status, type: Array, default: Array.new(2) { 0 }
 
@@ -48,6 +49,10 @@ class CarnivalUser
   def self.create_new(introducer_id, source)
     u = CarnivalUser.create(introducer_id: introducer_id, source: source)
     u.survey_order = Carnival::SURVEY.shuffle
+    u.reward_scheme_order = u.survey_order.map do |e|
+      s = Survey.find(e)
+      s.reward_schemes.where(default: true).first.id.to_s
+    end
     u.save
     u
   end
@@ -55,8 +60,6 @@ class CarnivalUser
   def pre_survey_result(result)
     if result
       self.update_attributes(pre_survey_status: FINISH)
-      carnival_log = CarnivalLog.create(type: CarnivalLog::GET_TICKET)
-      self.carnival_logs << carnival_log
     else
       self.update_attributes(pre_survey_status: REJECT)
     end
@@ -180,7 +183,7 @@ class CarnivalUser
       self.introducer_reward_assigned = true
       self.save
       # create log
-      carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE)
+      carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE, prize_name: "一次抽大奖机会")
       self.carnival_logs << carnival_log
     end
   end
