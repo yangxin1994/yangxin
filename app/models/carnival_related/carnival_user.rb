@@ -43,6 +43,7 @@ class CarnivalUser
 
   has_many :answers
   has_many :carnival_orders
+  has_many :carnival_logs
 
   def self.create_new(introducer_id, source)
     u = CarnivalUser.create(introducer_id: introducer_id, source: source)
@@ -54,6 +55,8 @@ class CarnivalUser
   def pre_survey_result(result)
     if result
       self.update_attributes(pre_survey_status: FINISH)
+      carnival_log = CarnivalLog.create(type: CarnivalLog::GET_TICKET)
+      self.carnival_logs << carnival_log
     else
       self.update_attributes(pre_survey_status: REJECT)
     end
@@ -176,6 +179,9 @@ class CarnivalUser
       introducer.save
       self.introducer_reward_assigned = true
       self.save
+      # create log
+      carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE)
+      self.carnival_logs << carnival_log
     end
   end
 
@@ -277,6 +283,9 @@ class CarnivalUser
     end
     order.save
     order.handle
+    # create log
+    carnival_log = CarnivalLog.create(type: CarnivalLog::STAGE_2, prize_name: "#{amount}元充值卡")
+    self.carnival_logs << carnival_log
     return "#{amount}元充值卡"
   end
 
@@ -303,6 +312,9 @@ class CarnivalUser
     end
     order.save
     order.handle
+    # create log
+    carnival_log = CarnivalLog.create(type: CarnivalLog::STAGE_1, prize_name: "10元充值卡")
+    self.carnival_logs << carnival_log
     return "10元充值卡"
   end
 
@@ -324,6 +336,9 @@ class CarnivalUser
     end
     order.save
     order.handle
+    # create log
+    carnival_log = CarnivalLog.create(type: CarnivalLog::STAGE_3, prize_name: "10元充值卡")
+    self.carnival_logs << carnival_log
     return "10元充值卡"
   end
 
@@ -350,6 +365,9 @@ class CarnivalUser
       order.status = CarnivalOrder::WAIT
     end
     order.save
+    # create log
+    carnival_log = CarnivalLog.create(type: CarnivalLog::STAGE_3_LOTTERY, prize_name: order.carnival_prize.name)
+    self.carnival_logs << carnival_log
     return order.carnival_prize.name
   end
 
@@ -369,6 +387,9 @@ class CarnivalUser
     order.carnival_user = self
     order.status = CarnivalOrder::WAIT
     order.save
+    # create log
+    carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE_LOTTERY, prize_name: order.carnival_prize.name)
+    self.carnival_logs << carnival_log
     return order.carnival_prize.name
   end
 end
