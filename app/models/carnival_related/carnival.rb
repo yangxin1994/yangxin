@@ -159,6 +159,8 @@ class Carnival
 
   def self.update_survey_quota(answer, survey_id)
     quota_stats = self.where(survey_id: survey_id, type: STATS).first
+    quota_stats.quota["amount"] += 1
+    quota_stats.save
 
     gender_qid = "538591f8eb0e5b7282000009"
     gender_q = Question.find(gender_qid)
