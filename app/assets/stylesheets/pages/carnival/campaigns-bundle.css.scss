@@ -503,6 +503,16 @@ a{
 		    top: 0;
 		    left: 0;
 		    margin-top: 0%;
+		    .draw_remain{
+					position: relative;
+					right: -400px;
+					width: 180px;
+					height: 36px;
+					line-height: 36px;
+					text-align: center;
+					background: #fff;
+					color: red;
+		    }
 		}
 		.ly-plate div.lottery-star{
 		    width:214px;

@@ -101,6 +101,136 @@ jQuery(function($) {
     })();
 
 
+
+
+
+    var start_draw = function() {
+        $("#lotteryBtn").rotate({
+            bind: {
+                click: function() {
+                    var lotteryBtn = $("#lotteryBtn");
+                    if (!lotteryBtn.hasClass('disabled')) {
+                        $("#lotteryBtn").addClass('disabled');
+                        var t_type = 1; //抽奖
+                        if (window.data.share_num > 0) {
+                            t_type = 2; //分享抽奖
+                        }
+
+                        $.post('/carnival/users/draw_lottery', {
+                            type: t_type
+                        }, function(data) {
+                            var d = new Date();
+                            var title = '';
+                            var content = '';
+
+                            function setDisabled() {
+                                if (window.data.share_lottery_num == window.data.share_num) {
+                                    lotteryBtn.addClass('disabled');
+                                } else {
+                                    lotteryBtn.removeClass('disabled');
+                                }
+                            }
+
+                            if (data.success) {
+                                window.data.share_lottery_num += 1;
+                                $.cookie('reward_4', d.getTime(), {
+                                    expires: 10 * 365
+                                });
+
+                                setDisabled();
+
+                                var priz_obj = {
+                                    1: window.data.priz_1,
+                                    2: window.data.priz_2,
+                                    3: window.data.priz_3
+                                }
+
+                                title = '恭喜您中奖了!'
+                                content = '恭喜您抽中了' + data.value + '我们会在订单审核通过后联系您!'
+
+                                if (data.value == window.data.priz_1) {
+                                    rotateFunc(1, 157, function() {
+                                        showNotice(title, content);
+                                    });
+                                } else if (data.value == window.data.priz_2) {
+                                    rotateFunc(2, 247, function() {
+                                        showNotice(title, content);
+                                    });
+                                } else if (data.value == window.data.priz_3) {
+                                    rotateFunc(3, 22, function() {
+                                        showNotice(title, content);
+                                    });
+                                }
+
+                            } else {
+                                var code;
+                                if (typeof(data.value.error_code) == 'number') {
+                                    code = parseInt(data.value.error_code, 10);
+                                } else {
+                                    code = data.value.error_code
+                                }
+                                switch (code) {
+                                    case -1:
+                                        title = '对不起,该用户不存在!';
+                                        break;
+                                    case -2:
+                                        title = '请先点亮小太阳';
+                                        content = '<a href="/s/' + window.data.background_survey + '">请先点亮小太阳</a>';
+                                        break;
+                                    case -3:
+                                        if (t_type == 3) {
+                                            title = '请回答完摩天轮关卡的所有答题';
+                                        } else if (t_type == 0) {
+                                            title = '请回答完跳楼机关卡的所有答题';
+                                        } else if (t_type == 4) {
+                                            title = '请回答完热气球关卡的所有答题';
+                                        } else if (t_type == 1) {
+                                            title = '请回答完热气球关卡的所有答题';
+                                        }
+
+                                        $('.carnival-popup .submit').text('马上完成')
+                                        $('.carnival-popup .submit').unbind('click');
+                                        $('.carnival-popup .submit').bind('click', function() {
+                                            $.fancybox.close();
+                                        })
+                                        break;
+                                    case -4:
+                                        title = '对不起,该奖品已被您领取';
+                                        break;
+                                    case -5:
+                                        window.data.share_lottery_num += 1;
+                                        $.cookie('reward_4', d.getTime(), {
+                                            expires: 10 * 365
+                                        });
+
+                                        setDisabled();
+
+                                        title = '对不起,您本次没有抽中!';
+                                        break;
+                                    case -6:
+                                        title = '对不起,该手机号不存在!'
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                timeOut(function() {
+                                    showNotice(title, content);
+                                })
+                            }
+                        })
+                    }
+                }
+            }
+        });
+    }
+
+    $('.share-lottery a').click(function() {
+        if (!$(this).hasClass('disabled')) {
+            start_draw();
+        }
+    })
+
+
     var showNotice = function(title, content) {
         $.carnivalbox({
             width: 460,
@@ -139,183 +269,7 @@ jQuery(function($) {
     };
 
 
-    $("#lotteryBtn").rotate({
-        bind: {
-            click: function() {
-                var lotteryBtn = $("#lotteryBtn");
-                if (!lotteryBtn.hasClass('disabled')) {
-                    $("#lotteryBtn").addClass('disabled');
-                    var t_type = 1; //抽奖
-                    if (window.data.share_num > 0) {
-                        t_type = 2; //分享抽奖
-                    }
-
-                    $.post('/carnival/users/draw_lottery', {
-                        type: t_type
-                    }, function(data) {
-                        var d = new Date();
-                        var title = '';
-                        var content = '';
-
-                        function setDisabled() {
-                            if (window.data.share_lottery_num == window.data.share_num) {
-                                lotteryBtn.addClass('disabled');
-                            } else {
-                                lotteryBtn.removeClass('disabled');
-                            }
-                        }
-
-                        if (data.success) {
-                            window.data.share_lottery_num += 1;
-                            $.cookie('reward_4', d.getTime(), {
-                                expires: 10 * 365
-                            });
-
-                            setDisabled();
-
-                            var priz_obj = {
-                                1: window.data.priz_1,
-                                2: window.data.priz_2,
-                                3: window.data.priz_3
-                            }
-
-                            title = '恭喜您中奖了!'
-                            content = '恭喜您抽中了' + data.value + '我们会在订单审核通过后联系您!'
-
-                            if (data.value == window.data.priz_1) {
-                                rotateFunc(1, 157, function() {
-                                    showNotice(title, content);
-                                });
-                            } else if (data.value == window.data.priz_2) {
-                                rotateFunc(2, 247, function() {
-                                    showNotice(title, content);
-                                });
-                            } else if (data.value == window.data.priz_3) {
-                                rotateFunc(3, 22, function() {
-                                    showNotice(title, content);
-                                });
-                            }
-
-                        } else {
-                            var code;
-                            if (typeof(data.value.error_code) == 'number') {
-                                code = parseInt(data.value.error_code, 10);
-                            } else {
-                                code = data.value.error_code
-                            }
-                            switch (code) {
-                                case -1:
-                                    title = '对不起,该用户不存在!';
-                                    break;
-                                case -2:
-                                    title = '请先点亮小太阳';
-                                    content = '<a href="/s/' + window.data.background_survey + '">请先点亮小太阳</a>';
-                                    break;
-                                case -3:
-                                    if (t_type == 3) {
-                                        title = '请回答完摩天轮关卡的所有答题';
-                                    } else if (t_type == 0) {
-                                        title = '请回答完跳楼机关卡的所有答题';
-                                    } else if (t_type == 4) {
-                                        title = '请回答完热气球关卡的所有答题';
-                                    } else if (t_type == 1) {
-                                        title = '请回答完热气球关卡的所有答题';
-                                    }
-
-                                    $('.carnival-popup .submit').text('马上完成')
-                                    $('.carnival-popup .submit').unbind('click');
-                                    $('.carnival-popup .submit').bind('click', function() {
-                                        $.fancybox.close();
-                                    })
-                                    break;
-                                case -4:
-                                    title = '对不起,该奖品已被您领取';
-                                    break;
-                                case -5:
-                                    window.data.share_lottery_num += 1;
-                                    $.cookie('reward_4', d.getTime(), {
-                                        expires: 10 * 365
-                                    });
-
-                                    setDisabled();
-
-                                    title = '对不起,您本次没有抽中!';
-                                    break;
-                                case -6:
-                                    title = '对不起,该手机号不存在!'
-                                    break;
-                                default:
-                                    break;
-                            }
-                            timeOut(function() {
-                                showNotice(title, content);
-                            })
-                        }
-                    })
-                }
-
-                // var time = [0, 1];
-                // time = time[Math.floor(Math.random() * time.length)];
-                // if (time == 0) {
-                //     timeOut(); //网络超时
-                // }
-
-                // if (time == 1) {
-                //     var data = [1, 2, 3, 0]; //返回的数组
-                //     data = data[Math.floor(Math.random() * data.length)];
-                //     if (data == 1) {
-                //         rotateFunc(1, 157, '恭喜您抽中的一等奖')
-                //     }
-                //     if (data == 2) {
-                //         rotateFunc(2, 247, '恭喜您抽中的二等奖')
-                //     }
-                //     if (data == 3) {
-                //         rotateFunc(3, 22, '恭喜您抽中的三等奖')
-                //     }
-                //     if (data == 0) {
-                //         var angle = [67, 112, 202, 292, 337];
-                //         angle = angle[Math.floor(Math.random() * angle.length)]
-                //         rotateFunc(0, angle, '很遗憾，这次您未抽中奖')
-                //     }
-                // }
-            }
-        }
-
-    });
-
-
-
-    // $("#lotteryBtn").rotate({
-    //     bind: {
-    //         click: function() {
-    //             var time = [0, 1];
-    //             time = time[Math.floor(Math.random() * time.length)];
-    //             if (time == 0) {
-    //                 timeOut(); //网络超时
-    //             }
-    //             if (time == 1) {
-    //                 var data = [1, 2, 3, 0]; //返回的数组
-    //                 data = data[Math.floor(Math.random() * data.length)];
-    //                 if (data == 1) {
-    //                     rotateFunc(1, 157, '恭喜您抽中的一等奖')
-    //                 }
-    //                 if (data == 2) {
-    //                     rotateFunc(2, 247, '恭喜您抽中的二等奖')
-    //                 }
-    //                 if (data == 3) {
-    //                     rotateFunc(3, 22, '恭喜您抽中的三等奖')
-    //                 }
-    //                 if (data == 0) {
-    //                     var angle = [67, 112, 202, 292, 337];
-    //                     angle = angle[Math.floor(Math.random() * angle.length)]
-    //                     rotateFunc(0, angle, '很遗憾，这次您未抽中奖')
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    // });
-
+    start_draw();
 
 
     //收藏夹

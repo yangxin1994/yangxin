@@ -66,9 +66,9 @@
       }
 
       // test
-      // pre_status = 32;
-      // window.data.t2_status = [2,0,5,0,0];
-      // window.current_step = 2;
+      pre_status = 32;
+      window.data.t3_status = [2,32,32,32];
+      window.current_step = 3;
 
 
       if (pre_status) {     
@@ -483,12 +483,14 @@
             if(data.success){
               if(t_type == 3){
                 $.cookie('reward_1',d.getTime(),{ expires: 10 * 365 });
-                TaskOpen('stair'); 
-                nextSec();
+                TaskOpen('stair');
+                notic.html( '领取成功!系统审核通过后会充值到您的手机!' );
+                notic.show();
               }else if(t_type == 0){
                 $.cookie('reward_2',d.getTime(),{ expires: 10 * 365 });
                 TaskOpen('balloon');
-                nextSec();                
+                notic.html('恭喜您抽中了' + data.value + '系统审核后会充值到您的手机!');
+                notic.show();             
               }else if(t_type == 4){
                 $.cookie('reward_3',d.getTime(),{ expires: 10 * 365 });
                 $.fancybox.close();
@@ -762,7 +764,12 @@
           </div>
         </div>
         <div class="ly-plate">
-          <div class="rotate-bg"></div>
+          <div class="rotate-bg">
+            <div class='draw_remain'>您还有
+      <%= @obj[:share_num].to_i == 0 ? 1 : @obj[:share_num].to_i%>/
+      <%= @obj[:share_lottery_num].to_i == 0 ? 1 : @obj[:share_lottery_num].to_i%>
+              次抽奖机会</div>
+          </div>
             <div class="lottery-star">
               <img src="/assets/activities/2014-6/ferris/rotate-static.png" id="lotteryBtn">
             </div>
