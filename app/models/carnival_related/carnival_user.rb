@@ -268,11 +268,11 @@ class CarnivalUser
       return REWARD_ASSIGNED
     end
     if amount == 10
-      p = 0.99
+      p = 1.1
     elsif amount == 50
-      p = 0.2
+      p = 0.18
     else
-      p = 0.1
+      p = 0.09
     end
     self.lottery_status[0] = REWARD_EXIST
     self.save
