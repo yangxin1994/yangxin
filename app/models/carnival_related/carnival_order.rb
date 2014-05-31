@@ -90,7 +90,7 @@ class CarnivalOrder
     return if self.status != WAIT
     return if [STAGE_1, STAGE_2, STAGE_3].include?(self.type)
 
-    # only hanlde the mobile orders that are in wait status
+    # only handle the mobile orders that are in wait status
     self.status = HANDLE
     self.esai_status = ESAI_HANDLE
     self.handled_at = Time.now
@@ -120,7 +120,7 @@ class CarnivalOrder
   def pass
     if self.status == UNDER_REVIEW
       self.update_attributes(status: WAIT)
-      self.hanlde
+      self.handle
     end
   end
 
