@@ -57,7 +57,7 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       pre_reject_count: CarnivalUser.where(pre_survey_status: 2).length,
       share_num:@current_carnival_user.share_num,
       share_lottery_num:@current_carnival_user.share_lottery_num,
-      own:@current_carnival_user.carnival_orders.present?,
+      own:@current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_3_LOTTERY, CarnivalOrder::SHARE].present?,
       prize_name:@priz_name
     }
 

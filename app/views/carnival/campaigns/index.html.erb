@@ -324,11 +324,17 @@
             var rem = '您还有' + (window.data.share_num - window.data.share_lottery_num) + '次抽奖机会';
           }
 
-          if(window.data.share_num < window.data.share_lottery_num){
-            //如果用户之前已经抽中奖品,再次进入这个页面后,所有抽奖机会消失,并将 window.data.share_lottery_num 设置为无限大
+          if(window.data.own){
+            //已经中奖
             var rem = '您还有0次抽奖机会';
             $("#lotteryBtn").addClass('disabled');
           }
+
+          // if(window.data.share_num < window.data.share_lottery_num){
+          //   //如果用户之前已经抽中奖品,再次进入这个页面后,所有抽奖机会消失,并将 window.data.share_lottery_num 设置为无限大
+          //   var rem = '您还有0次抽奖机会';
+          //   $("#lotteryBtn").addClass('disabled');
+          // }
 
         }
 
@@ -475,7 +481,6 @@
             }else{
               //第三关的话费领取完成但是还未抽奖
               get_remain();
-              console.log('ddd')
               $('.ly-plate').fadeIn(3000);
             } 
           }else{
