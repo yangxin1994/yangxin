@@ -3,6 +3,36 @@
   <%= javascript_include_tag "pages/carnival/campaigns-bundle" %>
   <script type="text/javascript">
     $(function(){
+      //continue game
+      $('#continue_game').click(function() {
+        $.carnivalbox({
+          width:460,
+          title:'继续游戏',
+          content:'如果您之前已经开始过游戏，可输入您的手机号继续游戏进度：',
+          btnCont:'继续游戏',
+          beforeshow:function(){
+            $('.carnival-popup p').after('<p><input style="padding: 0.5em; width: 250px;font-size: 14px; font-weight:bold;" class="mobile-ipt" type="text" /></p><p class="mobile-error" style="color: #E75C72; display:none;">手机格式有误</p>');
+          },
+          aftershow:function(){
+            $('.carnival-popup a.btn').click(function() {
+              var mobile = $.trim($('.carnival-popup input.mobile-ipt').val());
+              if(!$.regex.isMobile(mobile)) {
+                $('.carnival-popup p.mobile-error').text('手机格式有误').show();
+                return;
+              }
+              $('.carnival-popup p.mobile-error').hide();
+              $.postJSON('/carnival/users/login', {mobile: mobile}, function(retval) {
+                if(retval.success && retval.value) {
+                  location.reload(true);
+                } else {
+                  $('.carnival-popup p.mobile-error').text('该手机尚未开始游戏').show();
+                }
+              });
+            });
+          }
+        });
+      });
+
       window.data = <%= raw (@obj).to_json %>;
       var pre_status = parseInt(window.data.pre_status,10);
       window.current_step = parseInt(window.data.step,10);
@@ -137,7 +167,7 @@
                 }
               });
             }
-          });         
+          });
         })
       }
 
@@ -674,8 +704,8 @@
       <div class="page-inner">
         <div class="door-box">
           <div class="door">
-            <a href="javascript:void(0);" class="start">立即开始</a>
-            <p class="last">如果您已参加过本活动，可 <a href="javascript:void(0);">继续游戏</a></p>
+            <a href="http://wenjuanba.com/~k0dUx" class="start">开始抢票！</a>
+            <p class="last">如果您已参加过本活动，可 <a id='continue_game' href="javascript:void(0);">继续游戏</a></p>
           <span class="left"></span>
           <span class="right"></span>
         </div>
