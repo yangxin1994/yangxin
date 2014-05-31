@@ -65,12 +65,6 @@
         window.current_step = 3; 
       }
 
-      // test
-      // pre_status = 32;
-      // window.data.t2_status = [2,0,5,0,0];
-      // window.current_step = 2;
-
-
       if (pre_status) {     
         if(pre_status == 2){// for reject
           $('.door > p.last').remove();
@@ -144,14 +138,6 @@
             },1000);            
         })
 
-        // $('.happy').animate({'bottom':target_bottom + 'px'},3000,function(){
-        //   if(top < 0){//到达顶端
-        //     setTimeout(function(){
-        //       fallback();
-        //     },1000)            
-        //   }
-
-        // })
       }
 
       //down step
@@ -345,7 +331,7 @@
                 width:460,
                 title:'摩天轮关卡已完成',
                 content:'系统会在问卷审核通过后将<b>10元话费</b>充值到您的手机',
-                btnCont:'继续任务',
+                btnCont:'马上领取',
                 beforeshow:function(){
                   $('.carnival-popup p').after('<form action=""><input type="text" name="phone"/></form>')
           
@@ -442,7 +428,7 @@
                 title:'您已完成全部关卡',
                 content:'系统奖励您<b>10元话费</b>,并且赠送您一次<b>抽奖机会</b>',
     
-                btnCont:'前去抽奖',
+                btnCont:'马上领取',
                 beforeshow:function(){},
                 aftershow:function(){
                   var sub_btn   = $('.carnival-popup a.btn');
@@ -482,21 +468,31 @@
             if(data.success){
               if(t_type == 3){
                 $.cookie('reward_1',d.getTime(),{ expires: 10 * 365 });
-                TaskOpen('stair'); 
-                nextSec();
+                TaskOpen('stair');
+                notic.html( '领取成功!系统审核通过后会充值到您的手机!' );
+                notic.show();
+                $('.carnival-popup a.btn').unbind('click');
+                $('.carnival-popup a.btn').live('click',function(){
+                  nextSec();
+                })
               }else if(t_type == 0){
                 $.cookie('reward_2',d.getTime(),{ expires: 10 * 365 });
                 TaskOpen('balloon');
-                nextSec();                
+                notic.html('恭喜您抽中了' + data.value + '系统审核后会充值到您的手机!');
+                notic.show();  
+                $('.carnival-popup a.btn').live('click',function(){
+                  nextSec();
+                })                           
               }else if(t_type == 4){
                 $.cookie('reward_3',d.getTime(),{ expires: 10 * 365 });
-                $.fancybox.close();
-                makeFire();
-                flyBalloon();
+                notic.html('获得了10元手机充值奖励,系统会在审核后充值到您的手机!');
+                notic.show(); 
+                $('.carnival-popup a.btn').live('click',function(){
+                  makeFire();
+                  flyBalloon();
+                })
               }
-
             }else{
-
               function rebind_click(){
                 $('.carnival-popup .submit').text('马上完成')
                 $('.carnival-popup .submit').unbind('click');
@@ -588,76 +584,6 @@
           }
         })  
         // for hide survey end
-
-        // if(step == 2){
-        //   //跳楼机答题有顺序,必须从底往上答题
-        //   survey_arr = survey_arr.reverse();
-        //   //跳楼机,先上升，停止上升后标识底部的survey 为 答完状态
-        //   var move_to = status_arr.indexOf(0);
-        //   var prev_bottom;
-        //   var target_bottom;
-        //   switch(move_to){
-        //     case 0:
-        //       prev_bottom = 35;
-        //       target_bottom = 35;
-        //       break;
-        //     case 1:
-        //       prev_bottom = 35;
-        //       target_bottom = 95;
-        //       break;
-        //     case 2:
-        //       prev_bottom = 95;
-        //       target_bottom = 155;
-        //       break;
-        //     case 3:
-        //       prev_bottom = 155;
-        //       target_bottom = 215;
-        //       break;
-        //     case 4:
-        //       prev_bottom = 215;
-        //       target_bottom = 275;
-        //       break;
-        //     default:
-        //       prev_bottom = 280;
-        //       target_bottom = 322;
-        //   }
-        
-        //   $('.happy').css('bottom',prev_bottom);
-
-          
-        //   tmp_status = status_arr.filter(function(ele){return ele > 0 })
-        //   if(tmp_status.length > 0){
-        //     $('.sbottom').addClass('act');
-        //     $('.happy').addClass('act');
-        //   }else{
-        //     $('.sbottom').removeClass('act');
-        //     $('.happy').removeClass('act');
-        //   }
-
-        //   foraward(prev_bottom,target_bottom,move_to);
-
-        //   $.each(survey_arr,function(k,v){
-        //     if(parseInt(status_arr[k]) > 0){
-        //       $('#' + v).addClass('act');
-        //     }else{
-        //       if(k != 0){
-        //         if( parseInt(status_arr[k -1]) == 0 ){
-        //           $('#' + v).children().attr('href','javascript:void(0);');
-        //         }
-        //       }
-        //     }           
-        //   })
-        // }else{
-        //   $.each(survey_arr,function(k,v){
-        //     if(parseInt(status_arr[k]) > 0){
-        //       $('#' + v).addClass('act');
-        //       if(step == 3){
-        //         //热气球,如果某个小任务完成,删除绳子
-        //         $($('.line-wrap .line')[k]).hide();
-        //       }
-        //     }
-        //   })          
-        // }
 
       }
 
@@ -761,7 +687,12 @@
           </div>
         </div>
         <div class="ly-plate">
-          <div class="rotate-bg"></div>
+          <div class="rotate-bg">
+            <div class='draw_remain'>您还有
+      <%= @obj[:share_num].to_i == 0 ? 1 : @obj[:share_num].to_i%>/
+      <%= @obj[:share_lottery_num].to_i == 0 ? 1 : @obj[:share_lottery_num].to_i%>
+              次抽奖机会</div>
+          </div>
             <div class="lottery-star">
               <img src="/assets/activities/2014-6/ferris/rotate-static.png" id="lotteryBtn">
             </div>
