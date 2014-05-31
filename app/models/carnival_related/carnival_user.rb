@@ -52,7 +52,7 @@ class CarnivalUser
     u.survey_order = Carnival::SURVEY.shuffle
     u.reward_scheme_order = u.survey_order.map do |e|
       s = Survey.find(e)
-      s.reward_schemes.where(default: true).first.id.to_s
+      s.reward_schemes.where(need_review: true).first.id.to_s
     end
     u.save
     u

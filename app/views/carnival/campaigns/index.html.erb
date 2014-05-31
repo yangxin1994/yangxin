@@ -36,6 +36,12 @@
       });
 
       window.data = <%= raw (@obj).to_json %>;
+
+      //background status
+      if(window.data.background_survey_status == 32) {
+        $('.sun').addClass('active');
+      }
+
       var pre_status = parseInt(window.data.pre_status,10);
       window.current_step = parseInt(window.data.step,10);
 
@@ -62,8 +68,12 @@
       //   window.data.t3_status.pop();
       // }
 
+      pre_status = 32;
+      window.current_step = 3;
       if (pre_status) {     
         if(pre_status == 2){// for reject
+          $('.door > p.last').remove();
+          $('.door > a.start').remove();
             $.carnivalbox({
               width:460,
               title:'呃..您不符合本次活动要求',
@@ -77,10 +87,13 @@
               }
             })
         }else if(pre_status == 32){ // for finish
+          $('.door > p.last').remove();
+          $('.door > a.start').remove();
           // get ticket
           if(window.current_step){
             //每个小任务(及每个大任务)完成后的跳转页面
             setSection(window.current_step);
+            openDoor(false);
           }else{
             //预调研通过,通知领取门票,并进入下一个任务
             $.carnivalbox({
@@ -91,7 +104,7 @@
               aftershow:function(){
                 $('.carnival-popup a.btn').live('click',function(){
                   $.fancybox.close();
-                  openDoor();
+                  openDoor(true);
                 })
               }
             })
@@ -189,16 +202,17 @@
       }
 
       // open door
-      function openDoor(){
+      function openDoor(move){
         TaskOpen('wheel');// start the wheel section
-        $('.door .left').animate({'left':'-175px'},3000,function(){})
-
+        $('.door .left').animate({'left':'-175px'},3000,function(){});
         $('.door .right').animate({'right':'-148px'},3000,function(){
-          $.fn.fullpage.moveSectionUp()// go to next section
+          // $.fn.fullpage.moveSectionUp()// go to next section
           var d = new Date();
           $.cookie('ticket',d.getTime(),{ expires: 10 * 365 });
-        })
-        $.fn.fullpage.moveSectionUp();
+
+        });
+        if(move)
+          $.fn.fullpage.moveSectionUp();
       }
 
       // open task完成上一个任务后设置下一个任务
@@ -222,6 +236,8 @@
       //设置第一个大任务
       function setTaskOne(){
         fireUpBackground($('.section.wheel'));
+        $('#task_one_ask').hide();
+        $('#task_one_text').show();
         $('.section.wheel a').each(function(k,v){
           var uri = '/s/' + window.data.t1_surveys[k];
           $(v).attr('href',uri).attr('id',window.data.t1_surveys[k]);
@@ -235,7 +251,10 @@
 
       //设置第二个大任务
       function setTaskTwo(){
+        setTaskOne();
         fireUpBackground($('.section.stair'));
+        $('#task_two_ask').hide();
+        $('#task_two_text').show();
         var survey_arr = window.data.t2_surveys.reverse(); 
         $('.section.stair a').each(function(k,v){
           var uri = '/s/' + survey_arr[k];
@@ -245,8 +264,10 @@
 
       //设置第三个大任务
       function setTaskThree(){
-
+        setTaskTwo();
         fireUpBackground($('.section.balloon'));
+        $('#task_three_ask').hide();
+        $('#task_three_text').show();
         $('.section.balloon a').each(function(k,v){
           if(window.data.t3_surveys[k]){
             var uri = '/s/' + window.data.t3_surveys[k];
@@ -483,7 +504,7 @@
                     rebind_click();
                     break;
                 case -2:
-                    notic.html( '<a href="/s/' + window.data.background_survey + '">  请先点亮小太阳</a>' );
+                    notic.html( '<a href="/s/' + window.data.background_survey + '">需要先点亮小太阳，点击此处点亮。</a>' );
                     rebind_click();
                     break;
                 case -3:
@@ -719,7 +740,8 @@
               <div class='line line-4'></div>
               <div class='bg-grass'></div>
               <div class="tooltip rqq">
-                点击问号解开热气球绳子,<br>4根全部解开立即获得<b>神秘奖品</b><br>和<b>小米大奖抽奖机会！</b>
+                 <div id='task_three_ask' style='font-size: 60px; color: #ccc; line-height: 70px;'>?</div>
+                 <div id='task_three_text' style='display:none;'>点击问号解开热气球绳子,<br>4根全部解开立即获得<b>神秘奖品</b><br>和<b>小米大奖抽奖机会！</b></div>
               </div>
               <div class='stack stack1'><a href='javascript:void(0);'></a></div>
               <div class='stack stack2'><a href='javascript:void(0);'></a></div>
@@ -743,7 +765,8 @@
         <div id='machine-wrap'>
           <div class='wrap-skin'>
             <div class="tooltip tlj">
-              点击跳楼机问号进行闯关,<br>本关分5个小任务,闯关成功<br>可参加<b>神秘抽奖哦！</b>
+              <div id='task_two_ask' style='font-size: 60px; color: #ccc; line-height: 70px;'>?</div>
+              <div id='task_two_text' style='display:none;'>点击跳楼机问号进行闯关,<br>本关分5个小任务,闯关成功<br>可参加<b>神秘抽奖哦！</b></div>
             </div>
             <div class='happy'></div>
             <div class='st5'><a href='javascript:void(0);'></a></div>
@@ -762,8 +785,8 @@
       <div class="page-inner">
         <div id="ferris-wheel">
           <div class="tooltip mtl">
-            <!-- <div style='font-size: 50px; color: #f00;'>?</div> -->
-            点击摩天轮问号进行闯关,<br> 本关分5个小任务,闯关成功即送<b>10元手机充值卡！</b>
+            <div id='task_one_ask' style='font-size: 60px; color: #ccc; line-height: 70px;'>?</div>
+            <div id='task_one_text' style='display:none;'>点问号（<b>注意中间问号</b>）闯关,<br> 本关分5个小任务,闯关成功即送<b>10元手机充值卡！</b></div>
           </div>
           <span class="ferris-wheel-box">
           <a href="javascript:void(0);" class="one"></a>

@@ -152,7 +152,7 @@ class Answer
   end
 
   def self.find_by_survey_id_carnival_user_id_is_preview(survey_id, carnival_user_id, is_preview)
-    return nil if sample_id.blank?
+    return nil if carnival_user_id.blank?
     return Answer.where(carnival_user_id: carnival_user_id, survey_id: survey_id, :is_preview => is_preview).first
   end
 
