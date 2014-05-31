@@ -373,7 +373,6 @@
               + remain + '次抽奖机会'
               
               $.carnivalbox({
-                showClose:true,
                 width:460,
                 title:'欢迎您再次抽奖',
                 content:cont,
@@ -423,47 +422,69 @@
            type: t_type, 
            amount: num
           },function(data){
-            if(data.success){
-              var d = new Date();
-              if(t_type == 3){
-                $.cookie('reward_1',d.getTime(),{ expires: 10 * 365 });
-                TaskOpen('stair'); 
-              }else if(t_type == 0){
-                $.cookie('reward_2',d.getTime(),{ expires: 10 * 365 });
-                TaskOpen('balloon');                
-              }else if(t_type == 4){
-                $.cookie('reward_3',d.getTime(),{ expires: 10 * 365 });
-                //筐子点燃火焰
-                makeFire();
-                if($('.line-wrap .line:visible').length == 0){
-                  //所有绳子都已经剪断,气球飞扬
-                  flyBalloon();
-                }
-              }
-              
-              $.fancybox.close();
-              $.fn.fullpage.moveSectionUp()
-            }else{
-              var notic = $('.carnival-popup .notic');
-              if(data.value.error_code == -2){
-                notic.html( '<a href="/s/' + window.data.background_survey + '">请先点亮小太阳</a>' );
-              }
-              if(data.value.error_code == -3){
-                if(t_type == 3){
-                  notic.html('请回答完摩天轮关卡的所有答题')
-                }else if(t_type == 0){
-                  notic.html('请回答完跳楼机关卡的所有答题')
-                }else if(t_type == 4){
-                  notic.html('请回答完热气球关卡的所有答题')
-                }
-                
-                $('.carnival-popup .submit').text('马上完成')
-                $('.carnival-popup .submit').unbind('click');
-                $('.carnival-popup .submit').bind('click',function(){
+            var code = parseInt(data.value.error_code, 10);
+            var notic = $('.carnival-popup .notic');
+            var d = new Date();
+            switch (code) {
+                case -1:
+                    notic.html( '对不起,该用户不存在!' );
+                    notic.show();
+                    break;
+                case -2:
+                    notic.html( '<a href="/s/' + window.data.background_survey + '">请先点亮小太阳</a>' );
+                    notic.show();
+                    break;
+                case -3:
+                    if(t_type == 3){
+                      notic.html('请回答完摩天轮关卡的所有答题');
+                    }else if(t_type == 0){
+                      notic.html('请回答完跳楼机关卡的所有答题');
+                    }else if(t_type == 4){
+                      notic.html('请回答完热气球关卡的所有答题');
+                    }else if(t_type == 1){
+                      notic.html('请回答完热气球关卡的所有答题');
+                    }
+                    
+                    $('.carnival-popup .submit').text('马上完成')
+                    $('.carnival-popup .submit').unbind('click');
+                    $('.carnival-popup .submit').bind('click',function(){
+                      $.fancybox.close();
+                    })
+                    notic.show();
+                    break;
+                case -4:
+                    notic.html( '对不起,该奖品已被您领取' );
+                    notic.show();                
+                    break;
+                case -5:
+                    notic.html( '对不起,您本次没有抽中!' );
+                    notic.show();                    
+                    break;
+                case -6:
+                    notic.html('对不起,该手机号不存在!' );
+                    notic.show();                    
+                    break;
+                default:
+                  if(t_type == 3){
+                    $.cookie('reward_1',d.getTime(),{ expires: 10 * 365 });
+                    TaskOpen('stair'); 
+                  }else if(t_type == 0){
+                    $.cookie('reward_2',d.getTime(),{ expires: 10 * 365 });
+                    TaskOpen('balloon');                
+                  }else if(t_type == 4){
+                    $.cookie('reward_3',d.getTime(),{ expires: 10 * 365 });
+                    //筐子点燃火焰
+                    makeFire();
+                    if($('.line-wrap .line:visible').length == 0){
+                      //所有绳子都已经剪断,气球飞扬
+                      flyBalloon();
+                    }
+                  }
+                  
                   $.fancybox.close();
-                })
-              }
-              notic.show();
+                  $.fn.fullpage.moveSectionUp();
+
+                  break;
             }
           })
       }

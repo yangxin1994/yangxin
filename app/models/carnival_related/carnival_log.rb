@@ -16,7 +16,7 @@ class CarnivalLog
   SHARE_LOTTERY = 7
 
   field :type, :type => Integer
-  field :prize_name :type => String
+  field :prize_name, :type => String
 
   belongs_to :carnival_user
 end
