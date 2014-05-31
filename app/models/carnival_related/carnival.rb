@@ -142,11 +142,11 @@ class Carnival
     return true if quota_stats.quota["income"][5] < quota_setting.quota["income"][5] && [income_q.issue["items"][10]["id"], income_q.issue["items"][11]["id"], income_q.issue["items"][12]["id"], income_q.issue["items"][13]["id"], income_q.issue["items"][14]["id"]].include?(answer.answer_content[income_qid]["selection"][0])
 
     region_qid = "53859237eb0e5b245200000f"
-    region_q = Question.find(address_qid)
+    region_q = Question.find(region_qid)
     # region beijing, shanghai, guangzhou, shenzhen, tianjin, nanjing, wuhan, shenyang, xi'an, chengdu, chongqing, hangzhou, tsingdao,
     # dalian, ningbo, jinan, harbin, changchun, xiamen, zhengzhou, suzhou, wuxi, changsha, fuzhou, lanzhou, urumchi, kunming
-    code = ["4096", "36864", "77888", "78016", "8192", "41024", "69696", "24640", "28930", "94272", "90112", "45120", "61568", "24704", "45184", "61504", "32832", "28736", "53376", "65600", "41088", "73792", "53312", "114752", "127040", "102464"]
-    code.each do |c|
+    code = ["4096", "36864", "77888", "78016", "8192", "41024", "69696", "24640", "110656", "94272", "90112", "45120", "61568", "24704", "45184", "61504", "32832", "28736", "53376", "65600", "41088", "73792", "53312", "114752", "127040", "102464"]
+    code.each_with_index do |c, index|
       return true if quota_stats.quota["region"][c] < quota_setting.quota["region"][c] && QuillCommon::AddressUtility.satisfy_region_code?(answer.answer_content[region_qid]["address"], c)
     end
     # other cities
@@ -197,10 +197,10 @@ class Carnival
     quota_stats.quota["income"][5] += 1 if [income_q.issue["items"][10]["id"], income_q.issue["items"][11]["id"], income_q.issue["items"][12]["id"], income_q.issue["items"][13]["id"], income_q.issue["items"][14]["id"]].include?(answer.answer_content[income_qid]["selection"][0])
 
     region_qid = "53859237eb0e5b245200000f"
-    region_q = Question.find(address_qid)
+    region_q = Question.find(region_qid)
     # region beijing, shanghai, guangzhou, shenzhen, tianjin, nanjing, wuhan, shenyang, xi'an, chengdu, chongqing, hangzhou, tsingdao,
     # dalian, ningbo, jinan, harbin, changchun, xiamen, zhengzhou, suzhou, wuxi, changsha, fuzhou, lanzhou, urumchi, kunming
-    code = ["4096", "36864", "77888", "78016", "8192", "41024", "69696", "24640", "28930", "94272", "90112", "45120", "61568", "24704", "45184", "61504", "32832", "28736", "53376", "65600", "41088", "73792", "53312", "114752", "127040", "102464"]
+    code = ["4096", "36864", "77888", "78016", "8192", "41024", "69696", "24640", "110656", "94272", "90112", "45120", "61568", "24704", "45184", "61504", "32832", "28736", "53376", "65600", "41088", "73792", "53312", "114752", "127040", "102464"]
     code.each do |c|
       quota_stats.quota["region"][c] += 1 if QuillCommon::AddressUtility.satisfy_region_code?(answer.answer_content[region_qid]["address"], c)
     end
@@ -215,6 +215,7 @@ class Carnival
   end
 
   def self.background_survey_finished(answer_id)
+    answer = Answer.find(answer_id)
     carnival_user = answer.carnival_user
     carnival_user.update_attributes(background_survey_status: CarnivalUser::FINISH)
   end

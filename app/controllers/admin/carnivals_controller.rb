@@ -12,11 +12,13 @@ class Admin::CarnivalsController < Admin::AdminController
   def update_quota
     # render text: "hello" and return
     quota_setting = Carnival.where(survey_id: Carnival::PRE_SURVEY, type: Carnival::SETTING).first
-    quota_setting.quota[:gender] = params[:gender].values
-    quota_setting.quota[:age] = params[:age].values
-    quota_setting.quota[:income] = params[:income].values
-    quota_setting.quota[:education] = params[:education].values
-    quota_setting.quota[:region] = params[:region]
+    quota_setting.quota["gender"] = params[:gender].values.map! { |e| e.to_i }
+    quota_setting.quota["age"] = params[:age].values.map! { |e| e.to_i }
+    quota_setting.quota["income"] = params[:income].values.map! { |e| e.to_i }
+    quota_setting.quota["education"] = params[:education].values.map! { |e| e.to_i }
+    params[:region].each do |k,v|
+	    quota_setting.quota["region"][k] = v.to_i
+		end
     quota_setting.save
     redirect_to action: :pre_surveys and return
   end

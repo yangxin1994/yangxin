@@ -12,6 +12,7 @@ class CarnivalUser
   REJECT = 2
   UNDER_REVIEW = 4
   FINISH = 32
+  HIDE = 64
 
   # reward_status
   REWARD_NOT_EXIST = 0
@@ -75,7 +76,7 @@ class CarnivalUser
     input_ids_1 = [613766637056106, 8188468568300061]
     if (input_ids_1 & a).blank?
       index = self.survey_order.index(s1_id)
-      self.survey_status[index] = FINISH
+      self.survey_status[index] = HIDE
     end
 
     # 538415caeb0e5b815400000b: 预调研里过去一年在“笔记本电脑/台式机”看过电影的用户才回答此问卷
@@ -83,7 +84,7 @@ class CarnivalUser
     input_ids_2 = [9419552569209770]
     if (input_ids_2 & a).blank?
       index = self.survey_order.index(s2_id)
-      self.survey_status[index] = FINISH
+      self.survey_status[index] = HIDE
     end
 
     # 53843581eb0e5bff58000001: 预调研里过去一年在“平板”或“手机”看过电影的用户才回答此问卷
@@ -91,7 +92,7 @@ class CarnivalUser
     input_ids_3 = [2214434698414035, 22230203902982316]
     if (input_ids_3 & a).blank?
       index = self.survey_order.index(s3_id)
-      self.survey_status[index] = FINISH
+      self.survey_status[index] = HIDE
     end
 
     self.save
