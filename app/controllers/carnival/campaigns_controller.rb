@@ -15,7 +15,7 @@ class Carnival::CampaignsController < Carnival::CarnivalController
     if !@current_carnival_user.reward_scheme_order.nil?
       surveys = @current_carnival_user.reward_scheme_order.each_slice(5).to_a
     else
-      surveys = [[1,1,1,1,1],[1,1,1,1,1], [1,1,1,1]]
+      surveys = [[122,133,144,155,166],[222,233,244,255,266], [322,333,344,355]]
     end
 
     step_arr = @current_carnival_user.survey_status.each_slice(5).to_a

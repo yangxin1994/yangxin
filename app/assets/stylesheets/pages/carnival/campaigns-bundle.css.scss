@@ -8,6 +8,15 @@
 
 //弹出窗
 
+.section{
+	a{
+		cursor:default;
+	}
+	&.active{
+		cursor: pointer;
+	}
+}
+
 .popup-close{
 	position:absolute;
 	display:inline-block;
@@ -209,6 +218,10 @@ a{
 				z-index: 100;
 				top:156px;
 				left:156px;
+				&.act{
+					cursor: default;
+				}
+
 			}
 		}
 	}
@@ -256,7 +269,12 @@ a{
 			}
 		}		
 		.st4{
-
+			width:106px;
+			height:60px;
+			position: absolute;
+			left:2px;
+			bottom:244px;
+			cursor:pointer;
 			@include ferris-sprite(st4);
 			&:hover{
 				@include ferris-sprite(st4_hover);
