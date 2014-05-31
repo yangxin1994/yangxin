@@ -38,7 +38,9 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       t1_status:step_arr[0],
       t2_status:step_arr[1],
       t3_status:step_arr[2],
-      pre_reject_count: CarnivalUser.where(pre_survey_status: 2).length
+      pre_reject_count: CarnivalUser.where(pre_survey_status: 2).length,
+      share_num:@current_carnival_user.share_num,
+      share_lottery_num:@current_carnival_user.share_lottery_num
     }
 
     return @obj 

@@ -77,7 +77,7 @@
 
       $('a.start').live('click',function(){
         var d = new Date();
-        $.cookie('adv',d.getTime());
+        $.cookie('adv',d.getTime(),{ expires: 10 * 365 });
         window.location.href = '/s/' + window.data.pre_survey;
       })
 
@@ -164,7 +164,7 @@
         $('.door .right').animate({'right':'-148px'},3000,function(){
           $.fn.fullpage.moveSectionUp()// go to next section
           var d = new Date();
-          $.cookie('ticket',d.getTime());
+          $.cookie('ticket',d.getTime(),{ expires: 10 * 365 });
         })
         $.fn.fullpage.moveSectionUp();
         
@@ -318,7 +318,8 @@
         if(step == 3){
           if($.cookie('reward_3')){
             //第三个大任务充值话费已经领取
-            if($.cookie('reward_4')){
+            var remain = window.data.share_num -  window.data.share_lottery_num;
+            if($.cookie('reward_4') && remain <= 0){
               //已经参加了转盘抽奖
               $.carnivalbox({
                 width:460,
@@ -330,13 +331,32 @@
                   var sub_btn   = $('.carnival-popup a.btn');
                   sub_btn.live('click',function(){
                     $.fancybox.close();
-                    window.location.href = '/';
                   });
                 }
               })              
             }else{
-            $('.ball-body').css({'top':'-350px'});
-            $('.ly-plate').show();
+              $('.bg4').css({'background-position-y': '0%'});
+              $('.ball-body').css({'top':'-1000px'});
+              $('.bg-grass').hide();
+              $('.line-wrap').hide();
+              var cont = '您共有' + window.data.share_num + '次抽奖机会,还剩余'
+              + remain + '次抽奖机会'
+              
+              $.carnivalbox({
+                showClose:true,
+                width:460,
+                title:'欢迎您再次抽奖',
+                content:cont,
+                btnCont:'继续抽奖',
+                beforeshow:function(){},
+                aftershow:function(){
+                  var sub_btn   = $('.carnival-popup a.btn');
+                  sub_btn.live('click',function(){
+                    $.fancybox.close();
+                    $('.ly-plate').fadeIn(3000);
+                  });
+                }
+              })  
             }
           }else{
             if(window.data.t3_status.indexOf(0) < 0){
@@ -376,13 +396,13 @@
             if(data.success){
               var d = new Date();
               if(t_type == 3){
-                $.cookie('reward_1',d.getTime());
+                $.cookie('reward_1',d.getTime(),{ expires: 10 * 365 });
                 TaskOpen('stair'); 
               }else if(t_type == 0){
-                $.cookie('reward_2',d.getTime());
+                $.cookie('reward_2',d.getTime(),{ expires: 10 * 365 });
                 TaskOpen('balloon');                
               }else if(t_type == 4){
-                $.cookie('reward_3',d.getTime());
+                $.cookie('reward_3',d.getTime(),{ expires: 10 * 365 });
                 //筐子点燃火焰
                 makeFire();
                 if($('.line-wrap .line:visible').length == 0){
@@ -549,8 +569,6 @@
         }
       }
 
-
-
       //摩天轮发光闪烁
       function flashWheel(wheel){
         var wheel = $('.section.wheel');
@@ -572,7 +590,7 @@
         $('.ball-line').css({'top':ngrass_top});
 
         if(nbg == '30%'){
-          $('.ball-body').animate({'top':'-350px'},4000,function(){
+          $('.ball-body').animate({'top':'-1000px'},4000,function(){
             $('.ly-plate').fadeIn(4000,function(){})
           })
           return false;

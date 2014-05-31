@@ -4,6 +4,7 @@ jQuery.extend({
     carnivalbox: function(options) {
         var _defaults = {
             showTitle: false,
+            showClose: false,
             title: '',
             content: '',
             btnCont: '',
@@ -33,7 +34,7 @@ jQuery.extend({
             minWidth: _options.width,
             openEffect: 'none',
             closeEffect: 'none',
-            showCloseButton: false,
+            showCloseButton: _options.showClose,
             helpers: {
                 overlay: {
                     locked: false,
