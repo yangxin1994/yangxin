@@ -29,7 +29,6 @@
 
   $(function () {
     // social share
-    // TODO: share link to QQ
     var share_href = 'http://wenjuanba.com/carnival/campaigns?i=<%= @current_carnival_user.id.to_s %>'; 
     _.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace'], $.proxy(function(v) {
       $('#' + v).click(function() {
@@ -79,12 +78,23 @@
       <div class="header-box">
         <div class="bulletin">
           <ul>
-            <li><span>5分钟之前</span>  <span>XXX</span> <span>获得了</span> <span>门票一张<1> </1></span></li>
-            <li><span>5分钟之前</span>  <span>XXX</span> <span>获得了</span> <span>门票一张<2> </2></span></li>
-            <li><span>5分钟之前</span>  <span>XXX</span> <span>获得了</span> <span>门票一张<3> </3></span></li>
+            <% CarnivalLog.recent_logs.each do |log| %>
+              <li>
+                <span><%= Time.now.to_i - log.created_at %></span>
+                <span><%= log.carnival_user.mobile %></span>
+                <% if [CarnivalLog::STAGE_1, CarnivalLog::STAGE_3].include?(log.type) %>
+                  <span>获得了</span>
+                <% elsif log.type == CarnivalLog::SHARE %>
+                  <span>分享成功，获得了</span>
+                <% else %>
+                  <span>抽到了</span>
+                <% end %>
+                <span><%= log.prize_name %></span>
+              </li>
+            <% end %>
           </ul>
         </div>
-				<a href="javascript:void(0);" class="sun" id="sun"></a>
+				<a href="http://wenjuanba.com/~yEQIs" class="sun" id="sun"></a>
 				<div class="tooltip ty">跪求点亮Orz</div>
          <div class="questions">
           <a class="link" href="javascript:void(0);">FAQ<b></b></a>

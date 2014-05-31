@@ -10,10 +10,12 @@
           title:'继续游戏',
           content:'如果您之前已经开始过游戏，可输入您的手机号继续游戏进度：',
           btnCont:'继续游戏',
+          showClose: true,
           beforeshow:function(){
             $('.carnival-popup p').after('<p><input style="padding: 0.5em; width: 250px;font-size: 14px; font-weight:bold;" class="mobile-ipt" type="text" /></p><p class="mobile-error" style="color: #E75C72; display:none;">手机格式有误</p>');
           },
           aftershow:function(){
+            $('.fancybox-skin a.popup-close').text('X').css('color', '#999');
             $('.carnival-popup a.btn').click(function() {
               var mobile = $.trim($('.carnival-popup input.mobile-ipt').val());
               if(!$.regex.isMobile(mobile)) {

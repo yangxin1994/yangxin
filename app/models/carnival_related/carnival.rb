@@ -51,7 +51,9 @@ class Carnival
 
 
   PRE_SURVEY = "53859185eb0e5b7282000002"
+  PRE_SURVEY_REWARD_SCHEME = "53859185eb0e5b7282000003"
   BACKGROUND_SURVEY = "53858ff3eb0e5b3366000023"
+  BACKGROUND_SURVEY_REWARD_SCHEME = "53858ff3eb0e5b3366000024"
   SURVEY = ["53868990eb0e5ba257000025",
     "53843373eb0e5bac1d00002f",
     "538415caeb0e5b815400000b",
@@ -83,6 +85,7 @@ class Carnival
   end
 
   def self.pre_survey_finished(answer_id)
+	  binding.pry
     answer = Answer.find(answer_id)
     carnival_user = answer.carnival_user
     # check whether pass the pre survey
@@ -93,7 +96,7 @@ class Carnival
     else
       result = self.check_pre_survey_quota(answer)
     end
-    carnival_user.pre_survey_finished(result)
+    carnival_user.pre_survey_result(result)
     carnival_user.hide_survey(answer) if result
     self.update_survey_quota(answer, PRE_SURVEY) if result
   end

@@ -625,6 +625,7 @@ OopsData::Application.routes.draw do
     resources :users do
       collection do
         post :login, :draw_lottery, :update
+        get :draw_lottery
       end
     end
     resources :campaigns, :only => [:index]
