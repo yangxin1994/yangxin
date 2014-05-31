@@ -64,12 +64,12 @@
         window.current_step = 3; 
       }
 
-      // if(window.data.t3_surveys.length == 4){
-      //   window.data.t3_status.pop();
-      // }
+      // test
+      pre_status = 32;
+      window.data.t2_status = [2,0,5,0,0];
+      window.current_step = 2;
 
-      // pre_status = 32;
-      // window.current_step = 3;
+
       if (pre_status) {     
         if(pre_status == 2){// for reject
           $('.door > p.last').remove();
@@ -93,6 +93,9 @@
           if(window.current_step){
             //每个小任务(及每个大任务)完成后的跳转页面
             setSection(window.current_step);
+            if(window.data.t3_status.indexOf(0) < 0){
+              $('.share-lottery a').removeClass('disabled');
+            }
             openDoor(false);
           }else{
             //预调研通过,通知领取门票,并进入下一个任务
@@ -243,7 +246,14 @@
           $(v).attr('href',uri).attr('id',window.data.t1_surveys[k]);
           // add for hide survey start
           if(window.data.t1_status[k] > 0){
-            $(v).addClass('act');
+            if(window.data.t1_status[k] != 2){
+              $(v).addClass('act');  
+            }
+          }else{
+            //摩天轮红色中间的问号因为缺少一张图片的原因,所以只能移除five class
+            if($(v).hasClass('five')){
+              $(v).removeClass('five');  
+            }
           } 
           // add for hide survey end
         })
@@ -255,7 +265,6 @@
         fireUpBackground($('.section.stair'));
         $('#task_two_ask').hide();
         $('#task_two_text').show();
-        // var survey_arr = window.data.t2_surveys.reverse(); 
         $('.section.stair a').each(function(k,v){
           var uri = '/s/' + window.data.t2_surveys[k];
           $(v).attr('href',uri).parent().attr('id',window.data.t2_surveys[k]);
@@ -570,7 +579,9 @@
         // for hide survey start
         $.each(survey_arr,function(k,v){
           if(parseInt(status_arr[k]) > 0){
-            $('#' + v).addClass('act');
+            if( parseInt(status_arr[k]) != 2 ){
+              $('#' + v).addClass('act');  
+            }
             if(step == 3){
               //热气球,如果某个小任务完成,删除绳子
               $($('.line-wrap .line')[k]).hide();
