@@ -33,15 +33,15 @@ class Carnival::UsersController < Carnival::CarnivalController
     end
     case params[:type].to_i
     when 0
-      retval = current_carnival_user.draw_second_stage_lottery(params[:amount].to_i, params[:mobile])
+      retval = current_carnival_user.draw_second_stage_lottery(params[:amount].to_i)
     when 1
-      retval = current_carnival_user.draw_third_stage_lottery(params[:mobile])
+      retval = current_carnival_user.draw_third_stage_lottery
     when 2
-      retval = current_carnival_user.draw_share_lottery(params[:mobile])
+      retval = current_carnival_user.draw_share_lottery
     when 3
       retval = current_carnival_user.create_first_stage_order(params[:mobile])
     when 4
-      retval = current_carnival_user.create_third_stage_mobile_order(params[:mobile])
+      retval = current_carnival_user.create_third_stage_mobile_order
     end
     render_json_auto retval and return
   end
