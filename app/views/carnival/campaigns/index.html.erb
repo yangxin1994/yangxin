@@ -330,24 +330,20 @@
             $("#lotteryBtn").addClass('disabled');
           }
 
-          // if(window.data.share_num < window.data.share_lottery_num){
-          //   //如果用户之前已经抽中奖品,再次进入这个页面后,所有抽奖机会消失,并将 window.data.share_lottery_num 设置为无限大
-          //   var rem = '您还有0次抽奖机会';
-          //   $("#lotteryBtn").addClass('disabled');
-          // }
-
         }
 
+        $('.ly-plate .draw_remain').text(rem)
 
-        if(window.data.share_lottery_num >= window.data.share_num){
-          $("#lotteryBtn").addClass('disabled');
-        }
-        if(window.data.share_num > 0){
-          var rem = window.data.share_num - window.data.share_lottery_num;
-        }else{
-          var rem = '您还有1次抽奖机会'
-        }
-        $('.ly-plate .draw_remain').text(rem)  
+
+        // if(window.data.share_lottery_num >= window.data.share_num){
+        //   $("#lotteryBtn").addClass('disabled');
+        // }
+        // if(window.data.share_num > 0){
+        //   var rem = window.data.share_num - window.data.share_lottery_num;
+        // }else{
+        //   var rem = '您还有1次抽奖机会'
+        // }
+        // $('.ly-plate .draw_remain').text(rem)  
       }
 
       //标识某个问卷是否已经回答完毕
