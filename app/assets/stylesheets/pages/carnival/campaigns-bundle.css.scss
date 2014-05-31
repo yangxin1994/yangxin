@@ -1,25 +1,38 @@
-//=require ui/widgets/od_popup
+//=require jquery.fancybox
+@import "common";
 @import "compass/css3/border-radius";
 @import "compass/utilities/general/clearfix";
 @import "activities/2014-6/ferris/*.png";
 @import "compass/reset";
+
+
 //弹出窗
 a{
 	text-decoration: none;
 }
-.popup{
+.carnival-popup{
 	padding:30px;
 	min-width: 400px;
 	min-height:100px;
 	background: #f8f8f8;
 	float: left;
 	margin:20px;
-	// position: absolute;
-	// left:200px;
-	// top:200px;
 	text-align: center;
 	cursor: default;
 	@include border-radius(4px);
+  .notic{
+    display:none;
+    position:absolute;
+    top:6px;
+    width:400px;
+    font-size: 14px;
+    background:#fe7b91;
+    color:#fff;
+    @include one-line(26px);
+    a{
+      color:#fff;
+    }
+  }
 	img{
 		display: block;
 		margin:0 auto;
@@ -91,11 +104,12 @@ a{
 	position: relative;
 	left:550px;
 	top:240px;
+
+
  .ferris-wheel-box{
 		width:350px;
 		height:350px;
 		top:100px;
-		
 		.ferris{
 			display:none;
 			width:350px;
@@ -189,7 +203,6 @@ a{
 	}
 }
 
-
 #machine-wrap{
 	position: absolute;
 	left:360px;
@@ -232,12 +245,7 @@ a{
 			}
 		}		
 		.st4{
-			width:106px;
-			height:60px;
-			position: absolute;
-			left:2px;
-			bottom:244px;
-			cursor:pointer;
+
 			@include ferris-sprite(st4);
 			&:hover{
 				@include ferris-sprite(st4_hover);
@@ -473,10 +481,6 @@ a{
 		    position:absolute;
 		    top:150px;
 		    left:147px;
-		    /*text-indent:-999em;
-		    overflow:hidden;
-		    background:url(rotate-static.png);
-		    -webkit-transform:rotate(0deg);*/
 		    outline:none
 		}
 		.ly-plate div.lottery-star #lotteryBtn{

@@ -7,6 +7,10 @@
       var pre_status = parseInt(window.data.pre_status,10);
       window.current_step = parseInt(window.data.step,10);
 
+      if(window.data.pre_status > 0){
+        $('#ad').hide();
+      }
+
       //如果拿到票后刷新页面，直接进入第一个任务
       if( $.cookie('ticket') && window.current_step == 0){
         window.current_step = 1; 
@@ -24,10 +28,10 @@
       
 
       // for test
-      // pre_status = 32;
+      //pre_status = 32;
       // window.current_step = 0;
       // window.data.t2_status = [0,0,0,0,0];
-      // window.data.t3_status = [1,1,1,1,0];
+      //window.data.t3_status = [1,1,1,1,0];
 
       if(window.data.t3_surveys.length == 4){
         window.data.t3_status.pop();
@@ -35,7 +39,18 @@
 
       if (pre_status) {     
         if(pre_status == 2){// for reject
-          //$.od.odPopup({withoutTitle:true,content: '您不在此次调研范围内!'});
+            $.carnivalbox({
+              width:460,
+              title:'呃..您不符合本次活动要求',
+              content:'有<b>' + window.data.pre_reject_count + '</b>个小盆友和您一样挂在了这条路上..',
+              btnCont:'我知道了',
+              aftershow:function(){
+                $('.carnival-popup a.btn').live('click',function(){
+                  $.fancybox.close();
+                  window.location.href = '/';
+                })
+              }
+            })
         }else if(pre_status == 32){ // for finish
           // get ticket
           if(window.current_step){
@@ -58,6 +73,14 @@
           }
         } 
       }
+
+
+      $('a.start').live('click',function(){
+        var d = new Date();
+        $.cookie('adv',d.getTime());
+        window.location.href = '/s/' + window.data.pre_survey;
+      })
+
 
       //set full page
       function setFullPage() {
@@ -130,9 +153,6 @@
         }else if(step == 3){
           $('.section.balloon').addClass('active').siblings().removeClass('active');
           setTaskDetail(step,$('.section.balloon'));
-        }else{
-          $('.section.reward').addClass('active').siblings().removeClass('active');
-          setTaskDetail(step,$('.section.reward'));
         }
       }
 
@@ -161,7 +181,7 @@
           break;
         case 'balloon':
           setTaskThree();
-          break;u
+          break;
         case 'reward':
           setTaskFour();
           break;
@@ -189,6 +209,7 @@
 
       //设置第三个大任务
       function setTaskThree(){
+
         fireUpBackground($('.section.balloon'));
         $('.section.balloon a').each(function(k,v){
           if(window.data.t3_surveys[k]){
@@ -209,6 +230,7 @@
 
       //答题跳转回来用
       function setTaskDetail(step,content){
+
         fireUpBackground(content);
         switch(step){
         case 1:
@@ -232,6 +254,7 @@
 
       //标识某个问卷是否已经回答完毕
       function flagSurvey(step,survey_arr,status_arr){
+
         //for test
         switch(step){
         case 1:
@@ -293,14 +316,49 @@
         }
 
         if(step == 3){
-          //筐子点燃火焰
-          makeFire();
-
-          if($('.line-wrap.line:visible').length == 0){
-            //所有绳子都已经剪断,气球飞扬
-            flyBalloon();
+          if($.cookie('reward_3')){
+            //第三个大任务充值话费已经领取
+            if($.cookie('reward_4')){
+              //已经参加了转盘抽奖
+              $.carnivalbox({
+                width:460,
+                title:'你已完成抽奖活动,感谢您的参与',
+                content:'',
+                btnCont:'离开',
+                beforeshow:function(){},
+                aftershow:function(){
+                  var sub_btn   = $('.carnival-popup a.btn');
+                  sub_btn.live('click',function(){
+                    $.fancybox.close();
+                    window.location.href = '/';
+                  });
+                }
+              })              
+            }else{
+            $('.ball-body').css({'top':'-350px'});
+            $('.ly-plate').show();
+            }
+          }else{
+            if(window.data.t3_status.indexOf(0) < 0){
+              $.carnivalbox({
+                width:460,
+                title:'您已完成全部关卡',
+                content:'系统奖励您<b>10元话费</b>,并且赠送您一次<b>抽奖机会</b>',
+    
+                btnCont:'前去抽奖',
+                beforeshow:function(){},
+                aftershow:function(){
+                  var sub_btn   = $('.carnival-popup a.btn');
+                  sub_btn.live('click',function(){
+                    if(!sub_btn.hasClass('disabled')){
+                        sub_btn.addClass('disabled');
+                        sendAjax(4,null,null);
+                    }
+                  });
+                }
+              })
+            };
           }
-
         }
 
       }
@@ -316,14 +374,21 @@
            amount: num
           },function(data){
             if(data.success){
+              var d = new Date();
               if(t_type == 3){
-                var d = new Date();
                 $.cookie('reward_1',d.getTime());
                 TaskOpen('stair'); 
               }else if(t_type == 0){
-                var d = new Date();
                 $.cookie('reward_2',d.getTime());
                 TaskOpen('balloon');                
+              }else if(t_type == 4){
+                $.cookie('reward_3',d.getTime());
+                //筐子点燃火焰
+                makeFire();
+                if($('.line-wrap .line:visible').length == 0){
+                  //所有绳子都已经剪断,气球飞扬
+                  flyBalloon();
+                }
               }
               
               $.fancybox.close();
@@ -338,6 +403,8 @@
                   notic.html('请回答完摩天轮关卡的所有答题')
                 }else if(t_type == 0){
                   notic.html('请回答完跳楼机关卡的所有答题')
+                }else if(t_type == 4){
+                  notic.html('请回答完热气球关卡的所有答题')
                 }
                 
                 $('.carnival-popup .submit').text('马上完成')
@@ -363,21 +430,22 @@
       //给气球点火
       function makeFire(){
         var umbrella = $('.umbrella');
-        umbrella.addClass('act');
         var basket = $('.basket');
-
         if(window.data.t3_status.indexOf(0) < 0){
+            umbrella.addClass('act');  
+          
           if(basket.hasClass('left')){
             basket.removeClass('left').addClass('right');
           }else{
             basket.removeClass('right').addClass('left');  
-          }          
-        }
-        setTimeout(makeFire,300); 
+          }
+          setTimeout(makeFire,300);          
+        } 
       }
 
       // set Active
       function setFlag(step,survey_arr,status_arr){
+        percentNotice(step,survey_arr,status_arr)
         if(step == 2){
           //跳楼机答题有顺序,必须从底往上答题
           survey_arr = survey_arr.reverse();
@@ -446,8 +514,43 @@
               }
             }
           })          
-        }        
+        }
+
       }
+
+      function percentNotice(step,survey_arr,status_arr){
+        var tmp_status = status_arr.filter(function(ele){ return ele > 0})
+        if( $.inArray(0,status_arr) > 0 && tmp_status.length > 0 ){
+          if(step == 1){
+            var con = '摩天轮';
+            var reward = '10元话费';
+          }else if(step == 2){
+            var con = '跳楼机';
+            var reward = '10(50或100)元话费抽奖机会';
+          }else if(step == 3){
+            var con = '热气球'
+            var reward = '10元话费及一次抽大奖机会';
+          }
+          var answered = status_arr.filter(function(ele){ return ele > 0 });
+          var perc     = answered.length + '/' +  status_arr.length ;
+          var t = '完成任务';
+          var con = '恭喜,已完成' + con + '关卡的' + perc + ',全部完成可获得' + reward;   
+          $.carnivalbox({
+            width:460,
+            title:t,
+            content: con,
+            btnCont:'继续任务',
+            aftershow:function(){
+              $('.carnival-popup a.btn').live('click',function(){
+                $.fancybox.close();
+              })
+            }
+          })
+        }
+      }
+
+
+
       //摩天轮发光闪烁
       function flashWheel(wheel){
         var wheel = $('.section.wheel');
@@ -479,8 +582,8 @@
 
 
       setFullPage();
-    });
 
+    });
 
   </script>
 <% end %>
