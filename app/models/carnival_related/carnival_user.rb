@@ -106,18 +106,18 @@ class CarnivalUser
 
     # handle order
     if index <= 4
-      order = self.orders.where(type: CarnivalOrder::STAGE_1).first
+      order = self.carnival_orders.where(type: CarnivalOrder::STAGE_1).first
       if !(self.survey_status[0..4] & [REJECT, NOT_EXIST, FINISH]).present?
         order.under_review if order.present?
       end
     elsif index <= 9
-      order = self.orders.where(type: CarnivalOrder::STAGE_2).first
+      order = self.carnival_orders.where(type: CarnivalOrder::STAGE_2).first
       if !(self.survey_status[5..9] & [REJECT, NOT_EXIST, FINISH]).present?
         order.under_review if order.present?
       end
     else
-      o1 = self.orders.where(type: CarnivalOrder::STAGE_3).first
-      o2 = self.orders.where(type: CarnivalOrder::STAGE_3_LOTTERY).first
+      o1 = self.carnival_orders.where(type: CarnivalOrder::STAGE_3).first
+      o2 = self.carnival_orders.where(type: CarnivalOrder::STAGE_3_LOTTERY).first
       if (self.survey_status[10..13] & [REJECT, NOT_EXIST, FINISH]).present?
         o1.under_review if o1.present?
         o2.under_review if o2.present?
@@ -145,28 +145,28 @@ class CarnivalUser
 
     # update quota if the answer passed review
     if answer_status == Answer::FINISH
-      pre_survey_answer = self.answers.find(Carnival::PRE_SURVEY)
+      pre_survey_answer = self.answers.where(survey_id: Carnival::PRE_SURVEY)
       Carnival.update_survey_quota(pre_survey_answer, answer.survey_id.to_s)
     end
 
     # handle order
     if index <= 4
-      order = self.orders.where(type: CarnivalOrder::STAGE_1).first
+      order = self.carnival_orders.where(type: CarnivalOrder::STAGE_1).first
       if (self.survey_status[0..4] & [REJECT]).present?
         order.reject if order.present?
       elsif (self.survey_status[0..4] & [REJECT, NOT_EXIST, UNDER_REVIEW]).present?
         order.pass if order.present?
       end
     elsif index <= 9
-      order = self.orders.where(type: CarnivalOrder::STAGE_2).first
+      order = self.carnival_orders.where(type: CarnivalOrder::STAGE_2).first
       if (self.survey_status[5..9] & [REJECT]).present?
         order.reject if order.present?
       elsif (self.survey_status[5..9] & [REJECT, NOT_EXIST, UNDER_REVIEW]).present?
         order.pass if order.present?
       end
     else
-      o1 = self.orders.where(type: CarnivalOrder::STAGE_3).first
-      o2 = self.orders.where(type: CarnivalOrder::STAGE_3_LOTTERY).first
+      o1 = self.carnival_orders.where(type: CarnivalOrder::STAGE_3).first
+      o2 = self.carnival_orders.where(type: CarnivalOrder::STAGE_3_LOTTERY).first
       if (self.survey_status[10..13] & [REJECT]).present?
         o1.reject if o1.present?
         o2.reject if o2.present?
@@ -191,7 +191,7 @@ class CarnivalUser
 
   def fill_answer(answer)
     # based on the user's pre survey answer, some questions are hidden
-    pre_survey_answer = self.answers.where(survey_id: Carnival::PRE_SURVEY)
+    pre_survey_answer = self.answers.where(survey_id: Carnival::PRE_SURVEY).first
 
     s1_id = "53868990eb0e5ba257000025"
     if answer.survey_id.to_s == s1_id
@@ -294,7 +294,8 @@ class CarnivalUser
   end
 
   def create_first_stage_order(mobile)
-    if CarnivalUser.where(mobile: mobile).present?
+    u = CarnivalUser.where(mobile: mobile).first
+    if u.present? && u.id.to_s != self.id.to_s
       return MOBILE_EXIST
     else
       self.update_attributes(mobile: mobile)
@@ -302,7 +303,7 @@ class CarnivalUser
     if (self.survey_status[0..4] & [NOT_EXIST, REJECT]).present?
       return SURVEY_NOT_FINISHED
     end
-    #if self.orders.where(type: CarnivalOrder::STAGE_1).present?
+    #if self.carnival_orders.where(type: CarnivalOrder::STAGE_1).present?
     if self.carnival_orders.where(type: CarnivalOrder::STAGE_1).present?
       return REWARD_ASSIGNED
     end
@@ -326,7 +327,7 @@ class CarnivalUser
     if (self.survey_status[10..13] & [NOT_EXIST, REJECT]).present?
       return SURVEY_NOT_FINISHED
     end
-    #if self.orders.where(type: CarnivalOrder::STAGE_3).present?
+    #if self.carnival_orders.where(type: CarnivalOrder::STAGE_3).present?
     if self.carnival_orders.where(type: CarnivalOrder::STAGE_3).present?
       return REWARD_ASSIGNED
     end
