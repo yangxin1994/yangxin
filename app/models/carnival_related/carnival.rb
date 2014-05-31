@@ -102,8 +102,8 @@ class Carnival
   end
 
   def self.check_pre_survey_quota(answer)
-    quota_setting = self.where(survey_id: PRE_SURVEY, type: SETTING)
-    quota_stats = self.where(survey_id: PRE_SURVEY, type: STATS)
+    quota_setting = self.where(survey_id: PRE_SURVEY, type: SETTING).first
+    quota_stats = self.where(survey_id: PRE_SURVEY, type: STATS).first
 
     gender_qid = "538591f8eb0e5b7282000009"
     gender_q = Question.find(gender_qid)
