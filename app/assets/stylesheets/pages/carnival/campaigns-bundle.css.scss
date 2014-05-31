@@ -13,7 +13,10 @@
 		cursor:default;
 	}
 	&.active{
-		cursor: pointer;
+		a{
+			cursor: pointer;	
+		}
+		
 	}
 }
 
