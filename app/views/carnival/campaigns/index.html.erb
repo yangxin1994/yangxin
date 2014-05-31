@@ -232,12 +232,10 @@
           // add for hide survey start
           if(window.data.t1_status[k] > 0){
             if(window.data.t1_status[k] != 2){
+              if($(v).hasClass('five')){
+                $(v).removeClass('five');  
+              }
               $(v).addClass('act');  
-            }
-          }else{
-            //摩天轮红色中间的问号因为缺少一张图片的原因,所以只能移除five class
-            if($(v).hasClass('five')){
-              $(v).removeClass('five');  
             }
           } 
           // add for hide survey end
@@ -393,10 +391,6 @@
 
 
             var remain = window.data.share_num -  window.data.share_lottery_num;
-            console.log('====================================')
-            console.log(remain)
-            console.log($.cookie('reward_4'))
-            console.log('====================================')
             if($.cookie('reward_4')){
               //已经参加了转盘抽奖
               if(remain <= 0){
