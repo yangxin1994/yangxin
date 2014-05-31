@@ -870,13 +870,12 @@ to{transform: rotate(359deg)}
 			position: absolute;
 			z-index: 999;
 			background: #72CBED;
+      font-weight: bold;
+      top:190px;
+      left:80px;
 			&:hover{
 				background: #46C2E8;
 			}
-		}
-		.start{
-			top:190px;
-			left:80px;
 		}
 		.last{
 			cursor: default;
@@ -890,9 +889,11 @@ to{transform: rotate(359deg)}
 			left:80px;
 			position: absolute;
 			z-index: 999;
-			a:hover{
-				text-decoration: underline;
-			}
+      font-size: 12px;
+      a {
+        color: #46C2E8;
+        &:hover { text-decoration: underline; }
+      }
 		}
 		.left{
 			width:207px;
