@@ -29,7 +29,7 @@ class Filler::AnswersController < Filler::FillerController
       params[:agent_task_id],
       answer )
     if Carnival::ALL_SURVEY.include?(params[:survey_id])
-      current_carnival_user << answer if current_carnival_user.present?
+      current_carnival_user.answers << answer if current_carnival_user.present?
       current_carnival_user.fill_answer(answer)
     else
       current_user.answers << answer if current_user.present?
@@ -140,16 +140,22 @@ class Filler::AnswersController < Filler::FillerController
     render_json_e(ErrorEnum::WRONG_ANSWER_STATUS) and return if !@answer.is_edit
     # 1. update the answer content
     @answer.update_answer(params[:answer_content] || {})
+	  logger.info @answer.answer_content.inspect
     # 2. check quality control
     passed = @answer.check_quality_control(params[:answer_content] || {})
+	  logger.info @answer.answer_content.inspect
     # 3. check screen questions
     passed &&= @answer.check_screen(params[:answer_content] || {})
+	  logger.info @answer.answer_content.inspect
     # 4. check quota questions (skip for previewing)
     passed &&= @answer.check_question_quota(params[:answer_content] || {}) if !@answer.is_preview
+	  logger.info @answer.answer_content.inspect
     # 5. update the logic control result
     @answer.update_logic_control_result(params[:answer_content] || {}) if passed
+	  logger.info @answer.answer_content.inspect
     # 6. automatically finish the answers that do not allow pageup
     @answer.finish(true) if passed
+	  logger.info @answer.answer_content.inspect
     render_json_s and return
   end
 

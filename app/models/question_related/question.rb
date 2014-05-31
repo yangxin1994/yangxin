@@ -56,8 +56,9 @@ class Question < BasicQuestion
 
   def estimate_answer_time
     text_length = self.content["text"].length + self.note.length
-    return (text_length / OOPSDATA[Rails.env]["words_per_second"].to_i).ceil +
+    val =  (text_length / OOPSDATA[Rails.env]["words_per_second"].to_i).ceil +
       Issue.create_issue(self.question_type, self.issue).estimate_answer_time
+		return val / 4
   end
 
 
