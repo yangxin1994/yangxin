@@ -71,6 +71,8 @@
 
       if (pre_status) {     
         if(pre_status == 2){// for reject
+          $('.door > p.last').remove();
+          $('.door > a.start').remove();
             $.carnivalbox({
               width:460,
               title:'呃..您不符合本次活动要求',
