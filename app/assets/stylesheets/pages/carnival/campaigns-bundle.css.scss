@@ -7,6 +7,16 @@
 
 
 //弹出窗
+
+.popup-close{
+	position:absolute;
+	display:inline-block;
+	width: 16px;
+	height:16px;
+	top:15px;
+	right:15px;
+}
+
 a{
 	text-decoration: none;
 }
