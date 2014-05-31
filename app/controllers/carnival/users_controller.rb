@@ -2,7 +2,7 @@
 class Carnival::UsersController < Carnival::CarnivalController
 
   def update
-    carnival_user = CarnivalUser.find(params[:id])
+    carnival_user = CarnivalUser.find(cookies[:carnival_user_id])
     carnival_user.mobile = params[:mobile]
     carnival_user.save
   end
@@ -10,7 +10,7 @@ class Carnival::UsersController < Carnival::CarnivalController
   def login
     carnival_user = CarnivalUser.where(mobile: params[:mobile]).first
     if carnival_user.present?
-      cookies[:carnival_user_id] = carnival_user.id.to_s
+      set_carnival_user_cookie carnival_user.id.to_s
       render_json_auto true and return
     else
       render_json_auto false and return
