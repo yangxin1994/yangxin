@@ -35,6 +35,11 @@
         });
       });
 
+      //background status
+      if(window.data.background_survey_status == 32) {
+        $('.sun').addClass('active');
+      }
+
       window.data = <%= raw (@obj).to_json %>;
       var pre_status = parseInt(window.data.pre_status,10);
       window.current_step = parseInt(window.data.step,10);
