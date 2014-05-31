@@ -262,8 +262,13 @@
               $('#' + window.data.t2_surveys[k]).addClass('act');  
             }
           }
-
         })
+
+        if($.inArray(0,window.data.t2_status) < 0){
+          $('.happy').addClass('act');
+          $('.sbottom').addClass('act');
+        }
+
       }
 
       //设置第三个大任务
