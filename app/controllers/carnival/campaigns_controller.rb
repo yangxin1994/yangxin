@@ -10,7 +10,9 @@ class Carnival::CampaignsController < Carnival::CarnivalController
 
     background_survey = Carnival::BACKGROUND_SURVEY
 
-    surveys = Carnival::SURVEY.each_slice(5).to_a
+    #surveys = Carnival::SURVEY.each_slice(5).to_a
+
+    surveys = @current_carnival_user.reward_scheme_order.each_slice(5).to_a    
 
     step_arr = @current_carnival_user.survey_status.each_slice(5).to_a
 
@@ -24,11 +26,16 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       step = 1
     end
 
+    if @current_carnival_user.carnival_orders.present?
+      @priz_name = @current_carnival_user.carnival_orders.last.carnival_prize.try(:name)  
+    end
+    
+
     @obj = {
       pre_status:@current_carnival_user.pre_survey_status,
       step:step,
-      pre_survey:pre_survey,
-      background_survey:background_survey,
+      pre_survey:Carnival::PRE_SURVEY_REWARD_SCHEME,
+      background_survey:Carnival::BACKGROUND_SURVEY_REWARD_SCHEME,
       background_survey_status:@current_carnival_user.background_survey_status,
       t1_surveys:surveys[0],
       t2_surveys:surveys[1],
@@ -41,7 +48,9 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       priz_3:CarnivalPrize.where(name: "小米移动电源").first.name,
       pre_reject_count: CarnivalUser.where(pre_survey_status: 2).length,
       share_num:@current_carnival_user.share_num,
-      share_lottery_num:@current_carnival_user.share_lottery_num
+      share_lottery_num:@current_carnival_user.share_lottery_num,
+      own:@current_carnival_user.carnival_orders.present?,
+      prize_name:@priz_name
     }
 
     return @obj 

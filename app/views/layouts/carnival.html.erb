@@ -60,7 +60,7 @@
 <body>
 
   <div class="header">
-  	<div id="ad" <% if @obj['pre_status'].to_i > 0 %> style='top:-665px;' <% end %> >
+  	<div id="ad" <% if @obj['pre_status'].to_i <= 0 %> style='top:0px;' <% end %> >
   		<div class="gifts">
   			<a class="gift-a" target="_blank" rel="nofollow" href="http://www.mi.com/note"></a>
   			<a class="gift-b" target="_blank" rel="nofollow" href="http://www.mi.com/hezis"></a>
