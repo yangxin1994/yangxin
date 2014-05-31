@@ -12,11 +12,10 @@
 	a{
 		cursor:default;
 	}
-	&.active{
+	&.current{
 		a{
-			cursor: pointer;	
+			cursor: pointer;
 		}
-		
 	}
 }
 
