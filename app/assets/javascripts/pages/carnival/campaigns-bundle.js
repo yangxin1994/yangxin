@@ -26,7 +26,7 @@ jQuery(function($) {
 	//活动介绍
 		var ad = $('#ad')[0];
 		var drag = ad.children[0];
-		var b=true;
+		var b=window.show_ad;
 		var a=ad.offsetTop;
 		var timer=null;
 		drag.onclick = function(){
