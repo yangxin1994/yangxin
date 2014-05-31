@@ -252,9 +252,15 @@
         $('#task_two_ask').hide();
         $('#task_two_text').show();
         $('.section.stair').addClass('current');
+
         $('.section.stair a').each(function(k,v){
           var uri = '/s/' + window.data.t2_surveys[k];
           $(v).attr('href',uri).parent().attr('id',window.data.t2_surveys[k]);
+          if(parseInt(window.data.t2_surveys[k]) > 0){
+            if( parseInt(window.data.t2_surveys[k]) != 2 ){
+              $('#' + v).addClass('act');  
+            }
+          }
         })
       }
 
