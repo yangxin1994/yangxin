@@ -63,17 +63,10 @@
       if($.cookie('reward_2')){
         window.current_step = 3; 
       }
-      
 
-      // for test
-      //pre_status = 32;
-      // window.current_step = 0;
-      // window.data.t2_status = [0,0,0,0,0];
-      //window.data.t3_status = [1,1,1,1,0];
-
-      if(window.data.t3_surveys.length == 4){
-        window.data.t3_status.pop();
-      }
+      // if(window.data.t3_surveys.length == 4){
+      //   window.data.t3_status.pop();
+      // }
 
       // pre_status = 32;
       // window.current_step = 3;
@@ -139,15 +132,22 @@
       }
     
       //up step
-      function foraward(prev_bottom,target_bottom,top){
-        $('.happy').animate({'bottom':target_bottom + 'px'},3000,function(){
-          if(top < 0){//到达顶端
+      //function foraward(prev_bottom,target_bottom,top){
+      function foraward(){
+        $('.happy').animate({'bottom':'322px'},3000,function(){
             setTimeout(function(){
               fallback();
-            },1000)            
-          }
-
+            },1000);            
         })
+
+        // $('.happy').animate({'bottom':target_bottom + 'px'},3000,function(){
+        //   if(top < 0){//到达顶端
+        //     setTimeout(function(){
+        //       fallback();
+        //     },1000)            
+        //   }
+
+        // })
       }
 
       //down step
@@ -209,6 +209,7 @@
           // $.fn.fullpage.moveSectionUp()// go to next section
           var d = new Date();
           $.cookie('ticket',d.getTime(),{ expires: 10 * 365 });
+
         });
         if(move)
           $.fn.fullpage.moveSectionUp();
@@ -240,6 +241,11 @@
         $('.section.wheel a').each(function(k,v){
           var uri = '/s/' + window.data.t1_surveys[k];
           $(v).attr('href',uri).attr('id',window.data.t1_surveys[k]);
+          // add for hide survey start
+          if(window.data.t1_status[k] > 0){
+            $(v).addClass('act');
+          } 
+          // add for hide survey end
         })
       }
 
@@ -327,7 +333,6 @@
             turnWheel();
             //弹出话费充值提示
             setTimeout(function(){
-
               $.carnivalbox({
                 width:460,
                 title:'摩天轮关卡已完成',
@@ -361,8 +366,12 @@
                 }
               })              
             },1000)
-          }else{
-            // 弹出气泡提示操作方法
+          }
+        }
+
+        if(step == 2){
+          if($.inArray(0,status_arr) < 0){
+            foraward();
           }
         }
 
@@ -456,14 +465,47 @@
             var code = parseInt(data.value.error_code, 10);
             var notic = $('.carnival-popup .notic');
             var d = new Date();
-            switch (code) {
+
+            function nextSec(){
+              $.fancybox.close();
+              $.fn.fullpage.moveSectionUp()                
+            }
+
+            if(data.success){
+              if(t_type == 3){
+                $.cookie('reward_1',d.getTime(),{ expires: 10 * 365 });
+                TaskOpen('stair'); 
+                nextSec();
+              }else if(t_type == 0){
+                $.cookie('reward_2',d.getTime(),{ expires: 10 * 365 });
+                TaskOpen('balloon');
+                nextSec();                
+              }else if(t_type == 4){
+                $.cookie('reward_3',d.getTime(),{ expires: 10 * 365 });
+                $.fancybox.close();
+                makeFire();
+                flyBalloon();
+              }
+
+            }else{
+
+              function rebind_click(){
+                $('.carnival-popup .submit').text('马上完成')
+                $('.carnival-popup .submit').unbind('click');
+                $('.carnival-popup .submit').bind('click',function(){
+                  $.fancybox.close();
+                })
+                notic.show();
+              };
+
+              switch (code) {
                 case -1:
                     notic.html( '对不起,该用户不存在!' );
-                    notic.show();
+                    rebind_click();
                     break;
                 case -2:
                     notic.html( '<a href="/s/' + window.data.background_survey + '">需要先点亮小太阳，点击此处点亮。</a>' );
-                    notic.show();
+                    rebind_click();
                     break;
                 case -3:
                     if(t_type == 3){
@@ -475,47 +517,23 @@
                     }else if(t_type == 1){
                       notic.html('请回答完热气球关卡的所有答题');
                     }
-                    
-                    $('.carnival-popup .submit').text('马上完成')
-                    $('.carnival-popup .submit').unbind('click');
-                    $('.carnival-popup .submit').bind('click',function(){
-                      $.fancybox.close();
-                    })
-                    notic.show();
+                    rebind_click();
                     break;
                 case -4:
                     notic.html( '对不起,该奖品已被您领取' );
-                    notic.show();                
+                    rebind_click();               
                     break;
                 case -5:
                     notic.html( '对不起,您本次没有抽中!' );
-                    notic.show();                    
+                    rebind_click();                    
                     break;
                 case -6:
                     notic.html('对不起,该手机号不存在!' );
-                    notic.show();                    
+                    rebind_click();                  
                     break;
                 default:
-                  if(t_type == 3){
-                    $.cookie('reward_1',d.getTime(),{ expires: 10 * 365 });
-                    TaskOpen('stair'); 
-                  }else if(t_type == 0){
-                    $.cookie('reward_2',d.getTime(),{ expires: 10 * 365 });
-                    TaskOpen('balloon');                
-                  }else if(t_type == 4){
-                    $.cookie('reward_3',d.getTime(),{ expires: 10 * 365 });
-                    //筐子点燃火焰
-                    makeFire();
-                    if($('.line-wrap .line:visible').length == 0){
-                      //所有绳子都已经剪断,气球飞扬
-                      flyBalloon();
-                    }
-                  }
-                  
-                  $.fancybox.close();
-                  $.fn.fullpage.moveSectionUp();
-
                   break;
+              }
             }
           })
       }
@@ -548,75 +566,88 @@
       // set Active
       function setFlag(step,survey_arr,status_arr){
         percentNotice(step,survey_arr,status_arr)
-        if(step == 2){
-          //跳楼机答题有顺序,必须从底往上答题
-          survey_arr = survey_arr.reverse();
-          //跳楼机,先上升，停止上升后标识底部的survey 为 答完状态
-          var move_to = status_arr.indexOf(0);
-          var prev_bottom;
-          var target_bottom;
-          switch(move_to){
-            case 0:
-              prev_bottom = 35;
-              target_bottom = 35;
-              break;
-            case 1:
-              prev_bottom = 35;
-              target_bottom = 95;
-              break;
-            case 2:
-              prev_bottom = 95;
-              target_bottom = 155;
-              break;
-            case 3:
-              prev_bottom = 155;
-              target_bottom = 215;
-              break;
-            case 4:
-              prev_bottom = 215;
-              target_bottom = 275;
-              break;
-            default:
-              prev_bottom = 280;
-              target_bottom = 322;
+
+        // for hide survey start
+        $.each(survey_arr,function(k,v){
+          if(parseInt(status_arr[k]) > 0){
+            $('#' + v).addClass('act');
+            if(step == 3){
+              //热气球,如果某个小任务完成,删除绳子
+              $($('.line-wrap .line')[k]).hide();
+            }
           }
+        })  
+        // for hide survey end
+
+        // if(step == 2){
+        //   //跳楼机答题有顺序,必须从底往上答题
+        //   survey_arr = survey_arr.reverse();
+        //   //跳楼机,先上升，停止上升后标识底部的survey 为 答完状态
+        //   var move_to = status_arr.indexOf(0);
+        //   var prev_bottom;
+        //   var target_bottom;
+        //   switch(move_to){
+        //     case 0:
+        //       prev_bottom = 35;
+        //       target_bottom = 35;
+        //       break;
+        //     case 1:
+        //       prev_bottom = 35;
+        //       target_bottom = 95;
+        //       break;
+        //     case 2:
+        //       prev_bottom = 95;
+        //       target_bottom = 155;
+        //       break;
+        //     case 3:
+        //       prev_bottom = 155;
+        //       target_bottom = 215;
+        //       break;
+        //     case 4:
+        //       prev_bottom = 215;
+        //       target_bottom = 275;
+        //       break;
+        //     default:
+        //       prev_bottom = 280;
+        //       target_bottom = 322;
+        //   }
         
-          $('.happy').css('bottom',prev_bottom);
+        //   $('.happy').css('bottom',prev_bottom);
 
           
-          tmp_status = status_arr.filter(function(ele){return ele > 0 })
-          if(tmp_status.length > 0){
-            $('.sbottom').addClass('act');
-            $('.happy').addClass('act');
-          }else{
-            $('.sbottom').removeClass('act');
-            $('.happy').removeClass('act');
-          }
+        //   tmp_status = status_arr.filter(function(ele){return ele > 0 })
+        //   if(tmp_status.length > 0){
+        //     $('.sbottom').addClass('act');
+        //     $('.happy').addClass('act');
+        //   }else{
+        //     $('.sbottom').removeClass('act');
+        //     $('.happy').removeClass('act');
+        //   }
 
-          foraward(prev_bottom,target_bottom,move_to);
+        //   foraward(prev_bottom,target_bottom,move_to);
 
-          $.each(survey_arr,function(k,v){
-            if(parseInt(status_arr[k]) > 0){
-              $('#' + v).addClass('act');
-            }else{
-              if(k != 0){
-                if( parseInt(status_arr[k -1]) == 0 ){
-                  $('#' + v).children().attr('href','javascript:void(0);');
-                }
-              }
-            }           
-          })
-        }else{
-          $.each(survey_arr,function(k,v){
-            if(parseInt(status_arr[k]) > 0){
-              $('#' + v).addClass('act');
-              if(step == 3){
-                //热气球,如果某个小任务完成,删除绳子
-                $($('.line-wrap .line')[k]).hide();
-              }
-            }
-          })          
-        }
+        //   $.each(survey_arr,function(k,v){
+        //     if(parseInt(status_arr[k]) > 0){
+        //       $('#' + v).addClass('act');
+        //     }else{
+        //       if(k != 0){
+        //         if( parseInt(status_arr[k -1]) == 0 ){
+        //           $('#' + v).children().attr('href','javascript:void(0);');
+        //         }
+        //       }
+        //     }           
+        //   })
+        // }else{
+        //   $.each(survey_arr,function(k,v){
+        //     if(parseInt(status_arr[k]) > 0){
+        //       $('#' + v).addClass('act');
+        //       if(step == 3){
+        //         //热气球,如果某个小任务完成,删除绳子
+        //         $($('.line-wrap .line')[k]).hide();
+        //       }
+        //     }
+        //   })          
+        // }
 
       }
 
@@ -679,7 +710,6 @@
         }
         setTimeout(flyBalloon,100)
       }
-
 
       setFullPage();
 
