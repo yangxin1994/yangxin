@@ -357,10 +357,9 @@ class CarnivalUser
 
     ### draw
     prize = CarnivalPrize.draw
-
     return UNLUCKY if prize.blank?
     order = CarnivalOrder.create(type: CarnivalOrder::STAGE_3_LOTTERY, mobile: self.mobile)
-    order.prize = prize
+    order.carnival_prize = prize
     order.carnival_user = self
     if self.survey_status[10..13].include?(UNDER_REVIEW)
       order.status = CarnivalOrder::UNDER_REVIEW
@@ -388,7 +387,7 @@ class CarnivalUser
 		self.share_lottery_num = 10000
 		self.save
     order = CarnivalOrder.create(type: CarnivalOrder::SHARE, mobile: self.mobile)
-    order.prize = prize
+    order.carnival_prize = prize
     order.carnival_user = self
     order.status = CarnivalOrder::WAIT
     order.save

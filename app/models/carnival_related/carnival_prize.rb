@@ -20,6 +20,7 @@ class CarnivalPrize
     p1 = CarnivalPrize.where(name: "红米note").first
     p2 = CarnivalPrize.where(name: "小米盒子").first
     p3 = CarnivalPrize.where(name: "小米移动电源").first
+
     if v < 2.0 / 27 && p1.remain > 0
       p1.remain = p1.remain - 1
       p1.save

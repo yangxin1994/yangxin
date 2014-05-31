@@ -1,3 +1,4 @@
+# encoding: utf-8
 class Carnival::CampaignsController < Carnival::CarnivalController
   def index
     if @current_carnival_user.blank?
@@ -5,9 +6,6 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       set_carnival_user_cookie(@current_carnival_user.id.to_s)
     end
 
-    Rails.logger.info('-----------------------------')
-    Rails.logger.info(@current_carnival_user.inspect)
-    Rails.logger.info('-----------------------------')
     pre_survey = Carnival::PRE_SURVEY
 
     background_survey = Carnival::BACKGROUND_SURVEY
@@ -38,6 +36,9 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       t1_status:step_arr[0],
       t2_status:step_arr[1],
       t3_status:step_arr[2],
+      priz_1:CarnivalPrize.where(name: "红米note").first.name,
+      priz_2:CarnivalPrize.where(name: "小米盒子").first.name,
+      priz_3:CarnivalPrize.where(name: "小米移动电源").first.name,
       pre_reject_count: CarnivalUser.where(pre_survey_status: 2).length,
       share_num:@current_carnival_user.share_num,
       share_lottery_num:@current_carnival_user.share_lottery_num
