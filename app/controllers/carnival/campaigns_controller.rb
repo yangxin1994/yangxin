@@ -5,10 +5,9 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       cookies[:carnival_user_id] = @current_carnival_user.id.to_s
     end
 
-  Rails.logger.info('--------------------------')
-  Rails.logger.info(@current_carnival_user.inspect)
-  Rails.logger.info('--------------------------')
-
+    Rails.logger.info('-----------------------------')
+    Rails.logger.info(@current_carnival_user.inspect)
+    Rails.logger.info('-----------------------------')
     pre_survey = Carnival::PRE_SURVEY
 
     background_survey = Carnival::BACKGROUND_SURVEY

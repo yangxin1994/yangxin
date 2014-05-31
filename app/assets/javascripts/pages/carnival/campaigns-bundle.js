@@ -1,20 +1,6 @@
 jQuery(function($) {
-    //顶部下拉菜单
-    function pullDown(obj) {
-        var oBox = $(obj)[0];
-        oBox.onmouseover = function() {
-            this.children[1].style.display = 'block';
-            this.children[0].className = 'link active';
-        };
-        oBox.onmouseout = function() {
-            this.children[1].style.display = 'none';
-            this.children[0].className = 'link';
-        };
-    };
-    pullDown('.questions');
-    pullDown('.share');
-    pullDown('.save');
-    //滚动公告
+	(function(){
+		//滚动公告
     var oDiv = $('.bulletin')[0];
     var oUl = oDiv.children[0];
     oUl.innerHTML += oUl.innerHTML;
@@ -34,6 +20,74 @@ jQuery(function($) {
             };
         }, 30);
     };
+	})();
+
+	(function(){
+	//活动介绍
+		var ad = $('#ad')[0];
+		var drag = ad.children[0];
+		var b=true;
+		var a=ad.offsetTop;
+		var timer=null;
+		drag.onclick = function(){
+			clearInterval(timer);
+			adSport();
+		};	
+		ad.onclick = function(){
+			clearInterval(timer);
+			adSport();
+		}
+		var giftBtn = $('.gifts a');
+		for(var i=0;i<giftBtn.length;i++){
+			
+			giftBtn[i].onclick = function(ev){
+				var oEvent = ev || event;
+				oEvent.cancelBubble=true;
+			}
+		}
+		function adSport(){
+			if(b){
+				timer = setInterval(function(){
+						a-=10;
+						if(a<=-ad.offsetHeight){
+							clearInterval(timer);
+							a=-ad.offsetHeight;
+							b=false;
+						}
+						ad.style.top = a + 'px';
+					},20)
+				}else{
+				timer = setInterval(function(){
+						a+=10;
+						if(a>=0){
+							clearInterval(timer);
+							a=0;
+							b=true;
+						}
+						ad.style.top = a + 'px';
+					},20)
+				};
+			};	
+	})();
+	
+		(function(){
+			//顶部下拉菜单
+	    function pullDown(obj) {
+	        var oBox = $(obj)[0];
+	        oBox.onmouseover = function() {
+	            this.children[1].style.display = 'block';
+	            this.children[0].className = 'link active';
+	        };
+	        oBox.onmouseout = function() {
+	            this.children[1].style.display = 'none';
+	            this.children[0].className = 'link';
+	        };
+	    };
+	    pullDown('.questions');
+	    pullDown('.share');
+	    pullDown('.save');
+		})();
+    
 
     var timeOut = function() { //超时函数
         $("#lotteryBtn").rotate({

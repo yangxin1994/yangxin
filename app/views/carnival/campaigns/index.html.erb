@@ -7,6 +7,11 @@
       var pre_status = parseInt(window.data.pre_status,10);
       window.current_step = parseInt(window.data.step,10);
 
+      //是否显示广告
+      if($.cookie('adv')){
+        $('#ad').css({'top':'-665px'});
+      }
+
       //如果拿到票后刷新页面，直接进入第一个任务
       if( $.cookie('ticket') && window.current_step == 0){
         window.current_step = 1; 
@@ -69,6 +74,14 @@
           }
         } 
       }
+
+
+      $('a.start').live('click',function(){
+        var d = new Date();
+        $.cookie('adv',d.getTime());
+        window.location.href = '/s/' + window.data.pre_survey;
+      })
+
 
       //set full page
       function setFullPage() {
@@ -511,38 +524,36 @@
       }
 
       function percentNotice(step,survey_arr,status_arr){
+        var tmp_status = arr.filter(function(ele){ return ele > 0})
 
-        if(step == 1){
-          var con = '摩天轮';
-          var reward = '10元话费';
-        }else if(step == 2){
-          var con = '跳楼机';
-          var reward = '10(50或100)元话费抽奖机会';
-        }else if(step == 3){
-          var con = '热气球'
-          var reward = '10元话费及一次抽大奖机会';
-        }
-
-        var answered = status_arr.filter(function(ele){ return ele > 0 });
-        var perc     = answered.length + '/' +  status_arr.length ;
-        var t = '完成任务';
-        var con = '恭喜,已完成' + con + '关卡的' + perc + ',全部完成可获得' + reward;   
-
-
-        $.carnivalbox({
-          width:460,
-          title:t,
-          content: con,
-          btnCont:'继续任务',
-          aftershow:function(){
-            $('.carnival-popup a.btn').live('click',function(){
-              $.fancybox.close();
-            })
+        if( $.inArray(0,status_arr) > 0 && tmp_status > 0 ){
+          if(step == 1){
+            var con = '摩天轮';
+            var reward = '10元话费';
+          }else if(step == 2){
+            var con = '跳楼机';
+            var reward = '10(50或100)元话费抽奖机会';
+          }else if(step == 3){
+            var con = '热气球'
+            var reward = '10元话费及一次抽大奖机会';
           }
-        })
 
-
-
+          var answered = status_arr.filter(function(ele){ return ele > 0 });
+          var perc     = answered.length + '/' +  status_arr.length ;
+          var t = '完成任务';
+          var con = '恭喜,已完成' + con + '关卡的' + perc + ',全部完成可获得' + reward;   
+          $.carnivalbox({
+            width:460,
+            title:t,
+            content: con,
+            btnCont:'继续任务',
+            aftershow:function(){
+              $('.carnival-popup a.btn').live('click',function(){
+                $.fancybox.close();
+              })
+            }
+          })
+        }
       }
 
 
@@ -668,10 +679,9 @@
     <div class="page bg1">
       <div class="page-inner">
         <div class="door-box">
-          <div class="tooltip ty">跪求点亮Orz</div>
           <div class="door">
             <a href="javascript:void(0);" class="start">立即开始</a>
-            <a href="javascript:void(0);" class="last">继续游戏</a>
+            <p class="last">如果您参加过本活动,可以<a href="javascript:void(0);">继续游戏</a></p>
           <span class="left"></span>
           <span class="right"></span>
         </div>
