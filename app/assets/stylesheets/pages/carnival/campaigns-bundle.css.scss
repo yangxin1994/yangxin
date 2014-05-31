@@ -8,6 +8,15 @@
 
 //弹出窗
 
+.section{
+	a{
+		cursor:default;
+	}
+	&.active{
+		cursor: pointer;
+	}
+}
+
 .popup-close{
 	position:absolute;
 	display:inline-block;
