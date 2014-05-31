@@ -190,7 +190,7 @@ class CarnivalUser
 
   def fill_answer(answer)
     # based on the user's pre survey answer, some questions are hidden
-    pre_survey_answer = self.answers.find(Carnival::PRE_SURVEY)
+    pre_survey_answer = self.answers.where(survey_id: Carnival::PRE_SURVEY)
 
     s1_id = "53868990eb0e5ba257000025"
     if answer.survey_id.to_s == s1_id
@@ -357,10 +357,9 @@ class CarnivalUser
 
     ### draw
     prize = CarnivalPrize.draw
-
     return UNLUCKY if prize.blank?
     order = CarnivalOrder.create(type: CarnivalOrder::STAGE_3_LOTTERY, mobile: self.mobile)
-    order.prize = prize
+    order.carnival_prize = prize
     order.carnival_user = self
     if self.survey_status[10..13].include?(UNDER_REVIEW)
       order.status = CarnivalOrder::UNDER_REVIEW
@@ -385,8 +384,10 @@ class CarnivalUser
     prize = CarnivalPrize.draw
 
     return UNLUCKY if prize.blank?
+		self.share_lottery_num = 10000
+		self.save
     order = CarnivalOrder.create(type: CarnivalOrder::SHARE, mobile: self.mobile)
-    order.prize = prize
+    order.carnival_prize = prize
     order.carnival_user = self
     order.status = CarnivalOrder::WAIT
     order.save

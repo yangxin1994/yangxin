@@ -85,6 +85,7 @@ class Carnival
   end
 
   def self.pre_survey_finished(answer_id)
+	  binding.pry
     answer = Answer.find(answer_id)
     carnival_user = answer.carnival_user
     # check whether pass the pre survey
@@ -95,14 +96,14 @@ class Carnival
     else
       result = self.check_pre_survey_quota(answer)
     end
-    carnival_user.pre_survey_finished(result)
+    carnival_user.pre_survey_result(result)
     carnival_user.hide_survey(answer) if result
     self.update_survey_quota(answer, PRE_SURVEY) if result
   end
 
   def self.check_pre_survey_quota(answer)
-    quota_setting = self.where(survey_id: PRE_SURVEY, type: SETTING)
-    quota_stats = self.where(survey_id: PRE_SURVEY, type: STATS)
+    quota_setting = self.where(survey_id: PRE_SURVEY, type: SETTING).first
+    quota_stats = self.where(survey_id: PRE_SURVEY, type: STATS).first
 
     gender_qid = "538591f8eb0e5b7282000009"
     gender_q = Question.find(gender_qid)

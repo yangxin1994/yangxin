@@ -80,7 +80,7 @@
           <ul>
             <% CarnivalLog.recent_logs.each do |log| %>
               <li>
-                <span><%= Time.now.to_i - log.created_at %></span>
+                <span><%= ch_time(log.created_at) %></span>
                 <span><%= log.carnival_user.mobile %></span>
                 <% if [CarnivalLog::STAGE_1, CarnivalLog::STAGE_3].include?(log.type) %>
                   <span>获得了</span>
