@@ -22,6 +22,15 @@ jQuery(function($) {
     };
 	})();
 
+  //提交手机
+  $('.save-btn').click(function(){
+    var mobile = $.trim($('#save_mobile_ipt').val());
+    if(mobile == '') return;
+    $.postJSON('/carnival/campaigns/update', {mobile: mobile}, function(retval) {
+      console.log(retval);
+    });
+  });
+
 	(function(){
 	//活动介绍
 		var ad = $('#ad')[0];
@@ -217,6 +226,7 @@ BookmarkApp = function () {
     addBookmark : addBookmark
   }
 }();
+
 
 
 

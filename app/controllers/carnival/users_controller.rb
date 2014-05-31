@@ -2,7 +2,7 @@
 class Carnival::UsersController < Carnival::CarnivalController
 
   def update
-    carnival_user = CarnivalUser.find(params[:id])
+    carnival_user = CarnivalUser.find(cookies[:carnival_user_id])
     carnival_user.mobile = params[:mobile]
     carnival_user.save
   end

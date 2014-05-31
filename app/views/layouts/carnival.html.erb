@@ -20,20 +20,37 @@
   </style>
 
   <script type="text/javascript">
+
   <% if @obj['pre_status'].to_i > 0 %>
   window.show_ad = false;
   <% else %>
   window.show_ad = true;
   <% end %>
+
   $(function () {
     // social share
-    // TODO: i, share link to QQ
-    var share_href = 'http://wenjuanba.com/carnival/campaigns?i='; //TODO: i
+    var share_href = 'http://wenjuanba.com/carnival/campaigns?i=<%= @current_carnival_user.id.to_s %>'; 
     _.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace'], $.proxy(function(v) {
       $('#' + v).click(function() {
         $.social['shareTo' + v](share_href + '&c=' + v, '我发现了一个好玩的活动：问卷吧嘉年华，参加100%获得手机充值卡，并可抽取红米note、小米盒子、小米电源等大奖哦！', 'http://wenjuanba.com/assets/activities/2014-6/carnival.png');
       });
     }, this));
+    $('#QQ').click(function() {
+      $.carnivalbox({
+        width:460,
+        title:'分享活动链接',
+        content:'复制以下链接邀请好友参加活动，每成功邀请 1 位好友，可获得 1 次小米大奖抽奖机会。',
+        btnCont:'关闭窗口',
+        beforeshow:function(){
+          $('.carnival-popup p').after('<p style="color: #E75C72">' + share_href + '&c=QQ</p>');
+        },
+        aftershow:function(){
+          $('.carnival-popup a.btn').click(function() {
+            $.fancybox.close();
+          });
+        }
+      });
+    });
   });
   </script>
 
@@ -51,7 +68,7 @@
   		</div>
   		<div class="statistic">
   			<span class="yjsc"></span>
-  			<b>12310</b>
+  			<b><%= CarnivalOrder.all.length %></b>
   			<span class="gjp"></span>
   		</div>
   		<a href="javascript:;" class="drag"></a>
@@ -77,7 +94,7 @@
             <% end %>
           </ul>
         </div>
-				<a href="javascript:void(0);" class="sun" id="sun"></a>
+				<a href="http://wenjuanba.com/~yEQIs" class="sun" id="sun"></a>
 				<div class="tooltip ty">跪求点亮Orz</div>
          <div class="questions">
           <a class="link" href="javascript:void(0);">FAQ<b></b></a>
@@ -94,9 +111,12 @@
          	
          		<span class="save-box">
          			<form action="">
-         				<!-- <p><input type="text" placeholder="输入手机号保存进度"><a class="save-btn" href="javascript:void(0);">提交</a></p> -->
-                <p style='color:#000;'>当前登录：132678988373</p>
-         				<div style="clear:both;padding:5px 0;"></div>
+                <% if @current_carnival_user.mobile.blank? %>
+                <!-- <p><input id='save_mobile_ipt' type="text" placeholder="输入手机号保存进度"><a class="save-btn" href="javascript:void(0);">提交</a></p> -->
+                <% else %>
+                <!-- <p style='color:#000;'>当前登录：<%= @current_carnival_user.mobile %></p> -->
+                <% end %>
+         				<!-- <div style="clear:both;padding:5px 0;"></div> -->
          				<p><a class="favorite" href="javascript:void(0)" onClick="return BookmarkApp.addBookmark(this)">将本活动放入收藏夹</a></p>
          				
          			</form>
@@ -115,7 +135,7 @@
               <li><a id='SinaWeibo' class="sina" href="javascript:void(0);"></a></li>
                <li><a id='TencentWeibo' class="tencent" href="javascript:void(0);"></a></li>
                <!-- <li><a class="weixin" href="javascript:void(0);"><i></i>微信朋友圈</a></li> -->
-               <li><a class="qq" href="javascript:void(0);"></a></li>
+               <li><a id='QQ' class="qq" href="javascript:void(0);"></a></li>
                <li><a id='QQSpace' class="qzone" href="javascript:void(0);"></a></li>
                <li><a id='Renren' class="renren" href="javascript:void(0);"></a></li>
                <li><a id='Douban' class="douban" href="javascript:void(0);"></a></li>
