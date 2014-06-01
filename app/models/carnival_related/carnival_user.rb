@@ -25,6 +25,7 @@ class CarnivalUser
   REWARD_ASSIGNED = -4
   UNLUCKY = -5
   MOBILE_EXIST = -6
+  ALREADY_HIT = -7
 
 
   field :mobile, type: String, default: ""
@@ -354,14 +355,15 @@ class CarnivalUser
     if self.lottery_status[1] == REWARD_EXIST
       return REWARD_ASSIGNED
     end
+    if self.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_3_LOTTERY, CarnivalOrder::SHARE]).first.present?
+      return ALREADY_HIT
+    end
     self.lottery_status[1] = REWARD_EXIST
     self.save
 
     ### draw
     prize = CarnivalPrize.draw
     return UNLUCKY if prize.blank?
-		self.share_lottery_num = 10000
-		self.save
     order = CarnivalOrder.create(type: CarnivalOrder::STAGE_3_LOTTERY, mobile: self.mobile)
     order.carnival_prize = prize
     order.carnival_user = self
@@ -381,6 +383,9 @@ class CarnivalUser
     if self.share_num <= self.share_lottery_num
       return REWARD_ASSIGNED
     end
+    if self.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_3_LOTTERY, CarnivalOrder::SHARE]).first.present?
+      return ALREADY_HIT
+    end
     self.share_lottery_num += 1
     self.save
 
@@ -388,8 +393,6 @@ class CarnivalUser
     prize = CarnivalPrize.draw
 
     return UNLUCKY if prize.blank?
-		self.share_lottery_num = 10000
-		self.save
     order = CarnivalOrder.create(type: CarnivalOrder::SHARE, mobile: self.mobile)
     order.carnival_prize = prize
     order.carnival_user = self
