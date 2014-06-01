@@ -38,6 +38,13 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       @priz_name = @current_carnival_user.carnival_orders.last.carnival_prize.try(:name)  
     end
     
+    rew_2 = @current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_2]).first 
+
+    @rew_2_result = nil
+    if rew_2.present?
+      @rew_2_result  = rew_2.status   
+    end  
+
 
     @obj = {
       pre_status:@current_carnival_user.pre_survey_status,
@@ -58,7 +65,10 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       share_num:@current_carnival_user.share_num,
       share_lottery_num:@current_carnival_user.share_lottery_num,
       own:@current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_3_LOTTERY, CarnivalOrder::SHARE]).present?,
-      prize_name:@priz_name
+      prize_name:@priz_name,
+      rew_1:@current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_1]).present?,
+      rew_2:@rew_2_result,
+      rew_3:@current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_3]).present?
     }
 
     return @obj 
