@@ -203,7 +203,7 @@ jQuery(function($) {
                                     title = '对不起,您本次没有抽中!';
                                     break;
                                 case -6:
-                                    title = '对不起,该手机号不存在!'
+                                    title = '对不起,该手机号已经参与活动并领奖，不能重复参与!'
                                     break;
                                 default:
                                     break;
