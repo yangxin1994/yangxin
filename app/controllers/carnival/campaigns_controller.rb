@@ -68,7 +68,8 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       prize_name:@priz_name,
       rew_1:@current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_1]).present?,
       rew_2:@rew_2_result,
-      rew_3:@current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_3]).present?
+      rew_3:@current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_3]).present?,
+      lot_status:@current_carnival_user.lottery_status
     }
 
     return @obj 
