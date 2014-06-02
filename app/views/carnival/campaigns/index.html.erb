@@ -265,7 +265,7 @@
         fireUpBackground($('.section.stair'));
         if(parseInt(window.data.lot_status[0]) > 0){
           if(window.data.rew_2_name){
-            $('#task_two_text').text('恭喜您抽中了' + window.data.rew_2_name + '元话费充值,系统会在问卷审核通过后充值到您的手机');
+            $('#task_two_text').text('恭喜您抽中了' + window.data.rew_2_name.amount + '元话费充值,系统会在问卷审核通过后充值到您的手机');
           }else{
             $('#task_two_text').text('抱歉，您没有抽中任何面值的话费充值');
           }  
