@@ -312,10 +312,6 @@
           if(window.data.t3_surveys[k]){
             var uri = '/s/' + window.data.t3_surveys[k];
             $(v).attr('href',uri).parent().attr('id',window.data.t3_surveys[k]);
-          }else{
-            //第三个大任务,如果小任务不足五个，移除多于的绳子和答题链接
-            $(v).parent().remove();
-            $($('.line-wrap .line')[k -1]).hide();
           }
         })
       }
@@ -529,6 +525,7 @@
                   if(parseInt(window.data.t3_status[k]) > 0 && parseInt(window.data.  t3_status[k]) != 2){
                     //热气球,如果某个小任务完成,删除绳子
                     $('#' + v).addClass('act');
+                    $('#' + v).find('a').attr('href','javascript:void(0);');
                     $($('.line-wrap .line')[k]).hide();
                   }else{
                     $($('.line-wrap .line')[k]).show();
