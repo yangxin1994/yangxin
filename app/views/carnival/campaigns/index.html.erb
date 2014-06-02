@@ -455,9 +455,6 @@
         }
 
         if(step == 3){
-          console.log('--------------------------')
-          console.log(step)
-          console.log('--------------------------')
           if(window.data.rew_3){
           //if($.cookie('reward_3')){
             //第三个大任务充值话费已经领取
@@ -545,7 +542,9 @@
                   });
                 }
               })
-            };
+            }else{
+              setTaskThree();
+            }
           }
         }
 
