@@ -444,7 +444,8 @@
         }
 
         if(step == 2){
-          if($.inArray(0,status_arr) < 0){
+          if($.inArray(0,status_arr) < 0 && $.inArray(2,status_arr) < 0 ){
+
             if(parseInt(window.data.lot_status[0]) == 0){
               foraward(); //用户在第二关没有抽奖  
             }else{
