@@ -77,7 +77,8 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       rew_2:@rew_2_result,
       rew_2_name:@rew_2_name,
       rew_3:@current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_3]).present?,
-      lot_status:@current_carnival_user.lottery_status
+      lot_status:@current_carnival_user.lottery_status,
+      mobile:@current_carnival_user.mobile
     }
 
     return @obj 

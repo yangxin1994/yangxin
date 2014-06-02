@@ -195,9 +195,6 @@ jQuery(function($) {
                                     break;
                                 case -5:
                                     window.data.share_lottery_num += 1;
-                                    // $.cookie('reward_4', d.getTime(), {
-                                    //     expires: 10 * 365
-                                    // });
 
                                     setDisabled();
 
