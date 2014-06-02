@@ -98,7 +98,7 @@ class CarnivalUser
 
     s4_id = "53859a0deb0e5b2452000021"
     qid = "5385919deb0e5b7282000004"
-    if answer.answer_content[qid]["selection"].include?(4115158460088965) && !answer.answer_content[qid]["selection"].include?(6547096649221507)
+    if !answer.answer_content[qid]["selection"].include?(4115158460088965) && !answer.answer_content[qid]["selection"].include?(6547096649221507)
       index = self.survey_order.index(s4_id)
       self.survey_status[index] = HIDE
       self.save
@@ -461,6 +461,9 @@ class CarnivalUser
   end
 
   def draw_share_lottery
+    if (self.survey_status & [NOT_EXIST, REJECT]).present?
+      return SURVEY_NOT_FINISHED
+    end
     if self.share_num <= self.share_lottery_num
       return REWARD_ASSIGNED
     end
