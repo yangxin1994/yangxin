@@ -96,9 +96,9 @@
           if(window.current_step){
             //每个小任务(及每个大任务)完成后的跳转页面
             setSection(window.current_step);
-            if(window.data.t3_status.indexOf(0) < 0){
-              $('.share-lottery a').removeClass('disabled');
-            }
+            // if(window.data.t3_status.indexOf(0) < 0 && window.data.t3_status.indexOf(2) < 0){
+            //   $('.share-lottery a').removeClass('disabled');
+            // }
             openDoor(false);
           }else{
             //预调研通过,通知领取门票,并进入下一个任务
@@ -109,7 +109,7 @@
               btnCont:'立即前往',
               aftershow:function(){
                 $('.carnival-popup a.btn').live('click',function(){
-                  $.fancybox.close();
+                  $.fancybox.close();openDoor
                   openDoor(true);
                 })
               }
@@ -165,7 +165,7 @@
             aftershow:function(){
               var sub_btn   = $('.carnival-popup a.btn');
 
-              sub_btn.live('click',function(){
+              sub_btn.live('click',funcforawardtion(){
                 if(!sub_btn.hasClass('disabled')){
                     var money =  $('.carnival-popup input:checked').val();
                     if(money == 'a'){
@@ -288,7 +288,7 @@
           }
         })
 
-        if($.inArray(0,window.data.t2_status) < 0){
+        if($.inArray(0,window.data.t2_status) < 0 && $.inArray(2,window.data.t2_status) < 0){
           $('.happy').addClass('act');
           $('.sbottom').addClass('act');
         }
@@ -298,6 +298,15 @@
       //设置第三个大任务
       function setTaskThree(){
         setTaskTwo();
+        if(parseInt(window.data.lot_status[1]) > 0){
+          if(window.data.rew_3_name){
+            $('#task_three_text').text('恭喜您抽中了' + window.data.rew_3_name + '系统会在问卷审核通过后与您联系')
+          }else{
+            $('#task_three_text').text('抱歉，您没有抽中任何奖品');
+          }  
+          
+        }
+
         fireUpBackground($('.section.balloon'));
         $('#task_three_ask').hide();
         $('#task_three_text').show();
@@ -404,42 +413,44 @@
         if(step == 1){
           //摩天轮,如果该大任务的每个小任务都完成,则加载动画效果
           if($.inArray(0,status_arr) < 0 ){
-            turnWheel();
-            //弹出话费充值提示
-            setTimeout(function(){
-              $.carnivalbox({
-                width:460,
-                title:'摩天轮关卡已完成',
-                content:'系统会在问卷审核通过后将<b>10元话费</b>充值到您的手机',
-                btnCont:'马上领取',
-                beforeshow:function(){
-                  $('.carnival-popup p').after('<form action=""><input type="text" name="phone"/></form>')
+            if($.inArray(2,status_arr) < 0){
+              turnWheel();
+              //弹出话费充值提示
+              setTimeout(function(){
+                $.carnivalbox({
+                  width:460,
+                  title:'摩天轮关卡已完成',
+                  content:'系统会在问卷审核通过后将<b>10元话费</b>充值到您的手机',
+                  btnCont:'马上领取',
+                  beforeshow:function(){
+                    $('.carnival-popup p').after('<form action=""><input type="text" name="phone"/></form>')
           
-                },
-                aftershow:function(){
-                  var phone_ipt = $('.carnival-popup form input');
-                  var sub_btn   = $('.carnival-popup a.btn');
-                  phone_ipt.live('focus',function(){
-                    $(this).removeClass('error');
-                    sub_btn.removeClass('disabled');
-                  });
-                  sub_btn.live('click',function(){
-                    if(!sub_btn.hasClass('disabled')){
-                      var phone = phone_ipt.val();
-                      if($.regex.isMobile(phone)){
-                        sub_btn.addClass('disabled');
-                        phone_ipt.removeClass('error');
-                        sub_btn.addClass('disabled');
-                        sendAjax(3,phone);                   
-                      }else{
-                        phone_ipt.addClass('error');
-                        sub_btn.removeClass('disabled');
+                  },
+                  aftershow:function(){
+                    var phone_ipt = $('.carnival-popup form input');
+                    var sub_btn   = $('.carnival-popup a.btn');
+                    phone_ipt.live('focus',function(){
+                      $(this).removeClass('error');
+                      sub_btn.removeClass('disabled');
+                    });
+                    sub_btn.live('click',function(){
+                      if(!sub_btn.hasClass('disabled')){
+                        var phone = phone_ipt.val();
+                        if($.regex.isMobile(phone)){
+                          sub_btn.addClass('disabled');
+                          phone_ipt.removeClass('error');
+                          sub_btn.addClass('disabled');
+                          sendAjax(3,phone);                   
+                        }else{
+                          phone_ipt.addClass('error');
+                          sub_btn.removeClass('disabled');
+                        }
                       }
-                    }
-                  });
-                }
-              })              
-            },1000)
+                    });
+                  }
+                })              
+              },1000);
+            }
           }
         }
 
@@ -457,14 +468,13 @@
 
         if(step == 3){
           if(window.data.rew_3){
-            $('.section.balloon').addClass('active').siblings().removeClass('active');
-          //if($.cookie('reward_3')){
             //第三个大任务充值话费已经领取
-
-            $('.bg4').css({'background-position-y': '0%'});
-            $('.ball-body').css({'top':'-1000px'});
-            $('.bg-grass').hide();
-            $('.line-wrap').hide();
+            $('.section.balloon').addClass('active').siblings().removeClass('active');
+            //不应该把答题链接隐藏,因为有可能是被拒绝,重新答题
+            // $('.bg4').css({'background-position-y': '0%'});
+            // $('.ball-body').css({'top':'-1000px'});
+            // $('.bg-grass').hide();
+            // $('.line-wrap').hide();
 
 
             var remain = window.data.share_num -  window.data.share_lottery_num;
@@ -526,7 +536,7 @@
             } 
           }else{
             //第三个大任务充值话费尚未领取
-            if(window.data.t3_status.indexOf(0) < 0){
+            if(window.data.t3_status.indexOf(0) < 0 && window.data.t3_status.indexOf(2) < 0){
               $.carnivalbox({
                 width:460,
                 title:'您已完成全部关卡',
@@ -548,13 +558,13 @@
               setTaskThree();
               $('.section.balloon').addClass('active').siblings().removeClass('active');
               $.each(window.data.t3_surveys,function(k,v){
-                if(parseInt(window.data.t3_status[k]) > 0){
+                if(parseInt(window.data.t3_status[k]) > 0 && parseInt(window.data.t3_status[k]) != 2){
                   //热气球,如果某个小任务完成,删除绳子
                   $('#' + v).addClass('act');
                   $($('.line-wrap .line')[k]).hide();
                 }
               }) 
-              percentNotice(step,survey_arr,window.data.t3_status);
+              //percentNotice(step,survey_arr,window.data.t3_status);
             }
           }
         }
@@ -611,12 +621,15 @@
                 })
               }
             }else{
-              function rebind_click(txt){
+              function rebind_click(txt,next){
                 txt = txt || '马上完成';
                 $('.carnival-popup .submit').text(txt)
                 $('.carnival-popup .submit').unbind('click');
                 $('.carnival-popup .submit').bind('click',function(){
                   $.fancybox.close();
+                  if(next){
+                    $.fn.fullpage.moveSectionUp();
+                  }
                 })
                 notic.show();
               };
@@ -648,7 +661,12 @@
                     break;
                 case -5:
                     notic.html( '对不起,您本次没有抽中!' );
-                    rebind_click('我知道了');                    
+                    if(t_type == 0){
+                      TaskOpen('balloon');
+                      rebind_click('我知道了',true);
+                    }else{
+                      rebind_click('我知道了');  
+                    }
                     break;
                 case -6:
                     notic.html('对不起,该手机号已经参与活动并领奖,不能重复参与!' );
