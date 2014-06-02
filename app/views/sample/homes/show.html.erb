@@ -5,77 +5,85 @@
       window.current_user_id = "<%= current_user.id %>"
     <% end %>   
     jQuery(function(){
-        var paidSlider = $('.paid-survey');
-        var content = $('.paid-survey ul')[0];
-        var oLi = content.children;
-        var page = $('.page')[0];
-        var prev = page.children[0];
-        var next = page.children[1];
-        var n = content.offsetTop;
-        var target;
-        var timer;
-        if(oLi.length<=2){
-          page.style.display = 'none';
-          return;
-        }else{
-          page.style.display = 'block';
-          content.innerHTML += content.innerHTML;
-          function sliderTop(){
-            target = setInterval(function(){
-              n-=1;
-              if(n <= -content.offsetHeight/2){
-                n = 0;
-              };
-              if(!(n%-content.children[0].offsetHeight)){
-                  clearInterval(target);
-                  return;
-              };
-              $(content).animate({top:n+'px'},10);
-            },10);
-            return target;
-          };        
-          sliderTop();
-          function sliderDown(){
-            target = setInterval(function(){
-              n+=1;
-              if(n >= 0){
-                n = -content.offsetHeight/2;
-              };
-              if(!(n%-content.children[0].offsetHeight)){
-                  clearInterval(target);
-                  return;
-              };
-              $(content).animate({top:n+'px'},10);
-            },10);
-            return target;
-          };        
+      // carnival
+      // setTimeout(function() {
+      //   $('#carnival').slideDown(1500);
+      //   setTimeout(function() {
+      //     $('#carnival').slideUp(1500);
+      //   }, 15000);
+      // }, 500);
+      
+    //     var paidSlider = $('.paid-survey');
+    //     var content = $('.paid-survey ul')[0];
+    //     var oLi = content.children;
+    //     var page = $('.page')[0];
+    //     var prev = page.children[0];
+    //     var next = page.children[1];
+    //     var n = content.offsetTop;
+    //     var target;
+    //     var timer;
+    //     if(oLi.length<=2){
+    //       page.style.display = 'none';
+    //       return;
+    //     }else{
+    //       page.style.display = 'block';
+    //       content.innerHTML += content.innerHTML;
+    //       function sliderTop(){
+    //         target = setInterval(function(){
+    //           n-=1;
+    //           if(n <= -content.offsetHeight/2){
+    //             n = 0;
+    //           };
+    //           if(!(n%-content.children[0].offsetHeight)){
+    //               clearInterval(target);
+    //               return;
+    //           };
+    //           $(content).animate({top:n+'px'},10);
+    //         },10);
+    //         return target;
+    //       };        
+    //       sliderTop();
+    //       function sliderDown(){
+    //         target = setInterval(function(){
+    //           n+=1;
+    //           if(n >= 0){
+    //             n = -content.offsetHeight/2;
+    //           };
+    //           if(!(n%-content.children[0].offsetHeight)){
+    //               clearInterval(target);
+    //               return;
+    //           };
+    //           $(content).animate({top:n+'px'},10);
+    //         },10);
+    //         return target;
+    //       };        
 
-          //停止上移动
-          function stopMove(){
-            return setInterval(function(){
-              sliderTop();
-            },5000); 
-          };
-          timer = stopMove();
-          //移入
-          paidSlider.mouseenter(function(){
-            clearInterval(timer);
-          });
-          //移出
-          paidSlider.mouseleave(function(){
-            timer = stopMove();
-          });
-          //上翻页
-          prev.onclick = function(){
-            clearInterval(target);
-            sliderTop();
-          }
-          //下翻页
-          next.onclick = function(){
-            clearInterval(target);
-            sliderDown();
-          };
-         };
+    //       //停止上移动
+    //       function stopMove(){
+    //         return setInterval(function(){
+    //           sliderTop();
+    //         },5000); 
+    //       };
+    //       timer = stopMove();
+    //       //移入
+    //       paidSlider.mouseenter(function(){
+    //         clearInterval(timer);
+    //       });
+    //       //移出
+    //       paidSlider.mouseleave(function(){
+    //         timer = stopMove();
+    //       });
+    //       //上翻页
+    //       prev.onclick = function(){
+    //         clearInterval(target);
+    //         sliderTop();
+    //       }
+    //       //下翻页
+    //       next.onclick = function(){
+    //         clearInterval(target);
+    //         sliderDown();
+    //       };
+    //      };
       });
   </script>
 <% end %>
@@ -118,7 +126,8 @@
       </div>
       <div class="bd">
         <ul>
-          <li><img src="/assets/od-quillme/banner/banner_1.jpg" /></li>
+          <!-- <li><a href='/carnival/campaigns'><img src="/assets/od-quillme/banner/banner_carnival.png" /></a></li> -->
+          <li><img src="/assets/od-quillme/banner/banner_1.png" /></li>
           <li><img src="/assets/od-quillme/banner/banner_2.png" /></li>
           <li><img src="/assets/od-quillme/banner/banner_3.png" /></li>
         </ul>
@@ -159,90 +168,14 @@
   <div class="paid-survey">
     <div class="content-title">
       <h2>热点调研</h2>
-      <div class="page">
+      <div class="page" click="0">
         <a href="javascript:void(0);" class="prev"><i class="page-top"></i></a>
         <a href="javascript:void(0);" class="next"><i class="page-bottom"></i></a>
       </div>
     </div>
     <div class="survey-list express">
       <ul>
-        <!-- <%= render :partial => 'sample/surveys/express_surveys',:locals => {:surveys => @data[:express_surveys]} %> -->
-
-
-
-
-        <li class="express_0 research-content  have-border" num="0">
-          <span class="reward lottery red">
-            <b>免费调研</b> 
-          </span>         
-          <span class="research-title">
-            <a href="">
-              东莞的哥，父爱的沉思和过度劳累的代价！11111
-            </a>
-          </span>
-          <span class="share">
-              <a class="btn share-btn" data="0" survey_id="" scheme_id="" s_title="">
-                分享
-              </a>
-          </span>
-          <span class="research-meta">
-            <span class="estimate">
-              1分钟
-            </span>
-            <span class="people">
-              <em>20</em>人已参与
-            </span>
-          </span>
-        </li>
-        <li class="express_0 research-content  have-border" num="0">
-          <span class="reward lottery red">
-            <b>免费调研</b> 
-          </span>         
-          <span class="research-title">
-            <a href="">
-              东莞的哥，父爱的沉思和过度劳累的代价！222
-            </a>
-          </span>
-          <span class="share">
-              <a class="btn share-btn" data="0" survey_id="" scheme_id="" s_title="">
-                分享
-              </a>
-          </span>
-          <span class="research-meta">
-            <span class="estimate">
-              1分钟
-            </span>
-            <span class="people">
-              <em>20</em>人已参与
-            </span>
-          </span>
-        </li>
-        <li class="express_0 research-content  have-border" num="0">
-          <span class="reward lottery red">
-            <b>免费调研</b> 
-          </span>         
-          <span class="research-title">
-            <a href="">
-              东莞的哥，父爱的沉思和过度劳累的代价！333
-            </a>
-          </span>
-          <span class="share">
-              <a class="btn share-btn" data="0" survey_id="" scheme_id="" s_title="">
-                分享
-              </a>
-          </span>
-          <span class="research-meta">
-            <span class="estimate">
-              1分钟
-            </span>
-            <span class="people">
-              <em>20</em>人已参与
-            </span>
-          </span>
-        </li>
-      
-
-
+        <%= render :partial => 'sample/surveys/express_surveys',:locals => {:surveys => @data[:express_surveys]} %>
       </ul>
     </div>
   </div>
@@ -362,6 +295,8 @@
   </div>
 </div>
 
+<% if Rails.env.production? %>
 <div style='display:none;'><script type="text/javascript"> var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://"); document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fb54732309180d2feab954364fdebf7f2' type='text/javascript'%3E%3C/script%3E")) </script>
 </div>
+<% end %>
 

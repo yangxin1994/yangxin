@@ -189,7 +189,7 @@ $(function(){
 					var next_btn = $('#next_btn'), prev_btn = $('#prev_btn');
 					// Disable next button for some time (don't disable it for allow_pageup==true survey, or previewing)
 					var has_not_empty_answer = (_.find(answers || [], function(a) { return a != null; }) != null);
-					if(!has_not_empty_answer && !this.options.is_preview && prev_btn.length > 0) {
+					if(!this.options.is_preview && (prev_btn.length == 0 || !has_not_empty_answer)) {
 						$.util.disable(next_btn);
 						var old_text = next_btn.text();
 						function _update_btn() {
@@ -246,6 +246,12 @@ $(function(){
 			} else if(value.answer_status == 4 || value.answer_status == 8 || value.answer_status == 32) {
 				// answer_status: 4（待审核），8（等待代理审核），32（完成）
 				if(this.options.reward.reward_scheme_type == 0) {
+          // hack for survey carnival
+          if(!this.options.is_preview && this.model.get('style_setting').redirect_link == 'carnival') {
+            location.href = "/carnival/campaigns";
+            return;
+          }
+          // end hack
 					// free, show message
 					this.hbs({
 						title: this.model.get('title'),

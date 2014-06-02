@@ -24,7 +24,7 @@ class SmsApi # 短信接口
   # PASSWORD = '921256'
   PASSWORD = 'od@2013'
   CODE = 4699
-  AUTOGRAPH = '［问卷吧］'
+  AUTOGRAPH = '【问卷吧】'
   ##### 注意: 不能使用短信接口发送个人信息(如"老地方见","你在哪"之类)                   #####
   ##### 否则短信平台会封掉接口，测试时只写两个字"内部测试"加其他必要的程序信息(如校验码)#####
   ##### 注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意!注意注意!!注意!#####
@@ -107,12 +107,41 @@ class SmsApi # 短信接口
             :query => { :cdkey => SmsApi::CDKEY,
                         :password => SmsApi::PASSWORD,
                         :phone    => phone,
-                        :message  => message + AUTOGRAPH,
+                        :message  => AUTOGRAPH + message,
                         :sendtime => sendtime})
   end
 
 
   ################### different types of sms ########################
+
+  def self.pre_survey_sms(survey_id, mobile, reward_scheme_id)
+    survey = Survey.find(survey_id)
+    @survey_title = survey.title
+    @survey_link = "#{Rails.application.config.quillme_host}/s/#{reward_scheme_id}"
+    @survey_link = Rails.application.config.quillme_host + "/" + MongoidShortener.generate(@survey_link)
+    
+    @reward = ""
+    reward_scheme = RewardScheme.find_by_id(reward_scheme_id)
+    if reward_scheme && reward_scheme.rewards[0].present?
+      case reward_scheme.rewards[0]["type"]
+      when RewardScheme::MOBILE
+          @reward = "#{reward_scheme.rewards[0]["amount"]}元手机话费奖励"
+      when RewardScheme::ALIPAY
+          @reward = "#{reward_scheme.rewards[0]["amount"]}元支付宝奖励"
+      when RewardScheme::JIFENBAO
+          @reward = "#{reward_scheme.rewards[0]["amount"]}元集分宝奖励"
+      when RewardScheme::POINT
+          @reward = "#{reward_scheme.rewards[0]["amount"]}积分奖励"
+      when RewardScheme::LOTTERY
+          @reward = "一次抽奖机会"
+      end
+    end
+
+    text_template_file_name = "#{Rails.root}/app/views/sms_text/pre_survey_invitation_sms.text.erb"
+    text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+    text = text_template.result(binding)
+    self.send_sms('pre_survey_invitation', mobile, text)
+  end
 
   def self.invitation_sms(survey_id, sample_id, callback, opt = {})
     sample = User.find_by_id(sample_id)
@@ -202,6 +231,13 @@ class SmsApi # 短信接口
     puts "CCCCCCCCCCCCCCCC"
     @gift_name = opt["gift_name"].to_s
     text_template_file_name = "#{Rails.root}/app/views/sms_text/charge_confirm_sms.text.erb"
+    text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
+    text = text_template.result(binding)
+    self.send_sms(type, mobile, text)
+  end
+
+  def self.carnival_re_invitation(type, mobile, callback, opt)
+    text_template_file_name = "#{Rails.root}/app/views/sms_text/carnival_re_invitation.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
     text = text_template.result(binding)
     self.send_sms(type, mobile, text)

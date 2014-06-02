@@ -1,0 +1,206 @@
+<!-- content for head -->
+<% content_for :head do %>
+  <%= javascript_include_tag "pages/admin/carnival/index-bundle" %>
+<% end %>
+
+<% content_for :sidebar do %>
+  <ul class="nav nav-list flowy-admin-sidenav">
+    <li>
+      <a href="/admin/carnivals/pre_surveys">
+        <i class="icon-chevron-right"></i>
+        预调研配额
+      </a>
+    </li>
+    <li>
+      <a href="/admin/carnivals/surveys">
+        <i class="icon-chevron-right"></i>
+        调研回收
+      </a>
+    </li>
+    <li class="active">
+      <a href="/admin/carnivals/orders">
+        <i class="icon-chevron-right"></i>
+        订单
+      </a>
+    </li>    
+  </ul>
+<% end %>
+
+
+<div>
+  <span>
+    <form class="form-search" style="display:inline">
+    <div class="input-append">
+      <input class="span6" name="type" id="" type="hidden" value="<%= params[:type] =%>">
+      <input class="span6 search-query" name="keyword" id="" type="text" placeholder="电话或者订单号">
+      <button class="btn">搜索</button>
+    </div>    
+    </form>
+  </span>
+  <span class="pull-right">
+    <a class="btn" href="/admin/carnivals/recharge_fail_mobile">失败易赛订单再充值</a>
+    <%= paginator_mini @orders %>
+    <div class="btn-group">
+      <button class="btn dropdown-toggle" data-toggle="dropdown"><i class="icon-filter"></i>筛选<span class="caret"></span></button>
+      <ul class="dropdown-menu pull-right">
+        <li><a href="/admin/carnivals/orders">全部</a></li>
+        <li class="divider"></li>
+        <li><a class="querilayer" href="?type=1">话费充值</a></li>
+        <li><a class="querilayer" href="?type=2">抽奖</a></li>
+        <li class="divider"></li>
+        <li><a class="querilayer" href="?status=1">等待处理</a></li>
+        <li><a class="querilayer" href="?status=2">正在处理</a></li>
+        <li><a class="querilayer" href="?status=4">处理成功</a></li>
+        <li><a class="querilayer" href="?status=8">处理失败</a></li>
+        <li><a class="querilayer" href="?status=64">被拒绝</a></li>         
+        <li><a class="querilayer" href="?status=128">待审核</a></li>         
+      </ul>
+      
+    </div>
+  </span>
+</div>
+
+<div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <td width="12%">名称</td>
+      <td width="5%">数量</td>
+      <td width="8%">电话</td>
+      <td width="12%">创建时间</td>
+      <td width="15%">操作</td>
+      <td width="10%">易赛状态</td>
+    </tr>
+  </thead>
+  <tbody>
+    <% @orders["data"].each_with_index do |order, i| %>
+    <tr>
+      <td><%= order.prize_name %></td>
+      <td><%= order.amount %></td>
+      <td title="订单号: <%= order['code'] %>; 易赛订单号: <%= order.esai_order_id %>" class="o-detail"><%= order.mobile %></td>_
+      <td><%= order.created_at.strftime("%F<br />%T").html_safe %></td>
+      <td>
+        <div class="btn-group">
+          <% case order['status'].to_i %>
+          <% when 1 %>
+            <a class="btn handle" href="#handles-<%= order['_id'] %>" >开始处理</a>
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              <span class="caret"></span>
+            </button>
+          <% when 2 %>
+            <a href="#handles-<%= order['_id'] %>" class="btn finishs">处理成功</a>
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a href="#handlef-<%= order['_id'] %>" class="finishf">处理失败</a></li>
+            </ul>
+          <% when 128 %>
+            <a class="btn disabled" href="#handles-<%= order['_id'] %>" >待审核</a>
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              <span class="caret"></span>
+            </button>
+          <% else %>
+            <a href="#handles-<%= order['_id'] %>" class="btn disabled"><%= order_status_tag order['status'] %></a>
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              <span class="caret"></span>
+            </button>
+          <% end -%>
+        </div>
+      </td>
+      <td>
+        <li><a hrf="#">易赛状态：<%= esai_order_status_tag(order.esai_status) %></a></li>
+        <% if order.esai_status == CarnivalOrder::ESAI_HANDLE %>
+          <li>易赛状态：<a class="refresh_esai" href="javascript:void()", data-id="<%= order.id.to_s %>">刷新</a></li>
+        <% end %>
+      </td>
+    </tr>
+    <% end -%>
+  </tbody>
+
+</table>
+
+</div>
+  <div class="modal hide fade" id="info_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>配送信息设置</h3>
+    </div>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <input type="hidden" name="oid" id="oid"> 
+        <div class="control-group">
+          <label class="control-label" for="block">快递公司</label>
+          <div class="controls">
+            <input type="text" class="input-medium" name="company" id="company"> 
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="block">快运单号</label>
+          <div class="controls">
+            <input type="text" class="input-medium" name="tracking_number" id="tracking_number"> 
+          </div>
+        </div>        
+        <div class="control-group">
+          <label class="control-label" for="roles">发货时间</label>
+          <div class="controls">
+            <input type="text" class="input-medium" name="sent_at" id="sent_at"> 
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#info_modal').modal('hide');">取消</a>
+      <button type="button" class="btn btn-primary" data-loading-text="保存中..." id="send_info">确定修改</button>
+    </div>
+  </div>
+
+  <div class="modal hide fade" id="remark_modal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>备注</h3>
+    </div>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <input type="hidden" name="orid" id="orid"> 
+        <div class="control-group">
+          <label class="control-label" for="block">更新备注</label>
+          <div class="controls">
+            <textarea id="ipt_remark"></textarea>
+          </div>
+        </div>        
+      </form>
+    </div>
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#remark_modal').modal('hide');">取消</a>
+      <button type="button" class="btn btn-primary" data-loading-text="保存中..." id="send_remark">确定修改</button>
+    </div>
+  </div>
+
+
+  <div class="modal hide fade" id="date_model">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>日期</h3>
+    </div>
+    <div class="modal-body">
+      <form class="form-horizontal">
+        <div class="control-group">
+          <label class="control-label" for="block">起始</label>
+          <div class="controls">
+            <input type="text" name="date_min" id="date_min" placeholder="日期格式：yyyy/mm/dd"> 
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="block">结束</label>
+          <div class="controls">
+            <input type="text" name="date_max" id="date_max" placeholder="日期格式：yyyy/mm/dd"> 
+          </div>
+        </div>              
+      </form>
+    </div>
+    <div class="modal-footer">
+      <a class="btn" href="javascript:$('#date_model').modal('hide');">取消</a>
+      <button type="button" class="btn btn-primary" id="send_date">筛选</button>
+    </div>
+  </div>

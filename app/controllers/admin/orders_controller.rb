@@ -108,15 +108,15 @@ class Admin::OrdersController < Admin::AdminController
 
   def recharge_fail_mobile
     Order.recharge_fail_mobile
-		redirect_to action: :index, type: 4 and return
+    redirect_to action: :index, type: 4 and return
   end
 
   def check_result
     order = Order.find(params[:id])
     retval = order.check_result
-		logger.info "AAAAAAAAAAAAAAAA"
-		logger.info retval
-		logger.info "AAAAAAAAAAAAAAAA"
+    logger.info "AAAAAAAAAAAAAAAA"
+    logger.info retval
+    logger.info "AAAAAAAAAAAAAAAA"
     render_json_auto retval
   end
 end

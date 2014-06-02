@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= @page_title or "#{corp_name_short} | 专注网络调研 让调研更科学" %></title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="description" content="<%= corp_name %>网络调研/网络调查平台是专业从事网络数据产品和市场调研的第三方服务商，为您提供优质、科学、严谨的数字化调研和研究咨询服务。" />
+  <meta name="Keywords" content="<%= corp_name_short %>,<%= corp_name %>,网络调查,网络调研,数字化调研,优数调研,市场调研,研究咨询,连续性调研,问卷调查" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+
+  <%= stylesheet_link_tag    "layouts/carnival-layout" %>
+  <%= javascript_include_tag "layouts/app-layout" %>
+  <%= javascript_include_tag "layouts/carnival-layout" %>
+
+  <%= csrf_meta_tags %>
+  <link rel="shortcut icon" href="/assets/od-quillme/favicon.ico">
+  
+  
+  <style>
+/*    .section.a {filter:progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);-webkit-filter: grayscale(100%);}*/
+  </style>
+
+  <script type="text/javascript">
+
+  <% if @obj[:pre_status].to_i > 0 %>
+  window.show_ad = false;
+  <% else %>
+  window.show_ad = true;
+  <% end %>
+
+  $(function () {
+    // social share
+    var share_href = 'http://wenjuanba.com/carnival/campaigns?i=<%= @current_carnival_user.id.to_s %>'; 
+    _.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace'], $.proxy(function(v) {
+      $('#' + v).click(function() {
+        $.social['shareTo' + v](share_href + '&c=' + v, '我发现了一个好玩的活动“问卷吧嘉年华”，参加100%获得手机充值卡，还可以抽红米note、小米盒子、小米电源等大奖哦！你也来参加吧！', 'http://wenjuanba.com/assets/activities/2014-6/carnival.png');
+      });
+    }, this));
+    $('#QQ').click(function() {
+      $.carnivalbox({
+        width:460,
+        title:'分享活动链接',
+        content:'复制以下链接邀请好友参加活动，每成功邀请 1 位好友，可获得 1 次小米大奖抽奖机会。',
+        btnCont:'关闭窗口',
+        beforeshow:function(){
+          $('.carnival-popup p').after('<p style="color: #E75C72">' + share_href + '&c=QQ</p>');
+        },
+        aftershow:function(){
+          $('.carnival-popup a.btn').click(function() {
+            $.fancybox.close();
+          });
+        }
+      });
+    });
+  });
+  </script>
+
+  <%= yield :head %>
+
+</head>
+<body>
+
+  <div class="header">
+  	<div id="ad" <% if @obj[:pre_status].to_i <= 0 %> style='top:0px;' <% end %> >
+  		<div class="gifts">
+  			<a class="gift-a" target="_blank" rel="nofollow" href="http://www.mi.com/note"></a>
+  			<a class="gift-b" target="_blank" rel="nofollow" href="http://www.mi.com/hezis"></a>
+  			<a class="gift-c" target="_blank" rel="nofollow" href="http://www.mi.com/item/1135000430"></a>
+  		</div>
+  		<div class="statistic">
+  			<span class="yjsc"></span>
+  			<b><%= CarnivalOrder.all.length %></b>
+  			<span class="gjp"></span>
+  		</div>
+  		<a href="javascript:;" class="drag"></a>
+  	</div>
+  	
+    <div class="page">
+      <div class="header-box">
+        <div class="bulletin">
+          <ul>
+            <% CarnivalLog.recent_logs.each do |log| %>
+              <li>
+                <span><%= ch_time(log.created_at) %></span>
+                <span><%= log.carnival_user.mobile[0..2].to_s + "****" + log.carnival_user.mobile[7..10].to_s %></span>
+                <% if [CarnivalLog::STAGE_1, CarnivalLog::STAGE_3].include?(log.type) %>
+                  <span>获得了</span>
+                <% elsif log.type == CarnivalLog::SHARE %>
+                  <span>分享成功，获得了</span>
+                <% else %>
+                  <span>抽到了</span>
+                <% end %>
+                <span><%= log.prize_name %></span>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+				<a href="/s/53858ff3eb0e5b3366000024" class="sun" id="sun"></a>
+				<div id='light_sun' class="tooltip ty"><a href='/s/53858ff3eb0e5b3366000024'>跪求点亮Orz</a></div>
+         <div class="questions">
+          <a class="link" href="javascript:void(0);">FAQ<b></b></a>
+          <ul>
+            <li><span class="title">如何参与活动?</span><span class="text">滚动至页面最下方，抢得嘉年华门票即可开始闯关。</span></li>
+            <li><span class="title">3个关卡必须都完成吗？</span><span class="text">3个关卡顺序开通，每个关卡均设置奖品，通关后还可参与抽取小米大奖。</span></li>
+            <li><span class="title">都有哪些奖品？</span><span class="text">第一关为10元充值卡（100%中奖），第二、三关为神秘礼品，完成第三关还可参加小米note（2台）、小米盒子增强版（5个）、小米电源（20个）抽奖哦。</span></li>
+            <li><span class="title">如何领奖？</span><span class="text">问卷吧统一在活动结束后公布大奖获奖名单，并电话联系中奖者寄出奖品。</span></li>
+          </ul>
+        </div>
+        <div class="save">
+        	
+          <a class="link" href="javascript:void(0);">收藏<b></b></a>
+         	
+         		<span class="save-box">
+         			<form action="">
+                <% if @current_carnival_user.mobile.blank? %>
+                <!-- <p><input id='save_mobile_ipt' type="text" placeholder="输入手机号保存进度"><a class="save-btn" href="javascript:void(0);">提交</a></p> -->
+                <% else %>
+                <!-- <p style='color:#000;'>当前登录：<%= @current_carnival_user.mobile %></p> -->
+                <% end %>
+         				<!-- <div style="clear:both;padding:5px 0;"></div> -->
+         				<p><a class="favorite" href="javascript:void(0)" onClick="return BookmarkApp.addBookmark(this)">将本活动放入收藏夹</a></p>
+         				
+         			</form>
+         		</span>
+
+        </div>
+				
+
+        <div class="share">
+          <a class="link" href="javascript:void(0);">分享拿大奖<b></b></a>
+          <div class="share-box">
+            <p>
+              成功邀请1次可抽奖1次
+            </p>
+            <ul class="share">
+              <li><a id='SinaWeibo' class="sina" href="javascript:void(0);"></a></li>
+               <li><a id='TencentWeibo' class="tencent" href="javascript:void(0);"></a></li>
+               <!-- <li><a class="weixin" href="javascript:void(0);"><i></i>微信朋友圈</a></li> -->
+               <li><a id='QQ' class="qq" href="javascript:void(0);"></a></li>
+               <li><a id='QQSpace' class="qzone" href="javascript:void(0);"></a></li>
+               <li><a id='Renren' class="renren" href="javascript:void(0);"></a></li>
+               <li><a id='Douban' class="douban" href="javascript:void(0);"></a></li>
+            </ul>
+            <div style="clear:both;"></div>
+            <div class="share-lottery">
+              <a style='display:none;' class="disabled" href="javascript:void(0);">抽奖（通关后开启）</a>
+              <p>
+                已获得 <b><%=@obj[:share_num]%></b> 次抽大奖机会
+              </p>
+              <p>（通关后可开始抽奖）</p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <%= yield %>
+  <div class="footer">
+    <div class="page">
+      <div class="footer-box">
+       <span class="copy">本次活动最终解释权归 <a href="/">问卷吧</a> 所有</span>
+       <!-- 在线交流 -->
+       <span class="contact">
+          <a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=2523562014&site=qq&menu=yes">客服QQ: 2523562014</a>
+          <!-- <a target="_blank" href="http://wpa.qq.com/msgrd?v=3&uin=2523562014&site=qq&menu=yes">百度网桥</a> -->
+          <span>电话: 400-650-7905 转838</span>
+       </span>
+      </div>
+    </div>
+  </div>
+  <div style='display:none;'><script type="text/javascript"> var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://"); document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fb54732309180d2feab954364fdebf7f2' type='text/javascript'%3E%3C/script%3E")) </script>
+  </div>
+
+<% if Rails.env.production? %>
+<div style='display:none;'>
+  <!-- Baidu statistic -->
+  <script type="text/javascript">
+  var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+  document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fbd6514854e0a82f4cf35b8a23b78ee51' type='text/javascript'%3E%3C/script%3E"));
+  </script>
+</div>
+<% end %>
+</body>
+</html>

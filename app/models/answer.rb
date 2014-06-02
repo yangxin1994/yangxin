@@ -76,6 +76,7 @@ class Answer
 
   belongs_to :agent_task
   belongs_to :user, class_name: "User", inverse_of: :answers
+  belongs_to :carnival_user
   belongs_to :survey
   belongs_to :interviewer_task
   belongs_to :lottery
@@ -148,6 +149,11 @@ class Answer
   def self.find_by_survey_id_sample_id_is_preview(survey_id, sample_id, is_preview)
     return nil if sample_id.blank?
     return Answer.where(user_id: sample_id, survey_id: survey_id, :is_preview => is_preview).first
+  end
+
+  def self.find_by_survey_id_carnival_user_id_is_preview(survey_id, carnival_user_id, is_preview)
+    return nil if carnival_user_id.blank?
+    return Answer.where(carnival_user_id: carnival_user_id, survey_id: survey_id, :is_preview => is_preview).first
   end
 
   def self.find_by_status(status)
@@ -661,8 +667,11 @@ class Answer
       self.set_under_agent_review
     elsif self.is_preview || !self.need_review
       self.set_finish
+      Carnival.pre_survey_finished(self.id) if self.survey_id.to_s == Carnival::PRE_SURVEY
+      Carnival.background_survey_finished(self.id) if self.survey_id.to_s == Carnival::BACKGROUND_SURVEY
     else
       self.set_under_review
+      Carnival.survey_finished(self.id) if Carnival::SURVEY.include?(self.survey_id.to_s)
     end
     self.update_quota(old_status) if !self.is_preview
     self.finished_at = Time.now.to_i
@@ -730,6 +739,7 @@ class Answer
       message_content += ", 拒绝原因: #{message}" if message.present?
       PunishLog.create_punish_log(user.id) if user.present?
     end
+    Carnival.survey_reviewed(self.id) if Carnival::SURVEY.include?(self.survey_id.to_s)
     answer_auditor.create_message(message_title, message_content, [user._id.to_s]) if user.present?
     update_attributes(audit_message: message_content, auditor: answer_auditor, audit_at: Time.now.to_i)
     interviewer_task.try(:refresh_quota)

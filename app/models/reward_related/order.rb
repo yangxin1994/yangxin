@@ -67,6 +67,7 @@ class Order
   belongs_to :gift
   belongs_to :answer
   belongs_to :sample, :class_name => "User", :inverse_of => :orders
+  belongs_to :movie_activity
 
   index({ code: 1 }, { background: true } )
   index({ status: 1 }, { background: true } )
@@ -235,14 +236,6 @@ class Order
     self.handled_at = Time.now
     self.save
     ChargeWorker.perform_async(self.id.to_s, self.mobile, self.amount)
-=begin
-    if retval.nil?
-      self.esai_status = ESAI_FAIL
-    else
-      self.esai_status = ESAI_HANDLE
-      self.esai_order_id = retval
-    end
-=end
   end
 
   def self.recharge_fail_mobile
