@@ -46,9 +46,9 @@
       var pre_status = parseInt(window.data.pre_status,10);
       window.current_step = parseInt(window.data.step,10);
 
-      // if(window.data.pre_status > 0){
-      //   $('#ad').hide();
-      // }
+      if(window.data.pre_status > 0){
+        $('#ad').hide();
+      }
 
       //如果拿到票后刷新页面，直接进入第一个任务
       if( $.cookie('ticket') && window.current_step == 0){
