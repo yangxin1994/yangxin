@@ -226,6 +226,10 @@
       //设置第一个大任务
       function setTaskOne(){
         fireUpBackground($('.section.wheel'));
+        if(window.data.rew_1){  
+          $('#task_one_text').text('恭喜您完成摩天轮关卡,系统会在审核后将10元话费充值到您的手机');
+        }
+        
         $('#task_one_ask').hide();
         $('#task_one_text').show();
         $('.section.wheel').addClass('current');
@@ -243,6 +247,7 @@
           } 
           // add for hide survey end
         })
+
       }
 
       //设置第二个大任务
