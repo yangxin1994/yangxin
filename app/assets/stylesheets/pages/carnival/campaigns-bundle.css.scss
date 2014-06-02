@@ -922,6 +922,7 @@ to{transform: rotate(359deg)}
       left:80px;
 			&:hover{
 				background: #46C2E8;
+        cursor: pointer;
 			}
 		}
 		.last{
@@ -939,7 +940,10 @@ to{transform: rotate(359deg)}
       font-size: 12px;
       a {
         color: #46C2E8;
-        &:hover { text-decoration: underline; }
+        &:hover { 
+          text-decoration: underline; 
+          cursor: pointer;
+        }
       }
 		}
 		.left{
@@ -968,6 +972,9 @@ to{transform: rotate(359deg)}
 	font-weight: bold;
 	cursor: default;
 	position: absolute;
+  a {
+    color:#72CBED;
+  }
 	b{
 		color:red;
 	}
