@@ -706,7 +706,7 @@
       }
 
       function percentNotice(step,survey_arr,status_arr){
-        if( window.data.t1_status.indexOf(2) >= 0 ){
+        if( status_arr.indexOf(2) >= 0 ){
           //如果发现有被拒绝的答案,给出相应的提示
           $.carnivalbox({
             width:460,
