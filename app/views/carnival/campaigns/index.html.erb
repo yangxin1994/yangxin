@@ -470,58 +470,81 @@
             var remain = window.data.share_num -  window.data.share_lottery_num;
             if($.cookie('reward_4')){
               if(window.data.t3_status.indexOf(2) < 0){
-                  $('.ball-cont').hide();
-              }
-              //已经参加了转盘抽奖
-              if(remain <= 0){
-                //首次完成全部任务后并已经抽奖，再次来到页面
-                $("#lotteryBtn").addClass('disabled');
-                $.carnivalbox({
-                  width:460,
-                  title:'你已完成抽奖活动,感谢您的参与',
-                  content:'',
-                  btnCont:'离开',
-                  beforeshow:function(){},
-                  aftershow:function(){
-                    var sub_btn   = $('.carnival-popup a.btn');
-                    sub_btn.live('click',function(){
-                      $.fancybox.close();
-                    });
+                $('.ball-cont').hide();
+                //已经参加了转盘抽奖
+                if(remain <= 0){
+                  //首次完成全部任务后并已经抽奖，再次来到页面
+                  $("#lotteryBtn").addClass('disabled');
+                  $.carnivalbox({
+                    width:460,
+                    title:'你已完成抽奖活动,感谢您的参与',
+                    content:'',
+                    btnCont:'离开',
+                    beforeshow:function(){},
+                    aftershow:function(){
+                      var sub_btn   = $('.carnival-popup a.btn');
+                      sub_btn.live('click',function(){
+                        $.fancybox.close();
+                      });
+                    }
+                  }) 
+                }else{
+                  //已经完成了转盘抽奖,但是可以重复抽奖
+                  if(window.data.own){
+                    //已经抽中奖品,不允许再次抽奖
+                    $("#lotteryBtn").addClass('disabled');
+                    var title ='恭喜您,中奖了';
+                    var cont = '您已经抽中奖品' +  window.data.prize_name + '  我们会在审核后联系您!'  ;
+                    var btn_cont = '我知道了';
+                    $('#lotteryBtn').addClass('disabled');
+                  }else{
+                    //分享抽奖情况
+                    var title ='欢迎您再次抽奖';
+                    var cont = '您共有' + window.data.share_num + '次抽奖机会,还剩余'
+                  + remain + '次抽奖机会';
+                    var btn_cont = '继续抽奖';
+                  }
+  
+                  $.carnivalbox({
+                    width:460,
+                    title:title,
+                    content:cont,
+                    btnCont:btn_cont,
+                    beforeshow:function(){},
+                    aftershow:function(){
+                      var sub_btn   = $('.carnival-popup a.btn');
+                      sub_btn.live('click',function(){
+                        $.fancybox.close();
+                        get_remain();
+                        $('.ly-plate').fadeIn(3000);
+                      });
+                    }
+                  })
+                }
+
+              }else{
+                $.each(window.data.t3_surveys,function(k,v){
+                  if(parseInt(window.data.t3_status[k]) > 0 && parseInt(window.data.  t3_status[k]) != 2){
+                    //热气球,如果某个小任务完成,删除绳子
+                    $('#' + v).addClass('act');
+                    $($('.line-wrap .line')[k]).hide();
                   }
                 }) 
-              }else{
-                //已经完成了转盘抽奖,但是可以重复抽奖
-                if(window.data.own){
-                  //已经抽中奖品,不允许再次抽奖
-                  $("#lotteryBtn").addClass('disabled');
-                  var title ='恭喜您,中奖了';
-                  var cont = '您已经抽中奖品' +  window.data.prize_name + '我们会在审核后联系您!'  ;
-                  var btn_cont = '我知道了';
-                  $('#lotteryBtn').addClass('disabled');
-                }else{
-                  //分享抽奖情况
-                  var title ='欢迎您再次抽奖';
-                  var cont = '您共有' + window.data.share_num + '次抽奖机会,还剩余'
-                + remain + '次抽奖机会';
-                  var btn_cont = '继续抽奖';
-                }
 
                 $.carnivalbox({
                   width:460,
-                  title:title,
-                  content:cont,
-                  btnCont:btn_cont,
-                  beforeshow:function(){},
+                  title:'您有答案被拒绝',
+                  content: '系统发现您有问卷审核未通过,只有全部问卷审核通过才可以领取10元话费',
+                  btnCont:'重新答题',
                   aftershow:function(){
-                    var sub_btn   = $('.carnival-popup a.btn');
-                    sub_btn.live('click',function(){
+                    $('.carnival-popup a.btn').live('click',function(){
                       $.fancybox.close();
-                      get_remain();
-                      $('.ly-plate').fadeIn(3000);
-                    });
+                    })
                   }
-                })
+                }) 
+                               
               }
+
             }else{
               //第三关的话费领取完成但是还未抽奖
               get_remain();
