@@ -621,7 +621,8 @@
                 })
               }else if(t_type == 0){
                 //$.cookie('reward_2',d.getTime(),{ expires: 10 * 365 });
-                TaskOpen('balloon');
+                //TaskOpen('balloon');
+                setSection(3);
                 notic.html('恭喜您抽中了' + data.value + '系统审核后会充值到您的手机!');
                 notic.show();  
                 $('.carnival-popup a.btn').live('click',function(){
