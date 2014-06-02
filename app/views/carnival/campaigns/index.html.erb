@@ -278,7 +278,8 @@
 
           if(parseInt(window.data.t2_status[k]) > 0){
             if( parseInt(window.data.t2_status[k]) != 2 ){
-              $('#' + window.data.t2_surveys[k]).addClass('act');  
+              $('#' + window.data.t2_surveys[k]).addClass('act'); 
+              $('#' + window.data.t2_surveys[k]).attr('href','javascript:void(0);');
             }
           }
         })
