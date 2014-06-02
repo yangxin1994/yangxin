@@ -545,6 +545,15 @@
             }else{
               setTaskThree();
               $('.section.balloon').addClass('active').siblings().removeClass('active');
+              $.each(survey_arr,function(k,v){
+                if(parseInt(status_arr[k]) > 0){
+                  if(step == 3){
+                    //热气球,如果某个小任务完成,删除绳子
+                    $($('.line-wrap .line')[k]).hide();
+                  }
+                }
+              }) 
+              percentNotice(step,survey_arr,status_arr);
             }
           }
         }
@@ -678,7 +687,7 @@
 
       // set Active
       function setFlag(step,survey_arr,status_arr){
-        percentNotice(step,survey_arr,status_arr)
+        percentNotice(step,survey_arr,status_arr);
 
         // for hide survey start
         $.each(survey_arr,function(k,v){
