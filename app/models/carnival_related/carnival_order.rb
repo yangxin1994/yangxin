@@ -88,13 +88,14 @@ class CarnivalOrder
 
   def handle
     return if self.status != WAIT
-    return if [STAGE_1, STAGE_2, STAGE_3].include?(self.type)
+    return if ![STAGE_1, STAGE_2, STAGE_3].include?(self.type)
 
     # only handle the mobile orders that are in wait status
     self.status = HANDLE
     self.esai_status = ESAI_HANDLE
     self.handled_at = Time.now
     self.save
+    logger.info "FFFFFFFFFFFFFFFFFFFFFFFF"
     CarnivalChargeWorker.perform_async(self.id.to_s, self.mobile, self.amount)
   end
 

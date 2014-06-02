@@ -223,9 +223,13 @@ class Carnival
   end
 
   def self.survey_finished(answer_id)
+    logger.info "00000000000000000"
     answer = Answer.find(answer_id)
+    logger.info "00000000000000000"
     carnival_user = answer.carnival_user
+    logger.info "00000000000000000"
     carnival_user.survey_finished(answer.id)
+    logger.info "00000000000000000"
   end
 
   def self.survey_reviewed(answer_id)

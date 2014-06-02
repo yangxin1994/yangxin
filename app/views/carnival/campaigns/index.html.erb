@@ -46,9 +46,9 @@
       var pre_status = parseInt(window.data.pre_status,10);
       window.current_step = parseInt(window.data.step,10);
 
-      if(window.data.pre_status > 0){
-        $('#ad').hide();
-      }
+      // if(window.data.pre_status > 0){
+      //   $('#ad').hide();
+      // }
 
       //如果拿到票后刷新页面，直接进入第一个任务
       if( $.cookie('ticket') && window.current_step == 0){
@@ -898,7 +898,7 @@
         <div class="door-box">
           <div class="door">
             <a href="/s/53859185eb0e5b7282000003" class="start">开始抢票！</a>
-            <p class="last">如果您已参加过本活动，可 <a id='continue_game' href="javascript:void(0);">继续游戏</a></p>
+            <p class="last">如果您已经抢到了门票，可 <a id='continue_game' href="javascript:void(0);">继续游戏</a></p>
           <span class="left"></span>
           <span class="right"></span>
         </div>
