@@ -103,6 +103,10 @@ jQuery(function($) {
     $("#lotteryBtn").rotate({
         bind: {
             click: function() {
+                $.cookie('reward_4', d.getTime(), {
+                    expires: 10 * 365
+                });
+
                 var lotteryBtn = $("#lotteryBtn");
                 if (!lotteryBtn.hasClass('disabled')) {
                     $("#lotteryBtn").addClass('disabled');
@@ -117,10 +121,6 @@ jQuery(function($) {
                         var d = new Date();
                         var title = '';
                         var content = '';
-
-                        $.cookie('reward_4', d.getTime(), {
-                            expires: 10 * 365
-                        });
 
                         function setDisabled() {
                             if (window.data.share_lottery_num >= window.data.share_num) {
@@ -194,9 +194,9 @@ jQuery(function($) {
                                     break;
                                 case -5:
                                     window.data.share_lottery_num += 1;
-                                    $.cookie('reward_4', d.getTime(), {
-                                        expires: 10 * 365
-                                    });
+                                // $.cookie('reward_4', d.getTime(), {
+                                //     expires: 10 * 365
+                                // });
 
                                     setDisabled();
 

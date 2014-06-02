@@ -56,14 +56,22 @@
       }
 
       //已经领取第一关的手机充值,再次进入页面的时候直接进入下一个场景
-      if($.cookie('reward_1')){
+      if(window.data.rew_1){
         window.current_step = 2;
       }
 
+      // if($.cookie('reward_1')){
+      //   window.current_step = 2;
+      // }
+
       //第二关任务完成 再次来到页面,直接进入第三个任务场景
-      if($.cookie('reward_2')){
-        window.current_step = 3; 
+      if(window.data.rew_2){
+        window.current_step = 3;
       }
+
+      // if($.cookie('reward_2')){
+      //   window.current_step = 3; 
+      // }
 
       if (pre_status) {     
         if(pre_status == 2){// for reject
@@ -229,7 +237,7 @@
         if(window.data.rew_1){  
           $('#task_one_text').text('恭喜您完成摩天轮关卡,系统会在审核后将10元话费充值到您的手机');
         }
-        
+
         $('#task_one_ask').hide();
         $('#task_one_text').show();
         $('.section.wheel').addClass('current');
@@ -254,6 +262,11 @@
       function setTaskTwo(){
         setTaskOne();
         fireUpBackground($('.section.stair'));
+        if(parseInt(window.data.lot_status[0]) > 0){  
+          $('#task_two_text').text('恭喜您抽中了' + window.data.rew_2_name + '元话费充值,系统会在问卷审核通过后充值到您的手机');
+        }
+
+
         $('#task_two_ask').hide();
         $('#task_two_text').show();
         $('.section.stair').addClass('current');
@@ -431,7 +444,8 @@
         }
 
         if(step == 3){
-          if($.cookie('reward_3')){
+          if(window.data.rew_3){
+          //if($.cookie('reward_3')){
             //第三个大任务充值话费已经领取
 
             $('.bg4').css({'background-position-y': '0%'});
@@ -544,7 +558,7 @@
 
             if(data.success){
               if(t_type == 3){
-                $.cookie('reward_1',d.getTime(),{ expires: 10 * 365 });
+                //$.cookie('reward_1',d.getTime(),{ expires: 10 * 365 });
                 TaskOpen('stair');
                 notic.html( '领取成功!系统审核通过后会充值到您的手机!' );
                 notic.show();
@@ -554,7 +568,7 @@
                   nextSec();
                 })
               }else if(t_type == 0){
-                $.cookie('reward_2',d.getTime(),{ expires: 10 * 365 });
+                //$.cookie('reward_2',d.getTime(),{ expires: 10 * 365 });
                 TaskOpen('balloon');
                 notic.html('恭喜您抽中了' + data.value + '系统审核后会充值到您的手机!');
                 notic.show();  
@@ -562,7 +576,7 @@
                   nextSec();
                 })                           
               }else if(t_type == 4){
-                $.cookie('reward_3',d.getTime(),{ expires: 10 * 365 });
+                //$.cookie('reward_3',d.getTime(),{ expires: 10 * 365 });
                 notic.html('获得了10元手机充值奖励,系统会在审核后充值到您的手机!');
                 notic.show();
                 $('.carnival-popup a.btn').text('现在去抽奖'); 
