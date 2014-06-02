@@ -96,6 +96,30 @@ class CarnivalUser
       self.survey_status[index] = HIDE
     end
 
+    s4_id = "53859a0deb0e5b2452000021"
+    qid = "5385919deb0e5b7282000004"
+    if answer.answer_content[qid]["selection"].include?(4115158460088965) && !answer.answer_content[qid]["selection"].include?(6547096649221507)
+      index = self.survey_order.index(s4_id)
+      self.survey_status[index] = HIDE
+      self.save
+    end
+
+    s5_id = "53881af6eb0e5bb25600001d"
+    qid = "5385919deb0e5b7282000004"
+    if !answer.answer_content[qid]["selection"].include?(18295341391711480) && !answer.answer_content[qid]["selection"].include?(22228735216556990)
+      index = self.survey_order.index(s5_id)
+      self.survey_status[index] = HIDE
+      self.save
+    end
+
+    s6_id = "5388279feb0e5b9d630000e2"
+    qid = "5385919deb0e5b7282000004"
+    if !answer.answer_content[qid]["selection"].include?(29048866216688388) && !answer.answer_content[qid]["selection"].include?(25714631368535548)
+      index = self.survey_order.index(s6_id)
+      self.survey_status[index] = HIDE
+      self.save
+    end
+
     self.save
   end
 
@@ -260,75 +284,57 @@ class CarnivalUser
 
     s4_id = "53859a0deb0e5b2452000021"
     if answer.survey_id.to_s == s4_id
-      if !pre_survey_answer.answer_content[qid]["selection"].include?(4115158460088965) && !pre_survey_answer.answer_content[qid]["selection"].include?(6547096649221507)
-        index = self.survey_order.index(s4_id)
-        self.survey_status[index] = HIDE
-        self.save
-      else
-        # 1. 预调研过去一年看过电视的回答A系列问题；
-        qid = "5385919deb0e5b7282000004"
-        if !pre_survey_answer.answer_content[qid]["selection"].include?(4115158460088965)
-          # do not watch tv, hide the A series questions
-          ["538808cceb0e5b27df000081", "5388091feb0e5b27df000084", "53880938eb0e5bb7d900003b", "5388098aeb0e5b27df000088", "53880a21eb0e5b27df000096", "53880a72eb0e5b67c4000001", "53880ab5eb0e5bb7d900004e", "53880acbeb0e5bb7d9000050", "53880ae2eb0e5b67c4000007"].each do |qid|
-            answer.answer_content[qid] = {}
-          end
+      # 1. 预调研过去一年看过电视的回答A系列问题；
+      qid = "5385919deb0e5b7282000004"
+      if !pre_survey_answer.answer_content[qid]["selection"].include?(4115158460088965)
+        # do not watch tv, hide the A series questions
+        ["538808cceb0e5b27df000081", "5388091feb0e5b27df000084", "53880938eb0e5bb7d900003b", "5388098aeb0e5b27df000088", "53880a21eb0e5b27df000096", "53880a72eb0e5b67c4000001", "53880ab5eb0e5bb7d900004e", "53880acbeb0e5bb7d9000050", "53880ae2eb0e5b67c4000007"].each do |qid|
+          answer.answer_content[qid] = {}
         end
-        # 2. 预调研过去一年读过报纸的回答B系列问题；
-        if !pre_survey_answer.answer_content[qid]["selection"].include?(6547096649221507)
-          # do not read newspaper, hide the B series questions
-          ["53880b18eb0e5b27df0000a1", "53880b2feb0e5b67c400000c", "53880b59eb0e5b67c4000013", "53880bb1eb0e5b27df0000ab", "53880c8ceb0e5b67c4000019", "53880be0eb0e5bce4f000006", "53880cd4eb0e5b6876000014", "53880cebeb0e5bce4f000010", "53880d05eb0e5bce4f000015"].each do |qid|
-            answer.answer_content[qid] = {}
-          end
+      end
+      # 2. 预调研过去一年读过报纸的回答B系列问题；
+      if !pre_survey_answer.answer_content[qid]["selection"].include?(6547096649221507)
+        # do not read newspaper, hide the B series questions
+        ["53880b18eb0e5b27df0000a1", "53880b2feb0e5b67c400000c", "53880b59eb0e5b67c4000013", "53880bb1eb0e5b27df0000ab", "53880c8ceb0e5b67c4000019", "53880be0eb0e5bce4f000006", "53880cd4eb0e5b6876000014", "53880cebeb0e5bce4f000010", "53880d05eb0e5bce4f000015"].each do |qid|
+          answer.answer_content[qid] = {}
         end
       end
     end
 
     s5_id = "53881af6eb0e5bb25600001d"
     if answer.survey_id.to_s == s5_id
-      if !pre_survey_answer.answer_content[qid]["selection"].include?(18295341391711480) && !pre_survey_answer.answer_content[qid]["selection"].include?(22228735216556990)
-        index = self.survey_order.index(s5_id)
-        self.survey_status[index] = HIDE
-        self.save
-      else
-        # 1. 预调研过去一年听过广播的回答C系列问题；
-        qid = "5385919deb0e5b7282000004"
-        if !pre_survey_answer.answer_content[qid]["selection"].include?(18295341391711480)
-          # do not listen radio, hide the C series questions
-          ["53881b24eb0e5bb7d90000f5", "53881b36eb0e5b9d63000048", "53881b9aeb0e5b9d6300004e", "53881bfaeb0e5bd9a7000009", "53881c33eb0e5bd9a700000f", "53881c5deb0e5b9d6300005b", "53881cffeb0e5bb25600003d", "53881d1beb0e5bd9a7000020", "53881d31eb0e5bb25600003f"].each do |qid|
-            answer.answer_content[qid] = {}
-          end
+      # 1. 预调研过去一年听过广播的回答C系列问题；
+      qid = "5385919deb0e5b7282000004"
+      if !pre_survey_answer.answer_content[qid]["selection"].include?(18295341391711480)
+        # do not listen radio, hide the C series questions
+        ["53881b24eb0e5bb7d90000f5", "53881b36eb0e5b9d63000048", "53881b9aeb0e5b9d6300004e", "53881bfaeb0e5bd9a7000009", "53881c33eb0e5bd9a700000f", "53881c5deb0e5b9d6300005b", "53881cffeb0e5bb25600003d", "53881d1beb0e5bd9a7000020", "53881d31eb0e5bb25600003f"].each do |qid|
+          answer.answer_content[qid] = {}
         end
-        # 2. 预调研过去一年读过杂志的回答D系列问题；
-        if !pre_survey_answer.answer_content[qid]["selection"].include?(22228735216556990)
-          # do not read magzine, hide the D series questions
-          ["53881d58eb0e5bb256000042", "53881d6aeb0e5bb256000043", "53881da3eb0e5b9d63000061", "53881dc9eb0e5bb256000050", "53881defeb0e5bb7d9000102", "53881e32eb0e5b9d6300006c", "53881e44eb0e5b50a2000008", "53881e5beb0e5b9d6300006d", "53881e70eb0e5b50a200000b"].each do |qid|
-            answer.answer_content[qid] = {}
-          end
+      end
+      # 2. 预调研过去一年读过杂志的回答D系列问题；
+      if !pre_survey_answer.answer_content[qid]["selection"].include?(22228735216556990)
+        # do not read magzine, hide the D series questions
+        ["53881d58eb0e5bb256000042", "53881d6aeb0e5bb256000043", "53881da3eb0e5b9d63000061", "53881dc9eb0e5bb256000050", "53881defeb0e5bb7d9000102", "53881e32eb0e5b9d6300006c", "53881e44eb0e5b50a2000008", "53881e5beb0e5b9d6300006d", "53881e70eb0e5b50a200000b"].each do |qid|
+          answer.answer_content[qid] = {}
         end
       end
     end
 
     s6_id = "5388279feb0e5b9d630000e2"
     if answer.survey_id.to_s == s6_id
-      if !pre_survey_answer.answer_content[qid]["selection"].include?(29048866216688388) && !pre_survey_answer.answer_content[qid]["selection"].include?(25714631368535548)
-        index = self.survey_order.index(s6_id)
-        self.survey_status[index] = HIDE
-        self.save
-      else
-        # 1. 预调研过去一年用过笔记本/台式机上网的回答E系列问题；
-        qid = "5385919deb0e5b7282000004"
-        if !pre_survey_answer.answer_content[qid]["selection"].include?(29048866216688388)
-          # do not use notepad/PC, hide the E series questions
-          ["538827bfeb0e5b2922000023", "538827d6eb0e5b912d00000a", "53882811eb0e5b2922000029", "5388282deb0e5b292200002c", "53882848eb0e5b9d630000ea", "53882894eb0e5b292200002f", "538828b8eb0e5b2922000038", "538828e6eb0e5b2337000001"].each do |qid|
-            answer.answer_content[qid] = {}
-          end
+      # 1. 预调研过去一年用过笔记本/台式机上网的回答E系列问题；
+      qid = "5385919deb0e5b7282000004"
+      if !pre_survey_answer.answer_content[qid]["selection"].include?(29048866216688388)
+        # do not use notepad/PC, hide the E series questions
+        ["538827bfeb0e5b2922000023", "538827d6eb0e5b912d00000a", "53882811eb0e5b2922000029", "5388282deb0e5b292200002c", "53882848eb0e5b9d630000ea", "53882894eb0e5b292200002f", "538828b8eb0e5b2922000038", "538828e6eb0e5b2337000001"].each do |qid|
+          answer.answer_content[qid] = {}
         end
-        # 2. 预调研过去一年用过手机/平板上网的回答F系列问题；
-        if !pre_survey_answer.answer_content[qid]["selection"].include?(25714631368535548)
-          # do not use mobile/pad, hide the F series questions
-          ["5388291aeb0e5b912d000010", "53882934eb0e5b912d000015", "53882951eb0e5b2922000041", "5388296feb0e5b2922000044", "53882988eb0e5b1d89000003", "538829bbeb0e5b292200004b", "538829e0eb0e5b2922000050", "53882a04eb0e5b2922000052"].each do |qid|
-            answer.answer_content[qid] = {}
-          end
+      end
+      # 2. 预调研过去一年用过手机/平板上网的回答F系列问题；
+      if !pre_survey_answer.answer_content[qid]["selection"].include?(25714631368535548)
+        # do not use mobile/pad, hide the F series questions
+        ["5388291aeb0e5b912d000010", "53882934eb0e5b912d000015", "53882951eb0e5b2922000041", "5388296feb0e5b2922000044", "53882988eb0e5b1d89000003", "538829bbeb0e5b292200004b", "538829e0eb0e5b2922000050", "53882a04eb0e5b2922000052"].each do |qid|
+          answer.answer_content[qid] = {}
         end
       end
     end
