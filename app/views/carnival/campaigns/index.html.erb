@@ -611,7 +611,8 @@
             if(data.success){
               if(t_type == 3){
                 //$.cookie('reward_1',d.getTime(),{ expires: 10 * 365 });
-                TaskOpen('stair');
+                //TaskOpen('stair');
+                setSection(2);
                 notic.html( '领取成功!系统审核通过后会充值到您的手机!' );
                 notic.show();
                 $('.carnival-popup a.btn').text('继续答题');
@@ -681,7 +682,8 @@
                 case -5:
                     notic.html( '对不起,您本次没有抽中!' );
                     if(t_type == 0){
-                      TaskOpen('balloon');
+                      //TaskOpen('balloon');
+                      setSection(3)
                       rebind_click('我知道了',true);
                     }else{
                       rebind_click('我知道了');  
