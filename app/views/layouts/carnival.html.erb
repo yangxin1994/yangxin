@@ -81,7 +81,7 @@
             <% CarnivalLog.recent_logs.each do |log| %>
               <li>
                 <span><%= ch_time(log.created_at) %></span>
-                <span><%= log.carnival_user.mobile[0..2] + "****" + log.carnival_user.mobile[7..10] %></span>
+                <span><%= log.carnival_user.mobile[0..2].to_s + "****" + log.carnival_user.mobile[7..10].to_s %></span>
                 <% if [CarnivalLog::STAGE_1, CarnivalLog::STAGE_3].include?(log.type) %>
                   <span>获得了</span>
                 <% elsif log.type == CarnivalLog::SHARE %>
