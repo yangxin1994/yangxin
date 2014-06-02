@@ -548,7 +548,9 @@
               $.each(survey_arr,function(k,v){
                 if(parseInt(window.data.t3_status[k]) > 0){
                   //热气球,如果某个小任务完成,删除绳子
-                  $('#' + v).addClass('act');
+                  //$('#' + v).addClass('act');
+                  cosnole.log(v);
+                  console.log('----------------------')
                   $($('.line-wrap .line')[k]).hide();
                 }
               }) 
