@@ -176,6 +176,7 @@
                       money = 100;
                     }
                     sub_btn.addClass('disabled');
+                    var d = new Date();
                     sendAjax(0,null,money);
                 }
               });
@@ -262,8 +263,13 @@
       function setTaskTwo(){
         setTaskOne();
         fireUpBackground($('.section.stair'));
-        if(parseInt(window.data.lot_status[0]) > 0){  
-          $('#task_two_text').text('恭喜您抽中了' + window.data.rew_2_name + '元话费充值,系统会在问卷审核通过后充值到您的手机');
+        if(parseInt(window.data.lot_status[0]) > 0){
+          if(window.data.rew_2_name){
+            $('#task_two_text').text('恭喜您抽中了' + window.data.rew_2_name + '元话费充值,系统会在问卷审核通过后充值到您的手机');
+          }else{
+            $('#task_two_text').text('抱歉，您没有抽中任何面值的话费充值');
+          }  
+          
         }
 
 
@@ -438,13 +444,20 @@
         }
 
         if(step == 2){
-          if($.inArray(0,status_arr) < 0){
-            foraward();
+          if($.inArray(0,status_arr) < 0 && $.inArray(2,status_arr) < 0 ){
+
+            if(parseInt(window.data.lot_status[0]) == 0){
+              foraward(); //用户在第二关没有抽奖  
+            }else{
+              //用户在第二关有抽奖
+              step = 3;  
+            }
           }
         }
 
         if(step == 3){
           if(window.data.rew_3){
+            $('.section.balloon').addClass('active').siblings().removeClass('active');
           //if($.cookie('reward_3')){
             //第三个大任务充值话费已经领取
 
@@ -531,7 +544,18 @@
                   });
                 }
               })
-            };
+            }else{
+              setTaskThree();
+              $('.section.balloon').addClass('active').siblings().removeClass('active');
+              $.each(window.data.t3_surveys,function(k,v){
+                if(parseInt(window.data.t3_status[k]) > 0){
+                  //热气球,如果某个小任务完成,删除绳子
+                  $('#' + v).addClass('act');
+                  $($('.line-wrap .line')[k]).hide();
+                }
+              }) 
+              percentNotice(step,survey_arr,window.data.t3_status);
+            }
           }
         }
 
@@ -664,7 +688,7 @@
 
       // set Active
       function setFlag(step,survey_arr,status_arr){
-        percentNotice(step,survey_arr,status_arr)
+        percentNotice(step,survey_arr,status_arr);
 
         // for hide survey start
         $.each(survey_arr,function(k,v){
@@ -683,7 +707,7 @@
       }
 
       function percentNotice(step,survey_arr,status_arr){
-        if( window.data.t1_status.indexOf(2) >= 0 ){
+        if( status_arr.indexOf(2) >= 0 ){
           //如果发现有被拒绝的答案,给出相应的提示
           $.carnivalbox({
             width:460,
