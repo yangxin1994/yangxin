@@ -103,6 +103,10 @@ jQuery(function($) {
     $("#lotteryBtn").rotate({
         bind: {
             click: function() {
+                $.cookie('reward_4', d.getTime(), {
+                    expires: 10 * 365
+                });
+
                 var lotteryBtn = $("#lotteryBtn");
                 if (!lotteryBtn.hasClass('disabled')) {
                     $("#lotteryBtn").addClass('disabled');
@@ -117,10 +121,6 @@ jQuery(function($) {
                         var d = new Date();
                         var title = '';
                         var content = '';
-
-                        $.cookie('reward_4', d.getTime(), {
-                            expires: 10 * 365
-                        });
 
                         function setDisabled() {
                             if (window.data.share_lottery_num >= window.data.share_num) {
@@ -190,20 +190,23 @@ jQuery(function($) {
                                     })
                                     break;
                                 case -4:
-                                    title = '对不起,该奖品已被您抽中';
+                                    title = '对不起,您已经参与过抽奖,不能再次抽奖';
                                     break;
                                 case -5:
                                     window.data.share_lottery_num += 1;
-                                    $.cookie('reward_4', d.getTime(), {
-                                        expires: 10 * 365
-                                    });
+                                // $.cookie('reward_4', d.getTime(), {
+                                //     expires: 10 * 365
+                                // });
 
                                     setDisabled();
 
                                     title = '对不起,您本次没有抽中!';
                                     break;
                                 case -6:
-                                    title = '对不起,该手机号不存在!'
+                                    title = '对不起,该手机号已经参与活动并领奖，不能重复参与!'
+                                    break;
+                                case -7:
+                                    title = '您已经成功抽取了' + window.data.prize_name + ',不能重复抽奖';
                                     break;
                                 default:
                                     break;
