@@ -32,7 +32,7 @@
     var share_href = 'http://wenjuanba.com/carnival/campaigns?i=<%= @current_carnival_user.id.to_s %>'; 
     _.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace'], $.proxy(function(v) {
       $('#' + v).click(function() {
-        $.social['shareTo' + v](share_href + '&c=' + v, '我发现了一个好玩的活动：问卷吧嘉年华，参加100%获得手机充值卡，并可抽取红米note、小米盒子、小米电源等大奖哦！', 'http://wenjuanba.com/assets/activities/2014-6/carnival.png');
+        $.social['shareTo' + v](share_href + '&c=' + v, '我发现了一个好玩的活动“问卷吧嘉年华”，参加100%获得手机充值卡，还可以抽红米note、小米盒子、小米电源等大奖哦！你也来参加吧！', 'http://wenjuanba.com/assets/activities/2014-6/carnival.png');
       });
     }, this));
     $('#QQ').click(function() {
