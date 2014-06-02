@@ -163,7 +163,7 @@ class CarnivalUser
       answer.save
       if self.mobile.present?
         # send sms to invite the sample answer again
-        SmsWorker.perform_async("carnival_re_invitation", self.mobile, "")
+        SmsWorker.perform_async("carnival_re_invitation", self.mobile, "", answer_id: answer_id.to_s)
       end
     end
     self.save
