@@ -578,6 +578,7 @@
                 if(parseInt(window.data.t3_status[k]) > 0 && parseInt(window.data.t3_status[k]) != 2){
                   //热气球,如果某个小任务完成,删除绳子
                   $('#' + v).addClass('act');
+                  $('#' + v).find('a').attr('href','javascript:void(0);');
                   $($('.line-wrap .line')[k]).hide();
                 }
               }) 
