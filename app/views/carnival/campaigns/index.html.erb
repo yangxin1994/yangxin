@@ -39,7 +39,7 @@
 
       //background status
       if(window.data.background_survey_status == 32) {
-        $('.sun').addClass('active');
+        $('.sun').addClass('active').attr('href', 'javascript:void(0);');
         $('#light_sun').remove();
       }
 
@@ -469,10 +469,9 @@
         }
 
         if(step == 3){
+          $('.section.balloon').addClass('active').siblings().removeClass('active');
           if(window.data.rew_3){
             //第三个大任务充值话费已经领取
-            $('.section.balloon').addClass('active').siblings().removeClass('active');
-
             var remain = window.data.share_num -  window.data.share_lottery_num;
             if($.cookie('reward_4')){
               if(window.data.t3_status.indexOf(2) < 0){
