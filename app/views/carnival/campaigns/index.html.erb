@@ -648,16 +648,21 @@
                 })
               }
             }else{
-              function rebind_click(txt,next){
+              function rebind_click(txt,next,cb){
                 txt = txt || '马上完成';
                 $('.carnival-popup .submit').text(txt)
                 $('.carnival-popup .submit').unbind('click');
-                $('.carnival-popup .submit').bind('click',function(){
-                  $.fancybox.close();
-                  if(next){
-                    $.fn.fullpage.moveSectionUp();
-                  }
-                })
+                if(cb){
+                  cb();
+                }else{
+                  $('.carnival-popup .submit').bind('click',function(){
+                    $.fancybox.close();
+                    if(next){
+                      $.fn.fullpage.moveSectionUp();
+                    }
+                  })
+                }
+
                 notic.show();
               };
 
@@ -697,7 +702,35 @@
                     break;
                 case -6:
                     notic.html('对不起,该手机号已经参与活动并领奖,不能重复参与!' );
-                    rebind_click('马上领取');                  
+                    rebind_click('马上领取',null,function(){
+                      $('.carnival-popup .submit').bind('click',function(){
+                        // for rewrite mobile start
+                        var phone_ipt = $('.carnival-popup form input');
+                        var sub_btn   = $('.carnival-popup a.btn');
+                        phone_ipt.live('focus',function(){
+                          $(this).removeClass('error');
+                          sub_btn.removeClass('disabled');
+                        });
+                        sub_btn.live('click',function(){
+                          if(!sub_btn.hasClass('disabled')){
+                            var phone = phone_ipt.val();
+                            if($.regex.isMobile(phone)){
+                              sub_btn.addClass('disabled');
+                              phone_ipt.removeClass('error');
+                              sub_btn.addClass('disabled');
+                              sendAjax(3,phone);                   
+                            }else{
+                              phone_ipt.addClass('error');
+                              sub_btn.removeClass('disabled');
+                            }
+                          }
+                        });
+                        // for rewrite mobile end
+                        if(next){
+                          $.fn.fullpage.moveSectionUp();
+                        }
+                      })                      
+                    });                  
                     break;
                 default:
                   break;
