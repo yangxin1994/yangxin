@@ -474,7 +474,7 @@
           if(window.data.rew_3){
             //第三个大任务充值话费已经领取
             var remain = window.data.share_num -  window.data.share_lottery_num;
-            if($.cookie('reward_4')){
+            if(window.data.lot_status[1] > 0 ){
               if(window.data.t3_status.indexOf(2) < 0){
                 $('.ball-cont').hide();
                 //已经参加了转盘抽奖
@@ -861,7 +861,7 @@
             })
             return false;
           }
-          
+
         }
         setTimeout(flyBalloon,100)
       }
