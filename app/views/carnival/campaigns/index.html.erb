@@ -673,7 +673,9 @@
                     break;
                 case -2:
                     notic.html( '<a href="/s/' + window.data.background_survey + '">需要先点亮小太阳，点击此处点亮。</a>' );
-                    rebind_click('');
+                    rebind_click('',null,function(){
+                      window.location.href = '/s/' + window.data.background_survey;
+                    });
                     break;
                 case -3:
                     if(t_type == 3){
@@ -845,7 +847,7 @@
       function flyBalloon(){
         var bg  = parseInt($('.bg4').css('background-position-y'));
         var nbg = bg - 1 + '%';
-        if (nbg >0){
+        if (nbg != 0%){
           $('.bg4').css({'background-position-y': nbg});
           var grass_top = parseInt( $('.ball-line').css('top') );
           var ngrass_top = grass_top + 10 + 'px';
@@ -858,8 +860,8 @@
             })
             return false;
           }
+          setTimeout(flyBalloon,100);
         }
-        setTimeout(flyBalloon,100)
       }
 
       setFullPage();
