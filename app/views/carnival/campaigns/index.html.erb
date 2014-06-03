@@ -811,18 +811,20 @@
 
       function flyBalloon(){
         var bg  = parseInt($('.bg4').css('background-position-y'));
-        var nbg = bg - 1 + '%'
-        $('.bg4').css({'background-position-y': nbg});
-        var grass_top = parseInt( $('.ball-line').css('top') );
-        var ngrass_top = grass_top + 10 + 'px';
-        $('.ball-line').css({'top':ngrass_top});
-
-        if(nbg == '30%'){
-          $('.ball-body').animate({'top':'-1000px'},4000,function(){
-            get_remain();
-            $('.ly-plate').fadeIn(4000,function(){})
-          })
-          return false;
+        var nbg = bg - 1 + '%';
+        if (nbg >0){
+          $('.bg4').css({'background-position-y': nbg});
+          var grass_top = parseInt( $('.ball-line').css('top') );
+          var ngrass_top = grass_top + 10 + 'px';
+          $('.ball-line').css({'top':ngrass_top});
+  
+          if(nbg == '30%'){
+            $('.ball-body').animate({'top':'-1000px'},4000,function(){
+              get_remain();
+              $('.ly-plate').fadeIn(4000,function(){})
+            })
+            return false;
+          }
         }
         setTimeout(flyBalloon,100)
       }
