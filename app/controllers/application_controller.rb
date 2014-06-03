@@ -19,7 +19,7 @@ class ApplicationController < ActionController::Base
 
     # flash.instance_variable_set('@flashes', _flashes)
     if cookies[:carnival_user_id].present?
-      @current_carnival_user = CarnivalUser.find(cookies[:carnival_user_id])
+      @current_carnival_user = CarnivalUser.where(id: cookies[:carnival_user_id]).first
     end
   end
 
