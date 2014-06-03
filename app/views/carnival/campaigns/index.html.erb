@@ -478,13 +478,31 @@
               if(window.data.t3_status.indexOf(2) < 0){
                 $('.ball-cont').hide();
                 //已经参加了转盘抽奖
+
+                var share = '<p class="share_d">分享链接,获得更多抽奖机会:</p><p class="so_share">\
+                    <a id="SinaWeibo" class="sina"></a>\
+                    <a id="TencentWeibo" class="tencent"></a>\
+                    <a id="Renren" class="renren"></a>\
+                    <a id="QQ" class="qq"></a>\
+                    <a id="Douban" class="douban"></a>\
+                    <a id="QQSpace" class="qzone"></a>\
+                    </p><p class="share_d">点击参与以下问卷,获得更多积分:</p>\
+                    <p>\
+                      <a href="/s/5389497eeb0e5b2b55000283" target="_blank">问卷吧嘉年华之月度活动（5月任务1）</a><br />\
+                      <a href="/s/5389855ceb0e5b7781000003" target="_blank">问卷吧嘉年华之月度活动（5月任务2）</a>\
+                    </p>';
+
+
+
+
+
                 if(remain <= 0){
                   //首次完成全部任务后并已经抽奖，再次来到页面
                   $("#lotteryBtn").addClass('disabled');
                   $.carnivalbox({
                     width:460,
                     title:'你已完成抽奖活动,感谢您的参与',
-                    content:'',
+                    content:share,
                     btnCont:'离开',
                     beforeshow:function(){},
                     aftershow:function(){
@@ -553,11 +571,26 @@
                 }) 
                                
               }
-
             }else{
               //第三关的话费领取完成但是还未抽奖
               get_remain();
-              $('.ly-plate').fadeIn(3000);
+              if(window.data.t3_status.indexOf(2) < 0){
+                $('.ball-cont').hide();
+                $('.ly-plate').fadeIn(3000);
+              }else{
+                $('.line-wrap .line').show();
+                $('.stack').removeClass('act');
+                $.each(window.data.t3_surveys,function(k,v){
+                  $('#' + v).find('a').attr('href','/s/' + v)
+                  if(parseInt(window.data.t3_status[k]) > 0 && parseInt(window.data.  t3_status[k]) != 2){
+                    //热气球,如果某个小任务完成,删除绳子
+                    $('#' + v).addClass('act');
+                    $('#' + v).find('a').attr('href','javascript:void(0);');
+                    $($('.line-wrap .line')[k]).hide();
+                  }
+                }) 
+              }
+              
             } 
           }else{
             //第三个大任务充值话费尚未领取
@@ -590,7 +623,6 @@
                   $($('.line-wrap .line')[k]).hide();
                 }
               }) 
-              //percentNotice(step,survey_arr,window.data.t3_status);
             }
           }
         }
@@ -618,7 +650,6 @@
 
             if(data.success){
               if(t_type == 3){
-                //$.cookie('reward_1',d.getTime(),{ expires: 10 * 365 });
                 TaskOpen('stair');
                 notic.html( '领取成功!系统审核通过后会充值到您的手机!' );
                 notic.show();
@@ -628,16 +659,15 @@
                   nextSec();
                 })
               }else if(t_type == 0){
-                //$.cookie('reward_2',d.getTime(),{ expires: 10 * 365 });
                 TaskOpen('balloon');
                 //setSection(3);
                 notic.html('恭喜您抽中了' + data.value + '系统审核后会充值到您的手机!');
                 notic.show();  
+                $('.carnival-popup a.btn').text('继续答题');
                 $('.carnival-popup a.btn').live('click',function(){
                   nextSec();
                 })                           
               }else if(t_type == 4){
-                //$.cookie('reward_3',d.getTime(),{ expires: 10 * 365 });
                 notic.html('获得了10元手机充值奖励,系统会在审核后充值到您的手机!');
                 notic.show();
                 $('.carnival-popup a.btn').text('现在去抽奖'); 
@@ -792,7 +822,7 @@
           $.carnivalbox({
             width:460,
             title:'您有答案被拒绝',
-            content: '系统发现您有问卷审核未通过,只有全部问卷审核通过才可以领取10元话费',
+            content: '系统发现您有问卷审核未通过,只有全部问卷审核通过才可以领取话费及抽奖活动',
             btnCont:'重新答题',
             aftershow:function(){
               $('.carnival-popup a.btn').live('click',function(){
@@ -853,15 +883,18 @@
           var grass_top = parseInt( $('.ball-line').css('top') );
           var ngrass_top = grass_top + 10 + 'px';
           $('.ball-line').css({'top':ngrass_top});
-  
-          if(nbg == '30%'){
+          // if(nbg == '30%'){
+          //   $('.ball-body').animate({'top':'-1000px'},4000,function(){
+          //     get_remain();
+          //     $('.ly-plate').fadeIn(4000,function(){})
+          //   })
+          //   return false;
+          // }
+        }else{
             $('.ball-body').animate({'top':'-1000px'},4000,function(){
               get_remain();
               $('.ly-plate').fadeIn(4000,function(){})
-            })
-            return false;
-          }
-
+            })          
         }
         setTimeout(flyBalloon,100)
       }
