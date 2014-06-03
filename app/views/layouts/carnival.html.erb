@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title><%= @page_title or "#{corp_name_short} | 专注网络调研 让调研更科学" %></title>
+  <title>问卷吧嘉年华 - 答题获取手机充值卡，还可以抽红米note、小米盒子、小米电源等大奖哦！你也来参加吧！</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="description" content="<%= corp_name %>网络调研/网络调查平台是专业从事网络数据产品和市场调研的第三方服务商，为您提供优质、科学、严谨的数字化调研和研究咨询服务。" />
   <meta name="Keywords" content="<%= corp_name_short %>,<%= corp_name %>,网络调查,网络调研,数字化调研,优数调研,市场调研,研究咨询,连续性调研,问卷调查" />
@@ -31,11 +31,11 @@
     // social share
     var share_href = 'http://wenjuanba.com/carnival/campaigns?i=<%= @current_carnival_user.id.to_s %>'; 
     _.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace'], $.proxy(function(v) {
-      $('#' + v).click(function() {
+      $('#' + v).live('click',function() {
         $.social['shareTo' + v](share_href + '&c=' + v, '我发现了一个好玩的活动“问卷吧嘉年华”，参加100%获得手机充值卡，还可以抽红米note、小米盒子、小米电源等大奖哦！你也来参加吧！', 'http://wenjuanba.com/assets/activities/2014-6/carnival.png');
       });
     }, this));
-    $('#QQ').click(function() {
+    $('#QQ').live('click',function() {
       $.carnivalbox({
         width:460,
         title:'分享活动链接',
