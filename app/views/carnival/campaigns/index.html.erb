@@ -847,7 +847,7 @@
       function flyBalloon(){
         var bg  = parseInt($('.bg4').css('background-position-y'));
         var nbg = bg - 1 + '%';
-        if (nbg != 0%){
+        // if (nbg >0){
           $('.bg4').css({'background-position-y': nbg});
           var grass_top = parseInt( $('.ball-line').css('top') );
           var ngrass_top = grass_top + 10 + 'px';
@@ -860,8 +860,8 @@
             })
             return false;
           }
-          setTimeout(flyBalloon,100);
-        }
+        // }
+        setTimeout(flyBalloon,100)
       }
 
       setFullPage();
