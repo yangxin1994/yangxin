@@ -469,6 +469,7 @@
         }
 
         if(step == 3){
+          setTaskThree();
           $('.section.balloon').addClass('active').siblings().removeClass('active');
           if(window.data.rew_3){
             //第三个大任务充值话费已经领取
@@ -579,8 +580,8 @@
                 }
               })
             }else{
-              setTaskThree();
-              $('.section.balloon').addClass('active').siblings().removeClass('active');
+              // setTaskThree();
+              // $('.section.balloon').addClass('active').siblings().removeClass('active');
               $.each(window.data.t3_surveys,function(k,v){
                 if(parseInt(window.data.t3_status[k]) > 0 && parseInt(window.data.t3_status[k]) != 2){
                   //热气球,如果某个小任务完成,删除绳子
