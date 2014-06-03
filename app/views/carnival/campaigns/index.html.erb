@@ -313,7 +313,15 @@
             var uri = '/s/' + window.data.t3_surveys[k];
             $(v).attr('href',uri).parent().attr('id',window.data.t3_surveys[k]);
           }
+
+           if(parseInt(window.data.t3_status[k]) > 0 && parseInt(window.data.t3_status[k])!= 0 ){
+              $('#' + window.data.t3_surveys[k]).addClass('act');
+              $('#' + window.data.t3_surveys[k]).find('a').attr('href','javascript:void(0);')
+              $($('.line-wrap .line')[k]).hide();
+           }
+
         })
+
       }
 
       //设置抽奖
