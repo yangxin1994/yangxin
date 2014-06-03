@@ -469,12 +469,12 @@
         }
 
         if(step == 3){
+          setTaskThree();
+          $('.section.balloon').addClass('active').siblings().removeClass('active');
           if(window.data.rew_3){
             //第三个大任务充值话费已经领取
-            $('.section.balloon').addClass('active').siblings().removeClass('active');
-
             var remain = window.data.share_num -  window.data.share_lottery_num;
-            if($.cookie('reward_4')){
+            if(window.data.lot_status[1] > 0 ){
               if(window.data.t3_status.indexOf(2) < 0){
                 $('.ball-cont').hide();
                 //已经参加了转盘抽奖
@@ -580,8 +580,8 @@
                 }
               })
             }else{
-              setTaskThree();
-              $('.section.balloon').addClass('active').siblings().removeClass('active');
+              // setTaskThree();
+              // $('.section.balloon').addClass('active').siblings().removeClass('active');
               $.each(window.data.t3_surveys,function(k,v){
                 if(parseInt(window.data.t3_status[k]) > 0 && parseInt(window.data.t3_status[k]) != 2){
                   //热气球,如果某个小任务完成,删除绳子
@@ -648,16 +648,21 @@
                 })
               }
             }else{
-              function rebind_click(txt,next){
+              function rebind_click(txt,next,cb){
                 txt = txt || '马上完成';
                 $('.carnival-popup .submit').text(txt)
                 $('.carnival-popup .submit').unbind('click');
-                $('.carnival-popup .submit').bind('click',function(){
-                  $.fancybox.close();
-                  if(next){
-                    $.fn.fullpage.moveSectionUp();
-                  }
-                })
+                if(cb){
+                  cb();
+                }else{
+                  $('.carnival-popup .submit').bind('click',function(){
+                    $.fancybox.close();
+                    if(next){
+                      $.fn.fullpage.moveSectionUp();
+                    }
+                  })
+                }
+
                 notic.show();
               };
 
@@ -668,7 +673,9 @@
                     break;
                 case -2:
                     notic.html( '<a href="/s/' + window.data.background_survey + '">需要先点亮小太阳，点击此处点亮。</a>' );
-                    rebind_click('');
+                    rebind_click('',null,function(){
+                      window.location.href = '/s/' + window.data.background_survey;
+                    });
                     break;
                 case -3:
                     if(t_type == 3){
@@ -697,7 +704,35 @@
                     break;
                 case -6:
                     notic.html('对不起,该手机号已经参与活动并领奖,不能重复参与!' );
-                    rebind_click('马上领取');                  
+                    rebind_click('马上领取',null,function(){
+                      $('.carnival-popup .submit').bind('click',function(){
+                        // for rewrite mobile start
+                        var phone_ipt = $('.carnival-popup form input');
+                        var sub_btn   = $('.carnival-popup a.btn');
+                        phone_ipt.live('focus',function(){
+                          $(this).removeClass('error');
+                          sub_btn.removeClass('disabled');
+                        });
+                        sub_btn.live('click',function(){
+                          if(!sub_btn.hasClass('disabled')){
+                            var phone = phone_ipt.val();
+                            if($.regex.isMobile(phone)){
+                              sub_btn.addClass('disabled');
+                              phone_ipt.removeClass('error');
+                              sub_btn.addClass('disabled');
+                              sendAjax(3,phone);                   
+                            }else{
+                              phone_ipt.addClass('error');
+                              sub_btn.removeClass('disabled');
+                            }
+                          }
+                        });
+                        // for rewrite mobile end
+                        if(next){
+                          $.fn.fullpage.moveSectionUp();
+                        }
+                      })                      
+                    });                  
                     break;
                 default:
                   break;
@@ -811,18 +846,22 @@
 
       function flyBalloon(){
         var bg  = parseInt($('.bg4').css('background-position-y'));
-        var nbg = bg - 1 + '%'
-        $('.bg4').css({'background-position-y': nbg});
-        var grass_top = parseInt( $('.ball-line').css('top') );
-        var ngrass_top = grass_top + 10 + 'px';
-        $('.ball-line').css({'top':ngrass_top});
+        var n_bg = bg - 1; 
+        var nbg = n_bg + '%';
+        if (n_bg >0){
+          $('.bg4').css({'background-position-y': nbg});
+          var grass_top = parseInt( $('.ball-line').css('top') );
+          var ngrass_top = grass_top + 10 + 'px';
+          $('.ball-line').css({'top':ngrass_top});
+  
+          if(nbg == '30%'){
+            $('.ball-body').animate({'top':'-1000px'},4000,function(){
+              get_remain();
+              $('.ly-plate').fadeIn(4000,function(){})
+            })
+            return false;
+          }
 
-        if(nbg == '30%'){
-          $('.ball-body').animate({'top':'-1000px'},4000,function(){
-            get_remain();
-            $('.ly-plate').fadeIn(4000,function(){})
-          })
-          return false;
         }
         setTimeout(flyBalloon,100)
       }
