@@ -108,6 +108,11 @@ jQuery(function($) {
                     expires: 10 * 365
                 });
 
+                var otext_f = $('.draw_remain').text().split(',')[0];
+                var otext_l = $('.draw_remain').text().split(',')[1];
+                var num = parseInt(otext_l.match(/\d+/)[0]);
+
+                $('.draw_remain').text(otext_f + ',还剩' + (num - 1) + '次')
                 var lotteryBtn = $("#lotteryBtn");
                 if (!lotteryBtn.hasClass('disabled')) {
                     $("#lotteryBtn").addClass('disabled');
