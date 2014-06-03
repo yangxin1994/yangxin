@@ -339,6 +339,18 @@ class CarnivalUser
       end
     end
 
+    s7_id = "5385982aeb0e5b7282000022"
+    if answer.survey_id.to_s == s7_id
+      # 1. B5-B7只针对女性
+      qid = "538591f8eb0e5b7282000009"
+      if pre_survey_answer.answer_content[qid]["selection"].include?(9735976263679518)
+        # male, hide B5-B7
+        ["5385982beb0e5b7282000043", "5385982beb0e5b7282000044", "5385982beb0e5b7282000045"].each do |qid|
+          answer.answer_content[qid] = {}
+        end
+      end
+    end
+
     answer.save
   end
 
