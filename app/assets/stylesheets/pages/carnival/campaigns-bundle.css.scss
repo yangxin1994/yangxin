@@ -61,6 +61,32 @@ a{
 	text-align: center;
 	cursor: default;
 	@include border-radius(4px);
+	.so_share{
+		a{
+			display:inline-block;
+			width:45px;
+			height:45px;
+			&.sina{
+				@include ferris-sprite(sina);
+			}
+			&.qq{
+				@include ferris-sprite(qq);
+			}
+			&.tencent{
+				@include ferris-sprite(tencent);
+			}
+			&.douban{
+				@include ferris-sprite(douban);
+			}
+			&.renren{
+				@include ferris-sprite(renren);
+			}
+			&.qzone{
+				@include ferris-sprite(qzone);
+			}
+
+		}
+	}
   .notic{
     display:none;
     position:absolute;
@@ -94,6 +120,10 @@ a{
 		margin-top:10px;
 		b{
 			color:#52ACEF;
+		}
+		&.share_d{
+			text-align: left;
+			font-weight: bold;
 		}
 	}
 	.btn{

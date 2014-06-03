@@ -137,6 +137,19 @@ jQuery(function($) {
                                 }
                             }
 
+                            var share = '<p class="share_d">分享链接,获得更多抽奖机会:</p><p class="so_share">\
+                    <a id="SinaWeibo" class="sina"></a>\
+                    <a id="TencentWeibo" class="tencent"></a>\
+                    <a id="Renren" class="renren"></a>\
+                    <a id="QQ" class="qq"></a>\
+                    <a id="Douban" class="douban"></a>\
+                    <a id="QQSpace" class="qzone"></a>\
+                    </p><p class="share_d">点击参与以下问卷,获得更多积分:</p>\
+                    <p>\
+                      <a href="/s/5389497eeb0e5b2b55000283" target="_blank">问卷吧嘉年华之月度活动（5月任务1）</a><br />\
+                      <a href="/s/5389855ceb0e5b7781000003" target="_blank">问卷吧嘉年华之月度活动（5月任务2）</a>\
+                    </p>';
+
                             if (data.success) {
                                 window.data.share_lottery_num += 1;
                                 setDisabled();
@@ -152,15 +165,21 @@ jQuery(function($) {
 
                                 if (data.value == window.data.priz_1) {
                                     rotateFunc(1, 157, function() {
-                                        showNotice(title, content);
+                                        showNotice(title, content, function() {
+                                            //share.appendTo()
+                                        });
                                     });
                                 } else if (data.value == window.data.priz_2) {
                                     rotateFunc(2, 247, function() {
-                                        showNotice(title, content);
+                                        showNotice(title, content, function() {
+
+                                        });
                                     });
                                 } else if (data.value == window.data.priz_3) {
                                     rotateFunc(3, 22, function() {
-                                        showNotice(title, content);
+                                        showNotice(title, content, function() {
+
+                                        });
                                     });
                                 }
 
@@ -205,6 +224,9 @@ jQuery(function($) {
                                         setDisabled();
 
                                         title = '对不起,您本次没有抽中!';
+                                        var cb = function() {
+                                            $(share).insertBefore('a.submit');
+                                        }
                                         break;
                                     case -6:
                                         title = '对不起,该手机号已经参与活动并领奖，不能重复参与!'
@@ -216,7 +238,7 @@ jQuery(function($) {
                                         break;
                                 }
                                 timeOut(function() {
-                                    showNotice(title, content);
+                                    showNotice(title, content, cb);
                                 })
                             }
                         })
@@ -232,12 +254,18 @@ jQuery(function($) {
     });
 
 
-    var showNotice = function(title, content) {
+    var showNotice = function(title, content, cb) {
         $.carnivalbox({
             width: 460,
             title: title,
             content: content,
             btnCont: '我知道了',
+            beforeshow: function() {
+                if (cb) {
+                    cb();
+                }
+
+            },
             aftershow: function() {
                 $('.carnival-popup a.btn').live('click', function() {
                     $.fancybox.close();
