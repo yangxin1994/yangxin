@@ -200,18 +200,6 @@ class CarnivalUser
         o2.pass if o2.present?
       end
     end
-
-    # give introducer lottery chance
-    if (self.survey_status & [NOT_EXIST, REJECT, UNDER_REVIEW]).blank? && self.introducer_id.present? && !self.introducer_reward_assigned
-      introducer = CarnivalUser.find(self.introducer_id)
-      introducer.share_num += 1
-      introducer.save
-      self.introducer_reward_assigned = true
-      self.save
-      # create log
-      carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE, prize_name: "一次抽大奖机会")
-      introducer.carnival_logs << carnival_log
-    end
   end
 
   def fill_answer(answer)
@@ -414,7 +402,35 @@ class CarnivalUser
     # create log
     carnival_log = CarnivalLog.create(type: CarnivalLog::STAGE_1, prize_name: "10元充值卡")
     self.carnival_logs << carnival_log
+
+    # give introducer lottery chance
+    if self.introducer_id.present? && !self.introducer_reward_assigned
+      introducer = CarnivalUser.find(self.introducer_id)
+      introducer.share_num += 1
+      introducer.save
+      self.introducer_reward_assigned = true
+      self.save
+      # create log
+      carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE, prize_name: "一次抽大奖机会")
+      introducer.carnival_logs << carnival_log
+    end
+
     return "10元充值卡"
+  end
+
+  def self.assign_share_lottery
+    CarnivalUser.all.each do |c|
+      if c.introducer_id.present? && !c.introducer_reward_assigned && c.mobile.present?
+        introducer = CarnivalUser.find(self.introducer_id)
+        introducer.share_num += 1
+        introducer.save
+        self.introducer_reward_assigned = true
+        self.save
+        # create log
+        carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE, prize_name: "一次抽大奖机会")
+        introducer.carnival_logs << carnival_log
+      end
+    end
   end
 
   def create_third_stage_mobile_order
