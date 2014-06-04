@@ -60,6 +60,7 @@ class Carnival::CampaignsController < Carnival::CarnivalController
     end
     
 
+
     #三种话费的抽奖 
     #lottery_status
     #第一个元素代表话费的抽奖,1表示已经抽过奖,0表示没有抽过奖
@@ -77,6 +78,13 @@ class Carnival::CampaignsController < Carnival::CarnivalController
     if @rew_3.present?
       @rew_3_name = @rew_3.amount
     end
+
+    @charged_amount = [
+      @current_carnival_user.carnival_orders.where(type: CarnivalOrder::STAGE_1).first.try(:charged).to_i,
+      @current_carnival_user.carnival_orders.where(type: CarnivalOrder::STAGE_2).first.try(:charged).to_i,
+      @current_carnival_user.carnival_orders.where(type: CarnivalOrder::STAGE_3).first.try(:charged).to_i,
+    ]
+
 
     @obj = {
       pre_status:@current_carnival_user.pre_survey_status,
@@ -106,7 +114,8 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       #第一个元素代表话费的抽奖,1表示已经抽过奖,0表示没有抽过奖
       #第二个元素代表抽大奖,1表示已经抽过,0表示没有抽过
       lot_status:@current_carnival_user.lottery_status, 
-      mobile:@current_carnival_user.mobile #手机号
+      mobile:@current_carnival_user.mobile, #手机号
+      charged_amount: @charged_amount
     }
 
     return @obj 

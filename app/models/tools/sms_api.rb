@@ -74,7 +74,7 @@ class SmsApi # 短信接口
     puts phone
     puts message
     puts "AAAAAAAAAAAAAA"
-    return if Rails.env == "production"
+    return if Rails.env != "production"
     seqid = Random.rand(10000..9999999999999999).to_i
 
     result = get('/sdkproxy/sendsms.action',
@@ -226,9 +226,6 @@ class SmsApi # 短信接口
   end
 
   def self.charge_confirm_sms(type, mobile, callback, opt)
-    puts "CCCCCCCCCCCCCCCC"
-    puts opt.inspect
-    puts "CCCCCCCCCCCCCCCC"
     @gift_name = opt["gift_name"].to_s
     text_template_file_name = "#{Rails.root}/app/views/sms_text/charge_confirm_sms.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
@@ -237,6 +234,10 @@ class SmsApi # 短信接口
   end
 
   def self.carnival_re_invitation(type, mobile, callback, opt)
+    answer_id = opt["answer_id"]
+    @answer_link = "#{Rails.application.config.quillme_host}/a/#{answer_id}"
+    @answer_link = Rails.application.config.quillme_host + "/" + MongoidShortener.generate(@answer_link)
+
     text_template_file_name = "#{Rails.root}/app/views/sms_text/carnival_re_invitation.text.erb"
     text_template = ERB.new(File.new(text_template_file_name).read, nil, "%")
     text = text_template.result(binding)
