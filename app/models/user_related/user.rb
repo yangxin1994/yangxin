@@ -76,6 +76,7 @@ class User
   field :level, :type => Integer, default: 0
   field :level_expire_time, :type => Integer, default: -1
   field :point, :type => Integer, :default => 0
+  field :carnival_email_sent, :type => Boolean, default: false
 
 
   has_and_belongs_to_many :messages, class_name: "Message", inverse_of: :receiver

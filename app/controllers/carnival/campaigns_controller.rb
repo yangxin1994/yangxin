@@ -52,6 +52,11 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       @rew_2_result  = rew_2.status   
     end  
 
+    @charged_amount = [
+      @current_carnival_user.carnival_orders.where(type: CarnivalOrder::STAGE_1).first.try(:charged).to_i,
+      @current_carnival_user.carnival_orders.where(type: CarnivalOrder::STAGE_2).first.try(:charged).to_i,
+      @current_carnival_user.carnival_orders.where(type: CarnivalOrder::STAGE_3).first.try(:charged).to_i,
+    ]
 
     @obj = {
       pre_status:@current_carnival_user.pre_survey_status,
@@ -78,7 +83,8 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       rew_2_name:@rew_2_name,
       rew_3:@current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_3]).present?,
       lot_status:@current_carnival_user.lottery_status,
-      mobile:@current_carnival_user.mobile
+      mobile:@current_carnival_user.mobile,
+      charged_amount: @charged_amount
     }
 
     return @obj 
