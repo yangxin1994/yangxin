@@ -404,15 +404,19 @@ class CarnivalUser
     self.carnival_logs << carnival_log
 
     # give introducer lottery chance
-    if self.introducer_id.present? && !self.introducer_reward_assigned
-      introducer = CarnivalUser.find(self.introducer_id)
-      introducer.share_num += 1
-      introducer.save
+    if self.introducer_id.to_s.utf8!.present? && !self.introducer_reward_assigned
+      introducer = CarnivalUser.where(id: self.introducer_id.to_s.utf8!).first
+      if introducer.present?
+        introducer.share_num += 1
+        introducer.save
+      end
       self.introducer_reward_assigned = true
       self.save
       # create log
-      carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE, prize_name: "一次抽大奖机会")
-      introducer.carnival_logs << carnival_log
+      if introducer.present?
+        carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE, prize_name: "一次抽大奖机会")
+        introducer.carnival_logs << carnival_log
+      end
     end
 
     return "10元充值卡"
@@ -420,15 +424,18 @@ class CarnivalUser
 
   def self.assign_share_lottery
     CarnivalUser.all.each do |c|
-      if c.introducer_id.present? && !c.introducer_reward_assigned && c.mobile.present?
-        introducer = CarnivalUser.find(self.introducer_id)
-        introducer.share_num += 1
-        introducer.save
-        self.introducer_reward_assigned = true
-        self.save
+      puts c.id.to_s
+      if c.introducer_id.to_s.utf8!.present? && !c.introducer_reward_assigned && c.mobile.present?
+        introducer = CarnivalUser.where(id: c.introducer_id.to_s.utf8!).first
+        if introducer.present?
+          introducer.share_num += 1
+          introducer.save
+        end
+        c.introducer_reward_assigned = true
+        c.save
         # create log
         carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE, prize_name: "一次抽大奖机会")
-        introducer.carnival_logs << carnival_log
+        introducer.carnival_logs << carnival_log if introducer.present?
       end
     end
   end
