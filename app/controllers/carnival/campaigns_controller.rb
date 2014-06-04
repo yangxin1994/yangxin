@@ -58,6 +58,11 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       @current_carnival_user.carnival_orders.where(type: CarnivalOrder::STAGE_3).first.try(:charged).to_i,
     ]
 
+    @answer_order = @current_carnival_user.survey_order.map do |e|
+      a = @current_carnival_user.answers.where(survey_id: e).first
+      a.present? ? a.id.to_s : ""
+    end
+
     @obj = {
       pre_status:@current_carnival_user.pre_survey_status,
       step:step,
@@ -84,7 +89,8 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       rew_3:@current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_3]).present?,
       lot_status:@current_carnival_user.lottery_status,
       mobile:@current_carnival_user.mobile,
-      charged_amount: @charged_amount
+      charged_amount: @charged_amount,
+      answer_order: @answer_order
     }
 
     return @obj 
