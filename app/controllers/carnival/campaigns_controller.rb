@@ -86,7 +86,7 @@ class Carnival::CampaignsController < Carnival::CarnivalController
     ]
 
     
-    @charged_amount = [10,100,10]
+    #@charged_amount = [10,100,10]
 
 
     @obj = {

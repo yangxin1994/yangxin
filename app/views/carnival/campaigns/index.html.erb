@@ -260,15 +260,23 @@
       function setTaskTwo(){
         setTaskOne();
         fireUpBackground($('.section.stair'));
-        if(parseInt(window.data.lot_status[0]) > 0){
-          if(window.data.rew_2_name){
-            $('#task_two_text').text('恭喜您抽中了' + window.data.rew_2_name + '元话费充值,系统会在问卷审核通过后充值到您的手机');
-          }else{
-            $('#task_two_text').text('抱歉，您没有抽中任何面值的话费充值');
-          }  
-          
-        }
-
+        if(window.data.t2_status.indexOf(2) >= 0){
+          $('#task_two_text').text('您在该任务中有问卷被拒绝,须所有问卷都审核通过后才可获得抽奖所得的话费');
+        }else{
+          if(parseInt(window.data.lot_status[0]) > 0){
+            //已经点击领取了
+            if(parseInt(window.data.charged_amount[1]) > 0){
+              $('#task_two_text').text('恭喜您,我们已将' + window.data.charged_amount[1] + '元话费充值到您的手机('+ window.data.mobile +')中');
+            }else{
+              if(window.data.rew_2_name){
+                $('#task_two_text').text('恭喜您完成摩天轮关卡,系统会在审核后将' + window.data.rew_2_name + '元话费充值到您的手机('+ window.data.mobile + ')');
+              }else{
+                $('#task_two_text').text('抱歉，您没有抽中任何面值的话费充值');
+              }
+                
+            } 
+          }         
+        } 
 
         $('#task_two_ask').hide();
         $('#task_two_text').show();
@@ -783,7 +791,7 @@
 
       //驱动升降机
       function turnStair(){
-        if(window.data.t2_status.indexOf(0) < 0 && window.data.t2_status.indexOf(2)){
+        if(window.data.t2_status.indexOf(0) < 0 && window.data.t2_status.indexOf(2) < 0){
             $('.happy').addClass('act');
             $('.sbottom').addClass('act');
             $('.happy').animate({'bottom':'322px'},3000,function(){
@@ -800,7 +808,7 @@
       //转动摩天轮
       function turnWheel(){
         var wheel = $('.section.wheel');
-        if(window.data.t1_status.indexOf(0) < 0 && window.data.t1_status.indexOf(2)){
+        if(window.data.t1_status.indexOf(0) < 0 && window.data.t1_status.indexOf(2) < 0){
           wheel.find('a').hide();
           wheel.find('span').show();
           flash = wheel.find('.ferris');
