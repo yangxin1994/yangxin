@@ -442,6 +442,11 @@ class CarnivalUser
     self.lottery_status[1] = REWARD_EXIST
     self.save
 
+    # for test start =============
+    return CarnivalPrize.draw
+
+    #for test  end   =============
+
     ### draw
     prize = CarnivalPrize.draw
     return UNLUCKY if prize.blank?

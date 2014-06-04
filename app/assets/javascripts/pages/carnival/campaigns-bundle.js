@@ -153,12 +153,6 @@ jQuery(function($) {
                                 window.data.share_lottery_num += 1;
                                 setDisabled();
 
-                                var priz_obj = {
-                                    1: window.data.priz_1,
-                                    2: window.data.priz_2,
-                                    3: window.data.priz_3
-                                }
-
                                 title = '恭喜您中奖了!'
                                 content = '恭喜您抽中了' + data.value + '我们会在问卷审核通过后联系您!'
 
@@ -181,7 +175,6 @@ jQuery(function($) {
                                         });
                                     });
                                 }
-
                             } else {
                                 var code;
                                 if (typeof(data.value.error_code) == 'number') {

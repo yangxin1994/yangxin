@@ -1103,11 +1103,30 @@ to{transform: rotate(359deg)}
 	background:#A2CA81 url('/assets/activities/2014-6/ferris/bg4.png') no-repeat center 110%;
 }
 
+// @media (max-width:1000px)and(max-height:800px){
+// 	.door-box{
+// 		margin-top:0px;
+// 	}
+// 	.ferris-wheel{
+// 		top:200px;
+// 	}
+// }
+
 @media (max-width:1000px)and(max-height:800px){
-	.door-box{
-		margin-top:0px;
+	html{
+		width:1100px;
 	}
-	.ferris-wheel{
-		top:200px;
+	#ferris-wheel{
+		top:40px;
 	}
 }
+@media (max-width:768px){
+	body{
+		width:1100px;
+	}
+	#ferris-wheel{
+		top:40px;
+	}
+}
+
+
