@@ -85,6 +85,9 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       @current_carnival_user.carnival_orders.where(type: CarnivalOrder::STAGE_3).first.try(:charged).to_i,
     ]
 
+    
+    @charged_amount = [10,100,10]
+
 
     @obj = {
       pre_status:@current_carnival_user.pre_survey_status,

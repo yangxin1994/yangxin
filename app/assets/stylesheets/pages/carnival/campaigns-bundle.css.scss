@@ -265,14 +265,14 @@ a{
 				}
 			}
 			&.five{
-				width:40px;
-				height:40px;
+				width:76px;
+				height:76px;
 				display: block;
 				position: absolute;
 				@include ferris-sprite(five);
 				z-index: 100;
-				top:156px;
-				left:156px;
+				top:138px;
+				left:138px;
 				&.act{
 					cursor: default;
 				}
@@ -1111,6 +1111,9 @@ to{transform: rotate(359deg)}
 // 		top:200px;
 // 	}
 // }
+
+
+
 
 @media (max-width:1000px)and(max-height:800px){
 	html{
