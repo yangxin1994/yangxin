@@ -6,16 +6,9 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       set_carnival_user_cookie(@current_carnival_user.id.to_s)
     end
 
-    Rails.logger.info('--------------------------------------')
-    Rails.logger.info(@current_carnival_user.inspect)
-    Rails.logger.info('--------------------------------------')
-
     pre_survey = Carnival::PRE_SURVEY
 
     background_survey = Carnival::BACKGROUND_SURVEY
-
-
-    
 
     if !@current_carnival_user.reward_scheme_order.nil?
       surveys = @current_carnival_user.reward_scheme_order.each_slice(5).to_a
@@ -85,8 +78,6 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       @current_carnival_user.carnival_orders.where(type: CarnivalOrder::STAGE_3).first.try(:charged).to_i,
     ]
 
-    
-    #@charged_amount = [10,100,10]
 
 
     @obj = {
