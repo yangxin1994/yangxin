@@ -78,11 +78,19 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       @current_carnival_user.carnival_orders.where(type: CarnivalOrder::STAGE_3).first.try(:charged).to_i,
     ]
 
+    @answer_order = @current_carnival_user.survey_order.map do |e|
+      a = @current_carnival_user.answers.where(survey_id: e).first
+      a.present? ? a.id.to_s : ""
+    end
+
+    answer_orders = @answer_order.each_slice(5).to_a
+
 
 
     @obj = {
       pre_status:@current_carnival_user.pre_survey_status,
       step:step,
+      all_status:step_arr,
       pre_survey:Carnival::PRE_SURVEY_REWARD_SCHEME,
       background_survey:Carnival::BACKGROUND_SURVEY_REWARD_SCHEME,
       background_survey_status:@current_carnival_user.background_survey_status,
@@ -92,6 +100,9 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       t1_status:step_arr[0],#第一关的五个问卷的答题状态
       t2_status:step_arr[1],#第二关的五个问卷的答题状态
       t3_status:step_arr[2],#第三关的五个问卷的答题状态
+      t1_answers:answer_orders[0],#第一关的某个问卷是否存在继续答题的情况
+      t2_answers:answer_orders[1],#第二关的某个问卷是否存在继续答题的情况
+      t3_answers:answer_orders[2],#第三关的某个问卷是否存在继续答题的情况
       priz_1:CarnivalPrize.where(name: "红米note").first.name,
       priz_2:CarnivalPrize.where(name: "小米盒子").first.name,
       priz_3:CarnivalPrize.where(name: "小米移动电源").first.name,
@@ -109,9 +120,9 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       #第二个元素代表抽大奖,1表示已经抽过,0表示没有抽过
       lot_status:@current_carnival_user.lottery_status, 
       mobile:@current_carnival_user.mobile, #手机号
-      charged_amount: @charged_amount
+      charged_amount: @charged_amount,
+      answer_order: @answer_order
     }
-
     return @obj 
   end
 

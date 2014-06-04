@@ -104,6 +104,7 @@ jQuery(function($) {
         bind: {
             click: function() {
                 if (!$("#lotteryBtn").hasClass('disabled')) {
+
                     var d = new Date();
                     $.cookie('reward_4', d.getTime(), {
                         expires: 10 * 365
@@ -205,7 +206,7 @@ jQuery(function($) {
                                         }
 
                                         $('.carnival-popup .submit').text('马上完成')
-                                        $('.carnival-popup .submit').unbind('click');
+                                        $('.carnival-popup .submit').die('click');
                                         $('.carnival-popup .submit').bind('click', function() {
                                             $.fancybox.close();
                                         })
