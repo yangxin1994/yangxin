@@ -490,7 +490,8 @@ $(function() {
             } else if (value.answer_status == 16) {
                 // 重答
                 this.hbs({
-                    title: this.model.get('title')
+                    title: this.model.get('title'),
+                    audit_message: value.answer_audit_message
                 }, 'survey_filler_redo').appendTo($('#f_body'));
                 var redo_btn = $('#redo_btn').click($.proxy(function() {
                     redo_btn.attr('disabled', 'disabled').text('正在准备重新答题...');
