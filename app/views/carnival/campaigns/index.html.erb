@@ -304,21 +304,27 @@
       //设置第三个大任务
       function setTaskThree(){
         setTaskTwo();
-        if(parseInt(window.data.lot_status[1]) > 0){
 
-          if(window.own){
-            $('#task_three_text').text('恭喜您抽中了' + window.data.prize_name + '系统会在问卷审核通过后与您联系')
-          }else{
-            $('#task_three_text').text('抱歉，您没有抽中任何奖品');
-          }
-
+        if(window.data.t3_status.indexOf(2) >= 0){
+          $('#task_three_text').text('您在该任务中有问卷被拒绝,须所有问卷都审核通过后才可获得抽奖所得的话费');
         }else{
-          if(window.rew_3){
-              $('#task_three_text').text('恭喜您获得了10元话费，我们会在问卷审核后充值到您的手机');
+          if(parseInt(window.data.lot_status[1]) > 0){
+            if(window.own){
+              $('#task_three_text').text('恭喜您抽中了' + window.data.prize_name + '  系统会在问卷审核通过后与您联系')
+            }else{
+              $('#task_three_text').text('抱歉，您没有抽中任何奖品');
+            }
+          }else{
+            if(window.data.rew_3_name){
+              //已经点击领取了
+              if(parseInt(window.data.charged_amount[2]) > 0){
+                $('#task_three_text').text('恭喜您,我们已将10元话费充值到您的手机('+   window.data.mobile +')中');
+              }else{
+                $('#task_three_text').text('  恭喜您获得了10元话费奖励,系统会在问卷审核通过后将10元话费充值到您的手机('+   window.data.mobile + ')中');  
+              } 
+            }  
           }
-        }
-
-
+        } 
 
 
         fireUpBackground($('.section.balloon'));
@@ -526,7 +532,10 @@
                         $.fancybox.close();
                       });
                     }
-                  }) 
+                  });
+
+                  $(share).insertBefore('a.submit');
+
                 }else{
                   //已经完成了转盘抽奖,但是可以重复抽奖
                   if(window.data.own){
@@ -564,7 +573,8 @@
                         
                       });
                     }
-                  })
+                  });
+                  $(share).insertBefore('a.submit');
                 }
 
               }else{

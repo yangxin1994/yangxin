@@ -56,7 +56,7 @@ class Carnival::CampaignsController < Carnival::CarnivalController
     #抽中大奖的奖品名称
     @lot = @current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_3_LOTTERY, CarnivalOrder::SHARE]).first 
     if @lot.present?
-      @priz_name = @lot.carnival_orders.last.carnival_prize.try(:name)  
+      @priz_name = @lot.carnival_prize.name  
     end
     
 
