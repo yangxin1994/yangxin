@@ -6,8 +6,8 @@ class MailgunApi
   @@survey_email_from = "\"问卷吧\" <postmaster@wenjuanba.net>"
   @@user_email_from = "\"问卷吧\" <postmaster@wenjuanba.cn>"
 
-  def self.batch_send_carnival_email
-    @emails = (User.all.select { |e| e.email.present? } ).map { |e| e.email }
+  def self.batch_send_carnival_email(number)
+    @emails = (User.all.select { |e| e.email.present? && !e.carnival_email_sent } )[0..number - 1].map { |e| e.email }
     # @emails = ["jesse.yang1985@gmail.com", "yangzexi@126.com"]
     group_size = 900
     # @group_emails = @emails.each_slice(group_size).to_a
@@ -34,6 +34,13 @@ class MailgunApi
     html_template_file_name = "#{Rails.root}/app/views/survey_mailer/carnival_email.html.erb"
     html_template = ERB.new(File.new(html_template_file_name).read, nil, "%")
     premailer = Premailer.new(html_template.result(binding), :warn_level => Premailer::Warnings::SAFE)
+
+    @group_emails.each do |emails|
+      emails.each do |e|
+        u = User.find_by_email(e)
+        u.update_attributes(carnival_email_sent: true) if u.present?
+      end
+    end
 
     @group_emails.each_with_index do |emails, i|
       data = {}
