@@ -262,14 +262,14 @@ a{
 				}
 			}
 			&.five{
-				width:40px;
-				height:40px;
+				width:76px;
+				height:76px;
 				display: block;
 				position: absolute;
 				@include ferris-sprite(five);
 				z-index: 100;
-				top:156px;
-				left:156px;
+				top:138px;
+				left:138px;
 				&.act{
 					cursor: default;
 				}
@@ -1100,11 +1100,30 @@ to{transform: rotate(359deg)}
 	background:#A2CA81 url('/assets/activities/2014-6/ferris/bg4.png') no-repeat center 110%;
 }
 
+// @media (max-width:1000px)and(max-height:800px){
+// 	.door-box{
+// 		margin-top:0px;
+// 	}
+// 	.ferris-wheel{
+// 		top:200px;
+// 	}
+// }
+
 @media (max-width:1000px)and(max-height:800px){
-	.door-box{
-		margin-top:0px;
+	html{
+		width:1100px;
 	}
-	.ferris-wheel{
-		top:200px;
+	#ferris-wheel{
+		top:40px;
 	}
 }
+@media (max-width:768px){
+	body{
+		width:1100px;
+	}
+	#ferris-wheel{
+		top:40px;
+	}
+}
+
+
