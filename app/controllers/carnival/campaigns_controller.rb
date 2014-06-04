@@ -15,21 +15,43 @@ class Carnival::CampaignsController < Carnival::CarnivalController
     background_survey = Carnival::BACKGROUND_SURVEY
 
 
+    
+
     if !@current_carnival_user.reward_scheme_order.nil?
       surveys = @current_carnival_user.reward_scheme_order.each_slice(5).to_a
     end
 
     step_arr = @current_carnival_user.survey_status.each_slice(5).to_a
 
+    #是否领取了第一关10元话费充值
+    @rew_1 = @current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_1]).first
+
     step = 0
-    #根据status的的数据情况来判断是第几关
-    if (step_arr[2].include?(CarnivalUser::UNDER_REVIEW) || step_arr[2].include?(CarnivalUser::UNDER_REVIEW) || step_arr[2].include?(CarnivalUser::FINISH) )
-      step = 3
-    elsif (step_arr[1].include?(CarnivalUser::UNDER_REVIEW) || step_arr[1].include?(CarnivalUser::UNDER_REVIEW) || step_arr[1].include?(CarnivalUser::FINISH) )  
-      step = 2
-    elsif (step_arr[0].include?(CarnivalUser::UNDER_REVIEW) || step_arr[0].include?(CarnivalUser::UNDER_REVIEW) || step_arr[0].include?(CarnivalUser::FINISH) )
+
+    #如果预调研通过,则进入第一关
+    if @current_carnival_user.pre_survey_status.to_i == 32
       step = 1
     end
+
+    #如果领取了第一关的话费奖励,则进入到第二关
+    if @rew_1.present?
+      step = 2
+    end
+
+    #如果第二关已经抽奖,则进入到第三关
+    if @current_carnival_user.lottery_status[0] > 0
+      step = 3
+    end
+
+    # step = 0
+    # #根据status的的数据情况来判断是第几关
+    # if (step_arr[2].include?(CarnivalUser::UNDER_REVIEW) || step_arr[2].include?(CarnivalUser::HIDE) || step_arr[2].include?(CarnivalUser::FINISH) )
+    #   step = 3
+    # elsif (step_arr[1].include?(CarnivalUser::UNDER_REVIEW) || step_arr[1].include?(CarnivalUser::HIDE) || step_arr[1].include?(CarnivalUser::FINISH) )  
+    #   step = 2
+    # elsif (step_arr[0].include?(CarnivalUser::UNDER_REVIEW) || step_arr[0].include?(CarnivalUser::HIDE) || step_arr[0].include?(CarnivalUser::FINISH) )
+    #   step = 1
+    # end
 
     #抽中大奖的奖品名称
     @lot = @current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_3_LOTTERY, CarnivalOrder::SHARE]).first 
@@ -77,7 +99,7 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       own:@lot.present?,#是否有抽中大奖
       prize_name:@priz_name,#抽中大奖的名称
       #是否领取了第一关的10块钱充值
-      rew_1:@current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_1]).present?,
+      rew_1:@rew_1.present?,
       rew_2_name:@rew_2_name,#三种话费抽奖,如果抽中，抽中的面值
       rew_3:@rew_3.present?,#是否领取了第三关的10块钱充值
       rew_3_name:@rew_3_name,#第三关的充值面额

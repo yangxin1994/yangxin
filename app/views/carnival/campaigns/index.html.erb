@@ -48,9 +48,9 @@
 
 
       //如果拿到票后刷新页面，直接进入第一个任务
-      if( $.cookie('ticket') && window.current_step == 0){
-        window.current_step = 1; 
-      }
+      // if( $.cookie('ticket') && window.current_step == 0){
+      //   window.current_step = 1; 
+      // }
 
       //已经领取第一关的手机充值,再次进入页面的时候直接进入下一个场景
       if(window.data.rew_1){
@@ -89,30 +89,32 @@
           $('.door > a.start').remove();
           // get ticket
           if(window.current_step){
-            //每个小任务(及每个大任务)完成后的跳转页面
-            setSection(window.current_step);
-            
-            turnStair();
-            
-            turnWheel();
-            
-            openDoor(false);
-          }else{
-            //预调研通过,通知领取门票,并进入下一个任务
-            $.carnivalbox({
-              width:460,
-              title:'已获得门票',
-              content:'',
-              btnCont:'立即前往',
-              aftershow:function(){
-                $('.carnival-popup a.btn').live('click',function(){
-                  $.fancybox.close();openDoor
-                  openDoor(true);
-                })
-              }
-            })
+            if($.cookie('ticket')){
+              //每个小任务(及每个大任务)完成后的跳转页面
+              setSection(window.current_step);
+              
+              turnStair();
+              
+              turnWheel();
+              
+              openDoor(false);  
+            }else{
+              //预调研通过,通知领取门票,并进入下一个任务
+              $.carnivalbox({
+                width:460,
+                title:'已获得门票',
+                content:'',
+                btnCont:'立即前往',
+                aftershow:function(){
+                  $('.carnival-popup a.btn').live('click',function(){
+                    $.fancybox.close();
+                    openDoor(true);
+                  })
+                }
+              })            
+            }
           }
-        } 
+        }
       }
 
 
@@ -124,6 +126,7 @@
 
       //set full page
       function setFullPage() {
+          console.log('1111111111')
           $('.fullPage').fullpage({
               verticalCentered: true,
               slidesColor: ['#eff2c9', '#eff2c9', '#eff2c9', '#eff2c9'],
@@ -132,10 +135,10 @@
               autoScrolling: false
           })
       }
-    
       //up step
       //function foraward(prev_bottom,target_bottom,top){
       function foraward(){
+        console.log('22222222222222')
         $('.happy').addClass('act');
         $('.sbottom').addClass('act');
         $('.happy').animate({'bottom':'322px'},3000,function(){
@@ -148,6 +151,7 @@
 
       //down step
       function fallback(){
+        console.log('333333333333333333')
         $('.happy').animate({'bottom':'35px'},3000,function(){
           $.carnivalbox({
             width:460,
@@ -183,6 +187,7 @@
 
       //set section
       function setSection(step){
+        console.log('444444444444444')
         var step = parseInt(step,10);
         if(step == 1){
           $('.section.wheel').addClass('active').siblings().removeClass('active');
@@ -198,6 +203,7 @@
 
       // open door
       function openDoor(move){
+        console.log('55555555555555')
         TaskOpen('wheel');// start the wheel section
         $('.door .left').animate({'left':'-175px'},3000,function(){});
         $('.door .right').animate({'right':'-148px'},3000,function(){
@@ -211,6 +217,7 @@
 
       // open task完成上一个任务后设置下一个任务
       function TaskOpen(flag){
+        console.log('66666666666666')
         switch(flag){
         case 'wheel':
           setTaskOne();
@@ -229,6 +236,7 @@
 
       //设置第一个大任务
       function setTaskOne(){
+        console.log('7777777777777')
         fireUpBackground($('.section.wheel'));
         if(window.data.rew_1){  
           $('#task_one_text').text('恭喜您完成摩天轮关卡,系统会在审核后将10元话费充值到您的手机('+ window.data.mobile + ')')
@@ -259,6 +267,7 @@
 
       //设置第二个大任务
       function setTaskTwo(){
+        console.log('8888888888888888888')
         setTaskOne();
         fireUpBackground($('.section.stair'));
         if(parseInt(window.data.lot_status[0]) > 0){
@@ -296,6 +305,7 @@
 
       //设置第三个大任务
       function setTaskThree(){
+        console.log('999999999999999999')
         setTaskTwo();
         if(parseInt(window.data.lot_status[1]) > 0){
 
@@ -336,12 +346,13 @@
 
       //设置抽奖
       function setTaskFour(){
+        console.log('10')
         //setTaskThree();
       }
 
       //答题跳转回来用
       function setTaskDetail(step,content){
-
+        console.log('11')
         fireUpBackground(content);
         switch(step){
         case 1:
@@ -360,11 +371,13 @@
 
       //点亮不同场景的背景颜色
       function fireUpBackground(secContent){
+        console.log('12')
         // do something
       }
 
       // 获取剩余抽奖机会
       function get_remain(){
+        console.log('13')
         if(window.data.share_lottery_num == 0 && window.data.share_num == 0){
           //第一次抽奖且没有分享过,只有一次抽奖机会
           if(window.data.lot_status[1] > 0){
@@ -406,7 +419,7 @@
 
       //标识某个问卷是否已经回答完毕
       function flagSurvey(step,survey_arr,status_arr){
-
+        console.log('14')
         //for test
         switch(step){
         case 1:
@@ -646,6 +659,7 @@
       //mobile 手机号
       //数量
       function sendAjax(t_type,phone,num){
+        console.log('15')
         var url = '/carnival/users/draw_lottery';
         $.post(url,
           {mobile: phone, 
@@ -786,6 +800,7 @@
 
       //驱动升降机
       function turnStair(){
+        console.log('16')
         if(window.data.t2_status.indexOf(0) < 0 && window.data.t2_status.indexOf(2)){
             $('.happy').addClass('act');
             $('.sbottom').addClass('act');
@@ -802,6 +817,7 @@
 
       //转动摩天轮
       function turnWheel(){
+        console.log('17')
         var wheel = $('.section.wheel');
         if(window.data.t1_status.indexOf(0) < 0 && window.data.t1_status.indexOf(2)){
           wheel.find('a').hide();
@@ -814,6 +830,7 @@
 
       //给气球点火
       function makeFire(){
+        console.log('18')
         var umbrella = $('.umbrella');
         var basket = $('.basket');
         if(window.data.t3_status.indexOf(0) < 0){
@@ -830,6 +847,7 @@
 
       // set Active
       function setFlag(step,survey_arr,status_arr){
+        console.log('19')
         percentNotice(step,survey_arr,status_arr);
 
         // for hide survey start
@@ -849,6 +867,7 @@
       }
 
       function percentNotice(step,survey_arr,status_arr){
+        console.log('20')
         if( status_arr.indexOf(2) >= 0 ){
           //如果发现有被拒绝的答案,给出相应的提示
           $.carnivalbox({
@@ -896,6 +915,7 @@
 
       //摩天轮发光闪烁
       function flashWheel(wheel){
+        console.log('21')
         var wheel = $('.section.wheel');
         flash = wheel.find('.ferris');
         if(flash.hasClass('flash')){
