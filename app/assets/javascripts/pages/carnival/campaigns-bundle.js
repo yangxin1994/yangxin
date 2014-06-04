@@ -141,7 +141,6 @@ jQuery(function($) {
                     <a id="SinaWeibo" class="sina"></a>\
                     <a id="TencentWeibo" class="tencent"></a>\
                     <a id="Renren" class="renren"></a>\
-                    <a id="QQ" class="qq"></a>\
                     <a id="Douban" class="douban"></a>\
                     <a id="QQSpace" class="qzone"></a>\
                     </p><p class="share_d">点击参与以下问卷,获得更多积分:</p>\

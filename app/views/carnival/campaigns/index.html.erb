@@ -46,9 +46,6 @@
       var pre_status = parseInt(window.data.pre_status,10);
       window.current_step = parseInt(window.data.step,10);
 
-      // if(window.data.pre_status > 0){
-      //   $('#ad').hide();
-      // }
 
       //如果拿到票后刷新页面，直接进入第一个任务
       if( $.cookie('ticket') && window.current_step == 0){
@@ -124,9 +121,11 @@
               verticalCentered: true,
               slidesColor: ['#eff2c9', '#eff2c9', '#eff2c9', '#eff2c9'],
               loopTop: false,
+              navigation: true,
               navigationPosition:'right',
               loopBottom: false,
-              autoScrolling: true
+              autoScrolling: false,
+              scrollOverflow:true
           })
       }
     
@@ -302,6 +301,8 @@
             $('#task_three_text').text('抱歉，您没有抽中任何奖品');
           }  
           
+        }else{
+
         }
 
         fireUpBackground($('.section.balloon'));
@@ -476,14 +477,15 @@
             var remain = window.data.share_num -  window.data.share_lottery_num;
             if(window.data.lot_status[1] > 0 ){
               if(window.data.t3_status.indexOf(2) < 0){
-                $('.ball-cont').hide();
+                //$('.ball-cont').hide();
+                $('.umbrella').addClass('act');
+                makeFire();
                 //已经参加了转盘抽奖
 
                 var share = '<p class="share_d">分享链接,获得更多抽奖机会:</p><p class="so_share">\
                     <a id="SinaWeibo" class="sina"></a>\
                     <a id="TencentWeibo" class="tencent"></a>\
                     <a id="Renren" class="renren"></a>\
-                    <a id="QQ" class="qq"></a>\
                     <a id="Douban" class="douban"></a>\
                     <a id="QQSpace" class="qzone"></a>\
                     </p><p class="share_d">点击参与以下问卷,获得更多积分:</p>\
@@ -492,13 +494,11 @@
                       <a href="/s/5389855ceb0e5b7781000003" target="_blank">问卷吧嘉年华之月度活动（5月任务2）</a>\
                     </p>';
 
-
-
-
-
                 if(remain <= 0){
                   //首次完成全部任务后并已经抽奖，再次来到页面
                   $("#lotteryBtn").addClass('disabled');
+                  $('.ly-plate .draw_remain').text('剩余0次抽奖机会');
+                  $('.ly-plate').show();
                   $.carnivalbox({
                     width:460,
                     title:'你已完成抽奖活动,感谢您的参与',
@@ -517,10 +517,11 @@
                   if(window.data.own){
                     //已经抽中奖品,不允许再次抽奖
                     $("#lotteryBtn").addClass('disabled');
+                    $('.ly-plate .draw_remain').text('剩余0次抽奖机会')
                     var title ='恭喜您,中奖了';
                     var cont = '您已经抽中奖品' +  window.data.prize_name + '  我们会在审核后联系您!'  ;
                     var btn_cont = '我知道了';
-                    $('#lotteryBtn').addClass('disabled');
+                    $('.ly-plate').show();
                   }else{
                     //分享抽奖情况
                     var title ='欢迎您再次抽奖';
@@ -540,7 +541,7 @@
                       sub_btn.live('click',function(){
                         $.fancybox.close();
                         get_remain();
-                        $('.ly-plate').fadeIn(3000);
+                        $('.ly-plate').show();
                       });
                     }
                   })
@@ -576,7 +577,7 @@
               get_remain();
               if(window.data.t3_status.indexOf(2) < 0){
                 $('.ball-cont').hide();
-                $('.ly-plate').fadeIn(3000);
+                $('.ly-plate').show();
               }else{
                 $('.line-wrap .line').show();
                 $('.stack').removeClass('act');
@@ -774,10 +775,13 @@
       //转动摩天轮
       function turnWheel(){
         var wheel = $('.section.wheel');
-        wheel.find('a').hide();
-        wheel.find('span').show();
-        flash = wheel.find('.ferris');
-        flashWheel();
+        if(window.data.t1_status.indexOf(0) < 0 && window.data.t1_status.indexOf(2)){
+          wheel.find('a').hide();
+          wheel.find('span').show();
+          flash = wheel.find('.ferris');
+          flashWheel();          
+        }
+
       }
 
       //给气球点火
@@ -883,17 +887,10 @@
           var grass_top = parseInt( $('.ball-line').css('top') );
           var ngrass_top = grass_top + 10 + 'px';
           $('.ball-line').css({'top':ngrass_top});
-          // if(nbg == '30%'){
-          //   $('.ball-body').animate({'top':'-1000px'},4000,function(){
-          //     get_remain();
-          //     $('.ly-plate').fadeIn(4000,function(){})
-          //   })
-          //   return false;
-          // }
         }else{
             $('.ball-body').animate({'top':'-1000px'},4000,function(){
               get_remain();
-              $('.ly-plate').fadeIn(4000,function(){})
+              $('.ly-plate').fadeIn(3000,function(){})
             })          
         }
         setTimeout(flyBalloon,100)
