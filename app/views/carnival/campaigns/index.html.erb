@@ -54,28 +54,26 @@
 
       var tmp_all_status = $.map(window.data.all_status,function(e){ return e});
 
-      if(window.data.all_status.indexOf(2) >= 0){
-        continue_answer = true;
+      if($.inArray(2,tmp_all_status) >= 0){
+        var continue_answer = true;
       }
 
-      if(window.data.all_status.indexOf(4) >= 0){
-        continue_answer = true;
+      if($.inArray(4,tmp_all_status) >= 0){
+        var continue_answer = true;
       }
 
-      if(window.data.all_status.indexOf(32) >= 0){
-        continue_answer = true;
-      }      
-
-      if(window.data.all_status.indexOf(64) >= 0){
-        continue_answer = true;
+      if($.inArray(32,tmp_all_status) >= 0){
+        var continue_answer = true;
       }
-      
 
-      //第二关任务完成 再次来到页面,直接进入第三个任务场景
+      if($.inArray(64,tmp_all_status) >= 0){
+        var continue_answer = true;
+      }
+
+      // //第二关任务完成 再次来到页面,直接进入第三个任务场景
       if(parseInt(window.data.lot_status[0]) > 0){
         window.current_step = 3;
       }
-
       if (pre_status) {    
         if(pre_status == 2){// for reject
           $('.door > p.last').remove();
@@ -139,10 +137,8 @@
               fallback();
             },1000);            
         })
-
       }
-
-      //down step
+      
       function fallback(){
         $('.happy').animate({'bottom':'35px'},3000,function(){
           $.carnivalbox({
@@ -151,7 +147,7 @@
             content:'注意：系统会在问卷审核通过后将<b>话费</b>充值到您的手机',
             btnCont:'抽奖',
             beforeshow:function(){
-              var text = '<form action=""><input type="radio" name="charg" checked="checked" value="a" />10元（中奖率99%）<input type="radio" name="charg" value="b" />50元（中奖率20%）<input type="radio" name="charg" value="c" />100元（中奖率10%）</form>'
+              var text = '<form action=""><input type="radio" name="charg" checked="checked" value="a" />10元（中奖率99%）<input type="radio" name="charg" value="b" />50元（中奖率20%）<input type="radio" name="charg" value="c" />100元（中奖率10%）</form>';
               $('.carnival-popup p').after(text);
             },
             aftershow:function(){
@@ -345,8 +341,6 @@
             foraward(); //用户在第二关没有抽奖  
           }
         }
-
-
       }
 
       //设置第三个大任务
@@ -705,9 +699,6 @@
               })            
             })
         }
-
-
-
       }
 
       //转动摩天轮
@@ -719,7 +710,6 @@
           flash = wheel.find('.ferris');
           flashWheel();          
         }
-
       }
 
       //给气球点火
@@ -840,9 +830,6 @@
         }
         setTimeout(flyBalloon,100)
       }
-
-
-
       //set full page
       function setFullPage() {
         $('.fullPage').fullpage({
