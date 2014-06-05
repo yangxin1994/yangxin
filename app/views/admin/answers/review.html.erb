@@ -40,6 +40,12 @@
       <span>右键点击地图设置访问点</span>
       <div id="map" style="height:500px;"></div>
     <%- end %>
+    <%- if @questions.carnival_user.present? %>
+      <span><a href="/admin/answers/<%= @questions.carnival_user.answers.asc(:created_at).first.id.to_s %>/review">嘉年华预调研答案</a></span>
+      <%- if @questions.carnival_user.mobile.present? %>
+        <span>嘉年华用户手机号：<%= @questions.carnival_user.mobile %></span>
+      <%- end %>
+    <%- end %>
   </div>
 <%= render :partial => "admin/answers/detail" %>
 <% if @questions['status'].to_i == 4 %>

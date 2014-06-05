@@ -684,7 +684,11 @@ class Survey
     qindex = 0
     q = self.all_questions_type(false)
     csv_string = CSV.generate(:headers => true) do |csv|
-      csv << excel_header
+      if answers[0].carnival_user.present?
+        csv << ["mobile", "pre_survey_answer"] + excel_header
+			else
+        csv << excel_header
+			end
       answers.each_with_index do |answer, index|
         if answer.finished_at.present?
           answer_time = Time.at(answer.finished_at) - answer.created_at
@@ -693,6 +697,10 @@ class Survey
           answer_time = 0      
         end
         line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
+        if answer.carnival_user.present?
+          aid = answer.carnival_user.answers.asc(:created_at).first.id.to_s
+          line_answer.insert(0, answer.carnival_user.mobile.to_s, Rails.application.config.quillme_host + "/admin/answers/#{aid}/review")
+        end
         begin
           all_questions_id(false).each_with_index do |question, index|
             qindex = index
