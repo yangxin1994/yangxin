@@ -202,7 +202,7 @@
       //设置第一个大任务
       function setTaskOne(){
         $('.section.wheel').addClass('active').siblings().removeClass('active');
-        if(window.data.t1_status.indexOf(2) >= 0){
+        if($.inArray(2,window.data.t1_status) >= 0){
           $('#task_one_text').text('您在该任务中有问卷被拒绝,须所有问卷都审核通过后才可获得10元充值');
         }else{
           if(window.data.rew_1){
@@ -289,7 +289,8 @@
       function setTaskTwo(){
         setTaskOne();
         $('.section.stair').addClass('active').siblings().removeClass('active');
-        if(window.data.t2_status.indexOf(2) >= 0){
+        if($.inArray(2,window.data.t2_status) >= 0){
+        // if(window.data.t2_status.indexOf(2) >= 0){
           $('#task_two_text').text('您在该任务中有问卷被拒绝,须所有问卷都审核通过后才可获得抽奖所得的话费');
         }else{
           if(parseInt(window.data.lot_status[0]) > 0){
@@ -347,7 +348,8 @@
       function setTaskThree(){
         setTaskTwo();
         $('.section.balloon').addClass('active').siblings().removeClass('active');
-        if(window.data.t3_status.indexOf(2) >= 0){
+        if($.inArray(2,window.data.t3_status) >= 0){
+        // if(window.data.t3_status.indexOf(2) >= 0){
           $('#task_three_text').text('您在该任务中有问卷被拒绝,须所有问卷都审核通过后才可获得抽奖所得的话费');
         }else{
           if(parseInt(window.data.lot_status[1]) > 0){
@@ -398,7 +400,8 @@
           //第三个大任务充值话费已经领取
           var remain = window.data.share_num -  window.data.share_lottery_num;
           if(window.data.lot_status[1] > 0 ){
-            if(window.data.t3_status.indexOf(2) < 0){
+            if($.inArray(2,window.data.t3_status) < 0)
+            // if(window.data.t3_status.indexOf(2) < 0){
               //$('.ball-cont').hide();
               $('.umbrella').addClass('act');
               makeFire();
@@ -480,14 +483,16 @@
           }else{
             //第三关的话费领取完成但是还未抽奖
             get_remain();
-            if(window.data.t3_status.indexOf(2) < 0 && window.data.t3_status.indexOf(0) < 0){
+            if($.inArray(2,window.data.t3_status) < 0 && $.inArray(0,window.data.t3_status) < 0 ){
+            // if(window.data.t3_status.indexOf(2) < 0 && window.data.t3_status.indexOf(0) < 0){
               $('.ball-cont').hide();
               $('.ly-plate').show();
             }
           } 
         }else{
           //第三个大任务充值话费尚未领取
-          if(window.data.t3_status.indexOf(0) < 0 && window.data.t3_status.indexOf(2) < 0){
+          if($.inArray(0,window.data.t3_status) < 0 && $.inArray(2,window.data.t3_status) < 0 ){
+          // if(window.data.t3_status.indexOf(0) < 0 && window.data.t3_status.indexOf(2) < 0){
             $.carnivalbox({
               width:460,
               title:'您已完成全部关卡',
@@ -690,7 +695,8 @@
 
       //驱动升降机
       function turnStair(){
-        if(window.data.t2_status.indexOf(0) < 0 && window.data.t2_status.indexOf(2) < 0){
+        if($.inArray(0,window.data.t2_status) < 0 && $.inArray(2,window.data.t2_status) < 0 ){
+        // if(window.data.t2_status.indexOf(0) < 0 && window.data.t2_status.indexOf(2) < 0){
             $('.happy').addClass('act');
             $('.sbottom').addClass('act');
             $('.happy').animate({'bottom':'322px'},3000,function(){
@@ -704,7 +710,8 @@
       //转动摩天轮
       function turnWheel(){
         var wheel = $('.section.wheel');
-        if(window.data.t1_status.indexOf(0) < 0 && window.data.t1_status.indexOf(2) < 0){
+        if($.inArray(0,window.data.t1_status) < 0 && $.inArray(2,window.data.t1_status) < 0 ){
+        // if(window.data.t1_status.indexOf(0) < 0 && window.data.t1_status.indexOf(2) < 0){
           wheel.find('a').hide();
           wheel.find('span').show();
           flash = wheel.find('.ferris');
@@ -716,7 +723,8 @@
       function makeFire(){
         var umbrella = $('.umbrella');
         var basket = $('.basket');
-        if(window.data.t3_status.indexOf(0) < 0){
+        if($.inArray(0,window.data.t3_status) < 0){
+        // if(window.data.t3_status.indexOf(0) < 0){
             umbrella.addClass('act');  
           
           if(basket.hasClass('left')){
@@ -730,19 +738,21 @@
 
 
       function percentNotice(step,survey_arr,status_arr){
-
-        if (tmp_all_status.indexOf(2) >= 0){
+        if($.inArray(2,tmp_all_status) >= 0){
+        // if (tmp_all_status.indexOf(2) >= 0){
           var sec_idx = [];
           $.each(window.data.all_status,function(k,v){
-            if(v.indexOf(2) >= 0){
+            if($.inArray(2,v) >= 0){
+            // if(v.indexOf(2) >= 0){
               sec_idx.push(k)
             }
           })
 
           var sec_target;
-          if(sec_idx.indexOf(0) >= 0){
+          if($.inArray(0,sec_idx) >= 0){
+          // if(sec_idx.indexOf(0) >= 0){
             sec_target = 3;
-          }else if(sec_idx.indexOf(1) >= 0){
+          }else if($.inArray(1,sec_idx) >= 0){
             sec_target = 2;
           }else{
             sec_target = 1;
