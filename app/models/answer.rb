@@ -130,15 +130,20 @@ class Answer
     answers = answers.find_by_status(options[:status]) if options[:status]
     answers = answers.find_by_status(options["status"]) if options["status"]
     if options[:keyword].present?
-      if options[:keyword] =~ /^.+@.+$/
-        options[:email] = options[:keyword]
-      elsif /^\d{11}$/
-        options[:mobile] = options[:keyword]
+      if answers[0].carnival_user.present?
+        c = CarnivalUser.where(mobile: options[:keyword]).first
+        answers = answers.where(carnival_user_id: c.try(:_id))
       else
-        return answers.where(:_id => options[:keyword])
+        if options[:keyword] =~ /^.+@.+$/
+          options[:email] = options[:keyword]
+        elsif /^\d{11}$/
+          options[:mobile] = options[:keyword]
+        else
+          return answers.where(:_id => options[:keyword])
+        end
+        user = User.search_sample(options[:email], options[:mobile], true).first
+        answers = answers.where(:user_id => user.try(:_id))
       end
-      user = User.search_sample(options[:email], options[:mobile], true).first
-      answers = answers.where(:user_id => user.try(:_id))
     end
     answers  
   end  
