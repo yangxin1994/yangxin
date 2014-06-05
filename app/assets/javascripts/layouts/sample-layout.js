@@ -27,7 +27,7 @@ $(document).ready(function() {
     jQuery(".slider").slide({
         mainCell: ".bd ul",
         effect: "leftLoop",
-        delayTime: 1000,
+        delayTime: 3000,
         autoPlay: true
     });
 
