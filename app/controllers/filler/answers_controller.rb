@@ -126,7 +126,11 @@ class Filler::AnswersController < Filler::FillerController
 
   def clear
     @answer = Answer.find(params[:id])
-    render_json_auto @answer.clear and return
+    @answer.clear
+    if @answer.carnival_user.present?
+      @answer.carnival_user.fill_answer(@answer)
+    end
+    render_json_auto true and return
   end
 
 

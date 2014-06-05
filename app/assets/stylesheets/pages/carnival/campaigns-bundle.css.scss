@@ -8,6 +8,9 @@
 
 //弹出窗
 
+.fullPage{
+	overflow-x:auto;
+}
 .section{
 	a{
 		cursor:default;
@@ -122,7 +125,9 @@ a{
 			color:#52ACEF;
 		}
 		&.share_d{
-			text-align: left;
+			color:#fff;
+			background:#fec919;
+			// text-align: left;
 			font-weight: bold;
 		}
 	}
@@ -1108,6 +1113,9 @@ to{transform: rotate(359deg)}
 // 		top:200px;
 // 	}
 // }
+
+
+
 
 @media (max-width:1000px)and(max-height:800px){
 	html{

@@ -163,7 +163,7 @@ class CarnivalUser
       answer.save
       if self.mobile.present?
         # send sms to invite the sample answer again
-        SmsWorker.perform_async("carnival_re_invitation", self.mobile, "")
+        SmsWorker.perform_async("carnival_re_invitation", self.mobile, "", answer_id: answer_id.to_s)
       end
     end
     self.save
@@ -199,18 +199,6 @@ class CarnivalUser
         o1.pass if o1.present?
         o2.pass if o2.present?
       end
-    end
-
-    # give introducer lottery chance
-    if (self.survey_status & [NOT_EXIST, REJECT, UNDER_REVIEW]).blank? && self.introducer_id.present? && !self.introducer_reward_assigned
-      introducer = CarnivalUser.find(self.introducer_id)
-      introducer.share_num += 1
-      introducer.save
-      self.introducer_reward_assigned = true
-      self.save
-      # create log
-      carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE, prize_name: "一次抽大奖机会")
-      introducer.carnival_logs << carnival_log
     end
   end
 
@@ -339,6 +327,18 @@ class CarnivalUser
       end
     end
 
+    s7_id = "5385982aeb0e5b7282000022"
+    if answer.survey_id.to_s == s7_id
+      # 1. B5-B7只针对女性
+      qid = "538591f8eb0e5b7282000009"
+      if pre_survey_answer.answer_content[qid]["selection"].include?(9735976263679518)
+        # male, hide B5-B7
+        ["5385982beb0e5b7282000043", "5385982beb0e5b7282000044", "5385982beb0e5b7282000045"].each do |qid|
+          answer.answer_content[qid] = {}
+        end
+      end
+    end
+
     answer.save
   end
 
@@ -402,7 +402,42 @@ class CarnivalUser
     # create log
     carnival_log = CarnivalLog.create(type: CarnivalLog::STAGE_1, prize_name: "10元充值卡")
     self.carnival_logs << carnival_log
+
+    # give introducer lottery chance
+    if self.introducer_id.to_s.utf8!.present? && !self.introducer_reward_assigned
+      introducer = CarnivalUser.where(id: self.introducer_id.to_s.utf8!).first
+      if introducer.present?
+        introducer.share_num += 1
+        introducer.save
+      end
+      self.introducer_reward_assigned = true
+      self.save
+      # create log
+      if introducer.present?
+        carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE, prize_name: "一次抽大奖机会")
+        introducer.carnival_logs << carnival_log
+      end
+    end
+
     return "10元充值卡"
+  end
+
+  def self.assign_share_lottery
+    CarnivalUser.all.each do |c|
+      puts c.id.to_s
+      if c.introducer_id.to_s.utf8!.present? && !c.introducer_reward_assigned && c.mobile.present?
+        introducer = CarnivalUser.where(id: c.introducer_id.to_s.utf8!).first
+        if introducer.present?
+          introducer.share_num += 1
+          introducer.save
+        end
+        c.introducer_reward_assigned = true
+        c.save
+        # create log
+        carnival_log = CarnivalLog.create(type: CarnivalLog::SHARE, prize_name: "一次抽大奖机会")
+        introducer.carnival_logs << carnival_log if introducer.present?
+      end
+    end
   end
 
   def create_third_stage_mobile_order
