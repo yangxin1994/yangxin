@@ -179,9 +179,9 @@
         if(step == 1){
           setTaskOne(true)
         }else if(step == 2){
-          setTaskTwo();
+          setTaskTwo(true);
         }else if(step == 3){
-          setTaskThree();
+          setTaskThree(true);
         }
       }
 
@@ -289,8 +289,8 @@
       }
 
       //设置第二个大任务
-      function setTaskTwo(){
-        setTaskOne(true);
+      function setTaskTwo(show_percent){
+        setTaskOne(false);
         $('.section.stair').addClass('active').siblings().removeClass('active');
         if($.inArray(2,window.data.t2_status) >= 0){
         // if(window.data.t2_status.indexOf(2) >= 0){
@@ -334,8 +334,10 @@
             } 
           }
         })
-
-        percentNotice(window.current_step,window.data.t2_surveys,window.data.t2_status);
+        if(show_percent){
+          percentNotice(window.current_step,window.data.t2_surveys,window.data.t2_status);  
+        }
+        
 
         if($.inArray(0,window.data.t2_status) < 0 && $.inArray(2,window.data.t2_status) < 0 ){
           $('.happy').addClass('act');
@@ -348,8 +350,8 @@
       }
 
       //设置第三个大任务
-      function setTaskThree(){
-        setTaskTwo();
+      function setTaskThree(show_percent){
+        setTaskTwo(false);
         $('.section.balloon').addClass('active').siblings().removeClass('active');
         if($.inArray(2,window.data.t3_status) >= 0){
         // if(window.data.t3_status.indexOf(2) >= 0){
@@ -397,7 +399,10 @@
             }
           }
         })
-        percentNotice(window.current_step,window.data.t3_surveys,window.data.t3_status);
+        if(show_percent){
+          percentNotice(window.current_step,window.data.t3_surveys,window.data.t3_status);  
+        }
+        
 
         if(window.data.rew_3){
           //第三个大任务充值话费已经领取
@@ -581,7 +586,7 @@
                 $('.carnival-popup a.btn').live('click',function(){
                   $.fancybox.close();
                   $.fn.fullpage.moveSectionUp()
-                  setTaskTwo();
+                  setTaskTwo(false);
                 })
               }else if(t_type == 0){
                 window.data.lot_status[0] = 1; //表示第二关已经抽过奖
@@ -655,11 +660,13 @@
                     notic.html( '对不起,您本次没有抽中!' );
                     if(t_type == 0){
                       window.data.lot_status[0] = 1;
-                      rebind_click('我知道了',true);
+                      rebind_click('我知道了');
+                      $.fn.fullpage.moveTo(1);
                       setTaskThree();
                     }else{
                       rebind_click('我知道了');  
                     }
+
                     break;
                 case -6:
                     notic.html('对不起,该手机号已经参与活动并领奖,不能重复参与!' );
