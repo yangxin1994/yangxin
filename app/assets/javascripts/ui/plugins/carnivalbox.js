@@ -19,7 +19,8 @@ jQuery.extend({
                 return false
             },
             afterclose: function() {
-                return false
+                $('.carnival-popup a.btn').die("click");
+                $('.carnival-popup').remove();
             }
         }
         var _options = $.extend(_defaults, options);
