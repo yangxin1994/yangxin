@@ -138,7 +138,7 @@ jQuery(function($) {
                                 }
                             }
 
-                            var share = '<p class="share_d">分享链接,获得更多抽奖机会:</p><p class="so_share">\
+                            var share = '<p class="share_d">邀请好友参加活动，成功邀请1人，可再抽奖1次</p><p class="so_share">\
                     <a id="SinaWeibo" class="sina"></a>\
                     <a id="TencentWeibo" class="tencent"></a>\
                     <a id="Renren" class="renren"></a>\
@@ -260,11 +260,13 @@ jQuery(function($) {
                 if (cb) {
                     cb();
                 }
-
             },
             aftershow: function() {
                 $('.carnival-popup a.btn').live('click', function() {
                     $.fancybox.close();
+                    if ($("#lotteryBtn").hasClass('disabled')) {
+                        $('.ly-plate').hide();
+                    }
                 })
             }
         })
