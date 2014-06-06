@@ -113,9 +113,9 @@ class CarnivalOrder
   end
 
   def reject
-    if self.status == UNDER_REVIEW || self.status == WAIT
-      self.update_attributes(status: REJECT)
-    end
+#    if self.status == UNDER_REVIEW || self.status == WAIT
+    self.update_attributes(status: REJECT)
+#    end
   end
 
   def pass
