@@ -404,9 +404,10 @@
 
         if(window.data.rew_3){
           //第三个大任务充值话费已经领取
-          var remain = window.data.share_num -  window.data.share_lottery_num;
+          
 
           if(window.data.lot_status[1] > 0 ){
+            var remain = window.data.share_num -  window.data.share_lottery_num;  
             if($.inArray(2,window.data.t3_status) < 0){
               $('.umbrella').addClass('act');
               makeFire();
@@ -481,7 +482,7 @@
                 }else{
                   //分享抽奖情况
                   var title ='欢迎您再次抽奖';
-                  var cont = '您共有' + window.data.share_num + 1 + '次抽奖机会,还剩余'
+                  var cont = '您共有' + (window.data.share_num + 1) + '次抽奖机会,还剩余'
                 + remain + '次抽奖机会';
                   var btn_cont = '继续抽奖';
                   var show = true;
