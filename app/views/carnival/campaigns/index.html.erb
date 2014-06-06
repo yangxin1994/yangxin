@@ -147,6 +147,7 @@
             content:'注意：系统会在问卷审核通过后将<b>话费</b>充值到您的手机',
             btnCont:'抽奖',
             beforeshow:function(){
+              $('.notic').css({'left':'90px'});
               var text = '<form action=""><input type="radio" name="charg" checked="checked" value="a" />10元（中奖率99%）<input type="radio" name="charg" value="b" />50元（中奖率20%）<input type="radio" name="charg" value="c" />100元（中奖率10%）</form>';
               $('.carnival-popup p').after(text);
             },
@@ -255,7 +256,7 @@
                 content:'系统会在问卷审核通过后将<b>10元话费</b>充值到您的手机',
                 btnCont:'马上领取',
                 beforeshow:function(){
-                  $('.carnival-popup p').after('<form action=""><input type="text"  name="phone" placeholder="请输入手机号码"/></form>');
+                  $('.carnival-popup p').after('<form action=""><input class="phone" type="text"  name="phone" placeholder="请输入手机号码"/></form>');
                 },
                 aftershow:function(){
                   var phone_ipt = $('.carnival-popup form input');
