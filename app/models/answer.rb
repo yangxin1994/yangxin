@@ -1426,6 +1426,7 @@ class Answer
   end
 
   def check_matrix_answer
+    result = false
     self.answer_content.each do |k, v|
       q = Question.find(k)
       next if q.type != QuestionTypeEnum::MATRIX_CHOICE_QUESTION
@@ -1449,10 +1450,11 @@ class Answer
       end
 
       if identical
-        self.update_attributes(suspected: true)
+        result = true
         break
       end
     end
+    a.update_attributes(suspected: result)
     return self.suspected
   end
 end
