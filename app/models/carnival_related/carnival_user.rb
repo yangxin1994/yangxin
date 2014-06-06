@@ -213,9 +213,9 @@ class CarnivalUser
     s1_id = "53868990eb0e5ba257000025"
     if answer.survey_id.to_s == s1_id
       # 1. 所有样本都回答S3题。
-      # 2. 预调研里过去一年在“电视”看过电影的用户才回答A1-A7题。
+      # 2. 预调研里过去一年在“影院”和“汽车影院”看过电影的用户才回答A1-A7题。
       qid = "538591d6eb0e5b7282000007"
-      if !pre_survey_answer.answer_content[qid]["selection"].include?(613766637056106)
+      if (pre_survey_answer.answer_content[qid]["selection"] & [8188468568300061, 613766637056106]).blank?
         # hide A1-A7
         ["53868990eb0e5ba25700002a", "53868990eb0e5ba25700002b", "53868990eb0e5ba25700002c", "53868990eb0e5ba25700002d", "53868990eb0e5ba25700002e", "53868990eb0e5ba25700002f", "53868990eb0e5ba257000030"].each do |qid|
           answer.answer_content[qid] = {}
