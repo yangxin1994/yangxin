@@ -39,6 +39,8 @@ class Admin::AnswersController < Admin::AdminController
     answers = survey.answers.search(params)
     if params[:suspected].to_s == "true"
       answers = answers.select { |e| e.suspected == true }
+    elsif params[:suspected].to_s == "false"
+      answers = answers.select { |e| e.suspected == false }
     end
     csv_string = survey.admin_to_csv(answers)
     csv_string_gbk = ""
