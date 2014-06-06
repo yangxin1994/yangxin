@@ -404,9 +404,10 @@
 
         if(window.data.rew_3){
           //第三个大任务充值话费已经领取
-          var remain = window.data.share_num + 1 -  window.data.share_lottery_num;
+          
 
           if(window.data.lot_status[1] > 0 ){
+            var remain = window.data.share_num -  window.data.share_lottery_num;  
             if($.inArray(2,window.data.t3_status) < 0){
               $('.umbrella').addClass('act');
               makeFire();
