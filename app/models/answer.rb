@@ -684,6 +684,10 @@ class Answer
     self.deliver_reward
     self.update_sample_attributes if !self.is_preview && self.is_finish
     self.save
+
+    if Carnival::SURVEY.include?(self.survey.id.to_s)
+      self.check_contradiction
+    end
   end
 
   def sync_questions
@@ -1468,6 +1472,53 @@ class Answer
       Survey.find(sid).answers.each do |a|
         # next if !a.suspected.nil?
         a.check_matrix_answer
+      end
+    end
+  end
+
+  def check_contradiction
+    auditor = User.find_by_email('gaoyuzhen@oopsdata.com')
+    case self.survey.id.to_s
+    when "53842c9aeb0e5bbcb90000a1"
+      # 问卷吧嘉年华小任务（编号：XFXW-03）
+      # 1. 买房不如租房，省下的钱可以再进行其他投资选择非常赞同/比较赞同，够交首付款了，就立即买房，哪怕要做房奴也无所谓选择非常赞同/比较赞时拒绝。
+      # 拒绝理由：问题：买房不如租房，省下的钱可以再进行其他投资您选择了选择非常赞同/比较赞同，后面问题：够交首付款了，就立即买房，哪怕要做房奴也无所谓，您选择了非常赞同/比较赞同，前后矛盾。
+      qid = "53842c9aeb0e5bbcb90000b9"
+      if [9851430721501932, 1354350224157874].include?(self.answer_content[qid]["6377448048371890"]) && [9851430721501932, 1354350224157874].include?(self.answer_content[qid]["8094893003381247"])
+        self.review(false, auditor, "问题：买房不如租房，省下的钱可以再进行其他投资您选择了选择非常赞同/比较赞同，后面问题：够交首付款了，就立即买房，哪怕要做房奴也无所谓，您选择了非常赞同/比较赞同，前后矛盾。")
+      end
+      # 2. 买房不如租房，省下的钱可以再进行其他投资选择比较不赞同/非常不赞成同，够交首付款了，就立即买房，哪怕要做房奴也无所谓选择比较不赞同/非常不赞成时拒绝。
+      # 拒绝理由：问题：买房不如租房，省下的钱可以再进行其他投资您选择了选择了赞同/非常不赞成同，后面问题：够交首付款了，就立即买房，哪怕要做房奴也无所谓，您选择了比较不赞同/非常不赞成同，前后矛盾。
+      if [9282991777352414, 17442556690362260].include?(self.answer_content[qid]["6377448048371890"]) && [9282991777352414, 17442556690362260].include?(self.answer_content[qid]["8094893003381247"])
+        self.review(false, auditor, "问题：买房不如租房，省下的钱可以再进行其他投资您选择了选择了赞同/非常不赞成同，后面问题：够交首付款了，就立即买房，哪怕要做房奴也无所谓，您选择了比较不赞同/非常不赞成同，前后矛盾。")
+      end
+      # 3. 现在房价太高，与其买新房不如买一个质量好的二手房选择非常赞同/比较赞同、即使房价高一些，我也觉得买新房比买二手房好选择非常赞同/比较赞时拒绝
+      # 拒绝理由：问题：现在房价太高，与其买新房不如买一个质量好的二手房您选择了非常赞同/比较赞同，后面问题：即使房价高一些，我也觉得买新房比买二手房好，您选择了非常赞同/比较赞同，前后矛盾。
+      if [9851430721501932, 1354350224157874].include?(self.answer_content[qid]["5790746457359993"]) && [9851430721501932, 1354350224157874].include?(self.answer_content[qid]["23111421468531964"])
+        self.review(false, auditor, "问题：现在房价太高，与其买新房不如买一个质量好的二手房您选择了非常赞同/比较赞同，后面问题：即使房价高一些，我也觉得买新房比买二手房好，您选择了非常赞同/比较赞同，前后矛盾。")
+      end
+      # 4. 现在房价太高，与其买新房不如买一个质量好的二手房选择比较不赞同/非常不赞成、即使房价高一些，我也觉得买新房比买二手房好选择比较不赞同/非常不赞成时拒绝
+      # 拒绝理由：问题：现在房价太高，与其买新房不如买一个质量好的二手房您选择了比较不赞同/非常不赞成，后面问题：即使房价高一些，我也觉得买新房比买二手房好，您选择了比较不赞同/非常不赞成，前后矛盾。
+      if [9282991777352414, 17442556690362260].include?(self.answer_content[qid]["5790746457359993"]) && [9282991777352414, 17442556690362260].include?(self.answer_content[qid]["23111421468531964"])
+        self.review(false, auditor, "问题：现在房价太高，与其买新房不如买一个质量好的二手房您选择了比较不赞同/非常不赞成，后面问题：即使房价高一些，我也觉得买新房比买二手房好，您选择了比较不赞同/非常不赞成，前后矛盾。")
+      end
+      # 5. 矩阵题全部选择一般的也拒绝。
+      # 拒绝理由：回答不认真，没有认真查看题目进行作答，系统检测到很多答案数据都是一样的，数据不真实。
+      normal = true
+      if self.answer_content[qid].each do |k, v|
+        normal &&= (v == 7954243128112563)
+      end
+      if normal
+        self.review(false, auditor, "回答不认真，没有认真查看题目进行作答，系统检测到很多答案数据都是一样的，数据不真实。")
+      end
+    end
+  end
+
+  def self.check_matrix_answer
+    ["53842c9aeb0e5bbcb90000a1"].each do |sid|
+      Survey.find(sid).answers.each do |a|
+        # next if !a.suspected.nil?
+        a.check_contradiction
       end
     end
   end
