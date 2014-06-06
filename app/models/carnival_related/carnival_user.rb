@@ -125,6 +125,7 @@ class CarnivalUser
 
   def survey_finished(answer_id)
     answer = Answer.find(answer_id)
+    answer.check_matrix_answer
     index = self.survey_order.index(answer.survey_id.to_s)
     self.survey_status[index] = UNDER_REVIEW
     self.save

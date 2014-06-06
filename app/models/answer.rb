@@ -72,6 +72,7 @@ class Answer
   field :agent_feedback_email
   field :agent_feedback_mobile
   field :sample_attributes_updated, :type => Boolean, default: false
+  field :suspected, :type => Boolean, default: false
 
 
   belongs_to :agent_task
@@ -1422,5 +1423,46 @@ class Answer
       self.user.write_sample_attribute(q.sample_attribute.name, attr_value) if attr_value.present?
     end
     self.update_attributes(sample_attributes_updated: true)
+  end
+
+  def check_matrix_answer
+    result = false
+    self.answer_content.each do |k, v|
+      q = Question.find(k)
+      next if q.question_type != QuestionTypeEnum::MATRIX_CHOICE_QUESTION
+      if q.issue["option_type"] == 0
+        # single choice
+        identical = true
+        if v.present? && v.length >= 5
+          v.values[1..-1].each do |e|
+            identical &&= v.values[0] == e
+          end
+        else
+          identical = false
+        end
+      else
+        # multiple choice
+        identical = true
+        v.values[1..-1].each do |e|
+          identical &&= v.values[0] == e
+        end
+        identical = false if v.values[0].length < 4
+      end
+
+      if identical
+        result = true
+        break
+      end
+    end
+    self.update_attributes(suspected: result)
+    return self.suspected
+  end
+
+  def self.check_matrix_answer
+    Carnival::SURVEY.each do |s|
+      s.answers.each do |a|
+        a.check_matrix_answer
+      end
+    end
   end
 end
