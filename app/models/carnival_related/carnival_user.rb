@@ -154,7 +154,7 @@ class CarnivalUser
   def survey_reviewed(answer_id, answer_status)
     answer = Answer.find(answer_id)
     index = self.survey_order.index(answer.survey_id.to_s)
-    self.survey_status[index] = answer_status == Answer::FINISH ? FINISH : REJECT
+    old_status = self.survey_status[index]
 
     if answer_status == Answer::FINISH
       self.survey_status[index] = FINISH
@@ -173,6 +173,9 @@ class CarnivalUser
     if answer_status == Answer::FINISH
       pre_survey_answer = self.answers.where(survey_id: Carnival::PRE_SURVEY).first
       Carnival.update_survey_quota(pre_survey_answer, answer.survey_id.to_s)
+    elsif answer_status == Answer::REJECT && old_status == FINISH
+      pre_survey_answer = self.answers.where(survey_id: Carnival::PRE_SURVEY).first
+      Carnival.update_survey_quota(pre_survey_answer, answer.survey_id.to_s, false)
     end
 
     # handle order

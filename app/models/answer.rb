@@ -731,7 +731,7 @@ class Answer
   end
 
   def review(review_result, answer_auditor, message)
-    return false if self.status != UNDER_REVIEW
+    # return false if self.status != UNDER_REVIEW
     old_status = self.status
     if review_result
       self.set_finish
@@ -1447,7 +1447,7 @@ class Answer
         (v.values[1..-1] || []).each do |e|
           identical &&= v.values[0] == e
         end
-        identical = false if (v.values[0] || []).length < 4
+        identical = false if (v.values[0] || []).length < 4 && v.length < 5
       end
 
       if identical

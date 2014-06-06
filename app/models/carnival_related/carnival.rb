@@ -156,46 +156,47 @@ class Carnival
     return false
   end
 
-  def self.update_survey_quota(answer, survey_id)
+  def self.update_survey_quota(answer, survey_id, increase = true)
+    delta = increase ? 1 : -1
     quota_stats = self.where(survey_id: survey_id, type: STATS).first
-    quota_stats.quota["amount"] += 1
+    quota_stats.quota["amount"] += delta
     quota_stats.save
 
     gender_qid = "538591f8eb0e5b7282000009"
     gender_q = Question.find(gender_qid)
     # male, femail
     [0, 1].each do |e|
-      quota_stats.quota["gender"][e] += 1 if answer.answer_content[gender_qid]["selection"][0] == gender_q.issue["items"][e]["id"]
+      quota_stats.quota["gender"][e] += delta if answer.answer_content[gender_qid]["selection"][0] == gender_q.issue["items"][e]["id"]
     end
 
     age_qid = "5385920ceb0e5b728200000b"
     age_q = Question.find(age_qid)
     # age under 18, 19-24, 25-30, 31-35, 36-40, 41-50, 50+
     (0..6).to_a.each do |e|
-      quota_stats.quota["age"][e] += 1 if answer.answer_content[age_qid]["selection"][0] == age_q.issue["items"][e]["id"]
+      quota_stats.quota["age"][e] += delta if answer.answer_content[age_qid]["selection"][0] == age_q.issue["items"][e]["id"]
     end
       
     edu_qid = "53859222eb0e5b245200000c"
     edu_q = Question.find(edu_qid)
     # edu under middle school, high school, collage, bachelor, master+
     (0..4).to_a.each do |e|
-      quota_stats.quota["education"][e] += 1 if answer.answer_content[edu_qid]["selection"][0] == edu_q.issue["items"][e]["id"]
+      quota_stats.quota["education"][e] += delta if answer.answer_content[edu_qid]["selection"][0] == edu_q.issue["items"][e]["id"]
     end
 
     income_qid = "5385924eeb0e5b2452000011"
     income_q = Question.find(income_qid)
     # income under 2000
-    quota_stats.quota["income"][0] += 1 if [income_q.issue["items"][0]["id"], income_q.issue["items"][1]["id"], income_q.issue["items"][2]["id"]].include?(answer.answer_content[income_qid]["selection"][0])
+    quota_stats.quota["income"][0] += delta if [income_q.issue["items"][0]["id"], income_q.issue["items"][1]["id"], income_q.issue["items"][2]["id"]].include?(answer.answer_content[income_qid]["selection"][0])
     # income 2000-3000
-    quota_stats.quota["income"][1] += 1 if answer.answer_content[income_qid]["selection"][0] == income_q.issue["items"][3]["id"]
+    quota_stats.quota["income"][1] += delta if answer.answer_content[income_qid]["selection"][0] == income_q.issue["items"][3]["id"]
     # income 3000-6000
-    quota_stats.quota["income"][2] += 1 if [income_q.issue["items"][4]["id"], income_q.issue["items"][5]["id"], income_q.issue["items"][6]["id"]].include?(answer.answer_content[income_qid]["selection"][0])
+    quota_stats.quota["income"][2] += delta if [income_q.issue["items"][4]["id"], income_q.issue["items"][5]["id"], income_q.issue["items"][6]["id"]].include?(answer.answer_content[income_qid]["selection"][0])
     # income 6000-8000
-    quota_stats.quota["income"][3] += 1 if [income_q.issue["items"][7]["id"], income_q.issue["items"][8]["id"]].include?(answer.answer_content[income_qid]["selection"][0])
+    quota_stats.quota["income"][3] += delta if [income_q.issue["items"][7]["id"], income_q.issue["items"][8]["id"]].include?(answer.answer_content[income_qid]["selection"][0])
     # income 8000-10000
-    quota_stats.quota["income"][4] += 1 if answer.answer_content[income_qid]["selection"][0] == income_q.issue["items"][9]["id"]
+    quota_stats.quota["income"][4] += delta if answer.answer_content[income_qid]["selection"][0] == income_q.issue["items"][9]["id"]
     # income 10000+
-    quota_stats.quota["income"][5] += 1 if [income_q.issue["items"][10]["id"], income_q.issue["items"][11]["id"], income_q.issue["items"][12]["id"], income_q.issue["items"][13]["id"], income_q.issue["items"][14]["id"]].include?(answer.answer_content[income_qid]["selection"][0])
+    quota_stats.quota["income"][5] += delta if [income_q.issue["items"][10]["id"], income_q.issue["items"][11]["id"], income_q.issue["items"][12]["id"], income_q.issue["items"][13]["id"], income_q.issue["items"][14]["id"]].include?(answer.answer_content[income_qid]["selection"][0])
 
     region_qid = "53859237eb0e5b245200000f"
     region_q = Question.find(region_qid)
@@ -203,12 +204,12 @@ class Carnival
     # dalian, ningbo, jinan, harbin, changchun, xiamen, zhengzhou, suzhou, wuxi, changsha, fuzhou, lanzhou, urumchi, kunming
     code = ["4096", "36864", "77888", "78016", "8192", "41024", "69696", "24640", "110656", "94272", "90112", "45120", "61568", "24704", "45184", "61504", "32832", "28736", "53376", "65600", "41088", "73792", "53312", "114752", "127040", "102464"]
     code.each do |c|
-      quota_stats.quota["region"][c] += 1 if QuillCommon::AddressUtility.satisfy_region_code?(answer.answer_content[region_qid]["address"], c)
+      quota_stats.quota["region"][c] += delta if QuillCommon::AddressUtility.satisfy_region_code?(answer.answer_content[region_qid]["address"], c)
     end
     # other cities
     if !code.include?(answer.answer_content[region_qid]["address"].to_s)
       (1..7).to_a.each do |c|
-        quota_stats.quota["region"][c.to_s] += 1 if QuillCommon::AddressUtility.satisfy_big_region?(answer.answer_content[region_qid]["address"], c)
+        quota_stats.quota["region"][c.to_s] += delta if QuillCommon::AddressUtility.satisfy_big_region?(answer.answer_content[region_qid]["address"], c)
       end
     end
     quota_stats.save
