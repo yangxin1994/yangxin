@@ -1427,6 +1427,7 @@ class Answer
 
   def check_matrix_answer
     result = false
+    puts self.id.to_s
     self.answer_content.each do |k, v|
       q = Question.find_by_id(k)
       next if q.nil? || q.question_type != QuestionTypeEnum::MATRIX_CHOICE_QUESTION
@@ -1444,10 +1445,13 @@ class Answer
       else
         # multiple choice
         identical = true
-        (v.values[1..-1] || []).each do |e|
-          identical &&= v.values[0] == e
+        if (v.values[0] || []).length >= 4 || v.length >= 5
+          (v.values[1..-1] || []).each do |e|
+            identical &&= v.values[0] == e
+          end
+        else
+          identical = false
         end
-        identical = false if (v.values[0] || []).length < 4 && v.length < 5
       end
 
       if identical
@@ -1462,7 +1466,7 @@ class Answer
   def self.check_matrix_answer
     Carnival::SURVEY.each do |sid|
       Survey.find(sid).answers.each do |a|
-        next if !a.suspected.nil?
+        # next if !a.suspected.nil?
         a.check_matrix_answer
       end
     end
