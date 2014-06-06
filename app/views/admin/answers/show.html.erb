@@ -56,6 +56,8 @@
         <li class="divider"></li>
         <li><a href="<%= params[:id] %>/to_csv" class="querilayer">导当前条件下所有数据</a></li>
         <li><a href="<%= params[:id] %>/to_csv?status=32">导出审核完毕的数据</a></li>
+        <li><a href="<%= params[:id] %>/to_csv?status=4&suspected=true">导出疑似作弊的待审核数据</a></li>
+        <li><a href="<%= params[:id] %>/to_csv?status=32&suspected=true">导出疑似作弊的通过审核数据</a></li>
       </ul>
     </div>
   </span>

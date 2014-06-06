@@ -72,7 +72,7 @@ class Answer
   field :agent_feedback_email
   field :agent_feedback_mobile
   field :sample_attributes_updated, :type => Boolean, default: false
-  field :suspected, :type => Boolean, default: false
+  field :suspected, :type => Boolean
 
 
   belongs_to :agent_task
@@ -1428,8 +1428,8 @@ class Answer
   def check_matrix_answer
     result = false
     self.answer_content.each do |k, v|
-      q = Question.find(k)
-      next if q.question_type != QuestionTypeEnum::MATRIX_CHOICE_QUESTION
+      q = Question.find_by_id(k)
+      next if q.nil? || q.question_type != QuestionTypeEnum::MATRIX_CHOICE_QUESTION
       if q.issue["option_type"] == 0
         # single choice
         identical = true
@@ -1459,8 +1459,8 @@ class Answer
   end
 
   def self.check_matrix_answer
-    Carnival::SURVEY.each do |s|
-      s.answers.each do |a|
+    Carnival::SURVEY.each do |sid|
+      Survey.find(sid).answers.each do |a|
         a.check_matrix_answer
       end
     end
