@@ -1513,7 +1513,7 @@ class Answer
     end
   end
 
-  def self.check_matrix_answer
+  def self.check_contradiction
     ["53842c9aeb0e5bbcb90000a1"].each do |sid|
       Survey.find(sid).answers.where(status: Answer::UNDER_REVIEW).each do |a|
         # next if !a.suspected.nil?
