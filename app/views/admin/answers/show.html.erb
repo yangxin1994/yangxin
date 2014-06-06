@@ -97,6 +97,8 @@
           <td><a href="/admin/samples/<%= answer["user_id"] %>"><%= answer["user_email_mobile"] %></a></td>
         <% elsif answer.carnival_user.present?  %>
           <td><span><%= answer.carnival_user.mobile %></span></td>
+        <% else %>
+          <td></td>
         <% end  %>
         <td><%= answer_type_tag answer["status"] %></td>
         <td><%= answer["created_at"].strftime('%F %R') %></td>

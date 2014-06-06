@@ -685,7 +685,7 @@ class Survey
     q = self.all_questions_type(false)
     csv_string = CSV.generate(:headers => true) do |csv|
       if answers[0].carnival_user.present?
-        csv << ["mobile", "pre_survey_answer"] + excel_header
+        csv << ["mobile"] + excel_header
 			else
         csv << excel_header
 			end
@@ -698,8 +698,7 @@ class Survey
         end
         line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
         if answer.carnival_user.present?
-          aid = answer.carnival_user.answers.asc(:created_at).first.id.to_s
-          line_answer.insert(0, answer.carnival_user.mobile.to_s, Rails.application.config.quillme_host + "/admin/answers/#{aid}/review")
+          line_answer.insert(0, answer.carnival_user.mobile.to_s)
         end
         begin
           all_questions_id(false).each_with_index do |question, index|
