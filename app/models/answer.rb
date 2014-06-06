@@ -1454,7 +1454,15 @@ class Answer
         break
       end
     end
-    a.update_attributes(suspected: result)
+    self.update_attributes(suspected: result)
     return self.suspected
+  end
+
+  def self.check_matrix_answer
+    Carnival::SURVEY.each do |s|
+      s.answers.each do |a|
+        a.check_matrix_answer
+      end
+    end
   end
 end
