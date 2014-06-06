@@ -1430,11 +1430,12 @@ class Answer
     self.answer_content.each do |k, v|
       q = Question.find_by_id(k)
       next if q.nil? || q.question_type != QuestionTypeEnum::MATRIX_CHOICE_QUESTION
+      next if v.nil?
       if q.issue["option_type"] == 0
         # single choice
         identical = true
         if v.present? && v.length >= 5
-          v.values[1..-1].each do |e|
+          (v.values[1..-1] || []).each do |e|
             identical &&= v.values[0] == e
           end
         else
@@ -1443,10 +1444,10 @@ class Answer
       else
         # multiple choice
         identical = true
-        v.values[1..-1].each do |e|
+        (v.values[1..-1] || []).each do |e|
           identical &&= v.values[0] == e
         end
-        identical = false if v.values[0].length < 4
+        identical = false if (v.values[0] || []).length < 4
       end
 
       if identical
