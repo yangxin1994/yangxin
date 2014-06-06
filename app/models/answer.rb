@@ -1461,6 +1461,7 @@ class Answer
   def self.check_matrix_answer
     Carnival::SURVEY.each do |sid|
       Survey.find(sid).answers.each do |a|
+        next if !a.suspected.nil?
         a.check_matrix_answer
       end
     end
