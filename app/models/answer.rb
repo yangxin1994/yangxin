@@ -1428,11 +1428,11 @@ class Answer
   def check_matrix_answer
     self.answer_content.each do |k, v|
       q = Question.find(k)
-      next if q.type != QuestionTypeEnum::MATRIX_CHOICE_QUESTION
+      next if q.question_type != QuestionTypeEnum::MATRIX_CHOICE_QUESTION
       if q.issue["option_type"] == 0
         # single choice
         identical = true
-        if v.length >= 5
+        if v.present? && v.length >= 5
           v.values[1..-1].each do |e|
             identical &&= v.values[0] == e
           end
