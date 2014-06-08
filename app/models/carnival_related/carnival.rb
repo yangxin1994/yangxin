@@ -219,22 +219,18 @@ class Carnival
   def self.background_survey_finished(answer_id)
     answer = Answer.find(answer_id)
     carnival_user = answer.carnival_user
-    carnival_user.update_attributes(background_survey_status: CarnivalUser::FINISH)
+    carnival_user.update_attributes(background_survey_status: CarnivalUser::FINISH) if carnival_user.present?
   end
 
   def self.survey_finished(answer_id)
-    logger.info "00000000000000000"
     answer = Answer.find(answer_id)
-    logger.info "00000000000000000"
     carnival_user = answer.carnival_user
-    logger.info "00000000000000000"
-    carnival_user.survey_finished(answer.id)
-    logger.info "00000000000000000"
+    carnival_user.survey_finished(answer.id) if carnival_user.present?
   end
 
   def self.survey_reviewed(answer_id)
     answer = Answer.find(answer_id)
     carnival_user = answer.carnival_user
-    carnival_user.survey_reviewed(answer.id, answer.status)
+    carnival_user.survey_reviewed(answer.id, answer.status) if carnival_user.present?
   end
 end

@@ -738,11 +738,13 @@ class Answer
     # return false if self.status != UNDER_REVIEW
     old_status = self.status
     if review_result
+      return false if self.status == FINISH
       self.set_finish
       self.update_sample_attributes
       message_title = "问卷[#{self.survey.title}]通过审核!"
       message_content = "您参与的[#{self.survey.title}]已通过审核,感谢参与."
     else
+      return false if self.status == REJECT || self.status == REDO
       set_reject_with_type(REJECT_BY_REVIEW)
       message_title = "对不起,您参与的问卷未通过审核!"
       message_content = "您参与的问卷[#{self.survey.title}]没有通过管理员审核"

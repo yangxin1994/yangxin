@@ -680,15 +680,16 @@ class Survey
   end
 
   def admin_to_csv(answers)
+    answers ||= []
     formated_error = []
     qindex = 0
     q = self.all_questions_type(false)
     csv_string = CSV.generate(:headers => true) do |csv|
       if answers[0].carnival_user.present?
         csv << ["mobile"] + excel_header
-			else
+      else
         csv << excel_header
-			end
+      end
       answers.each_with_index do |answer, index|
         if answer.finished_at.present?
           answer_time = Time.at(answer.finished_at) - answer.created_at
