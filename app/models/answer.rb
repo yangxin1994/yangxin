@@ -1478,6 +1478,18 @@ class Answer
   def check_contradiction
     auditor = User.find_by_email('gaoyuzhen@oopsdata.com')
     case self.survey.id.to_s
+    when "5388279feb0e5b9d630000e2"
+      # 问卷吧嘉年华小任务（编号：MTJC-03）
+      q1_id = "53882951eb0e5b2922000041"
+      q2_id = "5388296feb0e5b2922000044"
+      # 如果11题选择了工作日“基本上全天挂着”，那么12题选择下图红框内任意一个都会被拒绝
+      if self.answer_content[q1_id]["65898603455285"].include?("14858394562312644") && (self.answer_content[q2_id]["2978021165598964"] & [6608992363315114, 8467625290988152, 2460868964029945, 2057838799813489, 17464662733559188, 21491070367932970, 19804991962459590]).present?
+        self.review(false, auditor, "您在回答工作日通常在什么时间通过手机/平板电脑上网的问题时，选择了基本上全天都挂着；在回答工作日每次通过手机/平板电脑上网的时间有多长的问题时，选择的时间较短，前后矛盾，没有认真答题。")
+      end
+      # 如果11题选择了周六周日“基本上全天挂着”，那么12题选择下图红框内任意一个都会被拒绝
+      if self.answer_content[q1_id]["726508114874852"].include?("14858394562312644") && (self.answer_content[q2_id]["456915970214569"] & [6608992363315114, 8467625290988152, 2460868964029945, 2057838799813489, 17464662733559188, 21491070367932970, 19804991962459590]).present?
+        self.review(false, auditor, "您在回答周六、周日通常在什么时间通过手机/平板电脑上网的问题时，选择了基本上全天都挂着；在回答周六、周日每次通过手机/平板电脑上网的时间有多长的问题时，选择的时间较短，前后矛盾，没有认真答题。")
+      end
     when "53842c9aeb0e5bbcb90000a1"
       # 问卷吧嘉年华小任务（编号：XFXW-03）
       # 1. 买房不如租房，省下的钱可以再进行其他投资选择非常赞同/比较赞同，够交首付款了，就立即买房，哪怕要做房奴也无所谓选择非常赞同/比较赞时拒绝。
@@ -1514,9 +1526,10 @@ class Answer
   end
 
   def self.check_contradiction
-    ["53842c9aeb0e5bbcb90000a1"].each do |sid|
+    # 53842c9aeb0e5bbcb90000a1: XFXW-03
+    # 5388279feb0e5b9d630000e2: MTJC-03
+    ["5388279feb0e5b9d630000e2"].each do |sid|
       Survey.find(sid).answers.where(status: Answer::UNDER_REVIEW).each do |a|
-        # next if !a.suspected.nil?
         a.check_contradiction
       end
     end
