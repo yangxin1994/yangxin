@@ -1492,7 +1492,7 @@ class Answer
       # B2 B3选项都一样
       # 拒绝条件：相同选项的拒绝（例如B1选手机B2选手机）
       q1_id = "53842d30eb0e5bb228000032"
-      q1_id = "53842d30eb0e5bb228000033"
+      q2_id = "53842d30eb0e5bb228000033"
       if self.answer_content[q1_id].present? && self.answer_content[q2_id].present?
         q1_items = Question.find(q1_id).issue["items"].map { |e| e["id"] }
         q2_items = Question.find(q2_id).issue["items"].map { |e| e["id"] }

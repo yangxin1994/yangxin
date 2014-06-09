@@ -28,6 +28,7 @@ $(document).ready(function() {
         mainCell: ".bd ul",
         effect: "leftLoop",
         delayTime: 3000,
+        interTime: 6000,
         autoPlay: true
     });
 
