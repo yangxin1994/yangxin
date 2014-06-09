@@ -1480,6 +1480,11 @@ class Answer
   def check_contradiction
     auditor = User.find_by_email('gaoyuzhen@oopsdata.com')
     case self.survey.id.to_s
+    when "5385982aeb0e5b7282000022"
+      # 问卷吧嘉年华小任务（编号：XFXW-05）
+      # 您平时多长时间使用一次化妆水?
+      # 选择“从来不用”，拒绝。
+      q1_id = "5385982beb0e5b728200003a"
     when "53842d30eb0e5bb228000008"
       # 问卷吧嘉年华小任务（编号：XFXW-04）
       # B2.您或您家未来半年内打算购买以下哪些IT数码产品？
@@ -1696,7 +1701,8 @@ class Answer
     # 5388279feb0e5b9d630000e2: MTJC-03
     # 53868990eb0e5ba257000025: GGJC
     # 53842d30eb0e5bb228000008: XFXW-04
-    ["53842d30eb0e5bb228000008"].each do |sid|
+    # 5385982aeb0e5b7282000022: XFXW-05
+    ["5385982aeb0e5b7282000022"].each do |sid|
       Survey.find(sid).answers.where(status: Answer::UNDER_REVIEW).each do |a|
         a.check_contradiction
       end
