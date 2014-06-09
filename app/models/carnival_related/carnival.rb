@@ -233,4 +233,60 @@ class Carnival
     carnival_user = answer.carnival_user
     carnival_user.survey_reviewed(answer.id, answer.status) if carnival_user.present?
   end
+
+  def self.refresh_quota
+    SURVEY.each do |e|
+      puts e + ": begin"
+      c = Carnival.where(survey_id: e).first
+      c.quota["amount"] = 0
+      c.quota["gender"] = [0,0]
+      c.quota["age"] = [0, 0, 0, 0, 0, 0, 0]
+      c.quota["income"] = [0, 0, 0, 0, 0, 0]
+      c.quota["education"] = [0, 0, 0, 0, 0]
+      c.quota["region"] = {"4096" => 0, # beijing
+        "36864" => 0,       # shanghai
+        "77888" => 0,       # guangzhou
+        "78016" => 0,       # shenzhen
+        "8192" => 0,        # tianjin
+        "41024" => 0,       # nanjing
+        "69696" => 0,       # wuhan
+        "24640" => 0,       # shenyang
+        "110656" => 0,       # xi'an
+        "94272" => 0,       # chengdu
+        "90112" => 0,       # chongqing
+        "45120" => 0,       # hangzhou
+        "61568" => 0,       # tsingdao
+        "24704" => 0,       # dalian
+        "45184" => 0,       # ningbo
+        "61504" => 0,       # jinan
+        "32832" => 0,       # harbin
+        "28736" => 0,       # changchun
+        "53376" => 0,       # xiamen
+        "65600" => 0,       # zhengzhou
+        "41280" => 0,       # suzhou
+        "41088" => 0,       # wuxi
+        "73792" => 0,       # changsha
+        "53312" => 0,       # fuzhou
+        "114752" => 0,      # lanzhou
+        "127040" => 0,      # urumchi
+        "102464" => 0,      # kunming
+        "1" => 0,           # others-huadong
+        "2" => 0,           # others-huanan
+        "3" => 0,           # others-huazhong
+        "4" => 0,           # others-huabei
+        "5" => 0,           # others-xibei
+        "6" => 0,           # others-xinan
+        "7" => 0,           # others-dongbei
+        }
+      c.save
+      s = Survey.find(e)
+      s.answers.where(status: Answer::FINISH).each do |a|
+        next if a.carnival_user.blank?
+        pre_survey_answer = a.carnival_user.answers.where(survey_id: PRE_SURVEY).first
+        next if pre_survey_answer.blank?
+        Carnival.update_survey_quota(pre_survey_answer, e)
+      end
+      puts e + ": end"
+    end
+  end
 end
