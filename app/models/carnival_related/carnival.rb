@@ -157,6 +157,9 @@ class Carnival
   end
 
   def self.update_survey_quota(answer, survey_id, increase = true)
+    answer.answer_content.each do |k,v|
+      return if v.blank?
+    end
     delta = increase ? 1 : -1
     quota_stats = self.where(survey_id: survey_id, type: STATS).first
     quota_stats.quota["amount"] += delta
@@ -284,6 +287,7 @@ class Carnival
         next if a.carnival_user.blank?
         pre_survey_answer = a.carnival_user.answers.where(survey_id: PRE_SURVEY).first
         next if pre_survey_answer.blank?
+        puts a.id.to_s
         Carnival.update_survey_quota(pre_survey_answer, e)
       end
       puts e + ": end"
