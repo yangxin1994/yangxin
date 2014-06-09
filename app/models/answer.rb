@@ -1480,6 +1480,55 @@ class Answer
   def check_contradiction
     auditor = User.find_by_email('gaoyuzhen@oopsdata.com')
     case self.survey.id.to_s
+    when "53842d30eb0e5bb228000008"
+      # 问卷吧嘉年华小任务（编号：XFXW-04）
+      # B2.您或您家未来半年内打算购买以下哪些IT数码产品？
+      # B3.您或您家未来半年内不会购买以下哪些IT数码产品？
+      # B2 B3选项都一样
+      # 拒绝条件：相同选项的拒绝（例如B1选手机B2选手机）
+      q1_id = "53842d30eb0e5bb228000032"
+      q1_id = "53842d30eb0e5bb228000033"
+      if self.answer_content[q1_id].present? && self.answer_content[q2_id].present?
+        q1_items = Question.find(q1_id).issue["items"].map { |e| e["id"] }
+        q2_items = Question.find(q2_id).issue["items"].map { |e| e["id"] }
+        q1_a_index = self.answer_content[q1_id]["selection"].map { |e| q1_items.index(e) }
+        q2_a_index = self.answer_content[q2_id]["selection"].map { |e| q2_items.index(e) }
+        if (q1_a_index & q2_a_index).present?
+          return self.review(false, auditor, "回答不认真。问题:您或您家未来半年内打算购买和您或您家未来半年内不会购买的IT数码产品,您的选择是一样的,前后矛盾。")
+        end
+      end
+
+      # B12. 未来半年内您家打算购买以下哪些家用电器？
+      # B13.未来半年内您家不会购买以下哪些家用电器？
+      # B12.B13选项都一样
+      # 拒绝条件：相同选项的拒绝
+      q3_id = "53842d30eb0e5bb22800003d"
+      q4_id = "53842d30eb0e5bb22800003e"
+      if self.answer_content[q3_id].present? && self.answer_content[q4_id].present?
+        q3_items = Question.find(q3_id).issue["items"].map { |e| e["id"] }
+        q4_items = Question.find(q4_id).issue["items"].map { |e| e["id"] }
+        q3_a_index = self.answer_content[q3_id]["selection"].map { |e| q3_items.index(e) }
+        q4_a_index = self.answer_content[q4_id]["selection"].map { |e| q4_items.index(e) }
+        if (q3_a_index & q4_a_index).present?
+          return self.review(false, auditor, "回答不认真。未来半年内您家打算购买和未来半年内您家不会购买的家用电器,您的选择是一样的,前后矛盾。")
+        end
+      end
+
+      # B15.您或您家未来半年内打算购买以下哪些电子电器产品？
+      # B16.未来半年内您家不会购买以下哪些电子电器产品？
+      # B15.B16选项都一样
+      # 拒绝条件：相同选项的拒绝
+      q5_id = "53842d31eb0e5bb228000041"
+      q6_id = "53842d31eb0e5bb228000042"
+      if self.answer_content[q5_id].present? && self.answer_content[q6_id].present?
+        q5_items = Question.find(q5_id).issue["items"].map { |e| e["id"] }
+        q6_items = Question.find(q6_id).issue["items"].map { |e| e["id"] }
+        q5_a_index = self.answer_content[q5_id]["selection"].map { |e| q5_items.index(e) }
+        q6_a_index = self.answer_content[q6_id]["selection"].map { |e| q6_items.index(e) }
+        if (q5_a_index & q6_a_index).present?
+          return self.review(false, auditor, "回答不认真。您或您家未来半年内打算购买和您或您家未来半年内不会购买的电子产品,您的选择是一样的,前后矛盾。")
+        end
+      end
     when "53868990eb0e5ba257000025"
       # 问卷吧嘉年华小任务（编号：GGJC）
       # S3.您如何看待电影中出现的品牌:
@@ -1646,7 +1695,8 @@ class Answer
     # 53842c9aeb0e5bbcb90000a1: XFXW-03
     # 5388279feb0e5b9d630000e2: MTJC-03
     # 53868990eb0e5ba257000025: GGJC
-    ["53868990eb0e5ba257000025"].each do |sid|
+    # 53842d30eb0e5bb228000008: XFXW-04
+    ["53842d30eb0e5bb228000008"].each do |sid|
       Survey.find(sid).answers.where(status: Answer::UNDER_REVIEW).each do |a|
         a.check_contradiction
       end
