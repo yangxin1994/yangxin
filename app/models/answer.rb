@@ -1485,6 +1485,64 @@ class Answer
       # 您平时多长时间使用一次化妆水?
       # 选择“从来不用”，拒绝。
       q1_id = "5385982beb0e5b728200003a"
+      if self.answer_content[q1_id].present? && self.answer_content[q1_id]["selection"].include?(18626607499360290)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了化妆水；在回答平时多长时间使用一次化妆水的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 您平时多长时间使用一次保湿产品?
+      # 选择“从来不用”，拒绝。
+      q2_id = "5385982beb0e5b728200003b"
+      if self.answer_content[q2_id].present? && self.answer_content[q2_id]["selection"].include?(20117377351336600)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了保湿产品；在回答平时多长时间使用一次保湿产品的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 您平时多长时间使用一次美白产品?
+      # 选择“从来不用”，拒绝。
+      q3_id = "5385982beb0e5b728200003c"
+      if self.answer_content[q3_id].present? && self.answer_content[q3_id]["selection"].include?(24183166894457330)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了美白产品；在回答平时多长时间使用一次美白产品的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 您平时多长时间使用一次抗皱产品?
+      # 选择“从来不用”，拒绝。
+      q4_id = "5385982beb0e5b728200003d"
+      if self.answer_content[q4_id].present? && self.answer_content[q4_id]["selection"].include?(17600101280371876)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了抗皱产品；在回答平时多长时间使用一次抗皱产品的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 您平时多长时间使用一次防晒产品?
+      # 选择“从来不用”，拒绝。
+      q5_id = "5385982beb0e5b728200003e"
+      if self.answer_content[q5_id].present? && self.answer_content[q5_id]["selection"].include?(24071942529544176)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了防晒产品；在回答平时多长时间使用一次防晒产品的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 您平时多长时间使用一次祛斑产品?
+      # 选择“从来不用”，拒绝。
+      q6_id = "5385982beb0e5b728200003f"
+      if self.answer_content[q6_id].present? && self.answer_content[q6_id]["selection"].include?(13778233929924768)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了祛斑产品；在回答平时多长时间使用一次祛斑产品的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 您平时多长时间使用一次祛痘产品?
+      # 选择“从来不用”，拒绝。
+      q7_id = "5385982beb0e5b7282000040"
+      if self.answer_content[q7_id].present? && self.answer_content[q7_id]["selection"].include?(31701187658068960)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了祛痘产品；在回答平时多长时间使用一次祛痘产品的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 您平时多长时间使用一次眼部护理产品?
+      # 选择“从来不用”，拒绝。
+      q8_id = "5385982beb0e5b7282000041"
+      if self.answer_content[q8_id].present? && self.answer_content[q8_id]["selection"].include?(9819392651748270)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了眼部护理产品；在回答平时多长时间使用一次眼部护理产品的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 如果第16题的子问题里选择了“不做此类护理”，那么15题对应子问题里选择除了“一个月也没有一次”外的5个选项中的任意一个选项，都拒绝，每个子问题都是如此。
+      q9_id = "5385982beb0e5b7282000046"
+      q10_id = "5385982beb0e5b7282000047"
+      if self.answer_content[q9_id].present? && self.answer_content[q10_id].present?
+        q9 = Question.find(q9_id)
+        q10 = Question.find(q10_id)
+        q9.issue["rows"].each_with_index do |r, index|
+          q10_r_id = q10.issue["rows"][index]["id"].to_s
+          if [5042842124097239, 4222621758003774, 6018777364637514, 3659747314302127, 20778639463058204].include?(self.answer_content[q9_id][r["id"].to_s]) && self.answer_content[q10_id][q10_r_id].include?(14268191503939008)
+            return self.review(false, auditor, "您在回答做美容美发美体护理的频次的问题时，选择的时间较短，在一个月以内；在回答做美容美发美体护理的地点时，选择了不做此类护理，前后矛盾，没有认真答题。")
+          end
+        end
+      end
     when "53842d30eb0e5bb228000008"
       # 问卷吧嘉年华小任务（编号：XFXW-04）
       # B2.您或您家未来半年内打算购买以下哪些IT数码产品？

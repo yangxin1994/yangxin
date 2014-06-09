@@ -265,7 +265,6 @@ OopsData::Application.routes.draw do
       collection do
         get :pre_surveys, :surveys, :orders, :region_quota, :recharge_fail_mobile, :check_order_result
         post :update_quota
-        get :recharge_fail_mobile
       end
 
       member do
