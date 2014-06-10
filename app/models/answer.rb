@@ -1637,12 +1637,12 @@ class Answer
           end
         end
         if [5511498787937847, 3260314383344951, 6758167448164534, 6902359150061489, 13194501943255804].include?(self.answer_content[q3_id]["19265310329668136"][0])
-          if self.answer_content[q2_id_ary[9]]["selection"].include?(22638846609036320)
+          if self.answer_content[q3_id_ary[9]]["selection"].include?(22638846609036320)
             return self.review(false, auditor, "您最近一次购买以下配饰是在什么时候？您选择的最近购买过。您通常购买一下配饰是在什么地点？却选择没有购买过。前后矛盾。")
           end
         end
         if [5511498787937847, 3260314383344951, 6758167448164534, 6902359150061489, 13194501943255804].include?(self.answer_content[q3_id]["21050428569599900"][0])
-          if self.answer_content[q2_id_ary[10]]["selection"].include?(27501447805005100)
+          if self.answer_content[q3_id_ary[10]]["selection"].include?(27501447805005100)
             return self.review(false, auditor, "您最近一次购买以下配饰是在什么时候？您选择的最近购买过。您通常购买一下配饰是在什么地点？却选择没有购买过。前后矛盾。")
           end
         end
@@ -1849,7 +1849,7 @@ class Answer
         q10 = Question.find(q10_id)
         q9.issue["rows"].each_with_index do |r, index|
           q10_r_id = q10.issue["rows"][index]["id"].to_s
-          if [5042842124097239, 4222621758003774, 6018777364637514, 3659747314302127, 20778639463058204].include?(self.answer_content[q9_id][r["id"].to_s]) && self.answer_content[q10_id][q10_r_id].include?(14268191503939008)
+          if [5042842124097239, 4222621758003774, 6018777364637514, 3659747314302127, 20778639463058204].include?(self.answer_content[q9_id][r["id"].to_s][0]) && self.answer_content[q10_id][q10_r_id].include?(14268191503939008)
             return self.review(false, auditor, "您在回答做美容美发美体护理的频次的问题时，选择的时间较短，在一个月以内；在回答做美容美发美体护理的地点时，选择了不做此类护理，前后矛盾，没有认真答题。")
           end
         end
