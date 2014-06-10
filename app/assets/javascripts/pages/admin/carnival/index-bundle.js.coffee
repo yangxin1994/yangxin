@@ -154,7 +154,7 @@ $ ->
     order_id = $(this).data("id")
     $this = $(this)
     $.ajax
-      url: "/admin/carnivals/#{order_id}/check_result"
+      url: "/admin/carnivals/#{order_id}/check_order_result"
       type: 'GET'
       success: (ret)->
         if ret.success

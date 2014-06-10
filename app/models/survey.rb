@@ -685,6 +685,7 @@ class Survey
     qindex = 0
     q = self.all_questions_type(false)
     csv_string = CSV.generate(:headers => true) do |csv|
+      break if answers.blank?
       if answers[0].carnival_user.present?
         csv << ["mobile"] + excel_header
       else

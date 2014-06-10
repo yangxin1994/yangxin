@@ -42,7 +42,8 @@ class Admin::AnswersController < Admin::AdminController
     elsif params[:suspected].to_s == "false"
       answers = answers.select { |e| e.suspected == false }
     end
-    csv_string = survey.admin_to_csv(answers)
+    csv_string = survey.admin_to_csv(answers || [])
+    csv_string ||= ""
     csv_string_gbk = ""
     csv_string.each_char do |csv_str|
       begin

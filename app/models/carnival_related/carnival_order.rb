@@ -99,6 +99,26 @@ class CarnivalOrder
     CarnivalChargeWorker.perform_async(self.id.to_s, self.mobile, self.amount)
   end
 
+  def handle_one_by_one
+    return if self.status != WAIT
+    return if ![STAGE_1, STAGE_2, STAGE_3].include?(self.type)
+
+    self.status = HANDLE
+    self.esai_status = ESAI_HANDLE
+    self.handled_at = Time.now
+    self.save
+    logger.info "FFFFFFFFFFFFFFFFFFFFFFFF"
+
+    retval = EsaiApi.new.charge_phone(self.mobile, self.amount, "None")
+    if retval.nil?
+      self.esai_status = CarnivalOrder::ESAI_FAIL
+    else
+      self.esai_status = CarnivalOrder::ESAI_HANDLE
+      self.esai_order_id = retval
+    end
+    self.save
+  end
+
   def manu_handle
     return ErrorEnum::WRONG_ORDER_STATUS if self.status != WAIT
     self.status = HANDLE
@@ -140,9 +160,10 @@ class CarnivalOrder
   end
 
   def self.recharge_fail_mobile
-    CarnivalOrder.where(esai_status: ESAI_FAIL, status: HANDLE).each do |order|
+    CarnivalOrder.where(esai_status: ESAI_FAIL, status: HANDLE).each_with_index do |order, index|
+      puts index
       order.update_attributes(status: WAIT)
-      order.handle
+      order.handle_one_by_one
     end
   end
 
