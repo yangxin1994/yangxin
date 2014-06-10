@@ -1480,6 +1480,380 @@ class Answer
   def check_contradiction
     auditor = User.find_by_email('gaoyuzhen@oopsdata.com')
     case self.survey.id.to_s
+    when "5384282deb0e5bbcb900002b"
+      # 问卷吧嘉年华小任务（编号：XFXW-02）
+      # 回答不认真，您最近一次购买以下服装是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。
+      q1_id = "5384282deb0e5bbcb900002e"
+      if self.answer_content[q1_id].present?
+        q1_id_ary = ["5384282deb0e5bbcb900002f", "5384282deb0e5bbcb9000030", "5384282deb0e5bbcb9000031", "5384282deb0e5bbcb9000032", "5384282deb0e5bbcb9000033", "5384282deb0e5bbcb9000034", "5384282deb0e5bbcb9000035", "5384282deb0e5bbcb9000036", "5384282deb0e5bbcb9000037"]
+        if [6063282373457212, 1332025380940685, 629956041602594, 8743666065696540, 20654034206111250].include?(self.answer_content[q1_id]["8421881148058847"][0])
+          if self.answer_content[q1_id_ary[0]]["selection"].include?(26906607407257976)
+            return self.review(false, auditor, "回答不认真，您最近一次购买以下服装是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [6063282373457212, 1332025380940685, 629956041602594, 8743666065696540, 20654034206111250].include?(self.answer_content[q1_id]["5731047882234557"][0])
+          if self.answer_content[q1_id_ary[1]]["selection"].include?(15333389563179084)
+            return self.review(false, auditor, "回答不认真，您最近一次购买以下服装是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [6063282373457212, 1332025380940685, 629956041602594, 8743666065696540, 20654034206111250].include?(self.answer_content[q1_id]["6920470923816009"][0])
+          if self.answer_content[q1_id_ary[2]]["selection"].include?(22562795826490028)
+            return self.review(false, auditor, "回答不认真，您最近一次购买以下服装是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [6063282373457212, 1332025380940685, 629956041602594, 8743666065696540, 20654034206111250].include?(self.answer_content[q1_id]["1905180640109205"][0])
+          if self.answer_content[q1_id_ary[3]]["selection"].include?(23045718616622224)
+            return self.review(false, auditor, "回答不认真，您最近一次购买以下服装是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [6063282373457212, 1332025380940685, 629956041602594, 8743666065696540, 20654034206111250].include?(self.answer_content[q1_id]["24016718891360356"][0])
+          if self.answer_content[q1_id_ary[4]]["selection"].include?(15060067400644048)
+            return self.review(false, auditor, "回答不认真，您最近一次购买以下服装是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [6063282373457212, 1332025380940685, 629956041602594, 8743666065696540, 20654034206111250].include?(self.answer_content[q1_id]["18793900016606364"][0])
+          if self.answer_content[q1_id_ary[5]]["selection"].include?(20929449850566080)
+            return self.review(false, auditor, "回答不认真，您最近一次购买以下服装是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [6063282373457212, 1332025380940685, 629956041602594, 8743666065696540, 20654034206111250].include?(self.answer_content[q1_id]["15971570274703724"][0])
+          if self.answer_content[q1_id_ary[6]]["selection"].include?(17785995684465368)
+            return self.review(false, auditor, "回答不认真，您最近一次购买以下服装是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [6063282373457212, 1332025380940685, 629956041602594, 8743666065696540, 20654034206111250].include?(self.answer_content[q1_id]["26517003384795564"][0])
+          if self.answer_content[q1_id_ary[7]]["selection"].include?(28027343098469750)
+            return self.review(false, auditor, "回答不认真，您最近一次购买以下服装是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [6063282373457212, 1332025380940685, 629956041602594, 8743666065696540, 20654034206111250].include?(self.answer_content[q1_id]["14727999294553480"][0])
+          if self.answer_content[q1_id_ary[8]]["selection"].include?(18134694218623456)
+            return self.review(false, auditor, "回答不认真，您最近一次购买以下服装是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+      end
+      # 您最近一次购买以下服装，鞋子是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。
+      q2_id = "5384282deb0e5bbcb9000041"
+      if self.answer_content[q2_id].present?
+        q2_id_ary = ["5384282deb0e5bbcb9000042", "5384282deb0e5bbcb9000043", "5384282deb0e5bbcb9000044", "5384282deb0e5bbcb9000045", "5384282deb0e5bbcb9000046", "5384282deb0e5bbcb9000047", "5384282deb0e5bbcb9000048", "5384282deb0e5bbcb9000049", "5384282deb0e5bbcb900004a", "5384282deb0e5bbcb900004b"]
+        if [80610906142193, 537652013685443, 6080364894431893, 2088661825684050, 13443849246235992].include?(self.answer_content[q2_id]["4252329268653682"][0])
+          if self.answer_content[q2_id_ary[0]]["selection"].include?(8509585111237307)
+            return self.review(false, auditor, "您最近一次购买以下服装，鞋子是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [80610906142193, 537652013685443, 6080364894431893, 2088661825684050, 13443849246235992].include?(self.answer_content[q2_id]["25166279325515350"][0])
+          if self.answer_content[q2_id_ary[1]]["selection"].include?(17528728611175652)
+            return self.review(false, auditor, "您最近一次购买以下服装，鞋子是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [80610906142193, 537652013685443, 6080364894431893, 2088661825684050, 13443849246235992].include?(self.answer_content[q2_id]["12077112613499512"][0])
+          if self.answer_content[q2_id_ary[2]]["selection"].include?(18826881988340904)
+            return self.review(false, auditor, "您最近一次购买以下服装，鞋子是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [80610906142193, 537652013685443, 6080364894431893, 2088661825684050, 13443849246235992].include?(self.answer_content[q2_id]["24724363208536420"][0])
+          if self.answer_content[q2_id_ary[3]]["selection"].include?(15482650482064836)
+            return self.review(false, auditor, "您最近一次购买以下服装，鞋子是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [80610906142193, 537652013685443, 6080364894431893, 2088661825684050, 13443849246235992].include?(self.answer_content[q2_id]["16341843170833212"][0])
+          if self.answer_content[q2_id_ary[4]]["selection"].include?(27838643820950176)
+            return self.review(false, auditor, "您最近一次购买以下服装，鞋子是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [80610906142193, 537652013685443, 6080364894431893, 2088661825684050, 13443849246235992].include?(self.answer_content[q2_id]["21065405170686920"][0])
+          if self.answer_content[q2_id_ary[5]]["selection"].include?(20117934599072816)
+            return self.review(false, auditor, "您最近一次购买以下服装，鞋子是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [80610906142193, 537652013685443, 6080364894431893, 2088661825684050, 13443849246235992].include?(self.answer_content[q2_id]["27254975234412044"][0])
+          if self.answer_content[q2_id_ary[6]]["selection"].include?(24303521636451948)
+            return self.review(false, auditor, "您最近一次购买以下服装，鞋子是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [80610906142193, 537652013685443, 6080364894431893, 2088661825684050, 13443849246235992].include?(self.answer_content[q2_id]["25102518150836624"][0])
+          if self.answer_content[q2_id_ary[7]]["selection"].include?(16530286885401964)
+            return self.review(false, auditor, "您最近一次购买以下服装，鞋子是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [80610906142193, 537652013685443, 6080364894431893, 2088661825684050, 13443849246235992].include?(self.answer_content[q2_id]["19494109406389700"][0])
+          if self.answer_content[q2_id_ary[8]]["selection"].include?(18917522031438016)
+            return self.review(false, auditor, "您最近一次购买以下服装，鞋子是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [80610906142193, 537652013685443, 6080364894431893, 2088661825684050, 13443849246235992].include?(self.answer_content[q2_id]["13331135805949980"][0])
+          if self.answer_content[q2_id_ary[9]]["selection"].include?(15332060997953048)
+            return self.review(false, auditor, "您最近一次购买以下服装，鞋子是在什么时候？您选择的最近购买过。而后面的您通常购买以下服装是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+      end
+      # 您最近一次购买以下配饰是在什么时候？您选择的最近购买过。您通常购买一下配饰是在什么地点？却选择没有购买过。前后矛盾。
+      q3_id = "5384282deb0e5bbcb9000058"
+      if self.answer_content[q3_id].present?
+        q3_id_ary = ["5384282deb0e5bbcb9000059", "5384282deb0e5bbcb900005a", "5384282deb0e5bbcb900005b", "5384282deb0e5bbcb900005c", "5384282deb0e5bbcb900005d", "5384282deb0e5bbcb900005e", "5384282deb0e5bbcb900005f", "5384282deb0e5bbcb9000060", "5384282deb0e5bbcb9000061", "5384282deb0e5bbcb9000062", "5384282deb0e5bbcb9000063"]
+        if [5511498787937847, 3260314383344951, 6758167448164534, 6902359150061489, 13194501943255804].include?(self.answer_content[q3_id]["5774153198153655"][0])
+          if self.answer_content[q3_id_ary[0]]["selection"].include?(19328245926638090)
+            return self.review(false, auditor, "您最近一次购买以下配饰是在什么时候？您选择的最近购买过。您通常购买一下配饰是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [5511498787937847, 3260314383344951, 6758167448164534, 6902359150061489, 13194501943255804].include?(self.answer_content[q3_id]["6935449779139548"][0])
+          if self.answer_content[q3_id_ary[1]]["selection"].include?(25297077345676840)
+            return self.review(false, auditor, "您最近一次购买以下配饰是在什么时候？您选择的最近购买过。您通常购买一下配饰是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [5511498787937847, 3260314383344951, 6758167448164534, 6902359150061489, 13194501943255804].include?(self.answer_content[q3_id]["6595512487294154"][0])
+          if self.answer_content[q3_id_ary[2]]["selection"].include?(22827636179093320)
+            return self.review(false, auditor, "您最近一次购买以下配饰是在什么时候？您选择的最近购买过。您通常购买一下配饰是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [5511498787937847, 3260314383344951, 6758167448164534, 6902359150061489, 13194501943255804].include?(self.answer_content[q3_id]["4574881044486772"][0])
+          if self.answer_content[q3_id_ary[3]]["selection"].include?(30228617297101056)
+            return self.review(false, auditor, "您最近一次购买以下配饰是在什么时候？您选择的最近购买过。您通常购买一下配饰是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [5511498787937847, 3260314383344951, 6758167448164534, 6902359150061489, 13194501943255804].include?(self.answer_content[q3_id]["16570173053353908"][0])
+          if self.answer_content[q3_id_ary[4]]["selection"].include?(21210143022345256)
+            return self.review(false, auditor, "您最近一次购买以下配饰是在什么时候？您选择的最近购买过。您通常购买一下配饰是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [5511498787937847, 3260314383344951, 6758167448164534, 6902359150061489, 13194501943255804].include?(self.answer_content[q3_id]["22552797757837810"][0])
+          if self.answer_content[q3_id_ary[5]]["selection"].include?(23225210126153116)
+            return self.review(false, auditor, "您最近一次购买以下配饰是在什么时候？您选择的最近购买过。您通常购买一下配饰是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [5511498787937847, 3260314383344951, 6758167448164534, 6902359150061489, 13194501943255804].include?(self.answer_content[q3_id]["23662811227425824"][0])
+          if self.answer_content[q3_id_ary[6]]["selection"].include?(18883132176625290)
+            return self.review(false, auditor, "您最近一次购买以下配饰是在什么时候？您选择的最近购买过。您通常购买一下配饰是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [5511498787937847, 3260314383344951, 6758167448164534, 6902359150061489, 13194501943255804].include?(self.answer_content[q3_id]["21751476652737612"][0])
+          if self.answer_content[q3_id_ary[7]]["selection"].include?(20678020665600784)
+            return self.review(false, auditor, "您最近一次购买以下配饰是在什么时候？您选择的最近购买过。您通常购买一下配饰是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [5511498787937847, 3260314383344951, 6758167448164534, 6902359150061489, 13194501943255804].include?(self.answer_content[q3_id]["21000437332134600"][0])
+          if self.answer_content[q3_id_ary[8]]["selection"].include?(20111189078278720)
+            return self.review(false, auditor, "您最近一次购买以下配饰是在什么时候？您选择的最近购买过。您通常购买一下配饰是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [5511498787937847, 3260314383344951, 6758167448164534, 6902359150061489, 13194501943255804].include?(self.answer_content[q3_id]["19265310329668136"][0])
+          if self.answer_content[q3_id_ary[9]]["selection"].include?(22638846609036320)
+            return self.review(false, auditor, "您最近一次购买以下配饰是在什么时候？您选择的最近购买过。您通常购买一下配饰是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+        if [5511498787937847, 3260314383344951, 6758167448164534, 6902359150061489, 13194501943255804].include?(self.answer_content[q3_id]["21050428569599900"][0])
+          if self.answer_content[q3_id_ary[10]]["selection"].include?(27501447805005100)
+            return self.review(false, auditor, "您最近一次购买以下配饰是在什么时候？您选择的最近购买过。您通常购买一下配饰是在什么地点？却选择没有购买过。前后矛盾。")
+          end
+        end
+      end
+    when "53843187eb0e5b2ac8000037"
+      # 问卷吧嘉年华小任务（编号：XFXW-06）
+      q1_id = "53843187eb0e5b2ac800003b"
+      # 您在回答在不影响家庭稳定的情况下，我不反对婚外恋的问题时，选择了赞同；在回答我认为婚后应该对伴侣忠诚的问题时，选择了赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q1_id].present?
+        if [2266010792463603, 5067004245540575].include?((self.answer_content[q1_id]["5659440666829353"] || [])[0]) && [2266010792463603, 5067004245540575].include?((self.answer_content[q1_id]["18612246297257348"] || [])[0])
+          return self.review(false, auditor, "您在回答在不影响家庭稳定的情况下，我不反对婚外恋的问题时，选择了赞同；在回答我认为婚后应该对伴侣忠诚的问题时，选择了赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      # 您在回答在不影响家庭稳定的情况下，我不反对婚外恋的问题时，选择了不赞同；在回答我认为婚后应该对伴侣忠诚的问题时，选择了不赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q1_id].present?
+        if [1270715460665074, 7800577250270601].include?((self.answer_content[q1_id]["5659440666829353"] || [])[0]) && [1270715460665074, 7800577250270601].include?((self.answer_content[q1_id]["18612246297257348"] || [])[0])
+          return self.review(false, auditor, "您在回答在不影响家庭稳定的情况下，我不反对婚外恋的问题时，选择了不赞同；在回答我认为婚后应该对伴侣忠诚的问题时，选择了不赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      # 您在回答人的一生可以有多个性伙伴的问题时，选择了赞同；在回答我认为婚后应该对伴侣忠诚的问题时，选择了赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q1_id].present?
+        if [2266010792463603, 5067004245540575].include?((self.answer_content[q1_id]["12005902279563464"] || [])[0]) && [2266010792463603, 5067004245540575].include?((self.answer_content[q1_id]["18612246297257348"] || [])[0])
+          return self.review(false, auditor, "您在回答人的一生可以有多个性伙伴的问题时，选择了赞同；在回答我认为婚后应该对伴侣忠诚的问题时，选择了赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      # 您在回答人的一生可以有多个性伙伴的问题时，选择了不赞同；在回答我认为婚后应该对伴侣忠诚的问题时，选择了不赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q1_id].present?
+        if [1270715460665074, 7800577250270601].include?((self.answer_content[q1_id]["12005902279563464"] || [])[0]) && [1270715460665074, 7800577250270601].include?((self.answer_content[q1_id]["18612246297257348"] || [])[0])
+          return self.review(false, auditor, "您在回答人的一生可以有多个性伙伴的问题时，选择了不赞同；在回答我认为婚后应该对伴侣忠诚的问题时，选择了不赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      q2_id = "53843187eb0e5b2ac800003d"
+      # 您在回答父母为成年子女买房买车，是理所当然的问题时，选择了赞同；您在回答子女不应该啃老的问题时，选择了赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q2_id].present?
+        if [3729430513998543, 4454254694219727].include?((self.answer_content[q2_id]["483117460548432"] || [])[0]) && [3729430513998543, 4454254694219727].include?((self.answer_content[q2_id]["15834195234798144"] || [])[0])
+          return self.review(false, auditor, "您在回答父母为成年子女买房买车，是理所当然的问题时，选择了赞同；您在回答子女不应该啃老的问题时，选择了赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      # 您在回答父母为成年子女买房买车，是理所当然的问题时，选择了不赞同；您在回答子女不应该啃老的问题时，选择了不赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q2_id].present?
+        if [5206008404796127, 18666950161695570].include?((self.answer_content[q2_id]["483117460548432"] || [])[0]) && [5206008404796127, 18666950161695570].include?((self.answer_content[q2_id]["15834195234798144"] || [])[0])
+          return self.review(false, auditor, "您在回答父母为成年子女买房买车，是理所当然的问题时，选择了不赞同；您在回答子女不应该啃老的问题时，选择了不赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      q3_id = "53843187eb0e5b2ac800003e"
+      # 您在回答不介意男性女性谁更强势，只要互相满意就行的问题时，选择了赞同；您在回答我不能接受男女关系中女性占主导的问题时，选择了赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q3_id].present?
+        if [9469874432835554, 7681413586680518].include?((self.answer_content[q3_id]["9185048434343078"] || [])[0]) && [9469874432835554, 7681413586680518].include?((self.answer_content[q3_id]["20199379702567652"] || [])[0])
+          return self.review(false, auditor, "您在回答不介意男性女性谁更强势，只要互相满意就行的问题时，选择了赞同；您在回答我不能接受男女关系中女性占主导的问题时，选择了赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      # 您在回答不介意男性女性谁更强势，只要互相满意就行的问题时，选择了不赞同；您在回答我不能接受男女关系中女性占主导的问题时，选择了不赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q3_id].present?
+        if [8319240065055097, 5658047513723913].include?((self.answer_content[q3_id]["9185048434343078"] || [])[0]) && [8319240065055097, 5658047513723913].include?((self.answer_content[q3_id]["20199379702567652"] || [])[0])
+          return self.review(false, auditor, "您在回答不介意男性女性谁更强势，只要互相满意就行的问题时，选择了不赞同；您在回答我不能接受男女关系中女性占主导的问题时，选择了不赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      q4_id = "53843187eb0e5b2ac800003f"
+      # 您在回答我总是能按时吃饭的问题时，选择了赞同；您在回答我常常因为一些原因耽误了吃饭睡觉的时间的问题时，选择了赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q4_id].present?
+        if [4247775521710277, 3748205862205147].include?((self.answer_content[q4_id]["2926838308338995"] || [])[0]) && [4247775521710277, 3748205862205147].include?((self.answer_content[q4_id]["22460966436741384"] || [])[0])
+          return self.review(false, auditor, "您在回答我总是能按时吃饭的问题时，选择了赞同；您在回答我常常因为一些原因耽误了吃饭睡觉的时间的问题时，选择了赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      # 您在回答我总是能按时吃饭的问题时，选择了不赞同；您在回答我常常因为一些原因耽误了吃饭睡觉的时间的问题时，选择了不赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q4_id].present?
+        if [9784563136934096, 14712701360876656].include?((self.answer_content[q4_id]["2926838308338995"] || [])[0]) && [9784563136934096, 14712701360876656].include?((self.answer_content[q4_id]["22460966436741384"] || [])[0])
+          return self.review(false, auditor, "您在回答我总是能按时吃饭的问题时，选择了不赞同；您在回答我常常因为一些原因耽误了吃饭睡觉的时间的问题时，选择了不赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      q5_id = "53843187eb0e5b2ac8000043"
+      # 您在回答我觉得周围的人比较尊重、欣赏我的问题时，选择了赞同；您在回答我觉得同事和老板并不赏识我的问题时，选择了赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q5_id].present?
+        if [4872314033006373, 542422466260607].include?((self.answer_content[q5_id]["11662298124656860"] || [])[0]) && [4872314033006373, 542422466260607].include?((self.answer_content[q5_id]["23248677102980936"] || [])[0])
+          return self.review(false, auditor, "您在回答我觉得周围的人比较尊重、欣赏我的问题时，选择了赞同；您在回答我觉得同事和老板并不赏识我的问题时，选择了赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      # 您在回答我觉得周围的人比较尊重、欣赏我的问题时，选择了不赞同；您在回答我觉得同事和老板并不赏识我的问题时，选择了不赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q5_id].present?
+        if [1750861104257711, 13990643886299348].include?((self.answer_content[q5_id]["11662298124656860"] || [])[0]) && [1750861104257711, 13990643886299348].include?((self.answer_content[q5_id]["23248677102980936"] || [])[0])
+          return self.review(false, auditor, "您在回答我觉得周围的人比较尊重、欣赏我的问题时，选择了不赞同；您在回答我觉得同事和老板并不赏识我的问题时，选择了不赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      q6_id = "5387f6e7eb0e5b63c8000084"
+      # 您在回答为了提高生活品质，我可以接受贷款和借债的问题时，选择了赞同；您在回答哪怕为了改善生活，我也不愿意欠别人钱的问题时，选择了赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q6_id].present?
+        if [1118561990446328, 1135563994747466].include?((self.answer_content[q6_id]["7556701418003352"] || [])[0]) && [1118561990446328, 1135563994747466].include?((self.answer_content[q6_id]["15396301937919656"] || [])[0])
+          return self.review(false, auditor, "您在回答为了提高生活品质，我可以接受贷款和借债的问题时，选择了赞同；您在回答哪怕为了改善生活，我也不愿意欠别人钱的问题时，选择了赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      # 您在回答为了提高生活品质，我可以接受贷款和借债的问题时，选择了不赞同；您在回答哪怕为了改善生活，我也不愿意欠别人钱的问题时，选择了不赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q6_id].present?
+        if [6282167280981283, 19479556202586436].include?((self.answer_content[q6_id]["7556701418003352"] || [])[0]) && [6282167280981283, 19479556202586436].include?((self.answer_content[q6_id]["15396301937919656"] || [])[0])
+          return self.review(false, auditor, "您在回答为了提高生活品质，我可以接受贷款和借债的问题时，选择了赞同；您在回答哪怕为了改善生活，我也不愿意欠别人钱的问题时，选择了赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      q7_id = "5387f6f7eb0e5b63c8000085"
+      # 您在回答我经常观察其他人是否使用名牌商品的问题时，选择了赞同；您在回答我不会注意到周围人是否在使用名牌商品的问题时，选择了赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q7_id].present?
+        if [310777727905778, 9074270701623456].include?((self.answer_content[q7_id]["923178067319331"] || [])[0]) && [310777727905778, 9074270701623456].include?((self.answer_content[q7_id]["9126189132884300"] || [])[0])
+          return self.review(false, auditor, "您在回答我经常观察其他人是否使用名牌商品的问题时，选择了赞同；您在回答我不会注意到周围人是否在使用名牌商品的问题时，选择了赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      # 您在回答我经常观察其他人是否使用名牌商品的问题时，选择了不赞同；您在回答我不会注意到周围人是否在使用名牌商品的问题时，选择了不赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q7_id].present?
+        if [7223399211883869, 19110985263434800].include?((self.answer_content[q7_id]["923178067319331"] || [])[0]) && [7223399211883869, 19110985263434800].include?((self.answer_content[q7_id]["9126189132884300"] || [])[0])
+          return self.review(false, auditor, "您在回答我经常观察其他人是否使用名牌商品的问题时，选择了不赞同；您在回答我不会注意到周围人是否在使用名牌商品的问题时，选择了不赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      q8_id = "5387f6faeb0e5b63c8000086"
+      # 您在回答人和人之间越来越平等了，特权现象减少了的问题时，选择了赞同；您在回答社会不公平越来越明显，很多人有特权的问题时，选择了赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q8_id].present?
+        if [6570602281113133, 1869451695589552].include?((self.answer_content[q8_id]["23743809319774560"] || [])[0]) && [6570602281113133, 1869451695589552].include?((self.answer_content[q8_id]["16998110318772216"] || [])[0])
+          return self.review(false, auditor, "您在回答人和人之间越来越平等了，特权现象减少了的问题时，选择了赞同；您在回答社会不公平越来越明显，很多人有特权的问题时，选择了赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      # 您在回答人和人之间越来越平等了，特权现象减少了的问题时，选择了不赞同；您在回答社会不公平越来越明显，很多人有特权的问题时，选择了不赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q8_id].present?
+        if [8303131721894165, 14237650258208604].include?((self.answer_content[q8_id]["23743809319774560"] || [])[0]) && [8303131721894165, 14237650258208604].include?((self.answer_content[q8_id]["16998110318772216"] || [])[0])
+          return self.review(false, auditor, "您在回答人和人之间越来越平等了，特权现象减少了的问题时，选择了不赞同；您在回答社会不公平越来越明显，很多人有特权的问题时，选择了不赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      q9_id = "5387f723eb0e5b63c8000087"
+      # 您在回答即使花更多一些钱我也愿意食用绿色食品的问题时，选择了赞同；您在回答没必要为生态农产品多支付费用的问题时，选择了赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q9_id].present?
+        if [9736586578537008, 6278687095031692].include?((self.answer_content[q9_id]["9599674978450954"] || [])[0]) && [9736586578537008, 6278687095031692].include?((self.answer_content[q9_id]["27227119990395556"] || [])[0])
+          return self.review(false, auditor, "您在回答即使花更多一些钱我也愿意食用绿色食品的问题时，选择了赞同；您在回答没必要为生态农产品多支付费用的问题时，选择了赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      # 您在回答即使花更多一些钱我也愿意食用绿色食品的问题时，选择了不赞同；您在回答没必要为生态农产品多支付费用的问题时，选择了不赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q9_id].present?
+        if [8486791375483583, 20541360557767216].include?((self.answer_content[q9_id]["9599674978450954"] || [])[0]) && [8486791375483583, 20541360557767216].include?((self.answer_content[q9_id]["27227119990395556"] || [])[0])
+          return self.review(false, auditor, "您在回答即使花更多一些钱我也愿意食用绿色食品的问题时，选择了不赞同；您在回答没必要为生态农产品多支付费用的问题时，选择了不赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      q10_id = "5387f734eb0e5b63c800008a"
+      # 您在回答与西方的节日相比较,我更喜欢过传统节日的问题时，选择了赞同；您在回答我更喜欢过西方节日的问题时，选择了赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q10_id].present?
+        if [1805661974650164, 1975222385094150].include?((self.answer_content[q10_id]["805121409891742"] || [])[0]) && [1805661974650164, 1975222385094150].include?((self.answer_content[q10_id]["15621327604883530"] || [])[0])
+          return self.review(false, auditor, "您在回答与西方的节日相比较,我更喜欢过传统节日的问题时，选择了赞同；您在回答我更喜欢过西方节日的问题时，选择了赞同，前后矛盾，没有认真答题。")
+        end
+      end
+      # 您在回答与西方的节日相比较,我更喜欢过传统节日的问题时，选择了不赞同；您在回答我更喜欢过西方节日的问题时，选择了不赞同，前后矛盾，没有认真答题。
+      if self.answer_content[q10_id].present?
+        if [3928553455608006, 23824163601042388].include?((self.answer_content[q10_id]["805121409891742"] || [3928553455608006, 23824163601042388])[0]) && [].include?((self.answer_content[q10_id]["15621327604883530"] || [])[0])
+          return self.review(false, auditor, "您在回答与西方的节日相比较,我更喜欢过传统节日的问题时，选择了不赞同；您在回答我更喜欢过西方节日的问题时，选择了不赞同，前后矛盾，没有认真答题。")
+        end
+      end
+    when "5385982aeb0e5b7282000022"
+      # 问卷吧嘉年华小任务（编号：XFXW-05）
+      # 您平时多长时间使用一次化妆水?
+      # 选择“从来不用”，拒绝。
+      q1_id = "5385982beb0e5b728200003a"
+      if self.answer_content[q1_id].present? && self.answer_content[q1_id]["selection"].include?(18626607499360290)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了化妆水；在回答平时多长时间使用一次化妆水的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 您平时多长时间使用一次保湿产品?
+      # 选择“从来不用”，拒绝。
+      q2_id = "5385982beb0e5b728200003b"
+      if self.answer_content[q2_id].present? && self.answer_content[q2_id]["selection"].include?(20117377351336600)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了保湿产品；在回答平时多长时间使用一次保湿产品的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 您平时多长时间使用一次美白产品?
+      # 选择“从来不用”，拒绝。
+      q3_id = "5385982beb0e5b728200003c"
+      if self.answer_content[q3_id].present? && self.answer_content[q3_id]["selection"].include?(24183166894457330)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了美白产品；在回答平时多长时间使用一次美白产品的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 您平时多长时间使用一次抗皱产品?
+      # 选择“从来不用”，拒绝。
+      q4_id = "5385982beb0e5b728200003d"
+      if self.answer_content[q4_id].present? && self.answer_content[q4_id]["selection"].include?(17600101280371876)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了抗皱产品；在回答平时多长时间使用一次抗皱产品的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 您平时多长时间使用一次防晒产品?
+      # 选择“从来不用”，拒绝。
+      q5_id = "5385982beb0e5b728200003e"
+      if self.answer_content[q5_id].present? && self.answer_content[q5_id]["selection"].include?(24071942529544176)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了防晒产品；在回答平时多长时间使用一次防晒产品的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 您平时多长时间使用一次祛斑产品?
+      # 选择“从来不用”，拒绝。
+      q6_id = "5385982beb0e5b728200003f"
+      if self.answer_content[q6_id].present? && self.answer_content[q6_id]["selection"].include?(13778233929924768)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了祛斑产品；在回答平时多长时间使用一次祛斑产品的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 您平时多长时间使用一次祛痘产品?
+      # 选择“从来不用”，拒绝。
+      q7_id = "5385982beb0e5b7282000040"
+      if self.answer_content[q7_id].present? && self.answer_content[q7_id]["selection"].include?(31701187658068960)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了祛痘产品；在回答平时多长时间使用一次祛痘产品的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 您平时多长时间使用一次眼部护理产品?
+      # 选择“从来不用”，拒绝。
+      q8_id = "5385982beb0e5b7282000041"
+      if self.answer_content[q8_id].present? && self.answer_content[q8_id]["selection"].include?(9819392651748270)
+        return self.review(false, auditor, "您在回答使用下列哪些化妆品的问题时，选择了眼部护理产品；在回答平时多长时间使用一次眼部护理产品的问题时，选择了从来不用，前后矛盾，没有认真答题。")
+      end
+      # 如果第16题的子问题里选择了“不做此类护理”，那么15题对应子问题里选择除了“一个月也没有一次”外的5个选项中的任意一个选项，都拒绝，每个子问题都是如此。
+      q9_id = "5385982beb0e5b7282000046"
+      q10_id = "5385982beb0e5b7282000047"
+      if self.answer_content[q9_id].present? && self.answer_content[q10_id].present?
+        q9 = Question.find(q9_id)
+        q10 = Question.find(q10_id)
+        q9.issue["rows"].each_with_index do |r, index|
+          q10_r_id = q10.issue["rows"][index]["id"].to_s
+          if [5042842124097239, 4222621758003774, 6018777364637514, 3659747314302127, 20778639463058204].include?(self.answer_content[q9_id][r["id"].to_s][0]) && self.answer_content[q10_id][q10_r_id].include?(14268191503939008)
+            return self.review(false, auditor, "您在回答做美容美发美体护理的频次的问题时，选择的时间较短，在一个月以内；在回答做美容美发美体护理的地点时，选择了不做此类护理，前后矛盾，没有认真答题。")
+          end
+        end
+      end
     when "53842d30eb0e5bb228000008"
       # 问卷吧嘉年华小任务（编号：XFXW-04）
       # B2.您或您家未来半年内打算购买以下哪些IT数码产品？
@@ -1696,7 +2070,10 @@ class Answer
     # 5388279feb0e5b9d630000e2: MTJC-03
     # 53868990eb0e5ba257000025: GGJC
     # 53842d30eb0e5bb228000008: XFXW-04
-    ["53842d30eb0e5bb228000008"].each do |sid|
+    # 5385982aeb0e5b7282000022: XFXW-05
+    # 53843187eb0e5b2ac8000037: XFXW-06
+    # 5384282deb0e5bbcb900002b: XFXW-02
+    ["5385982aeb0e5b7282000022", "53843187eb0e5b2ac8000037", "5384282deb0e5bbcb900002b"].each do |sid|
       Survey.find(sid).answers.where(status: Answer::UNDER_REVIEW).each do |a|
         a.check_contradiction
       end
