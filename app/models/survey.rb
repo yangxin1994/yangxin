@@ -578,6 +578,9 @@ class Survey
 
   def spss_header
     headers =[
+      {"spss_name" => "user_id",
+       "spss_type" => "String",
+       "spss_label" => "用户ID"},
       {"spss_name" => "answer_id",
        "spss_type" => "String",
        "spss_label" => "答案ID"},
@@ -593,6 +596,9 @@ class Survey
       {"spss_name" => "IP",
        "spss_type" => "String",
        "spss_label" => "IP"},
+      {"spss_name" => "location",
+       "spss_type" => "String",
+       "spss_label" => "地点"},
       {"spss_name" => "time",
        "spss_type" => "String",
        "spss_label" => "答题时长"}
@@ -604,7 +610,7 @@ class Survey
   end
 
   def excel_header
-    headers =["answer_id", "is_agent", "email", "mobile", "IP", "地点", "答题时长"]
+    headers =["user_id", "answer_id", "is_agent", "email", "mobile", "IP", "地点", "答题时长"]
     self.all_questions(false).each_with_index do |e, i|
       headers += e.excel_header("q#{i+1}")
     end
@@ -659,7 +665,14 @@ class Survey
       else
         answer_time = 0      
       end
-      line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, "#{answer_time} 分"]
+      if answer.carnival_user.present?
+        user_id = answer.carnival_user.id.to_s
+      elsif answer.user.present?
+        user_id = answer.user.id.to_s
+      else
+        user_id = ""
+      end
+      line_answer = [user_id, answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.ip_address, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
       begin
         all_questions_id(false).each_with_index do |question, index|
           qindex = index
@@ -698,7 +711,7 @@ class Survey
         else
           answer_time = 0      
         end
-        line_answer = [answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
+        line_answer = [answer.carnival_user.try(:id) || answer.user.try(:id), answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
         if answer.carnival_user.present?
           line_answer.insert(0, answer.carnival_user.mobile.to_s)
         end
