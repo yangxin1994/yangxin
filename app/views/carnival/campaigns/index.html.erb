@@ -800,7 +800,12 @@
             }
           })
         }else{
-          var tmp_status = status_arr.filter(function(ele){ return ele > 0})
+
+          var tmp_status = $.grep(status_arr, function( ele, i ) {
+            return ele > 0 ;
+          });
+
+          //var tmp_status = status_arr.filter(function(ele){ return ele > 0})
           if( $.inArray(0,status_arr) >= 0 && tmp_status.length > 0 ){
             if(step == 1){
               var con = '摩天轮';
@@ -812,7 +817,13 @@
               var con = '热气球'
               var reward = '10元话费及一次抽大奖机会';
             }
-            var answered = status_arr.filter(function(ele){ return ele > 0 });
+
+            var answered = $.grep(status_arr, function( ele, i ) {
+              return ele > 0 ;
+            });
+
+
+            //var answered = status_arr.filter(function(ele){ return ele > 0 });
             var perc     = answered.length + '/' +  status_arr.length ;
             var t = '完成任务';
             var con = '恭喜,已完成' + con + '关卡的' + perc + ',全部完成可获得' + reward;   
