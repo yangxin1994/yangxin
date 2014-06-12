@@ -545,11 +545,9 @@ class Answer
                                 condition["answer"],
                                 condition["fuzzy"])
         return true if !pass_condition
-        # set_reject_with_type(REJECT_BY_SCREEN) and return false if pass_condition
       end
     end
     set_reject_with_type(REJECT_BY_SCREEN) and return false
-    # true
   end
 
   def check_question_quota(answer_content)
