@@ -144,7 +144,7 @@ class Carnival
     region_q = Question.find(region_qid)
     # region beijing, shanghai, guangzhou, shenzhen, tianjin, nanjing, wuhan, shenyang, xi'an, chengdu, chongqing, hangzhou, tsingdao,
     # dalian, ningbo, jinan, harbin, changchun, xiamen, zhengzhou, suzhou, wuxi, changsha, fuzhou, lanzhou, urumchi, kunming
-    code = ["4096", "36864", "77888", "78016", "8192", "41024", "69696", "24640", "110656", "94272", "90112", "45120", "61568", "24704", "45184", "61504", "32832", "28736", "53376", "65600", "41088", "73792", "53312", "114752", "127040", "102464"]
+    code = ["4096", "36864", "77888", "78016", "8192", "41024", "69696", "24640", "110656", "94272", "90112", "45120", "61568", "24704", "45184", "61504", "32832", "28736", "53376", "65600", "41280", "41088", "73792", "53312", "114752", "127040", "102464"]
     code.each_with_index do |c, index|
       return true if quota_stats.quota["region"][c] < quota_setting.quota["region"][c] && QuillCommon::AddressUtility.satisfy_region_code?(answer.answer_content[region_qid]["address"], c)
     end
@@ -205,7 +205,7 @@ class Carnival
     region_q = Question.find(region_qid)
     # region beijing, shanghai, guangzhou, shenzhen, tianjin, nanjing, wuhan, shenyang, xi'an, chengdu, chongqing, hangzhou, tsingdao,
     # dalian, ningbo, jinan, harbin, changchun, xiamen, zhengzhou, suzhou, wuxi, changsha, fuzhou, lanzhou, urumchi, kunming
-    code = ["4096", "36864", "77888", "78016", "8192", "41024", "69696", "24640", "110656", "94272", "90112", "45120", "61568", "24704", "45184", "61504", "32832", "28736", "53376", "65600", "41088", "73792", "53312", "114752", "127040", "102464"]
+    code = ["4096", "36864", "77888", "78016", "8192", "41024", "69696", "24640", "110656", "94272", "90112", "45120", "61568", "24704", "45184", "61504", "32832", "28736", "53376", "65600", "41280", "41088", "73792", "53312", "114752", "127040", "102464"]
     code.each do |c|
       quota_stats.quota["region"][c] += delta if QuillCommon::AddressUtility.satisfy_region_code?(answer.answer_content[region_qid]["address"], c)
     end
@@ -238,9 +238,10 @@ class Carnival
   end
 
   def self.refresh_quota
-    SURVEY.each do |e|
+#    ([PRE_SURVEY] + SURVEY).each do |e|
+    ["53859185eb0e5b7282000002", "5385982aeb0e5b7282000022", "53843187eb0e5b2ac8000037"].each do |e|
       puts e + ": begin"
-      c = Carnival.where(survey_id: e).first
+      c = Carnival.where(survey_id: e, type: STATS).first
       c.quota["amount"] = 0
       c.quota["gender"] = [0,0]
       c.quota["age"] = [0, 0, 0, 0, 0, 0, 0]

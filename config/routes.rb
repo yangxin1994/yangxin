@@ -1,7 +1,7 @@
 require 'sidekiq/web'
 OopsData::Application.routes.draw do
 
-  # mount Sidekiq::Web, at: "/sidekiq"
+  mount Sidekiq::Web, at: "/sidekiq"
 
   # match '*path' => 'welcome#index'
   # get '/:unique_key' => 'utility/short_urls#show', :constraints => { :unique_key => /~.+/ }
