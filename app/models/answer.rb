@@ -537,17 +537,18 @@ class Answer
       condition_qid_ary = logic_control_rule["conditions"].map {|ele| ele["question_id"]}
       next if (new_answer.keys & condition_qid_ary).empty?
       # for each condition, check whether it is violated
+      pass_condition = true
       logic_control_rule["conditions"].each do |condition|
         # if the volunteer has not answered this question, stop the checking of this rule
         break if answer_content[condition["question_id"]].nil?
-        pass_condition = Tool.check_choice_question_answer(condition["question_id"],
+        pass_condition &&= Tool.check_choice_question_answer(condition["question_id"],
                                 answer_content[condition["question_id"]]["selection"],
                                 condition["answer"],
                                 condition["fuzzy"])
-        return true if !pass_condition
       end
+      set_reject_with_type(REJECT_BY_SCREEN) and return false if pass_condition
     end
-    set_reject_with_type(REJECT_BY_SCREEN) and return false
+    true
   end
 
   def check_question_quota(answer_content)
