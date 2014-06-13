@@ -1373,8 +1373,8 @@ class Answer
     # return if no user or attributes already updated
     return false if self.user.blank? || self.sample_attributes_updated
     self.answer_content.each do |q_id, answer|
-      q = BasicQuestion.find(q_id)
-      next if answer.blank? || q.sample_attribute.blank?
+      q = BasicQuestion.find_by_id(q_id)
+      next if answer.blank? || q.blank? || q.sample_attribute.blank?
       attr_value = nil
       case q.sample_attribute.type
       when DataType::STRING
