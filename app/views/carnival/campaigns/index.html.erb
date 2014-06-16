@@ -194,7 +194,8 @@
           $.cookie('ticket',d.getTime(),{ expires: 10 * 365 });
 
           if(move){
-            $.fn.fullpage.moveSectionUp();  
+            $.fn.fullpage.moveSectionUp();
+            window.location.href = '/s/' + window.data.t1_surveys[0];    
           }
           setTaskOne(false);
         });
@@ -602,6 +603,8 @@
                   $.fancybox.close();
                   $.fn.fullpage.moveSectionUp()
                   setTaskTwo(false);
+                  var idx = $.inArray(0,window.data.t2_status);
+                  window.location.href = '/s/' + window.data.t2_surveys[idx];
                 })
               }else if(t_type == 0){
                 window.data.lot_status[0] = 1; //表示第二关已经抽过奖
@@ -614,6 +617,8 @@
                   $.fancybox.close();
                   $.fn.fullpage.moveTo(1);
                   setTaskThree();
+                  var idx = $.inArray(0,window.data.t3_status);
+                  window.location.href = '/s/' + window.data.t3_surveys[idx];                  
                 })                           
               }else if(t_type == 4){//第三关 10块钱手机话费
                 notic.html('获得了10元手机充值奖励,系统会在审核后充值到您的手机!');
@@ -678,6 +683,8 @@
                       rebind_click('我知道了');
                       $.fn.fullpage.moveTo(1);
                       setTaskThree();
+                      var idx = $.inArray(0,window.data.t3_status);
+                      window.location.href = '/s/' + window.data.t3_surveys[idx];
                     }else{
                       rebind_click('我知道了');  
                     }
@@ -810,12 +817,35 @@
             if(step == 1){
               var con = '摩天轮';
               var reward = '10元话费';
+              var idx = $.inArray(0,window.data.t1_status);
+              if (idx >= 0){
+                var s_id = window.data.t1_surveys[idx];
+              }
+              console.log('==================================')
+              console.log(s_id)
+              console.log('==================================')
             }else if(step == 2){
               var con = '跳楼机';
               var reward = '10(50或100)元话费抽奖机会';
+              var idx = $.inArray(0,window.data.t2_status);
+              if (idx >= 0){
+                var s_id = window.data.t2_surveys[idx];
+              }
+              console.log('==================================')
+              console.log(s_id)
+              console.log('==================================')
+        
             }else if(step == 3){
               var con = '热气球'
               var reward = '10元话费及一次抽大奖机会';
+              var idx = $.inArray(0,window.data.t3_status);
+              if (idx >= 0){
+                var s_id = window.data.t3_surveys[idx];
+              }
+              console.log('==================================')
+              console.log(s_id)
+              console.log('==================================')
+          
             }
 
             var answered = $.grep(status_arr, function( ele, i ) {
@@ -836,6 +866,7 @@
                 $('.carnival-popup a.btn').die('click');
                 $('.carnival-popup a.btn').live('click',function(){
                   $.fancybox.close();
+                  window.location.href = '/s/' + s_id ;
                 })
               }
             })
