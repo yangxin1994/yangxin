@@ -402,13 +402,10 @@
           percentNotice(window.current_step,window.data.t3_surveys,window.data.t3_status);  
         }
         
-
         if(window.data.rew_3){
           //第三个大任务充值话费已经领取
-          
-
           if(window.data.lot_status[1] > 0 ){
-            var remain = window.data.share_num -  window.data.share_lottery_num;  
+            var remain = parseInt(window.data.share_num) -  parseInt(window.data.share_lottery_num);  
             if($.inArray(2,window.data.t3_status) < 0){
               $('.umbrella').addClass('act');
               makeFire();
@@ -451,7 +448,6 @@
                     }
                   });
                 }else{
-
                   $.carnivalbox({
                     width:460,
                     title:'抱歉,您没有抽到任何奖品,感谢您的参与',

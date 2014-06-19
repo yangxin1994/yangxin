@@ -112,16 +112,11 @@ jQuery(function($) {
                     var lotteryBtn = $("#lotteryBtn");
 
                     $("#lotteryBtn").addClass('disabled');
-                    //var t_type = 1; //抽奖
+                    //t_type = 1; //抽奖
+                    //t_type = 2; //分享抽奖
 
-                    // if (window.data.share_num > 0) {
-                    //     t_type = 2; //分享抽奖
-                    // }
-
-                    if (window.data.lot_status[1] > 0) {
-                        if (window.data.share_num > window.data.share_lottery_num) {
-                            var t_type = 2;
-                        }
+                    if (parseInt(window.data.lot_status[1]) > 0) {
+                        var t_type = 2;
                     } else {
                         var t_type = 1;
                     }
