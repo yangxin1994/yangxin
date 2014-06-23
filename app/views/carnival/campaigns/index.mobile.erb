@@ -1,0 +1,377 @@
+<% content_for :head do %>
+  <script type='text/javascript'>
+    $(function(){
+      window.data = <%= raw (@obj).to_json %>;
+
+      function show_step(step){
+        switch(step){
+          case 3:
+            $('.ball').show().siblings().hide();
+            if($.inArray(2,window.data.t3_status) >= 0){
+              $('.ball .congratulation .desire').text('您在本轮有问卷审核未通过');
+            }
+            $('.ball ul li').each(function(k,v){
+              var k_status = parseInt(window.data.t3_status[k]);
+              if(k_status != 0 || k_status != 2){
+                $(v).addClass('disabled').find('a').attr('href','javascript:void(0);');
+              }else{
+                $(v).find('a').attr('href','/s/' + window.data.t3_surveys[k]);
+              }
+            })
+
+            var not_dis = $('.ball ul li').not('.disabled').first();
+            if(not_dis.length > 0){
+              $('.ball .q-r a').text(not_dis.text()).attr('href',not_dis.attr('href'));
+            }else{
+              $('.ball .q-r a').text($('.ball ul li:last').find('a').text()).attr('href','javascript:void(0);').addClass('disabled');
+            }
+
+            break;
+          case 2:
+            $('.stair').show().siblings().hide();
+            if($.inArray(2,window.data.t2_status) >= 0){
+              $('.stair .congratulation .desire').text('您在本轮有问卷审核未通过');
+            }
+
+            $('.stair ul li').each(function(k,v){
+              var k_status = parseInt(window.data.t2_status[k]);
+              if(k_status != 0 && k_status != 2){
+                $(v).addClass('disabled').find('a').attr('href','javascript:void(0);');
+              }else{
+                $(v).find('a').attr('href','/s/' + window.data.t2_surveys[k]);
+              }
+            }) 
+
+            var not_dis = $('.stair ul li').not('.disabled').first();
+
+            if(not_dis.length > 0){
+              $('.stair .q-r a').text(not_dis.find('a').text()).attr('href',not_dis.find('a').attr('href'));
+            }else{
+              $('.stair .q-r a').text($('.stair ul li:last').find('a').text()).attr('href','javascript:void(0);').addClass('disabled');
+            }
+            break;
+          case 1:
+            $('.wheel').show().siblings().hide();
+            if($.inArray(2,window.data.t1_status) >= 0){
+              $('.wheel .congratulation .desire').text('您在本轮有问卷审核未通过');
+            }
+            $('.wheel ul li').each(function(k,v){
+              var k_status = parseInt(window.data.t1_status[k]);
+              if(k_status != 0 && k_status != 2){
+                $(v).addClass('disabled').find('a').attr('href','javascript:void(0);');
+              }else{
+                $(v).find('a').attr('href','/s/' + window.data.t1_surveys[k]);
+              }
+            })
+
+            var not_dis = $('.wheel ul li').not('.disabled').first();
+            if(not_dis.length > 0){
+              $('.wheel .q-r a').text(not_dis.find('a').text()).attr('href',not_dis.find('a').attr('href'));
+            }else{
+              $('.wheel .q-r a').text($('.wheel ul li:last').find('a').text()).attr('href','javascript:void(0);').addClass('disabled');
+            }
+            break;
+        }
+      }
+
+      function sendAjax(t_type,phone,num){
+        var url = '/carnival/users/draw_lottery';
+        $.post(url,{
+          mobile:phone,
+          type:t_type,
+          amount:num
+        },function(data){
+          console.log(data)
+          console.log('-----------------------------------')
+          if(data.success){
+            if(t_type == 0){
+              window.data.lot_status[0] = 1; //表示第二关已经抽过奖
+              window.data.rew_2_name = num;//面值
+              $('.chong-lottery').empty().html('<div class="ajx_s">恭喜您抽中了' + num + '元话费充值,系统会在问卷审核通过后充值到您的手机</div>').append('<div class="btn-con"><button class="go_on">我知道了,继续答题</button></div>');
+              $('button.go_on').bind('click',function(){
+                var idx = $.inArray(0,window.data.t3_surveys)
+                console.log(idx)
+                console.log(window.data.t3_surveys)
+                console.log('-------------------------------------')
+                //window.location.href='/s/' + window.data.t3_surveys[idx];
+              })
+            }
+            if(t_type == 1){
+
+            }
+            if(t_type == 2){
+
+            }
+            if(t_type == 3){
+
+            }
+            if(t_type == 4){
+
+            }
+
+          }else{
+              switch (code) {
+                case -1:
+                    alert( '对不起,该用户不存在!' );
+                    break;
+                case -3:
+                    if(t_type == 3){
+                      alert('完成第一轮所有问卷');
+                    }else if(t_type == 0){
+                      alert('请完成第二轮所有问卷');
+                    }else if(t_type == 4){
+                      alert('完成第三轮所有问卷');
+                    }else if(t_type == 1){
+                      alert('完成第三轮所有问卷');
+                    }
+                    break;
+                case -4:
+                    alert( '对不起,您已经参与过抽奖' ); 
+                    window.location.href = '/'             
+                    break;
+                case -5:
+                    if(t_type == 0){
+                      window.data.lot_status[0] = 1;
+                      $('.chong-lottery').empty().html('<div class="ajx_s">对不起,您本次没有抽中</div>').append('<div class="btn-con"><button class="go_on">我知道了,继续答题</button></div>');
+                      $('button.go_on').bind('click',function(){
+                        var idx = $.inArray(0,window.data.t3_surveys)
+                        window.location.href='/s/' + window.data.t3_surveys[idx];
+                      })
+                    }else{
+                        
+                    }
+                    break;
+                case -6:
+                    notic.html('对不起,该手机号已经参与活动并领奖,不能重复参与!' );
+                    rebind_click('确定提交',null,function(){
+                      $('.carnival-popup .submit').bind('click',function(){
+                        // for rewrite mobile start
+                        var phone_ipt = $('.carnival-popup form input');
+                        var sub_btn   = $('.carnival-popup a.btn');
+                        phone_ipt.live('focus',function(){
+                          $(this).removeClass('error');
+                          sub_btn.removeClass('disabled');
+                        });
+                        sub_btn.live('click',function(){
+                          if(!sub_btn.hasClass('disabled')){
+                            var phone = phone_ipt.val();
+                            if($.regex.isMobile(phone)){
+                              sub_btn.addClass('disabled');
+                              phone_ipt.removeClass('error');
+                              sub_btn.addClass('disabled');
+                              sendAjax(3,phone);                   
+                            }else{
+                              phone_ipt.addClass('error');
+                              sub_btn.removeClass('disabled');
+                            }
+                          }
+                        });
+                      })                      
+                    });                  
+                    break;
+                default:
+                  break;
+              }
+          }
+        })
+      }
+
+      function slide() {
+        var act = $('.slider li.active');
+        act.removeClass('active');
+        if (act.next().length > 0) {
+            act.next().addClass('active');
+        } else {
+            act.siblings().first().addClass('active')
+        }
+      }
+
+
+      setInterval(slide, 2000);
+
+      var pre_status = parseInt(window.data.pre_status);
+
+      $('button.ticket').click(function(){
+        window.location.href = '/s/' + window.data.pre_survey;
+      })
+
+      if(pre_status){
+        if(pre_status == 2){
+          $('.gate > div').empty().text('呃..您不符合本次活动要求').css({'color':'#fff','padding-top':'92px'})
+        }else{
+          var current_step = parseInt(window.data.step);
+
+          var tmp_all_status = $.map(window.data.all_status,function(e){ return e});
+
+          if($.inArray(2,tmp_all_status) >= 0){
+            var sec_idx = [];
+            $.each(window.data.all_status,function(k,v){
+              if($.inArray(2,v) >= 0){
+                sec_idx.push(k)
+              }
+            })
+  
+            if($.inArray(0,sec_idx) >= 0){
+              show_step(1);
+            }else if($.inArray(1,sec_idx) >= 0){
+              show_step(2);
+            }else{
+              show_step(3);
+            }
+          }else{
+
+            if( $.inArray(0,window.data.t1_status) < 0 ){
+              current_step = 2;
+            }            
+
+            if( $.inArray(0,window.data.t2_status) < 0 ){
+              if(parseInt(window.data.lot_status[0]) < 1){
+                current_step = 2;
+                $('.chong-lottery').show().siblings().hide();
+                $('.chong-lottery .form button').bind('click',function(){
+                  var money =  $('.chong-lottery .form input:checked').val();
+                  $(this).addClass('disabled');
+                  sendAjax(0,null,money);
+                })
+              }else{
+                current_step = 3;  
+              }
+              
+            }
+
+            if( $.inArray(0,window.data.t3_status) < 0 ){
+              current_step = 3; 
+            }          
+
+            if(current_step == 3){
+              show_step(3);
+            }else if(current_step == 2){
+              show_step(2);
+            }else {
+              show_step(1);
+            }
+          }
+        }
+      }
+
+    })
+  </script>
+<% end %>
+<div class='container'>
+  <div class="slider">
+    <ul>
+      <li>
+        <a href='/carnival/campaigns'>
+          <img src="/assets/od-quillme/banner/banner_carnival.png" />
+        </a>
+      </li>
+      <li>
+        <img src="/assets/od-quillme/banner/banner_2.png" />
+      </li>
+      <li class='active'>
+        <img src="/assets/od-quillme/banner/banner_3.png" />
+      </li>
+    </ul>  
+  </div>  
+  <div class='page'>
+      <div class='gate'>
+        <div>
+          <button class='ticket'>开始抢门票</button>
+          <div class='note'>抢门票,答题有机会抽大奖</div>
+        </div>  
+      </div>
+      <div class='wheel'>
+        <div class="congratulation">
+          <div class='desire'>恭喜您完成上一轮答题</div>
+          <div class='detail'>完成以下问卷将有机会获得10元手机话费</div>
+        </div>
+        <div class="q-list">
+          <div class='q-l'>
+            <ul>
+              <li><a>1</a></li>
+              <li><a>2</a></li>
+              <li><a>3</a></li>
+              <li><a>4</a></li>
+              <li><a>5</a></li>
+            </ul>
+          </div>
+          <div class='q-r'>
+            <a href=''>1</a>
+          </div>
+        </div>        
+      </div>
+      <div class='stair'>
+        <div class="congratulation">
+          <div class='desire'>恭喜您完成首轮问卷</div>
+          <div class='detail'>完成以下问卷您将获得参与抽奖送话费的机会</div>
+        </div>  
+        <div class="q-list">
+          <div class='q-l'>
+            <ul>
+              <li><a>1</a></li>
+              <li><a>2</a></li>
+              <li><a>3</a></li>
+              <li><a>4</a></li>
+              <li><a>5</a></li>
+            </ul>
+          </div>
+          <div class='q-r'>
+            <a href=''>1</a>
+          </div>
+        </div>
+        <div class='chong-lottery'>
+          <div class='form'>
+            <label>   
+              <input type='radio' name='lottery' value= '10' checked='checked'/>
+              <span>10元(中奖率99%)</span>
+            </label>
+            <label>   
+              <input type='radio' name='lottery' value= '50' />
+              <span>50元(中奖率20%)</span>
+            </label>
+            <label>   
+              <input type='radio' name='lottery' value= '100' />
+              <span>100元(中奖率10%)</span>
+            </label>
+            <button>抽奖</button>                        
+          </div>
+        </div> 
+      </div>
+      <div class='ball'>
+        <div class="congratulation">
+          <div class='desire'>恭喜您完成第二轮问卷回答</div>
+          <div class='detail'>完成以下问卷您将获得10元话费及一次抽大奖机会</div>
+        </div>  
+        <div class="q-list">
+          <div class='q-l'>
+            <ul>
+              <li><a>1</a></li>
+              <li><a>2</a></li>
+              <li><a>3</a></li>
+              <li><a>4</a></li>
+              <li><a>5</a></li>
+            </ul>
+          </div>
+          <div class='q-r'>
+            <a href=''>1</a>
+          </div>
+        </div>
+        <div class='prize-lottery'>
+          <div>
+            <div class='lot-result'>恭喜您获得了10元话费及一次抽大奖机会</div>
+            <div class='form'>
+              <input type='text' name='phone' placeholder="请输入手机号" />
+            </div>
+            <div class='btn-cont'>
+              <button>马上抽奖(您有10次抽奖机会)</button>
+            </div>
+          </div>
+        </div>         
+      </div>
+  </div>
+</div>
+
+
+
+
+
