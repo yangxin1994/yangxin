@@ -189,12 +189,13 @@ class ReportResult < Result
         else
           cur_question_answer = answers_transform[question_id].delete_if { |e| e.blank? }
         end
+        pre_text = "共有#{cur_question_answer.length}人回答了本道题。"
         case question.question_type
         when QuestionTypeEnum::CHOICE_QUESTION
           analysis_result = analyze_choice(question.issue, cur_question_answer, items_com: items_com)
           # judge whether this is a single choice or multiple choice
           if question.issue["max_choice"] == 1
-            text = single_choice_description(analysis_result, question.issue)
+            text = pre_text + single_choice_description(analysis_result, question.issue)
             text = ActionView::Base.full_sanitizer.sanitize(text)
             report_data.push_component(ReportData::DESCRIPTION, "text" => text)
             chart_components = DataAdapter.convert_single_data(question.question_type,
@@ -204,12 +205,12 @@ class ReportResult < Result
                                       answer_number: cur_question_answer.length)
             report_data.push_chart_components(chart_components)
           else
-            pie_text = multiple_choice_description(analysis_result,
+            pie_text = pre_text + multiple_choice_description(analysis_result,
                                 question.issue,
                                 :answer_number => cur_question_answer.length,
                                 :chart_type => 'pie')
             pie_text = ActionView::Base.full_sanitizer.sanitize(pie_text)
-            bar_text = multiple_choice_description(analysis_result,
+            bar_text = pre_text + multiple_choice_description(analysis_result,
                                 question.issue,
                                 :answer_number => cur_question_answer.length,
                                 :chart_type => 'bar')
@@ -229,7 +230,7 @@ class ReportResult < Result
           end
         when QuestionTypeEnum::MATRIX_CHOICE_QUESTION
           analysis_result = analyze_matrix_choice(question.issue, cur_question_answer)
-          text = matrix_choice_description(analysis_result, question.issue)
+          text = pre_text + matrix_choice_description(analysis_result, question.issue)
           text = ActionView::Base.full_sanitizer.sanitize(text)
           report_data.push_component(ReportData::DESCRIPTION, "text" => text)
           chart_components = DataAdapter.convert_single_data(question.question_type,
@@ -243,7 +244,7 @@ class ReportResult < Result
                             cur_question_answer,
                             :segment => segment)
           segment ||= analysis_result[:segment]
-          text = number_blank_description(analysis_result,
+          text = pre_text + number_blank_description(analysis_result,
                           question.issue,
                           :segment => segment)
           text = ActionView::Base.full_sanitizer.sanitize(text)
@@ -262,7 +263,7 @@ class ReportResult < Result
                             cur_question_answer,
                             :segment => segment)
           segment ||= analysis_result[:segment]
-          text = time_blank_description(analysis_result,
+          text = pre_text + time_blank_description(analysis_result,
                         question.issue,
                         :segment => segment)
           text = ActionView::Base.full_sanitizer.sanitize(text)
@@ -277,7 +278,7 @@ class ReportResult < Result
         when QuestionTypeEnum::ADDRESS_BLANK_QUESTION
           analysis_result = analyze_address_blank(question.issue,
                               cur_question_answer)
-          text = address_blank_description(analysis_result, question.issue)
+          text = pre_text + address_blank_description(analysis_result, question.issue)
           text = ActionView::Base.full_sanitizer.sanitize(text)
           report_data.push_component(ReportData::DESCRIPTION, "text" => text)
           chart_components = DataAdapter.convert_single_data(question.question_type,
