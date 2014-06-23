@@ -398,19 +398,22 @@
             }
           }
         })
+
         if(show_percent){
           percentNotice(window.current_step,window.data.t3_surveys,window.data.t3_status);  
-        }else{
+        }
+
+        if($.inArray(2,tmp_all_status) < 0){
           if(window.data.rew_3){
             //第三个大任务充值话费已经领取
             if(window.data.lot_status[1] > 0 ){
-              var remain = parseInt(window.data.share_num) -  parseInt(window.data. share_lottery_num);  
+              var remain = parseInt(window.data.share_num) -  parseInt(window.data.share_lottery_num);  
               if($.inArray(2,window.data.t3_status) < 0){
                 $('.umbrella').addClass('act');
                 makeFire();
                 //已经参加了转盘抽奖
-  
-                var share = '<p class="share_d">邀请好友参加活动，成功邀请1人，可再抽奖1次</p>< p class="so_share">\
+    
+                var share = '<p class="share_d">邀请好友参加活动，成功邀请1人，可再抽奖1次</p><p class="so_share">\
                     <a id="SinaWeibo" class="sina"></a>\
                     <a id="TencentWeibo" class="tencent"></a>\
                     <a id="Renren" class="renren"></a>\
@@ -418,18 +421,18 @@
                     <a id="QQSpace" class="qzone"></a>\
                     </p><p class="share_d">点击参与以下问卷,获得更多积分:</p>\
                     <p>\
-                      <a href="/s/5389855ceb0e5b7781000003" target="_blank">  问卷吧嘉年华之月度活动（5月任务2）</a><br />\
-                      <a href="/s/5389497eeb0e5b2b55000283" target="_blank">  问卷吧嘉年华之月度活动（5月任务1）</a>\
+                      <a href="/s/5389855ceb0e5b7781000003" target="_blank">    问卷吧嘉年华之月度活动（5月任务2）</a><br />\
+                      <a href="/s/5389497eeb0e5b2b55000283" target="_blank">    问卷吧嘉年华之月度活动（5月任务1）</a>\
                     </p>';
-  
+    
                 if(remain <= 0){
                   //首次完成全部任务后并已经抽奖，再次来到页面
                   $("#lotteryBtn").addClass('disabled');
                   if(window.data.own){
                   var title ='恭喜您,中奖了';
-                  var cont = '您已经抽中奖品' +  window.data.prize_name + '  我们会在审核后联系您!'  ;
+                  var cont = '您已经抽中奖品' +  window.data.prize_name + '  我们会在审核后联系您!'    ;
                   var btn_cont = '我知道了';
-
+  
                   $.carnivalbox({
                     width:460,
                     title:title,
@@ -471,7 +474,7 @@
                     $("#lotteryBtn").addClass('disabled');
                     //$('.ly-plate .draw_remain').text('剩余0次抽奖机会')
                     var title ='恭喜您,中奖了';
-                    var cont = '您已经抽中奖品' +  window.data.prize_name + '    我们会在审核后联系您!'  ;
+                    var cont = '您已经抽中奖品' +  window.data.prize_name + '      我们会在审核后联系您!'  ;
                     var btn_cont = '我知道了';
                     var show = false;
                     //$('.ly-plate').show();
@@ -483,7 +486,7 @@
                     var btn_cont = '继续抽奖';
                     var show = true;
                   }
-    
+      
                   $.carnivalbox({
                     width:460,
                     title:title,
@@ -510,7 +513,7 @@
             }else{
               //第三关的话费领取完成但是还未抽奖
               get_remain();
-              if($.inArray(2,window.data.t3_status) < 0 && $.inArray(0,window.data. t3_status) < 0){
+              if($.inArray(2,window.data.t3_status) < 0 && $.inArray(0,window.data. t3_status) <   0){
                 $('.ball-cont').hide();
                 $('.ly-plate').show();
               }
@@ -537,6 +540,9 @@
             }
           }
         }
+
+
+
       }
       // 获取剩余抽奖机会
       function get_remain(){
