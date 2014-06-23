@@ -1,5 +1,19 @@
 # encoding: utf-8
 class Carnival::CampaignsController < Carnival::CarnivalController
+
+  before_filter :force_tablet_html, :check_mobile_param
+  has_mobile_fu
+
+  # Continue rendering HTML for tablet
+  def force_tablet_html
+    session[:tablet_view] = false
+  end
+
+  def check_mobile_param
+    force_mobile_format if params[:m].to_b
+  end
+
+
   def index
     if @current_carnival_user.blank?
       @current_carnival_user = CarnivalUser.create_new(params[:i], params[:c])
@@ -36,15 +50,6 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       step = 3
     end
 
-    # step = 0
-    # #根据status的的数据情况来判断是第几关
-    # if (step_arr[2].include?(CarnivalUser::UNDER_REVIEW) || step_arr[2].include?(CarnivalUser::HIDE) || step_arr[2].include?(CarnivalUser::FINISH) )
-    #   step = 3
-    # elsif (step_arr[1].include?(CarnivalUser::UNDER_REVIEW) || step_arr[1].include?(CarnivalUser::HIDE) || step_arr[1].include?(CarnivalUser::FINISH) )  
-    #   step = 2
-    # elsif (step_arr[0].include?(CarnivalUser::UNDER_REVIEW) || step_arr[0].include?(CarnivalUser::HIDE) || step_arr[0].include?(CarnivalUser::FINISH) )
-    #   step = 1
-    # end
 
     #抽中大奖的奖品名称
     @lot = @current_carnival_user.carnival_orders.where(:type.in => [CarnivalOrder::STAGE_3_LOTTERY, CarnivalOrder::SHARE]).first 
@@ -123,6 +128,11 @@ class Carnival::CampaignsController < Carnival::CarnivalController
       charged_amount: @charged_amount,
       answer_order: @answer_order
     }
+
+    Rails.logger.info('------------------------------------------')
+    Rails.logger.info(@current_carnival_user.inspect)
+    Rails.logger.info('------------------------------------------')
+
     return @obj 
   end
 

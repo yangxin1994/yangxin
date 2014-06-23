@@ -1,0 +1,443 @@
+@import "common";
+@import "compass/css3/box-shadow";
+@import "compass/css3/border-radius";
+@import "compass/utilities/general/clearfix";
+@import "compass/css3/opacity";
+@import "activities/2014-6/ferris/*.png";
+
+.container{
+  .page{
+    .gate{
+      // display: none;
+      height:200px;
+      background:#2f3847;
+      text-align: center;
+      button{
+        margin-top:70px;
+        width:80%;
+        height:60px;
+        background:#a3b4d2;
+        font-size:14px;
+        color:#fff;
+        @include border-radius(3px);
+        @include box-shadow(0 1px 1px #999);
+        border:0px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .note{
+        margin-top:20px;
+        color:#fff;
+        font-size: 14px;
+      }
+    }
+    .wheel{
+      display:none;
+      height:444px;
+      .congratulation{
+        height:128px;
+        background:black;
+        text-align: center;
+        padding-top:24px;
+        color:#fff;
+        .detail{
+          margin-top:24px;
+        }
+        // background:url(/assets/od-quillme/success.png) no-repeat;
+      }
+      .q-list{
+        width:80%;
+        height:262px;
+        margin:0 auto;
+        backround:#fff;
+        @include clearfix;
+        .q-l{
+          float:left;
+          height:100%;
+          width:20%;
+          ul{
+            list-style: none;
+            li{
+              width:38px;
+              background:#ff6600;
+              text-align:center;
+              @include one-line(38px);
+              margin-bottom:10px;
+              @include border-radius(3px);
+              color:#fff;
+              font-size:14px;
+              font-weight: bold;
+              cursor:pointer;
+              a{
+                display:inline-block;
+                width:100%;
+                height:100%;                
+                color:#fff;
+                text-decoration: none;
+              }
+              &.disabled{
+                background:#f1f1f1;
+                cursor:default;
+                a{
+                  color:#fff;
+                }
+              }
+            }
+          }
+        }
+        .q-r{
+          float:left;
+          width:80%;
+          height:262px;
+          text-align: center;
+          a{
+            float:right;
+            display:inline-block;
+            width:116px;
+            @include one-line(116px);
+            color:#fff;
+            background:#ff6600;
+            font-size:20px;
+            font-weight: bold;
+            margin-top:73px;
+            text-decoration: none;
+            @include border-radius(3px);
+            &.disabled{
+              background:#f1f1f1;
+            }             
+          }
+        }
+      }
+    }
+    .stair{
+      display:none;
+      height:444px;
+      .congratulation{
+        height:128px;
+        background:black;
+        text-align: center;
+        padding-top:24px;
+        color:#fff;
+        .detail{
+          margin-top:24px;
+        }
+        // background:url(/assets/od-quillme/success.png) no-repeat;
+      }
+      .q-list{
+        width:80%;
+        height:262px;
+        margin:0 auto;
+        backround:#fff;
+        @include clearfix;
+        .q-l{
+          float:left;
+          height:100%;
+          width:20%;
+          ul{
+            list-style: none;
+            li{
+              width:38px;
+              background:#ff6600;
+              text-align:center;
+              @include one-line(38px);
+              margin-bottom:10px;
+              @include border-radius(3px);
+              font-size:14px;
+              font-weight: bold;
+              cursor:pointer;
+              a{
+                display:inline-block;
+                width:100%;
+                height:100%;                
+                color:#fff;
+                text-decoration: none;
+              }
+              &.disabled{
+                background:#f1f1f1;
+                cursor:default;
+                a{
+                  color:#fff;
+                }
+              }              
+            }
+          }
+        }
+        .q-r{
+          float:left;
+          width:80%;
+          height:262px;
+          text-align: center;
+          a{
+            float:right;
+            display:inline-block;
+            width:116px;
+            @include one-line(116px);
+            color:#fff;
+            background:#ff6600;
+            font-size:20px;
+            font-weight: bold;
+            margin-top:73px;
+            text-decoration: none;
+            @include border-radius(3px);
+            &.disabled{
+              background:#f1f1f1;
+            }            
+          }
+        }
+      } 
+      .chong-lottery{
+        display:none;
+        margin:0 auto;
+        background:#d1e6f7;
+        .form{
+          padding:20px 0px;
+          width:100%;
+          text-align: center;          
+          label{
+            display:block;
+            text-align: left;
+            padding-left:20px;
+            margin-bottom: 10px;
+          }
+          button{
+            width:80%;
+            height:30px;
+            border:0px;
+            @include border-radius(3px);
+            color:#fff;
+            background:#4576c6;
+            cursor: pointer;
+          }
+        }
+        .ajx_s{
+          text-align: center;
+          padding: 12px;
+          font-size: 14px;
+          line-height: 2em;
+        }
+        .btn-con{
+          width:100%;
+          text-align: center;
+          padding:10px 0px;
+          button.go_on{
+              @include one-line(40px);
+              text-align: center;
+              background:#a3b4d2;
+              font-size:14px;
+              color:#fff;
+              @include border-radius(3px);
+              @include box-shadow(0 1px 1px #999);
+              border:0px;
+              width:80%;
+              margin:0px auto;
+              font-weight: bold;  
+              cursor: pointer;        
+          }
+        }
+      }     
+    }
+    .ball{
+      display:none;
+      height:444px;
+      .congratulation{
+        height:128px;
+        background:black;
+        text-align: center;
+        padding-top:24px;
+        color:#fff;
+        .detail{
+          margin-top:24px;
+        }
+        // background:url(/assets/od-quillme/success.png) no-repeat;
+      }
+      .q-list{
+        width:80%;
+        height:262px;
+        margin:0 auto;
+        backround:#fff;
+        @include clearfix;
+        .q-l{
+          float:left;
+          height:100%;
+          width:20%;
+          ul{
+            list-style: none;
+            li{
+              width:38px;
+              background:#ff6600;
+              text-align:center;
+              @include one-line(38px);
+              margin-bottom:10px;
+              @include border-radius(3px);
+              font-size:14px;
+              font-weight: bold;
+              cursor:pointer;
+              a{
+                display:inline-block;
+                width:100%;
+                height:100%;
+                color:#fff;
+                text-decoration: none;
+              }
+              &.disabled{
+                background:#f1f1f1;
+                cursor:default;
+                a{
+                  color:#fff;
+                }
+              }
+            }
+          }
+        }
+        .q-r{
+          float:left;
+          width:80%;
+          height:262px;
+          text-align: center;
+          a{
+            float:right;
+            display:inline-block;
+            width:116px;
+            @include one-line(116px);
+            color:#fff;
+            background:#ff6600;
+            font-size:20px;
+            font-weight: bold;
+            margin-top:73px;
+            text-decoration: none;
+            @include border-radius(3px);
+            &.disabled{
+              background:#f1f1f1;
+            }
+          }
+        }
+      }
+      .prize-lottery{
+        display: none;
+        // width:80%;
+        // height:200px;
+        margin:0 auto;
+        background:#d1e6f7;
+        .lot-result{
+          // @include one-line(60px);
+          text-align:center;
+          background:#c7e9c4;
+          color:#fff;
+        }
+        .form{
+          @include one-line(80px);
+          text-align: center;
+          input{
+            height:24px;
+            text-align: center;
+            &.error{
+              border:1px solid red;
+            }
+          }
+        }
+        .btn-cont{
+          text-align: center;
+          padding:10px 0px;
+          button{
+            @include one-line(60px);
+            text-align: center;
+            background:#a3b4d2;
+            font-size:14px;
+            color:#fff;
+            @include border-radius(3px);
+            @include box-shadow(0 1px 1px #999);
+            border:0px;
+            width:80%;
+            margin:0px auto;
+            font-weight: bold;
+          }          
+        }
+       
+      }    
+      .do_lottery{
+        display:none;
+        background: #d1e6f7;
+        padding: 20px 0px;
+        text-align: center;
+        .note{
+          font-size: 16px;
+          font-weight: bold;
+        }
+        .resu{
+          margin: 10px 0px;
+          color: #fff;
+          background: red;
+        }
+        button{
+          @include one-line(60px);
+          text-align: center;
+          background:#a3b4d2;
+          font-size:14px;
+          color:#fff;
+          @include border-radius(3px);
+          @include box-shadow(0 1px 1px #999);
+          border:0px;
+          width:80%;
+          margin:0px auto;
+          font-weight: bold;
+          margin:10px 0px;
+        }
+      }   
+    }
+  }
+
+  .slider{
+    overflow:hidden; 
+    height:202px;
+    ul{
+      margin:0px;
+      padding:0px;
+      li{
+        display:none;
+        list-style: none;
+        img{ 
+          width:inherit; 
+        }
+        &.active{
+          display:block;
+        }          
+      }
+    }     
+  }
+
+  .social_share{
+    width:100%;
+    text-align: center;
+    a{
+      display:inline-block;
+      width:45px;
+      height:45px;
+      &.sina{
+        @include ferris-sprite(sina);
+      }
+      &.qq{
+        @include ferris-sprite(qq);
+      }
+      &.tencent{
+        @include ferris-sprite(tencent);
+      }
+      &.douban{
+        @include ferris-sprite(douban);
+      }
+      &.renren{
+        @include ferris-sprite(renren);
+      }
+      &.qzone{
+        @include ferris-sprite(qzone);
+      }
+
+    }
+
+  }
+
+
+
+
+
+}
+

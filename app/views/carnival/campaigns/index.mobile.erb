@@ -1,0 +1,476 @@
+<% content_for :head do %>
+  <script type='text/javascript'>
+    $(function(){
+      window.data = <%= raw (@obj).to_json %>;
+
+      function show_step(step){
+        switch(step){
+          case 3:
+            $('.ball').show().siblings().hide();
+            if($.inArray(2,window.data.t3_status) >= 0){
+              $('.ball .congratulation .desire').text('您在本轮有问卷审核未通过');
+            }
+            $('.ball ul li').each(function(k,v){
+              var k_status = parseInt(window.data.t3_status[k]);
+              if(k_status != 0 && k_status != 2){
+                $(v).addClass('disabled').find('a').attr('href','javascript:void(0);');
+              }else{
+                $(v).find('a').attr('href','/s/' + window.data.t3_surveys[k]);
+              }
+            })
+
+            var not_dis = $('.ball ul li').not('.disabled').first();
+            if(not_dis.length > 0){
+              $('.ball .q-r a').text(not_dis.text()).attr('href',not_dis.attr('href'));
+            }else{
+              $('.ball .q-r a').text($('.ball ul li:last').find('a').text()).attr('href','javascript:void(0);').addClass('disabled');
+            }
+
+            break;
+          case 2:
+            $('.stair').show().siblings().hide();
+            if($.inArray(2,window.data.t2_status) >= 0){
+              $('.stair .congratulation .desire').text('您在本轮有问卷审核未通过');
+            }
+
+            $('.stair ul li').each(function(k,v){
+              var k_status = parseInt(window.data.t2_status[k]);
+              if(k_status != 0 && k_status != 2){
+                $(v).addClass('disabled').find('a').attr('href','javascript:void(0);');
+              }else{
+                $(v).find('a').attr('href','/s/' + window.data.t2_surveys[k]);
+              }
+            }) 
+
+            var not_dis = $('.stair ul li').not('.disabled').first();
+
+            if(not_dis.length > 0){
+              $('.stair .q-r a').text(not_dis.find('a').text()).attr('href',not_dis.find('a').attr('href'));
+            }else{
+              $('.stair .q-r a').text($('.stair ul li:last').find('a').text()).attr('href','javascript:void(0);').addClass('disabled');
+            }
+            break;
+          case 1:
+            $('.wheel').show().siblings().hide();
+            if($.inArray(2,window.data.t1_status) >= 0){
+              $('.wheel .congratulation .desire').text('您在本轮有问卷审核未通过');
+            }
+            $('.wheel ul li').each(function(k,v){
+              var k_status = parseInt(window.data.t1_status[k]);
+              if(k_status != 0 && k_status != 2){
+                $(v).addClass('disabled').find('a').attr('href','javascript:void(0);');
+              }else{
+                $(v).find('a').attr('href','/s/' + window.data.t1_surveys[k]);
+              }
+            })
+
+            var not_dis = $('.wheel ul li').not('.disabled').first();
+            if(not_dis.length > 0){
+              $('.wheel .q-r a').text(not_dis.find('a').text()).attr('href',not_dis.find('a').attr('href'));
+            }else{
+              $('.wheel .q-r a').text($('.wheel ul li:last').find('a').text()).attr('href','javascript:void(0);').addClass('disabled');
+            }
+            break;
+        }
+      }
+
+      function sendAjax(t_type,phone,num){
+
+        var url = '/carnival/users/draw_lottery';
+        $.post(url,{
+          mobile:phone,
+          type:t_type,
+          amount:num
+        },function(data){
+          if(data.success){
+            if(t_type == 0){
+              window.data.lot_status[0] = 1; //表示第二关已经抽过奖
+              window.data.rew_2_name = num;//面值
+              $('.chong-lottery').empty().html('<div class="ajx_s">恭喜您抽中了' + num + '元话费充值,系统会在问卷审核通过后充值到您的手机</div>').append('<div class="btn-con"><button class="go_on">我知道了,继续答题</button></div>');
+              $('button.go_on').bind('click',function(){
+                var idx = $.inArray(0,window.data.t3_status)
+                window.location.href='/s/' + window.data.t3_surveys[idx];
+              })
+            }
+            if(t_type == 1 || t_type == 2){
+              var remain = window.data.share_num - window.data.share_lottery_num;
+              if (t_typ == 1) {
+                window.data.lot_status[1] = 1;
+              } else {
+                window.data.share_lottery_num += 1;
+              }
+              var content = '恭喜您抽中了' + data.value + '我们会在问卷审核通过后联系您!'
+
+              $('.do_lottery .resu').text(content);
+
+              $('.do_lottery .note').text('您有' +  remain + '次抽奖机会');
+
+              setDisabled();
+
+              
+            }
+
+            if(t_type == 3){
+              sendAjax(4,null,null)
+            }
+            if(t_type == 4){
+              $('.do_lottery').show().siblings().hide();
+
+              $('.do_lottery .note').text('您有' + (window.data.share_num - window.data.share_lottery_num + 1) + '次抽奖机会');
+              $('.do_lottery .resu').hide();
+
+              $('.do_lottery button').bind('click',function(){
+                if(!$(this).hasClass('disabled')){
+                  if (parseInt(window.data.lot_status[1]) > 0) {
+                      var t_type = 2;
+                  } else {
+                      var t_type = 1;
+                  }
+                  $(this).addClass('disabled');              
+                  sendAjax(t_type);
+                }
+              })
+            }
+          }else{
+            var code = parseInt(data.value.error_code)
+              switch (code) {
+                case -1:
+                    alert( '对不起,该用户不存在!' );
+                    break;
+                case -3:
+                    if(t_type == 3){
+                      alert('完成第一轮所有问卷');
+                    }else if(t_type == 0){
+                      alert('请完成第二轮所有问卷');
+                    }else if(t_type == 4){
+                      alert('完成第三轮所有问卷');
+                    }else if(t_type == 1){
+                      alert('完成第三轮所有问卷');
+                    }
+                    break;
+                case -4:
+                    alert( '对不起,您已经参与过抽奖' ); 
+                    window.location.href = '/'             
+                    break;
+                case -5:
+                    if(t_type == 0){
+                      window.data.lot_status[0] = 1;
+                      $('.chong-lottery').empty().html('<div class="ajx_s">对不起,您本次没有抽中<br />别灰心继续答题赢大奖</div>').append('<div class="btn-con"><button class="go_on">我知道了,继续答题</button></div>');
+                      $('button.go_on').bind('click',function(){
+                        var idx = $.inArray(0,window.data.t3_status)
+                        window.location.href='/s/' + window.data.t3_surveys[idx];
+                      })
+                    }else{
+                      var remain = window.data.share_num - window.data.share_lottery_num;
+                      if (t_type == 1) {
+                        window.data.lot_status[1] = 1;
+                      } else {
+                        window.data.share_lottery_num += 1;
+                      }
+
+                      var content = '对不起,您没有抽中任何奖品!'
+
+                      $('.do_lottery .note').text('您有' +  remain + '次抽奖机会');
+
+                      $('.do_lottery .resu').text(content).show();
+
+                      setDisabled();
+                    }
+                    break;
+                case -6:
+                    $('.prize-lottery .lot-result').text('对不起,该手机号已经参与活动并领奖,不能重复参与!' );
+                    break;
+                default:
+                  break;
+              }
+          }
+        })
+      }
+
+      function setDisabled() {
+          if (window.data.lot_status[1] > 0) {
+              if (window.data.share_lottery_num >= window.data.share_num) {
+                  $('.do_lottery button').addClass('disabled');
+              } else {
+                  $('.do_lottery button').removeClass('disabled');
+              }
+          } else {
+              if (window.data.share_lottery_num >= window.data.share_num + 1) {
+                  $('.do_lottery button').addClass('disabled');
+              } else {
+                  $('.do_lottery button').removeClass('disabled');
+              }
+          }
+      }
+
+      setDisabled();
+
+
+      function slide() {
+        var act = $('.slider li.active');
+        act.removeClass('active');
+        if (act.next().length > 0) {
+            act.next().addClass('active');
+        } else {
+            act.siblings().first().addClass('active')
+        }
+      }
+
+
+      setInterval(slide, 2000);
+
+      var pre_status = parseInt(window.data.pre_status);
+
+      $('button.ticket').click(function(){
+        window.location.href = '/s/' + window.data.pre_survey;
+      })
+
+      if(pre_status){
+        if(pre_status == 2){
+          $('.gate > div').empty().text('呃..您不符合本次活动要求').css({'color':'#fff','padding-top':'92px'})
+        }else{
+          var current_step = parseInt(window.data.step);
+
+          var tmp_all_status = $.map(window.data.all_status,function(e){ return e});
+
+          if($.inArray(2,tmp_all_status) >= 0){
+            var sec_idx = [];
+            $.each(window.data.all_status,function(k,v){
+              if($.inArray(2,v) >= 0){
+                sec_idx.push(k)
+              }
+            })
+  
+            if($.inArray(0,sec_idx) >= 0){
+              show_step(1);
+            }else if($.inArray(1,sec_idx) >= 0){
+              show_step(2);
+            }else{
+              show_step(3);
+            }
+          }else{
+
+            if( $.inArray(0,window.data.t1_status) < 0 ){
+              current_step = 2;
+            }            
+
+            if( $.inArray(0,window.data.t2_status) < 0 ){
+              if(parseInt(window.data.lot_status[0]) < 1){
+                current_step = 2;
+                $('.chong-lottery').show().siblings().hide();
+                $('.chong-lottery .form button').bind('click',function(){
+                  var money =  $('.chong-lottery .form input:checked').val();
+                  $(this).addClass('disabled');
+                  sendAjax(0,null,money);
+                })
+              }else{
+                current_step = 3;  
+              }
+              
+            }
+
+            if( $.inArray(0,window.data.t3_status) < 0 ){
+              current_step = 3; 
+              if($.inArray(2,window.data.t3_status) < 0){
+                if(window.data.own){
+                  $('.do-lottery').show().siblings().hide();
+                }else{
+                  if(window.data.rew_3){
+                    $('.do_lottery').show().siblings().hide();
+                    if(window.data.lot_status[1] > 0){
+                      var remain = window.data.share_num - window.data.share_lottery_num;
+                    }else{
+                      var remain = window.data.share_num + 1 - window.data.share_lottery_num;  
+                    }
+                    
+                    $('.do_lottery .resu').hide();
+                    $('.do_lottery .note').text('您有' +  remain + '次抽奖机会');
+
+                    $('.do_lottery button').bind('click',function(){
+                      if(!$(this).hasClass('disabled')){
+                        if (parseInt(window.data.lot_status[1]) > 0) {
+                            var t_type = 2;
+                        } else {
+                            var t_type = 1;
+                        }
+                        $(this).addClass('disabled');              
+                        sendAjax(t_type);
+                      }
+                    })
+
+
+                  }else{
+                    $('.prize-lottery').show().siblings().hide();
+                  }
+                }
+              }
+              $('.prize-lottery button').bind('click',function(){
+                var phone = parseInt( $('.prize-lottery input').val() );
+                if($.regex.isMobile(phone)){
+                  sendAjax(3,phone);
+                }else{
+                  $('.prize-lottery input').addClass('error')
+                }
+                
+              })
+            }          
+
+            if(current_step == 3){
+              show_step(3);
+            }else if(current_step == 2){
+              show_step(2);
+            }else {
+              show_step(1);
+            }
+          }
+        }
+      }
+
+
+      // var share = '<p class="share_d">邀请好友参加活动，成功邀请1人，可再抽奖1次</p><p class="so_share">\
+      //               <a id="SinaWeibo" class="sina"></a>\
+      //               <a id="TencentWeibo" class="tencent"></a>\
+      //               <a id="Renren" class="renren"></a>\
+      //               <a id="Douban" class="douban"></a>\
+      //               <a id="QQSpace" class="qzone"></a>\
+      //               </p>';
+
+      // $('.social_share').append(share);
+
+      // var share_href = 'http://wenjuanba.com/carnival/campaigns?i=<%= @current_carnival_user.id.to_s %>'; 
+      // _.each(['SinaWeibo', 'TencentWeibo', 'Renren', 'Douban', 'QQSpace'], $.proxy(function(v ) {
+      //   $('#' + v).live('click',function() {
+      //     $.social['shareTo' + v](share_href + '&c=' + v, '我发现了一个好玩的活动“问卷吧嘉年华”，参  加100%获得手机充值卡，还可以抽红米note、小米盒子、小米电源等大奖哦！你也来参加吧！', ' http://wenjuanba.com/assets/activities/2014-6/carnival.png');
+      //   });
+      // }, this));
+  
+      })
+  </script>
+<% end %>
+<div class='container'>
+  <div class="slider">
+    <ul>
+      <li>
+        <a href='/carnival/campaigns'>
+          <img src="/assets/od-quillme/banner/banner_carnival.png" />
+        </a>
+      </li>
+      <li>
+        <img src="/assets/od-quillme/banner/banner_2.png" />
+      </li>
+      <li class='active'>
+        <img src="/assets/od-quillme/banner/banner_3.png" />
+      </li>
+    </ul>  
+  </div>  
+  <div class='page'>
+      <div class='gate'>
+        <div>
+          <button class='ticket'>开始抢门票</button>
+          <div class='note'>抢门票,答题有机会抽大奖</div>
+        </div>  
+      </div>
+      <div class='wheel'>
+        <div class="congratulation">
+          <div class='desire'>恭喜您完成抢门票答题</div>
+          <div class='detail'>完成以下问卷将有机会获得10元话费</div>
+        </div>
+        <div class="q-list">
+          <div class='q-l'>
+            <ul>
+              <li><a>1</a></li>
+              <li><a>2</a></li>
+              <li><a>3</a></li>
+              <li><a>4</a></li>
+              <li><a>5</a></li>
+            </ul>
+          </div>
+          <div class='q-r'>
+            <a href=''>1</a>
+          </div>
+        </div>        
+      </div>
+      <div class='stair'>
+        <div class="congratulation">
+          <div class='desire'>恭喜您完成首轮问卷<br />(通过审核后话费将充值到您的手机)</div>
+          <div class='detail'>完成以下问卷您将有机会再赢取100元话费</div>
+        </div>  
+        <div class="q-list">
+          <div class='q-l'>
+            <ul>
+              <li><a>1</a></li>
+              <li><a>2</a></li>
+              <li><a>3</a></li>
+              <li><a>4</a></li>
+              <li><a>5</a></li>
+            </ul>
+          </div>
+          <div class='q-r'>
+            <a href=''>1</a>
+          </div>
+        </div>
+        <div class='chong-lottery'>
+          <div class='form'>
+            <label>   
+              <input type='radio' name='lottery' value= '10' checked='checked'/>
+              <span>10元(中奖率99%)</span>
+            </label>
+            <label>   
+              <input type='radio' name='lottery' value= '50' />
+              <span>50元(中奖率20%)</span>
+            </label>
+            <label>   
+              <input type='radio' name='lottery' value= '100' />
+              <span>100元(中奖率10%)</span>
+            </label>
+            <button>抽奖</button>                        
+          </div>
+        </div> 
+      </div>
+      <div class='ball'>
+        <div class="congratulation">
+          <div class='desire'>恭喜您完成第二轮问卷</div>
+          <!-- 完成最后一关赢取神秘大奖 -->
+          <div class='detail'>完成以下问卷您将获得10元话费及一次抽大奖机会</div>
+        </div>  
+        <div class="q-list">
+          <div class='q-l'>
+            <ul>
+              <li><a>1</a></li>
+              <li><a>2</a></li>
+              <li><a>3</a></li>
+              <li><a>4</a></li>
+            </ul>
+          </div>
+          <div class='q-r'>
+            <a href=''>1</a>
+          </div>
+        </div>
+        <div class='prize-lottery'>
+          <div>
+            <div class='lot-result'>恭喜您获得了10元话费及一次抽大奖机会</div>
+            <div class='form'>
+              <input type='text' name='phone' placeholder="请输入手机号" />
+            </div>
+            <div class='btn-cont'>
+              <button>马上领取</button>
+              <!-- 马上抽奖(您有10次抽奖机会) -->
+            </div>
+          </div>
+        </div> 
+        <div class='do_lottery'>
+          <div class='note'>您有10次抽奖机会</div>
+          <div class='resu'>您本次未抽中</div>
+          <button>马上抽奖</button>
+        </div>        
+      </div>
+  </div>
+<!--   <div class='social_share'>
+    
+  </div> -->
+</div>
+
+
+
+
+
