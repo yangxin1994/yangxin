@@ -106,8 +106,6 @@
               $('.do_lottery .note').text('您有' +  remain + '次抽奖机会');
 
               setDisabled();
-
-              
             }
 
             if(t_type == 3){
@@ -338,6 +336,13 @@
                     }
                   })
 
+
+                  var mobile = window.location.href.match(/\?c=\d{11}/);
+                  if(!mobile){
+                    if(!window.data.rew_3){
+                      sendAjax(4,null,null);
+                    }
+                  }
 
                   //去除了第三关奖励10元话费机制,完成第三关后直接抽奖
                   // if(window.data.rew_3){
