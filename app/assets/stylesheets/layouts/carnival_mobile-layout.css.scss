@@ -3,6 +3,7 @@
 @import "compass/css3/border-radius";
 @import "compass/utilities/general/clearfix";
 @import "compass/css3/opacity";
+@import "activities/2014-6/ferris/*.png";
 
 .container{
   .page{
@@ -90,6 +91,7 @@
           height:262px;
           text-align: center;
           a{
+            float:right;
             display:inline-block;
             width:116px;
             @include one-line(116px);
@@ -166,6 +168,7 @@
           height:262px;
           text-align: center;
           a{
+            float:right;
             display:inline-block;
             width:116px;
             @include one-line(116px);
@@ -292,6 +295,7 @@
           height:262px;
           text-align: center;
           a{
+            float:right;
             display:inline-block;
             width:116px;
             @include one-line(116px);
@@ -309,12 +313,13 @@
         }
       }
       .prize-lottery{
-        width:80%;
-        height:200px;
+        display: none;
+        // width:80%;
+        // height:200px;
         margin:0 auto;
         background:#d1e6f7;
         .lot-result{
-          @include one-line(60px);
+          // @include one-line(60px);
           text-align:center;
           background:#c7e9c4;
           color:#fff;
@@ -325,10 +330,14 @@
           input{
             height:24px;
             text-align: center;
+            &.error{
+              border:1px solid red;
+            }
           }
         }
         .btn-cont{
           text-align: center;
+          padding:10px 0px;
           button{
             @include one-line(60px);
             text-align: center;
@@ -344,7 +353,36 @@
           }          
         }
        
-      }       
+      }    
+      .do_lottery{
+        display:none;
+        background: #d1e6f7;
+        padding: 20px 0px;
+        text-align: center;
+        .note{
+          font-size: 16px;
+          font-weight: bold;
+        }
+        .resu{
+          margin: 10px 0px;
+          color: #fff;
+          background: red;
+        }
+        button{
+          @include one-line(60px);
+          text-align: center;
+          background:#a3b4d2;
+          font-size:14px;
+          color:#fff;
+          @include border-radius(3px);
+          @include box-shadow(0 1px 1px #999);
+          border:0px;
+          width:80%;
+          margin:0px auto;
+          font-weight: bold;
+          margin:10px 0px;
+        }
+      }   
     }
   }
 
@@ -365,6 +403,36 @@
         }          
       }
     }     
+  }
+
+  .social_share{
+    width:100%;
+    text-align: center;
+    a{
+      display:inline-block;
+      width:45px;
+      height:45px;
+      &.sina{
+        @include ferris-sprite(sina);
+      }
+      &.qq{
+        @include ferris-sprite(qq);
+      }
+      &.tencent{
+        @include ferris-sprite(tencent);
+      }
+      &.douban{
+        @include ferris-sprite(douban);
+      }
+      &.renren{
+        @include ferris-sprite(renren);
+      }
+      &.qzone{
+        @include ferris-sprite(qzone);
+      }
+
+    }
+
   }
 
 

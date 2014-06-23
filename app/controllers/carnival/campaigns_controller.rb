@@ -130,7 +130,7 @@ class Carnival::CampaignsController < Carnival::CarnivalController
     }
 
     Rails.logger.info('------------------------------------------')
-    Rails.logger.info(@obj.inspect)
+    Rails.logger.info(@current_carnival_user.inspect)
     Rails.logger.info('------------------------------------------')
 
     return @obj 
