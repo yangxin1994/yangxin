@@ -699,7 +699,8 @@ class Survey
     q = self.all_questions_type(false)
     csv_string = CSV.generate(:headers => true) do |csv|
       break if answers.blank?
-      if answers[0].carnival_user.present?
+      carnival_answer = (Carnival::SURVEY + [Carnival::PRE_SURVEY]).include?(answers[0].survey_id.to_s)
+      if carnival_answer
         csv << ["mobile"] + excel_header
       else
         csv << excel_header
@@ -711,9 +712,9 @@ class Survey
         else
           answer_time = 0      
         end
-        line_answer = [answer.carnival_user.try(:id) || answer.user.try(:id), answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
-        if answer.carnival_user.present?
-          line_answer.insert(0, answer.carnival_user.mobile.to_s)
+        line_answer = [answer.carnival_user.try(:id) || answer.user.try(:id) || "", answer._id, answer.agent_task.present?.to_s, answer.user.try(:email), answer.user.try(:mobile), answer.remote_ip, QuillCommon::AddressUtility.find_province_city_town_by_code(answer.region), "#{answer_time} 分"]
+        if carnival_answer
+          line_answer.insert(0, answer.carnival_user.try(:mobile).to_s)
         end
         begin
           all_questions_id(false).each_with_index do |question, index|

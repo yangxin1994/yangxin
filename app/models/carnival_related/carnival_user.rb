@@ -35,7 +35,7 @@ class CarnivalUser
 
   # 0 for not exist, 2 for reject, 32 for finish
   field :pre_survey_status, type: Integer, default: 0
-  field :background_survey_status, type: Integer, default: 0
+  field :background_survey_status, type: Integer, default: 32
   field :survey_order, type: Array
   field :reward_scheme_order, type: Array
   field :survey_status, type: Array, default: Array.new(14) { 0 }
