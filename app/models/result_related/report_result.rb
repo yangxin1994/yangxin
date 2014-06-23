@@ -298,17 +298,17 @@ class ReportResult < Result
             segment = component["value"]["format"].nil? ? nil : component["value"]["format"][id.to_s]
             case sub_question_type
             when "Number"
-              text = number_blank_description(sub_analysis_result,
+              text = pre_text + number_blank_description(sub_analysis_result,
                                   sub_question_issue,
                                   :segment => segment)
               sub_question_type = QuestionTypeEnum::NUMBER_BLANK_QUESTION
             when "Time"
-              text = time_blank_description(sub_analysis_result,
+              text = pre_text + time_blank_description(sub_analysis_result,
                                 sub_question_issue,
                                 :segment => segment)
               sub_question_type = QuestionTypeEnum::TIME_BLANK_QUESTION
             when "Address"
-              text = address_blank_description(sub_analysis_result, sub_question_issue)
+              text = pre_text + address_blank_description(sub_analysis_result, sub_question_issue)
               sub_question_type = QuestionTypeEnum::ADDRESS_BLANK_QUESTION
             end
             text = ActionView::Base.full_sanitizer.sanitize(text)
@@ -323,7 +323,7 @@ class ReportResult < Result
           end
         when QuestionTypeEnum::CONST_SUM_QUESTION
           analysis_result = analyze_const_sum(question.issue, cur_question_answer, items_com: items_com)
-          text = const_sum_description(analysis_result, question.issue)
+          text = pre_text + const_sum_description(analysis_result, question.issue)
           text = ActionView::Base.full_sanitizer.sanitize(text)
           report_data.push_component(ReportData::DESCRIPTION, "text" => text)
           chart_components = DataAdapter.convert_single_data(question.question_type,
@@ -333,7 +333,7 @@ class ReportResult < Result
           report_data.push_chart_components(chart_components)
         when QuestionTypeEnum::SORT_QUESTION
           analysis_result = analyze_sort(question.issue, cur_question_answer, items_com: items_com)
-          text = sort_description(analysis_result,
+          text = pre_text + sort_description(analysis_result,
                       question.issue,
                       :answer_number => cur_question_answer.length)
           text = ActionView::Base.full_sanitizer.sanitize(text)
@@ -345,7 +345,7 @@ class ReportResult < Result
           report_data.push_chart_components(chart_components)
         when QuestionTypeEnum::SCALE_QUESTION
           analysis_result = analyze_scale(question.issue, cur_question_answer, items_com: items_com)
-          text = scale_description(analysis_result, question.issue)
+          text = pre_text + scale_description(analysis_result, question.issue)
           text = ActionView::Base.full_sanitizer.sanitize(text)
           report_data.push_component(ReportData::DESCRIPTION, "text" => text)
           chart_components = DataAdapter.convert_single_data(question.question_type,
